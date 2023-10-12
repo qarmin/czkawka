@@ -1,3 +1,4 @@
+use log::info;
 use std::collections::BTreeSet;
 use std::fs;
 use std::process::Command;
@@ -10,132 +11,119 @@ struct CollectedFiles {
     symlinks: BTreeSet<String>,
 }
 
+static CZKAWKA_PATH: state::InitCell<String> = state::InitCell::new();
+static COLLECTED_FILES: state::InitCell<CollectedFiles> = state::InitCell::new();
+
 const ATTEMPTS: u32 = 10;
 
 // App runs - ./ci_tester PATH_TO_CZKAWKA
 fn main() {
+    handsome_logger::init().unwrap();
     let args: Vec<String> = std::env::args().collect();
     let path_to_czkawka = args[1].clone();
-
+    CZKAWKA_PATH.set(path_to_czkawka);
     remove_test_dir();
     run_with_good_status(&["ls"], false);
     unzip_files();
 
     let all_files = collect_all_files_and_dirs("TestFiles").unwrap();
+    COLLECTED_FILES.set(all_files);
     remove_test_dir();
 
     for _ in 0..ATTEMPTS {
-        test_empty_files(&path_to_czkawka, &all_files);
-        test_smallest_files(&path_to_czkawka, &all_files);
-        test_biggest_files(&path_to_czkawka, &all_files);
-        test_empty_folders(&path_to_czkawka, &all_files);
-        test_temporary_files(&path_to_czkawka, &all_files);
-        test_symlinks_files(&path_to_czkawka, &all_files);
-        test_remove_duplicates_one_oldest(&path_to_czkawka, &all_files);
-        test_remove_duplicates_one_newest(&path_to_czkawka, &all_files);
-        test_remove_duplicates_all_expect_newest(&path_to_czkawka, &all_files);
-        test_remove_duplicates_all_expect_oldest(&path_to_czkawka, &all_files);
+        test_empty_files();
+        test_smallest_files();
+        test_biggest_files();
+        test_empty_folders();
+        test_temporary_files();
+        test_symlinks_files();
+        test_remove_duplicates_one_oldest();
+        test_remove_duplicates_one_newest();
+        test_remove_duplicates_all_expect_newest();
+        test_remove_duplicates_all_expect_oldest();
     }
 
     println!("Completed checking");
 }
-fn test_remove_duplicates_all_expect_oldest(path_to_czkawka: &str, all_files: &CollectedFiles) {
+fn test_remove_duplicates_all_expect_oldest() {
+    info!("test_remove_duplicates_all_expect_oldest");
     run_test(
-        path_to_czkawka,
         &["dup", "-d", "TestFiles", "-D", "AEO"],
-        all_files,
         vec!["Images/A1.jpg", "Images/A5.jpg", "Music/M1.mp3", "Music/M2.mp3", "Videos/V1.mp4", "Videos/V5.mp4"],
         vec![],
         vec![],
     );
 }
-fn test_remove_duplicates_all_expect_newest(path_to_czkawka: &str, all_files: &CollectedFiles) {
+fn test_remove_duplicates_all_expect_newest() {
+    info!("test_remove_duplicates_all_expect_newest");
     run_test(
-        path_to_czkawka,
         &["dup", "-d", "TestFiles", "-D", "AEN"],
-        all_files,
         vec!["Images/A2.jpg", "Images/A5.jpg", "Music/M1.mp3", "Music/M5.mp3", "Videos/V1.mp4", "Videos/V2.mp4"],
         vec![],
         vec![],
     );
 }
 
-fn test_remove_duplicates_one_newest(path_to_czkawka: &str, all_files: &CollectedFiles) {
+fn test_remove_duplicates_one_newest() {
+    info!("test_remove_duplicates_one_newest");
     run_test(
-        path_to_czkawka,
         &["dup", "-d", "TestFiles", "-D", "ON"],
-        all_files,
         vec!["Images/A1.jpg", "Music/M2.mp3", "Videos/V5.mp4"],
         vec![],
         vec![],
     );
 }
-fn test_remove_duplicates_one_oldest(path_to_czkawka: &str, all_files: &CollectedFiles) {
+fn test_remove_duplicates_one_oldest() {
+    info!("test_remove_duplicates_one_oldest");
     run_test(
-        path_to_czkawka,
         &["dup", "-d", "TestFiles", "-D", "OO"],
-        all_files,
         vec!["Images/A2.jpg", "Music/M5.mp3", "Videos/V2.mp4"],
         vec![],
         vec![],
     );
 }
 
-fn test_symlinks_files(path_to_czkawka: &str, all_files: &CollectedFiles) {
-    run_test(
-        path_to_czkawka,
-        &["symlinks", "-d", "TestFiles", "-D"],
-        all_files,
-        vec![],
-        vec![],
-        vec!["Symlinks/EmptyFiles"],
-    );
+fn test_symlinks_files() {
+    info!("test_symlinks_files");
+    run_test(&["symlinks", "-d", "TestFiles", "-D"], vec![], vec![], vec!["Symlinks/EmptyFiles"]);
 }
-fn test_temporary_files(path_to_czkawka: &str, all_files: &CollectedFiles) {
-    run_test(
-        path_to_czkawka,
-        &["temp", "-d", "TestFiles", "-D"],
-        all_files,
-        vec!["Temporary/Boczze.cache"],
-        vec![],
-        vec![],
-    );
+fn test_temporary_files() {
+    info!("test_temporary_files");
+    run_test(&["temp", "-d", "TestFiles", "-D"], vec!["Temporary/Boczze.cache"], vec![], vec![]);
 }
-fn test_empty_folders(path_to_czkawka: &str, all_files: &CollectedFiles) {
+fn test_empty_folders() {
+    info!("test_empty_folders");
     run_test(
-        path_to_czkawka,
         &["empty-folders", "-d", "TestFiles", "-D"],
-        all_files,
         vec![],
         vec!["EmptyFolders/One", "EmptyFolders/Two", "EmptyFolders/Two/TwoInside"],
         vec![],
     );
 }
 
-fn test_biggest_files(path_to_czkawka: &str, all_files: &CollectedFiles) {
+fn test_biggest_files() {
+    info!("test_biggest_files");
     run_test(
-        path_to_czkawka,
         &["big", "-d", "TestFiles", "-n", "6", "-D"],
-        all_files,
         vec!["Music/M3.flac", "Music/M4.mp3", "Videos/V2.mp4", "Videos/V3.webm", "Videos/V1.mp4", "Videos/V5.mp4"],
         vec![],
         vec![],
     );
 }
 
-fn test_smallest_files(path_to_czkawka: &str, all_files: &CollectedFiles) {
+fn test_smallest_files() {
+    info!("test_smallest_files");
     run_test(
-        path_to_czkawka,
         &["big", "-d", "TestFiles", "-J", "-n", "5", "-D"],
-        all_files,
         vec!["Broken/Br.jpg", "Broken/Br.mp3", "Broken/Br.pdf", "Broken/Br.zip", "EmptyFolders/ThreeButNot/KEKEKE"],
         vec![],
         vec![],
     );
 }
 
-fn test_empty_files(path_to_czkawka: &str, all_files: &CollectedFiles) {
-    run_test(path_to_czkawka, &["empty-files", "-d", "TestFiles", "-D"], all_files, vec!["EmptyFile"], vec![], vec![]);
+fn test_empty_files() {
+    info!("test_empty_files");
+    run_test(&["empty-files", "-d", "TestFiles", "-D"], vec!["EmptyFile"], vec![], vec![]);
 }
 
 ////////////////////////////////////
@@ -144,26 +132,24 @@ fn test_empty_files(path_to_czkawka: &str, all_files: &CollectedFiles) {
 ////////////////////////////////////
 ////////////////////////////////////
 
-fn run_test(
-    path_to_czkawka: &str,
-    arguments: &[&str],
-    all_files: &CollectedFiles,
-    expected_files_differences: Vec<&'static str>,
-    expected_folders_differences: Vec<&'static str>,
-    expected_symlinks_differences: Vec<&'static str>,
-) {
+fn run_test(arguments: &[&str], expected_files_differences: Vec<&'static str>, expected_folders_differences: Vec<&'static str>, expected_symlinks_differences: Vec<&'static str>) {
     unzip_files();
     // Add path_to_czkawka to arguments
     let mut all_arguments = vec![];
-    all_arguments.push(path_to_czkawka);
+    all_arguments.push(CZKAWKA_PATH.get().as_str());
     all_arguments.extend_from_slice(arguments);
     run_with_good_status(&all_arguments, true);
-    file_folder_diffs(&all_files, expected_files_differences, expected_folders_differences, expected_symlinks_differences);
+    file_folder_diffs(
+        COLLECTED_FILES.get(),
+        expected_files_differences,
+        expected_folders_differences,
+        expected_symlinks_differences,
+    );
 
     remove_test_dir();
 }
 fn unzip_files() {
-    run_with_good_status(&["unzip", "TestFiles.zip", "-d", "TestFiles"], false);
+    run_with_good_status(&["unzip", "-X", "TestFiles.zip", "-d", "TestFiles"], false);
 }
 fn remove_test_dir() {
     let _ = fs::remove_dir_all("TestFiles");
