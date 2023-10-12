@@ -20,7 +20,7 @@
   - Temporary Files - Finds temporary files
   - Similar Images - Finds images which are not exactly the same (different resolution, watermarks)
   - Similar Videos - Looks for visually similar videos
-  - Same Music - Searches for music with the same artist, album etc.
+  - Same Music - Searches for similar music by tags or by reading content and comparing it
   - Invalid Symbolic Links - Shows symbolic links which point to non-existent files/directories
   - Broken Files - Finds files that are invalid or corrupted
   - Bad Extensions - Lists files whose content not match with their extension

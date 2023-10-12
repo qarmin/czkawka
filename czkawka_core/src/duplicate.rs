@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::collections::{BTreeMap, HashSet};
 use std::fmt::Debug;
 use std::fs::File;
@@ -424,11 +425,14 @@ impl DuplicateFinder {
             debug!("prehash_load_cache_at_start - started diff between loaded and prechecked files");
             for (size, mut vec_file_entry) in mem::take(&mut self.files_with_identical_size) {
                 if let Some(cached_vec_file_entry) = loaded_hash_map.get(&size) {
-                    // TODO maybe hashset is not needed when using < 4 elements
-                    let cached_path_entries = cached_vec_file_entry.iter().map(|e| &e.path).collect::<HashSet<_>>();
+                    // TODO maybe hashmap is not needed when using < 4 elements
+                    let mut cached_path_entries: HashMap<&Path, FileEntry> = HashMap::new();
+                    for file_entry in cached_vec_file_entry {
+                        cached_path_entries.insert(&file_entry.path, file_entry.clone());
+                    }
                     for file_entry in vec_file_entry {
-                        if cached_path_entries.contains(&file_entry.path) {
-                            records_already_cached.entry(size).or_default().push(file_entry);
+                        if let Some(cached_file_entry) = cached_path_entries.remove(file_entry.path.as_path()) {
+                            records_already_cached.entry(size).or_default().push(cached_file_entry);
                         } else {
                             non_cached_files_to_check.entry(size).or_default().push(file_entry);
                         }
@@ -504,11 +508,11 @@ impl DuplicateFinder {
         );
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.prehash_load_cache_at_start();
-
+        // dbg!(&non_cached_files_to_check);
         debug!("Starting calculating prehash");
         #[allow(clippy::type_complexity)]
         let pre_hash_results: Vec<(u64, BTreeMap<String, Vec<FileEntry>>, Vec<String>)> = non_cached_files_to_check
-            .par_iter()
+            .into_par_iter()
             .map(|(size, vec_file_entry)| {
                 let mut hashmap_with_hash: BTreeMap<String, Vec<FileEntry>> = Default::default();
                 let mut errors: Vec<String> = Vec::new();
@@ -519,15 +523,16 @@ impl DuplicateFinder {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
-                for file_entry in vec_file_entry {
-                    match hash_calculation(&mut buffer, file_entry, &check_type, 0) {
+                for mut file_entry in vec_file_entry {
+                    match hash_calculation(&mut buffer, &file_entry, &check_type, 0) {
                         Ok(hash_string) => {
-                            hashmap_with_hash.entry(hash_string.clone()).or_default().push(file_entry.clone());
+                            file_entry.hash = hash_string.clone();
+                            hashmap_with_hash.entry(hash_string.clone()).or_default().push(file_entry);
                         }
                         Err(s) => errors.push(s),
                     }
                 }
-                Some((*size, hashmap_with_hash, errors))
+                Some((size, hashmap_with_hash, errors))
             })
             .while_some()
             .collect();
@@ -581,11 +586,14 @@ impl DuplicateFinder {
             debug!("full_hashing_load_cache_at_start - started diff between loaded and prechecked files");
             for (size, mut vec_file_entry) in pre_checked_map {
                 if let Some(cached_vec_file_entry) = loaded_hash_map.get(&size) {
-                    // TODO maybe hashset is not needed when using < 4 elements
-                    let cached_path_entries = cached_vec_file_entry.iter().map(|e| &e.path).collect::<HashSet<_>>();
+                    // TODO maybe hashmap is not needed when using < 4 elements
+                    let mut cached_path_entries: HashMap<&Path, FileEntry> = HashMap::new();
+                    for file_entry in cached_vec_file_entry {
+                        cached_path_entries.insert(&file_entry.path, file_entry.clone());
+                    }
                     for file_entry in vec_file_entry {
-                        if cached_path_entries.contains(&file_entry.path) {
-                            records_already_cached.entry(size).or_default().push(file_entry);
+                        if let Some(cached_file_entry) = cached_path_entries.remove(file_entry.path.as_path()) {
+                            records_already_cached.entry(size).or_default().push(cached_file_entry);
                         } else {
                             non_cached_files_to_check.entry(size).or_default().push(file_entry);
                         }
