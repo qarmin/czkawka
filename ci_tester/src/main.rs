@@ -167,7 +167,12 @@ fn test_temporary_files() {
 }
 fn test_empty_folders() {
     info!("test_empty_folders");
-    run_test(&["empty-folders", "-d", "TestFiles", "-D"], vec![], vec!["EmptyFolders/One", "EmptyFolders/Two"], vec![]);
+    run_test(
+        &["empty-folders", "-d", "TestFiles", "-D"],
+        vec![],
+        vec!["EmptyFolders/One", "EmptyFolders/Two", "EmptyFolders/Two/TwoInside"],
+        vec![],
+    );
 }
 
 fn test_biggest_files() {

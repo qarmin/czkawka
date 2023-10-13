@@ -100,14 +100,14 @@ pub enum ErrorType {
 
 /// Enum with values which show if folder is empty.
 /// In function "`optimize_folders`" automatically "Maybe" is changed to "Yes", so it is not necessary to put it here
-#[derive(Eq, PartialEq, Copy, Clone)]
+#[derive(Eq, PartialEq, Copy, Clone, Debug)]
 pub(crate) enum FolderEmptiness {
     No,
     Maybe,
 }
 
 /// Struct assigned to each checked folder with parent path(used to ignore parent if children are not empty) and flag which shows if folder is empty
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct FolderEntry {
     pub(crate) parent_path: Option<PathBuf>,
     // Usable only when finding
