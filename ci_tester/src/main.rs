@@ -50,9 +50,39 @@ fn main() {
         test_remove_same_music_content_all_expect_oldest();
         test_remove_same_music_content_one_newest();
         test_remove_same_music_content_all_expect_newest();
+        test_remove_videos_one_oldest();
+        test_remove_videos_one_newest();
+        test_remove_videos_all_expect_oldest();
+        test_remove_videos_all_expect_newest();
     }
 
     println!("Completed checking");
+}
+fn test_remove_videos_one_oldest() {
+    info!("test_remove_videos_one_oldest");
+    run_test(&["video", "-d", "TestFiles", "-D", "OO"], vec!["Videos/V3.webm"], vec![], vec![]);
+}
+fn test_remove_videos_one_newest() {
+    info!("test_remove_videos_one_newest");
+    run_test(&["video", "-d", "TestFiles", "-D", "ON"], vec!["Videos/V5.mp4"], vec![], vec![]);
+}
+fn test_remove_videos_all_expect_oldest() {
+    info!("test_remove_videos_all_expect_oldest");
+    run_test(
+        &["video", "-d", "TestFiles", "-D", "AEO"],
+        vec!["Videos/V1.mp4", "Videos/V2.mp4", "Videos/V5.mp4"],
+        vec![],
+        vec![],
+    );
+}
+fn test_remove_videos_all_expect_newest() {
+    info!("test_remove_videos_all_expect_newest");
+    run_test(
+        &["video", "-d", "TestFiles", "-D", "AEN"],
+        vec!["Videos/V1.mp4", "Videos/V2.mp4", "Videos/V3.webm"],
+        vec![],
+        vec![],
+    );
 }
 
 fn test_remove_same_music_content_one_newest() {
