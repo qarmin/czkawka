@@ -125,7 +125,7 @@ impl SameMusic {
             music_to_check: Default::default(),
             approximate_comparison: true,
             duplicated_music_entries_referenced: vec![],
-            check_type: CheckingMethod::AudioContent,
+            check_type: CheckingMethod::AudioTags,
             hash_preset_config: Configuration::preset_test1(), // TODO allow to change this
             minimum_segment_duration: 10.0,
             maximum_difference: 2.0,

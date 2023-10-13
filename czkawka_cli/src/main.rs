@@ -345,6 +345,9 @@ fn same_music(same_music: SameMusicArgs) {
         maximal_file_size,
         music_similarity,
         dry_run,
+        minimum_segment_duration,
+        maximum_difference,
+        search_method,
     } = same_music;
 
     set_number_of_threads(thread_number.thread_number);
@@ -362,6 +365,9 @@ fn same_music(same_music: SameMusicArgs) {
     item.set_music_similarity(music_similarity);
     item.set_delete_method(delete_method.delete_method);
     item.set_dry_run(dry_run.dry_run);
+    item.set_minimum_segment_duration(minimum_segment_duration);
+    item.set_maximum_difference(maximum_difference);
+    item.set_check_type(search_method);
 
     item.find_same_music(None, None);
 

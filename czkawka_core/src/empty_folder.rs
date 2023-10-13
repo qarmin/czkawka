@@ -1,6 +1,5 @@
 use std::collections::BTreeMap;
-use std::{fs, mem};
-
+use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
 
@@ -58,15 +57,15 @@ impl EmptyFolder {
     fn optimize_folders(&mut self) {
         let mut new_directory_folders: BTreeMap<PathBuf, FolderEntry> = Default::default();
 
-        for (name, folder_entry) in mem::take(&mut self.empty_folder_list) {
+        for (name, folder_entry) in &self.empty_folder_list {
             match &folder_entry.parent_path {
                 Some(t) => {
                     if !self.empty_folder_list.contains_key(t) {
-                        new_directory_folders.insert(name, folder_entry);
+                        new_directory_folders.insert(name.clone(), folder_entry.clone());
                     }
                 }
                 None => {
-                    new_directory_folders.insert(name, folder_entry);
+                    new_directory_folders.insert(name.clone(), folder_entry.clone());
                 }
             }
         }
