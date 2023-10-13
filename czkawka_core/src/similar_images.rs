@@ -20,12 +20,12 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "heif")]
 use crate::common::get_dynamic_image_from_heic;
 use crate::common::{
-    check_folder_children, create_crash_message, get_dynamic_image_from_raw_image, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, HEIC_EXTENSIONS,
-    IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS,
+    check_folder_children, create_crash_message, delete_files_custom, get_dynamic_image_from_raw_image, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads,
+    HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS,
 };
 use crate::common_cache::{get_similar_images_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
-use crate::common_tool::{CommonData, CommonToolData};
+use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::{DebugPrint, PrintResults, ResultEntry};
 use crate::flc;
 
@@ -140,6 +140,7 @@ impl SimilarImages {
             self.common_data.stopped_search = true;
             return;
         }
+        self.delete_files();
         self.debug_print();
     }
 
@@ -806,6 +807,15 @@ impl SimilarImages {
             }
         }
         assert!(!found, "Found Invalid entries, verify errors before"); // TODO crashes with empty result with reference folder, verify why
+    }
+
+    fn delete_files(&mut self) {
+        if self.common_data.delete_method == DeleteMethod::None {
+            return;
+        }
+
+        let vec_files = self.similar_vectors.iter().collect::<Vec<_>>();
+        delete_files_custom(&vec_files, &self.common_data.delete_method, &mut self.common_data.text_messages, self.common_data.dry_run);
     }
 }
 

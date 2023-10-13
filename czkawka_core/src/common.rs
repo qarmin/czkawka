@@ -25,7 +25,10 @@ use log::{info, LevelFilter, Record};
 use crate::common_dir_traversal::{CheckingMethod, ProgressData, ToolType};
 use crate::common_directory::Directories;
 use crate::common_items::ExcludedItems;
+use crate::common_messages::Messages;
+use crate::common_tool::DeleteMethod;
 use crate::common_traits::ResultEntry;
+use crate::duplicate::make_hard_link;
 use crate::CZKAWKA_VERSION;
 
 static NUMBER_OF_THREADS: state::InitCell<usize> = state::InitCell::new();
@@ -234,35 +237,6 @@ pub fn create_crash_message(library_name: &str, file_path: &str, home_library_ur
 }
 
 impl Common {
-    pub fn delete_multiple_entries(entries: &[String]) -> Vec<String> {
-        let mut path: &Path;
-        let mut warnings: Vec<String> = Vec::new();
-        for entry in entries {
-            path = Path::new(entry);
-            if path.is_dir() {
-                if let Err(e) = fs::remove_dir_all(entry) {
-                    warnings.push(format!("Failed to remove folder {entry}, reason {e}"));
-                }
-            } else if let Err(e) = fs::remove_file(entry) {
-                warnings.push(format!("Failed to remove file {entry}, reason {e}"));
-            }
-        }
-        warnings
-    }
-
-    pub fn delete_one_entry(entry: &str) -> String {
-        let path: &Path = Path::new(entry);
-        let mut warning: String = String::new();
-        if path.is_dir() {
-            if let Err(e) = fs::remove_dir_all(entry) {
-                warning = format!("Failed to remove folder {entry}, reason {e}");
-            }
-        } else if let Err(e) = fs::remove_file(entry) {
-            warning = format!("Failed to remove file {entry}, reason {e}");
-        }
-        warning
-    }
-
     pub fn regex_check(expression: &str, directory: impl AsRef<Path>) -> bool {
         if expression == "*" {
             return true;
@@ -374,6 +348,98 @@ pub fn check_folder_children(
     dir_result.push(next_folder);
 }
 
+// Here we assume, that internal Vec<> have at least 1 object
+#[allow(clippy::ptr_arg)]
+pub fn delete_files_custom<T>(items: &Vec<&Vec<T>>, delete_method: &DeleteMethod, text_messages: &mut Messages, dry_run: bool) -> (u64, usize, usize)
+where
+    T: ResultEntry + Clone,
+{
+    let res = items
+        .iter()
+        .map(|values| {
+            let mut gained_space: u64 = 0;
+            let mut removed_files: usize = 0;
+            let mut failed_to_remove_files: usize = 0;
+            let mut infos = Vec::new();
+            let mut errors = Vec::new();
+
+            let mut all_values = (*values).clone();
+            let len = all_values.len();
+
+            // Sorted from oldest to newest - from smallest value to bigger
+            all_values.sort_unstable_by_key(ResultEntry::get_modified_date);
+
+            if delete_method == &DeleteMethod::HardLink {
+                let original_file = &all_values[0];
+                for file_entry in &all_values[1..] {
+                    if dry_run {
+                        infos.push(format!(
+                            "dry_run - would create hardlink from {:?} to {:?}",
+                            original_file.get_path(),
+                            original_file.get_path()
+                        ));
+                    } else {
+                        if dry_run {
+                            infos.push(format!("Replace file {:?} with hard link to {:?}", original_file.get_path(), file_entry.get_path()));
+                        } else {
+                            if let Err(e) = make_hard_link(original_file.get_path(), file_entry.get_path()) {
+                                errors.push(format!(
+                                    "Cannot create hard link from {:?} to {:?} - {}",
+                                    file_entry.get_path(),
+                                    original_file.get_path(),
+                                    e
+                                ));
+                                failed_to_remove_files += 1;
+                            } else {
+                                gained_space += 1;
+                                removed_files += 1;
+                            }
+                        }
+                    }
+                }
+
+                return (infos, errors, gained_space, removed_files, failed_to_remove_files);
+            }
+
+            let items = match delete_method {
+                DeleteMethod::Delete => &all_values,
+                DeleteMethod::AllExceptNewest => &all_values[..(len - 1)],
+                DeleteMethod::AllExceptOldest => &all_values[1..],
+                DeleteMethod::OneOldest => &all_values[..1],
+                DeleteMethod::OneNewest => &all_values[(len - 1)..],
+                DeleteMethod::HardLink | DeleteMethod::None => unreachable!("HardLink and None should be handled before"),
+            };
+
+            for i in items {
+                if dry_run {
+                    infos.push(format!("dry_run - would delete file: {:?}", i.get_path()));
+                } else {
+                    if let Err(e) = std::fs::remove_file(i.get_path()) {
+                        errors.push(format!("Cannot delete file: {:?} - {e}", i.get_path()));
+                        failed_to_remove_files += 1;
+                    } else {
+                        removed_files += 1;
+                        gained_space += i.get_size();
+                    }
+                }
+            }
+            (infos, errors, gained_space, removed_files, failed_to_remove_files)
+        })
+        .collect::<Vec<_>>();
+
+    let mut gained_space = 0;
+    let mut removed_files = 0;
+    let mut failed_to_remove_files = 0;
+    for (infos, errors, gained_space_v, removed_files_v, failed_to_remove_files_v) in res {
+        text_messages.messages.extend(infos);
+        text_messages.errors.extend(errors);
+        gained_space += gained_space_v;
+        removed_files += removed_files_v;
+        failed_to_remove_files += failed_to_remove_files_v;
+    }
+
+    (gained_space, removed_files, failed_to_remove_files)
+}
 pub fn filter_reference_folders_generic<T>(entries_to_check: Vec<Vec<T>>, directories: &Directories) -> Vec<(T, Vec<T>)>
 where
     T: ResultEntry,

@@ -1,5 +1,5 @@
 use std::collections::BTreeMap;
-use std::fs;
+use std::{fs, mem};
 
 use std::io::Write;
 use std::path::PathBuf;
@@ -8,15 +8,15 @@ use crossbeam_channel::Receiver;
 use fun_time::fun_time;
 use futures::channel::mpsc::UnboundedSender;
 use log::debug;
+use rayon::prelude::*;
 
 use crate::common_dir_traversal::{Collect, DirTraversalBuilder, DirTraversalResult, FolderEmptiness, FolderEntry, ProgressData, ToolType};
-use crate::common_tool::{CommonData, CommonToolData};
+use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::{DebugPrint, PrintResults};
 
 pub struct EmptyFolder {
     common_data: CommonToolData,
     information: Info,
-    delete_folders: bool,
     empty_folder_list: BTreeMap<PathBuf, FolderEntry>, // Path, FolderEntry
 }
 
@@ -30,7 +30,6 @@ impl EmptyFolder {
         Self {
             common_data: CommonToolData::new(ToolType::EmptyFolders),
             information: Default::default(),
-            delete_folders: false,
             empty_folder_list: Default::default(),
         }
     }
@@ -51,24 +50,23 @@ impl EmptyFolder {
             return;
         }
         self.optimize_folders();
-        if self.delete_folders {
-            self.delete_empty_folders();
-        }
+
+        self.delete_files();
         self.debug_print();
     }
 
     fn optimize_folders(&mut self) {
         let mut new_directory_folders: BTreeMap<PathBuf, FolderEntry> = Default::default();
 
-        for (name, folder_entry) in &self.empty_folder_list {
+        for (name, folder_entry) in mem::take(&mut self.empty_folder_list) {
             match &folder_entry.parent_path {
                 Some(t) => {
                     if !self.empty_folder_list.contains_key(t) {
-                        new_directory_folders.insert(name.clone(), folder_entry.clone());
+                        new_directory_folders.insert(name, folder_entry);
                     }
                 }
                 None => {
-                    new_directory_folders.insert(name.clone(), folder_entry.clone());
+                    new_directory_folders.insert(name, folder_entry);
                 }
             }
         }
@@ -109,19 +107,24 @@ impl EmptyFolder {
         }
     }
 
-    #[fun_time(message = "delete_empty_folders")]
-    fn delete_empty_folders(&mut self) {
-        // Folders may be deleted or require too big privileges
-        for name in self.empty_folder_list.keys() {
-            match fs::remove_dir_all(name) {
-                Ok(()) => (),
-                Err(e) => self
-                    .common_data
-                    .text_messages
-                    .warnings
-                    .push(format!("Failed to remove folder {}, reason {}", name.display(), e)),
-            };
+    // #[fun_time(message = "delete_files")]
+    fn delete_files(&mut self) {
+        if self.get_delete_method() == DeleteMethod::None {
+            return;
         }
+        let folders_to_remove = self.empty_folder_list.keys().collect::<Vec<_>>();
+
+        let errors: Vec<_> = folders_to_remove
+            .into_par_iter()
+            .filter_map(|name| {
+                if let Err(e) = fs::remove_dir_all(name) {
+                    Some(format!("Failed to remove folder {name:?}, reason {e}"))
+                } else {
+                    None
+                }
+            })
+            .collect();
+        self.get_text_messages_mut().errors.extend(errors);
     }
 }
 
@@ -170,10 +173,5 @@ impl CommonData for EmptyFolder {
     }
     fn get_cd_mut(&mut self) -> &mut CommonToolData {
         &mut self.common_data
-    }
-}
-impl EmptyFolder {
-    pub fn set_delete_folder(&mut self, delete_folder: bool) {
-        self.delete_folders = delete_folder;
     }
 }

@@ -132,15 +132,8 @@ pub struct DuplicatesArgs {
         long_help = "Methods to search files.\nNAME - Fast but but rarely usable,\nSIZE - Fast but not accurate, checking by the file's size,\nHASH - The slowest method, checking by the hash of the entire file"
     )]
     pub search_method: CheckingMethod,
-    #[clap(
-        short = 'D',
-        long,
-        default_value = "NONE",
-        value_parser = parse_delete_method,
-        help = "Delete method (AEN, AEO, ON, OO, HARD)",
-        long_help = "Methods to delete the files.\nAEN - All files except the newest,\nAEO - All files except the oldest,\nON - Only 1 file, the newest,\nOO - Only 1 file, the oldest\nHARD - create hard link\nNONE - not delete files"
-    )]
-    pub delete_method: DeleteMethod,
+    #[clap(flatten)]
+    pub delete_method: DMethod,
     #[clap(
         short = 't',
         long,
@@ -165,7 +158,7 @@ pub struct DuplicatesArgs {
     #[clap(flatten)]
     pub allow_hard_links: AllowHardLinks,
     #[clap(flatten)]
-    pub dryrun: DryRun,
+    pub dry_run: DryRun,
 }
 
 #[derive(Debug, clap::Args)]
@@ -314,6 +307,10 @@ pub struct SimilarImagesArgs {
     #[clap(flatten)]
     pub file_to_save: FileToSave,
     #[clap(flatten)]
+    pub delete_method: DMethod,
+    #[clap(flatten)]
+    pub dry_run: DryRun,
+    #[clap(flatten)]
     pub json_compact_file_to_save: JsonCompactFileToSave,
     #[clap(flatten)]
     pub json_pretty_file_to_save: JsonPrettyFileToSave,
@@ -358,8 +355,10 @@ pub struct SameMusicArgs {
     pub excluded_directories: ExcludedDirectories,
     #[clap(flatten)]
     pub excluded_items: ExcludedItems,
-    // #[clap(short = 'D', long, help = "Delete found files")]
-    // delete_files: bool, TODO
+    #[clap(flatten)]
+    pub delete_method: DMethod,
+    #[clap(flatten)]
+    pub dry_run: DryRun,
     #[clap(
         short = 'z',
         long,
@@ -464,8 +463,10 @@ pub struct SimilarVideosArgs {
     pub excluded_directories: ExcludedDirectories,
     #[clap(flatten)]
     pub excluded_items: ExcludedItems,
-    // #[clap(short = 'D', long, help = "Delete found files")]
-    // delete_files: bool, TODO
+    #[clap(flatten)]
+    pub delete_method: DMethod,
+    #[clap(flatten)]
+    pub dry_run: DryRun,
     #[clap(flatten)]
     pub file_to_save: FileToSave,
     #[clap(flatten)]
@@ -531,6 +532,19 @@ pub struct BadExtensionsArgs {
     #[cfg(target_family = "unix")]
     #[clap(flatten)]
     pub exclude_other_filesystems: ExcludeOtherFilesystems,
+}
+
+#[derive(Debug, clap::Args)]
+pub struct DMethod {
+    #[clap(
+        short = 'D',
+        long,
+        default_value = "NONE",
+        value_parser = parse_delete_method,
+        help = "Delete method (AEN, AEO, ON, OO, HARD)",
+        long_help = "Methods to delete the files.\nAEN - All files except the newest,\nAEO - All files except the oldest,\nON - Only 1 file, the newest,\nOO - Only 1 file, the oldest\nHARD - create hard link\nNONE - not delete files"
+    )]
+    pub delete_method: DeleteMethod,
 }
 
 #[derive(Debug, clap::Args)]
@@ -630,7 +644,7 @@ pub struct CaseSensitiveNameComparison {
 #[derive(Debug, clap::Args)]
 pub struct DryRun {
     #[clap(long, help = "Do nothing and print the operation that would happen.")]
-    pub dryrun: bool,
+    pub dry_run: bool,
 }
 
 impl FileToSave {
