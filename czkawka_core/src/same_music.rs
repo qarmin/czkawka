@@ -25,10 +25,12 @@ use symphonia::core::io::MediaSourceStream;
 use symphonia::core::meta::MetadataOptions;
 use symphonia::core::probe::Hint;
 
-use crate::common::{create_crash_message, filter_reference_folders_generic, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, AUDIO_FILES_EXTENSIONS};
+use crate::common::{
+    create_crash_message, delete_files_custom, filter_reference_folders_generic, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, AUDIO_FILES_EXTENSIONS,
+};
 use crate::common_cache::{get_similar_music_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
-use crate::common_tool::{CommonData, CommonToolData};
+use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::*;
 
 bitflags! {
@@ -123,7 +125,7 @@ impl SameMusic {
             music_to_check: Default::default(),
             approximate_comparison: true,
             duplicated_music_entries_referenced: vec![],
-            check_type: CheckingMethod::AudioContent,
+            check_type: CheckingMethod::AudioTags,
             hash_preset_config: Configuration::preset_test1(), // TODO allow to change this
             minimum_segment_duration: 10.0,
             maximum_difference: 2.0,
@@ -653,20 +655,12 @@ impl SameMusic {
 
     #[fun_time(message = "delete_files")]
     fn delete_files(&mut self) {
+        if self.common_data.delete_method == DeleteMethod::None {
+            return;
+        }
 
-        // TODO
-        // match self.delete_method {
-        //     DeleteMethod::Delete => {
-        //         for file_entry in &self.music_entries {
-        //             if fs::remove_file(file_entry.path.clone()).is_err() {
-        //                 self.common_data.text_messages.warnings.push(file_entry.path.display().to_string());
-        //             }
-        //         }
-        //     }
-        //     DeleteMethod::None => {
-        //         //Just do nothing
-        //     }
-        // }
+        let vec_files = self.duplicated_music_entries.iter().collect::<Vec<_>>();
+        delete_files_custom(&vec_files, &self.common_data.delete_method, &mut self.common_data.text_messages, self.common_data.dry_run);
     }
 }
 

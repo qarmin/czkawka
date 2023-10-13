@@ -127,20 +127,13 @@ pub struct DuplicatesArgs {
         short,
         long,
         default_value = "HASH",
-        value_parser = parse_checking_method,
+        value_parser = parse_checking_method_duplicate,
         help = "Search method (NAME, SIZE, HASH)",
         long_help = "Methods to search files.\nNAME - Fast but but rarely usable,\nSIZE - Fast but not accurate, checking by the file's size,\nHASH - The slowest method, checking by the hash of the entire file"
     )]
     pub search_method: CheckingMethod,
-    #[clap(
-        short = 'D',
-        long,
-        default_value = "NONE",
-        value_parser = parse_delete_method,
-        help = "Delete method (AEN, AEO, ON, OO, HARD)",
-        long_help = "Methods to delete the files.\nAEN - All files except the newest,\nAEO - All files except the oldest,\nON - Only 1 file, the newest,\nOO - Only 1 file, the oldest\nHARD - create hard link\nNONE - not delete files"
-    )]
-    pub delete_method: DeleteMethod,
+    #[clap(flatten)]
+    pub delete_method: DMethod,
     #[clap(
         short = 't',
         long,
@@ -165,7 +158,7 @@ pub struct DuplicatesArgs {
     #[clap(flatten)]
     pub allow_hard_links: AllowHardLinks,
     #[clap(flatten)]
-    pub dryrun: DryRun,
+    pub dry_run: DryRun,
 }
 
 #[derive(Debug, clap::Args)]
@@ -314,6 +307,10 @@ pub struct SimilarImagesArgs {
     #[clap(flatten)]
     pub file_to_save: FileToSave,
     #[clap(flatten)]
+    pub delete_method: DMethod,
+    #[clap(flatten)]
+    pub dry_run: DryRun,
+    #[clap(flatten)]
     pub json_compact_file_to_save: JsonCompactFileToSave,
     #[clap(flatten)]
     pub json_pretty_file_to_save: JsonPrettyFileToSave,
@@ -358,8 +355,10 @@ pub struct SameMusicArgs {
     pub excluded_directories: ExcludedDirectories,
     #[clap(flatten)]
     pub excluded_items: ExcludedItems,
-    // #[clap(short = 'D', long, help = "Delete found files")]
-    // delete_files: bool, TODO
+    #[clap(flatten)]
+    pub delete_method: DMethod,
+    #[clap(flatten)]
+    pub dry_run: DryRun,
     #[clap(
         short = 'z',
         long,
@@ -369,6 +368,15 @@ pub struct SameMusicArgs {
         long_help = "Sets which rows must be equal to set this files as duplicates(may be mixed, but must be divided by commas)."
     )]
     pub music_similarity: MusicSimilarity,
+    #[clap(
+        short,
+        long,
+        default_value = "TAGS",
+        value_parser = parse_checking_method_same_music,
+        help = "Search method (CONTENT, TAGS)",
+        long_help = "Methods to search files.\nCONTENT - finds similar audio files by content, TAGS - finds similar images by tags, needs to set"
+    )]
+    pub search_method: CheckingMethod,
     #[clap(flatten)]
     pub file_to_save: FileToSave,
     #[clap(flatten)]
@@ -398,6 +406,53 @@ pub struct SameMusicArgs {
         long_help = "Maximum size of checked files in bytes, assigning lower value may speed up searching"
     )]
     pub maximal_file_size: u64,
+    #[clap(
+        short = 'l',
+        long,
+        value_parser = parse_minimum_segment_duration,
+        default_value = "10.0",
+        help = "Maximum size in bytes",
+        long_help = "Minimum segment duration, smaller value will finds also shorter similar segments, which may increase false positives number"
+    )]
+    pub minimum_segment_duration: f32,
+    #[clap(
+        short = 'd',
+        long,
+        value_parser = parse_maximum_difference,
+        default_value = "2.0",
+        help = "Maximum difference between segments",
+        long_help = "Maximum difference between segments, 0.0 will find only identical segments, 10.0 will find also segments which are almost not similar at all"
+    )]
+    pub maximum_difference: f64,
+}
+
+fn parse_maximum_difference(src: &str) -> Result<f64, String> {
+    match src.parse::<f64>() {
+        Ok(maximum_difference) => {
+            if maximum_difference <= 0.0 {
+                Err("Maximum difference must be bigger than 0".to_string())
+            } else if maximum_difference >= 10.0 {
+                Err("Maximum difference must be smaller than 10.0".to_string())
+            } else {
+                Ok(maximum_difference)
+            }
+        }
+        Err(e) => Err(e.to_string()),
+    }
+}
+fn parse_minimum_segment_duration(src: &str) -> Result<f32, String> {
+    match src.parse::<f32>() {
+        Ok(minimum_segment_duration) => {
+            if minimum_segment_duration <= 0.0 {
+                Err("Minimum segment duration must be bigger than 0".to_string())
+            } else if minimum_segment_duration >= 3600.0 {
+                Err("Minimum segment duration must be smaller than 3600(greater values not have much sense)".to_string())
+            } else {
+                Ok(minimum_segment_duration)
+            }
+        }
+        Err(e) => Err(e.to_string()),
+    }
 }
 
 #[derive(Debug, clap::Args)]
@@ -464,8 +519,10 @@ pub struct SimilarVideosArgs {
     pub excluded_directories: ExcludedDirectories,
     #[clap(flatten)]
     pub excluded_items: ExcludedItems,
-    // #[clap(short = 'D', long, help = "Delete found files")]
-    // delete_files: bool, TODO
+    #[clap(flatten)]
+    pub delete_method: DMethod,
+    #[clap(flatten)]
+    pub dry_run: DryRun,
     #[clap(flatten)]
     pub file_to_save: FileToSave,
     #[clap(flatten)]
@@ -531,6 +588,19 @@ pub struct BadExtensionsArgs {
     #[cfg(target_family = "unix")]
     #[clap(flatten)]
     pub exclude_other_filesystems: ExcludeOtherFilesystems,
+}
+
+#[derive(Debug, clap::Args)]
+pub struct DMethod {
+    #[clap(
+        short = 'D',
+        long,
+        default_value = "NONE",
+        value_parser = parse_delete_method,
+        help = "Delete method (AEN, AEO, ON, OO, HARD)",
+        long_help = "Methods to delete the files.\nAEN - All files except the newest,\nAEO - All files except the oldest,\nON - Only 1 file, the newest,\nOO - Only 1 file, the oldest\nHARD - create hard link\nNONE - not delete files"
+    )]
+    pub delete_method: DeleteMethod,
 }
 
 #[derive(Debug, clap::Args)]
@@ -630,7 +700,7 @@ pub struct CaseSensitiveNameComparison {
 #[derive(Debug, clap::Args)]
 pub struct DryRun {
     #[clap(long, help = "Do nothing and print the operation that would happen.")]
-    pub dryrun: bool,
+    pub dry_run: bool,
 }
 
 impl FileToSave {
@@ -683,13 +753,21 @@ fn parse_tolerance(src: &str) -> Result<i32, &'static str> {
     }
 }
 
-fn parse_checking_method(src: &str) -> Result<CheckingMethod, &'static str> {
+fn parse_checking_method_duplicate(src: &str) -> Result<CheckingMethod, &'static str> {
     match src.to_ascii_lowercase().as_str() {
         "name" => Ok(CheckingMethod::Name),
         "size" => Ok(CheckingMethod::Size),
         "size_name" => Ok(CheckingMethod::SizeName),
         "hash" => Ok(CheckingMethod::Hash),
         _ => Err("Couldn't parse the search method (allowed: NAME, SIZE, HASH)"),
+    }
+}
+
+fn parse_checking_method_same_music(src: &str) -> Result<CheckingMethod, &'static str> {
+    match src.to_ascii_lowercase().as_str() {
+        "tags" => Ok(CheckingMethod::AudioTags),
+        "content" => Ok(CheckingMethod::AudioContent),
+        _ => Err("Couldn't parse the searc method (allowed: TAGS, CONTENT)"),
     }
 }
 
@@ -773,7 +851,7 @@ fn parse_image_hash_size(src: &str) -> Result<u8, String> {
 }
 
 fn parse_music_duplicate_type(src: &str) -> Result<MusicSimilarity, String> {
-    if src.is_empty() {
+    if src.trim().is_empty() {
         return Ok(MusicSimilarity::NONE);
     }
 
@@ -781,22 +859,22 @@ fn parse_music_duplicate_type(src: &str) -> Result<MusicSimilarity, String> {
 
     let parts: Vec<String> = src.split(',').map(|e| e.to_lowercase().replace('_', "")).collect();
 
-    if parts.iter().any(|e| e.contains("tracktitle")) {
+    if parts.contains(&"tracktitle".into()) {
         similarity |= MusicSimilarity::TRACK_TITLE;
     }
-    if parts.iter().any(|e| e.contains("trackartist")) {
+    if parts.contains(&"trackartist".into()) {
         similarity |= MusicSimilarity::TRACK_ARTIST;
     }
-    if parts.iter().any(|e| e.contains("year")) {
+    if parts.contains(&"year".into()) {
         similarity |= MusicSimilarity::YEAR;
     }
-    if parts.iter().any(|e| e.contains("bitrate")) {
+    if parts.contains(&"bitrate".into()) {
         similarity |= MusicSimilarity::BITRATE;
     }
-    if parts.iter().any(|e| e.contains("genre")) {
+    if parts.contains(&"genre".into()) {
         similarity |= MusicSimilarity::GENRE;
     }
-    if parts.iter().any(|e| e.contains("length")) {
+    if parts.contains(&"length".into()) {
         similarity |= MusicSimilarity::LENGTH;
     }
 

@@ -1,5 +1,4 @@
-use std::collections::HashMap;
-use std::collections::{BTreeMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fmt::Debug;
 use std::fs::File;
 use std::hash::Hasher;
@@ -19,10 +18,9 @@ use log::debug;
 use rayon::prelude::*;
 use xxhash_rust::xxh3::Xxh3;
 
-use crate::common::{prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
+use crate::common::{delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crate::common_cache::{get_duplicate_cache_file, load_cache_from_file_generalized_by_size, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
-use crate::common_messages::Messages;
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::*;
 
@@ -82,7 +80,6 @@ pub struct DuplicateFinder {
     check_method: CheckingMethod,
     hash_type: HashType,
     ignore_hard_links: bool,
-    dryrun: bool,
     use_prehash_cache: bool,
     minimal_cache_file_size: u64,
     minimal_prehash_cache_file_size: u64,
@@ -105,7 +102,6 @@ impl DuplicateFinder {
             check_method: CheckingMethod::None,
             ignore_hard_links: true,
             hash_type: HashType::Blake3,
-            dryrun: false,
             use_prehash_cache: true,
             minimal_cache_file_size: 1024 * 256, // By default cache only >= 256 KB files
             minimal_prehash_cache_file_size: 0,
@@ -823,114 +819,25 @@ impl DuplicateFinder {
         match self.check_method {
             CheckingMethod::Name => {
                 let vec_files = self.files_with_identical_names.values().collect::<Vec<_>>();
-                delete_files(&vec_files, &self.common_data.delete_method, &mut self.common_data.text_messages, self.dryrun);
+                delete_files_custom(&vec_files, &self.common_data.delete_method, &mut self.common_data.text_messages, self.common_data.dry_run);
             }
             CheckingMethod::SizeName => {
                 let vec_files = self.files_with_identical_size_names.values().collect::<Vec<_>>();
-                delete_files(&vec_files, &self.common_data.delete_method, &mut self.common_data.text_messages, self.dryrun);
+                delete_files_custom(&vec_files, &self.common_data.delete_method, &mut self.common_data.text_messages, self.common_data.dry_run);
             }
             CheckingMethod::Hash => {
                 for vec_files in self.files_with_identical_hashes.values() {
                     let vev: Vec<&Vec<FileEntry>> = vec_files.iter().collect::<Vec<_>>();
-                    delete_files(&vev, &self.common_data.delete_method, &mut self.common_data.text_messages, self.dryrun);
+                    delete_files_custom(&vev, &self.common_data.delete_method, &mut self.common_data.text_messages, self.common_data.dry_run);
                 }
             }
             CheckingMethod::Size => {
                 let vec_files = self.files_with_identical_size.values().collect::<Vec<_>>();
-                delete_files(&vec_files, &self.common_data.delete_method, &mut self.common_data.text_messages, self.dryrun);
+                delete_files_custom(&vec_files, &self.common_data.delete_method, &mut self.common_data.text_messages, self.common_data.dry_run);
             }
             _ => panic!(),
         }
     }
-}
-// Here we assume, that internal Vec<> have at least 1 object
-#[allow(clippy::ptr_arg)]
-fn delete_files(items: &Vec<&Vec<FileEntry>>, delete_method: &DeleteMethod, text_messages: &mut Messages, dryrun: bool) -> (u64, usize, usize) {
-    let res = items
-        .iter()
-        .map(|values| {
-            let mut gained_space: u64 = 0;
-            let mut removed_files: usize = 0;
-            let mut failed_to_remove_files: usize = 0;
-            let mut infos = Vec::new();
-            let mut errors = Vec::new();
-
-            let mut all_values = (*values).clone();
-            let len = all_values.len();
-
-            // Sorted from oldest to newest - from smallest value to bigger
-            all_values.sort_unstable_by_key(ResultEntry::get_modified_date);
-
-            if delete_method == &DeleteMethod::HardLink {
-                let original_file = &all_values[0];
-                for file_entry in &all_values[1..] {
-                    if dryrun {
-                        infos.push(format!(
-                            "Dryrun - would create hardlink from {:?} to {:?}",
-                            original_file.get_path(),
-                            original_file.get_path()
-                        ));
-                    } else {
-                        if dryrun {
-                            infos.push(format!("Replace file {:?} with hard link to {:?}", original_file.get_path(), file_entry.get_path()));
-                        } else {
-                            if let Err(e) = make_hard_link(original_file.get_path(), file_entry.get_path()) {
-                                errors.push(format!(
-                                    "Cannot create hard link from {:?} to {:?} - {}",
-                                    file_entry.get_path(),
-                                    original_file.get_path(),
-                                    e
-                                ));
-                                failed_to_remove_files += 1;
-                            } else {
-                                gained_space += 1;
-                                removed_files += 1;
-                            }
-                        }
-                    }
-                }
-
-                return (infos, errors, gained_space, removed_files, failed_to_remove_files);
-            }
-
-            let items = match delete_method {
-                DeleteMethod::Delete => &all_values,
-                DeleteMethod::AllExceptNewest => &all_values[..(len - 1)],
-                DeleteMethod::AllExceptOldest => &all_values[1..],
-                DeleteMethod::OneOldest => &all_values[..1],
-                DeleteMethod::OneNewest => &all_values[(len - 1)..],
-                DeleteMethod::HardLink | DeleteMethod::None => unreachable!("HardLink and None should be handled before"),
-            };
-
-            for i in items {
-                if dryrun {
-                    infos.push(format!("Dryrun - would delete file: {:?}", i.get_path()));
-                } else {
-                    if let Err(e) = std::fs::remove_file(i.get_path()) {
-                        errors.push(format!("Cannot delete file: {:?} - {e}", i.get_path()));
-                        failed_to_remove_files += 1;
-                    } else {
-                        removed_files += 1;
-                        gained_space += i.get_size();
-                    }
-                }
-            }
-            (infos, errors, gained_space, removed_files, failed_to_remove_files)
-        })
-        .collect::<Vec<_>>();
-
-    let mut gained_space = 0;
-    let mut removed_files = 0;
-    let mut failed_to_remove_files = 0;
-    for (infos, errors, gained_space_v, removed_files_v, failed_to_remove_files_v) in res {
-        text_messages.messages.extend(infos);
-        text_messages.errors.extend(errors);
-        gained_space += gained_space_v;
-        removed_files += removed_files_v;
-        failed_to_remove_files += failed_to_remove_files_v;
-    }
-
-    (gained_space, removed_files, failed_to_remove_files)
 }
 
 impl DuplicateFinder {
@@ -982,8 +889,8 @@ impl DuplicateFinder {
         self.ignore_hard_links = ignore_hard_links;
     }
 
-    pub fn set_dryrun(&mut self, dryrun: bool) {
-        self.dryrun = dryrun;
+    pub fn set_dry_run(&mut self, dry_run: bool) {
+        self.common_data.dry_run = dry_run;
     }
 
     pub fn set_check_method(&mut self, check_method: CheckingMethod) {

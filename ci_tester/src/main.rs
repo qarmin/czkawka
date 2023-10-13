@@ -15,6 +15,7 @@ static CZKAWKA_PATH: state::InitCell<String> = state::InitCell::new();
 static COLLECTED_FILES: state::InitCell<CollectedFiles> = state::InitCell::new();
 
 const ATTEMPTS: u32 = 10;
+const PRINT_MESSAGES_CZKAWKA: bool = true;
 
 // App runs - ./ci_tester PATH_TO_CZKAWKA
 fn main() {
@@ -41,9 +42,112 @@ fn main() {
         test_remove_duplicates_one_newest();
         test_remove_duplicates_all_expect_newest();
         test_remove_duplicates_all_expect_oldest();
+        test_remove_same_music_tags_one_oldest();
+        test_remove_same_music_tags_one_newest();
+        test_remove_same_music_tags_all_expect_oldest();
+        test_remove_same_music_tags_all_expect_newest();
+        test_remove_same_music_content_one_oldest();
+        test_remove_same_music_content_all_expect_oldest();
+        test_remove_same_music_content_one_newest();
+        test_remove_same_music_content_all_expect_newest();
+        test_remove_videos_one_oldest();
+        test_remove_videos_one_newest();
+        test_remove_videos_all_expect_oldest();
+        test_remove_videos_all_expect_newest();
     }
 
     println!("Completed checking");
+}
+fn test_remove_videos_one_oldest() {
+    info!("test_remove_videos_one_oldest");
+    run_test(&["video", "-d", "TestFiles", "-D", "OO"], vec!["Videos/V3.webm"], vec![], vec![]);
+}
+fn test_remove_videos_one_newest() {
+    info!("test_remove_videos_one_newest");
+    run_test(&["video", "-d", "TestFiles", "-D", "ON"], vec!["Videos/V5.mp4"], vec![], vec![]);
+}
+fn test_remove_videos_all_expect_oldest() {
+    info!("test_remove_videos_all_expect_oldest");
+    run_test(
+        &["video", "-d", "TestFiles", "-D", "AEO"],
+        vec!["Videos/V1.mp4", "Videos/V2.mp4", "Videos/V5.mp4"],
+        vec![],
+        vec![],
+    );
+}
+fn test_remove_videos_all_expect_newest() {
+    info!("test_remove_videos_all_expect_newest");
+    run_test(
+        &["video", "-d", "TestFiles", "-D", "AEN"],
+        vec!["Videos/V1.mp4", "Videos/V2.mp4", "Videos/V3.webm"],
+        vec![],
+        vec![],
+    );
+}
+
+fn test_remove_same_music_content_one_newest() {
+    info!("test_remove_same_music_content_one_newest");
+    run_test(
+        &["music", "-d", "TestFiles", "-s", "CONTENT", "-l", "2.0", "-D", "ON"],
+        vec!["Music/M2.mp3"],
+        vec![],
+        vec![],
+    );
+}
+fn test_remove_same_music_content_all_expect_newest() {
+    info!("test_remove_same_music_content_all_expect_newest");
+    run_test(
+        &["music", "-d", "TestFiles", "-s", "CONTENT", "-l", "2.0", "-D", "AEN"],
+        vec!["Music/M1.mp3", "Music/M3.flac", "Music/M5.mp3"],
+        vec![],
+        vec![],
+    );
+}
+
+fn test_remove_same_music_content_all_expect_oldest() {
+    info!("test_remove_same_music_content_all_expect_oldest");
+    run_test(
+        &["music", "-d", "TestFiles", "-s", "CONTENT", "-l", "2.0", "-D", "AEO"],
+        vec!["Music/M1.mp3", "Music/M2.mp3", "Music/M3.flac"],
+        vec![],
+        vec![],
+    );
+}
+
+fn test_remove_same_music_content_one_oldest() {
+    info!("test_remove_same_music_content_one_oldest");
+    run_test(
+        &["music", "-d", "TestFiles", "-s", "CONTENT", "-l", "2.0", "-D", "OO"],
+        vec!["Music/M5.mp3"],
+        vec![],
+        vec![],
+    );
+}
+fn test_remove_same_music_tags_one_oldest() {
+    info!("test_remove_same_music_one_oldest");
+    run_test(&["music", "-d", "TestFiles", "-D", "OO"], vec!["Music/M5.mp3"], vec![], vec![]);
+}
+fn test_remove_same_music_tags_one_newest() {
+    info!("test_remove_same_music_one_newest");
+    run_test(&["music", "-d", "TestFiles", "-D", "ON"], vec!["Music/M2.mp3"], vec![], vec![]);
+}
+fn test_remove_same_music_tags_all_expect_oldest() {
+    info!("test_remove_same_music_all_expect_oldest");
+    run_test(
+        &["music", "-d", "TestFiles", "-D", "AEO"],
+        vec!["Music/M1.mp3", "Music/M2.mp3", "Music/M3.flac"],
+        vec![],
+        vec![],
+    );
+}
+fn test_remove_same_music_tags_all_expect_newest() {
+    info!("test_remove_same_music_all_expect_newest");
+    run_test(
+        &["music", "-d", "TestFiles", "-D", "AEN"],
+        vec!["Music/M1.mp3", "Music/M3.flac", "Music/M5.mp3"],
+        vec![],
+        vec![],
+    );
 }
 fn test_remove_duplicates_all_expect_oldest() {
     info!("test_remove_duplicates_all_expect_oldest");
@@ -138,7 +242,7 @@ fn run_test(arguments: &[&str], expected_files_differences: Vec<&'static str>, e
     let mut all_arguments = vec![];
     all_arguments.push(CZKAWKA_PATH.get().as_str());
     all_arguments.extend_from_slice(arguments);
-    run_with_good_status(&all_arguments, true);
+    run_with_good_status(&all_arguments, PRINT_MESSAGES_CZKAWKA);
     file_folder_diffs(
         COLLECTED_FILES.get(),
         expected_files_differences,

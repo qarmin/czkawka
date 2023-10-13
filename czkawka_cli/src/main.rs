@@ -75,7 +75,7 @@ fn duplicates(duplicates: DuplicatesArgs) {
         #[cfg(target_family = "unix")]
         exclude_other_filesystems,
         allow_hard_links,
-        dryrun,
+        dry_run,
         case_sensitive_name_comparison,
     } = duplicates;
 
@@ -91,13 +91,13 @@ fn duplicates(duplicates: DuplicatesArgs) {
     item.set_minimal_cache_file_size(minimal_cached_file_size);
     item.set_allowed_extensions(allowed_extensions.allowed_extensions.join(","));
     item.set_check_method(search_method);
-    item.set_delete_method(delete_method);
+    item.set_delete_method(delete_method.delete_method);
     item.set_hash_type(hash_type);
     item.set_recursive_search(!not_recursive.not_recursive);
     #[cfg(target_family = "unix")]
     item.set_exclude_other_filesystems(exclude_other_filesystems.exclude_other_filesystems);
     item.set_ignore_hard_links(!allow_hard_links.allow_hard_links);
-    item.set_dryrun(dryrun.dryrun);
+    item.set_dry_run(dry_run.dry_run);
     item.set_case_sensitive_name_comparison(case_sensitive_name_comparison.case_sensitive_name_comparison);
 
     item.find_duplicates(None, None);
@@ -131,7 +131,9 @@ fn empty_folders(empty_folders: EmptyFoldersArgs) {
     item.set_included_directory(directories.directories);
     item.set_excluded_directory(excluded_directories.excluded_directories);
     item.set_excluded_items(excluded_items.excluded_items);
-    item.set_delete_folder(delete_folders);
+    if delete_folders {
+        item.set_delete_method(DeleteMethod::Delete);
+    }
     #[cfg(target_family = "unix")]
     item.set_exclude_other_filesystems(exclude_other_filesystems.exclude_other_filesystems);
 
@@ -292,6 +294,8 @@ fn similar_images(similar_images: SimilarImagesArgs) {
         hash_alg,
         image_filter,
         hash_size,
+        delete_method,
+        dry_run,
     } = similar_images;
 
     set_number_of_threads(thread_number.thread_number);
@@ -309,6 +313,8 @@ fn similar_images(similar_images: SimilarImagesArgs) {
     item.set_image_filter(image_filter);
     item.set_hash_alg(hash_alg);
     item.set_hash_size(hash_size);
+    item.set_delete_method(delete_method.delete_method);
+    item.set_dry_run(dry_run.dry_run);
 
     item.set_similarity(return_similarity_from_similarity_preset(&similarity_preset, hash_size));
 
@@ -328,7 +334,7 @@ fn same_music(same_music: SameMusicArgs) {
         directories,
         excluded_directories,
         excluded_items,
-        // delete_files,
+        delete_method,
         file_to_save,
         json_compact_file_to_save,
         json_pretty_file_to_save,
@@ -338,6 +344,10 @@ fn same_music(same_music: SameMusicArgs) {
         minimal_file_size,
         maximal_file_size,
         music_similarity,
+        dry_run,
+        minimum_segment_duration,
+        maximum_difference,
+        search_method,
     } = same_music;
 
     set_number_of_threads(thread_number.thread_number);
@@ -353,10 +363,11 @@ fn same_music(same_music: SameMusicArgs) {
     #[cfg(target_family = "unix")]
     item.set_exclude_other_filesystems(exclude_other_filesystems.exclude_other_filesystems);
     item.set_music_similarity(music_similarity);
-
-    // if delete_files {
-    //     // TODO item.set_delete_method(same_music::DeleteMethod::Delete);
-    // }
+    item.set_delete_method(delete_method.delete_method);
+    item.set_dry_run(dry_run.dry_run);
+    item.set_minimum_segment_duration(minimum_segment_duration);
+    item.set_maximum_difference(maximum_difference);
+    item.set_check_type(search_method);
 
     item.find_same_music(None, None);
 
@@ -467,6 +478,8 @@ fn similar_videos(similar_videos: SimilarVideosArgs) {
         minimal_file_size,
         maximal_file_size,
         allowed_extensions,
+        delete_method,
+        dry_run,
     } = similar_videos;
 
     set_number_of_threads(thread_number.thread_number);
@@ -483,6 +496,8 @@ fn similar_videos(similar_videos: SimilarVideosArgs) {
     item.set_minimal_file_size(minimal_file_size);
     item.set_maximal_file_size(maximal_file_size);
     item.set_tolerance(tolerance);
+    item.set_delete_method(delete_method.delete_method);
+    item.set_dry_run(dry_run.dry_run);
 
     item.find_similar_videos(None, None);
 

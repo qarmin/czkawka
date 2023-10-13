@@ -22,6 +22,7 @@ pub struct CommonToolData {
     pub(crate) delete_outdated_cache: bool,
     pub(crate) save_also_as_json: bool,
     pub(crate) use_reference_folders: bool,
+    pub(crate) dry_run: bool,
 }
 
 #[derive(Eq, PartialEq, Clone, Debug, Copy, Default)]
@@ -53,6 +54,7 @@ impl CommonToolData {
             delete_outdated_cache: true,
             save_also_as_json: false,
             use_reference_folders: false,
+            dry_run: false,
         }
     }
 }
@@ -60,6 +62,13 @@ impl CommonToolData {
 pub trait CommonData {
     fn get_cd(&self) -> &CommonToolData;
     fn get_cd_mut(&mut self) -> &mut CommonToolData;
+
+    fn set_dry_run(&mut self, dry_run: bool) {
+        self.get_cd_mut().dry_run = dry_run;
+    }
+    fn get_dry_run(&self) -> bool {
+        self.get_cd().dry_run
+    }
 
     fn set_use_cache(&mut self, use_cache: bool) {
         self.get_cd_mut().use_cache = use_cache;
@@ -189,6 +198,8 @@ pub trait CommonData {
         println!("Delete outdated cache: {:?}", self.get_cd().delete_outdated_cache);
         println!("Save also as json: {:?}", self.get_cd().save_also_as_json);
         println!("Delete method: {:?}", self.get_cd().delete_method);
+        println!("Use reference folders: {:?}", self.get_cd().use_reference_folders);
+        println!("Dry run: {:?}", self.get_cd().dry_run);
 
         println!("---------------DEBUG PRINT MESSAGES---------------");
         println!("Errors size - {}", self.get_cd().text_messages.errors.len());

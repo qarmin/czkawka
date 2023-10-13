@@ -15,10 +15,10 @@ use serde::{Deserialize, Serialize};
 use vid_dup_finder_lib::HashCreationErrorKind::DetermineVideo;
 use vid_dup_finder_lib::{NormalizedTolerance, VideoHash};
 
-use crate::common::{check_folder_children, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, VIDEO_FILES_EXTENSIONS};
+use crate::common::{check_folder_children, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, VIDEO_FILES_EXTENSIONS};
 use crate::common_cache::{get_similar_videos_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
-use crate::common_tool::{CommonData, CommonToolData};
+use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::{DebugPrint, PrintResults, ResultEntry};
 use crate::flc;
 use crate::localizer_core::generate_translation_hashmap;
@@ -123,6 +123,7 @@ impl SimilarVideos {
                 return;
             }
         }
+        self.delete_files();
         self.debug_print();
     }
 
@@ -400,6 +401,15 @@ impl SimilarVideos {
                 })
                 .collect::<Vec<(FileEntry, Vec<FileEntry>)>>();
         }
+    }
+
+    fn delete_files(&mut self) {
+        if self.common_data.delete_method == DeleteMethod::None {
+            return;
+        }
+
+        let vec_files = self.similar_vectors.iter().collect::<Vec<_>>();
+        delete_files_custom(&vec_files, &self.common_data.delete_method, &mut self.common_data.text_messages, self.common_data.dry_run);
     }
 }
 
