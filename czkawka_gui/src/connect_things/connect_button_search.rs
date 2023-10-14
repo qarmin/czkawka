@@ -794,7 +794,7 @@ fn bad_extensions_search(
     });
 }
 
-#[fun_time(message = "clean_tree_view")]
+#[fun_time(message = "clean_tree_view", level = "debug")]
 fn clean_tree_view(tree_view: &gtk4::TreeView) {
     let list_store = get_list_store(tree_view);
     list_store.clear();

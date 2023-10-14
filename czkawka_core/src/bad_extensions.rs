@@ -13,7 +13,7 @@ use mime_guess::get_mime_extensions;
 use rayon::prelude::*;
 use serde::Serialize;
 
-use crate::common::{prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
+use crate::common::{check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::*;
@@ -194,7 +194,7 @@ impl BadExtensions {
         }
     }
 
-    #[fun_time(message = "find_bad_extensions_files")]
+    #[fun_time(message = "find_bad_extensions_files", level = "info")]
     pub fn find_bad_extensions_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_dirs_before_start();
         if !self.check_files(stop_receiver, progress_sender) {
@@ -208,7 +208,7 @@ impl BadExtensions {
         self.debug_print();
     }
 
-    #[fun_time(message = "check_files")]
+    #[fun_time(message = "check_files", level = "debug")]
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let result = DirTraversalBuilder::new()
             .root_dirs(self.common_data.directories.included_directories.clone())
@@ -238,7 +238,7 @@ impl BadExtensions {
         }
     }
 
-    #[fun_time(message = "look_for_bad_extensions_files")]
+    #[fun_time(message = "look_for_bad_extensions_files", level = "debug")]
     fn look_for_bad_extensions_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 1, 1, self.files_to_check.len(), CheckingMethod::None, self.get_cd().tool_type);
@@ -270,7 +270,7 @@ impl BadExtensions {
         true
     }
 
-    #[fun_time(message = "verify_extensions")]
+    #[fun_time(message = "verify_extensions", level = "debug")]
     fn verify_extensions(
         &self,
         files_to_check: Vec<FileEntry>,
@@ -283,7 +283,7 @@ impl BadExtensions {
             .into_par_iter()
             .map(|file_entry| {
                 atomic_counter.fetch_add(1, Ordering::Relaxed);
-                if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                if check_if_stop_received(stop_receiver) {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }

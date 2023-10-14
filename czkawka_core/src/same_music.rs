@@ -26,7 +26,8 @@ use symphonia::core::meta::MetadataOptions;
 use symphonia::core::probe::Hint;
 
 use crate::common::{
-    create_crash_message, delete_files_custom, filter_reference_folders_generic, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, AUDIO_FILES_EXTENSIONS,
+    check_if_stop_received, create_crash_message, delete_files_custom, filter_reference_folders_generic, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads,
+    AUDIO_FILES_EXTENSIONS,
 };
 use crate::common_cache::{get_similar_music_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
@@ -62,6 +63,9 @@ pub struct MusicEntry {
     pub genre: String,
     pub bitrate: u32,
 }
+
+const MAX_STAGE_TAGS: u8 = 4;
+const MAX_STAGE_CONTENT: u8 = 5;
 
 impl ResultEntry for MusicEntry {
     fn get_path(&self) -> &Path {
@@ -132,7 +136,7 @@ impl SameMusic {
         }
     }
 
-    #[fun_time(message = "print_results")]
+    #[fun_time(message = "find_same_music", level = "info")]
     pub fn find_same_music(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_dirs_before_start();
         self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
@@ -171,7 +175,7 @@ impl SameMusic {
         self.debug_print();
     }
 
-    #[fun_time(message = "check_files")]
+    #[fun_time(message = "check_files", level = "debug")]
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         if !self.common_data.allowed_extensions.using_custom_extensions() {
             self.common_data.allowed_extensions.extend_allowed_extensions(AUDIO_FILES_EXTENSIONS);
@@ -181,6 +185,12 @@ impl SameMusic {
                 return true;
             }
         }
+
+        let max_stage = match self.check_type {
+            CheckingMethod::AudioTags => MAX_STAGE_TAGS,
+            CheckingMethod::AudioContent => MAX_STAGE_CONTENT,
+            _ => panic!(),
+        };
 
         let result = DirTraversalBuilder::new()
             .root_dirs(self.common_data.directories.included_directories.clone())
@@ -193,7 +203,7 @@ impl SameMusic {
             .allowed_extensions(self.common_data.allowed_extensions.clone())
             .excluded_items(self.common_data.excluded_items.clone())
             .recursive_search(self.common_data.recursive_search)
-            .max_stage(2)
+            .max_stage(max_stage)
             .build()
             .run();
 
@@ -215,7 +225,7 @@ impl SameMusic {
         }
     }
 
-    #[fun_time(message = "load_cache")]
+    #[fun_time(message = "load_cache", level = "debug")]
     fn load_cache(&mut self, checking_tags: bool) -> (BTreeMap<String, MusicEntry>, BTreeMap<String, MusicEntry>, BTreeMap<String, MusicEntry>) {
         let loaded_hash_map;
 
@@ -250,7 +260,7 @@ impl SameMusic {
         (loaded_hash_map, records_already_cached, non_cached_files_to_check)
     }
 
-    #[fun_time(message = "save_cache")]
+    #[fun_time(message = "save_cache", level = "debug")]
     fn save_cache(&mut self, vec_file_entry: Vec<MusicEntry>, loaded_hash_map: BTreeMap<String, MusicEntry>, checking_tags: bool) {
         if !self.common_data.use_cache {
             return;
@@ -266,12 +276,26 @@ impl SameMusic {
         self.get_text_messages_mut().extend_with_another_messages(messages);
     }
 
-    #[fun_time(message = "calculate_fingerprint")]
+    #[fun_time(message = "calculate_fingerprint", level = "debug")]
     fn calculate_fingerprint(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+        let (progress_thread_handle, progress_thread_run, _atomic_counter, _check_was_stopped) =
+            prepare_thread_handler_common(progress_sender, 1, MAX_STAGE_CONTENT, 0, self.check_type, self.common_data.tool_type);
+
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache(false);
 
-        let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, 1, 3, non_cached_files_to_check.len(), self.check_type, self.common_data.tool_type);
+        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+        if check_if_stop_received(stop_receiver) {
+            return false;
+        }
+
+        let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) = prepare_thread_handler_common(
+            progress_sender,
+            2,
+            MAX_STAGE_CONTENT,
+            non_cached_files_to_check.len(),
+            self.check_type,
+            self.common_data.tool_type,
+        );
         let configuration = &self.hash_preset_config;
 
         debug!("calculate_fingerprint - starting fingerprinting");
@@ -279,7 +303,7 @@ impl SameMusic {
             .into_par_iter()
             .map(|(path, mut music_entry)| {
                 atomic_counter.fetch_add(1, Ordering::Relaxed);
-                if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                if check_if_stop_received(stop_receiver) {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
@@ -298,6 +322,8 @@ impl SameMusic {
         debug!("calculate_fingerprint - ended fingerprinting");
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+        let (progress_thread_handle, progress_thread_run, _atomic_counter, _check_was_stopped) =
+            prepare_thread_handler_common(progress_sender, 3, MAX_STAGE_CONTENT, 0, self.check_type, self.common_data.tool_type);
 
         // Just connect loaded results with already calculated
         vec_file_entry.extend(records_already_cached.into_values());
@@ -307,18 +333,33 @@ impl SameMusic {
         self.save_cache(vec_file_entry, loaded_hash_map, false);
 
         // Break if stop was clicked after saving to cache
-        if check_was_stopped.load(Ordering::Relaxed) {
+        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+        if check_was_stopped.load(Ordering::Relaxed) || check_if_stop_received(stop_receiver) {
             return false;
         }
         true
     }
 
-    #[fun_time(message = "read_tags")]
+    #[fun_time(message = "read_tags", level = "debug")]
     fn read_tags(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+        let (progress_thread_handle, progress_thread_run, _atomic_counter, _check_was_stopped) =
+            prepare_thread_handler_common(progress_sender, 1, MAX_STAGE_TAGS, 0, self.check_type, self.common_data.tool_type);
+
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache(true);
 
-        let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, 1, 2, non_cached_files_to_check.len(), self.check_type, self.common_data.tool_type);
+        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+        if check_if_stop_received(stop_receiver) {
+            return false;
+        }
+
+        let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) = prepare_thread_handler_common(
+            progress_sender,
+            2,
+            MAX_STAGE_TAGS,
+            non_cached_files_to_check.len(),
+            self.check_type,
+            self.common_data.tool_type,
+        );
 
         debug!("read_tags - starting reading tags");
         // Clean for duplicate files
@@ -326,7 +367,7 @@ impl SameMusic {
             .into_par_iter()
             .map(|(path, mut music_entry)| {
                 atomic_counter.fetch_add(1, Ordering::Relaxed);
-                if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                if check_if_stop_received(stop_receiver) {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
@@ -343,6 +384,8 @@ impl SameMusic {
         debug!("read_tags - ended reading tags");
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+        let (progress_thread_handle, progress_thread_run, _atomic_counter, _check_was_stopped) =
+            prepare_thread_handler_common(progress_sender, 3, MAX_STAGE_TAGS, 0, self.check_type, self.common_data.tool_type);
 
         // Just connect loaded results with already calculated
         vec_file_entry.extend(records_already_cached.into_values());
@@ -352,6 +395,7 @@ impl SameMusic {
         self.save_cache(vec_file_entry, loaded_hash_map, true);
 
         // Break if stop was clicked after saving to cache
+        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
         if check_was_stopped.load(Ordering::Relaxed) {
             return false;
         }
@@ -359,16 +403,16 @@ impl SameMusic {
         true
     }
 
-    #[fun_time(message = "check_for_duplicate_tags")]
+    #[fun_time(message = "check_for_duplicate_tags", level = "debug")]
     fn check_for_duplicate_tags(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, 2, 2, self.music_to_check.len(), self.check_type, self.common_data.tool_type);
+            prepare_thread_handler_common(progress_sender, 4, MAX_STAGE_TAGS, self.music_to_check.len(), self.check_type, self.common_data.tool_type);
 
         let mut old_duplicates: Vec<Vec<MusicEntry>> = vec![self.music_entries.clone()];
         let mut new_duplicates: Vec<Vec<MusicEntry>> = Vec::new();
 
         if (self.music_similarity & MusicSimilarity::TRACK_TITLE) == MusicSimilarity::TRACK_TITLE {
-            if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+            if check_if_stop_received(stop_receiver) {
                 send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                 return false;
             }
@@ -376,7 +420,7 @@ impl SameMusic {
             old_duplicates = self.check_music_item(old_duplicates, &atomic_counter, |fe| &fe.track_title, self.approximate_comparison);
         }
         if (self.music_similarity & MusicSimilarity::TRACK_ARTIST) == MusicSimilarity::TRACK_ARTIST {
-            if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+            if check_if_stop_received(stop_receiver) {
                 send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                 return false;
             }
@@ -384,7 +428,7 @@ impl SameMusic {
             old_duplicates = self.check_music_item(old_duplicates, &atomic_counter, |fe| &fe.track_artist, self.approximate_comparison);
         }
         if (self.music_similarity & MusicSimilarity::YEAR) == MusicSimilarity::YEAR {
-            if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+            if check_if_stop_received(stop_receiver) {
                 send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                 return false;
             }
@@ -392,7 +436,7 @@ impl SameMusic {
             old_duplicates = self.check_music_item(old_duplicates, &atomic_counter, |fe| &fe.year, false);
         }
         if (self.music_similarity & MusicSimilarity::LENGTH) == MusicSimilarity::LENGTH {
-            if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+            if check_if_stop_received(stop_receiver) {
                 send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                 return false;
             }
@@ -400,7 +444,7 @@ impl SameMusic {
             old_duplicates = self.check_music_item(old_duplicates, &atomic_counter, |fe| &fe.length, false);
         }
         if (self.music_similarity & MusicSimilarity::GENRE) == MusicSimilarity::GENRE {
-            if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+            if check_if_stop_received(stop_receiver) {
                 send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                 return false;
             }
@@ -408,7 +452,7 @@ impl SameMusic {
             old_duplicates = self.check_music_item(old_duplicates, &atomic_counter, |fe| &fe.genre, false);
         }
         if (self.music_similarity & MusicSimilarity::BITRATE) == MusicSimilarity::BITRATE {
-            if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+            if check_if_stop_received(stop_receiver) {
                 send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                 return false;
             }
@@ -458,11 +502,11 @@ impl SameMusic {
 
         true
     }
-    #[fun_time(message = "read_tags_to_files_similar_by_content")]
+    #[fun_time(message = "read_tags_to_files_similar_by_content", level = "debug")]
     fn read_tags_to_files_similar_by_content(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let groups_to_check = max(self.duplicated_music_entries.len(), self.duplicated_music_entries_referenced.len());
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, 3, 3, groups_to_check, self.check_type, self.common_data.tool_type);
+            prepare_thread_handler_common(progress_sender, 5, MAX_STAGE_CONTENT, groups_to_check, self.check_type, self.common_data.tool_type);
 
         if !self.duplicated_music_entries.is_empty() {
             let _: Vec<_> = self
@@ -470,7 +514,7 @@ impl SameMusic {
                 .par_iter_mut()
                 .map(|vec_me| {
                     atomic_counter.fetch_add(1, Ordering::Relaxed);
-                    if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                    if check_if_stop_received(stop_receiver) {
                         check_was_stopped.store(true, Ordering::Relaxed);
                         return None;
                     }
@@ -488,7 +532,7 @@ impl SameMusic {
                 .par_iter_mut()
                 .map(|(me_o, vec_me)| {
                     atomic_counter.fetch_add(1, Ordering::Relaxed);
-                    if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                    if check_if_stop_received(stop_receiver) {
                         check_was_stopped.store(true, Ordering::Relaxed);
                         return None;
                     }
@@ -525,7 +569,7 @@ impl SameMusic {
         (base_files, files_to_compare)
     }
 
-    #[fun_time(message = "compare_fingerprints")]
+    #[fun_time(message = "compare_fingerprints", level = "debug")]
     fn compare_fingerprints(
         &mut self,
         stop_receiver: Option<&Receiver<()>>,
@@ -543,7 +587,7 @@ impl SameMusic {
 
         for f_entry in base_files {
             atomic_counter.fetch_add(1, Ordering::Relaxed);
-            if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+            if check_if_stop_received(stop_receiver) {
                 return None;
             }
 
@@ -584,7 +628,7 @@ impl SameMusic {
         Some(duplicated_music_entries)
     }
 
-    #[fun_time(message = "check_for_duplicate_fingerprints")]
+    #[fun_time(message = "check_for_duplicate_fingerprints", level = "debug")]
     fn check_for_duplicate_fingerprints(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let (base_files, files_to_compare) = self.split_fingerprints_to_check();
         let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
@@ -621,7 +665,7 @@ impl SameMusic {
         true
     }
 
-    #[fun_time(message = "check_music_item")]
+    #[fun_time(message = "check_music_item", level = "debug")]
     fn check_music_item(
         &self,
         old_duplicates: Vec<Vec<MusicEntry>>,
@@ -653,7 +697,7 @@ impl SameMusic {
         new_duplicates
     }
 
-    #[fun_time(message = "delete_files")]
+    #[fun_time(message = "delete_files", level = "debug")]
     fn delete_files(&mut self) {
         if self.common_data.delete_method == DeleteMethod::None {
             return;
@@ -887,7 +931,7 @@ impl Default for SameMusic {
 }
 
 impl DebugPrint for SameMusic {
-    #[fun_time(message = "debug_print")]
+    #[fun_time(message = "debug_print", level = "debug")]
     fn debug_print(&self) {
         if !cfg!(debug_assertions) {
             return;

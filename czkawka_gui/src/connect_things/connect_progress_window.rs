@@ -84,7 +84,13 @@ fn process_bar_same_music(gui_data: &GuiData, item: &ProgressData) {
             label_stage.set_text(&flg!("progress_scanning_general_file", file_number_tm(item)));
             taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
         }
+        // Loading cache
         1 => {
+            progress_bar_current_stage.hide();
+            common_set_data(item, &progress_bar_all_stages, &progress_bar_current_stage, &taskbar_state);
+            label_stage.set_text(&flg!("progress_cache_loading"));
+        }
+        2 => {
             progress_bar_current_stage.show();
             common_set_data(item, &progress_bar_all_stages, &progress_bar_current_stage, &taskbar_state);
 
@@ -94,7 +100,14 @@ fn process_bar_same_music(gui_data: &GuiData, item: &ProgressData) {
                 _ => panic!(),
             }
         }
-        2 => {
+        // Saving cache
+        3 => {
+            progress_bar_current_stage.hide();
+            common_set_data(item, &progress_bar_all_stages, &progress_bar_current_stage, &taskbar_state);
+            label_stage.set_text(&flg!("progress_cache_saving"));
+        }
+        4 => {
+            progress_bar_current_stage.show();
             common_set_data(item, &progress_bar_all_stages, &progress_bar_current_stage, &taskbar_state);
 
             match item.checking_method {
@@ -103,7 +116,8 @@ fn process_bar_same_music(gui_data: &GuiData, item: &ProgressData) {
                 _ => panic!(),
             }
         }
-        3 => {
+        5 => {
+            progress_bar_current_stage.show();
             common_set_data(item, &progress_bar_all_stages, &progress_bar_current_stage, &taskbar_state);
 
             if item.checking_method == CheckingMethod::AudioContent {
@@ -235,21 +249,42 @@ fn process_bar_duplicates(gui_data: &GuiData, item: &ProgressData) {
                 // Checking Size
                 0 => {
                     progress_bar_current_stage.hide();
-                    // progress_bar_all_stages.hide();
-                    progress_bar_all_stages.set_fraction(0 as f64);
+                    progress_bar_all_stages.set_fraction(0f64);
                     label_stage.set_text(&flg!("progress_scanning_size", file_number_tm(item)));
                     taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
                 }
+                // Loading cache
+                1 | 4 => {
+                    progress_bar_current_stage.hide();
+                    common_set_data(item, &progress_bar_all_stages, &progress_bar_current_stage, &taskbar_state);
+
+                    if item.current_stage == 1 {
+                        label_stage.set_text(&flg!("progress_prehash_cache_loading"));
+                    } else {
+                        label_stage.set_text(&flg!("progress_hash_cache_loading"));
+                    }
+                }
+                // Saving cache
+                3 | 6 => {
+                    progress_bar_current_stage.hide();
+                    common_set_data(item, &progress_bar_all_stages, &progress_bar_current_stage, &taskbar_state);
+
+                    if item.current_stage == 3 {
+                        label_stage.set_text(&flg!("progress_prehash_cache_saving"));
+                    } else {
+                        label_stage.set_text(&flg!("progress_hash_cache_saving"));
+                    }
+                }
                 // Hash - first 1KB file
-                1 => {
+                2 => {
                     progress_bar_current_stage.show();
-                    // progress_bar_all_stages.show();
                     common_set_data(item, &progress_bar_all_stages, &progress_bar_current_stage, &taskbar_state);
 
                     label_stage.set_text(&flg!("progress_analyzed_partial_hash", progress_ratio_tm(item)));
                 }
                 // Hash - normal hash
-                2 => {
+                5 => {
+                    progress_bar_current_stage.show();
                     common_set_data(item, &progress_bar_all_stages, &progress_bar_current_stage, &taskbar_state);
                     label_stage.set_text(&flg!("progress_analyzed_full_hash", progress_ratio_tm(item)));
                 }
@@ -285,14 +320,18 @@ fn process_bar_duplicates(gui_data: &GuiData, item: &ProgressData) {
 
 fn common_set_data(item: &ProgressData, progress_bar_all_stages: &ProgressBar, progress_bar_current_stage: &ProgressBar, taskbar_state: &Rc<RefCell<TaskbarProgress>>) {
     if item.entries_to_check != 0 {
-        progress_bar_all_stages.set_fraction((item.current_stage as f64 + (item.entries_checked) as f64 / item.entries_to_check as f64) / (item.max_stage + 1) as f64);
+        let all_stages = (item.current_stage as f64 + (item.entries_checked) as f64 / item.entries_to_check as f64) / (item.max_stage + 1) as f64;
+        let all_stages = if all_stages > 0.99 { 0.99 } else { all_stages };
+        progress_bar_all_stages.set_fraction(all_stages);
         progress_bar_current_stage.set_fraction((item.entries_checked) as f64 / item.entries_to_check as f64);
         taskbar_state.borrow().set_progress_value(
             ((item.current_stage as usize) * item.entries_to_check + item.entries_checked) as u64,
             item.entries_to_check as u64 * (item.max_stage + 1) as u64,
         );
     } else {
-        progress_bar_all_stages.set_fraction((item.current_stage as f64) / (item.max_stage + 1) as f64);
+        let all_stages = (item.current_stage as f64) / (item.max_stage + 1) as f64;
+        let all_stages = if all_stages > 0.99 { 0.99 } else { all_stages };
+        progress_bar_all_stages.set_fraction(all_stages);
         progress_bar_current_stage.set_fraction(0f64);
         taskbar_state.borrow().set_progress_value(item.current_stage as u64, 1 + item.max_stage as u64);
     }

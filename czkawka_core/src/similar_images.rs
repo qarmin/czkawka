@@ -20,8 +20,8 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "heif")]
 use crate::common::get_dynamic_image_from_heic;
 use crate::common::{
-    check_folder_children, create_crash_message, delete_files_custom, get_dynamic_image_from_raw_image, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads,
-    HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS,
+    check_folder_children, check_if_stop_received, create_crash_message, delete_files_custom, get_dynamic_image_from_raw_image, prepare_thread_handler_common,
+    send_info_and_wait_for_ending_all_threads, HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS,
 };
 use crate::common_cache::{get_similar_images_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
@@ -124,7 +124,7 @@ impl SimilarImages {
         }
     }
 
-    #[fun_time(message = "find_similar_images")]
+    #[fun_time(message = "find_similar_images", level = "info")]
     pub fn find_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_dirs_before_start();
         self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
@@ -144,7 +144,7 @@ impl SimilarImages {
         self.debug_print();
     }
 
-    #[fun_time(message = "check_for_similar_images")]
+    #[fun_time(message = "check_for_similar_images", level = "debug")]
     fn check_for_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
@@ -171,7 +171,7 @@ impl SimilarImages {
             prepare_thread_handler_common(progress_sender, 0, 2, 0, CheckingMethod::None, self.common_data.tool_type);
 
         while !folders_to_check.is_empty() {
-            if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+            if check_if_stop_received(stop_receiver) {
                 send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                 return false;
             }
@@ -258,7 +258,7 @@ impl SimilarImages {
         }
     }
 
-    #[fun_time(message = "hash_images_load_cache")]
+    #[fun_time(message = "hash_images_load_cache", level = "debug")]
     fn hash_images_load_cache(&mut self) -> (BTreeMap<String, FileEntry>, BTreeMap<String, FileEntry>, BTreeMap<String, FileEntry>) {
         let loaded_hash_map;
 
@@ -303,7 +303,7 @@ impl SimilarImages {
     // - Join already read hashes with hashes which were read from file
     // - Join all hashes and save it to file
 
-    #[fun_time(message = "hash_images")]
+    #[fun_time(message = "hash_images", level = "debug")]
     fn hash_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.hash_images_load_cache();
 
@@ -315,7 +315,7 @@ impl SimilarImages {
             .into_par_iter()
             .map(|(_s, file_entry)| {
                 atomic_counter.fetch_add(1, Ordering::Relaxed);
-                if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                if check_if_stop_received(stop_receiver) {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
@@ -352,7 +352,7 @@ impl SimilarImages {
         true
     }
 
-    #[fun_time(message = "save_to_cache")]
+    #[fun_time(message = "save_to_cache", level = "debug")]
     fn save_to_cache(&mut self, vec_file_entry: Vec<(FileEntry, ImHash)>, loaded_hash_map: BTreeMap<String, FileEntry>) {
         if self.common_data.use_cache {
             // Must save all results to file, old loaded from file with all currently counted results
@@ -443,7 +443,7 @@ impl SimilarImages {
     }
 
     // Split hashes at 2 parts, base hashes and hashes to compare, 3 argument is set of hashes with multiple images
-    #[fun_time(message = "split_hashes")]
+    #[fun_time(message = "split_hashes", level = "debug")]
     fn split_hashes(&mut self, all_hashed_images: &HashMap<ImHash, Vec<FileEntry>>) -> (Vec<ImHash>, HashSet<ImHash>) {
         let hashes_with_multiple_images: HashSet<ImHash> = all_hashed_images
             .iter()
@@ -485,7 +485,7 @@ impl SimilarImages {
         (base_hashes, hashes_with_multiple_images)
     }
 
-    #[fun_time(message = "collect_hash_compare_result")]
+    #[fun_time(message = "collect_hash_compare_result", level = "debug")]
     fn collect_hash_compare_result(
         &self,
         hashes_parents: HashMap<ImHash, u32>,
@@ -545,7 +545,7 @@ impl SimilarImages {
         }
     }
 
-    #[fun_time(message = "compare_hashes_with_non_zero_tolerance")]
+    #[fun_time(message = "compare_hashes_with_non_zero_tolerance", level = "debug")]
     fn compare_hashes_with_non_zero_tolerance(
         &mut self,
         all_hashed_images: &HashMap<ImHash, Vec<FileEntry>>,
@@ -572,7 +572,7 @@ impl SimilarImages {
                 .map(|hash_to_check| {
                     atomic_counter.fetch_add(1, Ordering::Relaxed);
 
-                    if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                    if check_if_stop_received(stop_receiver) {
                         check_was_stopped.store(true, Ordering::Relaxed);
                         return None;
                     }
@@ -621,7 +621,7 @@ impl SimilarImages {
         true
     }
 
-    #[fun_time(message = "connect_results")]
+    #[fun_time(message = "connect_results", level = "debug")]
     fn connect_results(
         &self,
         partial_results: Vec<(&ImHash, Vec<(u32, &ImHash)>)>,
@@ -683,7 +683,7 @@ impl SimilarImages {
         }
     }
 
-    #[fun_time(message = "find_similar_hashes")]
+    #[fun_time(message = "find_similar_hashes", level = "debug")]
     fn find_similar_hashes(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         if self.image_hashes.is_empty() {
             return true;
@@ -736,7 +736,7 @@ impl SimilarImages {
         true
     }
 
-    #[fun_time(message = "exclude_items_with_same_size")]
+    #[fun_time(message = "exclude_items_with_same_size", level = "debug")]
     fn exclude_items_with_same_size(&mut self) {
         if self.exclude_images_with_same_size {
             for vec_file_entry in mem::take(&mut self.similar_vectors) {
@@ -755,7 +755,7 @@ impl SimilarImages {
         }
     }
 
-    #[fun_time(message = "remove_multiple_records_from_reference_folders")]
+    #[fun_time(message = "remove_multiple_records_from_reference_folders", level = "debug")]
     fn remove_multiple_records_from_reference_folders(&mut self) {
         if self.common_data.use_reference_folders {
             self.similar_referenced_vectors = mem::take(&mut self.similar_vectors)

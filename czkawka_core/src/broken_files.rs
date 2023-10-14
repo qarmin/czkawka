@@ -19,7 +19,7 @@ use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::common::{
-    check_folder_children, create_crash_message, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, AUDIO_FILES_EXTENSIONS,
+    check_folder_children, check_if_stop_received, create_crash_message, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, AUDIO_FILES_EXTENSIONS,
     IMAGE_RS_BROKEN_FILES_EXTENSIONS, PDF_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS,
 };
 use crate::common_cache::{get_broken_files_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
@@ -92,7 +92,7 @@ impl BrokenFiles {
         }
     }
 
-    #[fun_time(message = "find_broken_files")]
+    #[fun_time(message = "find_broken_files", level = "info")]
     pub fn find_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_dirs_before_start();
         if !self.check_files(stop_receiver, progress_sender) {
@@ -107,7 +107,7 @@ impl BrokenFiles {
         self.debug_print();
     }
 
-    #[fun_time(message = "check_files")]
+    #[fun_time(message = "check_files", level = "debug")]
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
@@ -121,7 +121,7 @@ impl BrokenFiles {
 
         debug!("check_files - starting to collect files");
         while !folders_to_check.is_empty() {
-            if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+            if check_if_stop_received(stop_receiver) {
                 send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                 return false;
             }
@@ -319,7 +319,7 @@ impl BrokenFiles {
         }
     }
 
-    #[fun_time(message = "load_cache")]
+    #[fun_time(message = "load_cache", level = "debug")]
     fn load_cache(&mut self) -> (BTreeMap<String, FileEntry>, BTreeMap<String, FileEntry>, BTreeMap<String, FileEntry>) {
         let loaded_hash_map;
 
@@ -346,7 +346,7 @@ impl BrokenFiles {
         (loaded_hash_map, records_already_cached, non_cached_files_to_check)
     }
 
-    #[fun_time(message = "look_for_broken_files")]
+    #[fun_time(message = "look_for_broken_files", level = "debug")]
     fn look_for_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache();
 
@@ -358,7 +358,7 @@ impl BrokenFiles {
             .into_par_iter()
             .map(|(_, file_entry)| {
                 atomic_counter.fetch_add(1, Ordering::Relaxed);
-                if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                if check_if_stop_received(stop_receiver) {
                     return None;
                 }
 
@@ -396,7 +396,7 @@ impl BrokenFiles {
 
         true
     }
-    #[fun_time(message = "save_to_cache")]
+    #[fun_time(message = "save_to_cache", level = "debug")]
     fn save_to_cache(&mut self, vec_file_entry: &[FileEntry], loaded_hash_map: BTreeMap<String, FileEntry>) {
         if self.common_data.use_cache {
             // Must save all results to file, old loaded from file with all currently counted results
@@ -414,7 +414,7 @@ impl BrokenFiles {
         }
     }
 
-    #[fun_time(message = "delete_files")]
+    #[fun_time(message = "delete_files", level = "debug")]
     fn delete_files(&mut self) {
         match self.common_data.delete_method {
             DeleteMethod::Delete => {

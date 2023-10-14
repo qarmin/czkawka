@@ -21,7 +21,7 @@ directories-next = "2.0"
 # Needed by similar images
 image_hasher = "1.2"
 bk-tree = "0.5"
-image = { version = "0.24", default-features = false, features = ["gif", "jpeg", "ico", "png", "pnm", "tga", "tiff", "webp", "bmp", "hdr", "dxt", "dds", "farbfeld", "openexr", "qoi", "avif"] }
+image = { version = "0.24", default-features = false, features = ["gif", "jpeg", "ico", "png", "pnm", "tga", "tiff", "webp", "bmp", "hdr", "dxt", "dds", "farbfeld", "openexr", "qoi"] }
 hamming = "0.1"
 
 # Needed by same music

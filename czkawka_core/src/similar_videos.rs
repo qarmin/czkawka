@@ -15,7 +15,9 @@ use serde::{Deserialize, Serialize};
 use vid_dup_finder_lib::HashCreationErrorKind::DetermineVideo;
 use vid_dup_finder_lib::{NormalizedTolerance, VideoHash};
 
-use crate::common::{check_folder_children, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, VIDEO_FILES_EXTENSIONS};
+use crate::common::{
+    check_folder_children, check_if_stop_received, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, VIDEO_FILES_EXTENSIONS,
+};
 use crate::common_cache::{get_similar_videos_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
@@ -100,7 +102,7 @@ impl SimilarVideos {
         }
     }
 
-    #[fun_time(message = "find_similar_videos")]
+    #[fun_time(message = "find_similar_videos", level = "info")]
     pub fn find_similar_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         if !check_if_ffmpeg_is_installed() {
             self.common_data.text_messages.errors.push(flc!("core_ffmpeg_not_found"));
@@ -127,7 +129,7 @@ impl SimilarVideos {
         self.debug_print();
     }
 
-    #[fun_time(message = "check_for_similar_videos")]
+    #[fun_time(message = "check_for_similar_videos", level = "debug")]
     fn check_for_similar_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
@@ -149,7 +151,7 @@ impl SimilarVideos {
             prepare_thread_handler_common(progress_sender, 0, 1, 0, CheckingMethod::None, self.common_data.tool_type);
 
         while !folders_to_check.is_empty() {
-            if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+            if check_if_stop_received(stop_receiver) {
                 send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                 return false;
             }
@@ -237,7 +239,7 @@ impl SimilarVideos {
         }
     }
 
-    #[fun_time(message = "load_cache_at_start")]
+    #[fun_time(message = "load_cache_at_start", level = "debug")]
     fn load_cache_at_start(&mut self) -> (BTreeMap<String, FileEntry>, BTreeMap<String, FileEntry>, BTreeMap<String, FileEntry>) {
         let loaded_hash_map;
         let mut records_already_cached: BTreeMap<String, FileEntry> = Default::default();
@@ -263,7 +265,7 @@ impl SimilarVideos {
         (loaded_hash_map, records_already_cached, non_cached_files_to_check)
     }
 
-    #[fun_time(message = "sort_videos")]
+    #[fun_time(message = "sort_videos", level = "debug")]
     fn sort_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache_at_start();
 
@@ -274,7 +276,7 @@ impl SimilarVideos {
             .par_iter()
             .map(|file_entry| {
                 atomic_counter.fetch_add(1, Ordering::Relaxed);
-                if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                if check_if_stop_received(stop_receiver) {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
@@ -343,7 +345,7 @@ impl SimilarVideos {
         true
     }
 
-    #[fun_time(message = "save_cache")]
+    #[fun_time(message = "save_cache", level = "debug")]
     fn save_cache(&mut self, vec_file_entry: Vec<FileEntry>, loaded_hash_map: BTreeMap<String, FileEntry>) {
         if self.common_data.use_cache {
             // Must save all results to file, old loaded from file with all currently counted results
@@ -357,7 +359,7 @@ impl SimilarVideos {
         }
     }
 
-    #[fun_time(message = "match_groups_of_videos")]
+    #[fun_time(message = "match_groups_of_videos", level = "debug")]
     fn match_groups_of_videos(&mut self, vector_of_hashes: Vec<VideoHash>, hashmap_with_file_entries: &HashMap<String, FileEntry>) {
         let match_group = vid_dup_finder_lib::search(vector_of_hashes, NormalizedTolerance::new(self.tolerance as f64 / 100.0f64));
         let mut collected_similar_videos: Vec<Vec<FileEntry>> = Default::default();
@@ -383,7 +385,7 @@ impl SimilarVideos {
         self.similar_vectors = collected_similar_videos;
     }
 
-    #[fun_time(message = "remove_from_reference_folders")]
+    #[fun_time(message = "remove_from_reference_folders", level = "debug")]
     fn remove_from_reference_folders(&mut self) {
         if self.common_data.use_reference_folders {
             self.similar_referenced_vectors = mem::take(&mut self.similar_vectors)
@@ -420,7 +422,7 @@ impl Default for SimilarVideos {
 }
 
 impl DebugPrint for SimilarVideos {
-    #[fun_time(message = "debug_print")]
+    #[fun_time(message = "debug_print", level = "debug")]
     fn debug_print(&self) {
         if !cfg!(debug_assertions) {
             return;

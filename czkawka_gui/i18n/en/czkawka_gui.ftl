@@ -471,6 +471,12 @@ progress_scanning_size_name = Scanning name and size of {$file_number} file
 progress_scanning_name = Scanning name of {$file_number} file
 progress_analyzed_partial_hash = Analyzed partial hash of {$file_checked}/{$all_files} files
 progress_analyzed_full_hash = Analyzed full hash of {$file_checked}/{$all_files} files
+progress_prehash_cache_loading = Loading prehash cache
+progress_prehash_cache_saving = Saving prehash cache
+progress_hash_cache_loading = Loading hash cache
+progress_hash_cache_saving = Saving hash cache
+progress_cache_loading = Loading cache
+progress_cache_saving = Saving cache
 
 progress_current_stage = Current Stage:{"  "}
 progress_all_stages = All Stages:{"  "}

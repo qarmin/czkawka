@@ -14,7 +14,7 @@ use log::debug;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::common::{check_folder_children, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, split_path};
+use crate::common::{check_folder_children, check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, split_path};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::{DebugPrint, PrintResults};
@@ -56,7 +56,7 @@ impl BigFile {
         }
     }
 
-    #[fun_time(message = "find_big_files")]
+    #[fun_time(message = "find_big_files", level = "info")]
     pub fn find_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_dirs_before_start();
         if !self.look_for_big_files(stop_receiver, progress_sender) {
@@ -67,7 +67,7 @@ impl BigFile {
         self.debug_print();
     }
 
-    #[fun_time(message = "look_for_big_files")]
+    #[fun_time(message = "look_for_big_files", level = "debug")]
     fn look_for_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
         let mut old_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
@@ -82,7 +82,7 @@ impl BigFile {
 
         debug!("Starting to search for big files");
         while !folders_to_check.is_empty() {
-            if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+            if check_if_stop_received(stop_receiver) {
                 send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                 return false;
             }
@@ -181,7 +181,7 @@ impl BigFile {
         fe_result.push((fe.size, fe));
     }
 
-    #[fun_time(message = "extract_n_biggest_files")]
+    #[fun_time(message = "extract_n_biggest_files", level = "debug")]
     pub fn extract_n_biggest_files(&mut self, old_map: BTreeMap<u64, Vec<FileEntry>>) {
         let iter: Box<dyn Iterator<Item = _>>;
         if self.search_mode == SearchMode::SmallestFiles {

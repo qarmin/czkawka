@@ -41,7 +41,7 @@ pub fn get_duplicate_cache_file(type_of_hash: &HashType, is_prehash: bool) -> St
     format!("cache_duplicates_{type_of_hash:?}{prehash_str}_61.bin")
 }
 
-#[fun_time(message = "save_cache_to_file_generalized")]
+#[fun_time(message = "save_cache_to_file_generalized", level = "debug")]
 pub fn save_cache_to_file_generalized<T>(cache_file_name: &str, hashmap: &BTreeMap<String, T>, save_also_as_json: bool, minimum_file_size: u64) -> Messages
 where
     T: Serialize + ResultEntry + Sized + Send + Sync,
@@ -78,13 +78,14 @@ where
         }
 
         text_messages.messages.push(format!("Properly saved to file {} cache entries.", hashmap.len()));
+        debug!("Properly saved to file {} cache entries.", hashmap.len());
     } else {
         debug!("Failed to save cache to file {cache_file_name} because not exists");
     }
     text_messages
 }
 
-#[fun_time(message = "load_cache_from_file_generalized_by_path")]
+#[fun_time(message = "load_cache_from_file_generalized_by_path", level = "debug")]
 pub fn load_cache_from_file_generalized_by_path<T>(cache_file_name: &str, delete_outdated_cache: bool, used_files: &BTreeMap<String, T>) -> (Messages, Option<BTreeMap<String, T>>)
 where
     for<'a> T: Deserialize<'a> + ResultEntry + Sized + Send + Sync + Clone,
@@ -104,7 +105,7 @@ where
     (text_messages, Some(map_loaded_entries))
 }
 
-#[fun_time(message = "load_cache_from_file_generalized_by_size")]
+#[fun_time(message = "load_cache_from_file_generalized_by_size", level = "debug")]
 pub fn load_cache_from_file_generalized_by_size<T>(
     cache_file_name: &str,
     delete_outdated_cache: bool,
@@ -135,7 +136,7 @@ where
     (text_messages, Some(map_loaded_entries))
 }
 
-#[fun_time(message = "load_cache_from_file_generalized_by_path_from_size")]
+#[fun_time(message = "load_cache_from_file_generalized_by_path_from_size", level = "debug")]
 pub fn load_cache_from_file_generalized_by_path_from_size<T>(
     cache_file_name: &str,
     delete_outdated_cache: bool,
@@ -166,7 +167,7 @@ where
     (text_messages, Some(map_loaded_entries))
 }
 
-#[fun_time(message = "load_cache_from_file_generalized")]
+#[fun_time(message = "load_cache_from_file_generalized", level = "debug")]
 fn load_cache_from_file_generalized<T>(cache_file_name: &str, delete_outdated_cache: bool, used_files: &BTreeMap<String, T>) -> (Messages, Option<Vec<T>>)
 where
     for<'a> T: Deserialize<'a> + ResultEntry + Sized + Send + Sync + Clone,
