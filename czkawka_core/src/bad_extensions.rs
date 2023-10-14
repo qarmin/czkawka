@@ -73,10 +73,10 @@ const WORKAROUNDS: &[(&str, &str)] = &[
     // Games specific extensions - cannot be used here common extensions like zip
     ("gz", "h3m"),     // Heroes 3
     ("zip", "hashdb"), // Gog
-    ("c2", "zip"),     // King of the Dark Age
-    ("c2", "bmp"),     // King of the Dark Age
-    ("c2", "avi"),     // King of the Dark Age
-    ("c2", "exe"),     // King of the Dark Age
+    ("zip", "c2"),     // King of the Dark Age
+    ("bmp", "c2"),     // King of the Dark Age
+    ("avi", "c2"),     // King of the Dark Age
+    ("exe", "c2"),     // King of the Dark Age
     // Other
     ("der", "keystore"),  // Godot/Android keystore
     ("exe", "pyd"),       // Python/Mingw
@@ -99,6 +99,7 @@ const WORKAROUNDS: &[(&str, &str)] = &[
     ("odt", "ott"),       // Libreoffice
     ("ogg", "ogv"),       // Audio format
     ("pem", "key"),       // curl, openssl
+    ("png", "kpp"),       // Krita presets
     ("pptx", "ppsx"),     // Powerpoint
     ("sh", "bash"),       // Linux
     ("sh", "guess"),      // GNU
@@ -143,6 +144,7 @@ const WORKAROUNDS: &[(&str, &str)] = &[
     ("zip", "docx"),      // Word
     ("zip", "jar"),       // Java
     ("zip", "kra"),       // Krita
+    ("zip", "kgm"),       // Krita
     ("zip", "nupkg"),     // Nuget packages
     ("zip", "odg"),       // Libreoffice
     ("zip", "pptx"),      // Powerpoint

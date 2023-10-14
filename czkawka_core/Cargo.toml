@@ -21,7 +21,7 @@ directories-next = "2.0"
 # Needed by similar images
 image_hasher = "1.2"
 bk-tree = "0.5"
-image = "0.24"
+image = { version = "0.24", default-features = false, features = ["gif", "jpeg", "ico", "png", "pnm", "tga", "tiff", "webp", "bmp", "hdr", "dxt", "dds", "farbfeld", "openexr", "qoi", "avif"] }
 hamming = "0.1"
 
 # Needed by same music
@@ -69,8 +69,6 @@ imagepipe = "0.5"
 # Checking for invalid extensions
 mime_guess = "2.0"
 infer = "0.15"
-
-num_cpus = "1.16"
 
 # Heif/Heic
 libheif-rs = { version = "=0.18.0", optional = true } # Do not upgrade now, since Ubuntu 22.04 not works with newer version

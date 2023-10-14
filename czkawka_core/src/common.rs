@@ -38,7 +38,7 @@ pub fn get_number_of_threads() -> usize {
     if *data >= 1 {
         *data
     } else {
-        num_cpus::get()
+        get_default_number_of_threads()
     }
 }
 
@@ -66,11 +66,11 @@ pub fn print_version_mode() {
 }
 
 pub fn set_default_number_of_threads() {
-    set_number_of_threads(num_cpus::get());
+    set_number_of_threads(get_default_number_of_threads());
 }
 
 pub fn get_default_number_of_threads() -> usize {
-    num_cpus::get()
+    thread::available_parallelism().map(std::num::NonZeroUsize::get).unwrap_or(1)
 }
 
 pub fn set_number_of_threads(thread_number: usize) {
@@ -84,15 +84,17 @@ pub const RAW_IMAGE_EXTENSIONS: &[&str] = &[
     ".cr2", ".ari",
 ];
 pub const IMAGE_RS_EXTENSIONS: &[&str] = &[
-    ".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", ".webp", ".gif", ".ico", ".exr",
+    ".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", ".webp", ".gif", ".ico", ".exr", ".qoi", ".avif",
 ];
 
-pub const IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS: &[&str] = &[".jpg", ".jpeg", ".png", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", ".bmp", ".webp", ".exr"];
+pub const IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS: &[&str] = &[
+    ".jpg", ".jpeg", ".png", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", ".bmp", ".webp", ".exr", ".qoi", ".avif",
+];
 
 pub const IMAGE_RS_BROKEN_FILES_EXTENSIONS: &[&str] = &[
     ".jpg", ".jpeg", ".png", ".tiff", ".tif", ".tga", ".ff", ".jif", ".jfi", ".gif", ".bmp", ".ico", ".jfif", ".jpe", ".pnz", ".dib", ".webp", ".exr",
 ];
-pub const HEIC_EXTENSIONS: &[&str] = &[".heif", ".heifs", ".heic", ".heics", ".avci", ".avcs", ".avif", ".avifs"];
+pub const HEIC_EXTENSIONS: &[&str] = &[".heif", ".heifs", ".heic", ".heics", ".avci", ".avcs", ".avifs"];
 
 pub const ZIP_FILES_EXTENSIONS: &[&str] = &[".zip", ".jar"];
 
