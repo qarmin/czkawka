@@ -201,7 +201,7 @@ Then, for each selected tag by which we want to search for duplicates, we perfor
 ### Similar Images
 It is a tool for finding similar images that differ e.g. in watermark, size etc.
 
-The tool first collects images with specific extensions that can be checked - `[".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".pnm", ".tga", ".ff", ".gif", ".jif", ".jfi", ".ico", ".webp", ".avif"]`.
+The tool first collects images with specific extensions that can be checked - `[".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".pnm", ".tga", ".ff", ".gif", ".jif", ".jfi", ".ico", ".webp"]`.
 
 Next cached data is loaded from file to prevent hashing twice the same file.  
 The cache which points to non-existing data, by default is deleted automatically.
