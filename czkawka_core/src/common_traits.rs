@@ -11,7 +11,7 @@ pub trait DebugPrint {
 pub trait PrintResults {
     fn write_results<T: Write>(&self, writer: &mut T) -> std::io::Result<()>;
 
-    #[fun_time(message = "print_results_to_output")]
+    #[fun_time(message = "print_results_to_output", level = "debug")]
     fn print_results_to_output(&self) {
         let stdout = std::io::stdout();
         let mut handle = stdout.lock();
@@ -19,7 +19,7 @@ pub trait PrintResults {
         handle.flush().unwrap();
     }
 
-    #[fun_time(message = "print_results_to_file")]
+    #[fun_time(message = "print_results_to_file", level = "debug")]
     fn print_results_to_file(&self, file_name: &str) -> std::io::Result<()> {
         let file_name: String = match file_name {
             "" => "results.txt".to_string(),
@@ -43,7 +43,7 @@ pub trait PrintResults {
         }
     }
 
-    #[fun_time(message = "save_results_to_file_as_json_pretty")]
+    #[fun_time(message = "save_results_to_file_as_json_pretty", level = "debug")]
     fn save_results_to_file_as_json_pretty<T: Serialize>(&self, file_name: &str, item_to_serialize: &T) -> std::io::Result<()> {
         let file_handler = File::create(file_name)?;
         let mut writer = BufWriter::new(file_handler);
@@ -51,7 +51,7 @@ pub trait PrintResults {
         Ok(())
     }
 
-    #[fun_time(message = "save_results_to_file_as_json_compact")]
+    #[fun_time(message = "save_results_to_file_as_json_compact", level = "debug")]
     fn save_results_to_file_as_json_compact<T: Serialize>(&self, file_name: &str, item_to_serialize: &T) -> std::io::Result<()> {
         let file_handler = File::create(file_name)?;
         let mut writer = BufWriter::new(file_handler);

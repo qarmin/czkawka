@@ -41,7 +41,7 @@ impl EmptyFolder {
         &self.information
     }
 
-    #[fun_time(message = "find_empty_folders")]
+    #[fun_time(message = "find_empty_folders", level = "info")]
     pub fn find_empty_folders(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_dirs_before_start();
         if !self.check_for_empty_folders(stop_receiver, progress_sender) {
@@ -73,7 +73,7 @@ impl EmptyFolder {
         self.information.number_of_empty_folders = self.empty_folder_list.len();
     }
 
-    #[fun_time(message = "check_for_empty_folders")]
+    #[fun_time(message = "check_for_empty_folders", level = "debug")]
     fn check_for_empty_folders(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let result = DirTraversalBuilder::new()
             .root_dirs(self.common_data.directories.included_directories.clone())
@@ -106,7 +106,7 @@ impl EmptyFolder {
         }
     }
 
-    // #[fun_time(message = "delete_files")]
+    // #[fun_time(message = "delete_files", level = "debug")]
     fn delete_files(&mut self) {
         if self.get_delete_method() == DeleteMethod::None {
             return;

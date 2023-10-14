@@ -56,7 +56,7 @@ impl BigFile {
         }
     }
 
-    #[fun_time(message = "find_big_files")]
+    #[fun_time(message = "find_big_files", level = "info")]
     pub fn find_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_dirs_before_start();
         if !self.look_for_big_files(stop_receiver, progress_sender) {
@@ -67,7 +67,7 @@ impl BigFile {
         self.debug_print();
     }
 
-    #[fun_time(message = "look_for_big_files")]
+    #[fun_time(message = "look_for_big_files", level = "debug")]
     fn look_for_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
         let mut old_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
@@ -181,7 +181,7 @@ impl BigFile {
         fe_result.push((fe.size, fe));
     }
 
-    #[fun_time(message = "extract_n_biggest_files")]
+    #[fun_time(message = "extract_n_biggest_files", level = "debug")]
     pub fn extract_n_biggest_files(&mut self, old_map: BTreeMap<u64, Vec<FileEntry>>) {
         let iter: Box<dyn Iterator<Item = _>>;
         if self.search_mode == SearchMode::SmallestFiles {

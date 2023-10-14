@@ -194,7 +194,7 @@ impl BadExtensions {
         }
     }
 
-    #[fun_time(message = "find_bad_extensions_files")]
+    #[fun_time(message = "find_bad_extensions_files", level = "info")]
     pub fn find_bad_extensions_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_dirs_before_start();
         if !self.check_files(stop_receiver, progress_sender) {
@@ -208,7 +208,7 @@ impl BadExtensions {
         self.debug_print();
     }
 
-    #[fun_time(message = "check_files")]
+    #[fun_time(message = "check_files", level = "debug")]
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let result = DirTraversalBuilder::new()
             .root_dirs(self.common_data.directories.included_directories.clone())
@@ -238,7 +238,7 @@ impl BadExtensions {
         }
     }
 
-    #[fun_time(message = "look_for_bad_extensions_files")]
+    #[fun_time(message = "look_for_bad_extensions_files", level = "debug")]
     fn look_for_bad_extensions_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 1, 1, self.files_to_check.len(), CheckingMethod::None, self.get_cd().tool_type);
@@ -270,7 +270,7 @@ impl BadExtensions {
         true
     }
 
-    #[fun_time(message = "verify_extensions")]
+    #[fun_time(message = "verify_extensions", level = "debug")]
     fn verify_extensions(
         &self,
         files_to_check: Vec<FileEntry>,

@@ -505,7 +505,7 @@ pub fn prepare_thread_handler_common(
     (progress_thread_sender, progress_thread_run, atomic_counter, check_was_stopped)
 }
 
-#[fun_time(message = "send_info_and_wait_for_ending_all_threads")]
+#[fun_time(message = "send_info_and_wait_for_ending_all_threads", level = "debug")]
 pub fn send_info_and_wait_for_ending_all_threads(progress_thread_run: &Arc<AtomicBool>, progress_thread_handle: JoinHandle<()>) {
     progress_thread_run.store(false, Ordering::Relaxed);
     progress_thread_handle.join().unwrap();

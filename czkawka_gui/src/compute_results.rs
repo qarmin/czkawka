@@ -230,7 +230,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
     });
 }
 
-#[fun_time(message = "computer_bad_extensions")]
+#[fun_time(message = "computer_bad_extensions", level = "debug")]
 fn computer_bad_extensions(
     be: BadExtensions,
     entry_info: &Entry,
@@ -304,7 +304,7 @@ fn computer_bad_extensions(
     }
 }
 
-#[fun_time(message = "computer_broken_files")]
+#[fun_time(message = "computer_broken_files", level = "debug")]
 fn computer_broken_files(
     br: BrokenFiles,
     entry_info: &Entry,
@@ -378,7 +378,7 @@ fn computer_broken_files(
     }
 }
 
-#[fun_time(message = "computer_invalid_symlinks")]
+#[fun_time(message = "computer_invalid_symlinks", level = "debug")]
 fn computer_invalid_symlinks(
     ifs: InvalidSymlinks,
     entry_info: &Entry,
@@ -450,7 +450,7 @@ fn computer_invalid_symlinks(
     }
 }
 
-#[fun_time(message = "computer_same_music")]
+#[fun_time(message = "computer_same_music", level = "debug")]
 fn computer_same_music(
     mf: SameMusic,
     entry_info: &Entry,
@@ -625,7 +625,7 @@ fn computer_same_music(
     }
 }
 
-#[fun_time(message = "computer_similar_videos")]
+#[fun_time(message = "computer_similar_videos", level = "debug")]
 fn computer_similar_videos(
     ff: SimilarVideos,
     entry_info: &Entry,
@@ -727,7 +727,7 @@ fn computer_similar_videos(
     }
 }
 
-#[fun_time(message = "computer_similar_images")]
+#[fun_time(message = "computer_similar_images", level = "debug")]
 fn computer_similar_images(
     sf: SimilarImages,
     entry_info: &Entry,
@@ -860,7 +860,7 @@ fn computer_similar_images(
     }
 }
 
-#[fun_time(message = "computer_temporary_files")]
+#[fun_time(message = "computer_temporary_files", level = "debug")]
 fn computer_temporary_files(
     tf: Temporary,
     entry_info: &Entry,
@@ -932,7 +932,7 @@ fn computer_temporary_files(
     }
 }
 
-#[fun_time(message = "computer_big_files")]
+#[fun_time(message = "computer_big_files", level = "debug")]
 fn computer_big_files(
     bf: BigFile,
     entry_info: &Entry,
@@ -1000,7 +1000,7 @@ fn computer_big_files(
     }
 }
 
-#[fun_time(message = "computer_empty_files")]
+#[fun_time(message = "computer_empty_files", level = "debug")]
 fn computer_empty_files(
     vf: EmptyFiles,
     entry_info: &Entry,
@@ -1067,7 +1067,7 @@ fn computer_empty_files(
     }
 }
 
-#[fun_time(message = "computer_empty_folders")]
+#[fun_time(message = "computer_empty_folders", level = "debug")]
 fn computer_empty_folders(
     ef: EmptyFolder,
     entry_info: &Entry,
@@ -1139,7 +1139,7 @@ fn computer_empty_folders(
     }
 }
 
-#[fun_time(message = "computer_duplicate_finder")]
+#[fun_time(message = "computer_duplicate_finder", level = "debug")]
 fn computer_duplicate_finder(
     df: DuplicateFinder,
     entry_info: &Entry,

@@ -30,7 +30,7 @@ impl InvalidSymlinks {
         }
     }
 
-    #[fun_time(message = "find_invalid_links")]
+    #[fun_time(message = "find_invalid_links", level = "info")]
     pub fn find_invalid_links(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_dirs_before_start();
         if !self.check_files(stop_receiver, progress_sender) {
@@ -41,7 +41,7 @@ impl InvalidSymlinks {
         self.debug_print();
     }
 
-    #[fun_time(message = "check_files")]
+    #[fun_time(message = "check_files", level = "debug")]
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let result = DirTraversalBuilder::new()
             .root_dirs(self.common_data.directories.included_directories.clone())
@@ -69,7 +69,7 @@ impl InvalidSymlinks {
         }
     }
 
-    #[fun_time(message = "delete_files")]
+    #[fun_time(message = "delete_files", level = "debug")]
     fn delete_files(&mut self) {
         match self.common_data.delete_method {
             DeleteMethod::Delete => {

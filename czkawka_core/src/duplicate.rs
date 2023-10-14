@@ -110,7 +110,7 @@ impl DuplicateFinder {
         }
     }
 
-    #[fun_time(message = "find_duplicates")]
+    #[fun_time(message = "find_duplicates", level = "info")]
     pub fn find_duplicates(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
         self.optimize_dirs_before_start();
         self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
@@ -150,7 +150,7 @@ impl DuplicateFinder {
         self.debug_print();
     }
 
-    #[fun_time(message = "check_files_name")]
+    #[fun_time(message = "check_files_name", level = "debug")]
     fn check_files_name(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let group_by_func = if self.case_sensitive_name_comparison {
             |fe: &FileEntry| fe.path.file_name().unwrap().to_string_lossy().to_string()
@@ -225,7 +225,7 @@ impl DuplicateFinder {
         }
     }
 
-    #[fun_time(message = "check_files_size_name")]
+    #[fun_time(message = "check_files_size_name", level = "debug")]
     fn check_files_size_name(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let group_by_func = if self.case_sensitive_name_comparison {
             |fe: &FileEntry| (fe.size, fe.path.file_name().unwrap().to_string_lossy().to_string())
@@ -302,7 +302,7 @@ impl DuplicateFinder {
         }
     }
 
-    #[fun_time(message = "check_files_size")]
+    #[fun_time(message = "check_files_size", level = "debug")]
     fn check_files_size(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let max_stage = match self.check_method {
             CheckingMethod::Size => 0,
@@ -377,7 +377,7 @@ impl DuplicateFinder {
         }
     }
 
-    #[fun_time(message = "filter_reference_folders_by_size")]
+    #[fun_time(message = "filter_reference_folders_by_size", level = "debug")]
     fn filter_reference_folders_by_size(&mut self) {
         if self.common_data.use_reference_folders && self.check_method == CheckingMethod::Size {
             let vec = mem::take(&mut self.files_with_identical_size)
@@ -400,7 +400,7 @@ impl DuplicateFinder {
         }
     }
 
-    #[fun_time(message = "prehash_load_cache_at_start")]
+    #[fun_time(message = "prehash_load_cache_at_start", level = "debug")]
     fn prehash_load_cache_at_start(&mut self) -> (BTreeMap<u64, Vec<FileEntry>>, BTreeMap<u64, Vec<FileEntry>>, BTreeMap<u64, Vec<FileEntry>>) {
         // Cache algorithm
         // - Load data from cache
@@ -453,7 +453,7 @@ impl DuplicateFinder {
         (loaded_hash_map, records_already_cached, non_cached_files_to_check)
     }
 
-    #[fun_time(message = "prehash_save_cache_at_exit")]
+    #[fun_time(message = "prehash_save_cache_at_exit", level = "debug")]
     fn prehash_save_cache_at_exit(&mut self, loaded_hash_map: BTreeMap<u64, Vec<FileEntry>>, pre_hash_results: &Vec<(u64, BTreeMap<String, Vec<FileEntry>>, Vec<String>)>) {
         if self.use_prehash_cache {
             // All results = records already cached + computed results
@@ -487,7 +487,7 @@ impl DuplicateFinder {
         }
     }
 
-    #[fun_time(message = "prehashing")]
+    #[fun_time(message = "prehashing", level = "debug")]
     fn prehashing(
         &mut self,
         stop_receiver: Option<&Receiver<()>>,
@@ -577,7 +577,7 @@ impl DuplicateFinder {
         Some(())
     }
 
-    #[fun_time(message = "full_hashing_load_cache_at_start")]
+    #[fun_time(message = "full_hashing_load_cache_at_start", level = "debug")]
     fn full_hashing_load_cache_at_start(
         &mut self,
         mut pre_checked_map: BTreeMap<u64, Vec<FileEntry>>,
@@ -628,7 +628,7 @@ impl DuplicateFinder {
         (loaded_hash_map, records_already_cached, non_cached_files_to_check)
     }
 
-    #[fun_time(message = "full_hashing_save_cache_at_exit")]
+    #[fun_time(message = "full_hashing_save_cache_at_exit", level = "debug")]
     fn full_hashing_save_cache_at_exit(
         &mut self,
         records_already_cached: BTreeMap<u64, Vec<FileEntry>>,
@@ -680,7 +680,7 @@ impl DuplicateFinder {
         self.get_text_messages_mut().extend_with_another_messages(messages);
     }
 
-    // #[fun_time(message = "full_hashing")]
+    // #[fun_time(message = "full_hashing", level = "debug")]
     fn full_hashing(
         &mut self,
         stop_receiver: Option<&Receiver<()>>,
@@ -757,7 +757,7 @@ impl DuplicateFinder {
         Some(())
     }
 
-    #[fun_time(message = "hash_reference_folders")]
+    #[fun_time(message = "hash_reference_folders", level = "debug")]
     fn hash_reference_folders(&mut self) {
         // Reference - only use in size, because later hash will be counted differently
         if self.common_data.use_reference_folders {
@@ -806,7 +806,7 @@ impl DuplicateFinder {
         }
     }
 
-    #[fun_time(message = "check_files_hash")]
+    #[fun_time(message = "check_files_hash", level = "debug")]
     fn check_files_hash(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         assert_eq!(self.check_method, CheckingMethod::Hash);
 
@@ -829,7 +829,7 @@ impl DuplicateFinder {
         true
     }
 
-    #[fun_time(message = "delete_files")]
+    #[fun_time(message = "delete_files", level = "debug")]
     fn delete_files(&mut self) {
         if self.common_data.delete_method == DeleteMethod::None {
             return;

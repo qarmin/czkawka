@@ -340,7 +340,7 @@ where
     F: Fn(&FileEntry) -> T,
     T: Ord + PartialOrd,
 {
-    #[fun_time(message = "run(collecting files/dirs)")]
+    #[fun_time(message = "run(collecting files/dirs)", level = "debug")]
     pub fn run(self) -> DirTraversalResult<T> {
         let mut all_warnings = vec![];
         let mut grouped_file_entries: BTreeMap<T, Vec<FileEntry>> = BTreeMap::new();
