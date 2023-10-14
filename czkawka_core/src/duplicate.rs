@@ -34,6 +34,7 @@ pub enum HashType {
     Xxh3,
 }
 
+const MAX_STAGE: u8 = 5;
 impl HashType {
     fn hasher(self: &HashType) -> Box<dyn MyHasher> {
         match self {
@@ -305,7 +306,7 @@ impl DuplicateFinder {
     fn check_files_size(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
         let max_stage = match self.check_method {
             CheckingMethod::Size => 0,
-            CheckingMethod::Hash => 2,
+            CheckingMethod::Hash => MAX_STAGE,
             _ => panic!(),
         };
         let result = DirTraversalBuilder::new()
@@ -494,16 +495,23 @@ impl DuplicateFinder {
         pre_checked_map: &mut BTreeMap<u64, Vec<FileEntry>>,
     ) -> Option<()> {
         let check_type = self.hash_type;
+        let (progress_thread_handle, progress_thread_run, _atomic_counter, check_was_stopped) =
+            prepare_thread_handler_common(progress_sender, 1, MAX_STAGE, 0, self.check_method, self.common_data.tool_type);
+
+        let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.prehash_load_cache_at_start();
+
+        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+        if check_was_stopped.load(Ordering::Relaxed) {
+            return None;
+        }
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) = prepare_thread_handler_common(
             progress_sender,
-            1,
             2,
-            self.files_with_identical_size.values().map(Vec::len).sum(),
+            MAX_STAGE,
+            non_cached_files_to_check.values().map(Vec::len).sum(),
             self.check_method,
             self.common_data.tool_type,
         );
-
-        let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.prehash_load_cache_at_start();
 
         debug!("Starting calculating prehash");
         #[allow(clippy::type_complexity)]
@@ -536,10 +544,11 @@ impl DuplicateFinder {
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
-        // Check if user aborted search(only from GUI)
-        if check_was_stopped.load(Ordering::Relaxed) {
-            return None;
-        }
+        let stopped_search = check_was_stopped.load(Ordering::Relaxed);
+
+        // Saving into cache
+        let (progress_thread_handle, progress_thread_run, _atomic_counter, check_was_stopped) =
+            prepare_thread_handler_common(progress_sender, 3, MAX_STAGE, 0, self.check_method, self.common_data.tool_type);
 
         // Add data from cache
         for (size, vec_file_entry) in &records_already_cached {
@@ -559,6 +568,11 @@ impl DuplicateFinder {
         }
 
         self.prehash_save_cache_at_exit(loaded_hash_map, &pre_hash_results);
+
+        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+        if check_was_stopped.load(Ordering::Relaxed) || stopped_search {
+            return None;
+        }
 
         Some(())
     }
@@ -666,28 +680,33 @@ impl DuplicateFinder {
         self.get_text_messages_mut().extend_with_another_messages(messages);
     }
 
-    #[fun_time(message = "full_hashing")]
+    // #[fun_time(message = "full_hashing")]
     fn full_hashing(
         &mut self,
         stop_receiver: Option<&Receiver<()>>,
         progress_sender: Option<&UnboundedSender<ProgressData>>,
         pre_checked_map: BTreeMap<u64, Vec<FileEntry>>,
     ) -> Option<()> {
-        let check_type = self.hash_type;
+        let (progress_thread_handle, progress_thread_run, _atomic_counter, check_was_stopped) =
+            prepare_thread_handler_common(progress_sender, 4, MAX_STAGE, 0, self.check_method, self.common_data.tool_type);
+
+        let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.full_hashing_load_cache_at_start(pre_checked_map);
+
+        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+        if check_was_stopped.load(Ordering::Relaxed) {
+            return None;
+        }
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) = prepare_thread_handler_common(
             progress_sender,
-            2,
-            2,
-            pre_checked_map.values().map(Vec::len).sum(),
+            5,
+            MAX_STAGE,
+            non_cached_files_to_check.values().map(Vec::len).sum(),
             self.check_method,
             self.common_data.tool_type,
         );
 
-        ///////////////////////////////////////////////////////////////////////////// HASHING START
-
-        let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.full_hashing_load_cache_at_start(pre_checked_map);
-
+        let check_type = self.hash_type;
         debug!("Starting full hashing of {} files", non_cached_files_to_check.values().map(Vec::len).sum::<usize>());
         let mut full_hash_results: Vec<(u64, BTreeMap<String, Vec<FileEntry>>, Vec<String>)> = non_cached_files_to_check
             .into_par_iter()
@@ -717,14 +736,14 @@ impl DuplicateFinder {
             .collect();
         debug!("Finished full hashing");
 
+        // Even if clicked stop, save items to cache and show results
+        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+        let (progress_thread_handle, progress_thread_run, _atomic_counter, _check_was_stopped) =
+            prepare_thread_handler_common(progress_sender, 6, MAX_STAGE, 0, self.check_method, self.common_data.tool_type);
+
         self.full_hashing_save_cache_at_exit(records_already_cached, &mut full_hash_results, loaded_hash_map);
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-
-        // Break if stop was clicked after saving to cache
-        if check_was_stopped.load(Ordering::Relaxed) {
-            return None;
-        }
 
         for (size, hash_map, mut errors) in full_hash_results {
             self.common_data.text_messages.warnings.append(&mut errors);

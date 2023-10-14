@@ -78,6 +78,7 @@ where
         }
 
         text_messages.messages.push(format!("Properly saved to file {} cache entries.", hashmap.len()));
+        debug!("Properly saved to file {} cache entries.", hashmap.len());
     } else {
         debug!("Failed to save cache to file {cache_file_name} because not exists");
     }

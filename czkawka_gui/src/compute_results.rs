@@ -4,6 +4,7 @@ use std::path::PathBuf;
 use std::rc::Rc;
 
 use chrono::NaiveDateTime;
+use fun_time::fun_time;
 use glib::Receiver;
 use gtk4::prelude::*;
 use gtk4::{Entry, ListStore, TextView, TreeView, Widget};
@@ -229,6 +230,7 @@ pub fn connect_compute_results(gui_data: &GuiData, glib_stop_receiver: Receiver<
     });
 }
 
+#[fun_time(message = "computer_bad_extensions")]
 fn computer_bad_extensions(
     be: BadExtensions,
     entry_info: &Entry,
@@ -302,6 +304,7 @@ fn computer_bad_extensions(
     }
 }
 
+#[fun_time(message = "computer_broken_files")]
 fn computer_broken_files(
     br: BrokenFiles,
     entry_info: &Entry,
@@ -375,6 +378,7 @@ fn computer_broken_files(
     }
 }
 
+#[fun_time(message = "computer_invalid_symlinks")]
 fn computer_invalid_symlinks(
     ifs: InvalidSymlinks,
     entry_info: &Entry,
@@ -446,6 +450,7 @@ fn computer_invalid_symlinks(
     }
 }
 
+#[fun_time(message = "computer_same_music")]
 fn computer_same_music(
     mf: SameMusic,
     entry_info: &Entry,
@@ -620,6 +625,7 @@ fn computer_same_music(
     }
 }
 
+#[fun_time(message = "computer_similar_videos")]
 fn computer_similar_videos(
     ff: SimilarVideos,
     entry_info: &Entry,
@@ -721,6 +727,7 @@ fn computer_similar_videos(
     }
 }
 
+#[fun_time(message = "computer_similar_images")]
 fn computer_similar_images(
     sf: SimilarImages,
     entry_info: &Entry,
@@ -853,6 +860,7 @@ fn computer_similar_images(
     }
 }
 
+#[fun_time(message = "computer_temporary_files")]
 fn computer_temporary_files(
     tf: Temporary,
     entry_info: &Entry,
@@ -924,6 +932,7 @@ fn computer_temporary_files(
     }
 }
 
+#[fun_time(message = "computer_big_files")]
 fn computer_big_files(
     bf: BigFile,
     entry_info: &Entry,
@@ -991,6 +1000,7 @@ fn computer_big_files(
     }
 }
 
+#[fun_time(message = "computer_empty_files")]
 fn computer_empty_files(
     vf: EmptyFiles,
     entry_info: &Entry,
@@ -1057,6 +1067,7 @@ fn computer_empty_files(
     }
 }
 
+#[fun_time(message = "computer_empty_folders")]
 fn computer_empty_folders(
     ef: EmptyFolder,
     entry_info: &Entry,
@@ -1128,6 +1139,7 @@ fn computer_empty_folders(
     }
 }
 
+#[fun_time(message = "computer_duplicate_finder")]
 fn computer_duplicate_finder(
     df: DuplicateFinder,
     entry_info: &Entry,
