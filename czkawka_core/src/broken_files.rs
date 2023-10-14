@@ -19,7 +19,7 @@ use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::common::{
-    check_folder_children, create_crash_message, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, AUDIO_FILES_EXTENSIONS,
+    check_folder_children, check_if_stop_received, create_crash_message, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, AUDIO_FILES_EXTENSIONS,
     IMAGE_RS_BROKEN_FILES_EXTENSIONS, PDF_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS,
 };
 use crate::common_cache::{get_broken_files_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
@@ -121,7 +121,7 @@ impl BrokenFiles {
 
         debug!("check_files - starting to collect files");
         while !folders_to_check.is_empty() {
-            if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+            if check_if_stop_received(stop_receiver) {
                 send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                 return false;
             }
@@ -358,7 +358,7 @@ impl BrokenFiles {
             .into_par_iter()
             .map(|(_, file_entry)| {
                 atomic_counter.fetch_add(1, Ordering::Relaxed);
-                if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                if check_if_stop_received(stop_receiver) {
                     return None;
                 }
 

@@ -12,7 +12,7 @@ use log::debug;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::common::{prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
+use crate::common::{check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
@@ -379,7 +379,7 @@ where
         } = self;
 
         while !folders_to_check.is_empty() {
-            if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+            if check_if_stop_received(stop_receiver) {
                 send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                 return DirTraversalResult::Stopped;
             }

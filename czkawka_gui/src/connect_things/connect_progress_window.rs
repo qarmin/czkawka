@@ -84,7 +84,13 @@ fn process_bar_same_music(gui_data: &GuiData, item: &ProgressData) {
             label_stage.set_text(&flg!("progress_scanning_general_file", file_number_tm(item)));
             taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
         }
+        // Loading cache
         1 => {
+            progress_bar_current_stage.hide();
+            common_set_data(item, &progress_bar_all_stages, &progress_bar_current_stage, &taskbar_state);
+            label_stage.set_text(&flg!("progress_cache_loading"));
+        }
+        2 => {
             progress_bar_current_stage.show();
             common_set_data(item, &progress_bar_all_stages, &progress_bar_current_stage, &taskbar_state);
 
@@ -94,7 +100,14 @@ fn process_bar_same_music(gui_data: &GuiData, item: &ProgressData) {
                 _ => panic!(),
             }
         }
-        2 => {
+        // Saving cache
+        3 => {
+            progress_bar_current_stage.hide();
+            common_set_data(item, &progress_bar_all_stages, &progress_bar_current_stage, &taskbar_state);
+            label_stage.set_text(&flg!("progress_cache_saving"));
+        }
+        4 => {
+            progress_bar_current_stage.show();
             common_set_data(item, &progress_bar_all_stages, &progress_bar_current_stage, &taskbar_state);
 
             match item.checking_method {
@@ -103,7 +116,8 @@ fn process_bar_same_music(gui_data: &GuiData, item: &ProgressData) {
                 _ => panic!(),
             }
         }
-        3 => {
+        5 => {
+            progress_bar_current_stage.show();
             common_set_data(item, &progress_bar_all_stages, &progress_bar_current_stage, &taskbar_state);
 
             if item.checking_method == CheckingMethod::AudioContent {

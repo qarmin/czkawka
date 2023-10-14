@@ -15,7 +15,9 @@ use serde::{Deserialize, Serialize};
 use vid_dup_finder_lib::HashCreationErrorKind::DetermineVideo;
 use vid_dup_finder_lib::{NormalizedTolerance, VideoHash};
 
-use crate::common::{check_folder_children, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, VIDEO_FILES_EXTENSIONS};
+use crate::common::{
+    check_folder_children, check_if_stop_received, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, VIDEO_FILES_EXTENSIONS,
+};
 use crate::common_cache::{get_similar_videos_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
@@ -149,7 +151,7 @@ impl SimilarVideos {
             prepare_thread_handler_common(progress_sender, 0, 1, 0, CheckingMethod::None, self.common_data.tool_type);
 
         while !folders_to_check.is_empty() {
-            if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+            if check_if_stop_received(stop_receiver) {
                 send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                 return false;
             }
@@ -274,7 +276,7 @@ impl SimilarVideos {
             .par_iter()
             .map(|file_entry| {
                 atomic_counter.fetch_add(1, Ordering::Relaxed);
-                if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                if check_if_stop_received(stop_receiver) {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }

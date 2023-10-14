@@ -106,7 +106,7 @@ impl EmptyFolder {
         }
     }
 
-    // #[fun_time(message = "delete_files", level = "debug")]
+    #[fun_time(message = "delete_files", level = "debug")]
     fn delete_files(&mut self) {
         if self.get_delete_method() == DeleteMethod::None {
             return;

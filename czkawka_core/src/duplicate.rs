@@ -18,7 +18,7 @@ use log::debug;
 use rayon::prelude::*;
 use xxhash_rust::xxh3::Xxh3;
 
-use crate::common::{delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
+use crate::common::{check_if_stop_received, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crate::common_cache::{get_duplicate_cache_file, load_cache_from_file_generalized_by_size, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
@@ -495,13 +495,13 @@ impl DuplicateFinder {
         pre_checked_map: &mut BTreeMap<u64, Vec<FileEntry>>,
     ) -> Option<()> {
         let check_type = self.hash_type;
-        let (progress_thread_handle, progress_thread_run, _atomic_counter, check_was_stopped) =
+        let (progress_thread_handle, progress_thread_run, _atomic_counter, _check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 1, MAX_STAGE, 0, self.check_method, self.common_data.tool_type);
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.prehash_load_cache_at_start();
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-        if check_was_stopped.load(Ordering::Relaxed) {
+        if check_if_stop_received(stop_receiver) {
             return None;
         }
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) = prepare_thread_handler_common(
@@ -523,7 +523,7 @@ impl DuplicateFinder {
                 let mut buffer = [0u8; 1024 * 2];
 
                 atomic_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
-                if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                if check_if_stop_received(stop_receiver) {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
@@ -544,10 +544,8 @@ impl DuplicateFinder {
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
-        let stopped_search = check_was_stopped.load(Ordering::Relaxed);
-
         // Saving into cache
-        let (progress_thread_handle, progress_thread_run, _atomic_counter, check_was_stopped) =
+        let (progress_thread_handle, progress_thread_run, _atomic_counter, _check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 3, MAX_STAGE, 0, self.check_method, self.common_data.tool_type);
 
         // Add data from cache
@@ -570,7 +568,7 @@ impl DuplicateFinder {
         self.prehash_save_cache_at_exit(loaded_hash_map, &pre_hash_results);
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-        if check_was_stopped.load(Ordering::Relaxed) || stopped_search {
+        if check_was_stopped.load(Ordering::Relaxed) || check_if_stop_received(stop_receiver) {
             return None;
         }
 
@@ -680,20 +678,20 @@ impl DuplicateFinder {
         self.get_text_messages_mut().extend_with_another_messages(messages);
     }
 
-    // #[fun_time(message = "full_hashing", level = "debug")]
+    #[fun_time(message = "full_hashing", level = "debug")]
     fn full_hashing(
         &mut self,
         stop_receiver: Option<&Receiver<()>>,
         progress_sender: Option<&UnboundedSender<ProgressData>>,
         pre_checked_map: BTreeMap<u64, Vec<FileEntry>>,
     ) -> Option<()> {
-        let (progress_thread_handle, progress_thread_run, _atomic_counter, check_was_stopped) =
+        let (progress_thread_handle, progress_thread_run, _atomic_counter, _check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 4, MAX_STAGE, 0, self.check_method, self.common_data.tool_type);
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.full_hashing_load_cache_at_start(pre_checked_map);
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-        if check_was_stopped.load(Ordering::Relaxed) {
+        if check_if_stop_received(stop_receiver) {
             return None;
         }
 
@@ -717,7 +715,7 @@ impl DuplicateFinder {
 
                 atomic_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
                 for mut file_entry in vec_file_entry {
-                    if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                    if check_if_stop_received(stop_receiver) {
                         check_was_stopped.store(true, Ordering::Relaxed);
                         return None;
                     }

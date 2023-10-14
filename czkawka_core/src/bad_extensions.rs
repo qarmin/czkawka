@@ -13,7 +13,7 @@ use mime_guess::get_mime_extensions;
 use rayon::prelude::*;
 use serde::Serialize;
 
-use crate::common::{prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
+use crate::common::{check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::*;
@@ -283,7 +283,7 @@ impl BadExtensions {
             .into_par_iter()
             .map(|file_entry| {
                 atomic_counter.fetch_add(1, Ordering::Relaxed);
-                if stop_receiver.is_some() && stop_receiver.unwrap().try_recv().is_ok() {
+                if check_if_stop_received(stop_receiver) {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }

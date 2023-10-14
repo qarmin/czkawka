@@ -1,6 +1,6 @@
 ## Version 6.1.0 - ?
-- BREAKING CHANGE - Changed cache saving method, deduplicated, optimized and simplified procedure(all files needs to be hashed again) - [#1072](https://github.com/qarmin/czkawka/pull/1072)
-- Remove up to 170ms of delay after ending scan - [#1070](https://github.com/qarmin/czkawka/pull/1070)
+- BREAKING CHANGE - Changed cache saving method, deduplicated, optimized and simplified procedure(all files needs to be hashed again) - [#1072](https://github.com/qarmin/czkawka/pull/1072), [#1086](https://github.com/qarmin/czkawka/pull/1086)
+- Remove up to 340ms of delay when waiting for results - [#1070](https://github.com/qarmin/czkawka/pull/1070)
 - Added logger with useful info when debugging app (level can be adjusted via e.g. `RUST_LOG=debug` env) - [#1072](https://github.com/qarmin/czkawka/pull/1072), [#1070](https://github.com/qarmin/czkawka/pull/1070)
 - Core code cleanup - [#1072](https://github.com/qarmin/czkawka/pull/1072), [#1070](https://github.com/qarmin/czkawka/pull/1070), [#1082](https://github.com/qarmin/czkawka/pull/1082)
 - Updated list of bad extensions and support for finding invalid jar files - [#1070](https://github.com/qarmin/czkawka/pull/1070)
@@ -10,6 +10,10 @@
 - Added exporting results into json file format - [#1083](https://github.com/qarmin/czkawka/pull/1083)
 - Added new test/regression suite for CI - [#1083](https://github.com/qarmin/czkawka/pull/1083)
 - Added ability to use relative paths - [#1083](https://github.com/qarmin/czkawka/pull/1083)
+- Allowed removing similar images/videos/music from cli - [#1087](https://github.com/qarmin/czkawka/pull/1087)
+- Added info about saving/loading items to cache in duplicate and music mode - [#1091](https://github.com/qarmin/czkawka/pull/1091)
+- Fixed number of files to check in duplicate mode - [#1091](https://github.com/qarmin/czkawka/pull/1091)
+- Added support for qoi image format - [e92a](https://github.com/qarmin/czkawka/commit/e92a8a65de9bd1250be482dbce06959125554849)
 - Fixed stability problem, that could remove invalid file in CLI - [#1083](https://github.com/qarmin/czkawka/pull/1083)
 - Fixed problem with invalid cache loading - [#0000]
 - Fix Windows gui crashes by using gtk 4.6 instead 4.8 or 4.10 - [#992](https://github.com/qarmin/czkawka/pull/992)
