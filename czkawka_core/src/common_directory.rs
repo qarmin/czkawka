@@ -134,19 +134,24 @@ impl Directories {
         }
 
         // Try to canonicalize them
-        if let Ok(dir) = directory.canonicalize() {
-            directory = dir;
-            dbg!("Is canonicalize", &directory);
-        }
+
         if cfg!(windows) {
-            dbg!("Before windows", &directory);
-            let path_str = directory.to_string_lossy().to_string();
-            if let Some(path_str) = path_str.strip_prefix(r"\\?\") {
-                if path_str.chars().nth(1) == Some(':') {
-                    directory = PathBuf::from(path_str);
+            // Only canonicalize if it's not a network path
+            // This can be check by checking if path starts with \\?\UNC\
+            if let Ok(dir_can) = directory.canonicalize() {
+                let dir_can_str = dir_can.to_string_lossy().to_string();
+                if dir_can_str.starts_with(r"\\?\") && dir_can_str.chars().nth(5) == Some(':') {
+                    directory = PathBuf::from(dir_can_str);
                 }
+
+                directory = dir_can;
+                dbg!("After canonicalize", &directory);
             }
-            dbg!("After windows", &directory);
+        } else {
+            if let Ok(dir) = directory.canonicalize() {
+                directory = dir;
+                dbg!("Is canonicalize UNIX", &directory);
+            }
         }
         (Some(directory), messages)
     }
