@@ -1,6 +1,6 @@
 [package]
 name = "czkawka_slint"
-version = "6.0.0"
+version = "6.1.0"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2021"
 rust-version = "1.72.1"

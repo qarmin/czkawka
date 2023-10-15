@@ -9,7 +9,7 @@ assignees: ''
 
 **Desktop (please complete the following information):**
 
-- Czkawka version<!--  e.g. 6.0.0 cli/gui -->:
+- Czkawka version<!--  e.g. 6.1.0 cli/gui -->:
 - OS version<!--  e.g Ubuntu 22.04, Windows 11, Mac 15.1 ARM -->:
 - Terminal output[optional]:
 

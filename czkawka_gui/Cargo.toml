@@ -1,6 +1,6 @@
 [package]
 name = "czkawka_gui"
-version = "6.0.0"
+version = "6.1.0"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2021"
 rust-version = "1.70.0"
@@ -53,7 +53,7 @@ log = "0.4.20"
 handsome_logger = "0.8"
 fun_time = { version = "0.3.1", features = ["log"] }
 
-czkawka_core = { path = "../czkawka_core", version = "6.0.0", features = [] }
+czkawka_core = { path = "../czkawka_core", version = "6.1.0", features = [] }
 gtk4 = { version = "0.7", default-features = false, features = ["v4_6"] }
 
 [target.'cfg(windows)'.dependencies]

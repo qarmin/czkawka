@@ -85,7 +85,7 @@ Install the GUI version on Linux:
 
 ```shell
 # download
-curl --location https://github.com/qarmin/czkawka/releases/download/6.0.0/linux_czkawka_gui --output ~/.local/bin/linux_czkawka_gui
+curl --location https://github.com/qarmin/czkawka/releases/download/6.1.0/linux_czkawka_gui --output ~/.local/bin/linux_czkawka_gui
 # mark as executable
 chmod +x ~/.local/bin/linux_czkawka_gui
 # run
