@@ -45,7 +45,7 @@ impl Directories {
         let mut messages: Messages = Messages::new();
 
         dbg!("Before", &self.included_directories);
-        dbg!("Before", included_directories);
+        dbg!("Before", &included_directory);
         if included_directory.is_empty() {
             messages.errors.push(flc!("core_missing_no_chosen_included_directory"));
             return messages;
