@@ -142,7 +142,9 @@ impl Directories {
             dbg!("Before windows", &directory);
             let path_str = directory.to_string_lossy().to_string();
             if let Some(path_str) = path_str.strip_prefix(r"\\?\") {
-                directory = PathBuf::from(path_str);
+                if path_str.chars().nth(1) == Some(':') {
+                    directory = PathBuf::from(path_str);
+                }
             }
             dbg!("After windows", &directory);
         }
