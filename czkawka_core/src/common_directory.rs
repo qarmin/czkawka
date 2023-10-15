@@ -68,7 +68,7 @@ impl Directories {
             if cfg!(windows) {
                 directory = PathBuf::from(directory.strip_prefix(r"\\?\").unwrap_or(&directory));
             }
-
+            dbg!();
             checked_directories.push(directory);
         }
 
@@ -295,6 +295,12 @@ impl Directories {
     }
 
     pub fn is_in_referenced_directory(&self, path: &Path) -> bool {
+        dbg!(
+            &self.reference_directories,
+            path,
+            self.reference_directories.iter().any(|e| path.starts_with(e)),
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        );
         self.reference_directories.iter().any(|e| path.starts_with(e))
     }
 
