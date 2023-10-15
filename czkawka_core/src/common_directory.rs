@@ -143,8 +143,6 @@ impl Directories {
                 if dir_can_str.starts_with(r"\\?\") && dir_can_str.chars().nth(5) == Some(':') {
                     directory = PathBuf::from(dir_can_str);
                 }
-
-                directory = dir_can;
                 dbg!("After canonicalize", &directory);
             }
         } else {
