@@ -25,6 +25,7 @@ impl Directories {
     pub fn set_reference_directory(&mut self, reference_directory: &[PathBuf]) -> Messages {
         let mut messages: Messages = Messages::new();
 
+        dbg!("Before", &self.reference_directories);
         self.reference_directories = reference_directory
             .iter()
             .filter_map(|directory| {
@@ -36,12 +37,14 @@ impl Directories {
             })
             .collect::<Vec<PathBuf>>();
 
+        dbg!("After", &self.reference_directories);
         messages
     }
 
     pub fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) -> Messages {
         let mut messages: Messages = Messages::new();
 
+        dbg!("Before", &self.included_directories);
         if included_directory.is_empty() {
             messages.errors.push(flc!("core_missing_no_chosen_included_directory"));
             return messages;
@@ -67,12 +70,14 @@ impl Directories {
 
         self.included_directories = checked_directories;
 
+        dbg!("After", &self.included_directories);
         messages
     }
 
     pub fn set_excluded_directory(&mut self, excluded_directory: Vec<PathBuf>) -> Messages {
         let mut messages: Messages = Messages::new();
 
+        dbg!("Before", &self.excluded_directories);
         if excluded_directory.is_empty() {
             return messages;
         }
@@ -97,6 +102,7 @@ impl Directories {
         }
         self.excluded_directories = checked_directories;
 
+        dbg!("After", &self.excluded_directories);
         messages
     }
 
