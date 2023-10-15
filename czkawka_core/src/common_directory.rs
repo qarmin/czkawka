@@ -61,9 +61,12 @@ impl Directories {
                 continue;
             }
 
-            // If not checking windows strange paths, try to canonicalize them
+            // Try to canonicalize them
             if let Ok(dir) = directory.canonicalize() {
                 directory = dir;
+            }
+            if cfg!(linux) {
+                directory = PathBuf::from(directory.strip_prefix(r"\\?\").unwrap_or(&directory));
             }
 
             checked_directories.push(directory);
@@ -89,7 +92,7 @@ impl Directories {
         let directories: Vec<PathBuf> = excluded_directory;
 
         let mut checked_directories: Vec<PathBuf> = Vec::new();
-        for directory in directories {
+        for mut directory in directories {
             let directory_as_string = directory.to_string_lossy();
             if directory_as_string == "/" {
                 messages.errors.push(flc!("core_excluded_directory_pointless_slash"));
@@ -102,27 +105,12 @@ impl Directories {
                 ));
                 continue;
             }
-            #[cfg(not(target_family = "windows"))]
-            if directory.is_relative() {
-                messages.warnings.push(flc!(
-                    "core_directory_relative_path",
-                    generate_translation_hashmap(vec![("path", directory.display().to_string())])
-                ));
-                continue;
-            }
-            #[cfg(target_family = "windows")]
-            if directory.is_relative() && !directory.starts_with("\\") {
-                messages.warnings.push(flc!(
-                    "core_directory_relative_path",
-                    generate_translation_hashmap(vec![("path", directory.display().to_string())])
-                ));
-                continue;
-            }
 
             if !directory.exists() {
                 // No error when excluded directories are missing
                 continue;
             }
+
             if !directory.is_dir() {
                 messages.warnings.push(flc!(
                     "core_directory_must_be_directory",
@@ -130,6 +118,15 @@ impl Directories {
                 ));
                 continue;
             }
+
+            // Try to canonicalize them
+            if let Ok(dir) = directory.canonicalize() {
+                directory = dir;
+            }
+            if cfg!(linux) {
+                directory = PathBuf::from(directory.strip_prefix(r"\\?\").unwrap_or(&directory));
+            }
+
             checked_directories.push(directory);
         }
         self.excluded_directories = checked_directories;

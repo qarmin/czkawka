@@ -18,7 +18,6 @@ core_folder_no_modification_date = Unable to get modification date from folder {
 
 core_missing_no_chosen_included_directory = At least one directory must be provided
 core_directory_wildcard_no_supported = Directories: Wildcards in path are not supported, ignoring { $path }
-core_directory_relative_path = Directories: Relative path are not supported, ignoring { $path }
 core_directory_must_exists = Directories:  Provided folder path must exist, ignoring { $path }
 core_directory_must_be_directory = Directories: Provided path must point at the directory, ignoring { $path }
 core_included_directory_zero_valid_directories = Included Directory ERROR: Not found even one correct path to included which is required
