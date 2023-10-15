@@ -110,6 +110,7 @@ impl Directories {
     }
 
     fn canonicalize_and_clear_path(directory: &Path, is_excluded: bool) -> (Option<PathBuf>, Messages) {
+        dbg!("Testing", &directory);
         let mut messages = Messages::new();
         let mut directory = directory.to_path_buf();
         if !directory.exists() {
