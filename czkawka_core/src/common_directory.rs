@@ -43,9 +43,10 @@ impl Directories {
                     directory = dir;
                 }
                 if cfg!(windows) {
-                    dbg!("", &directory);
-                    directory = PathBuf::from(directory.strip_prefix(r"\\?\").unwrap_or(&directory));
-                    dbg!(&directory);
+                    let path_str = directory.to_string_lossy().to_string();
+                    if let Some(path_str) = path_str.strip_prefix(r"\\?\") {
+                        directory = PathBuf::from(path_str);
+                    }
                 }
                 Some(directory)
             })
@@ -92,9 +93,11 @@ impl Directories {
                 directory = dir;
             }
             if cfg!(windows) {
-                directory = PathBuf::from(directory.strip_prefix(r"\\?\").unwrap_or(&directory));
-            }
-            dbg!();
+                let path_str = directory.to_string_lossy().to_string();
+                if let Some(path_str) = path_str.strip_prefix(r"\\?\") {
+                    directory = PathBuf::from(path_str);
+                }
+            };
             checked_directories.push(directory);
         }
 
@@ -150,7 +153,10 @@ impl Directories {
                 directory = dir;
             }
             if cfg!(windows) {
-                directory = PathBuf::from(directory.strip_prefix(r"\\?\").unwrap_or(&directory));
+                let path_str = directory.to_string_lossy().to_string();
+                if let Some(path_str) = path_str.strip_prefix(r"\\?\") {
+                    directory = PathBuf::from(path_str);
+                }
             }
 
             checked_directories.push(directory);
