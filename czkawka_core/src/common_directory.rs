@@ -22,8 +22,21 @@ impl Directories {
         Default::default()
     }
 
-    pub fn set_reference_directory(&mut self, reference_directory: Vec<PathBuf>) {
-        self.reference_directories = reference_directory;
+    pub fn set_reference_directory(&mut self, reference_directory: &[PathBuf]) -> Messages {
+        let mut messages: Messages = Messages::new();
+
+        self.reference_directories = reference_directory
+            .iter()
+            .filter_map(|directory| {
+                let (dir, msg) = Self::canonicalize_and_clear_path(directory, false);
+
+                messages.extend_with_another_messages(msg);
+
+                dir
+            })
+            .collect::<Vec<PathBuf>>();
+
+        messages
     }
 
     pub fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) -> Messages {
@@ -37,44 +50,14 @@ impl Directories {
         let directories: Vec<PathBuf> = included_directory;
 
         let mut checked_directories: Vec<PathBuf> = Vec::new();
-        for mut directory in directories {
-            if directory.to_string_lossy().contains('*') {
-                messages.warnings.push(flc!(
-                    "core_directory_wildcard_no_supported",
-                    generate_translation_hashmap(vec![("path", directory.display().to_string())])
-                ));
-                continue;
-            }
+        for directory in directories {
+            let (dir, msg) = Self::canonicalize_and_clear_path(&directory, false);
 
-            if !directory.exists() {
-                messages.warnings.push(flc!(
-                    "core_directory_must_exists",
-                    generate_translation_hashmap(vec![("path", directory.display().to_string())])
-                ));
-                continue;
-            }
-            if !directory.is_dir() {
-                messages.warnings.push(flc!(
-                    "core_directory_must_be_directory",
-                    generate_translation_hashmap(vec![("path", directory.display().to_string())])
-                ));
-                continue;
-            }
+            messages.extend_with_another_messages(msg);
 
-            // If not checking windows strange paths, try to canonicalize them
-            if !directory.starts_with("\\") {
-                let Ok(dir2) = directory.canonicalize() else {
-                    messages.warnings.push(flc!(
-                        "core_directory_must_exists",
-                        generate_translation_hashmap(vec![("path", directory.display().to_string())])
-                    ));
-                    continue;
-                };
-
-                directory = dir2;
+            if let Some(dir) = dir {
+                checked_directories.push(dir);
             }
-
-            checked_directories.push(directory);
         }
 
         if checked_directories.is_empty() {
@@ -103,46 +86,52 @@ impl Directories {
                 messages.errors.push(flc!("core_excluded_directory_pointless_slash"));
                 break;
             }
-            if directory_as_string.contains('*') {
-                messages.warnings.push(flc!(
-                    "core_directory_wildcard_no_supported",
-                    generate_translation_hashmap(vec![("path", directory.display().to_string())])
-                ));
-                continue;
-            }
-            #[cfg(not(target_family = "windows"))]
-            if directory.is_relative() {
-                messages.warnings.push(flc!(
-                    "core_directory_relative_path",
-                    generate_translation_hashmap(vec![("path", directory.display().to_string())])
-                ));
-                continue;
-            }
-            #[cfg(target_family = "windows")]
-            if directory.is_relative() && !directory.starts_with("\\") {
-                messages.warnings.push(flc!(
-                    "core_directory_relative_path",
-                    generate_translation_hashmap(vec![("path", directory.display().to_string())])
-                ));
-                continue;
-            }
 
-            if !directory.exists() {
-                // No error when excluded directories are missing
-                continue;
+            let (dir, msg) = Self::canonicalize_and_clear_path(&directory, true);
+
+            messages.extend_with_another_messages(msg);
+
+            if let Some(dir) = dir {
+                checked_directories.push(dir);
             }
-            if !directory.is_dir() {
-                messages.warnings.push(flc!(
-                    "core_directory_must_be_directory",
-                    generate_translation_hashmap(vec![("path", directory.display().to_string())])
-                ));
-                continue;
-            }
-            checked_directories.push(directory);
         }
         self.excluded_directories = checked_directories;
 
         messages
+    }
+
+    fn canonicalize_and_clear_path(directory: &Path, is_excluded: bool) -> (Option<PathBuf>, Messages) {
+        let mut messages = Messages::new();
+        let mut directory = directory.to_path_buf();
+        if !directory.exists() {
+            if !is_excluded {
+                messages.warnings.push(flc!(
+                    "core_directory_must_exists",
+                    generate_translation_hashmap(vec![("path", directory.display().to_string())])
+                ));
+            }
+            return (None, messages);
+        }
+
+        if !directory.is_dir() {
+            messages.warnings.push(flc!(
+                "core_directory_must_be_directory",
+                generate_translation_hashmap(vec![("path", directory.display().to_string())])
+            ));
+            return (None, messages);
+        }
+
+        // Try to canonicalize them
+        if let Ok(dir) = directory.canonicalize() {
+            directory = dir;
+        }
+        if cfg!(windows) {
+            let path_str = directory.to_string_lossy().to_string();
+            if let Some(path_str) = path_str.strip_prefix(r"\\?\") {
+                directory = PathBuf::from(path_str);
+            }
+        }
+        (Some(directory), messages)
     }
 
     #[cfg(target_family = "unix")]

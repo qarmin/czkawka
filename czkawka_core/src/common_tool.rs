@@ -112,7 +112,8 @@ pub trait CommonData {
     }
 
     fn set_reference_directory(&mut self, reference_directory: Vec<PathBuf>) {
-        self.get_cd_mut().directories.set_reference_directory(reference_directory);
+        let messages = self.get_cd_mut().directories.set_reference_directory(&reference_directory);
+        self.get_cd_mut().text_messages.extend_with_another_messages(messages);
     }
 
     #[cfg(target_family = "unix")]
