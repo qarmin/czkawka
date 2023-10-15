@@ -23,7 +23,33 @@ impl Directories {
     }
 
     pub fn set_reference_directory(&mut self, reference_directory: Vec<PathBuf>) {
-        self.reference_directories = reference_directory;
+        self.reference_directories = reference_directory
+            .iter()
+            .map(|d| {
+                let mut directory = d.clone();
+                if directory.to_string_lossy().contains('*') {
+                    return None;
+                }
+
+                if !directory.exists() {
+                    return None;
+                }
+                if !directory.is_dir() {
+                    return None;
+                }
+
+                // Try to canonicalize them
+                if let Ok(dir) = directory.canonicalize() {
+                    directory = dir;
+                }
+                if cfg!(windows) {
+                    directory = PathBuf::from(directory.strip_prefix(r"\\?\").unwrap_or(&directory));
+                }
+                Some(directory)
+            })
+            .filter(|d| d.is_some())
+            .map(|d| d.unwrap())
+            .collect::<Vec<PathBuf>>();
     }
 
     pub fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) -> Messages {
