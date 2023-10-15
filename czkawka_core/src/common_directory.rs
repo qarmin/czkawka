@@ -25,7 +25,7 @@ impl Directories {
     pub fn set_reference_directory(&mut self, reference_directory: Vec<PathBuf>) {
         self.reference_directories = reference_directory
             .iter()
-            .map(|d| {
+            .filter_map(|d| {
                 let mut directory = d.clone();
                 if directory.to_string_lossy().contains('*') {
                     return None;
@@ -43,12 +43,12 @@ impl Directories {
                     directory = dir;
                 }
                 if cfg!(windows) {
+                    dbg!("", &directory);
                     directory = PathBuf::from(directory.strip_prefix(r"\\?\").unwrap_or(&directory));
+                    dbg!(&directory);
                 }
                 Some(directory)
             })
-            .filter(|d| d.is_some())
-            .map(|d| d.unwrap())
             .collect::<Vec<PathBuf>>();
     }
 
