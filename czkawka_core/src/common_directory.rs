@@ -65,7 +65,7 @@ impl Directories {
             if let Ok(dir) = directory.canonicalize() {
                 directory = dir;
             }
-            if cfg!(linux) {
+            if cfg!(windows) {
                 directory = PathBuf::from(directory.strip_prefix(r"\\?\").unwrap_or(&directory));
             }
 
@@ -123,7 +123,7 @@ impl Directories {
             if let Ok(dir) = directory.canonicalize() {
                 directory = dir;
             }
-            if cfg!(linux) {
+            if cfg!(windows) {
                 directory = PathBuf::from(directory.strip_prefix(r"\\?\").unwrap_or(&directory));
             }
 
