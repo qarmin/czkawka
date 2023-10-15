@@ -62,16 +62,8 @@ impl Directories {
             }
 
             // If not checking windows strange paths, try to canonicalize them
-            if !directory.starts_with("\\") {
-                let Ok(dir2) = directory.canonicalize() else {
-                    messages.warnings.push(flc!(
-                        "core_directory_must_exists",
-                        generate_translation_hashmap(vec![("path", directory.display().to_string())])
-                    ));
-                    continue;
-                };
-
-                directory = dir2;
+            if let Ok(dir) = directory.canonicalize() {
+                directory = dir;
             }
 
             checked_directories.push(directory);
