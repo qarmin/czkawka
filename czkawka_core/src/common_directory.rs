@@ -45,6 +45,7 @@ impl Directories {
         let mut messages: Messages = Messages::new();
 
         dbg!("Before", &self.included_directories);
+        dbg!("Before", included_directories);
         if included_directory.is_empty() {
             messages.errors.push(flc!("core_missing_no_chosen_included_directory"));
             return messages;
@@ -54,8 +55,10 @@ impl Directories {
 
         let mut checked_directories: Vec<PathBuf> = Vec::new();
         for directory in directories {
+            dbg!("Checking", &directory);
             let (dir, msg) = Self::canonicalize_and_clear_path(&directory, false);
 
+            dbg!("Got", &dir);
             messages.extend_with_another_messages(msg);
 
             if let Some(dir) = dir {
@@ -110,6 +113,7 @@ impl Directories {
         let mut messages = Messages::new();
         let mut directory = directory.to_path_buf();
         if !directory.exists() {
+            dbg!("Doesn't exists", &directory);
             if !is_excluded {
                 messages.warnings.push(flc!(
                     "core_directory_must_exists",
@@ -120,6 +124,7 @@ impl Directories {
         }
 
         if !directory.is_dir() {
+            dbg!("Is not dir", &directory);
             messages.warnings.push(flc!(
                 "core_directory_must_be_directory",
                 generate_translation_hashmap(vec![("path", directory.display().to_string())])
@@ -130,12 +135,15 @@ impl Directories {
         // Try to canonicalize them
         if let Ok(dir) = directory.canonicalize() {
             directory = dir;
+            dbg!("Is canonicalize", &directory);
         }
         if cfg!(windows) {
+            dbg!("Before windows", &directory);
             let path_str = directory.to_string_lossy().to_string();
             if let Some(path_str) = path_str.strip_prefix(r"\\?\") {
                 directory = PathBuf::from(path_str);
             }
+            dbg!("After windows", &directory);
         }
         (Some(directory), messages)
     }
