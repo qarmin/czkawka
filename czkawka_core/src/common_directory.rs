@@ -25,7 +25,6 @@ impl Directories {
     pub fn set_reference_directory(&mut self, reference_directory: &[PathBuf]) -> Messages {
         let mut messages: Messages = Messages::new();
 
-        dbg!("Before", &self.reference_directories);
         self.reference_directories = reference_directory
             .iter()
             .filter_map(|directory| {
@@ -37,15 +36,12 @@ impl Directories {
             })
             .collect::<Vec<PathBuf>>();
 
-        dbg!("After", &self.reference_directories);
         messages
     }
 
     pub fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) -> Messages {
         let mut messages: Messages = Messages::new();
 
-        dbg!("Before", &self.included_directories);
-        dbg!("Before", &included_directory);
         if included_directory.is_empty() {
             messages.errors.push(flc!("core_missing_no_chosen_included_directory"));
             return messages;
@@ -55,10 +51,8 @@ impl Directories {
 
         let mut checked_directories: Vec<PathBuf> = Vec::new();
         for directory in directories {
-            dbg!("Checking", &directory);
             let (dir, msg) = Self::canonicalize_and_clear_path(&directory, false);
 
-            dbg!("Got", &dir);
             messages.extend_with_another_messages(msg);
 
             if let Some(dir) = dir {
@@ -73,14 +67,12 @@ impl Directories {
 
         self.included_directories = checked_directories;
 
-        dbg!("After", &self.included_directories);
         messages
     }
 
     pub fn set_excluded_directory(&mut self, excluded_directory: Vec<PathBuf>) -> Messages {
         let mut messages: Messages = Messages::new();
 
-        dbg!("Before", &self.excluded_directories);
         if excluded_directory.is_empty() {
             return messages;
         }
@@ -105,16 +97,13 @@ impl Directories {
         }
         self.excluded_directories = checked_directories;
 
-        dbg!("After", &self.excluded_directories);
         messages
     }
 
     fn canonicalize_and_clear_path(directory: &Path, is_excluded: bool) -> (Option<PathBuf>, Messages) {
-        dbg!("Testing", &directory);
         let mut messages = Messages::new();
         let mut directory = directory.to_path_buf();
         if !directory.exists() {
-            dbg!("Doesn't exists", &directory);
             if !is_excluded {
                 messages.warnings.push(flc!(
                     "core_directory_must_exists",
@@ -125,7 +114,6 @@ impl Directories {
         }
 
         if !directory.is_dir() {
-            dbg!("Is not dir", &directory);
             messages.warnings.push(flc!(
                 "core_directory_must_be_directory",
                 generate_translation_hashmap(vec![("path", directory.display().to_string())])
@@ -145,12 +133,10 @@ impl Directories {
                         directory = PathBuf::from(dir_can_str);
                     }
                 }
-                dbg!("After canonicalize", &directory);
             }
         } else {
             if let Ok(dir) = directory.canonicalize() {
                 directory = dir;
-                dbg!("Is canonicalize UNIX", &directory);
             }
         }
         (Some(directory), messages)
