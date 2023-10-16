@@ -122,13 +122,21 @@ impl Directories {
         }
 
         // Try to canonicalize them
-        if let Ok(dir) = directory.canonicalize() {
-            directory = dir;
-        }
+
         if cfg!(windows) {
-            let path_str = directory.to_string_lossy().to_string();
-            if let Some(path_str) = path_str.strip_prefix(r"\\?\") {
-                directory = PathBuf::from(path_str);
+            // Only canonicalize if it's not a network path
+            // This can be check by checking if path starts with \\?\UNC\
+            if let Ok(dir_can) = directory.canonicalize() {
+                let dir_can_str = dir_can.to_string_lossy().to_string();
+                if let Some(dir_can_str) = dir_can_str.strip_prefix(r"\\?\") {
+                    if dir_can_str.chars().nth(1) == Some(':') {
+                        directory = PathBuf::from(dir_can_str);
+                    }
+                }
+            }
+        } else {
+            if let Ok(dir) = directory.canonicalize() {
+                directory = dir;
             }
         }
         (Some(directory), messages)
