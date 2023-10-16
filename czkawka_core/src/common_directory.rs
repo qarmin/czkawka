@@ -140,8 +140,10 @@ impl Directories {
             // This can be check by checking if path starts with \\?\UNC\
             if let Ok(dir_can) = directory.canonicalize() {
                 let dir_can_str = dir_can.to_string_lossy().to_string();
-                if dir_can_str.starts_with(r"\\?\") && dir_can_str.chars().nth(5) == Some(':') {
-                    directory = PathBuf::from(dir_can_str);
+                if let Some(dir_can_str) = dir_can_str.strip_prefix(r"\\?\") {
+                    if dir_can_str.chars().nth(1) == Some(':') {
+                        directory = PathBuf::from(dir_can_str);
+                    }
                 }
                 dbg!("After canonicalize", &directory);
             }
