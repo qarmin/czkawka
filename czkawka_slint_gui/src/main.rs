@@ -1,28 +1,30 @@
 fn main() {}
 
 slint::slint! {
-import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView} from "std-widgets.slint";
+import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox} from "std-widgets.slint";
 
-component CzkawkaTableView inherits Rectangle {
+component SelectableTableView inherits Rectangle {
     in property <[string]> columns;
     in property <[[string]]> values;
 
-    private property <[length]> column_sizes: [20px, 100px, 50px, 200px];
-    private property <int> column_number: 3;
+    private property <[length]> column_sizes: [30px, 100px, 100px, 100px];
+    private property <int> column_number: 4;
 
     VerticalBox {
         padding: 5px;
+        // Widgets
         HorizontalLayout {
             padding: 5px; spacing: 5px;
             vertical-stretch: 0;
             for title[idx] in root.columns : HorizontalLayout {
                 width: root.column_sizes[idx];
-                Text { overflow: elide; text: idx; }
+                Text { overflow: elide; text: title; }
                 Rectangle {
                     width: 1px;
                     background: gray;
+
                     TouchArea {
-                        width: 10px;
+                        width: 5px;
                         x: (parent.width - self.width) / 2;
                         property <length> cached;
                         pointer-event(event) => {
@@ -43,13 +45,38 @@ component CzkawkaTableView inherits Rectangle {
                 }
             }
         }
-        ListView {
-            for r in root.values : HorizontalLayout {
-                padding: 5px;
-                spacing: 5px;
-                for t[idx] in r : HorizontalLayout {
-                    width: root.column_sizes[idx];
-                    Text { overflow: elide; text: t; }
+        list_view:= ListView {
+            for r[idx] in root.values : Rectangle {
+                private property <bool> selected: false;
+                background: touch-area.has-hover ? (selected ? #333333 : #222222) : (selected ? #333333: #222222);
+
+                touch_area:= TouchArea {
+                    clicked => {
+                        parent.selected = !parent.selected
+                    }
+                }
+
+                HorizontalLayout {
+                    padding: 5px;
+                    spacing: 5px;
+                    //width: root.column_sizes[idx];
+
+                    CheckBox {
+                        //min-width: 200px;
+                        width: root.column-sizes[0];
+                    }
+
+                    HorizontalLayout {
+                        padding: 5px;
+                        spacing: 5px;
+                        for f[idx] in r : Text {
+                            width: root.column-sizes[idx + 1];
+                            text: f;
+                            vertical-alignment: center;
+
+                            overflow: elide;
+                        }
+                    }
                 }
             }
         }
@@ -60,7 +87,7 @@ export component MainWindow {
     in-out property <int> active-tab;
     VerticalBox {
         HorizontalBox {
-            width: 400px;
+            width: 600px;
             preferred-height: 300px;
 
             tab_bar := VerticalLayout {
@@ -76,24 +103,28 @@ export component MainWindow {
                 }
             }
 
-            CzkawkaTableView {
-                columns: ["Device", "Mount Point", "Total", "Free"];
+            // TODO - using root.active-tab in visible property will not
+            if root.active-tab == 0: SelectableTableView {
+                columns: ["Selection", "Folder Name", "Path", "Modification Date"];
                 values: [
-                        ["/dev/sda1", "/", "255GB", "82.2GB"] ,
-                        ["/dev/sda2", "/tmp", "60.5GB", "44.5GB"] ,
-                        ["/dev/sdb1", "/home", "255GB", "32.2GB"] ,
+                        ["kropkarz", "/Xd1", "24.10.2023"] ,
+                        ["witasphere", "/Xd1/Imagerren2", "25.11.1991"] ,
+                        ["lokkaler", "/Xd1/Vide2", "01.23.1911"] ,
                 ];
             }
         }
         HorizontalBox {
-            Button {
+            scan_button:= Button {
                 text: "Scan";
             }
-            Button {
+            delete_button:= Button {
                 text: "Delete";
             }
         }
     }
 }
+
+
+
 
 }
