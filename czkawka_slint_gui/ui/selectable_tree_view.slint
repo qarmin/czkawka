@@ -1,0 +1,81 @@
+import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox} from "std-widgets.slint";
+
+export component SelectableTableView inherits Rectangle {
+    in property <[string]> columns;
+    in property <[[string]]> values;
+
+    private property <[length]> column_sizes: [30px, 100px, 100px, 100px];
+    private property <int> column_number: 4;
+
+    VerticalBox {
+        padding: 5px;
+        // Widgets
+        HorizontalLayout {
+            padding: 5px; spacing: 5px;
+            vertical-stretch: 0;
+            for title[idx] in root.columns : HorizontalLayout {
+                width: root.column_sizes[idx];
+                Text { overflow: elide; text: title; }
+                Rectangle {
+                    width: 1px;
+                    background: gray;
+
+                    TouchArea {
+                        width: 5px;
+                        x: (parent.width - self.width) / 2;
+                        property <length> cached;
+                        pointer-event(event) => {
+                            if (event.button == PointerEventButton.left && event.kind == PointerEventKind.down) {
+                                self.cached = root.column_sizes[idx];
+                            }
+                        }
+                        moved => {
+                            if (self.pressed) {
+                                root.column_sizes[idx] += (self.mouse-x - self.pressed-x);
+                                if (root.column_sizes[idx] < 0) {
+                                    root.column_sizes[idx] = 0;
+                                }
+                            }
+                        }
+                        mouse-cursor: ew-resize;
+                    }
+                }
+            }
+        }
+        list_view:= ListView {
+            for r[idx] in root.values : Rectangle {
+                private property <bool> selected: false;
+                background: touch-area.has-hover ? (selected ? #333333 : #222222) : (selected ? #333333: #222222);
+
+                touch_area:= TouchArea {
+                    clicked => {
+                        parent.selected = !parent.selected
+                    }
+                }
+
+                HorizontalLayout {
+                    padding: 5px;
+                    spacing: 5px;
+                    //width: root.column_sizes[idx];
+
+                    CheckBox {
+                        //min-width: 200px;
+                        width: root.column-sizes[0];
+                    }
+
+                    HorizontalLayout {
+                        padding: 5px;
+                        spacing: 5px;
+                        for f[idx] in r : Text {
+                            width: root.column-sizes[idx + 1];
+                            text: f;
+                            vertical-alignment: center;
+
+                            overflow: elide;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

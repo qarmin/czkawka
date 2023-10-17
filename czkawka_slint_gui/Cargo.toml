@@ -8,7 +8,11 @@ description = "Slint frontend of Czkawka"
 license = "GPL-3"
 homepage = "https://github.com/qarmin/czkawka"
 repository = "https://github.com/qarmin/czkawka"
+build = "build.rs"
 
 [dependencies]
 slint = "1.2.2"
 rand = "0.8.5"
+
+[dev-dependencies]
+slint-build = "1.2.2"
