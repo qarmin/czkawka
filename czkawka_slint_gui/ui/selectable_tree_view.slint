@@ -2,7 +2,7 @@ import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListV
 
 export component SelectableTableView inherits Rectangle {
     in property <[string]> columns;
-    in property <[[string]]> values;
+    in property <[{checked: bool, selected_row: bool, val:[string]}]> values;
 
     private property <[length]> column_sizes: [30px, 100px, 100px, 100px];
     private property <int> column_number: 4;
@@ -45,13 +45,12 @@ export component SelectableTableView inherits Rectangle {
         }
         list_view:= ListView {
             for r[idx] in root.values : Rectangle {
-                private property <bool> selected: false;
-                background: touch-area.has-hover ? (selected ? #cccccc : #dddddd) : (selected ? #cccccc: #dddddd);
+                background: touch-area.has-hover ? (r.selected_row ? #cccccc : #dddddd) : (r.selected_row ? #cccccc: #dddddd);
                 // background: touch-area.has-hover ? (selected ? #333333 : #222222) : (selected ? #333333: #222222);
 
                 touch_area:= TouchArea {
                     clicked => {
-                        parent.selected = !parent.selected
+                        r.selected_row = !r.selected_row
                     }
                 }
 
@@ -62,14 +61,18 @@ export component SelectableTableView inherits Rectangle {
 
                     CheckBox {
                         //min-width: 200px;
+                        checked: r.checked;
                         width: root.column-sizes[0];
+                        toggled => {
+                            r.checked = self.checked;
+                        }
                         // preferred-width: root.column-sizes[0];
                     }
 
                     HorizontalLayout {
                         padding: 5px;
                         spacing: 5px;
-                        for f[idx] in r : Text {
+                        for f[idx] in r.val : Text {
                             width: root.column-sizes[idx + 1];
                             text: f;
                             vertical-alignment: center;

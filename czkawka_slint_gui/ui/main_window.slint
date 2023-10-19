@@ -7,11 +7,12 @@ enum CurrentTab {
 }
 
 export component MainWindow {
+    callback deleted;    
     in-out property <CurrentTab> active-tab;
-    in-out property <[[string]]> empty-folder-model: [
-        ["kropkarz", "/Xd1", "24.10.2023"] ,
-        ["witasphere", "/Xd1/Imagerren2", "25.11.1991"] ,
-        ["lokkaler", "/Xd1/Vide2", "01.23.1911"] ,
+    in-out property <[{checked: bool, selected_row: bool, val:[string]}]> empty-folder-model: [
+        {checked: false, selected_row: false, val: ["kropkarz", "/Xd1", "24.10.2023"]} ,
+        {checked: false, selected_row: true, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
+        {checked: true, selected_row: false, val: ["lokkaler", "/Xd1/Vide2", "01.23.1911"]} ,
 ];
 
     min-width: 200px;
@@ -47,6 +48,9 @@ export component MainWindow {
             }
             delete_button:= Button {
                 text: "Delete";
+                clicked => {
+                    root.deleted();
+                }
             }
         }
     }
