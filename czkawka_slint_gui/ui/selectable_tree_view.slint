@@ -11,7 +11,8 @@ export component SelectableTableView inherits Rectangle {
         padding: 5px;
         // Widgets
         HorizontalLayout {
-            padding: 5px; spacing: 5px;
+            padding: 5px; 
+            spacing: 5px;
             vertical-stretch: 0;
             for title[idx] in root.columns : HorizontalLayout {
                 width: root.column_sizes[idx];
@@ -32,8 +33,8 @@ export component SelectableTableView inherits Rectangle {
                         moved => {
                             if (self.pressed) {
                                 root.column_sizes[idx] += (self.mouse-x - self.pressed-x);
-                                if (root.column_sizes[idx] < 0) {
-                                    root.column_sizes[idx] = 0;
+                                if (root.column_sizes[idx] < 20px) {
+                                    root.column_sizes[idx] = 20px;
                                 }
                             }
                         }
@@ -45,7 +46,8 @@ export component SelectableTableView inherits Rectangle {
         list_view:= ListView {
             for r[idx] in root.values : Rectangle {
                 private property <bool> selected: false;
-                background: touch-area.has-hover ? (selected ? #333333 : #222222) : (selected ? #333333: #222222);
+                background: touch-area.has-hover ? (selected ? #cccccc : #dddddd) : (selected ? #cccccc: #dddddd);
+                // background: touch-area.has-hover ? (selected ? #333333 : #222222) : (selected ? #333333: #222222);
 
                 touch_area:= TouchArea {
                     clicked => {
@@ -61,6 +63,7 @@ export component SelectableTableView inherits Rectangle {
                     CheckBox {
                         //min-width: 200px;
                         width: root.column-sizes[0];
+                        // preferred-width: root.column-sizes[0];
                     }
 
                     HorizontalLayout {

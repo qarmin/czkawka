@@ -13,6 +13,7 @@ build = "build.rs"
 [dependencies]
 slint = "1.2.2"
 rand = "0.8.5"
+#czkawka_core = { version = "6.1.0", path = "../czkawka_core" }
 
-[dev-dependencies]
+[build-dependencies]
 slint-build = "1.2.2"
