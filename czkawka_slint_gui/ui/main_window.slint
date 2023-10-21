@@ -1,19 +1,24 @@
 import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox} from "std-widgets.slint";
 import {SelectableTableView} from "selectable_tree_view.slint";
+import {LeftSidePanel} from "left_side_panel.slint";
+import {CurrentTab} from "common.slint";
 
-enum CurrentTab {
-    EmptyFolders,
-    SimilarImages,
-}
-
-export component MainWindow {
+export component MainWindow inherits Window {
     callback deleted;    
-    in-out property <CurrentTab> active-tab;
-    in-out property <[{checked: bool, selected_row: bool, val:[string]}]> empty-folder-model: [
-        {checked: false, selected_row: false, val: ["kropkarz", "/Xd1", "24.10.2023"]} ,
-        {checked: false, selected_row: true, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
-        {checked: true, selected_row: false, val: ["lokkaler", "/Xd1/Vide2", "01.23.1911"]} ,
-];
+    callback scanned(CurrentTab);
+
+    in-out property <bool> scanning: false;
+
+    in-out property <CurrentTab> active-tab: CurrentTab.EmptyFolders;
+    in-out property <[{checked: bool, selected_row: bool, header_row: bool, val:[string]}]> empty_folder_model: [
+        {checked: false, selected_row: false, header_row: true, val: ["kropkarz", "/Xd1", "24.10.2023"]} ,
+        {checked: false, selected_row: true, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
+        {checked: true, selected_row: false, header_row: false, val: ["lokkaler", "/Xd1/Vide2", "01.23.1911"]}
+    ];
+    in-out property <[{checked: bool, selected_row: bool, header_row: bool, val:[string]}]> empty_files_model: [];
+    in-out property <[{checked: bool, selected_row: bool, header_row: bool, val:[string]}]> similar_images_model: [];
+
+    title: root.active-tab == CurrentTab.EmptyFiles ? "EmptyFiles" : (root.active-tab == CurrentTab.EmptyFolders ? "EmptyFolders" : "Similar Images");
 
     min-width: 200px;
     VerticalBox {
@@ -21,32 +26,42 @@ export component MainWindow {
             // min-width: 600px;
             preferred-height: 300px;
 
-            tab_bar := VerticalLayout {
-                width: 120px;
-                spacing: 3px;
-                Button {
-                    text: "Empty Folders";
-                    clicked => { root.active-tab = CurrentTab.EmptyFolders; }
-                }
-                Button {
-                    text: "Similar Images";
-                    clicked => { root.active-tab = CurrentTab.SimilarImages; }
-                }
+            LeftSidePanel {
+                scanning: root.scanning;
+                active-tab <=> root.active-tab;
             }
 
-            // TODO - using root.active-tab in visible property will not
+            // TODO - using root.active-tab in visible property will not clear model
             if root.active-tab == CurrentTab.EmptyFolders: SelectableTableView {
                 min-width: 200px;
 
                 columns: ["Selection", "Folder Name", "Path", "Modification Date"];
                 values: empty-folder-model;
             }
+            if root.active-tab == CurrentTab.EmptyFiles: SelectableTableView {
+                min-width: 200px;
+
+                columns: ["Selection", "Folder Name", "Path", "Modification Date"];
+                values: empty-files-model;
+            }
+            if root.active-tab == CurrentTab.SimilarImages: SelectableTableView {
+                min-width: 200px;
+
+                columns: ["Selection", "Folder Name", "Path", "Modification Date"];
+                values: similar-images-model;
+            }
         }
         HorizontalBox {
+            height: 50px;
             scan_button:= Button {
+                enabled: !scanning;
                 text: "Scan";
+                clicked => {
+                    root.scanned(active-tab);
+                }
             }
             delete_button:= Button {
+                enabled: !scanning;
                 text: "Delete";
                 clicked => {
                     root.deleted();
@@ -55,4 +70,3 @@ export component MainWindow {
         }
     }
 }
-

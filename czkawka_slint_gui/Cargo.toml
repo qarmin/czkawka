@@ -14,7 +14,8 @@ build = "build.rs"
 #slint = "1.2.2"
 slint = { git = "https://github.com/slint-ui/slint.git", branch = "olivier/fix-3700"}
 rand = "0.8.5"
-#czkawka_core = { version = "6.1.0", path = "../czkawka_core" }
+czkawka_core = { version = "6.1.0", path = "../czkawka_core" }
+chrono = "0.4.31"
 
 [build-dependencies]
 slint-build = { git = "https://github.com/slint-ui/slint.git", branch = "olivier/fix-3700"}

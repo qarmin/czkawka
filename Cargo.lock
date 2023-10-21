@@ -959,8 +959,7 @@ dependencies = [
 [[package]]
 name = "const-field-offset"
 version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6304465f16f463cddc572b737c3df93576edd3a6b53f057bd8beeb29f4ef8dfd"
+source = "git+https://github.com/slint-ui/slint.git?branch=olivier/fix-3700#c03366792958460a84e4c340a34928643338a963"
 dependencies = [
  "const-field-offset-macro",
  "field-offset",
@@ -969,8 +968,7 @@ dependencies = [
 [[package]]
 name = "const-field-offset-macro"
 version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "57aaaad9185d3bcb3afe63549d8ba60b2fb0ea8dc2da83f62dd56805edf56fd1"
+source = "git+https://github.com/slint-ui/slint.git?branch=olivier/fix-3700#c03366792958460a84e4c340a34928643338a963"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1329,6 +1327,8 @@ dependencies = [
 name = "czkawka_slint"
 version = "6.1.0"
 dependencies = [
+ "chrono",
+ "czkawka_core",
  "rand",
  "slint",
  "slint-build",
@@ -1568,12 +1568,6 @@ checksum = "1369f1679d6b706d234c4c1e0613c415c2c74b598a09ad28080ba2474b72e42d"
 dependencies = [
  "libc",
 ]
-
-[[package]]
-name = "dunce"
-version = "1.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "56ce8c6da7551ec6c462cbaf3bfbc75131ebbfa1c944aeaa9dab51ca1c5f0c3b"
 
 [[package]]
 name = "dwrote"
@@ -2656,9 +2650,8 @@ dependencies = [
 
 [[package]]
 name = "i-slint-backend-linuxkms"
-version = "1.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0e321d0f8d12509ec2ed5b5aba4996922606686ac3d86d70ba126cba1b4e4563"
+version = "1.3.0"
+source = "git+https://github.com/slint-ui/slint.git?branch=olivier/fix-3700#c03366792958460a84e4c340a34928643338a963"
 dependencies = [
  "calloop 0.11.0",
  "drm",
@@ -2676,9 +2669,8 @@ dependencies = [
 
 [[package]]
 name = "i-slint-backend-qt"
-version = "1.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0f1ce3687c329341842f79c31c95d7bcf49b6fda7fd19b09e0b5d7fb33b9d6b2"
+version = "1.3.0"
+source = "git+https://github.com/slint-ui/slint.git?branch=olivier/fix-3700#c03366792958460a84e4c340a34928643338a963"
 dependencies = [
  "const-field-offset",
  "cpp",
@@ -2696,22 +2688,21 @@ dependencies = [
 
 [[package]]
 name = "i-slint-backend-selector"
-version = "1.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e7382cc01e9c9ef607debe1e4af7e1c6af78720a258fd18d8e32761b8593c5db"
+version = "1.3.0"
+source = "git+https://github.com/slint-ui/slint.git?branch=olivier/fix-3700#c03366792958460a84e4c340a34928643338a963"
 dependencies = [
  "cfg-if",
  "i-slint-backend-linuxkms",
  "i-slint-backend-qt",
  "i-slint-backend-winit",
+ "i-slint-common",
  "i-slint-core",
 ]
 
 [[package]]
 name = "i-slint-backend-winit"
-version = "1.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f8c0f3f01e2c678d24b81914a38e53d3b660a0ef13831acb59c71bd7c95ed0cb"
+version = "1.3.0"
+source = "git+https://github.com/slint-ui/slint.git?branch=olivier/fix-3700#c03366792958460a84e4c340a34928643338a963"
 dependencies = [
  "accesskit",
  "accesskit_winit",
@@ -2748,9 +2739,8 @@ dependencies = [
 
 [[package]]
 name = "i-slint-common"
-version = "1.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e7daf484e68bf27e06b7501767c6e66063c0f85948e57a6de679b53d2d9d2044"
+version = "1.3.0"
+source = "git+https://github.com/slint-ui/slint.git?branch=olivier/fix-3700#c03366792958460a84e4c340a34928643338a963"
 dependencies = [
  "cfg-if",
  "derive_more",
@@ -2760,16 +2750,14 @@ dependencies = [
 
 [[package]]
 name = "i-slint-compiler"
-version = "1.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8b99172cc43ca17a78e96e3f8f13699d9fc1c00474d2d87bc57c0f7e816c4a48"
+version = "1.3.0"
+source = "git+https://github.com/slint-ui/slint.git?branch=olivier/fix-3700#c03366792958460a84e4c340a34928643338a963"
 dependencies = [
  "by_address",
  "codemap",
  "codemap-diagnostic",
  "css-color-parser2",
  "derive_more",
- "dunce",
  "fontdue",
  "i-slint-common",
  "image",
@@ -2791,9 +2779,8 @@ dependencies = [
 
 [[package]]
 name = "i-slint-core"
-version = "1.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b62e590bb3d6009447a52760e9343c25a3bf7a8a7b0ad7ab5a77c5324fcaa957"
+version = "1.3.0"
+source = "git+https://github.com/slint-ui/slint.git?branch=olivier/fix-3700#c03366792958460a84e4c340a34928643338a963"
 dependencies = [
  "auto_enums",
  "bytemuck",
@@ -2835,9 +2822,8 @@ dependencies = [
 
 [[package]]
 name = "i-slint-core-macros"
-version = "1.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "62a416f1e9fc42c2bf1f171e5be38a8155850fcd390fce300869bcc9d6c9c117"
+version = "1.3.0"
+source = "git+https://github.com/slint-ui/slint.git?branch=olivier/fix-3700#c03366792958460a84e4c340a34928643338a963"
 dependencies = [
  "quote",
  "syn 2.0.38",
@@ -2845,9 +2831,8 @@ dependencies = [
 
 [[package]]
 name = "i-slint-renderer-femtovg"
-version = "1.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e99a941fca00b96a7756d56e4bc5e2876283f34c693eabc73585c0b91ab84f0"
+version = "1.3.0"
+source = "git+https://github.com/slint-ui/slint.git?branch=olivier/fix-3700#c03366792958460a84e4c340a34928643338a963"
 dependencies = [
  "cfg-if",
  "const-field-offset",
@@ -2879,9 +2864,8 @@ dependencies = [
 
 [[package]]
 name = "i-slint-renderer-skia"
-version = "1.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9f617268cfee53e1fa3fcab8f6ab2775deacfce74057386c4ad39ef2647f8db6"
+version = "1.3.0"
+source = "git+https://github.com/slint-ui/slint.git?branch=olivier/fix-3700#c03366792958460a84e4c340a34928643338a963"
 dependencies = [
  "cfg-if",
  "cfg_aliases",
@@ -3389,11 +3373,9 @@ version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "54a0adf8d8607a73a5b74cbe4132f57cb349e4bf860103cd089461bbcbc9907e"
 dependencies = [
- "cc",
  "errno",
  "libseat-sys",
  "log",
- "pkg-config",
 ]
 
 [[package]]
@@ -5062,9 +5044,8 @@ dependencies = [
 
 [[package]]
 name = "slint"
-version = "1.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c9a6f76430dde7dc57d374c37aa3103532813cc275a94b515b5907e91dd19334"
+version = "1.3.0"
+source = "git+https://github.com/slint-ui/slint.git?branch=olivier/fix-3700#c03366792958460a84e4c340a34928643338a963"
 dependencies = [
  "const-field-offset",
  "i-slint-backend-selector",
@@ -5079,21 +5060,19 @@ dependencies = [
 
 [[package]]
 name = "slint-build"
-version = "1.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c6edc7309a89f14c685086544ea3dbd7668ccdeb03d774f06879f38237e55815"
+version = "1.3.0"
+source = "git+https://github.com/slint-ui/slint.git?branch=olivier/fix-3700#c03366792958460a84e4c340a34928643338a963"
 dependencies = [
  "i-slint-compiler",
  "spin_on",
  "thiserror",
- "toml_edit 0.19.15",
+ "toml_edit 0.20.2",
 ]
 
 [[package]]
 name = "slint-macros"
-version = "1.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "33f96e5ea0574ac69b773b159d43124f7a329107cf60c11516e63d38c2d8c89c"
+version = "1.3.0"
+source = "git+https://github.com/slint-ui/slint.git?branch=olivier/fix-3700#c03366792958460a84e4c340a34928643338a963"
 dependencies = [
  "i-slint-compiler",
  "proc-macro2",
@@ -6226,8 +6205,7 @@ dependencies = [
 [[package]]
 name = "vtable"
 version = "0.1.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9f4c7506238561777a1861d3dc3c0001877c475187e7bc4392ea87ebf631fd9c"
+source = "git+https://github.com/slint-ui/slint.git?branch=olivier/fix-3700#c03366792958460a84e4c340a34928643338a963"
 dependencies = [
  "const-field-offset",
  "portable-atomic",
@@ -6238,8 +6216,7 @@ dependencies = [
 [[package]]
 name = "vtable-macro"
 version = "0.1.10"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6b2b8eecdb8e4284adf5546fc518f048f6dc33e7203dbe36fa93a4add39b31f6"
+source = "git+https://github.com/slint-ui/slint.git?branch=olivier/fix-3700#c03366792958460a84e4c340a34928643338a963"
 dependencies = [
  "proc-macro2",
  "quote",
