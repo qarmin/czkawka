@@ -39,7 +39,7 @@ fn scan_empty_folders(a: Weak<MainWindow>) {
         });
 
         a.upgrade_in_event_loop(move |app| {
-            let mut folder_map = ef.get_empty_folder_list();
+            let folder_map = ef.get_empty_folder_list();
             let items = Rc::new(VecModel::default());
             for path in vector {
                 let (directory, file) = split_path(&path);

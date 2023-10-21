@@ -4,29 +4,38 @@ import {LeftSidePanel} from "left_side_panel.slint";
 import {CurrentTab} from "common.slint";
 
 export component MainWindow inherits Window {
-    callback deleted;    
+    callback deleted;
     callback scanned(CurrentTab);
+    min-width: 300px;
 
     in-out property <bool> scanning: false;
 
     in-out property <CurrentTab> active-tab: CurrentTab.EmptyFolders;
-    in-out property <[{checked: bool, selected_row: bool, header_row: bool, val:[string]}]> empty_folder_model: [
+    in-out property <[{checked: bool, header_row: bool, selected_row: bool, val:[string]}]> empty_folder_model: [
         {checked: false, selected_row: false, header_row: true, val: ["kropkarz", "/Xd1", "24.10.2023"]} ,
-        {checked: false, selected_row: true, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
+        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
+        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
+        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
+        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
+        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
+        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
+        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
+        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
+        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
         {checked: true, selected_row: false, header_row: false, val: ["lokkaler", "/Xd1/Vide2", "01.23.1911"]}
     ];
-    in-out property <[{checked: bool, selected_row: bool, header_row: bool, val:[string]}]> empty_files_model: [];
-    in-out property <[{checked: bool, selected_row: bool, header_row: bool, val:[string]}]> similar_images_model: [];
+    in-out property <[{checked: bool, header_row: bool, selected_row: bool, val:[string]}]> empty_files_model: [];
+    in-out property <[{checked: bool, header_row: bool, selected_row: bool, val:[string]}]> similar_images_model: [];
 
     title: root.active-tab == CurrentTab.EmptyFiles ? "EmptyFiles" : (root.active-tab == CurrentTab.EmptyFolders ? "EmptyFolders" : "Similar Images");
 
-    min-width: 200px;
     VerticalBox {
         HorizontalBox {
             // min-width: 600px;
             preferred-height: 300px;
 
             LeftSidePanel {
+                max-width: 10px; // Just forces the smallest possible 
                 scanning: root.scanning;
                 active-tab <=> root.active-tab;
             }
@@ -35,20 +44,22 @@ export component MainWindow inherits Window {
             if root.active-tab == CurrentTab.EmptyFolders: SelectableTableView {
                 min-width: 200px;
 
-                columns: ["Selection", "Folder Name", "Path", "Modification Date"];
-                values: empty-folder-model;
+                columns: ["Selection", "Folder Name", "Path"];
+                last-column: "Modification Date";
+                column-sizes: [30px, 100px, 100px, 100px];
+                values <=> empty-folder-model;
             }
             if root.active-tab == CurrentTab.EmptyFiles: SelectableTableView {
                 min-width: 200px;
 
                 columns: ["Selection", "Folder Name", "Path", "Modification Date"];
-                values: empty-files-model;
+                values <=> empty-files-model;
             }
             if root.active-tab == CurrentTab.SimilarImages: SelectableTableView {
                 min-width: 200px;
 
                 columns: ["Selection", "Folder Name", "Path", "Modification Date"];
-                values: similar-images-model;
+                values <=> similar-images-model;
             }
         }
         HorizontalBox {
