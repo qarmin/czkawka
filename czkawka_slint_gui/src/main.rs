@@ -24,9 +24,9 @@ fn main() {
             items.push(slint::format!("Item {r}.{c}").into());
         }
 
-        row_data.push((r % 4 == 0, r % 3 == 0, r % 2 == 0, ModelRc::new(items)));
+        row_data.push((r % 2 == 0, false, true, ModelRc::new(items)));
     }
-    // app.set_empty_folder_model(row_data.into());
+    app.set_empty_folder_model(row_data.into());
 
     connect_delete_button(&app);
     connect_scan_button(&app);
