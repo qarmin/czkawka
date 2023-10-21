@@ -1,0 +1,44 @@
+import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox} from "std-widgets.slint";
+import {CurrentTab} from "common.slint";
+
+component TabItem {
+    in property <bool> scanning;
+    in-out property <CurrentTab> active-tab;
+    in property <string> text;
+    in property <CurrentTab> curr_tab;
+
+    Button {
+        enabled: !scanning;
+        text: root.text;
+        clicked => { root.active-tab = root.curr-tab; }
+    }
+}
+
+export component LeftSidePanel {
+    in-out property <CurrentTab> active-tab;
+    in-out property <bool> scanning;
+
+    VerticalLayout {
+        width: 120px;
+        spacing: 3px;
+        
+        TabItem {
+            scanning: scanning;
+            text: "Empty Folders";
+            active-tab <=> root.active-tab;
+            curr_tab: CurrentTab.EmptyFolders;
+        }
+        TabItem {
+            scanning: scanning;
+            text: "Empty Files";
+            active-tab <=> root.active-tab;
+            curr_tab: CurrentTab.EmptyFiles;
+        }
+        TabItem {
+            scanning: scanning;
+            text: "Similar Images";
+            active-tab <=> root.active-tab;
+            curr_tab: CurrentTab.SimilarImages;
+        }
+    }
+}
