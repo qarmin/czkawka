@@ -1,0 +1,38 @@
+import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox} from "std-widgets.slint";
+import {SelectableTableView} from "selectable_tree_view.slint";
+import {LeftSidePanel} from "left_side_panel.slint";
+import {CurrentTab} from "common.slint";
+
+export component MainList {
+    in-out property <CurrentTab> active-tab;
+    
+    in-out property <[{checked: bool, header_row: bool, selected_row: bool, val:[string]}]> empty_folder_model;
+    in-out property <[{checked: bool, header_row: bool, selected_row: bool, val:[string]}]> empty_files_model;
+    in-out property <[{checked: bool, header_row: bool, selected_row: bool, val:[string]}]> similar_images_model;
+
+// TODO - using root.active-tab in visible property will not clear model
+    if root.active-tab == CurrentTab.EmptyFolders: SelectableTableView {
+        min-width: 200px;
+
+        columns: ["Selection", "Folder Name", "Path"];
+        last-column: "Modification Date";
+        column-sizes: [30px, 100px, 100px, 100px];
+        values <=> empty-folder-model;
+    }
+    if root.active-tab == CurrentTab.EmptyFiles: SelectableTableView {
+        min-width: 200px;
+
+        columns: ["Selection", "Folder Name", "Path"];
+        last-column: "Modification Date";
+        column-sizes: [30px, 100px, 100px, 100px];
+        values <=> empty-files-model;
+    }
+    if root.active-tab == CurrentTab.SimilarImages: SelectableTableView {
+        min-width: 200px;
+
+        columns: ["Selection", "Folder Name", "Path"];
+        last-column: "Modification Date";
+        column-sizes: [30px, 100px, 100px, 100px];
+        values <=> similar-images-model;
+    }
+}

@@ -1,0 +1,31 @@
+import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox} from "std-widgets.slint";
+import {SelectableTableView} from "selectable_tree_view.slint";
+import {LeftSidePanel} from "left_side_panel.slint";
+import {MainList} from "main_lists.slint";
+import {CurrentTab} from "common.slint";
+
+
+export component ActionButtons {
+    callback deleted;
+    callback scanned(CurrentTab);
+    in-out property <bool> scanning;
+    in-out property <CurrentTab> active-tab;
+
+    HorizontalBox {
+        height: 50px;
+        scan_button:= Button {
+            enabled: !scanning;
+            text: "Scan";
+            clicked => {
+                root.scanned(active-tab);
+            }
+        }
+        delete_button:= Button {
+            enabled: !scanning;
+            text: "Delete";
+            clicked => {
+                root.deleted();
+            }
+        }
+    }
+}

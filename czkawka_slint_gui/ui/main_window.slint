@@ -1,18 +1,39 @@
 import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox} from "std-widgets.slint";
 import {SelectableTableView} from "selectable_tree_view.slint";
 import {LeftSidePanel} from "left_side_panel.slint";
+import {MainList} from "main_lists.slint";
 import {CurrentTab} from "common.slint";
+import { ActionButtons } from "action_buttons.slint";
 
 export component MainWindow inherits Window {
     callback deleted;
     callback scanned(CurrentTab);
     min-width: 300px;
+    preferred-width: 1024px;
+    min-height: 300px;
+    preferred-height: 600px;
 
     in-out property <bool> scanning: false;
 
     in-out property <CurrentTab> active-tab: CurrentTab.EmptyFolders;
     in-out property <[{checked: bool, header_row: bool, selected_row: bool, val:[string]}]> empty_folder_model: [
         {checked: false, selected_row: false, header_row: true, val: ["kropkarz", "/Xd1", "24.10.2023"]} ,
+        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
+        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
+        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
+        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
+        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
+        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
+        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
+        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
+        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
+        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
+        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
+        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
+        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
+        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
+        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
+        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
         {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
         {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
         {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
@@ -31,53 +52,30 @@ export component MainWindow inherits Window {
 
     VerticalBox {
         HorizontalBox {
+            vertical-stretch: 1.0;
             // min-width: 600px;
             preferred-height: 300px;
 
             LeftSidePanel {
-                max-width: 10px; // Just forces the smallest possible 
-                scanning: root.scanning;
+                horizontal-stretch: 0.0;
+                scanning <=> root.scanning;
                 active-tab <=> root.active-tab;
             }
 
-            // TODO - using root.active-tab in visible property will not clear model
-            if root.active-tab == CurrentTab.EmptyFolders: SelectableTableView {
-                min-width: 200px;
-
-                columns: ["Selection", "Folder Name", "Path"];
-                last-column: "Modification Date";
-                column-sizes: [30px, 100px, 100px, 100px];
-                values <=> empty-folder-model;
-            }
-            if root.active-tab == CurrentTab.EmptyFiles: SelectableTableView {
-                min-width: 200px;
-
-                columns: ["Selection", "Folder Name", "Path", "Modification Date"];
-                values <=> empty-files-model;
-            }
-            if root.active-tab == CurrentTab.SimilarImages: SelectableTableView {
-                min-width: 200px;
-
-                columns: ["Selection", "Folder Name", "Path", "Modification Date"];
-                values <=> similar-images-model;
+            MainList {
+                horizontal-stretch: 1.0;
+                active-tab <=> root.active-tab;
+                empty_folder_model <=> root.empty_folder_model;
+                empty_files_model <=> root.empty_files_model;
+                similar_images_model <=> root.similar_images_model;
             }
         }
-        HorizontalBox {
-            height: 50px;
-            scan_button:= Button {
-                enabled: !scanning;
-                text: "Scan";
-                clicked => {
-                    root.scanned(active-tab);
-                }
-            }
-            delete_button:= Button {
-                enabled: !scanning;
-                text: "Delete";
-                clicked => {
-                    root.deleted();
-                }
-            }
+        ActionButtons {
+            vertical-stretch: 0.0;
+            scanning <=> root.scanning;
+            active-tab <=> root.active-tab;
+            deleted => {root.deleted();}
+            scanned(item) => {root.scanned(item);}
         }
     }
 }

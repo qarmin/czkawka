@@ -17,28 +17,47 @@ component TabItem {
 export component LeftSidePanel {
     in-out property <CurrentTab> active-tab;
     in-out property <bool> scanning;
+    width: 120px;
 
     VerticalLayout {
-        width: 120px;
-        spacing: 3px;
-        
-        TabItem {
-            scanning: scanning;
-            text: "Empty Folders";
-            active-tab <=> root.active-tab;
-            curr_tab: CurrentTab.EmptyFolders;
+        spacing: 20px;
+        Rectangle {
+            height: 100px;
+            Image {
+                width: root.width;
+                source: @image-url("../icons/logo.png");
+            }
         }
-        TabItem {
-            scanning: scanning;
-            text: "Empty Files";
-            active-tab <=> root.active-tab;
-            curr_tab: CurrentTab.EmptyFiles;
+        VerticalLayout {
+            spacing: 3px;
+            alignment: center;
+            
+            TabItem {
+                scanning: scanning;
+                text: "Empty Folders";
+                active-tab <=> root.active-tab;
+                curr_tab: CurrentTab.EmptyFolders;
+            }
+            TabItem {
+                scanning: scanning;
+                text: "Empty Files";
+                active-tab <=> root.active-tab;
+                curr_tab: CurrentTab.EmptyFiles;
+            }
+            TabItem {
+                scanning: scanning;
+                text: "Similar Images";
+                active-tab <=> root.active-tab;
+                curr_tab: CurrentTab.SimilarImages;
+            }
         }
-        TabItem {
-            scanning: scanning;
-            text: "Similar Images";
-            active-tab <=> root.active-tab;
-            curr_tab: CurrentTab.SimilarImages;
+        HorizontalLayout {
+            height: 20px;
+            alignment: end;
+            Image {
+                width: 20px;
+                source: @image-url("../icons/settings.png");
+            }
         }
     }
 }

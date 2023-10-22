@@ -7,7 +7,7 @@ export component SelectableTableView inherits Rectangle {
 
     in-out property <[length]> column_sizes: [200px, 100px, 100px, 100px];
     private property <[length]> real_sizes: [0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px];
-    private property <int> column_number: 4;
+    private property <int> column_number: column-sizes.length + 1;
 
     in-out property <int> selected_item: -1;
 
@@ -51,8 +51,10 @@ export component SelectableTableView inherits Rectangle {
         }
         list_view := ListView {
             min-width: 100px;
+
             for r[idx] in root.values : Rectangle {
                 height: 30px;
+                // TODO move this into singleton
                 background: r.header-row ? #888888 : (touch-area.has-hover ? (r.selected_row ? #cccccc : #dddddd) : (r.selected_row ? #cccccc: #dddddd));
                 // background: touch-area.has-hover ? (selected ? #333333 : #222222) : (selected ? #333333: #222222);
 
