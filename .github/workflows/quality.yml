@@ -20,11 +20,7 @@ jobs:
       - name: Check the format
         run: cargo fmt --all -- --check
 
-      # type complexity must be ignored because we use huge templates for queries
+      # Clippy overly_complex_bool_expr is disabled because mess with generated files in target dir
+      # and I cannot disable it
       - name: Run clippy
-        run: >
-          cargo clippy
-          --all-targets
-          --all-features
-          --
-          -D warnings
+        run: cargo clippy --all-targets --all-features -- -A clippy::overly_complex_bool_expr -D warnings

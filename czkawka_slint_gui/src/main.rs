@@ -24,15 +24,16 @@ fn main() {
     app.run().unwrap();
 }
 
+type ModelType = VecModel<(bool, bool, bool, ModelRc<SharedString>)>;
 // TODO remove this after trying
 pub fn to_remove_debug(app: &MainWindow) {
-    let row_data: Rc<VecModel<(bool, bool, bool, ModelRc<SharedString>)>> = Rc::new(VecModel::default());
+    let row_data: Rc<ModelType> = Rc::new(VecModel::default());
 
-    for r in 0..100000 {
+    for r in 0..100_000 {
         let items = VecModel::default();
 
         for c in 0..3 {
-            items.push(slint::format!("Item {r}.{c}").into());
+            items.push(slint::format!("Item {r}.{c}"));
         }
 
         row_data.push((r % 2 == 0, r % 3 == 0, false, ModelRc::new(items)));

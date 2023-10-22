@@ -20,7 +20,7 @@ pub fn connect_delete_button(app: &MainWindow) {
                 *selected_row = false;
             });
             let r = ModelRc::new(VecModel::from(entries_left));
-            app.set_empty_folder_model(r.into());
+            app.set_empty_folder_model(r);
         }
     });
 }

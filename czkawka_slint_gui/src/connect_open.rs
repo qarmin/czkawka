@@ -1,6 +1,4 @@
 use crate::MainWindow;
-use slint::{ComponentHandle, Model, ModelRc, SharedString, VecModel};
-use std::borrow::BorrowMut;
 
 pub fn connect_open_items(app: &MainWindow) {
     app.on_item_opened(move |path| {
