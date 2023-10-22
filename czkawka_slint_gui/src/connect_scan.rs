@@ -1,5 +1,7 @@
-use crate::{split_path, CurrentTab, MainWindow};
+use crate::{split_path, CurrentTab, MainWindow, ProgressToSend};
 use chrono::NaiveDateTime;
+use crossbeam_channel::Sender;
+use czkawka_core::common_dir_traversal::ProgressData;
 use czkawka_core::common_tool::CommonData;
 use czkawka_core::empty_folder::EmptyFolder;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
@@ -7,27 +9,32 @@ use std::path::PathBuf;
 use std::rc::Rc;
 use std::thread;
 
-pub fn connect_scan_button(app: &MainWindow) {
+pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressData>) {
     let a = app.as_weak();
     app.on_scanned(move |active_tab| {
         let app = a.upgrade().unwrap();
         app.set_scanning(true);
+        app.set_progress_datas(ProgressToSend {
+            all_progress: 0,
+            current_progress: 0,
+            step_name: SharedString::from(""),
+        });
 
         let a = app.as_weak();
         match active_tab {
             CurrentTab::EmptyFolders => {
-                scan_empty_folders(a);
+                scan_empty_folders(a, &progress_sender);
             }
             _ => panic!(),
         }
     });
 }
 
-fn scan_empty_folders(a: Weak<MainWindow>) {
+fn scan_empty_folders(a: Weak<MainWindow>, progress_sender: &Sender<ProgressData>) {
     thread::spawn(move || {
         let mut ef = EmptyFolder::new();
         ef.set_included_directory(vec![PathBuf::from("/home/rafal/Desktop")]);
-        ef.find_empty_folders(None, None);
+        ef.find_empty_folders(None, Some(progress_sender));
 
         ef.get_empty_folder_list();
 

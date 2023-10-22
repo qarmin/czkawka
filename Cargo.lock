@@ -1328,6 +1328,7 @@ name = "czkawka_slint"
 version = "6.1.0"
 dependencies = [
  "chrono",
+ "crossbeam-channel",
  "czkawka_core",
  "open",
  "rand",

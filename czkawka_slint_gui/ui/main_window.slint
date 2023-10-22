@@ -2,19 +2,26 @@ import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListV
 import {SelectableTableView} from "selectable_tree_view.slint";
 import {LeftSidePanel} from "left_side_panel.slint";
 import {MainList} from "main_lists.slint";
-import {CurrentTab} from "common.slint";
+import {CurrentTab, ProgressToSend} from "common.slint";
 import { ActionButtons } from "action_buttons.slint";
+import { Progress } from "progress.slint";
 
 export component MainWindow inherits Window {
     callback deleted;
     callback scanned(CurrentTab);
     callback item_opened(string);
+
     min-width: 300px;
     preferred-width: 1024px;
     min-height: 300px;
     preferred-height: 600px;
 
     in-out property <bool> scanning: false;
+    in-out property <ProgressToSend> progress_datas : {
+        current_progress: 15,
+        all_progress: 20,
+        step_name: "Cache",
+    };
 
     in-out property <CurrentTab> active-tab: CurrentTab.EmptyFolders;
     in-out property <[{checked: bool, header_row: bool, selected_row: bool, val:[string]}]> empty_folder_model: [
@@ -63,14 +70,21 @@ export component MainWindow inherits Window {
                 active-tab <=> root.active-tab;
             }
 
-            MainList {
+            VerticalLayout {
                 horizontal-stretch: 1.0;
-                active-tab <=> root.active-tab;
-                empty_folder_model <=> root.empty_folder_model;
-                empty_files_model <=> root.empty_files_model;
-                similar_images_model <=> root.similar_images_model;
-
-                item_opened(item) => {item_opened(item)}
+                MainList {
+                    vertical-stretch: 1.0;
+                    active-tab <=> root.active-tab;
+                    empty_folder_model <=> root.empty_folder_model;
+                    empty_files_model <=> root.empty_files_model;
+                    similar_images_model <=> root.similar_images_model;
+    
+                    item_opened(item) => {item_opened(item)}
+                }
+                Progress { 
+                    horizontal-stretch: 0.0;
+                    progress_datas <=> root.progress_datas;
+                }
             }
         }
         ActionButtons {

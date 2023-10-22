@@ -18,9 +18,18 @@ export component SelectableTableView inherits Rectangle {
 
     in-out property <int> selected_item: -1;
 
+    forward-focus: focus_item;
+
+    focus_item := FocusScope {
+        key-released(event) => {
+            debug(event);
+            accept
+        }
+    }
+
     VerticalBox {
         padding: 5px;
-        // Widgets
+        forward-focus: focus-item;
         HorizontalLayout {
             padding: 5px; 
             spacing: 5px;
@@ -32,11 +41,13 @@ export component SelectableTableView inherits Rectangle {
                 Rectangle {
                     width: 1px;
                     background: gray;
+                    forward-focus: focus-item;
                     
                     TouchArea {
                         width: 5px;
                         x: (parent.width - self.width) / 2;
                         property <length> cached;
+                        forward-focus: focus-item;
                         pointer-event(event) => {
                             if (event.button == PointerEventButton.left && event.kind == PointerEventKind.down) {
                                 self.cached = root.column_sizes[idx];
@@ -58,14 +69,17 @@ export component SelectableTableView inherits Rectangle {
         }
         list_view := ListView {
             min-width: 100px;
+            forward-focus: focus-item;
 
             for r[idx] in root.values : Rectangle {
+                forward-focus: focus-item;
                 height: 30px;
                 // TODO move this into singleton
                 background: r.header-row ? #888888 : (touch-area.has-hover ? (r.selected_row ? #cccccc : #dddddd) : (r.selected_row ? #cccccc: #dddddd));
                 // background: touch-area.has-hover ? (selected ? #333333 : #222222) : (selected ? #333333: #222222);
 
                 touch_area:= TouchArea {
+                    forward-focus: focus-item;
                     clicked => {
                         if (!r.header_row) {
                             r.selected_row = !r.selected_row;
@@ -82,6 +96,7 @@ export component SelectableTableView inherits Rectangle {
                         }
                     }
                     pointer-event(event) => {
+                        debug(event);
                         // TODO this should be clicked by double-click
                         if (event.button == PointerEventButton.right && event.kind == PointerEventKind.up) {
                             root.item_opened(r.val[root.parentPathIdx - 1])
@@ -94,16 +109,16 @@ export component SelectableTableView inherits Rectangle {
                 HorizontalLayout {
                     padding: 5px;
                     spacing: 5px;
+                    forward-focus: focus-item;
 
                     CheckBox {
-                        //min-width: 200px;
                         visible: !r.header-row;
                         checked: r.checked && !r.header-row;
                         width: root.column-sizes[0];
+                        forward-focus: focus-item;
                         toggled => {
                             r.checked = self.checked;
                         }
-                        // preferred-width: root.column-sizes[0];
                     }
 
                     HorizontalLayout {
@@ -112,6 +127,7 @@ export component SelectableTableView inherits Rectangle {
                             width: root.column-sizes[idx + 1];
                             text: f;
                             font-size: 12px;
+                            forward-focus: focus-item;
 
                             vertical-alignment: center;
 

@@ -1,7 +1,9 @@
 mod connect_delete;
 mod connect_open;
+mod connect_progress_receiver;
 mod connect_scan;
 
+use crossbeam_channel::{unbounded, Receiver, Sender};
 use std::path::Path;
 use std::rc::Rc;
 
@@ -9,17 +11,22 @@ use crate::connect_delete::connect_delete_button;
 use crate::connect_open::connect_open_items;
 use crate::connect_scan::connect_scan_button;
 
+use crate::connect_progress_receiver::connect_progress_gathering;
+use czkawka_core::common_dir_traversal::ProgressData;
 use slint::{ModelRc, SharedString, VecModel};
 
 slint::include_modules!();
 fn main() {
     let app = MainWindow::new().unwrap(); //.run().unwrap();
 
+    let (progress_sender, progress_receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
+    // Fills model at start, don't really needed too much after testing
     to_remove_debug(&app);
 
     connect_delete_button(&app);
-    connect_scan_button(&app);
+    connect_scan_button(&app, progress_sender);
     connect_open_items(&app);
+    connect_progress_gathering(&app, progress_receiver);
 
     app.run().unwrap();
 }
@@ -29,7 +36,7 @@ type ModelType = VecModel<(bool, bool, bool, ModelRc<SharedString>)>;
 pub fn to_remove_debug(app: &MainWindow) {
     let row_data: Rc<ModelType> = Rc::new(VecModel::default());
 
-    for r in 0..100_000 {
+    for r in 0..1_000_000 {
         let items = VecModel::default();
 
         for c in 0..3 {
