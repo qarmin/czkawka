@@ -1,4 +1,5 @@
 use crate::{MainWindow, ProgressToSend};
+
 use crossbeam_channel::Receiver;
 use czkawka_core::common_dir_traversal::ProgressData;
 use slint::{ComponentHandle, SharedString};

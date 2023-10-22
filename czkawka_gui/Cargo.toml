@@ -19,9 +19,6 @@ chrono = "0.4.31"
 # Used for sending stop signal across threads
 crossbeam-channel = "0.5.8"
 
-# To get information about progress
-futures = "0.3.28"
-
 # For saving/loading config files to specific directories
 directories-next = "2.0"
 

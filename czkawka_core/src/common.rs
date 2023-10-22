@@ -10,9 +10,9 @@ use std::{fs, thread};
 
 #[cfg(feature = "heif")]
 use anyhow::Result;
+use crossbeam_channel::Sender;
 use directories_next::ProjectDirs;
 use fun_time::fun_time;
-use futures::channel::mpsc::UnboundedSender;
 use handsome_logger::{ColorChoice, ConfigBuilder, TerminalMode};
 use image::{DynamicImage, ImageBuffer, Rgb};
 use imagepipe::{ImageSource, Pipeline};
@@ -460,7 +460,7 @@ where
 }
 
 pub fn prepare_thread_handler_common(
-    progress_sender: Option<&UnboundedSender<ProgressData>>,
+    progress_sender: Option<&Sender<ProgressData>>,
     current_stage: u8,
     max_stage: u8,
     max_value: usize,
@@ -480,7 +480,7 @@ pub fn prepare_thread_handler_common(
             loop {
                 if time_since_last_send.elapsed().unwrap().as_millis() > SEND_PROGRESS_DATA_TIME_BETWEEN as u128 {
                     progress_send
-                        .unbounded_send(ProgressData {
+                        .send(ProgressData {
                             checking_method,
                             current_stage,
                             max_stage,

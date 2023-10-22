@@ -5,9 +5,8 @@ use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 
-use crossbeam_channel::Receiver;
+use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
-use futures::channel::mpsc::UnboundedSender;
 use log::debug;
 use mime_guess::get_mime_extensions;
 use rayon::prelude::*;
@@ -195,7 +194,7 @@ impl BadExtensions {
     }
 
     #[fun_time(message = "find_bad_extensions_files", level = "info")]
-    pub fn find_bad_extensions_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
+    pub fn find_bad_extensions_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) {
         self.optimize_dirs_before_start();
         if !self.check_files(stop_receiver, progress_sender) {
             self.common_data.stopped_search = true;
@@ -209,7 +208,7 @@ impl BadExtensions {
     }
 
     #[fun_time(message = "check_files", level = "debug")]
-    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         let result = DirTraversalBuilder::new()
             .root_dirs(self.common_data.directories.included_directories.clone())
             .group_by(|_fe| ())
@@ -239,7 +238,7 @@ impl BadExtensions {
     }
 
     #[fun_time(message = "look_for_bad_extensions_files", level = "debug")]
-    fn look_for_bad_extensions_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+    fn look_for_bad_extensions_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 1, 1, self.files_to_check.len(), CheckingMethod::None, self.get_cd().tool_type);
 

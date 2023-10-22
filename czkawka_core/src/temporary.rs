@@ -6,9 +6,8 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 
-use crossbeam_channel::Receiver;
+use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
-use futures::channel::mpsc::UnboundedSender;
 use rayon::prelude::*;
 use serde::Serialize;
 
@@ -60,7 +59,7 @@ impl Temporary {
     }
 
     #[fun_time(message = "find_temporary_files", level = "info")]
-    pub fn find_temporary_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
+    pub fn find_temporary_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) {
         self.optimize_dirs_before_start();
         if !self.check_files(stop_receiver, progress_sender) {
             self.common_data.stopped_search = true;
@@ -71,7 +70,7 @@ impl Temporary {
     }
 
     #[fun_time(message = "check_files", level = "debug")]
-    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
         // Add root folders for finding

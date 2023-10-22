@@ -10,9 +10,8 @@ use std::path::Path;
 use std::sync::atomic::Ordering;
 use std::{fs, mem};
 
-use crossbeam_channel::Receiver;
+use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
-use futures::channel::mpsc::UnboundedSender;
 use humansize::{format_size, BINARY};
 use log::debug;
 use rayon::prelude::*;
@@ -111,7 +110,7 @@ impl DuplicateFinder {
     }
 
     #[fun_time(message = "find_duplicates", level = "info")]
-    pub fn find_duplicates(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
+    pub fn find_duplicates(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) {
         self.optimize_dirs_before_start();
         self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
 
@@ -151,7 +150,7 @@ impl DuplicateFinder {
     }
 
     #[fun_time(message = "check_files_name", level = "debug")]
-    fn check_files_name(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+    fn check_files_name(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         let group_by_func = if self.case_sensitive_name_comparison {
             |fe: &FileEntry| fe.path.file_name().unwrap().to_string_lossy().to_string()
         } else {
@@ -226,7 +225,7 @@ impl DuplicateFinder {
     }
 
     #[fun_time(message = "check_files_size_name", level = "debug")]
-    fn check_files_size_name(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+    fn check_files_size_name(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         let group_by_func = if self.case_sensitive_name_comparison {
             |fe: &FileEntry| (fe.size, fe.path.file_name().unwrap().to_string_lossy().to_string())
         } else {
@@ -303,7 +302,7 @@ impl DuplicateFinder {
     }
 
     #[fun_time(message = "check_files_size", level = "debug")]
-    fn check_files_size(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+    fn check_files_size(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         let max_stage = match self.check_method {
             CheckingMethod::Size => 0,
             CheckingMethod::Hash => MAX_STAGE,
@@ -491,7 +490,7 @@ impl DuplicateFinder {
     fn prehashing(
         &mut self,
         stop_receiver: Option<&Receiver<()>>,
-        progress_sender: Option<&UnboundedSender<ProgressData>>,
+        progress_sender: Option<&Sender<ProgressData>>,
         pre_checked_map: &mut BTreeMap<u64, Vec<FileEntry>>,
     ) -> Option<()> {
         let check_type = self.hash_type;
@@ -679,12 +678,7 @@ impl DuplicateFinder {
     }
 
     #[fun_time(message = "full_hashing", level = "debug")]
-    fn full_hashing(
-        &mut self,
-        stop_receiver: Option<&Receiver<()>>,
-        progress_sender: Option<&UnboundedSender<ProgressData>>,
-        pre_checked_map: BTreeMap<u64, Vec<FileEntry>>,
-    ) -> Option<()> {
+    fn full_hashing(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>, pre_checked_map: BTreeMap<u64, Vec<FileEntry>>) -> Option<()> {
         let (progress_thread_handle, progress_thread_run, _atomic_counter, _check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 4, MAX_STAGE, 0, self.check_method, self.common_data.tool_type);
 
@@ -805,7 +799,7 @@ impl DuplicateFinder {
     }
 
     #[fun_time(message = "check_files_hash", level = "debug")]
-    fn check_files_hash(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+    fn check_files_hash(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         assert_eq!(self.check_method, CheckingMethod::Hash);
 
         let mut pre_checked_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();

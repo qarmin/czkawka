@@ -1263,7 +1263,6 @@ dependencies = [
  "directories-next",
  "ffmpeg_cmdline_utils",
  "fun_time",
- "futures",
  "hamming",
  "handsome_logger",
  "humansize",
@@ -1304,7 +1303,6 @@ dependencies = [
  "directories-next",
  "fs_extra",
  "fun_time",
- "futures",
  "gdk4",
  "glib",
  "gtk4",
@@ -2001,28 +1999,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "futures"
-version = "0.3.28"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "23342abe12aba583913b2e62f22225ff9c950774065e4bfb61a19cd9770fec40"
-dependencies = [
- "futures-channel",
- "futures-core",
- "futures-executor",
- "futures-io",
- "futures-sink",
- "futures-task",
- "futures-util",
-]
-
-[[package]]
 name = "futures-channel"
 version = "0.3.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "955518d47e09b25bbebc7a18df10b81f0c766eaf4c4f1cccef2fca5f2a4fb5f2"
 dependencies = [
  "futures-core",
- "futures-sink",
 ]
 
 [[package]]
@@ -2092,7 +2074,6 @@ version = "0.3.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "26b01e40b772d54cf6c6d721c1d1abd0647a0106a12ecaa1c186273392a69533"
 dependencies = [
- "futures-channel",
  "futures-core",
  "futures-io",
  "futures-macro",

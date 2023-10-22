@@ -3,10 +3,9 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::thread;
 
-use crossbeam_channel::Receiver;
+use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
-use futures::channel::mpsc::UnboundedSender;
-use glib::Sender;
+use glib::Sender as glibSender;
 use gtk4::prelude::*;
 use gtk4::Grid;
 
@@ -35,7 +34,7 @@ use crate::taskbar_progress::tbp_flags::TBPF_NOPROGRESS;
 use crate::{flg, DEFAULT_MAXIMAL_FILE_SIZE, DEFAULT_MINIMAL_CACHE_SIZE, DEFAULT_MINIMAL_FILE_SIZE};
 
 #[allow(clippy::too_many_arguments)]
-pub fn connect_button_search(gui_data: &GuiData, glib_stop_sender: Sender<Message>, progress_sender: UnboundedSender<ProgressData>) {
+pub fn connect_button_search(gui_data: &GuiData, glib_stop_sender: glibSender<Message>, progress_sender: Sender<ProgressData>) {
     let buttons_array = gui_data.bottom_buttons.buttons_array.clone();
     let buttons_search_clone = gui_data.bottom_buttons.buttons_search.clone();
     let grid_progress_stages = gui_data.progress_window.grid_progress_stages.clone();
@@ -284,9 +283,9 @@ fn duplicate_search(
     gui_data: &GuiData,
     loaded_common_items: LoadedCommonItems,
     stop_receiver: Receiver<()>,
-    glib_stop_sender: Sender<Message>,
+    glib_stop_sender: glibSender<Message>,
     grid_progress_stages: &Grid,
-    progress_data_sender: UnboundedSender<ProgressData>,
+    progress_data_sender: Sender<ProgressData>,
 ) {
     grid_progress_stages.show();
 
@@ -346,9 +345,9 @@ fn empty_files_search(
     gui_data: &GuiData,
     loaded_common_items: LoadedCommonItems,
     stop_receiver: Receiver<()>,
-    glib_stop_sender: Sender<Message>,
+    glib_stop_sender: glibSender<Message>,
     grid_progress_stages: &Grid,
-    progress_data_sender: UnboundedSender<ProgressData>,
+    progress_data_sender: Sender<ProgressData>,
 ) {
     grid_progress_stages.hide();
 
@@ -373,9 +372,9 @@ fn empty_directories_search(
     gui_data: &GuiData,
     loaded_common_items: LoadedCommonItems,
     stop_receiver: Receiver<()>,
-    glib_stop_sender: Sender<Message>,
+    glib_stop_sender: glibSender<Message>,
     grid_progress_stages: &Grid,
-    progress_data_sender: UnboundedSender<ProgressData>,
+    progress_data_sender: Sender<ProgressData>,
 ) {
     grid_progress_stages.hide();
 
@@ -397,9 +396,9 @@ fn big_files_search(
     gui_data: &GuiData,
     loaded_common_items: LoadedCommonItems,
     stop_receiver: Receiver<()>,
-    glib_stop_sender: Sender<Message>,
+    glib_stop_sender: glibSender<Message>,
     grid_progress_stages: &Grid,
-    progress_data_sender: UnboundedSender<ProgressData>,
+    progress_data_sender: Sender<ProgressData>,
 ) {
     grid_progress_stages.hide();
 
@@ -433,9 +432,9 @@ fn temporary_files_search(
     gui_data: &GuiData,
     loaded_common_items: LoadedCommonItems,
     stop_receiver: Receiver<()>,
-    glib_stop_sender: Sender<Message>,
+    glib_stop_sender: glibSender<Message>,
     grid_progress_stages: &Grid,
-    progress_data_sender: UnboundedSender<ProgressData>,
+    progress_data_sender: Sender<ProgressData>,
 ) {
     grid_progress_stages.hide();
 
@@ -459,9 +458,9 @@ fn same_music_search(
     gui_data: &GuiData,
     loaded_common_items: LoadedCommonItems,
     stop_receiver: Receiver<()>,
-    glib_stop_sender: Sender<Message>,
+    glib_stop_sender: glibSender<Message>,
     grid_progress_stages: &Grid,
-    progress_data_sender: UnboundedSender<ProgressData>,
+    progress_data_sender: Sender<ProgressData>,
     show_dialog: &Arc<AtomicBool>,
 ) {
     grid_progress_stages.show();
@@ -561,9 +560,9 @@ fn broken_files_search(
     gui_data: &GuiData,
     loaded_common_items: LoadedCommonItems,
     stop_receiver: Receiver<()>,
-    glib_stop_sender: Sender<Message>,
+    glib_stop_sender: glibSender<Message>,
     grid_progress_stages: &Grid,
-    progress_data_sender: UnboundedSender<ProgressData>,
+    progress_data_sender: Sender<ProgressData>,
     show_dialog: &Arc<AtomicBool>,
 ) {
     grid_progress_stages.show();
@@ -636,9 +635,9 @@ fn similar_image_search(
     gui_data: &GuiData,
     loaded_common_items: LoadedCommonItems,
     stop_receiver: Receiver<()>,
-    glib_stop_sender: Sender<Message>,
+    glib_stop_sender: glibSender<Message>,
     grid_progress_stages: &Grid,
-    progress_data_sender: UnboundedSender<ProgressData>,
+    progress_data_sender: Sender<ProgressData>,
 ) {
     grid_progress_stages.show();
 
@@ -698,9 +697,9 @@ fn similar_video_search(
     gui_data: &GuiData,
     loaded_common_items: LoadedCommonItems,
     stop_receiver: Receiver<()>,
-    glib_stop_sender: Sender<Message>,
+    glib_stop_sender: glibSender<Message>,
     grid_progress_stages: &Grid,
-    progress_data_sender: UnboundedSender<ProgressData>,
+    progress_data_sender: Sender<ProgressData>,
 ) {
     grid_progress_stages.show();
 
@@ -742,9 +741,9 @@ fn bad_symlinks_search(
     gui_data: &GuiData,
     loaded_common_items: LoadedCommonItems,
     stop_receiver: Receiver<()>,
-    glib_stop_sender: Sender<Message>,
+    glib_stop_sender: glibSender<Message>,
     grid_progress_stages: &Grid,
-    progress_data_sender: UnboundedSender<ProgressData>,
+    progress_data_sender: Sender<ProgressData>,
 ) {
     grid_progress_stages.hide();
 
@@ -769,9 +768,9 @@ fn bad_extensions_search(
     gui_data: &GuiData,
     loaded_common_items: LoadedCommonItems,
     stop_receiver: Receiver<()>,
-    glib_stop_sender: Sender<Message>,
+    glib_stop_sender: glibSender<Message>,
     grid_progress_stages: &Grid,
-    progress_data_sender: UnboundedSender<ProgressData>,
+    progress_data_sender: Sender<ProgressData>,
 ) {
     grid_progress_stages.show();
 

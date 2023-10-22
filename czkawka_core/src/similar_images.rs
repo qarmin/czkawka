@@ -7,9 +7,9 @@ use std::time::SystemTime;
 use std::{mem, panic};
 
 use bk_tree::BKTree;
-use crossbeam_channel::Receiver;
+
+use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
-use futures::channel::mpsc::UnboundedSender;
 use humansize::{format_size, BINARY};
 use image::GenericImageView;
 use image_hasher::{FilterType, HashAlg, HasherConfig};
@@ -125,7 +125,7 @@ impl SimilarImages {
     }
 
     #[fun_time(message = "find_similar_images", level = "info")]
-    pub fn find_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
+    pub fn find_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) {
         self.optimize_dirs_before_start();
         self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
         if !self.check_for_similar_images(stop_receiver, progress_sender) {
@@ -145,7 +145,7 @@ impl SimilarImages {
     }
 
     #[fun_time(message = "check_for_similar_images", level = "debug")]
-    fn check_for_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+    fn check_for_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
         if !self.common_data.allowed_extensions.using_custom_extensions() {
@@ -304,7 +304,7 @@ impl SimilarImages {
     // - Join all hashes and save it to file
 
     #[fun_time(message = "hash_images", level = "debug")]
-    fn hash_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+    fn hash_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.hash_images_load_cache();
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
@@ -550,7 +550,7 @@ impl SimilarImages {
         &mut self,
         all_hashed_images: &HashMap<ImHash, Vec<FileEntry>>,
         collected_similar_images: &mut HashMap<ImHash, Vec<FileEntry>>,
-        progress_sender: Option<&UnboundedSender<ProgressData>>,
+        progress_sender: Option<&Sender<ProgressData>>,
         stop_receiver: Option<&Receiver<()>>,
         tolerance: u32,
     ) -> bool {
@@ -684,7 +684,7 @@ impl SimilarImages {
     }
 
     #[fun_time(message = "find_similar_hashes", level = "debug")]
-    fn find_similar_hashes(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+    fn find_similar_hashes(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         if self.image_hashes.is_empty() {
             return true;
         }

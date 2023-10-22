@@ -12,6 +12,7 @@ use std::thread;
 pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressData>) {
     let a = app.as_weak();
     app.on_scanned(move |active_tab| {
+        let progress_sender = progress_sender.clone();
         let app = a.upgrade().unwrap();
         app.set_scanning(true);
         app.set_progress_datas(ProgressToSend {
@@ -23,18 +24,18 @@ pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressDat
         let a = app.as_weak();
         match active_tab {
             CurrentTab::EmptyFolders => {
-                scan_empty_folders(a, &progress_sender);
+                scan_empty_folders(a, progress_sender);
             }
             _ => panic!(),
         }
     });
 }
 
-fn scan_empty_folders(a: Weak<MainWindow>, progress_sender: &Sender<ProgressData>) {
+fn scan_empty_folders(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>) {
     thread::spawn(move || {
         let mut ef = EmptyFolder::new();
         ef.set_included_directory(vec![PathBuf::from("/home/rafal/Desktop")]);
-        ef.find_empty_folders(None, Some(progress_sender));
+        ef.find_empty_folders(None, Some(&progress_sender));
 
         ef.get_empty_folder_list();
 

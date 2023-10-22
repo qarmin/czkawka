@@ -2,9 +2,8 @@ use std::fs;
 
 use std::io::prelude::*;
 
-use crossbeam_channel::Receiver;
+use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
-use futures::channel::mpsc::UnboundedSender;
 use log::debug;
 
 use crate::common_dir_traversal::{Collect, DirTraversalBuilder, DirTraversalResult, ErrorType, FileEntry, ProgressData, ToolType};
@@ -31,7 +30,7 @@ impl InvalidSymlinks {
     }
 
     #[fun_time(message = "find_invalid_links", level = "info")]
-    pub fn find_invalid_links(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
+    pub fn find_invalid_links(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) {
         self.optimize_dirs_before_start();
         if !self.check_files(stop_receiver, progress_sender) {
             self.common_data.stopped_search = true;
@@ -42,7 +41,7 @@ impl InvalidSymlinks {
     }
 
     #[fun_time(message = "check_files", level = "debug")]
-    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         let result = DirTraversalBuilder::new()
             .root_dirs(self.common_data.directories.included_directories.clone())
             .group_by(|_fe| ())

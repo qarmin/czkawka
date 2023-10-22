@@ -5,9 +5,8 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::Ordering;
 use std::time::UNIX_EPOCH;
 
-use crossbeam_channel::Receiver;
+use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
-use futures::channel::mpsc::UnboundedSender;
 use log::debug;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -136,7 +135,7 @@ pub struct DirTraversalBuilder<'a, 'b, F> {
     group_by: Option<F>,
     root_dirs: Vec<PathBuf>,
     stop_receiver: Option<&'a Receiver<()>>,
-    progress_sender: Option<&'b UnboundedSender<ProgressData>>,
+    progress_sender: Option<&'b Sender<ProgressData>>,
     minimal_file_size: Option<u64>,
     maximal_file_size: Option<u64>,
     checking_method: CheckingMethod,
@@ -153,7 +152,7 @@ pub struct DirTraversal<'a, 'b, F> {
     group_by: F,
     root_dirs: Vec<PathBuf>,
     stop_receiver: Option<&'a Receiver<()>>,
-    progress_sender: Option<&'b UnboundedSender<ProgressData>>,
+    progress_sender: Option<&'b Sender<ProgressData>>,
     recursive_search: bool,
     directories: Directories,
     excluded_items: ExcludedItems,
@@ -204,7 +203,7 @@ impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
         self
     }
 
-    pub fn progress_sender(mut self, progress_sender: Option<&'b UnboundedSender<ProgressData>>) -> Self {
+    pub fn progress_sender(mut self, progress_sender: Option<&'b Sender<ProgressData>>) -> Self {
         self.progress_sender = progress_sender;
         self
     }

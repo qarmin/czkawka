@@ -5,11 +5,10 @@
 #![allow(clippy::type_complexity)]
 #![allow(clippy::needless_late_init)]
 
+use crossbeam_channel::{unbounded, Receiver, Sender};
 use std::env;
 use std::ffi::OsString;
 
-use futures::channel::mpsc;
-use futures::channel::mpsc::{UnboundedReceiver, UnboundedSender};
 use glib::Priority;
 use gtk4::gio::ApplicationFlags;
 use gtk4::prelude::*;
@@ -87,7 +86,7 @@ fn build_ui(application: &Application, arguments: &[OsString]) {
     let (glib_stop_sender, glib_stop_receiver) = glib::MainContext::channel(Priority::default());
 
     // Futures progress report
-    let (progress_sender, progress_receiver): (UnboundedSender<ProgressData>, UnboundedReceiver<ProgressData>) = mpsc::unbounded();
+    let (progress_sender, progress_receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
 
     initialize_gui(&gui_data);
     validate_notebook_data(&gui_data); // Must be run after initialization of gui, to check if everything was properly setup

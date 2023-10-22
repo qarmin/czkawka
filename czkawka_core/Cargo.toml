@@ -28,9 +28,6 @@ hamming = "0.1"
 bitflags = "2.4"
 lofty = "0.16"
 
-# Futures - needed by async progress sender
-futures = "0.3.28"
-
 # Needed by broken files
 zip = { version = "0.6", features = ["aes-crypto", "bzip2", "deflate", "time"], default-features = false }
 audio_checker = "0.1"

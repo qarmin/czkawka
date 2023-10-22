@@ -1,9 +1,10 @@
+use crossbeam_channel::Receiver;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use futures::channel::mpsc::UnboundedReceiver;
-use futures::StreamExt;
+use std::time::Duration;
+
 use glib::MainContext;
 use gtk4::prelude::*;
 use gtk4::ProgressBar;
@@ -19,29 +20,35 @@ use crate::taskbar_progress::tbp_flags::TBPF_INDETERMINATE;
 use crate::taskbar_progress::TaskbarProgress;
 
 #[allow(clippy::too_many_arguments)]
-pub fn connect_progress_window(gui_data: &GuiData, mut progress_receiver: UnboundedReceiver<ProgressData>) {
+pub fn connect_progress_window(gui_data: &GuiData, progress_receiver: Receiver<ProgressData>) {
     let main_context = MainContext::default();
     let _guard = main_context.acquire().unwrap();
 
     let gui_data = gui_data.clone();
+
     let future = async move {
-        while let Some(item) = progress_receiver.next().await {
-            match item.tool_type {
-                ToolType::Duplicate => process_bar_duplicates(&gui_data, &item),
-                ToolType::EmptyFiles => process_bar_empty_files(&gui_data, &item),
-                ToolType::EmptyFolders => process_bar_empty_folder(&gui_data, &item),
-                ToolType::BigFile => process_bar_big_files(&gui_data, &item),
-                ToolType::SameMusic => process_bar_same_music(&gui_data, &item),
-                ToolType::SimilarImages => process_bar_similar_images(&gui_data, &item),
-                ToolType::SimilarVideos => process_bar_similar_videos(&gui_data, &item),
-                ToolType::TemporaryFiles => process_bar_temporary(&gui_data, &item),
-                ToolType::InvalidSymlinks => process_bar_invalid_symlinks(&gui_data, &item),
-                ToolType::BrokenFiles => process_bar_broken_files(&gui_data, &item),
-                ToolType::BadExtensions => process_bar_bad_extensions(&gui_data, &item),
-                ToolType::None => panic!(),
+        loop {
+            let item = progress_receiver.try_recv();
+            if let Ok(item) = item {
+                match item.tool_type {
+                    ToolType::Duplicate => process_bar_duplicates(&gui_data, &item),
+                    ToolType::EmptyFiles => process_bar_empty_files(&gui_data, &item),
+                    ToolType::EmptyFolders => process_bar_empty_folder(&gui_data, &item),
+                    ToolType::BigFile => process_bar_big_files(&gui_data, &item),
+                    ToolType::SameMusic => process_bar_same_music(&gui_data, &item),
+                    ToolType::SimilarImages => process_bar_similar_images(&gui_data, &item),
+                    ToolType::SimilarVideos => process_bar_similar_videos(&gui_data, &item),
+                    ToolType::TemporaryFiles => process_bar_temporary(&gui_data, &item),
+                    ToolType::InvalidSymlinks => process_bar_invalid_symlinks(&gui_data, &item),
+                    ToolType::BrokenFiles => process_bar_broken_files(&gui_data, &item),
+                    ToolType::BadExtensions => process_bar_bad_extensions(&gui_data, &item),
+                    ToolType::None => panic!(),
+                }
             }
+            glib::timeout_future(Duration::from_millis(300)).await;
         }
     };
+
     main_context.spawn_local(future);
 }
 
