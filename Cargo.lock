@@ -1329,6 +1329,7 @@ version = "6.1.0"
 dependencies = [
  "chrono",
  "czkawka_core",
+ "open",
  "rand",
  "slint",
  "slint-build",

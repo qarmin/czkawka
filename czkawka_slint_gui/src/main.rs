@@ -1,10 +1,12 @@
 mod connect_delete;
+mod connect_open;
 mod connect_scan;
 
 use std::path::Path;
 use std::rc::Rc;
 
 use crate::connect_delete::connect_delete_button;
+use crate::connect_open::connect_open_items;
 use crate::connect_scan::connect_scan_button;
 
 use slint::{ModelRc, SharedString, VecModel};
@@ -17,6 +19,7 @@ fn main() {
 
     connect_delete_button(&app);
     connect_scan_button(&app);
+    connect_open_items(&app);
 
     app.run().unwrap();
 }

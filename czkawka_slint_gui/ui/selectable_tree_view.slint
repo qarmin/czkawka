@@ -1,13 +1,20 @@
 import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox} from "std-widgets.slint";
+import {TypeOfOpenedItem} from "common.slint";
 
 export component SelectableTableView inherits Rectangle {
+    callback item_opened(string);
+
     in property <[string]> columns;
     in property <string> last_column;
     in-out property <[{checked: bool, header_row: bool, selected_row: bool, val:[string]}]> values;
 
-    in-out property <[length]> column_sizes: [200px, 100px, 100px, 100px];
+    in-out property <[length]> column_sizes;
     private property <[length]> real_sizes: [0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px];
     private property <int> column_number: column-sizes.length + 1;
+
+    // This idx, starts from zero, but since first is always a checkbox, and is not in model.val values, remove 1 from idx
+    in-out property <int> parentPathIdx;
+    in-out property <int> fileNameIdx;
 
     in-out property <int> selected_item: -1;
 
@@ -72,6 +79,14 @@ export component SelectableTableView inherits Rectangle {
                                     root.selected-item = -1;
                                 }
                             }
+                        }
+                    }
+                    pointer-event(event) => {
+                        // TODO this should be clicked by double-click
+                        if (event.button == PointerEventButton.right && event.kind == PointerEventKind.up) {
+                            root.item_opened(r.val[root.parentPathIdx - 1])
+                        } else if (event.button == PointerEventButton.middle && event.kind == PointerEventKind.up) {
+                            root.item_opened(r.val[root.parentPathIdx - 1] + "/" + r.val[root.fileNameIdx - 1])
                         }
                     }
                 }

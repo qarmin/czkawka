@@ -8,6 +8,7 @@ import { ActionButtons } from "action_buttons.slint";
 export component MainWindow inherits Window {
     callback deleted;
     callback scanned(CurrentTab);
+    callback item_opened(string);
     min-width: 300px;
     preferred-width: 1024px;
     min-height: 300px;
@@ -68,6 +69,8 @@ export component MainWindow inherits Window {
                 empty_folder_model <=> root.empty_folder_model;
                 empty_files_model <=> root.empty_files_model;
                 similar_images_model <=> root.similar_images_model;
+
+                item_opened(item) => {item_opened(item)}
             }
         }
         ActionButtons {
