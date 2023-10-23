@@ -1,7 +1,9 @@
+use gdk4::{DragAction, FileList};
+use std::collections::HashSet;
 use std::path::PathBuf;
 
 use gtk4::prelude::*;
-use gtk4::{FileChooserNative, Notebook, Orientation, ResponseType, TreeView, Window};
+use gtk4::{DropTarget, FileChooserNative, Notebook, Orientation, ResponseType, TreeView, Window};
 
 #[cfg(target_family = "windows")]
 use czkawka_core::common::Common;
@@ -61,6 +63,11 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
             notebook_upper,
         );
     }
+    // Drag and drop
+    {
+        configure_directory_drop(&gui_data.upper_notebook.tree_view_included_directories, false);
+        configure_directory_drop(&gui_data.upper_notebook.tree_view_excluded_directories, true);
+    }
     // Remove Excluded Folder
     {
         let buttons_remove_excluded_directory = gui_data.upper_notebook.buttons_remove_excluded_directory.clone();
@@ -93,6 +100,32 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
     }
 }
 
+fn configure_directory_drop(tree_view: &TreeView, excluded_items: bool) {
+    let tv = tree_view.clone();
+    let drop_target = DropTarget::builder().name("file-drop-target").actions(DragAction::COPY).build();
+    drop_target.set_types(&[FileList::static_type()]);
+    drop_target.connect_drop(move |_, value, _, _| {
+        if let Ok(file_list) = value.get::<FileList>() {
+            let mut folders: HashSet<PathBuf> = HashSet::new();
+            for f in file_list.files() {
+                if let Some(path) = f.path() {
+                    if path.is_dir() {
+                        folders.insert(path);
+                    } else if let Some(parent) = path.parent() {
+                        if parent.is_dir() {
+                            folders.insert(parent.to_path_buf());
+                        }
+                    }
+                }
+            }
+            add_directories(&tv, &folders.into_iter().collect(), excluded_items);
+        }
+        true
+    });
+
+    tree_view.add_controller(drop_target);
+}
+
 fn connect_file_dialog(file_dialog_include_exclude_folder_selection: &FileChooserNative, include_tree_view: TreeView, exclude_tree_view: TreeView, notebook_upper: Notebook) {
     file_dialog_include_exclude_folder_selection.connect_response(move |file_chooser, response_type| {
         if response_type == ResponseType::Accept {
@@ -121,24 +154,28 @@ fn connect_file_dialog(file_dialog_include_exclude_folder_selection: &FileChoose
                 }
             }
 
-            let list_store = get_list_store(tree_view);
-
-            if excluded_items {
-                for file_entry in &folders {
-                    let values: [(u32, &dyn ToValue); 1] = [(ColumnsExcludedDirectory::Path as u32, &file_entry.to_string_lossy().to_string())];
-                    list_store.set(&list_store.append(), &values);
-                }
-            } else {
-                for file_entry in &folders {
-                    let values: [(u32, &dyn ToValue); 2] = [
-                        (ColumnsIncludedDirectory::Path as u32, &file_entry.to_string_lossy().to_string()),
-                        (ColumnsIncludedDirectory::ReferenceButton as u32, &false),
-                    ];
-                    list_store.set(&list_store.append(), &values);
-                }
-            }
+            add_directories(tree_view, &folders, excluded_items);
         }
     });
+}
+
+fn add_directories(tree_view: &TreeView, folders: &Vec<PathBuf>, excluded_items: bool) {
+    let list_store = get_list_store(tree_view);
+
+    if excluded_items {
+        for file_entry in folders {
+            let values: [(u32, &dyn ToValue); 1] = [(ColumnsExcludedDirectory::Path as u32, &file_entry.to_string_lossy().to_string())];
+            list_store.set(&list_store.append(), &values);
+        }
+    } else {
+        for file_entry in folders {
+            let values: [(u32, &dyn ToValue); 2] = [
+                (ColumnsIncludedDirectory::Path as u32, &file_entry.to_string_lossy().to_string()),
+                (ColumnsIncludedDirectory::ReferenceButton as u32, &false),
+            ];
+            list_store.set(&list_store.append(), &values);
+        }
+    }
 }
 
 fn add_manually_directories(window_main: &Window, tree_view: &TreeView, excluded_items: bool) {
