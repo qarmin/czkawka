@@ -12,13 +12,36 @@ build = "build.rs"
 
 [dependencies]
 #slint = "1.2.2"
-slint = { git = "https://github.com/slint-ui/slint.git"}
+#slint = { git = "https://github.com/slint-ui/slint.git"}
+
+# Try to use only needed features from https://github.com/slint-ui/slint/blob/master/api/rs/slint/Cargo.toml#L23-L31
+slint = { git = "https://github.com/slint-ui/slint.git", default-features = false, features = ["std",
+    "backend-winit",
+    "renderer-femtovg",
+    "renderer-software",
+    "accessibility",
+    "compat-1-2"
+] }
+
+
 rand = "0.8.5"
 czkawka_core = { version = "6.1.0", path = "../czkawka_core" }
 chrono = "0.4.31"
-open="5.0.0"
+open = "5.0.0"
 crossbeam-channel = "0.5.8"
+handsome_logger = "0.8.0"
 
 [build-dependencies]
 #slint-build = "1.2.2"
-slint-build = { git = "https://github.com/slint-ui/slint.git"}
+slint-build = { git = "https://github.com/slint-ui/slint.git" }
+
+[features]
+default = ["skia_opengl"]
+skia_opengl = ["slint/renderer-skia-opengl"]
+skia_vulkan = ["slint/renderer-skia-vulkan"]
+software = ["slint/renderer-software"]
+femtovg = ["slint/renderer-femtovg"]
+winit_femtovg = ["slint/renderer-winit-femtovg"]
+winit_skia_opengl = ["slint/renderer-winit-skia-opengl"]
+winit_skia_vulkan = ["slint/renderer-winit-skia-vulkan"]
+winit_software = ["slint/renderer-winit-software"]

@@ -9,7 +9,9 @@ pub fn connect_progress_gathering(app: &MainWindow, progress_receiver: Receiver<
     let a = app.as_weak();
 
     thread::spawn(move || loop {
-        let progress_data = progress_receiver.recv().unwrap();
+        let Ok(progress_data) = progress_receiver.recv() else {
+            return; // Channel closed
+        };
 
         a.upgrade_in_event_loop(move |app| {
             let (all_stages, current_stage) = common_get_data(&progress_data);
