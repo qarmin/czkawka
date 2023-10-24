@@ -32,7 +32,7 @@ Very helpful in this situation will be logs from czkawka run with RUST_LOG envir
 
 **System**
 
-- Czkawka version<!--  e.g. 6.1.0 cli/gui -->:
-- OS version<!--  e.g Ubuntu 22.04, Windows 11, Mac 15.1 ARM -->:
+- Czkawka version: <!--  e.g. 6.1.0 cli/gui -->
+- OS version: <!--  e.g Ubuntu 22.04, Windows 11, Mac 15.1 ARM -->
 
 <!-- If you use flatpak, please include the result of `flatpak info com.github.qarmin.czkawka`. -->
