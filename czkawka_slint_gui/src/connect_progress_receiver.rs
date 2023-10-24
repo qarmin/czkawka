@@ -10,7 +10,7 @@ pub fn connect_progress_gathering(app: &MainWindow, progress_receiver: Receiver<
 
     thread::spawn(move || loop {
         let Ok(progress_data) = progress_receiver.recv() else {
-            return; // Channel closed
+            return; // Channel closed, so exit the thread since app closing
         };
 
         a.upgrade_in_event_loop(move |app| {

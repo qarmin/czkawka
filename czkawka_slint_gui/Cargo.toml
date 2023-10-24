@@ -23,7 +23,6 @@ slint = { git = "https://github.com/slint-ui/slint.git", default-features = fals
     "compat-1-2"
 ] }
 
-
 rand = "0.8.5"
 czkawka_core = { version = "6.1.0", path = "../czkawka_core" }
 chrono = "0.4.31"
@@ -36,7 +35,7 @@ handsome_logger = "0.8.0"
 slint-build = { git = "https://github.com/slint-ui/slint.git" }
 
 [features]
-default = ["skia_opengl"]
+default = ["winit_femtovg"]
 skia_opengl = ["slint/renderer-skia-opengl"]
 skia_vulkan = ["slint/renderer-skia-vulkan"]
 software = ["slint/renderer-software"]
