@@ -73,7 +73,7 @@ export component SelectableTableView inherits Rectangle {
 
             for r[idx] in root.values : Rectangle {
                 forward-focus: focus-item;
-                height: 30px;
+                height: 20px;
                 // TODO move this into singleton
                 background: r.header-row ? #888888 : (touch-area.has-hover ? (r.selected_row ? #cccccc : #dddddd) : (r.selected_row ? #cccccc: #dddddd));
                 // background: touch-area.has-hover ? (selected ? #333333 : #222222) : (selected ? #333333: #222222);
@@ -107,8 +107,6 @@ export component SelectableTableView inherits Rectangle {
                 }
 
                 HorizontalLayout {
-                    padding: 5px;
-                    spacing: 5px;
                     forward-focus: focus-item;
 
                     CheckBox {
