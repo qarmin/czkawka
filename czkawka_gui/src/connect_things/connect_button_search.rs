@@ -830,5 +830,18 @@ fn bad_extensions_search(
 #[fun_time(message = "clean_tree_view", level = "debug")]
 fn clean_tree_view(tree_view: &gtk4::TreeView) {
     let list_store = get_list_store(tree_view);
-    list_store.clear();
+    let mut all_iters = Vec::new();
+    let first_iter = list_store.iter_first();
+    if let Some(first_iter) = first_iter {
+        loop {
+            all_iters.push(first_iter);
+            if !list_store.iter_next(&first_iter) {
+                break;
+            }
+        }
+    }
+    all_iters.reverse();
+    for iter in all_iters {
+        list_store.remove(&iter);
+    }
 }
