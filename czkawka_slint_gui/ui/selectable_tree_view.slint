@@ -20,9 +20,10 @@ export component SelectableTableView inherits Rectangle {
 
     forward-focus: focus_item;
 
+    // TODO not works
     focus_item := FocusScope {
         key-released(event) => {
-            debug(event);
+            // debug(event);
             accept
         }
     }
@@ -96,7 +97,6 @@ export component SelectableTableView inherits Rectangle {
                         }
                     }
                     pointer-event(event) => {
-                        debug(event);
                         // TODO this should be clicked by double-click
                         if (event.button == PointerEventButton.right && event.kind == PointerEventKind.up) {
                             root.item_opened(r.val[root.parentPathIdx - 1])

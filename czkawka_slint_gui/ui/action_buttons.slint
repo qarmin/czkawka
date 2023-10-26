@@ -6,7 +6,10 @@ import {CurrentTab} from "common.slint";
 
 export component ActionButtons {
     callback deleted;
-    callback scanned(CurrentTab);
+    callback scan_stopping;
+    callback scan_starting(CurrentTab);
+
+    in-out property <bool> stop_requested: false;
     in-out property <bool> scanning;
     in-out property <CurrentTab> active-tab;
 
@@ -16,7 +19,16 @@ export component ActionButtons {
             enabled: !scanning;
             text: "Scan";
             clicked => {
-                root.scanned(active-tab);
+                root.scanning = true;
+                root.scan_starting(active-tab);
+            }
+        }
+        stop_button:= Button {
+            enabled: scanning && !stop_requested;
+            text: "Stop";
+            clicked => {
+                root.scan_stopping();
+                root.stop_requested = true;
             }
         }
         delete_button:= Button {

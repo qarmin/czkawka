@@ -1,4 +1,4 @@
-import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox} from "std-widgets.slint";
+import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox, LineEdit} from "std-widgets.slint";
 import {SelectableTableView} from "selectable_tree_view.slint";
 import {LeftSidePanel} from "left_side_panel.slint";
 import {MainList} from "main_lists.slint";
@@ -8,14 +8,18 @@ import { Progress } from "progress.slint";
 
 export component MainWindow inherits Window {
     callback deleted;
-    callback scanned(CurrentTab);
+    callback scan_stopping;
+    callback scan_starting(CurrentTab);
     callback item_opened(string);
+
+    callback scan_ended();
 
     min-width: 300px;
     preferred-width: 1024px;
     min-height: 300px;
     preferred-height: 600px;
 
+    in-out property <bool> stop_requested: false;
     in-out property <bool> scanning: false;
     in-out property <ProgressToSend> progress_datas : {
         current_progress: 15,
@@ -81,7 +85,7 @@ export component MainWindow inherits Window {
     
                     item_opened(item) => {item_opened(item)}
                 }
-                Progress { 
+                if root.scanning: Progress {                    
                     horizontal-stretch: 0.0;
                     progress_datas <=> root.progress_datas;
                 }
@@ -91,8 +95,19 @@ export component MainWindow inherits Window {
             vertical-stretch: 0.0;
             scanning <=> root.scanning;
             active-tab <=> root.active-tab;
+            stop_requested <=> root.stop-requested;
             deleted => {root.deleted();}
-            scanned(item) => {root.scanned(item);}
+            scan_stopping => {root.scan_stopping();}
+            scan_starting(item) => {root.scan_starting(item);}
         }
+        LineEdit {
+            text: root.stop-requested ? "Stopping scan, please wait..." : "Search stopped";
+            read-only: true;
+        }
+    }
+
+    scan_ended() => {
+        root.scanning = false;
+        root.stop_requested = false;
     }
 }

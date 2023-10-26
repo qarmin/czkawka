@@ -1,6 +1,6 @@
 use crate::{split_path, CurrentTab, MainWindow, ProgressToSend};
 use chrono::NaiveDateTime;
-use crossbeam_channel::Sender;
+use crossbeam_channel::{Receiver, Sender};
 use czkawka_core::common_dir_traversal::ProgressData;
 use czkawka_core::common_tool::CommonData;
 use czkawka_core::empty_folder::EmptyFolder;
@@ -9,12 +9,13 @@ use std::path::PathBuf;
 use std::rc::Rc;
 use std::thread;
 
-pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressData>) {
+pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>) {
     let a = app.as_weak();
-    app.on_scanned(move |active_tab| {
+    app.on_scan_starting(move |active_tab| {
         let progress_sender = progress_sender.clone();
+        let stop_receiver = stop_receiver.clone();
         let app = a.upgrade().unwrap();
-        app.set_scanning(true);
+
         app.set_progress_datas(ProgressToSend {
             all_progress: 0,
             current_progress: 0,
@@ -24,18 +25,18 @@ pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressDat
         let a = app.as_weak();
         match active_tab {
             CurrentTab::EmptyFolders => {
-                scan_empty_folders(a, progress_sender);
+                scan_empty_folders(a, progress_sender, stop_receiver);
             }
             _ => panic!(),
         }
     });
 }
 
-fn scan_empty_folders(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>) {
+fn scan_empty_folders(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>) {
     thread::spawn(move || {
         let mut ef = EmptyFolder::new();
         ef.set_included_directory(vec![PathBuf::from("/home/rafal")]);
-        ef.find_empty_folders(None, Some(&progress_sender));
+        ef.find_empty_folders(Some(&stop_receiver), Some(&progress_sender));
 
         ef.get_empty_folder_list();
 
@@ -60,7 +61,7 @@ fn scan_empty_folders(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>
                 items.push((false, false, false, ModelRc::new(data_model)));
             }
             app.set_empty_folder_model(items.into());
-            app.set_scanning(false);
+            app.invoke_scan_ended();
         })
     });
 }
