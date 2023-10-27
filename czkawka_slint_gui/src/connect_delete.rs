@@ -1,32 +1,40 @@
-use crate::common::ModelType;
-use crate::MainWindow;
-use slint::{ComponentHandle, Model, ModelRc, VecModel};
 use std::borrow::Borrow;
+
+use slint::{ComponentHandle, Model, ModelRc, VecModel};
+
+use crate::common::ModelType;
+use crate::{CurrentTab, MainWindow};
 
 pub fn connect_delete_button(app: &MainWindow) {
     let a = app.as_weak();
     app.on_deleted(move || {
         let app = a.upgrade().unwrap();
 
-        let r = app.get_empty_folder_model();
-        let m = r.borrow();
+        let active_tab = app.get_active_tab();
 
-        let (entries_to_delete, mut entries_left) = filter_out_checked_items(m, true);
-
-        if !entries_to_delete.is_empty() {
-            dbg!(format!("Items to remove {}", entries_to_delete.len()));
-
-            remove_all_items(entries_to_delete);
-            deselect_all_items(&mut entries_left);
-
-            let r = ModelRc::new(VecModel::from(entries_left));
-            app.set_empty_folder_model(r);
+        match active_tab {
+            CurrentTab::EmptyFolders => handle_delete_empty_folders(&app),
+            _ => panic!(),
         }
     });
 }
 
+fn handle_delete_empty_folders(app: &MainWindow) {
+    let r = app.get_empty_folder_model();
+    let (entries_to_delete, mut entries_left) = filter_out_checked_items(r.borrow(), false);
+
+    if !entries_to_delete.is_empty() {
+        remove_selected_items(entries_to_delete);
+        deselect_all_items(&mut entries_left);
+
+        let r = ModelRc::new(VecModel::from(entries_left));
+        app.set_empty_folder_model(r);
+    }
+}
+
 // TODO delete in parallel items, consider to add progress bar
-fn remove_all_items(items: Vec<ModelType>) {
+fn remove_selected_items(items: Vec<ModelType>) {
+    dbg!(format!("Items to remove {}", items.len()));
     items.into_iter().for_each(|(_checked, _header_row, _selected_row, _data)| {});
 }
 
@@ -90,7 +98,7 @@ fn check_if_header_is_checked(items: &ModelRc<ModelType>) {
     }
 }
 
-// In some modes header should not be visible
+// In some modes header should not be visible, but if are, then it is a bug
 #[cfg(debug_assertions)]
 fn check_if_header_is_selected_but_should_not_be(items: &ModelRc<ModelType>, can_have_header: bool) {
     if !can_have_header {
@@ -103,9 +111,10 @@ fn check_if_header_is_selected_but_should_not_be(items: &ModelRc<ModelType>, can
 
 #[cfg(test)]
 mod tests {
+    use slint::{Model, ModelRc, SharedString, VecModel};
+
     use crate::common::ModelType;
     use crate::connect_delete::filter_out_checked_items;
-    use slint::{Model, ModelRc, SharedString, VecModel};
 
     #[test]
     fn test_filter_out_checked_items_empty() {
