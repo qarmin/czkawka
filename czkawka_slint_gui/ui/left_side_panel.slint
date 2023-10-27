@@ -1,5 +1,6 @@
 import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox} from "std-widgets.slint";
 import {CurrentTab} from "common.slint";
+import {ColorPalette} from "color_palette.slint";
 
 component TabItem {
     in property <bool> scanning;
@@ -7,10 +8,32 @@ component TabItem {
     in property <string> text;
     in property <CurrentTab> curr_tab;
 
-    Button {
-        enabled: !scanning;
+
+    Rectangle {
+        width: parent.width;
+        horizontal-stretch: 1.0;
+        background: touch-area.has-hover ? blue : green;
+        opacity: 0.05;
+
+        touch_area:= TouchArea {
+            clicked => {
+                root.active-tab = root.curr-tab;
+            }
+        }
+    }
+    HorizontalLayout {
+        width: parent.width;
+        alignment: LayoutAlignment.end;
+        Rectangle {
+            visible: (root.active-tab == root.curr-tab);
+            width: 5px;
+            background: ColorPalette.tab_selected_color;
+        }
+    }
+    Text {
         text: root.text;
-        clicked => { root.active-tab = root.curr-tab; }
+        width: parent.width;
+        horizontal-alignment: center;
     }
 }
 
@@ -29,22 +52,25 @@ export component LeftSidePanel {
             }
         }
         VerticalLayout {
-            spacing: 3px;
+            // spacing: 3px;
             alignment: center;
-            
+            out property <length> element-size: 25px;
             TabItem {
+                height: parent.element-size;
                 scanning: scanning;
                 text: "Empty Folders";
                 active-tab <=> root.active-tab;
                 curr_tab: CurrentTab.EmptyFolders;
             }
             TabItem {
+                height: parent.element-size;
                 scanning: scanning;
                 text: "Empty Files";
                 active-tab <=> root.active-tab;
                 curr_tab: CurrentTab.EmptyFiles;
             }
             TabItem {
+                height: parent.element-size;
                 scanning: scanning;
                 text: "Similar Images";
                 active-tab <=> root.active-tab;

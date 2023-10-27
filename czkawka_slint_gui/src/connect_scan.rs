@@ -35,7 +35,7 @@ pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressDat
 fn scan_empty_folders(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>) {
     thread::spawn(move || {
         let mut ef = EmptyFolder::new();
-        ef.set_included_directory(vec![PathBuf::from("/home/rafal")]);
+        ef.set_included_directory(vec![PathBuf::from("/home/rafal/Desktop")]);
         ef.find_empty_folders(Some(&stop_receiver), Some(&progress_sender));
 
         ef.get_empty_folder_list();
