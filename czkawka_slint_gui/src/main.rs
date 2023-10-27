@@ -1,3 +1,4 @@
+mod common;
 mod connect_delete;
 mod connect_open;
 mod connect_progress_receiver;
@@ -12,13 +13,16 @@ use crate::connect_delete::connect_delete_button;
 use crate::connect_open::connect_open_items;
 use crate::connect_scan::connect_scan_button;
 
+use crate::common::ModelType;
 use crate::connect_progress_receiver::connect_progress_gathering;
 use crate::connect_stop::connect_stop_button;
 use czkawka_core::common_dir_traversal::ProgressData;
-use slint::{ModelRc, SharedString, VecModel};
+use slint::{ModelRc, VecModel};
 
 slint::include_modules!();
 fn main() {
+    handsome_logger::init().unwrap();
+
     let app = MainWindow::new().unwrap(); //.run().unwrap();
 
     let (progress_sender, progress_receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
@@ -35,19 +39,19 @@ fn main() {
     app.run().unwrap();
 }
 
-type ModelType = VecModel<(bool, bool, bool, ModelRc<SharedString>)>;
 // TODO remove this after trying
 pub fn to_remove_debug(app: &MainWindow) {
-    let row_data: Rc<ModelType> = Rc::new(VecModel::default());
-
-    for r in 0..20_000_000 {
+    let row_data: Rc<VecModel<ModelType>> = Rc::new(VecModel::default());
+    for r in 0..100_000 {
         let items = VecModel::default();
 
         for c in 0..3 {
             items.push(slint::format!("Item {r}.{c}"));
         }
 
-        row_data.push((r % 2 == 0, r % 3 == 0, false, ModelRc::new(items)));
+        let is_header = r % 3 == 0;
+        let is_checked = (r % 2 == 0) && !is_header;
+        row_data.push((is_checked, is_header, false, ModelRc::new(items)));
     }
     app.set_empty_folder_model(row_data.into());
 }
