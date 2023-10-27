@@ -1,3 +1,5 @@
+#![allow(clippy::comparison_chain)]
+
 mod common;
 mod connect_delete;
 mod connect_open;

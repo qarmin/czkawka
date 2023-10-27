@@ -1,3 +1,13 @@
+## Version 7.0.0 - ?
+### GTK GUI
+
+### CLI
+
+### Slawka GUI
+
+### Core(all modes)
+
+
 ## Version 6.1.0 - 15.10.2023r
 - BREAKING CHANGE - Changed cache saving method, deduplicated, optimized and simplified procedure(all files needs to be hashed again) - [#1072](https://github.com/qarmin/czkawka/pull/1072), [#1086](https://github.com/qarmin/czkawka/pull/1086)
 - Remove up to 340ms of delay when waiting for results - [#1070](https://github.com/qarmin/czkawka/pull/1070)

@@ -97,16 +97,22 @@ export component MainWindow inherits Window {
             active-tab <=> root.active-tab;
             stop_requested <=> root.stop-requested;
             deleted => {root.deleted();}
-            scan_stopping => {root.scan_stopping();}
-            scan_starting(item) => {root.scan_starting(item);}
+            scan_stopping => {
+                text_summary.text = "Stopping scan, please wait...";
+                root.scan_stopping();
+            }
+            scan_starting(item) => {
+                text-summary.text = "Searching...";
+                root.scan_starting(item);
+            }
         }
-        LineEdit {
-            text: root.stop-requested ? "Stopping scan, please wait..." : "Search stopped";
+        text_summary := LineEdit {
             read-only: true;
         }
     }
 
     scan_ended() => {
+        text-summary.text = ""; // TODO this should be filled with results
         root.scanning = false;
         root.stop_requested = false;
     }
