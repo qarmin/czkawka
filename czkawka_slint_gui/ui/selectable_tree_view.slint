@@ -1,13 +1,15 @@
 import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox} from "std-widgets.slint";
 import {TypeOfOpenedItem} from "common.slint";
 import {ColorPalette} from "color_palette.slint";
+import {MainListModel} from "common.slint";
+
 
 export component SelectableTableView inherits Rectangle {
     callback item_opened(string);
 
     in property <[string]> columns;
     in property <string> last_column;
-    in-out property <[{checked: bool, header_row: bool, selected_row: bool, val:[string]}]> values;
+    in-out property <[MainListModel]> values;
 
     in-out property <[length]> column_sizes;
     private property <[length]> real_sizes: [0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px];
@@ -74,6 +76,7 @@ export component SelectableTableView inherits Rectangle {
             forward-focus: focus-item;
 
             for r[idx] in root.values : Rectangle {
+                border-radius: 20px;
                 forward-focus: focus-item;
                 height: 20px;
                 background: r.header-row ? ColorPalette.list_view_normal_header_color : (touch-area.has-hover ? (r.selected_row ? ColorPalette.list-view-normal-selected-header : ColorPalette.list_view_normal_color) : (r.selected_row ? ColorPalette.list-view-normal-selected-header: ColorPalette.list_view_normal_color));

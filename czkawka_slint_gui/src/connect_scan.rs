@@ -1,3 +1,4 @@
+use crate::MainListModel;
 use crate::{split_path, CurrentTab, MainWindow, ProgressToSend};
 use chrono::NaiveDateTime;
 use crossbeam_channel::{Receiver, Sender};
@@ -58,7 +59,13 @@ fn scan_empty_folders(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>
                     SharedString::from(NaiveDateTime::from_timestamp_opt(folder_map[&path].modified_date as i64, 0).unwrap().to_string()),
                 ]);
 
-                items.push((false, false, false, ModelRc::new(data_model)));
+                let main = MainListModel {
+                    checked: false,
+                    header_row: false,
+                    selected_row: false,
+                    val: ModelRc::new(data_model),
+                };
+                items.push(main);
             }
             app.set_empty_folder_model(items.into());
             app.invoke_scan_ended();

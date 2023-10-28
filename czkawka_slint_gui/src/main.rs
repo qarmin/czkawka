@@ -15,7 +15,6 @@ use crate::connect_delete::connect_delete_button;
 use crate::connect_open::connect_open_items;
 use crate::connect_scan::connect_scan_button;
 
-use crate::common::ModelType;
 use crate::connect_progress_receiver::connect_progress_gathering;
 use crate::connect_stop::connect_stop_button;
 use czkawka_core::common_dir_traversal::ProgressData;
@@ -43,7 +42,7 @@ fn main() {
 
 // TODO remove this after trying
 pub fn to_remove_debug(app: &MainWindow) {
-    let row_data: Rc<VecModel<ModelType>> = Rc::new(VecModel::default());
+    let row_data: Rc<VecModel<MainListModel>> = Rc::new(VecModel::default());
     for r in 0..100_000 {
         let items = VecModel::default();
 
@@ -53,7 +52,15 @@ pub fn to_remove_debug(app: &MainWindow) {
 
         let is_header = r % 3 == 0;
         let is_checked = (r % 2 == 0) && !is_header;
-        row_data.push((is_checked, is_header, false, ModelRc::new(items)));
+
+        let item = MainListModel {
+            checked: is_checked,
+            header_row: is_header,
+            selected_row: false,
+            val: ModelRc::new(items),
+        };
+
+        row_data.push(item);
     }
     app.set_empty_folder_model(row_data.into());
 }

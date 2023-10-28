@@ -9,8 +9,8 @@ export component MainList {
     in-out property <CurrentTab> active-tab;
     
     in-out property <[MainListModel]> empty_folder_model;
-    in-out property <[{checked: bool, header_row: bool, selected_row: bool, val:[string]}]> empty_files_model;
-    in-out property <[{checked: bool, header_row: bool, selected_row: bool, val:[string]}]> similar_images_model;
+    in-out property <[MainListModel]> empty_files_model;
+    in-out property <[MainListModel]> similar_images_model;
 
 // TODO - using root.active-tab in visible property will not clear model
     if root.active-tab == CurrentTab.EmptyFolders: SelectableTableView {
@@ -24,26 +24,28 @@ export component MainList {
         fileNameIdx: 1;
         item_opened(item) => {item_opened(item)}
     }
-    // if root.active-tab == CurrentTab.EmptyFiles: SelectableTableView {
-    //     min-width: 200px;
+    
+    if root.active-tab == CurrentTab.EmptyFiles: SelectableTableView {
+        min-width: 200px;
 
-    //     columns: ["Selection", "Folder Name", "Path"];
-    //     last-column: "Modification Date";
-    //     column-sizes: [30px, 100px, 100px, 100px];
-    //     values <=> empty-files-model;
-    //     parentPathIdx: 2;
-    //     fileNameIdx: 1;
-    //     item_opened(item) => {item_opened(item)}
-    // }
-    // if root.active-tab == CurrentTab.SimilarImages: SelectableTableView {
-    //     min-width: 200px;
+        columns: ["Selection", "Folder Name", "Path"];
+        last-column: "Modification Date";
+        column-sizes: [30px, 100px, 100px, 100px];
+        values <=> empty-files-model;
+        parentPathIdx: 2;
+        fileNameIdx: 1;
+        item_opened(item) => {item_opened(item)}
+    }
 
-    //     columns: ["Selection", "Folder Name", "Path"];
-    //     last-column: "Modification Date";
-    //     column-sizes: [30px, 100px, 100px, 100px];
-    //     values <=> similar-images-model;
-    //     parentPathIdx: 2;
-    //     fileNameIdx: 1;
-    //     item_opened(item) => {item_opened(item)}
-    // }
+    if root.active-tab == CurrentTab.SimilarImages: SelectableTableView {
+        min-width: 200px;
+
+        columns: ["Selection", "Folder Name", "Path"];
+        last-column: "Modification Date";
+        column-sizes: [30px, 100px, 100px, 100px];
+        values <=> similar-images-model;
+        parentPathIdx: 2;
+        fileNameIdx: 1;
+        item_opened(item) => {item_opened(item)}
+    }
 }
