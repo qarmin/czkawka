@@ -1,5 +1,12 @@
+import { StyleMetrics } from "std-widgets.slint";
+
 export global ColorPalette {
     // Tabs at left side
-    in-out property<color> tab_selected_color: NativeStyleMetrics.dark-color-scheme ? red : blue;
-    in-out property<color> tab_hovered_color: NativeStyleMetrics.dark-color-scheme ? green : yellow;
+    in-out property<color> tab_selected_color: StyleMetrics.dark-color-scheme ? red : blue;
+    in-out property<color> tab_hovered_color: StyleMetrics.dark-color-scheme ? green : yellow;
+
+    // ListView
+    in-out property<color> list_view_normal_color: StyleMetrics.dark-color-scheme ? #474747 : #dddddd;
+    in-out property<color> list_view_normal_header_color: StyleMetrics.dark-color-scheme ? #292929 : #888888;
+    in-out property<color> list_view_normal_selected_header: StyleMetrics.dark-color-scheme ? #575757 : #cccccc;
 }

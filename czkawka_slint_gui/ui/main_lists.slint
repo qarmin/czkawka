@@ -2,12 +2,13 @@ import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListV
 import {SelectableTableView} from "selectable_tree_view.slint";
 import {LeftSidePanel} from "left_side_panel.slint";
 import {CurrentTab, TypeOfOpenedItem} from "common.slint";
+import {MainListModel} from "common.slint";
 
 export component MainList {
     callback item_opened(string);
     in-out property <CurrentTab> active-tab;
     
-    in-out property <[{checked: bool, header_row: bool, selected_row: bool, val:[string]}]> empty_folder_model;
+    in-out property <[MainListModel]> empty_folder_model;
     in-out property <[{checked: bool, header_row: bool, selected_row: bool, val:[string]}]> empty_files_model;
     in-out property <[{checked: bool, header_row: bool, selected_row: bool, val:[string]}]> similar_images_model;
 
@@ -23,26 +24,26 @@ export component MainList {
         fileNameIdx: 1;
         item_opened(item) => {item_opened(item)}
     }
-    if root.active-tab == CurrentTab.EmptyFiles: SelectableTableView {
-        min-width: 200px;
+    // if root.active-tab == CurrentTab.EmptyFiles: SelectableTableView {
+    //     min-width: 200px;
 
-        columns: ["Selection", "Folder Name", "Path"];
-        last-column: "Modification Date";
-        column-sizes: [30px, 100px, 100px, 100px];
-        values <=> empty-files-model;
-        parentPathIdx: 2;
-        fileNameIdx: 1;
-        item_opened(item) => {item_opened(item)}
-    }
-    if root.active-tab == CurrentTab.SimilarImages: SelectableTableView {
-        min-width: 200px;
+    //     columns: ["Selection", "Folder Name", "Path"];
+    //     last-column: "Modification Date";
+    //     column-sizes: [30px, 100px, 100px, 100px];
+    //     values <=> empty-files-model;
+    //     parentPathIdx: 2;
+    //     fileNameIdx: 1;
+    //     item_opened(item) => {item_opened(item)}
+    // }
+    // if root.active-tab == CurrentTab.SimilarImages: SelectableTableView {
+    //     min-width: 200px;
 
-        columns: ["Selection", "Folder Name", "Path"];
-        last-column: "Modification Date";
-        column-sizes: [30px, 100px, 100px, 100px];
-        values <=> similar-images-model;
-        parentPathIdx: 2;
-        fileNameIdx: 1;
-        item_opened(item) => {item_opened(item)}
-    }
+    //     columns: ["Selection", "Folder Name", "Path"];
+    //     last-column: "Modification Date";
+    //     column-sizes: [30px, 100px, 100px, 100px];
+    //     values <=> similar-images-model;
+    //     parentPathIdx: 2;
+    //     fileNameIdx: 1;
+    //     item_opened(item) => {item_opened(item)}
+    // }
 }
