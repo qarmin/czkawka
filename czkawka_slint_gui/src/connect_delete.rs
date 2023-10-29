@@ -35,13 +35,14 @@ fn handle_delete_empty_folders(app: &MainWindow) {
 // TODO delete in parallel items, consider to add progress bar
 fn remove_selected_items(items: Vec<MainListModel>) {
     dbg!(format!("Items to remove {}", items.len()));
-    items.into_iter().for_each(|_item| {});
+    drop(items);
+    // items.into_iter().for_each(|_item| {});
 }
 
 fn deselect_all_items(items: &mut [MainListModel]) {
-    items.iter_mut().for_each(|item| {
+    for item in items {
         item.selected_row = false;
-    });
+    }
 }
 
 fn filter_out_checked_items(items: &ModelRc<MainListModel>, have_header: bool) -> (Vec<MainListModel>, Vec<MainListModel>) {
@@ -88,21 +89,23 @@ fn filter_out_checked_items(items: &ModelRc<MainListModel>, have_header: bool) -
 
 // Function to verify if really headers are not checked
 // Checked header is big bug
-#[cfg(debug_assertions)]
 fn check_if_header_is_checked(items: &ModelRc<MainListModel>) {
-    for item in items.iter() {
-        if item.header_row {
-            assert!(!item.checked);
+    if cfg!(debug_assertions) {
+        for item in items.iter() {
+            if item.header_row {
+                assert!(!item.checked);
+            }
         }
     }
 }
 
 // In some modes header should not be visible, but if are, then it is a bug
-#[cfg(debug_assertions)]
 fn check_if_header_is_selected_but_should_not_be(items: &ModelRc<MainListModel>, can_have_header: bool) {
-    if !can_have_header {
-        for item in items.iter() {
-            assert!(!item.header_row);
+    if cfg!(debug_assertions) {
+        if !can_have_header {
+            for item in items.iter() {
+                assert!(!item.header_row);
+            }
         }
     }
 }

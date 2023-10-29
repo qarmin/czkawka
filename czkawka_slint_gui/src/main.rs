@@ -1,4 +1,16 @@
 #![allow(clippy::comparison_chain)]
+#![allow(clippy::collapsible_if)]
+#![allow(clippy::overly_complex_bool_expr)] // Generated code
+#![allow(clippy::semicolon_if_nothing_returned)] // Generated code
+#![allow(clippy::used_underscore_binding)] // Generated code
+#![allow(clippy::unreadable_literal)] // Generated code
+#![allow(clippy::float_cmp)] // Generated code
+#![allow(clippy::no_effect_underscore_binding)] // Generated code
+#![allow(clippy::uninlined_format_args)] // Generated code
+#![allow(clippy::needless_pass_by_value)] // Generated code
+#![allow(clippy::redundant_closure_for_method_calls)] // Generated code
+#![allow(clippy::items_after_statements)] // Generated code
+#![allow(clippy::match_same_arms)] // Generated code
 
 mod common;
 mod connect_delete;
