@@ -17,8 +17,6 @@ build = "build.rs"
 # Try to use only needed features from https://github.com/slint-ui/slint/blob/master/api/rs/slint/Cargo.toml#L23-L31
 slint = { git = "https://github.com/slint-ui/slint.git", default-features = false, features = ["std",
     "backend-winit",
-    "renderer-femtovg",
-    "renderer-software",
     "accessibility",
     "compat-1-2"
 ] }
@@ -35,7 +33,7 @@ handsome_logger = "0.8.0"
 slint-build = { git = "https://github.com/slint-ui/slint.git" }
 
 [features]
-default = ["winit_femtovg"]
+default = ["winit_femtovg", "winit_software"]
 skia_opengl = ["slint/renderer-skia-opengl"]
 skia_vulkan = ["slint/renderer-skia-vulkan"]
 software = ["slint/renderer-software"]

@@ -17,12 +17,13 @@ use crate::connect_scan::connect_scan_button;
 
 use crate::connect_progress_receiver::connect_progress_gathering;
 use crate::connect_stop::connect_stop_button;
+use czkawka_core::common::setup_logger;
 use czkawka_core::common_dir_traversal::ProgressData;
 use slint::{ModelRc, VecModel};
 
 slint::include_modules!();
 fn main() {
-    handsome_logger::init().unwrap();
+    setup_logger(false);
 
     let app = MainWindow::new().unwrap(); //.run().unwrap();
 

@@ -76,7 +76,7 @@ export component SelectableTableView inherits Rectangle {
             forward-focus: focus-item;
 
             for r[idx] in root.values : Rectangle {
-                border-radius: 20px;
+                border-radius: 5px;
                 forward-focus: focus-item;
                 height: 20px;
                 background: r.header-row ? ColorPalette.list_view_normal_header_color : (touch-area.has-hover ? (r.selected_row ? ColorPalette.list-view-normal-selected-header : ColorPalette.list_view_normal_color) : (r.selected_row ? ColorPalette.list-view-normal-selected-header: ColorPalette.list_view_normal_color));
