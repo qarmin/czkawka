@@ -17,7 +17,7 @@ export component VisibilityButton inherits Button {
     }
 }
 
-export component ActionButtons {
+export component ActionButtons inherits HorizontalLayout {
     callback deleted;
     callback scan_stopping;
     callback scan_starting(CurrentTab);
@@ -26,47 +26,55 @@ export component ActionButtons {
     in-out property <bool> stop_requested: false;
     in-out property <bool> scanning;
     in-out property <CurrentTab> active-tab;
+    out property <int> name;
+    height: 30px;
+    spacing: 4px;
 
-    HorizontalBox {
-        height: 50px;
-        scan_button:= Button {
-            enabled: !scanning;
-            text: "Scan";
-            clicked => {
-                root.scanning = true;
-                root.scan_starting(active-tab);
-            }
+    scan_button:= Button {
+        height: parent.height;
+        enabled: !scanning;
+        text: "Scan";
+        clicked => {
+            root.scanning = true;
+            root.scan_starting(active-tab);
         }
-        stop_button:= Button {
-            enabled: scanning && !stop_requested;
-            text: "Stop";
-            clicked => {
-                root.scan_stopping();
-                root.stop_requested = true;
-            }
+    }
+    stop_button:= Button {
+        height: parent.height;
+        enabled: scanning && !stop_requested;
+        text: "Stop";
+        clicked => {
+            root.scan_stopping();
+            root.stop_requested = true;
         }
-        delete_button:= Button {
-            enabled: !scanning;
-            text: "Delete";
-            clicked => {
-                root.deleted();
-            }
+    }
+    delete_button:= Button {
+        height: parent.height;
+        enabled: !scanning;
+        text: "Delete";
+        clicked => {
+            root.deleted();
         }
+    }
 
-        VisibilityButton {
-            button-visibility: BottomPanelVisibility.Directories;
-            bottom_panel_visibility <=> bottom_panel_visibility;
-            text: "Dirs";
-        }
-        VisibilityButton {
-            button-visibility: BottomPanelVisibility.NotVisible;
-            bottom_panel_visibility <=> bottom_panel_visibility;
-            text: "NotVS";
-        }
-        VisibilityButton {
-            button-visibility: BottomPanelVisibility.TextErrors;
-            bottom_panel_visibility <=> bottom_panel_visibility;
-            text: "Text";
-        }
+    VisibilityButton {
+        height: parent.height;
+        button-visibility: BottomPanelVisibility.Directories;
+        bottom_panel_visibility <=> bottom_panel_visibility;
+        text: "Dirs";
+    }
+    
+    VisibilityButton {
+        height: parent.height;
+        button-visibility: BottomPanelVisibility.NotVisible;
+        bottom_panel_visibility <=> bottom_panel_visibility;
+        text: "NotVS";
+    }
+    
+    VisibilityButton {
+        height: parent.height;
+        button-visibility: BottomPanelVisibility.TextErrors;
+        bottom_panel_visibility <=> bottom_panel_visibility;
+        text: "Text";
     }
 }

@@ -27,6 +27,7 @@ chrono = "0.4.31"
 open = "5.0.0"
 crossbeam-channel = "0.5.8"
 handsome_logger = "0.8.0"
+rfd = { version = "0.12.0", default-features = false, features = ["xdg-portal"] }
 
 [build-dependencies]
 #slint-build = "1.2.2"

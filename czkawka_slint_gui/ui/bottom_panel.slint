@@ -5,12 +5,16 @@ import {BottomPanelVisibility} from "common.slint";
 
 component DirectoriesPanel {
     out property <length> buttonSize: 75px;
+    callback folder-choose-requested(bool);
 
     HorizontalLayout {
         VerticalLayout {
             width: buttonSize;
             Button {
                 text: "Add";
+                clicked => {
+                    folder-choose-requested(true);
+                }
             }
             Button {
                 text: "Remove";
@@ -33,6 +37,9 @@ component DirectoriesPanel {
             width: buttonSize;
             Button {
                 text: "Add";
+                clicked => {
+                    folder-choose-requested(false);
+                }
             }
             Button {
                 text: "Remove";
@@ -62,6 +69,7 @@ component TextErrorsPanel {
 
 export component BottomPanel {
     in-out property <BottomPanelVisibility> bottom_panel_visibility: BottomPanelVisibility.Directories;
+    callback folder-choose-requested(bool);
     
     min-height: bottom-panel-visibility == BottomPanelVisibility.NotVisible ? 0px : 150px;
     min-width: bottom-panel-visibility == BottomPanelVisibility.NotVisible ? 0px : 400px;
@@ -69,6 +77,7 @@ export component BottomPanel {
     if bottom-panel-visibility == BottomPanelVisibility.Directories: DirectoriesPanel {
         width: parent.width;
         height: parent.height;
+        folder-choose-requested(included-directories) => {root.folder-choose-requested(included-directories)}
     }
     if bottom-panel-visibility == BottomPanelVisibility.TextErrors : TextErrorsPanel {
         width: parent.width;

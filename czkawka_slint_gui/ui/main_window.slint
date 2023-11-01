@@ -16,6 +16,7 @@ export component MainWindow inherits Window {
     callback scan_stopping;
     callback scan_starting(CurrentTab);
     callback item_opened(string);
+    callback folder-choose-requested(bool);
 
     callback scan_ended();
 
@@ -117,6 +118,7 @@ export component MainWindow inherits Window {
         BottomPanel {
             bottom-panel-visibility <=> action_buttons.bottom-panel-visibility;
             vertical-stretch: 0.0;
+            folder-choose-requested(included-directories) => {root.folder-choose-requested(included-directories)}
         }
     }
 

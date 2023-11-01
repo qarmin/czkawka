@@ -14,6 +14,7 @@
 
 mod common;
 mod connect_delete;
+mod connect_directories_changes;
 mod connect_open;
 mod connect_progress_receiver;
 mod connect_scan;
@@ -28,6 +29,7 @@ use crate::connect_delete::connect_delete_button;
 use crate::connect_open::connect_open_items;
 use crate::connect_scan::connect_scan_button;
 
+use crate::connect_directories_changes::connect_add_directories;
 use crate::connect_progress_receiver::connect_progress_gathering;
 use crate::connect_stop::connect_stop_button;
 use crate::settings::reset_settings;
@@ -51,6 +53,7 @@ fn main() {
     connect_stop_button(&app, stop_sender);
     connect_open_items(&app);
     connect_progress_gathering(&app, progress_receiver);
+    connect_add_directories(&app);
 
     reset_settings(&app);
 
