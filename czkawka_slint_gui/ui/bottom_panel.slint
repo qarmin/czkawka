@@ -1,11 +1,9 @@
 
 import {Button, StandardListView, VerticalBox} from "std-widgets.slint";
 import {Settings} from "settings.slint";
+import {BottomPanelVisibility} from "common.slint";
 
-export component BottomPanel {
-    min-height: 50px;
-    min-width: 400px;
-
+component DirectoriesPanel {
     out property <length> buttonSize: 75px;
 
     HorizontalLayout {
@@ -53,5 +51,27 @@ export component BottomPanel {
                 model: Settings.excluded-directories;
             }
         }
+    }
+}
+// TODO this should be a normal read only Text editor
+component TextErrorsPanel {
+    Rectangle {
+        background: red;
+    }
+}
+
+export component BottomPanel {
+    in-out property <BottomPanelVisibility> bottom_panel_visibility: BottomPanelVisibility.Directories;
+    
+    min-height: bottom-panel-visibility == BottomPanelVisibility.NotVisible ? 0px : 150px;
+    min-width: bottom-panel-visibility == BottomPanelVisibility.NotVisible ? 0px : 400px;
+
+    if bottom-panel-visibility == BottomPanelVisibility.Directories: DirectoriesPanel {
+        width: parent.width;
+        height: parent.height;
+    }
+    if bottom-panel-visibility == BottomPanelVisibility.TextErrors : TextErrorsPanel {
+        width: parent.width;
+        height: parent.height;
     }
 }

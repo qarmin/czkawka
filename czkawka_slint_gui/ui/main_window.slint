@@ -96,7 +96,7 @@ export component MainWindow inherits Window {
                 }
             }
         }
-        ActionButtons {
+        action_buttons := ActionButtons {
             vertical-stretch: 0.0;
             scanning <=> root.scanning;
             active-tab <=> root.active-tab;
@@ -114,7 +114,8 @@ export component MainWindow inherits Window {
         text_summary := LineEdit {
             read-only: true;
         }
-        BottomPanel { 
+        BottomPanel {
+            bottom-panel-visibility <=> action_buttons.bottom-panel-visibility;
             vertical-stretch: 0.0;
         }
     }

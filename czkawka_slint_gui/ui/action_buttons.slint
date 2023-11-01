@@ -2,13 +2,27 @@ import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListV
 import {LeftSidePanel} from "left_side_panel.slint";
 import {MainList} from "main_lists.slint";
 import {CurrentTab} from "common.slint";
+import {BottomPanelVisibility} from "common.slint";
 
+export component VisibilityButton inherits Button {
+    in-out property <BottomPanelVisibility> button_visibility;
+    in-out property <BottomPanelVisibility> bottom_panel_visibility;
+
+    enabled: bottom_panel_visibility != button-visibility;
+    height: 30px;
+    width: 70px;
+
+    clicked => {
+        bottom-panel-visibility = button_visibility;
+    }
+}
 
 export component ActionButtons {
     callback deleted;
     callback scan_stopping;
     callback scan_starting(CurrentTab);
-
+    
+    in-out property <BottomPanelVisibility> bottom_panel_visibility: BottomPanelVisibility.Directories;
     in-out property <bool> stop_requested: false;
     in-out property <bool> scanning;
     in-out property <CurrentTab> active-tab;
@@ -37,6 +51,22 @@ export component ActionButtons {
             clicked => {
                 root.deleted();
             }
+        }
+
+        VisibilityButton {
+            button-visibility: BottomPanelVisibility.Directories;
+            bottom_panel_visibility <=> bottom_panel_visibility;
+            text: "Dirs";
+        }
+        VisibilityButton {
+            button-visibility: BottomPanelVisibility.NotVisible;
+            bottom_panel_visibility <=> bottom_panel_visibility;
+            text: "NotVS";
+        }
+        VisibilityButton {
+            button-visibility: BottomPanelVisibility.TextErrors;
+            bottom_panel_visibility <=> bottom_panel_visibility;
+            text: "Text";
         }
     }
 }
