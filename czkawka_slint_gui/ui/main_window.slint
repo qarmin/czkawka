@@ -6,6 +6,10 @@ import {CurrentTab, ProgressToSend} from "common.slint";
 import { ActionButtons } from "action_buttons.slint";
 import { Progress } from "progress.slint";
 import {MainListModel} from "common.slint";
+import {Settings, SettingsModel} from "settings.slint";
+import { BottomPanel } from "bottom_panel.slint";
+
+export {Settings}
 
 export component MainWindow inherits Window {
     callback deleted;
@@ -109,6 +113,9 @@ export component MainWindow inherits Window {
         }
         text_summary := LineEdit {
             read-only: true;
+        }
+        BottomPanel { 
+            vertical-stretch: 0.0;
         }
     }
 

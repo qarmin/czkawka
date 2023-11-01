@@ -18,6 +18,7 @@ mod connect_open;
 mod connect_progress_receiver;
 mod connect_scan;
 mod connect_stop;
+mod settings;
 
 use crossbeam_channel::{unbounded, Receiver, Sender};
 use std::path::Path;
@@ -29,6 +30,7 @@ use crate::connect_scan::connect_scan_button;
 
 use crate::connect_progress_receiver::connect_progress_gathering;
 use crate::connect_stop::connect_stop_button;
+use crate::settings::reset_settings;
 use czkawka_core::common::setup_logger;
 use czkawka_core::common_dir_traversal::ProgressData;
 use slint::{ModelRc, VecModel};
@@ -50,12 +52,14 @@ fn main() {
     connect_open_items(&app);
     connect_progress_gathering(&app, progress_receiver);
 
+    reset_settings(&app);
+
     app.run().unwrap();
 }
 
 // TODO remove this after trying
 pub fn to_remove_debug(app: &MainWindow) {
-    let row_data: Rc<VecModel<MainListModel>> = Rc::new(VecModel::default());
+    let header_row_data: Rc<VecModel<MainListModel>> = Rc::new(VecModel::default());
     for r in 0..100_000 {
         let items = VecModel::default();
 
@@ -73,9 +77,31 @@ pub fn to_remove_debug(app: &MainWindow) {
             val: ModelRc::new(items),
         };
 
-        row_data.push(item);
+        header_row_data.push(item);
     }
-    app.set_empty_folder_model(row_data.into());
+    let non_header_row_data: Rc<VecModel<MainListModel>> = Rc::new(VecModel::default());
+    for r in 0..100_000 {
+        let items = VecModel::default();
+
+        for c in 0..3 {
+            items.push(slint::format!("Item {r}.{c}"));
+        }
+
+        let is_checked = r % 2 == 0;
+
+        let item = MainListModel {
+            checked: is_checked,
+            header_row: false,
+            selected_row: false,
+            val: ModelRc::new(items),
+        };
+
+        non_header_row_data.push(item);
+    }
+
+    app.set_empty_folder_model(non_header_row_data.clone().into());
+    app.set_empty_files_model(non_header_row_data.into());
+    app.set_similar_images_model(header_row_data.into());
 }
 
 pub fn split_path(path: &Path) -> (String, String) {

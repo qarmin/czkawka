@@ -1,0 +1,57 @@
+
+import {Button, StandardListView, VerticalBox} from "std-widgets.slint";
+import {Settings} from "settings.slint";
+
+export component BottomPanel {
+    min-height: 50px;
+    min-width: 400px;
+
+    out property <length> buttonSize: 75px;
+
+    HorizontalLayout {
+        VerticalLayout {
+            width: buttonSize;
+            Button {
+                text: "Add";
+            }
+            Button {
+                text: "Remove";
+            }
+            Rectangle {
+                vertical-stretch: 1.0;
+            }
+        }
+        VerticalLayout {
+            Rectangle {
+                Text {
+                    text: "Included Directories";
+                }
+            }
+            StandardListView {
+                model: Settings.included-directories;
+            }
+        }
+        VerticalLayout {
+            width: buttonSize;
+            Button {
+                text: "Add";
+            }
+            Button {
+                text: "Remove";
+            }
+            Rectangle {
+                vertical-stretch: 1.0;
+            }
+        }
+        VerticalLayout {
+            Rectangle {
+                Text {
+                    text: "Excluded Directories";
+                }
+            }
+            StandardListView {
+                model: Settings.excluded-directories;
+            }
+        }
+    }
+}
