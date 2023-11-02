@@ -1332,6 +1332,7 @@ dependencies = [
  "crossbeam-channel",
  "czkawka_core",
  "handsome_logger",
+ "home",
  "open",
  "rand",
  "rfd",
