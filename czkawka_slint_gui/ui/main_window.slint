@@ -11,10 +11,6 @@ import { BottomPanel } from "bottom_panel.slint";
 
 export {Settings}
 
-export component Raw inherits Window {
-    preferred-width: 2000px;
-}
-
 export component MainWindow inherits Window {
     callback deleted;
     callback scan_stopping;
@@ -70,8 +66,6 @@ export component MainWindow inherits Window {
     ];
     in-out property <[MainListModel]> empty_files_model: [];
     in-out property <[MainListModel]> similar_images_model: [];
-
-    title: root.active-tab == CurrentTab.EmptyFiles ? "EmptyFiles" : (root.active-tab == CurrentTab.EmptyFolders ? "EmptyFolders" : "Similar Images");
 
     VerticalBox {
         HorizontalBox {
