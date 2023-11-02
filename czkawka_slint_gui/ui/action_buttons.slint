@@ -21,7 +21,7 @@ export component ActionButtons inherits HorizontalLayout {
     callback deleted;
     callback scan_stopping;
     callback scan_starting(CurrentTab);
-    
+
     in-out property <BottomPanelVisibility> bottom_panel_visibility: BottomPanelVisibility.Directories;
     in-out property <bool> stop_requested: false;
     in-out property <bool> scanning;
@@ -48,6 +48,11 @@ export component ActionButtons inherits HorizontalLayout {
             root.stop_requested = true;
         }
     }
+
+    Rectangle {
+        horizontal-stretch: 0.5;
+    }
+
     delete_button:= Button {
         height: parent.height;
         enabled: !scanning;
@@ -56,25 +61,33 @@ export component ActionButtons inherits HorizontalLayout {
             root.deleted();
         }
     }
+    
+    Rectangle {
+        horizontal-stretch: 0.5;
+    }
 
-    VisibilityButton {
-        height: parent.height;
-        button-visibility: BottomPanelVisibility.Directories;
-        bottom_panel_visibility <=> bottom_panel_visibility;
-        text: "Dirs";
-    }
-    
-    VisibilityButton {
-        height: parent.height;
-        button-visibility: BottomPanelVisibility.NotVisible;
-        bottom_panel_visibility <=> bottom_panel_visibility;
-        text: "NotVS";
-    }
-    
-    VisibilityButton {
-        height: parent.height;
-        button-visibility: BottomPanelVisibility.TextErrors;
-        bottom_panel_visibility <=> bottom_panel_visibility;
-        text: "Text";
+    HorizontalLayout {
+        padding: 0px;
+        spacing: 0px;
+        VisibilityButton {
+            height: parent.height;
+            button-visibility: BottomPanelVisibility.Directories;
+            bottom_panel_visibility <=> bottom_panel_visibility;
+            text: "Dirs";
+        }
+
+        VisibilityButton {
+            height: parent.height;
+            button-visibility: BottomPanelVisibility.TextErrors;
+            bottom_panel_visibility <=> bottom_panel_visibility;
+            text: "Text";
+        }
+
+        VisibilityButton {
+            height: parent.height;
+            button-visibility: BottomPanelVisibility.NotVisible;
+            bottom_panel_visibility <=> bottom_panel_visibility;
+            text: "NotVS";
+        }
     }
 }

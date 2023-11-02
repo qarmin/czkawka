@@ -1,5 +1,5 @@
 
-import {Button, StandardListView, VerticalBox} from "std-widgets.slint";
+import {Button, StandardListView, VerticalBox, ScrollView, TextEdit} from "std-widgets.slint";
 import {Settings} from "settings.slint";
 import {BottomPanelVisibility} from "common.slint";
 
@@ -61,15 +61,19 @@ component DirectoriesPanel {
     }
 }
 // TODO this should be a normal read only Text editor
-component TextErrorsPanel {
-    Rectangle {
-        background: red;
-    }
+component TextErrorsPanel inherits TextEdit {
+    height: 20px;
+    read-only: true;
+    text: "Something\nShould be\nASFASF\nasgasg\nASfgasga\nasfgAGAWGW\nAfgAWFGAWG\nfawfafgweg\nAFGWGTwgwg\nGawgAWFWAF\nawfawgaw\nasfa \nasfawgw\nawfawg\nRRRRRR";
+    
 }
 
 export component BottomPanel {
     in-out property <BottomPanelVisibility> bottom_panel_visibility: BottomPanelVisibility.Directories;
+    in-out property <string> console_text;
+
     callback folder-choose-requested(bool);
+    callback set_console_text(string);
     
     min-height: bottom-panel-visibility == BottomPanelVisibility.NotVisible ? 0px : 150px;
     min-width: bottom-panel-visibility == BottomPanelVisibility.NotVisible ? 0px : 400px;
@@ -79,8 +83,15 @@ export component BottomPanel {
         height: parent.height;
         folder-choose-requested(included-directories) => {root.folder-choose-requested(included-directories)}
     }
+    
     if bottom-panel-visibility == BottomPanelVisibility.TextErrors : TextErrorsPanel {
+        text: console_text;
+
         width: parent.width;
         height: parent.height;
+    }
+
+    set_console_text(text) => {
+        console_text = text;
     }
 }

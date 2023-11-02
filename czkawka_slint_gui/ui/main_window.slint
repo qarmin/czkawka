@@ -11,17 +11,22 @@ import { BottomPanel } from "bottom_panel.slint";
 
 export {Settings}
 
+export component Raw inherits Window {
+    preferred-width: 2000px;
+}
+
 export component MainWindow inherits Window {
     callback deleted;
     callback scan_stopping;
     callback scan_starting(CurrentTab);
     callback item_opened(string);
     callback folder-choose-requested(bool);
+    callback set_console_text(string);
 
     callback scan_ended();
 
     min-width: 300px;
-    preferred-width: 1024px;
+    preferred-width: 2000px;
     min-height: 300px;
     preferred-height: 600px;
 
@@ -71,7 +76,6 @@ export component MainWindow inherits Window {
     VerticalBox {
         HorizontalBox {
             vertical-stretch: 1.0;
-            // min-width: 600px;
             preferred-height: 300px;
 
             LeftSidePanel {
@@ -115,11 +119,15 @@ export component MainWindow inherits Window {
         text_summary := LineEdit {
             read-only: true;
         }
-        BottomPanel {
+        bottom_panel := BottomPanel {
             bottom-panel-visibility <=> action_buttons.bottom-panel-visibility;
             vertical-stretch: 0.0;
             folder-choose-requested(included-directories) => {root.folder-choose-requested(included-directories)}
         }
+    }
+
+    set_console_text(text) => {
+        bottom-panel.set_console_text(text);
     }
 
     scan_ended() => {

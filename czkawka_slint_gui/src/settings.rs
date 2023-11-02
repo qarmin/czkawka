@@ -6,6 +6,9 @@ use slint::{ComponentHandle, ModelRc, SharedString, StandardListViewItem, VecMod
 pub fn reset_settings(app: &MainWindow) {
     let settings = app.global::<Settings>();
 
+    // app.width(1000);
+    app.invoke_set_console_text(SharedString::from(""));
+
     // Get current folder where executed binary is
     let current_folder = env::current_dir();
     let mut included_directories = vec![];
