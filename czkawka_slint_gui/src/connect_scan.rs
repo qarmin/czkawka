@@ -1,7 +1,8 @@
 use crate::MainListModel;
-use crate::{split_path, CurrentTab, MainWindow, ProgressToSend};
+use crate::{CurrentTab, MainWindow, ProgressToSend};
 use chrono::NaiveDateTime;
 use crossbeam_channel::{Receiver, Sender};
+use czkawka_core::common::split_path;
 use czkawka_core::common_dir_traversal::ProgressData;
 use czkawka_core::common_tool::CommonData;
 use czkawka_core::empty_folder::EmptyFolder;

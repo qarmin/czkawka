@@ -29,13 +29,15 @@ crossbeam-channel = "0.5.8"
 handsome_logger = "0.8.0"
 rfd = { version = "0.12.0", default-features = false, features = ["xdg-portal"] }
 home = "0.5.5"
+log = "0.4.20"
 
 [build-dependencies]
 #slint-build = "1.2.2"
 slint-build = { git = "https://github.com/slint-ui/slint.git" }
 
 [features]
-default = ["winit_femtovg", "winit_software"]
+# TODO remove from deault features skia, because is harder to cross-compile it
+default = ["winit_femtovg", "winit_software", "winit_skia_opengl"]
 skia_opengl = ["slint/renderer-skia-opengl"]
 skia_vulkan = ["slint/renderer-skia-vulkan"]
 software = ["slint/renderer-software"]

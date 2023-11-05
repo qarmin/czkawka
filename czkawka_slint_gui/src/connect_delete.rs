@@ -4,6 +4,7 @@ use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
 use crate::MainListModel;
 use crate::{CurrentTab, MainWindow};
+use log::info;
 
 pub fn connect_delete_button(app: &MainWindow) {
     let a = app.as_weak();
@@ -34,7 +35,7 @@ fn handle_delete_empty_folders(app: &MainWindow) {
 
 // TODO delete in parallel items, consider to add progress bar
 fn remove_selected_items(items: Vec<MainListModel>) {
-    dbg!(format!("Items to remove {}", items.len()));
+    info!("Items to remove {}", items.len());
     drop(items);
     // items.into_iter().for_each(|_item| {});
 }

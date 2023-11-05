@@ -1,8 +1,46 @@
-use crate::{MainWindow, Settings};
 use rfd::FileDialog;
 use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
-pub fn connect_add_directories(app: &MainWindow) {
+use crate::{MainWindow, Settings};
+
+pub fn connect_add_remove_directories(app: &MainWindow) {
+    connect_add_directories(app);
+    connect_remove_directories(app);
+}
+
+fn connect_remove_directories(app: &MainWindow) {
+    let a = app.as_weak();
+    app.global::<Settings>().on_remove_item_directories(move |included_directories, current_index| {
+        // Nothing selected
+        if current_index == -1 {
+            return;
+        }
+        let app = a.upgrade().unwrap();
+        let settings = app.global::<Settings>();
+
+        if included_directories {
+            let included_model = settings.get_included_directories();
+            let model_count = included_model.iter().count();
+
+            if model_count > current_index as usize {
+                let mut included_model = included_model.iter().collect::<Vec<_>>();
+                included_model.remove(current_index as usize);
+                settings.set_included_directories(ModelRc::new(VecModel::from(included_model)));
+            }
+        } else {
+            let excluded_model = settings.get_excluded_directories();
+            let model_count = excluded_model.iter().count();
+
+            if model_count > current_index as usize {
+                let mut excluded_model = excluded_model.iter().collect::<Vec<_>>();
+                excluded_model.remove(current_index as usize);
+                settings.set_excluded_directories(ModelRc::new(VecModel::from(excluded_model)));
+            }
+        }
+    });
+}
+
+fn connect_add_directories(app: &MainWindow) {
     let a = app.as_weak();
     app.on_folder_choose_requested(move |included_directories| {
         let app = a.upgrade().unwrap();

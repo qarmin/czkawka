@@ -10,6 +10,11 @@ Slint version of app should not have any special runtime requirements - it shoul
 Alternatively, it can be run with software rendering.
 
 ## Compilation
+Ubuntu
+```
+sudo apt install libfontconfig-dev libfreetype-dev
+```
+
 Default compilation is done by `cargo build --release` and should work on most systems.
 
 You need the latest available version of Rust to compile it, because NAME_TODO aims to support the latest slint verions,
