@@ -4,12 +4,12 @@ import {Settings} from "settings.slint";
 import {BottomPanelVisibility} from "common.slint";
 
 component DirectoriesPanel {
-    out property <length> buttonSize: 75px;
     callback folder-choose-requested(bool);
 
+    // Included directories
     HorizontalLayout {
         VerticalLayout {
-            width: buttonSize;
+            horizontal-stretch: 0.0;
             Button {
                 text: "Add";
                 clicked => {
@@ -27,6 +27,7 @@ component DirectoriesPanel {
             }
         }
         VerticalLayout {
+            horizontal-stretch: 1.0;
             Rectangle {
                 Text {
                     text: "Included Directories";
@@ -36,8 +37,10 @@ component DirectoriesPanel {
                 model: Settings.included-directories;
             }
         }
+
+        // Excluded directories 
         VerticalLayout {
-            width: buttonSize;
+            horizontal-stretch: 0.0;
             Button {
                 text: "Add";
                 clicked => {
@@ -50,11 +53,18 @@ component DirectoriesPanel {
                     Settings.remove_item_directories(false, excluded-list.current-item);
                 }
             }
+            Button {
+                text: "Manual Add";
+                clicked => {
+                    popup_item.show();
+                }
+            }
             Rectangle {
                 vertical-stretch: 1.0;
             }
         }
         VerticalLayout {
+            horizontal-stretch: 1.0;
             Rectangle {
                 Text {
                     text: "Excluded Directories";
@@ -64,6 +74,30 @@ component DirectoriesPanel {
                 model: Settings.excluded-directories;
             }
         }
+    }
+
+    popup_item := PopupWindow {
+        height: root.height;
+        width: root.width;
+
+        private property <string> text_data;
+
+        close-on-click: false;
+
+        TextEdit {
+            text <=> text-data;
+        }
+        TextEdit {
+
+        }
+
+        Rectangle {
+            background: red;
+            border-radius: 3px;
+            border-width: 2px;
+            border-color: blue;
+        }
+
     }
 }
 // TODO this should be a normal read only Text editor
