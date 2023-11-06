@@ -15,6 +15,6 @@ flatpak/
 /report
 ci_tester/target
 ci_tester/Cargo.lock
-czkawka_slint_gui/Cargo.lock
-czkawka_slint_gui/target
+krokiet/Cargo.lock
+krokiet/target
 *.json

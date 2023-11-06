@@ -1,10 +1,10 @@
 [package]
-name = "czkawka_slint"
+name = "krokiet"
 version = "6.1.0"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2021"
 rust-version = "1.72.1"
-description = "Slint frontend of Czkawka"
+description = "Slint frontend of Czkawka Core"
 license = "GPL-3"
 homepage = "https://github.com/qarmin/czkawka"
 repository = "https://github.com/qarmin/czkawka"
@@ -17,7 +17,7 @@ build = "build.rs"
 # Try to use only needed features from https://github.com/slint-ui/slint/blob/master/api/rs/slint/Cargo.toml#L23-L31
 slint = { git = "https://github.com/slint-ui/slint.git", default-features = false, features = ["std",
     "backend-winit",
-    "accessibility",
+#    "accessibility",
     "compat-1-2"
 ] }
 #slint = { path = "/home/rafal/test/slint/api/rs/slint/", default-features = false, features = ["std",
