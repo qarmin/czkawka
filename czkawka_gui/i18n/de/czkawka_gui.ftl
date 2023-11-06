@@ -411,7 +411,7 @@ progress_scanning_size = Scanne Größe der { $file_number } Datei
 progress_scanning_size_name = Scanne Namen und Größe der { $file_number } Datei
 progress_scanning_name = Scanne Name der { $file_number } Datei
 progress_analyzed_partial_hash = Teilhash von { $file_checked }/{ $all_files } Dateien analysiert
-progress_analyzed_full_hash = Analysiert voller Hash von { $file_checked }/{ $all_files } Dateien
+progress_analyzed_full_hash = Analysiert vollen Hash von { $file_checked }/{ $all_files } Dateien
 progress_current_stage = Aktuelle Stufe:{ " " }
 progress_all_stages = Alle Stufen:{ " " }
 # Saving loading 
@@ -422,7 +422,7 @@ saving_loading_loading_success = Richtig geladene App-Konfiguration.
 saving_loading_invalid_string = Für Schlüssel "{ $key }" ungültiges Ergebnis gefunden: "{ $result }", welches keine Zeichenkette ist.
 saving_loading_invalid_int = Für Schlüssel "{ $key }" ungültiges Ergebnis gefunden: "{ $result }", welches keine ganze Zahl ist.
 saving_loading_invalid_bool = Für Schlüssel "{ $key }" ungültiges Ergebnis gefunden: "{ $result }", welches kein Boolean ist.
-saving_loading_decode_problem_bool = Fehler beim Dekodieren des Bools von Schlüssel "{ $key }" gefunden "{ $result }" aber erlaubte Werte sind 0, 1, true oder false.
+saving_loading_decode_problem_bool = Fehler beim Dekodieren des Bools von Schlüssel "{ $key }": gefunden "{ $result }", aber erlaubte Werte sind 0, 1, true oder false.
 saving_loading_saving_same_keys = Versucht die Einstellung mit doppelter Taste "{ $key } " zu speichern.
 saving_loading_failed_to_get_home_directory = Home-Verzeichnis konnte nicht zum Öffnen und Speichern der Konfigurationsdatei geladen werden.
 saving_loading_folder_config_instead_file = Konfigurationsdatei im Pfad "{ $path }" kann nicht erstellt oder geöffnet werden, da bereits ein Ordner vorhanden ist.
