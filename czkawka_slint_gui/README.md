@@ -54,6 +54,21 @@ should print something like
 Slint: Build config: debug; Backend: software
 ```
 
+## Dark theme
+App was created with white fluent theme by default, but is easily possible to use dark theme by setting `SLINT_STYLE` environment variable to `fluent-dark` during compilation
+e.g. 
+```
+SLINT_STYLE=fluent-dark cargo run -- --path .
+```
+
+Slint supports also other themes, but they are not officially supported by this app and may be broken.
+```
+SLINT_STYLE=cupertino-light cargo run -- --path .
+SLINT_STYLE=cupertino-dark cargo run -- --path .
+SLINT_STYLE=material-light cargo run -- --path .
+SLINT_STYLE=material-dark cargo run -- --path .
+```
+
 ## How to help?
 - Suggesting possible design changes in the gui - of course, they should be possible to be simply implemented in the slint keeping in mind the performance aspect as well
 - Modifying user interface - gui is written in simple language similar to qml - [slint live preview example](https://slint.dev/releases/1.2.2/editor/?load_demo=examples/printerdemo/ui/printerdemo.slint)
