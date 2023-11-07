@@ -1,16 +1,53 @@
 use rfd::FileDialog;
 use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
-use crate::{MainWindow, Settings};
+use crate::{Callabler, MainWindow, Settings};
 
 pub fn connect_add_remove_directories(app: &MainWindow) {
     connect_add_directories(app);
     connect_remove_directories(app);
+    connect_add_manual_directories(app);
+}
+
+fn connect_add_manual_directories(app: &MainWindow) {
+    let a = app.as_weak();
+    app.global::<Callabler>().on_added_manual_directories(move |included_directories, list_of_files_to_add| {
+        let non_empty_lines = list_of_files_to_add.lines().filter(|x| !x.is_empty()).collect::<Vec<_>>();
+        if non_empty_lines.is_empty() {
+            return;
+        }
+        let app = a.upgrade().unwrap();
+        let settings = app.global::<Settings>();
+
+        if included_directories {
+            let included_model = settings.get_included_directories();
+            let mut included_model = included_model.iter().collect::<Vec<_>>();
+            included_model.extend(non_empty_lines.iter().map(|x| {
+                let mut element = slint::StandardListViewItem::default();
+                element.text = slint::SharedString::from(x.to_string());
+                element
+            }));
+            included_model.sort_by_cached_key(|x| x.text.to_string());
+            included_model.dedup();
+            settings.set_included_directories(ModelRc::new(VecModel::from(included_model)));
+        } else {
+            let excluded_model = settings.get_excluded_directories();
+            let mut excluded_model = excluded_model.iter().collect::<Vec<_>>();
+            excluded_model.extend(non_empty_lines.iter().map(|x| {
+                let mut element = slint::StandardListViewItem::default();
+                element.text = slint::SharedString::from(x.to_string());
+                element
+            }));
+            excluded_model.sort_by_cached_key(|x| x.text.to_string());
+            excluded_model.dedup();
+            settings.set_excluded_directories(ModelRc::new(VecModel::from(excluded_model)));
+        }
+    });
 }
 
 fn connect_remove_directories(app: &MainWindow) {
     let a = app.as_weak();
-    app.global::<Settings>().on_remove_item_directories(move |included_directories, current_index| {
+    app.global::<Callabler>().on_remove_item_directories(move |included_directories, current_index| {
         // Nothing selected
         if current_index == -1 {
             return;

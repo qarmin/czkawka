@@ -1,13 +1,6 @@
-export struct SettingsModel {
-    is_selected: bool,
-}
-
 export global Settings  {
-    in-out property<SettingsModel> model;
     in-out property<bool> checkbox_checked: false;
 
     in-out property <[StandardListViewItem]> included_directories: [{text: "ABCD"}, {text: "BCDA"}];
     in-out property <[StandardListViewItem]> excluded_directories: [{text: "ABCD"}, {text: "BCDA"}, {text: "CDFFF"}];
-
-    callback remove_item_directories(bool, int);
 }
