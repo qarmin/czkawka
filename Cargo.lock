@@ -3322,6 +3322,8 @@ dependencies = [
  "open",
  "rand",
  "rfd",
+ "serde",
+ "serde_json",
  "slint",
  "slint-build",
 ]

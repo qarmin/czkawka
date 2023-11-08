@@ -135,13 +135,7 @@ export component MainWindow inherits Window {
         property <bool> included_directories;
         private property <string> text_data;
 
-        callback set_included_directories(bool);
-
         close-on-click: false;
-
-        set-included-directories(included-directories) => {
-            self.included-directories = included-directories; 
-        }
 
         HorizontalLayout {
             alignment: LayoutAlignment.center;

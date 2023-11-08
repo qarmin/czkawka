@@ -2,8 +2,7 @@ use std::borrow::Borrow;
 
 use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
-use crate::MainListModel;
-use crate::{CurrentTab, MainWindow};
+use crate::{CurrentTab, MainListModel, MainWindow};
 use log::info;
 
 pub fn connect_delete_button(app: &MainWindow) {
