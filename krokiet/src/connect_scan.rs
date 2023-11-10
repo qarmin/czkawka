@@ -1,4 +1,5 @@
 use crate::settings::{collect_settings, SettingsCustom};
+use crate::Settings;
 use crate::{CurrentTab, MainListModel, MainWindow, ProgressToSend};
 use chrono::NaiveDateTime;
 use crossbeam_channel::{Receiver, Sender};
@@ -49,6 +50,7 @@ fn scan_empty_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, 
         finder.find_empty_files(Some(&stop_receiver), Some(&progress_sender));
 
         let mut vector = finder.get_empty_files().clone();
+        let messages = finder.get_text_messages().create_messages_text();
 
         vector.sort_unstable_by_key(|e| {
             let t = split_path(e.get_path());
@@ -56,6 +58,7 @@ fn scan_empty_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, 
         });
 
         a.upgrade_in_event_loop(move |app| {
+            let number_of_empty_files = vector.len();
             let items = Rc::new(VecModel::default());
             for fe in vector {
                 let (directory, file) = split_path(fe.get_path());
@@ -74,7 +77,8 @@ fn scan_empty_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, 
                 items.push(main);
             }
             app.set_empty_files_model(items.into());
-            app.invoke_scan_ended();
+            app.invoke_scan_ended(format!("Found {} empty files", number_of_empty_files).into());
+            app.global::<Settings>().set_info_text(messages.into());
         })
     });
 }
@@ -87,6 +91,7 @@ fn scan_empty_folders(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>
         finder.find_empty_folders(Some(&stop_receiver), Some(&progress_sender));
 
         let mut vector = finder.get_empty_folder_list().keys().cloned().collect::<Vec<PathBuf>>();
+        let messages = finder.get_text_messages().create_messages_text();
 
         vector.sort_unstable_by_key(|e| {
             let t = split_path(e.as_path());
@@ -113,7 +118,8 @@ fn scan_empty_folders(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>
                 items.push(main);
             }
             app.set_empty_folder_model(items.into());
-            app.invoke_scan_ended();
+            app.invoke_scan_ended(format!("Found {} empty folders", folder_map.len()).into());
+            app.global::<Settings>().set_info_text(messages.into());
         })
     });
 }

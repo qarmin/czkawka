@@ -5,16 +5,19 @@ use std::path::PathBuf;
 use crate::common::create_string_standard_list_view_from_pathbuf;
 use crate::Settings;
 use home::home_dir;
-use slint::{ComponentHandle, Model, SharedString};
+use slint::{ComponentHandle, Model};
 
 #[cfg(target_family = "unix")]
 const DEFAULT_EXCLUDED_DIRECTORIES: &[&str] = &["/proc", "/dev", "/sys", "/run", "/snap"];
 #[cfg(not(target_family = "unix"))]
 const DEFAULT_EXCLUDED_DIRECTORIES: &[&str] = &["C:\\Windows"];
 
-pub fn reset_settings(app: &MainWindow) {
-    app.invoke_set_console_text(SharedString::from(""));
+pub struct SettingsCustom {
+    pub included_directories: Vec<PathBuf>,
+    pub excluded_directories: Vec<PathBuf>,
+}
 
+pub fn reset_settings(app: &MainWindow) {
     set_settings_to_gui(app, &SettingsCustom::default());
 }
 
@@ -28,11 +31,9 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
     // Excluded directories
     let excluded_items = create_string_standard_list_view_from_pathbuf(&custom_settings.excluded_directories);
     settings.set_excluded_directories(excluded_items);
-}
 
-pub struct SettingsCustom {
-    pub included_directories: Vec<PathBuf>,
-    pub excluded_directories: Vec<PathBuf>,
+    // Clear text
+    app.global::<Settings>().set_info_text("".into());
 }
 
 impl Default for SettingsCustom {

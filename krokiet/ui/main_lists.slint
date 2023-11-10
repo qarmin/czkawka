@@ -28,9 +28,9 @@ export component MainList {
     if root.active-tab == CurrentTab.EmptyFiles: SelectableTableView {
         min-width: 200px;
 
-        columns: ["Selection", "Folder Name", "Path"];
+        columns: ["Selection", "File Name", "Path"];
         last-column: "Modification Date";
-        column-sizes: [30px, 100px, 100px, 100px];
+        column-sizes: [35px, 100px, 350px, 100px];
         values <=> empty-files-model;
         parentPathIdx: 2;
         fileNameIdx: 1;
@@ -40,9 +40,9 @@ export component MainList {
     if root.active-tab == CurrentTab.SimilarImages: SelectableTableView {
         min-width: 200px;
 
-        columns: ["Selection", "Folder Name", "Path"];
+        columns: ["Selection", "File Name", "Path"];
         last-column: "Modification Date";
-        column-sizes: [30px, 100px, 100px, 100px];
+        column-sizes: [35px, 100px, 350px, 100px];
         values <=> similar-images-model;
         parentPathIdx: 2;
         fileNameIdx: 1;
