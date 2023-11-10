@@ -6,23 +6,17 @@ import {MainListModel} from "common.slint";
 
 export component SelectableTableView inherits Rectangle {
     callback item_opened(string);
-
     in property <[string]> columns;
     in property <string> last_column;
     in-out property <[MainListModel]> values;
-
     in-out property <[length]> column_sizes;
-    private property <[length]> real_sizes: [0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px];
+    private property <[length]> real_sizes: [0px, 0px, 0px, 0px, 0px, 0px, 0px, 0px, 0px, 0px, 0px, 0px, 0px, 0px, 0px, 0px, 0px, 0px];
     private property <int> column_number: column-sizes.length + 1;
-
     // This idx, starts from zero, but since first is always a checkbox, and is not in model.val values, remove 1 from idx
     in-out property <int> parentPathIdx;
     in-out property <int> fileNameIdx;
-
     in-out property <int> selected_item: -1;
-
     forward-focus: focus_item;
-
     // TODO not works
     focus_item := FocusScope {
         key-released(event) => {
@@ -35,18 +29,20 @@ export component SelectableTableView inherits Rectangle {
         padding: 5px;
         forward-focus: focus-item;
         HorizontalLayout {
-            padding: 5px; 
+            padding: 5px;
             spacing: 5px;
             vertical-stretch: 0;
-            for title[idx] in root.columns : HorizontalLayout {
+            for title [idx] in root.columns: HorizontalLayout {
                 width: root.column-sizes[idx];
+                Text {
+                    overflow: elide;
+                    text: title;
+                }
 
-                Text { overflow: elide; text: title; }
                 Rectangle {
                     width: 1px;
                     background: gray;
                     forward-focus: focus-item;
-                    
                     TouchArea {
                         width: 5px;
                         x: (parent.width - self.width) / 2;
@@ -69,18 +65,22 @@ export component SelectableTableView inherits Rectangle {
                     }
                 }
             }
-            Text { overflow: elide; text: last-column; }
+
+            Text {
+                overflow: elide;
+                text: last-column;
+            }
         }
+
         list_view := ListView {
             min-width: 100px;
             forward-focus: focus-item;
-
-            for r[idx] in root.values : Rectangle {
+            for r [idx] in root.values: Rectangle {
                 border-radius: 5px;
                 forward-focus: focus-item;
                 height: 20px;
-                background: r.header-row ? ColorPalette.list_view_normal_header_color : (touch-area.has-hover ? (r.selected_row ? ColorPalette.list-view-normal-selected-header : ColorPalette.list_view_normal_color) : (r.selected_row ? ColorPalette.list-view-normal-selected-header: ColorPalette.list_view_normal_color));
-                touch_area:= TouchArea {
+                background: r.header-row ? ColorPalette.list_view_normal_header_color : (touch-area.has-hover ? (r.selected_row ? ColorPalette.list-view-normal-selected-header : ColorPalette.list_view_normal_color) : (r.selected_row ? ColorPalette.list-view-normal-selected-header : ColorPalette.list_view_normal_color));
+                touch_area := TouchArea {
                     forward-focus: focus-item;
                     clicked => {
                         if (!r.header_row) {
@@ -109,7 +109,6 @@ export component SelectableTableView inherits Rectangle {
 
                 HorizontalLayout {
                     forward-focus: focus-item;
-
                     CheckBox {
                         visible: !r.header-row;
                         checked: r.checked && !r.header-row;
@@ -122,14 +121,12 @@ export component SelectableTableView inherits Rectangle {
 
                     HorizontalLayout {
                         spacing: 5px;
-                        for f[idx] in r.val : Text {
+                        for f [idx] in r.val: Text {
                             width: root.column-sizes[idx + 1];
                             text: f;
                             font-size: 12px;
                             forward-focus: focus-item;
-
                             vertical-alignment: center;
-
                             overflow: elide;
                         }
                     }

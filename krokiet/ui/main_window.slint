@@ -19,22 +19,18 @@ export component MainWindow inherits Window {
     callback scan_starting(CurrentTab);
     callback item_opened(string);
     callback folder-choose-requested(bool);
-
     callback scan_ended(string);
-
     min-width: 300px;
     preferred-width: 800px;
     min-height: 300px;
     preferred-height: 600px;
-
     in-out property <bool> stop_requested: false;
     in-out property <bool> scanning: false;
-    in-out property <ProgressToSend> progress_datas : {
+    in-out property <ProgressToSend> progress_datas: {
         current_progress: 15,
         all_progress: 20,
         step_name: "Cache",
     };
-
     in-out property <CurrentTab> active-tab: CurrentTab.EmptyFolders;
     in-out property <[MainListModel]> empty_folder_model: [
         {checked: false, selected_row: false, header_row: true, val: ["kropkarz", "/Xd1", "24.10.2023"]} ,
@@ -44,12 +40,10 @@ export component MainWindow inherits Window {
     ];
     in-out property <[MainListModel]> empty_files_model: [];
     in-out property <[MainListModel]> similar_images_model: [];
-
     VerticalBox {
         HorizontalBox {
             vertical-stretch: 1.0;
             preferred-height: 300px;
-
             LeftSidePanel {
                 horizontal-stretch: 0.0;
                 scanning <=> root.scanning;
@@ -65,20 +59,26 @@ export component MainWindow inherits Window {
                     empty_files_model <=> root.empty_files_model;
                     similar_images_model <=> root.similar_images_model;
     
-                    item_opened(item) => {item_opened(item)}
+                    item_opened(item) => {
+                        item_opened(item)
+                    }
                 }
-                if root.scanning: Progress {                    
+
+                if root.scanning: Progress {
                     horizontal-stretch: 0.0;
                     progress_datas <=> root.progress_datas;
                 }
             }
         }
+
         action_buttons := ActionButtons {
             vertical-stretch: 0.0;
             scanning <=> root.scanning;
             active-tab <=> root.active-tab;
             stop_requested <=> root.stop-requested;
-            deleted => {root.deleted();}
+            deleted => {
+                root.deleted();
+            }
             scan_stopping => {
                 text_summary.text = "Stopping scan, please wait...";
                 root.scan_stopping();
@@ -88,15 +88,20 @@ export component MainWindow inherits Window {
                 root.scan_starting(item);
             }
         }
+
         text_summary := LineEdit {
             read-only: true;
         }
+
         bottom_panel := BottomPanel {
-            property <bool> included-directories; // TODO why cannot set popup_item property? Strange limitation
+            property <bool> included-directories;
+            // TODO why cannot set popup_item property? Strange limitation
 
             bottom-panel-visibility <=> action_buttons.bottom-panel-visibility;
             vertical-stretch: 0.0;
-            folder-choose-requested(included-directories) => {root.folder-choose-requested(included-directories)}
+            folder-choose-requested(included-directories) => {
+                root.folder-choose-requested(included-directories)
+            }
             show_manual_add_dialog(included-directories) => {
                 self.included-directories = included-directories;
                 popup-item.show()
@@ -107,12 +112,9 @@ export component MainWindow inherits Window {
     popup_item := PopupWindow {
         height: root.height;
         width: root.width;
-        
         property <bool> included_directories;
         private property <string> text_data;
-
         close-on-click: false;
-
         HorizontalLayout {
             alignment: LayoutAlignment.center;
             VerticalLayout {
@@ -128,10 +130,12 @@ export component MainWindow inherits Window {
                             text: "Please add directories one per line";
                             horizontal-alignment: TextHorizontalAlignment.center;
                         }
+
                         TextEdit {
                             vertical-stretch: 1.0;
                             text <=> text-data;
                         }
+
                         HorizontalLayout {
                             min-height: 20px;
                             Button {
@@ -142,6 +146,7 @@ export component MainWindow inherits Window {
                                     popup-item.close();
                                 }
                             }
+
                             Button {
                                 text: "Cancel";
                                 clicked => {
@@ -153,7 +158,6 @@ export component MainWindow inherits Window {
                 }
             }
         }
-
     }
 
     scan_ended(scan_text) => {

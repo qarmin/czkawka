@@ -7,11 +7,9 @@ import {BottomPanelVisibility} from "common.slint";
 export component VisibilityButton inherits Button {
     in-out property <BottomPanelVisibility> button_visibility;
     in-out property <BottomPanelVisibility> bottom_panel_visibility;
-
     enabled: bottom_panel_visibility != button-visibility;
     height: 30px;
     width: 70px;
-
     clicked => {
         bottom-panel-visibility = button_visibility;
     }
@@ -21,7 +19,6 @@ export component ActionButtons inherits HorizontalLayout {
     callback deleted;
     callback scan_stopping;
     callback scan_starting(CurrentTab);
-
     in-out property <BottomPanelVisibility> bottom_panel_visibility: BottomPanelVisibility.Directories;
     in-out property <bool> stop_requested: false;
     in-out property <bool> scanning;
@@ -29,8 +26,7 @@ export component ActionButtons inherits HorizontalLayout {
     out property <int> name;
     height: 30px;
     spacing: 4px;
-
-    scan_button:= Button {
+    scan_button := Button {
         height: parent.height;
         enabled: !scanning;
         text: "Scan";
@@ -39,7 +35,8 @@ export component ActionButtons inherits HorizontalLayout {
             root.scan_starting(active-tab);
         }
     }
-    stop_button:= Button {
+
+    stop_button := Button {
         height: parent.height;
         enabled: scanning && !stop_requested;
         text: "Stop";
@@ -53,7 +50,7 @@ export component ActionButtons inherits HorizontalLayout {
         horizontal-stretch: 0.5;
     }
 
-    delete_button:= Button {
+    delete_button := Button {
         height: parent.height;
         enabled: !scanning;
         text: "Delete";
@@ -61,7 +58,7 @@ export component ActionButtons inherits HorizontalLayout {
             root.deleted();
         }
     }
-    
+
     Rectangle {
         horizontal-stretch: 0.5;
     }

@@ -9,12 +9,12 @@ export component Progress {
     in-out property <ProgressToSend> progress_datas;
     preferred-width: 400px;
     preferred-height: 40px;
-
     VerticalLayout {
         Text {
             text: progress-datas.step-name;
             horizontal-alignment: TextHorizontalAlignment.center;
         }
+
         HorizontalLayout {
             spacing: 5px;
             VerticalLayout {
@@ -23,11 +23,13 @@ export component Progress {
                     vertical-alignment: TextVerticalAlignment.center;
                     text: "Current Stage:";
                 }
+
                 Text {
                     vertical-alignment: TextVerticalAlignment.center;
                     text: "All Stages:";
                 }
             }
+
             VerticalLayout {
                 spacing: 5px;
                 VerticalLayout {
@@ -38,23 +40,26 @@ export component Progress {
                         progress: progress_datas.current-progress / 100.0;
                     }
                 }
+
                 VerticalLayout {
                     alignment: LayoutAlignment.center;
                     ProgressIndicator {
                         height: 8px;
-                        progress:  progress_datas.all-progress / 100.0;
+                        progress: progress_datas.all-progress / 100.0;
                     }
                 }
             }
+
             VerticalLayout {
                 spacing: 5px;
                 Text {
                     vertical-alignment: TextVerticalAlignment.center;
-                    text:  progress_datas.current-progress + "%";
+                    text: progress_datas.current-progress + "%";
                 }
+
                 Text {
                     vertical-alignment: TextVerticalAlignment.center;
-                    text:  progress_datas.all-progress + "%";
+                    text: progress_datas.all-progress + "%";
                 }
             }
         }

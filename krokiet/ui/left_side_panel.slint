@@ -7,50 +7,47 @@ component TabItem {
     in-out property <CurrentTab> active-tab;
     in property <string> text;
     in property <CurrentTab> curr_tab;
-
     Rectangle {
         width: parent.width;
         horizontal-stretch: 1.0;
         background: touch-area.has-hover ? ColorPalette.tab-hovered-color : transparent;
-
-        touch_area:= TouchArea {
+        touch_area := TouchArea {
             clicked => {
                 if (root.active-tab == root.curr-tab) {
                     return;
                 }
-
                 root.active-tab = root.curr-tab;
             }
         }
     }
+
     HorizontalLayout {
         width: parent.width;
         alignment: LayoutAlignment.end;
         layout_rectangle := VerticalLayout {
-            empty_rectangle := Rectangle {
+            empty_rectangle := Rectangle { }
 
-            }
             current_rectangle := Rectangle {
                 visible: (root.active-tab == root.curr-tab);
                 border-radius: 2px;
                 width: 5px;
                 height: 0px;
                 background: ColorPalette.tab_selected_color;
-                animate height {
+                animate height{
                     duration: 150ms;
-                    easing: ease;
+                easing: ease;
                 }
             }
-            empty_rectangle2 := Rectangle {
-                
-            }
+            empty_rectangle2 := Rectangle { }
         }
     }
+
     Text {
         text: root.text;
         width: parent.width;
         horizontal-alignment: center;
     }
+
     states [
         is-selected when root.active-tab == root.curr-tab: {
             current_rectangle.height: layout_rectangle.height;
@@ -65,7 +62,6 @@ export component LeftSidePanel {
     in-out property <CurrentTab> active-tab;
     in-out property <bool> scanning;
     width: 120px;
-
     VerticalLayout {
         spacing: 20px;
         Rectangle {
@@ -75,6 +71,7 @@ export component LeftSidePanel {
                 source: @image-url("../icons/logo.png");
             }
         }
+
         VerticalLayout {
             // spacing: 3px;
             alignment: center;
@@ -86,6 +83,7 @@ export component LeftSidePanel {
                 active-tab <=> root.active-tab;
                 curr_tab: CurrentTab.EmptyFolders;
             }
+
             TabItem {
                 height: parent.element-size;
                 scanning: scanning;
@@ -93,6 +91,7 @@ export component LeftSidePanel {
                 active-tab <=> root.active-tab;
                 curr_tab: CurrentTab.EmptyFiles;
             }
+
             TabItem {
                 height: parent.element-size;
                 scanning: scanning;
@@ -101,6 +100,7 @@ export component LeftSidePanel {
                 curr_tab: CurrentTab.SimilarImages;
             }
         }
+
         HorizontalLayout {
             height: 20px;
             alignment: end;
