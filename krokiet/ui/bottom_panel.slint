@@ -97,6 +97,7 @@ component DirectoriesPanel {
 component TextErrorsPanel inherits TextEdit {
     height: 20px;
     read-only: true;
+    wrap: TextWrap.no-wrap;
     text <=> Settings.info_text;
 }
 

@@ -39,12 +39,12 @@ export component MainList {
 
     if root.active-tab == CurrentTab.SimilarImages: SelectableTableView {
         min-width: 200px;
-        columns: ["Selection", "File Name", "Path"];
+        columns: ["Selection", "Similarity", "Size", "Dimensions", "File Name", "Path"];
         last-column: "Modification Date";
-        column-sizes: [35px, 100px, 350px, 100px];
+        column-sizes: [35px, 80px, 80px, 80px, 350px, 100px, 100px];
         values <=> similar-images-model;
-        parentPathIdx: 2;
-        fileNameIdx: 1;
+        parentPathIdx: 5;
+        fileNameIdx: 4;
         item_opened(item) => {
             item_opened(item)
         }

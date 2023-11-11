@@ -467,6 +467,7 @@ pub fn prepare_thread_handler_common(
     checking_method: CheckingMethod,
     tool_type: ToolType,
 ) -> (JoinHandle<()>, Arc<AtomicBool>, Arc<AtomicUsize>, AtomicBool) {
+    assert_ne!(tool_type, ToolType::None, "ToolType::None should not exist");
     let progress_thread_run = Arc::new(AtomicBool::new(true));
     let atomic_counter = Arc::new(AtomicUsize::new(0));
     let check_was_stopped = AtomicBool::new(false);

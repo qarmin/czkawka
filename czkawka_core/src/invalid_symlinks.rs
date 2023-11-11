@@ -52,6 +52,7 @@ impl InvalidSymlinks {
             .allowed_extensions(self.common_data.allowed_extensions.clone())
             .excluded_items(self.common_data.excluded_items.clone())
             .recursive_search(self.common_data.recursive_search)
+            .tool_type(self.common_data.tool_type)
             .build()
             .run();
 

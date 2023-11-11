@@ -53,6 +53,7 @@ export component Progress {
             VerticalLayout {
                 spacing: 5px;
                 Text {
+                    visible: progress_datas.current-progress >= -0.001;
                     vertical-alignment: TextVerticalAlignment.center;
                     text: progress_datas.current-progress + "%";
                 }

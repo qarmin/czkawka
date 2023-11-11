@@ -187,7 +187,7 @@ impl<'a, 'b> DirTraversalBuilder<'a, 'b, ()> {
             directories: None,
             allowed_extensions: None,
             excluded_items: None,
-            tool_type: ToolType::BadExtensions,
+            tool_type: ToolType::None,
         }
     }
 }
@@ -341,6 +341,8 @@ where
 {
     #[fun_time(message = "run(collecting files/dirs)", level = "debug")]
     pub fn run(self) -> DirTraversalResult<T> {
+        assert!(self.tool_type != ToolType::None, "Tool type cannot be None");
+
         let mut all_warnings = vec![];
         let mut grouped_file_entries: BTreeMap<T, Vec<FileEntry>> = BTreeMap::new();
         let mut folder_entries: BTreeMap<PathBuf, FolderEntry> = BTreeMap::new();

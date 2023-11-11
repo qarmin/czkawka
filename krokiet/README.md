@@ -73,14 +73,13 @@ should print something like
 Slint: Build config: debug; Backend: software
 ```
 
-## Dark/Different theme
+## Different theme
 
-App was created with white fluent theme by default, but is easily possible to use dark theme by setting `SLINT_STYLE`
-environment variable to `fluent-dark` during compilation
-e.g.
+App was created with fluent theme in mind, but is possible to use dark theme by setting `SLINT_STYLE` environment
+variable to `fluent-dark` during compilation e.g.
 
 ```
-SLINT_STYLE=fluent-dark cargo run -- --path .
+SLINT_STYLE=fluent-light cargo run -- --path .
 ```
 
 Slint supports also other themes, but they are not officially supported by this app and may be broken.
@@ -97,7 +96,8 @@ SLINT_STYLE=material-dark cargo run -- --path .
 - Suggesting possible design changes in the gui - of course, they should be possible to be simply implemented in the
   slint keeping in mind the performance aspect as well
 - Modifying user interface - gui is written in simple language similar to qml, that can be modified in vscode/web with
-  live preview - [slint live preview example](https://slint.dev/releases/1.3.0/editor/?load_demo=examples/printerdemo/ui/printerdemo.slint)
+  live
+  preview - [slint live preview example](https://slint.dev/releases/1.3.0/editor/?load_demo=examples/printerdemo/ui/printerdemo.slint)
 - Improving libraries used by Krokiet e.g. czkawka_core, image-rs etc.
 - Improving app rust code
 
@@ -120,6 +120,8 @@ SLINT_STYLE=material-dark cargo run -- --path .
 - proper popup windows - slint not handle them properly
 - logo
 - about window
+- reference folders
+- translations(problem is only with interface, messages like "Checking {x} file" can be easily translated from rust side)
 
 ## Why Slint?
 
@@ -145,10 +147,13 @@ errors.
 
 So only Slint left with its cons and pros.
 
+## License
+Code is licensed under MIT license but entire project is licensed under GPL-3.0 license, due Slint license restrictions.
+
 ## Name
 
 Why Krokiet(eng. Croquette)?  
 Because I like croquettes(Polish version), the ones with meat, mushrooms wrapped in breadcrumbs... it makes my mouth
 water.  
 I considered also other dishes which I like to eat like pierogi, żurek, pączek, schabowy or zapiekanka.  
-This name should be a lot of easier to remember than Czkawka.
+This name should be a lot of easier to remember than czkawka or szyszka.

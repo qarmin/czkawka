@@ -169,6 +169,7 @@ impl DuplicateFinder {
             .recursive_search(self.common_data.recursive_search)
             .minimal_file_size(self.common_data.minimal_file_size)
             .maximal_file_size(self.common_data.maximal_file_size)
+            .tool_type(self.common_data.tool_type)
             .build()
             .run();
 
@@ -244,6 +245,7 @@ impl DuplicateFinder {
             .recursive_search(self.common_data.recursive_search)
             .minimal_file_size(self.common_data.minimal_file_size)
             .maximal_file_size(self.common_data.maximal_file_size)
+            .tool_type(self.common_data.tool_type)
             .build()
             .run();
 
@@ -321,6 +323,7 @@ impl DuplicateFinder {
             .recursive_search(self.common_data.recursive_search)
             .minimal_file_size(self.common_data.minimal_file_size)
             .maximal_file_size(self.common_data.maximal_file_size)
+            .tool_type(self.common_data.tool_type)
             .build()
             .run();
 

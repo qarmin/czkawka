@@ -83,6 +83,7 @@ impl EmptyFolder {
             .excluded_items(self.common_data.excluded_items.clone())
             .collect(Collect::EmptyFolders)
             .max_stage(0)
+            .tool_type(self.common_data.tool_type)
             .build()
             .run();
 

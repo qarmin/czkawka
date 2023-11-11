@@ -94,7 +94,7 @@ pub struct SimilarImages {
     // Hashmap with image hashes and Vector with names of files
     similarity: u32,
     images_to_check: BTreeMap<String, FileEntry>,
-    hash_size: u8,
+    pub hash_size: u8, // TODO to remove pub, this is needeed by new gui, because there is no way to check what exactly was seelected
     hash_alg: HashAlg,
     image_filter: FilterType,
     exclude_images_with_same_size: bool,

@@ -9,6 +9,7 @@
 
 ### Core
 - Using normal crossbeam channels instead of asyncio tokio channel - [#1102](https://github.com/qarmin/czkawka/pull/1102)
+- Fixed tool type when using progress of empty directories
 
 ## Version 6.1.0 - 15.10.2023r
 - BREAKING CHANGE - Changed cache saving method, deduplicated, optimized and simplified procedure(all files needs to be hashed again) - [#1072](https://github.com/qarmin/czkawka/pull/1072), [#1086](https://github.com/qarmin/czkawka/pull/1086)
