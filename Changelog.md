@@ -1,12 +1,14 @@
 ## Version 7.0.0 - ?
 ### GTK GUI
+- Added drag&drop support for included/excluded folders - [#1102](https://github.com/qarmin/czkawka/pull/1102)
 
 ### CLI
 
-### Slawka GUI
+### Krokiet GUI
+- Initial release of new gui - [#1102](https://github.com/qarmin/czkawka/pull/1102)
 
-### Core(all modes)
-
+### Core
+- Using normal crossbeam channels instead of asyncio tokio channel - [#1102](https://github.com/qarmin/czkawka/pull/1102)
 
 ## Version 6.1.0 - 15.10.2023r
 - BREAKING CHANGE - Changed cache saving method, deduplicated, optimized and simplified procedure(all files needs to be hashed again) - [#1072](https://github.com/qarmin/czkawka/pull/1072), [#1086](https://github.com/qarmin/czkawka/pull/1086)

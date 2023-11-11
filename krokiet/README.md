@@ -97,7 +97,7 @@ SLINT_STYLE=material-dark cargo run -- --path .
 - Suggesting possible design changes in the gui - of course, they should be possible to be simply implemented in the
   slint keeping in mind the performance aspect as well
 - Modifying user interface - gui is written in simple language similar to qml, that can be modified in vscode/web with
-  live preview - [slint live preview example](https://slint.dev/releases/1.2.2/editor/?load_demo=examples/printerdemo/ui/printerdemo.slint)
+  live preview - [slint live preview example](https://slint.dev/releases/1.3.0/editor/?load_demo=examples/printerdemo/ui/printerdemo.slint)
 - Improving libraries used by Krokiet e.g. czkawka_core, image-rs etc.
 - Improving app rust code
 
@@ -110,8 +110,16 @@ SLINT_STYLE=material-dark cargo run -- --path .
 - settings
 - moving files
 - deleting files
+- sorting files
+- saving results
+- symlink/hardlink
 - implementing all modes
 - multiple languages
+- multiple selection
+- key selection support
+- proper popup windows - slint not handle them properly
+- logo
+- about window
 
 ## Why Slint?
 
