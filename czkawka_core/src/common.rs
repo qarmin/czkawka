@@ -44,7 +44,7 @@ pub fn get_number_of_threads() -> usize {
 
 fn filtering_messages(record: &Record) -> bool {
     if let Some(module_path) = record.module_path() {
-        module_path.starts_with("czkawka")
+        module_path.starts_with("czkawka") || module_path.starts_with("krokiet")
     } else {
         true
     }

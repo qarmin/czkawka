@@ -1,6 +1,6 @@
 use crate::common::create_vec_model_from_vec_string;
 use crate::settings::{collect_settings, SettingsCustom};
-use crate::Settings;
+use crate::GuiState;
 use crate::{CurrentTab, MainListModel, MainWindow, ProgressToSend};
 use chrono::NaiveDateTime;
 use crossbeam_channel::{Receiver, Sender};
@@ -98,7 +98,7 @@ fn scan_similar_images(a: Weak<MainWindow>, progress_sender: Sender<ProgressData
             }
             app.set_similar_images_model(items.into());
             app.invoke_scan_ended(format!("Found {} similar images files", number_of_empty_files).into());
-            app.global::<Settings>().set_info_text(messages.into());
+            app.global::<GuiState>().set_info_text(messages.into());
         })
     });
 }
@@ -139,7 +139,7 @@ fn scan_empty_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, 
             }
             app.set_empty_files_model(items.into());
             app.invoke_scan_ended(format!("Found {} empty files", number_of_empty_files).into());
-            app.global::<Settings>().set_info_text(messages.into());
+            app.global::<GuiState>().set_info_text(messages.into());
         })
     });
 }
@@ -180,7 +180,7 @@ fn scan_empty_folders(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>
             }
             app.set_empty_folder_model(items.into());
             app.invoke_scan_ended(format!("Found {} empty folders", folder_map.len()).into());
-            app.global::<Settings>().set_info_text(messages.into());
+            app.global::<GuiState>().set_info_text(messages.into());
         })
     });
 }

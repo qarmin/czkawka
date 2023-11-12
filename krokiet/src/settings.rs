@@ -3,6 +3,7 @@ use std::env;
 use std::path::PathBuf;
 
 use crate::common::create_string_standard_list_view_from_pathbuf;
+use crate::GuiState;
 use crate::Settings;
 use home::home_dir;
 use slint::{ComponentHandle, Model};
@@ -33,7 +34,7 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
     settings.set_excluded_directories(excluded_items);
 
     // Clear text
-    app.global::<Settings>().set_info_text("".into());
+    app.global::<GuiState>().set_info_text("".into());
 }
 
 impl Default for SettingsCustom {

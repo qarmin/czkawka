@@ -3317,6 +3317,7 @@ dependencies = [
  "handsome_logger",
  "home",
  "humansize",
+ "image",
  "log",
  "open",
  "rand",

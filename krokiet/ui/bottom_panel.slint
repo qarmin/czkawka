@@ -3,6 +3,7 @@ import {Button, StandardListView, VerticalBox, ScrollView, TextEdit} from "std-w
 import {Settings} from "settings.slint";
 import {BottomPanelVisibility} from "common.slint";
 import {Callabler} from "callabler.slint";
+import {GuiState} from "gui_state.slint";
 
 component DirectoriesPanel inherits HorizontalLayout {
     callback folder_choose_requested(bool);
@@ -98,7 +99,7 @@ component TextErrorsPanel inherits TextEdit {
     height: 20px;
     read-only: true;
     wrap: TextWrap.no-wrap;
-    text <=> Settings.info_text;
+    text <=> GuiState.info_text;
 }
 
 export component BottomPanel {

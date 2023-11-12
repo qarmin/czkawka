@@ -9,19 +9,23 @@ export component MainList {
     in-out property <[MainListModel]> empty_folder_model;
     in-out property <[MainListModel]> empty_files_model;
     in-out property <[MainListModel]> similar_images_model;
-    // TODO - using root.active-tab in visible property will not clear model
-    if root.active-tab == CurrentTab.EmptyFolders: SelectableTableView {
+    
+    SelectableTableView {
+        visible: root.active-tab == CurrentTab.EmptyFolders;
         min-width: 200px;
+        height: parent.height;
         columns: ["Selection", "Folder Name", "Path"];
         last-column: "Modification Date";
-        column-sizes: [35px, 100px, 350px, 300px];
+        column-sizes: [35px, 100px, 350px, 100px];
         values <=> empty-folder-model;
         parentPathIdx: 2;
         fileNameIdx: 1;
     }
 
-    if root.active-tab == CurrentTab.EmptyFiles: SelectableTableView {
+    SelectableTableView {
+        visible: root.active-tab == CurrentTab.EmptyFiles;
         min-width: 200px;
+        height: parent.height;
         columns: ["Selection", "File Name", "Path"];
         last-column: "Modification Date";
         column-sizes: [35px, 100px, 350px, 100px];
@@ -30,8 +34,10 @@ export component MainList {
         fileNameIdx: 1;
     }
 
-    if root.active-tab == CurrentTab.SimilarImages: SelectableTableView {
+    SelectableTableView {
+        visible: root.active-tab == CurrentTab.SimilarImages;
         min-width: 200px;
+        height: parent.height;
         columns: ["Selection", "Similarity", "Size", "Dimensions", "File Name", "Path"];
         last-column: "Modification Date";
         column-sizes: [35px, 80px, 80px, 80px, 350px, 100px, 100px];
