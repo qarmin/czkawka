@@ -2,12 +2,12 @@ use std::borrow::Borrow;
 
 use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
-use crate::{CurrentTab, MainListModel, MainWindow};
+use crate::{Callabler, CurrentTab, MainListModel, MainWindow};
 use log::info;
 
 pub fn connect_delete_button(app: &MainWindow) {
     let a = app.as_weak();
-    app.on_deleted(move || {
+    app.global::<Callabler>().on_delete_selected_items(move || {
         let app = a.upgrade().unwrap();
 
         let active_tab = app.get_active_tab();

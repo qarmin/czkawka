@@ -1,4 +1,10 @@
 export global Callabler {
+    // Bottom panel operations
     callback remove_item_directories(bool, int);
     callback added_manual_directories(bool, string);
+
+    // Right click or middle click opener
+    callback item_opened(string);
+
+    callback delete_selected_items();
 }

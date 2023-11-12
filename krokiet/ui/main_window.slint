@@ -14,11 +14,9 @@ import {ColorPalette} from "color_palette.slint";
 export {Settings, Callabler}
 
 export component MainWindow inherits Window {
-    callback deleted;
     callback scan_stopping;
     callback scan_starting(CurrentTab);
-    callback item_opened(string);
-    callback folder-choose-requested(bool);
+    callback folder_choose_requested(bool);
     callback scan_ended(string);
     min-width: 300px;
     preferred-width: 800px;
@@ -58,10 +56,6 @@ export component MainWindow inherits Window {
                     empty_folder_model <=> root.empty_folder_model;
                     empty_files_model <=> root.empty_files_model;
                     similar_images_model <=> root.similar_images_model;
-    
-                    item_opened(item) => {
-                        item_opened(item)
-                    }
                 }
 
                 if root.scanning: Progress {
@@ -76,9 +70,6 @@ export component MainWindow inherits Window {
             scanning <=> root.scanning;
             active-tab <=> root.active-tab;
             stop_requested <=> root.stop-requested;
-            deleted => {
-                root.deleted();
-            }
             scan_stopping => {
                 text_summary.text = "Stopping scan, please wait...";
                 root.scan_stopping();
@@ -99,8 +90,8 @@ export component MainWindow inherits Window {
 
             bottom-panel-visibility <=> action_buttons.bottom-panel-visibility;
             vertical-stretch: 0.0;
-            folder-choose-requested(included-directories) => {
-                root.folder-choose-requested(included-directories)
+            folder_choose_requested(included-directories) => {
+                root.folder_choose_requested(included-directories)
             }
             show_manual_add_dialog(included-directories) => {
                 self.included-directories = included-directories;

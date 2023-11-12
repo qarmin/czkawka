@@ -1132,6 +1132,7 @@ mod tests {
     use std::collections::HashMap;
     use std::path::PathBuf;
 
+    use crate::common_dir_traversal::ToolType;
     use bk_tree::BKTree;
 
     use crate::common_directory::Directories;
@@ -1152,6 +1153,10 @@ mod tests {
         for _ in 0..100 {
             let mut similar_images = SimilarImages {
                 similarity: 0,
+                common_data: CommonToolData {
+                    tool_type: ToolType::SimilarImages,
+                    ..Default::default()
+                },
                 ..Default::default()
             };
 
@@ -1183,6 +1188,10 @@ mod tests {
         for _ in 0..100 {
             let mut similar_images = SimilarImages {
                 similarity: 1,
+                common_data: CommonToolData {
+                    tool_type: ToolType::SimilarImages,
+                    ..Default::default()
+                },
                 ..Default::default()
             };
 
@@ -1203,6 +1212,7 @@ mod tests {
                 similarity: 2,
                 common_data: CommonToolData {
                     use_reference_folders: false,
+                    tool_type: ToolType::SimilarImages,
                     ..Default::default()
                 },
                 ..Default::default()
@@ -1227,6 +1237,10 @@ mod tests {
     //     for _ in 0..100 {
     //         let mut similar_images = SimilarImages {
     //             similarity: 10,
+    //     common_data: CommonToolData {
+    //     tool_type: ToolType::SimilarImages,
+    //     ..Default::default()
+    // },
     //             use_reference_folders: false,
     //             ..Default::default()
     //         };
@@ -1250,6 +1264,7 @@ mod tests {
             let mut similar_images = SimilarImages {
                 similarity: 0,
                 common_data: CommonToolData {
+                    tool_type: ToolType::SimilarImages,
                     directories: Directories {
                         reference_directories: vec![PathBuf::from("/home/rr/")],
                         ..Default::default()
@@ -1276,6 +1291,7 @@ mod tests {
             let mut similar_images = SimilarImages {
                 similarity: 0,
                 common_data: CommonToolData {
+                    tool_type: ToolType::SimilarImages,
                     directories: Directories {
                         reference_directories: vec![PathBuf::from("/home/rr/")],
                         ..Default::default()
@@ -1303,6 +1319,7 @@ mod tests {
             let mut similar_images = SimilarImages {
                 similarity: 0,
                 common_data: CommonToolData {
+                    tool_type: ToolType::SimilarImages,
                     directories: Directories {
                         reference_directories: vec![PathBuf::from("/home/rr/")],
                         ..Default::default()
@@ -1334,6 +1351,7 @@ mod tests {
             let mut similar_images = SimilarImages {
                 similarity: 1,
                 common_data: CommonToolData {
+                    tool_type: ToolType::SimilarImages,
                     use_reference_folders: false,
                     ..Default::default()
                 },
@@ -1358,6 +1376,7 @@ mod tests {
             let mut similar_images = SimilarImages {
                 similarity: 4,
                 common_data: CommonToolData {
+                    tool_type: ToolType::SimilarImages,
                     use_reference_folders: false,
                     ..Default::default()
                 },
@@ -1391,6 +1410,7 @@ mod tests {
             let mut similar_images = SimilarImages {
                 similarity: 1,
                 common_data: CommonToolData {
+                    tool_type: ToolType::SimilarImages,
                     directories: Directories {
                         reference_directories: vec![PathBuf::from("/home/rr/")],
                         ..Default::default()
@@ -1421,6 +1441,7 @@ mod tests {
             let mut similar_images = SimilarImages {
                 similarity: 1,
                 common_data: CommonToolData {
+                    tool_type: ToolType::SimilarImages,
                     directories: Directories {
                         reference_directories: vec![PathBuf::from("/home/rr/")],
                         ..Default::default()
@@ -1448,6 +1469,7 @@ mod tests {
             let mut similar_images = SimilarImages {
                 similarity: 1,
                 common_data: CommonToolData {
+                    tool_type: ToolType::SimilarImages,
                     directories: Directories {
                         reference_directories: vec![PathBuf::from("/home/rr/")],
                         ..Default::default()
@@ -1486,6 +1508,7 @@ mod tests {
             let mut similar_images = SimilarImages {
                 similarity: 10,
                 common_data: CommonToolData {
+                    tool_type: ToolType::SimilarImages,
                     directories: Directories {
                         reference_directories: vec![PathBuf::from("/home/rr/")],
                         ..Default::default()

@@ -2,7 +2,7 @@ import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListV
 import {TypeOfOpenedItem} from "common.slint";
 import {ColorPalette} from "color_palette.slint";
 import {MainListModel} from "common.slint";
-
+import {Callabler} from "callabler.slint";
 
 export component SelectableTableView inherits Rectangle {
     callback item_opened(string);
@@ -100,9 +100,9 @@ export component SelectableTableView inherits Rectangle {
                     pointer-event(event) => {
                         // TODO this should be clicked by double-click
                         if (event.button == PointerEventButton.right && event.kind == PointerEventKind.up) {
-                            root.item_opened(r.val[root.parentPathIdx - 1])
+                            Callabler.item_opened(r.val[root.parentPathIdx - 1])
                         } else if (event.button == PointerEventButton.middle && event.kind == PointerEventKind.up) {
-                            root.item_opened(r.val[root.parentPathIdx - 1] + "/" + r.val[root.fileNameIdx - 1])
+                            Callabler.item_opened(r.val[root.parentPathIdx - 1] + "/" + r.val[root.fileNameIdx - 1])
                         }
                     }
                 }

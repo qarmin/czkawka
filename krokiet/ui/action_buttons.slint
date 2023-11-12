@@ -3,6 +3,7 @@ import {LeftSidePanel} from "left_side_panel.slint";
 import {MainList} from "main_lists.slint";
 import {CurrentTab} from "common.slint";
 import {BottomPanelVisibility} from "common.slint";
+import {Callabler} from "callabler.slint";
 
 export component VisibilityButton inherits Button {
     in-out property <BottomPanelVisibility> button_visibility;
@@ -16,7 +17,6 @@ export component VisibilityButton inherits Button {
 }
 
 export component ActionButtons inherits HorizontalLayout {
-    callback deleted;
     callback scan_stopping;
     callback scan_starting(CurrentTab);
     in-out property <BottomPanelVisibility> bottom_panel_visibility: BottomPanelVisibility.Directories;
@@ -55,7 +55,7 @@ export component ActionButtons inherits HorizontalLayout {
         enabled: !scanning;
         text: "Delete";
         clicked => {
-            root.deleted();
+            Callabler.delete_selected_items();
         }
     }
 
