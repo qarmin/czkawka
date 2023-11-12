@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::thread::{sleep, JoinHandle};
-use std::time::{Duration, SystemTime};
+use std::time::{Duration, Instant, SystemTime};
 use std::{fs, thread};
 
 #[cfg(feature = "heif")]
@@ -18,7 +18,7 @@ use image::{DynamicImage, ImageBuffer, Rgb};
 use imagepipe::{ImageSource, Pipeline};
 #[cfg(feature = "heif")]
 use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
-use log::{info, LevelFilter, Record};
+use log::{debug, info, LevelFilter, Record};
 
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
@@ -184,12 +184,17 @@ pub fn get_dynamic_image_from_heic(path: &str) -> Result<DynamicImage> {
 }
 
 pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path> + std::fmt::Debug) -> Option<DynamicImage> {
+    let mut start_timer = Instant::now();
+    let mut times = Vec::new();
+
     let file_handler = match OpenOptions::new().read(true).open(&path) {
         Ok(t) => t,
         Err(_e) => {
             return None;
         }
     };
+    times.push(("After opening", start_timer.elapsed()));
+    start_timer = Instant::now();
 
     let mut reader = BufReader::new(file_handler);
     let raw = match rawloader::decode(&mut reader) {
@@ -199,7 +204,13 @@ pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path> + std::fmt::Debug
         }
     };
 
+    times.push(("After decoding", start_timer.elapsed()));
+    start_timer = Instant::now();
+
     let source = ImageSource::Raw(raw);
+
+    times.push(("After creating source", start_timer.elapsed()));
+    start_timer = Instant::now();
 
     let mut pipeline = match Pipeline::new_from_source(source) {
         Ok(pipeline) => pipeline,
@@ -207,6 +218,9 @@ pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path> + std::fmt::Debug
             return None;
         }
     };
+
+    times.push(("After creating pipeline", start_timer.elapsed()));
+    start_timer = Instant::now();
 
     pipeline.run(None);
     let image = match pipeline.output_8bit(None) {
@@ -216,12 +230,22 @@ pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path> + std::fmt::Debug
         }
     };
 
+    times.push(("After creating image", start_timer.elapsed()));
+    start_timer = Instant::now();
+
     let Some(image) = ImageBuffer::<Rgb<u8>, Vec<u8>>::from_raw(image.width as u32, image.height as u32, image.data) else {
         return None;
     };
 
+    times.push(("After creating image buffer", start_timer.elapsed()));
+    start_timer = Instant::now();
     // println!("Properly hashed {:?}", path);
-    Some(DynamicImage::ImageRgb8(image))
+    let res = Some(DynamicImage::ImageRgb8(image));
+    times.push(("After creating dynamic image", start_timer.elapsed()));
+
+    let str_timer = times.into_iter().map(|(name, time)| format!("{name}: {time:?}")).collect::<Vec<_>>().join(", ");
+    debug!("Loading raw image --- {str_timer}");
+    res
 }
 
 pub fn split_path(path: &Path) -> (String, String) {

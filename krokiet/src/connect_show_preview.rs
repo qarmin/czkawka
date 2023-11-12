@@ -1,5 +1,5 @@
 use crate::{Callabler, GuiState, MainWindow};
-use czkawka_core::common::IMAGE_RS_EXTENSIONS;
+use czkawka_core::common::{get_dynamic_image_from_raw_image, IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
 use image::DynamicImage;
 use log::{debug, error};
 use slint::ComponentHandle;
@@ -50,17 +50,33 @@ fn load_image(image_path: &Path) -> Option<(Duration, image::DynamicImage)> {
     let image_extension = image_path.extension()?.to_string_lossy().to_lowercase();
     let extension_with_dot = format!(".{}", image_extension);
 
-    if !IMAGE_RS_EXTENSIONS.contains(&extension_with_dot.as_str()) {
+    let is_raw_image = RAW_IMAGE_EXTENSIONS.contains(&extension_with_dot.as_str());
+    let is_normal_image = IMAGE_RS_EXTENSIONS.contains(&extension_with_dot.as_str());
+
+    if !is_raw_image && !is_normal_image {
         return None;
     }
     let load_img_start_timer = Instant::now();
-    let img = image::open(image_name);
 
-    match img {
-        Ok(img) => Some((load_img_start_timer.elapsed(), img)),
-        Err(e) => {
-            error!("Error while loading image: {}", e);
+    // TODO this needs to be run inside closure
+    let img = if is_normal_image {
+        match image::open(image_name) {
+            Ok(img) => img,
+            Err(e) => {
+                error!("Error while loading image: {}", e);
+                return None;
+            }
+        }
+    } else if is_raw_image {
+        if let Some(img) = get_dynamic_image_from_raw_image(image_name) {
+            img
+        } else {
+            error!("Error while loading raw image - not sure why - try to guess");
             return None;
         }
-    }
+    } else {
+        panic!("Used not supported image extension");
+    };
+
+    Some((load_img_start_timer.elapsed(), img))
 }

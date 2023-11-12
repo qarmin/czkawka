@@ -8,7 +8,6 @@ import {GuiState} from "gui_state.slint";
 export component SelectableTableView inherits Rectangle {
     callback item_opened(string);
     in property <[string]> columns;
-    in property <string> last_column;
     in-out property <[MainListModel]> values;
     in-out property <[length]> column_sizes;
     private property <int> column_number: column-sizes.length + 1;
@@ -25,119 +24,123 @@ export component SelectableTableView inherits Rectangle {
         }
     }
 
-    VerticalBox {
-        padding: 5px;
-        forward-focus: focus-item;
-        HorizontalLayout {
+    ScrollView {
+        VerticalBox {
             padding: 5px;
-            spacing: 5px;
-            vertical-stretch: 0;
-            for title [idx] in root.columns: HorizontalLayout {
-                width: root.column-sizes[idx];
-                Text {
-                    overflow: elide;
-                    text: title;
-                }
+            forward-focus: focus-item;
+            HorizontalLayout {
+                padding: 5px;
+                spacing: 5px;
+                vertical-stretch: 0;
+                for title [idx] in root.columns: HorizontalLayout {
+                    width: root.column-sizes[idx];
+                    Text {
+                        overflow: elide;
+                        text: title;
+                    }
 
-                Rectangle {
-                    width: 1px;
-                    background: gray;
-                    forward-focus: focus-item;
-                    TouchArea {
-                        width: 5px;
-                        x: (parent.width - self.width) / 2;
-                        property <length> cached;
+                    Rectangle {
+                        width: 1px;
+                        background: gray;
                         forward-focus: focus-item;
-                        pointer-event(event) => {
-                            if (event.button == PointerEventButton.left && event.kind == PointerEventKind.down) {
-                                self.cached = root.column_sizes[idx];
-                            }
-                        }
-                        moved => {
-                            if (self.pressed) {
-                                root.column_sizes[idx] += (self.mouse-x - self.pressed-x);
-                                if (root.column_sizes[idx] < 20px) {
-                                    root.column_sizes[idx] = 20px;
+                        TouchArea {
+                            width: 5px;
+                            x: (parent.width - self.width) / 2;
+                            property <length> cached;
+                            forward-focus: focus-item;
+                            pointer-event(event) => {
+                                if (event.button == PointerEventButton.left && event.kind == PointerEventKind.down) {
+                                    self.cached = root.column_sizes[idx];
                                 }
                             }
+                            moved => {
+                                if (self.pressed) {
+                                    root.column_sizes[idx] += (self.mouse-x - self.pressed-x);
+                                    if (root.column_sizes[idx] < 20px) {
+                                        root.column_sizes[idx] = 20px;
+                                    }
+                                }
+                            }
+                            mouse-cursor: ew-resize;
                         }
-                        mouse-cursor: ew-resize;
                     }
                 }
             }
 
-            Text {
-                overflow: elide;
-                text: last-column;
-            }
-        }
-
-        list_view := ListView {
-            min-width: 100px;
-            forward-focus: focus-item;
-            for r [idx] in root.values: Rectangle {
-                border-radius: 5px;
+            list_view := ListView {
+                min-width: 100px;
                 forward-focus: focus-item;
-                height: 20px;
-                background: r.header-row ? ColorPalette.list_view_normal_header_color : (touch-area.has-hover ? (r.selected_row ? ColorPalette.list-view-normal-selected-header : ColorPalette.list_view_normal_color) : (r.selected_row ? ColorPalette.list-view-normal-selected-header : ColorPalette.list_view_normal_color));
-                touch_area := TouchArea {
+                for r [idx] in root.values: Rectangle {
+                    border-radius: 5px;
                     forward-focus: focus-item;
-                    clicked => {
-                        if (!r.header_row) {
-                            r.selected_row = !r.selected_row;
-                            if (root.selected-item == -1) {
-                                root.selected-item = idx;
-                            } else {
-                                if (r.selected_row == true) {
-                                    root.values[root.selected-item].selected_row = false;
+                    height: 20px;
+                    background: r.header-row ? ColorPalette.list_view_normal_header_color : (touch-area.has-hover ? (r.selected_row ? ColorPalette.list-view-normal-selected-header : ColorPalette.list_view_normal_color) : (r.selected_row ? ColorPalette.list-view-normal-selected-header : ColorPalette.list_view_normal_color));
+                    touch_area := TouchArea {
+                        forward-focus: focus-item;
+                        clicked => {
+                            if (!r.header_row) {
+                                r.selected_row = !r.selected_row;
+                                if (root.selected-item == -1) {
                                     root.selected-item = idx;
                                 } else {
-                                    root.selected-item = -1;
+                                    if (r.selected_row == true) {
+                                        root.values[root.selected-item].selected_row = false;
+                                        root.selected-item = idx;
+                                    } else {
+                                        root.selected-item = -1;
+                                    }
+                                }
+
+                                if (root.selected_item != -1) {
+                                    Callabler.load_image_preview(r.val[root.parentPathIdx - 1] + "/" + r.val[root.fileNameIdx - 1]);
+                                } else {
+                                    GuiState.preview-visible = false;
                                 }
                             }
-
-                            if (root.selected_item != -1) {
-                                Callabler.load_image_preview(r.val[root.parentPathIdx - 1] + "/" + r.val[root.fileNameIdx - 1]);
-                            } else {
-                                GuiState.preview-visible = false;
+                        }
+                        pointer-event(event) => {
+                            // TODO this should be clicked by double-click
+                            if (event.button == PointerEventButton.right && event.kind == PointerEventKind.up) {
+                                Callabler.item_opened(r.val[root.parentPathIdx - 1])
+                            } else if (event.button == PointerEventButton.middle && event.kind == PointerEventKind.up) {
+                                Callabler.item_opened(r.val[root.parentPathIdx - 1] + "/" + r.val[root.fileNameIdx - 1])
                             }
-                        }
-                    }
-                    pointer-event(event) => {
-                        // TODO this should be clicked by double-click
-                        if (event.button == PointerEventButton.right && event.kind == PointerEventKind.up) {
-                            Callabler.item_opened(r.val[root.parentPathIdx - 1])
-                        } else if (event.button == PointerEventButton.middle && event.kind == PointerEventKind.up) {
-                            Callabler.item_opened(r.val[root.parentPathIdx - 1] + "/" + r.val[root.fileNameIdx - 1])
-                        }
-                    }
-                }
-
-                HorizontalLayout {
-                    forward-focus: focus-item;
-                    CheckBox {
-                        visible: !r.header-row;
-                        checked: r.checked && !r.header-row;
-                        width: root.column-sizes[0];
-                        forward-focus: focus-item;
-                        toggled => {
-                            r.checked = self.checked;
                         }
                     }
 
                     HorizontalLayout {
-                        spacing: 5px;
-                        for f [idx] in r.val: Text {
-                            width: root.column-sizes[idx + 1];
-                            text: f;
-                            font-size: 12px;
+                        forward-focus: focus-item;
+                        CheckBox {
+                            visible: !r.header-row;
+                            checked: r.checked && !r.header-row;
+                            width: root.column-sizes[0];
                             forward-focus: focus-item;
-                            vertical-alignment: center;
-                            overflow: elide;
+                            toggled => {
+                                r.checked = self.checked;
+                            }
+                        }
+
+                        HorizontalLayout {
+                            spacing: 5px;
+                            for f [idx] in r.val: Text {
+                                width: root.column-sizes[idx + 1];
+                                text: f;
+                                font-size: 12px;
+                                forward-focus: focus-item;
+                                vertical-alignment: center;
+                                overflow: elide;
+                            }
                         }
                     }
                 }
             }
+        }
+    }
+
+    public function deselect_selected_item() {
+        if (root.selected_item != -1) {
+            root.values[root.selected-item].selected_row = false;
+            root.selected-item = -1;
         }
     }
 }

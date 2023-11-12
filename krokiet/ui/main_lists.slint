@@ -9,40 +9,43 @@ export component MainList {
     in-out property <[MainListModel]> empty_folder_model;
     in-out property <[MainListModel]> empty_files_model;
     in-out property <[MainListModel]> similar_images_model;
+    callback changed_current_tab();
     
-    SelectableTableView {
+    empty_folders := SelectableTableView {
         visible: root.active-tab == CurrentTab.EmptyFolders;
         min-width: 200px;
         height: parent.height;
-        columns: ["Selection", "Folder Name", "Path"];
-        last-column: "Modification Date";
-        column-sizes: [35px, 100px, 350px, 100px];
+        columns: ["Selection", "Folder Name", "Path", "Modification Date"];
+        column-sizes: [35px, 100px, 350px, 150px];
         values <=> empty-folder-model;
         parentPathIdx: 2;
         fileNameIdx: 1;
     }
 
-    SelectableTableView {
+    empty_files := SelectableTableView {
         visible: root.active-tab == CurrentTab.EmptyFiles;
         min-width: 200px;
         height: parent.height;
-        columns: ["Selection", "File Name", "Path"];
-        last-column: "Modification Date";
-        column-sizes: [35px, 100px, 350px, 100px];
+        columns: ["Selection", "File Name", "Path", "Modification Date"];
+        column-sizes: [35px, 100px, 350px, 150px];
         values <=> empty-files-model;
         parentPathIdx: 2;
         fileNameIdx: 1;
     }
 
-    SelectableTableView {
+    similar_images := SelectableTableView {
         visible: root.active-tab == CurrentTab.SimilarImages;
         min-width: 200px;
         height: parent.height;
-        columns: ["Selection", "Similarity", "Size", "Dimensions", "File Name", "Path"];
-        last-column: "Modification Date";
-        column-sizes: [35px, 80px, 80px, 80px, 350px, 100px, 100px];
+        columns: ["Selection", "Similarity", "Size", "Dimensions", "File Name", "Path", "Modification Date"];
+        column-sizes: [35px, 80px, 80px, 80px, 100px, 350px, 150px];
         values <=> similar-images-model;
         parentPathIdx: 5;
         fileNameIdx: 4;
+    }
+    changed_current_tab() => {
+        empty_folders.deselect_selected_item();
+        empty_files.deselect_selected_item();
+        similar_images.deselect_selected_item();
     }
 }

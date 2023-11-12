@@ -53,13 +53,18 @@ export component MainWindow inherits Window {
                 horizontal-stretch: 0.0;
                 scanning <=> root.scanning;
                 active-tab <=> root.active-tab;
+                changed_current_tab() => {
+                    GuiState.preview-visible = false;
+                    main_list.changed_current_tab();
+                }
             }
 
             VerticalLayout {
                 horizontal-stretch: 1.0;
                 Rectangle {
                     vertical-stretch: 1.0;
-                    MainList {
+                    main_list := MainList {
+                        x: 0;
                         width: GuiState.preview_visible ? parent.width / 2 : parent.width;
                         height: parent.height;
                         horizontal-stretch: 0.5;
@@ -74,6 +79,7 @@ export component MainWindow inherits Window {
                         width: GuiState.preview_visible ? parent.width / 2 : 0;
                         visible: GuiState.preview_visible;
                         source: GuiState.preview_image;
+                        image-fit: ImageFit.contain;
                     }
                 }
 
