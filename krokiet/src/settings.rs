@@ -22,6 +22,7 @@ pub struct SettingsCustom {
     #[serde(default = "default_excluded_directories")]
     pub excluded_directories: Vec<PathBuf>,
 }
+
 impl Default for SettingsCustom {
     fn default() -> Self {
         Self {
