@@ -1,7 +1,6 @@
 use crate::common::create_vec_model_from_vec_string;
 use crate::settings::{collect_settings, SettingsCustom};
-use crate::GuiState;
-use crate::{CurrentTab, MainListModel, MainWindow, ProgressToSend};
+use crate::{CurrentTab, GuiState, MainListModel, MainWindow, ProgressToSend};
 use chrono::NaiveDateTime;
 use crossbeam_channel::{Receiver, Sender};
 use czkawka_core::common::split_path;
@@ -12,8 +11,7 @@ use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
 use czkawka_core::similar_images;
 use czkawka_core::similar_images::SimilarImages;
-use humansize::format_size;
-use humansize::BINARY;
+use humansize::{format_size, BINARY};
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
 use std::path::PathBuf;
 use std::rc::Rc;

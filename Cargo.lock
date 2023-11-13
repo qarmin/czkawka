@@ -3314,6 +3314,7 @@ dependencies = [
  "chrono",
  "crossbeam-channel",
  "czkawka_core",
+ "directories-next",
  "handsome_logger",
  "home",
  "humansize",

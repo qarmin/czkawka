@@ -33,7 +33,7 @@ use crate::connect_directories_changes::connect_add_remove_directories;
 use crate::connect_progress_receiver::connect_progress_gathering;
 use crate::connect_show_preview::connect_show_preview;
 use crate::connect_stop::connect_stop_button;
-use crate::settings::reset_settings;
+use crate::settings::{load_settings_from_file, reset_settings, save_settings_to_file};
 use czkawka_core::common::setup_logger;
 use czkawka_core::common_dir_traversal::ProgressData;
 use slint::{ModelRc, VecModel};
@@ -42,12 +42,15 @@ slint::include_modules!();
 fn main() {
     setup_logger(false);
 
-    let app = MainWindow::new().unwrap(); //.run().unwrap();
+    let app = MainWindow::new().unwrap();
 
     let (progress_sender, progress_receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
     let (stop_sender, stop_receiver): (Sender<()>, Receiver<()>) = unbounded();
-    // Fills model at start, don't really needed too much after testing
+
     to_remove_debug(&app);
+
+    reset_settings(&app);
+    load_settings_from_file(&app);
 
     connect_delete_button(&app);
     connect_scan_button(&app, progress_sender, stop_receiver);
@@ -57,9 +60,9 @@ fn main() {
     connect_add_remove_directories(&app);
     connect_show_preview(&app);
 
-    reset_settings(&app);
-
     app.run().unwrap();
+
+    save_settings_to_file(&app);
 }
 
 // TODO remove this after debugging - or leave commented
