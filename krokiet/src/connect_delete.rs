@@ -12,9 +12,18 @@ pub fn connect_delete_button(app: &MainWindow) {
 
         let active_tab = app.get_active_tab();
 
-        match active_tab {
-            CurrentTab::EmptyFolders => handle_delete_empty_folders(&app),
+        let model = match active_tab {
+            CurrentTab::EmptyFolders => app.get_empty_folder_model(),
             _ => panic!(),
+        };
+
+        let new_model = handle_delete_items(&model);
+
+        if let Some(new_model) = new_model {
+            match active_tab {
+                CurrentTab::EmptyFolders => app.set_empty_folder_model(new_model),
+                _ => panic!(),
+            }
         }
     });
 }
@@ -30,6 +39,19 @@ fn handle_delete_empty_folders(app: &MainWindow) {
         let r = ModelRc::new(VecModel::from(entries_left));
         app.set_empty_folder_model(r);
     }
+}
+
+fn handle_delete_items(items: &ModelRc<MainListModel>) -> Option<ModelRc<MainListModel>> {
+    let (entries_to_delete, mut entries_left) = filter_out_checked_items(items.borrow(), false);
+
+    if !entries_to_delete.is_empty() {
+        remove_selected_items(entries_to_delete);
+        deselect_all_items(&mut entries_left);
+
+        let r = ModelRc::new(VecModel::from(entries_left));
+        return Some(r);
+    }
+    None
 }
 
 // TODO delete in parallel items, consider to add progress bar
@@ -145,13 +167,13 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "First item in normal model, cannot be header")]
     fn test_filter_out_checked_items_one_element_invalid_normal() {
         let items = create_new_model(vec![(false, true, false, vec![])]);
         filter_out_checked_items(&items, false);
     }
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "First item in header model must be a header")]
     fn test_filter_out_checked_items_one_element_invalid_header() {
         let items = create_new_model(vec![(false, false, false, vec![])]);
         filter_out_checked_items(&items, true);

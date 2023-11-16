@@ -26,23 +26,28 @@ export component ActionButtons inherits HorizontalLayout {
     out property <int> name;
     height: 30px;
     spacing: 4px;
-    scan_button := Button {
-        height: parent.height;
-        enabled: !scanning;
-        text: "Scan";
-        clicked => {
-            root.scanning = true;
-            root.scan_starting(active-tab);
-        }
-    }
 
-    stop_button := Button {
-        height: parent.height;
-        enabled: scanning && !stop_requested;
-        text: "Stop";
-        clicked => {
-            root.scan_stopping();
-            root.stop_requested = true;
+    Rectangle {
+        scan_button := Button {
+            height: parent.height;
+            enabled: !scanning;
+            visible: !scanning;
+            text: "Scan";
+            clicked => {
+                root.scanning = true;
+                root.scan_starting(active-tab);
+            }
+        }
+
+        stop_button := Button {
+            height: parent.height;
+            visible: scanning;
+            enabled: scanning && !stop_requested;
+            text: "Stop";
+            clicked => {
+                root.scan_stopping();
+                root.stop_requested = true;
+            }
         }
     }
 
