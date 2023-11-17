@@ -43,6 +43,12 @@ export component MainList {
         parentPathIdx: 5;
         fileNameIdx: 4;
     }
+    focus_item := FocusScope {
+        key-released(event) => {
+            debug(event);
+            accept
+        }
+    }
     changed_current_tab() => {
         empty_folders.deselect_selected_item();
         empty_files.deselect_selected_item();

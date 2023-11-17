@@ -1305,6 +1305,7 @@ dependencies = [
  "rawloader",
  "rayon",
  "rust-embed",
+ "rustc_version",
  "rusty-chromaprint",
  "serde",
  "serde_json",

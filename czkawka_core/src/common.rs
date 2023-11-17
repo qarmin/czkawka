@@ -18,7 +18,7 @@ use image::{DynamicImage, ImageBuffer, Rgb};
 use imagepipe::{ImageSource, Pipeline};
 #[cfg(feature = "heif")]
 use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
-use log::{debug, info, LevelFilter, Record};
+use log::{debug, info, warn, LevelFilter, Record};
 
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
@@ -58,11 +58,19 @@ pub fn setup_logger(disabled_printing: bool) {
 }
 
 pub fn print_version_mode() {
+    let rust_version = match rustc_version::version_meta() {
+        Ok(meta) => meta.semver.to_string(),
+        Err(_) => "<unknown>".to_string(),
+    };
+
     info!(
-        "Czkawka version: {}, was compiled with {} mode",
+        "App version: {}, compiled with {} mode on rustc {rust_version}",
         CZKAWKA_VERSION,
-        if cfg!(debug_assertions) { "debug" } else { "release" }
+        if cfg!(debug_assertions) { "debug" } else { "release" },
     );
+    if cfg!(debug_assertions) {
+        warn!("You are running debug version of app which is a lot of slower than release version.");
+    }
 }
 
 pub fn set_default_number_of_threads() {

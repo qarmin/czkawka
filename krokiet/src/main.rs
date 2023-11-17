@@ -34,13 +34,14 @@ use crate::connect_progress_receiver::connect_progress_gathering;
 use crate::connect_show_preview::connect_show_preview;
 use crate::connect_stop::connect_stop_button;
 use crate::settings::{load_settings_from_file, reset_settings, save_settings_to_file};
-use czkawka_core::common::setup_logger;
+use czkawka_core::common::{print_version_mode, setup_logger};
 use czkawka_core::common_dir_traversal::ProgressData;
 use slint::{ModelRc, VecModel};
 
 slint::include_modules!();
 fn main() {
     setup_logger(false);
+    print_version_mode();
 
     let app = MainWindow::new().unwrap();
 

@@ -74,6 +74,7 @@ anyhow = { version = "1.0" }
 
 state = "0.6"
 
+rustc_version = "0.4"
 log = "0.4.20"
 handsome_logger = "0.8"
 fun_time = { version = "0.3.1", features = ["log"] }
