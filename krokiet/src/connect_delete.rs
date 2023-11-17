@@ -14,38 +14,29 @@ pub fn connect_delete_button(app: &MainWindow) {
 
         let model = match active_tab {
             CurrentTab::EmptyFolders => app.get_empty_folder_model(),
+            CurrentTab::SimilarImages => app.get_similar_images_model(),
+            CurrentTab::EmptyFiles => app.get_empty_files_model(),
             _ => panic!(),
         };
 
-        let new_model = handle_delete_items(&model);
+        let new_model = handle_delete_items(&model, active_tab == CurrentTab::EmptyFolders);
 
         if let Some(new_model) = new_model {
             match active_tab {
                 CurrentTab::EmptyFolders => app.set_empty_folder_model(new_model),
+                CurrentTab::SimilarImages => app.set_similar_images_model(new_model),
+                CurrentTab::EmptyFiles => app.set_empty_files_model(new_model),
                 _ => panic!(),
             }
         }
     });
 }
 
-fn handle_delete_empty_folders(app: &MainWindow) {
-    let r = app.get_empty_folder_model();
-    let (entries_to_delete, mut entries_left) = filter_out_checked_items(r.borrow(), false);
+fn handle_delete_items(items: &ModelRc<MainListModel>, delete_empty_folders: bool) -> Option<ModelRc<MainListModel>> {
+    let (entries_to_delete, mut entries_left) = filter_out_checked_items(items, false);
 
     if !entries_to_delete.is_empty() {
-        remove_selected_items(entries_to_delete);
-        deselect_all_items(&mut entries_left);
-
-        let r = ModelRc::new(VecModel::from(entries_left));
-        app.set_empty_folder_model(r);
-    }
-}
-
-fn handle_delete_items(items: &ModelRc<MainListModel>) -> Option<ModelRc<MainListModel>> {
-    let (entries_to_delete, mut entries_left) = filter_out_checked_items(items.borrow(), false);
-
-    if !entries_to_delete.is_empty() {
-        remove_selected_items(entries_to_delete);
+        remove_selected_items(entries_to_delete, delete_empty_folders);
         deselect_all_items(&mut entries_left);
 
         let r = ModelRc::new(VecModel::from(entries_left));
@@ -55,9 +46,12 @@ fn handle_delete_items(items: &ModelRc<MainListModel>) -> Option<ModelRc<MainLis
 }
 
 // TODO delete in parallel items, consider to add progress bar
-fn remove_selected_items(items: Vec<MainListModel>) {
+// For empty folders double check if folders are really empty - this function probably should be run in thread
+// and at the end should be send signal to main thread to update model
+fn remove_selected_items(items: Vec<MainListModel>, delete_empty_folders: bool) {
     info!("Items to remove {}", items.len());
     drop(items);
+    drop(delete_empty_folders);
     // items.into_iter().for_each(|_item| {});
 }
 
@@ -75,6 +69,7 @@ fn filter_out_checked_items(items: &ModelRc<MainListModel>, have_header: bool) -
 
     let (entries_to_delete, mut entries_left): (Vec<_>, Vec<_>) = items.iter().partition(|item| item.checked);
 
+    // When have header, we must also throw out orphaned items - this needs to be
     if have_header && !entries_left.is_empty() {
         // First row must be header
         assert!(entries_left[0].header_row);

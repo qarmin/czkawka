@@ -15,12 +15,12 @@ export component SelectableTableView inherits Rectangle {
     in-out property <int> parentPathIdx;
     in-out property <int> fileNameIdx;
     in-out property <int> selected_item: -1;
-    out property <length> list_view_width: column_sizes[0] + column_sizes[1] + column_sizes[2] + column_sizes[3] + column_sizes[4] + column_sizes[5] + column_sizes[6] + column_sizes[7] + column_sizes[8] + column_sizes[9] + column_sizes[10] + column_sizes[11];
+    out property <length> list_view_width: max(self.width - 20px, column_sizes[0] + column_sizes[1] + column_sizes[2] + column_sizes[3] + column_sizes[4] + column_sizes[5] + column_sizes[6] + column_sizes[7] + column_sizes[8] + column_sizes[9] + column_sizes[10] + column_sizes[11]);
     forward-focus: focus_item;
     // TODO not works
     focus_item := FocusScope {
         key-released(event) => {
-            // debug(event);
+            debug(event);
             accept
         }
     }
