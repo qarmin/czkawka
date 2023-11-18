@@ -1,0 +1,53 @@
+name: 🐧 Linux CLI Eyra
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 0 * * 2'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  linux-cli:
+    strategy:
+      matrix:
+        toolchain: [ nightly ]
+        type: [ release ]
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install basic libraries
+        run: sudo apt-get update; sudo apt install -y
+
+      - name: Setup rust version
+        run: rustup default ${{ matrix.toolchain }}
+
+      - name: Add eyra
+        run: |
+          cd czkawka_cli
+          cargo add eyra --rename=std
+          echo 'fn main() { println!("cargo:rustc-link-arg=-nostartfiles"); }' > build.rs
+          cd ..
+
+      - name: Build Release
+        run: cargo build --release --bin czkawka_cli
+        if: ${{ (matrix.type == 'release') }}
+
+      - name: Store Linux CLI
+        uses: actions/upload-artifact@v3
+        with:
+          name: czkawka_cli-${{ runner.os }}-${{ matrix.toolchain }}
+          path: target/release/czkawka_cli
+        if: ${{ matrix.type == 'release' }}
+
+      - name: Linux Regression Test
+        run: |
+          wget https://github.com/qarmin/czkawka/releases/download/6.0.0/TestFiles.zip
+          cd ci_tester
+          cargo build --release
+          cd ..
+          
+          ci_tester/target/release/ci_tester target/release/czkawka_cli
+        if: ${{ matrix.type == 'release' }}

@@ -1,5 +1,3 @@
-use std::borrow::Borrow;
-
 use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
 use crate::{Callabler, CurrentTab, MainListModel, MainWindow};
@@ -16,7 +14,6 @@ pub fn connect_delete_button(app: &MainWindow) {
             CurrentTab::EmptyFolders => app.get_empty_folder_model(),
             CurrentTab::SimilarImages => app.get_similar_images_model(),
             CurrentTab::EmptyFiles => app.get_empty_files_model(),
-            _ => panic!(),
         };
 
         let new_model = handle_delete_items(&model, active_tab == CurrentTab::EmptyFolders);
@@ -26,7 +23,6 @@ pub fn connect_delete_button(app: &MainWindow) {
                 CurrentTab::EmptyFolders => app.set_empty_folder_model(new_model),
                 CurrentTab::SimilarImages => app.set_similar_images_model(new_model),
                 CurrentTab::EmptyFiles => app.set_empty_files_model(new_model),
-                _ => panic!(),
             }
         }
     });

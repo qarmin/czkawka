@@ -32,7 +32,7 @@ const TEMP_EXTENSIONS: &[&str] = &[
     ".partial",
 ];
 
-#[derive(Clone, Serialize)]
+#[derive(Clone, Serialize, Debug)]
 pub struct FileEntry {
     pub path: PathBuf,
     pub modified_date: u64,

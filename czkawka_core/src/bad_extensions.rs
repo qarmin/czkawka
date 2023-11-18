@@ -160,7 +160,7 @@ const WORKAROUNDS: &[(&str, &str)] = &[
     ("exe", "xls"), // Not sure why xls is not recognized
 ];
 
-#[derive(Clone, Serialize)]
+#[derive(Clone, Serialize, Debug)]
 pub struct BadFileEntry {
     pub path: PathBuf,
     pub modified_date: u64,

@@ -26,7 +26,7 @@ use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_di
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::*;
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct FileEntry {
     pub path: PathBuf,
     pub modified_date: u64,
