@@ -10,6 +10,7 @@ export component MainList {
     in-out property <[MainListModel]> empty_files_model;
     in-out property <[MainListModel]> similar_images_model;
     callback changed_current_tab();
+    callback released_key(string);
     
     empty_folders := SelectableTableView {
         visible: root.active-tab == CurrentTab.EmptyFolders;
@@ -45,7 +46,18 @@ export component MainList {
     }
     focus_item := FocusScope {
         key-released(event) => {
-            debug(event);
+            if (!self.visible) {
+                return;
+            }
+            if (root.active-tab == CurrentTab.EmptyFiles) {
+                empty_files.released_key(event);
+            } else if (root.active-tab == CurrentTab.EmptyFolders) {
+                empty-folders.released_key(event);
+            } else if (root.active-tab == CurrentTab.SimilarImages) {
+                similar-images.released_key(event);
+            } else {
+                debug("Non handled key in main_lists.slint");
+            }
             accept
         }
     }

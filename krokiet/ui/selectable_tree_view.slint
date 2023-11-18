@@ -16,18 +16,9 @@ export component SelectableTableView inherits Rectangle {
     in-out property <int> fileNameIdx;
     in-out property <int> selected_item: -1;
     out property <length> list_view_width: max(self.width - 20px, column_sizes[0] + column_sizes[1] + column_sizes[2] + column_sizes[3] + column_sizes[4] + column_sizes[5] + column_sizes[6] + column_sizes[7] + column_sizes[8] + column_sizes[9] + column_sizes[10] + column_sizes[11]);
-    forward-focus: focus_item;
-    // TODO not works
-    focus_item := FocusScope {
-        key-released(event) => {
-            debug(event);
-            accept
-        }
-    }
 
     VerticalBox {
         padding: 0px;
-        forward-focus: focus-item;
         ScrollView {
             height: 30px;
             viewport-x <=> list_view.viewport-x;
@@ -45,12 +36,10 @@ export component SelectableTableView inherits Rectangle {
                     Rectangle {
                         width: 1px;
                         background: gray;
-                        forward-focus: focus-item;
                         TouchArea {
                             width: 5px;
                             x: (parent.width - self.width) / 2;
                             property <length> cached;
-                            forward-focus: focus-item;
                             pointer-event(event) => {
                                 if (event.button == PointerEventButton.left && event.kind == PointerEventKind.down) {
                                     self.cached = root.column_sizes[idx];
@@ -74,16 +63,13 @@ export component SelectableTableView inherits Rectangle {
         list_view := ListView {
             padding: 0px;
             min-width: 100px;
-            forward-focus: focus-item;
             for r [idx] in root.values: Rectangle {
                 width: list_view_width;
             
                 border-radius: 5px;
-                forward-focus: focus-item;
                 height: 20px;
                 background: r.header-row ? ColorPalette.list_view_normal_header_color : (touch-area.has-hover ? (r.selected_row ? ColorPalette.list-view-normal-selected-header : ColorPalette.list_view_normal_color) : (r.selected_row ? ColorPalette.list-view-normal-selected-header : ColorPalette.list_view_normal_color));
                 touch_area := TouchArea {
-                    forward-focus: focus-item;
                     clicked => {
                         if (!r.header_row) {
                             r.selected_row = !r.selected_row;
@@ -116,12 +102,10 @@ export component SelectableTableView inherits Rectangle {
                 }
 
                 HorizontalLayout {
-                    forward-focus: focus-item;
                     CheckBox {
                         visible: !r.header-row;
                         checked: r.checked && !r.header-row;
                         width: root.column-sizes[0];
-                        forward-focus: focus-item;
                         toggled => {
                             r.checked = self.checked;
                         }
@@ -133,7 +117,6 @@ export component SelectableTableView inherits Rectangle {
                             width: root.column-sizes[idx + 1];
                             text: f;
                             font-size: 12px;
-                            forward-focus: focus-item;
                             vertical-alignment: center;
                             overflow: elide;
                         }
@@ -147,6 +130,71 @@ export component SelectableTableView inherits Rectangle {
         if (root.selected_item != -1) {
             root.values[root.selected-item].selected_row = false;
             root.selected-item = -1;
+        }
+    }
+
+    // TODO this should work with multiple selection and shift and control key - problably logic will need to be set in global state
+    public function released_key(event: KeyEvent) {
+        if (event.text == " ") {
+            if (root.selected_item != -1) {
+                root.values[root.selected_item].checked = !root.values[root.selected_item].checked;
+            }
+        } else if (event.text == Key.DownArrow) {
+            if (root.selected_item != -1) {
+                if (root.values.length - 1 == root.selected_item) {
+                    // Last element, so unselect it
+                    root.values[root.selected_item].selected_row = false;
+                    root.selected_item = -1;
+                } else {
+                    // Select next item, if next item is header row, then select second
+                    // This should be safe, because header row should never be last item
+                    root.values[root.selected_item].selected_row = false;
+                    if (root.values[root.selected_item + 1].header_row) {
+                        root.selected_item += 2;
+                    } else {
+                        root.selected_item += 1;
+                    }
+                    root.values[root.selected_item].selected_row = true;
+                }
+            } else {
+                // Select last item if nothing is selected
+                if (root.values.length > 0) {
+                    if (root.values[0].header_row) {
+                        root.selected_item = 1;
+                    } else {
+                        root.selected_item = 0;
+                    }
+                    root.values[root.selected_item].selected_row = true;
+                }
+            }
+        } else if (event.text == Key.UpArrow) {
+            if (root.selected_item != -1) {
+                if (root.selected_item == 0) {
+                    // First element, so unselect it
+                    root.values[root.selected_item].selected_row = false;
+                    root.selected_item = -1;
+                } else {
+                    root.values[root.selected_item].selected_row = false;
+                    // Select previous item, if previous item is header row, then select second previous item
+                    // This is safe, because if there is non header row upper, then can be easily selected,
+                    // but otherwise is done -2 which for 1 (smallest possible item to set with header row) gives -1, so gives
+                    // this non selected row
+                    if (root.values[root.selected_item - 1].header_row) {
+                        root.selected_item -= 2;
+                    } else {
+                        root.selected_item -= 1;
+                    }
+                    if (root.selected_item != -1) {
+                        root.values[root.selected_item].selected_row = true;
+                    }
+                }
+            } else {
+                // Select last item if nothing is selected
+                if (root.values.length > 0) {
+                    root.selected_item = root.values.length - 1;
+                    root.values[root.selected_item].selected_row = true;
+                }
+            }
         }
     }
 }
