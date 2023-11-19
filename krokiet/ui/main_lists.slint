@@ -50,8 +50,8 @@ export component MainList {
         fileNameIdx: 4;
     }
     focus_item := FocusScope {
-        x:0;
         width: 0px; // Hack to not steal first click from other components - https://github.com/slint-ui/slint/issues/3503
+        // Hack not works https://github.com/slint-ui/slint/issues/3503#issuecomment-1817809834 because disables key-released event
 
         key-released(event) => {
             if (!self.visible || !self.has-focus) {
