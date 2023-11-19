@@ -46,8 +46,8 @@ export component MainList {
     }
     focus_item := FocusScope {
         key-released(event) => {
-            if (!self.visible) {
-                return;
+            if (!self.visible || !self.has-focus) {
+                return accept;
             }
             if (root.active-tab == CurrentTab.EmptyFiles) {
                 empty_files.released_key(event);
