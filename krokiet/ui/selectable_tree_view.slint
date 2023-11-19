@@ -8,8 +8,13 @@ import {GuiState} from "gui_state.slint";
 export component SelectableTableView inherits Rectangle {
     callback item_opened(string);
     in property <[string]> columns;
-    in-out property <[MainListModel]> values;
-    in-out property <[length]> column_sizes;
+    in-out property <[MainListModel]> values: [
+        {checked: false, selected_row: false, header_row: true, val: ["kropkarz", "/Xd1", "24.10.2023"]} ,
+        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
+        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
+        {checked: true, selected_row: false, header_row: false, val: ["lokkaler", "/Xd1/Vide2", "01.23.1911"]}
+    ];
+    in-out property <[length]> column_sizes: [30px, 80px, 150px, 160px];
     private property <int> column_number: column-sizes.length + 1;
     // This idx, starts from zero, but since first is always a checkbox, and is not in model.val values, remove 1 from idx
     in-out property <int> parentPathIdx;
