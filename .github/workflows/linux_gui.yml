@@ -9,6 +9,50 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
+  linux-krokiet-gui:
+    strategy:
+      matrix:
+        toolchain: [ stable, 1.72.1 ]
+        type: [ release ]
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install basic libraries
+        run: sudo apt-get update; sudo apt install libgtk-4-dev libheif-dev -y
+
+      - name: Setup rust version
+        run: rustup default ${{ matrix.toolchain }}
+
+      - name: Build Release Krokiet
+        run: cargo build --release --bin krokiet
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: "-C debuginfo=0"
+        if: ${{ (matrix.type == 'release') }}
+
+      - name: Store Linux GUI Krokiet
+        uses: actions/upload-artifact@v3
+        with:
+          name: krokiet-${{ runner.os }}-${{ matrix.toolchain }}
+          path: target/release/krokiet
+        if: ${{ matrix.type == 'release' }}
+
+      - name: Build Release Krokiet heif
+        run: cargo build --release --bin krokiet --features heif
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: "-C debuginfo=0"
+        if: ${{ (matrix.type == 'release') }}
+
+      - name: Store Linux GUI Krokiet heif
+        uses: actions/upload-artifact@v3
+        with:
+          name: krokiet-${{ runner.os }}-${{ matrix.toolchain }}-heif
+          path: target/release/krokiet
+        if: ${{ matrix.type == 'release' }}
+
+
   linux-gui:
     strategy:
       matrix:
@@ -25,32 +69,33 @@ jobs:
         run: rustup default ${{ matrix.toolchain }}
 
       - name: Build Release Heif
-        run: cargo build --release --features heif
+        run: cargo build --release --bin czkawka_gui --features heif
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: "-C debuginfo=0"
-        if: ${{ (matrix.type == 'release') && (matrix.toolchain == '1.72.1') }}
+        if: ${{ (matrix.type == 'release') }}
 
       - name: Store Linux GUI Heif
         uses: actions/upload-artifact@v3
         with:
           name: czkawka_gui-${{ runner.os }}-${{ matrix.toolchain }}-heif
           path: target/release/czkawka_gui
-        if: ${{ matrix.type == 'release' }}
+        if: ${{ (matrix.type == 'release') && (matrix.toolchain == 'stable') }}
 
       - name: Build Release
-        run: cargo build --release
+        run: cargo build --release --bin czkawka_gui
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: "-C debuginfo=0"
-        if: ${{ (matrix.type == 'release') && (matrix.toolchain == 'stable') }}
+        if: ${{ (matrix.type == 'release') }}
 
+      # Only store stable toolchain
       - name: Store Linux GUI
         uses: actions/upload-artifact@v3
         with:
           name: czkawka_gui-${{ runner.os }}-${{ matrix.toolchain }}
           path: target/release/czkawka_gui
-        if: ${{ matrix.type == 'release' }}
+        if: ${{ (matrix.type == 'release') && (matrix.toolchain == 'stable') }}
 
   linux-appimage-gui:
     strategy:
@@ -68,7 +113,7 @@ jobs:
         run: rustup default ${{ matrix.toolchain }}
 
       - name: Build Release
-        run: cargo build --release
+        run: cargo build --release --bin czkawka_gui
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: "-C debuginfo=0"

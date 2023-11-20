@@ -9,8 +9,47 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
+  krokiet:
+    strategy:
+      fail-fast: false
+      matrix:
+        use_heif: [ normal ]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup rust version
+        run: rustup default ${{ matrix.toolchain }}
+
+      - name: Compile Krokiet
+        run: cargo build --release --bin krokiet
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: krokiet-windows-${{ github.sha }}-${{ matrix.use_heif }}
+          path: |
+            target/release/krokiet.exe
+          if-no-files-found: error
+
+      - name: Show console window on windows
+        run: sed -i 's|\#\!\[windows_subsystem|//#![windows_subsystem|' czkawka_gui/src/main.rs
+
+      - name: Compile Krokiet Console
+        run: cargo build --release --bin krokiet
+
+      - name: Upload artifacts Console
+        uses: actions/upload-artifact@v3
+        with:
+          name: krokiet-windows-${{ github.sha }}-${{ matrix.use_heif }}-console
+          path: |
+            target/release/krokiet.exe
+          if-no-files-found: error
+
+
   container:
     strategy:
+      fail-fast: false
       matrix:
         use_heif: [ non_heif ] #, heif ] - heif problems with mingw
     runs-on: ubuntu-22.04
