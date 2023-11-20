@@ -1,3 +1,5 @@
+// Remove console window in Windows OS
+#![windows_subsystem = "windows"]
 #![allow(clippy::comparison_chain)]
 #![allow(clippy::collapsible_if)]
 #![allow(clippy::overly_complex_bool_expr)] // Generated code

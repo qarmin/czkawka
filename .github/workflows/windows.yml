@@ -33,7 +33,7 @@ jobs:
           if-no-files-found: error
 
       - name: Show console window on windows
-        run: sed -i 's|\#\!\[windows_subsystem|//#![windows_subsystem|' czkawka_gui/src/main.rs
+        run: sed -i 's|\#\!\[windows_subsystem|//#![windows_subsystem|' krokiet/src/main.rs
 
       - name: Compile Krokiet Console
         run: cargo build --release --bin krokiet
