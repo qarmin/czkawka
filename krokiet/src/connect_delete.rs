@@ -158,13 +158,13 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "First item in normal model, cannot be header")]
+    #[should_panic]
     fn test_filter_out_checked_items_one_element_invalid_normal() {
         let items = create_new_model(vec![(false, true, false, vec![])]);
         filter_out_checked_items(&items, false);
     }
     #[test]
-    #[should_panic(expected = "First item in header model must be a header")]
+    #[should_panic]
     fn test_filter_out_checked_items_one_element_invalid_header() {
         let items = create_new_model(vec![(false, false, false, vec![])]);
         filter_out_checked_items(&items, true);

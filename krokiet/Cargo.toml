@@ -41,7 +41,6 @@ slint-build = "1.3"
 #slint-build = { path = "/home/rafal/test/slint/api/rs/build/"}
 
 [features]
-# TODO remove from deault features skia, because is harder to cross-compile it
 default = ["winit_femtovg", "winit_software"]
 skia_opengl = ["slint/renderer-skia-opengl"]
 skia_vulkan = ["slint/renderer-skia-vulkan"]
@@ -51,3 +50,5 @@ winit_femtovg = ["slint/renderer-winit-femtovg"]
 winit_skia_opengl = ["slint/renderer-winit-skia-opengl"]
 winit_skia_vulkan = ["slint/renderer-winit-skia-vulkan"]
 winit_software = ["slint/renderer-winit-software"]
+
+heif = ["czkawka_core/heif"]

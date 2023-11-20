@@ -19,16 +19,13 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Install basic libraries
-        run: sudo apt update; sudo apt install libheif-dev ffmpeg -y
+        run: sudo apt update || true; sudo apt install libheif-dev ffmpeg -y
 
       - name: Setup rust version
         run: rustup default ${{ matrix.toolchain }}
 
       - name: Build Release
         run: cargo build --release --bin czkawka_cli
-        env:
-          CARGO_INCREMENTAL: 0
-          RUSTFLAGS: "-C debuginfo=0"
         if: ${{ (matrix.type == 'release') }}
 
       - name: Store Linux CLI

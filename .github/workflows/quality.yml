@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Install Gtk 4
-        run: sudo apt update; sudo apt install -y libgtk-4-dev libheif-dev -y
+        run: sudo apt update || true; sudo apt install -y libgtk-4-dev libheif-dev -y
 
       - name: Check the format
         run: cargo fmt --all -- --check
@@ -23,4 +23,4 @@ jobs:
       # Clippy overly_complex_bool_expr is disabled because mess with generated files in target dir
       # and I cannot disable it
       - name: Run clippy
-        run: cargo clippy --all-targets --all-features -- -A clippy::overly_complex_bool_expr -D warnings
+        run: cargo clippy --all-targets --all-features -- -D warnings

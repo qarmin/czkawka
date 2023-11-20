@@ -32,8 +32,6 @@ jobs:
 
       - name: Build Release
         run: cargo build --release
-        env:
-          CARGO_INCREMENTAL: 0
         if: ${{ matrix.type == 'release'}}
 
       - name: Store MacOS CLI
@@ -59,8 +57,6 @@ jobs:
 
       - name: Build Release Heif
         run: cargo build --release --features heif
-        env:
-          CARGO_INCREMENTAL: 0
         if: ${{ matrix.type == 'release'}}
 
       - name: Store MacOS CLI Heif
