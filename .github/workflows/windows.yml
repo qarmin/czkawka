@@ -20,9 +20,9 @@ jobs:
 
       - name: Install dependencies(mostly sd)
         run: |
-          curl https://github.com/chmln/sd/releases/download/v1.0.0/sd-v1.0.0-x86_64-pc-windows-gnu.zip
-          Expand-Archive ./sd-v1.0.0-x86_64-pc-windows-gnu.zip
-          cp sd-v1.0.0-x86_64-pc-windows-gnu/sd-v1.0.0-x86_64-pc-windows-gnu/sd.exe .
+          Invoke-WebRequest -Uri https://github.com/chmln/sd/releases/download/v1.0.0/sd-v1.0.0-x86_64-pc-windows-gnu.zip -OutFile a.zip
+          Expand-Archive ./a.zip
+          cp a/sd-v1.0.0-x86_64-pc-windows-gnu/sd.exe .
 
       - name: Setup rust version
         run: rustup default ${{ matrix.toolchain }}
