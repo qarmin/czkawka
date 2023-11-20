@@ -20,11 +20,9 @@ jobs:
 
       - name: Install dependencies(mostly sd)
         run: |
-          sudo apt update || true; sudo apt install wget -y
-          wget https://github.com/chmln/sd/releases/download/v1.0.0/sd-v1.0.0-x86_64-unknown-linux-gnu.tar.gz -O a.tar.gz
-          tar -xzf a.tar.gz
-          chmod +x sd-v1.0.0-x86_64-unknown-linux-gnu/sd
-          sudo cp sd-v1.0.0-x86_64-unknown-linux-gnu/sd /usr/bin/sd
+          curl https://github.com/chmln/sd/releases/download/v1.0.0/sd-v1.0.0-x86_64-pc-windows-gnu.zip
+          Expand-Archive ./sd-v1.0.0-x86_64-pc-windows-gnu.zip
+          cp sd-v1.0.0-x86_64-pc-windows-gnu/sd-v1.0.0-x86_64-pc-windows-gnu/sd.exe .
 
       - name: Setup rust version
         run: rustup default ${{ matrix.toolchain }}
@@ -41,7 +39,7 @@ jobs:
           if-no-files-found: error
 
       - name: Show console window on windows
-        run: sd -s '#![windows_subsystem = "windows"]' '//#![windows_subsystem = "windows"]' krokiet/src/main.rs
+        run: ./sd.exe -s '#![windows_subsystem = "windows"]' '//#![windows_subsystem = "windows"]' krokiet/src/main.rs
 
       - name: Compile Krokiet Console
         run: cargo build --release --bin krokiet
@@ -143,6 +141,13 @@ jobs:
       image: ghcr.io/piegamesde/gtk4-cross:gtk-4.6
     steps:
       - uses: actions/checkout@v1
+      - name: Install dependencies(mostly sd)
+        run: |
+          sudo apt update || true; sudo apt install wget -y
+          wget https://github.com/chmln/sd/releases/download/v1.0.0/sd-v1.0.0-x86_64-unknown-linux-gnu.tar.gz -O a.tar.gz
+          tar -xzf a.tar.gz
+          chmod +x sd-v1.0.0-x86_64-unknown-linux-gnu/sd
+          sudo cp sd-v1.0.0-x86_64-unknown-linux-gnu/sd /usr/bin/sd
       - name: Install additional dependencies
         # gio is for the build script
         run: dnf install wget2 unzip mingw64-bzip2.noarch mingw64-poppler mingw64-poppler-glib mingw32-python3 rust-gio-devel adwaita-icon-theme -y && dnf clean all -y
@@ -162,7 +167,7 @@ jobs:
           path: target
           key: windows-build-target
       - name: Show console window on windows
-        run: sed -i 's|\#\!\[windows_subsystem|//#![windows_subsystem|' czkawka_gui/src/main.rs
+        run: sd -s '#![windows_subsystem = "windows"]' '//#![windows_subsystem = "windows"]' krokiet/src/main.rs
       - name: Cross compile for Windows
         run: |
           #!/bin/bash

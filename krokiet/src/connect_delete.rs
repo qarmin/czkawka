@@ -44,10 +44,10 @@ fn handle_delete_items(items: &ModelRc<MainListModel>, delete_empty_folders: boo
 // TODO delete in parallel items, consider to add progress bar
 // For empty folders double check if folders are really empty - this function probably should be run in thread
 // and at the end should be send signal to main thread to update model
-fn remove_selected_items(items: Vec<MainListModel>, delete_empty_folders: bool) {
+fn remove_selected_items(items: Vec<MainListModel>, _delete_empty_folders: bool) {
     info!("Items to remove {}", items.len());
     drop(items);
-    drop(delete_empty_folders);
+    // drop(delete_empty_folders);
     // items.into_iter().for_each(|_item| {});
 }
 
