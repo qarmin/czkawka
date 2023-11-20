@@ -140,7 +140,7 @@ Flathub page with Czkawka can be found [**here**](https://flathub.org/apps/detai
 ### PPA - Debian/Ubuntu (unofficial)
 ```
 sudo add-apt-repository ppa:xtradeb/apps
-sudo apt-get update
+sudo apt update
 sudo apt-get install czkawka
 ```
 

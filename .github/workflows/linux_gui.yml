@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Install basic libraries
-        run: sudo apt-get update; sudo apt install libgtk-4-dev libheif-dev -y
+        run: sudo apt update; sudo apt install libheif-dev -y
 
       - name: Setup rust version
         run: rustup default ${{ matrix.toolchain }}
@@ -63,7 +63,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Install basic libraries
-        run: sudo apt-get update; sudo apt install libgtk-4-dev libheif-dev -y
+        run: sudo apt update; sudo apt install libgtk-4-dev libheif-dev -y
 
       - name: Setup rust version
         run: rustup default ${{ matrix.toolchain }}
@@ -107,7 +107,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Install Dependencies
-        run: sudo apt-get update; sudo apt install libgtk-4-dev libheif-dev librsvg2-dev wget fuse libfuse2 -y
+        run: sudo apt update; sudo apt install libgtk-4-dev libheif-dev librsvg2-dev wget fuse libfuse2 -y
 
       - name: Setup rust version
         run: rustup default ${{ matrix.toolchain }}
@@ -163,7 +163,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Install Dependencies
-        run: sudo apt-get update; sudo apt install libgtk-4-dev libheif-dev librsvg2-dev wget fuse libfuse2 -y xvfb
+        run: sudo apt update; sudo apt install libgtk-4-dev libheif-dev librsvg2-dev wget fuse libfuse2 -y xvfb
 
       - name: Setup rust version
         run: rustup default ${{ matrix.toolchain }}
