@@ -25,7 +25,7 @@ jobs:
           cp a/sd-v1.0.0-x86_64-pc-windows-gnu/sd.exe .
 
       - name: Setup rust version
-        run: rustup default ${{ matrix.toolchain }}
+        run: rustup default stable-x86_64-pc-windows-gnu
 
       - name: Compile Krokiet
         run: cargo build --release --bin krokiet
