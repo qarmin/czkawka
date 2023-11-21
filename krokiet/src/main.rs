@@ -2,6 +2,8 @@
 #![windows_subsystem = "windows"]
 #![allow(clippy::comparison_chain)]
 #![allow(clippy::collapsible_if)]
+#![allow(clippy::should_panic_without_expect)]
+#![allow(clippy::struct_field_names)] // Generated code
 #![allow(clippy::overly_complex_bool_expr)] // Generated code
 #![allow(clippy::semicolon_if_nothing_returned)] // Generated code
 #![allow(clippy::used_underscore_binding)] // Generated code

@@ -3,6 +3,7 @@ import {SelectableTableView} from "selectable_tree_view.slint";
 import {LeftSidePanel} from "left_side_panel.slint";
 import {CurrentTab, TypeOfOpenedItem} from "common.slint";
 import {MainListModel} from "common.slint";
+import {SettingsList} from "settings_list.slint";
 
 export component MainList {
     in-out property <CurrentTab> active-tab: CurrentTab.EmptyFolders;
@@ -49,6 +50,11 @@ export component MainList {
         parentPathIdx: 5;
         fileNameIdx: 4;
     }
+
+    settings_list := SettingsList {
+        visible: root.active-tab == CurrentTab.Settings;
+    }
+
     focus_item := FocusScope {
         width: 0px; // Hack to not steal first click from other components - https://github.com/slint-ui/slint/issues/3503
         // Hack not works https://github.com/slint-ui/slint/issues/3503#issuecomment-1817809834 because disables key-released event

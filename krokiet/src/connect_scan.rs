@@ -42,7 +42,8 @@ pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressDat
             }
             CurrentTab::SimilarImages => {
                 scan_similar_images(a, progress_sender, stop_receiver, custom_settings);
-            } // _ => panic!(),
+            }
+            CurrentTab::Settings => panic!("Button should be disabled"),
         }
     });
 }

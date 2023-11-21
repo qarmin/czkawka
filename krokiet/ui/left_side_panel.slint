@@ -1,6 +1,7 @@
 import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox} from "std-widgets.slint";
 import {CurrentTab} from "common.slint";
 import {ColorPalette} from "color_palette.slint";
+import {GuiState} from "gui_state.slint";
 
 component TabItem {
     in property <bool> scanning;
@@ -109,11 +110,17 @@ export component LeftSidePanel {
         }
 
         HorizontalLayout {
-            height: 20px;
+            padding-bottom: 2px;
+            padding-right: 3px;
             alignment: end;
-            Image {
-                width: 20px;
-                source: @image-url("../icons/settings.svg");
+            Button {
+                height: 50px;
+                width: self.height;
+                icon: @image-url("../icons/settings.svg");
+                clicked => {
+                    active_tab = CurrentTab.Settings;
+                    root.changed_current_tab();
+                }
             }
         }
     }

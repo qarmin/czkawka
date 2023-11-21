@@ -1,4 +1,8 @@
 export global Settings {
     in-out property <[StandardListViewItem]> included_directories: [{text: "ABCD"}, {text: "BCDA"}];
     in-out property <[StandardListViewItem]> excluded_directories: [{text: "ABCD"}, {text: "BCDA"}, {text: "CDFFF"}];
+
+    // Settings
+    in-out property <string> excluded_items: "Excluded items";
+    in-out property <string> allowed_extensions: "Allowed extensions";
 }
