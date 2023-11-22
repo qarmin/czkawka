@@ -22,7 +22,7 @@ jobs:
         run: sudo apt update || true; sudo apt install -y ffmpeg
 
       - name: Setup rust version
-        run: rustup default ${{ matrix.toolchain }}
+        run: rustup default nightly-2023-11-16
 
       - name: Add eyra
         run: |

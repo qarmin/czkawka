@@ -1,5 +1,6 @@
 // Remove console window in Windows OS
 #![windows_subsystem = "windows"]
+#![allow(unknown_lints)] // May be disabled, but locally I use nightly clippy
 #![allow(clippy::comparison_chain)]
 #![allow(clippy::collapsible_if)]
 #![allow(clippy::should_panic_without_expect)]
@@ -79,7 +80,7 @@ pub fn to_remove_debug(app: &MainWindow) {
 
 fn to_remove_create_with_header() -> Rc<VecModel<MainListModel>> {
     let header_row_data: Rc<VecModel<MainListModel>> = Rc::new(VecModel::default());
-    for r in 0..100_000 {
+    for r in 0..10_000 {
         let items = VecModel::default();
 
         for c in 0..3 {

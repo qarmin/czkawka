@@ -39,7 +39,9 @@ jobs:
           if-no-files-found: error
 
       - name: Show console window on windows
-        run: ./sd.exe -s '#![windows_subsystem = "windows"]' '//#![windows_subsystem = "windows"]' krokiet/src/main.rs
+        run: |
+          ./sd.exe -s '#![windows_subsystem = "windows"]' '//#![windows_subsystem = "windows"]' krokiet/src/main.rs
+          cat krokiet/src/main.rs
 
       - name: Compile Krokiet Console
         run: cargo build --release --bin krokiet
