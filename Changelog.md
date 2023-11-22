@@ -1,6 +1,7 @@
 ## Version 7.0.0 - ?
 ### GTK GUI
 - Added drag&drop support for included/excluded folders - [#1106](https://github.com/qarmin/czkawka/pull/1106)
+- Added information where is saved info about scan results - [#1102](https://github.com/qarmin/czkawka/pull/1102)
 
 ### CLI
 - Providing full static rust binary with [Eyra](https://github.com/sunfishcode/eyra) - [#1102](https://github.com/qarmin/czkawka/pull/1102)

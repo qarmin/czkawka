@@ -51,7 +51,7 @@ jobs:
       - name: Store MacOS Krokiet
         uses: actions/upload-artifact@v3
         with:
-          name: czkawka_gui-${{ runner.os }}-${{ matrix.toolchain }}
+          name: krokiet-${{ runner.os }}-${{ matrix.toolchain }}
           path: target/release/krokiet
         if: ${{ matrix.type == 'release' }}
 
@@ -76,6 +76,6 @@ jobs:
       - name: Store MacOS Krokiet Heif
         uses: actions/upload-artifact@v3
         with:
-          name: czkawka_gui-${{ runner.os }}-${{ matrix.toolchain }}-heif
+          name: krokiet-${{ runner.os }}-${{ matrix.toolchain }}-heif
           path: target/release/krokiet
         if: ${{ matrix.type == 'release' }}
