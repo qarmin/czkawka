@@ -9,7 +9,54 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  krokiet:
+  krokiet-compiled-on-linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        use_heif: [ normal ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies(mostly sd)
+        run: |
+          wget https://github.com/chmln/sd/releases/download/v1.0.0/sd-v1.0.0-x86_64-unknown-linux-gnu.tar.gz -O a.tar.gz
+          tar -xzf a.tar.gz
+          cp sd-v1.0.0-x86_64-unknown-linux-gnu/sd .
+          chmod +x ./sd
+
+      - name: Setup rust version
+        run: |
+          rustup target add x86_64-pc-windows-gnu
+
+      - name: Compile Krokiet
+        run: cargo build --release --target x86_64-unknown-linux-gnu --bin krokiet
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: krokiet-windows-c-on-linux-${{ github.sha }}-${{ matrix.use_heif }}
+          path: |
+            target/release/krokiet.exe
+          if-no-files-found: error
+
+      - name: Show console window on windows
+        run: |
+          ./sd.exe -s '#![windows_subsystem = "windows"]' '//#![windows_subsystem = "windows"]' krokiet/src/main.rs
+          cat krokiet/src/main.rs
+
+      - name: Compile Krokiet Console
+        run: cargo build --release --target x86_64-unknown-linux-gnu --bin krokiet
+
+      - name: Upload artifacts Console
+        uses: actions/upload-artifact@v3
+        with:
+          name: krokiet-windows-c-on-linux-${{ github.sha }}-${{ matrix.use_heif }}-console
+          path: |
+            target/release/krokiet.exe
+          if-no-files-found: error
+
+  krokiet-compiled-on-windows:
     strategy:
       fail-fast: false
       matrix:
@@ -33,7 +80,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: krokiet-windows-${{ github.sha }}-${{ matrix.use_heif }}
+          name: krokiet-windows-c-on-windows-${{ github.sha }}-${{ matrix.use_heif }}
           path: |
             target/release/krokiet.exe
           if-no-files-found: error
@@ -49,7 +96,7 @@ jobs:
       - name: Upload artifacts Console
         uses: actions/upload-artifact@v3
         with:
-          name: krokiet-windows-${{ github.sha }}-${{ matrix.use_heif }}-console
+          name: krokiet-windows-c-on-windows-${{ github.sha }}-${{ matrix.use_heif }}-console
           path: |
             target/release/krokiet.exe
           if-no-files-found: error
