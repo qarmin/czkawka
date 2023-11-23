@@ -62,11 +62,20 @@ pub fn print_version_mode() {
         Ok(meta) => meta.semver.to_string(),
         Err(_) => "<unknown>".to_string(),
     };
+    let info = os_info::get();
+    let debug_release = if cfg!(debug_assertions) { "debug" } else { "release" };
+
+    let processors = match thread::available_parallelism() {
+        Ok(t) => t.get(),
+        Err(_) => 1,
+    };
 
     info!(
-        "App version: {}, compiled with {} mode on rustc {rust_version}",
-        CZKAWKA_VERSION,
-        if cfg!(debug_assertions) { "debug" } else { "release" },
+        "App version: {CZKAWKA_VERSION}, {debug_release} mode, rust {rust_version}, os {} {} [{} {}], {processors} cpu/threads",
+        info.os_type(),
+        info.version(),
+        std::env::consts::ARCH,
+        info.bitness(),
     );
     if cfg!(debug_assertions) {
         warn!("You are running debug version of app which is a lot of slower than release version.");

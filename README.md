@@ -27,24 +27,12 @@
 
 ![Czkawka](https://user-images.githubusercontent.com/41945903/145280350-506f7e94-4db0-4de7-a68d-6e7c26bbd2bf.gif)
 
-## Supported OS
-Linux - Ubuntu 22.04+, Fedora 36+, Alpine Linux 3.16+, Debian 12+ and a lot of more 
-
-Windows - 7, 8.1, 10, 11  
-MacOS - 10.15+
-
-If you are looking for older version that use GTK 3 and have support for more OS(like e.g. Ubuntu 20.04), look at [4.1.0](https://github.com/qarmin/czkawka/releases/tag/4.1.0) or older versions.
-
-## How do I use it?
-You can find the instructions on how to use Czkawka [**here**](instructions/Instruction.md).
-
-Some helpful tricks you can find [**here**](instructions/Instruction.md#tips-tricks-and-known-bugs)
-
-## Installation
-Installation instructions with download links you can find [**here**](instructions/Installation.md).
-
-## Compilation
-If you want to try and develop Czkawka or just use the latest available feature, you may want to look at the [**compilation instructions**](instructions/Compilation.md).
+## Usage, installation, compilation, requirements, license
+Each tool uses different technologies, so you can find instructions for each of them in the appropriate file:
+- [Czkawka GUI (GTK frontend)](czkawka_gui/README.md)</br>
+- [Czkawka CLI](czkawka_cli/README.md)</br>
+- [Czkawka Core](czkawka_core/README.md)</br>
+- [Krokiet GUI (Slint frontend)](krokiet/README.md)</br>
 
 ## Benchmarks
 
@@ -166,19 +154,6 @@ but I gave up on these ideas because they contained Polish characters, which wou
 
 At the beginning of the program creation, if the response concerning the name was unanimously negative, I prepared myself 
 for a possible change of the name of the program, and the opinions were extremely mixed.
-
-## License
-Code is distributed under MIT license.
-
-Icon was created by [jannuary](https://github.com/jannuary) and licensed CC-BY-4.0.
-
-Windows dark theme is used from project [WhiteSur](https://github.com/slypy/whitesur-gtk4-theme) with MIT license.
-
-Some icons were taken from [ReShot](https://www.reshot.com) site and are licensed under Reshot Free License.
-
-The program is completely free to use.
-
-"Gratis to uczciwa cena" - "Free is a fair price"
 
 ## Thanks
 
