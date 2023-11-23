@@ -44,7 +44,7 @@ impl Default for SettingsCustom {
 }
 
 pub fn reset_settings(app: &MainWindow) {
-    serde::set_settings_to_gui(app, &SettingsCustom::default());
+    set_settings_to_gui(app, &SettingsCustom::default());
 }
 
 pub fn load_settings_from_file(app: &MainWindow) {
