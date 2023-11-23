@@ -20,6 +20,7 @@ jobs:
 
       - name: Install dependencies(mostly sd)
         run: |
+          apt update || true;apt install -y mingw-w64 mingw-w64-x86-64-dev
           wget https://github.com/chmln/sd/releases/download/v1.0.0/sd-v1.0.0-x86_64-unknown-linux-gnu.tar.gz -O a.tar.gz
           tar -xzf a.tar.gz
           cp sd-v1.0.0-x86_64-unknown-linux-gnu/sd .
