@@ -42,7 +42,7 @@ jobs:
 
       - name: Show console window on windows
         run: |
-          ./sd.exe -s '#![windows_subsystem = "windows"]' '//#![windows_subsystem = "windows"]' krokiet/src/main.rs
+          ./sd -s '#![windows_subsystem = "windows"]' '//#![windows_subsystem = "windows"]' krokiet/src/main.rs
           cat krokiet/src/main.rs
 
       - name: Compile Krokiet Console

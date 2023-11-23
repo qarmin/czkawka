@@ -15,12 +15,21 @@ const DEFAULT_EXCLUDED_DIRECTORIES: &[&str] = &["/proc", "/dev", "/sys", "/run",
 #[cfg(not(target_family = "unix"))]
 const DEFAULT_EXCLUDED_DIRECTORIES: &[&str] = &["C:\\Windows"];
 
+#[cfg(target_family = "unix")]
+pub const DEFAULT_EXCLUDED_ITEMS: &str = "*/.git/*,*/node_modules/*,*/lost+found/*,*/Trash/*,*/.Trash-*/*,*/snap/*,/home/*/.cache/*";
+#[cfg(not(target_family = "unix"))]
+pub const DEFAULT_EXCLUDED_ITEMS: &str = "*\\.git\\*,*\\node_modules\\*,*\\lost+found\\*,*:\\windows\\*,*:\\$RECYCLE.BIN\\*,*:\\$SysReset\\*,*:\\System Volume Information\\*,*:\\OneDriveTemp\\*,*:\\hiberfil.sys,*:\\pagefile.sys,*:\\swapfile.sys";
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SettingsCustom {
     #[serde(default = "default_included_directories")]
     pub included_directories: Vec<PathBuf>,
     #[serde(default = "default_excluded_directories")]
     pub excluded_directories: Vec<PathBuf>,
+    #[serde(default = "default_excluded_items")]
+    pub excluded_items: String,
+    #[serde(default)]
+    pub allowed_extensions: String,
 }
 
 impl Default for SettingsCustom {
@@ -28,12 +37,14 @@ impl Default for SettingsCustom {
         Self {
             included_directories: default_included_directories(),
             excluded_directories: default_excluded_directories(),
+            excluded_items: default_excluded_items(),
+            allowed_extensions: String::new(),
         }
     }
 }
 
 pub fn reset_settings(app: &MainWindow) {
-    set_settings_to_gui(app, &SettingsCustom::default());
+    serde::set_settings_to_gui(app, &SettingsCustom::default());
 }
 
 pub fn load_settings_from_file(app: &MainWindow) {
@@ -100,12 +111,15 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
     let settings = app.global::<Settings>();
 
     // Included directories
-    let included_items = create_string_standard_list_view_from_pathbuf(&custom_settings.included_directories);
-    settings.set_included_directories(included_items);
+    let included_directories = create_string_standard_list_view_from_pathbuf(&custom_settings.included_directories);
+    settings.set_included_directories(included_directories);
 
     // Excluded directories
-    let excluded_items = create_string_standard_list_view_from_pathbuf(&custom_settings.excluded_directories);
-    settings.set_excluded_directories(excluded_items);
+    let excluded_directories = create_string_standard_list_view_from_pathbuf(&custom_settings.excluded_directories);
+    settings.set_excluded_directories(excluded_directories);
+
+    settings.set_excluded_items(custom_settings.excluded_items.clone().into());
+    settings.set_allowed_extensions(custom_settings.allowed_extensions.clone().into());
 
     // Clear text
     app.global::<GuiState>().set_info_text("".into());
@@ -120,9 +134,14 @@ pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let excluded_directories = settings.get_excluded_directories();
     let excluded_directories = excluded_directories.iter().map(|x| PathBuf::from(x.text.as_str())).collect::<Vec<_>>();
 
+    let excluded_items = settings.get_excluded_items().to_string();
+    let allowed_extensions = settings.get_allowed_extensions().to_string();
+
     SettingsCustom {
         included_directories,
         excluded_directories,
+        excluded_items,
+        allowed_extensions,
     }
 }
 
@@ -146,4 +165,8 @@ fn default_excluded_directories() -> Vec<PathBuf> {
     let mut excluded_directories = DEFAULT_EXCLUDED_DIRECTORIES.iter().map(PathBuf::from).collect::<Vec<_>>();
     excluded_directories.sort();
     excluded_directories
+}
+
+fn default_excluded_items() -> String {
+    DEFAULT_EXCLUDED_ITEMS.to_string()
 }
