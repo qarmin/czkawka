@@ -30,14 +30,14 @@ jobs:
           rustup target add x86_64-pc-windows-gnu
 
       - name: Compile Krokiet
-        run: cargo build --release --target x86_64-unknown-linux-gnu --bin krokiet
+        run: cargo build --release --target x86_64-pc-windows-gnu --bin krokiet
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: krokiet-windows-c-on-linux-${{ github.sha }}-${{ matrix.use_heif }}
           path: |
-            target/release/krokiet.exe
+            target/x86_64-pc-windows-gnu/release/krokiet.exe
           if-no-files-found: error
 
       - name: Show console window on windows
@@ -46,14 +46,14 @@ jobs:
           cat krokiet/src/main.rs
 
       - name: Compile Krokiet Console
-        run: cargo build --release --target x86_64-unknown-linux-gnu --bin krokiet
+        run: cargo build --release --target x86_64-pc-windows-gnu --bin krokiet
 
       - name: Upload artifacts Console
         uses: actions/upload-artifact@v3
         with:
           name: krokiet-windows-c-on-linux-${{ github.sha }}-${{ matrix.use_heif }}-console
           path: |
-            target/release/krokiet.exe
+            target/x86_64-pc-windows-gnu/release/krokiet.exe
           if-no-files-found: error
 
   krokiet-compiled-on-windows:
