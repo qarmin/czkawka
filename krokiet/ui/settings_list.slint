@@ -21,32 +21,64 @@ component TextComponent inherits HorizontalLayout {
     }
 }
 
-export component SettingsList inherits ScrollView {
-    min-height: 300px;
-    VerticalLayout {
+component MinMaxSizeComponent inherits HorizontalLayout {
+    spacing: 20px;
+    Text {
+        horizontal-stretch: 0.0;
+        text:"Size";
+        vertical-alignment: TextVerticalAlignment.center;
+    }
+    HorizontalLayout {
         spacing: 5px;
+        horizontal-stretch: 1.0;
         Text {
-            text: "Settings";
-            height: SettingsSize.item_height;
-            horizontal-alignment: TextHorizontalAlignment.center;
-            font-size: 20px;
-        }
-        Text {
-            text: "General settings";
-            height: SettingsSize.item_height;
-            horizontal-alignment: TextHorizontalAlignment.center;
-        }
-        TextComponent {
-            name: "Excluded item:";
-            model <=> Settings.excluded_items;
-        }
-        TextComponent {
-            name: "Allowed extensions:";
-            model <=> Settings.allowed_extensions;
+            text:"Min:";
+            vertical-alignment: TextVerticalAlignment.center;
         }
         SpinBox {
             enabled: true;
             height: SettingsSize.item_height;
+        }
+        Text {
+            text:"Max:";
+            vertical-alignment: TextVerticalAlignment.center;
+        }
+        SpinBox {
+            enabled: true;
+            height: SettingsSize.item_height;
+        }
+    }
+}
+
+export component SettingsList inherits VerticalLayout {
+    preferred-height: 300px;
+    preferred-width: 400px;
+
+    Text {
+        text: "Settings";
+        height: SettingsSize.item_height;
+        horizontal-alignment: TextHorizontalAlignment.center;
+        font-size: 20px;
+    }
+    ScrollView {
+        VerticalLayout {
+            spacing: 5px;
+            Text {
+                text: "General settings";
+                height: SettingsSize.item_height;
+                horizontal-alignment: TextHorizontalAlignment.center;
+            }
+            TextComponent {
+                name: "Excluded item:";
+                model <=> Settings.excluded_items;
+            }
+            TextComponent {
+                name: "Allowed extensions:";
+                model <=> Settings.allowed_extensions;
+            }
+            MinMaxSizeComponent {
+
+            }
         }
     }
 }

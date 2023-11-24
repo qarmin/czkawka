@@ -32,6 +32,8 @@ use crate::duplicate::make_hard_link;
 use crate::CZKAWKA_VERSION;
 
 static NUMBER_OF_THREADS: state::InitCell<usize> = state::InitCell::new();
+pub const DEFAULT_THREAD_SIZE: usize = 8 * 1024 * 1024; // 8 MB
+pub const DEFAULT_WORKER_THREAD_SIZE: usize = 4 * 1024 * 1024; // 4 MB
 
 pub fn get_number_of_threads() -> usize {
     let data = NUMBER_OF_THREADS.get();
@@ -62,7 +64,6 @@ pub fn print_version_mode() {
         Ok(meta) => meta.semver.to_string(),
         Err(_) => "<unknown>".to_string(),
     };
-    let info = os_info::get();
     let debug_release = if cfg!(debug_assertions) { "debug" } else { "release" };
 
     let processors = match thread::available_parallelism() {
@@ -70,6 +71,7 @@ pub fn print_version_mode() {
         Err(_) => 1,
     };
 
+    let info = os_info::get();
     info!(
         "App version: {CZKAWKA_VERSION}, {debug_release} mode, rust {rust_version}, os {} {} [{} {}], {processors} cpu/threads",
         info.os_type(),
@@ -93,7 +95,11 @@ pub fn get_default_number_of_threads() -> usize {
 pub fn set_number_of_threads(thread_number: usize) {
     NUMBER_OF_THREADS.set(thread_number);
 
-    rayon::ThreadPoolBuilder::new().num_threads(get_number_of_threads()).build_global().unwrap();
+    rayon::ThreadPoolBuilder::new()
+        .num_threads(get_number_of_threads())
+        .stack_size(DEFAULT_WORKER_THREAD_SIZE)
+        .build_global()
+        .unwrap();
 }
 
 pub const RAW_IMAGE_EXTENSIONS: &[&str] = &[
