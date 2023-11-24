@@ -1,4 +1,7 @@
 export global Settings {
+    in-out property <int> settings_preset_idx: 0;
+    in-out property <[string]> settings_presets: ["Preset 1", "Preset 2"];
+
     in-out property <[StandardListViewItem]> included_directories: [{text: "ABCD"}, {text: "BCDA"}];
     in-out property <[StandardListViewItem]> excluded_directories: [{text: "ABCD"}, {text: "BCDA"}, {text: "CDFFF"}];
 

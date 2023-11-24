@@ -1,5 +1,6 @@
-import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox, ScrollView, LineEdit, SpinBox} from "std-widgets.slint";
+import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox, ScrollView, LineEdit, SpinBox, ComboBox, TextEdit} from "std-widgets.slint";
 import { Settings } from "settings.slint";
+import { Callabler } from "callabler.slint";
 
 global SettingsSize {
     out property <length> item_height: 30px;
@@ -25,7 +26,7 @@ component MinMaxSizeComponent inherits HorizontalLayout {
     spacing: 20px;
     Text {
         horizontal-stretch: 0.0;
-        text:"Size";
+        text:"Items Size";
         vertical-alignment: TextVerticalAlignment.center;
     }
     HorizontalLayout {
@@ -50,6 +51,32 @@ component MinMaxSizeComponent inherits HorizontalLayout {
     }
 }
 
+component Presets inherits HorizontalLayout {
+    spacing: 5px;
+    Text {
+        text : "Current:";
+        vertical-alignment: TextVerticalAlignment.center;
+    }
+    combo_box := ComboBox {
+        current-index <=> Settings.settings_preset_idx;
+        model: Settings.settings_presets;
+        selected(item) => {
+            Callabler.changed_settings_preset(item, self.current_index);
+            current_name.text = item;
+        }
+    }
+    current_name := LineEdit {
+        text: Settings.settings_presets[0];
+    }
+    Button {
+        text: "Save";
+        clicked => {
+            Settings.settings_presets[combo_box.current_index] = current_name.text;
+            combo_box.current_value = current_name.text;
+        }
+    }
+}
+
 export component SettingsList inherits VerticalLayout {
     preferred-height: 300px;
     preferred-width: 400px;
@@ -63,10 +90,14 @@ export component SettingsList inherits VerticalLayout {
     ScrollView {
         VerticalLayout {
             spacing: 5px;
+            Presets{
+                height: SettingsSize.item_height;
+            }
             Text {
                 text: "General settings";
                 height: SettingsSize.item_height;
                 horizontal-alignment: TextHorizontalAlignment.center;
+                vertical-alignment: TextVerticalAlignment.center;
             }
             TextComponent {
                 name: "Excluded item:";

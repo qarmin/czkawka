@@ -4,21 +4,12 @@ use std::path::PathBuf;
 
 use crate::common::create_string_standard_list_view_from_pathbuf;
 use crate::{GuiState, Settings};
+use czkawka_core::common_items::{DEFAULT_EXCLUDED_DIRECTORIES, DEFAULT_EXCLUDED_ITEMS};
 use directories_next::ProjectDirs;
 use home::home_dir;
 use log::error;
 use serde::{Deserialize, Serialize};
 use slint::{ComponentHandle, Model};
-
-#[cfg(target_family = "unix")]
-const DEFAULT_EXCLUDED_DIRECTORIES: &[&str] = &["/proc", "/dev", "/sys", "/run", "/snap"];
-#[cfg(not(target_family = "unix"))]
-const DEFAULT_EXCLUDED_DIRECTORIES: &[&str] = &["C:\\Windows"];
-
-#[cfg(target_family = "unix")]
-pub const DEFAULT_EXCLUDED_ITEMS: &str = "*/.git/*,*/node_modules/*,*/lost+found/*,*/Trash/*,*/.Trash-*/*,*/snap/*,/home/*/.cache/*";
-#[cfg(not(target_family = "unix"))]
-pub const DEFAULT_EXCLUDED_ITEMS: &str = "*\\.git\\*,*\\node_modules\\*,*\\lost+found\\*,*:\\windows\\*,*:\\$RECYCLE.BIN\\*,*:\\$SysReset\\*,*:\\System Volume Information\\*,*:\\OneDriveTemp\\*,*:\\hiberfil.sys,*:\\pagefile.sys,*:\\swapfile.sys";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SettingsCustom {
@@ -34,12 +25,7 @@ pub struct SettingsCustom {
 
 impl Default for SettingsCustom {
     fn default() -> Self {
-        Self {
-            included_directories: default_included_directories(),
-            excluded_directories: default_excluded_directories(),
-            excluded_items: default_excluded_items(),
-            allowed_extensions: String::new(),
-        }
+        serde_json::from_str("{}").unwrap()
     }
 }
 
