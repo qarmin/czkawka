@@ -12,7 +12,10 @@ export global Callabler {
     callback load_image_preview(string);
 
     // Settings
-    callback changed_settings_preset(string, int);
+    callback changed_settings_preset();
+    callback save_current_preset();
+    callback load_current_preset();
+    callback reset_current_preset();
 
     // Translations
     pure callback translate(string, [{key: string, value: string}]) -> string;

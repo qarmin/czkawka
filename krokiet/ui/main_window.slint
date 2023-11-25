@@ -24,6 +24,7 @@ export component MainWindow inherits Window {
     preferred-width: 800px;
     min-height: 300px;
     preferred-height: 600px;
+    in-out property <string> text_summary_text: "";
     in-out property <bool> stop_requested: false;
     in-out property <bool> scanning: false;
     in-out property <ProgressToSend> progress_datas: {
@@ -96,16 +97,17 @@ export component MainWindow inherits Window {
             active-tab <=> root.active-tab;
             stop_requested <=> root.stop-requested;
             scan_stopping => {
-                text_summary.text = "Stopping scan, please wait...";
+                text_summary_text = "Stopping scan, please wait...";
                 root.scan_stopping();
             }
             scan_starting(item) => {
-                text-summary.text = "Searching...";
+                text_summary_text = "Searching...";
                 root.scan_starting(item);
             }
         }
 
         text_summary := LineEdit {
+            text: text_summary_text;
             read-only: true;
         }
 
@@ -177,7 +179,7 @@ export component MainWindow inherits Window {
     }
 
     scan_ended(scan_text) => {
-        text-summary.text = scan_text;
+        text_summary_text = scan_text;
         root.scanning = false;
         root.stop_requested = false;
     }

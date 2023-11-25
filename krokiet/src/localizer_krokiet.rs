@@ -1,5 +1,5 @@
 use i18n_embed::fluent::{fluent_language_loader, FluentLanguageLoader};
-use i18n_embed::{DefaultLocalizer, LanguageLoader, Localizer};
+use i18n_embed::LanguageLoader;
 use once_cell::sync::Lazy;
 use rust_embed::RustEmbed;
 
@@ -26,7 +26,7 @@ macro_rules! flk {
     }};
 }
 
-// Get the `Localizer` to be used for localizing this library.
-pub fn localizer_krokiet() -> Box<dyn Localizer> {
-    Box::from(DefaultLocalizer::new(&*LANGUAGE_LOADER_GUI, &Localizations))
-}
+// // Get the `Localizer` to be used for localizing this library.
+// pub fn localizer_krokiet() -> Box<dyn Localizer> {
+//     Box::from(DefaultLocalizer::new(&*LANGUAGE_LOADER_GUI, &Localizations))
+// }

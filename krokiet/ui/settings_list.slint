@@ -18,7 +18,7 @@ component TextComponent inherits HorizontalLayout {
     LineEdit {
         horizontal-stretch: 1.0;
         height: SettingsSize.item_height;
-        text: model;
+        text <=> model;
     }
 }
 
@@ -40,6 +40,7 @@ component MinMaxSizeComponent inherits HorizontalLayout {
             enabled: true;
             maximum: 999999999999999;
             height: SettingsSize.item_height;
+            value <=> Settings.minimum_file_size;
         }
         Text {
             text:"Max:";
@@ -49,6 +50,7 @@ component MinMaxSizeComponent inherits HorizontalLayout {
             enabled: true;
             maximum: 999999999999999;
             height: SettingsSize.item_height;
+            value <=> Settings.maximum_file_size;
         }
     }
 }
@@ -59,7 +61,7 @@ component Presets inherits Rectangle {
     if !edit_name: HorizontalLayout {
         spacing: 5px;
         Text {
-            text : "Current:";
+            text : "Current Preset:";
             vertical-alignment: TextVerticalAlignment.center;
         }
         combo_box := ComboBox {
@@ -67,7 +69,7 @@ component Presets inherits Rectangle {
             model: Settings.settings_presets;
             selected(item) => {
                 Settings.settings_preset_idx = self.current_index;
-                Callabler.changed_settings_preset(item, self.current_index);
+                Callabler.changed_settings_preset();
             }
         }
         Button {
@@ -142,6 +144,27 @@ export component SettingsList inherits VerticalLayout {
             }
             MinMaxSizeComponent {
 
+            }
+        }
+    }
+    HorizontalLayout {
+        spacing: 5px;
+        Button {
+            text: "Save";
+            clicked => {
+                Callabler.save_current_preset();
+            }
+        }
+        Button {
+            text: "Load";
+            clicked => {
+                Callabler.load_current_preset();
+            }
+        }
+        Button {
+            text: "Reset";
+            clicked => {
+                Callabler.reset_current_preset();
             }
         }
     }

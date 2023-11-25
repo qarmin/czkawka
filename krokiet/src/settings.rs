@@ -1,16 +1,16 @@
-use crate::MainWindow;
+use crate::{Callabler, MainWindow};
 use std::cmp::{max, min};
 use std::env;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
-use crate::common::create_string_standard_list_view_from_pathbuf;
+use crate::common::{create_string_standard_list_view_from_pathbuf, create_vec_model_from_vec_string};
 use crate::{GuiState, Settings};
 use czkawka_core::common_items::{DEFAULT_EXCLUDED_DIRECTORIES, DEFAULT_EXCLUDED_ITEMS};
 use directories_next::ProjectDirs;
 use home::home_dir;
-use log::{error, info};
+use log::{debug, error, info};
 use serde::{Deserialize, Serialize};
-use slint::{ComponentHandle, Model};
+use slint::{ComponentHandle, Model, ModelRc};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SettingsCustom {
@@ -22,6 +22,10 @@ pub struct SettingsCustom {
     pub excluded_items: String,
     #[serde(default)]
     pub allowed_extensions: String,
+    #[serde(default = "minimum_file_size")]
+    pub minimum_file_size: i32,
+    #[serde(default = "maximum_file_size")]
+    pub maximum_file_size: i32,
 }
 
 impl Default for SettingsCustom {
@@ -46,6 +50,68 @@ impl Default for BasicSettings {
     }
 }
 
+pub fn connect_changing_settings_preset(app: &MainWindow) {
+    let a = app.as_weak();
+    app.global::<Callabler>().on_changed_settings_preset(move || {
+        let app = a.upgrade().unwrap();
+        let current_item = app.global::<Settings>().get_settings_preset_idx();
+        let loaded_data = load_data_from_file::<SettingsCustom>(get_config_file(current_item));
+        match loaded_data {
+            Ok(loaded_data) => {
+                set_settings_to_gui(&app, &loaded_data);
+                app.set_text_summary_text(format!("Changed and loaded properly preset {}", current_item + 1).into());
+            }
+            Err(e) => {
+                set_settings_to_gui(&app, &SettingsCustom::default());
+                app.set_text_summary_text(format!("Cannot change and load preset {} - reason {e}", current_item + 1).into());
+            }
+        }
+    });
+    let a = app.as_weak();
+    app.global::<Callabler>().on_save_current_preset(move || {
+        let app = a.upgrade().unwrap();
+        let settings = app.global::<Settings>();
+        let current_item = settings.get_settings_preset_idx();
+        let result = save_data_to_file(get_config_file(current_item), &collect_settings(&app));
+        match result {
+            Ok(()) => {
+                app.set_text_summary_text(format!("Saved preset {}", current_item + 1).into());
+            }
+            Err(e) => {
+                app.set_text_summary_text(format!("Cannot save preset {} - reason {e}", current_item + 1).into());
+                error!("{e}");
+            }
+        }
+    });
+    let a = app.as_weak();
+    app.global::<Callabler>().on_reset_current_preset(move || {
+        let app = a.upgrade().unwrap();
+        let settings = app.global::<Settings>();
+        let current_item = settings.get_settings_preset_idx();
+        set_settings_to_gui(&app, &SettingsCustom::default());
+        app.set_text_summary_text(format!("Reset preset {}", current_item + 1).into());
+    });
+    let a = app.as_weak();
+    app.global::<Callabler>().on_load_current_preset(move || {
+        let app = a.upgrade().unwrap();
+        let settings = app.global::<Settings>();
+        let current_item = settings.get_settings_preset_idx();
+        let loaded_data = load_data_from_file::<SettingsCustom>(get_config_file(current_item));
+        match loaded_data {
+            Ok(loaded_data) => {
+                set_settings_to_gui(&app, &loaded_data);
+                app.set_text_summary_text(format!("Loaded preset {}", current_item + 1).into());
+            }
+            Err(e) => {
+                set_settings_to_gui(&app, &SettingsCustom::default());
+                let err_message = format!("Cannot load preset {} - reason {e}", current_item + 1);
+                app.set_text_summary_text(err_message.into());
+                error!("{e}");
+            }
+        }
+    });
+}
+
 pub fn create_default_settings_files() {
     let base_config_file = get_base_config_file();
     if let Some(base_config_file) = base_config_file {
@@ -53,7 +119,8 @@ pub fn create_default_settings_files() {
             let _ = save_data_to_file(Some(base_config_file), &BasicSettings::default());
         }
     }
-    for i in 0..10 {
+
+    for i in 1..=10 {
         let config_file = get_config_file(i);
         if let Some(config_file) = config_file {
             if !config_file.is_file() {
@@ -63,12 +130,9 @@ pub fn create_default_settings_files() {
     }
 }
 
-pub fn reset_settings(app: &MainWindow) {
-    set_settings_to_gui(app, &SettingsCustom::default());
-}
-
 pub fn load_settings_from_file(app: &MainWindow) {
     let result_base_settings = load_data_from_file::<BasicSettings>(get_base_config_file());
+
     let base_settings;
     if let Ok(base_settings_temp) = result_base_settings {
         base_settings = base_settings_temp;
@@ -78,6 +142,7 @@ pub fn load_settings_from_file(app: &MainWindow) {
     }
 
     let results_custom_settings = load_data_from_file::<SettingsCustom>(get_config_file(base_settings.default_preset));
+
     let custom_settings;
     if let Ok(custom_settings_temp) = results_custom_settings {
         custom_settings = custom_settings_temp;
@@ -90,7 +155,20 @@ pub fn load_settings_from_file(app: &MainWindow) {
     set_base_settings_to_gui(app, &base_settings);
 }
 
-pub fn save_settings_to_file(app: &MainWindow) {
+pub fn save_all_settings_to_file(app: &MainWindow) {
+    save_base_settings_to_file(app);
+    save_custom_settings_to_file(app);
+}
+
+pub fn save_base_settings_to_file(app: &MainWindow) {
+    let result = save_data_to_file(get_base_config_file(), &collect_base_settings(app));
+
+    if let Err(e) = result {
+        error!("{e}");
+    }
+}
+
+pub fn save_custom_settings_to_file(app: &MainWindow) {
     let current_item = app.global::<Settings>().get_settings_preset_idx();
     let result = save_data_to_file(get_config_file(current_item), &collect_settings(app));
 
@@ -99,34 +177,36 @@ pub fn save_settings_to_file(app: &MainWindow) {
     }
 }
 
-pub fn load_data_from_file<T>(config_data: Option<PathBuf>) -> Result<T, String>
+pub fn load_data_from_file<T>(config_file: Option<PathBuf>) -> Result<T, String>
 where
     for<'de> T: Deserialize<'de>,
 {
-    let Some(config_data) = config_data else {
+    let current_time = std::time::Instant::now();
+    let Some(config_file) = config_file else {
         return Err("Cannot get config file".into());
     };
-    if !config_data.is_file() {
+    if !config_file.is_file() {
         return Err("Config file doesn't exists".into());
     }
 
-    match std::fs::read_to_string(config_data) {
+    let result = match std::fs::read_to_string(&config_file) {
         Ok(serialized) => match serde_json::from_str(&serialized) {
             Ok(custom_settings) => Ok(custom_settings),
-            Err(e) => {
-                return Err(format!("Cannot deserialize settings: {e}"));
-            }
+            Err(e) => Err(format!("Cannot deserialize settings: {e}")),
         },
-        Err(e) => {
-            return Err(format!("Cannot read config file: {e}"));
-        }
-    }
+        Err(e) => Err(format!("Cannot read config file: {e}")),
+    };
+
+    debug!("Loading data from file {:?} took {:?}", config_file, current_time.elapsed());
+
+    result
 }
 
 pub fn save_data_to_file<T>(config_file: Option<PathBuf>, serializable_data: &T) -> Result<(), String>
 where
     T: Serialize,
 {
+    let current_time = std::time::Instant::now();
     let Some(config_file) = config_file else {
         return Err("Cannot get config file".into());
     };
@@ -139,7 +219,7 @@ where
 
     match serde_json::to_string_pretty(&serializable_data) {
         Ok(serialized) => {
-            if let Err(e) = std::fs::write(config_file, serialized) {
+            if let Err(e) = std::fs::write(&config_file, serialized) {
                 return Err(format!("Cannot save config file: {e}"));
             }
         }
@@ -147,6 +227,8 @@ where
             return Err(format!("Cannot serialize settings: {e}"));
         }
     }
+
+    debug!("Saving data to file {:?} took {:?}", config_file, current_time.elapsed());
     Ok(())
 }
 
@@ -173,6 +255,7 @@ pub fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicSettings
     let settings = app.global::<Settings>();
     // settings.set_language(basic_settings.language.clone());
     settings.set_settings_preset_idx(basic_settings.default_preset);
+    settings.set_settings_presets(ModelRc::new(create_vec_model_from_vec_string(basic_settings.preset_names.clone())));
 }
 pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
     let settings = app.global::<Settings>();
@@ -187,6 +270,8 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
 
     settings.set_excluded_items(custom_settings.excluded_items.clone().into());
     settings.set_allowed_extensions(custom_settings.allowed_extensions.clone().into());
+    settings.set_minimum_file_size(custom_settings.minimum_file_size);
+    settings.set_maximum_file_size(custom_settings.maximum_file_size);
 
     // Clear text
     app.global::<GuiState>().set_info_text("".into());
@@ -203,12 +288,16 @@ pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
 
     let excluded_items = settings.get_excluded_items().to_string();
     let allowed_extensions = settings.get_allowed_extensions().to_string();
+    let minimum_file_size = settings.get_minimum_file_size();
+    let maximum_file_size = settings.get_maximum_file_size();
 
     SettingsCustom {
         included_directories,
         excluded_directories,
         excluded_items,
         allowed_extensions,
+        minimum_file_size,
+        maximum_file_size,
     }
 }
 
@@ -257,10 +346,26 @@ fn default_language() -> String {
 }
 
 fn default_preset_names() -> Vec<String> {
-    vec![
-        "Preset 0", "Preset 1", "Preset 2", "Preset 3", "Preset 4", "Preset 5", "Preset 6", "Preset 7", "Preset 8", "Preset 9",
+    [
+        "Preset 1",
+        "Preset 2",
+        "Preset 3",
+        "Preset 4",
+        "Preset 5",
+        "Preset 6",
+        "Preset 7",
+        "Preset 8",
+        "Preset 9",
+        "Preset 10",
     ]
     .iter()
-    .map(|x| x.to_string())
+    .map(|x| (*x).to_string())
     .collect::<Vec<_>>()
+}
+
+fn minimum_file_size() -> i32 {
+    16
+}
+fn maximum_file_size() -> i32 {
+    i32::MAX
 }
