@@ -25,6 +25,8 @@ mod connect_progress_receiver;
 mod connect_scan;
 mod connect_show_preview;
 mod connect_stop;
+mod connect_translation;
+mod localizer_krokiet;
 mod settings;
 
 use crossbeam_channel::{unbounded, Receiver, Sender};
@@ -38,6 +40,7 @@ use crate::connect_directories_changes::connect_add_remove_directories;
 use crate::connect_progress_receiver::connect_progress_gathering;
 use crate::connect_show_preview::connect_show_preview;
 use crate::connect_stop::connect_stop_button;
+use crate::connect_translation::connect_translations;
 use crate::settings::{load_settings_from_file, reset_settings, save_settings_to_file};
 use czkawka_core::common::{print_version_mode, setup_logger};
 use czkawka_core::common_dir_traversal::ProgressData;
@@ -65,6 +68,7 @@ fn main() {
     connect_progress_gathering(&app, progress_receiver);
     connect_add_remove_directories(&app);
     connect_show_preview(&app);
+    connect_translations(&app);
 
     app.run().unwrap();
 

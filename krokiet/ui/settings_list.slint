@@ -38,6 +38,7 @@ component MinMaxSizeComponent inherits HorizontalLayout {
         }
         SpinBox {
             enabled: true;
+            maximum: 999999999999999;
             height: SettingsSize.item_height;
         }
         Text {
@@ -46,34 +47,63 @@ component MinMaxSizeComponent inherits HorizontalLayout {
         }
         SpinBox {
             enabled: true;
+            maximum: 999999999999999;
             height: SettingsSize.item_height;
         }
     }
 }
 
-component Presets inherits HorizontalLayout {
+component Presets inherits Rectangle {
+    property <bool> edit_name;
+    property <string> current_index;
+    if !edit_name: HorizontalLayout {
+        spacing: 5px;
+        Text {
+            text : "Current:";
+            vertical-alignment: TextVerticalAlignment.center;
+        }
+        combo_box := ComboBox {
+            current-index <=> Settings.settings_preset_idx;
+            model: Settings.settings_presets;
+            selected(item) => {
+                Settings.settings_preset_idx = self.current_index;
+                Callabler.changed_settings_preset(item, self.current_index);
+            }
+        }
+        Button {
+            text: "Edit name";
+            clicked => {
+                root.edit_name = !root.edit_name;
+            }
+        }
+    }
+    if edit_name : HorizontalLayout{
+        spacing: 5px;
+        Text {
+            text: "Choose name for prefix " + (Settings.settings_preset_idx + 1);
+            vertical-alignment: TextVerticalAlignment.center;
+        }
+        current_name := LineEdit {
+            text: Settings.settings_presets[Settings.settings_preset_idx];
+        }
+        Button {
+            text: "Save";
+            clicked => {
+                Settings.settings_presets[Settings.settings_preset_idx] = current_name.text;
+                edit_name = false;
+            }
+        }
+    }
+}
+
+component Language inherits HorizontalLayout {
     spacing: 5px;
-    Text {
-        text : "Current:";
+    Text {     
+        text: Callabler.translate("settings_language", []);
         vertical-alignment: TextVerticalAlignment.center;
     }
-    combo_box := ComboBox {
-        current-index <=> Settings.settings_preset_idx;
-        model: Settings.settings_presets;
-        selected(item) => {
-            Callabler.changed_settings_preset(item, self.current_index);
-            current_name.text = item;
-        }
-    }
-    current_name := LineEdit {
-        text: Settings.settings_presets[0];
-    }
-    Button {
-        text: "Save";
-        clicked => {
-            Settings.settings_presets[combo_box.current_index] = current_name.text;
-            combo_box.current_value = current_name.text;
-        }
+    ComboBox {
+        model: ["English"];
     }
 }
 
@@ -91,6 +121,9 @@ export component SettingsList inherits VerticalLayout {
         VerticalLayout {
             spacing: 5px;
             Presets{
+                height: SettingsSize.item_height;
+            }
+            Language {
                 height: SettingsSize.item_height;
             }
             Text {

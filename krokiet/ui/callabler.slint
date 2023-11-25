@@ -13,4 +13,7 @@ export global Callabler {
 
     // Settings
     callback changed_settings_preset(string, int);
+
+    // Translations
+    pure callback translate(string, [{key: string, value: string}]) -> string;
 }
