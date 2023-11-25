@@ -110,12 +110,12 @@ export component LeftSidePanel {
         }
 
         HorizontalLayout {
-            padding-bottom: 2px;
-            padding-right: 3px;
             alignment: end;
             Button {
-                height: 50px;
-                width: self.height;
+                min-width: 20px;
+                min-height: 20px;
+                max-height: self.width;
+                preferred-height: self.width;
                 icon: @image-url("../icons/settings.svg");
                 clicked => {
                     active_tab = CurrentTab.Settings;

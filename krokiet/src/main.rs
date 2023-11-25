@@ -41,7 +41,7 @@ use crate::connect_progress_receiver::connect_progress_gathering;
 use crate::connect_show_preview::connect_show_preview;
 use crate::connect_stop::connect_stop_button;
 use crate::connect_translation::connect_translations;
-use crate::settings::{load_settings_from_file, reset_settings, save_settings_to_file};
+use crate::settings::{create_default_settings_files, load_settings_from_file, reset_settings, save_settings_to_file};
 use czkawka_core::common::{print_version_mode, setup_logger};
 use czkawka_core::common_dir_traversal::ProgressData;
 use slint::{ModelRc, VecModel};
@@ -58,7 +58,7 @@ fn main() {
 
     to_remove_debug(&app);
 
-    reset_settings(&app);
+    create_default_settings_files();
     load_settings_from_file(&app);
 
     connect_delete_button(&app);

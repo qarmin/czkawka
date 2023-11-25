@@ -28,21 +28,25 @@ pub fn connect_progress_window(gui_data: &GuiData, progress_receiver: Receiver<P
 
     let future = async move {
         loop {
-            let item = progress_receiver.try_recv();
-            if let Ok(item) = item {
-                match item.tool_type {
-                    ToolType::Duplicate => process_bar_duplicates(&gui_data, &item),
-                    ToolType::EmptyFiles => process_bar_empty_files(&gui_data, &item),
-                    ToolType::EmptyFolders => process_bar_empty_folder(&gui_data, &item),
-                    ToolType::BigFile => process_bar_big_files(&gui_data, &item),
-                    ToolType::SameMusic => process_bar_same_music(&gui_data, &item),
-                    ToolType::SimilarImages => process_bar_similar_images(&gui_data, &item),
-                    ToolType::SimilarVideos => process_bar_similar_videos(&gui_data, &item),
-                    ToolType::TemporaryFiles => process_bar_temporary(&gui_data, &item),
-                    ToolType::InvalidSymlinks => process_bar_invalid_symlinks(&gui_data, &item),
-                    ToolType::BrokenFiles => process_bar_broken_files(&gui_data, &item),
-                    ToolType::BadExtensions => process_bar_bad_extensions(&gui_data, &item),
-                    ToolType::None => panic!(),
+            loop {
+                let item = progress_receiver.try_recv();
+                if let Ok(item) = item {
+                    match item.tool_type {
+                        ToolType::Duplicate => process_bar_duplicates(&gui_data, &item),
+                        ToolType::EmptyFiles => process_bar_empty_files(&gui_data, &item),
+                        ToolType::EmptyFolders => process_bar_empty_folder(&gui_data, &item),
+                        ToolType::BigFile => process_bar_big_files(&gui_data, &item),
+                        ToolType::SameMusic => process_bar_same_music(&gui_data, &item),
+                        ToolType::SimilarImages => process_bar_similar_images(&gui_data, &item),
+                        ToolType::SimilarVideos => process_bar_similar_videos(&gui_data, &item),
+                        ToolType::TemporaryFiles => process_bar_temporary(&gui_data, &item),
+                        ToolType::InvalidSymlinks => process_bar_invalid_symlinks(&gui_data, &item),
+                        ToolType::BrokenFiles => process_bar_broken_files(&gui_data, &item),
+                        ToolType::BadExtensions => process_bar_bad_extensions(&gui_data, &item),
+                        ToolType::None => panic!(),
+                    }
+                } else {
+                    break;
                 }
             }
             glib::timeout_future(Duration::from_millis(300)).await;
