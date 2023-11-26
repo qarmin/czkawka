@@ -20,7 +20,5 @@ jobs:
       - name: Check the format
         run: cargo fmt --all -- --check
 
-      # Clippy overly_complex_bool_expr is disabled because mess with generated files in target dir
-      # and I cannot disable it
       - name: Run clippy
         run: cargo clippy --all-targets --all-features -- -D warnings

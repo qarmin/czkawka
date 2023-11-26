@@ -116,21 +116,10 @@ jobs:
       - name: Install additional dependencies
         # gio is for the build script
         run: dnf install wget2 unzip mingw64-bzip2.noarch mingw64-poppler mingw64-poppler-glib mingw32-python3 rust-gio-devel adwaita-icon-theme -y && dnf clean all -y
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          target: x86_64-pc-windows-gnu
-      - name: Cache ~/.cargo
-        uses: actions/cache@v1
-        with:
-          path: ~/.cargo
-          key: windows-dotcargo
-      - name: Cache cargo build
-        uses: actions/cache@v1
-        with:
-          path: target
-          key: windows-build-target
+
+      - name: Setup rust version
+        run: |
+          rustup target add x86_64-pc-windows-gnu
 
       - name: Cross compile for Windows Heif
         run: |
@@ -201,21 +190,9 @@ jobs:
       - name: Install additional dependencies
         # gio is for the build script
         run: dnf install wget2 unzip mingw64-bzip2.noarch mingw64-poppler mingw64-poppler-glib mingw32-python3 rust-gio-devel adwaita-icon-theme -y && dnf clean all -y
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          target: x86_64-pc-windows-gnu
-      - name: Cache ~/.cargo
-        uses: actions/cache@v1
-        with:
-          path: ~/.cargo
-          key: windows-dotcargo
-      - name: Cache cargo build
-        uses: actions/cache@v1
-        with:
-          path: target
-          key: windows-build-target
+      - name: Setup rust version
+        run: |
+          rustup target add x86_64-pc-windows-gnu
       - name: Show console window on windows
         run: sd -s '#![windows_subsystem = "windows"]' '//#![windows_subsystem = "windows"]' krokiet/src/main.rs
       - name: Cross compile for Windows

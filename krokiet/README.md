@@ -10,7 +10,9 @@ frontend(but of course I want implement most of features from other project).
 
 Krokiet should not have any special runtime requirements - it should work on almost any device non-antic device.
 
-Prebuild binaries should work on Windows 10,11, Mac
+Prebuild binaries should work on Windows 10,11, Mac, Ubuntu 22.04/20.04 and similar(libheif version + czkawka_gui requires Ubuntu 22.04+ and rest Ubuntu 20.04) - https://github.com/qarmin/czkawka/releases/
+
+
 
 ## Compilation
 
@@ -99,13 +101,10 @@ SLINT_STYLE=material-dark cargo run -- --path .
 - Modifying user interface - gui is written in simple language similar to qml, that can be modified in vscode/web with
   live
   preview - [slint live preview example](https://slint.dev/releases/1.3.0/editor/?load_demo=examples/printerdemo/ui/printerdemo.slint)
-- Improving libraries used by Krokiet e.g. czkawka_core, image-rs etc.
 - Improving app rust code
 
 ## Missing features available in GTK 4 frontend
 
-- preview support
-- selecting/deselecting results
 - icons in buttons
 - resizable input files panel
 - settings
@@ -115,9 +114,7 @@ SLINT_STYLE=material-dark cargo run -- --path .
 - saving results
 - symlink/hardlink
 - implementing all modes
-- multiple languages
 - multiple selection
-- key selection support
 - proper popup windows - slint not handle them properly
 - logo
 - about window
@@ -129,13 +126,13 @@ SLINT_STYLE=material-dark cargo run -- --path .
 
 There are multiple reasons why I decided to use Slint as toolkit for Krokiet over other toolkits.
 
-| Toolkit | Pros                                                                                                                                                                                                                                                        | Cons                                                                                                                                                                                                                                                                                                                                                                                                                   |
-|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Gtk 4   | - Hard compilation/cross compilation and bundling all required libraries - mostly on windows </br> - Cambalache can be used to create graphically gui </br> - Good gtk4-rs bindings(but sometimes not really intuitive)                                     | - Hard compilation/cross compilation and bundling all required libraries - mostly on windows </br> - Forcing the use of a specific gui creation style </br> - Strange crashes, not working basic features, etc.(again, mostly on windows) </br> - Forcing to use bugged/outdated but dynamically loaded version of libraries on linux (e.g. 4.6 on Ubuntu 22.04) - not all fixes are backported                        |
-| Qt      | - QML support - simplify creating of gui from code it is easy to use and powerful </br> - Very flexible framework <br/> - Typescript/javascript <=> qml interoperability </br> - Probably the most mature GUI library                                       | - New and limited qt bindings <br/> - Big cross compilation problems and hard to setup on non windows platforms <br/>  - Very easy to create and use invalid state in QML(unexpected null/undefined values etc.) <br/> - Commercial license or GPL                                                                                                                                                                     |
-| Slint   | - Internal language is compiled to native code <br/> - Live gui preview with Vscode/Vscodium without needing to use rust <br/> - Full rust solution - easy to compile/cross compile, minimal runtime requirements </br> - Static type checks in slint files | - Internal .slint language is more limited than QML(javascript flexibility is hard to ) <br/> - Out of bounds and similar errors are quietly being corrected instead printing error - this can lead to hard to debug problems    <br/> - Commercial license or GPL(is available also different <br/> - Popup windows almost not exists <br/> - Internal widgets are almost not customizable and usually quite limited) |
-| Iced    | - ~100% rust code - so compilation is simple </br> - Elm architecture - simple to understand                                                                                                                                                                | - Mostly maintained by one person - slows down fixing bugs and implementing new features </br> - GUI can be created only from rust code, which really is bad for creating complex GUIs(mostly due rust compile times)  </br> - Docs are almost non-existent                                                                                                                                                            |
-| Tauri   | - Easy to create ui(at least for web developers) - uses html/css/js</br>- Quite portable                                                                                                                                                                    | - Webview dependency - it is not really lightweight and can be hard to compile on some platforms and on Linux e.g. webRTC not working have multiple limitaions in different os</br>- Cannot select directory - file chooser only can choose files - small thing but important for me</br>- Not very performant Rust <=> Javascript communication                                                                       |
+| Toolkit | Pros                                                                                                                                                                                                                                                        | Cons                                                                                                                                                                                                                                                                                                                                                                                            |
+|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Gtk 4   | - Hard compilation/cross compilation and bundling all required libraries - mostly on windows </br> - Cambalache can be used to create graphically gui </br> - Good gtk4-rs bindings(but sometimes not really intuitive)                                     | - Hard compilation/cross compilation and bundling all required libraries - mostly on windows </br> - Forcing the use of a specific gui creation style </br> - Strange crashes, not working basic features, etc.(again, mostly on windows) </br> - Forcing to use bugged/outdated but dynamically loaded version of libraries on linux (e.g. 4.6 on Ubuntu 22.04) - not all fixes are backported |
+| Qt      | - QML support - simplify creating of gui from code it is easy to use and powerful </br> - Very flexible framework <br/> - Typescript/javascript <=> qml interoperability </br> - Probably the most mature GUI library                                       | - New and limited qt bindings <br/> - Hard to cross-compile <br/>  - Very easy to create and use invalid state in QML(unexpected null/undefined values, messed properties bindings etc.) <br/> - Commercial license or GPL                                                                                                                                                                      |
+| Slint   | - Internal language is compiled to native code <br/> - Live gui preview with Vscode/Vscodium without needing to use rust <br/> - Full rust solution - easy to compile/cross compile, minimal runtime requirements </br> - Static type checks in slint files | - Internal .slint language is more limited than QML <br/> - Out of bounds and similar errors are quietly being corrected instead printing error - this can lead to hard to debug problems <br/> - Only GPL is only available open-source license <br/> - Popup windows almost not exists <br/> - Internal widgets are almost not customizable and usually quite limited                         |
+| Iced    | - ~100% rust code - so compilation is simple </br> - Elm architecture - simple to understand                                                                                                                                                                | - Mostly maintained by one person - slows down fixing bugs and implementing new features </br> - GUI can be created only from rust code, which really is bad for creating complex GUIs(mostly due rust compile times)  </br> - Docs are almost non-existent                                                                                                                                     |
+| Tauri   | - Easy to create ui(at least for web developers) - uses html/css/js</br>- Quite portable                                                                                                                                                                    | - Webview dependency - it is not really lightweight and can be hard to compile on some platforms and on Linux e.g. webRTC not working</br>- Cannot select directory - file chooser only can choose files - small thing but important for me</br>- Not very performant Rust <=> Javascript communication                                                                                         |
 
 Since I don't have time to create really complex and good looking GUI, I needed a helper tool to create GUI not from
 Rust(I don't want to use different language, because this will make communication with czkawka_core harder) so I decided

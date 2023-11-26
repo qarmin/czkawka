@@ -144,17 +144,6 @@ You can also help by doing other things:
 - Creating videos - [First Video](https://www.youtube.com/watch?v=CWlRiTD4vDc) or [Spanish Tutorial](https://www.youtube.com/watch?v=V9x-pHJRmKY)
 - Recommending it to others
 
-## Name
-Czkawka is a Polish word which means _hiccup_.
-
-I chose this name because I wanted to hear people speaking other languages pronounce it, so feel free to spell it the way you want.
-
-This name is not as bad as it seems, because I was also thinking about using words like _żółć_, _gżegżółka_ or _żołądź_, 
-but I gave up on these ideas because they contained Polish characters, which would cause difficulty in searching for the project.
-
-At the beginning of the program creation, if the response concerning the name was unanimously negative, I prepared myself 
-for a possible change of the name of the program, and the opinions were extremely mixed.
-
 ## Thanks
 
 Big thanks to Pádraig Brady, creator of fantastic FSlint, because without his work I wouldn't create this tool.
