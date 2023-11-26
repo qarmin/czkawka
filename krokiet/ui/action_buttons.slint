@@ -30,7 +30,7 @@ export component ActionButtons inherits HorizontalLayout {
     Rectangle {
         scan_button := Button {
             height: parent.height;
-            enabled: !scanning;
+            enabled: !scanning && active-tab != CurrentTab.Settings;
             visible: !scanning;
             text: "Scan";
             clicked => {

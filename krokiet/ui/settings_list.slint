@@ -2,6 +2,8 @@ import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListV
 import { Settings } from "settings.slint";
 import { Callabler } from "callabler.slint";
 
+// TODO use Spinbox instead LineEdit {} to be able to set only numbers
+
 global SettingsSize {
     out property <length> item_height: 30px;
 }
@@ -26,7 +28,7 @@ component MinMaxSizeComponent inherits HorizontalLayout {
     spacing: 20px;
     Text {
         horizontal-stretch: 0.0;
-        text:"Items Size(Kb)";
+        text:"Items Size(Bytes)";
         vertical-alignment: TextVerticalAlignment.center;
     }
     HorizontalLayout {
@@ -36,21 +38,17 @@ component MinMaxSizeComponent inherits HorizontalLayout {
             text:"Min:";
             vertical-alignment: TextVerticalAlignment.center;
         }
-        SpinBox {
-            enabled: true;
-            maximum: 999999999999999;
+        LineEdit {
             height: SettingsSize.item_height;
-            value <=> Settings.minimum_file_size;
+            text <=> Settings.minimum_file_size;
         }
         Text {
             text:"Max:";
             vertical-alignment: TextVerticalAlignment.center;
         }
-        SpinBox {
-            enabled: true;
-            maximum: 999999999999999;
+        LineEdit {
             height: SettingsSize.item_height;
-            value <=> Settings.maximum_file_size;
+            text <=> Settings.maximum_file_size;
         }
     }
 }

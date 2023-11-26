@@ -12,6 +12,9 @@ use log::{debug, error, info};
 use serde::{Deserialize, Serialize};
 use slint::{ComponentHandle, Model, ModelRc};
 
+pub const DEFAULT_MINIMUM_SIZE: i32 = 16 * 1024;
+pub const DEFAULT_MAXIMUM_SIZE: i32 = i32::MAX;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SettingsCustom {
     #[serde(default = "default_included_directories")]
@@ -133,7 +136,7 @@ pub fn create_default_settings_files() {
 pub fn load_settings_from_file(app: &MainWindow) {
     let result_base_settings = load_data_from_file::<BasicSettings>(get_base_config_file());
 
-    let base_settings;
+    let mut base_settings;
     if let Ok(base_settings_temp) = result_base_settings {
         base_settings = base_settings_temp;
     } else {
@@ -151,6 +154,18 @@ pub fn load_settings_from_file(app: &MainWindow) {
         custom_settings = SettingsCustom::default();
     }
 
+    // Validate here values and set "proper"
+    // preset_names should have 10 items
+    if base_settings.preset_names.len() > 10 {
+        base_settings.preset_names.truncate(10);
+    } else if base_settings.preset_names.len() < 10 {
+        while base_settings.preset_names.len() < 10 {
+            base_settings.preset_names.push(format!("Preset {}", base_settings.preset_names.len() + 1));
+        }
+    }
+    base_settings.default_preset = max(min(base_settings.default_preset, 9), 0);
+
+    // Ended validating
     set_settings_to_gui(app, &custom_settings);
     set_base_settings_to_gui(app, &base_settings);
 }
@@ -241,8 +256,6 @@ pub fn get_base_config_file() -> Option<PathBuf> {
     Some(base_config_file)
 }
 pub fn get_config_file(number: i32) -> Option<PathBuf> {
-    let number = max(min(number, 9), 0);
-
     let Some(configs) = ProjectDirs::from("pl", "Qarmin", "Krokiet") else {
         return None;
     };
@@ -270,8 +283,8 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
 
     settings.set_excluded_items(custom_settings.excluded_items.clone().into());
     settings.set_allowed_extensions(custom_settings.allowed_extensions.clone().into());
-    settings.set_minimum_file_size(custom_settings.minimum_file_size);
-    settings.set_maximum_file_size(custom_settings.maximum_file_size);
+    settings.set_minimum_file_size(custom_settings.minimum_file_size.to_string().into());
+    settings.set_maximum_file_size(custom_settings.maximum_file_size.to_string().into());
 
     // Clear text
     app.global::<GuiState>().set_info_text("".into());
@@ -288,8 +301,8 @@ pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
 
     let excluded_items = settings.get_excluded_items().to_string();
     let allowed_extensions = settings.get_allowed_extensions().to_string();
-    let minimum_file_size = settings.get_minimum_file_size();
-    let maximum_file_size = settings.get_maximum_file_size();
+    let minimum_file_size = settings.get_minimum_file_size().parse::<i32>().unwrap_or(DEFAULT_MINIMUM_SIZE);
+    let maximum_file_size = settings.get_maximum_file_size().parse::<i32>().unwrap_or(DEFAULT_MAXIMUM_SIZE);
 
     SettingsCustom {
         included_directories,
@@ -364,8 +377,8 @@ fn default_preset_names() -> Vec<String> {
 }
 
 fn minimum_file_size() -> i32 {
-    16
+    DEFAULT_MINIMUM_SIZE
 }
 fn maximum_file_size() -> i32 {
-    i32::MAX
+    DEFAULT_MAXIMUM_SIZE
 }

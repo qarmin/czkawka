@@ -1,4 +1,3 @@
-use crate::common::create_vec_model_from_vec_string;
 use crate::settings::{collect_settings, SettingsCustom};
 use crate::{CurrentTab, GuiState, MainListModel, MainWindow, ProgressToSend};
 use chrono::NaiveDateTime;
@@ -54,8 +53,7 @@ fn scan_similar_images(a: Weak<MainWindow>, progress_sender: Sender<ProgressData
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
             let mut finder = SimilarImages::new();
-            finder.set_included_directory(custom_settings.included_directories.clone());
-            finder.set_excluded_directory(custom_settings.excluded_directories.clone());
+            set_common_settings(&mut finder, &custom_settings);
             finder.find_similar_images(Some(&stop_receiver), Some(&progress_sender));
 
             let mut vector = finder.get_similar_images().clone();
@@ -71,30 +69,19 @@ fn scan_similar_images(a: Weak<MainWindow>, progress_sender: Sender<ProgressData
                 let number_of_empty_files = vector.len();
                 let items = Rc::new(VecModel::default());
                 for vec_fe in vector {
-                    items.push(MainListModel {
-                        checked: false,
-                        header_row: true,
-                        selected_row: false,
-                        val: ModelRc::new(VecModel::default()),
-                    });
+                    insert_data_to_model(&items, ModelRc::new(VecModel::default()), false);
                     for fe in vec_fe {
                         let (directory, file) = split_path(fe.get_path());
-                        let data_model = create_vec_model_from_vec_string(vec![
-                            similar_images::get_string_from_similarity(&fe.similarity, hash_size),
-                            format_size(fe.size, BINARY),
-                            fe.dimensions.clone(),
-                            file,
-                            directory,
-                            NaiveDateTime::from_timestamp_opt(fe.get_modified_date() as i64, 0).unwrap().to_string(),
+                        let data_model = VecModel::from_slice(&[
+                            similar_images::get_string_from_similarity(&fe.similarity, hash_size).into(),
+                            format_size(fe.size, BINARY).into(),
+                            fe.dimensions.clone().into(),
+                            file.into(),
+                            directory.into(),
+                            NaiveDateTime::from_timestamp_opt(fe.get_modified_date() as i64, 0).unwrap().to_string().into(),
                         ]);
 
-                        let main = MainListModel {
-                            checked: false,
-                            header_row: false,
-                            selected_row: false,
-                            val: ModelRc::new(data_model),
-                        };
-                        items.push(main);
+                        insert_data_to_model(&items, data_model, false);
                     }
                 }
                 app.set_similar_images_model(items.into());
@@ -110,8 +97,7 @@ fn scan_empty_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, 
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
             let mut finder = EmptyFiles::new();
-            finder.set_included_directory(custom_settings.included_directories.clone());
-            finder.set_excluded_directory(custom_settings.excluded_directories.clone());
+            set_common_settings(&mut finder, &custom_settings);
             finder.find_empty_files(Some(&stop_receiver), Some(&progress_sender));
 
             let mut vector = finder.get_empty_files().clone();
@@ -128,18 +114,12 @@ fn scan_empty_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, 
                 for fe in vector {
                     let (directory, file) = split_path(fe.get_path());
                     let data_model = VecModel::from_slice(&[
-                        SharedString::from(file),
-                        SharedString::from(directory),
-                        SharedString::from(NaiveDateTime::from_timestamp_opt(fe.get_modified_date() as i64, 0).unwrap().to_string()),
+                        file.into(),
+                        directory.into(),
+                        NaiveDateTime::from_timestamp_opt(fe.get_modified_date() as i64, 0).unwrap().to_string().into(),
                     ]);
 
-                    let main = MainListModel {
-                        checked: false,
-                        header_row: false,
-                        selected_row: false,
-                        val: ModelRc::new(data_model),
-                    };
-                    items.push(main);
+                    insert_data_to_model(&items, data_model, false);
                 }
                 app.set_empty_files_model(items.into());
                 app.invoke_scan_ended(format!("Found {} empty files", number_of_empty_files).into());
@@ -154,8 +134,7 @@ fn scan_empty_folders(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
             let mut finder = EmptyFolder::new();
-            finder.set_included_directory(custom_settings.included_directories.clone());
-            finder.set_excluded_directory(custom_settings.excluded_directories.clone());
+            set_common_settings(&mut finder, &custom_settings);
             finder.find_empty_folders(Some(&stop_receiver), Some(&progress_sender));
 
             let mut vector = finder.get_empty_folder_list().keys().cloned().collect::<Vec<PathBuf>>();
@@ -172,18 +151,12 @@ fn scan_empty_folders(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>
                 for path in vector {
                     let (directory, file) = split_path(&path);
                     let data_model = VecModel::from_slice(&[
-                        SharedString::from(file),
-                        SharedString::from(directory),
-                        SharedString::from(NaiveDateTime::from_timestamp_opt(folder_map[&path].modified_date as i64, 0).unwrap().to_string()),
+                        file.into(),
+                        directory.into(),
+                        NaiveDateTime::from_timestamp_opt(folder_map[&path].modified_date as i64, 0).unwrap().to_string().into(),
                     ]);
 
-                    let main = MainListModel {
-                        checked: false,
-                        header_row: false,
-                        selected_row: false,
-                        val: ModelRc::new(data_model),
-                    };
-                    items.push(main);
+                    insert_data_to_model(&items, data_model, false);
                 }
                 app.set_empty_folder_model(items.into());
                 app.invoke_scan_ended(format!("Found {} empty folders", folder_map.len()).into());
@@ -191,4 +164,27 @@ fn scan_empty_folders(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>
             })
         })
         .unwrap();
+}
+
+fn insert_data_to_model(items: &Rc<VecModel<MainListModel>>, data_model: ModelRc<SharedString>, header_row: bool) {
+    let main = MainListModel {
+        checked: false,
+        header_row,
+        selected_row: false,
+        val: ModelRc::new(data_model),
+    };
+    items.push(main);
+}
+
+fn set_common_settings<T>(component: &mut T, custom_settings: &SettingsCustom)
+where
+    T: CommonData,
+{
+    component.set_included_directory(custom_settings.included_directories.clone());
+    component.set_excluded_directory(custom_settings.excluded_directories.clone());
+    component.set_recursive_search(true); // TODO bind
+    component.set_minimal_file_size(custom_settings.minimum_file_size as u64 * 1024);
+    component.set_minimal_file_size(custom_settings.maximum_file_size as u64 * 1024);
+    component.set_allowed_extensions(custom_settings.allowed_extensions.clone());
+    component.set_excluded_items(custom_settings.excluded_items.split(',').map(str::to_string).collect());
 }
