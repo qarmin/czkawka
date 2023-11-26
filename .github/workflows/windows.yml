@@ -107,7 +107,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        use_heif: [ non_heif ] #, heif ] - heif problems with mingw
+        use_heif: [ non_heif ]
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/piegamesde/gtk4-cross:gtk-4.6
@@ -121,19 +121,9 @@ jobs:
           source "$HOME/.cargo/env"
           rustup target add x86_64-pc-windows-gnu
 
-      - name: Cross compile for Windows Heif
-        run: |
-          #!/bin/bash
-          set -euo pipefail
-          export PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/share/pkgconfig:$MINGW_PREFIX/lib/pkgconfig/:/usr/x86_64-w64-mingw32/lib/pkgconfig/
-          cargo build --target=x86_64-pc-windows-gnu --release --locked --features heif
-          mkdir -p package
-          cp target/x86_64-pc-windows-gnu/release/czkawka_gui.exe package/
-          cp target/x86_64-pc-windows-gnu/release/czkawka_cli.exe package/
-        if: ${{ matrix.use_heif == 'heif' }}
-
       - name: Cross compile for Windows
         run: |
+          source "$HOME/.cargo/env"
           #!/bin/bash
           set -euo pipefail
           export PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/share/pkgconfig:$MINGW_PREFIX/lib/pkgconfig/:/usr/x86_64-w64-mingw32/lib/pkgconfig/
@@ -141,7 +131,6 @@ jobs:
           mkdir -p package
           cp target/x86_64-pc-windows-gnu/release/czkawka_gui.exe package/
           cp target/x86_64-pc-windows-gnu/release/czkawka_cli.exe package/
-        if: ${{ matrix.use_heif == 'non_heif' }}
 
       - name: Package
         run: |
@@ -199,6 +188,7 @@ jobs:
         run: sd -s '#![windows_subsystem = "windows"]' '//#![windows_subsystem = "windows"]' krokiet/src/main.rs
       - name: Cross compile for Windows
         run: |
+          source "$HOME/.cargo/env"
           #!/bin/bash
           set -euo pipefail
           export PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/share/pkgconfig:$MINGW_PREFIX/lib/pkgconfig/:/usr/x86_64-w64-mingw32/lib/pkgconfig/
