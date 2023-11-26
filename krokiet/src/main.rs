@@ -27,6 +27,7 @@ mod connect_show_preview;
 mod connect_stop;
 mod connect_translation;
 mod localizer_krokiet;
+mod set_initial_gui_info;
 mod settings;
 
 use crossbeam_channel::{unbounded, Receiver, Sender};

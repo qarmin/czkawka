@@ -1,6 +1,7 @@
-import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox, ScrollView, LineEdit, SpinBox, ComboBox, TextEdit} from "std-widgets.slint";
+import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox, ScrollView, LineEdit, SpinBox, ComboBox, TextEdit, Slider} from "std-widgets.slint";
 import { Settings } from "settings.slint";
 import { Callabler } from "callabler.slint";
+import { GuiState } from "gui_state.slint";
 
 // TODO use Spinbox instead LineEdit {} to be able to set only numbers
 
@@ -21,6 +22,44 @@ component TextComponent inherits HorizontalLayout {
         horizontal-stretch: 1.0;
         height: SettingsSize.item_height;
         text <=> model;
+    }
+}
+
+component CheckBoxComponent inherits HorizontalLayout {
+    in-out property <bool> model;
+    in property <string> name;
+    spacing: 5px;
+    CheckBox {
+        horizontal-stretch: 1.0;
+        height: SettingsSize.item_height;
+        checked <=> model;
+        text: name;
+    }
+    Rectangle {}
+}
+
+component ThreadSliderComponent inherits HorizontalLayout {
+    in-out property <float> minimum_number;
+    in-out property <float> maximum_number;
+    in-out property <string> name;
+    spacing: 5px;
+    
+    Text {
+        text <=> name;
+        vertical-alignment: TextVerticalAlignment.center;
+        height: SettingsSize.item_height;
+    }
+    slider := Slider {
+        enabled: true;
+        height: SettingsSize.item_height;
+        minimum: minimum_number;
+        maximum <=> maximum_number;
+        value <=> Settings.thread_number;
+    }
+    Text {
+        height: SettingsSize.item_height;
+        vertical-alignment: TextVerticalAlignment.center;
+        text: round(slider.value) == 0 ? ("All (" + GuiState.maximum_threads + "/" + GuiState.maximum_threads + ")") : (round(slider.value) + "/" + GuiState.maximum_threads);
     }
 }
 
@@ -142,6 +181,26 @@ export component SettingsList inherits VerticalLayout {
             }
             MinMaxSizeComponent {
 
+            }
+            CheckBoxComponent {
+                name: "Use Cache";
+                model <=> Settings.use_cache;
+            }
+            CheckBoxComponent {
+                name: "Also save cache as JSON file";
+                model <=> Settings.save_as_json;
+            }
+            CheckBoxComponent {
+                name: "Move deleted files to trash";
+                model <=> Settings.move_to_trash;
+            }
+            CheckBoxComponent {
+                name: "Ignore other filesystems (only Linux)";
+                model <=> Settings.ignore_other_filesystems;
+            }
+            ThreadSliderComponent {
+                name: "Thread number";
+                maximum_number <=> GuiState.maximum_threads;
             }
         }
     }

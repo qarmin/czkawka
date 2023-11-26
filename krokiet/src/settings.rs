@@ -29,6 +29,16 @@ pub struct SettingsCustom {
     pub minimum_file_size: i32,
     #[serde(default = "maximum_file_size")]
     pub maximum_file_size: i32,
+    #[serde(default = "ttrue")]
+    pub use_cache: bool,
+    #[serde(default)]
+    pub save_also_as_json: bool,
+    #[serde(default)]
+    pub move_deleted_files_to_trash: bool,
+    #[serde(default)]
+    pub ignore_other_file_systems: bool,
+    #[serde(default)]
+    pub thread_number: i32,
 }
 
 impl Default for SettingsCustom {
@@ -285,6 +295,11 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
     settings.set_allowed_extensions(custom_settings.allowed_extensions.clone().into());
     settings.set_minimum_file_size(custom_settings.minimum_file_size.to_string().into());
     settings.set_maximum_file_size(custom_settings.maximum_file_size.to_string().into());
+    settings.set_use_cache(custom_settings.use_cache);
+    settings.set_save_as_json(custom_settings.save_also_as_json);
+    settings.set_move_to_trash(custom_settings.move_deleted_files_to_trash);
+    settings.set_ignore_other_filesystems(custom_settings.ignore_other_file_systems);
+    settings.set_thread_number(custom_settings.thread_number as f32);
 
     // Clear text
     app.global::<GuiState>().set_info_text("".into());
@@ -304,6 +319,11 @@ pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let minimum_file_size = settings.get_minimum_file_size().parse::<i32>().unwrap_or(DEFAULT_MINIMUM_SIZE);
     let maximum_file_size = settings.get_maximum_file_size().parse::<i32>().unwrap_or(DEFAULT_MAXIMUM_SIZE);
 
+    let use_cache = settings.get_use_cache();
+    let save_also_as_json = settings.get_save_as_json();
+    let move_deleted_files_to_trash = settings.get_move_to_trash();
+    let ignore_other_file_systems = settings.get_ignore_other_filesystems();
+    let thread_number = settings.get_thread_number().round() as i32;
     SettingsCustom {
         included_directories,
         excluded_directories,
@@ -311,6 +331,11 @@ pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
         allowed_extensions,
         minimum_file_size,
         maximum_file_size,
+        use_cache,
+        save_also_as_json,
+        move_deleted_files_to_trash,
+        ignore_other_file_systems,
+        thread_number,
     }
 }
 
@@ -381,4 +406,7 @@ fn minimum_file_size() -> i32 {
 }
 fn maximum_file_size() -> i32 {
     DEFAULT_MAXIMUM_SIZE
+}
+fn ttrue() -> bool {
+    true
 }
