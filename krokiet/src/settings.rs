@@ -5,6 +5,7 @@ use std::path::PathBuf;
 
 use crate::common::{create_string_standard_list_view_from_pathbuf, create_vec_model_from_vec_string};
 use crate::{GuiState, Settings};
+use czkawka_core::common::get_available_threads;
 use czkawka_core::common_items::{DEFAULT_EXCLUDED_DIRECTORIES, DEFAULT_EXCLUDED_ITEMS};
 use directories_next::ProjectDirs;
 use home::home_dir;
@@ -156,7 +157,7 @@ pub fn load_settings_from_file(app: &MainWindow) {
 
     let results_custom_settings = load_data_from_file::<SettingsCustom>(get_config_file(base_settings.default_preset));
 
-    let custom_settings;
+    let mut custom_settings;
     if let Ok(custom_settings_temp) = results_custom_settings {
         custom_settings = custom_settings_temp;
     } else {
@@ -174,6 +175,7 @@ pub fn load_settings_from_file(app: &MainWindow) {
         }
     }
     base_settings.default_preset = max(min(base_settings.default_preset, 9), 0);
+    custom_settings.thread_number = max(min(custom_settings.thread_number, get_available_threads() as i32), 0);
 
     // Ended validating
     set_settings_to_gui(app, &custom_settings);

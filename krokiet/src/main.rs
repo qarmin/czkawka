@@ -42,6 +42,7 @@ use crate::connect_progress_receiver::connect_progress_gathering;
 use crate::connect_show_preview::connect_show_preview;
 use crate::connect_stop::connect_stop_button;
 use crate::connect_translation::connect_translations;
+use crate::set_initial_gui_info::set_initial_gui_infos;
 use crate::settings::{connect_changing_settings_preset, create_default_settings_files, load_settings_from_file, save_all_settings_to_file};
 use czkawka_core::common::{print_version_mode, setup_logger};
 use czkawka_core::common_dir_traversal::ProgressData;
@@ -62,6 +63,7 @@ fn main() {
     create_default_settings_files();
     load_settings_from_file(&app);
 
+    set_initial_gui_infos(&app);
     connect_delete_button(&app);
     connect_scan_button(&app, progress_sender, stop_receiver);
     connect_stop_button(&app, stop_sender);
