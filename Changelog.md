@@ -13,6 +13,7 @@
 - Using normal crossbeam channels instead of asyncio tokio channel - [#1102](https://github.com/qarmin/czkawka/pull/1102)
 - Fixed tool type when using progress of empty directories - [#1102](https://github.com/qarmin/czkawka/pull/1102)
 - Fixed missing json support in saving size and name - [#1102](https://github.com/qarmin/czkawka/pull/1102)
+- Fix cross-compiled debug windows build - [#1102](https://github.com/qarmin/czkawka/pull/1102)
 
 ## Version 6.1.0 - 15.10.2023r
 - BREAKING CHANGE - Changed cache saving method, deduplicated, optimized and simplified procedure(all files needs to be hashed again) - [#1072](https://github.com/qarmin/czkawka/pull/1072), [#1086](https://github.com/qarmin/czkawka/pull/1086)
