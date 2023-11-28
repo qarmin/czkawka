@@ -1,5 +1,3 @@
-use std::thread;
-
 use czkawka_core::common::get_available_threads;
 use slint::ComponentHandle;
 

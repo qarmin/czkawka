@@ -22,6 +22,7 @@ export component ActionButtons inherits HorizontalLayout {
     in-out property <BottomPanelVisibility> bottom_panel_visibility: BottomPanelVisibility.Directories;
     in-out property <bool> stop_requested: false;
     in-out property <bool> scanning;
+    in-out property <bool> lists_enabled: active-tab != CurrentTab.Settings;
     in-out property <CurrentTab> active-tab;
     out property <int> name;
     height: 30px;
@@ -30,7 +31,7 @@ export component ActionButtons inherits HorizontalLayout {
     Rectangle {
         scan_button := Button {
             height: parent.height;
-            enabled: !scanning && active-tab != CurrentTab.Settings;
+            enabled: !scanning && lists_enabled;
             visible: !scanning;
             text: "Scan";
             clicked => {
@@ -42,7 +43,7 @@ export component ActionButtons inherits HorizontalLayout {
         stop_button := Button {
             height: parent.height;
             visible: scanning;
-            enabled: scanning && !stop_requested;
+            enabled: scanning && !stop_requested && root.lists_enabled;
             text: "Stop";
             clicked => {
                 root.scan_stopping();
@@ -57,7 +58,7 @@ export component ActionButtons inherits HorizontalLayout {
 
     delete_button := Button {
         height: parent.height;
-        enabled: !scanning;
+        enabled: !scanning && lists_enabled;
         text: "Delete";
         clicked => {
             Callabler.delete_selected_items();

@@ -31,6 +31,8 @@ pub struct SettingsCustom {
     #[serde(default = "maximum_file_size")]
     pub maximum_file_size: i32,
     #[serde(default = "ttrue")]
+    pub recursive_search: bool,
+    #[serde(default = "ttrue")]
     pub use_cache: bool,
     #[serde(default)]
     pub save_also_as_json: bool,
@@ -321,6 +323,7 @@ pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let minimum_file_size = settings.get_minimum_file_size().parse::<i32>().unwrap_or(DEFAULT_MINIMUM_SIZE);
     let maximum_file_size = settings.get_maximum_file_size().parse::<i32>().unwrap_or(DEFAULT_MAXIMUM_SIZE);
 
+    let recursive_search = settings.get_recursive_search();
     let use_cache = settings.get_use_cache();
     let save_also_as_json = settings.get_save_as_json();
     let move_deleted_files_to_trash = settings.get_move_to_trash();
@@ -333,6 +336,7 @@ pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
         allowed_extensions,
         minimum_file_size,
         maximum_file_size,
+        recursive_search,
         use_cache,
         save_also_as_json,
         move_deleted_files_to_trash,

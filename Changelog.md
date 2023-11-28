@@ -1,7 +1,7 @@
 ## Version 7.0.0 - ?
 ### GTK GUI
 - Added drag&drop support for included/excluded folders - [#1106](https://github.com/qarmin/czkawka/pull/1106)
-- Added information where is saved info about scan results - [#1102](https://github.com/qarmin/czkawka/pull/1102)
+- Added information where are saved scan results - [#1102](https://github.com/qarmin/czkawka/pull/1102)
 
 ### CLI
 - Providing full static rust binary with [Eyra](https://github.com/sunfishcode/eyra) - [#1102](https://github.com/qarmin/czkawka/pull/1102)
@@ -14,6 +14,7 @@
 - Fixed tool type when using progress of empty directories - [#1102](https://github.com/qarmin/czkawka/pull/1102)
 - Fixed missing json support in saving size and name - [#1102](https://github.com/qarmin/czkawka/pull/1102)
 - Fix cross-compiled debug windows build - [#1102](https://github.com/qarmin/czkawka/pull/1102)
+- Added bigger stack size by default(fixes stack overflow in some musl apps) - [#1102](https://github.com/qarmin/czkawka/pull/1102)
 
 ## Version 6.1.0 - 15.10.2023r
 - BREAKING CHANGE - Changed cache saving method, deduplicated, optimized and simplified procedure(all files needs to be hashed again) - [#1072](https://github.com/qarmin/czkawka/pull/1072), [#1086](https://github.com/qarmin/czkawka/pull/1086)
