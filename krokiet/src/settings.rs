@@ -1,20 +1,24 @@
-use crate::{Callabler, MainWindow};
 use std::cmp::{max, min};
 use std::env;
 use std::path::PathBuf;
 
-use crate::common::{create_string_standard_list_view_from_pathbuf, create_vec_model_from_vec_string};
-use crate::{GuiState, Settings};
-use czkawka_core::common::get_available_threads;
-use czkawka_core::common_items::{DEFAULT_EXCLUDED_DIRECTORIES, DEFAULT_EXCLUDED_ITEMS};
 use directories_next::ProjectDirs;
 use home::home_dir;
 use log::{debug, error, info};
 use serde::{Deserialize, Serialize};
 use slint::{ComponentHandle, Model, ModelRc};
 
-pub const DEFAULT_MINIMUM_SIZE: i32 = 16 * 1024;
-pub const DEFAULT_MAXIMUM_SIZE: i32 = i32::MAX;
+use czkawka_core::common::get_available_threads;
+use czkawka_core::common_items::{DEFAULT_EXCLUDED_DIRECTORIES, DEFAULT_EXCLUDED_ITEMS};
+
+use crate::common::{create_string_standard_list_view_from_pathbuf, create_vec_model_from_vec_string};
+use crate::{Callabler, MainWindow};
+use crate::{GuiState, Settings};
+
+pub const DEFAULT_MINIMUM_SIZE_KB: i32 = 16;
+pub const DEFAULT_MAXIMUM_SIZE_KB: i32 = i32::MAX / 1024;
+pub const DEFAULT_MINIMUM_CACHE_SIZE: i32 = 256;
+pub const DEFAULT_MINIMUM_PREHASH_CACHE_SIZE: i32 = 256;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SettingsCustom {
@@ -42,6 +46,26 @@ pub struct SettingsCustom {
     pub ignore_other_file_systems: bool,
     #[serde(default)]
     pub thread_number: i32,
+    #[serde(default = "ttrue")]
+    pub duplicate_image_preview: bool,
+    #[serde(default = "ttrue")]
+    pub duplicate_hide_hard_links: bool,
+    #[serde(default = "ttrue")]
+    pub duplicate_use_prehash: bool,
+    #[serde(default = "minimal_hash_cache_size")]
+    pub duplicate_minimal_hash_cache_size: i32,
+    #[serde(default = "minimal_prehash_cache_size")]
+    pub duplicate_minimal_prehash_cache_size: i32,
+    #[serde(default = "ttrue")]
+    pub duplicate_delete_outdated_entries: bool,
+    #[serde(default = "ttrue")]
+    pub similar_images_show_image_preview: bool,
+    #[serde(default = "ttrue")]
+    pub similar_images_delete_outdated_entries: bool,
+    #[serde(default = "ttrue")]
+    pub similar_videos_delete_outdated_entries: bool,
+    #[serde(default = "ttrue")]
+    pub similar_music_delete_outdated_entries: bool,
 }
 
 impl Default for SettingsCustom {
@@ -320,8 +344,8 @@ pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
 
     let excluded_items = settings.get_excluded_items().to_string();
     let allowed_extensions = settings.get_allowed_extensions().to_string();
-    let minimum_file_size = settings.get_minimum_file_size().parse::<i32>().unwrap_or(DEFAULT_MINIMUM_SIZE);
-    let maximum_file_size = settings.get_maximum_file_size().parse::<i32>().unwrap_or(DEFAULT_MAXIMUM_SIZE);
+    let minimum_file_size = settings.get_minimum_file_size().parse::<i32>().unwrap_or(DEFAULT_MINIMUM_SIZE_KB);
+    let maximum_file_size = settings.get_maximum_file_size().parse::<i32>().unwrap_or(DEFAULT_MAXIMUM_SIZE_KB);
 
     let recursive_search = settings.get_recursive_search();
     let use_cache = settings.get_use_cache();
@@ -329,6 +353,24 @@ pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let move_deleted_files_to_trash = settings.get_move_to_trash();
     let ignore_other_file_systems = settings.get_ignore_other_filesystems();
     let thread_number = settings.get_thread_number().round() as i32;
+
+    let duplicate_image_preview = settings.get_duplicate_image_preview();
+    let duplicate_hide_hard_links = settings.get_duplicate_hide_hard_links();
+    let duplicate_use_prehash = settings.get_duplicate_use_prehash();
+    let duplicate_minimal_hash_cache_size = settings.get_duplicate_minimal_hash_cache_size().parse::<i32>().unwrap_or(DEFAULT_MINIMUM_CACHE_SIZE);
+    let duplicate_minimal_prehash_cache_size = settings
+        .get_duplicate_minimal_prehash_cache_size()
+        .parse::<i32>()
+        .unwrap_or(DEFAULT_MINIMUM_PREHASH_CACHE_SIZE);
+    let duplicate_delete_outdated_entries = settings.get_duplicate_delete_outdated_entries();
+
+    let similar_images_show_image_preview = settings.get_similar_images_show_image_preview();
+    let similar_images_delete_outdated_entries = settings.get_similar_images_delete_outdated_entries();
+
+    let similar_videos_delete_outdated_entries = settings.get_similar_videos_delete_outdated_entries();
+
+    let similar_music_delete_outdated_entries = settings.get_similar_music_delete_outdated_entries();
+
     SettingsCustom {
         included_directories,
         excluded_directories,
@@ -342,6 +384,16 @@ pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
         move_deleted_files_to_trash,
         ignore_other_file_systems,
         thread_number,
+        duplicate_image_preview,
+        duplicate_hide_hard_links,
+        duplicate_use_prehash,
+        duplicate_minimal_hash_cache_size,
+        duplicate_minimal_prehash_cache_size,
+        duplicate_delete_outdated_entries,
+        similar_images_show_image_preview,
+        similar_images_delete_outdated_entries,
+        similar_videos_delete_outdated_entries,
+        similar_music_delete_outdated_entries,
     }
 }
 
@@ -390,29 +442,21 @@ fn default_language() -> String {
 }
 
 fn default_preset_names() -> Vec<String> {
-    [
-        "Preset 1",
-        "Preset 2",
-        "Preset 3",
-        "Preset 4",
-        "Preset 5",
-        "Preset 6",
-        "Preset 7",
-        "Preset 8",
-        "Preset 9",
-        "Preset 10",
-    ]
-    .iter()
-    .map(|x| (*x).to_string())
-    .collect::<Vec<_>>()
+    (0..10).map(|x| format!("Preset {}", x + 1)).collect::<Vec<_>>()
 }
 
 fn minimum_file_size() -> i32 {
-    DEFAULT_MINIMUM_SIZE
+    DEFAULT_MINIMUM_SIZE_KB
 }
 fn maximum_file_size() -> i32 {
-    DEFAULT_MAXIMUM_SIZE
+    DEFAULT_MAXIMUM_SIZE_KB
 }
 fn ttrue() -> bool {
     true
+}
+fn minimal_hash_cache_size() -> i32 {
+    DEFAULT_MINIMUM_CACHE_SIZE
+}
+fn minimal_prehash_cache_size() -> i32 {
+    DEFAULT_MINIMUM_PREHASH_CACHE_SIZE
 }

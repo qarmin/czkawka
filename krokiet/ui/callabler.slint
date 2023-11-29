@@ -7,6 +7,7 @@ export global Callabler {
     callback item_opened(string);
 
     callback delete_selected_items();
+    // callback ();
 
     // Preview
     callback load_image_preview(string);
@@ -19,4 +20,7 @@ export global Callabler {
 
     // Translations
     pure callback translate(string, [{key: string, value: string}]) -> string;
+
+    // Only Slint
+    callback open_select_popup();
 }

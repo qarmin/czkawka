@@ -12,6 +12,8 @@ import { BottomPanel } from "bottom_panel.slint";
 import {ColorPalette} from "color_palette.slint";
 import {GuiState} from "gui_state.slint";
 import { Preview } from "preview.slint";
+import {PopupNewDirectories} from "popup_new_directories.slint";
+import { PopupSelect } from "popup_select.slint";
 
 export {Settings, Callabler, GuiState}
 
@@ -46,6 +48,7 @@ export component MainWindow inherits Window {
         {checked: true, selected_row: false, header_row: false, val: ["lokkaler", "/Xd1/Vide2", "01.23.1911"]}
     ];
     in-out property <[MainListModel]> similar_images_model: [];
+    
     VerticalBox {
         HorizontalBox {
             vertical-stretch: 1.0;
@@ -112,71 +115,28 @@ export component MainWindow inherits Window {
         }
 
         bottom_panel := BottomPanel {
-            property <bool> included-directories;
-            // TODO why cannot set popup_item property? Strange limitation
-
-            bottom-panel-visibility <=> action_buttons.bottom-panel-visibility;
+            bottom-panel-visibility <=> action_buttons.bottom_panel_visibility;
             vertical-stretch: 0.0;
-            folder_choose_requested(included-directories) => {
-                root.folder_choose_requested(included-directories)
+            folder_choose_requested(included_directories) => {
+                root.folder_choose_requested(included_directories)
             }
-            show_manual_add_dialog(included-directories) => {
-                self.included-directories = included-directories;
-                popup-item.show()
+            show_manual_add_dialog(included_directories) => {
+                GuiState.choosing_include_directories = included_directories;
+                new_directory_popup_window.show_popup()
             }
         }
     }
 
-    popup_item := PopupWindow {
+    new_directory_popup_window := PopupNewDirectories {
         height: root.height;
         width: root.width;
-        property <bool> included_directories;
-        private property <string> text_data;
-        close-on-click: false;
-        HorizontalLayout {
-            alignment: LayoutAlignment.center;
-            VerticalLayout {
-                alignment: LayoutAlignment.center;
-                Rectangle {
-                    clip: true;
-                    width: popup_item.width - 20px;
-                    height: popup_item.height - 20px;
-                    border-radius: 20px;
-                    background: ColorPalette.popup_background;
-                    VerticalLayout {
-                        Text {
-                            text: "Please add directories one per line";
-                            horizontal-alignment: TextHorizontalAlignment.center;
-                        }
-
-                        TextEdit {
-                            vertical-stretch: 1.0;
-                            text <=> text-data;
-                        }
-
-                        HorizontalLayout {
-                            min-height: 20px;
-                            Button {
-                                enabled: text-data != "";
-                                text: "OK";
-                                clicked => {
-                                    Callabler.added_manual_directories(bottom-panel.included-directories, text_data);
-                                    popup-item.close();
-                                }
-                            }
-
-                            Button {
-                                text: "Cancel";
-                                clicked => {
-                                    popup-item.close();
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
+
+    // select_popup_window := PopupSelect {
+    //     height: root.height;
+    //     width: root.width;
+    // }
+
 
     scan_ended(scan_text) => {
         text_summary_text = scan_text;
