@@ -9,11 +9,14 @@ import {MainListModel} from "common.slint";
 import {Settings} from "settings.slint";
 import {Callabler} from "callabler.slint";
 import { BottomPanel } from "bottom_panel.slint";
-import {ColorPalette} from "color_palette.slint";
-import {GuiState} from "gui_state.slint";
+import { ColorPalette } from "color_palette.slint";
+import { GuiState } from "gui_state.slint";
 import { Preview } from "preview.slint";
 
 export component PopupNewDirectories inherits Rectangle {
+    width: 400px;
+    height: 400px;
+
     callback show_popup();
 
     popup_window := PopupWindow {
@@ -69,6 +72,13 @@ export component PopupNewDirectories inherits Rectangle {
             }
         }
     }
+
+    // Button {
+    //     text:"KKK";
+    //     clicked => {
+    //         show-popup();
+    //     }
+    // }
 
     show_popup() => {
         popup_window.show();

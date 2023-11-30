@@ -109,17 +109,34 @@ export component LeftSidePanel {
             }
         }
 
-        HorizontalLayout {
-            alignment: end;
-            Button {
-                min-width: 20px;
-                min-height: 20px;
-                max-height: self.width;
-                preferred-height: self.width;
-                icon: @image-url("../icons/settings.svg");
-                clicked => {
-                    active_tab = CurrentTab.Settings;
-                    root.changed_current_tab();
+        Rectangle {
+            HorizontalLayout {
+                alignment: start;
+                Button {
+                    enabled: active-tab != CurrentTab.Settings;
+                    min-width: 20px;
+                    min-height: 20px;
+                    max-height: self.width;
+                    preferred-height: self.width;
+                    icon: @image-url("../icons/settings.svg");
+                    clicked => {
+                        debug("Changed showing settings");
+                        GuiState.visible_tool_settings != !GuiState.visible-tool-settings;
+                    }
+                }
+            }
+            HorizontalLayout {
+                alignment: end;
+                Button {
+                    min-width: 20px;
+                    min-height: 20px;
+                    max-height: self.width;
+                    preferred-height: self.width;
+                    icon: @image-url("../icons/settings.svg");
+                    clicked => {
+                        active_tab = CurrentTab.Settings;
+                        root.changed_current_tab();
+                    }
                 }
             }
         }

@@ -329,6 +329,18 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
     settings.set_ignore_other_filesystems(custom_settings.ignore_other_file_systems);
     settings.set_thread_number(custom_settings.thread_number as f32);
 
+    settings.set_recursive_search(custom_settings.recursive_search);
+    settings.set_duplicate_image_preview(custom_settings.duplicate_image_preview);
+    settings.set_duplicate_hide_hard_links(custom_settings.duplicate_hide_hard_links);
+    settings.set_duplicate_use_prehash(custom_settings.duplicate_use_prehash);
+    settings.set_duplicate_minimal_hash_cache_size(custom_settings.duplicate_minimal_hash_cache_size.to_string().into());
+    settings.set_duplicate_minimal_prehash_cache_size(custom_settings.duplicate_minimal_prehash_cache_size.to_string().into());
+    settings.set_duplicate_delete_outdated_entries(custom_settings.duplicate_delete_outdated_entries);
+    settings.set_similar_images_show_image_preview(custom_settings.similar_images_show_image_preview);
+    settings.set_similar_images_delete_outdated_entries(custom_settings.similar_images_delete_outdated_entries);
+    settings.set_similar_videos_delete_outdated_entries(custom_settings.similar_videos_delete_outdated_entries);
+    settings.set_similar_music_delete_outdated_entries(custom_settings.similar_music_delete_outdated_entries);
+
     // Clear text
     app.global::<GuiState>().set_info_text("".into());
 }

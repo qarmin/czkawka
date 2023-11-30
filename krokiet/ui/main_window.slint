@@ -14,6 +14,7 @@ import {GuiState} from "gui_state.slint";
 import { Preview } from "preview.slint";
 import {PopupNewDirectories} from "popup_new_directories.slint";
 import { PopupSelect } from "popup_select.slint";
+import { ToolSettings } from "tool_settings.slint";
 
 export {Settings, Callabler, GuiState}
 
@@ -22,10 +23,12 @@ export component MainWindow inherits Window {
     callback scan_starting(CurrentTab);
     callback folder_choose_requested(bool);
     callback scan_ended(string);
+
     min-width: 300px;
     preferred-width: 800px;
     min-height: 300px;
     preferred-height: 600px;
+    
     in-out property <string> text_summary_text: "";
     in-out property <bool> stop_requested: false;
     in-out property <bool> scanning: false;
@@ -34,7 +37,7 @@ export component MainWindow inherits Window {
         all_progress: 20,
         step_name: "Cache",
     };
-    in-out property <CurrentTab> active-tab: CurrentTab.EmptyFolders;
+    in-out property <CurrentTab> active_tab: CurrentTab.EmptyFolders;
     in-out property <[MainListModel]> empty_folder_model: [
         {checked: false, selected_row: false, header_row: true, val: ["kropkarz", "/Xd1", "24.10.2023"]} ,
         {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
@@ -65,11 +68,12 @@ export component MainWindow inherits Window {
 
             VerticalLayout {
                 horizontal-stretch: 1.0;
+                min_width: 300px;
                 Rectangle {
                     vertical-stretch: 1.0;
                     main_list := MainList {
                         x: 0;
-                        width: GuiState.preview_visible ? parent.width / 2 : parent.width;
+                        width: preview_or_tool_settings.visible ? parent.width / 2 : parent.width;
                         height: parent.height;
                         horizontal-stretch: 0.5;
                         active-tab <=> root.active-tab;
@@ -77,13 +81,23 @@ export component MainWindow inherits Window {
                         empty_files_model <=> root.empty_files_model;
                         similar_images_model <=> root.similar_images_model;
                     }
-                    Preview {
+                    preview_or_tool_settings := Rectangle {
+                        visible: (GuiState.preview_visible || GuiState.visible_tool_settings) && active_tab != CurrentTab.Settings;
                         height: parent.height;
                         x: parent.width / 2;
-                        width: GuiState.preview_visible ? parent.width / 2 : 0;
-                        visible: GuiState.preview_visible;
-                        source: GuiState.preview_image;
-                        image-fit: ImageFit.contain;
+                        width: self.visible ? parent.width / 2 : 0;
+                        Preview {
+                            height: parent.height;
+                            width: parent.width;
+                            visible: GuiState.preview_visible && !GuiState.visible_tool_settings;
+                            source: GuiState.preview_image;
+                            image-fit: ImageFit.contain;
+                        }
+                        ToolSettings {
+                            height: parent.height;
+                            width: parent.width;
+                            visible: GuiState.visible_tool_settings;
+                        }
                     }
                 }
 

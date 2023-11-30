@@ -21,8 +21,9 @@ jobs:
       - name: Install basic libraries
         run: sudo apt update || true; sudo apt install -y ffmpeg
 
+      # New versions of nightly rust may call new unimplemented in eyra functions, so use const version
       - name: Setup rust version
-        run: rustup default nightly-2023-11-16
+        run: rustup default nightly-2023-11-29
 
       - name: Add eyra
         run: |
