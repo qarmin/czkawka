@@ -190,9 +190,7 @@ impl BrokenFiles {
     ) -> Option<FileEntry> {
         atomic_counter.fetch_add(1, Ordering::Relaxed);
 
-        let Some(file_name_lowercase) = get_lowercase_name(entry_data, warnings) else {
-            return None;
-        };
+        let file_name_lowercase = get_lowercase_name(entry_data, warnings)?;
 
         if !self.common_data.allowed_extensions.matches_filename(&file_name_lowercase) {
             return None;

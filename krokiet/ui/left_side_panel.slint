@@ -120,7 +120,6 @@ export component LeftSidePanel {
                     preferred-height: self.width;
                     icon: @image-url("../icons/settings.svg");
                     clicked => {
-                        debug("Changed showing settings");
                         GuiState.visible_tool_settings = !GuiState.visible-tool-settings;
                     }
                 }

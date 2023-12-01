@@ -152,9 +152,7 @@ impl Temporary {
     ) -> Option<FileEntry> {
         atomic_counter.fetch_add(1, Ordering::Relaxed);
 
-        let Some(file_name_lowercase) = get_lowercase_name(entry_data, warnings) else {
-            return None;
-        };
+        let file_name_lowercase = get_lowercase_name(entry_data, warnings)?;
 
         if !TEMP_EXTENSIONS.iter().any(|f| file_name_lowercase.ends_with(f)) {
             return None;

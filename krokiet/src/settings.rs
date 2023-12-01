@@ -287,17 +287,13 @@ where
 }
 
 pub fn get_base_config_file() -> Option<PathBuf> {
-    let Some(configs) = ProjectDirs::from("pl", "Qarmin", "Krokiet") else {
-        return None;
-    };
+    let configs = ProjectDirs::from("pl", "Qarmin", "Krokiet")?;
     let config_folder = configs.config_dir();
     let base_config_file = config_folder.join("config_general.json");
     Some(base_config_file)
 }
 pub fn get_config_file(number: i32) -> Option<PathBuf> {
-    let Some(configs) = ProjectDirs::from("pl", "Qarmin", "Krokiet") else {
-        return None;
-    };
+    let configs = ProjectDirs::from("pl", "Qarmin", "Krokiet")?;
     let config_folder = configs.config_dir();
     let config_file = config_folder.join(format!("config_preset_{number}.json"));
     Some(config_file)

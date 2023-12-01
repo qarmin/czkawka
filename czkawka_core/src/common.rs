@@ -176,10 +176,7 @@ pub fn open_cache_folder(cache_file_name: &str, save_to_cache: bool, use_json: b
                 file_handler_default = Some(t);
             } else {
                 if use_json {
-                    file_handler_json = Some(match OpenOptions::new().read(true).open(&cache_file_json) {
-                        Ok(t) => t,
-                        Err(_) => return None,
-                    });
+                    file_handler_json = Some(OpenOptions::new().read(true).open(&cache_file_json).ok()?);
                 } else {
                     // messages.push(format!("Cannot find or open cache file {}", cache_file.display())); // No error or warning
                     return None;
