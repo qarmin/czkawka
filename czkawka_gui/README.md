@@ -10,7 +10,7 @@ Prebuild binareies are available here - https://github.com/qarmin/czkawka/releas
 
 ### Linux
 #### Prebuild binaries
-  Ubuntu - `sudo apt install libgtk-4 libheif ffmpeg -y`
+  Ubuntu - `sudo apt install libgtk-4 libheif libraw ffmpeg -y`
 #### Snap - 
   none - all needed libraries are bundled in snap [except ffmpeg](https://github.com/snapcrafters/ffmpeg/issues/73)  - https://snapcraft.io/czkawka
 #### Flatpak
@@ -18,7 +18,7 @@ Prebuild binareies are available here - https://github.com/qarmin/czkawka/releas
 ### Mac
 ```
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-brew install gtk4 adwaita-icon-theme ffmpeg librsvg libheif
+brew install gtk4 adwaita-icon-theme ffmpeg librsvg libheif libraw
 ```
 
 ### Windows
@@ -41,15 +41,19 @@ Compilation of gui is harder that compilation cli or core, because uses gtk4 whi
 
 ### Linux (Ubuntu, but on other OS should work similar)
 ```shell
-sudo apt install libgtk-4-dev libheif-dev -y
+sudo apt install libgtk-4-dev libheif-dev libraw-dev -y
 cargo run --release --bin czkawka_gui
+# Or with support for heif and libraw
+cargo run --release --bin czkawka_gui --features "heif,libraw"
 ```
 ### Mac
 ```shell
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-brew install rustup gtk4 adwaita-icon-theme ffmpeg librsvg libheif pkg-config
+brew install rustup gtk4 adwaita-icon-theme ffmpeg librsvg libheif libraw pkg-config
 rustup-init
 cargo run --release --bin czkawka_gui
+# Or with support for heif and libraw
+cargo run --release --bin czkawka_gui --features "heif,libraw"
 ```
 ### Windows
 Currently, there is no instruction how to compile app on Windows natively.</br>

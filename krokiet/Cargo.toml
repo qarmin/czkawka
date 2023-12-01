@@ -58,3 +58,4 @@ winit_skia_vulkan = ["slint/renderer-winit-skia-vulkan"]
 winit_software = ["slint/renderer-winit-software"]
 
 heif = ["czkawka_core/heif"]
+libraw = ["czkawka_core/libraw"]

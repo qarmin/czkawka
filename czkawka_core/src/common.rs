@@ -1,6 +1,7 @@
+#[allow(unused_imports)]
+// I don't wanna fight with unused imports in this file, so simply ignore it to avoid too much complexity
 use std::ffi::OsString;
 use std::fs::{DirEntry, File, OpenOptions};
-use std::io::BufReader;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
@@ -18,7 +19,10 @@ use image::{DynamicImage, ImageBuffer, Rgb};
 use imagepipe::{ImageSource, Pipeline};
 #[cfg(feature = "heif")]
 use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
+#[cfg(feature = "libraw")]
+use libraw::Processor;
 use log::{debug, info, warn, LevelFilter, Record};
+use rawloader::RawLoader;
 
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
@@ -204,16 +208,33 @@ pub fn get_dynamic_image_from_heic(path: &str) -> Result<DynamicImage> {
         .ok_or_else(|| anyhow::anyhow!("Failed to create image buffer"))
 }
 
+#[cfg(feature = "libraw")]
+pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path>) -> Option<DynamicImage> {
+    let buf = fs::read(path.as_ref()).ok()?;
+
+    let processor = Processor::new();
+    let start_timer = Instant::now();
+    let processed = processor.process_8bit(&buf).expect("processing successful");
+    println!("Processing took {:?}", start_timer.elapsed());
+
+    let width = processed.width();
+    let height = processed.height();
+    dbg!(width, height);
+
+    let data = processed.to_vec();
+
+    let buffer = ImageBuffer::from_raw(width, height, data)?;
+    // Utwórz DynamicImage z ImageBuffer
+    Some(DynamicImage::ImageRgb8(buffer))
+}
+
+#[cfg(not(feature = "libraw"))]
 pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path> + std::fmt::Debug) -> Option<DynamicImage> {
     let mut start_timer = Instant::now();
     let mut times = Vec::new();
 
-    let file_handler = OpenOptions::new().read(true).open(&path).ok()?;
-    times.push(("After opening", start_timer.elapsed()));
-    start_timer = Instant::now();
-
-    let mut reader = BufReader::new(file_handler);
-    let raw = rawloader::decode(&mut reader).ok()?;
+    let loader = RawLoader::new();
+    let raw = loader.decode_file(path.as_ref()).ok()?;
 
     times.push(("After decoding", start_timer.elapsed()));
     start_timer = Instant::now();
