@@ -211,22 +211,12 @@ pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path> + std::fmt::Debug
     let mut start_timer = Instant::now();
     let mut times = Vec::new();
 
-    let file_handler = match OpenOptions::new().read(true).open(&path) {
-        Ok(t) => t,
-        Err(_e) => {
-            return None;
-        }
-    };
+    let file_handler = OpenOptions::new().read(true).open(&path).ok()?;
     times.push(("After opening", start_timer.elapsed()));
     start_timer = Instant::now();
 
     let mut reader = BufReader::new(file_handler);
-    let raw = match rawloader::decode(&mut reader) {
-        Ok(raw) => raw,
-        Err(_e) => {
-            return None;
-        }
-    };
+    let raw = rawloader::decode(&mut reader).ok()?;
 
     times.push(("After decoding", start_timer.elapsed()));
     start_timer = Instant::now();
@@ -236,30 +226,18 @@ pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path> + std::fmt::Debug
     times.push(("After creating source", start_timer.elapsed()));
     start_timer = Instant::now();
 
-    let mut pipeline = match Pipeline::new_from_source(source) {
-        Ok(pipeline) => pipeline,
-        Err(_e) => {
-            return None;
-        }
-    };
+    let mut pipeline = Pipeline::new_from_source(source).ok()?;
 
     times.push(("After creating pipeline", start_timer.elapsed()));
     start_timer = Instant::now();
 
     pipeline.run(None);
-    let image = match pipeline.output_8bit(None) {
-        Ok(image) => image,
-        Err(_e) => {
-            return None;
-        }
-    };
+    let image = pipeline.output_8bit(None).ok()?;
 
     times.push(("After creating image", start_timer.elapsed()));
     start_timer = Instant::now();
 
-    let Some(image) = ImageBuffer::<Rgb<u8>, Vec<u8>>::from_raw(image.width as u32, image.height as u32, image.data) else {
-        return None;
-    };
+    let image = ImageBuffer::<Rgb<u8>, Vec<u8>>::from_raw(image.width as u32, image.height as u32, image.data)?;
 
     times.push(("After creating image buffer", start_timer.elapsed()));
     start_timer = Instant::now();

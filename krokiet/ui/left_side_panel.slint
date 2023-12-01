@@ -121,13 +121,14 @@ export component LeftSidePanel {
                     icon: @image-url("../icons/settings.svg");
                     clicked => {
                         debug("Changed showing settings");
-                        GuiState.visible_tool_settings != !GuiState.visible-tool-settings;
+                        GuiState.visible_tool_settings = !GuiState.visible-tool-settings;
                     }
                 }
             }
             HorizontalLayout {
                 alignment: end;
                 Button {
+                    enabled: active-tab != CurrentTab.Settings;
                     min-width: 20px;
                     min-height: 20px;
                     max-height: self.width;

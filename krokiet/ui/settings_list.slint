@@ -145,6 +145,12 @@ component Language inherits HorizontalLayout {
         model: ["English"];
     }
 }
+component HeaderText inherits Text {
+    font-size: 15px;
+    height: SettingsSize.item_height;
+    horizontal-alignment: TextHorizontalAlignment.center;
+    vertical-alignment: TextVerticalAlignment.center;
+}
 
 export component SettingsList inherits VerticalLayout {
     preferred-height: 300px;
@@ -162,14 +168,12 @@ export component SettingsList inherits VerticalLayout {
             Presets{
                 height: SettingsSize.item_height;
             }
-            Language {
-                height: SettingsSize.item_height;
-            }
-            Text {
+            // TODO Maybe someday
+            // Language {
+            //     height: SettingsSize.item_height;
+            // }
+            HeaderText {
                 text: "General settings";
-                height: SettingsSize.item_height;
-                horizontal-alignment: TextHorizontalAlignment.center;
-                vertical-alignment: TextVerticalAlignment.center;
             }
             TextComponent {
                 name: "Excluded item:";
@@ -206,11 +210,8 @@ export component SettingsList inherits VerticalLayout {
                 name: "Thread number";
                 maximum_number <=> GuiState.maximum_threads;
             }
-            Text {
+            HeaderText {
                 text: "Duplicate tool";
-                height: SettingsSize.item_height;
-                horizontal-alignment: TextHorizontalAlignment.center;
-                vertical-alignment: TextVerticalAlignment.center;
             }
             CheckBoxComponent {
                 name: "Image preview";
@@ -236,11 +237,8 @@ export component SettingsList inherits VerticalLayout {
                 name: "Delete outdated entries";
                 model <=> Settings.duplicate_delete_outdated_entries;
             }
-            Text {
+            HeaderText {
                 text: "Similar Images tool";
-                height: SettingsSize.item_height;
-                horizontal-alignment: TextHorizontalAlignment.center;
-                vertical-alignment: TextVerticalAlignment.center;
             }
             CheckBoxComponent {
                 name: "Image preview";
@@ -250,21 +248,15 @@ export component SettingsList inherits VerticalLayout {
                 name: "Delete outdated entries";
                 model <=> Settings.similar_images_delete_outdated_entries;
             }
-            Text {
+            HeaderText {
                 text: "Similar Videos tool";
-                height: SettingsSize.item_height;
-                horizontal-alignment: TextHorizontalAlignment.center;
-                vertical-alignment: TextVerticalAlignment.center;
             }
             CheckBoxComponent {
                 name: "Delete outdated entries";
                 model <=> Settings.similar_videos_delete_outdated_entries;
             }
-            Text {
+            HeaderText {
                 text: "Similar Music tool";
-                height: SettingsSize.item_height;
-                horizontal-alignment: TextHorizontalAlignment.center;
-                vertical-alignment: TextVerticalAlignment.center;
             }
             CheckBoxComponent {
                 name: "Delete outdated entries";

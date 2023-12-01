@@ -8,7 +8,7 @@ use log::{debug, error, info};
 use serde::{Deserialize, Serialize};
 use slint::{ComponentHandle, Model, ModelRc};
 
-use czkawka_core::common::get_available_threads;
+use czkawka_core::common::{get_available_threads, set_number_of_threads};
 use czkawka_core::common_items::{DEFAULT_EXCLUDED_DIRECTORIES, DEFAULT_EXCLUDED_ITEMS};
 
 use crate::common::{create_string_standard_list_view_from_pathbuf, create_vec_model_from_vec_string};
@@ -206,6 +206,7 @@ pub fn load_settings_from_file(app: &MainWindow) {
     // Ended validating
     set_settings_to_gui(app, &custom_settings);
     set_base_settings_to_gui(app, &base_settings);
+    set_number_of_threads(custom_settings.thread_number as usize);
 }
 
 pub fn save_all_settings_to_file(app: &MainWindow) {

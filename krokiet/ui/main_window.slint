@@ -61,7 +61,7 @@ export component MainWindow inherits Window {
                 scanning <=> root.scanning;
                 active-tab <=> root.active-tab;
                 changed_current_tab() => {
-                    GuiState.preview-visible = false;
+                    GuiState.preview_visible = false;
                     main_list.changed_current_tab();
                 }
             }

@@ -60,10 +60,11 @@ fn main() {
 
     to_remove_debug(&app);
 
+    set_initial_gui_infos(&app);
+
     create_default_settings_files();
     load_settings_from_file(&app);
 
-    set_initial_gui_infos(&app);
     connect_delete_button(&app);
     connect_scan_button(&app, progress_sender, stop_receiver);
     connect_stop_button(&app, stop_sender);

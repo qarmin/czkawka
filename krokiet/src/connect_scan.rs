@@ -69,7 +69,7 @@ fn scan_similar_images(a: Weak<MainWindow>, progress_sender: Sender<ProgressData
                 let number_of_empty_files = vector.len();
                 let items = Rc::new(VecModel::default());
                 for vec_fe in vector {
-                    insert_data_to_model(&items, ModelRc::new(VecModel::default()), false);
+                    insert_data_to_model(&items, ModelRc::new(VecModel::default()), true);
                     for fe in vec_fe {
                         let (directory, file) = split_path(fe.get_path());
                         let data_model = VecModel::from_slice(&[
@@ -182,9 +182,12 @@ where
 {
     component.set_included_directory(custom_settings.included_directories.clone());
     component.set_excluded_directory(custom_settings.excluded_directories.clone());
-    component.set_recursive_search(true); // TODO bind
+    component.set_recursive_search(custom_settings.recursive_search);
     component.set_minimal_file_size(custom_settings.minimum_file_size as u64 * 1024);
-    component.set_minimal_file_size(custom_settings.maximum_file_size as u64 * 1024);
+    component.set_maximal_file_size(custom_settings.maximum_file_size as u64 * 1024);
     component.set_allowed_extensions(custom_settings.allowed_extensions.clone());
     component.set_excluded_items(custom_settings.excluded_items.split(',').map(str::to_string).collect());
+    component.set_exclude_other_filesystems(custom_settings.ignore_other_file_systems);
+    component.set_use_cache(custom_settings.use_cache);
+    component.set_save_also_as_json(custom_settings.save_also_as_json);
 }
