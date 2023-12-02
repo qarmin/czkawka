@@ -238,7 +238,7 @@ mod tests {
     fn create_new_model(items: Vec<(bool, bool, bool, Vec<&'static str>)>) -> ModelRc<MainListModel> {
         let model = VecModel::default();
         for item in items {
-            let all_items: Vec<SharedString> = item.3.iter().map(|item| item.into()).collect::<Vec<_>>();
+            let all_items: Vec<SharedString> = item.3.iter().map(|item| (*item).into()).collect::<Vec<_>>();
             let all_items = VecModel::from(all_items);
             model.push(MainListModel {
                 checked: item.0,

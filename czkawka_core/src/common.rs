@@ -1,4 +1,4 @@
-#[allow(unused_imports)]
+#![allow(unused_imports)]
 // I don't wanna fight with unused imports in this file, so simply ignore it to avoid too much complexity
 use std::ffi::OsString;
 use std::fs::{DirEntry, File, OpenOptions};

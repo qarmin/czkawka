@@ -87,31 +87,34 @@ Similar images which check 349 image files that occupied 1.7 GB
 
 Bleachbit is a master at finding and removing temporary files, while Czkawka only finds the most basic ones. So these two apps shouldn't be compared directly or be considered as an alternative to one another.
 
-|                          |   Czkawka   |   FSlint   |     DupeGuru      |  Bleachbit  |
-|:------------------------:|:-----------:|:----------:|:-----------------:|:-----------:|
-|         Language         |    Rust     |   Python   |   Python/Obj-C    |   Python    |
-|            OS            | Lin,Mac,Win |    Lin     |    Lin,Mac,Win    | Lin,Mac,Win |
-|        Framework         |    GTK 4    |   PyGTK2   | Qt 5 (PyQt)/Cocoa |   PyGTK3    |
-|     Duplicate finder     |     ✔       |      ✔     |        ✔          |             |
-|       Empty files        |     ✔       |      ✔     |                   |             |
-|      Empty folders       |     ✔       |      ✔     |                   |             |
-|     Temporary files      |     ✔       |      ✔     |                   |     ✔       |
-|        Big files         |     ✔       |            |                   |             |
-|      Similar images      |     ✔       |            |        ✔          |             |
-|      Similar videos      |     ✔       |            |                   |             |
-|  Music duplicates(tags)  |     ✔       |            |        ✔          |             |
-|     Invalid symlinks     |     ✔       |      ✔     |                   |             |
-|       Broken files       |     ✔       |            |                   |             |
-|      Names conflict      |     ✔       |      ✔     |                   |             |
-| Invalid names/extensions |     ✔       |      ✔     |                   |             |
-|    Installed packages    |             |      ✔     |                   |             |
-|          Bad ID          |             |      ✔     |                   |             |
-|  Non stripped binaries   |             |      ✔     |                   |             |
-|   Redundant whitespace   |             |      ✔     |                   |             |
-|    Overwriting files     |             |      ✔     |                   |     ✔       |
-|    Multiple languages    |     ✔       |      ✔     |        ✔          |     ✔       |
-|      Cache support       |     ✔       |            |        ✔          |             |
-|  In active development   |     Yes     |      No    |        Yes        |     Yes     |
+In this comparison remember, that even if app have same features they may work different(e.g. one app may have more options to choose than other). 
+
+|                          |   Czkawka   |   Krokiet   | FSlint |      DupeGuru      |  Bleachbit  |
+|:------------------------:|:-----------:|:-----------:|:------:|:------------------:|:-----------:|
+|         Language         |    Rust     |    Rust     | Python |    Python/Obj-C    |   Python    |
+| Framework base language  |      C      |    Rust     |   C    | C/C++/Obj-C/Swift  |      C      |
+|        Framework         |    GTK 4    |    Slint    | PyGTK2 | Qt 5 (PyQt)/Cocoa  |   PyGTK3    |
+|            OS            | Lin,Mac,Win | Lin,Mac,Win |  Lin   |    Lin,Mac,Win     | Lin,Mac,Win |
+|     Duplicate finder     |      ✔      |      ✔      |   ✔    |         ✔          |             |
+|       Empty files        |      ✔      |      ✔      |   ✔    |                    |             |
+|      Empty folders       |      ✔      |      ✔      |   ✔    |                    |             |
+|     Temporary files      |      ✔      |      ✔      |   ✔    |                    |      ✔      |
+|        Big files         |      ✔      |      ✔      |        |                    |             |
+|      Similar images      |      ✔      |      ✔      |        |         ✔          |             |
+|      Similar videos      |      ✔      |      ✔      |        |                    |             |
+|  Music duplicates(tags)  |      ✔      |      ✔      |        |         ✔          |             |
+|     Invalid symlinks     |      ✔      |      ✔      |   ✔    |                    |             |
+|       Broken files       |      ✔      |      ✔      |        |                    |             |
+|      Names conflict      |      ✔      |      ✔      |   ✔    |                    |             |
+| Invalid names/extensions |      ✔      |      ✔      |   ✔    |                    |             |
+|    Installed packages    |             |             |   ✔    |                    |             |
+|          Bad ID          |             |             |   ✔    |                    |             |
+|  Non stripped binaries   |             |             |   ✔    |                    |             |
+|   Redundant whitespace   |             |             |   ✔    |                    |             |
+|    Overwriting files     |             |             |   ✔    |                    |      ✔      |
+|    Multiple languages    |      ✔      |             |   ✔    |         ✔          |      ✔      |
+|      Cache support       |      ✔      |      ✔      |        |         ✔          |             |
+|  In active development   |     Yes     |             |   No   |        Yes         |     Yes     |
 
 ## Other apps
 There are many similar applications to Czkawka on the Internet, which do some things better and some things worse:  
