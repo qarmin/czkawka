@@ -1,4 +1,4 @@
-import { Button, VerticalBox ,TextEdit, HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox, LineEdit} from "std-widgets.slint";
+import { Button, VerticalBox ,TextEdit, HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox, LineEdit, ScrollView, ComboBox, Slider} from "std-widgets.slint";
 import {SelectableTableView} from "selectable_tree_view.slint";
 import {LeftSidePanel} from "left_side_panel.slint";
 import {MainList} from "main_lists.slint";
@@ -15,14 +15,85 @@ import { Preview } from "preview.slint";
 import {PopupNewDirectories} from "popup_new_directories.slint";
 import { PopupSelect } from "popup_select.slint";
 
-export component ToolSettings inherits Rectangle {
-    width: 300px;
-    height: 300px;
+component ComboBoxWrapper inherits HorizontalLayout  {
+    in-out property <string> text;
+    in-out property <[string]> model;
+    in-out property <int> current_index;
+    spacing: 5px;
+    Text {
+        text <=> root.text;
+        vertical_alignment: TextVerticalAlignment.center;
+    }
+    ComboBox {
+        model: root.model;
+        current_index <=> root.current_index;
+    }
+}
+
+component CheckBoxWrapper inherits CheckBox {
     
-    if GuiState.active_tab == CurrentTab.SimilarImages: VerticalLayout {
-        Text {
-            text: "   Subsettings";
-            font-size: 15px;
+}
+
+component SubsettingsHeader inherits Text {
+    text: "Subsettings";
+    font-size: 15px;
+}
+
+component SliderWrapper inherits HorizontalLayout {
+    in-out property <float> maximum;
+    in-out property <float> value;
+    in-out property <string> text;
+    in-out property <string> end_text;
+    in-out property <length> end_text_size;
+    spacing: 5px;
+    Text {
+        text: root.text;
+    }
+    Slider {
+        min-width: 30px;
+        minimum: 0;
+        maximum <=> root.maximum;
+        value <=> root.value;
+    }
+    Text {
+        text: root.end_text;
+        width: root.end_text_size;
+    }
+}
+
+export component ToolSettings {
+    ScrollView {
+        if GuiState.active_tab == CurrentTab.SimilarImages: VerticalLayout {
+            spacing: 5px;
+            padding: 10px;
+            SubsettingsHeader { }
+            ComboBoxWrapper {
+                text: "Hash size";
+                model: Settings.duplicate_sub_available_hash_size;
+                current_index: Settings.duplicate_sub_hash_size_index;
+            }
+            ComboBoxWrapper {
+                text: "Resize Algorithm";
+                model: Settings.duplicate_sub_available_resize_algorithm;
+                current_index: Settings.duplicate_sub_resize_algorithm_index;
+            }
+            ComboBoxWrapper {
+                text: "Hash type";
+                model: Settings.duplicate_sub_available_hash_type;
+                current_index: Settings.duplicate_sub_hash_type_index;
+            }
+            CheckBoxWrapper {
+                text: "Ignore same size";
+                checked: Settings.duplicate_sub_ignore_same_size;
+            }
+            SliderWrapper {
+                text: "Max difference";
+                end_text: "(" + round(Settings.duplicate_sub_current_similarity) + "/" + round(Settings.duplicate_sub_max_similarity) + ")";
+                end_text_size: 40px;
+                maximum <=> Settings.duplicate_sub_max_similarity;
+                value <=> Settings.duplicate_sub_current_similarity;
+            }
+            Rectangle {}
         }
     }
 }
