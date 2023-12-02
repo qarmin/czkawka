@@ -35,13 +35,13 @@ export global Settings {
 
     // Allowed subsettings
     // Duplicate
-    in-out property <[string]> duplicate_sub_available_hash_size: ["8", "16", "32", "64"];
-    in-out property <int> duplicate_sub_hash_size_index: 0;
-    in-out property <[string]> duplicate_sub_available_resize_algorithm: ["Lanczos3", "Nearest", "Triangle", "Gaussian", "CatmullRom"];
-    in-out property <int> duplicate_sub_resize_algorithm_index: 0;
-    in-out property <[string]> duplicate_sub_available_hash_type: ["Gradient", "Mean", "VertGradient", "BlockHash", "DoubleGradient"];
-    in-out property <int> duplicate_sub_hash_type_index: 0;
-    in-out property <float> duplicate_sub_max_similarity: 40;
-    in-out property <float> duplicate_sub_current_similarity: 20;
-    in-out property <bool> duplicate_sub_ignore_same_size;
+    in-out property <[string]> similar_images_sub_available_hash_size: ["8", "16", "32", "64"];
+    in-out property <int> similar_images_sub_hash_size_index: 0;
+    in-out property <[string]> similar_images_sub_available_resize_algorithm: ["Lanczos3", "Nearest", "Triangle", "Gaussian", "CatmullRom"];
+    in-out property <int> similar_images_sub_resize_algorithm_index: 0;
+    in-out property <[string]> similar_images_sub_available_hash_type: ["Gradient", "Mean", "VertGradient", "BlockHash", "DoubleGradient"];
+    in-out property <int> similar_images_sub_hash_type_index: 0;
+    in-out property <float> similar_images_sub_max_similarity: 40;
+    in-out property <float> similar_images_sub_current_similarity: 20;
+    in-out property <bool> similar_images_sub_ignore_same_size;
 }

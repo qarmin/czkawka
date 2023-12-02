@@ -4,7 +4,8 @@ use std::path::PathBuf;
 
 use directories_next::ProjectDirs;
 use home::home_dir;
-use log::{debug, error, info};
+use image_hasher::{FilterType, HashAlg};
+use log::{debug, error, info, warn};
 use serde::{Deserialize, Serialize};
 use slint::{ComponentHandle, Model, ModelRc};
 
@@ -19,6 +20,26 @@ pub const DEFAULT_MINIMUM_SIZE_KB: i32 = 16;
 pub const DEFAULT_MAXIMUM_SIZE_KB: i32 = i32::MAX / 1024;
 pub const DEFAULT_MINIMUM_CACHE_SIZE: i32 = 256;
 pub const DEFAULT_MINIMUM_PREHASH_CACHE_SIZE: i32 = 256;
+
+// (Hash size, Maximum difference) - Ehh... to simplify it, just use everywhere 40 as maximum similarity - for now I'm to lazy to change it, when hash size changes
+// So if you want to change it, you need to change it in multiple places
+pub const ALLOWED_HASH_SIZE_VALUES: &[(u8, u8)] = &[(8, 40), (16, 40), (32, 40), (64, 40)];
+
+pub const ALLOWED_RESIZE_ALGORITHM_VALUES: &[(&str, &str, FilterType)] = &[
+    ("lanczos3", "Lanczos3", FilterType::Lanczos3),
+    ("gaussian", "Gaussian", FilterType::Gaussian),
+    ("catmullrom", "CatmullRom", FilterType::CatmullRom),
+    ("triangle", "Triangle", FilterType::Triangle),
+    ("nearest", "Nearest", FilterType::Nearest),
+];
+
+pub const ALLOWED_HASH_TYPE_VALUES: &[(&str, &str, HashAlg)] = &[
+    ("mean", "Mean", HashAlg::Mean),
+    ("gradient", "Gradient", HashAlg::Gradient),
+    ("blockhash", "BlockHash", HashAlg::Blockhash),
+    ("vertgradient", "VertGradient", HashAlg::VertGradient),
+    ("doublegradient", "DoubleGradient", HashAlg::DoubleGradient),
+];
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SettingsCustom {
@@ -66,6 +87,20 @@ pub struct SettingsCustom {
     pub similar_videos_delete_outdated_entries: bool,
     #[serde(default = "ttrue")]
     pub similar_music_delete_outdated_entries: bool,
+    #[serde(default = "default_sub_hash_size")]
+    pub similar_images_sub_hash_size: u8,
+    #[serde(default = "default_hash_type")]
+    pub similar_images_sub_hash_type: String,
+    #[serde(default = "default_resize_algorithm")]
+    pub similar_images_sub_resize_algorithm: String,
+    #[serde(default)]
+    pub similar_images_sub_ignore_same_size: bool,
+    #[serde(default = "default_similarity")]
+    pub similar_images_sub_similarity: i32,
+}
+
+pub fn default_similarity() -> i32 {
+    10
 }
 
 impl Default for SettingsCustom {
@@ -338,6 +373,52 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
     settings.set_similar_videos_delete_outdated_entries(custom_settings.similar_videos_delete_outdated_entries);
     settings.set_similar_music_delete_outdated_entries(custom_settings.similar_music_delete_outdated_entries);
 
+    let similar_images_sub_hash_size_idx = if let Some(idx) = ALLOWED_HASH_SIZE_VALUES
+        .iter()
+        .position(|(hash_size, _max_similarity)| *hash_size == custom_settings.similar_images_sub_hash_size)
+    {
+        idx
+    } else {
+        warn!(
+            "Value of hash size \"{}\" is invalid, setting it to default value",
+            custom_settings.similar_images_sub_hash_size
+        );
+        0
+    };
+    settings.set_similar_images_sub_hash_size_index(similar_images_sub_hash_size_idx as i32);
+
+    let similar_images_sub_hash_type_idx = if let Some(idx) = ALLOWED_HASH_TYPE_VALUES
+        .iter()
+        .position(|(settings_key, _gui_name, _hash_type)| *settings_key == custom_settings.similar_images_sub_hash_type)
+    {
+        idx
+    } else {
+        warn!(
+            "Value of hash type \"{}\" is invalid, setting it to default value",
+            custom_settings.similar_images_sub_hash_type
+        );
+        0
+    };
+    settings.set_similar_images_sub_hash_type_index(similar_images_sub_hash_type_idx as i32);
+
+    let similar_images_sub_resize_algorithm_idx = if let Some(idx) = ALLOWED_RESIZE_ALGORITHM_VALUES
+        .iter()
+        .position(|(settings_key, _gui_name, _resize_alg)| *settings_key == custom_settings.similar_images_sub_resize_algorithm)
+    {
+        idx
+    } else {
+        warn!(
+            "Value of resize algorithm \"{}\" is invalid, setting it to default value",
+            custom_settings.similar_images_sub_resize_algorithm
+        );
+        0
+    };
+    settings.set_similar_images_sub_resize_algorithm_index(similar_images_sub_resize_algorithm_idx as i32);
+
+    settings.set_similar_images_sub_ignore_same_size(custom_settings.similar_images_sub_ignore_same_size);
+    settings.set_similar_images_sub_max_similarity(40.0); // TODO this is now set to stable 40
+    settings.set_similar_images_sub_current_similarity(custom_settings.similar_images_sub_similarity as f32);
+
     // Clear text
     app.global::<GuiState>().set_info_text("".into());
 }
@@ -380,6 +461,17 @@ pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
 
     let similar_music_delete_outdated_entries = settings.get_similar_music_delete_outdated_entries();
 
+    let similar_images_sub_hash_size_idx = settings.get_similar_images_sub_hash_size_index();
+    let similar_images_sub_hash_size = ALLOWED_HASH_SIZE_VALUES[similar_images_sub_hash_size_idx as usize].0;
+
+    let similar_images_sub_hash_type_idx = settings.get_similar_images_sub_hash_type_index();
+    let similar_images_sub_hash_type = ALLOWED_HASH_TYPE_VALUES[similar_images_sub_hash_type_idx as usize].0.to_string();
+
+    let similar_images_sub_resize_algorithm_idx = settings.get_similar_images_sub_resize_algorithm_index();
+    let similar_images_sub_resize_algorithm = ALLOWED_RESIZE_ALGORITHM_VALUES[similar_images_sub_resize_algorithm_idx as usize].0.to_string();
+
+    let similar_images_sub_ignore_same_size = settings.get_similar_images_sub_ignore_same_size();
+    let similar_images_sub_similarity = settings.get_similar_images_sub_current_similarity().round() as i32;
     SettingsCustom {
         included_directories,
         excluded_directories,
@@ -403,6 +495,11 @@ pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
         similar_images_delete_outdated_entries,
         similar_videos_delete_outdated_entries,
         similar_music_delete_outdated_entries,
+        similar_images_sub_hash_size,
+        similar_images_sub_hash_type,
+        similar_images_sub_resize_algorithm,
+        similar_images_sub_ignore_same_size,
+        similar_images_sub_similarity,
     }
 }
 
@@ -468,4 +565,14 @@ fn minimal_hash_cache_size() -> i32 {
 }
 fn minimal_prehash_cache_size() -> i32 {
     DEFAULT_MINIMUM_PREHASH_CACHE_SIZE
+}
+
+pub fn default_resize_algorithm() -> String {
+    ALLOWED_RESIZE_ALGORITHM_VALUES[0].0.to_string()
+}
+pub fn default_hash_type() -> String {
+    ALLOWED_HASH_TYPE_VALUES[0].0.to_string()
+}
+pub fn default_sub_hash_size() -> u8 {
+    16
 }

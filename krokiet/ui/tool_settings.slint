@@ -69,29 +69,29 @@ export component ToolSettings {
             SubsettingsHeader { }
             ComboBoxWrapper {
                 text: "Hash size";
-                model: Settings.duplicate_sub_available_hash_size;
-                current_index: Settings.duplicate_sub_hash_size_index;
+                model: Settings.similar_images_sub_available_hash_size;
+                current_index: Settings.similar_images_sub_hash_size_index;
             }
             ComboBoxWrapper {
                 text: "Resize Algorithm";
-                model: Settings.duplicate_sub_available_resize_algorithm;
-                current_index: Settings.duplicate_sub_resize_algorithm_index;
+                model: Settings.similar_images_sub_available_resize_algorithm;
+                current_index: Settings.similar_images_sub_resize_algorithm_index;
             }
             ComboBoxWrapper {
                 text: "Hash type";
-                model: Settings.duplicate_sub_available_hash_type;
-                current_index: Settings.duplicate_sub_hash_type_index;
+                model: Settings.similar_images_sub_available_hash_type;
+                current_index: Settings.similar_images_sub_hash_type_index;
             }
             CheckBoxWrapper {
                 text: "Ignore same size";
-                checked: Settings.duplicate_sub_ignore_same_size;
+                checked: Settings.similar_images_sub_ignore_same_size;
             }
             SliderWrapper {
                 text: "Max difference";
-                end_text: "(" + round(Settings.duplicate_sub_current_similarity) + "/" + round(Settings.duplicate_sub_max_similarity) + ")";
+                end_text: "(" + round(Settings.similar_images_sub_current_similarity) + "/" + round(Settings.similar_images_sub_max_similarity) + ")";
                 end_text_size: 40px;
-                maximum <=> Settings.duplicate_sub_max_similarity;
-                value <=> Settings.duplicate_sub_current_similarity;
+                maximum <=> Settings.similar_images_sub_max_similarity;
+                value <=> Settings.similar_images_sub_current_similarity;
             }
             Rectangle {}
         }

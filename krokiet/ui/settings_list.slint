@@ -154,6 +154,22 @@ component HeaderText inherits Text {
     vertical-alignment: TextVerticalAlignment.center;
 }
 
+component ConfigCacheButtons inherits HorizontalLayout {
+    spacing: 20px;
+    Button {
+        text: "Open config folder";
+        clicked => {
+            Callabler.open_config_folder();
+        }
+    }
+    Button {
+        text: "Open cache folder";
+        clicked => {
+            Callabler.open_cache_folder();
+        }
+    }
+}
+
 export component SettingsList inherits VerticalLayout {
     preferred-height: 300px;
     preferred-width: 400px;
@@ -169,6 +185,7 @@ export component SettingsList inherits VerticalLayout {
     ScrollView {
         VerticalLayout {
             padding-right: 15px;
+            padding-bottom: 10px;
             spacing: 5px;
             Presets{
                 height: SettingsSize.item_height;
@@ -273,6 +290,9 @@ export component SettingsList inherits VerticalLayout {
             CheckBoxComponent {
                 name: "Delete outdated entries";
                 model <=> Settings.similar_music_delete_outdated_entries;
+            }
+            ConfigCacheButtons {
+
             }
         }
     }

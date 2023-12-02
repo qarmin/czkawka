@@ -1,4 +1,4 @@
-use crate::settings::{collect_settings, SettingsCustom};
+use crate::settings::{collect_settings, SettingsCustom, ALLOWED_HASH_TYPE_VALUES, ALLOWED_RESIZE_ALGORITHM_VALUES};
 use crate::{CurrentTab, GuiState, MainListModel, MainWindow, ProgressToSend};
 use chrono::NaiveDateTime;
 use crossbeam_channel::{Receiver, Sender};
@@ -54,6 +54,21 @@ fn scan_similar_images(a: Weak<MainWindow>, progress_sender: Sender<ProgressData
         .spawn(move || {
             let mut finder = SimilarImages::new();
             set_common_settings(&mut finder, &custom_settings);
+            finder.set_hash_size(custom_settings.similar_images_sub_hash_size);
+            let resize_algortithm = ALLOWED_RESIZE_ALGORITHM_VALUES
+                .iter()
+                .find(|(setting_name, _gui_name, _resize_alg)| setting_name == &custom_settings.similar_images_sub_resize_algorithm)
+                .expect("Resize algorithm not found")
+                .2;
+            finder.set_image_filter(resize_algortithm);
+            let hash_type = ALLOWED_HASH_TYPE_VALUES
+                .iter()
+                .find(|(setting_name, _gui_name, _resize_alg)| setting_name == &custom_settings.similar_images_sub_hash_type)
+                .expect("Hash type not found")
+                .2;
+            finder.set_hash_alg(hash_type);
+            finder.set_exclude_images_with_same_size(custom_settings.similar_images_sub_ignore_same_size);
+            finder.set_similarity(custom_settings.similar_images_sub_similarity as u32);
             finder.find_similar_images(Some(&stop_receiver), Some(&progress_sender));
 
             let mut vector = finder.get_similar_images().clone();

@@ -100,6 +100,13 @@ pub fn get_default_number_of_threads() -> usize {
 pub fn set_number_of_threads(thread_number: usize) {
     NUMBER_OF_THREADS.set(thread_number);
 
+    let additional_message = if thread_number == 0 {
+        " (0 - means that all available threads will be used)"
+    } else {
+        ""
+    };
+    debug!("Number of threads set to {thread_number}{additional_message}");
+
     rayon::ThreadPoolBuilder::new()
         .num_threads(get_number_of_threads())
         .stack_size(DEFAULT_WORKER_THREAD_SIZE)
