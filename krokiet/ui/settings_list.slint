@@ -43,6 +43,8 @@ component ThreadSliderComponent inherits HorizontalLayout {
     in-out property <float> maximum_number;
     in-out property <string> name;
     spacing: 5px;
+
+    callback changed <=> slider.changed;
     
     Text {
         text <=> name;
@@ -156,6 +158,8 @@ export component SettingsList inherits VerticalLayout {
     preferred-height: 300px;
     preferred-width: 400px;
 
+    in-out property <bool> restart_required;
+
     Text {
         text: "Settings";
         height: SettingsSize.item_height;
@@ -164,6 +168,7 @@ export component SettingsList inherits VerticalLayout {
     }
     ScrollView {
         VerticalLayout {
+            padding-right: 15px;
             spacing: 5px;
             Presets{
                 height: SettingsSize.item_height;
@@ -209,6 +214,13 @@ export component SettingsList inherits VerticalLayout {
             ThreadSliderComponent {
                 name: "Thread number";
                 maximum_number <=> GuiState.maximum_threads;
+                changed => {
+                    restart_required = true;
+                }
+            }
+            if restart_required: Text {
+                text: "---You need to restart app to apply changes in thread number---";
+                horizontal-alignment: TextHorizontalAlignment.center;
             }
             HeaderText {
                 text: "Duplicate tool";
@@ -221,13 +233,13 @@ export component SettingsList inherits VerticalLayout {
                 name: "Hide hard links";
                 model <=> Settings.duplicate_hide_hard_links;
             }
-            CheckBoxComponent {
-                name: "Use prehash";
-                model <=> Settings.duplicate_use_prehash;
-            }
             TextComponent {
                 name: "Minimal size of cached files - Hash (KB)";
                 model <=> Settings.duplicate_minimal_hash_cache_size;
+            }
+            CheckBoxComponent {
+                name: "Use prehash";
+                model <=> Settings.duplicate_use_prehash;
             }
             TextComponent {
                 name: "Minimal size of cached files - Prehash (KB)";

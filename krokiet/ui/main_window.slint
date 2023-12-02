@@ -37,7 +37,6 @@ export component MainWindow inherits Window {
         all_progress: 20,
         step_name: "Cache",
     };
-    in-out property <CurrentTab> active_tab: CurrentTab.EmptyFolders;
     in-out property <[MainListModel]> empty_folder_model: [
         {checked: false, selected_row: false, header_row: true, val: ["kropkarz", "/Xd1", "24.10.2023"]} ,
         {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
@@ -59,7 +58,6 @@ export component MainWindow inherits Window {
             LeftSidePanel {
                 horizontal-stretch: 0.0;
                 scanning <=> root.scanning;
-                active-tab <=> root.active-tab;
                 changed_current_tab() => {
                     GuiState.preview_visible = false;
                     main_list.changed_current_tab();
@@ -76,27 +74,26 @@ export component MainWindow inherits Window {
                         width: preview_or_tool_settings.visible ? parent.width / 2 : parent.width;
                         height: parent.height;
                         horizontal-stretch: 0.5;
-                        active-tab <=> root.active-tab;
                         empty_folder_model <=> root.empty_folder_model;
                         empty_files_model <=> root.empty_files_model;
                         similar_images_model <=> root.similar_images_model;
                     }
                     preview_or_tool_settings := Rectangle {
-                        visible: (GuiState.preview_visible || GuiState.visible_tool_settings) && active_tab != CurrentTab.Settings;
+                        visible: (GuiState.preview_visible || tool_settings.visible) && GuiState.active_tab != CurrentTab.Settings;
                         height: parent.height;
                         x: parent.width / 2;
                         width: self.visible ? parent.width / 2 : 0;
                         Preview {
                             height: parent.height;
                             width: parent.width;
-                            visible: GuiState.preview_visible && !GuiState.visible_tool_settings;
+                            visible: GuiState.preview_visible && !tool_settings.visible;
                             source: GuiState.preview_image;
                             image-fit: ImageFit.contain;
                         }
-                        ToolSettings {
+                        tool_settings := ToolSettings {
                             height: parent.height;
                             width: parent.width;
-                            visible: GuiState.visible_tool_settings;
+                            visible: GuiState.visible_tool_settings && GuiState.available_subsettings;
                         }
                     }
                 }
@@ -111,7 +108,6 @@ export component MainWindow inherits Window {
         action_buttons := ActionButtons {
             vertical-stretch: 0.0;
             scanning <=> root.scanning;
-            active-tab <=> root.active-tab;
             stop_requested <=> root.stop-requested;
             scan_stopping => {
                 text_summary_text = "Stopping scan, please wait...";

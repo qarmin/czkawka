@@ -4,9 +4,9 @@ import {LeftSidePanel} from "left_side_panel.slint";
 import {CurrentTab, TypeOfOpenedItem} from "common.slint";
 import {MainListModel} from "common.slint";
 import {SettingsList} from "settings_list.slint";
+import {GuiState} from "gui_state.slint";
 
 export component MainList {
-    in-out property <CurrentTab> active-tab: CurrentTab.EmptyFolders;
     in-out property <[MainListModel]> empty_folder_model: [
         {checked: false, selected_row: false, header_row: true, val: ["kropkarz", "/Xd1", "24.10.2023"]} ,
         {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
@@ -19,7 +19,7 @@ export component MainList {
     callback released_key(string);
     
     empty_folders := SelectableTableView {
-        visible: root.active-tab == CurrentTab.EmptyFolders;
+        visible: GuiState.active_tab == CurrentTab.EmptyFolders;
         min-width: 200px;
         height: parent.height;
         columns: ["Selection", "Folder Name", "Path", "Modification Date"];
@@ -30,7 +30,7 @@ export component MainList {
     }
 
     empty_files := SelectableTableView {
-        visible: root.active-tab == CurrentTab.EmptyFiles;
+        visible: GuiState.active_tab == CurrentTab.EmptyFiles;
         min-width: 200px;
         height: parent.height;
         columns: ["Selection", "File Name", "Path", "Modification Date"];
@@ -41,7 +41,7 @@ export component MainList {
     }
 
     similar_images := SelectableTableView {
-        visible: root.active-tab == CurrentTab.SimilarImages;
+        visible: GuiState.active_tab == CurrentTab.SimilarImages;
         min-width: 200px;
         height: parent.height;
         columns: ["Selection", "Similarity", "Size", "Dimensions", "File Name", "Path", "Modification Date"];
@@ -52,7 +52,7 @@ export component MainList {
     }
 
     settings_list := SettingsList {
-        visible: root.active-tab == CurrentTab.Settings;
+        visible: GuiState.active_tab == CurrentTab.Settings;
     }
 
     focus_item := FocusScope {
@@ -63,11 +63,11 @@ export component MainList {
             if (!self.visible || !self.has-focus) {
                 return accept;
             }
-            if (root.active-tab == CurrentTab.EmptyFiles) {
+            if (GuiState.active_tab == CurrentTab.EmptyFiles) {
                 empty_files.released_key(event);
-            } else if (root.active-tab == CurrentTab.EmptyFolders) {
+            } else if (GuiState.active_tab == CurrentTab.EmptyFolders) {
                 empty-folders.released_key(event);
-            } else if (root.active-tab == CurrentTab.SimilarImages) {
+            } else if (GuiState.active_tab == CurrentTab.SimilarImages) {
                 similar-images.released_key(event);
             } else {
                 debug("Non handled key in main_lists.slint");

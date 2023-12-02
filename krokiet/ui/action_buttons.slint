@@ -4,6 +4,7 @@ import {MainList} from "main_lists.slint";
 import {CurrentTab} from "common.slint";
 import {BottomPanelVisibility} from "common.slint";
 import {Callabler} from "callabler.slint";
+import {GuiState} from "gui_state.slint";
 
 export component VisibilityButton inherits Button {
     in-out property <BottomPanelVisibility> button_visibility;
@@ -22,9 +23,8 @@ export component ActionButtons inherits HorizontalLayout {
     in-out property <BottomPanelVisibility> bottom_panel_visibility: BottomPanelVisibility.Directories;
     in-out property <bool> stop_requested: false;
     in-out property <bool> scanning;
-    in-out property <bool> lists_enabled: active-tab != CurrentTab.Settings;
+    in-out property <bool> lists_enabled: GuiState.active_tab != CurrentTab.Settings;
     // in-out property <>
-    in-out property <CurrentTab> active-tab;
     out property <int> name;
     height: 30px;
     spacing: 4px;
@@ -37,7 +37,7 @@ export component ActionButtons inherits HorizontalLayout {
             text: "Scan";
             clicked => {
                 root.scanning = true;
-                root.scan_starting(active-tab);
+                root.scan_starting(GuiState.active_tab);
             }
         }
 

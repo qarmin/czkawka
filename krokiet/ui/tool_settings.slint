@@ -14,9 +14,15 @@ import {GuiState} from "gui_state.slint";
 import { Preview } from "preview.slint";
 import {PopupNewDirectories} from "popup_new_directories.slint";
 import { PopupSelect } from "popup_select.slint";
+
 export component ToolSettings inherits Rectangle {
     width: 300px;
     height: 300px;
-    in-out property <CurrentTab> active_tab;
-    background: red;
+    
+    if GuiState.active_tab == CurrentTab.SimilarImages: VerticalLayout {
+        Text {
+            text: "   Subsettings";
+            font-size: 15px;
+        }
+    }
 }

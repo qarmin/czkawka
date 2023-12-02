@@ -1,3 +1,5 @@
+import {CurrentTab} from "common.slint";
+
 // State to show 
 export global GuiState {
     in-out property <length> app_width;
@@ -11,4 +13,7 @@ export global GuiState {
 
     in-out property <bool> choosing_include_directories;
     in-out property <bool> visible_tool_settings;
+
+    in-out property <bool> available_subsettings: active_tab == CurrentTab.SimilarImages;
+    in-out property <CurrentTab> active_tab: CurrentTab.EmptyFiles;
 }

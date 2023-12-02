@@ -1,6 +1,6 @@
 use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
-use crate::{Callabler, CurrentTab, MainListModel, MainWindow};
+use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow};
 use log::info;
 
 pub fn connect_delete_button(app: &MainWindow) {
@@ -8,7 +8,7 @@ pub fn connect_delete_button(app: &MainWindow) {
     app.global::<Callabler>().on_delete_selected_items(move || {
         let app = a.upgrade().unwrap();
 
-        let active_tab = app.get_active_tab();
+        let active_tab = app.global::<GuiState>().get_active_tab();
 
         let model = match active_tab {
             CurrentTab::EmptyFolders => app.get_empty_folder_model(),

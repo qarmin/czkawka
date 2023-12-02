@@ -5,7 +5,6 @@ import {GuiState} from "gui_state.slint";
 
 component TabItem {
     in property <bool> scanning;
-    in-out property <CurrentTab> active-tab;
     in property <string> text;
     in property <CurrentTab> curr_tab;
     callback changed_current_tab();
@@ -16,10 +15,10 @@ component TabItem {
         background: touch-area.has-hover ? ColorPalette.tab-hovered-color : transparent;
         touch_area := TouchArea {
             clicked => {
-                if (root.active-tab == root.curr-tab) {
+                if (GuiState.active_tab == root.curr-tab) {
                     return;
                 }
-                root.active-tab = root.curr-tab;
+                GuiState.active_tab = root.curr-tab;
                 changed_current_tab();
             }
         }
@@ -32,7 +31,7 @@ component TabItem {
             empty_rectangle := Rectangle { }
 
             current_rectangle := Rectangle {
-                visible: (root.active-tab == root.curr-tab);
+                visible: (GuiState.active_tab == root.curr-tab);
                 border-radius: 2px;
                 width: 5px;
                 height: 0px;
@@ -53,17 +52,16 @@ component TabItem {
     }
 
     states [
-        is-selected when root.active-tab == root.curr-tab: {
+        is-selected when GuiState.active_tab == root.curr-tab: {
             current_rectangle.height: layout_rectangle.height;
         }
-        is-not-selected when root.active-tab != root.curr-tab: {
+        is-not-selected when GuiState.active_tab != root.curr-tab: {
             current_rectangle.height: 0px;
         }
     ]
 }
 
 export component LeftSidePanel {
-    in-out property <CurrentTab> active-tab;
     in-out property <bool> scanning;
     callback changed_current_tab();
     width: 120px;
@@ -85,7 +83,6 @@ export component LeftSidePanel {
                 height: parent.element-size;
                 scanning: scanning;
                 text: "Empty Folders";
-                active-tab <=> root.active-tab;
                 curr_tab: CurrentTab.EmptyFolders;
                 changed_current_tab() => {root.changed_current_tab();}
             }
@@ -94,7 +91,6 @@ export component LeftSidePanel {
                 height: parent.element-size;
                 scanning: scanning;
                 text: "Empty Files";
-                active-tab <=> root.active-tab;
                 curr_tab: CurrentTab.EmptyFiles;
                 changed_current_tab() => {root.changed_current_tab();}
             }
@@ -103,7 +99,6 @@ export component LeftSidePanel {
                 height: parent.element-size;
                 scanning: scanning;
                 text: "Similar Images";
-                active-tab <=> root.active-tab;
                 curr_tab: CurrentTab.SimilarImages;
                 changed_current_tab() => {root.changed_current_tab();}
             }
@@ -113,7 +108,7 @@ export component LeftSidePanel {
             HorizontalLayout {
                 alignment: start;
                 Button {
-                    enabled: active-tab != CurrentTab.Settings;
+                    enabled: GuiState.active_tab != CurrentTab.Settings && GuiState.available_subsettings;
                     min-width: 20px;
                     min-height: 20px;
                     max-height: self.width;
@@ -127,14 +122,14 @@ export component LeftSidePanel {
             HorizontalLayout {
                 alignment: end;
                 Button {
-                    enabled: active-tab != CurrentTab.Settings;
+                    enabled: GuiState.active_tab != CurrentTab.Settings;
                     min-width: 20px;
                     min-height: 20px;
                     max-height: self.width;
                     preferred-height: self.width;
                     icon: @image-url("../icons/settings.svg");
                     clicked => {
-                        active_tab = CurrentTab.Settings;
+                        GuiState.active_tab = CurrentTab.Settings;
                         root.changed_current_tab();
                     }
                 }
