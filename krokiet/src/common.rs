@@ -6,7 +6,7 @@ use std::path::PathBuf;
 //         .iter()
 //         .map(|x| {
 //             let mut element = StandardListViewItem::default();
-//             element.text = SharedString::from(x.to_string());
+//             element.text = x.into();
 //             element
 //         })
 //         .collect::<Vec<_>>();
@@ -17,7 +17,7 @@ pub fn create_string_standard_list_view_from_pathbuf(items: &[PathBuf]) -> Model
         .iter()
         .map(|x| {
             let mut element = StandardListViewItem::default();
-            element.text = SharedString::from(x.to_string_lossy().to_string());
+            element.text = x.to_string_lossy().to_string().into();
             element
         })
         .collect::<Vec<_>>();

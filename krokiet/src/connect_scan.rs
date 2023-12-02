@@ -26,7 +26,7 @@ pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressDat
         app.set_progress_datas(ProgressToSend {
             all_progress: 0,
             current_progress: -1,
-            step_name: SharedString::from(""),
+            step_name: "".into(),
         });
 
         let custom_settings = collect_settings(&app);

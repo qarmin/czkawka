@@ -2,7 +2,7 @@ use crate::{MainWindow, ProgressToSend};
 
 use crossbeam_channel::Receiver;
 use czkawka_core::common_dir_traversal::{ProgressData, ToolType};
-use slint::{ComponentHandle, SharedString};
+use slint::ComponentHandle;
 use std::thread;
 
 pub fn connect_progress_gathering(app: &MainWindow, progress_receiver: Receiver<ProgressData>) {
@@ -21,7 +21,7 @@ pub fn connect_progress_gathering(app: &MainWindow, progress_receiver: Receiver<
                     to_send = ProgressToSend {
                         all_progress,
                         current_progress,
-                        step_name: SharedString::from(format!("Checked {} files", progress_data.entries_checked)),
+                        step_name: format!("Checked {} files", progress_data.entries_checked).into(),
                     };
                 }
                 ToolType::EmptyFolders => {
@@ -29,7 +29,7 @@ pub fn connect_progress_gathering(app: &MainWindow, progress_receiver: Receiver<
                     to_send = ProgressToSend {
                         all_progress,
                         current_progress,
-                        step_name: SharedString::from(format!("Checked {} folders", progress_data.entries_checked)),
+                        step_name: format!("Checked {} folders", progress_data.entries_checked).into(),
                     };
                 }
                 ToolType::SimilarImages => {
@@ -55,7 +55,7 @@ pub fn connect_progress_gathering(app: &MainWindow, progress_receiver: Receiver<
                     to_send = ProgressToSend {
                         all_progress,
                         current_progress,
-                        step_name: SharedString::from(step_name),
+                        step_name: step_name.into(),
                     };
                 }
                 _ => {

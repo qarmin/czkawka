@@ -24,7 +24,7 @@ fn connect_add_manual_directories(app: &MainWindow) {
             let mut included_model = included_model.iter().collect::<Vec<_>>();
             included_model.extend(non_empty_lines.iter().map(|x| {
                 let mut element = slint::StandardListViewItem::default();
-                element.text = slint::SharedString::from((*x).to_string());
+                element.text = (*x).into();
                 element
             }));
             included_model.sort_by_cached_key(|x| x.text.to_string());
@@ -35,7 +35,7 @@ fn connect_add_manual_directories(app: &MainWindow) {
             let mut excluded_model = excluded_model.iter().collect::<Vec<_>>();
             excluded_model.extend(non_empty_lines.iter().map(|x| {
                 let mut element = slint::StandardListViewItem::default();
-                element.text = slint::SharedString::from((*x).to_string());
+                element.text = (*x).into();
                 element
             }));
             excluded_model.sort_by_cached_key(|x| x.text.to_string());
@@ -106,7 +106,7 @@ fn connect_add_directories(app: &MainWindow) {
             .iter()
             .map(|x| {
                 let mut element = slint::StandardListViewItem::default();
-                element.text = slint::SharedString::from(x.to_string());
+                element.text = x.into();
                 element
             })
             .collect::<Vec<_>>();
