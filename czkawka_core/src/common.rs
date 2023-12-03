@@ -21,8 +21,9 @@ use imagepipe::{ImageSource, Pipeline};
 use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
 #[cfg(feature = "libraw")]
 use libraw::Processor;
-use log::{debug, info, warn, LevelFilter, Record};
+use log::{debug, error, info, warn, LevelFilter, Record};
 use rawloader::RawLoader;
+use symphonia::core::conv::IntoSample;
 
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
@@ -38,6 +39,11 @@ use crate::CZKAWKA_VERSION;
 static NUMBER_OF_THREADS: state::InitCell<usize> = state::InitCell::new();
 pub const DEFAULT_THREAD_SIZE: usize = 8 * 1024 * 1024; // 8 MB
 pub const DEFAULT_WORKER_THREAD_SIZE: usize = 4 * 1024 * 1024; // 4 MB
+
+#[cfg(not(target_family = "windows"))]
+pub const CHARACTER: char = '/';
+#[cfg(target_family = "windows")]
+pub const CHARACTER: char = '\\';
 
 pub fn get_number_of_threads() -> usize {
     let data = NUMBER_OF_THREADS.get();
@@ -145,6 +151,46 @@ pub const LOOP_DURATION: u32 = 20; //ms
 pub const SEND_PROGRESS_DATA_TIME_BETWEEN: u32 = 200; //ms
 
 pub struct Common();
+
+pub fn remove_folder_if_contains_only_empty_folders(path: impl AsRef<Path>) -> bool {
+    let path = path.as_ref();
+    if !path.is_dir() {
+        error!("Trying to remove folder which is not a directory");
+        return false;
+    }
+
+    let mut entries_to_check = Vec::new();
+    let Ok(initial_entry) = path.read_dir() else {
+        return false;
+    };
+    for entry in initial_entry {
+        if let Ok(entry) = entry {
+            entries_to_check.push(entry);
+        } else {
+            return false;
+        }
+    }
+    loop {
+        let Some(entry) = entries_to_check.pop() else {
+            break;
+        };
+        if !entry.path().is_dir() {
+            return false;
+        }
+        let Ok(internal_read_dir) = entry.path().read_dir() else {
+            return false;
+        };
+        for internal_elements in internal_read_dir {
+            if let Ok(internal_element) = internal_elements {
+                entries_to_check.push(internal_element);
+            } else {
+                return false;
+            }
+        }
+    }
+
+    fs::remove_dir_all(path).is_ok()
+}
 
 pub fn open_cache_folder(cache_file_name: &str, save_to_cache: bool, use_json: bool, warnings: &mut Vec<String>) -> Option<((Option<File>, PathBuf), (Option<File>, PathBuf))> {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
@@ -573,9 +619,36 @@ pub fn send_info_and_wait_for_ending_all_threads(progress_thread_run: &Arc<Atomi
 
 #[cfg(test)]
 mod test {
-    use std::path::PathBuf;
+    use std::fs;
+    use std::io::Write;
+    use std::path::{Path, PathBuf};
+    use tempfile::tempdir;
 
-    use crate::common::Common;
+    use crate::common::{remove_folder_if_contains_only_empty_folders, Common};
+
+    #[test]
+    fn test_remove_folder_if_contains_only_empty_folders() {
+        let dir = tempdir().unwrap();
+        let sub_dir = dir.path().join("sub_dir");
+        fs::create_dir(&sub_dir).unwrap();
+
+        // Test with empty directory
+        assert!(remove_folder_if_contains_only_empty_folders(&sub_dir));
+        assert!(!Path::new(&sub_dir).exists());
+
+        // Test with directory containing an empty directory
+        fs::create_dir(&sub_dir).unwrap();
+        fs::create_dir(sub_dir.join("empty_sub_dir")).unwrap();
+        assert!(remove_folder_if_contains_only_empty_folders(&sub_dir));
+        assert!(!Path::new(&sub_dir).exists());
+
+        // Test with directory containing a file
+        fs::create_dir(&sub_dir).unwrap();
+        let mut file = fs::File::create(sub_dir.join("file.txt")).unwrap();
+        writeln!(file, "Hello, world!").unwrap();
+        assert!(!remove_folder_if_contains_only_empty_folders(&sub_dir));
+        assert!(Path::new(&sub_dir).exists());
+    }
 
     #[test]
     fn test_regex() {

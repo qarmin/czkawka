@@ -78,6 +78,7 @@ export component ActionButtons inherits HorizontalLayout {
     }
 
     select_button := Button {
+        visible: false;
         height: parent.height;
         enabled: !scanning && lists_enabled;
         text: "Select";

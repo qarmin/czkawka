@@ -58,7 +58,7 @@ fn main() {
     let (progress_sender, progress_receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
     let (stop_sender, stop_receiver): (Sender<()>, Receiver<()>) = unbounded();
 
-    to_remove_debug(&app);
+    // to_remove_debug(&app);
 
     set_initial_gui_infos(&app);
 
@@ -80,12 +80,12 @@ fn main() {
     save_all_settings_to_file(&app);
 }
 
-// TODO remove this after debugging - or leave commented
-pub fn to_remove_debug(app: &MainWindow) {
-    app.set_empty_folder_model(to_remove_create_without_header("@@").into());
-    app.set_empty_files_model(to_remove_create_without_header("%%").into());
-    app.set_similar_images_model(to_remove_create_with_header().into());
-}
+// // TODO remove this after debugging - or leave commented
+// pub fn to_remove_debug(app: &MainWindow) {
+//     app.set_empty_folder_model(to_remove_create_without_header("@@").into());
+//     app.set_empty_files_model(to_remove_create_without_header("%%").into());
+//     app.set_similar_images_model(to_remove_create_with_header().into());
+// }
 
 fn to_remove_create_with_header() -> Rc<VecModel<MainListModel>> {
     let header_row_data: Rc<VecModel<MainListModel>> = Rc::new(VecModel::default());

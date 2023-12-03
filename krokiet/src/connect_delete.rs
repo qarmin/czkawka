@@ -1,7 +1,10 @@
 use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
+use crate::common::{get_is_header_mode, get_name_idx, get_path_idx};
 use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow};
+use czkawka_core::common::{remove_folder_if_contains_only_empty_folders, CHARACTER};
 use log::info;
+use rayon::prelude::*;
 
 pub fn connect_delete_button(app: &MainWindow) {
     let a = app.as_weak();
@@ -17,7 +20,7 @@ pub fn connect_delete_button(app: &MainWindow) {
             CurrentTab::Settings => panic!("Button should be disabled"),
         };
 
-        let new_model = handle_delete_items(&model, active_tab == CurrentTab::EmptyFolders);
+        let new_model = handle_delete_items(&model, active_tab);
 
         if let Some(new_model) = new_model {
             match active_tab {
@@ -27,17 +30,19 @@ pub fn connect_delete_button(app: &MainWindow) {
                 CurrentTab::Settings => panic!("Button should be disabled"),
             }
         }
+
+        app.global::<GuiState>().set_preview_visible(false);
     });
 }
 
-fn handle_delete_items(items: &ModelRc<MainListModel>, delete_empty_folders: bool) -> Option<ModelRc<MainListModel>> {
-    let (entries_to_delete, mut entries_left) = filter_out_checked_items(items, false);
+fn handle_delete_items(items: &ModelRc<MainListModel>, active_tab: CurrentTab) -> Option<ModelRc<MainListModel>> {
+    let (entries_to_delete, mut entries_left) = filter_out_checked_items(items, get_is_header_mode(active_tab));
 
     if !entries_to_delete.is_empty() {
-        remove_selected_items(entries_to_delete, delete_empty_folders);
+        remove_selected_items(entries_to_delete, active_tab);
         deselect_all_items(&mut entries_left);
 
-        let r = ModelRc::new(VecModel::from(entries_left));
+        let r = ModelRc::new(VecModel::from(entries_left)); // TODO here maybe should also stay old model if entries cannot be removed
         return Some(r);
     }
     None
@@ -46,11 +51,30 @@ fn handle_delete_items(items: &ModelRc<MainListModel>, delete_empty_folders: boo
 // TODO delete in parallel items, consider to add progress bar
 // For empty folders double check if folders are really empty - this function probably should be run in thread
 // and at the end should be send signal to main thread to update model
-fn remove_selected_items(items: Vec<MainListModel>, _delete_empty_folders: bool) {
-    info!("Items to remove {}", items.len());
-    drop(items);
-    // drop(delete_empty_folders);
-    // items.into_iter().for_each(|_item| {});
+// TODO handle also situations where cannot delete file/folder
+fn remove_selected_items(items: Vec<MainListModel>, active_tab: CurrentTab) {
+    let path_idx = get_path_idx(active_tab);
+    let name_idx = get_name_idx(active_tab);
+    let items_to_remove = items
+        .iter()
+        .map(|item| {
+            let path = item.val.iter().nth(path_idx).unwrap();
+            let name = item.val.iter().nth(name_idx).unwrap();
+            format!("{}{}{}", path, CHARACTER, name)
+        })
+        .collect::<Vec<_>>();
+
+    info!("Removing items: {:?} {:?}", items_to_remove, active_tab);
+    // Iterate over empty folders and not delete them if they are not empty
+    if active_tab == CurrentTab::EmptyFolders {
+        items_to_remove.into_par_iter().for_each(|item| {
+            remove_folder_if_contains_only_empty_folders(item);
+        });
+    } else {
+        items_to_remove.into_par_iter().for_each(|item| {
+            let _ = std::fs::remove_file(item);
+        });
+    }
 }
 
 fn deselect_all_items(items: &mut [MainListModel]) {
