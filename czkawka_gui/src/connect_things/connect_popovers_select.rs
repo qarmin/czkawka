@@ -2,8 +2,6 @@ use gtk4::prelude::*;
 use gtk4::{ResponseType, TreeIter, Window};
 use regex::Regex;
 
-use czkawka_core::common::Common;
-
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::*;
@@ -441,22 +439,22 @@ fn popover_custom_select_unselect(
                         } else {
                             if check_name {
                                 if case_sensitive {
-                                    if Common::regex_check(&name_wildcard, &name) {
+                                    if regex_check(&name_wildcard, &name) {
                                         need_to_change_thing = true;
                                     }
                                 } else {
-                                    if Common::regex_check(&name_wildcard.to_lowercase(), name.to_lowercase()) {
+                                    if regex_check(&name_wildcard.to_lowercase(), name.to_lowercase()) {
                                         need_to_change_thing = true;
                                     }
                                 }
                             }
                             if check_path {
                                 if case_sensitive {
-                                    if Common::regex_check(&path_wildcard, &path) {
+                                    if regex_check(&path_wildcard, &path) {
                                         need_to_change_thing = true;
                                     }
                                 } else {
-                                    if Common::regex_check(&path_wildcard.to_lowercase(), path.to_lowercase()) {
+                                    if regex_check(&path_wildcard.to_lowercase(), path.to_lowercase()) {
                                         need_to_change_thing = true;
                                     }
                                 }

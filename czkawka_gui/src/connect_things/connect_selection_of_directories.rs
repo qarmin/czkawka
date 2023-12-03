@@ -6,7 +6,7 @@ use gtk4::prelude::*;
 use gtk4::{DropTarget, FileChooserNative, Notebook, Orientation, ResponseType, TreeView, Window};
 
 #[cfg(target_family = "windows")]
-use czkawka_core::common::Common;
+use czkawka_core::common::normalize_windows_path;
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
@@ -204,7 +204,7 @@ fn add_manually_directories(window_main: &Window, tree_view: &TreeView, excluded
             for text in entry.text().split(';') {
                 let mut text = text.trim().to_string();
                 #[cfg(target_family = "windows")]
-                let mut text = Common::normalize_windows_path(text).to_string_lossy().to_string();
+                let mut text = normalize_windows_path(text).to_string_lossy().to_string();
 
                 remove_ending_slashes(&mut text);
 

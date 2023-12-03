@@ -982,7 +982,9 @@ impl PrintResults for DuplicateFinder {
         writeln!(
             writer,
             "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
-            self.common_data.directories.included_directories, self.common_data.directories.excluded_directories, self.common_data.excluded_items.items
+            self.common_data.directories.included_directories,
+            self.common_data.directories.excluded_directories,
+            self.common_data.excluded_items.get_excluded_items()
         )?;
 
         match self.check_method {

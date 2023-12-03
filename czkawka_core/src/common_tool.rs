@@ -173,10 +173,8 @@ pub trait CommonData {
     }
 
     fn set_excluded_items(&mut self, excluded_items: Vec<String>) {
-        let (messages, warnings, errors) = self.get_cd_mut().excluded_items.set_excluded_items(excluded_items);
-        self.get_cd_mut().text_messages.messages.extend(messages);
-        self.get_cd_mut().text_messages.warnings.extend(warnings);
-        self.get_cd_mut().text_messages.errors.extend(errors);
+        let messages = self.get_cd_mut().excluded_items.set_excluded_items(excluded_items);
+        self.get_cd_mut().text_messages.extend_with_another_messages(messages);
     }
 
     fn optimize_dirs_before_start(&mut self) {

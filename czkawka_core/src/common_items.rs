@@ -1,6 +1,7 @@
+use crate::common::regex_check;
 use std::path::Path;
 
-use crate::common::Common;
+use crate::common_messages::Messages;
 
 #[cfg(target_family = "unix")]
 pub const DEFAULT_EXCLUDED_DIRECTORIES: &[&str] = &["/proc", "/dev", "/sys", "/run", "/snap"];
@@ -14,7 +15,15 @@ pub const DEFAULT_EXCLUDED_ITEMS: &str = "*\\.git\\*,*\\node_modules\\*,*\\lost+
 
 #[derive(Debug, Clone, Default)]
 pub struct ExcludedItems {
-    pub items: Vec<String>,
+    expressions: Vec<String>,
+    expression_splits: Vec<Vec<String>>,
+    connected_expressions: Vec<SingleExcludedItem>,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct SingleExcludedItem {
+    pub expression: String,
+    pub expression_splits: Vec<String>,
 }
 
 impl ExcludedItems {
@@ -22,12 +31,16 @@ impl ExcludedItems {
         Default::default()
     }
 
-    pub fn set_excluded_items(&mut self, excluded_items: Vec<String>) -> (Vec<String>, Vec<String>, Vec<String>) {
-        let messages: Vec<String> = Vec::new();
+    pub fn new_from(excluded_items: Vec<String>) -> Self {
+        let mut s = Self::new();
+        s.set_excluded_items(excluded_items);
+        s
+    }
+
+    pub fn set_excluded_items(&mut self, excluded_items: Vec<String>) -> Messages {
         let mut warnings: Vec<String> = Vec::new();
-        let errors: Vec<String> = Vec::new();
         if excluded_items.is_empty() {
-            return (messages, warnings, errors);
+            return Messages::new();
         }
 
         let expressions: Vec<String> = excluded_items;
@@ -54,19 +67,38 @@ impl ExcludedItems {
 
             checked_expressions.push(expression);
         }
-        self.items = checked_expressions;
-        (messages, warnings, errors)
+
+        for checked_expression in &checked_expressions {
+            let item = new_excluded_item(checked_expression);
+            self.expressions.push(item.expression.clone());
+            self.expression_splits.push(item.expression_splits.clone());
+            self.connected_expressions.push(item);
+        }
+        Messages {
+            messages: vec![],
+            warnings,
+            errors: vec![],
+        }
     }
 
+    pub fn get_excluded_items(&self) -> &Vec<String> {
+        &self.expressions
+    }
     pub fn is_excluded(&self, path: impl AsRef<Path>) -> bool {
         #[cfg(target_family = "windows")]
-        let path = Common::normalize_windows_path(path);
+        let path = normalize_windows_path(path);
 
-        for expression in &self.items {
-            if Common::regex_check(expression, &path) {
+        for expression in &self.connected_expressions {
+            if regex_check(expression, &path) {
                 return true;
             }
         }
         false
     }
+}
+
+pub fn new_excluded_item(expression: &str) -> SingleExcludedItem {
+    let expression = expression.trim().to_string();
+    let expression_splits: Vec<String> = expression.split('*').filter_map(|e| if e.is_empty() { None } else { Some(e.to_string()) }).collect();
+    SingleExcludedItem { expression, expression_splits }
 }

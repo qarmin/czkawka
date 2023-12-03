@@ -194,7 +194,9 @@ impl PrintResults for Temporary {
         writeln!(
             writer,
             "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
-            self.common_data.directories.included_directories, self.common_data.directories.excluded_directories, self.common_data.excluded_items.items
+            self.common_data.directories.included_directories,
+            self.common_data.directories.excluded_directories,
+            self.common_data.excluded_items.get_excluded_items()
         )?;
         writeln!(writer, "Found {} temporary files.\n", self.information.number_of_temporary_files)?;
 
