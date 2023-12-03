@@ -363,7 +363,7 @@ pub fn regex_check(expression_item: &SingleExcludedItem, directory: impl AsRef<P
     let mut last_split_point = directory_name.find(&expression_item.expression_splits[0]).unwrap();
     let mut current_index: usize = 0;
     let mut found_index: usize;
-    for spl in expression_item.expression_splits[1..].iter() {
+    for spl in &expression_item.expression_splits[1..] {
         found_index = match directory_name[current_index..].find(spl) {
             Some(t) => t,
             None => return false,

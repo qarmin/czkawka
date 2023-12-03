@@ -19,6 +19,7 @@
 - Speedup checking for wildcards and fix invalid recognizing long excluded items - [#1152](https://github.com/qarmin/czkawka/pull/1152)
 - Even 10x speedup when searching for empty folders - [#1152](https://github.com/qarmin/czkawka/pull/1152)
 - Collecting files for scan can be a lot of faster due lazy file metadata gathering - [#1152](https://github.com/qarmin/czkawka/pull/1152)
+- Fixed recognizing not accessible folders as non-empty - [#1152](https://github.com/qarmin/czkawka/pull/1152)
 
 ## Version 6.1.0 - 15.10.2023r
 - BREAKING CHANGE - Changed cache saving method, deduplicated, optimized and simplified procedure(all files needs to be hashed again) - [#1072](https://github.com/qarmin/czkawka/pull/1072), [#1086](https://github.com/qarmin/czkawka/pull/1086)
