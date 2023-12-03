@@ -1,0 +1,47 @@
+export global Settings {
+    in-out property <int> settings_preset_idx: 0;
+    in-out property <[string]> settings_presets: ["Preset 1", "Preset 2"];
+
+    in-out property <[StandardListViewItem]> included_directories: [{text: "ABCD"}, {text: "BCDA"}];
+    in-out property <[StandardListViewItem]> excluded_directories: [{text: "ABCD"}, {text: "BCDA"}, {text: "CDFFF"}];
+
+    // Settings
+    in-out property <string> excluded_items: "Excluded items";
+    in-out property <string> allowed_extensions: "Allowed extensions";
+    in-out property <string> minimum_file_size: 0;
+    in-out property <string> maximum_file_size: 0;
+    in-out property <bool> recursive_search: true;
+    in-out property <bool> use_cache: false;
+    in-out property <bool> save_as_json: false;
+    in-out property <bool> move_to_trash: false;
+    in-out property <bool> ignore_other_filesystems: false;
+    in-out property <float> thread_number: 4;
+
+    in-out property <bool> duplicate_image_preview;
+    in-out property <bool> duplicate_hide_hard_links;
+    in-out property <bool> duplicate_use_prehash;
+    in-out property <string> duplicate_minimal_hash_cache_size;
+    in-out property <string> duplicate_minimal_prehash_cache_size;
+    in-out property <bool> duplicate_delete_outdated_entries;
+    
+    in-out property <bool> similar_images_show_image_preview;
+    in-out property <bool> similar_images_delete_outdated_entries;
+
+    // in-out property <int> similar_videos_show_video_preview; // TODO - maybe someday
+    in-out property <bool> similar_videos_delete_outdated_entries;
+
+    in-out property <bool> similar_music_delete_outdated_entries;
+
+
+    // Allowed subsettings
+    // Duplicate
+    in-out property <[string]> similar_images_sub_available_hash_size: ["8", "16", "32", "64"];
+    in-out property <int> similar_images_sub_hash_size_index: 0;
+    in-out property <[string]> similar_images_sub_available_resize_algorithm: ["Lanczos3", "Nearest", "Triangle", "Gaussian", "CatmullRom"];
+    in-out property <int> similar_images_sub_resize_algorithm_index: 0;
+    in-out property <[string]> similar_images_sub_available_hash_type: ["Gradient", "Mean", "VertGradient", "BlockHash", "DoubleGradient"];
+    in-out property <int> similar_images_sub_hash_type_index: 0;
+    in-out property <float> similar_images_sub_max_similarity: 40;
+    in-out property <float> similar_images_sub_current_similarity: 20;
+    in-out property <bool> similar_images_sub_ignore_same_size;
+}

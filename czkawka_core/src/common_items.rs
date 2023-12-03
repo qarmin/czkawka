@@ -3,6 +3,11 @@ use std::path::Path;
 use crate::common::Common;
 
 #[cfg(target_family = "unix")]
+pub const DEFAULT_EXCLUDED_DIRECTORIES: &[&str] = &["/proc", "/dev", "/sys", "/run", "/snap"];
+#[cfg(not(target_family = "unix"))]
+pub const DEFAULT_EXCLUDED_DIRECTORIES: &[&str] = &["C:\\Windows"];
+
+#[cfg(target_family = "unix")]
 pub const DEFAULT_EXCLUDED_ITEMS: &str = "*/.git/*,*/node_modules/*,*/lost+found/*,*/Trash/*,*/.Trash-*/*,*/snap/*,/home/*/.cache/*";
 #[cfg(not(target_family = "unix"))]
 pub const DEFAULT_EXCLUDED_ITEMS: &str = "*\\.git\\*,*\\node_modules\\*,*\\lost+found\\*,*:\\windows\\*,*:\\$RECYCLE.BIN\\*,*:\\$SysReset\\*,*:\\System Volume Information\\*,*:\\OneDriveTemp\\*,*:\\hiberfil.sys,*:\\pagefile.sys,*:\\swapfile.sys";

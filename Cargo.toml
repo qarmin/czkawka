@@ -3,10 +3,10 @@ members = [
     "czkawka_core",
     "czkawka_cli",
     "czkawka_gui",
+    "krokiet"
 ]
 exclude = [
     "ci_tester",
-    "czkawka_slint_gui"
 ]
 resolver = "2"
 

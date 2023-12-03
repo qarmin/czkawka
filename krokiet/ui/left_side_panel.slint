@@ -1,0 +1,139 @@
+import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox} from "std-widgets.slint";
+import {CurrentTab} from "common.slint";
+import {ColorPalette} from "color_palette.slint";
+import {GuiState} from "gui_state.slint";
+
+component TabItem {
+    in property <bool> scanning;
+    in property <string> text;
+    in property <CurrentTab> curr_tab;
+    callback changed_current_tab();
+
+    Rectangle {
+        width: parent.width;
+        horizontal-stretch: 1.0;
+        background: touch-area.has-hover ? ColorPalette.tab-hovered-color : transparent;
+        touch_area := TouchArea {
+            clicked => {
+                if (GuiState.active_tab == root.curr-tab) {
+                    return;
+                }
+                GuiState.active_tab = root.curr-tab;
+                changed_current_tab();
+            }
+        }
+    }
+
+    HorizontalLayout {
+        width: parent.width;
+        alignment: LayoutAlignment.end;
+        layout_rectangle := VerticalLayout {
+            empty_rectangle := Rectangle { }
+
+            current_rectangle := Rectangle {
+                visible: (GuiState.active_tab == root.curr-tab);
+                border-radius: 2px;
+                width: 5px;
+                height: 0px;
+                background: ColorPalette.tab_selected_color;
+                animate height{
+                    duration: 150ms;
+                easing: ease;
+                }
+            }
+            empty_rectangle2 := Rectangle { }
+        }
+    }
+
+    Text {
+        text: root.text;
+        width: parent.width;
+        horizontal-alignment: center;
+    }
+
+    states [
+        is-selected when GuiState.active_tab == root.curr-tab: {
+            current_rectangle.height: layout_rectangle.height;
+        }
+        is-not-selected when GuiState.active_tab != root.curr-tab: {
+            current_rectangle.height: 0px;
+        }
+    ]
+}
+
+export component LeftSidePanel {
+    in-out property <bool> scanning;
+    callback changed_current_tab();
+    width: 120px;
+    VerticalLayout {
+        spacing: 20px;
+        Rectangle {
+            height: 100px;
+            Image {
+                width: root.width;
+                source: @image-url("../icons/logo.png");
+            }
+        }
+
+        VerticalLayout {
+            // spacing: 3px;
+            alignment: center;
+            out property <length> element-size: 25px;
+            TabItem {
+                height: parent.element-size;
+                scanning: scanning;
+                text: "Empty Folders";
+                curr_tab: CurrentTab.EmptyFolders;
+                changed_current_tab() => {root.changed_current_tab();}
+            }
+
+            TabItem {
+                height: parent.element-size;
+                scanning: scanning;
+                text: "Empty Files";
+                curr_tab: CurrentTab.EmptyFiles;
+                changed_current_tab() => {root.changed_current_tab();}
+            }
+
+            TabItem {
+                height: parent.element-size;
+                scanning: scanning;
+                text: "Similar Images";
+                curr_tab: CurrentTab.SimilarImages;
+                changed_current_tab() => {root.changed_current_tab();}
+            }
+        }
+
+        Rectangle {
+            HorizontalLayout {
+                alignment: start;
+                Button {
+                    enabled: GuiState.active_tab != CurrentTab.Settings && GuiState.available_subsettings;
+                    min-width: 20px;
+                    min-height: 20px;
+                    max-height: self.width;
+                    preferred-height: self.width;
+                    icon: @image-url("../icons/settings.svg");
+                    clicked => {
+                        GuiState.visible_tool_settings = !GuiState.visible-tool-settings;
+                    }
+                }
+            }
+            HorizontalLayout {
+                alignment: end;
+                Button {
+                    enabled: GuiState.active_tab != CurrentTab.Settings;
+                    min-width: 20px;
+                    min-height: 20px;
+                    max-height: self.width;
+                    preferred-height: self.width;
+                    icon: @image-url("../icons/settings.svg");
+                    clicked => {
+                        GuiState.active_tab = CurrentTab.Settings;
+                        root.changed_current_tab();
+                    }
+                }
+            }
+        }
+    }
+}

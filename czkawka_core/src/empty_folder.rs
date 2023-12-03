@@ -3,9 +3,8 @@ use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
 
-use crossbeam_channel::Receiver;
+use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
-use futures::channel::mpsc::UnboundedSender;
 use log::debug;
 use rayon::prelude::*;
 
@@ -42,7 +41,7 @@ impl EmptyFolder {
     }
 
     #[fun_time(message = "find_empty_folders", level = "info")]
-    pub fn find_empty_folders(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
+    pub fn find_empty_folders(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) {
         self.optimize_dirs_before_start();
         if !self.check_for_empty_folders(stop_receiver, progress_sender) {
             self.common_data.stopped_search = true;
@@ -74,7 +73,7 @@ impl EmptyFolder {
     }
 
     #[fun_time(message = "check_for_empty_folders", level = "debug")]
-    fn check_for_empty_folders(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+    fn check_for_empty_folders(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         let result = DirTraversalBuilder::new()
             .root_dirs(self.common_data.directories.included_directories.clone())
             .group_by(|_fe| ())
@@ -84,6 +83,7 @@ impl EmptyFolder {
             .excluded_items(self.common_data.excluded_items.clone())
             .collect(Collect::EmptyFolders)
             .max_stage(0)
+            .tool_type(self.common_data.tool_type)
             .build()
             .run();
 

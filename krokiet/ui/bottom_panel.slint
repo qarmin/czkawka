@@ -1,0 +1,126 @@
+
+import {Button, StandardListView, VerticalBox, ScrollView, TextEdit} from "std-widgets.slint";
+import {Settings} from "settings.slint";
+import {BottomPanelVisibility} from "common.slint";
+import {Callabler} from "callabler.slint";
+import {GuiState} from "gui_state.slint";
+
+component DirectoriesPanel inherits HorizontalLayout {
+    callback folder_choose_requested(bool);
+    callback show_manual_add_dialog(bool);
+    // Included directories
+    VerticalLayout {
+        horizontal-stretch: 0.0;
+        spacing: 5px;
+        Button {
+            text: "Add";
+            clicked => {
+                folder_choose_requested(true);
+            }
+        }
+
+        Button {
+            text: "Remove";
+            clicked => {
+                Callabler.remove_item_directories(true, included-list.current-item);
+            }
+        }
+
+        Button {
+            text: "Manual Add";
+            clicked => {
+                show_manual_add_dialog(true);
+            }
+        }
+
+        Rectangle {
+            vertical-stretch: 1.0;
+        }
+    }
+
+    VerticalLayout {
+        horizontal-stretch: 1.0;
+        Rectangle {
+            Text {
+                text: "Included Directories";
+            }
+        }
+
+        included_list := StandardListView {
+            model: Settings.included-directories;
+        }
+    }
+
+    // Excluded directories 
+    VerticalLayout {
+        horizontal-stretch: 0.0;
+        spacing: 5px;
+        Button {
+            text: "Add";
+            clicked => {
+                folder_choose_requested(false);
+            }
+        }
+
+        Button {
+            text: "Remove";
+            clicked => {
+                Callabler.remove_item_directories(false, excluded-list.current-item);
+            }
+        }
+
+        Button {
+            text: "Manual Add";
+            clicked => {
+                show_manual_add_dialog(false);
+            }
+        }
+
+        Rectangle {
+            vertical-stretch: 1.0;
+        }
+    }
+
+    VerticalLayout {
+        horizontal-stretch: 1.0;
+        Rectangle {
+            Text {
+                text: "Excluded Directories";
+            }
+        }
+
+        excluded_list := StandardListView {
+            model: Settings.excluded-directories;
+        }
+    }
+}
+
+component TextErrorsPanel inherits TextEdit {
+    height: 20px;
+    read-only: true;
+    wrap: TextWrap.no-wrap;
+    text <=> GuiState.info_text;
+}
+
+export component BottomPanel {
+    in-out property <BottomPanelVisibility> bottom_panel_visibility: BottomPanelVisibility.Directories;
+    callback folder_choose_requested(bool);
+    callback show_manual_add_dialog(bool);
+    min-height: bottom-panel-visibility == BottomPanelVisibility.NotVisible ? 0px : 150px;
+    min-width: bottom-panel-visibility == BottomPanelVisibility.NotVisible ? 0px : 400px;
+    if bottom-panel-visibility == BottomPanelVisibility.Directories: DirectoriesPanel {
+        width: parent.width;
+        height: parent.height;
+        folder_choose_requested(included-directories) => {
+            root.folder_choose_requested(included-directories)
+        }
+        show_manual_add_dialog(included-directories) => {
+            root.show_manual_add_dialog(included-directories)
+        }
+    }
+
+    if bottom-panel-visibility == BottomPanelVisibility.TextErrors: TextErrorsPanel {
+        width: parent.width;
+        height: parent.height;
+    }
+}

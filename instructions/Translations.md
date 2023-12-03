@@ -8,6 +8,10 @@ Main/Default language is English, but also Polish is officially supported.
 
 Translating is mostly done by site - https://crowdin.com/project/czkawka
 
+If you want to translate Czkawka to your language, you can do it in this site.
+
+Next chapters are only for internal use, so just use crowdin page.
+
 ## How to translate Czkawka?
 
 Base translatable strings are placed under `i18n/en/czkawka_gui.ftl` file.  

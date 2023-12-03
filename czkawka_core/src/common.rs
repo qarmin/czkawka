@@ -1,24 +1,29 @@
+#![allow(unused_imports)]
+// I don't wanna fight with unused imports in this file, so simply ignore it to avoid too much complexity
 use std::ffi::OsString;
 use std::fs::{DirEntry, File, OpenOptions};
-use std::io::BufReader;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::thread::{sleep, JoinHandle};
-use std::time::{Duration, SystemTime};
+use std::time::{Duration, Instant, SystemTime};
 use std::{fs, thread};
 
 #[cfg(feature = "heif")]
 use anyhow::Result;
+use crossbeam_channel::Sender;
 use directories_next::ProjectDirs;
 use fun_time::fun_time;
-use futures::channel::mpsc::UnboundedSender;
 use handsome_logger::{ColorChoice, ConfigBuilder, TerminalMode};
 use image::{DynamicImage, ImageBuffer, Rgb};
 use imagepipe::{ImageSource, Pipeline};
 #[cfg(feature = "heif")]
 use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
-use log::{info, LevelFilter, Record};
+#[cfg(feature = "libraw")]
+use libraw::Processor;
+use log::{debug, error, info, warn, LevelFilter, Record};
+use rawloader::RawLoader;
+use symphonia::core::conv::IntoSample;
 
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
@@ -32,6 +37,13 @@ use crate::duplicate::make_hard_link;
 use crate::CZKAWKA_VERSION;
 
 static NUMBER_OF_THREADS: state::InitCell<usize> = state::InitCell::new();
+pub const DEFAULT_THREAD_SIZE: usize = 8 * 1024 * 1024; // 8 MB
+pub const DEFAULT_WORKER_THREAD_SIZE: usize = 4 * 1024 * 1024; // 4 MB
+
+#[cfg(not(target_family = "windows"))]
+pub const CHARACTER: char = '/';
+#[cfg(target_family = "windows")]
+pub const CHARACTER: char = '\\';
 
 pub fn get_number_of_threads() -> usize {
     let data = NUMBER_OF_THREADS.get();
@@ -44,7 +56,7 @@ pub fn get_number_of_threads() -> usize {
 
 fn filtering_messages(record: &Record) -> bool {
     if let Some(module_path) = record.module_path() {
-        module_path.starts_with("czkawka")
+        module_path.starts_with("czkawka") || module_path.starts_with("krokiet")
     } else {
         true
     }
@@ -57,12 +69,30 @@ pub fn setup_logger(disabled_printing: bool) {
     handsome_logger::TermLogger::init(config, TerminalMode::Mixed, ColorChoice::Always).unwrap();
 }
 
+pub fn get_available_threads() -> usize {
+    thread::available_parallelism().map(std::num::NonZeroUsize::get).unwrap_or(1)
+}
+
 pub fn print_version_mode() {
+    let rust_version = match rustc_version::version_meta() {
+        Ok(meta) => meta.semver.to_string(),
+        Err(_) => "<unknown>".to_string(),
+    };
+    let debug_release = if cfg!(debug_assertions) { "debug" } else { "release" };
+
+    let processors = get_available_threads();
+
+    let info = os_info::get();
     info!(
-        "Czkawka version: {}, was compiled with {} mode",
-        CZKAWKA_VERSION,
-        if cfg!(debug_assertions) { "debug" } else { "release" }
+        "App version: {CZKAWKA_VERSION}, {debug_release} mode, rust {rust_version}, os {} {} [{} {}], {processors} cpu/threads",
+        info.os_type(),
+        info.version(),
+        std::env::consts::ARCH,
+        info.bitness(),
     );
+    if cfg!(debug_assertions) {
+        warn!("You are running debug version of app which is a lot of slower than release version.");
+    }
 }
 
 pub fn set_default_number_of_threads() {
@@ -76,7 +106,18 @@ pub fn get_default_number_of_threads() -> usize {
 pub fn set_number_of_threads(thread_number: usize) {
     NUMBER_OF_THREADS.set(thread_number);
 
-    rayon::ThreadPoolBuilder::new().num_threads(get_number_of_threads()).build_global().unwrap();
+    let additional_message = if thread_number == 0 {
+        " (0 - means that all available threads will be used)"
+    } else {
+        ""
+    };
+    debug!("Number of threads set to {thread_number}{additional_message}");
+
+    rayon::ThreadPoolBuilder::new()
+        .num_threads(get_number_of_threads())
+        .stack_size(DEFAULT_WORKER_THREAD_SIZE)
+        .build_global()
+        .unwrap();
 }
 
 pub const RAW_IMAGE_EXTENSIONS: &[&str] = &[
@@ -110,6 +151,46 @@ pub const LOOP_DURATION: u32 = 20; //ms
 pub const SEND_PROGRESS_DATA_TIME_BETWEEN: u32 = 200; //ms
 
 pub struct Common();
+
+pub fn remove_folder_if_contains_only_empty_folders(path: impl AsRef<Path>) -> bool {
+    let path = path.as_ref();
+    if !path.is_dir() {
+        error!("Trying to remove folder which is not a directory");
+        return false;
+    }
+
+    let mut entries_to_check = Vec::new();
+    let Ok(initial_entry) = path.read_dir() else {
+        return false;
+    };
+    for entry in initial_entry {
+        if let Ok(entry) = entry {
+            entries_to_check.push(entry);
+        } else {
+            return false;
+        }
+    }
+    loop {
+        let Some(entry) = entries_to_check.pop() else {
+            break;
+        };
+        if !entry.path().is_dir() {
+            return false;
+        }
+        let Ok(internal_read_dir) = entry.path().read_dir() else {
+            return false;
+        };
+        for internal_elements in internal_read_dir {
+            if let Ok(internal_element) = internal_elements {
+                entries_to_check.push(internal_element);
+            } else {
+                return false;
+            }
+        }
+    }
+
+    fs::remove_dir_all(path).is_ok()
+}
 
 pub fn open_cache_folder(cache_file_name: &str, save_to_cache: bool, use_json: bool, warnings: &mut Vec<String>) -> Option<((Option<File>, PathBuf), (Option<File>, PathBuf))> {
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
@@ -152,10 +233,7 @@ pub fn open_cache_folder(cache_file_name: &str, save_to_cache: bool, use_json: b
                 file_handler_default = Some(t);
             } else {
                 if use_json {
-                    file_handler_json = Some(match OpenOptions::new().read(true).open(&cache_file_json) {
-                        Ok(t) => t,
-                        Err(_) => return None,
-                    });
+                    file_handler_json = Some(OpenOptions::new().read(true).open(&cache_file_json).ok()?);
                 } else {
                     // messages.push(format!("Cannot find or open cache file {}", cache_file.display())); // No error or warning
                     return None;
@@ -183,45 +261,64 @@ pub fn get_dynamic_image_from_heic(path: &str) -> Result<DynamicImage> {
         .ok_or_else(|| anyhow::anyhow!("Failed to create image buffer"))
 }
 
-pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path> + std::fmt::Debug) -> Option<DynamicImage> {
-    let file_handler = match OpenOptions::new().read(true).open(&path) {
-        Ok(t) => t,
-        Err(_e) => {
-            return None;
-        }
-    };
+#[cfg(feature = "libraw")]
+pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path>) -> Option<DynamicImage> {
+    let buf = fs::read(path.as_ref()).ok()?;
 
-    let mut reader = BufReader::new(file_handler);
-    let raw = match rawloader::decode(&mut reader) {
-        Ok(raw) => raw,
-        Err(_e) => {
-            return None;
-        }
-    };
+    let processor = Processor::new();
+    let start_timer = Instant::now();
+    let processed = processor.process_8bit(&buf).expect("processing successful");
+    println!("Processing took {:?}", start_timer.elapsed());
+
+    let width = processed.width();
+    let height = processed.height();
+    dbg!(width, height);
+
+    let data = processed.to_vec();
+
+    let buffer = ImageBuffer::from_raw(width, height, data)?;
+    // Utwórz DynamicImage z ImageBuffer
+    Some(DynamicImage::ImageRgb8(buffer))
+}
+
+#[cfg(not(feature = "libraw"))]
+pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path> + std::fmt::Debug) -> Option<DynamicImage> {
+    let mut start_timer = Instant::now();
+    let mut times = Vec::new();
+
+    let loader = RawLoader::new();
+    let raw = loader.decode_file(path.as_ref()).ok()?;
+
+    times.push(("After decoding", start_timer.elapsed()));
+    start_timer = Instant::now();
 
     let source = ImageSource::Raw(raw);
 
-    let mut pipeline = match Pipeline::new_from_source(source) {
-        Ok(pipeline) => pipeline,
-        Err(_e) => {
-            return None;
-        }
-    };
+    times.push(("After creating source", start_timer.elapsed()));
+    start_timer = Instant::now();
+
+    let mut pipeline = Pipeline::new_from_source(source).ok()?;
+
+    times.push(("After creating pipeline", start_timer.elapsed()));
+    start_timer = Instant::now();
 
     pipeline.run(None);
-    let image = match pipeline.output_8bit(None) {
-        Ok(image) => image,
-        Err(_e) => {
-            return None;
-        }
-    };
+    let image = pipeline.output_8bit(None).ok()?;
 
-    let Some(image) = ImageBuffer::<Rgb<u8>, Vec<u8>>::from_raw(image.width as u32, image.height as u32, image.data) else {
-        return None;
-    };
+    times.push(("After creating image", start_timer.elapsed()));
+    start_timer = Instant::now();
 
+    let image = ImageBuffer::<Rgb<u8>, Vec<u8>>::from_raw(image.width as u32, image.height as u32, image.data)?;
+
+    times.push(("After creating image buffer", start_timer.elapsed()));
+    start_timer = Instant::now();
     // println!("Properly hashed {:?}", path);
-    Some(DynamicImage::ImageRgb8(image))
+    let res = Some(DynamicImage::ImageRgb8(image));
+    times.push(("After creating dynamic image", start_timer.elapsed()));
+
+    let str_timer = times.into_iter().map(|(name, time)| format!("{name}: {time:?}")).collect::<Vec<_>>().join(", ");
+    debug!("Loading raw image --- {str_timer}");
+    res
 }
 
 pub fn split_path(path: &Path) -> (String, String) {
@@ -460,13 +557,14 @@ where
 }
 
 pub fn prepare_thread_handler_common(
-    progress_sender: Option<&UnboundedSender<ProgressData>>,
+    progress_sender: Option<&Sender<ProgressData>>,
     current_stage: u8,
     max_stage: u8,
     max_value: usize,
     checking_method: CheckingMethod,
     tool_type: ToolType,
 ) -> (JoinHandle<()>, Arc<AtomicBool>, Arc<AtomicUsize>, AtomicBool) {
+    assert_ne!(tool_type, ToolType::None, "ToolType::None should not exist");
     let progress_thread_run = Arc::new(AtomicBool::new(true));
     let atomic_counter = Arc::new(AtomicUsize::new(0));
     let check_was_stopped = AtomicBool::new(false);
@@ -480,7 +578,7 @@ pub fn prepare_thread_handler_common(
             loop {
                 if time_since_last_send.elapsed().unwrap().as_millis() > SEND_PROGRESS_DATA_TIME_BETWEEN as u128 {
                     progress_send
-                        .unbounded_send(ProgressData {
+                        .send(ProgressData {
                             checking_method,
                             current_stage,
                             max_stage,
@@ -521,9 +619,36 @@ pub fn send_info_and_wait_for_ending_all_threads(progress_thread_run: &Arc<Atomi
 
 #[cfg(test)]
 mod test {
-    use std::path::PathBuf;
+    use std::fs;
+    use std::io::Write;
+    use std::path::{Path, PathBuf};
+    use tempfile::tempdir;
 
-    use crate::common::Common;
+    use crate::common::{remove_folder_if_contains_only_empty_folders, Common};
+
+    #[test]
+    fn test_remove_folder_if_contains_only_empty_folders() {
+        let dir = tempdir().unwrap();
+        let sub_dir = dir.path().join("sub_dir");
+        fs::create_dir(&sub_dir).unwrap();
+
+        // Test with empty directory
+        assert!(remove_folder_if_contains_only_empty_folders(&sub_dir));
+        assert!(!Path::new(&sub_dir).exists());
+
+        // Test with directory containing an empty directory
+        fs::create_dir(&sub_dir).unwrap();
+        fs::create_dir(sub_dir.join("empty_sub_dir")).unwrap();
+        assert!(remove_folder_if_contains_only_empty_folders(&sub_dir));
+        assert!(!Path::new(&sub_dir).exists());
+
+        // Test with directory containing a file
+        fs::create_dir(&sub_dir).unwrap();
+        let mut file = fs::File::create(sub_dir.join("file.txt")).unwrap();
+        writeln!(file, "Hello, world!").unwrap();
+        assert!(!remove_folder_if_contains_only_empty_folders(&sub_dir));
+        assert!(Path::new(&sub_dir).exists());
+    }
 
     #[test]
     fn test_regex() {

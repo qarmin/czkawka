@@ -14,6 +14,7 @@ use once_cell::sync::OnceCell;
 use czkawka_core::bad_extensions::BadExtensions;
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
+use czkawka_core::common::CHARACTER;
 use czkawka_core::common_dir_traversal;
 use czkawka_core::common_messages::Messages;
 use czkawka_core::duplicate::DuplicateFinder;
@@ -28,11 +29,6 @@ use czkawka_core::temporary::Temporary;
 use crate::flg;
 use crate::notebook_enums::{NotebookMainEnum, NotebookUpperEnum};
 use crate::notebook_info::{NotebookObject, NOTEBOOKS_INFO};
-
-#[cfg(not(target_family = "windows"))]
-pub const CHARACTER: char = '/';
-#[cfg(target_family = "windows")]
-pub const CHARACTER: char = '\\';
 
 pub const KEY_DELETE: u32 = 119;
 pub const KEY_ENTER: u32 = 36;

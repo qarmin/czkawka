@@ -1,0 +1,19 @@
+import {CurrentTab} from "common.slint";
+
+// State to show 
+export global GuiState {
+    in-out property <length> app_width;
+    in-out property <length> app_height;
+
+    in-out property <string> info_text: "Nothing to report";
+    in-out property <bool> preview_visible;
+    in-out property <image> preview_image;
+
+    in-out property <float> maximum_threads: 40;
+
+    in-out property <bool> choosing_include_directories;
+    in-out property <bool> visible_tool_settings;
+
+    in-out property <bool> available_subsettings: active_tab == CurrentTab.SimilarImages;
+    in-out property <CurrentTab> active_tab: CurrentTab.EmptyFiles;
+}

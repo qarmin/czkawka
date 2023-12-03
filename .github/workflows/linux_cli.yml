@@ -12,23 +12,20 @@ jobs:
   linux-cli:
     strategy:
       matrix:
-        toolchain: [ stable, 1.70.0 ]
+        toolchain: [ stable, 1.72.1 ]
         type: [ release ]
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
 
       - name: Install basic libraries
-        run: sudo apt-get update; sudo apt install libheif-dev ffmpeg -y
+        run: sudo apt update || true; sudo apt install libheif-dev ffmpeg -y
 
       - name: Setup rust version
         run: rustup default ${{ matrix.toolchain }}
 
       - name: Build Release
         run: cargo build --release --bin czkawka_cli
-        env:
-          CARGO_INCREMENTAL: 0
-          RUSTFLAGS: "-C debuginfo=0"
         if: ${{ (matrix.type == 'release') }}
 
       - name: Store Linux CLI

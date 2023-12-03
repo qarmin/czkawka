@@ -1,0 +1,86 @@
+import { Button, VerticalBox ,TextEdit, HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox, LineEdit} from "std-widgets.slint";
+import {SelectableTableView} from "selectable_tree_view.slint";
+import {LeftSidePanel} from "left_side_panel.slint";
+import {MainList} from "main_lists.slint";
+import {CurrentTab, ProgressToSend} from "common.slint";
+import { ActionButtons } from "action_buttons.slint";
+import { Progress } from "progress.slint";
+import {MainListModel} from "common.slint";
+import {Settings} from "settings.slint";
+import {Callabler} from "callabler.slint";
+import { BottomPanel } from "bottom_panel.slint";
+import { ColorPalette } from "color_palette.slint";
+import { GuiState } from "gui_state.slint";
+import { Preview } from "preview.slint";
+
+export component PopupNewDirectories inherits Rectangle {
+    width: 400px;
+    height: 400px;
+
+    callback show_popup();
+
+    popup_window := PopupWindow {
+        width: root.width;
+        height: root.height;
+
+        property <bool> included_directories;
+        private property <string> text_data;
+        close-on-click: false;
+        HorizontalLayout {
+            alignment: LayoutAlignment.center;
+            VerticalLayout {
+                alignment: LayoutAlignment.center;
+                Rectangle {
+                    clip: true;
+                    width: root.width - 20px;
+                    height: root.height - 20px;
+                    border-radius: 20px;
+                    background: ColorPalette.popup_background;
+                    VerticalLayout {
+                        Text {
+                            text: "Please add directories one per line";
+                            horizontal-alignment: TextHorizontalAlignment.center;
+                        }
+
+                        TextEdit {
+                            vertical-stretch: 1.0;
+                            text <=> text-data;
+                        }
+
+                        HorizontalLayout {
+                            min-height: 20px;
+                            Button {
+                                enabled: text-data != "";
+                                text: "OK";
+                                clicked => {
+                                    Callabler.added_manual_directories(GuiState.choosing_include_directories, text_data);
+                                    debug("OK");
+                                    popup_window.close();
+                                }
+                            }
+
+                            Button {
+                                text: "Cancel";
+                                clicked => {
+                                    debug("Cancel");
+                                    popup_window.close();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Button {
+    //     text:"KKK";
+    //     clicked => {
+    //         show-popup();
+    //     }
+    // }
+
+    show_popup() => {
+        popup_window.show();
+    }
+}

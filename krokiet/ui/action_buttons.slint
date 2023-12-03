@@ -1,0 +1,120 @@
+import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox} from "std-widgets.slint";
+import {LeftSidePanel} from "left_side_panel.slint";
+import {MainList} from "main_lists.slint";
+import {CurrentTab} from "common.slint";
+import {BottomPanelVisibility} from "common.slint";
+import {Callabler} from "callabler.slint";
+import {GuiState} from "gui_state.slint";
+
+export component VisibilityButton inherits Button {
+    in-out property <BottomPanelVisibility> button_visibility;
+    in-out property <BottomPanelVisibility> bottom_panel_visibility;
+    enabled: bottom_panel_visibility != button-visibility;
+    height: 30px;
+    width: 70px;
+    clicked => {
+        bottom-panel-visibility = button_visibility;
+    }
+}
+
+export component ActionButtons inherits HorizontalLayout {
+    callback scan_stopping;
+    callback scan_starting(CurrentTab);
+    in-out property <BottomPanelVisibility> bottom_panel_visibility: BottomPanelVisibility.Directories;
+    in-out property <bool> stop_requested: false;
+    in-out property <bool> scanning;
+    in-out property <bool> lists_enabled: GuiState.active_tab != CurrentTab.Settings;
+    // in-out property <>
+    out property <int> name;
+    height: 30px;
+    spacing: 4px;
+
+    Rectangle {
+        scan_button := Button {
+            height: parent.height;
+            enabled: !scanning && lists_enabled;
+            visible: !scanning;
+            text: "Scan";
+            clicked => {
+                root.scanning = true;
+                root.scan_starting(GuiState.active_tab);
+            }
+        }
+
+        stop_button := Button {
+            height: parent.height;
+            visible: scanning;
+            enabled: scanning && !stop_requested && root.lists_enabled;
+            text: "Stop";
+            clicked => {
+                root.scan_stopping();
+                root.stop_requested = true;
+            }
+        }
+    }
+
+    Rectangle {
+        horizontal-stretch: 0.5;
+    }
+
+    delete_button := Button {
+        height: parent.height;
+        enabled: !scanning && lists_enabled;
+        text: "Delete";
+        clicked => {
+            Callabler.delete_selected_items();
+        }
+    }
+
+    popup_item := PopupWindow {
+        height: root.height;
+        width: root.width;
+        close-on-click: true;
+        VerticalLayout {
+            for i[idx] in ["A","B","C"]: Rectangle {
+                background: red;   
+            }
+        }   
+    }
+
+    select_button := Button {
+        visible: false;
+        height: parent.height;
+        enabled: !scanning && lists_enabled;
+        text: "Select";
+        clicked => {
+            debug("Selected");
+            popup_item.show();
+            // Callabler.select_items();
+        }
+    }
+
+    Rectangle {
+        horizontal-stretch: 0.5;
+    }
+
+    HorizontalLayout {
+        padding: 0px;
+        spacing: 0px;
+        VisibilityButton {
+            height: parent.height;
+            button-visibility: BottomPanelVisibility.Directories;
+            bottom_panel_visibility <=> bottom_panel_visibility;
+            text: "Dirs";
+        }
+
+        VisibilityButton {
+            height: parent.height;
+            button-visibility: BottomPanelVisibility.TextErrors;
+            bottom_panel_visibility <=> bottom_panel_visibility;
+            text: "Text";
+        }
+
+        VisibilityButton {
+            height: parent.height;
+            button-visibility: BottomPanelVisibility.NotVisible;
+            bottom_panel_visibility <=> bottom_panel_visibility;
+            text: "None";
+        }
+    }
+}

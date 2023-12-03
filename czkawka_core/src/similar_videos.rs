@@ -5,10 +5,9 @@ use std::mem;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::Ordering;
 
-use crossbeam_channel::Receiver;
+use crossbeam_channel::{Receiver, Sender};
 use ffmpeg_cmdline_utils::FfmpegErrorKind::FfmpegNotFound;
 use fun_time::fun_time;
-use futures::channel::mpsc::UnboundedSender;
 use humansize::{format_size, BINARY};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -103,7 +102,7 @@ impl SimilarVideos {
     }
 
     #[fun_time(message = "find_similar_videos", level = "info")]
-    pub fn find_similar_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
+    pub fn find_similar_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) {
         if !check_if_ffmpeg_is_installed() {
             self.common_data.text_messages.errors.push(flc!("core_ffmpeg_not_found"));
             #[cfg(target_os = "windows")]
@@ -130,7 +129,7 @@ impl SimilarVideos {
     }
 
     #[fun_time(message = "check_for_similar_videos", level = "debug")]
-    fn check_for_similar_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+    fn check_for_similar_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
         if !self.common_data.allowed_extensions.using_custom_extensions() {
@@ -266,7 +265,7 @@ impl SimilarVideos {
     }
 
     #[fun_time(message = "sort_videos", level = "debug")]
-    fn sort_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+    fn sort_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache_at_start();
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =

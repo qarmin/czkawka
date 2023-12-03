@@ -1,0 +1,30 @@
+export enum CurrentTab {
+    EmptyFolders,
+    EmptyFiles,
+    SimilarImages,
+    Settings
+}
+
+export enum TypeOfOpenedItem {
+    CurrentItem,
+    ParentItem,
+}
+
+export struct ProgressToSend {
+    current_progress: int,
+    all_progress: int,
+    step_name: string,
+}
+
+export struct MainListModel {
+    checked: bool,
+    header_row: bool,
+    selected_row: bool,
+    val: [string]
+}
+
+export enum BottomPanelVisibility {
+    NotVisible,
+    TextErrors,
+    Directories
+}

@@ -9,48 +9,92 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  linux-gui:
+  linux-krokiet-gui:
     strategy:
       matrix:
-        toolchain: [ stable, 1.70.0 ]
+        toolchain: [ stable, 1.72.1 ]
+        type: [ release ]
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup rust version
+        run: rustup default ${{ matrix.toolchain }}
+
+      - name: Build Release Krokiet
+        run: cargo build --release --bin krokiet
+        if: ${{ (matrix.type == 'release') }}
+
+      - name: Store Linux GUI Krokiet
+        uses: actions/upload-artifact@v3
+        with:
+          name: krokiet-${{ runner.os }}-${{ matrix.toolchain }}
+          path: target/release/krokiet
+        if: ${{ matrix.type == 'release' }}
+
+  linux-krokiet-gui-heif:
+    strategy:
+      matrix:
+        toolchain: [ stable, 1.72.1 ]
         type: [ release ]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
 
       - name: Install basic libraries
-        run: sudo apt-get update; sudo apt install libgtk-4-dev libheif-dev -y
+        run: sudo apt update || true; sudo apt install libheif-dev libraw-dev -y
 
       - name: Setup rust version
         run: rustup default ${{ matrix.toolchain }}
 
-      - name: Build Release Heif
-        run: cargo build --release --features heif
-        env:
-          CARGO_INCREMENTAL: 0
-          RUSTFLAGS: "-C debuginfo=0"
-        if: ${{ (matrix.type == 'release') && (matrix.toolchain == '1.70.0') }}
+      - name: Build Release Krokiet heif
+        run: cargo build --release --bin krokiet --features "heif,libraw"
+        if: ${{ (matrix.type == 'release') }}
 
-      - name: Store Linux GUI Heif
+      - name: Store Linux GUI Krokiet heif libraw
         uses: actions/upload-artifact@v3
         with:
-          name: czkawka_gui-${{ runner.os }}-${{ matrix.toolchain }}-heif
-          path: target/release/czkawka_gui
+          name: krokiet-${{ runner.os }}-${{ matrix.toolchain }}-heif-libraw
+          path: target/release/krokiet
         if: ${{ matrix.type == 'release' }}
 
-      - name: Build Release
-        run: cargo build --release
-        env:
-          CARGO_INCREMENTAL: 0
-          RUSTFLAGS: "-C debuginfo=0"
+  linux-gui:
+    strategy:
+      matrix:
+        toolchain: [ stable, 1.72.1 ]
+        type: [ release ]
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install basic libraries
+        run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev -y
+
+      - name: Setup rust version
+        run: rustup default ${{ matrix.toolchain }}
+
+      - name: Build Release Heif Libraw
+        run: cargo build --release --bin czkawka_gui --features "heif,libraw"
+        if: ${{ (matrix.type == 'release') }}
+
+      - name: Store Linux GUI Heif Libraw
+        uses: actions/upload-artifact@v3
+        with:
+          name: czkawka_gui-${{ runner.os }}-${{ matrix.toolchain }}-heif-libraw
+          path: target/release/czkawka_gui
         if: ${{ (matrix.type == 'release') && (matrix.toolchain == 'stable') }}
 
+      - name: Build Release
+        run: cargo build --release --bin czkawka_gui
+        if: ${{ (matrix.type == 'release') }}
+
+      # Only store stable toolchain
       - name: Store Linux GUI
         uses: actions/upload-artifact@v3
         with:
           name: czkawka_gui-${{ runner.os }}-${{ matrix.toolchain }}
           path: target/release/czkawka_gui
-        if: ${{ matrix.type == 'release' }}
+        if: ${{ (matrix.type == 'release') && (matrix.toolchain == 'stable') }}
 
   linux-appimage-gui:
     strategy:
@@ -62,16 +106,13 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Install Dependencies
-        run: sudo apt-get update; sudo apt install libgtk-4-dev libheif-dev librsvg2-dev wget fuse libfuse2 -y
+        run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev librsvg2-dev wget fuse libfuse2 -y
 
       - name: Setup rust version
         run: rustup default ${{ matrix.toolchain }}
 
       - name: Build Release
-        run: cargo build --release
-        env:
-          CARGO_INCREMENTAL: 0
-          RUSTFLAGS: "-C debuginfo=0"
+        run: cargo build --release --bin czkawka_gui
 
       - name: Download appimage dependencies
         run: |
@@ -118,13 +159,10 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Install Dependencies
-        run: sudo apt-get update; sudo apt install libgtk-4-dev libheif-dev librsvg2-dev wget fuse libfuse2 -y xvfb
+        run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev librsvg2-dev wget fuse libfuse2 -y xvfb
 
       - name: Setup rust version
         run: rustup default ${{ matrix.toolchain }}
 
       - name: Test
         run: xvfb-run cargo test
-        env:
-          CARGO_INCREMENTAL: 0
-          RUSTFLAGS: "-C debuginfo=0"

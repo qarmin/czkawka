@@ -7,9 +7,8 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::{fs, mem, panic};
 
-use crossbeam_channel::Receiver;
+use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
-use futures::channel::mpsc::UnboundedSender;
 use log::debug;
 use pdf::file::FileOptions;
 use pdf::object::ParseOptions;
@@ -27,7 +26,7 @@ use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_di
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::*;
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct FileEntry {
     pub path: PathBuf,
     pub modified_date: u64,
@@ -93,7 +92,7 @@ impl BrokenFiles {
     }
 
     #[fun_time(message = "find_broken_files", level = "info")]
-    pub fn find_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
+    pub fn find_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) {
         self.optimize_dirs_before_start();
         if !self.check_files(stop_receiver, progress_sender) {
             self.common_data.stopped_search = true;
@@ -108,7 +107,7 @@ impl BrokenFiles {
     }
 
     #[fun_time(message = "check_files", level = "debug")]
-    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
 
         // Add root folders for finding
@@ -191,9 +190,7 @@ impl BrokenFiles {
     ) -> Option<FileEntry> {
         atomic_counter.fetch_add(1, Ordering::Relaxed);
 
-        let Some(file_name_lowercase) = get_lowercase_name(entry_data, warnings) else {
-            return None;
-        };
+        let file_name_lowercase = get_lowercase_name(entry_data, warnings)?;
 
         if !self.common_data.allowed_extensions.matches_filename(&file_name_lowercase) {
             return None;
@@ -347,7 +344,7 @@ impl BrokenFiles {
     }
 
     #[fun_time(message = "look_for_broken_files", level = "debug")]
-    fn look_for_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+    fn look_for_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache();
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =

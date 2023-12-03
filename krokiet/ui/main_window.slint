@@ -1,0 +1,156 @@
+import { Button, VerticalBox ,TextEdit, HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox, LineEdit} from "std-widgets.slint";
+import {SelectableTableView} from "selectable_tree_view.slint";
+import {LeftSidePanel} from "left_side_panel.slint";
+import {MainList} from "main_lists.slint";
+import {CurrentTab, ProgressToSend} from "common.slint";
+import { ActionButtons } from "action_buttons.slint";
+import { Progress } from "progress.slint";
+import {MainListModel} from "common.slint";
+import {Settings} from "settings.slint";
+import {Callabler} from "callabler.slint";
+import { BottomPanel } from "bottom_panel.slint";
+import {ColorPalette} from "color_palette.slint";
+import {GuiState} from "gui_state.slint";
+import { Preview } from "preview.slint";
+import {PopupNewDirectories} from "popup_new_directories.slint";
+import { PopupSelect } from "popup_select.slint";
+import { ToolSettings } from "tool_settings.slint";
+
+export {Settings, Callabler, GuiState}
+
+export component MainWindow inherits Window {
+    callback scan_stopping;
+    callback scan_starting(CurrentTab);
+    callback folder_choose_requested(bool);
+    callback scan_ended(string);
+
+    min-width: 300px;
+    preferred-width: 800px;
+    min-height: 300px;
+    preferred-height: 600px;
+    
+    in-out property <string> text_summary_text: "";
+    in-out property <bool> stop_requested: false;
+    in-out property <bool> scanning: false;
+    in-out property <ProgressToSend> progress_datas: {
+        current_progress: 15,
+        all_progress: 20,
+        step_name: "Cache",
+    };
+    in-out property <[MainListModel]> empty_folder_model: [
+        {checked: false, selected_row: false, header_row: true, val: ["kropkarz", "/Xd1", "24.10.2023"]} ,
+        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
+        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
+        {checked: true, selected_row: false, header_row: false, val: ["lokkaler", "/Xd1/Vide2", "01.23.1911"]}
+    ];
+    in-out property <[MainListModel]> empty_files_model: [
+        {checked: false, selected_row: false, header_row: true, val: ["kropkarz", "/Xd1", "24.10.2023"]} ,
+        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
+        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
+        {checked: true, selected_row: false, header_row: false, val: ["lokkaler", "/Xd1/Vide2", "01.23.1911"]}
+    ];
+    in-out property <[MainListModel]> similar_images_model: [];
+    
+    VerticalBox {
+        HorizontalBox {
+            vertical-stretch: 1.0;
+            preferred-height: 300px;
+            LeftSidePanel {
+                horizontal-stretch: 0.0;
+                scanning <=> root.scanning;
+                changed_current_tab() => {
+                    GuiState.preview_visible = false;
+                    main_list.changed_current_tab();
+                }
+            }
+
+            VerticalLayout {
+                horizontal-stretch: 1.0;
+                min_width: 300px;
+                Rectangle {
+                    vertical-stretch: 1.0;
+                    main_list := MainList {
+                        x: 0;
+                        width: preview_or_tool_settings.visible ? parent.width / 2 : parent.width;
+                        height: parent.height;
+                        horizontal-stretch: 0.5;
+                        empty_folder_model <=> root.empty_folder_model;
+                        empty_files_model <=> root.empty_files_model;
+                        similar_images_model <=> root.similar_images_model;
+                    }
+                    preview_or_tool_settings := Rectangle {
+                        visible: (GuiState.preview_visible || tool_settings.visible) && GuiState.active_tab != CurrentTab.Settings;
+                        height: parent.height;
+                        x: parent.width / 2;
+                        width: self.visible ? parent.width / 2 : 0;
+                        Preview {
+                            height: parent.height;
+                            width: parent.width;
+                            visible: GuiState.preview_visible && !tool_settings.visible;
+                            source: GuiState.preview_image;
+                            image-fit: ImageFit.contain;
+                        }
+                        tool_settings := ToolSettings {
+                            height: parent.height;
+                            width: parent.width;
+                            visible: GuiState.visible_tool_settings && GuiState.available_subsettings;
+                        }
+                    }
+                }
+
+                if root.scanning: Progress {
+                    horizontal-stretch: 0.0;
+                    progress_datas <=> root.progress_datas;
+                }
+            }
+        }
+
+        action_buttons := ActionButtons {
+            vertical-stretch: 0.0;
+            scanning <=> root.scanning;
+            stop_requested <=> root.stop-requested;
+            scan_stopping => {
+                text_summary_text = "Stopping scan, please wait...";
+                root.scan_stopping();
+            }
+            scan_starting(item) => {
+                text_summary_text = "Searching...";
+                root.scan_starting(item);
+            }
+        }
+
+        text_summary := LineEdit {
+            text: text_summary_text;
+            read-only: true;
+        }
+
+        bottom_panel := BottomPanel {
+            bottom-panel-visibility <=> action_buttons.bottom_panel_visibility;
+            vertical-stretch: 0.0;
+            folder_choose_requested(included_directories) => {
+                root.folder_choose_requested(included_directories)
+            }
+            show_manual_add_dialog(included_directories) => {
+                GuiState.choosing_include_directories = included_directories;
+                new_directory_popup_window.show_popup()
+            }
+        }
+    }
+
+    new_directory_popup_window := PopupNewDirectories {
+        height: root.height;
+        width: root.width;
+    }
+
+    // select_popup_window := PopupSelect {
+    //     height: root.height;
+    //     width: root.width;
+    // }
+
+
+    scan_ended(scan_text) => {
+        text_summary_text = scan_text;
+        root.scanning = false;
+        root.stop_requested = false;
+    }
+}

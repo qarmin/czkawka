@@ -6,7 +6,7 @@ use crate::GuiData;
 pub fn validate_notebook_data(gui_data: &GuiData) {
     // Test treeviews names, each treeview should have set name same as variable name
 
-    for (_i, item) in gui_data.main_notebook.get_main_tree_views().iter().enumerate() {
+    for item in &gui_data.main_notebook.get_main_tree_views() {
         // println!("Checking {} element", i);
 
         get_notebook_enum_from_tree_view(item);

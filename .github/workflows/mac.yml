@@ -32,8 +32,6 @@ jobs:
 
       - name: Build Release
         run: cargo build --release
-        env:
-          CARGO_INCREMENTAL: 0
         if: ${{ matrix.type == 'release'}}
 
       - name: Store MacOS CLI
@@ -50,10 +48,15 @@ jobs:
           path: target/release/czkawka_gui
         if: ${{ matrix.type == 'release' }}
 
+      - name: Store MacOS Krokiet
+        uses: actions/upload-artifact@v3
+        with:
+          name: krokiet-${{ runner.os }}-${{ matrix.toolchain }}
+          path: target/release/krokiet
+        if: ${{ matrix.type == 'release' }}
+
       - name: Build Release Heif
         run: cargo build --release --features heif
-        env:
-          CARGO_INCREMENTAL: 0
         if: ${{ matrix.type == 'release'}}
 
       - name: Store MacOS CLI Heif
@@ -68,4 +71,11 @@ jobs:
         with:
           name: czkawka_gui-${{ runner.os }}-${{ matrix.toolchain }}-heif
           path: target/release/czkawka_gui
+        if: ${{ matrix.type == 'release' }}
+
+      - name: Store MacOS Krokiet Heif
+        uses: actions/upload-artifact@v3
+        with:
+          name: krokiet-${{ runner.os }}-${{ matrix.toolchain }}-heif
+          path: target/release/krokiet
         if: ${{ matrix.type == 'release' }}

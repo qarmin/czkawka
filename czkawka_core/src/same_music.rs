@@ -9,9 +9,9 @@ use std::sync::Arc;
 use std::{mem, panic};
 
 use anyhow::Context;
-use crossbeam_channel::Receiver;
+
+use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
-use futures::channel::mpsc::UnboundedSender;
 use humansize::{format_size, BINARY};
 use lofty::{read_from, AudioFile, ItemKey, TaggedFileExt};
 use log::debug;
@@ -137,7 +137,7 @@ impl SameMusic {
     }
 
     #[fun_time(message = "find_same_music", level = "info")]
-    pub fn find_same_music(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) {
+    pub fn find_same_music(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) {
         self.optimize_dirs_before_start();
         self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
         if !self.check_files(stop_receiver, progress_sender) {
@@ -176,7 +176,7 @@ impl SameMusic {
     }
 
     #[fun_time(message = "check_files", level = "debug")]
-    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         if !self.common_data.allowed_extensions.using_custom_extensions() {
             self.common_data.allowed_extensions.extend_allowed_extensions(AUDIO_FILES_EXTENSIONS);
         } else {
@@ -203,6 +203,7 @@ impl SameMusic {
             .allowed_extensions(self.common_data.allowed_extensions.clone())
             .excluded_items(self.common_data.excluded_items.clone())
             .recursive_search(self.common_data.recursive_search)
+            .tool_type(self.common_data.tool_type)
             .max_stage(max_stage)
             .build()
             .run();
@@ -277,7 +278,7 @@ impl SameMusic {
     }
 
     #[fun_time(message = "calculate_fingerprint", level = "debug")]
-    fn calculate_fingerprint(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+    fn calculate_fingerprint(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         let (progress_thread_handle, progress_thread_run, _atomic_counter, _check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 1, MAX_STAGE_CONTENT, 0, self.check_type, self.common_data.tool_type);
 
@@ -341,7 +342,7 @@ impl SameMusic {
     }
 
     #[fun_time(message = "read_tags", level = "debug")]
-    fn read_tags(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+    fn read_tags(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         let (progress_thread_handle, progress_thread_run, _atomic_counter, _check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 1, MAX_STAGE_TAGS, 0, self.check_type, self.common_data.tool_type);
 
@@ -404,7 +405,7 @@ impl SameMusic {
     }
 
     #[fun_time(message = "check_for_duplicate_tags", level = "debug")]
-    fn check_for_duplicate_tags(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+    fn check_for_duplicate_tags(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 4, MAX_STAGE_TAGS, self.music_to_check.len(), self.check_type, self.common_data.tool_type);
 
@@ -503,7 +504,7 @@ impl SameMusic {
         true
     }
     #[fun_time(message = "read_tags_to_files_similar_by_content", level = "debug")]
-    fn read_tags_to_files_similar_by_content(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+    fn read_tags_to_files_similar_by_content(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         let groups_to_check = max(self.duplicated_music_entries.len(), self.duplicated_music_entries_referenced.len());
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 5, MAX_STAGE_CONTENT, groups_to_check, self.check_type, self.common_data.tool_type);
@@ -629,7 +630,7 @@ impl SameMusic {
     }
 
     #[fun_time(message = "check_for_duplicate_fingerprints", level = "debug")]
-    fn check_for_duplicate_fingerprints(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&UnboundedSender<ProgressData>>) -> bool {
+    fn check_for_duplicate_fingerprints(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         let (base_files, files_to_compare) = self.split_fingerprints_to_check();
         let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 2, 3, base_files.len(), self.check_type, self.common_data.tool_type);

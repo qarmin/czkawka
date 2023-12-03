@@ -1,5 +1,12 @@
 # Compiling Czkawka from sources
 
+This instruction is outdated and will be removed in one of next version, please look at README.md files in each module folder for more up to date instructions.
+- [Czkawka GUI (GTK frontend)](../czkawka_gui/README.md)</br>
+- [Czkawka CLI](../czkawka_cli/README.md)</br>
+- [Czkawka Core](../czkawka_core/README.md)</br>
+- [Krokiet GUI (Slint frontend)](../krokiet/README.md)</br>
+
+
 ## Requirements
 
 If you only want the terminal version without a GUI, just skip all the packages with `gtk` in their names.
@@ -12,7 +19,7 @@ New versions of GTK fixes some bugs, so e.g. middle button selection will work o
 
 | Program | Min    | What for                                                                             |
 |---------|--------|--------------------------------------------------------------------------------------|
-| Rust    | 1.70.0 | The minimum version of rust does not depend on anything, so it can change frequently |
+| Rust    | 1.72.1 | The minimum version of rust does not depend on anything, so it can change frequently |
 | GTK     | 4.6    | Only for the `GTK` backend                                                           |
 
 #### Debian / Ubuntu

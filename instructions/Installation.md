@@ -1,4 +1,11 @@
 # Installation
+
+This instruction is outdated and will be removed in one of next version, please look at README.md files in each module folder for more up to date instructions.
+- [Czkawka GUI (GTK frontend)](../czkawka_gui/README.md)</br>
+- [Czkawka CLI](../czkawka_cli/README.md)</br>
+- [Czkawka Core](../czkawka_core/README.md)</br>
+- [Krokiet GUI (Slint frontend)](../krokiet/README.md)</br>
+
 ## Requirements
 ### Linux
 If you use Snap, Flatpak or Appimage, you need to only install ffmpeg if you want to use Similar Videos tool.
@@ -140,7 +147,7 @@ Flathub page with Czkawka can be found [**here**](https://flathub.org/apps/detai
 ### PPA - Debian/Ubuntu (unofficial)
 ```
 sudo add-apt-repository ppa:xtradeb/apps
-sudo apt-get update
+sudo apt update
 sudo apt-get install czkawka
 ```
 
