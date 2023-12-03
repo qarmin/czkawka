@@ -102,9 +102,9 @@ impl ExcludedItems {
 
 pub fn new_excluded_item(expression: &str) -> SingleExcludedItem {
     let expression = expression.trim().to_string();
-    let mut expression_splits: Vec<String> = expression.split('*').filter_map(|e| if e.is_empty() { None } else { Some(e.to_string()) }).collect();
-    expression_splits.sort();
+    let expression_splits: Vec<String> = expression.split('*').filter_map(|e| if e.is_empty() { None } else { Some(e.to_string()) }).collect();
     let mut unique_extensions_splits = expression_splits.clone();
+    unique_extensions_splits.sort();
     unique_extensions_splits.dedup();
     SingleExcludedItem {
         expression,
