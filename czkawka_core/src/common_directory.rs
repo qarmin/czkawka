@@ -1,8 +1,8 @@
+use crate::common::normalize_windows_path;
 use std::path::{Path, PathBuf};
 #[cfg(target_family = "unix")]
 use std::{fs, os::unix::fs::MetadataExt};
 
-use crate::common::Common;
 use crate::common_messages::Messages;
 use crate::flc;
 use crate::localizer_core::generate_translation_hashmap;
@@ -154,9 +154,9 @@ impl Directories {
         let mut optimized_excluded: Vec<PathBuf> = Vec::new();
 
         if cfg!(target_family = "windows") {
-            self.included_directories = self.included_directories.iter().map(Common::normalize_windows_path).collect();
-            self.excluded_directories = self.excluded_directories.iter().map(Common::normalize_windows_path).collect();
-            self.reference_directories = self.reference_directories.iter().map(Common::normalize_windows_path).collect();
+            self.included_directories = self.included_directories.iter().map(normalize_windows_path).collect();
+            self.excluded_directories = self.excluded_directories.iter().map(normalize_windows_path).collect();
+            self.reference_directories = self.reference_directories.iter().map(normalize_windows_path).collect();
         }
 
         // Remove duplicated entries like: "/", "/"
@@ -309,7 +309,7 @@ impl Directories {
     pub fn is_excluded(&self, path: impl AsRef<Path>) -> bool {
         let path = path.as_ref();
         #[cfg(target_family = "windows")]
-        let path = Common::normalize_windows_path(path);
+        let path = normalize_windows_path(path);
         // We're assuming that `excluded_directories` are already normalized
         self.excluded_directories.iter().any(|p| p.as_path() == path)
     }

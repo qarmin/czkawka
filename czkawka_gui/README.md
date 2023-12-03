@@ -31,7 +31,7 @@ pacman -S mingw-w64-x86_64-czkawka-gui
 and you can create shortcut to `C:\msys64\mingw64\bin\czkawka_gui.exe`
 
 ## Compilation
-Compilation of gui is harder that compilation cli or core, because uses gtk4 which is written in C and also requires a lot build and runtime dependencies.
+Compilation of gui is harder than compilation cli or core, because uses gtk4 which is written in C and also requires a lot build and runtime dependencies.
 
 ### Requirements
 |  Program  |  Minimal version  |

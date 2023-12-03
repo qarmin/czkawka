@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 use std::fs;
-use std::fs::{DirEntry, Metadata};
+use std::fs::DirEntry;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -14,7 +14,7 @@ use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::common::{check_folder_children, check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, split_path};
-use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
+use crate::common_dir_traversal::{common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::{DebugPrint, PrintResults};
 
@@ -68,7 +68,7 @@ impl BigFile {
 
     #[fun_time(message = "look_for_big_files", level = "debug")]
     fn look_for_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
-        let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
+        let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2);
         let mut old_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
 
         // Add root folders for finding
@@ -99,22 +99,25 @@ impl BigFile {
 
                     // Check every sub folder/file/link etc.
                     for entry in read_dir {
-                        let Some((entry_data, metadata)) = common_get_entry_data_metadata(&entry, &mut warnings, current_folder) else {
+                        let Ok(entry_data) = entry else {
+                            continue;
+                        };
+                        let Ok(file_type) = entry_data.file_type() else {
                             continue;
                         };
 
-                        if metadata.is_dir() {
+                        if file_type.is_dir() {
                             check_folder_children(
                                 &mut dir_result,
                                 &mut warnings,
                                 current_folder,
-                                entry_data,
+                                &entry_data,
                                 self.common_data.recursive_search,
                                 &self.common_data.directories,
                                 &self.common_data.excluded_items,
                             );
-                        } else if metadata.is_file() {
-                            self.collect_file_entry(&atomic_counter, &metadata, entry_data, &mut fe_result, &mut warnings, current_folder);
+                        } else if file_type.is_file() {
+                            self.collect_file_entry(&atomic_counter, &entry_data, &mut fe_result, &mut warnings, current_folder);
                         }
                     }
                     (dir_result, warnings, fe_result)
@@ -146,17 +149,12 @@ impl BigFile {
     pub fn collect_file_entry(
         &self,
         atomic_counter: &Arc<AtomicUsize>,
-        metadata: &Metadata,
         entry_data: &DirEntry,
         fe_result: &mut Vec<(u64, FileEntry)>,
         warnings: &mut Vec<String>,
         current_folder: &Path,
     ) {
         atomic_counter.fetch_add(1, Ordering::Relaxed);
-
-        if metadata.len() == 0 {
-            return;
-        }
 
         let Some(file_name_lowercase) = get_lowercase_name(entry_data, warnings) else {
             return;
@@ -171,10 +169,18 @@ impl BigFile {
             return;
         }
 
+        let Ok(metadata) = entry_data.metadata() else {
+            return;
+        };
+
+        if metadata.len() == 0 {
+            return;
+        }
+
         let fe: FileEntry = FileEntry {
             path: current_file_name.clone(),
             size: metadata.len(),
-            modified_date: get_modified_time(metadata, warnings, &current_file_name, false),
+            modified_date: get_modified_time(&metadata, warnings, &current_file_name, false),
         };
 
         fe_result.push((fe.size, fe));
@@ -253,7 +259,9 @@ impl PrintResults for BigFile {
         writeln!(
             writer,
             "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
-            self.common_data.directories.included_directories, self.common_data.directories.excluded_directories, self.common_data.excluded_items.items
+            self.common_data.directories.included_directories,
+            self.common_data.directories.excluded_directories,
+            self.common_data.excluded_items.get_excluded_items()
         )?;
 
         if self.information.number_of_real_files != 0 {

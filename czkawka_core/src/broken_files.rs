@@ -1,5 +1,5 @@
 use std::collections::BTreeMap;
-use std::fs::{DirEntry, File, Metadata};
+use std::fs::{DirEntry, File};
 use std::io::prelude::*;
 
 use std::path::{Path, PathBuf};
@@ -22,7 +22,7 @@ use crate::common::{
     IMAGE_RS_BROKEN_FILES_EXTENSIONS, PDF_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS,
 };
 use crate::common_cache::{get_broken_files_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
-use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
+use crate::common_dir_traversal::{common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::*;
 
@@ -108,7 +108,7 @@ impl BrokenFiles {
 
     #[fun_time(message = "check_files", level = "debug")]
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
-        let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
+        let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2);
 
         // Add root folders for finding
         for id in &self.common_data.directories.included_directories {
@@ -138,22 +138,25 @@ impl BrokenFiles {
 
                     // Check every sub folder/file/link etc.
                     for entry in read_dir {
-                        let Some((entry_data, metadata)) = common_get_entry_data_metadata(&entry, &mut warnings, current_folder) else {
+                        let Ok(entry_data) = entry else {
+                            continue;
+                        };
+                        let Ok(file_type) = entry_data.file_type() else {
                             continue;
                         };
 
-                        if metadata.is_dir() {
+                        if file_type.is_dir() {
                             check_folder_children(
                                 &mut dir_result,
                                 &mut warnings,
                                 current_folder,
-                                entry_data,
+                                &entry_data,
                                 self.common_data.recursive_search,
                                 &self.common_data.directories,
                                 &self.common_data.excluded_items,
                             );
-                        } else if metadata.is_file() {
-                            if let Some(file_entry) = self.get_file_entry(&metadata, &atomic_counter, entry_data, &mut warnings, current_folder) {
+                        } else if file_type.is_file() {
+                            if let Some(file_entry) = self.get_file_entry(&atomic_counter, &entry_data, &mut warnings, current_folder) {
                                 fe_result.push((file_entry.path.to_string_lossy().to_string(), file_entry));
                             }
                         }
@@ -180,14 +183,7 @@ impl BrokenFiles {
         true
     }
 
-    fn get_file_entry(
-        &self,
-        metadata: &Metadata,
-        atomic_counter: &Arc<AtomicUsize>,
-        entry_data: &DirEntry,
-        warnings: &mut Vec<String>,
-        current_folder: &Path,
-    ) -> Option<FileEntry> {
+    fn get_file_entry(&self, atomic_counter: &Arc<AtomicUsize>, entry_data: &DirEntry, warnings: &mut Vec<String>, current_folder: &Path) -> Option<FileEntry> {
         atomic_counter.fetch_add(1, Ordering::Relaxed);
 
         let file_name_lowercase = get_lowercase_name(entry_data, warnings)?;
@@ -207,9 +203,13 @@ impl BrokenFiles {
             return None;
         }
 
+        let Ok(metadata) = entry_data.metadata() else {
+            return None;
+        };
+
         let fe: FileEntry = FileEntry {
             path: current_file_name.clone(),
-            modified_date: get_modified_time(metadata, warnings, &current_file_name, false),
+            modified_date: get_modified_time(&metadata, warnings, &current_file_name, false),
             size: metadata.len(),
             type_of_file,
             error_string: String::new(),
@@ -464,7 +464,9 @@ impl PrintResults for BrokenFiles {
         writeln!(
             writer,
             "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
-            self.common_data.directories.included_directories, self.common_data.directories.excluded_directories, self.common_data.excluded_items.items
+            self.common_data.directories.included_directories,
+            self.common_data.directories.excluded_directories,
+            self.common_data.excluded_items.get_excluded_items()
         )?;
 
         if !self.broken_files.is_empty() {
