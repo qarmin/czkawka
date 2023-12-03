@@ -2,9 +2,7 @@ use czkawka_core::common::get_available_threads;
 use slint::{ComponentHandle, SharedString, VecModel};
 
 use crate::settings::{ALLOWED_HASH_SIZE_VALUES, ALLOWED_HASH_TYPE_VALUES, ALLOWED_RESIZE_ALGORITHM_VALUES};
-use crate::GuiState;
-use crate::MainWindow;
-use crate::Settings;
+use crate::{GuiState, MainWindow, Settings};
 
 // Some info needs to be send to gui at the start like available thread number in OS.
 //

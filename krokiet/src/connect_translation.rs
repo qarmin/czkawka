@@ -1,7 +1,6 @@
 use crate::localizer_krokiet::LANGUAGE_LOADER_GUI;
 use crate::{Callabler, MainWindow};
-use slint::ComponentHandle;
-use slint::Model;
+use slint::{ComponentHandle, Model};
 use std::collections::HashMap;
 
 pub fn connect_translations(app: &MainWindow) {

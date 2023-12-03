@@ -13,8 +13,7 @@ use czkawka_core::common::{get_available_threads, set_number_of_threads};
 use czkawka_core::common_items::{DEFAULT_EXCLUDED_DIRECTORIES, DEFAULT_EXCLUDED_ITEMS};
 
 use crate::common::{create_string_standard_list_view_from_pathbuf, create_vec_model_from_vec_string};
-use crate::{Callabler, MainWindow};
-use crate::{GuiState, Settings};
+use crate::{Callabler, GuiState, MainWindow, Settings};
 
 pub const DEFAULT_MINIMUM_SIZE_KB: i32 = 16;
 pub const DEFAULT_MAXIMUM_SIZE_KB: i32 = i32::MAX / 1024;

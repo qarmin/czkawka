@@ -1,3 +1,5 @@
+use czkawka_core::common::regex_check;
+use czkawka_core::common_items::new_excluded_item;
 use gtk4::prelude::*;
 use gtk4::{ResponseType, TreeIter, Window};
 use regex::Regex;
@@ -367,6 +369,11 @@ fn popover_custom_select_unselect(
             #[cfg(target_family = "windows")]
             let path_wildcard = path_wildcard.replace("/", "\\");
 
+            let name_wildcard_excluded = new_excluded_item(&name_wildcard);
+            let name_wildcard_lowercase_excluded = new_excluded_item(&name_wildcard.to_lowercase());
+            let path_wildcard_excluded = new_excluded_item(&path_wildcard);
+            let path_wildcard_lowercase_excluded = new_excluded_item(&path_wildcard.to_lowercase());
+
             if response_type == ResponseType::Ok {
                 let check_path = check_button_path.is_active();
                 let check_name = check_button_name.is_active();
@@ -439,22 +446,22 @@ fn popover_custom_select_unselect(
                         } else {
                             if check_name {
                                 if case_sensitive {
-                                    if regex_check(&name_wildcard, &name) {
+                                    if regex_check(&name_wildcard_excluded, &name) {
                                         need_to_change_thing = true;
                                     }
                                 } else {
-                                    if regex_check(&name_wildcard.to_lowercase(), name.to_lowercase()) {
+                                    if regex_check(&name_wildcard_lowercase_excluded, name.to_lowercase()) {
                                         need_to_change_thing = true;
                                     }
                                 }
                             }
                             if check_path {
                                 if case_sensitive {
-                                    if regex_check(&path_wildcard, &path) {
+                                    if regex_check(&path_wildcard_excluded, &path) {
                                         need_to_change_thing = true;
                                     }
                                 } else {
-                                    if regex_check(&path_wildcard.to_lowercase(), path.to_lowercase()) {
+                                    if regex_check(&path_wildcard_lowercase_excluded, path.to_lowercase()) {
                                         need_to_change_thing = true;
                                     }
                                 }

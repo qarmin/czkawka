@@ -1,4 +1,4 @@
-use crate::common::regex_check;
+use crate::common::{normalize_windows_path, regex_check};
 use std::path::Path;
 
 use crate::common_messages::Messages;

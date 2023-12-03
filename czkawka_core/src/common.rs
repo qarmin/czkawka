@@ -332,8 +332,6 @@ pub fn create_crash_message(library_name: &str, file_path: &str, home_library_ur
 }
 
 pub fn regex_check(expression_item: &SingleExcludedItem, directory: impl AsRef<Path>) -> bool {
-    dbg!(&expression_item);
-    dbg!(&directory.as_ref());
     if expression_item.expression == "*" {
         return true;
     }
@@ -351,29 +349,26 @@ pub fn regex_check(expression_item: &SingleExcludedItem, directory: impl AsRef<P
             return false;
         }
     }
-    dbg!("Here");
 
     // `git*` shouldn't be true for `/gitsfafasfs`
     if !expression_item.expression.starts_with('*') && directory.find(&expression_item.expression_splits[0]).unwrap() > 0 {
         return false;
     }
-    dbg!("Here2");
     // `*home` shouldn't be true for `/homeowner`
     if !expression_item.expression.ends_with('*') && !directory.ends_with(expression_item.expression_splits.last().unwrap()) {
         return false;
     }
-    dbg!("Here3");
 
     // At the end we check if parts between * are correctly positioned
     let mut last_split_point = directory.find(&expression_item.expression_splits[0]).unwrap();
-    let mut current_index: usize;
+    let mut current_index: usize = 0;
     let mut found_index: usize;
     for spl in expression_item.expression_splits[1..].iter() {
-        current_index = last_split_point + spl.len();
         found_index = match directory[current_index..].find(spl) {
             Some(t) => t,
             None => return false,
         };
+        current_index = last_split_point + spl.len();
         last_split_point = found_index + current_index;
     }
     true
@@ -663,11 +658,10 @@ mod test {
         assert!(!regex_check(&new_excluded_item("*home/*koc"), "/koc/home/"));
         assert!(!regex_check(&new_excluded_item("*home/"), "/home"));
         assert!(!regex_check(&new_excluded_item("*TTT"), "/GGG"));
-
-        // assert!(regex_check(
-        //     &new_excluded_item("*/home/*/.local/share/containers/*"),
-        //     "/var/home/roman/.local/share/containers/storage/overlay/"
-        // ));
+        assert!(regex_check(
+            &new_excluded_item("*/home/*/.local/share/containers"),
+            "/var/home/roman/.local/share/containers"
+        ));
 
         if cfg!(target_family = "windows") {
             assert!(regex_check(&new_excluded_item("*\\home"), "C:\\home"));
