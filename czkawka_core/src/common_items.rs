@@ -18,7 +18,6 @@ pub const DEFAULT_EXCLUDED_ITEMS: &str = "*\\.git\\*,*\\node_modules\\*,*\\lost+
 #[derive(Debug, Clone, Default)]
 pub struct ExcludedItems {
     expressions: Vec<String>,
-    expression_splits: Vec<Vec<String>>,
     connected_expressions: Vec<SingleExcludedItem>,
 }
 
@@ -74,7 +73,6 @@ impl ExcludedItems {
         for checked_expression in &checked_expressions {
             let item = new_excluded_item(checked_expression);
             self.expressions.push(item.expression.clone());
-            self.expression_splits.push(item.expression_splits.clone());
             self.connected_expressions.push(item);
         }
         Messages {
@@ -88,6 +86,9 @@ impl ExcludedItems {
         &self.expressions
     }
     pub fn is_excluded(&self, path: impl AsRef<Path>) -> bool {
+        if self.connected_expressions.is_empty() {
+            return false;
+        }
         #[cfg(target_family = "windows")]
         let path = normalize_windows_path(path);
 

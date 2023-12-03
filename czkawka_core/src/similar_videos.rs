@@ -1,5 +1,5 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap};
-use std::fs::{DirEntry, Metadata};
+use std::fs::DirEntry;
 use std::io::Write;
 use std::mem;
 use std::path::{Path, PathBuf};
@@ -18,7 +18,7 @@ use crate::common::{
     check_folder_children, check_if_stop_received, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, VIDEO_FILES_EXTENSIONS,
 };
 use crate::common_cache::{get_similar_videos_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
-use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
+use crate::common_dir_traversal::{common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::{DebugPrint, PrintResults, ResultEntry};
 use crate::flc;
@@ -168,23 +168,26 @@ impl SimilarVideos {
 
                     // Check every sub folder/file/link etc.
                     for entry in read_dir {
-                        let Some((entry_data, metadata)) = common_get_entry_data_metadata(&entry, &mut warnings, current_folder) else {
+                        let Ok(entry_data) = entry else {
+                            continue;
+                        };
+                        let Ok(file_type) = entry_data.file_type() else {
                             continue;
                         };
 
-                        if metadata.is_dir() {
+                        if file_type.is_dir() {
                             check_folder_children(
                                 &mut dir_result,
                                 &mut warnings,
                                 current_folder,
-                                entry_data,
+                                &entry_data,
                                 self.common_data.recursive_search,
                                 &self.common_data.directories,
                                 &self.common_data.excluded_items,
                             );
-                        } else if metadata.is_file() {
+                        } else if file_type.is_file() {
                             atomic_counter.fetch_add(1, Ordering::Relaxed);
-                            self.add_video_file_entry(&metadata, entry_data, &mut fe_result, &mut warnings, current_folder);
+                            self.add_video_file_entry(&entry_data, &mut fe_result, &mut warnings, current_folder);
                         }
                     }
                     (dir_result, warnings, fe_result)
@@ -209,7 +212,7 @@ impl SimilarVideos {
         true
     }
 
-    fn add_video_file_entry(&self, metadata: &Metadata, entry_data: &DirEntry, fe_result: &mut Vec<(String, FileEntry)>, warnings: &mut Vec<String>, current_folder: &Path) {
+    fn add_video_file_entry(&self, entry_data: &DirEntry, fe_result: &mut Vec<(String, FileEntry)>, warnings: &mut Vec<String>, current_folder: &Path) {
         let Some(file_name_lowercase) = get_lowercase_name(entry_data, warnings) else {
             return;
         };
@@ -218,18 +221,22 @@ impl SimilarVideos {
             return;
         }
 
+        let current_file_name = current_folder.join(entry_data.file_name());
+        if self.common_data.excluded_items.is_excluded(&current_file_name) {
+            return;
+        }
+        let current_file_name_str = current_file_name.to_string_lossy().to_string();
+
+        let Ok(metadata) = entry_data.metadata() else {
+            return;
+        };
+
         // Checking files
         if (self.common_data.minimal_file_size..=self.common_data.maximal_file_size).contains(&metadata.len()) {
-            let current_file_name = current_folder.join(entry_data.file_name());
-            if self.common_data.excluded_items.is_excluded(&current_file_name) {
-                return;
-            }
-            let current_file_name_str = current_file_name.to_string_lossy().to_string();
-
             let fe: FileEntry = FileEntry {
                 path: current_file_name.clone(),
                 size: metadata.len(),
-                modified_date: get_modified_time(metadata, warnings, &current_file_name, false),
+                modified_date: get_modified_time(&metadata, warnings, &current_file_name, false),
                 vhash: Default::default(),
                 error: String::new(),
             };

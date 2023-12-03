@@ -1,5 +1,5 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
-use std::fs::{DirEntry, Metadata};
+use std::fs::DirEntry;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::Ordering;
@@ -24,7 +24,7 @@ use crate::common::{
     send_info_and_wait_for_ending_all_threads, HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS,
 };
 use crate::common_cache::{get_similar_images_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
-use crate::common_dir_traversal::{common_get_entry_data_metadata, common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
+use crate::common_dir_traversal::{common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::{DebugPrint, PrintResults, ResultEntry};
 use crate::flc;
@@ -188,23 +188,26 @@ impl SimilarImages {
                     };
 
                     for entry in read_dir {
-                        let Some((entry_data, metadata)) = common_get_entry_data_metadata(&entry, &mut warnings, current_folder) else {
+                        let Ok(entry_data) = entry else {
+                            continue;
+                        };
+                        let Ok(file_type) = entry_data.file_type() else {
                             continue;
                         };
 
-                        if metadata.is_dir() {
+                        if file_type.is_dir() {
                             check_folder_children(
                                 &mut dir_result,
                                 &mut warnings,
                                 current_folder,
-                                entry_data,
+                                &entry_data,
                                 self.common_data.recursive_search,
                                 &self.common_data.directories,
                                 &self.common_data.excluded_items,
                             );
-                        } else if metadata.is_file() {
+                        } else if file_type.is_file() {
                             atomic_counter.fetch_add(1, Ordering::Relaxed);
-                            self.add_file_entry(&metadata, current_folder, entry_data, &mut fe_result, &mut warnings);
+                            self.add_file_entry(current_folder, &entry_data, &mut fe_result, &mut warnings);
                         }
                     }
                     (dir_result, warnings, fe_result)
@@ -229,7 +232,7 @@ impl SimilarImages {
         true
     }
 
-    fn add_file_entry(&self, metadata: &Metadata, current_folder: &Path, entry_data: &DirEntry, fe_result: &mut Vec<(String, FileEntry)>, warnings: &mut Vec<String>) {
+    fn add_file_entry(&self, current_folder: &Path, entry_data: &DirEntry, fe_result: &mut Vec<(String, FileEntry)>, warnings: &mut Vec<String>) {
         let Some(file_name_lowercase) = get_lowercase_name(entry_data, warnings) else {
             return;
         };
@@ -238,18 +241,22 @@ impl SimilarImages {
             return;
         }
 
+        let current_file_name = current_folder.join(entry_data.file_name());
+        if self.common_data.excluded_items.is_excluded(&current_file_name) {
+            return;
+        }
+
+        let Ok(metadata) = entry_data.metadata() else {
+            return;
+        };
+
         // Checking files
         if (self.common_data.minimal_file_size..=self.common_data.maximal_file_size).contains(&metadata.len()) {
-            let current_file_name = current_folder.join(entry_data.file_name());
-            if self.common_data.excluded_items.is_excluded(&current_file_name) {
-                return;
-            }
-
             let fe: FileEntry = FileEntry {
                 path: current_file_name.clone(),
                 size: metadata.len(),
                 dimensions: String::new(),
-                modified_date: get_modified_time(metadata, warnings, &current_file_name, false),
+                modified_date: get_modified_time(&metadata, warnings, &current_file_name, false),
                 hash: Vec::new(),
                 similarity: 0,
             };

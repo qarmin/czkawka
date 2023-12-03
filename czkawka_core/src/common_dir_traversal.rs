@@ -1,6 +1,6 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use std::fs;
-use std::fs::{DirEntry, Metadata, ReadDir};
+use std::fs::{DirEntry, FileType, Metadata, ReadDir};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::Ordering;
 use std::time::UNIX_EPOCH;
@@ -321,8 +321,7 @@ pub enum DirTraversalResult<T: Ord + PartialOrd> {
     Stopped,
 }
 
-fn entry_type(metadata: &Metadata) -> EntryType {
-    let file_type = metadata.file_type();
+fn entry_type(file_type: FileType) -> EntryType {
     if file_type.is_dir() {
         EntryType::Dir
     } else if file_type.is_symlink() {
@@ -345,7 +344,7 @@ where
 
         let mut all_warnings = vec![];
         let mut grouped_file_entries: BTreeMap<T, Vec<FileEntry>> = BTreeMap::new();
-        let mut folder_entries: BTreeMap<PathBuf, FolderEntry> = BTreeMap::new();
+        let mut folder_entries: HashMap<PathBuf, FolderEntry> = HashMap::new();
 
         // Add root folders into result (only for empty folder collection)
         let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2);
@@ -401,18 +400,18 @@ where
                     let mut counter = 0;
                     // Check every sub folder/file/link etc.
                     'dir: for entry in read_dir {
-                        let Some((entry_data, metadata)) = common_get_entry_data_metadata(&entry, &mut warnings, current_folder) else {
+                        let Some(entry_data) = common_get_entry_data(&entry, &mut warnings, current_folder) else {
                             continue;
                         };
+                        let Ok(file_type) = entry_data.file_type() else { continue };
 
-                        match (entry_type(&metadata), collect) {
+                        match (entry_type(file_type), collect) {
                             (EntryType::Dir, Collect::Files | Collect::InvalidSymlinks) => {
                                 process_dir_in_file_symlink_mode(recursive_search, current_folder, entry_data, &directories, &mut dir_result, &mut warnings, &excluded_items);
                             }
                             (EntryType::Dir, Collect::EmptyFolders) => {
                                 counter += 1;
                                 process_dir_in_dir_mode(
-                                    &metadata,
                                     current_folder,
                                     entry_data,
                                     &directories,
@@ -426,7 +425,6 @@ where
                             (EntryType::File, Collect::Files) => {
                                 counter += 1;
                                 process_file_in_file_mode(
-                                    &metadata,
                                     entry_data,
                                     &mut warnings,
                                     &mut fe_result,
@@ -456,7 +454,6 @@ where
                             (EntryType::Symlink, Collect::InvalidSymlinks) => {
                                 counter += 1;
                                 process_symlink_in_symlink_mode(
-                                    &metadata,
                                     entry_data,
                                     &mut warnings,
                                     &mut fe_result,
@@ -513,7 +510,7 @@ where
                 warnings: all_warnings,
             },
             Collect::EmptyFolders => DirTraversalResult::SuccessFolders {
-                folder_entries,
+                folder_entries: folder_entries.into_iter().collect(),
                 warnings: all_warnings,
             },
         }
@@ -521,7 +518,6 @@ where
 }
 
 fn process_file_in_file_mode(
-    metadata: &Metadata,
     entry_data: &DirEntry,
     warnings: &mut Vec<String>,
     fe_result: &mut Vec<FileEntry>,
@@ -540,26 +536,30 @@ fn process_file_in_file_mode(
         return;
     }
 
+    let current_file_name = current_folder.join(entry_data.file_name());
+    if excluded_items.is_excluded(&current_file_name) {
+        return;
+    }
+
+    #[cfg(target_family = "unix")]
+    if directories.exclude_other_filesystems() {
+        match directories.is_on_other_filesystems(&current_file_name) {
+            Ok(true) => return,
+            Err(e) => warnings.push(e),
+            _ => (),
+        }
+    }
+
+    let Some(metadata) = common_get_metadata_dir(entry_data, warnings, current_folder) else {
+        return;
+    };
+
     if (minimal_file_size..=maximal_file_size).contains(&metadata.len()) {
-        let current_file_name = current_folder.join(entry_data.file_name());
-        if excluded_items.is_excluded(&current_file_name) {
-            return;
-        }
-
-        #[cfg(target_family = "unix")]
-        if directories.exclude_other_filesystems() {
-            match directories.is_on_other_filesystems(&current_file_name) {
-                Ok(true) => return,
-                Err(e) => warnings.push(e),
-                _ => (),
-            }
-        }
-
         // Creating new file entry
         let fe: FileEntry = FileEntry {
             path: current_file_name.clone(),
             size: metadata.len(),
-            modified_date: get_modified_time(metadata, warnings, &current_file_name, false),
+            modified_date: get_modified_time(&metadata, warnings, &current_file_name, false),
             hash: String::new(),
             symlink_info: None,
         };
@@ -569,7 +569,6 @@ fn process_file_in_file_mode(
 }
 
 fn process_dir_in_dir_mode(
-    metadata: &Metadata,
     current_folder: &Path,
     entry_data: &DirEntry,
     directories: &Directories,
@@ -594,13 +593,18 @@ fn process_dir_in_dir_mode(
         }
     }
 
+    let Some(metadata) = common_get_metadata_dir(entry_data, warnings, current_folder) else {
+        set_as_not_empty_folder_list.push(current_folder.to_path_buf());
+        return;
+    };
+
     dir_result.push(next_folder.clone());
     folder_entries_list.push((
         next_folder,
         FolderEntry {
             parent_path: Some(current_folder.to_path_buf()),
             is_empty: FolderEmptiness::Maybe,
-            modified_date: get_modified_time(metadata, warnings, current_folder, true),
+            modified_date: get_modified_time(&metadata, warnings, current_folder, true),
         },
     ));
 }
@@ -640,7 +644,6 @@ fn process_dir_in_file_symlink_mode(
 }
 
 fn process_symlink_in_symlink_mode(
-    metadata: &Metadata,
     entry_data: &DirEntry,
     warnings: &mut Vec<String>,
     fe_result: &mut Vec<FileEntry>,
@@ -670,6 +673,10 @@ fn process_symlink_in_symlink_mode(
             _ => (),
         }
     }
+
+    let Some(metadata) = common_get_metadata_dir(entry_data, warnings, current_folder) else {
+        return;
+    };
 
     let mut destination_path = PathBuf::new();
     let type_of_error;
@@ -709,7 +716,7 @@ fn process_symlink_in_symlink_mode(
     // Creating new file entry
     let fe: FileEntry = FileEntry {
         path: current_file_name.clone(),
-        modified_date: get_modified_time(metadata, warnings, &current_file_name, false),
+        modified_date: get_modified_time(&metadata, warnings, &current_file_name, false),
         size: 0,
         hash: String::new(),
         symlink_info: Some(SymlinkInfo { destination_path, type_of_error }),
@@ -730,6 +737,32 @@ pub fn common_read_dir(current_folder: &Path, warnings: &mut Vec<String>) -> Opt
             None
         }
     }
+}
+pub fn common_get_entry_data<'a>(entry: &'a Result<DirEntry, std::io::Error>, warnings: &mut Vec<String>, current_folder: &Path) -> Option<&'a DirEntry> {
+    let entry_data = match entry {
+        Ok(t) => t,
+        Err(e) => {
+            warnings.push(flc!(
+                "core_cannot_read_entry_dir",
+                generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
+            ));
+            return None;
+        }
+    };
+    Some(entry_data)
+}
+pub fn common_get_metadata_dir(entry_data: &DirEntry, warnings: &mut Vec<String>, current_folder: &Path) -> Option<Metadata> {
+    let metadata: Metadata = match entry_data.metadata() {
+        Ok(t) => t,
+        Err(e) => {
+            warnings.push(flc!(
+                "core_cannot_read_metadata_dir",
+                generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
+            ));
+            return None;
+        }
+    };
+    Some(metadata)
 }
 
 pub fn common_get_entry_data_metadata<'a>(entry: &'a Result<DirEntry, std::io::Error>, warnings: &mut Vec<String>, current_folder: &Path) -> Option<(&'a DirEntry, Metadata)> {
@@ -797,16 +830,17 @@ pub fn get_lowercase_name(entry_data: &DirEntry, warnings: &mut Vec<String>) -> 
     Some(name)
 }
 
-fn set_as_not_empty_folder(folder_entries: &mut BTreeMap<PathBuf, FolderEntry>, current_folder: &Path) {
+fn set_as_not_empty_folder(folder_entries: &mut HashMap<PathBuf, FolderEntry>, current_folder: &Path) {
     let mut d = folder_entries.get_mut(current_folder).unwrap();
-    // Not folder so it may be a file or symbolic link so it isn't empty
-    d.is_empty = FolderEmptiness::No;
     // Loop to recursively set as non empty this and all his parent folders
     loop {
         d.is_empty = FolderEmptiness::No;
         if d.parent_path.is_some() {
             let cf = d.parent_path.clone().unwrap();
             d = folder_entries.get_mut(&cf).unwrap();
+            if d.is_empty == FolderEmptiness::No {
+                break; // Already set as non empty, so one of child already set it to non empty
+            }
         } else {
             break;
         }

@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 use std::fs;
-use std::fs::Metadata;
+use std::fs::FileType;
 
 use gtk4::prelude::*;
 use gtk4::{Align, CheckButton, Dialog, Orientation, ResponseType, TextView};
@@ -325,14 +325,14 @@ pub fn empty_folder_remover(
                         break 'dir;
                     }
                 };
-                let metadata: Metadata = match entry_data.metadata() {
+                let file_type: FileType = match entry_data.file_type() {
                     Ok(t) => t,
                     Err(_inspected) => {
                         error_happened = true;
                         break 'dir;
                     }
                 };
-                if metadata.is_dir() {
+                if file_type.is_dir() {
                     next_folder = String::new()
                         + &current_folder
                         + "/"
