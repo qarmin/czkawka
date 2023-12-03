@@ -348,7 +348,7 @@ where
         let mut folder_entries: BTreeMap<PathBuf, FolderEntry> = BTreeMap::new();
 
         // Add root folders into result (only for empty folder collection)
-        let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
+        let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2);
         if self.collect == Collect::EmptyFolders {
             for dir in &self.root_dirs {
                 folder_entries.insert(

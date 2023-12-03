@@ -146,7 +146,7 @@ impl SimilarImages {
 
     #[fun_time(message = "check_for_similar_images", level = "debug")]
     fn check_for_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
-        let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
+        let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2);
 
         if !self.common_data.allowed_extensions.using_custom_extensions() {
             self.common_data.allowed_extensions.extend_allowed_extensions(IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS);

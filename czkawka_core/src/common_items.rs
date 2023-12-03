@@ -1,4 +1,6 @@
-use crate::common::{normalize_windows_path, regex_check};
+#[cfg(not(target_family = "unix"))]
+use crate::common::normalize_windows_path;
+use crate::common::regex_check;
 use std::path::Path;
 
 use crate::common_messages::Messages;
@@ -24,6 +26,7 @@ pub struct ExcludedItems {
 pub struct SingleExcludedItem {
     pub expression: String,
     pub expression_splits: Vec<String>,
+    pub unique_extensions_splits: Vec<String>,
 }
 
 impl ExcludedItems {
@@ -99,6 +102,13 @@ impl ExcludedItems {
 
 pub fn new_excluded_item(expression: &str) -> SingleExcludedItem {
     let expression = expression.trim().to_string();
-    let expression_splits: Vec<String> = expression.split('*').filter_map(|e| if e.is_empty() { None } else { Some(e.to_string()) }).collect();
-    SingleExcludedItem { expression, expression_splits }
+    let mut expression_splits: Vec<String> = expression.split('*').filter_map(|e| if e.is_empty() { None } else { Some(e.to_string()) }).collect();
+    expression_splits.sort();
+    let mut unique_extensions_splits = expression_splits.clone();
+    unique_extensions_splits.dedup();
+    SingleExcludedItem {
+        expression,
+        expression_splits,
+        unique_extensions_splits,
+    }
 }

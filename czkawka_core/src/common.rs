@@ -341,30 +341,30 @@ pub fn regex_check(expression_item: &SingleExcludedItem, directory: impl AsRef<P
     }
 
     // Get rid of non unicode characters
-    let directory = directory.as_ref().to_string_lossy();
+    let directory_name = directory.as_ref().to_string_lossy();
 
     // Early checking if directory contains all parts needed by expression
-    for split in &expression_item.expression_splits {
-        if !directory.contains(split) {
+    for split in &expression_item.unique_extensions_splits {
+        if !directory_name.contains(split) {
             return false;
         }
     }
 
     // `git*` shouldn't be true for `/gitsfafasfs`
-    if !expression_item.expression.starts_with('*') && directory.find(&expression_item.expression_splits[0]).unwrap() > 0 {
+    if !expression_item.expression.starts_with('*') && directory_name.find(&expression_item.expression_splits[0]).unwrap() > 0 {
         return false;
     }
     // `*home` shouldn't be true for `/homeowner`
-    if !expression_item.expression.ends_with('*') && !directory.ends_with(expression_item.expression_splits.last().unwrap()) {
+    if !expression_item.expression.ends_with('*') && !directory_name.ends_with(expression_item.expression_splits.last().unwrap()) {
         return false;
     }
 
     // At the end we check if parts between * are correctly positioned
-    let mut last_split_point = directory.find(&expression_item.expression_splits[0]).unwrap();
+    let mut last_split_point = directory_name.find(&expression_item.expression_splits[0]).unwrap();
     let mut current_index: usize = 0;
     let mut found_index: usize;
     for spl in expression_item.expression_splits[1..].iter() {
-        found_index = match directory[current_index..].find(spl) {
+        found_index = match directory_name[current_index..].find(spl) {
             Some(t) => t,
             None => return false,
         };

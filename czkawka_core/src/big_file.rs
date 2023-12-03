@@ -68,7 +68,7 @@ impl BigFile {
 
     #[fun_time(message = "look_for_big_files", level = "debug")]
     fn look_for_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
-        let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
+        let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2);
         let mut old_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
 
         // Add root folders for finding

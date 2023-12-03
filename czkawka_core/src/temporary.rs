@@ -71,7 +71,7 @@ impl Temporary {
 
     #[fun_time(message = "check_files", level = "debug")]
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
-        let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2); // This should be small enough too not see to big difference and big enough to store most of paths without needing to resize vector
+        let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2);
 
         // Add root folders for finding
         for id in &self.common_data.directories.included_directories {
