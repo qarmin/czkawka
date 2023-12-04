@@ -675,7 +675,7 @@ pub struct FileToSave {
 
 #[derive(Debug, clap::Args)]
 pub struct JsonCompactFileToSave {
-    #[clap(short, long, value_name = "json-file-name", help = "Saves the results into the compact json file")]
+    #[clap(short = 'C', long, value_name = "json-file-name", help = "Saves the results into the compact json file")]
     pub compact_file_to_save: Option<PathBuf>,
 }
 

@@ -24,7 +24,7 @@ use crate::common::{
     send_info_and_wait_for_ending_all_threads, HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS,
 };
 use crate::common_cache::{get_similar_images_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
-use crate::common_dir_traversal::{common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
+use crate::common_dir_traversal::{common_read_dir, get_modified_time, CheckingMethod, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::{DebugPrint, PrintResults, ResultEntry};
 use crate::flc;
@@ -156,7 +156,7 @@ impl SimilarImages {
         } else {
             self.common_data
                 .allowed_extensions
-                .validate_allowed_extensions(&[IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS, HEIC_EXTENSIONS].concat());
+                .extend_allowed_extensions(&[IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS, HEIC_EXTENSIONS].concat());
             if !self.common_data.allowed_extensions.using_custom_extensions() {
                 return true;
             }
@@ -194,7 +194,6 @@ impl SimilarImages {
                         let Ok(file_type) = entry_data.file_type() else {
                             continue;
                         };
-
                         if file_type.is_dir() {
                             check_folder_children(
                                 &mut dir_result,
@@ -226,6 +225,8 @@ impl SimilarImages {
                 }
             }
         }
+        eprintln!("Tested {} files", atomic_counter.load(Ordering::Relaxed));
+        eprintln!("Imagest to check {}", self.images_to_check.len());
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
@@ -233,11 +234,7 @@ impl SimilarImages {
     }
 
     fn add_file_entry(&self, current_folder: &Path, entry_data: &DirEntry, fe_result: &mut Vec<(String, FileEntry)>, warnings: &mut Vec<String>) {
-        let Some(file_name_lowercase) = get_lowercase_name(entry_data, warnings) else {
-            return;
-        };
-
-        if !self.common_data.allowed_extensions.matches_filename(&file_name_lowercase) {
+        if !self.common_data.allowed_extensions.check_if_entry_ends_with_extension(entry_data) {
             return;
         }
 

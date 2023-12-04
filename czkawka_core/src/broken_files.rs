@@ -22,7 +22,7 @@ use crate::common::{
     IMAGE_RS_BROKEN_FILES_EXTENSIONS, PDF_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS,
 };
 use crate::common_cache::{get_broken_files_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
-use crate::common_dir_traversal::{common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
+use crate::common_dir_traversal::{common_read_dir, get_modified_time, CheckingMethod, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::*;
 
@@ -185,13 +185,11 @@ impl BrokenFiles {
 
     fn get_file_entry(&self, atomic_counter: &Arc<AtomicUsize>, entry_data: &DirEntry, warnings: &mut Vec<String>, current_folder: &Path) -> Option<FileEntry> {
         atomic_counter.fetch_add(1, Ordering::Relaxed);
-
-        let file_name_lowercase = get_lowercase_name(entry_data, warnings)?;
-
-        if !self.common_data.allowed_extensions.matches_filename(&file_name_lowercase) {
+        if !self.common_data.allowed_extensions.check_if_entry_ends_with_extension(entry_data) {
             return None;
         }
 
+        let file_name_lowercase = entry_data.file_name().to_string_lossy().to_lowercase();
         let type_of_file = check_extension_availability(&file_name_lowercase);
 
         if !check_if_file_extension_is_allowed(&type_of_file, &self.checked_types) {

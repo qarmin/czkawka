@@ -14,7 +14,7 @@ use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::common::{check_folder_children, check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, split_path};
-use crate::common_dir_traversal::{common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
+use crate::common_dir_traversal::{common_read_dir, get_modified_time, CheckingMethod, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::{DebugPrint, PrintResults};
 
@@ -155,12 +155,7 @@ impl BigFile {
         current_folder: &Path,
     ) {
         atomic_counter.fetch_add(1, Ordering::Relaxed);
-
-        let Some(file_name_lowercase) = get_lowercase_name(entry_data, warnings) else {
-            return;
-        };
-
-        if !self.common_data.allowed_extensions.matches_filename(&file_name_lowercase) {
+        if !self.common_data.allowed_extensions.check_if_entry_ends_with_extension(entry_data) {
             return;
         }
 
@@ -178,9 +173,9 @@ impl BigFile {
         }
 
         let fe: FileEntry = FileEntry {
-            path: current_file_name.clone(),
-            size: metadata.len(),
             modified_date: get_modified_time(&metadata, warnings, &current_file_name, false),
+            path: current_file_name,
+            size: metadata.len(),
         };
 
         fe_result.push((fe.size, fe));

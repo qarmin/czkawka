@@ -1,8 +1,10 @@
 use crate::common_messages::Messages;
+use std::collections::HashSet;
+use std::fs::DirEntry;
 
 #[derive(Debug, Clone, Default)]
 pub struct Extensions {
-    file_extensions: Vec<String>,
+    file_extensions_hashset: HashSet<String>,
 }
 
 impl Extensions {
@@ -28,26 +30,24 @@ impl Extensions {
                 continue;
             }
 
-            if !extension.starts_with('.') {
-                extension = format!(".{extension}");
+            if extension.starts_with('.') {
+                extension = extension[1..].to_string();
             }
 
-            if extension[1..].contains('.') {
+            if extension.contains('.') {
                 messages.warnings.push(format!("{extension} is not valid extension because contains dot inside"));
                 continue;
             }
 
-            if extension[1..].contains(' ') {
+            if extension.contains(' ') {
                 messages.warnings.push(format!("{extension} is not valid extension because contains empty space inside"));
                 continue;
             }
 
-            if !self.file_extensions.contains(&extension) {
-                self.file_extensions.push(extension);
-            }
+            self.file_extensions_hashset.insert(extension);
         }
 
-        if self.file_extensions.is_empty() {
+        if self.file_extensions_hashset.is_empty() {
             messages
                 .messages
                 .push("No valid extensions were provided, so allowing all extensions by default.".to_string());
@@ -57,32 +57,36 @@ impl Extensions {
 
     pub fn matches_filename(&self, file_name: &str) -> bool {
         // assert_eq!(file_name, file_name.to_lowercase());
-        if !self.file_extensions.is_empty() && !self.file_extensions.iter().any(|e| file_name.ends_with(e)) {
+        if !self.file_extensions_hashset.is_empty() && !self.file_extensions_hashset.iter().any(|e| file_name.ends_with(e)) {
             return false;
         }
         true
     }
+    pub fn check_if_entry_ends_with_extension(&self, entry_data: &DirEntry) -> bool {
+        if self.file_extensions_hashset.is_empty() {
+            return true;
+        }
+
+        let file_name = entry_data.file_name();
+        let Some(file_name_str) = file_name.to_str() else { return false };
+        let Some(extension_idx) = file_name_str.rfind('.') else { return false };
+        let extension = &file_name_str[extension_idx + 1..];
+
+        if extension.chars().all(|c| c.is_ascii_lowercase()) {
+            self.file_extensions_hashset.contains(extension)
+        } else {
+            self.file_extensions_hashset.contains(&extension.to_lowercase())
+        }
+    }
 
     pub fn using_custom_extensions(&self) -> bool {
-        !self.file_extensions.is_empty()
+        !self.file_extensions_hashset.is_empty()
     }
 
     pub fn extend_allowed_extensions(&mut self, file_extensions: &[&str]) {
         for extension in file_extensions {
-            assert!(extension.starts_with('.'));
-            self.file_extensions.push((*extension).to_string());
+            let extension_without_dot = extension.trim_start_matches('.');
+            self.file_extensions_hashset.insert(extension_without_dot.to_string());
         }
-    }
-
-    pub fn validate_allowed_extensions(&mut self, file_extensions: &[&str]) {
-        let mut current_file_extensions = Vec::new();
-
-        for extension in file_extensions {
-            assert!(extension.starts_with('.'));
-            if self.file_extensions.contains(&(*extension).to_string()) {
-                current_file_extensions.push((*extension).to_string());
-            }
-        }
-        self.file_extensions = current_file_extensions;
     }
 }

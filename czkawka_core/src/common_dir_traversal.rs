@@ -529,11 +529,7 @@ fn process_file_in_file_mode(
     minimal_file_size: u64,
     maximal_file_size: u64,
 ) {
-    let Some(file_name_lowercase) = get_lowercase_name(entry_data, warnings) else {
-        return;
-    };
-
-    if !allowed_extensions.matches_filename(&file_name_lowercase) {
+    if !allowed_extensions.check_if_entry_ends_with_extension(entry_data) {
         return;
     }
 
@@ -653,11 +649,7 @@ fn process_symlink_in_symlink_mode(
     directories: &Directories,
     excluded_items: &ExcludedItems,
 ) {
-    let Some(file_name_lowercase) = get_lowercase_name(entry_data, warnings) else {
-        return;
-    };
-
-    if !allowed_extensions.matches_filename(&file_name_lowercase) {
+    if !allowed_extensions.check_if_entry_ends_with_extension(entry_data) {
         return;
     }
 
