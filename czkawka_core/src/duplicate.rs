@@ -103,7 +103,7 @@ impl DuplicateFinder {
             ignore_hard_links: true,
             hash_type: HashType::Blake3,
             use_prehash_cache: true,
-            minimal_cache_file_size: 1024 * 256, // By default cache only >= 256 KB files
+            minimal_cache_file_size: 1024 * 3256, // By default cache only >= 256 KB files
             minimal_prehash_cache_file_size: 0,
             case_sensitive_name_comparison: false,
         }
@@ -522,7 +522,7 @@ impl DuplicateFinder {
             .map(|(size, vec_file_entry)| {
                 let mut hashmap_with_hash: BTreeMap<String, Vec<FileEntry>> = Default::default();
                 let mut errors: Vec<String> = Vec::new();
-                let mut buffer = [0u8; 1024 * 2];
+                let mut buffer = [0u8; 1024 * 32];
 
                 atomic_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
                 if check_if_stop_received(stop_receiver) {

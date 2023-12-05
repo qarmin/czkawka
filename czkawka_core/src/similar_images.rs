@@ -146,7 +146,7 @@ impl SimilarImages {
 
     #[fun_time(message = "check_for_similar_images", level = "debug")]
     fn check_for_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
-        let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2);
+        let mut folders_to_check: Vec<PathBuf> = self.common_data.directories.included_directories.clone();
 
         if !self.common_data.allowed_extensions.using_custom_extensions() {
             self.common_data.allowed_extensions.extend_allowed_extensions(IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS);
@@ -177,13 +177,13 @@ impl SimilarImages {
             }
 
             let segments: Vec<_> = folders_to_check
-                .par_iter()
+                .into_par_iter()
                 .map(|current_folder| {
                     let mut dir_result = vec![];
                     let mut warnings = vec![];
                     let mut fe_result = vec![];
 
-                    let Some(read_dir) = common_read_dir(current_folder, &mut warnings) else {
+                    let Some(read_dir) = common_read_dir(&current_folder, &mut warnings) else {
                         return (dir_result, warnings, fe_result);
                     };
 
@@ -198,7 +198,7 @@ impl SimilarImages {
                             check_folder_children(
                                 &mut dir_result,
                                 &mut warnings,
-                                current_folder,
+                                &current_folder,
                                 &entry_data,
                                 self.common_data.recursive_search,
                                 &self.common_data.directories,
@@ -206,15 +206,15 @@ impl SimilarImages {
                             );
                         } else if file_type.is_file() {
                             atomic_counter.fetch_add(1, Ordering::Relaxed);
-                            self.add_file_entry(current_folder, &entry_data, &mut fe_result, &mut warnings);
+                            self.add_file_entry(&current_folder, &entry_data, &mut fe_result, &mut warnings);
                         }
                     }
                     (dir_result, warnings, fe_result)
                 })
                 .collect();
 
-            // Advance the frontier
-            folders_to_check.clear();
+            let required_size = segments.iter().map(|(segment, _, _)| segment.len()).sum::<usize>();
+            folders_to_check = Vec::with_capacity(required_size);
 
             // Process collected data
             for (segment, warnings, fe_result) in segments {
@@ -281,7 +281,7 @@ impl SimilarImages {
             debug!("hash_images-load_cache - starting calculating diff");
             for (name, file_entry) in mem::take(&mut self.images_to_check) {
                 if let Some(cached_file_entry) = loaded_hash_map.get(&name) {
-                    records_already_cached.insert(name.clone(), cached_file_entry.clone());
+                    records_already_cached.insert(name, cached_file_entry.clone());
                 } else {
                     non_cached_files_to_check.insert(name, file_entry);
                 }

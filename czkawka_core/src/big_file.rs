@@ -68,13 +68,9 @@ impl BigFile {
 
     #[fun_time(message = "look_for_big_files", level = "debug")]
     fn look_for_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
-        let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2);
         let mut old_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
 
-        // Add root folders for finding
-        for id in &self.common_data.directories.included_directories {
-            folders_to_check.push(id.clone());
-        }
+        let mut folders_to_check: Vec<PathBuf> = self.common_data.directories.included_directories.clone();
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 0, 0, 0, CheckingMethod::None, self.common_data.tool_type);
@@ -87,13 +83,13 @@ impl BigFile {
             }
 
             let segments: Vec<_> = folders_to_check
-                .par_iter()
+                .into_par_iter()
                 .map(|current_folder| {
                     let mut dir_result = vec![];
                     let mut warnings = vec![];
                     let mut fe_result = vec![];
 
-                    let Some(read_dir) = common_read_dir(current_folder, &mut warnings) else {
+                    let Some(read_dir) = common_read_dir(&current_folder, &mut warnings) else {
                         return (dir_result, warnings, fe_result);
                     };
 
@@ -110,22 +106,22 @@ impl BigFile {
                             check_folder_children(
                                 &mut dir_result,
                                 &mut warnings,
-                                current_folder,
+                                &current_folder,
                                 &entry_data,
                                 self.common_data.recursive_search,
                                 &self.common_data.directories,
                                 &self.common_data.excluded_items,
                             );
                         } else if file_type.is_file() {
-                            self.collect_file_entry(&atomic_counter, &entry_data, &mut fe_result, &mut warnings, current_folder);
+                            self.collect_file_entry(&atomic_counter, &entry_data, &mut fe_result, &mut warnings, &current_folder);
                         }
                     }
                     (dir_result, warnings, fe_result)
                 })
                 .collect();
 
-            // Advance the frontier
-            folders_to_check.clear();
+            let required_size = segments.iter().map(|(segment, _, _)| segment.len()).sum::<usize>();
+            folders_to_check = Vec::with_capacity(required_size);
 
             // Process collected data
             for (segment, warnings, fe_result) in segments {

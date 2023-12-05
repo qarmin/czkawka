@@ -5,6 +5,7 @@
 
 ### CLI
 - Providing full static rust binary with [Eyra](https://github.com/sunfishcode/eyra) - [#1102](https://github.com/qarmin/czkawka/pull/1102)
+- Fixed duplicated `-c` argument, now saving as compact json is handled via `-C` - ???? 
 
 ### Krokiet GUI
 - Initial release of new gui - [#1102](https://github.com/qarmin/czkawka/pull/1102)

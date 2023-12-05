@@ -347,7 +347,6 @@ where
         let mut folder_entries: HashMap<PathBuf, FolderEntry> = HashMap::new();
 
         // Add root folders into result (only for empty folder collection)
-        let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2);
         if self.collect == Collect::EmptyFolders {
             for dir in &self.root_dirs {
                 folder_entries.insert(
@@ -361,7 +360,7 @@ where
             }
         }
         // Add root folders for finding
-        folders_to_check.extend(self.root_dirs);
+        let mut folders_to_check: Vec<PathBuf> = self.root_dirs.clone();
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
             prepare_thread_handler_common(self.progress_sender, 0, self.max_stage, 0, self.checking_method, self.tool_type);
@@ -385,7 +384,7 @@ where
             }
 
             let segments: Vec<_> = folders_to_check
-                .par_iter()
+                .into_par_iter()
                 .map(|current_folder| {
                     let mut dir_result = vec![];
                     let mut warnings = vec![];
@@ -393,27 +392,27 @@ where
                     let mut set_as_not_empty_folder_list = vec![];
                     let mut folder_entries_list = vec![];
 
-                    let Some(read_dir) = common_read_dir(current_folder, &mut warnings) else {
-                        set_as_not_empty_folder_list.push(current_folder.clone());
+                    let Some(read_dir) = common_read_dir(&current_folder, &mut warnings) else {
+                        set_as_not_empty_folder_list.push(current_folder);
                         return (dir_result, warnings, fe_result, set_as_not_empty_folder_list, folder_entries_list);
                     };
 
                     let mut counter = 0;
                     // Check every sub folder/file/link etc.
                     'dir: for entry in read_dir {
-                        let Some(entry_data) = common_get_entry_data(&entry, &mut warnings, current_folder) else {
+                        let Some(entry_data) = common_get_entry_data(&entry, &mut warnings, &current_folder) else {
                             continue;
                         };
                         let Ok(file_type) = entry_data.file_type() else { continue };
 
                         match (entry_type(file_type), collect) {
                             (EntryType::Dir, Collect::Files | Collect::InvalidSymlinks) => {
-                                process_dir_in_file_symlink_mode(recursive_search, current_folder, entry_data, &directories, &mut dir_result, &mut warnings, &excluded_items);
+                                process_dir_in_file_symlink_mode(recursive_search, &current_folder, entry_data, &directories, &mut dir_result, &mut warnings, &excluded_items);
                             }
                             (EntryType::Dir, Collect::EmptyFolders) => {
                                 counter += 1;
                                 process_dir_in_dir_mode(
-                                    current_folder,
+                                    &current_folder,
                                     entry_data,
                                     &directories,
                                     &mut dir_result,
@@ -430,7 +429,7 @@ where
                                     &mut warnings,
                                     &mut fe_result,
                                     &allowed_extensions,
-                                    current_folder,
+                                    &current_folder,
                                     &directories,
                                     &excluded_items,
                                     minimal_file_size,
@@ -440,7 +439,7 @@ where
                             (EntryType::File | EntryType::Symlink, Collect::EmptyFolders) => {
                                 #[cfg(target_family = "unix")]
                                 if directories.exclude_other_filesystems() {
-                                    match directories.is_on_other_filesystems(current_folder) {
+                                    match directories.is_on_other_filesystems(&current_folder) {
                                         Ok(true) => continue 'dir,
                                         Err(e) => warnings.push(e.to_string()),
                                         _ => (),
@@ -459,7 +458,7 @@ where
                                     &mut warnings,
                                     &mut fe_result,
                                     &allowed_extensions,
-                                    current_folder,
+                                    &current_folder,
                                     &directories,
                                     &excluded_items,
                                 );
@@ -477,8 +476,8 @@ where
                 })
                 .collect();
 
-            // Advance the frontier
-            folders_to_check.clear();
+            let required_size = segments.iter().map(|(segment, _, _, _, _)| segment.len()).sum::<usize>();
+            folders_to_check = Vec::with_capacity(required_size);
 
             // Process collected data
             for (segment, warnings, fe_result, set_as_not_empty_folder_list, fe_list) in segments {
@@ -554,9 +553,9 @@ fn process_file_in_file_mode(
     if (minimal_file_size..=maximal_file_size).contains(&metadata.len()) {
         // Creating new file entry
         let fe: FileEntry = FileEntry {
-            path: current_file_name.clone(),
             size: metadata.len(),
             modified_date: get_modified_time(&metadata, warnings, &current_file_name, false),
+            path: current_file_name,
             hash: String::new(),
             symlink_info: None,
         };
@@ -708,8 +707,8 @@ fn process_symlink_in_symlink_mode(
 
     // Creating new file entry
     let fe: FileEntry = FileEntry {
-        path: current_file_name.clone(),
         modified_date: get_modified_time(&metadata, warnings, &current_file_name, false),
+        path: current_file_name,
         size: 0,
         hash: String::new(),
         symlink_info: Some(SymlinkInfo { destination_path, type_of_error }),

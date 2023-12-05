@@ -242,7 +242,7 @@ impl SameMusic {
             debug!("load_cache - Starting to check for differences");
             for (name, file_entry) in mem::take(&mut self.music_to_check) {
                 if let Some(cached_file_entry) = loaded_hash_map.get(&name) {
-                    records_already_cached.insert(name.clone(), cached_file_entry.clone());
+                    records_already_cached.insert(name, cached_file_entry.clone());
                 } else {
                     non_cached_files_to_check.insert(name, file_entry);
                 }
@@ -622,7 +622,7 @@ impl SameMusic {
                     music_entries.push(entry.clone());
                 }
                 used_paths.insert(f_string);
-                music_entries.push(f_entry.clone());
+                music_entries.push(f_entry);
                 duplicated_music_entries.push(music_entries);
             }
         }
