@@ -393,7 +393,9 @@ where
                     let mut folder_entries_list = vec![];
 
                     let Some(read_dir) = common_read_dir(&current_folder, &mut warnings) else {
-                        set_as_not_empty_folder_list.push(current_folder);
+                        if collect == Collect::EmptyFolders {
+                            set_as_not_empty_folder_list.push(current_folder);
+                        }
                         return (dir_result, warnings, fe_result, set_as_not_empty_folder_list, folder_entries_list);
                     };
 
