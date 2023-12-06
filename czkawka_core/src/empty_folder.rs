@@ -1,7 +1,6 @@
-use std::collections::{BTreeMap, HashMap};
+use std::collections::HashMap;
 use std::fs;
 use std::io::Write;
-use std::path::PathBuf;
 
 use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
@@ -151,7 +150,9 @@ impl PrintResults for EmptyFolder {
         if !self.empty_folder_list.is_empty() {
             writeln!(writer, "--------------------------Empty folder list--------------------------")?;
             writeln!(writer, "Found {} empty folders", self.information.number_of_empty_folders)?;
-            for name in self.empty_folder_list.keys() {
+            let mut empty_folder_list = self.empty_folder_list.keys().collect::<Vec<_>>();
+            empty_folder_list.sort_unstable();
+            for name in empty_folder_list {
                 writeln!(writer, "{name}")?;
             }
         } else {

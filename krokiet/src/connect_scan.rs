@@ -12,7 +12,6 @@ use czkawka_core::similar_images;
 use czkawka_core::similar_images::SimilarImages;
 use humansize::{format_size, BINARY};
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
-use std::path::PathBuf;
 use std::rc::Rc;
 use std::thread;
 
@@ -118,10 +117,7 @@ fn scan_empty_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, 
             let mut vector = finder.get_empty_files().clone();
             let messages = finder.get_text_messages().create_messages_text();
 
-            vector.sort_unstable_by_key(|e| {
-                let t = split_path(e.get_path());
-                (t.0, t.1)
-            });
+            vector.sort_unstable_by_key(|e| split_path(e.get_path()));
 
             a.upgrade_in_event_loop(move |app| {
                 let number_of_empty_files = vector.len();
