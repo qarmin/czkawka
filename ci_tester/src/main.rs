@@ -319,12 +319,12 @@ fn collect_all_files_and_dirs(dir: &str) -> std::io::Result<CollectedFiles> {
             let path = entry.path();
 
             if path.is_dir() {
-                folders.insert(path.display().to_string());
-                folders_to_check.push(path.display().to_string());
+                folders.insert(path.to_string_lossy().to_string());
+                folders_to_check.push(path.to_string_lossy().to_string());
             } else if path.is_symlink() {
-                symlinks.insert(path.display().to_string());
+                symlinks.insert(path.to_string_lossy().to_string());
             } else if path.is_file() {
-                files.insert(path.display().to_string());
+                files.insert(path.to_string_lossy().to_string());
             } else {
                 panic!("Unknown type of file {:?}", path);
             }

@@ -856,8 +856,8 @@ impl PrintResults for SimilarImages {
                 for file_entry in struct_similar {
                     writeln!(
                         writer,
-                        "{} - {} - {} - {}",
-                        file_entry.path.display(),
+                        "{:?} - {} - {} - {}",
+                        file_entry.path,
                         file_entry.dimensions,
                         format_size(file_entry.size, BINARY),
                         get_string_from_similarity(&file_entry.similarity, self.hash_size)
@@ -873,8 +873,8 @@ impl PrintResults for SimilarImages {
                 writeln!(writer)?;
                 writeln!(
                     writer,
-                    "{} - {} - {} - {}",
-                    file_entry.path.display(),
+                    "{:?} - {} - {} - {}",
+                    file_entry.path,
                     file_entry.dimensions,
                     format_size(file_entry.size, BINARY),
                     get_string_from_similarity(&file_entry.similarity, self.hash_size)
@@ -882,8 +882,8 @@ impl PrintResults for SimilarImages {
                 for file_entry in vec_file_entry {
                     writeln!(
                         writer,
-                        "{} - {} - {} - {}",
-                        file_entry.path.display(),
+                        "{:?} - {} - {} - {}",
+                        file_entry.path,
                         file_entry.dimensions,
                         format_size(file_entry.size, BINARY),
                         get_string_from_similarity(&file_entry.similarity, self.hash_size)

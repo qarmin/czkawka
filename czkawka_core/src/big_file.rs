@@ -210,7 +210,7 @@ impl BigFile {
             DeleteMethod::Delete => {
                 for file_entry in &self.big_files {
                     if fs::remove_file(&file_entry.path).is_err() {
-                        self.common_data.text_messages.warnings.push(file_entry.path.display().to_string());
+                        self.common_data.text_messages.warnings.push(file_entry.path.to_string_lossy().to_string());
                     }
                 }
             }
@@ -259,7 +259,7 @@ impl PrintResults for BigFile {
                 writeln!(writer, "{} the smallest files.\n\n", self.information.number_of_real_files)?;
             }
             for file_entry in &self.big_files {
-                writeln!(writer, "{} ({}) - {}", format_size(file_entry.size, BINARY), file_entry.size, file_entry.path.display())?;
+                writeln!(writer, "{} ({}) - {:?}", format_size(file_entry.size, BINARY), file_entry.size, file_entry.path)?;
             }
         } else {
             write!(writer, "Not found any files.").unwrap();

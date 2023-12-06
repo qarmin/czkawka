@@ -171,7 +171,7 @@ impl Temporary {
                 let mut warnings = Vec::new();
                 for file_entry in &self.temporary_files {
                     if fs::remove_file(file_entry.path.clone()).is_err() {
-                        warnings.push(file_entry.path.display().to_string());
+                        warnings.push(file_entry.path.to_string_lossy().to_string());
                     }
                 }
                 self.common_data.text_messages.warnings.extend(warnings);
@@ -196,7 +196,7 @@ impl PrintResults for Temporary {
         writeln!(writer, "Found {} temporary files.\n", self.information.number_of_temporary_files)?;
 
         for file_entry in &self.temporary_files {
-            writeln!(writer, "{}", file_entry.path.display())?;
+            writeln!(writer, "{:?}", file_entry.path)?;
         }
 
         Ok(())

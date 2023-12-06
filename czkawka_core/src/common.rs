@@ -203,18 +203,18 @@ pub fn open_cache_folder(cache_file_name: &str, save_to_cache: bool, use_json: b
         if save_to_cache {
             if cache_dir.exists() {
                 if !cache_dir.is_dir() {
-                    warnings.push(format!("Config dir {} is a file!", cache_dir.display()));
+                    warnings.push(format!("Config dir {cache_dir:?} is a file!"));
                     return None;
                 }
             } else if let Err(e) = fs::create_dir_all(&cache_dir) {
-                warnings.push(format!("Cannot create config dir {}, reason {}", cache_dir.display(), e));
+                warnings.push(format!("Cannot create config dir {cache_dir:?}, reason {e}"));
                 return None;
             }
 
             file_handler_default = Some(match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
                 Ok(t) => t,
                 Err(e) => {
-                    warnings.push(format!("Cannot create or open cache file {}, reason {}", cache_file.display(), e));
+                    warnings.push(format!("Cannot create or open cache file {cache_file:?}, reason {e}"));
                     return None;
                 }
             });
@@ -222,7 +222,7 @@ pub fn open_cache_folder(cache_file_name: &str, save_to_cache: bool, use_json: b
                 file_handler_json = Some(match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file_json) {
                     Ok(t) => t,
                     Err(e) => {
-                        warnings.push(format!("Cannot create or open cache file {}, reason {}", cache_file_json.display(), e));
+                        warnings.push(format!("Cannot create or open cache file {cache_file_json:?}, reason {e}"));
                         return None;
                     }
                 });
@@ -234,7 +234,7 @@ pub fn open_cache_folder(cache_file_name: &str, save_to_cache: bool, use_json: b
                 if use_json {
                     file_handler_json = Some(OpenOptions::new().read(true).open(&cache_file_json).ok()?);
                 } else {
-                    // messages.push(format!("Cannot find or open cache file {}", cache_file.display())); // No error or warning
+                    // messages.push(format!("Cannot find or open cache file {cache_file:?}")); // No error or warning
                     return None;
                 }
             }
@@ -322,8 +322,8 @@ pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path> + std::fmt::Debug
 
 pub fn split_path(path: &Path) -> (String, String) {
     match (path.parent(), path.file_name()) {
-        (Some(dir), Some(file)) => (dir.display().to_string(), file.to_string_lossy().into_owned()),
-        (Some(dir), None) => (dir.display().to_string(), String::new()),
+        (Some(dir), Some(file)) => (dir.to_string_lossy().to_string(), file.to_string_lossy().into_owned()),
+        (Some(dir), None) => (dir.to_string_lossy().to_string(), String::new()),
         (None, _) => (String::new(), String::new()),
     }
 }

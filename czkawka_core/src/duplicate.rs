@@ -1002,7 +1002,7 @@ impl PrintResults for DuplicateFinder {
                     for (name, vector) in self.files_with_identical_names.iter().rev() {
                         writeln!(writer, "Name - {} - {} files ", name, vector.len())?;
                         for j in vector {
-                            writeln!(writer, "{}", j.path.display())?;
+                            writeln!(writer, "{:?}", j.path)?;
                         }
                         writeln!(writer)?;
                     }
@@ -1018,9 +1018,9 @@ impl PrintResults for DuplicateFinder {
                     )?;
                     for (name, (file_entry, vector)) in self.files_with_identical_names_referenced.iter().rev() {
                         writeln!(writer, "Name - {} - {} files ", name, vector.len())?;
-                        writeln!(writer, "Reference file - {}", file_entry.path.display())?;
+                        writeln!(writer, "Reference file - {:?}", file_entry.path)?;
                         for j in vector {
-                            writeln!(writer, "{}", j.path.display())?;
+                            writeln!(writer, "{:?}", j.path)?;
                         }
                         writeln!(writer)?;
                     }
@@ -1042,7 +1042,7 @@ impl PrintResults for DuplicateFinder {
                     for ((size, name), vector) in self.files_with_identical_size_names.iter().rev() {
                         writeln!(writer, "Name - {}, {} - {} files ", name, format_size(*size, BINARY), vector.len())?;
                         for j in vector {
-                            writeln!(writer, "{}", j.path.display())?;
+                            writeln!(writer, "{:?}", j.path)?;
                         }
                         writeln!(writer)?;
                     }
@@ -1058,9 +1058,9 @@ impl PrintResults for DuplicateFinder {
                     )?;
                     for ((size, name), (file_entry, vector)) in self.files_with_identical_size_names_referenced.iter().rev() {
                         writeln!(writer, "Name - {}, {} - {} files ", name, format_size(*size, BINARY), vector.len())?;
-                        writeln!(writer, "Reference file - {}", file_entry.path.display())?;
+                        writeln!(writer, "Reference file - {:?}", file_entry.path)?;
                         for j in vector {
-                            writeln!(writer, "{}", j.path.display())?;
+                            writeln!(writer, "{:?}", j.path)?;
                         }
                         writeln!(writer)?;
                     }
@@ -1084,7 +1084,7 @@ impl PrintResults for DuplicateFinder {
                     for (size, vector) in self.files_with_identical_size.iter().rev() {
                         write!(writer, "\n---- Size {} ({}) - {} files \n", format_size(*size, BINARY), size, vector.len())?;
                         for file_entry in vector {
-                            writeln!(writer, "{}", file_entry.path.display())?;
+                            writeln!(writer, "{:?}", file_entry.path)?;
                         }
                     }
                 } else if !self.files_with_identical_size_referenced.is_empty() {
@@ -1101,9 +1101,9 @@ impl PrintResults for DuplicateFinder {
                     )?;
                     for (size, (file_entry, vector)) in self.files_with_identical_size_referenced.iter().rev() {
                         writeln!(writer, "\n---- Size {} ({}) - {} files", format_size(*size, BINARY), size, vector.len())?;
-                        writeln!(writer, "Reference file - {}", file_entry.path.display())?;
+                        writeln!(writer, "Reference file - {:?}", file_entry.path)?;
                         for file_entry in vector {
-                            writeln!(writer, "{}", file_entry.path.display())?;
+                            writeln!(writer, "{:?}", file_entry.path)?;
                         }
                     }
                 } else {
@@ -1127,7 +1127,7 @@ impl PrintResults for DuplicateFinder {
                         for vector in vectors_vector {
                             writeln!(writer, "\n---- Size {} ({}) - {} files", format_size(*size, BINARY), size, vector.len())?;
                             for file_entry in vector {
-                                writeln!(writer, "{}", file_entry.path.display())?;
+                                writeln!(writer, "{:?}", file_entry.path)?;
                             }
                         }
                     }
@@ -1146,9 +1146,9 @@ impl PrintResults for DuplicateFinder {
                     for (size, vectors_vector) in self.files_with_identical_hashes_referenced.iter().rev() {
                         for (file_entry, vector) in vectors_vector {
                             writeln!(writer, "\n---- Size {} ({}) - {} files", format_size(*size, BINARY), size, vector.len())?;
-                            writeln!(writer, "Reference file - {}", file_entry.path.display())?;
+                            writeln!(writer, "Reference file - {:?}", file_entry.path)?;
                             for file_entry in vector {
-                                writeln!(writer, "{}", file_entry.path.display())?;
+                                writeln!(writer, "{:?}", file_entry.path)?;
                             }
                         }
                     }
@@ -1226,7 +1226,7 @@ pub trait MyHasher {
 fn hash_calculation(buffer: &mut [u8], file_entry: &FileEntry, hash_type: &HashType, limit: u64) -> Result<String, String> {
     let mut file_handler = match File::open(&file_entry.path) {
         Ok(t) => t,
-        Err(e) => return Err(format!("Unable to check hash of file {}, reason {}", file_entry.path.display(), e)),
+        Err(e) => return Err(format!("Unable to check hash of file {:?}, reason {e}", file_entry.path)),
     };
     let hasher = &mut *hash_type.hasher();
     let mut current_file_read_bytes: u64 = 0;
@@ -1234,7 +1234,7 @@ fn hash_calculation(buffer: &mut [u8], file_entry: &FileEntry, hash_type: &HashT
         let n = match file_handler.read(buffer) {
             Ok(0) => break,
             Ok(t) => t,
-            Err(e) => return Err(format!("Error happened when checking hash of file {}, reason {}", file_entry.path.display(), e)),
+            Err(e) => return Err(format!("Error happened when checking hash of file {:?}, reason {}", file_entry.path, e)),
         };
 
         current_file_read_bytes += n as u64;

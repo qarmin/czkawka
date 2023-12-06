@@ -226,7 +226,7 @@ impl LoadSaveStruct {
                             text_view_errors,
                             &flg!(
                                 "saving_loading_folder_config_instead_file",
-                                generate_translation_hashmap(vec![("path", config_dir.display().to_string())])
+                                generate_translation_hashmap(vec![("path", config_dir.to_string_lossy().to_string())])
                             ),
                         );
                         return None;
@@ -236,7 +236,7 @@ impl LoadSaveStruct {
                         text_view_errors,
                         &flg!(
                             "saving_loading_failed_to_create_configuration_folder",
-                            generate_translation_hashmap(vec![("path", config_dir.display().to_string()), ("reason", e.to_string())])
+                            generate_translation_hashmap(vec![("path", config_dir.to_string_lossy().to_string()), ("reason", e.to_string())])
                         ),
                     );
                     return None;
@@ -249,7 +249,7 @@ impl LoadSaveStruct {
                             text_view_errors,
                             &flg!(
                                 "saving_loading_failed_to_create_config_file",
-                                generate_translation_hashmap(vec![("path", config_file.display().to_string()), ("reason", e.to_string())])
+                                generate_translation_hashmap(vec![("path", config_file.to_string_lossy().to_string()), ("reason", e.to_string())])
                             ),
                         );
                         return None;
@@ -264,7 +264,7 @@ impl LoadSaveStruct {
                         text_view_errors,
                         &flg!(
                             "saving_loading_failed_to_read_config_file",
-                            generate_translation_hashmap(vec![("path", config_file.display().to_string())])
+                            generate_translation_hashmap(vec![("path", config_file.to_string_lossy().to_string())])
                         ),
                     );
                 }
@@ -278,7 +278,7 @@ impl LoadSaveStruct {
                         text_view_errors,
                         &flg!(
                             "saving_loading_failed_to_create_config_file",
-                            generate_translation_hashmap(vec![("path", config_file.display().to_string()), ("reason", e.to_string())])
+                            generate_translation_hashmap(vec![("path", config_file.to_string_lossy().to_string()), ("reason", e.to_string())])
                         ),
                     );
                     return None;
@@ -299,7 +299,7 @@ impl LoadSaveStruct {
                     text_view_errors,
                     &flg!(
                         "saving_loading_failed_to_read_data_from_file",
-                        generate_translation_hashmap(vec![("path", config_file.display().to_string()), ("reason", e.to_string())])
+                        generate_translation_hashmap(vec![("path", config_file.to_string_lossy().to_string()), ("reason", e.to_string())])
                     ),
                 );
                 return;
@@ -370,7 +370,7 @@ impl LoadSaveStruct {
                     text_view_errors,
                     flg!(
                         "saving_loading_saving_success",
-                        generate_translation_hashmap(vec![("name", config_file.display().to_string())])
+                        generate_translation_hashmap(vec![("name", config_file.to_string_lossy().to_string())])
                     )
                     .as_str(),
                 );
@@ -379,7 +379,7 @@ impl LoadSaveStruct {
                     text_view_errors,
                     flg!(
                         "saving_loading_saving_failure",
-                        generate_translation_hashmap(vec![("name", config_file.display().to_string())])
+                        generate_translation_hashmap(vec![("name", config_file.to_string_lossy().to_string())])
                     )
                     .as_str(),
                 );

@@ -440,7 +440,7 @@ impl PrintResults for SimilarVideos {
             for struct_similar in &self.similar_vectors {
                 writeln!(writer, "Found {} videos which have similar friends", struct_similar.len())?;
                 for file_entry in struct_similar {
-                    writeln!(writer, "{} - {}", file_entry.path.display(), format_size(file_entry.size, BINARY))?;
+                    writeln!(writer, "{:?} - {}", file_entry.path, format_size(file_entry.size, BINARY))?;
                 }
                 writeln!(writer)?;
             }
@@ -450,9 +450,9 @@ impl PrintResults for SimilarVideos {
             for (fe, struct_similar) in &self.similar_referenced_vectors {
                 writeln!(writer, "Found {} videos which have similar friends", struct_similar.len())?;
                 writeln!(writer)?;
-                writeln!(writer, "{} - {}", fe.path.display(), format_size(fe.size, BINARY))?;
+                writeln!(writer, "{:?} - {}", fe.path, format_size(fe.size, BINARY))?;
                 for file_entry in struct_similar {
-                    writeln!(writer, "{} - {}", file_entry.path.display(), format_size(file_entry.size, BINARY))?;
+                    writeln!(writer, "{:?} - {}", file_entry.path, format_size(file_entry.size, BINARY))?;
                 }
                 writeln!(writer)?;
             }

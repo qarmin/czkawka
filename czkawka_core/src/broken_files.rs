@@ -410,7 +410,7 @@ impl BrokenFiles {
             DeleteMethod::Delete => {
                 for file_entry in &self.broken_files {
                     if fs::remove_file(&file_entry.path).is_err() {
-                        self.common_data.text_messages.warnings.push(file_entry.path.display().to_string());
+                        self.common_data.text_messages.warnings.push(file_entry.path.to_string_lossy().to_string());
                     }
                 }
             }
@@ -465,7 +465,7 @@ impl PrintResults for BrokenFiles {
         if !self.broken_files.is_empty() {
             writeln!(writer, "Found {} broken files.", self.information.number_of_broken_files)?;
             for file_entry in &self.broken_files {
-                writeln!(writer, "{} - {}", file_entry.path.display(), file_entry.error_string)?;
+                writeln!(writer, "{:?} - {}", file_entry.path, file_entry.error_string)?;
             }
         } else {
             write!(writer, "Not found any broken files.")?;

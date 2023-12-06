@@ -729,7 +729,7 @@ pub fn common_read_dir(current_folder: &Path, warnings: &mut Vec<String>) -> Opt
         Err(e) => {
             warnings.push(flc!(
                 "core_cannot_open_dir",
-                generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
+                generate_translation_hashmap(vec![("dir", current_folder.to_string_lossy().to_string()), ("reason", e.to_string())])
             ));
             None
         }
@@ -741,7 +741,7 @@ pub fn common_get_entry_data<'a>(entry: &'a Result<DirEntry, std::io::Error>, wa
         Err(e) => {
             warnings.push(flc!(
                 "core_cannot_read_entry_dir",
-                generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
+                generate_translation_hashmap(vec![("dir", current_folder.to_string_lossy().to_string()), ("reason", e.to_string())])
             ));
             return None;
         }
@@ -754,7 +754,7 @@ pub fn common_get_metadata_dir(entry_data: &DirEntry, warnings: &mut Vec<String>
         Err(e) => {
             warnings.push(flc!(
                 "core_cannot_read_metadata_dir",
-                generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
+                generate_translation_hashmap(vec![("dir", current_folder.to_string_lossy().to_string()), ("reason", e.to_string())])
             ));
             return None;
         }
@@ -768,7 +768,7 @@ pub fn common_get_entry_data_metadata<'a>(entry: &'a Result<DirEntry, std::io::E
         Err(e) => {
             warnings.push(flc!(
                 "core_cannot_read_entry_dir",
-                generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
+                generate_translation_hashmap(vec![("dir", current_folder.to_string_lossy().to_string()), ("reason", e.to_string())])
             ));
             return None;
         }
@@ -778,7 +778,7 @@ pub fn common_get_entry_data_metadata<'a>(entry: &'a Result<DirEntry, std::io::E
         Err(e) => {
             warnings.push(flc!(
                 "core_cannot_read_metadata_dir",
-                generate_translation_hashmap(vec![("dir", current_folder.display().to_string()), ("reason", e.to_string())])
+                generate_translation_hashmap(vec![("dir", current_folder.to_string_lossy().to_string()), ("reason", e.to_string())])
             ));
             return None;
         }
@@ -791,7 +791,7 @@ pub fn get_modified_time(metadata: &Metadata, warnings: &mut Vec<String>, curren
         Ok(t) => match t.duration_since(UNIX_EPOCH) {
             Ok(d) => d.as_secs(),
             Err(_inspected) => {
-                let translation_hashmap = generate_translation_hashmap(vec![("name", current_file_name.display().to_string())]);
+                let translation_hashmap = generate_translation_hashmap(vec![("name", current_file_name.to_string_lossy().to_string())]);
                 if is_folder {
                     warnings.push(flc!("core_folder_modified_before_epoch", translation_hashmap));
                 } else {
@@ -801,7 +801,7 @@ pub fn get_modified_time(metadata: &Metadata, warnings: &mut Vec<String>, curren
             }
         },
         Err(e) => {
-            let translation_hashmap = generate_translation_hashmap(vec![("name", current_file_name.display().to_string()), ("reason", e.to_string())]);
+            let translation_hashmap = generate_translation_hashmap(vec![("name", current_file_name.to_string_lossy().to_string()), ("reason", e.to_string())]);
             if is_folder {
                 warnings.push(flc!("core_folder_no_modification_date", translation_hashmap));
             } else {
@@ -818,7 +818,7 @@ pub fn get_lowercase_name(entry_data: &DirEntry, warnings: &mut Vec<String>) -> 
         Err(_inspected) => {
             warnings.push(flc!(
                 "core_file_not_utf8_name",
-                generate_translation_hashmap(vec![("name", entry_data.path().display().to_string())])
+                generate_translation_hashmap(vec![("name", entry_data.path().to_string_lossy().to_string())])
             ));
             return None;
         }
