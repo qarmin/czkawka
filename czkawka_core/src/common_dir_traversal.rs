@@ -108,7 +108,8 @@ pub(crate) enum FolderEmptiness {
 /// Struct assigned to each checked folder with parent path(used to ignore parent if children are not empty) and flag which shows if folder is empty
 #[derive(Clone, Debug)]
 pub struct FolderEntry {
-    pub(crate) parent_path: Option<PathBuf>,
+    pub path: PathBuf,
+    pub(crate) parent_path: Option<String>,
     // Usable only when finding
     pub(crate) is_empty: FolderEmptiness,
     pub modified_date: u64,
@@ -316,7 +317,7 @@ pub enum DirTraversalResult<T: Ord + PartialOrd> {
     },
     SuccessFolders {
         warnings: Vec<String>,
-        folder_entries: BTreeMap<PathBuf, FolderEntry>, // Path, FolderEntry
+        folder_entries: HashMap<String, FolderEntry>, // Path, FolderEntry
     },
     Stopped,
 }
@@ -344,14 +345,15 @@ where
 
         let mut all_warnings = vec![];
         let mut grouped_file_entries: BTreeMap<T, Vec<FileEntry>> = BTreeMap::new();
-        let mut folder_entries: HashMap<PathBuf, FolderEntry> = HashMap::new();
+        let mut folder_entries: HashMap<String, FolderEntry> = HashMap::new();
 
         // Add root folders into result (only for empty folder collection)
         if self.collect == Collect::EmptyFolders {
             for dir in &self.root_dirs {
                 folder_entries.insert(
-                    dir.clone(),
+                    dir.to_string_lossy().to_string(),
                     FolderEntry {
+                        path: dir.clone(),
                         parent_path: None,
                         is_empty: FolderEmptiness::Maybe,
                         modified_date: 0,
@@ -493,7 +495,7 @@ where
                     set_as_not_empty_folder(&mut folder_entries, current_folder);
                 }
                 for (path, entry) in fe_list {
-                    folder_entries.insert(path, entry);
+                    folder_entries.insert(path.to_string_lossy().to_string(), entry);
                 }
             }
         }
@@ -512,7 +514,7 @@ where
                 warnings: all_warnings,
             },
             Collect::EmptyFolders => DirTraversalResult::SuccessFolders {
-                folder_entries: folder_entries.into_iter().collect(),
+                folder_entries,
                 warnings: all_warnings,
             },
         }
@@ -598,9 +600,10 @@ fn process_dir_in_dir_mode(
 
     dir_result.push(next_folder.clone());
     folder_entries_list.push((
-        next_folder,
+        next_folder.clone(),
         FolderEntry {
-            parent_path: Some(current_folder.to_path_buf()),
+            path: next_folder,
+            parent_path: Some(current_folder.to_string_lossy().to_string()),
             is_empty: FolderEmptiness::Maybe,
             modified_date: get_modified_time(&metadata, warnings, current_folder, true),
         },
@@ -824,8 +827,8 @@ pub fn get_lowercase_name(entry_data: &DirEntry, warnings: &mut Vec<String>) -> 
     Some(name)
 }
 
-fn set_as_not_empty_folder(folder_entries: &mut HashMap<PathBuf, FolderEntry>, current_folder: &Path) {
-    let mut d = folder_entries.get_mut(current_folder).unwrap();
+fn set_as_not_empty_folder(folder_entries: &mut HashMap<String, FolderEntry>, current_folder: &Path) {
+    let mut d = folder_entries.get_mut(current_folder.to_string_lossy().as_ref()).unwrap();
     // Loop to recursively set as non empty this and all his parent folders
     loop {
         d.is_empty = FolderEmptiness::No;

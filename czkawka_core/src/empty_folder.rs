@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
@@ -15,7 +15,7 @@ use crate::common_traits::{DebugPrint, PrintResults};
 pub struct EmptyFolder {
     common_data: CommonToolData,
     information: Info,
-    empty_folder_list: BTreeMap<PathBuf, FolderEntry>, // Path, FolderEntry
+    empty_folder_list: HashMap<String, FolderEntry>, // Path, FolderEntry
 }
 
 #[derive(Default)]
@@ -32,7 +32,7 @@ impl EmptyFolder {
         }
     }
 
-    pub const fn get_empty_folder_list(&self) -> &BTreeMap<PathBuf, FolderEntry> {
+    pub const fn get_empty_folder_list(&self) -> &HashMap<String, FolderEntry> {
         &self.empty_folder_list
     }
 
@@ -54,7 +54,7 @@ impl EmptyFolder {
     }
 
     fn optimize_folders(&mut self) {
-        let mut new_directory_folders: BTreeMap<PathBuf, FolderEntry> = Default::default();
+        let mut new_directory_folders: HashMap<String, FolderEntry> = Default::default();
 
         for (name, folder_entry) in &self.empty_folder_list {
             match &folder_entry.parent_path {
@@ -152,7 +152,7 @@ impl PrintResults for EmptyFolder {
             writeln!(writer, "--------------------------Empty folder list--------------------------")?;
             writeln!(writer, "Found {} empty folders", self.information.number_of_empty_folders)?;
             for name in self.empty_folder_list.keys() {
-                writeln!(writer, "{}", name.display())?;
+                writeln!(writer, "{name}")?;
             }
         } else {
             write!(writer, "Not found any empty folders.")?;

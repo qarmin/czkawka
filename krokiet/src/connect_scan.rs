@@ -152,23 +152,20 @@ fn scan_empty_folders(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>
             set_common_settings(&mut finder, &custom_settings);
             finder.find_empty_folders(Some(&stop_receiver), Some(&progress_sender));
 
-            let mut vector = finder.get_empty_folder_list().keys().cloned().collect::<Vec<PathBuf>>();
+            let mut vector = finder.get_empty_folder_list().values().cloned().collect::<Vec<_>>();
             let messages = finder.get_text_messages().create_messages_text();
 
-            vector.sort_unstable_by_key(|e| {
-                let t = split_path(e.as_path());
-                (t.0, t.1)
-            });
+            vector.sort_unstable_by_key(|fe| split_path(fe.path.as_path()));
 
             a.upgrade_in_event_loop(move |app| {
                 let folder_map = finder.get_empty_folder_list();
                 let items = Rc::new(VecModel::default());
-                for path in vector {
-                    let (directory, file) = split_path(&path);
+                for fe in vector {
+                    let (directory, file) = split_path(&fe.path);
                     let data_model = VecModel::from_slice(&[
                         file.into(),
                         directory.into(),
-                        NaiveDateTime::from_timestamp_opt(folder_map[&path].modified_date as i64, 0).unwrap().to_string().into(),
+                        NaiveDateTime::from_timestamp_opt(fe.modified_date as i64, 0).unwrap().to_string().into(),
                     ]);
 
                     insert_data_to_model(&items, data_model, false);

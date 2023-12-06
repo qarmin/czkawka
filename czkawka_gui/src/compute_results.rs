@@ -1100,24 +1100,24 @@ fn computer_empty_folders(
             let list_store = get_list_store(tree_view);
 
             let hashmap = ef.get_empty_folder_list();
-            let mut vector = hashmap.keys().cloned().collect::<Vec<PathBuf>>();
+            let mut vector = hashmap.values().collect::<Vec<_>>();
 
             vector.sort_unstable_by_key(|e| {
-                let t = split_path(e.as_path());
+                let t = split_path(e.path.as_path());
                 (t.0, t.1)
             });
 
-            for path in vector {
-                let (directory, file) = split_path(&path);
+            for fe in vector {
+                let (directory, file) = split_path(&fe.path);
                 let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
                     (ColumnsEmptyFolders::SelectionButton as u32, &false),
                     (ColumnsEmptyFolders::Name as u32, &file),
                     (ColumnsEmptyFolders::Path as u32, &directory),
                     (
                         ColumnsEmptyFolders::Modification as u32,
-                        &(NaiveDateTime::from_timestamp_opt(hashmap.get(&path).unwrap().modified_date as i64, 0).unwrap().to_string()),
+                        &(NaiveDateTime::from_timestamp_opt(fe.modified_date as i64, 0).unwrap().to_string()),
                     ),
-                    (ColumnsEmptyFolders::ModificationAsSecs as u32, &(hashmap.get(&path).unwrap().modified_date)),
+                    (ColumnsEmptyFolders::ModificationAsSecs as u32, &(fe.modified_date)),
                 ];
                 list_store.set(&list_store.append(), &values);
             }
