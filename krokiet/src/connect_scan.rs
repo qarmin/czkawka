@@ -2,7 +2,7 @@ use crate::settings::{collect_settings, SettingsCustom, ALLOWED_HASH_TYPE_VALUES
 use crate::{CurrentTab, GuiState, MainListModel, MainWindow, ProgressToSend};
 use chrono::NaiveDateTime;
 use crossbeam_channel::{Receiver, Sender};
-use czkawka_core::common::{split_path, DEFAULT_THREAD_SIZE};
+use czkawka_core::common::{split_path, split_path_compare, DEFAULT_THREAD_SIZE};
 use czkawka_core::common_dir_traversal::ProgressData;
 use czkawka_core::common_tool::CommonData;
 use czkawka_core::common_traits::ResultEntry;
@@ -117,7 +117,7 @@ fn scan_empty_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, 
             let mut vector = finder.get_empty_files().clone();
             let messages = finder.get_text_messages().create_messages_text();
 
-            vector.sort_unstable_by_key(|e| split_path(e.get_path()));
+            vector.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
             a.upgrade_in_event_loop(move |app| {
                 let number_of_empty_files = vector.len();
@@ -151,7 +151,7 @@ fn scan_empty_folders(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>
             let mut vector = finder.get_empty_folder_list().values().cloned().collect::<Vec<_>>();
             let messages = finder.get_text_messages().create_messages_text();
 
-            vector.sort_unstable_by_key(|fe| split_path(fe.path.as_path()));
+            vector.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
             a.upgrade_in_event_loop(move |app| {
                 let folder_map = finder.get_empty_folder_list();

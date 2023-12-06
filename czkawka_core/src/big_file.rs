@@ -13,7 +13,7 @@ use log::debug;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::common::{check_folder_children, check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, split_path};
+use crate::common::{check_folder_children, check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, split_path_compare};
 use crate::common_dir_traversal::{common_read_dir, get_modified_time, CheckingMethod, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::{DebugPrint, PrintResults};
@@ -189,7 +189,7 @@ impl BigFile {
         for (_size, mut vector) in iter {
             if self.information.number_of_real_files < self.number_of_files_to_check {
                 if vector.len() > 1 {
-                    vector.sort_unstable_by_key(|e| split_path(e.path.as_path()));
+                    vector.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
                 }
                 for file in vector {
                     if self.information.number_of_real_files < self.number_of_files_to_check {

@@ -1,10 +1,11 @@
 #![allow(unused_imports)]
 // I don't wanna fight with unused imports in this file, so simply ignore it to avoid too much complexity
+use std::cmp::Ordering;
 use std::ffi::OsString;
 use std::fs::{DirEntry, File, OpenOptions};
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
-use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, AtomicUsize};
+use std::sync::{atomic, Arc};
 use std::thread::{sleep, JoinHandle};
 use std::time::{Duration, Instant, SystemTime};
 use std::{fs, thread};
@@ -327,6 +328,25 @@ pub fn split_path(path: &Path) -> (String, String) {
     }
 }
 
+pub fn split_path_compare(path_a: &Path, path_b: &Path) -> Ordering {
+    let parent_dir_a = path_a.parent();
+    let parent_dir_b = path_b.parent();
+    if parent_dir_a.is_none() || parent_dir_b.is_none() {
+        let file_name_a = path_a.file_name();
+        let file_name_b = path_b.file_name();
+        if file_name_a.is_none() || file_name_b.is_none() {
+            return Ordering::Equal;
+        }
+
+        return if file_name_a > file_name_b { Ordering::Greater } else { Ordering::Less };
+    }
+    if parent_dir_a > parent_dir_b {
+        Ordering::Greater
+    } else {
+        Ordering::Less
+    }
+}
+
 pub fn create_crash_message(library_name: &str, file_path: &str, home_library_url: &str) -> String {
     format!("{library_name} library crashed when opening \"{file_path}\", please check if this is fixed with the latest version of {library_name} (e.g. with https://github.com/qarmin/crates_tester) and if it is not fixed, please report bug here - {home_library_url}")
 }
@@ -569,14 +589,14 @@ pub fn prepare_thread_handler_common(
                             checking_method,
                             current_stage,
                             max_stage,
-                            entries_checked: atomic_counter.load(Ordering::Relaxed),
+                            entries_checked: atomic_counter.load(atomic::Ordering::Relaxed),
                             entries_to_check: max_value,
                             tool_type,
                         })
                         .unwrap();
                     time_since_last_send = SystemTime::now();
                 }
-                if !progress_thread_run.load(Ordering::Relaxed) {
+                if !progress_thread_run.load(atomic::Ordering::Relaxed) {
                     break;
                 }
                 sleep(Duration::from_millis(LOOP_DURATION as u64));
@@ -600,7 +620,7 @@ pub fn check_if_stop_received(stop_receiver: Option<&crossbeam_channel::Receiver
 
 #[fun_time(message = "send_info_and_wait_for_ending_all_threads", level = "debug")]
 pub fn send_info_and_wait_for_ending_all_threads(progress_thread_run: &Arc<AtomicBool>, progress_thread_handle: JoinHandle<()>) {
-    progress_thread_run.store(false, Ordering::Relaxed);
+    progress_thread_run.store(false, atomic::Ordering::Relaxed);
     progress_thread_handle.join().unwrap();
 }
 

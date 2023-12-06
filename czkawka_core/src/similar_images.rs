@@ -598,6 +598,7 @@ impl SimilarImages {
                         })
                         .collect::<Vec<_>>();
 
+                    // Sort by tolerance
                     found_items.sort_unstable_by_key(|f| f.0);
                     Some((hash_to_check, found_items))
                 })

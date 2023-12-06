@@ -12,7 +12,7 @@ use humansize::{format_size, BINARY};
 use czkawka_core::bad_extensions::BadExtensions;
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
-use czkawka_core::common::split_path;
+use czkawka_core::common::{split_path, split_path_compare};
 use czkawka_core::common_dir_traversal::{CheckingMethod, FileEntry};
 use czkawka_core::common_tool::CommonData;
 use czkawka_core::duplicate::DuplicateFinder;
@@ -264,7 +264,7 @@ fn computer_bad_extensions(
 
             // Sort
             let mut vector = vector.clone();
-            vector.sort_unstable_by_key(|e| split_path(e.path.as_path()));
+            vector.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
             for file_entry in vector {
                 let (directory, file) = split_path(&file_entry.path);
@@ -336,7 +336,7 @@ fn computer_broken_files(
 
             // Sort
             let mut vector = vector.clone();
-            vector.sort_unstable_by_key(|e| split_path(e.path.as_path()));
+            vector.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
             for file_entry in vector {
                 let (directory, file) = split_path(&file_entry.path);
@@ -499,7 +499,7 @@ fn computer_same_music(
                     // Sort
                     let vec_file_entry = if vec_file_entry.len() >= 2 {
                         let mut vec_file_entry = vec_file_entry.clone();
-                        vec_file_entry.sort_unstable_by_key(|e| split_path(e.path.as_path()));
+                        vec_file_entry.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
                         vec_file_entry
                     } else {
                         vec_file_entry.clone()
@@ -551,7 +551,7 @@ fn computer_same_music(
                     // Sort
                     let vec_file_entry = if vec_file_entry.len() >= 2 {
                         let mut vec_file_entry = vec_file_entry.clone();
-                        vec_file_entry.sort_unstable_by_key(|e| split_path(e.path.as_path()));
+                        vec_file_entry.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
                         vec_file_entry
                     } else {
                         vec_file_entry.clone()
@@ -657,7 +657,7 @@ fn computer_similar_videos(
                     // Sort
                     let vec_file_entry = if vec_file_entry.len() >= 2 {
                         let mut vec_file_entry = vec_file_entry.clone();
-                        vec_file_entry.sort_unstable_by_key(|e| split_path(e.path.as_path()));
+                        vec_file_entry.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
                         vec_file_entry
                     } else {
                         vec_file_entry.clone()
@@ -676,7 +676,7 @@ fn computer_similar_videos(
                     // Sort
                     let vec_file_entry = if vec_file_entry.len() >= 2 {
                         let mut vec_file_entry = vec_file_entry.clone();
-                        vec_file_entry.sort_unstable_by_key(|e| split_path(e.path.as_path()));
+                        vec_file_entry.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
                         vec_file_entry
                     } else {
                         vec_file_entry.clone()
@@ -876,7 +876,7 @@ fn computer_temporary_files(
 
             // Sort // TODO maybe simplify this via common file entry
             let mut vector = vector.clone();
-            vector.sort_unstable_by_key(|e| split_path(e.path.as_path()));
+            vector.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
             for file_entry in vector {
                 let (directory, file) = split_path(&file_entry.path);
@@ -1080,7 +1080,7 @@ fn computer_empty_folders(
             let hashmap = ef.get_empty_folder_list();
             let mut vector = hashmap.values().collect::<Vec<_>>();
 
-            vector.sort_unstable_by_key(|e| split_path(e.path.as_path()));
+            vector.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
             for fe in vector {
                 let (directory, file) = split_path(&fe.path);
@@ -1328,7 +1328,7 @@ fn computer_duplicate_finder(
 fn vector_sort_unstable_entry_by_path(vector: &Vec<FileEntry>) -> Vec<FileEntry> {
     if vector.len() >= 2 {
         let mut vector = vector.clone();
-        vector.sort_unstable_by_key(|e| split_path(e.path.as_path()));
+        vector.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
         vector
     } else {
         vector.clone()
@@ -1337,7 +1337,7 @@ fn vector_sort_unstable_entry_by_path(vector: &Vec<FileEntry>) -> Vec<FileEntry>
 
 fn vector_sort_simple_unstable_entry_by_path(vector: &[FileEntry]) -> Vec<FileEntry> {
     let mut vector = vector.to_owned();
-    vector.sort_unstable_by_key(|e| split_path(e.path.as_path()));
+    vector.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
     vector
 }
 
