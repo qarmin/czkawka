@@ -90,7 +90,7 @@ impl EmptyFiles {
             DeleteMethod::Delete => {
                 for file_entry in &self.empty_files {
                     if fs::remove_file(file_entry.path.clone()).is_err() {
-                        self.common_data.text_messages.warnings.push(file_entry.path.display().to_string());
+                        self.common_data.text_messages.warnings.push(file_entry.path.to_string_lossy().to_string());
                     }
                 }
             }
@@ -135,7 +135,7 @@ impl PrintResults for EmptyFiles {
         if !self.empty_files.is_empty() {
             writeln!(writer, "Found {} empty files.", self.information.number_of_empty_files)?;
             for file_entry in &self.empty_files {
-                writeln!(writer, "{}", file_entry.path.display())?;
+                writeln!(writer, "{:?}", file_entry.path)?;
             }
         } else {
             write!(writer, "Not found any empty files.")?;

@@ -55,25 +55,21 @@ where
         {
             let writer = BufWriter::new(file_handler.unwrap()); // Unwrap because cannot fail here
             if let Err(e) = bincode::serialize_into(writer, &hashmap_to_save) {
-                text_messages
-                    .warnings
-                    .push(format!("Cannot write data to cache file {}, reason {}", cache_file.display(), e));
-                debug!("Failed to save cache to file {:?}", cache_file);
+                text_messages.warnings.push(format!("Cannot write data to cache file {cache_file:?}, reason {e}"));
+                debug!("Failed to save cache to file {cache_file:?}");
                 return text_messages;
             }
-            debug!("Saved binary to file {:?}", cache_file);
+            debug!("Saved binary to file {cache_file:?}");
         }
         if save_also_as_json {
             if let Some(file_handler_json) = file_handler_json {
                 let writer = BufWriter::new(file_handler_json);
                 if let Err(e) = serde_json::to_writer(writer, &hashmap_to_save) {
-                    text_messages
-                        .warnings
-                        .push(format!("Cannot write data to cache file {}, reason {}", cache_file_json.display(), e));
-                    debug!("Failed to save cache to file {:?}", cache_file_json);
+                    text_messages.warnings.push(format!("Cannot write data to cache file {cache_file_json:?}, reason {e}"));
+                    debug!("Failed to save cache to file {cache_file_json:?}");
                     return text_messages;
                 }
-                debug!("Saved json to file {:?}", cache_file_json);
+                debug!("Saved json to file {cache_file_json:?}");
             }
         }
 
@@ -182,10 +178,8 @@ where
             vec_loaded_entries = match bincode::deserialize_from(reader) {
                 Ok(t) => t,
                 Err(e) => {
-                    text_messages
-                        .warnings
-                        .push(format!("Failed to load data from cache file {}, reason {}", cache_file.display(), e));
-                    debug!("Failed to load cache from file {:?}", cache_file);
+                    text_messages.warnings.push(format!("Failed to load data from cache file {cache_file:?}, reason {e}"));
+                    debug!("Failed to load cache from file {cache_file:?}");
                     return (text_messages, None);
                 }
             };
@@ -194,10 +188,8 @@ where
             vec_loaded_entries = match serde_json::from_reader(reader) {
                 Ok(t) => t,
                 Err(e) => {
-                    text_messages
-                        .warnings
-                        .push(format!("Failed to load data from cache file {}, reason {}", cache_file_json.display(), e));
-                    debug!("Failed to load cache from file {:?}", cache_file);
+                    text_messages.warnings.push(format!("Failed to load data from cache file {cache_file_json:?}, reason {e}"));
+                    debug!("Failed to load cache from file {cache_file:?}");
                     return (text_messages, None);
                 }
             };

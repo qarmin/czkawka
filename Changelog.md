@@ -5,6 +5,7 @@
 
 ### CLI
 - Providing full static rust binary with [Eyra](https://github.com/sunfishcode/eyra) - [#1102](https://github.com/qarmin/czkawka/pull/1102)
+- Fixed duplicated `-c` argument, now saving as compact json is handled via `-C` - ???? 
 
 ### Krokiet GUI
 - Initial release of new gui - [#1102](https://github.com/qarmin/czkawka/pull/1102)
@@ -17,7 +18,7 @@
 - Added bigger stack size by default(fixes stack overflow in some musl apps) - [#1102](https://github.com/qarmin/czkawka/pull/1102)
 - Added optional libraw dependency(better single-core performance and support more raw files) - [#1102](https://github.com/qarmin/czkawka/pull/1102)
 - Speedup checking for wildcards and fix invalid recognizing long excluded items - [#1152](https://github.com/qarmin/czkawka/pull/1152)
-- Even 10x speedup when searching for empty folders - [#1152](https://github.com/qarmin/czkawka/pull/1152)
+- Big speedup when searching for empty folders(especially with multithreading + cached FS schema)  - [#1152](https://github.com/qarmin/czkawka/pull/1152)
 - Collecting files for scan can be a lot of faster due lazy file metadata gathering - [#1152](https://github.com/qarmin/czkawka/pull/1152)
 - Fixed recognizing not accessible folders as non-empty - [#1152](https://github.com/qarmin/czkawka/pull/1152)
 

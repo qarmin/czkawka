@@ -1,10 +1,11 @@
 #![allow(unused_imports)]
 // I don't wanna fight with unused imports in this file, so simply ignore it to avoid too much complexity
+use std::cmp::Ordering;
 use std::ffi::OsString;
 use std::fs::{DirEntry, File, OpenOptions};
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
-use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, AtomicUsize};
+use std::sync::{atomic, Arc};
 use std::thread::{sleep, JoinHandle};
 use std::time::{Duration, Instant, SystemTime};
 use std::{fs, thread};
@@ -202,18 +203,18 @@ pub fn open_cache_folder(cache_file_name: &str, save_to_cache: bool, use_json: b
         if save_to_cache {
             if cache_dir.exists() {
                 if !cache_dir.is_dir() {
-                    warnings.push(format!("Config dir {} is a file!", cache_dir.display()));
+                    warnings.push(format!("Config dir {cache_dir:?} is a file!"));
                     return None;
                 }
             } else if let Err(e) = fs::create_dir_all(&cache_dir) {
-                warnings.push(format!("Cannot create config dir {}, reason {}", cache_dir.display(), e));
+                warnings.push(format!("Cannot create config dir {cache_dir:?}, reason {e}"));
                 return None;
             }
 
             file_handler_default = Some(match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
                 Ok(t) => t,
                 Err(e) => {
-                    warnings.push(format!("Cannot create or open cache file {}, reason {}", cache_file.display(), e));
+                    warnings.push(format!("Cannot create or open cache file {cache_file:?}, reason {e}"));
                     return None;
                 }
             });
@@ -221,7 +222,7 @@ pub fn open_cache_folder(cache_file_name: &str, save_to_cache: bool, use_json: b
                 file_handler_json = Some(match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file_json) {
                     Ok(t) => t,
                     Err(e) => {
-                        warnings.push(format!("Cannot create or open cache file {}, reason {}", cache_file_json.display(), e));
+                        warnings.push(format!("Cannot create or open cache file {cache_file_json:?}, reason {e}"));
                         return None;
                     }
                 });
@@ -233,7 +234,7 @@ pub fn open_cache_folder(cache_file_name: &str, save_to_cache: bool, use_json: b
                 if use_json {
                     file_handler_json = Some(OpenOptions::new().read(true).open(&cache_file_json).ok()?);
                 } else {
-                    // messages.push(format!("Cannot find or open cache file {}", cache_file.display())); // No error or warning
+                    // messages.push(format!("Cannot find or open cache file {cache_file:?}")); // No error or warning
                     return None;
                 }
             }
@@ -321,9 +322,28 @@ pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path> + std::fmt::Debug
 
 pub fn split_path(path: &Path) -> (String, String) {
     match (path.parent(), path.file_name()) {
-        (Some(dir), Some(file)) => (dir.display().to_string(), file.to_string_lossy().into_owned()),
-        (Some(dir), None) => (dir.display().to_string(), String::new()),
+        (Some(dir), Some(file)) => (dir.to_string_lossy().to_string(), file.to_string_lossy().into_owned()),
+        (Some(dir), None) => (dir.to_string_lossy().to_string(), String::new()),
         (None, _) => (String::new(), String::new()),
+    }
+}
+
+pub fn split_path_compare(path_a: &Path, path_b: &Path) -> Ordering {
+    let parent_dir_a = path_a.parent();
+    let parent_dir_b = path_b.parent();
+    if parent_dir_a.is_none() || parent_dir_b.is_none() {
+        let file_name_a = path_a.file_name();
+        let file_name_b = path_b.file_name();
+        if file_name_a.is_none() || file_name_b.is_none() {
+            return Ordering::Equal;
+        }
+
+        return if file_name_a > file_name_b { Ordering::Greater } else { Ordering::Less };
+    }
+    if parent_dir_a > parent_dir_b {
+        Ordering::Greater
+    } else {
+        Ordering::Less
     }
 }
 
@@ -569,14 +589,14 @@ pub fn prepare_thread_handler_common(
                             checking_method,
                             current_stage,
                             max_stage,
-                            entries_checked: atomic_counter.load(Ordering::Relaxed),
+                            entries_checked: atomic_counter.load(atomic::Ordering::Relaxed),
                             entries_to_check: max_value,
                             tool_type,
                         })
                         .unwrap();
                     time_since_last_send = SystemTime::now();
                 }
-                if !progress_thread_run.load(Ordering::Relaxed) {
+                if !progress_thread_run.load(atomic::Ordering::Relaxed) {
                     break;
                 }
                 sleep(Duration::from_millis(LOOP_DURATION as u64));
@@ -600,7 +620,7 @@ pub fn check_if_stop_received(stop_receiver: Option<&crossbeam_channel::Receiver
 
 #[fun_time(message = "send_info_and_wait_for_ending_all_threads", level = "debug")]
 pub fn send_info_and_wait_for_ending_all_threads(progress_thread_run: &Arc<AtomicBool>, progress_thread_handle: JoinHandle<()>) {
-    progress_thread_run.store(false, Ordering::Relaxed);
+    progress_thread_run.store(false, atomic::Ordering::Relaxed);
     progress_thread_handle.join().unwrap();
 }
 

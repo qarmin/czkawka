@@ -2,6 +2,8 @@
 
 **Czkawka** (_tch•kav•ka_ (IPA: [ˈʧ̑kafka]), "hiccup" in Polish) is a simple, fast and free app to remove unnecessary files from your computer.
 
+**Krokiet** ((IPA: [ˈkrɔcɛt]), "croquet" in Polish) same as above, but uses Slint frontend.
+
 ## Features
 - Written in memory-safe Rust
 - Amazingly fast - due to using more or less advanced algorithms and multithreading
@@ -9,7 +11,7 @@
 - Multiplatform - works on Linux, Windows, macOS, FreeBSD and many more
 - Cache support - second and further scans should be much faster than the first one
 - CLI frontend - for easy automation
-- GUI frontend - uses GTK 4 framework and looks similar to FSlint
+- GUI frontend - uses GTK 4 or Slint frameworks
 - No spying - Czkawka does not have access to the Internet, nor does it collect any user information or statistics
 - Multilingual - support multiple languages like Polish, English or Italian
 - Multiple tools to use:
@@ -36,9 +38,18 @@ Each tool uses different technologies, so you can find instructions for each of 
 
 ## Benchmarks
 
-Since Czkawka is written in Rust and it aims to be a faster alternative to FSlint or DupeGuru which are written in Python, we need to compare the speed of these tools.
+Previous benchmark was done mostly with two python project - dupeguru and fslint.  
+Both were written in python so it was mostly obvious that Czkawka will be faster due using more low-level functions and faster language.  
 
-I tested it on a 256 GB SSD and an i7-4770 CPU.
+I tried to use rmlint gui but it not even started on my computer, so instead I used Detwinner, fclones-gui and dupeguru.
+
+I tested it on a 1024 GB SSD(Sata 3) and an i7-4770 CPU(4/8HT), disk contains 1742102 files which took 850 GB
+Minimum file size 64KB, with search in hidden folders without any excluded folders/files.
+
+Czkawka 7.0.0
+Detwinner 0.4.2
+Dupeguru 4.3.1
+Fclones-gui 0.2.0
 
 I prepared a disk and performed a test without any folder exceptions and with disabled ignoring of hard links. The disk contained 363 215 files, took 221,8 GB and had 62093 duplicate files in 31790 groups which occupied 4,1 GB.
 
@@ -83,38 +94,40 @@ Similar images which check 349 image files that occupied 1.7 GB
 | DupeGuru 4.1.1 (First Run)  |    55s     |
 | DupeGuru 4.1.1 (Second Run) |     1s     |
 
+Of course there are multiple tools that offer even better performance, but usually are only specialized in one simple area.
+
 ## Comparison to other tools
 
 Bleachbit is a master at finding and removing temporary files, while Czkawka only finds the most basic ones. So these two apps shouldn't be compared directly or be considered as an alternative to one another.
 
 In this comparison remember, that even if app have same features they may work different(e.g. one app may have more options to choose than other). 
 
-|                          |   Czkawka   |   Krokiet   | FSlint |      DupeGuru      |  Bleachbit  |
-|:------------------------:|:-----------:|:-----------:|:------:|:------------------:|:-----------:|
-|         Language         |    Rust     |    Rust     | Python |    Python/Obj-C    |   Python    |
-| Framework base language  |      C      |    Rust     |   C    | C/C++/Obj-C/Swift  |      C      |
-|        Framework         |    GTK 4    |    Slint    | PyGTK2 | Qt 5 (PyQt)/Cocoa  |   PyGTK3    |
-|            OS            | Lin,Mac,Win | Lin,Mac,Win |  Lin   |    Lin,Mac,Win     | Lin,Mac,Win |
-|     Duplicate finder     |      ✔      |      ✔      |   ✔    |         ✔          |             |
-|       Empty files        |      ✔      |      ✔      |   ✔    |                    |             |
-|      Empty folders       |      ✔      |      ✔      |   ✔    |                    |             |
-|     Temporary files      |      ✔      |      ✔      |   ✔    |                    |      ✔      |
-|        Big files         |      ✔      |      ✔      |        |                    |             |
-|      Similar images      |      ✔      |      ✔      |        |         ✔          |             |
-|      Similar videos      |      ✔      |      ✔      |        |                    |             |
-|  Music duplicates(tags)  |      ✔      |      ✔      |        |         ✔          |             |
-|     Invalid symlinks     |      ✔      |      ✔      |   ✔    |                    |             |
-|       Broken files       |      ✔      |      ✔      |        |                    |             |
-|      Names conflict      |      ✔      |      ✔      |   ✔    |                    |             |
-| Invalid names/extensions |      ✔      |      ✔      |   ✔    |                    |             |
-|    Installed packages    |             |             |   ✔    |                    |             |
-|          Bad ID          |             |             |   ✔    |                    |             |
-|  Non stripped binaries   |             |             |   ✔    |                    |             |
-|   Redundant whitespace   |             |             |   ✔    |                    |             |
-|    Overwriting files     |             |             |   ✔    |                    |      ✔      |
-|    Multiple languages    |      ✔      |             |   ✔    |         ✔          |      ✔      |
-|      Cache support       |      ✔      |      ✔      |        |         ✔          |             |
-|  In active development   |     Yes     |             |   No   |        Yes         |     Yes     |
+|                          |   Czkawka   |   Krokiet   | FSlint |     DupeGuru      |  Bleachbit  |
+|:------------------------:|:-----------:|:-----------:|:------:|:-----------------:|:-----------:|
+|         Language         |    Rust     |    Rust     | Python |   Python/Obj-C    |   Python    |
+| Framework base language  |      C      |    Rust     |   C    | C/C++/Obj-C/Swift |      C      |
+|        Framework         |    GTK 4    |    Slint    | PyGTK2 | Qt 5 (PyQt)/Cocoa |   PyGTK3    |
+|            OS            | Lin,Mac,Win | Lin,Mac,Win |  Lin   |    Lin,Mac,Win    | Lin,Mac,Win |
+|     Duplicate finder     |      ✔      |      ✔      |   ✔    |         ✔         |             |
+|       Empty files        |      ✔      |      ✔      |   ✔    |                   |             |
+|      Empty folders       |      ✔      |      ✔      |   ✔    |                   |             |
+|     Temporary files      |      ✔      |      ✔      |   ✔    |                   |      ✔      |
+|        Big files         |      ✔      |      ✔      |        |                   |             |
+|      Similar images      |      ✔      |      ✔      |        |         ✔         |             |
+|      Similar videos      |      ✔      |      ✔      |        |                   |             |
+|  Music duplicates(tags)  |      ✔      |      ✔      |        |         ✔         |             |
+|     Invalid symlinks     |      ✔      |      ✔      |   ✔    |                   |             |
+|       Broken files       |      ✔      |      ✔      |        |                   |             |
+|      Names conflict      |      ✔      |      ✔      |   ✔    |                   |             |
+| Invalid names/extensions |      ✔      |      ✔      |   ✔    |                   |             |
+|    Installed packages    |             |             |   ✔    |                   |             |
+|          Bad ID          |             |             |   ✔    |                   |             |
+|  Non stripped binaries   |             |             |   ✔    |                   |             |
+|   Redundant whitespace   |             |             |   ✔    |                   |             |
+|    Overwriting files     |             |             |   ✔    |                   |      ✔      |
+|    Multiple languages    |      ✔      |             |   ✔    |         ✔         |      ✔      |
+|      Cache support       |      ✔      |      ✔      |        |         ✔         |             |
+|  In active development   |     Yes     |     Yes     |   No   |        Yes        |     Yes     |
 
 ## Other apps
 There are many similar applications to Czkawka on the Internet, which do some things better and some things worse:  
@@ -123,6 +136,7 @@ There are many similar applications to Czkawka on the Internet, which do some th
 - [FSlint](https://github.com/pixelb/fslint) - A little outdated, but still have some tools not available in Czkawka
 - [AntiDupl.NET](https://github.com/ermig1979/AntiDupl) - Shows a lot of metadata of compared images
 - [Video Duplicate Finder](https://github.com/0x90d/videoduplicatefinder) - Finds similar videos(surprising, isn't it), supports video thumbnails
+
 ### CLI
 Due to limited time, the biggest emphasis is on the GUI version so if you are looking for really good and feature-packed console apps, then take a look at these:
 - [Fclones](https://github.com/pkolaczk/fclones) - One of the fastest tools to find duplicates; it is written also in Rust

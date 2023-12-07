@@ -13,8 +13,8 @@ use log::debug;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::common::{check_folder_children, check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, split_path};
-use crate::common_dir_traversal::{common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
+use crate::common::{check_folder_children, check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, split_path_compare};
+use crate::common_dir_traversal::{common_read_dir, get_modified_time, CheckingMethod, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::{DebugPrint, PrintResults};
 
@@ -68,13 +68,9 @@ impl BigFile {
 
     #[fun_time(message = "look_for_big_files", level = "debug")]
     fn look_for_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
-        let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2);
         let mut old_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
 
-        // Add root folders for finding
-        for id in &self.common_data.directories.included_directories {
-            folders_to_check.push(id.clone());
-        }
+        let mut folders_to_check: Vec<PathBuf> = self.common_data.directories.included_directories.clone();
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 0, 0, 0, CheckingMethod::None, self.common_data.tool_type);
@@ -87,13 +83,13 @@ impl BigFile {
             }
 
             let segments: Vec<_> = folders_to_check
-                .par_iter()
+                .into_par_iter()
                 .map(|current_folder| {
                     let mut dir_result = vec![];
                     let mut warnings = vec![];
                     let mut fe_result = vec![];
 
-                    let Some(read_dir) = common_read_dir(current_folder, &mut warnings) else {
+                    let Some(read_dir) = common_read_dir(&current_folder, &mut warnings) else {
                         return (dir_result, warnings, fe_result);
                     };
 
@@ -110,22 +106,22 @@ impl BigFile {
                             check_folder_children(
                                 &mut dir_result,
                                 &mut warnings,
-                                current_folder,
+                                &current_folder,
                                 &entry_data,
                                 self.common_data.recursive_search,
                                 &self.common_data.directories,
                                 &self.common_data.excluded_items,
                             );
                         } else if file_type.is_file() {
-                            self.collect_file_entry(&atomic_counter, &entry_data, &mut fe_result, &mut warnings, current_folder);
+                            self.collect_file_entry(&atomic_counter, &entry_data, &mut fe_result, &mut warnings, &current_folder);
                         }
                     }
                     (dir_result, warnings, fe_result)
                 })
                 .collect();
 
-            // Advance the frontier
-            folders_to_check.clear();
+            let required_size = segments.iter().map(|(segment, _, _)| segment.len()).sum::<usize>();
+            folders_to_check = Vec::with_capacity(required_size);
 
             // Process collected data
             for (segment, warnings, fe_result) in segments {
@@ -155,12 +151,7 @@ impl BigFile {
         current_folder: &Path,
     ) {
         atomic_counter.fetch_add(1, Ordering::Relaxed);
-
-        let Some(file_name_lowercase) = get_lowercase_name(entry_data, warnings) else {
-            return;
-        };
-
-        if !self.common_data.allowed_extensions.matches_filename(&file_name_lowercase) {
+        if !self.common_data.allowed_extensions.check_if_entry_ends_with_extension(entry_data) {
             return;
         }
 
@@ -178,9 +169,9 @@ impl BigFile {
         }
 
         let fe: FileEntry = FileEntry {
-            path: current_file_name.clone(),
-            size: metadata.len(),
             modified_date: get_modified_time(&metadata, warnings, &current_file_name, false),
+            path: current_file_name,
+            size: metadata.len(),
         };
 
         fe_result.push((fe.size, fe));
@@ -198,10 +189,7 @@ impl BigFile {
         for (_size, mut vector) in iter {
             if self.information.number_of_real_files < self.number_of_files_to_check {
                 if vector.len() > 1 {
-                    vector.sort_unstable_by_key(|e| {
-                        let t = split_path(e.path.as_path());
-                        (t.0, t.1)
-                    });
+                    vector.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
                 }
                 for file in vector {
                     if self.information.number_of_real_files < self.number_of_files_to_check {
@@ -222,7 +210,7 @@ impl BigFile {
             DeleteMethod::Delete => {
                 for file_entry in &self.big_files {
                     if fs::remove_file(&file_entry.path).is_err() {
-                        self.common_data.text_messages.warnings.push(file_entry.path.display().to_string());
+                        self.common_data.text_messages.warnings.push(file_entry.path.to_string_lossy().to_string());
                     }
                 }
             }
@@ -271,7 +259,7 @@ impl PrintResults for BigFile {
                 writeln!(writer, "{} the smallest files.\n\n", self.information.number_of_real_files)?;
             }
             for file_entry in &self.big_files {
-                writeln!(writer, "{} ({}) - {}", format_size(file_entry.size, BINARY), file_entry.size, file_entry.path.display())?;
+                writeln!(writer, "{} ({}) - {:?}", format_size(file_entry.size, BINARY), file_entry.size, file_entry.path)?;
             }
         } else {
             write!(writer, "Not found any files.").unwrap();

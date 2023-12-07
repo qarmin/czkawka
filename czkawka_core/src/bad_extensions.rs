@@ -426,7 +426,7 @@ impl PrintResults for BadExtensions {
         writeln!(writer, "Found {} files with invalid extension.\n", self.information.number_of_files_with_bad_extension)?;
 
         for file_entry in &self.bad_extensions_files {
-            writeln!(writer, "{} ----- {}", file_entry.path.display(), file_entry.proper_extensions)?;
+            writeln!(writer, "{:?} ----- {}", file_entry.path, file_entry.proper_extensions)?;
         }
 
         Ok(())

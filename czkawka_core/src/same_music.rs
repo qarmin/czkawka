@@ -180,7 +180,7 @@ impl SameMusic {
         if !self.common_data.allowed_extensions.using_custom_extensions() {
             self.common_data.allowed_extensions.extend_allowed_extensions(AUDIO_FILES_EXTENSIONS);
         } else {
-            self.common_data.allowed_extensions.validate_allowed_extensions(AUDIO_FILES_EXTENSIONS);
+            self.common_data.allowed_extensions.extend_allowed_extensions(AUDIO_FILES_EXTENSIONS);
             if !self.common_data.allowed_extensions.using_custom_extensions() {
                 return true;
             }
@@ -242,7 +242,7 @@ impl SameMusic {
             debug!("load_cache - Starting to check for differences");
             for (name, file_entry) in mem::take(&mut self.music_to_check) {
                 if let Some(cached_file_entry) = loaded_hash_map.get(&name) {
-                    records_already_cached.insert(name.clone(), cached_file_entry.clone());
+                    records_already_cached.insert(name, cached_file_entry.clone());
                 } else {
                     non_cached_files_to_check.insert(name, file_entry);
                 }
@@ -622,7 +622,7 @@ impl SameMusic {
                     music_entries.push(entry.clone());
                 }
                 used_paths.insert(f_string);
-                music_entries.push(f_entry.clone());
+                music_entries.push(f_entry);
                 duplicated_music_entries.push(music_entries);
             }
         }
@@ -955,14 +955,8 @@ impl PrintResults for SameMusic {
                 for file_entry in vec_file_entry {
                     writeln!(
                         writer,
-                        "TT: {}  -  TA: {}  -  Y: {}  -  L: {}  -  G: {}  -  B: {}  -  P: {}",
-                        file_entry.track_title,
-                        file_entry.track_artist,
-                        file_entry.year,
-                        file_entry.length,
-                        file_entry.genre,
-                        file_entry.bitrate,
-                        file_entry.path.display()
+                        "TT: {}  -  TA: {}  -  Y: {}  -  L: {}  -  G: {}  -  B: {}  -  P: {:?}",
+                        file_entry.track_title, file_entry.track_artist, file_entry.year, file_entry.length, file_entry.genre, file_entry.bitrate, file_entry.path
                     )?;
                 }
                 writeln!(writer)?;
@@ -974,26 +968,14 @@ impl PrintResults for SameMusic {
                 writeln!(writer)?;
                 writeln!(
                     writer,
-                    "TT: {}  -  TA: {}  -  Y: {}  -  L: {}  -  G: {}  -  B: {}  -  P: {}",
-                    file_entry.track_title,
-                    file_entry.track_artist,
-                    file_entry.year,
-                    file_entry.length,
-                    file_entry.genre,
-                    file_entry.bitrate,
-                    file_entry.path.display()
+                    "TT: {}  -  TA: {}  -  Y: {}  -  L: {}  -  G: {}  -  B: {}  -  P: {:?}",
+                    file_entry.track_title, file_entry.track_artist, file_entry.year, file_entry.length, file_entry.genre, file_entry.bitrate, file_entry.path
                 )?;
                 for file_entry in vec_file_entry {
                     writeln!(
                         writer,
-                        "TT: {}  -  TA: {}  -  Y: {}  -  L: {}  -  G: {}  -  B: {}  -  P: {}",
-                        file_entry.track_title,
-                        file_entry.track_artist,
-                        file_entry.year,
-                        file_entry.length,
-                        file_entry.genre,
-                        file_entry.bitrate,
-                        file_entry.path.display()
+                        "TT: {}  -  TA: {}  -  Y: {}  -  L: {}  -  G: {}  -  B: {}  -  P: {:?}",
+                        file_entry.track_title, file_entry.track_artist, file_entry.year, file_entry.length, file_entry.genre, file_entry.bitrate, file_entry.path
                     )?;
                 }
                 writeln!(writer)?;

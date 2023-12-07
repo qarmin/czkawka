@@ -75,7 +75,7 @@ impl InvalidSymlinks {
             DeleteMethod::Delete => {
                 for file_entry in &self.invalid_symlinks {
                     if fs::remove_file(file_entry.path.clone()).is_err() {
-                        self.common_data.text_messages.warnings.push(file_entry.path.display().to_string());
+                        self.common_data.text_messages.warnings.push(file_entry.path.to_string_lossy().to_string());
                     }
                 }
             }
@@ -112,9 +112,9 @@ impl PrintResults for InvalidSymlinks {
             for file_entry in &self.invalid_symlinks {
                 writeln!(
                     writer,
-                    "{}\t\t{}\t\t{}",
-                    file_entry.path.display(),
-                    file_entry.symlink_info.clone().expect("invalid traversal result").destination_path.display(),
+                    "{:?}\t\t{:?}\t\t{}",
+                    file_entry.path,
+                    file_entry.symlink_info.clone().expect("invalid traversal result").destination_path,
                     match file_entry.symlink_info.clone().expect("invalid traversal result").type_of_error {
                         ErrorType::InfiniteRecursion => "Infinite Recursion",
                         ErrorType::NonExistentFile => "Non Existent File",

@@ -1,6 +1,5 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::path::PathBuf;
 use std::rc::Rc;
 
 use chrono::NaiveDateTime;
@@ -13,7 +12,7 @@ use humansize::{format_size, BINARY};
 use czkawka_core::bad_extensions::BadExtensions;
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
-use czkawka_core::common::split_path;
+use czkawka_core::common::{split_path, split_path_compare};
 use czkawka_core::common_dir_traversal::{CheckingMethod, FileEntry};
 use czkawka_core::common_tool::CommonData;
 use czkawka_core::duplicate::DuplicateFinder;
@@ -265,10 +264,7 @@ fn computer_bad_extensions(
 
             // Sort
             let mut vector = vector.clone();
-            vector.sort_unstable_by_key(|e| {
-                let t = split_path(e.path.as_path());
-                (t.0, t.1)
-            });
+            vector.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
             for file_entry in vector {
                 let (directory, file) = split_path(&file_entry.path);
@@ -340,10 +336,7 @@ fn computer_broken_files(
 
             // Sort
             let mut vector = vector.clone();
-            vector.sort_unstable_by_key(|e| {
-                let t = split_path(e.path.as_path());
-                (t.0, t.1)
-            });
+            vector.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
             for file_entry in vector {
                 let (directory, file) = split_path(&file_entry.path);
@@ -506,10 +499,7 @@ fn computer_same_music(
                     // Sort
                     let vec_file_entry = if vec_file_entry.len() >= 2 {
                         let mut vec_file_entry = vec_file_entry.clone();
-                        vec_file_entry.sort_unstable_by_key(|e| {
-                            let t = split_path(e.path.as_path());
-                            (t.0, t.1)
-                        });
+                        vec_file_entry.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
                         vec_file_entry
                     } else {
                         vec_file_entry.clone()
@@ -561,10 +551,7 @@ fn computer_same_music(
                     // Sort
                     let vec_file_entry = if vec_file_entry.len() >= 2 {
                         let mut vec_file_entry = vec_file_entry.clone();
-                        vec_file_entry.sort_unstable_by_key(|e| {
-                            let t = split_path(e.path.as_path());
-                            (t.0, t.1)
-                        });
+                        vec_file_entry.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
                         vec_file_entry
                     } else {
                         vec_file_entry.clone()
@@ -670,10 +657,7 @@ fn computer_similar_videos(
                     // Sort
                     let vec_file_entry = if vec_file_entry.len() >= 2 {
                         let mut vec_file_entry = vec_file_entry.clone();
-                        vec_file_entry.sort_unstable_by_key(|e| {
-                            let t = split_path(e.path.as_path());
-                            (t.0, t.1)
-                        });
+                        vec_file_entry.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
                         vec_file_entry
                     } else {
                         vec_file_entry.clone()
@@ -692,10 +676,7 @@ fn computer_similar_videos(
                     // Sort
                     let vec_file_entry = if vec_file_entry.len() >= 2 {
                         let mut vec_file_entry = vec_file_entry.clone();
-                        vec_file_entry.sort_unstable_by_key(|e| {
-                            let t = split_path(e.path.as_path());
-                            (t.0, t.1)
-                        });
+                        vec_file_entry.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
                         vec_file_entry
                     } else {
                         vec_file_entry.clone()
@@ -895,10 +876,7 @@ fn computer_temporary_files(
 
             // Sort // TODO maybe simplify this via common file entry
             let mut vector = vector.clone();
-            vector.sort_unstable_by_key(|e| {
-                let t = split_path(e.path.as_path());
-                (t.0, t.1)
-            });
+            vector.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
             for file_entry in vector {
                 let (directory, file) = split_path(&file_entry.path);
@@ -1100,24 +1078,21 @@ fn computer_empty_folders(
             let list_store = get_list_store(tree_view);
 
             let hashmap = ef.get_empty_folder_list();
-            let mut vector = hashmap.keys().cloned().collect::<Vec<PathBuf>>();
+            let mut vector = hashmap.values().collect::<Vec<_>>();
 
-            vector.sort_unstable_by_key(|e| {
-                let t = split_path(e.as_path());
-                (t.0, t.1)
-            });
+            vector.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
-            for path in vector {
-                let (directory, file) = split_path(&path);
+            for fe in vector {
+                let (directory, file) = split_path(&fe.path);
                 let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
                     (ColumnsEmptyFolders::SelectionButton as u32, &false),
                     (ColumnsEmptyFolders::Name as u32, &file),
                     (ColumnsEmptyFolders::Path as u32, &directory),
                     (
                         ColumnsEmptyFolders::Modification as u32,
-                        &(NaiveDateTime::from_timestamp_opt(hashmap.get(&path).unwrap().modified_date as i64, 0).unwrap().to_string()),
+                        &(NaiveDateTime::from_timestamp_opt(fe.modified_date as i64, 0).unwrap().to_string()),
                     ),
-                    (ColumnsEmptyFolders::ModificationAsSecs as u32, &(hashmap.get(&path).unwrap().modified_date)),
+                    (ColumnsEmptyFolders::ModificationAsSecs as u32, &(fe.modified_date)),
                 ];
                 list_store.set(&list_store.append(), &values);
             }
@@ -1353,10 +1328,7 @@ fn computer_duplicate_finder(
 fn vector_sort_unstable_entry_by_path(vector: &Vec<FileEntry>) -> Vec<FileEntry> {
     if vector.len() >= 2 {
         let mut vector = vector.clone();
-        vector.sort_unstable_by_key(|e| {
-            let t = split_path(e.path.as_path());
-            (t.0, t.1)
-        });
+        vector.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
         vector
     } else {
         vector.clone()
@@ -1365,10 +1337,7 @@ fn vector_sort_unstable_entry_by_path(vector: &Vec<FileEntry>) -> Vec<FileEntry>
 
 fn vector_sort_simple_unstable_entry_by_path(vector: &[FileEntry]) -> Vec<FileEntry> {
     let mut vector = vector.to_owned();
-    vector.sort_unstable_by_key(|e| {
-        let t = split_path(e.path.as_path());
-        (t.0, t.1)
-    });
+    vector.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
     vector
 }
 

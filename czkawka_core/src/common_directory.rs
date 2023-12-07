@@ -107,7 +107,7 @@ impl Directories {
             if !is_excluded {
                 messages.warnings.push(flc!(
                     "core_directory_must_exists",
-                    generate_translation_hashmap(vec![("path", directory.display().to_string())])
+                    generate_translation_hashmap(vec![("path", directory.to_string_lossy().to_string())])
                 ));
             }
             return (None, messages);
@@ -116,7 +116,7 @@ impl Directories {
         if !directory.is_dir() {
             messages.warnings.push(flc!(
                 "core_directory_must_be_directory",
-                generate_translation_hashmap(vec![("path", directory.display().to_string())])
+                generate_translation_hashmap(vec![("path", directory.to_string_lossy().to_string())])
             ));
             return (None, messages);
         }
@@ -293,7 +293,7 @@ impl Directories {
                     Ok(m) => self.included_dev_ids.push(m.dev()),
                     Err(_) => messages.errors.push(flc!(
                         "core_directory_unable_to_get_device_id",
-                        generate_translation_hashmap(vec![("path", d.display().to_string())])
+                        generate_translation_hashmap(vec![("path", d.to_string_lossy().to_string())])
                     )),
                 }
             }
@@ -326,7 +326,7 @@ impl Directories {
             Ok(m) => Ok(!self.included_dev_ids.iter().any(|&id| id == m.dev())),
             Err(_) => Err(flc!(
                 "core_directory_unable_to_get_device_id",
-                generate_translation_hashmap(vec![("path", path.display().to_string())])
+                generate_translation_hashmap(vec![("path", path.to_string_lossy().to_string())])
             )),
         }
     }

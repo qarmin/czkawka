@@ -24,7 +24,7 @@ use crate::common::{
     send_info_and_wait_for_ending_all_threads, HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS,
 };
 use crate::common_cache::{get_similar_images_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
-use crate::common_dir_traversal::{common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
+use crate::common_dir_traversal::{common_read_dir, get_modified_time, CheckingMethod, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::{DebugPrint, PrintResults, ResultEntry};
 use crate::flc;
@@ -146,7 +146,7 @@ impl SimilarImages {
 
     #[fun_time(message = "check_for_similar_images", level = "debug")]
     fn check_for_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
-        let mut folders_to_check: Vec<PathBuf> = Vec::with_capacity(1024 * 2);
+        let mut folders_to_check: Vec<PathBuf> = self.common_data.directories.included_directories.clone();
 
         if !self.common_data.allowed_extensions.using_custom_extensions() {
             self.common_data.allowed_extensions.extend_allowed_extensions(IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS);
@@ -156,7 +156,7 @@ impl SimilarImages {
         } else {
             self.common_data
                 .allowed_extensions
-                .validate_allowed_extensions(&[IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS, HEIC_EXTENSIONS].concat());
+                .extend_allowed_extensions(&[IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS, HEIC_EXTENSIONS].concat());
             if !self.common_data.allowed_extensions.using_custom_extensions() {
                 return true;
             }
@@ -177,13 +177,13 @@ impl SimilarImages {
             }
 
             let segments: Vec<_> = folders_to_check
-                .par_iter()
+                .into_par_iter()
                 .map(|current_folder| {
                     let mut dir_result = vec![];
                     let mut warnings = vec![];
                     let mut fe_result = vec![];
 
-                    let Some(read_dir) = common_read_dir(current_folder, &mut warnings) else {
+                    let Some(read_dir) = common_read_dir(&current_folder, &mut warnings) else {
                         return (dir_result, warnings, fe_result);
                     };
 
@@ -194,12 +194,11 @@ impl SimilarImages {
                         let Ok(file_type) = entry_data.file_type() else {
                             continue;
                         };
-
                         if file_type.is_dir() {
                             check_folder_children(
                                 &mut dir_result,
                                 &mut warnings,
-                                current_folder,
+                                &current_folder,
                                 &entry_data,
                                 self.common_data.recursive_search,
                                 &self.common_data.directories,
@@ -207,15 +206,15 @@ impl SimilarImages {
                             );
                         } else if file_type.is_file() {
                             atomic_counter.fetch_add(1, Ordering::Relaxed);
-                            self.add_file_entry(current_folder, &entry_data, &mut fe_result, &mut warnings);
+                            self.add_file_entry(&current_folder, &entry_data, &mut fe_result, &mut warnings);
                         }
                     }
                     (dir_result, warnings, fe_result)
                 })
                 .collect();
 
-            // Advance the frontier
-            folders_to_check.clear();
+            let required_size = segments.iter().map(|(segment, _, _)| segment.len()).sum::<usize>();
+            folders_to_check = Vec::with_capacity(required_size);
 
             // Process collected data
             for (segment, warnings, fe_result) in segments {
@@ -226,6 +225,8 @@ impl SimilarImages {
                 }
             }
         }
+        eprintln!("Tested {} files", atomic_counter.load(Ordering::Relaxed));
+        eprintln!("Imagest to check {}", self.images_to_check.len());
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
@@ -233,11 +234,7 @@ impl SimilarImages {
     }
 
     fn add_file_entry(&self, current_folder: &Path, entry_data: &DirEntry, fe_result: &mut Vec<(String, FileEntry)>, warnings: &mut Vec<String>) {
-        let Some(file_name_lowercase) = get_lowercase_name(entry_data, warnings) else {
-            return;
-        };
-
-        if !self.common_data.allowed_extensions.matches_filename(&file_name_lowercase) {
+        if !self.common_data.allowed_extensions.check_if_entry_ends_with_extension(entry_data) {
             return;
         }
 
@@ -284,7 +281,7 @@ impl SimilarImages {
             debug!("hash_images-load_cache - starting calculating diff");
             for (name, file_entry) in mem::take(&mut self.images_to_check) {
                 if let Some(cached_file_entry) = loaded_hash_map.get(&name) {
-                    records_already_cached.insert(name.clone(), cached_file_entry.clone());
+                    records_already_cached.insert(name, cached_file_entry.clone());
                 } else {
                     non_cached_files_to_check.insert(name, file_entry);
                 }
@@ -601,6 +598,7 @@ impl SimilarImages {
                         })
                         .collect::<Vec<_>>();
 
+                    // Sort by tolerance
                     found_items.sort_unstable_by_key(|f| f.0);
                     Some((hash_to_check, found_items))
                 })
@@ -858,8 +856,8 @@ impl PrintResults for SimilarImages {
                 for file_entry in struct_similar {
                     writeln!(
                         writer,
-                        "{} - {} - {} - {}",
-                        file_entry.path.display(),
+                        "{:?} - {} - {} - {}",
+                        file_entry.path,
                         file_entry.dimensions,
                         format_size(file_entry.size, BINARY),
                         get_string_from_similarity(&file_entry.similarity, self.hash_size)
@@ -875,8 +873,8 @@ impl PrintResults for SimilarImages {
                 writeln!(writer)?;
                 writeln!(
                     writer,
-                    "{} - {} - {} - {}",
-                    file_entry.path.display(),
+                    "{:?} - {} - {} - {}",
+                    file_entry.path,
                     file_entry.dimensions,
                     format_size(file_entry.size, BINARY),
                     get_string_from_similarity(&file_entry.similarity, self.hash_size)
@@ -884,8 +882,8 @@ impl PrintResults for SimilarImages {
                 for file_entry in vec_file_entry {
                     writeln!(
                         writer,
-                        "{} - {} - {} - {}",
-                        file_entry.path.display(),
+                        "{:?} - {} - {} - {}",
+                        file_entry.path,
                         file_entry.dimensions,
                         format_size(file_entry.size, BINARY),
                         get_string_from_similarity(&file_entry.similarity, self.hash_size)
