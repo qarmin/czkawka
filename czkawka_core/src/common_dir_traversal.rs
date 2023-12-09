@@ -396,7 +396,7 @@ where
 
                     let Some(read_dir) = common_read_dir(&current_folder, &mut warnings) else {
                         if collect == Collect::EmptyFolders {
-                            set_as_not_empty_folder_list.push(current_folder);
+                            set_as_not_empty_folder_list.push(current_folder.to_string_lossy().to_string());
                         }
                         return (dir_result, warnings, fe_result, set_as_not_empty_folder_list, folder_entries_list);
                     };
@@ -450,7 +450,7 @@ where
                                     }
                                 }
 
-                                set_as_not_empty_folder_list.push(current_folder.clone());
+                                set_as_not_empty_folder_list.push(current_folder.to_string_lossy().to_string());
                             }
                             (EntryType::File, Collect::InvalidSymlinks) => {
                                 counter += 1;
@@ -575,12 +575,13 @@ fn process_dir_in_dir_mode(
     dir_result: &mut Vec<PathBuf>,
     warnings: &mut Vec<String>,
     excluded_items: &ExcludedItems,
-    set_as_not_empty_folder_list: &mut Vec<PathBuf>,
+    set_as_not_empty_folder_list: &mut Vec<String>,
     folder_entries_list: &mut Vec<(PathBuf, FolderEntry)>,
 ) {
+    let current_folder_str = current_folder.to_string_lossy().to_string();
     let next_folder = current_folder.join(entry_data.file_name());
     if excluded_items.is_excluded(&next_folder) || directories.is_excluded(&next_folder) {
-        set_as_not_empty_folder_list.push(current_folder.to_path_buf());
+        set_as_not_empty_folder_list.push(current_folder_str);
         return;
     }
 
@@ -594,7 +595,7 @@ fn process_dir_in_dir_mode(
     }
 
     let Some(metadata) = common_get_metadata_dir(entry_data, warnings, current_folder) else {
-        set_as_not_empty_folder_list.push(current_folder.to_path_buf());
+        set_as_not_empty_folder_list.push(current_folder_str);
         return;
     };
 
@@ -603,7 +604,7 @@ fn process_dir_in_dir_mode(
         next_folder.clone(),
         FolderEntry {
             path: next_folder,
-            parent_path: Some(current_folder.to_string_lossy().to_string()),
+            parent_path: Some(current_folder_str),
             is_empty: FolderEmptiness::Maybe,
             modified_date: get_modified_time(&metadata, warnings, current_folder, true),
         },
@@ -827,8 +828,8 @@ pub fn get_lowercase_name(entry_data: &DirEntry, warnings: &mut Vec<String>) -> 
     Some(name)
 }
 
-fn set_as_not_empty_folder(folder_entries: &mut HashMap<String, FolderEntry>, current_folder: &Path) {
-    let mut d = folder_entries.get_mut(current_folder.to_string_lossy().as_ref()).unwrap();
+fn set_as_not_empty_folder(folder_entries: &mut HashMap<String, FolderEntry>, current_folder: &str) {
+    let mut d = folder_entries.get_mut(current_folder).unwrap();
     // Loop to recursively set as non empty this and all his parent folders
     loop {
         d.is_empty = FolderEmptiness::No;
