@@ -231,9 +231,7 @@ impl BadExtensions {
 
                 true
             }
-            DirTraversalResult::SuccessFolders { .. } => {
-                unreachable!()
-            }
+
             DirTraversalResult::Stopped => false,
         }
     }

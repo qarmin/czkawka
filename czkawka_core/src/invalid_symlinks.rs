@@ -64,7 +64,6 @@ impl InvalidSymlinks {
                 debug!("Found {} invalid symlinks.", self.information.number_of_invalid_symlinks);
                 true
             }
-            DirTraversalResult::SuccessFolders { .. } => unreachable!(),
             DirTraversalResult::Stopped => false,
         }
     }
