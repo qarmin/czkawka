@@ -177,13 +177,16 @@ impl EmptyFolder {
             for (segment, warnings, set_as_not_empty_folder_list, fe_list) in segments {
                 folders_to_check.extend(segment);
                 self.common_data.text_messages.warnings.extend(warnings);
-                for current_folder in &set_as_not_empty_folder_list {
-                    Self::set_as_not_empty_folder(&mut folder_entries, current_folder);
-                }
+                non_empty_folders.extend(set_as_not_empty_folder_list);
                 for (path, entry) in fe_list {
                     folder_entries.insert(path, entry);
                 }
             }
+        }
+
+        // Start to
+        for current_folder in non_empty_folders.into_iter().rev() {
+            Self::set_as_not_empty_folder(&mut folder_entries, &current_folder);
         }
 
         for (name, folder_entry) in folder_entries {
@@ -199,6 +202,10 @@ impl EmptyFolder {
 
     pub(crate) fn set_as_not_empty_folder(folder_entries: &mut HashMap<String, FolderEntry>, current_folder: &str) {
         let mut d = folder_entries.get_mut(current_folder).unwrap();
+        if d.is_empty == FolderEmptiness::No {
+            return; // Already set as non empty by one of his child
+        }
+
         // Loop to recursively set as non empty this and all his parent folders
         loop {
             d.is_empty = FolderEmptiness::No;

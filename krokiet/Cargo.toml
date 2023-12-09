@@ -40,8 +40,8 @@ rayon = "1.8.0"
 # Translations
 i18n-embed = { version = "0.14", features = ["fluent-system", "desktop-requester"] }
 i18n-embed-fl = "0.7"
-rust-embed = { version = "8.0", features = ["debug-embed"] }
-once_cell = "1.18"
+rust-embed = { version = "8.1", features = ["debug-embed"] }
+once_cell = "1.19"
 
 [build-dependencies]
 slint-build = "1.3"
