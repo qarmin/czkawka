@@ -174,7 +174,6 @@ impl SimilarVideos {
                             check_folder_children(
                                 &mut dir_result,
                                 &mut warnings,
-                                &current_folder,
                                 &entry_data,
                                 self.common_data.recursive_search,
                                 &self.common_data.directories,
@@ -182,7 +181,7 @@ impl SimilarVideos {
                             );
                         } else if file_type.is_file() {
                             atomic_counter.fetch_add(1, Ordering::Relaxed);
-                            self.add_video_file_entry(&entry_data, &mut fe_result, &mut warnings, &current_folder);
+                            self.add_video_file_entry(&entry_data, &mut fe_result, &mut warnings);
                         }
                     }
                     (dir_result, warnings, fe_result)
@@ -207,12 +206,12 @@ impl SimilarVideos {
         true
     }
 
-    fn add_video_file_entry(&self, entry_data: &DirEntry, fe_result: &mut Vec<(String, FileEntry)>, warnings: &mut Vec<String>, current_folder: &Path) {
+    fn add_video_file_entry(&self, entry_data: &DirEntry, fe_result: &mut Vec<(String, FileEntry)>, warnings: &mut Vec<String>) {
         if !self.common_data.allowed_extensions.check_if_entry_ends_with_extension(entry_data) {
             return;
         }
 
-        let current_file_name = current_folder.join(entry_data.file_name());
+        let current_file_name = entry_data.path();
         if self.common_data.excluded_items.is_excluded(&current_file_name) {
             return;
         }

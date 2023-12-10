@@ -91,6 +91,10 @@ pub fn print_version_mode() {
     if cfg!(debug_assertions) {
         warn!("You are running debug version of app which is a lot of slower than release version.");
     }
+
+    if option_env!("USING_CRANELIFT").is_some() {
+        warn!("You are running app with cranelift which is intended only for fast compilation, not runtime performance.");
+    }
 }
 
 pub fn set_default_number_of_threads() {
@@ -170,7 +174,11 @@ pub fn remove_folder_if_contains_only_empty_folders(path: impl AsRef<Path>) -> b
         let Some(entry) = entries_to_check.pop() else {
             break;
         };
-        if !entry.path().is_dir() {
+        let Some(file_type) = entry.file_type().ok() else {
+            return false;
+        };
+
+        if !file_type.is_dir() {
             return false;
         }
         let Ok(internal_read_dir) = entry.path().read_dir() else {
@@ -418,7 +426,6 @@ pub fn normalize_windows_path(path_to_change: impl AsRef<Path>) -> PathBuf {
 pub fn check_folder_children(
     dir_result: &mut Vec<PathBuf>,
     warnings: &mut Vec<String>,
-    current_folder: &Path,
     entry_data: &DirEntry,
     recursive_search: bool,
     directories: &Directories,
@@ -428,25 +435,25 @@ pub fn check_folder_children(
         return;
     }
 
-    let next_folder = current_folder.join(entry_data.file_name());
-    if directories.is_excluded(&next_folder) {
+    let next_item = entry_data.path();
+    if directories.is_excluded(&next_item) {
         return;
     }
 
-    if excluded_items.is_excluded(&next_folder) {
+    if excluded_items.is_excluded(&next_item) {
         return;
     }
 
     #[cfg(target_family = "unix")]
     if directories.exclude_other_filesystems() {
-        match directories.is_on_other_filesystems(&next_folder) {
+        match directories.is_on_other_filesystems(&next_item) {
             Ok(true) => return,
             Err(e) => warnings.push(e),
             _ => (),
         }
     }
 
-    dir_result.push(next_folder);
+    dir_result.push(next_item);
 }
 
 // Here we assume, that internal Vec<> have at least 1 object

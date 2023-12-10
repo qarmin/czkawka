@@ -368,7 +368,7 @@ where
 
                         match (entry_type(file_type), collect) {
                             (EntryType::Dir, Collect::Files | Collect::InvalidSymlinks) => {
-                                process_dir_in_file_symlink_mode(recursive_search, &current_folder, entry_data, &directories, &mut dir_result, &mut warnings, &excluded_items);
+                                process_dir_in_file_symlink_mode(recursive_search, entry_data, &directories, &mut dir_result, &mut warnings, &excluded_items);
                             }
                             (EntryType::File, Collect::Files) => {
                                 counter += 1;
@@ -377,7 +377,6 @@ where
                                     &mut warnings,
                                     &mut fe_result,
                                     &allowed_extensions,
-                                    &current_folder,
                                     &directories,
                                     &excluded_items,
                                     minimal_file_size,
@@ -389,15 +388,7 @@ where
                             }
                             (EntryType::Symlink, Collect::InvalidSymlinks) => {
                                 counter += 1;
-                                process_symlink_in_symlink_mode(
-                                    entry_data,
-                                    &mut warnings,
-                                    &mut fe_result,
-                                    &allowed_extensions,
-                                    &current_folder,
-                                    &directories,
-                                    &excluded_items,
-                                );
+                                process_symlink_in_symlink_mode(entry_data, &mut warnings, &mut fe_result, &allowed_extensions, &directories, &excluded_items);
                             }
                             (EntryType::Symlink, Collect::Files) | (EntryType::Other, _) => {
                                 // nothing to do
@@ -444,7 +435,6 @@ fn process_file_in_file_mode(
     warnings: &mut Vec<String>,
     fe_result: &mut Vec<FileEntry>,
     allowed_extensions: &Extensions,
-    current_folder: &Path,
     directories: &Directories,
     excluded_items: &ExcludedItems,
     minimal_file_size: u64,
@@ -454,7 +444,7 @@ fn process_file_in_file_mode(
         return;
     }
 
-    let current_file_name = current_folder.join(entry_data.file_name());
+    let current_file_name = entry_data.path();
     if excluded_items.is_excluded(&current_file_name) {
         return;
     }
@@ -468,7 +458,7 @@ fn process_file_in_file_mode(
         }
     }
 
-    let Some(metadata) = common_get_metadata_dir(entry_data, warnings, current_folder) else {
+    let Some(metadata) = common_get_metadata_dir(entry_data, warnings, &current_file_name) else {
         return;
     };
 
@@ -488,7 +478,6 @@ fn process_file_in_file_mode(
 
 fn process_dir_in_file_symlink_mode(
     recursive_search: bool,
-    current_folder: &Path,
     entry_data: &DirEntry,
     directories: &Directories,
     dir_result: &mut Vec<PathBuf>,
@@ -499,25 +488,25 @@ fn process_dir_in_file_symlink_mode(
         return;
     }
 
-    let next_folder = current_folder.join(entry_data.file_name());
-    if directories.is_excluded(&next_folder) {
+    let dir_path = entry_data.path();
+    if directories.is_excluded(&dir_path) {
         return;
     }
 
-    if excluded_items.is_excluded(&next_folder) {
+    if excluded_items.is_excluded(&dir_path) {
         return;
     }
 
     #[cfg(target_family = "unix")]
     if directories.exclude_other_filesystems() {
-        match directories.is_on_other_filesystems(&next_folder) {
+        match directories.is_on_other_filesystems(&dir_path) {
             Ok(true) => return,
             Err(e) => warnings.push(e),
             _ => (),
         }
     }
 
-    dir_result.push(next_folder);
+    dir_result.push(dir_path);
 }
 
 fn process_symlink_in_symlink_mode(
@@ -525,7 +514,6 @@ fn process_symlink_in_symlink_mode(
     warnings: &mut Vec<String>,
     fe_result: &mut Vec<FileEntry>,
     allowed_extensions: &Extensions,
-    current_folder: &Path,
     directories: &Directories,
     excluded_items: &ExcludedItems,
 ) {
@@ -533,21 +521,21 @@ fn process_symlink_in_symlink_mode(
         return;
     }
 
-    let current_file_name = current_folder.join(entry_data.file_name());
+    let current_file_name = entry_data.path();
     if excluded_items.is_excluded(&current_file_name) {
         return;
     }
 
     #[cfg(target_family = "unix")]
     if directories.exclude_other_filesystems() {
-        match directories.is_on_other_filesystems(current_folder) {
+        match directories.is_on_other_filesystems(&current_file_name) {
             Ok(true) => return,
             Err(e) => warnings.push(e),
             _ => (),
         }
     }
 
-    let Some(metadata) = common_get_metadata_dir(entry_data, warnings, current_folder) else {
+    let Some(metadata) = common_get_metadata_dir(entry_data, warnings, &current_file_name) else {
         return;
     };
 

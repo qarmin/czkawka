@@ -257,7 +257,7 @@ impl LoadSaveStruct {
                 };
                 return Some((config_file_handler, config_file));
             }
-            if !config_file.exists() || !config_file.is_file() {
+            if !config_file.is_file() {
                 if manual_execution {
                     // Don't show errors when there is no configuration file when starting app
                     add_text_to_text_view(

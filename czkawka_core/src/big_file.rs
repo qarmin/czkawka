@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::fs::DirEntry;
 use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 
@@ -106,14 +106,13 @@ impl BigFile {
                             check_folder_children(
                                 &mut dir_result,
                                 &mut warnings,
-                                &current_folder,
                                 &entry_data,
                                 self.common_data.recursive_search,
                                 &self.common_data.directories,
                                 &self.common_data.excluded_items,
                             );
                         } else if file_type.is_file() {
-                            self.collect_file_entry(&atomic_counter, &entry_data, &mut fe_result, &mut warnings, &current_folder);
+                            self.collect_file_entry(&atomic_counter, &entry_data, &mut fe_result, &mut warnings);
                         }
                     }
                     (dir_result, warnings, fe_result)
@@ -142,20 +141,13 @@ impl BigFile {
         true
     }
 
-    pub fn collect_file_entry(
-        &self,
-        atomic_counter: &Arc<AtomicUsize>,
-        entry_data: &DirEntry,
-        fe_result: &mut Vec<(u64, FileEntry)>,
-        warnings: &mut Vec<String>,
-        current_folder: &Path,
-    ) {
+    pub fn collect_file_entry(&self, atomic_counter: &Arc<AtomicUsize>, entry_data: &DirEntry, fe_result: &mut Vec<(u64, FileEntry)>, warnings: &mut Vec<String>) {
         atomic_counter.fetch_add(1, Ordering::Relaxed);
         if !self.common_data.allowed_extensions.check_if_entry_ends_with_extension(entry_data) {
             return;
         }
 
-        let current_file_name = current_folder.join(entry_data.file_name());
+        let current_file_name = entry_data.path();
         if self.common_data.excluded_items.is_excluded(&current_file_name) {
             return;
         }

@@ -231,10 +231,10 @@ impl EmptyFolder {
         set_as_not_empty_folder_list: &mut Vec<String>,
         folder_entries_list: &mut Vec<(String, FolderEntry)>,
     ) {
-        let current_folder_str = current_folder.to_string_lossy().to_string();
-        let next_folder = current_folder.join(entry_data.file_name());
+        let parent_folder_str = current_folder.to_string_lossy().to_string();
+        let next_folder = entry_data.path();
         if excluded_items.is_excluded(&next_folder) || directories.is_excluded(&next_folder) {
-            set_as_not_empty_folder_list.push(current_folder_str);
+            set_as_not_empty_folder_list.push(parent_folder_str);
             return;
         }
 
@@ -247,8 +247,8 @@ impl EmptyFolder {
             }
         }
 
-        let Some(metadata) = common_get_metadata_dir(entry_data, warnings, current_folder) else {
-            set_as_not_empty_folder_list.push(current_folder_str);
+        let Some(metadata) = common_get_metadata_dir(entry_data, warnings, &next_folder) else {
+            set_as_not_empty_folder_list.push(parent_folder_str);
             return;
         };
 
@@ -257,7 +257,7 @@ impl EmptyFolder {
             next_folder.to_string_lossy().to_string(),
             FolderEntry {
                 path: next_folder,
-                parent_path: Some(current_folder_str),
+                parent_path: Some(parent_folder_str),
                 is_empty: FolderEmptiness::Maybe,
                 modified_date: get_modified_time(&metadata, warnings, current_folder, true),
             },
