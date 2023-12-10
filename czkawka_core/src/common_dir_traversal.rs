@@ -292,10 +292,6 @@ pub enum DirTraversalResult<T: Ord + PartialOrd> {
         warnings: Vec<String>,
         grouped_file_entries: BTreeMap<T, Vec<FileEntry>>,
     },
-    // SuccessFolders {
-    //     warnings: Vec<String>,
-    //     folder_entries: HashMap<String, FolderEntry>, // Path, FolderEntry
-    // },
     Stopped,
 }
 

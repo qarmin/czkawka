@@ -94,7 +94,7 @@ impl EmptyFolder {
         self.information.number_of_empty_folders = self.empty_folder_list.len();
     }
 
-    // #[fun_time(message = "check_for_empty_folders", level = "debug")]
+    #[fun_time(message = "check_for_empty_folders", level = "debug")]
     fn check_for_empty_folders(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         let mut folders_to_check: Vec<PathBuf> = self.common_data.directories.included_directories.clone();
 
