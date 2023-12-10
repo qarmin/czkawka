@@ -320,8 +320,8 @@ fn collect_all_files_and_dirs(dir: &str) -> std::io::Result<CollectedFiles> {
             let path_str = entry.path().to_string_lossy().to_string();
 
             if file_type.is_dir() {
-                folders.insert(path_str);
-                folders_to_check.push(path_str.clone());
+                folders.insert(path_str.clone());
+                folders_to_check.push(path_str);
             } else if file_type.is_symlink() {
                 symlinks.insert(path_str);
             } else if file_type.is_file() {
