@@ -75,10 +75,7 @@ pub fn get_available_threads() -> usize {
 }
 
 pub fn print_version_mode() {
-    let rust_version = match rustc_version::version_meta() {
-        Ok(meta) => meta.semver.to_string(),
-        Err(_) => "<unknown>".to_string(),
-    };
+    let rust_version = env!("RUST_VERSION_INTERNAL");
     let debug_release = if cfg!(debug_assertions) { "debug" } else { "release" };
 
     let processors = get_available_threads();

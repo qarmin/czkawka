@@ -8,7 +8,7 @@ description = "Core of Czkawka app"
 license = "MIT"
 homepage = "https://github.com/qarmin/czkawka"
 repository = "https://github.com/qarmin/czkawka"
-
+build = "build.rs"
 
 [dependencies]
 humansize = "2.1"
@@ -77,10 +77,12 @@ anyhow = { version = "1.0" }
 state = "0.6"
 
 os_info = { version = "3", default-features = false }
-rustc_version = "0.4"
 log = "0.4.20"
 handsome_logger = "0.8"
 fun_time = { version = "0.3", features = ["log"] }
+
+[build-dependencies]
+rustc_version = "0.4"
 
 [features]
 default = []

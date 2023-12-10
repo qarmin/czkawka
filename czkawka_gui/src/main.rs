@@ -83,6 +83,8 @@ fn build_ui(application: &Application, arguments: &[OsString]) {
     let gui_data: GuiData = GuiData::new_with_application(application);
 
     // Used for getting data from thread
+    // TODO - deprecation happened without any example, so not sure how new code should look like
+    #[allow(deprecated)]
     let (glib_stop_sender, glib_stop_receiver) = glib::MainContext::channel(Priority::default());
 
     // Futures progress report
