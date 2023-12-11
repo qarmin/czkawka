@@ -31,6 +31,8 @@ mod set_initial_gui_info;
 mod settings;
 
 use crossbeam_channel::{unbounded, Receiver, Sender};
+use slint::VecModel;
+use std::rc::Rc;
 // use std::rc::Rc;
 
 use crate::connect_delete::connect_delete_button;
@@ -60,6 +62,10 @@ fn main() {
 
     // to_remove_debug(&app);
 
+    // Slint files may already contains data in models, so clear them before starting - todo,
+    // check if non zeroed models are useful
+    zeroing_all_models(&app);
+
     set_initial_gui_infos(&app);
 
     create_default_settings_files();
@@ -78,6 +84,12 @@ fn main() {
     app.run().unwrap();
 
     save_all_settings_to_file(&app);
+}
+
+pub fn zeroing_all_models(app: &MainWindow) {
+    app.set_empty_folder_model(Rc::new(VecModel::default()).into());
+    app.set_empty_files_model(Rc::new(VecModel::default()).into());
+    app.set_similar_images_model(Rc::new(VecModel::default()).into());
 }
 
 // // TODO remove this after debugging - or leave commented

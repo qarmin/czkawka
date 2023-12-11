@@ -10,14 +10,14 @@ homepage = "https://github.com/qarmin/czkawka"
 repository = "https://github.com/qarmin/czkawka"
 
 [dependencies]
-clap = { version = "4.3", features = ["derive"] }
+clap = { version = "4.4", features = ["derive"] }
 
 # For enum types
 image_hasher = "1.2"
 
 log = "0.4.20"
 handsome_logger = "0.8"
-fun_time = { version = "0.3.1", features = ["log"] }
+fun_time = { version = "0.3", features = ["log"] }
 czkawka_core = { path = "../czkawka_core", version = "6.1.0", features = [] }
 
 [features]

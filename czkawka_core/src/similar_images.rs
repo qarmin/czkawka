@@ -198,7 +198,6 @@ impl SimilarImages {
                             check_folder_children(
                                 &mut dir_result,
                                 &mut warnings,
-                                &current_folder,
                                 &entry_data,
                                 self.common_data.recursive_search,
                                 &self.common_data.directories,
@@ -206,7 +205,7 @@ impl SimilarImages {
                             );
                         } else if file_type.is_file() {
                             atomic_counter.fetch_add(1, Ordering::Relaxed);
-                            self.add_file_entry(&current_folder, &entry_data, &mut fe_result, &mut warnings);
+                            self.add_file_entry(&entry_data, &mut fe_result, &mut warnings);
                         }
                     }
                     (dir_result, warnings, fe_result)
@@ -233,12 +232,12 @@ impl SimilarImages {
         true
     }
 
-    fn add_file_entry(&self, current_folder: &Path, entry_data: &DirEntry, fe_result: &mut Vec<(String, FileEntry)>, warnings: &mut Vec<String>) {
+    fn add_file_entry(&self, entry_data: &DirEntry, fe_result: &mut Vec<(String, FileEntry)>, warnings: &mut Vec<String>) {
         if !self.common_data.allowed_extensions.check_if_entry_ends_with_extension(entry_data) {
             return;
         }
 
-        let current_file_name = current_folder.join(entry_data.file_name());
+        let current_file_name = entry_data.path();
         if self.common_data.excluded_items.is_excluded(&current_file_name) {
             return;
         }
@@ -249,16 +248,17 @@ impl SimilarImages {
 
         // Checking files
         if (self.common_data.minimal_file_size..=self.common_data.maximal_file_size).contains(&metadata.len()) {
+            let path_str = current_file_name.to_string_lossy().to_string();
             let fe: FileEntry = FileEntry {
-                path: current_file_name.clone(),
                 size: metadata.len(),
                 dimensions: String::new(),
                 modified_date: get_modified_time(&metadata, warnings, &current_file_name, false),
+                path: current_file_name,
                 hash: Vec::new(),
                 similarity: 0,
             };
 
-            fe_result.push((current_file_name.to_string_lossy().to_string(), fe));
+            fe_result.push((path_str, fe));
         }
     }
 

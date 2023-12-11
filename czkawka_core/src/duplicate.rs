@@ -204,9 +204,6 @@ impl DuplicateFinder {
 
                 true
             }
-            DirTraversalResult::SuccessFolders { .. } => {
-                unreachable!()
-            }
             DirTraversalResult::Stopped => false,
         }
     }
@@ -280,9 +277,7 @@ impl DuplicateFinder {
 
                 true
             }
-            DirTraversalResult::SuccessFolders { .. } => {
-                unreachable!()
-            }
+
             DirTraversalResult::Stopped => false,
         }
     }
@@ -356,9 +351,7 @@ impl DuplicateFinder {
 
                 true
             }
-            DirTraversalResult::SuccessFolders { .. } => {
-                unreachable!()
-            }
+
             DirTraversalResult::Stopped => false,
         }
     }

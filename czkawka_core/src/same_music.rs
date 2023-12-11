@@ -219,9 +219,7 @@ impl SameMusic {
                 debug!("check_files - Found {} music files.", self.music_to_check.len());
                 true
             }
-            DirTraversalResult::SuccessFolders { .. } => {
-                unreachable!()
-            }
+
             DirTraversalResult::Stopped => false,
         }
     }

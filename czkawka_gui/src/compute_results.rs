@@ -1325,13 +1325,13 @@ fn computer_duplicate_finder(
     }
 }
 
-fn vector_sort_unstable_entry_by_path(vector: &Vec<FileEntry>) -> Vec<FileEntry> {
+fn vector_sort_unstable_entry_by_path(vector: &[FileEntry]) -> Vec<FileEntry> {
     if vector.len() >= 2 {
-        let mut vector = vector.clone();
+        let mut vector = vector.to_owned();
         vector.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
         vector
     } else {
-        vector.clone()
+        vector.to_owned()
     }
 }
 

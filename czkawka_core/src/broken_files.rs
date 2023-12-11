@@ -144,14 +144,13 @@ impl BrokenFiles {
                             check_folder_children(
                                 &mut dir_result,
                                 &mut warnings,
-                                &current_folder,
                                 &entry_data,
                                 self.common_data.recursive_search,
                                 &self.common_data.directories,
                                 &self.common_data.excluded_items,
                             );
                         } else if file_type.is_file() {
-                            if let Some(file_entry) = self.get_file_entry(&atomic_counter, &entry_data, &mut warnings, &current_folder) {
+                            if let Some(file_entry) = self.get_file_entry(&atomic_counter, &entry_data, &mut warnings) {
                                 fe_result.push((file_entry.path.to_string_lossy().to_string(), file_entry));
                             }
                         }
@@ -178,7 +177,7 @@ impl BrokenFiles {
         true
     }
 
-    fn get_file_entry(&self, atomic_counter: &Arc<AtomicUsize>, entry_data: &DirEntry, warnings: &mut Vec<String>, current_folder: &Path) -> Option<FileEntry> {
+    fn get_file_entry(&self, atomic_counter: &Arc<AtomicUsize>, entry_data: &DirEntry, warnings: &mut Vec<String>) -> Option<FileEntry> {
         atomic_counter.fetch_add(1, Ordering::Relaxed);
         if !self.common_data.allowed_extensions.check_if_entry_ends_with_extension(entry_data) {
             return None;
@@ -191,7 +190,7 @@ impl BrokenFiles {
             return None;
         }
 
-        let current_file_name = current_folder.join(entry_data.file_name());
+        let current_file_name = entry_data.path();
         if self.common_data.excluded_items.is_excluded(&current_file_name) {
             return None;
         }
