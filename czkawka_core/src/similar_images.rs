@@ -307,7 +307,7 @@ impl SimilarImages {
     // - Join already read hashes with hashes which were read from file
     // - Join all hashes and save it to file
 
-    #[fun_time(message = "hash_images", level = "debug")]
+    // #[fun_time(message = "hash_images", level = "debug")]
     fn hash_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.hash_images_load_cache();
 
@@ -315,34 +315,35 @@ impl SimilarImages {
             prepare_thread_handler_common(progress_sender, 1, 2, non_cached_files_to_check.len(), CheckingMethod::None, self.common_data.tool_type);
 
         debug!("hash_images - start hashing images");
-        let mut vec_file_entry: Vec<(FileEntry, ImHash)> = non_cached_files_to_check
+        let mut vec_file_entry: Vec<FileEntry> = non_cached_files_to_check
             .into_par_iter()
-            .map(|(_s, file_entry)| {
+            .map(|(_s, mut file_entry)| {
                 atomic_counter.fetch_add(1, Ordering::Relaxed);
                 if check_if_stop_received(stop_receiver) {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
-                Some(Some(self.collect_image_file_entry(file_entry)))
+                self.collect_image_file_entry(&mut file_entry);
+
+                Some(Some(file_entry))
             })
             .while_some()
-            .filter(Option::is_some)
-            .map(Option::unwrap)
-            .collect::<Vec<(FileEntry, ImHash)>>();
+            .filter_map(|e| e)
+            .collect::<Vec<FileEntry>>();
         debug!("hash_images - end hashing images");
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
         // Just connect loaded results with already calculated hashes
         for file_entry in records_already_cached.into_values() {
-            vec_file_entry.push((file_entry.clone(), file_entry.hash));
+            vec_file_entry.push(file_entry);
         }
 
         // All valid entries are used to create bktree used to check for hash similarity
-        for (file_entry, buf) in &vec_file_entry {
-            // Only use to comparing, non broken hashes(all 0 or 255 hashes means that algorithm fails to decode them because e.g. contains a log of alpha channel)
-            if !(buf.is_empty() || buf.iter().all(|e| *e == 0) || buf.iter().all(|e| *e == 255)) {
-                self.image_hashes.entry(buf.clone()).or_default().push(file_entry.clone());
+        for file_entry in &vec_file_entry {
+            // Only use to comparing, non broken hashes(all 0 or 255 hashes means that algorithm fails to decode them because e.g. contains a lot of alpha channel)
+            if !(file_entry.hash.is_empty() || file_entry.hash.iter().all(|e| *e == 0) || file_entry.hash.iter().all(|e| *e == 255)) {
+                self.image_hashes.entry(file_entry.hash.clone()).or_default().push(file_entry.clone());
             }
         }
 
@@ -357,11 +358,11 @@ impl SimilarImages {
     }
 
     #[fun_time(message = "save_to_cache", level = "debug")]
-    fn save_to_cache(&mut self, vec_file_entry: Vec<(FileEntry, ImHash)>, loaded_hash_map: BTreeMap<String, FileEntry>) {
+    fn save_to_cache(&mut self, vec_file_entry: Vec<FileEntry>, loaded_hash_map: BTreeMap<String, FileEntry>) {
         if self.common_data.use_cache {
             // Must save all results to file, old loaded from file with all currently counted results
             let mut all_results: BTreeMap<String, FileEntry> = loaded_hash_map;
-            for (file_entry, _hash) in vec_file_entry {
+            for file_entry in vec_file_entry {
                 all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
             }
 
@@ -375,7 +376,7 @@ impl SimilarImages {
         }
     }
 
-    fn collect_image_file_entry(&self, mut file_entry: FileEntry) -> (FileEntry, ImHash) {
+    fn collect_image_file_entry(&self, file_entry: &mut FileEntry) {
         let file_name_lowercase = file_entry.path.to_string_lossy().to_lowercase();
 
         let image;
@@ -385,7 +386,7 @@ impl SimilarImages {
             if RAW_IMAGE_EXTENSIONS.iter().any(|e| file_name_lowercase.ends_with(e)) {
                 image = match get_dynamic_image_from_raw_image(&file_entry.path) {
                     Some(t) => t,
-                    None => return (file_entry, Vec::new()),
+                    None => return,
                 };
                 break 'krztyna;
             }
@@ -395,7 +396,7 @@ impl SimilarImages {
                 image = match get_dynamic_image_from_heic(&file_entry.path.to_string_lossy()) {
                     Ok(t) => t,
                     Err(_) => {
-                        return (file_entry, Vec::new());
+                        return;
                     }
                 };
                 break 'krztyna;
@@ -417,12 +418,12 @@ impl SimilarImages {
                 if let Ok(image2) = image_result {
                     image = image2;
                 } else {
-                    return (file_entry, Vec::new());
+                    return;
                 }
             } else {
                 let message = create_crash_message("Image-rs", &file_entry.path.to_string_lossy(), "https://github.com/image-rs/image/issues");
                 println!("{message}");
-                return (file_entry, Vec::new());
+                return;
             }
 
             break 'krztyna;
@@ -439,11 +440,7 @@ impl SimilarImages {
         let hasher = hasher_config.to_hasher();
 
         let hash = hasher.hash_image(&image);
-        let buf: ImHash = hash.as_bytes().to_vec();
-
-        file_entry.hash = buf.clone();
-
-        (file_entry, buf)
+        file_entry.hash = hash.as_bytes().to_vec();
     }
 
     // Split hashes at 2 parts, base hashes and hashes to compare, 3 argument is set of hashes with multiple images
