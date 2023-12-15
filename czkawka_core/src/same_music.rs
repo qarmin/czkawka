@@ -834,7 +834,7 @@ fn read_single_file_tag(path: &str, music_entry: &mut MusicEntry) -> bool {
         return false;
     };
 
-    let result = panic::catch_unwind(move || {
+    let Ok(possible_tagged_file) = panic::catch_unwind(move || {
         match read_from(&mut file) {
             Ok(t) => Some(t),
             Err(_inspected) => {
@@ -842,20 +842,13 @@ fn read_single_file_tag(path: &str, music_entry: &mut MusicEntry) -> bool {
                 None
             }
         }
-    });
-
-    let tagged_file = if let Ok(t) = result {
-        match t {
-            Some(r) => r,
-            None => {
-                return true;
-            }
-        }
-    } else {
+    }) else {
         let message = create_crash_message("Lofty", path, "https://github.com/image-rs/image/issues");
         println!("{message}");
         return false;
     };
+
+    let Some(tagged_file) = possible_tagged_file else { return true };
 
     let properties = tagged_file.properties();
 

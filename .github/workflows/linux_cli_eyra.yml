@@ -23,7 +23,7 @@ jobs:
 
       # New versions of nightly rust may call new unimplemented in eyra functions, so use const version
       - name: Setup rust version
-        run: rustup default nightly-2023-11-29
+        run: rustup default nightly-2023-12-14
 
       - name: Add eyra
         run: |

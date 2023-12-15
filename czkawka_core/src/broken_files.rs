@@ -212,7 +212,7 @@ impl BrokenFiles {
     fn check_broken_image(&self, mut file_entry: FileEntry) -> Option<FileEntry> {
         let mut file_entry_clone = file_entry.clone();
 
-        let result = panic::catch_unwind(|| {
+        panic::catch_unwind(|| {
             if let Err(e) = image::open(&file_entry.path) {
                 let error_string = e.to_string();
                 // This error is a problem with image library, remove check when https://github.com/image-rs/jpeg-decoder/issues/130 will be fixed
@@ -222,17 +222,13 @@ impl BrokenFiles {
                 file_entry.error_string = error_string;
             }
             Some(file_entry)
-        });
-
-        // If image crashed during opening, needs to be printed info about crashes thing
-        if let Ok(image_result) = result {
-            image_result
-        } else {
+        })
+        .unwrap_or_else(|_| {
             let message = create_crash_message("Image-rs", &file_entry_clone.path.to_string_lossy(), "https://github.com/Serial-ATA/lofty-rs");
             println!("{message}");
             file_entry_clone.error_string = message;
             Some(file_entry_clone)
-        }
+        })
     }
     fn check_broken_zip(&self, mut file_entry: FileEntry) -> Option<FileEntry> {
         match File::open(&file_entry.path) {
@@ -250,21 +246,18 @@ impl BrokenFiles {
             Ok(file) => {
                 let mut file_entry_clone = file_entry.clone();
 
-                let result = panic::catch_unwind(|| {
+                panic::catch_unwind(|| {
                     if let Err(e) = audio_checker::parse_audio_file(file) {
                         file_entry.error_string = e.to_string();
                     }
                     Some(file_entry)
-                });
-
-                if let Ok(audio_result) = result {
-                    audio_result
-                } else {
+                })
+                .unwrap_or_else(|_| {
                     let message = create_crash_message("Symphonia", &file_entry_clone.path.to_string_lossy(), "https://github.com/pdeljanov/Symphonia");
                     println!("{message}");
                     file_entry_clone.error_string = message;
                     Some(file_entry_clone)
-                }
+                })
             }
             Err(_inspected) => None,
         }
@@ -273,7 +266,7 @@ impl BrokenFiles {
         let parser_options = ParseOptions::tolerant(); // Only show as broken files with really big bugs
 
         let mut file_entry_clone = file_entry.clone();
-        let result = panic::catch_unwind(|| {
+        panic::catch_unwind(|| {
             match FileOptions::cached().parse_options(parser_options).open(&file_entry.path) {
                 Ok(file) => {
                     for idx in 0..file.num_pages() {
@@ -297,15 +290,13 @@ impl BrokenFiles {
                 }
             }
             Some(file_entry)
-        });
-        if let Ok(pdf_result) = result {
-            pdf_result
-        } else {
+        })
+        .unwrap_or_else(|_| {
             let message = create_crash_message("PDF-rs", &file_entry_clone.path.to_string_lossy(), "https://github.com/pdf-rs/pdf");
             println!("{message}");
             file_entry_clone.error_string = message;
             Some(file_entry_clone)
-        }
+        })
     }
 
     #[fun_time(message = "load_cache", level = "debug")]
