@@ -13,7 +13,7 @@ use czkawka_core::bad_extensions::BadExtensions;
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
 use czkawka_core::common::{split_path, split_path_compare};
-use czkawka_core::common_dir_traversal::{CheckingMethod, FileEntry};
+use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::common_tool::CommonData;
 use czkawka_core::common_traits::ResultEntry;
 use czkawka_core::duplicate::DuplicateFinder;
@@ -23,8 +23,7 @@ use czkawka_core::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::localizer_core::generate_translation_hashmap;
 use czkawka_core::same_music::{MusicSimilarity, SameMusic};
 use czkawka_core::similar_images;
-use czkawka_core::similar_images::ImagesEntry;
-use czkawka_core::similar_images::SimilarImages;
+use czkawka_core::similar_images::{ImagesEntry, SimilarImages};
 use czkawka_core::similar_videos::SimilarVideos;
 use czkawka_core::temporary::Temporary;
 
@@ -1327,13 +1326,16 @@ fn computer_duplicate_finder(
     }
 }
 
-fn vector_sort_unstable_entry_by_path(vector: &[FileEntry]) -> Vec<FileEntry> {
+fn vector_sort_unstable_entry_by_path<T>(vector: &[T]) -> Vec<T>
+where
+    T: ResultEntry + Clone,
+{
     if vector.len() >= 2 {
-        let mut vector = vector.to_owned();
-        vector.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+        let mut vector = vector.to_vec();
+        vector.sort_unstable_by(|a, b| split_path_compare(a.get_path(), b.get_path()));
         vector
     } else {
-        vector.to_owned()
+        vector.to_vec()
     }
 }
 

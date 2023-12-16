@@ -64,7 +64,6 @@ pub struct FileEntry {
     pub path: PathBuf,
     pub size: u64,
     pub modified_date: u64,
-    pub hash: String,
 }
 
 impl ResultEntry for FileEntry {
@@ -468,7 +467,6 @@ fn process_file_in_file_mode(
             size: metadata.len(),
             modified_date: get_modified_time(&metadata, warnings, &current_file_name, false),
             path: current_file_name,
-            hash: String::new(),
         };
 
         fe_result.push(fe);
@@ -543,7 +541,6 @@ fn process_symlink_in_symlink_mode(
         size: metadata.len(),
         modified_date: get_modified_time(&metadata, warnings, &current_file_name, false),
         path: current_file_name,
-        hash: String::new(),
     };
 
     fe_result.push(fe);
