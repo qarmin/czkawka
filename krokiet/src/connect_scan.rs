@@ -11,6 +11,7 @@ use czkawka_core::empty_folder::{EmptyFolder, FolderEntry};
 use czkawka_core::similar_images;
 use czkawka_core::similar_images::SimilarImages;
 use humansize::{format_size, BINARY};
+use rayon::prelude::*;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
 use std::rc::Rc;
 use std::thread;
@@ -74,7 +75,7 @@ fn scan_similar_images(a: Weak<MainWindow>, progress_sender: Sender<ProgressData
             let messages = finder.get_text_messages().create_messages_text();
 
             for vec_fe in &mut vector {
-                vec_fe.sort_unstable_by_key(|e| e.similarity);
+                vec_fe.par_sort_unstable_by_key(|e| e.similarity);
             }
 
             let hash_size = custom_settings.similar_images_sub_hash_size;
@@ -120,7 +121,7 @@ fn scan_empty_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, 
             let mut vector = finder.get_empty_files().clone();
             let messages = finder.get_text_messages().create_messages_text();
 
-            vector.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+            vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
             a.upgrade_in_event_loop(move |app| {
                 write_empty_files_results(&app, vector, messages);
@@ -157,7 +158,7 @@ fn scan_empty_folders(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>
             let mut vector = finder.get_empty_folder_list().values().cloned().collect::<Vec<_>>();
             let messages = finder.get_text_messages().create_messages_text();
 
-            vector.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+            vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
             a.upgrade_in_event_loop(move |app| {
                 write_empty_folders_results(&app, vector, messages);

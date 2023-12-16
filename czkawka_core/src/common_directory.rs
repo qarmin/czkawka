@@ -122,7 +122,6 @@ impl Directories {
         }
 
         // Try to canonicalize them
-
         if cfg!(windows) {
             // Only canonicalize if it's not a network path
             // This can be check by checking if path starts with \\?\UNC\
