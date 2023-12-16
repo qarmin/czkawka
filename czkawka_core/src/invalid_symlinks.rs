@@ -1,10 +1,12 @@
 use std::fs;
 
 use std::io::prelude::*;
+use std::path::{Path, PathBuf};
 
 use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
 use log::debug;
+use serde::{Deserialize, Serialize};
 
 use crate::common_dir_traversal::{Collect, DirTraversalBuilder, DirTraversalResult, ErrorType, FileEntry, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
@@ -15,10 +17,50 @@ pub struct Info {
     pub number_of_invalid_symlinks: usize,
 }
 
+const MAX_NUMBER_OF_SYMLINK_JUMPS: i32 = 20;
+
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
+pub struct SymlinkInfo {
+    pub destination_path: PathBuf,
+    pub type_of_error: ErrorType,
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SymlinksFileEntry {
+    pub path: PathBuf,
+    pub size: u64,
+    pub modified_date: u64,
+    pub symlink_info: Option<SymlinkInfo>,
+}
+
+impl ResultEntry for SymlinksFileEntry {
+    fn get_path(&self) -> &Path {
+        &self.path
+    }
+    fn get_modified_date(&self) -> u64 {
+        self.modified_date
+    }
+    fn get_size(&self) -> u64 {
+        self.size
+    }
+}
+
+impl FileEntry {
+    fn into_symlinks_entry(self) -> SymlinksFileEntry {
+        SymlinksFileEntry {
+            size: self.size,
+            path: self.path,
+            modified_date: self.modified_date,
+
+            symlink_info: None,
+        }
+    }
+}
+
 pub struct InvalidSymlinks {
     common_data: CommonToolData,
     information: Info,
-    invalid_symlinks: Vec<FileEntry>,
+    invalid_symlinks: Vec<SymlinksFileEntry>,
 }
 impl InvalidSymlinks {
     pub fn new() -> Self {
@@ -53,7 +95,18 @@ impl InvalidSymlinks {
 
         match result {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
-                self.invalid_symlinks = grouped_file_entries.into_values().flatten().collect();
+                self.invalid_symlinks = grouped_file_entries
+                    .into_values()
+                    .flatten()
+                    .filter_map(|e| {
+                        let mut entry = e.into_symlinks_entry();
+                        let Some((destination_path, type_of_error)) = Self::check_invalid_symlinks(&entry.path) else {
+                            return None;
+                        };
+                        entry.symlink_info = Some(SymlinkInfo { destination_path, type_of_error });
+                        Some(entry)
+                    })
+                    .collect();
                 self.information.number_of_invalid_symlinks = self.invalid_symlinks.len();
                 self.common_data.text_messages.warnings.extend(warnings);
                 debug!("Found {} invalid symlinks.", self.information.number_of_invalid_symlinks);
@@ -61,6 +114,44 @@ impl InvalidSymlinks {
             }
             DirTraversalResult::Stopped => false,
         }
+    }
+
+    fn check_invalid_symlinks(current_file_name: &Path) -> Option<(PathBuf, ErrorType)> {
+        let mut destination_path = PathBuf::new();
+        let type_of_error;
+
+        match current_file_name.read_link() {
+            Ok(t) => {
+                destination_path.push(t);
+                let mut number_of_loop = 0;
+                let mut current_path = current_file_name.to_path_buf();
+                loop {
+                    if number_of_loop == 0 && !current_path.exists() {
+                        type_of_error = ErrorType::NonExistentFile;
+                        break;
+                    }
+                    if number_of_loop == MAX_NUMBER_OF_SYMLINK_JUMPS {
+                        type_of_error = ErrorType::InfiniteRecursion;
+                        break;
+                    }
+
+                    current_path = match current_path.read_link() {
+                        Ok(t) => t,
+                        Err(_inspected) => {
+                            // Looks that some next symlinks are broken, but we do nothing with it - TODO why they are broken
+                            return None;
+                        }
+                    };
+
+                    number_of_loop += 1;
+                }
+            }
+            Err(_inspected) => {
+                // Failed to load info about it
+                type_of_error = ErrorType::NonExistentFile;
+            }
+        }
+        Some((destination_path, type_of_error))
     }
 
     #[fun_time(message = "delete_files", level = "debug")]
@@ -137,7 +228,7 @@ impl CommonData for InvalidSymlinks {
 }
 
 impl InvalidSymlinks {
-    pub const fn get_invalid_symlinks(&self) -> &Vec<FileEntry> {
+    pub const fn get_invalid_symlinks(&self) -> &Vec<SymlinksFileEntry> {
         &self.invalid_symlinks
     }
 

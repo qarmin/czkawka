@@ -65,7 +65,6 @@ pub struct FileEntry {
     pub size: u64,
     pub modified_date: u64,
     pub hash: String,
-    pub symlink_info: Option<SymlinkInfo>,
 }
 
 impl ResultEntry for FileEntry {
@@ -81,14 +80,6 @@ impl ResultEntry for FileEntry {
 }
 
 // Symlinks
-
-const MAX_NUMBER_OF_SYMLINK_JUMPS: i32 = 20;
-
-#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
-pub struct SymlinkInfo {
-    pub destination_path: PathBuf,
-    pub type_of_error: ErrorType,
-}
 
 #[derive(Clone, Debug, PartialEq, Eq, Copy, Deserialize, Serialize)]
 pub enum ErrorType {
@@ -478,7 +469,6 @@ fn process_file_in_file_mode(
             modified_date: get_modified_time(&metadata, warnings, &current_file_name, false),
             path: current_file_name,
             hash: String::new(),
-            symlink_info: None,
         };
 
         fe_result.push(fe);
@@ -548,51 +538,14 @@ fn process_symlink_in_symlink_mode(
         return;
     };
 
-    let mut destination_path = PathBuf::new();
-    let type_of_error;
-
-    match current_file_name.read_link() {
-        Ok(t) => {
-            destination_path.push(t);
-            let mut number_of_loop = 0;
-            let mut current_path = current_file_name.clone();
-            loop {
-                if number_of_loop == 0 && !current_path.exists() {
-                    type_of_error = ErrorType::NonExistentFile;
-                    break;
-                }
-                if number_of_loop == MAX_NUMBER_OF_SYMLINK_JUMPS {
-                    type_of_error = ErrorType::InfiniteRecursion;
-                    break;
-                }
-
-                current_path = match current_path.read_link() {
-                    Ok(t) => t,
-                    Err(_inspected) => {
-                        // Looks that some next symlinks are broken, but we do nothing with it - TODO why they are broken
-                        return;
-                    }
-                };
-
-                number_of_loop += 1;
-            }
-        }
-        Err(_inspected) => {
-            // Failed to load info about it
-            type_of_error = ErrorType::NonExistentFile;
-        }
-    }
-
     // Creating new file entry
     let fe: FileEntry = FileEntry {
+        size: metadata.len(),
         modified_date: get_modified_time(&metadata, warnings, &current_file_name, false),
         path: current_file_name,
-        size: 0,
         hash: String::new(),
-        symlink_info: Some(SymlinkInfo { destination_path, type_of_error }),
     };
 
-    // Adding files to Vector
     fe_result.push(fe);
 }
 

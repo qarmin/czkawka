@@ -15,6 +15,7 @@ use czkawka_core::broken_files::BrokenFiles;
 use czkawka_core::common::{split_path, split_path_compare};
 use czkawka_core::common_dir_traversal::{CheckingMethod, FileEntry};
 use czkawka_core::common_tool::CommonData;
+use czkawka_core::common_traits::ResultEntry;
 use czkawka_core::duplicate::DuplicateFinder;
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
@@ -1336,9 +1337,12 @@ fn vector_sort_unstable_entry_by_path(vector: &[FileEntry]) -> Vec<FileEntry> {
     }
 }
 
-fn vector_sort_simple_unstable_entry_by_path(vector: &[FileEntry]) -> Vec<FileEntry> {
-    let mut vector = vector.to_owned();
-    vector.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+fn vector_sort_simple_unstable_entry_by_path<T>(vector: &[T]) -> Vec<T>
+where
+    T: ResultEntry + Clone,
+{
+    let mut vector = vector.to_vec();
+    vector.sort_unstable_by(|a, b| split_path_compare(a.get_path(), b.get_path()));
     vector
 }
 
