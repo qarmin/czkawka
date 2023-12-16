@@ -12,12 +12,13 @@ repository = "https://github.com/qarmin/czkawka"
 [dependencies]
 gdk4 = "0.7"
 glib = "0.18"
+gtk4 = { version = "0.7", default-features = false, features = ["v4_6"] }
 
 humansize = "2.1"
 chrono = "0.4.31"
 
 # Used for sending stop signal across threads
-crossbeam-channel = "0.5.8"
+crossbeam-channel = "0.5"
 
 # For saving/loading config files to specific directories
 directories-next = "2.0"
@@ -49,9 +50,9 @@ once_cell = "1.19"
 log = "0.4.20"
 handsome_logger = "0.8"
 fun_time = { version = "0.3", features = ["log"] }
+rayon = "1.8"
 
 czkawka_core = { path = "../czkawka_core", version = "6.1.0", features = [] }
-gtk4 = { version = "0.7", default-features = false, features = ["v4_6"] }
 
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3.9", features = ["combaseapi", "objbase", "shobjidl_core", "windef", "winerror", "wtypesbase", "winuser"] }

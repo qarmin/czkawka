@@ -80,10 +80,10 @@ impl ResultEntry for MusicEntry {
 }
 
 impl FileEntry {
-    fn to_music_entry(&self) -> MusicEntry {
+    fn into_music_entry(self) -> MusicEntry {
         MusicEntry {
             size: self.size,
-            path: self.path.clone(),
+            path: self.path,
             modified_date: self.modified_date,
 
             fingerprint: vec![],
@@ -177,13 +177,9 @@ impl SameMusic {
 
     #[fun_time(message = "check_files", level = "debug")]
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
-        if !self.common_data.allowed_extensions.using_custom_extensions() {
-            self.common_data.allowed_extensions.extend_allowed_extensions(AUDIO_FILES_EXTENSIONS);
-        } else {
-            self.common_data.allowed_extensions.extend_allowed_extensions(AUDIO_FILES_EXTENSIONS);
-            if !self.common_data.allowed_extensions.using_custom_extensions() {
-                return true;
-            }
+        self.common_data.allowed_extensions.set_and_validate_extensions(AUDIO_FILES_EXTENSIONS);
+        if !self.common_data.allowed_extensions.set_any_extensions() {
+            return true;
         }
 
         let max_stage = match self.check_type {
@@ -193,17 +189,10 @@ impl SameMusic {
         };
 
         let result = DirTraversalBuilder::new()
-            .root_dirs(self.common_data.directories.included_directories.clone())
             .group_by(|_fe| ())
             .stop_receiver(stop_receiver)
             .progress_sender(progress_sender)
-            .minimal_file_size(self.common_data.minimal_file_size)
-            .maximal_file_size(self.common_data.maximal_file_size)
-            .directories(self.common_data.directories.clone())
-            .allowed_extensions(self.common_data.allowed_extensions.clone())
-            .excluded_items(self.common_data.excluded_items.clone())
-            .recursive_search(self.common_data.recursive_search)
-            .tool_type(self.common_data.tool_type)
+            .common_data(&self.common_data)
             .max_stage(max_stage)
             .build()
             .run();
@@ -213,7 +202,7 @@ impl SameMusic {
                 self.music_to_check = grouped_file_entries
                     .into_values()
                     .flatten()
-                    .map(|fe| (fe.path.to_string_lossy().to_string(), fe.to_music_entry()))
+                    .map(|fe| (fe.path.to_string_lossy().to_string(), fe.into_music_entry()))
                     .collect();
                 self.common_data.text_messages.warnings.extend(warnings);
                 debug!("check_files - Found {} music files.", self.music_to_check.len());
@@ -834,7 +823,7 @@ fn read_single_file_tag(path: &str, music_entry: &mut MusicEntry) -> bool {
         return false;
     };
 
-    let result = panic::catch_unwind(move || {
+    let Ok(possible_tagged_file) = panic::catch_unwind(move || {
         match read_from(&mut file) {
             Ok(t) => Some(t),
             Err(_inspected) => {
@@ -842,20 +831,13 @@ fn read_single_file_tag(path: &str, music_entry: &mut MusicEntry) -> bool {
                 None
             }
         }
-    });
-
-    let tagged_file = if let Ok(t) = result {
-        match t {
-            Some(r) => r,
-            None => {
-                return true;
-            }
-        }
-    } else {
+    }) else {
         let message = create_crash_message("Lofty", path, "https://github.com/image-rs/image/issues");
         println!("{message}");
         return false;
     };
+
+    let Some(tagged_file) = possible_tagged_file else { return true };
 
     let properties = tagged_file.properties();
 

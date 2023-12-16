@@ -12,7 +12,7 @@ use rayon::prelude::*;
 use serde::Serialize;
 
 use crate::common::{check_folder_children, check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
-use crate::common_dir_traversal::{common_read_dir, get_lowercase_name, get_modified_time, CheckingMethod, ProgressData, ToolType};
+use crate::common_dir_traversal::{common_read_dir, get_modified_time, CheckingMethod, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::*;
 
@@ -142,13 +142,15 @@ impl Temporary {
     pub fn get_file_entry(&self, atomic_counter: &Arc<AtomicUsize>, entry_data: &DirEntry, warnings: &mut Vec<String>) -> Option<FileEntry> {
         atomic_counter.fetch_add(1, Ordering::Relaxed);
 
-        let file_name_lowercase = get_lowercase_name(entry_data, warnings)?;
-
-        if !TEMP_EXTENSIONS.iter().any(|f| file_name_lowercase.ends_with(f)) {
-            return None;
-        }
         let current_file_name = entry_data.path();
         if self.common_data.excluded_items.is_excluded(&current_file_name) {
+            return None;
+        }
+
+        let file_name = entry_data.file_name();
+        let file_name_ascii_lowercase = file_name.to_ascii_lowercase();
+        let file_name_lowercase = file_name_ascii_lowercase.to_string_lossy();
+        if !TEMP_EXTENSIONS.iter().any(|f| file_name_lowercase.ends_with(f)) {
             return None;
         }
 

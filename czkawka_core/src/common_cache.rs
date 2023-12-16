@@ -203,11 +203,9 @@ where
         vec_loaded_entries = vec_loaded_entries
             .into_par_iter()
             .filter(|file_entry| {
-                if delete_outdated_cache && !file_entry.get_path().exists() {
-                    return false;
-                }
+                let path = file_entry.get_path();
 
-                let file_entry_path_str = file_entry.get_path().to_string_lossy().to_string();
+                let file_entry_path_str = path.to_string_lossy().to_string();
                 if let Some(used_file) = used_files.get(&file_entry_path_str) {
                     if file_entry.get_size() != used_file.get_size() {
                         return false;
@@ -215,6 +213,10 @@ where
                     if file_entry.get_modified_date() != used_file.get_modified_date() {
                         return false;
                     }
+                }
+
+                if delete_outdated_cache && !path.exists() {
+                    return false;
                 }
 
                 true

@@ -8,13 +8,15 @@ use glib::Receiver;
 use gtk4::prelude::*;
 use gtk4::{Entry, ListStore, TextView, TreeView, Widget};
 use humansize::{format_size, BINARY};
+use rayon::prelude::*;
 
 use czkawka_core::bad_extensions::BadExtensions;
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
 use czkawka_core::common::{split_path, split_path_compare};
-use czkawka_core::common_dir_traversal::{CheckingMethod, FileEntry};
+use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::common_tool::CommonData;
+use czkawka_core::common_traits::ResultEntry;
 use czkawka_core::duplicate::DuplicateFinder;
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
@@ -22,7 +24,7 @@ use czkawka_core::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::localizer_core::generate_translation_hashmap;
 use czkawka_core::same_music::{MusicSimilarity, SameMusic};
 use czkawka_core::similar_images;
-use czkawka_core::similar_images::SimilarImages;
+use czkawka_core::similar_images::{ImagesEntry, SimilarImages};
 use czkawka_core::similar_videos::SimilarVideos;
 use czkawka_core::temporary::Temporary;
 
@@ -264,7 +266,7 @@ fn computer_bad_extensions(
 
             // Sort
             let mut vector = vector.clone();
-            vector.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+            vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
             for file_entry in vector {
                 let (directory, file) = split_path(&file_entry.path);
@@ -336,7 +338,7 @@ fn computer_broken_files(
 
             // Sort
             let mut vector = vector.clone();
-            vector.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+            vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
             for file_entry in vector {
                 let (directory, file) = split_path(&file_entry.path);
@@ -407,7 +409,7 @@ fn computer_invalid_symlinks(
 
             for file_entry in vector {
                 let (directory, file) = split_path(&file_entry.path);
-                let symlink_info = file_entry.symlink_info.clone().expect("invalid traversal result");
+                let symlink_info = file_entry.symlink_info;
                 let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
                     (ColumnsInvalidSymlinks::SelectionButton as u32, &false),
                     (ColumnsInvalidSymlinks::Name as u32, &file),
@@ -499,7 +501,7 @@ fn computer_same_music(
                     // Sort
                     let vec_file_entry = if vec_file_entry.len() >= 2 {
                         let mut vec_file_entry = vec_file_entry.clone();
-                        vec_file_entry.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+                        vec_file_entry.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
                         vec_file_entry
                     } else {
                         vec_file_entry.clone()
@@ -551,7 +553,7 @@ fn computer_same_music(
                     // Sort
                     let vec_file_entry = if vec_file_entry.len() >= 2 {
                         let mut vec_file_entry = vec_file_entry.clone();
-                        vec_file_entry.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+                        vec_file_entry.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
                         vec_file_entry
                     } else {
                         vec_file_entry.clone()
@@ -657,7 +659,7 @@ fn computer_similar_videos(
                     // Sort
                     let vec_file_entry = if vec_file_entry.len() >= 2 {
                         let mut vec_file_entry = vec_file_entry.clone();
-                        vec_file_entry.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+                        vec_file_entry.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
                         vec_file_entry
                     } else {
                         vec_file_entry.clone()
@@ -676,7 +678,7 @@ fn computer_similar_videos(
                     // Sort
                     let vec_file_entry = if vec_file_entry.len() >= 2 {
                         let mut vec_file_entry = vec_file_entry.clone();
-                        vec_file_entry.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+                        vec_file_entry.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
                         vec_file_entry
                     } else {
                         vec_file_entry.clone()
@@ -749,13 +751,13 @@ fn computer_similar_images(
             let list_store = get_list_store(tree_view);
 
             if sf.get_use_reference() {
-                let vec_struct_similar: &Vec<(similar_images::FileEntry, Vec<similar_images::FileEntry>)> = sf.get_similar_images_referenced();
+                let vec_struct_similar: &Vec<(ImagesEntry, Vec<ImagesEntry>)> = sf.get_similar_images_referenced();
                 for (base_file_entry, vec_file_entry) in vec_struct_similar {
                     // Sort
                     let vec_file_entry = if vec_file_entry.len() >= 2 {
                         let mut vec_file_entry = vec_file_entry.clone();
                         // Use comparison by similarity, because it is more important that path here
-                        vec_file_entry.sort_unstable_by_key(|e| e.similarity);
+                        vec_file_entry.par_sort_unstable_by_key(|e| e.similarity);
                         vec_file_entry
                     } else {
                         vec_file_entry.clone()
@@ -798,7 +800,7 @@ fn computer_similar_images(
                     let vec_file_entry = if vec_file_entry.len() >= 2 {
                         let mut vec_file_entry = vec_file_entry.clone();
                         // Use comparison by similarity, because it is more important that path here
-                        vec_file_entry.sort_unstable_by_key(|e| e.similarity);
+                        vec_file_entry.par_sort_unstable_by_key(|e| e.similarity);
                         vec_file_entry
                     } else {
                         vec_file_entry.clone()
@@ -876,7 +878,7 @@ fn computer_temporary_files(
 
             // Sort // TODO maybe simplify this via common file entry
             let mut vector = vector.clone();
-            vector.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+            vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
             for file_entry in vector {
                 let (directory, file) = split_path(&file_entry.path);
@@ -1080,7 +1082,7 @@ fn computer_empty_folders(
             let hashmap = ef.get_empty_folder_list();
             let mut vector = hashmap.values().collect::<Vec<_>>();
 
-            vector.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+            vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
             for fe in vector {
                 let (directory, file) = split_path(&fe.path);
@@ -1325,19 +1327,27 @@ fn computer_duplicate_finder(
     }
 }
 
-fn vector_sort_unstable_entry_by_path(vector: &[FileEntry]) -> Vec<FileEntry> {
+fn vector_sort_unstable_entry_by_path<T>(vector: &[T]) -> Vec<T>
+where
+    T: ResultEntry + Clone,
+    T: std::marker::Send,
+{
     if vector.len() >= 2 {
-        let mut vector = vector.to_owned();
-        vector.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+        let mut vector = vector.to_vec();
+        vector.par_sort_unstable_by(|a, b| split_path_compare(a.get_path(), b.get_path()));
         vector
     } else {
-        vector.to_owned()
+        vector.to_vec()
     }
 }
 
-fn vector_sort_simple_unstable_entry_by_path(vector: &[FileEntry]) -> Vec<FileEntry> {
-    let mut vector = vector.to_owned();
-    vector.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+fn vector_sort_simple_unstable_entry_by_path<T>(vector: &[T]) -> Vec<T>
+where
+    T: ResultEntry + Clone,
+    T: std::marker::Send,
+{
+    let mut vector = vector.to_vec();
+    vector.par_sort_unstable_by(|a, b| split_path_compare(a.get_path(), b.get_path()));
     vector
 }
 

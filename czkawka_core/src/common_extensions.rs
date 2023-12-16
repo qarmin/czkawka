@@ -79,14 +79,32 @@ impl Extensions {
         }
     }
 
-    pub fn using_custom_extensions(&self) -> bool {
+    pub fn set_any_extensions(&self) -> bool {
         !self.file_extensions_hashset.is_empty()
     }
 
-    pub fn extend_allowed_extensions(&mut self, file_extensions: &[&str]) {
+    fn extend_allowed_extensions(&mut self, file_extensions: &[&str]) {
         for extension in file_extensions {
             let extension_without_dot = extension.trim_start_matches('.');
             self.file_extensions_hashset.insert(extension_without_dot.to_string());
+        }
+    }
+
+    // E.g. when using similar videos, user can provide extensions like "mp4,flv", but if user provide "mp4,jpg" then
+    // it will be only "mp4" because "jpg" is not valid extension for videos
+    fn union_allowed_extensions(&mut self, file_extensions: &[&str]) {
+        let mut new_extensions = HashSet::new();
+        for extension in file_extensions {
+            let extension_without_dot = extension.trim_start_matches('.');
+            new_extensions.insert(extension_without_dot.to_string());
+        }
+    }
+
+    pub fn set_and_validate_extensions(&mut self, file_extensions: &[&str]) {
+        if self.file_extensions_hashset.is_empty() {
+            self.extend_allowed_extensions(file_extensions);
+        } else {
+            self.union_allowed_extensions(file_extensions);
         }
     }
 }

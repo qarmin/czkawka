@@ -48,10 +48,9 @@ fn load_image(image_path: &Path) -> Option<(Duration, image::DynamicImage)> {
     }
     let image_name = image_path.to_string_lossy().to_string();
     let image_extension = image_path.extension()?.to_string_lossy().to_lowercase();
-    let extension_with_dot = format!(".{}", image_extension);
 
-    let is_raw_image = RAW_IMAGE_EXTENSIONS.contains(&extension_with_dot.as_str());
-    let is_normal_image = IMAGE_RS_EXTENSIONS.contains(&extension_with_dot.as_str());
+    let is_raw_image = RAW_IMAGE_EXTENSIONS.contains(&image_extension.as_str());
+    let is_normal_image = IMAGE_RS_EXTENSIONS.contains(&image_extension.as_str());
 
     if !is_raw_image && !is_normal_image {
         return None;

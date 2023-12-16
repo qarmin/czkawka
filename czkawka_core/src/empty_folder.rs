@@ -310,7 +310,7 @@ impl PrintResults for EmptyFolder {
             writeln!(writer, "--------------------------Empty folder list--------------------------")?;
             writeln!(writer, "Found {} empty folders", self.information.number_of_empty_folders)?;
             let mut empty_folder_list = self.empty_folder_list.keys().collect::<Vec<_>>();
-            empty_folder_list.sort_unstable();
+            empty_folder_list.par_sort_unstable();
             for name in empty_folder_list {
                 writeln!(writer, "{name}")?;
             }

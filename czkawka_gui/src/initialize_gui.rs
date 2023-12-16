@@ -497,9 +497,9 @@ fn show_preview(
 
             let is_heic;
             if let Some(extension) = Path::new(&name).extension() {
-                let extension = format!(".{}", extension.to_string_lossy().to_lowercase());
-                is_heic = HEIC_EXTENSIONS.contains(&extension.as_str());
-                if !RAW_IMAGE_EXTENSIONS.contains(&extension.as_str()) && !IMAGE_RS_EXTENSIONS.contains(&extension.as_str()) && !is_heic {
+                let extension_lowercase = extension.to_string_lossy().to_lowercase();
+                is_heic = HEIC_EXTENSIONS.contains(&extension_lowercase.as_str());
+                if !RAW_IMAGE_EXTENSIONS.contains(&extension_lowercase.as_str()) && !IMAGE_RS_EXTENSIONS.contains(&extension_lowercase.as_str()) && !is_heic {
                     break 'dir;
                 }
             } else {

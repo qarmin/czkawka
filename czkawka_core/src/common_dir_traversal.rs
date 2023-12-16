@@ -15,6 +15,7 @@ use crate::common::{check_if_stop_received, prepare_thread_handler_common, send_
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
+use crate::common_tool::CommonToolData;
 use crate::common_traits::ResultEntry;
 use crate::flc;
 use crate::localizer_core::generate_translation_hashmap;
@@ -63,8 +64,6 @@ pub struct FileEntry {
     pub path: PathBuf,
     pub size: u64,
     pub modified_date: u64,
-    pub hash: String,
-    pub symlink_info: Option<SymlinkInfo>,
 }
 
 impl ResultEntry for FileEntry {
@@ -80,14 +79,6 @@ impl ResultEntry for FileEntry {
 }
 
 // Symlinks
-
-const MAX_NUMBER_OF_SYMLINK_JUMPS: i32 = 20;
-
-#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
-pub struct SymlinkInfo {
-    pub destination_path: PathBuf,
-    pub type_of_error: ErrorType,
-}
 
 #[derive(Clone, Debug, PartialEq, Eq, Copy, Deserialize, Serialize)]
 pub enum ErrorType {
@@ -173,6 +164,18 @@ impl<'a, 'b> DirTraversalBuilder<'a, 'b, ()> {
 impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
     pub fn root_dirs(mut self, dirs: Vec<PathBuf>) -> Self {
         self.root_dirs = dirs;
+        self
+    }
+
+    pub fn common_data(mut self, common_tool_data: &CommonToolData) -> Self {
+        self.root_dirs = common_tool_data.directories.included_directories.clone();
+        self.allowed_extensions = Some(common_tool_data.allowed_extensions.clone());
+        self.excluded_items = Some(common_tool_data.excluded_items.clone());
+        self.recursive_search = common_tool_data.recursive_search;
+        self.minimal_file_size = Some(common_tool_data.minimal_file_size);
+        self.maximal_file_size = Some(common_tool_data.maximal_file_size);
+        self.tool_type = common_tool_data.tool_type;
+        self.directories = Some(common_tool_data.directories.clone());
         self
     }
 
@@ -464,8 +467,6 @@ fn process_file_in_file_mode(
             size: metadata.len(),
             modified_date: get_modified_time(&metadata, warnings, &current_file_name, false),
             path: current_file_name,
-            hash: String::new(),
-            symlink_info: None,
         };
 
         fe_result.push(fe);
@@ -535,51 +536,13 @@ fn process_symlink_in_symlink_mode(
         return;
     };
 
-    let mut destination_path = PathBuf::new();
-    let type_of_error;
-
-    match current_file_name.read_link() {
-        Ok(t) => {
-            destination_path.push(t);
-            let mut number_of_loop = 0;
-            let mut current_path = current_file_name.clone();
-            loop {
-                if number_of_loop == 0 && !current_path.exists() {
-                    type_of_error = ErrorType::NonExistentFile;
-                    break;
-                }
-                if number_of_loop == MAX_NUMBER_OF_SYMLINK_JUMPS {
-                    type_of_error = ErrorType::InfiniteRecursion;
-                    break;
-                }
-
-                current_path = match current_path.read_link() {
-                    Ok(t) => t,
-                    Err(_inspected) => {
-                        // Looks that some next symlinks are broken, but we do nothing with it - TODO why they are broken
-                        return;
-                    }
-                };
-
-                number_of_loop += 1;
-            }
-        }
-        Err(_inspected) => {
-            // Failed to load info about it
-            type_of_error = ErrorType::NonExistentFile;
-        }
-    }
-
     // Creating new file entry
     let fe: FileEntry = FileEntry {
+        size: metadata.len(),
         modified_date: get_modified_time(&metadata, warnings, &current_file_name, false),
         path: current_file_name,
-        size: 0,
-        hash: String::new(),
-        symlink_info: Some(SymlinkInfo { destination_path, type_of_error }),
     };
 
-    // Adding files to Vector
     fe_result.push(fe);
 }
 
@@ -670,19 +633,4 @@ pub fn get_modified_time(metadata: &Metadata, warnings: &mut Vec<String>, curren
             0
         }
     }
-}
-
-pub fn get_lowercase_name(entry_data: &DirEntry, warnings: &mut Vec<String>) -> Option<String> {
-    let name = match entry_data.file_name().into_string() {
-        Ok(t) => t,
-        Err(_inspected) => {
-            warnings.push(flc!(
-                "core_file_not_utf8_name",
-                generate_translation_hashmap(vec![("name", entry_data.path().to_string_lossy().to_string())])
-            ));
-            return None;
-        }
-    }
-    .to_lowercase();
-    Some(name)
 }
