@@ -25,12 +25,12 @@ pub struct SymlinkInfo {
     pub type_of_error: ErrorType,
 }
 
-#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SymlinksFileEntry {
     pub path: PathBuf,
     pub size: u64,
     pub modified_date: u64,
-    pub symlink_info: Option<SymlinkInfo>,
+    pub symlink_info: SymlinkInfo,
 }
 
 impl ResultEntry for SymlinksFileEntry {
@@ -46,13 +46,13 @@ impl ResultEntry for SymlinksFileEntry {
 }
 
 impl FileEntry {
-    fn into_symlinks_entry(self) -> SymlinksFileEntry {
+    fn into_symlinks_entry(self, symlink_info: SymlinkInfo) -> SymlinksFileEntry {
         SymlinksFileEntry {
             size: self.size,
             path: self.path,
             modified_date: self.modified_date,
 
-            symlink_info: None,
+            symlink_info,
         }
     }
 }
@@ -99,12 +99,10 @@ impl InvalidSymlinks {
                     .into_values()
                     .flatten()
                     .filter_map(|e| {
-                        let mut entry = e.into_symlinks_entry();
-                        let Some((destination_path, type_of_error)) = Self::check_invalid_symlinks(&entry.path) else {
+                        let Some((destination_path, type_of_error)) = Self::check_invalid_symlinks(&e.path) else {
                             return None;
                         };
-                        entry.symlink_info = Some(SymlinkInfo { destination_path, type_of_error });
-                        Some(entry)
+                        Some(e.into_symlinks_entry(SymlinkInfo { destination_path, type_of_error }))
                     })
                     .collect();
                 self.information.number_of_invalid_symlinks = self.invalid_symlinks.len();
@@ -159,7 +157,7 @@ impl InvalidSymlinks {
         match self.common_data.delete_method {
             DeleteMethod::Delete => {
                 for file_entry in &self.invalid_symlinks {
-                    if fs::remove_file(file_entry.path.clone()).is_err() {
+                    if fs::remove_file(&file_entry.path).is_err() {
                         self.common_data.text_messages.warnings.push(file_entry.path.to_string_lossy().to_string());
                     }
                 }
@@ -199,8 +197,8 @@ impl PrintResults for InvalidSymlinks {
                     writer,
                     "{:?}\t\t{:?}\t\t{}",
                     file_entry.path,
-                    file_entry.symlink_info.clone().expect("invalid traversal result").destination_path,
-                    match file_entry.symlink_info.clone().expect("invalid traversal result").type_of_error {
+                    file_entry.symlink_info.destination_path,
+                    match file_entry.symlink_info.type_of_error {
                         ErrorType::InfiniteRecursion => "Infinite Recursion",
                         ErrorType::NonExistentFile => "Non Existent File",
                     }

@@ -82,7 +82,7 @@ impl EmptyFiles {
         match self.common_data.delete_method {
             DeleteMethod::Delete => {
                 for file_entry in &self.empty_files {
-                    if fs::remove_file(file_entry.path.clone()).is_err() {
+                    if fs::remove_file(&file_entry.path).is_err() {
                         self.common_data.text_messages.warnings.push(file_entry.path.to_string_lossy().to_string());
                     }
                 }

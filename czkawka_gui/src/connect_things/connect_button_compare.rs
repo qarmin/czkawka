@@ -353,8 +353,11 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>)
         let big_img = Image::new();
 
         let mut pixbuf = get_pixbuf_from_dynamic_image(&DynamicImage::new_rgb8(1, 1)).unwrap();
-        let name_lowercase = name.to_lowercase();
-        let is_heic = HEIC_EXTENSIONS.iter().any(|extension| name_lowercase.ends_with(extension));
+        let extension_lowercase = full_path.split('.').last().map(str::to_lowercase);
+        let is_heic = match extension_lowercase {
+            Some(extension) => HEIC_EXTENSIONS.iter().any(|e| e == &extension),
+            None => false,
+        };
 
         if is_heic {
             #[allow(clippy::never_loop)]

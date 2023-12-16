@@ -559,7 +559,7 @@ impl DuplicateFinder {
                     match hash_calculation(&mut buffer, &file_entry, &check_type, 0) {
                         Ok(hash_string) => {
                             file_entry.hash = hash_string.clone();
-                            hashmap_with_hash.entry(hash_string.clone()).or_default().push(file_entry);
+                            hashmap_with_hash.entry(hash_string).or_default().push(file_entry);
                         }
                         Err(s) => errors.push(s),
                     }

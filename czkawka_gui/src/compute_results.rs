@@ -409,7 +409,7 @@ fn computer_invalid_symlinks(
 
             for file_entry in vector {
                 let (directory, file) = split_path(&file_entry.path);
-                let symlink_info = file_entry.symlink_info.clone().expect("invalid traversal result");
+                let symlink_info = file_entry.symlink_info;
                 let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
                     (ColumnsInvalidSymlinks::SelectionButton as u32, &false),
                     (ColumnsInvalidSymlinks::Name as u32, &file),

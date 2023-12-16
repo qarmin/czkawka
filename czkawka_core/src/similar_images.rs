@@ -45,6 +45,7 @@ pub struct ImagesEntry {
     pub modified_date: u64,
     pub hash: ImHash,
     pub similarity: u32,
+    pub image_type: ImageType,
 }
 
 impl ResultEntry for ImagesEntry {
@@ -68,8 +69,17 @@ impl FileEntry {
             dimensions: String::new(),
             hash: Vec::new(),
             similarity: 0,
+            image_type: ImageType::Unknown,
         }
     }
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+pub enum ImageType {
+    Normal,
+    Raw,
+    Heic,
+    Unknown,
 }
 
 const MAX_IMAGE_STAGE: u8 = 2;
@@ -158,7 +168,7 @@ impl SimilarImages {
         self.debug_print();
     }
 
-    #[fun_time(message = "check_for_similar_images", level = "debug")]
+    // #[fun_time(message = "check_for_similar_images", level = "debug")]
     fn check_for_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         if cfg!(feature = "heif") {
             self.common_data
@@ -172,6 +182,10 @@ impl SimilarImages {
         if !self.common_data.allowed_extensions.set_any_extensions() {
             return true;
         }
+
+        let normal_image_extensions = IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS.iter().collect::<HashSet<_>>();
+        let raw_image_extensions = RAW_IMAGE_EXTENSIONS.iter().collect::<HashSet<_>>();
+        let heic_extensions = HEIC_EXTENSIONS.iter().collect::<HashSet<_>>();
 
         let result = DirTraversalBuilder::new()
             .group_by(|_fe| ())
@@ -187,7 +201,19 @@ impl SimilarImages {
                 self.images_to_check = grouped_file_entries
                     .into_values()
                     .flatten()
-                    .map(|fe| (fe.path.to_string_lossy().to_string(), fe.into_images_entry()))
+                    .map(|fe| {
+                        let fe_str = fe.path.to_string_lossy().to_string();
+                        let extension_lowercase = fe.path.extension().unwrap_or_default().to_string_lossy().to_lowercase();
+                        let mut image_entry = fe.into_images_entry();
+                        if normal_image_extensions.contains(&extension_lowercase.as_str()) {
+                            image_entry.image_type = ImageType::Normal;
+                        } else if raw_image_extensions.contains(&extension_lowercase.as_str()) {
+                            image_entry.image_type = ImageType::Raw;
+                        } else if heic_extensions.contains(&extension_lowercase.as_str()) {
+                            image_entry.image_type = ImageType::Heic;
+                        }
+                        (fe_str, image_entry)
+                    })
                     .collect();
                 self.common_data.text_messages.warnings.extend(warnings);
                 debug!("check_files - Found {} image files.", self.images_to_check.len());
@@ -313,59 +339,42 @@ impl SimilarImages {
     }
 
     fn collect_image_file_entry(&self, file_entry: &mut ImagesEntry) {
-        let file_name_lowercase = file_entry.path.to_string_lossy().to_lowercase();
-
-        let image;
-
-        #[allow(clippy::never_loop)] // Required to implement nice if/else
-        'krztyna: loop {
-            if RAW_IMAGE_EXTENSIONS.iter().any(|e| file_name_lowercase.ends_with(e)) {
-                image = match get_dynamic_image_from_raw_image(&file_entry.path) {
+        let img;
+        match file_entry.image_type {
+            ImageType::Normal | ImageType::Heic => {
+                if cfg!(feature = "heif") && file_entry.image_type == ImageType::Heic {
+                    img = match get_dynamic_image_from_heic(&file_entry.path.to_string_lossy()) {
+                        Ok(t) => t,
+                        Err(_) => {
+                            return;
+                        }
+                    };
+                } else {
+                    if let Ok(image_result) = panic::catch_unwind(|| image::open(&file_entry.path)) {
+                        if let Ok(image2) = image_result {
+                            img = image2;
+                        } else {
+                            return;
+                        }
+                    } else {
+                        let message = create_crash_message("Image-rs", &file_entry.path.to_string_lossy(), "https://github.com/image-rs/image/issues");
+                        println!("{message}");
+                        return;
+                    }
+                }
+            }
+            ImageType::Raw => {
+                img = match get_dynamic_image_from_raw_image(&file_entry.path) {
                     Some(t) => t,
                     None => return,
                 };
-                break 'krztyna;
             }
-
-            #[cfg(feature = "heif")]
-            if HEIC_EXTENSIONS.iter().any(|e| file_name_lowercase.ends_with(e)) {
-                image = match get_dynamic_image_from_heic(&file_entry.path.to_string_lossy()) {
-                    Ok(t) => t,
-                    Err(_) => {
-                        return;
-                    }
-                };
-                break 'krztyna;
+            _ => {
+                unreachable!();
             }
-
-            // Normal image extension, when any other fail, not using if/else
-            let result = panic::catch_unwind(|| {
-                match image::open(file_entry.path.clone()) {
-                    Ok(t) => Ok(t),
-                    // Err(_inspected) => return Some(None), // Something is wrong with image,
-                    // For broken images empty hash is used, because without it will try to resecan files each time when it is called(missing cache file is responsible for it)
-                    // This may cause problems(very rarely), when e.g. file was not available due lack of permissions, but it is available now
-                    Err(_inspected) => Err(()),
-                }
-            });
-
-            // If image crashed during opening, we just skip checking its hash and go on
-            if let Ok(image_result) = result {
-                if let Ok(image2) = image_result {
-                    image = image2;
-                } else {
-                    return;
-                }
-            } else {
-                let message = create_crash_message("Image-rs", &file_entry.path.to_string_lossy(), "https://github.com/image-rs/image/issues");
-                println!("{message}");
-                return;
-            }
-
-            break 'krztyna;
         }
 
-        let dimensions = image.dimensions();
+        let dimensions = img.dimensions();
 
         file_entry.dimensions = format!("{}x{}", dimensions.0, dimensions.1);
 
@@ -375,7 +384,7 @@ impl SimilarImages {
             .resize_filter(self.image_filter);
         let hasher = hasher_config.to_hasher();
 
-        let hash = hasher.hash_image(&image);
+        let hash = hasher.hash_image(&img);
         file_entry.hash = hash.as_bytes().to_vec();
     }
 
@@ -1075,7 +1084,7 @@ mod tests {
 
     use crate::common_directory::Directories;
     use crate::common_tool::CommonToolData;
-    use crate::similar_images::{Hamming, ImHash, ImagesEntry, SimilarImages};
+    use crate::similar_images::{Hamming, ImHash, ImageType, ImagesEntry, SimilarImages};
 
     #[test]
     fn test_compare_no_images() {
@@ -1515,6 +1524,7 @@ mod tests {
             modified_date: 0,
             hash,
             similarity: 0,
+            image_type: ImageType::Normal,
         }
     }
 }

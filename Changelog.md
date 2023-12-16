@@ -5,7 +5,7 @@
 
 ### CLI
 - Providing full static rust binary with [Eyra](https://github.com/sunfishcode/eyra) - [#1102](https://github.com/qarmin/czkawka/pull/1102)
-- Fixed duplicated `-c` argument, now saving as compact json is handled via `-C` - ???? 
+- Fixed duplicated `-c` argument, now saving as compact json is handled via `-C` - [#1153](https://github.com/qarmin/czkawka/pull/1153)
 
 ### Krokiet GUI
 - Initial release of new gui - [#1102](https://github.com/qarmin/czkawka/pull/1102)
@@ -21,6 +21,8 @@
 - Big speedup when searching for empty folders(especially with multithreading + cached FS schema)  - [#1152](https://github.com/qarmin/czkawka/pull/1152)
 - Collecting files for scan can be a lot of faster due lazy file metadata gathering - [#1152](https://github.com/qarmin/czkawka/pull/1152)
 - Fixed recognizing not accessible folders as non-empty - [#1152](https://github.com/qarmin/czkawka/pull/1152)
+- Unifying code for collecting files to scan - [#1159](https://github.com/qarmin/czkawka/pull/1159)
+- Decrease memory usage when collecting files by removing unused fields in custom file entries structs - [#1159](https://github.com/qarmin/czkawka/pull/1159)
 
 ## Version 6.1.0 - 15.10.2023r
 - BREAKING CHANGE - Changed cache saving method, deduplicated, optimized and simplified procedure(all files needs to be hashed again) - [#1072](https://github.com/qarmin/czkawka/pull/1072), [#1086](https://github.com/qarmin/czkawka/pull/1086)
