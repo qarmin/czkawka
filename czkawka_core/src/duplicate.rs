@@ -158,18 +158,11 @@ impl DuplicateFinder {
         };
 
         let result = DirTraversalBuilder::new()
-            .root_dirs(self.common_data.directories.included_directories.clone())
+            .common_data(&self.common_data)
             .group_by(group_by_func)
             .stop_receiver(stop_receiver)
             .progress_sender(progress_sender)
             .checking_method(CheckingMethod::Name)
-            .directories(self.common_data.directories.clone())
-            .allowed_extensions(self.common_data.allowed_extensions.clone())
-            .excluded_items(self.common_data.excluded_items.clone())
-            .recursive_search(self.common_data.recursive_search)
-            .minimal_file_size(self.common_data.minimal_file_size)
-            .maximal_file_size(self.common_data.maximal_file_size)
-            .tool_type(self.common_data.tool_type)
             .build()
             .run();
 
@@ -231,18 +224,11 @@ impl DuplicateFinder {
         };
 
         let result = DirTraversalBuilder::new()
-            .root_dirs(self.common_data.directories.included_directories.clone())
+            .common_data(&self.common_data)
             .group_by(group_by_func)
             .stop_receiver(stop_receiver)
             .progress_sender(progress_sender)
             .checking_method(CheckingMethod::Name)
-            .directories(self.common_data.directories.clone())
-            .allowed_extensions(self.common_data.allowed_extensions.clone())
-            .excluded_items(self.common_data.excluded_items.clone())
-            .recursive_search(self.common_data.recursive_search)
-            .minimal_file_size(self.common_data.minimal_file_size)
-            .maximal_file_size(self.common_data.maximal_file_size)
-            .tool_type(self.common_data.tool_type)
             .build()
             .run();
 
@@ -306,19 +292,12 @@ impl DuplicateFinder {
             _ => panic!(),
         };
         let result = DirTraversalBuilder::new()
-            .root_dirs(self.common_data.directories.included_directories.clone())
+            .common_data(&self.common_data)
             .group_by(|fe| fe.size)
             .stop_receiver(stop_receiver)
             .progress_sender(progress_sender)
             .checking_method(self.check_method)
             .max_stage(max_stage)
-            .directories(self.common_data.directories.clone())
-            .allowed_extensions(self.common_data.allowed_extensions.clone())
-            .excluded_items(self.common_data.excluded_items.clone())
-            .recursive_search(self.common_data.recursive_search)
-            .minimal_file_size(self.common_data.minimal_file_size)
-            .maximal_file_size(self.common_data.maximal_file_size)
-            .tool_type(self.common_data.tool_type)
             .build()
             .run();
 

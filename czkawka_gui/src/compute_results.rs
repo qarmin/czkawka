@@ -22,6 +22,7 @@ use czkawka_core::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::localizer_core::generate_translation_hashmap;
 use czkawka_core::same_music::{MusicSimilarity, SameMusic};
 use czkawka_core::similar_images;
+use czkawka_core::similar_images::ImagesEntry;
 use czkawka_core::similar_images::SimilarImages;
 use czkawka_core::similar_videos::SimilarVideos;
 use czkawka_core::temporary::Temporary;
@@ -749,7 +750,7 @@ fn computer_similar_images(
             let list_store = get_list_store(tree_view);
 
             if sf.get_use_reference() {
-                let vec_struct_similar: &Vec<(similar_images::FileEntry, Vec<similar_images::FileEntry>)> = sf.get_similar_images_referenced();
+                let vec_struct_similar: &Vec<(ImagesEntry, Vec<ImagesEntry>)> = sf.get_similar_images_referenced();
                 for (base_file_entry, vec_file_entry) in vec_struct_similar {
                     // Sort
                     let vec_file_entry = if vec_file_entry.len() >= 2 {

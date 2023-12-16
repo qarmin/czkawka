@@ -80,10 +80,10 @@ impl ResultEntry for MusicEntry {
 }
 
 impl FileEntry {
-    fn to_music_entry(&self) -> MusicEntry {
+    fn into_music_entry(self) -> MusicEntry {
         MusicEntry {
             size: self.size,
-            path: self.path.clone(),
+            path: self.path,
             modified_date: self.modified_date,
 
             fingerprint: vec![],
@@ -193,17 +193,10 @@ impl SameMusic {
         };
 
         let result = DirTraversalBuilder::new()
-            .root_dirs(self.common_data.directories.included_directories.clone())
             .group_by(|_fe| ())
             .stop_receiver(stop_receiver)
             .progress_sender(progress_sender)
-            .minimal_file_size(self.common_data.minimal_file_size)
-            .maximal_file_size(self.common_data.maximal_file_size)
-            .directories(self.common_data.directories.clone())
-            .allowed_extensions(self.common_data.allowed_extensions.clone())
-            .excluded_items(self.common_data.excluded_items.clone())
-            .recursive_search(self.common_data.recursive_search)
-            .tool_type(self.common_data.tool_type)
+            .common_data(&self.common_data)
             .max_stage(max_stage)
             .build()
             .run();
@@ -213,7 +206,7 @@ impl SameMusic {
                 self.music_to_check = grouped_file_entries
                     .into_values()
                     .flatten()
-                    .map(|fe| (fe.path.to_string_lossy().to_string(), fe.to_music_entry()))
+                    .map(|fe| (fe.path.to_string_lossy().to_string(), fe.into_music_entry()))
                     .collect();
                 self.common_data.text_messages.warnings.extend(warnings);
                 debug!("check_files - Found {} music files.", self.music_to_check.len());

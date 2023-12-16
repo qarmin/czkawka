@@ -15,6 +15,7 @@ use crate::common::{check_if_stop_received, prepare_thread_handler_common, send_
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
+use crate::common_tool::CommonToolData;
 use crate::common_traits::ResultEntry;
 use crate::flc;
 use crate::localizer_core::generate_translation_hashmap;
@@ -173,6 +174,18 @@ impl<'a, 'b> DirTraversalBuilder<'a, 'b, ()> {
 impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
     pub fn root_dirs(mut self, dirs: Vec<PathBuf>) -> Self {
         self.root_dirs = dirs;
+        self
+    }
+
+    pub fn common_data(mut self, common_tool_data: &CommonToolData) -> Self {
+        self.root_dirs = common_tool_data.directories.included_directories.clone();
+        self.allowed_extensions = Some(common_tool_data.allowed_extensions.clone());
+        self.excluded_items = Some(common_tool_data.excluded_items.clone());
+        self.recursive_search = common_tool_data.recursive_search;
+        self.minimal_file_size = Some(common_tool_data.minimal_file_size);
+        self.maximal_file_size = Some(common_tool_data.maximal_file_size);
+        self.tool_type = common_tool_data.tool_type;
+        self.directories = Some(common_tool_data.directories.clone());
         self
     }
 

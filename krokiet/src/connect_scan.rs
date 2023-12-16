@@ -86,7 +86,7 @@ fn scan_similar_images(a: Weak<MainWindow>, progress_sender: Sender<ProgressData
         })
         .unwrap();
 }
-fn write_similar_images_results(app: &MainWindow, vector: Vec<Vec<similar_images::FileEntry>>, messages: String, hash_size: u8) {
+fn write_similar_images_results(app: &MainWindow, vector: Vec<Vec<similar_images::ImagesEntry>>, messages: String, hash_size: u8) {
     let items_found = vector.len();
     let items = Rc::new(VecModel::default());
     for vec_fe in vector {
