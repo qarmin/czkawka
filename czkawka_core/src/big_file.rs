@@ -59,6 +59,7 @@ impl BigFile {
             .stop_receiver(stop_receiver)
             .progress_sender(progress_sender)
             .common_data(&self.common_data)
+            .minimal_file_size(1)
             .max_stage(0)
             .build()
             .run();
