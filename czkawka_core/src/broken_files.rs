@@ -448,6 +448,7 @@ fn check_extension_availability(
     };
 
     let Some(extension_str) = extension.to_str() else {
+        debug_assert!(false, "Extension not really fully str");
         return TypeOfFile::Unknown;
     };
 

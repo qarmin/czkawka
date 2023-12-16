@@ -1,29 +1,15 @@
-use std::collections::BTreeMap;
 use std::fs;
-use std::fs::DirEntry;
 use std::io::Write;
-use std::path::PathBuf;
-use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::Arc;
 
 use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
 use humansize::{format_size, BINARY};
 use log::debug;
 use rayon::prelude::*;
-use serde::{Deserialize, Serialize};
 
-use crate::common::{check_folder_children, check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, split_path_compare};
-use crate::common_dir_traversal::{common_read_dir, get_modified_time, CheckingMethod, ProgressData, ToolType};
+use crate::common_dir_traversal::{DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::{DebugPrint, PrintResults};
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct FileEntry {
-    pub path: PathBuf,
-    pub size: u64,
-    pub modified_date: u64,
-}
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum SearchMode {
@@ -66,134 +52,38 @@ impl BigFile {
         self.debug_print();
     }
 
-    #[fun_time(message = "look_for_big_files", level = "debug")]
+    // #[fun_time(message = "look_for_big_files", level = "debug")]
     fn look_for_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
-        let mut old_map: BTreeMap<u64, Vec<FileEntry>> = Default::default();
+        let result = DirTraversalBuilder::new()
+            .group_by(|_fe| ())
+            .stop_receiver(stop_receiver)
+            .progress_sender(progress_sender)
+            .common_data(&self.common_data)
+            .max_stage(0)
+            .build()
+            .run();
 
-        let mut folders_to_check: Vec<PathBuf> = self.common_data.directories.included_directories.clone();
+        match result {
+            DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
+                let mut all_files = grouped_file_entries.into_values().flatten().collect::<Vec<_>>();
+                all_files.par_sort_unstable_by_key(|fe| fe.size);
 
-        let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, 0, 0, 0, CheckingMethod::None, self.common_data.tool_type);
+                if self.search_mode == SearchMode::BiggestFiles {
+                    all_files.reverse();
+                }
 
-        debug!("Starting to search for big files");
-        while !folders_to_check.is_empty() {
-            if check_if_stop_received(stop_receiver) {
-                send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-                return false;
-            }
+                if all_files.len() > self.number_of_files_to_check {
+                    all_files.truncate(self.number_of_files_to_check);
+                }
 
-            let segments: Vec<_> = folders_to_check
-                .into_par_iter()
-                .map(|current_folder| {
-                    let mut dir_result = vec![];
-                    let mut warnings = vec![];
-                    let mut fe_result = vec![];
+                self.big_files = all_files;
 
-                    let Some(read_dir) = common_read_dir(&current_folder, &mut warnings) else {
-                        return (dir_result, warnings, fe_result);
-                    };
-
-                    // Check every sub folder/file/link etc.
-                    for entry in read_dir {
-                        let Ok(entry_data) = entry else {
-                            continue;
-                        };
-                        let Ok(file_type) = entry_data.file_type() else {
-                            continue;
-                        };
-
-                        if file_type.is_dir() {
-                            check_folder_children(
-                                &mut dir_result,
-                                &mut warnings,
-                                &entry_data,
-                                self.common_data.recursive_search,
-                                &self.common_data.directories,
-                                &self.common_data.excluded_items,
-                            );
-                        } else if file_type.is_file() {
-                            self.collect_file_entry(&atomic_counter, &entry_data, &mut fe_result, &mut warnings);
-                        }
-                    }
-                    (dir_result, warnings, fe_result)
-                })
-                .collect();
-
-            let required_size = segments.iter().map(|(segment, _, _)| segment.len()).sum::<usize>();
-            folders_to_check = Vec::with_capacity(required_size);
-
-            // Process collected data
-            for (segment, warnings, fe_result) in segments {
-                folders_to_check.extend(segment);
                 self.common_data.text_messages.warnings.extend(warnings);
-                for (size, fe) in fe_result {
-                    old_map.entry(size).or_default().push(fe);
-                }
+                debug!("check_files - Found {} biggest/smallest files.", self.big_files.len());
+                true
             }
-        }
 
-        debug!("Collected {} files", old_map.len());
-
-        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-
-        self.extract_n_biggest_files(old_map);
-
-        true
-    }
-
-    pub fn collect_file_entry(&self, atomic_counter: &Arc<AtomicUsize>, entry_data: &DirEntry, fe_result: &mut Vec<(u64, FileEntry)>, warnings: &mut Vec<String>) {
-        atomic_counter.fetch_add(1, Ordering::Relaxed);
-        if !self.common_data.allowed_extensions.check_if_entry_ends_with_extension(entry_data) {
-            return;
-        }
-
-        let current_file_name = entry_data.path();
-        if self.common_data.excluded_items.is_excluded(&current_file_name) {
-            return;
-        }
-
-        let Ok(metadata) = entry_data.metadata() else {
-            return;
-        };
-
-        if metadata.len() == 0 {
-            return;
-        }
-
-        let fe: FileEntry = FileEntry {
-            modified_date: get_modified_time(&metadata, warnings, &current_file_name, false),
-            path: current_file_name,
-            size: metadata.len(),
-        };
-
-        fe_result.push((fe.size, fe));
-    }
-
-    #[fun_time(message = "extract_n_biggest_files", level = "debug")]
-    pub fn extract_n_biggest_files(&mut self, old_map: BTreeMap<u64, Vec<FileEntry>>) {
-        let iter: Box<dyn Iterator<Item = _>>;
-        if self.search_mode == SearchMode::SmallestFiles {
-            iter = Box::new(old_map.into_iter());
-        } else {
-            iter = Box::new(old_map.into_iter().rev());
-        }
-
-        for (_size, mut vector) in iter {
-            if self.information.number_of_real_files < self.number_of_files_to_check {
-                if vector.len() > 1 {
-                    vector.sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
-                }
-                for file in vector {
-                    if self.information.number_of_real_files < self.number_of_files_to_check {
-                        self.big_files.push(file);
-                        self.information.number_of_real_files += 1;
-                    } else {
-                        break;
-                    }
-                }
-            } else {
-                break;
-            }
+            DirTraversalResult::Stopped => false,
         }
     }
 
