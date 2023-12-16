@@ -340,15 +340,19 @@ impl SimilarImages {
 
     fn collect_image_file_entry(&self, file_entry: &mut ImagesEntry) {
         let img;
+
         match file_entry.image_type {
             ImageType::Normal | ImageType::Heic => {
                 if cfg!(feature = "heif") && file_entry.image_type == ImageType::Heic {
-                    img = match get_dynamic_image_from_heic(&file_entry.path.to_string_lossy()) {
-                        Ok(t) => t,
-                        Err(_) => {
-                            return;
-                        }
-                    };
+                    #[cfg(feature = "heif")]
+                    {
+                        img = match get_dynamic_image_from_heic(&file_entry.path.to_string_lossy()) {
+                            Ok(t) => t,
+                            Err(_) => {
+                                return;
+                            }
+                        };
+                    }
                 } else {
                     if let Ok(image_result) = panic::catch_unwind(|| image::open(&file_entry.path)) {
                         if let Ok(image2) = image_result {
