@@ -341,19 +341,33 @@ impl SimilarImages {
     fn collect_image_file_entry(&self, file_entry: &mut ImagesEntry) {
         let img;
 
-        match file_entry.image_type {
-            ImageType::Normal | ImageType::Heic => {
-                if cfg!(feature = "heif") && file_entry.image_type == ImageType::Heic {
-                    #[cfg(feature = "heif")]
-                    {
-                        img = match get_dynamic_image_from_heic(&file_entry.path.to_string_lossy()) {
-                            Ok(t) => t,
-                            Err(_) => {
-                                return;
-                            }
-                        };
+        if file_entry.image_type == ImageType::Heic {
+            #[cfg(feature = "heif")]
+            {
+                img = match get_dynamic_image_from_heic(&file_entry.path.to_string_lossy()) {
+                    Ok(t) => t,
+                    Err(_) => {
+                        return;
+                    }
+                };
+            }
+            #[cfg(not(feature = "heif"))]
+            {
+                if let Ok(image_result) = panic::catch_unwind(|| image::open(&file_entry.path)) {
+                    if let Ok(image2) = image_result {
+                        img = image2;
+                    } else {
+                        return;
                     }
                 } else {
+                    let message = crate::common::create_crash_message("Image-rs", &file_entry.path.to_string_lossy(), "https://github.com/image-rs/image/issues");
+                    println!("{message}");
+                    return;
+                }
+            }
+        } else {
+            match file_entry.image_type {
+                ImageType::Normal | ImageType::Heic => {
                     if let Ok(image_result) = panic::catch_unwind(|| image::open(&file_entry.path)) {
                         if let Ok(image2) = image_result {
                             img = image2;
@@ -366,15 +380,15 @@ impl SimilarImages {
                         return;
                     }
                 }
-            }
-            ImageType::Raw => {
-                img = match get_dynamic_image_from_raw_image(&file_entry.path) {
-                    Some(t) => t,
-                    None => return,
-                };
-            }
-            _ => {
-                unreachable!();
+                ImageType::Raw => {
+                    img = match get_dynamic_image_from_raw_image(&file_entry.path) {
+                        Some(t) => t,
+                        None => return,
+                    };
+                }
+                _ => {
+                    unreachable!();
+                }
             }
         }
 
