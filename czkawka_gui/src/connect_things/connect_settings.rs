@@ -214,7 +214,7 @@ pub fn connect_settings(gui_data: &GuiData) {
                 dialog.connect_response(move |dialog, response_type| {
                     if response_type == ResponseType::Ok {
                         let (mut messages, loaded_items) =
-                            load_cache_from_file_generalized_by_path::<czkawka_core::similar_videos::FileEntry>(&get_similar_videos_cache_file(), true, &Default::default());
+                            load_cache_from_file_generalized_by_path::<czkawka_core::similar_videos::VideosEntry>(&get_similar_videos_cache_file(), true, &Default::default());
 
                         if let Some(cache_entries) = loaded_items {
                             let save_messages = save_cache_to_file_generalized(&get_similar_videos_cache_file(), &cache_entries, false, 0);

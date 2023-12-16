@@ -177,13 +177,9 @@ impl SameMusic {
 
     #[fun_time(message = "check_files", level = "debug")]
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
-        if !self.common_data.allowed_extensions.using_custom_extensions() {
-            self.common_data.allowed_extensions.extend_allowed_extensions(AUDIO_FILES_EXTENSIONS);
-        } else {
-            self.common_data.allowed_extensions.extend_allowed_extensions(AUDIO_FILES_EXTENSIONS);
-            if !self.common_data.allowed_extensions.using_custom_extensions() {
-                return true;
-            }
+        self.common_data.allowed_extensions.set_and_validate_extensions(AUDIO_FILES_EXTENSIONS);
+        if !self.common_data.allowed_extensions.set_any_extensions() {
+            return true;
         }
 
         let max_stage = match self.check_type {

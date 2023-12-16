@@ -684,18 +684,3 @@ pub fn get_modified_time(metadata: &Metadata, warnings: &mut Vec<String>, curren
         }
     }
 }
-
-pub fn get_lowercase_name(entry_data: &DirEntry, warnings: &mut Vec<String>) -> Option<String> {
-    let name = match entry_data.file_name().into_string() {
-        Ok(t) => t,
-        Err(_inspected) => {
-            warnings.push(flc!(
-                "core_file_not_utf8_name",
-                generate_translation_hashmap(vec![("name", entry_data.path().to_string_lossy().to_string())])
-            ));
-            return None;
-        }
-    }
-    .to_lowercase();
-    Some(name)
-}

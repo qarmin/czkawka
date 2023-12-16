@@ -104,11 +104,11 @@ pub struct SimilarImages {
     bktree: BKTree<ImHash, Hamming>,
     similar_vectors: Vec<Vec<ImagesEntry>>,
     similar_referenced_vectors: Vec<(ImagesEntry, Vec<ImagesEntry>)>,
-    image_hashes: HashMap<ImHash, Vec<ImagesEntry>>,
     // Hashmap with image hashes and Vector with names of files
+    image_hashes: HashMap<ImHash, Vec<ImagesEntry>>,
     similarity: u32,
     images_to_check: BTreeMap<String, ImagesEntry>,
-    pub hash_size: u8, // TODO to remove pub, this is needeed by new gui, because there is no way to check what exactly was seelected
+    hash_size: u8,
     hash_alg: HashAlg,
     image_filter: FilterType,
     exclude_images_with_same_size: bool,
@@ -160,18 +160,17 @@ impl SimilarImages {
 
     #[fun_time(message = "check_for_similar_images", level = "debug")]
     fn check_for_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
-        if !self.common_data.allowed_extensions.using_custom_extensions() {
-            self.common_data.allowed_extensions.extend_allowed_extensions(IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS);
-            self.common_data.allowed_extensions.extend_allowed_extensions(RAW_IMAGE_EXTENSIONS);
-            #[cfg(feature = "heif")]
-            self.common_data.allowed_extensions.extend_allowed_extensions(HEIC_EXTENSIONS);
+        if cfg!(feature = "heif") {
+            self.common_data
+                .allowed_extensions
+                .set_and_validate_extensions(&[IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS, HEIC_EXTENSIONS].concat());
         } else {
             self.common_data
                 .allowed_extensions
-                .extend_allowed_extensions(&[IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS, HEIC_EXTENSIONS].concat());
-            if !self.common_data.allowed_extensions.using_custom_extensions() {
-                return true;
-            }
+                .set_and_validate_extensions(&[IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS].concat());
+        }
+        if !self.common_data.allowed_extensions.set_any_extensions() {
+            return true;
         }
 
         let result = DirTraversalBuilder::new()
@@ -244,7 +243,7 @@ impl SimilarImages {
     // - Join already read hashes with hashes which were read from file
     // - Join all hashes and save it to file
 
-    // #[fun_time(message = "hash_images", level = "debug")]
+    #[fun_time(message = "hash_images", level = "debug")]
     fn hash_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.hash_images_load_cache();
 

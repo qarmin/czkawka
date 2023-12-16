@@ -78,7 +78,7 @@ fn scan_similar_images(a: Weak<MainWindow>, progress_sender: Sender<ProgressData
                 vec_fe.sort_unstable_by_key(|e| e.similarity);
             }
 
-            let hash_size = finder.hash_size;
+            let hash_size = custom_settings.similar_images_sub_hash_size;
 
             a.upgrade_in_event_loop(move |app| {
                 write_similar_images_results(&app, vector, messages, hash_size);
