@@ -222,7 +222,7 @@ impl SameMusic {
 
         if self.common_data.use_cache {
             let (messages, loaded_items) =
-                load_cache_from_file_generalized_by_path::<MusicEntry>(get_similar_music_cache_file(checking_tags), self.get_delete_outdated_cache(), &self.music_to_check);
+                load_cache_from_file_generalized_by_path::<MusicEntry>(&get_similar_music_cache_file(checking_tags), self.get_delete_outdated_cache(), &self.music_to_check);
             self.get_text_messages_mut().extend_with_another_messages(messages);
             loaded_hash_map = loaded_items.unwrap_or_default();
 
@@ -260,7 +260,7 @@ impl SameMusic {
             all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
         }
 
-        let messages = save_cache_to_file_generalized(get_similar_music_cache_file(checking_tags), &all_results, self.common_data.save_also_as_json, 0);
+        let messages = save_cache_to_file_generalized(&get_similar_music_cache_file(checking_tags), &all_results, self.common_data.save_also_as_json, 0);
         self.get_text_messages_mut().extend_with_another_messages(messages);
     }
 

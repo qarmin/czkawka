@@ -12,33 +12,34 @@ use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 use std::io::{BufReader, BufWriter};
 
+const CACHE_VERSION: &str = "70";
+
 pub fn get_broken_files_cache_file() -> String {
-    "cache_broken_files_61.bin".to_string()
+    format!("cache_broken_files_{CACHE_VERSION}.bin")
 }
 
 pub fn get_similar_images_cache_file(hash_size: &u8, hash_alg: &HashAlg, image_filter: &FilterType) -> String {
     format!(
-        "cache_similar_images_{}_{}_{}_61.bin",
-        hash_size,
+        "cache_similar_images_{hash_size}_{}_{}_{CACHE_VERSION}.bin",
         convert_algorithm_to_string(hash_alg),
         convert_filters_to_string(image_filter),
     )
 }
 
 pub fn get_similar_videos_cache_file() -> String {
-    "cache_similar_videos_61.bin".to_string()
+    format!("cache_similar_videos_{CACHE_VERSION}.bin")
 }
-pub fn get_similar_music_cache_file(checking_tags: bool) -> &'static str {
+pub fn get_similar_music_cache_file(checking_tags: bool) -> String {
     if checking_tags {
-        "cache_same_music_tags_61.bin"
+        format!("cache_same_music_tags_{CACHE_VERSION}.bin")
     } else {
-        "cache_same_music_fingerprints_61.bin"
+        format!("cache_same_music_fingerprints_{CACHE_VERSION}.bin")
     }
 }
 
 pub fn get_duplicate_cache_file(type_of_hash: &HashType, is_prehash: bool) -> String {
     let prehash_str = if is_prehash { "_prehash" } else { "" };
-    format!("cache_duplicates_{type_of_hash:?}{prehash_str}_61.bin")
+    format!("cache_duplicates_{type_of_hash:?}{prehash_str}_{CACHE_VERSION}.bin")
 }
 
 #[fun_time(message = "save_cache_to_file_generalized", level = "debug")]
