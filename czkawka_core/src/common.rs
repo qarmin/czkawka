@@ -341,17 +341,10 @@ pub fn create_crash_message(library_name: &str, file_path: &str, home_library_ur
     format!("{library_name} library crashed when opening \"{file_path}\", please check if this is fixed with the latest version of {library_name} (e.g. with https://github.com/qarmin/crates_tester) and if it is not fixed, please report bug here - {home_library_url}")
 }
 
-pub fn regex_check(expression_item: &SingleExcludedItem, directory: impl AsRef<Path>) -> bool {
-    if expression_item.expression == "*" {
+pub fn regex_check(expression_item: &SingleExcludedItem, directory_name: &str) -> bool {
+    if expression_item.expression_splits.is_empty() {
         return true;
     }
-
-    if expression_item.expression_splits.is_empty() {
-        return false;
-    }
-
-    // Get rid of non unicode characters
-    let directory_name = directory.as_ref().to_string_lossy();
 
     // Early checking if directory contains all parts needed by expression
     for split in &expression_item.unique_extensions_splits {
@@ -649,6 +642,7 @@ mod test {
 
     #[test]
     fn test_regex() {
+        assert!(regex_check(&new_excluded_item("*"), "/home/rafal"));
         assert!(regex_check(&new_excluded_item("*home*"), "/home/rafal"));
         assert!(regex_check(&new_excluded_item("*home"), "/home"));
         assert!(regex_check(&new_excluded_item("*home/"), "/home/"));
