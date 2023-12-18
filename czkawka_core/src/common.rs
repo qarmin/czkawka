@@ -462,7 +462,7 @@ where
                         infos.push(format!(
                             "dry_run - would create hardlink from {:?} to {:?}",
                             original_file.get_path(),
-                            original_file.get_path()
+                            file_entry.get_path()
                         ));
                     } else {
                         if dry_run {
