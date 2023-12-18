@@ -331,21 +331,8 @@ pub fn split_path(path: &Path) -> (String, String) {
 }
 
 pub fn split_path_compare(path_a: &Path, path_b: &Path) -> Ordering {
-    let parent_dir_a = path_a.parent();
-    let parent_dir_b = path_b.parent();
-
-    if parent_dir_a.is_none() || parent_dir_b.is_none() {
-        return Ordering::Equal; // Do not sort if there is no parent directory - is this really common?
-    }
-    match parent_dir_a.cmp(&parent_dir_b) {
-        Ordering::Equal => {
-            let file_name_a = path_a.file_name();
-            let file_name_b = path_b.file_name();
-            if file_name_a.is_none() || file_name_b.is_none() {
-                return Ordering::Equal;
-            }
-            file_name_a.cmp(&file_name_b)
-        }
+    match path_a.parent().cmp(&path_b.parent()) {
+        Ordering::Equal => path_a.file_name().cmp(&path_b.file_name()),
         other => other,
     }
 }
