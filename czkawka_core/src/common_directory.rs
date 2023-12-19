@@ -305,8 +305,7 @@ impl Directories {
         self.reference_directories.iter().any(|e| path.starts_with(e))
     }
 
-    pub fn is_excluded(&self, path: impl AsRef<Path>) -> bool {
-        let path = path.as_ref();
+    pub fn is_excluded(&self, path: &Path) -> bool {
         #[cfg(target_family = "windows")]
         let path = normalize_windows_path(path);
         // We're assuming that `excluded_directories` are already normalized

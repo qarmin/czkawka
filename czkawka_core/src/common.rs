@@ -500,7 +500,7 @@ where
                 if dry_run {
                     infos.push(format!("dry_run - would delete file: {:?}", i.get_path()));
                 } else {
-                    if let Err(e) = std::fs::remove_file(i.get_path()) {
+                    if let Err(e) = fs::remove_file(i.get_path()) {
                         errors.push(format!("Cannot delete file: {:?} - {e}", i.get_path()));
                         failed_to_remove_files += 1;
                     } else {

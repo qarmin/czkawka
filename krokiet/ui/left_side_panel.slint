@@ -108,7 +108,7 @@ export component LeftSidePanel {
             HorizontalLayout {
                 alignment: start;
                 Button {
-                    enabled: GuiState.active_tab != CurrentTab.Settings && GuiState.available_subsettings;
+                    visible: GuiState.active_tab != CurrentTab.Settings && GuiState.available_subsettings;
                     min-width: 20px;
                     min-height: 20px;
                     max-height: self.width;
@@ -122,7 +122,7 @@ export component LeftSidePanel {
             HorizontalLayout {
                 alignment: end;
                 Button {
-                    enabled: GuiState.active_tab != CurrentTab.Settings;
+                    visible: GuiState.active_tab != CurrentTab.Settings;
                     min-width: 20px;
                     min-height: 20px;
                     max-height: self.width;
