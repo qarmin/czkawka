@@ -259,7 +259,7 @@ pub fn save_base_settings_to_file(app: &MainWindow) {
 
 pub fn save_custom_settings_to_file(app: &MainWindow) {
     let current_item = app.global::<Settings>().get_settings_preset_idx();
-    let result = save_data_to_file(get_config_file(current_item), &collect_settings(app));
+    let result = save_data_to_file(get_config_file(current_item + 1), &collect_settings(app));
 
     if let Err(e) = result {
         error!("{e}");
@@ -279,14 +279,18 @@ where
     }
 
     let result = match std::fs::read_to_string(&config_file) {
-        Ok(serialized) => match serde_json::from_str(&serialized) {
-            Ok(custom_settings) => Ok(custom_settings),
-            Err(e) => Err(format!("Cannot deserialize settings: {e}")),
-        },
+        Ok(serialized) => {
+            debug!("Loading data from file {:?} took {:?}", config_file, current_time.elapsed());
+
+            match serde_json::from_str(&serialized) {
+                Ok(custom_settings) => Ok(custom_settings),
+                Err(e) => Err(format!("Cannot deserialize settings: {e}")),
+            }
+        }
         Err(e) => Err(format!("Cannot read config file: {e}")),
     };
 
-    debug!("Loading data from file {:?} took {:?}", config_file, current_time.elapsed());
+    debug!("Loading and converting data from file {:?} took {:?}", config_file, current_time.elapsed());
 
     result
 }

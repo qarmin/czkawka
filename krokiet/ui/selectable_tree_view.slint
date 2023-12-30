@@ -75,17 +75,16 @@ export component SelectableTableView inherits Rectangle {
                 height: 20px;
                 background: r.header-row ? ColorPalette.list_view_normal_header_color : (touch-area.has-hover ? (r.selected_row ? ColorPalette.list-view-normal-selected-header : ColorPalette.list_view_normal_color) : (r.selected_row ? ColorPalette.list-view-normal-selected-header : ColorPalette.list_view_normal_color));
                 touch_area := TouchArea {
-                    clicked => {
+                    function clicked_manual() {
                         if (!r.header_row) {
-                            r.selected_row = !r.selected_row;
                             if (root.selected-item == -1) {
+                                r.selected_row = !r.selected_row;
                                 root.selected-item = idx;
                             } else {
-                                if (r.selected_row == true) {
+                                if (!r.selected_row && root.selected-item != idx) {
+                                    r.selected_row = !r.selected_row;
                                     root.values[root.selected-item].selected_row = false;
                                     root.selected-item = idx;
-                                } else {
-                                    root.selected-item = -1;
                                 }
                             }
 
@@ -96,13 +95,19 @@ export component SelectableTableView inherits Rectangle {
                             }
                         }
                     }
+                    double-clicked => {
+                            Callabler.item_opened(r.val[root.parentPathIdx - 1] + "/" + r.val[root.fileNameIdx - 1])
+                    }
                     pointer-event(event) => {
-                        // TODO this should be clicked by double-click
+                        // TODO this should be clicked by double-click - https://github.com/slint-ui/slint/issues/4235
                         if (event.button == PointerEventButton.right && event.kind == PointerEventKind.up) {
                             Callabler.item_opened(r.val[root.parentPathIdx - 1])
-                        } else if (event.button == PointerEventButton.middle && event.kind == PointerEventKind.up) {
-                            Callabler.item_opened(r.val[root.parentPathIdx - 1] + "/" + r.val[root.fileNameIdx - 1])
+                        } else if (event.button == PointerEventButton.left && event.kind == PointerEventKind.up) {
+                            clicked_manual();
                         }
+                        //else if (event.button == PointerEventButton.middle && event.kind == PointerEventKind.up) {
+                        //    Callabler.item_opened(r.val[root.parentPathIdx - 1] + "/" + r.val[root.fileNameIdx - 1])
+                        //}
                     }
                 }
 

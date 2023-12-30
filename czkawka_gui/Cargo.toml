@@ -44,7 +44,7 @@ fs_extra = "1.3"
 # Language
 i18n-embed = { version = "0.14", features = ["fluent-system", "desktop-requester"] }
 i18n-embed-fl = "0.7"
-rust-embed = { version = "8.1", features = ["debug-embed"] }
+rust-embed = { version = "8.2", features = ["debug-embed"] }
 once_cell = "1.19"
 
 log = "0.4.20"
