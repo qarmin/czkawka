@@ -18,3 +18,4 @@ ci_tester/Cargo.lock
 krokiet/Cargo.lock
 krokiet/target
 *.json
+*.mm_profdata
