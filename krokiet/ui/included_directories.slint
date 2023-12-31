@@ -1,0 +1,101 @@
+
+import {Button, StandardListView, VerticalBox, ListView, ScrollView, TextEdit, CheckBox} from "std-widgets.slint";
+import {Callabler} from "callabler.slint";
+
+export struct IncludedDirectoriesModel {
+    path: string,
+    referended_folder: bool,
+}
+
+export component InlcudedDirectories {
+    in-out property <[IncludedDirectoriesModel]> model: [{path: "/home/path", referended_folder: false}];
+    in-out property <int> current_index: -1;
+
+    in-out property <length> size_referenced_folder: 40px;
+    
+    min-width: 50px;
+    VerticalLayout {
+        HorizontalLayout {
+            spacing: 5px;
+            Text {
+                text: "Referenced folder";
+                width: size_referenced_folder;
+            }
+            Text{
+                horizontal-stretch: 1.0;
+                text: "Path";
+            }
+        }
+        ListView {
+            for data in model : Rectangle {
+                height: 30px;
+                border_radius: 5px;
+                width: parent.width;
+                HorizontalLayout {
+                    spacing: 5px;
+                    width: parent.width;
+
+                    CheckBox {
+                        checked: data.referended_folder;
+                        width: size_referenced_folder;
+                    }
+                    Text {
+                        horizontal-stretch: 1.0;
+                        text: data.path;
+                        vertical-alignment: center;
+                    }
+                }
+            }
+        }
+    }
+}
+
+export component ExcludeDirectories {
+    in-out property <[string]> model: ["/home/path"];
+    in-out property <int> current_index: -1;
+    private property <PointerEvent> event;
+
+    min-width: 50px;
+    VerticalLayout {
+        HorizontalLayout {
+            spacing: 5px;
+            Text {
+                text: "Path";
+            }
+        }
+        ListView {
+            for data[idx] in model : Rectangle {
+                height: 30px;
+                border_radius: 5px;
+                width: parent.width;
+
+                touch_area := TouchArea {
+                    clicked => {
+                        if (current_index == -1) {
+                            
+                        }
+                    }
+                    double-clicked => {
+                        if (event.button == PointerEventButton.middle && event.kind == PointerEventKind.up) {
+                            Callabler.item_opened(data)
+                        }
+                    }
+                    pointer-event(event) => {
+                        root.event = event;
+                    }
+                }
+                
+                HorizontalLayout {
+                    spacing: 5px;
+                    width: parent.width;
+
+                    Text {
+                        horizontal-stretch: 1.0;
+                        text: data;
+                        vertical-alignment: center;
+                    }
+                }
+            }
+        }
+    }
+}
