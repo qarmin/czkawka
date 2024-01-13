@@ -87,13 +87,7 @@ pub enum Commands {
 #[derive(Debug, clap::Args)]
 pub struct DuplicatesArgs {
     #[clap(flatten)]
-    pub thread_number: ThreadNumber,
-    #[clap(flatten)]
-    pub directories: Directories,
-    #[clap(flatten)]
-    pub excluded_directories: ExcludedDirectories,
-    #[clap(flatten)]
-    pub excluded_items: ExcludedItems,
+    pub common_cli_items: CommonCliItems,
     #[clap(
         short,
         long,
@@ -121,8 +115,6 @@ pub struct DuplicatesArgs {
         long_help = "Minimum size of cached files in bytes, assigning bigger value may speed up the scan but loading the cache will be slower, assigning smaller value may slow down the scan and some files may need to be hashed again but loading the cache will be faster"
     )]
     pub minimal_cached_file_size: u64,
-    #[clap(flatten)]
-    pub allowed_extensions: AllowedExtensions,
     #[clap(
         short,
         long,
@@ -143,18 +135,7 @@ pub struct DuplicatesArgs {
     )]
     pub hash_type: HashType,
     #[clap(flatten)]
-    pub file_to_save: FileToSave,
-    #[clap(flatten)]
-    pub json_compact_file_to_save: JsonCompactFileToSave,
-    #[clap(flatten)]
-    pub json_pretty_file_to_save: JsonPrettyFileToSave,
-    #[clap(flatten)]
-    pub not_recursive: NotRecursive,
-    #[clap(flatten)]
     pub case_sensitive_name_comparison: CaseSensitiveNameComparison,
-    #[cfg(target_family = "unix")]
-    #[clap(flatten)]
-    pub exclude_other_filesystems: ExcludeOtherFilesystems,
     #[clap(flatten)]
     pub allow_hard_links: AllowHardLinks,
     #[clap(flatten)]
@@ -164,117 +145,43 @@ pub struct DuplicatesArgs {
 #[derive(Debug, clap::Args)]
 pub struct EmptyFoldersArgs {
     #[clap(flatten)]
-    pub thread_number: ThreadNumber,
-    #[clap(flatten)]
-    pub directories: Directories,
-    #[clap(flatten)]
-    pub excluded_directories: ExcludedDirectories,
-    #[clap(flatten)]
-    pub excluded_items: ExcludedItems,
+    pub common_cli_items: CommonCliItems,
     #[clap(short = 'D', long, help = "Delete found folders")]
     pub delete_folders: bool,
-    #[clap(flatten)]
-    pub file_to_save: FileToSave,
-    #[clap(flatten)]
-    pub json_compact_file_to_save: JsonCompactFileToSave,
-    #[clap(flatten)]
-    pub json_pretty_file_to_save: JsonPrettyFileToSave,
-    #[cfg(target_family = "unix")]
-    #[clap(flatten)]
-    pub exclude_other_filesystems: ExcludeOtherFilesystems,
 }
 
 #[derive(Debug, clap::Args)]
 pub struct BiggestFilesArgs {
     #[clap(flatten)]
-    pub thread_number: ThreadNumber,
-    #[clap(flatten)]
-    pub directories: Directories,
-    #[clap(flatten)]
-    pub excluded_directories: ExcludedDirectories,
-    #[clap(flatten)]
-    pub excluded_items: ExcludedItems,
-    #[clap(flatten)]
-    pub allowed_extensions: AllowedExtensions,
+    pub common_cli_items: CommonCliItems,
     #[clap(short, long, default_value = "50", help = "Number of files to be shown")]
     pub number_of_files: usize,
     #[clap(short = 'D', long, help = "Delete found files")]
     pub delete_files: bool,
-    #[clap(flatten)]
-    pub file_to_save: FileToSave,
-    #[clap(flatten)]
-    pub json_compact_file_to_save: JsonCompactFileToSave,
-    #[clap(flatten)]
-    pub json_pretty_file_to_save: JsonPrettyFileToSave,
-    #[clap(flatten)]
-    pub not_recursive: NotRecursive,
     #[clap(short = 'J', long, help = "Finds the smallest files instead the biggest")]
     pub smallest_mode: bool,
-    #[cfg(target_family = "unix")]
-    #[clap(flatten)]
-    pub exclude_other_filesystems: ExcludeOtherFilesystems,
 }
 
 #[derive(Debug, clap::Args)]
 pub struct EmptyFilesArgs {
     #[clap(flatten)]
-    pub thread_number: ThreadNumber,
-    #[clap(flatten)]
-    pub directories: Directories,
-    #[clap(flatten)]
-    pub excluded_directories: ExcludedDirectories,
-    #[clap(flatten)]
-    pub excluded_items: ExcludedItems,
-    #[clap(flatten)]
-    pub allowed_extensions: AllowedExtensions,
+    pub common_cli_items: CommonCliItems,
     #[clap(short = 'D', long, help = "Delete found files")]
     pub delete_files: bool,
-    #[clap(flatten)]
-    pub file_to_save: FileToSave,
-    #[clap(flatten)]
-    pub json_compact_file_to_save: JsonCompactFileToSave,
-    #[clap(flatten)]
-    pub json_pretty_file_to_save: JsonPrettyFileToSave,
-    #[clap(flatten)]
-    pub not_recursive: NotRecursive,
-    #[cfg(target_family = "unix")]
-    #[clap(flatten)]
-    pub exclude_other_filesystems: ExcludeOtherFilesystems,
 }
 
 #[derive(Debug, clap::Args)]
 pub struct TemporaryArgs {
     #[clap(flatten)]
-    pub thread_number: ThreadNumber,
-    #[clap(flatten)]
-    pub directories: Directories,
-    #[clap(flatten)]
-    pub excluded_directories: ExcludedDirectories,
-    #[clap(flatten)]
-    pub excluded_items: ExcludedItems,
+    pub common_cli_items: CommonCliItems,
     #[clap(short = 'D', long, help = "Delete found files")]
     pub delete_files: bool,
-    #[clap(flatten)]
-    pub file_to_save: FileToSave,
-    #[clap(flatten)]
-    pub json_compact_file_to_save: JsonCompactFileToSave,
-    #[clap(flatten)]
-    pub json_pretty_file_to_save: JsonPrettyFileToSave,
-    #[clap(flatten)]
-    pub not_recursive: NotRecursive,
-    #[cfg(target_family = "unix")]
-    #[clap(flatten)]
-    pub exclude_other_filesystems: ExcludeOtherFilesystems,
 }
 
 #[derive(Debug, clap::Args)]
 pub struct SimilarImagesArgs {
     #[clap(flatten)]
-    pub thread_number: ThreadNumber,
-    #[clap(flatten)]
-    pub directories: Directories,
-    #[clap(flatten)]
-    pub excluded_directories: ExcludedDirectories,
+    pub common_cli_items: CommonCliItems,
     #[clap(
         short,
         long,
@@ -303,22 +210,9 @@ pub struct SimilarImagesArgs {
     )]
     pub similarity_preset: SimilarityPreset,
     #[clap(flatten)]
-    pub excluded_items: ExcludedItems,
-    #[clap(flatten)]
-    pub file_to_save: FileToSave,
-    #[clap(flatten)]
     pub delete_method: DMethod,
     #[clap(flatten)]
     pub dry_run: DryRun,
-    #[clap(flatten)]
-    pub json_compact_file_to_save: JsonCompactFileToSave,
-    #[clap(flatten)]
-    pub json_pretty_file_to_save: JsonPrettyFileToSave,
-    #[clap(flatten)]
-    pub not_recursive: NotRecursive,
-    #[cfg(target_family = "unix")]
-    #[clap(flatten)]
-    pub exclude_other_filesystems: ExcludeOtherFilesystems,
     #[clap(
         short = 'g',
         long,
@@ -348,13 +242,7 @@ pub struct SimilarImagesArgs {
 #[derive(Debug, clap::Args)]
 pub struct SameMusicArgs {
     #[clap(flatten)]
-    pub thread_number: ThreadNumber,
-    #[clap(flatten)]
-    pub directories: Directories,
-    #[clap(flatten)]
-    pub excluded_directories: ExcludedDirectories,
-    #[clap(flatten)]
-    pub excluded_items: ExcludedItems,
+    pub common_cli_items: CommonCliItems,
     #[clap(flatten)]
     pub delete_method: DMethod,
     #[clap(flatten)]
@@ -377,17 +265,6 @@ pub struct SameMusicArgs {
         long_help = "Methods to search files.\nCONTENT - finds similar audio files by content, TAGS - finds similar images by tags, needs to set"
     )]
     pub search_method: CheckingMethod,
-    #[clap(flatten)]
-    pub file_to_save: FileToSave,
-    #[clap(flatten)]
-    pub json_compact_file_to_save: JsonCompactFileToSave,
-    #[clap(flatten)]
-    pub json_pretty_file_to_save: JsonPrettyFileToSave,
-    #[clap(flatten)]
-    pub not_recursive: NotRecursive,
-    #[cfg(target_family = "unix")]
-    #[clap(flatten)]
-    pub exclude_other_filesystems: ExcludeOtherFilesystems,
     #[clap(
         short,
         long,
@@ -458,84 +335,27 @@ fn parse_minimum_segment_duration(src: &str) -> Result<f32, String> {
 #[derive(Debug, clap::Args)]
 pub struct InvalidSymlinksArgs {
     #[clap(flatten)]
-    pub thread_number: ThreadNumber,
-    #[clap(flatten)]
-    pub directories: Directories,
-    #[clap(flatten)]
-    pub excluded_directories: ExcludedDirectories,
-    #[clap(flatten)]
-    pub excluded_items: ExcludedItems,
-    #[clap(flatten)]
-    pub allowed_extensions: AllowedExtensions,
+    pub common_cli_items: CommonCliItems,
     #[clap(short = 'D', long, help = "Delete found files")]
     pub delete_files: bool,
-    #[clap(flatten)]
-    pub file_to_save: FileToSave,
-    #[clap(flatten)]
-    pub json_compact_file_to_save: JsonCompactFileToSave,
-    #[clap(flatten)]
-    pub json_pretty_file_to_save: JsonPrettyFileToSave,
-    #[clap(flatten)]
-    pub not_recursive: NotRecursive,
-    #[cfg(target_family = "unix")]
-    #[clap(flatten)]
-    pub exclude_other_filesystems: ExcludeOtherFilesystems,
 }
 
 #[derive(Debug, clap::Args)]
 pub struct BrokenFilesArgs {
     #[clap(flatten)]
-    pub thread_number: ThreadNumber,
-    #[clap(flatten)]
-    pub directories: Directories,
-    #[clap(flatten)]
-    pub excluded_directories: ExcludedDirectories,
-    #[clap(flatten)]
-    pub excluded_items: ExcludedItems,
-    #[clap(flatten)]
-    pub allowed_extensions: AllowedExtensions,
+    pub common_cli_items: CommonCliItems,
     #[clap(short = 'D', long, help = "Delete found files")]
     pub delete_files: bool,
-    #[clap(flatten)]
-    pub file_to_save: FileToSave,
-    #[clap(flatten)]
-    pub json_compact_file_to_save: JsonCompactFileToSave,
-    #[clap(flatten)]
-    pub json_pretty_file_to_save: JsonPrettyFileToSave,
-    #[clap(flatten)]
-    pub not_recursive: NotRecursive,
-    #[cfg(target_family = "unix")]
-    #[clap(flatten)]
-    pub exclude_other_filesystems: ExcludeOtherFilesystems,
 }
 
 #[derive(Debug, clap::Args)]
 pub struct SimilarVideosArgs {
     #[clap(flatten)]
-    pub thread_number: ThreadNumber,
-    #[clap(flatten)]
-    pub directories: Directories,
-    #[clap(flatten)]
-    pub excluded_directories: ExcludedDirectories,
-    #[clap(flatten)]
-    pub excluded_items: ExcludedItems,
+    pub common_cli_items: CommonCliItems,
     #[clap(flatten)]
     pub delete_method: DMethod,
     #[clap(flatten)]
     pub dry_run: DryRun,
-    #[clap(flatten)]
-    pub file_to_save: FileToSave,
-    #[clap(flatten)]
-    pub json_compact_file_to_save: JsonCompactFileToSave,
-    #[clap(flatten)]
-    pub json_pretty_file_to_save: JsonPrettyFileToSave,
-    #[clap(flatten)]
-    pub allowed_extensions: AllowedExtensions,
-    #[clap(flatten)]
-    pub not_recursive: NotRecursive,
-    #[cfg(target_family = "unix")]
-    #[clap(flatten)]
-    pub exclude_other_filesystems: ExcludeOtherFilesystems,
     #[clap(
         short,
         long,
@@ -568,26 +388,53 @@ pub struct SimilarVideosArgs {
 #[derive(Debug, clap::Args)]
 pub struct BadExtensionsArgs {
     #[clap(flatten)]
-    pub thread_number: ThreadNumber,
-    #[clap(flatten)]
-    pub directories: Directories,
-    #[clap(flatten)]
-    pub excluded_directories: ExcludedDirectories,
-    #[clap(flatten)]
-    pub excluded_items: ExcludedItems,
-    #[clap(flatten)]
-    pub allowed_extensions: AllowedExtensions,
+    pub common_cli_items: CommonCliItems,
+}
+
+#[derive(Debug, clap::Args)]
+pub struct CommonCliItems {
+    #[clap(short = 'T', long, default_value = "0", help = "Limits thread number, 0(default) will use all available threads")]
+    pub thread_number: usize,
+    #[clap(
+        short,
+        long,
+        required = true,
+        help = "Directorie(s) to search",
+        long_help = "List of directorie(s) which will be searched(absolute path)"
+    )]
+    pub directories: Vec<PathBuf>,
+    #[clap(
+        short,
+        long,
+        help = "Excluded directorie(s)",
+        long_help = "List of directorie(s) which will be excluded from search(absolute path)"
+    )]
+    pub excluded_directories: Vec<PathBuf>,
+    #[clap(
+        short = 'E',
+        long,
+        help = "Excluded item(s)",
+        long_help = "List of excluded item(s) which contains * wildcard(may be slow, so use -e where possible)"
+    )]
+    pub excluded_items: Vec<String>,
+    #[clap(
+        short = 'x',
+        long,
+        help = "Allowed file extension(s)",
+        long_help = "List of checked files with provided extension(s). There are also helpful macros which allow to easy use a typical extensions like:\nIMAGE(\"jpg,kra,gif,png,bmp,tiff,hdr,svg\"),\nTEXT(\"txt,doc,docx,odt,rtf\"),\nVIDEO(\"mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp\") or\nMUSIC(\"mp3,flac,ogg,tta,wma,webm\")\n "
+    )]
+    pub allowed_extensions: Vec<String>,
     #[clap(flatten)]
     pub file_to_save: FileToSave,
     #[clap(flatten)]
     pub json_compact_file_to_save: JsonCompactFileToSave,
     #[clap(flatten)]
     pub json_pretty_file_to_save: JsonPrettyFileToSave,
-    #[clap(flatten)]
-    pub not_recursive: NotRecursive,
+    #[clap(short = 'R', long, help = "Prevents from recursive check of folders")]
+    pub not_recursive: bool,
     #[cfg(target_family = "unix")]
-    #[clap(flatten)]
-    pub exclude_other_filesystems: ExcludeOtherFilesystems,
+    #[clap(short = 'X', long, help = "Exclude files on other filesystems")]
+    pub exclude_other_filesystems: bool,
 }
 
 #[derive(Debug, clap::Args)]
@@ -601,70 +448,6 @@ pub struct DMethod {
         long_help = "Methods to delete the files.\nAEN - All files except the newest,\nAEO - All files except the oldest,\nON - Only 1 file, the newest,\nOO - Only 1 file, the oldest\nHARD - create hard link\nNONE - not delete files"
     )]
     pub delete_method: DeleteMethod,
-}
-
-#[derive(Debug, clap::Args)]
-pub struct Directories {
-    #[clap(
-        short,
-        long,
-        required = true,
-        help = "Directorie(s) to search",
-        long_help = "List of directorie(s) which will be searched(absolute path)"
-    )]
-    pub directories: Vec<PathBuf>,
-}
-
-#[derive(Debug, clap::Args)]
-pub struct ExcludedDirectories {
-    #[clap(
-        short,
-        long,
-        help = "Excluded directorie(s)",
-        long_help = "List of directorie(s) which will be excluded from search(absolute path)"
-    )]
-    pub excluded_directories: Vec<PathBuf>,
-}
-
-#[derive(Debug, clap::Args)]
-pub struct ExcludedItems {
-    #[clap(
-        short = 'E',
-        long,
-        help = "Excluded item(s)",
-        long_help = "List of excluded item(s) which contains * wildcard(may be slow, so use -e where possible)"
-    )]
-    pub excluded_items: Vec<String>,
-}
-
-#[derive(Debug, clap::Args)]
-pub struct AllowedExtensions {
-    #[clap(
-        short = 'x',
-        long,
-        help = "Allowed file extension(s)",
-        long_help = "List of checked files with provided extension(s). There are also helpful macros which allow to easy use a typical extensions like:\nIMAGE(\"jpg,kra,gif,png,bmp,tiff,hdr,svg\"),\nTEXT(\"txt,doc,docx,odt,rtf\"),\nVIDEO(\"mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp\") or\nMUSIC(\"mp3,flac,ogg,tta,wma,webm\")\n "
-    )]
-    pub allowed_extensions: Vec<String>,
-}
-
-#[derive(Debug, clap::Args)]
-pub struct NotRecursive {
-    #[clap(short = 'R', long, help = "Prevents from recursive check of folders")]
-    pub not_recursive: bool,
-}
-
-#[derive(Debug, clap::Args)]
-pub struct ThreadNumber {
-    #[clap(short = 'T', long, default_value = "0", help = "Limits thread number, 0(default) will use all available threads")]
-    pub thread_number: usize,
-}
-
-#[cfg(target_family = "unix")]
-#[derive(Debug, clap::Args)]
-pub struct ExcludeOtherFilesystems {
-    #[clap(short = 'X', long, help = "Exclude files on other filesystems")]
-    pub exclude_other_filesystems: bool,
 }
 
 #[derive(Debug, clap::Args)]

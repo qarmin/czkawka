@@ -21,8 +21,8 @@ use czkawka_core::similar_videos::SimilarVideos;
 use czkawka_core::temporary::Temporary;
 
 use crate::commands::{
-    Args, BadExtensionsArgs, BiggestFilesArgs, BrokenFilesArgs, DuplicatesArgs, EmptyFilesArgs, EmptyFoldersArgs, InvalidSymlinksArgs, SameMusicArgs, SimilarImagesArgs,
-    SimilarVideosArgs, TemporaryArgs,
+    Args, BadExtensionsArgs, BiggestFilesArgs, BrokenFilesArgs, CommonCliItems, DuplicatesArgs, EmptyFilesArgs, EmptyFoldersArgs, InvalidSymlinksArgs, SameMusicArgs,
+    SimilarImagesArgs, SimilarVideosArgs, TemporaryArgs,
 };
 
 mod commands;
@@ -57,126 +57,63 @@ fn main() {
 
 fn duplicates(duplicates: DuplicatesArgs) {
     let DuplicatesArgs {
-        thread_number,
-        directories,
-        excluded_directories,
-        excluded_items,
+        common_cli_items,
         minimal_file_size,
         maximal_file_size,
         minimal_cached_file_size,
-        allowed_extensions,
         search_method,
         delete_method,
         hash_type,
-        file_to_save,
-        json_compact_file_to_save,
-        json_pretty_file_to_save,
-        not_recursive,
-        #[cfg(target_family = "unix")]
-        exclude_other_filesystems,
         allow_hard_links,
         dry_run,
         case_sensitive_name_comparison,
     } = duplicates;
 
-    set_number_of_threads(thread_number.thread_number);
-
     let mut item = DuplicateFinder::new();
 
-    item.set_included_directory(directories.directories);
-    item.set_excluded_directory(excluded_directories.excluded_directories);
-    item.set_excluded_items(excluded_items.excluded_items);
+    set_common_settings(&mut item, &common_cli_items);
     item.set_minimal_file_size(minimal_file_size);
     item.set_maximal_file_size(maximal_file_size);
     item.set_minimal_cache_file_size(minimal_cached_file_size);
-    item.set_allowed_extensions(allowed_extensions.allowed_extensions.join(","));
     item.set_check_method(search_method);
     item.set_delete_method(delete_method.delete_method);
     item.set_hash_type(hash_type);
-    item.set_recursive_search(!not_recursive.not_recursive);
-    #[cfg(target_family = "unix")]
-    item.set_exclude_other_filesystems(exclude_other_filesystems.exclude_other_filesystems);
     item.set_ignore_hard_links(!allow_hard_links.allow_hard_links);
     item.set_dry_run(dry_run.dry_run);
     item.set_case_sensitive_name_comparison(case_sensitive_name_comparison.case_sensitive_name_comparison);
 
     item.find_duplicates(None, None);
 
-    save_results_to_files(file_to_save.file_name(), json_compact_file_to_save.file_name(), json_pretty_file_to_save.file_name(), &item);
-
-    if !cfg!(debug_assertions) {
-        item.print_results_to_output();
-    }
-    item.get_text_messages().print_messages();
+    save_and_print_results(&mut item, &common_cli_items);
 }
 
 fn empty_folders(empty_folders: EmptyFoldersArgs) {
-    let EmptyFoldersArgs {
-        thread_number,
-        directories,
-        delete_folders,
-        file_to_save,
-        json_compact_file_to_save,
-        json_pretty_file_to_save,
-        excluded_directories,
-        excluded_items,
-        #[cfg(target_family = "unix")]
-        exclude_other_filesystems,
-    } = empty_folders;
-
-    set_number_of_threads(thread_number.thread_number);
+    let EmptyFoldersArgs { common_cli_items, delete_folders } = empty_folders;
 
     let mut item = EmptyFolder::new();
 
-    item.set_included_directory(directories.directories);
-    item.set_excluded_directory(excluded_directories.excluded_directories);
-    item.set_excluded_items(excluded_items.excluded_items);
+    set_common_settings(&mut item, &common_cli_items);
     if delete_folders {
         item.set_delete_method(DeleteMethod::Delete);
     }
-    #[cfg(target_family = "unix")]
-    item.set_exclude_other_filesystems(exclude_other_filesystems.exclude_other_filesystems);
 
     item.find_empty_folders(None, None);
 
-    save_results_to_files(file_to_save.file_name(), json_compact_file_to_save.file_name(), json_pretty_file_to_save.file_name(), &item);
-
-    if !cfg!(debug_assertions) {
-        item.print_results_to_output();
-    }
-    item.get_text_messages().print_messages();
+    save_and_print_results(&mut item, &common_cli_items);
 }
 
 fn biggest_files(biggest_files: BiggestFilesArgs) {
     let BiggestFilesArgs {
-        thread_number,
-        directories,
-        excluded_directories,
-        excluded_items,
-        allowed_extensions,
+        common_cli_items,
         number_of_files,
-        file_to_save,
-        json_compact_file_to_save,
-        json_pretty_file_to_save,
-        not_recursive,
-        #[cfg(target_family = "unix")]
-        exclude_other_filesystems,
         delete_files,
         smallest_mode,
     } = biggest_files;
 
-    set_number_of_threads(thread_number.thread_number);
-
     let mut item = BigFile::new();
 
-    item.set_included_directory(directories.directories);
-    item.set_excluded_directory(excluded_directories.excluded_directories);
-    item.set_excluded_items(excluded_items.excluded_items);
-    item.set_allowed_extensions(allowed_extensions.allowed_extensions.join(","));
+    set_common_settings(&mut item, &common_cli_items);
     item.set_number_of_files_to_check(number_of_files);
-    item.set_recursive_search(!not_recursive.not_recursive);
-    #[cfg(target_family = "unix")]
-    item.set_exclude_other_filesystems(exclude_other_filesystems.exclude_other_filesystems);
     if delete_files {
         item.set_delete_method(DeleteMethod::Delete);
     }
@@ -186,41 +123,15 @@ fn biggest_files(biggest_files: BiggestFilesArgs) {
 
     item.find_big_files(None, None);
 
-    save_results_to_files(file_to_save.file_name(), json_compact_file_to_save.file_name(), json_pretty_file_to_save.file_name(), &item);
-
-    if !cfg!(debug_assertions) {
-        item.print_results_to_output();
-    }
-    item.get_text_messages().print_messages();
+    save_and_print_results(&mut item, &common_cli_items);
 }
 
 fn empty_files(empty_files: EmptyFilesArgs) {
-    let EmptyFilesArgs {
-        thread_number,
-        directories,
-        excluded_directories,
-        excluded_items,
-        allowed_extensions,
-        delete_files,
-        file_to_save,
-        json_compact_file_to_save,
-        json_pretty_file_to_save,
-        not_recursive,
-        #[cfg(target_family = "unix")]
-        exclude_other_filesystems,
-    } = empty_files;
-
-    set_number_of_threads(thread_number.thread_number);
+    let EmptyFilesArgs { common_cli_items, delete_files } = empty_files;
 
     let mut item = EmptyFiles::new();
 
-    item.set_included_directory(directories.directories);
-    item.set_excluded_directory(excluded_directories.excluded_directories);
-    item.set_excluded_items(excluded_items.excluded_items);
-    item.set_allowed_extensions(allowed_extensions.allowed_extensions.join(","));
-    item.set_recursive_search(!not_recursive.not_recursive);
-    #[cfg(target_family = "unix")]
-    item.set_exclude_other_filesystems(exclude_other_filesystems.exclude_other_filesystems);
+    set_common_settings(&mut item, &common_cli_items);
 
     if delete_files {
         item.set_delete_method(DeleteMethod::Delete);
@@ -228,39 +139,15 @@ fn empty_files(empty_files: EmptyFilesArgs) {
 
     item.find_empty_files(None, None);
 
-    save_results_to_files(file_to_save.file_name(), json_compact_file_to_save.file_name(), json_pretty_file_to_save.file_name(), &item);
-
-    if !cfg!(debug_assertions) {
-        item.print_results_to_output();
-    }
-    item.get_text_messages().print_messages();
+    save_and_print_results(&mut item, &common_cli_items);
 }
 
 fn temporary(temporary: TemporaryArgs) {
-    let TemporaryArgs {
-        thread_number,
-        directories,
-        excluded_directories,
-        excluded_items,
-        #[cfg(target_family = "unix")]
-        exclude_other_filesystems,
-        delete_files,
-        file_to_save,
-        json_compact_file_to_save,
-        json_pretty_file_to_save,
-        not_recursive,
-    } = temporary;
-
-    set_number_of_threads(thread_number.thread_number);
+    let TemporaryArgs { common_cli_items, delete_files } = temporary;
 
     let mut item = Temporary::new();
 
-    item.set_included_directory(directories.directories);
-    item.set_excluded_directory(excluded_directories.excluded_directories);
-    item.set_excluded_items(excluded_items.excluded_items);
-    item.set_recursive_search(!not_recursive.not_recursive);
-    #[cfg(target_family = "unix")]
-    item.set_exclude_other_filesystems(exclude_other_filesystems.exclude_other_filesystems);
+    set_common_settings(&mut item, &common_cli_items);
 
     if delete_files {
         item.set_delete_method(DeleteMethod::Delete);
@@ -268,29 +155,15 @@ fn temporary(temporary: TemporaryArgs) {
 
     item.find_temporary_files(None, None);
 
-    save_results_to_files(file_to_save.file_name(), json_compact_file_to_save.file_name(), json_pretty_file_to_save.file_name(), &item);
-
-    if !cfg!(debug_assertions) {
-        item.print_results_to_output();
-    }
-    item.get_text_messages().print_messages();
+    save_and_print_results(&mut item, &common_cli_items);
 }
 
 fn similar_images(similar_images: SimilarImagesArgs) {
     let SimilarImagesArgs {
-        thread_number,
-        directories,
-        excluded_directories,
-        excluded_items,
-        file_to_save,
-        json_compact_file_to_save,
-        json_pretty_file_to_save,
+        common_cli_items,
         minimal_file_size,
         maximal_file_size,
         similarity_preset,
-        not_recursive,
-        #[cfg(target_family = "unix")]
-        exclude_other_filesystems,
         hash_alg,
         image_filter,
         hash_size,
@@ -298,18 +171,11 @@ fn similar_images(similar_images: SimilarImagesArgs) {
         dry_run,
     } = similar_images;
 
-    set_number_of_threads(thread_number.thread_number);
-
     let mut item = SimilarImages::new();
 
-    item.set_included_directory(directories.directories);
-    item.set_excluded_directory(excluded_directories.excluded_directories);
-    item.set_excluded_items(excluded_items.excluded_items);
+    set_common_settings(&mut item, &common_cli_items);
     item.set_minimal_file_size(minimal_file_size);
     item.set_maximal_file_size(maximal_file_size);
-    item.set_recursive_search(!not_recursive.not_recursive);
-    #[cfg(target_family = "unix")]
-    item.set_exclude_other_filesystems(exclude_other_filesystems.exclude_other_filesystems);
     item.set_image_filter(image_filter);
     item.set_hash_alg(hash_alg);
     item.set_hash_size(hash_size);
@@ -320,27 +186,13 @@ fn similar_images(similar_images: SimilarImagesArgs) {
 
     item.find_similar_images(None, None);
 
-    save_results_to_files(file_to_save.file_name(), json_compact_file_to_save.file_name(), json_pretty_file_to_save.file_name(), &item);
-
-    if !cfg!(debug_assertions) {
-        item.print_results_to_output();
-    }
-    item.get_text_messages().print_messages();
+    save_and_print_results(&mut item, &common_cli_items);
 }
 
 fn same_music(same_music: SameMusicArgs) {
     let SameMusicArgs {
-        thread_number,
-        directories,
-        excluded_directories,
-        excluded_items,
+        common_cli_items,
         delete_method,
-        file_to_save,
-        json_compact_file_to_save,
-        json_pretty_file_to_save,
-        not_recursive,
-        #[cfg(target_family = "unix")]
-        exclude_other_filesystems,
         minimal_file_size,
         maximal_file_size,
         music_similarity,
@@ -350,18 +202,11 @@ fn same_music(same_music: SameMusicArgs) {
         search_method,
     } = same_music;
 
-    set_number_of_threads(thread_number.thread_number);
-
     let mut item = SameMusic::new();
 
-    item.set_included_directory(directories.directories);
-    item.set_excluded_directory(excluded_directories.excluded_directories);
-    item.set_excluded_items(excluded_items.excluded_items);
+    set_common_settings(&mut item, &common_cli_items);
     item.set_minimal_file_size(minimal_file_size);
     item.set_maximal_file_size(maximal_file_size);
-    item.set_recursive_search(!not_recursive.not_recursive);
-    #[cfg(target_family = "unix")]
-    item.set_exclude_other_filesystems(exclude_other_filesystems.exclude_other_filesystems);
     item.set_music_similarity(music_similarity);
     item.set_delete_method(delete_method.delete_method);
     item.set_dry_run(dry_run.dry_run);
@@ -371,82 +216,30 @@ fn same_music(same_music: SameMusicArgs) {
 
     item.find_same_music(None, None);
 
-    save_results_to_files(file_to_save.file_name(), json_compact_file_to_save.file_name(), json_pretty_file_to_save.file_name(), &item);
-
-    if !cfg!(debug_assertions) {
-        item.print_results_to_output();
-    }
-    item.get_text_messages().print_messages();
+    save_and_print_results(&mut item, &common_cli_items);
 }
 
 fn invalid_symlinks(invalid_symlinks: InvalidSymlinksArgs) {
-    let InvalidSymlinksArgs {
-        thread_number,
-        directories,
-        excluded_directories,
-        excluded_items,
-        allowed_extensions,
-        file_to_save,
-        json_compact_file_to_save,
-        json_pretty_file_to_save,
-        not_recursive,
-        #[cfg(target_family = "unix")]
-        exclude_other_filesystems,
-        delete_files,
-    } = invalid_symlinks;
-
-    set_number_of_threads(thread_number.thread_number);
+    let InvalidSymlinksArgs { common_cli_items, delete_files } = invalid_symlinks;
 
     let mut item = InvalidSymlinks::new();
 
-    item.set_included_directory(directories.directories);
-    item.set_excluded_directory(excluded_directories.excluded_directories);
-    item.set_excluded_items(excluded_items.excluded_items);
-    item.set_allowed_extensions(allowed_extensions.allowed_extensions.join(","));
-    item.set_recursive_search(!not_recursive.not_recursive);
-    #[cfg(target_family = "unix")]
-    item.set_exclude_other_filesystems(exclude_other_filesystems.exclude_other_filesystems);
+    set_common_settings(&mut item, &common_cli_items);
     if delete_files {
         item.set_delete_method(DeleteMethod::Delete);
     }
 
     item.find_invalid_links(None, None);
 
-    save_results_to_files(file_to_save.file_name(), json_compact_file_to_save.file_name(), json_pretty_file_to_save.file_name(), &item);
-
-    if !cfg!(debug_assertions) {
-        item.print_results_to_output();
-    }
-    item.get_text_messages().print_messages();
+    save_and_print_results(&mut item, &common_cli_items);
 }
 
 fn broken_files(broken_files: BrokenFilesArgs) {
-    let BrokenFilesArgs {
-        thread_number,
-        directories,
-        excluded_directories,
-        excluded_items,
-        allowed_extensions,
-        delete_files,
-        file_to_save,
-        json_compact_file_to_save,
-        json_pretty_file_to_save,
-        not_recursive,
-        #[cfg(target_family = "unix")]
-        exclude_other_filesystems,
-    } = broken_files;
-
-    set_number_of_threads(thread_number.thread_number);
+    let BrokenFilesArgs { common_cli_items, delete_files } = broken_files;
 
     let mut item = BrokenFiles::new();
 
-    item.set_included_directory(directories.directories);
-    item.set_excluded_directory(excluded_directories.excluded_directories);
-    item.set_excluded_items(excluded_items.excluded_items);
-    item.set_allowed_extensions(allowed_extensions.allowed_extensions.join(","));
-    item.set_recursive_search(!not_recursive.not_recursive);
-    #[cfg(target_family = "unix")]
-    item.set_exclude_other_filesystems(exclude_other_filesystems.exclude_other_filesystems);
+    set_common_settings(&mut item, &common_cli_items);
 
     if delete_files {
         item.set_delete_method(DeleteMethod::Delete);
@@ -454,45 +247,22 @@ fn broken_files(broken_files: BrokenFilesArgs) {
 
     item.find_broken_files(None, None);
 
-    save_results_to_files(file_to_save.file_name(), json_compact_file_to_save.file_name(), json_pretty_file_to_save.file_name(), &item);
-
-    if !cfg!(debug_assertions) {
-        item.print_results_to_output();
-    }
-    item.get_text_messages().print_messages();
+    save_and_print_results(&mut item, &common_cli_items);
 }
 
 fn similar_videos(similar_videos: SimilarVideosArgs) {
     let SimilarVideosArgs {
-        thread_number,
-        directories,
-        excluded_directories,
-        excluded_items,
-        file_to_save,
-        json_compact_file_to_save,
-        json_pretty_file_to_save,
-        not_recursive,
-        #[cfg(target_family = "unix")]
-        exclude_other_filesystems,
+        common_cli_items,
         tolerance,
         minimal_file_size,
         maximal_file_size,
-        allowed_extensions,
         delete_method,
         dry_run,
     } = similar_videos;
 
-    set_number_of_threads(thread_number.thread_number);
-
     let mut item = SimilarVideos::new();
 
-    item.set_included_directory(directories.directories);
-    item.set_excluded_directory(excluded_directories.excluded_directories);
-    item.set_excluded_items(excluded_items.excluded_items);
-    item.set_allowed_extensions(allowed_extensions.allowed_extensions.join(","));
-    item.set_recursive_search(!not_recursive.not_recursive);
-    #[cfg(target_family = "unix")]
-    item.set_exclude_other_filesystems(exclude_other_filesystems.exclude_other_filesystems);
+    set_common_settings(&mut item, &common_cli_items);
     item.set_minimal_file_size(minimal_file_size);
     item.set_maximal_file_size(maximal_file_size);
     item.set_tolerance(tolerance);
@@ -501,65 +271,54 @@ fn similar_videos(similar_videos: SimilarVideosArgs) {
 
     item.find_similar_videos(None, None);
 
-    save_results_to_files(file_to_save.file_name(), json_compact_file_to_save.file_name(), json_pretty_file_to_save.file_name(), &item);
-
-    if !cfg!(debug_assertions) {
-        item.print_results_to_output();
-    }
-    item.get_text_messages().print_messages();
+    save_and_print_results(&mut item, &common_cli_items);
 }
 
 fn bad_extensions(bad_extensions: BadExtensionsArgs) {
-    let BadExtensionsArgs {
-        thread_number,
-        directories,
-        excluded_directories,
-        excluded_items,
-        file_to_save,
-        json_compact_file_to_save,
-        json_pretty_file_to_save,
-        not_recursive,
-        #[cfg(target_family = "unix")]
-        exclude_other_filesystems,
-        allowed_extensions,
-    } = bad_extensions;
-
-    set_number_of_threads(thread_number.thread_number);
+    let BadExtensionsArgs { common_cli_items } = bad_extensions;
 
     let mut item = BadExtensions::new();
 
-    item.set_included_directory(directories.directories);
-    item.set_excluded_directory(excluded_directories.excluded_directories);
-    item.set_excluded_items(excluded_items.excluded_items);
-    item.set_allowed_extensions(allowed_extensions.allowed_extensions.join(","));
-    item.set_recursive_search(!not_recursive.not_recursive);
-    #[cfg(target_family = "unix")]
-    item.set_exclude_other_filesystems(exclude_other_filesystems.exclude_other_filesystems);
+    set_common_settings(&mut item, &common_cli_items);
 
     item.find_bad_extensions_files(None, None);
 
-    save_results_to_files(file_to_save.file_name(), json_compact_file_to_save.file_name(), json_pretty_file_to_save.file_name(), &item);
-
-    if !cfg!(debug_assertions) {
-        item.print_results_to_output();
-    }
-    item.get_text_messages().print_messages();
+    save_and_print_results(&mut item, &common_cli_items);
 }
 
-fn save_results_to_files<T: PrintResults>(txt_file_name: Option<&str>, compact_json_file_name: Option<&str>, pretty_json_file_name: Option<&str>, item: &T) {
-    if let Some(file_name) = txt_file_name {
-        if let Err(e) = item.print_results_to_file(file_name) {
+fn save_and_print_results<T: CommonData + PrintResults>(component: &mut T, common_cli_items: &CommonCliItems) {
+    if let Some(file_name) = common_cli_items.file_to_save.file_name() {
+        if let Err(e) = component.print_results_to_file(file_name) {
             error!("Failed to save results to file {e}");
         }
     }
-    if let Some(file_name) = compact_json_file_name {
-        if let Err(e) = item.save_results_to_file_as_json(file_name, false) {
+    if let Some(file_name) = common_cli_items.json_compact_file_to_save.file_name() {
+        if let Err(e) = component.save_results_to_file_as_json(file_name, false) {
             error!("Failed to save compact json results to file {e}");
         }
     }
-    if let Some(file_name) = pretty_json_file_name {
-        if let Err(e) = item.save_results_to_file_as_json(file_name, true) {
+    if let Some(file_name) = common_cli_items.json_pretty_file_to_save.file_name() {
+        if let Err(e) = component.save_results_to_file_as_json(file_name, true) {
             error!("Failed to save pretty json results to file {e}");
         }
     }
+    if !cfg!(debug_assertions) {
+        component.print_results_to_output();
+    }
+    component.get_text_messages().print_messages();
+}
+
+fn set_common_settings<T>(component: &mut T, common_cli_items: &CommonCliItems)
+where
+    T: CommonData + PrintResults,
+{
+    set_number_of_threads(common_cli_items.thread_number);
+
+    component.set_included_directory(common_cli_items.directories.clone());
+    component.set_excluded_directory(common_cli_items.excluded_directories.clone());
+    component.set_excluded_items(common_cli_items.excluded_items.clone());
+    component.set_recursive_search(!common_cli_items.not_recursive);
+    #[cfg(target_family = "unix")]
+    component.set_exclude_other_filesystems(common_cli_items.exclude_other_filesystems);
+    component.set_allowed_extensions(common_cli_items.allowed_extensions.clone().join(","));
 }
