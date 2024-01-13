@@ -83,6 +83,11 @@ pub fn connect_progress_window(gui_data: &GuiData, progress_receiver: Receiver<P
             loop {
                 let item = progress_receiver.try_recv();
                 if let Ok(item) = item {
+                    // if item.current_stage == 0 {
+                    //     progress_collect_items(&gui_data, &item, item.tool_type != ToolType::EmptyFolders);
+                    // } else {
+                    //
+                    // }
                     match item.tool_type {
                         ToolType::Duplicate => process_bar_duplicates(&gui_data, &item),
                         ToolType::EmptyFiles => process_bar_empty_files(&gui_data, &item),
@@ -107,6 +112,23 @@ pub fn connect_progress_window(gui_data: &GuiData, progress_receiver: Receiver<P
 
     main_context.spawn_local(future);
 }
+// fn progress_collect_items(gui_data: &GuiData, item: &ProgressData, files: bool) {
+//     let label_stage = gui_data.progress_window.label_stage.clone();
+//     let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
+//     let progress_bar_all_stages = gui_data.progress_window.progress_bar_all_stages.clone();
+//     let taskbar_state = gui_data.taskbar_state.clone();
+//
+//     progress_bar_current_stage.hide();
+//     if files {
+//         label_stage.set_text(&flg!("progress_scanning_general_file", file_number_tm(item)));
+//     } else {
+//         label_stage.set_text(&flg!(
+//             "progress_scanning_empty_folders",
+//             generate_translation_hashmap(vec![("folder_number", item.entries_checked.to_string())])
+//         ));
+//     }
+//     taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
+// }
 
 fn process_bar_empty_files(gui_data: &GuiData, item: &ProgressData) {
     let label_stage = gui_data.progress_window.label_stage.clone();
