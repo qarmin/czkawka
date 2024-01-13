@@ -19,6 +19,47 @@ use crate::localizer_core::generate_translation_hashmap;
 use crate::taskbar_progress::tbp_flags::TBPF_INDETERMINATE;
 use crate::taskbar_progress::TaskbarProgress;
 
+// Empty files
+// 0 - Collecting files
+// Empty folders
+// 0 - Collecting folders
+// Big files
+// 0 - Collecting files
+// Same music
+// 0 - Collecting files
+// 1 - Loading cache
+// 2 - Checking tags / content
+// 3 - Saving cache
+// 4 - Checking tags / content - progress
+// 5 - Only content - ending
+// Similar images
+// 0 - Collecting files
+// 1 - Scanning images
+// 2 - Comparing hashes
+// Similar videos
+// 0 - Collecting files
+// 1 - Scanning videos
+// Temporary files
+// 0 - Collecting files
+// Invalid symlinks
+// 0 - Collecting files
+// Broken files
+// 0 - Collecting files
+// 1 - Scanning files
+// Bad extensions
+// 0 - Collecting files
+// 1 - Scanning files
+// Duplicates - Hash
+// 0 - Collecting files
+// 1 - Loading cache
+// 2 - Hash - first 1KB file
+// 3 - Saving cache
+// 4 - Loading cache
+// 5 - Hash - normal hash
+// 6 - Saving cache
+// Duplicates - Name or SizeName or Size
+// 0 - Collecting files
+
 #[allow(clippy::too_many_arguments)]
 pub fn connect_progress_window(gui_data: &GuiData, progress_receiver: Receiver<ProgressData>) {
     let main_context = MainContext::default();

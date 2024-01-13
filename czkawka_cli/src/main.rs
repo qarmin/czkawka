@@ -1,6 +1,11 @@
 #![allow(clippy::needless_late_init)]
 
+use std::thread;
+use std::time::Duration;
+
 use clap::Parser;
+use crossbeam_channel::{bounded, unbounded, Receiver, Sender};
+use indicatif::{ProgressBar, ProgressStyle};
 use log::error;
 
 use commands::Commands;
@@ -8,6 +13,7 @@ use czkawka_core::bad_extensions::BadExtensions;
 use czkawka_core::big_file::{BigFile, SearchMode};
 use czkawka_core::broken_files::BrokenFiles;
 use czkawka_core::common::{print_version_mode, set_number_of_threads, setup_logger};
+use czkawka_core::common_dir_traversal::ProgressData;
 use czkawka_core::common_tool::{CommonData, DeleteMethod};
 #[allow(unused_imports)] // It is used in release for print_results_to_output().
 use czkawka_core::common_traits::*;
@@ -24,8 +30,10 @@ use crate::commands::{
     Args, BadExtensionsArgs, BiggestFilesArgs, BrokenFilesArgs, CommonCliItems, DuplicatesArgs, EmptyFilesArgs, EmptyFoldersArgs, InvalidSymlinksArgs, SameMusicArgs,
     SimilarImagesArgs, SimilarVideosArgs, TemporaryArgs,
 };
+use crate::progress::connect_progress;
 
 mod commands;
+mod progress;
 
 fn main() {
     let command = Args::parse().command;
@@ -37,10 +45,13 @@ fn main() {
         println!("{command:?}");
     }
 
-    match command {
+    let (progress_sender, progress_receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
+    let (stop_sender, stop_receiver): (Sender<()>, Receiver<()>) = bounded(1);
+
+    let calculate_thread = thread::spawn(move || match command {
         Commands::Duplicates(duplicates_args) => duplicates(duplicates_args),
         Commands::EmptyFolders(empty_folders_args) => empty_folders(empty_folders_args),
-        Commands::BiggestFiles(biggest_files_args) => biggest_files(biggest_files_args),
+        Commands::BiggestFiles(biggest_files_args) => biggest_files(biggest_files_args, stop_receiver, progress_sender),
         Commands::EmptyFiles(empty_files_args) => empty_files(empty_files_args),
         Commands::Temporary(temporary_args) => temporary(temporary_args),
         Commands::SimilarImages(similar_images_args) => similar_images(similar_images_args),
@@ -52,7 +63,16 @@ fn main() {
         Commands::Tester {} => {
             test_image_conversion_speed();
         }
-    }
+    });
+    ctrlc::set_handler(move || {
+        println!("Get Sender");
+        stop_sender.send(()).expect("Could not send signal on channel.")
+    })
+    .expect("Error setting Ctrl-C handler");
+
+    connect_progress(progress_receiver);
+
+    calculate_thread.join().unwrap();
 }
 
 fn duplicates(duplicates: DuplicatesArgs) {
@@ -102,7 +122,7 @@ fn empty_folders(empty_folders: EmptyFoldersArgs) {
     save_and_print_results(&mut item, &common_cli_items);
 }
 
-fn biggest_files(biggest_files: BiggestFilesArgs) {
+fn biggest_files(biggest_files: BiggestFilesArgs, stop_sender: Receiver<()>, progress_sender: Sender<ProgressData>) {
     let BiggestFilesArgs {
         common_cli_items,
         number_of_files,
@@ -121,7 +141,7 @@ fn biggest_files(biggest_files: BiggestFilesArgs) {
         item.set_search_mode(SearchMode::SmallestFiles);
     }
 
-    item.find_big_files(None, None);
+    item.find_big_files(Some(&stop_sender), Some(&progress_sender));
 
     save_and_print_results(&mut item, &common_cli_items);
 }
@@ -132,7 +152,6 @@ fn empty_files(empty_files: EmptyFilesArgs) {
     let mut item = EmptyFiles::new();
 
     set_common_settings(&mut item, &common_cli_items);
-
     if delete_files {
         item.set_delete_method(DeleteMethod::Delete);
     }
@@ -148,7 +167,6 @@ fn temporary(temporary: TemporaryArgs) {
     let mut item = Temporary::new();
 
     set_common_settings(&mut item, &common_cli_items);
-
     if delete_files {
         item.set_delete_method(DeleteMethod::Delete);
     }
@@ -181,7 +199,6 @@ fn similar_images(similar_images: SimilarImagesArgs) {
     item.set_hash_size(hash_size);
     item.set_delete_method(delete_method.delete_method);
     item.set_dry_run(dry_run.dry_run);
-
     item.set_similarity(return_similarity_from_similarity_preset(&similarity_preset, hash_size));
 
     item.find_similar_images(None, None);
@@ -240,7 +257,6 @@ fn broken_files(broken_files: BrokenFilesArgs) {
     let mut item = BrokenFiles::new();
 
     set_common_settings(&mut item, &common_cli_items);
-
     if delete_files {
         item.set_delete_method(DeleteMethod::Delete);
     }
@@ -302,6 +318,7 @@ fn save_and_print_results<T: CommonData + PrintResults>(component: &mut T, commo
             error!("Failed to save pretty json results to file {e}");
         }
     }
+
     if !cfg!(debug_assertions) {
         component.print_results_to_output();
     }
