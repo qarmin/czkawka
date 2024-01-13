@@ -338,7 +338,7 @@ pub fn split_path_compare(path_a: &Path, path_b: &Path) -> Ordering {
 }
 
 pub fn create_crash_message(library_name: &str, file_path: &str, home_library_url: &str) -> String {
-    format!("{library_name} library crashed when opening \"{file_path}\", please check if this is fixed with the latest version of {library_name} (e.g. with https://github.com/qarmin/crates_tester) and if it is not fixed, please report bug here - {home_library_url}")
+    format!("{library_name} library crashed when opening \"{file_path}\", please check if this is fixed with the latest version of {library_name} and if it is not fixed, please report bug here - {home_library_url}")
 }
 
 pub fn regex_check(expression_item: &SingleExcludedItem, directory_name: &str) -> bool {

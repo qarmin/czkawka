@@ -36,7 +36,7 @@ regex = "1.10"
 image_hasher = "1.2"
 
 # Move files to trash
-trash = "3.1"
+trash = "3.2"
 
 # For moving files(why std::fs doesn't have such features?)
 fs_extra = "1.3"
