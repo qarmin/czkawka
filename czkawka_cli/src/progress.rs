@@ -3,7 +3,7 @@ use std::time::Duration;
 use crossbeam_channel::Receiver;
 use indicatif::{ProgressBar, ProgressStyle};
 
-use czkawka_core::common_dir_traversal::{ProgressData, ToolType};
+use czkawka_core::common_dir_traversal::{CheckingMethod, ProgressData, ToolType};
 
 pub fn connect_progress(progress_receiver: Receiver<ProgressData>) {
     let mut pb = ProgressBar::new(1);
@@ -13,48 +13,79 @@ pub fn connect_progress(progress_receiver: Receiver<ProgressData>) {
             pb.finish_and_clear();
             if progress_data.current_stage == 0 {
                 pb = get_progress_bar_for_collect_files();
+            } else if check_if_saving_cache(&progress_data) || check_if_loading_cache(&progress_data) {
+                pb = get_progress_loading_saving_cache(check_if_loading_cache(&progress_data));
             } else {
-                pb = ProgressBar::new_spinner();
+                pb = get_progress_known_values(progress_data.entries_to_check, &get_progress_message(&progress_data));
             }
             latest_id = Some(progress_data.current_stage);
         }
 
+        pb.set_position(progress_data.entries_checked as u64);
         if progress_data.current_stage == 0 && progress_data.tool_type != ToolType::EmptyFolders {
             pb.set_message(format!("Collecting files: {}", progress_data.entries_checked));
         } else if progress_data.current_stage == 0 {
             pb.set_message(format!("Collecting folders: {}", progress_data.entries_checked));
-        } else {
-            pb.set_message(format!("Loading cache: {}", progress_data.entries_checked));
         }
-        // println!("{:?}", progress_data);
     }
     pb.finish();
-    println!("AAA");
 }
 
-pub fn check_if_loading_saving_cache(progress_data: &ProgressData) -> bool {}
+pub fn get_progress_message(progress_data: &ProgressData) -> String {
+    match (progress_data.tool_type, progress_data.current_stage, progress_data.checking_method) {
+        (ToolType::SameMusic, 2, CheckingMethod::AudioTags) => "Reading tags",
+        (ToolType::SameMusic, 2, CheckingMethod::AudioContent) => "Calculating fingerprint",
+        (ToolType::SameMusic, 4, CheckingMethod::AudioTags) => "Comparing tags",
+        (ToolType::SameMusic, 4, CheckingMethod::AudioContent) => "Comparing fingerprint",
+        (ToolType::SameMusic, 5, CheckingMethod::AudioContent) => "Reading tags",
+
+        (ToolType::Duplicate, 2, CheckingMethod::Hash) => "Reading prehashes",
+        (ToolType::Duplicate, 5, CheckingMethod::Hash) => "Reading hashes",
+        _ => unreachable!(),
+    }
+    .to_string()
+}
+
+pub fn check_if_loading_cache(progress_data: &ProgressData) -> bool {
+    match (progress_data.tool_type, progress_data.current_stage) {
+        (ToolType::SameMusic, 1) => true,
+        (ToolType::Duplicate, 1 | 4) => true,
+        _ => false,
+    }
+}
+pub fn check_if_saving_cache(progress_data: &ProgressData) -> bool {
+    match (progress_data.tool_type, progress_data.current_stage) {
+        (ToolType::SameMusic, 3) => true,
+        (ToolType::Duplicate, 3 | 6) => true,
+        _ => false,
+    }
+}
 
 pub fn get_progress_bar_for_collect_files() -> ProgressBar {
     let pb = ProgressBar::new_spinner();
     pb.enable_steady_tick(Duration::from_millis(120));
     pb.set_style(
-        ProgressStyle::with_template("{spinner:.blue} {msg}")
+        ProgressStyle::with_template("{msg} {spinner:.blue}")
             .unwrap()
             .tick_strings(&["▹▹▹▹▹", "▸▹▹▹▹", "▹▸▹▹▹", "▹▹▸▹▹", "▹▹▹▸▹", "▹▹▹▹▸", "▪▪▪▪▪"]),
     );
     pb
 }
 
-pub fn get_progress_known_values(max_value: usize) -> ProgressBar {
+pub fn get_progress_known_values(max_value: usize, msg: &str) -> ProgressBar {
     let pb = ProgressBar::new(max_value as u64);
-    pb.set_style(
-        ProgressStyle::default_bar()
-            .template("{spinner:.blue} {msg} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {pos}/{len} ({eta})")
-            .progress_chars("##-"),
-    );
+    pb.set_style(ProgressStyle::with_template(&format!("{msg} [{{bar}}] {{pos}}/{{len}} ")).unwrap().progress_chars("=> "));
     pb
 }
 
-// pub fn get_progress_loading_saving_cache() -> ProgressBar {
-//
-// }
+pub fn get_progress_loading_saving_cache(loading: bool) -> ProgressBar {
+    let msg = if loading { "Loading cache" } else { "Saving cache" };
+    let pb = ProgressBar::new_spinner();
+    pb.enable_steady_tick(Duration::from_millis(120));
+    pb.set_style(
+        ProgressStyle::with_template(&format!("{msg} {{spinner:.blue}}"))
+            .unwrap()
+            .tick_strings(&["▹▹▹▹▹", "▸▹▹▹▹", "▹▸▹▹▹", "▹▹▸▹▹", "▹▹▹▸▹", "▹▹▹▹▸", "▪▪▪▪▪"]),
+    );
+    pb
+}
