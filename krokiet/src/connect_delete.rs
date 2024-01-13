@@ -3,7 +3,6 @@ use slint::{ComponentHandle, Model, ModelRc, VecModel};
 use crate::common::{get_is_header_mode, get_name_idx, get_path_idx};
 use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow};
 use czkawka_core::common::{remove_folder_if_contains_only_empty_folders, CHARACTER};
-use log::info;
 use rayon::prelude::*;
 
 pub fn connect_delete_button(app: &MainWindow) {
@@ -64,7 +63,6 @@ fn remove_selected_items(items: Vec<MainListModel>, active_tab: CurrentTab) {
         })
         .collect::<Vec<_>>();
 
-    info!("Removing items: {:?} {:?}", items_to_remove, active_tab);
     // Iterate over empty folders and not delete them if they are not empty
     if active_tab == CurrentTab::EmptyFolders {
         items_to_remove.into_par_iter().for_each(|item| {

@@ -26,7 +26,7 @@ hamming = "0.1"
 
 # Needed by same music
 bitflags = "2.4"
-lofty = "0.17"
+lofty = "0.18"
 
 # Needed by broken files
 zip = { version = "0.6", features = ["aes-crypto", "bzip2", "deflate", "time"], default-features = false }
@@ -42,7 +42,7 @@ blake3 = "1.5"
 crc32fast = "1.3"
 xxhash-rust = { version = "0.8", features = ["xxh3"] }
 
-tempfile = "3.8"
+tempfile = "3.9"
 
 # Video Duplicates
 vid_dup_finder_lib = "0.1"
@@ -56,7 +56,7 @@ serde_json = "1.0"
 # Language
 i18n-embed = { version = "0.14", features = ["fluent-system", "desktop-requester"] }
 i18n-embed-fl = "0.7"
-rust-embed = { version = "8.1", features = ["debug-embed"] }
+rust-embed = { version = "8.2", features = ["debug-embed"] }
 once_cell = "1.19"
 
 # Raw image files

@@ -450,7 +450,7 @@ fn popover_custom_select_unselect(
                                         need_to_change_thing = true;
                                     }
                                 } else {
-                                    if regex_check(&name_wildcard_lowercase_excluded, name.to_lowercase()) {
+                                    if regex_check(&name_wildcard_lowercase_excluded, &name.to_lowercase()) {
                                         need_to_change_thing = true;
                                     }
                                 }
@@ -461,7 +461,7 @@ fn popover_custom_select_unselect(
                                         need_to_change_thing = true;
                                     }
                                 } else {
-                                    if regex_check(&path_wildcard_lowercase_excluded, path.to_lowercase()) {
+                                    if regex_check(&path_wildcard_lowercase_excluded, &path.to_lowercase()) {
                                         need_to_change_thing = true;
                                     }
                                 }

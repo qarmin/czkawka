@@ -1,4 +1,8 @@
 ## Version 7.0.0 - ?
+### BREAKING CHANGES
+- Reducing size of cache files, made old cache files incompatible with new version
+- `-C` in CLI now saves as compact json
+
 ### GTK GUI
 - Added drag&drop support for included/excluded folders - [#1106](https://github.com/qarmin/czkawka/pull/1106)
 - Added information where are saved scan results - [#1102](https://github.com/qarmin/czkawka/pull/1102)
@@ -23,6 +27,7 @@
 - Fixed recognizing not accessible folders as non-empty - [#1152](https://github.com/qarmin/czkawka/pull/1152)
 - Unifying code for collecting files to scan - [#1159](https://github.com/qarmin/czkawka/pull/1159)
 - Decrease memory usage when collecting files by removing unused fields in custom file entries structs - [#1159](https://github.com/qarmin/czkawka/pull/1159)
+- Decrease a little size of cache by few percents and improve loading/saving speed - [#1159](https://github.com/qarmin/czkawka/pull/1159)
 
 ## Version 6.1.0 - 15.10.2023r
 - BREAKING CHANGE - Changed cache saving method, deduplicated, optimized and simplified procedure(all files needs to be hashed again) - [#1072](https://github.com/qarmin/czkawka/pull/1072), [#1086](https://github.com/qarmin/czkawka/pull/1086)
@@ -171,7 +176,7 @@
 ## Version 3.2.0 - 07.08.2021r
 - Use checkbox instead selection to select files [#392](https://github.com/qarmin/czkawka/pull/392)
 - Re-enable hardlink on windows - [#410](https://github.com/qarmin/czkawka/pull/410)
-- Fix symlink and harlink creating - [#409](https://github.com/qarmin/czkawka/pull/409)
+- Fix symlink and hardlink creating - [#409](https://github.com/qarmin/czkawka/pull/409)
 - Add image preview to duplicate finder [#408](https://github.com/qarmin/czkawka/pull/408)
 - Add setting maximum file size [#407](https://github.com/qarmin/czkawka/pull/407)
 - Add new grouping algorithm to similar images [#405](https://github.com/qarmin/czkawka/pull/405)

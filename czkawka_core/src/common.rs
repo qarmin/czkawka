@@ -331,39 +331,20 @@ pub fn split_path(path: &Path) -> (String, String) {
 }
 
 pub fn split_path_compare(path_a: &Path, path_b: &Path) -> Ordering {
-    let parent_dir_a = path_a.parent();
-    let parent_dir_b = path_b.parent();
-    if parent_dir_a.is_none() || parent_dir_b.is_none() {
-        let file_name_a = path_a.file_name();
-        let file_name_b = path_b.file_name();
-        if file_name_a.is_none() || file_name_b.is_none() {
-            return Ordering::Equal;
-        }
-
-        return if file_name_a > file_name_b { Ordering::Greater } else { Ordering::Less };
-    }
-    if parent_dir_a > parent_dir_b {
-        Ordering::Greater
-    } else {
-        Ordering::Less
+    match path_a.parent().cmp(&path_b.parent()) {
+        Ordering::Equal => path_a.file_name().cmp(&path_b.file_name()),
+        other => other,
     }
 }
 
 pub fn create_crash_message(library_name: &str, file_path: &str, home_library_url: &str) -> String {
-    format!("{library_name} library crashed when opening \"{file_path}\", please check if this is fixed with the latest version of {library_name} (e.g. with https://github.com/qarmin/crates_tester) and if it is not fixed, please report bug here - {home_library_url}")
+    format!("{library_name} library crashed when opening \"{file_path}\", please check if this is fixed with the latest version of {library_name} and if it is not fixed, please report bug here - {home_library_url}")
 }
 
-pub fn regex_check(expression_item: &SingleExcludedItem, directory: impl AsRef<Path>) -> bool {
-    if expression_item.expression == "*" {
+pub fn regex_check(expression_item: &SingleExcludedItem, directory_name: &str) -> bool {
+    if expression_item.expression_splits.is_empty() {
         return true;
     }
-
-    if expression_item.expression_splits.is_empty() {
-        return false;
-    }
-
-    // Get rid of non unicode characters
-    let directory_name = directory.as_ref().to_string_lossy();
 
     // Early checking if directory contains all parts needed by expression
     for split in &expression_item.unique_extensions_splits {
@@ -481,7 +462,7 @@ where
                         infos.push(format!(
                             "dry_run - would create hardlink from {:?} to {:?}",
                             original_file.get_path(),
-                            original_file.get_path()
+                            file_entry.get_path()
                         ));
                     } else {
                         if dry_run {
@@ -519,7 +500,7 @@ where
                 if dry_run {
                     infos.push(format!("dry_run - would delete file: {:?}", i.get_path()));
                 } else {
-                    if let Err(e) = std::fs::remove_file(i.get_path()) {
+                    if let Err(e) = fs::remove_file(i.get_path()) {
                         errors.push(format!("Cannot delete file: {:?} - {e}", i.get_path()));
                         failed_to_remove_files += 1;
                     } else {
@@ -661,6 +642,7 @@ mod test {
 
     #[test]
     fn test_regex() {
+        assert!(regex_check(&new_excluded_item("*"), "/home/rafal"));
         assert!(regex_check(&new_excluded_item("*home*"), "/home/rafal"));
         assert!(regex_check(&new_excluded_item("*home"), "/home"));
         assert!(regex_check(&new_excluded_item("*home/"), "/home/"));

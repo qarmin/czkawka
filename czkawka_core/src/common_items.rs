@@ -85,15 +85,17 @@ impl ExcludedItems {
     pub fn get_excluded_items(&self) -> &Vec<String> {
         &self.expressions
     }
-    pub fn is_excluded(&self, path: impl AsRef<Path>) -> bool {
+    pub fn is_excluded(&self, path: &Path) -> bool {
         if self.connected_expressions.is_empty() {
             return false;
         }
         #[cfg(target_family = "windows")]
         let path = normalize_windows_path(path);
 
+        let path_str = path.to_string_lossy();
+
         for expression in &self.connected_expressions {
-            if regex_check(expression, &path) {
+            if regex_check(expression, &path_str) {
                 return true;
             }
         }
@@ -107,6 +109,7 @@ pub fn new_excluded_item(expression: &str) -> SingleExcludedItem {
     let mut unique_extensions_splits = expression_splits.clone();
     unique_extensions_splits.sort();
     unique_extensions_splits.dedup();
+    unique_extensions_splits.sort_by_key(|b| std::cmp::Reverse(b.len()));
     SingleExcludedItem {
         expression,
         expression_splits,
