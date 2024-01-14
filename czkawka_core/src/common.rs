@@ -562,7 +562,8 @@ pub fn prepare_thread_handler_common(
         let progress_thread_run = progress_thread_run.clone();
         let atomic_counter = atomic_counter.clone();
         thread::spawn(move || {
-            let mut time_since_last_send = SystemTime::now();
+            // Use earlier time, to send immediately first message
+            let mut time_since_last_send = SystemTime::now() - Duration::from_secs(10u64);
 
             loop {
                 if time_since_last_send.elapsed().unwrap().as_millis() > SEND_PROGRESS_DATA_TIME_BETWEEN as u128 {

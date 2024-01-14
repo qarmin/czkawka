@@ -19,6 +19,58 @@ use crate::localizer_core::generate_translation_hashmap;
 use crate::taskbar_progress::tbp_flags::TBPF_INDETERMINATE;
 use crate::taskbar_progress::TaskbarProgress;
 
+// Empty files
+// 0 - Collecting files
+
+// Empty folders
+// 0 - Collecting folders
+
+// Big files
+// 0 - Collecting files
+
+// Same music
+// 0 - Collecting files
+// 1 - Loading cache
+// 2 - Checking tags / content
+// 3 - Saving cache
+// 4 - Checking tags / content - progress
+// 5 - Only content - ending
+
+// Similar images
+// 0 - Collecting files
+// 1 - Scanning images
+// 2 - Comparing hashes
+
+// Similar videos
+// 0 - Collecting files
+// 1 - Scanning videos
+
+// Temporary files
+// 0 - Collecting files
+
+// Invalid symlinks
+// 0 - Collecting files
+
+// Broken files
+// 0 - Collecting files
+// 1 - Scanning files
+
+// Bad extensions
+// 0 - Collecting files
+// 1 - Scanning files
+
+// Duplicates - Hash
+// 0 - Collecting files
+// 1 - Loading cache
+// 2 - Hash - first 1KB file
+// 3 - Saving cache
+// 4 - Loading cache
+// 5 - Hash - normal hash
+// 6 - Saving cache
+
+// Duplicates - Name or SizeName or Size
+// 0 - Collecting files
+
 #[allow(clippy::too_many_arguments)]
 pub fn connect_progress_window(gui_data: &GuiData, progress_receiver: Receiver<ProgressData>) {
     let main_context = MainContext::default();
@@ -31,19 +83,12 @@ pub fn connect_progress_window(gui_data: &GuiData, progress_receiver: Receiver<P
             loop {
                 let item = progress_receiver.try_recv();
                 if let Ok(item) = item {
-                    match item.tool_type {
-                        ToolType::Duplicate => process_bar_duplicates(&gui_data, &item),
-                        ToolType::EmptyFiles => process_bar_empty_files(&gui_data, &item),
-                        ToolType::EmptyFolders => process_bar_empty_folder(&gui_data, &item),
-                        ToolType::BigFile => process_bar_big_files(&gui_data, &item),
-                        ToolType::SameMusic => process_bar_same_music(&gui_data, &item),
-                        ToolType::SimilarImages => process_bar_similar_images(&gui_data, &item),
-                        ToolType::SimilarVideos => process_bar_similar_videos(&gui_data, &item),
-                        ToolType::TemporaryFiles => process_bar_temporary(&gui_data, &item),
-                        ToolType::InvalidSymlinks => process_bar_invalid_symlinks(&gui_data, &item),
-                        ToolType::BrokenFiles => process_bar_broken_files(&gui_data, &item),
-                        ToolType::BadExtensions => process_bar_bad_extensions(&gui_data, &item),
-                        ToolType::None => panic!(),
+                    if item.current_stage == 0 {
+                        progress_collect_items(&gui_data, &item, item.tool_type != ToolType::EmptyFolders);
+                    } else if check_if_loading_saving_cache(&item) {
+                        progress_save_load_cache(&gui_data, &item);
+                    } else {
+                        progress_default(&gui_data, &item);
                     }
                 } else {
                     break;
@@ -55,278 +100,123 @@ pub fn connect_progress_window(gui_data: &GuiData, progress_receiver: Receiver<P
 
     main_context.spawn_local(future);
 }
-
-fn process_bar_empty_files(gui_data: &GuiData, item: &ProgressData) {
+pub fn check_if_loading_saving_cache(progress_data: &ProgressData) -> bool {
+    matches!(
+        (progress_data.tool_type, progress_data.current_stage),
+        (ToolType::SameMusic, 1 | 3) | (ToolType::Duplicate, 1 | 3 | 4 | 6)
+    )
+}
+fn progress_save_load_cache(gui_data: &GuiData, item: &ProgressData) {
     let label_stage = gui_data.progress_window.label_stage.clone();
+    let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
     let taskbar_state = gui_data.taskbar_state.clone();
 
-    label_stage.set_text(&flg!("progress_scanning_general_file", file_number_tm(item)));
+    progress_bar_current_stage.hide();
     taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
-}
-
-fn process_bar_empty_folder(gui_data: &GuiData, item: &ProgressData) {
-    let label_stage = gui_data.progress_window.label_stage.clone();
-    let taskbar_state = gui_data.taskbar_state.clone();
-
-    label_stage.set_text(&flg!(
-        "progress_scanning_empty_folders",
-        generate_translation_hashmap(vec![("folder_number", item.entries_checked.to_string())])
-    ));
-    taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
-}
-
-fn process_bar_big_files(gui_data: &GuiData, item: &ProgressData) {
-    let label_stage = gui_data.progress_window.label_stage.clone();
-    let taskbar_state = gui_data.taskbar_state.clone();
-
-    label_stage.set_text(&flg!("progress_scanning_general_file", file_number_tm(item)));
-    taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
-}
-
-fn process_bar_same_music(gui_data: &GuiData, item: &ProgressData) {
-    let label_stage = gui_data.progress_window.label_stage.clone();
-    let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
-    let progress_bar_all_stages = gui_data.progress_window.progress_bar_all_stages.clone();
-    let taskbar_state = gui_data.taskbar_state.clone();
-
-    match item.current_stage {
-        0 => {
-            progress_bar_current_stage.hide();
-            label_stage.set_text(&flg!("progress_scanning_general_file", file_number_tm(item)));
-            taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
+    let text = match (item.tool_type, item.checking_method, item.current_stage) {
+        (ToolType::SameMusic, CheckingMethod::AudioTags | CheckingMethod::AudioContent, 1) => {
+            flg!("progress_cache_loading")
         }
-        // Loading cache
-        1 => {
-            progress_bar_current_stage.hide();
-            common_set_data(item, &progress_bar_all_stages, &progress_bar_current_stage, &taskbar_state);
-            label_stage.set_text(&flg!("progress_cache_loading"));
+        (ToolType::SameMusic, CheckingMethod::AudioTags | CheckingMethod::AudioContent, 3) => {
+            flg!("progress_cache_saving")
         }
-        2 => {
-            progress_bar_current_stage.show();
-            common_set_data(item, &progress_bar_all_stages, &progress_bar_current_stage, &taskbar_state);
-
-            match item.checking_method {
-                CheckingMethod::AudioTags => label_stage.set_text(&flg!("progress_scanning_music_tags", progress_ratio_tm(item))),
-                CheckingMethod::AudioContent => label_stage.set_text(&flg!("progress_scanning_music_content", progress_ratio_tm(item))),
-                _ => panic!(),
-            }
+        (ToolType::Duplicate, CheckingMethod::Hash, 1) => {
+            flg!("progress_prehash_cache_loading")
         }
-        // Saving cache
-        3 => {
-            progress_bar_current_stage.hide();
-            common_set_data(item, &progress_bar_all_stages, &progress_bar_current_stage, &taskbar_state);
-            label_stage.set_text(&flg!("progress_cache_saving"));
+        (ToolType::Duplicate, CheckingMethod::Hash, 3) => {
+            flg!("progress_prehash_cache_saving")
         }
-        4 => {
-            progress_bar_current_stage.show();
-            common_set_data(item, &progress_bar_all_stages, &progress_bar_current_stage, &taskbar_state);
-
-            match item.checking_method {
-                CheckingMethod::AudioTags => label_stage.set_text(&flg!("progress_scanning_music_tags_end", progress_ratio_tm(item))),
-                CheckingMethod::AudioContent => label_stage.set_text(&flg!("progress_scanning_music_content_end", progress_ratio_tm(item))),
-                _ => panic!(),
-            }
+        (ToolType::Duplicate, CheckingMethod::Hash, 4) => {
+            flg!("progress_hash_cache_loading")
         }
-        5 => {
-            progress_bar_current_stage.show();
-            common_set_data(item, &progress_bar_all_stages, &progress_bar_current_stage, &taskbar_state);
-
-            if item.checking_method == CheckingMethod::AudioContent {
-                label_stage.set_text(&flg!("progress_scanning_music_tags", progress_ratio_tm(item)));
-            } else {
-                panic!();
-            }
-        }
-        _ => panic!(),
-    }
-}
-
-fn process_bar_similar_images(gui_data: &GuiData, item: &ProgressData) {
-    let label_stage = gui_data.progress_window.label_stage.clone();
-    let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
-    let progress_bar_all_stages = gui_data.progress_window.progress_bar_all_stages.clone();
-    let taskbar_state = gui_data.taskbar_state.clone();
-
-    match item.current_stage {
-        0 => {
-            progress_bar_current_stage.hide();
-            label_stage.set_text(&flg!("progress_scanning_general_file", file_number_tm(item)));
-            taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
-        }
-        1 => {
-            progress_bar_current_stage.show();
-            common_set_data(item, &progress_bar_all_stages, &progress_bar_current_stage, &taskbar_state);
-            label_stage.set_text(&flg!("progress_scanning_image", progress_ratio_tm(item)));
-        }
-        2 => {
-            progress_bar_current_stage.show();
-            common_set_data(item, &progress_bar_all_stages, &progress_bar_current_stage, &taskbar_state);
-            label_stage.set_text(&flg!("progress_comparing_image_hashes", progress_ratio_tm(item)));
-        }
-        _ => panic!(),
-    }
-}
-
-fn process_bar_similar_videos(gui_data: &GuiData, item: &ProgressData) {
-    let label_stage = gui_data.progress_window.label_stage.clone();
-    let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
-    let progress_bar_all_stages = gui_data.progress_window.progress_bar_all_stages.clone();
-    let taskbar_state = gui_data.taskbar_state.clone();
-
-    match item.current_stage {
-        0 => {
-            progress_bar_current_stage.hide();
-            label_stage.set_text(&flg!("progress_scanning_general_file", file_number_tm(item)));
-            taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
-        }
-        1 => {
-            progress_bar_current_stage.show();
-            common_set_data(item, &progress_bar_all_stages, &progress_bar_current_stage, &taskbar_state);
-            label_stage.set_text(&flg!("progress_scanning_video", progress_ratio_tm(item)));
-        }
-        _ => panic!(),
-    }
-}
-
-fn process_bar_temporary(gui_data: &GuiData, item: &ProgressData) {
-    let label_stage = gui_data.progress_window.label_stage.clone();
-    let taskbar_state = gui_data.taskbar_state.clone();
-
-    label_stage.set_text(&flg!("progress_scanning_general_file", file_number_tm(item)));
-    taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
-}
-
-fn process_bar_invalid_symlinks(gui_data: &GuiData, item: &ProgressData) {
-    let label_stage = gui_data.progress_window.label_stage.clone();
-    let taskbar_state = gui_data.taskbar_state.clone();
-
-    label_stage.set_text(&flg!("progress_scanning_general_file", file_number_tm(item)));
-    taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
-}
-
-fn process_bar_broken_files(gui_data: &GuiData, item: &ProgressData) {
-    let label_stage = gui_data.progress_window.label_stage.clone();
-    let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
-    let progress_bar_all_stages = gui_data.progress_window.progress_bar_all_stages.clone();
-    let taskbar_state = gui_data.taskbar_state.clone();
-
-    match item.current_stage {
-        0 => {
-            progress_bar_current_stage.hide();
-            label_stage.set_text(&flg!("progress_scanning_general_file", file_number_tm(item)));
-            taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
-        }
-        1 => {
-            progress_bar_current_stage.show();
-            common_set_data(item, &progress_bar_all_stages, &progress_bar_current_stage, &taskbar_state);
-            label_stage.set_text(&flg!("progress_scanning_broken_files", progress_ratio_tm(item)));
-        }
-        _ => panic!(),
-    }
-}
-
-fn process_bar_bad_extensions(gui_data: &GuiData, item: &ProgressData) {
-    let label_stage = gui_data.progress_window.label_stage.clone();
-    let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
-    let progress_bar_all_stages = gui_data.progress_window.progress_bar_all_stages.clone();
-    let taskbar_state = gui_data.taskbar_state.clone();
-
-    match item.current_stage {
-        0 => {
-            progress_bar_current_stage.hide();
-            label_stage.set_text(&flg!("progress_scanning_general_file", file_number_tm(item)));
-            taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
-        }
-        1 => {
-            progress_bar_current_stage.show();
-            common_set_data(item, &progress_bar_all_stages, &progress_bar_current_stage, &taskbar_state);
-            label_stage.set_text(&flg!("progress_scanning_extension_of_files", progress_ratio_tm(item)));
-        }
-        _ => panic!(),
-    }
-}
-
-fn process_bar_duplicates(gui_data: &GuiData, item: &ProgressData) {
-    let label_stage = gui_data.progress_window.label_stage.clone();
-    let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
-    let progress_bar_all_stages = gui_data.progress_window.progress_bar_all_stages.clone();
-    let grid_progress_stages = gui_data.progress_window.grid_progress_stages.clone();
-    let taskbar_state = gui_data.taskbar_state.clone();
-
-    match item.checking_method {
-        CheckingMethod::Hash => {
-            label_stage.show();
-            match item.current_stage {
-                // Checking Size
-                0 => {
-                    progress_bar_current_stage.hide();
-                    progress_bar_all_stages.set_fraction(0f64);
-                    label_stage.set_text(&flg!("progress_scanning_size", file_number_tm(item)));
-                    taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
-                }
-                // Loading cache
-                1 | 4 => {
-                    progress_bar_current_stage.hide();
-                    common_set_data(item, &progress_bar_all_stages, &progress_bar_current_stage, &taskbar_state);
-
-                    if item.current_stage == 1 {
-                        label_stage.set_text(&flg!("progress_prehash_cache_loading"));
-                    } else {
-                        label_stage.set_text(&flg!("progress_hash_cache_loading"));
-                    }
-                }
-                // Saving cache
-                3 | 6 => {
-                    progress_bar_current_stage.hide();
-                    common_set_data(item, &progress_bar_all_stages, &progress_bar_current_stage, &taskbar_state);
-
-                    if item.current_stage == 3 {
-                        label_stage.set_text(&flg!("progress_prehash_cache_saving"));
-                    } else {
-                        label_stage.set_text(&flg!("progress_hash_cache_saving"));
-                    }
-                }
-                // Hash - first 1KB file
-                2 => {
-                    progress_bar_current_stage.show();
-                    common_set_data(item, &progress_bar_all_stages, &progress_bar_current_stage, &taskbar_state);
-
-                    label_stage.set_text(&flg!("progress_analyzed_partial_hash", progress_ratio_tm(item)));
-                }
-                // Hash - normal hash
-                5 => {
-                    progress_bar_current_stage.show();
-                    common_set_data(item, &progress_bar_all_stages, &progress_bar_current_stage, &taskbar_state);
-                    label_stage.set_text(&flg!("progress_analyzed_full_hash", progress_ratio_tm(item)));
-                }
-                _ => {
-                    panic!("Not available current_stage");
-                }
-            }
-        }
-        CheckingMethod::Name => {
-            label_stage.show();
-            grid_progress_stages.hide();
-
-            label_stage.set_text(&flg!("progress_scanning_name", file_number_tm(item)));
-            taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
-        }
-        CheckingMethod::SizeName => {
-            label_stage.show();
-            grid_progress_stages.hide();
-
-            label_stage.set_text(&flg!("progress_scanning_size_name", file_number_tm(item)));
-            taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
-        }
-        CheckingMethod::Size => {
-            label_stage.show();
-            grid_progress_stages.hide();
-
-            label_stage.set_text(&flg!("progress_scanning_size", file_number_tm(item)));
-            taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
+        (ToolType::Duplicate, CheckingMethod::Hash, 6) => {
+            flg!("progress_hash_cache_saving")
         }
         _ => panic!(),
     };
+    label_stage.set_text(&text);
+}
+
+fn progress_collect_items(gui_data: &GuiData, item: &ProgressData, files: bool) {
+    let label_stage = gui_data.progress_window.label_stage.clone();
+    let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
+    let taskbar_state = gui_data.taskbar_state.clone();
+
+    progress_bar_current_stage.hide();
+    taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
+
+    match (item.tool_type, item.checking_method) {
+        (ToolType::Duplicate, CheckingMethod::Name) => {
+            label_stage.set_text(&flg!("progress_scanning_name", file_number_tm(item)));
+            return;
+        }
+        (ToolType::Duplicate, CheckingMethod::SizeName) => {
+            label_stage.set_text(&flg!("progress_scanning_size_name", file_number_tm(item)));
+            return;
+        }
+        (ToolType::Duplicate, CheckingMethod::Size | CheckingMethod::Hash) => {
+            label_stage.set_text(&flg!("progress_scanning_size", file_number_tm(item)));
+            return;
+        }
+        _ => {}
+    }
+
+    if files {
+        label_stage.set_text(&flg!("progress_scanning_general_file", file_number_tm(item)));
+    } else {
+        label_stage.set_text(&flg!(
+            "progress_scanning_empty_folders",
+            generate_translation_hashmap(vec![("folder_number", item.entries_checked.to_string())])
+        ));
+    }
+}
+
+fn progress_default(gui_data: &GuiData, item: &ProgressData) {
+    let label_stage = gui_data.progress_window.label_stage.clone();
+    let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
+    let progress_bar_all_stages = gui_data.progress_window.progress_bar_all_stages.clone();
+    let taskbar_state = gui_data.taskbar_state.clone();
+
+    progress_bar_current_stage.show();
+    common_set_data(item, &progress_bar_all_stages, &progress_bar_current_stage, &taskbar_state);
+    taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
+
+    match (item.tool_type, item.checking_method, item.current_stage) {
+        (ToolType::SameMusic, CheckingMethod::AudioTags, 2) | (ToolType::SameMusic, CheckingMethod::AudioContent, 5) => {
+            label_stage.set_text(&flg!("progress_scanning_music_tags", progress_ratio_tm(item)));
+        }
+        (ToolType::SameMusic, CheckingMethod::AudioContent, 2) => {
+            label_stage.set_text(&flg!("progress_scanning_music_content", progress_ratio_tm(item)));
+        }
+        (ToolType::SameMusic, CheckingMethod::AudioTags, 4) => {
+            label_stage.set_text(&flg!("progress_scanning_music_tags_end", progress_ratio_tm(item)));
+        }
+        (ToolType::SameMusic, CheckingMethod::AudioContent, 4) => {
+            label_stage.set_text(&flg!("progress_scanning_music_content_end", progress_ratio_tm(item)));
+        }
+        (ToolType::SimilarImages, _, 1) => {
+            label_stage.set_text(&flg!("progress_scanning_image", progress_ratio_tm(item)));
+        }
+        (ToolType::SimilarImages, _, 2) => {
+            label_stage.set_text(&flg!("progress_comparing_image_hashes", progress_ratio_tm(item)));
+        }
+        (ToolType::SimilarVideos, _, 1) => {
+            label_stage.set_text(&flg!("progress_scanning_video", progress_ratio_tm(item)));
+        }
+        (ToolType::BrokenFiles, _, 1) => {
+            label_stage.set_text(&flg!("progress_scanning_broken_files", progress_ratio_tm(item)));
+        }
+        (ToolType::BadExtensions, _, 1) => {
+            label_stage.set_text(&flg!("progress_scanning_extension_of_files", progress_ratio_tm(item)));
+        }
+        (ToolType::Duplicate, CheckingMethod::Hash, 2) => {
+            label_stage.set_text(&flg!("progress_analyzed_partial_hash", progress_ratio_tm(item)));
+        }
+        (ToolType::Duplicate, CheckingMethod::Hash, 5) => {
+            label_stage.set_text(&flg!("progress_analyzed_full_hash", progress_ratio_tm(item)));
+        }
+        _ => unreachable!(),
+    }
 }
 
 fn common_set_data(item: &ProgressData, progress_bar_all_stages: &ProgressBar, progress_bar_current_stage: &ProgressBar, taskbar_state: &Rc<RefCell<TaskbarProgress>>) {

@@ -268,7 +268,7 @@ impl DuplicateFinder {
             .group_by(group_by_func)
             .stop_receiver(stop_receiver)
             .progress_sender(progress_sender)
-            .checking_method(CheckingMethod::Name)
+            .checking_method(CheckingMethod::SizeName)
             .build()
             .run();
 

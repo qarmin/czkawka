@@ -193,6 +193,7 @@ impl SameMusic {
             .stop_receiver(stop_receiver)
             .progress_sender(progress_sender)
             .common_data(&self.common_data)
+            .checking_method(self.check_type)
             .max_stage(max_stage)
             .build()
             .run();
