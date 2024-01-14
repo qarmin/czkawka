@@ -156,17 +156,17 @@ impl BrokenFiles {
 
         match result {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
-                self.broken_files = grouped_file_entries
+                self.files_to_check = grouped_file_entries
                     .into_values()
                     .flatten()
                     .map(|fe| {
                         let mut broken_entry = fe.into_broken_entry();
                         broken_entry.type_of_file = check_extension_availability(broken_entry.get_path(), &images_extensions, &zip_extensions, &audio_extensions, &pdf_extensions);
-                        broken_entry
+                        (broken_entry.path.to_string_lossy().to_string(), broken_entry)
                     })
                     .collect();
                 self.common_data.text_messages.warnings.extend(warnings);
-                debug!("check_files - Found {} image files.", self.broken_files.len());
+                debug!("check_files - Found {} files to check.", self.files_to_check.len());
                 true
             }
 
@@ -451,16 +451,18 @@ fn check_extension_availability(
         debug_assert!(false, "Extension not really fully str");
         return TypeOfFile::Unknown;
     };
+    let extension_lowercase = extension_str.to_ascii_lowercase();
 
-    if images_extensions.contains(&extension_str) {
+    if images_extensions.contains(&extension_lowercase.as_str()) {
         TypeOfFile::Image
-    } else if zip_extensions.contains(&extension_str) {
+    } else if zip_extensions.contains(&extension_lowercase.as_str()) {
         TypeOfFile::ArchiveZip
-    } else if audio_extensions.contains(&extension_str) {
+    } else if audio_extensions.contains(&extension_lowercase.as_str()) {
         TypeOfFile::Audio
-    } else if pdf_extensions.contains(&extension_str) {
+    } else if pdf_extensions.contains(&extension_lowercase.as_str()) {
         TypeOfFile::PDF
     } else {
+        eprintln!("File with unknown extension: {full_name:?} - {extension_lowercase}");
         debug_assert!(false, "File with unknown extension");
         TypeOfFile::Unknown
     }

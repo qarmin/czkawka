@@ -5,7 +5,7 @@ use indicatif::{ProgressBar, ProgressStyle};
 
 use czkawka_core::common_dir_traversal::{CheckingMethod, ProgressData, ToolType};
 
-pub fn connect_progress(progress_receiver: Receiver<ProgressData>) {
+pub fn connect_progress(progress_receiver: &Receiver<ProgressData>) {
     let mut pb = ProgressBar::new(1);
     let mut latest_id = None;
     while let Ok(progress_data) = progress_receiver.recv() {
@@ -33,11 +33,10 @@ pub fn connect_progress(progress_receiver: Receiver<ProgressData>) {
 
 pub fn get_progress_message(progress_data: &ProgressData) -> String {
     match (progress_data.tool_type, progress_data.current_stage, progress_data.checking_method) {
-        (ToolType::SameMusic, 2, CheckingMethod::AudioTags) => "Reading tags",
+        (ToolType::SameMusic, 2, CheckingMethod::AudioTags) | (ToolType::SameMusic, 5, CheckingMethod::AudioContent) => "Reading tags",
         (ToolType::SameMusic, 2, CheckingMethod::AudioContent) => "Calculating fingerprint",
         (ToolType::SameMusic, 4, CheckingMethod::AudioTags) => "Comparing tags",
         (ToolType::SameMusic, 4, CheckingMethod::AudioContent) => "Comparing fingerprint",
-        (ToolType::SameMusic, 5, CheckingMethod::AudioContent) => "Reading tags",
 
         (ToolType::Duplicate, 2, CheckingMethod::Hash) => "Reading prehashes",
         (ToolType::Duplicate, 5, CheckingMethod::Hash) => "Reading hashes",
@@ -47,18 +46,16 @@ pub fn get_progress_message(progress_data: &ProgressData) -> String {
 }
 
 pub fn check_if_loading_cache(progress_data: &ProgressData) -> bool {
-    match (progress_data.tool_type, progress_data.current_stage) {
-        (ToolType::SameMusic, 1) => true,
-        (ToolType::Duplicate, 1 | 4) => true,
-        _ => false,
-    }
+    matches!(
+        (progress_data.tool_type, progress_data.current_stage),
+        (ToolType::SameMusic, 1) | (ToolType::Duplicate, 1 | 4)
+    )
 }
 pub fn check_if_saving_cache(progress_data: &ProgressData) -> bool {
-    match (progress_data.tool_type, progress_data.current_stage) {
-        (ToolType::SameMusic, 3) => true,
-        (ToolType::Duplicate, 3 | 6) => true,
-        _ => false,
-    }
+    matches!(
+        (progress_data.tool_type, progress_data.current_stage),
+        (ToolType::SameMusic, 3) | (ToolType::Duplicate, 3 | 6)
+    )
 }
 
 pub fn get_progress_bar_for_collect_files() -> ProgressBar {
