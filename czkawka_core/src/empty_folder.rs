@@ -5,12 +5,12 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::Ordering;
 
-use crate::common::{check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
 use log::debug;
 use rayon::prelude::*;
 
+use crate::common::{check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crate::common_dir_traversal::{common_get_entry_data, common_get_metadata_dir, common_read_dir, get_modified_time, CheckingMethod, ProgressData, ToolType};
 use crate::common_directory::Directories;
 use crate::common_items::ExcludedItems;

@@ -1,8 +1,9 @@
-use log::info;
 use std::collections::BTreeSet;
 use std::fs;
 use std::process::Command;
 use std::process::Stdio;
+
+use log::info;
 
 #[derive(Default, Clone, Debug)]
 struct CollectedFiles {

@@ -1,16 +1,18 @@
-use crate::common;
-use crate::common_messages::Messages;
-use crate::common_traits::ResultEntry;
-use crate::duplicate::HashType;
-use crate::similar_images::{convert_algorithm_to_string, convert_filters_to_string};
+use std::collections::BTreeMap;
+use std::io::{BufReader, BufWriter};
+
 use fun_time::fun_time;
 use image::imageops::FilterType;
 use image_hasher::HashAlg;
 use log::debug;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
-use std::io::{BufReader, BufWriter};
+
+use crate::common;
+use crate::common_messages::Messages;
+use crate::common_traits::ResultEntry;
+use crate::duplicate::HashType;
+use crate::similar_images::{convert_algorithm_to_string, convert_filters_to_string};
 
 const CACHE_VERSION: &str = "70";
 

@@ -5,10 +5,10 @@
 #![allow(clippy::type_complexity)]
 #![allow(clippy::needless_late_init)]
 
-use crossbeam_channel::{unbounded, Receiver, Sender};
 use std::env;
 use std::ffi::OsString;
 
+use crossbeam_channel::{unbounded, Receiver, Sender};
 use glib::Priority;
 use gtk4::gio::ApplicationFlags;
 use gtk4::prelude::*;

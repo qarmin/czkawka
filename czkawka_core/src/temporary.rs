@@ -1,7 +1,6 @@
 use std::fs;
 use std::fs::DirEntry;
 use std::io::prelude::*;
-
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;

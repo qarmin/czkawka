@@ -17,6 +17,25 @@
 #![allow(clippy::items_after_statements)] // Generated code
 #![allow(clippy::match_same_arms)] // Generated code
 
+use std::rc::Rc;
+
+use crossbeam_channel::{unbounded, Receiver, Sender};
+use slint::VecModel;
+
+use czkawka_core::common::{print_version_mode, setup_logger};
+use czkawka_core::common_dir_traversal::ProgressData;
+
+use crate::connect_delete::connect_delete_button;
+use crate::connect_directories_changes::connect_add_remove_directories;
+use crate::connect_open::connect_open_items;
+use crate::connect_progress_receiver::connect_progress_gathering;
+use crate::connect_scan::connect_scan_button;
+use crate::connect_show_preview::connect_show_preview;
+use crate::connect_stop::connect_stop_button;
+use crate::connect_translation::connect_translations;
+use crate::set_initial_gui_info::set_initial_gui_infos;
+use crate::settings::{connect_changing_settings_preset, create_default_settings_files, load_settings_from_file, save_all_settings_to_file};
+
 mod common;
 mod connect_delete;
 mod connect_directories_changes;
@@ -30,24 +49,8 @@ mod localizer_krokiet;
 mod set_initial_gui_info;
 mod settings;
 
-use crossbeam_channel::{unbounded, Receiver, Sender};
-use slint::VecModel;
-use std::rc::Rc;
 // use std::rc::Rc;
 
-use crate::connect_delete::connect_delete_button;
-use crate::connect_open::connect_open_items;
-use crate::connect_scan::connect_scan_button;
-
-use crate::connect_directories_changes::connect_add_remove_directories;
-use crate::connect_progress_receiver::connect_progress_gathering;
-use crate::connect_show_preview::connect_show_preview;
-use crate::connect_stop::connect_stop_button;
-use crate::connect_translation::connect_translations;
-use crate::set_initial_gui_info::set_initial_gui_infos;
-use crate::settings::{connect_changing_settings_preset, create_default_settings_files, load_settings_from_file, save_all_settings_to_file};
-use czkawka_core::common::{print_version_mode, setup_logger};
-use czkawka_core::common_dir_traversal::ProgressData;
 // use slint::{ModelRc, VecModel};
 
 slint::include_modules!();

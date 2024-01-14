@@ -1,9 +1,10 @@
+use rayon::prelude::*;
 use slint::{ComponentHandle, Model, ModelRc, VecModel};
+
+use czkawka_core::common::{remove_folder_if_contains_only_empty_folders, CHARACTER};
 
 use crate::common::{get_is_header_mode, get_name_idx, get_path_idx};
 use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow};
-use czkawka_core::common::{remove_folder_if_contains_only_empty_folders, CHARACTER};
-use rayon::prelude::*;
 
 pub fn connect_delete_button(app: &MainWindow) {
     let a = app.as_weak();

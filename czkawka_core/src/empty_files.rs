@@ -1,5 +1,4 @@
 use std::fs;
-
 use std::io::prelude::*;
 
 use crossbeam_channel::{Receiver, Sender};

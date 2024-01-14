@@ -1,6 +1,8 @@
-use crate::CurrentTab;
-use slint::{ModelRc, SharedString, StandardListViewItem, VecModel};
 use std::path::PathBuf;
+
+use slint::{ModelRc, SharedString, StandardListViewItem, VecModel};
+
+use crate::CurrentTab;
 
 // Remember to match updated this according to ui/main_lists.slint and connect_scan.rs files
 pub fn get_path_idx(active_tab: CurrentTab) -> usize {

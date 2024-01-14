@@ -1,7 +1,12 @@
-use crate::settings::{collect_settings, SettingsCustom, ALLOWED_HASH_TYPE_VALUES, ALLOWED_RESIZE_ALGORITHM_VALUES};
-use crate::{CurrentTab, GuiState, MainListModel, MainWindow, ProgressToSend};
+use std::rc::Rc;
+use std::thread;
+
 use chrono::NaiveDateTime;
 use crossbeam_channel::{Receiver, Sender};
+use humansize::{format_size, BINARY};
+use rayon::prelude::*;
+use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
+
 use czkawka_core::common::{split_path, split_path_compare, DEFAULT_THREAD_SIZE};
 use czkawka_core::common_dir_traversal::{FileEntry, ProgressData};
 use czkawka_core::common_tool::CommonData;
@@ -10,11 +15,9 @@ use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::{EmptyFolder, FolderEntry};
 use czkawka_core::similar_images;
 use czkawka_core::similar_images::SimilarImages;
-use humansize::{format_size, BINARY};
-use rayon::prelude::*;
-use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
-use std::rc::Rc;
-use std::thread;
+
+use crate::settings::{collect_settings, SettingsCustom, ALLOWED_HASH_TYPE_VALUES, ALLOWED_RESIZE_ALGORITHM_VALUES};
+use crate::{CurrentTab, GuiState, MainListModel, MainWindow, ProgressToSend};
 
 pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>) {
     let a = app.as_weak();

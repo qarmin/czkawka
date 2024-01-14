@@ -2,14 +2,12 @@ use std::cmp::max;
 use std::collections::{BTreeMap, HashSet};
 use std::fs::File;
 use std::io::prelude::*;
-
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::{mem, panic};
 
 use anyhow::Context;
-
 use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
 use humansize::{format_size, BINARY};

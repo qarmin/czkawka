@@ -1,8 +1,9 @@
-use fun_time::fun_time;
-use serde::Serialize;
 use std::fs::File;
 use std::io::{BufWriter, Write};
 use std::path::Path;
+
+use fun_time::fun_time;
+use serde::Serialize;
 
 pub trait DebugPrint {
     fn debug_print(&self);

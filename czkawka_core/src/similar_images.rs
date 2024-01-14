@@ -6,7 +6,6 @@ use std::time::SystemTime;
 use std::{mem, panic};
 
 use bk_tree::BKTree;
-
 use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
 use humansize::{format_size, BINARY};
@@ -1097,9 +1096,9 @@ mod tests {
     use std::collections::HashMap;
     use std::path::PathBuf;
 
-    use crate::common_dir_traversal::ToolType;
     use bk_tree::BKTree;
 
+    use crate::common_dir_traversal::ToolType;
     use crate::common_directory::Directories;
     use crate::common_tool::CommonToolData;
     use crate::similar_images::{Hamming, ImHash, ImageType, ImagesEntry, SimilarImages};

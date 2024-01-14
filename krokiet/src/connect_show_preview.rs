@@ -1,10 +1,13 @@
-use crate::{Callabler, GuiState, MainWindow};
-use czkawka_core::common::{get_dynamic_image_from_raw_image, IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
+use std::path::Path;
+use std::time::{Duration, Instant};
+
 use image::DynamicImage;
 use log::{debug, error};
 use slint::ComponentHandle;
-use std::path::Path;
-use std::time::{Duration, Instant};
+
+use czkawka_core::common::{get_dynamic_image_from_raw_image, IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
+
+use crate::{Callabler, GuiState, MainWindow};
 
 pub type ImageBufferRgba = image::ImageBuffer<image::Rgba<u8>, Vec<u8>>;
 

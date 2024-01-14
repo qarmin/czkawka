@@ -1,8 +1,8 @@
+use std::path::Path;
+
 #[cfg(not(target_family = "unix"))]
 use crate::common::normalize_windows_path;
 use crate::common::regex_check;
-use std::path::Path;
-
 use crate::common_messages::Messages;
 
 #[cfg(target_family = "unix")]

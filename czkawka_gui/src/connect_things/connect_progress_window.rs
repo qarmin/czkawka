@@ -1,10 +1,9 @@
-use crossbeam_channel::Receiver;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
-
 use std::time::Duration;
 
+use crossbeam_channel::Receiver;
 use glib::MainContext;
 use gtk4::prelude::*;
 use gtk4::ProgressBar;

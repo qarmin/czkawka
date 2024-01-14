@@ -1,8 +1,8 @@
-use crate::common::normalize_windows_path;
 use std::path::{Path, PathBuf};
 #[cfg(target_family = "unix")]
 use std::{fs, os::unix::fs::MetadataExt};
 
+use crate::common::normalize_windows_path;
 use crate::common_messages::Messages;
 use crate::flc;
 

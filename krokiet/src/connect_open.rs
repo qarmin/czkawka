@@ -1,7 +1,8 @@
-use crate::{Callabler, MainWindow};
 use directories_next::ProjectDirs;
 use log::error;
 use slint::ComponentHandle;
+
+use crate::{Callabler, MainWindow};
 
 pub fn connect_open_items(app: &MainWindow) {
     app.global::<Callabler>().on_item_opened(move |path| {

@@ -1,6 +1,7 @@
-use crate::common_messages::Messages;
 use std::collections::HashSet;
 use std::fs::DirEntry;
+
+use crate::common_messages::Messages;
 
 #[derive(Debug, Clone, Default)]
 pub struct Extensions {

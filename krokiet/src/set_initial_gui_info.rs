@@ -1,5 +1,6 @@
-use czkawka_core::common::get_available_threads;
 use slint::{ComponentHandle, SharedString, VecModel};
+
+use czkawka_core::common::get_available_threads;
 
 use crate::settings::{ALLOWED_HASH_SIZE_VALUES, ALLOWED_HASH_TYPE_VALUES, ALLOWED_RESIZE_ALGORITHM_VALUES};
 use crate::{GuiState, MainWindow, Settings};

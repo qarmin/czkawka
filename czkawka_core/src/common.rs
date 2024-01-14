@@ -1,4 +1,6 @@
 #![allow(unused_imports)]
+
+use std::{fs, thread};
 // I don't wanna fight with unused imports in this file, so simply ignore it to avoid too much complexity
 use std::cmp::Ordering;
 use std::ffi::OsString;
@@ -8,7 +10,6 @@ use std::sync::atomic::{AtomicBool, AtomicUsize};
 use std::sync::{atomic, Arc};
 use std::thread::{sleep, JoinHandle};
 use std::time::{Duration, Instant, SystemTime};
-use std::{fs, thread};
 
 #[cfg(feature = "heif")]
 use anyhow::Result;
@@ -16,14 +17,12 @@ use crossbeam_channel::Sender;
 use directories_next::ProjectDirs;
 use fun_time::fun_time;
 use handsome_logger::{ColorChoice, ConfigBuilder, TerminalMode};
-use image::{DynamicImage, ImageBuffer, Rgb};
-use imagepipe::{ImageSource, Pipeline};
+use image::{DynamicImage, ImageBuffer};
 #[cfg(feature = "heif")]
 use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
 #[cfg(feature = "libraw")]
 use libraw::Processor;
 use log::{debug, error, info, warn, LevelFilter, Record};
-use rawloader::RawLoader;
 use symphonia::core::conv::IntoSample;
 
 // #[cfg(feature = "heif")]
@@ -612,10 +611,11 @@ mod test {
     use std::fs;
     use std::io::Write;
     use std::path::{Path, PathBuf};
+
     use tempfile::tempdir;
 
     use crate::common::{normalize_windows_path, regex_check, remove_folder_if_contains_only_empty_folders};
-    use crate::common_items::{new_excluded_item, ExcludedItems};
+    use crate::common_items::new_excluded_item;
 
     #[test]
     fn test_remove_folder_if_contains_only_empty_folders() {
