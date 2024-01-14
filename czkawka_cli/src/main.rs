@@ -10,7 +10,7 @@ use commands::Commands;
 use czkawka_core::bad_extensions::BadExtensions;
 use czkawka_core::big_file::{BigFile, SearchMode};
 use czkawka_core::broken_files::BrokenFiles;
-use czkawka_core::common::{print_version_mode, set_number_of_threads, setup_logger};
+use czkawka_core::common::{print_version_mode, set_number_of_threads, setup_logger, DEFAULT_THREAD_SIZE};
 use czkawka_core::common_dir_traversal::ProgressData;
 use czkawka_core::common_tool::{CommonData, DeleteMethod};
 #[allow(unused_imports)] // It is used in release for print_results_to_output().
@@ -46,7 +46,7 @@ fn main() {
     let (progress_sender, progress_receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
     let (stop_sender, stop_receiver): (Sender<()>, Receiver<()>) = bounded(1);
 
-    let calculate_thread = thread::spawn(move || match command {
+    let calculate_thread = thread::Builder::new().stack_size(DEFAULT_THREAD_SIZE).spawn(move || match command {
         Commands::Duplicates(duplicates_args) => duplicates(duplicates_args, &stop_receiver, &progress_sender),
         Commands::EmptyFolders(empty_folders_args) => empty_folders(empty_folders_args, &stop_receiver, &progress_sender),
         Commands::BiggestFiles(biggest_files_args) => biggest_files(biggest_files_args, &stop_receiver, &progress_sender),
