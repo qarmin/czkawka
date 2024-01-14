@@ -8,7 +8,6 @@ use gtk4::{Align, CheckButton, Dialog, Orientation, ResponseType, TextView};
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::*;
-use crate::localizer_core::generate_translation_hashmap;
 use crate::notebook_enums::*;
 use crate::notebook_info::NOTEBOOKS_INFO;
 
@@ -148,13 +147,11 @@ fn create_dialog_ask_for_deletion(window_main: &gtk4::Window, number_of_selected
 
     let label: gtk4::Label = gtk4::Label::new(Some(&flg!("delete_question_label")));
     let label2: gtk4::Label = match number_of_selected_groups {
-        0 => gtk4::Label::new(Some(&flg!(
-            "delete_items_label",
-            generate_translation_hashmap(vec![("items", number_of_selected_items.to_string())])
-        ))),
+        0 => gtk4::Label::new(Some(&flg!("delete_items_label", items = number_of_selected_items))),
         _ => gtk4::Label::new(Some(&flg!(
             "delete_items_groups_label",
-            generate_translation_hashmap(vec![("items", number_of_selected_items.to_string()), ("groups", number_of_selected_groups.to_string())])
+            items = number_of_selected_items,
+            groups = number_of_selected_groups
         ))),
     };
 
@@ -368,10 +365,7 @@ pub fn empty_folder_remover(
             }
         }
         if error_happened {
-            messages += &flg!(
-                "delete_folder_failed",
-                generate_translation_hashmap(vec![("dir", get_full_name_from_path_name(&path, &name))])
-            );
+            messages += &flg!("delete_folder_failed", dir = get_full_name_from_path_name(&path, &name));
             messages += "\n";
         }
     }
@@ -425,11 +419,7 @@ pub fn basic_remove(
                 }
 
                 Err(e) => {
-                    messages += flg!(
-                        "delete_file_failed",
-                        generate_translation_hashmap(vec![("name", get_full_name_from_path_name(&path, &name)), ("reason", e.to_string())])
-                    )
-                    .as_str();
+                    messages += flg!("delete_file_failed", name = get_full_name_from_path_name(&path, &name), reason = e.to_string()).as_str();
                     messages += "\n";
                 }
             }
@@ -439,11 +429,7 @@ pub fn basic_remove(
                     model.remove(&iter);
                 }
                 Err(e) => {
-                    messages += flg!(
-                        "delete_file_failed",
-                        generate_translation_hashmap(vec![("name", get_full_name_from_path_name(&path, &name)), ("reason", e.to_string())])
-                    )
-                    .as_str();
+                    messages += flg!("delete_file_failed", name = get_full_name_from_path_name(&path, &name), reason = e.to_string()).as_str();
                     messages += "\n";
                 }
             }
@@ -513,19 +499,11 @@ pub fn tree_remove(
         for file_name in vec_file_name {
             if !use_trash {
                 if let Err(e) = fs::remove_file(get_full_name_from_path_name(&path, &file_name)) {
-                    messages += flg!(
-                        "delete_file_failed",
-                        generate_translation_hashmap(vec![("name", get_full_name_from_path_name(&path, &file_name)), ("reason", e.to_string())])
-                    )
-                    .as_str();
+                    messages += flg!("delete_file_failed", name = get_full_name_from_path_name(&path, &file_name), reason = e.to_string()).as_str();
                     messages += "\n";
                 }
             } else if let Err(e) = trash::delete(get_full_name_from_path_name(&path, &file_name)) {
-                messages += flg!(
-                    "delete_file_failed",
-                    generate_translation_hashmap(vec![("name", get_full_name_from_path_name(&path, &file_name)), ("reason", e.to_string())])
-                )
-                .as_str();
+                messages += flg!("delete_file_failed", name = get_full_name_from_path_name(&path, &file_name), reason = e.to_string()).as_str();
                 messages += "\n";
             }
 

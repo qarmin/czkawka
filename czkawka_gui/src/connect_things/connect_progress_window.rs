@@ -164,10 +164,7 @@ fn progress_collect_items(gui_data: &GuiData, item: &ProgressData, files: bool) 
     if files {
         label_stage.set_text(&flg!("progress_scanning_general_file", file_number_tm(item)));
     } else {
-        label_stage.set_text(&flg!(
-            "progress_scanning_empty_folders",
-            generate_translation_hashmap(vec![("folder_number", item.entries_checked.to_string())])
-        ));
+        label_stage.set_text(&flg!("progress_scanning_empty_folders", folder_number = item.entries_checked));
     }
 }
 

@@ -20,7 +20,6 @@ use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraver
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::{DebugPrint, PrintResults, ResultEntry};
 use crate::flc;
-use crate::localizer_core::generate_translation_hashmap;
 
 pub const MAX_TOLERANCE: i32 = 20;
 
@@ -121,10 +120,10 @@ impl SimilarVideos {
             #[cfg(target_os = "windows")]
             self.common_data.text_messages.errors.push(flc!("core_ffmpeg_not_found_windows"));
             #[cfg(target_os = "linux")]
-            self.common_data.text_messages.errors.push(flc!(
-                "core_ffmpeg_missing_in_snap",
-                generate_translation_hashmap(vec![("url", "https://github.com/snapcrafters/ffmpeg/issues/73".to_string())])
-            ));
+            self.common_data
+                .text_messages
+                .errors
+                .push(flc!("core_ffmpeg_missing_in_snap", url = "https://github.com/snapcrafters/ffmpeg/issues/73"));
         } else {
             self.optimize_dirs_before_start();
             self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();

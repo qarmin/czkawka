@@ -21,7 +21,6 @@ use czkawka_core::duplicate::DuplicateFinder;
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
 use czkawka_core::invalid_symlinks::InvalidSymlinks;
-use czkawka_core::localizer_core::generate_translation_hashmap;
 use czkawka_core::same_music::{MusicSimilarity, SameMusic};
 use czkawka_core::similar_images;
 use czkawka_core::similar_images::{ImagesEntry, SimilarImages};
@@ -250,13 +249,7 @@ fn computer_bad_extensions(
         let text_messages = be.get_text_messages();
 
         let bad_extensions_number: usize = information.number_of_files_with_bad_extension;
-        entry_info.set_text(
-            flg!(
-                "compute_found_bad_extensions",
-                generate_translation_hashmap(vec![("number_files", bad_extensions_number.to_string()),])
-            )
-            .as_str(),
-        );
+        entry_info.set_text(flg!("compute_found_bad_extensions", number_files = bad_extensions_number).as_str());
 
         // Create GUI
         {
@@ -322,13 +315,7 @@ fn computer_broken_files(
 
         let broken_files_number: usize = information.number_of_broken_files;
 
-        entry_info.set_text(
-            flg!(
-                "compute_found_broken_files",
-                generate_translation_hashmap(vec![("number_files", broken_files_number.to_string()),])
-            )
-            .as_str(),
-        );
+        entry_info.set_text(flg!("compute_found_broken_files", number_files = broken_files_number).as_str());
 
         // Create GUI
         {
@@ -393,13 +380,7 @@ fn computer_invalid_symlinks(
 
         let invalid_symlinks: usize = information.number_of_invalid_symlinks;
 
-        entry_info.set_text(
-            flg!(
-                "compute_found_invalid_symlinks",
-                generate_translation_hashmap(vec![("number_files", invalid_symlinks.to_string()),])
-            )
-            .as_str(),
-        );
+        entry_info.set_text(flg!("compute_found_invalid_symlinks", number_files = invalid_symlinks).as_str());
 
         // Create GUI
         {
@@ -473,10 +454,8 @@ fn computer_same_music(
         entry_info.set_text(
             flg!(
                 "compute_found_music",
-                generate_translation_hashmap(vec![
-                    ("number_files", information.number_of_duplicates.to_string()),
-                    ("number_groups", information.number_of_groups.to_string()),
-                ])
+                number_files = information.number_of_duplicates,
+                number_groups = information.number_of_groups
             )
             .as_str(),
         );
@@ -640,10 +619,8 @@ fn computer_similar_videos(
         entry_info.set_text(
             flg!(
                 "compute_found_videos",
-                generate_translation_hashmap(vec![
-                    ("number_files", information.number_of_duplicates.to_string()),
-                    ("number_groups", information.number_of_groups.to_string()),
-                ])
+                number_files = information.number_of_duplicates,
+                number_groups = information.number_of_groups
             )
             .as_str(),
         );
@@ -738,10 +715,8 @@ fn computer_similar_images(
         entry_info.set_text(
             flg!(
                 "compute_found_images",
-                generate_translation_hashmap(vec![
-                    ("number_files", information.number_of_duplicates.to_string()),
-                    ("number_groups", information.number_of_groups.to_string()),
-                ])
+                number_files = information.number_of_duplicates,
+                number_groups = information.number_of_groups
             )
             .as_str(),
         );
@@ -862,13 +837,7 @@ fn computer_temporary_files(
         let text_messages = tf.get_text_messages();
 
         let temporary_files_number: usize = information.number_of_temporary_files;
-        entry_info.set_text(
-            flg!(
-                "compute_found_temporary_files",
-                generate_translation_hashmap(vec![("number_files", temporary_files_number.to_string()),])
-            )
-            .as_str(),
-        );
+        entry_info.set_text(flg!("compute_found_temporary_files", number_files = temporary_files_number).as_str());
 
         // Create GUI
         {
@@ -932,13 +901,7 @@ fn computer_big_files(
 
         let biggest_files_number: usize = information.number_of_real_files;
 
-        entry_info.set_text(
-            flg!(
-                "compute_found_big_files",
-                generate_translation_hashmap(vec![("number_files", biggest_files_number.to_string()),])
-            )
-            .as_str(),
-        );
+        entry_info.set_text(flg!("compute_found_big_files", number_files = biggest_files_number).as_str());
 
         // Create GUI
         {
@@ -1000,13 +963,7 @@ fn computer_empty_files(
 
         let empty_files_number: usize = information.number_of_empty_files;
 
-        entry_info.set_text(
-            flg!(
-                "compute_found_empty_files",
-                generate_translation_hashmap(vec![("number_files", empty_files_number.to_string()),])
-            )
-            .as_str(),
-        );
+        entry_info.set_text(flg!("compute_found_empty_files", number_files = empty_files_number).as_str());
 
         // Create GUI
         {
@@ -1067,13 +1024,7 @@ fn computer_empty_folders(
 
         let empty_folder_number: usize = information.number_of_empty_folders;
 
-        entry_info.set_text(
-            flg!(
-                "compute_found_empty_folders",
-                generate_translation_hashmap(vec![("number_files", empty_folder_number.to_string()),])
-            )
-            .as_str(),
-        );
+        entry_info.set_text(flg!("compute_found_empty_folders", number_files = empty_folder_number).as_str());
 
         // Create GUI
         {
@@ -1167,22 +1118,14 @@ fn computer_duplicate_finder(
             _ => panic!(),
         }
         if duplicates_size == 0 {
-            entry_info.set_text(
-                flg!(
-                    "compute_found_duplicates_name",
-                    generate_translation_hashmap(vec![("number_files", duplicates_number.to_string()), ("number_groups", duplicates_group.to_string())])
-                )
-                .as_str(),
-            );
+            entry_info.set_text(flg!("compute_found_duplicates_name", number_files = duplicates_number, number_groups = duplicates_group).as_str());
         } else {
             entry_info.set_text(
                 flg!(
                     "compute_found_duplicates_hash_size",
-                    generate_translation_hashmap(vec![
-                        ("number_files", duplicates_number.to_string()),
-                        ("number_groups", duplicates_group.to_string()),
-                        ("size", format_size(duplicates_size, BINARY))
-                    ])
+                    number_files = duplicates_number,
+                    number_groups = duplicates_group,
+                    size = format_size(duplicates_size, BINARY)
                 )
                 .as_str(),
             );
