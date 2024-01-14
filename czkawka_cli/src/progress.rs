@@ -40,6 +40,11 @@ pub fn get_progress_message(progress_data: &ProgressData) -> String {
 
         (ToolType::Duplicate, 2, CheckingMethod::Hash) => "Reading prehashes",
         (ToolType::Duplicate, 5, CheckingMethod::Hash) => "Reading hashes",
+        (ToolType::SimilarImages, 1, _) => "Reading images",
+        (ToolType::SimilarImages, 2, _) => "Comparing image hashes",
+        (ToolType::SimilarVideos, 1, _) => "Reading similar values",
+        (ToolType::BrokenFiles, 1, _) => "Checking broken files",
+        (ToolType::BadExtensions, 1, _) => "Checking extensions of files",
         _ => unreachable!(),
     }
     .to_string()
