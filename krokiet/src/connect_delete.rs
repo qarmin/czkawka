@@ -1,7 +1,8 @@
 use rayon::prelude::*;
 use slint::{ComponentHandle, Model, ModelRc, VecModel};
+use std::path::MAIN_SEPARATOR;
 
-use czkawka_core::common::{remove_folder_if_contains_only_empty_folders, CHARACTER};
+use czkawka_core::common::remove_folder_if_contains_only_empty_folders;
 
 use crate::common::{get_is_header_mode, get_name_idx, get_path_idx};
 use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow};
@@ -60,7 +61,7 @@ fn remove_selected_items(items: Vec<MainListModel>, active_tab: CurrentTab) {
         .map(|item| {
             let path = item.val.iter().nth(path_idx).unwrap();
             let name = item.val.iter().nth(name_idx).unwrap();
-            format!("{}{}{}", path, CHARACTER, name)
+            format!("{}{}{}", path, MAIN_SEPARATOR, name)
         })
         .collect::<Vec<_>>();
 

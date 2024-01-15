@@ -70,7 +70,7 @@ fn main() {
 
     connect_progress(&progress_receiver);
 
-    calculate_thread.join().unwrap();
+    calculate_thread.unwrap().join().unwrap();
 }
 
 fn duplicates(duplicates: DuplicatesArgs, stop_receiver: &Receiver<()>, progress_sender: &Sender<ProgressData>) {

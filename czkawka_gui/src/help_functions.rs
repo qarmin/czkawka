@@ -1,7 +1,7 @@
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::io::BufReader;
-use std::path::PathBuf;
+use std::path::{PathBuf, MAIN_SEPARATOR};
 
 use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
 use glib::Error;
@@ -14,7 +14,6 @@ use once_cell::sync::OnceCell;
 use czkawka_core::bad_extensions::BadExtensions;
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
-use czkawka_core::common::CHARACTER;
 use czkawka_core::common_dir_traversal;
 use czkawka_core::common_messages::Messages;
 use czkawka_core::duplicate::DuplicateFinder;
@@ -414,7 +413,7 @@ pub fn get_notebook_object_from_tree_view(tree_view: &TreeView) -> &NotebookObje
 pub fn get_full_name_from_path_name(path: &str, name: &str) -> String {
     let mut string = String::with_capacity(path.len() + name.len() + 1);
     string.push_str(path);
-    string.push(CHARACTER);
+    string.push(MAIN_SEPARATOR);
     string.push_str(name);
     string
 }

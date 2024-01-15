@@ -18,11 +18,13 @@ use directories_next::ProjectDirs;
 use fun_time::fun_time;
 use handsome_logger::{ColorChoice, ConfigBuilder, TerminalMode};
 use image::{DynamicImage, ImageBuffer};
+use imagepipe::{ImageSource, Pipeline};
 #[cfg(feature = "heif")]
 use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
 #[cfg(feature = "libraw")]
 use libraw::Processor;
 use log::{debug, error, info, warn, LevelFilter, Record};
+use rawloader::RawLoader;
 use symphonia::core::conv::IntoSample;
 
 // #[cfg(feature = "heif")]
@@ -34,16 +36,11 @@ use crate::common_messages::Messages;
 use crate::common_tool::DeleteMethod;
 use crate::common_traits::ResultEntry;
 use crate::duplicate::make_hard_link;
-use crate::CZKAWKA_VERSION;
+use crate::MAIN_SEPARATOR;
 
 static NUMBER_OF_THREADS: state::InitCell<usize> = state::InitCell::new();
 pub const DEFAULT_THREAD_SIZE: usize = 8 * 1024 * 1024; // 8 MB
 pub const DEFAULT_WORKER_THREAD_SIZE: usize = 4 * 1024 * 1024; // 4 MB
-
-#[cfg(not(target_family = "windows"))]
-pub const CHARACTER: char = '/';
-#[cfg(target_family = "windows")]
-pub const CHARACTER: char = '\\';
 
 pub fn get_number_of_threads() -> usize {
     let data = NUMBER_OF_THREADS.get();
@@ -81,7 +78,7 @@ pub fn print_version_mode() {
 
     let info = os_info::get();
     info!(
-        "App version: {CZKAWKA_VERSION}, {debug_release} mode, rust {rust_version}, os {} {} [{} {}], {processors} cpu/threads",
+        "App version: {MAIN_SEPARATOR}, {debug_release} mode, rust {rust_version}, os {} {} [{} {}], {processors} cpu/threads",
         info.os_type(),
         info.version(),
         std::env::consts::ARCH,

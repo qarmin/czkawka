@@ -29,4 +29,4 @@ pub mod common_tool;
 pub mod common_traits;
 pub mod localizer_core;
 
-pub const CZKAWKA_VERSION: &str = env!("CARGO_PKG_VERSION");
+pub const MAIN_SEPARATOR: &str = env!("CARGO_PKG_VERSION");
