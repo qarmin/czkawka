@@ -69,22 +69,22 @@ duplicate_check_method_tooltip =
         Hash - Finds files which have the same content. This mode hashes the file and later compares this hash to find duplicates. This mode is the safest way to find duplicates. App heavily uses cache, so second and further scans of the same data should be a lot of faster than the first. 
 
 image_hash_size_tooltip =
-        Each checked image produce special hash which can be compared with every other, and small difference between them means that this images are similar.
+        Each checked image produces a special hash which can be compared with each other, and a small difference between them means that these images are similar.
 
-        8 hash size is quite good to find images that are only little similar to original. With bigger set of images (>1000) will produce big amount of false positives, so I recommend to use for such amount bigger hash size.
+        8 hash size is quite good to find images that are only a little similar to original. With a bigger set of images (>1000), this will produce a big amount of false positives, so I recommend to use  a bigger hash size in this case.
 
-        16 is default hash size which is quite good compromise between finding even a little similar images and having small amount of hash collisions.
+        16 is the default hash size which is quite a good compromise between finding even a little similar images and having only a small amount of hash collisions.
 
-        32 and 64 hashes finds only very similar images, but almost should not have any false positives (maybe except some images with alpha channel).
+        32 and 64 hashes find only very similar images, but should have almost no false positives (maybe except some images with alpha channel).
 
 image_resize_filter_tooltip = 
-        To compute hash of image, library must first resize it.
+        To compute hash of image, the library must first resize it.
 
-        Depend on chosen algorithm, resulted image used to calculate hash will may looks little different.
+        Depend on chosen algorithm, the resulting image used to calculate hash will looks a little different.
 
-        The fastest algorithm to use, but also one which gives the worst results is Nearest, it is enabled by default, because with 16x16 hash size, lower quality it is not really visible.
+        The fastest algorithm to use, but also the one which gives the worst results, is Nearest. It is enabled by default, because with 16x16 hash size lower quality it is not really visible.
 
-        With 8x8 hash size is recommended to use different algorithm than Nearest, to have better groups of images.
+        With 8x8 hash size it is recommended to use a different algorithm than Nearest, to have better groups of images.
 
 image_hash_alg_tooltip = 
         Users can choose from one of many algorithms of calculating the hash.
@@ -146,7 +146,7 @@ main_check_box_broken_files_archive = Archive
 main_check_box_broken_files_image = Image
 
 check_button_general_same_size = Ignore same size
-check_button_general_same_size_tooltip = Ignore from results, files which have identical size - usually this are 1:1 duplicates
+check_button_general_same_size_tooltip = Ignore files with identical size in results - usually these are 1:1 duplicates
 
 main_label_size_bytes_tooltip = Size of files which will be used in scan
 

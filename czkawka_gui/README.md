@@ -4,9 +4,9 @@ Czkawka GUI is a graphical user interface for Czkawka Core written with GTK 4.
 ![Screenshot from 2023-11-26 12-43-32](https://github.com/qarmin/czkawka/assets/41945903/722ed490-0be1-4dac-bcfc-182a4d0787dc)
 
 ## Requirements
-Requirements depends on platform that you are using.
+Requirements depend on your platform.
 
-Prebuild binareies are available here - https://github.com/qarmin/czkawka/releases/
+Prebuilt binaries are available here - https://github.com/qarmin/czkawka/releases/
 
 ### Linux
 #### Prebuild binaries
@@ -22,16 +22,16 @@ brew install gtk4 adwaita-icon-theme ffmpeg librsvg libheif libraw
 ```
 
 ### Windows
-All needed libraries should be bundled in zip(except ffmpeg which you need download and unpack to location with `czkawka_gui.exe` - https://ffmpeg.org/download.html#build-windows)
+All needed libraries should be bundled in zip (except ffmpeg which you need download and unpack to location with `czkawka_gui.exe` - https://ffmpeg.org/download.html#build-windows)
 
-You can also install app via msys2(webp and heif should work here) - https://www.msys2.org/#installation (czkawka package - https://packages.msys2.org/base/mingw-w64-czkawka)
+You can also install the app via msys2 (webp and heif should work here) - https://www.msys2.org/#installation (czkawka package - https://packages.msys2.org/base/mingw-w64-czkawka)
 ```
 pacman -S mingw-w64-x86_64-czkawka-gui
 ```
-and you can create shortcut to `C:\msys64\mingw64\bin\czkawka_gui.exe`
+and you can create a shortcut to `C:\msys64\mingw64\bin\czkawka_gui.exe`
 
 ## Compilation
-Compilation of gui is harder than compilation cli or core, because uses gtk4 which is written in C and also requires a lot build and runtime dependencies.
+Compiling the gui is harder than compiling cli or core, because it uses gtk4 which is written in C and also requires a lot build and runtime dependencies.
 
 ### Requirements
 |  Program  |  Minimal version  |
@@ -56,15 +56,15 @@ cargo run --release --bin czkawka_gui
 cargo run --release --bin czkawka_gui --features "heif,libraw"
 ```
 ### Windows
-Currently, there is no instruction how to compile app on Windows natively.</br>
-You can check for CI for instructions how to cross-compile app from linux to windows(uses prebuilt docker image) - [CI Instructions](../.github/workflows/windows.yml)</br>
-There exists mingw recipe which you can try to convert for your purposes - https://github.com/msys2/MINGW-packages/blob/master/mingw-w64-czkawka/PKGBUILD
+Currently, there is are no instructions on how to compile the app on Windows natively.</br>
+You can check for CI for instructions how to cross-compile the app from linux to windows (uses prebuilt docker image) - [CI Instructions](../.github/workflows/windows.yml)</br>
+There exists a mingw recipe which you can try to convert for your purposes - https://github.com/msys2/MINGW-packages/blob/master/mingw-w64-czkawka/PKGBUILD
 
 ## Limitations
-Not all available features other components implemented here, so this is list of  limitations:
-- Snap versions not allows to use similar videos feature
-- Windows version not supports heif and webp files with prebuild binaries
-- Prebuild binaries for mac arm not exists
+Not all available features and/or components implemented here, this is the list of limitations:
+- Snap versions does not allow to use the similar videos feature
+- Windows version does not support heif and webp files with prebuilt binaries
+- Prebuilt binaries for mac arm do not exist
 
 ## License
 Code is distributed under MIT license.
