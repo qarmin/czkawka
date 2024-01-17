@@ -106,7 +106,7 @@ impl BrokenFiles {
 
     #[fun_time(message = "find_broken_files", level = "info")]
     pub fn find_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) {
-        self.optimize_dirs_before_start();
+        self.prepare_items();
         if !self.check_files(stop_receiver, progress_sender) {
             self.common_data.stopped_search = true;
             return;
@@ -139,8 +139,8 @@ impl BrokenFiles {
             }
         }
 
-        self.common_data.allowed_extensions.set_and_validate_extensions(&extensions);
-        if !self.common_data.allowed_extensions.set_any_extensions() {
+        self.common_data.extensions.set_and_validate_allowed_extensions(&extensions);
+        if !self.common_data.extensions.set_any_extensions() {
             return true;
         }
 

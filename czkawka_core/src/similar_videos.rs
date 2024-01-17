@@ -125,7 +125,7 @@ impl SimilarVideos {
                 .errors
                 .push(flc!("core_ffmpeg_missing_in_snap", url = "https://github.com/snapcrafters/ffmpeg/issues/73"));
         } else {
-            self.optimize_dirs_before_start();
+            self.prepare_items();
             self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
             if !self.check_for_similar_videos(stop_receiver, progress_sender) {
                 self.common_data.stopped_search = true;
@@ -142,8 +142,8 @@ impl SimilarVideos {
 
     // #[fun_time(message = "check_for_similar_videos", level = "debug")]
     fn check_for_similar_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
-        self.common_data.allowed_extensions.set_and_validate_extensions(VIDEO_FILES_EXTENSIONS);
-        if !self.common_data.allowed_extensions.set_any_extensions() {
+        self.common_data.extensions.set_and_validate_allowed_extensions(VIDEO_FILES_EXTENSIONS);
+        if !self.common_data.extensions.set_any_extensions() {
             return true;
         }
 

@@ -142,7 +142,7 @@ impl DuplicateFinder {
 
     #[fun_time(message = "find_duplicates", level = "info")]
     pub fn find_duplicates(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) {
-        self.optimize_dirs_before_start();
+        self.prepare_items();
         self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
 
         match self.check_method {

@@ -64,7 +64,7 @@ impl EmptyFolder {
 
     #[fun_time(message = "find_empty_folders", level = "info")]
     pub fn find_empty_folders(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) {
-        self.optimize_dirs_before_start();
+        self.prepare_items();
         if !self.check_for_empty_folders(stop_receiver, progress_sender) {
             self.common_data.stopped_search = true;
             return;

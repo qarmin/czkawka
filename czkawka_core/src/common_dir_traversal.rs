@@ -112,7 +112,7 @@ pub struct DirTraversalBuilder<'a, 'b, F> {
     recursive_search: bool,
     directories: Option<Directories>,
     excluded_items: Option<ExcludedItems>,
-    allowed_extensions: Option<Extensions>,
+    extensions: Option<Extensions>,
     tool_type: ToolType,
 }
 
@@ -124,7 +124,7 @@ pub struct DirTraversal<'a, 'b, F> {
     recursive_search: bool,
     directories: Directories,
     excluded_items: ExcludedItems,
-    allowed_extensions: Extensions,
+    extensions: Extensions,
     minimal_file_size: u64,
     maximal_file_size: u64,
     checking_method: CheckingMethod,
@@ -153,7 +153,7 @@ impl<'a, 'b> DirTraversalBuilder<'a, 'b, ()> {
             collect: Collect::Files,
             recursive_search: false,
             directories: None,
-            allowed_extensions: None,
+            extensions: None,
             excluded_items: None,
             tool_type: ToolType::None,
         }
@@ -168,7 +168,7 @@ impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
 
     pub fn common_data(mut self, common_tool_data: &CommonToolData) -> Self {
         self.root_dirs = common_tool_data.directories.included_directories.clone();
-        self.allowed_extensions = Some(common_tool_data.allowed_extensions.clone());
+        self.extensions = Some(common_tool_data.extensions.clone());
         self.excluded_items = Some(common_tool_data.excluded_items.clone());
         self.recursive_search = common_tool_data.recursive_search;
         self.minimal_file_size = Some(common_tool_data.minimal_file_size);
@@ -218,8 +218,8 @@ impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
         self
     }
 
-    pub fn allowed_extensions(mut self, allowed_extensions: Extensions) -> Self {
-        self.allowed_extensions = Some(allowed_extensions);
+    pub fn extensions(mut self, extensions: Extensions) -> Self {
+        self.extensions = Some(extensions);
         self
     }
 
@@ -257,7 +257,7 @@ impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
             stop_receiver: self.stop_receiver,
             progress_sender: self.progress_sender,
             directories: self.directories,
-            allowed_extensions: self.allowed_extensions,
+            extensions: self.extensions,
             excluded_items: self.excluded_items,
             recursive_search: self.recursive_search,
             maximal_file_size: self.maximal_file_size,
@@ -282,7 +282,7 @@ impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
             collect: self.collect,
             directories: self.directories.expect("could not build"),
             excluded_items: self.excluded_items.expect("could not build"),
-            allowed_extensions: self.allowed_extensions.unwrap_or_default(),
+            extensions: self.extensions.unwrap_or_default(),
             recursive_search: self.recursive_search,
             tool_type: self.tool_type,
         }
@@ -331,7 +331,7 @@ where
             collect,
             directories,
             excluded_items,
-            allowed_extensions,
+            extensions,
             recursive_search,
             minimal_file_size,
             maximal_file_size,
@@ -374,7 +374,7 @@ where
                                     entry_data,
                                     &mut warnings,
                                     &mut fe_result,
-                                    &allowed_extensions,
+                                    &extensions,
                                     &directories,
                                     &excluded_items,
                                     minimal_file_size,
@@ -386,7 +386,7 @@ where
                             }
                             (EntryType::Symlink, Collect::InvalidSymlinks) => {
                                 counter += 1;
-                                process_symlink_in_symlink_mode(entry_data, &mut warnings, &mut fe_result, &allowed_extensions, &directories, &excluded_items);
+                                process_symlink_in_symlink_mode(entry_data, &mut warnings, &mut fe_result, &extensions, &directories, &excluded_items);
                             }
                             (EntryType::Symlink, Collect::Files) | (EntryType::Other, _) => {
                                 // nothing to do
@@ -432,13 +432,13 @@ fn process_file_in_file_mode(
     entry_data: &DirEntry,
     warnings: &mut Vec<String>,
     fe_result: &mut Vec<FileEntry>,
-    allowed_extensions: &Extensions,
+    extensions: &Extensions,
     directories: &Directories,
     excluded_items: &ExcludedItems,
     minimal_file_size: u64,
     maximal_file_size: u64,
 ) {
-    if !allowed_extensions.check_if_entry_ends_with_extension(entry_data) {
+    if !extensions.check_if_entry_have_valid_extension(entry_data) {
         return;
     }
 
@@ -509,11 +509,11 @@ fn process_symlink_in_symlink_mode(
     entry_data: &DirEntry,
     warnings: &mut Vec<String>,
     fe_result: &mut Vec<FileEntry>,
-    allowed_extensions: &Extensions,
+    extensions: &Extensions,
     directories: &Directories,
     excluded_items: &ExcludedItems,
 ) {
-    if !allowed_extensions.check_if_entry_ends_with_extension(entry_data) {
+    if !extensions.check_if_entry_have_valid_extension(entry_data) {
         return;
     }
 

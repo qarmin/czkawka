@@ -136,7 +136,7 @@ impl SameMusic {
 
     #[fun_time(message = "find_same_music", level = "info")]
     pub fn find_same_music(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) {
-        self.optimize_dirs_before_start();
+        self.prepare_items();
         self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
         if !self.check_files(stop_receiver, progress_sender) {
             self.common_data.stopped_search = true;
@@ -175,8 +175,8 @@ impl SameMusic {
 
     #[fun_time(message = "check_files", level = "debug")]
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
-        self.common_data.allowed_extensions.set_and_validate_extensions(AUDIO_FILES_EXTENSIONS);
-        if !self.common_data.allowed_extensions.set_any_extensions() {
+        self.common_data.extensions.set_and_validate_allowed_extensions(AUDIO_FILES_EXTENSIONS);
+        if !self.common_data.extensions.set_any_extensions() {
             return true;
         }
 
