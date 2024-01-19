@@ -320,25 +320,16 @@ fn duplicate_search(
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
             let mut df = DuplicateFinder::new();
-            df.set_included_directory(loaded_common_items.included_directories);
-            df.set_excluded_directory(loaded_common_items.excluded_directories);
-            df.set_reference_directory(loaded_common_items.reference_directories);
-            df.set_recursive_search(loaded_common_items.recursive_search);
-            df.set_excluded_items(loaded_common_items.excluded_items);
-            df.set_allowed_extensions(loaded_common_items.allowed_extensions);
-            df.set_minimal_file_size(loaded_common_items.minimal_file_size);
-            df.set_maximal_file_size(loaded_common_items.maximal_file_size);
+
+            df.set_common_settings(&loaded_common_items);
             df.set_minimal_cache_file_size(loaded_common_items.minimal_cache_file_size);
             df.set_minimal_prehash_cache_file_size(minimal_prehash_cache_file_size);
             df.set_check_method(check_method);
             df.set_hash_type(hash_type);
-            df.set_save_also_as_json(loaded_common_items.save_also_as_json);
             df.set_ignore_hard_links(loaded_common_items.hide_hard_links);
-            df.set_use_cache(loaded_common_items.use_cache);
             df.set_use_prehash_cache(use_prehash_cache);
             df.set_delete_outdated_cache(delete_outdated_cache);
             df.set_case_sensitive_name_comparison(case_sensitive_name_comparison);
-            df.set_exclude_other_filesystems(loaded_common_items.ignore_other_filesystems);
             df.find_duplicates(Some(&stop_receiver), Some(&progress_data_sender));
             glib_stop_sender.send(Message::Duplicates(df)).unwrap();
         })
@@ -363,12 +354,7 @@ fn empty_files_search(
         .spawn(move || {
             let mut vf = EmptyFiles::new();
 
-            vf.set_included_directory(loaded_common_items.included_directories);
-            vf.set_excluded_directory(loaded_common_items.excluded_directories);
-            vf.set_recursive_search(loaded_common_items.recursive_search);
-            vf.set_excluded_items(loaded_common_items.excluded_items);
-            vf.set_allowed_extensions(loaded_common_items.allowed_extensions);
-            vf.set_exclude_other_filesystems(loaded_common_items.ignore_other_filesystems);
+            vf.set_common_settings(&loaded_common_items);
             vf.find_empty_files(Some(&stop_receiver), Some(&progress_data_sender));
             glib_stop_sender.send(Message::EmptyFiles(vf)).unwrap();
         })
@@ -392,10 +378,8 @@ fn empty_directories_search(
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
             let mut ef = EmptyFolder::new();
-            ef.set_included_directory(loaded_common_items.included_directories);
-            ef.set_excluded_directory(loaded_common_items.excluded_directories);
-            ef.set_excluded_items(loaded_common_items.excluded_items);
-            ef.set_exclude_other_filesystems(loaded_common_items.ignore_other_filesystems);
+
+            ef.set_common_settings(&loaded_common_items);
             ef.find_empty_folders(Some(&stop_receiver), Some(&progress_data_sender));
             glib_stop_sender.send(Message::EmptyFolders(ef)).unwrap();
         })
@@ -427,14 +411,9 @@ fn big_files_search(
         .spawn(move || {
             let mut bf = BigFile::new();
 
-            bf.set_included_directory(loaded_common_items.included_directories);
-            bf.set_excluded_directory(loaded_common_items.excluded_directories);
-            bf.set_recursive_search(loaded_common_items.recursive_search);
-            bf.set_excluded_items(loaded_common_items.excluded_items);
-            bf.set_allowed_extensions(loaded_common_items.allowed_extensions);
+            bf.set_common_settings(&loaded_common_items);
             bf.set_number_of_files_to_check(numbers_of_files_to_check);
             bf.set_search_mode(big_files_mode);
-            bf.set_exclude_other_filesystems(loaded_common_items.ignore_other_filesystems);
             bf.find_big_files(Some(&stop_receiver), Some(&progress_data_sender));
             glib_stop_sender.send(Message::BigFiles(bf)).unwrap();
         })
@@ -459,11 +438,7 @@ fn temporary_files_search(
         .spawn(move || {
             let mut tf = Temporary::new();
 
-            tf.set_included_directory(loaded_common_items.included_directories);
-            tf.set_excluded_directory(loaded_common_items.excluded_directories);
-            tf.set_recursive_search(loaded_common_items.recursive_search);
-            tf.set_excluded_items(loaded_common_items.excluded_items);
-            tf.set_exclude_other_filesystems(loaded_common_items.ignore_other_filesystems);
+            tf.set_common_settings(&loaded_common_items);
             tf.find_temporary_files(Some(&stop_receiver), Some(&progress_data_sender));
             glib_stop_sender.send(Message::Temporary(tf)).unwrap();
         })
@@ -530,22 +505,12 @@ fn same_music_search(
             .spawn(move || {
                 let mut mf = SameMusic::new();
 
-                mf.set_included_directory(loaded_common_items.included_directories);
-                mf.set_excluded_directory(loaded_common_items.excluded_directories);
-                mf.set_reference_directory(loaded_common_items.reference_directories);
-                mf.set_excluded_items(loaded_common_items.excluded_items);
-                mf.set_use_cache(loaded_common_items.use_cache);
-                mf.set_minimal_file_size(loaded_common_items.minimal_file_size);
-                mf.set_maximal_file_size(loaded_common_items.maximal_file_size);
-                mf.set_allowed_extensions(loaded_common_items.allowed_extensions);
-                mf.set_recursive_search(loaded_common_items.recursive_search);
+                mf.set_common_settings(&loaded_common_items);
                 mf.set_music_similarity(music_similarity);
                 mf.set_maximum_difference(maximum_difference);
                 mf.set_minimum_segment_duration(minimum_segment_duration);
                 mf.set_check_type(check_method);
                 mf.set_approximate_comparison(approximate_comparison);
-                mf.set_save_also_as_json(loaded_common_items.save_also_as_json);
-                mf.set_exclude_other_filesystems(loaded_common_items.ignore_other_filesystems);
                 mf.find_same_music(Some(&stop_receiver), Some(&progress_data_sender));
                 glib_stop_sender.send(Message::SameMusic(mf)).unwrap();
             })
@@ -615,15 +580,8 @@ fn broken_files_search(
             .spawn(move || {
                 let mut br = BrokenFiles::new();
 
-                br.set_included_directory(loaded_common_items.included_directories);
-                br.set_excluded_directory(loaded_common_items.excluded_directories);
-                br.set_recursive_search(loaded_common_items.recursive_search);
-                br.set_excluded_items(loaded_common_items.excluded_items);
-                br.set_use_cache(loaded_common_items.use_cache);
-                br.set_allowed_extensions(loaded_common_items.allowed_extensions);
-                br.set_save_also_as_json(loaded_common_items.save_also_as_json);
+                br.set_common_settings(&loaded_common_items);
                 br.set_checked_types(checked_types);
-                br.set_exclude_other_filesystems(loaded_common_items.ignore_other_filesystems);
                 br.find_broken_files(Some(&stop_receiver), Some(&progress_data_sender));
                 glib_stop_sender.send(Message::BrokenFiles(br)).unwrap();
             })
@@ -695,23 +653,13 @@ fn similar_image_search(
         .spawn(move || {
             let mut sf = SimilarImages::new();
 
-            sf.set_included_directory(loaded_common_items.included_directories);
-            sf.set_excluded_directory(loaded_common_items.excluded_directories);
-            sf.set_reference_directory(loaded_common_items.reference_directories);
-            sf.set_recursive_search(loaded_common_items.recursive_search);
-            sf.set_excluded_items(loaded_common_items.excluded_items);
-            sf.set_minimal_file_size(loaded_common_items.minimal_file_size);
-            sf.set_maximal_file_size(loaded_common_items.maximal_file_size);
+            sf.set_common_settings(&loaded_common_items);
             sf.set_similarity(similarity);
-            sf.set_use_cache(loaded_common_items.use_cache);
             sf.set_hash_alg(hash_alg);
             sf.set_hash_size(hash_size);
             sf.set_image_filter(image_filter);
-            sf.set_allowed_extensions(loaded_common_items.allowed_extensions);
             sf.set_delete_outdated_cache(delete_outdated_cache);
             sf.set_exclude_images_with_same_size(ignore_same_size);
-            sf.set_save_also_as_json(loaded_common_items.save_also_as_json);
-            sf.set_exclude_other_filesystems(loaded_common_items.ignore_other_filesystems);
             sf.find_similar_images(Some(&stop_receiver), Some(&progress_data_sender));
             glib_stop_sender.send(Message::SimilarImages(sf)).unwrap();
         })
@@ -745,20 +693,10 @@ fn similar_video_search(
         .spawn(move || {
             let mut sf = SimilarVideos::new();
 
-            sf.set_included_directory(loaded_common_items.included_directories);
-            sf.set_excluded_directory(loaded_common_items.excluded_directories);
-            sf.set_reference_directory(loaded_common_items.reference_directories);
-            sf.set_recursive_search(loaded_common_items.recursive_search);
-            sf.set_excluded_items(loaded_common_items.excluded_items);
-            sf.set_minimal_file_size(loaded_common_items.minimal_file_size);
-            sf.set_maximal_file_size(loaded_common_items.maximal_file_size);
-            sf.set_allowed_extensions(loaded_common_items.allowed_extensions);
-            sf.set_use_cache(loaded_common_items.use_cache);
+            sf.set_common_settings(&loaded_common_items);
             sf.set_tolerance(tolerance);
             sf.set_delete_outdated_cache(delete_outdated_cache);
             sf.set_exclude_videos_with_same_size(ignore_same_size);
-            sf.set_save_also_as_json(loaded_common_items.save_also_as_json);
-            sf.set_exclude_other_filesystems(loaded_common_items.ignore_other_filesystems);
             sf.find_similar_videos(Some(&stop_receiver), Some(&progress_data_sender));
             glib_stop_sender.send(Message::SimilarVideos(sf)).unwrap();
         })
@@ -783,12 +721,7 @@ fn bad_symlinks_search(
         .spawn(move || {
             let mut isf = InvalidSymlinks::new();
 
-            isf.set_included_directory(loaded_common_items.included_directories);
-            isf.set_excluded_directory(loaded_common_items.excluded_directories);
-            isf.set_recursive_search(loaded_common_items.recursive_search);
-            isf.set_excluded_items(loaded_common_items.excluded_items);
-            isf.set_allowed_extensions(loaded_common_items.allowed_extensions);
-            isf.set_exclude_other_filesystems(loaded_common_items.ignore_other_filesystems);
+            isf.set_common_settings(&loaded_common_items);
             isf.find_invalid_links(Some(&stop_receiver), Some(&progress_data_sender));
             glib_stop_sender.send(Message::InvalidSymlinks(isf)).unwrap();
         })
@@ -813,18 +746,29 @@ fn bad_extensions_search(
         .spawn(move || {
             let mut be = BadExtensions::new();
 
-            be.set_included_directory(loaded_common_items.included_directories);
-            be.set_excluded_directory(loaded_common_items.excluded_directories);
-            be.set_excluded_items(loaded_common_items.excluded_items);
-            be.set_minimal_file_size(loaded_common_items.minimal_file_size);
-            be.set_maximal_file_size(loaded_common_items.maximal_file_size);
-            be.set_allowed_extensions(loaded_common_items.allowed_extensions);
-            be.set_recursive_search(loaded_common_items.recursive_search);
-            be.set_exclude_other_filesystems(loaded_common_items.ignore_other_filesystems);
+            be.set_common_settings(&loaded_common_items);
             be.find_bad_extensions_files(Some(&stop_receiver), Some(&progress_data_sender));
             glib_stop_sender.send(Message::BadExtensions(be)).unwrap();
         })
         .unwrap();
+}
+
+fn set_common_settings<T>(component: &mut T, loaded_common_items: &LoadedCommonItems)
+where
+    T: CommonData,
+{
+    component.set_included_directory(loaded_common_items.included_directories.clone());
+    component.set_excluded_directory(loaded_common_items.excluded_directories.clone());
+    component.set_reference_directory(loaded_common_items.reference_directories.clone());
+    component.set_recursive_search(loaded_common_items.recursive_search);
+    component.set_allowed_extensions(loaded_common_items.allowed_extensions.clone());
+    component.set_excluded_directory(loaded_common_items.excluded_directories.clone());
+    component.set_excluded_items(loaded_common_items.excluded_items.clone());
+    component.set_exclude_other_filesystems(loaded_common_items.ignore_other_filesystems);
+    component.set_use_cache(loaded_common_items.use_cache);
+    component.set_save_also_as_json(loaded_common_items.save_also_as_json);
+    component.set_minimal_file_size(loaded_common_items.minimal_file_size);
+    component.set_maximal_file_size(loaded_common_items.maximal_file_size);
 }
 
 #[fun_time(message = "clean_tree_view", level = "debug")]

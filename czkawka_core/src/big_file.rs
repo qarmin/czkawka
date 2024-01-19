@@ -60,6 +60,7 @@ impl BigFile {
             .progress_sender(progress_sender)
             .common_data(&self.common_data)
             .minimal_file_size(1)
+            .maximal_file_size(u64::MAX)
             .max_stage(0)
             .build()
             .run();
