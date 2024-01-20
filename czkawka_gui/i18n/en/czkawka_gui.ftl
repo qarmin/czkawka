@@ -192,7 +192,7 @@ upper_allowed_extensions_tooltip =
 
         Usage example  ".exe, IMAGE, VIDEO, .rar, 7z" - this means that images (e.g. jpg, png), videos (e.g. avi, mp4), exe, rar, and 7z files will be scanned.
 
-upper_disabled_extensions_tooltip =
+upper_excluded_extensions_tooltip =
         List of disabled files which will be ignored in scan.
 
         When using both allowed and disabled extensions, this one has higher priority, so file will not be checked.
@@ -203,7 +203,7 @@ upper_excluded_items_tooltip =
 
 upper_excluded_items = Excluded Items:
 upper_allowed_extensions = Allowed Extensions:
-upper_disabled_extensions = Disabled Extensions:
+upper_excluded_extensions = Disabled Extensions:
 
 
 # Popovers

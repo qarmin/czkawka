@@ -270,12 +270,12 @@
                               </object>
                             </child>
                             <child>
-                              <object class="GtkLabel" id="label_disabled_extensions">
+                              <object class="GtkLabel" id="label_excluded_extensions">
                                 <property name="label" translatable="yes">Disabled Extensions</property>
                               </object>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="entry_disabled_extensions">
+                              <object class="GtkEntry" id="entry_excluded_extensions">
                                 <property name="focusable">1</property>
                                 <property name="hexpand">1</property>
                               </object>

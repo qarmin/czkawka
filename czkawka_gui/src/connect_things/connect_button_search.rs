@@ -201,6 +201,7 @@ struct LoadedCommonItems {
     recursive_search: bool,
     excluded_items: Vec<String>,
     allowed_extensions: String,
+    excluded_extensions: String,
     hide_hard_links: bool,
     use_cache: bool,
     save_also_as_json: bool,
@@ -217,6 +218,7 @@ impl LoadedCommonItems {
         let check_button_settings_hide_hard_links = gui_data.settings.check_button_settings_hide_hard_links.clone();
         let check_button_settings_use_cache = gui_data.settings.check_button_settings_use_cache.clone();
         let entry_allowed_extensions = gui_data.upper_notebook.entry_allowed_extensions.clone();
+        let entry_excluded_extensions = gui_data.upper_notebook.entry_excluded_extensions.clone();
         let entry_excluded_items = gui_data.upper_notebook.entry_excluded_items.clone();
         let entry_general_maximal_size = gui_data.upper_notebook.entry_general_maximal_size.clone();
         let entry_general_minimal_size = gui_data.upper_notebook.entry_general_minimal_size.clone();
@@ -241,6 +243,7 @@ impl LoadedCommonItems {
             .map(std::string::ToString::to_string)
             .collect::<Vec<String>>();
         let allowed_extensions = entry_allowed_extensions.text().as_str().to_string();
+        let excluded_extensions = entry_excluded_extensions.text().as_str().to_string();
         let hide_hard_links = check_button_settings_hide_hard_links.is_active();
         let use_cache = check_button_settings_use_cache.is_active();
         let save_also_as_json = check_button_settings_save_also_json.is_active();
@@ -269,6 +272,7 @@ impl LoadedCommonItems {
             recursive_search,
             excluded_items,
             allowed_extensions,
+            excluded_extensions,
             hide_hard_links,
             use_cache,
             save_also_as_json,
@@ -319,19 +323,19 @@ fn duplicate_search(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut df = DuplicateFinder::new();
+            let mut item = DuplicateFinder::new();
 
-            df.set_common_settings(&loaded_common_items);
-            df.set_minimal_cache_file_size(loaded_common_items.minimal_cache_file_size);
-            df.set_minimal_prehash_cache_file_size(minimal_prehash_cache_file_size);
-            df.set_check_method(check_method);
-            df.set_hash_type(hash_type);
-            df.set_ignore_hard_links(loaded_common_items.hide_hard_links);
-            df.set_use_prehash_cache(use_prehash_cache);
-            df.set_delete_outdated_cache(delete_outdated_cache);
-            df.set_case_sensitive_name_comparison(case_sensitive_name_comparison);
-            df.find_duplicates(Some(&stop_receiver), Some(&progress_data_sender));
-            glib_stop_sender.send(Message::Duplicates(df)).unwrap();
+            set_common_settings(&mut item, &loaded_common_items);
+            item.set_minimal_cache_file_size(loaded_common_items.minimal_cache_file_size);
+            item.set_minimal_prehash_cache_file_size(minimal_prehash_cache_file_size);
+            item.set_check_method(check_method);
+            item.set_hash_type(hash_type);
+            item.set_ignore_hard_links(loaded_common_items.hide_hard_links);
+            item.set_use_prehash_cache(use_prehash_cache);
+            item.set_delete_outdated_cache(delete_outdated_cache);
+            item.set_case_sensitive_name_comparison(case_sensitive_name_comparison);
+            item.find_duplicates(Some(&stop_receiver), Some(&progress_data_sender));
+            glib_stop_sender.send(Message::Duplicates(item)).unwrap();
         })
         .unwrap();
 }
@@ -352,11 +356,11 @@ fn empty_files_search(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut vf = EmptyFiles::new();
+            let mut item = EmptyFiles::new();
 
-            vf.set_common_settings(&loaded_common_items);
-            vf.find_empty_files(Some(&stop_receiver), Some(&progress_data_sender));
-            glib_stop_sender.send(Message::EmptyFiles(vf)).unwrap();
+            set_common_settings(&mut item, &loaded_common_items);
+            item.find_empty_files(Some(&stop_receiver), Some(&progress_data_sender));
+            glib_stop_sender.send(Message::EmptyFiles(item)).unwrap();
         })
         .unwrap();
 }
@@ -377,11 +381,11 @@ fn empty_directories_search(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut ef = EmptyFolder::new();
+            let mut item = EmptyFolder::new();
 
-            ef.set_common_settings(&loaded_common_items);
-            ef.find_empty_folders(Some(&stop_receiver), Some(&progress_data_sender));
-            glib_stop_sender.send(Message::EmptyFolders(ef)).unwrap();
+            set_common_settings(&mut item, &loaded_common_items);
+            item.find_empty_folders(Some(&stop_receiver), Some(&progress_data_sender));
+            glib_stop_sender.send(Message::EmptyFolders(item)).unwrap();
         })
         .unwrap();
 }
@@ -409,13 +413,13 @@ fn big_files_search(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut bf = BigFile::new();
+            let mut item = BigFile::new();
 
-            bf.set_common_settings(&loaded_common_items);
-            bf.set_number_of_files_to_check(numbers_of_files_to_check);
-            bf.set_search_mode(big_files_mode);
-            bf.find_big_files(Some(&stop_receiver), Some(&progress_data_sender));
-            glib_stop_sender.send(Message::BigFiles(bf)).unwrap();
+            set_common_settings(&mut item, &loaded_common_items);
+            item.set_number_of_files_to_check(numbers_of_files_to_check);
+            item.set_search_mode(big_files_mode);
+            item.find_big_files(Some(&stop_receiver), Some(&progress_data_sender));
+            glib_stop_sender.send(Message::BigFiles(item)).unwrap();
         })
         .unwrap();
 }
@@ -436,11 +440,11 @@ fn temporary_files_search(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut tf = Temporary::new();
+            let mut item = Temporary::new();
 
-            tf.set_common_settings(&loaded_common_items);
-            tf.find_temporary_files(Some(&stop_receiver), Some(&progress_data_sender));
-            glib_stop_sender.send(Message::Temporary(tf)).unwrap();
+            set_common_settings(&mut item, &loaded_common_items);
+            item.find_temporary_files(Some(&stop_receiver), Some(&progress_data_sender));
+            glib_stop_sender.send(Message::Temporary(item)).unwrap();
         })
         .unwrap();
 }
@@ -503,16 +507,16 @@ fn same_music_search(
         thread::Builder::new()
             .stack_size(DEFAULT_THREAD_SIZE)
             .spawn(move || {
-                let mut mf = SameMusic::new();
+                let mut item = SameMusic::new();
 
-                mf.set_common_settings(&loaded_common_items);
-                mf.set_music_similarity(music_similarity);
-                mf.set_maximum_difference(maximum_difference);
-                mf.set_minimum_segment_duration(minimum_segment_duration);
-                mf.set_check_type(check_method);
-                mf.set_approximate_comparison(approximate_comparison);
-                mf.find_same_music(Some(&stop_receiver), Some(&progress_data_sender));
-                glib_stop_sender.send(Message::SameMusic(mf)).unwrap();
+                set_common_settings(&mut item, &loaded_common_items);
+                item.set_music_similarity(music_similarity);
+                item.set_maximum_difference(maximum_difference);
+                item.set_minimum_segment_duration(minimum_segment_duration);
+                item.set_check_type(check_method);
+                item.set_approximate_comparison(approximate_comparison);
+                item.find_same_music(Some(&stop_receiver), Some(&progress_data_sender));
+                glib_stop_sender.send(Message::SameMusic(item)).unwrap();
             })
             .unwrap();
     } else {
@@ -578,12 +582,12 @@ fn broken_files_search(
         thread::Builder::new()
             .stack_size(DEFAULT_THREAD_SIZE)
             .spawn(move || {
-                let mut br = BrokenFiles::new();
+                let mut item = BrokenFiles::new();
 
-                br.set_common_settings(&loaded_common_items);
-                br.set_checked_types(checked_types);
-                br.find_broken_files(Some(&stop_receiver), Some(&progress_data_sender));
-                glib_stop_sender.send(Message::BrokenFiles(br)).unwrap();
+                set_common_settings(&mut item, &loaded_common_items);
+                item.set_checked_types(checked_types);
+                item.find_broken_files(Some(&stop_receiver), Some(&progress_data_sender));
+                glib_stop_sender.send(Message::BrokenFiles(item)).unwrap();
             })
             .unwrap();
     } else {
@@ -651,17 +655,17 @@ fn similar_image_search(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut sf = SimilarImages::new();
+            let mut item = SimilarImages::new();
 
-            sf.set_common_settings(&loaded_common_items);
-            sf.set_similarity(similarity);
-            sf.set_hash_alg(hash_alg);
-            sf.set_hash_size(hash_size);
-            sf.set_image_filter(image_filter);
-            sf.set_delete_outdated_cache(delete_outdated_cache);
-            sf.set_exclude_images_with_same_size(ignore_same_size);
-            sf.find_similar_images(Some(&stop_receiver), Some(&progress_data_sender));
-            glib_stop_sender.send(Message::SimilarImages(sf)).unwrap();
+            set_common_settings(&mut item, &loaded_common_items);
+            item.set_similarity(similarity);
+            item.set_hash_alg(hash_alg);
+            item.set_hash_size(hash_size);
+            item.set_image_filter(image_filter);
+            item.set_delete_outdated_cache(delete_outdated_cache);
+            item.set_exclude_images_with_same_size(ignore_same_size);
+            item.find_similar_images(Some(&stop_receiver), Some(&progress_data_sender));
+            glib_stop_sender.send(Message::SimilarImages(item)).unwrap();
         })
         .unwrap();
 }
@@ -691,14 +695,14 @@ fn similar_video_search(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut sf = SimilarVideos::new();
+            let mut item = SimilarVideos::new();
 
-            sf.set_common_settings(&loaded_common_items);
-            sf.set_tolerance(tolerance);
-            sf.set_delete_outdated_cache(delete_outdated_cache);
-            sf.set_exclude_videos_with_same_size(ignore_same_size);
-            sf.find_similar_videos(Some(&stop_receiver), Some(&progress_data_sender));
-            glib_stop_sender.send(Message::SimilarVideos(sf)).unwrap();
+            set_common_settings(&mut item, &loaded_common_items);
+            item.set_tolerance(tolerance);
+            item.set_delete_outdated_cache(delete_outdated_cache);
+            item.set_exclude_videos_with_same_size(ignore_same_size);
+            item.find_similar_videos(Some(&stop_receiver), Some(&progress_data_sender));
+            glib_stop_sender.send(Message::SimilarVideos(item)).unwrap();
         })
         .unwrap();
 }
@@ -719,11 +723,11 @@ fn bad_symlinks_search(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut isf = InvalidSymlinks::new();
+            let mut item = InvalidSymlinks::new();
 
-            isf.set_common_settings(&loaded_common_items);
-            isf.find_invalid_links(Some(&stop_receiver), Some(&progress_data_sender));
-            glib_stop_sender.send(Message::InvalidSymlinks(isf)).unwrap();
+            set_common_settings(&mut item, &loaded_common_items);
+            item.find_invalid_links(Some(&stop_receiver), Some(&progress_data_sender));
+            glib_stop_sender.send(Message::InvalidSymlinks(item)).unwrap();
         })
         .unwrap();
 }
@@ -744,11 +748,11 @@ fn bad_extensions_search(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut be = BadExtensions::new();
+            let mut item = BadExtensions::new();
 
-            be.set_common_settings(&loaded_common_items);
-            be.find_bad_extensions_files(Some(&stop_receiver), Some(&progress_data_sender));
-            glib_stop_sender.send(Message::BadExtensions(be)).unwrap();
+            set_common_settings(&mut item, &loaded_common_items);
+            item.find_bad_extensions_files(Some(&stop_receiver), Some(&progress_data_sender));
+            glib_stop_sender.send(Message::BadExtensions(item)).unwrap();
         })
         .unwrap();
 }
@@ -762,7 +766,7 @@ where
     component.set_reference_directory(loaded_common_items.reference_directories.clone());
     component.set_recursive_search(loaded_common_items.recursive_search);
     component.set_allowed_extensions(loaded_common_items.allowed_extensions.clone());
-    component.set_excluded_directory(loaded_common_items.excluded_directories.clone());
+    component.set_excluded_extensions(loaded_common_items.excluded_extensions.clone());
     component.set_excluded_items(loaded_common_items.excluded_items.clone());
     component.set_exclude_other_filesystems(loaded_common_items.ignore_other_filesystems);
     component.set_use_cache(loaded_common_items.use_cache);
