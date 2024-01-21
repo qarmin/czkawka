@@ -1,14 +1,11 @@
 
 import {Button, StandardListView, VerticalBox, ListView, ScrollView, TextEdit, CheckBox} from "std-widgets.slint";
 import {Callabler} from "callabler.slint";
-
-export struct IncludedDirectoriesModel {
-    path: string,
-    referended_folder: bool,
-}
+import {IncludedDirectoriesModel, ExcludedDirectoriesModel} from "common.slint";
+import {ColorPalette} from "color_palette.slint";
 
 export component InlcudedDirectories {
-    in-out property <[IncludedDirectoriesModel]> model: [{path: "/home/path", referended_folder: false}];
+    in-out property <[IncludedDirectoriesModel]> model: [{path: "/home/path", referenced_folder: false, selected_row: false}];
     in-out property <int> current_index: -1;
 
     in-out property <length> size_referenced_folder: 40px;
@@ -36,7 +33,7 @@ export component InlcudedDirectories {
                     width: parent.width;
 
                     CheckBox {
-                        checked: data.referended_folder;
+                        checked: data.referenced_folder;
                         width: size_referenced_folder;
                     }
                     Text {
@@ -50,8 +47,8 @@ export component InlcudedDirectories {
     }
 }
 
-export component ExcludeDirectories {
-    in-out property <[string]> model: ["/home/path"];
+export component ExcludedDirectories {
+    in-out property <[ExcludedDirectoriesModel]> model: [{path:"/home/path", selected_row: false}, {path:"/home/path", selected_row: false}, ];
     in-out property <int> current_index: -1;
     private property <PointerEvent> event;
 
@@ -64,21 +61,27 @@ export component ExcludeDirectories {
             }
         }
         ListView {
-            for data[idx] in model : Rectangle {
+            for r[idx] in model : Rectangle {
                 height: 30px;
                 border_radius: 5px;
                 width: parent.width;
 
+                background: touch-area.has-hover ? (r.selected_row ? ColorPalette.list-view-normal-selected-header : ColorPalette.list_view_normal_color) : (r.selected_row ? ColorPalette.list-view-normal-selected-header : ColorPalette.list_view_normal_color);
+
                 touch_area := TouchArea {
                     clicked => {
                         if (current_index == -1) {
-                            
+                            r.selected_row = true;
+                        } else {
+                            if (current_index != idx) {
+                                model[current_index].selected_row = false;
+                            }
+                            r.selected_row = true;
                         }
+                        current_index = idx;
                     }
                     double-clicked => {
-                        if (event.button == PointerEventButton.middle && event.kind == PointerEventKind.up) {
-                            Callabler.item_opened(data)
-                        }
+                        Callabler.item_opened(r.path);
                     }
                     pointer-event(event) => {
                         root.event = event;
@@ -91,7 +94,7 @@ export component ExcludeDirectories {
 
                     Text {
                         horizontal-stretch: 1.0;
-                        text: data;
+                        text: r.path;
                         vertical-alignment: center;
                     }
                 }

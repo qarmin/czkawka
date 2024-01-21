@@ -28,3 +28,14 @@ export enum BottomPanelVisibility {
     TextErrors,
     Directories
 }
+
+export struct IncludedDirectoriesModel {
+    path: string,
+    referenced_folder: bool,
+    selected_row: bool,
+}
+
+export struct ExcludedDirectoriesModel {
+    path: string,
+    selected_row: bool,
+}

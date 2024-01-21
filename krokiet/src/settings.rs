@@ -50,6 +50,8 @@ pub struct SettingsCustom {
     pub excluded_items: String,
     #[serde(default)]
     pub allowed_extensions: String,
+    #[serde(default)]
+    pub excluded_extensions: String,
     #[serde(default = "minimum_file_size")]
     pub minimum_file_size: i32,
     #[serde(default = "maximum_file_size")]
@@ -357,6 +359,7 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
 
     settings.set_excluded_items(custom_settings.excluded_items.clone().into());
     settings.set_allowed_extensions(custom_settings.allowed_extensions.clone().into());
+    settings.set_excluded_extensions(custom_settings.excluded_extensions.clone().into());
     settings.set_minimum_file_size(custom_settings.minimum_file_size.to_string().into());
     settings.set_maximum_file_size(custom_settings.maximum_file_size.to_string().into());
     settings.set_use_cache(custom_settings.use_cache);
@@ -438,6 +441,7 @@ pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
 
     let excluded_items = settings.get_excluded_items().to_string();
     let allowed_extensions = settings.get_allowed_extensions().to_string();
+    let excluded_extensions = settings.get_excluded_extensions().to_string();
     let minimum_file_size = settings.get_minimum_file_size().parse::<i32>().unwrap_or(DEFAULT_MINIMUM_SIZE_KB);
     let maximum_file_size = settings.get_maximum_file_size().parse::<i32>().unwrap_or(DEFAULT_MAXIMUM_SIZE_KB);
 
@@ -481,6 +485,7 @@ pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
         excluded_directories,
         excluded_items,
         allowed_extensions,
+        excluded_extensions,
         minimum_file_size,
         maximum_file_size,
         recursive_search,

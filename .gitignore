@@ -21,3 +21,4 @@ krokiet/target
 *.mm_profdata
 perf.data
 perf.data.old
+krokiet/ui/test.slint
