@@ -104,19 +104,17 @@ impl EmptyFolder {
         let excluded_items = self.common_data.excluded_items.clone();
         let directories = self.common_data.directories.clone();
 
-        let mut folder_entries: HashMap<String, FolderEntry> = HashMap::new();
         let mut non_empty_folders: Vec<String> = vec![];
 
+        let mut start_folder_entries = Vec::with_capacity(folders_to_check.len());
+        let mut new_folder_entries_list = Vec::new();
         for dir in &folders_to_check {
-            folder_entries.insert(
-                dir.to_string_lossy().to_string(),
-                FolderEntry {
-                    path: dir.clone(),
-                    parent_path: None,
-                    is_empty: FolderEmptiness::Maybe,
-                    modified_date: 0,
-                },
-            );
+            start_folder_entries.push(FolderEntry {
+                path: dir.clone(),
+                parent_path: None,
+                is_empty: FolderEmptiness::Maybe,
+                modified_date: 0,
+            });
         }
 
         while !folders_to_check.is_empty() {
@@ -187,9 +185,17 @@ impl EmptyFolder {
                 if let Some(non_empty_folder) = non_empty_folder {
                     non_empty_folders.push(non_empty_folder);
                 }
-                for (path, entry) in fe_list {
-                    folder_entries.insert(path, entry);
-                }
+                new_folder_entries_list.push(fe_list);
+            }
+        }
+
+        let mut folder_entries: HashMap<String, FolderEntry> = HashMap::with_capacity(start_folder_entries.len() + new_folder_entries_list.iter().map(|e| e.len()).sum::<usize>());
+        for fe in start_folder_entries {
+            folder_entries.insert(fe.path.to_string_lossy().to_string(), fe);
+        }
+        for fe_list in new_folder_entries_list {
+            for fe in fe_list {
+                folder_entries.insert(fe.path.to_string_lossy().to_string(), fe);
             }
         }
 
@@ -239,7 +245,7 @@ impl EmptyFolder {
         warnings: &mut Vec<String>,
         excluded_items: &ExcludedItems,
         non_empty_folder: &mut Option<String>,
-        folder_entries_list: &mut Vec<(String, FolderEntry)>,
+        folder_entries_list: &mut Vec<FolderEntry>,
     ) {
         let next_folder = entry_data.path();
         if excluded_items.is_excluded(&next_folder) || directories.is_excluded(&next_folder) {
@@ -266,15 +272,12 @@ impl EmptyFolder {
         };
 
         dir_result.push(next_folder.clone());
-        folder_entries_list.push((
-            next_folder.to_string_lossy().to_string(),
-            FolderEntry {
-                path: next_folder,
-                parent_path: Some(current_folder_as_str.to_string()),
-                is_empty: FolderEmptiness::Maybe,
-                modified_date: get_modified_time(&metadata, warnings, current_folder, true),
-            },
-        ));
+        folder_entries_list.push(FolderEntry {
+            path: next_folder,
+            parent_path: Some(current_folder_as_str.to_string()),
+            is_empty: FolderEmptiness::Maybe,
+            modified_date: get_modified_time(&metadata, warnings, current_folder, true),
+        });
     }
 
     #[fun_time(message = "delete_files", level = "debug")]
