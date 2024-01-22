@@ -94,7 +94,7 @@ impl EmptyFolder {
         self.information.number_of_empty_folders = self.empty_folder_list.len();
     }
 
-    #[fun_time(message = "check_for_empty_folders", level = "debug")]
+    // #[fun_time(message = "check_for_empty_folders", level = "debug")]
     fn check_for_empty_folders(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         let mut folders_to_check: Vec<PathBuf> = self.common_data.directories.included_directories.clone();
 
@@ -130,12 +130,13 @@ impl EmptyFolder {
                 .map(|current_folder| {
                     let mut dir_result = vec![];
                     let mut warnings = vec![];
-                    let mut set_as_not_empty_folder_list = vec![];
+                    let mut non_empty_folder = None;
                     let mut folder_entries_list = vec![];
 
+                    let current_folder_as_string = current_folder.to_string_lossy().to_string();
+
                     let Some(read_dir) = common_read_dir(&current_folder, &mut warnings) else {
-                        set_as_not_empty_folder_list.push(current_folder.to_string_lossy().to_string());
-                        return (dir_result, warnings, set_as_not_empty_folder_list, folder_entries_list);
+                        return (dir_result, warnings, Some(current_folder_as_string), folder_entries_list);
                     };
 
                     let mut counter = 0;
@@ -150,23 +151,27 @@ impl EmptyFolder {
                             counter += 1;
                             Self::process_dir_in_dir_mode(
                                 &current_folder,
+                                &current_folder_as_string,
                                 entry_data,
                                 &directories,
                                 &mut dir_result,
                                 &mut warnings,
                                 &excluded_items,
-                                &mut set_as_not_empty_folder_list,
+                                &mut non_empty_folder,
                                 &mut folder_entries_list,
                             );
                         } else {
-                            set_as_not_empty_folder_list.push(current_folder.to_string_lossy().to_string());
+                            if non_empty_folder.is_none() {
+                                non_empty_folder = Some(current_folder_as_string.clone());
+                            }
                         }
                     }
                     if counter > 0 {
                         // Increase counter in batch, because usually it may be slow to add multiple times atomic value
                         atomic_counter.fetch_add(counter, Ordering::Relaxed);
                     }
-                    (dir_result, warnings, set_as_not_empty_folder_list, folder_entries_list)
+
+                    (dir_result, warnings, non_empty_folder, folder_entries_list)
                 })
                 .collect();
 
@@ -174,10 +179,14 @@ impl EmptyFolder {
             folders_to_check = Vec::with_capacity(required_size);
 
             // Process collected data
-            for (segment, warnings, set_as_not_empty_folder_list, fe_list) in segments {
+            for (segment, warnings, non_empty_folder, fe_list) in segments {
                 folders_to_check.extend(segment);
-                self.common_data.text_messages.warnings.extend(warnings);
-                non_empty_folders.extend(set_as_not_empty_folder_list);
+                if !warnings.is_empty() {
+                    self.common_data.text_messages.warnings.extend(warnings);
+                }
+                if let Some(non_empty_folder) = non_empty_folder {
+                    non_empty_folders.push(non_empty_folder);
+                }
                 for (path, entry) in fe_list {
                     folder_entries.insert(path, entry);
                 }
@@ -223,18 +232,20 @@ impl EmptyFolder {
 
     fn process_dir_in_dir_mode(
         current_folder: &Path,
+        current_folder_as_str: &str,
         entry_data: &DirEntry,
         directories: &Directories,
         dir_result: &mut Vec<PathBuf>,
         warnings: &mut Vec<String>,
         excluded_items: &ExcludedItems,
-        set_as_not_empty_folder_list: &mut Vec<String>,
+        non_empty_folder: &mut Option<String>,
         folder_entries_list: &mut Vec<(String, FolderEntry)>,
     ) {
-        let parent_folder_str = current_folder.to_string_lossy().to_string();
         let next_folder = entry_data.path();
         if excluded_items.is_excluded(&next_folder) || directories.is_excluded(&next_folder) {
-            set_as_not_empty_folder_list.push(parent_folder_str);
+            if non_empty_folder.is_none() {
+                *non_empty_folder = Some(current_folder_as_str.to_string());
+            }
             return;
         }
 
@@ -248,7 +259,9 @@ impl EmptyFolder {
         }
 
         let Some(metadata) = common_get_metadata_dir(entry_data, warnings, &next_folder) else {
-            set_as_not_empty_folder_list.push(parent_folder_str);
+            if non_empty_folder.is_none() {
+                *non_empty_folder = Some(current_folder_as_str.to_string());
+            }
             return;
         };
 
@@ -257,7 +270,7 @@ impl EmptyFolder {
             next_folder.to_string_lossy().to_string(),
             FolderEntry {
                 path: next_folder,
-                parent_path: Some(parent_folder_str),
+                parent_path: Some(current_folder_as_str.to_string()),
                 is_empty: FolderEmptiness::Maybe,
                 modified_date: get_modified_time(&metadata, warnings, current_folder, true),
             },
