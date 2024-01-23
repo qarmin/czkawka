@@ -13,7 +13,7 @@ build = "build.rs"
 [dependencies]
 rand = "0.8"
 czkawka_core = { version = "6.1.0", path = "../czkawka_core" }
-chrono = "0.4.31"
+chrono = "0.4.32"
 open = "5.0"
 crossbeam-channel = "0.5"
 handsome_logger = "0.8"

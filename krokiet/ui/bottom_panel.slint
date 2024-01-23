@@ -4,10 +4,13 @@ import {Settings} from "settings.slint";
 import {BottomPanelVisibility} from "common.slint";
 import {Callabler} from "callabler.slint";
 import {GuiState} from "gui_state.slint";
+import {IncludedDirectories, ExcludedDirectories} from "included_directories.slint";
 
 component DirectoriesPanel inherits HorizontalLayout {
     callback folder_choose_requested(bool);
     callback show_manual_add_dialog(bool);
+
+    spacing: 5px;
     // Included directories
     VerticalLayout {
         horizontal-stretch: 0.0;
@@ -22,7 +25,7 @@ component DirectoriesPanel inherits HorizontalLayout {
         Button {
             text: "Remove";
             clicked => {
-                Callabler.remove_item_directories(true, included-list.current-item);
+                Callabler.remove_item_directories(true, included_list.current_index);
             }
         }
 
@@ -46,9 +49,7 @@ component DirectoriesPanel inherits HorizontalLayout {
             }
         }
 
-        included_list := StandardListView {
-            model: Settings.included-directories;
-        }
+        included_list := IncludedDirectories { }
     }
 
     // Excluded directories 
@@ -65,7 +66,7 @@ component DirectoriesPanel inherits HorizontalLayout {
         Button {
             text: "Remove";
             clicked => {
-                Callabler.remove_item_directories(false, excluded-list.current-item);
+                Callabler.remove_item_directories(false, excluded_list.current_index);
             }
         }
 
@@ -89,9 +90,7 @@ component DirectoriesPanel inherits HorizontalLayout {
             }
         }
 
-        excluded_list := StandardListView {
-            model: Settings.excluded-directories;
-        }
+        excluded_list := ExcludedDirectories { }
     }
 }
 

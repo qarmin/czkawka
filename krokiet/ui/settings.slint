@@ -1,9 +1,16 @@
+
+import {IncludedDirectoriesModel, ExcludedDirectoriesModel} from "common.slint";
+
 export global Settings {
     in-out property <int> settings_preset_idx: 0;
     in-out property <[string]> settings_presets: ["Preset 1", "Preset 2"];
 
     in-out property <[StandardListViewItem]> included_directories: [{text: "ABCD"}, {text: "BCDA"}];
     in-out property <[StandardListViewItem]> excluded_directories: [{text: "ABCD"}, {text: "BCDA"}, {text: "CDFFF"}];
+
+    
+    in-out property <[IncludedDirectoriesModel]> included_directories_model: [{path: "/home/path", referenced_folder: false, selected_row: false}];
+    in-out property <[ExcludedDirectoriesModel]> excluded_directories_model: [{path:"/home/path", selected_row: false}, {path:"/home/path", selected_row: false}];
 
     // Settings
     in-out property <string> excluded_items: "Excluded items";

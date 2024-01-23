@@ -15,7 +15,7 @@ glib = "0.18"
 gtk4 = { version = "0.7", default-features = false, features = ["v4_6"] }
 
 humansize = "2.1"
-chrono = "0.4.31"
+chrono = "0.4.32"
 
 # Used for sending stop signal across threads
 crossbeam-channel = "0.5"

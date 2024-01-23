@@ -762,16 +762,16 @@ dependencies = [
 
 [[package]]
 name = "chrono"
-version = "0.4.31"
+version = "0.4.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f2c685bad3eb3d45a01354cedb7d5faa66194d1d58ba6e267a8de788f79db38"
+checksum = "41daef31d7a747c5c847246f36de49ced6f7403b4cdabc807a97b5cc184cda7a"
 dependencies = [
  "android-tzdata",
  "iana-time-zone",
  "js-sys",
  "num-traits",
  "wasm-bindgen",
- "windows-targets 0.48.5",
+ "windows-targets 0.52.0",
 ]
 
 [[package]]
@@ -944,7 +944,7 @@ dependencies = [
 [[package]]
 name = "const-field-offset"
 version = "0.1.3"
-source = "git+https://github.com/slint-ui/slint.git#43d1f62fb113e432ebfa7e9fb8a033ae1788e566"
+source = "git+https://github.com/slint-ui/slint.git#c350d787c14c24131beb3a555acc291cbc779e79"
 dependencies = [
  "const-field-offset-macro",
  "field-offset",
@@ -953,7 +953,7 @@ dependencies = [
 [[package]]
 name = "const-field-offset-macro"
 version = "0.1.3"
-source = "git+https://github.com/slint-ui/slint.git#43d1f62fb113e432ebfa7e9fb8a033ae1788e566"
+source = "git+https://github.com/slint-ui/slint.git#c350d787c14c24131beb3a555acc291cbc779e79"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1903,21 +1903,21 @@ version = "0.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "674e258f4b5d2dcd63888c01c68413c51f565e8af99d2f7701c7b81d79ef41c4"
 dependencies = [
- "roxmltree",
+ "roxmltree 0.18.1",
 ]
 
 [[package]]
 name = "fontdb"
-version = "0.15.0"
+version = "0.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "020e203f177c0fb250fb19455a252e838d2bbbce1f80f25ecc42402aafa8cd38"
+checksum = "98b88c54a38407f7352dd2c4238830115a6377741098ffd1f997c813d0e088a6"
 dependencies = [
  "fontconfig-parser",
  "log",
- "memmap2 0.8.0",
+ "memmap2 0.9.3",
  "slotmap",
  "tinyvec",
- "ttf-parser 0.19.2",
+ "ttf-parser",
 ]
 
 [[package]]
@@ -1927,7 +1927,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9099a2f86b8e674b75d03ff154b3fe4c5208ed249ced8d69cc313a9fa40bb488"
 dependencies = [
  "hashbrown 0.14.3",
- "ttf-parser 0.20.0",
+ "ttf-parser",
 ]
 
 [[package]]
@@ -2661,7 +2661,7 @@ dependencies = [
 [[package]]
 name = "i-slint-backend-linuxkms"
 version = "1.4.0"
-source = "git+https://github.com/slint-ui/slint.git#43d1f62fb113e432ebfa7e9fb8a033ae1788e566"
+source = "git+https://github.com/slint-ui/slint.git#c350d787c14c24131beb3a555acc291cbc779e79"
 dependencies = [
  "calloop",
  "drm 0.9.0",
@@ -2681,7 +2681,7 @@ dependencies = [
 [[package]]
 name = "i-slint-backend-selector"
 version = "1.4.0"
-source = "git+https://github.com/slint-ui/slint.git#43d1f62fb113e432ebfa7e9fb8a033ae1788e566"
+source = "git+https://github.com/slint-ui/slint.git#c350d787c14c24131beb3a555acc291cbc779e79"
 dependencies = [
  "cfg-if",
  "i-slint-backend-linuxkms",
@@ -2694,7 +2694,7 @@ dependencies = [
 [[package]]
 name = "i-slint-backend-winit"
 version = "1.4.0"
-source = "git+https://github.com/slint-ui/slint.git#43d1f62fb113e432ebfa7e9fb8a033ae1788e566"
+source = "git+https://github.com/slint-ui/slint.git#c350d787c14c24131beb3a555acc291cbc779e79"
 dependencies = [
  "bytemuck",
  "cfg-if",
@@ -2728,7 +2728,7 @@ dependencies = [
 [[package]]
 name = "i-slint-common"
 version = "1.4.0"
-source = "git+https://github.com/slint-ui/slint.git#43d1f62fb113e432ebfa7e9fb8a033ae1788e566"
+source = "git+https://github.com/slint-ui/slint.git#c350d787c14c24131beb3a555acc291cbc779e79"
 dependencies = [
  "cfg-if",
  "derive_more",
@@ -2739,7 +2739,7 @@ dependencies = [
 [[package]]
 name = "i-slint-compiler"
 version = "1.4.0"
-source = "git+https://github.com/slint-ui/slint.git#43d1f62fb113e432ebfa7e9fb8a033ae1788e566"
+source = "git+https://github.com/slint-ui/slint.git#c350d787c14c24131beb3a555acc291cbc779e79"
 dependencies = [
  "by_address",
  "codemap",
@@ -2768,7 +2768,7 @@ dependencies = [
 [[package]]
 name = "i-slint-core"
 version = "1.4.0"
-source = "git+https://github.com/slint-ui/slint.git#43d1f62fb113e432ebfa7e9fb8a033ae1788e566"
+source = "git+https://github.com/slint-ui/slint.git#c350d787c14c24131beb3a555acc291cbc779e79"
 dependencies = [
  "auto_enums",
  "bytemuck",
@@ -2793,7 +2793,7 @@ dependencies = [
  "portable-atomic",
  "resvg",
  "rgb",
- "rustybuzz 0.11.0",
+ "rustybuzz 0.12.1",
  "scoped-tls-hkt",
  "scopeguard",
  "slab",
@@ -2811,7 +2811,7 @@ dependencies = [
 [[package]]
 name = "i-slint-core-macros"
 version = "1.4.0"
-source = "git+https://github.com/slint-ui/slint.git#43d1f62fb113e432ebfa7e9fb8a033ae1788e566"
+source = "git+https://github.com/slint-ui/slint.git#c350d787c14c24131beb3a555acc291cbc779e79"
 dependencies = [
  "quote",
  "syn 2.0.48",
@@ -2820,7 +2820,7 @@ dependencies = [
 [[package]]
 name = "i-slint-renderer-femtovg"
 version = "1.4.0"
-source = "git+https://github.com/slint-ui/slint.git#43d1f62fb113e432ebfa7e9fb8a033ae1788e566"
+source = "git+https://github.com/slint-ui/slint.git#c350d787c14c24131beb3a555acc291cbc779e79"
 dependencies = [
  "cfg-if",
  "const-field-offset",
@@ -2840,7 +2840,7 @@ dependencies = [
  "raw-window-handle",
  "rgb",
  "scoped-tls-hkt",
- "ttf-parser 0.20.0",
+ "ttf-parser",
  "unicode-script",
  "unicode-segmentation",
  "vtable",
@@ -2852,7 +2852,7 @@ dependencies = [
 [[package]]
 name = "i-slint-renderer-skia"
 version = "1.4.0"
-source = "git+https://github.com/slint-ui/slint.git#43d1f62fb113e432ebfa7e9fb8a033ae1788e566"
+source = "git+https://github.com/slint-ui/slint.git#c350d787c14c24131beb3a555acc291cbc779e79"
 dependencies = [
  "ash",
  "bytemuck",
@@ -4062,7 +4062,7 @@ version = "0.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d4586edfe4c648c71797a74c84bacb32b52b212eff5dfe2bb9f2c599844023e7"
 dependencies = [
- "ttf-parser 0.20.0",
+ "ttf-parser",
 ]
 
 [[package]]
@@ -4515,18 +4515,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "rctree"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3b42e27ef78c35d3998403c1d26f3efd9e135d3e5121b0a4845cc5cc27547f4f"
-
-[[package]]
 name = "realfft"
 version = "3.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "953d9f7e5cdd80963547b456251296efc2626ed4e3cbf36c869d9564e0220571"
 dependencies = [
- "rustfft 6.1.0",
+ "rustfft 6.2.0",
 ]
 
 [[package]]
@@ -4604,9 +4598,9 @@ checksum = "c08c74e62047bb2de4ff487b251e4a92e24f48745648451635cec7d591162d9f"
 
 [[package]]
 name = "resvg"
-version = "0.36.0"
+version = "0.38.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cc7980f653f9a7db31acff916a262c3b78c562919263edea29bf41a056e20497"
+checksum = "5c34501046959e06470ba62a2dc7f31c15f94ac250d842a45f9e012f4ee40c1e"
 dependencies = [
  "log",
  "pico-args",
@@ -4691,6 +4685,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "roxmltree"
+version = "0.19.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3cd14fd5e3b777a7422cca79358c57a8f6e3a703d9ac187448d0daf220c2407f"
+
+[[package]]
 name = "rubato"
 version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4772,7 +4772,7 @@ version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8b61555105d6a9bf98797c063c362a1d24ed8ab0431655e38f1cf51e52089551"
 dependencies = [
- "rustfft 6.1.0",
+ "rustfft 6.2.0",
 ]
 
 [[package]]
@@ -4791,9 +4791,9 @@ dependencies = [
 
 [[package]]
 name = "rustfft"
-version = "6.1.0"
+version = "6.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e17d4f6cbdb180c9f4b2a26bbf01c4e647f1e1dea22fe8eb9db54198b32f9434"
+checksum = "43806561bc506d0c5d160643ad742e3161049ac01027b5e6d7524091fd401d86"
 dependencies = [
  "num-complex 0.4.4",
  "num-integer",
@@ -4866,23 +4866,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "023a224821c3208db13134f398c2d92ed81267ef4f65ac8dff670c00b829faac"
 dependencies = [
  "rubato",
- "rustfft 6.1.0",
-]
-
-[[package]]
-name = "rustybuzz"
-version = "0.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "71cd15fef9112a1f94ac64b58d1e4628192631ad6af4dc69997f995459c874e7"
-dependencies = [
- "bitflags 1.3.2",
- "bytemuck",
- "smallvec",
- "ttf-parser 0.19.2",
- "unicode-bidi-mirroring",
- "unicode-ccc",
- "unicode-properties",
- "unicode-script",
+ "rustfft 6.2.0",
 ]
 
 [[package]]
@@ -4894,7 +4878,23 @@ dependencies = [
  "bitflags 1.3.2",
  "bytemuck",
  "smallvec",
- "ttf-parser 0.20.0",
+ "ttf-parser",
+ "unicode-bidi-mirroring",
+ "unicode-ccc",
+ "unicode-properties",
+ "unicode-script",
+]
+
+[[package]]
+name = "rustybuzz"
+version = "0.12.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f0ae5692c5beaad6a9e22830deeed7874eae8a4e3ba4076fb48e12c56856222c"
+dependencies = [
+ "bitflags 2.4.2",
+ "bytemuck",
+ "smallvec",
+ "ttf-parser",
  "unicode-bidi-mirroring",
  "unicode-ccc",
  "unicode-properties",
@@ -5074,9 +5074,9 @@ dependencies = [
 
 [[package]]
 name = "shlex"
-version = "1.2.0"
+version = "1.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a7cee0529a6d40f580e7a5e6c495c8fbfe21b7b52795ed4bb5e62cdf92bc6380"
+checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 
 [[package]]
 name = "signal-hook-registry"
@@ -5151,7 +5151,7 @@ dependencies = [
 [[package]]
 name = "slint"
 version = "1.4.0"
-source = "git+https://github.com/slint-ui/slint.git#43d1f62fb113e432ebfa7e9fb8a033ae1788e566"
+source = "git+https://github.com/slint-ui/slint.git#c350d787c14c24131beb3a555acc291cbc779e79"
 dependencies = [
  "const-field-offset",
  "i-slint-backend-selector",
@@ -5167,7 +5167,7 @@ dependencies = [
 [[package]]
 name = "slint-build"
 version = "1.4.0"
-source = "git+https://github.com/slint-ui/slint.git#43d1f62fb113e432ebfa7e9fb8a033ae1788e566"
+source = "git+https://github.com/slint-ui/slint.git#c350d787c14c24131beb3a555acc291cbc779e79"
 dependencies = [
  "i-slint-compiler",
  "spin_on",
@@ -5178,7 +5178,7 @@ dependencies = [
 [[package]]
 name = "slint-macros"
 version = "1.4.0"
-source = "git+https://github.com/slint-ui/slint.git#43d1f62fb113e432ebfa7e9fb8a033ae1788e566"
+source = "git+https://github.com/slint-ui/slint.git#c350d787c14c24131beb3a555acc291cbc779e79"
 dependencies = [
  "i-slint-compiler",
  "proc-macro2",
@@ -5420,9 +5420,9 @@ checksum = "81cdd64d312baedb58e21336b31bc043b77e01cc99033ce76ef539f78e965ebc"
 
 [[package]]
 name = "svgtypes"
-version = "0.12.0"
+version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d71499ff2d42f59d26edb21369a308ede691421f79ebc0f001e2b1fd3a7c9e52"
+checksum = "6e44e288cd960318917cbd540340968b90becc8bc81f171345d706e7a89d9d70"
 dependencies = [
  "kurbo",
  "siphasher",
@@ -6002,12 +6002,6 @@ checksum = "622b09ce2fe2df4618636fb92176d205662f59803f39e70d1c333393082de96c"
 
 [[package]]
 name = "ttf-parser"
-version = "0.19.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "49d64318d8311fc2668e48b63969f4343e0a85c4a109aa8460d6672e364b8bd1"
-
-[[package]]
-name = "ttf-parser"
 version = "0.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "17f77d76d837a7830fe1d4f12b7b4ba4192c1888001c7164257e4bc6d21d96b4"
@@ -6207,9 +6201,9 @@ checksum = "daf8dba3b7eb870caf1ddeed7bc9d2a049f3cfdfae7cb521b087cc33ae4c49da"
 
 [[package]]
 name = "usvg"
-version = "0.36.0"
+version = "0.38.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c51daa774fe9ee5efcf7b4fec13019b8119cda764d9a8b5b06df02bb1445c656"
+checksum = "377f62b4a3c173de8654c1aa80ab1dac1154e6f13a779a9943e53780120d1625"
 dependencies = [
  "base64",
  "log",
@@ -6222,16 +6216,16 @@ dependencies = [
 
 [[package]]
 name = "usvg-parser"
-version = "0.36.0"
+version = "0.38.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "45c88a5ffaa338f0e978ecf3d4e00d8f9f493e29bed0752e1a808a1db16afc40"
+checksum = "351a05e6f2023d6b4e946f734240a3927aefdcf930d7d42587a2c8a8869814b0"
 dependencies = [
  "data-url",
  "flate2",
  "imagesize",
  "kurbo",
  "log",
- "roxmltree",
+ "roxmltree 0.19.0",
  "simplecss",
  "siphasher",
  "svgtypes",
@@ -6240,14 +6234,14 @@ dependencies = [
 
 [[package]]
 name = "usvg-text-layout"
-version = "0.36.0"
+version = "0.38.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4d2374378cb7a3fb8f33894e0fdb8625e1bbc4f25312db8d91f862130b541593"
+checksum = "8c41888b9d5cf431fe852eaf9d047bbde83251b98f1749c2f08b1071e6db46e2"
 dependencies = [
  "fontdb",
  "kurbo",
  "log",
- "rustybuzz 0.10.0",
+ "rustybuzz 0.12.1",
  "unicode-bidi",
  "unicode-script",
  "unicode-vo",
@@ -6256,11 +6250,10 @@ dependencies = [
 
 [[package]]
 name = "usvg-tree"
-version = "0.36.0"
+version = "0.38.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6cacb0c5edeaf3e80e5afcf5b0d4004cc1d36318befc9a7c6606507e5d0f4062"
+checksum = "18863e0404ed153d6e56362c5b1146db9f4f262a3244e3cf2dbe7d8a85909f05"
 dependencies = [
- "rctree",
  "strict-num",
  "svgtypes",
  "tiny-skia-path",
@@ -6325,7 +6318,7 @@ dependencies = [
 [[package]]
 name = "vtable"
 version = "0.1.11"
-source = "git+https://github.com/slint-ui/slint.git#43d1f62fb113e432ebfa7e9fb8a033ae1788e566"
+source = "git+https://github.com/slint-ui/slint.git#c350d787c14c24131beb3a555acc291cbc779e79"
 dependencies = [
  "const-field-offset",
  "portable-atomic",
@@ -6336,7 +6329,7 @@ dependencies = [
 [[package]]
 name = "vtable-macro"
 version = "0.1.10"
-source = "git+https://github.com/slint-ui/slint.git#43d1f62fb113e432ebfa7e9fb8a033ae1788e566"
+source = "git+https://github.com/slint-ui/slint.git#c350d787c14c24131beb3a555acc291cbc779e79"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -6607,9 +6600,9 @@ checksum = "1778a42e8b3b90bff8d0f5032bf22250792889a5cdc752aa0020c84abe3aaf10"
 
 [[package]]
 name = "weezl"
-version = "0.1.7"
+version = "0.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9193164d4de03a926d909d3bc7c30543cecb35400c02114792c2cae20d5e2dbb"
+checksum = "53a85b86a771b1c87058196170769dd264f66c0782acf1ae6cc51bfd64b39082"
 
 [[package]]
 name = "which"
