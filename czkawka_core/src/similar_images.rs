@@ -23,7 +23,7 @@ use crate::common::{
     HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS,
 };
 use crate::common_cache::{get_similar_images_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
-use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
+use crate::common_dir_traversal::{inode, take_1_per_inode, CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::{DebugPrint, PrintResults, ResultEntry};
 use crate::flc;
@@ -122,6 +122,7 @@ pub struct SimilarImages {
     hash_alg: HashAlg,
     image_filter: FilterType,
     exclude_images_with_same_size: bool,
+    ignore_hard_links: bool,
 }
 
 #[derive(Default)]
@@ -145,6 +146,7 @@ impl SimilarImages {
             hash_alg: HashAlg::Gradient,
             image_filter: FilterType::Lanczos3,
             exclude_images_with_same_size: false,
+            ignore_hard_links: false,
         }
     }
 
@@ -188,7 +190,7 @@ impl SimilarImages {
         let heic_extensions = HEIC_EXTENSIONS.iter().collect::<HashSet<_>>();
 
         let result = DirTraversalBuilder::new()
-            .group_by(|_fe| ())
+            .group_by(inode)
             .stop_receiver(stop_receiver)
             .progress_sender(progress_sender)
             .common_data(&self.common_data)
@@ -199,8 +201,8 @@ impl SimilarImages {
         match result {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
                 self.images_to_check = grouped_file_entries
-                    .into_values()
-                    .flatten()
+                    .into_iter()
+                    .flat_map(if self.ignore_hard_links { |(_, fes)| fes } else { take_1_per_inode })
                     .map(|fe| {
                         let fe_str = fe.path.to_string_lossy().to_string();
                         let extension_lowercase = fe.path.extension().unwrap_or_default().to_string_lossy().to_lowercase();
@@ -1089,6 +1091,10 @@ impl SimilarImages {
 
     pub fn set_similarity(&mut self, similarity: u32) {
         self.similarity = similarity;
+    }
+
+    pub fn set_ignore_hard_links(&mut self, ignore_hard_links: bool) {
+        self.ignore_hard_links = ignore_hard_links;
     }
 }
 
