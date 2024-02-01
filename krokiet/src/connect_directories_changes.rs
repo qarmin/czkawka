@@ -1,7 +1,7 @@
 use rfd::FileDialog;
 use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
-use crate::{Callabler, MainWindow, Settings};
+use crate::{Callabler, ExcludedDirectoriesModel, IncludedDirectoriesModel, MainWindow, Settings};
 
 pub fn connect_add_remove_directories(app: &MainWindow) {
     connect_add_directories(app);
