@@ -20,27 +20,26 @@ fn connect_add_manual_directories(app: &MainWindow) {
         let settings = app.global::<Settings>();
 
         if included_directories {
-            let included_model = settings.get_included_directories();
+            let included_model = settings.get_included_directories_model();
             let mut included_model = included_model.iter().collect::<Vec<_>>();
-            included_model.extend(non_empty_lines.iter().map(|x| {
-                let mut element = slint::StandardListViewItem::default();
-                element.text = (*x).into();
-                element
+            included_model.extend(non_empty_lines.iter().map(|x| IncludedDirectoriesModel {
+                path: x.to_string_lossy().to_string().into(),
+                referenced_folder: false,
+                selected_row: false,
             }));
             included_model.sort_by_cached_key(|x| x.text.to_string());
             included_model.dedup();
-            settings.set_included_directories(ModelRc::new(VecModel::from(included_model)));
+            settings.set_included_directories_model(ModelRc::new(VecModel::from(included_model)));
         } else {
-            let excluded_model = settings.get_excluded_directories();
+            let excluded_model = settings.get_excluded_directories_model();
             let mut excluded_model = excluded_model.iter().collect::<Vec<_>>();
-            excluded_model.extend(non_empty_lines.iter().map(|x| {
-                let mut element = slint::StandardListViewItem::default();
-                element.text = (*x).into();
-                element
+            excluded_model.extend(non_empty_lines.iter().map(|x| ExcludedDirectoriesModel {
+                path: x.to_string_lossy().to_string().into(),
+                selected_row: false,
             }));
-            excluded_model.sort_by_cached_key(|x| x.text.to_string());
+            excluded_model.sort_by_cached_key(|x| x.path.to_string());
             excluded_model.dedup();
-            settings.set_excluded_directories(ModelRc::new(VecModel::from(excluded_model)));
+            settings.set_excluded_directories_model(ModelRc::new(VecModel::from(excluded_model)));
         }
     });
 }
@@ -92,12 +91,12 @@ fn connect_add_directories(app: &MainWindow) {
 
         let settings = app.global::<Settings>();
         let old_folders = if included_directories {
-            settings.get_included_directories()
+            settings.get_included_directories_model()
         } else {
-            settings.get_excluded_directories()
+            settings.get_excluded_directories_model()
         };
 
-        let mut new_folders = old_folders.iter().map(|x| x.text.to_string()).collect::<Vec<_>>();
+        let mut new_folders = old_folders.iter().map(|x| x.path.to_string()).collect::<Vec<_>>();
         new_folders.extend(folders.iter().map(|x| x.to_string_lossy().to_string()));
         new_folders.sort();
         new_folders.dedup();
@@ -113,9 +112,9 @@ fn connect_add_directories(app: &MainWindow) {
         let new_folders_model = ModelRc::new(VecModel::from(new_folders_standard_list_view));
 
         if included_directories {
-            settings.set_included_directories(new_folders_model);
+            settings.set_included_directories_model(new_folders_model);
         } else {
-            settings.set_excluded_directories(new_folders_model);
+            settings.set_excluded_directories_model(new_folders_model);
         }
     });
 }

@@ -12,7 +12,7 @@ use slint::{ComponentHandle, Model, ModelRc};
 use czkawka_core::common::{get_available_threads, set_number_of_threads};
 use czkawka_core::common_items::{DEFAULT_EXCLUDED_DIRECTORIES, DEFAULT_EXCLUDED_ITEMS};
 
-use crate::common::{create_string_standard_list_view_from_pathbuf, create_vec_model_from_vec_string};
+use crate::common::{create_included_directories_model_from_pathbuf, create_excluded_directories_model_from_pathbuf, create_vec_model_from_vec_string};
 use crate::{Callabler, GuiState, MainWindow, Settings};
 
 pub const DEFAULT_MINIMUM_SIZE_KB: i32 = 16;
@@ -350,11 +350,11 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
     let settings = app.global::<Settings>();
 
     // Included directories
-    let included_directories = create_string_standard_list_view_from_pathbuf(&custom_settings.included_directories);
+    let included_directories = create_included_directories_model_from_pathbuf(&custom_settings.included_directories);
     settings.set_included_directories(included_directories);
 
     // Excluded directories
-    let excluded_directories = create_string_standard_list_view_from_pathbuf(&custom_settings.excluded_directories);
+    let excluded_directories = create_excluded_directories_model_from_pathbuf(&custom_settings.excluded_directories);
     settings.set_excluded_directories(excluded_directories);
 
     settings.set_excluded_items(custom_settings.excluded_items.clone().into());
@@ -433,11 +433,11 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
 pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let settings = app.global::<Settings>();
 
-    let included_directories = settings.get_included_directories();
-    let included_directories = included_directories.iter().map(|x| PathBuf::from(x.text.as_str())).collect::<Vec<_>>();
+    let included_directories = settings.get_included_directories_model();
+    let included_directories = included_directories.iter().map(|model| PathBuf::from(model.path.as_str())).collect::<Vec<_>>();
 
-    let excluded_directories = settings.get_excluded_directories();
-    let excluded_directories = excluded_directories.iter().map(|x| PathBuf::from(x.text.as_str())).collect::<Vec<_>>();
+    let excluded_directories = settings.get_excluded_directories_model();
+    let excluded_directories = excluded_directories.iter().map(|model| PathBuf::from(model.path.as_str())).collect::<Vec<_>>();
 
     let excluded_items = settings.get_excluded_items().to_string();
     let allowed_extensions = settings.get_allowed_extensions().to_string();

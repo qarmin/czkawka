@@ -1,7 +1,8 @@
 use std::path::PathBuf;
 
 use slint::{ModelRc, SharedString, StandardListViewItem, VecModel};
-
+use crate::ExcludedDirectoriesModel;
+use crate::IncludedDirectoriesModel;
 use crate::CurrentTab;
 
 // Remember to match updated this according to ui/main_lists.slint and connect_scan.rs files
@@ -50,6 +51,33 @@ pub fn create_string_standard_list_view_from_pathbuf(items: &[PathBuf]) -> Model
         })
         .collect::<Vec<_>>();
     ModelRc::new(VecModel::from(new_folders_standard_list_view))
+}
+
+pub fn create_included_directories_model_from_pathbuf(items: &[PathBuf]) -> ModelRc<IncludedDirectoriesModel> {
+    let converted = items
+        .iter()
+        .map(|x| {
+            IncludedDirectoriesModel {
+                path: x.to_string_lossy().to_string().into(),
+                referenced_folder: false,
+                selected_row: false,
+            }
+        })
+        .collect::<Vec<_>>();
+    ModelRc::new(VecModel::from(converted))
+}
+
+pub fn create_excluded_directories_model_from_pathbuf(items: &[PathBuf]) -> ModelRc<ExcludedDirectoriesModel> {
+    let converted = items
+        .iter()
+        .map(|x| {
+            ExcludedDirectoriesModel {
+                path: x.to_string_lossy().to_string().into(),
+                selected_row: false,
+            }
+        })
+        .collect::<Vec<_>>();
+    ModelRc::new(VecModel::from(converted))
 }
 
 pub fn create_vec_model_from_vec_string(items: Vec<String>) -> VecModel<SharedString> {
