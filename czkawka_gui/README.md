@@ -64,6 +64,7 @@ There exists mingw recipe which you can try to convert for your purposes - https
 Not all available features other components implemented here, so this is list of  limitations:
 - Snap versions not allows to use similar videos feature
 - Windows version not supports heif and webp files with prebuild binaries
+- On Windows, text may appear very small on high resolution displays, a workaround is to override DPI scaling for this app, see [#867#issuecomment-1416761308](https://github.com/qarmin/czkawka/issues/863#issuecomment-1416761308)
 - Prebuild binaries for mac arm not exists
 
 ## License
