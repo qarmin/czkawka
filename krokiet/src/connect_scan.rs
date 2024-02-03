@@ -14,7 +14,7 @@ use czkawka_core::common_traits::ResultEntry;
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::{EmptyFolder, FolderEntry};
 use czkawka_core::similar_images;
-use czkawka_core::similar_images::SimilarImages;
+use czkawka_core::similar_images::{ImagesEntry, SimilarImages};
 
 use crate::settings::{collect_settings, SettingsCustom, ALLOWED_HASH_TYPE_VALUES, ALLOWED_RESIZE_ALGORITHM_VALUES};
 use crate::{CurrentTab, GuiState, MainListModel, MainWindow, ProgressToSend};
@@ -74,22 +74,70 @@ fn scan_similar_images(a: Weak<MainWindow>, progress_sender: Sender<ProgressData
             finder.set_similarity(custom_settings.similar_images_sub_similarity as u32);
             finder.find_similar_images(Some(&stop_receiver), Some(&progress_sender));
 
-            let mut vector = finder.get_similar_images().clone();
-            let messages = finder.get_text_messages().create_messages_text();
+            if finder.get_use_reference() {
+                let mut vector = finder.get_similar_images_referenced().clone();
+                let messages = finder.get_text_messages().create_messages_text();
 
-            for vec_fe in &mut vector {
-                vec_fe.par_sort_unstable_by_key(|e| e.similarity);
+                let hash_size = custom_settings.similar_images_sub_hash_size;
+
+                for (_first_entry, vec_fe) in &mut vector {
+                    vec_fe.par_sort_unstable_by_key(|e| e.similarity);
+                }
+
+                a.upgrade_in_event_loop(move |app| {
+                    write_similar_images_results_referenced(&app, vector, messages, hash_size);
+                })
+            } else {
+                let mut vector = finder.get_similar_images().clone();
+                let messages = finder.get_text_messages().create_messages_text();
+
+                let hash_size = custom_settings.similar_images_sub_hash_size;
+
+                for vec_fe in &mut vector {
+                    vec_fe.par_sort_unstable_by_key(|e| e.similarity);
+                }
+
+                a.upgrade_in_event_loop(move |app| {
+                    write_similar_images_results(&app, vector, messages, hash_size);
+                })
             }
-
-            let hash_size = custom_settings.similar_images_sub_hash_size;
-
-            a.upgrade_in_event_loop(move |app| {
-                write_similar_images_results(&app, vector, messages, hash_size);
-            })
         })
         .unwrap();
 }
-fn write_similar_images_results(app: &MainWindow, vector: Vec<Vec<similar_images::ImagesEntry>>, messages: String, hash_size: u8) {
+fn write_similar_images_results_referenced(app: &MainWindow, vector: Vec<(ImagesEntry, Vec<ImagesEntry>)>, messages: String, hash_size: u8) {
+    let items_found = vector.len();
+    let items = Rc::new(VecModel::default());
+    for (ref_fe, vec_fe) in vector {
+        let (ref_directory, ref_file) = split_path(ref_fe.get_path());
+        let ref_data_model = VecModel::from_slice(&[
+            similar_images::get_string_from_similarity(&ref_fe.similarity, hash_size).into(),
+            format_size(ref_fe.size, BINARY).into(),
+            ref_fe.dimensions.clone().into(),
+            ref_file.into(),
+            ref_directory.into(),
+            NaiveDateTime::from_timestamp_opt(ref_fe.get_modified_date() as i64, 0).unwrap().to_string().into(),
+        ]);
+        insert_data_to_model(&items, ref_data_model, true);
+
+        for fe in vec_fe {
+            let (directory, file) = split_path(fe.get_path());
+            let data_model = VecModel::from_slice(&[
+                similar_images::get_string_from_similarity(&fe.similarity, hash_size).into(),
+                format_size(fe.size, BINARY).into(),
+                fe.dimensions.clone().into(),
+                file.into(),
+                directory.into(),
+                NaiveDateTime::from_timestamp_opt(fe.get_modified_date() as i64, 0).unwrap().to_string().into(),
+            ]);
+
+            insert_data_to_model(&items, data_model, false);
+        }
+    }
+    app.set_similar_images_model(items.into());
+    app.invoke_scan_ended(format!("Found {items_found} similar images files").into());
+    app.global::<GuiState>().set_info_text(messages.into());
+}
+fn write_similar_images_results(app: &MainWindow, vector: Vec<Vec<ImagesEntry>>, messages: String, hash_size: u8) {
     let items_found = vector.len();
     let items = Rc::new(VecModel::default());
     for vec_fe in vector {
@@ -202,6 +250,7 @@ where
     T: CommonData,
 {
     component.set_included_directory(custom_settings.included_directories.clone());
+    component.set_reference_directory(custom_settings.included_directories_referenced.clone());
     component.set_excluded_directory(custom_settings.excluded_directories.clone());
     component.set_recursive_search(custom_settings.recursive_search);
     component.set_minimal_file_size(custom_settings.minimum_file_size as u64 * 1024);

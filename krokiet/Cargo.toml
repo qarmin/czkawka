@@ -17,7 +17,7 @@ chrono = "0.4.33"
 open = "5.0"
 crossbeam-channel = "0.5"
 handsome_logger = "0.8"
-rfd = { version = "0.13", default-features = false, features = ["xdg-portal", "tokio"] }
+rfd = { version = "0.13", default-features = false, features = ["xdg-portal", "async-std"] }
 home = "0.5"
 log = "0.4.20"
 serde = "1.0"
@@ -30,7 +30,7 @@ rayon = "1.8"
 
 # Translations
 i18n-embed = { version = "0.14", features = ["fluent-system", "desktop-requester"] }
-i18n-embed-fl = "0.7"
+i18n-embed-fl = "0.8"
 rust-embed = { version = "8.2", features = ["debug-embed"] }
 once_cell = "1.19"
 

@@ -52,16 +52,11 @@ impl Extensions {
     }
 
     /// List of allowed extensions, only files with this extensions will be checking if are duplicates
-    /// After, extensions cannot contains any dot, commas etc.
+    /// After, extensions cannot contain any dot, commas etc.
     pub fn set_allowed_extensions(&mut self, allowed_extensions: String) -> Messages {
-        let (extensions, mut messages) = Self::filter_extensions(allowed_extensions);
+        let (extensions, messages) = Self::filter_extensions(allowed_extensions);
 
         self.allowed_extensions_hashset = extensions;
-        if self.allowed_extensions_hashset.is_empty() {
-            messages
-                .messages
-                .push("No valid extensions were provided, so allowing all extensions by default.".to_string());
-        }
         messages
     }
 

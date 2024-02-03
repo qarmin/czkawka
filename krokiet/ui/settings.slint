@@ -6,7 +6,9 @@ export global Settings {
     in-out property <[string]> settings_presets: ["Preset 1", "Preset 2"];
     
     in-out property <[IncludedDirectoriesModel]> included_directories_model: [{path: "/home/path", referenced_folder: false, selected_row: false}];
+    in-out property <int> included_directories_model_selected_idx: -1;
     in-out property <[ExcludedDirectoriesModel]> excluded_directories_model: [{path:"/home/path", selected_row: false}, {path:"/home/path", selected_row: false}];
+    in-out property <int> excluded_directories_model_selected_idx: -1;
 
     // Settings
     in-out property <string> excluded_items: "Excluded items";

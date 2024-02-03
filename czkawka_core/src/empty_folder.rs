@@ -189,7 +189,7 @@ impl EmptyFolder {
             }
         }
 
-        let mut folder_entries: HashMap<String, FolderEntry> = HashMap::with_capacity(start_folder_entries.len() + new_folder_entries_list.iter().map(|e| e.len()).sum::<usize>());
+        let mut folder_entries: HashMap<String, FolderEntry> = HashMap::with_capacity(start_folder_entries.len() + new_folder_entries_list.iter().map(Vec::len).sum::<usize>());
         for fe in start_folder_entries {
             folder_entries.insert(fe.path.to_string_lossy().to_string(), fe);
         }

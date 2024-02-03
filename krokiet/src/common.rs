@@ -1,9 +1,9 @@
 use std::path::PathBuf;
 
-use slint::{ModelRc, SharedString, StandardListViewItem, VecModel};
+use crate::CurrentTab;
 use crate::ExcludedDirectoriesModel;
 use crate::IncludedDirectoriesModel;
-use crate::CurrentTab;
+use slint::{ModelRc, SharedString, VecModel};
 
 // Remember to match updated this according to ui/main_lists.slint and connect_scan.rs files
 pub fn get_path_idx(active_tab: CurrentTab) -> usize {
@@ -41,25 +41,27 @@ pub fn get_is_header_mode(active_tab: CurrentTab) -> bool {
 //         .collect::<Vec<_>>();
 //     ModelRc::new(VecModel::from(new_folders_standard_list_view))
 // }
-pub fn create_string_standard_list_view_from_pathbuf(items: &[PathBuf]) -> ModelRc<StandardListViewItem> {
-    let new_folders_standard_list_view = items
-        .iter()
-        .map(|x| {
-            let mut element = StandardListViewItem::default();
-            element.text = x.to_string_lossy().to_string().into();
-            element
-        })
-        .collect::<Vec<_>>();
-    ModelRc::new(VecModel::from(new_folders_standard_list_view))
-}
+// pub fn create_string_standard_list_view_from_pathbuf(items: &[PathBuf]) -> ModelRc<StandardListViewItem> {
+//     let new_folders_standard_list_view = items
+//         .iter()
+//         .map(|x| {
+//             let mut element = StandardListViewItem::default();
+//             element.text = x.to_string_lossy().to_string().into();
+//             element
+//         })
+//         .collect::<Vec<_>>();
+//     ModelRc::new(VecModel::from(new_folders_standard_list_view))
+// }
 
-pub fn create_included_directories_model_from_pathbuf(items: &[PathBuf]) -> ModelRc<IncludedDirectoriesModel> {
+pub fn create_included_directories_model_from_pathbuf(items: &[PathBuf], referenced: &[PathBuf]) -> ModelRc<IncludedDirectoriesModel> {
+    let referenced_as_string = referenced.iter().map(|x| x.to_string_lossy().to_string()).collect::<Vec<_>>();
     let converted = items
         .iter()
         .map(|x| {
+            let path_as_string = x.to_string_lossy().to_string();
             IncludedDirectoriesModel {
                 path: x.to_string_lossy().to_string().into(),
-                referenced_folder: false,
+                referenced_folder: referenced_as_string.contains(&path_as_string),
                 selected_row: false,
             }
         })
@@ -70,11 +72,9 @@ pub fn create_included_directories_model_from_pathbuf(items: &[PathBuf]) -> Mode
 pub fn create_excluded_directories_model_from_pathbuf(items: &[PathBuf]) -> ModelRc<ExcludedDirectoriesModel> {
     let converted = items
         .iter()
-        .map(|x| {
-            ExcludedDirectoriesModel {
-                path: x.to_string_lossy().to_string().into(),
-                selected_row: false,
-            }
+        .map(|x| ExcludedDirectoriesModel {
+            path: x.to_string_lossy().to_string().into(),
+            selected_row: false,
         })
         .collect::<Vec<_>>();
     ModelRc::new(VecModel::from(converted))

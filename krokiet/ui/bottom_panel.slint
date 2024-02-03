@@ -25,7 +25,7 @@ component DirectoriesPanel inherits HorizontalLayout {
         Button {
             text: "Remove";
             clicked => {
-                Callabler.remove_item_directories(true, included_list.current_index);
+                Callabler.remove_item_directories(true);
             }
         }
 
@@ -66,7 +66,7 @@ component DirectoriesPanel inherits HorizontalLayout {
         Button {
             text: "Remove";
             clicked => {
-                Callabler.remove_item_directories(false, excluded_list.current_index);
+                Callabler.remove_item_directories(false);
             }
         }
 

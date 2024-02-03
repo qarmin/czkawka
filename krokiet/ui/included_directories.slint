@@ -6,8 +6,8 @@ import {ColorPalette} from "color_palette.slint";
 import {Settings} from "settings.slint";
 
 export component IncludedDirectories {
-    in-out property <[IncludedDirectoriesModel]> model: Settings.included_directories_model;
-    in-out property <int> current_index: -1;
+    in-out property <[IncludedDirectoriesModel]> model <=> Settings.included_directories_model;
+    in-out property <int> current_index <=> Settings.included_directories_model_selected_idx;
 
     in-out property <length> size_referenced_folder: 33px;
     
@@ -26,21 +26,43 @@ export component IncludedDirectories {
             }
         }
         ListView {
-            for data in model : Rectangle {
+            for r[idx] in model : Rectangle {
                 height: 30px;
                 border_radius: 5px;
                 width: parent.width;
+
+                background: touch-area.has-hover ? (r.selected_row ? ColorPalette.list-view-normal-selected-header : ColorPalette.list_view_normal_color) : (r.selected_row ? ColorPalette.list-view-normal-selected-header : ColorPalette.list_view_normal_color);
+                touch_area := TouchArea {
+                    clicked => {
+                        if (current_index == -1) {
+                            r.selected_row = true;
+                        } else {
+                            if (current_index != idx) {
+                                model[current_index].selected_row = false;
+                            }
+                            r.selected_row = true;
+                        }
+                        current_index = idx;
+                    }
+                    double-clicked => {
+                        Callabler.item_opened(r.path);
+                    }
+                }
+                
                 HorizontalLayout {
                     spacing: 5px;
                     width: parent.width;
 
                     CheckBox {
-                        checked: data.referenced_folder;
+                        checked: r.referenced_folder;
+                        toggled => {
+                            model[idx].referenced_folder = self.checked;
+                        }
                         width: size_referenced_folder;
                     }
                     Text {
                         horizontal-stretch: 1.0;
-                        text: data.path;
+                        text: r.path;
                         vertical-alignment: center;
                     }
                 }
@@ -50,9 +72,8 @@ export component IncludedDirectories {
 }
 
 export component ExcludedDirectories {
-    in-out property <[ExcludedDirectoriesModel]> model: Settings.excluded_directories_model;
-    in-out property <int> current_index: -1;
-    private property <PointerEvent> event;
+    in-out property <[ExcludedDirectoriesModel]> model <=> Settings.excluded_directories_model;
+    in-out property <int> current_index <=> Settings.excluded_directories_model_selected_idx;
 
     min-width: 50px;
     VerticalLayout {
@@ -84,9 +105,6 @@ export component ExcludedDirectories {
                     }
                     double-clicked => {
                         Callabler.item_opened(r.path);
-                    }
-                    pointer-event(event) => {
-                        root.event = event;
                     }
                 }
                 
