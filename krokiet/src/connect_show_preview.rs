@@ -7,7 +7,7 @@ use slint::ComponentHandle;
 
 use czkawka_core::common::{get_dynamic_image_from_raw_image, IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
 
-use crate::{Callabler, GuiState, MainWindow};
+use crate::{Callabler, CurrentTab, GuiState, MainWindow, Settings};
 
 pub type ImageBufferRgba = image::ImageBuffer<image::Rgba<u8>, Vec<u8>>;
 
@@ -15,6 +15,16 @@ pub fn connect_show_preview(app: &MainWindow) {
     let a = app.as_weak();
     app.global::<Callabler>().on_load_image_preview(move |image_path| {
         let app = a.upgrade().unwrap();
+
+        let settings = app.global::<Settings>();
+        let gui_state = app.global::<GuiState>();
+
+        let active_tab = gui_state.get_active_tab();
+
+        if active_tab == CurrentTab::SimilarImages && !settings.get_similar_images_show_image_preview() {
+            gui_state.set_preview_visible(false);
+            return;
+        }
 
         let path = Path::new(image_path.as_str());
 
@@ -25,16 +35,16 @@ pub fn connect_show_preview(app: &MainWindow) {
             let convert_time = start_timer_convert_time.elapsed();
 
             let start_set_time = Instant::now();
-            app.global::<GuiState>().set_preview_image(slint_image);
+            gui_state.set_preview_image(slint_image);
             let set_time = start_set_time.elapsed();
 
             debug!(
                 "Loading image took: {:?}, converting image took: {:?}, setting image took: {:?}",
                 load_time, convert_time, set_time
             );
-            app.global::<GuiState>().set_preview_visible(true);
+            gui_state.set_preview_visible(true);
         } else {
-            app.global::<GuiState>().set_preview_visible(false);
+            gui_state.set_preview_visible(false);
         }
     });
 }

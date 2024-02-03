@@ -291,7 +291,7 @@ impl SimilarImages {
             .while_some()
             .filter_map(|e| e)
             .collect::<Vec<ImagesEntry>>();
-        debug!("hash_images - end hashing images");
+        debug!("hash_images - end hashing {} images", vec_file_entry.len());
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
@@ -457,54 +457,21 @@ impl SimilarImages {
         collected_similar_images: &mut HashMap<ImHash, Vec<ImagesEntry>>,
         hashes_similarity: HashMap<ImHash, (ImHash, u32)>,
     ) {
-        if self.common_data.use_reference_folders {
-            // This is same step as without reference folders, but also checks if children are inside/outside reference directories, because may happen, that one file is inside reference folder and other outside
+        // Collecting results to vector
+        for (parent_hash, child_number) in hashes_parents {
+            // If hash contains other hasher OR multiple images are available for checked hash
+            if child_number > 0 || hashes_with_multiple_images.contains(&parent_hash) {
+                let vec_fe = all_hashed_images[&parent_hash].clone();
+                collected_similar_images.insert(parent_hash.clone(), vec_fe);
+            }
+        }
 
-            // Collecting results to vector
-            for (parent_hash, child_number) in hashes_parents {
-                // If hash contains other hasher OR multiple images are available for checked hash
-                if child_number > 0 || hashes_with_multiple_images.contains(&parent_hash) {
-                    let vec_fe = all_hashed_images
-                        .get(&parent_hash)
-                        .unwrap()
-                        .iter()
-                        .filter(|e| is_in_reference_folder(&self.common_data.directories.reference_directories, &e.path))
-                        .cloned()
-                        .collect();
-                    collected_similar_images.insert(parent_hash.clone(), vec_fe);
-                }
+        for (child_hash, (parent_hash, similarity)) in hashes_similarity {
+            let mut vec_fe = all_hashed_images[&child_hash].clone();
+            for fe in &mut vec_fe {
+                fe.similarity = similarity;
             }
-
-            for (child_hash, (parent_hash, similarity)) in hashes_similarity {
-                let mut vec_fe: Vec<_> = all_hashed_images
-                    .get(&child_hash)
-                    .unwrap()
-                    .iter()
-                    .filter(|e| !is_in_reference_folder(&self.common_data.directories.reference_directories, &e.path))
-                    .cloned()
-                    .collect();
-                for fe in &mut vec_fe {
-                    fe.similarity = similarity;
-                }
-                collected_similar_images.get_mut(&parent_hash).unwrap().append(&mut vec_fe);
-            }
-        } else {
-            // Collecting results to vector
-            for (parent_hash, child_number) in hashes_parents {
-                // If hash contains other hasher OR multiple images are available for checked hash
-                if child_number > 0 || hashes_with_multiple_images.contains(&parent_hash) {
-                    let vec_fe = all_hashed_images.get(&parent_hash).unwrap().clone();
-                    collected_similar_images.insert(parent_hash.clone(), vec_fe);
-                }
-            }
-
-            for (child_hash, (parent_hash, similarity)) in hashes_similarity {
-                let mut vec_fe = all_hashed_images.get(&child_hash).unwrap().clone();
-                for fe in &mut vec_fe {
-                    fe.similarity = similarity;
-                }
-                collected_similar_images.get_mut(&parent_hash).unwrap().append(&mut vec_fe);
-            }
+            collected_similar_images.get_mut(&parent_hash).unwrap().append(&mut vec_fe);
         }
     }
 
@@ -770,7 +737,7 @@ impl SimilarImages {
                 }
             }
         }
-        assert!(!found, "Found Invalid entries, verify errors before"); // TODO crashes with empty result with reference folder, verify why
+        assert!(!found, "Found Invalid entries, verify errors before");
     }
 
     fn delete_files(&mut self) {
@@ -1004,12 +971,12 @@ fn debug_check_for_duplicated_things(
     for (hash, number_of_children) in hashes_parents {
         if *number_of_children > 0 {
             if hashmap_hashes.contains(hash) {
-                println!("------1--HASH--{}  {:?}", numm, all_hashed_images.get(hash).unwrap());
+                println!("------1--HASH--{}  {:?}", numm, all_hashed_images[hash]);
                 found_broken_thing = true;
             }
             hashmap_hashes.insert((*hash).clone());
 
-            for i in all_hashed_images.get(hash).unwrap() {
+            for i in &all_hashed_images[hash] {
                 let name = i.path.to_string_lossy().to_string();
                 if hashmap_names.contains(&name) {
                     println!("------1--NAME--{numm}  {name:?}");
@@ -1021,12 +988,12 @@ fn debug_check_for_duplicated_things(
     }
     for hash in hashes_similarity.keys() {
         if hashmap_hashes.contains(hash) {
-            println!("------2--HASH--{}  {:?}", numm, all_hashed_images.get(hash).unwrap());
+            println!("------2--HASH--{}  {:?}", numm, all_hashed_images[hash]);
             found_broken_thing = true;
         }
         hashmap_hashes.insert((*hash).clone());
 
-        for i in all_hashed_images.get(hash).unwrap() {
+        for i in &all_hashed_images[hash] {
             let name = i.path.to_string_lossy().to_string();
             if hashmap_names.contains(&name) {
                 println!("------2--NAME--{numm}  {name:?}");
@@ -1193,34 +1160,6 @@ mod tests {
             assert_eq!(similar_images.get_similar_images()[0].len(), 3);
         }
     }
-
-    // TODO this not works yet,
-    // Need to find a way to
-    // #[test]
-    // fn test_similar_similarity() {
-    //     for _ in 0..100 {
-    //         let mut similar_images = SimilarImages {
-    //             similarity: 10,
-    //     common_data: CommonToolData {
-    //     tool_type: ToolType::SimilarImages,
-    //     ..Default::default()
-    // },
-    //             use_reference_folders: false,
-    //             ..Default::default()
-    //         };
-    //
-    //         let fe1 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 0b0000_0001], "abc.txt");
-    //         let fe2 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 0b0000_0010], "bcd.txt");
-    //         let fe3 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 0b0000_0100], "rrd.txt");
-    //         let fe4 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 0b0111_1111], "rdd.txt");
-    //
-    //         add_hashes(&mut similar_images.image_hashes, vec![fe1, fe2, fe3, fe4]);
-    //
-    //         similar_images.find_similar_hashes(None, None);
-    //         assert_eq!(similar_images.get_similar_images().len(), 1);
-    //         assert_eq!(similar_images.get_similar_images()[0].len(), 4);
-    //     }
-    // }
 
     #[test]
     fn test_simple_referenced_same_group() {
@@ -1463,6 +1402,35 @@ mod tests {
                 assert_eq!(res[0].0.path, PathBuf::from("/home/rr/krkr.txt"));
                 assert_eq!(res[1].0.path, PathBuf::from("/home/rr/abc.txt"));
             }
+        }
+    }
+
+    #[test]
+    fn test_reference_same() {
+        for _ in 0..100 {
+            let mut similar_images = SimilarImages {
+                similarity: 1,
+                common_data: CommonToolData {
+                    tool_type: ToolType::SimilarImages,
+                    directories: Directories {
+                        reference_directories: vec![PathBuf::from("/home/rr/")],
+                        ..Default::default()
+                    },
+                    use_reference_folders: true,
+                    ..Default::default()
+                },
+                ..Default::default()
+            };
+
+            let fe1 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "/home/rr/abc.txt");
+            let fe2 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "/home/kk/bcd.txt");
+
+            add_hashes(&mut similar_images.image_hashes, vec![fe1, fe2]);
+
+            similar_images.find_similar_hashes(None, None);
+            let res = similar_images.get_similar_images_referenced();
+            assert_eq!(res.len(), 1);
+            assert_eq!(res[0].1.len(), 1);
         }
     }
 

@@ -32,6 +32,7 @@
 - Decrease memory usage when collecting files by removing unused fields in custom file entries structs - [#1159](https://github.com/qarmin/czkawka/pull/1159)
 - Decrease a little size of cache by few percents and improve loading/saving speed - [#1159](https://github.com/qarmin/czkawka/pull/1159)
 - Added ability to remove from scan files with excluded extensions - [#1184](https://github.com/qarmin/czkawka/pull/1102)
+- Fixed not showing in similar images results, files with same hashes when using reference folders - [#1184](https://github.com/qarmin/czkawka/pull/1102)
 
 ## Version 6.1.0 - 15.10.2023r
 - BREAKING CHANGE - Changed cache saving method, deduplicated, optimized and simplified procedure(all files needs to be hashed again) - [#1072](https://github.com/qarmin/czkawka/pull/1072), [#1086](https://github.com/qarmin/czkawka/pull/1086)

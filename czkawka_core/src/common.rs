@@ -269,7 +269,6 @@ pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path>) -> Option<Dynami
 
     let width = processed.width();
     let height = processed.height();
-    dbg!(width, height);
 
     let data = processed.to_vec();
 
