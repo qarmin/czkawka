@@ -64,7 +64,9 @@ There exists mingw recipe which you can try to convert for your purposes - https
 Not all available features other components implemented here, so this is list of  limitations:
 - Snap versions not allows to use similar videos feature
 - On Windows, prebuild binaries do not support heif and webp files
-- On Windows, text may appear very small on high resolution displays, a workaround is to override DPI scaling for this app, see [#867#issuecomment-1416761308](https://github.com/qarmin/czkawka/issues/863#issuecomment-1416761308)
+- On Windows, text may appear very small on high resolution displays, a solution is to manually change DPI scaling for this app, see :
+  - recommended fix: [#787#issuecomment-1292253437](https://github.com/qarmin/czkawka/issues/787#issuecomment-1292253437) (modify gtk.css),
+  - or this workaround: [#867#issuecomment-1416761308](https://github.com/qarmin/czkawka/issues/863#issuecomment-1416761308) (modify windows DPI settings for this app (this works too but the text is a bit blurry)).
 - Prebuild binaries for mac arm not exists
 
 ## License
