@@ -7,13 +7,13 @@ use czkawka_core::common_tool::DeleteMethod;
 use czkawka_core::duplicate::HashType;
 use czkawka_core::same_music::MusicSimilarity;
 use czkawka_core::similar_images::SimilarityPreset;
-use czkawka_core::MAIN_SEPARATOR;
+use czkawka_core::CZKAWKA_VERSION;
 
 #[derive(clap::Parser)]
 #[clap(
     name = "czkawka",
     help_template = HELP_TEMPLATE,
-    version = MAIN_SEPARATOR
+    version = CZKAWKA_VERSION
 )]
 pub struct Args {
     #[command(subcommand)]

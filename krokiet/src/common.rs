@@ -1,8 +1,6 @@
 use std::path::PathBuf;
 
-use crate::CurrentTab;
-use crate::ExcludedDirectoriesModel;
-use crate::IncludedDirectoriesModel;
+use crate::{CurrentTab, ExcludedDirectoriesModel, IncludedDirectoriesModel};
 use slint::{ModelRc, SharedString, VecModel};
 
 // Remember to match updated this according to ui/main_lists.slint and connect_scan.rs files

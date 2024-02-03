@@ -36,7 +36,7 @@ use crate::common_messages::Messages;
 use crate::common_tool::DeleteMethod;
 use crate::common_traits::ResultEntry;
 use crate::duplicate::make_hard_link;
-use crate::MAIN_SEPARATOR;
+use crate::CZKAWKA_VERSION;
 
 static NUMBER_OF_THREADS: state::InitCell<usize> = state::InitCell::new();
 pub const DEFAULT_THREAD_SIZE: usize = 8 * 1024 * 1024; // 8 MB
@@ -78,7 +78,7 @@ pub fn print_version_mode() {
 
     let info = os_info::get();
     info!(
-        "App version: {MAIN_SEPARATOR}, {debug_release} mode, rust {rust_version}, os {} {} [{} {}], {processors} cpu/threads",
+        "App version: {CZKAWKA_VERSION}, {debug_release} mode, rust {rust_version}, os {} {} [{} {}], {processors} cpu/threads",
         info.os_type(),
         info.version(),
         std::env::consts::ARCH,
