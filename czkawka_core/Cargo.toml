@@ -42,7 +42,7 @@ blake3 = "1.5"
 crc32fast = "1.3"
 xxhash-rust = { version = "0.8", features = ["xxh3"] }
 
-tempfile = "3.9"
+tempfile = "3.10"
 
 # Video Duplicates
 vid_dup_finder_lib = "0.1"

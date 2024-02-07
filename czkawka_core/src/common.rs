@@ -39,6 +39,7 @@ use crate::duplicate::make_hard_link;
 use crate::CZKAWKA_VERSION;
 
 static NUMBER_OF_THREADS: state::InitCell<usize> = state::InitCell::new();
+static ALL_AVAILABLE_THREADS: state::InitCell<usize> = state::InitCell::new();
 pub const DEFAULT_THREAD_SIZE: usize = 8 * 1024 * 1024; // 8 MB
 pub const DEFAULT_WORKER_THREAD_SIZE: usize = 4 * 1024 * 1024; // 4 MB
 
@@ -47,7 +48,7 @@ pub fn get_number_of_threads() -> usize {
     if *data >= 1 {
         *data
     } else {
-        get_default_number_of_threads()
+        get_all_available_threads()
     }
 }
 
@@ -66,15 +67,19 @@ pub fn setup_logger(disabled_printing: bool) {
     handsome_logger::TermLogger::init(config, TerminalMode::Mixed, ColorChoice::Always).unwrap();
 }
 
-pub fn get_available_threads() -> usize {
-    thread::available_parallelism().map(std::num::NonZeroUsize::get).unwrap_or(1)
+pub fn get_all_available_threads() -> usize {
+    *ALL_AVAILABLE_THREADS.get_or_init(|| {
+        let available_threads = thread::available_parallelism().map(std::num::NonZeroUsize::get).unwrap_or(1);
+        ALL_AVAILABLE_THREADS.set(available_threads);
+        available_threads
+    })
 }
 
 pub fn print_version_mode() {
     let rust_version = env!("RUST_VERSION_INTERNAL");
     let debug_release = if cfg!(debug_assertions) { "debug" } else { "release" };
 
-    let processors = get_available_threads();
+    let processors = get_all_available_threads();
 
     let info = os_info::get();
     info!(
@@ -94,11 +99,7 @@ pub fn print_version_mode() {
 }
 
 pub fn set_default_number_of_threads() {
-    set_number_of_threads(get_default_number_of_threads());
-}
-
-pub fn get_default_number_of_threads() -> usize {
-    thread::available_parallelism().map(std::num::NonZeroUsize::get).unwrap_or(1)
+    set_number_of_threads(get_all_available_threads());
 }
 
 pub fn set_number_of_threads(thread_number: usize) {

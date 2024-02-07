@@ -9,7 +9,7 @@ use log::{debug, error, info, warn};
 use serde::{Deserialize, Serialize};
 use slint::{ComponentHandle, Model, ModelRc};
 
-use czkawka_core::common::{get_available_threads, set_number_of_threads};
+use czkawka_core::common::{get_all_available_threads, set_number_of_threads};
 use czkawka_core::common_items::{DEFAULT_EXCLUDED_DIRECTORIES, DEFAULT_EXCLUDED_ITEMS};
 
 use crate::common::{create_excluded_directories_model_from_pathbuf, create_included_directories_model_from_pathbuf, create_vec_model_from_vec_string};
@@ -240,7 +240,7 @@ pub fn load_settings_from_file(app: &MainWindow) {
         }
     }
     base_settings.default_preset = max(min(base_settings.default_preset, 9), 0);
-    custom_settings.thread_number = max(min(custom_settings.thread_number, get_available_threads() as i32), 0);
+    custom_settings.thread_number = max(min(custom_settings.thread_number, get_all_available_threads() as i32), 0);
 
     // Ended validating
     set_settings_to_gui(app, &custom_settings);

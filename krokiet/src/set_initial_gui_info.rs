@@ -1,6 +1,6 @@
 use slint::{ComponentHandle, SharedString, VecModel};
 
-use czkawka_core::common::get_available_threads;
+use czkawka_core::common::get_all_available_threads;
 
 use crate::settings::{ALLOWED_HASH_SIZE_VALUES, ALLOWED_HASH_TYPE_VALUES, ALLOWED_RESIZE_ALGORITHM_VALUES};
 use crate::{GuiState, MainWindow, Settings};
@@ -8,7 +8,7 @@ use crate::{GuiState, MainWindow, Settings};
 // Some info needs to be send to gui at the start like available thread number in OS.
 //
 pub fn set_initial_gui_infos(app: &MainWindow) {
-    let threads = get_available_threads();
+    let threads = get_all_available_threads();
     let settings = app.global::<Settings>();
     app.global::<GuiState>().set_maximum_threads(threads as f32);
 

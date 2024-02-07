@@ -9,7 +9,7 @@ use directories_next::ProjectDirs;
 use gtk4::prelude::*;
 use gtk4::{ComboBoxText, ScrolledWindow, TextView, TreeView};
 
-use czkawka_core::common::get_default_number_of_threads;
+use czkawka_core::common::get_all_available_threads;
 use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::common_items::DEFAULT_EXCLUDED_ITEMS;
 use czkawka_core::similar_images::SIMILAR_VALUES;
@@ -833,8 +833,8 @@ pub fn load_configuration(
         main_notebook.scale_similarity_similar_images.connect_change_value(scale_step_function);
         main_notebook.scale_similarity_similar_images.set_value(similar_images_similarity as f64);
 
-        settings.scale_settings_number_of_threads.set_range(0_f64, get_default_number_of_threads() as f64);
-        settings.scale_settings_number_of_threads.set_fill_level(get_default_number_of_threads() as f64);
+        settings.scale_settings_number_of_threads.set_range(0_f64, get_all_available_threads() as f64);
+        settings.scale_settings_number_of_threads.set_fill_level(get_all_available_threads() as f64);
         settings.scale_settings_number_of_threads.connect_change_value(scale_step_function);
         settings.scale_settings_number_of_threads.set_value(thread_number as f64);
     } else {
