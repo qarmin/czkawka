@@ -342,7 +342,7 @@
 	(10,7,"GtkButton","buttons_popover_sort_selection",2,None,None,None,4,None)
   </object>
   <object_property>
-	(3,1,"GtkAboutDialog","comments","2020 - 2023  Rafał Mikrut(qarmin)
+	(3,1,"GtkAboutDialog","comments","2020 - 2024  Rafał Mikrut(qarmin)
 
                 This program is free to use and will always be.
                 ",1,None,None,None,None,None,None,None,None),

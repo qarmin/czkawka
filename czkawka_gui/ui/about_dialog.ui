@@ -4,7 +4,7 @@
   <!-- interface-name about_dialog.ui -->
   <requires lib="gtk" version="4.6"/>
   <object class="GtkAboutDialog" id="about_dialog">
-    <property name="comments" translatable="yes">2020 - 2023  Rafał Mikrut(qarmin)
+    <property name="comments" translatable="yes">2020 - 2024  Rafał Mikrut(qarmin)
 
 This program is free to use and will always be.
 </property>
