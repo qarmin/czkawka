@@ -15,7 +15,7 @@ pub struct GuiProgressDialog {
     pub label_progress_current_stage: gtk4::Label,
     pub label_progress_all_stages: gtk4::Label,
 
-    pub grid_progress_stages: gtk4::Grid,
+    pub grid_progress: gtk4::Grid,
 
     pub button_stop_in_dialog: gtk4::Button,
     pub evk_button_stop_in_dialog: EventControllerKey,
@@ -38,7 +38,7 @@ impl GuiProgressDialog {
         let label_progress_current_stage: gtk4::Label = builder.object("label_progress_current_stage").unwrap();
         let label_progress_all_stages: gtk4::Label = builder.object("label_progress_all_stages").unwrap();
 
-        let grid_progress_stages: gtk4::Grid = builder.object("grid_progress_stages").unwrap();
+        let grid_progress: gtk4::Grid = builder.object("grid_progress").unwrap();
 
         let button_stop_in_dialog: gtk4::Button = builder.object("button_stop_in_dialog").unwrap();
         let evk_button_stop_in_dialog = EventControllerKey::new();
@@ -53,7 +53,7 @@ impl GuiProgressDialog {
             label_stage,
             label_progress_current_stage,
             label_progress_all_stages,
-            grid_progress_stages,
+            grid_progress,
             button_stop_in_dialog,
             evk_button_stop_in_dialog,
         }

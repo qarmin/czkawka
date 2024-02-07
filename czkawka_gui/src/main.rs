@@ -9,7 +9,6 @@ use std::env;
 use std::ffi::OsString;
 
 use crossbeam_channel::{unbounded, Receiver, Sender};
-use glib::Priority;
 use gtk4::gio::ApplicationFlags;
 use gtk4::prelude::*;
 use gtk4::Application;
@@ -82,10 +81,7 @@ fn main() {
 fn build_ui(application: &Application, arguments: &[OsString]) {
     let gui_data: GuiData = GuiData::new_with_application(application);
 
-    // Used for getting data from thread
-    // TODO - deprecation happened without any example, so not sure how new code should look like
-    #[allow(deprecated)]
-    let (glib_stop_sender, glib_stop_receiver) = glib::MainContext::channel(Priority::default());
+    let (result_sender, result_receiver) = unbounded();
 
     // Futures progress report
     let (progress_sender, progress_receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
@@ -111,7 +107,7 @@ fn build_ui(application: &Application, arguments: &[OsString]) {
 
     connect_button_delete(&gui_data);
     connect_button_save(&gui_data);
-    connect_button_search(&gui_data, glib_stop_sender, progress_sender);
+    connect_button_search(&gui_data, result_sender, progress_sender);
     connect_button_select(&gui_data);
     connect_button_sort(&gui_data);
     connect_button_stop(&gui_data);
@@ -124,7 +120,7 @@ fn build_ui(application: &Application, arguments: &[OsString]) {
     connect_selection_of_directories(&gui_data);
     connect_popover_select(&gui_data);
     connect_popover_sort(&gui_data);
-    connect_compute_results(&gui_data, glib_stop_receiver);
+    connect_compute_results(&gui_data, result_receiver);
     connect_progress_window(&gui_data, progress_receiver);
     connect_show_hide_ui(&gui_data);
     connect_settings(&gui_data);

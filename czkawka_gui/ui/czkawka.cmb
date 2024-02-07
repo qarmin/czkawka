@@ -267,7 +267,7 @@
 	(7,17,"GtkButton","buttons_popover_unselect_all",2,None,None,None,14,None),
 	(8,15,"GtkDialog","window_progress",None,None,None,None,None,None),
 	(8,16,"GtkBox",None,15,None,None,None,None,None),
-	(8,17,"GtkGrid","grid_progress_stages",16,None,None,None,None,None),
+	(8,17,"GtkGrid","grid_progress",16,None,None,None,None,None),
 	(8,18,"GtkLabel","label_progress_all_stages",17,None,None,None,None,None),
 	(8,19,"GtkProgressBar","progress_bar_all_stages",17,None,None,None,1,None),
 	(8,20,"GtkLabel","label_progress_current_stage",17,None,None,None,2,None),
