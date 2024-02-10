@@ -22,7 +22,12 @@ pub fn connect_show_preview(app: &MainWindow) {
         let active_tab = gui_state.get_active_tab();
 
         if active_tab == CurrentTab::SimilarImages && !settings.get_similar_images_show_image_preview() {
-            gui_state.set_preview_visible(false);
+            set_preview_visible(&gui_state, None);
+            return;
+        }
+
+        // Do not load the same image again
+        if image_path == gui_state.get_preview_image_path() {
             return;
         }
 
@@ -42,11 +47,21 @@ pub fn connect_show_preview(app: &MainWindow) {
                 "Loading image took: {:?}, converting image took: {:?}, setting image took: {:?}",
                 load_time, convert_time, set_time
             );
-            gui_state.set_preview_visible(true);
+            set_preview_visible(&gui_state, Some(image_path.as_str()));
         } else {
-            gui_state.set_preview_visible(false);
+            set_preview_visible(&gui_state, None);
         }
     });
+}
+
+fn set_preview_visible(gui_state: &GuiState, preview: Option<&str>) {
+    if let Some(preview) = preview {
+        gui_state.set_preview_image_path(preview.into());
+        gui_state.set_preview_visible(true);
+    } else {
+        gui_state.set_preview_image_path("".into());
+        gui_state.set_preview_visible(false);
+    }
 }
 
 fn convert_into_slint_image(img: DynamicImage) -> slint::Image {

@@ -1,3 +1,5 @@
+import { SelectMode } from "common.slint";
+
 export global Callabler {
     // Bottom panel operations
     callback remove_item_directories(bool);
@@ -7,7 +9,7 @@ export global Callabler {
     callback item_opened(string);
 
     callback delete_selected_items();
-    // callback ();
+    callback select_items(SelectMode);
 
     // Preview
     callback load_image_preview(string);

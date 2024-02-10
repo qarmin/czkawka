@@ -42,6 +42,7 @@ mod connect_directories_changes;
 mod connect_open;
 mod connect_progress_receiver;
 mod connect_scan;
+mod connect_select;
 mod connect_show_preview;
 mod connect_stop;
 mod connect_translation;
