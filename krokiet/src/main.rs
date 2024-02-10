@@ -30,6 +30,7 @@ use crate::connect_directories_changes::connect_add_remove_directories;
 use crate::connect_open::connect_open_items;
 use crate::connect_progress_receiver::connect_progress_gathering;
 use crate::connect_scan::connect_scan_button;
+use crate::connect_select::{connect_select, connect_showing_proper_select_buttons};
 use crate::connect_show_preview::connect_show_preview;
 use crate::connect_stop::connect_stop_button;
 use crate::connect_translation::connect_translations;
@@ -84,6 +85,8 @@ fn main() {
     connect_show_preview(&app);
     connect_translations(&app);
     connect_changing_settings_preset(&app);
+    connect_select(&app);
+    connect_showing_proper_select_buttons(&app);
 
     app.run().unwrap();
 

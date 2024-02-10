@@ -1,6 +1,8 @@
 import {CurrentTab} from "common.slint";
+import {SelectModel, SelectMode} from "common.slint";
 
-// State to show 
+// State Gui state that shows the current state of the GUI
+// It extends Settings global state with settings that are not saved to the settings file
 export global GuiState {
     in-out property <length> app_width;
     in-out property <length> app_height;
@@ -17,4 +19,5 @@ export global GuiState {
 
     in-out property <bool> available_subsettings: active_tab == CurrentTab.SimilarImages;
     in-out property <CurrentTab> active_tab: CurrentTab.EmptyFiles;
+    in-out property <[SelectModel]> select_results_list: [{data: SelectMode.SelectAll, name: "Select All"}, {data: SelectMode.UnselectAll, name: "Deselect All"}];
 }

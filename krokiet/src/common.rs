@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use crate::{CurrentTab, ExcludedDirectoriesModel, IncludedDirectoriesModel};
+use crate::{CurrentTab, ExcludedDirectoriesModel, IncludedDirectoriesModel, MainListModel, MainWindow};
 use slint::{ModelRc, SharedString, VecModel};
 
 // Remember to match updated this according to ui/main_lists.slint and connect_scan.rs files
@@ -24,6 +24,24 @@ pub fn get_is_header_mode(active_tab: CurrentTab) -> bool {
     match active_tab {
         CurrentTab::EmptyFolders | CurrentTab::EmptyFiles => false,
         CurrentTab::SimilarImages => true,
+        CurrentTab::Settings => panic!("Button should be disabled"),
+    }
+}
+
+pub fn get_tool_model(app: &MainWindow, tab: CurrentTab) -> ModelRc<MainListModel> {
+    match tab {
+        CurrentTab::EmptyFolders => app.get_empty_folder_model(),
+        CurrentTab::SimilarImages => app.get_similar_images_model(),
+        CurrentTab::EmptyFiles => app.get_empty_files_model(),
+        CurrentTab::Settings => panic!("Button should be disabled"),
+    }
+}
+
+pub fn set_tool_model(app: &MainWindow, tab: CurrentTab, model: ModelRc<MainListModel>) {
+    match tab {
+        CurrentTab::EmptyFolders => app.set_empty_folder_model(model),
+        CurrentTab::SimilarImages => app.set_similar_images_model(model),
+        CurrentTab::EmptyFiles => app.set_empty_files_model(model),
         CurrentTab::Settings => panic!("Button should be disabled"),
     }
 }

@@ -4,7 +4,7 @@ use std::path::MAIN_SEPARATOR;
 
 use czkawka_core::common::remove_folder_if_contains_only_empty_folders;
 
-use crate::common::{get_is_header_mode, get_name_idx, get_path_idx};
+use crate::common::{get_is_header_mode, get_name_idx, get_path_idx, get_tool_model, set_tool_model};
 use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow};
 
 pub fn connect_delete_button(app: &MainWindow) {
@@ -14,22 +14,12 @@ pub fn connect_delete_button(app: &MainWindow) {
 
         let active_tab = app.global::<GuiState>().get_active_tab();
 
-        let model = match active_tab {
-            CurrentTab::EmptyFolders => app.get_empty_folder_model(),
-            CurrentTab::SimilarImages => app.get_similar_images_model(),
-            CurrentTab::EmptyFiles => app.get_empty_files_model(),
-            CurrentTab::Settings => panic!("Button should be disabled"),
-        };
+        let model = get_tool_model(&app, active_tab);
 
         let new_model = handle_delete_items(&model, active_tab);
 
         if let Some(new_model) = new_model {
-            match active_tab {
-                CurrentTab::EmptyFolders => app.set_empty_folder_model(new_model),
-                CurrentTab::SimilarImages => app.set_similar_images_model(new_model),
-                CurrentTab::EmptyFiles => app.set_empty_files_model(new_model),
-                CurrentTab::Settings => panic!("Button should be disabled"),
-            }
+            set_tool_model(&app, active_tab, new_model);
         }
 
         app.global::<GuiState>().set_preview_visible(false);

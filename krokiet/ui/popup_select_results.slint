@@ -5,7 +5,7 @@ import {MainList} from "main_lists.slint";
 import {CurrentTab, ProgressToSend} from "common.slint";
 import { ActionButtons } from "action_buttons.slint";
 import { Progress } from "progress.slint";
-import {MainListModel} from "common.slint";
+import {MainListModel, SelectMode, SelectModel} from "common.slint";
 import {Settings} from "settings.slint";
 import {Callabler} from "callabler.slint";
 import { BottomPanel } from "bottom_panel.slint";
@@ -15,7 +15,7 @@ import { Preview } from "preview.slint";
 
 export component PopupSelectResults inherits Rectangle {
     callback show_popup();
-    property <[{data: string, name: string}]> model: [{data: "SELECT_ALL", name: "Select All"}, {data: "DESELECT_ALL", name: "Deselect All"}, {data: "INVERT_SELECTION", name: "Invert Selection"}]; 
+    property <[SelectModel]> model: GuiState.select_results_list; 
     property <length> item_height: 30px;
     property <length> item_width: 140px;
     out property <length> all_items_height: item_height * model.length;
@@ -38,7 +38,7 @@ export component PopupSelectResults inherits Rectangle {
                     width: item_width;
     
                     clicked => {
-                        debug(i.data);
+                        Callabler.select_items(i.data);
                         popup_window.close();
                     }
                 }
