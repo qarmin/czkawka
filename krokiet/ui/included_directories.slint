@@ -108,15 +108,12 @@ export component ExcludedDirectories {
                     }
                 }
                 
-                HorizontalLayout {
-                    spacing: 5px;
+                Text {
+                    x: 5px;
                     width: parent.width;
-
-                    Text {
-                        horizontal-stretch: 1.0;
-                        text: r.path;
-                        vertical-alignment: center;
-                    }
+                    height: parent.height;
+                    text: r.path;
+                    vertical-alignment: center;
                 }
             }
         }

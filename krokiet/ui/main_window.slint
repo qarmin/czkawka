@@ -13,7 +13,7 @@ import {ColorPalette} from "color_palette.slint";
 import {GuiState} from "gui_state.slint";
 import { Preview } from "preview.slint";
 import {PopupNewDirectories} from "popup_new_directories.slint";
-import { PopupSelect } from "popup_select.slint";
+import { PopupSelectResults } from "popup_select_results.slint";
 import { ToolSettings } from "tool_settings.slint";
 
 export {Settings, Callabler, GuiState}
@@ -117,6 +117,11 @@ export component MainWindow inherits Window {
                 text_summary_text = "Searching...";
                 root.scan_starting(item);
             }
+            show_select_popup(x_offset, y_offset) => {
+                select_popup_window.x_offset = x_offset;
+                select_popup_window.y_offset = y_offset - select-popup-window.all_items_height - 5px;
+                select_popup_window.show_popup();
+            }
         }
 
         text_summary := LineEdit {
@@ -142,10 +147,16 @@ export component MainWindow inherits Window {
         width: root.width;
     }
 
-    // select_popup_window := PopupSelect {
-    //     height: root.height;
-    //     width: root.width;
-    // }
+    select_popup_window := PopupSelectResults {
+        property <length> x_offset: 0;
+        property <length> y_offset: 0;
+        
+        x: parent.x + x_offset;
+        y: parent.y + y_offset;
+        
+        height: root.height;
+        width: root.width;
+    }
 
 
     scan_ended(scan_text) => {

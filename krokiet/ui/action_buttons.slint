@@ -5,6 +5,7 @@ import {CurrentTab} from "common.slint";
 import {BottomPanelVisibility} from "common.slint";
 import {Callabler} from "callabler.slint";
 import {GuiState} from "gui_state.slint";
+import { ContextMenu } from "widgets/context_menu.slint";
 
 export component VisibilityButton inherits Button {
     in-out property <BottomPanelVisibility> button_visibility;
@@ -20,6 +21,7 @@ export component VisibilityButton inherits Button {
 export component ActionButtons inherits HorizontalLayout {
     callback scan_stopping;
     callback scan_starting(CurrentTab);
+    callback show_select_popup(length, length);
     in-out property <BottomPanelVisibility> bottom_panel_visibility: BottomPanelVisibility.Directories;
     in-out property <bool> stop_requested: false;
     in-out property <bool> scanning;
@@ -65,26 +67,13 @@ export component ActionButtons inherits HorizontalLayout {
         }
     }
 
-    popup_item := PopupWindow {
-        height: root.height;
-        width: root.width;
-        close-on-click: true;
-        VerticalLayout {
-            for i[idx] in ["A","B","C"]: Rectangle {
-                background: red;   
-            }
-        }   
-    }
 
     select_button := Button {
-        visible: false;
         height: parent.height;
         enabled: !scanning && lists_enabled;
         text: "Select";
         clicked => {
-            debug("Selected");
-            popup_item.show();
-            // Callabler.select_items();
+            show_select_popup(self.x - self.width / 2, self.y + parent.y);
         }
     }
 
