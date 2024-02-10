@@ -108,29 +108,12 @@ fn write_similar_images_results_referenced(app: &MainWindow, vector: Vec<(Images
     let items_found = vector.len();
     let items = Rc::new(VecModel::default());
     for (ref_fe, vec_fe) in vector {
-        let (ref_directory, ref_file) = split_path(ref_fe.get_path());
-        let ref_data_model = VecModel::from_slice(&[
-            similar_images::get_string_from_similarity(&ref_fe.similarity, hash_size).into(),
-            format_size(ref_fe.size, BINARY).into(),
-            ref_fe.dimensions.clone().into(),
-            ref_file.into(),
-            ref_directory.into(),
-            NaiveDateTime::from_timestamp_opt(ref_fe.get_modified_date() as i64, 0).unwrap().to_string().into(),
-        ]);
-        insert_data_to_model(&items, ref_data_model, true);
+        let (data_model_str, data_model_int) = prepare_data_model_similar_images(&ref_fe, hash_size);
+        insert_data_to_model(&items, data_model_str, data_model_int, true);
 
         for fe in vec_fe {
-            let (directory, file) = split_path(fe.get_path());
-            let data_model = VecModel::from_slice(&[
-                similar_images::get_string_from_similarity(&fe.similarity, hash_size).into(),
-                format_size(fe.size, BINARY).into(),
-                fe.dimensions.clone().into(),
-                file.into(),
-                directory.into(),
-                NaiveDateTime::from_timestamp_opt(fe.get_modified_date() as i64, 0).unwrap().to_string().into(),
-            ]);
-
-            insert_data_to_model(&items, data_model, false);
+            let (data_model_str, data_model_int) = prepare_data_model_similar_images(&fe, hash_size);
+            insert_data_to_model(&items, data_model_str, data_model_int, false);
         }
     }
     app.set_similar_images_model(items.into());
@@ -141,26 +124,31 @@ fn write_similar_images_results(app: &MainWindow, vector: Vec<Vec<ImagesEntry>>,
     let items_found = vector.len();
     let items = Rc::new(VecModel::default());
     for vec_fe in vector {
-        insert_data_to_model(&items, ModelRc::new(VecModel::default()), true);
+        insert_data_to_model(&items, ModelRc::new(VecModel::default()), ModelRc::new(VecModel::default()), true);
         for fe in vec_fe {
-            let (directory, file) = split_path(fe.get_path());
-            let data_model = VecModel::from_slice(&[
-                similar_images::get_string_from_similarity(&fe.similarity, hash_size).into(),
-                format_size(fe.size, BINARY).into(),
-                fe.dimensions.clone().into(),
-                file.into(),
-                directory.into(),
-                NaiveDateTime::from_timestamp_opt(fe.get_modified_date() as i64, 0).unwrap().to_string().into(),
-            ]);
-
-            insert_data_to_model(&items, data_model, false);
+            let (data_model_str, data_model_int) = prepare_data_model_similar_images(&fe, hash_size);
+            insert_data_to_model(&items, data_model_str, data_model_int, false);
         }
     }
     app.set_similar_images_model(items.into());
     app.invoke_scan_ended(format!("Found {items_found} similar images files").into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
+fn prepare_data_model_similar_images(fe: &ImagesEntry, hash_size: u8) -> (ModelRc<SharedString>, ModelRc<i32>) {
+    let (directory, file) = split_path(fe.get_path());
+    let data_model_str = VecModel::from_slice(&[
+        similar_images::get_string_from_similarity(&fe.similarity, hash_size).into(),
+        format_size(fe.size, BINARY).into(),
+        format!("{}x{}", fe.width, fe.height).into(),
+        file.into(),
+        directory.into(),
+        NaiveDateTime::from_timestamp_opt(fe.get_modified_date() as i64, 0).unwrap().to_string().into(),
+    ]);
+    let data_model_int = VecModel::from_slice(&[fe.width as i32, fe.height as i32]);
+    (data_model_str, data_model_int)
+}
 
+///////////////////////////////// Empty Files
 fn scan_empty_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>, custom_settings: SettingsCustom) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
@@ -184,20 +172,26 @@ fn write_empty_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages:
     let items_found = vector.len();
     let items = Rc::new(VecModel::default());
     for fe in vector {
-        let (directory, file) = split_path(fe.get_path());
-        let data_model = VecModel::from_slice(&[
-            file.into(),
-            directory.into(),
-            NaiveDateTime::from_timestamp_opt(fe.get_modified_date() as i64, 0).unwrap().to_string().into(),
-        ]);
-
-        insert_data_to_model(&items, data_model, false);
+        let (data_model_str, data_model_int) = prepare_data_model_empty_files(&fe);
+        insert_data_to_model(&items, data_model_str, data_model_int, false);
     }
     app.set_empty_files_model(items.into());
     app.invoke_scan_ended(format!("Found {items_found} empty files").into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 
+fn prepare_data_model_empty_files(fe: &FileEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
+    let (directory, file) = split_path(fe.get_path());
+    let data_model_str = VecModel::from_slice(&[
+        file.into(),
+        directory.into(),
+        NaiveDateTime::from_timestamp_opt(fe.get_modified_date() as i64, 0).unwrap().to_string().into(),
+    ]);
+    let data_model_int = VecModel::from_slice(&[]);
+    (data_model_str, data_model_int)
+}
+
+////////////////////////////////////////// Empty Folders
 fn scan_empty_folders(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>, custom_settings: SettingsCustom) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
@@ -221,26 +215,33 @@ fn write_empty_folders_results(app: &MainWindow, vector: Vec<FolderEntry>, messa
     let items_found = vector.len();
     let items = Rc::new(VecModel::default());
     for fe in vector {
-        let (directory, file) = split_path(&fe.path);
-        let data_model = VecModel::from_slice(&[
-            file.into(),
-            directory.into(),
-            NaiveDateTime::from_timestamp_opt(fe.modified_date as i64, 0).unwrap().to_string().into(),
-        ]);
-
-        insert_data_to_model(&items, data_model, false);
+        let (data_model_str, data_model_int) = prepare_data_model_empty_folders(&fe);
+        insert_data_to_model(&items, data_model_str, data_model_int, false);
     }
     app.set_empty_folder_model(items.into());
     app.invoke_scan_ended(format!("Found {items_found} empty folders").into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 
-fn insert_data_to_model(items: &Rc<VecModel<MainListModel>>, data_model: ModelRc<SharedString>, header_row: bool) {
+fn prepare_data_model_empty_folders(fe: &FolderEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
+    let (directory, file) = split_path(&fe.path);
+    let data_model_str = VecModel::from_slice(&[
+        file.into(),
+        directory.into(),
+        NaiveDateTime::from_timestamp_opt(fe.modified_date as i64, 0).unwrap().to_string().into(),
+    ]);
+    let data_model_int = VecModel::from_slice(&[]);
+    (data_model_str, data_model_int)
+}
+
+////////////////////////////////////////// Common
+fn insert_data_to_model(items: &Rc<VecModel<MainListModel>>, data_model_str: ModelRc<SharedString>, data_model_int: ModelRc<i32>, header_row: bool) {
     let main = MainListModel {
         checked: false,
         header_row,
         selected_row: false,
-        val: ModelRc::new(data_model),
+        val_str: ModelRc::new(data_model_str),
+        val_int: ModelRc::new(data_model_int), // TODO fill
     };
     items.push(main);
 }

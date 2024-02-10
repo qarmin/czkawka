@@ -9,10 +9,10 @@ export component SelectableTableView inherits Rectangle {
     callback item_opened(string);
     in property <[string]> columns;
     in-out property <[MainListModel]> values: [
-        {checked: false, selected_row: false, header_row: true, val: ["kropkarz", "/Xd1", "24.10.2023"]} ,
-        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
-        {checked: false, selected_row: false, header_row: false, val: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"]} ,
-        {checked: true, selected_row: false, header_row: false, val: ["lokkaler", "/Xd1/Vide2", "01.23.1911"]}
+        {checked: false, selected_row: false, header_row: true, val_str: ["kropkarz", "/Xd1", "24.10.2023"], val_int: []} ,
+        {checked: false, selected_row: false, header_row: false, val_str: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []} ,
+        {checked: false, selected_row: false, header_row: false, val_str: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []} ,
+        {checked: true, selected_row: false, header_row: false, val_str: ["lokkaler", "/Xd1/Vide2", "01.23.1911"], val_int: []}
     ];
     in-out property <[length]> column_sizes: [30px, 80px, 150px, 160px];
     private property <int> column_number: column-sizes.length + 1;
@@ -89,24 +89,24 @@ export component SelectableTableView inherits Rectangle {
                             }
 
                             if (root.selected_item != -1) {
-                                Callabler.load_image_preview(r.val[root.parentPathIdx - 1] + "/" + r.val[root.fileNameIdx - 1]);
+                                Callabler.load_image_preview(r.val_str[root.parentPathIdx - 1] + "/" + r.val_str[root.fileNameIdx - 1]);
                             } else {
                                 GuiState.preview_visible = false;
                             }
                         }
                     }
                     double-clicked => {
-                            Callabler.item_opened(r.val[root.parentPathIdx - 1] + "/" + r.val[root.fileNameIdx - 1])
+                            Callabler.item_opened(r.val_str[root.parentPathIdx - 1] + "/" + r.val_str[root.fileNameIdx - 1])
                     }
                     pointer-event(event) => {
                         // TODO this should be clicked by double-click - https://github.com/slint-ui/slint/issues/4235
                         if (event.button == PointerEventButton.right && event.kind == PointerEventKind.up) {
-                            Callabler.item_opened(r.val[root.parentPathIdx - 1])
+                            Callabler.item_opened(r.val_str[root.parentPathIdx - 1])
                         } else if (event.button == PointerEventButton.left && event.kind == PointerEventKind.up) {
                             clicked_manual();
                         }
                         //else if (event.button == PointerEventButton.middle && event.kind == PointerEventKind.up) {
-                        //    Callabler.item_opened(r.val[root.parentPathIdx - 1] + "/" + r.val[root.fileNameIdx - 1])
+                        //    Callabler.item_opened(r.val_str[root.parentPathIdx - 1] + "/" + r.val_str[root.fileNameIdx - 1])
                         //}
                     }
                 }
@@ -123,7 +123,7 @@ export component SelectableTableView inherits Rectangle {
 
                     HorizontalLayout {
                         spacing: 5px;
-                        for f [idx] in r.val: Text {
+                        for f [idx] in r.val_str: Text {
                             width: root.column-sizes[idx + 1];
                             text: f;
                             font-size: 12px;

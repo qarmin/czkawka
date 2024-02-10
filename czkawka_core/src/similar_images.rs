@@ -40,7 +40,8 @@ pub const SIMILAR_VALUES: [[u32; 6]; 4] = [
 pub struct ImagesEntry {
     pub path: PathBuf,
     pub size: u64,
-    pub dimensions: String,
+    pub width: u32,
+    pub height: u32,
     pub modified_date: u64,
     pub hash: ImHash,
     pub similarity: u32,
@@ -65,7 +66,8 @@ impl FileEntry {
             path: self.path,
             modified_date: self.modified_date,
 
-            dimensions: String::new(),
+            width: 0,
+            height: 0,
             hash: Vec::new(),
             similarity: 0,
             image_type: ImageType::Unknown,
@@ -393,7 +395,8 @@ impl SimilarImages {
 
         let dimensions = img.dimensions();
 
-        file_entry.dimensions = format!("{}x{}", dimensions.0, dimensions.1);
+        file_entry.width = dimensions.0;
+        file_entry.height = dimensions.1;
 
         let hasher_config = HasherConfig::new()
             .hash_size(self.hash_size as u32, self.hash_size as u32)
@@ -782,9 +785,10 @@ impl PrintResults for SimilarImages {
                 for file_entry in struct_similar {
                     writeln!(
                         writer,
-                        "{:?} - {} - {} - {}",
+                        "{:?} - {}x{} - {} - {}",
                         file_entry.path,
-                        file_entry.dimensions,
+                        file_entry.width,
+                        file_entry.height,
                         format_size(file_entry.size, BINARY),
                         get_string_from_similarity(&file_entry.similarity, self.hash_size)
                     )?;
@@ -799,18 +803,20 @@ impl PrintResults for SimilarImages {
                 writeln!(writer)?;
                 writeln!(
                     writer,
-                    "{:?} - {} - {} - {}",
+                    "{:?} - {}x{} - {} - {}",
                     file_entry.path,
-                    file_entry.dimensions,
+                    file_entry.width,
+                    file_entry.height,
                     format_size(file_entry.size, BINARY),
                     get_string_from_similarity(&file_entry.similarity, self.hash_size)
                 )?;
                 for file_entry in vec_file_entry {
                     writeln!(
                         writer,
-                        "{:?} - {} - {} - {}",
+                        "{:?} - {}x{} - {} - {}",
                         file_entry.path,
-                        file_entry.dimensions,
+                        file_entry.width,
+                        file_entry.height,
                         format_size(file_entry.size, BINARY),
                         get_string_from_similarity(&file_entry.similarity, self.hash_size)
                     )?;
@@ -1505,7 +1511,8 @@ mod tests {
         ImagesEntry {
             path: PathBuf::from(name.to_string()),
             size: 0,
-            dimensions: String::new(),
+            width: 100,
+            height: 100,
             modified_date: 0,
             hash,
             similarity: 0,

@@ -1,6 +1,6 @@
 use crate::common::{get_tool_model, set_tool_model};
+use crate::SelectModel;
 use crate::{Callabler, GuiState, MainListModel, MainWindow, SelectMode};
-use crate::{CurrentTab, SelectModel};
 use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
 // TODO optimize this, not sure if it is possible to not copy entire model to just select item
@@ -22,7 +22,7 @@ pub fn connect_select(app: &MainWindow) {
 }
 
 pub fn connect_showing_proper_select_buttons(app: &MainWindow) {
-    set_select_buttons(&app);
+    set_select_buttons(app);
     let a = app.as_weak();
     app.global::<Callabler>().on_tab_changed(move || {
         let app = a.upgrade().unwrap();

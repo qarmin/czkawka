@@ -49,8 +49,8 @@ fn remove_selected_items(items: Vec<MainListModel>, active_tab: CurrentTab) {
     let items_to_remove = items
         .iter()
         .map(|item| {
-            let path = item.val.iter().nth(path_idx).unwrap();
-            let name = item.val.iter().nth(name_idx).unwrap();
+            let path = item.val_str.iter().nth(path_idx).unwrap();
+            let name = item.val_str.iter().nth(name_idx).unwrap();
             format!("{}{}{}", path, MAIN_SEPARATOR, name)
         })
         .collect::<Vec<_>>();
@@ -196,8 +196,8 @@ mod tests {
             (false, false, false, vec!["5"]),
         ]);
         let (to_delete, left) = filter_out_checked_items(&items, false);
-        let to_delete_data = get_single_data_from_model(&to_delete);
-        let left_data = get_single_data_from_model(&left);
+        let to_delete_data = get_single_data_str_from_model(&to_delete);
+        let left_data = get_single_data_str_from_model(&left);
 
         assert_eq!(to_delete_data, vec!["3", "4"]);
         assert_eq!(left_data, vec!["1", "2", "5"]);
@@ -216,8 +216,8 @@ mod tests {
             (false, false, false, vec!["8"]),
         ]);
         let (to_delete, left) = filter_out_checked_items(&items, true);
-        let to_delete_data = get_single_data_from_model(&to_delete);
-        let left_data = get_single_data_from_model(&left);
+        let to_delete_data = get_single_data_str_from_model(&to_delete);
+        let left_data = get_single_data_str_from_model(&left);
 
         assert_eq!(to_delete_data, vec!["3"]);
         assert_eq!(left_data, vec!["6", "7", "8"]);
@@ -236,15 +236,15 @@ mod tests {
             (false, false, false, vec!["8"]),
         ]);
         let (to_delete, left) = filter_out_checked_items(&items, true);
-        let to_delete_data = get_single_data_from_model(&to_delete);
-        let left_data = get_single_data_from_model(&left);
+        let to_delete_data = get_single_data_str_from_model(&to_delete);
+        let left_data = get_single_data_str_from_model(&left);
 
         assert_eq!(to_delete_data, vec!["3"]);
         assert_eq!(left_data, vec!["1", "2", "4", "5", "6"]);
     }
 
-    fn get_single_data_from_model(model: &[MainListModel]) -> Vec<String> {
-        let mut d = model.iter().map(|item| item.val.iter().next().unwrap().to_string()).collect::<Vec<_>>();
+    fn get_single_data_str_from_model(model: &[MainListModel]) -> Vec<String> {
+        let mut d = model.iter().map(|item| item.val_str.iter().next().unwrap().to_string()).collect::<Vec<_>>();
         d.sort();
         d
     }
@@ -258,7 +258,8 @@ mod tests {
                 checked: item.0,
                 header_row: item.1,
                 selected_row: item.2,
-                val: ModelRc::new(all_items),
+                val_str: ModelRc::new(all_items),
+                val_int: ModelRc::new(VecModel::default()),
             });
         }
         ModelRc::new(model)
