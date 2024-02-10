@@ -97,7 +97,7 @@ pub fn connect_compute_results(gui_data: &GuiData, result_receiver: Receiver<Mes
 
                     match msg {
                         Message::Duplicates(df) => {
-                            computer_duplicate_finder(
+                            compute_duplicate_finder(
                                 df,
                                 &entry_info,
                                 &tree_view_duplicate_finder,
@@ -109,7 +109,7 @@ pub fn connect_compute_results(gui_data: &GuiData, result_receiver: Receiver<Mes
                             );
                         }
                         Message::EmptyFolders(ef) => {
-                            computer_empty_folders(
+                            compute_empty_folders(
                                 ef,
                                 &entry_info,
                                 &tree_view_empty_folder_finder,
@@ -121,7 +121,7 @@ pub fn connect_compute_results(gui_data: &GuiData, result_receiver: Receiver<Mes
                             );
                         }
                         Message::EmptyFiles(vf) => {
-                            computer_empty_files(
+                            compute_empty_files(
                                 vf,
                                 &entry_info,
                                 &tree_view_empty_files_finder,
@@ -133,7 +133,7 @@ pub fn connect_compute_results(gui_data: &GuiData, result_receiver: Receiver<Mes
                             );
                         }
                         Message::BigFiles(bf) => {
-                            computer_big_files(
+                            compute_big_files(
                                 bf,
                                 &entry_info,
                                 &tree_view_big_files_finder,
@@ -145,7 +145,7 @@ pub fn connect_compute_results(gui_data: &GuiData, result_receiver: Receiver<Mes
                             );
                         }
                         Message::Temporary(tf) => {
-                            computer_temporary_files(
+                            compute_temporary_files(
                                 tf,
                                 &entry_info,
                                 &tree_view_temporary_files_finder,
@@ -157,7 +157,7 @@ pub fn connect_compute_results(gui_data: &GuiData, result_receiver: Receiver<Mes
                             );
                         }
                         Message::SimilarImages(sf) => {
-                            computer_similar_images(
+                            compute_similar_images(
                                 sf,
                                 &entry_info,
                                 &tree_view_similar_images_finder,
@@ -170,7 +170,7 @@ pub fn connect_compute_results(gui_data: &GuiData, result_receiver: Receiver<Mes
                             );
                         }
                         Message::SimilarVideos(ff) => {
-                            computer_similar_videos(
+                            compute_similar_videos(
                                 ff,
                                 &entry_info,
                                 &tree_view_similar_videos_finder,
@@ -182,7 +182,7 @@ pub fn connect_compute_results(gui_data: &GuiData, result_receiver: Receiver<Mes
                             );
                         }
                         Message::SameMusic(mf) => {
-                            computer_same_music(
+                            compute_same_music(
                                 mf,
                                 &entry_info,
                                 &tree_view_same_music_finder,
@@ -194,7 +194,7 @@ pub fn connect_compute_results(gui_data: &GuiData, result_receiver: Receiver<Mes
                             );
                         }
                         Message::InvalidSymlinks(ifs) => {
-                            computer_invalid_symlinks(
+                            compute_invalid_symlinks(
                                 ifs,
                                 &entry_info,
                                 &tree_view_invalid_symlinks,
@@ -206,7 +206,7 @@ pub fn connect_compute_results(gui_data: &GuiData, result_receiver: Receiver<Mes
                             );
                         }
                         Message::BrokenFiles(br) => {
-                            computer_broken_files(
+                            compute_broken_files(
                                 br,
                                 &entry_info,
                                 &tree_view_broken_files,
@@ -218,7 +218,7 @@ pub fn connect_compute_results(gui_data: &GuiData, result_receiver: Receiver<Mes
                             );
                         }
                         Message::BadExtensions(be) => {
-                            computer_bad_extensions(
+                            compute_bad_extensions(
                                 be,
                                 &entry_info,
                                 &tree_view_bad_extensions,
@@ -239,8 +239,8 @@ pub fn connect_compute_results(gui_data: &GuiData, result_receiver: Receiver<Mes
     });
 }
 
-#[fun_time(message = "computer_bad_extensions", level = "debug")]
-fn computer_bad_extensions(
+#[fun_time(message = "compute_bad_extensions", level = "debug")]
+fn compute_bad_extensions(
     be: BadExtensions,
     entry_info: &Entry,
     tree_view: &TreeView,
@@ -304,8 +304,8 @@ fn computer_bad_extensions(
     }
 }
 
-#[fun_time(message = "computer_broken_files", level = "debug")]
-fn computer_broken_files(
+#[fun_time(message = "compute_broken_files", level = "debug")]
+fn compute_broken_files(
     br: BrokenFiles,
     entry_info: &Entry,
     tree_view: &TreeView,
@@ -369,8 +369,8 @@ fn computer_broken_files(
     }
 }
 
-#[fun_time(message = "computer_invalid_symlinks", level = "debug")]
-fn computer_invalid_symlinks(
+#[fun_time(message = "compute_invalid_symlinks", level = "debug")]
+fn compute_invalid_symlinks(
     ifs: InvalidSymlinks,
     entry_info: &Entry,
     tree_view: &TreeView,
@@ -435,8 +435,8 @@ fn computer_invalid_symlinks(
     }
 }
 
-#[fun_time(message = "computer_same_music", level = "debug")]
-fn computer_same_music(
+#[fun_time(message = "compute_same_music", level = "debug")]
+fn compute_same_music(
     mf: SameMusic,
     entry_info: &Entry,
     tree_view: &TreeView,
@@ -602,8 +602,8 @@ fn computer_same_music(
     }
 }
 
-#[fun_time(message = "computer_similar_videos", level = "debug")]
-fn computer_similar_videos(
+#[fun_time(message = "compute_similar_videos", level = "debug")]
+fn compute_similar_videos(
     ff: SimilarVideos,
     entry_info: &Entry,
     tree_view: &TreeView,
@@ -696,8 +696,8 @@ fn computer_similar_videos(
     }
 }
 
-#[fun_time(message = "computer_similar_images", level = "debug")]
-fn computer_similar_images(
+#[fun_time(message = "compute_similar_images", level = "debug")]
+fn compute_similar_images(
     sf: SimilarImages,
     entry_info: &Entry,
     tree_view: &TreeView,
@@ -827,8 +827,8 @@ fn computer_similar_images(
     }
 }
 
-#[fun_time(message = "computer_temporary_files", level = "debug")]
-fn computer_temporary_files(
+#[fun_time(message = "compute_temporary_files", level = "debug")]
+fn compute_temporary_files(
     tf: Temporary,
     entry_info: &Entry,
     tree_view: &TreeView,
@@ -890,8 +890,8 @@ fn computer_temporary_files(
     }
 }
 
-#[fun_time(message = "computer_big_files", level = "debug")]
-fn computer_big_files(
+#[fun_time(message = "compute_big_files", level = "debug")]
+fn compute_big_files(
     bf: BigFile,
     entry_info: &Entry,
     tree_view: &TreeView,
@@ -952,8 +952,8 @@ fn computer_big_files(
     }
 }
 
-#[fun_time(message = "computer_empty_files", level = "debug")]
-fn computer_empty_files(
+#[fun_time(message = "compute_empty_files", level = "debug")]
+fn compute_empty_files(
     vf: EmptyFiles,
     entry_info: &Entry,
     tree_view: &TreeView,
@@ -1013,8 +1013,8 @@ fn computer_empty_files(
     }
 }
 
-#[fun_time(message = "computer_empty_folders", level = "debug")]
-fn computer_empty_folders(
+#[fun_time(message = "compute_empty_folders", level = "debug")]
+fn compute_empty_folders(
     ef: EmptyFolder,
     entry_info: &Entry,
     tree_view: &TreeView,
@@ -1076,8 +1076,8 @@ fn computer_empty_folders(
     }
 }
 
-#[fun_time(message = "computer_duplicate_finder", level = "debug")]
-fn computer_duplicate_finder(
+#[fun_time(message = "compute_duplicate_finder", level = "debug")]
+fn compute_duplicate_finder(
     df: DuplicateFinder,
     entry_info: &Entry,
     tree_view_duplicate_finder: &TreeView,
