@@ -34,7 +34,7 @@ jobs:
 
       - name: Enable LTO
         run: sed -i 's/#lto = "fat"/lto = "fat"/g' Cargo.toml
-        if: ${{ matrix.toolchain == 'release' }}
+        if: ${{ (matrix.type == 'release') }}
 
       - name: Build Release
         run: cargo build --release --bin czkawka_cli

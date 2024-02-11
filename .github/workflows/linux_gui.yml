@@ -23,7 +23,7 @@ jobs:
 
       - name: Enable LTO
         run: sed -i 's/#lto = "fat"/lto = "fat"/g' Cargo.toml
-        if: ${{ matrix.toolchain == 'release' }}
+        if: ${{ (matrix.type == 'release') }}
 
       - name: Build Release Krokiet
         run: cargo build --release --bin krokiet
@@ -53,7 +53,7 @@ jobs:
 
       - name: Enable LTO
         run: sed -i 's/#lto = "fat"/lto = "fat"/g' Cargo.toml
-        if: ${{ matrix.toolchain == 'release' }}
+        if: ${{ (matrix.type == 'release') }}
 
       - name: Build Release Krokiet heif
         run: cargo build --release --bin krokiet --features "heif,libraw"
@@ -83,7 +83,7 @@ jobs:
 
       - name: Enable LTO
         run: sed -i 's/#lto = "fat"/lto = "fat"/g' Cargo.toml
-        if: ${{ matrix.toolchain == 'release' }}
+        if: ${{ (matrix.type == 'release') }}
 
       - name: Build Release Heif Libraw
         run: cargo build --release --bin czkawka_gui --features "heif,libraw"
@@ -125,7 +125,7 @@ jobs:
 
       - name: Enable LTO
         run: sed -i 's/#lto = "fat"/lto = "fat"/g' Cargo.toml
-        if: ${{ matrix.toolchain == 'release' }}
+        if: ${{ (matrix.type == 'release') }}
 
       - name: Build Release
         run: cargo build --release --bin czkawka_gui
