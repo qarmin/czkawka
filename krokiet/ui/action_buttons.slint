@@ -72,7 +72,7 @@ export component ActionButtons inherits HorizontalLayout {
         enabled: !scanning && lists_enabled;
         text: "Select";
         clicked => {
-            show_select_popup(self.x - self.width / 2, self.y + parent.y);
+            show_select_popup(self.x + self.width / 2, self.y + parent.y);
         }
     }
 

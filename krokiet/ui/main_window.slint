@@ -119,7 +119,7 @@ export component MainWindow inherits Window {
             }
             show_select_popup(x_offset, y_offset) => {
                 select_popup_window.x_offset = x_offset;
-                select_popup_window.y_offset = y_offset - select-popup-window.all_items_height - 5px;
+                select_popup_window.y_offset = y_offset;
                 select_popup_window.show_popup();
             }
         }
@@ -151,8 +151,8 @@ export component MainWindow inherits Window {
         property <length> x_offset: 0;
         property <length> y_offset: 0;
         
-        x: parent.x + x_offset;
-        y: parent.y + y_offset;
+        x: parent.x + x_offset - self.item_width / 2.0;
+        y: parent.y + y_offset - self.all_items_height - 5px;
         
         height: root.height;
         width: root.width;

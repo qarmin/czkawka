@@ -26,6 +26,12 @@ pub struct FolderEntry {
     pub modified_date: u64,
 }
 
+impl FolderEntry {
+    pub fn get_modified_date(&self) -> u64 {
+        self.modified_date
+    }
+}
+
 pub struct EmptyFolder {
     common_data: CommonToolData,
     information: Info,

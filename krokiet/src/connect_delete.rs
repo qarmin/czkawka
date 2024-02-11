@@ -4,7 +4,7 @@ use std::path::MAIN_SEPARATOR;
 
 use czkawka_core::common::remove_folder_if_contains_only_empty_folders;
 
-use crate::common::{get_is_header_mode, get_name_idx, get_path_idx, get_tool_model, set_tool_model};
+use crate::common::{get_is_header_mode, get_str_name_idx, get_str_path_idx, get_tool_model, set_tool_model};
 use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow};
 
 pub fn connect_delete_button(app: &MainWindow) {
@@ -44,8 +44,8 @@ fn handle_delete_items(items: &ModelRc<MainListModel>, active_tab: CurrentTab) -
 // and at the end should be send signal to main thread to update model
 // TODO handle also situations where cannot delete file/folder
 fn remove_selected_items(items: Vec<MainListModel>, active_tab: CurrentTab) {
-    let path_idx = get_path_idx(active_tab);
-    let name_idx = get_name_idx(active_tab);
+    let path_idx = get_str_path_idx(active_tab);
+    let name_idx = get_str_name_idx(active_tab);
     let items_to_remove = items
         .iter()
         .map(|item| {

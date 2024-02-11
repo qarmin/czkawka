@@ -19,5 +19,5 @@ export global GuiState {
 
     in-out property <bool> available_subsettings: active_tab == CurrentTab.SimilarImages;
     in-out property <CurrentTab> active_tab: CurrentTab.EmptyFiles;
-    in-out property <[SelectModel]> select_results_list: [{data: SelectMode.SelectAll, name: "Select All"}, {data: SelectMode.UnselectAll, name: "Deselect All"}];
+    in-out property <[SelectModel]> select_results_list: [{data: SelectMode.SelectAll, name: "Select All"}, {data: SelectMode.UnselectAll, name: "Deselect All"}, {data: SelectMode.SelectTheSmallestResolution, name: "Select the smallest resolution"}];
 }

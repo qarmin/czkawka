@@ -16,6 +16,7 @@ use czkawka_core::empty_folder::{EmptyFolder, FolderEntry};
 use czkawka_core::similar_images;
 use czkawka_core::similar_images::{ImagesEntry, SimilarImages};
 
+use crate::common::split_u64_into_i32s;
 use crate::settings::{collect_settings, SettingsCustom, ALLOWED_HASH_TYPE_VALUES, ALLOWED_RESIZE_ALGORITHM_VALUES};
 use crate::{CurrentTab, GuiState, MainListModel, MainWindow, ProgressToSend};
 
@@ -50,7 +51,6 @@ pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressDat
     });
 }
 
-// TODO handle referenced folders
 fn scan_similar_images(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>, custom_settings: SettingsCustom) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
@@ -70,6 +70,7 @@ fn scan_similar_images(a: Weak<MainWindow>, progress_sender: Sender<ProgressData
                 .expect("Hash type not found")
                 .2;
             finder.set_hash_alg(hash_type);
+            dbg!(&custom_settings.similar_images_sub_ignore_same_size);
             finder.set_exclude_images_with_same_size(custom_settings.similar_images_sub_ignore_same_size);
             finder.set_similarity(custom_settings.similar_images_sub_similarity as u32);
             finder.find_similar_images(Some(&stop_receiver), Some(&progress_sender));
@@ -144,7 +145,9 @@ fn prepare_data_model_similar_images(fe: &ImagesEntry, hash_size: u8) -> (ModelR
         directory.into(),
         NaiveDateTime::from_timestamp_opt(fe.get_modified_date() as i64, 0).unwrap().to_string().into(),
     ]);
-    let data_model_int = VecModel::from_slice(&[fe.width as i32, fe.height as i32]);
+    let modification_split = split_u64_into_i32s(fe.get_modified_date());
+    let size_split = split_u64_into_i32s(fe.size);
+    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1, size_split.0, size_split.1, fe.width as i32, fe.height as i32]);
     (data_model_str, data_model_int)
 }
 
@@ -187,7 +190,9 @@ fn prepare_data_model_empty_files(fe: &FileEntry) -> (ModelRc<SharedString>, Mod
         directory.into(),
         NaiveDateTime::from_timestamp_opt(fe.get_modified_date() as i64, 0).unwrap().to_string().into(),
     ]);
-    let data_model_int = VecModel::from_slice(&[]);
+    let modification_split = split_u64_into_i32s(fe.get_modified_date());
+    let size_split = split_u64_into_i32s(fe.size);
+    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1, size_split.0, size_split.1]);
     (data_model_str, data_model_int)
 }
 
@@ -230,7 +235,8 @@ fn prepare_data_model_empty_folders(fe: &FolderEntry) -> (ModelRc<SharedString>,
         directory.into(),
         NaiveDateTime::from_timestamp_opt(fe.modified_date as i64, 0).unwrap().to_string().into(),
     ]);
-    let data_model_int = VecModel::from_slice(&[]);
+    let modification_split = split_u64_into_i32s(fe.get_modified_date());
+    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1]);
     (data_model_str, data_model_int)
 }
 
@@ -241,7 +247,7 @@ fn insert_data_to_model(items: &Rc<VecModel<MainListModel>>, data_model_str: Mod
         header_row,
         selected_row: false,
         val_str: ModelRc::new(data_model_str),
-        val_int: ModelRc::new(data_model_int), // TODO fill
+        val_int: ModelRc::new(data_model_int),
     };
     items.push(main);
 }

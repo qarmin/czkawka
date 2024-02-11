@@ -17,7 +17,7 @@ export component PopupSelectResults inherits Rectangle {
     callback show_popup();
     property <[SelectModel]> model: GuiState.select_results_list; 
     property <length> item_height: 30px;
-    property <length> item_width: 140px;
+    out property <length> item_width: 200px;
     out property <length> all_items_height: item_height * model.length;
 
     popup_window := PopupWindow {
