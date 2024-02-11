@@ -31,7 +31,7 @@ jobs:
         run: rustup default ${{ matrix.toolchain }}
 
       - name: Enable LTO
-        run: sed -i 's/#lto = "fat"/lto = "fat"/g' Cargo.toml
+        run: sed -i '' 's/#lto = "fat"/lto = "fat"/g' Cargo.toml
         if: ${{ (matrix.type == 'release') }}
 
       - name: Build Release
