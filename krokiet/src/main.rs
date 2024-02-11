@@ -27,6 +27,7 @@ use czkawka_core::common_dir_traversal::ProgressData;
 
 use crate::connect_delete::connect_delete_button;
 use crate::connect_directories_changes::connect_add_remove_directories;
+use crate::connect_move::connect_move;
 use crate::connect_open::connect_open_items;
 use crate::connect_progress_receiver::connect_progress_gathering;
 use crate::connect_scan::connect_scan_button;
@@ -40,6 +41,7 @@ use crate::settings::{connect_changing_settings_preset, create_default_settings_
 mod common;
 mod connect_delete;
 mod connect_directories_changes;
+mod connect_move;
 mod connect_open;
 mod connect_progress_receiver;
 mod connect_scan;
@@ -48,12 +50,9 @@ mod connect_show_preview;
 mod connect_stop;
 mod connect_translation;
 mod localizer_krokiet;
+mod model_operations;
 mod set_initial_gui_info;
 mod settings;
-
-// use std::rc::Rc;
-
-// use slint::{ModelRc, VecModel};
 
 slint::include_modules!();
 fn main() {
@@ -87,6 +86,7 @@ fn main() {
     connect_changing_settings_preset(&app);
     connect_select(&app);
     connect_showing_proper_select_buttons(&app);
+    connect_move(&app);
 
     app.run().unwrap();
 
