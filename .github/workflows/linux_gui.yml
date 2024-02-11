@@ -21,6 +21,10 @@ jobs:
       - name: Setup rust version
         run: rustup default ${{ matrix.toolchain }}
 
+      - name: Enable LTO
+        run: sed -i 's/#lto = "fat"/lto = "fat"/g' Cargo.toml
+        if: ${{ matrix.toolchain == 'release' }}
+
       - name: Build Release Krokiet
         run: cargo build --release --bin krokiet
         if: ${{ (matrix.type == 'release') }}
@@ -47,6 +51,10 @@ jobs:
       - name: Setup rust version
         run: rustup default ${{ matrix.toolchain }}
 
+      - name: Enable LTO
+        run: sed -i 's/#lto = "fat"/lto = "fat"/g' Cargo.toml
+        if: ${{ matrix.toolchain == 'release' }}
+
       - name: Build Release Krokiet heif
         run: cargo build --release --bin krokiet --features "heif,libraw"
         if: ${{ (matrix.type == 'release') }}
@@ -72,6 +80,10 @@ jobs:
 
       - name: Setup rust version
         run: rustup default ${{ matrix.toolchain }}
+
+      - name: Enable LTO
+        run: sed -i 's/#lto = "fat"/lto = "fat"/g' Cargo.toml
+        if: ${{ matrix.toolchain == 'release' }}
 
       - name: Build Release Heif Libraw
         run: cargo build --release --bin czkawka_gui --features "heif,libraw"
@@ -110,6 +122,10 @@ jobs:
 
       - name: Setup rust version
         run: rustup default ${{ matrix.toolchain }}
+
+      - name: Enable LTO
+        run: sed -i 's/#lto = "fat"/lto = "fat"/g' Cargo.toml
+        if: ${{ matrix.toolchain == 'release' }}
 
       - name: Build Release
         run: cargo build --release --bin czkawka_gui

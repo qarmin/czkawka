@@ -24,6 +24,10 @@ jobs:
       - name: Setup rust version
         run: rustup default ${{ matrix.toolchain }}
 
+      - name: Enable LTO
+        run: sed -i 's/#lto = "fat"/lto = "fat"/g' Cargo.toml
+        if: ${{ matrix.toolchain == 'release' }}
+
       - name: Build Release
         run: cargo build --release --bin czkawka_cli
         if: ${{ (matrix.type == 'release') }}

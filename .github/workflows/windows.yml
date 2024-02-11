@@ -30,6 +30,9 @@ jobs:
         run: |
           rustup target add x86_64-pc-windows-gnu
 
+      - name: Enable LTO
+        run: sed -i 's/#lto = "fat"/lto = "fat"/g' Cargo.toml
+
       - name: Compile Krokiet
         run: cargo build --release --target x86_64-pc-windows-gnu --bin krokiet
 
@@ -74,6 +77,9 @@ jobs:
 
       - name: Setup rust version
         run: rustup default stable-x86_64-pc-windows-gnu
+
+      - name: Enable LTO
+        run: sed -i 's/#lto = "fat"/lto = "fat"/g' Cargo.toml
 
       - name: Compile Krokiet
         run: cargo build --release --bin krokiet
