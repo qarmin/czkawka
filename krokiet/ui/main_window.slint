@@ -13,6 +13,7 @@ import {ColorPalette} from "color_palette.slint";
 import {GuiState} from "gui_state.slint";
 import { Preview } from "preview.slint";
 import {PopupNewDirectories} from "popup_new_directories.slint";
+import {PopupDelete} from "popup_delete.slint";
 import { PopupSelectResults } from "popup_select_results.slint";
 import { ToolSettings } from "tool_settings.slint";
 
@@ -122,6 +123,9 @@ export component MainWindow inherits Window {
                 select_popup_window.y_offset = y_offset;
                 select_popup_window.show_popup();
             }
+            show_remove_popup => {
+                delete_popup_window.show_popup();
+            }
         }
 
         text_summary := LineEdit {
@@ -158,6 +162,13 @@ export component MainWindow inherits Window {
         width: root.width;
     }
 
+    delete_popup_window := PopupDelete {
+        height: root.height;
+        width: root.width;
+
+        x: parent.x + (root.width - self.popup_width) / 2.0;
+        y: parent.y + (parent.height - self.popup_height) / 2.0;
+    }
 
     scan_ended(scan_text) => {
         text_summary_text = scan_text;

@@ -21,6 +21,7 @@ export component ActionButtons inherits HorizontalLayout {
     callback scan_stopping;
     callback scan_starting(CurrentTab);
     callback show_select_popup(length, length);
+    callback show_remove_popup();
     in-out property <BottomPanelVisibility> bottom_panel_visibility: BottomPanelVisibility.Directories;
     in-out property <bool> stop_requested: false;
     in-out property <bool> scanning;
@@ -57,22 +58,21 @@ export component ActionButtons inherits HorizontalLayout {
         horizontal-stretch: 0.5;
     }
 
-    delete_button := Button {
-        height: parent.height;
-        enabled: !scanning && lists_enabled;
-        text: "Delete";
-        clicked => {
-            Callabler.delete_selected_items();
-        }
-    }
-
-
     select_button := Button {
         height: parent.height;
         enabled: !scanning && lists_enabled;
         text: "Select";
         clicked => {
             show_select_popup(self.x + self.width / 2, self.y + parent.y);
+        }
+    }
+
+    delete_button := Button {
+        height: parent.height;
+        enabled: !scanning && lists_enabled;
+        text: "Delete";
+        clicked => {
+            show_remove_popup();
         }
     }
 

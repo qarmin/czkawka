@@ -38,14 +38,14 @@ pub fn get_int_size_idx(active_tab: CurrentTab) -> usize {
     }
 }
 
-pub fn get_width_idx(active_tab: CurrentTab) -> usize {
+pub fn get_int_width_idx(active_tab: CurrentTab) -> usize {
     match active_tab {
         CurrentTab::SimilarImages => 4,
         CurrentTab::Settings => panic!("Button should be disabled"),
         _ => panic!("Unable to get height from this tab"),
     }
 }
-pub fn get_height_idx(active_tab: CurrentTab) -> usize {
+pub fn get_int_height_idx(active_tab: CurrentTab) -> usize {
     match active_tab {
         CurrentTab::SimilarImages => 5,
         CurrentTab::Settings => panic!("Button should be disabled"),
