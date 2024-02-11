@@ -16,7 +16,7 @@ jobs:
         use_heif: [ normal ]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install dependencies(mostly sd)
         run: |
@@ -37,7 +37,7 @@ jobs:
         run: cargo build --release --target x86_64-pc-windows-gnu --bin krokiet
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: krokiet-windows-c-on-linux-${{ github.sha }}-${{ matrix.use_heif }}
           path: |
@@ -53,7 +53,7 @@ jobs:
         run: cargo build --release --target x86_64-pc-windows-gnu --bin krokiet
 
       - name: Upload artifacts Console
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: krokiet-windows-c-on-linux-${{ github.sha }}-${{ matrix.use_heif }}-console
           path: |
@@ -67,7 +67,7 @@ jobs:
         use_heif: [ normal ]
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install dependencies(mostly sd)
         run: |
@@ -85,7 +85,7 @@ jobs:
         run: cargo build --release --bin krokiet
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: krokiet-windows-c-on-windows-${{ github.sha }}-${{ matrix.use_heif }}
           path: |
@@ -101,7 +101,7 @@ jobs:
         run: cargo build --release --bin krokiet
 
       - name: Upload artifacts Console
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: krokiet-windows-c-on-windows-${{ github.sha }}-${{ matrix.use_heif }}-console
           path: |
@@ -118,7 +118,7 @@ jobs:
     container:
       image: ghcr.io/mglolenstine/gtk4-cross:gtk-4.10
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install additional dependencies
         # gio is for the build script
         run: |
@@ -161,7 +161,7 @@ jobs:
           rm gtk4_theme.zip
           cd ../..
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: czkawka-windows-${{ github.sha }}-${{ matrix.use_heif }}-4.10
           path: |
@@ -177,7 +177,7 @@ jobs:
     container:
       image: ghcr.io/piegamesde/gtk4-cross:gtk-4.6
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install additional dependencies
         # gio is for the build script
         run: |
@@ -220,7 +220,7 @@ jobs:
           rm gtk4_theme.zip
           cd ../..
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: czkawka-windows-${{ github.sha }}-${{ matrix.use_heif }}-4.6
           path: |
@@ -233,7 +233,7 @@ jobs:
     container:
       image: ghcr.io/piegamesde/gtk4-cross:gtk-4.6
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install dependencies(mostly sd)
         run: |
           dnf install wget -y
@@ -284,7 +284,7 @@ jobs:
           rm gtk4_theme.zip
           cd ../..
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: czkawka-windows-${{ github.sha }}-console-4.6
           path: |

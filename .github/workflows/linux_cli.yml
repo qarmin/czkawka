@@ -16,7 +16,7 @@ jobs:
         type: [ release ]
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install basic libraries
         run: sudo apt update || true; sudo apt install libheif-dev ffmpeg -y
@@ -33,7 +33,7 @@ jobs:
         if: ${{ (matrix.type == 'release') }}
 
       - name: Store Linux CLI
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: czkawka_cli-${{ runner.os }}-${{ matrix.toolchain }}
           path: target/release/czkawka_cli
