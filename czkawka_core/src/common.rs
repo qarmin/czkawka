@@ -146,22 +146,21 @@ pub const VIDEO_FILES_EXTENSIONS: &[&str] = &[
 pub const LOOP_DURATION: u32 = 20; //ms
 pub const SEND_PROGRESS_DATA_TIME_BETWEEN: u32 = 200; //ms
 
-pub fn remove_folder_if_contains_only_empty_folders(path: impl AsRef<Path>) -> bool {
+pub fn remove_folder_if_contains_only_empty_folders(path: impl AsRef<Path>, remove_to_trash: bool) -> Result<(), String> {
     let path = path.as_ref();
     if !path.is_dir() {
-        error!("Trying to remove folder which is not a directory");
-        return false;
+        return Err(format!("Trying to remove folder {path:?} which is not a directory",));
     }
 
     let mut entries_to_check = Vec::new();
     let Ok(initial_entry) = path.read_dir() else {
-        return false;
+        return Err(format!("Cannot read directory {path:?}",));
     };
     for entry in initial_entry {
         if let Ok(entry) = entry {
             entries_to_check.push(entry);
         } else {
-            return false;
+            return Err(format!("Cannot read entry from directory {path:?}"));
         }
     }
     loop {
@@ -169,25 +168,29 @@ pub fn remove_folder_if_contains_only_empty_folders(path: impl AsRef<Path>) -> b
             break;
         };
         let Some(file_type) = entry.file_type().ok() else {
-            return false;
+            return Err(format!("Folder contains file with unknown type {:?} inside {path:?}", entry.path()));
         };
 
         if !file_type.is_dir() {
-            return false;
+            return Err(format!("Folder contains file {:?} inside {path:?}", entry.path(),));
         }
         let Ok(internal_read_dir) = entry.path().read_dir() else {
-            return false;
+            return Err(format!("Cannot read directory {:?} inside {path:?}", entry.path()));
         };
         for internal_elements in internal_read_dir {
             if let Ok(internal_element) = internal_elements {
                 entries_to_check.push(internal_element);
             } else {
-                return false;
+                return Err(format!("Cannot read entry from directory {:?} inside {path:?}", entry.path()));
             }
         }
     }
 
-    fs::remove_dir_all(path).is_ok()
+    if remove_to_trash {
+        trash::delete(path).map_err(|e| format!("Cannot move folder {path:?} to trash, reason {e}"))
+    } else {
+        fs::remove_dir_all(path).map_err(|e| format!("Cannot remove directory {path:?}, reason {e}"))
+    }
 }
 
 pub fn open_cache_folder(cache_file_name: &str, save_to_cache: bool, use_json: bool, warnings: &mut Vec<String>) -> Option<((Option<File>, PathBuf), (Option<File>, PathBuf))> {
@@ -621,20 +624,20 @@ mod test {
         fs::create_dir(&sub_dir).unwrap();
 
         // Test with empty directory
-        assert!(remove_folder_if_contains_only_empty_folders(&sub_dir));
+        assert!(remove_folder_if_contains_only_empty_folders(&sub_dir, false).is_ok());
         assert!(!Path::new(&sub_dir).exists());
 
         // Test with directory containing an empty directory
         fs::create_dir(&sub_dir).unwrap();
         fs::create_dir(sub_dir.join("empty_sub_dir")).unwrap();
-        assert!(remove_folder_if_contains_only_empty_folders(&sub_dir));
+        assert!(remove_folder_if_contains_only_empty_folders(&sub_dir, false).is_ok());
         assert!(!Path::new(&sub_dir).exists());
 
         // Test with directory containing a file
         fs::create_dir(&sub_dir).unwrap();
         let mut file = fs::File::create(sub_dir.join("file.txt")).unwrap();
         writeln!(file, "Hello, world!").unwrap();
-        assert!(!remove_folder_if_contains_only_empty_folders(&sub_dir));
+        assert!(remove_folder_if_contains_only_empty_folders(&sub_dir, false).is_err());
         assert!(Path::new(&sub_dir).exists());
     }
 

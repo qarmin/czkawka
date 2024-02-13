@@ -9,6 +9,15 @@ impl Messages {
     pub fn new() -> Self {
         Default::default()
     }
+    pub fn new_from_errors(errors: Vec<String>) -> Self {
+        Messages { errors, ..Default::default() }
+    }
+    pub fn new_from_warnings(warnings: Vec<String>) -> Self {
+        Messages { warnings, ..Default::default() }
+    }
+    pub fn new_from_messages(messages: Vec<String>) -> Self {
+        Messages { messages, ..Default::default() }
+    }
     pub fn print_messages(&self) {
         println!("{}", self.create_messages_text());
     }

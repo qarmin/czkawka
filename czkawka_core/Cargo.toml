@@ -39,7 +39,7 @@ symphonia = { version = "0.5", features = ["all"] }
 
 # Hashes for duplicate files
 blake3 = "1.5"
-crc32fast = "1.3"
+crc32fast = "1.4"
 xxhash-rust = { version = "0.8", features = ["xxh3"] }
 
 tempfile = "3.10"
@@ -75,6 +75,7 @@ anyhow = { version = "1.0" }
 
 
 state = "0.6"
+trash = "3.3"
 
 os_info = { version = "3", default-features = false }
 log = "0.4.20"

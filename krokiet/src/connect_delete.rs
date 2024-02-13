@@ -2,6 +2,7 @@ use rayon::prelude::*;
 use slint::{ComponentHandle, ModelRc, VecModel};
 
 use czkawka_core::common::remove_folder_if_contains_only_empty_folders;
+use czkawka_core::common_messages::Messages;
 
 use crate::common::{get_is_header_mode, get_tool_model, set_tool_model};
 use crate::model_operations::{collect_full_path_from_model, deselect_all_items, filter_out_checked_items};
@@ -16,43 +17,54 @@ pub fn connect_delete_button(app: &MainWindow) {
 
         let model = get_tool_model(&app, active_tab);
 
-        let new_model = handle_delete_items(&model, active_tab);
+        let remove_to_trash = false;
+
+        let (errors, new_model) = handle_delete_items(&model, active_tab, remove_to_trash);
 
         if let Some(new_model) = new_model {
             set_tool_model(&app, active_tab, new_model);
         }
 
+        app.global::<GuiState>().set_info_text(Messages::new_from_errors(errors).create_messages_text().into());
+
         app.global::<GuiState>().set_preview_visible(false);
     });
 }
 
-fn handle_delete_items(items: &ModelRc<MainListModel>, active_tab: CurrentTab) -> Option<ModelRc<MainListModel>> {
+fn handle_delete_items(items: &ModelRc<MainListModel>, active_tab: CurrentTab, remove_to_trash: bool) -> (Vec<String>, Option<ModelRc<MainListModel>>) {
     let (entries_to_delete, mut entries_left) = filter_out_checked_items(items, get_is_header_mode(active_tab));
 
     if !entries_to_delete.is_empty() {
         let vec_items_to_remove = collect_full_path_from_model(&entries_to_delete, active_tab);
-        remove_selected_items(vec_items_to_remove, active_tab);
+        let errors = remove_selected_items(vec_items_to_remove, active_tab, remove_to_trash);
         deselect_all_items(&mut entries_left);
 
         let r = ModelRc::new(VecModel::from(entries_left)); // TODO here maybe should also stay old model if entries cannot be removed
-        return Some(r);
+        return (errors, Some(r));
     }
-    None
+    (vec![], None)
 }
 
 // TODO delete in parallel items, consider to add progress bar
 // For empty folders double check if folders are really empty - this function probably should be run in thread
 // and at the end should be send signal to main thread to update model
 // TODO handle also situations where cannot delete file/folder
-fn remove_selected_items(items_to_remove: Vec<String>, active_tab: CurrentTab) {
+fn remove_selected_items(items_to_remove: Vec<String>, active_tab: CurrentTab, remove_to_trash: bool) -> Vec<String> {
     // Iterate over empty folders and not delete them if they are not empty
     if active_tab == CurrentTab::EmptyFolders {
-        items_to_remove.into_par_iter().for_each(|item| {
-            remove_folder_if_contains_only_empty_folders(item);
-        });
+        items_to_remove
+            .into_par_iter()
+            .filter_map(|item| remove_folder_if_contains_only_empty_folders(item, remove_to_trash).err())
+            .collect()
     } else {
-        items_to_remove.into_par_iter().for_each(|item| {
-            let _ = std::fs::remove_file(item);
-        });
+        items_to_remove
+            .into_par_iter()
+            .filter_map(|item| {
+                if let Err(e) = std::fs::remove_file(item) {
+                    return Some(format!("Error while removing file: {e}"));
+                }
+                None
+            })
+            .collect()
     }
 }
