@@ -22,6 +22,8 @@ export global Callabler {
 
     callback tab_changed();
 
+    callback move_items(bool, bool, string);
+
     // Translations
     pure callback translate(string, [{key: string, value: string}]) -> string;
 

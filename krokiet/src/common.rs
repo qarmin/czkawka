@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
-use crate::{CurrentTab, ExcludedDirectoriesModel, GuiState, IncludedDirectoriesModel, MainListModel, MainWindow};
-use slint::{ComponentHandle, ModelRc, SharedString, VecModel};
+use crate::{CurrentTab, ExcludedDirectoriesModel, IncludedDirectoriesModel, MainListModel, MainWindow};
+use slint::{ModelRc, SharedString, VecModel};
 
 // Remember to match updated this according to ui/main_lists.slint and connect_scan.rs files
 pub fn get_str_path_idx(active_tab: CurrentTab) -> usize {

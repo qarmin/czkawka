@@ -8,6 +8,8 @@ pub fn deselect_all_items(items: &mut [MainListModel]) {
         item.selected_row = false;
     }
 }
+
+#[allow(unused)]
 pub fn select_all_items(items: &mut [MainListModel]) {
     for item in items {
         item.selected_row = true;

@@ -22,6 +22,7 @@ export component ActionButtons inherits HorizontalLayout {
     callback scan_starting(CurrentTab);
     callback show_select_popup(length, length);
     callback show_remove_popup();
+    callback request_folder_to_move();
     in-out property <BottomPanelVisibility> bottom_panel_visibility: BottomPanelVisibility.Directories;
     in-out property <bool> stop_requested: false;
     in-out property <bool> scanning;
@@ -63,7 +64,7 @@ export component ActionButtons inherits HorizontalLayout {
         enabled: !scanning && lists_enabled;
         text: "Move";
         clicked => {
-            // show_move_popup(self.x + self.width / 2, self.y + parent.y);
+            request_folder_to_move();
         }
     }
 

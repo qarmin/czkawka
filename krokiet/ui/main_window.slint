@@ -14,6 +14,7 @@ import {GuiState} from "gui_state.slint";
 import { Preview } from "preview.slint";
 import {PopupNewDirectories} from "popup_new_directories.slint";
 import {PopupDelete} from "popup_delete.slint";
+import {PopupMoveFolders} from "popup_move_folders.slint";
 import { PopupSelectResults } from "popup_select_results.slint";
 import { ToolSettings } from "tool_settings.slint";
 
@@ -24,6 +25,8 @@ export component MainWindow inherits Window {
     callback scan_starting(CurrentTab);
     callback folder_choose_requested(bool);
     callback scan_ended(string);
+    callback show_move_folders_dialog(string);
+    callback folders_move_choose_requested();
 
     min-width: 300px;
     preferred-width: 800px;
@@ -51,7 +54,7 @@ export component MainWindow inherits Window {
         {checked: true, selected_row: false, header_row: false, val_str: ["lokkaler", "/Xd1/Vide2", "01.23.1911"], val_int: []}
     ];
     in-out property <[MainListModel]> similar_images_model: [];
-    
+
     VerticalBox {
         HorizontalBox {
             vertical-stretch: 1.0;
@@ -123,6 +126,9 @@ export component MainWindow inherits Window {
                 select_popup_window.y_offset = y_offset;
                 select_popup_window.show_popup();
             }
+            request_folder_to_move => {
+                folders_move_choose_requested();
+            }
             show_remove_popup => {
                 delete_popup_window.show_popup();
             }
@@ -168,6 +174,19 @@ export component MainWindow inherits Window {
 
         x: parent.x + (root.width - self.popup_width) / 2.0;
         y: parent.y + (parent.height - self.popup_height) / 2.0;
+    }
+
+    move_popup_window := PopupMoveFolders {
+        height: root.height;
+        width: root.width;
+
+        x: parent.x + (root.width - self.popup_width) / 2.0;
+        y: parent.y + (parent.height - self.popup_height) / 2.0;
+    }
+
+    show_move_folders_dialog(folder_name) => {
+        move_popup_window.folder_name = folder_name;
+        move_popup_window.show_popup();
     }
 
     scan_ended(scan_text) => {

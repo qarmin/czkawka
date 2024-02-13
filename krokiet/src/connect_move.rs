@@ -4,23 +4,32 @@ use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow};
 
 use czkawka_core::common_messages::Messages;
 use rayon::prelude::*;
+use rfd::FileDialog;
 use slint::{ComponentHandle, ModelRc, VecModel};
 use std::path::{Path, PathBuf};
 use std::{fs, path};
 
 pub fn connect_move(app: &MainWindow) {
     let a = app.as_weak();
-    app.global::<Callabler>().on_move_items(move |select_mode, preserve_structure, copy_mode| {
+    app.on_folders_move_choose_requested(move || {
+        let app = a.upgrade().unwrap();
+
+        let file_dialog = FileDialog::new();
+        let Some(folder) = file_dialog.pick_folder() else {
+            return;
+        };
+        let folder_str = folder.to_string_lossy().to_string();
+
+        app.invoke_show_move_folders_dialog(folder_str.into());
+    });
+
+    let a = app.as_weak();
+    app.global::<Callabler>().on_move_items(move |preserve_structure, copy_mode, output_folder| {
         let app = a.upgrade().unwrap();
         let active_tab = app.global::<GuiState>().get_active_tab();
         let current_model = get_tool_model(&app, active_tab);
 
-        // If tree structure will be
-        let preserve_structure = false;
-        let copy_mode = true;
-        let output_folder = "/home/rafal/Downloads/AAAAAAAA";
-
-        let (errors, new_model) = move_operation(&current_model, preserve_structure, copy_mode, output_folder, active_tab);
+        let (errors, new_model) = move_operation(&current_model, preserve_structure, copy_mode, &output_folder, active_tab);
         if let Some(new_model) = new_model {
             set_tool_model(&app, active_tab, new_model);
         }
@@ -104,10 +113,7 @@ fn collect_path_and_create_folders(input_path: &str, input_file: &str, output_pa
 
     let mut output_full_path = PathBuf::from(output_path);
     if preserve_structure {
-        output_full_path.extend(Path::new(input_path).components().filter(|c| match c {
-            path::Component::Normal(_) => true,
-            _ => false,
-        }));
+        output_full_path.extend(Path::new(input_path).components().filter(|c| matches!(c, path::Component::Normal(_))));
     };
     let _ = fs::create_dir_all(&output_full_path);
     output_full_path.push(input_file);
