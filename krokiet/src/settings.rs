@@ -199,7 +199,7 @@ pub fn create_default_settings_files() {
         }
     }
 
-    for i in 1..=10 {
+    for i in 0..10 {
         let config_file = get_config_file(i);
         if let Some(config_file) = config_file {
             if !config_file.is_file() {

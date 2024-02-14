@@ -9,7 +9,7 @@ pub fn get_str_path_idx(active_tab: CurrentTab) -> usize {
         CurrentTab::EmptyFolders => 1,
         CurrentTab::EmptyFiles => 1,
         CurrentTab::SimilarImages => 4,
-        CurrentTab::Settings => panic!("Button should be disabled"),
+        CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
     }
 }
 pub fn get_str_name_idx(active_tab: CurrentTab) -> usize {
@@ -17,7 +17,7 @@ pub fn get_str_name_idx(active_tab: CurrentTab) -> usize {
         CurrentTab::EmptyFolders => 0,
         CurrentTab::EmptyFiles => 0,
         CurrentTab::SimilarImages => 3,
-        CurrentTab::Settings => panic!("Button should be disabled"),
+        CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
     }
 }
 
@@ -26,14 +26,14 @@ pub fn get_int_modification_date_idx(active_tab: CurrentTab) -> usize {
         CurrentTab::EmptyFiles => 0,
         CurrentTab::SimilarImages => 0,
         CurrentTab::EmptyFolders => 0,
-        CurrentTab::Settings => panic!("Button should be disabled"),
+        CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
     }
 }
 pub fn get_int_size_idx(active_tab: CurrentTab) -> usize {
     match active_tab {
         CurrentTab::EmptyFiles => 2,
         CurrentTab::SimilarImages => 2,
-        CurrentTab::Settings => panic!("Button should be disabled"),
+        CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
         CurrentTab::EmptyFolders => panic!("Unable to get size from this tab"),
     }
 }
@@ -41,14 +41,14 @@ pub fn get_int_size_idx(active_tab: CurrentTab) -> usize {
 pub fn get_int_width_idx(active_tab: CurrentTab) -> usize {
     match active_tab {
         CurrentTab::SimilarImages => 4,
-        CurrentTab::Settings => panic!("Button should be disabled"),
+        CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
         _ => panic!("Unable to get height from this tab"),
     }
 }
 pub fn get_int_height_idx(active_tab: CurrentTab) -> usize {
     match active_tab {
         CurrentTab::SimilarImages => 5,
-        CurrentTab::Settings => panic!("Button should be disabled"),
+        CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
         _ => panic!("Unable to get height from this tab"),
     }
 }
@@ -57,7 +57,7 @@ pub fn get_is_header_mode(active_tab: CurrentTab) -> bool {
     match active_tab {
         CurrentTab::EmptyFolders | CurrentTab::EmptyFiles => false,
         CurrentTab::SimilarImages => true,
-        CurrentTab::Settings => panic!("Button should be disabled"),
+        CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
     }
 }
 
@@ -66,7 +66,7 @@ pub fn get_tool_model(app: &MainWindow, tab: CurrentTab) -> ModelRc<MainListMode
         CurrentTab::EmptyFolders => app.get_empty_folder_model(),
         CurrentTab::SimilarImages => app.get_similar_images_model(),
         CurrentTab::EmptyFiles => app.get_empty_files_model(),
-        CurrentTab::Settings => panic!("Button should be disabled"),
+        CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
     }
 }
 
@@ -75,7 +75,7 @@ pub fn set_tool_model(app: &MainWindow, tab: CurrentTab, model: ModelRc<MainList
         CurrentTab::EmptyFolders => app.set_empty_folder_model(model),
         CurrentTab::SimilarImages => app.set_similar_images_model(model),
         CurrentTab::EmptyFiles => app.set_empty_files_model(model),
-        CurrentTab::Settings => panic!("Button should be disabled"),
+        CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
     }
 }
 

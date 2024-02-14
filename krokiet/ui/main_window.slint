@@ -83,7 +83,7 @@ export component MainWindow inherits Window {
                         similar_images_model <=> root.similar_images_model;
                     }
                     preview_or_tool_settings := Rectangle {
-                        visible: (GuiState.preview_visible || tool_settings.visible) && GuiState.active_tab != CurrentTab.Settings;
+                        visible: (GuiState.preview_visible || tool_settings.visible) && GuiState.is_tool_tab_active;
                         height: parent.height;
                         x: parent.width / 2;
                         width: self.visible ? parent.width / 2 : 0;
@@ -134,9 +134,17 @@ export component MainWindow inherits Window {
             }
         }
 
-        text_summary := LineEdit {
-            text: text_summary_text;
-            read-only: true;
+        HorizontalLayout {
+            spacing: 5px;
+            text_summary := LineEdit {
+                text: text_summary_text;
+                read-only: true;
+            }
+            Text {
+                text: "Krokiet\n7.0.0";
+                vertical-alignment: center;
+                horizontal-alignment: center;
+            }
         }
 
         bottom_panel := BottomPanel {

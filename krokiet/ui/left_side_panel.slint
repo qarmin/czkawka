@@ -1,5 +1,5 @@
 import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox} from "std-widgets.slint";
-import {CurrentTab} from "common.slint";
+import {CurrentTab, BottomPanelVisibility} from "common.slint";
 import {ColorPalette} from "color_palette.slint";
 import {GuiState} from "gui_state.slint";
 import {Callabler} from "callabler.slint";
@@ -70,10 +70,19 @@ export component LeftSidePanel {
     VerticalLayout {
         spacing: 20px;
         Rectangle {
+            visible: GuiState.active_tab != CurrentTab.About;
             height: 100px;
             Image {
                 width: root.width;
                 source: @image-url("../icons/logo.png");
+            }
+            touch_area := TouchArea {
+                clicked => {
+                    GuiState.active_tab = CurrentTab.About;
+                    Callabler.tab_changed();
+                    root.changed_current_tab();
+                    GuiState.bottom_panel_visibility = BottomPanelVisibility.NotVisible;
+                }
             }
         }
 
@@ -110,7 +119,7 @@ export component LeftSidePanel {
             HorizontalLayout {
                 alignment: start;
                 Button {
-                    visible: GuiState.active_tab != CurrentTab.Settings && GuiState.available_subsettings;
+                    visible: GuiState.available_subsettings;
                     min-width: 20px;
                     min-height: 20px;
                     max-height: self.width;

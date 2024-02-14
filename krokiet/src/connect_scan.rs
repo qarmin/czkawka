@@ -46,7 +46,7 @@ pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressDat
             CurrentTab::SimilarImages => {
                 scan_similar_images(a, progress_sender, stop_receiver, custom_settings);
             }
-            CurrentTab::Settings => panic!("Button should be disabled"),
+            CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
         }
     });
 }
@@ -58,12 +58,12 @@ fn scan_similar_images(a: Weak<MainWindow>, progress_sender: Sender<ProgressData
             let mut finder = SimilarImages::new();
             set_common_settings(&mut finder, &custom_settings);
             finder.set_hash_size(custom_settings.similar_images_sub_hash_size);
-            let resize_algortithm = ALLOWED_RESIZE_ALGORITHM_VALUES
+            let resize_algorithm = ALLOWED_RESIZE_ALGORITHM_VALUES
                 .iter()
                 .find(|(setting_name, _gui_name, _resize_alg)| setting_name == &custom_settings.similar_images_sub_resize_algorithm)
                 .expect("Resize algorithm not found")
                 .2;
-            finder.set_image_filter(resize_algortithm);
+            finder.set_image_filter(resize_algorithm);
             let hash_type = ALLOWED_HASH_TYPE_VALUES
                 .iter()
                 .find(|(setting_name, _gui_name, _resize_alg)| setting_name == &custom_settings.similar_images_sub_hash_type)

@@ -37,4 +37,13 @@ pub fn connect_open_items(app: &MainWindow) {
             error!("Failed to open cache folder {:?}: {e}", cache_folder);
         }
     });
+
+    app.global::<Callabler>().on_open_link(move |link| {
+        match open::that(link.as_str()) {
+            Ok(()) => {}
+            Err(e) => {
+                eprintln!("Failed to open link: {e}");
+            }
+        };
+    });
 }

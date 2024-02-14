@@ -5,6 +5,7 @@ import {CurrentTab, TypeOfOpenedItem} from "common.slint";
 import {MainListModel} from "common.slint";
 import {SettingsList} from "settings_list.slint";
 import {GuiState} from "gui_state.slint";
+import {About} from "about.slint";
 
 export component MainList {
     in-out property <[MainListModel]> empty_folder_model: [
@@ -53,6 +54,10 @@ export component MainList {
 
     settings_list := SettingsList {
         visible: GuiState.active_tab == CurrentTab.Settings;
+    }
+
+    about_app := About {
+        visible: GuiState.active_tab == CurrentTab.About;
     }
 
     focus_item := FocusScope {

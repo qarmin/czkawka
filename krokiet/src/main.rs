@@ -64,10 +64,6 @@ fn main() {
     let (progress_sender, progress_receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
     let (stop_sender, stop_receiver): (Sender<()>, Receiver<()>) = unbounded();
 
-    // to_remove_debug(&app);
-
-    // Slint files may already contains data in models, so clear them before starting - todo,
-    // check if non zeroed models are useful
     zeroing_all_models(&app);
 
     set_initial_gui_infos(&app);
@@ -98,56 +94,3 @@ pub fn zeroing_all_models(app: &MainWindow) {
     app.set_empty_files_model(Rc::new(VecModel::default()).into());
     app.set_similar_images_model(Rc::new(VecModel::default()).into());
 }
-
-// // TODO remove this after debugging - or leave commented
-// pub fn to_remove_debug(app: &MainWindow) {
-//     app.set_empty_folder_model(to_remove_create_without_header("@@").into());
-//     app.set_empty_files_model(to_remove_create_without_header("%%").into());
-//     app.set_similar_images_model(to_remove_create_with_header().into());
-// }
-
-// fn to_remove_create_with_header() -> Rc<VecModel<MainListModel>> {
-//     let header_row_data: Rc<VecModel<MainListModel>> = Rc::new(VecModel::default());
-//     for r in 0..10_000 {
-//         let items = VecModel::default();
-//
-//         for c in 0..3 {
-//             items.push(slint::format!("Item {r}.{c}"));
-//         }
-//
-//         let is_header = r % 3 == 0;
-//         let is_checked = (r % 2 == 0) && !is_header;
-//
-//         let item = MainListModel {
-//             checked: is_checked,
-//             header_row: is_header,
-//             selected_row: false,
-//             val: ModelRc::new(items),
-//         };
-//
-//         header_row_data.push(item);
-//     }
-//     header_row_data
-// }
-// fn to_remove_create_without_header(s: &str) -> Rc<VecModel<MainListModel>> {
-//     let non_header_row_data: Rc<VecModel<MainListModel>> = Rc::new(VecModel::default());
-//     for r in 0..100_000 {
-//         let items = VecModel::default();
-//
-//         for c in 0..3 {
-//             items.push(slint::format!("Item {r}.{c}.{s}"));
-//         }
-//
-//         let is_checked = r % 2 == 0;
-//
-//         let item = MainListModel {
-//             checked: is_checked,
-//             header_row: false,
-//             selected_row: false,
-//             val: ModelRc::new(items),
-//         };
-//
-//         non_header_row_data.push(item);
-//     }
-//     non_header_row_data
-// }
