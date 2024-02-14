@@ -1,5 +1,4 @@
 use std::fs;
-
 use std::io::prelude::*;
 
 use crossbeam_channel::{Receiver, Sender};
@@ -41,7 +40,7 @@ impl EmptyFiles {
 
     #[fun_time(message = "find_empty_files", level = "info")]
     pub fn find_empty_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) {
-        self.optimize_dirs_before_start();
+        self.prepare_items();
         if !self.check_files(stop_receiver, progress_sender) {
             self.common_data.stopped_search = true;
             return;

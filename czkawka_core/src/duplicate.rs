@@ -134,7 +134,7 @@ impl DuplicateFinder {
             ignore_hard_links: true,
             hash_type: HashType::Blake3,
             use_prehash_cache: true,
-            minimal_cache_file_size: 1024 * 3256, // By default cache only >= 256 KB files
+            minimal_cache_file_size: 1024 * 256, // By default cache only >= 256 KB files
             minimal_prehash_cache_file_size: 0,
             case_sensitive_name_comparison: false,
         }
@@ -142,7 +142,7 @@ impl DuplicateFinder {
 
     #[fun_time(message = "find_duplicates", level = "info")]
     pub fn find_duplicates(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) {
-        self.optimize_dirs_before_start();
+        self.prepare_items();
         self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
 
         match self.check_method {

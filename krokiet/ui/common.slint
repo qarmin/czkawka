@@ -20,11 +20,40 @@ export struct MainListModel {
     checked: bool,
     header_row: bool,
     selected_row: bool,
-    val: [string]
+    val_str: [string],
+    val_int: [int]
 }
 
 export enum BottomPanelVisibility {
     NotVisible,
     TextErrors,
     Directories
+}
+
+export struct IncludedDirectoriesModel {
+    path: string,
+    referenced_folder: bool,
+    selected_row: bool,
+}
+
+export struct ExcludedDirectoriesModel {
+    path: string,
+    selected_row: bool,
+}
+
+export enum SelectMode {
+    SelectAll,
+    UnselectAll,
+    InvertSelection,
+    SelectTheBiggestSize,
+    SelectTheBiggestResolution,
+    SelectTheSmallestSize,
+    SelectTheSmallestResolution,
+    SelectNewest,
+    SelectOldest,
+}
+
+export struct SelectModel {
+    data: SelectMode,
+    name: string
 }

@@ -1,7 +1,9 @@
+use std::collections::HashMap;
+
+use slint::{ComponentHandle, Model};
+
 use crate::localizer_krokiet::LANGUAGE_LOADER_GUI;
 use crate::{Callabler, MainWindow};
-use slint::{ComponentHandle, Model};
-use std::collections::HashMap;
 
 pub fn connect_translations(app: &MainWindow) {
     app.global::<Callabler>().on_translate(move |text_to_translate, args| {

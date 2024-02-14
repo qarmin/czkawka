@@ -43,7 +43,7 @@ impl BigFile {
 
     #[fun_time(message = "find_big_files", level = "info")]
     pub fn find_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) {
-        self.optimize_dirs_before_start();
+        self.prepare_items();
         if !self.look_for_big_files(stop_receiver, progress_sender) {
             self.common_data.stopped_search = true;
             return;
@@ -60,6 +60,7 @@ impl BigFile {
             .progress_sender(progress_sender)
             .common_data(&self.common_data)
             .minimal_file_size(1)
+            .maximal_file_size(u64::MAX)
             .max_stage(0)
             .build()
             .run();

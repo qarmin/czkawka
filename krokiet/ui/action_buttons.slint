@@ -20,11 +20,13 @@ export component VisibilityButton inherits Button {
 export component ActionButtons inherits HorizontalLayout {
     callback scan_stopping;
     callback scan_starting(CurrentTab);
+    callback show_select_popup(length, length);
+    callback show_remove_popup();
+    callback request_folder_to_move();
     in-out property <BottomPanelVisibility> bottom_panel_visibility: BottomPanelVisibility.Directories;
     in-out property <bool> stop_requested: false;
     in-out property <bool> scanning;
     in-out property <bool> lists_enabled: GuiState.active_tab != CurrentTab.Settings;
-    // in-out property <>
     out property <int> name;
     height: 30px;
     spacing: 4px;
@@ -57,35 +59,30 @@ export component ActionButtons inherits HorizontalLayout {
         horizontal-stretch: 0.5;
     }
 
+    move_button := Button {
+        height: parent.height;
+        enabled: !scanning && lists_enabled;
+        text: "Move";
+        clicked => {
+            request_folder_to_move();
+        }
+    }
+
+    select_button := Button {
+        height: parent.height;
+        enabled: !scanning && lists_enabled;
+        text: "Select";
+        clicked => {
+            show_select_popup(self.x + self.width / 2, self.y + parent.y);
+        }
+    }
+
     delete_button := Button {
         height: parent.height;
         enabled: !scanning && lists_enabled;
         text: "Delete";
         clicked => {
-            Callabler.delete_selected_items();
-        }
-    }
-
-    popup_item := PopupWindow {
-        height: root.height;
-        width: root.width;
-        close-on-click: true;
-        VerticalLayout {
-            for i[idx] in ["A","B","C"]: Rectangle {
-                background: red;   
-            }
-        }   
-    }
-
-    select_button := Button {
-        visible: false;
-        height: parent.height;
-        enabled: !scanning && lists_enabled;
-        text: "Select";
-        clicked => {
-            debug("Selected");
-            popup_item.show();
-            // Callabler.select_items();
+            show_remove_popup();
         }
     }
 

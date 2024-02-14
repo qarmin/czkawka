@@ -3,19 +3,19 @@ name = "czkawka_gui"
 version = "6.1.0"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2021"
-rust-version = "1.72.1"
+rust-version = "1.74.0"
 description = "GTK frontend of Czkawka"
 license = "MIT"
 homepage = "https://github.com/qarmin/czkawka"
 repository = "https://github.com/qarmin/czkawka"
 
 [dependencies]
-gdk4 = "0.7"
-glib = "0.18"
-gtk4 = { version = "0.7", default-features = false, features = ["v4_6"] }
+gdk4 = "0.8"
+glib = "0.19"
+gtk4 = { version = "0.8", default-features = false, features = ["v4_6"] }
 
 humansize = "2.1"
-chrono = "0.4.31"
+chrono = "0.4.34"
 
 # Used for sending stop signal across threads
 crossbeam-channel = "0.5"
@@ -36,14 +36,14 @@ regex = "1.10"
 image_hasher = "1.2"
 
 # Move files to trash
-trash = "3.2"
+trash = "3.3"
 
 # For moving files(why std::fs doesn't have such features?)
 fs_extra = "1.3"
 
 # Language
 i18n-embed = { version = "0.14", features = ["fluent-system", "desktop-requester"] }
-i18n-embed-fl = "0.7"
+i18n-embed-fl = "0.8"
 rust-embed = { version = "8.2", features = ["debug-embed"] }
 once_cell = "1.19"
 

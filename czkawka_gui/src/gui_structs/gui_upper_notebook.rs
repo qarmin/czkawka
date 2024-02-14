@@ -23,6 +23,7 @@ pub struct GuiUpperNotebook {
 
     pub entry_excluded_items: gtk4::Entry,
     pub entry_allowed_extensions: gtk4::Entry,
+    pub entry_excluded_extensions: gtk4::Entry,
 
     pub check_button_recursive: gtk4::CheckButton,
 
@@ -35,6 +36,7 @@ pub struct GuiUpperNotebook {
 
     pub label_excluded_items: gtk4::Label,
     pub label_allowed_extensions: gtk4::Label,
+    pub label_excluded_extensions: gtk4::Label,
 
     pub entry_general_minimal_size: gtk4::Entry,
     pub entry_general_maximal_size: gtk4::Entry,
@@ -64,6 +66,7 @@ impl GuiUpperNotebook {
         tree_view_excluded_directories.add_controller(gc_tree_view_excluded_directories.clone());
 
         let entry_allowed_extensions: gtk4::Entry = builder.object("entry_allowed_extensions").unwrap();
+        let entry_excluded_extensions: gtk4::Entry = builder.object("entry_excluded_extensions").unwrap();
         let entry_excluded_items: gtk4::Entry = builder.object("entry_excluded_items").unwrap();
 
         let check_button_recursive: gtk4::CheckButton = builder.object("check_button_recursive").unwrap();
@@ -77,6 +80,7 @@ impl GuiUpperNotebook {
 
         let label_excluded_items: gtk4::Label = builder.object("label_excluded_items").unwrap();
         let label_allowed_extensions: gtk4::Label = builder.object("label_allowed_extensions").unwrap();
+        let label_excluded_extensions: gtk4::Label = builder.object("label_excluded_extensions").unwrap();
 
         let entry_general_minimal_size: gtk4::Entry = builder.object("entry_general_minimal_size").unwrap();
         let entry_general_maximal_size: gtk4::Entry = builder.object("entry_general_maximal_size").unwrap();
@@ -103,6 +107,7 @@ impl GuiUpperNotebook {
             gc_tree_view_excluded_directories,
             entry_excluded_items,
             entry_allowed_extensions,
+            entry_excluded_extensions,
             check_button_recursive,
             buttons_manual_add_included_directory,
             buttons_add_included_directory,
@@ -112,6 +117,7 @@ impl GuiUpperNotebook {
             buttons_remove_excluded_directory,
             label_excluded_items,
             label_allowed_extensions,
+            label_excluded_extensions,
             entry_general_minimal_size,
             entry_general_maximal_size,
             label_general_size_bytes,
@@ -141,11 +147,14 @@ impl GuiUpperNotebook {
 
         self.label_allowed_extensions.set_tooltip_text(Some(&flg!("upper_allowed_extensions_tooltip")));
         self.entry_allowed_extensions.set_tooltip_text(Some(&flg!("upper_allowed_extensions_tooltip")));
+        self.label_excluded_extensions.set_tooltip_text(Some(&flg!("upper_excluded_extensions_tooltip")));
+        self.entry_excluded_extensions.set_tooltip_text(Some(&flg!("upper_excluded_extensions_tooltip")));
         self.label_excluded_items.set_tooltip_text(Some(&flg!("upper_excluded_items_tooltip")));
         self.entry_excluded_items.set_tooltip_text(Some(&flg!("upper_excluded_items_tooltip")));
 
         self.label_excluded_items.set_label(&flg!("upper_excluded_items"));
         self.label_allowed_extensions.set_label(&flg!("upper_allowed_extensions"));
+        self.label_excluded_extensions.set_label(&flg!("upper_excluded_extensions"));
 
         self.label_general_size_bytes.set_label(&flg!("main_label_size_bytes"));
         self.label_general_min_size.set_label(&flg!("main_label_min_size"));

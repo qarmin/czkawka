@@ -12,21 +12,25 @@ jobs:
   linux-krokiet-gui:
     strategy:
       matrix:
-        toolchain: [ stable, 1.72.1 ]
+        toolchain: [ stable, 1.74.0 ]
         type: [ release ]
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup rust version
         run: rustup default ${{ matrix.toolchain }}
+
+      - name: Enable LTO
+        run: sed -i 's/#lto = "fat"/lto = "fat"/g' Cargo.toml
+        if: ${{ (matrix.type == 'release') }}
 
       - name: Build Release Krokiet
         run: cargo build --release --bin krokiet
         if: ${{ (matrix.type == 'release') }}
 
       - name: Store Linux GUI Krokiet
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: krokiet-${{ runner.os }}-${{ matrix.toolchain }}
           path: target/release/krokiet
@@ -35,11 +39,11 @@ jobs:
   linux-krokiet-gui-heif:
     strategy:
       matrix:
-        toolchain: [ stable, 1.72.1 ]
+        toolchain: [ stable, 1.74.0 ]
         type: [ release ]
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install basic libraries
         run: sudo apt update || true; sudo apt install libheif-dev libraw-dev -y
@@ -47,12 +51,16 @@ jobs:
       - name: Setup rust version
         run: rustup default ${{ matrix.toolchain }}
 
+      - name: Enable LTO
+        run: sed -i 's/#lto = "fat"/lto = "fat"/g' Cargo.toml
+        if: ${{ (matrix.type == 'release') }}
+
       - name: Build Release Krokiet heif
         run: cargo build --release --bin krokiet --features "heif,libraw"
         if: ${{ (matrix.type == 'release') }}
 
       - name: Store Linux GUI Krokiet heif libraw
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: krokiet-${{ runner.os }}-${{ matrix.toolchain }}-heif-libraw
           path: target/release/krokiet
@@ -61,11 +69,11 @@ jobs:
   linux-gui:
     strategy:
       matrix:
-        toolchain: [ stable, 1.72.1 ]
+        toolchain: [ stable, 1.74.0 ]
         type: [ release ]
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install basic libraries
         run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev -y
@@ -73,12 +81,16 @@ jobs:
       - name: Setup rust version
         run: rustup default ${{ matrix.toolchain }}
 
+      - name: Enable LTO
+        run: sed -i 's/#lto = "fat"/lto = "fat"/g' Cargo.toml
+        if: ${{ (matrix.type == 'release') }}
+
       - name: Build Release Heif Libraw
         run: cargo build --release --bin czkawka_gui --features "heif,libraw"
         if: ${{ (matrix.type == 'release') }}
 
       - name: Store Linux GUI Heif Libraw
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: czkawka_gui-${{ runner.os }}-${{ matrix.toolchain }}-heif-libraw
           path: target/release/czkawka_gui
@@ -90,7 +102,7 @@ jobs:
 
       # Only store stable toolchain
       - name: Store Linux GUI
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: czkawka_gui-${{ runner.os }}-${{ matrix.toolchain }}
           path: target/release/czkawka_gui
@@ -103,13 +115,17 @@ jobs:
         type: [ release ]
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install Dependencies
         run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev librsvg2-dev wget fuse libfuse2 -y
 
       - name: Setup rust version
         run: rustup default ${{ matrix.toolchain }}
+
+      - name: Enable LTO
+        run: sed -i 's/#lto = "fat"/lto = "fat"/g' Cargo.toml
+        if: ${{ (matrix.type == 'release') }}
 
       - name: Build Release
         run: cargo build --release --bin czkawka_gui
@@ -127,7 +143,7 @@ jobs:
           ./linuxdeploy-x86_64.AppImage --appdir AppDir --plugin gtk --output appimage --icon-file data/icons/com.github.qarmin.czkawka.svg --desktop-file data/com.github.qarmin.czkawka.desktop
 
       - name: Store Linux Appimage GUI
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: czkawka_gui-appimage-${{ runner.os }}-${{ matrix.toolchain }}
           path: Czkawka*.AppImage
@@ -144,7 +160,7 @@ jobs:
           mv out/Czkawka*.AppImage out/czkawka_gui-minimal.AppImage
 
       - name: Minimal Appimage Upload
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: czkawka_gui-${{ matrix.toolchain }}_minimal_AppImage
           path: out/*.AppImage
@@ -156,7 +172,7 @@ jobs:
         type: [ debug ]
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install Dependencies
         run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev librsvg2-dev wget fuse libfuse2 -y xvfb

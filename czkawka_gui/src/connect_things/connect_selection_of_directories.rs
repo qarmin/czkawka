@@ -1,7 +1,7 @@
-use gdk4::{DragAction, FileList};
 use std::collections::HashSet;
 use std::path::PathBuf;
 
+use gdk4::{DragAction, FileList};
 use gtk4::prelude::*;
 use gtk4::{DropTarget, FileChooserNative, Notebook, Orientation, ResponseType, TreeView, Window};
 

@@ -269,6 +269,17 @@
                                 <property name="hexpand">1</property>
                               </object>
                             </child>
+                            <child>
+                              <object class="GtkLabel" id="label_excluded_extensions">
+                                <property name="label" translatable="yes">Disabled Extensions</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkEntry" id="entry_excluded_extensions">
+                                <property name="focusable">1</property>
+                                <property name="hexpand">1</property>
+                              </object>
+                            </child>
                           </object>
                         </child>
                         <child>

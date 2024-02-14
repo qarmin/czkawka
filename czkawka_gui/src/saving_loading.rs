@@ -9,7 +9,7 @@ use directories_next::ProjectDirs;
 use gtk4::prelude::*;
 use gtk4::{ComboBoxText, ScrolledWindow, TextView, TreeView};
 
-use czkawka_core::common::get_default_number_of_threads;
+use czkawka_core::common::get_all_available_threads;
 use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::common_items::DEFAULT_EXCLUDED_ITEMS;
 use czkawka_core::similar_images::SIMILAR_VALUES;
@@ -21,7 +21,6 @@ use crate::gui_structs::gui_upper_notebook::GuiUpperNotebook;
 use crate::help_combo_box::DUPLICATES_CHECK_METHOD_COMBO_BOX;
 use crate::help_functions::*;
 use crate::language_functions::{get_language_from_combo_box_text, LANGUAGES_ALL};
-use crate::localizer_core::generate_translation_hashmap;
 
 const SAVE_FILE_NAME: &str = "czkawka_gui_config_4.txt";
 
@@ -82,7 +81,7 @@ impl LoadSaveStruct {
     pub fn get_vector_string(&self, key: &str, default_value: Vec<String>) -> Vec<String> {
         if self.loaded_items.contains_key(key) {
             let mut new_vector = Vec::new();
-            for i in self.loaded_items.get(key).unwrap() {
+            for i in &self.loaded_items[key] {
                 if !i.trim().is_empty() {
                     new_vector.push(i.trim().to_string());
                 }
@@ -105,19 +104,13 @@ impl LoadSaveStruct {
     }
     pub fn get_string(&self, key: String, default_value: String) -> String {
         if self.loaded_items.contains_key(&key) {
-            let item = self.loaded_items.get(&key).unwrap().clone().into_iter().filter(|e| !e.is_empty()).collect::<Vec<String>>();
+            let item = &self.loaded_items[&key].clone().into_iter().filter(|e| !e.is_empty()).collect::<Vec<String>>();
             return if item.len() == 1 {
                 item[0].clone()
             } else if item.is_empty() {
                 String::new()
             } else {
-                add_text_to_text_view(
-                    &self.text_view,
-                    &flg!(
-                        "saving_loading_invalid_string",
-                        generate_translation_hashmap(vec![("key", key), ("result", format!("{item:?}"))])
-                    ),
-                );
+                add_text_to_text_view(&self.text_view, &flg!("saving_loading_invalid_string", key = key, result = format!("{item:?}")));
                 default_value
             };
         }
@@ -126,7 +119,7 @@ impl LoadSaveStruct {
     }
     pub fn get_object<T: std::str::FromStr>(&self, key: String, default_value: T) -> T {
         if self.loaded_items.contains_key(&key) {
-            let item = self.loaded_items.get(&key).unwrap().clone().into_iter().filter(|e| !e.is_empty()).collect::<Vec<String>>();
+            let item = &self.loaded_items[&key].clone().into_iter().filter(|e| !e.is_empty()).collect::<Vec<String>>();
 
             return if item.len() == 1 {
                 if let Ok(t) = item[0].parse::<T>() {
@@ -136,13 +129,7 @@ impl LoadSaveStruct {
                     default_value
                 }
             } else {
-                add_text_to_text_view(
-                    &self.text_view,
-                    &flg!(
-                        "saving_loading_invalid_int",
-                        generate_translation_hashmap(vec![("key", key), ("result", format!("{item:?}"))])
-                    ),
-                );
+                add_text_to_text_view(&self.text_view, &flg!("saving_loading_invalid_int", key = key, result = format!("{item:?}")));
                 default_value
             };
         }
@@ -151,7 +138,7 @@ impl LoadSaveStruct {
     }
     pub fn get_bool(&self, key: String, default_value: bool) -> bool {
         if self.loaded_items.contains_key(&key) {
-            let item = self.loaded_items.get(&key).unwrap().clone().into_iter().filter(|e| !e.is_empty()).collect::<Vec<String>>();
+            let item = &self.loaded_items[&key].clone().into_iter().filter(|e| !e.is_empty()).collect::<Vec<String>>();
             return if item.len() == 1 {
                 let text = item[0].trim().to_lowercase();
                 if text == "false" || text == "0" {
@@ -159,23 +146,11 @@ impl LoadSaveStruct {
                 } else if text == "true" || text == "1" {
                     true
                 } else {
-                    add_text_to_text_view(
-                        &self.text_view,
-                        &flg!(
-                            "saving_loading_decode_problem_bool",
-                            generate_translation_hashmap(vec![("key", key), ("result", item[0].to_string())])
-                        ),
-                    );
+                    add_text_to_text_view(&self.text_view, &flg!("saving_loading_decode_problem_bool", key = key, result = item[0].to_string()));
                     default_value
                 }
             } else {
-                add_text_to_text_view(
-                    &self.text_view,
-                    &flg!(
-                        "saving_loading_invalid_bool",
-                        generate_translation_hashmap(vec![("key", key), ("result", format!("{item:?}"))])
-                    ),
-                );
+                add_text_to_text_view(&self.text_view, &flg!("saving_loading_invalid_bool", key = key, result = format!("{item:?}")));
                 default_value
             };
         }
@@ -186,10 +161,7 @@ impl LoadSaveStruct {
     // Bool, int, string
     pub fn save_var<T: ToString>(&mut self, key: String, value: &T) {
         if self.loaded_items.contains_key(&key) {
-            add_text_to_text_view(
-                &self.text_view,
-                &flg!("saving_loading_saving_same_keys", generate_translation_hashmap(vec![("key", key.clone())])),
-            );
+            add_text_to_text_view(&self.text_view, &flg!("saving_loading_saving_same_keys", key = key.clone()));
         }
 
         self.loaded_items.insert(key, vec![value.to_string()]);
@@ -224,10 +196,7 @@ impl LoadSaveStruct {
                     if !config_dir.is_dir() {
                         add_text_to_text_view(
                             text_view_errors,
-                            &flg!(
-                                "saving_loading_folder_config_instead_file",
-                                generate_translation_hashmap(vec![("path", config_dir.to_string_lossy().to_string())])
-                            ),
+                            &flg!("saving_loading_folder_config_instead_file", path = config_dir.to_string_lossy().to_string()),
                         );
                         return None;
                     }
@@ -236,7 +205,8 @@ impl LoadSaveStruct {
                         text_view_errors,
                         &flg!(
                             "saving_loading_failed_to_create_configuration_folder",
-                            generate_translation_hashmap(vec![("path", config_dir.to_string_lossy().to_string()), ("reason", e.to_string())])
+                            path = config_dir.to_string_lossy().to_string(),
+                            reason = e.to_string()
                         ),
                     );
                     return None;
@@ -249,7 +219,8 @@ impl LoadSaveStruct {
                             text_view_errors,
                             &flg!(
                                 "saving_loading_failed_to_create_config_file",
-                                generate_translation_hashmap(vec![("path", config_file.to_string_lossy().to_string()), ("reason", e.to_string())])
+                                path = config_file.to_string_lossy().to_string(),
+                                reason = e.to_string()
                             ),
                         );
                         return None;
@@ -262,10 +233,7 @@ impl LoadSaveStruct {
                     // Don't show errors when there is no configuration file when starting app
                     add_text_to_text_view(
                         text_view_errors,
-                        &flg!(
-                            "saving_loading_failed_to_read_config_file",
-                            generate_translation_hashmap(vec![("path", config_file.to_string_lossy().to_string())])
-                        ),
+                        &flg!("saving_loading_failed_to_read_config_file", path = config_file.to_string_lossy().to_string()),
                     );
                 }
                 return None;
@@ -278,7 +246,8 @@ impl LoadSaveStruct {
                         text_view_errors,
                         &flg!(
                             "saving_loading_failed_to_create_config_file",
-                            generate_translation_hashmap(vec![("path", config_file.to_string_lossy().to_string()), ("reason", e.to_string())])
+                            path = config_file.to_string_lossy().to_string(),
+                            reason = e.to_string()
                         ),
                     );
                     return None;
@@ -299,7 +268,8 @@ impl LoadSaveStruct {
                     text_view_errors,
                     &flg!(
                         "saving_loading_failed_to_read_data_from_file",
-                        generate_translation_hashmap(vec![("path", config_file.to_string_lossy().to_string()), ("reason", e.to_string())])
+                        path = config_file.to_string_lossy().to_string(),
+                        reason = e.to_string()
                     ),
                 );
                 return;
@@ -314,23 +284,14 @@ impl LoadSaveStruct {
                 } else if !header.is_empty() {
                     self.loaded_items.entry(header.clone()).or_default().push(line.to_string());
                 } else {
-                    add_text_to_text_view(
-                        text_view_errors,
-                        &flg!(
-                            "saving_loading_orphan_data",
-                            generate_translation_hashmap(vec![("data", line.to_string()), ("index", index.to_string())])
-                        ),
-                    );
+                    add_text_to_text_view(text_view_errors, &flg!("saving_loading_orphan_data", data = line, line = index.to_string()));
                 }
             }
 
             let (_, hashmap_sl) = create_hash_map();
             for setting in self.loaded_items.keys() {
                 if !hashmap_sl.contains_key(setting) {
-                    add_text_to_text_view(
-                        text_view_errors,
-                        &flg!("saving_loading_not_valid", generate_translation_hashmap(vec![("data", setting.to_string())])),
-                    );
+                    add_text_to_text_view(text_view_errors, &flg!("saving_loading_not_valid", data = setting.clone()));
                 }
             }
 
@@ -368,20 +329,12 @@ impl LoadSaveStruct {
             if data_saved {
                 add_text_to_text_view(
                     text_view_errors,
-                    flg!(
-                        "saving_loading_saving_success",
-                        generate_translation_hashmap(vec![("name", config_file.to_string_lossy().to_string())])
-                    )
-                    .as_str(),
+                    flg!("saving_loading_saving_success", name = config_file.to_string_lossy().to_string()).as_str(),
                 );
             } else {
                 add_text_to_text_view(
                     text_view_errors,
-                    flg!(
-                        "saving_loading_saving_failure",
-                        generate_translation_hashmap(vec![("name", config_file.to_string_lossy().to_string())])
-                    )
-                    .as_str(),
+                    flg!("saving_loading_saving_failure", name = config_file.to_string_lossy().to_string()).as_str(),
                 );
             }
         }
@@ -509,183 +462,138 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
 
     // Upper notebook
     saving_struct.save_list_store(
-        hashmap_ls.get(&LoadText::IncludedDirectories).unwrap().to_string(),
+        hashmap_ls[&LoadText::IncludedDirectories].clone(),
         &upper_notebook.tree_view_included_directories.clone(),
         ColumnsIncludedDirectory::Path as i32,
     );
     saving_struct.save_list_store(
-        hashmap_ls.get(&LoadText::ExcludedDirectories).unwrap().to_string(),
+        hashmap_ls[&LoadText::ExcludedDirectories].clone(),
         &upper_notebook.tree_view_excluded_directories.clone(),
         ColumnsExcludedDirectory::Path as i32,
     );
-    saving_struct.save_var(hashmap_ls.get(&LoadText::ExcludedItems).unwrap().to_string(), &upper_notebook.entry_excluded_items.text());
-    saving_struct.save_var(
-        hashmap_ls.get(&LoadText::AllowedExtensions).unwrap().to_string(),
-        &upper_notebook.entry_allowed_extensions.text(),
-    );
-    saving_struct.save_var(
-        hashmap_ls.get(&LoadText::MinimalFileSize).unwrap().to_string(),
-        &upper_notebook.entry_general_minimal_size.text(),
-    );
-    saving_struct.save_var(
-        hashmap_ls.get(&LoadText::MaximalFileSize).unwrap().to_string(),
-        &upper_notebook.entry_general_maximal_size.text(),
-    );
+    saving_struct.save_var(hashmap_ls[&LoadText::ExcludedItems].clone(), &upper_notebook.entry_excluded_items.text());
+    saving_struct.save_var(hashmap_ls[&LoadText::AllowedExtensions].clone(), &upper_notebook.entry_allowed_extensions.text());
+    saving_struct.save_var(hashmap_ls[&LoadText::MinimalFileSize].clone(), &upper_notebook.entry_general_minimal_size.text());
+    saving_struct.save_var(hashmap_ls[&LoadText::MaximalFileSize].clone(), &upper_notebook.entry_general_maximal_size.text());
 
     // Check buttons
+    saving_struct.save_var(hashmap_ls[&LoadText::SaveAtExit].clone(), &settings.check_button_settings_save_at_exit.is_active());
+    saving_struct.save_var(hashmap_ls[&LoadText::LoadAtStart].clone(), &settings.check_button_settings_load_at_start.is_active());
     saving_struct.save_var(
-        hashmap_ls.get(&LoadText::SaveAtExit).unwrap().to_string(),
-        &settings.check_button_settings_save_at_exit.is_active(),
-    );
-    saving_struct.save_var(
-        hashmap_ls.get(&LoadText::LoadAtStart).unwrap().to_string(),
-        &settings.check_button_settings_load_at_start.is_active(),
-    );
-    saving_struct.save_var(
-        hashmap_ls.get(&LoadText::ConfirmDeletionFiles).unwrap().to_string(),
+        hashmap_ls[&LoadText::ConfirmDeletionFiles].clone(),
         &settings.check_button_settings_confirm_deletion.is_active(),
     );
     saving_struct.save_var(
-        hashmap_ls.get(&LoadText::ConfirmDeletionAllFilesInGroup).unwrap().to_string(),
+        hashmap_ls[&LoadText::ConfirmDeletionAllFilesInGroup].clone(),
         &settings.check_button_settings_confirm_group_deletion.is_active(),
     );
     saving_struct.save_var(
-        hashmap_ls.get(&LoadText::ImagePreviewImage).unwrap().to_string(),
+        hashmap_ls[&LoadText::ImagePreviewImage].clone(),
         &settings.check_button_settings_show_preview_similar_images.is_active(),
     );
     saving_struct.save_var(
-        hashmap_ls.get(&LoadText::DuplicatePreviewImage).unwrap().to_string(),
+        hashmap_ls[&LoadText::DuplicatePreviewImage].clone(),
         &settings.check_button_settings_show_preview_duplicates.is_active(),
     );
+    saving_struct.save_var(hashmap_ls[&LoadText::HideHardLinks].clone(), &settings.check_button_settings_hide_hard_links.is_active());
+    saving_struct.save_var(hashmap_ls[&LoadText::UseCache].clone(), &settings.check_button_settings_use_cache.is_active());
+    saving_struct.save_var(hashmap_ls[&LoadText::UseJsonCacheFile].clone(), &settings.check_button_settings_save_also_json.is_active());
+    saving_struct.save_var(hashmap_ls[&LoadText::DeleteToTrash].clone(), &settings.check_button_settings_use_trash.is_active());
     saving_struct.save_var(
-        hashmap_ls.get(&LoadText::HideHardLinks).unwrap().to_string(),
-        &settings.check_button_settings_hide_hard_links.is_active(),
-    );
-    saving_struct.save_var(
-        hashmap_ls.get(&LoadText::UseCache).unwrap().to_string(),
-        &settings.check_button_settings_use_cache.is_active(),
-    );
-    saving_struct.save_var(
-        hashmap_ls.get(&LoadText::UseJsonCacheFile).unwrap().to_string(),
-        &settings.check_button_settings_save_also_json.is_active(),
-    );
-    saving_struct.save_var(
-        hashmap_ls.get(&LoadText::DeleteToTrash).unwrap().to_string(),
-        &settings.check_button_settings_use_trash.is_active(),
-    );
-    saving_struct.save_var(
-        hashmap_ls.get(&LoadText::ImageDeleteOutdatedCacheEntries).unwrap().to_string(),
+        hashmap_ls[&LoadText::ImageDeleteOutdatedCacheEntries].clone(),
         &settings.check_button_settings_similar_images_delete_outdated_cache.is_active(),
     );
     saving_struct.save_var(
-        hashmap_ls.get(&LoadText::DuplicateDeleteOutdatedCacheEntries).unwrap().to_string(),
+        hashmap_ls[&LoadText::DuplicateDeleteOutdatedCacheEntries].clone(),
         &settings.check_button_settings_duplicates_delete_outdated_cache.is_active(),
     );
     saving_struct.save_var(
-        hashmap_ls.get(&LoadText::VideoDeleteOutdatedCacheEntries).unwrap().to_string(),
+        hashmap_ls[&LoadText::VideoDeleteOutdatedCacheEntries].clone(),
         &settings.check_button_settings_similar_videos_delete_outdated_cache.is_active(),
     );
     saving_struct.save_var(
-        hashmap_ls.get(&LoadText::UsePrehashCache).unwrap().to_string(),
+        hashmap_ls[&LoadText::UsePrehashCache].clone(),
         &settings.check_button_duplicates_use_prehash_cache.is_active(),
     );
     saving_struct.save_var(
-        hashmap_ls.get(&LoadText::ShowBottomTextPanel).unwrap().to_string(),
+        hashmap_ls[&LoadText::ShowBottomTextPanel].clone(),
         &settings.check_button_settings_show_text_view.is_active(),
     );
     saving_struct.save_var(
-        hashmap_ls.get(&LoadText::GeneralIgnoreOtherFilesystems).unwrap().to_string(),
+        hashmap_ls[&LoadText::GeneralIgnoreOtherFilesystems].clone(),
         &settings.check_button_settings_one_filesystem.is_active(),
     );
 
     saving_struct.save_var(
-        hashmap_ls.get(&LoadText::BrokenFilesArchive).unwrap().to_string(),
+        hashmap_ls[&LoadText::BrokenFilesArchive].clone(),
         &main_notebook.check_button_broken_files_archive.is_active(),
     );
-    saving_struct.save_var(
-        hashmap_ls.get(&LoadText::BrokenFilesImage).unwrap().to_string(),
-        &main_notebook.check_button_broken_files_image.is_active(),
-    );
-    saving_struct.save_var(
-        hashmap_ls.get(&LoadText::BrokenFilesAudio).unwrap().to_string(),
-        &main_notebook.check_button_broken_files_audio.is_active(),
-    );
-    saving_struct.save_var(
-        hashmap_ls.get(&LoadText::BrokenFilesPdf).unwrap().to_string(),
-        &main_notebook.check_button_broken_files_pdf.is_active(),
-    );
+    saving_struct.save_var(hashmap_ls[&LoadText::BrokenFilesImage].clone(), &main_notebook.check_button_broken_files_image.is_active());
+    saving_struct.save_var(hashmap_ls[&LoadText::BrokenFilesAudio].clone(), &main_notebook.check_button_broken_files_audio.is_active());
+    saving_struct.save_var(hashmap_ls[&LoadText::BrokenFilesPdf].clone(), &main_notebook.check_button_broken_files_pdf.is_active());
 
     // Others
+    saving_struct.save_var(hashmap_ls[&LoadText::ThreadNumber].clone(), &settings.scale_settings_number_of_threads.value().round());
+    saving_struct.save_var(hashmap_ls[&LoadText::MinimalCacheSize].clone(), &settings.entry_settings_cache_file_minimal_size.text());
     saving_struct.save_var(
-        hashmap_ls.get(&LoadText::ThreadNumber).unwrap().to_string(),
-        &settings.scale_settings_number_of_threads.value().round(),
-    );
-    saving_struct.save_var(
-        hashmap_ls.get(&LoadText::MinimalCacheSize).unwrap().to_string(),
-        &settings.entry_settings_cache_file_minimal_size.text(),
-    );
-    saving_struct.save_var(
-        hashmap_ls.get(&LoadText::MinimalPrehashCacheSize).unwrap().to_string(),
+        hashmap_ls[&LoadText::MinimalPrehashCacheSize].clone(),
         &settings.entry_settings_prehash_cache_file_minimal_size.text(),
     );
     saving_struct.save_var(
-        hashmap_ls.get(&LoadText::Language).unwrap().to_string(),
+        hashmap_ls[&LoadText::Language].clone(),
         &get_language_from_combo_box_text(&settings.combo_box_settings_language.active_text().unwrap()).short_text,
     );
 
     // Comboboxes main notebook
     saving_struct.save_var(
-        hashmap_ls.get(&LoadText::ComboBoxDuplicateHashType).unwrap().to_string(),
+        hashmap_ls[&LoadText::ComboBoxDuplicateHashType].clone(),
         &main_notebook.combo_box_duplicate_hash_type.active().unwrap_or(0),
     );
     saving_struct.save_var(
-        hashmap_ls.get(&LoadText::ComboBoxDuplicateCheckMethod).unwrap().to_string(),
+        hashmap_ls[&LoadText::ComboBoxDuplicateCheckMethod].clone(),
         &main_notebook.combo_box_duplicate_check_method.active().unwrap_or(0),
     );
     saving_struct.save_var(
-        hashmap_ls.get(&LoadText::ComboBoxImageResizeAlgorithm).unwrap().to_string(),
+        hashmap_ls[&LoadText::ComboBoxImageResizeAlgorithm].clone(),
         &main_notebook.combo_box_image_resize_algorithm.active().unwrap_or(0),
     );
     saving_struct.save_var(
-        hashmap_ls.get(&LoadText::ComboBoxImageHashType).unwrap().to_string(),
+        hashmap_ls[&LoadText::ComboBoxImageHashType].clone(),
         &main_notebook.combo_box_image_hash_algorithm.active().unwrap_or(0),
     );
     saving_struct.save_var(
-        hashmap_ls.get(&LoadText::ComboBoxImageHashSize).unwrap().to_string(),
+        hashmap_ls[&LoadText::ComboBoxImageHashSize].clone(),
         &main_notebook.combo_box_image_hash_size.active().unwrap_or(0),
     );
     saving_struct.save_var(
-        hashmap_ls.get(&LoadText::ComboBoxBigFiles).unwrap().to_string(),
+        hashmap_ls[&LoadText::ComboBoxBigFiles].clone(),
         &main_notebook.combo_box_big_files_mode.active().unwrap_or(0),
     );
 
     // Other2
     saving_struct.save_var(
-        hashmap_ls.get(&LoadText::DuplicateNameCaseSensitive).unwrap().to_string(),
+        hashmap_ls[&LoadText::DuplicateNameCaseSensitive].clone(),
         &main_notebook.check_button_duplicate_case_sensitive_name.is_active(),
     );
+    saving_struct.save_var(hashmap_ls[&LoadText::NumberOfBiggestFiles].clone(), &main_notebook.entry_big_files_number.text());
     saving_struct.save_var(
-        hashmap_ls.get(&LoadText::NumberOfBiggestFiles).unwrap().to_string(),
-        &main_notebook.entry_big_files_number.text(),
-    );
-    saving_struct.save_var(
-        hashmap_ls.get(&LoadText::SimilarImagesSimilarity).unwrap().to_string(),
+        hashmap_ls[&LoadText::SimilarImagesSimilarity].clone(),
         &main_notebook.scale_similarity_similar_images.value(),
     );
     saving_struct.save_var(
-        hashmap_ls.get(&LoadText::SimilarImagesIgnoreSameSize).unwrap().to_string(),
+        hashmap_ls[&LoadText::SimilarImagesIgnoreSameSize].clone(),
         &main_notebook.check_button_image_ignore_same_size.is_active(),
     );
     saving_struct.save_var(
-        hashmap_ls.get(&LoadText::SimilarVideosSimilarity).unwrap().to_string(),
+        hashmap_ls[&LoadText::SimilarVideosSimilarity].clone(),
         &main_notebook.scale_similarity_similar_videos.value(),
     );
     saving_struct.save_var(
-        hashmap_ls.get(&LoadText::SimilarVideosIgnoreSameSize).unwrap().to_string(),
+        hashmap_ls[&LoadText::SimilarVideosIgnoreSameSize].clone(),
         &main_notebook.check_button_video_ignore_same_size.is_active(),
     );
     saving_struct.save_var(
-        hashmap_ls.get(&LoadText::MusicApproximateComparison).unwrap().to_string(),
+        hashmap_ls[&LoadText::MusicApproximateComparison].clone(),
         &main_notebook.check_button_music_approximate_comparison.is_active(),
     );
 
@@ -719,83 +627,59 @@ pub fn load_configuration(
     // Loading data from hashmaps
     let (hashmap_ls, _hashmap_sl) = create_hash_map();
 
-    let mut included_directories: Vec<String> = loaded_entries.get_vector_string(hashmap_ls.get(&LoadText::IncludedDirectories).unwrap(), included_directories);
-    let mut excluded_directories: Vec<String> = loaded_entries.get_vector_string(hashmap_ls.get(&LoadText::ExcludedDirectories).unwrap(), excluded_directories);
-    let excluded_items: String = loaded_entries.get_string(
-        hashmap_ls.get(&LoadText::ExcludedItems).unwrap().clone(),
-        upper_notebook.entry_excluded_items.text().to_string(),
-    );
-    let allowed_extensions: String = loaded_entries.get_string(hashmap_ls.get(&LoadText::AllowedExtensions).unwrap().clone(), String::new());
-    let minimal_file_size: String = loaded_entries.get_integer_string(hashmap_ls.get(&LoadText::MinimalFileSize).unwrap().clone(), DEFAULT_MINIMAL_FILE_SIZE.to_string());
-    let maximal_file_size: String = loaded_entries.get_integer_string(hashmap_ls.get(&LoadText::MaximalFileSize).unwrap().clone(), DEFAULT_MAXIMAL_FILE_SIZE.to_string());
+    let mut included_directories: Vec<String> = loaded_entries.get_vector_string(&hashmap_ls[&LoadText::IncludedDirectories], included_directories);
+    let mut excluded_directories: Vec<String> = loaded_entries.get_vector_string(&hashmap_ls[&LoadText::ExcludedDirectories], excluded_directories);
+    let excluded_items: String = loaded_entries.get_string(hashmap_ls[&LoadText::ExcludedItems].clone(), upper_notebook.entry_excluded_items.text().to_string());
+    let allowed_extensions: String = loaded_entries.get_string(hashmap_ls[&LoadText::AllowedExtensions].clone(), String::new());
+    let minimal_file_size: String = loaded_entries.get_integer_string(hashmap_ls[&LoadText::MinimalFileSize].clone(), DEFAULT_MINIMAL_FILE_SIZE.to_string());
+    let maximal_file_size: String = loaded_entries.get_integer_string(hashmap_ls[&LoadText::MaximalFileSize].clone(), DEFAULT_MAXIMAL_FILE_SIZE.to_string());
 
-    let loading_at_start: bool = loaded_entries.get_bool(hashmap_ls.get(&LoadText::LoadAtStart).unwrap().clone(), DEFAULT_LOAD_AT_START);
-    let mut saving_at_exit: bool = loaded_entries.get_bool(hashmap_ls.get(&LoadText::SaveAtExit).unwrap().clone(), DEFAULT_SAVE_ON_EXIT);
-    let confirm_deletion: bool = loaded_entries.get_bool(hashmap_ls.get(&LoadText::ConfirmDeletionFiles).unwrap().clone(), DEFAULT_CONFIRM_DELETION);
-    let confirm_group_deletion: bool = loaded_entries.get_bool(hashmap_ls.get(&LoadText::ConfirmDeletionAllFilesInGroup).unwrap().clone(), DEFAULT_CONFIRM_GROUP_DELETION);
-    let show_previews_similar_images: bool = loaded_entries.get_bool(hashmap_ls.get(&LoadText::ImagePreviewImage).unwrap().clone(), DEFAULT_SHOW_IMAGE_PREVIEW);
-    let show_previews_duplicates: bool = loaded_entries.get_bool(hashmap_ls.get(&LoadText::DuplicatePreviewImage).unwrap().clone(), DEFAULT_SHOW_DUPLICATE_IMAGE_PREVIEW);
-    let bottom_text_panel: bool = loaded_entries.get_bool(hashmap_ls.get(&LoadText::ShowBottomTextPanel).unwrap().clone(), DEFAULT_BOTTOM_TEXT_VIEW);
-    let hide_hard_links: bool = loaded_entries.get_bool(hashmap_ls.get(&LoadText::HideHardLinks).unwrap().clone(), DEFAULT_HIDE_HARD_LINKS);
-    let use_cache: bool = loaded_entries.get_bool(hashmap_ls.get(&LoadText::UseCache).unwrap().clone(), DEFAULT_USE_CACHE);
-    let use_json_cache: bool = loaded_entries.get_bool(hashmap_ls.get(&LoadText::UseJsonCacheFile).unwrap().clone(), DEFAULT_SAVE_ALSO_AS_JSON);
-    let use_trash: bool = loaded_entries.get_bool(hashmap_ls.get(&LoadText::DeleteToTrash).unwrap().clone(), DEFAULT_USE_TRASH);
-    let ignore_other_fs: bool = loaded_entries.get_bool(
-        hashmap_ls.get(&LoadText::GeneralIgnoreOtherFilesystems).unwrap().clone(),
-        DEFAULT_GENERAL_IGNORE_OTHER_FILESYSTEMS,
-    );
+    let loading_at_start: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::LoadAtStart].clone(), DEFAULT_LOAD_AT_START);
+    let mut saving_at_exit: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::SaveAtExit].clone(), DEFAULT_SAVE_ON_EXIT);
+    let confirm_deletion: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::ConfirmDeletionFiles].clone(), DEFAULT_CONFIRM_DELETION);
+    let confirm_group_deletion: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::ConfirmDeletionAllFilesInGroup].clone(), DEFAULT_CONFIRM_GROUP_DELETION);
+    let show_previews_similar_images: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::ImagePreviewImage].clone(), DEFAULT_SHOW_IMAGE_PREVIEW);
+    let show_previews_duplicates: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::DuplicatePreviewImage].clone(), DEFAULT_SHOW_DUPLICATE_IMAGE_PREVIEW);
+    let bottom_text_panel: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::ShowBottomTextPanel].clone(), DEFAULT_BOTTOM_TEXT_VIEW);
+    let hide_hard_links: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::HideHardLinks].clone(), DEFAULT_HIDE_HARD_LINKS);
+    let use_cache: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::UseCache].clone(), DEFAULT_USE_CACHE);
+    let use_json_cache: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::UseJsonCacheFile].clone(), DEFAULT_SAVE_ALSO_AS_JSON);
+    let use_trash: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::DeleteToTrash].clone(), DEFAULT_USE_TRASH);
+    let ignore_other_fs: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::GeneralIgnoreOtherFilesystems].clone(), DEFAULT_GENERAL_IGNORE_OTHER_FILESYSTEMS);
     let delete_outdated_cache_duplicates: bool = loaded_entries.get_bool(
-        hashmap_ls.get(&LoadText::DuplicateDeleteOutdatedCacheEntries).unwrap().clone(),
+        hashmap_ls[&LoadText::DuplicateDeleteOutdatedCacheEntries].clone(),
         DEFAULT_DUPLICATE_REMOVE_AUTO_OUTDATED_CACHE,
     );
-    let delete_outdated_cache_similar_images: bool = loaded_entries.get_bool(
-        hashmap_ls.get(&LoadText::ImageDeleteOutdatedCacheEntries).unwrap().clone(),
-        DEFAULT_IMAGE_REMOVE_AUTO_OUTDATED_CACHE,
-    );
-    let delete_outdated_cache_similar_videos: bool = loaded_entries.get_bool(
-        hashmap_ls.get(&LoadText::VideoDeleteOutdatedCacheEntries).unwrap().clone(),
-        DEFAULT_VIDEO_REMOVE_AUTO_OUTDATED_CACHE,
-    );
-    let use_prehash_cache: bool = loaded_entries.get_bool(hashmap_ls.get(&LoadText::UsePrehashCache).unwrap().clone(), DEFAULT_USE_PRECACHE);
+    let delete_outdated_cache_similar_images: bool =
+        loaded_entries.get_bool(hashmap_ls[&LoadText::ImageDeleteOutdatedCacheEntries].clone(), DEFAULT_IMAGE_REMOVE_AUTO_OUTDATED_CACHE);
+    let delete_outdated_cache_similar_videos: bool =
+        loaded_entries.get_bool(hashmap_ls[&LoadText::VideoDeleteOutdatedCacheEntries].clone(), DEFAULT_VIDEO_REMOVE_AUTO_OUTDATED_CACHE);
+    let use_prehash_cache: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::UsePrehashCache].clone(), DEFAULT_USE_PRECACHE);
 
-    let cache_prehash_minimal_size: String = loaded_entries.get_integer_string(
-        hashmap_ls.get(&LoadText::MinimalPrehashCacheSize).unwrap().clone(),
-        DEFAULT_PREHASH_MINIMAL_CACHE_SIZE.to_string(),
-    );
-    let cache_minimal_size: String = loaded_entries.get_integer_string(hashmap_ls.get(&LoadText::MinimalCacheSize).unwrap().clone(), DEFAULT_MINIMAL_CACHE_SIZE.to_string());
-    let short_language = loaded_entries.get_string(hashmap_ls.get(&LoadText::Language).unwrap().clone(), short_language);
+    let cache_prehash_minimal_size: String =
+        loaded_entries.get_integer_string(hashmap_ls[&LoadText::MinimalPrehashCacheSize].clone(), DEFAULT_PREHASH_MINIMAL_CACHE_SIZE.to_string());
+    let cache_minimal_size: String = loaded_entries.get_integer_string(hashmap_ls[&LoadText::MinimalCacheSize].clone(), DEFAULT_MINIMAL_CACHE_SIZE.to_string());
+    let short_language = loaded_entries.get_string(hashmap_ls[&LoadText::Language].clone(), short_language);
 
-    let combo_box_duplicate_hash_type = loaded_entries.get_object(hashmap_ls.get(&LoadText::ComboBoxDuplicateHashType).unwrap().clone(), 0);
-    let combo_box_duplicate_checking_method = loaded_entries.get_object(hashmap_ls.get(&LoadText::ComboBoxDuplicateCheckMethod).unwrap().clone(), 0);
-    let combo_box_image_hash_size = loaded_entries.get_object(hashmap_ls.get(&LoadText::ComboBoxImageHashSize).unwrap().clone(), 1); // 16 instead default 8
-    let combo_box_image_hash_algorithm = loaded_entries.get_object(hashmap_ls.get(&LoadText::ComboBoxImageHashType).unwrap().clone(), 0);
-    let combo_box_image_resize_algorithm = loaded_entries.get_object(hashmap_ls.get(&LoadText::ComboBoxImageResizeAlgorithm).unwrap().clone(), 0);
-    let combo_box_big_files_mode = loaded_entries.get_object(hashmap_ls.get(&LoadText::ComboBoxBigFiles).unwrap().clone(), 0);
+    let combo_box_duplicate_hash_type = loaded_entries.get_object(hashmap_ls[&LoadText::ComboBoxDuplicateHashType].clone(), 0);
+    let combo_box_duplicate_checking_method = loaded_entries.get_object(hashmap_ls[&LoadText::ComboBoxDuplicateCheckMethod].clone(), 0);
+    let combo_box_image_hash_size = loaded_entries.get_object(hashmap_ls[&LoadText::ComboBoxImageHashSize].clone(), 1); // 16 instead default 8
+    let combo_box_image_hash_algorithm = loaded_entries.get_object(hashmap_ls[&LoadText::ComboBoxImageHashType].clone(), 0);
+    let combo_box_image_resize_algorithm = loaded_entries.get_object(hashmap_ls[&LoadText::ComboBoxImageResizeAlgorithm].clone(), 0);
+    let combo_box_big_files_mode = loaded_entries.get_object(hashmap_ls[&LoadText::ComboBoxBigFiles].clone(), 0);
 
-    let number_of_biggest_files = loaded_entries.get_integer_string(
-        hashmap_ls.get(&LoadText::NumberOfBiggestFiles).unwrap().clone(),
-        DEFAULT_NUMBER_OF_BIGGEST_FILES.to_string(),
-    );
-    let similar_images_similarity = loaded_entries.get_object(hashmap_ls.get(&LoadText::SimilarImagesSimilarity).unwrap().clone(), DEFAULT_SIMILAR_IMAGES_SIMILARITY);
-    let similar_images_ignore_same_size = loaded_entries.get_bool(
-        hashmap_ls.get(&LoadText::SimilarImagesIgnoreSameSize).unwrap().clone(),
-        DEFAULT_SIMILAR_IMAGES_IGNORE_SAME_SIZE,
-    );
-    let similar_videos_similarity = loaded_entries.get_object(hashmap_ls.get(&LoadText::SimilarVideosSimilarity).unwrap().clone(), DEFAULT_SIMILAR_VIDEOS_SIMILARITY);
-    let similar_videos_ignore_same_size = loaded_entries.get_bool(
-        hashmap_ls.get(&LoadText::SimilarVideosIgnoreSameSize).unwrap().clone(),
-        DEFAULT_SIMILAR_VIDEOS_IGNORE_SAME_SIZE,
-    );
-    let check_button_case_sensitive_name = loaded_entries.get_object(
-        hashmap_ls.get(&LoadText::DuplicateNameCaseSensitive).unwrap().clone(),
-        DEFAULT_DUPLICATE_CASE_SENSITIVE_NAME_CHECKING,
-    );
+    let number_of_biggest_files = loaded_entries.get_integer_string(hashmap_ls[&LoadText::NumberOfBiggestFiles].clone(), DEFAULT_NUMBER_OF_BIGGEST_FILES.to_string());
+    let similar_images_similarity = loaded_entries.get_object(hashmap_ls[&LoadText::SimilarImagesSimilarity].clone(), DEFAULT_SIMILAR_IMAGES_SIMILARITY);
+    let similar_images_ignore_same_size = loaded_entries.get_bool(hashmap_ls[&LoadText::SimilarImagesIgnoreSameSize].clone(), DEFAULT_SIMILAR_IMAGES_IGNORE_SAME_SIZE);
+    let similar_videos_similarity = loaded_entries.get_object(hashmap_ls[&LoadText::SimilarVideosSimilarity].clone(), DEFAULT_SIMILAR_VIDEOS_SIMILARITY);
+    let similar_videos_ignore_same_size = loaded_entries.get_bool(hashmap_ls[&LoadText::SimilarVideosIgnoreSameSize].clone(), DEFAULT_SIMILAR_VIDEOS_IGNORE_SAME_SIZE);
+    let check_button_case_sensitive_name = loaded_entries.get_object(hashmap_ls[&LoadText::DuplicateNameCaseSensitive].clone(), DEFAULT_DUPLICATE_CASE_SENSITIVE_NAME_CHECKING);
 
-    let check_button_broken_files_archive = loaded_entries.get_object(hashmap_ls.get(&LoadText::BrokenFilesArchive).unwrap().clone(), DEFAULT_BROKEN_FILES_ARCHIVE);
-    let check_button_broken_files_pdf = loaded_entries.get_object(hashmap_ls.get(&LoadText::BrokenFilesPdf).unwrap().clone(), DEFAULT_BROKEN_FILES_PDF);
-    let check_button_broken_files_image = loaded_entries.get_object(hashmap_ls.get(&LoadText::BrokenFilesImage).unwrap().clone(), DEFAULT_BROKEN_FILES_IMAGE);
-    let check_button_broken_files_audio = loaded_entries.get_object(hashmap_ls.get(&LoadText::BrokenFilesAudio).unwrap().clone(), DEFAULT_BROKEN_FILES_AUDIO);
-    let thread_number = loaded_entries.get_object(hashmap_ls.get(&LoadText::ThreadNumber).unwrap().clone(), DEFAULT_THREAD_NUMBER);
+    let check_button_broken_files_archive = loaded_entries.get_object(hashmap_ls[&LoadText::BrokenFilesArchive].clone(), DEFAULT_BROKEN_FILES_ARCHIVE);
+    let check_button_broken_files_pdf = loaded_entries.get_object(hashmap_ls[&LoadText::BrokenFilesPdf].clone(), DEFAULT_BROKEN_FILES_PDF);
+    let check_button_broken_files_image = loaded_entries.get_object(hashmap_ls[&LoadText::BrokenFilesImage].clone(), DEFAULT_BROKEN_FILES_IMAGE);
+    let check_button_broken_files_audio = loaded_entries.get_object(hashmap_ls[&LoadText::BrokenFilesAudio].clone(), DEFAULT_BROKEN_FILES_AUDIO);
+    let thread_number = loaded_entries.get_object(hashmap_ls[&LoadText::ThreadNumber].clone(), DEFAULT_THREAD_NUMBER);
 
     let mut set_start_folders = false;
     if !manual_execution {
@@ -949,8 +833,8 @@ pub fn load_configuration(
         main_notebook.scale_similarity_similar_images.connect_change_value(scale_step_function);
         main_notebook.scale_similarity_similar_images.set_value(similar_images_similarity as f64);
 
-        settings.scale_settings_number_of_threads.set_range(0_f64, get_default_number_of_threads() as f64);
-        settings.scale_settings_number_of_threads.set_fill_level(get_default_number_of_threads() as f64);
+        settings.scale_settings_number_of_threads.set_range(0_f64, get_all_available_threads() as f64);
+        settings.scale_settings_number_of_threads.set_fill_level(get_all_available_threads() as f64);
         settings.scale_settings_number_of_threads.connect_change_value(scale_step_function);
         settings.scale_settings_number_of_threads.set_value(thread_number as f64);
     } else {

@@ -5,7 +5,6 @@ use std::thread;
 
 use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
-use glib::Sender as glibSender;
 use gtk4::prelude::*;
 use gtk4::Grid;
 
@@ -35,10 +34,10 @@ use crate::taskbar_progress::tbp_flags::TBPF_NOPROGRESS;
 use crate::{flg, DEFAULT_MAXIMAL_FILE_SIZE, DEFAULT_MINIMAL_CACHE_SIZE, DEFAULT_MINIMAL_FILE_SIZE};
 
 #[allow(clippy::too_many_arguments)]
-pub fn connect_button_search(gui_data: &GuiData, glib_stop_sender: glibSender<Message>, progress_sender: Sender<ProgressData>) {
+pub fn connect_button_search(gui_data: &GuiData, result_sender: Sender<Message>, progress_sender: Sender<ProgressData>) {
     let buttons_array = gui_data.bottom_buttons.buttons_array.clone();
     let buttons_search_clone = gui_data.bottom_buttons.buttons_search.clone();
-    let grid_progress_stages = gui_data.progress_window.grid_progress_stages.clone();
+    let grid_progress = gui_data.progress_window.grid_progress.clone();
     let label_stage = gui_data.progress_window.label_stage.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let notebook_upper = gui_data.upper_notebook.notebook_upper.clone();
@@ -55,7 +54,7 @@ pub fn connect_button_search(gui_data: &GuiData, glib_stop_sender: glibSender<Me
 
     let gui_data = gui_data.clone();
     buttons_search_clone.connect_clicked(move |_| {
-        let loaded_common_items = LoadedCommonItems::load_items(&gui_data);
+        let loaded_commons = LoadedCommonItems::load_items(&gui_data);
 
         // Check if user selected all referenced folders
         let list_store_included_directories = get_list_store(&tree_view_included_directories);
@@ -83,104 +82,27 @@ pub fn connect_button_search(gui_data: &GuiData, glib_stop_sender: glibSender<Me
 
         reset_text_view(&text_view_errors);
 
-        let glib_stop_sender = glib_stop_sender.clone();
+        let result_sender = result_sender.clone();
         let stop_receiver = stop_receiver.clone();
         // Consume any stale stop messages.
         stop_receiver.try_iter().for_each(|()| ());
 
         label_stage.show();
 
+        let progress_sender = progress_sender.clone();
+
         match to_notebook_main_enum(notebook_main.current_page().unwrap()) {
-            NotebookMainEnum::Duplicate => duplicate_search(
-                &gui_data,
-                loaded_common_items,
-                stop_receiver,
-                glib_stop_sender,
-                &grid_progress_stages,
-                progress_sender.clone(),
-            ),
-            NotebookMainEnum::EmptyFiles => empty_files_search(
-                &gui_data,
-                loaded_common_items,
-                stop_receiver,
-                glib_stop_sender,
-                &grid_progress_stages,
-                progress_sender.clone(),
-            ),
-            NotebookMainEnum::EmptyDirectories => empty_directories_search(
-                &gui_data,
-                loaded_common_items,
-                stop_receiver,
-                glib_stop_sender,
-                &grid_progress_stages,
-                progress_sender.clone(),
-            ),
-            NotebookMainEnum::BigFiles => big_files_search(
-                &gui_data,
-                loaded_common_items,
-                stop_receiver,
-                glib_stop_sender,
-                &grid_progress_stages,
-                progress_sender.clone(),
-            ),
-            NotebookMainEnum::Temporary => temporary_files_search(
-                &gui_data,
-                loaded_common_items,
-                stop_receiver,
-                glib_stop_sender,
-                &grid_progress_stages,
-                progress_sender.clone(),
-            ),
-            NotebookMainEnum::SimilarImages => similar_image_search(
-                &gui_data,
-                loaded_common_items,
-                stop_receiver,
-                glib_stop_sender,
-                &grid_progress_stages,
-                progress_sender.clone(),
-            ),
-            NotebookMainEnum::SimilarVideos => similar_video_search(
-                &gui_data,
-                loaded_common_items,
-                stop_receiver,
-                glib_stop_sender,
-                &grid_progress_stages,
-                progress_sender.clone(),
-            ),
-            NotebookMainEnum::SameMusic => same_music_search(
-                &gui_data,
-                loaded_common_items,
-                stop_receiver,
-                glib_stop_sender,
-                &grid_progress_stages,
-                progress_sender.clone(),
-                &show_dialog,
-            ),
-            NotebookMainEnum::Symlinks => bad_symlinks_search(
-                &gui_data,
-                loaded_common_items,
-                stop_receiver,
-                glib_stop_sender,
-                &grid_progress_stages,
-                progress_sender.clone(),
-            ),
-            NotebookMainEnum::BrokenFiles => broken_files_search(
-                &gui_data,
-                loaded_common_items,
-                stop_receiver,
-                glib_stop_sender,
-                &grid_progress_stages,
-                progress_sender.clone(),
-                &show_dialog,
-            ),
-            NotebookMainEnum::BadExtensions => bad_extensions_search(
-                &gui_data,
-                loaded_common_items,
-                stop_receiver,
-                glib_stop_sender,
-                &grid_progress_stages,
-                progress_sender.clone(),
-            ),
+            NotebookMainEnum::Duplicate => duplicate_search(&gui_data, loaded_commons, stop_receiver, result_sender, &grid_progress, progress_sender),
+            NotebookMainEnum::EmptyFiles => empty_files_search(&gui_data, loaded_commons, stop_receiver, result_sender, &grid_progress, progress_sender),
+            NotebookMainEnum::EmptyDirectories => empty_dirs_search(&gui_data, loaded_commons, stop_receiver, result_sender, &grid_progress, progress_sender),
+            NotebookMainEnum::BigFiles => big_files_search(&gui_data, loaded_commons, stop_receiver, result_sender, &grid_progress, progress_sender),
+            NotebookMainEnum::Temporary => temporary_files_search(&gui_data, loaded_commons, stop_receiver, result_sender, &grid_progress, progress_sender),
+            NotebookMainEnum::SimilarImages => similar_image_search(&gui_data, loaded_commons, stop_receiver, result_sender, &grid_progress, progress_sender),
+            NotebookMainEnum::SimilarVideos => similar_video_search(&gui_data, loaded_commons, stop_receiver, result_sender, &grid_progress, progress_sender),
+            NotebookMainEnum::SameMusic => same_music_search(&gui_data, loaded_commons, stop_receiver, result_sender, &grid_progress, progress_sender, &show_dialog),
+            NotebookMainEnum::Symlinks => bad_symlinks_search(&gui_data, loaded_commons, stop_receiver, result_sender, &grid_progress, progress_sender),
+            NotebookMainEnum::BrokenFiles => broken_files_search(&gui_data, loaded_commons, stop_receiver, result_sender, &grid_progress, progress_sender, &show_dialog),
+            NotebookMainEnum::BadExtensions => bad_extensions_search(&gui_data, loaded_commons, stop_receiver, result_sender, &grid_progress, progress_sender),
         }
 
         window_progress.set_default_size(1, 1);
@@ -201,6 +123,7 @@ struct LoadedCommonItems {
     recursive_search: bool,
     excluded_items: Vec<String>,
     allowed_extensions: String,
+    excluded_extensions: String,
     hide_hard_links: bool,
     use_cache: bool,
     save_also_as_json: bool,
@@ -217,6 +140,7 @@ impl LoadedCommonItems {
         let check_button_settings_hide_hard_links = gui_data.settings.check_button_settings_hide_hard_links.clone();
         let check_button_settings_use_cache = gui_data.settings.check_button_settings_use_cache.clone();
         let entry_allowed_extensions = gui_data.upper_notebook.entry_allowed_extensions.clone();
+        let entry_excluded_extensions = gui_data.upper_notebook.entry_excluded_extensions.clone();
         let entry_excluded_items = gui_data.upper_notebook.entry_excluded_items.clone();
         let entry_general_maximal_size = gui_data.upper_notebook.entry_general_maximal_size.clone();
         let entry_general_minimal_size = gui_data.upper_notebook.entry_general_minimal_size.clone();
@@ -241,6 +165,7 @@ impl LoadedCommonItems {
             .map(std::string::ToString::to_string)
             .collect::<Vec<String>>();
         let allowed_extensions = entry_allowed_extensions.text().as_str().to_string();
+        let excluded_extensions = entry_excluded_extensions.text().as_str().to_string();
         let hide_hard_links = check_button_settings_hide_hard_links.is_active();
         let use_cache = check_button_settings_use_cache.is_active();
         let save_also_as_json = check_button_settings_save_also_json.is_active();
@@ -269,6 +194,7 @@ impl LoadedCommonItems {
             recursive_search,
             excluded_items,
             allowed_extensions,
+            excluded_extensions,
             hide_hard_links,
             use_cache,
             save_also_as_json,
@@ -282,13 +208,13 @@ impl LoadedCommonItems {
 
 fn duplicate_search(
     gui_data: &GuiData,
-    loaded_common_items: LoadedCommonItems,
+    loaded_commons: LoadedCommonItems,
     stop_receiver: Receiver<()>,
-    glib_stop_sender: glibSender<Message>,
-    grid_progress_stages: &Grid,
+    result_sender: Sender<Message>,
+    grid_progress: &Grid,
     progress_data_sender: Sender<ProgressData>,
 ) {
-    grid_progress_stages.show();
+    grid_progress.show();
 
     let combo_box_duplicate_check_method = gui_data.main_notebook.combo_box_duplicate_check_method.clone();
     let combo_box_duplicate_hash_type = gui_data.main_notebook.combo_box_duplicate_hash_type.clone();
@@ -319,41 +245,32 @@ fn duplicate_search(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut df = DuplicateFinder::new();
-            df.set_included_directory(loaded_common_items.included_directories);
-            df.set_excluded_directory(loaded_common_items.excluded_directories);
-            df.set_reference_directory(loaded_common_items.reference_directories);
-            df.set_recursive_search(loaded_common_items.recursive_search);
-            df.set_excluded_items(loaded_common_items.excluded_items);
-            df.set_allowed_extensions(loaded_common_items.allowed_extensions);
-            df.set_minimal_file_size(loaded_common_items.minimal_file_size);
-            df.set_maximal_file_size(loaded_common_items.maximal_file_size);
-            df.set_minimal_cache_file_size(loaded_common_items.minimal_cache_file_size);
-            df.set_minimal_prehash_cache_file_size(minimal_prehash_cache_file_size);
-            df.set_check_method(check_method);
-            df.set_hash_type(hash_type);
-            df.set_save_also_as_json(loaded_common_items.save_also_as_json);
-            df.set_ignore_hard_links(loaded_common_items.hide_hard_links);
-            df.set_use_cache(loaded_common_items.use_cache);
-            df.set_use_prehash_cache(use_prehash_cache);
-            df.set_delete_outdated_cache(delete_outdated_cache);
-            df.set_case_sensitive_name_comparison(case_sensitive_name_comparison);
-            df.set_exclude_other_filesystems(loaded_common_items.ignore_other_filesystems);
-            df.find_duplicates(Some(&stop_receiver), Some(&progress_data_sender));
-            glib_stop_sender.send(Message::Duplicates(df)).unwrap();
+            let mut item = DuplicateFinder::new();
+
+            set_common_settings(&mut item, &loaded_commons);
+            item.set_minimal_cache_file_size(loaded_commons.minimal_cache_file_size);
+            item.set_minimal_prehash_cache_file_size(minimal_prehash_cache_file_size);
+            item.set_check_method(check_method);
+            item.set_hash_type(hash_type);
+            item.set_ignore_hard_links(loaded_commons.hide_hard_links);
+            item.set_use_prehash_cache(use_prehash_cache);
+            item.set_delete_outdated_cache(delete_outdated_cache);
+            item.set_case_sensitive_name_comparison(case_sensitive_name_comparison);
+            item.find_duplicates(Some(&stop_receiver), Some(&progress_data_sender));
+            result_sender.send(Message::Duplicates(item)).unwrap();
         })
         .unwrap();
 }
 
 fn empty_files_search(
     gui_data: &GuiData,
-    loaded_common_items: LoadedCommonItems,
+    loaded_commons: LoadedCommonItems,
     stop_receiver: Receiver<()>,
-    glib_stop_sender: glibSender<Message>,
-    grid_progress_stages: &Grid,
+    result_sender: Sender<Message>,
+    grid_progress: &Grid,
     progress_data_sender: Sender<ProgressData>,
 ) {
-    grid_progress_stages.hide();
+    grid_progress.hide();
 
     let tree_view_empty_files_finder = gui_data.main_notebook.tree_view_empty_files_finder.clone();
     clean_tree_view(&tree_view_empty_files_finder);
@@ -361,29 +278,24 @@ fn empty_files_search(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut vf = EmptyFiles::new();
+            let mut item = EmptyFiles::new();
 
-            vf.set_included_directory(loaded_common_items.included_directories);
-            vf.set_excluded_directory(loaded_common_items.excluded_directories);
-            vf.set_recursive_search(loaded_common_items.recursive_search);
-            vf.set_excluded_items(loaded_common_items.excluded_items);
-            vf.set_allowed_extensions(loaded_common_items.allowed_extensions);
-            vf.set_exclude_other_filesystems(loaded_common_items.ignore_other_filesystems);
-            vf.find_empty_files(Some(&stop_receiver), Some(&progress_data_sender));
-            glib_stop_sender.send(Message::EmptyFiles(vf)).unwrap();
+            set_common_settings(&mut item, &loaded_commons);
+            item.find_empty_files(Some(&stop_receiver), Some(&progress_data_sender));
+            result_sender.send(Message::EmptyFiles(item)).unwrap();
         })
         .unwrap();
 }
 
-fn empty_directories_search(
+fn empty_dirs_search(
     gui_data: &GuiData,
-    loaded_common_items: LoadedCommonItems,
+    loaded_commons: LoadedCommonItems,
     stop_receiver: Receiver<()>,
-    glib_stop_sender: glibSender<Message>,
-    grid_progress_stages: &Grid,
+    result_sender: Sender<Message>,
+    grid_progress: &Grid,
     progress_data_sender: Sender<ProgressData>,
 ) {
-    grid_progress_stages.hide();
+    grid_progress.hide();
 
     let tree_view_empty_folder_finder = gui_data.main_notebook.tree_view_empty_folder_finder.clone();
     clean_tree_view(&tree_view_empty_folder_finder);
@@ -391,26 +303,24 @@ fn empty_directories_search(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut ef = EmptyFolder::new();
-            ef.set_included_directory(loaded_common_items.included_directories);
-            ef.set_excluded_directory(loaded_common_items.excluded_directories);
-            ef.set_excluded_items(loaded_common_items.excluded_items);
-            ef.set_exclude_other_filesystems(loaded_common_items.ignore_other_filesystems);
-            ef.find_empty_folders(Some(&stop_receiver), Some(&progress_data_sender));
-            glib_stop_sender.send(Message::EmptyFolders(ef)).unwrap();
+            let mut item = EmptyFolder::new();
+
+            set_common_settings(&mut item, &loaded_commons);
+            item.find_empty_folders(Some(&stop_receiver), Some(&progress_data_sender));
+            result_sender.send(Message::EmptyFolders(item)).unwrap();
         })
         .unwrap();
 }
 
 fn big_files_search(
     gui_data: &GuiData,
-    loaded_common_items: LoadedCommonItems,
+    loaded_commons: LoadedCommonItems,
     stop_receiver: Receiver<()>,
-    glib_stop_sender: glibSender<Message>,
-    grid_progress_stages: &Grid,
+    result_sender: Sender<Message>,
+    grid_progress: &Grid,
     progress_data_sender: Sender<ProgressData>,
 ) {
-    grid_progress_stages.hide();
+    grid_progress.hide();
 
     let combo_box_big_files_mode = gui_data.main_notebook.combo_box_big_files_mode.clone();
     let entry_big_files_number = gui_data.main_notebook.entry_big_files_number.clone();
@@ -425,31 +335,26 @@ fn big_files_search(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut bf = BigFile::new();
+            let mut item = BigFile::new();
 
-            bf.set_included_directory(loaded_common_items.included_directories);
-            bf.set_excluded_directory(loaded_common_items.excluded_directories);
-            bf.set_recursive_search(loaded_common_items.recursive_search);
-            bf.set_excluded_items(loaded_common_items.excluded_items);
-            bf.set_allowed_extensions(loaded_common_items.allowed_extensions);
-            bf.set_number_of_files_to_check(numbers_of_files_to_check);
-            bf.set_search_mode(big_files_mode);
-            bf.set_exclude_other_filesystems(loaded_common_items.ignore_other_filesystems);
-            bf.find_big_files(Some(&stop_receiver), Some(&progress_data_sender));
-            glib_stop_sender.send(Message::BigFiles(bf)).unwrap();
+            set_common_settings(&mut item, &loaded_commons);
+            item.set_number_of_files_to_check(numbers_of_files_to_check);
+            item.set_search_mode(big_files_mode);
+            item.find_big_files(Some(&stop_receiver), Some(&progress_data_sender));
+            result_sender.send(Message::BigFiles(item)).unwrap();
         })
         .unwrap();
 }
 
 fn temporary_files_search(
     gui_data: &GuiData,
-    loaded_common_items: LoadedCommonItems,
+    loaded_commons: LoadedCommonItems,
     stop_receiver: Receiver<()>,
-    glib_stop_sender: glibSender<Message>,
-    grid_progress_stages: &Grid,
+    result_sender: Sender<Message>,
+    grid_progress: &Grid,
     progress_data_sender: Sender<ProgressData>,
 ) {
-    grid_progress_stages.hide();
+    grid_progress.hide();
 
     let tree_view_temporary_files_finder = gui_data.main_notebook.tree_view_temporary_files_finder.clone();
     clean_tree_view(&tree_view_temporary_files_finder);
@@ -457,29 +362,25 @@ fn temporary_files_search(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut tf = Temporary::new();
+            let mut item = Temporary::new();
 
-            tf.set_included_directory(loaded_common_items.included_directories);
-            tf.set_excluded_directory(loaded_common_items.excluded_directories);
-            tf.set_recursive_search(loaded_common_items.recursive_search);
-            tf.set_excluded_items(loaded_common_items.excluded_items);
-            tf.set_exclude_other_filesystems(loaded_common_items.ignore_other_filesystems);
-            tf.find_temporary_files(Some(&stop_receiver), Some(&progress_data_sender));
-            glib_stop_sender.send(Message::Temporary(tf)).unwrap();
+            set_common_settings(&mut item, &loaded_commons);
+            item.find_temporary_files(Some(&stop_receiver), Some(&progress_data_sender));
+            result_sender.send(Message::Temporary(item)).unwrap();
         })
         .unwrap();
 }
 
 fn same_music_search(
     gui_data: &GuiData,
-    loaded_common_items: LoadedCommonItems,
+    loaded_commons: LoadedCommonItems,
     stop_receiver: Receiver<()>,
-    glib_stop_sender: glibSender<Message>,
-    grid_progress_stages: &Grid,
+    result_sender: Sender<Message>,
+    grid_progress: &Grid,
     progress_data_sender: Sender<ProgressData>,
     show_dialog: &Arc<AtomicBool>,
 ) {
-    grid_progress_stages.show();
+    grid_progress.show();
 
     let check_button_music_artist: gtk4::CheckButton = gui_data.main_notebook.check_button_music_artist.clone();
     let check_button_music_title: gtk4::CheckButton = gui_data.main_notebook.check_button_music_title.clone();
@@ -528,26 +429,16 @@ fn same_music_search(
         thread::Builder::new()
             .stack_size(DEFAULT_THREAD_SIZE)
             .spawn(move || {
-                let mut mf = SameMusic::new();
+                let mut item = SameMusic::new();
 
-                mf.set_included_directory(loaded_common_items.included_directories);
-                mf.set_excluded_directory(loaded_common_items.excluded_directories);
-                mf.set_reference_directory(loaded_common_items.reference_directories);
-                mf.set_excluded_items(loaded_common_items.excluded_items);
-                mf.set_use_cache(loaded_common_items.use_cache);
-                mf.set_minimal_file_size(loaded_common_items.minimal_file_size);
-                mf.set_maximal_file_size(loaded_common_items.maximal_file_size);
-                mf.set_allowed_extensions(loaded_common_items.allowed_extensions);
-                mf.set_recursive_search(loaded_common_items.recursive_search);
-                mf.set_music_similarity(music_similarity);
-                mf.set_maximum_difference(maximum_difference);
-                mf.set_minimum_segment_duration(minimum_segment_duration);
-                mf.set_check_type(check_method);
-                mf.set_approximate_comparison(approximate_comparison);
-                mf.set_save_also_as_json(loaded_common_items.save_also_as_json);
-                mf.set_exclude_other_filesystems(loaded_common_items.ignore_other_filesystems);
-                mf.find_same_music(Some(&stop_receiver), Some(&progress_data_sender));
-                glib_stop_sender.send(Message::SameMusic(mf)).unwrap();
+                set_common_settings(&mut item, &loaded_commons);
+                item.set_music_similarity(music_similarity);
+                item.set_maximum_difference(maximum_difference);
+                item.set_minimum_segment_duration(minimum_segment_duration);
+                item.set_check_type(check_method);
+                item.set_approximate_comparison(approximate_comparison);
+                item.find_same_music(Some(&stop_receiver), Some(&progress_data_sender));
+                result_sender.send(Message::SameMusic(item)).unwrap();
             })
             .unwrap();
     } else {
@@ -577,14 +468,14 @@ fn same_music_search(
 
 fn broken_files_search(
     gui_data: &GuiData,
-    loaded_common_items: LoadedCommonItems,
+    loaded_commons: LoadedCommonItems,
     stop_receiver: Receiver<()>,
-    glib_stop_sender: glibSender<Message>,
-    grid_progress_stages: &Grid,
+    result_sender: Sender<Message>,
+    grid_progress: &Grid,
     progress_data_sender: Sender<ProgressData>,
     show_dialog: &Arc<AtomicBool>,
 ) {
-    grid_progress_stages.show();
+    grid_progress.show();
 
     let check_button_broken_files_archive: gtk4::CheckButton = gui_data.main_notebook.check_button_broken_files_archive.clone();
     let check_button_broken_files_pdf: gtk4::CheckButton = gui_data.main_notebook.check_button_broken_files_pdf.clone();
@@ -613,19 +504,12 @@ fn broken_files_search(
         thread::Builder::new()
             .stack_size(DEFAULT_THREAD_SIZE)
             .spawn(move || {
-                let mut br = BrokenFiles::new();
+                let mut item = BrokenFiles::new();
 
-                br.set_included_directory(loaded_common_items.included_directories);
-                br.set_excluded_directory(loaded_common_items.excluded_directories);
-                br.set_recursive_search(loaded_common_items.recursive_search);
-                br.set_excluded_items(loaded_common_items.excluded_items);
-                br.set_use_cache(loaded_common_items.use_cache);
-                br.set_allowed_extensions(loaded_common_items.allowed_extensions);
-                br.set_save_also_as_json(loaded_common_items.save_also_as_json);
-                br.set_checked_types(checked_types);
-                br.set_exclude_other_filesystems(loaded_common_items.ignore_other_filesystems);
-                br.find_broken_files(Some(&stop_receiver), Some(&progress_data_sender));
-                glib_stop_sender.send(Message::BrokenFiles(br)).unwrap();
+                set_common_settings(&mut item, &loaded_commons);
+                item.set_checked_types(checked_types);
+                item.find_broken_files(Some(&stop_receiver), Some(&progress_data_sender));
+                result_sender.send(Message::BrokenFiles(item)).unwrap();
             })
             .unwrap();
     } else {
@@ -655,13 +539,13 @@ fn broken_files_search(
 
 fn similar_image_search(
     gui_data: &GuiData,
-    loaded_common_items: LoadedCommonItems,
+    loaded_commons: LoadedCommonItems,
     stop_receiver: Receiver<()>,
-    glib_stop_sender: glibSender<Message>,
-    grid_progress_stages: &Grid,
+    result_sender: Sender<Message>,
+    grid_progress: &Grid,
     progress_data_sender: Sender<ProgressData>,
 ) {
-    grid_progress_stages.show();
+    grid_progress.show();
 
     let combo_box_image_hash_size = gui_data.main_notebook.combo_box_image_hash_size.clone();
     let combo_box_image_hash_algorithm = gui_data.main_notebook.combo_box_image_hash_algorithm.clone();
@@ -693,40 +577,30 @@ fn similar_image_search(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut sf = SimilarImages::new();
+            let mut item = SimilarImages::new();
 
-            sf.set_included_directory(loaded_common_items.included_directories);
-            sf.set_excluded_directory(loaded_common_items.excluded_directories);
-            sf.set_reference_directory(loaded_common_items.reference_directories);
-            sf.set_recursive_search(loaded_common_items.recursive_search);
-            sf.set_excluded_items(loaded_common_items.excluded_items);
-            sf.set_minimal_file_size(loaded_common_items.minimal_file_size);
-            sf.set_maximal_file_size(loaded_common_items.maximal_file_size);
-            sf.set_similarity(similarity);
-            sf.set_use_cache(loaded_common_items.use_cache);
-            sf.set_hash_alg(hash_alg);
-            sf.set_hash_size(hash_size);
-            sf.set_image_filter(image_filter);
-            sf.set_allowed_extensions(loaded_common_items.allowed_extensions);
-            sf.set_delete_outdated_cache(delete_outdated_cache);
-            sf.set_exclude_images_with_same_size(ignore_same_size);
-            sf.set_save_also_as_json(loaded_common_items.save_also_as_json);
-            sf.set_exclude_other_filesystems(loaded_common_items.ignore_other_filesystems);
-            sf.find_similar_images(Some(&stop_receiver), Some(&progress_data_sender));
-            glib_stop_sender.send(Message::SimilarImages(sf)).unwrap();
+            set_common_settings(&mut item, &loaded_commons);
+            item.set_similarity(similarity);
+            item.set_hash_alg(hash_alg);
+            item.set_hash_size(hash_size);
+            item.set_image_filter(image_filter);
+            item.set_delete_outdated_cache(delete_outdated_cache);
+            item.set_exclude_images_with_same_size(ignore_same_size);
+            item.find_similar_images(Some(&stop_receiver), Some(&progress_data_sender));
+            result_sender.send(Message::SimilarImages(item)).unwrap();
         })
         .unwrap();
 }
 
 fn similar_video_search(
     gui_data: &GuiData,
-    loaded_common_items: LoadedCommonItems,
+    loaded_commons: LoadedCommonItems,
     stop_receiver: Receiver<()>,
-    glib_stop_sender: glibSender<Message>,
-    grid_progress_stages: &Grid,
+    result_sender: Sender<Message>,
+    grid_progress: &Grid,
     progress_data_sender: Sender<ProgressData>,
 ) {
-    grid_progress_stages.show();
+    grid_progress.show();
 
     let check_button_video_ignore_same_size = gui_data.main_notebook.check_button_video_ignore_same_size.clone();
     let check_button_settings_similar_videos_delete_outdated_cache = gui_data.settings.check_button_settings_similar_videos_delete_outdated_cache.clone();
@@ -743,37 +617,27 @@ fn similar_video_search(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut sf = SimilarVideos::new();
+            let mut item = SimilarVideos::new();
 
-            sf.set_included_directory(loaded_common_items.included_directories);
-            sf.set_excluded_directory(loaded_common_items.excluded_directories);
-            sf.set_reference_directory(loaded_common_items.reference_directories);
-            sf.set_recursive_search(loaded_common_items.recursive_search);
-            sf.set_excluded_items(loaded_common_items.excluded_items);
-            sf.set_minimal_file_size(loaded_common_items.minimal_file_size);
-            sf.set_maximal_file_size(loaded_common_items.maximal_file_size);
-            sf.set_allowed_extensions(loaded_common_items.allowed_extensions);
-            sf.set_use_cache(loaded_common_items.use_cache);
-            sf.set_tolerance(tolerance);
-            sf.set_delete_outdated_cache(delete_outdated_cache);
-            sf.set_exclude_videos_with_same_size(ignore_same_size);
-            sf.set_save_also_as_json(loaded_common_items.save_also_as_json);
-            sf.set_exclude_other_filesystems(loaded_common_items.ignore_other_filesystems);
-            sf.find_similar_videos(Some(&stop_receiver), Some(&progress_data_sender));
-            glib_stop_sender.send(Message::SimilarVideos(sf)).unwrap();
+            set_common_settings(&mut item, &loaded_commons);
+            item.set_tolerance(tolerance);
+            item.set_delete_outdated_cache(delete_outdated_cache);
+            item.set_exclude_videos_with_same_size(ignore_same_size);
+            item.find_similar_videos(Some(&stop_receiver), Some(&progress_data_sender));
+            result_sender.send(Message::SimilarVideos(item)).unwrap();
         })
         .unwrap();
 }
 
 fn bad_symlinks_search(
     gui_data: &GuiData,
-    loaded_common_items: LoadedCommonItems,
+    loaded_commons: LoadedCommonItems,
     stop_receiver: Receiver<()>,
-    glib_stop_sender: glibSender<Message>,
-    grid_progress_stages: &Grid,
+    result_sender: Sender<Message>,
+    grid_progress: &Grid,
     progress_data_sender: Sender<ProgressData>,
 ) {
-    grid_progress_stages.hide();
+    grid_progress.hide();
 
     let tree_view_invalid_symlinks = gui_data.main_notebook.tree_view_invalid_symlinks.clone();
     clean_tree_view(&tree_view_invalid_symlinks);
@@ -781,29 +645,24 @@ fn bad_symlinks_search(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut isf = InvalidSymlinks::new();
+            let mut item = InvalidSymlinks::new();
 
-            isf.set_included_directory(loaded_common_items.included_directories);
-            isf.set_excluded_directory(loaded_common_items.excluded_directories);
-            isf.set_recursive_search(loaded_common_items.recursive_search);
-            isf.set_excluded_items(loaded_common_items.excluded_items);
-            isf.set_allowed_extensions(loaded_common_items.allowed_extensions);
-            isf.set_exclude_other_filesystems(loaded_common_items.ignore_other_filesystems);
-            isf.find_invalid_links(Some(&stop_receiver), Some(&progress_data_sender));
-            glib_stop_sender.send(Message::InvalidSymlinks(isf)).unwrap();
+            set_common_settings(&mut item, &loaded_commons);
+            item.find_invalid_links(Some(&stop_receiver), Some(&progress_data_sender));
+            result_sender.send(Message::InvalidSymlinks(item)).unwrap();
         })
         .unwrap();
 }
 
 fn bad_extensions_search(
     gui_data: &GuiData,
-    loaded_common_items: LoadedCommonItems,
+    loaded_commons: LoadedCommonItems,
     stop_receiver: Receiver<()>,
-    glib_stop_sender: glibSender<Message>,
-    grid_progress_stages: &Grid,
+    result_sender: Sender<Message>,
+    grid_progress: &Grid,
     progress_data_sender: Sender<ProgressData>,
 ) {
-    grid_progress_stages.show();
+    grid_progress.show();
 
     let tree_view_bad_extensions = gui_data.main_notebook.tree_view_bad_extensions.clone();
     clean_tree_view(&tree_view_bad_extensions);
@@ -811,20 +670,31 @@ fn bad_extensions_search(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut be = BadExtensions::new();
+            let mut item = BadExtensions::new();
 
-            be.set_included_directory(loaded_common_items.included_directories);
-            be.set_excluded_directory(loaded_common_items.excluded_directories);
-            be.set_excluded_items(loaded_common_items.excluded_items);
-            be.set_minimal_file_size(loaded_common_items.minimal_file_size);
-            be.set_maximal_file_size(loaded_common_items.maximal_file_size);
-            be.set_allowed_extensions(loaded_common_items.allowed_extensions);
-            be.set_recursive_search(loaded_common_items.recursive_search);
-            be.set_exclude_other_filesystems(loaded_common_items.ignore_other_filesystems);
-            be.find_bad_extensions_files(Some(&stop_receiver), Some(&progress_data_sender));
-            glib_stop_sender.send(Message::BadExtensions(be)).unwrap();
+            set_common_settings(&mut item, &loaded_commons);
+            item.find_bad_extensions_files(Some(&stop_receiver), Some(&progress_data_sender));
+            result_sender.send(Message::BadExtensions(item)).unwrap();
         })
         .unwrap();
+}
+
+fn set_common_settings<T>(component: &mut T, loaded_commons: &LoadedCommonItems)
+where
+    T: CommonData,
+{
+    component.set_included_directory(loaded_commons.included_directories.clone());
+    component.set_excluded_directory(loaded_commons.excluded_directories.clone());
+    component.set_reference_directory(loaded_commons.reference_directories.clone());
+    component.set_recursive_search(loaded_commons.recursive_search);
+    component.set_allowed_extensions(loaded_commons.allowed_extensions.clone());
+    component.set_excluded_extensions(loaded_commons.excluded_extensions.clone());
+    component.set_excluded_items(loaded_commons.excluded_items.clone());
+    component.set_exclude_other_filesystems(loaded_commons.ignore_other_filesystems);
+    component.set_use_cache(loaded_commons.use_cache);
+    component.set_save_also_as_json(loaded_commons.save_also_as_json);
+    component.set_minimal_file_size(loaded_commons.minimal_file_size);
+    component.set_maximal_file_size(loaded_commons.maximal_file_size);
 }
 
 #[fun_time(message = "clean_tree_view", level = "debug")]

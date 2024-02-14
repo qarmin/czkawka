@@ -1,4 +1,6 @@
 #![allow(unused_imports)]
+
+use std::{fs, thread};
 // I don't wanna fight with unused imports in this file, so simply ignore it to avoid too much complexity
 use std::cmp::Ordering;
 use std::ffi::OsString;
@@ -8,7 +10,6 @@ use std::sync::atomic::{AtomicBool, AtomicUsize};
 use std::sync::{atomic, Arc};
 use std::thread::{sleep, JoinHandle};
 use std::time::{Duration, Instant, SystemTime};
-use std::{fs, thread};
 
 #[cfg(feature = "heif")]
 use anyhow::Result;
@@ -38,20 +39,16 @@ use crate::duplicate::make_hard_link;
 use crate::CZKAWKA_VERSION;
 
 static NUMBER_OF_THREADS: state::InitCell<usize> = state::InitCell::new();
+static ALL_AVAILABLE_THREADS: state::InitCell<usize> = state::InitCell::new();
 pub const DEFAULT_THREAD_SIZE: usize = 8 * 1024 * 1024; // 8 MB
 pub const DEFAULT_WORKER_THREAD_SIZE: usize = 4 * 1024 * 1024; // 4 MB
-
-#[cfg(not(target_family = "windows"))]
-pub const CHARACTER: char = '/';
-#[cfg(target_family = "windows")]
-pub const CHARACTER: char = '\\';
 
 pub fn get_number_of_threads() -> usize {
     let data = NUMBER_OF_THREADS.get();
     if *data >= 1 {
         *data
     } else {
-        get_default_number_of_threads()
+        get_all_available_threads()
     }
 }
 
@@ -70,15 +67,19 @@ pub fn setup_logger(disabled_printing: bool) {
     handsome_logger::TermLogger::init(config, TerminalMode::Mixed, ColorChoice::Always).unwrap();
 }
 
-pub fn get_available_threads() -> usize {
-    thread::available_parallelism().map(std::num::NonZeroUsize::get).unwrap_or(1)
+pub fn get_all_available_threads() -> usize {
+    *ALL_AVAILABLE_THREADS.get_or_init(|| {
+        let available_threads = thread::available_parallelism().map(std::num::NonZeroUsize::get).unwrap_or(1);
+        ALL_AVAILABLE_THREADS.set(available_threads);
+        available_threads
+    })
 }
 
 pub fn print_version_mode() {
     let rust_version = env!("RUST_VERSION_INTERNAL");
     let debug_release = if cfg!(debug_assertions) { "debug" } else { "release" };
 
-    let processors = get_available_threads();
+    let processors = get_all_available_threads();
 
     let info = os_info::get();
     info!(
@@ -98,11 +99,7 @@ pub fn print_version_mode() {
 }
 
 pub fn set_default_number_of_threads() {
-    set_number_of_threads(get_default_number_of_threads());
-}
-
-pub fn get_default_number_of_threads() -> usize {
-    thread::available_parallelism().map(std::num::NonZeroUsize::get).unwrap_or(1)
+    set_number_of_threads(get_all_available_threads());
 }
 
 pub fn set_number_of_threads(thread_number: usize) {
@@ -149,22 +146,21 @@ pub const VIDEO_FILES_EXTENSIONS: &[&str] = &[
 pub const LOOP_DURATION: u32 = 20; //ms
 pub const SEND_PROGRESS_DATA_TIME_BETWEEN: u32 = 200; //ms
 
-pub fn remove_folder_if_contains_only_empty_folders(path: impl AsRef<Path>) -> bool {
+pub fn remove_folder_if_contains_only_empty_folders(path: impl AsRef<Path>, remove_to_trash: bool) -> Result<(), String> {
     let path = path.as_ref();
     if !path.is_dir() {
-        error!("Trying to remove folder which is not a directory");
-        return false;
+        return Err(format!("Trying to remove folder {path:?} which is not a directory",));
     }
 
     let mut entries_to_check = Vec::new();
     let Ok(initial_entry) = path.read_dir() else {
-        return false;
+        return Err(format!("Cannot read directory {path:?}",));
     };
     for entry in initial_entry {
         if let Ok(entry) = entry {
             entries_to_check.push(entry);
         } else {
-            return false;
+            return Err(format!("Cannot read entry from directory {path:?}"));
         }
     }
     loop {
@@ -172,25 +168,29 @@ pub fn remove_folder_if_contains_only_empty_folders(path: impl AsRef<Path>) -> b
             break;
         };
         let Some(file_type) = entry.file_type().ok() else {
-            return false;
+            return Err(format!("Folder contains file with unknown type {:?} inside {path:?}", entry.path()));
         };
 
         if !file_type.is_dir() {
-            return false;
+            return Err(format!("Folder contains file {:?} inside {path:?}", entry.path(),));
         }
         let Ok(internal_read_dir) = entry.path().read_dir() else {
-            return false;
+            return Err(format!("Cannot read directory {:?} inside {path:?}", entry.path()));
         };
         for internal_elements in internal_read_dir {
             if let Ok(internal_element) = internal_elements {
                 entries_to_check.push(internal_element);
             } else {
-                return false;
+                return Err(format!("Cannot read entry from directory {:?} inside {path:?}", entry.path()));
             }
         }
     }
 
-    fs::remove_dir_all(path).is_ok()
+    if remove_to_trash {
+        trash::delete(path).map_err(|e| format!("Cannot move folder {path:?} to trash, reason {e}"))
+    } else {
+        fs::remove_dir_all(path).map_err(|e| format!("Cannot remove directory {path:?}, reason {e}"))
+    }
 }
 
 pub fn open_cache_folder(cache_file_name: &str, save_to_cache: bool, use_json: bool, warnings: &mut Vec<String>) -> Option<((Option<File>, PathBuf), (Option<File>, PathBuf))> {
@@ -273,7 +273,6 @@ pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path>) -> Option<Dynami
 
     let width = processed.width();
     let height = processed.height();
-    dbg!(width, height);
 
     let data = processed.to_vec();
 
@@ -612,10 +611,11 @@ mod test {
     use std::fs;
     use std::io::Write;
     use std::path::{Path, PathBuf};
+
     use tempfile::tempdir;
 
     use crate::common::{normalize_windows_path, regex_check, remove_folder_if_contains_only_empty_folders};
-    use crate::common_items::{new_excluded_item, ExcludedItems};
+    use crate::common_items::new_excluded_item;
 
     #[test]
     fn test_remove_folder_if_contains_only_empty_folders() {
@@ -624,20 +624,20 @@ mod test {
         fs::create_dir(&sub_dir).unwrap();
 
         // Test with empty directory
-        assert!(remove_folder_if_contains_only_empty_folders(&sub_dir));
+        assert!(remove_folder_if_contains_only_empty_folders(&sub_dir, false).is_ok());
         assert!(!Path::new(&sub_dir).exists());
 
         // Test with directory containing an empty directory
         fs::create_dir(&sub_dir).unwrap();
         fs::create_dir(sub_dir.join("empty_sub_dir")).unwrap();
-        assert!(remove_folder_if_contains_only_empty_folders(&sub_dir));
+        assert!(remove_folder_if_contains_only_empty_folders(&sub_dir, false).is_ok());
         assert!(!Path::new(&sub_dir).exists());
 
         // Test with directory containing a file
         fs::create_dir(&sub_dir).unwrap();
         let mut file = fs::File::create(sub_dir.join("file.txt")).unwrap();
         writeln!(file, "Hello, world!").unwrap();
-        assert!(!remove_folder_if_contains_only_empty_folders(&sub_dir));
+        assert!(remove_folder_if_contains_only_empty_folders(&sub_dir, false).is_err());
         assert!(Path::new(&sub_dir).exists());
     }
 

@@ -17,38 +17,42 @@
 #![allow(clippy::items_after_statements)] // Generated code
 #![allow(clippy::match_same_arms)] // Generated code
 
-mod common;
-mod connect_delete;
-mod connect_directories_changes;
-mod connect_open;
-mod connect_progress_receiver;
-mod connect_scan;
-mod connect_show_preview;
-mod connect_stop;
-mod connect_translation;
-mod localizer_krokiet;
-mod set_initial_gui_info;
-mod settings;
+use std::rc::Rc;
 
 use crossbeam_channel::{unbounded, Receiver, Sender};
 use slint::VecModel;
-use std::rc::Rc;
-// use std::rc::Rc;
+
+use czkawka_core::common::{print_version_mode, setup_logger};
+use czkawka_core::common_dir_traversal::ProgressData;
 
 use crate::connect_delete::connect_delete_button;
-use crate::connect_open::connect_open_items;
-use crate::connect_scan::connect_scan_button;
-
 use crate::connect_directories_changes::connect_add_remove_directories;
+use crate::connect_move::connect_move;
+use crate::connect_open::connect_open_items;
 use crate::connect_progress_receiver::connect_progress_gathering;
+use crate::connect_scan::connect_scan_button;
+use crate::connect_select::{connect_select, connect_showing_proper_select_buttons};
 use crate::connect_show_preview::connect_show_preview;
 use crate::connect_stop::connect_stop_button;
 use crate::connect_translation::connect_translations;
 use crate::set_initial_gui_info::set_initial_gui_infos;
 use crate::settings::{connect_changing_settings_preset, create_default_settings_files, load_settings_from_file, save_all_settings_to_file};
-use czkawka_core::common::{print_version_mode, setup_logger};
-use czkawka_core::common_dir_traversal::ProgressData;
-// use slint::{ModelRc, VecModel};
+
+mod common;
+mod connect_delete;
+mod connect_directories_changes;
+mod connect_move;
+mod connect_open;
+mod connect_progress_receiver;
+mod connect_scan;
+mod connect_select;
+mod connect_show_preview;
+mod connect_stop;
+mod connect_translation;
+mod localizer_krokiet;
+mod model_operations;
+mod set_initial_gui_info;
+mod settings;
 
 slint::include_modules!();
 fn main() {
@@ -80,6 +84,9 @@ fn main() {
     connect_show_preview(&app);
     connect_translations(&app);
     connect_changing_settings_preset(&app);
+    connect_select(&app);
+    connect_showing_proper_select_buttons(&app);
+    connect_move(&app);
 
     app.run().unwrap();
 

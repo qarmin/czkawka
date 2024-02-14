@@ -69,7 +69,7 @@ component MinMaxSizeComponent inherits HorizontalLayout {
     spacing: 20px;
     Text {
         horizontal-stretch: 0.0;
-        text:"Items Size(Bytes)";
+        text:"File Size(Kilobytes)";
         vertical-alignment: TextVerticalAlignment.center;
     }
     HorizontalLayout {
@@ -205,6 +205,10 @@ export component SettingsList inherits VerticalLayout {
                 name: "Allowed extensions:";
                 model <=> Settings.allowed_extensions;
             }
+            TextComponent {
+                name: "Excluded extensions:";
+                model <=> Settings.excluded_extensions;
+            }
             MinMaxSizeComponent {
 
             }
@@ -263,7 +267,7 @@ export component SettingsList inherits VerticalLayout {
                 model <=> Settings.duplicate_minimal_prehash_cache_size;
             }
             CheckBoxComponent {
-                name: "Delete outdated entries";
+                name: "Delete automatically outdated entries";
                 model <=> Settings.duplicate_delete_outdated_entries;
             }
             HeaderText {
@@ -274,21 +278,21 @@ export component SettingsList inherits VerticalLayout {
                 model <=> Settings.similar_images_show_image_preview;
             }
             CheckBoxComponent {
-                name: "Delete outdated entries";
+                name: "Delete automatically outdated entries";
                 model <=> Settings.similar_images_delete_outdated_entries;
             }
             HeaderText {
                 text: "Similar Videos tool";
             }
             CheckBoxComponent {
-                name: "Delete outdated entries";
+                name: "Delete automatically outdated entries";
                 model <=> Settings.similar_videos_delete_outdated_entries;
             }
             HeaderText {
                 text: "Similar Music tool";
             }
             CheckBoxComponent {
-                name: "Delete outdated entries";
+                name: "Delete automatically outdated entries";
                 model <=> Settings.similar_music_delete_outdated_entries;
             }
             ConfigCacheButtons {

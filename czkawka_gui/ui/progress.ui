@@ -13,7 +13,7 @@
         <property name="orientation">vertical</property>
         <property name="spacing">10</property>
         <child>
-          <object class="GtkGrid" id="grid_progress_stages">
+          <object class="GtkGrid" id="grid_progress">
             <property name="margin-end">2</property>
             <property name="margin-start">2</property>
             <property name="margin-top">2</property>

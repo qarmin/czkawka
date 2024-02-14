@@ -25,7 +25,7 @@ cargo run --release --bin czkawka_cli --features "heif,libraw"
 ```
 on linux to build fully static binary with eyra you need to use (this is only for crazy people, so just use command above if you don't know what you are doing)
 ```shell
-rustup default nightly-2023-11-16 # or any newer nightly that works fine with eyra
+rustup default nightly-2024-02-06 # or any newer nightly that works fine with eyra
 cd czkawka_cli
 cargo add eyra --rename=std
 echo 'fn main() { println!("cargo:rustc-link-arg=-nostartfiles"); }' > build.rs

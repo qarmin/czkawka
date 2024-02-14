@@ -3,7 +3,7 @@ name = "krokiet"
 version = "6.1.0"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2021"
-rust-version = "1.72.1"
+rust-version = "1.74.0"
 description = "Slint frontend of Czkawka Core"
 license = "GPL-3"
 homepage = "https://github.com/qarmin/czkawka"
@@ -13,11 +13,11 @@ build = "build.rs"
 [dependencies]
 rand = "0.8"
 czkawka_core = { version = "6.1.0", path = "../czkawka_core" }
-chrono = "0.4.31"
+chrono = "0.4.34"
 open = "5.0"
 crossbeam-channel = "0.5"
 handsome_logger = "0.8"
-rfd = { version = "0.12", default-features = false, features = ["xdg-portal"] }
+rfd = { version = "0.13", default-features = false, features = ["xdg-portal", "async-std"] }
 home = "0.5"
 log = "0.4.20"
 serde = "1.0"
@@ -26,26 +26,26 @@ humansize = "2.1"
 image = "0.24"
 directories-next = "2.0"
 image_hasher = "1.2"
-rayon = "1.8.0"
+rayon = "1.8"
 
 # Translations
 i18n-embed = { version = "0.14", features = ["fluent-system", "desktop-requester"] }
-i18n-embed-fl = "0.7"
+i18n-embed-fl = "0.8"
 rust-embed = { version = "8.2", features = ["debug-embed"] }
 once_cell = "1.19"
 
 # Try to use only needed features from https://github.com/slint-ui/slint/blob/master/api/rs/slint/Cargo.toml#L23-L31
 #slint = { path = "/home/rafal/test/slint/api/rs/slint/", default-features = false, features = ["std",
-slint = { git = "https://github.com/slint-ui/slint.git", default-features = false, features = [
-# slint = { version = "1.3", default-features = false, features = [
+#slint = { git = "https://github.com/slint-ui/slint.git", default-features = false, features = [
+ slint = { version = "1.4", default-features = false, features = [
     "std",
     "backend-winit",
     "compat-1-2"
 ] }
 [build-dependencies]
 #slint-build = { path = "/home/rafal/test/slint/api/rs/build/"}
-slint-build = { git = "https://github.com/slint-ui/slint.git" }
-# slint-build = "1.3"
+#slint-build = { git = "https://github.com/slint-ui/slint.git" }
+ slint-build = "1.4"
 
 [features]
 default = ["winit_femtovg", "winit_software"]

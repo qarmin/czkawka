@@ -13,7 +13,6 @@ import {ColorPalette} from "color_palette.slint";
 import {GuiState} from "gui_state.slint";
 import { Preview } from "preview.slint";
 import {PopupNewDirectories} from "popup_new_directories.slint";
-import { PopupSelect } from "popup_select.slint";
 
 component ComboBoxWrapper inherits HorizontalLayout {
     in-out property <string> text;
@@ -70,21 +69,21 @@ export component ToolSettings {
             ComboBoxWrapper {
                 text: "Hash size";
                 model: Settings.similar_images_sub_available_hash_size;
-                current_index: Settings.similar_images_sub_hash_size_index;
+                current_index <=> Settings.similar_images_sub_hash_size_index;
             }
             ComboBoxWrapper {
                 text: "Resize Algorithm";
                 model: Settings.similar_images_sub_available_resize_algorithm;
-                current_index: Settings.similar_images_sub_resize_algorithm_index;
+                current_index <=> Settings.similar_images_sub_resize_algorithm_index;
             }
             ComboBoxWrapper {
                 text: "Hash type";
                 model: Settings.similar_images_sub_available_hash_type;
-                current_index: Settings.similar_images_sub_hash_type_index;
+                current_index <=> Settings.similar_images_sub_hash_type_index;
             }
             CheckBoxWrapper {
                 text: "Ignore same size";
-                checked: Settings.similar_images_sub_ignore_same_size;
+                checked <=> Settings.similar_images_sub_ignore_same_size;
             }
             SliderWrapper {
                 text: "Max difference";

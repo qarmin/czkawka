@@ -1,9 +1,11 @@
-use crate::{MainWindow, ProgressToSend};
+use std::thread;
 
 use crossbeam_channel::Receiver;
-use czkawka_core::common_dir_traversal::{ProgressData, ToolType};
 use slint::ComponentHandle;
-use std::thread;
+
+use czkawka_core::common_dir_traversal::{ProgressData, ToolType};
+
+use crate::{MainWindow, ProgressToSend};
 
 pub fn connect_progress_gathering(app: &MainWindow, progress_receiver: Receiver<ProgressData>) {
     let a = app.as_weak();

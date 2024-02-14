@@ -1,13 +1,15 @@
+import { SelectMode } from "common.slint";
+
 export global Callabler {
     // Bottom panel operations
-    callback remove_item_directories(bool, int);
+    callback remove_item_directories(bool);
     callback added_manual_directories(bool, string);
 
     // Right click or middle click opener
     callback item_opened(string);
 
     callback delete_selected_items();
-    // callback ();
+    callback select_items(SelectMode);
 
     // Preview
     callback load_image_preview(string);
@@ -17,6 +19,10 @@ export global Callabler {
     callback save_current_preset();
     callback load_current_preset();
     callback reset_current_preset();
+
+    callback tab_changed();
+
+    callback move_items(bool, bool, string);
 
     // Translations
     pure callback translate(string, [{key: string, value: string}]) -> string;

@@ -9,7 +9,6 @@ use czkawka_core::duplicate::make_hard_link;
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::*;
-use crate::localizer_core::generate_translation_hashmap;
 use crate::notebook_enums::*;
 use crate::notebook_info::NOTEBOOKS_INFO;
 
@@ -211,42 +210,21 @@ fn hardlink_symlink(
         for symhardlink_data in vec_symhardlink_data {
             for file_to_symlink in symhardlink_data.files_to_symhardlink {
                 if let Err(e) = fs::remove_file(&file_to_symlink) {
-                    add_text_to_text_view(
-                        text_view_errors,
-                        flg!(
-                            "delete_file_failed",
-                            generate_translation_hashmap(vec![("name", file_to_symlink.to_string()), ("reason", e.to_string())])
-                        )
-                        .as_str(),
-                    );
+                    add_text_to_text_view(text_view_errors, flg!("delete_file_failed", name = file_to_symlink, reason = e.to_string()).as_str());
                     continue;
                 };
 
                 #[cfg(target_family = "unix")]
                 {
                     if let Err(e) = std::os::unix::fs::symlink(&symhardlink_data.original_data, &file_to_symlink) {
-                        add_text_to_text_view(
-                            text_view_errors,
-                            flg!(
-                                "delete_file_failed",
-                                generate_translation_hashmap(vec![("name", file_to_symlink.to_string()), ("reason", e.to_string())])
-                            )
-                            .as_str(),
-                        );
+                        add_text_to_text_view(text_view_errors, flg!("delete_file_failed", name = file_to_symlink, reason = e.to_string()).as_str());
                         continue;
                     };
                 }
                 #[cfg(target_family = "windows")]
                 {
                     if let Err(e) = std::os::windows::fs::symlink_file(&symhardlink_data.original_data, &file_to_symlink) {
-                        add_text_to_text_view(
-                            text_view_errors,
-                            flg!(
-                                "delete_file_failed",
-                                generate_translation_hashmap(vec![("name", file_to_symlink.to_string()), ("reason", e.to_string())])
-                            )
-                            .as_str(),
-                        );
+                        add_text_to_text_view(text_view_errors, flg!("delete_file_failed", name = file_to_symlink, reason = e.to_string()).as_str());
                         continue;
                     };
                 }

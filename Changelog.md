@@ -10,9 +10,9 @@
 ### CLI
 - Providing full static rust binary with [Eyra](https://github.com/sunfishcode/eyra) - [#1102](https://github.com/qarmin/czkawka/pull/1102)
 - Fixed duplicated `-c` argument, now saving as compact json is handled via `-C` - [#1153](https://github.com/qarmin/czkawka/pull/1153)
-- Added progress bar - [#TODO]()
-- Clean and safe cancelling of scan - [#TODO]()
-- Unification of CLI arguments - [#TODO]()
+- Added scan progress bar - [#1183](https://github.com/qarmin/czkawka/pull/1183)
+- Clean and safe cancelling of scan - [#1183](https://github.com/qarmin/czkawka/pull/1183)
+- Unification of CLI arguments - [#1183](https://github.com/qarmin/czkawka/pull/1183)
 
 ### Krokiet GUI
 - Initial release of new gui - [#1102](https://github.com/qarmin/czkawka/pull/1102)
@@ -31,6 +31,9 @@
 - Unifying code for collecting files to scan - [#1159](https://github.com/qarmin/czkawka/pull/1159)
 - Decrease memory usage when collecting files by removing unused fields in custom file entries structs - [#1159](https://github.com/qarmin/czkawka/pull/1159)
 - Decrease a little size of cache by few percents and improve loading/saving speed - [#1159](https://github.com/qarmin/czkawka/pull/1159)
+- Added ability to remove from scan files with excluded extensions - [#1184](https://github.com/qarmin/czkawka/pull/1102)
+- Fixed not showing in similar images results, files with same hashes when using reference folders - [#1184](https://github.com/qarmin/czkawka/pull/1102)
+- Optimize release binaries with LTO(~25% smaller, ~5/10% faster) - [#1184](https://github.com/qarmin/czkawka/pull/1102)
 
 ## Version 6.1.0 - 15.10.2023r
 - BREAKING CHANGE - Changed cache saving method, deduplicated, optimized and simplified procedure(all files needs to be hashed again) - [#1072](https://github.com/qarmin/czkawka/pull/1072), [#1086](https://github.com/qarmin/czkawka/pull/1086)

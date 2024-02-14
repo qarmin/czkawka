@@ -12,11 +12,11 @@ jobs:
   linux-cli:
     strategy:
       matrix:
-        toolchain: [ stable, 1.72.1 ]
+        toolchain: [ stable, 1.74.0 ]
         type: [ release ]
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install basic libraries
         run: sudo apt update || true; sudo apt install libheif-dev ffmpeg -y
@@ -24,12 +24,16 @@ jobs:
       - name: Setup rust version
         run: rustup default ${{ matrix.toolchain }}
 
+      - name: Enable LTO
+        run: sed -i 's/#lto = "fat"/lto = "fat"/g' Cargo.toml
+        if: ${{ (matrix.type == 'release') }}
+
       - name: Build Release
         run: cargo build --release --bin czkawka_cli
         if: ${{ (matrix.type == 'release') }}
 
       - name: Store Linux CLI
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: czkawka_cli-${{ runner.os }}-${{ matrix.toolchain }}
           path: target/release/czkawka_cli

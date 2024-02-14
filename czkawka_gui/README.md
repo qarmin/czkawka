@@ -36,7 +36,7 @@ Compiling the gui is harder than compiling cli or core, because it uses gtk4 whi
 ### Requirements
 |  Program  |  Minimal version  |
 |:---------:|:-----------------:|
-|   Rust    |      1.72.1       |
+|   Rust    |      1.74.0       |
 |    GTK    |        4.6        |
 
 ### Linux (Ubuntu, but on other OS should work similar)

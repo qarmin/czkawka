@@ -1,7 +1,12 @@
-use crate::settings::{collect_settings, SettingsCustom, ALLOWED_HASH_TYPE_VALUES, ALLOWED_RESIZE_ALGORITHM_VALUES};
-use crate::{CurrentTab, GuiState, MainListModel, MainWindow, ProgressToSend};
+use std::rc::Rc;
+use std::thread;
+
 use chrono::NaiveDateTime;
 use crossbeam_channel::{Receiver, Sender};
+use humansize::{format_size, BINARY};
+use rayon::prelude::*;
+use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
+
 use czkawka_core::common::{split_path, split_path_compare, DEFAULT_THREAD_SIZE};
 use czkawka_core::common_dir_traversal::{FileEntry, ProgressData};
 use czkawka_core::common_tool::CommonData;
@@ -9,12 +14,11 @@ use czkawka_core::common_traits::ResultEntry;
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::{EmptyFolder, FolderEntry};
 use czkawka_core::similar_images;
-use czkawka_core::similar_images::SimilarImages;
-use humansize::{format_size, BINARY};
-use rayon::prelude::*;
-use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
-use std::rc::Rc;
-use std::thread;
+use czkawka_core::similar_images::{ImagesEntry, SimilarImages};
+
+use crate::common::split_u64_into_i32s;
+use crate::settings::{collect_settings, SettingsCustom, ALLOWED_HASH_TYPE_VALUES, ALLOWED_RESIZE_ALGORITHM_VALUES};
+use crate::{CurrentTab, GuiState, MainListModel, MainWindow, ProgressToSend};
 
 pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>) {
     let a = app.as_weak();
@@ -47,7 +51,6 @@ pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressDat
     });
 }
 
-// TODO handle referenced folders
 fn scan_similar_images(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>, custom_settings: SettingsCustom) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
@@ -67,49 +70,88 @@ fn scan_similar_images(a: Weak<MainWindow>, progress_sender: Sender<ProgressData
                 .expect("Hash type not found")
                 .2;
             finder.set_hash_alg(hash_type);
+            dbg!(&custom_settings.similar_images_sub_ignore_same_size);
             finder.set_exclude_images_with_same_size(custom_settings.similar_images_sub_ignore_same_size);
             finder.set_similarity(custom_settings.similar_images_sub_similarity as u32);
             finder.find_similar_images(Some(&stop_receiver), Some(&progress_sender));
 
-            let mut vector = finder.get_similar_images().clone();
-            let messages = finder.get_text_messages().create_messages_text();
+            if finder.get_use_reference() {
+                let mut vector = finder.get_similar_images_referenced().clone();
+                let messages = finder.get_text_messages().create_messages_text();
 
-            for vec_fe in &mut vector {
-                vec_fe.par_sort_unstable_by_key(|e| e.similarity);
+                let hash_size = custom_settings.similar_images_sub_hash_size;
+
+                for (_first_entry, vec_fe) in &mut vector {
+                    vec_fe.par_sort_unstable_by_key(|e| e.similarity);
+                }
+
+                a.upgrade_in_event_loop(move |app| {
+                    write_similar_images_results_referenced(&app, vector, messages, hash_size);
+                })
+            } else {
+                let mut vector = finder.get_similar_images().clone();
+                let messages = finder.get_text_messages().create_messages_text();
+
+                let hash_size = custom_settings.similar_images_sub_hash_size;
+
+                for vec_fe in &mut vector {
+                    vec_fe.par_sort_unstable_by_key(|e| e.similarity);
+                }
+
+                a.upgrade_in_event_loop(move |app| {
+                    write_similar_images_results(&app, vector, messages, hash_size);
+                })
             }
-
-            let hash_size = custom_settings.similar_images_sub_hash_size;
-
-            a.upgrade_in_event_loop(move |app| {
-                write_similar_images_results(&app, vector, messages, hash_size);
-            })
         })
         .unwrap();
 }
-fn write_similar_images_results(app: &MainWindow, vector: Vec<Vec<similar_images::ImagesEntry>>, messages: String, hash_size: u8) {
+fn write_similar_images_results_referenced(app: &MainWindow, vector: Vec<(ImagesEntry, Vec<ImagesEntry>)>, messages: String, hash_size: u8) {
     let items_found = vector.len();
     let items = Rc::new(VecModel::default());
-    for vec_fe in vector {
-        insert_data_to_model(&items, ModelRc::new(VecModel::default()), true);
-        for fe in vec_fe {
-            let (directory, file) = split_path(fe.get_path());
-            let data_model = VecModel::from_slice(&[
-                similar_images::get_string_from_similarity(&fe.similarity, hash_size).into(),
-                format_size(fe.size, BINARY).into(),
-                fe.dimensions.clone().into(),
-                file.into(),
-                directory.into(),
-                NaiveDateTime::from_timestamp_opt(fe.get_modified_date() as i64, 0).unwrap().to_string().into(),
-            ]);
+    for (ref_fe, vec_fe) in vector {
+        let (data_model_str, data_model_int) = prepare_data_model_similar_images(&ref_fe, hash_size);
+        insert_data_to_model(&items, data_model_str, data_model_int, true);
 
-            insert_data_to_model(&items, data_model, false);
+        for fe in vec_fe {
+            let (data_model_str, data_model_int) = prepare_data_model_similar_images(&fe, hash_size);
+            insert_data_to_model(&items, data_model_str, data_model_int, false);
         }
     }
     app.set_similar_images_model(items.into());
     app.invoke_scan_ended(format!("Found {items_found} similar images files").into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
+fn write_similar_images_results(app: &MainWindow, vector: Vec<Vec<ImagesEntry>>, messages: String, hash_size: u8) {
+    let items_found = vector.len();
+    let items = Rc::new(VecModel::default());
+    for vec_fe in vector {
+        insert_data_to_model(&items, ModelRc::new(VecModel::default()), ModelRc::new(VecModel::default()), true);
+        for fe in vec_fe {
+            let (data_model_str, data_model_int) = prepare_data_model_similar_images(&fe, hash_size);
+            insert_data_to_model(&items, data_model_str, data_model_int, false);
+        }
+    }
+    app.set_similar_images_model(items.into());
+    app.invoke_scan_ended(format!("Found {items_found} similar images files").into());
+    app.global::<GuiState>().set_info_text(messages.into());
+}
+fn prepare_data_model_similar_images(fe: &ImagesEntry, hash_size: u8) -> (ModelRc<SharedString>, ModelRc<i32>) {
+    let (directory, file) = split_path(fe.get_path());
+    let data_model_str = VecModel::from_slice(&[
+        similar_images::get_string_from_similarity(&fe.similarity, hash_size).into(),
+        format_size(fe.size, BINARY).into(),
+        format!("{}x{}", fe.width, fe.height).into(),
+        file.into(),
+        directory.into(),
+        NaiveDateTime::from_timestamp_opt(fe.get_modified_date() as i64, 0).unwrap().to_string().into(),
+    ]);
+    let modification_split = split_u64_into_i32s(fe.get_modified_date());
+    let size_split = split_u64_into_i32s(fe.size);
+    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1, size_split.0, size_split.1, fe.width as i32, fe.height as i32]);
+    (data_model_str, data_model_int)
+}
 
+///////////////////////////////// Empty Files
 fn scan_empty_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>, custom_settings: SettingsCustom) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
@@ -133,20 +175,28 @@ fn write_empty_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages:
     let items_found = vector.len();
     let items = Rc::new(VecModel::default());
     for fe in vector {
-        let (directory, file) = split_path(fe.get_path());
-        let data_model = VecModel::from_slice(&[
-            file.into(),
-            directory.into(),
-            NaiveDateTime::from_timestamp_opt(fe.get_modified_date() as i64, 0).unwrap().to_string().into(),
-        ]);
-
-        insert_data_to_model(&items, data_model, false);
+        let (data_model_str, data_model_int) = prepare_data_model_empty_files(&fe);
+        insert_data_to_model(&items, data_model_str, data_model_int, false);
     }
     app.set_empty_files_model(items.into());
     app.invoke_scan_ended(format!("Found {items_found} empty files").into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 
+fn prepare_data_model_empty_files(fe: &FileEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
+    let (directory, file) = split_path(fe.get_path());
+    let data_model_str = VecModel::from_slice(&[
+        file.into(),
+        directory.into(),
+        NaiveDateTime::from_timestamp_opt(fe.get_modified_date() as i64, 0).unwrap().to_string().into(),
+    ]);
+    let modification_split = split_u64_into_i32s(fe.get_modified_date());
+    let size_split = split_u64_into_i32s(fe.size);
+    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1, size_split.0, size_split.1]);
+    (data_model_str, data_model_int)
+}
+
+////////////////////////////////////////// Empty Folders
 fn scan_empty_folders(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>, custom_settings: SettingsCustom) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
@@ -170,26 +220,34 @@ fn write_empty_folders_results(app: &MainWindow, vector: Vec<FolderEntry>, messa
     let items_found = vector.len();
     let items = Rc::new(VecModel::default());
     for fe in vector {
-        let (directory, file) = split_path(&fe.path);
-        let data_model = VecModel::from_slice(&[
-            file.into(),
-            directory.into(),
-            NaiveDateTime::from_timestamp_opt(fe.modified_date as i64, 0).unwrap().to_string().into(),
-        ]);
-
-        insert_data_to_model(&items, data_model, false);
+        let (data_model_str, data_model_int) = prepare_data_model_empty_folders(&fe);
+        insert_data_to_model(&items, data_model_str, data_model_int, false);
     }
     app.set_empty_folder_model(items.into());
     app.invoke_scan_ended(format!("Found {items_found} empty folders").into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 
-fn insert_data_to_model(items: &Rc<VecModel<MainListModel>>, data_model: ModelRc<SharedString>, header_row: bool) {
+fn prepare_data_model_empty_folders(fe: &FolderEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
+    let (directory, file) = split_path(&fe.path);
+    let data_model_str = VecModel::from_slice(&[
+        file.into(),
+        directory.into(),
+        NaiveDateTime::from_timestamp_opt(fe.modified_date as i64, 0).unwrap().to_string().into(),
+    ]);
+    let modification_split = split_u64_into_i32s(fe.get_modified_date());
+    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1]);
+    (data_model_str, data_model_int)
+}
+
+////////////////////////////////////////// Common
+fn insert_data_to_model(items: &Rc<VecModel<MainListModel>>, data_model_str: ModelRc<SharedString>, data_model_int: ModelRc<i32>, header_row: bool) {
     let main = MainListModel {
         checked: false,
         header_row,
         selected_row: false,
-        val: ModelRc::new(data_model),
+        val_str: ModelRc::new(data_model_str),
+        val_int: ModelRc::new(data_model_int),
     };
     items.push(main);
 }
@@ -199,11 +257,13 @@ where
     T: CommonData,
 {
     component.set_included_directory(custom_settings.included_directories.clone());
+    component.set_reference_directory(custom_settings.included_directories_referenced.clone());
     component.set_excluded_directory(custom_settings.excluded_directories.clone());
     component.set_recursive_search(custom_settings.recursive_search);
     component.set_minimal_file_size(custom_settings.minimum_file_size as u64 * 1024);
     component.set_maximal_file_size(custom_settings.maximum_file_size as u64 * 1024);
     component.set_allowed_extensions(custom_settings.allowed_extensions.clone());
+    component.set_excluded_extensions(custom_settings.excluded_extensions.clone());
     component.set_excluded_items(custom_settings.excluded_items.split(',').map(str::to_string).collect());
     component.set_exclude_other_filesystems(custom_settings.ignore_other_file_systems);
     component.set_use_cache(custom_settings.use_cache);

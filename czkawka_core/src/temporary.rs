@@ -1,7 +1,6 @@
 use std::fs;
 use std::fs::DirEntry;
 use std::io::prelude::*;
-
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
@@ -60,7 +59,7 @@ impl Temporary {
 
     #[fun_time(message = "find_temporary_files", level = "info")]
     pub fn find_temporary_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) {
-        self.optimize_dirs_before_start();
+        self.prepare_items();
         if !self.check_files(stop_receiver, progress_sender) {
             self.common_data.stopped_search = true;
             return;

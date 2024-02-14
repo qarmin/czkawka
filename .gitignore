@@ -19,3 +19,6 @@ krokiet/Cargo.lock
 krokiet/target
 *.json
 *.mm_profdata
+perf.data
+perf.data.old
+krokiet/ui/test.slint

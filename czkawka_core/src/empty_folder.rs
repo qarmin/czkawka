@@ -5,12 +5,12 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::Ordering;
 
-use crate::common::{check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
 use log::debug;
 use rayon::prelude::*;
 
+use crate::common::{check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crate::common_dir_traversal::{common_get_entry_data, common_get_metadata_dir, common_read_dir, get_modified_time, CheckingMethod, ProgressData, ToolType};
 use crate::common_directory::Directories;
 use crate::common_items::ExcludedItems;
@@ -24,6 +24,12 @@ pub struct FolderEntry {
     // Usable only when finding
     pub(crate) is_empty: FolderEmptiness,
     pub modified_date: u64,
+}
+
+impl FolderEntry {
+    pub fn get_modified_date(&self) -> u64 {
+        self.modified_date
+    }
 }
 
 pub struct EmptyFolder {
@@ -64,7 +70,7 @@ impl EmptyFolder {
 
     #[fun_time(message = "find_empty_folders", level = "info")]
     pub fn find_empty_folders(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) {
-        self.optimize_dirs_before_start();
+        self.prepare_items();
         if !self.check_for_empty_folders(stop_receiver, progress_sender) {
             self.common_data.stopped_search = true;
             return;
@@ -104,19 +110,17 @@ impl EmptyFolder {
         let excluded_items = self.common_data.excluded_items.clone();
         let directories = self.common_data.directories.clone();
 
-        let mut folder_entries: HashMap<String, FolderEntry> = HashMap::new();
         let mut non_empty_folders: Vec<String> = vec![];
 
+        let mut start_folder_entries = Vec::with_capacity(folders_to_check.len());
+        let mut new_folder_entries_list = Vec::new();
         for dir in &folders_to_check {
-            folder_entries.insert(
-                dir.to_string_lossy().to_string(),
-                FolderEntry {
-                    path: dir.clone(),
-                    parent_path: None,
-                    is_empty: FolderEmptiness::Maybe,
-                    modified_date: 0,
-                },
-            );
+            start_folder_entries.push(FolderEntry {
+                path: dir.clone(),
+                parent_path: None,
+                is_empty: FolderEmptiness::Maybe,
+                modified_date: 0,
+            });
         }
 
         while !folders_to_check.is_empty() {
@@ -130,12 +134,13 @@ impl EmptyFolder {
                 .map(|current_folder| {
                     let mut dir_result = vec![];
                     let mut warnings = vec![];
-                    let mut set_as_not_empty_folder_list = vec![];
+                    let mut non_empty_folder = None;
                     let mut folder_entries_list = vec![];
 
+                    let current_folder_as_string = current_folder.to_string_lossy().to_string();
+
                     let Some(read_dir) = common_read_dir(&current_folder, &mut warnings) else {
-                        set_as_not_empty_folder_list.push(current_folder.to_string_lossy().to_string());
-                        return (dir_result, warnings, set_as_not_empty_folder_list, folder_entries_list);
+                        return (dir_result, warnings, Some(current_folder_as_string), folder_entries_list);
                     };
 
                     let mut counter = 0;
@@ -150,23 +155,27 @@ impl EmptyFolder {
                             counter += 1;
                             Self::process_dir_in_dir_mode(
                                 &current_folder,
+                                &current_folder_as_string,
                                 entry_data,
                                 &directories,
                                 &mut dir_result,
                                 &mut warnings,
                                 &excluded_items,
-                                &mut set_as_not_empty_folder_list,
+                                &mut non_empty_folder,
                                 &mut folder_entries_list,
                             );
                         } else {
-                            set_as_not_empty_folder_list.push(current_folder.to_string_lossy().to_string());
+                            if non_empty_folder.is_none() {
+                                non_empty_folder = Some(current_folder_as_string.clone());
+                            }
                         }
                     }
                     if counter > 0 {
                         // Increase counter in batch, because usually it may be slow to add multiple times atomic value
                         atomic_counter.fetch_add(counter, Ordering::Relaxed);
                     }
-                    (dir_result, warnings, set_as_not_empty_folder_list, folder_entries_list)
+
+                    (dir_result, warnings, non_empty_folder, folder_entries_list)
                 })
                 .collect();
 
@@ -174,13 +183,25 @@ impl EmptyFolder {
             folders_to_check = Vec::with_capacity(required_size);
 
             // Process collected data
-            for (segment, warnings, set_as_not_empty_folder_list, fe_list) in segments {
+            for (segment, warnings, non_empty_folder, fe_list) in segments {
                 folders_to_check.extend(segment);
-                self.common_data.text_messages.warnings.extend(warnings);
-                non_empty_folders.extend(set_as_not_empty_folder_list);
-                for (path, entry) in fe_list {
-                    folder_entries.insert(path, entry);
+                if !warnings.is_empty() {
+                    self.common_data.text_messages.warnings.extend(warnings);
                 }
+                if let Some(non_empty_folder) = non_empty_folder {
+                    non_empty_folders.push(non_empty_folder);
+                }
+                new_folder_entries_list.push(fe_list);
+            }
+        }
+
+        let mut folder_entries: HashMap<String, FolderEntry> = HashMap::with_capacity(start_folder_entries.len() + new_folder_entries_list.iter().map(Vec::len).sum::<usize>());
+        for fe in start_folder_entries {
+            folder_entries.insert(fe.path.to_string_lossy().to_string(), fe);
+        }
+        for fe_list in new_folder_entries_list {
+            for fe in fe_list {
+                folder_entries.insert(fe.path.to_string_lossy().to_string(), fe);
             }
         }
 
@@ -223,18 +244,20 @@ impl EmptyFolder {
 
     fn process_dir_in_dir_mode(
         current_folder: &Path,
+        current_folder_as_str: &str,
         entry_data: &DirEntry,
         directories: &Directories,
         dir_result: &mut Vec<PathBuf>,
         warnings: &mut Vec<String>,
         excluded_items: &ExcludedItems,
-        set_as_not_empty_folder_list: &mut Vec<String>,
-        folder_entries_list: &mut Vec<(String, FolderEntry)>,
+        non_empty_folder: &mut Option<String>,
+        folder_entries_list: &mut Vec<FolderEntry>,
     ) {
-        let parent_folder_str = current_folder.to_string_lossy().to_string();
         let next_folder = entry_data.path();
         if excluded_items.is_excluded(&next_folder) || directories.is_excluded(&next_folder) {
-            set_as_not_empty_folder_list.push(parent_folder_str);
+            if non_empty_folder.is_none() {
+                *non_empty_folder = Some(current_folder_as_str.to_string());
+            }
             return;
         }
 
@@ -248,20 +271,19 @@ impl EmptyFolder {
         }
 
         let Some(metadata) = common_get_metadata_dir(entry_data, warnings, &next_folder) else {
-            set_as_not_empty_folder_list.push(parent_folder_str);
+            if non_empty_folder.is_none() {
+                *non_empty_folder = Some(current_folder_as_str.to_string());
+            }
             return;
         };
 
         dir_result.push(next_folder.clone());
-        folder_entries_list.push((
-            next_folder.to_string_lossy().to_string(),
-            FolderEntry {
-                path: next_folder,
-                parent_path: Some(parent_folder_str),
-                is_empty: FolderEmptiness::Maybe,
-                modified_date: get_modified_time(&metadata, warnings, current_folder, true),
-            },
-        ));
+        folder_entries_list.push(FolderEntry {
+            path: next_folder,
+            parent_path: Some(current_folder_as_str.to_string()),
+            is_empty: FolderEmptiness::Maybe,
+            modified_date: get_modified_time(&metadata, warnings, current_folder, true),
+        });
     }
 
     #[fun_time(message = "delete_files", level = "debug")]

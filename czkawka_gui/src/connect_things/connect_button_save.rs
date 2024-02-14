@@ -11,7 +11,6 @@ use czkawka_core::common_traits::PrintResults;
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::BottomButtonsEnum;
-use crate::localizer_core::generate_translation_hashmap;
 use crate::notebook_enums::*;
 
 pub fn connect_button_save(gui_data: &GuiData) {
@@ -76,7 +75,7 @@ fn post_save_things(
     buttons_save: &Button,
     current_path: String,
 ) {
-    entry_info.set_text(&flg!("save_results_to_file", generate_translation_hashmap(vec![("name", current_path),])));
+    entry_info.set_text(&flg!("save_results_to_file", name = current_path));
     // Set state
     {
         buttons_save.hide();

@@ -2,6 +2,7 @@ import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListV
 import {CurrentTab} from "common.slint";
 import {ColorPalette} from "color_palette.slint";
 import {GuiState} from "gui_state.slint";
+import {Callabler} from "callabler.slint";
 
 component TabItem {
     in property <bool> scanning;
@@ -19,6 +20,7 @@ component TabItem {
                     return;
                 }
                 GuiState.active_tab = root.curr-tab;
+                Callabler.tab_changed();
                 changed_current_tab();
             }
         }
@@ -130,6 +132,7 @@ export component LeftSidePanel {
                     icon: @image-url("../icons/settings.svg");
                     clicked => {
                         GuiState.active_tab = CurrentTab.Settings;
+                        Callabler.tab_changed();
                         root.changed_current_tab();
                     }
                 }

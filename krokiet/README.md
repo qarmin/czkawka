@@ -1,6 +1,6 @@
 # Krokiet
 
-Krokiet is new Czkawka frontend written in Slint(written mostly in Rust) in opposite to Gtk 4 frontend which uses mostly
+Krokiet is new Czkawka frontend written in Slint, which uses Rust in opposite to Gtk 4 frontend which uses mostly
 C code.
 
 Different toolkit means different look, limitations and features, so you should not expect same features like in Gtk 4
@@ -24,7 +24,7 @@ sudo apt install libfontconfig-dev libfreetype-dev
 
 Default compilation is done by `cargo build --release` and should work on most systems.
 
-You need the latest available version of Rust to compile it, because Krokiet aims to support the latest slint verions,
+You need the latest available version of Rust to compile it, because Krokiet aims to support the latest slint versions,
 that should provide best experience.
 
 The only exception is building skia renderer which is non default feature that can be enabled manually if you want to
@@ -102,25 +102,6 @@ SLINT_STYLE=material-dark cargo run -- --path .
   live
   preview - [slint live preview example](https://slint.dev/releases/1.3.0/editor/?load_demo=examples/printerdemo/ui/printerdemo.slint)
 - Improving app rust code
-
-## Missing features available in GTK 4 frontend
-
-- icons in buttons
-- resizable input files panel
-- settings
-- moving files
-- deleting files
-- sorting files
-- saving results
-- symlink/hardlink
-- implementing all modes
-- multiple selection
-- proper popup windows - slint not handle them properly
-- logo
-- about window
-- reference folders
-- translations(problem is only with interface, messages like "Checking {x} file" can be easily translated from rust
-  side)
 
 ## Why Slint?
 

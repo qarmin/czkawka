@@ -9,10 +9,10 @@ use log::{debug, error, info, warn};
 use serde::{Deserialize, Serialize};
 use slint::{ComponentHandle, Model, ModelRc};
 
-use czkawka_core::common::{get_available_threads, set_number_of_threads};
+use czkawka_core::common::{get_all_available_threads, set_number_of_threads};
 use czkawka_core::common_items::{DEFAULT_EXCLUDED_DIRECTORIES, DEFAULT_EXCLUDED_ITEMS};
 
-use crate::common::{create_string_standard_list_view_from_pathbuf, create_vec_model_from_vec_string};
+use crate::common::{create_excluded_directories_model_from_pathbuf, create_included_directories_model_from_pathbuf, create_vec_model_from_vec_string};
 use crate::{Callabler, GuiState, MainWindow, Settings};
 
 pub const DEFAULT_MINIMUM_SIZE_KB: i32 = 16;
@@ -44,12 +44,16 @@ pub const ALLOWED_HASH_TYPE_VALUES: &[(&str, &str, HashAlg)] = &[
 pub struct SettingsCustom {
     #[serde(default = "default_included_directories")]
     pub included_directories: Vec<PathBuf>,
+    #[serde(default)]
+    pub included_directories_referenced: Vec<PathBuf>,
     #[serde(default = "default_excluded_directories")]
     pub excluded_directories: Vec<PathBuf>,
     #[serde(default = "default_excluded_items")]
     pub excluded_items: String,
     #[serde(default)]
     pub allowed_extensions: String,
+    #[serde(default)]
+    pub excluded_extensions: String,
     #[serde(default = "minimum_file_size")]
     pub minimum_file_size: i32,
     #[serde(default = "maximum_file_size")]
@@ -236,7 +240,7 @@ pub fn load_settings_from_file(app: &MainWindow) {
         }
     }
     base_settings.default_preset = max(min(base_settings.default_preset, 9), 0);
-    custom_settings.thread_number = max(min(custom_settings.thread_number, get_available_threads() as i32), 0);
+    custom_settings.thread_number = max(min(custom_settings.thread_number, get_all_available_threads() as i32), 0);
 
     // Ended validating
     set_settings_to_gui(app, &custom_settings);
@@ -259,7 +263,7 @@ pub fn save_base_settings_to_file(app: &MainWindow) {
 
 pub fn save_custom_settings_to_file(app: &MainWindow) {
     let current_item = app.global::<Settings>().get_settings_preset_idx();
-    let result = save_data_to_file(get_config_file(current_item + 1), &collect_settings(app));
+    let result = save_data_to_file(get_config_file(current_item), &collect_settings(app));
 
     if let Err(e) = result {
         error!("{e}");
@@ -348,15 +352,16 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
     let settings = app.global::<Settings>();
 
     // Included directories
-    let included_directories = create_string_standard_list_view_from_pathbuf(&custom_settings.included_directories);
-    settings.set_included_directories(included_directories);
+    let included_directories = create_included_directories_model_from_pathbuf(&custom_settings.included_directories, &custom_settings.included_directories_referenced);
+    settings.set_included_directories_model(included_directories);
 
     // Excluded directories
-    let excluded_directories = create_string_standard_list_view_from_pathbuf(&custom_settings.excluded_directories);
-    settings.set_excluded_directories(excluded_directories);
+    let excluded_directories = create_excluded_directories_model_from_pathbuf(&custom_settings.excluded_directories);
+    settings.set_excluded_directories_model(excluded_directories);
 
     settings.set_excluded_items(custom_settings.excluded_items.clone().into());
     settings.set_allowed_extensions(custom_settings.allowed_extensions.clone().into());
+    settings.set_excluded_extensions(custom_settings.excluded_extensions.clone().into());
     settings.set_minimum_file_size(custom_settings.minimum_file_size.to_string().into());
     settings.set_maximum_file_size(custom_settings.maximum_file_size.to_string().into());
     settings.set_use_cache(custom_settings.use_cache);
@@ -430,14 +435,20 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
 pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let settings = app.global::<Settings>();
 
-    let included_directories = settings.get_included_directories();
-    let included_directories = included_directories.iter().map(|x| PathBuf::from(x.text.as_str())).collect::<Vec<_>>();
+    let included_directories_model = settings.get_included_directories_model();
+    let included_directories = included_directories_model.iter().map(|model| PathBuf::from(model.path.as_str())).collect::<Vec<_>>();
+    let included_directories_referenced = included_directories_model
+        .iter()
+        .filter(|model| model.referenced_folder)
+        .map(|model| PathBuf::from(model.path.as_str()))
+        .collect::<Vec<_>>();
 
-    let excluded_directories = settings.get_excluded_directories();
-    let excluded_directories = excluded_directories.iter().map(|x| PathBuf::from(x.text.as_str())).collect::<Vec<_>>();
+    let excluded_directories_model = settings.get_excluded_directories_model();
+    let excluded_directories = excluded_directories_model.iter().map(|model| PathBuf::from(model.path.as_str())).collect::<Vec<_>>();
 
     let excluded_items = settings.get_excluded_items().to_string();
     let allowed_extensions = settings.get_allowed_extensions().to_string();
+    let excluded_extensions = settings.get_excluded_extensions().to_string();
     let minimum_file_size = settings.get_minimum_file_size().parse::<i32>().unwrap_or(DEFAULT_MINIMUM_SIZE_KB);
     let maximum_file_size = settings.get_maximum_file_size().parse::<i32>().unwrap_or(DEFAULT_MAXIMUM_SIZE_KB);
 
@@ -478,9 +489,11 @@ pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let similar_images_sub_similarity = settings.get_similar_images_sub_current_similarity().round() as i32;
     SettingsCustom {
         included_directories,
+        included_directories_referenced,
         excluded_directories,
         excluded_items,
         allowed_extensions,
+        excluded_extensions,
         minimum_file_size,
         maximum_file_size,
         recursive_search,
