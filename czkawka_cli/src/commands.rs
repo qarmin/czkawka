@@ -212,6 +212,8 @@ pub struct SimilarImagesArgs {
     #[clap(flatten)]
     pub delete_method: DMethod,
     #[clap(flatten)]
+    pub allow_hard_links: AllowHardLinks,
+    #[clap(flatten)]
     pub dry_run: DryRun,
     #[clap(
         short = 'g',
@@ -354,6 +356,8 @@ pub struct SimilarVideosArgs {
     pub common_cli_items: CommonCliItems,
     #[clap(flatten)]
     pub delete_method: DMethod,
+    #[clap(flatten)]
+    pub allow_hard_links: AllowHardLinks,
     #[clap(flatten)]
     pub dry_run: DryRun,
     #[clap(

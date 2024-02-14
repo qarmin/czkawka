@@ -185,6 +185,7 @@ fn similar_images(similar_images: SimilarImagesArgs, stop_receiver: &Receiver<()
         hash_size,
         delete_method,
         dry_run,
+        allow_hard_links,
     } = similar_images;
 
     let mut item = SimilarImages::new();
@@ -198,6 +199,7 @@ fn similar_images(similar_images: SimilarImagesArgs, stop_receiver: &Receiver<()
     item.set_delete_method(delete_method.delete_method);
     item.set_dry_run(dry_run.dry_run);
     item.set_similarity(return_similarity_from_similarity_preset(&similarity_preset, hash_size));
+    item.set_ignore_hard_links(!allow_hard_links.allow_hard_links);
 
     item.find_similar_images(Some(stop_receiver), Some(progress_sender));
 
@@ -272,6 +274,7 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_receiver: &Receiver<()
         maximal_file_size,
         delete_method,
         dry_run,
+        allow_hard_links,
     } = similar_videos;
 
     let mut item = SimilarVideos::new();
@@ -282,6 +285,7 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_receiver: &Receiver<()
     item.set_tolerance(tolerance);
     item.set_delete_method(delete_method.delete_method);
     item.set_dry_run(dry_run.dry_run);
+    item.set_ignore_hard_links(!allow_hard_links.allow_hard_links);
 
     item.find_similar_videos(Some(stop_receiver), Some(progress_sender));
 

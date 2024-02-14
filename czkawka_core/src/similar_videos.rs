@@ -16,7 +16,7 @@ use vid_dup_finder_lib::{NormalizedTolerance, VideoHash};
 
 use crate::common::{check_if_stop_received, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, VIDEO_FILES_EXTENSIONS};
 use crate::common_cache::{get_similar_videos_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
-use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
+use crate::common_dir_traversal::{inode, take_1_per_inode, CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::{DebugPrint, PrintResults, ResultEntry};
 use crate::flc;
@@ -83,6 +83,7 @@ pub struct SimilarVideos {
     videos_to_check: BTreeMap<String, VideosEntry>,
     tolerance: i32,
     exclude_videos_with_same_size: bool,
+    ignore_hard_links: bool,
 }
 
 impl CommonData for SimilarVideos {
@@ -111,6 +112,7 @@ impl SimilarVideos {
             tolerance: 10,
             exclude_videos_with_same_size: false,
             similar_referenced_vectors: vec![],
+            ignore_hard_links: false,
         }
     }
 
@@ -149,7 +151,7 @@ impl SimilarVideos {
         }
 
         let result = DirTraversalBuilder::new()
-            .group_by(|_fe| ())
+            .group_by(inode)
             .stop_receiver(stop_receiver)
             .progress_sender(progress_sender)
             .common_data(&self.common_data)
@@ -160,8 +162,8 @@ impl SimilarVideos {
         match result {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
                 self.videos_to_check = grouped_file_entries
-                    .into_values()
-                    .flatten()
+                    .into_iter()
+                    .flat_map(if self.ignore_hard_links { |(_, fes)| fes } else { take_1_per_inode })
                     .map(|fe| (fe.path.to_string_lossy().to_string(), fe.into_videos_entry()))
                     .collect();
                 self.common_data.text_messages.warnings.extend(warnings);
@@ -453,5 +455,9 @@ impl SimilarVideos {
 
     pub fn get_use_reference(&self) -> bool {
         self.common_data.use_reference_folders
+    }
+
+    pub fn set_ignore_hard_links(&mut self, ignore_hard_links: bool) {
+        self.ignore_hard_links = ignore_hard_links;
     }
 }

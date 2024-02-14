@@ -1,6 +1,8 @@
 use std::collections::BTreeMap;
 use std::fs;
-use std::fs::{DirEntry, FileType, Metadata, ReadDir};
+use std::fs::{DirEntry, FileType, Metadata};
+#[cfg(target_family = "unix")]
+use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::Ordering;
 use std::time::UNIX_EPOCH;
@@ -92,7 +94,7 @@ pub enum Collect {
     Files,
 }
 
-#[derive(Eq, PartialEq, Copy, Clone)]
+#[derive(Eq, PartialEq, Copy, Clone, Debug)]
 enum EntryType {
     File,
     Dir,
@@ -546,9 +548,17 @@ fn process_symlink_in_symlink_mode(
     fe_result.push(fe);
 }
 
-pub fn common_read_dir(current_folder: &Path, warnings: &mut Vec<String>) -> Option<ReadDir> {
+pub fn common_read_dir(current_folder: &Path, warnings: &mut Vec<String>) -> Option<Vec<Result<DirEntry, std::io::Error>>> {
     match fs::read_dir(current_folder) {
-        Ok(t) => Some(t),
+        Ok(t) => {
+            // Make directory traversal order stable
+            let mut r: Vec<_> = t.collect();
+            r.sort_by_key(|d| match d {
+                Ok(f) => f.path(),
+                _ => PathBuf::new(),
+            });
+            Some(r)
+        }
         Err(e) => {
             warnings.push(flc!(
                 "core_cannot_open_dir",
@@ -632,5 +642,197 @@ pub fn get_modified_time(metadata: &Metadata, warnings: &mut Vec<String>, curren
             }
             0
         }
+    }
+}
+
+#[cfg(target_family = "windows")]
+pub fn inode(_fe: &FileEntry) -> Option<u64> {
+    None
+}
+
+#[cfg(target_family = "unix")]
+pub fn inode(fe: &FileEntry) -> Option<u64> {
+    if let Ok(meta) = fs::metadata(&fe.path) {
+        Some(meta.ino())
+    } else {
+        None
+    }
+}
+
+pub fn take_1_per_inode((k, mut v): (Option<u64>, Vec<FileEntry>)) -> Vec<FileEntry> {
+    if k.is_some() {
+        v.drain(1..);
+    }
+    v
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::common_tool::*;
+    use once_cell::sync::Lazy;
+    use std::fs;
+    use std::fs::File;
+    use std::io;
+    use std::io::prelude::*;
+    use std::time::{Duration, SystemTime};
+    use tempfile::TempDir;
+
+    impl CommonData for CommonToolData {
+        fn get_cd(&self) -> &CommonToolData {
+            self
+        }
+        fn get_cd_mut(&mut self) -> &mut CommonToolData {
+            self
+        }
+    }
+
+    static NOW: Lazy<SystemTime> = Lazy::new(|| SystemTime::UNIX_EPOCH + Duration::new(100, 0));
+    const CONTENT: &[u8; 1] = b"a";
+
+    fn create_files(dir: &TempDir) -> io::Result<(PathBuf, PathBuf, PathBuf)> {
+        let (src, hard, other) = (dir.path().join("a"), dir.path().join("b"), dir.path().join("c"));
+
+        let mut file = File::create(&src)?;
+        file.write_all(CONTENT)?;
+        fs::hard_link(&src, &hard)?;
+        file.set_modified(*NOW)?;
+
+        let mut file = File::create(&other)?;
+        file.write_all(CONTENT)?;
+        file.set_modified(*NOW)?;
+        Ok((src, hard, other))
+    }
+
+    #[test]
+    fn test_traversal() -> io::Result<()> {
+        let dir = tempfile::Builder::new().tempdir()?;
+        let (src, hard, other) = create_files(&dir)?;
+        let secs = NOW.duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs();
+
+        let mut common_data = CommonToolData::new(ToolType::SimilarImages);
+        common_data.directories.set_included_directory([dir.path().to_owned()].to_vec());
+        common_data.set_minimal_file_size(0);
+
+        match DirTraversalBuilder::new().group_by(|_fe| ()).common_data(&common_data).build().run() {
+            DirTraversalResult::SuccessFiles {
+                warnings: _,
+                grouped_file_entries,
+            } => {
+                let actual: Vec<_> = grouped_file_entries.into_values().flatten().collect();
+                assert_eq!(
+                    [
+                        FileEntry {
+                            path: src,
+                            size: 1,
+                            modified_date: secs,
+                        },
+                        FileEntry {
+                            path: hard,
+                            size: 1,
+                            modified_date: secs,
+                        },
+                        FileEntry {
+                            path: other,
+                            size: 1,
+                            modified_date: secs,
+                        },
+                    ]
+                    .to_vec(),
+                    actual
+                );
+            }
+            _ => {
+                panic!("Expect SuccessFiles.");
+            }
+        };
+        Ok(())
+    }
+
+    #[cfg(target_family = "unix")]
+    #[test]
+    fn test_traversal_group_by_inode() -> io::Result<()> {
+        let dir = tempfile::Builder::new().tempdir()?;
+        let (src, _, other) = create_files(&dir)?;
+        let secs = NOW.duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs();
+
+        let mut common_data = CommonToolData::new(ToolType::SimilarImages);
+        common_data.directories.set_included_directory([dir.path().to_owned()].to_vec());
+        common_data.set_minimal_file_size(0);
+
+        match DirTraversalBuilder::new().group_by(inode).common_data(&common_data).build().run() {
+            DirTraversalResult::SuccessFiles {
+                warnings: _,
+                grouped_file_entries,
+            } => {
+                let actual: Vec<_> = grouped_file_entries.into_iter().flat_map(take_1_per_inode).collect();
+                assert_eq!(
+                    [
+                        FileEntry {
+                            path: src,
+                            size: 1,
+                            modified_date: secs,
+                        },
+                        FileEntry {
+                            path: other,
+                            size: 1,
+                            modified_date: secs,
+                        },
+                    ]
+                    .to_vec(),
+                    actual
+                );
+            }
+            _ => {
+                panic!("Expect SuccessFiles.");
+            }
+        };
+        Ok(())
+    }
+
+    #[cfg(target_family = "windows")]
+    #[test]
+    fn test_traversal_group_by_inode() -> io::Result<()> {
+        let dir = tempfile::Builder::new().tempdir()?;
+        let (src, hard, other) = create_files(&dir)?;
+        let secs = NOW.duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs();
+
+        let mut common_data = CommonToolData::new(ToolType::SimilarImages);
+        common_data.directories.set_included_directory([dir.path().to_owned()].to_vec());
+        common_data.set_minimal_file_size(0);
+
+        match DirTraversalBuilder::new().group_by(inode).common_data(&common_data).build().run() {
+            DirTraversalResult::SuccessFiles {
+                warnings: _,
+                grouped_file_entries,
+            } => {
+                let actual: Vec<_> = grouped_file_entries.into_iter().flat_map(take_1_per_inode).collect();
+                assert_eq!(
+                    [
+                        FileEntry {
+                            path: src,
+                            size: 1,
+                            modified_date: secs,
+                        },
+                        FileEntry {
+                            path: hard,
+                            size: 1,
+                            modified_date: secs,
+                        },
+                        FileEntry {
+                            path: other,
+                            size: 1,
+                            modified_date: secs,
+                        },
+                    ]
+                    .to_vec(),
+                    actual
+                );
+            }
+            _ => {
+                panic!("Expect SuccessFiles.");
+            }
+        };
+        Ok(())
     }
 }
