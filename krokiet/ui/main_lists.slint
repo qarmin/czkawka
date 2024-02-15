@@ -20,7 +20,7 @@ export component MainList {
         {checked: false, selected_row: false, header_row: false, val_str: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []},
         {checked: true, selected_row: false, header_row: false, val_str: ["lokkaler", "/Xd1/Vide2", "01.23.1911"], val_int: []}
     ];
-    in-out property <[MainListModel]> temporary-files_model: [];
+    in-out property <[MainListModel]> temporary_files_model: [];
     in-out property <[MainListModel]> similar_images_model: [
         {checked: false, selected_row: false, header_row: true, val_str: ["Original", "500KB", "100x100", "kropkarz", "/Xd1", "24.10.2023"], val_int: []},
         {checked: false, selected_row: false, header_row: false, val_str: ["Similar", "500KB", "100x100", "witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []},
@@ -34,16 +34,43 @@ export component MainList {
 
     callback changed_current_tab();
     callback released_key(string);
+
+    out property <length> path_px: 350px;
+    out property <length> name_px: 100px;
+    out property <length> mod_px: 150px;
+    out property <length> size_px: 50px;
     
+    duplicates := SelectableTableView {
+        visible: GuiState.active_tab == CurrentTab.DuplicateFiles;
+        min-width: 200px;
+        height: parent.height;
+        columns: ["Selection", "Size", "File Name", "Path", "Modification Date"];
+        column-sizes: [35px, size_px, name_px, path_px, mod_px];
+        values <=> duplicate_files_model;
+        parentPathIdx: 3;
+        fileNameIdx: 2;
+    }
+
     empty_folders := SelectableTableView {
         visible: GuiState.active_tab == CurrentTab.EmptyFolders;
         min-width: 200px;
         height: parent.height;
         columns: ["Selection", "Folder Name", "Path", "Modification Date"];
-        column-sizes: [35px, 100px, 350px, 150px];
+        column-sizes: [35px, name_px, path_px, mod_px];
         values <=> empty-folder-model;
         parentPathIdx: 2;
         fileNameIdx: 1;
+    }
+
+    big_files := SelectableTableView {
+        visible: GuiState.active_tab == CurrentTab.BigFiles;
+        min-width: 200px;
+        height: parent.height;
+        columns: ["Selection", "Size", "File Name", "Path", "Modification Date"];
+        column-sizes: [35px, size_px, name_px, path_px, mod_px];
+        values <=> big_files_model;
+        parentPathIdx: 3;
+        fileNameIdx: 2;
     }
 
     empty_files := SelectableTableView {
@@ -51,10 +78,21 @@ export component MainList {
         min-width: 200px;
         height: parent.height;
         columns: ["Selection", "File Name", "Path", "Modification Date"];
-        column-sizes: [35px, 100px, 350px, 150px];
+        column-sizes: [35px, name_px, path_px, mod_px];
         values <=> empty-files-model;
         parentPathIdx: 2;
         fileNameIdx: 1;
+    }
+
+    temporary_files := SelectableTableView {
+        visible: GuiState.active_tab == CurrentTab.TemporaryFiles;
+        min-width: 200px;
+        height: parent.height;
+        columns: ["Selection", "Size", "File Name", "Path", "Modification Date"];
+        column-sizes: [35px, size_px, name_px, path_px, mod_px];
+        values <=> temporary_files_model;
+        parentPathIdx: 3;
+        fileNameIdx: 2;
     }
 
     similar_images := SelectableTableView {
@@ -62,10 +100,65 @@ export component MainList {
         min-width: 200px;
         height: parent.height;
         columns: ["Selection", "Similarity", "Size", "Dimensions", "File Name", "Path", "Modification Date"];
-        column-sizes: [35px, 80px, 80px, 80px, 100px, 350px, 150px];
+        column-sizes: [35px, 80px, 80px, 80px, name_px, path_px, mod_px];
         values <=> similar-images-model;
         parentPathIdx: 5;
         fileNameIdx: 4;
+    }
+
+    similar_videos := SelectableTableView {
+        visible: GuiState.active_tab == CurrentTab.SimilarVideos;
+        min-width: 200px;
+        height: parent.height;
+        columns: ["Selection", "Size", "File Name", "Path", "Modification Date"];
+        column-sizes: [35px, size_px, name_px, path_px, mod_px];
+        values <=> similar_videos_model;
+        parentPathIdx: 3;
+        fileNameIdx: 2;
+    }
+
+    similar_music := SelectableTableView {
+        visible: GuiState.active_tab == CurrentTab.SimilarMusic;
+        min-width: 200px;
+        height: parent.height;
+        columns: ["Selection", "Size", "File Name", "Title","Artist", "Year", "Bitrate", "Length", "Genre", "Path", "Modification Date"];
+        column-sizes: [35px, size_px, name_px, 80px, 80px, 80px, 80px, 80px, 80px, path_px, mod_px];
+        values <=> similar_music_model;
+        parentPathIdx: 9;
+        fileNameIdx: 2;
+    }
+
+    invalid_symlink := SelectableTableView {
+        visible: GuiState.active_tab == CurrentTab.InvalidSymlinks;
+        min-width: 200px;
+        height: parent.height;
+        columns: ["Selection", "Symlink Name", "Symlink Folder", "Destination Path", "Modification Date"];
+        column-sizes: [35px, name_px, path_px, path_px, mod_px];
+        values <=> invalid_symlinks_model;
+        parentPathIdx: 2;
+        fileNameIdx: 1;
+    }
+
+    broken_files := SelectableTableView {
+        visible: GuiState.active_tab == CurrentTab.BrokenFiles;
+        min-width: 200px;
+        height: parent.height;
+        columns: ["Selection", "Size", "File Name", "Type of Error", "Path", "Modification Date"];
+        column-sizes: [35px, size_px, name_px, 200px, path_px, mod_px];
+        values <=> broken_files_model;
+        parentPathIdx: 4;
+        fileNameIdx: 2;
+    }
+
+    bad_extensions := SelectableTableView {
+        visible: GuiState.active_tab == CurrentTab.BadExtensions;
+        min-width: 200px;
+        height: parent.height;
+        columns: ["Selection", "File Name", "Path", "Current Extension", "Proper Extension"];
+        column-sizes: [35px, name_px, path_px, 40px, 200px];
+        values <=> bad_extensions_model;
+        parentPathIdx: 4;
+        fileNameIdx: 2;
     }
 
     settings_list := SettingsList {

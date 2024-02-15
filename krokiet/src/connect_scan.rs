@@ -39,6 +39,9 @@ pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressDat
 
         let a = app.as_weak();
         match active_tab {
+            CurrentTab::DuplicateFiles => {
+                scan_duplicates(a, progress_sender, stop_receiver, custom_settings);
+            }
             CurrentTab::EmptyFolders => {
                 scan_empty_folders(a, progress_sender, stop_receiver, custom_settings);
             }
@@ -50,9 +53,6 @@ pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressDat
             }
             CurrentTab::BigFiles => {
                 scan_big_files(a, progress_sender, stop_receiver, custom_settings);
-            }
-            CurrentTab::DuplicateFiles => {
-                scan_duplicates(a, progress_sender, stop_receiver, custom_settings);
             }
             CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
             _ => unimplemented!(),

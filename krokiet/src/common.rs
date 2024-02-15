@@ -7,6 +7,7 @@ use slint::{ModelRc, SharedString, VecModel};
 // Int model is used to store data in unchanged(* except that we need to split u64 into two i32) form and is used to sort/select data
 // Str model is used to display data in gui
 
+// Duplicates
 #[repr(u8)]
 pub enum IntDataDuplicateFiles {
     ModificationDatePart1,
@@ -22,6 +23,7 @@ pub enum StrDataDuplicateFiles {
     ModificationDate,
 }
 
+// Empty Folders
 #[repr(u8)]
 pub enum IntDataEmptyFolders {
     ModificationDatePart1,
@@ -34,6 +36,7 @@ pub enum StrDataEmptyFolders {
     Path,
     ModificationDate,
 }
+// Big Files
 #[repr(u8)]
 pub enum IntDataBigFiles {
     ModificationDatePart1,
@@ -50,6 +53,7 @@ pub enum StrDataBigFiles {
     ModificationDate,
 }
 
+// Empty files
 #[repr(u8)]
 pub enum IntDataEmptyFiles {
     ModificationDatePart1,
@@ -64,6 +68,7 @@ pub enum StrDataEmptyFiles {
     Path,
     ModificationDate,
 }
+// Temporary Files
 #[repr(u8)]
 pub enum IntDataTemporaryFiles {
     ModificationDatePart1,
@@ -79,6 +84,7 @@ pub enum StrDataTemporaryFiles {
     ModificationDate,
 }
 
+// Similar Images
 #[repr(u8)]
 pub enum IntDataSimilarImages {
     ModificationDatePart1,
@@ -99,6 +105,7 @@ pub enum StrDataSimilarImages {
     ModificationDate,
 }
 
+// Similar Videos
 #[repr(u8)]
 pub enum IntDataSimilarVideos {
     ModificationDatePart1,
@@ -115,6 +122,7 @@ pub enum StrDataSimilarVideos {
     ModificationDate,
 }
 
+// Similar Music
 #[repr(u8)]
 pub enum IntDataSimilarMusic {
     ModificationDatePart1,
@@ -136,6 +144,8 @@ pub enum StrDataSimilarMusic {
     Path,
     ModificationDate,
 }
+
+// Invalid Symlinks
 #[repr(u8)]
 pub enum IntDataInvalidSymlinks {
     ModificationDatePart1,
@@ -150,6 +160,8 @@ pub enum StrDataInvalidSymlinks {
     TypeOfError,
     ModificationDate,
 }
+
+// Broken Files
 #[repr(u8)]
 pub enum IntDataBrokenFiles {
     ModificationDatePart1,
