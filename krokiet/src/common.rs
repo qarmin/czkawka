@@ -7,8 +7,80 @@ use slint::{ModelRc, SharedString, VecModel};
 // Str model is used to display data in gui
 
 #[repr(u8)]
+pub enum IntDataDuplicateFiles {
+    ModificationDatePart1,
+    ModificationDatePart2,
+    SizePart1,
+    SizePart2,
+}
+#[repr(u8)]
+pub enum StrDataDuplicateFiles {
+    Size,
+    Name,
+    Path,
+    ModificationDate,
+}
+
+#[repr(u8)]
+pub enum IntDataEmptyFolders {
+    ModificationDatePart1,
+    ModificationDatePart2,
+}
+
+#[repr(u8)]
+pub enum StrDataEmptyFolders {
+    Name,
+    Path,
+    ModificationDate,
+}
+#[repr(u8)]
+pub enum IntDataBigFiles {
+    ModificationDatePart1,
+    ModificationDatePart2,
+    SizePart1,
+    SizePart2,
+}
+
+#[repr(u8)]
+pub enum StrDataBigFiles {
+    Size,
+    Name,
+    Path,
+    ModificationDate,
+}
+
+#[repr(u8)]
+pub enum IntDataEmptyFiles {
+    ModificationDatePart1,
+    ModificationDatePart2,
+    SizePart1,
+    SizePart2,
+}
+
+#[repr(u8)]
+pub enum StrDataEmptyFiles {
+    Name,
+    Path,
+    ModificationDate,
+}
+#[repr(u8)]
+pub enum IntDataTemporaryFiles {
+    ModificationDatePart1,
+    ModificationDatePart2,
+    SizePart1,
+    SizePart2,
+}
+#[repr(u8)]
+pub enum StrDataTemporaryFiles {
+    Size,
+    Name,
+    Path,
+    ModificationDate,
+}
+
+#[repr(u8)]
 pub enum IntDataSimilarImages {
-    ModificationDatePart1 = 0,
+    ModificationDatePart1,
     ModificationDatePart2,
     SizePart1,
     SizePart2,
@@ -18,7 +90,7 @@ pub enum IntDataSimilarImages {
 
 #[repr(u8)]
 pub enum StrDataSimilarImages {
-    Similarity = 0,
+    Similarity,
     Size,
     Resolution,
     Name,
@@ -27,31 +99,86 @@ pub enum StrDataSimilarImages {
 }
 
 #[repr(u8)]
-pub enum IntDataEmptyFiles {
-    ModificationDatePart1 = 0,
+pub enum IntDataSimilarVideos {
+    ModificationDatePart1,
     ModificationDatePart2,
     SizePart1,
     SizePart2,
 }
 
 #[repr(u8)]
-pub enum StrDataEmptyFiles {
-    Name = 0,
+pub enum StrDataSimilarVideos {
+    Size,
+    Name,
     Path,
     ModificationDate,
 }
 
 #[repr(u8)]
-pub enum IntDataEmptyFolders {
-    ModificationDatePart1 = 0,
+pub enum IntDataSimilarMusic {
+    ModificationDatePart1,
+    ModificationDatePart2,
+    SizePart1,
+    SizePart2,
+}
+
+#[repr(u8)]
+pub enum StrDataSimilarMusic {
+    Size,
+    Name,
+    Title,
+    Artist,
+    Year,
+    Bitrate,
+    Length,
+    Genre,
+    Path,
+    ModificationDate,
+}
+#[repr(u8)]
+pub enum IntDataInvalidSymlinks {
+    ModificationDatePart1,
     ModificationDatePart2,
 }
 
 #[repr(u8)]
-pub enum StrDataEmptyFolders {
-    Name = 0,
-    Path,
+pub enum StrDataInvalidSymlinks {
+    SymlinkName,
+    SymlinkFolder,
+    DestinationPath,
+    TypeOfError,
     ModificationDate,
+}
+#[repr(u8)]
+pub enum IntDataBrokenFiles {
+    ModificationDatePart1,
+    ModificationDatePart2,
+    SizePart1,
+    SizePart2,
+}
+
+#[repr(u8)]
+pub enum StrDataBrokenFiles {
+    Name,
+    Path,
+    TypeOfError,
+    Size,
+    ModificationDate,
+}
+#[repr(u8)]
+pub enum IntDataBadExtensions {
+    ModificationDatePart1,
+    ModificationDatePart2,
+    SizePart1,
+    SizePart2,
+}
+
+#[repr(u8)]
+pub enum StrDataBadExtensions {
+    Name,
+    Path,
+    CurrentExtension,
+    ProperExtension,
 }
 
 // Remember to match updated this according to ui/main_lists.slint and connect_scan.rs files
@@ -60,6 +187,14 @@ pub fn get_str_path_idx(active_tab: CurrentTab) -> usize {
         CurrentTab::EmptyFolders => StrDataEmptyFolders::Path as usize,
         CurrentTab::EmptyFiles => StrDataEmptyFiles::Path as usize,
         CurrentTab::SimilarImages => StrDataSimilarImages::Path as usize,
+        CurrentTab::DuplicateFiles => StrDataDuplicateFiles::Path as usize,
+        CurrentTab::BigFiles => StrDataBigFiles::Path as usize,
+        CurrentTab::TemporaryFiles => StrDataTemporaryFiles::Path as usize,
+        CurrentTab::SimilarVideos => StrDataSimilarVideos::Path as usize,
+        CurrentTab::SimilarMusic => StrDataSimilarMusic::Path as usize,
+        CurrentTab::InvalidSymlinks => StrDataInvalidSymlinks::SymlinkFolder as usize,
+        CurrentTab::BrokenFiles => StrDataBrokenFiles::Path as usize,
+        CurrentTab::BadExtensions => StrDataBadExtensions::Path as usize,
         CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
     }
 }
@@ -69,6 +204,14 @@ pub fn get_str_name_idx(active_tab: CurrentTab) -> usize {
         CurrentTab::EmptyFolders => StrDataEmptyFolders::Name as usize,
         CurrentTab::EmptyFiles => StrDataEmptyFiles::Name as usize,
         CurrentTab::SimilarImages => StrDataSimilarImages::Name as usize,
+        CurrentTab::DuplicateFiles => StrDataDuplicateFiles::Name as usize,
+        CurrentTab::BigFiles => StrDataBigFiles::Name as usize,
+        CurrentTab::TemporaryFiles => StrDataTemporaryFiles::Name as usize,
+        CurrentTab::SimilarVideos => StrDataSimilarVideos::Name as usize,
+        CurrentTab::SimilarMusic => StrDataSimilarMusic::Name as usize,
+        CurrentTab::InvalidSymlinks => StrDataInvalidSymlinks::SymlinkName as usize,
+        CurrentTab::BrokenFiles => StrDataBrokenFiles::Name as usize,
+        CurrentTab::BadExtensions => StrDataBadExtensions::Name as usize,
         CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
     }
 }
@@ -78,6 +221,14 @@ pub fn get_int_modification_date_idx(active_tab: CurrentTab) -> usize {
         CurrentTab::EmptyFiles => IntDataEmptyFiles::ModificationDatePart1 as usize,
         CurrentTab::EmptyFolders => IntDataEmptyFolders::ModificationDatePart1 as usize,
         CurrentTab::SimilarImages => IntDataSimilarImages::ModificationDatePart1 as usize,
+        CurrentTab::DuplicateFiles => IntDataDuplicateFiles::ModificationDatePart1 as usize,
+        CurrentTab::BigFiles => IntDataBigFiles::ModificationDatePart1 as usize,
+        CurrentTab::TemporaryFiles => IntDataTemporaryFiles::ModificationDatePart1 as usize,
+        CurrentTab::SimilarVideos => IntDataSimilarVideos::ModificationDatePart1 as usize,
+        CurrentTab::SimilarMusic => IntDataSimilarMusic::ModificationDatePart1 as usize,
+        CurrentTab::InvalidSymlinks => IntDataInvalidSymlinks::ModificationDatePart1 as usize,
+        CurrentTab::BrokenFiles => IntDataBrokenFiles::ModificationDatePart1 as usize,
+        CurrentTab::BadExtensions => IntDataBadExtensions::ModificationDatePart1 as usize,
         CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
     }
 }
@@ -86,8 +237,15 @@ pub fn get_int_size_idx(active_tab: CurrentTab) -> usize {
     match active_tab {
         CurrentTab::EmptyFiles => IntDataEmptyFiles::SizePart1 as usize,
         CurrentTab::SimilarImages => IntDataSimilarImages::SizePart1 as usize,
+        CurrentTab::DuplicateFiles => IntDataDuplicateFiles::SizePart1 as usize,
+        CurrentTab::BigFiles => IntDataBigFiles::SizePart1 as usize,
+        CurrentTab::TemporaryFiles => IntDataTemporaryFiles::SizePart1 as usize,
+        CurrentTab::SimilarVideos => IntDataSimilarVideos::SizePart1 as usize,
+        CurrentTab::SimilarMusic => IntDataSimilarMusic::SizePart1 as usize,
+        CurrentTab::BrokenFiles => IntDataBrokenFiles::SizePart1 as usize,
+        CurrentTab::BadExtensions => IntDataBadExtensions::SizePart1 as usize,
         CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
-        CurrentTab::EmptyFolders => panic!("Unable to get size from this tab"),
+        CurrentTab::EmptyFolders | CurrentTab::InvalidSymlinks => panic!("Unable to get size from this tab"),
     }
 }
 
@@ -109,8 +267,14 @@ pub fn get_int_height_idx(active_tab: CurrentTab) -> usize {
 
 pub fn get_is_header_mode(active_tab: CurrentTab) -> bool {
     match active_tab {
-        CurrentTab::EmptyFolders | CurrentTab::EmptyFiles => false,
-        CurrentTab::SimilarImages => true,
+        CurrentTab::EmptyFolders
+        | CurrentTab::EmptyFiles
+        | CurrentTab::BrokenFiles
+        | CurrentTab::BigFiles
+        | CurrentTab::TemporaryFiles
+        | CurrentTab::InvalidSymlinks
+        | CurrentTab::BadExtensions => false,
+        CurrentTab::SimilarImages | CurrentTab::DuplicateFiles | CurrentTab::SimilarVideos | CurrentTab::SimilarMusic => true,
         CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
     }
 }
@@ -120,6 +284,14 @@ pub fn get_tool_model(app: &MainWindow, tab: CurrentTab) -> ModelRc<MainListMode
         CurrentTab::EmptyFolders => app.get_empty_folder_model(),
         CurrentTab::SimilarImages => app.get_similar_images_model(),
         CurrentTab::EmptyFiles => app.get_empty_files_model(),
+        CurrentTab::DuplicateFiles => app.get_duplicate_files_model(),
+        CurrentTab::BigFiles => app.get_big_files_model(),
+        CurrentTab::TemporaryFiles => app.get_temporary_files_model(),
+        CurrentTab::SimilarVideos => app.get_similar_videos_model(),
+        CurrentTab::SimilarMusic => app.get_similar_music_model(),
+        CurrentTab::InvalidSymlinks => app.get_invalid_symlinks_model(),
+        CurrentTab::BrokenFiles => app.get_broken_files_model(),
+        CurrentTab::BadExtensions => app.get_bad_extensions_model(),
         CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
     }
 }
@@ -129,6 +301,14 @@ pub fn set_tool_model(app: &MainWindow, tab: CurrentTab, model: ModelRc<MainList
         CurrentTab::EmptyFolders => app.set_empty_folder_model(model),
         CurrentTab::SimilarImages => app.set_similar_images_model(model),
         CurrentTab::EmptyFiles => app.set_empty_files_model(model),
+        CurrentTab::DuplicateFiles => app.set_duplicate_files_model(model),
+        CurrentTab::BigFiles => app.set_big_files_model(model),
+        CurrentTab::TemporaryFiles => app.set_temporary_files_model(model),
+        CurrentTab::SimilarVideos => app.set_similar_videos_model(model),
+        CurrentTab::SimilarMusic => app.set_similar_music_model(model),
+        CurrentTab::InvalidSymlinks => app.set_invalid_symlinks_model(model),
+        CurrentTab::BrokenFiles => app.set_broken_files_model(model),
+        CurrentTab::BadExtensions => app.set_bad_extensions_model(model),
         CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
     }
 }
