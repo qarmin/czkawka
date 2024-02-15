@@ -1282,7 +1282,7 @@ fn compute_duplicate_finder(
 fn vector_sort_unstable_entry_by_path<T>(vector: &[T]) -> Vec<T>
 where
     T: ResultEntry + Clone,
-    T: std::marker::Send,
+    T: Send,
 {
     if vector.len() >= 2 {
         let mut vector = vector.to_vec();

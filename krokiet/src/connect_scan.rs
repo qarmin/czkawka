@@ -15,8 +15,10 @@ use czkawka_core::common_traits::ResultEntry;
 use czkawka_core::duplicate::{DuplicateEntry, DuplicateFinder};
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::{EmptyFolder, FolderEntry};
+use czkawka_core::same_music::{MusicEntry, SameMusic};
 use czkawka_core::similar_images;
 use czkawka_core::similar_images::{ImagesEntry, SimilarImages};
+use czkawka_core::similar_videos::{SimilarVideos, VideosEntry};
 
 use crate::common::split_u64_into_i32s;
 use crate::settings::{collect_settings, SettingsCustom, ALLOWED_HASH_TYPE_VALUES, ALLOWED_RESIZE_ALGORITHM_VALUES};
@@ -45,14 +47,14 @@ pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressDat
             CurrentTab::EmptyFolders => {
                 scan_empty_folders(a, progress_sender, stop_receiver, custom_settings);
             }
+            CurrentTab::BigFiles => {
+                scan_big_files(a, progress_sender, stop_receiver, custom_settings);
+            }
             CurrentTab::EmptyFiles => {
                 scan_empty_files(a, progress_sender, stop_receiver, custom_settings);
             }
             CurrentTab::SimilarImages => {
                 scan_similar_images(a, progress_sender, stop_receiver, custom_settings);
-            }
-            CurrentTab::BigFiles => {
-                scan_big_files(a, progress_sender, stop_receiver, custom_settings);
             }
             CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
             _ => unimplemented!(),
@@ -255,6 +257,51 @@ fn prepare_data_model_big_files(fe: &FileEntry) -> (ModelRc<SharedString>, Model
     let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1, size_split.0, size_split.1]);
     (data_model_str, data_model_int)
 }
+
+///////////////////////////////// Empty Files
+fn scan_empty_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>, custom_settings: SettingsCustom) {
+    thread::Builder::new()
+        .stack_size(DEFAULT_THREAD_SIZE)
+        .spawn(move || {
+            let mut finder = EmptyFiles::new();
+            set_common_settings(&mut finder, &custom_settings);
+            finder.find_empty_files(Some(&stop_receiver), Some(&progress_sender));
+
+            let mut vector = finder.get_empty_files().clone();
+            let messages = finder.get_text_messages().create_messages_text();
+
+            vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+
+            a.upgrade_in_event_loop(move |app| {
+                write_empty_files_results(&app, vector, messages);
+            })
+        })
+        .unwrap();
+}
+fn write_empty_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages: String) {
+    let items_found = vector.len();
+    let items = Rc::new(VecModel::default());
+    for fe in vector {
+        let (data_model_str, data_model_int) = prepare_data_model_empty_files(&fe);
+        insert_data_to_model(&items, data_model_str, data_model_int, false);
+    }
+    app.set_empty_files_model(items.into());
+    app.invoke_scan_ended(format!("Found {items_found} empty files").into());
+    app.global::<GuiState>().set_info_text(messages.into());
+}
+
+fn prepare_data_model_empty_files(fe: &FileEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
+    let (directory, file) = split_path(fe.get_path());
+    let data_model_str = VecModel::from_slice(&[
+        file.into(),
+        directory.into(),
+        NaiveDateTime::from_timestamp_opt(fe.get_modified_date() as i64, 0).unwrap().to_string().into(),
+    ]);
+    let modification_split = split_u64_into_i32s(fe.get_modified_date());
+    let size_split = split_u64_into_i32s(fe.size);
+    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1, size_split.0, size_split.1]);
+    (data_model_str, data_model_int)
+}
 // Scan Similar Images
 
 fn scan_similar_images(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>, custom_settings: SettingsCustom) {
@@ -341,41 +388,65 @@ fn prepare_data_model_similar_images(fe: &ImagesEntry, hash_size: u8) -> (ModelR
     (data_model_str, data_model_int)
 }
 
-///////////////////////////////// Empty Files
-fn scan_empty_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>, custom_settings: SettingsCustom) {
+// Scan Similar Videos
+
+fn scan_similar_videos(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>, custom_settings: SettingsCustom) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut finder = EmptyFiles::new();
+            let mut finder = SimilarVideos::new();
             set_common_settings(&mut finder, &custom_settings);
-            finder.find_empty_files(Some(&stop_receiver), Some(&progress_sender));
 
-            let mut vector = finder.get_empty_files().clone();
+            // TODO set rest of settings
+            finder.find_similar_videos(Some(&stop_receiver), Some(&progress_sender));
+
             let messages = finder.get_text_messages().create_messages_text();
 
-            vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+            let mut vector;
+            if finder.get_use_reference() {
+                vector = finder
+                    .get_similar_videos_referenced()
+                    .iter()
+                    .cloned()
+                    .map(|(original, others)| (Some(original), others))
+                    .collect::<Vec<_>>();
+            } else {
+                vector = finder.get_similar_videos().iter().cloned().map(|items| (None, items)).collect::<Vec<_>>();
+            }
+            for (_first_entry, vec_fe) in &mut vector {
+                vec_fe.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+            }
 
             a.upgrade_in_event_loop(move |app| {
-                write_empty_files_results(&app, vector, messages);
+                write_similar_videos_results(&app, vector, messages);
             })
         })
         .unwrap();
 }
-fn write_empty_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages: String) {
+fn write_similar_videos_results(app: &MainWindow, vector: Vec<(Option<VideosEntry>, Vec<VideosEntry>)>, messages: String) {
     let items_found = vector.len();
     let items = Rc::new(VecModel::default());
-    for fe in vector {
-        let (data_model_str, data_model_int) = prepare_data_model_empty_files(&fe);
-        insert_data_to_model(&items, data_model_str, data_model_int, false);
+    for (ref_fe, vec_fe) in vector {
+        if let Some(ref_fe) = ref_fe {
+            let (data_model_str, data_model_int) = prepare_data_model_similar_videos(&ref_fe);
+            insert_data_to_model(&items, data_model_str, data_model_int, true);
+        } else {
+            insert_data_to_model(&items, ModelRc::new(VecModel::default()), ModelRc::new(VecModel::default()), true);
+        }
+
+        for fe in vec_fe {
+            let (data_model_str, data_model_int) = prepare_data_model_similar_videos(&fe);
+            insert_data_to_model(&items, data_model_str, data_model_int, false);
+        }
     }
-    app.set_empty_files_model(items.into());
-    app.invoke_scan_ended(format!("Found {items_found} empty files").into());
+    app.set_similar_videos_model(items.into());
+    app.invoke_scan_ended(format!("Found {items_found} similar videos files").into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
-
-fn prepare_data_model_empty_files(fe: &FileEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
+fn prepare_data_model_similar_videos(fe: &VideosEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(fe.get_path());
     let data_model_str = VecModel::from_slice(&[
+        format_size(fe.size, BINARY).into(),
         file.into(),
         directory.into(),
         NaiveDateTime::from_timestamp_opt(fe.get_modified_date() as i64, 0).unwrap().to_string().into(),
@@ -385,7 +456,79 @@ fn prepare_data_model_empty_files(fe: &FileEntry) -> (ModelRc<SharedString>, Mod
     let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1, size_split.0, size_split.1]);
     (data_model_str, data_model_int)
 }
+// Scan Similar Music
+fn scan_similar_music(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>, custom_settings: SettingsCustom) {
+    thread::Builder::new()
+        .stack_size(DEFAULT_THREAD_SIZE)
+        .spawn(move || {
+            let mut finder = SameMusic::new();
+            set_common_settings(&mut finder, &custom_settings);
 
+            // TODO set rest of settings
+            finder.find_similar_music(Some(&stop_receiver), Some(&progress_sender));
+
+            let messages = finder.get_text_messages().create_messages_text();
+
+            let mut vector;
+            if finder.get_use_reference() {
+                vector = finder
+                    .get_similar_music_referenced()
+                    .iter()
+                    .cloned()
+                    .map(|(original, others)| (Some(original), others))
+                    .collect::<Vec<_>>();
+            } else {
+                vector = finder.get_similar_music().iter().cloned().map(|items| (None, items)).collect::<Vec<_>>();
+            }
+            for (_first_entry, vec_fe) in &mut vector {
+                vec_fe.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+            }
+
+            a.upgrade_in_event_loop(move |app| {
+                crate::connect_scan::write_similar_music_results(&app, vector, messages);
+            })
+        })
+        .unwrap();
+}
+fn write_similar_music_results(app: &MainWindow, vector: Vec<(Option<MusicEntry>, Vec<MusicEntry>)>, messages: String) {
+    let items_found = vector.len();
+    let items = Rc::new(VecModel::default());
+    for (ref_fe, vec_fe) in vector {
+        if let Some(ref_fe) = ref_fe {
+            let (data_model_str, data_model_int) = crate::connect_scan::prepare_data_model_similar_music(&ref_fe);
+            insert_data_to_model(&items, data_model_str, data_model_int, true);
+        } else {
+            insert_data_to_model(&items, ModelRc::new(VecModel::default()), ModelRc::new(VecModel::default()), true);
+        }
+
+        for fe in vec_fe {
+            let (data_model_str, data_model_int) = crate::connect_scan::prepare_data_model_similar_music(&fe);
+            insert_data_to_model(&items, data_model_str, data_model_int, false);
+        }
+    }
+    app.set_similar_music_model(items.into());
+    app.invoke_scan_ended(format!("Found {items_found} similar music files").into());
+    app.global::<GuiState>().set_info_text(messages.into());
+}
+fn prepare_data_model_similar_music(fe: &MusicEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
+    let (directory, file) = split_path(fe.get_path());
+    let data_model_str = VecModel::from_slice(&[
+        format_size(fe.size, BINARY).into(),
+        file.into(),
+        fe.track_title.clone().into(),
+        fe.track_artist.clone().into(),
+        fe.year.clone().into(),
+        fe.bitrate.to_string().into(),
+        fe.length.clone().into(),
+        fe.genre.clone().into(),
+        directory.into(),
+        NaiveDateTime::from_timestamp_opt(fe.get_modified_date() as i64, 0).unwrap().to_string().into(),
+    ]);
+    let modification_split = split_u64_into_i32s(fe.get_modified_date());
+    let size_split = split_u64_into_i32s(fe.size);
+    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1, size_split.0, size_split.1]);
+    (data_model_str, data_model_int)
+}
 ////////////////////////////////////////// Common
 fn insert_data_to_model(items: &Rc<VecModel<MainListModel>>, data_model_str: ModelRc<SharedString>, data_model_int: ModelRc<i32>, header_row: bool) {
     let main = MainListModel {
