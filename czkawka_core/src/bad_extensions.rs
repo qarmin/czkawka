@@ -1,7 +1,7 @@
 use std::collections::{BTreeSet, HashMap};
 use std::io::prelude::*;
 use std::mem;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 
@@ -167,6 +167,18 @@ pub struct BadFileEntry {
     pub size: u64,
     pub current_extension: String,
     pub proper_extensions: String,
+}
+
+impl ResultEntry for BadFileEntry {
+    fn get_path(&self) -> &Path {
+        &self.path
+    }
+    fn get_modified_date(&self) -> u64 {
+        self.modified_date
+    }
+    fn get_size(&self) -> u64 {
+        self.size
+    }
 }
 
 #[derive(Default)]

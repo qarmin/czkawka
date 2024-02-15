@@ -3,7 +3,9 @@ use std::thread;
 
 use chrono::NaiveDateTime;
 use crossbeam_channel::{Receiver, Sender};
+use czkawka_core::bad_extensions::{BadExtensions, BadFileEntry};
 use czkawka_core::big_file::BigFile;
+use czkawka_core::broken_files::{BrokenEntry, BrokenFiles};
 use humansize::{format_size, BINARY};
 use rayon::prelude::*;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
@@ -15,6 +17,7 @@ use czkawka_core::common_traits::ResultEntry;
 use czkawka_core::duplicate::{DuplicateEntry, DuplicateFinder};
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::{EmptyFolder, FolderEntry};
+use czkawka_core::invalid_symlinks::{InvalidSymlinks, SymlinksFileEntry};
 use czkawka_core::same_music::{MusicEntry, SameMusic};
 use czkawka_core::similar_images;
 use czkawka_core::similar_images::{ImagesEntry, SimilarImages};
@@ -55,6 +58,21 @@ pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressDat
             }
             CurrentTab::SimilarImages => {
                 scan_similar_images(a, progress_sender, stop_receiver, custom_settings);
+            }
+            CurrentTab::SimilarVideos => {
+                scan_similar_videos(a, progress_sender, stop_receiver, custom_settings);
+            }
+            CurrentTab::SimilarMusic => {
+                scan_similar_music(a, progress_sender, stop_receiver, custom_settings);
+            }
+            CurrentTab::InvalidSymlinks => {
+                scan_invalid_symlinks(a, progress_sender, stop_receiver, custom_settings);
+            }
+            CurrentTab::BadExtensions => {
+                scan_bad_extensions(a, progress_sender, stop_receiver, custom_settings);
+            }
+            CurrentTab::BrokenFiles => {
+                scan_broken_files(a, progress_sender, stop_receiver, custom_settings);
             }
             CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
             _ => unimplemented!(),
@@ -465,7 +483,7 @@ fn scan_similar_music(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>
             set_common_settings(&mut finder, &custom_settings);
 
             // TODO set rest of settings
-            finder.find_similar_music(Some(&stop_receiver), Some(&progress_sender));
+            finder.find_same_music(Some(&stop_receiver), Some(&progress_sender));
 
             let messages = finder.get_text_messages().create_messages_text();
 
@@ -478,7 +496,7 @@ fn scan_similar_music(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>
                     .map(|(original, others)| (Some(original), others))
                     .collect::<Vec<_>>();
             } else {
-                vector = finder.get_similar_music().iter().cloned().map(|items| (None, items)).collect::<Vec<_>>();
+                vector = finder.get_duplicated_music_entries().iter().cloned().map(|items| (None, items)).collect::<Vec<_>>();
             }
             for (_first_entry, vec_fe) in &mut vector {
                 vec_fe.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
@@ -524,6 +542,138 @@ fn prepare_data_model_similar_music(fe: &MusicEntry) -> (ModelRc<SharedString>, 
         directory.into(),
         NaiveDateTime::from_timestamp_opt(fe.get_modified_date() as i64, 0).unwrap().to_string().into(),
     ]);
+    let modification_split = split_u64_into_i32s(fe.get_modified_date());
+    let size_split = split_u64_into_i32s(fe.size);
+    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1, size_split.0, size_split.1]);
+    (data_model_str, data_model_int)
+}
+// Invalid Symlinks
+fn scan_invalid_symlinks(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>, custom_settings: SettingsCustom) {
+    thread::Builder::new()
+        .stack_size(DEFAULT_THREAD_SIZE)
+        .spawn(move || {
+            let mut finder = InvalidSymlinks::new();
+            set_common_settings(&mut finder, &custom_settings);
+            // TOOD set rest of settings
+            finder.find_invalid_links(Some(&stop_receiver), Some(&progress_sender));
+
+            let mut vector = finder.get_invalid_symlinks().clone();
+            let messages = finder.get_text_messages().create_messages_text();
+
+            vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+
+            a.upgrade_in_event_loop(move |app| {
+                write_invalid_symlinks_results(&app, vector, messages);
+            })
+        })
+        .unwrap();
+}
+fn write_invalid_symlinks_results(app: &MainWindow, vector: Vec<SymlinksFileEntry>, messages: String) {
+    let items_found = vector.len();
+    let items = Rc::new(VecModel::default());
+    for fe in vector {
+        let (data_model_str, data_model_int) = crate::connect_scan::prepare_data_model_invalid_symlinks(&fe);
+        insert_data_to_model(&items, data_model_str, data_model_int, false);
+    }
+    app.set_invalid_symlinks_model(items.into());
+    app.invoke_scan_ended(format!("Found {items_found} invalid symlinks").into());
+    app.global::<GuiState>().set_info_text(messages.into());
+}
+
+fn prepare_data_model_invalid_symlinks(fe: &SymlinksFileEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
+    let (directory, file) = split_path(fe.get_path());
+    let data_model_str = VecModel::from_slice(&[
+        file.into(),
+        directory.into(),
+        fe.symlink_info.destination_path.to_string_lossy().to_string().into(),
+        fe.symlink_info.type_of_error.to_string().into(),
+        NaiveDateTime::from_timestamp_opt(fe.get_modified_date() as i64, 0).unwrap().to_string().into(),
+    ]);
+    let modification_split = split_u64_into_i32s(fe.get_modified_date());
+    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1]);
+    (data_model_str, data_model_int)
+}
+////////////////////////////////////////// Broken Files
+fn scan_broken_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>, custom_settings: SettingsCustom) {
+    thread::Builder::new()
+        .stack_size(DEFAULT_THREAD_SIZE)
+        .spawn(move || {
+            let mut finder = BrokenFiles::new();
+            set_common_settings(&mut finder, &custom_settings);
+            finder.find_broken_files(Some(&stop_receiver), Some(&progress_sender));
+
+            let mut vector = finder.get_broken_files().clone();
+            let messages = finder.get_text_messages().create_messages_text();
+
+            vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+
+            a.upgrade_in_event_loop(move |app| {
+                crate::connect_scan::write_broken_files_results(&app, vector, messages);
+            })
+        })
+        .unwrap();
+}
+fn write_broken_files_results(app: &MainWindow, vector: Vec<BrokenEntry>, messages: String) {
+    let items_found = vector.len();
+    let items = Rc::new(VecModel::default());
+    for fe in vector {
+        let (data_model_str, data_model_int) = crate::connect_scan::prepare_data_model_broken_files(&fe);
+        insert_data_to_model(&items, data_model_str, data_model_int, false);
+    }
+    app.set_empty_folder_model(items.into());
+    app.invoke_scan_ended(format!("Found {items_found} files").into());
+    app.global::<GuiState>().set_info_text(messages.into());
+}
+
+fn prepare_data_model_broken_files(fe: &BrokenEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
+    let (directory, file) = split_path(&fe.path);
+    let data_model_str = VecModel::from_slice(&[
+        file.into(),
+        directory.into(),
+        fe.error_string.clone().into(),
+        format_size(fe.size, BINARY).into(),
+        NaiveDateTime::from_timestamp_opt(fe.modified_date as i64, 0).unwrap().to_string().into(),
+    ]);
+    let modification_split = split_u64_into_i32s(fe.get_modified_date());
+    let size_split = split_u64_into_i32s(fe.size);
+    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1, size_split.0, size_split.1]);
+    (data_model_str, data_model_int)
+}
+////////////////////////////////////////// Bad Extensions
+fn scan_bad_extensions(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>, custom_settings: SettingsCustom) {
+    thread::Builder::new()
+        .stack_size(DEFAULT_THREAD_SIZE)
+        .spawn(move || {
+            let mut finder = BadExtensions::new();
+            set_common_settings(&mut finder, &custom_settings);
+            finder.find_bad_extensions_files(Some(&stop_receiver), Some(&progress_sender));
+
+            let mut vector = finder.get_bad_extensions_files().clone();
+            let messages = finder.get_text_messages().create_messages_text();
+
+            vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+
+            a.upgrade_in_event_loop(move |app| {
+                crate::connect_scan::write_bad_extensions_results(&app, vector, messages);
+            })
+        })
+        .unwrap();
+}
+fn write_bad_extensions_results(app: &MainWindow, vector: Vec<BadFileEntry>, messages: String) {
+    let items_found = vector.len();
+    let items = Rc::new(VecModel::default());
+    for fe in vector {
+        let (data_model_str, data_model_int) = prepare_data_model_bad_extensions(&fe);
+        insert_data_to_model(&items, data_model_str, data_model_int, false);
+    }
+    app.set_empty_folder_model(items.into());
+    app.invoke_scan_ended(format!("Found {items_found} files with bad extensions").into());
+    app.global::<GuiState>().set_info_text(messages.into());
+}
+
+fn prepare_data_model_bad_extensions(fe: &BadFileEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
+    let (directory, file) = split_path(&fe.path);
+    let data_model_str = VecModel::from_slice(&[file.into(), directory.into(), fe.current_extension.clone().into(), fe.proper_extensions.clone().into()]);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
     let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1, size_split.0, size_split.1]);

@@ -178,6 +178,7 @@ pub enum StrDataBrokenFiles {
     Size,
     ModificationDate,
 }
+// Bad Extensions
 #[repr(u8)]
 pub enum IntDataBadExtensions {
     ModificationDatePart1,
