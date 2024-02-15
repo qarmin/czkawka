@@ -88,8 +88,8 @@ fn scan_duplicates(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, s
                         vector = finder
                             .get_files_with_identical_hashes_referenced()
                             .values()
-                            .cloned()
                             .flatten()
+                            .cloned()
                             .map(|(original, other)| (Some(original), other))
                             .collect::<Vec<_>>();
                     }
@@ -107,7 +107,7 @@ fn scan_duplicates(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, s
             } else {
                 match finder.get_check_method() {
                     CheckingMethod::Hash => {
-                        vector = finder.get_files_sorted_by_hash().values().cloned().flatten().map(|items| (None, items)).collect::<Vec<_>>();
+                        vector = finder.get_files_sorted_by_hash().values().flatten().cloned().map(|items| (None, items)).collect::<Vec<_>>();
                     }
                     CheckingMethod::Name | CheckingMethod::Size | CheckingMethod::SizeName => {
                         let values: Vec<_> = match finder.get_check_method() {
