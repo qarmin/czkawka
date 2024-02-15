@@ -22,6 +22,7 @@ use czkawka_core::same_music::{MusicEntry, SameMusic};
 use czkawka_core::similar_images;
 use czkawka_core::similar_images::{ImagesEntry, SimilarImages};
 use czkawka_core::similar_videos::{SimilarVideos, VideosEntry};
+use czkawka_core::temporary::{Temporary, TemporaryFileEntry};
 
 use crate::common::split_u64_into_i32s;
 use crate::settings::{collect_settings, SettingsCustom, ALLOWED_HASH_TYPE_VALUES, ALLOWED_RESIZE_ALGORITHM_VALUES};
@@ -74,8 +75,10 @@ pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressDat
             CurrentTab::BrokenFiles => {
                 scan_broken_files(a, progress_sender, stop_receiver, custom_settings);
             }
+            CurrentTab::TemporaryFiles => {
+                scan_temporary_files(a, progress_sender, stop_receiver, custom_settings);
+            }
             CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
-            _ => unimplemented!(),
         }
     });
 }
@@ -168,7 +171,7 @@ fn write_duplicate_results(app: &MainWindow, vector: Vec<(Option<DuplicateEntry>
             insert_data_to_model(&items, data_model_str, data_model_int, false);
         }
     }
-    app.set_similar_images_model(items.into());
+    app.set_duplicate_files_model(items.into());
     app.invoke_scan_ended(format!("Found {items_found} similar duplicates files").into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
@@ -257,7 +260,7 @@ fn write_big_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages: S
         let (data_model_str, data_model_int) = prepare_data_model_big_files(&fe);
         insert_data_to_model(&items, data_model_str, data_model_int, false);
     }
-    app.set_empty_folder_model(items.into());
+    app.set_big_files_model(items.into());
     app.invoke_scan_ended(format!("Found {items_found} files").into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
@@ -592,6 +595,48 @@ fn prepare_data_model_invalid_symlinks(fe: &SymlinksFileEntry) -> (ModelRc<Share
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1]);
     (data_model_str, data_model_int)
+} ////////////////////////////////////////// Temporary Files
+fn scan_temporary_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>, custom_settings: SettingsCustom) {
+    thread::Builder::new()
+        .stack_size(DEFAULT_THREAD_SIZE)
+        .spawn(move || {
+            let mut finder = Temporary::new();
+            set_common_settings(&mut finder, &custom_settings);
+            finder.find_temporary_files(Some(&stop_receiver), Some(&progress_sender));
+
+            let mut vector = finder.get_temporary_files().clone();
+            let messages = finder.get_text_messages().create_messages_text();
+
+            vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+
+            a.upgrade_in_event_loop(move |app| {
+                crate::connect_scan::write_temporary_files_results(&app, vector, messages);
+            })
+        })
+        .unwrap();
+}
+fn write_temporary_files_results(app: &MainWindow, vector: Vec<TemporaryFileEntry>, messages: String) {
+    let items_found = vector.len();
+    let items = Rc::new(VecModel::default());
+    for fe in vector {
+        let (data_model_str, data_model_int) = crate::connect_scan::prepare_data_model_temporary_files(&fe);
+        insert_data_to_model(&items, data_model_str, data_model_int, false);
+    }
+    app.set_temporary_files_model(items.into());
+    app.invoke_scan_ended(format!("Found {items_found} files").into());
+    app.global::<GuiState>().set_info_text(messages.into());
+}
+
+fn prepare_data_model_temporary_files(fe: &TemporaryFileEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
+    let (directory, file) = split_path(&fe.path);
+    let data_model_str = VecModel::from_slice(&[
+        file.into(),
+        directory.into(),
+        NaiveDateTime::from_timestamp_opt(fe.modified_date as i64, 0).unwrap().to_string().into(),
+    ]);
+    let modification_split = split_u64_into_i32s(fe.get_modified_date());
+    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1]);
+    (data_model_str, data_model_int)
 }
 ////////////////////////////////////////// Broken Files
 fn scan_broken_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>, custom_settings: SettingsCustom) {
@@ -620,7 +665,7 @@ fn write_broken_files_results(app: &MainWindow, vector: Vec<BrokenEntry>, messag
         let (data_model_str, data_model_int) = crate::connect_scan::prepare_data_model_broken_files(&fe);
         insert_data_to_model(&items, data_model_str, data_model_int, false);
     }
-    app.set_empty_folder_model(items.into());
+    app.set_broken_files_model(items.into());
     app.invoke_scan_ended(format!("Found {items_found} files").into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
@@ -666,7 +711,7 @@ fn write_bad_extensions_results(app: &MainWindow, vector: Vec<BadFileEntry>, mes
         let (data_model_str, data_model_int) = prepare_data_model_bad_extensions(&fe);
         insert_data_to_model(&items, data_model_str, data_model_int, false);
     }
-    app.set_empty_folder_model(items.into());
+    app.set_bad_extensions_model(items.into());
     app.invoke_scan_ended(format!("Found {items_found} files with bad extensions").into());
     app.global::<GuiState>().set_info_text(messages.into());
 }

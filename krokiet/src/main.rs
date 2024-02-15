@@ -93,4 +93,12 @@ pub fn zeroing_all_models(app: &MainWindow) {
     app.set_empty_folder_model(Rc::new(VecModel::default()).into());
     app.set_empty_files_model(Rc::new(VecModel::default()).into());
     app.set_similar_images_model(Rc::new(VecModel::default()).into());
+    app.set_duplicate_files_model(Rc::new(VecModel::default()).into());
+    app.set_similar_music_model(Rc::new(VecModel::default()).into());
+    app.set_big_files_model(Rc::new(VecModel::default()).into());
+    app.set_bad_extensions_model(Rc::new(VecModel::default()).into());
+    app.set_broken_files_model(Rc::new(VecModel::default()).into());
+    app.set_similar_videos_model(Rc::new(VecModel::default()).into());
+    app.set_invalid_symlinks_model(Rc::new(VecModel::default()).into());
+    app.set_temporary_files_model(Rc::new(VecModel::default()).into());
 }

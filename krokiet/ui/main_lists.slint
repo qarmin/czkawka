@@ -88,8 +88,8 @@ export component MainList {
         visible: GuiState.active_tab == CurrentTab.TemporaryFiles;
         min-width: 200px;
         height: parent.height;
-        columns: ["Selection", "Size", "File Name", "Path", "Modification Date"];
-        column-sizes: [35px, size_px, name_px, path_px, mod_px];
+        columns: ["Selection", "File Name", "Path", "Modification Date"];
+        column-sizes: [35px, name_px, path_px, mod_px];
         values <=> temporary_files_model;
         parentPathIdx: 3;
         fileNameIdx: 2;
@@ -143,8 +143,8 @@ export component MainList {
         visible: GuiState.active_tab == CurrentTab.BrokenFiles;
         min-width: 200px;
         height: parent.height;
-        columns: ["Selection", "Size", "File Name", "Type of Error", "Path", "Modification Date"];
-        column-sizes: [35px, size_px, name_px, 200px, path_px, mod_px];
+        columns: ["Selection", "File Name", "Path", "Type of Error", "Size", "Modification Date"];
+        column-sizes: [35px, name_px, path_px, 200px, size_px, mod_px];
         values <=> broken_files_model;
         parentPathIdx: 4;
         fileNameIdx: 2;

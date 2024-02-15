@@ -68,7 +68,7 @@ export component LeftSidePanel {
     callback changed_current_tab();
     width: 120px;
     VerticalLayout {
-        spacing: 10px;
+        spacing: 2px;
         Rectangle {
             visible: GuiState.active_tab != CurrentTab.About;
             height: 80px;
@@ -110,7 +110,6 @@ export component LeftSidePanel {
                 curr_tab: r.tab;
                 changed_current_tab() => {root.changed_current_tab();}
             }
-            
         }
 
         Rectangle {

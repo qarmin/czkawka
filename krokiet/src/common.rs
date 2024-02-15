@@ -73,12 +73,9 @@ pub enum StrDataEmptyFiles {
 pub enum IntDataTemporaryFiles {
     ModificationDatePart1,
     ModificationDatePart2,
-    SizePart1,
-    SizePart2,
 }
 #[repr(u8)]
 pub enum StrDataTemporaryFiles {
-    Size,
     Name,
     Path,
     ModificationDate,
@@ -253,13 +250,12 @@ pub fn get_int_size_idx(active_tab: CurrentTab) -> usize {
         CurrentTab::SimilarImages => IntDataSimilarImages::SizePart1 as usize,
         CurrentTab::DuplicateFiles => IntDataDuplicateFiles::SizePart1 as usize,
         CurrentTab::BigFiles => IntDataBigFiles::SizePart1 as usize,
-        CurrentTab::TemporaryFiles => IntDataTemporaryFiles::SizePart1 as usize,
         CurrentTab::SimilarVideos => IntDataSimilarVideos::SizePart1 as usize,
         CurrentTab::SimilarMusic => IntDataSimilarMusic::SizePart1 as usize,
         CurrentTab::BrokenFiles => IntDataBrokenFiles::SizePart1 as usize,
         CurrentTab::BadExtensions => IntDataBadExtensions::SizePart1 as usize,
         CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
-        CurrentTab::EmptyFolders | CurrentTab::InvalidSymlinks => panic!("Unable to get size from this tab"),
+        CurrentTab::EmptyFolders | CurrentTab::InvalidSymlinks | CurrentTab::TemporaryFiles => panic!("Unable to get size from this tab"),
     }
 }
 
