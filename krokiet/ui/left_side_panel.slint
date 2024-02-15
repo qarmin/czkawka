@@ -68,13 +68,14 @@ export component LeftSidePanel {
     callback changed_current_tab();
     width: 120px;
     VerticalLayout {
-        spacing: 20px;
+        spacing: 10px;
         Rectangle {
             visible: GuiState.active_tab != CurrentTab.About;
-            height: 100px;
+            height: 80px;
             Image {
-                width: root.width;
+                width: parent.height;
                 source: @image-url("../icons/logo.png");
+                image-fit: ImageFit.contain;
             }
             touch_area := TouchArea {
                 clicked => {
@@ -86,33 +87,30 @@ export component LeftSidePanel {
             }
         }
 
-        VerticalLayout {
-            // spacing: 3px;
-            alignment: center;
+        ListView {
             out property <length> element-size: 25px;
-            TabItem {
-                height: parent.element-size;
-                scanning: scanning;
-                text: "Empty Folders";
-                curr_tab: CurrentTab.EmptyFolders;
-                changed_current_tab() => {root.changed_current_tab();}
-            }
+            out property <[{name: string, tab: CurrentTab}]> speed_model: [
+                {name: "Duplicate Files", tab: CurrentTab.DuplicateFiles},
+                {name: "Empty Folders", tab: CurrentTab.EmptyFolders}, 
+                {name: "Big Files", tab: CurrentTab.BigFiles},
+                {name: "Empty Files", tab: CurrentTab.EmptyFiles}, 
+                {name: "Temporary Files", tab: CurrentTab.TemporaryFiles},
+                {name: "Similar Images", tab: CurrentTab.SimilarImages},
+                {name: "Similar Videos", tab: CurrentTab.SimilarVideos},
+                {name: "Music Duplicates", tab: CurrentTab.MusicDuplicates},
+                {name: "Invalid Symlinks", tab: CurrentTab.InvalidSymlinks},
+                {name: "Broken Files", tab: CurrentTab.BrokenFiles},
+                {name: "Bad Extensions", tab: CurrentTab.BadExtensions}
+            ];
 
-            TabItem {
+            for r[idx] in  speed_model: TabItem {
                 height: parent.element-size;
                 scanning: scanning;
-                text: "Empty Files";
-                curr_tab: CurrentTab.EmptyFiles;
+                text: r.name;
+                curr_tab: r.tab;
                 changed_current_tab() => {root.changed_current_tab();}
             }
-
-            TabItem {
-                height: parent.element-size;
-                scanning: scanning;
-                text: "Similar Images";
-                curr_tab: CurrentTab.SimilarImages;
-                changed_current_tab() => {root.changed_current_tab();}
-            }
+            
         }
 
         Rectangle {
