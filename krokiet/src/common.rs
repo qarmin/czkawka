@@ -3,36 +3,89 @@ use std::path::PathBuf;
 use crate::{CurrentTab, ExcludedDirectoriesModel, IncludedDirectoriesModel, MainListModel, MainWindow};
 use slint::{ModelRc, SharedString, VecModel};
 
+// Int model is used to store data in unchanged(* except that we need to split u64 into two i32) form and is used to sort/select data
+// Str model is used to display data in gui
+
+#[repr(u8)]
+pub enum IntDataSimilarImages {
+    ModificationDatePart1 = 0,
+    ModificationDatePart2,
+    SizePart1,
+    SizePart2,
+    Width,
+    Height,
+}
+
+#[repr(u8)]
+pub enum StrDataSimilarImages {
+    Similarity = 0,
+    Size,
+    Resolution,
+    Name,
+    Path,
+    ModificationDate,
+}
+
+#[repr(u8)]
+pub enum IntDataEmptyFiles {
+    ModificationDatePart1 = 0,
+    ModificationDatePart2,
+    SizePart1,
+    SizePart2,
+}
+
+#[repr(u8)]
+pub enum StrDataEmptyFiles {
+    Name = 0,
+    Path,
+    ModificationDate,
+}
+
+#[repr(u8)]
+pub enum IntDataEmptyFolders {
+    ModificationDatePart1 = 0,
+    ModificationDatePart2,
+}
+
+#[repr(u8)]
+pub enum StrDataEmptyFolders {
+    Name = 0,
+    Path,
+    ModificationDate,
+}
+
 // Remember to match updated this according to ui/main_lists.slint and connect_scan.rs files
 pub fn get_str_path_idx(active_tab: CurrentTab) -> usize {
     match active_tab {
-        CurrentTab::EmptyFolders => 1,
-        CurrentTab::EmptyFiles => 1,
-        CurrentTab::SimilarImages => 4,
+        CurrentTab::EmptyFolders => StrDataEmptyFolders::Path as usize,
+        CurrentTab::EmptyFiles => StrDataEmptyFiles::Path as usize,
+        CurrentTab::SimilarImages => StrDataSimilarImages::Path as usize,
         CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
     }
 }
+
 pub fn get_str_name_idx(active_tab: CurrentTab) -> usize {
     match active_tab {
-        CurrentTab::EmptyFolders => 0,
-        CurrentTab::EmptyFiles => 0,
-        CurrentTab::SimilarImages => 3,
+        CurrentTab::EmptyFolders => StrDataEmptyFolders::Name as usize,
+        CurrentTab::EmptyFiles => StrDataEmptyFiles::Name as usize,
+        CurrentTab::SimilarImages => StrDataSimilarImages::Name as usize,
         CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
     }
 }
 
 pub fn get_int_modification_date_idx(active_tab: CurrentTab) -> usize {
     match active_tab {
-        CurrentTab::EmptyFiles => 0,
-        CurrentTab::SimilarImages => 0,
-        CurrentTab::EmptyFolders => 0,
+        CurrentTab::EmptyFiles => IntDataEmptyFiles::ModificationDatePart1 as usize,
+        CurrentTab::EmptyFolders => IntDataEmptyFolders::ModificationDatePart1 as usize,
+        CurrentTab::SimilarImages => IntDataSimilarImages::ModificationDatePart1 as usize,
         CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
     }
 }
+
 pub fn get_int_size_idx(active_tab: CurrentTab) -> usize {
     match active_tab {
-        CurrentTab::EmptyFiles => 2,
-        CurrentTab::SimilarImages => 2,
+        CurrentTab::EmptyFiles => IntDataEmptyFiles::SizePart1 as usize,
+        CurrentTab::SimilarImages => IntDataSimilarImages::SizePart1 as usize,
         CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
         CurrentTab::EmptyFolders => panic!("Unable to get size from this tab"),
     }
@@ -40,14 +93,15 @@ pub fn get_int_size_idx(active_tab: CurrentTab) -> usize {
 
 pub fn get_int_width_idx(active_tab: CurrentTab) -> usize {
     match active_tab {
-        CurrentTab::SimilarImages => 4,
+        CurrentTab::SimilarImages => IntDataSimilarImages::Width as usize,
         CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
         _ => panic!("Unable to get height from this tab"),
     }
 }
+
 pub fn get_int_height_idx(active_tab: CurrentTab) -> usize {
     match active_tab {
-        CurrentTab::SimilarImages => 5,
+        CurrentTab::SimilarImages => IntDataSimilarImages::Height as usize,
         CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
         _ => panic!("Unable to get height from this tab"),
     }
@@ -140,6 +194,7 @@ pub fn split_u64_into_i32s(value: u64) -> (i32, i32) {
     let part2: i32 = value as i32;
     (part1, part2)
 }
+
 pub fn connect_i32_into_u64(part1: i32, part2: i32) -> u64 {
     ((part1 as u64) << 32) | (part2 as u64 & 0xFFFFFFFF)
 }
@@ -155,6 +210,7 @@ mod test {
         assert_eq!(part1, 0);
         assert_eq!(part2, 1);
     }
+
     #[test]
     fn test_split_u64_into_i32s_big() {
         let value = u64::MAX;
@@ -162,6 +218,7 @@ mod test {
         assert_eq!(part1, -1);
         assert_eq!(part2, -1);
     }
+
     #[test]
     fn test_connect_i32_into_u64_small() {
         let part1 = 0;
@@ -169,6 +226,7 @@ mod test {
         let value = super::connect_i32_into_u64(part1, part2);
         assert_eq!(value, 1);
     }
+
     #[test]
     fn test_connect_i32_into_u64_big() {
         let part1 = -1;
@@ -176,6 +234,7 @@ mod test {
         let value = super::connect_i32_into_u64(part1, part2);
         assert_eq!(value, u64::MAX);
     }
+
     #[test]
     fn test_connect_split_zero() {
         for start_value in [0, 1, 10, u32::MAX as u64, i32::MAX as u64, u64::MAX] {
