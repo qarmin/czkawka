@@ -35,7 +35,7 @@ export component ActionButtons inherits HorizontalLayout {
         scan_button := Button {
             height: parent.height;
             enabled: !scanning && lists_enabled;
-            visible: !scanning;
+            visible: !scanning && lists_enabled;
             text: "Scan";
             clicked => {
                 root.scanning = true;
@@ -60,6 +60,7 @@ export component ActionButtons inherits HorizontalLayout {
     }
 
     move_button := Button {
+        visible: lists_enabled;
         height: parent.height;
         enabled: !scanning && lists_enabled;
         text: "Move";
@@ -69,6 +70,7 @@ export component ActionButtons inherits HorizontalLayout {
     }
 
     select_button := Button {
+        visible: lists_enabled;
         height: parent.height;
         enabled: !scanning && lists_enabled;
         text: "Select";
@@ -78,6 +80,7 @@ export component ActionButtons inherits HorizontalLayout {
     }
 
     delete_button := Button {
+        visible: lists_enabled;
         height: parent.height;
         enabled: !scanning && lists_enabled;
         text: "Delete";

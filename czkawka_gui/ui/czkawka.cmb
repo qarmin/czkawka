@@ -688,7 +688,7 @@
 	(5,177,"GtkWidget","focusable","1",None,None,None,None,None,None,None,None,None),
 	(5,177,"GtkWidget","hexpand","1",None,None,None,None,None,None,None,None,None),
 	(5,178,"GtkEditable","editable","0",None,None,None,None,None,None,None,None,None),
-	(5,178,"GtkEditable","text","Czkawka 6.1.0",1,None,None,None,None,None,None,None,None),
+	(5,178,"GtkEditable","text","Czkawka 7.0.0",1,None,None,None,None,None,None,None,None),
 	(5,178,"GtkEditable","xalign","1",None,None,None,None,None,None,None,None,None),
 	(5,178,"GtkEntry","has-frame","0",None,None,None,None,None,None,None,None,None),
 	(5,178,"GtkWidget","focusable","1",None,None,None,None,None,None,None,None,None),
