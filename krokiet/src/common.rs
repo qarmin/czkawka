@@ -1,3 +1,4 @@
+#![allow(dead_code)] // TODO later remove
 use std::path::PathBuf;
 
 use crate::{CurrentTab, ExcludedDirectoriesModel, IncludedDirectoriesModel, MainListModel, MainWindow};

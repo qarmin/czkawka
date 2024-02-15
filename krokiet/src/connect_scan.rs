@@ -9,10 +9,10 @@ use rayon::prelude::*;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
 
 use czkawka_core::common::{split_path, split_path_compare, DEFAULT_THREAD_SIZE};
-use czkawka_core::common_dir_traversal::{FileEntry, ProgressData};
+use czkawka_core::common_dir_traversal::{CheckingMethod, FileEntry, ProgressData};
 use czkawka_core::common_tool::CommonData;
 use czkawka_core::common_traits::ResultEntry;
-use czkawka_core::duplicate::DuplicateFinder;
+use czkawka_core::duplicate::{DuplicateEntry, DuplicateFinder};
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::{EmptyFolder, FolderEntry};
 use czkawka_core::similar_images;
@@ -20,7 +20,6 @@ use czkawka_core::similar_images::{ImagesEntry, SimilarImages};
 
 use crate::common::split_u64_into_i32s;
 use crate::settings::{collect_settings, SettingsCustom, ALLOWED_HASH_TYPE_VALUES, ALLOWED_RESIZE_ALGORITHM_VALUES};
-use crate::CurrentTab::DuplicateFiles;
 use crate::{CurrentTab, GuiState, MainListModel, MainWindow, ProgressToSend};
 
 pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>) {
@@ -49,6 +48,12 @@ pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressDat
             CurrentTab::SimilarImages => {
                 scan_similar_images(a, progress_sender, stop_receiver, custom_settings);
             }
+            CurrentTab::BigFiles => {
+                scan_big_files(a, progress_sender, stop_receiver, custom_settings);
+            }
+            CurrentTab::DuplicateFiles => {
+                scan_duplicates(a, progress_sender, stop_receiver, custom_settings);
+            }
             CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
             _ => unimplemented!(),
         }
@@ -57,84 +62,109 @@ pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressDat
 
 // Scan Duplicates
 
-// fn scan_duplicates(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>, custom_settings: SettingsCustom) {
-//     thread::Builder::new()
-//         .stack_size(DEFAULT_THREAD_SIZE)
-//         .spawn(move || {
-//             let mut finder = DuplicateFinder::new();
-//             set_common_settings(&mut finder, &custom_settings);
-//             // TODO Fill rest of settings
-//             finder.find_duplicates(Some(&stop_receiver), Some(&progress_sender));
-//
-//             if finder.get_use_reference() {
-//                 let mut vector = finder.get_ref().clone();
-//                 let messages = finder.get_text_messages().create_messages_text();
-//
-//                 for (_first_entry, vec_fe) in &mut vector {
-//                     vec_fe.par_sort_unstable_by_key(|e| e.similarity);
-//                 }
-//
-//                 a.upgrade_in_event_loop(move |app| {
-//                     write_duplicates_results_referenced(&app, vector, messages);
-//                 })
-//             } else {
-//                 let mut vector = finder.get_similar_images().clone();
-//                 let messages = finder.get_text_messages().create_messages_text();
-//
-//                 for vec_fe in &mut vector {
-//                     vec_fe.par_sort_unstable_by_key(|e| e.similarity);
-//                 }
-//
-//                 a.upgrade_in_event_loop(move |app| {
-//                     write_duplicates_results(&app, vector, messages);
-//                 })
-//             }
-//         })
-//         .unwrap();
-// }
-// fn write_duplicates_results_referenced(app: &MainWindow, vector: Vec<(ImagesEntry, Vec<ImagesEntry>)>, messages: String) {
-//     let items_found = vector.len();
-//     let items = Rc::new(VecModel::default());
-//     for (ref_fe, vec_fe) in vector {
-//         let (data_model_str, data_model_int) = prepare_data_model_duplicates(&ref_fe);
-//         insert_data_to_model(&items, data_model_str, data_model_int, true);
-//
-//         for fe in vec_fe {
-//             let (data_model_str, data_model_int) = prepare_data_model_duplicates(&fe);
-//             insert_data_to_model(&items, data_model_str, data_model_int, false);
-//         }
-//     }
-//     app.set_duplicate_files_model(items.into());
-//     app.invoke_scan_ended(format!("Found {items_found} duplicate files").into());
-//     app.global::<GuiState>().set_info_text(messages.into());
-// }
-// fn write_duplicates_results(app: &MainWindow, vector: Vec<Vec<ImagesEntry>>, messages: String) {
-//     let items_found = vector.len();
-//     let items = Rc::new(VecModel::default());
-//     for vec_fe in vector {
-//         insert_data_to_model(&items, ModelRc::new(VecModel::default()), ModelRc::new(VecModel::default()), true);
-//         for fe in vec_fe {
-//             let (data_model_str, data_model_int) = prepare_data_model_duplicates(&fe);
-//             insert_data_to_model(&items, data_model_str, data_model_int, false);
-//         }
-//     }
-//     app.set_duplicate_files_model(items.into());
-//     app.invoke_scan_ended(format!("Found {items_found} duplicate files").into());
-//     app.global::<GuiState>().set_info_text(messages.into());
-// }
-// fn prepare_data_model_duplicates(fe: &ImagesEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
-//     let (directory, file) = split_path(fe.get_path());
-//     let data_model_str = VecModel::from_slice(&[
-//         format_size(fe.size, BINARY).into(),
-//         file.into(),
-//         directory.into(),
-//         NaiveDateTime::from_timestamp_opt(fe.get_modified_date() as i64, 0).unwrap().to_string().into(),
-//     ]);
-//     let modification_split = split_u64_into_i32s(fe.get_modified_date());
-//     let size_split = split_u64_into_i32s(fe.size);
-//     let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1, size_split.0, size_split.1]);
-//     (data_model_str, data_model_int)
-// }
+fn scan_duplicates(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>, custom_settings: SettingsCustom) {
+    thread::Builder::new()
+        .stack_size(DEFAULT_THREAD_SIZE)
+        .spawn(move || {
+            let mut finder = DuplicateFinder::new();
+            set_common_settings(&mut finder, &custom_settings);
+            // TODO Fill rest of settings
+            finder.set_check_method(CheckingMethod::Hash);
+            // finder.set_minimal_cache_file_size(loaded_commons.minimal_cache_file_size);
+            // finder.set_minimal_prehash_cache_file_size(minimal_prehash_cache_file_size);
+            // finder.set_check_method(check_method);
+            // finder.set_hash_type(hash_type);
+            // finder.set_ignore_hard_links(loaded_commons.hide_hard_links);
+            // finder.set_use_prehash_cache(use_prehash_cache);
+            // finder.set_delete_outdated_cache(delete_outdated_cache);
+            // finder.set_case_sensitive_name_comparison(case_sensitive_name_comparison);
+            finder.find_duplicates(Some(&stop_receiver), Some(&progress_sender));
+            let messages = finder.get_text_messages().create_messages_text();
+
+            let mut vector;
+            if finder.get_use_reference() {
+                match finder.get_check_method() {
+                    CheckingMethod::Hash => {
+                        vector = finder
+                            .get_files_with_identical_hashes_referenced()
+                            .values()
+                            .cloned()
+                            .flatten()
+                            .map(|(original, other)| (Some(original), other))
+                            .collect::<Vec<_>>();
+                    }
+                    CheckingMethod::Name | CheckingMethod::Size | CheckingMethod::SizeName => {
+                        let values: Vec<_> = match finder.get_check_method() {
+                            CheckingMethod::Name => finder.get_files_with_identical_name_referenced().values().cloned().collect(),
+                            CheckingMethod::Size => finder.get_files_with_identical_size_referenced().values().cloned().collect(),
+                            CheckingMethod::SizeName => finder.get_files_with_identical_size_names_referenced().values().cloned().collect(),
+                            _ => unreachable!("Invalid check method."),
+                        };
+                        vector = values.into_iter().map(|(original, other)| (Some(original), other)).collect::<Vec<_>>();
+                    }
+                    _ => unreachable!("Invalid check method."),
+                }
+            } else {
+                match finder.get_check_method() {
+                    CheckingMethod::Hash => {
+                        vector = finder.get_files_sorted_by_hash().values().cloned().flatten().map(|items| (None, items)).collect::<Vec<_>>();
+                    }
+                    CheckingMethod::Name | CheckingMethod::Size | CheckingMethod::SizeName => {
+                        let values: Vec<_> = match finder.get_check_method() {
+                            CheckingMethod::Name => finder.get_files_sorted_by_names().values().cloned().collect(),
+                            CheckingMethod::Size => finder.get_files_sorted_by_size().values().cloned().collect(),
+                            CheckingMethod::SizeName => finder.get_files_sorted_by_size_name().values().cloned().collect(),
+                            _ => unreachable!("Invalid check method."),
+                        };
+                        vector = values.into_iter().map(|items| (None, items)).collect::<Vec<_>>();
+                    }
+                    _ => unreachable!("Invalid check method."),
+                }
+            }
+
+            for (_first, vec) in &mut vector {
+                vec.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+            }
+
+            a.upgrade_in_event_loop(move |app| {
+                write_duplicate_results(&app, vector, messages);
+            })
+        })
+        .unwrap();
+}
+fn write_duplicate_results(app: &MainWindow, vector: Vec<(Option<DuplicateEntry>, Vec<DuplicateEntry>)>, messages: String) {
+    let items_found = vector.len();
+    let items = Rc::new(VecModel::default());
+    for (ref_fe, vec_fe) in vector {
+        if let Some(ref_fe) = ref_fe {
+            let (data_model_str, data_model_int) = prepare_data_model_duplicates(&ref_fe);
+            insert_data_to_model(&items, data_model_str, data_model_int, true);
+        } else {
+            insert_data_to_model(&items, ModelRc::new(VecModel::default()), ModelRc::new(VecModel::default()), true);
+        }
+
+        for fe in vec_fe {
+            let (data_model_str, data_model_int) = prepare_data_model_duplicates(&fe);
+            insert_data_to_model(&items, data_model_str, data_model_int, false);
+        }
+    }
+    app.set_similar_images_model(items.into());
+    app.invoke_scan_ended(format!("Found {items_found} similar duplicates files").into());
+    app.global::<GuiState>().set_info_text(messages.into());
+}
+fn prepare_data_model_duplicates(fe: &DuplicateEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
+    let (directory, file) = split_path(fe.get_path());
+    let data_model_str = VecModel::from_slice(&[
+        format_size(fe.size, BINARY).into(),
+        file.into(),
+        directory.into(),
+        NaiveDateTime::from_timestamp_opt(fe.get_modified_date() as i64, 0).unwrap().to_string().into(),
+    ]);
+    let modification_split = split_u64_into_i32s(fe.get_modified_date());
+    let size_split = split_u64_into_i32s(fe.size);
+    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1, size_split.0, size_split.1]);
+    (data_model_str, data_model_int)
+}
 
 ////////////////////////////////////////// Empty Folders
 fn scan_empty_folders(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>, custom_settings: SettingsCustom) {
@@ -195,7 +225,7 @@ fn scan_big_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, st
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
             a.upgrade_in_event_loop(move |app| {
-                crate::connect_scan::write_big_files_results(&app, vector, messages);
+                write_big_files_results(&app, vector, messages);
             })
         })
         .unwrap();
@@ -204,11 +234,11 @@ fn write_big_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages: S
     let items_found = vector.len();
     let items = Rc::new(VecModel::default());
     for fe in vector {
-        let (data_model_str, data_model_int) = crate::connect_scan::prepare_data_model_big_files(&fe);
+        let (data_model_str, data_model_int) = prepare_data_model_big_files(&fe);
         insert_data_to_model(&items, data_model_str, data_model_int, false);
     }
     app.set_empty_folder_model(items.into());
-    app.invoke_scan_ended(format!("Found {items_found} empty folders").into());
+    app.invoke_scan_ended(format!("Found {items_found} files").into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 

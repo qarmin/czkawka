@@ -2,12 +2,11 @@ use std::panic;
 use std::path::Path;
 use std::time::{Duration, Instant};
 
-use czkawka_core::broken_files::BrokenEntry;
 use image::DynamicImage;
 use log::{debug, error};
 use slint::ComponentHandle;
 
-use czkawka_core::common::{create_crash_message, get_dynamic_image_from_raw_image, IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
+use czkawka_core::common::{get_dynamic_image_from_raw_image, IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
 
 use crate::{Callabler, CurrentTab, GuiState, MainWindow, Settings};
 
@@ -72,7 +71,7 @@ fn convert_into_slint_image(img: DynamicImage) -> slint::Image {
     slint::Image::from_rgba8(buffer)
 }
 
-fn load_image(image_path: &Path) -> Option<(Duration, image::DynamicImage)> {
+fn load_image(image_path: &Path) -> Option<(Duration, DynamicImage)> {
     if !image_path.is_file() {
         return None;
     }
