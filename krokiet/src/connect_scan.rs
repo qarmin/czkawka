@@ -240,6 +240,8 @@ fn scan_big_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, st
         .spawn(move || {
             let mut finder = BigFile::new();
             set_common_settings(&mut finder, &custom_settings);
+            // finder.set_number_of_files_to_check(numbers_of_files_to_check);
+            // finder.set_search_mode(sett);
             finder.find_big_files(Some(&stop_receiver), Some(&progress_sender));
 
             let mut vector = finder.get_big_files().clone();
