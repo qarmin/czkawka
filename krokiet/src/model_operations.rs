@@ -34,8 +34,6 @@ pub fn collect_path_name_from_model(items: &[MainListModel], active_tab: Current
     items
         .iter()
         .map(|item| {
-            dbg!(item.val_str.iter().nth(path_idx).unwrap().to_string());
-            dbg!(item.val_str.iter().nth(name_idx).unwrap().to_string());
             (
                 item.val_str.iter().nth(path_idx).unwrap().to_string(),
                 item.val_str.iter().nth(name_idx).unwrap().to_string(),

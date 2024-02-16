@@ -8,7 +8,7 @@ use home::home_dir;
 use image_hasher::{FilterType, HashAlg};
 use log::{debug, error, info, warn};
 use serde::{Deserialize, Serialize};
-use slint::{ComponentHandle, Model, ModelRc};
+use slint::{ComponentHandle, Model, ModelRc, SharedString, VecModel};
 
 use czkawka_core::common::{get_all_available_threads, set_number_of_threads};
 use czkawka_core::common_dir_traversal::CheckingMethod;
@@ -447,6 +447,8 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
         0
     });
     settings.set_similar_images_sub_hash_size_index(similar_images_sub_hash_size_idx as i32);
+    settings.set_similar_images_sub_hash_size_value(ALLOWED_HASH_SIZE_VALUES[similar_images_sub_hash_size_idx].1.to_string().into());
+    // TODO all items with _value are not necessary, but due bug in slint are required, because combobox is not updated properly
 
     let similar_images_sub_hash_type_idx = get_hash_type_idx(&custom_settings.similar_images_sub_hash_type).unwrap_or_else(|| {
         warn!(
@@ -465,6 +467,7 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
         0
     });
     settings.set_similar_images_sub_resize_algorithm_index(similar_images_sub_resize_algorithm_idx as i32);
+    settings.set_similar_images_sub_resize_algorithm_value(ALLOWED_RESIZE_ALGORITHM_VALUES[similar_images_sub_resize_algorithm_idx].1.to_string().into());
 
     settings.set_similar_images_sub_ignore_same_size(custom_settings.similar_images_sub_ignore_same_size);
     settings.set_similar_images_sub_max_similarity(40.0);
@@ -478,6 +481,7 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
         0
     });
     settings.set_duplicates_sub_check_method_index(duplicates_sub_check_method_idx as i32);
+    settings.set_duplicates_sub_check_method_value(ALLOWED_DUPLICATES_CHECK_METHOD_VALUES[duplicates_sub_check_method_idx].1.to_string().into());
     let duplicates_sub_available_hash_type_idx = get_duplicates_hash_type_idx(&custom_settings.duplicates_sub_available_hash_type).unwrap_or_else(|| {
         warn!(
             "Value of duplicates hash type \"{}\" is invalid, setting it to default value",
@@ -486,6 +490,7 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
         0
     });
     settings.set_duplicates_sub_available_hash_type_index(duplicates_sub_available_hash_type_idx as i32);
+    settings.set_duplicates_sub_available_hash_type_value(ALLOWED_DUPLICATES_HASH_TYPE_VALUES[duplicates_sub_available_hash_type_idx].1.to_string().into());
 
     let biggest_files_sub_method_idx = get_biggest_item_idx(&custom_settings.biggest_files_sub_method).unwrap_or_else(|| {
         warn!(
@@ -495,7 +500,10 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
         0
     });
     settings.set_biggest_files_sub_method_index(biggest_files_sub_method_idx as i32);
+    settings.set_biggest_files_sub_method_value(ALLOWED_BIG_FILE_SIZE_VALUES[biggest_files_sub_method_idx].1.to_string().into());
     settings.set_biggest_files_sub_number_of_files(custom_settings.biggest_files_sub_number_of_files.to_string().into());
+    let all_gui_items: Vec<SharedString> = ALLOWED_BIG_FILE_SIZE_VALUES.iter().map(|(_, gui_name, _)| (*gui_name).into()).collect::<Vec<_>>();
+    settings.set_biggest_files_sub_method(ModelRc::new(VecModel::from(all_gui_items)));
 
     settings.set_similar_videos_sub_ignore_same_size(custom_settings.similar_videos_sub_ignore_same_size);
     settings.set_similar_videos_sub_current_similarity(custom_settings.similar_videos_sub_similarity as f32);
@@ -509,6 +517,7 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
         0
     });
     settings.set_similar_music_sub_audio_check_type_index(similar_music_sub_audio_check_type_idx as i32);
+    settings.set_similar_music_sub_audio_check_type_value(ALLOWED_AUDIO_CHECK_TYPE_VALUES[similar_music_sub_audio_check_type_idx].1.to_string().into());
     settings.set_similar_music_sub_approximate_comparison(custom_settings.similar_music_sub_approximate_comparison);
     settings.set_similar_music_sub_title(custom_settings.similar_music_sub_title);
     settings.set_similar_music_sub_artist(custom_settings.similar_music_sub_artist);
@@ -704,9 +713,6 @@ fn default_biggest_method() -> String {
 fn default_audio_check_type() -> String {
     ALLOWED_AUDIO_CHECK_TYPE_VALUES[0].0.to_string()
 }
-fn default_hash_size() -> u8 {
-    DEFAULT_HASH_SIZE
-}
 fn default_video_similarity() -> i32 {
     DEFAULT_VIDEO_SIMILARITY
 }
@@ -752,7 +758,7 @@ pub fn default_hash_type() -> String {
     ALLOWED_HASH_TYPE_VALUES[0].0.to_string()
 }
 pub fn default_sub_hash_size() -> u8 {
-    16
+    DEFAULT_HASH_SIZE
 }
 
 fn get_allowed_hash_size_idx(h_size: u8) -> Option<usize> {

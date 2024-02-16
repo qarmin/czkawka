@@ -19,6 +19,7 @@ component ComboBoxWrapper inherits HorizontalLayout {
     in-out property <string> text;
     in-out property <[string]> model;
     in-out property <int> current_index;
+    in-out property <string> current_value;
     spacing: 5px;
     Text {
         text <=> root.text;
@@ -27,6 +28,7 @@ component ComboBoxWrapper inherits HorizontalLayout {
     ComboBox {
         model: root.model;
         current_index <=> root.current_index;
+        current_value <=> root.current_value;
     }
 }
 
@@ -72,16 +74,19 @@ export component ToolSettings {
                 text: "Hash size";
                 model: Settings.similar_images_sub_available_hash_size;
                 current_index <=> Settings.similar_images_sub_hash_size_index;
+                current_value <=> Settings.similar_images_sub_hash_size_value;
             }
             ComboBoxWrapper {
                 text: "Resize Algorithm";
                 model: Settings.similar_images_sub_available_resize_algorithm;
                 current_index <=> Settings.similar_images_sub_resize_algorithm_index;
+                current_value <=> Settings.similar_images_sub_resize_algorithm_value;
             }
             ComboBoxWrapper {
                 text: "Hash type";
                 model: Settings.similar_images_sub_available_hash_type;
                 current_index <=> Settings.similar_images_sub_hash_type_index;
+                current_value <=> Settings.similar_images_sub_hash_type_value;
             }
             CheckBoxWrapper {
                 text: "Ignore same size";
@@ -105,11 +110,13 @@ export component ToolSettings {
                 text: "Check method";
                 model: Settings.duplicates_sub_check_method;
                 current_index <=> Settings.duplicates_sub_check_method_index;
+                current_value <=> Settings.duplicates_sub_check_method_value;
             }
             ComboBoxWrapper {
                 text: "Hash type";
                 model: Settings.duplicates_sub_available_hash_type;
                 current_index <=> Settings.duplicates_sub_available_hash_type_index;
+                current_value <=> Settings.duplicates_sub_available_hash_type_value;
             }
             Rectangle {}
         }
@@ -122,6 +129,7 @@ export component ToolSettings {
                 text: "Checked files";
                 model: Settings.biggest_files_sub_method;
                 current_index <=> Settings.biggest_files_sub_method_index;
+                current_value <=> Settings.biggest_files_sub_method_value;
             }
             TextComponent {
                 name: "Number of files";
@@ -156,6 +164,7 @@ export component ToolSettings {
                 text: "Audio check type";
                 model: Settings.similar_music_sub_audio_check_type;
                 current_index <=> Settings.similar_music_sub_audio_check_type_index;
+                current_value <=> Settings.similar_music_sub_audio_check_type_value;
             }
             CheckBoxWrapper {
                 text: "Approximate Tag Comparison";

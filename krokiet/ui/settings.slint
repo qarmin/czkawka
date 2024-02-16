@@ -43,10 +43,13 @@ export global Settings {
     // Similar Images
     in-out property <[string]> similar_images_sub_available_hash_size: ["8", "16", "32", "64"];
     in-out property <int> similar_images_sub_hash_size_index: 0;
+    in-out property <string> similar_images_sub_hash_size_value: "8";
     in-out property <[string]> similar_images_sub_available_resize_algorithm: ["Lanczos3", "Nearest", "Triangle", "Gaussian", "CatmullRom"];
     in-out property <int> similar_images_sub_resize_algorithm_index: 0;
+    in-out property <string> similar_images_sub_resize_algorithm_value: "Lanczos3";
     in-out property <[string]> similar_images_sub_available_hash_type: ["Gradient", "Mean", "VertGradient", "BlockHash", "DoubleGradient"];
     in-out property <int> similar_images_sub_hash_type_index: 0;
+    in-out property <string> similar_images_sub_hash_type_value: "Gradient";
     in-out property <float> similar_images_sub_max_similarity: 40;
     in-out property <float> similar_images_sub_current_similarity: 20;
     in-out property <bool> similar_images_sub_ignore_same_size;
@@ -54,12 +57,15 @@ export global Settings {
     // Duplicates
     in-out property <[string]> duplicates_sub_check_method: ["Hash", "Size", "Name", "Size and Name"];
     in-out property <int> duplicates_sub_check_method_index: 0;
+    in-out property <string> duplicates_sub_check_method_value: "Hash";
     in-out property <[string]> duplicates_sub_available_hash_type: ["Blake3", "CRC32", "XXH3"];
     in-out property <int> duplicates_sub_available_hash_type_index: 0;
+    in-out property <string> duplicates_sub_available_hash_type_value: "Blake3";
 
     // Big files
     in-out property <[string]> biggest_files_sub_method: ["The Biggest", "The Smallest"];
     in-out property <int> biggest_files_sub_method_index: 0;
+    in-out property <string> biggest_files_sub_method_value: "The Biggest";
     in-out property <string> biggest_files_sub_number_of_files: 50;
 
     // Similar Videos
@@ -70,6 +76,7 @@ export global Settings {
     // Same Music
     in-out property <[string]> similar_music_sub_audio_check_type: ["Tags", "Fingerprint"];
     in-out property <int> similar_music_sub_audio_check_type_index: 0;
+    in-out property <string> similar_music_sub_audio_check_type_value: "Tags";
     in-out property <bool> similar_music_sub_approximate_comparison;
     in-out property <bool> similar_music_sub_title: true;
     in-out property <bool> similar_music_sub_artist: true;
