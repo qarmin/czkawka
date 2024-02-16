@@ -161,14 +161,14 @@ fn write_duplicate_results(app: &MainWindow, vector: Vec<(Option<DuplicateEntry>
     for (ref_fe, vec_fe) in vector {
         if let Some(ref_fe) = ref_fe {
             let (data_model_str, data_model_int) = prepare_data_model_duplicates(&ref_fe);
-            insert_data_to_model(&items, data_model_str, data_model_int, true);
+            insert_data_to_model(&items, data_model_str, data_model_int, Some(true));
         } else {
-            insert_data_to_model(&items, ModelRc::new(VecModel::default()), ModelRc::new(VecModel::default()), true);
+            insert_data_to_model(&items, ModelRc::new(VecModel::default()), ModelRc::new(VecModel::default()), Some(false));
         }
 
         for fe in vec_fe {
             let (data_model_str, data_model_int) = prepare_data_model_duplicates(&fe);
-            insert_data_to_model(&items, data_model_str, data_model_int, false);
+            insert_data_to_model(&items, data_model_str, data_model_int, None);
         }
     }
     app.set_duplicate_files_model(items.into());
@@ -214,7 +214,7 @@ fn write_empty_folders_results(app: &MainWindow, vector: Vec<FolderEntry>, messa
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_empty_folders(&fe);
-        insert_data_to_model(&items, data_model_str, data_model_int, false);
+        insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_empty_folder_model(items.into());
     app.invoke_scan_ended(format!("Found {items_found} empty folders").into());
@@ -245,7 +245,12 @@ fn scan_big_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, st
             let mut vector = finder.get_big_files().clone();
             let messages = finder.get_text_messages().create_messages_text();
 
-            vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+            // TODO - if biggest files
+            if true {
+                vector.par_sort_unstable_by_key(|fe| u64::MAX - fe.size);
+            } else {
+                vector.par_sort_unstable_by_key(|fe| fe.size);
+            }
 
             a.upgrade_in_event_loop(move |app| {
                 write_big_files_results(&app, vector, messages);
@@ -258,7 +263,7 @@ fn write_big_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages: S
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_big_files(&fe);
-        insert_data_to_model(&items, data_model_str, data_model_int, false);
+        insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_big_files_model(items.into());
     app.invoke_scan_ended(format!("Found {items_found} files").into());
@@ -304,7 +309,7 @@ fn write_empty_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages:
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_empty_files(&fe);
-        insert_data_to_model(&items, data_model_str, data_model_int, false);
+        insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_empty_files_model(items.into());
     app.invoke_scan_ended(format!("Found {items_found} empty files").into());
@@ -379,14 +384,14 @@ fn write_similar_images_results(app: &MainWindow, vector: Vec<(Option<ImagesEntr
     for (ref_fe, vec_fe) in vector {
         if let Some(ref_fe) = ref_fe {
             let (data_model_str, data_model_int) = prepare_data_model_similar_images(&ref_fe, hash_size);
-            insert_data_to_model(&items, data_model_str, data_model_int, true);
+            insert_data_to_model(&items, data_model_str, data_model_int, Some(true));
         } else {
-            insert_data_to_model(&items, ModelRc::new(VecModel::default()), ModelRc::new(VecModel::default()), true);
+            insert_data_to_model(&items, ModelRc::new(VecModel::default()), ModelRc::new(VecModel::default()), Some(false));
         }
 
         for fe in vec_fe {
             let (data_model_str, data_model_int) = prepare_data_model_similar_images(&fe, hash_size);
-            insert_data_to_model(&items, data_model_str, data_model_int, false);
+            insert_data_to_model(&items, data_model_str, data_model_int, None);
         }
     }
     app.set_similar_images_model(items.into());
@@ -450,14 +455,14 @@ fn write_similar_videos_results(app: &MainWindow, vector: Vec<(Option<VideosEntr
     for (ref_fe, vec_fe) in vector {
         if let Some(ref_fe) = ref_fe {
             let (data_model_str, data_model_int) = prepare_data_model_similar_videos(&ref_fe);
-            insert_data_to_model(&items, data_model_str, data_model_int, true);
+            insert_data_to_model(&items, data_model_str, data_model_int, Some(true));
         } else {
-            insert_data_to_model(&items, ModelRc::new(VecModel::default()), ModelRc::new(VecModel::default()), true);
+            insert_data_to_model(&items, ModelRc::new(VecModel::default()), ModelRc::new(VecModel::default()), Some(false));
         }
 
         for fe in vec_fe {
             let (data_model_str, data_model_int) = prepare_data_model_similar_videos(&fe);
-            insert_data_to_model(&items, data_model_str, data_model_int, false);
+            insert_data_to_model(&items, data_model_str, data_model_int, None);
         }
     }
     app.set_similar_videos_model(items.into());
@@ -517,14 +522,14 @@ fn write_similar_music_results(app: &MainWindow, vector: Vec<(Option<MusicEntry>
     for (ref_fe, vec_fe) in vector {
         if let Some(ref_fe) = ref_fe {
             let (data_model_str, data_model_int) = crate::connect_scan::prepare_data_model_similar_music(&ref_fe);
-            insert_data_to_model(&items, data_model_str, data_model_int, true);
+            insert_data_to_model(&items, data_model_str, data_model_int, Some(true));
         } else {
-            insert_data_to_model(&items, ModelRc::new(VecModel::default()), ModelRc::new(VecModel::default()), true);
+            insert_data_to_model(&items, ModelRc::new(VecModel::default()), ModelRc::new(VecModel::default()), Some(false));
         }
 
         for fe in vec_fe {
             let (data_model_str, data_model_int) = crate::connect_scan::prepare_data_model_similar_music(&fe);
-            insert_data_to_model(&items, data_model_str, data_model_int, false);
+            insert_data_to_model(&items, data_model_str, data_model_int, None);
         }
     }
     app.set_similar_music_model(items.into());
@@ -576,7 +581,7 @@ fn write_invalid_symlinks_results(app: &MainWindow, vector: Vec<SymlinksFileEntr
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = crate::connect_scan::prepare_data_model_invalid_symlinks(&fe);
-        insert_data_to_model(&items, data_model_str, data_model_int, false);
+        insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_invalid_symlinks_model(items.into());
     app.invoke_scan_ended(format!("Found {items_found} invalid symlinks").into());
@@ -620,7 +625,7 @@ fn write_temporary_files_results(app: &MainWindow, vector: Vec<TemporaryFileEntr
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = crate::connect_scan::prepare_data_model_temporary_files(&fe);
-        insert_data_to_model(&items, data_model_str, data_model_int, false);
+        insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_temporary_files_model(items.into());
     app.invoke_scan_ended(format!("Found {items_found} files").into());
@@ -663,7 +668,7 @@ fn write_broken_files_results(app: &MainWindow, vector: Vec<BrokenEntry>, messag
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = crate::connect_scan::prepare_data_model_broken_files(&fe);
-        insert_data_to_model(&items, data_model_str, data_model_int, false);
+        insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_broken_files_model(items.into());
     app.invoke_scan_ended(format!("Found {items_found} files").into());
@@ -709,7 +714,7 @@ fn write_bad_extensions_results(app: &MainWindow, vector: Vec<BadFileEntry>, mes
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_bad_extensions(&fe);
-        insert_data_to_model(&items, data_model_str, data_model_int, false);
+        insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_bad_extensions_model(items.into());
     app.invoke_scan_ended(format!("Found {items_found} files with bad extensions").into());
@@ -725,10 +730,11 @@ fn prepare_data_model_bad_extensions(fe: &BadFileEntry) -> (ModelRc<SharedString
     (data_model_str, data_model_int)
 }
 ////////////////////////////////////////// Common
-fn insert_data_to_model(items: &Rc<VecModel<MainListModel>>, data_model_str: ModelRc<SharedString>, data_model_int: ModelRc<i32>, header_row: bool) {
+fn insert_data_to_model(items: &Rc<VecModel<MainListModel>>, data_model_str: ModelRc<SharedString>, data_model_int: ModelRc<i32>, full_header_row: Option<bool>) {
     let main = MainListModel {
         checked: false,
-        header_row,
+        header_row: full_header_row.is_some(),
+        full_header_row: full_header_row.unwrap_or(false),
         selected_row: false,
         val_str: ModelRc::new(data_model_str),
         val_int: ModelRc::new(data_model_int),
