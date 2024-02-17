@@ -1,4 +1,5 @@
 use std::collections::BTreeMap;
+use std::fmt::Display;
 use std::fs;
 use std::fs::{DirEntry, FileType, Metadata};
 #[cfg(target_family = "unix")]
@@ -85,6 +86,15 @@ impl ResultEntry for FileEntry {
 pub enum ErrorType {
     InfiniteRecursion,
     NonExistentFile,
+}
+
+impl Display for ErrorType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ErrorType::InfiniteRecursion => write!(f, "Infinite recursion"),
+            ErrorType::NonExistentFile => write!(f, "Non existent file"),
+        }
+    }
 }
 
 #[derive(Copy, Clone, Eq, PartialEq)]
@@ -318,7 +328,7 @@ where
 {
     #[fun_time(message = "run(collecting files/dirs)", level = "debug")]
     pub fn run(self) -> DirTraversalResult<T> {
-        assert!(self.tool_type != ToolType::None, "Tool type cannot be None");
+        assert_ne!(self.tool_type, ToolType::None, "Tool type cannot be None");
 
         let mut all_warnings = vec![];
         let mut grouped_file_entries: BTreeMap<T, Vec<FileEntry>> = BTreeMap::new();

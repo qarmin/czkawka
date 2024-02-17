@@ -34,8 +34,6 @@ pub fn collect_path_name_from_model(items: &[MainListModel], active_tab: Current
     items
         .iter()
         .map(|item| {
-            dbg!(item.val_str.iter().nth(path_idx).unwrap().to_string());
-            dbg!(item.val_str.iter().nth(name_idx).unwrap().to_string());
             (
                 item.val_str.iter().nth(path_idx).unwrap().to_string(),
                 item.val_str.iter().nth(name_idx).unwrap().to_string(),
@@ -228,6 +226,7 @@ mod tests {
             model.push(MainListModel {
                 checked: item.0,
                 header_row: item.1,
+                full_header_row: false, // TODO - this needs to be calculated
                 selected_row: item.2,
                 val_str: ModelRc::new(all_items),
                 val_int: ModelRc::new(VecModel::default()),

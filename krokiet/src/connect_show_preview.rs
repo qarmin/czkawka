@@ -1,3 +1,4 @@
+use std::panic;
 use std::path::Path;
 use std::time::{Duration, Instant};
 
@@ -21,7 +22,9 @@ pub fn connect_show_preview(app: &MainWindow) {
 
         let active_tab = gui_state.get_active_tab();
 
-        if active_tab == CurrentTab::SimilarImages && !settings.get_similar_images_show_image_preview() {
+        if (active_tab == CurrentTab::SimilarImages && !settings.get_similar_images_show_image_preview())
+            || (active_tab == CurrentTab::DuplicateFiles && !settings.get_duplicate_image_preview())
+        {
             set_preview_visible(&gui_state, None);
             return;
         }
@@ -70,7 +73,7 @@ fn convert_into_slint_image(img: DynamicImage) -> slint::Image {
     slint::Image::from_rgba8(buffer)
 }
 
-fn load_image(image_path: &Path) -> Option<(Duration, image::DynamicImage)> {
+fn load_image(image_path: &Path) -> Option<(Duration, DynamicImage)> {
     if !image_path.is_file() {
         return None;
     }
@@ -80,30 +83,32 @@ fn load_image(image_path: &Path) -> Option<(Duration, image::DynamicImage)> {
     let is_raw_image = RAW_IMAGE_EXTENSIONS.contains(&image_extension.as_str());
     let is_normal_image = IMAGE_RS_EXTENSIONS.contains(&image_extension.as_str());
 
-    if !is_raw_image && !is_normal_image {
-        return None;
-    }
     let load_img_start_timer = Instant::now();
 
-    // TODO this needs to be run inside closure
-    let img = if is_normal_image {
-        match image::open(image_name) {
-            Ok(img) => img,
-            Err(e) => {
-                error!("Error while loading image: {}", e);
+    let img = panic::catch_unwind(|| {
+        let int_img = if is_normal_image {
+            match image::open(image_name) {
+                Ok(img) => img,
+                Err(e) => {
+                    error!("Error while loading image: {}", e);
+                    return None;
+                }
+            }
+        } else if is_raw_image {
+            if let Some(img) = get_dynamic_image_from_raw_image(image_name) {
+                img
+            } else {
+                error!("Error while loading raw image - not sure why - try to guess");
                 return None;
             }
-        }
-    } else if is_raw_image {
-        if let Some(img) = get_dynamic_image_from_raw_image(image_name) {
-            img
         } else {
-            error!("Error while loading raw image - not sure why - try to guess");
             return None;
-        }
-    } else {
-        panic!("Used not supported image extension");
-    };
-
+        };
+        Some(int_img)
+    })
+    .unwrap_or_else(|e| {
+        error!("Error while loading image: {e:?}");
+        None
+    })?;
     Some((load_img_start_timer.elapsed(), img))
 }

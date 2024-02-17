@@ -32,9 +32,18 @@ const TEMP_EXTENSIONS: &[&str] = &[
 ];
 
 #[derive(Clone, Serialize, Debug)]
-pub struct FileEntry {
+pub struct TemporaryFileEntry {
     pub path: PathBuf,
     pub modified_date: u64,
+}
+
+impl TemporaryFileEntry {
+    pub fn get_path(&self) -> &PathBuf {
+        &self.path
+    }
+    pub fn get_modified_date(&self) -> u64 {
+        self.modified_date
+    }
 }
 
 #[derive(Default)]
@@ -45,7 +54,7 @@ pub struct Info {
 pub struct Temporary {
     common_data: CommonToolData,
     information: Info,
-    temporary_files: Vec<FileEntry>,
+    temporary_files: Vec<TemporaryFileEntry>,
 }
 
 impl Temporary {
@@ -138,7 +147,7 @@ impl Temporary {
 
         true
     }
-    pub fn get_file_entry(&self, atomic_counter: &Arc<AtomicUsize>, entry_data: &DirEntry, warnings: &mut Vec<String>) -> Option<FileEntry> {
+    pub fn get_file_entry(&self, atomic_counter: &Arc<AtomicUsize>, entry_data: &DirEntry, warnings: &mut Vec<String>) -> Option<TemporaryFileEntry> {
         atomic_counter.fetch_add(1, Ordering::Relaxed);
 
         let current_file_name = entry_data.path();
@@ -158,7 +167,7 @@ impl Temporary {
         };
 
         // Creating new file entry
-        Some(FileEntry {
+        Some(TemporaryFileEntry {
             modified_date: get_modified_time(&metadata, warnings, &current_file_name, false),
             path: current_file_name,
         })
@@ -234,7 +243,7 @@ impl CommonData for Temporary {
 }
 
 impl Temporary {
-    pub const fn get_temporary_files(&self) -> &Vec<FileEntry> {
+    pub const fn get_temporary_files(&self) -> &Vec<TemporaryFileEntry> {
         &self.temporary_files
     }
 

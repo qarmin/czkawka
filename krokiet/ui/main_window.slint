@@ -28,6 +28,8 @@ export component MainWindow inherits Window {
     callback show_move_folders_dialog(string);
     callback folders_move_choose_requested();
 
+    title: "Krokiet - Data Cleaner";
+
     min-width: 300px;
     preferred-width: 800px;
     min-height: 300px;
@@ -41,19 +43,17 @@ export component MainWindow inherits Window {
         all_progress: 20,
         step_name: "Cache",
     };
-    in-out property <[MainListModel]> empty_folder_model: [
-        {checked: false, selected_row: false, header_row: true, val_str: ["kropkarz", "/Xd1", "24.10.2023"], val_int: []} ,
-        {checked: false, selected_row: false, header_row: false, val_str: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []} ,
-        {checked: false, selected_row: false, header_row: false, val_str: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []} ,
-        {checked: true, selected_row: false, header_row: false, val_str: ["lokkaler", "/Xd1/Vide2", "01.23.1911"], val_int: []}
-    ];
-    in-out property <[MainListModel]> empty_files_model: [
-        {checked: false, selected_row: false, header_row: true, val_str: ["kropkarz", "/Xd1", "24.10.2023"], val_int: []} ,
-        {checked: false, selected_row: false, header_row: false, val_str: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []} ,
-        {checked: false, selected_row: false, header_row: false, val_str: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []} ,
-        {checked: true, selected_row: false, header_row: false, val_str: ["lokkaler", "/Xd1/Vide2", "01.23.1911"], val_int: []}
-    ];
+    in-out property <[MainListModel]> duplicate_files_model: [];
+    in-out property <[MainListModel]> empty_folder_model: [];
+    in-out property <[MainListModel]> big_files_model: [];
+    in-out property <[MainListModel]> empty_files_model: [];
+    in-out property <[MainListModel]> temporary-files_model: [];
     in-out property <[MainListModel]> similar_images_model: [];
+    in-out property <[MainListModel]> similar_videos_model: [];
+    in-out property <[MainListModel]> similar_music_model: [];
+    in-out property <[MainListModel]> invalid_symlinks_model: [];
+    in-out property <[MainListModel]> broken_files_model: [];
+    in-out property <[MainListModel]> bad_extensions_model: [];
 
     VerticalBox {
         HorizontalBox {
@@ -78,12 +78,20 @@ export component MainWindow inherits Window {
                         width: preview_or_tool_settings.visible ? parent.width / 2 : parent.width;
                         height: parent.height;
                         horizontal-stretch: 0.5;
+                        duplicate_files_model <=> root.duplicate_files_model;
                         empty_folder_model <=> root.empty_folder_model;
+                        big_files_model <=> root.big_files_model;
                         empty_files_model <=> root.empty_files_model;
+                        temporary-files_model <=> root.temporary-files_model;
                         similar_images_model <=> root.similar_images_model;
+                        similar_videos_model <=> root.similar_videos_model;
+                        similar_music_model <=> root.similar_music_model;
+                        invalid_symlinks_model <=> root.invalid_symlinks_model;
+                        broken_files_model <=> root.broken_files_model;
+                        bad_extensions_model <=> root.bad_extensions_model;
                     }
                     preview_or_tool_settings := Rectangle {
-                        visible: (GuiState.preview_visible || tool_settings.visible) && GuiState.active_tab != CurrentTab.Settings;
+                        visible: (GuiState.preview_visible || tool_settings.visible) && GuiState.is_tool_tab_active;
                         height: parent.height;
                         x: parent.width / 2;
                         width: self.visible ? parent.width / 2 : 0;
@@ -134,9 +142,17 @@ export component MainWindow inherits Window {
             }
         }
 
-        text_summary := LineEdit {
-            text: text_summary_text;
-            read-only: true;
+        HorizontalLayout {
+            spacing: 5px;
+            text_summary := LineEdit {
+                text: text_summary_text;
+                read-only: true;
+            }
+            Text {
+                text: "Krokiet\n7.0.0";
+                vertical-alignment: center;
+                horizontal-alignment: center;
+            }
         }
 
         bottom_panel := BottomPanel {

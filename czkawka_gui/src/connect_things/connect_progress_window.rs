@@ -217,10 +217,10 @@ fn progress_default(gui_data: &GuiData, item: &ProgressData) {
 
 fn common_set_data(item: &ProgressData, progress_bar_all_stages: &ProgressBar, progress_bar_current_stage: &ProgressBar, taskbar_state: &Rc<RefCell<TaskbarProgress>>) {
     if item.entries_to_check != 0 {
-        let all_stages = (item.current_stage as f64 + (item.entries_checked) as f64 / item.entries_to_check as f64) / (item.max_stage + 1) as f64;
+        let all_stages = (item.current_stage as f64 + item.entries_checked as f64 / item.entries_to_check as f64) / (item.max_stage + 1) as f64;
         let all_stages = if all_stages > 0.99 { 0.99 } else { all_stages };
         progress_bar_all_stages.set_fraction(all_stages);
-        progress_bar_current_stage.set_fraction((item.entries_checked) as f64 / item.entries_to_check as f64);
+        progress_bar_current_stage.set_fraction(item.entries_checked as f64 / item.entries_to_check as f64);
         taskbar_state.borrow().set_progress_value(
             ((item.current_stage as usize) * item.entries_to_check + item.entries_checked) as u64,
             item.entries_to_check as u64 * (item.max_stage + 1) as u64,

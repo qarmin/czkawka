@@ -23,10 +23,10 @@ export component ActionButtons inherits HorizontalLayout {
     callback show_select_popup(length, length);
     callback show_remove_popup();
     callback request_folder_to_move();
-    in-out property <BottomPanelVisibility> bottom_panel_visibility: BottomPanelVisibility.Directories;
+    in-out property <BottomPanelVisibility> bottom_panel_visibility <=> GuiState.bottom_panel_visibility;
     in-out property <bool> stop_requested: false;
     in-out property <bool> scanning;
-    in-out property <bool> lists_enabled: GuiState.active_tab != CurrentTab.Settings;
+    in-out property <bool> lists_enabled: GuiState.is_tool_tab_active;
     out property <int> name;
     height: 30px;
     spacing: 4px;
@@ -35,7 +35,7 @@ export component ActionButtons inherits HorizontalLayout {
         scan_button := Button {
             height: parent.height;
             enabled: !scanning && lists_enabled;
-            visible: !scanning;
+            visible: !scanning && lists_enabled;
             text: "Scan";
             clicked => {
                 root.scanning = true;
@@ -60,6 +60,7 @@ export component ActionButtons inherits HorizontalLayout {
     }
 
     move_button := Button {
+        visible: lists_enabled;
         height: parent.height;
         enabled: !scanning && lists_enabled;
         text: "Move";
@@ -69,6 +70,7 @@ export component ActionButtons inherits HorizontalLayout {
     }
 
     select_button := Button {
+        visible: lists_enabled;
         height: parent.height;
         enabled: !scanning && lists_enabled;
         text: "Select";
@@ -78,6 +80,7 @@ export component ActionButtons inherits HorizontalLayout {
     }
 
     delete_button := Button {
+        visible: lists_enabled;
         height: parent.height;
         enabled: !scanning && lists_enabled;
         text: "Delete";

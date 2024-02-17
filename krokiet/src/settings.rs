@@ -2,15 +2,18 @@ use std::cmp::{max, min};
 use std::env;
 use std::path::PathBuf;
 
+use czkawka_core::big_file::SearchMode;
 use directories_next::ProjectDirs;
 use home::home_dir;
 use image_hasher::{FilterType, HashAlg};
 use log::{debug, error, info, warn};
 use serde::{Deserialize, Serialize};
-use slint::{ComponentHandle, Model, ModelRc};
+use slint::{ComponentHandle, Model, ModelRc, SharedString, VecModel};
 
 use czkawka_core::common::{get_all_available_threads, set_number_of_threads};
+use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::common_items::{DEFAULT_EXCLUDED_DIRECTORIES, DEFAULT_EXCLUDED_ITEMS};
+use czkawka_core::duplicate::HashType;
 
 use crate::common::{create_excluded_directories_model_from_pathbuf, create_included_directories_model_from_pathbuf, create_vec_model_from_vec_string};
 use crate::{Callabler, GuiState, MainWindow, Settings};
@@ -19,6 +22,12 @@ pub const DEFAULT_MINIMUM_SIZE_KB: i32 = 16;
 pub const DEFAULT_MAXIMUM_SIZE_KB: i32 = i32::MAX / 1024;
 pub const DEFAULT_MINIMUM_CACHE_SIZE: i32 = 256;
 pub const DEFAULT_MINIMUM_PREHASH_CACHE_SIZE: i32 = 256;
+pub const DEFAULT_BIGGEST_FILES: i32 = 50;
+pub const DEFAULT_IMAGE_SIMILARITY: i32 = 10;
+pub const DEFAULT_VIDEO_SIMILARITY: i32 = 15;
+pub const DEFAULT_HASH_SIZE: u8 = 16;
+pub const DEFAULT_MAXIMUM_DIFFERENCE_VALUE: f32 = 3.0;
+pub const DEFAULT_MINIMAL_FRAGMENT_DURATION_VALUE: f32 = 5.0;
 
 // (Hash size, Maximum difference) - Ehh... to simplify it, just use everywhere 40 as maximum similarity - for now I'm to lazy to change it, when hash size changes
 // So if you want to change it, you need to change it in multiple places
@@ -32,12 +41,30 @@ pub const ALLOWED_RESIZE_ALGORITHM_VALUES: &[(&str, &str, FilterType)] = &[
     ("nearest", "Nearest", FilterType::Nearest),
 ];
 
-pub const ALLOWED_HASH_TYPE_VALUES: &[(&str, &str, HashAlg)] = &[
+pub const ALLOWED_IMAGE_HASH_ALG_VALUES: &[(&str, &str, HashAlg)] = &[
     ("mean", "Mean", HashAlg::Mean),
     ("gradient", "Gradient", HashAlg::Gradient),
     ("blockhash", "BlockHash", HashAlg::Blockhash),
     ("vertgradient", "VertGradient", HashAlg::VertGradient),
     ("doublegradient", "DoubleGradient", HashAlg::DoubleGradient),
+];
+pub const ALLOWED_BIG_FILE_SIZE_VALUES: &[(&str, &str, SearchMode)] = &[
+    ("biggest", "The Biggest", SearchMode::BiggestFiles),
+    ("smallest", "The Smallest", SearchMode::SmallestFiles),
+];
+pub const ALLOWED_AUDIO_CHECK_TYPE_VALUES: &[(&str, &str, CheckingMethod)] =
+    &[("tags", "Tags", CheckingMethod::AudioTags), ("fingerprint", "Fingerprint", CheckingMethod::AudioContent)];
+
+pub const ALLOWED_DUPLICATES_CHECK_METHOD_VALUES: &[(&str, &str, CheckingMethod)] = &[
+    ("hash", "Hash", CheckingMethod::Hash),
+    ("size", "Size", CheckingMethod::Size),
+    ("name", "Name", CheckingMethod::Name),
+    ("size_and_name", "Size and Name", CheckingMethod::SizeName),
+];
+pub const ALLOWED_DUPLICATES_HASH_TYPE_VALUES: &[(&str, &str, HashType)] = &[
+    ("blake3", "Blake3", HashType::Blake3),
+    ("crc32", "CRC32", HashType::Crc32),
+    ("xxh3", "XXH3", HashType::Xxh3),
 ];
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -93,17 +120,55 @@ pub struct SettingsCustom {
     #[serde(default = "default_sub_hash_size")]
     pub similar_images_sub_hash_size: u8,
     #[serde(default = "default_hash_type")]
-    pub similar_images_sub_hash_type: String,
+    pub similar_images_sub_hash_alg: String,
     #[serde(default = "default_resize_algorithm")]
     pub similar_images_sub_resize_algorithm: String,
     #[serde(default)]
     pub similar_images_sub_ignore_same_size: bool,
-    #[serde(default = "default_similarity")]
+    #[serde(default = "default_image_similarity")]
     pub similar_images_sub_similarity: i32,
-}
-
-pub fn default_similarity() -> i32 {
-    10
+    #[serde(default = "default_duplicates_check_method")]
+    pub duplicates_sub_check_method: String,
+    #[serde(default = "default_duplicates_hash_type")]
+    pub duplicates_sub_available_hash_type: String,
+    #[serde(default)]
+    pub duplicates_sub_name_case_sensitive: bool,
+    #[serde(default = "default_biggest_method")]
+    pub biggest_files_sub_method: String,
+    #[serde(default = "default_biggest_files")]
+    pub biggest_files_sub_number_of_files: i32,
+    #[serde(default)]
+    pub similar_videos_sub_ignore_same_size: bool,
+    #[serde(default = "default_video_similarity")]
+    pub similar_videos_sub_similarity: i32,
+    #[serde(default = "default_audio_check_type")]
+    pub similar_music_sub_audio_check_type: String,
+    #[serde(default)]
+    pub similar_music_sub_approximate_comparison: bool,
+    #[serde(default = "ttrue")]
+    pub similar_music_sub_title: bool,
+    #[serde(default = "ttrue")]
+    pub similar_music_sub_artist: bool,
+    #[serde(default)]
+    pub similar_music_sub_year: bool,
+    #[serde(default)]
+    pub similar_music_sub_bitrate: bool,
+    #[serde(default)]
+    pub similar_music_sub_genre: bool,
+    #[serde(default)]
+    pub similar_music_sub_length: bool,
+    #[serde(default = "default_maximum_difference_value")]
+    pub similar_music_sub_maximum_difference_value: f32,
+    #[serde(default = "default_minimal_fragment_duration_value")]
+    pub similar_music_sub_minimal_fragment_duration_value: f32,
+    #[serde(default = "ttrue")]
+    pub broken_files_sub_audio: bool,
+    #[serde(default)]
+    pub broken_files_sub_pdf: bool,
+    #[serde(default)]
+    pub broken_files_sub_archive: bool,
+    #[serde(default)]
+    pub broken_files_sub_image: bool,
 }
 
 impl Default for SettingsCustom {
@@ -199,7 +264,7 @@ pub fn create_default_settings_files() {
         }
     }
 
-    for i in 1..=10 {
+    for i in 0..10 {
         let config_file = get_config_file(i);
         if let Some(config_file) = config_file {
             if !config_file.is_file() {
@@ -377,56 +442,102 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
     settings.set_duplicate_minimal_hash_cache_size(custom_settings.duplicate_minimal_hash_cache_size.to_string().into());
     settings.set_duplicate_minimal_prehash_cache_size(custom_settings.duplicate_minimal_prehash_cache_size.to_string().into());
     settings.set_duplicate_delete_outdated_entries(custom_settings.duplicate_delete_outdated_entries);
+    settings.set_duplicates_sub_name_case_sensitive(custom_settings.duplicates_sub_name_case_sensitive);
     settings.set_similar_images_show_image_preview(custom_settings.similar_images_show_image_preview);
     settings.set_similar_images_delete_outdated_entries(custom_settings.similar_images_delete_outdated_entries);
     settings.set_similar_videos_delete_outdated_entries(custom_settings.similar_videos_delete_outdated_entries);
     settings.set_similar_music_delete_outdated_entries(custom_settings.similar_music_delete_outdated_entries);
 
-    let similar_images_sub_hash_size_idx = if let Some(idx) = ALLOWED_HASH_SIZE_VALUES
-        .iter()
-        .position(|(hash_size, _max_similarity)| *hash_size == custom_settings.similar_images_sub_hash_size)
-    {
-        idx
-    } else {
+    let similar_images_sub_hash_size_idx = get_allowed_hash_size_idx(custom_settings.similar_images_sub_hash_size).unwrap_or_else(|| {
         warn!(
             "Value of hash size \"{}\" is invalid, setting it to default value",
             custom_settings.similar_images_sub_hash_size
         );
         0
-    };
+    });
     settings.set_similar_images_sub_hash_size_index(similar_images_sub_hash_size_idx as i32);
-
-    let similar_images_sub_hash_type_idx = if let Some(idx) = ALLOWED_HASH_TYPE_VALUES
-        .iter()
-        .position(|(settings_key, _gui_name, _hash_type)| *settings_key == custom_settings.similar_images_sub_hash_type)
-    {
-        idx
-    } else {
+    settings.set_similar_images_sub_hash_size_value(ALLOWED_HASH_SIZE_VALUES[similar_images_sub_hash_size_idx].1.to_string().into());
+    // TODO all items with _value are not necessary, but due bug in slint are required, because combobox is not updated properly
+    let similar_images_sub_hash_alg_idx = get_image_hash_alg_idx(&custom_settings.similar_images_sub_hash_alg).unwrap_or_else(|| {
         warn!(
             "Value of hash type \"{}\" is invalid, setting it to default value",
-            custom_settings.similar_images_sub_hash_type
+            custom_settings.similar_images_sub_hash_alg
         );
         0
-    };
-    settings.set_similar_images_sub_hash_type_index(similar_images_sub_hash_type_idx as i32);
-
-    let similar_images_sub_resize_algorithm_idx = if let Some(idx) = ALLOWED_RESIZE_ALGORITHM_VALUES
-        .iter()
-        .position(|(settings_key, _gui_name, _resize_alg)| *settings_key == custom_settings.similar_images_sub_resize_algorithm)
-    {
-        idx
-    } else {
+    });
+    settings.set_similar_images_sub_hash_alg_index(similar_images_sub_hash_alg_idx as i32);
+    let similar_images_sub_resize_algorithm_idx = get_resize_algorithm_idx(&custom_settings.similar_images_sub_resize_algorithm).unwrap_or_else(|| {
         warn!(
             "Value of resize algorithm \"{}\" is invalid, setting it to default value",
             custom_settings.similar_images_sub_resize_algorithm
         );
         0
-    };
+    });
     settings.set_similar_images_sub_resize_algorithm_index(similar_images_sub_resize_algorithm_idx as i32);
-
+    settings.set_similar_images_sub_resize_algorithm_value(ALLOWED_RESIZE_ALGORITHM_VALUES[similar_images_sub_resize_algorithm_idx].1.to_string().into());
     settings.set_similar_images_sub_ignore_same_size(custom_settings.similar_images_sub_ignore_same_size);
-    settings.set_similar_images_sub_max_similarity(40.0); // TODO this is now set to stable 40
+    settings.set_similar_images_sub_max_similarity(40.0);
     settings.set_similar_images_sub_current_similarity(custom_settings.similar_images_sub_similarity as f32);
+
+    let duplicates_sub_check_method_idx = get_duplicates_check_method_idx(&custom_settings.duplicates_sub_check_method).unwrap_or_else(|| {
+        warn!(
+            "Value of duplicates check method \"{}\" is invalid, setting it to default value",
+            custom_settings.duplicates_sub_check_method
+        );
+        0
+    });
+    settings.set_duplicates_sub_check_method_index(duplicates_sub_check_method_idx as i32);
+    settings.set_duplicates_sub_check_method_value(ALLOWED_DUPLICATES_CHECK_METHOD_VALUES[duplicates_sub_check_method_idx].1.to_string().into());
+    let duplicates_sub_available_hash_type_idx = get_duplicates_hash_type_idx(&custom_settings.duplicates_sub_available_hash_type).unwrap_or_else(|| {
+        warn!(
+            "Value of duplicates hash type \"{}\" is invalid, setting it to default value",
+            custom_settings.duplicates_sub_available_hash_type
+        );
+        0
+    });
+    settings.set_duplicates_sub_available_hash_type_index(duplicates_sub_available_hash_type_idx as i32);
+    settings.set_duplicates_sub_available_hash_type_value(ALLOWED_DUPLICATES_HASH_TYPE_VALUES[duplicates_sub_available_hash_type_idx].1.to_string().into());
+
+    let biggest_files_sub_method_idx = get_biggest_item_idx(&custom_settings.biggest_files_sub_method).unwrap_or_else(|| {
+        warn!(
+            "Value of biggest files method \"{}\" is invalid, setting it to default value",
+            custom_settings.biggest_files_sub_method
+        );
+        0
+    });
+    settings.set_biggest_files_sub_method_index(biggest_files_sub_method_idx as i32);
+    settings.set_biggest_files_sub_method_value(ALLOWED_BIG_FILE_SIZE_VALUES[biggest_files_sub_method_idx].1.to_string().into());
+    settings.set_biggest_files_sub_number_of_files(custom_settings.biggest_files_sub_number_of_files.to_string().into());
+    let all_gui_items: Vec<SharedString> = ALLOWED_BIG_FILE_SIZE_VALUES.iter().map(|(_, gui_name, _)| (*gui_name).into()).collect::<Vec<_>>();
+    settings.set_biggest_files_sub_method(ModelRc::new(VecModel::from(all_gui_items)));
+
+    settings.set_similar_videos_sub_ignore_same_size(custom_settings.similar_videos_sub_ignore_same_size);
+    settings.set_similar_videos_sub_current_similarity(custom_settings.similar_videos_sub_similarity as f32);
+    settings.set_similar_videos_sub_max_similarity(20.0);
+
+    let similar_music_sub_audio_check_type_idx = get_audio_check_type_idx(&custom_settings.similar_music_sub_audio_check_type).unwrap_or_else(|| {
+        warn!(
+            "Value of audio check type \"{}\" is invalid, setting it to default value",
+            custom_settings.similar_music_sub_audio_check_type
+        );
+        0
+    });
+    settings.set_similar_music_sub_audio_check_type_index(similar_music_sub_audio_check_type_idx as i32);
+    settings.set_similar_music_sub_audio_check_type_value(ALLOWED_AUDIO_CHECK_TYPE_VALUES[similar_music_sub_audio_check_type_idx].1.to_string().into());
+    settings.set_similar_music_sub_approximate_comparison(custom_settings.similar_music_sub_approximate_comparison);
+    settings.set_similar_music_sub_title(custom_settings.similar_music_sub_title);
+    settings.set_similar_music_sub_artist(custom_settings.similar_music_sub_artist);
+    settings.set_similar_music_sub_year(custom_settings.similar_music_sub_year);
+    settings.set_similar_music_sub_bitrate(custom_settings.similar_music_sub_bitrate);
+    settings.set_similar_music_sub_genre(custom_settings.similar_music_sub_genre);
+    settings.set_similar_music_sub_length(custom_settings.similar_music_sub_length);
+    settings.set_similar_music_sub_maximum_difference_value(custom_settings.similar_music_sub_maximum_difference_value);
+    settings.set_similar_music_sub_minimal_fragment_duration_value(custom_settings.similar_music_sub_minimal_fragment_duration_value);
+
+    settings.set_broken_files_sub_audio(custom_settings.broken_files_sub_audio);
+    settings.set_broken_files_sub_pdf(custom_settings.broken_files_sub_pdf);
+    settings.set_broken_files_sub_archive(custom_settings.broken_files_sub_archive);
+    settings.set_broken_files_sub_image(custom_settings.broken_files_sub_image);
 
     // Clear text
     app.global::<GuiState>().set_info_text("".into());
@@ -468,6 +579,7 @@ pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
         .parse::<i32>()
         .unwrap_or(DEFAULT_MINIMUM_PREHASH_CACHE_SIZE);
     let duplicate_delete_outdated_entries = settings.get_duplicate_delete_outdated_entries();
+    let duplicates_sub_name_case_sensitive = settings.get_duplicates_sub_name_case_sensitive();
 
     let similar_images_show_image_preview = settings.get_similar_images_show_image_preview();
     let similar_images_delete_outdated_entries = settings.get_similar_images_delete_outdated_entries();
@@ -478,15 +590,42 @@ pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
 
     let similar_images_sub_hash_size_idx = settings.get_similar_images_sub_hash_size_index();
     let similar_images_sub_hash_size = ALLOWED_HASH_SIZE_VALUES[similar_images_sub_hash_size_idx as usize].0;
-
-    let similar_images_sub_hash_type_idx = settings.get_similar_images_sub_hash_type_index();
-    let similar_images_sub_hash_type = ALLOWED_HASH_TYPE_VALUES[similar_images_sub_hash_type_idx as usize].0.to_string();
-
+    let similar_images_sub_hash_alg_idx = settings.get_similar_images_sub_hash_alg_index();
+    let similar_images_sub_hash_alg = ALLOWED_IMAGE_HASH_ALG_VALUES[similar_images_sub_hash_alg_idx as usize].0.to_string();
     let similar_images_sub_resize_algorithm_idx = settings.get_similar_images_sub_resize_algorithm_index();
     let similar_images_sub_resize_algorithm = ALLOWED_RESIZE_ALGORITHM_VALUES[similar_images_sub_resize_algorithm_idx as usize].0.to_string();
-
     let similar_images_sub_ignore_same_size = settings.get_similar_images_sub_ignore_same_size();
     let similar_images_sub_similarity = settings.get_similar_images_sub_current_similarity().round() as i32;
+
+    let duplicates_sub_check_method_idx = settings.get_duplicates_sub_check_method_index();
+    let duplicates_sub_check_method = ALLOWED_DUPLICATES_CHECK_METHOD_VALUES[duplicates_sub_check_method_idx as usize].0.to_string();
+    let duplicates_sub_available_hash_type_idx = settings.get_duplicates_sub_available_hash_type_index();
+    let duplicates_sub_available_hash_type = ALLOWED_DUPLICATES_HASH_TYPE_VALUES[duplicates_sub_available_hash_type_idx as usize].0.to_string();
+
+    let biggest_files_sub_method_idx = settings.get_biggest_files_sub_method_index();
+    let biggest_files_sub_method = ALLOWED_BIG_FILE_SIZE_VALUES[biggest_files_sub_method_idx as usize].0.to_string();
+    let biggest_files_sub_number_of_files = settings.get_biggest_files_sub_number_of_files().parse().unwrap_or(DEFAULT_BIGGEST_FILES);
+
+    let similar_videos_sub_ignore_same_size = settings.get_similar_videos_sub_ignore_same_size();
+    let similar_videos_sub_similarity = settings.get_similar_videos_sub_current_similarity().round() as i32;
+
+    let similar_music_sub_audio_check_type_idx = settings.get_similar_music_sub_audio_check_type_index();
+    let similar_music_sub_audio_check_type = ALLOWED_AUDIO_CHECK_TYPE_VALUES[similar_music_sub_audio_check_type_idx as usize].0.to_string();
+    let similar_music_sub_approximate_comparison = settings.get_similar_music_sub_approximate_comparison();
+    let similar_music_sub_title = settings.get_similar_music_sub_title();
+    let similar_music_sub_artist = settings.get_similar_music_sub_artist();
+    let similar_music_sub_year = settings.get_similar_music_sub_year();
+    let similar_music_sub_bitrate = settings.get_similar_music_sub_bitrate();
+    let similar_music_sub_genre = settings.get_similar_music_sub_genre();
+    let similar_music_sub_length = settings.get_similar_music_sub_length();
+    let similar_music_sub_maximum_difference_value = settings.get_similar_music_sub_maximum_difference_value();
+    let similar_music_sub_minimal_fragment_duration_value = settings.get_similar_music_sub_minimal_fragment_duration_value();
+
+    let broken_files_sub_audio = settings.get_broken_files_sub_audio();
+    let broken_files_sub_pdf = settings.get_broken_files_sub_pdf();
+    let broken_files_sub_archive = settings.get_broken_files_sub_archive();
+    let broken_files_sub_image = settings.get_broken_files_sub_image();
+
     SettingsCustom {
         included_directories,
         included_directories_referenced,
@@ -513,10 +652,31 @@ pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
         similar_videos_delete_outdated_entries,
         similar_music_delete_outdated_entries,
         similar_images_sub_hash_size,
-        similar_images_sub_hash_type,
+        similar_images_sub_hash_alg,
         similar_images_sub_resize_algorithm,
         similar_images_sub_ignore_same_size,
         similar_images_sub_similarity,
+        duplicates_sub_check_method,
+        duplicates_sub_available_hash_type,
+        duplicates_sub_name_case_sensitive,
+        biggest_files_sub_method,
+        biggest_files_sub_number_of_files,
+        similar_videos_sub_ignore_same_size,
+        similar_videos_sub_similarity,
+        similar_music_sub_audio_check_type,
+        similar_music_sub_approximate_comparison,
+        similar_music_sub_title,
+        similar_music_sub_artist,
+        similar_music_sub_year,
+        similar_music_sub_bitrate,
+        similar_music_sub_genre,
+        similar_music_sub_length,
+        similar_music_sub_maximum_difference_value,
+        similar_music_sub_minimal_fragment_duration_value,
+        broken_files_sub_audio,
+        broken_files_sub_pdf,
+        broken_files_sub_archive,
+        broken_files_sub_image,
     }
 }
 
@@ -555,7 +715,34 @@ fn default_excluded_directories() -> Vec<PathBuf> {
     excluded_directories.sort();
     excluded_directories
 }
+fn default_duplicates_check_method() -> String {
+    ALLOWED_DUPLICATES_CHECK_METHOD_VALUES[0].0.to_string()
+}
+fn default_maximum_difference_value() -> f32 {
+    DEFAULT_MAXIMUM_DIFFERENCE_VALUE
+}
+fn default_minimal_fragment_duration_value() -> f32 {
+    DEFAULT_MINIMAL_FRAGMENT_DURATION_VALUE
+}
+fn default_duplicates_hash_type() -> String {
+    ALLOWED_DUPLICATES_HASH_TYPE_VALUES[0].0.to_string()
+}
+fn default_biggest_method() -> String {
+    ALLOWED_BIG_FILE_SIZE_VALUES[0].0.to_string()
+}
+fn default_audio_check_type() -> String {
+    ALLOWED_AUDIO_CHECK_TYPE_VALUES[0].0.to_string()
+}
+fn default_video_similarity() -> i32 {
+    DEFAULT_VIDEO_SIMILARITY
+}
+fn default_biggest_files() -> i32 {
+    DEFAULT_BIGGEST_FILES
+}
 
+pub fn default_image_similarity() -> i32 {
+    DEFAULT_IMAGE_SIMILARITY
+}
 fn default_excluded_items() -> String {
     DEFAULT_EXCLUDED_ITEMS.to_string()
 }
@@ -588,8 +775,44 @@ pub fn default_resize_algorithm() -> String {
     ALLOWED_RESIZE_ALGORITHM_VALUES[0].0.to_string()
 }
 pub fn default_hash_type() -> String {
-    ALLOWED_HASH_TYPE_VALUES[0].0.to_string()
+    ALLOWED_IMAGE_HASH_ALG_VALUES[0].0.to_string()
 }
 pub fn default_sub_hash_size() -> u8 {
-    16
+    DEFAULT_HASH_SIZE
+}
+
+fn get_allowed_hash_size_idx(h_size: u8) -> Option<usize> {
+    ALLOWED_HASH_SIZE_VALUES.iter().position(|(hash_size, _max_similarity)| *hash_size == h_size)
+}
+
+pub fn get_image_hash_alg_idx(string_hash_type: &str) -> Option<usize> {
+    ALLOWED_IMAGE_HASH_ALG_VALUES
+        .iter()
+        .position(|(settings_key, gui_name, _hash_type)| *settings_key == string_hash_type || *gui_name == string_hash_type)
+}
+pub fn get_resize_algorithm_idx(string_resize_algorithm: &str) -> Option<usize> {
+    ALLOWED_RESIZE_ALGORITHM_VALUES
+        .iter()
+        .position(|(settings_key, gui_name, _resize_alg)| *settings_key == string_resize_algorithm || *gui_name == string_resize_algorithm)
+}
+pub fn get_biggest_item_idx(string_biggest_item: &str) -> Option<usize> {
+    ALLOWED_BIG_FILE_SIZE_VALUES
+        .iter()
+        .position(|(settings_key, gui_name, _search_mode)| *settings_key == string_biggest_item || *gui_name == string_biggest_item)
+}
+
+pub fn get_duplicates_check_method_idx(string_duplicates_check_method: &str) -> Option<usize> {
+    ALLOWED_DUPLICATES_CHECK_METHOD_VALUES
+        .iter()
+        .position(|(settings_key, gui_name, _check_method)| *settings_key == string_duplicates_check_method || *gui_name == string_duplicates_check_method)
+}
+pub fn get_duplicates_hash_type_idx(string_duplicates_hash_type: &str) -> Option<usize> {
+    ALLOWED_DUPLICATES_HASH_TYPE_VALUES
+        .iter()
+        .position(|(settings_key, gui_name, _hash_type)| *settings_key == string_duplicates_hash_type || *gui_name == string_duplicates_hash_type)
+}
+pub fn get_audio_check_type_idx(string_audio_check_type: &str) -> Option<usize> {
+    ALLOWED_AUDIO_CHECK_TYPE_VALUES
+        .iter()
+        .position(|(settings_key, gui_name, _audio_check_type)| *settings_key == string_audio_check_type || *gui_name == string_audio_check_type)
 }

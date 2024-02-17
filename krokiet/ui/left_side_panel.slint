@@ -1,5 +1,5 @@
 import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox} from "std-widgets.slint";
-import {CurrentTab} from "common.slint";
+import {CurrentTab, BottomPanelVisibility} from "common.slint";
 import {ColorPalette} from "color_palette.slint";
 import {GuiState} from "gui_state.slint";
 import {Callabler} from "callabler.slint";
@@ -68,40 +68,46 @@ export component LeftSidePanel {
     callback changed_current_tab();
     width: 120px;
     VerticalLayout {
-        spacing: 20px;
+        spacing: 2px;
         Rectangle {
-            height: 100px;
+            visible: GuiState.active_tab != CurrentTab.About;
+            height: 80px;
             Image {
-                width: root.width;
+                width: parent.height;
                 source: @image-url("../icons/logo.png");
+                image-fit: ImageFit.contain;
+            }
+            touch_area := TouchArea {
+                clicked => {
+                    GuiState.active_tab = CurrentTab.About;
+                    Callabler.tab_changed();
+                    root.changed_current_tab();
+                    GuiState.bottom_panel_visibility = BottomPanelVisibility.NotVisible;
+                }
             }
         }
 
-        VerticalLayout {
-            // spacing: 3px;
-            alignment: center;
+        ListView {
             out property <length> element-size: 25px;
-            TabItem {
-                height: parent.element-size;
-                scanning: scanning;
-                text: "Empty Folders";
-                curr_tab: CurrentTab.EmptyFolders;
-                changed_current_tab() => {root.changed_current_tab();}
-            }
+            out property <[{name: string, tab: CurrentTab}]> speed_model: [
+                {name: "Duplicate Files", tab: CurrentTab.DuplicateFiles},
+                {name: "Empty Folders", tab: CurrentTab.EmptyFolders}, 
+                {name: "Big Files", tab: CurrentTab.BigFiles},
+                {name: "Empty Files", tab: CurrentTab.EmptyFiles}, 
+                {name: "Temporary Files", tab: CurrentTab.TemporaryFiles},
+                {name: "Similar Images", tab: CurrentTab.SimilarImages},
+                {name: "Similar Videos", tab: CurrentTab.SimilarVideos},
+                {name: "Music Duplicates", tab: CurrentTab.SimilarMusic},
+                {name: "Invalid Symlinks", tab: CurrentTab.InvalidSymlinks},
+                {name: "Broken Files", tab: CurrentTab.BrokenFiles},
+                {name: "Bad Extensions", tab: CurrentTab.BadExtensions}
+            ];
 
-            TabItem {
+            for r[idx] in  speed_model: TabItem {
                 height: parent.element-size;
                 scanning: scanning;
-                text: "Empty Files";
-                curr_tab: CurrentTab.EmptyFiles;
-                changed_current_tab() => {root.changed_current_tab();}
-            }
-
-            TabItem {
-                height: parent.element-size;
-                scanning: scanning;
-                text: "Similar Images";
-                curr_tab: CurrentTab.SimilarImages;
+                text: r.name;
+                curr_tab: r.tab;
                 changed_current_tab() => {root.changed_current_tab();}
             }
         }
@@ -109,20 +115,6 @@ export component LeftSidePanel {
         Rectangle {
             HorizontalLayout {
                 alignment: start;
-                Button {
-                    visible: GuiState.active_tab != CurrentTab.Settings && GuiState.available_subsettings;
-                    min-width: 20px;
-                    min-height: 20px;
-                    max-height: self.width;
-                    preferred-height: self.width;
-                    icon: @image-url("../icons/settings.svg");
-                    clicked => {
-                        GuiState.visible_tool_settings = !GuiState.visible-tool-settings;
-                    }
-                }
-            }
-            HorizontalLayout {
-                alignment: end;
                 Button {
                     visible: GuiState.active_tab != CurrentTab.Settings;
                     min-width: 20px;
@@ -134,6 +126,20 @@ export component LeftSidePanel {
                         GuiState.active_tab = CurrentTab.Settings;
                         Callabler.tab_changed();
                         root.changed_current_tab();
+                    }
+                }
+            }
+            HorizontalLayout {
+                alignment: end;
+                Button {
+                    visible: GuiState.available_subsettings;
+                    min-width: 20px;
+                    min-height: 20px;
+                    max-height: self.width;
+                    preferred-height: self.width;
+                    icon: @image-url("../icons/subsettings.svg");
+                    clicked => {
+                        GuiState.visible_tool_settings = !GuiState.visible-tool-settings;
                     }
                 }
             }
