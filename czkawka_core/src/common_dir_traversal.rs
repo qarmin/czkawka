@@ -60,7 +60,7 @@ pub enum CheckingMethod {
     AudioContent,
 }
 
-#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct FileEntry {
     pub path: PathBuf,
     pub size: u64,
@@ -677,6 +677,7 @@ mod tests {
     use super::*;
     use crate::common_tool::*;
     use once_cell::sync::Lazy;
+    use std::collections::HashSet;
     use std::fs;
     use std::fs::File;
     use std::io;
@@ -725,9 +726,9 @@ mod tests {
                 warnings: _,
                 grouped_file_entries,
             } => {
-                let actual: Vec<_> = grouped_file_entries.into_values().flatten().collect();
+                let actual: HashSet<_> = grouped_file_entries.into_values().flatten().collect();
                 assert_eq!(
-                    [
+                    HashSet::from([
                         FileEntry {
                             path: src,
                             size: 1,
@@ -743,8 +744,7 @@ mod tests {
                             size: 1,
                             modified_date: secs,
                         },
-                    ]
-                    .to_vec(),
+                    ]),
                     actual
                 );
             }
@@ -771,9 +771,9 @@ mod tests {
                 warnings: _,
                 grouped_file_entries,
             } => {
-                let actual: Vec<_> = grouped_file_entries.into_iter().flat_map(take_1_per_inode).collect();
+                let actual: HashSet<_> = grouped_file_entries.into_iter().flat_map(take_1_per_inode).collect();
                 assert_eq!(
-                    [
+                    HashSet::from([
                         FileEntry {
                             path: src,
                             size: 1,
@@ -784,8 +784,7 @@ mod tests {
                             size: 1,
                             modified_date: secs,
                         },
-                    ]
-                    .to_vec(),
+                    ]),
                     actual
                 );
             }
@@ -812,9 +811,9 @@ mod tests {
                 warnings: _,
                 grouped_file_entries,
             } => {
-                let actual: Vec<_> = grouped_file_entries.into_iter().flat_map(take_1_per_inode).collect();
+                let actual: HashSet<_> = grouped_file_entries.into_iter().flat_map(take_1_per_inode).collect();
                 assert_eq!(
-                    [
+                    HashSet::from([
                         FileEntry {
                             path: src,
                             size: 1,
@@ -830,8 +829,7 @@ mod tests {
                             size: 1,
                             modified_date: secs,
                         },
-                    ]
-                    .to_vec(),
+                    ]),
                     actual
                 );
             }
