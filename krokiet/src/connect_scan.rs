@@ -793,11 +793,11 @@ fn prepare_data_model_bad_extensions(fe: &BadFileEntry) -> (ModelRc<SharedString
     (data_model_str, data_model_int)
 }
 ////////////////////////////////////////// Common
-fn insert_data_to_model(items: &Rc<VecModel<MainListModel>>, data_model_str: ModelRc<SharedString>, data_model_int: ModelRc<i32>, full_header_row: Option<bool>) {
+fn insert_data_to_model(items: &Rc<VecModel<MainListModel>>, data_model_str: ModelRc<SharedString>, data_model_int: ModelRc<i32>, filled_header_row: Option<bool>) {
     let main = MainListModel {
         checked: false,
-        header_row: full_header_row.is_some(),
-        full_header_row: full_header_row.unwrap_or(false),
+        header_row: filled_header_row.is_some(),
+        filled_header_row: filled_header_row.unwrap_or(false),
         selected_row: false,
         val_str: ModelRc::new(data_model_str),
         val_int: ModelRc::new(data_model_int),

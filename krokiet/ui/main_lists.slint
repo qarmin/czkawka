@@ -10,21 +10,21 @@ import {About} from "about.slint";
 export component MainList {
     in-out property <[MainListModel]> duplicate_files_model: [];
     in-out property <[MainListModel]> empty_folder_model: [
-        {checked: false, selected_row: false, header_row: false, full_header_row: false, val_str: ["kropkarz", "/Xd1", "24.10.2023"], val_int: []} ,
-        {checked: false, selected_row: false, header_row: false, full_header_row: false, val_str: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []},
-        {checked: true, selected_row: false, header_row: false, full_header_row: false, val_str: ["lokkaler", "/Xd1/Vide2", "01.23.1911"], val_int: []}
+        {checked: false, selected_row: false, header_row: false, filled_header_row: false, val_str: ["kropkarz", "/Xd1", "24.10.2023"], val_int: []} ,
+        {checked: false, selected_row: false, header_row: false, filled_header_row: false, val_str: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []},
+        {checked: true, selected_row: false, header_row: false, filled_header_row: false, val_str: ["lokkaler", "/Xd1/Vide2", "01.23.1911"], val_int: []}
     ];
     in-out property <[MainListModel]> big_files_model: [];
     in-out property <[MainListModel]> empty_files_model: [
-        {checked: false, selected_row: false, header_row: false, full_header_row: false, val_str: ["kropkarz", "/Xd1", "24.10.2023"], val_int: []} ,
-        {checked: false, selected_row: false, header_row: false, full_header_row: false, val_str: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []},
-        {checked: true, selected_row: false, header_row: false, full_header_row: false, val_str: ["lokkaler", "/Xd1/Vide2", "01.23.1911"], val_int: []}
+        {checked: false, selected_row: false, header_row: false, filled_header_row: false, val_str: ["kropkarz", "/Xd1", "24.10.2023"], val_int: []} ,
+        {checked: false, selected_row: false, header_row: false, filled_header_row: false, val_str: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []},
+        {checked: true, selected_row: false, header_row: false, filled_header_row: false, val_str: ["lokkaler", "/Xd1/Vide2", "01.23.1911"], val_int: []}
     ];
     in-out property <[MainListModel]> temporary_files_model: [];
     in-out property <[MainListModel]> similar_images_model: [
-        {checked: false, selected_row: false, header_row: true, full_header_row: false, val_str: ["Original", "500KB", "100x100", "kropkarz", "/Xd1", "24.10.2023"], val_int: []},
-        {checked: false, selected_row: false, header_row: false, full_header_row: false, val_str: ["Similar", "500KB", "100x100", "witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []},
-        {checked: true, selected_row: false, header_row: false, full_header_row: false, val_str: ["Similar", "500KB", "100x100", "lokkaler", "/Xd1/Vide2", "01.23.1911"], val_int: []}
+        {checked: false, selected_row: false, header_row: true, filled_header_row: false, val_str: ["Original", "500KB", "100x100", "kropkarz", "/Xd1", "24.10.2023"], val_int: []},
+        {checked: false, selected_row: false, header_row: false, filled_header_row: false, val_str: ["Similar", "500KB", "100x100", "witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []},
+        {checked: true, selected_row: false, header_row: false, filled_header_row: false, val_str: ["Similar", "500KB", "100x100", "lokkaler", "/Xd1/Vide2", "01.23.1911"], val_int: []}
     ];
     in-out property <[MainListModel]> similar_videos_model: [];
     in-out property <[MainListModel]> similar_music_model: [];
