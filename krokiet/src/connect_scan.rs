@@ -105,7 +105,7 @@ fn scan_duplicates(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, s
             // finder.set_ignore_hard_links(custom_settings.ignore); // TODO
             finder.set_use_prehash_cache(custom_settings.duplicate_use_prehash);
             finder.set_delete_outdated_cache(custom_settings.duplicate_delete_outdated_entries);
-            // finder.set_case_sensitive_name_comparison(custom_settings.); // TODO
+            finder.set_case_sensitive_name_comparison(custom_settings.duplicates_sub_name_case_sensitive);
             finder.find_duplicates(Some(&stop_receiver), Some(&progress_sender));
             let messages = finder.get_text_messages().create_messages_text();
 
@@ -396,7 +396,7 @@ fn write_similar_images_results(app: &MainWindow, vector: Vec<(Option<ImagesEntr
         }
     }
     app.set_similar_images_model(items.into());
-    app.invoke_scan_ended(format!("Found {items_found} similar images files").into());
+    app.invoke_scan_ended(format!("Found {items_found} similar image files").into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 fn prepare_data_model_similar_images(fe: &ImagesEntry, hash_size: u8) -> (ModelRc<SharedString>, ModelRc<i32>) {
@@ -470,7 +470,7 @@ fn write_similar_videos_results(app: &MainWindow, vector: Vec<(Option<VideosEntr
         }
     }
     app.set_similar_videos_model(items.into());
-    app.invoke_scan_ended(format!("Found {items_found} similar videos files").into());
+    app.invoke_scan_ended(format!("Found {items_found} similar video files").into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 fn prepare_data_model_similar_videos(fe: &VideosEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
@@ -523,8 +523,8 @@ fn scan_similar_music(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>
             }
 
             finder.set_music_similarity(music_similarity);
-            // finder.set_maximum_difference(custom_settings.mus); // TODO
-            // finder.set_minimum_segment_duration(minimum_segment_duration); // TODO
+            finder.set_maximum_difference(custom_settings.similar_music_sub_maximum_difference_value as f64);
+            finder.set_minimum_segment_duration(custom_settings.similar_music_sub_minimal_fragment_duration_value);
             let audio_check_type = ALLOWED_AUDIO_CHECK_TYPE_VALUES[get_audio_check_type_idx(&custom_settings.similar_music_sub_audio_check_type).unwrap()].2;
             finder.set_check_type(audio_check_type);
             finder.set_approximate_comparison(custom_settings.similar_music_sub_approximate_comparison);
@@ -549,7 +549,7 @@ fn scan_similar_music(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>
             }
 
             a.upgrade_in_event_loop(move |app| {
-                crate::connect_scan::write_similar_music_results(&app, vector, messages);
+                write_similar_music_results(&app, vector, messages);
             })
         })
         .unwrap();
@@ -559,14 +559,14 @@ fn write_similar_music_results(app: &MainWindow, vector: Vec<(Option<MusicEntry>
     let items = Rc::new(VecModel::default());
     for (ref_fe, vec_fe) in vector {
         if let Some(ref_fe) = ref_fe {
-            let (data_model_str, data_model_int) = crate::connect_scan::prepare_data_model_similar_music(&ref_fe);
+            let (data_model_str, data_model_int) = prepare_data_model_similar_music(&ref_fe);
             insert_data_to_model(&items, data_model_str, data_model_int, Some(true));
         } else {
             insert_data_to_model(&items, ModelRc::new(VecModel::default()), ModelRc::new(VecModel::default()), Some(false));
         }
 
         for fe in vec_fe {
-            let (data_model_str, data_model_int) = crate::connect_scan::prepare_data_model_similar_music(&fe);
+            let (data_model_str, data_model_int) = prepare_data_model_similar_music(&fe);
             insert_data_to_model(&items, data_model_str, data_model_int, None);
         }
     }
@@ -618,7 +618,7 @@ fn write_invalid_symlinks_results(app: &MainWindow, vector: Vec<SymlinksFileEntr
     let items_found = vector.len();
     let items = Rc::new(VecModel::default());
     for fe in vector {
-        let (data_model_str, data_model_int) = crate::connect_scan::prepare_data_model_invalid_symlinks(&fe);
+        let (data_model_str, data_model_int) = prepare_data_model_invalid_symlinks(&fe);
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_invalid_symlinks_model(items.into());
@@ -654,7 +654,7 @@ fn scan_temporary_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressDat
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
             a.upgrade_in_event_loop(move |app| {
-                crate::connect_scan::write_temporary_files_results(&app, vector, messages);
+                write_temporary_files_results(&app, vector, messages);
             })
         })
         .unwrap();
@@ -663,7 +663,7 @@ fn write_temporary_files_results(app: &MainWindow, vector: Vec<TemporaryFileEntr
     let items_found = vector.len();
     let items = Rc::new(VecModel::default());
     for fe in vector {
-        let (data_model_str, data_model_int) = crate::connect_scan::prepare_data_model_temporary_files(&fe);
+        let (data_model_str, data_model_int) = prepare_data_model_temporary_files(&fe);
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_temporary_files_model(items.into());
@@ -721,7 +721,7 @@ fn scan_broken_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>,
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
             a.upgrade_in_event_loop(move |app| {
-                crate::connect_scan::write_broken_files_results(&app, vector, messages);
+                write_broken_files_results(&app, vector, messages);
             })
         })
         .unwrap();
@@ -730,7 +730,7 @@ fn write_broken_files_results(app: &MainWindow, vector: Vec<BrokenEntry>, messag
     let items_found = vector.len();
     let items = Rc::new(VecModel::default());
     for fe in vector {
-        let (data_model_str, data_model_int) = crate::connect_scan::prepare_data_model_broken_files(&fe);
+        let (data_model_str, data_model_int) = prepare_data_model_broken_files(&fe);
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_broken_files_model(items.into());
@@ -767,7 +767,7 @@ fn scan_bad_extensions(a: Weak<MainWindow>, progress_sender: Sender<ProgressData
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
             a.upgrade_in_event_loop(move |app| {
-                crate::connect_scan::write_bad_extensions_results(&app, vector, messages);
+                write_bad_extensions_results(&app, vector, messages);
             })
         })
         .unwrap();

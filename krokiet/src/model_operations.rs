@@ -226,6 +226,7 @@ mod tests {
             model.push(MainListModel {
                 checked: item.0,
                 header_row: item.1,
+                full_header_row: false, // TODO - this needs to be calculated
                 selected_row: item.2,
                 val_str: ModelRc::new(all_items),
                 val_int: ModelRc::new(VecModel::default()),

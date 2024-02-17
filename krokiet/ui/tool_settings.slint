@@ -118,6 +118,10 @@ export component ToolSettings {
                 current_index <=> Settings.duplicates_sub_available_hash_type_index;
                 current_value <=> Settings.duplicates_sub_available_hash_type_value;
             }
+            CheckBoxWrapper {
+                text: "Case Sensitive(only name modes)";
+                checked <=> Settings.duplicates_sub_name_case_sensitive;
+            }
             Rectangle {}
         }
         VerticalLayout {
@@ -166,37 +170,60 @@ export component ToolSettings {
                 current_index <=> Settings.similar_music_sub_audio_check_type_index;
                 current_value <=> Settings.similar_music_sub_audio_check_type_value;
             }
-            CheckBoxWrapper {
-                text: "Approximate Tag Comparison";
-                checked <=> Settings.similar_music_sub_approximate_comparison;
+            // A little bit of a hack
+            // Mode should be set with a enum, not index, but it's not possible in slint(maybe yet)
+            if Settings.similar_music_sub_audio_check_type_index == 0: VerticalLayout {
+                spacing: 5px;
+                CheckBoxWrapper {
+                    text: "Approximate Tag Comparison";
+                    checked <=> Settings.similar_music_sub_approximate_comparison;
+                }
+                Text {
+                    text: "Compared tags";
+                    font-size: 12px;
+                }
+                CheckBoxWrapper {
+                    text: "Title";
+                    checked <=> Settings.similar_music_sub_title;
+                }
+                CheckBoxWrapper {
+                    text: "Artist";
+                    checked <=> Settings.similar_music_sub_artist;
+                }
+                CheckBoxWrapper {
+                    text: "Bitrate";
+                    checked <=> Settings.similar_music_sub_bitrate;
+                }
+                CheckBoxWrapper {
+                    text: "Genre";
+                    checked <=> Settings.similar_music_sub_genre;
+                }
+                CheckBoxWrapper {
+                    text: "Year";
+                    checked <=> Settings.similar_music_sub_year;
+                }
+                CheckBoxWrapper {
+                    text: "Length";
+                    checked <=> Settings.similar_music_sub_length;
+                }
             }
-            Text {
-                text: "Compared tags";
-                font-size: 12px;
-            }
-            CheckBoxWrapper {
-                text: "Title";
-                checked <=> Settings.similar_music_sub_title;
-            }
-            CheckBoxWrapper {
-                text: "Artist";
-                checked <=> Settings.similar_music_sub_artist;
-            }
-            CheckBoxWrapper {
-                text: "Bitrate";
-                checked <=> Settings.similar_music_sub_bitrate;
-            }
-            CheckBoxWrapper {
-                text: "Genre";
-                checked <=> Settings.similar_music_sub_genre;
-            }
-            CheckBoxWrapper {
-                text: "Year";
-                checked <=> Settings.similar_music_sub_year;
-            }
-            CheckBoxWrapper {
-                text: "Length";
-                checked <=> Settings.similar_music_sub_length;
+            if Settings.similar_music_sub_audio_check_type_index == 1: VerticalLayout {
+                spacing: 5px;
+                SliderWrapper {
+                    text: "Max difference";
+                    end_text: "(" + round(Settings.similar_music_sub_maximum_difference_value) + "/" + round(Settings.similar_music_sub_maximum_difference_max) + ")";
+                    end_text_size: 40px;
+                    maximum <=> Settings.similar_music_sub_maximum_difference_max;
+                    value <=> Settings.similar_music_sub_maximum_difference_value;
+                }
+                SliderWrapper {
+                    text: "Minimal fragment duration";
+                    end_text: round(Settings.similar_music_sub_minimal_fragment_duration_value);
+                    end_text_size: 40px;
+                    maximum <=> Settings.similar_music_sub_minimal_fragment_duration_max;
+                    value <=> Settings.similar_music_sub_minimal_fragment_duration_value;
+                }
+
             }
             Rectangle {}
         }

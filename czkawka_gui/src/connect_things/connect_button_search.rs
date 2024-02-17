@@ -77,8 +77,8 @@ pub fn connect_button_search(gui_data: &GuiData, result_sender: Sender<Message>,
         entry_info.set_text(&flg!("searching_for_data"));
 
         // Resets progress bars
-        progress_bar_all_stages.set_fraction(0 as f64);
-        progress_bar_current_stage.set_fraction(0 as f64);
+        progress_bar_all_stages.set_fraction(0f64);
+        progress_bar_current_stage.set_fraction(0f64);
 
         reset_text_view(&text_view_errors);
 
@@ -162,7 +162,7 @@ impl LoadedCommonItems {
             .as_str()
             .to_string()
             .split(',')
-            .map(std::string::ToString::to_string)
+            .map(ToString::to_string)
             .collect::<Vec<String>>();
         let allowed_extensions = entry_allowed_extensions.text().as_str().to_string();
         let excluded_extensions = entry_excluded_extensions.text().as_str().to_string();

@@ -212,7 +212,7 @@ fn add_manually_directories(window_main: &Window, tree_view: &TreeView, excluded
                     let list_store = get_list_store(&tree_view);
 
                     if excluded_items {
-                        if !(check_if_value_is_in_list_store(&list_store, ColumnsExcludedDirectory::Path as i32, &text)) {
+                        if !check_if_value_is_in_list_store(&list_store, ColumnsExcludedDirectory::Path as i32, &text) {
                             let values: [(u32, &dyn ToValue); 1] = [(ColumnsExcludedDirectory::Path as u32, &text)];
                             list_store.set(&list_store.append(), &values);
                         }

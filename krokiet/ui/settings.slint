@@ -61,6 +61,8 @@ export global Settings {
     in-out property <[string]> duplicates_sub_available_hash_type: ["Blake3", "CRC32", "XXH3"];
     in-out property <int> duplicates_sub_available_hash_type_index: 0;
     in-out property <string> duplicates_sub_available_hash_type_value: "Blake3";
+    in-out property <bool> duplicates_sub_name_case_sensitive: false;
+
 
     // Big files
     in-out property <[string]> biggest_files_sub_method: ["The Biggest", "The Smallest"];
@@ -84,6 +86,10 @@ export global Settings {
     in-out property <bool> similar_music_sub_bitrate: false;
     in-out property <bool> similar_music_sub_genre: false;
     in-out property <bool> similar_music_sub_length: false;
+    in-out property <float> similar_music_sub_minimal_fragment_duration_value: 5.0;
+    in-out property <float> similar_music_sub_minimal_fragment_duration_max: 180.0;
+    in-out property <float> similar_music_sub_maximum_difference_value: 3.0;
+    in-out property <float> similar_music_sub_maximum_difference_max: 10.0;
 
     // Broken Files
     in-out property <bool> broken_files_sub_audio: true;

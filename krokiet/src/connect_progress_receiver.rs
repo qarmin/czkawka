@@ -138,10 +138,10 @@ fn no_current_stage_get_data(item: &ProgressData) -> (i32, i32) {
 // Used to calculate number of files to check and also to calculate current progress according to number of files to check and checked
 fn common_get_data(item: &ProgressData) -> (i32, i32) {
     if item.entries_to_check != 0 {
-        let all_stages = (item.current_stage as f64 + (item.entries_checked) as f64 / item.entries_to_check as f64) / (item.max_stage + 1) as f64;
+        let all_stages = (item.current_stage as f64 + item.entries_checked as f64 / item.entries_to_check as f64) / (item.max_stage + 1) as f64;
         let all_stages = if all_stages > 0.99 { 0.99 } else { all_stages };
 
-        let current_stage = (item.entries_checked) as f64 / item.entries_to_check as f64;
+        let current_stage = item.entries_checked as f64 / item.entries_to_check as f64;
         let current_stage = if current_stage > 0.99 { 0.99 } else { current_stage };
         ((all_stages * 100.0) as i32, (current_stage * 100.0) as i32)
     } else {

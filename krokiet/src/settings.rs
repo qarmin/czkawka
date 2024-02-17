@@ -26,6 +26,8 @@ pub const DEFAULT_BIGGEST_FILES: i32 = 50;
 pub const DEFAULT_IMAGE_SIMILARITY: i32 = 10;
 pub const DEFAULT_VIDEO_SIMILARITY: i32 = 15;
 pub const DEFAULT_HASH_SIZE: u8 = 16;
+pub const DEFAULT_MAXIMUM_DIFFERENCE_VALUE: f32 = 3.0;
+pub const DEFAULT_MINIMAL_FRAGMENT_DURATION_VALUE: f32 = 5.0;
 
 // (Hash size, Maximum difference) - Ehh... to simplify it, just use everywhere 40 as maximum similarity - for now I'm to lazy to change it, when hash size changes
 // So if you want to change it, you need to change it in multiple places
@@ -129,6 +131,8 @@ pub struct SettingsCustom {
     pub duplicates_sub_check_method: String,
     #[serde(default = "default_duplicates_hash_type")]
     pub duplicates_sub_available_hash_type: String,
+    #[serde(default)]
+    pub duplicates_sub_name_case_sensitive: bool,
     #[serde(default = "default_biggest_method")]
     pub biggest_files_sub_method: String,
     #[serde(default = "default_biggest_files")]
@@ -153,6 +157,10 @@ pub struct SettingsCustom {
     pub similar_music_sub_genre: bool,
     #[serde(default)]
     pub similar_music_sub_length: bool,
+    #[serde(default = "default_maximum_difference_value")]
+    pub similar_music_sub_maximum_difference_value: f32,
+    #[serde(default = "default_minimal_fragment_duration_value")]
+    pub similar_music_sub_minimal_fragment_duration_value: f32,
     #[serde(default = "ttrue")]
     pub broken_files_sub_audio: bool,
     #[serde(default)]
@@ -434,6 +442,7 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
     settings.set_duplicate_minimal_hash_cache_size(custom_settings.duplicate_minimal_hash_cache_size.to_string().into());
     settings.set_duplicate_minimal_prehash_cache_size(custom_settings.duplicate_minimal_prehash_cache_size.to_string().into());
     settings.set_duplicate_delete_outdated_entries(custom_settings.duplicate_delete_outdated_entries);
+    settings.set_duplicates_sub_name_case_sensitive(custom_settings.duplicates_sub_name_case_sensitive);
     settings.set_similar_images_show_image_preview(custom_settings.similar_images_show_image_preview);
     settings.set_similar_images_delete_outdated_entries(custom_settings.similar_images_delete_outdated_entries);
     settings.set_similar_videos_delete_outdated_entries(custom_settings.similar_videos_delete_outdated_entries);
@@ -449,7 +458,6 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
     settings.set_similar_images_sub_hash_size_index(similar_images_sub_hash_size_idx as i32);
     settings.set_similar_images_sub_hash_size_value(ALLOWED_HASH_SIZE_VALUES[similar_images_sub_hash_size_idx].1.to_string().into());
     // TODO all items with _value are not necessary, but due bug in slint are required, because combobox is not updated properly
-
     let similar_images_sub_hash_alg_idx = get_image_hash_alg_idx(&custom_settings.similar_images_sub_hash_alg).unwrap_or_else(|| {
         warn!(
             "Value of hash type \"{}\" is invalid, setting it to default value",
@@ -458,7 +466,6 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
         0
     });
     settings.set_similar_images_sub_hash_alg_index(similar_images_sub_hash_alg_idx as i32);
-
     let similar_images_sub_resize_algorithm_idx = get_resize_algorithm_idx(&custom_settings.similar_images_sub_resize_algorithm).unwrap_or_else(|| {
         warn!(
             "Value of resize algorithm \"{}\" is invalid, setting it to default value",
@@ -468,7 +475,6 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
     });
     settings.set_similar_images_sub_resize_algorithm_index(similar_images_sub_resize_algorithm_idx as i32);
     settings.set_similar_images_sub_resize_algorithm_value(ALLOWED_RESIZE_ALGORITHM_VALUES[similar_images_sub_resize_algorithm_idx].1.to_string().into());
-
     settings.set_similar_images_sub_ignore_same_size(custom_settings.similar_images_sub_ignore_same_size);
     settings.set_similar_images_sub_max_similarity(40.0);
     settings.set_similar_images_sub_current_similarity(custom_settings.similar_images_sub_similarity as f32);
@@ -525,6 +531,8 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
     settings.set_similar_music_sub_bitrate(custom_settings.similar_music_sub_bitrate);
     settings.set_similar_music_sub_genre(custom_settings.similar_music_sub_genre);
     settings.set_similar_music_sub_length(custom_settings.similar_music_sub_length);
+    settings.set_similar_music_sub_maximum_difference_value(custom_settings.similar_music_sub_maximum_difference_value);
+    settings.set_similar_music_sub_minimal_fragment_duration_value(custom_settings.similar_music_sub_minimal_fragment_duration_value);
 
     settings.set_broken_files_sub_audio(custom_settings.broken_files_sub_audio);
     settings.set_broken_files_sub_pdf(custom_settings.broken_files_sub_pdf);
@@ -571,6 +579,7 @@ pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
         .parse::<i32>()
         .unwrap_or(DEFAULT_MINIMUM_PREHASH_CACHE_SIZE);
     let duplicate_delete_outdated_entries = settings.get_duplicate_delete_outdated_entries();
+    let duplicates_sub_name_case_sensitive = settings.get_duplicates_sub_name_case_sensitive();
 
     let similar_images_show_image_preview = settings.get_similar_images_show_image_preview();
     let similar_images_delete_outdated_entries = settings.get_similar_images_delete_outdated_entries();
@@ -609,6 +618,8 @@ pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let similar_music_sub_bitrate = settings.get_similar_music_sub_bitrate();
     let similar_music_sub_genre = settings.get_similar_music_sub_genre();
     let similar_music_sub_length = settings.get_similar_music_sub_length();
+    let similar_music_sub_maximum_difference_value = settings.get_similar_music_sub_maximum_difference_value();
+    let similar_music_sub_minimal_fragment_duration_value = settings.get_similar_music_sub_minimal_fragment_duration_value();
 
     let broken_files_sub_audio = settings.get_broken_files_sub_audio();
     let broken_files_sub_pdf = settings.get_broken_files_sub_pdf();
@@ -647,6 +658,7 @@ pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
         similar_images_sub_similarity,
         duplicates_sub_check_method,
         duplicates_sub_available_hash_type,
+        duplicates_sub_name_case_sensitive,
         biggest_files_sub_method,
         biggest_files_sub_number_of_files,
         similar_videos_sub_ignore_same_size,
@@ -659,6 +671,8 @@ pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
         similar_music_sub_bitrate,
         similar_music_sub_genre,
         similar_music_sub_length,
+        similar_music_sub_maximum_difference_value,
+        similar_music_sub_minimal_fragment_duration_value,
         broken_files_sub_audio,
         broken_files_sub_pdf,
         broken_files_sub_archive,
@@ -703,6 +717,12 @@ fn default_excluded_directories() -> Vec<PathBuf> {
 }
 fn default_duplicates_check_method() -> String {
     ALLOWED_DUPLICATES_CHECK_METHOD_VALUES[0].0.to_string()
+}
+fn default_maximum_difference_value() -> f32 {
+    DEFAULT_MAXIMUM_DIFFERENCE_VALUE
+}
+fn default_minimal_fragment_duration_value() -> f32 {
+    DEFAULT_MINIMAL_FRAGMENT_DURATION_VALUE
 }
 fn default_duplicates_hash_type() -> String {
     ALLOWED_DUPLICATES_HASH_TYPE_VALUES[0].0.to_string()

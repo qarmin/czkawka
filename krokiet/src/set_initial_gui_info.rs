@@ -1,6 +1,3 @@
-use czkawka_core::big_file::SearchMode;
-use image::imageops::FilterType;
-use image_hasher::HashAlg;
 use slint::{ComponentHandle, SharedString, VecModel};
 
 use czkawka_core::common::get_all_available_threads;
