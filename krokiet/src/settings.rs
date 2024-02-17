@@ -39,7 +39,7 @@ pub const ALLOWED_RESIZE_ALGORITHM_VALUES: &[(&str, &str, FilterType)] = &[
     ("nearest", "Nearest", FilterType::Nearest),
 ];
 
-pub const ALLOWED_HASH_TYPE_VALUES: &[(&str, &str, HashAlg)] = &[
+pub const ALLOWED_IMAGE_HASH_ALG_VALUES: &[(&str, &str, HashAlg)] = &[
     ("mean", "Mean", HashAlg::Mean),
     ("gradient", "Gradient", HashAlg::Gradient),
     ("blockhash", "BlockHash", HashAlg::Blockhash),
@@ -118,7 +118,7 @@ pub struct SettingsCustom {
     #[serde(default = "default_sub_hash_size")]
     pub similar_images_sub_hash_size: u8,
     #[serde(default = "default_hash_type")]
-    pub similar_images_sub_hash_type: String,
+    pub similar_images_sub_hash_alg: String,
     #[serde(default = "default_resize_algorithm")]
     pub similar_images_sub_resize_algorithm: String,
     #[serde(default)]
@@ -450,14 +450,14 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
     settings.set_similar_images_sub_hash_size_value(ALLOWED_HASH_SIZE_VALUES[similar_images_sub_hash_size_idx].1.to_string().into());
     // TODO all items with _value are not necessary, but due bug in slint are required, because combobox is not updated properly
 
-    let similar_images_sub_hash_type_idx = get_hash_type_idx(&custom_settings.similar_images_sub_hash_type).unwrap_or_else(|| {
+    let similar_images_sub_hash_alg_idx = get_image_hash_alg_idx(&custom_settings.similar_images_sub_hash_alg).unwrap_or_else(|| {
         warn!(
             "Value of hash type \"{}\" is invalid, setting it to default value",
-            custom_settings.similar_images_sub_hash_type
+            custom_settings.similar_images_sub_hash_alg
         );
         0
     });
-    settings.set_similar_images_sub_hash_type_index(similar_images_sub_hash_type_idx as i32);
+    settings.set_similar_images_sub_hash_alg_index(similar_images_sub_hash_alg_idx as i32);
 
     let similar_images_sub_resize_algorithm_idx = get_resize_algorithm_idx(&custom_settings.similar_images_sub_resize_algorithm).unwrap_or_else(|| {
         warn!(
@@ -581,8 +581,8 @@ pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
 
     let similar_images_sub_hash_size_idx = settings.get_similar_images_sub_hash_size_index();
     let similar_images_sub_hash_size = ALLOWED_HASH_SIZE_VALUES[similar_images_sub_hash_size_idx as usize].0;
-    let similar_images_sub_hash_type_idx = settings.get_similar_images_sub_hash_type_index();
-    let similar_images_sub_hash_type = ALLOWED_HASH_TYPE_VALUES[similar_images_sub_hash_type_idx as usize].0.to_string();
+    let similar_images_sub_hash_alg_idx = settings.get_similar_images_sub_hash_alg_index();
+    let similar_images_sub_hash_alg = ALLOWED_IMAGE_HASH_ALG_VALUES[similar_images_sub_hash_alg_idx as usize].0.to_string();
     let similar_images_sub_resize_algorithm_idx = settings.get_similar_images_sub_resize_algorithm_index();
     let similar_images_sub_resize_algorithm = ALLOWED_RESIZE_ALGORITHM_VALUES[similar_images_sub_resize_algorithm_idx as usize].0.to_string();
     let similar_images_sub_ignore_same_size = settings.get_similar_images_sub_ignore_same_size();
@@ -641,7 +641,7 @@ pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
         similar_videos_delete_outdated_entries,
         similar_music_delete_outdated_entries,
         similar_images_sub_hash_size,
-        similar_images_sub_hash_type,
+        similar_images_sub_hash_alg,
         similar_images_sub_resize_algorithm,
         similar_images_sub_ignore_same_size,
         similar_images_sub_similarity,
@@ -755,7 +755,7 @@ pub fn default_resize_algorithm() -> String {
     ALLOWED_RESIZE_ALGORITHM_VALUES[0].0.to_string()
 }
 pub fn default_hash_type() -> String {
-    ALLOWED_HASH_TYPE_VALUES[0].0.to_string()
+    ALLOWED_IMAGE_HASH_ALG_VALUES[0].0.to_string()
 }
 pub fn default_sub_hash_size() -> u8 {
     DEFAULT_HASH_SIZE
@@ -765,33 +765,33 @@ fn get_allowed_hash_size_idx(h_size: u8) -> Option<usize> {
     ALLOWED_HASH_SIZE_VALUES.iter().position(|(hash_size, _max_similarity)| *hash_size == h_size)
 }
 
-fn get_hash_type_idx(string_hash_type: &str) -> Option<usize> {
-    ALLOWED_HASH_TYPE_VALUES
+pub fn get_image_hash_alg_idx(string_hash_type: &str) -> Option<usize> {
+    ALLOWED_IMAGE_HASH_ALG_VALUES
         .iter()
         .position(|(settings_key, gui_name, _hash_type)| *settings_key == string_hash_type || *gui_name == string_hash_type)
 }
-fn get_resize_algorithm_idx(string_resize_algorithm: &str) -> Option<usize> {
+pub fn get_resize_algorithm_idx(string_resize_algorithm: &str) -> Option<usize> {
     ALLOWED_RESIZE_ALGORITHM_VALUES
         .iter()
         .position(|(settings_key, gui_name, _resize_alg)| *settings_key == string_resize_algorithm || *gui_name == string_resize_algorithm)
 }
-fn get_biggest_item_idx(string_biggest_item: &str) -> Option<usize> {
+pub fn get_biggest_item_idx(string_biggest_item: &str) -> Option<usize> {
     ALLOWED_BIG_FILE_SIZE_VALUES
         .iter()
         .position(|(settings_key, gui_name, _search_mode)| *settings_key == string_biggest_item || *gui_name == string_biggest_item)
 }
 
-fn get_duplicates_check_method_idx(string_duplicates_check_method: &str) -> Option<usize> {
+pub fn get_duplicates_check_method_idx(string_duplicates_check_method: &str) -> Option<usize> {
     ALLOWED_DUPLICATES_CHECK_METHOD_VALUES
         .iter()
         .position(|(settings_key, gui_name, _check_method)| *settings_key == string_duplicates_check_method || *gui_name == string_duplicates_check_method)
 }
-fn get_duplicates_hash_type_idx(string_duplicates_hash_type: &str) -> Option<usize> {
+pub fn get_duplicates_hash_type_idx(string_duplicates_hash_type: &str) -> Option<usize> {
     ALLOWED_DUPLICATES_HASH_TYPE_VALUES
         .iter()
         .position(|(settings_key, gui_name, _hash_type)| *settings_key == string_duplicates_hash_type || *gui_name == string_duplicates_hash_type)
 }
-fn get_audio_check_type_idx(string_audio_check_type: &str) -> Option<usize> {
+pub fn get_audio_check_type_idx(string_audio_check_type: &str) -> Option<usize> {
     ALLOWED_AUDIO_CHECK_TYPE_VALUES
         .iter()
         .position(|(settings_key, gui_name, _audio_check_type)| *settings_key == string_audio_check_type || *gui_name == string_audio_check_type)

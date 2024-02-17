@@ -4,8 +4,8 @@ use std::thread;
 use chrono::NaiveDateTime;
 use crossbeam_channel::{Receiver, Sender};
 use czkawka_core::bad_extensions::{BadExtensions, BadFileEntry};
-use czkawka_core::big_file::BigFile;
-use czkawka_core::broken_files::{BrokenEntry, BrokenFiles};
+use czkawka_core::big_file::{BigFile, SearchMode};
+use czkawka_core::broken_files::{BrokenEntry, BrokenFiles, CheckedTypes};
 use humansize::{format_size, BINARY};
 use rayon::prelude::*;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
@@ -18,14 +18,18 @@ use czkawka_core::duplicate::{DuplicateEntry, DuplicateFinder};
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::{EmptyFolder, FolderEntry};
 use czkawka_core::invalid_symlinks::{InvalidSymlinks, SymlinksFileEntry};
-use czkawka_core::same_music::{MusicEntry, SameMusic};
+use czkawka_core::same_music::{MusicEntry, MusicSimilarity, SameMusic};
 use czkawka_core::similar_images;
 use czkawka_core::similar_images::{ImagesEntry, SimilarImages};
 use czkawka_core::similar_videos::{SimilarVideos, VideosEntry};
 use czkawka_core::temporary::{Temporary, TemporaryFileEntry};
 
 use crate::common::split_u64_into_i32s;
-use crate::settings::{collect_settings, SettingsCustom, ALLOWED_HASH_TYPE_VALUES, ALLOWED_RESIZE_ALGORITHM_VALUES};
+use crate::settings::{
+    collect_settings, get_audio_check_type_idx, get_biggest_item_idx, get_duplicates_check_method_idx, get_duplicates_hash_type_idx, get_image_hash_alg_idx,
+    get_resize_algorithm_idx, SettingsCustom, ALLOWED_AUDIO_CHECK_TYPE_VALUES, ALLOWED_BIG_FILE_SIZE_VALUES, ALLOWED_DUPLICATES_CHECK_METHOD_VALUES,
+    ALLOWED_DUPLICATES_HASH_TYPE_VALUES, ALLOWED_IMAGE_HASH_ALG_VALUES, ALLOWED_RESIZE_ALGORITHM_VALUES,
+};
 use crate::{CurrentTab, GuiState, MainListModel, MainWindow, ProgressToSend};
 
 pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>) {
@@ -91,16 +95,17 @@ fn scan_duplicates(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, s
         .spawn(move || {
             let mut finder = DuplicateFinder::new();
             set_common_settings(&mut finder, &custom_settings);
-            // TODO Fill rest of settings
             finder.set_check_method(CheckingMethod::Hash);
-            // finder.set_minimal_cache_file_size(loaded_commons.minimal_cache_file_size);
-            // finder.set_minimal_prehash_cache_file_size(minimal_prehash_cache_file_size);
-            // finder.set_check_method(check_method);
-            // finder.set_hash_type(hash_type);
-            // finder.set_ignore_hard_links(loaded_commons.hide_hard_links);
-            // finder.set_use_prehash_cache(use_prehash_cache);
-            // finder.set_delete_outdated_cache(delete_outdated_cache);
-            // finder.set_case_sensitive_name_comparison(case_sensitive_name_comparison);
+            finder.set_minimal_cache_file_size(custom_settings.duplicate_minimal_hash_cache_size as u64);
+            finder.set_minimal_prehash_cache_file_size(custom_settings.duplicate_minimal_prehash_cache_size as u64);
+            let check_method = ALLOWED_DUPLICATES_CHECK_METHOD_VALUES[get_duplicates_check_method_idx(&custom_settings.duplicates_sub_check_method).unwrap()].2;
+            finder.set_check_method(check_method);
+            let hash_type = ALLOWED_DUPLICATES_HASH_TYPE_VALUES[get_duplicates_hash_type_idx(&custom_settings.duplicates_sub_available_hash_type).unwrap()].2;
+            finder.set_hash_type(hash_type);
+            // finder.set_ignore_hard_links(custom_settings.ignore); // TODO
+            finder.set_use_prehash_cache(custom_settings.duplicate_use_prehash);
+            finder.set_delete_outdated_cache(custom_settings.duplicate_delete_outdated_entries);
+            // finder.set_case_sensitive_name_comparison(custom_settings.); // TODO
             finder.find_duplicates(Some(&stop_receiver), Some(&progress_sender));
             let messages = finder.get_text_messages().create_messages_text();
 
@@ -240,15 +245,15 @@ fn scan_big_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, st
         .spawn(move || {
             let mut finder = BigFile::new();
             set_common_settings(&mut finder, &custom_settings);
-            // finder.set_number_of_files_to_check(numbers_of_files_to_check);
-            // finder.set_search_mode(sett);
+            finder.set_number_of_files_to_check(custom_settings.biggest_files_sub_number_of_files as usize);
+            let big_files_mode = ALLOWED_BIG_FILE_SIZE_VALUES[get_biggest_item_idx(&custom_settings.biggest_files_sub_method).unwrap()].2;
+            finder.set_search_mode(big_files_mode);
             finder.find_big_files(Some(&stop_receiver), Some(&progress_sender));
 
             let mut vector = finder.get_big_files().clone();
             let messages = finder.get_text_messages().create_messages_text();
 
-            // TODO - if biggest files
-            if true {
+            if big_files_mode == SearchMode::BiggestFiles {
                 vector.par_sort_unstable_by_key(|fe| u64::MAX - fe.size);
             } else {
                 vector.par_sort_unstable_by_key(|fe| fe.size);
@@ -338,22 +343,16 @@ fn scan_similar_images(a: Weak<MainWindow>, progress_sender: Sender<ProgressData
         .spawn(move || {
             let mut finder = SimilarImages::new();
             set_common_settings(&mut finder, &custom_settings);
-            finder.set_hash_size(custom_settings.similar_images_sub_hash_size);
-            let resize_algorithm = ALLOWED_RESIZE_ALGORITHM_VALUES
-                .iter()
-                .find(|(setting_name, _gui_name, _resize_alg)| setting_name == &custom_settings.similar_images_sub_resize_algorithm)
-                .expect("Resize algorithm not found")
-                .2;
-            finder.set_image_filter(resize_algorithm);
-            let hash_type = ALLOWED_HASH_TYPE_VALUES
-                .iter()
-                .find(|(setting_name, _gui_name, _resize_alg)| setting_name == &custom_settings.similar_images_sub_hash_type)
-                .expect("Hash type not found")
-                .2;
-            finder.set_hash_alg(hash_type);
 
-            finder.set_exclude_images_with_same_size(custom_settings.similar_images_sub_ignore_same_size);
             finder.set_similarity(custom_settings.similar_images_sub_similarity as u32);
+            let hash_alg = ALLOWED_IMAGE_HASH_ALG_VALUES[get_image_hash_alg_idx(&custom_settings.similar_images_sub_hash_alg).unwrap()].2;
+            finder.set_hash_alg(hash_alg);
+            finder.set_hash_size(custom_settings.similar_images_sub_hash_size);
+            let resize_algorithm = ALLOWED_RESIZE_ALGORITHM_VALUES[get_resize_algorithm_idx(&custom_settings.similar_images_sub_resize_algorithm).unwrap()].2;
+            finder.set_image_filter(resize_algorithm);
+            finder.set_delete_outdated_cache(custom_settings.similar_images_delete_outdated_entries);
+            finder.set_exclude_images_with_same_size(custom_settings.similar_images_sub_ignore_same_size);
+
             finder.find_similar_images(Some(&stop_receiver), Some(&progress_sender));
 
             let messages = finder.get_text_messages().create_messages_text();
@@ -425,7 +424,10 @@ fn scan_similar_videos(a: Weak<MainWindow>, progress_sender: Sender<ProgressData
             let mut finder = SimilarVideos::new();
             set_common_settings(&mut finder, &custom_settings);
 
-            // TODO set rest of settings
+            finder.set_tolerance(custom_settings.similar_videos_sub_similarity);
+            finder.set_delete_outdated_cache(custom_settings.similar_videos_delete_outdated_entries);
+            finder.set_exclude_videos_with_same_size(custom_settings.similar_videos_sub_ignore_same_size);
+
             finder.find_similar_videos(Some(&stop_receiver), Some(&progress_sender));
 
             let messages = finder.get_text_messages().create_messages_text();
@@ -492,7 +494,41 @@ fn scan_similar_music(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>
             let mut finder = SameMusic::new();
             set_common_settings(&mut finder, &custom_settings);
 
-            // TODO set rest of settings
+            let mut music_similarity: MusicSimilarity = MusicSimilarity::NONE;
+            if custom_settings.similar_music_sub_title {
+                music_similarity |= MusicSimilarity::TRACK_TITLE;
+            }
+            if custom_settings.similar_music_sub_artist {
+                music_similarity |= MusicSimilarity::TRACK_ARTIST;
+            }
+            if custom_settings.similar_music_sub_bitrate {
+                music_similarity |= MusicSimilarity::BITRATE;
+            }
+            if custom_settings.similar_music_sub_length {
+                music_similarity |= MusicSimilarity::LENGTH;
+            }
+            if custom_settings.similar_music_sub_year {
+                music_similarity |= MusicSimilarity::YEAR;
+            }
+            if custom_settings.similar_music_sub_genre {
+                music_similarity |= MusicSimilarity::GENRE;
+            }
+
+            if music_similarity == MusicSimilarity::NONE {
+                a.upgrade_in_event_loop(move |app| {
+                    app.set_text_summary_text("Cannot find similar music files without any similarity method selected.".into());
+                })
+                .unwrap();
+                return Ok(());
+            }
+
+            finder.set_music_similarity(music_similarity);
+            // finder.set_maximum_difference(custom_settings.mus); // TODO
+            // finder.set_minimum_segment_duration(minimum_segment_duration); // TODO
+            let audio_check_type = ALLOWED_AUDIO_CHECK_TYPE_VALUES[get_audio_check_type_idx(&custom_settings.similar_music_sub_audio_check_type).unwrap()].2;
+            finder.set_check_type(audio_check_type);
+            finder.set_approximate_comparison(custom_settings.similar_music_sub_approximate_comparison);
+
             finder.find_same_music(Some(&stop_receiver), Some(&progress_sender));
 
             let messages = finder.get_text_messages().create_messages_text();
@@ -564,7 +600,7 @@ fn scan_invalid_symlinks(a: Weak<MainWindow>, progress_sender: Sender<ProgressDa
         .spawn(move || {
             let mut finder = InvalidSymlinks::new();
             set_common_settings(&mut finder, &custom_settings);
-            // TOOD set rest of settings
+
             finder.find_invalid_links(Some(&stop_receiver), Some(&progress_sender));
 
             let mut vector = finder.get_invalid_symlinks().clone();
@@ -609,6 +645,7 @@ fn scan_temporary_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressDat
         .spawn(move || {
             let mut finder = Temporary::new();
             set_common_settings(&mut finder, &custom_settings);
+
             finder.find_temporary_files(Some(&stop_receiver), Some(&progress_sender));
 
             let mut vector = finder.get_temporary_files().clone();
@@ -652,6 +689,30 @@ fn scan_broken_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>,
         .spawn(move || {
             let mut finder = BrokenFiles::new();
             set_common_settings(&mut finder, &custom_settings);
+
+            let mut checked_types: CheckedTypes = CheckedTypes::NONE;
+            if custom_settings.broken_files_sub_audio {
+                checked_types |= CheckedTypes::AUDIO;
+            }
+            if custom_settings.broken_files_sub_pdf {
+                checked_types |= CheckedTypes::PDF;
+            }
+            if custom_settings.broken_files_sub_image {
+                checked_types |= CheckedTypes::IMAGE;
+            }
+            if custom_settings.broken_files_sub_archive {
+                checked_types |= CheckedTypes::ARCHIVE;
+            }
+
+            if checked_types == CheckedTypes::NONE {
+                a.upgrade_in_event_loop(move |app| {
+                    app.set_text_summary_text("Cannot find broken files without any file type selected.".into());
+                })
+                .unwrap();
+                return Ok(());
+            }
+
+            finder.set_checked_types(checked_types);
             finder.find_broken_files(Some(&stop_receiver), Some(&progress_sender));
 
             let mut vector = finder.get_broken_files().clone();
