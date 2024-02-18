@@ -29,6 +29,8 @@
 
 ![Czkawka](https://user-images.githubusercontent.com/41945903/145280350-506f7e94-4db0-4de7-a68d-6e7c26bbd2bf.gif)
 
+![Krokiet](https://github.com/qarmin/czkawka/assets/41945903/52628a29-ecd6-4692-9ee4-8a680c889193)
+
 ## Usage, installation, compilation, requirements, license
 Each tool uses different technologies, so you can find instructions for each of them in the appropriate file:
 - [Czkawka GUI (GTK frontend)](czkawka_gui/README.md)</br>
@@ -38,63 +40,7 @@ Each tool uses different technologies, so you can find instructions for each of 
 
 ## Benchmarks
 
-Previous benchmark was done mostly with two python project - dupeguru and fslint.  
-Both were written in python so it was mostly obvious that Czkawka will be faster due using more low-level functions and faster language.  
-
-I tried to use rmlint gui but it not even started on my computer, so instead I used Detwinner, fclones-gui and dupeguru.
-
-I tested it on a 1024 GB SSD(Sata 3) and an i7-4770 CPU(4/8HT), disk contains 1742102 files which took 850 GB
-Minimum file size 64KB, with search in hidden folders without any excluded folders/files.
-
-Czkawka 7.0.0
-Detwinner 0.4.2
-Dupeguru 4.3.1
-Fclones-gui 0.2.0
-
-I prepared a disk and performed a test without any folder exceptions and with disabled ignoring of hard links. The disk contained 363 215 files, took 221,8 GB and had 62093 duplicate files in 31790 groups which occupied 4,1 GB.
-
-I set the minimal file size to check to 1KB on all programs.
-
-| App                         | Executing Time |
-|:----------------------------|:--------------:|
-| FSlint 2.4.7 (First Run)    |      86s       |
-| FSlint 2.4.7 (Second Run)   |      43s       |
-| Czkawka 3.0.0 (First Run)   |       8s       |
-| Czkawka 3.0.0 (Second Run)  |       7s       |
-| DupeGuru 4.1.1 (First Run)  |      22s       |
-| DupeGuru 4.1.1 (Second Run) |      21s       |
-
-I used Mprof for checking memory usage of FSlint and DupeGuru, and Heaptrack for Czkawka.
-
-| App             | Idle Ram | Max Operational Ram Usage | Stabilized after search |
-|:----------------|:--------:|:-------------------------:|:-----------------------:|
-| FSlint 2.4.7    |  62 MB   |          164 MB           |         158 MB          |
-| Dupeguru 4.1.1  |  90 MB   |          170 MB           |         166 MB          |
-| Czkawka 3.0.0   |  12 MB   |          122 MB           |          60 MB          |
-
-
-In Dupeguru, I enabled checking images with different dimensions to match Czkawka behavior.
-Both apps use a caching mechanism, so the second scan is really fast.
-
-Similar images which check 10949 files that occupied 6.6 GB
-
-| App                         | Scan time |
-|:----------------------------|:---------:|
-| Czkawka 3.0.0 (First Run)   |   276s    |
-| Czkawka 3.0.0 (Second Run)  |    1s     |
-| DupeGuru 4.1.1 (First Run)  |   539s    |
-| DupeGuru 4.1.1 (Second Run) |    1s     |
-
-Similar images which check 349 image files that occupied 1.7 GB
-
-| App                         | Scan time  |
-|:----------------------------|:----------:|
-| Czkawka 3.0.0 (First Run)   |    54s     |
-| Czkawka 3.0.0 (Second Run)  |     1s     |
-| DupeGuru 4.1.1 (First Run)  |    55s     |
-| DupeGuru 4.1.1 (Second Run) |     1s     |
-
-Of course there are multiple tools that offer even better performance, but usually are only specialized in one simple area.
+TODO
 
 ## Comparison to other tools
 
