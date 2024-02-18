@@ -16,7 +16,6 @@ core_file_no_modification_date = Não foi possível obter a data de modificaçã
 core_folder_no_modification_date = Não foi possível obter a data de modificação da pasta { $name }, motivo { $reason }
 core_missing_no_chosen_included_directory = Pelo menos um diretório deve ser fornecido
 core_directory_wildcard_no_supported = Directorias: Caracteres curinga no caminho não são suportados, ignorando { $path }
-core_directory_relative_path = Directorias: Caminho relativo não são suportados, ignorando { $path }
 core_directory_must_exists = Directórios: Caminho da pasta fornecida deve sair, ignorando { $path }
 core_directory_must_be_directory = Diretórios: Caminho fornecido deve apontar para o diretório, ignorando { $path }
 core_included_directory_zero_valid_directories = ERRO do Diretório incluído: Não foi encontrado nenhum caminho correto que é necessário incluir

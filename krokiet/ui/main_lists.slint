@@ -91,8 +91,8 @@ export component MainList {
         columns: ["Selection", "File Name", "Path", "Modification Date"];
         column-sizes: [35px, name_px, path_px, mod_px];
         values <=> temporary_files_model;
-        parentPathIdx: 3;
-        fileNameIdx: 2;
+        parentPathIdx: 2;
+        fileNameIdx: 1;
     }
 
     similar_images := SelectableTableView {
@@ -146,8 +146,8 @@ export component MainList {
         columns: ["Selection", "File Name", "Path", "Type of Error", "Size", "Modification Date"];
         column-sizes: [35px, name_px, path_px, 200px, size_px, mod_px];
         values <=> broken_files_model;
-        parentPathIdx: 4;
-        fileNameIdx: 2;
+        parentPathIdx: 2;
+        fileNameIdx: 1;
     }
 
     bad_extensions := SelectableTableView {
@@ -157,8 +157,8 @@ export component MainList {
         columns: ["Selection", "File Name", "Path", "Current Extension", "Proper Extension"];
         column-sizes: [35px, name_px, path_px, 40px, 200px];
         values <=> bad_extensions_model;
-        parentPathIdx: 4;
-        fileNameIdx: 2;
+        parentPathIdx: 2;
+        fileNameIdx: 1;
     }
 
     settings_list := SettingsList {

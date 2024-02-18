@@ -60,21 +60,21 @@ duplicate_check_method_tooltip =
     
     Hash - Najde soubory, které mají stejný obsah. Tento režim hashuje soubor a později porovnává tento hash s nalezením duplikátů. Tento režim je nejbezpečnějším způsobem, jak nalézt duplikáty. Aplikace používá mezipaměť, takže druhé a další skenování stejných dat by mělo být mnohem rychlejší než první.
 image_hash_size_tooltip =
-    Každý zkontrolovaný obrázek vytváří speciální hash, který lze vzájemně porovnávat, a malý rozdíl mezi nimi znamená, že tyto obrázky jsou podobné.
+    Každý zkontrolovaný obrázek vytváří speciální hash který lze porovnávat, a malý rozdíl mezi nimi znamená, že tyto obrázky jsou podobné.
     
-    8 hash velikost je docela dobrá k nalezení obrázků, které jsou jen málo podobné originálům. S větší sadou obrázků(>1000) bude produkovat velké množství falešných pozitivních výsledků, takže doporučuji použít pro takovou částku větší hash velikosti.
+    8 hash velikost je docela dobrá k nalezení obrázků, které jsou jen trochu podobné originálům. S větší sadou obrázků (>1000) to vytvoří velké množství falešných pozitivních prvků, takže doporučuji v tomto případě použít větší hash velikost.
     
-    16 je výchozí velikost hash, což je docela dobrý kompromis mezi nalezením i trochu podobných obrázků a malým množstvím srážek hash.
+    16 je výchozí velikost hashu, což je docela dobrý kompromis mezi nalezením i trochu podobných obrázků a malým množstvím hashových kolizí.
     
-    32 a 64 hashy najde jen velmi podobné obrázky, ale téměř by neměly mít žádné falešné pozitivní (možná kromě některých obrázků s alfa kanálem).
+    32 a 64 hash nalezly jen velmi podobné obrázky, ale neměly by mít téměř žádné falešné pohledy (možná kromě některých obrázků s alfa kanálem).
 image_resize_filter_tooltip =
     Pro výpočet hash obrázku musí knihovna nejprve změnit velikost.
     
-    V závislosti na zvoleném algoritmu může výsledný obrázek použitý k výpočtu hash vypadat málo jinak.
+    V závislosti na zvoleném algoritmu bude výsledný obrázek použitý k výpočtu hash vypadat trochu jinak.
     
-    Nejrychlejší algoritmus k používání, ale také ten, který dává nejhorší výsledky, je nejblíže, je ve výchozím nastavení povoleno, protože s 16x16 hash velikostí, nižší kvalitou, není opravdu viditelná.
+    Nejrychlejší algoritmus k používání, ale také ten, který dává nejhorší výsledky, je blízko. Ve výchozím nastavení je povoleno, protože s menší kvalitou 16x16 hash není ve skutečnosti viditelná.
     
-    S velikostí 8x8 hash je doporučeno použít jiný algoritmus než nejbližší pro lepší skupiny obrázků.
+    S velikostí hash 8x8 je doporučeno použít jiný algoritmus než nejbližší pro lepší skupiny obrázků.
 image_hash_alg_tooltip =
     Uživatelé si mohou vybrat z jednoho z mnoha algoritmů pro výpočet hashu.
     
@@ -129,7 +129,7 @@ main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = Archivovat
 main_check_box_broken_files_image = Obrázek
 check_button_general_same_size = Ignorovat stejnou velikost
-check_button_general_same_size_tooltip = Ignorovat výsledky souborů, které mají stejnou velikost - obvykle jde o 1:1 duplicitní
+check_button_general_same_size_tooltip = Ignorovat soubory se stejnou velikostí ve výsledcích - obvykle se jedná o 1:1 duplicitní
 main_label_size_bytes_tooltip = Velikost souborů, které budou použity při skenování
 # Upper window
 upper_tree_view_included_folder_column_title = Vyhledávané složky
@@ -167,11 +167,16 @@ upper_allowed_extensions_tooltip =
     Následující makra, která přidávají více rozšíření najednou, jsou také k dispozici: IMAGE, VIDEO, MUSIC, TEXT.
     
     Příklad použití ".exe, IMAGE, VIDEO, .rar, 7z" - to znamená, že obrázky (např. . jpg, png), videa (např. avi, mp4), exe, rar a 7z soubory budou naskenovány.
+upper_excluded_extensions_tooltip =
+    Seznam zakázaných souborů, které budou při skenování ignorovány.
+    
+    Při používání povolených i zakázaných přípon, má tato vyšší prioritu, takže soubor nebude zaškrtnut.
 upper_excluded_items_tooltip =
     Vyloučené položky musí obsahovat * zástupné znaky a měly by být odděleny čárkami.
     To je pomalejší než vyloučené adresáře, proto je používáme opatrně.
 upper_excluded_items = Vyloučené položky:
 upper_allowed_extensions = Povolená rozšíření:
+upper_excluded_extensions = Zakázané rozšíření:
 # Popovers
 popover_select_all = Vybrat vše
 popover_unselect_all = Odznačit vše
@@ -333,7 +338,7 @@ settings_multiple_image_preview_checkbutton = Zobrazit náhled obrázku
 settings_multiple_clear_cache_button_tooltip =
     Ručně vymazat mezipaměť zastaralých položek.
     Toto by mělo být použito pouze v případě, že je zakázáno automatické vymazání.
-settings_multiple_clear_cache_button = Odstranit zastaralé výsledky z mezipaměti obrázků
+settings_multiple_clear_cache_button = Odstranit zastaralé výsledky z mezipaměti.
 
 ## Duplicates
 
@@ -413,6 +418,12 @@ progress_scanning_size_name = Skenování jména a velikosti souboru { $file_num
 progress_scanning_name = Skenování názvu souboru { $file_number }
 progress_analyzed_partial_hash = Analyzován částečný hash souborů { $file_checked }/{ $all_files }
 progress_analyzed_full_hash = Analyzováno úplné hash souborů { $file_checked }/{ $all_files }
+progress_prehash_cache_loading = Načítání mezipaměti rozpoznání
+progress_prehash_cache_saving = Ukládání mezipaměti rozpoznání
+progress_hash_cache_loading = Načítání hash keše
+progress_hash_cache_saving = Ukládání keše hash
+progress_cache_loading = Načítání keše
+progress_cache_saving = Ukládání keše
 progress_current_stage = Aktuální fáze:{ " " }
 progress_all_stages = Všechny etapy:{ " " }
 # Saving loading 
@@ -466,7 +477,7 @@ move_file_failed = Nepodařilo se přesunout soubor { $name }, důvod { $reason 
 move_files_title_dialog = Vyberte složku, do které chcete přesunout duplicitní soubory
 move_files_choose_more_than_1_path = Lze vybrat pouze jednu cestu, aby bylo možné zkopírovat jejich duplikované soubory, vybrané { $path_number }.
 move_stats = Správně přesunuto { $num_files }/{ $all_files } položek
-save_results_to_file = Uložené výsledky do souboru { $name }
+save_results_to_file = Uloženy výsledky do txt i json souborů do složky { $name }.
 search_not_choosing_any_music = CHYBA: Musíte vybrat alespoň jedno zaškrtávací políčko s prohledáváním hudby.
 search_not_choosing_any_broken_files = CHYBA: Musíte vybrat alespoň jedno zaškrtávací políčko s typem zkontrolovaných poškozených souborů.
 include_folders_dialog_title = Složky, které chcete zahrnout

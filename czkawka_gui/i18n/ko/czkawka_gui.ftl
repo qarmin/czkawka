@@ -60,19 +60,21 @@ duplicate_check_method_tooltip =
     
     해시 - 같은 내용을 가진 파일들을 찾습니다. 이 모드에서는 먼저 파일을 해시한 다음, 각 해시값들을 비교하여 중복 파일인지 식별합니다. 때문에 중복 파일을 찾는 데 있어 가장 확실한 방법입니다. Czkawka는 캐시에 매우 의존하므로, 같은 데이터를 두 번째 이후로 스캔하는 경우 첫 번째 스캔보다 더욱 빠르게 스캔이 이루어집니다.
 image_hash_size_tooltip =
-    각각의 확인된 이미지마다 특수한 해시값이 계산되어 서로 비교됩니다. 그리고 값의 차이가 작다면, 두 이미지는 서로 비슷할 가능성이 높습니다.
+    Each checked image produces a special hash which can be compared with each other, and a small difference between them means that these images are similar.
     
-    해시 크기 8은 원본과 유사도가 낮은 이미지까지 찾는 데 좋습니다. 하지만 1,000개를 넘어가는 이미지들을 서로 비교할 경우, 거짓 양성 반응이 나타날 가능성이 큽니다. 따라서 그런 경우에는 적당히 큰 값을 사용하는 것이 좋습니다.
+    8 hash size is quite good to find images that are only a little similar to original. With a bigger set of images (>1000), this will produce a big amount of false positives, so I recommend to use  a bigger hash size in this case.
     
-    해시 크기 32와 64는 오로지 매우 비슷한 이미지만 찾아내며, 거짓 양성 반응이 거의 나타나지 않습니다(다만 알파 채널을 가진 이미지의 경우 나타날 수 있습니다).
+    16 is the default hash size which is quite a good compromise between finding even a little similar images and having only a small amount of hash collisions.
+    
+    32 and 64 hashes find only very similar images, but should have almost no false positives (maybe except some images with alpha channel).
 image_resize_filter_tooltip =
-    이미지의 해시를 계산하기 위해서, 먼저 이미지의 크기를 조절해야 합니다.
+    To compute hash of image, the library must first resize it.
     
-    선택된 알고리즘에 따라, 유사도를 판단하기 위한 해시 값이 조금씩 달라집니다.
+    Depend on chosen algorithm, the resulting image used to calculate hash will looks a little different.
     
-    가장 빠르지만 동시에 가장 나쁜 결과를 보여주는 것은 Nearest입니다. 다만 16x16 해시 크기에서는 낮은 품질이 문제되지 않기 때문에 기본값으로 설정되어 있습니다.
+    The fastest algorithm to use, but also the one which gives the worst results, is Nearest. It is enabled by default, because with 16x16 hash size lower quality it is not really visible.
     
-    8x8 해시 사이즈의 경우, 더 나은 결과를 보장받기 위해서는 Nearest가 아닌 다른 알고리즘을 선택하세요.
+    With 8x8 hash size it is recommended to use a different algorithm than Nearest, to have better groups of images.
 image_hash_alg_tooltip =
     해시를 계산하는 데 사용되는 알고리즘을 선택할 수 있습니다.
     
@@ -127,7 +129,7 @@ main_check_box_broken_files_pdf = PDF
 main_check_box_broken_files_archive = 압축 파일
 main_check_box_broken_files_image = 이미지
 check_button_general_same_size = 같은 파일크기 무시
-check_button_general_same_size_tooltip = 같은 크기인 파일을 무시합니다. 보통 이들은 1:1 중복인 경우가 많습니다.
+check_button_general_same_size_tooltip = Ignore files with identical size in results - usually these are 1:1 duplicates
 main_label_size_bytes_tooltip = 스캔할 파일의 크기입니다.
 # Upper window
 upper_tree_view_included_folder_column_title = 검색할 폴더
@@ -165,11 +167,16 @@ upper_allowed_extensions_tooltip =
     IMAGE, VIDEO, MUSIC, TEXT를 입력할 경우 해당하는 파일을 모두 지칭할 수 있습니다.
     
     예시: ".exe, IMAGE, VIDEO, .rar, 7z" - 이와 같이 입력하면, 이미지 파일(예. jpg, png), 영상 파일(예. avi, mp4), exe, rar, 그리고 7z 파일을 검색합니다.
+upper_excluded_extensions_tooltip =
+    List of disabled files which will be ignored in scan.
+    
+    When using both allowed and disabled extensions, this one has higher priority, so file will not be checked.
 upper_excluded_items_tooltip =
     제외할 항목은 반드시 '*' 와일드카드 문자를 사용해서 추가해야 하며, 콤마(',')로 구분되어야 합니다.
     디렉터리를 직접 제외하는 것보다 느립니다. 주의해서 사용하세요.
 upper_excluded_items = 제외할 항목:
 upper_allowed_extensions = 허용할 확장자:
+upper_excluded_extensions = Disabled Extensions:
 # Popovers
 popover_select_all = 모두 선택
 popover_unselect_all = 모두 선택 해제
@@ -331,7 +338,7 @@ settings_multiple_image_preview_checkbutton = 이미지 미리보기 표시
 settings_multiple_clear_cache_button_tooltip =
     더 이상 존재하지 않는 파일을 캐시에서 제거합니다.
     캐시를 자동으로 정리하는 옵션이 꺼져 있을 때만 사용하세요.
-settings_multiple_clear_cache_button = 존재하지 않는 파일을 캐시에서 제거
+settings_multiple_clear_cache_button = Remove outdated results from cache.
 
 ## Duplicates
 
@@ -411,6 +418,12 @@ progress_scanning_size_name = Scanning name and size of { $file_number } file
 progress_scanning_name = { $file_number }개 파일의 이름 스캔 중
 progress_analyzed_partial_hash = { $file_checked }/{ $all_files }개 파일의 부분 해시 계산 중
 progress_analyzed_full_hash = { $file_checked }/{ $all_files }개 파일의 전체 해시 계산 중
+progress_prehash_cache_loading = Loading prehash cache
+progress_prehash_cache_saving = Saving prehash cache
+progress_hash_cache_loading = Loading hash cache
+progress_hash_cache_saving = Saving hash cache
+progress_cache_loading = Loading cache
+progress_cache_saving = Saving cache
 progress_current_stage = 현재 단계:{ "  " }
 progress_all_stages = 전체 단계:{ "  " }
 # Saving loading 
@@ -464,7 +477,7 @@ move_file_failed = { $name } 파일 이동 실패. 이유: { $reason }
 move_files_title_dialog = 중복 파일을 이동할 폴더를 선택하세요.
 move_files_choose_more_than_1_path = 중복 파일을 복사할 1개의 폴더만 지정해야 하지만, { $path_number }개의 경로를 선택했습니다.
 move_stats = { $num_files }/{ $all_files }개의 항목을 이동함
-save_results_to_file = { $name } 파일에 결과 저장함.
+save_results_to_file = Saved results both to txt and json files into { $name } folder.
 search_not_choosing_any_music = 경고: 최소한 하나의 검색 방법을 선택해야 합니다.
 search_not_choosing_any_broken_files = 경고: 최소한 하나 이상의 검색할 파일 분류를 선택해야 합니다.
 include_folders_dialog_title = 검색할 폴더 추가

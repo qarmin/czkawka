@@ -163,7 +163,7 @@ fn scan_duplicates(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, s
 fn write_duplicate_results(app: &MainWindow, vector: Vec<(Option<DuplicateEntry>, Vec<DuplicateEntry>)>, messages: String) {
     let items_found = vector.len();
     let items = Rc::new(VecModel::default());
-    for (ref_fe, vec_fe) in vector {
+    for (ref_fe, vec_fe) in vector.into_iter().rev() {
         if let Some(ref_fe) = ref_fe {
             let (data_model_str, data_model_int) = prepare_data_model_duplicates(&ref_fe);
             insert_data_to_model(&items, data_model_str, data_model_int, Some(true));

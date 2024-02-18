@@ -16,7 +16,6 @@ core_file_no_modification_date = Nelze získat datum úpravy ze souboru { $name 
 core_folder_no_modification_date = Nelze získat datum úpravy ze složky { $name }, důvod { $reason }
 core_missing_no_chosen_included_directory = Musí být uveden alespoň jeden adresář
 core_directory_wildcard_no_supported = Adresáře: Zástupné znaky v cestě nejsou podporovány, ignoruji { $path }
-core_directory_relative_path = Adresáře: Zástupné znaky v cestě nejsou podporovány, ignoruji { $path }
 core_directory_must_exists = Adresáře: Poskytnutá cesta ke složce musí existovat, ignoruji { $path }
 core_directory_must_be_directory = Adresáře: Poskytnutá cesta musí směřovat do adresáře, ignoruji { $path }
 core_included_directory_zero_valid_directories = CHYBA zahrnutí adresáře: Nenalezena ani jedna správná cesta k zahrnutí, která je vyžadována

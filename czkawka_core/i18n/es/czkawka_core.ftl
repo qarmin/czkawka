@@ -16,7 +16,6 @@ core_file_no_modification_date = No se puede obtener la fecha de modificación d
 core_folder_no_modification_date = No se puede obtener la fecha de modificación de la carpeta { $name }, razón { $reason }
 core_missing_no_chosen_included_directory = Debe proporcionarse al menos un directorio
 core_directory_wildcard_no_supported = Directorios: Los comodines en la ruta no son compatibles, ignorando { $path }
-core_directory_relative_path = Directorios: No se admite la ruta relativa, ignorando { $path }
 core_directory_must_exists = Directorios: La ruta de la carpeta debe salir, ignorando { $path }
 core_directory_must_be_directory = Directorios: La ruta proporcionada debe apuntar al directorio, ignorando { $path }
 core_included_directory_zero_valid_directories = ERROR del directorio incluido: No se ha encontrado ni una ruta correcta a incluida que es necesaria

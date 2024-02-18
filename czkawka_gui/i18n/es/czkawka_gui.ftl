@@ -4,7 +4,7 @@ window_main_title = Czkawka (Hipo)
 window_progress_title = Escaneando
 window_compare_images = Comparar imágenes
 # General
-general_ok_button = Ok
+general_ok_button = Aceptar
 general_close_button = Cerrar
 # Main window
 music_title_checkbox = Título
@@ -60,21 +60,21 @@ duplicate_check_method_tooltip =
     
     Hash - Encuentra archivos con el mismo contenido. Este modo molesta el archivo y luego compara este hash para encontrar duplicados. Este modo es la forma más segura de encontrar duplicados. La aplicación utiliza mucho caché, por lo que segundo y más análisis de los mismos datos debe ser mucho más rápido que el primero.
 image_hash_size_tooltip =
-    Cada imagen comprobada produce un hash especial que se puede comparar entre sí, y la pequeña diferencia entre ellas significa que estas imágenes son similares.
+    Cada imagen seleccionada produce un hash especial que se puede comparar entre sí y una pequeña diferencia entre ellas significa que estas imágenes son similares.
     
-    El tamaño de 8 hash es bastante bueno para encontrar imágenes que son poco similares a las originales. Con un conjunto más grande de imágenes(>1000) producirá una gran cantidad de falsos positivos, así que recomiendo usar para tal cantidad mayor de tamaño de hash.
+    tamaño de 8 hash es bastante bueno para encontrar imágenes que son un poco similares a las originales. Con un conjunto más grande de imágenes (>1000), esto producirá una gran cantidad de falsos positivos, así que recomiendo usar un mayor tamaño de hash en este caso.
     
-    16 es el tamaño predeterminado del hash, lo cual es bastante bueno entre encontrar incluso un poco de imágenes similares y tener una pequeña cantidad de colisiones hash.
+    16 es el tamaño de hash predeterminado, lo cual es un buen compromiso entre encontrar incluso un poco de imágenes similares y tener sólo una pequeña cantidad de colisiones hash.
     
-    32 y 64 hash sólo encuentra imágenes muy similares, pero casi no debería tener falsos positivos (quizás excepto algunas imágenes con canal alfa).
+    32 y 64 hashes sólo encuentran imágenes muy similares, pero no deberían tener casi falsos positivos (tal vez excepto algunas imágenes con canal alfa).
 image_resize_filter_tooltip =
-    Para calcular el hash de la imagen, primero la librería debe redimensionarlo.
+    To compute hash of image, the library must first resize it.
     
-    Dependiendo del algoritmo elegido, la imagen resultante usada para calcular el hash puede parecer poco diferente.
+    Depend on chosen algorithm, the resulting image used to calculate hash will looks a little different.
     
-    El algoritmo más rápido de usar, pero también uno que da los peores resultados es más cercano, está habilitada de forma predeterminada, ya que con un tamaño hash de 16x16, de menor calidad no es realmente visible.
+    The fastest algorithm to use, but also the one which gives the worst results, is Nearest. It is enabled by default, because with 16x16 hash size lower quality it is not really visible.
     
-    Con el tamaño hash de 8x8 se recomienda usar un algoritmo diferente al más cercano, para tener mejores grupos de imágenes.
+    With 8x8 hash size it is recommended to use a different algorithm than Nearest, to have better groups of images.
 image_hash_alg_tooltip =
     Los usuarios pueden elegir uno de los muchos algoritmos de cálculo del hash.
     
@@ -101,7 +101,7 @@ main_tree_view_column_folder_name = Nombre de carpeta
 main_tree_view_column_path = Ruta
 main_tree_view_column_modification = Fecha de modificación
 main_tree_view_column_size = Tamaño
-main_tree_view_column_similarity = Similaridad
+main_tree_view_column_similarity = Similitud
 main_tree_view_column_dimensions = Dimensiones
 main_tree_view_column_title = Título
 main_tree_view_column_artist = Artista
@@ -123,13 +123,13 @@ main_label_min_size = Mínimo
 main_label_max_size = Máximo
 main_label_shown_files = Número de archivos mostrados
 main_label_resize_algorithm = Algoritmo de Redimensionar
-main_label_similarity = Similarity{ " " }
+main_label_similarity = Similitud{ "   " }
 main_check_box_broken_files_audio = Sonido
 main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = Guardar
 main_check_box_broken_files_image = Imagen
 check_button_general_same_size = Ignorar el mismo tamaño
-check_button_general_same_size_tooltip = Ignorar de los resultados, archivos que tienen el mismo tamaño - generalmente son 1:1 duplicados
+check_button_general_same_size_tooltip = Ignorar archivos con idéntico tamaño en resultados - usualmente son 1:1 duplicados
 main_label_size_bytes_tooltip = Tamaño de los archivos que se utilizarán en el escaneo
 # Upper window
 upper_tree_view_included_folder_column_title = Carpetas a buscar
@@ -167,11 +167,16 @@ upper_allowed_extensions_tooltip =
     Las siguientes Macros, que añaden múltiples extensiones a la vez, también están disponibles: IMAGE, VIDEO, MUSIC, TEXT.
     
     Ejemplo de uso ".exe, IMAGE, VIDEO, .rar, 7z" - esto significa que imágenes (e. . jpg, png), videos (ej: avi, mp4), archivos exe, rar, y 7z serán escaneados.
+upper_excluded_extensions_tooltip =
+    List of disabled files which will be ignored in scan.
+    
+    When using both allowed and disabled extensions, this one has higher priority, so file will not be checked.
 upper_excluded_items_tooltip =
     Los artículos excluidos deben contener * comodín y deben estar separados por comas.
     Esto es más lento que los Directorios Excluidos, así que úselo con cuidado.
 upper_excluded_items = Elementos excluidos:
 upper_allowed_extensions = Extensiones permitidas:
+upper_excluded_extensions = Extensiones desactivadas:
 # Popovers
 popover_select_all = Seleccionar todo
 popover_unselect_all = Deseleccionar todo
@@ -269,7 +274,7 @@ about_donation_button_tooltip = Enlace a la página de donación.
 about_instruction_button_tooltip = Enlace a la página de instrucciones.
 about_translation_button_tooltip = Enlace a la página de Crowdin con traducciones de aplicaciones. Oficialmente se admiten polaco e inglés.
 about_repository_button = Repositorio
-about_donation_button = Donación
+about_donation_button = Donativo
 about_instruction_button = Instrucción
 about_translation_button = Traducción
 # Header
@@ -324,7 +329,7 @@ settings_multiple_delete_outdated_cache_checkbutton_tooltip =
 settings_notebook_general = General
 settings_notebook_duplicates = Duplicados
 settings_notebook_images = Imágenes similares
-settings_notebook_videos = Vídeo similar
+settings_notebook_videos = Vídeos similares
 
 ## Multiple - settings used in multiple tabs
 
@@ -333,7 +338,7 @@ settings_multiple_image_preview_checkbutton = Mostrar vista previa de la imagen
 settings_multiple_clear_cache_button_tooltip =
     Limpiar manualmente la caché de entradas desactualizadas.
     Esto solo debe utilizarse si se ha desactivado la limpieza automática.
-settings_multiple_clear_cache_button = Eliminar resultados desactualizados de la caché de imágenes
+settings_multiple_clear_cache_button = Eliminar resultados obsoletos de la caché.
 
 ## Duplicates
 
@@ -413,6 +418,12 @@ progress_scanning_size_name = Escaneando nombre y tamaño del archivo { $file_nu
 progress_scanning_name = Escaneando nombre del archivo { $file_number }
 progress_analyzed_partial_hash = Has analizado el hash parcial de { $file_checked }/{ $all_files } archivos
 progress_analyzed_full_hash = Se ha analizado el hash completo de { $file_checked }/{ $all_files } archivos
+progress_prehash_cache_loading = Cargando caché prehash
+progress_prehash_cache_saving = Guardando caché prehash
+progress_hash_cache_loading = Cargando caché hash
+progress_hash_cache_saving = Guardando caché hash
+progress_cache_loading = Cargando caché
+progress_cache_saving = Guardando caché
 progress_current_stage = Etapa actual:{ " " }
 progress_all_stages = Todas las etapas:{ " " }
 # Saving loading 
@@ -466,7 +477,7 @@ move_file_failed = Error al mover el archivo { $name }, razón { $reason }
 move_files_title_dialog = Elija la carpeta a la que desea mover los archivos duplicados
 move_files_choose_more_than_1_path = Solo se puede seleccionar una ruta para poder copiar sus archivos duplicados, seleccionado { $path_number }.
 move_stats = Mudado correctamente { $num_files }/{ $all_files } elementos
-save_results_to_file = Resultados guardados en el archivo { $name }
+save_results_to_file = Resultados guardados en archivos txt y json en la carpeta { $name }
 search_not_choosing_any_music = ERROR: Debe seleccionar al menos una casilla de verificación con tipos de búsqueda de música.
 search_not_choosing_any_broken_files = ERROR: Debe seleccionar al menos una casilla de verificación con el tipo de ficheros rotos comprobados.
 include_folders_dialog_title = Carpetas a incluir

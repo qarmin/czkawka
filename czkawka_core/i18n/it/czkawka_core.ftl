@@ -16,7 +16,6 @@ core_file_no_modification_date = Impossibile recuperare data di modifica dal fil
 core_folder_no_modification_date = Impossibile recuperare data di modifica dalla cartella { $name }, ragione { $reason }
 core_missing_no_chosen_included_directory = Almeno una directory deve essere fornita
 core_directory_wildcard_no_supported = Cartelle: i caratteri jolly nel percorso non sono supportati, ignorando { $path }
-core_directory_relative_path = Directories: Il percorso relativo non è supportato, ignorando { $path }
 core_directory_must_exists = Directories: Il percorso della cartella fornito deve uscire, ignorando { $path }
 core_directory_must_be_directory = Directories: Il percorso fornito deve puntare alla directory, ignorando { $path }
 core_included_directory_zero_valid_directories = ERRORE Directory incluso: Non trovato nemmeno un percorso corretto incluso che è richiesto

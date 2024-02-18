@@ -59,16 +59,6 @@ export component ActionButtons inherits HorizontalLayout {
         horizontal-stretch: 0.5;
     }
 
-    move_button := Button {
-        visible: lists_enabled;
-        height: parent.height;
-        enabled: !scanning && lists_enabled;
-        text: "Move";
-        clicked => {
-            request_folder_to_move();
-        }
-    }
-
     select_button := Button {
         visible: lists_enabled;
         height: parent.height;
@@ -76,6 +66,16 @@ export component ActionButtons inherits HorizontalLayout {
         text: "Select";
         clicked => {
             show_select_popup(self.x + self.width / 2, self.y + parent.y);
+        }
+    }
+
+    move_button := Button {
+        visible: lists_enabled;
+        height: parent.height;
+        enabled: !scanning && lists_enabled;
+        text: "Move";
+        clicked => {
+            request_folder_to_move();
         }
     }
 

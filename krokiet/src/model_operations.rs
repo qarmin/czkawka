@@ -5,14 +5,16 @@ use std::path::MAIN_SEPARATOR;
 
 pub fn deselect_all_items(items: &mut [MainListModel]) {
     for item in items {
-        item.selected_row = false;
+        item.checked = false;
     }
 }
 
 #[allow(unused)]
 pub fn select_all_items(items: &mut [MainListModel]) {
     for item in items {
-        item.selected_row = true;
+        if !item.header_row {
+            item.checked = true;
+        }
     }
 }
 

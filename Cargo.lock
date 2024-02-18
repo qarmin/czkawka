@@ -3348,6 +3348,7 @@ dependencies = [
  "crossbeam-channel",
  "czkawka_core",
  "directories-next",
+ "fs_extra",
  "handsome_logger",
  "home",
  "humansize",

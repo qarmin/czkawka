@@ -14,10 +14,10 @@ music_bitrate_checkbox = Bit-hızı
 music_genre_checkbox = Müzik Türü
 music_length_checkbox = Uzunluk
 music_comparison_checkbox = Yaklaşık Karşılaştırma
-music_checking_by_tags = Tags
-music_checking_by_content = Content
-same_music_seconds_label = Minimal fragment second duration
-same_music_similarity_label = Maximum difference
+music_checking_by_tags = Etiketler
+music_checking_by_content = İçerik
+same_music_seconds_label = Minimal parça saniyesel süresi
+same_music_similarity_label = Maksimum fark
 same_music_tooltip =
     Searching for similar music files by its content can be configured by setting:
     
@@ -47,7 +47,7 @@ duplicate_case_sensitive_name_tooltip =
     denetlemeden aynı adları eşleyip grup oluşturur.
     
     fatih.kavalci <--> FatiH.KaVaLCi
-duplicate_mode_size_name_combo_box = Size and Name
+duplicate_mode_size_name_combo_box = Boyut ve Ad Karşılaştırma
 duplicate_mode_name_combo_box = Ad Karşılaştırma
 duplicate_mode_size_combo_box = Boyut Karşılaştırma
 duplicate_mode_hash_combo_box = Özet Değeri
@@ -74,30 +74,21 @@ duplicate_check_method_tooltip =
     Czkawka, önbelleği yoğun olarak kullanır. Bu nedenle aynı verilerin ikinci ve sonraki taramaları 
     ilkinden çok daha hızlı olmalıdır.
 image_hash_size_tooltip =
-    Resim dosyalarının karşılaştırılması için her resim dosyasından özel bir hash 
-    (Sabit Uzunluklu Resim Çıktısı : SURÇ) üretilmelidir. İki resmin SURÇ farkı küçük ise 
-    bu resimlerin benzer olduğu anlamına gelir.
+    Each checked image produces a special hash which can be compared with each other, and a small difference between them means that these images are similar.
     
-    8'lik SURÇ boyutu aslına çok az benzeyen resimleri bulmak için oldukça iyidir. 
-    Büyük (>1000) resim kümelerinde çok sayıda hatalı eşleştirme yapacaktır. Bu nedenlenle 
-    büyük resim kümeleri ile çalışırken daha büyük bir SURÇ boyutu kullanmanız önerilir.
+    8 hash size is quite good to find images that are only a little similar to original. With a bigger set of images (>1000), this will produce a big amount of false positives, so I recommend to use  a bigger hash size in this case.
     
-    16'lık varsayılan SURÇ boyutu kısa sürede az miktarda hatalı eşleştirme ile 
-    birbirine biraz benzer resimler bulmak için en uygun seçenektir. 
+    16 is the default hash size which is quite a good compromise between finding even a little similar images and having only a small amount of hash collisions.
     
-    32 ve 64'lük SURÇ boyutları yalnızca bir birine çok benzeyen resimleri eşleştirir 
-    ve neredeyse (alfa kanallı kimi resimler dışında) hatalı eşleştirme yapmaz.
+    32 and 64 hashes find only very similar images, but should have almost no false positives (maybe except some images with alpha channel).
 image_resize_filter_tooltip =
-    Benzer resim dosyaları farklı biçimlerde, farklı boyutlarda, farklı sıkıştırma oranlarında olabilir. 
-    Sabit Uzunluklu Resim Çıktısı (SURÇ) üretimi öncesinde bir algoritma aracılığı ile yeniden boyutlandırılmalıdır.
+    To compute hash of image, the library must first resize it.
     
-    Seçilen algoritmaya bağlı olarak, elde edilen son görüntü biraz farklı görünecektir. 
+    Depend on chosen algorithm, the resulting image used to calculate hash will looks a little different.
     
-    Kullanılacak en hızlı aynı zamanda en kötü sonuçları veren algoritma Nearest'tir. Yine de varsayılan 
-    olarak etkindir. Çünkü kalite kaybı, 16x16 boyutluk SURÇ üretiminde gerçekten fark edilmez.
+    The fastest algorithm to use, but also the one which gives the worst results, is Nearest. It is enabled by default, because with 16x16 hash size lower quality it is not really visible.
     
-    8x8 boyutluk SURÇ üretimi ile daha iyi eşleştirilmiş resim gruplarına sahip olmak için 
-    Nearest'ten farklı bir algoritma kullanmanız önerilir.
+    With 8x8 hash size it is recommended to use a different algorithm than Nearest, to have better groups of images.
 image_hash_alg_tooltip =
     Kullanıcılar, SUÇ oluşturmanın birçok algoritmasından birini seçebilir. 
     Her birinin hem güçlü hem de zayıf noktaları vardır ve farklı görüntüler için 
@@ -151,7 +142,7 @@ main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = Arşiv
 main_check_box_broken_files_image = Resim
 check_button_general_same_size = Aynı boyutu yok say
-check_button_general_same_size_tooltip = Aynı boyuta sahip dosyalar -genellikle 1'e 1 eştir- sonuçlarda gösterilmez.
+check_button_general_same_size_tooltip = Ignore files with identical size in results - usually these are 1:1 duplicates
 main_label_size_bytes_tooltip = Taramada kullanılacak dosyaların boyutu
 # Upper window
 upper_tree_view_included_folder_column_title = Aranacak Klasörler
@@ -192,11 +183,16 @@ upper_allowed_extensions_tooltip =
     
     Kullanım örneği: ".exe, IMAGE, VIDEO, .rar, .7z" -- Bu girdi, resimlerin (ör. jpg, png ...), 
     videoların (ör. avi, mp4 ...), exe, rar ve 7z dosyalarının taranacağı anlamına gelir.
+upper_excluded_extensions_tooltip =
+    List of disabled files which will be ignored in scan.
+    
+    When using both allowed and disabled extensions, this one has higher priority, so file will not be checked.
 upper_excluded_items_tooltip =
     Hariç tutulan öğeler * joker karakterini içermeli ve virgülle ayrılmalıdır.
     Bu işlev, Hariç Tutulan Dizinlerden daha yavaştır, bu yüzden dikkatli kullanın.
 upper_excluded_items = Hariç Tutulan Öğeler:
 upper_allowed_extensions = İzin Verilen Uzantılar:
+upper_excluded_extensions = Disabled Extensions:
 # Popovers
 popover_select_all = Tümünü seç
 popover_unselect_all = Tümünün seçimini kaldır
@@ -367,7 +363,7 @@ settings_multiple_image_preview_checkbutton = Resim önizlemesini göster
 settings_multiple_clear_cache_button_tooltip =
     Güncel olmayan girişlerin önbelleğini el ile temizleyin.
     Bu, yalnızca otomatik temizleme devre dışı bırakılmışsa kullanılmalıdır.
-settings_multiple_clear_cache_button = Güncel olmayan girdileri resim önbelleğinden kaldır
+settings_multiple_clear_cache_button = Remove outdated results from cache.
 
 ## Duplicates
 
@@ -447,14 +443,20 @@ progress_scanning_image = { $file_checked }/{ $all_files } resmin SURÇ kaydı o
 progress_comparing_image_hashes = { $file_checked }/{ $all_files } resim SURÇ kaydı karşılaştırıldı.
 progress_scanning_music_tags_end = { $file_checked }/{ $all_files } müzik dosyasının etiketleri karşılaştırıldı.
 progress_scanning_music_tags = { $file_checked }/{ $all_files } müzik dosyasının etiketleri okundu.
-progress_scanning_music_content_end = Comparing fingerprint of { $file_checked }/{ $all_files } music file
-progress_scanning_music_content = Calculating fingerprint of { $file_checked }/{ $all_files } music file
+progress_scanning_music_content_end = Müzik dosyası { $file_checked }/{ $all_files } için parmak izi karşılaştırılıyor
+progress_scanning_music_content = Müzik dosyası { $file_checked }/{ $all_files } için parmak izi hesaplanıyor
 progress_scanning_empty_folders = { $folder_number } klasör tarandı.
 progress_scanning_size = { $file_number } dosyanın boyutu tarandı.
-progress_scanning_size_name = Scanning name and size of { $file_number } file
+progress_scanning_size_name = { $file_number } dosyasının ismi ve boyutu aranıyor
 progress_scanning_name = { $file_number } dosyanın adı tarandı.
 progress_analyzed_partial_hash = { $file_checked }/{ $all_files } dosyanın kısmi-SUÇ kaydı analiz edildi. ;-)
 progress_analyzed_full_hash = { $file_checked }/{ $all_files } dosyanın tam SUÇ kaydı analiz edildi. ;-)
+progress_prehash_cache_loading = Loading prehash cache
+progress_prehash_cache_saving = Saving prehash cache
+progress_hash_cache_loading = Loading hash cache
+progress_hash_cache_saving = Saving hash cache
+progress_cache_loading = Loading cache
+progress_cache_saving = Saving cache
 progress_current_stage = Geçerli Aşama: { " " }
 progress_all_stages = Tüm Aşamalar: { " " }
 # Saving loading 
@@ -508,7 +510,7 @@ move_file_failed = { $name } dosyası taşınamadı, nedeni: { $reason }
 move_files_title_dialog = Eş dosyaları taşımak istediğiniz klasörü seçin
 move_files_choose_more_than_1_path = Eş dosyaları taşıyabilmek için yalnızca bir yol seçilebilir, { $path_number } seçildi.
 move_stats = { $num_files }/{ $all_files } öğe düzgün şekilde taşındı.
-save_results_to_file = Sonuçlar { $name } dosyasına kaydedildi.
+save_results_to_file = Saved results both to txt and json files into { $name } folder.
 search_not_choosing_any_music = HATA: Müzik araması için en az bir onay kutusu seçmelisiniz.
 search_not_choosing_any_broken_files = HATA: Bozuk dosya araması için en az bir onay kutusu seçmelisiniz.
 include_folders_dialog_title = Aranacak Klasörler

@@ -16,7 +16,6 @@ core_file_no_modification_date = Klarte ikke å hente endringsdato fra filen { $
 core_folder_no_modification_date = Klarte ikke å hente endringsdato fra mappen { $name }. Årsak { $reason }
 core_missing_no_chosen_included_directory = Minst en katalog må angis
 core_directory_wildcard_no_supported = Kataloger: Jokertegn i stien støttes ikke, ignorerer { $path }
-core_directory_relative_path = Kataloger: Relativ sti støttes ikke. Ignorerer { $path }
 core_directory_must_exists = Kataloger: Angitt sti for mappe må eksistere. Ignorerer { $path }
 core_directory_must_be_directory = Kataloger: Angitt sti må peke på mappen. Ignorerer { $path }
 core_included_directory_zero_valid_directories = Feil med inkludert katalog: Fant ikke én eneste sti til den inkluderte mappen, noe som er påkrevd

@@ -60,19 +60,19 @@ duplicate_check_method_tooltip =
     
     Hash - Hittar filer som har samma innehåll. Detta läge hashar filen och senare jämför denna hash för att hitta dubbletter. Detta läge är det säkraste sättet att hitta dubbletter. Appen använder starkt cache, så andra och ytterligare skanningar av samma data bör vara mycket snabbare än den första.
 image_hash_size_tooltip =
-    Varje kontrollerad bild producerar speciell hash som kan jämföras med varandra och liten skillnad mellan dem innebär att dessa bilder är liknande.
+    Varje kontrollerad bild ger en speciell hash som kan jämföras med varandra, och en liten skillnad mellan dem innebär att dessa bilder är liknande.
     
-    8 hash-storlek är ganska bra att hitta bilder som bara är lite lika original. Med större uppsättning bilder (>1000) kommer att producera stora mängder falska positiva, så jag rekommenderar att använda för en sådan mängd större hashstorlek.
+    8 hash storlek är ganska bra att hitta bilder som bara är lite liknande till originalet. Med en större uppsättning bilder (>1000), kommer detta att producera en stor mängd falska positiva, så jag rekommenderar att använda en större hash storlek i detta fall.
     
-    16 är standard hashstorlek vilket är ganska bra kompromiss mellan att hitta även lite liknande bilder och att ha liten mängd hashkollisioner.
+    16 är standard hashstorlek vilket är en ganska bra kompromiss mellan att hitta även lite liknande bilder och att bara ha en liten mängd hashkollisioner.
     
-    32 och 64 hash finner endast mycket liknande bilder, men bör nästan inte ha några falska positiva (kanske förutom vissa bilder med alfa-kanal).
+    32 och 64 hashen finner endast mycket liknande bilder, men bör ha nästan inga falska positiva (kanske förutom vissa bilder med alfa-kanal).
 image_resize_filter_tooltip =
     För att beräkna hash av bilden, måste biblioteket först ändra storlek på den.
     
-    Beroende på vald algoritm kommer resultatbilden som används för att beräkna hash att se lite annorlunda ut.
+    Beroende på vald algoritm kommer den resulterande bilden som används för att beräkna hash att se lite annorlunda ut.
     
-    Den snabbaste algoritmen att använda, men också en som ger de värsta resultaten är Närmaste, det är aktiverat som standard, eftersom med 16x16 hash storlek, lägre kvalitet är det inte riktigt synligt.
+    Den snabbaste algoritmen att använda, men också den som ger de sämsta resultaten, är nära! Det är aktiverat som standard, eftersom med 16x16 hash storlek lägre kvalitet är det inte riktigt synligt.
     
     Med 8x8 hashstorlek rekommenderas att använda en annan algoritm än Närmaste för att få bättre grupper av bilder.
 image_hash_alg_tooltip =
@@ -129,7 +129,7 @@ main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = Arkiv
 main_check_box_broken_files_image = Bild
 check_button_general_same_size = Ignorera samma storlek
-check_button_general_same_size_tooltip = Ignorera från resultat, filer som har samma storlek - vanligtvis är detta 1:1 dubbletter
+check_button_general_same_size_tooltip = Ignorera filer med samma storlek i resultat - vanligtvis är dessa 1:1 dubbletter
 main_label_size_bytes_tooltip = Storlek på filer som kommer att användas vid skanning
 # Upper window
 upper_tree_view_included_folder_column_title = Mappar att söka
@@ -167,11 +167,16 @@ upper_allowed_extensions_tooltip =
     Följande makron som lägger till flera tillägg samtidigt, finns också: IMAGE, VIDEO, MUSIC, TEXT.
     
     Användningsexempel ".exe, IMAGE, VIDEO, .rar, 7z" - det betyder att bilder (e. . jpg, png), videor (t.ex. avi, mp4), exe, rar, och 7z filer kommer att skannas.
+upper_excluded_extensions_tooltip =
+    Lista över inaktiverade filer som kommer att ignoreras i skanning.
+    
+    Vid användning av både tillåtna och inaktiverade tillägg har denna högre prioritet, så filen kommer inte att kontrolleras.
 upper_excluded_items_tooltip =
     Exkluderade artiklar måste innehålla * jokertecken och bör separeras med kommatecken.
     Detta är långsammare än uteslutna kataloger, så använd det noggrant.
 upper_excluded_items = Exkluderade objekt:
 upper_allowed_extensions = Tillåtna tillägg:
+upper_excluded_extensions = Inaktiverade tillägg:
 # Popovers
 popover_select_all = Radera
 popover_unselect_all = Avmarkera alla
@@ -333,7 +338,7 @@ settings_multiple_image_preview_checkbutton = Visa förhandsgranskning av bild
 settings_multiple_clear_cache_button_tooltip =
     Rensa cache manuellt för föråldrade poster.
     Detta bör endast användas om automatisk rensning har inaktiverats.
-settings_multiple_clear_cache_button = Ta bort föråldrade resultat från bildcache
+settings_multiple_clear_cache_button = Ta bort föråldrade resultat från cachen.
 
 ## Duplicates
 
@@ -413,6 +418,12 @@ progress_scanning_size_name = Skannar namn och storlek på { $file_number } fil
 progress_scanning_name = Skannar namn på { $file_number } fil
 progress_analyzed_partial_hash = Analyserade partiella hash av { $file_checked }/{ $all_files } filer
 progress_analyzed_full_hash = Analyserad full hash av { $file_checked }/{ $all_files } filer
+progress_prehash_cache_loading = Laddar prehash cache
+progress_prehash_cache_saving = Sparar Omfattande cache
+progress_hash_cache_loading = Laddar hash-cache
+progress_hash_cache_saving = Sparar hash-cache
+progress_cache_loading = Laddar cache
+progress_cache_saving = Sparar cache
 progress_current_stage = Nuvarande steg:{ " " }
 progress_all_stages = Alla etapper:{ " "  }
 # Saving loading 
@@ -466,7 +477,7 @@ move_file_failed = Det gick inte att flytta filen { $name } anledning { $reason 
 move_files_title_dialog = Välj mapp som du vill flytta duplicerade filer till
 move_files_choose_more_than_1_path = Endast en sökväg kan väljas för att kunna kopiera sina duplicerade filer, valda { $path_number }.
 move_stats = Korrekt flyttad { $num_files }/{ $all_files } objekt
-save_results_to_file = Sparade resultat till filen { $name }
+save_results_to_file = Sparade resultat både till txt och json filer i { $name } mapp.
 search_not_choosing_any_music = FEL: Du måste välja minst en kryssruta med söktyper för musik.
 search_not_choosing_any_broken_files = FEL: Du måste välja minst en kryssruta med typ av markerade trasiga filer.
 include_folders_dialog_title = Mappar att inkludera

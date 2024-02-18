@@ -62,15 +62,17 @@ fn move_selected_items(items_to_move: Vec<(String, String)>, preserve_structure:
         return vec![format!("Error while creating folder: {err}")];
     }
 
+    // TODO option to override files
     if copy_mode {
         items_to_move
             .into_par_iter()
             .filter_map(|(path, name)| {
                 let (input_file, output_file) = collect_path_and_create_folders(&path, &name, output_folder, preserve_structure);
 
-                if let Err(e) = fs::copy(&input_file, &output_file) {
-                    return Some(format!("Error while copying file {input_file:?} to {output_file:?}, reason {e}"));
+                if output_file.exists() {
+                    return Some(format!("File {output_file:?} already exists, and will not be overridden"));
                 }
+                try_to_copy_item(&input_file, &output_file)?;
                 None
             })
             .collect()
@@ -81,7 +83,7 @@ fn move_selected_items(items_to_move: Vec<(String, String)>, preserve_structure:
                 let (input_file, output_file) = collect_path_and_create_folders(&path, &name, output_folder, preserve_structure);
 
                 if output_file.exists() {
-                    return Some(format!("File {output_file:?} already exists"));
+                    return Some(format!("File {output_file:?} already exists, and will not be overridden"));
                 }
 
                 // Try to rename file, may fail due various reasons
@@ -91,11 +93,8 @@ fn move_selected_items(items_to_move: Vec<(String, String)>, preserve_structure:
 
                 // It is possible that this failed, because file is on different partition, so
                 // we need to copy file and then remove old
-                if let Err(e) = fs::copy(&input_file, &output_file) {
-                    return Some(format!(
-                        "Error while copying file {input_file:?} to {output_file:?}(moving into different partition), reason {e}"
-                    ));
-                }
+                try_to_copy_item(&input_file, &output_file)?;
+
                 if let Err(e) = fs::remove_file(&input_file) {
                     return Some(format!("Error while removing file {input_file:?}(after copying into different partition), reason {e}"));
                 }
@@ -104,6 +103,22 @@ fn move_selected_items(items_to_move: Vec<(String, String)>, preserve_structure:
             })
             .collect()
     }
+}
+
+// Tries to copy file/folder, and returns error if it fails
+fn try_to_copy_item(input_file: &Path, output_file: &Path) -> Option<String> {
+    let res;
+    if input_file.is_dir() {
+        let options = fs_extra::dir::CopyOptions::new();
+        res = fs_extra::dir::copy(&input_file, &output_file, &options); // TODO consider to use less buggy library
+    } else {
+        let options = fs_extra::file::CopyOptions::new();
+        res = fs_extra::file::copy(&input_file, &output_file, &options);
+    }
+    if let Err(e) = res {
+        return Some(format!("Error while copying {input_file:?} to {output_file:?}, reason {e}"));
+    }
+    None
 }
 
 // Create input/output paths, and create output folder
@@ -117,6 +132,8 @@ fn collect_path_and_create_folders(input_path: &str, input_file: &str, output_pa
     };
     let _ = fs::create_dir_all(&output_full_path);
     output_full_path.push(input_file);
+
+    println!("input_full_path: {input_full_path:?}, output_full_path: {output_full_path:?}, output_path: {output_path:?}, input_path: {input_path:?}");
 
     (input_full_path, output_full_path)
 }
