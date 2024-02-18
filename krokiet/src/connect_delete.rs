@@ -60,8 +60,14 @@ fn remove_selected_items(items_to_remove: Vec<String>, active_tab: CurrentTab, r
         items_to_remove
             .into_par_iter()
             .filter_map(|item| {
-                if let Err(e) = std::fs::remove_file(item) {
-                    return Some(format!("Error while removing file: {e}"));
+                if remove_to_trash {
+                    if let Err(e) = trash::delete(item) {
+                        return Some(format!("Error while moving to trash: {e}"));
+                    }
+                } else {
+                    if let Err(e) = std::fs::remove_file(item) {
+                        return Some(format!("Error while removing file: {e}"));
+                    }
                 }
                 None
             })

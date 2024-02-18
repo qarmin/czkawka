@@ -26,7 +26,7 @@ pub fn collect_full_path_from_model(items: &[MainListModel], active_tab: Current
         .map(|item| {
             let path = item.val_str.iter().nth(path_idx).unwrap();
             let name = item.val_str.iter().nth(name_idx).unwrap();
-            format!("{}{}{}", path, MAIN_SEPARATOR, name)
+            format!("{path}{MAIN_SEPARATOR}{name}")
         })
         .collect::<Vec<_>>()
 }

@@ -3,6 +3,7 @@
 #![allow(unknown_lints)] // May be disabled, but locally I use nightly clippy
 #![allow(clippy::comparison_chain)]
 #![allow(clippy::collapsible_if)]
+#![allow(clippy::collapsible_else_if)]
 #![allow(clippy::should_panic_without_expect)]
 #![allow(clippy::struct_field_names)] // Generated code
 #![allow(clippy::overly_complex_bool_expr)] // Generated code

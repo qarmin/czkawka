@@ -39,7 +39,7 @@ pub fn connect_show_preview(app: &MainWindow) {
         let res = load_image(path);
         if let Some((load_time, img)) = res {
             let start_timer_convert_time = Instant::now();
-            let slint_image = convert_into_slint_image(img);
+            let slint_image = convert_into_slint_image(&img);
             let convert_time = start_timer_convert_time.elapsed();
 
             let start_set_time = Instant::now();
@@ -67,7 +67,7 @@ fn set_preview_visible(gui_state: &GuiState, preview: Option<&str>) {
     }
 }
 
-fn convert_into_slint_image(img: DynamicImage) -> slint::Image {
+fn convert_into_slint_image(img: &DynamicImage) -> slint::Image {
     let image_buffer: ImageBufferRgba = img.to_rgba8();
     let buffer = slint::SharedPixelBuffer::<slint::Rgba8Pixel>::clone_from_slice(image_buffer.as_raw(), image_buffer.width(), image_buffer.height());
     slint::Image::from_rgba8(buffer)

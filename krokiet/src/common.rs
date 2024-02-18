@@ -1,4 +1,4 @@
-#![allow(dead_code)] // TODO later remove
+#![allow(dead_code)]
 use std::path::PathBuf;
 
 use crate::{CurrentTab, ExcludedDirectoriesModel, IncludedDirectoriesModel, MainListModel, MainWindow, Settings};
@@ -391,7 +391,7 @@ pub fn split_u64_into_i32s(value: u64) -> (i32, i32) {
 }
 
 pub fn connect_i32_into_u64(part1: i32, part2: i32) -> u64 {
-    ((part1 as u64) << 32) | (part2 as u64 & 0xFFFFFFFF)
+    ((part1 as u64) << 32) | (part2 as u64 & 0xFFFF_FFFF)
 }
 
 #[cfg(test)]
