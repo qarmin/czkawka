@@ -3,6 +3,8 @@
 Krokiet is new Czkawka frontend written in Slint, which uses Rust in opposite to Gtk 4 frontend which uses mostly
 C code.
 
+![Krokiet](https://github.com/qarmin/czkawka/assets/41945903/52628a29-ecd6-4692-9ee4-8a680c889193)
+
 Different toolkit means different look, limitations and features, so you should not expect same features like in Gtk 4
 frontend(but of course I want implement most of features from other project).
 
@@ -10,7 +12,7 @@ frontend(but of course I want implement most of features from other project).
 
 Krokiet should not have any special runtime requirements - it should work on almost any device non-antic device.
 
-Prebuild binaries should work on Windows 10,11, Mac, Ubuntu 22.04/20.04 and similar(libheif version + czkawka_gui requires Ubuntu 22.04+ and rest Ubuntu 20.04) - https://github.com/qarmin/czkawka/releases/
+Prebuild binaries should work on Windows 10,11, Mac, Ubuntu 22.04/20.04 and similar(libheif version and czkawka_gui requires Ubuntu 22.04+, rest Ubuntu 20.04) - https://github.com/qarmin/czkawka/releases/
 
 
 

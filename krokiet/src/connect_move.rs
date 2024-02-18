@@ -107,14 +107,13 @@ fn move_selected_items(items_to_move: Vec<(String, String)>, preserve_structure:
 
 // Tries to copy file/folder, and returns error if it fails
 fn try_to_copy_item(input_file: &Path, output_file: &Path) -> Option<String> {
-    let res;
-    if input_file.is_dir() {
+    let res = if input_file.is_dir() {
         let options = fs_extra::dir::CopyOptions::new();
-        res = fs_extra::dir::copy(&input_file, &output_file, &options); // TODO consider to use less buggy library
+        fs_extra::dir::copy(input_file, output_file, &options) // TODO consider to use less buggy library
     } else {
         let options = fs_extra::file::CopyOptions::new();
-        res = fs_extra::file::copy(&input_file, &output_file, &options);
-    }
+        fs_extra::file::copy(input_file, output_file, &options)
+    };
     if let Err(e) = res {
         return Some(format!("Error while copying {input_file:?} to {output_file:?}, reason {e}"));
     }

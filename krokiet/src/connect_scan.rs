@@ -24,7 +24,7 @@ use czkawka_core::similar_images::{ImagesEntry, SimilarImages};
 use czkawka_core::similar_videos::{SimilarVideos, VideosEntry};
 use czkawka_core::temporary::{Temporary, TemporaryFileEntry};
 
-use crate::common::split_u64_into_i32s;
+use crate::common::{check_if_all_included_dirs_are_referenced, split_u64_into_i32s};
 use crate::settings::{
     collect_settings, get_audio_check_type_idx, get_biggest_item_idx, get_duplicates_check_method_idx, get_duplicates_hash_type_idx, get_image_hash_alg_idx,
     get_resize_algorithm_idx, SettingsCustom, ALLOWED_AUDIO_CHECK_TYPE_VALUES, ALLOWED_BIG_FILE_SIZE_VALUES, ALLOWED_DUPLICATES_CHECK_METHOD_VALUES,
@@ -35,9 +35,15 @@ use crate::{CurrentTab, GuiState, MainListModel, MainWindow, ProgressToSend};
 pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>) {
     let a = app.as_weak();
     app.on_scan_starting(move |active_tab| {
+        let app = a.upgrade().unwrap();
+
+        if check_if_all_included_dirs_are_referenced(&app) {
+            app.invoke_scan_ended("Cannot start scan when all included directories are set as referenced folders.".into());
+            return;
+        }
+
         let progress_sender = progress_sender.clone();
         let stop_receiver = stop_receiver.clone();
-        let app = a.upgrade().unwrap();
 
         app.set_progress_datas(ProgressToSend {
             all_progress: 0,
@@ -516,7 +522,7 @@ fn scan_similar_music(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>
 
             if music_similarity == MusicSimilarity::NONE {
                 a.upgrade_in_event_loop(move |app| {
-                    app.set_text_summary_text("Cannot find similar music files without any similarity method selected.".into());
+                    app.invoke_scan_ended("Cannot find similar music files without any similarity method selected.".into());
                 })
                 .unwrap();
                 return Ok(());
@@ -706,7 +712,7 @@ fn scan_broken_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>,
 
             if checked_types == CheckedTypes::NONE {
                 a.upgrade_in_event_loop(move |app| {
-                    app.set_text_summary_text("Cannot find broken files without any file type selected.".into());
+                    app.invoke_scan_ended("Cannot find broken files without any file type selected.".into());
                 })
                 .unwrap();
                 return Ok(());

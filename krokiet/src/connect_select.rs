@@ -63,7 +63,7 @@ fn set_select_buttons(app: &MainWindow) {
         | CurrentTab::InvalidSymlinks
         | CurrentTab::BrokenFiles
         | CurrentTab::BadExtensions => vec![],
-        CurrentTab::Settings | CurrentTab::About => unreachable!("Settings and About tabs should not have select buttons"),
+        CurrentTab::Settings | CurrentTab::About => vec![], // Not available in settings and about, so may be set any value here
     };
 
     base_buttons.extend(additional_buttons);

@@ -13,6 +13,7 @@
 - Added scan progress bar - [#1183](https://github.com/qarmin/czkawka/pull/1183)
 - Clean and safe cancelling of scan - [#1183](https://github.com/qarmin/czkawka/pull/1183)
 - Unification of CLI arguments - [#1183](https://github.com/qarmin/czkawka/pull/1183)
+- Hardlink support for similar images/videos - [#1201](https://github.com/qarmin/czkawka/pull/1201)
 
 ### Krokiet GUI
 - Initial release of new gui - [#1102](https://github.com/qarmin/czkawka/pull/1102)

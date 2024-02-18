@@ -38,10 +38,6 @@ Each tool uses different technologies, so you can find instructions for each of 
 - [Czkawka Core](czkawka_core/README.md)</br>
 - [Krokiet GUI (Slint frontend)](krokiet/README.md)</br>
 
-## Benchmarks
-
-TODO
-
 ## Comparison to other tools
 
 Bleachbit is a master at finding and removing temporary files, while Czkawka only finds the most basic ones. So these two apps shouldn't be compared directly or be considered as an alternative to one another.
