@@ -1,8 +1,8 @@
-#![allow(dead_code)] // TODO later remove
+#![allow(dead_code)]
 use std::path::PathBuf;
 
-use crate::{CurrentTab, ExcludedDirectoriesModel, IncludedDirectoriesModel, MainListModel, MainWindow};
-use slint::{ModelRc, SharedString, VecModel};
+use crate::{CurrentTab, ExcludedDirectoriesModel, IncludedDirectoriesModel, MainListModel, MainWindow, Settings};
+use slint::{ComponentHandle, Model, ModelRc, SharedString, VecModel};
 
 // Int model is used to store data in unchanged(* except that we need to split u64 into two i32) form and is used to sort/select data
 // Str model is used to display data in gui
@@ -373,6 +373,11 @@ pub fn create_excluded_directories_model_from_pathbuf(items: &[PathBuf]) -> Mode
     ModelRc::new(VecModel::from(converted))
 }
 
+pub fn check_if_all_included_dirs_are_referenced(app: &MainWindow) -> bool {
+    let included = app.global::<Settings>().get_included_directories_model();
+    included.iter().all(|x| x.referenced_folder)
+}
+
 pub fn create_vec_model_from_vec_string(items: Vec<String>) -> VecModel<SharedString> {
     VecModel::from(items.into_iter().map(SharedString::from).collect::<Vec<_>>())
 }
@@ -386,7 +391,7 @@ pub fn split_u64_into_i32s(value: u64) -> (i32, i32) {
 }
 
 pub fn connect_i32_into_u64(part1: i32, part2: i32) -> u64 {
-    ((part1 as u64) << 32) | (part2 as u64 & 0xFFFFFFFF)
+    ((part1 as u64) << 32) | (part2 as u64 & 0xFFFF_FFFF)
 }
 
 #[cfg(test)]

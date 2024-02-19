@@ -16,7 +16,6 @@ core_file_no_modification_date = Konnte das Änderungsdatum von Datei { $name } 
 core_folder_no_modification_date = Konnte das Änderungsdatum aus dem Ordner { $name } nicht abrufen, Grund { $reason }
 core_missing_no_chosen_included_directory = Mindestens ein Verzeichnis muss angegeben werden
 core_directory_wildcard_no_supported = Verzeichnisse: Wildcards im Pfad werden nicht unterstützt, { $path } wird ignoriert
-core_directory_relative_path = Verzeichnisse: Relativer Pfad wird nicht unterstützt, { $path } wird ignoriert
 core_directory_must_exists = Verzeichnisse: Der angegebene Ordnerpfad muss existieren, { $path } wird ignoriert
 core_directory_must_be_directory = Verzeichnisse: Der angegebene Pfad muss auf das Verzeichnis zeigen, { $path } wird ignoriert
 core_included_directory_zero_valid_directories = Einbezogenes Verzeichnis-FEHLER: Kein korrekter Pfad gefunden, welcher einbezogen werden soll, was erforderlich ist

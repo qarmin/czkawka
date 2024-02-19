@@ -19,17 +19,17 @@ music_checking_by_content = コンテンツ
 same_music_seconds_label = フラグメント最小秒の持続時間
 same_music_similarity_label = 最大差
 same_music_tooltip =
-    Searching for similar music files by its content can be configured by setting:
+    音楽ファイルの内容から類似ファイルを検索するように設定できます：
     
-    - The minimum fragment time after which music files can be identified as similar
-    - The maximum difference difference between two tested fragments
+    - 音楽ファイルが類似していると識別されるフラグメントの最小時間
+    - テストされた2つのフラグメントの最大差分
     
-    The key to good results is to find sensible combinations of these parameters, for provided.
+    良い結果を得るための鍵は、これらのパラメータの賢明な組み合わせを見つけることです。
     
-    Setting the minimum time to 5s and the maximum difference to 1.0, will look for almost identical fragments in the files.
-    A time of 20s and a maximum difference of 6.0, on the other hand, works well for finding remixes/live versions etc.
+    最小時間を5秒、最大差を1.0に設定すると、ファイル内のほとんど同じフラグメントを探します。
+    一方、時間を20秒、差の最大値を6.0に設定すると、リミックスやライブ・バージョンなどを探すのに効果的です。
     
-    By default, each music file is compared to each other and this can take a lot of time when testing many files, so it is usually better to use reference folders and specifying which files are to be compared with each other(with same amount of files, comparing fingerprints will be faster at least 4x than without reference folders).
+    デフォルトでは、各音楽ファイルは互いに比較され、多数のファイルをテストする場合、これは多くの時間を要します。したがって、通常、参照フォルダを使用し、どのファイルを互いに比較するかを指定する方が良いでしょう（同じ量のファイルでは、フィンガープリントの比較は参照フォルダなしよりも少なくとも 4 倍速くなります）。
 music_comparison_checkbox_tooltip =
     機械学習によりフレーズから括弧とその中身を除外するAIを使用して、類似の音楽ファイルを検索します。このオプションが有効な場合、例えば以下のファイルは重複とみなされます:
     
@@ -60,21 +60,21 @@ duplicate_check_method_tooltip =
     
     ハッシュ - 同じ内容のファイルを探します。ファイルをハッシュ化して比較することにより重複を見つけます。このモードは、重複を見つけるための最も安全な方法です。このツールはキャッシュを多用するので、同じデータの2回目以降のスキャンは最初の時よりずっと速くなるはずです。
 image_hash_size_tooltip =
-    チェックした画像はそれぞれ特別なハッシュを生成し、そのハッシュを比較することで、両者の差が小さいほど、この画像は類似していることを意味します。
+    Each checked image produces a special hash which can be compared with each other, and a small difference between them means that these images are similar.
     
-    8のハッシュサイズは、オリジナルに少ししか似ていない画像を見つけるのにかなり適しています。しかし、1000枚を超えるような大きな画像では、誤検出が多くなるため、より大きなハッシュサイズを使用することをお勧めします。
+    8 hash size is quite good to find images that are only a little similar to original. With a bigger set of images (>1000), this will produce a big amount of false positives, so I recommend to use  a bigger hash size in this case.
     
-    16はデフォルトのハッシュサイズであり、少しでも類似した画像を見つけることとハッシュの衝突を少なくすることの間でかなり良い妥協点です。
+    16 is the default hash size which is quite a good compromise between finding even a little similar images and having only a small amount of hash collisions.
     
-    32と64のハッシュは非常に類似した画像しか見つけられませんが、誤検出はほとんどありません（アルファチャンネルのある一部の画像を除いて）。
+    32 and 64 hashes find only very similar images, but should have almost no false positives (maybe except some images with alpha channel).
 image_resize_filter_tooltip =
-    画像のハッシュを計算するために、ライブラリはまず画像のサイズを変更する必要があります。
+    To compute hash of image, the library must first resize it.
     
-    選択されたアルゴリズムによって、ハッシュを計算するために使用される画像は少し違って見えるかもしれません。
+    Depend on chosen algorithm, the resulting image used to calculate hash will looks a little different.
     
-    最も高速なアルゴリズムは Nearest ですが、最も悪い結果を出すのも Nearest です。
+    The fastest algorithm to use, but also the one which gives the worst results, is Nearest. It is enabled by default, because with 16x16 hash size lower quality it is not really visible.
     
-    8x8のハッシュサイズでは、より良い画像群を得るために、Nearestとは異なるアルゴリズムを使用することが推奨されます。
+    With 8x8 hash size it is recommended to use a different algorithm than Nearest, to have better groups of images.
 image_hash_alg_tooltip =
     ハッシュの計算方法は、多くのアルゴリズムの中からユーザーが選択することができます。
     
@@ -129,7 +129,7 @@ main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = アーカイブする
 main_check_box_broken_files_image = Image
 check_button_general_same_size = 同じサイズを無視
-check_button_general_same_size_tooltip = 同一のサイズのファイルがあった場合、結果から無視する - 通常これは1:1重複です
+check_button_general_same_size_tooltip = 結果として同じサイズのファイルを無視 - 通常、これらは1:1重複です
 main_label_size_bytes_tooltip = スキャンで使用されるファイルのサイズ
 # Upper window
 upper_tree_view_included_folder_column_title = 検索するフォルダ
@@ -167,11 +167,16 @@ upper_allowed_extensions_tooltip =
     複数の拡張子を一度に追加するマクロ: IMAGE, VIDEO, MUSIC, TEXT も利用可能です。
     
     使用例: ".exe, IMAGE, VIDEO, .rar, 7z" - これは画像（jpg、pngなど）、動画（avi、mp4など）、exe、rar、7zファイルがスキャンされることを意味します。
+upper_excluded_extensions_tooltip =
+    スキャンで無視される無効なファイルの一覧です。
+    
+    許可された拡張子と無効化された拡張子の両方を使用する場合、この拡張子の方が優先度が高いので、ファイルはチェックされません。
 upper_excluded_items_tooltip =
     除外された項目はワイルドカード * を含んでいる必要があり、カンマで区切る必要があります。
     ディレクトリを除外するよりも遅いので注意してください。
 upper_excluded_items = 除外するアイテム:
 upper_allowed_extensions = 許可される拡張子:
+upper_excluded_extensions = 無効なエクステンション:
 # Popovers
 popover_select_all = すべて選択
 popover_unselect_all = すべて選択解除
@@ -249,10 +254,10 @@ bottom_hardlink_button_tooltip =
     グループ内の2つ以上の結果が選択されている場合にのみ機能します。
     最初の結果は変更されず、2番目以降の結果が最初の結果にハードリンクされます。
 bottom_hardlink_button_not_available_tooltip =
-    Create hardlinks.
-    Button is disabled, because hardlinks cannot be created.
-    Hardlinks only works with administrator privileges on Windows, so be sure to run app as administrator.
-    If app already works with such privileges check for similar issues on Github.
+    ハードリンクを作成する。
+    ハードリンクを作成できないため、ボタンは無効になっています。
+    ハードリンクはWindowsの管理者権限でのみ動作するので、アプリは必ず管理者として実行してください。
+    アプリがすでにそのような権限で動作している場合は、Githubに同様の問題がないか確認してください。
 bottom_move_button_tooltip =
     選択したフォルダにファイルを移動します。
     ディレクトリツリーを維持したまま、すべてのファイルをフォルダにコピーします。
@@ -333,7 +338,7 @@ settings_multiple_image_preview_checkbutton = 画像のプレビューを表示
 settings_multiple_clear_cache_button_tooltip =
     古いキャッシュエントリを手動でクリアします。
     自動クリアが無効の場合にのみ使用する必要があります。
-settings_multiple_clear_cache_button = 画像キャッシュから古い結果を削除
+settings_multiple_clear_cache_button = キャッシュから古い結果を削除します。
 
 ## Duplicates
 
@@ -413,6 +418,12 @@ progress_scanning_size_name = 名前と { $file_number } ファイルのサイ�
 progress_scanning_name = { $file_number } ファイルの名前をスキャン中
 progress_analyzed_partial_hash = { $file_checked }/{ $all_files } ファイルの部分ハッシュを分析中
 progress_analyzed_full_hash = { $file_checked }/{ $all_files } ファイルの完全ハッシュを分析中
+progress_prehash_cache_loading = プレハッシュキャッシュを読み込み中
+progress_prehash_cache_saving = プレハッシュキャッシュを保存しています
+progress_hash_cache_loading = ハッシュキャッシュを読み込み中
+progress_hash_cache_saving = ハッシュキャッシュを保存中
+progress_cache_loading = キャッシュを読み込み中
+progress_cache_saving = キャッシュを保存中
 progress_current_stage = 現在のステージ:{ "  " }
 progress_all_stages = すべてのステージ:{ "  " }
 # Saving loading 
@@ -466,7 +477,7 @@ move_file_failed = ファイル { $name } を移動できませんでした、�
 move_files_title_dialog = 重複したファイルの移動先フォルダを選択
 move_files_choose_more_than_1_path = 重複したファイルをコピーするには、1つのパスのみを選択する必要があります、{ $path_number } つ選択されました。
 move_stats = { $num_files }/{ $all_files } アイテムを適切に移動しました
-save_results_to_file = ファイル { $name } に結果を保存しました
+save_results_to_file = txtファイルとjsonファイルの両方を { $name } フォルダに保存しました。
 search_not_choosing_any_music = エラー: 音楽検索タイプのチェックボックスを少なくとも1つ選択する必要があります。
 search_not_choosing_any_broken_files = エラー: チェックされた壊れたファイルの種類のチェックボックスを少なくとも1つ選択する必要があります。
 include_folders_dialog_title = 含めるフォルダ

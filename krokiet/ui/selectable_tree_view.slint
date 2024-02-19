@@ -9,10 +9,10 @@ export component SelectableTableView inherits Rectangle {
     callback item_opened(string);
     in property <[string]> columns;
     in-out property <[MainListModel]> values: [
-        {checked: false, selected_row: false, header_row: true, full_header_row: false, val_str: ["kropkarz", "/Xd1", "24.10.2023"], val_int: []} ,
-        {checked: false, selected_row: false, header_row: false, full_header_row: false, val_str: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []} ,
-        {checked: false, selected_row: false, header_row: false, full_header_row: false, val_str: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []} ,
-        {checked: true, selected_row: false, header_row: false, full_header_row: false, val_str: ["lokkaler", "/Xd1/Vide2", "01.23.1911"], val_int: []}
+        {checked: false, selected_row: false, header_row: true, filled_header_row: false, val_str: ["kropkarz", "/Xd1", "24.10.2023"], val_int: []} ,
+        {checked: false, selected_row: false, header_row: false, filled_header_row: false, val_str: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []} ,
+        {checked: false, selected_row: false, header_row: false, filled_header_row: false, val_str: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []} ,
+        {checked: true, selected_row: false, header_row: false, filled_header_row: false, val_str: ["lokkaler", "/Xd1/Vide2", "01.23.1911"], val_int: []}
     ];
     in-out property <[length]> column_sizes: [30px, 80px, 150px, 160px];
     private property <int> column_number: column-sizes.length + 1;
@@ -42,7 +42,7 @@ export component SelectableTableView inherits Rectangle {
                         width: 1px;
                         background: gray;
                         TouchArea {
-                            width: 5px;
+                            width: 8px;
                             x: (parent.width - self.width) / 2;
                             property <length> cached;
                             pointer-event(event) => {
@@ -96,7 +96,7 @@ export component SelectableTableView inherits Rectangle {
                         }
                     }
                     double-clicked => {
-                            if (r.header_row && !r.full_header_row) {
+                            if (r.header_row && !r.filled_header_row) {
                                 return;
                             }
                             Callabler.item_opened(r.val_str[root.parentPathIdx - 1] + "/" + r.val_str[root.fileNameIdx - 1])
@@ -104,7 +104,7 @@ export component SelectableTableView inherits Rectangle {
                     pointer-event(event) => {
                         // TODO this should be clicked by double-click - https://github.com/slint-ui/slint/issues/4235
                         if (event.button == PointerEventButton.right && event.kind == PointerEventKind.up) {
-                            if (r.header_row && !r.full_header_row) {
+                            if (r.header_row && !r.filled_header_row) {
                                 return;
                             }
                             Callabler.item_opened(r.val_str[root.parentPathIdx - 1])

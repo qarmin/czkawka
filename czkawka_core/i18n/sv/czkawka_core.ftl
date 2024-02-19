@@ -16,7 +16,6 @@ core_file_no_modification_date = Det går inte att hämta ändringsdatum från f
 core_folder_no_modification_date = Det går inte att hämta ändringsdatum från mappen { $name }, anledning { $reason }
 core_missing_no_chosen_included_directory = Minst en katalog måste tillhandahållas
 core_directory_wildcard_no_supported = Kataloger: Wildcards i sökvägen stöds inte, ignorerar { $path }
-core_directory_relative_path = Kataloger: Relativ sökväg stöds inte, ignorerar { $path }
 core_directory_must_exists = Kataloger: Tillhandahållen mappsökväg måste finnas, ignorerar { $path }
 core_directory_must_be_directory = Kataloger: Tillhandahållen sökväg måste peka på katalogen, ignorerar { $path }
 core_included_directory_zero_valid_directories = Inkluderad katalog FEL: Hittas inte ens en korrekt sökväg till inkluderad som krävs

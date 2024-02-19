@@ -4,7 +4,7 @@ pub struct Language {
     pub short_text: &'static str,
 }
 
-pub const LANGUAGES_ALL: [Language; 15] = [
+pub const LANGUAGES_ALL: &[Language] = &[
     Language {
         combo_box_text: "English",
         short_text: "en",
@@ -65,12 +65,32 @@ pub const LANGUAGES_ALL: [Language; 15] = [
         combo_box_text: "Swedish (Svenska)",
         short_text: "sv",
     },
+    Language {
+        combo_box_text: "المملكة العربية السعودية (Saudi Arabia)",
+        short_text: "ar",
+    },
+    Language {
+        combo_box_text: "България (Bulgaria)",
+        short_text: "bg",
+    },
+    Language {
+        combo_box_text: "Ελλάδα (Greece)",
+        short_text: "el",
+    },
+    Language {
+        combo_box_text: "Nederland (Netherlands)",
+        short_text: "nl",
+    },
+    Language {
+        combo_box_text: "România (Romania)",
+        short_text: "ro",
+    },
 ];
 
 pub fn get_language_from_combo_box_text(combo_box_text: &str) -> Language {
     for lang in LANGUAGES_ALL {
         if lang.combo_box_text == combo_box_text {
-            return lang;
+            return lang.clone();
         }
     }
 

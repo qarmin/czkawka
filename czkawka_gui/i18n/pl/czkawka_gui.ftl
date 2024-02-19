@@ -60,21 +60,21 @@ duplicate_check_method_tooltip =
     
     Hash - Znajduje pliki, które mają tę samą zawartość. Ten tryb haszuje plik, a następnie porównuje utworzony skrót(hash) aby znaleźć duplikaty. Ten tryb jest najbezpieczniejszym sposobem na znalezienie duplikatów. Aplikacja używa pamięci podręcznej, więc drugie i kolejne skanowanie tych samych danych powinno być dużo szybsze niż za pierwszym razem.
 image_hash_size_tooltip =
-    Każdy sprawdzony obraz generuje hash, który można porównać z innymi a niewielka różnica między nimi oznacza, że te obrazy są podobne.
+    Każdy zaznaczony obraz tworzy specjalny skrót, który można porównać ze sobą, a niewielka różnica między nimi oznacza, że obrazy te są podobne.
     
-    Hash wielkości 8 jest dość dobry do wyszukiwania obrazów, które są tylko niewiele podobne do oryginału. Z większą ilością obrazów(>1000) będzie generować dużą ilość niepoprawnych wyników, więc w takim przypadku zalecam użycie większego hashu.
+    8 hashh rozmiar jest dość dobry do wyszukiwania obrazów, które są tylko trochę podobne do oryginału. Dzięki większemu zestawowi zdjęć (>1000), spowoduje to uzyskanie dużej ilości fałszywych dodatnich, więc zalecam użycie większego rozmiaru skrótu w tym przypadku.
     
-    16 to domyślny rozmiar hashu, który jest całkiem dobrym kompromisem między znalezieniem nawet nieco podobnych obrazów a niewielkim poziomem kolizji pomiędzy nimi.
+    16 to domyślny rozmiar hasha, który jest dość dobrym kompromisem między znalezieniem nawet nieco podobnych obrazów a zaledwie niewielką ilością kolizji haszujących.
     
-    32 i 64 znajdują tylko bardzo podobne zdjęcia, ale prawie nie powinny mieć kolizji (może z wyjątkiem niektórych obrazów z kanałem alfa(przezroczystością)).
+    32 i 64 hashy znajdują tylko bardzo podobne obrazy, ale nie powinny mieć prawie żadnych fałszywych pozytywnych (może z wyjątkiem niektórych obrazów z kanałem alfa).
 image_resize_filter_tooltip =
-    Aby obliczyć hash obrazu, biblioteka musi najpierw zmienić(zwykle zmniejszyć) jego rozmiar.
+    Aby obliczyć skrót obrazu, biblioteka musi najpierw zmienić jego rozmiar.
     
-    W zależności od wybranego algorytmu, zmiejszony obraz użyty do obliczenia skrótu może wyglądać nieco inaczej.
+    Dołącz do wybranego algorytmu, wynikowy obraz użyty do obliczenia skrótu będzie wyglądał nieco inaczej.
     
-    Najszybszy algorytm do użycia, ale również taki, który daje najgorsze wyniki, to Nearest i domyślnie jest włączony, ponieważ przy rozmiarze skrótu 16x16 jego niższa jakość, nie jest zbytnio widoczna.
+    Najszybszy algorytm do użycia, ale także ten, który daje najgorsze wyniki, jest najbardziej potrzebny. Domyślnie jest włączona, ponieważ przy rozmiarze skrótu 16x16 jego jakość nie jest naprawdę widoczna.
     
-    Przy rozmiarze hashu 8 zaleca się użycie innego algorytmu niż Nearest, aby mieć obraz mógł zostać lepiej zakwalifikowany do danej grupy.
+    Przy rozmiarze skrótu 8x8 zaleca się użycie innego algorytmu niż najbliższy, aby mieć lepsze grupy obrazów.
 image_hash_alg_tooltip =
     Użytkownicy mogą wybrać jeden z wielu algorytmów obliczania hashu.
     
@@ -129,7 +129,7 @@ main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = Archiwa
 main_check_box_broken_files_image = Obraz
 check_button_general_same_size = Ignoruj identyczny rozmiar
-check_button_general_same_size_tooltip = Wyrzuca z wyników skanowania pliki, które posiadają identyczny rozmiar, po to by w wynikach zostały tylko niemal identyczne rekordy.
+check_button_general_same_size_tooltip = Ignoruj pliki o identycznym rozmiarze w wynikach - zazwyczaj są to duplikaty 1:1
 main_label_size_bytes_tooltip = Rozmiar plików które będą zawarte przy przeszukiwaniu
 # Upper window
 upper_tree_view_included_folder_column_title = Foldery do Przeszukania
@@ -167,11 +167,16 @@ upper_allowed_extensions_tooltip =
     Istnieją makra, które umożliwiają dołączenie za jednym razem określonych typów plików IMAGE, VIDEO, MUSIC, TEXT.
     
     Przykład użycia ".exe, IMAGE, VIDEO, .rar, 7z" - oznacza że obrazy (np. jpg, png), filmy (np. avi, mp4), exe, rar i 7z zostaną sprawdzone.
+upper_excluded_extensions_tooltip =
+    Lista wyłączonych plików, które zostaną zignorowane w skanowaniu.
+    
+    Gdy używasz zarówno dozwolonych, jak i wyłączonych rozszerzeń, ten ma wyższy priorytet, więc plik nie zostanie sprawdzony.
 upper_excluded_items_tooltip =
     Wykluczone elementy muszą zawierać znak * (który odpowiada za dowolny ciąg znaków) i powinny być oddzielone przecinkami.
     Jest to wolniejszy sposób od zwykłego wykluczania katalogów, więc należy używać go ostrożnie.
 upper_excluded_items = Ignorowane Obiekty:
 upper_allowed_extensions = Dozwolone Rozszerzenia:
+upper_excluded_extensions = Wyłączone rozszerzenia:
 # Popovers
 popover_select_all = Zaznacz wszystko
 popover_unselect_all = Odznacz wszystko
@@ -333,7 +338,7 @@ settings_multiple_image_preview_checkbutton = Pokazuj podgląd obrazów
 settings_multiple_clear_cache_button_tooltip =
     Ręcznie wyczyść pamięć podręczną przestarzałych wpisów.
     To powinno być używane tylko wtedy, gdy automatyczne czyszczenie zostało wyłączone.
-settings_multiple_clear_cache_button = Usuń nieaktualne dane z pamięci podręcznej
+settings_multiple_clear_cache_button = Usuń nieaktualne wyniki z pamięci podręcznej.
 
 ## Duplicates
 
@@ -413,6 +418,12 @@ progress_scanning_size_name = Skanowanie nazwy i rozmiaru pliku { $file_number }
 progress_scanning_name = Sprawdzanie nazwy { $file_number } pliku
 progress_analyzed_partial_hash = Obliczanie częściowego hashu { $file_checked }/{ $all_files } pliku
 progress_analyzed_full_hash = Obliczanie pełnego hashu { $file_checked }/{ $all_files } pliku
+progress_prehash_cache_loading = Ładowanie pamięci podręcznej prehashu
+progress_prehash_cache_saving = Zapisywanie pamięci podręcznej prehashu
+progress_hash_cache_loading = Ładowanie pamięci podręcznej hash
+progress_hash_cache_saving = Zapisywanie pamięci podręcznej skrótu
+progress_cache_loading = Ładowanie pamięci podręcznej
+progress_cache_saving = Zapisywanie pamięci podręcznej
 progress_current_stage = Aktualny Etap:{ "  " }
 progress_all_stages = Wszystkie Etapy:{ "  " }
 # Saving loading 
@@ -470,7 +481,7 @@ move_file_failed = Nie można przenieść pliku { $name }, powód { $reason }
 move_files_title_dialog = Wybierz folder, do którego zostaną przeniesione pliki
 move_files_choose_more_than_1_path = Tylko jedna ścieżka może być wybrana, aby móc skopiować zduplikowane pliki, wybrano { $path_number }.
 move_stats = Poprawnie przeniesiono { $num_files }/{ $all_files } elementów
-save_results_to_file = Zapisano wyniki do pliku { $name }
+save_results_to_file = Zapisano wyniki zarówno do plików txt, jak i json w folderze { $name }.
 search_not_choosing_any_music = BŁĄD: Musisz zaznaczyć przynajmniej jeden pole, według którego będą wyszukiwane podobne pliki muzyczne.
 search_not_choosing_any_broken_files = BŁĄD: Musisz wybrać co najmniej jedno pole wyboru z rodzajem uszkodzonych plików.
 include_folders_dialog_title = Foldery do przeszukiwania

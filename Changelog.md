@@ -1,4 +1,4 @@
-## Version 7.0.0 - ?
+## Version 7.0.0 - 19.02.2024r
 ### BREAKING CHANGES
 - Reducing size of cache files, made old cache files incompatible with new version
 - `-C` in CLI now saves as compact json
@@ -13,6 +13,7 @@
 - Added scan progress bar - [#1183](https://github.com/qarmin/czkawka/pull/1183)
 - Clean and safe cancelling of scan - [#1183](https://github.com/qarmin/czkawka/pull/1183)
 - Unification of CLI arguments - [#1183](https://github.com/qarmin/czkawka/pull/1183)
+- Hardlink support for similar images/videos - [#1201](https://github.com/qarmin/czkawka/pull/1201)
 
 ### Krokiet GUI
 - Initial release of new gui - [#1102](https://github.com/qarmin/czkawka/pull/1102)
@@ -33,7 +34,7 @@
 - Decrease a little size of cache by few percents and improve loading/saving speed - [#1159](https://github.com/qarmin/czkawka/pull/1159)
 - Added ability to remove from scan files with excluded extensions - [#1184](https://github.com/qarmin/czkawka/pull/1102)
 - Fixed not showing in similar images results, files with same hashes when using reference folders - [#1184](https://github.com/qarmin/czkawka/pull/1102)
-- Optimize release binaries with LTO(~25% smaller, ~5/10% faster) - [#1184](https://github.com/qarmin/czkawka/pull/1102)
+- Optimize release binaries with LTO(~25/50% smaller, ~5/10% faster) - [#1184](https://github.com/qarmin/czkawka/pull/1102)
 
 ## Version 6.1.0 - 15.10.2023r
 - BREAKING CHANGE - Changed cache saving method, deduplicated, optimized and simplified procedure(all files needs to be hashed again) - [#1072](https://github.com/qarmin/czkawka/pull/1072), [#1086](https://github.com/qarmin/czkawka/pull/1086)

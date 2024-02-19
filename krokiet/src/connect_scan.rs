@@ -24,7 +24,7 @@ use czkawka_core::similar_images::{ImagesEntry, SimilarImages};
 use czkawka_core::similar_videos::{SimilarVideos, VideosEntry};
 use czkawka_core::temporary::{Temporary, TemporaryFileEntry};
 
-use crate::common::split_u64_into_i32s;
+use crate::common::{check_if_all_included_dirs_are_referenced, split_u64_into_i32s};
 use crate::settings::{
     collect_settings, get_audio_check_type_idx, get_biggest_item_idx, get_duplicates_check_method_idx, get_duplicates_hash_type_idx, get_image_hash_alg_idx,
     get_resize_algorithm_idx, SettingsCustom, ALLOWED_AUDIO_CHECK_TYPE_VALUES, ALLOWED_BIG_FILE_SIZE_VALUES, ALLOWED_DUPLICATES_CHECK_METHOD_VALUES,
@@ -35,9 +35,15 @@ use crate::{CurrentTab, GuiState, MainListModel, MainWindow, ProgressToSend};
 pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>) {
     let a = app.as_weak();
     app.on_scan_starting(move |active_tab| {
+        let app = a.upgrade().unwrap();
+
+        if check_if_all_included_dirs_are_referenced(&app) {
+            app.invoke_scan_ended("Cannot start scan when all included directories are set as referenced folders.".into());
+            return;
+        }
+
         let progress_sender = progress_sender.clone();
         let stop_receiver = stop_receiver.clone();
-        let app = a.upgrade().unwrap();
 
         app.set_progress_datas(ProgressToSend {
             all_progress: 0,
@@ -163,7 +169,7 @@ fn scan_duplicates(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, s
 fn write_duplicate_results(app: &MainWindow, vector: Vec<(Option<DuplicateEntry>, Vec<DuplicateEntry>)>, messages: String) {
     let items_found = vector.len();
     let items = Rc::new(VecModel::default());
-    for (ref_fe, vec_fe) in vector {
+    for (ref_fe, vec_fe) in vector.into_iter().rev() {
         if let Some(ref_fe) = ref_fe {
             let (data_model_str, data_model_int) = prepare_data_model_duplicates(&ref_fe);
             insert_data_to_model(&items, data_model_str, data_model_int, Some(true));
@@ -516,7 +522,7 @@ fn scan_similar_music(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>
 
             if music_similarity == MusicSimilarity::NONE {
                 a.upgrade_in_event_loop(move |app| {
-                    app.set_text_summary_text("Cannot find similar music files without any similarity method selected.".into());
+                    app.invoke_scan_ended("Cannot find similar music files without any similarity method selected.".into());
                 })
                 .unwrap();
                 return Ok(());
@@ -706,7 +712,7 @@ fn scan_broken_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>,
 
             if checked_types == CheckedTypes::NONE {
                 a.upgrade_in_event_loop(move |app| {
-                    app.set_text_summary_text("Cannot find broken files without any file type selected.".into());
+                    app.invoke_scan_ended("Cannot find broken files without any file type selected.".into());
                 })
                 .unwrap();
                 return Ok(());
@@ -793,11 +799,11 @@ fn prepare_data_model_bad_extensions(fe: &BadFileEntry) -> (ModelRc<SharedString
     (data_model_str, data_model_int)
 }
 ////////////////////////////////////////// Common
-fn insert_data_to_model(items: &Rc<VecModel<MainListModel>>, data_model_str: ModelRc<SharedString>, data_model_int: ModelRc<i32>, full_header_row: Option<bool>) {
+fn insert_data_to_model(items: &Rc<VecModel<MainListModel>>, data_model_str: ModelRc<SharedString>, data_model_int: ModelRc<i32>, filled_header_row: Option<bool>) {
     let main = MainListModel {
         checked: false,
-        header_row: full_header_row.is_some(),
-        full_header_row: full_header_row.unwrap_or(false),
+        header_row: filled_header_row.is_some(),
+        filled_header_row: filled_header_row.unwrap_or(false),
         selected_row: false,
         val_str: ModelRc::new(data_model_str),
         val_int: ModelRc::new(data_model_int),

@@ -58,21 +58,21 @@ duplicate_check_method_tooltip =
     
     Hash - Acha arquivos que têm o mesmo conteúdo. Este modo faz o hash do arquivo e entção compara este hash para achar duplicatas. Este modo é o jeito mais seguro de achar duplicatas. O aplicativo usa muito cache, logo, a segunda e outras varreduras dos mesmos dados devem ser muito mais rápidas que a primeira.
 image_hash_size_tooltip =
-    Cada imagem marcada produz um hash especial que pode ser comparado entre si, e uma pequena diferença entre eles significa que estas imagens são semelhantes.
+    Cada imagem marcada produz um hash especial que pode ser comparado entre si. e uma pequena diferença entre eles significa que essas imagens são parecidas. O tamanho hash
     
-    8 de tamanho do hash é muito bom para achar imagens que só são um pouco semelhantes às originais. Um maior conjunto de imagens (>1000) produzirá uma grande quantidade de falsos positivos, então eu recomendo usar para tal quantidade um tamanho de hash maior.
+    8 é muito bom para encontrar imagens que são apenas um pouco semelhantes ao original. Com um maior conjunto de imagens (>1000), isso irá produzir uma grande quantidade de falsos positivos, então eu recomendo usar um tamanho de hash maior neste caso.
     
-    16 é o tamanho de hash padrão, que é um compromisso muito bom entre achar até mesmo imagens só um pouco semelhantes e ter uma pequena quantidade de colisões de hash.
+    16 é o tamanho hash padrão que é um bom compromisso entre encontrar até mesmo algumas imagens semelhantes e ter apenas uma pequena quantidade de colisões hash.
     
-    Hashes de tamanho 32 e 64 só acham imagens muito semelhantes, mas quase não devem ter falsos positivos (talvez exceto algumas imagens com o canal alfa).
+    32 e 64 hashes só encontram imagens muito semelhantes, mas quase não devem ter falsos positivos (talvez, exceto algumas imagens com o canal alfa).
 image_resize_filter_tooltip =
-    Para calcular o hash da imagem, a biblioteca deve primeiro a redimensionar.
+    To compute hash of image, the library must first resize it.
     
-    Dependendo do algoritmo escolhido, a imagem resultante usada para calcular o hash pode parecer um pouco diferente.
+    Depend on chosen algorithm, the resulting image used to calculate hash will looks a little different.
     
-    O algoritmo mais rápido para ser usado, mas também aquele que dá os piores resultados é o mais próximo, que está habilitado por padrão, pois com um tamanho de hash de 16x16, a qualidade inferior não é realmente visível.
+    The fastest algorithm to use, but also the one which gives the worst results, is Nearest. It is enabled by default, because with 16x16 hash size lower quality it is not really visible.
     
-    O tamanho de hash 8x8 é recomendado para usar um algoritmo diferente do que precisa, para ter melhores grupos de imagens.
+    With 8x8 hash size it is recommended to use a different algorithm than Nearest, to have better groups of images.
 image_hash_alg_tooltip =
     Os usuários podem escolher entre um dos muitos algoritmos de cálculo do hash.
     
@@ -127,7 +127,7 @@ main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = Arquivar
 main_check_box_broken_files_image = Imagem
 check_button_general_same_size = Ignorar o mesmo tamanho
-check_button_general_same_size_tooltip = Ignorar dos resultados, arquivos com tamanho idêntico — geralmente isto são duplicatas 1:1
+check_button_general_same_size_tooltip = Ignorar arquivos com tamanho idêntico nos resultados - geralmente estes são duplicados 1:1
 main_label_size_bytes_tooltip = Tamanho dos arquivos que serão usados na verificação
 # Upper window
 upper_tree_view_included_folder_column_title = Diretórios para buscar
@@ -165,11 +165,16 @@ upper_allowed_extensions_tooltip =
     Os seguintes Macros, que adicionam várias extensões de uma só vez, também estão disponíveis: IMAGE, VIDEO, MUSIC, TEXT.
     
     Exemplo de uso ".exe, IMAGE, VIDEO, .rar, 7z" - isto significa que as imagens (e. . jpg, png), vídeos (por exemplo, avi, mp4), exe, rar e arquivos 7z serão escaneados.
+upper_excluded_extensions_tooltip =
+    Lista de arquivos desabilitados que serão ignorados na verificação.
+    
+    Ao usar extensões permitidas e desativadas, este tem maior prioridade, então o arquivo não será marcado.
 upper_excluded_items_tooltip =
     Itens excluídos devem conter * curinga e devem ser separados por vírgulas.
     Isto é mais lento do que a exclusão de diretórios, logo, use-o com cuidado.
 upper_excluded_items = Itens excluídos:
 upper_allowed_extensions = Extensões permitidas:
+upper_excluded_extensions = Extensões desabilitadas:
 # Popovers
 popover_select_all = Selecionar todos
 popover_unselect_all = Desmarcar todos
@@ -330,7 +335,7 @@ settings_multiple_image_preview_checkbutton = Exibir pré-visualização da imag
 settings_multiple_clear_cache_button_tooltip =
     Limpar manualmente o cache de entradas desatualizadas.
     Isto só deve ser usado se a limpeza automática houver sido desativada.
-settings_multiple_clear_cache_button = Remover resultados desatualizados do cache de imagens
+settings_multiple_clear_cache_button = Remover resultados desatualizados do cache.
 
 ## Duplicates
 
@@ -410,6 +415,12 @@ progress_scanning_size_name = Verificando nome e tamanho de { $file_number } arq
 progress_scanning_name = Verificando nome de { $file_number } arquivo
 progress_analyzed_partial_hash = Hash parcial analisado de { $file_checked }/{ $all_files } arquivos
 progress_analyzed_full_hash = Hash completo analisado de { $file_checked }/{ $all_files } arquivos
+progress_prehash_cache_loading = Carregando cache de pré-hash
+progress_prehash_cache_saving = Salvando cache pré-hash
+progress_hash_cache_loading = Carregando cache de hash
+progress_hash_cache_saving = Salvando cache de hash
+progress_cache_loading = Carregando cache
+progress_cache_saving = Salvando cache
 progress_current_stage = Estágio atual:{ " " }
 progress_all_stages = Todo estágio:{ " " }
 # Saving loading 
@@ -463,7 +474,7 @@ move_file_failed = Falha ao mover o arquivo { $name }, razão { $reason }
 move_files_title_dialog = Escolha a pasta para a qual você quer mover arquivos duplicados
 move_files_choose_more_than_1_path = Só um caminho pode ser selecionado para poder copiar seus arquivos duplicados, selecionado { $path_number }.
 move_stats = Devidamente movidos { $num_files }/{ $all_files } itens
-save_results_to_file = Resultados salvos no arquivo { $name }
+save_results_to_file = Resultados salvos tanto para arquivos txt quanto json na pasta { $name }.
 search_not_choosing_any_music = ERRO: Você deve selecionar ao menos uma caixa de seleção com tipos de busca de música.
 search_not_choosing_any_broken_files = ERRO: Você deve selecionar ao menos uma caixa de seleção com tipo de arquivos quebrados.
 include_folders_dialog_title = Pastas para incluir

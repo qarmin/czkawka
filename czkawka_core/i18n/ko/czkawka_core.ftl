@@ -16,7 +16,6 @@ core_file_no_modification_date = { $name } 파일의 수정된 시각을 읽을 
 core_folder_no_modification_date = { $name } 폴더의 수정된 시각을 읽을 수 없습니다. 이유: { $reason }
 core_missing_no_chosen_included_directory = 적어도 1개 이상의 디렉터리가 주어져야 합니다.
 core_directory_wildcard_no_supported = 디렉터리: 경로에는 와일드 카드가 지원되지 않습니다. "{ $path }"는 무시됩니다.
-core_directory_relative_path = 디렉터리: 경로에는 상대 경로가 지원되지 않습니다. "{ $path }"는 무시됩니다.
 core_directory_must_exists = 디렉터리: 주어진 폴더 경로는 반드시 존재해야 합니다. "{ $path }"는 무시됩니다.
 core_directory_must_be_directory = 디렉터리: 주어진 경로는 디렉터리를 가리켜야 합니다. "{ $path }"는 무시됩니다.
 core_included_directory_zero_valid_directories = 검색 대상 디렉터리 오류: 적어도 1개 이상의 유효한 경로가 주어져야 합니다. 유효한 경로가 하나도 없습니다.

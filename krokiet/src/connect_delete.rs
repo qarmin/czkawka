@@ -37,7 +37,7 @@ fn handle_delete_items(app: &MainWindow, items: &ModelRc<MainListModel>, active_
     if !entries_to_delete.is_empty() {
         let vec_items_to_remove = collect_full_path_from_model(&entries_to_delete, active_tab);
         let errors = remove_selected_items(vec_items_to_remove, active_tab, remove_to_trash);
-        deselect_all_items(&mut entries_left);
+        deselect_all_items(&mut entries_left); // TODO - this now probably is not needed, because selected items were removed
         app.set_text_summary_text(format!("Deleted {} items, failed to remove {} items", entries_to_delete.len() - errors.len(), errors.len()).into());
 
         let r = ModelRc::new(VecModel::from(entries_left)); // TODO here maybe should also stay old model if entries cannot be removed
@@ -60,8 +60,14 @@ fn remove_selected_items(items_to_remove: Vec<String>, active_tab: CurrentTab, r
         items_to_remove
             .into_par_iter()
             .filter_map(|item| {
-                if let Err(e) = std::fs::remove_file(item) {
-                    return Some(format!("Error while removing file: {e}"));
+                if remove_to_trash {
+                    if let Err(e) = trash::delete(item) {
+                        return Some(format!("Error while moving to trash: {e}"));
+                    }
+                } else {
+                    if let Err(e) = std::fs::remove_file(item) {
+                        return Some(format!("Error while removing file: {e}"));
+                    }
                 }
                 None
             })

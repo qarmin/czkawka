@@ -59,21 +59,21 @@ duplicate_check_method_tooltip =
     
     Hash - Trova i file che hanno lo stesso contenuto. Questa modalità fa hash sul file e in seguito confronta questo hash per trovare i duplicati. Questa modalità è il modo più sicuro per trovare i duplicati. App usa pesantemente la cache, quindi la seconda e ulteriori scansioni degli stessi dati dovrebbero essere molto più veloce del primo.
 image_hash_size_tooltip =
-    Ogni immagine selezionata produce hash speciale che può essere confrontato con l'altro, e piccola differenza tra di loro significa che queste immagini sono simili.
+    Ogni immagine selezionata produce un hash speciale che può essere confrontato l'uno con l'altro, e una piccola differenza tra loro significa che queste immagini sono simili.
     
-    8 dimensioni di hash sono abbastanza buone per trovare immagini che sono solo poco simili all'originale. Con serie più grande di immagini (>1000) produrrà la grande quantità di falsi positivi, quindi consiglio di usare per una tale quantità più grande dimensioni di hash.
+    8 hash size è abbastanza buono per trovare immagini che sono solo un po 'simili all'originale. Con un insieme più grande di immagini (>1000), questo produrrà una grande quantità di falsi positivi, quindi vi consiglio di utilizzare una dimensione di hash più grande in questo caso.
     
-    16 è la dimensione predefinita dell'hash che è abbastanza buon compromesso tra trovare anche un po 'di immagini simili e avere una piccola quantità di collisioni di hash.
+    16 è la dimensione predefinita dell'hash che è abbastanza un buon compromesso tra trovare anche un po 'di immagini simili e avere solo una piccola quantità di collisioni di hash.
     
-    32 e 64 hash trovano solo immagini molto simili, ma quasi non dovrebbero avere falsi positivi (forse tranne alcune immagini con canale alfa).
+    32 e 64 hash trovano solo immagini molto simili, ma non dovrebbero avere quasi falsi positivi (forse tranne alcune immagini con canale alfa).
 image_resize_filter_tooltip =
     Per calcolare l'hash dell'immagine, la libreria deve prima ridimensionarla.
     
-    Dipende dall'algoritmo scelto, l'immagine risultante utilizzata per calcolare l'hash potrebbe sembrare poco diversa.
+    Dipende dall'algoritmo scelto, l'immagine risultante utilizzata per calcolare l'hash apparirà un po' diversa.
     
-    L'algoritmo più veloce da usare, ma anche uno che dà i peggiori risultati è il più vicino, è abilitato per impostazione predefinita, perché con dimensioni di hash 16x16, qualità inferiore non è realmente visibile.
+    L'algoritmo più veloce da usare, ma anche quello che dà i peggiori risultati, è più vicino. È abilitato per impostazione predefinita, perché con 16x16 dimensioni hash di qualità inferiore non è davvero visibile.
     
-    Con 8x8 hash dimensione si consiglia di utilizzare un algoritmo diverso rispetto al più vicino, per avere migliori gruppi di immagini.
+    Con 8x8 dimensioni di hash si consiglia di utilizzare un algoritmo diverso da quello più vicino, per avere migliori gruppi di immagini.
 image_hash_alg_tooltip =
     Gli utenti possono scegliere tra uno dei molti algoritmi di calcolo dell'hash.
     
@@ -128,7 +128,7 @@ main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = Compresso
 main_check_box_broken_files_image = Immagine
 check_button_general_same_size = Ignora stesse dimensioni
-check_button_general_same_size_tooltip = Nei risultati, ignora i file con le stesse dimensioni - solitamente questi sono duplicati 1:1
+check_button_general_same_size_tooltip = Ignora i file con dimensioni identiche nei risultati - di solito sono duplicati 1:1
 main_label_size_bytes_tooltip = Dimensione dei file utilizzati nella ricerca
 # Upper window
 upper_tree_view_included_folder_column_title = Cartelle di ricerca
@@ -166,11 +166,16 @@ upper_allowed_extensions_tooltip =
     Sono disponibili anche i seguenti Macro, che aggiungono più estensioni contemporaneamente: IMAGE, VIDEO, MUSIC, TESTO.
     
     Esempio di utilizzo ".exe, IMAGE, VIDEO, .rar, 7z" - questo significa che le immagini (e. . jpg, png), video (ad esempio avi, mp4), exe, rar e file 7z verranno analizzati.
+upper_excluded_extensions_tooltip =
+    Elenco dei file disabilitati che verranno ignorati nella scansione.
+    
+    Quando si usano entrambe le estensioni consentite e disabilitate, questo ha la priorità maggiore, quindi il file non verrà selezionato.
 upper_excluded_items_tooltip =
     Gli elementi esclusi devono contenere * caratteri jolly e devono essere separati da virgole.
     Questo è più lento delle directory escluse, quindi usalo attentamente.
 upper_excluded_items = Voci escluse:
 upper_allowed_extensions = Estensioni permesse:
+upper_excluded_extensions = Estensioni Disabilitate:
 # Popovers
 popover_select_all = Seleziona tutto
 popover_unselect_all = Deseleziona tutto
@@ -332,7 +337,7 @@ settings_multiple_image_preview_checkbutton = Mostra anteprima immagini
 settings_multiple_clear_cache_button_tooltip =
     Pulisci manualmente la cache delle voci obsolete.
     Questo dovrebbe essere usato solo se la compensazione automatica è stata disabilitata.
-settings_multiple_clear_cache_button = Rimuove risultati obsoleti dalla cache delle immagini
+settings_multiple_clear_cache_button = Rimuovi i risultati obsoleti dalla cache.
 
 ## Duplicates
 
@@ -412,6 +417,12 @@ progress_scanning_size_name = Scansione nome e dimensione del file { $file_numbe
 progress_scanning_name = Leggendo il nome di { $file_number } file
 progress_analyzed_partial_hash = Analizzato gli hash parziali di { $file_checked }/{ $all_files } file
 progress_analyzed_full_hash = Analizzato gli hash completi di { $file_checked }/{ $all_files } file
+progress_prehash_cache_loading = Caricamento della cache prehash
+progress_prehash_cache_saving = Salvataggio della cache prehash
+progress_hash_cache_loading = Caricamento della cache hash
+progress_hash_cache_saving = Salvataggio della cache hash
+progress_cache_loading = Caricamento cache
+progress_cache_saving = Salvataggio cache
 progress_current_stage = Fase attuale:{ "  " }
 progress_all_stages = Tutte le fasi:{ "  " }
 # Saving loading 
@@ -465,7 +476,7 @@ move_file_failed = Spostamento file { $name } fallito, ragione { $reason }
 move_files_title_dialog = Seleziona la cartella dove vuoi spostare i file duplicati
 move_files_choose_more_than_1_path = Solo un percorso può essere selezionato per essere in grado di copiare i file duplicati, selezionato { $path_number }.
 move_stats = { $num_files }/{ $all_files } elementi spostati con successo
-save_results_to_file = Risultati salvati su file
+save_results_to_file = Risultati salvati sia in file txt che json nella cartella { $name }.
 search_not_choosing_any_music = ERRORE: Devi selezionare almeno una casella dei metodi di ricerca musicali.
 search_not_choosing_any_broken_files = ERRORE: è necessario selezionare almeno una casella di controllo selezionando il tipo di file danneggiati.
 include_folders_dialog_title = Cartelle incluse

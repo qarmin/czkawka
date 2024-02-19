@@ -16,7 +16,6 @@ core_file_no_modification_date = ファイル { $name } から変更日を取得
 core_folder_no_modification_date = フォルダ { $name } から変更日を取得できません、理由 { $reason }
 core_missing_no_chosen_included_directory = 少なくとも 1 つのディレクトリを指定する必要があります。
 core_directory_wildcard_no_supported = ディレクトリ: パス内のワイルドカードはサポートされていません。 { $path } を無視してください
-core_directory_relative_path = ディレクトリ: 相対パスはサポートされていません。 { $path } を無視してください
 core_directory_must_exists = ディレクトリ: 指定されたフォルダパスは、 { $path } を無視して終了する必要があります
 core_directory_must_be_directory = ディレクトリ: 指定されたパスはディレクトリを指す必要があります。 { $path } を無視します
 core_included_directory_zero_valid_directories = 含まれるディレクトリエラー: 必須の正しいパスが1つも見つかりません

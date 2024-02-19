@@ -16,7 +16,6 @@ core_file_no_modification_date = Nie udało się pobrać daty modyfikacji z plik
 core_folder_no_modification_date = Nie udało się pobrać daty modyfikacji z folderu { $name }, powód { $reason }
 core_missing_no_chosen_included_directory = Należy podać co najmniej jeden katalog
 core_directory_wildcard_no_supported = Katalogi: Wildcard na ścieżce nie są obsługiwane, ignorowanie { $path }
-core_directory_relative_path = Katalogi: Ścieżka względna nie jest wspierana, ignorowanie { $path }
 core_directory_must_exists = Katalogi: Podana ścieżka do folderu musi istnieć, ignorowanie { $path }
 core_directory_must_be_directory = Katalogi: Podana ścieżka musi wskazywać na katalog, ignorowanie { $path }
 core_included_directory_zero_valid_directories = Błąd katalogów do przeszukiwania: Nie znaleziono nawet jednej poprawnej ścieżki do przeszukania
