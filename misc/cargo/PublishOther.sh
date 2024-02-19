@@ -1,5 +1,5 @@
 #!/bin/bash
-NUMBER="6.1.0"
+NUMBER="7.0.0"
 CZKAWKA_PATH="/home/rafal"
 
 cd "$CZKAWKA_PATH"
@@ -29,6 +29,15 @@ then
 fi
 git reset --hard
 
+cd "$CZKAWKA_PATH/krokiet"
+cargo package
+if [ $(echo $?) != "0"  ]
+then
+  echo "Cargo package failed krokiet"
+  exit 1
+fi
+git reset --hard
+
 
 
 
@@ -38,6 +47,11 @@ cargo publish # --allow-dirty
 git reset --hard
 
 cd "$CZKAWKA_PATH/czkawka_gui"
+# sed -i "s/{ path = \"..\/czkawka_core\" }/\"=$NUMBER\"/g" "$CZKAWKA_PATH/czkawka_gui/Cargo.toml"
+cargo publish # --allow-dirty
+git reset --hard
+
+cd "$CZKAWKA_PATH/krokiet"
 # sed -i "s/{ path = \"..\/czkawka_core\" }/\"=$NUMBER\"/g" "$CZKAWKA_PATH/czkawka_gui/Cargo.toml"
 cargo publish # --allow-dirty
 git reset --hard
