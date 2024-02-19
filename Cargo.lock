@@ -1211,7 +1211,7 @@ checksum = "96a6ac251f4a2aca6b3f91340350eab87ae57c3f127ffeb585e92bd336717991"
 
 [[package]]
 name = "czkawka_cli"
-version = "6.1.0"
+version = "7.0.0"
 dependencies = [
  "clap",
  "crossbeam-channel",
@@ -1226,7 +1226,7 @@ dependencies = [
 
 [[package]]
 name = "czkawka_core"
-version = "6.1.0"
+version = "7.0.0"
 dependencies = [
  "anyhow",
  "audio_checker",
@@ -1275,7 +1275,7 @@ dependencies = [
 
 [[package]]
 name = "czkawka_gui"
-version = "6.1.0"
+version = "7.0.0"
 dependencies = [
  "chrono",
  "crossbeam-channel",
@@ -3342,7 +3342,7 @@ checksum = "e2db585e1d738fc771bf08a151420d3ed193d9d895a36df7f6f8a9456b911ddc"
 
 [[package]]
 name = "krokiet"
-version = "6.1.0"
+version = "7.0.0"
 dependencies = [
  "chrono",
  "crossbeam-channel",
