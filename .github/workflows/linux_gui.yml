@@ -22,7 +22,7 @@ jobs:
         run: rustup default ${{ matrix.toolchain }}
 
       - name: Enable LTO
-        run: sed -i 's/#lto = "fat"/lto = "fat"/g' Cargo.toml
+        run: sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
         if: ${{ (matrix.type == 'release') }}
 
       - name: Build Release Krokiet
@@ -52,7 +52,7 @@ jobs:
         run: rustup default ${{ matrix.toolchain }}
 
       - name: Enable LTO
-        run: sed -i 's/#lto = "fat"/lto = "fat"/g' Cargo.toml
+        run: sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
         if: ${{ (matrix.type == 'release') }}
 
       - name: Build Release Krokiet heif
@@ -82,7 +82,7 @@ jobs:
         run: rustup default ${{ matrix.toolchain }}
 
       - name: Enable LTO
-        run: sed -i 's/#lto = "fat"/lto = "fat"/g' Cargo.toml
+        run: sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
         if: ${{ (matrix.type == 'release') }}
 
       - name: Build Release Heif Libraw
@@ -124,7 +124,7 @@ jobs:
         run: rustup default ${{ matrix.toolchain }}
 
       - name: Enable LTO
-        run: sed -i 's/#lto = "fat"/lto = "fat"/g' Cargo.toml
+        run: sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
         if: ${{ (matrix.type == 'release') }}
 
       - name: Build Release

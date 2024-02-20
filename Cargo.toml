@@ -19,7 +19,7 @@ panic = "unwind"
 
 # LTO setting is disabled by default, because release mode is usually needed to develop app and compilation with LTO would take a lot of time
 # But it is used to optimize release builds(and probably also in CI, where time is not so important as in local development)
-#lto = "fat"
+#lto = "thin"
 
 # Optimize all dependencies except application/workspaces, even in debug builds
 [profile.dev.package."*"]
