@@ -198,7 +198,7 @@ pub fn connect_changing_settings_preset(app: &MainWindow) {
     app.global::<Callabler>().on_changed_settings_preset(move || {
         let app = a.upgrade().unwrap();
         let current_item = app.global::<Settings>().get_settings_preset_idx();
-        let loaded_data = load_data_from_file::<SettingsCustom>(get_config_file(current_item + 1));
+        let loaded_data = load_data_from_file::<SettingsCustom>(get_config_file(current_item));
         match loaded_data {
             Ok(loaded_data) => {
                 set_settings_to_gui(&app, &loaded_data);
