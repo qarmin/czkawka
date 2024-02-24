@@ -12,7 +12,7 @@ jobs:
   linux-krokiet-gui:
     strategy:
       matrix:
-        toolchain: [ stable, 1.74.0 ]
+        toolchain: [ stable, 1.75.0 ]
         type: [ release ]
     runs-on: ubuntu-20.04
     steps:
@@ -39,7 +39,7 @@ jobs:
   linux-krokiet-gui-heif:
     strategy:
       matrix:
-        toolchain: [ stable, 1.74.0 ]
+        toolchain: [ stable, 1.75.0 ]
         type: [ release ]
     runs-on: ubuntu-22.04
     steps:
@@ -69,7 +69,7 @@ jobs:
   linux-gui:
     strategy:
       matrix:
-        toolchain: [ stable, 1.74.0 ]
+        toolchain: [ stable, 1.75.0 ]
         type: [ release ]
     runs-on: ubuntu-22.04
     steps:
