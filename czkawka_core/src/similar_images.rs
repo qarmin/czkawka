@@ -279,6 +279,12 @@ impl SimilarImages {
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
             prepare_thread_handler_common(progress_sender, 1, 2, non_cached_files_to_check.len(), CheckingMethod::None, self.common_data.tool_type);
 
+        // Throw out images with not proper type - TODO why this happens, only broken cache?
+        let non_cached_files_to_check = non_cached_files_to_check
+            .into_iter()
+            .filter(|(_, file_entry)| file_entry.image_type != ImageType::Unknown)
+            .collect::<BTreeMap<_, _>>();
+
         debug!("hash_images - start hashing images");
         let mut vec_file_entry: Vec<ImagesEntry> = non_cached_files_to_check
             .into_par_iter()
