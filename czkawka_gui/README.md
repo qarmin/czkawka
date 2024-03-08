@@ -80,7 +80,7 @@ cargo run --release --bin czkawka_gui --features "heif,libraw"
 
 ### Windows
 
-Currently, there is are no instructions on how to compile the app on Windows natively.</br>
+Currently, there are no instructions on how to compile the app on Windows natively.</br>
 You can check for CI for instructions how to cross-compile the app from linux to windows (uses prebuilt docker
 image) - [CI Instructions](../.github/workflows/windows.yml)</br>
 There exists a mingw recipe which you can try to convert for your
