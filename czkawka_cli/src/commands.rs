@@ -94,7 +94,7 @@ pub struct DuplicatesArgs {
         value_parser = parse_minimal_file_size,
         default_value = "8192",
         help = "Minimum size in bytes",
-        long_help = "Minimum size of checked files in bytes, assigning bigger value may speed up searching"
+        long_help = "Minimum size of checked files in bytes; assigning bigger values may speed up searching"
     )]
     pub minimal_file_size: u64,
     #[clap(
@@ -103,7 +103,7 @@ pub struct DuplicatesArgs {
         value_parser = parse_maximal_file_size,
         default_value = "18446744073709551615",
         help = "Maximum size in bytes",
-        long_help = "Maximum size of checked files in bytes, assigning lower value may speed up searching"
+        long_help = "Maximum size of checked files in bytes; assigning lower values may speed up searching"
     )]
     pub maximal_file_size: u64,
     #[clap(
@@ -112,7 +112,7 @@ pub struct DuplicatesArgs {
         value_parser = parse_minimal_file_size,
         default_value = "257144",
         help = "Minimum cached file size in bytes",
-        long_help = "Minimum size of cached files in bytes, assigning bigger value may speed up the scan but loading the cache will be slower, assigning smaller value may slow down the scan and some files may need to be hashed again but loading the cache will be faster"
+        long_help = "Minimum size of cached files in bytes; assigning bigger values may speed up the scan, but loading the cache will be slower; assigning smaller values may slow down the scan and some files may need to be hashed again, but loading the cache will be faster"
     )]
     pub minimal_cached_file_size: u64,
     #[clap(
@@ -121,7 +121,7 @@ pub struct DuplicatesArgs {
         default_value = "HASH",
         value_parser = parse_checking_method_duplicate,
         help = "Search method (NAME, SIZE, HASH)",
-        long_help = "Methods to search files.\nNAME - Fast but but rarely usable,\nSIZE - Fast but not accurate, checking by the file's size,\nHASH - The slowest method, checking by the hash of the entire file"
+        long_help = "Methods to search files:\nNAME - Fast but but rarely usable;\nSIZE - Fast but not accurate, checking by the file's size;\nHASH - The slowest method, checking by the hash of the entire file."
     )]
     pub search_method: CheckingMethod,
     #[clap(flatten)]
@@ -188,7 +188,7 @@ pub struct SimilarImagesArgs {
         value_parser = parse_minimal_file_size,
         default_value = "16384",
         help = "Minimum size in bytes",
-        long_help = "Minimum size of checked files in bytes, assigning bigger value may speed up searching"
+        long_help = "Minimum size of checked files in bytes; assigning bigger values may speed up searching"
     )]
     pub minimal_file_size: u64,
     #[clap(
@@ -197,7 +197,7 @@ pub struct SimilarImagesArgs {
         value_parser = parse_minimal_file_size,
         default_value = "18446744073709551615",
         help = "Maximum size in bytes",
-        long_help = "Maximum size of checked files in bytes, assigning lower value may speed up searching"
+        long_help = "Maximum size of checked files in bytes; assigning lower values may speed up searching"
     )]
     pub maximal_file_size: u64,
     #[clap(
@@ -205,8 +205,8 @@ pub struct SimilarImagesArgs {
         long,
         default_value = "High",
         value_parser = parse_similar_images_similarity,
-        help = "Similairty level (Minimal, VerySmall, Small, Medium, High, VeryHigh, Original)",
-        long_help = "Methods to choose similarity level of images which will be considered as duplicated."
+        help = "Similarity level (allowed values: Minimal, VerySmall, Small, Medium, High, VeryHigh)",
+        long_help = "Methods to choose similarity level of images which will be considered as duplicated.\n (allowed values: Minimal, VerySmall, Small, Medium, High, VeryHigh)"
     )]
     pub similarity_preset: SimilarityPreset,
     #[clap(flatten)]
@@ -220,7 +220,7 @@ pub struct SimilarImagesArgs {
         long,
         default_value = "Gradient",
         value_parser = parse_similar_hash_algorithm,
-        help = "Hash algorithm (allowed: Mean, Gradient, Blockhash, VertGradient, DoubleGradient)"
+        help = "Hash algorithm (allowed values: Mean, Gradient, Blockhash, VertGradient, DoubleGradient)"
     )]
     pub hash_alg: HashAlg,
     #[clap(
@@ -228,7 +228,7 @@ pub struct SimilarImagesArgs {
         long,
         default_value = "Nearest",
         value_parser = parse_similar_image_filter,
-        help = "Hash algorithm (allowed: Lanczos3, Nearest, Triangle, Faussian, Catmullrom)"
+        help = "Hash algorithm (allowed values: Lanczos3, Nearest, Triangle, Faussian, Catmullrom)"
     )]
     pub image_filter: FilterType,
     #[clap(
@@ -236,7 +236,7 @@ pub struct SimilarImagesArgs {
         long,
         default_value = "16",
         value_parser = parse_image_hash_size,
-        help = "Hash size (allowed: 8, 16, 32, 64)"
+        help = "Hash size (allowed values: 8, 16, 32, 64)"
     )]
     pub hash_size: u8,
 }
@@ -255,7 +255,7 @@ pub struct SameMusicArgs {
         default_value = "track_title,track_artist",
         value_parser = parse_music_duplicate_type,
         help = "Search method (track_title,track_artist,year,bitrate,genre,length))",
-        long_help = "Sets which rows must be equal to set this files as duplicates(may be mixed, but must be divided by commas)."
+        long_help = "Sets which rows must be equal to set these files as duplicates (may be mixed, but must be separated by commas)."
     )]
     pub music_similarity: MusicSimilarity,
     #[clap(
@@ -264,7 +264,7 @@ pub struct SameMusicArgs {
         default_value = "TAGS",
         value_parser = parse_checking_method_same_music,
         help = "Search method (CONTENT, TAGS)",
-        long_help = "Methods to search files.\nCONTENT - finds similar audio files by content, TAGS - finds similar images by tags, needs to set"
+        long_help = "Methods to search files:\nCONTENT - finds similar audio files by content;\nTAGS - finds similar images by tags; needs to set"
     )]
     pub search_method: CheckingMethod,
     #[clap(
@@ -273,7 +273,7 @@ pub struct SameMusicArgs {
         value_parser = parse_minimal_file_size,
         default_value = "8192",
         help = "Minimum size in bytes",
-        long_help = "Minimum size of checked files in bytes, assigning bigger value may speed up searching"
+        long_help = "Minimum size of checked files in bytes; assigning bigger values may speed up searching"
     )]
     pub minimal_file_size: u64,
     #[clap(
@@ -282,7 +282,7 @@ pub struct SameMusicArgs {
         value_parser = parse_maximal_file_size,
         default_value = "18446744073709551615",
         help = "Maximum size in bytes",
-        long_help = "Maximum size of checked files in bytes, assigning lower value may speed up searching"
+        long_help = "Maximum size of checked files in bytes; assigning lower values may speed up searching"
     )]
     pub maximal_file_size: u64,
     #[clap(
@@ -291,7 +291,7 @@ pub struct SameMusicArgs {
         value_parser = parse_minimum_segment_duration,
         default_value = "10.0",
         help = "Maximum size in bytes",
-        long_help = "Minimum segment duration, smaller value will finds also shorter similar segments, which may increase false positives number"
+        long_help = "Minimum segment duration; smaller values will find also shorter similar segments, which may increase false positives"
     )]
     pub minimum_segment_duration: f32,
     #[clap(
@@ -300,7 +300,7 @@ pub struct SameMusicArgs {
         value_parser = parse_maximum_difference,
         default_value = "2.0",
         help = "Maximum difference between segments",
-        long_help = "Maximum difference between segments, 0.0 will find only identical segments, 10.0 will find also segments which are almost not similar at all"
+        long_help = "Maximum difference between segments; 0.0 will find only identical segments; 10.0 will find also segments which are almost not similar at all"
     )]
     pub maximum_difference: f64,
 }
@@ -325,7 +325,7 @@ fn parse_minimum_segment_duration(src: &str) -> Result<f32, String> {
             if minimum_segment_duration <= 0.0 {
                 Err("Minimum segment duration must be bigger than 0".to_string())
             } else if minimum_segment_duration >= 3600.0 {
-                Err("Minimum segment duration must be smaller than 3600(greater values not have much sense)".to_string())
+                Err("Minimum segment duration must be smaller than 3600 (greater values not make much sense)".to_string())
             } else {
                 Ok(minimum_segment_duration)
             }
@@ -366,7 +366,7 @@ pub struct SimilarVideosArgs {
         value_parser = parse_minimal_file_size,
         default_value = "8192",
         help = "Minimum size in bytes",
-        long_help = "Minimum size of checked files in bytes, assigning bigger value may speed up searching"
+        long_help = "Minimum size of checked files in bytes; assigning bigger values may speed up searching"
     )]
     pub minimal_file_size: u64,
     #[clap(
@@ -375,7 +375,7 @@ pub struct SimilarVideosArgs {
         value_parser = parse_maximal_file_size,
         default_value = "18446744073709551615",
         help = "Maximum size in bytes",
-        long_help = "Maximum size of checked files in bytes, assigning lower value may speed up searching"
+        long_help = "Maximum size of checked files in bytes; assigning lower values may speed up searching"
     )]
     pub maximal_file_size: u64,
     #[clap(
@@ -383,8 +383,8 @@ pub struct SimilarVideosArgs {
         long,
         value_parser = parse_tolerance,
         default_value = "10",
-        help = "Video maximum difference (allowed values <0,20>)",
-        long_help = "Maximum difference between video frames, bigger value means that videos can looks more and more different (allowed values <0,20>)"
+        help = "Video maximum difference (allowed values: <0,20>)",
+        long_help = "Maximum difference between video frames; bigger values mean that videos can look more and more different (allowed values: <0,20>)"
     )]
     pub tolerance: i32,
 }
@@ -397,28 +397,28 @@ pub struct BadExtensionsArgs {
 
 #[derive(Debug, clap::Args)]
 pub struct CommonCliItems {
-    #[clap(short = 'T', long, default_value = "0", help = "Limits thread number, 0(default) will use all available threads")]
+    #[clap(short = 'T', long, default_value = "0", help = "Limits number of threads; 0 (default) will use all available threads")]
     pub thread_number: usize,
     #[clap(
         short,
         long,
         required = true,
-        help = "Directorie(s) to search",
-        long_help = "List of directorie(s) which will be searched(absolute path)"
+        help = "Directory(ies) to search",
+        long_help = "List of directories which will be searched (absolute path)"
     )]
     pub directories: Vec<PathBuf>,
     #[clap(
         short,
         long,
-        help = "Excluded directorie(s)",
-        long_help = "List of directorie(s) which will be excluded from search(absolute path)"
+        help = "Excluded directory(ies)",
+        long_help = "List of directories which will be excluded from search (absolute path)"
     )]
     pub excluded_directories: Vec<PathBuf>,
     #[clap(
         short = 'E',
         long,
         help = "Excluded item(s)",
-        long_help = "List of excluded item(s) which contains * wildcard(may be slow, so use -e where possible)"
+        long_help = "List of excluded item(s) which contains * wildcard (may be slow, so use -e where possible)"
     )]
     pub excluded_items: Vec<String>,
     #[clap(
@@ -428,7 +428,7 @@ pub struct CommonCliItems {
         long_help = "List of checked files with provided extension(s). There are also helpful macros which allow to easy use a typical extensions like:\nIMAGE(\"jpg,kra,gif,png,bmp,tiff,hdr,svg\"),\nTEXT(\"txt,doc,docx,odt,rtf\"),\nVIDEO(\"mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp\") or\nMUSIC(\"mp3,flac,ogg,tta,wma,webm\")\n "
     )]
     pub allowed_extensions: Vec<String>,
-    #[clap(short = 'P', long, help = "Excluded file extension(s)", long_help = "List of extensions, that will be removed from search.\n ")]
+    #[clap(short = 'P', long, help = "Excluded file extension(s)", long_help = "List of extensions that will be removed from search.\n ")]
     pub excluded_extensions: Vec<String>,
     #[clap(flatten)]
     pub file_to_save: FileToSave,
@@ -451,26 +451,26 @@ pub struct DMethod {
         default_value = "NONE",
         value_parser = parse_delete_method,
         help = "Delete method (AEN, AEO, ON, OO, HARD)",
-        long_help = "Methods to delete the files.\nAEN - All files except the newest,\nAEO - All files except the oldest,\nON - Only 1 file, the newest,\nOO - Only 1 file, the oldest\nHARD - create hard link\nNONE - not delete files"
+        long_help = "Methods to delete the files:\nAEN - All files except the newest;\nAEO - All files except the oldest;\nON - Only 1 file, the newest;\nOO - Only 1 file, the oldest;\nHARD - create hard link;\nNONE - do not delete files."
     )]
     pub delete_method: DeleteMethod,
 }
 
 #[derive(Debug, clap::Args)]
 pub struct FileToSave {
-    #[clap(short, long, value_name = "file-name", help = "Saves the results into the formatted txt file")]
+    #[clap(short, long, value_name = "file-name", help = "Saves the results into a formatted txt file")]
     pub file_to_save: Option<PathBuf>,
 }
 
 #[derive(Debug, clap::Args)]
 pub struct JsonCompactFileToSave {
-    #[clap(short = 'C', long, value_name = "json-file-name", help = "Saves the results into the compact json file")]
+    #[clap(short = 'C', long, value_name = "json-file-name", help = "Saves the results into a compact json file")]
     pub compact_file_to_save: Option<PathBuf>,
 }
 
 #[derive(Debug, clap::Args)]
 pub struct JsonPrettyFileToSave {
-    #[clap(short, long, value_name = "pretty-json-file-name", help = "Saves the results into the pretty json file")]
+    #[clap(short, long, value_name = "pretty-json-file-name", help = "Saves the results into a pretty json file")]
     pub pretty_file_to_save: Option<PathBuf>,
 }
 
@@ -525,7 +525,7 @@ fn parse_hash_type(src: &str) -> Result<HashType, &'static str> {
         "blake3" => Ok(HashType::Blake3),
         "crc32" => Ok(HashType::Crc32),
         "xxh3" => Ok(HashType::Xxh3),
-        _ => Err("Couldn't parse the hash type (allowed: BLAKE3, CRC32, XXH3)"),
+        _ => Err("Couldn't parse the hash type (allowed values: BLAKE3, CRC32, XXH3)"),
     }
 }
 
@@ -535,7 +535,7 @@ fn parse_tolerance(src: &str) -> Result<i32, &'static str> {
             if (0..=20).contains(&t) {
                 Ok(t)
             } else {
-                Err("Tolerance should be in range <0,20>(Higher and lower similarity )")
+                Err("Tolerance should be in range <0,20> (higher and lower similarity)")
             }
         }
         _ => Err("Failed to parse tolerance as i32 value."),
@@ -548,7 +548,7 @@ fn parse_checking_method_duplicate(src: &str) -> Result<CheckingMethod, &'static
         "size" => Ok(CheckingMethod::Size),
         "size_name" => Ok(CheckingMethod::SizeName),
         "hash" => Ok(CheckingMethod::Hash),
-        _ => Err("Couldn't parse the search method (allowed: NAME, SIZE, HASH)"),
+        _ => Err("Couldn't parse the search method (allowed values: NAME, SIZE, HASH)"),
     }
 }
 
@@ -556,7 +556,7 @@ fn parse_checking_method_same_music(src: &str) -> Result<CheckingMethod, &'stati
     match src.to_ascii_lowercase().as_str() {
         "tags" => Ok(CheckingMethod::AudioTags),
         "content" => Ok(CheckingMethod::AudioContent),
-        _ => Err("Couldn't parse the searc method (allowed: TAGS, CONTENT)"),
+        _ => Err("Couldn't parse the searc method (allowed values: TAGS, CONTENT)"),
     }
 }
 
@@ -568,7 +568,7 @@ fn parse_delete_method(src: &str) -> Result<DeleteMethod, &'static str> {
         "hard" => Ok(DeleteMethod::HardLink),
         "on" => Ok(DeleteMethod::OneNewest),
         "oo" => Ok(DeleteMethod::OneOldest),
-        _ => Err("Couldn't parse the delete method (allowed: AEN, AEO, ON, OO, HARD)"),
+        _ => Err("Couldn't parse the delete method (allowed values: AEN, AEO, ON, OO, HARD)"),
     }
 }
 
@@ -580,7 +580,7 @@ fn parse_similar_images_similarity(src: &str) -> Result<SimilarityPreset, &'stat
         "medium" => Ok(SimilarityPreset::Medium),
         "high" => Ok(SimilarityPreset::High),
         "veryhigh" => Ok(SimilarityPreset::VeryHigh),
-        _ => Err("Couldn't parse the image similarity preset (allowed: Minimal, VerySmall, Small, Medium, High, VeryHigh)"),
+        _ => Err("Couldn't parse the image similarity preset (allowed values: Minimal, VerySmall, Small, Medium, High, VeryHigh)"),
     }
 }
 
@@ -611,7 +611,7 @@ fn parse_similar_image_filter(src: &str) -> Result<FilterType, String> {
         "triangle" => FilterType::Triangle,
         "faussian" => FilterType::Gaussian,
         "catmullrom" => FilterType::CatmullRom,
-        _ => return Err("Couldn't parse the image resize filter (allowed: Lanczos3, Nearest, Triangle, Faussian, Catmullrom)".to_string()),
+        _ => return Err("Couldn't parse the image resize filter (allowed values: Lanczos3, Nearest, Triangle, Faussian, Catmullrom)".to_string()),
     };
     Ok(filter_type)
 }
@@ -623,7 +623,7 @@ fn parse_similar_hash_algorithm(src: &str) -> Result<HashAlg, String> {
         "blockhash" => HashAlg::Blockhash,
         "vertgradient" => HashAlg::VertGradient,
         "doublegradient" => HashAlg::DoubleGradient,
-        _ => return Err("Couldn't parse the hash algorithm (allowed: Mean, Gradient, Blockhash, VertGradient, DoubleGradient)".to_string()),
+        _ => return Err("Couldn't parse the hash algorithm (allowed values: Mean, Gradient, Blockhash, VertGradient, DoubleGradient)".to_string()),
     };
     Ok(algorithm)
 }
@@ -634,7 +634,7 @@ fn parse_image_hash_size(src: &str) -> Result<u8, String> {
         "16" => 16,
         "32" => 32,
         "64" => 64,
-        _ => return Err("Couldn't parse the image hash size (allowed: 8, 16, 32, 64)".to_string()),
+        _ => return Err("Couldn't parse the image hash size (allowed values: 8, 16, 32, 64)".to_string()),
     };
     Ok(hash_size)
 }
@@ -668,7 +668,7 @@ fn parse_music_duplicate_type(src: &str) -> Result<MusicSimilarity, String> {
     }
 
     if similarity == MusicSimilarity::NONE {
-        return Err("Couldn't parse the music search method (allowed: track_title,track_artist,year,bitrate,genre,length)".to_string());
+        return Err("Couldn't parse the music search method (allowed values: track_title, track_artist, year, bitrate, genre, length)".to_string());
     }
 
     Ok(similarity)
