@@ -10,8 +10,8 @@ This instruction is outdated and will be removed in one of next version, please 
 ### Linux
 If you use Snap, Flatpak or Appimage, you need to only install ffmpeg if you want to use Similar Videos tool.
 
-For Czkawka GUI the lowest supported version of GTK is `3.24` which is the only required dependency(of course on Ubuntu, different distributions will probably require a little different set of dependences).  
-In app exists Similar Video tool which require `FFmpeg` to work, but is completely optional and without it, only warning would be printed when trying to use this tool without installed ffmpeg.  
+For Czkawka GUI the lowest supported version of GTK is `3.24` which is the only required dependency(of course on Ubuntu, different distributions will probably require a little different set of dependences).
+In app exists Similar Video tool which require `FFmpeg` to work, but is completely optional and without it, only warning would be printed when trying to use this tool without installed ffmpeg.
 Broken files finder by default don't check for music files, but it is possible to enable this feature and that require to have alsa lib installed(on Ubuntu this is `libasound2-dev` package)
 
 **Warning**
@@ -34,8 +34,8 @@ sudo xbps-install gcc pkg-config ffmpeg
 ```
 
 ### macOS
-Currently, you need to manually install `GTK 4` libraries, `FFmpeg` and the Adwaita theme, because they are dynamically loaded from the OS.  
-One very straight-forward way to do this is by using [Homebrew](https://brew.sh/).  
+Currently, you need to manually install `GTK 4` libraries, `FFmpeg` and the Adwaita theme, because they are dynamically loaded from the OS.
+One very straight-forward way to do this is by using [Homebrew](https://brew.sh/).
 Installation in the terminal:
 ```shell
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -50,7 +50,7 @@ At the end execute it:
 ./mac_czkawka_gui
 ```
 #### Compiling on Apple Silicon
-Prebuilt binaries are available only for x86_64, so if you use ARM e.g. Mac M1/M2, you must compile the app manually.  
+Prebuilt binaries are available only for x86_64, so if you use ARM e.g. Mac M1/M2, you must compile the app manually.
 
 **Compilation is simple, and takes less than 10 minutes on an M1/M2 mac.**
 
@@ -75,6 +75,29 @@ arch -x86_64 /usr/local/bin/brew install gtk4 adwaita-icon-theme ffmpeg librsvg 
 ```
 Sadly this doesn't work for all users, so feel free to update this part of documentation(look at https://github.com/qarmin/czkawka/issues/689 and https://github.com/qarmin/czkawka/issues/637 for more info)
 
+#### Generate App Bundle (macOS)
+
+To generate an app bundle on macOS, you can use the provided script `./misc/create_app_bundle.sh`. This script will create an `.app` bundle with the necessary structure and copy the executable and icon files into the correct locations.
+
+Before running the script, make sure you have the `librsvg` library installed, which is used to convert SVG icons to PNG format. You can install it using Homebrew:
+
+```shellscript
+brew install librsvg
+```
+Then, you can run the script with the following command:
+
+```shellscript
+./misc/create_app_bundle.sh
+```
+
+After running the script, you will find the generated `.app` bundle in the `./target/release` directory.
+
+You can move this bundle to your Applications folder to install the app:
+
+    ```shellscript
+    mv ./target/release/Czkawka.app /Applications
+    ```
+Now, you should be able to launch Czkawka from your Applications folder or via Spotlight search.
 
 ### Windows
 By default, all needed libraries are bundled with the app except libheif library which allows to scan/use heif files, inside `windows_czkawka_gui.zip`, but if you compile the app or just move `czkawka_gui.exe`, then you will need to install the `GTK 4`
@@ -84,8 +107,8 @@ FFmpeg to be able to use Similar Videos, you can download and install from this 
 
 ## Installation
 ### Precompiled binaries
-Ready-to-go executables for Linux, Windows and macOS are available [**here**](https://github.com/qarmin/czkawka/releases/).  
-If the app does not run when clicking the launcher, run it through a terminal.  
+Ready-to-go executables for Linux, Windows and macOS are available [**here**](https://github.com/qarmin/czkawka/releases/).
+If the app does not run when clicking the launcher, run it through a terminal.
 You don't need to have any additional libraries for CLI Czkawka.
 
 Install the GUI version on Linux:
@@ -105,7 +128,7 @@ linux_czkawka_gui
 Artifacts from each commit can be downloaded [**here**](https://github.com/qarmin/czkawka/actions)
 
 ### Appimage
-Appimage files are available in release page - [**GitHub releases**](https://github.com/qarmin/czkawka/releases/)  
+Appimage files are available in release page - [**GitHub releases**](https://github.com/qarmin/czkawka/releases/)
 Available are 2 versions of Appimage:
 - default - which bundle gtk theme
 - alternative - which don't include any gtk specific libraries
