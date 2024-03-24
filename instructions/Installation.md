@@ -79,25 +79,12 @@ Sadly this doesn't work for all users, so feel free to update this part of docum
 
 To generate an app bundle on macOS, you can use the provided script `./misc/create_app_bundle.sh`. This script will create an `.app` bundle with the necessary structure and copy the executable and icon files into the correct locations.
 
-Before running the script, make sure you have the `librsvg` library installed, which is used to convert SVG icons to PNG format. You can install it using Homebrew:
+1. Install `librsvg` with Homebrew: `brew install librsvg`
+2. Run the script: `./misc/create_app_bundle.sh`
+3. The `.app` bundle will be in `./target/release`
+4. Move the bundle to Applications: `mv ./target/release/Czkawka.app /Applications`
 
-```shellscript
-brew install librsvg
-```
-Then, you can run the script with the following command:
-
-```shellscript
-./misc/create_app_bundle.sh
-```
-
-After running the script, you will find the generated `.app` bundle in the `./target/release` directory.
-
-You can move this bundle to your Applications folder to install the app:
-
-    ```shellscript
-    mv ./target/release/Czkawka.app /Applications
-    ```
-Now, you should be able to launch Czkawka from your Applications folder or via Spotlight search.
+Now, you can launch Czkawka from your Applications folder or via Spotlight search.
 
 ### Windows
 By default, all needed libraries are bundled with the app except libheif library which allows to scan/use heif files, inside `windows_czkawka_gui.zip`, but if you compile the app or just move `czkawka_gui.exe`, then you will need to install the `GTK 4`
