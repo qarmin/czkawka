@@ -1,10 +1,13 @@
 #!/bin/bash
+
+# Define bundle ID
+BUNDLE_ID="com.github.qarmin.czkawka"
+
 # Get the directory of the current script (works even if the script is called from another location)
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+DIR="$(dirname "$0")"
 PARENT_DIR="$(dirname "$DIR")"
 BUNDLE_NAME="Czkawka.app"
-# Simplify the bundle path using cd and pwd
-BUNDLE_PATH=$(cd "$DIR/../target/release" && pwd)/$BUNDLE_NAME
+BUNDLE_PATH="$PARENT_DIR/target/release/$BUNDLE_NAME"
 
 BINARY_NAME="czkawka_gui"
 # Extract version from Cargo.toml
@@ -20,12 +23,30 @@ mkdir -p "$BUNDLE_PATH/Contents/Resources"
 # Step 3: Copy the binary
 cp "$PARENT_DIR/target/release/$BINARY_NAME" "$BUNDLE_PATH/Contents/MacOS/"
 
-# Step 4: Create and copy the icon and rename as .icns (macOS icon format)
-# Assuming the icon file is named correctly and located in the correct directory
+# Step 4: Generate the icon from SVG and copy it to the bundle
+SVG_PATH="$PARENT_DIR/data/icons/${BUNDLE_ID}.svg"
+ICONSET_DIR="${PARENT_DIR}/data/icons/${BUNDLE_ID}.iconset"
 
+# Create iconset directory
+mkdir -p "$ICONSET_DIR"
 
-ICON_NAME="com.github.qarmin.czkawka.icns"
-cp "$PARENT_DIR/data/icons/$ICON_NAME" "$BUNDLE_PATH/Contents/Resources/"
+# Generate icon sizes and populate the iconset
+ICON_SIZES="16 32 64 128 256 512"
+SRC_ICON="$SVG_PATH"
+
+for SIZE in $ICON_SIZES; do
+    rsvg-convert -w $SIZE -h $SIZE $SRC_ICON -o "${ICONSET_DIR}/icon_${SIZE}x${SIZE}.png"
+    if [ $SIZE -ne 512 ]; then
+        SIZE_2X=$((SIZE*2))
+        rsvg-convert -w $SIZE_2X -h $SIZE_2X $SRC_ICON -o "${ICONSET_DIR}/icon_${SIZE}x${SIZE}@2x.png"
+    fi
+done
+
+# Convert the iconset to an icns file
+iconutil -c icns "$ICONSET_DIR" -o "$BUNDLE_PATH/Contents/Resources/${BUNDLE_ID}.icns"
+
+# Clean up the iconset directory
+rm -rf "$ICONSET_DIR"
 
 # Step 5: Create the Info.plist file
 cat <<EOF >"$BUNDLE_PATH/Contents/Info.plist"
@@ -36,9 +57,9 @@ cat <<EOF >"$BUNDLE_PATH/Contents/Info.plist"
     <key>CFBundleExecutable</key>
     <string>$BINARY_NAME</string>
     <key>CFBundleIconFile</key>
-    <string>com.github.qarmin.czkawka</string>
+    <string>${BUNDLE_ID}</string>
     <key>CFBundleIdentifier</key>
-    <string>com.github.qarmin.czkawka</string>
+    <string>${BUNDLE_ID}</string>
     <key>CFBundleName</key>
     <string>Czkawka</string>
     <key>CFBundleVersion</key>
