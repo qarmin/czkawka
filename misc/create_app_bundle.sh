@@ -41,7 +41,7 @@ cat <<EOF >"$BUNDLE_PATH/Contents/Info.plist"
     <key>CFBundleExecutable</key>
     <string>$BINARY_NAME</string>
     <key>CFBundleIconFile</key>
-    <string>${BUNDLE_ID}</string>
+    <string>${BUNDLE_ID}.icns</string>
     <key>CFBundleIdentifier</key>
     <string>${BUNDLE_ID}</string>
     <key>CFBundleName</key>
