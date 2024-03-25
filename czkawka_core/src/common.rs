@@ -451,8 +451,11 @@ where
             let mut all_values = (*values).clone();
             let len = all_values.len();
 
-            // Sorted from oldest to newest - from smallest value to bigger
-            all_values.sort_unstable_by_key(ResultEntry::get_modified_date);
+            // Sorted from smallest to biggest or oldest to newest
+            all_values.sort_unstable_by_key(match delete_method {
+                DeleteMethod::AllExceptBiggest | DeleteMethod::AllExceptSmallest | DeleteMethod::OneBiggest | DeleteMethod::OneSmallest => ResultEntry::get_size,
+                _ => ResultEntry::get_modified_date,
+            });
 
             if delete_method == &DeleteMethod::HardLink {
                 let original_file = &all_values[0];
@@ -488,10 +491,10 @@ where
 
             let items = match delete_method {
                 DeleteMethod::Delete => &all_values,
-                DeleteMethod::AllExceptNewest => &all_values[..(len - 1)],
-                DeleteMethod::AllExceptOldest => &all_values[1..],
-                DeleteMethod::OneOldest => &all_values[..1],
-                DeleteMethod::OneNewest => &all_values[(len - 1)..],
+                DeleteMethod::AllExceptNewest | DeleteMethod::AllExceptBiggest => &all_values[..(len - 1)],
+                DeleteMethod::AllExceptOldest | DeleteMethod::AllExceptSmallest => &all_values[1..],
+                DeleteMethod::OneOldest | DeleteMethod::OneSmallest => &all_values[..1],
+                DeleteMethod::OneNewest | DeleteMethod::OneBiggest => &all_values[(len - 1)..],
                 DeleteMethod::HardLink | DeleteMethod::None => unreachable!("HardLink and None should be handled before"),
             };
 
