@@ -43,18 +43,34 @@ fn main() {
         test_remove_duplicates_one_newest();
         test_remove_duplicates_all_expect_newest();
         test_remove_duplicates_all_expect_oldest();
+        test_remove_duplicates_one_smallest();
+        test_remove_duplicates_one_biggest();
+        test_remove_duplicates_all_expect_biggest();
+        test_remove_duplicates_all_expect_smallest();
         test_remove_same_music_tags_one_oldest();
         test_remove_same_music_tags_one_newest();
         test_remove_same_music_tags_all_expect_oldest();
         test_remove_same_music_tags_all_expect_newest();
+        test_remove_same_music_tags_one_smallest();
+        test_remove_same_music_tags_one_biggest();
+        test_remove_same_music_tags_all_expect_biggest();
+        test_remove_same_music_tags_all_expect_smallest();
         test_remove_same_music_content_one_oldest();
         test_remove_same_music_content_all_expect_oldest();
         test_remove_same_music_content_one_newest();
         test_remove_same_music_content_all_expect_newest();
+        test_remove_same_music_content_one_smallest();
+        test_remove_same_music_content_one_biggest();
+        test_remove_same_music_content_all_expect_biggest();
+        test_remove_same_music_content_all_expect_smallest();
         test_remove_videos_one_oldest();
         test_remove_videos_one_newest();
         test_remove_videos_all_expect_oldest();
         test_remove_videos_all_expect_newest();
+        test_remove_videos_one_smallest();
+        test_remove_videos_one_biggest();
+        test_remove_videos_all_expect_biggest();
+        test_remove_videos_all_expect_smallest();
     }
 
     println!("Completed checking");
@@ -81,6 +97,32 @@ fn test_remove_videos_all_expect_newest() {
     run_test(
         &["video", "-d", "TestFiles", "-D", "AEN"],
         vec!["Videos/V1.mp4", "Videos/V2.mp4", "Videos/V3.webm"],
+        vec![],
+        vec![],
+    );
+}
+fn test_remove_videos_one_smallest() {
+    info!("test_remove_videos_one_smallest");
+    run_test(&["video", "-d", "TestFiles", "-D", "OS"], vec!["Videos/V2.mp4"], vec![], vec![]);
+}
+fn test_remove_videos_one_biggest() {
+    info!("test_remove_videos_one_biggest");
+    run_test(&["video", "-d", "TestFiles", "-D", "OB"], vec!["Videos/V3.webm"], vec![], vec![]);
+}
+fn test_remove_videos_all_expect_smallest() {
+    info!("test_remove_videos_all_expect_smallest");
+    run_test(
+        &["video", "-d", "TestFiles", "-D", "AES"],
+        vec!["Videos/V1.mp4", "Videos/V3.webm", "Videos/V5.mp4"],
+        vec![],
+        vec![],
+    );
+}
+fn test_remove_videos_all_expect_biggest() {
+    info!("test_remove_videos_all_expect_biggest");
+    run_test(
+        &["video", "-d", "TestFiles", "-D", "AEB"],
+        vec!["Videos/V1.mp4", "Videos/V2.mp4", "Videos/V5.mp4"],
         vec![],
         vec![],
     );
@@ -124,6 +166,44 @@ fn test_remove_same_music_content_one_oldest() {
         vec![],
     );
 }
+fn test_remove_same_music_content_one_biggest() {
+    info!("test_remove_same_music_content_one_biggest");
+    run_test(
+        &["music", "-d", "TestFiles", "-s", "CONTENT", "-l", "2.0", "-D", "OB"],
+        vec!["Music/M3.flac"],
+        vec![],
+        vec![],
+    );
+}
+fn test_remove_same_music_content_all_expect_biggest() {
+    info!("test_remove_same_music_content_all_expect_biggest");
+    run_test(
+        &["music", "-d", "TestFiles", "-s", "CONTENT", "-l", "2.0", "-D", "AEB"],
+        vec!["Music/M1.mp3", "Music/M2.mp3", "Music/M5.mp3"],
+        vec![],
+        vec![],
+    );
+}
+
+fn test_remove_same_music_content_all_expect_smallest() {
+    info!("test_remove_same_music_content_all_expect_smallest");
+    run_test(
+        &["music", "-d", "TestFiles", "-s", "CONTENT", "-l", "2.0", "-D", "AES"],
+        vec!["Music/M1.mp3", "Music/M3.flac", "Music/M5.mp3"],
+        vec![],
+        vec![],
+    );
+}
+
+fn test_remove_same_music_content_one_smallest() {
+    info!("test_remove_same_music_content_one_smallest");
+    run_test(
+        &["music", "-d", "TestFiles", "-s", "CONTENT", "-l", "2.0", "-D", "OS"],
+        vec!["Music/M2.mp3"],
+        vec![],
+        vec![],
+    );
+}
 fn test_remove_same_music_tags_one_oldest() {
     info!("test_remove_same_music_one_oldest");
     run_test(&["music", "-d", "TestFiles", "-D", "OO"], vec!["Music/M5.mp3"], vec![], vec![]);
@@ -146,6 +226,32 @@ fn test_remove_same_music_tags_all_expect_newest() {
     run_test(
         &["music", "-d", "TestFiles", "-D", "AEN"],
         vec!["Music/M1.mp3", "Music/M3.flac", "Music/M5.mp3"],
+        vec![],
+        vec![],
+    );
+}
+fn test_remove_same_music_tags_one_smallest() {
+    info!("test_remove_same_music_one_smallest");
+    run_test(&["music", "-d", "TestFiles", "-D", "OS"], vec!["Music/M1.mp3"], vec![], vec![]);
+}
+fn test_remove_same_music_tags_one_biggest() {
+    info!("test_remove_same_music_one_biggest");
+    run_test(&["music", "-d", "TestFiles", "-D", "OB"], vec!["Music/M3.flac"], vec![], vec![]);
+}
+fn test_remove_same_music_tags_all_expect_smallest() {
+    info!("test_remove_same_music_all_expect_smallest");
+    run_test(
+        &["music", "-d", "TestFiles", "-D", "AES"],
+        vec!["Music/M2.mp3", "Music/M3.flac", "Music/M5.mp3"],
+        vec![],
+        vec![],
+    );
+}
+fn test_remove_same_music_tags_all_expect_biggest() {
+    info!("test_remove_same_music_all_expect_biggest");
+    run_test(
+        &["music", "-d", "TestFiles", "-D", "AEB"],
+        vec!["Music/M1.mp3", "Music/M2.mp3", "Music/M5.mp3"],
         vec![],
         vec![],
     );
@@ -183,6 +289,43 @@ fn test_remove_duplicates_one_oldest() {
     run_test(
         &["dup", "-d", "TestFiles", "-D", "OO"],
         vec!["Images/A2.jpg", "Music/M5.mp3", "Videos/V2.mp4"],
+        vec![],
+        vec![],
+    );
+}
+fn test_remove_duplicates_all_expect_smallest() {
+    info!("test_remove_duplicates_all_expect_smallest");
+    run_test(
+        &["dup", "-d", "TestFiles", "-D", "AES"],
+        vec!["Images/A2.jpg", "Images/A5.jpg", "Music/M2.mp3", "Music/M5.mp3", "Videos/V2.mp4", "Videos/V5.mp4"],
+        vec![],
+        vec![],
+    );
+}
+fn test_remove_duplicates_all_expect_biggest() {
+    info!("test_remove_duplicates_all_expect_biggest");
+    run_test(
+        &["dup", "-d", "TestFiles", "-D", "AEN"],
+        vec!["Images/A2.jpg", "Images/A5.jpg", "Music/M1.mp3", "Music/M5.mp3", "Videos/V1.mp4", "Videos/V2.mp4"],
+        vec![],
+        vec![],
+    );
+}
+
+fn test_remove_duplicates_one_biggest() {
+    info!("test_remove_duplicates_one_biggest");
+    run_test(
+        &["dup", "-d", "TestFiles", "-D", "ON"],
+        vec!["Images/A1.jpg", "Music/M2.mp3", "Videos/V5.mp4"],
+        vec![],
+        vec![],
+    );
+}
+fn test_remove_duplicates_one_smallest() {
+    info!("test_remove_duplicates_one_smallest");
+    run_test(
+        &["dup", "-d", "TestFiles", "-D", "OS"],
+        vec!["Images/A1.jpg", "Music/M1.mp3", "Videos/V1.mp4"],
         vec![],
         vec![],
     );

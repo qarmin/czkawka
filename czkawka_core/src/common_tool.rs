@@ -35,6 +35,10 @@ pub enum DeleteMethod {
     OneOldest,
     OneNewest,
     HardLink,
+    AllExceptBiggest,
+    AllExceptSmallest,
+    OneBiggest,
+    OneSmallest,
 }
 
 impl CommonToolData {
