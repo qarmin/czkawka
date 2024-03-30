@@ -10,6 +10,8 @@ Requirements depend on your platform.
 
 Prebuilt binaries are available here - https://github.com/qarmin/czkawka/releases/
 
+A Dockerized version, that can be accessed through a web browser or a VNC client, is available here - https://github.com/jlesage/docker-czkawka
+
 ### Linux
 
 #### Prebuild binaries
