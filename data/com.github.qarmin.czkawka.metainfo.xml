@@ -27,6 +27,9 @@
   </releases>
   <content_rating type="oars-1.0"/>
   <developer_name>Rafał Mikrut</developer_name>
+    <developer id="com.github">
+      <name>Rafał Mikrut</name>
+  </developer>
   <url type="homepage">https://github.com/qarmin/czkawka</url>
   <url type="bugtracker">https://github.com/qarmin/czkawka/issues</url>
   <url type="donation">https://github.com/sponsors/qarmin</url>
