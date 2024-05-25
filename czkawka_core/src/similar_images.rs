@@ -355,7 +355,8 @@ impl SimilarImages {
             {
                 img = match get_dynamic_image_from_heic(&file_entry.path.to_string_lossy()) {
                     Ok(t) => t,
-                    Err(_) => {
+                    Err(e) => {
+                        println!("error reading {}: {}", file_entry.path.display(), e);
                         return;
                     }
                 };
