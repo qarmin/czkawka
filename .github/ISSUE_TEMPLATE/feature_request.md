@@ -7,5 +7,5 @@ assignees: ''
 
 ---
 
-**Feature Description**
+**Feature description**
 ...
