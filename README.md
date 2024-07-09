@@ -22,12 +22,12 @@ files from your computer.
     - Big Files - Finds the provided number of the biggest files in given location
   - Empty Files - Finds empty files across the drive
     - Temporary Files - Finds temporary files
-  - Similar Images - Finds similar images (different resolution, watermarks)
+  - Similar Images - Finds similar images, with possible slight variations (different resolution, watermarks)
   - Similar Videos - Finds similar videos
   - Same Music - Finds similar music by tags or by reading content and comparing it
     - Invalid Symbolic Links - Shows symbolic links which point to non-existent files/directories
     - Broken Files - Finds files that are invalid or corrupted
-  - Bad Extensions - Finds files which content doesn't match with their extension
+  - Bad Extensions - Finds files whose content doesn't match their extension
 
 ![Czkawka](https://user-images.githubusercontent.com/41945903/145280350-506f7e94-4db0-4de7-a68d-6e7c26bbd2bf.gif)
 
@@ -53,7 +53,7 @@ While Czkawka only finds the most basic ones, BleachBit is a master at finding a
 two apps shouldn't be directly compared or be considered as an alternative to one another.
 
 In this comparison, remember that even if the apps have the same features, they may work differently (e.g., one app may have more
-options to choose than the other).
+options available).
 
 |                          |   Czkawka   |   Krokiet   | FSlint |     DupeGuru      |  BleachBit  |
 |:------------------------:|:-----------:|:-----------:|:------:|:-----------------:|:-----------:|
@@ -99,7 +99,7 @@ There are many similar applications to Czkawka on the Internet, which do some th
 Due to limited time, the biggest emphasis is on the GUI version, so if you're looking for really good and feature-packed
 console apps, then take a look at these:
 
-- [Fclones](https://github.com/pkolaczk/fclones) - One of the fastest tools to find duplicates; it is written in Rust too
+- [Fclones](https://github.com/pkolaczk/fclones) - One of the fastest tools to find duplicates; it is also written in Rust
 - [Rmlint](https://github.com/sahib/rmlint) - Nice console interface and is feature packed
 - [RdFind](https://github.com/pauldreik/rdfind) - Fast, but written in C++ ¯\\_(ツ)\_/¯
 
@@ -136,7 +136,7 @@ You can also help by doing other things:
 
 Big thanks to Pádraig Brady, creator of the fantastic FSlint, because without his work, I wouldn't create this tool.
 
-Thanks too to all the people who create patches for this program, make it available on other systems, create videos,
+Thanks to all the people who create patches for this program, make it available on other systems, create videos,
 articles about it, etc.
 
 Also, I really appreciate the work of people that create crates on which Czkawka is based, and for that I try to report bugs
