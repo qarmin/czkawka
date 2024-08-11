@@ -77,7 +77,7 @@ pub enum Commands {
     #[clap(
         name = "ext",
         about = "Finds files with invalid extensions",
-        after_help = "EXAMPLE:\n    czkawka broken -d /home/czokolada/ -f results.txt"
+        after_help = "EXAMPLE:\n    czkawka ext -d /home/czokolada/ -f results.txt"
     )]
     BadExtensions(BadExtensionsArgs),
     #[clap(name = "tester", about = "Small utility to test supported speed of ", after_help = "EXAMPLE:\n    czkawka tester")]
