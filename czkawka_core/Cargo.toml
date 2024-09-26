@@ -15,11 +15,6 @@ humansize = "2.1"
 rayon = "1.10"
 crossbeam-channel = "0.5"
 
-# Get file id in Windows
-# Don't update anymore! This crate has a bug. I've submitted a patch upstream, but the change is breaking. The current code relies on the bug to work correctly!
-# Warning by CalunVier 2024.7.15
-file-id = "0.2.1"
-
 # For saving/loading config files to specific directories
 directories-next = "2.0"
 
@@ -86,6 +81,11 @@ os_info = { version = "3", default-features = false }
 log = "0.4.22"
 handsome_logger = "0.8"
 fun_time = { version = "0.3", features = ["log"] }
+
+[target.'cfg(windows)'.dependencies]
+# Don't update anymore! This crate has a bug. I've submitted a patch upstream, but the change is breaking. The current code relies on the bug to work correctly!
+# Warning by CalunVier 2024.7.15
+file-id = "=0.2.1"
 
 [build-dependencies]
 rustc_version = "0.4"
