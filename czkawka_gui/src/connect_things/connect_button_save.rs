@@ -31,18 +31,18 @@ pub fn connect_button_save(gui_data: &GuiData) {
     let entry_info = gui_data.entry_info.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     buttons_save.connect_clicked(move |_| {
-        let result = match to_notebook_main_enum(notebook_main.current_page().unwrap()) {
-            NotebookMainEnum::Duplicate => shared_duplication_state.borrow().save_all_in_one("results_duplicates"),
-            NotebookMainEnum::EmptyDirectories => shared_empty_folders_state.borrow().save_all_in_one("results_empty_directories"),
-            NotebookMainEnum::EmptyFiles => shared_empty_files_state.borrow().save_all_in_one("results_empty_files"),
-            NotebookMainEnum::Temporary => shared_temporary_files_state.borrow().save_all_in_one("results_temporary_files"),
-            NotebookMainEnum::BigFiles => shared_big_files_state.borrow().save_all_in_one("results_big_files"),
-            NotebookMainEnum::SimilarImages => shared_similar_images_state.borrow().save_all_in_one("results_similar_images"),
-            NotebookMainEnum::SimilarVideos => shared_similar_videos_state.borrow().save_all_in_one("results_similar_videos"),
-            NotebookMainEnum::SameMusic => shared_same_music_state.borrow().save_all_in_one("results_same_music"),
-            NotebookMainEnum::Symlinks => shared_same_invalid_symlinks.borrow().save_all_in_one("results_invalid_symlinks"),
-            NotebookMainEnum::BrokenFiles => shared_broken_files_state.borrow().save_all_in_one("results_broken_files"),
-            NotebookMainEnum::BadExtensions => shared_bad_extensions_state.borrow().save_all_in_one("results_bad_extensions"),
+        let result = match to_notebook_main_enum(notebook_main.current_page().expect("Current page not set")) {
+            NotebookMainEnum::Duplicate => shared_duplication_state.borrow().as_ref().map(|x| x.save_all_in_one("results_duplicates")),
+            NotebookMainEnum::EmptyDirectories => shared_empty_folders_state.borrow().as_ref().map(|x| x.save_all_in_one("results_empty_directories")),
+            NotebookMainEnum::EmptyFiles => shared_empty_files_state.borrow().as_ref().map(|x| x.save_all_in_one("results_empty_files")),
+            NotebookMainEnum::Temporary => shared_temporary_files_state.borrow().as_ref().map(|x| x.save_all_in_one("results_temporary_files")),
+            NotebookMainEnum::BigFiles => shared_big_files_state.borrow().as_ref().map(|x| x.save_all_in_one("results_big_files")),
+            NotebookMainEnum::SimilarImages => shared_similar_images_state.borrow().as_ref().map(|x| x.save_all_in_one("results_similar_images")),
+            NotebookMainEnum::SimilarVideos => shared_similar_videos_state.borrow().as_ref().map(|x| x.save_all_in_one("results_similar_videos")),
+            NotebookMainEnum::SameMusic => shared_same_music_state.borrow().as_ref().map(|x| x.save_all_in_one("results_same_music")),
+            NotebookMainEnum::Symlinks => shared_same_invalid_symlinks.borrow().as_ref().map(|x| x.save_all_in_one("results_invalid_symlinks")),
+            NotebookMainEnum::BrokenFiles => shared_broken_files_state.borrow().as_ref().map(|x| x.save_all_in_one("results_broken_files")),
+            NotebookMainEnum::BadExtensions => shared_bad_extensions_state.borrow().as_ref().map(|x| x.save_all_in_one("results_bad_extensions")),
         };
 
         let current_path = match env::current_dir() {
@@ -50,7 +50,7 @@ pub fn connect_button_save(gui_data: &GuiData) {
             Err(_) => "<unknown>".to_string(),
         };
 
-        match result {
+        match result.expect("Tried to save results, without running scan(bug which needs to be fixed)") {
             Ok(()) => (),
             Err(e) => {
                 entry_info.set_text(&format!("Failed to save results to folder {current_path}, reason {e}"));
@@ -59,7 +59,7 @@ pub fn connect_button_save(gui_data: &GuiData) {
         }
 
         post_save_things(
-            &to_notebook_main_enum(notebook_main.current_page().unwrap()),
+            to_notebook_main_enum(notebook_main.current_page().expect("Current page not set")),
             &shared_buttons,
             &entry_info,
             &buttons_save_clone,
@@ -69,7 +69,7 @@ pub fn connect_button_save(gui_data: &GuiData) {
 }
 
 fn post_save_things(
-    type_of_tab: &NotebookMainEnum,
+    type_of_tab: NotebookMainEnum,
     shared_buttons: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>,
     entry_info: &Entry,
     buttons_save: &Button,
@@ -79,6 +79,11 @@ fn post_save_things(
     // Set state
     {
         buttons_save.hide();
-        *shared_buttons.borrow_mut().get_mut(type_of_tab).unwrap().get_mut(&BottomButtonsEnum::Save).unwrap() = false;
+        *shared_buttons
+            .borrow_mut()
+            .get_mut(&type_of_tab)
+            .expect("Failed to get current tab")
+            .get_mut(&BottomButtonsEnum::Save)
+            .expect("Failed to get save button") = false;
     }
 }

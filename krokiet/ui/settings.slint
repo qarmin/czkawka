@@ -32,9 +32,11 @@ export global Settings {
     
     in-out property <bool> similar_images_show_image_preview;
     in-out property <bool> similar_images_delete_outdated_entries;
+    in-out property <bool> similar_images_hide_hard_links;
 
     // in-out property <int> similar_videos_show_video_preview; // TODO - maybe someday
     in-out property <bool> similar_videos_delete_outdated_entries;
+    in-out property <bool> similar_videos_hide_hard_links;
 
     in-out property <bool> similar_music_delete_outdated_entries;
 
@@ -47,7 +49,7 @@ export global Settings {
     in-out property <[string]> similar_images_sub_available_resize_algorithm: ["Lanczos3", "Nearest", "Triangle", "Gaussian", "CatmullRom"];
     in-out property <int> similar_images_sub_resize_algorithm_index: 0;
     in-out property <string> similar_images_sub_resize_algorithm_value: "Lanczos3";
-    in-out property <[string]> similar_images_sub_available_hash_type: ["Gradient", "Mean", "VertGradient", "BlockHash", "DoubleGradient"];
+    in-out property <[string]> similar_images_sub_available_hash_type: ["Gradient", "Mean", "VertGradient", "BlockHash", "DoubleGradient", "Median"];
     in-out property <int> similar_images_sub_hash_alg_index: 0;
     in-out property <string> similar_images_sub_hash_alg_value: "Gradient";
     in-out property <float> similar_images_sub_max_similarity: 40;
@@ -86,6 +88,7 @@ export global Settings {
     in-out property <bool> similar_music_sub_bitrate: false;
     in-out property <bool> similar_music_sub_genre: false;
     in-out property <bool> similar_music_sub_length: false;
+    in-out property <bool> similar_music_compare_fingerprints_only_with_similar_titles: false;
     in-out property <float> similar_music_sub_minimal_fragment_duration_value: 5.0;
     in-out property <float> similar_music_sub_minimal_fragment_duration_max: 180.0;
     in-out property <float> similar_music_sub_maximum_difference_value: 3.0;

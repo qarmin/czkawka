@@ -47,6 +47,7 @@ pub const ALLOWED_IMAGE_HASH_ALG_VALUES: &[(&str, &str, HashAlg)] = &[
     ("blockhash", "BlockHash", HashAlg::Blockhash),
     ("vertgradient", "VertGradient", HashAlg::VertGradient),
     ("doublegradient", "DoubleGradient", HashAlg::DoubleGradient),
+    ("median", "Median", HashAlg::Median),
 ];
 pub const ALLOWED_BIG_FILE_SIZE_VALUES: &[(&str, &str, SearchMode)] = &[
     ("biggest", "The Biggest", SearchMode::BiggestFiles),
@@ -110,6 +111,8 @@ pub struct SettingsCustom {
     #[serde(default = "ttrue")]
     pub duplicate_delete_outdated_entries: bool,
     #[serde(default = "ttrue")]
+    pub similar_images_hide_hard_links: bool,
+    #[serde(default = "ttrue")]
     pub similar_images_show_image_preview: bool,
     #[serde(default = "ttrue")]
     pub similar_images_delete_outdated_entries: bool,
@@ -137,6 +140,8 @@ pub struct SettingsCustom {
     pub biggest_files_sub_method: String,
     #[serde(default = "default_biggest_files")]
     pub biggest_files_sub_number_of_files: i32,
+    #[serde(default = "ttrue")]
+    pub similar_videos_hide_hard_links: bool,
     #[serde(default)]
     pub similar_videos_sub_ignore_same_size: bool,
     #[serde(default = "default_video_similarity")]
@@ -145,6 +150,8 @@ pub struct SettingsCustom {
     pub similar_music_sub_audio_check_type: String,
     #[serde(default)]
     pub similar_music_sub_approximate_comparison: bool,
+    #[serde(default)]
+    pub similar_music_compare_fingerprints_only_with_similar_titles: bool,
     #[serde(default = "ttrue")]
     pub similar_music_sub_title: bool,
     #[serde(default = "ttrue")]
@@ -173,7 +180,7 @@ pub struct SettingsCustom {
 
 impl Default for SettingsCustom {
     fn default() -> Self {
-        serde_json::from_str("{}").unwrap()
+        serde_json::from_str("{}").expect("Cannot fail creating {} from string")
     }
 }
 
@@ -189,14 +196,14 @@ pub struct BasicSettings {
 
 impl Default for BasicSettings {
     fn default() -> Self {
-        serde_json::from_str("{}").unwrap()
+        serde_json::from_str("{}").expect("Cannot fail creating {} from string")
     }
 }
 
 pub fn connect_changing_settings_preset(app: &MainWindow) {
     let a = app.as_weak();
     app.global::<Callabler>().on_changed_settings_preset(move || {
-        let app = a.upgrade().unwrap();
+        let app = a.upgrade().expect("Failed to upgrade app :(");
         let current_item = app.global::<Settings>().get_settings_preset_idx();
         let loaded_data = load_data_from_file::<SettingsCustom>(get_config_file(current_item));
         match loaded_data {
@@ -213,7 +220,7 @@ pub fn connect_changing_settings_preset(app: &MainWindow) {
     });
     let a = app.as_weak();
     app.global::<Callabler>().on_save_current_preset(move || {
-        let app = a.upgrade().unwrap();
+        let app = a.upgrade().expect("Failed to upgrade app :(");
         let settings = app.global::<Settings>();
         let current_item = settings.get_settings_preset_idx();
         let result = save_data_to_file(get_config_file(current_item), &collect_settings(&app));
@@ -229,7 +236,7 @@ pub fn connect_changing_settings_preset(app: &MainWindow) {
     });
     let a = app.as_weak();
     app.global::<Callabler>().on_reset_current_preset(move || {
-        let app = a.upgrade().unwrap();
+        let app = a.upgrade().expect("Failed to upgrade app :(");
         let settings = app.global::<Settings>();
         let current_item = settings.get_settings_preset_idx();
         set_settings_to_gui(&app, &SettingsCustom::default());
@@ -237,7 +244,7 @@ pub fn connect_changing_settings_preset(app: &MainWindow) {
     });
     let a = app.as_weak();
     app.global::<Callabler>().on_load_current_preset(move || {
-        let app = a.upgrade().unwrap();
+        let app = a.upgrade().expect("Failed to upgrade app :(");
         let settings = app.global::<Settings>();
         let current_item = settings.get_settings_preset_idx();
         let loaded_data = load_data_from_file::<SettingsCustom>(get_config_file(current_item));
@@ -304,7 +311,7 @@ pub fn load_settings_from_file(app: &MainWindow) {
             base_settings.preset_names.push(format!("Preset {}", base_settings.preset_names.len() + 1));
         }
     }
-    base_settings.default_preset = max(min(base_settings.default_preset, 9), 0);
+    base_settings.default_preset = base_settings.default_preset.clamp(0, 9);
     custom_settings.thread_number = max(min(custom_settings.thread_number, get_all_available_threads() as i32), 0);
 
     // Ended validating
@@ -443,9 +450,12 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
     settings.set_duplicate_minimal_prehash_cache_size(custom_settings.duplicate_minimal_prehash_cache_size.to_string().into());
     settings.set_duplicate_delete_outdated_entries(custom_settings.duplicate_delete_outdated_entries);
     settings.set_duplicates_sub_name_case_sensitive(custom_settings.duplicates_sub_name_case_sensitive);
+    settings.set_similar_images_hide_hard_links(custom_settings.similar_images_hide_hard_links);
     settings.set_similar_images_show_image_preview(custom_settings.similar_images_show_image_preview);
     settings.set_similar_images_delete_outdated_entries(custom_settings.similar_images_delete_outdated_entries);
+    settings.set_similar_videos_hide_hard_links(custom_settings.similar_videos_hide_hard_links);
     settings.set_similar_videos_delete_outdated_entries(custom_settings.similar_videos_delete_outdated_entries);
+    settings.set_similar_music_compare_fingerprints_only_with_similar_titles(custom_settings.similar_music_compare_fingerprints_only_with_similar_titles);
     settings.set_similar_music_delete_outdated_entries(custom_settings.similar_music_delete_outdated_entries);
 
     let similar_images_sub_hash_size_idx = get_allowed_hash_size_idx(custom_settings.similar_images_sub_hash_size).unwrap_or_else(|| {
@@ -456,7 +466,7 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
         0
     });
     settings.set_similar_images_sub_hash_size_index(similar_images_sub_hash_size_idx as i32);
-    settings.set_similar_images_sub_hash_size_value(ALLOWED_HASH_SIZE_VALUES[similar_images_sub_hash_size_idx].1.to_string().into());
+    settings.set_similar_images_sub_hash_size_value(ALLOWED_HASH_SIZE_VALUES[similar_images_sub_hash_size_idx].0.to_string().into());
     // TODO all items with _value are not necessary, but due bug in slint are required, because combobox is not updated properly
     let similar_images_sub_hash_alg_idx = get_image_hash_alg_idx(&custom_settings.similar_images_sub_hash_alg).unwrap_or_else(|| {
         warn!(
@@ -581,11 +591,14 @@ pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let duplicate_delete_outdated_entries = settings.get_duplicate_delete_outdated_entries();
     let duplicates_sub_name_case_sensitive = settings.get_duplicates_sub_name_case_sensitive();
 
+    let similar_images_hide_hard_links = settings.get_similar_images_hide_hard_links();
     let similar_images_show_image_preview = settings.get_similar_images_show_image_preview();
     let similar_images_delete_outdated_entries = settings.get_similar_images_delete_outdated_entries();
 
+    let similar_videos_hide_hard_links = settings.get_similar_videos_hide_hard_links();
     let similar_videos_delete_outdated_entries = settings.get_similar_videos_delete_outdated_entries();
 
+    let similar_music_compare_fingerprints_only_with_similar_titles = settings.get_similar_music_compare_fingerprints_only_with_similar_titles();
     let similar_music_delete_outdated_entries = settings.get_similar_music_delete_outdated_entries();
 
     let similar_images_sub_hash_size_idx = settings.get_similar_images_sub_hash_size_index();
@@ -647,6 +660,7 @@ pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
         duplicate_minimal_hash_cache_size,
         duplicate_minimal_prehash_cache_size,
         duplicate_delete_outdated_entries,
+        similar_images_hide_hard_links,
         similar_images_show_image_preview,
         similar_images_delete_outdated_entries,
         similar_videos_delete_outdated_entries,
@@ -661,10 +675,12 @@ pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
         duplicates_sub_name_case_sensitive,
         biggest_files_sub_method,
         biggest_files_sub_number_of_files,
+        similar_videos_hide_hard_links,
         similar_videos_sub_ignore_same_size,
         similar_videos_sub_similarity,
         similar_music_sub_audio_check_type,
         similar_music_sub_approximate_comparison,
+        similar_music_compare_fingerprints_only_with_similar_titles,
         similar_music_sub_title,
         similar_music_sub_artist,
         similar_music_sub_year,

@@ -177,7 +177,14 @@ pub fn connect_settings(gui_data: &GuiData) {
                                 FilterType::Nearest,
                                 FilterType::Triangle,
                             ] {
-                                for hash_alg in &[HashAlg::Blockhash, HashAlg::Gradient, HashAlg::DoubleGradient, HashAlg::VertGradient, HashAlg::Mean] {
+                                for hash_alg in &[
+                                    HashAlg::Blockhash,
+                                    HashAlg::Gradient,
+                                    HashAlg::DoubleGradient,
+                                    HashAlg::VertGradient,
+                                    HashAlg::Mean,
+                                    HashAlg::Median,
+                                ] {
                                     let (mut messages, loaded_items) = load_cache_from_file_generalized_by_path::<czkawka_core::similar_images::ImagesEntry>(
                                         &get_similar_images_cache_file(hash_size, hash_alg, image_filter),
                                         true,

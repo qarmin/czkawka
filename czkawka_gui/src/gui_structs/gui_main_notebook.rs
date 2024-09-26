@@ -121,6 +121,8 @@ pub struct GuiMainNotebook {
     pub check_button_music_genre: CheckButton,
     pub check_button_music_length: CheckButton,
     pub check_button_music_approximate_comparison: CheckButton,
+    pub check_button_music_compare_only_in_title_group: CheckButton,
+    #[allow(unused)]
     pub label_audio_check_type: Label,
     pub combo_box_audio_check_type: ComboBoxText,
     pub label_same_music_seconds: Label,
@@ -131,19 +133,19 @@ pub struct GuiMainNotebook {
 
 impl GuiMainNotebook {
     pub fn create_from_builder(builder: &Builder) -> Self {
-        let notebook_main: Notebook = builder.object("notebook_main").unwrap();
+        let notebook_main: Notebook = builder.object("notebook_main").expect("Cambalache");
 
-        let scrolled_window_duplicate_finder: ScrolledWindow = builder.object("scrolled_window_duplicate_finder").unwrap();
-        let scrolled_window_empty_folder_finder: ScrolledWindow = builder.object("scrolled_window_empty_folder_finder").unwrap();
-        let scrolled_window_empty_files_finder: ScrolledWindow = builder.object("scrolled_window_empty_files_finder").unwrap();
-        let scrolled_window_temporary_files_finder: ScrolledWindow = builder.object("scrolled_window_temporary_files_finder").unwrap();
-        let scrolled_window_big_files_finder: ScrolledWindow = builder.object("scrolled_window_big_files_finder").unwrap();
-        let scrolled_window_similar_images_finder: ScrolledWindow = builder.object("scrolled_window_similar_images_finder").unwrap();
-        let scrolled_window_similar_videos_finder: ScrolledWindow = builder.object("scrolled_window_similar_videos_finder").unwrap();
-        let scrolled_window_same_music_finder: ScrolledWindow = builder.object("scrolled_window_same_music_finder").unwrap();
-        let scrolled_window_invalid_symlinks: ScrolledWindow = builder.object("scrolled_window_invalid_symlinks").unwrap();
-        let scrolled_window_broken_files: ScrolledWindow = builder.object("scrolled_window_broken_files").unwrap();
-        let scrolled_window_bad_extensions: ScrolledWindow = builder.object("scrolled_window_bad_extensions").unwrap();
+        let scrolled_window_duplicate_finder: ScrolledWindow = builder.object("scrolled_window_duplicate_finder").expect("Cambalache");
+        let scrolled_window_empty_folder_finder: ScrolledWindow = builder.object("scrolled_window_empty_folder_finder").expect("Cambalache");
+        let scrolled_window_empty_files_finder: ScrolledWindow = builder.object("scrolled_window_empty_files_finder").expect("Cambalache");
+        let scrolled_window_temporary_files_finder: ScrolledWindow = builder.object("scrolled_window_temporary_files_finder").expect("Cambalache");
+        let scrolled_window_big_files_finder: ScrolledWindow = builder.object("scrolled_window_big_files_finder").expect("Cambalache");
+        let scrolled_window_similar_images_finder: ScrolledWindow = builder.object("scrolled_window_similar_images_finder").expect("Cambalache");
+        let scrolled_window_similar_videos_finder: ScrolledWindow = builder.object("scrolled_window_similar_videos_finder").expect("Cambalache");
+        let scrolled_window_same_music_finder: ScrolledWindow = builder.object("scrolled_window_same_music_finder").expect("Cambalache");
+        let scrolled_window_invalid_symlinks: ScrolledWindow = builder.object("scrolled_window_invalid_symlinks").expect("Cambalache");
+        let scrolled_window_broken_files: ScrolledWindow = builder.object("scrolled_window_broken_files").expect("Cambalache");
+        let scrolled_window_bad_extensions: ScrolledWindow = builder.object("scrolled_window_bad_extensions").expect("Cambalache");
 
         let tree_view_duplicate_finder: TreeView = TreeView::new();
         tree_view_duplicate_finder.set_widget_name("PIERD");
@@ -204,61 +206,62 @@ impl GuiMainNotebook {
         let gc_tree_view_bad_extensions: GestureClick = GestureClick::new();
         tree_view_bad_extensions.add_controller(gc_tree_view_bad_extensions.clone());
 
-        let combo_box_duplicate_check_method: ComboBoxText = builder.object("combo_box_duplicate_check_method").unwrap();
-        let combo_box_duplicate_hash_type: ComboBoxText = builder.object("combo_box_duplicate_hash_type").unwrap();
+        let combo_box_duplicate_check_method: ComboBoxText = builder.object("combo_box_duplicate_check_method").expect("Cambalache");
+        let combo_box_duplicate_hash_type: ComboBoxText = builder.object("combo_box_duplicate_hash_type").expect("Cambalache");
 
-        let entry_big_files_number: Entry = builder.object("entry_big_files_number").unwrap();
+        let entry_big_files_number: Entry = builder.object("entry_big_files_number").expect("Cambalache");
 
         //// Check Buttons
-        let check_button_duplicate_case_sensitive_name: CheckButton = builder.object("check_button_duplicate_case_sensitive_name").unwrap();
-        let check_button_music_title: CheckButton = builder.object("check_button_music_title").unwrap();
-        let check_button_music_artist: CheckButton = builder.object("check_button_music_artist").unwrap();
-        let check_button_music_year: CheckButton = builder.object("check_button_music_year").unwrap();
-        let check_button_music_bitrate: CheckButton = builder.object("check_button_music_bitrate").unwrap();
-        let check_button_music_genre: CheckButton = builder.object("check_button_music_genre").unwrap();
-        let check_button_music_length: CheckButton = builder.object("check_button_music_length").unwrap();
-        let check_button_music_approximate_comparison: CheckButton = builder.object("check_button_music_approximate_comparison").unwrap();
+        let check_button_duplicate_case_sensitive_name: CheckButton = builder.object("check_button_duplicate_case_sensitive_name").expect("Cambalache");
+        let check_button_music_title: CheckButton = builder.object("check_button_music_title").expect("Cambalache");
+        let check_button_music_artist: CheckButton = builder.object("check_button_music_artist").expect("Cambalache");
+        let check_button_music_year: CheckButton = builder.object("check_button_music_year").expect("Cambalache");
+        let check_button_music_bitrate: CheckButton = builder.object("check_button_music_bitrate").expect("Cambalache");
+        let check_button_music_genre: CheckButton = builder.object("check_button_music_genre").expect("Cambalache");
+        let check_button_music_length: CheckButton = builder.object("check_button_music_length").expect("Cambalache");
+        let check_button_music_approximate_comparison: CheckButton = builder.object("check_button_music_approximate_comparison").expect("Cambalache");
+        let check_button_music_compare_only_in_title_group: CheckButton = builder.object("check_button_music_compare_only_in_title_group").expect("Cambalache");
 
-        let check_button_broken_files_audio: CheckButton = builder.object("check_button_broken_files_audio").unwrap();
-        let check_button_broken_files_pdf: CheckButton = builder.object("check_button_broken_files_pdf").unwrap();
-        let check_button_broken_files_archive: CheckButton = builder.object("check_button_broken_files_archive").unwrap();
-        let check_button_broken_files_image: CheckButton = builder.object("check_button_broken_files_image").unwrap();
+        let check_button_broken_files_audio: CheckButton = builder.object("check_button_broken_files_audio").expect("Cambalache");
+        let check_button_broken_files_pdf: CheckButton = builder.object("check_button_broken_files_pdf").expect("Cambalache");
+        let check_button_broken_files_archive: CheckButton = builder.object("check_button_broken_files_archive").expect("Cambalache");
+        let check_button_broken_files_image: CheckButton = builder.object("check_button_broken_files_image").expect("Cambalache");
 
-        let scale_similarity_similar_images: Scale = builder.object("scale_similarity_similar_images").unwrap();
-        let scale_similarity_similar_videos: Scale = builder.object("scale_similarity_similar_videos").unwrap();
+        let scale_similarity_similar_images: Scale = builder.object("scale_similarity_similar_images").expect("Cambalache");
+        let scale_similarity_similar_videos: Scale = builder.object("scale_similarity_similar_videos").expect("Cambalache");
 
-        let combo_box_image_resize_algorithm: ComboBoxText = builder.object("combo_box_image_resize_algorithm").unwrap();
-        let combo_box_image_hash_algorithm: ComboBoxText = builder.object("combo_box_image_hash_algorithm").unwrap();
-        let combo_box_image_hash_size: ComboBoxText = builder.object("combo_box_image_hash_size").unwrap();
-        let combo_box_big_files_mode: ComboBoxText = builder.object("combo_box_big_files_mode").unwrap();
+        let combo_box_image_resize_algorithm: ComboBoxText = builder.object("combo_box_image_resize_algorithm").expect("Cambalache");
+        let combo_box_image_hash_algorithm: ComboBoxText = builder.object("combo_box_image_hash_algorithm").expect("Cambalache");
+        let combo_box_image_hash_size: ComboBoxText = builder.object("combo_box_image_hash_size").expect("Cambalache");
+        let combo_box_big_files_mode: ComboBoxText = builder.object("combo_box_big_files_mode").expect("Cambalache");
 
-        let check_button_image_ignore_same_size: CheckButton = builder.object("check_button_image_ignore_same_size").unwrap();
-        let check_button_video_ignore_same_size: CheckButton = builder.object("check_button_video_ignore_same_size").unwrap();
+        let check_button_image_ignore_same_size: CheckButton = builder.object("check_button_image_ignore_same_size").expect("Cambalache");
+        let check_button_video_ignore_same_size: CheckButton = builder.object("check_button_video_ignore_same_size").expect("Cambalache");
 
-        let label_similar_images_minimal_similarity: Label = builder.object("label_similar_images_minimal_similarity").unwrap();
+        let label_similar_images_minimal_similarity: Label = builder.object("label_similar_images_minimal_similarity").expect("Cambalache");
 
-        let label_duplicate_check_method: Label = builder.object("label_duplicate_check_method").unwrap();
-        let label_duplicate_hash_type: Label = builder.object("label_duplicate_hash_type").unwrap();
-        let label_big_shown_files: Label = builder.object("label_big_shown_files").unwrap();
-        let label_image_resize_algorithm: Label = builder.object("label_image_resize_algorithm").unwrap();
-        let label_image_hash_type: Label = builder.object("label_image_hash_type").unwrap();
-        let label_image_hash_size: Label = builder.object("label_image_hash_size").unwrap();
-        let label_image_similarity: Label = builder.object("label_image_similarity").unwrap();
-        let label_image_similarity_max: Label = builder.object("label_image_similarity_max").unwrap();
-        let label_video_similarity: Label = builder.object("label_video_similarity").unwrap();
-        let label_video_similarity_min: Label = builder.object("label_video_similarity_min").unwrap();
-        let label_video_similarity_max: Label = builder.object("label_video_similarity_max").unwrap();
-        let label_big_files_mode: Label = builder.object("label_big_files_mode").unwrap();
+        let label_duplicate_check_method: Label = builder.object("label_duplicate_check_method").expect("Cambalache");
+        let label_duplicate_hash_type: Label = builder.object("label_duplicate_hash_type").expect("Cambalache");
+        let label_big_shown_files: Label = builder.object("label_big_shown_files").expect("Cambalache");
+        let label_image_resize_algorithm: Label = builder.object("label_image_resize_algorithm").expect("Cambalache");
+        let label_image_hash_type: Label = builder.object("label_image_hash_type").expect("Cambalache");
+        let label_image_hash_size: Label = builder.object("label_image_hash_size").expect("Cambalache");
+        let label_image_similarity: Label = builder.object("label_image_similarity").expect("Cambalache");
+        let label_image_similarity_max: Label = builder.object("label_image_similarity_max").expect("Cambalache");
+        let label_video_similarity: Label = builder.object("label_video_similarity").expect("Cambalache");
+        let label_video_similarity_min: Label = builder.object("label_video_similarity_min").expect("Cambalache");
+        let label_video_similarity_max: Label = builder.object("label_video_similarity_max").expect("Cambalache");
+        let label_big_files_mode: Label = builder.object("label_big_files_mode").expect("Cambalache");
 
-        let image_preview_similar_images: Image = builder.object("image_preview_similar_images").unwrap();
-        let image_preview_duplicates: Image = builder.object("image_preview_duplicates").unwrap();
+        let image_preview_similar_images: Image = builder.object("image_preview_similar_images").expect("Cambalache");
+        let image_preview_duplicates: Image = builder.object("image_preview_duplicates").expect("Cambalache");
 
-        let label_audio_check_type: Label = builder.object("label_audio_check_type").unwrap();
-        let combo_box_audio_check_type: ComboBoxText = builder.object("combo_box_audio_check_type").unwrap();
-        let label_same_music_seconds: Label = builder.object("label_same_music_seconds").unwrap();
-        let label_same_music_similarity: Label = builder.object("label_same_music_similarity").unwrap();
-        let scale_seconds_same_music: Scale = builder.object("scale_seconds_same_music").unwrap();
-        let scale_similarity_same_music: Scale = builder.object("scale_similarity_same_music").unwrap();
+        let label_audio_check_type: Label = builder.object("label_audio_check_type").expect("Cambalache");
+        let combo_box_audio_check_type: ComboBoxText = builder.object("combo_box_audio_check_type").expect("Cambalache");
+        let label_same_music_seconds: Label = builder.object("label_same_music_seconds").expect("Cambalache");
+        let label_same_music_similarity: Label = builder.object("label_same_music_similarity").expect("Cambalache");
+        let scale_seconds_same_music: Scale = builder.object("scale_seconds_same_music").expect("Cambalache");
+        let scale_similarity_same_music: Scale = builder.object("scale_similarity_same_music").expect("Cambalache");
 
         Self {
             notebook_main,
@@ -294,42 +297,6 @@ impl GuiMainNotebook {
             evk_tree_view_same_music_finder,
             evk_tree_view_invalid_symlinks,
             evk_tree_view_broken_files,
-            entry_big_files_number,
-            check_button_music_title,
-            check_button_music_artist,
-            check_button_music_year,
-            check_button_music_bitrate,
-            check_button_music_genre,
-            check_button_music_length,
-            check_button_music_approximate_comparison,
-            label_audio_check_type,
-            scale_similarity_similar_images,
-            scale_similarity_similar_videos,
-            check_button_broken_files_audio,
-            check_button_broken_files_pdf,
-            check_button_broken_files_archive,
-            check_button_image_ignore_same_size,
-            label_similar_images_minimal_similarity,
-            label_duplicate_check_method,
-            label_duplicate_hash_type,
-            combo_box_duplicate_check_method,
-            label_big_shown_files,
-            label_image_resize_algorithm,
-            label_image_hash_type,
-            label_image_hash_size,
-            combo_box_image_resize_algorithm,
-            combo_box_image_hash_algorithm,
-            label_image_similarity,
-            label_image_similarity_max,
-            label_video_similarity,
-            label_video_similarity_min,
-            label_video_similarity_max,
-            image_preview_similar_images,
-            image_preview_duplicates,
-            combo_box_duplicate_hash_type,
-            combo_box_image_hash_size,
-            check_button_video_ignore_same_size,
-            check_button_duplicate_case_sensitive_name,
             evk_tree_view_bad_extensions,
             gc_tree_view_duplicate_finder,
             gc_tree_view_empty_folder_finder,
@@ -342,9 +309,46 @@ impl GuiMainNotebook {
             gc_tree_view_invalid_symlinks,
             gc_tree_view_broken_files,
             gc_tree_view_bad_extensions,
-            combo_box_big_files_mode,
+            combo_box_duplicate_check_method,
+            combo_box_duplicate_hash_type,
+            label_duplicate_check_method,
+            label_duplicate_hash_type,
+            check_button_duplicate_case_sensitive_name,
+            image_preview_duplicates,
+            label_big_shown_files,
+            entry_big_files_number,
             label_big_files_mode,
+            combo_box_big_files_mode,
+            scale_similarity_similar_images,
+            label_image_resize_algorithm,
+            label_image_hash_type,
+            label_image_hash_size,
+            combo_box_image_resize_algorithm,
+            combo_box_image_hash_algorithm,
+            combo_box_image_hash_size,
+            check_button_image_ignore_same_size,
+            check_button_video_ignore_same_size,
+            label_image_similarity,
+            label_image_similarity_max,
+            image_preview_similar_images,
+            label_similar_images_minimal_similarity,
+            label_video_similarity,
+            label_video_similarity_min,
+            label_video_similarity_max,
+            scale_similarity_similar_videos,
+            check_button_broken_files_audio,
+            check_button_broken_files_pdf,
+            check_button_broken_files_archive,
             check_button_broken_files_image,
+            check_button_music_title,
+            check_button_music_artist,
+            check_button_music_year,
+            check_button_music_bitrate,
+            check_button_music_genre,
+            check_button_music_length,
+            check_button_music_approximate_comparison,
+            check_button_music_compare_only_in_title_group,
+            label_audio_check_type,
             combo_box_audio_check_type,
             label_same_music_seconds,
             label_same_music_similarity,
@@ -434,7 +438,7 @@ impl GuiMainNotebook {
         self.scale_similarity_similar_videos.set_tooltip_text(Some(&flg!("same_music_tooltip")));
 
         {
-            let hash_size_index = self.combo_box_image_hash_size.active().unwrap() as usize;
+            let hash_size_index = self.combo_box_image_hash_size.active().expect("Some hash size must be active") as usize;
             let hash_size = IMAGES_HASH_SIZE_COMBO_BOX[hash_size_index];
             match hash_size {
                 8 => {
@@ -475,9 +479,9 @@ impl GuiMainNotebook {
         ] {
             self.notebook_main
                 .tab_label(&vec_children[main_enum])
-                .unwrap()
+                .expect("Tab label must be set")
                 .downcast::<Label>()
-                .unwrap()
+                .expect("Tab label must be a label")
                 .set_text(&fl_thing);
         }
 

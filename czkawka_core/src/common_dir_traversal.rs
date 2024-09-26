@@ -21,16 +21,7 @@ use crate::common_items::ExcludedItems;
 use crate::common_tool::CommonToolData;
 use crate::common_traits::ResultEntry;
 use crate::flc;
-
-#[derive(Debug)]
-pub struct ProgressData {
-    pub checking_method: CheckingMethod,
-    pub current_stage: u8,
-    pub max_stage: u8,
-    pub entries_checked: usize,
-    pub entries_to_check: usize,
-    pub tool_type: ToolType,
-}
+use crate::progress_data::{CurrentStage, ProgressData};
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Default)]
 pub enum ToolType {
@@ -119,7 +110,6 @@ pub struct DirTraversalBuilder<'a, 'b, F> {
     minimal_file_size: Option<u64>,
     maximal_file_size: Option<u64>,
     checking_method: CheckingMethod,
-    max_stage: u8,
     collect: Collect,
     recursive_search: bool,
     directories: Option<Directories>,
@@ -140,7 +130,6 @@ pub struct DirTraversal<'a, 'b, F> {
     minimal_file_size: u64,
     maximal_file_size: u64,
     checking_method: CheckingMethod,
-    max_stage: u8,
     tool_type: ToolType,
     collect: Collect,
 }
@@ -159,7 +148,6 @@ impl<'a, 'b> DirTraversalBuilder<'a, 'b, ()> {
             stop_receiver: None,
             progress_sender: None,
             checking_method: CheckingMethod::None,
-            max_stage: 0,
             minimal_file_size: None,
             maximal_file_size: None,
             collect: Collect::Files,
@@ -202,11 +190,6 @@ impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
 
     pub fn checking_method(mut self, checking_method: CheckingMethod) -> Self {
         self.checking_method = checking_method;
-        self
-    }
-
-    pub fn max_stage(mut self, max_stage: u8) -> Self {
-        self.max_stage = max_stage;
         self
     }
 
@@ -276,7 +259,6 @@ impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
             minimal_file_size: self.minimal_file_size,
             collect: self.collect,
             checking_method: self.checking_method,
-            max_stage: self.max_stage,
             tool_type: self.tool_type,
         }
     }
@@ -288,7 +270,6 @@ impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
             stop_receiver: self.stop_receiver,
             progress_sender: self.progress_sender,
             checking_method: self.checking_method,
-            max_stage: self.max_stage,
             minimal_file_size: self.minimal_file_size.unwrap_or(0),
             maximal_file_size: self.maximal_file_size.unwrap_or(u64::MAX),
             collect: self.collect,
@@ -337,7 +318,7 @@ where
         let mut folders_to_check: Vec<PathBuf> = self.root_dirs.clone();
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
-            prepare_thread_handler_common(self.progress_sender, 0, self.max_stage, 0, self.checking_method, self.tool_type);
+            prepare_thread_handler_common(self.progress_sender, CurrentStage::CollectingFiles, 0, (self.tool_type, self.checking_method));
 
         let DirTraversal {
             collect,
@@ -688,11 +669,10 @@ mod tests {
     use crate::common_tool::*;
     use once_cell::sync::Lazy;
     use std::collections::HashSet;
-    use std::fs;
     use std::fs::File;
-    use std::io;
     use std::io::prelude::*;
     use std::time::{Duration, SystemTime};
+    use std::{fs, io};
     use tempfile::TempDir;
 
     impl CommonData for CommonToolData {
@@ -725,7 +705,7 @@ mod tests {
     fn test_traversal() -> io::Result<()> {
         let dir = tempfile::Builder::new().tempdir()?;
         let (src, hard, other) = create_files(&dir)?;
-        let secs = NOW.duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs();
+        let secs = NOW.duration_since(SystemTime::UNIX_EPOCH).expect("Cannot fail calculating duration since epoch").as_secs();
 
         let mut common_data = CommonToolData::new(ToolType::SimilarImages);
         common_data.directories.set_included_directory([dir.path().to_owned()].to_vec());
@@ -770,7 +750,7 @@ mod tests {
     fn test_traversal_group_by_inode() -> io::Result<()> {
         let dir = tempfile::Builder::new().tempdir()?;
         let (src, _, other) = create_files(&dir)?;
-        let secs = NOW.duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs();
+        let secs = NOW.duration_since(SystemTime::UNIX_EPOCH).expect("Cannot fail calculating duration since epoch").as_secs();
 
         let mut common_data = CommonToolData::new(ToolType::SimilarImages);
         common_data.directories.set_included_directory([dir.path().to_owned()].to_vec());
@@ -810,7 +790,7 @@ mod tests {
     fn test_traversal_group_by_inode() -> io::Result<()> {
         let dir = tempfile::Builder::new().tempdir()?;
         let (src, hard, other) = create_files(&dir)?;
-        let secs = NOW.duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs();
+        let secs = NOW.duration_since(SystemTime::UNIX_EPOCH).expect("Cannot fail duration from epoch").as_secs();
 
         let mut common_data = CommonToolData::new(ToolType::SimilarImages);
         common_data.directories.set_included_directory([dir.path().to_owned()].to_vec());

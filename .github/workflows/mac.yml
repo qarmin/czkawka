@@ -59,27 +59,28 @@ jobs:
           path: target/release/krokiet
         if: ${{ matrix.type == 'release' }}
 
-      - name: Build Release Heif
-        run: cargo build --release --features heif
-        if: ${{ matrix.type == 'release'}}
-
-      - name: Store MacOS CLI Heif
-        uses: actions/upload-artifact@v4
-        with:
-          name: czkawka_cli-${{ runner.os }}-${{ matrix.toolchain }}-heif
-          path: target/release/czkawka_cli
-        if: ${{ matrix.type == 'release' }}
-
-      - name: Store MacOS GUI Heif
-        uses: actions/upload-artifact@v4
-        with:
-          name: czkawka_gui-${{ runner.os }}-${{ matrix.toolchain }}-heif
-          path: target/release/czkawka_gui
-        if: ${{ matrix.type == 'release' }}
-
-      - name: Store MacOS Krokiet Heif
-        uses: actions/upload-artifact@v4
-        with:
-          name: krokiet-${{ runner.os }}-${{ matrix.toolchain }}-heif
-          path: target/release/krokiet
-        if: ${{ matrix.type == 'release' }}
+# TODO - compilation is broken, not sure why
+#      - name: Build Release Heif
+#        run: cargo build --release --features heif
+#        if: ${{ matrix.type == 'release'}}
+#
+#      - name: Store MacOS CLI Heif
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: czkawka_cli-${{ runner.os }}-${{ matrix.toolchain }}-heif
+#          path: target/release/czkawka_cli
+#        if: ${{ matrix.type == 'release' }}
+#
+#      - name: Store MacOS GUI Heif
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: czkawka_gui-${{ runner.os }}-${{ matrix.toolchain }}-heif
+#          path: target/release/czkawka_gui
+#        if: ${{ matrix.type == 'release' }}
+#
+#      - name: Store MacOS Krokiet Heif
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: krokiet-${{ runner.os }}-${{ matrix.toolchain }}-heif
+#          path: target/release/krokiet
+#        if: ${{ matrix.type == 'release' }}

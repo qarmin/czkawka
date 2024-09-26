@@ -1,27 +1,28 @@
 use std::rc::Rc;
 use std::thread;
 
-use chrono::NaiveDateTime;
+use chrono::DateTime;
 use crossbeam_channel::{Receiver, Sender};
-use czkawka_core::bad_extensions::{BadExtensions, BadFileEntry};
-use czkawka_core::big_file::{BigFile, SearchMode};
-use czkawka_core::broken_files::{BrokenEntry, BrokenFiles, CheckedTypes};
+use czkawka_core::bad_extensions::{BadExtensions, BadExtensionsParameters, BadFileEntry};
+use czkawka_core::big_file::{BigFile, BigFileParameters, SearchMode};
+use czkawka_core::broken_files::{BrokenEntry, BrokenFiles, BrokenFilesParameters, CheckedTypes};
 use humansize::{format_size, BINARY};
 use rayon::prelude::*;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
 
 use czkawka_core::common::{split_path, split_path_compare, DEFAULT_THREAD_SIZE};
-use czkawka_core::common_dir_traversal::{CheckingMethod, FileEntry, ProgressData};
+use czkawka_core::common_dir_traversal::{CheckingMethod, FileEntry};
 use czkawka_core::common_tool::CommonData;
 use czkawka_core::common_traits::ResultEntry;
-use czkawka_core::duplicate::{DuplicateEntry, DuplicateFinder};
+use czkawka_core::duplicate::{DuplicateEntry, DuplicateFinder, DuplicateFinderParameters};
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::{EmptyFolder, FolderEntry};
 use czkawka_core::invalid_symlinks::{InvalidSymlinks, SymlinksFileEntry};
-use czkawka_core::same_music::{MusicEntry, MusicSimilarity, SameMusic};
+use czkawka_core::progress_data::ProgressData;
+use czkawka_core::same_music::{MusicEntry, MusicSimilarity, SameMusic, SameMusicParameters};
 use czkawka_core::similar_images;
-use czkawka_core::similar_images::{ImagesEntry, SimilarImages};
-use czkawka_core::similar_videos::{SimilarVideos, VideosEntry};
+use czkawka_core::similar_images::{ImagesEntry, SimilarImages, SimilarImagesParameters};
+use czkawka_core::similar_videos::{SimilarVideos, SimilarVideosParameters, VideosEntry};
 use czkawka_core::temporary::{Temporary, TemporaryFileEntry};
 
 use crate::common::{check_if_all_included_dirs_are_referenced, split_u64_into_i32s};
@@ -35,7 +36,7 @@ use crate::{CurrentTab, GuiState, MainListModel, MainWindow, ProgressToSend};
 pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>) {
     let a = app.as_weak();
     app.on_scan_starting(move |active_tab| {
-        let app = a.upgrade().unwrap();
+        let app = a.upgrade().expect("Failed to upgrade app :(");
 
         if check_if_all_included_dirs_are_referenced(&app) {
             app.invoke_scan_ended("Cannot start scan when all included directories are set as referenced folders.".into());
@@ -99,27 +100,31 @@ fn scan_duplicates(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, s
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut finder = DuplicateFinder::new();
-            set_common_settings(&mut finder, &custom_settings);
-            finder.set_check_method(CheckingMethod::Hash);
-            finder.set_minimal_cache_file_size(custom_settings.duplicate_minimal_hash_cache_size as u64);
-            finder.set_minimal_prehash_cache_file_size(custom_settings.duplicate_minimal_prehash_cache_size as u64);
-            let check_method = ALLOWED_DUPLICATES_CHECK_METHOD_VALUES[get_duplicates_check_method_idx(&custom_settings.duplicates_sub_check_method).unwrap()].2;
-            finder.set_check_method(check_method);
-            let hash_type = ALLOWED_DUPLICATES_HASH_TYPE_VALUES[get_duplicates_hash_type_idx(&custom_settings.duplicates_sub_available_hash_type).unwrap()].2;
-            finder.set_hash_type(hash_type);
-            // finder.set_ignore_hard_links(custom_settings.ignore); // TODO
-            finder.set_use_prehash_cache(custom_settings.duplicate_use_prehash);
-            finder.set_delete_outdated_cache(custom_settings.duplicate_delete_outdated_entries);
-            finder.set_case_sensitive_name_comparison(custom_settings.duplicates_sub_name_case_sensitive);
-            finder.find_duplicates(Some(&stop_receiver), Some(&progress_sender));
-            let messages = finder.get_text_messages().create_messages_text();
+            let hash_type =
+                ALLOWED_DUPLICATES_HASH_TYPE_VALUES[get_duplicates_hash_type_idx(&custom_settings.duplicates_sub_available_hash_type).expect("Failed to get hash type")].2;
+            let check_method =
+                ALLOWED_DUPLICATES_CHECK_METHOD_VALUES[get_duplicates_check_method_idx(&custom_settings.duplicates_sub_check_method).expect("Failed to get check method")].2;
+            let params = DuplicateFinderParameters::new(
+                check_method,
+                hash_type,
+                custom_settings.duplicate_hide_hard_links,
+                custom_settings.duplicate_use_prehash,
+                custom_settings.duplicate_minimal_hash_cache_size as u64,
+                custom_settings.duplicate_minimal_prehash_cache_size as u64,
+                custom_settings.duplicates_sub_name_case_sensitive,
+            );
+            let mut item = DuplicateFinder::new(params);
+
+            set_common_settings(&mut item, &custom_settings);
+            item.set_delete_outdated_cache(custom_settings.duplicate_delete_outdated_entries);
+            item.find_duplicates(Some(&stop_receiver), Some(&progress_sender));
+            let messages = item.get_text_messages().create_messages_text();
 
             let mut vector;
-            if finder.get_use_reference() {
-                match finder.get_check_method() {
+            if item.get_use_reference() {
+                match item.get_params().check_method {
                     CheckingMethod::Hash => {
-                        vector = finder
+                        vector = item
                             .get_files_with_identical_hashes_referenced()
                             .values()
                             .flatten()
@@ -128,10 +133,10 @@ fn scan_duplicates(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, s
                             .collect::<Vec<_>>();
                     }
                     CheckingMethod::Name | CheckingMethod::Size | CheckingMethod::SizeName => {
-                        let values: Vec<_> = match finder.get_check_method() {
-                            CheckingMethod::Name => finder.get_files_with_identical_name_referenced().values().cloned().collect(),
-                            CheckingMethod::Size => finder.get_files_with_identical_size_referenced().values().cloned().collect(),
-                            CheckingMethod::SizeName => finder.get_files_with_identical_size_names_referenced().values().cloned().collect(),
+                        let values: Vec<_> = match item.get_params().check_method {
+                            CheckingMethod::Name => item.get_files_with_identical_name_referenced().values().cloned().collect(),
+                            CheckingMethod::Size => item.get_files_with_identical_size_referenced().values().cloned().collect(),
+                            CheckingMethod::SizeName => item.get_files_with_identical_size_names_referenced().values().cloned().collect(),
                             _ => unreachable!("Invalid check method."),
                         };
                         vector = values.into_iter().map(|(original, other)| (Some(original), other)).collect::<Vec<_>>();
@@ -139,15 +144,15 @@ fn scan_duplicates(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, s
                     _ => unreachable!("Invalid check method."),
                 }
             } else {
-                match finder.get_check_method() {
+                match item.get_params().check_method {
                     CheckingMethod::Hash => {
-                        vector = finder.get_files_sorted_by_hash().values().flatten().cloned().map(|items| (None, items)).collect::<Vec<_>>();
+                        vector = item.get_files_sorted_by_hash().values().flatten().cloned().map(|items| (None, items)).collect::<Vec<_>>();
                     }
                     CheckingMethod::Name | CheckingMethod::Size | CheckingMethod::SizeName => {
-                        let values: Vec<_> = match finder.get_check_method() {
-                            CheckingMethod::Name => finder.get_files_sorted_by_names().values().cloned().collect(),
-                            CheckingMethod::Size => finder.get_files_sorted_by_size().values().cloned().collect(),
-                            CheckingMethod::SizeName => finder.get_files_sorted_by_size_name().values().cloned().collect(),
+                        let values: Vec<_> = match item.get_params().check_method {
+                            CheckingMethod::Name => item.get_files_sorted_by_names().values().cloned().collect(),
+                            CheckingMethod::Size => item.get_files_sorted_by_size().values().cloned().collect(),
+                            CheckingMethod::SizeName => item.get_files_sorted_by_size_name().values().cloned().collect(),
                             _ => unreachable!("Invalid check method."),
                         };
                         vector = values.into_iter().map(|items| (None, items)).collect::<Vec<_>>();
@@ -164,7 +169,7 @@ fn scan_duplicates(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, s
                 write_duplicate_results(&app, vector, messages);
             })
         })
-        .unwrap();
+        .expect("Cannot start thread - not much we can do here");
 }
 fn write_duplicate_results(app: &MainWindow, vector: Vec<(Option<DuplicateEntry>, Vec<DuplicateEntry>)>, messages: String) {
     let items_found = vector.len();
@@ -192,7 +197,10 @@ fn prepare_data_model_duplicates(fe: &DuplicateEntry) -> (ModelRc<SharedString>,
         format_size(fe.size, BINARY).into(),
         file.into(),
         directory.into(),
-        NaiveDateTime::from_timestamp_opt(fe.get_modified_date() as i64, 0).unwrap().to_string().into(),
+        DateTime::from_timestamp(fe.get_modified_date() as i64, 0)
+            .expect("Cannot create DateTime")
+            .to_string()
+            .into(),
     ]);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
@@ -205,12 +213,12 @@ fn scan_empty_folders(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut finder = EmptyFolder::new();
-            set_common_settings(&mut finder, &custom_settings);
-            finder.find_empty_folders(Some(&stop_receiver), Some(&progress_sender));
+            let mut item = EmptyFolder::new();
+            set_common_settings(&mut item, &custom_settings);
+            item.find_empty_folders(Some(&stop_receiver), Some(&progress_sender));
 
-            let mut vector = finder.get_empty_folder_list().values().cloned().collect::<Vec<_>>();
-            let messages = finder.get_text_messages().create_messages_text();
+            let mut vector = item.get_empty_folder_list().values().cloned().collect::<Vec<_>>();
+            let messages = item.get_text_messages().create_messages_text();
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
@@ -218,7 +226,7 @@ fn scan_empty_folders(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>
                 write_empty_folders_results(&app, vector, messages);
             })
         })
-        .unwrap();
+        .expect("Cannot start thread - not much we can do here");
 }
 fn write_empty_folders_results(app: &MainWindow, vector: Vec<FolderEntry>, messages: String) {
     let items_found = vector.len();
@@ -237,7 +245,10 @@ fn prepare_data_model_empty_folders(fe: &FolderEntry) -> (ModelRc<SharedString>,
     let data_model_str = VecModel::from_slice(&[
         file.into(),
         directory.into(),
-        NaiveDateTime::from_timestamp_opt(fe.modified_date as i64, 0).unwrap().to_string().into(),
+        DateTime::from_timestamp(fe.modified_date as i64, 0)
+            .expect("Modified date always should be in valid range")
+            .to_string()
+            .into(),
     ]);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1]);
@@ -249,15 +260,15 @@ fn scan_big_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, st
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut finder = BigFile::new();
-            set_common_settings(&mut finder, &custom_settings);
-            finder.set_number_of_files_to_check(custom_settings.biggest_files_sub_number_of_files as usize);
-            let big_files_mode = ALLOWED_BIG_FILE_SIZE_VALUES[get_biggest_item_idx(&custom_settings.biggest_files_sub_method).unwrap()].2;
-            finder.set_search_mode(big_files_mode);
-            finder.find_big_files(Some(&stop_receiver), Some(&progress_sender));
+            let big_files_mode = ALLOWED_BIG_FILE_SIZE_VALUES[get_biggest_item_idx(&custom_settings.biggest_files_sub_method).expect("Failed to get big files mode")].2;
+            let params = BigFileParameters::new(custom_settings.biggest_files_sub_number_of_files as usize, big_files_mode);
+            let mut item = BigFile::new(params);
 
-            let mut vector = finder.get_big_files().clone();
-            let messages = finder.get_text_messages().create_messages_text();
+            set_common_settings(&mut item, &custom_settings);
+            item.find_big_files(Some(&stop_receiver), Some(&progress_sender));
+
+            let mut vector = item.get_big_files().clone();
+            let messages = item.get_text_messages().create_messages_text();
 
             if big_files_mode == SearchMode::BiggestFiles {
                 vector.par_sort_unstable_by_key(|fe| u64::MAX - fe.size);
@@ -269,7 +280,7 @@ fn scan_big_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, st
                 write_big_files_results(&app, vector, messages);
             })
         })
-        .unwrap();
+        .expect("Cannot start thread - not much we can do here");
 }
 fn write_big_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages: String) {
     let items_found = vector.len();
@@ -289,7 +300,10 @@ fn prepare_data_model_big_files(fe: &FileEntry) -> (ModelRc<SharedString>, Model
         format_size(fe.size, BINARY).into(),
         file.into(),
         directory.into(),
-        NaiveDateTime::from_timestamp_opt(fe.modified_date as i64, 0).unwrap().to_string().into(),
+        DateTime::from_timestamp(fe.modified_date as i64, 0)
+            .expect("Modified date always should be in valid range")
+            .to_string()
+            .into(),
     ]);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
@@ -302,12 +316,12 @@ fn scan_empty_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, 
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut finder = EmptyFiles::new();
-            set_common_settings(&mut finder, &custom_settings);
-            finder.find_empty_files(Some(&stop_receiver), Some(&progress_sender));
+            let mut item = EmptyFiles::new();
+            set_common_settings(&mut item, &custom_settings);
+            item.find_empty_files(Some(&stop_receiver), Some(&progress_sender));
 
-            let mut vector = finder.get_empty_files().clone();
-            let messages = finder.get_text_messages().create_messages_text();
+            let mut vector = item.get_empty_files().clone();
+            let messages = item.get_text_messages().create_messages_text();
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
@@ -315,7 +329,7 @@ fn scan_empty_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, 
                 write_empty_files_results(&app, vector, messages);
             })
         })
-        .unwrap();
+        .expect("Cannot start thread - not much we can do here");
 }
 fn write_empty_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages: String) {
     let items_found = vector.len();
@@ -334,7 +348,10 @@ fn prepare_data_model_empty_files(fe: &FileEntry) -> (ModelRc<SharedString>, Mod
     let data_model_str = VecModel::from_slice(&[
         file.into(),
         directory.into(),
-        NaiveDateTime::from_timestamp_opt(fe.get_modified_date() as i64, 0).unwrap().to_string().into(),
+        DateTime::from_timestamp(fe.get_modified_date() as i64, 0)
+            .expect("Cannot create DateTime")
+            .to_string()
+            .into(),
     ]);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
@@ -347,33 +364,39 @@ fn scan_similar_images(a: Weak<MainWindow>, progress_sender: Sender<ProgressData
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut finder = SimilarImages::new();
-            set_common_settings(&mut finder, &custom_settings);
+            let hash_alg = ALLOWED_IMAGE_HASH_ALG_VALUES[get_image_hash_alg_idx(&custom_settings.similar_images_sub_hash_alg).expect("Failed to get hash algorithm")].2;
+            let resize_algorithm =
+                ALLOWED_RESIZE_ALGORITHM_VALUES[get_resize_algorithm_idx(&custom_settings.similar_images_sub_resize_algorithm).expect("Failed to get resize algorithm")].2;
 
-            finder.set_similarity(custom_settings.similar_images_sub_similarity as u32);
-            let hash_alg = ALLOWED_IMAGE_HASH_ALG_VALUES[get_image_hash_alg_idx(&custom_settings.similar_images_sub_hash_alg).unwrap()].2;
-            finder.set_hash_alg(hash_alg);
-            finder.set_hash_size(custom_settings.similar_images_sub_hash_size);
-            let resize_algorithm = ALLOWED_RESIZE_ALGORITHM_VALUES[get_resize_algorithm_idx(&custom_settings.similar_images_sub_resize_algorithm).unwrap()].2;
-            finder.set_image_filter(resize_algorithm);
-            finder.set_delete_outdated_cache(custom_settings.similar_images_delete_outdated_entries);
-            finder.set_exclude_images_with_same_size(custom_settings.similar_images_sub_ignore_same_size);
+            let params = SimilarImagesParameters::new(
+                custom_settings.similar_images_sub_similarity as u32,
+                custom_settings.similar_images_sub_hash_size,
+                hash_alg,
+                resize_algorithm,
+                custom_settings.similar_images_sub_ignore_same_size,
+                custom_settings.similar_images_hide_hard_links,
+            );
+            let mut item = SimilarImages::new(params);
 
-            finder.find_similar_images(Some(&stop_receiver), Some(&progress_sender));
+            set_common_settings(&mut item, &custom_settings);
 
-            let messages = finder.get_text_messages().create_messages_text();
+            item.set_delete_outdated_cache(custom_settings.similar_images_delete_outdated_entries);
+
+            item.find_similar_images(Some(&stop_receiver), Some(&progress_sender));
+
+            let messages = item.get_text_messages().create_messages_text();
             let hash_size = custom_settings.similar_images_sub_hash_size;
 
             let mut vector;
-            if finder.get_use_reference() {
-                vector = finder
+            if item.get_use_reference() {
+                vector = item
                     .get_similar_images_referenced()
                     .iter()
                     .cloned()
                     .map(|(original, others)| (Some(original), others))
                     .collect::<Vec<_>>();
             } else {
-                vector = finder.get_similar_images().iter().cloned().map(|items| (None, items)).collect::<Vec<_>>();
+                vector = item.get_similar_images().iter().cloned().map(|items| (None, items)).collect::<Vec<_>>();
             }
             for (_first_entry, vec_fe) in &mut vector {
                 vec_fe.par_sort_unstable_by_key(|e| e.similarity);
@@ -383,7 +406,7 @@ fn scan_similar_images(a: Weak<MainWindow>, progress_sender: Sender<ProgressData
                 write_similar_images_results(&app, vector, messages, hash_size);
             })
         })
-        .unwrap();
+        .expect("Cannot start thread - not much we can do here");
 }
 fn write_similar_images_results(app: &MainWindow, vector: Vec<(Option<ImagesEntry>, Vec<ImagesEntry>)>, messages: String, hash_size: u8) {
     let items_found = vector.len();
@@ -413,7 +436,10 @@ fn prepare_data_model_similar_images(fe: &ImagesEntry, hash_size: u8) -> (ModelR
         format!("{}x{}", fe.width, fe.height).into(),
         file.into(),
         directory.into(),
-        NaiveDateTime::from_timestamp_opt(fe.get_modified_date() as i64, 0).unwrap().to_string().into(),
+        DateTime::from_timestamp(fe.get_modified_date() as i64, 0)
+            .expect("Cannot create DateTime")
+            .to_string()
+            .into(),
     ]);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
@@ -427,27 +453,30 @@ fn scan_similar_videos(a: Weak<MainWindow>, progress_sender: Sender<ProgressData
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut finder = SimilarVideos::new();
-            set_common_settings(&mut finder, &custom_settings);
+            let params = SimilarVideosParameters::new(
+                custom_settings.similar_videos_sub_similarity,
+                custom_settings.similar_videos_sub_ignore_same_size,
+                custom_settings.similar_videos_hide_hard_links,
+            );
+            let mut item = SimilarVideos::new(params);
+            set_common_settings(&mut item, &custom_settings);
 
-            finder.set_tolerance(custom_settings.similar_videos_sub_similarity);
-            finder.set_delete_outdated_cache(custom_settings.similar_videos_delete_outdated_entries);
-            finder.set_exclude_videos_with_same_size(custom_settings.similar_videos_sub_ignore_same_size);
+            item.set_delete_outdated_cache(custom_settings.similar_videos_delete_outdated_entries);
 
-            finder.find_similar_videos(Some(&stop_receiver), Some(&progress_sender));
+            item.find_similar_videos(Some(&stop_receiver), Some(&progress_sender));
 
-            let messages = finder.get_text_messages().create_messages_text();
+            let messages = item.get_text_messages().create_messages_text();
 
             let mut vector;
-            if finder.get_use_reference() {
-                vector = finder
+            if item.get_use_reference() {
+                vector = item
                     .get_similar_videos_referenced()
                     .iter()
                     .cloned()
                     .map(|(original, others)| (Some(original), others))
                     .collect::<Vec<_>>();
             } else {
-                vector = finder.get_similar_videos().iter().cloned().map(|items| (None, items)).collect::<Vec<_>>();
+                vector = item.get_similar_videos().iter().cloned().map(|items| (None, items)).collect::<Vec<_>>();
             }
             for (_first_entry, vec_fe) in &mut vector {
                 vec_fe.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
@@ -457,7 +486,7 @@ fn scan_similar_videos(a: Weak<MainWindow>, progress_sender: Sender<ProgressData
                 write_similar_videos_results(&app, vector, messages);
             })
         })
-        .unwrap();
+        .expect("Cannot start thread - not much we can do here");
 }
 fn write_similar_videos_results(app: &MainWindow, vector: Vec<(Option<VideosEntry>, Vec<VideosEntry>)>, messages: String) {
     let items_found = vector.len();
@@ -485,7 +514,10 @@ fn prepare_data_model_similar_videos(fe: &VideosEntry) -> (ModelRc<SharedString>
         format_size(fe.size, BINARY).into(),
         file.into(),
         directory.into(),
-        NaiveDateTime::from_timestamp_opt(fe.get_modified_date() as i64, 0).unwrap().to_string().into(),
+        DateTime::from_timestamp(fe.get_modified_date() as i64, 0)
+            .expect("Cannot create DateTime")
+            .to_string()
+            .into(),
     ]);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
@@ -497,9 +529,6 @@ fn scan_similar_music(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut finder = SameMusic::new();
-            set_common_settings(&mut finder, &custom_settings);
-
             let mut music_similarity: MusicSimilarity = MusicSimilarity::NONE;
             if custom_settings.similar_music_sub_title {
                 music_similarity |= MusicSimilarity::TRACK_TITLE;
@@ -524,31 +553,37 @@ fn scan_similar_music(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>
                 a.upgrade_in_event_loop(move |app| {
                     app.invoke_scan_ended("Cannot find similar music files without any similarity method selected.".into());
                 })
-                .unwrap();
+                .expect("Cannot upgrade in event loop :(");
                 return Ok(());
             }
+            let audio_check_type =
+                ALLOWED_AUDIO_CHECK_TYPE_VALUES[get_audio_check_type_idx(&custom_settings.similar_music_sub_audio_check_type).expect("Failed to get audio check type")].2;
 
-            finder.set_music_similarity(music_similarity);
-            finder.set_maximum_difference(custom_settings.similar_music_sub_maximum_difference_value as f64);
-            finder.set_minimum_segment_duration(custom_settings.similar_music_sub_minimal_fragment_duration_value);
-            let audio_check_type = ALLOWED_AUDIO_CHECK_TYPE_VALUES[get_audio_check_type_idx(&custom_settings.similar_music_sub_audio_check_type).unwrap()].2;
-            finder.set_check_type(audio_check_type);
-            finder.set_approximate_comparison(custom_settings.similar_music_sub_approximate_comparison);
+            let params = SameMusicParameters::new(
+                music_similarity,
+                custom_settings.similar_music_sub_approximate_comparison,
+                audio_check_type,
+                custom_settings.similar_music_sub_minimal_fragment_duration_value,
+                custom_settings.similar_music_sub_maximum_difference_value as f64,
+                custom_settings.similar_music_compare_fingerprints_only_with_similar_titles,
+            );
+            let mut item = SameMusic::new(params);
+            set_common_settings(&mut item, &custom_settings);
 
-            finder.find_same_music(Some(&stop_receiver), Some(&progress_sender));
+            item.find_same_music(Some(&stop_receiver), Some(&progress_sender));
 
-            let messages = finder.get_text_messages().create_messages_text();
+            let messages = item.get_text_messages().create_messages_text();
 
             let mut vector;
-            if finder.get_use_reference() {
-                vector = finder
+            if item.get_use_reference() {
+                vector = item
                     .get_similar_music_referenced()
                     .iter()
                     .cloned()
                     .map(|(original, others)| (Some(original), others))
                     .collect::<Vec<_>>();
             } else {
-                vector = finder.get_duplicated_music_entries().iter().cloned().map(|items| (None, items)).collect::<Vec<_>>();
+                vector = item.get_duplicated_music_entries().iter().cloned().map(|items| (None, items)).collect::<Vec<_>>();
             }
             for (_first_entry, vec_fe) in &mut vector {
                 vec_fe.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
@@ -558,7 +593,7 @@ fn scan_similar_music(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>
                 write_similar_music_results(&app, vector, messages);
             })
         })
-        .unwrap();
+        .expect("Cannot start thread - not much we can do here");
 }
 fn write_similar_music_results(app: &MainWindow, vector: Vec<(Option<MusicEntry>, Vec<MusicEntry>)>, messages: String) {
     let items_found = vector.len();
@@ -592,7 +627,10 @@ fn prepare_data_model_similar_music(fe: &MusicEntry) -> (ModelRc<SharedString>, 
         fe.length.clone().into(),
         fe.genre.clone().into(),
         directory.into(),
-        NaiveDateTime::from_timestamp_opt(fe.get_modified_date() as i64, 0).unwrap().to_string().into(),
+        DateTime::from_timestamp(fe.get_modified_date() as i64, 0)
+            .expect("Cannot create DateTime")
+            .to_string()
+            .into(),
     ]);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
@@ -604,13 +642,13 @@ fn scan_invalid_symlinks(a: Weak<MainWindow>, progress_sender: Sender<ProgressDa
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut finder = InvalidSymlinks::new();
-            set_common_settings(&mut finder, &custom_settings);
+            let mut item = InvalidSymlinks::new();
+            set_common_settings(&mut item, &custom_settings);
 
-            finder.find_invalid_links(Some(&stop_receiver), Some(&progress_sender));
+            item.find_invalid_links(Some(&stop_receiver), Some(&progress_sender));
 
-            let mut vector = finder.get_invalid_symlinks().clone();
-            let messages = finder.get_text_messages().create_messages_text();
+            let mut vector = item.get_invalid_symlinks().clone();
+            let messages = item.get_text_messages().create_messages_text();
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
@@ -618,7 +656,7 @@ fn scan_invalid_symlinks(a: Weak<MainWindow>, progress_sender: Sender<ProgressDa
                 write_invalid_symlinks_results(&app, vector, messages);
             })
         })
-        .unwrap();
+        .expect("Cannot start thread - not much we can do here");
 }
 fn write_invalid_symlinks_results(app: &MainWindow, vector: Vec<SymlinksFileEntry>, messages: String) {
     let items_found = vector.len();
@@ -639,7 +677,10 @@ fn prepare_data_model_invalid_symlinks(fe: &SymlinksFileEntry) -> (ModelRc<Share
         directory.into(),
         fe.symlink_info.destination_path.to_string_lossy().to_string().into(),
         fe.symlink_info.type_of_error.to_string().into(),
-        NaiveDateTime::from_timestamp_opt(fe.get_modified_date() as i64, 0).unwrap().to_string().into(),
+        DateTime::from_timestamp(fe.get_modified_date() as i64, 0)
+            .expect("Cannot create DateTime")
+            .to_string()
+            .into(),
     ]);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1]);
@@ -649,13 +690,13 @@ fn scan_temporary_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressDat
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut finder = Temporary::new();
-            set_common_settings(&mut finder, &custom_settings);
+            let mut item = Temporary::new();
+            set_common_settings(&mut item, &custom_settings);
 
-            finder.find_temporary_files(Some(&stop_receiver), Some(&progress_sender));
+            item.find_temporary_files(Some(&stop_receiver), Some(&progress_sender));
 
-            let mut vector = finder.get_temporary_files().clone();
-            let messages = finder.get_text_messages().create_messages_text();
+            let mut vector = item.get_temporary_files().clone();
+            let messages = item.get_text_messages().create_messages_text();
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
@@ -663,7 +704,7 @@ fn scan_temporary_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressDat
                 write_temporary_files_results(&app, vector, messages);
             })
         })
-        .unwrap();
+        .expect("Cannot start thread - not much we can do here");
 }
 fn write_temporary_files_results(app: &MainWindow, vector: Vec<TemporaryFileEntry>, messages: String) {
     let items_found = vector.len();
@@ -682,7 +723,10 @@ fn prepare_data_model_temporary_files(fe: &TemporaryFileEntry) -> (ModelRc<Share
     let data_model_str = VecModel::from_slice(&[
         file.into(),
         directory.into(),
-        NaiveDateTime::from_timestamp_opt(fe.modified_date as i64, 0).unwrap().to_string().into(),
+        DateTime::from_timestamp(fe.modified_date as i64, 0)
+            .expect("Modified date always should be in valid range")
+            .to_string()
+            .into(),
     ]);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1]);
@@ -693,9 +737,6 @@ fn scan_broken_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>,
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut finder = BrokenFiles::new();
-            set_common_settings(&mut finder, &custom_settings);
-
             let mut checked_types: CheckedTypes = CheckedTypes::NONE;
             if custom_settings.broken_files_sub_audio {
                 checked_types |= CheckedTypes::AUDIO;
@@ -714,15 +755,18 @@ fn scan_broken_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>,
                 a.upgrade_in_event_loop(move |app| {
                     app.invoke_scan_ended("Cannot find broken files without any file type selected.".into());
                 })
-                .unwrap();
+                .expect("Cannot upgrade in event loop :(");
                 return Ok(());
             }
 
-            finder.set_checked_types(checked_types);
-            finder.find_broken_files(Some(&stop_receiver), Some(&progress_sender));
+            let params = BrokenFilesParameters::new(checked_types);
+            let mut item = BrokenFiles::new(params);
+            set_common_settings(&mut item, &custom_settings);
 
-            let mut vector = finder.get_broken_files().clone();
-            let messages = finder.get_text_messages().create_messages_text();
+            item.find_broken_files(Some(&stop_receiver), Some(&progress_sender));
+
+            let mut vector = item.get_broken_files().clone();
+            let messages = item.get_text_messages().create_messages_text();
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
@@ -730,7 +774,7 @@ fn scan_broken_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>,
                 write_broken_files_results(&app, vector, messages);
             })
         })
-        .unwrap();
+        .expect("Cannot start thread - not much we can do here");
 }
 fn write_broken_files_results(app: &MainWindow, vector: Vec<BrokenEntry>, messages: String) {
     let items_found = vector.len();
@@ -751,7 +795,10 @@ fn prepare_data_model_broken_files(fe: &BrokenEntry) -> (ModelRc<SharedString>, 
         directory.into(),
         fe.error_string.clone().into(),
         format_size(fe.size, BINARY).into(),
-        NaiveDateTime::from_timestamp_opt(fe.modified_date as i64, 0).unwrap().to_string().into(),
+        DateTime::from_timestamp(fe.modified_date as i64, 0)
+            .expect("Modified date always should be in valid range")
+            .to_string()
+            .into(),
     ]);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
@@ -763,12 +810,13 @@ fn scan_bad_extensions(a: Weak<MainWindow>, progress_sender: Sender<ProgressData
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut finder = BadExtensions::new();
-            set_common_settings(&mut finder, &custom_settings);
-            finder.find_bad_extensions_files(Some(&stop_receiver), Some(&progress_sender));
+            let params = BadExtensionsParameters::new();
+            let mut item = BadExtensions::new(params);
+            set_common_settings(&mut item, &custom_settings);
+            item.find_bad_extensions_files(Some(&stop_receiver), Some(&progress_sender));
 
-            let mut vector = finder.get_bad_extensions_files().clone();
-            let messages = finder.get_text_messages().create_messages_text();
+            let mut vector = item.get_bad_extensions_files().clone();
+            let messages = item.get_text_messages().create_messages_text();
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
@@ -776,7 +824,7 @@ fn scan_bad_extensions(a: Weak<MainWindow>, progress_sender: Sender<ProgressData
                 write_bad_extensions_results(&app, vector, messages);
             })
         })
-        .unwrap();
+        .expect("Cannot start thread - not much we can do here");
 }
 fn write_bad_extensions_results(app: &MainWindow, vector: Vec<BadFileEntry>, messages: String) {
     let items_found = vector.len();

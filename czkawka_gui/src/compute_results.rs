@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use std::time::Duration;
 
-use chrono::NaiveDateTime;
+use chrono::DateTime;
 use crossbeam_channel::Receiver;
 use fun_time::fun_time;
 use gtk4::prelude::*;
@@ -74,7 +74,7 @@ pub fn connect_compute_results(gui_data: &GuiData, result_receiver: Receiver<Mes
     let button_app_info = gui_data.header.button_app_info.clone();
 
     let main_context = glib::MainContext::default();
-    let _guard = main_context.acquire().unwrap();
+    let _guard = main_context.acquire().expect("Failed to acquire main context");
 
     glib::spawn_future_local(async move {
         loop {
@@ -92,7 +92,7 @@ pub fn connect_compute_results(gui_data: &GuiData, result_receiver: Receiver<Mes
 
                     taskbar_state.borrow().hide();
 
-                    let hash_size_index = combo_box_image_hash_size.active().unwrap() as usize;
+                    let hash_size_index = combo_box_image_hash_size.active().expect("Failed to get active item") as usize;
                     let hash_size = IMAGES_HASH_SIZE_COMBO_BOX[hash_size_index] as u8;
 
                     match msg {
@@ -245,7 +245,7 @@ fn compute_bad_extensions(
     entry_info: &Entry,
     tree_view: &TreeView,
     text_view_errors: &TextView,
-    shared_state: &Rc<RefCell<BadExtensions>>,
+    shared_state: &SharedState<BadExtensions>,
     shared_buttons: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>,
     buttons_array: &[Widget; 9],
     buttons_names: &[BottomButtonsEnum; 9],
@@ -280,7 +280,9 @@ fn compute_bad_extensions(
                     (ColumnsBadExtensions::ValidExtensions as u32, &file_entry.proper_extensions),
                     (
                         ColumnsBadExtensions::Modification as u32,
-                        &(NaiveDateTime::from_timestamp_opt(file_entry.modified_date as i64, 0).unwrap().to_string()),
+                        &(DateTime::from_timestamp(file_entry.modified_date as i64, 0)
+                            .expect("Modified date always should be in valid range")
+                            .to_string()),
                     ),
                     (ColumnsBadExtensions::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
                 ];
@@ -291,12 +293,12 @@ fn compute_bad_extensions(
 
         // Set state
         {
-            *shared_state.borrow_mut() = be;
+            *shared_state.borrow_mut() = Some(be);
 
-            set_specific_buttons_as_active(shared_buttons, &NotebookMainEnum::Temporary, bad_extensions_number > 0);
+            set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::Temporary, bad_extensions_number > 0);
 
             set_buttons(
-                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Temporary).unwrap(),
+                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Temporary).expect("Failed to borrow buttons"),
                 buttons_array,
                 buttons_names,
             );
@@ -310,7 +312,7 @@ fn compute_broken_files(
     entry_info: &Entry,
     tree_view: &TreeView,
     text_view_errors: &TextView,
-    shared_state: &Rc<RefCell<BrokenFiles>>,
+    shared_state: &SharedState<BrokenFiles>,
     shared_buttons: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>,
     buttons_array: &[Widget; 9],
     buttons_names: &[BottomButtonsEnum; 9],
@@ -345,7 +347,9 @@ fn compute_broken_files(
                     (ColumnsBrokenFiles::ErrorType as u32, &file_entry.error_string),
                     (
                         ColumnsBrokenFiles::Modification as u32,
-                        &(NaiveDateTime::from_timestamp_opt(file_entry.modified_date as i64, 0).unwrap().to_string()),
+                        &(DateTime::from_timestamp(file_entry.modified_date as i64, 0)
+                            .expect("Modified date always should be in valid range")
+                            .to_string()),
                     ),
                     (ColumnsBrokenFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
                 ];
@@ -356,12 +360,12 @@ fn compute_broken_files(
 
         // Set state
         {
-            *shared_state.borrow_mut() = br;
+            *shared_state.borrow_mut() = Some(br);
 
-            set_specific_buttons_as_active(shared_buttons, &NotebookMainEnum::BrokenFiles, broken_files_number > 0);
+            set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::BrokenFiles, broken_files_number > 0);
 
             set_buttons(
-                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BrokenFiles).unwrap(),
+                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BrokenFiles).expect("Failed to borrow buttons"),
                 buttons_array,
                 buttons_names,
             );
@@ -375,7 +379,7 @@ fn compute_invalid_symlinks(
     entry_info: &Entry,
     tree_view: &TreeView,
     text_view_errors: &TextView,
-    shared_state: &Rc<RefCell<InvalidSymlinks>>,
+    shared_state: &SharedState<InvalidSymlinks>,
     shared_buttons: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>,
     buttons_array: &[Widget; 9],
     buttons_names: &[BottomButtonsEnum; 9],
@@ -405,13 +409,12 @@ fn compute_invalid_symlinks(
                     (ColumnsInvalidSymlinks::Name as u32, &file),
                     (ColumnsInvalidSymlinks::Path as u32, &directory),
                     (ColumnsInvalidSymlinks::DestinationPath as u32, &symlink_info.destination_path.to_string_lossy().to_string()),
-                    (
-                        ColumnsInvalidSymlinks::TypeOfError as u32,
-                        &get_text_from_invalid_symlink_cause(&symlink_info.type_of_error),
-                    ),
+                    (ColumnsInvalidSymlinks::TypeOfError as u32, &get_text_from_invalid_symlink_cause(symlink_info.type_of_error)),
                     (
                         ColumnsInvalidSymlinks::Modification as u32,
-                        &(NaiveDateTime::from_timestamp_opt(file_entry.modified_date as i64, 0).unwrap().to_string()),
+                        &(DateTime::from_timestamp(file_entry.modified_date as i64, 0)
+                            .expect("Modified date always should be in valid range")
+                            .to_string()),
                     ),
                     (ColumnsInvalidSymlinks::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
                 ];
@@ -422,12 +425,12 @@ fn compute_invalid_symlinks(
 
         // Set state
         {
-            *shared_state.borrow_mut() = ifs;
+            *shared_state.borrow_mut() = Some(ifs);
 
-            set_specific_buttons_as_active(shared_buttons, &NotebookMainEnum::Symlinks, invalid_symlinks > 0);
+            set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::Symlinks, invalid_symlinks > 0);
 
             set_buttons(
-                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Symlinks).unwrap(),
+                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Symlinks).expect("Failed to borrow buttons"),
                 buttons_array,
                 buttons_names,
             );
@@ -441,7 +444,7 @@ fn compute_same_music(
     entry_info: &Entry,
     tree_view: &TreeView,
     text_view_errors: &TextView,
-    shared_state: &Rc<RefCell<SameMusic>>,
+    shared_state: &SharedState<SameMusic>,
     shared_buttons: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>,
     buttons_array: &[Widget; 9],
     buttons_names: &[BottomButtonsEnum; 9],
@@ -473,7 +476,7 @@ fn compute_same_music(
         {
             let list_store = get_list_store(tree_view);
 
-            let music_similarity = *mf.get_music_similarity();
+            let music_similarity = mf.get_params().music_similarity;
 
             let is_track_title = (MusicSimilarity::TRACK_TITLE & music_similarity) != MusicSimilarity::NONE;
             let is_track_artist = (MusicSimilarity::TRACK_ARTIST & music_similarity) != MusicSimilarity::NONE;
@@ -535,7 +538,7 @@ fn compute_same_music(
             } else {
                 let vector = mf.get_duplicated_music_entries();
 
-                let text: &str = if mf.get_check_type() == CheckingMethod::AudioTags { "-----" } else { "" };
+                let text: &str = if mf.get_params().check_type == CheckingMethod::AudioTags { "-----" } else { "" };
 
                 for vec_file_entry in vector {
                     // Sort
@@ -589,12 +592,12 @@ fn compute_same_music(
 
         // Set state
         {
-            *shared_state.borrow_mut() = mf;
+            *shared_state.borrow_mut() = Some(mf);
 
-            set_specific_buttons_as_active(shared_buttons, &NotebookMainEnum::SameMusic, same_music_number > 0);
+            set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::SameMusic, same_music_number > 0);
 
             set_buttons(
-                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).unwrap(),
+                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).expect("Failed to borrow buttons"),
                 buttons_array,
                 buttons_names,
             );
@@ -608,7 +611,7 @@ fn compute_similar_videos(
     entry_info: &Entry,
     tree_view: &TreeView,
     text_view_errors: &TextView,
-    shared_state: &Rc<RefCell<SimilarVideos>>,
+    shared_state: &SharedState<SimilarVideos>,
     shared_buttons: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>,
     buttons_array: &[Widget; 9],
     buttons_names: &[BottomButtonsEnum; 9],
@@ -683,12 +686,12 @@ fn compute_similar_videos(
 
         // Set state
         {
-            *shared_state.borrow_mut() = ff;
+            *shared_state.borrow_mut() = Some(ff);
 
-            set_specific_buttons_as_active(shared_buttons, &NotebookMainEnum::SimilarVideos, found_any_duplicates);
+            set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::SimilarVideos, found_any_duplicates);
 
             set_buttons(
-                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).unwrap(),
+                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).expect("Failed to borrow buttons"),
                 buttons_array,
                 buttons_names,
             );
@@ -702,7 +705,7 @@ fn compute_similar_images(
     entry_info: &Entry,
     tree_view: &TreeView,
     text_view_errors: &TextView,
-    shared_state: &Rc<RefCell<SimilarImages>>,
+    shared_state: &SharedState<SimilarImages>,
     shared_buttons: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>,
     buttons_array: &[Widget; 9],
     buttons_names: &[BottomButtonsEnum; 9],
@@ -814,12 +817,12 @@ fn compute_similar_images(
 
         // Set state
         {
-            *shared_state.borrow_mut() = sf;
+            *shared_state.borrow_mut() = Some(sf);
 
-            set_specific_buttons_as_active(shared_buttons, &NotebookMainEnum::SimilarImages, found_any_duplicates);
+            set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::SimilarImages, found_any_duplicates);
 
             set_buttons(
-                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarImages).unwrap(),
+                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarImages).expect("Failed to borrow buttons"),
                 buttons_array,
                 buttons_names,
             );
@@ -833,7 +836,7 @@ fn compute_temporary_files(
     entry_info: &Entry,
     tree_view: &TreeView,
     text_view_errors: &TextView,
-    shared_state: &Rc<RefCell<Temporary>>,
+    shared_state: &SharedState<Temporary>,
     shared_buttons: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>,
     buttons_array: &[Widget; 9],
     buttons_names: &[BottomButtonsEnum; 9],
@@ -866,7 +869,9 @@ fn compute_temporary_files(
                     (ColumnsTemporaryFiles::Path as u32, &directory),
                     (
                         ColumnsTemporaryFiles::Modification as u32,
-                        &(NaiveDateTime::from_timestamp_opt(file_entry.modified_date as i64, 0).unwrap().to_string()),
+                        &(DateTime::from_timestamp(file_entry.modified_date as i64, 0)
+                            .expect("Modified date always should be in valid range")
+                            .to_string()),
                     ),
                     (ColumnsTemporaryFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
                 ];
@@ -877,12 +882,12 @@ fn compute_temporary_files(
 
         // Set state
         {
-            *shared_state.borrow_mut() = tf;
+            *shared_state.borrow_mut() = Some(tf);
 
-            set_specific_buttons_as_active(shared_buttons, &NotebookMainEnum::Temporary, temporary_files_number > 0);
+            set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::Temporary, temporary_files_number > 0);
 
             set_buttons(
-                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Temporary).unwrap(),
+                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Temporary).expect("Failed to borrow buttons"),
                 buttons_array,
                 buttons_names,
             );
@@ -896,7 +901,7 @@ fn compute_big_files(
     entry_info: &Entry,
     tree_view: &TreeView,
     text_view_errors: &TextView,
-    shared_state: &Rc<RefCell<BigFile>>,
+    shared_state: &SharedState<BigFile>,
     shared_buttons: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>,
     buttons_array: &[Widget; 9],
     buttons_names: &[BottomButtonsEnum; 9],
@@ -927,7 +932,9 @@ fn compute_big_files(
                     (ColumnsBigFiles::Path as u32, &directory),
                     (
                         ColumnsBigFiles::Modification as u32,
-                        &(NaiveDateTime::from_timestamp_opt(file_entry.modified_date as i64, 0).unwrap().to_string()),
+                        &(DateTime::from_timestamp(file_entry.modified_date as i64, 0)
+                            .expect("Modified date always should be in valid range")
+                            .to_string()),
                     ),
                     (ColumnsBigFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
                     (ColumnsBigFiles::SizeAsBytes as u32, &(file_entry.size)),
@@ -939,12 +946,12 @@ fn compute_big_files(
 
         // Set state
         {
-            *shared_state.borrow_mut() = bf;
+            *shared_state.borrow_mut() = Some(bf);
 
-            set_specific_buttons_as_active(shared_buttons, &NotebookMainEnum::BigFiles, biggest_files_number > 0);
+            set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::BigFiles, biggest_files_number > 0);
 
             set_buttons(
-                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BigFiles).unwrap(),
+                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BigFiles).expect("Failed to borrow buttons"),
                 buttons_array,
                 buttons_names,
             );
@@ -958,7 +965,7 @@ fn compute_empty_files(
     entry_info: &Entry,
     tree_view: &TreeView,
     text_view_errors: &TextView,
-    shared_state: &Rc<RefCell<EmptyFiles>>,
+    shared_state: &SharedState<EmptyFiles>,
     shared_buttons: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>,
     buttons_array: &[Widget; 9],
     buttons_names: &[BottomButtonsEnum; 9],
@@ -989,7 +996,9 @@ fn compute_empty_files(
                     (ColumnsEmptyFiles::Path as u32, &directory),
                     (
                         ColumnsEmptyFiles::Modification as u32,
-                        &(NaiveDateTime::from_timestamp_opt(file_entry.modified_date as i64, 0).unwrap().to_string()),
+                        &(DateTime::from_timestamp(file_entry.modified_date as i64, 0)
+                            .expect("Modified date always should be in valid range")
+                            .to_string()),
                     ),
                     (ColumnsEmptyFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
                 ];
@@ -1000,12 +1009,12 @@ fn compute_empty_files(
 
         // Set state
         {
-            *shared_state.borrow_mut() = vf;
+            *shared_state.borrow_mut() = Some(vf);
 
-            set_specific_buttons_as_active(shared_buttons, &NotebookMainEnum::EmptyFiles, empty_files_number > 0);
+            set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::EmptyFiles, empty_files_number > 0);
 
             set_buttons(
-                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyFiles).unwrap(),
+                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyFiles).expect("Failed to borrow buttons"),
                 buttons_array,
                 buttons_names,
             );
@@ -1019,7 +1028,7 @@ fn compute_empty_folders(
     entry_info: &Entry,
     tree_view: &TreeView,
     text_view_errors: &TextView,
-    shared_state: &Rc<RefCell<EmptyFolder>>,
+    shared_state: &SharedState<EmptyFolder>,
     shared_buttons: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>,
     buttons_array: &[Widget; 9],
     buttons_names: &[BottomButtonsEnum; 9],
@@ -1052,7 +1061,9 @@ fn compute_empty_folders(
                     (ColumnsEmptyFolders::Path as u32, &directory),
                     (
                         ColumnsEmptyFolders::Modification as u32,
-                        &(NaiveDateTime::from_timestamp_opt(fe.modified_date as i64, 0).unwrap().to_string()),
+                        &(DateTime::from_timestamp(fe.modified_date as i64, 0)
+                            .expect("Modified date always should be in valid range")
+                            .to_string()),
                     ),
                     (ColumnsEmptyFolders::ModificationAsSecs as u32, &(fe.modified_date)),
                 ];
@@ -1063,12 +1074,12 @@ fn compute_empty_folders(
 
         // Set state
         {
-            *shared_state.borrow_mut() = ef;
+            *shared_state.borrow_mut() = Some(ef);
 
-            set_specific_buttons_as_active(shared_buttons, &NotebookMainEnum::EmptyDirectories, empty_folder_number > 0);
+            set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::EmptyDirectories, empty_folder_number > 0);
 
             set_buttons(
-                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyDirectories).unwrap(),
+                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyDirectories).expect("Failed to borrow buttons"),
                 buttons_array,
                 buttons_names,
             );
@@ -1082,7 +1093,7 @@ fn compute_duplicate_finder(
     entry_info: &Entry,
     tree_view_duplicate_finder: &TreeView,
     text_view_errors: &TextView,
-    shared_state: &Rc<RefCell<DuplicateFinder>>,
+    shared_state: &SharedState<DuplicateFinder>,
     shared_buttons: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>,
     buttons_array: &[Widget; 9],
     buttons_names: &[BottomButtonsEnum; 9],
@@ -1103,7 +1114,7 @@ fn compute_duplicate_finder(
         let duplicates_size: u64;
         let duplicates_group: usize;
 
-        match df.get_check_method() {
+        match df.get_params().check_method {
             CheckingMethod::Name => {
                 duplicates_number = information.number_of_duplicated_files_by_name;
                 duplicates_size = 0;
@@ -1145,7 +1156,7 @@ fn compute_duplicate_finder(
             let list_store = get_list_store(tree_view_duplicate_finder);
 
             if df.get_use_reference() {
-                match df.get_check_method() {
+                match df.get_params().check_method {
                     CheckingMethod::Name => {
                         let btreemap = df.get_files_with_identical_name_referenced();
 
@@ -1204,7 +1215,7 @@ fn compute_duplicate_finder(
                     _ => panic!(),
                 }
             } else {
-                match df.get_check_method() {
+                match df.get_params().check_method {
                     CheckingMethod::Name => {
                         let btreemap = df.get_files_sorted_by_names();
 
@@ -1266,12 +1277,12 @@ fn compute_duplicate_finder(
 
         // Set state
         {
-            *shared_state.borrow_mut() = df;
+            *shared_state.borrow_mut() = Some(df);
 
-            set_specific_buttons_as_active(shared_buttons, &NotebookMainEnum::Duplicate, duplicates_number > 0);
+            set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::Duplicate, duplicates_number > 0);
 
             set_buttons(
-                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Duplicate).unwrap(),
+                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Duplicate).expect("Failed to borrow buttons"),
                 buttons_array,
                 buttons_names,
             );
@@ -1314,7 +1325,9 @@ fn duplicates_add_to_list_store(list_store: &ListStore, file: &str, directory: &
         string_date = String::new();
     } else {
         size_str = format_size(size, BINARY);
-        string_date = NaiveDateTime::from_timestamp_opt(modified_date as i64, 0).unwrap().to_string();
+        string_date = DateTime::from_timestamp(modified_date as i64, 0)
+            .expect("Modified date always should be in valid range")
+            .to_string();
     };
 
     let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
@@ -1362,7 +1375,9 @@ fn similar_images_add_to_list_store(
         string_date = String::new();
     } else {
         size_str = format_size(size, BINARY);
-        string_date = NaiveDateTime::from_timestamp_opt(modified_date as i64, 0).unwrap().to_string();
+        string_date = DateTime::from_timestamp(modified_date as i64, 0)
+            .expect("Modified date always should be in valid range")
+            .to_string();
     }
 
     let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
@@ -1393,7 +1408,9 @@ fn similar_videos_add_to_list_store(list_store: &ListStore, file: &str, director
         string_date = String::new();
     } else {
         size_str = format_size(size, BINARY);
-        string_date = NaiveDateTime::from_timestamp_opt(modified_date as i64, 0).unwrap().to_string();
+        string_date = DateTime::from_timestamp(modified_date as i64, 0)
+            .expect("Modified date always should be in valid range")
+            .to_string();
     };
 
     let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
@@ -1438,7 +1455,9 @@ fn same_music_add_to_list_store(
         string_date = String::new();
     } else {
         size_str = format_size(size, BINARY);
-        string_date = NaiveDateTime::from_timestamp_opt(modified_date as i64, 0).unwrap().to_string();
+        string_date = DateTime::from_timestamp(modified_date as i64, 0)
+            .expect("Modified date always should be in valid range")
+            .to_string();
     };
 
     let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
@@ -1465,11 +1484,11 @@ fn same_music_add_to_list_store(
     list_store.set(&list_store.append(), &values);
 }
 
-fn set_specific_buttons_as_active(buttons_array: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>, notebook_enum: &NotebookMainEnum, value_to_set: bool) {
+fn set_specific_buttons_as_active(buttons_array: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>, notebook_enum: NotebookMainEnum, value_to_set: bool) {
     let mut b_mut = buttons_array.borrow_mut();
-    let butt = b_mut.get_mut(notebook_enum).unwrap();
-    let allowed_buttons = NOTEBOOKS_INFO[*notebook_enum as usize].bottom_buttons;
+    let butt = b_mut.get_mut(&notebook_enum).expect("Failed to borrow buttons");
+    let allowed_buttons = NOTEBOOKS_INFO[notebook_enum as usize].bottom_buttons;
     for i in allowed_buttons {
-        *butt.get_mut(i).unwrap() = value_to_set;
+        *butt.get_mut(i).expect("Failed to borrow buttons") = value_to_set;
     }
 }

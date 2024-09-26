@@ -5,9 +5,10 @@ use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
 use log::debug;
 
-use crate::common_dir_traversal::{DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
+use crate::common_dir_traversal::{DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::*;
+use crate::progress_data::ProgressData;
 
 #[derive(Default)]
 pub struct Info {

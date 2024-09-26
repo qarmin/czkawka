@@ -1,7 +1,6 @@
 use std::collections::BTreeSet;
 use std::fs;
-use std::process::Command;
-use std::process::Stdio;
+use std::process::{Command, Stdio};
 
 use log::info;
 
@@ -20,7 +19,7 @@ const PRINT_MESSAGES_CZKAWKA: bool = true;
 
 // App runs - ./ci_tester PATH_TO_CZKAWKA
 fn main() {
-    handsome_logger::init().unwrap();
+    handsome_logger::init().expect("Should not fail in tests");
     let args: Vec<String> = std::env::args().collect();
     let path_to_czkawka = args[1].clone();
     CZKAWKA_PATH.set(path_to_czkawka);
@@ -28,7 +27,7 @@ fn main() {
     run_with_good_status(&["ls"], false);
     unzip_files();
 
-    let all_files = collect_all_files_and_dirs("TestFiles").unwrap();
+    let all_files = collect_all_files_and_dirs("TestFiles").expect("Should not fail in tests");
     COLLECTED_FILES.set(all_files);
     remove_test_dir();
 
@@ -266,7 +265,7 @@ fn run_with_good_status(str_command: &[&str], print_messages: bool) {
     if !print_messages {
         com = com.stderr(Stdio::piped()).stdout(Stdio::piped());
     }
-    let status = com.spawn().expect("failed to execute process").wait().unwrap();
+    let status = com.spawn().expect("failed to execute process").wait().expect("Should not fail in tests");
     assert!(status.success());
 }
 
@@ -276,21 +275,21 @@ fn file_folder_diffs(
     mut expected_folders_differences: Vec<&'static str>,
     mut expected_symlinks_differences: Vec<&'static str>,
 ) {
-    let current_files = collect_all_files_and_dirs("TestFiles").unwrap();
+    let current_files = collect_all_files_and_dirs("TestFiles").expect("Should not fail in tests");
     let mut diff_files = all_files
         .files
         .difference(&current_files.files)
-        .map(|e| e.strip_prefix("TestFiles/").unwrap().to_string())
+        .map(|e| e.strip_prefix("TestFiles/").expect("Should not fail in tests").to_string())
         .collect::<Vec<_>>();
     let mut diff_folders = all_files
         .folders
         .difference(&current_files.folders)
-        .map(|e| e.strip_prefix("TestFiles/").unwrap().to_string())
+        .map(|e| e.strip_prefix("TestFiles/").expect("Should not fail in tests").to_string())
         .collect::<Vec<_>>();
     let mut diff_symlinks = all_files
         .symlinks
         .difference(&current_files.symlinks)
-        .map(|e| e.strip_prefix("TestFiles/").unwrap().to_string())
+        .map(|e| e.strip_prefix("TestFiles/").expect("Should not fail in tests").to_string())
         .collect::<Vec<_>>();
 
     expected_symlinks_differences.sort();
@@ -313,7 +312,7 @@ fn collect_all_files_and_dirs(dir: &str) -> std::io::Result<CollectedFiles> {
 
     let mut folders_to_check = vec![dir.to_string()];
     while !folders_to_check.is_empty() {
-        let folder = folders_to_check.pop().unwrap();
+        let folder = folders_to_check.pop().expect("Should not fail in tests");
         let rd = fs::read_dir(folder)?;
         for entry in rd {
             let entry = entry?;

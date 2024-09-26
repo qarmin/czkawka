@@ -1,13 +1,13 @@
 use std::path::PathBuf;
 
-use image_hasher::{FilterType, HashAlg};
-
+use czkawka_core::broken_files::CheckedTypes;
 use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::common_tool::DeleteMethod;
 use czkawka_core::duplicate::HashType;
 use czkawka_core::same_music::MusicSimilarity;
 use czkawka_core::similar_images::SimilarityPreset;
 use czkawka_core::CZKAWKA_VERSION;
+use image_hasher::{FilterType, HashAlg};
 
 #[derive(clap::Parser)]
 #[clap(
@@ -88,6 +88,22 @@ pub enum Commands {
 pub struct DuplicatesArgs {
     #[clap(flatten)]
     pub common_cli_items: CommonCliItems,
+    #[clap(
+        short = 'p',
+        long,
+        value_parser = parse_minimal_file_size,
+        default_value = "257144",
+        help = "Minimum prehash cache file size in bytes",
+        long_help = "Minimum size of prehash cached files in bytes"
+    )]
+    pub minimal_prehash_cache_file_size: u64,
+    #[clap(
+        short = 'u',
+        long,
+        help = "Use prehash cache",
+        long_help = "Use prehash cache to speed up the scanning process by avoiding rehashing files that have already been hashed"
+    )]
+    pub use_prehash_cache: bool,
     #[clap(
         short,
         long,
@@ -215,12 +231,14 @@ pub struct SimilarImagesArgs {
     pub allow_hard_links: AllowHardLinks,
     #[clap(flatten)]
     pub dry_run: DryRun,
+    #[clap(flatten)]
+    pub ignore_same_size: IgnoreSameSize,
     #[clap(
         short = 'g',
         long,
         default_value = "Gradient",
         value_parser = parse_similar_hash_algorithm,
-        help = "Hash algorithm (allowed: Mean, Gradient, Blockhash, VertGradient, DoubleGradient)"
+        help = "Hash algorithm (allowed: Mean, Gradient, Blockhash, VertGradient, DoubleGradient, Median)"
     )]
     pub hash_alg: HashAlg,
     #[clap(
@@ -249,6 +267,10 @@ pub struct SameMusicArgs {
     pub delete_method: DMethod,
     #[clap(flatten)]
     pub dry_run: DryRun,
+    #[clap(short, long, help = "Approximate comparison of music tags.")]
+    pub approximate_comparison: bool,
+    #[clap(short, long, help = "Compare only m.")]
+    pub compare_fingerprints_only_with_similar_titles: bool,
     #[clap(
         short = 'z',
         long,
@@ -348,6 +370,15 @@ pub struct BrokenFilesArgs {
     pub common_cli_items: CommonCliItems,
     #[clap(short = 'D', long, help = "Delete found files")]
     pub delete_files: bool,
+    #[clap(
+        short,
+        long,
+        default_value = "PDF",
+        value_parser = parse_broken_files,
+        help = "Checking file types (PDF, AUDIO, IMAGE, ARCHIVE)",
+        long_help = "Methods to search files - default PDF.\nPDF - finds broken PDF files,\nAUDIO - finds broken audio files,\nIMAGE - finds broken image files,\nARCHIVE - finds broken archive files"
+    )]
+    pub checked_types: Vec<CheckedTypes>,
 }
 
 #[derive(Debug, clap::Args)]
@@ -360,6 +391,8 @@ pub struct SimilarVideosArgs {
     pub allow_hard_links: AllowHardLinks,
     #[clap(flatten)]
     pub dry_run: DryRun,
+    #[clap(flatten)]
+    pub ignore_same_size: IgnoreSameSize,
     #[clap(
         short,
         long,
@@ -492,6 +525,12 @@ pub struct DryRun {
     pub dry_run: bool,
 }
 
+#[derive(Debug, clap::Args)]
+pub struct IgnoreSameSize {
+    #[clap(short, long, help = "Ignore files with the same size, leaving only one file of each size")]
+    pub ignore_same_size: bool,
+}
+
 impl FileToSave {
     pub fn file_name(&self) -> Option<&str> {
         if let Some(file_name) = &self.file_to_save {
@@ -549,6 +588,16 @@ fn parse_checking_method_duplicate(src: &str) -> Result<CheckingMethod, &'static
         "size_name" => Ok(CheckingMethod::SizeName),
         "hash" => Ok(CheckingMethod::Hash),
         _ => Err("Couldn't parse the search method (allowed: NAME, SIZE, HASH)"),
+    }
+}
+
+fn parse_broken_files(src: &str) -> Result<CheckedTypes, &'static str> {
+    match src.to_ascii_lowercase().as_str() {
+        "pdf" => Ok(CheckedTypes::PDF),
+        "audio" => Ok(CheckedTypes::AUDIO),
+        "image" => Ok(CheckedTypes::IMAGE),
+        "archive" => Ok(CheckedTypes::ARCHIVE),
+        _ => Err("Couldn't parse the broken files type (allowed: PDF, AUDIO, IMAGE, ARCHIVE)"),
     }
 }
 
@@ -623,7 +672,8 @@ fn parse_similar_hash_algorithm(src: &str) -> Result<HashAlg, String> {
         "blockhash" => HashAlg::Blockhash,
         "vertgradient" => HashAlg::VertGradient,
         "doublegradient" => HashAlg::DoubleGradient,
-        _ => return Err("Couldn't parse the hash algorithm (allowed: Mean, Gradient, Blockhash, VertGradient, DoubleGradient)".to_string()),
+        "median" => HashAlg::Median,
+        _ => return Err("Couldn't parse the hash algorithm (allowed: Mean, Gradient, Blockhash, VertGradient, DoubleGradient, Median)".to_string()),
     };
     Ok(algorithm)
 }

@@ -70,11 +70,16 @@ pub fn connect_popover_sort(gui_data: &GuiData) {
     let main_tree_views = gui_data.main_notebook.get_main_tree_views();
 
     buttons_popover_file_name.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().unwrap();
+        let nb_number = notebook_main.current_page().expect("Current page not set");
         let tree_view = &main_tree_views[nb_number as usize];
         let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
 
-        popover_sort_general::<String>(&popover_sort, tree_view, nb_object.column_name, nb_object.column_header.unwrap());
+        popover_sort_general::<String>(
+            &popover_sort,
+            tree_view,
+            nb_object.column_name,
+            nb_object.column_header.expect("Failed to get header column"),
+        );
     });
 
     let popover_sort = gui_data.popovers_sort.popover_sort.clone();
@@ -83,11 +88,16 @@ pub fn connect_popover_sort(gui_data: &GuiData) {
     let main_tree_views = gui_data.main_notebook.get_main_tree_views();
 
     buttons_popover_sort_folder_name.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().unwrap();
+        let nb_number = notebook_main.current_page().expect("Current page not set");
         let tree_view = &main_tree_views[nb_number as usize];
         let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
 
-        popover_sort_general::<String>(&popover_sort, tree_view, nb_object.column_path, nb_object.column_header.unwrap());
+        popover_sort_general::<String>(
+            &popover_sort,
+            tree_view,
+            nb_object.column_path,
+            nb_object.column_header.expect("Failed to get header column"),
+        );
     });
 
     let popover_sort = gui_data.popovers_sort.popover_sort.clone();
@@ -96,11 +106,16 @@ pub fn connect_popover_sort(gui_data: &GuiData) {
     let main_tree_views = gui_data.main_notebook.get_main_tree_views();
 
     buttons_popover_sort_selection.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().unwrap();
+        let nb_number = notebook_main.current_page().expect("Current page not set");
         let tree_view = &main_tree_views[nb_number as usize];
         let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
 
-        popover_sort_general::<bool>(&popover_sort, tree_view, nb_object.column_selection, nb_object.column_header.unwrap());
+        popover_sort_general::<bool>(
+            &popover_sort,
+            tree_view,
+            nb_object.column_selection,
+            nb_object.column_header.expect("Failed to get header column"),
+        );
     });
 
     let popover_sort = gui_data.popovers_sort.popover_sort.clone();
@@ -109,11 +124,16 @@ pub fn connect_popover_sort(gui_data: &GuiData) {
     let main_tree_views = gui_data.main_notebook.get_main_tree_views();
 
     buttons_popover_sort_size.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().unwrap();
+        let nb_number = notebook_main.current_page().expect("Current page not set");
         let tree_view = &main_tree_views[nb_number as usize];
         let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
 
-        popover_sort_general::<u64>(&popover_sort, tree_view, nb_object.column_size_as_bytes.unwrap(), nb_object.column_header.unwrap());
+        popover_sort_general::<u64>(
+            &popover_sort,
+            tree_view,
+            nb_object.column_size_as_bytes.expect("Failed to get size as bytes column"),
+            nb_object.column_header.expect("Failed to get header column"),
+        );
     });
 }
 
@@ -135,7 +155,7 @@ mod test {
             list_store.set(&list_store.append(), i);
         }
         let mut iters = Vec::new();
-        let iter = list_store.iter_first().unwrap();
+        let iter = list_store.iter_first().expect("Failed to get first iter");
         iters.push(iter);
         list_store.iter_next(&iter);
         iters.push(iter);
@@ -145,7 +165,7 @@ mod test {
         sort_iters::<String>(&list_store, iters, 1);
 
         let expected = [(2, "AAA"), (1, "BBB"), (3, "CCC")];
-        let curr_iter = list_store.iter_first().unwrap();
+        let curr_iter = list_store.iter_first().expect("Failed to get first iter");
         for exp in expected {
             let real_0 = list_store.get::<u32>(&curr_iter, 0);
             assert_eq!(real_0, exp.0);
@@ -170,7 +190,7 @@ mod test {
         popover_sort_general::<String>(&popover, &tree_view, 1, 0);
 
         let expected = ["DDD", "BBB", "CCC"];
-        let curr_iter = list_store.iter_first().unwrap();
+        let curr_iter = list_store.iter_first().expect("Failed to get first iter");
         for exp in expected {
             let real = list_store.get::<String>(&curr_iter, 1);
             assert_eq!(real, exp);
@@ -203,7 +223,7 @@ mod test {
         popover_sort_general::<String>(&popover, &tree_view, 1, 0);
 
         let expected = ["AAA", "BBB", "CCC", "TTT", "AAA", "PPP", "RRR", "WWW", "ZZZ"];
-        let curr_iter = list_store.iter_first().unwrap();
+        let curr_iter = list_store.iter_first().expect("Failed to get first iter");
         for exp in expected {
             let real = list_store.get::<String>(&curr_iter, 1);
             assert_eq!(real, exp);

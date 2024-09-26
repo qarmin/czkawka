@@ -12,18 +12,18 @@ pub fn connect_button_sort(gui_data: &GuiData) {
     let gc_buttons_sort = gui_data.bottom_buttons.gc_buttons_sort.clone();
 
     gc_buttons_sort.connect_pressed(move |_, _, _, _| {
-        show_required_popovers(&popovers_sort, &to_notebook_main_enum(notebook_main.current_page().unwrap()));
+        show_required_popovers(&popovers_sort, to_notebook_main_enum(notebook_main.current_page().expect("Current page not set")));
     });
 }
 
-fn show_required_popovers(popovers_sort: &GuiSortPopovers, current_mode: &NotebookMainEnum) {
+fn show_required_popovers(popovers_sort: &GuiSortPopovers, current_mode: NotebookMainEnum) {
     let buttons_popover_sort_file_name = popovers_sort.buttons_popover_sort_file_name.clone();
     let buttons_popover_sort_size = popovers_sort.buttons_popover_sort_size.clone();
     let buttons_popover_sort_folder_name = popovers_sort.buttons_popover_sort_folder_name.clone();
     let buttons_popover_sort_full_name = popovers_sort.buttons_popover_sort_full_name.clone();
     let buttons_popover_sort_selection = popovers_sort.buttons_popover_sort_selection.clone();
 
-    let arr = &NOTEBOOKS_INFO[*current_mode as usize].available_modes;
+    let arr = &NOTEBOOKS_INFO[current_mode as usize].available_modes;
 
     buttons_popover_sort_full_name.hide();
 
