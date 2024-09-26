@@ -143,7 +143,7 @@ jobs:
           pwd
           cp target/release/czkawka_gui AppDir/usr/bin
           ./linuxdeploy-x86_64.AppImage --appdir AppDir --plugin gtk --icon-file data/icons/com.github.qarmin.czkawka.svg --desktop-file data/com.github.qarmin.czkawka.desktop
-          ./appimagetool --comp zstd --mksquashfs-opt -Xcompression-level --mksquashfs-opt 20 \
+          ./appimagetool-x86_64.AppImage --comp zstd --mksquashfs-opt -Xcompression-level --mksquashfs-opt 20 \
             -u "gh-releases-zsync|$GITHUB_REPOSITORY_OWNER|czkawka|latest|*.AppImage.zsync" \
             ./AppDir
 

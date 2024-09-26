@@ -586,38 +586,31 @@ impl SameMusic {
                 continue;
             }
 
-            let temp_collected_similar_items = files_to_compare
+            let (mut collected_similar_items, errors): (Vec<_>, Vec<_>) = files_to_compare
                 .par_iter()
                 .map(|e_entry| {
                     let e_string = e_entry.path.to_string_lossy().to_string();
                     if used_paths.contains(&e_string) || e_string == f_string {
-                        return Ok(None);
+                        return None;
                     }
                     let mut segments = match match_fingerprints(&f_entry.fingerprint, &e_entry.fingerprint, configuration) {
                         Ok(segments) => segments,
-                        Err(e) => return Err(format!("Error while comparing fingerprints: {e}")),
+                        Err(e) => return Some(Err(format!("Error while comparing fingerprints: {e}"))),
                     };
                     segments.retain(|s| s.duration(configuration) > minimum_segment_duration && s.score < maximum_difference);
                     if segments.is_empty() {
-                        Ok(None)
+                        None
                     } else {
-                        Ok(Some((e_string, e_entry)))
+                        Some(Ok((e_string, e_entry)))
                     }
                 })
-                .collect::<Vec<_>>();
+                .flatten()
+                .partition_map(|res| match res {
+                    Ok(entry) => itertools::Either::Left(entry),
+                    Err(err) => itertools::Either::Right(err),
+                });
 
-            let mut collected_similar_items = Vec::with_capacity(temp_collected_similar_items.len());
-            for result in temp_collected_similar_items {
-                match result {
-                    Ok(Some(data)) => {
-                        collected_similar_items.push(data);
-                    }
-                    Ok(None) => (),
-                    Err(e) => {
-                        self.common_data.text_messages.errors.push(e);
-                    }
-                }
-            }
+            self.common_data.text_messages.errors.extend(errors);
 
             collected_similar_items.retain(|(path, _entry)| !used_paths.contains(path));
             if !collected_similar_items.is_empty() {

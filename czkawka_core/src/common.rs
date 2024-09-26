@@ -264,8 +264,8 @@ pub fn get_dynamic_image_from_heic(path: &str) -> Result<DynamicImage> {
 }
 
 #[cfg(feature = "libraw")]
-pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path>) -> Option<DynamicImage> {
-    let buf = fs::read(path.as_ref()).ok()?;
+pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path>) -> Result<DynamicImage> {
+    let buf = fs::read(path.as_ref())?;
 
     let processor = Processor::new();
     let start_timer = Instant::now();
@@ -276,19 +276,22 @@ pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path>) -> Option<Dynami
     let height = processed.height();
 
     let data = processed.to_vec();
+    let data_len = data.len();
 
-    let buffer = ImageBuffer::from_raw(width, height, data)?;
-    // Utwórz DynamicImage z ImageBuffer
-    Some(DynamicImage::ImageRgb8(buffer))
+    let buffer = ImageBuffer::from_raw(width, height, data).ok_or(anyhow::anyhow!(format!(
+        "Cannot create ImageBuffer from raw image with width: {width} and height: {height} and data length: {data_len}",
+    )))?;
+
+    Ok(DynamicImage::ImageRgb8(buffer))
 }
 
 #[cfg(not(feature = "libraw"))]
-pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path> + std::fmt::Debug) -> Option<DynamicImage> {
+pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path> + std::fmt::Debug) -> Result<DynamicImage, String> {
     let mut start_timer = Instant::now();
     let mut times = Vec::new();
 
     let loader = RawLoader::new();
-    let raw = loader.decode_file(path.as_ref()).ok()?;
+    let raw = loader.decode_file(path.as_ref()).map_err(|e| format!("Error decoding file: {e:?}"))?;
 
     times.push(("After decoding", start_timer.elapsed()));
     start_timer = Instant::now();
@@ -298,28 +301,27 @@ pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path> + std::fmt::Debug
     times.push(("After creating source", start_timer.elapsed()));
     start_timer = Instant::now();
 
-    let mut pipeline = Pipeline::new_from_source(source).ok()?;
+    let mut pipeline = Pipeline::new_from_source(source).map_err(|e| format!("Error creating pipeline: {e:?}"))?;
 
     times.push(("After creating pipeline", start_timer.elapsed()));
     start_timer = Instant::now();
 
     pipeline.run(None);
-    let image = pipeline.output_8bit(None).ok()?;
+    let image = pipeline.output_8bit(None).map_err(|e| format!("Error running pipeline: {e:?}"))?;
 
     times.push(("After creating image", start_timer.elapsed()));
     start_timer = Instant::now();
 
-    let image = ImageBuffer::<Rgb<u8>, Vec<u8>>::from_raw(image.width as u32, image.height as u32, image.data)?;
+    let image = ImageBuffer::<Rgb<u8>, Vec<u8>>::from_raw(image.width as u32, image.height as u32, image.data).ok_or_else(|| "Failed to create image buffer".to_string())?;
 
     times.push(("After creating image buffer", start_timer.elapsed()));
     start_timer = Instant::now();
-    // println!("Properly hashed {:?}", path);
-    let res = Some(DynamicImage::ImageRgb8(image));
+    let res = DynamicImage::ImageRgb8(image);
     times.push(("After creating dynamic image", start_timer.elapsed()));
 
     let str_timer = times.into_iter().map(|(name, time)| format!("{name}: {time:?}")).collect::<Vec<_>>().join(", ");
     debug!("Loading raw image --- {str_timer}");
-    res
+    Ok(res)
 }
 
 pub fn split_path(path: &Path) -> (String, String) {

@@ -6,7 +6,7 @@ use image::DynamicImage;
 use log::{debug, error};
 use slint::ComponentHandle;
 
-use czkawka_core::common::{get_dynamic_image_from_raw_image, IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
+use czkawka_core::common::{IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
 
 use crate::{Callabler, CurrentTab, GuiState, MainWindow, Settings};
 
@@ -95,11 +95,12 @@ fn load_image(image_path: &Path) -> Option<(Duration, DynamicImage)> {
                 }
             }
         } else if is_raw_image {
-            if let Some(img) = get_dynamic_image_from_raw_image(image_name) {
-                img
-            } else {
-                error!("Error while loading raw image - not sure why - try to guess");
-                return None;
+            match image::open(image_name) {
+                Ok(img) => img,
+                Err(e) => {
+                    error!("Error while loading raw image: {}", e);
+                    return None;
+                }
             }
         } else {
             return None;

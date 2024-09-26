@@ -81,10 +81,11 @@ os_info = { version = "3", default-features = false }
 log = "0.4.22"
 handsome_logger = "0.8"
 fun_time = { version = "0.3", features = ["log"] }
+itertools = "0.13"
 
-[target.'cfg(windows)'.dependencies]
 # Don't update anymore! This crate has a bug. I've submitted a patch upstream, but the change is breaking. The current code relies on the bug to work correctly!
 # Warning by CalunVier 2024.7.15
+[target.'cfg(windows)'.dependencies]
 file-id = "=0.2.1"
 
 [build-dependencies]
