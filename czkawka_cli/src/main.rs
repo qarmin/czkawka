@@ -350,12 +350,8 @@ fn save_and_print_results<T: CommonData + PrintResults>(component: &mut T, commo
         }
     }
 
-    // if !cfg!(debug_assertions) {
     component.print_results_to_output();
-    // }
-    // else {
-    //     println!("Results are not printed in debug mode");
-    // }
+
     component.get_text_messages().print_messages();
 }
 
