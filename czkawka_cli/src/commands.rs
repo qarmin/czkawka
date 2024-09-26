@@ -483,8 +483,8 @@ pub struct DMethod {
         long,
         default_value = "NONE",
         value_parser = parse_delete_method,
-        help = "Delete method (AEN, AEO, ON, OO, HARD)",
-        long_help = "Methods to delete the files.\nAEN - All files except the newest,\nAEO - All files except the oldest,\nON - Only 1 file, the newest,\nOO - Only 1 file, the oldest\nHARD - create hard link\nNONE - not delete files"
+        help = "Delete method (AEN, AEO, ON, OO, AEB, AES, OE, OS, HARD)",
+        long_help = "Methods to delete the files.\nAEN - All files except the newest,\nAEO - All files except the oldest,\nON - Only 1 file, the newest,\nOO - Only 1 file, the oldest\nAEB - All files except the biggest,\nAES - All files except the smallest,\nOB - Only 1 file, the biggest,\nOS - Only 1 file, the smallest\nHARD - create hard link\nNONE - not delete files"
     )]
     pub delete_method: DeleteMethod,
 }
@@ -617,7 +617,11 @@ fn parse_delete_method(src: &str) -> Result<DeleteMethod, &'static str> {
         "hard" => Ok(DeleteMethod::HardLink),
         "on" => Ok(DeleteMethod::OneNewest),
         "oo" => Ok(DeleteMethod::OneOldest),
-        _ => Err("Couldn't parse the delete method (allowed: AEN, AEO, ON, OO, HARD)"),
+        "aeb" => Ok(DeleteMethod::AllExceptBiggest),
+        "aes" => Ok(DeleteMethod::AllExceptSmallest),
+        "ob" => Ok(DeleteMethod::OneBiggest),
+        "os" => Ok(DeleteMethod::OneSmallest),
+        _ => Err("Couldn't parse the delete method (allowed: AEN, AEO, ON, OO, HARD, AEB, AES, OB, OS)"),
     }
 }
 
