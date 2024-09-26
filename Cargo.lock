@@ -1307,6 +1307,7 @@ dependencies = [
  "crossbeam-channel",
  "directories-next",
  "ffmpeg_cmdline_utils",
+ "file-id",
  "fun_time",
  "hamming",
  "handsome_logger",
@@ -1846,6 +1847,15 @@ checksum = "38e2275cc4e4fc009b0669731a1e5ab7ebf11f469eaede2bab9309a5b4d6057f"
 dependencies = [
  "memoffset",
  "rustc_version",
+]
+
+[[package]]
+name = "file-id"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6584280525fb2059cba3db2c04abf947a1a29a45ddae89f3870f8281704fafc9"
+dependencies = [
+ "windows-sys 0.48.0",
 ]
 
 [[package]]
