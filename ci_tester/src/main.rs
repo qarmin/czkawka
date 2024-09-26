@@ -376,7 +376,7 @@ fn test_empty_files() {
 
 fn test_big_files() {
     info!("test_big_files");
-    run_test(&["big", "-d", "TestFiles", "-n", "2", "-D"], vec![], vec![], vec![]);
+    run_test(&["big", "-d", "TestFiles", "-n", "2", "-D"], vec!["Music/M4.mp3", "Videos/V3.webm"], vec![], vec![]);
 }
 
 ////////////////////////////////////
