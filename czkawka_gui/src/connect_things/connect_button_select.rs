@@ -12,11 +12,11 @@ pub fn connect_button_select(gui_data: &GuiData) {
     let gc_buttons_select = gui_data.bottom_buttons.gc_buttons_select.clone();
 
     gc_buttons_select.connect_pressed(move |_, _, _, _| {
-        show_required_popovers(&popovers_select, &to_notebook_main_enum(notebook_main.current_page().unwrap()));
+        show_required_popovers(&popovers_select, to_notebook_main_enum(notebook_main.current_page().expect("Current page not set")));
     });
 }
 
-fn show_required_popovers(popovers_select: &GuiSelectPopovers, current_mode: &NotebookMainEnum) {
+fn show_required_popovers(popovers_select: &GuiSelectPopovers, current_mode: NotebookMainEnum) {
     let buttons_popover_select_all = popovers_select.buttons_popover_select_all.clone();
     let buttons_popover_unselect_all = popovers_select.buttons_popover_unselect_all.clone();
     let buttons_popover_reverse = popovers_select.buttons_popover_reverse.clone();
@@ -34,7 +34,7 @@ fn show_required_popovers(popovers_select: &GuiSelectPopovers, current_mode: &No
     let separator_select_image_size = popovers_select.separator_select_image_size.clone();
     let separator_select_reverse = popovers_select.separator_select_reverse.clone();
 
-    let arr = &NOTEBOOKS_INFO[*current_mode as usize].available_modes;
+    let arr = &NOTEBOOKS_INFO[current_mode as usize].available_modes;
 
     if arr.contains(&PopoverTypes::All) {
         buttons_popover_select_all.show();

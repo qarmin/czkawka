@@ -47,19 +47,19 @@ pub fn connect_button_compare(gui_data: &GuiData) {
     window_compare.set_default_size(700, 700);
 
     button_compare.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().unwrap();
+        let nb_number = notebook_main.current_page().expect("Current page not set");
         let tree_view = &main_tree_views[nb_number as usize];
         let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
-        let model = tree_view.model().unwrap();
+        let model = tree_view.model().expect("Missing tree_view model");
 
-        let group_number = count_number_of_groups(tree_view, nb_object.column_header.unwrap());
+        let group_number = count_number_of_groups(tree_view, nb_object.column_header.expect("Missing column_header"));
 
         if group_number == 0 {
             return;
         }
 
         // Check selected items
-        let (current_group, tree_path) = get_current_group_and_iter_from_selection(&model, &tree_view.selection(), nb_object.column_header.unwrap());
+        let (current_group, tree_path) = get_current_group_and_iter_from_selection(&model, &tree_view.selection(), nb_object.column_header.expect("Missing column_header"));
 
         *shared_current_of_groups.borrow_mut() = current_group;
         *shared_numbers_of_groups.borrow_mut() = group_number;
@@ -126,17 +126,22 @@ pub fn connect_button_compare(gui_data: &GuiData) {
     let image_compare_right = gui_data.compare_images.image_compare_right.clone();
 
     button_go_previous_compare_group.connect_clicked(move |button_go_previous_compare_group| {
-        let nb_number = notebook_main.current_page().unwrap();
+        let nb_number = notebook_main.current_page().expect("Current page not set");
         let tree_view = &main_tree_views[nb_number as usize];
         let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
-        let model = tree_view.model().unwrap();
+        let model = tree_view.model().expect("Missing tree_view model");
 
         *shared_current_of_groups.borrow_mut() -= 1;
 
         let current_group = *shared_current_of_groups.borrow();
         let group_number = *shared_numbers_of_groups.borrow();
 
-        let tree_path = move_iter(&model, shared_current_path.borrow().as_ref().unwrap(), nb_object.column_header.unwrap(), false);
+        let tree_path = move_iter(
+            &model,
+            shared_current_path.borrow().as_ref().expect("Missing current path"),
+            nb_object.column_header.expect("Missing column_header"),
+            false,
+        );
 
         populate_groups_at_start(
             nb_object,
@@ -178,17 +183,22 @@ pub fn connect_button_compare(gui_data: &GuiData) {
     let image_compare_right = gui_data.compare_images.image_compare_right.clone();
 
     button_go_next_compare_group.connect_clicked(move |button_go_next_compare_group| {
-        let nb_number = notebook_main.current_page().unwrap();
+        let nb_number = notebook_main.current_page().expect("Current page not set");
         let tree_view = &main_tree_views[nb_number as usize];
         let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
-        let model = tree_view.model().unwrap();
+        let model = tree_view.model().expect("Missing tree_view model");
 
         *shared_current_of_groups.borrow_mut() += 1;
 
         let current_group = *shared_current_of_groups.borrow();
         let group_number = *shared_numbers_of_groups.borrow();
 
-        let tree_path = move_iter(&model, shared_current_path.borrow().as_ref().unwrap(), nb_object.column_header.unwrap(), true);
+        let tree_path = move_iter(
+            &model,
+            shared_current_path.borrow().as_ref().expect("Missing current path"),
+            nb_object.column_header.expect("Missing column_header"),
+            true,
+        );
 
         populate_groups_at_start(
             nb_object,
@@ -216,20 +226,28 @@ pub fn connect_button_compare(gui_data: &GuiData) {
     let shared_current_path = gui_data.compare_images.shared_current_path.clone();
     let main_tree_views = gui_data.main_notebook.get_main_tree_views();
     check_button_left_preview_text.connect_toggled(move |check_button_left_preview_text| {
-        let nb_number = notebook_main.current_page().unwrap();
+        let nb_number = notebook_main.current_page().expect("Current page not set");
         let tree_view = &main_tree_views[nb_number as usize];
         let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
-        let model = tree_view.model().unwrap().downcast::<ListStore>().unwrap();
+        let model = tree_view
+            .model()
+            .expect("Missing tree_view model")
+            .downcast::<ListStore>()
+            .expect("Failed to downcast to ListStore");
 
-        let main_tree_path = shared_current_path.borrow().as_ref().unwrap().clone();
-        let this_tree_path = shared_using_for_preview.borrow().0.clone().unwrap();
+        let main_tree_path = shared_current_path.borrow().as_ref().expect("Missing current path").clone();
+        let this_tree_path = shared_using_for_preview.borrow().0.clone().expect("Missing left preview path");
         if main_tree_path == this_tree_path {
             return; // Selected header, so we don't need to select result in treeview
                     // TODO this should be handled by disabling entirely check box
         }
 
         let is_active = check_button_left_preview_text.is_active();
-        model.set_value(&model.iter(&this_tree_path).unwrap(), nb_object.column_selection as u32, &is_active.to_value());
+        model.set_value(
+            &model.iter(&this_tree_path).expect("Using invalid tree_path"),
+            nb_object.column_selection as u32,
+            &is_active.to_value(),
+        );
     });
 
     let check_button_right_preview_text = gui_data.compare_images.check_button_right_preview_text.clone();
@@ -239,20 +257,28 @@ pub fn connect_button_compare(gui_data: &GuiData) {
     let main_tree_views = gui_data.main_notebook.get_main_tree_views();
 
     check_button_right_preview_text.connect_toggled(move |check_button_right_preview_text| {
-        let nb_number = notebook_main.current_page().unwrap();
+        let nb_number = notebook_main.current_page().expect("Current page not set");
         let tree_view = &main_tree_views[nb_number as usize];
         let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
-        let model = tree_view.model().unwrap().downcast::<ListStore>().unwrap();
+        let model = tree_view
+            .model()
+            .expect("Missing tree_view model")
+            .downcast::<ListStore>()
+            .expect("Failed to downcast to ListStore");
 
-        let main_tree_path = shared_current_path.borrow().as_ref().unwrap().clone();
-        let this_tree_path = shared_using_for_preview.borrow().1.clone().unwrap();
+        let main_tree_path = shared_current_path.borrow().as_ref().expect("Missing current path").clone();
+        let this_tree_path = shared_using_for_preview.borrow().1.clone().expect("Missing right preview path");
         if main_tree_path == this_tree_path {
             return; // Selected header, so we don't need to select result in treeview
                     // TODO this should be handled by disabling entirely check box
         }
 
         let is_active = check_button_right_preview_text.is_active();
-        model.set_value(&model.iter(&this_tree_path).unwrap(), nb_object.column_selection as u32, &is_active.to_value());
+        model.set_value(
+            &model.iter(&this_tree_path).expect("Using invalid tree_path"),
+            nb_object.column_selection as u32,
+            &is_active.to_value(),
+        );
     });
 }
 
@@ -285,7 +311,13 @@ fn populate_groups_at_start(
         button_go_next_compare_group.set_sensitive(true);
     }
 
-    let all_vec = get_all_path(model, &tree_path, nb_object.column_header.unwrap(), nb_object.column_path, nb_object.column_name);
+    let all_vec = get_all_path(
+        model,
+        &tree_path,
+        nb_object.column_header.expect("Missing column_header"),
+        nb_object.column_path,
+        nb_object.column_name,
+    );
     *shared_current_path.borrow_mut() = Some(tree_path);
 
     let cache_all_images = generate_cache_for_results(all_vec);
@@ -325,9 +357,15 @@ fn populate_groups_at_start(
     *shared_image_cache.borrow_mut() = cache_all_images.clone();
 
     let mut found = false;
-    for i in get_all_direct_children(&scrolled_window_compare_choose_images.child().unwrap().downcast::<gtk4::Viewport>().unwrap()) {
+    for i in get_all_direct_children(
+        &scrolled_window_compare_choose_images
+            .child()
+            .expect("Failed to get child of scrolled_window_compare_choose_images")
+            .downcast::<gtk4::Viewport>()
+            .expect("Failed to downcast to Viewport"),
+    ) {
         if i.widget_name() == "all_box" {
-            let gtk_box = i.downcast::<gtk4::Box>().unwrap();
+            let gtk_box = i.downcast::<gtk4::Box>().expect("Failed to downcast to Box");
             update_bottom_buttons(&gtk_box, shared_using_for_preview, shared_image_cache);
             found = true;
             break;
@@ -335,9 +373,9 @@ fn populate_groups_at_start(
     }
     assert!(found);
 
-    let is_active = model.get::<bool>(&model.iter(&cache_all_images[0].4).unwrap(), nb_object.column_selection);
+    let is_active = model.get::<bool>(&model.iter(&cache_all_images[0].4).expect("Using invalid tree_path"), nb_object.column_selection);
     check_button_left_preview_text.set_active(is_active);
-    let is_active = model.get::<bool>(&model.iter(&cache_all_images[1].4).unwrap(), nb_object.column_selection);
+    let is_active = model.get::<bool>(&model.iter(&cache_all_images[1].4).expect("Using invalid tree_path"), nb_object.column_selection);
     check_button_right_preview_text.set_active(is_active);
 }
 
@@ -349,7 +387,7 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>)
         let small_img = Image::new();
         let big_img = Image::new();
 
-        let mut pixbuf = get_pixbuf_from_dynamic_image(&DynamicImage::new_rgb8(1, 1)).unwrap();
+        let mut pixbuf = get_pixbuf_from_dynamic_image(&DynamicImage::new_rgb8(1, 1)).expect("Failed to create pixbuf");
         let extension_lowercase = full_path.split('.').last().map(str::to_lowercase);
         let is_heic = match extension_lowercase {
             Some(extension) => HEIC_EXTENSIONS.iter().any(|e| e == &extension),
@@ -413,7 +451,7 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>)
 }
 
 fn get_all_path(model: &TreeModel, current_path: &TreePath, column_header: i32, column_path: i32, column_name: i32) -> Vec<(String, String, TreePath)> {
-    let used_iter = model.iter(current_path).unwrap();
+    let used_iter = model.iter(current_path).expect("Using invalid tree_path");
 
     assert!(model.get::<bool>(&used_iter, column_header));
     let using_reference = !model.get::<String>(&used_iter, column_path).is_empty();
@@ -454,7 +492,7 @@ fn get_all_path(model: &TreeModel, current_path: &TreePath, column_header: i32, 
 }
 
 fn move_iter(model: &TreeModel, tree_path: &TreePath, column_header: i32, go_next: bool) -> TreePath {
-    let tree_iter = model.iter(tree_path).unwrap();
+    let tree_iter = model.iter(tree_path).expect("Using invalid tree_path");
 
     assert!(model.get::<bool>(&tree_iter, column_header));
 
@@ -507,7 +545,7 @@ fn populate_similar_scrolled_view(
         let smaller_box = gtk4::Box::new(Orientation::Horizontal, 2);
 
         let button_left = gtk4::Button::builder().label(&flg!("compare_move_left_button")).build();
-        let label = gtk4::Label::builder().label(&(number + 1).to_string()).build();
+        let label = gtk4::Label::builder().label((number + 1).to_string()).build();
         let button_right = gtk4::Button::builder().label(&flg!("compare_move_right_button")).build();
 
         let image_compare_left = image_compare_left.clone();
@@ -527,7 +565,7 @@ fn populate_similar_scrolled_view(
             update_bottom_buttons(&all_gtk_box_clone, &shared_using_for_preview_clone, &shared_image_cache_clone);
             image_compare_left.set_paintable(big_thumbnail_clone.paintable().as_ref());
 
-            let is_active = model_clone.get::<bool>(&model_clone.iter(&tree_path_clone).unwrap(), column_selection);
+            let is_active = model_clone.get::<bool>(&model_clone.iter(&tree_path_clone).expect("Invalid tree_path"), column_selection);
             check_button_left_preview_text_clone.set_active(is_active);
             check_button_left_preview_text_clone.set_label(Some(&format!("{}. {}", number + 1, get_max_file_name(&path_clone, 60))));
         });
@@ -546,7 +584,7 @@ fn populate_similar_scrolled_view(
             update_bottom_buttons(&all_gtk_box_clone, &shared_using_for_preview_clone, &shared_image_cache_clone);
             image_compare_right.set_paintable(big_thumbnail_clone.paintable().as_ref());
 
-            let is_active = model_clone.get::<bool>(&model_clone.iter(&tree_path_clone).unwrap(), column_selection);
+            let is_active = model_clone.get::<bool>(&model_clone.iter(&tree_path_clone).expect("Invalid tree_path"), column_selection);
             check_button_right_preview_text_clone.set_active(is_active);
             check_button_right_preview_text_clone.set_label(Some(&format!("{}. {}", number + 1, get_max_file_name(&path_clone, 60))));
         });
@@ -581,15 +619,15 @@ fn update_bottom_buttons(
     shared_using_for_preview: &Rc<RefCell<(Option<TreePath>, Option<TreePath>)>>,
     image_cache: &Rc<RefCell<Vec<(String, String, Image, Image, TreePath)>>>,
 ) {
-    let left_tree_view = (shared_using_for_preview.borrow()).0.clone().unwrap();
-    let right_tree_view = (shared_using_for_preview.borrow()).1.clone().unwrap();
+    let left_tree_view = (shared_using_for_preview.borrow()).0.clone().expect("Left tree_view not set");
+    let right_tree_view = (shared_using_for_preview.borrow()).1.clone().expect("Right tree_view not set");
 
     for (number, i) in get_all_direct_children(all_gtk_box).into_iter().enumerate() {
         let cache_tree_path = (*image_cache.borrow())[number].4.clone();
         let is_chosen = cache_tree_path != right_tree_view && cache_tree_path != left_tree_view;
 
-        let bx = i.downcast::<gtk4::Box>().unwrap();
-        let smaller_bx = bx.first_child().unwrap().downcast::<gtk4::Box>().unwrap();
+        let bx = i.downcast::<gtk4::Box>().expect("Not Box");
+        let smaller_bx = bx.first_child().expect("No first child").downcast::<gtk4::Box>().expect("First child is not Box");
         for items in get_all_direct_children(&smaller_bx) {
             if let Ok(btn) = items.downcast::<gtk4::Button>() {
                 btn.set_sensitive(is_chosen);
@@ -606,7 +644,7 @@ fn get_current_group_and_iter_from_selection(model: &TreeModel, selection: &Tree
 
     let selected_records = selection.selected_rows().0;
 
-    let iter = model.iter_first().unwrap(); // Checking that treeview is not empty should be done before
+    let iter = model.iter_first().expect("Model is no empty, so should have first item"); // Checking that treeview is not empty should be done before
     header_clone = iter; // if nothing selected, use first group
     possible_header = iter; // if nothing selected, use first group
     assert!(model.get::<bool>(&iter, column_header)); // First element should be header

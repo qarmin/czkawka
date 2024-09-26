@@ -5,6 +5,15 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::Ordering;
 use std::{fs, mem, panic};
 
+use crate::common::{
+    check_if_stop_received, create_crash_message, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, AUDIO_FILES_EXTENSIONS,
+    IMAGE_RS_BROKEN_FILES_EXTENSIONS, PDF_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS,
+};
+use crate::common_cache::{get_broken_files_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
+use crate::common_dir_traversal::{DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
+use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
+use crate::common_traits::*;
+use crate::progress_data::{CurrentStage, ProgressData};
 use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
 use log::debug;
@@ -14,15 +23,6 @@ use pdf::PdfError;
 use pdf::PdfError::Try;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
-
-use crate::common::{
-    check_if_stop_received, create_crash_message, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, AUDIO_FILES_EXTENSIONS,
-    IMAGE_RS_BROKEN_FILES_EXTENSIONS, PDF_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS,
-};
-use crate::common_cache::{get_broken_files_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
-use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
-use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
-use crate::common_traits::*;
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct BrokenEntry {
@@ -66,10 +66,8 @@ pub enum TypeOfFile {
     PDF,
 }
 
-const MAX_BROKEN_FILES_STAGE: u8 = 1;
-
 bitflags! {
-    #[derive(PartialEq, Copy, Clone)]
+    #[derive(PartialEq, Copy, Clone, Debug)]
     pub struct CheckedTypes : u32 {
         const NONE = 0;
 
@@ -85,22 +83,32 @@ pub struct Info {
     pub number_of_broken_files: usize,
 }
 
+pub struct BrokenFilesParameters {
+    pub checked_types: CheckedTypes,
+}
+
+impl BrokenFilesParameters {
+    pub fn new(checked_types: CheckedTypes) -> Self {
+        Self { checked_types }
+    }
+}
+
 pub struct BrokenFiles {
     common_data: CommonToolData,
     information: Info,
     files_to_check: BTreeMap<String, BrokenEntry>,
     broken_files: Vec<BrokenEntry>,
-    checked_types: CheckedTypes,
+    params: BrokenFilesParameters,
 }
 
 impl BrokenFiles {
-    pub fn new() -> Self {
+    pub fn new(params: BrokenFilesParameters) -> Self {
         Self {
             common_data: CommonToolData::new(ToolType::BrokenFiles),
             information: Info::default(),
             files_to_check: Default::default(),
             broken_files: Default::default(),
-            checked_types: CheckedTypes::PDF | CheckedTypes::AUDIO | CheckedTypes::IMAGE | CheckedTypes::ARCHIVE,
+            params,
         }
     }
 
@@ -134,7 +142,7 @@ impl BrokenFiles {
             (CheckedTypes::IMAGE, IMAGE_RS_BROKEN_FILES_EXTENSIONS),
         ];
         for (checked_type, extensions_to_add) in &vec_extensions {
-            if self.checked_types.contains(*checked_type) {
+            if self.get_params().checked_types.contains(*checked_type) {
                 extensions.extend_from_slice(extensions_to_add);
             }
         }
@@ -149,7 +157,6 @@ impl BrokenFiles {
             .stop_receiver(stop_receiver)
             .progress_sender(progress_sender)
             .common_data(&self.common_data)
-            .max_stage(MAX_BROKEN_FILES_STAGE)
             .build()
             .run();
 
@@ -296,7 +303,7 @@ impl BrokenFiles {
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache();
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, 1, 1, non_cached_files_to_check.len(), CheckingMethod::None, self.common_data.tool_type);
+            prepare_thread_handler_common(progress_sender, CurrentStage::BrokenFilesChecking, non_cached_files_to_check.len(), self.get_test_type());
 
         debug!("look_for_broken_files - started finding for broken files");
         let mut vec_file_entry: Vec<BrokenEntry> = non_cached_files_to_check
@@ -317,8 +324,7 @@ impl BrokenFiles {
                 }
             })
             .while_some()
-            .filter(Option::is_some)
-            .map(Option::unwrap)
+            .flatten()
             .collect::<Vec<BrokenEntry>>();
         debug!("look_for_broken_files - ended finding for broken files");
 
@@ -384,17 +390,12 @@ impl BrokenFiles {
         &self.broken_files
     }
 
-    pub fn set_checked_types(&mut self, checked_types: CheckedTypes) {
-        self.checked_types = checked_types;
+    pub fn get_params(&self) -> &BrokenFilesParameters {
+        &self.params
     }
 
     pub const fn get_information(&self) -> &Info {
         &self.information
-    }
-}
-impl Default for BrokenFiles {
-    fn default() -> Self {
-        Self::new()
     }
 }
 

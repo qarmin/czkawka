@@ -7,9 +7,10 @@ use fun_time::fun_time;
 use log::debug;
 use serde::{Deserialize, Serialize};
 
-use crate::common_dir_traversal::{Collect, DirTraversalBuilder, DirTraversalResult, ErrorType, FileEntry, ProgressData, ToolType};
+use crate::common_dir_traversal::{Collect, DirTraversalBuilder, DirTraversalResult, ErrorType, FileEntry, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::*;
+use crate::progress_data::ProgressData;
 
 #[derive(Default)]
 pub struct Info {
@@ -98,9 +99,7 @@ impl InvalidSymlinks {
                     .into_values()
                     .flatten()
                     .filter_map(|e| {
-                        let Some((destination_path, type_of_error)) = Self::check_invalid_symlinks(&e.path) else {
-                            return None;
-                        };
+                        let (destination_path, type_of_error) = Self::check_invalid_symlinks(&e.path)?;
                         Some(e.into_symlinks_entry(SymlinkInfo { destination_path, type_of_error }))
                     })
                     .collect();

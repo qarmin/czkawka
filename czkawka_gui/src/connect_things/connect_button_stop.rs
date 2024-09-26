@@ -9,7 +9,7 @@ fn send_stop_message(stop_sender: &Sender<()>) {
     stop_sender
         .try_send(())
         .map_or_else(|e| if matches!(e, TrySendError::Full(())) { Ok(()) } else { Err(e) }, |()| Ok(()))
-        .unwrap();
+        .expect("Failed to send stop message");
 }
 
 pub fn connect_button_stop(gui_data: &GuiData) {

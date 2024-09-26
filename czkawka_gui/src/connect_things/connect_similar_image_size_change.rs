@@ -13,7 +13,7 @@ pub fn connect_similar_image_size_change(gui_data: &GuiData) {
     let label_similar_images_minimal_similarity = gui_data.main_notebook.label_similar_images_minimal_similarity.clone();
     let scale_similarity_similar_images = gui_data.main_notebook.scale_similarity_similar_images.clone();
     combo_box_image_hash_size.connect_changed(move |combo_box_image_hash_size| {
-        let hash_size_index = combo_box_image_hash_size.active().unwrap() as usize;
+        let hash_size_index = combo_box_image_hash_size.active().expect("Failed to get active item") as usize;
         let hash_size = IMAGES_HASH_SIZE_COMBO_BOX[hash_size_index];
 
         let index = match hash_size {

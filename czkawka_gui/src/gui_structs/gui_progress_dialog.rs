@@ -26,21 +26,21 @@ impl GuiProgressDialog {
         let glade_src = include_str!("../../ui/progress.ui").to_string();
         let builder = Builder::from_string(glade_src.as_str());
 
-        let window_progress: gtk4::Dialog = builder.object("window_progress").unwrap();
+        let window_progress: gtk4::Dialog = builder.object("window_progress").expect("Cambalache");
         window_progress.set_title(Some(&flg!("window_progress_title")));
         window_progress.set_transient_for(Some(window_main));
         window_progress.set_modal(true);
 
-        let progress_bar_current_stage: gtk4::ProgressBar = builder.object("progress_bar_current_stage").unwrap();
-        let progress_bar_all_stages: gtk4::ProgressBar = builder.object("progress_bar_all_stages").unwrap();
+        let progress_bar_current_stage: gtk4::ProgressBar = builder.object("progress_bar_current_stage").expect("Cambalache");
+        let progress_bar_all_stages: gtk4::ProgressBar = builder.object("progress_bar_all_stages").expect("Cambalache");
 
-        let label_stage: gtk4::Label = builder.object("label_stage").unwrap();
-        let label_progress_current_stage: gtk4::Label = builder.object("label_progress_current_stage").unwrap();
-        let label_progress_all_stages: gtk4::Label = builder.object("label_progress_all_stages").unwrap();
+        let label_stage: gtk4::Label = builder.object("label_stage").expect("Cambalache");
+        let label_progress_current_stage: gtk4::Label = builder.object("label_progress_current_stage").expect("Cambalache");
+        let label_progress_all_stages: gtk4::Label = builder.object("label_progress_all_stages").expect("Cambalache");
 
-        let grid_progress: gtk4::Grid = builder.object("grid_progress").unwrap();
+        let grid_progress: gtk4::Grid = builder.object("grid_progress").expect("Cambalache");
 
-        let button_stop_in_dialog: gtk4::Button = builder.object("button_stop_in_dialog").unwrap();
+        let button_stop_in_dialog: gtk4::Button = builder.object("button_stop_in_dialog").expect("Cambalache");
         let evk_button_stop_in_dialog = EventControllerKey::new();
         button_stop_in_dialog.add_controller(evk_button_stop_in_dialog.clone());
 

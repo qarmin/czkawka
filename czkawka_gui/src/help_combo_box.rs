@@ -50,6 +50,7 @@ pub const DUPLICATES_CHECK_METHOD_COMBO_BOX: [CheckMethodStruct; 4] = [
 
 #[derive(Copy, Clone)]
 pub struct AudioTypeStruct {
+    #[allow(unused)]
     pub eng_name: &'static str,
     pub check_method: CheckingMethod,
 }
@@ -67,6 +68,7 @@ pub const AUDIO_TYPE_CHECK_METHOD_COMBO_BOX: [AudioTypeStruct; 2] = [
 
 #[derive(Copy, Clone)]
 pub struct SearchModeStruct {
+    #[allow(unused)]
     pub eng_name: &'static str,
     pub check_method: SearchMode,
 }
@@ -115,7 +117,7 @@ pub struct ImageHashTypeStruct {
     pub hash_alg: HashAlg,
 }
 
-pub const IMAGES_HASH_TYPE_COMBO_BOX: [ImageHashTypeStruct; 5] = [
+pub const IMAGES_HASH_TYPE_COMBO_BOX: &[ImageHashTypeStruct] = &[
     ImageHashTypeStruct {
         eng_name: "Gradient",
         hash_alg: HashAlg::Gradient,
@@ -135,6 +137,10 @@ pub const IMAGES_HASH_TYPE_COMBO_BOX: [ImageHashTypeStruct; 5] = [
     ImageHashTypeStruct {
         eng_name: "DoubleGradient",
         hash_alg: HashAlg::DoubleGradient,
+    },
+    ImageHashTypeStruct {
+        eng_name: "Median",
+        hash_alg: HashAlg::Median,
     },
 ];
 

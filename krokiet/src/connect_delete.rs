@@ -11,7 +11,7 @@ use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow, Settings
 pub fn connect_delete_button(app: &MainWindow) {
     let a = app.as_weak();
     app.global::<Callabler>().on_delete_selected_items(move || {
-        let app = a.upgrade().unwrap();
+        let app = a.upgrade().expect("Failed to upgrade app :(");
 
         let active_tab = app.global::<GuiState>().get_active_tab();
 

@@ -24,8 +24,8 @@ pub fn collect_full_path_from_model(items: &[MainListModel], active_tab: Current
     items
         .iter()
         .map(|item| {
-            let path = item.val_str.iter().nth(path_idx).unwrap();
-            let name = item.val_str.iter().nth(name_idx).unwrap();
+            let path = item.val_str.iter().nth(path_idx).unwrap_or_else(|| panic!("Failed to get {path_idx} element"));
+            let name = item.val_str.iter().nth(name_idx).unwrap_or_else(|| panic!("Failed to get {name_idx} element"));
             format!("{path}{MAIN_SEPARATOR}{name}")
         })
         .collect::<Vec<_>>()
@@ -36,10 +36,9 @@ pub fn collect_path_name_from_model(items: &[MainListModel], active_tab: Current
     items
         .iter()
         .map(|item| {
-            (
-                item.val_str.iter().nth(path_idx).unwrap().to_string(),
-                item.val_str.iter().nth(name_idx).unwrap().to_string(),
-            )
+            let path = item.val_str.iter().nth(path_idx).unwrap_or_else(|| panic!("Failed to get {path_idx} element"));
+            let name = item.val_str.iter().nth(name_idx).unwrap_or_else(|| panic!("Failed to get {name_idx} element"));
+            (path.to_string(), name.to_string())
         })
         .collect::<Vec<_>>()
 }
@@ -52,9 +51,11 @@ pub fn filter_out_checked_items(items: &ModelRc<MainListModel>, have_header: boo
 
     let (entries_to_delete, mut entries_left): (Vec<_>, Vec<_>) = items.iter().partition(|item| item.checked);
 
-    // When have header, we must also throw out orphaned items - this needs to be
+    // When have header, we must also throw out orphaned items
     if have_header && !entries_left.is_empty() {
         // First row must be header
+        // If assert fails, that means, that we checked that for mode that not have headers
+        // And this needs to be changed
         assert!(entries_left[0].header_row);
         let is_filled_header = entries_left[0].filled_header_row;
 
@@ -336,7 +337,10 @@ mod tests {
         }
     }
     fn get_single_data_str_from_model(model: &[MainListModel]) -> Vec<String> {
-        let mut d = model.iter().map(|item| item.val_str.iter().next().unwrap().to_string()).collect::<Vec<_>>();
+        let mut d = model
+            .iter()
+            .map(|item| item.val_str.iter().next().expect("Failed to get first element").to_string())
+            .collect::<Vec<_>>();
         d.sort();
         d
     }

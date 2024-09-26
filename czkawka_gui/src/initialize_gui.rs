@@ -64,7 +64,7 @@ pub fn initialize_gui(gui_data: &GuiData) {
     {
         {
             let combo_box_image_hash_algorithm = gui_data.main_notebook.combo_box_image_hash_algorithm.clone();
-            for check_type in &IMAGES_HASH_TYPE_COMBO_BOX {
+            for check_type in IMAGES_HASH_TYPE_COMBO_BOX {
                 combo_box_image_hash_algorithm.append_text(check_type.eng_name);
             }
             combo_box_image_hash_algorithm.set_active(Some(0));
@@ -225,7 +225,7 @@ pub fn initialize_gui(gui_data: &GuiData) {
                     let (vec_tree_path, _tree_model) = selection.selected_rows();
 
                     for tree_path in vec_tree_path.iter().rev() {
-                        list_store.remove(&list_store.iter(tree_path).unwrap());
+                        list_store.remove(&list_store.iter(tree_path).expect("Using invalid tree_path"));
                     }
                 }
             });
@@ -259,7 +259,7 @@ pub fn initialize_gui(gui_data: &GuiData) {
                     let (vec_tree_path, _tree_model) = selection.selected_rows();
 
                     for tree_path in vec_tree_path.iter().rev() {
-                        list_store.remove(&list_store.iter(tree_path).unwrap());
+                        list_store.remove(&list_store.iter(tree_path).expect("Using invalid tree_path"));
                     }
                 }
             });
@@ -272,7 +272,7 @@ pub fn initialize_gui(gui_data: &GuiData) {
         let stop_sender = gui_data.stop_sender.clone();
 
         window_progress.connect_close_request(move |_| {
-            stop_sender.send(()).unwrap();
+            stop_sender.send(()).expect("Failed to send stop signal");
             glib::Propagation::Stop
         });
     }
@@ -422,7 +422,11 @@ fn connect_event_buttons(gui_data: &GuiData) {
             let preview_path = preview_path.clone();
             let nb_object = &NOTEBOOKS_INFO[NotebookMainEnum::Duplicate as usize];
             show_preview(
-                &event_controller_key.widget().downcast::<TreeView>().unwrap(),
+                &event_controller_key
+                    .widget()
+                    .expect("Item has no widget")
+                    .downcast::<gtk4::TreeView>()
+                    .expect("Widget is not TreeView"),
                 &text_view_errors,
                 &check_button_settings_show_preview,
                 &image_preview,
@@ -450,7 +454,11 @@ fn connect_event_buttons(gui_data: &GuiData) {
             let preview_path = preview_path.clone();
             let nb_object = &NOTEBOOKS_INFO[NotebookMainEnum::SimilarImages as usize];
             show_preview(
-                &event_controller_key.widget().downcast::<TreeView>().unwrap(),
+                &event_controller_key
+                    .widget()
+                    .expect("Item has no widget")
+                    .downcast::<gtk4::TreeView>()
+                    .expect("Widget is not TreeView"),
                 &text_view_errors,
                 &check_button_settings_show_preview_similar_images,
                 &image_preview,
@@ -481,8 +489,8 @@ fn show_preview(
         // TODO labels on {} are in testing stage, so we just ignore for now this warning until found better idea how to fix this
         #[allow(clippy::never_loop)]
         'dir: loop {
-            let path = tree_model.get::<String>(&tree_model.iter(&tree_path).unwrap(), column_path);
-            let name = tree_model.get::<String>(&tree_model.iter(&tree_path).unwrap(), column_name);
+            let path = tree_model.get::<String>(&tree_model.iter(&tree_path).expect("Invalid tree_path"), column_path);
+            let name = tree_model.get::<String>(&tree_model.iter(&tree_path).expect("Invalid tree_path"), column_name);
 
             let file_name = get_full_name_from_path_name(&path, &name);
             let file_name = file_name.as_str();

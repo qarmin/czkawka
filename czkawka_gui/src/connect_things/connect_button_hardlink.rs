@@ -59,7 +59,7 @@ async fn sym_hard_link_things(gui_data: GuiData, hardlinking: TypeOfTool) {
     let preview_path = gui_data.preview_path.clone();
     let window_main = gui_data.window_main.clone();
 
-    let nb_number = notebook_main.current_page().unwrap();
+    let nb_number = notebook_main.current_page().expect("Current page not set");
     let tree_view = &main_tree_views[nb_number as usize];
     let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
 
@@ -85,7 +85,7 @@ async fn sym_hard_link_things(gui_data: GuiData, hardlinking: TypeOfTool) {
         nb_object.column_path,
         column_header,
         nb_object.column_selection,
-        &hardlinking,
+        hardlinking,
         &text_view_errors,
     );
 
@@ -108,7 +108,7 @@ fn hardlink_symlink(
     column_path: i32,
     column_header: i32,
     column_selection: i32,
-    hardlinking: &TypeOfTool,
+    hardlinking: TypeOfTool,
     text_view_errors: &TextView,
 ) {
     reset_text_view(text_view_errors);
@@ -163,11 +163,10 @@ fn hardlink_symlink(
             let path = model.get::<String>(&current_iter, column_path);
             let full_file_path = get_full_name_from_path_name(&path, &file_name);
 
-            if current_symhardlink_data.is_some() {
+            if let Some(mut current_data) = current_symhardlink_data {
                 vec_tree_path_to_remove.push(model.path(&current_iter));
-                let mut temp_data = current_symhardlink_data.unwrap();
-                temp_data.files_to_symhardlink.push(full_file_path);
-                current_symhardlink_data = Some(temp_data);
+                current_data.files_to_symhardlink.push(full_file_path);
+                current_symhardlink_data = Some(current_data);
             } else {
                 current_symhardlink_data = Some(SymHardlinkData {
                     original_data: full_file_path,
@@ -197,7 +196,7 @@ fn hardlink_symlink(
             break;
         }
     }
-    if hardlinking == &TypeOfTool::Hardlinking {
+    if hardlinking == TypeOfTool::Hardlinking {
         for symhardlink_data in vec_symhardlink_data {
             for file_to_hardlink in symhardlink_data.files_to_symhardlink {
                 if let Err(e) = make_hard_link(&PathBuf::from(&symhardlink_data.original_data), &PathBuf::from(&file_to_hardlink)) {
@@ -232,7 +231,7 @@ fn hardlink_symlink(
         }
     }
     for tree_path in vec_tree_path_to_remove.iter().rev() {
-        model.remove(&model.iter(tree_path).unwrap());
+        model.remove(&model.iter(tree_path).expect("Using invalid tree_path"));
     }
 
     clean_invalid_headers(&model, column_header, column_path);
@@ -253,7 +252,7 @@ fn create_dialog_non_group(window_main: &gtk4::Window) -> Dialog {
 
     button_ok.grab_focus();
 
-    let parent = button_ok.parent().unwrap().parent().unwrap().downcast::<gtk4::Box>().unwrap(); // TODO Hack, but not so ugly as before
+    let parent = button_ok.parent().expect("Hack 1").parent().expect("Hack 2").downcast::<gtk4::Box>().expect("Hack 3"); // TODO Hack, but not so ugly as before
     parent.set_orientation(Orientation::Vertical);
     parent.insert_child_after(&label, None::<&gtk4::Widget>);
     parent.insert_child_after(&label2, Some(&label));
@@ -357,7 +356,7 @@ fn create_dialog_ask_for_linking(window_main: &gtk4::Window) -> (Dialog, CheckBu
 
     button_ok.grab_focus();
 
-    let parent = button_ok.parent().unwrap().parent().unwrap().downcast::<gtk4::Box>().unwrap(); // TODO Hack, but not so ugly as before
+    let parent = button_ok.parent().expect("Hack 1").parent().expect("Hack 2").downcast::<gtk4::Box>().expect("Hack 3"); // TODO Hack, but not so ugly as before
     parent.set_orientation(Orientation::Vertical);
     parent.insert_child_after(&label, None::<&gtk4::Widget>);
     parent.insert_child_after(&check_button, Some(&label));

@@ -32,6 +32,9 @@ pub fn connect_same_music_change_mode(gui_data: &GuiData) {
         check_button_music_length,
     ];
 
+    let check_button_music_compare_only_in_title_group = gui_data.main_notebook.check_button_music_compare_only_in_title_group.clone();
+    let reversed_buttons = [check_button_music_compare_only_in_title_group];
+
     let scale_seconds_same_music = gui_data.main_notebook.scale_seconds_same_music.clone();
     let scale_similarity_same_music = gui_data.main_notebook.scale_similarity_same_music.clone();
     let label_same_music_similarity = gui_data.main_notebook.label_same_music_similarity.clone();
@@ -49,27 +52,29 @@ pub fn connect_same_music_change_mode(gui_data: &GuiData) {
 
     let combo_box_audio_check_type = gui_data.main_notebook.combo_box_audio_check_type.clone();
 
-    let check_method_index = combo_box_audio_check_type.active().unwrap() as usize;
+    let check_method_index = combo_box_audio_check_type.active().expect("Failed to get active item") as usize;
     let check_method = AUDIO_TYPE_CHECK_METHOD_COMBO_BOX[check_method_index].check_method;
 
-    disable_enable_buttons(&buttons, &scales_and_labels, check_method);
+    disable_enable_buttons(&buttons, &reversed_buttons, &scales_and_labels, check_method);
     combo_box_audio_check_type.connect_changed(move |combo_box_text| {
         if let Some(active) = combo_box_text.active() {
             let check_method = AUDIO_TYPE_CHECK_METHOD_COMBO_BOX[active as usize].check_method;
 
-            disable_enable_buttons(&buttons, &scales_and_labels, check_method);
+            disable_enable_buttons(&buttons, &reversed_buttons, &scales_and_labels, check_method);
         }
     });
 }
 
-fn disable_enable_buttons(buttons: &[CheckButton; 7], scales: &[Widget; 4], current_mode: CheckingMethod) {
+fn disable_enable_buttons(buttons: &[CheckButton; 7], reverse_buttons: &[CheckButton; 1], scales: &[Widget; 4], current_mode: CheckingMethod) {
     match current_mode {
         CheckingMethod::AudioTags => {
             buttons.iter().for_each(WidgetExt::show);
+            reverse_buttons.iter().for_each(WidgetExt::hide);
             scales.iter().for_each(WidgetExt::hide);
         }
         CheckingMethod::AudioContent => {
             buttons.iter().for_each(WidgetExt::hide);
+            reverse_buttons.iter().for_each(WidgetExt::show);
             scales.iter().for_each(WidgetExt::show);
         }
         _ => panic!(),

@@ -278,11 +278,19 @@ export component SettingsList inherits VerticalLayout {
                 model <=> Settings.similar_images_show_image_preview;
             }
             CheckBoxComponent {
+                name: "Hide hard links";
+                model <=> Settings.similar_images_hide_hard_links;
+            }
+            CheckBoxComponent {
                 name: "Delete automatically outdated entries";
                 model <=> Settings.similar_images_delete_outdated_entries;
             }
             HeaderText {
                 text: "Similar Videos tool";
+            }
+            CheckBoxComponent {
+                name: "Hide hard links";
+                model <=> Settings.similar_videos_hide_hard_links;
             }
             CheckBoxComponent {
                 name: "Delete automatically outdated entries";

@@ -13,7 +13,11 @@ pub fn opening_enter_function_ported_upper_directories(
     key_code: u32,
     _modifier_type: ModifierType,
 ) -> glib::Propagation {
-    let tree_view = event_controller.widget().downcast::<gtk4::TreeView>().unwrap();
+    let tree_view = event_controller
+        .widget()
+        .expect("Item has no widget")
+        .downcast::<gtk4::TreeView>()
+        .expect("Widget is not TreeView");
 
     if cfg!(debug_assertions) {
         println!("key_code {key_code}");
@@ -40,7 +44,11 @@ pub fn opening_enter_function_ported_upper_directories(
 }
 
 pub fn opening_middle_mouse_function(gesture_click: &GestureClick, _number_of_clicks: i32, _b: f64, _c: f64) {
-    let tree_view = gesture_click.widget().downcast::<gtk4::TreeView>().unwrap();
+    let tree_view = gesture_click
+        .widget()
+        .expect("Item has no widget")
+        .downcast::<gtk4::TreeView>()
+        .expect("Widget is not TreeView");
 
     let nt_object = get_notebook_object_from_tree_view(&tree_view);
     if let Some(column_header) = nt_object.column_header {
@@ -51,7 +59,11 @@ pub fn opening_middle_mouse_function(gesture_click: &GestureClick, _number_of_cl
 }
 
 pub fn opening_double_click_function_directories(gesture_click: &GestureClick, number_of_clicks: i32, _b: f64, _c: f64) {
-    let tree_view = gesture_click.widget().downcast::<gtk4::TreeView>().unwrap();
+    let tree_view = gesture_click
+        .widget()
+        .expect("Item has no widget")
+        .downcast::<gtk4::TreeView>()
+        .expect("Widget is not TreeView");
 
     if number_of_clicks == 2 && (gesture_click.current_button() == 1 || gesture_click.current_button() == 3) {
         match get_notebook_upper_enum_from_tree_view(&tree_view) {
@@ -69,7 +81,11 @@ pub fn opening_double_click_function_directories(gesture_click: &GestureClick, n
 }
 
 pub fn opening_enter_function_ported(event_controller: &gtk4::EventControllerKey, _key: Key, key_code: u32, _modifier_type: ModifierType) -> glib::Propagation {
-    let tree_view = event_controller.widget().downcast::<gtk4::TreeView>().unwrap();
+    let tree_view = event_controller
+        .widget()
+        .expect("Item has no widget")
+        .downcast::<gtk4::TreeView>()
+        .expect("Widget is not TreeView");
     if cfg!(debug_assertions) {
         println!("key_code {key_code}");
     }
@@ -87,7 +103,11 @@ pub fn opening_enter_function_ported(event_controller: &gtk4::EventControllerKey
 }
 
 pub fn opening_double_click_function(gesture_click: &GestureClick, number_of_clicks: i32, _b: f64, _c: f64) {
-    let tree_view = gesture_click.widget().downcast::<gtk4::TreeView>().unwrap();
+    let tree_view = gesture_click
+        .widget()
+        .expect("Item has no widget")
+        .downcast::<gtk4::TreeView>()
+        .expect("Widget is not TreeView");
 
     let nt_object = get_notebook_object_from_tree_view(&tree_view);
     if number_of_clicks == 2 {
@@ -112,12 +132,12 @@ fn common_mark_function(tree_view: &gtk4::TreeView, column_selection: i32, colum
 
     for tree_path in selected_rows.iter().rev() {
         if let Some(column_header) = column_header {
-            if model.get::<bool>(&model.iter(tree_path).unwrap(), column_header) {
+            if model.get::<bool>(&model.iter(tree_path).expect("Using invalid tree_path"), column_header) {
                 continue;
             }
         }
-        let value = !tree_model.get::<bool>(&tree_model.iter(tree_path).unwrap(), column_selection);
-        model.set_value(&tree_model.iter(tree_path).unwrap(), column_selection as u32, &value.to_value());
+        let value = !tree_model.get::<bool>(&tree_model.iter(tree_path).expect("Invalid tree_path"), column_selection);
+        model.set_value(&tree_model.iter(tree_path).expect("Invalid tree_path"), column_selection as u32, &value.to_value());
     }
 }
 
@@ -126,8 +146,8 @@ fn common_open_function(tree_view: &gtk4::TreeView, column_name: i32, column_pat
     let (selected_rows, tree_model) = selection.selected_rows();
 
     for tree_path in selected_rows.iter().rev() {
-        let name = tree_model.get::<String>(&tree_model.iter(tree_path).unwrap(), column_name);
-        let path = tree_model.get::<String>(&tree_model.iter(tree_path).unwrap(), column_path);
+        let name = tree_model.get::<String>(&tree_model.iter(tree_path).expect("Invalid tree_path"), column_name);
+        let path = tree_model.get::<String>(&tree_model.iter(tree_path).expect("Invalid tree_path"), column_path);
 
         let end_path = match opening_mode {
             OpenMode::OnlyPath => path,
@@ -142,13 +162,13 @@ fn common_open_function(tree_view: &gtk4::TreeView, column_name: i32, column_pat
 
 fn reverse_selection(tree_view: &gtk4::TreeView, column_header: i32, column_selection: i32) {
     let (selected_rows, model) = tree_view.selection().selected_rows();
-    let model = model.downcast::<gtk4::ListStore>().unwrap();
+    let model = model.downcast::<gtk4::ListStore>().expect("Invalid list store model");
 
     if selected_rows.len() != 1 {
         return; // Multiple selection is not supported because it is a lot of harder to do it properly
     }
     let tree_path = selected_rows[0].clone();
-    let current_iter = model.iter(&tree_path).unwrap();
+    let current_iter = model.iter(&tree_path).expect("Invalid tree_path");
 
     if model.get::<bool>(&current_iter, column_header) {
         return; // Selecting header is not supported(this is available by using reference)
@@ -190,7 +210,7 @@ fn common_open_function_upper_directories(tree_view: &gtk4::TreeView, column_ful
     let (selected_rows, tree_model) = selection.selected_rows();
 
     for tree_path in selected_rows.iter().rev() {
-        let full_path = tree_model.get::<String>(&tree_model.iter(tree_path).unwrap(), column_full_path);
+        let full_path = tree_model.get::<String>(&tree_model.iter(tree_path).expect("Invalid tree_path"), column_full_path);
 
         if let Err(e) = open::that(&full_path) {
             println!("Failed to open file {full_path}, reason {e}");
@@ -225,19 +245,19 @@ fn handle_tree_keypress(tree_view: &gtk4::TreeView, key_code: u32, name_column: 
 }
 
 pub fn select_function_duplicates(_tree_selection: &gtk4::TreeSelection, tree_model: &gtk4::TreeModel, tree_path: &gtk4::TreePath, _is_path_currently_selected: bool) -> bool {
-    !tree_model.get::<bool>(&tree_model.iter(tree_path).unwrap(), ColumnsDuplicates::IsHeader as i32)
+    !tree_model.get::<bool>(&tree_model.iter(tree_path).expect("Invalid tree_path"), ColumnsDuplicates::IsHeader as i32)
 }
 
 pub fn select_function_same_music(_tree_selection: &gtk4::TreeSelection, tree_model: &gtk4::TreeModel, tree_path: &gtk4::TreePath, _is_path_currently_selected: bool) -> bool {
-    !tree_model.get::<bool>(&tree_model.iter(tree_path).unwrap(), ColumnsSameMusic::IsHeader as i32)
+    !tree_model.get::<bool>(&tree_model.iter(tree_path).expect("Invalid tree_path"), ColumnsSameMusic::IsHeader as i32)
 }
 
 pub fn select_function_similar_images(_tree_selection: &gtk4::TreeSelection, tree_model: &gtk4::TreeModel, tree_path: &gtk4::TreePath, _is_path_currently_selected: bool) -> bool {
-    !tree_model.get::<bool>(&tree_model.iter(tree_path).unwrap(), ColumnsSimilarImages::IsHeader as i32)
+    !tree_model.get::<bool>(&tree_model.iter(tree_path).expect("Invalid tree_path"), ColumnsSimilarImages::IsHeader as i32)
 }
 
 pub fn select_function_similar_videos(_tree_selection: &gtk4::TreeSelection, tree_model: &gtk4::TreeModel, tree_path: &gtk4::TreePath, _is_path_currently_selected: bool) -> bool {
-    !tree_model.get::<bool>(&tree_model.iter(tree_path).unwrap(), ColumnsSimilarVideos::IsHeader as i32)
+    !tree_model.get::<bool>(&tree_model.iter(tree_path).expect("Invalid tree_path"), ColumnsSimilarVideos::IsHeader as i32)
 }
 
 pub fn select_function_always_true(_tree_selection: &gtk4::TreeSelection, _tree_model: &gtk4::TreeModel, _tree_path: &gtk4::TreePath, _is_path_currently_selected: bool) -> bool {

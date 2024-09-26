@@ -212,7 +212,7 @@ fn create_default_selection_button_column(
 ) -> (CellRendererToggle, TreeViewColumn) {
     let renderer = CellRendererToggle::new();
     renderer.connect_toggled(move |_r, path| {
-        let iter = model.iter(&path).unwrap();
+        let iter = model.iter(&path).expect("Failed to get iter from tree_path");
         let mut fixed = model.get::<bool>(&iter, column_id);
         fixed = !fixed;
         model.set_value(&iter, column_id as u32, &fixed.to_value());
