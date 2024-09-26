@@ -7,7 +7,7 @@
 - Added Median hash algorithm
 - Fixed compilation with Rust >=1.80
 - Extracted tool input parameters, that helped to find not used parameters
-- TODO - Added new mod to find similar music only in groups with similar title tag
+- Added new mod to find similar music only in groups with similar title tag
 
 ### Krokiet
 

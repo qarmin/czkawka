@@ -198,6 +198,11 @@ impl BadExtensionsParameters {
         } // TODO add option to all modes
     }
 }
+impl Default for BadExtensionsParameters {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 pub struct BadExtensions {
     common_data: CommonToolData,

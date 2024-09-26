@@ -12,7 +12,7 @@ jobs:
   linux-cli:
     strategy:
       matrix:
-        toolchain: [ stable, 1.75.0 ]
+        toolchain: [ stable, 1.79.0 ]
         type: [ release ]
     runs-on: ubuntu-20.04
     steps:

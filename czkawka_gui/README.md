@@ -55,7 +55,7 @@ lot build and runtime dependencies.
 
 | Program | Minimal version |
 |:-------:|:---------------:|
-|  Rust   |     1.75.0      |
+|  Rust   |     1.79.0      |
 |   GTK   |       4.6       |
 
 ### Linux (Ubuntu, but on other OS should work similar)
