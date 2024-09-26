@@ -923,8 +923,14 @@ impl PrintResults for SameMusic {
                 for file_entry in vec_file_entry {
                     writeln!(
                         writer,
-                        "TT: {}  -  TA: {}  -  Y: {}  -  L: {}  -  G: {}  -  B: {}  -  P: {:?}",
-                        file_entry.track_title, file_entry.track_artist, file_entry.year, file_entry.length, file_entry.genre, file_entry.bitrate, file_entry.path
+                        "TT: {}  -  TA: {}  -  Y: {}  -  L: {}  -  G: {}  -  B: {}  -  P: \"{}\"",
+                        file_entry.track_title,
+                        file_entry.track_artist,
+                        file_entry.year,
+                        file_entry.length,
+                        file_entry.genre,
+                        file_entry.bitrate,
+                        file_entry.path.to_string_lossy()
                     )?;
                 }
                 writeln!(writer)?;
@@ -936,14 +942,26 @@ impl PrintResults for SameMusic {
                 writeln!(writer)?;
                 writeln!(
                     writer,
-                    "TT: {}  -  TA: {}  -  Y: {}  -  L: {}  -  G: {}  -  B: {}  -  P: {:?}",
-                    file_entry.track_title, file_entry.track_artist, file_entry.year, file_entry.length, file_entry.genre, file_entry.bitrate, file_entry.path
+                    "TT: {}  -  TA: {}  -  Y: {}  -  L: {}  -  G: {}  -  B: {}  -  P: \"{}\"",
+                    file_entry.track_title,
+                    file_entry.track_artist,
+                    file_entry.year,
+                    file_entry.length,
+                    file_entry.genre,
+                    file_entry.bitrate,
+                    file_entry.path.to_string_lossy()
                 )?;
                 for file_entry in vec_file_entry {
                     writeln!(
                         writer,
-                        "TT: {}  -  TA: {}  -  Y: {}  -  L: {}  -  G: {}  -  B: {}  -  P: {:?}",
-                        file_entry.track_title, file_entry.track_artist, file_entry.year, file_entry.length, file_entry.genre, file_entry.bitrate, file_entry.path
+                        "TT: {}  -  TA: {}  -  Y: {}  -  L: {}  -  G: {}  -  B: {}  -  P: \"{}\"",
+                        file_entry.track_title,
+                        file_entry.track_artist,
+                        file_entry.year,
+                        file_entry.length,
+                        file_entry.genre,
+                        file_entry.bitrate,
+                        file_entry.path.to_string_lossy()
                     )?;
                 }
                 writeln!(writer)?;

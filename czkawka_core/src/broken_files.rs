@@ -421,7 +421,7 @@ impl PrintResults for BrokenFiles {
         if !self.broken_files.is_empty() {
             writeln!(writer, "Found {} broken files.", self.information.number_of_broken_files)?;
             for file_entry in &self.broken_files {
-                writeln!(writer, "{:?} - {}", file_entry.path, file_entry.error_string)?;
+                writeln!(writer, "\"{}\" - {}", file_entry.path.to_string_lossy(), file_entry.error_string)?;
             }
         } else {
             write!(writer, "Not found any broken files.")?;

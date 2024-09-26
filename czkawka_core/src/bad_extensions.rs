@@ -103,6 +103,8 @@ const WORKAROUNDS: &[(&str, &str)] = &[
     ("pptx", "ppsx"),     // Powerpoint
     ("sh", "bash"),       // Linux
     ("sh", "guess"),      // GNU
+    ("sh", "lua"),        // Lua
+    ("sh", "js"),         // Javascript
     ("sh", "pl"),         // Gnome/Linux
     ("sh", "pm"),         // Gnome/Linux
     ("sh", "py"),         // Python
@@ -268,10 +270,6 @@ impl BadExtensions {
 
         let mut hashmap_workarounds: HashMap<&str, Vec<&str>> = Default::default();
         for (proper, found) in WORKAROUNDS {
-            // This should be enabled when items will have only 1 possible workaround items, but looks that some have 2 or even more, so at least for now this is disabled
-            // if hashmap_workarounds.contains_key(found) {
-            //     panic!("Already have {} key", found);
-            // }
             hashmap_workarounds.entry(found).or_default().push(proper);
         }
 
@@ -441,7 +439,7 @@ impl PrintResults for BadExtensions {
         writeln!(writer, "Found {} files with invalid extension.\n", self.information.number_of_files_with_bad_extension)?;
 
         for file_entry in &self.bad_extensions_files {
-            writeln!(writer, "{:?} ----- {}", file_entry.path, file_entry.proper_extensions)?;
+            writeln!(writer, "\"{}\" ----- {}", file_entry.path.to_string_lossy(), file_entry.proper_extensions)?;
         }
 
         Ok(())

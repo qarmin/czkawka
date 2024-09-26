@@ -206,7 +206,7 @@ impl PrintResults for Temporary {
         writeln!(writer, "Found {} temporary files.\n", self.information.number_of_temporary_files)?;
 
         for file_entry in &self.temporary_files {
-            writeln!(writer, "{:?}", file_entry.path)?;
+            writeln!(writer, "\"{}\"", file_entry.path.to_string_lossy())?;
         }
 
         Ok(())

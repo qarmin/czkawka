@@ -193,9 +193,9 @@ impl PrintResults for InvalidSymlinks {
             for file_entry in &self.invalid_symlinks {
                 writeln!(
                     writer,
-                    "{:?}\t\t{:?}\t\t{}",
-                    file_entry.path,
-                    file_entry.symlink_info.destination_path,
+                    "\"{}\"\t\t\"{}\"\t\t{}",
+                    file_entry.path.to_string_lossy(),
+                    file_entry.symlink_info.destination_path.to_string_lossy(),
                     match file_entry.symlink_info.type_of_error {
                         ErrorType::InfiniteRecursion => "Infinite Recursion",
                         ErrorType::NonExistentFile => "Non Existent File",

@@ -150,7 +150,13 @@ impl PrintResults for BigFile {
                 writeln!(writer, "{} the smallest files.\n\n", self.information.number_of_real_files)?;
             }
             for file_entry in &self.big_files {
-                writeln!(writer, "{} ({}) - {:?}", format_size(file_entry.size, BINARY), file_entry.size, file_entry.path)?;
+                writeln!(
+                    writer,
+                    "{} ({}) - \"{}\"",
+                    format_size(file_entry.size, BINARY),
+                    file_entry.size,
+                    file_entry.path.to_string_lossy()
+                )?;
             }
         } else {
             writeln!(writer, "Not found any files.")?;
