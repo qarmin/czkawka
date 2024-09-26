@@ -26,7 +26,7 @@ pub fn connect_button_move(gui_data: &GuiData) {
     let file_dialog_move_to_folder = gui_data.file_dialog_move_to_folder.clone();
 
     file_dialog_move_to_folder.connect_response(move |file_chooser, response_type| {
-        let nb_number = notebook_main.current_page().unwrap();
+        let nb_number = notebook_main.current_page().expect("Current page not set");
         let tree_view = &main_tree_views[nb_number as usize];
         let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
 
@@ -45,7 +45,7 @@ pub fn connect_button_move(gui_data: &GuiData) {
             for index in 0..g_files.n_items() {
                 let file = &g_files.item(index);
                 if let Some(file) = file {
-                    let ss = file.clone().downcast::<gtk4::gio::File>().unwrap();
+                    let ss = file.clone().downcast::<gtk4::gio::File>().expect("Failed to downcast to gio::File");
                     if let Some(path_buf) = ss.path() {
                         folders.push(path_buf);
                     }
@@ -184,7 +184,7 @@ fn move_files_common(
 
     // Save to variable paths of files, and remove it when not removing all occurrences.
     'next_result: for tree_path in selected_rows.iter().rev() {
-        let iter = model.iter(tree_path).unwrap();
+        let iter = model.iter(tree_path).expect("Using invalid tree_path");
 
         let file_name = model.get::<String>(&iter, column_file_name);
         let path = model.get::<String>(&iter, column_path);

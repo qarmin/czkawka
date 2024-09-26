@@ -3,7 +3,7 @@ name = "czkawka_cli"
 version = "7.0.0"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2021"
-rust-version = "1.75.0"
+rust-version = "1.79.0"
 description = "CLI frontend of Czkawka"
 license = "MIT"
 homepage = "https://github.com/qarmin/czkawka"
@@ -13,9 +13,9 @@ repository = "https://github.com/qarmin/czkawka"
 clap = { version = "4.5", features = ["derive"] }
 
 # For enum types
-image_hasher = "1.2"
+image_hasher = "2.0"
 
-log = "0.4.20"
+log = "0.4.22"
 handsome_logger = "0.8"
 fun_time = { version = "0.3", features = ["log"] }
 czkawka_core = { path = "../czkawka_core", version = "7.0.0", features = [] }

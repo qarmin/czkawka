@@ -12,7 +12,7 @@ use std::{fs, path};
 pub fn connect_move(app: &MainWindow) {
     let a = app.as_weak();
     app.on_folders_move_choose_requested(move || {
-        let app = a.upgrade().unwrap();
+        let app = a.upgrade().expect("Failed to upgrade app :(");
 
         let file_dialog = FileDialog::new();
         let Some(folder) = file_dialog.pick_folder() else {
@@ -25,7 +25,7 @@ pub fn connect_move(app: &MainWindow) {
 
     let a = app.as_weak();
     app.global::<Callabler>().on_move_items(move |preserve_structure, copy_mode, output_folder| {
-        let app = a.upgrade().unwrap();
+        let app = a.upgrade().expect("Failed to upgrade app :(");
         let active_tab = app.global::<GuiState>().get_active_tab();
         let current_model = get_tool_model(&app, active_tab);
 

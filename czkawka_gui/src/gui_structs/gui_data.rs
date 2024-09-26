@@ -31,7 +31,7 @@ use crate::gui_structs::gui_popovers_sort::GuiSortPopovers;
 use crate::gui_structs::gui_progress_dialog::GuiProgressDialog;
 use crate::gui_structs::gui_settings::GuiSettings;
 use crate::gui_structs::gui_upper_notebook::GuiUpperNotebook;
-use crate::help_functions::BottomButtonsEnum;
+use crate::help_functions::{BottomButtonsEnum, SharedState};
 use crate::notebook_enums::*;
 use crate::taskbar_progress::TaskbarProgress;
 
@@ -58,10 +58,6 @@ pub const CZK_ICON_TRASH: &[u8] = include_bytes!("../../icons/czk_trash.svg");
 
 #[derive(Clone)]
 pub struct GuiData {
-    // Glade builder
-    pub glade_src: String,
-    pub builder: Builder,
-
     // Windows
     pub window_main: gtk4::Window,
 
@@ -86,17 +82,17 @@ pub struct GuiData {
     pub shared_buttons: Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>,
 
     // State of search results
-    pub shared_duplication_state: Rc<RefCell<DuplicateFinder>>,
-    pub shared_empty_folders_state: Rc<RefCell<EmptyFolder>>,
-    pub shared_empty_files_state: Rc<RefCell<EmptyFiles>>,
-    pub shared_temporary_files_state: Rc<RefCell<Temporary>>,
-    pub shared_big_files_state: Rc<RefCell<BigFile>>,
-    pub shared_similar_images_state: Rc<RefCell<SimilarImages>>,
-    pub shared_similar_videos_state: Rc<RefCell<SimilarVideos>>,
-    pub shared_same_music_state: Rc<RefCell<SameMusic>>,
-    pub shared_same_invalid_symlinks: Rc<RefCell<InvalidSymlinks>>,
-    pub shared_broken_files_state: Rc<RefCell<BrokenFiles>>,
-    pub shared_bad_extensions_state: Rc<RefCell<BadExtensions>>,
+    pub shared_duplication_state: SharedState<DuplicateFinder>,
+    pub shared_empty_folders_state: SharedState<EmptyFolder>,
+    pub shared_empty_files_state: SharedState<EmptyFiles>,
+    pub shared_temporary_files_state: SharedState<Temporary>,
+    pub shared_big_files_state: SharedState<BigFile>,
+    pub shared_similar_images_state: SharedState<SimilarImages>,
+    pub shared_similar_videos_state: SharedState<SimilarVideos>,
+    pub shared_same_music_state: SharedState<SameMusic>,
+    pub shared_same_invalid_symlinks: SharedState<InvalidSymlinks>,
+    pub shared_broken_files_state: SharedState<BrokenFiles>,
+    pub shared_bad_extensions_state: SharedState<BadExtensions>,
 
     pub preview_path: Rc<RefCell<String>>,
 
@@ -119,11 +115,11 @@ impl GuiData {
         let builder = Builder::from_string(glade_src.as_str());
 
         //// Windows
-        let window_main: gtk4::Window = builder.object("window_main").unwrap();
+        let window_main: gtk4::Window = builder.object("window_main").expect("Cambalache");
         window_main.set_title(Some(&flg!("window_main_title")));
         window_main.show();
 
-        let pixbuf = Pixbuf::from_read(BufReader::new(ICON_ABOUT)).unwrap();
+        let pixbuf = Pixbuf::from_read(BufReader::new(ICON_ABOUT)).expect("Couldn't load icon");
 
         window_main.set_application(Some(application));
 
@@ -177,34 +173,32 @@ impl GuiData {
 
         // State of search results
 
-        let shared_duplication_state: Rc<RefCell<_>> = Rc::new(RefCell::new(DuplicateFinder::new()));
-        let shared_empty_folders_state: Rc<RefCell<_>> = Rc::new(RefCell::new(EmptyFolder::new()));
-        let shared_empty_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(EmptyFiles::new()));
-        let shared_temporary_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(Temporary::new()));
-        let shared_big_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(BigFile::new()));
-        let shared_similar_images_state: Rc<RefCell<_>> = Rc::new(RefCell::new(SimilarImages::new()));
-        let shared_similar_videos_state: Rc<RefCell<_>> = Rc::new(RefCell::new(SimilarVideos::new()));
-        let shared_same_music_state: Rc<RefCell<_>> = Rc::new(RefCell::new(SameMusic::new()));
-        let shared_same_invalid_symlinks: Rc<RefCell<_>> = Rc::new(RefCell::new(InvalidSymlinks::new()));
-        let shared_broken_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(BrokenFiles::new()));
-        let shared_bad_extensions_state: Rc<RefCell<_>> = Rc::new(RefCell::new(BadExtensions::new()));
+        let shared_duplication_state: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
+        let shared_empty_folders_state: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
+        let shared_empty_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
+        let shared_temporary_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
+        let shared_big_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
+        let shared_similar_images_state: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
+        let shared_similar_videos_state: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
+        let shared_same_music_state: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
+        let shared_same_invalid_symlinks: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
+        let shared_broken_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
+        let shared_bad_extensions_state: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
 
         let preview_path: Rc<RefCell<_>> = Rc::new(RefCell::new(String::new()));
 
         //// Entry
-        let entry_info: gtk4::Entry = builder.object("entry_info").unwrap();
+        let entry_info: gtk4::Entry = builder.object("entry_info").expect("Cambalache");
 
         //// Bottom
-        let text_view_errors: gtk4::TextView = builder.object("text_view_errors").unwrap();
-        let scrolled_window_errors: gtk4::ScrolledWindow = builder.object("scrolled_window_errors").unwrap();
+        let text_view_errors: gtk4::TextView = builder.object("text_view_errors").expect("Cambalache");
+        let scrolled_window_errors: gtk4::ScrolledWindow = builder.object("scrolled_window_errors").expect("Cambalache");
         scrolled_window_errors.show(); // Not sure why needed, but without it text view errors sometimes hide itself
 
         // Used for sending stop signal to thread
         let (stop_sender, stop_receiver): (crossbeam_channel::Sender<()>, crossbeam_channel::Receiver<()>) = bounded(1);
 
         Self {
-            glade_src,
-            builder,
             window_main,
             main_notebook,
             upper_notebook,

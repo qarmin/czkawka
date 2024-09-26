@@ -9,7 +9,7 @@ use slint::{ComponentHandle, Model, ModelRc, VecModel};
 pub fn connect_select(app: &MainWindow) {
     let a = app.as_weak();
     app.global::<Callabler>().on_select_items(move |select_mode| {
-        let app = a.upgrade().unwrap();
+        let app = a.upgrade().expect("Failed to upgrade app :(");
         let active_tab = app.global::<GuiState>().get_active_tab();
         let current_model = get_tool_model(&app, active_tab);
 
@@ -32,7 +32,7 @@ pub fn connect_showing_proper_select_buttons(app: &MainWindow) {
     set_select_buttons(app);
     let a = app.as_weak();
     app.global::<Callabler>().on_tab_changed(move || {
-        let app = a.upgrade().unwrap();
+        let app = a.upgrade().expect("Failed to upgrade app :(");
         set_select_buttons(&app);
     });
 }

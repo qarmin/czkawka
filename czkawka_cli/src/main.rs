@@ -1,4 +1,5 @@
 #![allow(clippy::needless_late_init)]
+#![warn(clippy::unwrap_used)]
 
 use std::thread;
 
@@ -7,21 +8,21 @@ use crossbeam_channel::{bounded, unbounded, Receiver, Sender};
 use log::error;
 
 use commands::Commands;
-use czkawka_core::bad_extensions::BadExtensions;
-use czkawka_core::big_file::{BigFile, SearchMode};
-use czkawka_core::broken_files::BrokenFiles;
+use czkawka_core::bad_extensions::{BadExtensions, BadExtensionsParameters};
+use czkawka_core::big_file::{BigFile, BigFileParameters, SearchMode};
+use czkawka_core::broken_files::{BrokenFiles, BrokenFilesParameters, CheckedTypes};
 use czkawka_core::common::{print_version_mode, set_number_of_threads, setup_logger, DEFAULT_THREAD_SIZE};
-use czkawka_core::common_dir_traversal::ProgressData;
 use czkawka_core::common_tool::{CommonData, DeleteMethod};
 #[allow(unused_imports)] // It is used in release for print_results_to_output().
 use czkawka_core::common_traits::*;
-use czkawka_core::duplicate::DuplicateFinder;
+use czkawka_core::duplicate::{DuplicateFinder, DuplicateFinderParameters};
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
 use czkawka_core::invalid_symlinks::InvalidSymlinks;
-use czkawka_core::same_music::SameMusic;
-use czkawka_core::similar_images::{return_similarity_from_similarity_preset, test_image_conversion_speed, SimilarImages};
-use czkawka_core::similar_videos::SimilarVideos;
+use czkawka_core::progress_data::ProgressData;
+use czkawka_core::same_music::{SameMusic, SameMusicParameters};
+use czkawka_core::similar_images::{return_similarity_from_similarity_preset, test_image_conversion_speed, SimilarImages, SimilarImagesParameters};
+use czkawka_core::similar_videos::{SimilarVideos, SimilarVideosParameters};
 use czkawka_core::temporary::Temporary;
 
 use crate::commands::{
@@ -46,22 +47,23 @@ fn main() {
     let (progress_sender, progress_receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
     let (stop_sender, stop_receiver): (Sender<()>, Receiver<()>) = bounded(1);
 
-    let calculate_thread = thread::Builder::new().stack_size(DEFAULT_THREAD_SIZE).spawn(move || match command {
-        Commands::Duplicates(duplicates_args) => duplicates(duplicates_args, &stop_receiver, &progress_sender),
-        Commands::EmptyFolders(empty_folders_args) => empty_folders(empty_folders_args, &stop_receiver, &progress_sender),
-        Commands::BiggestFiles(biggest_files_args) => biggest_files(biggest_files_args, &stop_receiver, &progress_sender),
-        Commands::EmptyFiles(empty_files_args) => empty_files(empty_files_args, &stop_receiver, &progress_sender),
-        Commands::Temporary(temporary_args) => temporary(temporary_args, &stop_receiver, &progress_sender),
-        Commands::SimilarImages(similar_images_args) => similar_images(similar_images_args, &stop_receiver, &progress_sender),
-        Commands::SameMusic(same_music_args) => same_music(same_music_args, &stop_receiver, &progress_sender),
-        Commands::InvalidSymlinks(invalid_symlinks_args) => invalid_symlinks(invalid_symlinks_args, &stop_receiver, &progress_sender),
-        Commands::BrokenFiles(broken_files_args) => broken_files(broken_files_args, &stop_receiver, &progress_sender),
-        Commands::SimilarVideos(similar_videos_args) => similar_videos(similar_videos_args, &stop_receiver, &progress_sender),
-        Commands::BadExtensions(bad_extensions_args) => bad_extensions(bad_extensions_args, &stop_receiver, &progress_sender),
-        Commands::Tester {} => {
-            test_image_conversion_speed();
-        }
-    });
+    let calculate_thread = thread::Builder::new()
+        .stack_size(DEFAULT_THREAD_SIZE)
+        .spawn(move || match command {
+            Commands::Duplicates(duplicates_args) => duplicates(duplicates_args, &stop_receiver, &progress_sender),
+            Commands::EmptyFolders(empty_folders_args) => empty_folders(empty_folders_args, &stop_receiver, &progress_sender),
+            Commands::BiggestFiles(biggest_files_args) => biggest_files(biggest_files_args, &stop_receiver, &progress_sender),
+            Commands::EmptyFiles(empty_files_args) => empty_files(empty_files_args, &stop_receiver, &progress_sender),
+            Commands::Temporary(temporary_args) => temporary(temporary_args, &stop_receiver, &progress_sender),
+            Commands::SimilarImages(similar_images_args) => similar_images(similar_images_args, &stop_receiver, &progress_sender),
+            Commands::SameMusic(same_music_args) => same_music(same_music_args, &stop_receiver, &progress_sender),
+            Commands::InvalidSymlinks(invalid_symlinks_args) => invalid_symlinks(invalid_symlinks_args, &stop_receiver, &progress_sender),
+            Commands::BrokenFiles(broken_files_args) => broken_files(broken_files_args, &stop_receiver, &progress_sender),
+            Commands::SimilarVideos(similar_videos_args) => similar_videos(similar_videos_args, &stop_receiver, &progress_sender),
+            Commands::BadExtensions(bad_extensions_args) => bad_extensions(bad_extensions_args, &stop_receiver, &progress_sender),
+            Commands::Tester {} => test_image_conversion_speed(),
+        })
+        .expect("Failed to spawn calculation thread");
     ctrlc::set_handler(move || {
         println!("Get Sender");
         stop_sender.send(()).expect("Could not send signal on channel.");
@@ -70,7 +72,7 @@ fn main() {
 
     connect_progress(&progress_receiver);
 
-    calculate_thread.unwrap().join().unwrap();
+    calculate_thread.join().expect("Failed to join calculation thread");
 }
 
 fn duplicates(duplicates: DuplicatesArgs, stop_receiver: &Receiver<()>, progress_sender: &Sender<ProgressData>) {
@@ -85,20 +87,26 @@ fn duplicates(duplicates: DuplicatesArgs, stop_receiver: &Receiver<()>, progress
         allow_hard_links,
         dry_run,
         case_sensitive_name_comparison,
+        minimal_prehash_cache_file_size,
+        use_prehash_cache,
     } = duplicates;
 
-    let mut item = DuplicateFinder::new();
+    let params = DuplicateFinderParameters::new(
+        search_method,
+        hash_type,
+        !allow_hard_links.allow_hard_links,
+        use_prehash_cache,
+        minimal_cached_file_size,
+        minimal_prehash_cache_file_size,
+        case_sensitive_name_comparison.case_sensitive_name_comparison,
+    );
+    let mut item = DuplicateFinder::new(params);
 
     set_common_settings(&mut item, &common_cli_items);
     item.set_minimal_file_size(minimal_file_size);
     item.set_maximal_file_size(maximal_file_size);
-    item.set_minimal_cache_file_size(minimal_cached_file_size);
-    item.set_check_method(search_method);
     item.set_delete_method(delete_method.delete_method);
-    item.set_hash_type(hash_type);
-    item.set_ignore_hard_links(!allow_hard_links.allow_hard_links);
     item.set_dry_run(dry_run.dry_run);
-    item.set_case_sensitive_name_comparison(case_sensitive_name_comparison.case_sensitive_name_comparison);
 
     item.find_duplicates(Some(stop_receiver), Some(progress_sender));
 
@@ -128,15 +136,13 @@ fn biggest_files(biggest_files: BiggestFilesArgs, stop_receiver: &Receiver<()>, 
         smallest_mode,
     } = biggest_files;
 
-    let mut item = BigFile::new();
+    let big_files_mode = if smallest_mode { SearchMode::SmallestFiles } else { SearchMode::BiggestFiles };
+    let params = BigFileParameters::new(number_of_files, big_files_mode);
+    let mut item = BigFile::new(params);
 
     set_common_settings(&mut item, &common_cli_items);
-    item.set_number_of_files_to_check(number_of_files);
     if delete_files {
         item.set_delete_method(DeleteMethod::Delete);
-    }
-    if smallest_mode {
-        item.set_search_mode(SearchMode::SmallestFiles);
     }
 
     item.find_big_files(Some(stop_receiver), Some(progress_sender));
@@ -186,20 +192,25 @@ fn similar_images(similar_images: SimilarImagesArgs, stop_receiver: &Receiver<()
         delete_method,
         dry_run,
         allow_hard_links,
+        ignore_same_size,
     } = similar_images;
 
-    let mut item = SimilarImages::new();
+    let similarity = return_similarity_from_similarity_preset(&similarity_preset, hash_size);
+    let params = SimilarImagesParameters::new(
+        similarity,
+        hash_size,
+        hash_alg,
+        image_filter,
+        ignore_same_size.ignore_same_size,
+        !allow_hard_links.allow_hard_links,
+    );
+    let mut item = SimilarImages::new(params);
 
     set_common_settings(&mut item, &common_cli_items);
     item.set_minimal_file_size(minimal_file_size);
     item.set_maximal_file_size(maximal_file_size);
-    item.set_image_filter(image_filter);
-    item.set_hash_alg(hash_alg);
-    item.set_hash_size(hash_size);
     item.set_delete_method(delete_method.delete_method);
     item.set_dry_run(dry_run.dry_run);
-    item.set_similarity(return_similarity_from_similarity_preset(&similarity_preset, hash_size));
-    item.set_ignore_hard_links(!allow_hard_links.allow_hard_links);
 
     item.find_similar_images(Some(stop_receiver), Some(progress_sender));
 
@@ -217,19 +228,25 @@ fn same_music(same_music: SameMusicArgs, stop_receiver: &Receiver<()>, progress_
         minimum_segment_duration,
         maximum_difference,
         search_method,
+        approximate_comparison,
+        compare_fingerprints_only_with_similar_titles,
     } = same_music;
 
-    let mut item = SameMusic::new();
+    let params = SameMusicParameters::new(
+        music_similarity,
+        approximate_comparison,
+        search_method,
+        minimum_segment_duration,
+        maximum_difference,
+        compare_fingerprints_only_with_similar_titles,
+    );
+    let mut item = SameMusic::new(params);
 
     set_common_settings(&mut item, &common_cli_items);
     item.set_minimal_file_size(minimal_file_size);
     item.set_maximal_file_size(maximal_file_size);
-    item.set_music_similarity(music_similarity);
     item.set_delete_method(delete_method.delete_method);
     item.set_dry_run(dry_run.dry_run);
-    item.set_minimum_segment_duration(minimum_segment_duration);
-    item.set_maximum_difference(maximum_difference);
-    item.set_check_type(search_method);
 
     item.find_same_music(Some(stop_receiver), Some(progress_sender));
 
@@ -252,9 +269,18 @@ fn invalid_symlinks(invalid_symlinks: InvalidSymlinksArgs, stop_receiver: &Recei
 }
 
 fn broken_files(broken_files: BrokenFilesArgs, stop_receiver: &Receiver<()>, progress_sender: &Sender<ProgressData>) {
-    let BrokenFilesArgs { common_cli_items, delete_files } = broken_files;
+    let BrokenFilesArgs {
+        common_cli_items,
+        delete_files,
+        checked_types,
+    } = broken_files;
 
-    let mut item = BrokenFiles::new();
+    let mut checked_type = CheckedTypes::NONE;
+    for check_type in checked_types {
+        checked_type |= check_type;
+    }
+    let params = BrokenFilesParameters::new(checked_type);
+    let mut item = BrokenFiles::new(params);
 
     set_common_settings(&mut item, &common_cli_items);
     if delete_files {
@@ -275,17 +301,17 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_receiver: &Receiver<()
         delete_method,
         dry_run,
         allow_hard_links,
+        ignore_same_size,
     } = similar_videos;
 
-    let mut item = SimilarVideos::new();
+    let params = SimilarVideosParameters::new(tolerance, ignore_same_size.ignore_same_size, !allow_hard_links.allow_hard_links);
+    let mut item = SimilarVideos::new(params);
 
     set_common_settings(&mut item, &common_cli_items);
     item.set_minimal_file_size(minimal_file_size);
     item.set_maximal_file_size(maximal_file_size);
-    item.set_tolerance(tolerance);
     item.set_delete_method(delete_method.delete_method);
     item.set_dry_run(dry_run.dry_run);
-    item.set_ignore_hard_links(!allow_hard_links.allow_hard_links);
 
     item.find_similar_videos(Some(stop_receiver), Some(progress_sender));
 
@@ -295,7 +321,8 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_receiver: &Receiver<()
 fn bad_extensions(bad_extensions: BadExtensionsArgs, stop_receiver: &Receiver<()>, progress_sender: &Sender<ProgressData>) {
     let BadExtensionsArgs { common_cli_items } = bad_extensions;
 
-    let mut item = BadExtensions::new();
+    let params = BadExtensionsParameters::new();
+    let mut item = BadExtensions::new(params);
 
     set_common_settings(&mut item, &common_cli_items);
 

@@ -3,9 +3,9 @@ use std::thread;
 use crossbeam_channel::Receiver;
 use slint::ComponentHandle;
 
-use czkawka_core::common_dir_traversal::{CheckingMethod, ProgressData, ToolType};
-
 use crate::{MainWindow, ProgressToSend};
+use czkawka_core::common_dir_traversal::ToolType;
+use czkawka_core::progress_data::{CurrentStage, ProgressData};
 
 pub fn connect_progress_gathering(app: &MainWindow, progress_receiver: Receiver<ProgressData>) {
     let a = app.as_weak();
@@ -16,9 +16,9 @@ pub fn connect_progress_gathering(app: &MainWindow, progress_receiver: Receiver<
         };
 
         a.upgrade_in_event_loop(move |app| {
-            let to_send = if progress_data.current_stage == 0 {
+            let to_send = if progress_data.current_stage_idx == 0 {
                 progress_collect_items(&progress_data, progress_data.tool_type != ToolType::EmptyFolders)
-            } else if check_if_loading_saving_cache(&progress_data) {
+            } else if progress_data.sstage.check_if_loading_saving_cache() {
                 progress_save_load_cache(&progress_data)
             } else {
                 progress_default(&progress_data)
@@ -26,25 +26,20 @@ pub fn connect_progress_gathering(app: &MainWindow, progress_receiver: Receiver<
 
             app.set_progress_datas(to_send);
         })
-        .unwrap();
+        .expect("Failed to spawn thread for progress gathering");
     });
 }
 
-pub fn check_if_loading_saving_cache(progress_data: &ProgressData) -> bool {
-    matches!(
-        (progress_data.tool_type, progress_data.current_stage),
-        (ToolType::SameMusic, 1 | 3) | (ToolType::Duplicate, 1 | 3 | 4 | 6)
-    )
-}
-
 fn progress_save_load_cache(item: &ProgressData) -> ProgressToSend {
-    let step_name = match (item.tool_type, item.checking_method, item.current_stage) {
-        (ToolType::SameMusic, CheckingMethod::AudioTags | CheckingMethod::AudioContent, 1) => "Loading cache",
-        (ToolType::SameMusic, CheckingMethod::AudioTags | CheckingMethod::AudioContent, 3) => "Saving cache",
-        (ToolType::Duplicate, CheckingMethod::Hash, 1) => "Loading prehash cache",
-        (ToolType::Duplicate, CheckingMethod::Hash, 3) => "Saving prehash cache",
-        (ToolType::Duplicate, CheckingMethod::Hash, 4) => "Loading hash cache",
-        (ToolType::Duplicate, CheckingMethod::Hash, 6) => "Saving hash cache",
+    let step_name = match item.sstage {
+        CurrentStage::SameMusicCacheLoadingTags => "Loading tags cache",
+        CurrentStage::SameMusicCacheLoadingFingerprints => "Loading fingerprints cache",
+        CurrentStage::SameMusicCacheSavingTags => "Saving tags cache",
+        CurrentStage::SameMusicCacheSavingFingerprints => "Saving fingerprints cache",
+        CurrentStage::DuplicatePreHashCacheLoading => "Loading prehash cache",
+        CurrentStage::DuplicatePreHashCacheSaving => "Saving prehash cache",
+        CurrentStage::DuplicateCacheLoading => "Loading hash cache",
+        CurrentStage::DuplicateCacheSaving => "Saving hash cache",
         _ => unreachable!(),
     };
     let (all_progress, current_progress) = common_get_data(item);
@@ -56,14 +51,14 @@ fn progress_save_load_cache(item: &ProgressData) -> ProgressToSend {
 }
 
 fn progress_collect_items(item: &ProgressData, files: bool) -> ProgressToSend {
-    let step_name = match (item.tool_type, item.checking_method) {
-        (ToolType::Duplicate, CheckingMethod::Name) => {
+    let step_name = match item.sstage {
+        CurrentStage::DuplicateScanningName => {
             format!("Scanning name of {} file", item.entries_checked)
         }
-        (ToolType::Duplicate, CheckingMethod::SizeName) => {
+        CurrentStage::DuplicateScanningSizeName => {
             format!("Scanning size and name of {} file", item.entries_checked)
         }
-        (ToolType::Duplicate, CheckingMethod::Size | CheckingMethod::Hash) => {
+        CurrentStage::DuplicateScanningSize => {
             format!("Scanning size of {} file", item.entries_checked)
         }
         _ => {
@@ -83,38 +78,38 @@ fn progress_collect_items(item: &ProgressData, files: bool) -> ProgressToSend {
 }
 
 fn progress_default(item: &ProgressData) -> ProgressToSend {
-    let step_name = match (item.tool_type, item.checking_method, item.current_stage) {
-        (ToolType::SameMusic, CheckingMethod::AudioTags, 2) | (ToolType::SameMusic, CheckingMethod::AudioContent, 5) => {
+    let step_name = match item.sstage {
+        CurrentStage::SameMusicReadingTags => {
             format!("Checking tags of {}/{} audio file", item.entries_checked, item.entries_to_check)
         }
-        (ToolType::SameMusic, CheckingMethod::AudioContent, 2) => {
+        CurrentStage::SameMusicCalculatingFingerprints => {
             format!("Checking content of {}/{} audio file", item.entries_checked, item.entries_to_check)
         }
-        (ToolType::SameMusic, CheckingMethod::AudioTags, 4) => {
-            format!("Scanning tags of {}/{} audio file", item.entries_checked, item.entries_to_check)
+        CurrentStage::SameMusicComparingTags => {
+            format!("Comparing tags of {}/{} audio file", item.entries_checked, item.entries_to_check)
         }
-        (ToolType::SameMusic, CheckingMethod::AudioContent, 4) => {
-            format!("Scanning content of {}/{} audio file", item.entries_checked, item.entries_to_check)
+        CurrentStage::SameMusicComparingFingerprints => {
+            format!("Comparing content of {}/{} audio file", item.entries_checked, item.entries_to_check)
         }
-        (ToolType::SimilarImages, _, 1) => {
+        CurrentStage::SimilarImagesCalculatingHashes => {
             format!("Hashing of {}/{} image", item.entries_checked, item.entries_to_check)
         }
-        (ToolType::SimilarImages, _, 2) => {
+        CurrentStage::SimilarImagesComparingHashes => {
             format!("Comparing {}/{} image hash", item.entries_checked, item.entries_to_check)
         }
-        (ToolType::SimilarVideos, _, 1) => {
+        CurrentStage::SimilarVideosCalculatingHashes => {
             format!("Hashing of {}/{} video", item.entries_checked, item.entries_to_check)
         }
-        (ToolType::BrokenFiles, _, 1) => {
+        CurrentStage::BrokenFilesChecking => {
             format!("Checking {}/{} file", item.entries_checked, item.entries_to_check)
         }
-        (ToolType::BadExtensions, _, 1) => {
+        CurrentStage::BadExtensionsChecking => {
             format!("Checking {}/{} file", item.entries_checked, item.entries_to_check)
         }
-        (ToolType::Duplicate, CheckingMethod::Hash, 2) => {
+        CurrentStage::DuplicatePreHashing => {
             format!("Analyzing partial hash of {}/{} files", item.entries_checked, item.entries_to_check)
         }
-        (ToolType::Duplicate, CheckingMethod::Hash, 5) => {
+        CurrentStage::DuplicateFullHashing => {
             format!("Analyzing full hash of {}/{} files", item.entries_checked, item.entries_to_check)
         }
         _ => unreachable!(),
@@ -128,9 +123,9 @@ fn progress_default(item: &ProgressData) -> ProgressToSend {
 }
 
 // Used when current stage not have enough data to show status, so we show only all_stages
-// Happens if we searching files and we don't know how many files we need to check
+// Happens if we are searching files and we don't know how many files we need to check
 fn no_current_stage_get_data(item: &ProgressData) -> (i32, i32) {
-    let all_stages = (item.current_stage as f64) / (item.max_stage + 1) as f64;
+    let all_stages = (item.current_stage_idx as f64) / (item.max_stage_idx + 1) as f64;
 
     ((all_stages * 100.0) as i32, -1)
 }
@@ -138,15 +133,15 @@ fn no_current_stage_get_data(item: &ProgressData) -> (i32, i32) {
 // Used to calculate number of files to check and also to calculate current progress according to number of files to check and checked
 fn common_get_data(item: &ProgressData) -> (i32, i32) {
     if item.entries_to_check != 0 {
-        let all_stages = (item.current_stage as f64 + item.entries_checked as f64 / item.entries_to_check as f64) / (item.max_stage + 1) as f64;
-        let all_stages = if all_stages > 0.99 { 0.99 } else { all_stages };
+        let all_stages = (item.current_stage_idx as f64 + item.entries_checked as f64 / item.entries_to_check as f64) / (item.max_stage_idx + 1) as f64;
+        let all_stages = all_stages.min(0.99);
 
         let current_stage = item.entries_checked as f64 / item.entries_to_check as f64;
-        let current_stage = if current_stage > 0.99 { 0.99 } else { current_stage };
+        let current_stage = current_stage.min(0.99);
         ((all_stages * 100.0) as i32, (current_stage * 100.0) as i32)
     } else {
-        let all_stages = (item.current_stage as f64) / (item.max_stage + 1) as f64;
-        let all_stages = if all_stages > 0.99 { 0.99 } else { all_stages };
+        let all_stages = (item.current_stage_idx as f64) / (item.max_stage_idx + 1) as f64;
+        let all_stages = all_stages.min(0.99);
         ((all_stages * 100.0) as i32, 0)
     }
 }

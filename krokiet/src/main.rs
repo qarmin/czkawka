@@ -24,7 +24,7 @@ use crossbeam_channel::{unbounded, Receiver, Sender};
 use slint::VecModel;
 
 use czkawka_core::common::{print_version_mode, setup_logger};
-use czkawka_core::common_dir_traversal::ProgressData;
+use czkawka_core::progress_data::ProgressData;
 
 use crate::connect_delete::connect_delete_button;
 use crate::connect_directories_changes::connect_add_remove_directories;
@@ -60,7 +60,7 @@ fn main() {
     setup_logger(false);
     print_version_mode();
 
-    let app = MainWindow::new().unwrap();
+    let app = MainWindow::new().expect("Failed to create main window");
 
     let (progress_sender, progress_receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
     let (stop_sender, stop_receiver): (Sender<()>, Receiver<()>) = unbounded();
@@ -85,7 +85,7 @@ fn main() {
     connect_showing_proper_select_buttons(&app);
     connect_move(&app);
 
-    app.run().unwrap();
+    app.run().expect("Failed to run app :(");
 
     save_all_settings_to_file(&app);
 }

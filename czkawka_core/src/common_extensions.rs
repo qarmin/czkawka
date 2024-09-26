@@ -106,6 +106,7 @@ impl Extensions {
 
     // E.g. when using similar videos, user can provide extensions like "mp4,flv", but if user provide "mp4,jpg" then
     // it will be only "mp4" because "jpg" is not valid extension for videos
+    #[allow(clippy::unused_self)]
     fn union_allowed_extensions(&mut self, file_extensions: &[&str]) {
         let mut new_extensions = HashSet::new();
         for extension in file_extensions {

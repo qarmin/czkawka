@@ -20,7 +20,7 @@ impl GuiAbout {
         let glade_src = include_str!("../../ui/about_dialog.ui").to_string();
         let builder = Builder::from_string(glade_src.as_str());
 
-        let about_dialog: gtk4::AboutDialog = builder.object("about_dialog").unwrap();
+        let about_dialog: gtk4::AboutDialog = builder.object("about_dialog").expect("Cambalache");
         about_dialog.set_modal(true);
         about_dialog.set_transient_for(Some(window_main));
 

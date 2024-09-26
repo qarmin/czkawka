@@ -16,7 +16,7 @@ use crate::notebook_info::NOTEBOOKS_INFO;
 pub fn connect_button_delete(gui_data: &GuiData) {
     let buttons_delete = gui_data.bottom_buttons.buttons_delete.clone();
 
-    let gui_data = gui_data.clone(); // TODO this maybe can be replaced, not sure if worth to do it
+    let gui_data = gui_data.clone(); // TODO this maybe can be replaced, not sure if worth to clone everything
 
     buttons_delete.connect_clicked(move |_| {
         glib::MainContext::default().spawn_local(delete_things(gui_data.clone()));
@@ -41,7 +41,7 @@ pub async fn delete_things(gui_data: GuiData) {
 
     let text_view_errors = gui_data.text_view_errors.clone();
 
-    let nb_number = notebook_main.current_page().unwrap();
+    let nb_number = notebook_main.current_page().expect("Current page not set");
     let tree_view = &main_tree_views[nb_number as usize];
     let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
 
@@ -164,7 +164,7 @@ fn create_dialog_ask_for_deletion(window_main: &gtk4::Window, number_of_selected
 
     button_ok.grab_focus();
 
-    let parent = button_ok.parent().unwrap().parent().unwrap().downcast::<gtk4::Box>().unwrap(); // TODO Hack, but not so ugly as before
+    let parent = button_ok.parent().expect("Hack 1").parent().expect("Hack 2").downcast::<gtk4::Box>().expect("Hack 3"); // TODO Hack, but not so ugly as before
     parent.set_orientation(Orientation::Vertical);
     parent.insert_child_after(&label, None::<&gtk4::Widget>);
     parent.insert_child_after(&label2, Some(&label));
@@ -189,7 +189,7 @@ fn create_dialog_group_deletion(window_main: &gtk4::Window) -> (Dialog, CheckBut
 
     button_ok.grab_focus();
 
-    let parent = button_ok.parent().unwrap().parent().unwrap().downcast::<gtk4::Box>().unwrap(); // TODO Hack, but not so ugly as before
+    let parent = button_ok.parent().expect("Hack 1").parent().expect("Hack 2").downcast::<gtk4::Box>().expect("Hack 3"); // TODO Hack, but not so ugly as before
     parent.set_orientation(Orientation::Vertical);
     parent.insert_child_after(&label, None::<&gtk4::Widget>);
     parent.insert_child_after(&label2, Some(&label));
@@ -294,7 +294,7 @@ pub fn empty_folder_remover(
 
     // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
     for tree_path in selected_rows.iter().rev() {
-        let iter = model.iter(tree_path).unwrap();
+        let iter = model.iter(tree_path).expect("Using invalid tree_path");
 
         let name = model.get::<String>(&iter, column_file_name);
         let path = model.get::<String>(&iter, column_path);
@@ -302,10 +302,8 @@ pub fn empty_folder_remover(
         // We must check if folder is really empty or contains only other empty folders
         let mut error_happened = false;
         let mut folders_to_check: Vec<String> = vec![get_full_name_from_path_name(&path, &name)];
-        let mut current_folder: String;
         let mut next_folder: String;
-        'dir: while !folders_to_check.is_empty() {
-            current_folder = folders_to_check.pop().unwrap();
+        'dir: while let Some(current_folder) = folders_to_check.pop() {
             let read_dir = match fs::read_dir(&current_folder) {
                 Ok(t) => t,
                 Err(_inspected) => {
@@ -407,7 +405,7 @@ pub fn basic_remove(
 
     // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
     for tree_path in selected_rows.iter().rev() {
-        let iter = model.iter(tree_path).unwrap();
+        let iter = model.iter(tree_path).expect("Using invalid tree_path");
 
         let name = model.get::<String>(&iter, column_file_name);
         let path = model.get::<String>(&iter, column_path);
@@ -482,7 +480,7 @@ pub fn tree_remove(
 
     // Save to variable paths of files, and remove it when not removing all occurrences.
     for tree_path in selected_rows.iter().rev() {
-        let iter = model.iter(tree_path).unwrap();
+        let iter = model.iter(tree_path).expect("Using invalid tree_path");
 
         let file_name = model.get::<String>(&iter, column_file_name);
         let path = model.get::<String>(&iter, column_path);

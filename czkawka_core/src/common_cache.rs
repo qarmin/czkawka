@@ -56,7 +56,7 @@ where
         let hashmap_to_save = hashmap.values().filter(|t| t.get_size() >= minimum_file_size).collect::<Vec<_>>();
 
         {
-            let writer = BufWriter::new(file_handler.unwrap()); // Unwrap because cannot fail here
+            let writer = BufWriter::new(file_handler.expect("Cannot fail, because for saving, this always exists"));
             if let Err(e) = bincode::serialize_into(writer, &hashmap_to_save) {
                 text_messages.warnings.push(format!("Cannot write data to cache file {cache_file:?}, reason {e}"));
                 debug!("Failed to save cache to file {cache_file:?}");
@@ -187,7 +187,7 @@ where
                 }
             };
         } else {
-            let reader = BufReader::new(file_handler_json.unwrap()); // Unwrap cannot fail, because at least one file must be valid
+            let reader = BufReader::new(file_handler_json.expect("This cannot fail, because if file_handler is None, then this cannot be None"));
             vec_loaded_entries = match serde_json::from_reader(reader) {
                 Ok(t) => t,
                 Err(e) => {

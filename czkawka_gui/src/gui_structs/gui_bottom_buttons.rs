@@ -34,21 +34,21 @@ pub struct GuiBottomButtons {
 
 impl GuiBottomButtons {
     pub fn create_from_builder(builder: &gtk4::Builder, popover_select: &gtk4::Popover, popover_sort: &gtk4::Popover) -> Self {
-        let buttons_search: gtk4::Button = builder.object("buttons_search").unwrap();
-        let buttons_select: gtk4::MenuButton = builder.object("buttons_select").unwrap();
-        let buttons_delete: gtk4::Button = builder.object("buttons_delete").unwrap();
-        let buttons_save: gtk4::Button = builder.object("buttons_save").unwrap();
-        let buttons_symlink: gtk4::Button = builder.object("buttons_symlink").unwrap();
-        let buttons_hardlink: gtk4::Button = builder.object("buttons_hardlink").unwrap();
-        let buttons_move: gtk4::Button = builder.object("buttons_move").unwrap();
-        let buttons_compare: gtk4::Button = builder.object("buttons_compare").unwrap();
-        let buttons_sort: gtk4::MenuButton = builder.object("buttons_sort").unwrap();
+        let buttons_search: gtk4::Button = builder.object("buttons_search").expect("Cambalache");
+        let buttons_select: gtk4::MenuButton = builder.object("buttons_select").expect("Cambalache");
+        let buttons_delete: gtk4::Button = builder.object("buttons_delete").expect("Cambalache");
+        let buttons_save: gtk4::Button = builder.object("buttons_save").expect("Cambalache");
+        let buttons_symlink: gtk4::Button = builder.object("buttons_symlink").expect("Cambalache");
+        let buttons_hardlink: gtk4::Button = builder.object("buttons_hardlink").expect("Cambalache");
+        let buttons_move: gtk4::Button = builder.object("buttons_move").expect("Cambalache");
+        let buttons_compare: gtk4::Button = builder.object("buttons_compare").expect("Cambalache");
+        let buttons_sort: gtk4::MenuButton = builder.object("buttons_sort").expect("Cambalache");
 
-        let buttons_show_errors: gtk4::Button = builder.object("buttons_show_errors").unwrap();
-        let buttons_show_upper_notebook: gtk4::Button = builder.object("buttons_show_upper_notebook").unwrap();
+        let buttons_show_errors: gtk4::Button = builder.object("buttons_show_errors").expect("Cambalache");
+        let buttons_show_upper_notebook: gtk4::Button = builder.object("buttons_show_upper_notebook").expect("Cambalache");
 
-        let label_buttons_select: gtk4::Label = builder.object("label_buttons_select").unwrap();
-        let label_buttons_sort: gtk4::Label = builder.object("label_buttons_sort").unwrap();
+        let label_buttons_select: gtk4::Label = builder.object("label_buttons_select").expect("Cambalache");
+        let label_buttons_sort: gtk4::Label = builder.object("label_buttons_sort").expect("Cambalache");
 
         let gc_buttons_select: GestureClick = GestureClick::new();
         let gc_buttons_sort: GestureClick = GestureClick::new();

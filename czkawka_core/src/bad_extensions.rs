@@ -13,9 +13,10 @@ use rayon::prelude::*;
 use serde::Serialize;
 
 use crate::common::{check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
-use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
+use crate::common_dir_traversal::{DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
 use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::*;
+use crate::progress_data::{CurrentStage, ProgressData};
 
 static DISABLED_EXTENSIONS: &[&str] = &["file", "cache", "bak", "data"]; // Such files can have any type inside
 
@@ -186,22 +187,39 @@ pub struct Info {
     pub number_of_files_with_bad_extension: usize,
 }
 
+pub struct BadExtensionsParameters {
+    pub include_files_without_extension: bool,
+}
+
+impl BadExtensionsParameters {
+    pub fn new() -> Self {
+        Self {
+            include_files_without_extension: false,
+        } // TODO add option to all modes
+    }
+}
+impl Default for BadExtensionsParameters {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 pub struct BadExtensions {
     common_data: CommonToolData,
     information: Info,
     files_to_check: Vec<FileEntry>,
     bad_extensions_files: Vec<BadFileEntry>,
-    include_files_without_extension: bool,
+    params: BadExtensionsParameters,
 }
 
 impl BadExtensions {
-    pub fn new() -> Self {
+    pub fn new(params: BadExtensionsParameters) -> Self {
         Self {
             common_data: CommonToolData::new(ToolType::BadExtensions),
             information: Info::default(),
             files_to_check: Default::default(),
             bad_extensions_files: Default::default(),
-            include_files_without_extension: true,
+            params,
         }
     }
 
@@ -244,7 +262,7 @@ impl BadExtensions {
     #[fun_time(message = "look_for_bad_extensions_files", level = "debug")]
     fn look_for_bad_extensions_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, 1, 1, self.files_to_check.len(), CheckingMethod::None, self.get_cd().tool_type);
+            prepare_thread_handler_common(progress_sender, CurrentStage::BadExtensionsChecking, self.files_to_check.len(), self.get_test_type());
 
         let files_to_check = mem::take(&mut self.files_to_check);
 
@@ -312,7 +330,7 @@ impl BadExtensions {
                     // Not found any extension
                     return Some(None);
                 } else if current_extension.is_empty() {
-                    if !self.include_files_without_extension {
+                    if !self.params.include_files_without_extension {
                         return Some(None);
                     }
                 } else if all_available_extensions.take(&current_extension).is_some() {
@@ -329,11 +347,11 @@ impl BadExtensions {
                 }))
             })
             .while_some()
-            .filter(Option::is_some)
-            .map(Option::unwrap)
+            .flatten()
             .collect::<Vec<_>>()
     }
 
+    #[allow(clippy::unused_self)]
     fn get_and_validate_extension(&self, file_entry: &FileEntry, proper_extension: &str) -> Option<String> {
         let current_extension;
         // Extract current extension from file
@@ -400,12 +418,6 @@ impl BadExtensions {
     }
 }
 
-impl Default for BadExtensions {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl DebugPrint for BadExtensions {
     fn debug_print(&self) {
         if !cfg!(debug_assertions) {
@@ -443,6 +455,10 @@ impl PrintResults for BadExtensions {
 impl BadExtensions {
     pub const fn get_bad_extensions_files(&self) -> &Vec<BadFileEntry> {
         &self.bad_extensions_files
+    }
+
+    pub fn get_params(&self) -> &BadExtensionsParameters {
+        &self.params
     }
 
     pub const fn get_information(&self) -> &Info {

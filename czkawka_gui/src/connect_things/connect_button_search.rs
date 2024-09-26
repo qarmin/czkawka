@@ -8,19 +8,20 @@ use fun_time::fun_time;
 use gtk4::prelude::*;
 use gtk4::Grid;
 
-use czkawka_core::bad_extensions::BadExtensions;
-use czkawka_core::big_file::BigFile;
-use czkawka_core::broken_files::{BrokenFiles, CheckedTypes};
+use czkawka_core::bad_extensions::{BadExtensions, BadExtensionsParameters};
+use czkawka_core::big_file::{BigFile, BigFileParameters};
+use czkawka_core::broken_files::{BrokenFiles, BrokenFilesParameters, CheckedTypes};
 use czkawka_core::common::DEFAULT_THREAD_SIZE;
-use czkawka_core::common_dir_traversal::{CheckingMethod, ProgressData};
+use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::common_tool::CommonData;
-use czkawka_core::duplicate::DuplicateFinder;
+use czkawka_core::duplicate::{DuplicateFinder, DuplicateFinderParameters};
 use czkawka_core::empty_files::EmptyFiles;
 use czkawka_core::empty_folder::EmptyFolder;
 use czkawka_core::invalid_symlinks::InvalidSymlinks;
-use czkawka_core::same_music::{MusicSimilarity, SameMusic};
-use czkawka_core::similar_images::SimilarImages;
-use czkawka_core::similar_videos::SimilarVideos;
+use czkawka_core::progress_data::ProgressData;
+use czkawka_core::same_music::{MusicSimilarity, SameMusic, SameMusicParameters};
+use czkawka_core::similar_images::{SimilarImages, SimilarImagesParameters};
+use czkawka_core::similar_videos::{SimilarVideos, SimilarVideosParameters};
 use czkawka_core::temporary::Temporary;
 
 use crate::gui_structs::gui_data::GuiData;
@@ -91,7 +92,7 @@ pub fn connect_button_search(gui_data: &GuiData, result_sender: Sender<Message>,
 
         let progress_sender = progress_sender.clone();
 
-        match to_notebook_main_enum(notebook_main.current_page().unwrap()) {
+        match to_notebook_main_enum(notebook_main.current_page().expect("Current page not set")) {
             NotebookMainEnum::Duplicate => duplicate_search(&gui_data, loaded_commons, stop_receiver, result_sender, &grid_progress, progress_sender),
             NotebookMainEnum::EmptyFiles => empty_files_search(&gui_data, loaded_commons, stop_receiver, result_sender, &grid_progress, progress_sender),
             NotebookMainEnum::EmptyDirectories => empty_dirs_search(&gui_data, loaded_commons, stop_receiver, result_sender, &grid_progress, progress_sender),
@@ -157,13 +158,7 @@ impl LoadedCommonItems {
             Some(ColumnsIncludedDirectory::ReferenceButton as i32),
         ));
         let recursive_search = check_button_recursive.is_active();
-        let excluded_items = entry_excluded_items
-            .text()
-            .as_str()
-            .to_string()
-            .split(',')
-            .map(ToString::to_string)
-            .collect::<Vec<String>>();
+        let excluded_items = entry_excluded_items.text().as_str().split(',').map(ToString::to_string).collect::<Vec<String>>();
         let allowed_extensions = entry_allowed_extensions.text().as_str().to_string();
         let excluded_extensions = entry_excluded_extensions.text().as_str().to_string();
         let hide_hard_links = check_button_settings_hide_hard_links.is_active();
@@ -173,18 +168,18 @@ impl LoadedCommonItems {
             .text()
             .as_str()
             .parse::<u64>()
-            .unwrap_or_else(|_| DEFAULT_MINIMAL_CACHE_SIZE.parse::<u64>().unwrap());
+            .unwrap_or_else(|_| DEFAULT_MINIMAL_CACHE_SIZE.parse::<u64>().expect("Failed to parse minimal_cache_file_size"));
 
         let minimal_file_size = entry_general_minimal_size
             .text()
             .as_str()
             .parse::<u64>()
-            .unwrap_or_else(|_| DEFAULT_MINIMAL_FILE_SIZE.parse::<u64>().unwrap());
+            .unwrap_or_else(|_| DEFAULT_MINIMAL_FILE_SIZE.parse::<u64>().expect("Failed to parse minimal_file_size"));
         let maximal_file_size = entry_general_maximal_size
             .text()
             .as_str()
             .parse::<u64>()
-            .unwrap_or_else(|_| DEFAULT_MAXIMAL_FILE_SIZE.parse::<u64>().unwrap());
+            .unwrap_or_else(|_| DEFAULT_MAXIMAL_FILE_SIZE.parse::<u64>().expect("Failed to parse maximal_file_size"));
         let ignore_other_filesystems = check_button_settings_one_filesystem.is_active();
 
         LoadedCommonItems {
@@ -228,10 +223,10 @@ fn duplicate_search(
     image_preview_duplicates.hide();
     clean_tree_view(&tree_view_duplicate_finder);
 
-    let check_method_index = combo_box_duplicate_check_method.active().unwrap() as usize;
+    let check_method_index = combo_box_duplicate_check_method.active().expect("Failed to get active item") as usize;
     let check_method = DUPLICATES_CHECK_METHOD_COMBO_BOX[check_method_index].check_method;
 
-    let hash_type_index = combo_box_duplicate_hash_type.active().unwrap() as usize;
+    let hash_type_index = combo_box_duplicate_hash_type.active().expect("Failed to get active item") as usize;
     let hash_type = DUPLICATES_HASH_TYPE_COMBO_BOX[hash_type_index].hash_type;
 
     let use_prehash_cache = check_button_duplicates_use_prehash_cache.is_active();
@@ -245,21 +240,23 @@ fn duplicate_search(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut item = DuplicateFinder::new();
+            let params = DuplicateFinderParameters::new(
+                check_method,
+                hash_type,
+                loaded_commons.hide_hard_links,
+                use_prehash_cache,
+                loaded_commons.minimal_cache_file_size,
+                minimal_prehash_cache_file_size,
+                case_sensitive_name_comparison,
+            );
+            let mut item = DuplicateFinder::new(params);
 
             set_common_settings(&mut item, &loaded_commons);
-            item.set_minimal_cache_file_size(loaded_commons.minimal_cache_file_size);
-            item.set_minimal_prehash_cache_file_size(minimal_prehash_cache_file_size);
-            item.set_check_method(check_method);
-            item.set_hash_type(hash_type);
-            item.set_ignore_hard_links(loaded_commons.hide_hard_links);
-            item.set_use_prehash_cache(use_prehash_cache);
             item.set_delete_outdated_cache(delete_outdated_cache);
-            item.set_case_sensitive_name_comparison(case_sensitive_name_comparison);
             item.find_duplicates(Some(&stop_receiver), Some(&progress_data_sender));
-            result_sender.send(Message::Duplicates(item)).unwrap();
+            result_sender.send(Message::Duplicates(item)).expect("Failed to send Duplicates message");
         })
-        .unwrap();
+        .expect("Failed to spawn DuplicateFinder thread");
 }
 
 fn empty_files_search(
@@ -282,9 +279,9 @@ fn empty_files_search(
 
             set_common_settings(&mut item, &loaded_commons);
             item.find_empty_files(Some(&stop_receiver), Some(&progress_data_sender));
-            result_sender.send(Message::EmptyFiles(item)).unwrap();
+            result_sender.send(Message::EmptyFiles(item)).expect("Failed to send EmptyFiles message");
         })
-        .unwrap();
+        .expect("Failed to spawn EmptyFiles thread");
 }
 
 fn empty_dirs_search(
@@ -307,9 +304,9 @@ fn empty_dirs_search(
 
             set_common_settings(&mut item, &loaded_commons);
             item.find_empty_folders(Some(&stop_receiver), Some(&progress_data_sender));
-            result_sender.send(Message::EmptyFolders(item)).unwrap();
+            result_sender.send(Message::EmptyFolders(item)).expect("Failed to send EmptyFolders message");
         })
-        .unwrap();
+        .expect("Failed to spawn EmptyFolders thread");
 }
 
 fn big_files_search(
@@ -327,7 +324,7 @@ fn big_files_search(
     let tree_view_big_files_finder = gui_data.main_notebook.tree_view_big_files_finder.clone();
     clean_tree_view(&tree_view_big_files_finder);
 
-    let big_files_mode_index = combo_box_big_files_mode.active().unwrap() as usize;
+    let big_files_mode_index = combo_box_big_files_mode.active().expect("Failed to get active item") as usize;
     let big_files_mode = BIG_FILES_CHECK_METHOD_COMBO_BOX[big_files_mode_index].check_method;
 
     let numbers_of_files_to_check = entry_big_files_number.text().as_str().parse::<usize>().unwrap_or(50);
@@ -335,15 +332,14 @@ fn big_files_search(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut item = BigFile::new();
+            let params = BigFileParameters::new(numbers_of_files_to_check, big_files_mode);
+            let mut item = BigFile::new(params);
 
             set_common_settings(&mut item, &loaded_commons);
-            item.set_number_of_files_to_check(numbers_of_files_to_check);
-            item.set_search_mode(big_files_mode);
             item.find_big_files(Some(&stop_receiver), Some(&progress_data_sender));
-            result_sender.send(Message::BigFiles(item)).unwrap();
+            result_sender.send(Message::BigFiles(item)).expect("Failed to send BigFiles message");
         })
-        .unwrap();
+        .expect("Failed to spawn BigFiles thread");
 }
 
 fn temporary_files_search(
@@ -366,9 +362,9 @@ fn temporary_files_search(
 
             set_common_settings(&mut item, &loaded_commons);
             item.find_temporary_files(Some(&stop_receiver), Some(&progress_data_sender));
-            result_sender.send(Message::Temporary(item)).unwrap();
+            result_sender.send(Message::Temporary(item)).expect("Failed to send Temporary message");
         })
-        .unwrap();
+        .expect("Failed to spawn Temporary thread");
 }
 
 fn same_music_search(
@@ -391,12 +387,14 @@ fn same_music_search(
     let tree_view_same_music_finder = gui_data.main_notebook.tree_view_same_music_finder.clone();
     let combo_box_audio_check_type = gui_data.main_notebook.combo_box_audio_check_type.clone();
     let check_button_music_approximate_comparison = gui_data.main_notebook.check_button_music_approximate_comparison.clone();
+    let check_button_music_compare_only_in_title_group = gui_data.main_notebook.check_button_music_compare_only_in_title_group.clone();
     let scale_seconds_same_music = gui_data.main_notebook.scale_seconds_same_music.clone();
     let scale_similarity_same_music = gui_data.main_notebook.scale_similarity_same_music.clone();
 
     clean_tree_view(&tree_view_same_music_finder);
 
     let approximate_comparison = check_button_music_approximate_comparison.is_active();
+    let comparison_only_in_title_group = check_button_music_compare_only_in_title_group.is_active();
 
     let mut music_similarity: MusicSimilarity = MusicSimilarity::NONE;
 
@@ -419,7 +417,7 @@ fn same_music_search(
         music_similarity |= MusicSimilarity::LENGTH;
     }
 
-    let check_method_index = combo_box_audio_check_type.active().unwrap() as usize;
+    let check_method_index = combo_box_audio_check_type.active().expect("Failed to get active item") as usize;
     let check_method = AUDIO_TYPE_CHECK_METHOD_COMBO_BOX[check_method_index].check_method;
 
     let maximum_difference = scale_similarity_same_music.value();
@@ -429,18 +427,21 @@ fn same_music_search(
         thread::Builder::new()
             .stack_size(DEFAULT_THREAD_SIZE)
             .spawn(move || {
-                let mut item = SameMusic::new();
+                let params = SameMusicParameters::new(
+                    music_similarity,
+                    approximate_comparison,
+                    check_method,
+                    minimum_segment_duration,
+                    maximum_difference,
+                    comparison_only_in_title_group,
+                );
+                let mut item = SameMusic::new(params);
 
                 set_common_settings(&mut item, &loaded_commons);
-                item.set_music_similarity(music_similarity);
-                item.set_maximum_difference(maximum_difference);
-                item.set_minimum_segment_duration(minimum_segment_duration);
-                item.set_check_type(check_method);
-                item.set_approximate_comparison(approximate_comparison);
                 item.find_same_music(Some(&stop_receiver), Some(&progress_data_sender));
-                result_sender.send(Message::SameMusic(item)).unwrap();
+                result_sender.send(Message::SameMusic(item)).expect("Failed to send SameMusic message");
             })
-            .unwrap();
+            .expect("Failed to spawn SameMusic thread");
     } else {
         let shared_buttons = gui_data.shared_buttons.clone();
         let buttons_array = gui_data.bottom_buttons.buttons_array.clone();
@@ -452,7 +453,7 @@ fn same_music_search(
         let button_app_info = gui_data.header.button_app_info.clone();
 
         set_buttons(
-            &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).unwrap(),
+            &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).expect("Failed to get SameMusic button"),
             &buttons_array,
             &buttons_names,
         );
@@ -504,14 +505,14 @@ fn broken_files_search(
         thread::Builder::new()
             .stack_size(DEFAULT_THREAD_SIZE)
             .spawn(move || {
-                let mut item = BrokenFiles::new();
+                let params = BrokenFilesParameters::new(checked_types);
+                let mut item = BrokenFiles::new(params);
 
                 set_common_settings(&mut item, &loaded_commons);
-                item.set_checked_types(checked_types);
                 item.find_broken_files(Some(&stop_receiver), Some(&progress_data_sender));
-                result_sender.send(Message::BrokenFiles(item)).unwrap();
+                result_sender.send(Message::BrokenFiles(item)).expect("Failed to send BrokenFiles message");
             })
-            .unwrap();
+            .expect("Failed to spawn BrokenFiles thread");
     } else {
         let shared_buttons = gui_data.shared_buttons.clone();
         let buttons_array = gui_data.bottom_buttons.buttons_array.clone();
@@ -523,7 +524,10 @@ fn broken_files_search(
         let button_app_info = gui_data.header.button_app_info.clone();
 
         set_buttons(
-            &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BrokenFiles).unwrap(),
+            &mut *shared_buttons
+                .borrow_mut()
+                .get_mut(&NotebookMainEnum::BrokenFiles)
+                .expect("Failed to get BrokenFiles button"),
             &buttons_array,
             &buttons_names,
         );
@@ -559,13 +563,13 @@ fn similar_image_search(
     clean_tree_view(&tree_view_similar_images_finder);
     image_preview_similar_images.hide();
 
-    let hash_size_index = combo_box_image_hash_size.active().unwrap() as usize;
+    let hash_size_index = combo_box_image_hash_size.active().expect("Failed to get active item") as usize;
     let hash_size = IMAGES_HASH_SIZE_COMBO_BOX[hash_size_index] as u8;
 
-    let image_filter_index = combo_box_image_resize_algorithm.active().unwrap() as usize;
+    let image_filter_index = combo_box_image_resize_algorithm.active().expect("Failed to get active item") as usize;
     let image_filter = IMAGES_RESIZE_ALGORITHM_COMBO_BOX[image_filter_index].filter;
 
-    let hash_alg_index = combo_box_image_hash_algorithm.active().unwrap() as usize;
+    let hash_alg_index = combo_box_image_hash_algorithm.active().expect("Failed to get active item") as usize;
     let hash_alg = IMAGES_HASH_TYPE_COMBO_BOX[hash_alg_index].hash_alg;
 
     let ignore_same_size = check_button_image_ignore_same_size.is_active();
@@ -577,19 +581,15 @@ fn similar_image_search(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut item = SimilarImages::new();
+            let params = SimilarImagesParameters::new(similarity, hash_size, hash_alg, image_filter, ignore_same_size, loaded_commons.hide_hard_links);
+            let mut item = SimilarImages::new(params);
 
             set_common_settings(&mut item, &loaded_commons);
-            item.set_similarity(similarity);
-            item.set_hash_alg(hash_alg);
-            item.set_hash_size(hash_size);
-            item.set_image_filter(image_filter);
             item.set_delete_outdated_cache(delete_outdated_cache);
-            item.set_exclude_images_with_same_size(ignore_same_size);
             item.find_similar_images(Some(&stop_receiver), Some(&progress_data_sender));
-            result_sender.send(Message::SimilarImages(item)).unwrap();
+            result_sender.send(Message::SimilarImages(item)).expect("Failed to send SimilarImages message");
         })
-        .unwrap();
+        .expect("Failed to spawn SimilarImages thread");
 }
 
 fn similar_video_search(
@@ -617,16 +617,15 @@ fn similar_video_search(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut item = SimilarVideos::new();
+            let params = SimilarVideosParameters::new(tolerance, ignore_same_size, loaded_commons.hide_hard_links);
+            let mut item = SimilarVideos::new(params);
 
             set_common_settings(&mut item, &loaded_commons);
-            item.set_tolerance(tolerance);
             item.set_delete_outdated_cache(delete_outdated_cache);
-            item.set_exclude_videos_with_same_size(ignore_same_size);
             item.find_similar_videos(Some(&stop_receiver), Some(&progress_data_sender));
-            result_sender.send(Message::SimilarVideos(item)).unwrap();
+            result_sender.send(Message::SimilarVideos(item)).expect("Failed to send SimilarVideos message");
         })
-        .unwrap();
+        .expect("Failed to spawn SimilarVideos thread");
 }
 
 fn bad_symlinks_search(
@@ -649,9 +648,9 @@ fn bad_symlinks_search(
 
             set_common_settings(&mut item, &loaded_commons);
             item.find_invalid_links(Some(&stop_receiver), Some(&progress_data_sender));
-            result_sender.send(Message::InvalidSymlinks(item)).unwrap();
+            result_sender.send(Message::InvalidSymlinks(item)).expect("Failed to send InvalidSymlinks message");
         })
-        .unwrap();
+        .expect("Failed to spawn InvalidSymlinks thread");
 }
 
 fn bad_extensions_search(
@@ -670,13 +669,14 @@ fn bad_extensions_search(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut item = BadExtensions::new();
+            let params = BadExtensionsParameters::new();
+            let mut item = BadExtensions::new(params);
 
             set_common_settings(&mut item, &loaded_commons);
             item.find_bad_extensions_files(Some(&stop_receiver), Some(&progress_data_sender));
-            result_sender.send(Message::BadExtensions(item)).unwrap();
+            result_sender.send(Message::BadExtensions(item)).expect("Failed to send BadExtensions message");
         })
-        .unwrap();
+        .expect("Failed to spawn BadExtensions thread");
 }
 
 fn set_common_settings<T>(component: &mut T, loaded_commons: &LoadedCommonItems)

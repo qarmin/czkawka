@@ -16,8 +16,9 @@ pub trait PrintResults {
     fn print_results_to_output(&self) {
         let stdout = std::io::stdout();
         let mut handle = stdout.lock();
-        self.write_results(&mut handle).unwrap();
-        handle.flush().unwrap();
+        // Panics here are allowed, because it is used only in CLI
+        self.write_results(&mut handle).expect("Error while writing to stdout");
+        handle.flush().expect("Error while flushing stdout");
     }
 
     #[fun_time(message = "print_results_to_file", level = "debug")]

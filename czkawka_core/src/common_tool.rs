@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use crate::common_dir_traversal::ToolType;
+use crate::common_dir_traversal::{CheckingMethod, ToolType};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
@@ -35,6 +35,10 @@ pub enum DeleteMethod {
     OneOldest,
     OneNewest,
     HardLink,
+    AllExceptBiggest,
+    AllExceptSmallest,
+    OneBiggest,
+    OneSmallest,
 }
 
 impl CommonToolData {
@@ -62,6 +66,16 @@ impl CommonToolData {
 pub trait CommonData {
     fn get_cd(&self) -> &CommonToolData;
     fn get_cd_mut(&mut self) -> &mut CommonToolData;
+    fn get_check_method(&self) -> CheckingMethod {
+        CheckingMethod::None
+    }
+    fn get_test_type(&self) -> (ToolType, CheckingMethod) {
+        (self.get_cd().tool_type, self.get_check_method())
+    }
+
+    fn get_tool_type(&self) -> ToolType {
+        self.get_cd().tool_type
+    }
 
     fn set_dry_run(&mut self, dry_run: bool) {
         self.get_cd_mut().dry_run = dry_run;

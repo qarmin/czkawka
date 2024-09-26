@@ -44,6 +44,9 @@ const DEFAULT_DUPLICATE_REMOVE_AUTO_OUTDATED_CACHE: bool = true;
 const DEFAULT_DUPLICATE_CASE_SENSITIVE_NAME_CHECKING: bool = false;
 const DEFAULT_GENERAL_IGNORE_OTHER_FILESYSTEMS: bool = false;
 
+const DEFAULT_MUSIC_APPROXIMATE_COMPARISON: bool = false;
+const DEFAULT_MUSIC_COMPARE_BY_TITLE: bool = false;
+
 const DEFAULT_BROKEN_FILES_PDF: bool = true;
 const DEFAULT_BROKEN_FILES_AUDIO: bool = true;
 const DEFAULT_BROKEN_FILES_ARCHIVE: bool = true;
@@ -182,6 +185,7 @@ impl LoadSaveStruct {
         self.loaded_items.insert(key, vec_string);
     }
 
+    #[allow(clippy::unused_self)]
     pub fn open_save_file(&self, text_view_errors: &TextView, save_configuration: bool, manual_execution: bool) -> Option<(File, PathBuf)> {
         if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
             // Lin: /home/username/.config/czkawka
@@ -380,6 +384,7 @@ enum LoadText {
     SimilarVideosSimilarity,
     SimilarVideosIgnoreSameSize,
     MusicApproximateComparison,
+    MusicCompareByTitle,
     DuplicateNameCaseSensitive,
     BrokenFilesPdf,
     BrokenFilesAudio,
@@ -433,6 +438,7 @@ fn create_hash_map() -> (HashMap<LoadText, String>, HashMap<String, LoadText>) {
         (LoadText::BrokenFilesArchive, "broken_files_archive"),
         (LoadText::GeneralIgnoreOtherFilesystems, "ignore_other_filesystems"),
         (LoadText::ThreadNumber, "thread_number"),
+        (LoadText::MusicCompareByTitle, "music_compare_by_title"),
     ];
     let mut hashmap_ls: HashMap<LoadText, String> = Default::default();
     let mut hashmap_sl: HashMap<String, LoadText> = Default::default();
@@ -541,7 +547,7 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
     );
     saving_struct.save_var(
         hashmap_ls[&LoadText::Language].clone(),
-        &get_language_from_combo_box_text(&settings.combo_box_settings_language.active_text().unwrap()).short_text,
+        &get_language_from_combo_box_text(&settings.combo_box_settings_language.active_text().expect("No active text")).short_text,
     );
 
     // Comboboxes main notebook
@@ -596,6 +602,10 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
         hashmap_ls[&LoadText::MusicApproximateComparison].clone(),
         &main_notebook.check_button_music_approximate_comparison.is_active(),
     );
+    saving_struct.save_var(
+        hashmap_ls[&LoadText::MusicCompareByTitle].clone(),
+        &main_notebook.check_button_music_compare_only_in_title_group.is_active(),
+    );
 
     saving_struct.save_to_file(&text_view_errors);
 }
@@ -617,7 +627,7 @@ pub fn load_configuration(
     loaded_entries.open_and_read_content(&text_view_errors, manual_execution);
 
     // Load here language, default system language could change value in settings so we don't want to lose this value
-    let short_language = get_language_from_combo_box_text(&settings.combo_box_settings_language.active_text().unwrap())
+    let short_language = get_language_from_combo_box_text(&settings.combo_box_settings_language.active_text().expect("No active text"))
         .short_text
         .to_string();
 
@@ -674,6 +684,8 @@ pub fn load_configuration(
     let similar_videos_similarity = loaded_entries.get_object(hashmap_ls[&LoadText::SimilarVideosSimilarity].clone(), DEFAULT_SIMILAR_VIDEOS_SIMILARITY);
     let similar_videos_ignore_same_size = loaded_entries.get_bool(hashmap_ls[&LoadText::SimilarVideosIgnoreSameSize].clone(), DEFAULT_SIMILAR_VIDEOS_IGNORE_SAME_SIZE);
     let check_button_case_sensitive_name = loaded_entries.get_object(hashmap_ls[&LoadText::DuplicateNameCaseSensitive].clone(), DEFAULT_DUPLICATE_CASE_SENSITIVE_NAME_CHECKING);
+    let check_button_music_approximate_comparison = loaded_entries.get_object(hashmap_ls[&LoadText::MusicApproximateComparison].clone(), DEFAULT_MUSIC_APPROXIMATE_COMPARISON);
+    let check_button_music_compare_by_title = loaded_entries.get_object(hashmap_ls[&LoadText::MusicCompareByTitle].clone(), DEFAULT_MUSIC_COMPARE_BY_TITLE);
 
     let check_button_broken_files_archive = loaded_entries.get_object(hashmap_ls[&LoadText::BrokenFilesArchive].clone(), DEFAULT_BROKEN_FILES_ARCHIVE);
     let check_button_broken_files_pdf = loaded_entries.get_object(hashmap_ls[&LoadText::BrokenFilesPdf].clone(), DEFAULT_BROKEN_FILES_PDF);
@@ -801,6 +813,10 @@ pub fn load_configuration(
         main_notebook.check_button_image_ignore_same_size.set_active(similar_images_ignore_same_size);
         main_notebook.check_button_video_ignore_same_size.set_active(similar_videos_ignore_same_size);
         main_notebook.scale_similarity_similar_videos.set_value(similar_videos_similarity as f64);
+        main_notebook.check_button_music_compare_only_in_title_group.set_active(check_button_music_compare_by_title);
+        main_notebook
+            .check_button_music_approximate_comparison
+            .set_active(check_button_music_approximate_comparison);
 
         main_notebook.check_button_broken_files_audio.set_active(check_button_broken_files_audio);
         main_notebook.check_button_broken_files_pdf.set_active(check_button_broken_files_pdf);
@@ -808,7 +824,7 @@ pub fn load_configuration(
         main_notebook.check_button_broken_files_archive.set_active(check_button_broken_files_archive);
 
         {
-            let combo_chosen_index = main_notebook.combo_box_duplicate_check_method.active().unwrap();
+            let combo_chosen_index = main_notebook.combo_box_duplicate_check_method.active().expect("Failed to get active item");
 
             if DUPLICATES_CHECK_METHOD_COMBO_BOX[combo_chosen_index as usize].check_method == CheckingMethod::Hash {
                 main_notebook.combo_box_duplicate_hash_type.set_visible(true);
@@ -826,7 +842,7 @@ pub fn load_configuration(
         }
 
         // Set size of similarity scale gtk node, must be set BEFORE setting value of this
-        let index = main_notebook.combo_box_image_hash_size.active().unwrap() as usize;
+        let index = main_notebook.combo_box_image_hash_size.active().expect("Failed to get active item") as usize;
 
         main_notebook.scale_similarity_similar_images.set_range(0_f64, SIMILAR_VALUES[index][5] as f64);
         main_notebook.scale_similarity_similar_images.set_fill_level(SIMILAR_VALUES[index][5] as f64);
@@ -885,7 +901,7 @@ pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNoteb
         list_store.clear();
 
         let current_dir: String = match env::current_dir() {
-            Ok(t) => t.to_str().unwrap().to_string(),
+            Ok(t) => t.to_string_lossy().to_string(),
             Err(_inspected) => {
                 if cfg!(target_family = "unix") {
                     add_text_to_text_view(&text_view_errors, "Failed to read current directory, setting /home instead");

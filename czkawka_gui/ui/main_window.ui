@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- Created with Cambalache 0.16.0 -->
+<!-- Created with Cambalache 0.90.4 -->
 <interface>
   <!-- interface-name main_window.ui -->
   <requires lib="gtk" version="4.6"/>
@@ -788,6 +788,12 @@
                               <object class="GtkCheckButton" id="check_button_music_approximate_comparison">
                                 <property name="focusable">1</property>
                                 <property name="label" translatable="yes">Approximate Comparison</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkCheckButton" id="check_button_music_compare_only_in_title_group">
+                                <property name="focusable">1</property>
+                                <property name="label">Comparison only in group</property>
                               </object>
                             </child>
                           </object>

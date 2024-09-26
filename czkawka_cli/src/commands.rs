@@ -1,13 +1,13 @@
 use std::path::PathBuf;
 
-use image_hasher::{FilterType, HashAlg};
-
+use czkawka_core::broken_files::CheckedTypes;
 use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::common_tool::DeleteMethod;
 use czkawka_core::duplicate::HashType;
 use czkawka_core::same_music::MusicSimilarity;
 use czkawka_core::similar_images::SimilarityPreset;
 use czkawka_core::CZKAWKA_VERSION;
+use image_hasher::{FilterType, HashAlg};
 
 #[derive(clap::Parser)]
 #[clap(
@@ -88,6 +88,22 @@ pub enum Commands {
 pub struct DuplicatesArgs {
     #[clap(flatten)]
     pub common_cli_items: CommonCliItems,
+    #[clap(
+        short = 'p',
+        long,
+        value_parser = parse_minimal_file_size,
+        default_value = "257144",
+        help = "Minimum prehash cache file size in bytes",
+        long_help = "Minimum size of prehash cached files in bytes"
+    )]
+    pub minimal_prehash_cache_file_size: u64,
+    #[clap(
+        short = 'u',
+        long,
+        help = "Use prehash cache",
+        long_help = "Use prehash cache to speed up the scanning process by avoiding rehashing files that have already been hashed"
+    )]
+    pub use_prehash_cache: bool,
     #[clap(
         short,
         long,
@@ -215,12 +231,14 @@ pub struct SimilarImagesArgs {
     pub allow_hard_links: AllowHardLinks,
     #[clap(flatten)]
     pub dry_run: DryRun,
+    #[clap(flatten)]
+    pub ignore_same_size: IgnoreSameSize,
     #[clap(
         short = 'g',
         long,
         default_value = "Gradient",
         value_parser = parse_similar_hash_algorithm,
-        help = "Hash algorithm (allowed: Mean, Gradient, Blockhash, VertGradient, DoubleGradient)"
+        help = "Hash algorithm (allowed: Mean, Gradient, Blockhash, VertGradient, DoubleGradient, Median)"
     )]
     pub hash_alg: HashAlg,
     #[clap(
@@ -249,6 +267,10 @@ pub struct SameMusicArgs {
     pub delete_method: DMethod,
     #[clap(flatten)]
     pub dry_run: DryRun,
+    #[clap(short, long, help = "Approximate comparison of music tags.")]
+    pub approximate_comparison: bool,
+    #[clap(short, long, help = "Compare only m.")]
+    pub compare_fingerprints_only_with_similar_titles: bool,
     #[clap(
         short = 'z',
         long,
@@ -348,6 +370,15 @@ pub struct BrokenFilesArgs {
     pub common_cli_items: CommonCliItems,
     #[clap(short = 'D', long, help = "Delete found files")]
     pub delete_files: bool,
+    #[clap(
+        short,
+        long,
+        default_value = "PDF",
+        value_parser = parse_broken_files,
+        help = "Checking file types (PDF, AUDIO, IMAGE, ARCHIVE)",
+        long_help = "Methods to search files - default PDF.\nPDF - finds broken PDF files,\nAUDIO - finds broken audio files,\nIMAGE - finds broken image files,\nARCHIVE - finds broken archive files"
+    )]
+    pub checked_types: Vec<CheckedTypes>,
 }
 
 #[derive(Debug, clap::Args)]
@@ -360,6 +391,8 @@ pub struct SimilarVideosArgs {
     pub allow_hard_links: AllowHardLinks,
     #[clap(flatten)]
     pub dry_run: DryRun,
+    #[clap(flatten)]
+    pub ignore_same_size: IgnoreSameSize,
     #[clap(
         short,
         long,
@@ -450,8 +483,8 @@ pub struct DMethod {
         long,
         default_value = "NONE",
         value_parser = parse_delete_method,
-        help = "Delete method (AEN, AEO, ON, OO, HARD)",
-        long_help = "Methods to delete the files.\nAEN - All files except the newest,\nAEO - All files except the oldest,\nON - Only 1 file, the newest,\nOO - Only 1 file, the oldest\nHARD - create hard link\nNONE - not delete files"
+        help = "Delete method (AEN, AEO, ON, OO, AEB, AES, OE, OS, HARD)",
+        long_help = "Methods to delete the files.\nAEN - All files except the newest,\nAEO - All files except the oldest,\nON - Only 1 file, the newest,\nOO - Only 1 file, the oldest\nAEB - All files except the biggest,\nAES - All files except the smallest,\nOB - Only 1 file, the biggest,\nOS - Only 1 file, the smallest\nHARD - create hard link\nNONE - not delete files"
     )]
     pub delete_method: DeleteMethod,
 }
@@ -490,6 +523,12 @@ pub struct CaseSensitiveNameComparison {
 pub struct DryRun {
     #[clap(long, help = "Do nothing and print the operation that would happen.")]
     pub dry_run: bool,
+}
+
+#[derive(Debug, clap::Args)]
+pub struct IgnoreSameSize {
+    #[clap(short, long, help = "Ignore files with the same size, leaving only one file of each size")]
+    pub ignore_same_size: bool,
 }
 
 impl FileToSave {
@@ -552,6 +591,16 @@ fn parse_checking_method_duplicate(src: &str) -> Result<CheckingMethod, &'static
     }
 }
 
+fn parse_broken_files(src: &str) -> Result<CheckedTypes, &'static str> {
+    match src.to_ascii_lowercase().as_str() {
+        "pdf" => Ok(CheckedTypes::PDF),
+        "audio" => Ok(CheckedTypes::AUDIO),
+        "image" => Ok(CheckedTypes::IMAGE),
+        "archive" => Ok(CheckedTypes::ARCHIVE),
+        _ => Err("Couldn't parse the broken files type (allowed: PDF, AUDIO, IMAGE, ARCHIVE)"),
+    }
+}
+
 fn parse_checking_method_same_music(src: &str) -> Result<CheckingMethod, &'static str> {
     match src.to_ascii_lowercase().as_str() {
         "tags" => Ok(CheckingMethod::AudioTags),
@@ -568,7 +617,11 @@ fn parse_delete_method(src: &str) -> Result<DeleteMethod, &'static str> {
         "hard" => Ok(DeleteMethod::HardLink),
         "on" => Ok(DeleteMethod::OneNewest),
         "oo" => Ok(DeleteMethod::OneOldest),
-        _ => Err("Couldn't parse the delete method (allowed: AEN, AEO, ON, OO, HARD)"),
+        "aeb" => Ok(DeleteMethod::AllExceptBiggest),
+        "aes" => Ok(DeleteMethod::AllExceptSmallest),
+        "ob" => Ok(DeleteMethod::OneBiggest),
+        "os" => Ok(DeleteMethod::OneSmallest),
+        _ => Err("Couldn't parse the delete method (allowed: AEN, AEO, ON, OO, HARD, AEB, AES, OB, OS)"),
     }
 }
 
@@ -623,7 +676,8 @@ fn parse_similar_hash_algorithm(src: &str) -> Result<HashAlg, String> {
         "blockhash" => HashAlg::Blockhash,
         "vertgradient" => HashAlg::VertGradient,
         "doublegradient" => HashAlg::DoubleGradient,
-        _ => return Err("Couldn't parse the hash algorithm (allowed: Mean, Gradient, Blockhash, VertGradient, DoubleGradient)".to_string()),
+        "median" => HashAlg::Median,
+        _ => return Err("Couldn't parse the hash algorithm (allowed: Mean, Gradient, Blockhash, VertGradient, DoubleGradient, Median)".to_string()),
     };
     Ok(algorithm)
 }

@@ -4,6 +4,7 @@
 #![allow(clippy::too_many_arguments)]
 #![allow(clippy::type_complexity)]
 #![allow(clippy::needless_late_init)]
+#![warn(clippy::unwrap_used)]
 
 use std::env;
 use std::ffi::OsString;
@@ -33,7 +34,7 @@ use connect_things::connect_settings::*;
 use connect_things::connect_show_hide_ui::*;
 use connect_things::connect_similar_image_size_change::*;
 use czkawka_core::common::{get_number_of_threads, print_version_mode, set_number_of_threads, setup_logger};
-use czkawka_core::common_dir_traversal::ProgressData;
+use czkawka_core::progress_data::ProgressData;
 use czkawka_core::*;
 use gui_structs::gui_data::*;
 

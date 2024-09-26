@@ -1,7 +1,6 @@
 #![allow(unused_imports)]
+// I don't wanna fight with unused(heif) imports in this file, so simply ignore it to avoid too much complexity
 
-use std::{fs, thread};
-// I don't wanna fight with unused imports in this file, so simply ignore it to avoid too much complexity
 use std::cmp::Ordering;
 use std::ffi::OsString;
 use std::fs::{DirEntry, File, OpenOptions};
@@ -10,6 +9,7 @@ use std::sync::atomic::{AtomicBool, AtomicUsize};
 use std::sync::{atomic, Arc};
 use std::thread::{sleep, JoinHandle};
 use std::time::{Duration, Instant, SystemTime};
+use std::{fs, thread};
 
 #[cfg(feature = "heif")]
 use anyhow::Result;
@@ -29,13 +29,14 @@ use symphonia::core::conv::IntoSample;
 
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
-use crate::common_dir_traversal::{CheckingMethod, ProgressData, ToolType};
+use crate::common_dir_traversal::{CheckingMethod, ToolType};
 use crate::common_directory::Directories;
 use crate::common_items::{ExcludedItems, SingleExcludedItem};
 use crate::common_messages::Messages;
-use crate::common_tool::DeleteMethod;
+use crate::common_tool::{CommonData, DeleteMethod};
 use crate::common_traits::ResultEntry;
 use crate::duplicate::make_hard_link;
+use crate::progress_data::{CurrentStage, ProgressData};
 use crate::CZKAWKA_VERSION;
 
 static NUMBER_OF_THREADS: state::InitCell<usize> = state::InitCell::new();
@@ -64,7 +65,7 @@ pub fn setup_logger(disabled_printing: bool) {
     let log_level = if disabled_printing { LevelFilter::Off } else { LevelFilter::Info };
 
     let config = ConfigBuilder::default().set_level(log_level).set_message_filtering(Some(filtering_messages)).build();
-    handsome_logger::TermLogger::init(config, TerminalMode::Mixed, ColorChoice::Always).unwrap();
+    handsome_logger::TermLogger::init(config, TerminalMode::Mixed, ColorChoice::Always).expect("Cannot initialize logger");
 }
 
 pub fn get_all_available_threads() -> usize {
@@ -116,7 +117,7 @@ pub fn set_number_of_threads(thread_number: usize) {
         .num_threads(get_number_of_threads())
         .stack_size(DEFAULT_WORKER_THREAD_SIZE)
         .build_global()
-        .unwrap();
+        .expect("Cannot set number of threads");
 }
 
 pub const RAW_IMAGE_EXTENSIONS: &[&str] = &[
@@ -256,7 +257,7 @@ pub fn get_dynamic_image_from_heic(path: &str) -> Result<DynamicImage> {
     let width = image.width();
     let height = image.height();
     let planes = image.planes();
-    let interleaved_plane = planes.interleaved.unwrap();
+    let interleaved_plane = planes.interleaved.ok_or_else(|| anyhow::anyhow!("Failed to get interleaved plane"))?;
     ImageBuffer::from_raw(width, height, interleaved_plane.data.to_owned())
         .map(DynamicImage::ImageRgb8)
         .ok_or_else(|| anyhow::anyhow!("Failed to create image buffer"))
@@ -353,16 +354,23 @@ pub fn regex_check(expression_item: &SingleExcludedItem, directory_name: &str) -
     }
 
     // `git*` shouldn't be true for `/gitsfafasfs`
-    if !expression_item.expression.starts_with('*') && directory_name.find(&expression_item.expression_splits[0]).unwrap() > 0 {
+    if !expression_item.expression.starts_with('*')
+        && directory_name
+            .find(&expression_item.expression_splits[0])
+            .expect("Cannot fail, because split must exists in directory_name")
+            > 0
+    {
         return false;
     }
     // `*home` shouldn't be true for `/homeowner`
-    if !expression_item.expression.ends_with('*') && !directory_name.ends_with(expression_item.expression_splits.last().unwrap()) {
+    if !expression_item.expression.ends_with('*')
+        && !directory_name.ends_with(expression_item.expression_splits.last().expect("Cannot fail, because at least one item is available"))
+    {
         return false;
     }
 
     // At the end we check if parts between * are correctly positioned
-    let mut last_split_point = directory_name.find(&expression_item.expression_splits[0]).unwrap();
+    let mut last_split_point = directory_name.find(&expression_item.expression_splits[0]).expect("Cannot fail, because is checked earlier");
     let mut current_index: usize = 0;
     let mut found_index: usize;
     for spl in &expression_item.expression_splits[1..] {
@@ -451,8 +459,11 @@ where
             let mut all_values = (*values).clone();
             let len = all_values.len();
 
-            // Sorted from oldest to newest - from smallest value to bigger
-            all_values.sort_unstable_by_key(ResultEntry::get_modified_date);
+            // Sorted from smallest to biggest or oldest to newest
+            all_values.sort_unstable_by_key(match delete_method {
+                DeleteMethod::AllExceptBiggest | DeleteMethod::AllExceptSmallest | DeleteMethod::OneBiggest | DeleteMethod::OneSmallest => ResultEntry::get_size,
+                _ => ResultEntry::get_modified_date,
+            });
 
             if delete_method == &DeleteMethod::HardLink {
                 let original_file = &all_values[0];
@@ -488,10 +499,10 @@ where
 
             let items = match delete_method {
                 DeleteMethod::Delete => &all_values,
-                DeleteMethod::AllExceptNewest => &all_values[..(len - 1)],
-                DeleteMethod::AllExceptOldest => &all_values[1..],
-                DeleteMethod::OneOldest => &all_values[..1],
-                DeleteMethod::OneNewest => &all_values[(len - 1)..],
+                DeleteMethod::AllExceptNewest | DeleteMethod::AllExceptBiggest => &all_values[..(len - 1)],
+                DeleteMethod::AllExceptOldest | DeleteMethod::AllExceptSmallest => &all_values[1..],
+                DeleteMethod::OneOldest | DeleteMethod::OneSmallest => &all_values[..1],
+                DeleteMethod::OneNewest | DeleteMethod::OneBiggest => &all_values[(len - 1)..],
                 DeleteMethod::HardLink | DeleteMethod::None => unreachable!("HardLink and None should be handled before"),
             };
 
@@ -535,10 +546,10 @@ where
             let (mut files_from_referenced_folders, normal_files): (Vec<_>, Vec<_>) =
                 vec_file_entry.into_iter().partition(|e| directories.is_in_referenced_directory(e.get_path()));
 
-            if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
+            if normal_files.is_empty() {
                 None
             } else {
-                Some((files_from_referenced_folders.pop().unwrap(), normal_files))
+                files_from_referenced_folders.pop().map(|file| (file, normal_files))
             }
         })
         .collect::<Vec<(T, Vec<T>)>>()
@@ -546,12 +557,11 @@ where
 
 pub fn prepare_thread_handler_common(
     progress_sender: Option<&Sender<ProgressData>>,
-    current_stage: u8,
-    max_stage: u8,
+    sstage: CurrentStage,
     max_value: usize,
-    checking_method: CheckingMethod,
-    tool_type: ToolType,
+    test_type: (ToolType, CheckingMethod),
 ) -> (JoinHandle<()>, Arc<AtomicBool>, Arc<AtomicUsize>, AtomicBool) {
+    let (tool_type, checking_method) = test_type;
     assert_ne!(tool_type, ToolType::None, "ToolType::None should not exist");
     let progress_thread_run = Arc::new(AtomicBool::new(true));
     let atomic_counter = Arc::new(AtomicUsize::new(0));
@@ -565,17 +575,20 @@ pub fn prepare_thread_handler_common(
             let mut time_since_last_send = SystemTime::now() - Duration::from_secs(10u64);
 
             loop {
-                if time_since_last_send.elapsed().unwrap().as_millis() > SEND_PROGRESS_DATA_TIME_BETWEEN as u128 {
-                    progress_send
-                        .send(ProgressData {
-                            checking_method,
-                            current_stage,
-                            max_stage,
-                            entries_checked: atomic_counter.load(atomic::Ordering::Relaxed),
-                            entries_to_check: max_value,
-                            tool_type,
-                        })
-                        .unwrap();
+                if time_since_last_send.elapsed().expect("Cannot count time backwards").as_millis() > SEND_PROGRESS_DATA_TIME_BETWEEN as u128 {
+                    let progress_data = ProgressData {
+                        sstage,
+                        checking_method,
+                        current_stage_idx: sstage.get_current_stage(),
+                        max_stage_idx: tool_type.get_max_stage(checking_method),
+                        entries_checked: atomic_counter.load(atomic::Ordering::Relaxed),
+                        entries_to_check: max_value,
+                        tool_type,
+                    };
+
+                    progress_data.validate();
+
+                    progress_send.send(progress_data).expect("Cannot send progress data");
                     time_since_last_send = SystemTime::now();
                 }
                 if !progress_thread_run.load(atomic::Ordering::Relaxed) {
@@ -603,7 +616,7 @@ pub fn check_if_stop_received(stop_receiver: Option<&crossbeam_channel::Receiver
 #[fun_time(message = "send_info_and_wait_for_ending_all_threads", level = "debug")]
 pub fn send_info_and_wait_for_ending_all_threads(progress_thread_run: &Arc<AtomicBool>, progress_thread_handle: JoinHandle<()>) {
     progress_thread_run.store(false, atomic::Ordering::Relaxed);
-    progress_thread_handle.join().unwrap();
+    progress_thread_handle.join().expect("Cannot join progress thread - quite fatal error, but happens rarely");
 }
 
 #[cfg(test)]
@@ -619,24 +632,24 @@ mod test {
 
     #[test]
     fn test_remove_folder_if_contains_only_empty_folders() {
-        let dir = tempdir().unwrap();
+        let dir = tempdir().expect("Cannot create temporary directory");
         let sub_dir = dir.path().join("sub_dir");
-        fs::create_dir(&sub_dir).unwrap();
+        fs::create_dir(&sub_dir).expect("Cannot create directory");
 
         // Test with empty directory
         assert!(remove_folder_if_contains_only_empty_folders(&sub_dir, false).is_ok());
         assert!(!Path::new(&sub_dir).exists());
 
         // Test with directory containing an empty directory
-        fs::create_dir(&sub_dir).unwrap();
-        fs::create_dir(sub_dir.join("empty_sub_dir")).unwrap();
+        fs::create_dir(&sub_dir).expect("Cannot create directory");
+        fs::create_dir(sub_dir.join("empty_sub_dir")).expect("Cannot create directory");
         assert!(remove_folder_if_contains_only_empty_folders(&sub_dir, false).is_ok());
         assert!(!Path::new(&sub_dir).exists());
 
         // Test with directory containing a file
-        fs::create_dir(&sub_dir).unwrap();
-        let mut file = fs::File::create(sub_dir.join("file.txt")).unwrap();
-        writeln!(file, "Hello, world!").unwrap();
+        fs::create_dir(&sub_dir).expect("Cannot create directory");
+        let mut file = fs::File::create(sub_dir.join("file.txt")).expect("Cannot create file");
+        writeln!(file, "Hello, world!").expect("Cannot write to file");
         assert!(remove_folder_if_contains_only_empty_folders(&sub_dir, false).is_err());
         assert!(Path::new(&sub_dir).exists());
     }

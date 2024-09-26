@@ -3,19 +3,19 @@ name = "czkawka_gui"
 version = "7.0.0"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2021"
-rust-version = "1.75.0"
+rust-version = "1.79.0"
 description = "GTK frontend of Czkawka"
 license = "MIT"
 homepage = "https://github.com/qarmin/czkawka"
 repository = "https://github.com/qarmin/czkawka"
 
 [dependencies]
-gdk4 = "0.8"
-glib = "0.19"
-gtk4 = { version = "0.8", default-features = false, features = ["v4_6"] }
+gdk4 = "0.9"
+glib = "0.20"
+gtk4 = { version = "0.9", default-features = false, features = ["v4_6"] }
 
 humansize = "2.1"
-chrono = "0.4.34"
+chrono = "0.4.38"
 
 # Used for sending stop signal across threads
 crossbeam-channel = "0.5"
@@ -24,33 +24,33 @@ crossbeam-channel = "0.5"
 directories-next = "2.0"
 
 # For opening files
-open = "5.0"
+open = "5.3"
 
 # To get image preview
-image = "0.24"
+image = "0.25"
 
 # To be able to use custom select
 regex = "1.10"
 
 # To get image_hasher types
-image_hasher = "1.2"
+image_hasher = "2.0"
 
 # Move files to trash
-trash = "3.3"
+trash = "5.1"
 
 # For moving files(why std::fs doesn't have such features?)
 fs_extra = "1.3"
 
 # Language
-i18n-embed = { version = "0.14", features = ["fluent-system", "desktop-requester"] }
-i18n-embed-fl = "0.8"
-rust-embed = { version = "8.2", features = ["debug-embed"] }
+i18n-embed = { version = "0.15", features = ["fluent-system", "desktop-requester"] }
+i18n-embed-fl = "0.9"
+rust-embed = { version = "8.5", features = ["debug-embed"] }
 once_cell = "1.19"
 
-log = "0.4.20"
+log = "0.4.22"
 handsome_logger = "0.8"
 fun_time = { version = "0.3", features = ["log"] }
-rayon = "1.8"
+rayon = "1.10"
 
 czkawka_core = { path = "../czkawka_core", version = "7.0.0", features = [] }
 

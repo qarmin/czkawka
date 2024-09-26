@@ -61,57 +61,60 @@ impl GuiSettings {
         let glade_src = include_str!("../../ui/settings.ui").to_string();
         let builder = Builder::from_string(glade_src.as_str());
 
-        let window_settings: Window = builder.object("window_settings").unwrap();
+        let window_settings: Window = builder.object("window_settings").expect("Cambalache");
         window_settings.set_title(Some(&flg!("window_settings_title")));
         window_settings.set_modal(true);
         window_settings.set_transient_for(Some(window_main));
 
-        let notebook_settings: gtk4::Notebook = builder.object("notebook_settings").unwrap();
+        let notebook_settings: gtk4::Notebook = builder.object("notebook_settings").expect("Cambalache");
 
         // General
-        let check_button_settings_one_filesystem: gtk4::CheckButton = builder.object("check_button_settings_one_filesystem").unwrap();
-        let check_button_settings_save_at_exit: gtk4::CheckButton = builder.object("check_button_settings_save_at_exit").unwrap();
-        let check_button_settings_load_at_start: gtk4::CheckButton = builder.object("check_button_settings_load_at_start").unwrap();
-        let check_button_settings_confirm_deletion: gtk4::CheckButton = builder.object("check_button_settings_confirm_deletion").unwrap();
-        let check_button_settings_confirm_link: gtk4::CheckButton = builder.object("check_button_settings_confirm_link").unwrap();
-        let check_button_settings_confirm_group_deletion: gtk4::CheckButton = builder.object("check_button_settings_confirm_group_deletion").unwrap();
-        let check_button_settings_show_text_view: gtk4::CheckButton = builder.object("check_button_settings_show_text_view").unwrap();
-        let check_button_settings_use_cache: gtk4::CheckButton = builder.object("check_button_settings_use_cache").unwrap();
-        let check_button_settings_save_also_json: gtk4::CheckButton = builder.object("check_button_settings_save_also_json").unwrap();
-        let check_button_settings_use_trash: gtk4::CheckButton = builder.object("check_button_settings_use_trash").unwrap();
-        let label_settings_general_language: gtk4::Label = builder.object("label_settings_general_language").unwrap();
-        let combo_box_settings_language: gtk4::ComboBoxText = builder.object("combo_box_settings_language").unwrap();
-        let label_settings_number_of_threads: gtk4::Label = builder.object("label_settings_number_of_threads").unwrap();
-        let scale_settings_number_of_threads: gtk4::Scale = builder.object("scale_settings_number_of_threads").unwrap();
-        let label_restart_needed: gtk4::Label = builder.object("label_restart_needed").unwrap();
+        let check_button_settings_one_filesystem: gtk4::CheckButton = builder.object("check_button_settings_one_filesystem").expect("Cambalache");
+        let check_button_settings_save_at_exit: gtk4::CheckButton = builder.object("check_button_settings_save_at_exit").expect("Cambalache");
+        let check_button_settings_load_at_start: gtk4::CheckButton = builder.object("check_button_settings_load_at_start").expect("Cambalache");
+        let check_button_settings_confirm_deletion: gtk4::CheckButton = builder.object("check_button_settings_confirm_deletion").expect("Cambalache");
+        let check_button_settings_confirm_link: gtk4::CheckButton = builder.object("check_button_settings_confirm_link").expect("Cambalache");
+        let check_button_settings_confirm_group_deletion: gtk4::CheckButton = builder.object("check_button_settings_confirm_group_deletion").expect("Cambalache");
+        let check_button_settings_show_text_view: gtk4::CheckButton = builder.object("check_button_settings_show_text_view").expect("Cambalache");
+        let check_button_settings_use_cache: gtk4::CheckButton = builder.object("check_button_settings_use_cache").expect("Cambalache");
+        let check_button_settings_save_also_json: gtk4::CheckButton = builder.object("check_button_settings_save_also_json").expect("Cambalache");
+        let check_button_settings_use_trash: gtk4::CheckButton = builder.object("check_button_settings_use_trash").expect("Cambalache");
+        let label_settings_general_language: gtk4::Label = builder.object("label_settings_general_language").expect("Cambalache");
+        let combo_box_settings_language: gtk4::ComboBoxText = builder.object("combo_box_settings_language").expect("Cambalache");
+        let label_settings_number_of_threads: gtk4::Label = builder.object("label_settings_number_of_threads").expect("Cambalache");
+        let scale_settings_number_of_threads: gtk4::Scale = builder.object("scale_settings_number_of_threads").expect("Cambalache");
+        let label_restart_needed: gtk4::Label = builder.object("label_restart_needed").expect("Cambalache");
 
         // Duplicates
-        let check_button_settings_hide_hard_links: gtk4::CheckButton = builder.object("check_button_settings_hide_hard_links").unwrap();
-        let entry_settings_cache_file_minimal_size: gtk4::Entry = builder.object("entry_settings_cache_file_minimal_size").unwrap();
-        let check_button_settings_show_preview_duplicates: gtk4::CheckButton = builder.object("check_button_settings_show_preview_duplicates").unwrap();
-        let check_button_settings_duplicates_delete_outdated_cache: gtk4::CheckButton = builder.object("check_button_settings_duplicates_delete_outdated_cache").unwrap();
-        let button_settings_duplicates_clear_cache: gtk4::Button = builder.object("button_settings_duplicates_clear_cache").unwrap();
-        let check_button_duplicates_use_prehash_cache: gtk4::CheckButton = builder.object("check_button_duplicates_use_prehash_cache").unwrap();
-        let entry_settings_prehash_cache_file_minimal_size: gtk4::Entry = builder.object("entry_settings_prehash_cache_file_minimal_size").unwrap();
-        let label_settings_duplicate_minimal_size_cache: gtk4::Label = builder.object("label_settings_duplicate_minimal_size_cache").unwrap();
-        let label_settings_duplicate_minimal_size_cache_prehash: gtk4::Label = builder.object("label_settings_duplicate_minimal_size_cache_prehash").unwrap();
+        let check_button_settings_hide_hard_links: gtk4::CheckButton = builder.object("check_button_settings_hide_hard_links").expect("Cambalache");
+        let entry_settings_cache_file_minimal_size: gtk4::Entry = builder.object("entry_settings_cache_file_minimal_size").expect("Cambalache");
+        let check_button_settings_show_preview_duplicates: gtk4::CheckButton = builder.object("check_button_settings_show_preview_duplicates").expect("Cambalache");
+        let check_button_settings_duplicates_delete_outdated_cache: gtk4::CheckButton =
+            builder.object("check_button_settings_duplicates_delete_outdated_cache").expect("Cambalache");
+        let button_settings_duplicates_clear_cache: gtk4::Button = builder.object("button_settings_duplicates_clear_cache").expect("Cambalache");
+        let check_button_duplicates_use_prehash_cache: gtk4::CheckButton = builder.object("check_button_duplicates_use_prehash_cache").expect("Cambalache");
+        let entry_settings_prehash_cache_file_minimal_size: gtk4::Entry = builder.object("entry_settings_prehash_cache_file_minimal_size").expect("Cambalache");
+        let label_settings_duplicate_minimal_size_cache: gtk4::Label = builder.object("label_settings_duplicate_minimal_size_cache").expect("Cambalache");
+        let label_settings_duplicate_minimal_size_cache_prehash: gtk4::Label = builder.object("label_settings_duplicate_minimal_size_cache_prehash").expect("Cambalache");
 
         // Similar Images
-        let check_button_settings_show_preview_similar_images: gtk4::CheckButton = builder.object("check_button_settings_show_preview_similar_images").unwrap();
-        let check_button_settings_similar_images_delete_outdated_cache: gtk4::CheckButton = builder.object("check_button_settings_similar_images_delete_outdated_cache").unwrap();
-        let button_settings_similar_images_clear_cache: gtk4::Button = builder.object("button_settings_similar_images_clear_cache").unwrap();
+        let check_button_settings_show_preview_similar_images: gtk4::CheckButton = builder.object("check_button_settings_show_preview_similar_images").expect("Cambalache");
+        let check_button_settings_similar_images_delete_outdated_cache: gtk4::CheckButton =
+            builder.object("check_button_settings_similar_images_delete_outdated_cache").expect("Cambalache");
+        let button_settings_similar_images_clear_cache: gtk4::Button = builder.object("button_settings_similar_images_clear_cache").expect("Cambalache");
 
         // Similar Videos
-        let check_button_settings_similar_videos_delete_outdated_cache: gtk4::CheckButton = builder.object("check_button_settings_similar_videos_delete_outdated_cache").unwrap();
-        let button_settings_similar_videos_clear_cache: gtk4::Button = builder.object("button_settings_similar_videos_clear_cache").unwrap();
+        let check_button_settings_similar_videos_delete_outdated_cache: gtk4::CheckButton =
+            builder.object("check_button_settings_similar_videos_delete_outdated_cache").expect("Cambalache");
+        let button_settings_similar_videos_clear_cache: gtk4::Button = builder.object("button_settings_similar_videos_clear_cache").expect("Cambalache");
 
         // Saving/Loading/Resetting configuration
-        let button_settings_save_configuration: gtk4::Button = builder.object("button_settings_save_configuration").unwrap();
-        let button_settings_load_configuration: gtk4::Button = builder.object("button_settings_load_configuration").unwrap();
-        let button_settings_reset_configuration: gtk4::Button = builder.object("button_settings_reset_configuration").unwrap();
+        let button_settings_save_configuration: gtk4::Button = builder.object("button_settings_save_configuration").expect("Cambalache");
+        let button_settings_load_configuration: gtk4::Button = builder.object("button_settings_load_configuration").expect("Cambalache");
+        let button_settings_reset_configuration: gtk4::Button = builder.object("button_settings_reset_configuration").expect("Cambalache");
 
-        let button_settings_open_cache_folder: gtk4::Button = builder.object("button_settings_open_cache_folder").unwrap();
-        let button_settings_open_settings_folder: gtk4::Button = builder.object("button_settings_open_settings_folder").unwrap();
+        let button_settings_open_cache_folder: gtk4::Button = builder.object("button_settings_open_cache_folder").expect("Cambalache");
+        let button_settings_open_settings_folder: gtk4::Button = builder.object("button_settings_open_settings_folder").expect("Cambalache");
 
         Self {
             window_settings,
@@ -274,9 +277,9 @@ impl GuiSettings {
         for (index, fl_thing) in names.iter().enumerate() {
             self.notebook_settings
                 .tab_label(&vec_children[index])
-                .unwrap()
+                .expect("Couldn't get tab label")
                 .downcast::<gtk4::Label>()
-                .unwrap()
+                .expect("Couldn't downcast to Label")
                 .set_text(fl_thing);
         }
     }

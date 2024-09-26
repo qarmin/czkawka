@@ -11,8 +11,8 @@ pub struct GuiHeader {
 
 impl GuiHeader {
     pub fn create_from_builder(builder: &gtk4::Builder) -> Self {
-        let button_settings: gtk4::Button = builder.object("button_settings").unwrap();
-        let button_app_info: gtk4::Button = builder.object("button_app_info").unwrap();
+        let button_settings: gtk4::Button = builder.object("button_settings").expect("Cambalache");
+        let button_app_info: gtk4::Button = builder.object("button_app_info").expect("Cambalache");
 
         set_icon_of_button(&button_settings, CZK_ICON_SETTINGS);
         set_icon_of_button(&button_app_info, CZK_ICON_INFO);
