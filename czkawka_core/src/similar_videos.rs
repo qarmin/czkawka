@@ -4,16 +4,6 @@ use std::mem;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::Ordering;
 
-use crossbeam_channel::{Receiver, Sender};
-use ffmpeg_cmdline_utils::FfmpegErrorKind::FfmpegNotFound;
-use fun_time::fun_time;
-use humansize::{format_size, BINARY};
-use log::debug;
-use rayon::prelude::*;
-use serde::{Deserialize, Serialize};
-use vid_dup_finder_lib::HashCreationErrorKind::DetermineVideo;
-use vid_dup_finder_lib::{NormalizedTolerance, VideoHash};
-
 use crate::common::{check_if_stop_received, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, VIDEO_FILES_EXTENSIONS};
 use crate::common_cache::{extract_loaded_cache, get_similar_videos_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{inode, take_1_per_inode, DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
@@ -21,6 +11,13 @@ use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::{DebugPrint, PrintResults, ResultEntry};
 use crate::flc;
 use crate::progress_data::{CurrentStage, ProgressData};
+use crossbeam_channel::{Receiver, Sender};
+use fun_time::fun_time;
+use humansize::{format_size, BINARY};
+use log::debug;
+use rayon::prelude::*;
+use serde::{Deserialize, Serialize};
+use vid_dup_finder_lib::VideoHash;
 
 pub const MAX_TOLERANCE: i32 = 20;
 
@@ -296,7 +293,11 @@ impl SimilarVideos {
 
     #[fun_time(message = "match_groups_of_videos", level = "debug")]
     fn match_groups_of_videos(&mut self, vector_of_hashes: Vec<VideoHash>, hashmap_with_file_entries: &HashMap<String, VideosEntry>) {
-        let match_group = vid_dup_finder_lib::search(vector_of_hashes, NormalizedTolerance::new(self.get_params().tolerance as f64 / 100.0f64));
+        // Tolerance in library is a value between 0 and 1
+        // Tolerance in this app is a value between 0 and 20
+        // Default tolerance in library is 0.30
+        // We need to allow to set value in range 0 - 0.5
+        let match_group = vid_dup_finder_lib::search(vector_of_hashes, self.get_params().tolerance as f64 / 40.0f64);
         let mut collected_similar_videos: Vec<Vec<VideosEntry>> = Default::default();
         for i in match_group {
             let mut temp_vector: Vec<VideosEntry> = Vec::new();
@@ -405,14 +406,11 @@ impl PrintResults for SimilarVideos {
 }
 
 pub fn check_if_ffmpeg_is_installed() -> bool {
-    let vid = "9999czekoczekoczekolada999.txt";
-    if let Err(DetermineVideo {
-        src_path: _a,
-        error: FfmpegNotFound,
-    }) = VideoHash::from_path(vid)
-    {
-        return false;
-    }
+    // let vid = "9999czekoczekoczekolada999.txt";
+    // TODO looks that in this version we cannot check if ffmpeg is installed
+    // if let Err(HashCreationErrorKind::NotVideo(_)) = VideoHash::from_path(vid) {
+    //     return false;
+    // }
     true
 }
 
