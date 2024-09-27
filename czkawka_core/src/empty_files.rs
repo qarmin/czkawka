@@ -128,7 +128,7 @@ impl PrintResults for EmptyFiles {
         if !self.empty_files.is_empty() {
             writeln!(writer, "Found {} empty files.", self.information.number_of_empty_files)?;
             for file_entry in &self.empty_files {
-                writeln!(writer, "{:?}", file_entry.path)?;
+                writeln!(writer, "\"{}\"", file_entry.path.to_string_lossy())?;
             }
         } else {
             write!(writer, "Not found any empty files.")?;

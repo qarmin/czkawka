@@ -9,7 +9,7 @@ use bk_tree::BKTree;
 use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
 use humansize::{format_size, BINARY};
-use image::GenericImageView;
+use image::{DynamicImage, GenericImageView};
 use image_hasher::{FilterType, HashAlg, HasherConfig};
 use log::debug;
 use rayon::prelude::*;
@@ -21,7 +21,7 @@ use crate::common::{
     check_if_stop_received, create_crash_message, delete_files_custom, get_dynamic_image_from_raw_image, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads,
     HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS,
 };
-use crate::common_cache::{get_similar_images_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
+use crate::common_cache::{extract_loaded_cache, get_similar_images_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{inode, take_1_per_inode, DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::{DebugPrint, PrintResults, ResultEntry};
@@ -257,13 +257,12 @@ impl SimilarImages {
             loaded_hash_map = loaded_items.unwrap_or_default();
 
             debug!("hash_images-load_cache - starting calculating diff");
-            for (name, file_entry) in mem::take(&mut self.images_to_check) {
-                if let Some(cached_file_entry) = loaded_hash_map.get(&name) {
-                    records_already_cached.insert(name, cached_file_entry.clone());
-                } else {
-                    non_cached_files_to_check.insert(name, file_entry);
-                }
-            }
+            extract_loaded_cache(
+                &loaded_hash_map,
+                mem::take(&mut self.images_to_check),
+                &mut records_already_cached,
+                &mut non_cached_files_to_check,
+            );
             debug!(
                 "hash_images_load_cache - completed diff between loaded and prechecked files, {}({}) - non cached, {}({}) - already cached",
                 non_cached_files_to_check.len(),
@@ -303,7 +302,7 @@ impl SimilarImages {
             .collect::<BTreeMap<_, _>>();
 
         debug!("hash_images - start hashing images");
-        let mut vec_file_entry: Vec<ImagesEntry> = non_cached_files_to_check
+        let (mut vec_file_entry, errors): (Vec<ImagesEntry>, Vec<String>) = non_cached_files_to_check
             .into_par_iter()
             .map(|(_s, mut file_entry)| {
                 atomic_counter.fetch_add(1, Ordering::Relaxed);
@@ -311,13 +310,19 @@ impl SimilarImages {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
-                self.collect_image_file_entry(&mut file_entry);
+                if let Err(e) = self.collect_image_file_entry(&mut file_entry) {
+                    return Some(Err(e));
+                }
 
-                Some(Some(file_entry))
+                Some(Ok(file_entry))
             })
             .while_some()
-            .filter_map(|e| e)
-            .collect::<Vec<ImagesEntry>>();
+            .partition_map(|res| match res {
+                Ok(entry) => itertools::Either::Left(entry),
+                Err(err) => itertools::Either::Right(err),
+            });
+
+        self.common_data.text_messages.errors.extend(errors);
         debug!("hash_images - end hashing {} images", vec_file_entry.len());
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
@@ -364,7 +369,7 @@ impl SimilarImages {
         }
     }
 
-    fn collect_image_file_entry(&self, file_entry: &mut ImagesEntry) {
+    fn collect_image_file_entry(&self, file_entry: &mut ImagesEntry) -> Result<(), String> {
         let img;
 
         if file_entry.image_type == ImageType::Heic {
@@ -372,44 +377,24 @@ impl SimilarImages {
             {
                 img = match get_dynamic_image_from_heic(&file_entry.path.to_string_lossy()) {
                     Ok(t) => t,
-                    Err(_) => {
-                        return;
+                    Err(e) => {
+                        return Err(format!("Cannot open HEIC file \"{}\": {}", file_entry.path.to_string_lossy(), e));
                     }
                 };
             }
             #[cfg(not(feature = "heif"))]
             {
-                if let Ok(image_result) = panic::catch_unwind(|| image::open(&file_entry.path)) {
-                    if let Ok(image2) = image_result {
-                        img = image2;
-                    } else {
-                        return;
-                    }
-                } else {
-                    let message = crate::common::create_crash_message("Image-rs", &file_entry.path.to_string_lossy(), "https://github.com/image-rs/image/issues");
-                    println!("{message}");
-                    return;
-                }
+                img = Self::get_normal_heif_image(file_entry)?;
             }
         } else {
             match file_entry.image_type {
                 ImageType::Normal | ImageType::Heic => {
-                    if let Ok(image_result) = panic::catch_unwind(|| image::open(&file_entry.path)) {
-                        if let Ok(image2) = image_result {
-                            img = image2;
-                        } else {
-                            return;
-                        }
-                    } else {
-                        let message = create_crash_message("Image-rs", &file_entry.path.to_string_lossy(), "https://github.com/image-rs/image/issues");
-                        println!("{message}");
-                        return;
-                    }
+                    img = Self::get_normal_heif_image(file_entry)?;
                 }
                 ImageType::Raw => {
                     img = match get_dynamic_image_from_raw_image(&file_entry.path) {
-                        Some(t) => t,
-                        None => return,
+                        Ok(t) => t,
+                        Err(e) => return Err(format!("Cannot open RAW file \"{}\": {}", file_entry.path.to_string_lossy(), e)),
                     };
                 }
                 _ => {
@@ -431,6 +416,21 @@ impl SimilarImages {
 
         let hash = hasher.hash_image(&img);
         file_entry.hash = hash.as_bytes().to_vec();
+
+        Ok(())
+    }
+
+    fn get_normal_heif_image(file_entry: &ImagesEntry) -> Result<DynamicImage, String> {
+        if let Ok(image_result) = panic::catch_unwind(|| image::open(&file_entry.path)) {
+            match image_result {
+                Ok(image) => Ok(image),
+                Err(e) => Err(format!("Cannot open image file \"{}\": {}", file_entry.path.to_string_lossy(), e)),
+            }
+        } else {
+            let message = create_crash_message("Image-rs", &file_entry.path.to_string_lossy(), "https://github.com/image-rs/image/issues");
+            println!("{message}");
+            Err(message)
+        }
     }
 
     // Split hashes at 2 parts, base hashes and hashes to compare, 3 argument is set of hashes with multiple images
@@ -809,8 +809,8 @@ impl PrintResults for SimilarImages {
                 for file_entry in struct_similar {
                     writeln!(
                         writer,
-                        "{:?} - {}x{} - {} - {}",
-                        file_entry.path,
+                        "\"{}\" - {}x{} - {} - {}",
+                        file_entry.path.to_string_lossy(),
                         file_entry.width,
                         file_entry.height,
                         format_size(file_entry.size, BINARY),
@@ -827,8 +827,8 @@ impl PrintResults for SimilarImages {
                 writeln!(writer)?;
                 writeln!(
                     writer,
-                    "{:?} - {}x{} - {} - {}",
-                    file_entry.path,
+                    "\"{}\" - {}x{} - {} - {}",
+                    file_entry.path.to_string_lossy(),
                     file_entry.width,
                     file_entry.height,
                     format_size(file_entry.size, BINARY),

@@ -95,11 +95,12 @@ fn load_image(image_path: &Path) -> Option<(Duration, DynamicImage)> {
                 }
             }
         } else if is_raw_image {
-            if let Some(img) = get_dynamic_image_from_raw_image(image_name) {
-                img
-            } else {
-                error!("Error while loading raw image - not sure why - try to guess");
-                return None;
+            match get_dynamic_image_from_raw_image(image_name) {
+                Ok(img) => img,
+                Err(e) => {
+                    error!("Error while loading raw image: {}", e);
+                    return None;
+                }
             }
         } else {
             return None;

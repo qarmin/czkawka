@@ -205,7 +205,7 @@ impl DuplicateFinder {
             |fe: &FileEntry| {
                 fe.path
                     .file_name()
-                    .unwrap_or_else(|| panic!("Found invalid file_name {:?}", fe.path))
+                    .unwrap_or_else(|| panic!("Found invalid file_name \"{}\"", fe.path.to_string_lossy()))
                     .to_string_lossy()
                     .to_string()
             }
@@ -213,7 +213,7 @@ impl DuplicateFinder {
             |fe: &FileEntry| {
                 fe.path
                     .file_name()
-                    .unwrap_or_else(|| panic!("Found invalid file_name {:?}", fe.path))
+                    .unwrap_or_else(|| panic!("Found invalid file_name \"{}\"", fe.path.to_string_lossy()))
                     .to_string_lossy()
                     .to_lowercase()
             }
@@ -294,7 +294,7 @@ impl DuplicateFinder {
                     fe.size,
                     fe.path
                         .file_name()
-                        .unwrap_or_else(|| panic!("Found invalid file_name {:?}", fe.path))
+                        .unwrap_or_else(|| panic!("Found invalid file_name \"{}\"", fe.path.to_string_lossy()))
                         .to_string_lossy()
                         .to_string(),
                 )
@@ -305,7 +305,7 @@ impl DuplicateFinder {
                     fe.size,
                     fe.path
                         .file_name()
-                        .unwrap_or_else(|| panic!("Found invalid file_name {:?}", fe.path))
+                        .unwrap_or_else(|| panic!("Found invalid file_name \"{}\"", fe.path.to_string_lossy()))
                         .to_string_lossy()
                         .to_lowercase(),
                 )
@@ -486,32 +486,12 @@ impl DuplicateFinder {
             self.get_text_messages_mut().extend_with_another_messages(messages);
             loaded_hash_map = loaded_items.unwrap_or_default();
 
-            debug!("prehash_load_cache_at_start - started diff between loaded and prechecked files");
-            for (size, mut vec_file_entry) in mem::take(&mut self.files_with_identical_size) {
-                if let Some(cached_vec_file_entry) = loaded_hash_map.get(&size) {
-                    // TODO maybe hashmap is not needed when using < 4 elements
-                    let mut cached_path_entries: HashMap<&Path, DuplicateEntry> = HashMap::new();
-                    for file_entry in cached_vec_file_entry {
-                        cached_path_entries.insert(&file_entry.path, file_entry.clone());
-                    }
-                    for file_entry in vec_file_entry {
-                        if let Some(cached_file_entry) = cached_path_entries.remove(file_entry.path.as_path()) {
-                            records_already_cached.entry(size).or_default().push(cached_file_entry);
-                        } else {
-                            non_cached_files_to_check.entry(size).or_default().push(file_entry);
-                        }
-                    }
-                } else {
-                    non_cached_files_to_check.entry(size).or_default().append(&mut vec_file_entry);
-                }
-            }
-
-            debug!(
-                "prehash_load_cache_at_start - completed diff between loaded and prechecked files, {}({}) - non cached, {}({}) - already cached",
-                non_cached_files_to_check.values().map(Vec::len).sum::<usize>(),
-                format_size(non_cached_files_to_check.values().map(|v| v.iter().map(|e| e.size).sum::<u64>()).sum::<u64>(), BINARY),
-                records_already_cached.values().map(Vec::len).sum::<usize>(),
-                format_size(records_already_cached.values().map(|v| v.iter().map(|e| e.size).sum::<u64>()).sum::<u64>(), BINARY),
+            Self::diff_loaded_and_prechecked_files(
+                "prehash_load_cache_at_start",
+                mem::take(&mut self.files_with_identical_size),
+                &loaded_hash_map,
+                &mut records_already_cached,
+                &mut non_cached_files_to_check,
             );
         } else {
             loaded_hash_map = Default::default();
@@ -644,6 +624,42 @@ impl DuplicateFinder {
         Some(())
     }
 
+    fn diff_loaded_and_prechecked_files(
+        function_name: &str,
+        used_map: BTreeMap<u64, Vec<DuplicateEntry>>,
+        loaded_hash_map: &BTreeMap<u64, Vec<DuplicateEntry>>,
+        records_already_cached: &mut BTreeMap<u64, Vec<DuplicateEntry>>,
+        non_cached_files_to_check: &mut BTreeMap<u64, Vec<DuplicateEntry>>,
+    ) {
+        debug!("{function_name} - started diff between loaded and prechecked files");
+
+        for (size, mut vec_file_entry) in used_map {
+            if let Some(cached_vec_file_entry) = loaded_hash_map.get(&size) {
+                // TODO maybe hashmap is not needed when using < 4 elements
+                let mut cached_path_entries: HashMap<&Path, DuplicateEntry> = HashMap::new();
+                for file_entry in cached_vec_file_entry {
+                    cached_path_entries.insert(&file_entry.path, file_entry.clone());
+                }
+                for file_entry in vec_file_entry {
+                    if let Some(cached_file_entry) = cached_path_entries.remove(file_entry.path.as_path()) {
+                        records_already_cached.entry(size).or_default().push(cached_file_entry);
+                    } else {
+                        non_cached_files_to_check.entry(size).or_default().push(file_entry);
+                    }
+                }
+            } else {
+                non_cached_files_to_check.entry(size).or_default().append(&mut vec_file_entry);
+            }
+        }
+        debug!(
+            "{function_name} - completed diff between loaded and prechecked files - {}({}) non cached, {}({}) already cached",
+            non_cached_files_to_check.len(),
+            format_size(non_cached_files_to_check.values().map(|v| v.iter().map(|e| e.size).sum::<u64>()).sum::<u64>(), BINARY),
+            records_already_cached.len(),
+            format_size(records_already_cached.values().map(|v| v.iter().map(|e| e.size).sum::<u64>()).sum::<u64>(), BINARY),
+        );
+    }
+
     #[fun_time(message = "full_hashing_load_cache_at_start", level = "debug")]
     fn full_hashing_load_cache_at_start(
         &mut self,
@@ -663,32 +679,12 @@ impl DuplicateFinder {
             self.get_text_messages_mut().extend_with_another_messages(messages);
             loaded_hash_map = loaded_items.unwrap_or_default();
 
-            debug!("full_hashing_load_cache_at_start - started diff between loaded and prechecked files");
-            for (size, mut vec_file_entry) in pre_checked_map {
-                if let Some(cached_vec_file_entry) = loaded_hash_map.get(&size) {
-                    // TODO maybe hashmap is not needed when using < 4 elements
-                    let mut cached_path_entries: HashMap<&Path, DuplicateEntry> = HashMap::new();
-                    for file_entry in cached_vec_file_entry {
-                        cached_path_entries.insert(&file_entry.path, file_entry.clone());
-                    }
-                    for file_entry in vec_file_entry {
-                        if let Some(cached_file_entry) = cached_path_entries.remove(file_entry.path.as_path()) {
-                            records_already_cached.entry(size).or_default().push(cached_file_entry);
-                        } else {
-                            non_cached_files_to_check.entry(size).or_default().push(file_entry);
-                        }
-                    }
-                } else {
-                    non_cached_files_to_check.entry(size).or_default().append(&mut vec_file_entry);
-                }
-            }
-
-            debug!(
-                "full_hashing_load_cache_at_start - completed diff between loaded and prechecked files - {}({}) non cached, {}({}) already cached",
-                non_cached_files_to_check.len(),
-                format_size(non_cached_files_to_check.values().map(|v| v.iter().map(|e| e.size).sum::<u64>()).sum::<u64>(), BINARY),
-                records_already_cached.len(),
-                format_size(records_already_cached.values().map(|v| v.iter().map(|e| e.size).sum::<u64>()).sum::<u64>(), BINARY),
+            Self::diff_loaded_and_prechecked_files(
+                "full_hashing_load_cache_at_start",
+                pre_checked_map,
+                &loaded_hash_map,
+                &mut records_already_cached,
+                &mut non_cached_files_to_check,
             );
         } else {
             debug!("full_hashing_load_cache_at_start - not using cache");
@@ -1043,7 +1039,7 @@ impl PrintResults for DuplicateFinder {
                     for (name, vector) in self.files_with_identical_names.iter().rev() {
                         writeln!(writer, "Name - {} - {} files ", name, vector.len())?;
                         for j in vector {
-                            writeln!(writer, "{:?}", j.path)?;
+                            writeln!(writer, "\"{}\"", j.path.to_string_lossy())?;
                         }
                         writeln!(writer)?;
                     }
@@ -1061,7 +1057,7 @@ impl PrintResults for DuplicateFinder {
                         writeln!(writer, "Name - {} - {} files ", name, vector.len())?;
                         writeln!(writer, "Reference file - {:?}", file_entry.path)?;
                         for j in vector {
-                            writeln!(writer, "{:?}", j.path)?;
+                            writeln!(writer, "\"{}\"", j.path.to_string_lossy())?;
                         }
                         writeln!(writer)?;
                     }
@@ -1083,7 +1079,7 @@ impl PrintResults for DuplicateFinder {
                     for ((size, name), vector) in self.files_with_identical_size_names.iter().rev() {
                         writeln!(writer, "Name - {}, {} - {} files ", name, format_size(*size, BINARY), vector.len())?;
                         for j in vector {
-                            writeln!(writer, "{:?}", j.path)?;
+                            writeln!(writer, "\"{}\"", j.path.to_string_lossy())?;
                         }
                         writeln!(writer)?;
                     }
@@ -1101,7 +1097,7 @@ impl PrintResults for DuplicateFinder {
                         writeln!(writer, "Name - {}, {} - {} files ", name, format_size(*size, BINARY), vector.len())?;
                         writeln!(writer, "Reference file - {:?}", file_entry.path)?;
                         for j in vector {
-                            writeln!(writer, "{:?}", j.path)?;
+                            writeln!(writer, "\"{}\"", j.path.to_string_lossy())?;
                         }
                         writeln!(writer)?;
                     }
@@ -1125,7 +1121,7 @@ impl PrintResults for DuplicateFinder {
                     for (size, vector) in self.files_with_identical_size.iter().rev() {
                         write!(writer, "\n---- Size {} ({}) - {} files \n", format_size(*size, BINARY), size, vector.len())?;
                         for file_entry in vector {
-                            writeln!(writer, "{:?}", file_entry.path)?;
+                            writeln!(writer, "\"{}\"", file_entry.path.to_string_lossy())?;
                         }
                     }
                 } else if !self.files_with_identical_size_referenced.is_empty() {
@@ -1144,7 +1140,7 @@ impl PrintResults for DuplicateFinder {
                         writeln!(writer, "\n---- Size {} ({}) - {} files", format_size(*size, BINARY), size, vector.len())?;
                         writeln!(writer, "Reference file - {:?}", file_entry.path)?;
                         for file_entry in vector {
-                            writeln!(writer, "{:?}", file_entry.path)?;
+                            writeln!(writer, "\"{}\"", file_entry.path.to_string_lossy())?;
                         }
                     }
                 } else {
@@ -1168,7 +1164,7 @@ impl PrintResults for DuplicateFinder {
                         for vector in vectors_vector {
                             writeln!(writer, "\n---- Size {} ({}) - {} files", format_size(*size, BINARY), size, vector.len())?;
                             for file_entry in vector {
-                                writeln!(writer, "{:?}", file_entry.path)?;
+                                writeln!(writer, "\"{}\"", file_entry.path.to_string_lossy())?;
                             }
                         }
                     }
@@ -1189,7 +1185,7 @@ impl PrintResults for DuplicateFinder {
                             writeln!(writer, "\n---- Size {} ({}) - {} files", format_size(*size, BINARY), size, vector.len())?;
                             writeln!(writer, "Reference file - {:?}", file_entry.path)?;
                             for file_entry in vector {
-                                writeln!(writer, "{:?}", file_entry.path)?;
+                                writeln!(writer, "\"{}\"", file_entry.path.to_string_lossy())?;
                             }
                         }
                     }
@@ -1233,7 +1229,7 @@ fn filter_hard_links(vec_file_entry: &[FileEntry]) -> Vec<FileEntry> {
     let mut identical: Vec<FileEntry> = Vec::with_capacity(vec_file_entry.len());
     for f in vec_file_entry {
         if let Ok(meta) = file_id::get_low_res_file_id(&f.path) {
-            if let file_id::FileId::HighRes {file_id, ..} = meta {
+            if let file_id::FileId::HighRes { file_id, .. } = meta {
                 if !inodes.insert(file_id) {
                     continue;
                 }

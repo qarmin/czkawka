@@ -33,6 +33,7 @@ fn main() {
 
     for _ in 0..ATTEMPTS {
         test_empty_files();
+        test_big_files();
         test_smallest_files();
         test_biggest_files();
         test_empty_folders();
@@ -373,6 +374,11 @@ fn test_empty_files() {
     run_test(&["empty-files", "-d", "TestFiles", "-D"], vec!["EmptyFile"], vec![], vec![]);
 }
 
+fn test_big_files() {
+    info!("test_big_files");
+    run_test(&["big", "-d", "TestFiles", "-n", "2", "-D"], vec!["Music/M4.mp3", "Videos/V3.webm"], vec![], vec![]);
+}
+
 ////////////////////////////////////
 ////////////////////////////////////
 /////////HELPER FUNCTIONS///////////
@@ -454,8 +460,7 @@ fn collect_all_files_and_dirs(dir: &str) -> std::io::Result<CollectedFiles> {
     let mut symlinks = BTreeSet::new();
 
     let mut folders_to_check = vec![dir.to_string()];
-    while !folders_to_check.is_empty() {
-        let folder = folders_to_check.pop().expect("Should not fail in tests");
+    while let Some(folder) = folders_to_check.pop() {
         let rd = fs::read_dir(folder)?;
         for entry in rd {
             let entry = entry?;
@@ -470,7 +475,7 @@ fn collect_all_files_and_dirs(dir: &str) -> std::io::Result<CollectedFiles> {
             } else if file_type.is_file() {
                 files.insert(path_str);
             } else {
-                panic!("Unknown type of file {path_str:?}");
+                panic!("Unknown type of file {path_str}");
             }
         }
     }

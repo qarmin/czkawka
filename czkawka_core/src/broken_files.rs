@@ -9,7 +9,7 @@ use crate::common::{
     check_if_stop_received, create_crash_message, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, AUDIO_FILES_EXTENSIONS,
     IMAGE_RS_BROKEN_FILES_EXTENSIONS, PDF_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS,
 };
-use crate::common_cache::{get_broken_files_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
+use crate::common_cache::{extract_loaded_cache, get_broken_files_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::*;
@@ -284,13 +284,7 @@ impl BrokenFiles {
             self.get_text_messages_mut().extend_with_another_messages(messages);
             loaded_hash_map = loaded_items.unwrap_or_default();
 
-            for (name, file_entry) in files_to_check {
-                if let Some(cached_file_entry) = loaded_hash_map.get(&name) {
-                    records_already_cached.insert(name, cached_file_entry.clone());
-                } else {
-                    non_cached_files_to_check.insert(name, file_entry);
-                }
-            }
+            extract_loaded_cache(&loaded_hash_map, files_to_check, &mut records_already_cached, &mut non_cached_files_to_check);
         } else {
             loaded_hash_map = Default::default();
             non_cached_files_to_check = files_to_check;
@@ -421,7 +415,7 @@ impl PrintResults for BrokenFiles {
         if !self.broken_files.is_empty() {
             writeln!(writer, "Found {} broken files.", self.information.number_of_broken_files)?;
             for file_entry in &self.broken_files {
-                writeln!(writer, "{:?} - {}", file_entry.path, file_entry.error_string)?;
+                writeln!(writer, "\"{}\" - {}", file_entry.path.to_string_lossy(), file_entry.error_string)?;
             }
         } else {
             write!(writer, "Not found any broken files.")?;
@@ -462,7 +456,7 @@ fn check_extension_availability(
     } else if pdf_extensions.contains(&extension_lowercase.as_str()) {
         TypeOfFile::PDF
     } else {
-        eprintln!("File with unknown extension: {full_name:?} - {extension_lowercase}");
+        eprintln!("File with unknown extension: \"{}\" - {extension_lowercase}", full_name.to_string_lossy());
         debug_assert!(false, "File with unknown extension");
         TypeOfFile::Unknown
     }

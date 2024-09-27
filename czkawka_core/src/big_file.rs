@@ -17,7 +17,7 @@ pub enum SearchMode {
     SmallestFiles,
 }
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct Info {
     pub number_of_real_files: usize,
 }
@@ -126,8 +126,8 @@ impl DebugPrint for BigFile {
         }
 
         println!("### INDIVIDUAL DEBUG PRINT ###");
-        println!("Big files size {} in {} groups", self.information.number_of_real_files, self.big_files.len());
-        println!("Number of files to check - {:?}", self.get_params().number_of_files_to_check);
+        println!("Info: {:?}", self.information);
+        println!("Number of files to check - {}", self.get_params().number_of_files_to_check);
         self.debug_print_common();
         println!("-----------------------------------------");
     }
@@ -150,7 +150,13 @@ impl PrintResults for BigFile {
                 writeln!(writer, "{} the smallest files.\n\n", self.information.number_of_real_files)?;
             }
             for file_entry in &self.big_files {
-                writeln!(writer, "{} ({}) - {:?}", format_size(file_entry.size, BINARY), file_entry.size, file_entry.path)?;
+                writeln!(
+                    writer,
+                    "{} ({}) - \"{}\"",
+                    format_size(file_entry.size, BINARY),
+                    file_entry.size,
+                    file_entry.path.to_string_lossy()
+                )?;
             }
         } else {
             writeln!(writer, "Not found any files.")?;

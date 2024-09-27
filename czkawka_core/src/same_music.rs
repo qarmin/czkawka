@@ -28,7 +28,7 @@ use crate::common::{
     check_if_stop_received, create_crash_message, delete_files_custom, filter_reference_folders_generic, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads,
     AUDIO_FILES_EXTENSIONS,
 };
-use crate::common_cache::{get_similar_music_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
+use crate::common_cache::{extract_loaded_cache, get_similar_music_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::*;
@@ -246,13 +246,12 @@ impl SameMusic {
             loaded_hash_map = loaded_items.unwrap_or_default();
 
             debug!("load_cache - Starting to check for differences");
-            for (name, file_entry) in mem::take(&mut self.music_to_check) {
-                if let Some(cached_file_entry) = loaded_hash_map.get(&name) {
-                    records_already_cached.insert(name, cached_file_entry.clone());
-                } else {
-                    non_cached_files_to_check.insert(name, file_entry);
-                }
-            }
+            extract_loaded_cache(
+                &loaded_hash_map,
+                mem::take(&mut self.music_to_check),
+                &mut records_already_cached,
+                &mut non_cached_files_to_check,
+            );
             debug!(
                 "load_cache - completed diff between loaded and prechecked files, {}({}) - non cached, {}({}) - already cached",
                 non_cached_files_to_check.len(),
@@ -586,38 +585,31 @@ impl SameMusic {
                 continue;
             }
 
-            let temp_collected_similar_items = files_to_compare
+            let (mut collected_similar_items, errors): (Vec<_>, Vec<_>) = files_to_compare
                 .par_iter()
                 .map(|e_entry| {
                     let e_string = e_entry.path.to_string_lossy().to_string();
                     if used_paths.contains(&e_string) || e_string == f_string {
-                        return Ok(None);
+                        return None;
                     }
                     let mut segments = match match_fingerprints(&f_entry.fingerprint, &e_entry.fingerprint, configuration) {
                         Ok(segments) => segments,
-                        Err(e) => return Err(format!("Error while comparing fingerprints: {e}")),
+                        Err(e) => return Some(Err(format!("Error while comparing fingerprints: {e}"))),
                     };
                     segments.retain(|s| s.duration(configuration) > minimum_segment_duration && s.score < maximum_difference);
                     if segments.is_empty() {
-                        Ok(None)
+                        None
                     } else {
-                        Ok(Some((e_string, e_entry)))
+                        Some(Ok((e_string, e_entry)))
                     }
                 })
-                .collect::<Vec<_>>();
+                .flatten()
+                .partition_map(|res| match res {
+                    Ok(entry) => itertools::Either::Left(entry),
+                    Err(err) => itertools::Either::Right(err),
+                });
 
-            let mut collected_similar_items = Vec::with_capacity(temp_collected_similar_items.len());
-            for result in temp_collected_similar_items {
-                match result {
-                    Ok(Some(data)) => {
-                        collected_similar_items.push(data);
-                    }
-                    Ok(None) => (),
-                    Err(e) => {
-                        self.common_data.text_messages.errors.push(e);
-                    }
-                }
-            }
+            self.common_data.text_messages.errors.extend(errors);
 
             collected_similar_items.retain(|(path, _entry)| !used_paths.contains(path));
             if !collected_similar_items.is_empty() {
@@ -930,8 +922,14 @@ impl PrintResults for SameMusic {
                 for file_entry in vec_file_entry {
                     writeln!(
                         writer,
-                        "TT: {}  -  TA: {}  -  Y: {}  -  L: {}  -  G: {}  -  B: {}  -  P: {:?}",
-                        file_entry.track_title, file_entry.track_artist, file_entry.year, file_entry.length, file_entry.genre, file_entry.bitrate, file_entry.path
+                        "TT: {}  -  TA: {}  -  Y: {}  -  L: {}  -  G: {}  -  B: {}  -  P: \"{}\"",
+                        file_entry.track_title,
+                        file_entry.track_artist,
+                        file_entry.year,
+                        file_entry.length,
+                        file_entry.genre,
+                        file_entry.bitrate,
+                        file_entry.path.to_string_lossy()
                     )?;
                 }
                 writeln!(writer)?;
@@ -943,14 +941,26 @@ impl PrintResults for SameMusic {
                 writeln!(writer)?;
                 writeln!(
                     writer,
-                    "TT: {}  -  TA: {}  -  Y: {}  -  L: {}  -  G: {}  -  B: {}  -  P: {:?}",
-                    file_entry.track_title, file_entry.track_artist, file_entry.year, file_entry.length, file_entry.genre, file_entry.bitrate, file_entry.path
+                    "TT: {}  -  TA: {}  -  Y: {}  -  L: {}  -  G: {}  -  B: {}  -  P: \"{}\"",
+                    file_entry.track_title,
+                    file_entry.track_artist,
+                    file_entry.year,
+                    file_entry.length,
+                    file_entry.genre,
+                    file_entry.bitrate,
+                    file_entry.path.to_string_lossy()
                 )?;
                 for file_entry in vec_file_entry {
                     writeln!(
                         writer,
-                        "TT: {}  -  TA: {}  -  Y: {}  -  L: {}  -  G: {}  -  B: {}  -  P: {:?}",
-                        file_entry.track_title, file_entry.track_artist, file_entry.year, file_entry.length, file_entry.genre, file_entry.bitrate, file_entry.path
+                        "TT: {}  -  TA: {}  -  Y: {}  -  L: {}  -  G: {}  -  B: {}  -  P: \"{}\"",
+                        file_entry.track_title,
+                        file_entry.track_artist,
+                        file_entry.year,
+                        file_entry.length,
+                        file_entry.genre,
+                        file_entry.bitrate,
+                        file_entry.path.to_string_lossy()
                     )?;
                 }
                 writeln!(writer)?;

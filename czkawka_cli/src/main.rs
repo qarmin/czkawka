@@ -65,8 +65,10 @@ fn main() {
         })
         .expect("Failed to spawn calculation thread");
     ctrlc::set_handler(move || {
-        println!("Get Sender");
-        stop_sender.send(()).expect("Could not send signal on channel.");
+        println!("Get Ctrl+C signal, stopping...");
+        if let Err(e) = stop_sender.send(()) {
+            eprintln!("Failed to send stop signal {e}(it is possible that the program is already stopped)");
+        };
     })
     .expect("Error setting Ctrl-C handler");
 
@@ -348,9 +350,8 @@ fn save_and_print_results<T: CommonData + PrintResults>(component: &mut T, commo
         }
     }
 
-    if !cfg!(debug_assertions) {
-        component.print_results_to_output();
-    }
+    component.print_results_to_output();
+
     component.get_text_messages().print_messages();
 }
 

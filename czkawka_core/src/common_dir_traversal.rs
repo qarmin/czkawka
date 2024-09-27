@@ -585,28 +585,8 @@ pub fn common_get_metadata_dir(entry_data: &DirEntry, warnings: &mut Vec<String>
 }
 
 pub fn common_get_entry_data_metadata<'a>(entry: &'a Result<DirEntry, std::io::Error>, warnings: &mut Vec<String>, current_folder: &Path) -> Option<(&'a DirEntry, Metadata)> {
-    let entry_data = match entry {
-        Ok(t) => t,
-        Err(e) => {
-            warnings.push(flc!(
-                "core_cannot_read_entry_dir",
-                dir = current_folder.to_string_lossy().to_string(),
-                reason = e.to_string()
-            ));
-            return None;
-        }
-    };
-    let metadata: Metadata = match entry_data.metadata() {
-        Ok(t) => t,
-        Err(e) => {
-            warnings.push(flc!(
-                "core_cannot_read_metadata_dir",
-                dir = current_folder.to_string_lossy().to_string(),
-                reason = e.to_string()
-            ));
-            return None;
-        }
-    };
+    let entry_data = common_get_entry_data(entry, warnings, current_folder)?;
+    let metadata = common_get_metadata_dir(entry_data, warnings, current_folder)?;
     Some((entry_data, metadata))
 }
 

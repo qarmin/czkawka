@@ -15,7 +15,7 @@ use vid_dup_finder_lib::HashCreationErrorKind::DetermineVideo;
 use vid_dup_finder_lib::{NormalizedTolerance, VideoHash};
 
 use crate::common::{check_if_stop_received, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, VIDEO_FILES_EXTENSIONS};
-use crate::common_cache::{get_similar_videos_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
+use crate::common_cache::{extract_loaded_cache, get_similar_videos_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{inode, take_1_per_inode, DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::{DebugPrint, PrintResults, ResultEntry};
@@ -183,13 +183,12 @@ impl SimilarVideos {
             self.get_text_messages_mut().extend_with_another_messages(messages);
             loaded_hash_map = loaded_items.unwrap_or_default();
 
-            for (name, file_entry) in mem::take(&mut self.videos_to_check) {
-                if let Some(cached_file_entry) = loaded_hash_map.get(&name) {
-                    records_already_cached.insert(name, cached_file_entry.clone());
-                } else {
-                    non_cached_files_to_check.insert(name, file_entry);
-                }
-            }
+            extract_loaded_cache(
+                &loaded_hash_map,
+                mem::take(&mut self.videos_to_check),
+                &mut records_already_cached,
+                &mut non_cached_files_to_check,
+            );
         } else {
             loaded_hash_map = Default::default();
             mem::swap(&mut self.videos_to_check, &mut non_cached_files_to_check);
@@ -373,7 +372,7 @@ impl PrintResults for SimilarVideos {
             for struct_similar in &self.similar_vectors {
                 writeln!(writer, "Found {} videos which have similar friends", struct_similar.len())?;
                 for file_entry in struct_similar {
-                    writeln!(writer, "{:?} - {}", file_entry.path, format_size(file_entry.size, BINARY))?;
+                    writeln!(writer, "\"{}\" - {}", file_entry.path.to_string_lossy(), format_size(file_entry.size, BINARY))?;
                 }
                 writeln!(writer)?;
             }
@@ -383,9 +382,9 @@ impl PrintResults for SimilarVideos {
             for (fe, struct_similar) in &self.similar_referenced_vectors {
                 writeln!(writer, "Found {} videos which have similar friends", struct_similar.len())?;
                 writeln!(writer)?;
-                writeln!(writer, "{:?} - {}", fe.path, format_size(fe.size, BINARY))?;
+                writeln!(writer, "\"{}\" - {}", fe.path.to_string_lossy(), format_size(fe.size, BINARY))?;
                 for file_entry in struct_similar {
-                    writeln!(writer, "{:?} - {}", file_entry.path, format_size(file_entry.size, BINARY))?;
+                    writeln!(writer, "\"{}\" - {}", file_entry.path.to_string_lossy(), format_size(file_entry.size, BINARY))?;
                 }
                 writeln!(writer)?;
             }

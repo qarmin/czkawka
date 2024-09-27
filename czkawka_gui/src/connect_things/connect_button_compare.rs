@@ -619,8 +619,8 @@ fn update_bottom_buttons(
     shared_using_for_preview: &Rc<RefCell<(Option<TreePath>, Option<TreePath>)>>,
     image_cache: &Rc<RefCell<Vec<(String, String, Image, Image, TreePath)>>>,
 ) {
-    let left_tree_view = (shared_using_for_preview.borrow()).0.clone().expect("Left tree_view not set");
-    let right_tree_view = (shared_using_for_preview.borrow()).1.clone().expect("Right tree_view not set");
+    let left_tree_view = shared_using_for_preview.borrow().0.clone().expect("Left tree_view not set");
+    let right_tree_view = shared_using_for_preview.borrow().1.clone().expect("Right tree_view not set");
 
     for (number, i) in get_all_direct_children(all_gtk_box).into_iter().enumerate() {
         let cache_tree_path = (*image_cache.borrow())[number].4.clone();
