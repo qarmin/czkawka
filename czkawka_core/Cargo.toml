@@ -45,7 +45,7 @@ xxhash-rust = { version = "0.8", features = ["xxh3"] }
 tempfile = "3.12"
 
 # Video Duplicates
-vid_dup_finder_lib = "0.1"
+vid_dup_finder_lib = { git = "https://github.com/Farmadupe/vid_dup_finder_lib", rev = "4015aed8efc83bf9f6643158bc714f0767d6de8a" }
 ffmpeg_cmdline_utils = "0.1"
 
 # Saving/Loading Cache
