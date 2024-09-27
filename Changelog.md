@@ -2,25 +2,33 @@
 
 ### Core
 
-- Removed some unnecessary panics
-- Simplified usage of structures when sending/receiving progress information
-- Added Median hash algorithm
-- Fixed compilation with Rust >=1.80
-- Extracted tool input parameters, that helped to find not used parameters
-- Added new mod to find similar music only in groups with similar title tag
+- Removed some unnecessary panics - [#1354](https://github.com/qarmin/czkawka/pull/1354)
+- Simplified usage of structures when sending/receiving progress
+  information - [#1354](https://github.com/qarmin/czkawka/pull/1354)
+- Added Median hash algorithm - [#1354](https://github.com/qarmin/czkawka/pull/1354)
+- Fixed compilation with Rust >=1.80 - [#1354](https://github.com/qarmin/czkawka/pull/1354)
+- Extracted tool input parameters, that helped to find not used
+  parameters - [#1354](https://github.com/qarmin/czkawka/pull/1354)
+- Added new mod to find similar music only in groups with similar title
+  tag - [#1354](https://github.com/qarmin/czkawka/pull/1354)
+- Printing to file/console no longer uses two backslashes in windows
+  paths - [#1354](https://github.com/qarmin/czkawka/pull/1354)
+- Fixed panic when failed to decode raw picture - [#1355](https://github.com/qarmin/czkawka/pull/1355)
 
 ### Krokiet
 
-- Fixed invalid default hash size in similar images
-- Fixed and added more input parameters to the application
+- Fixed invalid default hash size in similar images - [#1354](https://github.com/qarmin/czkawka/pull/1354)
+- Fixed and added more input parameters to the application - [#1354](https://github.com/qarmin/czkawka/pull/1354)
 
 ### GTK GUI
 
-- Fixed and added more input parameters to the application
+- Fixed and added more input parameters to the application - [#1355](https://github.com/qarmin/czkawka/pull/1355)
 
 ### CLI
 
-- Fixed and added more input parameters to the application
+- Fixed and added more input parameters to the application - [#1354](https://github.com/qarmin/czkawka/pull/1354)
+- Fixed crash when stopping scan mutliple times - [#1355](https://github.com/qarmin/czkawka/pull/1355)
+- Print results also in debug build - [#1355](https://github.com/qarmin/czkawka/pull/1355)
 
 ## Version 7.0.0 - 19.02.2024r
 

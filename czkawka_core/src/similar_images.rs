@@ -384,7 +384,7 @@ impl SimilarImages {
             }
             #[cfg(not(feature = "heif"))]
             {
-                img = Self::get_normal_heif_image(&file_entry)?;
+                img = Self::get_normal_heif_image(file_entry)?;
             }
         } else {
             match file_entry.image_type {

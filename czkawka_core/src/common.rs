@@ -281,7 +281,7 @@ pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path>) -> Result<Dynami
 
     let processor = Processor::new();
     let start_timer = Instant::now();
-    let processed = processor.process_8bit(&buf).expect("processing successful");
+    let processed = processor.process_8bit(&buf)?;
     println!("Processing took {:?}", start_timer.elapsed());
 
     let width = processed.width();
