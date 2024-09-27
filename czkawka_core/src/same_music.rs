@@ -28,7 +28,7 @@ use crate::common::{
     check_if_stop_received, create_crash_message, delete_files_custom, filter_reference_folders_generic, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads,
     AUDIO_FILES_EXTENSIONS,
 };
-use crate::common_cache::{get_similar_music_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
+use crate::common_cache::{extract_loaded_cache, get_similar_music_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::*;
@@ -246,13 +246,12 @@ impl SameMusic {
             loaded_hash_map = loaded_items.unwrap_or_default();
 
             debug!("load_cache - Starting to check for differences");
-            for (name, file_entry) in mem::take(&mut self.music_to_check) {
-                if let Some(cached_file_entry) = loaded_hash_map.get(&name) {
-                    records_already_cached.insert(name, cached_file_entry.clone());
-                } else {
-                    non_cached_files_to_check.insert(name, file_entry);
-                }
-            }
+            extract_loaded_cache(
+                &loaded_hash_map,
+                mem::take(&mut self.music_to_check),
+                &mut records_already_cached,
+                &mut non_cached_files_to_check,
+            );
             debug!(
                 "load_cache - completed diff between loaded and prechecked files, {}({}) - non cached, {}({}) - already cached",
                 non_cached_files_to_check.len(),

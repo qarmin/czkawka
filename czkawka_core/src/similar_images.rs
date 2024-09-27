@@ -21,7 +21,7 @@ use crate::common::{
     check_if_stop_received, create_crash_message, delete_files_custom, get_dynamic_image_from_raw_image, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads,
     HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS,
 };
-use crate::common_cache::{get_similar_images_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
+use crate::common_cache::{extract_loaded_cache, get_similar_images_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{inode, take_1_per_inode, DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::{DebugPrint, PrintResults, ResultEntry};
@@ -257,13 +257,12 @@ impl SimilarImages {
             loaded_hash_map = loaded_items.unwrap_or_default();
 
             debug!("hash_images-load_cache - starting calculating diff");
-            for (name, file_entry) in mem::take(&mut self.images_to_check) {
-                if let Some(cached_file_entry) = loaded_hash_map.get(&name) {
-                    records_already_cached.insert(name, cached_file_entry.clone());
-                } else {
-                    non_cached_files_to_check.insert(name, file_entry);
-                }
-            }
+            extract_loaded_cache(
+                &loaded_hash_map,
+                mem::take(&mut self.images_to_check),
+                &mut records_already_cached,
+                &mut non_cached_files_to_check,
+            );
             debug!(
                 "hash_images_load_cache - completed diff between loaded and prechecked files, {}({}) - non cached, {}({}) - already cached",
                 non_cached_files_to_check.len(),

@@ -425,7 +425,7 @@ fn connect_event_buttons(gui_data: &GuiData) {
                 &event_controller_key
                     .widget()
                     .expect("Item has no widget")
-                    .downcast::<gtk4::TreeView>()
+                    .downcast::<TreeView>()
                     .expect("Widget is not TreeView"),
                 &text_view_errors,
                 &check_button_settings_show_preview,
@@ -457,7 +457,7 @@ fn connect_event_buttons(gui_data: &GuiData) {
                 &event_controller_key
                     .widget()
                     .expect("Item has no widget")
-                    .downcast::<gtk4::TreeView>()
+                    .downcast::<TreeView>()
                     .expect("Widget is not TreeView"),
                 &text_view_errors,
                 &check_button_settings_show_preview_similar_images,

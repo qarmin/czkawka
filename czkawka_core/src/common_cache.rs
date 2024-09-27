@@ -84,6 +84,23 @@ where
     text_messages
 }
 
+pub fn extract_loaded_cache<T>(
+    loaded_hash_map: &BTreeMap<String, T>,
+    files_to_check: BTreeMap<String, T>,
+    records_already_cached: &mut BTreeMap<String, T>,
+    non_cached_files_to_check: &mut BTreeMap<String, T>,
+) where
+    T: Clone,
+{
+    for (name, file_entry) in files_to_check {
+        if let Some(cached_file_entry) = loaded_hash_map.get(&name) {
+            records_already_cached.insert(name, cached_file_entry.clone());
+        } else {
+            non_cached_files_to_check.insert(name, file_entry);
+        }
+    }
+}
+
 #[fun_time(message = "load_cache_from_file_generalized_by_path", level = "debug")]
 pub fn load_cache_from_file_generalized_by_path<T>(cache_file_name: &str, delete_outdated_cache: bool, used_files: &BTreeMap<String, T>) -> (Messages, Option<BTreeMap<String, T>>)
 where
