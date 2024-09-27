@@ -462,7 +462,7 @@ fn check_extension_availability(
     } else if pdf_extensions.contains(&extension_lowercase.as_str()) {
         TypeOfFile::PDF
     } else {
-        eprintln!("File with unknown extension: {full_name:?} - {extension_lowercase}");
+        eprintln!("File with unknown extension: \"{}\" - {extension_lowercase}", full_name.to_string_lossy());
         debug_assert!(false, "File with unknown extension");
         TypeOfFile::Unknown
     }

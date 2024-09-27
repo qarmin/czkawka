@@ -9,7 +9,7 @@ use bk_tree::BKTree;
 use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
 use humansize::{format_size, BINARY};
-use image::GenericImageView;
+use image::{DynamicImage, GenericImageView};
 use image_hasher::{FilterType, HashAlg, HasherConfig};
 use log::debug;
 use rayon::prelude::*;
@@ -379,49 +379,23 @@ impl SimilarImages {
                 img = match get_dynamic_image_from_heic(&file_entry.path.to_string_lossy()) {
                     Ok(t) => t,
                     Err(e) => {
-                        return Err(format!("Cannot open HEIC file {:?}: {}", file_entry.path, e));
+                        return Err(format!("Cannot open HEIC file \"{}\": {}", file_entry.path.to_string_lossy(), e));
                     }
                 };
             }
             #[cfg(not(feature = "heif"))]
             {
-                if let Ok(image_result) = panic::catch_unwind(|| image::open(&file_entry.path)) {
-                    match image_result {
-                        Ok(image2) => {
-                            img = image2;
-                        }
-                        Err(e) => {
-                            return Err(format!("Cannot open image file {:?}: {}", file_entry.path, e));
-                        }
-                    }
-                } else {
-                    let message = create_crash_message("Image-rs", &file_entry.path.to_string_lossy(), "https://github.com/image-rs/image/issues");
-                    println!("{message}");
-                    return Err(message);
-                }
+                img = Self::get_normal_heif_image(&file_entry)?;
             }
         } else {
             match file_entry.image_type {
                 ImageType::Normal | ImageType::Heic => {
-                    if let Ok(image_result) = panic::catch_unwind(|| image::open(&file_entry.path)) {
-                        match image_result {
-                            Ok(image2) => {
-                                img = image2;
-                            }
-                            Err(e) => {
-                                return Err(format!("Cannot open image file {:?}: {}", file_entry.path, e));
-                            }
-                        }
-                    } else {
-                        let message = create_crash_message("Image-rs", &file_entry.path.to_string_lossy(), "https://github.com/image-rs/image/issues");
-                        println!("{message}");
-                        return Err(message);
-                    }
+                    img = Self::get_normal_heif_image(&file_entry)?;
                 }
                 ImageType::Raw => {
                     img = match get_dynamic_image_from_raw_image(&file_entry.path) {
                         Ok(t) => t,
-                        Err(e) => return Err(format!("Cannot open RAW file {:?}: {}", file_entry.path, e)),
+                        Err(e) => return Err(format!("Cannot open RAW file \"{}\": {}", file_entry.path.to_string_lossy(), e)),
                     };
                 }
                 _ => {
@@ -445,6 +419,19 @@ impl SimilarImages {
         file_entry.hash = hash.as_bytes().to_vec();
 
         Ok(())
+    }
+
+    fn get_normal_heif_image(file_entry: &ImagesEntry) -> Result<DynamicImage, String> {
+        if let Ok(image_result) = panic::catch_unwind(|| image::open(&file_entry.path)) {
+            match image_result {
+                Ok(image) => Ok(image),
+                Err(e) => Err(format!("Cannot open image file \"{}\": {}", file_entry.path.to_string_lossy(), e)),
+            }
+        } else {
+            let message = create_crash_message("Image-rs", &file_entry.path.to_string_lossy(), "https://github.com/image-rs/image/issues");
+            println!("{message}");
+            Err(message)
+        }
     }
 
     // Split hashes at 2 parts, base hashes and hashes to compare, 3 argument is set of hashes with multiple images

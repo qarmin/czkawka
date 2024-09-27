@@ -475,7 +475,7 @@ fn collect_all_files_and_dirs(dir: &str) -> std::io::Result<CollectedFiles> {
             } else if file_type.is_file() {
                 files.insert(path_str);
             } else {
-                panic!("Unknown type of file {path_str:?}");
+                panic!("Unknown type of file {path_str}");
             }
         }
     }

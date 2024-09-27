@@ -127,7 +127,7 @@ impl DebugPrint for BigFile {
 
         println!("### INDIVIDUAL DEBUG PRINT ###");
         println!("Big files size {} in {} groups", self.information.number_of_real_files, self.big_files.len());
-        println!("Number of files to check - {:?}", self.get_params().number_of_files_to_check);
+        println!("Number of files to check - {}", self.get_params().number_of_files_to_check);
         self.debug_print_common();
         println!("-----------------------------------------");
     }

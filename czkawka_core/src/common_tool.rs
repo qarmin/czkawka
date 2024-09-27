@@ -208,16 +208,16 @@ pub trait CommonData {
         println!("Directories: {:?}", self.get_cd().directories);
         println!("Extensions: {:?}", self.get_cd().extensions);
         println!("Excluded items: {:?}", self.get_cd().excluded_items);
-        println!("Recursive search: {:?}", self.get_cd().recursive_search);
-        println!("Maximal file size: {:?}", self.get_cd().maximal_file_size);
-        println!("Minimal file size: {:?}", self.get_cd().minimal_file_size);
-        println!("Stopped search: {:?}", self.get_cd().stopped_search);
-        println!("Use cache: {:?}", self.get_cd().use_cache);
-        println!("Delete outdated cache: {:?}", self.get_cd().delete_outdated_cache);
-        println!("Save also as json: {:?}", self.get_cd().save_also_as_json);
+        println!("Recursive search: {}", self.get_cd().recursive_search);
+        println!("Maximal file size: {}", self.get_cd().maximal_file_size);
+        println!("Minimal file size: {}", self.get_cd().minimal_file_size);
+        println!("Stopped search: {}", self.get_cd().stopped_search);
+        println!("Use cache: {}", self.get_cd().use_cache);
+        println!("Delete outdated cache: {}", self.get_cd().delete_outdated_cache);
+        println!("Save also as json: {}", self.get_cd().save_also_as_json);
         println!("Delete method: {:?}", self.get_cd().delete_method);
-        println!("Use reference folders: {:?}", self.get_cd().use_reference_folders);
-        println!("Dry run: {:?}", self.get_cd().dry_run);
+        println!("Use reference folders: {}", self.get_cd().use_reference_folders);
+        println!("Dry run: {}", self.get_cd().dry_run);
 
         println!("---------------DEBUG PRINT MESSAGES---------------");
         println!("Errors size - {}", self.get_cd().text_messages.errors.len());

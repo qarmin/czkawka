@@ -150,18 +150,18 @@ pub const SEND_PROGRESS_DATA_TIME_BETWEEN: u32 = 200; //ms
 pub fn remove_folder_if_contains_only_empty_folders(path: impl AsRef<Path>, remove_to_trash: bool) -> Result<(), String> {
     let path = path.as_ref();
     if !path.is_dir() {
-        return Err(format!("Trying to remove folder {path:?} which is not a directory",));
+        return Err(format!("Trying to remove folder \"{}\" which is not a directory", path.to_string_lossy()));
     }
 
     let mut entries_to_check = Vec::new();
     let Ok(initial_entry) = path.read_dir() else {
-        return Err(format!("Cannot read directory {path:?}",));
+        return Err(format!("Cannot read directory \"{}\"", path.to_string_lossy()));
     };
     for entry in initial_entry {
         if let Ok(entry) = entry {
             entries_to_check.push(entry);
         } else {
-            return Err(format!("Cannot read entry from directory {path:?}"));
+            return Err(format!("Cannot read entry from directory \"{}\"", path.to_string_lossy()));
         }
     }
     loop {
@@ -169,28 +169,40 @@ pub fn remove_folder_if_contains_only_empty_folders(path: impl AsRef<Path>, remo
             break;
         };
         let Some(file_type) = entry.file_type().ok() else {
-            return Err(format!("Folder contains file with unknown type {:?} inside {path:?}", entry.path()));
+            return Err(format!(
+                "Folder contains file with unknown type \"{}\" inside \"{}\"",
+                entry.path().to_string_lossy(),
+                path.to_string_lossy()
+            ));
         };
 
         if !file_type.is_dir() {
-            return Err(format!("Folder contains file {:?} inside {path:?}", entry.path(),));
+            return Err(format!("Folder contains file \"{}\" inside \"{}\"", entry.path().to_string_lossy(), path.to_string_lossy()));
         }
         let Ok(internal_read_dir) = entry.path().read_dir() else {
-            return Err(format!("Cannot read directory {:?} inside {path:?}", entry.path()));
+            return Err(format!(
+                "Cannot read directory \"{}\" inside \"{}\"",
+                entry.path().to_string_lossy(),
+                path.to_string_lossy()
+            ));
         };
         for internal_elements in internal_read_dir {
             if let Ok(internal_element) = internal_elements {
                 entries_to_check.push(internal_element);
             } else {
-                return Err(format!("Cannot read entry from directory {:?} inside {path:?}", entry.path()));
+                return Err(format!(
+                    "Cannot read entry from directory \"{}\" inside \"{}\"",
+                    entry.path().to_string_lossy(),
+                    path.to_string_lossy()
+                ));
             }
         }
     }
 
     if remove_to_trash {
-        trash::delete(path).map_err(|e| format!("Cannot move folder {path:?} to trash, reason {e}"))
+        trash::delete(path).map_err(|e| format!("Cannot move folder \"{}\" to trash, reason {e}", path.to_string_lossy()))
     } else {
-        fs::remove_dir_all(path).map_err(|e| format!("Cannot remove directory {path:?}, reason {e}"))
+        fs::remove_dir_all(path).map_err(|e| format!("Cannot remove directory \"{}\", reason {e}", path.to_string_lossy()))
     }
 }
 
@@ -206,18 +218,18 @@ pub fn open_cache_folder(cache_file_name: &str, save_to_cache: bool, use_json: b
         if save_to_cache {
             if cache_dir.exists() {
                 if !cache_dir.is_dir() {
-                    warnings.push(format!("Config dir {cache_dir:?} is a file!"));
+                    warnings.push(format!("Config dir \"{}\" is a file!", cache_dir.to_string_lossy()));
                     return None;
                 }
             } else if let Err(e) = fs::create_dir_all(&cache_dir) {
-                warnings.push(format!("Cannot create config dir {cache_dir:?}, reason {e}"));
+                warnings.push(format!("Cannot create config dir \"{}\", reason {e}", cache_dir.to_string_lossy()));
                 return None;
             }
 
             file_handler_default = Some(match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
                 Ok(t) => t,
                 Err(e) => {
-                    warnings.push(format!("Cannot create or open cache file {cache_file:?}, reason {e}"));
+                    warnings.push(format!("Cannot create or open cache file \"{}\", reason {e}", cache_file.to_string_lossy()));
                     return None;
                 }
             });
@@ -225,7 +237,7 @@ pub fn open_cache_folder(cache_file_name: &str, save_to_cache: bool, use_json: b
                 file_handler_json = Some(match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file_json) {
                     Ok(t) => t,
                     Err(e) => {
-                        warnings.push(format!("Cannot create or open cache file {cache_file_json:?}, reason {e}"));
+                        warnings.push(format!("Cannot create or open cache file \"{}\", reason {e}", cache_file_json.to_string_lossy()));
                         return None;
                     }
                 });
@@ -472,20 +484,23 @@ where
                 for file_entry in &all_values[1..] {
                     if dry_run {
                         infos.push(format!(
-                            "dry_run - would create hardlink from {:?} to {:?}",
-                            original_file.get_path(),
-                            file_entry.get_path()
+                            "dry_run - would create hardlink from \"{}\" to \"{}\"",
+                            original_file.get_path().to_string_lossy(),
+                            file_entry.get_path().to_string_lossy()
                         ));
                     } else {
                         if dry_run {
-                            infos.push(format!("Replace file {:?} with hard link to {:?}", original_file.get_path(), file_entry.get_path()));
+                            infos.push(format!(
+                                "Replace file \"{}\" with hard link to \"{}\"",
+                                original_file.get_path().to_string_lossy(),
+                                file_entry.get_path().to_string_lossy()
+                            ));
                         } else {
                             if let Err(e) = make_hard_link(original_file.get_path(), file_entry.get_path()) {
                                 errors.push(format!(
-                                    "Cannot create hard link from {:?} to {:?} - {}",
-                                    file_entry.get_path(),
-                                    original_file.get_path(),
-                                    e
+                                    "Cannot create hard link from \"{}\" to \"{}\" - {e}",
+                                    file_entry.get_path().to_string_lossy(),
+                                    original_file.get_path().to_string_lossy()
                                 ));
                                 failed_to_remove_files += 1;
                             } else {
@@ -510,10 +525,10 @@ where
 
             for i in items {
                 if dry_run {
-                    infos.push(format!("dry_run - would delete file: {:?}", i.get_path()));
+                    infos.push(format!("dry_run - would delete file: \"{}\"", i.get_path().to_string_lossy()));
                 } else {
                     if let Err(e) = fs::remove_file(i.get_path()) {
-                        errors.push(format!("Cannot delete file: {:?} - {e}", i.get_path()));
+                        errors.push(format!("Cannot delete file: \"{}\" - {e}", i.get_path().to_string_lossy()));
                         failed_to_remove_files += 1;
                     } else {
                         removed_files += 1;

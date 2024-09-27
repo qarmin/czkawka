@@ -205,7 +205,7 @@ impl DuplicateFinder {
             |fe: &FileEntry| {
                 fe.path
                     .file_name()
-                    .unwrap_or_else(|| panic!("Found invalid file_name {:?}", fe.path))
+                    .unwrap_or_else(|| panic!("Found invalid file_name \"{}\"", fe.path.to_string_lossy()))
                     .to_string_lossy()
                     .to_string()
             }
@@ -213,7 +213,7 @@ impl DuplicateFinder {
             |fe: &FileEntry| {
                 fe.path
                     .file_name()
-                    .unwrap_or_else(|| panic!("Found invalid file_name {:?}", fe.path))
+                    .unwrap_or_else(|| panic!("Found invalid file_name \"{}\"", fe.path.to_string_lossy()))
                     .to_string_lossy()
                     .to_lowercase()
             }
@@ -294,7 +294,7 @@ impl DuplicateFinder {
                     fe.size,
                     fe.path
                         .file_name()
-                        .unwrap_or_else(|| panic!("Found invalid file_name {:?}", fe.path))
+                        .unwrap_or_else(|| panic!("Found invalid file_name \"{}\"", fe.path.to_string_lossy()))
                         .to_string_lossy()
                         .to_string(),
                 )
@@ -305,7 +305,7 @@ impl DuplicateFinder {
                     fe.size,
                     fe.path
                         .file_name()
-                        .unwrap_or_else(|| panic!("Found invalid file_name {:?}", fe.path))
+                        .unwrap_or_else(|| panic!("Found invalid file_name \"{}\"", fe.path.to_string_lossy()))
                         .to_string_lossy()
                         .to_lowercase(),
                 )
