@@ -389,7 +389,7 @@ impl SimilarImages {
         } else {
             match file_entry.image_type {
                 ImageType::Normal | ImageType::Heic => {
-                    img = Self::get_normal_heif_image(&file_entry)?;
+                    img = Self::get_normal_heif_image(file_entry)?;
                 }
                 ImageType::Raw => {
                     img = match get_dynamic_image_from_raw_image(&file_entry.path) {

@@ -586,7 +586,7 @@ pub fn common_get_metadata_dir(entry_data: &DirEntry, warnings: &mut Vec<String>
 
 pub fn common_get_entry_data_metadata<'a>(entry: &'a Result<DirEntry, std::io::Error>, warnings: &mut Vec<String>, current_folder: &Path) -> Option<(&'a DirEntry, Metadata)> {
     let entry_data = common_get_entry_data(entry, warnings, current_folder)?;
-    let metadata = common_get_metadata_dir(&entry_data, warnings, current_folder)?;
+    let metadata = common_get_metadata_dir(entry_data, warnings, current_folder)?;
     Some((entry_data, metadata))
 }
 
