@@ -140,7 +140,7 @@ impl SimilarVideos {
         self.debug_print();
     }
 
-    // #[fun_time(message = "check_for_similar_videos", level = "debug")]
+    #[fun_time(message = "check_for_similar_videos", level = "debug")]
     fn check_for_similar_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         self.common_data.extensions.set_and_validate_allowed_extensions(VIDEO_FILES_EXTENSIONS);
         if !self.common_data.extensions.set_any_extensions() {
@@ -198,6 +198,10 @@ impl SimilarVideos {
 
     #[fun_time(message = "sort_videos", level = "debug")]
     fn sort_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
+        if self.videos_to_check.is_empty() {
+            return true;
+        }
+
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache_at_start();
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) = prepare_thread_handler_common(

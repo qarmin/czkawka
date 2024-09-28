@@ -294,6 +294,10 @@ impl BrokenFiles {
 
     #[fun_time(message = "look_for_broken_files", level = "debug")]
     fn look_for_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
+        if self.files_to_check.is_empty() {
+            return true;
+        }
+
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache();
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =

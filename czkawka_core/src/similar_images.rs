@@ -183,7 +183,7 @@ impl SimilarImages {
         self.debug_print();
     }
 
-    // #[fun_time(message = "check_for_similar_images", level = "debug")]
+    #[fun_time(message = "check_for_similar_images", level = "debug")]
     fn check_for_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         if cfg!(feature = "heif") {
             self.common_data
@@ -286,6 +286,10 @@ impl SimilarImages {
 
     #[fun_time(message = "hash_images", level = "debug")]
     fn hash_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
+        if self.images_to_check.is_empty() {
+            return true;
+        }
+
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.hash_images_load_cache();
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) = prepare_thread_handler_common(

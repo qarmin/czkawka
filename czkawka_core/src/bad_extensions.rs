@@ -263,6 +263,10 @@ impl BadExtensions {
 
     #[fun_time(message = "look_for_bad_extensions_files", level = "debug")]
     fn look_for_bad_extensions_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
+        if self.files_to_check.is_empty() {
+            return true;
+        }
+
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
             prepare_thread_handler_common(progress_sender, CurrentStage::BadExtensionsChecking, self.files_to_check.len(), self.get_test_type());
 

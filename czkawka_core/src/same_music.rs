@@ -284,6 +284,10 @@ impl SameMusic {
 
     #[fun_time(message = "calculate_fingerprint", level = "debug")]
     fn calculate_fingerprint(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
+        if self.music_entries.is_empty() {
+            return true;
+        }
+
         // We only calculate fingerprints, for files with similar titles
         // This saves a lot of time, because we don't need to calculate and later compare fingerprints for files with different titles
 
@@ -360,6 +364,10 @@ impl SameMusic {
 
     #[fun_time(message = "read_tags", level = "debug")]
     fn read_tags(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
+        if self.music_to_check.is_empty() {
+            return true;
+        }
+
         let (progress_thread_handle, progress_thread_run, _atomic_counter, _check_was_stopped) =
             prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicCacheLoadingTags, 0, self.get_test_type());
 
@@ -628,6 +636,10 @@ impl SameMusic {
 
     #[fun_time(message = "check_for_duplicate_fingerprints", level = "debug")]
     fn check_for_duplicate_fingerprints(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
+        if self.music_entries.is_empty() {
+            return true;
+        }
+
         let grouped_files_to_check = self.split_fingerprints_to_check();
         let base_files_number = grouped_files_to_check.iter().map(|g| g.base_files.len()).sum::<usize>();
 

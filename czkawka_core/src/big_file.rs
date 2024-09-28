@@ -65,7 +65,7 @@ impl BigFile {
         self.debug_print();
     }
 
-    // #[fun_time(message = "look_for_big_files", level = "debug")]
+    #[fun_time(message = "look_for_big_files", level = "debug")]
     fn look_for_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         let result = DirTraversalBuilder::new()
             .group_by(|_fe| ())

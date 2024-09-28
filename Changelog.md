@@ -14,6 +14,7 @@
 - Printing to file/console no longer uses two backslashes in windows
   paths - [#1354](https://github.com/qarmin/czkawka/pull/1354)
 - Fixed panic when failed to decode raw picture - [#1355](https://github.com/qarmin/czkawka/pull/1355)
+- Remove useless saving/loading cache when there is no files to check - [#TODO](#TODO)
 
 ### Krokiet
 
