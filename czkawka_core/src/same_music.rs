@@ -391,7 +391,7 @@ impl SameMusic {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
-                if read_single_file_tag(&path, &mut music_entry) {
+                if read_single_file_tags(&path, &mut music_entry) {
                     Some(Some(music_entry))
                 } else {
                     Some(None)
@@ -537,6 +537,10 @@ impl SameMusic {
         let mut entries_grouped_by_title: BTreeMap<String, Vec<MusicEntry>> = BTreeMap::new();
         for entry in music_data {
             let simplified_track_title = get_simplified_name(&entry.track_title);
+            // TODO maybe add as option to check for empty titles?
+            if simplified_track_title.is_empty() {
+                continue;
+            }
             entries_grouped_by_title.entry(simplified_track_title).or_default().push(entry);
         }
         entries_grouped_by_title
@@ -551,7 +555,13 @@ impl SameMusic {
                 .filter_map(|(_title, entries)| {
                     let (base_files, files_to_compare) = self.split_fingerprints_to_base_and_files_to_compare(entries);
 
-                    if base_files.is_empty() || files_to_compare.is_empty() {
+                    // When there is 0 files in base files or files to compare there will be no comparison, so removing it from the list
+                    // Also when there is only one file in base files and files to compare and they are the same file, there will be no comparison
+
+                    if base_files.is_empty()
+                        || files_to_compare.is_empty()
+                        || (base_files.len() == 1 && files_to_compare.len() == 1 && (base_files[0].path == files_to_compare[0].path))
+                    {
                         return None;
                     }
 
@@ -823,7 +833,7 @@ fn calc_fingerprint_helper(path: impl AsRef<Path>, config: &Configuration) -> an
     Ok(printer.fingerprint().to_vec())
 }
 
-fn read_single_file_tag(path: &str, music_entry: &mut MusicEntry) -> bool {
+fn read_single_file_tags(path: &str, music_entry: &mut MusicEntry) -> bool {
     let Ok(mut file) = File::open(path) else {
         return false;
     };
@@ -932,17 +942,7 @@ impl PrintResults for SameMusic {
             for vec_file_entry in &self.duplicated_music_entries {
                 writeln!(writer, "Found {} music files which have similar friends", vec_file_entry.len())?;
                 for file_entry in vec_file_entry {
-                    writeln!(
-                        writer,
-                        "TT: {}  -  TA: {}  -  Y: {}  -  L: {}  -  G: {}  -  B: {}  -  P: \"{}\"",
-                        file_entry.track_title,
-                        file_entry.track_artist,
-                        file_entry.year,
-                        file_entry.length,
-                        file_entry.genre,
-                        file_entry.bitrate,
-                        file_entry.path.to_string_lossy()
-                    )?;
+                    write_music_entry(writer, file_entry)?;
                 }
                 writeln!(writer)?;
             }
@@ -951,29 +951,9 @@ impl PrintResults for SameMusic {
             for (file_entry, vec_file_entry) in &self.duplicated_music_entries_referenced {
                 writeln!(writer, "Found {} music files which have similar friends", vec_file_entry.len())?;
                 writeln!(writer)?;
-                writeln!(
-                    writer,
-                    "TT: {}  -  TA: {}  -  Y: {}  -  L: {}  -  G: {}  -  B: {}  -  P: \"{}\"",
-                    file_entry.track_title,
-                    file_entry.track_artist,
-                    file_entry.year,
-                    file_entry.length,
-                    file_entry.genre,
-                    file_entry.bitrate,
-                    file_entry.path.to_string_lossy()
-                )?;
+                write_music_entry(writer, file_entry)?;
                 for file_entry in vec_file_entry {
-                    writeln!(
-                        writer,
-                        "TT: {}  -  TA: {}  -  Y: {}  -  L: {}  -  G: {}  -  B: {}  -  P: \"{}\"",
-                        file_entry.track_title,
-                        file_entry.track_artist,
-                        file_entry.year,
-                        file_entry.length,
-                        file_entry.genre,
-                        file_entry.bitrate,
-                        file_entry.path.to_string_lossy()
-                    )?;
+                    write_music_entry(writer, file_entry)?;
                 }
                 writeln!(writer)?;
             }
@@ -991,6 +971,20 @@ impl PrintResults for SameMusic {
             self.save_results_to_file_as_json_internal(file_name, &self.duplicated_music_entries, pretty_print)
         }
     }
+}
+
+fn write_music_entry<T: Write>(writer: &mut T, file_entry: &MusicEntry) -> std::io::Result<()> {
+    writeln!(
+        writer,
+        "TT: {}  -  TA: {}  -  Y: {}  -  L: {}  -  G: {}  -  B: {}  -  P: \"{}\"",
+        file_entry.track_title,
+        file_entry.track_artist,
+        file_entry.year,
+        file_entry.length,
+        file_entry.genre,
+        file_entry.bitrate,
+        file_entry.path.to_string_lossy()
+    )
 }
 
 fn get_simplified_name(what: &str) -> String {
