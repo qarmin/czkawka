@@ -44,7 +44,7 @@ build_czkawka:
     cargo build --bin czkawka_gui
 
 upgrade:
-    cargo upgrade -i
+    cargo +nightly -Z unstable-options update --breaking
     cargo update
 
 fix:
