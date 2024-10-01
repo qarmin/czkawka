@@ -777,7 +777,7 @@ impl DuplicateFinder {
             .map(|(size, vec_file_entry)| {
                 let mut hashmap_with_hash: BTreeMap<String, Vec<DuplicateEntry>> = Default::default();
                 let mut errors: Vec<String> = Vec::new();
-                let mut buffer = [0u8; 1024 * 16];
+                let mut buffer = vec![0u8; 1024 * 1024 * 16];
 
                 atomic_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
                 for mut file_entry in vec_file_entry {
