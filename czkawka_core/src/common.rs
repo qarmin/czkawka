@@ -17,8 +17,9 @@ use crossbeam_channel::Sender;
 use directories_next::ProjectDirs;
 use fun_time::fun_time;
 use handsome_logger::{ColorChoice, ConfigBuilder, TerminalMode};
-use image::{DynamicImage, ImageBuffer, Rgb};
+use image::{DynamicImage, ImageBuffer, Rgb, Rgba};
 use imagepipe::{ImageSource, Pipeline};
+use jxl_oxide::JxlImage;
 #[cfg(feature = "heif")]
 use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
 #[cfg(feature = "libraw")]
@@ -85,7 +86,7 @@ pub fn print_version_mode() {
     let info = os_info::get();
 
     #[allow(unused_mut)]
-    let mut features = vec![];
+    let mut features: Vec<&str> = vec![];
     #[cfg(feature = "heif")]
     features.push("heif");
     #[cfg(feature = "libavif")]
@@ -284,6 +285,34 @@ pub fn open_cache_folder(cache_file_name: &str, save_to_cache: bool, use_json: b
         return Some(((file_handler_default, cache_file), (file_handler_json, cache_file_json)));
     }
     None
+}
+
+// TODO this code is ugly - this should exists in image-rs or be taken from official example of jxl-oxide
+// Its presence offends everything good in this world
+pub fn convert_jxl_image_to_dynamic_image(path: &str) -> anyhow::Result<DynamicImage> {
+    let buf_reader = std::io::BufReader::new(File::open(path)?);
+
+    let decoder = JxlImage::builder().read(buf_reader).map_err(|e| anyhow::anyhow!("Failed to read jxl file {e}"))?;
+    let width = decoder.width();
+    let height = decoder.height();
+    let frame = decoder.render_frame(0).map_err(|e| anyhow::anyhow!("Failed to render jxl frame {e}"))?;
+    let planar = &frame.image_planar();
+
+    if planar.len() == 3 {
+        let zips = planar[0].buf().iter().zip(planar[1].buf().iter()).zip(planar[2].buf().iter());
+        let pixels = zips.flat_map(|((r, g), b)| vec![r * 255.0, g * 255.0, b * 255.0]).collect::<Vec<_>>();
+        let data = ImageBuffer::<Rgb<u8>, Vec<u8>>::from_vec(width, height, pixels).ok_or_else(|| anyhow::anyhow!("Failed to create rgb image buffer from jxl data"))?;
+        Ok(DynamicImage::ImageRgb8(data))
+    } else if planar.len() == 4 {
+        let zips = planar[0].buf().iter().zip(planar[1].buf().iter()).zip(planar[2].buf().iter()).zip(planar[3].buf().iter());
+        let pixels = zips
+            .flat_map(|(((r, g), b), a)| vec![(r * 255.0) as u8, (g * 255.0) as u8, (b * 255.0) as u8, (a * 255.0) as u8])
+            .collect::<Vec<_>>();
+        let data = ImageBuffer::<Rgba<u8>, Vec<u8>>::from_vec(width, height, pixels).ok_or_else(|| anyhow::anyhow!("Failed to create rgba image buffer from jxl data"))?;
+        Ok(DynamicImage::ImageRgba8(data))
+    } else {
+        return Err(anyhow::anyhow!("Unsupported number of planes: {}", planar.len()));
+    }
 }
 
 #[cfg(feature = "heif")]

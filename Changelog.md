@@ -15,6 +15,8 @@
   paths - [#1354](https://github.com/qarmin/czkawka/pull/1354)
 - Fixed panic when failed to decode raw picture - [#1355](https://github.com/qarmin/czkawka/pull/1355)
 - Remove useless saving/loading cache when there is no files to check - [#TODO](#TODO)
+- Added jxl support - [#TODO](#TODO)
+- Added avif support(via external C library, not enabled by default) - [#TODO](#TODO)
 
 ### Krokiet
 
