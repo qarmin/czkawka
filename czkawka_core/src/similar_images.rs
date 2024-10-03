@@ -194,6 +194,8 @@ impl SimilarImages {
                 .extensions
                 .set_and_validate_allowed_extensions(&[IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS].concat());
         }
+
+        dbg!(IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS, HEIC_EXTENSIONS);
         if !self.common_data.extensions.set_any_extensions() {
             return true;
         }

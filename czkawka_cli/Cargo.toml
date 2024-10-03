@@ -27,3 +27,4 @@ ctrlc = { version = "3.4", features = ["termination"] }
 default = []
 heif = ["czkawka_core/heif"]
 libraw = ["czkawka_core/libraw"]
+libavif = ["czkawka_core/libavif"]

@@ -61,3 +61,4 @@ winapi = { version = "0.3.9", features = ["combaseapi", "objbase", "shobjidl_cor
 default = []
 heif = ["czkawka_core/heif"]
 libraw = ["czkawka_core/libraw"]
+libavif = ["czkawka_core/libavif"]

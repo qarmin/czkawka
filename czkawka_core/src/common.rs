@@ -83,12 +83,24 @@ pub fn print_version_mode() {
     let processors = get_all_available_threads();
 
     let info = os_info::get();
+
+    #[allow(unused_mut)]
+    let mut features = vec![];
+    #[cfg(feature = "heif")]
+    features.push("heif");
+    #[cfg(feature = "libavif")]
+    features.push("libavif");
+    #[cfg(feature = "libraw")]
+    features.push("libraw");
+
     info!(
-        "App version: {CZKAWKA_VERSION}, {debug_release} mode, rust {rust_version}, os {} {} [{} {}], {processors} cpu/threads",
+        "App version: {CZKAWKA_VERSION}, {debug_release} mode, rust {rust_version}, os {} {} [{} {}], {processors} cpu/threads, features({}): [{}]",
         info.os_type(),
         info.version(),
         std::env::consts::ARCH,
         info.bitness(),
+        features.len(),
+        features.join(", ")
     );
     if cfg!(debug_assertions) {
         warn!("You are running debug version of app which is a lot of slower than release version.");
@@ -123,14 +135,29 @@ pub fn set_number_of_threads(thread_number: usize) {
 pub const RAW_IMAGE_EXTENSIONS: &[&str] = &[
     "mrw", "arw", "srf", "sr2", "mef", "orf", "srw", "erf", "kdc", "kdc", "dcs", "rw2", "raf", "dcr", "dng", "pef", "crw", "iiq", "3fr", "nrw", "nef", "mos", "cr2", "ari",
 ];
+
+#[cfg(feature = "libavif")]
+pub const IMAGE_RS_EXTENSIONS: &[&str] = &[
+    "jpg", "jpeg", "png", "bmp", "tiff", "tif", "tga", "ff", "jif", "jfi", "webp", "gif", "ico", "exr", "qoi", "avif",
+];
+#[cfg(not(feature = "libavif"))]
 pub const IMAGE_RS_EXTENSIONS: &[&str] = &["jpg", "jpeg", "png", "bmp", "tiff", "tif", "tga", "ff", "jif", "jfi", "webp", "gif", "ico", "exr", "qoi"];
 
+#[cfg(feature = "libavif")]
+pub const IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS: &[&str] = &["jpg", "jpeg", "png", "tiff", "tif", "tga", "ff", "jif", "jfi", "bmp", "webp", "exr", "qoi", "avif"];
+#[cfg(not(feature = "libavif"))]
 pub const IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS: &[&str] = &["jpg", "jpeg", "png", "tiff", "tif", "tga", "ff", "jif", "jfi", "bmp", "webp", "exr", "qoi"];
 
+#[cfg(feature = "libavif")]
+pub const IMAGE_RS_BROKEN_FILES_EXTENSIONS: &[&str] = &[
+    "jpg", "jpeg", "png", "tiff", "tif", "tga", "ff", "jif", "jfi", "gif", "bmp", "ico", "jfif", "jpe", "pnz", "dib", "webp", "exr", "avif",
+];
+#[cfg(not(feature = "libavif"))]
 pub const IMAGE_RS_BROKEN_FILES_EXTENSIONS: &[&str] = &[
     "jpg", "jpeg", "png", "tiff", "tif", "tga", "ff", "jif", "jfi", "gif", "bmp", "ico", "jfif", "jpe", "pnz", "dib", "webp", "exr",
 ];
-pub const HEIC_EXTENSIONS: &[&str] = &["heif", "heifs", "heic", "heics", "avci", "avcs", "avifs"];
+
+pub const HEIC_EXTENSIONS: &[&str] = &["heif", "heifs", "heic", "heics", "avci", "avcs"];
 
 pub const ZIP_FILES_EXTENSIONS: &[&str] = &["zip", "jar"];
 

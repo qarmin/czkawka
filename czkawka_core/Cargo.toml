@@ -21,7 +21,7 @@ directories-next = "2.0"
 # Needed by similar images
 image_hasher = "2.0"
 bk-tree = "0.5"
-image = { version = "0.25", default-features = false, features = ["avif", "bmp", "dds", "exr", "ff", "gif", "hdr", "ico", "jpeg", "png", "pnm", "qoi", "tga", "tiff", "webp"] }
+image = { version = "0.25", default-features = false, features = ["bmp", "dds", "exr", "ff", "gif", "hdr", "ico", "jpeg", "png", "pnm", "qoi", "tga", "tiff", "webp"] }
 hamming = "0.1"
 
 # Needed by same music
@@ -95,3 +95,4 @@ rustc_version = "0.4"
 default = []
 heif = ["dep:libheif-rs", "dep:libheif-sys"]
 libraw = ["dep:libraw-rs"]
+libavif = ["image/avif-native", "image/avif"]

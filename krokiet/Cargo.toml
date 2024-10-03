@@ -62,3 +62,4 @@ winit_software = ["slint/renderer-winit-software"]
 
 heif = ["czkawka_core/heif"]
 libraw = ["czkawka_core/libraw"]
+libavif = ["czkawka_core/libavif"]
