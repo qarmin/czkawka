@@ -76,6 +76,7 @@ pub fn get_all_available_threads() -> usize {
     })
 }
 
+#[allow(clippy::vec_init_then_push)]
 pub fn print_version_mode() {
     let rust_version = env!("RUST_VERSION_INTERNAL");
     let debug_release = if cfg!(debug_assertions) { "debug" } else { "release" };
@@ -85,7 +86,6 @@ pub fn print_version_mode() {
     let info = os_info::get();
 
     #[allow(unused_mut)]
-    #[allow(clippy::vec_init_then_push)]
     let mut features: Vec<&str> = vec![];
     #[cfg(feature = "heif")]
     features.push("heif");
