@@ -17,7 +17,6 @@
 - Remove useless saving/loading cache when there is no files to check - [#TODO](#TODO)
 - Added jxl support - [#TODO](#TODO)
 - Added avif support(via external C library, not enabled by default) - [#TODO](#TODO)
-- Added 4GB memory limit when loading cache - [#TODO](#TODO)
 
 ### Krokiet
 
@@ -27,6 +26,7 @@
 ### GTK GUI
 
 - Fixed and added more input parameters to the application - [#1355](https://github.com/qarmin/czkawka/pull/1355)
+- Added option to use external libraries instead gtk pixbuf loader for previews - [#TODO](#TODO)
 - [External contribution] Mac homebrew version of app - https://formulae.brew.sh/formula/czkawka
 
 ### CLI
