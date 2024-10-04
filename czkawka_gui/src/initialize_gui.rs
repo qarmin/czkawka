@@ -508,7 +508,6 @@ fn show_preview(
             }
 
             let mut pixbuf = if use_rust_preview {
-                dbg!("Using Rust preview");
                 let image = match get_dynamic_image_from_path(&file_name) {
                     Ok(t) => t,
                     Err(e) => {
@@ -525,7 +524,6 @@ fn show_preview(
                     }
                 }
             } else {
-                dbg!("Using GTK preview");
                 match Pixbuf::from_file(&file_name) {
                     Ok(pixbuf) => pixbuf,
                     Err(e) => {

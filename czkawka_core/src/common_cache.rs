@@ -1,4 +1,3 @@
-use bincode::Options;
 use fun_time::fun_time;
 use image::imageops::FilterType;
 use image_hasher::HashAlg;

@@ -46,7 +46,7 @@ const DEFAULT_GENERAL_IGNORE_OTHER_FILESYSTEMS: bool = false;
 const DEFUALT_USING_RUST_LIBRARIES_TO_SHOW_PREVIEW: bool = true;
 
 const DEFAULT_MUSIC_APPROXIMATE_COMPARISON: bool = false;
-const DEFAULT_MUSIC_COMPARE_BY_TITLE: bool = false;
+const DEFAULT_MUSIC_GROUP_CONTENT_BY_TITLE: bool = false;
 
 const DEFAULT_BROKEN_FILES_PDF: bool = true;
 const DEFAULT_BROKEN_FILES_AUDIO: bool = true;
@@ -697,7 +697,7 @@ pub fn load_configuration(
     let similar_videos_ignore_same_size = loaded_entries.get_bool(hashmap_ls[&LoadText::SimilarVideosIgnoreSameSize].clone(), DEFAULT_SIMILAR_VIDEOS_IGNORE_SAME_SIZE);
     let check_button_case_sensitive_name = loaded_entries.get_object(hashmap_ls[&LoadText::DuplicateNameCaseSensitive].clone(), DEFAULT_DUPLICATE_CASE_SENSITIVE_NAME_CHECKING);
     let check_button_music_approximate_comparison = loaded_entries.get_object(hashmap_ls[&LoadText::MusicApproximateComparison].clone(), DEFAULT_MUSIC_APPROXIMATE_COMPARISON);
-    let check_button_music_compare_by_title = loaded_entries.get_object(hashmap_ls[&LoadText::MusicCompareByTitle].clone(), DEFAULT_MUSIC_COMPARE_BY_TITLE);
+    let check_button_music_compare_by_title = loaded_entries.get_object(hashmap_ls[&LoadText::MusicCompareByTitle].clone(), DEFAULT_MUSIC_GROUP_CONTENT_BY_TITLE);
 
     let check_button_broken_files_archive = loaded_entries.get_object(hashmap_ls[&LoadText::BrokenFilesArchive].clone(), DEFAULT_BROKEN_FILES_ARCHIVE);
     let check_button_broken_files_pdf = loaded_entries.get_object(hashmap_ls[&LoadText::BrokenFilesPdf].clone(), DEFAULT_BROKEN_FILES_PDF);
@@ -979,6 +979,7 @@ pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNoteb
         settings.entry_settings_prehash_cache_file_minimal_size.set_text(DEFAULT_PREHASH_MINIMAL_CACHE_SIZE);
         settings.combo_box_settings_language.set_active(Some(0));
         settings.check_button_settings_one_filesystem.set_active(DEFAULT_GENERAL_IGNORE_OTHER_FILESYSTEMS);
+        settings.check_button_settings_use_rust_preview.set_active(DEFUALT_USING_RUST_LIBRARIES_TO_SHOW_PREVIEW);
 
         main_notebook.combo_box_duplicate_hash_type.set_active(Some(0));
         main_notebook.combo_box_duplicate_check_method.set_active(Some(0));
@@ -994,6 +995,12 @@ pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNoteb
 
         main_notebook.scale_similarity_similar_images.set_range(0_f64, SIMILAR_VALUES[0][5] as f64); // DEFAULT FOR MAX of 8
         main_notebook.scale_similarity_similar_images.set_fill_level(SIMILAR_VALUES[0][5] as f64);
+
+        main_notebook
+            .check_button_music_compare_only_in_title_group
+            .set_active(DEFAULT_MUSIC_GROUP_CONTENT_BY_TITLE);
+
+        main_notebook.check_button_music_approximate_comparison.set_active(DEFAULT_MUSIC_APPROXIMATE_COMPARISON);
 
         main_notebook.entry_big_files_number.set_text(DEFAULT_NUMBER_OF_BIGGEST_FILES);
         main_notebook.scale_similarity_similar_images.set_value(DEFAULT_SIMILAR_IMAGES_SIMILARITY as f64);

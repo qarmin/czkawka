@@ -13,7 +13,8 @@ Windows 7.
 On linux it is even possible with eyra to avoid entirely libc and using fully static rust binary.
 
 If you want to use similar videos tool, you need to install ffmpeg(runtime dependency).  
-If you want to use heif/libraw(build/runtime dependency) you need to install required packages.
+If you want to use heif/libraw/libavif(build/runtime dependency) you need to install required packages(may require
+bigger os version than czkawka).
 
 - mac - `brew install ffmpeg libraw libheif libavif` - https://formulae.brew.sh/formula/ffmpeg
 - linux - `sudo apt install ffmpeg libraw-dev libheif-dev libavif-dev libdav1d-dev`

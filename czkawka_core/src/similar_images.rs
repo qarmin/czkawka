@@ -72,16 +72,6 @@ impl FileEntry {
     }
 }
 
-// TODO remove this, it is not needed, but it will break deserialization
-// Remove this in next breaking release
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
-pub enum ImageType {
-    Normal,
-    Raw,
-    Heic,
-    Unknown,
-}
-
 #[derive(Clone, Debug, Copy)]
 pub enum SimilarityPreset {
     Original,
@@ -1028,7 +1018,7 @@ mod tests {
     use std::path::PathBuf;
 
     use crate::common_tool::CommonData;
-    use crate::similar_images::{Hamming, ImHash, ImageType, ImagesEntry, SimilarImages, SimilarImagesParameters};
+    use crate::similar_images::{Hamming, ImHash, ImagesEntry, SimilarImages, SimilarImagesParameters};
     use bk_tree::BKTree;
     use image::imageops::FilterType;
     use image_hasher::HashAlg;

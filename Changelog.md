@@ -19,9 +19,13 @@
 - Printing to file/console no longer uses two backslashes in windows
   paths - [#1354](https://github.com/qarmin/czkawka/pull/1354)
 - Fixed panic when failed to decode raw picture - [#1355](https://github.com/qarmin/czkawka/pull/1355)
-- Remove useless saving/loading cache when there is no files to check - [#TODO](#TODO)
-- Added jxl support - [#TODO](#TODO)
-- Added avif support(via external C library, not enabled by default) - [#TODO](#TODO)
+- Remove useless saving/loading cache when there is no files to
+  check - [#1358](https://github.com/qarmin/czkawka/pull/1358)
+- Added jxl support - [#1358](https://github.com/qarmin/czkawka/pull/1358)
+- Added avif support(via external C library, not enabled by
+  default) - [#1358](https://github.com/qarmin/czkawka/pull/1358)
+- Integer overflow are enabled by default(prepare for reporting bugs, slower performance and
+  unstability) - [#1358](https://github.com/qarmin/czkawka/pull/1358)
 
 ### Krokiet
 
@@ -31,7 +35,8 @@
 ### GTK GUI
 
 - Fixed and added more input parameters to the application - [#1355](https://github.com/qarmin/czkawka/pull/1355)
-- Added option to use external libraries instead gtk pixbuf loader for previews - [#TODO](#TODO)
+- Added option to use external libraries instead gtk pixbuf loader for
+  previews - [#1358](https://github.com/qarmin/czkawka/pull/1358)
 - [External contribution] Mac homebrew version of app - https://formulae.brew.sh/formula/czkawka
 
 ### CLI
