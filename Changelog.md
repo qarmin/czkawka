@@ -17,6 +17,7 @@
 - Remove useless saving/loading cache when there is no files to check - [#TODO](#TODO)
 - Added jxl support - [#TODO](#TODO)
 - Added avif support(via external C library, not enabled by default) - [#TODO](#TODO)
+- Added 4GB memory limit when loading cache - [#TODO](#TODO)
 
 ### Krokiet
 

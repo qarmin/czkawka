@@ -9,7 +9,7 @@ use bk_tree::BKTree;
 use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
 use humansize::{format_size, BINARY};
-use image::{DynamicImage, GenericImageView};
+use image::GenericImageView;
 use image_hasher::{FilterType, HashAlg, HasherConfig};
 use log::debug;
 use rayon::prelude::*;
@@ -18,8 +18,8 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "heif")]
 use crate::common::get_dynamic_image_from_heic;
 use crate::common::{
-    check_if_stop_received, create_crash_message, delete_files_custom, get_dynamic_image_from_raw_image, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads,
-    HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS,
+    check_if_stop_received, delete_files_custom, get_dynamic_image_from_path, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, HEIC_EXTENSIONS,
+    IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, JXL_IMAGE_EXTENSIONS, RAW_IMAGE_EXTENSIONS,
 };
 use crate::common_cache::{extract_loaded_cache, get_similar_images_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{inode, take_1_per_inode, DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
@@ -71,11 +71,13 @@ impl FileEntry {
             height: 0,
             hash: Vec::new(),
             similarity: 0,
-            image_type: ImageType::Unknown,
+            image_type: ImageType::Unknown, // TODO remove this, duplicates extension, it is
         }
     }
 }
 
+// TODO remove this, it is not needed, but it will break deserialization
+// Remove this in next breaking release
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum ImageType {
     Normal,
@@ -188,21 +190,16 @@ impl SimilarImages {
         if cfg!(feature = "heif") {
             self.common_data
                 .extensions
-                .set_and_validate_allowed_extensions(&[IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS, HEIC_EXTENSIONS].concat());
+                .set_and_validate_allowed_extensions(&[IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS, JXL_IMAGE_EXTENSIONS, HEIC_EXTENSIONS].concat());
         } else {
             self.common_data
                 .extensions
-                .set_and_validate_allowed_extensions(&[IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS].concat());
+                .set_and_validate_allowed_extensions(&[IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS, JXL_IMAGE_EXTENSIONS].concat());
         }
 
-        dbg!(IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS, HEIC_EXTENSIONS);
         if !self.common_data.extensions.set_any_extensions() {
             return true;
         }
-
-        let normal_image_extensions = IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS.iter().collect::<HashSet<_>>();
-        let raw_image_extensions = RAW_IMAGE_EXTENSIONS.iter().collect::<HashSet<_>>();
-        let heic_extensions = HEIC_EXTENSIONS.iter().collect::<HashSet<_>>();
 
         let result = DirTraversalBuilder::new()
             .group_by(inode)
@@ -219,17 +216,8 @@ impl SimilarImages {
                     .flat_map(if self.get_params().ignore_hard_links { |(_, fes)| fes } else { take_1_per_inode })
                     .map(|fe| {
                         let fe_str = fe.path.to_string_lossy().to_string();
-                        let extension_lowercase = fe.path.extension().unwrap_or_default().to_string_lossy().to_lowercase();
-                        let mut image_entry = fe.into_images_entry();
-                        if normal_image_extensions.contains(&extension_lowercase.as_str()) {
-                            image_entry.image_type = ImageType::Normal;
-                        } else if raw_image_extensions.contains(&extension_lowercase.as_str()) {
-                            image_entry.image_type = ImageType::Raw;
-                        } else if heic_extensions.contains(&extension_lowercase.as_str()) {
-                            image_entry.image_type = ImageType::Heic;
-                        } else {
-                            panic!("Unrecognized extension")
-                        }
+                        let image_entry = fe.into_images_entry();
+
                         (fe_str, image_entry)
                     })
                     .collect();
@@ -301,12 +289,6 @@ impl SimilarImages {
             self.get_test_type(),
         );
 
-        // Throw out images with not proper type - TODO why this happens, only broken cache?
-        let non_cached_files_to_check = non_cached_files_to_check
-            .into_iter()
-            .filter(|(_, file_entry)| file_entry.image_type != ImageType::Unknown)
-            .collect::<BTreeMap<_, _>>();
-
         debug!("hash_images - start hashing images");
         let (mut vec_file_entry, errors): (Vec<ImagesEntry>, Vec<String>) = non_cached_files_to_check
             .into_par_iter()
@@ -376,38 +358,7 @@ impl SimilarImages {
     }
 
     fn collect_image_file_entry(&self, file_entry: &mut ImagesEntry) -> Result<(), String> {
-        let img;
-
-        if file_entry.image_type == ImageType::Heic {
-            #[cfg(feature = "heif")]
-            {
-                img = match get_dynamic_image_from_heic(&file_entry.path.to_string_lossy()) {
-                    Ok(t) => t,
-                    Err(e) => {
-                        return Err(format!("Cannot open HEIC file \"{}\": {}", file_entry.path.to_string_lossy(), e));
-                    }
-                };
-            }
-            #[cfg(not(feature = "heif"))]
-            {
-                img = Self::get_normal_heif_image(file_entry)?;
-            }
-        } else {
-            match file_entry.image_type {
-                ImageType::Normal | ImageType::Heic => {
-                    img = Self::get_normal_heif_image(file_entry)?;
-                }
-                ImageType::Raw => {
-                    img = match get_dynamic_image_from_raw_image(&file_entry.path) {
-                        Ok(t) => t,
-                        Err(e) => return Err(format!("Cannot open RAW file \"{}\": {}", file_entry.path.to_string_lossy(), e)),
-                    };
-                }
-                _ => {
-                    unreachable!();
-                }
-            }
-        }
+        let img = get_dynamic_image_from_path(&file_entry.path.to_string_lossy())?;
 
         let dimensions = img.dimensions();
 
@@ -424,19 +375,6 @@ impl SimilarImages {
         file_entry.hash = hash.as_bytes().to_vec();
 
         Ok(())
-    }
-
-    fn get_normal_heif_image(file_entry: &ImagesEntry) -> Result<DynamicImage, String> {
-        if let Ok(image_result) = panic::catch_unwind(|| image::open(&file_entry.path)) {
-            match image_result {
-                Ok(image) => Ok(image),
-                Err(e) => Err(format!("Cannot open image file \"{}\": {}", file_entry.path.to_string_lossy(), e)),
-            }
-        } else {
-            let message = create_crash_message("Image-rs", &file_entry.path.to_string_lossy(), "https://github.com/image-rs/image/issues");
-            println!("{message}");
-            Err(message)
-        }
     }
 
     // Split hashes at 2 parts, base hashes and hashes to compare, 3 argument is set of hashes with multiple images

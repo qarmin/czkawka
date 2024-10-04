@@ -1,12 +1,12 @@
-use std::collections::BTreeMap;
-use std::io::{BufReader, BufWriter};
-
+use bincode::Options;
 use fun_time::fun_time;
 use image::imageops::FilterType;
 use image_hasher::HashAlg;
-use log::debug;
+use log::{debug, error};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
+use std::io::{BufReader, BufWriter};
 
 use crate::common;
 use crate::common_messages::Messages;
@@ -195,11 +195,13 @@ where
         if let Some(file_handler) = file_handler {
             let reader = BufReader::new(file_handler);
 
-            vec_loaded_entries = match bincode::deserialize_from(reader) {
+            let options = bincode::DefaultOptions::new().with_limit(4 * 1024 * 1024 * 1024);
+
+            vec_loaded_entries = match options.deserialize_from(reader) {
                 Ok(t) => t,
                 Err(e) => {
                     text_messages.warnings.push(format!("Failed to load data from cache file {cache_file:?}, reason {e}"));
-                    debug!("Failed to load cache from file {cache_file:?}");
+                    error!("Failed to load cache from file {cache_file:?}");
                     return (text_messages, None);
                 }
             };
