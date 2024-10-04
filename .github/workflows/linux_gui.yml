@@ -46,7 +46,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install basic libraries
-        run: sudo apt update || true; sudo apt install libheif-dev libraw-dev -y
+        run: sudo apt update || true; sudo apt install libheif-dev libraw-dev libavif-dev -y
 
       - name: Setup rust version
         run: rustup default ${{ matrix.toolchain }}
@@ -56,13 +56,13 @@ jobs:
         if: ${{ (matrix.type == 'release') }}
 
       - name: Build Release Krokiet heif
-        run: cargo build --release --bin krokiet --features "heif,libraw"
+        run: cargo build --release --bin krokiet --features "heif,libraw,libavif"
         if: ${{ (matrix.type == 'release') }}
 
       - name: Store Linux GUI Krokiet heif libraw
         uses: actions/upload-artifact@v4
         with:
-          name: krokiet-${{ runner.os }}-${{ matrix.toolchain }}-heif-libraw
+          name: krokiet-${{ runner.os }}-${{ matrix.toolchain }}-heif-libraw-libavif
           path: target/release/krokiet
         if: ${{ matrix.type == 'release' }}
 
@@ -76,7 +76,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install basic libraries
-        run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev -y
+        run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev libavif-dev -y
 
       - name: Setup rust version
         run: rustup default ${{ matrix.toolchain }}
@@ -86,13 +86,13 @@ jobs:
         if: ${{ (matrix.type == 'release') }}
 
       - name: Build Release Heif Libraw
-        run: cargo build --release --bin czkawka_gui --features "heif,libraw"
+        run: cargo build --release --bin czkawka_gui --features "heif,libraw,libavif"
         if: ${{ (matrix.type == 'release') }}
 
       - name: Store Linux GUI Heif Libraw
         uses: actions/upload-artifact@v4
         with:
-          name: czkawka_gui-${{ runner.os }}-${{ matrix.toolchain }}-heif-libraw
+          name: czkawka_gui-${{ runner.os }}-${{ matrix.toolchain }}-heif-libraw-libavif
           path: target/release/czkawka_gui
         if: ${{ (matrix.type == 'release') && (matrix.toolchain == 'stable') }}
 
@@ -118,7 +118,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install Dependencies
-        run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev librsvg2-dev wget fuse libfuse2 desktop-file-utils -y
+        run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev libavif-dev librsvg2-dev wget fuse libfuse2 desktop-file-utils -y
 
       - name: Setup rust version
         run: rustup default ${{ matrix.toolchain }}
@@ -186,7 +186,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install Dependencies
-        run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev librsvg2-dev wget fuse libfuse2 -y xvfb
+        run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev libavif-dev librsvg2-dev wget fuse libfuse2 -y xvfb
 
       - name: Setup rust version
         run: rustup default ${{ matrix.toolchain }}

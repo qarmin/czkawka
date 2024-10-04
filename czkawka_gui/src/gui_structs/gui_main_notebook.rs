@@ -382,6 +382,8 @@ impl GuiMainNotebook {
         self.check_button_music_genre.set_label(Some(&flg!("music_genre_checkbox")));
         self.check_button_music_length.set_label(Some(&flg!("music_length_checkbox")));
         self.check_button_music_approximate_comparison.set_label(Some(&flg!("music_comparison_checkbox")));
+        self.check_button_music_compare_only_in_title_group
+            .set_label(Some(&flg!("music_compare_only_in_title_group")));
 
         self.check_button_music_approximate_comparison
             .set_tooltip_text(Some(&flg!("music_comparison_checkbox_tooltip")));
@@ -404,6 +406,8 @@ impl GuiMainNotebook {
         self.combo_box_duplicate_hash_type.set_tooltip_text(Some(&flg!("duplicate_hash_type_tooltip")));
         self.check_button_duplicate_case_sensitive_name
             .set_tooltip_text(Some(&flg!("duplicate_case_sensitive_name_tooltip")));
+        self.check_button_music_compare_only_in_title_group
+            .set_tooltip_text(Some(&flg!("music_compare_only_in_title_group_tooltip")));
 
         self.combo_box_image_hash_size.set_tooltip_text(Some(&flg!("image_hash_size_tooltip")));
         self.label_image_hash_size.set_tooltip_text(Some(&flg!("image_hash_size_tooltip")));

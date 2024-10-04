@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- Created with Cambalache 0.90.4 -->
+<!-- Created with Cambalache 0.92.0 -->
 <interface>
   <!-- interface-name popover_right_click.ui -->
   <requires lib="gtk" version="4.6"/>

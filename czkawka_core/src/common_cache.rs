@@ -196,7 +196,8 @@ where
             let reader = BufReader::new(file_handler);
 
             let options = bincode::DefaultOptions::new().with_limit(4 * 1024 * 1024 * 1024);
-
+            // let options = bincode::DefaultOptions::new();
+            // dbg!(&options);
             vec_loaded_entries = match options.deserialize_from(reader) {
                 Ok(t) => t,
                 Err(e) => {
@@ -210,7 +211,9 @@ where
             vec_loaded_entries = match serde_json::from_reader(reader) {
                 Ok(t) => t,
                 Err(e) => {
-                    text_messages.warnings.push(format!("Failed to load data from cache file {cache_file_json:?}, reason {e}"));
+                    text_messages
+                        .warnings
+                        .push(format!("Failed to load data from json cache file {cache_file_json:?}, reason {e}"));
                     debug!("Failed to load cache from file {cache_file:?}");
                     return (text_messages, None);
                 }

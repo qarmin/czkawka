@@ -27,6 +27,7 @@
 ### GTK GUI
 
 - Fixed and added more input parameters to the application - [#1355](https://github.com/qarmin/czkawka/pull/1355)
+- [External contribution] Mac homebrew version of app - https://formulae.brew.sh/formula/czkawka
 
 ### CLI
 

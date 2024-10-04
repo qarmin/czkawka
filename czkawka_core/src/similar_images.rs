@@ -15,8 +15,6 @@ use log::debug;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[cfg(feature = "heif")]
-use crate::common::get_dynamic_image_from_heic;
 use crate::common::{
     check_if_stop_received, delete_files_custom, get_dynamic_image_from_path, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, HEIC_EXTENSIONS,
     IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, JXL_IMAGE_EXTENSIONS, RAW_IMAGE_EXTENSIONS,
@@ -46,7 +44,6 @@ pub struct ImagesEntry {
     pub modified_date: u64,
     pub hash: ImHash,
     pub similarity: u32,
-    pub image_type: ImageType,
 }
 
 impl ResultEntry for ImagesEntry {
@@ -71,7 +68,6 @@ impl FileEntry {
             height: 0,
             hash: Vec::new(),
             similarity: 0,
-            image_type: ImageType::Unknown, // TODO remove this, duplicates extension, it is
         }
     }
 }
@@ -1407,7 +1403,6 @@ mod tests {
             modified_date: 0,
             hash,
             similarity: 0,
-            image_type: ImageType::Normal,
         }
     }
 }

@@ -43,6 +43,7 @@ const DEFAULT_IMAGE_REMOVE_AUTO_OUTDATED_CACHE: bool = true;
 const DEFAULT_DUPLICATE_REMOVE_AUTO_OUTDATED_CACHE: bool = true;
 const DEFAULT_DUPLICATE_CASE_SENSITIVE_NAME_CHECKING: bool = false;
 const DEFAULT_GENERAL_IGNORE_OTHER_FILESYSTEMS: bool = false;
+const DEFUALT_USING_RUST_LIBRARIES_TO_SHOW_PREVIEW: bool = true;
 
 const DEFAULT_MUSIC_APPROXIMATE_COMPARISON: bool = false;
 const DEFAULT_MUSIC_COMPARE_BY_TITLE: bool = false;
@@ -391,6 +392,7 @@ enum LoadText {
     BrokenFilesImage,
     BrokenFilesArchive,
     ThreadNumber,
+    GeneralUseRustLibrariesToPreview,
 }
 
 fn create_hash_map() -> (HashMap<LoadText, String>, HashMap<String, LoadText>) {
@@ -439,6 +441,7 @@ fn create_hash_map() -> (HashMap<LoadText, String>, HashMap<String, LoadText>) {
         (LoadText::GeneralIgnoreOtherFilesystems, "ignore_other_filesystems"),
         (LoadText::ThreadNumber, "thread_number"),
         (LoadText::MusicCompareByTitle, "music_compare_by_title"),
+        (LoadText::GeneralUseRustLibrariesToPreview, "use_rust_libraries_to_preview"),
     ];
     let mut hashmap_ls: HashMap<LoadText, String> = Default::default();
     let mut hashmap_sl: HashMap<String, LoadText> = Default::default();
@@ -528,6 +531,10 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
     saving_struct.save_var(
         hashmap_ls[&LoadText::GeneralIgnoreOtherFilesystems].clone(),
         &settings.check_button_settings_one_filesystem.is_active(),
+    );
+    saving_struct.save_var(
+        hashmap_ls[&LoadText::GeneralUseRustLibrariesToPreview].clone(),
+        &settings.check_button_settings_use_rust_preview.is_active(),
     );
 
     saving_struct.save_var(
@@ -656,6 +663,11 @@ pub fn load_configuration(
     let use_json_cache: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::UseJsonCacheFile].clone(), DEFAULT_SAVE_ALSO_AS_JSON);
     let use_trash: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::DeleteToTrash].clone(), DEFAULT_USE_TRASH);
     let ignore_other_fs: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::GeneralIgnoreOtherFilesystems].clone(), DEFAULT_GENERAL_IGNORE_OTHER_FILESYSTEMS);
+    let use_rust_libraries_to_preview: bool = loaded_entries.get_bool(
+        hashmap_ls[&LoadText::GeneralUseRustLibrariesToPreview].clone(),
+        DEFUALT_USING_RUST_LIBRARIES_TO_SHOW_PREVIEW,
+    );
+
     let delete_outdated_cache_duplicates: bool = loaded_entries.get_bool(
         hashmap_ls[&LoadText::DuplicateDeleteOutdatedCacheEntries].clone(),
         DEFAULT_DUPLICATE_REMOVE_AUTO_OUTDATED_CACHE,
@@ -800,6 +812,7 @@ pub fn load_configuration(
         settings.entry_settings_cache_file_minimal_size.set_text(&cache_minimal_size);
         settings.entry_settings_prehash_cache_file_minimal_size.set_text(&cache_prehash_minimal_size);
         settings.check_button_settings_one_filesystem.set_active(ignore_other_fs);
+        settings.check_button_settings_use_rust_preview.set_active(use_rust_libraries_to_preview);
 
         save_proper_value_to_combo_box(&main_notebook.combo_box_duplicate_hash_type, combo_box_duplicate_hash_type);
         save_proper_value_to_combo_box(&main_notebook.combo_box_duplicate_check_method, combo_box_duplicate_checking_method);
