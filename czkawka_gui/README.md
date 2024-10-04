@@ -75,7 +75,7 @@ lot build and runtime dependencies.
 ### Linux (Ubuntu, but on other OS should work similar)
 
 ```shell
-sudo apt install libgtk-4-dev libheif-dev libraw-dev libavif-dev -y
+sudo apt install libgtk-4-dev libheif-dev libraw-dev libavif-dev libdav1d-dev -y
 cargo run --release --bin czkawka_gui
 # Or with support for heif, libraw, libavif(this are c libraries)
 cargo run --release --bin czkawka_gui --features "heif,libraw,libavif"

@@ -16,7 +16,7 @@ If you want to use similar videos tool, you need to install ffmpeg(runtime depen
 If you want to use heif/libraw(build/runtime dependency) you need to install required packages.
 
 - mac - `brew install ffmpeg libraw libheif libavif` - https://formulae.brew.sh/formula/ffmpeg
-- linux - `sudo apt install ffmpeg libraw-dev libheif-dev libavif-dev`
+- linux - `sudo apt install ffmpeg libraw-dev libheif-dev libavif-dev libdav1d-dev`
 - windows - `choco install ffmpeg` - or if not working, download from https://ffmpeg.org/download.html#build-windows and
   unpack to location with `czkawka_cli.exe`, heif and libraw are not supported on windows
 

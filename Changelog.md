@@ -1,5 +1,10 @@
 ## Version 8.0.0 - ?
 
+### Breaking changes
+
+- Due removing image_type from image struct, old cache files are incompatible with new version and should be regenerated
+  from scratch
+
 ### Core
 
 - Removed some unnecessary panics - [#1354](https://github.com/qarmin/czkawka/pull/1354)
