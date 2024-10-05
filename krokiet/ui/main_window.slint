@@ -118,6 +118,18 @@ export component MainWindow inherits Window {
         }
 
         action_buttons := ActionButtons {
+            duplicate_files_model <=> root.duplicate_files_model;
+            empty_folder_model <=> root.empty_folder_model;
+            big_files_model <=> root.big_files_model;
+            empty_files_model <=> root.empty_files_model;
+            temporary-files_model <=> root.temporary-files_model;
+            similar_images_model <=> root.similar_images_model;
+            similar_videos_model <=> root.similar_videos_model;
+            similar_music_model <=> root.similar_music_model;
+            invalid_symlinks_model <=> root.invalid_symlinks_model;
+            broken_files_model <=> root.broken_files_model;
+            bad_extensions_model <=> root.bad_extensions_model;
+
             vertical-stretch: 0.0;
             scanning <=> root.scanning;
             stop_requested <=> root.stop-requested;
@@ -149,7 +161,7 @@ export component MainWindow inherits Window {
                 read-only: true;
             }
             Text {
-                text: "Krokiet\n7.0.0";
+                text: "Krokiet\n8.0.0";
                 vertical-alignment: center;
                 horizontal-alignment: center;
             }

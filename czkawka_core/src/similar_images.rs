@@ -29,8 +29,11 @@ use crate::progress_data::{CurrentStage, ProgressData};
 
 type ImHash = Vec<u8>;
 
+// 40 is, similar like previous 20 in 8 hash size is useless
+// But since Krowka have problems with proper changing max value in fly
+// hardcode 40 as max value
 pub const SIMILAR_VALUES: [[u32; 6]; 4] = [
-    [1, 2, 5, 7, 14, 20],    // 8
+    [1, 2, 5, 7, 14, 40],    // 8
     [2, 5, 15, 30, 40, 40],  // 16
     [4, 10, 20, 40, 40, 40], // 32
     [6, 20, 40, 40, 40, 40], // 64
@@ -357,7 +360,6 @@ impl SimilarImages {
             .hash_alg(self.get_params().hash_alg)
             .resize_filter(self.get_params().image_filter);
         let hasher = hasher_config.to_hasher();
-
         let hash = hasher.hash_image(&img);
         file_entry.hash = hash.as_bytes().to_vec();
 
@@ -818,7 +820,7 @@ pub fn get_string_from_similarity(similarity: &u32, hash_size: u8) -> String {
     } else if *similarity <= SIMILAR_VALUES[index_preset][5] {
         flc!("core_similarity_minimal")
     } else {
-        panic!();
+        panic!("Invalid similarity value {similarity} for hash size {hash_size} (index {index_preset})");
     }
 }
 

@@ -54,7 +54,6 @@ export component PopupNewDirectories inherits Rectangle {
                                 text: "OK";
                                 clicked => {
                                     Callabler.added_manual_directories(GuiState.choosing_include_directories, text_data);
-                                    debug("OK");
                                     popup_window.close();
                                 }
                             }
@@ -62,7 +61,6 @@ export component PopupNewDirectories inherits Rectangle {
                             Button {
                                 text: "Cancel";
                                 clicked => {
-                                    debug("Cancel");
                                     popup_window.close();
                                 }
                             }

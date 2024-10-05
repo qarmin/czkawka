@@ -34,6 +34,9 @@
 - Fixed invalid default hash size in similar images - [#1354](https://github.com/qarmin/czkawka/pull/1354)
 - Fixed and added more input parameters to the application - [#1354](https://github.com/qarmin/czkawka/pull/1354)
 - Fixed problem with loading invalid preset - [#1226](https://github.com/qarmin/czkawka/pull/1226)
+- Fixed crash when using 8 hash size with small similarity - [#TODO](https://github.com/qarmin/czkawka/pull/TODO)
+- Fixed crash when using 8 hash size with small similarity - [#TODO](https://github.com/qarmin/czkawka/pull/TODO)
+- Disabling buttons when no files was found - [#TODO](https://github.com/qarmin/czkawka/pull/TODO)
 
 ### GTK GUI
 
