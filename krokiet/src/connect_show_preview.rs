@@ -1,12 +1,10 @@
-use std::panic;
 use std::path::Path;
 use std::time::{Duration, Instant};
 
+use czkawka_core::common_image::get_dynamic_image_from_path;
 use image::DynamicImage;
 use log::{debug, error};
 use slint::ComponentHandle;
-
-use czkawka_core::common::{get_dynamic_image_from_raw_image, IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
 
 use crate::{Callabler, CurrentTab, GuiState, MainWindow, Settings};
 
@@ -77,39 +75,15 @@ fn load_image(image_path: &Path) -> Option<(Duration, DynamicImage)> {
     if !image_path.is_file() {
         return None;
     }
-    let image_name = image_path.to_string_lossy().to_string();
-    let image_extension = image_path.extension()?.to_string_lossy().to_lowercase();
-
-    let is_raw_image = RAW_IMAGE_EXTENSIONS.contains(&image_extension.as_str());
-    let is_normal_image = IMAGE_RS_EXTENSIONS.contains(&image_extension.as_str());
 
     let load_img_start_timer = Instant::now();
 
-    let img = panic::catch_unwind(|| {
-        let int_img = if is_normal_image {
-            match image::open(image_name) {
-                Ok(img) => img,
-                Err(e) => {
-                    error!("Error while loading image: {}", e);
-                    return None;
-                }
-            }
-        } else if is_raw_image {
-            match get_dynamic_image_from_raw_image(image_name) {
-                Ok(img) => img,
-                Err(e) => {
-                    error!("Error while loading raw image: {}", e);
-                    return None;
-                }
-            }
-        } else {
+    let img = match get_dynamic_image_from_path(&image_path.to_string_lossy()) {
+        Ok(img) => img,
+        Err(e) => {
+            error!("{e}");
             return None;
-        };
-        Some(int_img)
-    })
-    .unwrap_or_else(|e| {
-        error!("Error while loading image: {e:?}");
-        None
-    })?;
+        }
+    };
     Some((load_img_start_timer.elapsed(), img))
 }

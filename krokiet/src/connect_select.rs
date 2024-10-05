@@ -1,8 +1,9 @@
+use slint::{ComponentHandle, Model, ModelRc, VecModel};
+
 use crate::common::{
     connect_i32_into_u64, get_int_height_idx, get_int_modification_date_idx, get_int_size_idx, get_int_width_idx, get_is_header_mode, get_tool_model, set_tool_model,
 };
 use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow, SelectMode, SelectModel};
-use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
 // TODO optimize this, not sure if it is possible to not copy entire model to just select item
 // https://github.com/slint-ui/slint/discussions/4595

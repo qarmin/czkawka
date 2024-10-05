@@ -34,7 +34,7 @@ trash = "5.1"
 i18n-embed = { version = "0.15", features = ["fluent-system", "desktop-requester"] }
 i18n-embed-fl = "0.9"
 rust-embed = { version = "8.5", features = ["debug-embed"] }
-once_cell = "1.19"
+once_cell = "1.20"
 
 # Try to use only needed features from https://github.com/slint-ui/slint/blob/master/api/rs/slint/Cargo.toml#L23-L31
 #slint = { path = "/home/rafal/test/slint/api/rs/slint/", default-features = false, features = ["std",
@@ -62,3 +62,4 @@ winit_software = ["slint/renderer-winit-software"]
 
 heif = ["czkawka_core/heif"]
 libraw = ["czkawka_core/libraw"]
+libavif = ["czkawka_core/libavif"]

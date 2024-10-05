@@ -59,7 +59,7 @@ jobs:
           path: target/release/krokiet
         if: ${{ matrix.type == 'release' }}
 
-# TODO - compilation is broken, not sure why
+#      # TODO - compilation is broken, not sure why
 #      - name: Build Release Heif
 #        run: cargo build --release --features heif
 #        if: ${{ matrix.type == 'release'}}

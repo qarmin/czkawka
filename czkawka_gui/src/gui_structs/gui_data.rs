@@ -4,10 +4,6 @@ use std::io::BufReader;
 use std::rc::Rc;
 
 use crossbeam_channel::bounded;
-use gdk4::gdk_pixbuf::Pixbuf;
-use gtk4::prelude::*;
-use gtk4::{Builder, FileChooserNative};
-
 use czkawka_core::bad_extensions::BadExtensions;
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
@@ -19,6 +15,9 @@ use czkawka_core::same_music::SameMusic;
 use czkawka_core::similar_images::SimilarImages;
 use czkawka_core::similar_videos::SimilarVideos;
 use czkawka_core::temporary::Temporary;
+use gdk4::gdk_pixbuf::Pixbuf;
+use gtk4::prelude::*;
+use gtk4::{Builder, FileChooserNative};
 
 use crate::flg;
 use crate::gui_structs::gui_about::GuiAbout;

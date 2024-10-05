@@ -5,14 +5,13 @@ use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::{env, fs};
 
-use directories_next::ProjectDirs;
-use gtk4::prelude::*;
-use gtk4::{ComboBoxText, ScrolledWindow, TextView, TreeView};
-
 use czkawka_core::common::get_all_available_threads;
 use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::common_items::DEFAULT_EXCLUDED_ITEMS;
 use czkawka_core::similar_images::SIMILAR_VALUES;
+use directories_next::ProjectDirs;
+use gtk4::prelude::*;
+use gtk4::{ComboBoxText, ScrolledWindow, TextView, TreeView};
 
 use crate::flg;
 use crate::gui_structs::gui_main_notebook::GuiMainNotebook;
@@ -43,9 +42,10 @@ const DEFAULT_IMAGE_REMOVE_AUTO_OUTDATED_CACHE: bool = true;
 const DEFAULT_DUPLICATE_REMOVE_AUTO_OUTDATED_CACHE: bool = true;
 const DEFAULT_DUPLICATE_CASE_SENSITIVE_NAME_CHECKING: bool = false;
 const DEFAULT_GENERAL_IGNORE_OTHER_FILESYSTEMS: bool = false;
+const DEFUALT_USING_RUST_LIBRARIES_TO_SHOW_PREVIEW: bool = true;
 
 const DEFAULT_MUSIC_APPROXIMATE_COMPARISON: bool = false;
-const DEFAULT_MUSIC_COMPARE_BY_TITLE: bool = false;
+const DEFAULT_MUSIC_GROUP_CONTENT_BY_TITLE: bool = false;
 
 const DEFAULT_BROKEN_FILES_PDF: bool = true;
 const DEFAULT_BROKEN_FILES_AUDIO: bool = true;
@@ -391,6 +391,7 @@ enum LoadText {
     BrokenFilesImage,
     BrokenFilesArchive,
     ThreadNumber,
+    GeneralUseRustLibrariesToPreview,
 }
 
 fn create_hash_map() -> (HashMap<LoadText, String>, HashMap<String, LoadText>) {
@@ -439,6 +440,7 @@ fn create_hash_map() -> (HashMap<LoadText, String>, HashMap<String, LoadText>) {
         (LoadText::GeneralIgnoreOtherFilesystems, "ignore_other_filesystems"),
         (LoadText::ThreadNumber, "thread_number"),
         (LoadText::MusicCompareByTitle, "music_compare_by_title"),
+        (LoadText::GeneralUseRustLibrariesToPreview, "use_rust_libraries_to_preview"),
     ];
     let mut hashmap_ls: HashMap<LoadText, String> = Default::default();
     let mut hashmap_sl: HashMap<String, LoadText> = Default::default();
@@ -528,6 +530,10 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
     saving_struct.save_var(
         hashmap_ls[&LoadText::GeneralIgnoreOtherFilesystems].clone(),
         &settings.check_button_settings_one_filesystem.is_active(),
+    );
+    saving_struct.save_var(
+        hashmap_ls[&LoadText::GeneralUseRustLibrariesToPreview].clone(),
+        &settings.check_button_settings_use_rust_preview.is_active(),
     );
 
     saving_struct.save_var(
@@ -656,6 +662,11 @@ pub fn load_configuration(
     let use_json_cache: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::UseJsonCacheFile].clone(), DEFAULT_SAVE_ALSO_AS_JSON);
     let use_trash: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::DeleteToTrash].clone(), DEFAULT_USE_TRASH);
     let ignore_other_fs: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::GeneralIgnoreOtherFilesystems].clone(), DEFAULT_GENERAL_IGNORE_OTHER_FILESYSTEMS);
+    let use_rust_libraries_to_preview: bool = loaded_entries.get_bool(
+        hashmap_ls[&LoadText::GeneralUseRustLibrariesToPreview].clone(),
+        DEFUALT_USING_RUST_LIBRARIES_TO_SHOW_PREVIEW,
+    );
+
     let delete_outdated_cache_duplicates: bool = loaded_entries.get_bool(
         hashmap_ls[&LoadText::DuplicateDeleteOutdatedCacheEntries].clone(),
         DEFAULT_DUPLICATE_REMOVE_AUTO_OUTDATED_CACHE,
@@ -685,7 +696,7 @@ pub fn load_configuration(
     let similar_videos_ignore_same_size = loaded_entries.get_bool(hashmap_ls[&LoadText::SimilarVideosIgnoreSameSize].clone(), DEFAULT_SIMILAR_VIDEOS_IGNORE_SAME_SIZE);
     let check_button_case_sensitive_name = loaded_entries.get_object(hashmap_ls[&LoadText::DuplicateNameCaseSensitive].clone(), DEFAULT_DUPLICATE_CASE_SENSITIVE_NAME_CHECKING);
     let check_button_music_approximate_comparison = loaded_entries.get_object(hashmap_ls[&LoadText::MusicApproximateComparison].clone(), DEFAULT_MUSIC_APPROXIMATE_COMPARISON);
-    let check_button_music_compare_by_title = loaded_entries.get_object(hashmap_ls[&LoadText::MusicCompareByTitle].clone(), DEFAULT_MUSIC_COMPARE_BY_TITLE);
+    let check_button_music_compare_by_title = loaded_entries.get_object(hashmap_ls[&LoadText::MusicCompareByTitle].clone(), DEFAULT_MUSIC_GROUP_CONTENT_BY_TITLE);
 
     let check_button_broken_files_archive = loaded_entries.get_object(hashmap_ls[&LoadText::BrokenFilesArchive].clone(), DEFAULT_BROKEN_FILES_ARCHIVE);
     let check_button_broken_files_pdf = loaded_entries.get_object(hashmap_ls[&LoadText::BrokenFilesPdf].clone(), DEFAULT_BROKEN_FILES_PDF);
@@ -800,6 +811,7 @@ pub fn load_configuration(
         settings.entry_settings_cache_file_minimal_size.set_text(&cache_minimal_size);
         settings.entry_settings_prehash_cache_file_minimal_size.set_text(&cache_prehash_minimal_size);
         settings.check_button_settings_one_filesystem.set_active(ignore_other_fs);
+        settings.check_button_settings_use_rust_preview.set_active(use_rust_libraries_to_preview);
 
         save_proper_value_to_combo_box(&main_notebook.combo_box_duplicate_hash_type, combo_box_duplicate_hash_type);
         save_proper_value_to_combo_box(&main_notebook.combo_box_duplicate_check_method, combo_box_duplicate_checking_method);
@@ -966,6 +978,7 @@ pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNoteb
         settings.entry_settings_prehash_cache_file_minimal_size.set_text(DEFAULT_PREHASH_MINIMAL_CACHE_SIZE);
         settings.combo_box_settings_language.set_active(Some(0));
         settings.check_button_settings_one_filesystem.set_active(DEFAULT_GENERAL_IGNORE_OTHER_FILESYSTEMS);
+        settings.check_button_settings_use_rust_preview.set_active(DEFUALT_USING_RUST_LIBRARIES_TO_SHOW_PREVIEW);
 
         main_notebook.combo_box_duplicate_hash_type.set_active(Some(0));
         main_notebook.combo_box_duplicate_check_method.set_active(Some(0));
@@ -981,6 +994,12 @@ pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNoteb
 
         main_notebook.scale_similarity_similar_images.set_range(0_f64, SIMILAR_VALUES[0][5] as f64); // DEFAULT FOR MAX of 8
         main_notebook.scale_similarity_similar_images.set_fill_level(SIMILAR_VALUES[0][5] as f64);
+
+        main_notebook
+            .check_button_music_compare_only_in_title_group
+            .set_active(DEFAULT_MUSIC_GROUP_CONTENT_BY_TITLE);
+
+        main_notebook.check_button_music_approximate_comparison.set_active(DEFAULT_MUSIC_APPROXIMATE_COMPARISON);
 
         main_notebook.entry_big_files_number.set_text(DEFAULT_NUMBER_OF_BIGGEST_FILES);
         main_notebook.scale_similarity_similar_images.set_value(DEFAULT_SIMILAR_IMAGES_SIMILARITY as f64);

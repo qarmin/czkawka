@@ -26,6 +26,7 @@ pub struct GuiSettings {
     pub label_settings_number_of_threads: gtk4::Label,
     pub scale_settings_number_of_threads: gtk4::Scale,
     pub label_restart_needed: gtk4::Label,
+    pub check_button_settings_use_rust_preview: gtk4::CheckButton,
 
     // Duplicates
     pub check_button_settings_hide_hard_links: gtk4::CheckButton,
@@ -84,6 +85,7 @@ impl GuiSettings {
         let label_settings_number_of_threads: gtk4::Label = builder.object("label_settings_number_of_threads").expect("Cambalache");
         let scale_settings_number_of_threads: gtk4::Scale = builder.object("scale_settings_number_of_threads").expect("Cambalache");
         let label_restart_needed: gtk4::Label = builder.object("label_restart_needed").expect("Cambalache");
+        let check_button_settings_use_rust_preview: gtk4::CheckButton = builder.object("check_button_settings_use_rust_preview").expect("Cambalache");
 
         // Duplicates
         let check_button_settings_hide_hard_links: gtk4::CheckButton = builder.object("check_button_settings_hide_hard_links").expect("Cambalache");
@@ -134,6 +136,7 @@ impl GuiSettings {
             label_settings_number_of_threads,
             scale_settings_number_of_threads,
             label_restart_needed,
+            check_button_settings_use_rust_preview,
             check_button_settings_hide_hard_links,
             entry_settings_cache_file_minimal_size,
             entry_settings_prehash_cache_file_minimal_size,
@@ -176,6 +179,7 @@ impl GuiSettings {
         self.label_settings_general_language.set_label(&flg!("settings_language_label"));
         self.check_button_settings_one_filesystem.set_label(Some(&flg!("settings_ignore_other_filesystems")));
         self.label_settings_number_of_threads.set_label(&flg!("settings_number_of_threads"));
+        self.check_button_settings_use_rust_preview.set_label(Some(&flg!("settings_use_rust_preview")));
 
         self.check_button_settings_save_at_exit
             .set_tooltip_text(Some(&flg!("settings_save_at_exit_button_tooltip")));
@@ -197,6 +201,8 @@ impl GuiSettings {
         self.check_button_settings_one_filesystem
             .set_tooltip_text(Some(&flg!("settings_ignore_other_filesystems_tooltip")));
         self.scale_settings_number_of_threads.set_tooltip_text(Some(&flg!("settings_number_of_threads_tooltip")));
+        self.check_button_settings_use_rust_preview
+            .set_tooltip_text(Some(&flg!("settings_use_rust_preview_tooltip")));
 
         self.check_button_settings_hide_hard_links
             .set_label(Some(&flg!("settings_duplicates_hide_hard_link_button")));

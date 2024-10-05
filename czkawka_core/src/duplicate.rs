@@ -10,12 +10,6 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::Ordering;
 use std::{fs, mem};
 
-use crate::common::{check_if_stop_received, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
-use crate::common_cache::{get_duplicate_cache_file, load_cache_from_file_generalized_by_size, save_cache_to_file_generalized};
-use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
-use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
-use crate::common_traits::*;
-use crate::progress_data::{CurrentStage, ProgressData};
 use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
 use humansize::{format_size, BINARY};
@@ -23,6 +17,13 @@ use log::debug;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use xxhash_rust::xxh3::Xxh3;
+
+use crate::common::{check_if_stop_received, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
+use crate::common_cache::{get_duplicate_cache_file, load_cache_from_file_generalized_by_size, save_cache_to_file_generalized};
+use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
+use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
+use crate::common_traits::*;
+use crate::progress_data::{CurrentStage, ProgressData};
 
 const TEMP_HARDLINK_FILE: &str = "rzeczek.rxrxrxl";
 
@@ -544,7 +545,11 @@ impl DuplicateFinder {
         stop_receiver: Option<&Receiver<()>>,
         progress_sender: Option<&Sender<ProgressData>>,
         pre_checked_map: &mut BTreeMap<u64, Vec<DuplicateEntry>>,
-    ) -> Option<()> {
+    ) -> bool {
+        if self.files_with_identical_size.is_empty() {
+            return true;
+        }
+
         let check_type = self.get_params().hash_type;
         let (progress_thread_handle, progress_thread_run, _atomic_counter, _check_was_stopped) =
             prepare_thread_handler_common(progress_sender, CurrentStage::DuplicatePreHashCacheLoading, 0, self.get_test_type());
@@ -553,7 +558,7 @@ impl DuplicateFinder {
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
         if check_if_stop_received(stop_receiver) {
-            return None;
+            return false;
         }
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) = prepare_thread_handler_common(
             progress_sender,
@@ -618,10 +623,10 @@ impl DuplicateFinder {
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
         if check_was_stopped.load(Ordering::Relaxed) || check_if_stop_received(stop_receiver) {
-            return None;
+            return false;
         }
 
-        Some(())
+        true
     }
 
     fn diff_loaded_and_prechecked_files(
@@ -747,12 +752,11 @@ impl DuplicateFinder {
     }
 
     #[fun_time(message = "full_hashing", level = "debug")]
-    fn full_hashing(
-        &mut self,
-        stop_receiver: Option<&Receiver<()>>,
-        progress_sender: Option<&Sender<ProgressData>>,
-        pre_checked_map: BTreeMap<u64, Vec<DuplicateEntry>>,
-    ) -> Option<()> {
+    fn full_hashing(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>, pre_checked_map: BTreeMap<u64, Vec<DuplicateEntry>>) -> bool {
+        if pre_checked_map.is_empty() {
+            return true;
+        }
+
         let (progress_thread_handle, progress_thread_run, _atomic_counter, _check_was_stopped) =
             prepare_thread_handler_common(progress_sender, CurrentStage::DuplicateCacheLoading, 0, self.get_test_type());
 
@@ -760,7 +764,7 @@ impl DuplicateFinder {
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
         if check_if_stop_received(stop_receiver) {
-            return None;
+            return false;
         }
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) = prepare_thread_handler_common(
@@ -818,7 +822,7 @@ impl DuplicateFinder {
             }
         }
 
-        Some(())
+        true
     }
 
     #[fun_time(message = "hash_reference_folders", level = "debug")]
@@ -877,13 +881,11 @@ impl DuplicateFinder {
         assert_eq!(self.get_params().check_method, CheckingMethod::Hash);
 
         let mut pre_checked_map: BTreeMap<u64, Vec<DuplicateEntry>> = Default::default();
-        let ret = self.prehashing(stop_receiver, progress_sender, &mut pre_checked_map);
-        if ret.is_none() {
+        if !self.prehashing(stop_receiver, progress_sender, &mut pre_checked_map) {
             return false;
         }
 
-        let ret = self.full_hashing(stop_receiver, progress_sender, pre_checked_map);
-        if ret.is_none() {
+        if !self.full_hashing(stop_receiver, progress_sender, pre_checked_map) {
             return false;
         }
 
@@ -977,9 +979,9 @@ impl DuplicateFinder {
 
 impl DebugPrint for DuplicateFinder {
     fn debug_print(&self) {
-        if !cfg!(debug_assertions) {
-            return;
-        }
+        // if !cfg!(debug_assertions) {
+        //     return;
+        // }
         println!("---------------DEBUG PRINT---------------");
         println!(
             "Number of duplicated files by size(in groups) - {} ({})",
@@ -1008,6 +1010,12 @@ impl DebugPrint for DuplicateFinder {
 
         println!("Files list size - {}", self.files_with_identical_size.len());
         println!("Hashed Files list size - {}", self.files_with_identical_hashes.len());
+        println!("Files with identical names - {}", self.files_with_identical_names.len());
+        println!("Files with identical size names - {}", self.files_with_identical_size_names.len());
+        println!("Files with identical names referenced - {}", self.files_with_identical_names_referenced.len());
+        println!("Files with identical size names referenced - {}", self.files_with_identical_size_names_referenced.len());
+        println!("Files with identical size referenced - {}", self.files_with_identical_size_referenced.len());
+        println!("Files with identical hashes referenced - {}", self.files_with_identical_hashes_referenced.len());
         println!("Checking Method - {:?}", self.get_params().check_method);
         self.debug_print_common();
         println!("-----------------------------------------");
@@ -1183,7 +1191,7 @@ impl PrintResults for DuplicateFinder {
                     for (size, vectors_vector) in self.files_with_identical_hashes_referenced.iter().rev() {
                         for (file_entry, vector) in vectors_vector {
                             writeln!(writer, "\n---- Size {} ({}) - {} files", format_size(*size, BINARY), size, vector.len())?;
-                            writeln!(writer, "Reference file - {:?}", file_entry.path)?;
+                            writeln!(writer, "Reference file - \"{}\"", file_entry.path.to_string_lossy())?;
                             for file_entry in vector {
                                 writeln!(writer, "\"{}\"", file_entry.path.to_string_lossy())?;
                             }

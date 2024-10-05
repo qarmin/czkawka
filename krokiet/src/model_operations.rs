@@ -1,7 +1,9 @@
+use std::path::MAIN_SEPARATOR;
+
+use slint::{Model, ModelRc};
+
 use crate::common::{get_str_name_idx, get_str_path_idx};
 use crate::{CurrentTab, MainListModel};
-use slint::{Model, ModelRc};
-use std::path::MAIN_SEPARATOR;
 
 pub fn deselect_all_items(items: &mut [MainListModel]) {
     for item in items {

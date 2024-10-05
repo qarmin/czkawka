@@ -10,6 +10,8 @@ Requirements depend on your platform.
 
 Prebuilt binaries are available here - https://github.com/qarmin/czkawka/releases/
 
+Additional features like heif, libraw, libavif require additional libraries to be installed, and may increase
+
 ### Linux
 
 #### Prebuild binaries
@@ -27,9 +29,21 @@ none - all needed libraries are bundled - https://flathub.org/apps/com.github.qa
 
 ### Mac
 
+### Homebrew
+
+Czkawka gui is available in homebrew - https://formulae.brew.sh/formula/czkawka and can be installed via
+
 ```
+brew install czkawka
+```
+
+### Manual installation requirements
+
+```
+
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 brew install gtk4 adwaita-icon-theme ffmpeg librsvg libheif libraw
+
 ```
 
 ### Windows
@@ -41,7 +55,9 @@ You can also install the app via msys2 (webp and heif should work here) - https:
 package - https://packages.msys2.org/base/mingw-w64-czkawka)
 
 ```
+
 pacman -S mingw-w64-x86_64-czkawka-gui
+
 ```
 
 and you can create a shortcut to `C:\msys64\mingw64\bin\czkawka_gui.exe`
@@ -61,10 +77,11 @@ lot build and runtime dependencies.
 ### Linux (Ubuntu, but on other OS should work similar)
 
 ```shell
-sudo apt install libgtk-4-dev libheif-dev libraw-dev -y
+sudo apt install libgtk-4-dev -y # Base
+sudo apt install libgtk-4-dev libheif-dev libraw-dev libavif-dev libdav1d-dev -y # With features
 cargo run --release --bin czkawka_gui
-# Or with support for heif and libraw
-cargo run --release --bin czkawka_gui --features "heif,libraw"
+# Or with support for heif, libraw, libavif
+cargo run --release --bin czkawka_gui --features "heif,libraw,libavif"
 ```
 
 ### Mac
@@ -74,8 +91,8 @@ cargo run --release --bin czkawka_gui --features "heif,libraw"
 brew install rustup gtk4 adwaita-icon-theme ffmpeg librsvg libheif libraw pkg-config
 rustup-init
 cargo run --release --bin czkawka_gui
-# Or with support for heif and libraw
-cargo run --release --bin czkawka_gui --features "heif,libraw"
+# Or with support for heif, libraw, libavif
+cargo run --release --bin czkawka_gui --features "heif,libraw,libavif"
 ```
 
 ### Windows
@@ -91,7 +108,7 @@ purposes - https://github.com/msys2/MINGW-packages/blob/master/mingw-w64-czkawka
 Not all available features and/or components implemented here, this is the list of limitations:
 
 - Snap versions does not allow to use the similar videos feature
-- Windows version does not support heif and webp files with prebuilt binaries
+- Windows version does not support heif and webp files with prebuilt binaries(msys2 version support them)
 - Prebuilt binaries for mac arm do not exist
 - On Windows, text may appear very small on high resolution displays, a solution is to manually change DPI scaling for
   this app, see :

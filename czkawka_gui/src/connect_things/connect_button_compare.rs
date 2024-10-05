@@ -1,14 +1,11 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use czkawka_core::common_image::get_dynamic_image_from_path;
 use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
 use gtk4::prelude::*;
 use gtk4::{Align, CheckButton, Image, ListStore, Orientation, ScrolledWindow, TreeIter, TreeModel, TreePath, TreeSelection, Widget};
 use image::DynamicImage;
-
-#[cfg(feature = "heif")]
-use czkawka_core::common::get_dynamic_image_from_heic;
-use czkawka_core::common::HEIC_EXTENSIONS;
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
@@ -43,6 +40,8 @@ pub fn connect_button_compare(gui_data: &GuiData) {
 
     let image_compare_left = gui_data.compare_images.image_compare_left.clone();
     let image_compare_right = gui_data.compare_images.image_compare_right.clone();
+
+    let check_button_settings_use_rust_preview = gui_data.settings.check_button_settings_use_rust_preview.clone();
 
     window_compare.set_default_size(700, 700);
 
@@ -81,6 +80,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
             &shared_using_for_preview,
             &button_go_previous_compare_group,
             &button_go_next_compare_group,
+            &check_button_settings_use_rust_preview,
         );
 
         window_compare.show();
@@ -125,6 +125,8 @@ pub fn connect_button_compare(gui_data: &GuiData) {
     let image_compare_left = gui_data.compare_images.image_compare_left.clone();
     let image_compare_right = gui_data.compare_images.image_compare_right.clone();
 
+    let check_button_settings_use_rust_preview = gui_data.settings.check_button_settings_use_rust_preview.clone();
+
     button_go_previous_compare_group.connect_clicked(move |button_go_previous_compare_group| {
         let nb_number = notebook_main.current_page().expect("Current page not set");
         let tree_view = &main_tree_views[nb_number as usize];
@@ -160,6 +162,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
             &shared_using_for_preview,
             button_go_previous_compare_group,
             &button_go_next_compare_group,
+            &check_button_settings_use_rust_preview,
         );
     });
 
@@ -181,6 +184,8 @@ pub fn connect_button_compare(gui_data: &GuiData) {
 
     let image_compare_left = gui_data.compare_images.image_compare_left.clone();
     let image_compare_right = gui_data.compare_images.image_compare_right.clone();
+
+    let check_button_settings_use_rust_preview = gui_data.settings.check_button_settings_use_rust_preview.clone();
 
     button_go_next_compare_group.connect_clicked(move |button_go_next_compare_group| {
         let nb_number = notebook_main.current_page().expect("Current page not set");
@@ -217,6 +222,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
             &shared_using_for_preview,
             &button_go_previous_compare_group,
             button_go_next_compare_group,
+            &check_button_settings_use_rust_preview,
         );
     });
 
@@ -299,6 +305,7 @@ fn populate_groups_at_start(
     shared_using_for_preview: &Rc<RefCell<(Option<TreePath>, Option<TreePath>)>>,
     button_go_previous_compare_group: &gtk4::Button,
     button_go_next_compare_group: &gtk4::Button,
+    check_button_settings_use_rust_preview: &CheckButton,
 ) {
     if current_group == 1 {
         button_go_previous_compare_group.set_sensitive(false);
@@ -320,7 +327,7 @@ fn populate_groups_at_start(
     );
     *shared_current_path.borrow_mut() = Some(tree_path);
 
-    let cache_all_images = generate_cache_for_results(all_vec);
+    let cache_all_images = generate_cache_for_results(all_vec, check_button_settings_use_rust_preview.is_active());
 
     // This is safe, because cache have at least 2 results
     image_compare_left.set_paintable(cache_all_images[0].2.paintable().as_ref());
@@ -379,7 +386,7 @@ fn populate_groups_at_start(
     check_button_right_preview_text.set_active(is_active);
 }
 
-fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>) -> Vec<(String, String, Image, Image, TreePath)> {
+fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>, use_rust_loader: bool) -> Vec<(String, String, Image, Image, TreePath)> {
     // TODO use here threads,
     // For now threads cannot be used because Image and TreeIter cannot be used in threads
     let mut cache_all_images = Vec::new();
@@ -388,36 +395,23 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>)
         let big_img = Image::new();
 
         let mut pixbuf = get_pixbuf_from_dynamic_image(&DynamicImage::new_rgb8(1, 1)).expect("Failed to create pixbuf");
-        let extension_lowercase = full_path.split('.').last().map(str::to_lowercase);
-        let is_heic = match extension_lowercase {
-            Some(extension) => HEIC_EXTENSIONS.iter().any(|e| e == &extension),
-            None => false,
-        };
 
-        if is_heic {
-            #[allow(clippy::never_loop)]
-            'czystka: loop {
-                #[cfg(feature = "heif")]
-                if is_heic {
-                    match get_dynamic_image_from_heic(&full_path) {
+        if use_rust_loader {
+            match get_dynamic_image_from_path(&full_path) {
+                Ok(t) => {
+                    match get_pixbuf_from_dynamic_image(&t) {
                         Ok(t) => {
-                            match get_pixbuf_from_dynamic_image(&t) {
-                                Ok(t) => {
-                                    pixbuf = t;
-                                }
-                                Err(e) => {
-                                    println!("Failed to open image {full_path}, reason {e}");
-                                }
-                            };
+                            pixbuf = t;
                         }
                         Err(e) => {
                             println!("Failed to open image {full_path}, reason {e}");
                         }
                     };
-                    break 'czystka;
                 }
-                break 'czystka;
-            }
+                Err(e) => {
+                    println!("Failed to open image {full_path}, reason {e}");
+                }
+            };
         } else {
             match Pixbuf::from_file(&full_path) {
                 Ok(t) => {

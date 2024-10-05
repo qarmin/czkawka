@@ -1,10 +1,3 @@
-use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
-use glib::Error;
-use gtk4::prelude::*;
-use gtk4::{ListStore, Scale, ScrollType, TextView, TreeView, Widget};
-use image::codecs::jpeg::JpegEncoder;
-use image::{DynamicImage, EncodableLayout};
-use once_cell::sync::OnceCell;
 use std::cell::RefCell;
 use std::cmp::Ordering;
 use std::collections::HashMap;
@@ -25,6 +18,13 @@ use czkawka_core::same_music::SameMusic;
 use czkawka_core::similar_images::SimilarImages;
 use czkawka_core::similar_videos::SimilarVideos;
 use czkawka_core::temporary::Temporary;
+use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
+use glib::Error;
+use gtk4::prelude::*;
+use gtk4::{ListStore, Scale, ScrollType, TextView, TreeView, Widget};
+use image::codecs::jpeg::JpegEncoder;
+use image::{DynamicImage, EncodableLayout};
+use once_cell::sync::OnceCell;
 
 use crate::flg;
 use crate::notebook_enums::{NotebookMainEnum, NotebookUpperEnum};

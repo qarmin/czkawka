@@ -21,10 +21,9 @@
 use std::rc::Rc;
 
 use crossbeam_channel::{unbounded, Receiver, Sender};
-use slint::VecModel;
-
 use czkawka_core::common::{print_version_mode, setup_logger};
 use czkawka_core::progress_data::ProgressData;
+use slint::VecModel;
 
 use crate::connect_delete::connect_delete_button;
 use crate::connect_directories_changes::connect_add_remove_directories;

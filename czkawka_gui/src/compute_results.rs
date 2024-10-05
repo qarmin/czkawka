@@ -5,12 +5,6 @@ use std::time::Duration;
 
 use chrono::DateTime;
 use crossbeam_channel::Receiver;
-use fun_time::fun_time;
-use gtk4::prelude::*;
-use gtk4::{Entry, ListStore, TextView, TreeView, Widget};
-use humansize::{format_size, BINARY};
-use rayon::prelude::*;
-
 use czkawka_core::bad_extensions::BadExtensions;
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
@@ -27,6 +21,11 @@ use czkawka_core::similar_images;
 use czkawka_core::similar_images::{ImagesEntry, SimilarImages};
 use czkawka_core::similar_videos::SimilarVideos;
 use czkawka_core::temporary::Temporary;
+use fun_time::fun_time;
+use gtk4::prelude::*;
+use gtk4::{Entry, ListStore, TextView, TreeView, Widget};
+use humansize::{format_size, BINARY};
+use rayon::prelude::*;
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;

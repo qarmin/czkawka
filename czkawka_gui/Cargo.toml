@@ -30,7 +30,7 @@ open = "5.3"
 image = "0.25"
 
 # To be able to use custom select
-regex = "1.10"
+regex = "1.11"
 
 # To get image_hasher types
 image_hasher = "2.0"
@@ -45,7 +45,7 @@ fs_extra = "1.3"
 i18n-embed = { version = "0.15", features = ["fluent-system", "desktop-requester"] }
 i18n-embed-fl = "0.9"
 rust-embed = { version = "8.5", features = ["debug-embed"] }
-once_cell = "1.19"
+once_cell = "1.20"
 
 log = "0.4.22"
 handsome_logger = "0.8"
@@ -61,3 +61,4 @@ winapi = { version = "0.3.9", features = ["combaseapi", "objbase", "shobjidl_cor
 default = []
 heif = ["czkawka_core/heif"]
 libraw = ["czkawka_core/libraw"]
+libavif = ["czkawka_core/libavif"]

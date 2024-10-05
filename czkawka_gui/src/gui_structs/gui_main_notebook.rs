@@ -1,10 +1,9 @@
-use gtk4::prelude::*;
-use gtk4::{Builder, CheckButton, ComboBoxText, Entry, EventControllerKey, GestureClick, Image, Label, Notebook, Scale, ScrolledWindow, TreeView, Widget};
-
 use czkawka_core::big_file::SearchMode;
 use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::localizer_core::{fnc_get_similarity_minimal, fnc_get_similarity_very_high};
 use czkawka_core::similar_images::{get_string_from_similarity, SIMILAR_VALUES};
+use gtk4::prelude::*;
+use gtk4::{Builder, CheckButton, ComboBoxText, Entry, EventControllerKey, GestureClick, Image, Label, Notebook, Scale, ScrolledWindow, TreeView, Widget};
 
 use crate::flg;
 use crate::help_combo_box::{AUDIO_TYPE_CHECK_METHOD_COMBO_BOX, BIG_FILES_CHECK_METHOD_COMBO_BOX, DUPLICATES_CHECK_METHOD_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX};
@@ -382,6 +381,8 @@ impl GuiMainNotebook {
         self.check_button_music_genre.set_label(Some(&flg!("music_genre_checkbox")));
         self.check_button_music_length.set_label(Some(&flg!("music_length_checkbox")));
         self.check_button_music_approximate_comparison.set_label(Some(&flg!("music_comparison_checkbox")));
+        self.check_button_music_compare_only_in_title_group
+            .set_label(Some(&flg!("music_compare_only_in_title_group")));
 
         self.check_button_music_approximate_comparison
             .set_tooltip_text(Some(&flg!("music_comparison_checkbox_tooltip")));
@@ -404,6 +405,8 @@ impl GuiMainNotebook {
         self.combo_box_duplicate_hash_type.set_tooltip_text(Some(&flg!("duplicate_hash_type_tooltip")));
         self.check_button_duplicate_case_sensitive_name
             .set_tooltip_text(Some(&flg!("duplicate_case_sensitive_name_tooltip")));
+        self.check_button_music_compare_only_in_title_group
+            .set_tooltip_text(Some(&flg!("music_compare_only_in_title_group_tooltip")));
 
         self.combo_box_image_hash_size.set_tooltip_text(Some(&flg!("image_hash_size_tooltip")));
         self.label_image_hash_size.set_tooltip_text(Some(&flg!("image_hash_size_tooltip")));

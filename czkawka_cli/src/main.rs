@@ -4,10 +4,8 @@
 use std::thread;
 
 use clap::Parser;
-use crossbeam_channel::{bounded, unbounded, Receiver, Sender};
-use log::error;
-
 use commands::Commands;
+use crossbeam_channel::{bounded, unbounded, Receiver, Sender};
 use czkawka_core::bad_extensions::{BadExtensions, BadExtensionsParameters};
 use czkawka_core::big_file::{BigFile, BigFileParameters, SearchMode};
 use czkawka_core::broken_files::{BrokenFiles, BrokenFilesParameters, CheckedTypes};
@@ -24,6 +22,7 @@ use czkawka_core::same_music::{SameMusic, SameMusicParameters};
 use czkawka_core::similar_images::{return_similarity_from_similarity_preset, test_image_conversion_speed, SimilarImages, SimilarImagesParameters};
 use czkawka_core::similar_videos::{SimilarVideos, SimilarVideosParameters};
 use czkawka_core::temporary::Temporary;
+use log::error;
 
 use crate::commands::{
     Args, BadExtensionsArgs, BiggestFilesArgs, BrokenFilesArgs, CommonCliItems, DuplicatesArgs, EmptyFilesArgs, EmptyFoldersArgs, InvalidSymlinksArgs, SameMusicArgs,

@@ -4,8 +4,28 @@ build_all:
     cargo clippy
     cargo test
 
-run:
-    cargo run --bin czkawka_gui
+## run
+
+czkawka:
+    RUST_BACKTRACE=1 cargo run --bin czkawka_gui
+czkawka_r:
+    RUST_BACKTRACE=1 cargo run --bin czkawka_gui --release
+
+krokiet:
+    RUST_BACKTRACE=1 cargo run --bin krokiet
+krokiet_r:
+    RUST_BACKTRACE=1 cargo run --bin krokiet --release
+krokiet_dark:
+    RUST_BACKTRACE=1 SLINT_STYLE=fluent-dark cargo run --bin krokiet
+
+cli:
+    RUST_BACKTRACE=1 cargo run --bin czkawka_cli
+cli_r:
+    RUST_BACKTRACE=1 cargo run --bin czkawka_cli --release
+cli_help:
+    cargo run --bin czkawka_cli -- --help
+
+## Other
 
 build:
     cargo build --bin czkawka_gui
@@ -16,26 +36,6 @@ check:
 check_all:
     cargo check
 
-krokiet:
-    cargo run --bin krokiet
-
-czkawka:
-    cargo run --bin czkawka_gui
-
-krokiet_r:
-    cargo run --bin krokiet --release
-
-krokiet_dark:
-    SLINT_STYLE=fluent-dark cargo run --bin krokiet
-
-czkawka_r:
-    cargo run --bin czkawka_gui --release
-
-cli:
-    cargo run --bin czkawka_cli
-
-cli_help:
-    cargo run --bin czkawka_cli -- --help
 
 build_krokiet:
     cargo build --bin krokiet
@@ -44,7 +44,7 @@ build_czkawka:
     cargo build --bin czkawka_gui
 
 upgrade:
-    cargo upgrade -i
+    cargo +nightly -Z unstable-options update --breaking
     cargo update
 
 fix:

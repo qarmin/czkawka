@@ -645,15 +645,17 @@ pub fn take_1_per_inode((k, mut v): (Option<u64>, Vec<FileEntry>)) -> Vec<FileEn
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::common_tool::*;
-    use once_cell::sync::Lazy;
     use std::collections::HashSet;
     use std::fs::File;
     use std::io::prelude::*;
     use std::time::{Duration, SystemTime};
     use std::{fs, io};
+
+    use once_cell::sync::Lazy;
     use tempfile::TempDir;
+
+    use super::*;
+    use crate::common_tool::*;
 
     impl CommonData for CommonToolData {
         fn get_cd(&self) -> &CommonToolData {

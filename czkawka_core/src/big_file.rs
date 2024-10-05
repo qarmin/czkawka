@@ -1,15 +1,16 @@
 use std::fs;
 use std::io::Write;
 
-use crate::common_dir_traversal::{DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
-use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
-use crate::common_traits::{DebugPrint, PrintResults};
-use crate::progress_data::ProgressData;
 use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
 use humansize::{format_size, BINARY};
 use log::debug;
 use rayon::prelude::*;
+
+use crate::common_dir_traversal::{DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
+use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
+use crate::common_traits::{DebugPrint, PrintResults};
+use crate::progress_data::ProgressData;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum SearchMode {
@@ -65,7 +66,7 @@ impl BigFile {
         self.debug_print();
     }
 
-    // #[fun_time(message = "look_for_big_files", level = "debug")]
+    #[fun_time(message = "look_for_big_files", level = "debug")]
     fn look_for_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         let result = DirTraversalBuilder::new()
             .group_by(|_fe| ())

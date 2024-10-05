@@ -1,6 +1,3 @@
-#![allow(unused_imports)]
-// I don't wanna fight with unused(heif) imports in this file, so simply ignore it to avoid too much complexity
-
 use std::cmp::Ordering;
 use std::ffi::OsString;
 use std::fs::{DirEntry, File, OpenOptions};
@@ -8,24 +5,14 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize};
 use std::sync::{atomic, Arc};
 use std::thread::{sleep, JoinHandle};
-use std::time::{Duration, Instant, SystemTime};
+use std::time::{Duration, SystemTime};
 use std::{fs, thread};
 
-#[cfg(feature = "heif")]
-use anyhow::Result;
 use crossbeam_channel::Sender;
 use directories_next::ProjectDirs;
 use fun_time::fun_time;
 use handsome_logger::{ColorChoice, ConfigBuilder, TerminalMode};
-use image::{DynamicImage, ImageBuffer, Rgb};
-use imagepipe::{ImageSource, Pipeline};
-#[cfg(feature = "heif")]
-use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
-#[cfg(feature = "libraw")]
-use libraw::Processor;
-use log::{debug, error, info, warn, LevelFilter, Record};
-use rawloader::RawLoader;
-use symphonia::core::conv::IntoSample;
+use log::{debug, info, warn, LevelFilter, Record};
 
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
@@ -33,7 +20,7 @@ use crate::common_dir_traversal::{CheckingMethod, ToolType};
 use crate::common_directory::Directories;
 use crate::common_items::{ExcludedItems, SingleExcludedItem};
 use crate::common_messages::Messages;
-use crate::common_tool::{CommonData, DeleteMethod};
+use crate::common_tool::DeleteMethod;
 use crate::common_traits::ResultEntry;
 use crate::duplicate::make_hard_link;
 use crate::progress_data::{CurrentStage, ProgressData};
@@ -76,6 +63,7 @@ pub fn get_all_available_threads() -> usize {
     })
 }
 
+#[allow(clippy::vec_init_then_push)]
 pub fn print_version_mode() {
     let rust_version = env!("RUST_VERSION_INTERNAL");
     let debug_release = if cfg!(debug_assertions) { "debug" } else { "release" };
@@ -83,12 +71,24 @@ pub fn print_version_mode() {
     let processors = get_all_available_threads();
 
     let info = os_info::get();
+
+    #[allow(unused_mut)]
+    let mut features: Vec<&str> = vec![];
+    #[cfg(feature = "heif")]
+    features.push("heif");
+    #[cfg(feature = "libavif")]
+    features.push("libavif");
+    #[cfg(feature = "libraw")]
+    features.push("libraw");
+
     info!(
-        "App version: {CZKAWKA_VERSION}, {debug_release} mode, rust {rust_version}, os {} {} [{} {}], {processors} cpu/threads",
+        "App version: {CZKAWKA_VERSION}, {debug_release} mode, rust {rust_version}, os {} {} [{} {}], {processors} cpu/threads, features({}): [{}]",
         info.os_type(),
         info.version(),
         std::env::consts::ARCH,
         info.bitness(),
+        features.len(),
+        features.join(", ")
     );
     if cfg!(debug_assertions) {
         warn!("You are running debug version of app which is a lot of slower than release version.");
@@ -123,14 +123,31 @@ pub fn set_number_of_threads(thread_number: usize) {
 pub const RAW_IMAGE_EXTENSIONS: &[&str] = &[
     "mrw", "arw", "srf", "sr2", "mef", "orf", "srw", "erf", "kdc", "kdc", "dcs", "rw2", "raf", "dcr", "dng", "pef", "crw", "iiq", "3fr", "nrw", "nef", "mos", "cr2", "ari",
 ];
+
+pub const JXL_IMAGE_EXTENSIONS: &[&str] = &["jxl"];
+
+#[cfg(feature = "libavif")]
+pub const IMAGE_RS_EXTENSIONS: &[&str] = &[
+    "jpg", "jpeg", "png", "bmp", "tiff", "tif", "tga", "ff", "jif", "jfi", "webp", "gif", "ico", "exr", "qoi", "avif",
+];
+#[cfg(not(feature = "libavif"))]
 pub const IMAGE_RS_EXTENSIONS: &[&str] = &["jpg", "jpeg", "png", "bmp", "tiff", "tif", "tga", "ff", "jif", "jfi", "webp", "gif", "ico", "exr", "qoi"];
 
+#[cfg(feature = "libavif")]
+pub const IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS: &[&str] = &["jpg", "jpeg", "png", "tiff", "tif", "tga", "ff", "jif", "jfi", "bmp", "webp", "exr", "qoi", "avif"];
+#[cfg(not(feature = "libavif"))]
 pub const IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS: &[&str] = &["jpg", "jpeg", "png", "tiff", "tif", "tga", "ff", "jif", "jfi", "bmp", "webp", "exr", "qoi"];
 
+#[cfg(feature = "libavif")]
+pub const IMAGE_RS_BROKEN_FILES_EXTENSIONS: &[&str] = &[
+    "jpg", "jpeg", "png", "tiff", "tif", "tga", "ff", "jif", "jfi", "gif", "bmp", "ico", "jfif", "jpe", "pnz", "dib", "webp", "exr", "avif",
+];
+#[cfg(not(feature = "libavif"))]
 pub const IMAGE_RS_BROKEN_FILES_EXTENSIONS: &[&str] = &[
     "jpg", "jpeg", "png", "tiff", "tif", "tga", "ff", "jif", "jfi", "gif", "bmp", "ico", "jfif", "jpe", "pnz", "dib", "webp", "exr",
 ];
-pub const HEIC_EXTENSIONS: &[&str] = &["heif", "heifs", "heic", "heics", "avci", "avcs", "avifs"];
+
+pub const HEIC_EXTENSIONS: &[&str] = &["heif", "heifs", "heic", "heics", "avci", "avcs"];
 
 pub const ZIP_FILES_EXTENSIONS: &[&str] = &["zip", "jar"];
 
@@ -257,83 +274,6 @@ pub fn open_cache_folder(cache_file_name: &str, save_to_cache: bool, use_json: b
         return Some(((file_handler_default, cache_file), (file_handler_json, cache_file_json)));
     }
     None
-}
-
-#[cfg(feature = "heif")]
-pub fn get_dynamic_image_from_heic(path: &str) -> Result<DynamicImage> {
-    // let libheif = LibHeif::new();
-    let im = HeifContext::read_from_file(path)?;
-    let handle = im.primary_image_handle()?;
-    // let image = libheif.decode(&handle, ColorSpace::Rgb(RgbChroma::Rgb), None)?; // Enable when using libheif 0.19
-    let image = handle.decode(ColorSpace::Rgb(RgbChroma::Rgb), None)?;
-    let width = image.width();
-    let height = image.height();
-    let planes = image.planes();
-    let interleaved_plane = planes.interleaved.ok_or_else(|| anyhow::anyhow!("Failed to get interleaved plane"))?;
-    ImageBuffer::from_raw(width, height, interleaved_plane.data.to_owned())
-        .map(DynamicImage::ImageRgb8)
-        .ok_or_else(|| anyhow::anyhow!("Failed to create image buffer"))
-}
-
-#[cfg(feature = "libraw")]
-pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path>) -> Result<DynamicImage> {
-    let buf = fs::read(path.as_ref())?;
-
-    let processor = Processor::new();
-    let start_timer = Instant::now();
-    let processed = processor.process_8bit(&buf)?;
-    println!("Processing took {:?}", start_timer.elapsed());
-
-    let width = processed.width();
-    let height = processed.height();
-
-    let data = processed.to_vec();
-    let data_len = data.len();
-
-    let buffer = ImageBuffer::from_raw(width, height, data).ok_or(anyhow::anyhow!(format!(
-        "Cannot create ImageBuffer from raw image with width: {width} and height: {height} and data length: {data_len}",
-    )))?;
-
-    Ok(DynamicImage::ImageRgb8(buffer))
-}
-
-#[cfg(not(feature = "libraw"))]
-pub fn get_dynamic_image_from_raw_image(path: impl AsRef<Path> + std::fmt::Debug) -> Result<DynamicImage, String> {
-    let mut start_timer = Instant::now();
-    let mut times = Vec::new();
-
-    let loader = RawLoader::new();
-    let raw = loader.decode_file(path.as_ref()).map_err(|e| format!("Error decoding file: {e:?}"))?;
-
-    times.push(("After decoding", start_timer.elapsed()));
-    start_timer = Instant::now();
-
-    let source = ImageSource::Raw(raw);
-
-    times.push(("After creating source", start_timer.elapsed()));
-    start_timer = Instant::now();
-
-    let mut pipeline = Pipeline::new_from_source(source).map_err(|e| format!("Error creating pipeline: {e:?}"))?;
-
-    times.push(("After creating pipeline", start_timer.elapsed()));
-    start_timer = Instant::now();
-
-    pipeline.run(None);
-    let image = pipeline.output_8bit(None).map_err(|e| format!("Error running pipeline: {e:?}"))?;
-
-    times.push(("After creating image", start_timer.elapsed()));
-    start_timer = Instant::now();
-
-    let image = ImageBuffer::<Rgb<u8>, Vec<u8>>::from_raw(image.width as u32, image.height as u32, image.data).ok_or_else(|| "Failed to create image buffer".to_string())?;
-
-    times.push(("After creating image buffer", start_timer.elapsed()));
-    start_timer = Instant::now();
-    let res = DynamicImage::ImageRgb8(image);
-    times.push(("After creating dynamic image", start_timer.elapsed()));
-
-    let str_timer = times.into_iter().map(|(name, time)| format!("{name}: {time:?}")).collect::<Vec<_>>().join(", ");
-    debug!("Loading raw image --- {str_timer}");
-    Ok(res)
 }
 
 pub fn split_path(path: &Path) -> (String, String) {

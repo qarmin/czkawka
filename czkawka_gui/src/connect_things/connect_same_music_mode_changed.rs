@@ -1,7 +1,6 @@
+use czkawka_core::common_dir_traversal::CheckingMethod;
 use gtk4::prelude::*;
 use gtk4::{CheckButton, Widget};
-
-use czkawka_core::common_dir_traversal::CheckingMethod;
 
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_combo_box::AUDIO_TYPE_CHECK_METHOD_COMBO_BOX;

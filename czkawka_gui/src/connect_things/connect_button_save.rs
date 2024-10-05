@@ -3,10 +3,9 @@ use std::collections::HashMap;
 use std::env;
 use std::rc::Rc;
 
+use czkawka_core::common_traits::PrintResults;
 use gtk4::prelude::*;
 use gtk4::{Button, Entry};
-
-use czkawka_core::common_traits::PrintResults;
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;

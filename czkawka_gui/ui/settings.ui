@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- Created with Cambalache 0.90.4 -->
+<!-- Created with Cambalache 0.92.0 -->
 <interface>
   <!-- interface-name settings.ui -->
   <requires lib="gtk" version="4.6"/>
@@ -112,6 +112,13 @@
                             <property name="active">1</property>
                             <property name="focusable">1</property>
                             <property name="label">Exclude other filesystems(Linux)</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="check_button_settings_use_rust_preview">
+                            <property name="active">1</property>
+                            <property name="focusable">1</property>
+                            <property name="label">Use external libraries instead gtk to load previews</property>
                           </object>
                         </child>
                         <child>

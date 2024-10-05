@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install basic libraries
-        run: sudo apt update || true; sudo apt install libheif-dev ffmpeg -y
+        run: sudo apt update || true; sudo apt install libheif-dev libraw-dev ffmpeg -y
 
       - name: Setup rust version
         run: rustup default ${{ matrix.toolchain }}

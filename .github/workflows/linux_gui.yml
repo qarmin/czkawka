@@ -118,7 +118,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install Dependencies
-        run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev librsvg2-dev wget fuse libfuse2 desktop-file-utils -y
+        run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev librsvg2-dev wget fuse libfuse2 desktop-file-utils -y
 
       - name: Setup rust version
         run: rustup default ${{ matrix.toolchain }}
@@ -186,7 +186,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install Dependencies
-        run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev librsvg2-dev wget fuse libfuse2 -y xvfb
+        run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev librsvg2-dev wget fuse libfuse2 -y xvfb
 
       - name: Setup rust version
         run: rustup default ${{ matrix.toolchain }}
