@@ -1,6 +1,5 @@
-use gtk4::prelude::*;
-
 use czkawka_core::common_dir_traversal::CheckingMethod;
+use gtk4::prelude::*;
 
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_combo_box::DUPLICATES_CHECK_METHOD_COMBO_BOX;

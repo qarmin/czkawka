@@ -4,7 +4,6 @@ use std::rc::Rc;
 use czkawka_core::common_image::get_dynamic_image_from_path;
 use czkawka_core::similar_images::SIMILAR_VALUES;
 use czkawka_core::similar_videos::MAX_TOLERANCE;
-
 use gdk4::gdk_pixbuf::Pixbuf;
 use glib::types::Type;
 use gtk4::gdk_pixbuf::InterpType;

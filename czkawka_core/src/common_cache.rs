@@ -1,11 +1,12 @@
+use std::collections::BTreeMap;
+use std::io::{BufReader, BufWriter};
+
 use fun_time::fun_time;
 use image::imageops::FilterType;
 use image_hasher::HashAlg;
 use log::{debug, error};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
-use std::io::{BufReader, BufWriter};
 
 use crate::common;
 use crate::common_messages::Messages;

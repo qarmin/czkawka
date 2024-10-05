@@ -1,13 +1,14 @@
-use crate::common::{get_is_header_mode, get_tool_model, set_tool_model};
-use crate::model_operations::{collect_path_name_from_model, deselect_all_items, filter_out_checked_items};
-use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow};
+use std::path::{Path, PathBuf};
+use std::{fs, path};
 
 use czkawka_core::common_messages::Messages;
 use rayon::prelude::*;
 use rfd::FileDialog;
 use slint::{ComponentHandle, ModelRc, VecModel};
-use std::path::{Path, PathBuf};
-use std::{fs, path};
+
+use crate::common::{get_is_header_mode, get_tool_model, set_tool_model};
+use crate::model_operations::{collect_path_name_from_model, deselect_all_items, filter_out_checked_items};
+use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow};
 
 pub fn connect_move(app: &MainWindow) {
     let a = app.as_weak();

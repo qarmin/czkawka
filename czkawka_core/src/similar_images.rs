@@ -1018,11 +1018,12 @@ mod tests {
     use std::collections::HashMap;
     use std::path::PathBuf;
 
-    use crate::common_tool::CommonData;
-    use crate::similar_images::{Hamming, ImHash, ImagesEntry, SimilarImages, SimilarImagesParameters};
     use bk_tree::BKTree;
     use image::imageops::FilterType;
     use image_hasher::HashAlg;
+
+    use crate::common_tool::CommonData;
+    use crate::similar_images::{Hamming, ImHash, ImagesEntry, SimilarImages, SimilarImagesParameters};
 
     fn get_default_parameters() -> SimilarImagesParameters {
         SimilarImagesParameters {

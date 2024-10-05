@@ -3,17 +3,16 @@ use std::env;
 use std::path::PathBuf;
 
 use czkawka_core::big_file::SearchMode;
+use czkawka_core::common::{get_all_available_threads, set_number_of_threads};
+use czkawka_core::common_dir_traversal::CheckingMethod;
+use czkawka_core::common_items::{DEFAULT_EXCLUDED_DIRECTORIES, DEFAULT_EXCLUDED_ITEMS};
+use czkawka_core::duplicate::HashType;
 use directories_next::ProjectDirs;
 use home::home_dir;
 use image_hasher::{FilterType, HashAlg};
 use log::{debug, error, info, warn};
 use serde::{Deserialize, Serialize};
 use slint::{ComponentHandle, Model, ModelRc, SharedString, VecModel};
-
-use czkawka_core::common::{get_all_available_threads, set_number_of_threads};
-use czkawka_core::common_dir_traversal::CheckingMethod;
-use czkawka_core::common_items::{DEFAULT_EXCLUDED_DIRECTORIES, DEFAULT_EXCLUDED_ITEMS};
-use czkawka_core::duplicate::HashType;
 
 use crate::common::{create_excluded_directories_model_from_pathbuf, create_included_directories_model_from_pathbuf, create_vec_model_from_vec_string};
 use crate::{Callabler, GuiState, MainWindow, Settings};

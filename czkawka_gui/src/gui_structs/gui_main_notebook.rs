@@ -1,10 +1,9 @@
-use gtk4::prelude::*;
-use gtk4::{Builder, CheckButton, ComboBoxText, Entry, EventControllerKey, GestureClick, Image, Label, Notebook, Scale, ScrolledWindow, TreeView, Widget};
-
 use czkawka_core::big_file::SearchMode;
 use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::localizer_core::{fnc_get_similarity_minimal, fnc_get_similarity_very_high};
 use czkawka_core::similar_images::{get_string_from_similarity, SIMILAR_VALUES};
+use gtk4::prelude::*;
+use gtk4::{Builder, CheckButton, ComboBoxText, Entry, EventControllerKey, GestureClick, Image, Label, Notebook, Scale, ScrolledWindow, TreeView, Widget};
 
 use crate::flg;
 use crate::help_combo_box::{AUDIO_TYPE_CHECK_METHOD_COMBO_BOX, BIG_FILES_CHECK_METHOD_COMBO_BOX, DUPLICATES_CHECK_METHOD_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX};

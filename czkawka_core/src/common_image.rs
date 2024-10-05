@@ -1,8 +1,16 @@
 #![allow(unused_imports)]
 // I don't wanna fight with unused(heif) imports in this file, so simply ignore it to avoid too much complexity
 
-use crate::common;
-use crate::common::{create_crash_message, HEIC_EXTENSIONS, JXL_IMAGE_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
+use std::cmp::Ordering;
+use std::ffi::OsString;
+use std::fs::{DirEntry, File, OpenOptions};
+use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicBool, AtomicUsize};
+use std::sync::{atomic, Arc};
+use std::thread::{sleep, JoinHandle};
+use std::time::{Duration, Instant, SystemTime};
+use std::{fs, panic, thread};
+
 use anyhow::anyhow;
 use crossbeam_channel::Sender;
 use directories_next::ProjectDirs;
@@ -18,16 +26,10 @@ use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
 use libraw::Processor;
 use log::{debug, error, info, warn, LevelFilter, Record};
 use rawloader::RawLoader;
-use std::cmp::Ordering;
-use std::ffi::OsString;
-use std::fs::{DirEntry, File, OpenOptions};
-use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicBool, AtomicUsize};
-use std::sync::{atomic, Arc};
-use std::thread::{sleep, JoinHandle};
-use std::time::{Duration, Instant, SystemTime};
-use std::{fs, panic, thread};
 use symphonia::core::conv::IntoSample;
+
+use crate::common;
+use crate::common::{create_crash_message, HEIC_EXTENSIONS, JXL_IMAGE_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
 

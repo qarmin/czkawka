@@ -1,15 +1,16 @@
 use std::fs;
 use std::io::Write;
 
-use crate::common_dir_traversal::{DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
-use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
-use crate::common_traits::{DebugPrint, PrintResults};
-use crate::progress_data::ProgressData;
 use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
 use humansize::{format_size, BINARY};
 use log::debug;
 use rayon::prelude::*;
+
+use crate::common_dir_traversal::{DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
+use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
+use crate::common_traits::{DebugPrint, PrintResults};
+use crate::progress_data::ProgressData;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum SearchMode {

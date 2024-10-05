@@ -5,14 +5,13 @@ use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::{env, fs};
 
-use directories_next::ProjectDirs;
-use gtk4::prelude::*;
-use gtk4::{ComboBoxText, ScrolledWindow, TextView, TreeView};
-
 use czkawka_core::common::get_all_available_threads;
 use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::common_items::DEFAULT_EXCLUDED_ITEMS;
 use czkawka_core::similar_images::SIMILAR_VALUES;
+use directories_next::ProjectDirs;
+use gtk4::prelude::*;
+use gtk4::{ComboBoxText, ScrolledWindow, TextView, TreeView};
 
 use crate::flg;
 use crate::gui_structs::gui_main_notebook::GuiMainNotebook;

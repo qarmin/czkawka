@@ -1,12 +1,11 @@
 use std::collections::HashSet;
 use std::path::PathBuf;
 
+#[cfg(target_family = "windows")]
+use czkawka_core::common::normalize_windows_path;
 use gdk4::{DragAction, FileList};
 use gtk4::prelude::*;
 use gtk4::{DropTarget, FileChooserNative, Notebook, Orientation, ResponseType, TreeView, Window};
-
-#[cfg(target_family = "windows")]
-use czkawka_core::common::normalize_windows_path;
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;

@@ -147,10 +147,11 @@ impl GuiBottomButtons {
 
 #[cfg(target_family = "windows")]
 fn test_hardlinks() -> bool {
-    use directories_next::ProjectDirs;
     use std::fs;
     use std::io::Write;
     use std::path::Path;
+
+    use directories_next::ProjectDirs;
 
     let mut hardlinked = false;
 

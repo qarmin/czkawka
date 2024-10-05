@@ -1,8 +1,7 @@
-use image_hasher::{FilterType, HashAlg};
-
 use czkawka_core::big_file::SearchMode;
 use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::duplicate::HashType;
+use image_hasher::{FilterType, HashAlg};
 
 pub struct HashTypeStruct {
     pub eng_name: &'static str,

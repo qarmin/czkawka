@@ -10,12 +10,6 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::Ordering;
 use std::{fs, mem};
 
-use crate::common::{check_if_stop_received, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
-use crate::common_cache::{get_duplicate_cache_file, load_cache_from_file_generalized_by_size, save_cache_to_file_generalized};
-use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
-use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
-use crate::common_traits::*;
-use crate::progress_data::{CurrentStage, ProgressData};
 use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
 use humansize::{format_size, BINARY};
@@ -23,6 +17,13 @@ use log::debug;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use xxhash_rust::xxh3::Xxh3;
+
+use crate::common::{check_if_stop_received, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
+use crate::common_cache::{get_duplicate_cache_file, load_cache_from_file_generalized_by_size, save_cache_to_file_generalized};
+use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
+use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
+use crate::common_traits::*;
+use crate::progress_data::{CurrentStage, ProgressData};
 
 const TEMP_HARDLINK_FILE: &str = "rzeczek.rxrxrxl";
 

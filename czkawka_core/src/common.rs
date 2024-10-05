@@ -1,12 +1,3 @@
-use crossbeam_channel::Sender;
-use directories_next::ProjectDirs;
-use fun_time::fun_time;
-use handsome_logger::{ColorChoice, ConfigBuilder, TerminalMode};
-#[cfg(feature = "heif")]
-use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
-#[cfg(feature = "libraw")]
-use libraw::Processor;
-use log::{debug, info, warn, LevelFilter, Record};
 use std::cmp::Ordering;
 use std::ffi::OsString;
 use std::fs::{DirEntry, File, OpenOptions};
@@ -16,6 +7,16 @@ use std::sync::{atomic, Arc};
 use std::thread::{sleep, JoinHandle};
 use std::time::{Duration, SystemTime};
 use std::{fs, thread};
+
+use crossbeam_channel::Sender;
+use directories_next::ProjectDirs;
+use fun_time::fun_time;
+use handsome_logger::{ColorChoice, ConfigBuilder, TerminalMode};
+#[cfg(feature = "heif")]
+use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
+#[cfg(feature = "libraw")]
+use libraw::Processor;
+use log::{debug, info, warn, LevelFilter, Record};
 
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;

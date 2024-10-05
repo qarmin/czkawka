@@ -1,6 +1,5 @@
-use gtk4::prelude::*;
-
 use czkawka_core::similar_images::{get_string_from_similarity, SIMILAR_VALUES};
+use gtk4::prelude::*;
 
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_combo_box::IMAGES_HASH_SIZE_COMBO_BOX;

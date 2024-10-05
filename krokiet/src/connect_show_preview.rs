@@ -1,11 +1,10 @@
 use std::path::Path;
 use std::time::{Duration, Instant};
 
+use czkawka_core::common_image::get_dynamic_image_from_path;
 use image::DynamicImage;
 use log::{debug, error};
 use slint::ComponentHandle;
-
-use czkawka_core::common_image::get_dynamic_image_from_path;
 
 use crate::{Callabler, CurrentTab, GuiState, MainWindow, Settings};
 

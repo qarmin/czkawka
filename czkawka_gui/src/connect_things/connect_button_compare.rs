@@ -1,6 +1,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use czkawka_core::common_image::get_dynamic_image_from_path;
 use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
 use gtk4::prelude::*;
 use gtk4::{Align, CheckButton, Image, ListStore, Orientation, ScrolledWindow, TreeIter, TreeModel, TreePath, TreeSelection, Widget};
@@ -12,7 +13,6 @@ use crate::help_functions::{
     count_number_of_groups, get_all_direct_children, get_full_name_from_path_name, get_max_file_name, get_pixbuf_from_dynamic_image, resize_pixbuf_dimension,
 };
 use crate::notebook_info::{NotebookObject, NOTEBOOKS_INFO};
-use czkawka_core::common_image::get_dynamic_image_from_path;
 
 const BIG_PREVIEW_SIZE: i32 = 600;
 const SMALL_PREVIEW_SIZE: i32 = 130;
