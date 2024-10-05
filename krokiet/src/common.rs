@@ -374,6 +374,11 @@ pub fn create_excluded_directories_model_from_pathbuf(items: &[PathBuf]) -> Mode
     ModelRc::new(VecModel::from(converted))
 }
 
+pub fn check_if_there_are_any_included_folders(app: &MainWindow) -> bool {
+    let included = app.global::<Settings>().get_included_directories_model();
+    included.iter().count() > 0
+}
+
 pub fn check_if_all_included_dirs_are_referenced(app: &MainWindow) -> bool {
     let included = app.global::<Settings>().get_included_directories_model();
     included.iter().all(|x| x.referenced_folder)
