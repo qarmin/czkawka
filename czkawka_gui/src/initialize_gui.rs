@@ -1,5 +1,4 @@
 use std::cell::RefCell;
-use std::path::Path;
 use std::rc::Rc;
 
 use gdk4::gdk_pixbuf::Pixbuf;
@@ -10,7 +9,7 @@ use gtk4::{CheckButton, Image, ScrolledWindow, SelectionMode, TextView, TreeMode
 
 #[cfg(feature = "heif")]
 use czkawka_core::common::get_dynamic_image_from_heic;
-use czkawka_core::common::{get_dynamic_image_from_path, HEIC_EXTENSIONS, IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
+use czkawka_core::common::get_dynamic_image_from_path;
 use czkawka_core::similar_images::SIMILAR_VALUES;
 use czkawka_core::similar_videos::MAX_TOLERANCE;
 

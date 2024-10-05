@@ -3,7 +3,7 @@
 ### Breaking changes
 
 - Due removing image_type from image struct, old cache files are incompatible with new version and should be regenerated
-  from scratch
+  from scratch(it uses new name)
 
 ### Core
 
@@ -21,26 +21,31 @@
 - Fixed panic when failed to decode raw picture - [#1355](https://github.com/qarmin/czkawka/pull/1355)
 - Remove useless saving/loading cache when there is no files to
   check - [#1358](https://github.com/qarmin/czkawka/pull/1358)
+- Filtering hard links on windows - [#1316](https://github.com/qarmin/czkawka/pull/1316)
 - Added jxl support - [#1358](https://github.com/qarmin/czkawka/pull/1358)
 - Added avif support(via external C library, not enabled by
   default) - [#1358](https://github.com/qarmin/czkawka/pull/1358)
 - Integer overflow are enabled by default(prepare for reporting bugs, slower performance and
   unstability) - [#1358](https://github.com/qarmin/czkawka/pull/1358)
+- Fixed crash when loading invalid image cache - [#1230](https://github.com/qarmin/czkawka/pull/1230)
 
 ### Krokiet
 
 - Fixed invalid default hash size in similar images - [#1354](https://github.com/qarmin/czkawka/pull/1354)
 - Fixed and added more input parameters to the application - [#1354](https://github.com/qarmin/czkawka/pull/1354)
+- Fixed problem with loading invalid preset - [#1226](https://github.com/qarmin/czkawka/pull/1226)
 
 ### GTK GUI
 
 - Fixed and added more input parameters to the application - [#1355](https://github.com/qarmin/czkawka/pull/1355)
 - Added option to use external libraries instead gtk pixbuf loader for
   previews - [#1358](https://github.com/qarmin/czkawka/pull/1358)
-- [External contribution] Mac homebrew version of app - https://formulae.brew.sh/formula/czkawka
+- Using static runtime with zstd compression in appimage - [#1350](https://github.com/qarmin/czkawka/pull/1355)
+- [External] Mac homebrew version of app - https://formulae.brew.sh/formula/czkawka
 
 ### CLI
 
+- Added options to find/remove images by size - [#1255](https://github.com/qarmin/czkawka/pull/1255)
 - Fixed and added more input parameters to the application - [#1354](https://github.com/qarmin/czkawka/pull/1354)
 - Fixed crash when stopping scan mutliple times - [#1355](https://github.com/qarmin/czkawka/pull/1355)
 - Print results also in debug build - [#1355](https://github.com/qarmin/czkawka/pull/1355)

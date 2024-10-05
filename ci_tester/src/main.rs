@@ -480,6 +480,17 @@ fn collect_all_files_and_dirs(dir: &str) -> std::io::Result<CollectedFiles> {
         }
     }
 
+    for dir in &folders_to_check {
+        println!("Folder \"{}\"", dir)
+    }
+    for symlink in &symlinks {
+        println!("Symlink \"{}\"", symlink)
+    }
+    for file in &files {
+        let metadata = fs::metadata(file)?;
+        println!("File \"{}\" with size {} bytes", file, metadata.len());
+    }
+
     folders.remove(dir);
     // println!("Found {} files, {} folders and {} symlinks", files.len(), folders.len(), symlinks.len());
     Ok(CollectedFiles { files, folders, symlinks })

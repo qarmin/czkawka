@@ -10,6 +10,8 @@ Requirements depend on your platform.
 
 Prebuilt binaries are available here - https://github.com/qarmin/czkawka/releases/
 
+Additional features like heif, libraw, libavif require additional libraries to be installed, and may increase
+
 ### Linux
 
 #### Prebuild binaries
@@ -75,9 +77,10 @@ lot build and runtime dependencies.
 ### Linux (Ubuntu, but on other OS should work similar)
 
 ```shell
-sudo apt install libgtk-4-dev libheif-dev libraw-dev libavif-dev libdav1d-dev -y
+sudo apt install libgtk-4-dev -y # Base
+sudo apt install libgtk-4-dev libheif-dev libraw-dev libavif-dev libdav1d-dev -y # With features
 cargo run --release --bin czkawka_gui
-# Or with support for heif, libraw, libavif(this are c libraries and may require greater version package/os version)
+# Or with support for heif, libraw, libavif
 cargo run --release --bin czkawka_gui --features "heif,libraw,libavif"
 ```
 
@@ -88,7 +91,7 @@ cargo run --release --bin czkawka_gui --features "heif,libraw,libavif"
 brew install rustup gtk4 adwaita-icon-theme ffmpeg librsvg libheif libraw pkg-config
 rustup-init
 cargo run --release --bin czkawka_gui
-# Or with support for heif, libraw, libavif(this are c libraries and may require greater version package/os version)
+# Or with support for heif, libraw, libavif
 cargo run --release --bin czkawka_gui --features "heif,libraw,libavif"
 ```
 
