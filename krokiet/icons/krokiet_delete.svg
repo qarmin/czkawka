@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   enable-background="new 0 0 512 512"
+   viewBox="0 0 512 512"
+   version="1.1"
+   id="svg2"
+   sodipodi:docname="krokiet_delete.svg"
+   inkscape:version="1.3.1 (9b9bdc1480, 2023-11-25, custom)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="namedview2"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.0634223"
+     inkscape:cx="218.16356"
+     inkscape:cy="270.82373"
+     inkscape:window-width="1920"
+     inkscape:window-height="1011"
+     inkscape:window-x="0"
+     inkscape:window-y="32"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg2" />
+  <path
+     d="m 251.09789,472.84735 c -116.86793,0 -211.945238,-95.07731 -211.945238,-211.94524 0,-116.86793 95.077308,-211.945239 211.945238,-211.945239 116.86793,0 211.94524,95.077309 211.94524,211.945239 0,116.86793 -95.07731,211.94524 -211.94524,211.94524 z m 0,-406.371881 c -107.20621,0 -194.42664,87.220441 -194.42664,194.426641 0,107.20621 87.22043,194.42664 194.42664,194.42664 107.2062,0 194.42664,-87.22043 194.42664,-194.42664 0,-107.2062 -87.22044,-194.426641 -194.42664,-194.426641 z"
+     id="path1"
+     style="stroke-width:0.827911" />
+  <path
+     d="M 372.64648,229.92167 H 131.90057 v 65.12515 h 240.74591 z"
+     fill="#f2f2f2"
+     stroke-width="1.02186"
+     id="path2"
+     style="fill:#000000" />
+</svg>

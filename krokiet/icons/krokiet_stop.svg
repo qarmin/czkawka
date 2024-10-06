@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   enable-background="new 0 0 512 512"
+   viewBox="0 0 512 512"
+   version="1.1"
+   id="svg3"
+   sodipodi:docname="krokiet_stop.svg"
+   inkscape:version="1.3.1 (9b9bdc1480, 2023-11-25, custom)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs3" />
+  <sodipodi:namedview
+     id="namedview3"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.5039062"
+     inkscape:cx="256"
+     inkscape:cy="256"
+     inkscape:window-width="1920"
+     inkscape:window-height="1011"
+     inkscape:window-x="0"
+     inkscape:window-y="32"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg3" />
+  <path
+     d="m 253.67845,460.24602 c -111.34242,0 -201.924473,-90.58205 -201.924473,-201.92447 0,-111.34242 90.582053,-201.924472 201.924473,-201.924472 111.34242,0 201.92447,90.582052 201.92447,201.924472 0,111.34242 -90.58205,201.92447 -201.92447,201.92447 z m 0,-387.158623 c -102.1375,0 -185.234153,83.096653 -185.234153,185.234153 0,102.1375 83.096653,185.23415 185.234153,185.23415 102.1375,0 185.23415,-83.09665 185.23415,-185.23415 0,-102.1375 -83.09665,-185.234153 -185.23415,-185.234153 z"
+     id="path1"
+     style="stroke-width:0.788767" />
+  <g
+     fill="#f2f2f2"
+     transform="matrix(0.55777203,0.55771362,-0.55771362,0.55777203,258.08847,-28.27187)"
+     id="g3"
+     style="fill:#000000">
+    <path
+       d="m 96.446,234.14 h 327.87 v 55.947 H 96.446 Z"
+       id="path2"
+       style="fill:#000000" />
+    <path
+       d="m 98.184,-288.35 h 327.87 v 55.947 H 98.184 Z"
+       transform="rotate(90)"
+       id="path3"
+       style="fill:#000000" />
+  </g>
+</svg>
