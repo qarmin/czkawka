@@ -81,6 +81,15 @@ should print something like
 Slint: Build config: debug; Backend: software
 ```
 
+## Scaling application
+
+If you have high DPI monitor, you may want to scale application. You can do it by setting `SLINT_SCALE_FACTOR`
+environment
+
+```
+SLINT_SCALE_FACTOR=2 cargo run 
+```
+
 ## Different theme
 
 App was created with dark fluent theme in mind, but is possible to use light theme by setting `SLINT_STYLE` environment
