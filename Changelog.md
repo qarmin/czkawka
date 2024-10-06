@@ -2,7 +2,8 @@
 
 ### Breaking changes
 
-- Due removing image_type from image struct, old cache files are incompatible with new version and should be regenerated
+- Due to the removal image_type from image struct, old cache files are incompatible with new version and should be
+  regenerated
   from scratch(it uses new name)
 
 ### Core
@@ -36,7 +37,9 @@
 - Fixed problem with loading invalid preset - [#1226](https://github.com/qarmin/czkawka/pull/1226)
 - Fixed crash when using 8 hash size with small similarity - [#TODO](https://github.com/qarmin/czkawka/pull/TODO)
 - Fixed crash when using 8 hash size with small similarity - [#TODO](https://github.com/qarmin/czkawka/pull/TODO)
-- Disabling buttons when no files was found - [#TODO](https://github.com/qarmin/czkawka/pull/TODO)
+- Disabling buttons when no files were found - [#TODO](https://github.com/qarmin/czkawka/pull/TODO)
+- Changed way to close/open panel at bottom - [#TODO](https://github.com/qarmin/czkawka/pull/TODO)
+- Modify logo a little - [#TODO](https://github.com/qarmin/czkawka/pull/TODO)
 
 ### GTK GUI
 
@@ -50,7 +53,7 @@
 
 - Added options to find/remove images by size - [#1255](https://github.com/qarmin/czkawka/pull/1255)
 - Fixed and added more input parameters to the application - [#1354](https://github.com/qarmin/czkawka/pull/1354)
-- Fixed crash when stopping scan mutliple times - [#1355](https://github.com/qarmin/czkawka/pull/1355)
+- Fixed crash when stopping scan multiple times - [#1355](https://github.com/qarmin/czkawka/pull/1355)
 - Print results also in debug build - [#1355](https://github.com/qarmin/czkawka/pull/1355)
 
 ## Version 7.0.0 - 19.02.2024r

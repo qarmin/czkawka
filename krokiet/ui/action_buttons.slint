@@ -10,11 +10,15 @@ import {MainListModel} from "common.slint";
 export component VisibilityButton inherits Button {
     in-out property <BottomPanelVisibility> button_visibility;
     in-out property <BottomPanelVisibility> bottom_panel_visibility;
-    enabled: bottom_panel_visibility != button-visibility;
+    checked: bottom_panel_visibility == button-visibility;
     height: 30px;
     width: 70px;
     clicked => {
-        bottom-panel-visibility = button_visibility;
+        if (bottom_panel_visibility == button_visibility) {
+            bottom_panel_visibility = BottomPanelVisibility.NotVisible;
+        } else {
+            bottom_panel_visibility = button_visibility;
+        }
     }
 }
 
@@ -170,14 +174,7 @@ export component ActionButtons inherits HorizontalLayout {
             height: parent.height;
             button-visibility: BottomPanelVisibility.TextErrors;
             bottom_panel_visibility <=> bottom_panel_visibility;
-            text: "Text";
-        }
-
-        VisibilityButton {
-            height: parent.height;
-            button-visibility: BottomPanelVisibility.NotVisible;
-            bottom_panel_visibility <=> bottom_panel_visibility;
-            text: "None";
+            text: "Output";
         }
     }
 }
