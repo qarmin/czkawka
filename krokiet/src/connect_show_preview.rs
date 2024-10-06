@@ -1,7 +1,7 @@
 use std::path::Path;
 use std::time::{Duration, Instant};
 
-use czkawka_core::common_image::get_dynamic_image_from_path;
+use czkawka_core::common_image::{check_if_can_display_image, get_dynamic_image_from_path};
 use image::DynamicImage;
 use log::{debug, error};
 use slint::ComponentHandle;
@@ -23,6 +23,11 @@ pub fn connect_show_preview(app: &MainWindow) {
         if (active_tab == CurrentTab::SimilarImages && !settings.get_similar_images_show_image_preview())
             || (active_tab == CurrentTab::DuplicateFiles && !settings.get_duplicate_image_preview())
         {
+            set_preview_visible(&gui_state, None);
+            return;
+        }
+
+        if !check_if_can_display_image(&image_path) {
             set_preview_visible(&gui_state, None);
             return;
         }

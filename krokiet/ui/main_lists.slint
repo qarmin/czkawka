@@ -45,7 +45,7 @@ export component MainList {
         min-width: 200px;
         height: parent.height;
         columns: ["Selection", "Size", "File Name", "Path", "Modification Date"];
-        column-sizes: [35px, size_px, name_px, path_px, mod_px];
+        column_sizes: [35px, size_px, name_px, path_px, mod_px];
         values <=> duplicate_files_model;
         parentPathIdx: 3;
         fileNameIdx: 2;
@@ -56,8 +56,8 @@ export component MainList {
         min-width: 200px;
         height: parent.height;
         columns: ["Selection", "Folder Name", "Path", "Modification Date"];
-        column-sizes: [35px, name_px, path_px, mod_px];
-        values <=> empty-folder-model;
+        column_sizes: [35px, name_px, path_px, mod_px];
+        values <=> empty_folder_model;
         parentPathIdx: 2;
         fileNameIdx: 1;
     }
@@ -67,7 +67,7 @@ export component MainList {
         min-width: 200px;
         height: parent.height;
         columns: ["Selection", "Size", "File Name", "Path", "Modification Date"];
-        column-sizes: [35px, size_px, name_px, path_px, mod_px];
+        column_sizes: [35px, size_px, name_px, path_px, mod_px];
         values <=> big_files_model;
         parentPathIdx: 3;
         fileNameIdx: 2;
@@ -78,8 +78,8 @@ export component MainList {
         min-width: 200px;
         height: parent.height;
         columns: ["Selection", "File Name", "Path", "Modification Date"];
-        column-sizes: [35px, name_px, path_px, mod_px];
-        values <=> empty-files-model;
+        column_sizes: [35px, name_px, path_px, mod_px];
+        values <=> empty_files_model;
         parentPathIdx: 2;
         fileNameIdx: 1;
     }
@@ -89,7 +89,7 @@ export component MainList {
         min-width: 200px;
         height: parent.height;
         columns: ["Selection", "File Name", "Path", "Modification Date"];
-        column-sizes: [35px, name_px, path_px, mod_px];
+        column_sizes: [35px, name_px, path_px, mod_px];
         values <=> temporary_files_model;
         parentPathIdx: 2;
         fileNameIdx: 1;
@@ -100,8 +100,8 @@ export component MainList {
         min-width: 200px;
         height: parent.height;
         columns: ["Selection", "Similarity", "Size", "Dimensions", "File Name", "Path", "Modification Date"];
-        column-sizes: [35px, 80px, 80px, 80px, name_px, path_px, mod_px];
-        values <=> similar-images-model;
+        column_sizes: [35px, 80px, 80px, 80px, name_px, path_px, mod_px];
+        values <=> similar_images_model;
         parentPathIdx: 5;
         fileNameIdx: 4;
     }
@@ -111,7 +111,7 @@ export component MainList {
         min-width: 200px;
         height: parent.height;
         columns: ["Selection", "Size", "File Name", "Path", "Modification Date"];
-        column-sizes: [35px, size_px, name_px, path_px, mod_px];
+        column_sizes: [35px, size_px, name_px, path_px, mod_px];
         values <=> similar_videos_model;
         parentPathIdx: 3;
         fileNameIdx: 2;
@@ -122,7 +122,7 @@ export component MainList {
         min-width: 200px;
         height: parent.height;
         columns: ["Selection", "Size", "File Name", "Title","Artist", "Year", "Bitrate", "Length", "Genre", "Path", "Modification Date"];
-        column-sizes: [35px, size_px, name_px, 80px, 80px, 80px, 80px, 80px, 80px, path_px, mod_px];
+        column_sizes: [35px, size_px, name_px, 80px, 80px, 80px, 80px, 80px, 80px, path_px, mod_px];
         values <=> similar_music_model;
         parentPathIdx: 9;
         fileNameIdx: 2;
@@ -133,7 +133,7 @@ export component MainList {
         min-width: 200px;
         height: parent.height;
         columns: ["Selection", "Symlink Name", "Symlink Folder", "Destination Path", "Modification Date"];
-        column-sizes: [35px, name_px, path_px, path_px, mod_px];
+        column_sizes: [35px, name_px, path_px, path_px, mod_px];
         values <=> invalid_symlinks_model;
         parentPathIdx: 2;
         fileNameIdx: 1;
@@ -144,7 +144,7 @@ export component MainList {
         min-width: 200px;
         height: parent.height;
         columns: ["Selection", "File Name", "Path", "Type of Error", "Size", "Modification Date"];
-        column-sizes: [35px, name_px, path_px, 200px, size_px, mod_px];
+        column_sizes: [35px, name_px, path_px, 200px, size_px, mod_px];
         values <=> broken_files_model;
         parentPathIdx: 2;
         fileNameIdx: 1;
@@ -155,7 +155,7 @@ export component MainList {
         min-width: 200px;
         height: parent.height;
         columns: ["Selection", "File Name", "Path", "Current Extension", "Proper Extension"];
-        column-sizes: [35px, name_px, path_px, 40px, 200px];
+        column_sizes: [35px, name_px, path_px, 40px, 200px];
         values <=> bad_extensions_model;
         parentPathIdx: 2;
         fileNameIdx: 1;
@@ -170,7 +170,8 @@ export component MainList {
     }
 
     focus_item := FocusScope {
-        width: 0px; // Hack to not steal first click from other components - https://github.com/slint-ui/slint/issues/3503
+        // TODO consider to remove that - looks that hack not works and is unnecessary
+        // width: 0px; // Hack to not steal first click from other components - https://github.com/slint-ui/slint/issues/3503
         // Hack not works https://github.com/slint-ui/slint/issues/3503#issuecomment-1817809834 because disables key-released event
 
         key-released(event) => {
@@ -180,12 +181,34 @@ export component MainList {
             if (GuiState.active_tab == CurrentTab.EmptyFiles) {
                 empty_files.released_key(event);
             } else if (GuiState.active_tab == CurrentTab.EmptyFolders) {
-                empty-folders.released_key(event);
+                empty_folders.released_key(event);
             } else if (GuiState.active_tab == CurrentTab.SimilarImages) {
-                similar-images.released_key(event);
+                similar_images.released_key(event);
+            } else if (GuiState.active_tab == CurrentTab.BadExtensions) {
+                bad_extensions.released_key(event);
+            } else if (GuiState.active_tab == CurrentTab.BigFiles) {
+                big_files.released_key(event);
+            } else if (GuiState.active_tab == CurrentTab.DuplicateFiles) {
+                duplicates.released_key(event);
+            } else if (GuiState.active_tab == CurrentTab.TemporaryFiles) {
+                temporary_files.released_key(event);
+            } else if (GuiState.active_tab == CurrentTab.SimilarVideos) {
+                similar_videos.released_key(event);
+            } else if (GuiState.active_tab == CurrentTab.SimilarMusic) {
+                similar_music.released_key(event);
+            } else if (GuiState.active_tab == CurrentTab.InvalidSymlinks) {
+                invalid_symlink.released_key(event);
+            } else if (GuiState.active_tab == CurrentTab.BrokenFiles) {
+                broken_files.released_key(event);
             } else {
-                debug("Non handled key in main_lists.slint");
+                debug("Non handled key in main_lists.slint", event, GuiState.active_tab);
             }
+            
+            
+            
+            // else {
+            //     debug("Non handled key in main_lists.slint", event, GuiState.active_tab);
+            // }
             accept
         }
     }

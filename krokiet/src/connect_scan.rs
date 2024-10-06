@@ -24,7 +24,7 @@ use humansize::{format_size, BINARY};
 use rayon::prelude::*;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
 
-use crate::common::{check_if_all_included_dirs_are_referenced, split_u64_into_i32s};
+use crate::common::{check_if_all_included_dirs_are_referenced, check_if_there_are_any_included_folders, split_u64_into_i32s};
 use crate::settings::{
     collect_settings, get_audio_check_type_idx, get_biggest_item_idx, get_duplicates_check_method_idx, get_duplicates_hash_type_idx, get_image_hash_alg_idx,
     get_resize_algorithm_idx, SettingsCustom, ALLOWED_AUDIO_CHECK_TYPE_VALUES, ALLOWED_BIG_FILE_SIZE_VALUES, ALLOWED_DUPLICATES_CHECK_METHOD_VALUES,
@@ -36,6 +36,11 @@ pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressDat
     let a = app.as_weak();
     app.on_scan_starting(move |active_tab| {
         let app = a.upgrade().expect("Failed to upgrade app :(");
+
+        if !check_if_there_are_any_included_folders(&app) {
+            app.invoke_scan_ended("Cannot start scan when no included directories are set.".into());
+            return;
+        }
 
         if check_if_all_included_dirs_are_referenced(&app) {
             app.invoke_scan_ended("Cannot start scan when all included directories are set as referenced folders.".into());

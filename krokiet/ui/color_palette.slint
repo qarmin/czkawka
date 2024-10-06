@@ -6,9 +6,30 @@ export global ColorPalette {
     in-out property <color> tab_selected_color: dark_scheme ? #353535 : #5e5e5e;
     in-out property <color> tab_hovered_color: dark_scheme ? #49494926 : #80808014;
     // ListView
-    in-out property <color> list_view_normal_color: dark_scheme ? #222222 : #dddddd;
-    in-out property <color> list_view_normal_header_color: dark_scheme ? #111111 : #888888;
-    in-out property <color> list_view_normal_selected_header: dark_scheme ? #444444 : #cccccc;
+    in-out property <color> list_view_item_color: dark_scheme ? #222222 : #dddddd;
+    in-out property <color> list_view_item_hovered_color: dark_scheme ? #333333 : #d2d2d2;
+    in-out property <color> list_view_item_selected_color: dark_scheme ? #444444 : #cccccc;
+    in-out property <color> list_view_item_selected_hovered_color: dark_scheme ? #555555 : #bbbbbb;
+
+    in-out property <color> list_view_header_color: dark_scheme ? #111111 : #888888;
+    in-out property <color> list_view_clicked_header_color: dark_scheme ? #1a1a1a : #808080;
+    
     // Popup
     in-out property <color> popup_background: dark_scheme ? #353535 : #5e5e5e;
+
+
+    public pure function  get_listview_color(selected: bool, hovered: bool) -> color {
+        if (selected) {
+            return hovered ? self.list_view_item_selected_hovered_color : self.list_view_item_selected_color;
+        } else {
+            return hovered ? self.list_view_item_hovered_color : self.list_view_item_color;
+        }
+    }
+    public pure function get_listview_color_with_header(selected: bool, hovered: bool, header: bool) -> color {
+        if (header) {
+            return selected ? self.list_view_clicked_header_color : self.list_view_header_color;
+        } else {
+            return self.get_listview_color(selected, hovered);
+        }
+    }
 }

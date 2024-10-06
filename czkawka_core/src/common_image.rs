@@ -29,7 +29,7 @@ use rawloader::RawLoader;
 use symphonia::core::conv::IntoSample;
 
 use crate::common;
-use crate::common::{create_crash_message, HEIC_EXTENSIONS, JXL_IMAGE_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
+use crate::common::{create_crash_message, HEIC_EXTENSIONS, IMAGE_RS_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, JXL_IMAGE_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
 
@@ -170,4 +170,18 @@ pub fn get_raw_image(path: impl AsRef<Path> + std::fmt::Debug) -> Result<Dynamic
     let str_timer = times.into_iter().map(|(name, time)| format!("{name}: {time:?}")).collect::<Vec<_>>().join(", ");
     debug!("Loading raw image --- {str_timer}");
     Ok(res)
+}
+
+pub fn check_if_can_display_image(path: &str) -> bool {
+    let Some(extension) = Path::new(path).extension() else {
+        return false;
+    };
+    let extension_str = extension.to_string_lossy().to_lowercase();
+    #[cfg(feature = "heif")]
+    let allowed_extensions = &[IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS, JXL_IMAGE_EXTENSIONS, HEIC_EXTENSIONS].concat();
+
+    #[cfg(not(feature = "heif"))]
+    let allowed_extensions = &[IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS, JXL_IMAGE_EXTENSIONS].concat();
+
+    allowed_extensions.iter().any(|ext| extension_str.ends_with(ext))
 }

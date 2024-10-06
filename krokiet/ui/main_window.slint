@@ -47,7 +47,7 @@ export component MainWindow inherits Window {
     in-out property <[MainListModel]> empty_folder_model: [];
     in-out property <[MainListModel]> big_files_model: [];
     in-out property <[MainListModel]> empty_files_model: [];
-    in-out property <[MainListModel]> temporary-files_model: [];
+    in-out property <[MainListModel]> temporary_files_model: [];
     in-out property <[MainListModel]> similar_images_model: [];
     in-out property <[MainListModel]> similar_videos_model: [];
     in-out property <[MainListModel]> similar_music_model: [];
@@ -82,7 +82,7 @@ export component MainWindow inherits Window {
                         empty_folder_model <=> root.empty_folder_model;
                         big_files_model <=> root.big_files_model;
                         empty_files_model <=> root.empty_files_model;
-                        temporary-files_model <=> root.temporary-files_model;
+                        temporary_files_model <=> root.temporary_files_model;
                         similar_images_model <=> root.similar_images_model;
                         similar_videos_model <=> root.similar_videos_model;
                         similar_music_model <=> root.similar_music_model;
@@ -118,9 +118,21 @@ export component MainWindow inherits Window {
         }
 
         action_buttons := ActionButtons {
+            duplicate_files_model <=> root.duplicate_files_model;
+            empty_folder_model <=> root.empty_folder_model;
+            big_files_model <=> root.big_files_model;
+            empty_files_model <=> root.empty_files_model;
+            temporary_files_model <=> root.temporary_files_model;
+            similar_images_model <=> root.similar_images_model;
+            similar_videos_model <=> root.similar_videos_model;
+            similar_music_model <=> root.similar_music_model;
+            invalid_symlinks_model <=> root.invalid_symlinks_model;
+            broken_files_model <=> root.broken_files_model;
+            bad_extensions_model <=> root.bad_extensions_model;
+
             vertical-stretch: 0.0;
             scanning <=> root.scanning;
-            stop_requested <=> root.stop-requested;
+            stop_requested <=> root.stop_requested;
             scan_stopping => {
                 text_summary_text = "Stopping scan, please wait...";
                 root.scan_stopping();
@@ -156,7 +168,7 @@ export component MainWindow inherits Window {
         }
 
         bottom_panel := BottomPanel {
-            bottom-panel-visibility <=> action_buttons.bottom_panel_visibility;
+            bottom_panel_visibility <=> action_buttons.bottom_panel_visibility;
             vertical-stretch: 0.0;
             folder_choose_requested(included_directories) => {
                 root.folder_choose_requested(included_directories)

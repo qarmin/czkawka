@@ -5,15 +5,20 @@ import {CurrentTab} from "common.slint";
 import {BottomPanelVisibility} from "common.slint";
 import {Callabler} from "callabler.slint";
 import {GuiState} from "gui_state.slint";
+import {MainListModel} from "common.slint";
 
 export component VisibilityButton inherits Button {
     in-out property <BottomPanelVisibility> button_visibility;
     in-out property <BottomPanelVisibility> bottom_panel_visibility;
-    enabled: bottom_panel_visibility != button-visibility;
+    checked: bottom_panel_visibility == button_visibility;
     height: 30px;
     width: 70px;
     clicked => {
-        bottom-panel-visibility = button_visibility;
+        if (bottom_panel_visibility == button_visibility) {
+            bottom_panel_visibility = BottomPanelVisibility.NotVisible;
+        } else {
+            bottom_panel_visibility = button_visibility;
+        }
     }
 }
 
@@ -23,13 +28,70 @@ export component ActionButtons inherits HorizontalLayout {
     callback show_select_popup(length, length);
     callback show_remove_popup();
     callback request_folder_to_move();
+
+    in-out property <[MainListModel]> duplicate_files_model: [];
+    in-out property <[MainListModel]> empty_folder_model: [];
+    in-out property <[MainListModel]> big_files_model: [];
+    in-out property <[MainListModel]> empty_files_model: [];
+    in-out property <[MainListModel]> temporary_files_model: [];
+    in-out property <[MainListModel]> similar_images_model: [];
+    in-out property <[MainListModel]> similar_videos_model: [];
+    in-out property <[MainListModel]> similar_music_model: [];
+    in-out property <[MainListModel]> invalid_symlinks_model: [];
+    in-out property <[MainListModel]> broken_files_model: [];
+    in-out property <[MainListModel]> bad_extensions_model: [];
+
+    property <CurrentTab> active_tab: GuiState.active_tab;
+
     in-out property <BottomPanelVisibility> bottom_panel_visibility <=> GuiState.bottom_panel_visibility;
     in-out property <bool> stop_requested: false;
     in-out property <bool> scanning;
     in-out property <bool> lists_enabled: GuiState.is_tool_tab_active;
+    in-out property <bool> results_available: false;
     out property <int> name;
     height: 30px;
     spacing: 4px;
+
+    changed duplicate_files_model => {check_if_enable_buttons();}
+    changed empty_folder_model => {check_if_enable_buttons();}
+    changed big_files_model => {check_if_enable_buttons();}
+    changed empty_files_model => {check_if_enable_buttons();}
+    changed temporary_files_model => {check_if_enable_buttons();}
+    changed similar_images_model => {check_if_enable_buttons();}
+    changed similar_videos_model => {check_if_enable_buttons();}
+    changed similar_music_model => {check_if_enable_buttons();}
+    changed invalid_symlinks_model => {check_if_enable_buttons();}
+    changed broken_files_model => {check_if_enable_buttons();}
+    changed bad_extensions_model => {check_if_enable_buttons();}
+    changed active_tab => {check_if_enable_buttons();}
+
+    function check_if_enable_buttons() {
+        if (active_tab == CurrentTab.DuplicateFiles && duplicate_files_model.length > 0) {
+            results_available = true;
+        } else if (active_tab == CurrentTab.EmptyFolders && empty_folder_model.length > 0) {
+            results_available = true;
+        } else if (active_tab == CurrentTab.BigFiles && big_files_model.length > 0) {
+            results_available = true;
+        } else if (active_tab == CurrentTab.EmptyFiles && empty_files_model.length > 0) {
+            results_available = true;
+        } else if (active_tab == CurrentTab.TemporaryFiles && temporary_files_model.length > 0) {
+            results_available = true;
+        } else if (active_tab == CurrentTab.SimilarImages && similar_images_model.length > 0) {
+            results_available = true;
+        } else if (active_tab == CurrentTab.SimilarVideos && similar_videos_model.length > 0) {
+            results_available = true;
+        } else if (active_tab == CurrentTab.SimilarMusic && similar_music_model.length > 0) {
+            results_available = true;
+        } else if (active_tab == CurrentTab.InvalidSymlinks && invalid_symlinks_model.length > 0) {
+            results_available = true;
+        } else if (active_tab == CurrentTab.BrokenFiles && broken_files_model.length > 0) {
+            results_available = true;
+        } else if (active_tab == CurrentTab.BadExtensions && bad_extensions_model.length > 0) {
+            results_available = true;
+        } else {
+            results_available = false;
+        }
+    }
 
     Rectangle {
         scan_button := Button {
@@ -37,6 +99,7 @@ export component ActionButtons inherits HorizontalLayout {
             enabled: !scanning && lists_enabled;
             visible: !scanning && lists_enabled;
             text: "Scan";
+            icon: @image-url("../icons/krokiet_search.svg");
             clicked => {
                 root.scanning = true;
                 root.scan_starting(GuiState.active_tab);
@@ -48,6 +111,7 @@ export component ActionButtons inherits HorizontalLayout {
             visible: scanning;
             enabled: scanning && !stop_requested && root.lists_enabled;
             text: "Stop";
+            icon: @image-url("../icons/krokiet_stop.svg");
             clicked => {
                 root.scan_stopping();
                 root.stop_requested = true;
@@ -56,14 +120,15 @@ export component ActionButtons inherits HorizontalLayout {
     }
 
     Rectangle {
-        horizontal-stretch: 0.5;
+        max-width: 5px;
     }
 
     select_button := Button {
         visible: lists_enabled;
         height: parent.height;
-        enabled: !scanning && lists_enabled;
+        enabled: !scanning && lists_enabled && results_available;
         text: "Select";
+        icon: @image-url("../icons/krokiet_select.svg");
         clicked => {
             show_select_popup(self.x + self.width / 2, self.y + parent.y);
         }
@@ -72,8 +137,9 @@ export component ActionButtons inherits HorizontalLayout {
     move_button := Button {
         visible: lists_enabled;
         height: parent.height;
-        enabled: !scanning && lists_enabled;
+        enabled: !scanning && lists_enabled && results_available;
         text: "Move";
+        icon: @image-url("../icons/krokiet_move.svg");
         clicked => {
             request_folder_to_move();
         }
@@ -82,8 +148,9 @@ export component ActionButtons inherits HorizontalLayout {
     delete_button := Button {
         visible: lists_enabled;
         height: parent.height;
-        enabled: !scanning && lists_enabled;
+        enabled: !scanning && lists_enabled && results_available;
         text: "Delete";
+        icon: @image-url("../icons/krokiet_delete.svg");
         clicked => {
             show_remove_popup();
         }
@@ -98,23 +165,16 @@ export component ActionButtons inherits HorizontalLayout {
         spacing: 0px;
         VisibilityButton {
             height: parent.height;
-            button-visibility: BottomPanelVisibility.Directories;
+            button_visibility: BottomPanelVisibility.Directories;
             bottom_panel_visibility <=> bottom_panel_visibility;
             text: "Dirs";
         }
 
         VisibilityButton {
             height: parent.height;
-            button-visibility: BottomPanelVisibility.TextErrors;
+            button_visibility: BottomPanelVisibility.TextErrors;
             bottom_panel_visibility <=> bottom_panel_visibility;
-            text: "Text";
-        }
-
-        VisibilityButton {
-            height: parent.height;
-            button-visibility: BottomPanelVisibility.NotVisible;
-            bottom_panel_visibility <=> bottom_panel_visibility;
-            text: "None";
+            text: "Output";
         }
     }
 }
