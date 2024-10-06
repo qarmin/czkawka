@@ -73,10 +73,12 @@ export component SelectableTableView inherits Rectangle {
             
                 border-radius: 5px;
                 height: 20px;
-                background: r.header_row ? ColorPalette.list_view_normal_header_color : (touch-area.has-hover ? (r.selected_row ? ColorPalette.list_view_normal_selected_header : ColorPalette.list_view_normal_color) : (r.selected_row ? ColorPalette.list_view_normal_selected_header : ColorPalette.list_view_normal_color));
+                background: ColorPalette.get_listview_color_with_header(r.selected_row, touch-area.has-hover, r.header_row);
                 touch_area := TouchArea {
                     function clicked_manual() {
-                        if (!r.header_row) {
+                        // We don't allow to select header row
+                        // unless it contains data, which is true only for for modes with reference folders
+                        if (!r.header_row || r.val_str.length > 0) {
                             if (root.selected_item == -1) {
                                 r.selected_row = !r.selected_row;
                                 root.selected_item = idx;

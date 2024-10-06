@@ -40,6 +40,7 @@
 - Changed way to close/open panel at bottom - [#1359](https://github.com/qarmin/czkawka/pull/1359)
 - Modify logo a little - [#1359](https://github.com/qarmin/czkawka/pull/1359)
 - Avoid errors when trying to load preview of not supported file - [#1359](https://github.com/qarmin/czkawka/pull/1359)
+- Added ability to show preview of referenced folders - [#1359](https://github.com/qarmin/czkawka/pull/1359)
 
 ### GTK GUI
 
