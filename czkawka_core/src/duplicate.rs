@@ -979,9 +979,9 @@ impl DuplicateFinder {
 
 impl DebugPrint for DuplicateFinder {
     fn debug_print(&self) {
-        // if !cfg!(debug_assertions) {
-        //     return;
-        // }
+        if !cfg!(debug_assertions) {
+            return;
+        }
         println!("---------------DEBUG PRINT---------------");
         println!(
             "Number of duplicated files by size(in groups) - {} ({})",

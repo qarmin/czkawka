@@ -1,0 +1,26 @@
+name: 🐧 Linux Minimal version
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 0 * * 2'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  linux-cli:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install basic libraries
+        run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev ffmpeg -y
+
+      - name: Setup rust version
+        run: rustup default 1.79.0
+
+      - name: Build
+        run: |
+          cargo build
+          cargo build --features "heif,libraw"

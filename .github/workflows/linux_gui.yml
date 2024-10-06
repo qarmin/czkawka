@@ -10,37 +10,38 @@ env:
 
 jobs:
   linux-krokiet-gui:
-    strategy:
-      matrix:
-        toolchain: [ stable, 1.79.0 ]
-        type: [ release ]
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup rust version
-        run: rustup default ${{ matrix.toolchain }}
+        run: rustup default stable
 
       - name: Enable LTO
         run: sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
-        if: ${{ (matrix.type == 'release') }}
 
       - name: Build Release Krokiet
         run: cargo build --release --bin krokiet
-        if: ${{ (matrix.type == 'release') }}
 
       - name: Store Linux GUI Krokiet
         uses: actions/upload-artifact@v4
         with:
-          name: krokiet-${{ runner.os }}-${{ matrix.toolchain }}
+          name: krokiet-${{ runner.os }}
           path: target/release/krokiet
-        if: ${{ matrix.type == 'release' }}
+
+      - name: Prepare files to release
+        run: |
+          mv target/release/krokiet linux_krokiet_gui
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: ${{ github.ref == 'refs/heads/master' }}
+        with:
+          tag_name: "Nightly"
+          files: |
+            linux_krokiet_gui
+          token: ${{ secrets.PAT_REPOSITORY }}
 
   linux-krokiet-gui-heif:
-    strategy:
-      matrix:
-        toolchain: [ stable, 1.79.0 ]
-        type: [ release ]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -49,28 +50,33 @@ jobs:
         run: sudo apt update || true; sudo apt install libheif-dev libraw-dev -y
 
       - name: Setup rust version
-        run: rustup default ${{ matrix.toolchain }}
+        run: rustup default stable
 
       - name: Enable LTO
         run: sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
-        if: ${{ (matrix.type == 'release') }}
 
       - name: Build Release Krokiet heif
         run: cargo build --release --bin krokiet --features "heif,libraw"
-        if: ${{ (matrix.type == 'release') }}
 
       - name: Store Linux GUI Krokiet heif libraw
         uses: actions/upload-artifact@v4
         with:
-          name: krokiet-${{ runner.os }}-${{ matrix.toolchain }}-heif-libraw
+          name: krokiet-${{ runner.os }}-heif-libraw
           path: target/release/krokiet
-        if: ${{ matrix.type == 'release' }}
+
+      - name: Prepare files to release
+        run: |
+          mv target/release/krokiet linux_krokiet_heif_raw_gui
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: ${{ github.ref == 'refs/heads/master' }}
+        with:
+          tag_name: "Nightly"
+          files: |
+            linux_krokiet_heif_raw_gui
+          token: ${{ secrets.PAT_REPOSITORY }}
 
   linux-gui:
-    strategy:
-      matrix:
-        toolchain: [ stable, 1.79.0 ]
-        type: [ release ]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -79,40 +85,43 @@ jobs:
         run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev -y
 
       - name: Setup rust version
-        run: rustup default ${{ matrix.toolchain }}
+        run: rustup default stable
 
       - name: Enable LTO
         run: sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
-        if: ${{ (matrix.type == 'release') }}
 
       - name: Build Release Heif Libraw
         run: cargo build --release --bin czkawka_gui --features "heif,libraw"
-        if: ${{ (matrix.type == 'release') }}
 
       - name: Store Linux GUI Heif Libraw
         uses: actions/upload-artifact@v4
         with:
-          name: czkawka_gui-${{ runner.os }}-${{ matrix.toolchain }}-heif-libraw
+          name: czkawka_gui-${{ runner.os }}-heif-libraw
           path: target/release/czkawka_gui
-        if: ${{ (matrix.type == 'release') && (matrix.toolchain == 'stable') }}
 
       - name: Build Release
         run: cargo build --release --bin czkawka_gui
-        if: ${{ (matrix.type == 'release') }}
 
       # Only store stable toolchain
       - name: Store Linux GUI
         uses: actions/upload-artifact@v4
         with:
-          name: czkawka_gui-${{ runner.os }}-${{ matrix.toolchain }}
+          name: czkawka_gui-${{ runner.os }}
           path: target/release/czkawka_gui
-        if: ${{ (matrix.type == 'release') && (matrix.toolchain == 'stable') }}
+
+      - name: Prepare files to release
+        run: |
+          mv target/release/czkawka_gui linux_czkawka_gui
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: ${{ github.ref == 'refs/heads/master' }}
+        with:
+          tag_name: "Nightly"
+          files: |
+            linux_czkawka_gui
+          token: ${{ secrets.PAT_REPOSITORY }}
 
   linux-appimage-gui:
-    strategy:
-      matrix:
-        toolchain: [ stable ]
-        type: [ release ]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -121,11 +130,10 @@ jobs:
         run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev librsvg2-dev wget fuse libfuse2 desktop-file-utils -y
 
       - name: Setup rust version
-        run: rustup default ${{ matrix.toolchain }}
+        run: rustup default stable
 
       - name: Enable LTO
         run: sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
-        if: ${{ (matrix.type == 'release') }}
 
       - name: Build Release
         run: cargo build --release --bin czkawka_gui
@@ -150,13 +158,13 @@ jobs:
       - name: Store Linux Appimage GUI
         uses: actions/upload-artifact@v4
         with:
-          name: czkawka_gui-appimage-${{ runner.os }}-${{ matrix.toolchain }}
+          name: czkawka_gui-appimage-${{ runner.os }}
           path: Czkawka*.AppImage
 
       - name: Store Linux Appimage GUI Zsync
         uses: actions/upload-artifact@v4
         with:
-          name: czkawka_gui-appimage-${{ runner.os }}-${{ matrix.toolchain }}.zsync
+          name: czkawka_gui-appimage-${{ runner.os }}.zsync
           path: Czkawka*.AppImage.zsync
 
       - name: Minimal AppImage
@@ -173,14 +181,22 @@ jobs:
       - name: Minimal Appimage Upload
         uses: actions/upload-artifact@v4
         with:
-          name: czkawka_gui-${{ matrix.toolchain }}_minimal_AppImage
+          name: czkawka_gui_minimal_AppImage
           path: out/*.AppImage
 
+      - name: Prepare files to release
+        run: |
+          mv out/czkawka_gui-minimal.AppImage linux_czkawka_gui_minimal.AppImage
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: ${{ github.ref == 'refs/heads/master' }}
+        with:
+          tag_name: "Nightly"
+          files: |
+            linux_czkawka_gui_minimal.AppImage
+          token: ${{ secrets.PAT_REPOSITORY }}
+
   linux-tests:
-    strategy:
-      matrix:
-        toolchain: [ stable ]
-        type: [ debug ]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -189,7 +205,7 @@ jobs:
         run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev librsvg2-dev wget fuse libfuse2 -y xvfb
 
       - name: Setup rust version
-        run: rustup default ${{ matrix.toolchain }}
+        run: rustup default stable
 
       - name: Test
         run: xvfb-run cargo test

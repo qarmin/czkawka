@@ -10,10 +10,6 @@ env:
 
 jobs:
   linux-cli:
-    strategy:
-      matrix:
-        toolchain: [ nightly ]
-        type: [ release ]
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
@@ -34,18 +30,15 @@ jobs:
 
       - name: Enable LTO
         run: sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
-        if: ${{ (matrix.type == 'release') }}
 
       - name: Build Release
         run: cargo build --release --bin czkawka_cli
-        if: ${{ (matrix.type == 'release') }}
 
       - name: Store Linux CLI
         uses: actions/upload-artifact@v4
         with:
-          name: czkawka_cli-${{ runner.os }}-${{ matrix.toolchain }}
+          name: czkawka_cli-${{ runner.os }}
           path: target/release/czkawka_cli
-        if: ${{ matrix.type == 'release' }}
 
       - name: Linux Regression Test
         run: |
@@ -55,4 +48,15 @@ jobs:
           cd ..
           
           ci_tester/target/release/ci_tester target/release/czkawka_cli
-        if: ${{ matrix.type == 'release' }}
+
+      - name: Prepare files to release
+        run: |
+          mv target/release/czkawka_cli linux_czkawka_cli_eyra
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: ${{ github.ref == 'refs/heads/master' }}
+        with:
+          tag_name: "Nightly"
+          files: |
+            linux_czkawka_cli_eyra
+          token: ${{ secrets.PAT_REPOSITORY }}

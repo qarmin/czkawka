@@ -10,10 +10,6 @@ env:
 
 jobs:
   macos:
-    strategy:
-      matrix:
-        toolchain: [ stable ]
-        type: [ release ]
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,59 +24,66 @@ jobs:
           brew link --overwrite python@3.11
 
       - name: Setup rust version
-        run: rustup default ${{ matrix.toolchain }}
+        run: rustup default stable
 
       - name: Enable LTO
         run: sed -i '' 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
-        if: ${{ (matrix.type == 'release') }}
 
       - name: Build Release
         run: cargo build --release
-        if: ${{ matrix.type == 'release'}}
 
       - name: Store MacOS CLI
         uses: actions/upload-artifact@v4
         with:
-          name: czkawka_cli-${{ runner.os }}-${{ matrix.toolchain }}
+          name: czkawka_cli-${{ runner.os }}
           path: target/release/czkawka_cli
-        if: ${{ matrix.type == 'release' }}
 
       - name: Store MacOS GUI
         uses: actions/upload-artifact@v4
         with:
-          name: czkawka_gui-${{ runner.os }}-${{ matrix.toolchain }}
+          name: czkawka_gui-${{ runner.os }}
           path: target/release/czkawka_gui
-        if: ${{ matrix.type == 'release' }}
 
       - name: Store MacOS Krokiet
         uses: actions/upload-artifact@v4
         with:
-          name: krokiet-${{ runner.os }}-${{ matrix.toolchain }}
+          name: krokiet-${{ runner.os }}
           path: target/release/krokiet
-        if: ${{ matrix.type == 'release' }}
+
+      - name: Prepare files to release
+        run: |
+          mv target/release/czkawka_cli macos_czkawka_cli
+          mv target/release/czkawka_gui macos_czkawka_gui
+          mv target/release/krokiet macos_krokiet
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: ${{ github.ref == 'refs/heads/master' }}
+        with:
+          tag_name: "Nightly"
+          files: |
+            macos_czkawka_cli
+            macos_czkawka_gui
+            macos_krokiet
+          token: ${{ secrets.PAT_REPOSITORY }}
 
 #      # TODO - compilation is broken, not sure why
 #      - name: Build Release Heif
 #        run: cargo build --release --features heif
-#        if: ${{ matrix.type == 'release'}}
 #
 #      - name: Store MacOS CLI Heif
 #        uses: actions/upload-artifact@v4
 #        with:
-#          name: czkawka_cli-${{ runner.os }}-${{ matrix.toolchain }}-heif
+#          name: czkawka_cli-${{ runner.os }}-heif
 #          path: target/release/czkawka_cli
-#        if: ${{ matrix.type == 'release' }}
 #
 #      - name: Store MacOS GUI Heif
 #        uses: actions/upload-artifact@v4
 #        with:
-#          name: czkawka_gui-${{ runner.os }}-${{ matrix.toolchain }}-heif
+#          name: czkawka_gui-${{ runner.os }}-heif
 #          path: target/release/czkawka_gui
-#        if: ${{ matrix.type == 'release' }}
 #
 #      - name: Store MacOS Krokiet Heif
 #        uses: actions/upload-artifact@v4
 #        with:
-#          name: krokiet-${{ runner.os }}-${{ matrix.toolchain }}-heif
+#          name: krokiet-${{ runner.os }}-heif
 #          path: target/release/krokiet
-#        if: ${{ matrix.type == 'release' }}
