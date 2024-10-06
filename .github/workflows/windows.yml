@@ -66,6 +66,7 @@ jobs:
 
       - name: Release
         uses: softprops/action-gh-release@v2
+        if: ${{ github.ref == 'refs/heads/master' }}
         with:
           tag_name: "Nightly"
           files: |
@@ -127,6 +128,7 @@ jobs:
 
       - name: Release
         uses: softprops/action-gh-release@v2
+        if: ${{ github.ref == 'refs/heads/master' }}
         with:
           tag_name: "Nightly"
           files: |
@@ -194,6 +196,7 @@ jobs:
           mv ./package windows_czkawka_gui_gtk_410.zip
       - name: Release
         uses: softprops/action-gh-release@v2
+        if: ${{ github.ref == 'refs/heads/master' }}
         with:
           tag_name: "Nightly"
           files: |
@@ -260,6 +263,7 @@ jobs:
           mv ./package windows_czkawka_gui_gtk_46.zip
       - name: Release
         uses: softprops/action-gh-release@v2
+        if: ${{ github.ref == 'refs/heads/master' }}
         with:
           tag_name: "Nightly"
           files: |
@@ -335,8 +339,10 @@ jobs:
           mv ./package windows_czkawka_gui_gtk_46_console.zip
       - name: Release
         uses: softprops/action-gh-release@v2
+        if: ${{ github.ref == 'refs/heads/master' }}
         with:
           tag_name: "Nightly"
           files: |
             windows_czkawka_gui_gtk_46_console.zip
           token: ${{ secrets.PAT_REPOSITORY }}
+        if: github.event.pull_request.merged == true && github.event_name == 'pull_request' && github.event.action == 'closed'

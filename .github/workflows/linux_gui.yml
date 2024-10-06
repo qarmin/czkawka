@@ -34,6 +34,7 @@ jobs:
           mv target/release/krokiet linux_krokiet_gui
       - name: Release
         uses: softprops/action-gh-release@v2
+        if: ${{ github.ref == 'refs/heads/master' }}
         with:
           tag_name: "Nightly"
           files: |
@@ -68,6 +69,7 @@ jobs:
           mv target/release/krokiet linux_krokiet_heif_raw_gui
       - name: Release
         uses: softprops/action-gh-release@v2
+        if: ${{ github.ref == 'refs/heads/master' }}
         with:
           tag_name: "Nightly"
           files: |
@@ -112,6 +114,7 @@ jobs:
           mv target/release/czkawka_gui linux_czkawka_gui
       - name: Release
         uses: softprops/action-gh-release@v2
+        if: ${{ github.ref == 'refs/heads/master' }}
         with:
           tag_name: "Nightly"
           files: |
@@ -127,7 +130,7 @@ jobs:
         run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev librsvg2-dev wget fuse libfuse2 desktop-file-utils -y
 
       - name: Setup rust version
-        run: rustup default stable}
+        run: rustup default stable
 
       - name: Enable LTO
         run: sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
@@ -186,6 +189,7 @@ jobs:
           mv out/czkawka_gui-minimal.AppImage linux_czkawka_gui_minimal.AppImage
       - name: Release
         uses: softprops/action-gh-release@v2
+        if: ${{ github.ref == 'refs/heads/master' }}
         with:
           tag_name: "Nightly"
           files: |

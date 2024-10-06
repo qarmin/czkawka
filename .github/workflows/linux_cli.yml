@@ -46,6 +46,7 @@ jobs:
           mv target/release/czkawka_cli linux_czkawka_cli
       - name: Release
         uses: softprops/action-gh-release@v2
+        if: ${{ github.ref == 'refs/heads/master' }}
         with:
           tag_name: "Nightly"
           files: |
