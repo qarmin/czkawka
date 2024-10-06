@@ -37,7 +37,7 @@ pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressDat
     app.on_scan_starting(move |active_tab| {
         let app = a.upgrade().expect("Failed to upgrade app :(");
 
-        if check_if_there_are_any_included_folders(&app) {
+        if !check_if_there_are_any_included_folders(&app) {
             app.invoke_scan_ended("Cannot start scan when no included directories are set.".into());
             return;
         }
