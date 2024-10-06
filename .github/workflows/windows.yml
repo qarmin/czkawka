@@ -345,4 +345,3 @@ jobs:
           files: |
             windows_czkawka_gui_gtk_46_console.zip
           token: ${{ secrets.PAT_REPOSITORY }}
-        if: github.event.pull_request.merged == true && github.event_name == 'pull_request' && github.event.action == 'closed'
