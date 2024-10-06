@@ -10,10 +10,6 @@ env:
 
 jobs:
   krokiet-compiled-on-linux:
-    strategy:
-      fail-fast: false
-      matrix:
-        use_heif: [ normal ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -39,7 +35,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: krokiet-windows-c-on-linux-${{ github.sha }}-${{ matrix.use_heif }}
+          name: krokiet-windows-c-on-linux-${{ github.sha }}
           path: |
             target/x86_64-pc-windows-gnu/release/krokiet.exe
           if-no-files-found: error
@@ -59,7 +55,7 @@ jobs:
       - name: Upload artifacts Console
         uses: actions/upload-artifact@v4
         with:
-          name: krokiet-windows-c-on-linux-${{ github.sha }}-${{ matrix.use_heif }}-console
+          name: krokiet-windows-c-on-linux-${{ github.sha }}-console
           path: |
             target/x86_64-pc-windows-gnu/release/krokiet.exe
           if-no-files-found: error
@@ -78,10 +74,6 @@ jobs:
           token: ${{ secrets.PAT_REPOSITORY }}
 
   krokiet-compiled-on-windows:
-    strategy:
-      fail-fast: false
-      matrix:
-        use_heif: [ normal ]
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -104,7 +96,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: krokiet-windows-c-on-windows-${{ github.sha }}-${{ matrix.use_heif }}
+          name: krokiet-windows-c-on-windows-${{ github.sha }}
           path: |
             target/release/krokiet.exe
           if-no-files-found: error
@@ -124,7 +116,7 @@ jobs:
       - name: Upload artifacts Console
         uses: actions/upload-artifact@v4
         with:
-          name: krokiet-windows-c-on-windows-${{ github.sha }}-${{ matrix.use_heif }}-console
+          name: krokiet-windows-c-on-windows-${{ github.sha }}-console
           path: |
             target/release/krokiet.exe
           if-no-files-found: error
@@ -143,10 +135,6 @@ jobs:
           token: ${{ secrets.PAT_REPOSITORY }}
 
   container_4_10:
-    strategy:
-      fail-fast: false
-      matrix:
-        use_heif: [ non_heif ]
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/mglolenstine/gtk4-cross:gtk-4.10
@@ -196,7 +184,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: czkawka-windows-${{ github.sha }}-${{ matrix.use_heif }}-4.10
+          name: czkawka-windows-${{ github.sha }}-4.10
           path: |
             ./package
           if-no-files-found: error
@@ -213,10 +201,6 @@ jobs:
           token: ${{ secrets.PAT_REPOSITORY }}
 
   container_4_6:
-    strategy:
-      fail-fast: false
-      matrix:
-        use_heif: [ non_heif ]
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/piegamesde/gtk4-cross:gtk-4.6
@@ -266,7 +250,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: czkawka-windows-${{ github.sha }}-${{ matrix.use_heif }}-4.6
+          name: czkawka-windows-${{ github.sha }}-4.6
           path: |
             ./package
           if-no-files-found: error
