@@ -44,6 +44,10 @@ jobs:
             target/x86_64-pc-windows-gnu/release/krokiet.exe
           if-no-files-found: error
 
+      - name: Prepare files to release
+        run: |
+          mv target/x86_64-pc-windows-gnu/release/krokiet.exe windows_krokiet.exe
+
       - name: Show console window on windows
         run: |
           ./sd -s '#![windows_subsystem = "windows"]' '//#![windows_subsystem = "windows"]' krokiet/src/main.rs
@@ -59,6 +63,19 @@ jobs:
           path: |
             target/x86_64-pc-windows-gnu/release/krokiet.exe
           if-no-files-found: error
+
+      - name: Prepare files to release
+        run: |
+          mv target/x86_64-pc-windows-gnu/release/krokiet.exe windows_krokiet_console.exe
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "Nightly"
+          files: |
+            windows_krokiet.exe
+            windows_krokiet_console.exe
+          token: ${{ secrets.PAT_REPOSITORY }}
 
   krokiet-compiled-on-windows:
     strategy:
@@ -92,6 +109,10 @@ jobs:
             target/release/krokiet.exe
           if-no-files-found: error
 
+      - name: Prepare files to release
+        run: |
+          mv target/release/krokiet.exe windows_krokiet_on_windows.exe
+
       - name: Show console window on windows
         run: |
           ./sd.exe -s '#![windows_subsystem = "windows"]' '//#![windows_subsystem = "windows"]' krokiet/src/main.rs
@@ -108,6 +129,18 @@ jobs:
             target/release/krokiet.exe
           if-no-files-found: error
 
+      - name: Prepare files to release
+        run: |
+          mv target/release/krokiet.exe windows_krokiet_on_windows_console.exe
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "Nightly"
+          files: |
+            windows_krokiet_on_windows.exe
+            windows_krokiet_on_windows_console.exe
+          token: ${{ secrets.PAT_REPOSITORY }}
 
   container_4_10:
     strategy:
@@ -168,6 +201,17 @@ jobs:
             ./package
           if-no-files-found: error
 
+      - name: Prepare files to release
+        run: |
+          mv ./package windows_czkawka_gui_gtk_410.zip
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "Nightly"
+          files: |
+            windows_czkawka_gui_gtk_410.zip
+          token: ${{ secrets.PAT_REPOSITORY }}
+
   container_4_6:
     strategy:
       fail-fast: false
@@ -226,6 +270,17 @@ jobs:
           path: |
             ./package
           if-no-files-found: error
+
+      - name: Prepare files to release
+        run: |
+          mv ./package windows_czkawka_gui_gtk_46.zip
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "Nightly"
+          files: |
+            windows_czkawka_gui_gtk_46.zip
+          token: ${{ secrets.PAT_REPOSITORY }}
 
   # Provide option to log things to windows CLI
   container_4_6_console_window:
@@ -290,3 +345,14 @@ jobs:
           path: |
             ./package
           if-no-files-found: error
+
+      - name: Prepare files to release
+        run: |
+          mv ./package windows_czkawka_gui_gtk_46_console.zip
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "Nightly"
+          files: |
+            windows_czkawka_gui_gtk_46_console.zip
+          token: ${{ secrets.PAT_REPOSITORY }}
