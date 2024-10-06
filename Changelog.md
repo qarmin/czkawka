@@ -35,11 +35,11 @@
 - Fixed invalid default hash size in similar images - [#1354](https://github.com/qarmin/czkawka/pull/1354)
 - Fixed and added more input parameters to the application - [#1354](https://github.com/qarmin/czkawka/pull/1354)
 - Fixed problem with loading invalid preset - [#1226](https://github.com/qarmin/czkawka/pull/1226)
-- Fixed crash when using 8 hash size with small similarity - [#TODO](https://github.com/qarmin/czkawka/pull/TODO)
-- Fixed crash when using 8 hash size with small similarity - [#TODO](https://github.com/qarmin/czkawka/pull/TODO)
-- Disabling buttons when no files were found - [#TODO](https://github.com/qarmin/czkawka/pull/TODO)
-- Changed way to close/open panel at bottom - [#TODO](https://github.com/qarmin/czkawka/pull/TODO)
-- Modify logo a little - [#TODO](https://github.com/qarmin/czkawka/pull/TODO)
+- Fixed crash when using 8 hash size with small similarity - [#1359](https://github.com/qarmin/czkawka/pull/1359)
+- Disabling buttons when no files were found - [#1359](https://github.com/qarmin/czkawka/pull/1359)
+- Changed way to close/open panel at bottom - [#1359](https://github.com/qarmin/czkawka/pull/1359)
+- Modify logo a little - [#1359](https://github.com/qarmin/czkawka/pull/1359)
+- Avoid errors when trying to load preview of not supported file - [#1359](https://github.com/qarmin/czkawka/pull/1359)
 
 ### GTK GUI
 
