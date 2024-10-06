@@ -11,6 +11,11 @@
 - Slint 1.8 which Krokiet uses requires femtovg 0.9.2 which broke font
   rendering - https://github.com/slint-ui/slint/issues/6298
 
+### CI
+
+- Providing nightly
+  builds - [#1360](https://github.com/qarmin/czkawka/pull/1360) - https://github.com/qarmin/czkawka/releases/tag/Nightly
+
 ### Core
 
 - Removed some unnecessary panics - [#1354](https://github.com/qarmin/czkawka/pull/1354)

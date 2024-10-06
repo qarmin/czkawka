@@ -42,7 +42,7 @@ jobs:
 
       - name: Prepare files to release
         run: |
-          mv target/x86_64-pc-windows-gnu/release/krokiet.exe windows_krokiet.exe
+          mv target/x86_64-pc-windows-gnu/release/krokiet.exe windows_krokiet_on_linux.exe
 
       - name: Show console window on windows
         run: |
@@ -62,7 +62,7 @@ jobs:
 
       - name: Prepare files to release
         run: |
-          mv target/x86_64-pc-windows-gnu/release/krokiet.exe windows_krokiet_console.exe
+          mv target/x86_64-pc-windows-gnu/release/krokiet.exe windows_krokiet_on_linux_console.exe
 
       - name: Release
         uses: softprops/action-gh-release@v2
@@ -70,8 +70,8 @@ jobs:
         with:
           tag_name: "Nightly"
           files: |
-            windows_krokiet.exe
-            windows_krokiet_console.exe
+            windows_krokiet_on_linux.exe
+            windows_krokiet_on_linux_console.exe
           token: ${{ secrets.PAT_REPOSITORY }}
 
   krokiet-compiled-on-windows:
