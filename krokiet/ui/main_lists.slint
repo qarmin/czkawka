@@ -170,7 +170,8 @@ export component MainList {
     }
 
     focus_item := FocusScope {
-        width: 0px; // Hack to not steal first click from other components - https://github.com/slint-ui/slint/issues/3503
+        // TODO consider to remove that - looks that hack not works and is unnecessary
+        // width: 0px; // Hack to not steal first click from other components - https://github.com/slint-ui/slint/issues/3503
         // Hack not works https://github.com/slint-ui/slint/issues/3503#issuecomment-1817809834 because disables key-released event
 
         key-released(event) => {
@@ -183,9 +184,31 @@ export component MainList {
                 empty_folders.released_key(event);
             } else if (GuiState.active_tab == CurrentTab.SimilarImages) {
                 similar_images.released_key(event);
+            } else if (GuiState.active_tab == CurrentTab.BadExtensions) {
+                bad_extensions.released_key(event);
+            } else if (GuiState.active_tab == CurrentTab.BigFiles) {
+                big_files.released_key(event);
+            } else if (GuiState.active_tab == CurrentTab.DuplicateFiles) {
+                duplicates.released_key(event);
+            } else if (GuiState.active_tab == CurrentTab.TemporaryFiles) {
+                temporary_files.released_key(event);
+            } else if (GuiState.active_tab == CurrentTab.SimilarVideos) {
+                similar_videos.released_key(event);
+            } else if (GuiState.active_tab == CurrentTab.SimilarMusic) {
+                similar_music.released_key(event);
+            } else if (GuiState.active_tab == CurrentTab.InvalidSymlinks) {
+                invalid_symlink.released_key(event);
+            } else if (GuiState.active_tab == CurrentTab.BrokenFiles) {
+                broken_files.released_key(event);
             } else {
-                debug("Non handled key in main_lists.slint");
+                debug("Non handled key in main_lists.slint", event, GuiState.active_tab);
             }
+            
+            
+            
+            // else {
+            //     debug("Non handled key in main_lists.slint", event, GuiState.active_tab);
+            // }
             accept
         }
     }

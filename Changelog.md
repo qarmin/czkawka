@@ -6,6 +6,11 @@
   regenerated
   from scratch(it uses new name)
 
+### Known regressions
+
+- Slint 1.8 which Krokiet uses requires femtovg 0.9.2 which broke font
+  rendering - https://github.com/slint-ui/slint/issues/6298
+
 ### Core
 
 - Removed some unnecessary panics - [#1354](https://github.com/qarmin/czkawka/pull/1354)
@@ -27,7 +32,7 @@
 - Added avif support(via external C library, not enabled by
   default) - [#1358](https://github.com/qarmin/czkawka/pull/1358)
 - Integer overflow are enabled by default(prepare for reporting bugs, slower performance and
-  unstability) - [#1358](https://github.com/qarmin/czkawka/pull/1358)
+  general unstability) - [#1358](https://github.com/qarmin/czkawka/pull/1358)
 - Fixed crash when loading invalid image cache - [#1230](https://github.com/qarmin/czkawka/pull/1230)
 
 ### Krokiet
@@ -41,6 +46,8 @@
 - Modify logo a little - [#1359](https://github.com/qarmin/czkawka/pull/1359)
 - Avoid errors when trying to load preview of not supported file - [#1359](https://github.com/qarmin/czkawka/pull/1359)
 - Added ability to show preview of referenced folders - [#1359](https://github.com/qarmin/czkawka/pull/1359)
+- Enable selecting with space and jumping over entries with
+  arrows and opening with enter - [#1359](https://github.com/qarmin/czkawka/pull/1359)
 
 ### GTK GUI
 

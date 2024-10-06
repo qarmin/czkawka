@@ -91,17 +91,17 @@ export component SelectableTableView inherits Rectangle {
                             }
 
                             if (root.selected_item != -1) {
-                                Callabler.load_image_preview(r.val_str[root.parentPathIdx - 1] + "/" + r.val_str[root.fileNameIdx - 1]);
+                                showPreview();
                             } else {
                                 GuiState.preview_visible = false;
                             }
                         }
                     }
                     double-clicked => {
-                            if (r.header_row && !r.filled_header_row) {
-                                return;
-                            }
-                            Callabler.item_opened(r.val_str[root.parentPathIdx - 1] + "/" + r.val_str[root.fileNameIdx - 1])
+                        if (r.header_row && !r.filled_header_row) {
+                            return;
+                        }
+                        openSelectedItem();
                     }
                     pointer-event(event) => {
                         // TODO this should be clicked by double-click - https://github.com/slint-ui/slint/issues/4235
@@ -151,11 +151,23 @@ export component SelectableTableView inherits Rectangle {
         }
     }
 
+    function showPreview() {
+        Callabler.load_image_preview(root.values[root.selected_item].val_str[root.parentPathIdx - 1] + "/" + root.values[root.selected_item].val_str[root.fileNameIdx - 1]);
+    }
+
+    function openSelectedItem() {
+        Callabler.item_opened(root.values[root.selected_item].val_str[root.parentPathIdx - 1] + "/" + root.values[root.selected_item].val_str[root.fileNameIdx - 1]);
+    }
+
     // TODO this should work with multiple selection and shift and control key - problably logic will need to be set in global state
     public function released_key(event: KeyEvent) {
         if (event.text == " ") {
-            if (root.selected_item != -1) {
+            if (root.selected_item != -1 && !root.values[root.selected_item].header_row) {
                 root.values[root.selected_item].checked = !root.values[root.selected_item].checked;
+            }
+        } else if (event.text == "\n" ) {
+            if (root.selected_item != -1) {
+                openSelectedItem();
             }
         } else if (event.text == Key.DownArrow) {
             if (root.selected_item != -1) {
@@ -173,6 +185,7 @@ export component SelectableTableView inherits Rectangle {
                         root.selected_item += 1;
                     }
                     root.values[root.selected_item].selected_row = true;
+                    showPreview();
                 }
             } else {
                 // Select last item if nothing is selected
@@ -183,6 +196,7 @@ export component SelectableTableView inherits Rectangle {
                         root.selected_item = 0;
                     }
                     root.values[root.selected_item].selected_row = true;
+                    showPreview();
                 }
             }
         } else if (event.text == Key.UpArrow) {
@@ -204,6 +218,7 @@ export component SelectableTableView inherits Rectangle {
                     }
                     if (root.selected_item != -1) {
                         root.values[root.selected_item].selected_row = true;
+                        showPreview();
                     }
                 }
             } else {
@@ -211,6 +226,7 @@ export component SelectableTableView inherits Rectangle {
                 if (root.values.length > 0) {
                     root.selected_item = root.values.length - 1;
                     root.values[root.selected_item].selected_row = true;
+                    showPreview();
                 }
             }
         }

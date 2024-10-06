@@ -132,6 +132,8 @@ export component LeftSidePanel {
             HorizontalLayout {
                 alignment: end;
                 Button {
+                    checkable: true;
+                    checked: GuiState.visible_tool_settings;
                     visible: GuiState.available_subsettings;
                     min-width: 20px;
                     min-height: 20px;
