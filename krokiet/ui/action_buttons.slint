@@ -95,6 +95,7 @@ export component ActionButtons inherits HorizontalLayout {
             enabled: !scanning && lists_enabled;
             visible: !scanning && lists_enabled;
             text: "Scan";
+            icon: @image-url("../icons/krokiet_search.svg");
             clicked => {
                 root.scanning = true;
                 root.scan_starting(GuiState.active_tab);
@@ -106,6 +107,7 @@ export component ActionButtons inherits HorizontalLayout {
             visible: scanning;
             enabled: scanning && !stop_requested && root.lists_enabled;
             text: "Stop";
+            icon: @image-url("../icons/krokiet_stop.svg");
             clicked => {
                 root.scan_stopping();
                 root.stop_requested = true;
@@ -122,6 +124,7 @@ export component ActionButtons inherits HorizontalLayout {
         height: parent.height;
         enabled: !scanning && lists_enabled && results_available;
         text: "Select";
+        icon: @image-url("../icons/krokiet_select.svg");
         clicked => {
             show_select_popup(self.x + self.width / 2, self.y + parent.y);
         }
@@ -132,6 +135,7 @@ export component ActionButtons inherits HorizontalLayout {
         height: parent.height;
         enabled: !scanning && lists_enabled && results_available;
         text: "Move";
+        icon: @image-url("../icons/krokiet_move.svg");
         clicked => {
             request_folder_to_move();
         }
@@ -142,6 +146,7 @@ export component ActionButtons inherits HorizontalLayout {
         height: parent.height;
         enabled: !scanning && lists_enabled && results_available;
         text: "Delete";
+        icon: @image-url("../icons/krokiet_delete.svg");
         clicked => {
             show_remove_popup();
         }
