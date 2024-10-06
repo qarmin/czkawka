@@ -105,20 +105,20 @@ export component BottomPanel {
     in-out property <BottomPanelVisibility> bottom_panel_visibility: BottomPanelVisibility.Directories;
     callback folder_choose_requested(bool);
     callback show_manual_add_dialog(bool);
-    min-height: bottom-panel-visibility == BottomPanelVisibility.NotVisible ? 0px : 150px;
-    min-width: bottom-panel-visibility == BottomPanelVisibility.NotVisible ? 0px : 400px;
-    if bottom-panel-visibility == BottomPanelVisibility.Directories: DirectoriesPanel {
+    min-height: bottom_panel_visibility == BottomPanelVisibility.NotVisible ? 0px : 150px;
+    min-width: bottom_panel_visibility == BottomPanelVisibility.NotVisible ? 0px : 400px;
+    if bottom_panel_visibility == BottomPanelVisibility.Directories: DirectoriesPanel {
         width: parent.width;
         height: parent.height;
-        folder_choose_requested(included-directories) => {
-            root.folder_choose_requested(included-directories)
+        folder_choose_requested(included_directories) => {
+            root.folder_choose_requested(included_directories)
         }
-        show_manual_add_dialog(included-directories) => {
-            root.show_manual_add_dialog(included-directories)
+        show_manual_add_dialog(included_directories) => {
+            root.show_manual_add_dialog(included_directories)
         }
     }
 
-    if bottom-panel-visibility == BottomPanelVisibility.TextErrors: TextErrorsPanel {
+    if bottom_panel_visibility == BottomPanelVisibility.TextErrors: TextErrorsPanel {
         width: parent.width;
         height: parent.height;
     }

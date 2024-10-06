@@ -10,7 +10,7 @@ import {MainListModel} from "common.slint";
 export component VisibilityButton inherits Button {
     in-out property <BottomPanelVisibility> button_visibility;
     in-out property <BottomPanelVisibility> bottom_panel_visibility;
-    checked: bottom_panel_visibility == button-visibility;
+    checked: bottom_panel_visibility == button_visibility;
     height: 30px;
     width: 70px;
     clicked => {
@@ -33,7 +33,7 @@ export component ActionButtons inherits HorizontalLayout {
     in-out property <[MainListModel]> empty_folder_model: [];
     in-out property <[MainListModel]> big_files_model: [];
     in-out property <[MainListModel]> empty_files_model: [];
-    in-out property <[MainListModel]> temporary-files_model: [];
+    in-out property <[MainListModel]> temporary_files_model: [];
     in-out property <[MainListModel]> similar_images_model: [];
     in-out property <[MainListModel]> similar_videos_model: [];
     in-out property <[MainListModel]> similar_music_model: [];
@@ -56,7 +56,7 @@ export component ActionButtons inherits HorizontalLayout {
     changed empty_folder_model => {check_if_enable_buttons();}
     changed big_files_model => {check_if_enable_buttons();}
     changed empty_files_model => {check_if_enable_buttons();}
-    changed temporary-files_model => {check_if_enable_buttons();}
+    changed temporary_files_model => {check_if_enable_buttons();}
     changed similar_images_model => {check_if_enable_buttons();}
     changed similar_videos_model => {check_if_enable_buttons();}
     changed similar_music_model => {check_if_enable_buttons();}
@@ -74,7 +74,7 @@ export component ActionButtons inherits HorizontalLayout {
             results_available = true;
         } else if (active_tab == CurrentTab.EmptyFiles && empty_files_model.length > 0) {
             results_available = true;
-        } else if (active_tab == CurrentTab.TemporaryFiles && temporary-files_model.length > 0) {
+        } else if (active_tab == CurrentTab.TemporaryFiles && temporary_files_model.length > 0) {
             results_available = true;
         } else if (active_tab == CurrentTab.SimilarImages && similar_images_model.length > 0) {
             results_available = true;
@@ -165,14 +165,14 @@ export component ActionButtons inherits HorizontalLayout {
         spacing: 0px;
         VisibilityButton {
             height: parent.height;
-            button-visibility: BottomPanelVisibility.Directories;
+            button_visibility: BottomPanelVisibility.Directories;
             bottom_panel_visibility <=> bottom_panel_visibility;
             text: "Dirs";
         }
 
         VisibilityButton {
             height: parent.height;
-            button-visibility: BottomPanelVisibility.TextErrors;
+            button_visibility: BottomPanelVisibility.TextErrors;
             bottom_panel_visibility <=> bottom_panel_visibility;
             text: "Output";
         }

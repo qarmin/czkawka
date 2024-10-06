@@ -31,7 +31,7 @@ export component IncludedDirectories {
                 border_radius: 5px;
                 width: parent.width;
 
-                background: touch-area.has-hover ? (r.selected_row ? ColorPalette.list-view-normal-selected-header : ColorPalette.list_view_normal_color) : (r.selected_row ? ColorPalette.list-view-normal-selected-header : ColorPalette.list_view_normal_color);
+                background: touch-area.has-hover ? (r.selected_row ? ColorPalette.list_view_normal_selected_header : ColorPalette.list_view_normal_color) : (r.selected_row ? ColorPalette.list_view_normal_selected_header : ColorPalette.list_view_normal_color);
                 touch_area := TouchArea {
                     clicked => {
                         if (current_index == -1) {
@@ -90,7 +90,7 @@ export component ExcludedDirectories {
                 border_radius: 5px;
                 width: parent.width;
 
-                background: touch-area.has-hover ? (r.selected_row ? ColorPalette.list-view-normal-selected-header : ColorPalette.list_view_normal_color) : (r.selected_row ? ColorPalette.list-view-normal-selected-header : ColorPalette.list_view_normal_color);
+                background: touch-area.has-hover ? (r.selected_row ? ColorPalette.list_view_normal_selected_header : ColorPalette.list_view_normal_color) : (r.selected_row ? ColorPalette.list_view_normal_selected_header : ColorPalette.list_view_normal_color);
 
                 touch_area := TouchArea {
                     clicked => {
