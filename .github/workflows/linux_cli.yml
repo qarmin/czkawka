@@ -42,7 +42,7 @@ jobs:
           cargo build --release
           cd ..
           
-          ci_tester/target/release/ci_tester target/release/czkawka_cli
+          ci_tester/target/release/ci_tester target/debug/czkawka_cli
 
       - name: Prepare files to release
         run: |
