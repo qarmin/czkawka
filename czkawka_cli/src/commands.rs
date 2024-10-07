@@ -25,7 +25,7 @@ pub enum Commands {
     #[clap(
         name = "dup",
         about = "Finds duplicate files",
-        after_help = "EXAMPLE:\n    czkawka dup -d /home/rafal -e /home/rafal/Obrazy  -m 25 -x 7z rar IMAGE -s hash -f results.txt -D aeo"
+        after_help = "EXAMPLE:\n    czkawka dup -d /home/rafal - -e /home/rafal/Obrazy  -m 25 -x 7z rar IMAGE -s hash -f results.txt -D aeo"
     )]
     Duplicates(DuplicatesArgs),
     #[clap(
@@ -89,9 +89,9 @@ pub struct DuplicatesArgs {
     #[clap(flatten)]
     pub common_cli_items: CommonCliItems,
     #[clap(flatten)]
-    pub referenced_folder: ReferencedFolder,
+    pub reference_directories: ReferenceDirectories,
     #[clap(
-        short = 'p',
+        short = 'Z',
         long,
         value_parser = parse_minimal_file_size,
         default_value = "257144",
@@ -201,7 +201,7 @@ pub struct SimilarImagesArgs {
     #[clap(flatten)]
     pub common_cli_items: CommonCliItems,
     #[clap(flatten)]
-    pub referenced_folder: ReferencedFolder,
+    pub reference_directories: ReferenceDirectories,
     #[clap(
         short,
         long,
@@ -268,7 +268,7 @@ pub struct SameMusicArgs {
     #[clap(flatten)]
     pub common_cli_items: CommonCliItems,
     #[clap(flatten)]
-    pub referenced_folder: ReferencedFolder,
+    pub reference_directories: ReferenceDirectories,
     #[clap(flatten)]
     pub delete_method: DMethod,
     #[clap(flatten)]
@@ -323,7 +323,7 @@ pub struct SameMusicArgs {
     )]
     pub minimum_segment_duration: f32,
     #[clap(
-        short = 'd',
+        short = 'Y',
         long,
         value_parser = parse_maximum_difference,
         default_value = "2.0",
@@ -392,7 +392,7 @@ pub struct SimilarVideosArgs {
     #[clap(flatten)]
     pub common_cli_items: CommonCliItems,
     #[clap(flatten)]
-    pub referenced_folder: ReferencedFolder,
+    pub reference_directories: ReferenceDirectories,
     #[clap(flatten)]
     pub delete_method: DMethod,
     #[clap(flatten)]
@@ -504,14 +504,14 @@ pub struct FileToSave {
 }
 
 #[derive(Debug, clap::Args)]
-pub struct ReferencedFolder {
+pub struct ReferenceDirectories {
     #[clap(
         short,
         long,
         help = "Reference directorie(s) to search",
         long_help = "List of directorie(s) which will be searched(absolute path) - this directories are set as reference folders, so will not be visible in the results"
     )]
-    pub reference_folders: Vec<PathBuf>,
+    pub reference_directories: Vec<PathBuf>,
 }
 
 #[derive(Debug, clap::Args)]
@@ -546,7 +546,7 @@ pub struct DryRun {
 
 #[derive(Debug, clap::Args)]
 pub struct IgnoreSameSize {
-    #[clap(short, long, help = "Ignore files with the same size, leaving only one file of each size")]
+    #[clap(short = 'J', long, help = "Ignore files with the same size, leaving only one file of each size")]
     pub ignore_same_size: bool,
 }
 

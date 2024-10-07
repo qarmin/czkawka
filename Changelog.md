@@ -5,6 +5,7 @@
 - Due to the removal image_type from image struct, old cache files are incompatible with new version and should be
   regenerated
   from scratch(it uses new name)
+- Some CLI arguments could change short name, due fixing ambiguous names
 
 ### Known regressions
 
@@ -15,6 +16,7 @@
 
 - Providing nightly
   builds - [#1360](https://github.com/qarmin/czkawka/pull/1360) - https://github.com/qarmin/czkawka/releases/tag/Nightly
+- Added finding duplicated options in CLI -[#1364](https://github.com/qarmin/czkawka/pull/1364)
 
 ### Core
 
@@ -68,6 +70,7 @@
 - Fixed and added more input parameters to the application - [#1354](https://github.com/qarmin/czkawka/pull/1354)
 - Fixed crash when stopping scan multiple times - [#1355](https://github.com/qarmin/czkawka/pull/1355)
 - Print results also in debug build - [#1355](https://github.com/qarmin/czkawka/pull/1355)
+- Added support for selecting reference directories -[#1364](https://github.com/qarmin/czkawka/pull/1364)
 
 ## Version 7.0.0 - 19.02.2024r
 

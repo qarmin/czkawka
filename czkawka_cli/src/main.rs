@@ -80,7 +80,7 @@ fn main() {
 fn duplicates(duplicates: DuplicatesArgs, stop_receiver: &Receiver<()>, progress_sender: &Sender<ProgressData>) {
     let DuplicatesArgs {
         common_cli_items,
-        referenced_folder,
+        reference_directories,
         minimal_file_size,
         maximal_file_size,
         minimal_cached_file_size,
@@ -105,7 +105,7 @@ fn duplicates(duplicates: DuplicatesArgs, stop_receiver: &Receiver<()>, progress
     );
     let mut item = DuplicateFinder::new(params);
 
-    set_common_settings(&mut item, &common_cli_items, Some(referenced_folder.reference_folders.as_ref()));
+    set_common_settings(&mut item, &common_cli_items, Some(reference_directories.reference_directories.as_ref()));
     item.set_minimal_file_size(minimal_file_size);
     item.set_maximal_file_size(maximal_file_size);
     item.set_delete_method(delete_method.delete_method);
@@ -186,7 +186,7 @@ fn temporary(temporary: TemporaryArgs, stop_receiver: &Receiver<()>, progress_se
 fn similar_images(similar_images: SimilarImagesArgs, stop_receiver: &Receiver<()>, progress_sender: &Sender<ProgressData>) {
     let SimilarImagesArgs {
         common_cli_items,
-        referenced_folder,
+        reference_directories,
         minimal_file_size,
         maximal_file_size,
         similarity_preset,
@@ -210,7 +210,7 @@ fn similar_images(similar_images: SimilarImagesArgs, stop_receiver: &Receiver<()
     );
     let mut item = SimilarImages::new(params);
 
-    set_common_settings(&mut item, &common_cli_items, Some(referenced_folder.reference_folders.as_ref()));
+    set_common_settings(&mut item, &common_cli_items, Some(reference_directories.reference_directories.as_ref()));
     item.set_minimal_file_size(minimal_file_size);
     item.set_maximal_file_size(maximal_file_size);
     item.set_delete_method(delete_method.delete_method);
@@ -224,7 +224,7 @@ fn similar_images(similar_images: SimilarImagesArgs, stop_receiver: &Receiver<()
 fn same_music(same_music: SameMusicArgs, stop_receiver: &Receiver<()>, progress_sender: &Sender<ProgressData>) {
     let SameMusicArgs {
         common_cli_items,
-        referenced_folder,
+        reference_directories,
         delete_method,
         minimal_file_size,
         maximal_file_size,
@@ -247,7 +247,7 @@ fn same_music(same_music: SameMusicArgs, stop_receiver: &Receiver<()>, progress_
     );
     let mut item = SameMusic::new(params);
 
-    set_common_settings(&mut item, &common_cli_items, Some(referenced_folder.reference_folders.as_ref()));
+    set_common_settings(&mut item, &common_cli_items, Some(reference_directories.reference_directories.as_ref()));
     item.set_minimal_file_size(minimal_file_size);
     item.set_maximal_file_size(maximal_file_size);
     item.set_delete_method(delete_method.delete_method);
@@ -299,7 +299,7 @@ fn broken_files(broken_files: BrokenFilesArgs, stop_receiver: &Receiver<()>, pro
 
 fn similar_videos(similar_videos: SimilarVideosArgs, stop_receiver: &Receiver<()>, progress_sender: &Sender<ProgressData>) {
     let SimilarVideosArgs {
-        referenced_folder,
+        reference_directories,
         common_cli_items,
         tolerance,
         minimal_file_size,
@@ -313,7 +313,7 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_receiver: &Receiver<()
     let params = SimilarVideosParameters::new(tolerance, ignore_same_size.ignore_same_size, !allow_hard_links.allow_hard_links);
     let mut item = SimilarVideos::new(params);
 
-    set_common_settings(&mut item, &common_cli_items, Some(referenced_folder.reference_folders.as_ref()));
+    set_common_settings(&mut item, &common_cli_items, Some(reference_directories.reference_directories.as_ref()));
     item.set_minimal_file_size(minimal_file_size);
     item.set_maximal_file_size(maximal_file_size);
     item.set_delete_method(delete_method.delete_method);
@@ -359,19 +359,19 @@ fn save_and_print_results<T: CommonData + PrintResults>(component: &mut T, commo
     component.get_text_messages().print_messages();
 }
 
-fn set_common_settings<T>(component: &mut T, common_cli_items: &CommonCliItems, referenced_folders: Option<&Vec<PathBuf>>)
+fn set_common_settings<T>(component: &mut T, common_cli_items: &CommonCliItems, reference_directories: Option<&Vec<PathBuf>>)
 where
     T: CommonData + PrintResults,
 {
     set_number_of_threads(common_cli_items.thread_number);
 
     let mut included_directories = common_cli_items.directories.clone();
-    if let Some(referenced_folders) = referenced_folders {
-        included_directories.extend_from_slice(referenced_folders);
-        component.set_reference_directory(referenced_folders.clone());
+    if let Some(reference_directories) = reference_directories {
+        included_directories.extend_from_slice(reference_directories);
+        component.set_reference_directory(reference_directories.clone());
     }
 
-    component.set_included_directory(common_cli_items.directories.clone());
+    component.set_included_directory(included_directories);
     component.set_excluded_directory(common_cli_items.excluded_directories.clone());
     component.set_excluded_items(common_cli_items.excluded_items.clone());
     component.set_recursive_search(!common_cli_items.not_recursive);

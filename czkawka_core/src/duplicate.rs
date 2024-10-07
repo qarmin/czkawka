@@ -1026,8 +1026,9 @@ impl PrintResults for DuplicateFinder {
     fn write_results<T: Write>(&self, writer: &mut T) -> io::Result<()> {
         writeln!(
             writer,
-            "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
+            "Results of searching {:?} (reference directories {:?}) with excluded directories {:?} and excluded items {:?}",
             self.common_data.directories.included_directories,
+            self.common_data.directories.reference_directories,
             self.common_data.directories.excluded_directories,
             self.common_data.excluded_items.get_excluded_items()
         )?;

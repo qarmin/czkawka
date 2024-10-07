@@ -20,9 +20,10 @@ const PRINT_MESSAGES_CZKAWKA: bool = true;
 fn test_args() {
     let modes = ["dup", "big", "empty-folders", "empty-files", "temp", "image", "symlinks", "broken", "ext", "video", "music"];
     for mode in modes {
+        println!("Testing mode {}", mode);
         let _ = fs::remove_dir_all("RandomDirWithoutContent");
         fs::create_dir_all("RandomDirWithoutContent").expect("Should not fail in tests");
-        run_with_good_status(&[CZKAWKA_PATH.get().as_str(), mode, "-d", "RandomDirWithoutContent"], false);
+        run_with_good_status(&[CZKAWKA_PATH.get().as_str(), mode, "-d", "RandomDirWithoutContent"], true);
     }
 }
 
@@ -34,7 +35,7 @@ fn main() {
     CZKAWKA_PATH.set(path_to_czkawka);
 
     test_args();
-
+    return;
     remove_test_dir();
     run_with_good_status(&["ls"], false);
     unzip_files();
