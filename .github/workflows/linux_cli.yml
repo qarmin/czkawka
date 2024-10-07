@@ -32,6 +32,9 @@ jobs:
           name: czkawka_cli-${{ runner.os }}
           path: target/release/czkawka_cli
 
+      - name: Build test version
+        run: cargo build --profile test --bin czkawka_cli
+
       - name: Linux Regression Test
         run: |
           wget https://github.com/qarmin/czkawka/releases/download/6.0.0/TestFiles.zip

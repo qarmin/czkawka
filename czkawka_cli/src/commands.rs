@@ -88,6 +88,8 @@ pub enum Commands {
 pub struct DuplicatesArgs {
     #[clap(flatten)]
     pub common_cli_items: CommonCliItems,
+    #[clap(flatten)]
+    pub referenced_folder: ReferencedFolder,
     #[clap(
         short = 'p',
         long,
@@ -198,6 +200,8 @@ pub struct TemporaryArgs {
 pub struct SimilarImagesArgs {
     #[clap(flatten)]
     pub common_cli_items: CommonCliItems,
+    #[clap(flatten)]
+    pub referenced_folder: ReferencedFolder,
     #[clap(
         short,
         long,
@@ -263,6 +267,8 @@ pub struct SimilarImagesArgs {
 pub struct SameMusicArgs {
     #[clap(flatten)]
     pub common_cli_items: CommonCliItems,
+    #[clap(flatten)]
+    pub referenced_folder: ReferencedFolder,
     #[clap(flatten)]
     pub delete_method: DMethod,
     #[clap(flatten)]
@@ -386,6 +392,8 @@ pub struct SimilarVideosArgs {
     #[clap(flatten)]
     pub common_cli_items: CommonCliItems,
     #[clap(flatten)]
+    pub referenced_folder: ReferencedFolder,
+    #[clap(flatten)]
     pub delete_method: DMethod,
     #[clap(flatten)]
     pub allow_hard_links: AllowHardLinks,
@@ -437,7 +445,7 @@ pub struct CommonCliItems {
         long,
         required = true,
         help = "Directorie(s) to search",
-        long_help = "List of directorie(s) which will be searched(absolute path)"
+        long_help = "List of directorie(s) which will be searched(absolute path) - this directories are not set as reference folders"
     )]
     pub directories: Vec<PathBuf>,
     #[clap(
@@ -493,6 +501,17 @@ pub struct DMethod {
 pub struct FileToSave {
     #[clap(short, long, value_name = "file-name", help = "Saves the results into the formatted txt file")]
     pub file_to_save: Option<PathBuf>,
+}
+
+#[derive(Debug, clap::Args)]
+pub struct ReferencedFolder {
+    #[clap(
+        short,
+        long,
+        help = "Reference directorie(s) to search",
+        long_help = "List of directorie(s) which will be searched(absolute path) - this directories are set as reference folders, so will not be visible in the results"
+    )]
+    pub reference_folders: Vec<PathBuf>,
 }
 
 #[derive(Debug, clap::Args)]

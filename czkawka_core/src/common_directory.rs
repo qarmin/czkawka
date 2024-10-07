@@ -119,7 +119,7 @@ impl Directories {
         // Try to canonicalize them
         if cfg!(windows) {
             // Only canonicalize if it's not a network path
-            // This can be check by checking if path starts with \\?\UNC\
+            // This can be done by checking if path starts with \\?\UNC\
             if let Ok(dir_can) = directory.canonicalize() {
                 let dir_can_str = dir_can.to_string_lossy().to_string();
                 if let Some(dir_can_str) = dir_can_str.strip_prefix(r"\\?\") {

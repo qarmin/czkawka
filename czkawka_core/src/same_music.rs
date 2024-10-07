@@ -398,7 +398,7 @@ impl SameMusic {
                 }
             })
             .while_some()
-            .filter_map(|e| e)
+            .flatten()
             .collect::<Vec<_>>();
         debug!("read_tags - ended reading tags");
 

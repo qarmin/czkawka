@@ -18,10 +18,10 @@ krokiet_r:
 krokiet_dark:
     RUST_BACKTRACE=1 SLINT_STYLE=fluent-dark cargo run --bin krokiet
 
-cli:
-    RUST_BACKTRACE=1 cargo run --bin czkawka_cli
-cli_r:
-    RUST_BACKTRACE=1 cargo run --bin czkawka_cli --release
+cli +args:
+    RUST_BACKTRACE=1 cargo run --bin czkawka_cli -- {{args}}
+cli_r args:
+    RUST_BACKTRACE=1 cargo run --bin czkawka_cli --release -- {{args}}
 cli_help:
     cargo run --bin czkawka_cli -- --help
 
