@@ -47,14 +47,6 @@ cd ..
 cargo build --release --bin czkawka_cli
 ```
 
-## Limitations
-
-Not all available features in core are available in CLI.
-
-List of not available features:
-
-- Ability to use/choose referenced directories
-
 ## LICENSE
 
 MIT

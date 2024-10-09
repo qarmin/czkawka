@@ -30,6 +30,7 @@ use crate::connect_directories_changes::connect_add_remove_directories;
 use crate::connect_move::connect_move;
 use crate::connect_open::connect_open_items;
 use crate::connect_progress_receiver::connect_progress_gathering;
+use crate::connect_rename::connect_rename;
 use crate::connect_scan::connect_scan_button;
 use crate::connect_select::{connect_select, connect_showing_proper_select_buttons};
 use crate::connect_show_preview::connect_show_preview;
@@ -44,6 +45,7 @@ mod connect_directories_changes;
 mod connect_move;
 mod connect_open;
 mod connect_progress_receiver;
+mod connect_rename;
 mod connect_scan;
 mod connect_select;
 mod connect_show_preview;
@@ -83,6 +85,7 @@ fn main() {
     connect_select(&app);
     connect_showing_proper_select_buttons(&app);
     connect_move(&app);
+    connect_rename(&app);
 
     app.run().expect("Failed to run app :(");
 

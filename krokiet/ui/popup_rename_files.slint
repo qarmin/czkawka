@@ -1,0 +1,75 @@
+import { Button, VerticalBox ,TextEdit, HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox, LineEdit} from "std-widgets.slint";
+import {SelectableTableView} from "selectable_tree_view.slint";
+import {LeftSidePanel} from "left_side_panel.slint";
+import {MainList} from "main_lists.slint";
+import {CurrentTab, ProgressToSend} from "common.slint";
+import { ActionButtons } from "action_buttons.slint";
+import { Progress } from "progress.slint";
+import {MainListModel, SelectMode, SelectModel} from "common.slint";
+import {Settings} from "settings.slint";
+import {Callabler} from "callabler.slint";
+import { BottomPanel } from "bottom_panel.slint";
+import {ColorPalette} from "color_palette.slint";
+import {GuiState} from "gui_state.slint";
+import { Preview } from "preview.slint";
+
+export component PopupRenameFiles inherits Rectangle {
+    out property <length> popup_width: 500px;
+    out property <length> popup_height: 150px;
+    in-out property <string> folder_name: "";
+    callback show_popup();
+
+    popup_window := PopupWindow {
+        width: popup_width;
+        height: popup_height;
+
+        close-on-click: false;
+        Rectangle {
+            width: parent.width;
+            height: parent.height;
+            border-radius: 5px;
+            background: ColorPalette.popup_background;
+            VerticalLayout {
+                Text {
+                    vertical-stretch: 0.0;
+                    min-height: 30px;
+                    text: "Renaming files";
+                    vertical-alignment: top;
+                    horizontal-alignment: center;
+                    font-size: 13px;
+                }
+                Text {
+                    vertical-stretch: 1.0;
+                    text: "This will rename extensions of selected files to more proper\n" + "\nAre you want to continue?";
+                    vertical-alignment: center;
+                    horizontal-alignment: center;
+                    font-size: 13px;
+                    padding: 10px;
+                }
+
+                HorizontalLayout {
+                    Button {
+                        text: "Yes";
+                        clicked => {
+                            popup_window.close();
+                            Callabler.rename_files();
+                        }
+                    }
+                    Rectangle {
+
+                    }
+                    Button {
+                        text: "No";
+                        clicked => {
+                            popup_window.close();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    show_popup() => {
+        popup_window.show();
+    }
+}

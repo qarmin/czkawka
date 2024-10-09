@@ -276,7 +276,7 @@ fn compute_bad_extensions(
                     (ColumnsBadExtensions::Name as u32, &file),
                     (ColumnsBadExtensions::Path as u32, &directory),
                     (ColumnsBadExtensions::CurrentExtension as u32, &file_entry.current_extension),
-                    (ColumnsBadExtensions::ValidExtensions as u32, &file_entry.proper_extensions),
+                    (ColumnsBadExtensions::ValidExtensions as u32, &file_entry.proper_extensions_group),
                     (
                         ColumnsBadExtensions::Modification as u32,
                         &(DateTime::from_timestamp(file_entry.modified_date as i64, 0)

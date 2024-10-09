@@ -29,3 +29,8 @@ overflow-checks = true
 # Optimize all dependencies except application/workspaces, even in debug builds
 [profile.dev.package."*"]
 opt-level = 3
+
+[profile.test]
+debug-assertions = true # Forces to crash when there is duplicated item in cli
+overflow-checks = true
+opt-level = 3

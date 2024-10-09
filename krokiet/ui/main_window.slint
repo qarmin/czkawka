@@ -16,6 +16,7 @@ import {PopupNewDirectories} from "popup_new_directories.slint";
 import {PopupDelete} from "popup_delete.slint";
 import {PopupMoveFolders} from "popup_move_folders.slint";
 import { PopupSelectResults } from "popup_select_results.slint";
+import {PopupRenameFiles} from "popup_rename_files.slint";
 import { ToolSettings } from "tool_settings.slint";
 
 export {Settings, Callabler, GuiState}
@@ -152,6 +153,9 @@ export component MainWindow inherits Window {
             show_remove_popup => {
                 delete_popup_window.show_popup();
             }
+            show_rename_popup => {
+                rename_popup_window.show_popup();
+            }
         }
 
         HorizontalLayout {
@@ -205,6 +209,14 @@ export component MainWindow inherits Window {
     }
 
     move_popup_window := PopupMoveFolders {
+        height: root.height;
+        width: root.width;
+
+        x: parent.x + (root.width - self.popup_width) / 2.0;
+        y: parent.y + (parent.height - self.popup_height) / 2.0;
+    }
+
+    rename_popup_window := PopupRenameFiles {
         height: root.height;
         width: root.width;
 

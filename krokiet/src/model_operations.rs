@@ -1,8 +1,8 @@
 use std::path::MAIN_SEPARATOR;
 
-use slint::{Model, ModelRc};
+use slint::{Model, ModelRc, SharedString};
 
-use crate::common::{get_str_name_idx, get_str_path_idx};
+use crate::common::{get_str_name_idx, get_str_path_idx, get_str_proper_extension};
 use crate::{CurrentTab, MainListModel};
 
 pub fn deselect_all_items(items: &mut [MainListModel]) {
@@ -26,8 +26,8 @@ pub fn collect_full_path_from_model(items: &[MainListModel], active_tab: Current
     items
         .iter()
         .map(|item| {
-            let path = item.val_str.iter().nth(path_idx).unwrap_or_else(|| panic!("Failed to get {path_idx} element"));
-            let name = item.val_str.iter().nth(name_idx).unwrap_or_else(|| panic!("Failed to get {name_idx} element"));
+            let path = get_shared_str_item(item, path_idx);
+            let name = get_shared_str_item(item, name_idx);
             format!("{path}{MAIN_SEPARATOR}{name}")
         })
         .collect::<Vec<_>>()
@@ -35,14 +35,26 @@ pub fn collect_full_path_from_model(items: &[MainListModel], active_tab: Current
 pub fn collect_path_name_from_model(items: &[MainListModel], active_tab: CurrentTab) -> Vec<(String, String)> {
     let path_idx = get_str_path_idx(active_tab);
     let name_idx = get_str_name_idx(active_tab);
+    items.iter().map(|item| (get_str_item(item, path_idx), get_str_item(item, name_idx))).collect::<Vec<_>>()
+}
+
+pub fn collect_path_name_and_proper_extension_from_model(items: &[MainListModel], active_tab: CurrentTab) -> Vec<(String, String, String)> {
+    let path_idx = get_str_path_idx(active_tab);
+    let name_idx = get_str_name_idx(active_tab);
+    let ext_idx = get_str_proper_extension(active_tab);
     items
         .iter()
-        .map(|item| {
-            let path = item.val_str.iter().nth(path_idx).unwrap_or_else(|| panic!("Failed to get {path_idx} element"));
-            let name = item.val_str.iter().nth(name_idx).unwrap_or_else(|| panic!("Failed to get {name_idx} element"));
-            (path.to_string(), name.to_string())
-        })
+        .map(|item| (get_str_item(item, path_idx), get_str_item(item, name_idx), get_str_item(item, ext_idx)))
         .collect::<Vec<_>>()
+}
+
+#[inline]
+pub fn get_str_item(main_list_model: &MainListModel, idx: usize) -> String {
+    main_list_model.val_str.iter().nth(idx).unwrap_or_else(|| panic!("Failed to get {idx} element")).to_string()
+}
+#[inline]
+pub fn get_shared_str_item(main_list_model: &MainListModel, idx: usize) -> SharedString {
+    main_list_model.val_str.iter().nth(idx).unwrap_or_else(|| panic!("Failed to get {idx} element"))
 }
 
 pub fn filter_out_checked_items(items: &ModelRc<MainListModel>, have_header: bool) -> (Vec<MainListModel>, Vec<MainListModel>) {

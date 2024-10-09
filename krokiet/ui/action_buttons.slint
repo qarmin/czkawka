@@ -27,6 +27,7 @@ export component ActionButtons inherits HorizontalLayout {
     callback scan_starting(CurrentTab);
     callback show_select_popup(length, length);
     callback show_remove_popup();
+    callback show_rename_popup();
     callback request_folder_to_move();
 
     in-out property <[MainListModel]> duplicate_files_model: [];
@@ -126,7 +127,7 @@ export component ActionButtons inherits HorizontalLayout {
     select_button := Button {
         visible: lists_enabled;
         height: parent.height;
-        enabled: !scanning && lists_enabled && results_available;
+        enabled: !scanning && self.visible && results_available;
         text: "Select";
         icon: @image-url("../icons/krokiet_select.svg");
         clicked => {
@@ -137,7 +138,7 @@ export component ActionButtons inherits HorizontalLayout {
     move_button := Button {
         visible: lists_enabled;
         height: parent.height;
-        enabled: !scanning && lists_enabled && results_available;
+        enabled: !scanning && self.visible && results_available;
         text: "Move";
         icon: @image-url("../icons/krokiet_move.svg");
         clicked => {
@@ -148,11 +149,22 @@ export component ActionButtons inherits HorizontalLayout {
     delete_button := Button {
         visible: lists_enabled;
         height: parent.height;
-        enabled: !scanning && lists_enabled && results_available;
+        enabled: !scanning && self.visible && results_available;
         text: "Delete";
         icon: @image-url("../icons/krokiet_delete.svg");
         clicked => {
             show_remove_popup();
+        }
+    }
+
+    rename_button := Button {
+        visible: lists_enabled && GuiState.active_tab == CurrentTab.BadExtensions;
+        height: parent.height;
+        enabled: !scanning && self.visible && results_available;
+        text: "Rename";
+        icon: @image-url("../icons/krokiet_rename.svg");
+        clicked => {
+            show_rename_popup();
         }
     }
 
