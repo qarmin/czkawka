@@ -19,6 +19,7 @@
 #![allow(clippy::match_same_arms)] // Generated code
 
 use std::rc::Rc;
+use std::sync::Arc;
 
 use crossbeam_channel::{unbounded, Receiver, Sender};
 use czkawka_core::common::{print_version_mode, setup_logger};
@@ -80,7 +81,7 @@ fn main() {
     load_settings_from_file(&app);
 
     connect_delete_button(&app);
-    connect_scan_button(&app, progress_sender, stop_receiver, Rc::clone(&shared_models));
+    connect_scan_button(&app, progress_sender, stop_receiver, Arc::clone(&shared_models));
     connect_stop_button(&app, stop_sender);
     connect_open_items(&app);
     connect_progress_gathering(&app, progress_receiver);
@@ -92,7 +93,7 @@ fn main() {
     connect_showing_proper_select_buttons(&app);
     connect_move(&app);
     connect_rename(&app);
-    connect_save(&app, Rc::clone(&shared_models));
+    connect_save(&app, Arc::clone(&shared_models));
 
     app.run().expect("Failed to run app :(");
 

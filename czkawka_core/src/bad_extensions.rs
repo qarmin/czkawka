@@ -77,6 +77,10 @@ const WORKAROUNDS: &[(&str, &str)] = &[
     ("bmp", "c2"),     // King of the Dark Age
     ("avi", "c2"),     // King of the Dark Age
     ("exe", "c2"),     // King of the Dark Age
+    // Raw images
+    ("nef", "tif"),
+    ("dng", "tif"),
+    ("arw", "tif"),
     // Other
     ("der", "keystore"),  // Godot/Android keystore
     ("exe", "pyd"),       // Python/Mingw
