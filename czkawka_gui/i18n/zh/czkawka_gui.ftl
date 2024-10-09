@@ -18,6 +18,11 @@ music_checking_by_tags = 标签
 music_checking_by_content = 内容
 same_music_seconds_label = 最小分片秒持续时间
 same_music_similarity_label = 最大差异
+music_compare_only_in_title_group = 仅在标题中比较
+music_compare_only_in_title_group_tooltip =
+    如果启用，文件按标题分类，然后相互比较。
+    
+    如果有一亿文件，而不是几乎1亿文件的比较，通常就会有大约2000万份比较。
 same_music_tooltip =
     通过设置以下内容，可以配置按其内容搜索类似的音乐文件：
     
@@ -288,6 +293,13 @@ header_about_button_tooltip = 打开包含应用程序信息的对话框。
 
 settings_number_of_threads = 使用的线程数
 settings_number_of_threads_tooltip = 使用的线程数，0表示所有可用线程都将被使用。
+settings_use_rust_preview = 使用外部库来加载预览
+settings_use_rust_preview_tooltip =
+    使用 gtk 预览有时会更快，支持更多格式，但有时恰恰相反。
+    
+    如果您在加载预览时遇到问题，您可以尝试更改此设置。
+    
+    关于非Linux系统，建议使用此选项。 因为gtk-pixbuf 并不总是可用的，所以禁用此选项不会加载某些图像的预览。
 settings_label_restart = 您需要重新启动应用才能应用设置！
 settings_ignore_other_filesystems = 忽略其它文件系统 (仅限Linux)
 settings_ignore_other_filesystems_tooltip =

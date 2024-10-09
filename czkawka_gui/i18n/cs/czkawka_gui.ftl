@@ -18,6 +18,11 @@ music_checking_by_tags = Štítky
 music_checking_by_content = Obsah
 same_music_seconds_label = Minimální délka trvání druhého fragmentu
 same_music_similarity_label = Maximální rozdíl
+music_compare_only_in_title_group = Porovnat pouze v názvu
+music_compare_only_in_title_group_tooltip =
+    Pokud je povoleno, soubory jsou seskupeny podle názvu a poté vzájemně porovnávány.
+    
+    S 10000 soubory, místo toho se obvykle uskuteční téměř 100 milionů srovnání kolem 20000 srovnání.
 same_music_tooltip =
     Vyhledávání podobných hudebních souborů podle jejich obsahu může být nakonfigurováno nastavením:
     
@@ -288,6 +293,13 @@ header_about_button_tooltip = Otevře dialog s informacemi o aplikaci.
 
 settings_number_of_threads = Počet použitých vláken
 settings_number_of_threads_tooltip = Počet použitých vláken, 0 znamená, že budou použita všechna dostupná vlákna.
+settings_use_rust_preview = Místo toho použít externí knihovny gtk k načtení náhledů
+settings_use_rust_preview_tooltip =
+    Použití gtk náhledů bude někdy rychlejší a bude podporovat více formátů, ale někdy to může být pravý opak.
+    
+    Pokud máte problémy s načítáním náhledů, můžete zkusit toto nastavení změnit.
+    
+    Na jiných než linuxových systémech je doporučeno použít tuto možnost, protože gtk-pixbuf není vždy k dispozici, takže vypnutí této možnosti nebude načíst náhledy některých obrázků.
 settings_label_restart = Pro použití nastavení je třeba restartovat aplikaci!
 settings_ignore_other_filesystems = Ignorovat ostatní souborové systémy (pouze Linux)
 settings_ignore_other_filesystems_tooltip =

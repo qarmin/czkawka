@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   clip-rule="evenodd"
+   fill-rule="evenodd"
+   height="2048"
+   image-rendering="optimizeQuality"
+   shape-rendering="geometricPrecision"
+   text-rendering="geometricPrecision"
+   viewBox="0 0 2048 2048"
+   width="2048"
+   version="1.1"
+   id="svg12"
+   sodipodi:docname="krokiet_rename (copy).svg"
+   inkscape:version="1.3.2 (091e20ef0f, 2023-11-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs12" />
+  <sodipodi:namedview
+     id="namedview12"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="0.19726563"
+     inkscape:cx="1254.6535"
+     inkscape:cy="861.78218"
+     inkscape:window-width="1130"
+     inkscape:window-height="1011"
+     inkscape:window-x="790"
+     inkscape:window-y="32"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg12" />
+  <path
+     d="m0 0h2048v2048h-2048z"
+     fill="none"
+     id="path1" />
+  <path
+     d="m 236.71658,507.59377 h 82.08745 V 1779.509 h -82.08745 z"
+     stroke-width="0.678476"
+     id="path2" />
+  <path
+     d="m 474.29746,533.31919 h 82.08745 V 931.4893 h -82.08745 z"
+     stroke-width="0.379612"
+     id="path2-7" />
+  <path
+     d="m 1022.7429,849.58334 v 82.08745 H 503.09757 v -82.08745 z"
+     stroke-width="0.43367"
+     id="path2-7-3" />
+  <path
+     d="m 966.21052,532.48314 h 82.08738 v 398.1701 h -82.08738 z"
+     stroke-width="0.379612"
+     id="path2-7-5" />
+  <path
+     d="M 235.65532,1746.6133 H 1781.701 v 85.1226 H 235.65532 Z"
+     stroke-width="0.761729"
+     id="path8" />
+  <path
+     d="m 236.6738,507.31956 h 1076.3544 v 85.1226 H 236.6738 Z"
+     stroke-width="0.635575"
+     id="path8-9" />
+  <path
+     d="m 1311.7633,507.6448 469.3371,399.07317 -55.1405,64.84894 -469.3371,-399.07317 z"
+     stroke-width="0.480842"
+     id="path8-9-6"
+     inkscape:transform-center-x="-207.1037"
+     inkscape:transform-center-y="231.97495" />
+  <path
+     d="m 1699.1531,904.94712 h 82.0874 v 925.90568 h -82.0874 z"
+     stroke-width="0.57888"
+     id="path9" />
+  <ellipse
+     style="fill:#000000"
+     id="path12"
+     cx="985.26324"
+     cy="1279.5432"
+     rx="166.93671"
+     ry="169.26324" />
+</svg>

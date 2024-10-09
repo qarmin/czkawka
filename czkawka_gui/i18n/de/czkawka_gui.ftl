@@ -18,6 +18,11 @@ music_checking_by_tags = Tags
 music_checking_by_content = Inhalt
 same_music_seconds_label = Minimale Dauer des Fragments, in Sekunden
 same_music_similarity_label = Maximaler Unterschied
+music_compare_only_in_title_group = Nur im Titel vergleichen
+music_compare_only_in_title_group_tooltip =
+    Wenn aktiviert, werden Dateien nach Titel gruppiert und dann miteinander verglichen.
+    
+    Mit 10000 Dateien, statt fast 100 Millionen Vergleiche wird es in der Regel rund 20000 Vergleiche geben.
 same_music_tooltip =
     Die Suche nach ähnlichen Musikdateien nach dem Inhalt kann über die Einstellung konfiguriert werden:
     
@@ -287,6 +292,13 @@ header_about_button_tooltip = Öffnet den Dialog mit Informationen über die App
 
 settings_number_of_threads = Anzahl der verwendeten Threads
 settings_number_of_threads_tooltip = Anzahl der verwendeten Threads, 0 bedeutet, dass alle verfügbaren Threads verwendet werden.
+settings_use_rust_preview = Verwenden Sie stattdessen externe Bibliotheken gtk, um Vorschaubilder zu laden
+settings_use_rust_preview_tooltip =
+    Die Verwendung von gtk-Vorschauen ist manchmal schneller und unterstützt mehr Formate, aber manchmal kann dies genau das Gegenteil sein.
+    
+    Wenn Sie Probleme mit dem Laden von Vorschauen haben, können Sie versuchen, diese Einstellung zu ändern.
+    
+    Auf Nicht-Linux-Systemen wird empfohlen, diese Option zu verwenden, da gtk-pixbuf dort nicht immer verfügbar ist, so dass die Deaktivierung dieser Option keine Vorschau einiger Bilder laden wird.
 settings_label_restart = Sie müssen die App neu starten, um die Einstellungen anzuwenden!
 settings_ignore_other_filesystems = Andere Dateisysteme ignorieren (nur Linux)
 settings_ignore_other_filesystems_tooltip =
