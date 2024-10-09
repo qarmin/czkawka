@@ -61,10 +61,13 @@ pub trait PrintResults {
         Ok(())
     }
 
-    fn save_all_in_one(&self, file_name: &str) -> std::io::Result<()> {
-        self.save_results_to_file_as_json(&format!("{file_name}_pretty.json"), true)?;
-        self.save_results_to_file_as_json(&format!("{file_name}_compact.json"), false)?;
-        self.print_results_to_file(&format!("{file_name}.txt"))?;
+    fn save_all_in_one(&self, folder: &str, base_file_name: &str) -> std::io::Result<()> {
+        let pretty_name = format!("{folder}/{base_file_name}_pretty.json");
+        self.save_results_to_file_as_json(&pretty_name, true)?;
+        let compact_name = format!("{folder}/{base_file_name}_compact.json");
+        self.save_results_to_file_as_json(&compact_name, false)?;
+        let txt_name = format!("{folder}/{base_file_name}.txt");
+        self.print_results_to_file(&txt_name)?;
         Ok(())
     }
 }

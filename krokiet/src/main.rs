@@ -31,6 +31,7 @@ use crate::connect_move::connect_move;
 use crate::connect_open::connect_open_items;
 use crate::connect_progress_receiver::connect_progress_gathering;
 use crate::connect_rename::connect_rename;
+use crate::connect_save::connect_save;
 use crate::connect_scan::connect_scan_button;
 use crate::connect_select::{connect_select, connect_showing_proper_select_buttons};
 use crate::connect_show_preview::connect_show_preview;
@@ -38,6 +39,7 @@ use crate::connect_stop::connect_stop_button;
 use crate::connect_translation::connect_translations;
 use crate::set_initial_gui_info::set_initial_gui_infos;
 use crate::settings::{connect_changing_settings_preset, create_default_settings_files, load_settings_from_file, save_all_settings_to_file};
+use crate::shared_models::SharedModels;
 
 mod common;
 mod connect_delete;
@@ -46,6 +48,7 @@ mod connect_move;
 mod connect_open;
 mod connect_progress_receiver;
 mod connect_rename;
+mod connect_save;
 mod connect_scan;
 mod connect_select;
 mod connect_show_preview;
@@ -55,6 +58,7 @@ mod localizer_krokiet;
 mod model_operations;
 mod set_initial_gui_info;
 mod settings;
+mod shared_models;
 
 slint::include_modules!();
 fn main() {
@@ -68,13 +72,15 @@ fn main() {
 
     zeroing_all_models(&app);
 
+    let shared_models = SharedModels::new_shared();
+
     set_initial_gui_infos(&app);
 
     create_default_settings_files();
     load_settings_from_file(&app);
 
     connect_delete_button(&app);
-    connect_scan_button(&app, progress_sender, stop_receiver);
+    connect_scan_button(&app, progress_sender, stop_receiver, Rc::clone(&shared_models));
     connect_stop_button(&app, stop_sender);
     connect_open_items(&app);
     connect_progress_gathering(&app, progress_receiver);
@@ -86,6 +92,7 @@ fn main() {
     connect_showing_proper_select_buttons(&app);
     connect_move(&app);
     connect_rename(&app);
+    connect_save(&app, Rc::clone(&shared_models));
 
     app.run().expect("Failed to run app :(");
 
