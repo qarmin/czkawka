@@ -169,7 +169,8 @@ pub struct BadFileEntry {
     pub modified_date: u64,
     pub size: u64,
     pub current_extension: String,
-    pub proper_extensions: String,
+    pub proper_extensions_group: String,
+    pub proper_extension: String,
 }
 
 impl ResultEntry for BadFileEntry {
@@ -345,7 +346,8 @@ impl BadExtensions {
                     modified_date: file_entry.modified_date,
                     size: file_entry.size,
                     current_extension,
-                    proper_extensions: valid_extensions,
+                    proper_extensions_group: valid_extensions,
+                    proper_extension: proper_extension.to_string(),
                 }))
             })
             .while_some()
@@ -386,6 +388,8 @@ impl BadExtensions {
         proper_extension: &str,
     ) -> (BTreeSet<String>, String) {
         let mut all_available_extensions: BTreeSet<String> = Default::default();
+        // TODO Isn't this a bug?
+        // Why to file without extensions we set this as empty
         let valid_extensions = if current_extension.is_empty() {
             String::new()
         } else {
@@ -443,7 +447,7 @@ impl PrintResults for BadExtensions {
         writeln!(writer, "Found {} files with invalid extension.\n", self.information.number_of_files_with_bad_extension)?;
 
         for file_entry in &self.bad_extensions_files {
-            writeln!(writer, "\"{}\" ----- {}", file_entry.path.to_string_lossy(), file_entry.proper_extensions)?;
+            writeln!(writer, "\"{}\" ----- {}", file_entry.path.to_string_lossy(), file_entry.proper_extensions_group)?;
         }
 
         Ok(())

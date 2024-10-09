@@ -844,7 +844,13 @@ fn write_bad_extensions_results(app: &MainWindow, vector: Vec<BadFileEntry>, mes
 
 fn prepare_data_model_bad_extensions(fe: &BadFileEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(&fe.path);
-    let data_model_str = VecModel::from_slice(&[file.into(), directory.into(), fe.current_extension.clone().into(), fe.proper_extensions.clone().into()]);
+    let data_model_str = VecModel::from_slice(&[
+        file.into(),
+        directory.into(),
+        fe.current_extension.clone().into(),
+        fe.proper_extensions_group.clone().into(),
+        fe.proper_extension.clone().into(),
+    ]);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
     let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1, size_split.0, size_split.1]);

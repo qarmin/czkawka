@@ -55,6 +55,7 @@
 - Added ability to show preview of referenced folders - [#1359](https://github.com/qarmin/czkawka/pull/1359)
 - Enable selecting with space and jumping over entries with
   arrows and opening with enter - [#1359](https://github.com/qarmin/czkawka/pull/1359)
+- Added button to rename files with invalid extension -[#1364](https://github.com/qarmin/czkawka/pull/1364)
 
 ### GTK GUI
 

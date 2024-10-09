@@ -190,6 +190,7 @@ pub enum StrDataBadExtensions {
     Name,
     Path,
     CurrentExtension,
+    ProperExtensionsGroup,
     ProperExtension,
 }
 
@@ -225,6 +226,14 @@ pub fn get_str_name_idx(active_tab: CurrentTab) -> usize {
         CurrentTab::BrokenFiles => StrDataBrokenFiles::Name as usize,
         CurrentTab::BadExtensions => StrDataBadExtensions::Name as usize,
         CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
+    }
+}
+
+pub fn get_str_proper_extension(active_tab: CurrentTab) -> usize {
+    match active_tab {
+        CurrentTab::BadExtensions => StrDataBadExtensions::ProperExtension as usize,
+        CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
+        _ => panic!("Unable to get proper extension from this tab"),
     }
 }
 

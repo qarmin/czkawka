@@ -53,7 +53,6 @@ export component PopupRenameFiles inherits Rectangle {
                         clicked => {
                             popup_window.close();
                             Callabler.rename_files();
-                            debug("Renaming files");
                         }
                     }
                     Rectangle {
@@ -71,7 +70,6 @@ export component PopupRenameFiles inherits Rectangle {
     }
 
     show_popup() => {
-        debug("Showing popup");
         popup_window.show();
     }
 }
