@@ -18,6 +18,11 @@ music_checking_by_tags = Etichete
 music_checking_by_content = Conținut
 same_music_seconds_label = Fragment minim a doua durată
 same_music_similarity_label = Diferența maximă
+music_compare_only_in_title_group = Compară numai în titlu
+music_compare_only_in_title_group_tooltip =
+    Când este activat, fișierele sunt grupate după titlu și apoi comparate între ele.
+    
+    Cu 10000 de fişiere, în schimb aproape 100 de milioane de comparaţii vor fi de obicei aproximativ 20000 de comparaţii.
 same_music_tooltip =
     Căutarea fişierelor muzicale similare după conţinutul său poate fi configurată prin setarea:
     
@@ -288,6 +293,13 @@ header_about_button_tooltip = Deschide dialogul cu informații despre aplicație
 
 settings_number_of_threads = Numar discutii folosite
 settings_number_of_threads_tooltip = Numărul de teme folosite, 0 înseamnă că vor fi folosite toate temele disponibile.
+settings_use_rust_preview = Folosește în schimb gtk librării externe pentru a încărca previzualizările
+settings_use_rust_preview_tooltip =
+    Utilizarea de previzualizări gtk va fi uneori mai rapidă și va suporta mai multe formate, dar uneori aceasta ar putea fi exact opusul.
+    
+    Dacă aveţi probleme cu încărcarea previzualizărilor, puteţi încerca să schimbaţi această setare.
+    
+    Pe sistemele non-linux, se recomandă folosirea acestei optiuni, pentru că gtk-pixbuf nu sunt întotdeauna disponibile, astfel încât dezactivarea acestei opțiuni nu va încărca previzualizarea unor imagini.
 settings_label_restart = Trebuie să reporniți aplicația pentru a aplica setările!
 settings_ignore_other_filesystems = Ignorați alte sisteme de fișiere (doar Linux)
 settings_ignore_other_filesystems_tooltip =

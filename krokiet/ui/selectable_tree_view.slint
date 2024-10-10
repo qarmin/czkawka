@@ -15,7 +15,7 @@ export component SelectableTableView inherits Rectangle {
         {checked: true, selected_row: false, header_row: false, filled_header_row: false, val_str: ["lokkaler", "/Xd1/Vide2", "01.23.1911"], val_int: []}
     ];
     in-out property <[length]> column_sizes: [30px, 80px, 150px, 160px];
-    private property <int> column_number: column-sizes.length + 1;
+    private property <int> column_number: column_sizes.length + 1;
     // This idx, starts from zero, but since first is always a checkbox, and is not in model.val values, remove 1 from idx
     in-out property <int> parentPathIdx;
     in-out property <int> fileNameIdx;
@@ -32,7 +32,7 @@ export component SelectableTableView inherits Rectangle {
             HorizontalLayout {
                 spacing: 5px;
                 for title [idx] in root.columns: HorizontalLayout {
-                    width: root.column-sizes[idx];
+                    width: root.column_sizes[idx];
                     Text {
                         overflow: elide;
                         text: title;
@@ -73,33 +73,35 @@ export component SelectableTableView inherits Rectangle {
             
                 border-radius: 5px;
                 height: 20px;
-                background: r.header-row ? ColorPalette.list_view_normal_header_color : (touch-area.has-hover ? (r.selected_row ? ColorPalette.list-view-normal-selected-header : ColorPalette.list_view_normal_color) : (r.selected_row ? ColorPalette.list-view-normal-selected-header : ColorPalette.list_view_normal_color));
+                background: ColorPalette.get_listview_color_with_header(r.selected_row, touch-area.has-hover, r.header_row);
                 touch_area := TouchArea {
                     function clicked_manual() {
-                        if (!r.header_row) {
-                            if (root.selected-item == -1) {
+                        // We don't allow to select header row
+                        // unless it contains data, which is true only for for modes with reference folders
+                        if (!r.header_row || r.val_str.length > 0) {
+                            if (root.selected_item == -1) {
                                 r.selected_row = !r.selected_row;
-                                root.selected-item = idx;
+                                root.selected_item = idx;
                             } else {
-                                if (!r.selected_row && root.selected-item != idx) {
+                                if (!r.selected_row && root.selected_item != idx) {
                                     r.selected_row = !r.selected_row;
-                                    root.values[root.selected-item].selected_row = false;
-                                    root.selected-item = idx;
+                                    root.values[root.selected_item].selected_row = false;
+                                    root.selected_item = idx;
                                 }
                             }
 
                             if (root.selected_item != -1) {
-                                Callabler.load_image_preview(r.val_str[root.parentPathIdx - 1] + "/" + r.val_str[root.fileNameIdx - 1]);
+                                showPreview();
                             } else {
                                 GuiState.preview_visible = false;
                             }
                         }
                     }
                     double-clicked => {
-                            if (r.header_row && !r.filled_header_row) {
-                                return;
-                            }
-                            Callabler.item_opened(r.val_str[root.parentPathIdx - 1] + "/" + r.val_str[root.fileNameIdx - 1])
+                        if (r.header_row && !r.filled_header_row) {
+                            return;
+                        }
+                        openSelectedItem();
                     }
                     pointer-event(event) => {
                         // TODO this should be clicked by double-click - https://github.com/slint-ui/slint/issues/4235
@@ -119,9 +121,9 @@ export component SelectableTableView inherits Rectangle {
 
                 HorizontalLayout {
                     CheckBox {
-                        visible: !r.header-row;
-                        checked: r.checked && !r.header-row;
-                        width: root.column-sizes[0];
+                        visible: !r.header_row;
+                        checked: r.checked && !r.header_row;
+                        width: root.column_sizes[0];
                         toggled => {
                             r.checked = self.checked;
                         }
@@ -130,7 +132,7 @@ export component SelectableTableView inherits Rectangle {
                     HorizontalLayout {
                         spacing: 5px;
                         for f [idx] in r.val_str: Text {
-                            width: root.column-sizes[idx + 1];
+                            width: root.column_sizes[idx + 1];
                             text: f;
                             font-size: 12px;
                             vertical-alignment: center;
@@ -144,16 +146,28 @@ export component SelectableTableView inherits Rectangle {
 
     public function deselect_selected_item() {
         if (root.selected_item != -1) {
-            root.values[root.selected-item].selected_row = false;
-            root.selected-item = -1;
+            root.values[root.selected_item].selected_row = false;
+            root.selected_item = -1;
         }
+    }
+
+    function showPreview() {
+        Callabler.load_image_preview(root.values[root.selected_item].val_str[root.parentPathIdx - 1] + "/" + root.values[root.selected_item].val_str[root.fileNameIdx - 1]);
+    }
+
+    function openSelectedItem() {
+        Callabler.item_opened(root.values[root.selected_item].val_str[root.parentPathIdx - 1] + "/" + root.values[root.selected_item].val_str[root.fileNameIdx - 1]);
     }
 
     // TODO this should work with multiple selection and shift and control key - problably logic will need to be set in global state
     public function released_key(event: KeyEvent) {
         if (event.text == " ") {
-            if (root.selected_item != -1) {
+            if (root.selected_item != -1 && !root.values[root.selected_item].header_row) {
                 root.values[root.selected_item].checked = !root.values[root.selected_item].checked;
+            }
+        } else if (event.text == "\n" ) {
+            if (root.selected_item != -1) {
+                openSelectedItem();
             }
         } else if (event.text == Key.DownArrow) {
             if (root.selected_item != -1) {
@@ -171,6 +185,7 @@ export component SelectableTableView inherits Rectangle {
                         root.selected_item += 1;
                     }
                     root.values[root.selected_item].selected_row = true;
+                    showPreview();
                 }
             } else {
                 // Select last item if nothing is selected
@@ -181,6 +196,7 @@ export component SelectableTableView inherits Rectangle {
                         root.selected_item = 0;
                     }
                     root.values[root.selected_item].selected_row = true;
+                    showPreview();
                 }
             }
         } else if (event.text == Key.UpArrow) {
@@ -202,6 +218,7 @@ export component SelectableTableView inherits Rectangle {
                     }
                     if (root.selected_item != -1) {
                         root.values[root.selected_item].selected_row = true;
+                        showPreview();
                     }
                 }
             } else {
@@ -209,6 +226,7 @@ export component SelectableTableView inherits Rectangle {
                 if (root.values.length > 0) {
                     root.selected_item = root.values.length - 1;
                     root.values[root.selected_item].selected_row = true;
+                    showPreview();
                 }
             }
         }

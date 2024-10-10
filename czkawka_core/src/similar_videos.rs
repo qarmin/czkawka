@@ -15,11 +15,12 @@ use vid_dup_finder_lib::HashCreationErrorKind::DetermineVideo;
 use vid_dup_finder_lib::{NormalizedTolerance, VideoHash};
 
 use crate::common::{check_if_stop_received, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, VIDEO_FILES_EXTENSIONS};
-use crate::common_cache::{get_similar_videos_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
-use crate::common_dir_traversal::{inode, take_1_per_inode, CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
+use crate::common_cache::{extract_loaded_cache, get_similar_videos_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
+use crate::common_dir_traversal::{inode, take_1_per_inode, DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::{DebugPrint, PrintResults, ResultEntry};
 use crate::flc;
+use crate::progress_data::{CurrentStage, ProgressData};
 
 pub const MAX_TOLERANCE: i32 = 20;
 
@@ -57,21 +58,22 @@ impl FileEntry {
     }
 }
 
-struct Hamming;
-
-impl bk_tree::Metric<Vec<u8>> for Hamming {
-    #[inline]
-    fn distance(&self, a: &Vec<u8>, b: &Vec<u8>) -> u32 {
-        hamming::distance_fast(a, b).unwrap() as u32
-    }
-
-    #[inline]
-    fn threshold_distance(&self, a: &Vec<u8>, b: &Vec<u8>, _threshold: u32) -> Option<u32> {
-        Some(self.distance(a, b))
-    }
+pub struct SimilarVideosParameters {
+    pub tolerance: i32,
+    pub exclude_videos_with_same_size: bool,
+    pub ignore_hard_links: bool,
 }
 
-const MAX_VIDEOS_STAGE: u8 = 1;
+impl SimilarVideosParameters {
+    pub fn new(tolerance: i32, exclude_videos_with_same_size: bool, ignore_hard_links: bool) -> Self {
+        assert!((0..=MAX_TOLERANCE).contains(&tolerance));
+        Self {
+            tolerance,
+            exclude_videos_with_same_size,
+            ignore_hard_links,
+        }
+    }
+}
 
 pub struct SimilarVideos {
     common_data: CommonToolData,
@@ -80,9 +82,7 @@ pub struct SimilarVideos {
     similar_referenced_vectors: Vec<(VideosEntry, Vec<VideosEntry>)>,
     videos_hashes: BTreeMap<Vec<u8>, Vec<VideosEntry>>,
     videos_to_check: BTreeMap<String, VideosEntry>,
-    tolerance: i32,
-    exclude_videos_with_same_size: bool,
-    ignore_hard_links: bool,
+    params: SimilarVideosParameters,
 }
 
 impl CommonData for SimilarVideos {
@@ -101,17 +101,15 @@ pub struct Info {
 }
 
 impl SimilarVideos {
-    pub fn new() -> Self {
+    pub fn new(params: SimilarVideosParameters) -> Self {
         Self {
             common_data: CommonToolData::new(ToolType::SimilarVideos),
             information: Default::default(),
             similar_vectors: vec![],
             videos_hashes: Default::default(),
             videos_to_check: Default::default(),
-            tolerance: 10,
-            exclude_videos_with_same_size: false,
             similar_referenced_vectors: vec![],
-            ignore_hard_links: false,
+            params,
         }
     }
 
@@ -142,7 +140,7 @@ impl SimilarVideos {
         self.debug_print();
     }
 
-    // #[fun_time(message = "check_for_similar_videos", level = "debug")]
+    #[fun_time(message = "check_for_similar_videos", level = "debug")]
     fn check_for_similar_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         self.common_data.extensions.set_and_validate_allowed_extensions(VIDEO_FILES_EXTENSIONS);
         if !self.common_data.extensions.set_any_extensions() {
@@ -154,7 +152,6 @@ impl SimilarVideos {
             .stop_receiver(stop_receiver)
             .progress_sender(progress_sender)
             .common_data(&self.common_data)
-            .max_stage(MAX_VIDEOS_STAGE)
             .build()
             .run();
 
@@ -162,7 +159,7 @@ impl SimilarVideos {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
                 self.videos_to_check = grouped_file_entries
                     .into_iter()
-                    .flat_map(if self.ignore_hard_links { |(_, fes)| fes } else { take_1_per_inode })
+                    .flat_map(if self.get_params().ignore_hard_links { |(_, fes)| fes } else { take_1_per_inode })
                     .map(|fe| (fe.path.to_string_lossy().to_string(), fe.into_videos_entry()))
                     .collect();
                 self.common_data.text_messages.warnings.extend(warnings);
@@ -186,13 +183,12 @@ impl SimilarVideos {
             self.get_text_messages_mut().extend_with_another_messages(messages);
             loaded_hash_map = loaded_items.unwrap_or_default();
 
-            for (name, file_entry) in mem::take(&mut self.videos_to_check) {
-                if let Some(cached_file_entry) = loaded_hash_map.get(&name) {
-                    records_already_cached.insert(name, cached_file_entry.clone());
-                } else {
-                    non_cached_files_to_check.insert(name, file_entry);
-                }
-            }
+            extract_loaded_cache(
+                &loaded_hash_map,
+                mem::take(&mut self.videos_to_check),
+                &mut records_already_cached,
+                &mut non_cached_files_to_check,
+            );
         } else {
             loaded_hash_map = Default::default();
             mem::swap(&mut self.videos_to_check, &mut non_cached_files_to_check);
@@ -202,10 +198,18 @@ impl SimilarVideos {
 
     #[fun_time(message = "sort_videos", level = "debug")]
     fn sort_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
+        if self.videos_to_check.is_empty() {
+            return true;
+        }
+
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache_at_start();
 
-        let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, 1, 1, non_cached_files_to_check.len(), CheckingMethod::None, self.common_data.tool_type);
+        let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) = prepare_thread_handler_common(
+            progress_sender,
+            CurrentStage::SimilarVideosCalculatingHashes,
+            non_cached_files_to_check.len(),
+            self.get_test_type(),
+        );
 
         let mut vec_file_entry: Vec<VideosEntry> = non_cached_files_to_check
             .par_iter()
@@ -296,14 +300,14 @@ impl SimilarVideos {
 
     #[fun_time(message = "match_groups_of_videos", level = "debug")]
     fn match_groups_of_videos(&mut self, vector_of_hashes: Vec<VideoHash>, hashmap_with_file_entries: &HashMap<String, VideosEntry>) {
-        let match_group = vid_dup_finder_lib::search(vector_of_hashes, NormalizedTolerance::new(self.tolerance as f64 / 100.0f64));
+        let match_group = vid_dup_finder_lib::search(vector_of_hashes, NormalizedTolerance::new(self.get_params().tolerance as f64 / 100.0f64));
         let mut collected_similar_videos: Vec<Vec<VideosEntry>> = Default::default();
         for i in match_group {
             let mut temp_vector: Vec<VideosEntry> = Vec::new();
             let mut bt_size: BTreeSet<u64> = Default::default();
             for j in i.duplicates() {
-                let file_entry = hashmap_with_file_entries.get(&j.to_string_lossy().to_string()).unwrap();
-                if self.exclude_videos_with_same_size {
+                let file_entry = &hashmap_with_file_entries[&j.to_string_lossy().to_string()];
+                if self.get_params().exclude_videos_with_same_size {
                     if !bt_size.contains(&file_entry.size) {
                         bt_size.insert(file_entry.size);
                         temp_vector.push(file_entry.clone());
@@ -330,10 +334,10 @@ impl SimilarVideos {
                         .into_iter()
                         .partition(|e| self.common_data.directories.is_in_referenced_directory(e.get_path()));
 
-                    if files_from_referenced_folders.is_empty() || normal_files.is_empty() {
+                    if normal_files.is_empty() {
                         None
                     } else {
-                        Some((files_from_referenced_folders.pop().unwrap(), normal_files))
+                        files_from_referenced_folders.pop().map(|file| (file, normal_files))
                     }
                 })
                 .collect::<Vec<(VideosEntry, Vec<VideosEntry>)>>();
@@ -347,12 +351,6 @@ impl SimilarVideos {
 
         let vec_files = self.similar_vectors.iter().collect::<Vec<_>>();
         delete_files_custom(&vec_files, &self.common_data.delete_method, &mut self.common_data.text_messages, self.common_data.dry_run);
-    }
-}
-
-impl Default for SimilarVideos {
-    fn default() -> Self {
-        Self::new()
     }
 }
 
@@ -378,7 +376,7 @@ impl PrintResults for SimilarVideos {
             for struct_similar in &self.similar_vectors {
                 writeln!(writer, "Found {} videos which have similar friends", struct_similar.len())?;
                 for file_entry in struct_similar {
-                    writeln!(writer, "{:?} - {}", file_entry.path, format_size(file_entry.size, BINARY))?;
+                    writeln!(writer, "\"{}\" - {}", file_entry.path.to_string_lossy(), format_size(file_entry.size, BINARY))?;
                 }
                 writeln!(writer)?;
             }
@@ -388,9 +386,9 @@ impl PrintResults for SimilarVideos {
             for (fe, struct_similar) in &self.similar_referenced_vectors {
                 writeln!(writer, "Found {} videos which have similar friends", struct_similar.len())?;
                 writeln!(writer)?;
-                writeln!(writer, "{:?} - {}", fe.path, format_size(fe.size, BINARY))?;
+                writeln!(writer, "\"{}\" - {}", fe.path.to_string_lossy(), format_size(fe.size, BINARY))?;
                 for file_entry in struct_similar {
-                    writeln!(writer, "{:?} - {}", file_entry.path, format_size(file_entry.size, BINARY))?;
+                    writeln!(writer, "\"{}\" - {}", file_entry.path.to_string_lossy(), format_size(file_entry.size, BINARY))?;
                 }
                 writeln!(writer)?;
             }
@@ -423,13 +421,8 @@ pub fn check_if_ffmpeg_is_installed() -> bool {
 }
 
 impl SimilarVideos {
-    pub fn set_exclude_videos_with_same_size(&mut self, exclude_videos_with_same_size: bool) {
-        self.exclude_videos_with_same_size = exclude_videos_with_same_size;
-    }
-
-    pub fn set_tolerance(&mut self, tolerance: i32) {
-        assert!((0..=MAX_TOLERANCE).contains(&tolerance));
-        self.tolerance = tolerance;
+    pub fn get_params(&self) -> &SimilarVideosParameters {
+        &self.params
     }
 
     pub const fn get_similar_videos(&self) -> &Vec<Vec<VideosEntry>> {
@@ -454,9 +447,5 @@ impl SimilarVideos {
 
     pub fn get_use_reference(&self) -> bool {
         self.common_data.use_reference_folders
-    }
-
-    pub fn set_ignore_hard_links(&mut self, ignore_hard_links: bool) {
-        self.ignore_hard_links = ignore_hard_links;
     }
 }

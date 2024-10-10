@@ -18,6 +18,11 @@ music_checking_by_tags = Etichette
 music_checking_by_content = Contenuto
 same_music_seconds_label = Durata minima del frammento
 same_music_similarity_label = Differenza massima
+music_compare_only_in_title_group = Confronta solo nel titolo
+music_compare_only_in_title_group_tooltip =
+    Se abilitato, i file vengono raggruppati per titolo e poi confrontati tra loro.
+    
+    Con 10000 file, invece quasi 100 milioni di confronti di solito ci saranno circa 20000 confronti.
 same_music_tooltip =
     La ricerca di file musicali simili dal suo contenuto può essere configurata impostando:
     
@@ -287,6 +292,13 @@ header_about_button_tooltip = Apre la finestra delle informazioni sul programma.
 
 settings_number_of_threads = Numero di thread usati
 settings_number_of_threads_tooltip = Numero di thread usati, 0 significa che tutti i thread disponibili saranno utilizzati.
+settings_use_rust_preview = Usa librerie esterne invece di gtk per caricare anteprime
+settings_use_rust_preview_tooltip =
+    Utilizzando le anteprime gtk a volte sarà più veloce e supporterà più formati, ma a volte questo potrebbe essere esattamente il contrario.
+    
+    Se hai problemi con il caricamento delle anteprime, puoi provare a modificare questa impostazione.
+    
+    Nei sistemi non-linux, si consiglia di utilizzare questa opzione, perché gtk-pixbuf non è sempre disponibile e quindi disabilitando questa opzione non caricherà le anteprime di alcune immagini.
 settings_label_restart = È necessario riavviare l'app per applicare le impostazioni!
 settings_ignore_other_filesystems = Ignora altri filesystem (solo Linux)
 settings_ignore_other_filesystems_tooltip =

@@ -1,15 +1,16 @@
+use slint::{ComponentHandle, Model, ModelRc, VecModel};
+
 use crate::common::{
     connect_i32_into_u64, get_int_height_idx, get_int_modification_date_idx, get_int_size_idx, get_int_width_idx, get_is_header_mode, get_tool_model, set_tool_model,
 };
 use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow, SelectMode, SelectModel};
-use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
 // TODO optimize this, not sure if it is possible to not copy entire model to just select item
 // https://github.com/slint-ui/slint/discussions/4595
 pub fn connect_select(app: &MainWindow) {
     let a = app.as_weak();
     app.global::<Callabler>().on_select_items(move |select_mode| {
-        let app = a.upgrade().unwrap();
+        let app = a.upgrade().expect("Failed to upgrade app :(");
         let active_tab = app.global::<GuiState>().get_active_tab();
         let current_model = get_tool_model(&app, active_tab);
 
@@ -32,7 +33,7 @@ pub fn connect_showing_proper_select_buttons(app: &MainWindow) {
     set_select_buttons(app);
     let a = app.as_weak();
     app.global::<Callabler>().on_tab_changed(move || {
-        let app = a.upgrade().unwrap();
+        let app = a.upgrade().expect("Failed to upgrade app :(");
         set_select_buttons(&app);
     });
 }

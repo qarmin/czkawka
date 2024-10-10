@@ -36,23 +36,23 @@ impl GuiCompareImages {
         let glade_src = include_str!("../../ui/compare_images.ui").to_string();
         let builder = Builder::from_string(glade_src.as_str());
 
-        let window_compare: gtk4::Window = builder.object("window_compare").unwrap();
+        let window_compare: gtk4::Window = builder.object("window_compare").expect("Cambalache");
         window_compare.set_title(Some(&flg!("window_compare_images")));
         window_compare.set_modal(true);
         window_compare.set_transient_for(Some(window_main));
 
-        let label_group_info: gtk4::Label = builder.object("label_group_info").unwrap();
+        let label_group_info: gtk4::Label = builder.object("label_group_info").expect("Cambalache");
 
-        let button_go_previous_compare_group: gtk4::Button = builder.object("button_go_previous_compare_group").unwrap();
-        let button_go_next_compare_group: gtk4::Button = builder.object("button_go_next_compare_group").unwrap();
+        let button_go_previous_compare_group: gtk4::Button = builder.object("button_go_previous_compare_group").expect("Cambalache");
+        let button_go_next_compare_group: gtk4::Button = builder.object("button_go_next_compare_group").expect("Cambalache");
 
-        let check_button_left_preview_text: gtk4::CheckButton = builder.object("check_button_left_preview_text").unwrap();
-        let check_button_right_preview_text: gtk4::CheckButton = builder.object("check_button_right_preview_text").unwrap();
+        let check_button_left_preview_text: gtk4::CheckButton = builder.object("check_button_left_preview_text").expect("Cambalache");
+        let check_button_right_preview_text: gtk4::CheckButton = builder.object("check_button_right_preview_text").expect("Cambalache");
 
-        let image_compare_left: gtk4::Image = builder.object("image_compare_left").unwrap();
-        let image_compare_right: gtk4::Image = builder.object("image_compare_right").unwrap();
+        let image_compare_left: gtk4::Image = builder.object("image_compare_left").expect("Cambalache");
+        let image_compare_right: gtk4::Image = builder.object("image_compare_right").expect("Cambalache");
 
-        let scrolled_window_compare_choose_images: gtk4::ScrolledWindow = builder.object("scrolled_window_compare_choose_images").unwrap();
+        let scrolled_window_compare_choose_images: gtk4::ScrolledWindow = builder.object("scrolled_window_compare_choose_images").expect("Cambalache");
 
         let shared_numbers_of_groups = Rc::new(RefCell::new(0));
         let shared_current_of_groups = Rc::new(RefCell::new(0));

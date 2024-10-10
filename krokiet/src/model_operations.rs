@@ -1,7 +1,9 @@
-use crate::common::{get_str_name_idx, get_str_path_idx};
-use crate::{CurrentTab, MainListModel};
-use slint::{Model, ModelRc};
 use std::path::MAIN_SEPARATOR;
+
+use slint::{Model, ModelRc, SharedString};
+
+use crate::common::{get_str_name_idx, get_str_path_idx, get_str_proper_extension};
+use crate::{CurrentTab, MainListModel};
 
 pub fn deselect_all_items(items: &mut [MainListModel]) {
     for item in items {
@@ -24,8 +26,8 @@ pub fn collect_full_path_from_model(items: &[MainListModel], active_tab: Current
     items
         .iter()
         .map(|item| {
-            let path = item.val_str.iter().nth(path_idx).unwrap();
-            let name = item.val_str.iter().nth(name_idx).unwrap();
+            let path = get_shared_str_item(item, path_idx);
+            let name = get_shared_str_item(item, name_idx);
             format!("{path}{MAIN_SEPARATOR}{name}")
         })
         .collect::<Vec<_>>()
@@ -33,15 +35,26 @@ pub fn collect_full_path_from_model(items: &[MainListModel], active_tab: Current
 pub fn collect_path_name_from_model(items: &[MainListModel], active_tab: CurrentTab) -> Vec<(String, String)> {
     let path_idx = get_str_path_idx(active_tab);
     let name_idx = get_str_name_idx(active_tab);
+    items.iter().map(|item| (get_str_item(item, path_idx), get_str_item(item, name_idx))).collect::<Vec<_>>()
+}
+
+pub fn collect_path_name_and_proper_extension_from_model(items: &[MainListModel], active_tab: CurrentTab) -> Vec<(String, String, String)> {
+    let path_idx = get_str_path_idx(active_tab);
+    let name_idx = get_str_name_idx(active_tab);
+    let ext_idx = get_str_proper_extension(active_tab);
     items
         .iter()
-        .map(|item| {
-            (
-                item.val_str.iter().nth(path_idx).unwrap().to_string(),
-                item.val_str.iter().nth(name_idx).unwrap().to_string(),
-            )
-        })
+        .map(|item| (get_str_item(item, path_idx), get_str_item(item, name_idx), get_str_item(item, ext_idx)))
         .collect::<Vec<_>>()
+}
+
+#[inline]
+pub fn get_str_item(main_list_model: &MainListModel, idx: usize) -> String {
+    main_list_model.val_str.iter().nth(idx).unwrap_or_else(|| panic!("Failed to get {idx} element")).to_string()
+}
+#[inline]
+pub fn get_shared_str_item(main_list_model: &MainListModel, idx: usize) -> SharedString {
+    main_list_model.val_str.iter().nth(idx).unwrap_or_else(|| panic!("Failed to get {idx} element"))
 }
 
 pub fn filter_out_checked_items(items: &ModelRc<MainListModel>, have_header: bool) -> (Vec<MainListModel>, Vec<MainListModel>) {
@@ -52,9 +65,11 @@ pub fn filter_out_checked_items(items: &ModelRc<MainListModel>, have_header: boo
 
     let (entries_to_delete, mut entries_left): (Vec<_>, Vec<_>) = items.iter().partition(|item| item.checked);
 
-    // When have header, we must also throw out orphaned items - this needs to be
+    // When have header, we must also throw out orphaned items
     if have_header && !entries_left.is_empty() {
         // First row must be header
+        // If assert fails, that means, that we checked that for mode that not have headers
+        // And this needs to be changed
         assert!(entries_left[0].header_row);
         let is_filled_header = entries_left[0].filled_header_row;
 
@@ -336,7 +351,10 @@ mod tests {
         }
     }
     fn get_single_data_str_from_model(model: &[MainListModel]) -> Vec<String> {
-        let mut d = model.iter().map(|item| item.val_str.iter().next().unwrap().to_string()).collect::<Vec<_>>();
+        let mut d = model
+            .iter()
+            .map(|item| item.val_str.iter().next().expect("Failed to get first element").to_string())
+            .collect::<Vec<_>>();
         d.sort();
         d
     }

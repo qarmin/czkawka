@@ -11,7 +11,7 @@ export component Progress {
     preferred-height: 40px;
     VerticalLayout {
         Text {
-            text: progress-datas.step-name;
+            text: progress-datas.step_name;
             horizontal-alignment: TextHorizontalAlignment.center;
         }
 
@@ -35,9 +35,9 @@ export component Progress {
                 VerticalLayout {
                     alignment: LayoutAlignment.center;
                     ProgressIndicator {
-                        visible: progress_datas.current-progress >= -0.001;
+                        visible: progress_datas.current_progress >= -0.001;
                         height: 8px;
-                        progress: progress_datas.current-progress / 100.0;
+                        progress: progress_datas.current_progress / 100.0;
                     }
                 }
 
@@ -45,7 +45,7 @@ export component Progress {
                     alignment: LayoutAlignment.center;
                     ProgressIndicator {
                         height: 8px;
-                        progress: progress_datas.all-progress / 100.0;
+                        progress: progress_datas.all_progress / 100.0;
                     }
                 }
             }
@@ -53,14 +53,14 @@ export component Progress {
             VerticalLayout {
                 spacing: 5px;
                 Text {
-                    visible: progress_datas.current-progress >= -0.001;
+                    visible: progress_datas.current_progress >= -0.001;
                     vertical-alignment: TextVerticalAlignment.center;
-                    text: progress_datas.current-progress + "%";
+                    text: progress_datas.current_progress + "%";
                 }
 
                 Text {
                     vertical-alignment: TextVerticalAlignment.center;
-                    text: progress_datas.all-progress + "%";
+                    text: progress_datas.all_progress + "%";
                 }
             }
         }

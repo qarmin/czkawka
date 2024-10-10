@@ -1,18 +1,14 @@
 use std::cell::RefCell;
-use std::path::Path;
 use std::rc::Rc;
 
+use czkawka_core::common_image::get_dynamic_image_from_path;
+use czkawka_core::similar_images::SIMILAR_VALUES;
+use czkawka_core::similar_videos::MAX_TOLERANCE;
 use gdk4::gdk_pixbuf::Pixbuf;
 use glib::types::Type;
 use gtk4::gdk_pixbuf::InterpType;
 use gtk4::prelude::*;
 use gtk4::{CheckButton, Image, ScrolledWindow, SelectionMode, TextView, TreeModel, TreePath, TreeSelection, TreeView};
-
-#[cfg(feature = "heif")]
-use czkawka_core::common::get_dynamic_image_from_heic;
-use czkawka_core::common::{HEIC_EXTENSIONS, IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
-use czkawka_core::similar_images::SIMILAR_VALUES;
-use czkawka_core::similar_videos::MAX_TOLERANCE;
 
 use crate::create_tree_view::*;
 use crate::gui_structs::gui_data::*;
@@ -64,7 +60,7 @@ pub fn initialize_gui(gui_data: &GuiData) {
     {
         {
             let combo_box_image_hash_algorithm = gui_data.main_notebook.combo_box_image_hash_algorithm.clone();
-            for check_type in &IMAGES_HASH_TYPE_COMBO_BOX {
+            for check_type in IMAGES_HASH_TYPE_COMBO_BOX {
                 combo_box_image_hash_algorithm.append_text(check_type.eng_name);
             }
             combo_box_image_hash_algorithm.set_active(Some(0));
@@ -225,7 +221,7 @@ pub fn initialize_gui(gui_data: &GuiData) {
                     let (vec_tree_path, _tree_model) = selection.selected_rows();
 
                     for tree_path in vec_tree_path.iter().rev() {
-                        list_store.remove(&list_store.iter(tree_path).unwrap());
+                        list_store.remove(&list_store.iter(tree_path).expect("Using invalid tree_path"));
                     }
                 }
             });
@@ -259,7 +255,7 @@ pub fn initialize_gui(gui_data: &GuiData) {
                     let (vec_tree_path, _tree_model) = selection.selected_rows();
 
                     for tree_path in vec_tree_path.iter().rev() {
-                        list_store.remove(&list_store.iter(tree_path).unwrap());
+                        list_store.remove(&list_store.iter(tree_path).expect("Using invalid tree_path"));
                     }
                 }
             });
@@ -272,7 +268,7 @@ pub fn initialize_gui(gui_data: &GuiData) {
         let stop_sender = gui_data.stop_sender.clone();
 
         window_progress.connect_close_request(move |_| {
-            stop_sender.send(()).unwrap();
+            stop_sender.send(()).expect("Failed to send stop signal");
             glib::Propagation::Stop
         });
     }
@@ -335,6 +331,7 @@ fn connect_event_mouse(gui_data: &GuiData) {
         let image_preview = gui_data.main_notebook.image_preview_duplicates.clone();
         let preview_path = gui_data.preview_path.clone();
         let tree_view = gui_data.main_notebook.tree_view_duplicate_finder.clone();
+        let check_button_settings_use_rust_preview = gui_data.settings.check_button_settings_use_rust_preview.clone();
 
         tree_view.set_property("activate-on-single-click", true);
 
@@ -351,6 +348,7 @@ fn connect_event_mouse(gui_data: &GuiData) {
                 &preview_path,
                 nb_object.column_path,
                 nb_object.column_name,
+                check_button_settings_use_rust_preview.is_active(),
             );
         });
     }
@@ -361,6 +359,7 @@ fn connect_event_mouse(gui_data: &GuiData) {
         let preview_path = gui_data.preview_path.clone();
         let image_preview = gui_data.main_notebook.image_preview_similar_images.clone();
         let tree_view = gui_data.main_notebook.tree_view_similar_images_finder.clone();
+        let check_button_settings_use_rust_preview = gui_data.settings.check_button_settings_use_rust_preview.clone();
 
         tree_view.set_property("activate-on-single-click", true);
 
@@ -376,6 +375,7 @@ fn connect_event_mouse(gui_data: &GuiData) {
                 &preview_path,
                 nb_object.column_path,
                 nb_object.column_name,
+                check_button_settings_use_rust_preview.is_active(),
             );
         });
     }
@@ -412,6 +412,7 @@ fn connect_event_buttons(gui_data: &GuiData) {
         let image_preview = gui_data.main_notebook.image_preview_duplicates.clone();
         let preview_path = gui_data.preview_path.clone();
         let evk = gui_data.main_notebook.evk_tree_view_duplicate_finder.clone();
+        let check_button_settings_use_rust_preview = gui_data.settings.check_button_settings_use_rust_preview.clone();
 
         evk.connect_key_pressed(opening_enter_function_ported);
 
@@ -422,13 +423,18 @@ fn connect_event_buttons(gui_data: &GuiData) {
             let preview_path = preview_path.clone();
             let nb_object = &NOTEBOOKS_INFO[NotebookMainEnum::Duplicate as usize];
             show_preview(
-                &event_controller_key.widget().downcast::<TreeView>().unwrap(),
+                &event_controller_key
+                    .widget()
+                    .expect("Item has no widget")
+                    .downcast::<TreeView>()
+                    .expect("Widget is not TreeView"),
                 &text_view_errors,
                 &check_button_settings_show_preview,
                 &image_preview,
                 &preview_path,
                 nb_object.column_path,
                 nb_object.column_name,
+                check_button_settings_use_rust_preview.is_active(),
             );
         });
     }
@@ -440,6 +446,7 @@ fn connect_event_buttons(gui_data: &GuiData) {
         let gui_data_clone = gui_data.clone();
         let preview_path = gui_data.preview_path.clone();
         let evk = gui_data.main_notebook.evk_tree_view_similar_images_finder.clone();
+        let check_button_settings_use_rust_preview = gui_data.settings.check_button_settings_use_rust_preview.clone();
 
         evk.connect_key_pressed(opening_enter_function_ported);
 
@@ -450,13 +457,18 @@ fn connect_event_buttons(gui_data: &GuiData) {
             let preview_path = preview_path.clone();
             let nb_object = &NOTEBOOKS_INFO[NotebookMainEnum::SimilarImages as usize];
             show_preview(
-                &event_controller_key.widget().downcast::<TreeView>().unwrap(),
+                &event_controller_key
+                    .widget()
+                    .expect("Item has no widget")
+                    .downcast::<TreeView>()
+                    .expect("Widget is not TreeView"),
                 &text_view_errors,
                 &check_button_settings_show_preview_similar_images,
                 &image_preview,
                 &preview_path,
                 nb_object.column_path,
                 nb_object.column_name,
+                check_button_settings_use_rust_preview.is_active(),
             );
         });
     }
@@ -470,6 +482,7 @@ fn show_preview(
     preview_path: &Rc<RefCell<String>>,
     column_path: i32,
     column_name: i32,
+    use_rust_preview: bool,
 ) {
     let (selected_rows, tree_model) = tree_view.selection().selected_rows();
 
@@ -481,33 +494,17 @@ fn show_preview(
         // TODO labels on {} are in testing stage, so we just ignore for now this warning until found better idea how to fix this
         #[allow(clippy::never_loop)]
         'dir: loop {
-            let path = tree_model.get::<String>(&tree_model.iter(&tree_path).unwrap(), column_path);
-            let name = tree_model.get::<String>(&tree_model.iter(&tree_path).unwrap(), column_name);
+            let path = tree_model.get::<String>(&tree_model.iter(&tree_path).expect("Invalid tree_path"), column_path);
+            let name = tree_model.get::<String>(&tree_model.iter(&tree_path).expect("Invalid tree_path"), column_name);
 
             let file_name = get_full_name_from_path_name(&path, &name);
-            let file_name = file_name.as_str();
 
-            {
-                let preview_path = preview_path.borrow();
-                let preview_path = &*preview_path;
-                if file_name == preview_path {
-                    return; // Preview is already created, no need to recreate it
-                }
+            if file_name == preview_path.borrow().as_str() {
+                return; // Preview is already created, no need to recreate it
             }
 
-            let is_heic;
-            if let Some(extension) = Path::new(&name).extension() {
-                let extension_lowercase = extension.to_string_lossy().to_lowercase();
-                is_heic = HEIC_EXTENSIONS.contains(&extension_lowercase.as_str());
-                if !RAW_IMAGE_EXTENSIONS.contains(&extension_lowercase.as_str()) && !IMAGE_RS_EXTENSIONS.contains(&extension_lowercase.as_str()) && !is_heic {
-                    break 'dir;
-                }
-            } else {
-                break 'dir;
-            }
-            let mut pixbuf = if cfg!(feature = "heif") && is_heic {
-                #[cfg(feature = "heif")]
-                let image = match get_dynamic_image_from_heic(file_name) {
+            let mut pixbuf = if use_rust_preview {
+                let image = match get_dynamic_image_from_path(&file_name) {
                     Ok(t) => t,
                     Err(e) => {
                         add_text_to_text_view(text_view_errors, flg!("preview_image_opening_failure", name = file_name, reason = e.to_string()).as_str());
@@ -515,7 +512,6 @@ fn show_preview(
                     }
                 };
 
-                #[cfg(feature = "heif")]
                 match get_pixbuf_from_dynamic_image(&image) {
                     Ok(t) => t,
                     Err(e) => {
@@ -523,18 +519,15 @@ fn show_preview(
                         break 'dir;
                     }
                 }
-
-                #[cfg(not(feature = "heif"))]
-                unreachable!()
             } else {
-                match Pixbuf::from_file(file_name) {
+                match Pixbuf::from_file(&file_name) {
                     Ok(pixbuf) => pixbuf,
                     Err(e) => {
                         add_text_to_text_view(
                             text_view_errors,
                             flg!(
                                 "preview_image_opening_failure",
-                                generate_translation_hashmap(vec![("name", file_name.to_string()), ("reason", e.to_string())])
+                                generate_translation_hashmap(vec![("name", file_name), ("reason", e.to_string())])
                             )
                             .as_str(),
                         );
@@ -542,7 +535,6 @@ fn show_preview(
                     }
                 }
             };
-
             pixbuf = match resize_pixbuf_dimension(&pixbuf, (800, 800), InterpType::Bilinear) {
                 None => {
                     add_text_to_text_view(text_view_errors, flg!("preview_image_resize_failure", name = file_name).as_str());
@@ -554,7 +546,7 @@ fn show_preview(
             image_preview.set_from_pixbuf(Some(&pixbuf));
             {
                 let mut preview_path = preview_path.borrow_mut();
-                *preview_path = file_name.to_string();
+                *preview_path = file_name;
             }
 
             created_image = true;

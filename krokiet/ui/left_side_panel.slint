@@ -13,13 +13,13 @@ component TabItem {
     Rectangle {
         width: parent.width;
         horizontal-stretch: 1.0;
-        background: touch-area.has-hover ? ColorPalette.tab-hovered-color : transparent;
+        background: touch-area.has-hover ? ColorPalette.tab_hovered_color : transparent;
         touch_area := TouchArea {
             clicked => {
-                if (GuiState.active_tab == root.curr-tab) {
+                if (GuiState.active_tab == root.curr_tab) {
                     return;
                 }
-                GuiState.active_tab = root.curr-tab;
+                GuiState.active_tab = root.curr_tab;
                 Callabler.tab_changed();
                 changed_current_tab();
             }
@@ -28,12 +28,12 @@ component TabItem {
 
     HorizontalLayout {
         width: parent.width;
-        alignment: LayoutAlignment.end;
+        alignment: LayoutAlignment.start;
         layout_rectangle := VerticalLayout {
             empty_rectangle := Rectangle { }
 
             current_rectangle := Rectangle {
-                visible: (GuiState.active_tab == root.curr-tab);
+                visible: (GuiState.active_tab == root.curr_tab);
                 border-radius: 2px;
                 width: 5px;
                 height: 0px;
@@ -54,10 +54,10 @@ component TabItem {
     }
 
     states [
-        is-selected when GuiState.active_tab == root.curr-tab: {
+        is-selected when GuiState.active_tab == root.curr_tab: {
             current_rectangle.height: layout_rectangle.height;
         }
-        is-not-selected when GuiState.active_tab != root.curr-tab: {
+        is-not-selected when GuiState.active_tab != root.curr_tab: {
             current_rectangle.height: 0px;
         }
     ]
@@ -74,7 +74,7 @@ export component LeftSidePanel {
             height: 80px;
             Image {
                 width: parent.height;
-                source: @image-url("../icons/logo.png");
+                source: @image-url("../icons/logo_small.png");
                 image-fit: ImageFit.contain;
             }
             touch_area := TouchArea {
@@ -88,7 +88,7 @@ export component LeftSidePanel {
         }
 
         ListView {
-            out property <length> element-size: 25px;
+            out property <length> element_size: 25px;
             out property <[{name: string, tab: CurrentTab}]> speed_model: [
                 {name: "Duplicate Files", tab: CurrentTab.DuplicateFiles},
                 {name: "Empty Folders", tab: CurrentTab.EmptyFolders}, 
@@ -104,7 +104,7 @@ export component LeftSidePanel {
             ];
 
             for r[idx] in  speed_model: TabItem {
-                height: parent.element-size;
+                height: parent.element_size;
                 scanning: scanning;
                 text: r.name;
                 curr_tab: r.tab;
@@ -132,6 +132,8 @@ export component LeftSidePanel {
             HorizontalLayout {
                 alignment: end;
                 Button {
+                    checkable: true;
+                    checked: GuiState.visible_tool_settings;
                     visible: GuiState.available_subsettings;
                     min-width: 20px;
                     min-height: 20px;
@@ -139,7 +141,7 @@ export component LeftSidePanel {
                     preferred-height: self.width;
                     icon: @image-url("../icons/subsettings.svg");
                     clicked => {
-                        GuiState.visible_tool_settings = !GuiState.visible-tool-settings;
+                        GuiState.visible_tool_settings = !GuiState.visible_tool_settings;
                     }
                 }
             }

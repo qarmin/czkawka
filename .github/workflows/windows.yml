@@ -10,10 +10,6 @@ env:
 
 jobs:
   krokiet-compiled-on-linux:
-    strategy:
-      fail-fast: false
-      matrix:
-        use_heif: [ normal ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -39,10 +35,14 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: krokiet-windows-c-on-linux-${{ github.sha }}-${{ matrix.use_heif }}
+          name: krokiet-windows-c-on-linux-${{ github.sha }}
           path: |
             target/x86_64-pc-windows-gnu/release/krokiet.exe
           if-no-files-found: error
+
+      - name: Prepare files to release
+        run: |
+          mv target/x86_64-pc-windows-gnu/release/krokiet.exe windows_krokiet_on_linux.exe
 
       - name: Show console window on windows
         run: |
@@ -55,16 +55,26 @@ jobs:
       - name: Upload artifacts Console
         uses: actions/upload-artifact@v4
         with:
-          name: krokiet-windows-c-on-linux-${{ github.sha }}-${{ matrix.use_heif }}-console
+          name: krokiet-windows-c-on-linux-${{ github.sha }}-console
           path: |
             target/x86_64-pc-windows-gnu/release/krokiet.exe
           if-no-files-found: error
 
+      - name: Prepare files to release
+        run: |
+          mv target/x86_64-pc-windows-gnu/release/krokiet.exe windows_krokiet_on_linux_console.exe
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: ${{ github.ref == 'refs/heads/master' }}
+        with:
+          tag_name: "Nightly"
+          files: |
+            windows_krokiet_on_linux.exe
+            windows_krokiet_on_linux_console.exe
+          token: ${{ secrets.PAT_REPOSITORY }}
+
   krokiet-compiled-on-windows:
-    strategy:
-      fail-fast: false
-      matrix:
-        use_heif: [ normal ]
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -87,10 +97,14 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: krokiet-windows-c-on-windows-${{ github.sha }}-${{ matrix.use_heif }}
+          name: krokiet-windows-c-on-windows-${{ github.sha }}
           path: |
             target/release/krokiet.exe
           if-no-files-found: error
+
+      - name: Prepare files to release
+        run: |
+          mv target/release/krokiet.exe windows_krokiet_on_windows.exe
 
       - name: Show console window on windows
         run: |
@@ -103,17 +117,26 @@ jobs:
       - name: Upload artifacts Console
         uses: actions/upload-artifact@v4
         with:
-          name: krokiet-windows-c-on-windows-${{ github.sha }}-${{ matrix.use_heif }}-console
+          name: krokiet-windows-c-on-windows-${{ github.sha }}-console
           path: |
             target/release/krokiet.exe
           if-no-files-found: error
 
+      - name: Prepare files to release
+        run: |
+          mv target/release/krokiet.exe windows_krokiet_on_windows_console.exe
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: ${{ github.ref == 'refs/heads/master' }}
+        with:
+          tag_name: "Nightly"
+          files: |
+            windows_krokiet_on_windows.exe
+            windows_krokiet_on_windows_console.exe
+          token: ${{ secrets.PAT_REPOSITORY }}
 
   container_4_10:
-    strategy:
-      fail-fast: false
-      matrix:
-        use_heif: [ non_heif ]
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/mglolenstine/gtk4-cross:gtk-4.10
@@ -163,16 +186,24 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: czkawka-windows-${{ github.sha }}-${{ matrix.use_heif }}-4.10
+          name: czkawka-windows-${{ github.sha }}-4.10
           path: |
             ./package
           if-no-files-found: error
 
+      - name: Prepare files to release
+        run: |
+          mv ./package windows_czkawka_gui_gtk_410.zip
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: ${{ github.ref == 'refs/heads/master' }}
+        with:
+          tag_name: "Nightly"
+          files: |
+            windows_czkawka_gui_gtk_410.zip
+          token: ${{ secrets.PAT_REPOSITORY }}
+
   container_4_6:
-    strategy:
-      fail-fast: false
-      matrix:
-        use_heif: [ non_heif ]
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/piegamesde/gtk4-cross:gtk-4.6
@@ -222,10 +253,22 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: czkawka-windows-${{ github.sha }}-${{ matrix.use_heif }}-4.6
+          name: czkawka-windows-${{ github.sha }}-4.6
           path: |
             ./package
           if-no-files-found: error
+
+      - name: Prepare files to release
+        run: |
+          mv ./package windows_czkawka_gui_gtk_46.zip
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: ${{ github.ref == 'refs/heads/master' }}
+        with:
+          tag_name: "Nightly"
+          files: |
+            windows_czkawka_gui_gtk_46.zip
+          token: ${{ secrets.PAT_REPOSITORY }}
 
   # Provide option to log things to windows CLI
   container_4_6_console_window:
@@ -290,3 +333,15 @@ jobs:
           path: |
             ./package
           if-no-files-found: error
+
+      - name: Prepare files to release
+        run: |
+          mv ./package windows_czkawka_gui_gtk_46_console.zip
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: ${{ github.ref == 'refs/heads/master' }}
+        with:
+          tag_name: "Nightly"
+          files: |
+            windows_czkawka_gui_gtk_46_console.zip
+          token: ${{ secrets.PAT_REPOSITORY }}

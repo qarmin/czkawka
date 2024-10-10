@@ -1,6 +1,5 @@
-use slint::{ComponentHandle, SharedString, VecModel};
-
 use czkawka_core::common::get_all_available_threads;
+use slint::{ComponentHandle, SharedString, VecModel};
 
 use crate::settings::{
     ALLOWED_BIG_FILE_SIZE_VALUES, ALLOWED_DUPLICATES_CHECK_METHOD_VALUES, ALLOWED_DUPLICATES_HASH_TYPE_VALUES, ALLOWED_HASH_SIZE_VALUES, ALLOWED_IMAGE_HASH_ALG_VALUES,

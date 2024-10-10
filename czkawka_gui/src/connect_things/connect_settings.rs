@@ -1,18 +1,17 @@
 use std::collections::BTreeMap;
 use std::default::Default;
 
-use directories_next::ProjectDirs;
-use gtk4::prelude::*;
-use gtk4::{Label, ResponseType, Window};
-use image::imageops::FilterType;
-use image_hasher::HashAlg;
-
 use czkawka_core::common_cache::{
     get_duplicate_cache_file, get_similar_images_cache_file, get_similar_videos_cache_file, load_cache_from_file_generalized_by_path, load_cache_from_file_generalized_by_size,
     save_cache_to_file_generalized,
 };
 use czkawka_core::common_messages::Messages;
 use czkawka_core::duplicate::HashType;
+use directories_next::ProjectDirs;
+use gtk4::prelude::*;
+use gtk4::{Label, ResponseType, Window};
+use image::imageops::FilterType;
+use image_hasher::HashAlg;
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
@@ -177,7 +176,14 @@ pub fn connect_settings(gui_data: &GuiData) {
                                 FilterType::Nearest,
                                 FilterType::Triangle,
                             ] {
-                                for hash_alg in &[HashAlg::Blockhash, HashAlg::Gradient, HashAlg::DoubleGradient, HashAlg::VertGradient, HashAlg::Mean] {
+                                for hash_alg in &[
+                                    HashAlg::Blockhash,
+                                    HashAlg::Gradient,
+                                    HashAlg::DoubleGradient,
+                                    HashAlg::VertGradient,
+                                    HashAlg::Mean,
+                                    HashAlg::Median,
+                                ] {
                                     let (mut messages, loaded_items) = load_cache_from_file_generalized_by_path::<czkawka_core::similar_images::ImagesEntry>(
                                         &get_similar_images_cache_file(hash_size, hash_alg, image_filter),
                                         true,

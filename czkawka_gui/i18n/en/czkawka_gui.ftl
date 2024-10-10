@@ -21,6 +21,12 @@ music_checking_by_content = Content
 same_music_seconds_label = Minimal fragment second duration
 same_music_similarity_label = Maximum difference
 
+music_compare_only_in_title_group = Compare only in title
+music_compare_only_in_title_group_tooltip =
+        When enabled, files are grouped by title and then compared to each other.
+
+        With 10000 files, instead almost 100 million comparisons usually there will be around 20000 comparisons.
+
 same_music_tooltip =
         Searching for similar music files by its content can be configured by setting:
 
@@ -331,6 +337,14 @@ header_about_button_tooltip = Opens dialog with info about app.
 ## General
 settings_number_of_threads = Number of used threads
 settings_number_of_threads_tooltip = Number of used threads, 0 means that all available threads will be used.
+
+settings_use_rust_preview = Use external libraries instead gtk to load previews
+settings_use_rust_preview_tooltip =
+        Using gtk previews will sometimes be faster and support more formats, but sometimes this could be exactly the opposite.
+
+        If you have problems with loading previews, you may can to try to change this setting.
+
+        On non-linux systems, it is recommended to use this option, because gtk-pixbuf are not always available there so disabling this option will not load previews of some images.
 
 settings_label_restart = You need to restart app to apply settings!
 

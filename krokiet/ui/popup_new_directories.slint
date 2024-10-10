@@ -44,17 +44,16 @@ export component PopupNewDirectories inherits Rectangle {
 
                         TextEdit {
                             vertical-stretch: 1.0;
-                            text <=> text-data;
+                            text <=> text_data;
                         }
 
                         HorizontalLayout {
                             min-height: 20px;
                             Button {
-                                enabled: text-data != "";
+                                enabled: text_data != "";
                                 text: "OK";
                                 clicked => {
                                     Callabler.added_manual_directories(GuiState.choosing_include_directories, text_data);
-                                    debug("OK");
                                     popup_window.close();
                                 }
                             }
@@ -62,7 +61,6 @@ export component PopupNewDirectories inherits Rectangle {
                             Button {
                                 text: "Cancel";
                                 clicked => {
-                                    debug("Cancel");
                                     popup_window.close();
                                 }
                             }

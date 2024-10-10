@@ -1,18 +1,19 @@
-use crate::common::{get_is_header_mode, get_tool_model, set_tool_model};
-use crate::model_operations::{collect_path_name_from_model, deselect_all_items, filter_out_checked_items};
-use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow};
+use std::path::{Path, PathBuf};
+use std::{fs, path};
 
 use czkawka_core::common_messages::Messages;
 use rayon::prelude::*;
 use rfd::FileDialog;
 use slint::{ComponentHandle, ModelRc, VecModel};
-use std::path::{Path, PathBuf};
-use std::{fs, path};
+
+use crate::common::{get_is_header_mode, get_tool_model, set_tool_model};
+use crate::model_operations::{collect_path_name_from_model, deselect_all_items, filter_out_checked_items};
+use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow};
 
 pub fn connect_move(app: &MainWindow) {
     let a = app.as_weak();
     app.on_folders_move_choose_requested(move || {
-        let app = a.upgrade().unwrap();
+        let app = a.upgrade().expect("Failed to upgrade app :(");
 
         let file_dialog = FileDialog::new();
         let Some(folder) = file_dialog.pick_folder() else {
@@ -25,7 +26,7 @@ pub fn connect_move(app: &MainWindow) {
 
     let a = app.as_weak();
     app.global::<Callabler>().on_move_items(move |preserve_structure, copy_mode, output_folder| {
-        let app = a.upgrade().unwrap();
+        let app = a.upgrade().expect("Failed to upgrade app :(");
         let active_tab = app.global::<GuiState>().get_active_tab();
         let current_model = get_tool_model(&app, active_tab);
 

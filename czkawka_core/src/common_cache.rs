@@ -4,7 +4,7 @@ use std::io::{BufReader, BufWriter};
 use fun_time::fun_time;
 use image::imageops::FilterType;
 use image_hasher::HashAlg;
-use log::debug;
+use log::{debug, error};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use serde::{Deserialize, Serialize};
 
@@ -15,6 +15,7 @@ use crate::duplicate::HashType;
 use crate::similar_images::{convert_algorithm_to_string, convert_filters_to_string};
 
 const CACHE_VERSION: &str = "70";
+const CACHE_IMAGE_VERSION: &str = "80";
 
 pub fn get_broken_files_cache_file() -> String {
     format!("cache_broken_files_{CACHE_VERSION}.bin")
@@ -22,7 +23,7 @@ pub fn get_broken_files_cache_file() -> String {
 
 pub fn get_similar_images_cache_file(hash_size: &u8, hash_alg: &HashAlg, image_filter: &FilterType) -> String {
     format!(
-        "cache_similar_images_{hash_size}_{}_{}_{CACHE_VERSION}.bin",
+        "cache_similar_images_{hash_size}_{}_{}_{CACHE_IMAGE_VERSION}.bin",
         convert_algorithm_to_string(hash_alg),
         convert_filters_to_string(image_filter),
     )
@@ -56,7 +57,7 @@ where
         let hashmap_to_save = hashmap.values().filter(|t| t.get_size() >= minimum_file_size).collect::<Vec<_>>();
 
         {
-            let writer = BufWriter::new(file_handler.unwrap()); // Unwrap because cannot fail here
+            let writer = BufWriter::new(file_handler.expect("Cannot fail, because for saving, this always exists"));
             if let Err(e) = bincode::serialize_into(writer, &hashmap_to_save) {
                 text_messages.warnings.push(format!("Cannot write data to cache file {cache_file:?}, reason {e}"));
                 debug!("Failed to save cache to file {cache_file:?}");
@@ -82,6 +83,23 @@ where
         debug!("Failed to save cache to file {cache_file_name} because not exists");
     }
     text_messages
+}
+
+pub fn extract_loaded_cache<T>(
+    loaded_hash_map: &BTreeMap<String, T>,
+    files_to_check: BTreeMap<String, T>,
+    records_already_cached: &mut BTreeMap<String, T>,
+    non_cached_files_to_check: &mut BTreeMap<String, T>,
+) where
+    T: Clone,
+{
+    for (name, file_entry) in files_to_check {
+        if let Some(cached_file_entry) = loaded_hash_map.get(&name) {
+            records_already_cached.insert(name, cached_file_entry.clone());
+        } else {
+            non_cached_files_to_check.insert(name, file_entry);
+        }
+    }
 }
 
 #[fun_time(message = "load_cache_from_file_generalized_by_path", level = "debug")]
@@ -178,20 +196,29 @@ where
         if let Some(file_handler) = file_handler {
             let reader = BufReader::new(file_handler);
 
+            // TODO cannot use limits
+            // Probably also save function needs to be updated
+            // Without it loading not working
+
+            // let options = bincode::DefaultOptions::new().with_limit(4 * 1024 * 1024 * 1024);
+            // vec_loaded_entries = match options.deserialize_from(reader) {
+
             vec_loaded_entries = match bincode::deserialize_from(reader) {
                 Ok(t) => t,
                 Err(e) => {
                     text_messages.warnings.push(format!("Failed to load data from cache file {cache_file:?}, reason {e}"));
-                    debug!("Failed to load cache from file {cache_file:?}");
+                    error!("Failed to load cache from file {cache_file:?}");
                     return (text_messages, None);
                 }
             };
         } else {
-            let reader = BufReader::new(file_handler_json.unwrap()); // Unwrap cannot fail, because at least one file must be valid
+            let reader = BufReader::new(file_handler_json.expect("This cannot fail, because if file_handler is None, then this cannot be None"));
             vec_loaded_entries = match serde_json::from_reader(reader) {
                 Ok(t) => t,
                 Err(e) => {
-                    text_messages.warnings.push(format!("Failed to load data from cache file {cache_file_json:?}, reason {e}"));
+                    text_messages
+                        .warnings
+                        .push(format!("Failed to load data from json cache file {cache_file_json:?}, reason {e}"));
                     debug!("Failed to load cache from file {cache_file:?}");
                     return (text_messages, None);
                 }

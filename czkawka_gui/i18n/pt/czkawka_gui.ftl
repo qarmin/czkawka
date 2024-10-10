@@ -1,8 +1,8 @@
 # Window titles
 window_settings_title = Configurações
 window_main_title = Czkawka (Soluço)
-window_progress_title = Verificando
-window_compare_images = Comparar imagens
+window_progress_title = Escaneando
+window_compare_images = Comparar Imagens
 # General
 general_ok_button = Ok
 general_close_button = Fechar
@@ -10,31 +10,36 @@ general_close_button = Fechar
 music_title_checkbox = Título
 music_artist_checkbox = Artista
 music_year_checkbox = Ano
-music_bitrate_checkbox = Taxa de bits
-music_genre_checkbox = Género
+music_bitrate_checkbox = Taxa de Bits
+music_genre_checkbox = Gênero
 music_length_checkbox = Comprimento
-music_comparison_checkbox = Comparação aproximada
+music_comparison_checkbox = Comparação Aproximada
 music_checking_by_tags = Etiquetas
 music_checking_by_content = Conteúdo
-same_music_seconds_label = Duração mínima do fragmento segundo tempo
+same_music_seconds_label = Duração mínima de segundos do fragmento
 same_music_similarity_label = Diferença máxima
-same_music_tooltip =
-    Procurar por arquivos de música semelhantes por seu conteúdo pode ser configurado pela configuração:
+music_compare_only_in_title_group = Comparar somente no título
+music_compare_only_in_title_group_tooltip =
+    When enabled, files are grouped by title and then compared to each other.
     
-    - Tempo mínimo de fragmento depois do qual os arquivos de música podem ser identificados como semelhantes
+    With 10000 files, instead almost 100 million comparisons usually there will be around 20000 comparisons.
+same_music_tooltip =
+    Buscar por arquivos de música semelhantes por seu conteúdo pode ser configurado definindo:
+    
+    - O tempo mínimo de fragmento após o qual os arquivos de música podem ser identificados como semelhantes
     - A diferença máxima entre dois fragmentos testados
     
-    A chave para bons resultados é encontrar combinações sensíveis desses parâmetros, para fornecido.
+    A chave para bons resultados é achar combinações sensíveis desses parâmetros, para fornecido.
     
-    Definir o tempo mínimo para 5s e a diferença máxima para 1.0, irá procurar fragmentos quase idênticos nos arquivos.
-    Um tempo de 20s e uma diferença máxima de 6.0, por outro lado, funciona bem para encontrar versões remixes/ao vivo, etc.
+    Definir o tempo mínimo para 5s e a diferença máxima para 1.0 buscará fragmentos quase iguais nos arquivos.
+    Um tempo de 20s e uma diferença máxima de 6.0, por outro lado, funciona bem para achar versões remixes/ao vivo, etc.
     
-    Por padrão, cada arquivo de música é comparado entre si, e isso pode levar muito tempo para testar muitos arquivos, portanto, é geralmente melhor usar pastas de referência e especificar quais arquivos devem ser comparados (com a mesma quantidade de arquivos, A comparação de impressões digitais será mais rápida pelo menos 4 vezes do que nas pastas de referência).
+    Por padrão, cada arquivo de música é comparado entre si, e isso pode levar muito tempo para testar muitos arquivos, logo, é geralmente melhor usar pastas de referência e especificar quais arquivos devem ser comparados entre si (com a mesma quantidade de arquivos, comparar impressões digitais será pelo menos 4x mais rápido do que sem pastas de referência).
 music_comparison_checkbox_tooltip =
     Ele busca arquivos de música semelhantes usando IA, que usa aprendizado de máquina para remover parênteses duma frase. Por exemplo, com esta opção ativada, os arquivos em questão serão considerados duplicatas:
     
     Świędziżłób     ---     Świędziżłób (Remix Lato 2021)
-duplicate_case_sensitive_name = Sensível a maiúsculas e minúsculas
+duplicate_case_sensitive_name = Sensível a Maiúsculas e Minúsculas
 duplicate_case_sensitive_name_tooltip =
     Quando ativado, o grupo só registra quando eles têm o mesmo nome, por exemplo, Żołd <-> Żołd
     
@@ -44,7 +49,7 @@ duplicate_mode_name_combo_box = Nome
 duplicate_mode_size_combo_box = Tamanho
 duplicate_mode_hash_combo_box = Hash
 duplicate_hash_type_tooltip =
-    Blake3 - função de hash criptográfico. Este é o padrão, pois é muito rápido.
+    Blake3 - função de hash criptográfico. Este é o padrão, por ser muito rápido.
     
     CRC32 - função de hash simples. Isto deve ser mais rápido que Blake3, mas pode muito raramente ter algumas colisões.
     
@@ -56,23 +61,23 @@ duplicate_check_method_tooltip =
     
     Tamanho - Acha arquivos que têm o mesmo tamanho.
     
-    Hash - Acha arquivos que têm o mesmo conteúdo. Este modo faz o hash do arquivo e entção compara este hash para achar duplicatas. Este modo é o jeito mais seguro de achar duplicatas. O aplicativo usa muito cache, logo, a segunda e outras varreduras dos mesmos dados devem ser muito mais rápidas que a primeira.
+    Hash - Acha arquivos que têm o mesmo conteúdo. Este modo faz o hash do arquivo e então compara este hash para achar duplicatas. Este modo é o jeito mais seguro de achar duplicatas. O aplicativo usa muito cache, logo, a segunda e outras varreduras dos mesmos dados devem ser muito mais rápidas que a primeira.
 image_hash_size_tooltip =
-    Cada imagem marcada produz um hash especial que pode ser comparado entre si. e uma pequena diferença entre eles significa que essas imagens são parecidas. O tamanho hash
+    Cada imagem marcada produz um hash especial que podem ser comparados entre si, e uma pequena diferença entre eles significa que essas imagens são parecidas.
     
-    8 é muito bom para encontrar imagens que são apenas um pouco semelhantes ao original. Com um maior conjunto de imagens (>1000), isso irá produzir uma grande quantidade de falsos positivos, então eu recomendo usar um tamanho de hash maior neste caso.
+    O tamanho de hash 8 é ótimo para achar imagens que são só um pouco semelhantes ao original. Com um maior conjunto de imagens (>1000), isso produzirá muitos falsos positivos, então recomendo usar um tamanho de hash maior neste caso.
     
-    16 é o tamanho hash padrão que é um bom compromisso entre encontrar até mesmo algumas imagens semelhantes e ter apenas uma pequena quantidade de colisões hash.
+    16 é o tamanho de hash padrão e um bom compromisso entre achar até mesmo imagens pouco semelhantes e ter poucas colisões de hash.
     
-    32 e 64 hashes só encontram imagens muito semelhantes, mas quase não devem ter falsos positivos (talvez, exceto algumas imagens com o canal alfa).
+    Hashes 32 e 64 só acham imagens muito semelhantes, mas quase não devem ter falsos positivos (talvez, exceto algumas imagens com o canal alfa).
 image_resize_filter_tooltip =
-    To compute hash of image, the library must first resize it.
+    Para computar o hash da imagem, a biblioteca deve primeiro redimensioná-la.
     
-    Depend on chosen algorithm, the resulting image used to calculate hash will looks a little different.
+    Dependendo do algoritmo escolhido, a imagem resultante usada para calcular o hash parecerá um pouco diferente.
     
-    The fastest algorithm to use, but also the one which gives the worst results, is Nearest. It is enabled by default, because with 16x16 hash size lower quality it is not really visible.
+    O algoritmo mais rápido a ser usado, mas também o que dá os piores resultados, é o Mais Próximo. Ele é ativado por padrão, pois com o tamanho de hash 16x16, a qualidade menor não é realmente visível.
     
-    With 8x8 hash size it is recommended to use a different algorithm than Nearest, to have better groups of images.
+    Com o tamanho de hash 8x8, recomenda-se usar um algoritmo diferente do Mais Próximo para ter melhores grupos de imagens.
 image_hash_alg_tooltip =
     Os usuários podem escolher entre um dos muitos algoritmos de cálculo do hash.
     
@@ -81,38 +86,38 @@ image_hash_alg_tooltip =
     Logo, para determinar o melhor para você, são precisos testes manuais.
 big_files_mode_combobox_tooltip = Permite a busca de arquivos menores/maiores
 big_files_mode_label = Arquivos verificados
-big_files_mode_smallest_combo_box = O menor
-big_files_mode_biggest_combo_box = O maior
-main_notebook_duplicates = Arquivos duplicados
-main_notebook_empty_directories = Diretórios vazios
-main_notebook_big_files = Arquivos grandes
-main_notebook_empty_files = Arquivos vazios
-main_notebook_temporary = Arquivos temporários
-main_notebook_similar_images = Imagens semelhantes
-main_notebook_similar_videos = Vídeos semelhantes
-main_notebook_same_music = Músicas duplicadas
-main_notebook_symlinks = Ligação simbólica inválida
-main_notebook_broken_files = Arquivos quebrados
-main_notebook_bad_extensions = Extensões inválidas
+big_files_mode_smallest_combo_box = O Menor
+big_files_mode_biggest_combo_box = O Maior
+main_notebook_duplicates = Arquivos Duplicados
+main_notebook_empty_directories = Diretórios Vazios
+main_notebook_big_files = Arquivos Grandes
+main_notebook_empty_files = Arquivos Vazios
+main_notebook_temporary = Arquivos Temporários
+main_notebook_similar_images = Imagens Semelhantes
+main_notebook_similar_videos = Vídeos Similares
+main_notebook_same_music = Músicas Duplicadas
+main_notebook_symlinks = Ligações Simbólicas Inválidas
+main_notebook_broken_files = Arquivos Quebrados
+main_notebook_bad_extensions = Extensões Inválidas
 main_tree_view_column_file_name = Nome do arquivo
-main_tree_view_column_folder_name = Nome do diretório
+main_tree_view_column_folder_name = Nome da Pasta
 main_tree_view_column_path = Caminho
-main_tree_view_column_modification = Data de modificação
+main_tree_view_column_modification = Data de Modificação
 main_tree_view_column_size = Tamanho
 main_tree_view_column_similarity = Similaridade
 main_tree_view_column_dimensions = Tamanho
 main_tree_view_column_title = Título
 main_tree_view_column_artist = Artista
 main_tree_view_column_year = Ano
-main_tree_view_column_bitrate = Taxa de bits
+main_tree_view_column_bitrate = Taxa de Bits
 main_tree_view_column_length = Comprimento
 main_tree_view_column_genre = Género
-main_tree_view_column_symlink_file_name = Nome do arquivo de ligação simbólica
-main_tree_view_column_symlink_folder = Diretório da ligação simbólica
-main_tree_view_column_destination_path = Caminho de destino
-main_tree_view_column_type_of_error = Tipo de erro
-main_tree_view_column_current_extension = Extensão atual
-main_tree_view_column_proper_extensions = Extensão adequada
+main_tree_view_column_symlink_file_name = Nome do Arquivo de Ligação Simbólica
+main_tree_view_column_symlink_folder = Pasta da Ligação Simbólica
+main_tree_view_column_destination_path = Caminho de Destino
+main_tree_view_column_type_of_error = Tipo de Erro
+main_tree_view_column_current_extension = Extensão Atual
+main_tree_view_column_proper_extensions = Extensão Adequada
 main_label_check_method = Método de verificação
 main_label_hash_type = Tipo de hash
 main_label_hash_size = Tamanho do hash
@@ -123,21 +128,21 @@ main_label_shown_files = Número de arquivos exibidos
 main_label_resize_algorithm = Redimensionar algoritmo
 main_label_similarity = Similaridade{ " " }
 main_check_box_broken_files_audio = Áudio
-main_check_box_broken_files_pdf = Pdf
+main_check_box_broken_files_pdf = PDF
 main_check_box_broken_files_archive = Arquivar
 main_check_box_broken_files_image = Imagem
-check_button_general_same_size = Ignorar o mesmo tamanho
-check_button_general_same_size_tooltip = Ignorar arquivos com tamanho idêntico nos resultados - geralmente estes são duplicados 1:1
-main_label_size_bytes_tooltip = Tamanho dos arquivos que serão usados na verificação
+check_button_general_same_size = Ignorar do mesmo tamanho
+check_button_general_same_size_tooltip = Ignorar arquivos com tamanho idêntico nos resultados — geralmente estes são duplicatas 1:1
+main_label_size_bytes_tooltip = Tamanho dos arquivos usados na verificação
 # Upper window
-upper_tree_view_included_folder_column_title = Diretórios para buscar
-upper_tree_view_included_reference_column_title = Diretórios de referência
+upper_tree_view_included_folder_column_title = Pastas para Buscar
+upper_tree_view_included_reference_column_title = Pastas de Referência
 upper_recursive_button = Recursiva
 upper_recursive_button_tooltip = Se selecionado, buscar também arquivos que não são postos diretamente nas pastas escolhidas.
-upper_manual_add_included_button = Adição manual
+upper_manual_add_included_button = Adicionar Manual
 upper_add_included_button = Adicionar
 upper_remove_included_button = Excluir
-upper_manual_add_excluded_button = Adição manual
+upper_manual_add_excluded_button = Adicionar Manual
 upper_add_excluded_button = Adicionar
 upper_remove_excluded_button = Excluir
 upper_manual_add_included_button_tooltip =
@@ -156,15 +161,15 @@ upper_manual_add_excluded_button_tooltip =
     /home/roman;/home/krokiet adicionará dois diretórios /home/roman e /home/keokiet
 upper_add_excluded_button_tooltip = Adicionar diretório a ser excluído na busca.
 upper_remove_excluded_button_tooltip = Excluir diretório da exclusão.
-upper_notebook_items_configuration = Configuração dos itens
-upper_notebook_excluded_directories = Diretórios excluídos
-upper_notebook_included_directories = Diretórios incluídos
+upper_notebook_items_configuration = Configuração dos Itens
+upper_notebook_excluded_directories = Diretórios Excluídos
+upper_notebook_included_directories = Diretórios Incluídos
 upper_allowed_extensions_tooltip =
     Extensões permitidas devem ser separadas por vírgulas (por padrão todas estão disponíveis).
     
     Os seguintes Macros, que adicionam várias extensões de uma só vez, também estão disponíveis: IMAGE, VIDEO, MUSIC, TEXT.
     
-    Exemplo de uso ".exe, IMAGE, VIDEO, .rar, 7z" - isto significa que as imagens (e. . jpg, png), vídeos (por exemplo, avi, mp4), exe, rar e arquivos 7z serão escaneados.
+    Exemplo de uso ".exe, IMAGE, VIDEO, .rar, 7z" — isto significa que as imagens (ex., jpg, png), vídeos (ex., avi, mp4), exe, rar e arquivos 7z serão escaneados.
 upper_excluded_extensions_tooltip =
     Lista de arquivos desabilitados que serão ignorados na verificação.
     
@@ -223,13 +228,13 @@ popover_custom_case_sensitive_check_button = Sensível a maiúsculas e minúscul
 popover_custom_all_in_group_label = Não selecionar todo registro no grupo
 popover_custom_mode_unselect = Desmarcar customizado
 popover_custom_mode_select = Selecionar customizado
-popover_sort_file_name = Nome do ficheiro
+popover_sort_file_name = Nome do arquivo
 popover_sort_folder_name = Nome da pasta
-popover_sort_full_name = Nome Completo
+popover_sort_full_name = Nome completo
 popover_sort_size = Tamanho
 popover_sort_selection = Seleção
-popover_invalid_regex = Regex inválida
-popover_valid_regex = Regex é válida
+popover_invalid_regex = Regex inválido
+popover_valid_regex = Expressão regular é válida
 # Bottom buttons
 bottom_search_button = Buscar
 bottom_select_button = Selecionar
@@ -285,6 +290,13 @@ header_about_button_tooltip = Abre diálogo com informações sobre o aplicativo
 
 settings_number_of_threads = Número de threads usadas
 settings_number_of_threads_tooltip = Numero de thread usadas. Zero significa que toda thread disponível será usada.
+settings_use_rust_preview = Usar bibliotecas externas em vez de gtk para carregar pré-visualizações
+settings_use_rust_preview_tooltip =
+    Using gtk previews will sometimes be faster and support more formats, but sometimes this could be exactly the opposite.
+    
+    If you have problems with loading previews, you may can to try to change this setting.
+    
+    On non-linux systems, it is recommended to use this option, because gtk-pixbuf are not always available there so disabling this option will not load previews of some images.
 settings_label_restart = Você tem de reiniciar o aplicativo para aplicar as configurações!
 settings_ignore_other_filesystems = Ignorar outros sistemas de arquivos (só Linux)
 settings_ignore_other_filesystems_tooltip =
@@ -324,9 +336,9 @@ settings_multiple_delete_outdated_cache_checkbutton_tooltip =
     
     No caso de ter centenas de milhares de registros no cache, é sugerido ativar isto, o que acelerará o carregamento/armazenamento de cache/salvamento no início/fim do escaneamento.
 settings_notebook_general = Geral
-settings_notebook_duplicates = Duplicados
-settings_notebook_images = Imagens semelhantes
-settings_notebook_videos = Vídeo semelhante
+settings_notebook_duplicates = Duplicatas
+settings_notebook_images = Imagens Semelhantes
+settings_notebook_videos = Vídeo Semelhante
 
 ## Multiple - settings used in multiple tabs
 
@@ -445,7 +457,7 @@ saving_loading_not_valid = A configuração "{ $data }" não existe na versão a
 invalid_symlink_infinite_recursion = Recursão infinita
 invalid_symlink_non_existent_destination = Arquivo de destino não existe
 # Other
-selected_all_reference_folders = Não se pode iniciar a busca quando todo diretório está definido como pasta de referência
+selected_all_reference_folders = Não é possível iniciar a busca quando todo diretório está definido como pasta de referência
 searching_for_data = Buscando dados, pode demorar um pouco, aguarde...
 text_view_messages = MENSAGENS
 text_view_warnings = AVISOS
@@ -484,7 +496,7 @@ cache_properly_cleared = Cache devidamente limpo
 cache_clear_duplicates_title = Limpando o cache de duplicatas
 cache_clear_similar_images_title = Limpando o cache de imagens similares
 cache_clear_similar_videos_title = Limpando o cache de vídeos similares
-cache_clear_message_label_1 = Quer limpar o cache de entradas desatualizadas?
+cache_clear_message_label_1 = Deseja limpar o cache de entradas desatualizadas?
 cache_clear_message_label_2 = Esta operação removerá toda entrada de cache que aponta para arquivos inválidos.
 cache_clear_message_label_3 = Isto pode acelerar um pouco o carregamento/salvamento para o cache.
 cache_clear_message_label_4 = AVISO: A operação removerá todo dado em cache de unidades externas desconectadas. Logo, cada hash terá de ser regenerado.

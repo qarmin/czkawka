@@ -1,12 +1,11 @@
 use std::collections::HashSet;
 use std::path::PathBuf;
 
+#[cfg(target_family = "windows")]
+use czkawka_core::common::normalize_windows_path;
 use gdk4::{DragAction, FileList};
 use gtk4::prelude::*;
 use gtk4::{DropTarget, FileChooserNative, Notebook, Orientation, ResponseType, TreeView, Window};
-
-#[cfg(target_family = "windows")]
-use czkawka_core::common::normalize_windows_path;
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
@@ -79,7 +78,7 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
             let (vec_tree_path, _tree_model) = selection.selected_rows();
 
             for tree_path in vec_tree_path.iter().rev() {
-                list_store.remove(&list_store.iter(tree_path).unwrap());
+                list_store.remove(&list_store.iter(tree_path).expect("Using invalid tree_path"));
             }
         });
     }
@@ -94,7 +93,7 @@ pub fn connect_selection_of_directories(gui_data: &GuiData) {
             let (vec_tree_path, _tree_model) = selection.selected_rows();
 
             for tree_path in vec_tree_path.iter().rev() {
-                list_store.remove(&list_store.iter(tree_path).unwrap());
+                list_store.remove(&list_store.iter(tree_path).expect("Using invalid tree_path"));
             }
         });
     }
@@ -130,7 +129,7 @@ fn connect_file_dialog(file_dialog_include_exclude_folder_selection: &FileChoose
     file_dialog_include_exclude_folder_selection.connect_response(move |file_chooser, response_type| {
         if response_type == ResponseType::Accept {
             let excluded_items;
-            let tree_view = match to_notebook_upper_enum(notebook_upper.current_page().unwrap()) {
+            let tree_view = match to_notebook_upper_enum(notebook_upper.current_page().expect("Current page not set")) {
                 NotebookUpperEnum::IncludedDirectories => {
                     excluded_items = false;
                     &include_tree_view
@@ -147,7 +146,7 @@ fn connect_file_dialog(file_dialog_include_exclude_folder_selection: &FileChoose
             for index in 0..g_files.n_items() {
                 let file = &g_files.item(index);
                 if let Some(file) = file {
-                    let ss = file.clone().downcast::<gtk4::gio::File>().unwrap();
+                    let ss = file.clone().downcast::<gtk4::gio::File>().expect("Failed to downcast to File");
                     if let Some(path_buf) = ss.path() {
                         folders.push(path_buf);
                     }
@@ -192,7 +191,7 @@ fn add_manually_directories(window_main: &Window, tree_view: &TreeView, excluded
     let added_button = dialog.add_button(&flg!("general_ok_button"), ResponseType::Ok);
     dialog.add_button(&flg!("general_close_button"), ResponseType::Cancel);
 
-    let parent = added_button.parent().unwrap().parent().unwrap().downcast::<gtk4::Box>().unwrap(); // TODO Hack, but not so ugly as before
+    let parent = added_button.parent().expect("Hack 1").parent().expect("Hack 2").downcast::<gtk4::Box>().expect("Hack 3"); // TODO Hack, but not so ugly as before
     parent.set_orientation(Orientation::Vertical);
     parent.insert_child_after(&entry, None::<&gtk4::Widget>);
 

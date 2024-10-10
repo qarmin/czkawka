@@ -223,7 +223,10 @@ export component ToolSettings {
                     maximum <=> Settings.similar_music_sub_minimal_fragment_duration_max;
                     value <=> Settings.similar_music_sub_minimal_fragment_duration_value;
                 }
-
+                CheckBoxWrapper {
+                    text: "Compare only with similar titles";
+                    checked <=> Settings.similar_music_compare_fingerprints_only_with_similar_titles;
+                }
             }
             Rectangle {}
         }

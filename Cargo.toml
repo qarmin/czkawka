@@ -17,10 +17,20 @@ resolver = "2"
 # until you are ready to occasional crashes
 panic = "unwind"
 
+# Should find more panics, that now are hidden from user
+# There is one big disadvantage - in case of overflow/underflow entire app crashes and panic cannot be catched and app aborts
+# So feel free to disable it, if you want
+overflow-checks = true
+
 # LTO setting is disabled by default, because release mode is usually needed to develop app and compilation with LTO would take a lot of time
 # But it is used to optimize release builds(and probably also in CI, where time is not so important as in local development)
 #lto = "thin"
 
 # Optimize all dependencies except application/workspaces, even in debug builds
 [profile.dev.package."*"]
+opt-level = 3
+
+[profile.test]
+debug-assertions = true # Forces to crash when there is duplicated item in cli
+overflow-checks = true
 opt-level = 3

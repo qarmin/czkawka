@@ -5,9 +5,10 @@ use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
 use log::debug;
 
-use crate::common_dir_traversal::{DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
+use crate::common_dir_traversal::{DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::*;
+use crate::progress_data::ProgressData;
 
 #[derive(Default)]
 pub struct Info {
@@ -127,7 +128,7 @@ impl PrintResults for EmptyFiles {
         if !self.empty_files.is_empty() {
             writeln!(writer, "Found {} empty files.", self.information.number_of_empty_files)?;
             for file_entry in &self.empty_files {
-                writeln!(writer, "{:?}", file_entry.path)?;
+                writeln!(writer, "\"{}\"", file_entry.path.to_string_lossy())?;
             }
         } else {
             write!(writer, "Not found any empty files.")?;

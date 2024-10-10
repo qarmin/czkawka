@@ -1,8 +1,7 @@
-use rayon::prelude::*;
-use slint::{ComponentHandle, ModelRc, VecModel};
-
 use czkawka_core::common::remove_folder_if_contains_only_empty_folders;
 use czkawka_core::common_messages::Messages;
+use rayon::prelude::*;
+use slint::{ComponentHandle, ModelRc, VecModel};
 
 use crate::common::{get_is_header_mode, get_tool_model, set_tool_model};
 use crate::model_operations::{collect_full_path_from_model, deselect_all_items, filter_out_checked_items};
@@ -11,7 +10,7 @@ use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow, Settings
 pub fn connect_delete_button(app: &MainWindow) {
     let a = app.as_weak();
     app.global::<Callabler>().on_delete_selected_items(move || {
-        let app = a.upgrade().unwrap();
+        let app = a.upgrade().expect("Failed to upgrade app :(");
 
         let active_tab = app.global::<GuiState>().get_active_tab();
 

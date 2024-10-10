@@ -10,12 +10,12 @@ env:
 
 jobs:
   quality:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
       - name: Install Gtk 4
-        run: sudo apt update || true; sudo apt install -y libgtk-4-dev libraw-dev libheif-dev -y
+        run: sudo apt update || true; sudo apt install -y libgtk-4-dev libraw-dev libheif-dev libavif-dev libdav1d-dev -y
 
       - name: Check the format
         run: cargo fmt --all -- --check

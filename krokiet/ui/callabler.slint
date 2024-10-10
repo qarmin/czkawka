@@ -22,7 +22,10 @@ export global Callabler {
 
     callback tab_changed();
 
+    // Dialogs
+    callback save_results();
     callback move_items(bool, bool, string);
+    callback rename_files();
 
     // Translations
     pure callback translate(string, [{key: string, value: string}]) -> string;

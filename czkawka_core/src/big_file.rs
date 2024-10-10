@@ -7,9 +7,10 @@ use humansize::{format_size, BINARY};
 use log::debug;
 use rayon::prelude::*;
 
-use crate::common_dir_traversal::{DirTraversalBuilder, DirTraversalResult, FileEntry, ProgressData, ToolType};
+use crate::common_dir_traversal::{DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::{DebugPrint, PrintResults};
+use crate::progress_data::ProgressData;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum SearchMode {
@@ -17,27 +18,40 @@ pub enum SearchMode {
     SmallestFiles,
 }
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct Info {
     pub number_of_real_files: usize,
+}
+
+pub struct BigFileParameters {
+    pub number_of_files_to_check: usize,
+    pub search_mode: SearchMode,
+}
+
+impl BigFileParameters {
+    pub fn new(number_of_files: usize, search_mode: SearchMode) -> Self {
+        let number_of_files_to_check = if number_of_files == 0 { 1 } else { number_of_files };
+        Self {
+            number_of_files_to_check,
+            search_mode,
+        }
+    }
 }
 
 pub struct BigFile {
     common_data: CommonToolData,
     information: Info,
     big_files: Vec<FileEntry>,
-    number_of_files_to_check: usize,
-    search_mode: SearchMode,
+    params: BigFileParameters,
 }
 
 impl BigFile {
-    pub fn new() -> Self {
+    pub fn new(params: BigFileParameters) -> Self {
         Self {
             common_data: CommonToolData::new(ToolType::BigFile),
             information: Info::default(),
             big_files: Default::default(),
-            number_of_files_to_check: 50,
-            search_mode: SearchMode::BiggestFiles,
+            params,
         }
     }
 
@@ -52,7 +66,7 @@ impl BigFile {
         self.debug_print();
     }
 
-    // #[fun_time(message = "look_for_big_files", level = "debug")]
+    #[fun_time(message = "look_for_big_files", level = "debug")]
     fn look_for_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
         let result = DirTraversalBuilder::new()
             .group_by(|_fe| ())
@@ -61,7 +75,6 @@ impl BigFile {
             .common_data(&self.common_data)
             .minimal_file_size(1)
             .maximal_file_size(u64::MAX)
-            .max_stage(0)
             .build()
             .run();
 
@@ -70,17 +83,18 @@ impl BigFile {
                 let mut all_files = grouped_file_entries.into_values().flatten().collect::<Vec<_>>();
                 all_files.par_sort_unstable_by_key(|fe| fe.size);
 
-                if self.search_mode == SearchMode::BiggestFiles {
+                if self.get_params().search_mode == SearchMode::BiggestFiles {
                     all_files.reverse();
                 }
 
-                if all_files.len() > self.number_of_files_to_check {
-                    all_files.truncate(self.number_of_files_to_check);
+                if all_files.len() > self.get_params().number_of_files_to_check {
+                    all_files.truncate(self.get_params().number_of_files_to_check);
                 }
 
                 self.big_files = all_files;
 
                 self.common_data.text_messages.warnings.extend(warnings);
+                self.information.number_of_real_files = self.big_files.len();
                 debug!("check_files - Found {} biggest/smallest files.", self.big_files.len());
                 true
             }
@@ -106,12 +120,6 @@ impl BigFile {
     }
 }
 
-impl Default for BigFile {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl DebugPrint for BigFile {
     fn debug_print(&self) {
         if !cfg!(debug_assertions) {
@@ -119,8 +127,8 @@ impl DebugPrint for BigFile {
         }
 
         println!("### INDIVIDUAL DEBUG PRINT ###");
-        println!("Big files size {} in {} groups", self.information.number_of_real_files, self.big_files.len());
-        println!("Number of files to check - {:?}", self.number_of_files_to_check);
+        println!("Info: {:?}", self.information);
+        println!("Number of files to check - {}", self.get_params().number_of_files_to_check);
         self.debug_print_common();
         println!("-----------------------------------------");
     }
@@ -137,16 +145,22 @@ impl PrintResults for BigFile {
         )?;
 
         if self.information.number_of_real_files != 0 {
-            if self.search_mode == SearchMode::BiggestFiles {
+            if self.get_params().search_mode == SearchMode::BiggestFiles {
                 writeln!(writer, "{} the biggest files.\n\n", self.information.number_of_real_files)?;
             } else {
                 writeln!(writer, "{} the smallest files.\n\n", self.information.number_of_real_files)?;
             }
             for file_entry in &self.big_files {
-                writeln!(writer, "{} ({}) - {:?}", format_size(file_entry.size, BINARY), file_entry.size, file_entry.path)?;
+                writeln!(
+                    writer,
+                    "{} ({}) - \"{}\"",
+                    format_size(file_entry.size, BINARY),
+                    file_entry.size,
+                    file_entry.path.to_string_lossy()
+                )?;
             }
         } else {
-            write!(writer, "Not found any files.").unwrap();
+            writeln!(writer, "Not found any files.")?;
         }
 
         Ok(())
@@ -167,10 +181,6 @@ impl CommonData for BigFile {
 }
 
 impl BigFile {
-    pub fn set_search_mode(&mut self, search_mode: SearchMode) {
-        self.search_mode = search_mode;
-    }
-
     pub const fn get_big_files(&self) -> &Vec<FileEntry> {
         &self.big_files
     }
@@ -179,7 +189,7 @@ impl BigFile {
         &self.information
     }
 
-    pub fn set_number_of_files_to_check(&mut self, number_of_files_to_check: usize) {
-        self.number_of_files_to_check = number_of_files_to_check;
+    pub fn get_params(&self) -> &BigFileParameters {
+        &self.params
     }
 }

@@ -16,7 +16,7 @@ fn connect_add_manual_directories(app: &MainWindow) {
         if folders.is_empty() {
             return;
         }
-        let app = a.upgrade().unwrap();
+        let app = a.upgrade().expect("Failed to upgrade app :(");
         let settings = app.global::<Settings>();
 
         if included_directories {
@@ -30,7 +30,7 @@ fn connect_add_manual_directories(app: &MainWindow) {
 fn connect_remove_directories(app: &MainWindow) {
     let a = app.as_weak();
     app.global::<Callabler>().on_remove_item_directories(move |included_directories| {
-        let app = a.upgrade().unwrap();
+        let app = a.upgrade().expect("Failed to upgrade app :(");
         let settings = app.global::<Settings>();
 
         let current_index = if included_directories {
@@ -81,7 +81,7 @@ fn connect_remove_directories(app: &MainWindow) {
 fn connect_add_directories(app: &MainWindow) {
     let a = app.as_weak();
     app.on_folder_choose_requested(move |included_directories| {
-        let app = a.upgrade().unwrap();
+        let app = a.upgrade().expect("Failed to upgrade app :(");
 
         let directory = std::env::current_dir().unwrap_or(std::path::PathBuf::from("/"));
 
