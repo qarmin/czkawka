@@ -73,10 +73,14 @@ const WORKAROUNDS: &[(&str, &str)] = &[
     // Games specific extensions - cannot be used here common extensions like zip
     ("gz", "h3m"),     // Heroes 3
     ("zip", "hashdb"), // Gog
-    ("zip", "c2"),     // King of the Dark Age
-    ("bmp", "c2"),     // King of the Dark Age
-    ("avi", "c2"),     // King of the Dark Age
-    ("exe", "c2"),     // King of the Dark Age
+    ("c2", "zip"),     // King of the Dark Age
+    ("c2", "bmp"),     // King of the Dark Age
+    ("c2", "avi"),     // King of the Dark Age
+    ("c2", "exe"),     // King of the Dark Age
+    // Raw images
+    ("tif", "nef"),
+    ("tif", "dng"),
+    ("tif", "arw"),
     // Other
     ("der", "keystore"),  // Godot/Android keystore
     ("exe", "pyd"),       // Python/Mingw

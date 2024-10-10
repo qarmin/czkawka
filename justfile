@@ -20,7 +20,7 @@ krokiet_dark:
 
 cli +args:
     RUST_BACKTRACE=1 cargo run --bin czkawka_cli -- {{args}}
-cli_r args:
+cli_r +args:
     RUST_BACKTRACE=1 cargo run --bin czkawka_cli --release -- {{args}}
 cli_help:
     cargo run --bin czkawka_cli -- --help

@@ -18,6 +18,11 @@ music_checking_by_tags = Tags
 music_checking_by_content = Contenu
 same_music_seconds_label = Durée minimale de seconde de fragment
 same_music_similarity_label = Différence maximale
+music_compare_only_in_title_group = Comparer seulement dans le titre
+music_compare_only_in_title_group_tooltip =
+    When enabled, files are grouped by title and then compared to each other.
+    
+    With 10000 files, instead almost 100 million comparisons usually there will be around 20000 comparisons.
 same_music_tooltip =
     La recherche de fichiers musicaux aux contenus similaires peut être configurée en définissant :
     
@@ -68,13 +73,13 @@ image_hash_size_tooltip =
     
     32 et 64 hachages ne trouvent que des images très similaires, mais devraient avoir presque pas de faux positifs (peut-être sauf certaines images avec canal alpha).
 image_resize_filter_tooltip =
-    To compute hash of image, the library must first resize it.
+    Pour calculer le hachage de l'image, la bibliothèque doit d'abord la redimensionner.
     
-    Depend on chosen algorithm, the resulting image used to calculate hash will looks a little different.
+    En fonction de l'algorithme choisi, l'image résultante utilisée pour calculer le hachage pourra sembler un peu différente.
     
-    The fastest algorithm to use, but also the one which gives the worst results, is Nearest. It is enabled by default, because with 16x16 hash size lower quality it is not really visible.
+    L'algorithme le plus rapide à utiliser, mais aussi celui qui donne les pires résultats, est PlusProche. Il est activé par défaut, car avec une taille de hachage d'une qualité inférieure à 16x16, cela ne sera que peu visible.
     
-    With 8x8 hash size it is recommended to use a different algorithm than Nearest, to have better groups of images.
+    Avec une taille de hachage de 8x8, il est recommandé d'utiliser un algorithme différent de PlusProche pour obtenir de meilleurs groupes d'images.
 image_hash_alg_tooltip =
     Les utilisateurs peuvent choisir parmi de nombreux algorithmes pour calculer le hash.
     
@@ -288,6 +293,13 @@ header_about_button_tooltip = Ouvre la boîte de dialogue contenant les informat
 
 settings_number_of_threads = Nombre de threads utilisés
 settings_number_of_threads_tooltip = Nombre de threads utilisés. « 0 » signifie que tous les threads disponibles seront utilisés.
+settings_use_rust_preview = Utiliser des bibliothèques externes à la place gtk pour charger les aperçus
+settings_use_rust_preview_tooltip =
+    Using gtk previews will sometimes be faster and support more formats, but sometimes this could be exactly the opposite.
+    
+    If you have problems with loading previews, you may can to try to change this setting.
+    
+    On non-linux systems, it is recommended to use this option, because gtk-pixbuf are not always available there so disabling this option will not load previews of some images.
 settings_label_restart = Vous devez redémarrer l’application pour appliquer les réglages !
 settings_ignore_other_filesystems = Ignorer les autres systèmes de fichiers (Linux uniquement)
 settings_ignore_other_filesystems_tooltip =

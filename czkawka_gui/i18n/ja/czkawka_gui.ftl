@@ -18,6 +18,11 @@ music_checking_by_tags = タグ
 music_checking_by_content = コンテンツ
 same_music_seconds_label = フラグメント最小秒の持続時間
 same_music_similarity_label = 最大差
+music_compare_only_in_title_group = タイトルのみ比較
+music_compare_only_in_title_group_tooltip =
+    有効にすると、ファイルはタイトルでグループ化され、それから比較されます。
+    
+    10000ファイルでは、その代わりに約100万比較が通常、約20000比較があります。
 same_music_tooltip =
     音楽ファイルの内容から類似ファイルを検索するように設定できます：
     
@@ -288,6 +293,13 @@ header_about_button_tooltip = アプリに関する情報を含むダイアロ�
 
 settings_number_of_threads = 使用されるスレッドの数
 settings_number_of_threads_tooltip = 使用するスレッドの数、0 は、使用可能なすべてのスレッドが使用されることを意味します。
+settings_use_rust_preview = プレビューの読み込みにgtkの代わりに外部ライブラリを使用する
+settings_use_rust_preview_tooltip =
+    Using gtk previews will sometimes be faster and support more formats, but sometimes this could be exactly the opposite.
+    
+    If you have problems with loading previews, you may can to try to change this setting.
+    
+    On non-linux systems, it is recommended to use this option, because gtk-pixbuf are not always available there so disabling this option will not load previews of some images.
 settings_label_restart = 設定を適用するにはアプリを再起動する必要があります！
 settings_ignore_other_filesystems = 他のファイルシステムを無視(Linuxのみ)
 settings_ignore_other_filesystems_tooltip =

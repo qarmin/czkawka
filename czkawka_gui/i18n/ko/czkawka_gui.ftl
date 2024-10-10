@@ -18,6 +18,11 @@ music_checking_by_tags = Tags
 music_checking_by_content = Content
 same_music_seconds_label = Minimal fragment second duration
 same_music_similarity_label = Maximum difference
+music_compare_only_in_title_group = Compare only in title
+music_compare_only_in_title_group_tooltip =
+    When enabled, files are grouped by title and then compared to each other.
+    
+    With 10000 files, instead almost 100 million comparisons usually there will be around 20000 comparisons.
 same_music_tooltip =
     Searching for similar music files by its content can be configured by setting:
     
@@ -288,6 +293,13 @@ header_about_button_tooltip = 이 앱에 대한 정보창을 엽니다.
 
 settings_number_of_threads = 스레드 수
 settings_number_of_threads_tooltip = 사용할 스레드 수입니다. 0이면 가능한 최대 스레드를 사용합니다.
+settings_use_rust_preview = Use external libraries instead gtk to load previews
+settings_use_rust_preview_tooltip =
+    Using gtk previews will sometimes be faster and support more formats, but sometimes this could be exactly the opposite.
+    
+    If you have problems with loading previews, you may can to try to change this setting.
+    
+    On non-linux systems, it is recommended to use this option, because gtk-pixbuf are not always available there so disabling this option will not load previews of some images.
 settings_label_restart = 이 설정을 적용하려면 프로그램을 재시작해야 합니다!
 settings_ignore_other_filesystems = 다른 파일시스템 무시(Linux에서만)
 settings_ignore_other_filesystems_tooltip =

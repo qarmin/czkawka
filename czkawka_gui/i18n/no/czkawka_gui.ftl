@@ -18,6 +18,11 @@ music_checking_by_tags = Tagger
 music_checking_by_content = Innhold
 same_music_seconds_label = Minste fragment andre varighet
 same_music_similarity_label = Maksimal differanse
+music_compare_only_in_title_group = Sammenlign bare i tittel
+music_compare_only_in_title_group_tooltip =
+    Når aktivert, blir filer gruppert etter tittel og sammenlignes med hverandre.
+    
+    Med 10000 filer, vil det i stedet være nesten 100 millioner sammenligninger som regel være rundt 20000 sammenligninger.
 same_music_tooltip =
     Søker etter lignende musikkfiler av innholdet kan konfigureres ved å gå inn:
     
@@ -288,6 +293,13 @@ header_about_button_tooltip = Åpner dialog med info om app.
 
 settings_number_of_threads = Antall brukte tråder
 settings_number_of_threads_tooltip = Antall brukte tråder. 0 betyr at alle tilgjengelige tråder vil bli brukt.
+settings_use_rust_preview = Bruk eksterne biblioteker i stedet gtk for å laste forhåndsvisninger
+settings_use_rust_preview_tooltip =
+    Med gtk innledning vil noen ganger være raskere og støtte flere formater, men noen ganger kan dette være akkurat det motsatte.
+    
+    Hvis du har problemer med å laste forhåndsvisninger, kan du prøve å endre denne innstillingen.
+    
+    på ikke-linux-systemer anbefales det å bruke dette alternativet, fordi gtk-pixbuf ikke alltid finnes, slik at deaktivering av dette alternativet ikke vil laste forhåndsvisninger på noen bilder.
 settings_label_restart = Start programmet på nytt for å bruke innstillingene!
 settings_ignore_other_filesystems = Ignorer andre filsystemer (bare Linux)
 settings_ignore_other_filesystems_tooltip =

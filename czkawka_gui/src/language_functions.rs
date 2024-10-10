@@ -50,6 +50,10 @@ pub const LANGUAGES_ALL: &[Language] = &[
         short_text: "pt",
     },
     Language {
+        combo_box_text: "Português Brasileiro (Brazilian Portuguese)",
+        short_text: "pt-BR",
+    },
+    Language {
         combo_box_text: "简体中文 (Simplified Chinese)",
         short_text: "zh",
     },

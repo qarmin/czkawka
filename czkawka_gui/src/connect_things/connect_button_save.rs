@@ -29,24 +29,45 @@ pub fn connect_button_save(gui_data: &GuiData) {
     let shared_buttons = gui_data.shared_buttons.clone();
     let entry_info = gui_data.entry_info.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    buttons_save.connect_clicked(move |_| {
-        let result = match to_notebook_main_enum(notebook_main.current_page().expect("Current page not set")) {
-            NotebookMainEnum::Duplicate => shared_duplication_state.borrow().as_ref().map(|x| x.save_all_in_one("results_duplicates")),
-            NotebookMainEnum::EmptyDirectories => shared_empty_folders_state.borrow().as_ref().map(|x| x.save_all_in_one("results_empty_directories")),
-            NotebookMainEnum::EmptyFiles => shared_empty_files_state.borrow().as_ref().map(|x| x.save_all_in_one("results_empty_files")),
-            NotebookMainEnum::Temporary => shared_temporary_files_state.borrow().as_ref().map(|x| x.save_all_in_one("results_temporary_files")),
-            NotebookMainEnum::BigFiles => shared_big_files_state.borrow().as_ref().map(|x| x.save_all_in_one("results_big_files")),
-            NotebookMainEnum::SimilarImages => shared_similar_images_state.borrow().as_ref().map(|x| x.save_all_in_one("results_similar_images")),
-            NotebookMainEnum::SimilarVideos => shared_similar_videos_state.borrow().as_ref().map(|x| x.save_all_in_one("results_similar_videos")),
-            NotebookMainEnum::SameMusic => shared_same_music_state.borrow().as_ref().map(|x| x.save_all_in_one("results_same_music")),
-            NotebookMainEnum::Symlinks => shared_same_invalid_symlinks.borrow().as_ref().map(|x| x.save_all_in_one("results_invalid_symlinks")),
-            NotebookMainEnum::BrokenFiles => shared_broken_files_state.borrow().as_ref().map(|x| x.save_all_in_one("results_broken_files")),
-            NotebookMainEnum::BadExtensions => shared_bad_extensions_state.borrow().as_ref().map(|x| x.save_all_in_one("results_bad_extensions")),
-        };
 
+    buttons_save.connect_clicked(move |_| {
         let current_path = match env::current_dir() {
             Ok(t) => t.to_string_lossy().to_string(),
-            Err(_) => "<unknown>".to_string(),
+            Err(_) => "__unknown__".to_string(),
+        };
+        let result = match to_notebook_main_enum(notebook_main.current_page().expect("Current page not set")) {
+            NotebookMainEnum::Duplicate => shared_duplication_state.borrow().as_ref().map(|x| x.save_all_in_one(&current_path, "results_duplicates")),
+            NotebookMainEnum::EmptyDirectories => shared_empty_folders_state
+                .borrow()
+                .as_ref()
+                .map(|x| x.save_all_in_one(&current_path, "results_empty_directories")),
+            NotebookMainEnum::EmptyFiles => shared_empty_files_state.borrow().as_ref().map(|x| x.save_all_in_one(&current_path, "results_empty_files")),
+            NotebookMainEnum::Temporary => shared_temporary_files_state
+                .borrow()
+                .as_ref()
+                .map(|x| x.save_all_in_one(&current_path, "results_temporary_files")),
+            NotebookMainEnum::BigFiles => shared_big_files_state.borrow().as_ref().map(|x| x.save_all_in_one(&current_path, "results_big_files")),
+            NotebookMainEnum::SimilarImages => shared_similar_images_state
+                .borrow()
+                .as_ref()
+                .map(|x| x.save_all_in_one(&current_path, "results_similar_images")),
+            NotebookMainEnum::SimilarVideos => shared_similar_videos_state
+                .borrow()
+                .as_ref()
+                .map(|x| x.save_all_in_one(&current_path, "results_similar_videos")),
+            NotebookMainEnum::SameMusic => shared_same_music_state.borrow().as_ref().map(|x| x.save_all_in_one(&current_path, "results_same_music")),
+            NotebookMainEnum::Symlinks => shared_same_invalid_symlinks
+                .borrow()
+                .as_ref()
+                .map(|x| x.save_all_in_one(&current_path, "results_invalid_symlinks")),
+            NotebookMainEnum::BrokenFiles => shared_broken_files_state
+                .borrow()
+                .as_ref()
+                .map(|x| x.save_all_in_one(&current_path, "results_broken_files")),
+            NotebookMainEnum::BadExtensions => shared_bad_extensions_state
+                .borrow()
+                .as_ref()
+                .map(|x| x.save_all_in_one(&current_path, "results_bad_extensions")),
         };
 
         match result.expect("Tried to save results, without running scan(bug which needs to be fixed)") {

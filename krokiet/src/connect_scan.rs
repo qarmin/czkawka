@@ -1,4 +1,5 @@
 use std::rc::Rc;
+use std::sync::{Arc, Mutex};
 use std::thread;
 
 use chrono::DateTime;
@@ -30,9 +31,10 @@ use crate::settings::{
     get_resize_algorithm_idx, SettingsCustom, ALLOWED_AUDIO_CHECK_TYPE_VALUES, ALLOWED_BIG_FILE_SIZE_VALUES, ALLOWED_DUPLICATES_CHECK_METHOD_VALUES,
     ALLOWED_DUPLICATES_HASH_TYPE_VALUES, ALLOWED_IMAGE_HASH_ALG_VALUES, ALLOWED_RESIZE_ALGORITHM_VALUES,
 };
+use crate::shared_models::SharedModels;
 use crate::{CurrentTab, GuiState, MainListModel, MainWindow, ProgressToSend};
 
-pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>) {
+pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>, shared_models: Arc<Mutex<SharedModels>>) {
     let a = app.as_weak();
     app.on_scan_starting(move |active_tab| {
         let app = a.upgrade().expect("Failed to upgrade app :(");
@@ -58,40 +60,42 @@ pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressDat
 
         let custom_settings = collect_settings(&app);
 
+        let cloned_model = Arc::clone(&shared_models);
+
         let a = app.as_weak();
         match active_tab {
             CurrentTab::DuplicateFiles => {
-                scan_duplicates(a, progress_sender, stop_receiver, custom_settings);
+                scan_duplicates(a, progress_sender, stop_receiver, custom_settings, cloned_model);
             }
             CurrentTab::EmptyFolders => {
-                scan_empty_folders(a, progress_sender, stop_receiver, custom_settings);
+                scan_empty_folders(a, progress_sender, stop_receiver, custom_settings, cloned_model);
             }
             CurrentTab::BigFiles => {
-                scan_big_files(a, progress_sender, stop_receiver, custom_settings);
+                scan_big_files(a, progress_sender, stop_receiver, custom_settings, cloned_model);
             }
             CurrentTab::EmptyFiles => {
-                scan_empty_files(a, progress_sender, stop_receiver, custom_settings);
+                scan_empty_files(a, progress_sender, stop_receiver, custom_settings, cloned_model);
             }
             CurrentTab::SimilarImages => {
-                scan_similar_images(a, progress_sender, stop_receiver, custom_settings);
+                scan_similar_images(a, progress_sender, stop_receiver, custom_settings, cloned_model);
             }
             CurrentTab::SimilarVideos => {
-                scan_similar_videos(a, progress_sender, stop_receiver, custom_settings);
+                scan_similar_videos(a, progress_sender, stop_receiver, custom_settings, cloned_model);
             }
             CurrentTab::SimilarMusic => {
-                scan_similar_music(a, progress_sender, stop_receiver, custom_settings);
+                scan_similar_music(a, progress_sender, stop_receiver, custom_settings, cloned_model);
             }
             CurrentTab::InvalidSymlinks => {
-                scan_invalid_symlinks(a, progress_sender, stop_receiver, custom_settings);
+                scan_invalid_symlinks(a, progress_sender, stop_receiver, custom_settings, cloned_model);
             }
             CurrentTab::BadExtensions => {
-                scan_bad_extensions(a, progress_sender, stop_receiver, custom_settings);
+                scan_bad_extensions(a, progress_sender, stop_receiver, custom_settings, cloned_model);
             }
             CurrentTab::BrokenFiles => {
-                scan_broken_files(a, progress_sender, stop_receiver, custom_settings);
+                scan_broken_files(a, progress_sender, stop_receiver, custom_settings, cloned_model);
             }
             CurrentTab::TemporaryFiles => {
-                scan_temporary_files(a, progress_sender, stop_receiver, custom_settings);
+                scan_temporary_files(a, progress_sender, stop_receiver, custom_settings, cloned_model);
             }
             CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
         }
@@ -100,7 +104,13 @@ pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressDat
 
 // Scan Duplicates
 
-fn scan_duplicates(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>, custom_settings: SettingsCustom) {
+fn scan_duplicates(
+    a: Weak<MainWindow>,
+    progress_sender: Sender<ProgressData>,
+    stop_receiver: Receiver<()>,
+    custom_settings: SettingsCustom,
+    shared_models: Arc<Mutex<SharedModels>>,
+) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
@@ -169,6 +179,8 @@ fn scan_duplicates(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, s
                 vec.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
             }
 
+            shared_models.lock().unwrap().shared_duplication_state = Some(item);
+
             a.upgrade_in_event_loop(move |app| {
                 write_duplicate_results(&app, vector, messages);
             })
@@ -213,7 +225,13 @@ fn prepare_data_model_duplicates(fe: &DuplicateEntry) -> (ModelRc<SharedString>,
 }
 
 ////////////////////////////////////////// Empty Folders
-fn scan_empty_folders(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>, custom_settings: SettingsCustom) {
+fn scan_empty_folders(
+    a: Weak<MainWindow>,
+    progress_sender: Sender<ProgressData>,
+    stop_receiver: Receiver<()>,
+    custom_settings: SettingsCustom,
+    shared_models: Arc<Mutex<SharedModels>>,
+) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
@@ -225,6 +243,8 @@ fn scan_empty_folders(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>
             let messages = item.get_text_messages().create_messages_text();
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+
+            shared_models.lock().unwrap().shared_empty_folders_state = Some(item);
 
             a.upgrade_in_event_loop(move |app| {
                 write_empty_folders_results(&app, vector, messages);
@@ -260,7 +280,13 @@ fn prepare_data_model_empty_folders(fe: &FolderEntry) -> (ModelRc<SharedString>,
 }
 
 ////////////////////////////////////////// Big files
-fn scan_big_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>, custom_settings: SettingsCustom) {
+fn scan_big_files(
+    a: Weak<MainWindow>,
+    progress_sender: Sender<ProgressData>,
+    stop_receiver: Receiver<()>,
+    custom_settings: SettingsCustom,
+    shared_models: Arc<Mutex<SharedModels>>,
+) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
@@ -279,6 +305,8 @@ fn scan_big_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, st
             } else {
                 vector.par_sort_unstable_by_key(|fe| fe.size);
             }
+
+            shared_models.lock().unwrap().shared_big_files_state = Some(item);
 
             a.upgrade_in_event_loop(move |app| {
                 write_big_files_results(&app, vector, messages);
@@ -316,7 +344,13 @@ fn prepare_data_model_big_files(fe: &FileEntry) -> (ModelRc<SharedString>, Model
 }
 
 ///////////////////////////////// Empty Files
-fn scan_empty_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>, custom_settings: SettingsCustom) {
+fn scan_empty_files(
+    a: Weak<MainWindow>,
+    progress_sender: Sender<ProgressData>,
+    stop_receiver: Receiver<()>,
+    custom_settings: SettingsCustom,
+    shared_models: Arc<Mutex<SharedModels>>,
+) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
@@ -328,6 +362,8 @@ fn scan_empty_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, 
             let messages = item.get_text_messages().create_messages_text();
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+
+            shared_models.lock().unwrap().shared_empty_files_state = Some(item);
 
             a.upgrade_in_event_loop(move |app| {
                 write_empty_files_results(&app, vector, messages);
@@ -364,7 +400,13 @@ fn prepare_data_model_empty_files(fe: &FileEntry) -> (ModelRc<SharedString>, Mod
 }
 // Scan Similar Images
 
-fn scan_similar_images(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>, custom_settings: SettingsCustom) {
+fn scan_similar_images(
+    a: Weak<MainWindow>,
+    progress_sender: Sender<ProgressData>,
+    stop_receiver: Receiver<()>,
+    custom_settings: SettingsCustom,
+    shared_models: Arc<Mutex<SharedModels>>,
+) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
@@ -405,6 +447,8 @@ fn scan_similar_images(a: Weak<MainWindow>, progress_sender: Sender<ProgressData
             for (_first_entry, vec_fe) in &mut vector {
                 vec_fe.par_sort_unstable_by_key(|e| e.similarity);
             }
+
+            shared_models.lock().unwrap().shared_similar_images_state = Some(item);
 
             a.upgrade_in_event_loop(move |app| {
                 write_similar_images_results(&app, vector, messages, hash_size);
@@ -453,7 +497,13 @@ fn prepare_data_model_similar_images(fe: &ImagesEntry, hash_size: u8) -> (ModelR
 
 // Scan Similar Videos
 
-fn scan_similar_videos(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>, custom_settings: SettingsCustom) {
+fn scan_similar_videos(
+    a: Weak<MainWindow>,
+    progress_sender: Sender<ProgressData>,
+    stop_receiver: Receiver<()>,
+    custom_settings: SettingsCustom,
+    shared_models: Arc<Mutex<SharedModels>>,
+) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
@@ -485,6 +535,8 @@ fn scan_similar_videos(a: Weak<MainWindow>, progress_sender: Sender<ProgressData
             for (_first_entry, vec_fe) in &mut vector {
                 vec_fe.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
             }
+
+            shared_models.lock().unwrap().shared_similar_videos_state = Some(item);
 
             a.upgrade_in_event_loop(move |app| {
                 write_similar_videos_results(&app, vector, messages);
@@ -529,7 +581,13 @@ fn prepare_data_model_similar_videos(fe: &VideosEntry) -> (ModelRc<SharedString>
     (data_model_str, data_model_int)
 }
 // Scan Similar Music
-fn scan_similar_music(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>, custom_settings: SettingsCustom) {
+fn scan_similar_music(
+    a: Weak<MainWindow>,
+    progress_sender: Sender<ProgressData>,
+    stop_receiver: Receiver<()>,
+    custom_settings: SettingsCustom,
+    shared_models: Arc<Mutex<SharedModels>>,
+) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
@@ -593,6 +651,8 @@ fn scan_similar_music(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>
                 vec_fe.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
             }
 
+            shared_models.lock().unwrap().shared_same_music_state = Some(item);
+
             a.upgrade_in_event_loop(move |app| {
                 write_similar_music_results(&app, vector, messages);
             })
@@ -642,7 +702,13 @@ fn prepare_data_model_similar_music(fe: &MusicEntry) -> (ModelRc<SharedString>, 
     (data_model_str, data_model_int)
 }
 // Invalid Symlinks
-fn scan_invalid_symlinks(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>, custom_settings: SettingsCustom) {
+fn scan_invalid_symlinks(
+    a: Weak<MainWindow>,
+    progress_sender: Sender<ProgressData>,
+    stop_receiver: Receiver<()>,
+    custom_settings: SettingsCustom,
+    shared_models: Arc<Mutex<SharedModels>>,
+) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
@@ -655,6 +721,8 @@ fn scan_invalid_symlinks(a: Weak<MainWindow>, progress_sender: Sender<ProgressDa
             let messages = item.get_text_messages().create_messages_text();
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+
+            shared_models.lock().unwrap().shared_same_invalid_symlinks = Some(item);
 
             a.upgrade_in_event_loop(move |app| {
                 write_invalid_symlinks_results(&app, vector, messages);
@@ -690,7 +758,13 @@ fn prepare_data_model_invalid_symlinks(fe: &SymlinksFileEntry) -> (ModelRc<Share
     let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1]);
     (data_model_str, data_model_int)
 } ////////////////////////////////////////// Temporary Files
-fn scan_temporary_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>, custom_settings: SettingsCustom) {
+fn scan_temporary_files(
+    a: Weak<MainWindow>,
+    progress_sender: Sender<ProgressData>,
+    stop_receiver: Receiver<()>,
+    custom_settings: SettingsCustom,
+    shared_models: Arc<Mutex<SharedModels>>,
+) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
@@ -703,6 +777,8 @@ fn scan_temporary_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressDat
             let messages = item.get_text_messages().create_messages_text();
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+
+            shared_models.lock().unwrap().shared_temporary_files_state = Some(item);
 
             a.upgrade_in_event_loop(move |app| {
                 write_temporary_files_results(&app, vector, messages);
@@ -737,7 +813,13 @@ fn prepare_data_model_temporary_files(fe: &TemporaryFileEntry) -> (ModelRc<Share
     (data_model_str, data_model_int)
 }
 ////////////////////////////////////////// Broken Files
-fn scan_broken_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>, custom_settings: SettingsCustom) {
+fn scan_broken_files(
+    a: Weak<MainWindow>,
+    progress_sender: Sender<ProgressData>,
+    stop_receiver: Receiver<()>,
+    custom_settings: SettingsCustom,
+    shared_models: Arc<Mutex<SharedModels>>,
+) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
@@ -773,6 +855,8 @@ fn scan_broken_files(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>,
             let messages = item.get_text_messages().create_messages_text();
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+
+            shared_models.lock().unwrap().shared_broken_files_state = Some(item);
 
             a.upgrade_in_event_loop(move |app| {
                 write_broken_files_results(&app, vector, messages);
@@ -810,7 +894,13 @@ fn prepare_data_model_broken_files(fe: &BrokenEntry) -> (ModelRc<SharedString>, 
     (data_model_str, data_model_int)
 }
 ////////////////////////////////////////// Bad Extensions
-fn scan_bad_extensions(a: Weak<MainWindow>, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>, custom_settings: SettingsCustom) {
+fn scan_bad_extensions(
+    a: Weak<MainWindow>,
+    progress_sender: Sender<ProgressData>,
+    stop_receiver: Receiver<()>,
+    custom_settings: SettingsCustom,
+    shared_models: Arc<Mutex<SharedModels>>,
+) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
@@ -823,6 +913,8 @@ fn scan_bad_extensions(a: Weak<MainWindow>, progress_sender: Sender<ProgressData
             let messages = item.get_text_messages().create_messages_text();
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+
+            shared_models.lock().unwrap().shared_bad_extensions_state = Some(item);
 
             a.upgrade_in_event_loop(move |app| {
                 write_bad_extensions_results(&app, vector, messages);

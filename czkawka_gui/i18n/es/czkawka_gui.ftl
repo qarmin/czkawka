@@ -18,27 +18,36 @@ music_checking_by_tags = Etiquetas
 music_checking_by_content = Contenido
 same_music_seconds_label = Duración mínima del segundo fragmento
 same_music_similarity_label = Diferencia máxima
+music_compare_only_in_title_group = Comparar sólo en el título
+music_compare_only_in_title_group_tooltip =
+    When enabled, files are grouped by title and then compared to each other.
+    
+    With 10000 files, instead almost 100 million comparisons usually there will be around 20000 comparisons.
 same_music_tooltip =
-    Buscando archivos de música similares por su contenido se puede configurar configurando:
+    Al buscar archivos de música, por su contenido, podemos usar las siguientes opciones:
     
     - El tiempo mínimo de fragmento después del cual los archivos de música pueden ser identificados como similares
     - La diferencia máxima entre dos fragmentos probados
     
-    La clave para los buenos resultados es encontrar combinaciones sensatas de estos parámetros, para proporcionar.
+    La clave, para lograr los mejores resultados al buscar. Es proporcionando las mejores combinaciones de estos parámetros:
     
-    Establecer el tiempo mínimo a 5 s y la diferencia máxima a 1.0, buscará fragmentos casi idénticos en los archivos.
-    Un tiempo de 20 años y una diferencia máxima de 6.0, por otro lado, funciona bien para encontrar remixes/versiones en vivo, etc.
+    - Establecer el tiempo mínimo a 5 s y la diferencia máxima a 1.0, buscará fragmentos casi idénticos en los archivos.
+    - Un tiempo de 20 años y una diferencia máxima de 6.0, por otro lado, funciona bien para encontrar remixes/versiones en vivo, etc.
     
-    Por defecto, cada archivo de música se compara entre sí y esto puede tomar mucho tiempo al probar muchos archivos, por lo que normalmente es mejor usar carpetas de referencia y especificar qué archivos deben compararse entre sí (con la misma cantidad de archivos, comparar las huellas dactilares será más rápido al menos 4x que sin carpetas de referencia).
+    Por defecto, cada archivo de música se compara entre sí y esto puede llevar mucho tiempo al probar muchos archivos, por lo que normalmente es mejor usar carpetas de referencia y especificar qué archivos deben compararse entre sí (con la misma cantidad de archivos, comparar las huellas dactilares será más rápido al menos 4x que sin carpetas de referencia).
 music_comparison_checkbox_tooltip =
     Busca archivos de música similares usando IA, que usa el aprendizaje automático para eliminar paréntesis de una frase. Por ejemplo, con esta opción activada, los archivos en cuestión se considerarán duplicados:
     
     Świędziżłób     ---     Świędziżłób (Remix Lato 2021)
 duplicate_case_sensitive_name = Sensible a mayúsculas
 duplicate_case_sensitive_name_tooltip =
-    Cuando está habilitado, agrupa registros sólo cuando tienen exactamente el mismo nombre p.ej. Żołd <-> Żołd
+    Cuando está habilitado, agrupa registros solo cuando tienen exactamente el mismo nombre. P. ej.
     
-    Deshabilitar tal opción agrupará nombres sin comprobar si cada letra tiene el mismo tamaño, p. ej. żoŁD <-> Żołd
+     Żołd ↔ Żołd
+    
+    En cambio, si deshabilitamos dicha opción, agrupará nombres sin comprobar si cada letra tiene el mismo tamaño. P. ej. 
+    
+    żoŁD ↔ Żołd
 duplicate_mode_size_name_combo_box = Tamaño y nombre
 duplicate_mode_name_combo_box = Nombre
 duplicate_mode_size_combo_box = Tamaño
@@ -68,20 +77,20 @@ image_hash_size_tooltip =
     
     32 y 64 hashes sólo encuentran imágenes muy similares, pero no deberían tener casi falsos positivos (tal vez excepto algunas imágenes con canal alfa).
 image_resize_filter_tooltip =
-    To compute hash of image, the library must first resize it.
+    Al calcular el hash de una imagen, lo primero que hace la librería es redimensionar esta.
     
-    Depend on chosen algorithm, the resulting image used to calculate hash will looks a little different.
+    Dependiendo del algoritmo que elijamos, la imagen resultante usada para calcular el hash puede ser demasiado parecida.
     
-    The fastest algorithm to use, but also the one which gives the worst results, is Nearest. It is enabled by default, because with 16x16 hash size lower quality it is not really visible.
+    El algoritmo más rápido, es también uno de los que da los peores es el de aproximación cercana o Nearest. Ya que de forma predeterminada, usa un tamaño de hash de 16x16, insuficiente para poder verse.
     
-    With 8x8 hash size it is recommended to use a different algorithm than Nearest, to have better groups of images.
+    Con el tamaño hash de 8x8 se recomienda usar un algoritmo diferente al tipo Nearest, para tener mejores grupos de imágenes.
 image_hash_alg_tooltip =
     Los usuarios pueden elegir uno de los muchos algoritmos de cálculo del hash.
     
     Cada uno tiene puntos fuertes y débiles y a veces dará mejores y a veces peores resultados para diferentes imágenes.
     
     Así que, para determinar la mejor para ti, se requiere una prueba manual.
-big_files_mode_combobox_tooltip = Permite buscar archivos más pequeños/mayores
+big_files_mode_combobox_tooltip = Permite buscar archivos de un menor/mayor tamaño
 big_files_mode_label = Archivos marcados
 big_files_mode_smallest_combo_box = El más pequeño
 big_files_mode_biggest_combo_box = El más grande
@@ -92,8 +101,8 @@ main_notebook_empty_files = Archivos vacíos
 main_notebook_temporary = Archivos temporales
 main_notebook_similar_images = Imágenes similares
 main_notebook_similar_videos = Videos similares
-main_notebook_same_music = Duplicados de música
-main_notebook_symlinks = Enlaces simbólicos inválidos
+main_notebook_same_music = Canciones duplicadas
+main_notebook_symlinks = Enlaces simbólicos rotos
 main_notebook_broken_files = Archivos rotos
 main_notebook_bad_extensions = Extensiones incorrectas
 main_tree_view_column_file_name = Nombre del archivo
@@ -115,14 +124,14 @@ main_tree_view_column_destination_path = Ruta de destino
 main_tree_view_column_type_of_error = Tipo de error
 main_tree_view_column_current_extension = Extensión actual
 main_tree_view_column_proper_extensions = Extensión adecuada
-main_label_check_method = Comprobar método
+main_label_check_method = Método de comprobación
 main_label_hash_type = Tipo de Hash
 main_label_hash_size = Tamaño hash
 main_label_size_bytes = Tamaño (bytes)
 main_label_min_size = Mínimo
 main_label_max_size = Máximo
 main_label_shown_files = Número de archivos mostrados
-main_label_resize_algorithm = Algoritmo de Redimensionar
+main_label_resize_algorithm = Algoritmo de Redimensionado
 main_label_similarity = Similitud{ "   " }
 main_check_box_broken_files_audio = Sonido
 main_check_box_broken_files_pdf = Pdf
@@ -135,8 +144,8 @@ main_label_size_bytes_tooltip = Tamaño de los archivos que se utilizarán en el
 upper_tree_view_included_folder_column_title = Carpetas a buscar
 upper_tree_view_included_reference_column_title = Carpetas de referencia
 upper_recursive_button = Recursivo
-upper_recursive_button_tooltip = Si se selecciona, busque también archivos que no se coloquen directamente bajo las carpetas seleccionadas.
-upper_manual_add_included_button = Añadir manual
+upper_recursive_button_tooltip = Si se selecciona, busca cualquier archivo, sin importar si está o no en una sub-carpeta.
+upper_manual_add_included_button = Añadir manualmente
 upper_add_included_button = Añadir
 upper_remove_included_button = Eliminar
 upper_manual_add_excluded_button = Añadir manual
@@ -145,7 +154,7 @@ upper_remove_excluded_button = Eliminar
 upper_manual_add_included_button_tooltip =
     Añade el nombre del directorio para buscar a mano.
     
-    Para agregar múltiples rutas a la vez, separalas por ;
+    Para agregar múltiples rutas a la vez, sepáralas con ;
     
     /home/roman;/home/rozkaz añadirá dos directorios /home/roman y /home/rozkaz
 upper_add_included_button_tooltip = Añadir nuevo directorio para buscar.
@@ -168,9 +177,9 @@ upper_allowed_extensions_tooltip =
     
     Ejemplo de uso ".exe, IMAGE, VIDEO, .rar, 7z" - esto significa que imágenes (e. . jpg, png), videos (ej: avi, mp4), archivos exe, rar, y 7z serán escaneados.
 upper_excluded_extensions_tooltip =
-    List of disabled files which will be ignored in scan.
+    Lista de archivos ignorados, durante el escaneo.
     
-    When using both allowed and disabled extensions, this one has higher priority, so file will not be checked.
+    Cuando desactivamos las extensiones permitidas, estas tienen mayor prioridad, haciendo que los archivos no sean comprobados.
 upper_excluded_items_tooltip =
     Los artículos excluidos deben contener * comodín y deben estar separados por comas.
     Esto es más lento que los Directorios Excluidos, así que úselo con cuidado.
@@ -288,6 +297,13 @@ header_about_button_tooltip = Abre el diálogo con información sobre la aplicac
 
 settings_number_of_threads = Número de hilos usados
 settings_number_of_threads_tooltip = Número de hilos usados, 0 significa que se utilizarán todos los hilos disponibles.
+settings_use_rust_preview = Usar librerías externas en su lugar gtk para cargar vistas previas
+settings_use_rust_preview_tooltip =
+    Using gtk previews will sometimes be faster and support more formats, but sometimes this could be exactly the opposite.
+    
+    If you have problems with loading previews, you may can to try to change this setting.
+    
+    On non-linux systems, it is recommended to use this option, because gtk-pixbuf are not always available there so disabling this option will not load previews of some images.
 settings_label_restart = ¡Necesitas reiniciar la aplicación para aplicar la configuración!
 settings_ignore_other_filesystems = Ignorar otros sistemas de ficheros (sólo Linux)
 settings_ignore_other_filesystems_tooltip =

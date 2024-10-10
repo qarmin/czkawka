@@ -1,9 +1,8 @@
 # Krokiet
 
-Krokiet is new Czkawka frontend written in Slint, which uses Rust in opposite to Gtk 4 frontend which uses mostly
-C code.
+Krokiet is new Czkawka frontend written in Slint.
 
-![Krokiet](https://github.com/qarmin/czkawka/assets/41945903/52628a29-ecd6-4692-9ee4-8a680c889193)
+![Krokiet](https://github.com/user-attachments/assets/531cc479-8900-4db6-aa60-598284e7f815)
 
 Different toolkit means different look, limitations and features, so you should not expect same features like in Gtk 4
 frontend(but of course I want implement most of the features from other project).

@@ -18,6 +18,11 @@ music_checking_by_tags = Етикети
 music_checking_by_content = Съдържание
 same_music_seconds_label = Минимална продължителност на фрагмента в секунди
 same_music_similarity_label = Максимална разлика
+music_compare_only_in_title_group = Compare only in title
+music_compare_only_in_title_group_tooltip =
+    When enabled, files are grouped by title and then compared to each other.
+    
+    With 10000 files, instead almost 100 million comparisons usually there will be around 20000 comparisons.
 same_music_tooltip =
     Търсенето на подобни музикални файлове по съдържание може да се конфигурира чрез настройка:
     
@@ -288,6 +293,13 @@ header_about_button_tooltip = Отваря диалогов прозорец с 
 
 settings_number_of_threads = Брой използвани нишки
 settings_number_of_threads_tooltip = Брой използвани нишки, 0 означава, че ще бъдат използвани всички налични нишки.
+settings_use_rust_preview = Use external libraries instead gtk to load previews
+settings_use_rust_preview_tooltip =
+    Using gtk previews will sometimes be faster and support more formats, but sometimes this could be exactly the opposite.
+    
+    If you have problems with loading previews, you may can to try to change this setting.
+    
+    On non-linux systems, it is recommended to use this option, because gtk-pixbuf are not always available there so disabling this option will not load previews of some images.
 settings_label_restart = Трябва да рестартирате приложението, за да приложите настройките!
 settings_ignore_other_filesystems = Игнориране на други файлови системи (само за Linux)
 settings_ignore_other_filesystems_tooltip =

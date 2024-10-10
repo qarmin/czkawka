@@ -28,6 +28,7 @@ export component ActionButtons inherits HorizontalLayout {
     callback show_select_popup(length, length);
     callback show_remove_popup();
     callback show_rename_popup();
+    callback show_save_popup();
     callback request_folder_to_move();
 
     in-out property <[MainListModel]> duplicate_files_model: [];
@@ -157,6 +158,17 @@ export component ActionButtons inherits HorizontalLayout {
         }
     }
 
+    save_button := Button {
+        visible: lists_enabled;
+        height: parent.height;
+        enabled: !scanning && self.visible && results_available;
+        text: "Save";
+        icon: @image-url("../icons/krokiet_save.svg");
+        clicked => {
+            show_save_popup();
+        }
+    }
+
     rename_button := Button {
         visible: lists_enabled && GuiState.active_tab == CurrentTab.BadExtensions;
         height: parent.height;
@@ -177,16 +189,18 @@ export component ActionButtons inherits HorizontalLayout {
         spacing: 0px;
         VisibilityButton {
             height: parent.height;
+            width: 40px;
             button_visibility: BottomPanelVisibility.Directories;
             bottom_panel_visibility <=> bottom_panel_visibility;
-            text: "Dirs";
+            icon: @image-url("../icons/krokiet_dir.svg");
         }
 
         VisibilityButton {
             height: parent.height;
+            width: 40px;
             button_visibility: BottomPanelVisibility.TextErrors;
             bottom_panel_visibility <=> bottom_panel_visibility;
-            text: "Output";
+            icon: @image-url("../icons/krokiet_info.svg");
         }
     }
 }
