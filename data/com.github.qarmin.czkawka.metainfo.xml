@@ -14,7 +14,11 @@
   <screenshots>
     <screenshot type="default">
       <image>https://user-images.githubusercontent.com/41945903/147875238-7f82fa27-c6dd-47e7-87ed-e253fb2cbc3e.png</image>
+    </screenshot>
+    <screenshot>
       <image>https://user-images.githubusercontent.com/41945903/147875239-bcf9776c-885d-45ac-ba82-5a426d8e1647.png</image>
+    </screenshot>
+    <screenshot>
       <image>https://user-images.githubusercontent.com/41945903/147875243-e654e683-37f7-46fa-8321-119a4c5775e7.png</image>
     </screenshot>
   </screenshots>
@@ -23,6 +27,9 @@
   </releases>
   <content_rating type="oars-1.0"/>
   <developer_name>Rafał Mikrut</developer_name>
+    <developer id="com.github.qarmin">
+      <name>Rafał Mikrut</name>
+  </developer>
   <url type="homepage">https://github.com/qarmin/czkawka</url>
   <url type="bugtracker">https://github.com/qarmin/czkawka/issues</url>
   <url type="donation">https://github.com/sponsors/qarmin</url>
