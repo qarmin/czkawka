@@ -26,8 +26,8 @@ impl GuiAbout {
 
         about_dialog.set_logo(Picture::for_pixbuf(logo).paintable().as_ref());
 
-        // Taken from command - "git shortlog -s -n -e" - remember to remove duplicates
-        // First clean it with regex " \<[^\n]+" and next with " +[0-9]+\t" and at end replace "([^\n]+)" with ""$1","
+        // Taken from command - "git shortlog -s -n -e > a.txt" - remember to remove duplicates
+        // First clean it with regex " \<[^\n]+" and next with " +[0-9]+\t" and at end replace "([^\n]+)" with ""$1"," (or ""\0",")
         // This should be updated only before releasing new version
         about_dialog.set_authors(&[
             "Rafał Mikrut",
@@ -35,7 +35,6 @@ impl GuiAbout {
             "Thomas Andreas Jung",
             "Alexis Lefebvre",
             "Peter Blackson",
-            "qarmin",
             "TheEvilSkeleton",
             "Ben Bodenmiller",
             "ChihWei Wang",
@@ -52,6 +51,7 @@ impl GuiAbout {
             "Adam Boguszewski",
             "Alex",
             "Caduser2020",
+            "CalunVier",
             "Danny Kirkham",
             "Dariusz Niedoba",
             "Douman",
@@ -72,13 +72,17 @@ impl GuiAbout {
             "Nick Gallimore",
             "Nikita Karamov",
             "OMEGA_RAZER",
+            "Renner0E",
             "Rodrigo Torres",
+            "Samuel",
             "Sbgodin",
             "Spirit",
             "Stefan Seering",
             "Syfaro",
+            "Sébastien",
             "Tom Paine",
             "Tom Praschan",
+            "Torsten Homberger",
             "Yuri Slobodyanyuk",
             "alexdraconian",
             "bakeromso",

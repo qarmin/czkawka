@@ -9,12 +9,12 @@ assignees: ''
 
 **Bug Description**
 
-
 **Steps to reproduce:**
 <!-- Please describe what you expected to see and what you saw instead. Also include screenshots or screencasts if needed. -->
 
 
 **Terminal output** (optional):
+
 ```
 <!--
 Add terminal output only if needed - if there are some errors or warnings or you have performance/freeze issues.  
@@ -30,10 +30,9 @@ Very helpful in this situation will be logs from czkawka run with RUST_LOG envir
 </details>
 ```
 
-
 **System**
 
-- Czkawka/Krokiet version: <!--  e.g. 7.0.0 cli/gui -->
+- Czkawka/Krokiet version: <!--  e.g. 8.0.0 cli/gui -->
 - OS version: <!--  e.g Ubuntu 22.04, Windows 11, Mac 15.1 ARM -->
 - Installation method: <!-- e.g. github binaries, snap, flatpak, msys2 -->
 

@@ -125,6 +125,7 @@ impl GuiBottomButtons {
         get_custom_label_from_widget(&self.buttons_symlink.clone()).set_text(&flg!("bottom_symlink_button"));
         get_custom_label_from_widget(&self.buttons_move.clone()).set_text(&flg!("bottom_move_button"));
         get_custom_label_from_widget(&self.buttons_hardlink.clone()).set_text(&flg!("bottom_hardlink_button"));
+        get_custom_label_from_widget(&self.buttons_compare.clone()).set_text(&flg!("bottom_compare_button"));
         self.label_buttons_sort.set_text(&flg!("bottom_sort_button"));
 
         self.buttons_search.set_tooltip_text(Some(&flg!("bottom_search_button_tooltip")));
@@ -134,6 +135,7 @@ impl GuiBottomButtons {
         self.buttons_symlink.set_tooltip_text(Some(&flg!("bottom_symlink_button_tooltip")));
         self.buttons_move.set_tooltip_text(Some(&flg!("bottom_move_button_tooltip")));
         self.buttons_sort.set_tooltip_text(Some(&flg!("bottom_sort_button_tooltip")));
+        self.buttons_compare.set_tooltip_text(Some(&flg!("bottom_compare_button_tooltip")));
         if self.buttons_hardlink.is_sensitive() {
             self.buttons_hardlink.set_tooltip_text(Some(&flg!("bottom_hardlink_button_tooltip")));
         } else {
