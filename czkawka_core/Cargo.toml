@@ -76,6 +76,7 @@ libheif-rs = { version = "=0.18.0", optional = true } # Do not upgrade now, sinc
 libheif-sys = { version = "=1.14.2", optional = true } # 1.14.3 brake compilation on Ubuntu 22.04, so pin it to this version
 anyhow = { version = "1.0.89" }
 
+nom-exif = "2.1.0"
 
 state = "0.6"
 trash = "5.1"

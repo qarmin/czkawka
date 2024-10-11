@@ -15,7 +15,7 @@ use crate::duplicate::HashType;
 use crate::similar_images::{convert_algorithm_to_string, convert_filters_to_string};
 
 const CACHE_VERSION: &str = "70";
-const CACHE_IMAGE_VERSION: &str = "80";
+const CACHE_IMAGE_VERSION: &str = "90";
 
 pub fn get_broken_files_cache_file() -> String {
     format!("cache_broken_files_{CACHE_VERSION}.bin")
