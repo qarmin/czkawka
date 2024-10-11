@@ -18,7 +18,7 @@ jobs:
         run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev ffmpeg -y
 
       - name: Setup rust version
-        run: rustup default 1.79.0
+        run: rustup default 1.80.0
 
       - name: Build
         run: |

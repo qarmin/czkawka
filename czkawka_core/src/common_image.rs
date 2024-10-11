@@ -25,6 +25,7 @@ use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
 #[cfg(feature = "libraw")]
 use libraw::Processor;
 use log::{debug, error, info, warn, LevelFilter, Record};
+use nom_exif::{ExifIter, ExifTag, MediaParser, MediaSource};
 use rawloader::RawLoader;
 use symphonia::core::conv::IntoSample;
 
@@ -87,7 +88,19 @@ pub fn get_dynamic_image_from_path(path: &str) -> Result<DynamicImage, String> {
 
     if let Ok(res) = res {
         match res {
-            Ok(t) => Ok(t),
+            Ok(t) => {
+                let rotation = get_rotation_from_exif(path).unwrap_or(None);
+                match rotation {
+                    Some(ExifOrientation::Normal) | None => Ok(t),
+                    Some(ExifOrientation::MirrorHorizontal) => Ok(t.fliph()),
+                    Some(ExifOrientation::Rotate180) => Ok(t.rotate180()),
+                    Some(ExifOrientation::MirrorVertical) => Ok(t.flipv()),
+                    Some(ExifOrientation::MirrorHorizontalAndRotate270CW) => Ok(t.fliph().rotate270()),
+                    Some(ExifOrientation::Rotate90CW) => Ok(t.rotate90()),
+                    Some(ExifOrientation::MirrorHorizontalAndRotate90CW) => Ok(t.fliph().rotate90()),
+                    Some(ExifOrientation::Rotate270CW) => Ok(t.rotate270()),
+                }
+            }
             Err(e) => Err(format!("Cannot open image file \"{path}\": {e}")),
         }
     } else {
@@ -184,4 +197,44 @@ pub fn check_if_can_display_image(path: &str) -> bool {
     let allowed_extensions = &[IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS, JXL_IMAGE_EXTENSIONS].concat();
 
     allowed_extensions.iter().any(|ext| extension_str.ends_with(ext))
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ExifOrientation {
+    Normal,
+    MirrorHorizontal,
+    Rotate180,
+    MirrorVertical,
+    MirrorHorizontalAndRotate270CW,
+    Rotate90CW,
+    MirrorHorizontalAndRotate90CW,
+    Rotate270CW,
+}
+
+pub fn get_rotation_from_exif(path: &str) -> Result<Option<ExifOrientation>, nom_exif::Error> {
+    let mut parser = MediaParser::new();
+    let ms = MediaSource::file_path(path)?;
+    if !ms.has_exif() {
+        return Ok(None);
+    }
+    let exif_iter: ExifIter = parser.parse(ms)?;
+    for exif_entry in exif_iter {
+        if exif_entry.tag() == Some(ExifTag::Orientation) {
+            if let Some(value) = exif_entry.get_value() {
+                return match value.to_string().as_str() {
+                    "1" => Ok(Some(ExifOrientation::Normal)),
+                    "2" => Ok(Some(ExifOrientation::MirrorHorizontal)),
+                    "3" => Ok(Some(ExifOrientation::Rotate180)),
+                    "4" => Ok(Some(ExifOrientation::MirrorVertical)),
+                    "5" => Ok(Some(ExifOrientation::MirrorHorizontalAndRotate270CW)),
+                    "6" => Ok(Some(ExifOrientation::Rotate90CW)),
+                    "7" => Ok(Some(ExifOrientation::MirrorHorizontalAndRotate90CW)),
+                    "8" => Ok(Some(ExifOrientation::Rotate270CW)),
+                    _ => Ok(None),
+                };
+            }
+        }
+    }
+
+    Ok(None)
 }

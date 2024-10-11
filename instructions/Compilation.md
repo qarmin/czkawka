@@ -20,7 +20,7 @@ New versions of GTK fixes some bugs, so e.g. middle button selection will work o
 
 | Program | Min    | What for                                                                             |
 |---------|--------|--------------------------------------------------------------------------------------|
-| Rust    | 1.79.0 | The minimum version of rust does not depend on anything, so it can change frequently |
+| Rust    | 1.80.0 | The minimum version of rust does not depend on anything, so it can change frequently |
 | GTK     | 4.6    | Only for the `GTK` backend                                                           |
 
 #### Debian / Ubuntu

@@ -18,7 +18,7 @@ export global GuiState {
     in-out property <bool> visible_tool_settings;
 
     in-out property <bool> available_subsettings: active_tab == CurrentTab.SimilarImages || active_tab == CurrentTab.DuplicateFiles || active_tab == CurrentTab.SimilarVideos || active_tab == CurrentTab.SimilarMusic || active_tab == CurrentTab.BigFiles || active_tab == CurrentTab.BrokenFiles;
-    in-out property <CurrentTab> active_tab: CurrentTab.SimilarImages;
+    in-out property <CurrentTab> active_tab: CurrentTab.DuplicateFiles;
     in-out property <bool> is_tool_tab_active: active_tab != CurrentTab.Settings && active_tab != CurrentTab.About;
     in-out property <[SelectModel]> select_results_list: [{data: SelectMode.SelectAll, name: "Select All"}, {data: SelectMode.UnselectAll, name: "Deselect All"}, {data: SelectMode.SelectTheSmallestResolution, name: "Select the smallest resolution"}];
 
