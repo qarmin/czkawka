@@ -1,6 +1,6 @@
 [package]
 name = "krokiet"
-version = "7.0.0"
+version = "8.0.0"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2021"
 rust-version = "1.79.0"
@@ -12,7 +12,7 @@ build = "build.rs"
 
 [dependencies]
 rand = "0.8"
-czkawka_core = { version = "7.0.0", path = "../czkawka_core" }
+czkawka_core = { version = "8.0.0", path = "../czkawka_core" }
 chrono = "0.4.38"
 open = "5.3"
 crossbeam-channel = "0.5"

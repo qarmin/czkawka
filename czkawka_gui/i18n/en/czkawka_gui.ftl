@@ -286,6 +286,7 @@ bottom_symlink_button = Symlink
 bottom_hardlink_button = Hardlink
 bottom_move_button = Move
 bottom_sort_button = Sort
+bottom_compare_button = Compare
 
 bottom_search_button_tooltip = Start search
 bottom_select_button_tooltip = Select records. Only selected files/folders can be later processed.
@@ -310,6 +311,8 @@ bottom_move_button_tooltip =
         When trying to move two files with identical name to folder, second will fail and show error.
 bottom_sort_button_tooltip =
         Sorts files/folders according to selected method.
+bottom_compare_button_tooltip =
+        Compare images in the group.
 
 bottom_show_errors_tooltip = Show/Hide bottom text panel.
 bottom_show_upper_notebook_tooltip = Show/Hide upper notebook panel.

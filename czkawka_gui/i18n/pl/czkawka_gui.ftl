@@ -244,6 +244,7 @@ bottom_delete_button = Usuń
 bottom_save_button = Zapisz
 bottom_symlink_button = Symlink
 bottom_hardlink_button = Hardlink
+bottom_compare_button = Porównaj
 bottom_move_button = Przenieś
 bottom_sort_button = Sortuj
 bottom_search_button_tooltip = Rozpocznij wyszukiwanie
@@ -267,6 +268,7 @@ bottom_move_button_tooltip =
     Przenosi pliki do wybranego katalogu.
     Kopiuje wszystkie pliki do katalogu bez zachowania struktury plików.
     Podczas próby przeniesienia dwóch plików o identycznej nazwie do folderu, drugi plik nie zostanie przeniesiony i pojawi się błąd.
+bottom_compare_button_tooltip = Porównuje pliki/foldery w grupach.
 bottom_sort_button_tooltip = Sortuje pliki/foldery zgodnie z wybraną metodą.
 bottom_show_errors_tooltip = Pokaż/Ukryj dolny panel tekstowy.
 bottom_show_upper_notebook_tooltip = Pokazuje/ukrywa górny panel.

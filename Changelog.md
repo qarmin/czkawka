@@ -1,4 +1,4 @@
-## Version 8.0.0 - ?
+## Version 8.0.0 - 11.10.2024r
 
 ### Breaking changes
 
@@ -63,6 +63,7 @@
 - Added option to use external libraries instead gtk pixbuf loader for
   previews - [#1358](https://github.com/qarmin/czkawka/pull/1358)
 - Using static runtime with zstd compression in appimage - [#1350](https://github.com/qarmin/czkawka/pull/1355)
+- Restoring flatpak builds - [#1275](https://github.com/qarmin/czkawka/pull/1275)
 - [External] Mac homebrew version of app - https://formulae.brew.sh/formula/czkawka
 
 ### CLI

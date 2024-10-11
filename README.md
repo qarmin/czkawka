@@ -29,9 +29,9 @@ files from your computer.
     - Broken Files - Finds files that are invalid or corrupted
     - Bad Extensions - Lists files whose content not match with their extension
 
-![Czkawka](https://user-images.githubusercontent.com/41945903/145280350-506f7e94-4db0-4de7-a68d-6e7c26bbd2bf.gif)
+![Czkawka](https://github.com/user-attachments/assets/b0409515-1bec-4e13-8fac-7bdfa15f5848)
 
-![Krokiet](https://github.com/qarmin/czkawka/assets/41945903/52628a29-ecd6-4692-9ee4-8a680c889193)
+![Krokiet](https://github.com/user-attachments/assets/906cbbc3-f011-4306-81da-9e4e53b49a9f)
 
 Changelog and new releases can be found in [Github releases](https://github.com/qarmin/czkawka/releases) or
 in [CHANGELOG.md](CHANGELOG.md).

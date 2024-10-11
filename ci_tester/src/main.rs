@@ -35,7 +35,6 @@ fn main() {
     CZKAWKA_PATH.set(path_to_czkawka);
 
     test_args();
-    return;
     remove_test_dir();
     run_with_good_status(&["ls"], false);
     unzip_files();
