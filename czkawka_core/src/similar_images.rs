@@ -2,7 +2,7 @@ use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::Ordering;
-use std::time::SystemTime;
+use std::time::Instant;
 use std::{mem, panic};
 
 use bk_tree::BKTree;
@@ -890,21 +890,12 @@ pub fn test_image_conversion_speed() {
                     for size in [8, 16, 32, 64] {
                         let hasher_config = HasherConfig::new().hash_alg(alg).resize_filter(filter).hash_size(size, size);
 
-                        let start = SystemTime::now();
+                        let start = Instant::now();
 
                         let hasher = hasher_config.to_hasher();
                         let _hash = hasher.hash_image(&img_open);
 
-                        let end = SystemTime::now();
-
-                        println!(
-                            "{:?} us {:?} {:?} {}x{}",
-                            end.duration_since(start).expect("Used time backwards").as_micros(),
-                            alg,
-                            filter,
-                            size,
-                            size
-                        );
+                        println!("{:?} us {:?} {:?} {}x{}", start.elapsed().as_micros(), alg, filter, size, size);
                     }
                 }
             }

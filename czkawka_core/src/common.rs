@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize};
 use std::sync::{atomic, Arc};
 use std::thread::{sleep, JoinHandle};
-use std::time::{Duration, SystemTime};
+use std::time::{Duration, Instant};
 use std::{fs, thread};
 
 use crossbeam_channel::Sender;
@@ -529,10 +529,10 @@ pub fn prepare_thread_handler_common(
         let atomic_counter = atomic_counter.clone();
         thread::spawn(move || {
             // Use earlier time, to send immediately first message
-            let mut time_since_last_send = SystemTime::now() - Duration::from_secs(10u64);
+            let mut time_since_last_send = Instant::now().checked_sub(Duration::from_secs(10u64)).unwrap();
 
             loop {
-                if time_since_last_send.elapsed().expect("Cannot count time backwards").as_millis() > SEND_PROGRESS_DATA_TIME_BETWEEN as u128 {
+                if time_since_last_send.elapsed().as_millis() > SEND_PROGRESS_DATA_TIME_BETWEEN as u128 {
                     let progress_data = ProgressData {
                         sstage,
                         checking_method,
@@ -546,7 +546,7 @@ pub fn prepare_thread_handler_common(
                     progress_data.validate();
 
                     progress_send.send(progress_data).expect("Cannot send progress data");
-                    time_since_last_send = SystemTime::now();
+                    time_since_last_send = Instant::now();
                 }
                 if !progress_thread_run.load(atomic::Ordering::Relaxed) {
                     break;
