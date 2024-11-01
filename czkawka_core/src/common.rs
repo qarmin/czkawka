@@ -31,6 +31,12 @@ static ALL_AVAILABLE_THREADS: state::InitCell<usize> = state::InitCell::new();
 pub const DEFAULT_THREAD_SIZE: usize = 8 * 1024 * 1024; // 8 MB
 pub const DEFAULT_WORKER_THREAD_SIZE: usize = 4 * 1024 * 1024; // 4 MB
 
+#[derive(Debug, PartialEq)]
+pub enum WorkContinueStatus {
+    Continue,
+    Stop,
+}
+
 pub fn get_number_of_threads() -> usize {
     let data = NUMBER_OF_THREADS.get();
     if *data >= 1 {
@@ -529,7 +535,7 @@ pub fn prepare_thread_handler_common(
         let atomic_counter = atomic_counter.clone();
         thread::spawn(move || {
             // Use earlier time, to send immediately first message
-            let mut time_since_last_send = Instant::now().checked_sub(Duration::from_secs(10u64)).unwrap();
+            let mut time_since_last_send = Instant::now().checked_sub(Duration::from_secs(10u64)).unwrap_or_else(Instant::now);
 
             loop {
                 if time_since_last_send.elapsed().as_millis() > SEND_PROGRESS_DATA_TIME_BETWEEN as u128 {

@@ -95,8 +95,6 @@ pub enum CurrentStage {
 }
 
 impl ProgressData {
-    // TODO change validations to debug_asserts
-    // Currently are too flaky to run asserts in normal builds
     pub fn validate(&self) {
         assert!(
             self.current_stage_idx <= self.max_stage_idx,
@@ -114,8 +112,6 @@ impl ProgressData {
             self.checking_method
         );
 
-        // TODO not sure about other types
-        // may need to be changed
         if self.sstage != CurrentStage::CollectingFiles {
             assert!(
                 self.entries_checked <= self.entries_to_check,
