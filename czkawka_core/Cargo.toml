@@ -34,7 +34,7 @@ audio_checker = "0.1"
 pdf = "0.9"
 
 # Needed by audio similarity feature
-rusty-chromaprint = "0.2"
+rusty-chromaprint = "0.3"
 symphonia = { version = "0.5", features = ["all"] }
 
 # Hashes for duplicate files
@@ -65,7 +65,7 @@ once_cell = "1.20"
 rawloader = "0.37"
 imagepipe = "0.5"
 libraw-rs = { version = "0.0.4", optional = true }
-jxl-oxide = { version = "0.9.0", default-features = false }
+jxl-oxide = { version = "0.10.0", default-features = false }
 
 # Checking for invalid extensions
 mime_guess = "2.0"
@@ -94,6 +94,14 @@ file-id = "=0.2.1"
 
 [build-dependencies]
 rustc_version = "0.4"
+
+[dev-dependencies]
+criterion = "0.5"
+const_format = "0.2"
+
+[[bench]]
+name = "hash_calculation_benchmark"
+harness = false
 
 [features]
 default = []

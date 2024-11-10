@@ -27,6 +27,13 @@ cli_help:
 
 ## Other
 
+bench:
+    cd czkawka_core && cargo bench
+    xdg-open target/criterion/report/index.html
+
+bench_clean:
+    rm -rf target/criterion
+
 build:
     cargo build --bin czkawka_gui
 

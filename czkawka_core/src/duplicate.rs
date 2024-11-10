@@ -1281,7 +1281,7 @@ pub trait MyHasher {
     fn finalize(&self) -> String;
 }
 
-fn hash_calculation(buffer: &mut [u8], file_entry: &DuplicateEntry, hash_type: HashType, limit: u64) -> Result<String, String> {
+pub fn hash_calculation(buffer: &mut [u8], file_entry: &DuplicateEntry, hash_type: HashType, limit: u64) -> Result<String, String> {
     let mut file_handler = match File::open(&file_entry.path) {
         Ok(t) => t,
         Err(e) => return Err(format!("Unable to check hash of file {:?}, reason {e}", file_entry.path)),
