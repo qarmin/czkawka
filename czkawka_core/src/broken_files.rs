@@ -336,10 +336,7 @@ impl BrokenFiles {
 
         self.save_to_cache(&vec_file_entry, loaded_hash_map);
 
-        self.broken_files = vec_file_entry
-            .into_par_iter()
-            .filter_map(|f| if f.error_string.is_empty() { None } else { Some(f) })
-            .collect();
+        self.broken_files = vec_file_entry.into_iter().filter_map(|f| if f.error_string.is_empty() { None } else { Some(f) }).collect();
 
         self.information.number_of_broken_files = self.broken_files.len();
         debug!("Found {} broken files.", self.information.number_of_broken_files);
