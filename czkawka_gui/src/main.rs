@@ -69,6 +69,10 @@ mod tests;
 
 fn main() {
     let application = Application::new(None::<String>, ApplicationFlags::HANDLES_OPEN | ApplicationFlags::HANDLES_COMMAND_LINE);
+
+    #[cfg(target_os = "linux")]
+    glib::set_prgname(Some("com.github.qarmin.czkawka"));
+
     application.connect_command_line(move |app, cmdline| {
         setup_logger(false);
         print_version_mode();
