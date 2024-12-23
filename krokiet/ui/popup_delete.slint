@@ -22,7 +22,7 @@ export component PopupDelete inherits Rectangle {
         width: popup_width;
         height: popup_height;
 
-        close-on-click: true;
+        close-policy: PopupClosePolicy.close-on-click-outside;
         Rectangle {
             width: parent.width;
             height: parent.height;

@@ -22,7 +22,7 @@ directories-next = "2.0"
 image_hasher = "2.0"
 bk-tree = "0.5"
 image = { version = "0.25", default-features = false, features = ["bmp", "dds", "exr", "ff", "gif", "hdr", "ico", "jpeg", "png", "pnm", "qoi", "tga", "tiff", "webp"] }
-hamming = "0.1"
+hamming-bitwise-fast = "1.0"
 
 # Needed by same music
 bitflags = "2.6"
@@ -45,8 +45,8 @@ xxhash-rust = { version = "0.8", features = ["xxh3"] }
 tempfile = "3.13"
 
 # Video Duplicates
-vid_dup_finder_lib = "0.1"
-ffmpeg_cmdline_utils = "0.1"
+vid_dup_finder_lib = "0.2"
+ffmpeg_cmdline_utils = "0.3"
 
 # Saving/Loading Cache
 serde = "1.0"

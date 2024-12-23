@@ -744,6 +744,8 @@ pub fn get_pixbuf_from_dynamic_image(dynamic_image: &DynamicImage) -> Result<Pix
     let mut output = Vec::new();
     JpegEncoder::new(&mut output).encode_image(dynamic_image).expect("Failed to encode jpeg image"); // TODO remove here unwrap
     let arra;
+    // TODO - this code can really be broken, but I couldn't find better solution
+    #[allow(static_mut_refs)]
     unsafe {
         IMAGE_PREVIEW_ARRAY.take();
         IMAGE_PREVIEW_ARRAY.set(output).expect("Setting image preview array failed");

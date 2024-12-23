@@ -5,14 +5,12 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::Ordering;
 
 use crossbeam_channel::{Receiver, Sender};
-use ffmpeg_cmdline_utils::FfmpegErrorKind::FfmpegNotFound;
 use fun_time::fun_time;
 use humansize::{format_size, BINARY};
 use log::debug;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
-use vid_dup_finder_lib::HashCreationErrorKind::DetermineVideo;
-use vid_dup_finder_lib::{NormalizedTolerance, VideoHash};
+use vid_dup_finder_lib::{ffmpeg_builder, VideoHash};
 
 use crate::common::{check_if_stop_received, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, VIDEO_FILES_EXTENSIONS};
 use crate::common_cache::{extract_loaded_cache, get_similar_videos_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
@@ -115,7 +113,7 @@ impl SimilarVideos {
 
     #[fun_time(message = "find_similar_videos", level = "info")]
     pub fn find_similar_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) {
-        if !check_if_ffmpeg_is_installed() {
+        if !ffmpeg_cmdline_utils::ffmpeg_and_ffprobe_are_callable() {
             self.common_data.text_messages.errors.push(flc!("core_ffmpeg_not_found"));
             #[cfg(target_os = "windows")]
             self.common_data.text_messages.errors.push(flc!("core_ffmpeg_not_found_windows"));
@@ -221,7 +219,7 @@ impl SimilarVideos {
                 }
                 let mut file_entry = file_entry.1.clone();
 
-                let vhash = match VideoHash::from_path(&file_entry.path) {
+                let vhash = match ffmpeg_builder::VideoHashBuilder::default().hash(file_entry.path.clone()) {
                     Ok(t) => t,
                     Err(e) => {
                         return {
@@ -300,7 +298,12 @@ impl SimilarVideos {
 
     #[fun_time(message = "match_groups_of_videos", level = "debug")]
     fn match_groups_of_videos(&mut self, vector_of_hashes: Vec<VideoHash>, hashmap_with_file_entries: &HashMap<String, VideosEntry>) {
-        let match_group = vid_dup_finder_lib::search(vector_of_hashes, NormalizedTolerance::new(self.get_params().tolerance as f64 / 100.0f64));
+        // Tolerance in library is a value between 0 and 1
+        // Tolerance in this app is a value between 0 and 20
+        // Default tolerance in library is 0.30
+        // We need to allow to set value in range 0 - 0.5
+        let match_group = vid_dup_finder_lib::search(vector_of_hashes, self.get_params().tolerance as f64 / 40.0f64);
+
         let mut collected_similar_videos: Vec<Vec<VideosEntry>> = Default::default();
         for i in match_group {
             let mut temp_vector: Vec<VideosEntry> = Vec::new();
@@ -406,18 +409,6 @@ impl PrintResults for SimilarVideos {
             self.save_results_to_file_as_json_internal(file_name, &self.similar_vectors, pretty_print)
         }
     }
-}
-
-pub fn check_if_ffmpeg_is_installed() -> bool {
-    let vid = "9999czekoczekoczekolada999.txt";
-    if let Err(DetermineVideo {
-        src_path: _a,
-        error: FfmpegNotFound,
-    }) = VideoHash::from_path(vid)
-    {
-        return false;
-    }
-    true
 }
 
 impl SimilarVideos {

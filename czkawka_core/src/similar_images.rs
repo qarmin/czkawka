@@ -8,6 +8,7 @@ use std::{mem, panic};
 use bk_tree::BKTree;
 use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
+use hamming_bitwise_fast::hamming_bitwise_fast;
 use humansize::{format_size, BINARY};
 use image::GenericImageView;
 use image_hasher::{FilterType, HashAlg, HasherConfig};
@@ -92,7 +93,7 @@ struct Hamming;
 
 impl bk_tree::Metric<ImHash> for Hamming {
     fn distance(&self, a: &ImHash, b: &ImHash) -> u32 {
-        hamming::distance_fast(a, b).expect("Calculating hamming distance, cannot fail") as u32
+        hamming_bitwise_fast(a, b)
     }
 
     fn threshold_distance(&self, a: &ImHash, b: &ImHash, _threshold: u32) -> Option<u32> {
