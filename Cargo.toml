@@ -6,6 +6,7 @@ members = [
     "krokiet"
 ]
 exclude = [
+    "misc/test_read_perf",
     "ci_tester",
 ]
 resolver = "2"

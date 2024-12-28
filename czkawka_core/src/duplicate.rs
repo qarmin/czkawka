@@ -1,3 +1,10 @@
+use crossbeam_channel::{Receiver, Sender};
+use fun_time::fun_time;
+use humansize::{format_size, BINARY};
+use log::debug;
+use rayon::prelude::*;
+use serde::{Deserialize, Serialize};
+use std::cell::RefCell;
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fmt::Debug;
 use std::fs::File;
@@ -9,13 +16,6 @@ use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::Ordering;
 use std::{fs, mem};
-
-use crossbeam_channel::{Receiver, Sender};
-use fun_time::fun_time;
-use humansize::{format_size, BINARY};
-use log::debug;
-use rayon::prelude::*;
-use serde::{Deserialize, Serialize};
 use xxhash_rust::xxh3::Xxh3;
 
 use crate::common::{check_if_stop_received, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, WorkContinueStatus};
@@ -26,6 +26,10 @@ use crate::common_traits::*;
 use crate::progress_data::{CurrentStage, ProgressData};
 
 const TEMP_HARDLINK_FILE: &str = "rzeczek.rxrxrxl";
+
+thread_local! {
+    static THREAD_BUFFER: RefCell<Vec<u8>> = RefCell::new(vec![0u8; 1024 * 2024]);
+}
 
 #[derive(PartialEq, Eq, Clone, Debug, Copy, Default)]
 pub enum HashType {
@@ -574,22 +578,24 @@ impl DuplicateFinder {
             .map(|(size, vec_file_entry)| {
                 let mut hashmap_with_hash: BTreeMap<String, Vec<DuplicateEntry>> = Default::default();
                 let mut errors: Vec<String> = Vec::new();
-                let mut buffer = [0u8; 1024 * 32];
 
                 atomic_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
                 if check_if_stop_received(stop_receiver) {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
-                for mut file_entry in vec_file_entry {
-                    match hash_calculation(&mut buffer, &file_entry, check_type, 0) {
-                        Ok(hash_string) => {
-                            file_entry.hash = hash_string.clone();
-                            hashmap_with_hash.entry(hash_string).or_default().push(file_entry);
+                THREAD_BUFFER.with_borrow_mut(|buffer| {
+                    for mut file_entry in vec_file_entry {
+                        match hash_calculation(buffer, &file_entry, check_type, 1024 * 32) {
+                            Ok(hash_string) => {
+                                file_entry.hash = hash_string.clone();
+                                hashmap_with_hash.entry(hash_string).or_default().push(file_entry);
+                            }
+                            Err(s) => errors.push(s),
                         }
-                        Err(s) => errors.push(s),
                     }
-                }
+                });
+
                 Some((size, hashmap_with_hash, errors))
             })
             .while_some()
@@ -781,23 +787,30 @@ impl DuplicateFinder {
             .map(|(size, vec_file_entry)| {
                 let mut hashmap_with_hash: BTreeMap<String, Vec<DuplicateEntry>> = Default::default();
                 let mut errors: Vec<String> = Vec::new();
-                let mut buffer = [0u8; 1024 * 16];
-
+                let mut exam_stopped = false;
                 atomic_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
-                for mut file_entry in vec_file_entry {
-                    if check_if_stop_received(stop_receiver) {
-                        check_was_stopped.store(true, Ordering::Relaxed);
-                        return None;
-                    }
 
-                    match hash_calculation(&mut buffer, &file_entry, check_type, u64::MAX) {
-                        Ok(hash_string) => {
-                            file_entry.hash = hash_string.clone();
-                            hashmap_with_hash.entry(hash_string.clone()).or_default().push(file_entry);
+                THREAD_BUFFER.with_borrow_mut(|buffer| {
+                    for mut file_entry in vec_file_entry {
+                        if check_if_stop_received(stop_receiver) {
+                            check_was_stopped.store(true, Ordering::Relaxed);
+                            exam_stopped = true;
+                            break;
                         }
-                        Err(s) => errors.push(s),
+
+                        match hash_calculation(buffer, &file_entry, check_type, u64::MAX) {
+                            Ok(hash_string) => {
+                                file_entry.hash = hash_string.clone();
+                                hashmap_with_hash.entry(hash_string.clone()).or_default().push(file_entry);
+                            }
+                            Err(s) => errors.push(s),
+                        }
                     }
+                });
+                if exam_stopped {
+                    return None;
                 }
+
                 Some((size, hashmap_with_hash, errors))
             })
             .while_some()

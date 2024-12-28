@@ -1,4 +1,3 @@
-use const_format::concatcp;
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use czkawka_core::duplicate::{hash_calculation, DuplicateEntry, HashType};
 use std::env::temp_dir;

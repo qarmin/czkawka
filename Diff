@@ -1,0 +1,13 @@
+Performance comparison of using Array and Vector with specific buffer sizes for reading files from disk and calculating their hashes.
+This is quite realistic scenario which also uses rayon which sometimes sometimes mess with predictability of results.
+My computer have quite good CPU, but cheap Sata SSD, so results shows disk
+
+(Time to read files and calculate hashes in parallel, smaller is better)
+| Name | 250000 files ~50 KB(SSD) | 170 files 5MB-150MB(SSD) | 1 file 0.9 GB(SSD) | 6200 files 50KB - 50MB(HDD) | 1 file 671 MB(HDD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Array 16KB | Base | Base | Base  | Base |
+| Vector 16KB | 0% | 0% | 0% | 0% | 0% |
+| Vector 1MB | -7% | -4% | -16% | -45% | 0% |
+| Thread local Vector 1MB | -12% | -4% | -16% | -45% | 0% |
+
+I tried to
