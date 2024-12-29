@@ -1,9 +1,3 @@
-use crossbeam_channel::{Receiver, Sender};
-use fun_time::fun_time;
-use humansize::{format_size, BINARY};
-use log::debug;
-use rayon::prelude::*;
-use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fmt::Debug;
@@ -16,6 +10,13 @@ use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::Ordering;
 use std::{fs, mem};
+
+use crossbeam_channel::{Receiver, Sender};
+use fun_time::fun_time;
+use humansize::{format_size, BINARY};
+use log::debug;
+use rayon::prelude::*;
+use serde::{Deserialize, Serialize};
 use xxhash_rust::xxh3::Xxh3;
 
 use crate::common::{check_if_stop_received, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, WorkContinueStatus};
@@ -549,9 +550,9 @@ impl DuplicateFinder {
         stop_receiver: Option<&Receiver<()>>,
         progress_sender: Option<&Sender<ProgressData>>,
         pre_checked_map: &mut BTreeMap<u64, Vec<DuplicateEntry>>,
-    ) -> bool {
+    ) -> WorkContinueStatus {
         if self.files_with_identical_size.is_empty() {
-            return true;
+            return crate::common::WorkContinueStatus::Continue;
         }
 
         let check_type = self.get_params().hash_type;
@@ -562,7 +563,7 @@ impl DuplicateFinder {
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
         if check_if_stop_received(stop_receiver) {
-            return false;
+            return crate::common::WorkContinueStatus::Stop;
         }
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) = prepare_thread_handler_common(
             progress_sender,
@@ -629,10 +630,10 @@ impl DuplicateFinder {
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
         if check_was_stopped.load(Ordering::Relaxed) || check_if_stop_received(stop_receiver) {
-            return false;
+            return crate::common::WorkContinueStatus::Stop;
         }
 
-        true
+        crate::common::WorkContinueStatus::Continue
     }
 
     fn diff_loaded_and_prechecked_files(
@@ -758,9 +759,14 @@ impl DuplicateFinder {
     }
 
     #[fun_time(message = "full_hashing", level = "debug")]
-    fn full_hashing(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>, pre_checked_map: BTreeMap<u64, Vec<DuplicateEntry>>) -> bool {
+    fn full_hashing(
+        &mut self,
+        stop_receiver: Option<&Receiver<()>>,
+        progress_sender: Option<&Sender<ProgressData>>,
+        pre_checked_map: BTreeMap<u64, Vec<DuplicateEntry>>,
+    ) -> WorkContinueStatus {
         if pre_checked_map.is_empty() {
-            return true;
+            return crate::common::WorkContinueStatus::Continue;
         }
 
         let (progress_thread_handle, progress_thread_run, _atomic_counter, _check_was_stopped) =
@@ -770,7 +776,7 @@ impl DuplicateFinder {
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
         if check_if_stop_received(stop_receiver) {
-            return false;
+            return crate::common::WorkContinueStatus::Stop;
         }
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) = prepare_thread_handler_common(
@@ -835,7 +841,7 @@ impl DuplicateFinder {
             }
         }
 
-        true
+        crate::common::WorkContinueStatus::Continue
     }
 
     #[fun_time(message = "hash_reference_folders", level = "debug")]
@@ -894,11 +900,11 @@ impl DuplicateFinder {
         assert_eq!(self.get_params().check_method, CheckingMethod::Hash);
 
         let mut pre_checked_map: BTreeMap<u64, Vec<DuplicateEntry>> = Default::default();
-        if !self.prehashing(stop_receiver, progress_sender, &mut pre_checked_map) {
+        if self.prehashing(stop_receiver, progress_sender, &mut pre_checked_map) == crate::common::WorkContinueStatus::Stop {
             return crate::common::WorkContinueStatus::Stop;
         }
 
-        if !self.full_hashing(stop_receiver, progress_sender, pre_checked_map) {
+        if self.full_hashing(stop_receiver, progress_sender, pre_checked_map) == crate::common::WorkContinueStatus::Stop {
             return crate::common::WorkContinueStatus::Stop;
         }
 

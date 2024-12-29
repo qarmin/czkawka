@@ -13,7 +13,7 @@ repository = "https://github.com/qarmin/czkawka"
 clap = { version = "4.5", features = ["derive"] }
 
 # For enum types
-image_hasher = "2.0"
+image_hasher = "3.0"
 
 log = "0.4.22"
 handsome_logger = "0.8"

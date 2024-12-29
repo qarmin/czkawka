@@ -12,7 +12,9 @@ use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use vid_dup_finder_lib::{ffmpeg_builder, VideoHash};
 
-use crate::common::{check_if_stop_received, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, VIDEO_FILES_EXTENSIONS};
+use crate::common::{
+    check_if_stop_received, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, WorkContinueStatus, VIDEO_FILES_EXTENSIONS,
+};
 use crate::common_cache::{extract_loaded_cache, get_similar_videos_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{inode, take_1_per_inode, DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
@@ -125,11 +127,11 @@ impl SimilarVideos {
         } else {
             self.prepare_items();
             self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
-            if !self.check_for_similar_videos(stop_receiver, progress_sender) {
+            if self.check_for_similar_videos(stop_receiver, progress_sender) == crate::common::WorkContinueStatus::Stop {
                 self.common_data.stopped_search = true;
                 return;
             }
-            if !self.sort_videos(stop_receiver, progress_sender) {
+            if self.sort_videos(stop_receiver, progress_sender) == crate::common::WorkContinueStatus::Stop {
                 self.common_data.stopped_search = true;
                 return;
             }
@@ -139,10 +141,10 @@ impl SimilarVideos {
     }
 
     #[fun_time(message = "check_for_similar_videos", level = "debug")]
-    fn check_for_similar_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
+    fn check_for_similar_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         self.common_data.extensions.set_and_validate_allowed_extensions(VIDEO_FILES_EXTENSIONS);
         if !self.common_data.extensions.set_any_extensions() {
-            return true;
+            return crate::common::WorkContinueStatus::Continue;
         }
 
         let result = DirTraversalBuilder::new()
@@ -162,10 +164,10 @@ impl SimilarVideos {
                     .collect();
                 self.common_data.text_messages.warnings.extend(warnings);
                 debug!("check_files - Found {} video files.", self.videos_to_check.len());
-                true
+                crate::common::WorkContinueStatus::Continue
             }
 
-            DirTraversalResult::Stopped => false,
+            DirTraversalResult::Stopped => crate::common::WorkContinueStatus::Stop,
         }
     }
 
@@ -195,9 +197,9 @@ impl SimilarVideos {
     }
 
     #[fun_time(message = "sort_videos", level = "debug")]
-    fn sort_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
+    fn sort_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.videos_to_check.is_empty() {
-            return true;
+            return crate::common::WorkContinueStatus::Continue;
         }
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache_at_start();
@@ -257,7 +259,7 @@ impl SimilarVideos {
 
         // Break if stop was clicked after saving to cache
         if check_was_stopped.load(Ordering::Relaxed) {
-            return false;
+            return crate::common::WorkContinueStatus::Stop;
         }
 
         self.match_groups_of_videos(vector_of_hashes, &hashmap_with_file_entries);
@@ -279,7 +281,7 @@ impl SimilarVideos {
         self.videos_hashes = Default::default();
         self.videos_to_check = Default::default();
 
-        true
+        crate::common::WorkContinueStatus::Continue
     }
 
     #[fun_time(message = "save_cache", level = "debug")]

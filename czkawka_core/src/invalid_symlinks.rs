@@ -7,6 +7,7 @@ use fun_time::fun_time;
 use log::debug;
 use serde::{Deserialize, Serialize};
 
+use crate::common::WorkContinueStatus;
 use crate::common_dir_traversal::{Collect, DirTraversalBuilder, DirTraversalResult, ErrorType, FileEntry, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::*;
@@ -74,7 +75,7 @@ impl InvalidSymlinks {
     #[fun_time(message = "find_invalid_links", level = "info")]
     pub fn find_invalid_links(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) {
         self.prepare_items();
-        if !self.check_files(stop_receiver, progress_sender) {
+        if self.check_files(stop_receiver, progress_sender) == WorkContinueStatus::Stop {
             self.common_data.stopped_search = true;
             return;
         }
@@ -83,7 +84,7 @@ impl InvalidSymlinks {
     }
 
     #[fun_time(message = "check_files", level = "debug")]
-    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
+    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let result = DirTraversalBuilder::new()
             .common_data(&self.common_data)
             .group_by(|_fe| ())
@@ -106,9 +107,9 @@ impl InvalidSymlinks {
                 self.information.number_of_invalid_symlinks = self.invalid_symlinks.len();
                 self.common_data.text_messages.warnings.extend(warnings);
                 debug!("Found {} invalid symlinks.", self.information.number_of_invalid_symlinks);
-                true
+                crate::common::WorkContinueStatus::Continue
             }
-            DirTraversalResult::Stopped => false,
+            DirTraversalResult::Stopped => crate::common::WorkContinueStatus::Stop,
         }
     }
 

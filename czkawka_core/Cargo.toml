@@ -19,7 +19,7 @@ crossbeam-channel = "0.5"
 directories-next = "2.0"
 
 # Needed by similar images
-image_hasher = "2.0"
+image_hasher = "3.0"
 bk-tree = "0.5"
 image = { version = "0.25", default-features = false, features = ["bmp", "dds", "exr", "ff", "gif", "hdr", "ico", "jpeg", "png", "pnm", "qoi", "tga", "tiff", "webp"] }
 hamming-bitwise-fast = "1.0"

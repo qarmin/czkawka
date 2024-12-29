@@ -33,7 +33,7 @@ image = "0.25"
 regex = "1.11"
 
 # To get image_hasher types
-image_hasher = "2.0"
+image_hasher = "3.0"
 
 # Move files to trash
 trash = "5.1"

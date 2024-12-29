@@ -134,7 +134,7 @@ pub struct DirTraversal<'a, 'b, F> {
     collect: Collect,
 }
 
-impl<'a, 'b> Default for DirTraversalBuilder<'a, 'b, ()> {
+impl Default for DirTraversalBuilder<'_, '_, ()> {
     fn default() -> Self {
         Self::new()
     }
@@ -302,7 +302,7 @@ fn entry_type(file_type: FileType) -> EntryType {
     }
 }
 
-impl<'a, 'b, F, T> DirTraversal<'a, 'b, F>
+impl<F, T> DirTraversal<'_, '_, F>
 where
     F: Fn(&FileEntry) -> T,
     T: Ord + PartialOrd,
