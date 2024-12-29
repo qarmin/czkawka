@@ -127,11 +127,11 @@ impl SimilarVideos {
         } else {
             self.prepare_items();
             self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
-            if self.check_for_similar_videos(stop_receiver, progress_sender) == crate::common::WorkContinueStatus::Stop {
+            if self.check_for_similar_videos(stop_receiver, progress_sender) == WorkContinueStatus::Stop {
                 self.common_data.stopped_search = true;
                 return;
             }
-            if self.sort_videos(stop_receiver, progress_sender) == crate::common::WorkContinueStatus::Stop {
+            if self.sort_videos(stop_receiver, progress_sender) == WorkContinueStatus::Stop {
                 self.common_data.stopped_search = true;
                 return;
             }
@@ -144,7 +144,7 @@ impl SimilarVideos {
     fn check_for_similar_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         self.common_data.extensions.set_and_validate_allowed_extensions(VIDEO_FILES_EXTENSIONS);
         if !self.common_data.extensions.set_any_extensions() {
-            return crate::common::WorkContinueStatus::Continue;
+            return WorkContinueStatus::Continue;
         }
 
         let result = DirTraversalBuilder::new()
@@ -164,10 +164,10 @@ impl SimilarVideos {
                     .collect();
                 self.common_data.text_messages.warnings.extend(warnings);
                 debug!("check_files - Found {} video files.", self.videos_to_check.len());
-                crate::common::WorkContinueStatus::Continue
+                WorkContinueStatus::Continue
             }
 
-            DirTraversalResult::Stopped => crate::common::WorkContinueStatus::Stop,
+            DirTraversalResult::Stopped => WorkContinueStatus::Stop,
         }
     }
 
@@ -199,7 +199,7 @@ impl SimilarVideos {
     #[fun_time(message = "sort_videos", level = "debug")]
     fn sort_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.videos_to_check.is_empty() {
-            return crate::common::WorkContinueStatus::Continue;
+            return WorkContinueStatus::Continue;
         }
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache_at_start();
@@ -259,7 +259,7 @@ impl SimilarVideos {
 
         // Break if stop was clicked after saving to cache
         if check_was_stopped.load(Ordering::Relaxed) {
-            return crate::common::WorkContinueStatus::Stop;
+            return WorkContinueStatus::Stop;
         }
 
         self.match_groups_of_videos(vector_of_hashes, &hashmap_with_file_entries);
@@ -281,7 +281,7 @@ impl SimilarVideos {
         self.videos_hashes = Default::default();
         self.videos_to_check = Default::default();
 
-        crate::common::WorkContinueStatus::Continue
+        WorkContinueStatus::Continue
     }
 
     #[fun_time(message = "save_cache", level = "debug")]

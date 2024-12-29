@@ -107,9 +107,9 @@ impl InvalidSymlinks {
                 self.information.number_of_invalid_symlinks = self.invalid_symlinks.len();
                 self.common_data.text_messages.warnings.extend(warnings);
                 debug!("Found {} invalid symlinks.", self.information.number_of_invalid_symlinks);
-                crate::common::WorkContinueStatus::Continue
+                WorkContinueStatus::Continue
             }
-            DirTraversalResult::Stopped => crate::common::WorkContinueStatus::Stop,
+            DirTraversalResult::Stopped => WorkContinueStatus::Stop,
         }
     }
 

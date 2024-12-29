@@ -189,7 +189,7 @@ impl SimilarImages {
         }
 
         if !self.common_data.extensions.set_any_extensions() {
-            return crate::common::WorkContinueStatus::Continue;
+            return WorkContinueStatus::Continue;
         }
 
         let result = DirTraversalBuilder::new()
@@ -214,10 +214,10 @@ impl SimilarImages {
                     .collect();
                 self.common_data.text_messages.warnings.extend(warnings);
                 debug!("check_files - Found {} image files.", self.images_to_check.len());
-                crate::common::WorkContinueStatus::Continue
+                WorkContinueStatus::Continue
             }
 
-            DirTraversalResult::Stopped => crate::common::WorkContinueStatus::Stop,
+            DirTraversalResult::Stopped => WorkContinueStatus::Stop,
         }
     }
 
@@ -268,7 +268,7 @@ impl SimilarImages {
     #[fun_time(message = "hash_images", level = "debug")]
     fn hash_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.images_to_check.is_empty() {
-            return crate::common::WorkContinueStatus::Continue;
+            return WorkContinueStatus::Continue;
         }
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.hash_images_load_cache();
@@ -323,10 +323,10 @@ impl SimilarImages {
 
         // Break if stop was clicked after saving to cache
         if check_was_stopped.load(Ordering::Relaxed) {
-            return crate::common::WorkContinueStatus::Stop;
+            return WorkContinueStatus::Stop;
         }
 
-        crate::common::WorkContinueStatus::Continue
+        WorkContinueStatus::Continue
     }
 
     #[fun_time(message = "save_to_cache", level = "debug")]
@@ -503,7 +503,7 @@ impl SimilarImages {
 
             if check_was_stopped.load(Ordering::Relaxed) {
                 send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-                return crate::common::WorkContinueStatus::Stop;
+                return WorkContinueStatus::Stop;
             }
 
             self.connect_results(partial_results, &mut hashes_parents, &mut hashes_similarity, &hashes_with_multiple_images);
@@ -514,7 +514,7 @@ impl SimilarImages {
         debug_check_for_duplicated_things(self.common_data.use_reference_folders, &hashes_parents, &hashes_similarity, all_hashed_images, "LATTER");
         self.collect_hash_compare_result(hashes_parents, &hashes_with_multiple_images, all_hashed_images, collected_similar_images, hashes_similarity);
 
-        crate::common::WorkContinueStatus::Continue
+        WorkContinueStatus::Continue
     }
 
     #[fun_time(message = "connect_results", level = "debug")]
@@ -584,7 +584,7 @@ impl SimilarImages {
     #[fun_time(message = "find_similar_hashes", level = "debug")]
     fn find_similar_hashes(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.image_hashes.is_empty() {
-            return crate::common::WorkContinueStatus::Continue;
+            return WorkContinueStatus::Continue;
         }
 
         let tolerance = self.get_params().similarity;
@@ -602,9 +602,9 @@ impl SimilarImages {
                 }
             }
         } else if self.compare_hashes_with_non_zero_tolerance(&all_hashed_images, &mut collected_similar_images, progress_sender, stop_receiver, tolerance)
-            == crate::common::WorkContinueStatus::Stop
+            == WorkContinueStatus::Stop
         {
-            return crate::common::WorkContinueStatus::Stop;
+            return WorkContinueStatus::Stop;
         }
 
         self.verify_duplicated_items(&collected_similar_images);
@@ -633,7 +633,7 @@ impl SimilarImages {
         self.images_to_check = Default::default();
         self.bktree = BKTree::new(Hamming);
 
-        crate::common::WorkContinueStatus::Continue
+        WorkContinueStatus::Continue
     }
 
     #[fun_time(message = "exclude_items_with_same_size", level = "debug")]

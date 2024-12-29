@@ -365,10 +365,10 @@ impl DuplicateFinder {
                 }
                 self.calculate_size_name_stats();
 
-                crate::common::WorkContinueStatus::Continue
+                WorkContinueStatus::Continue
             }
 
-            DirTraversalResult::Stopped => crate::common::WorkContinueStatus::Stop,
+            DirTraversalResult::Stopped => WorkContinueStatus::Stop,
         }
     }
 
@@ -427,10 +427,10 @@ impl DuplicateFinder {
                     self.files_with_identical_size_referenced.values().map(|(_fe, vec)| vec.len()).sum::<usize>()
                 );
 
-                crate::common::WorkContinueStatus::Continue
+                WorkContinueStatus::Continue
             }
 
-            DirTraversalResult::Stopped => crate::common::WorkContinueStatus::Stop,
+            DirTraversalResult::Stopped => WorkContinueStatus::Stop,
         }
     }
 
@@ -552,7 +552,7 @@ impl DuplicateFinder {
         pre_checked_map: &mut BTreeMap<u64, Vec<DuplicateEntry>>,
     ) -> WorkContinueStatus {
         if self.files_with_identical_size.is_empty() {
-            return crate::common::WorkContinueStatus::Continue;
+            return WorkContinueStatus::Continue;
         }
 
         let check_type = self.get_params().hash_type;
@@ -563,7 +563,7 @@ impl DuplicateFinder {
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
         if check_if_stop_received(stop_receiver) {
-            return crate::common::WorkContinueStatus::Stop;
+            return WorkContinueStatus::Stop;
         }
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) = prepare_thread_handler_common(
             progress_sender,
@@ -630,10 +630,10 @@ impl DuplicateFinder {
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
         if check_was_stopped.load(Ordering::Relaxed) || check_if_stop_received(stop_receiver) {
-            return crate::common::WorkContinueStatus::Stop;
+            return WorkContinueStatus::Stop;
         }
 
-        crate::common::WorkContinueStatus::Continue
+        WorkContinueStatus::Continue
     }
 
     fn diff_loaded_and_prechecked_files(
@@ -766,7 +766,7 @@ impl DuplicateFinder {
         pre_checked_map: BTreeMap<u64, Vec<DuplicateEntry>>,
     ) -> WorkContinueStatus {
         if pre_checked_map.is_empty() {
-            return crate::common::WorkContinueStatus::Continue;
+            return WorkContinueStatus::Continue;
         }
 
         let (progress_thread_handle, progress_thread_run, _atomic_counter, _check_was_stopped) =
@@ -776,7 +776,7 @@ impl DuplicateFinder {
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
         if check_if_stop_received(stop_receiver) {
-            return crate::common::WorkContinueStatus::Stop;
+            return WorkContinueStatus::Stop;
         }
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) = prepare_thread_handler_common(
@@ -841,7 +841,7 @@ impl DuplicateFinder {
             }
         }
 
-        crate::common::WorkContinueStatus::Continue
+        WorkContinueStatus::Continue
     }
 
     #[fun_time(message = "hash_reference_folders", level = "debug")]
@@ -900,12 +900,12 @@ impl DuplicateFinder {
         assert_eq!(self.get_params().check_method, CheckingMethod::Hash);
 
         let mut pre_checked_map: BTreeMap<u64, Vec<DuplicateEntry>> = Default::default();
-        if self.prehashing(stop_receiver, progress_sender, &mut pre_checked_map) == crate::common::WorkContinueStatus::Stop {
-            return crate::common::WorkContinueStatus::Stop;
+        if self.prehashing(stop_receiver, progress_sender, &mut pre_checked_map) == WorkContinueStatus::Stop {
+            return WorkContinueStatus::Stop;
         }
 
-        if self.full_hashing(stop_receiver, progress_sender, pre_checked_map) == crate::common::WorkContinueStatus::Stop {
-            return crate::common::WorkContinueStatus::Stop;
+        if self.full_hashing(stop_receiver, progress_sender, pre_checked_map) == WorkContinueStatus::Stop {
+            return WorkContinueStatus::Stop;
         }
 
         self.hash_reference_folders();
@@ -913,7 +913,7 @@ impl DuplicateFinder {
         // Clean unused data
         self.files_with_identical_size = Default::default();
 
-        crate::common::WorkContinueStatus::Continue
+        WorkContinueStatus::Continue
     }
 
     #[fun_time(message = "delete_files", level = "debug")]

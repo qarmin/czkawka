@@ -127,7 +127,7 @@ impl EmptyFolder {
         while !folders_to_check.is_empty() {
             if check_if_stop_received(stop_receiver) {
                 send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-                return crate::common::WorkContinueStatus::Stop;
+                return WorkContinueStatus::Stop;
             }
 
             let segments: Vec<_> = folders_to_check
