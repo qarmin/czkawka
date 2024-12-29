@@ -720,7 +720,7 @@ mod tests {
                     actual
                 );
             }
-            _ => {
+            DirTraversalResult::Stopped => {
                 panic!("Expect SuccessFiles.");
             }
         };
@@ -760,7 +760,7 @@ mod tests {
                     actual
                 );
             }
-            _ => {
+            DirTraversalResult::Stopped => {
                 panic!("Expect SuccessFiles.");
             }
         };

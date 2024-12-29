@@ -35,7 +35,7 @@ pub fn opening_enter_function_ported_upper_directories(
         NotebookUpperEnum::ExcludedDirectories => {
             handle_tree_keypress_upper_directories(&tree_view, key_code, ColumnsExcludedDirectory::Path as i32, None);
         }
-        _ => {
+        NotebookUpperEnum::ItemsConfiguration => {
             panic!()
         }
     }
@@ -73,7 +73,7 @@ pub fn opening_double_click_function_directories(gesture_click: &GestureClick, n
             NotebookUpperEnum::ExcludedDirectories => {
                 common_open_function_upper_directories(&tree_view, ColumnsExcludedDirectory::Path as i32);
             }
-            _ => {
+            NotebookUpperEnum::ItemsConfiguration => {
                 panic!()
             }
         }

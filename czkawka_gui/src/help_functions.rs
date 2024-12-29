@@ -404,7 +404,7 @@ pub fn get_tree_view_name_from_notebook_upper_enum(notebook_upper_enum: Notebook
     match notebook_upper_enum {
         NotebookUpperEnum::IncludedDirectories => "tree_view_upper_included_directories",
         NotebookUpperEnum::ExcludedDirectories => "tree_view_upper_excluded_directories",
-        _ => panic!(),
+        NotebookUpperEnum::ItemsConfiguration => panic!(),
     }
 }
 

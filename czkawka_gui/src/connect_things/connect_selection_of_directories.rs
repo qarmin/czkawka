@@ -138,7 +138,7 @@ fn connect_file_dialog(file_dialog_include_exclude_folder_selection: &FileChoose
                     excluded_items = true;
                     &exclude_tree_view
                 }
-                _ => panic!(),
+                NotebookUpperEnum::ItemsConfiguration => panic!(),
             };
 
             let mut folders: Vec<PathBuf> = Vec::new();
