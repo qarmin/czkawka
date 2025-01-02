@@ -5,15 +5,14 @@
 
 ### Known regressions
 - Crashes when using similar videos(when hashing invalid files)
-- Crashes when reading exif data - reported here - https://github.com/mindeng/nom-exif/issues/created_by/qarmin
 
 ### CI
 
 ### Core
 - Updated vid_dup_finder, now it is able to find similar videos shorter than 30 seconds - [#]()
 - More supported jxl image formats(using built-in jxl -> image-rs converter) - [#]()
-- Rotating all images by default, basin on exif orientation - [#]()
-- Using resuable 
+- Rotating all images by default, basing on their exif orientation - [#]()
+- Using reusable and bigger buffer for reading files in duplicate mode - [#]()
 
 ### Krokiet
 

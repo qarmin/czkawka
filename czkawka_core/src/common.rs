@@ -86,6 +86,8 @@ pub fn print_version_mode() {
     features.push("libavif");
     #[cfg(feature = "libraw")]
     features.push("libraw");
+    #[cfg(feature = "fast_image_resize")]
+    features.push("fast_image_resize");
 
     info!(
         "App version: {CZKAWKA_VERSION}, {debug_release} mode, rust {rust_version}, os {} {} [{} {}], {processors} cpu/threads, features({}): [{}]",

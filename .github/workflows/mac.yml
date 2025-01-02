@@ -19,9 +19,9 @@ jobs:
 
       - name: Install GTK4
         run: |
-          brew link --overwrite python@3.11
+          brew link --overwrite python@3.13
           brew install rust gtk4 libheif || true
-          brew link --overwrite python@3.11
+          brew link --overwrite python@3.13
 
       - name: Setup rust version
         run: rustup default stable

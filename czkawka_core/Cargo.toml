@@ -21,7 +21,7 @@ directories-next = "2.0"
 # Needed by similar images
 image_hasher = "3.0"
 bk-tree = "0.5"
-image = { version = "0.25", default-features = false, features = ["bmp", "dds", "exr", "ff", "gif", "hdr", "ico", "jpeg", "png", "pnm", "qoi", "tga", "tiff", "webp"] }
+image = { version = "0.25", default-features = false, features = ["bmp", "dds", "exr", "ff", "gif", "hdr", "ico", "jpeg", "png", "pnm", "qoi", "tga", "tiff", "webp", "rayon"] }
 hamming-bitwise-fast = "1.0"
 
 # Needed by same music
@@ -85,7 +85,7 @@ os_info = { version = "3", default-features = false }
 log = "0.4.22"
 handsome_logger = "0.8"
 fun_time = { version = "0.3", features = ["log"] }
-itertools = "0.13"
+itertools = "0.14"
 
 # Don't update anymore! This crate has a bug. I've submitted a patch upstream, but the change is breaking. The current code relies on the bug to work correctly!
 # Warning by CalunVier 2024.7.15
@@ -108,3 +108,4 @@ default = []
 heif = ["dep:libheif-rs", "dep:libheif-sys"]
 libraw = ["dep:libraw-rs"]
 libavif = ["image/avif-native", "image/avif"]
+fast_image_resize = ["image_hasher/fast_resize_unstable"]

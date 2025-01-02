@@ -15,6 +15,9 @@ use crate::duplicate::HashType;
 use crate::similar_images::{convert_algorithm_to_string, convert_filters_to_string};
 
 const CACHE_VERSION: &str = "70";
+#[cfg(feature = "fast_image_resize")]
+const CACHE_IMAGE_VERSION: &str = "90_fast_resize";
+#[cfg(not(feature = "fast_image_resize"))]
 const CACHE_IMAGE_VERSION: &str = "90";
 const CACHE_VIDEO_VERSION: &str = "90";
 
