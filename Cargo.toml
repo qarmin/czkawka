@@ -7,6 +7,7 @@ members = [
 ]
 exclude = [
     "misc/test_read_perf",
+    "misc/test_image_perf",
     "ci_tester",
 ]
 resolver = "2"

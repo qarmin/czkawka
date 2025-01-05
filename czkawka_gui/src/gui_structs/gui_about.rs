@@ -125,7 +125,7 @@ impl GuiAbout {
     }
 
     pub fn update_language(&self) {
-        let mut comment_text: String = "2020 - 2024  Rafał Mikrut(qarmin)\n\n".to_string();
+        let mut comment_text: String = "2020 - 2025  Rafał Mikrut(qarmin)\n\n".to_string();
         comment_text += &flg!("about_window_motto");
         self.about_dialog.set_comments(Some(&comment_text));
 
