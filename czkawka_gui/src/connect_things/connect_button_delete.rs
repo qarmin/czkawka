@@ -453,6 +453,8 @@ pub fn tree_remove(
 
     let mut messages: String = String::new();
 
+    // TODO - looks like a but - this var is not deleted
+    #[allow(clippy::collection_is_never_read)]
     let mut vec_path_to_delete: Vec<(String, String)> = Vec::new();
     let mut map_with_path_to_delete: BTreeMap<String, Vec<String>> = Default::default(); // BTreeMap<Path,Vec<FileName>>
 

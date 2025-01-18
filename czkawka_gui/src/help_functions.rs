@@ -481,9 +481,6 @@ pub fn clean_invalid_headers(model: &ListStore, column_header: i32, column_path:
                     }
                 }
             }
-            for tree_path in vec_tree_path_to_delete.iter().rev() {
-                model.remove(&model.iter(tree_path).expect("Using invalid tree_path"));
-            }
         }
         // Non empty means that header points at reference folder
         else {
@@ -529,9 +526,9 @@ pub fn clean_invalid_headers(model: &ListStore, column_header: i32, column_path:
                     }
                 }
             }
-            for tree_path in vec_tree_path_to_delete.iter().rev() {
-                model.remove(&model.iter(tree_path).expect("Using invalid tree_path"));
-            }
+        }
+        for tree_path in vec_tree_path_to_delete.iter().rev() {
+            model.remove(&model.iter(tree_path).expect("Using invalid tree_path"));
         }
     }
 

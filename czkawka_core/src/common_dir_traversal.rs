@@ -82,8 +82,8 @@ pub enum ErrorType {
 impl Display for ErrorType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ErrorType::InfiniteRecursion => write!(f, "Infinite recursion"),
-            ErrorType::NonExistentFile => write!(f, "Non existent file"),
+            Self::InfiniteRecursion => write!(f, "Infinite recursion"),
+            Self::NonExistentFile => write!(f, "Non existent file"),
         }
     }
 }

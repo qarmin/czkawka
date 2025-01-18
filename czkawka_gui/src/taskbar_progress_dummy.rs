@@ -37,6 +37,7 @@ impl TaskbarProgress {
 
     pub fn show(&self) {}
 
+    #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn release(&mut self) {}
 }
 

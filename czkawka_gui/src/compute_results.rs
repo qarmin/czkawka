@@ -1291,8 +1291,7 @@ fn compute_duplicate_finder(
 
 fn vector_sort_unstable_entry_by_path<T>(vector: &[T]) -> Vec<T>
 where
-    T: ResultEntry + Clone,
-    T: Send,
+    T: ResultEntry + Clone + Send,
 {
     if vector.len() >= 2 {
         let mut vector = vector.to_vec();
@@ -1305,8 +1304,7 @@ where
 
 fn vector_sort_simple_unstable_entry_by_path<T>(vector: &[T]) -> Vec<T>
 where
-    T: ResultEntry + Clone,
-    T: Send,
+    T: ResultEntry + Clone + Send,
 {
     let mut vector = vector.to_vec();
     vector.par_sort_unstable_by(|a, b| split_path_compare(a.get_path(), b.get_path()));

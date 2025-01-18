@@ -643,8 +643,7 @@ impl SimilarImages {
                 let mut bt_sizes: BTreeSet<u64> = Default::default();
                 let mut vec_values = Vec::new();
                 for file_entry in vec_file_entry {
-                    if !bt_sizes.contains(&file_entry.size) {
-                        bt_sizes.insert(file_entry.size);
+                    if bt_sizes.insert(file_entry.size) {
                         vec_values.push(file_entry);
                     }
                 }

@@ -313,8 +313,7 @@ impl SimilarVideos {
             for j in i.duplicates() {
                 let file_entry = &hashmap_with_file_entries[&j.to_string_lossy().to_string()];
                 if self.get_params().exclude_videos_with_same_size {
-                    if !bt_size.contains(&file_entry.size) {
-                        bt_size.insert(file_entry.size);
+                    if bt_size.insert(file_entry.size) {
                         temp_vector.push(file_entry.clone());
                     }
                 } else {
