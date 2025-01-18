@@ -140,8 +140,8 @@ impl Default for DirTraversalBuilder<'_, '_, ()> {
     }
 }
 
-impl<'a, 'b> DirTraversalBuilder<'a, 'b, ()> {
-    pub fn new() -> DirTraversalBuilder<'a, 'b, ()> {
+impl DirTraversalBuilder<'_, '_, ()> {
+    pub fn new() -> Self {
         DirTraversalBuilder {
             group_by: None,
             root_dirs: vec![],

@@ -507,7 +507,7 @@ fn show_preview(
                 let image = match get_dynamic_image_from_path(&file_name) {
                     Ok(t) => t,
                     Err(e) => {
-                        add_text_to_text_view(text_view_errors, flg!("preview_image_opening_failure", name = file_name, reason = e.to_string()).as_str());
+                        add_text_to_text_view(text_view_errors, flg!("preview_image_opening_failure", name = file_name, reason = e).as_str());
                         break 'dir;
                     }
                 };

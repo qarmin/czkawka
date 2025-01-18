@@ -246,7 +246,7 @@ impl BrokenFiles {
                     for idx in 0..file.num_pages() {
                         if let Err(e) = file.get_page(idx) {
                             let err = validate_pdf_error(&mut file_entry, e);
-                            if let PdfError::InvalidPassword = err {
+                            if matches!(err, PdfError::InvalidPassword) {
                                 return None;
                             }
                             break;
@@ -258,7 +258,7 @@ impl BrokenFiles {
                         return None;
                     }
                     let err = validate_pdf_error(&mut file_entry, e);
-                    if let PdfError::InvalidPassword = err {
+                    if matches!(err, PdfError::InvalidPassword) {
                         return None;
                     }
                 }

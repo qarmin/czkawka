@@ -26,7 +26,7 @@ hamming-bitwise-fast = "1.0"
 
 # Needed by same music
 bitflags = "2.6"
-lofty = "0.21"
+lofty = "0.22"
 
 # Needed by broken files
 zip = { version = "2.2", features = ["aes-crypto", "bzip2", "deflate", "time"], default-features = false }

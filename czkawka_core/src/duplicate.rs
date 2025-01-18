@@ -41,11 +41,11 @@ pub enum HashType {
 }
 
 impl HashType {
-    fn hasher(self: HashType) -> Box<dyn MyHasher> {
+    fn hasher(self) -> Box<dyn MyHasher> {
         match self {
-            HashType::Blake3 => Box::new(blake3::Hasher::new()),
-            HashType::Crc32 => Box::new(crc32fast::Hasher::new()),
-            HashType::Xxh3 => Box::new(Xxh3::new()),
+            Self::Blake3 => Box::new(blake3::Hasher::new()),
+            Self::Crc32 => Box::new(crc32fast::Hasher::new()),
+            Self::Xxh3 => Box::new(Xxh3::new()),
         }
     }
 }

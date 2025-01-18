@@ -181,7 +181,7 @@ impl LoadedCommonItems {
             .unwrap_or_else(|_| DEFAULT_MAXIMAL_FILE_SIZE.parse::<u64>().expect("Failed to parse maximal_file_size"));
         let ignore_other_filesystems = check_button_settings_one_filesystem.is_active();
 
-        LoadedCommonItems {
+        Self {
             included_directories,
             excluded_directories,
             reference_directories,

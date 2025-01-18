@@ -161,12 +161,12 @@ impl ProgressData {
 impl ToolType {
     pub fn get_max_stage(&self, checking_method: CheckingMethod) -> u8 {
         match *self {
-            ToolType::Duplicate => 6,
-            ToolType::EmptyFolders | ToolType::EmptyFiles | ToolType::InvalidSymlinks | ToolType::BigFile | ToolType::TemporaryFiles => 0,
-            ToolType::BrokenFiles | ToolType::BadExtensions | ToolType::SimilarVideos => 1,
-            ToolType::SimilarImages => 2,
-            ToolType::None => unreachable!("ToolType::None is not allowed"),
-            ToolType::SameMusic => match checking_method {
+            Self::Duplicate => 6,
+            Self::EmptyFolders | Self::EmptyFiles | Self::InvalidSymlinks | Self::BigFile | Self::TemporaryFiles => 0,
+            Self::BrokenFiles | Self::BadExtensions | Self::SimilarVideos => 1,
+            Self::SimilarImages => 2,
+            Self::None => unreachable!("ToolType::None is not allowed"),
+            Self::SameMusic => match checking_method {
                 CheckingMethod::AudioTags => 4,
                 CheckingMethod::AudioContent => 7,
                 _ => unreachable!("CheckingMethod {checking_method:?} in same music mode is not allowed"),
@@ -179,29 +179,29 @@ impl CurrentStage {
     pub fn get_current_stage(&self) -> u8 {
         #[allow(clippy::match_same_arms)] // Now it is easier to read
         match self {
-            CurrentStage::CollectingFiles => 0,
-            CurrentStage::DuplicateScanningName => 0,
-            CurrentStage::DuplicateScanningSizeName => 0,
-            CurrentStage::DuplicateScanningSize => 0,
-            CurrentStage::DuplicatePreHashCacheLoading => 1,
-            CurrentStage::DuplicatePreHashing => 2,
-            CurrentStage::DuplicatePreHashCacheSaving => 3,
-            CurrentStage::DuplicateCacheLoading => 4,
-            CurrentStage::DuplicateFullHashing => 5,
-            CurrentStage::DuplicateCacheSaving => 6,
-            CurrentStage::SimilarImagesCalculatingHashes => 1,
-            CurrentStage::SimilarImagesComparingHashes => 2,
-            CurrentStage::SimilarVideosCalculatingHashes => 1,
-            CurrentStage::BrokenFilesChecking => 1,
-            CurrentStage::BadExtensionsChecking => 1,
-            CurrentStage::SameMusicCacheLoadingTags => 1,
-            CurrentStage::SameMusicReadingTags => 2,
-            CurrentStage::SameMusicCacheSavingTags => 3,
-            CurrentStage::SameMusicComparingTags => 4,
-            CurrentStage::SameMusicCacheLoadingFingerprints => 4,
-            CurrentStage::SameMusicCalculatingFingerprints => 5,
-            CurrentStage::SameMusicCacheSavingFingerprints => 6,
-            CurrentStage::SameMusicComparingFingerprints => 7,
+            Self::CollectingFiles => 0,
+            Self::DuplicateScanningName => 0,
+            Self::DuplicateScanningSizeName => 0,
+            Self::DuplicateScanningSize => 0,
+            Self::DuplicatePreHashCacheLoading => 1,
+            Self::DuplicatePreHashing => 2,
+            Self::DuplicatePreHashCacheSaving => 3,
+            Self::DuplicateCacheLoading => 4,
+            Self::DuplicateFullHashing => 5,
+            Self::DuplicateCacheSaving => 6,
+            Self::SimilarImagesCalculatingHashes => 1,
+            Self::SimilarImagesComparingHashes => 2,
+            Self::SimilarVideosCalculatingHashes => 1,
+            Self::BrokenFilesChecking => 1,
+            Self::BadExtensionsChecking => 1,
+            Self::SameMusicCacheLoadingTags => 1,
+            Self::SameMusicReadingTags => 2,
+            Self::SameMusicCacheSavingTags => 3,
+            Self::SameMusicComparingTags => 4,
+            Self::SameMusicCacheLoadingFingerprints => 4,
+            Self::SameMusicCalculatingFingerprints => 5,
+            Self::SameMusicCacheSavingFingerprints => 6,
+            Self::SameMusicComparingFingerprints => 7,
         }
     }
     pub fn check_if_loading_saving_cache(&self) -> bool {
@@ -210,19 +210,13 @@ impl CurrentStage {
     pub fn check_if_loading_cache(&self) -> bool {
         matches!(
             self,
-            CurrentStage::SameMusicCacheLoadingFingerprints
-                | CurrentStage::SameMusicCacheLoadingTags
-                | CurrentStage::DuplicateCacheLoading
-                | CurrentStage::DuplicatePreHashCacheLoading
+            Self::SameMusicCacheLoadingFingerprints | Self::SameMusicCacheLoadingTags | Self::DuplicateCacheLoading | Self::DuplicatePreHashCacheLoading
         )
     }
     pub fn check_if_saving_cache(&self) -> bool {
         matches!(
             self,
-            CurrentStage::SameMusicCacheSavingFingerprints
-                | CurrentStage::SameMusicCacheSavingTags
-                | CurrentStage::DuplicateCacheSaving
-                | CurrentStage::DuplicatePreHashCacheSaving
+            Self::SameMusicCacheSavingFingerprints | Self::SameMusicCacheSavingTags | Self::DuplicateCacheSaving | Self::DuplicatePreHashCacheSaving
         )
     }
 }

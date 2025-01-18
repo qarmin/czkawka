@@ -25,8 +25,8 @@ pub mod tbp_flags {
 pub struct TaskbarProgress {}
 
 impl TaskbarProgress {
-    pub fn new() -> TaskbarProgress {
-        TaskbarProgress {}
+    pub fn new() -> Self {
+        Self {}
     }
 
     pub fn set_progress_state(&self, _tbp_flags: TBPFLAG) {}
@@ -42,7 +42,7 @@ impl TaskbarProgress {
 
 impl From<HWND> for TaskbarProgress {
     fn from(_hwnd: HWND) -> Self {
-        TaskbarProgress {}
+        Self {}
     }
 }
 
