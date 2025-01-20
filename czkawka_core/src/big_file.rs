@@ -7,6 +7,7 @@ use humansize::{format_size, BINARY};
 use log::debug;
 use rayon::prelude::*;
 
+use crate::common::WorkContinueStatus;
 use crate::common_dir_traversal::{DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::{DebugPrint, PrintResults};
@@ -58,7 +59,7 @@ impl BigFile {
     #[fun_time(message = "find_big_files", level = "info")]
     pub fn find_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) {
         self.prepare_items();
-        if !self.look_for_big_files(stop_receiver, progress_sender) {
+        if self.look_for_big_files(stop_receiver, progress_sender) == WorkContinueStatus::Stop {
             self.common_data.stopped_search = true;
             return;
         }
@@ -67,7 +68,7 @@ impl BigFile {
     }
 
     #[fun_time(message = "look_for_big_files", level = "debug")]
-    fn look_for_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
+    fn look_for_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let result = DirTraversalBuilder::new()
             .group_by(|_fe| ())
             .stop_receiver(stop_receiver)
@@ -96,10 +97,10 @@ impl BigFile {
                 self.common_data.text_messages.warnings.extend(warnings);
                 self.information.number_of_real_files = self.big_files.len();
                 debug!("check_files - Found {} biggest/smallest files.", self.big_files.len());
-                true
+                WorkContinueStatus::Continue
             }
 
-            DirTraversalResult::Stopped => false,
+            DirTraversalResult::Stopped => WorkContinueStatus::Stop,
         }
     }
 

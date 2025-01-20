@@ -5,16 +5,16 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::Ordering;
 
 use crossbeam_channel::{Receiver, Sender};
-use ffmpeg_cmdline_utils::FfmpegErrorKind::FfmpegNotFound;
 use fun_time::fun_time;
 use humansize::{format_size, BINARY};
 use log::debug;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
-use vid_dup_finder_lib::HashCreationErrorKind::DetermineVideo;
-use vid_dup_finder_lib::{NormalizedTolerance, VideoHash};
+use vid_dup_finder_lib::{ffmpeg_builder, VideoHash};
 
-use crate::common::{check_if_stop_received, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, VIDEO_FILES_EXTENSIONS};
+use crate::common::{
+    check_if_stop_received, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, WorkContinueStatus, VIDEO_FILES_EXTENSIONS,
+};
 use crate::common_cache::{extract_loaded_cache, get_similar_videos_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{inode, take_1_per_inode, DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
@@ -115,7 +115,7 @@ impl SimilarVideos {
 
     #[fun_time(message = "find_similar_videos", level = "info")]
     pub fn find_similar_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) {
-        if !check_if_ffmpeg_is_installed() {
+        if !ffmpeg_cmdline_utils::ffmpeg_and_ffprobe_are_callable() {
             self.common_data.text_messages.errors.push(flc!("core_ffmpeg_not_found"));
             #[cfg(target_os = "windows")]
             self.common_data.text_messages.errors.push(flc!("core_ffmpeg_not_found_windows"));
@@ -127,11 +127,11 @@ impl SimilarVideos {
         } else {
             self.prepare_items();
             self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
-            if !self.check_for_similar_videos(stop_receiver, progress_sender) {
+            if self.check_for_similar_videos(stop_receiver, progress_sender) == WorkContinueStatus::Stop {
                 self.common_data.stopped_search = true;
                 return;
             }
-            if !self.sort_videos(stop_receiver, progress_sender) {
+            if self.sort_videos(stop_receiver, progress_sender) == WorkContinueStatus::Stop {
                 self.common_data.stopped_search = true;
                 return;
             }
@@ -141,10 +141,10 @@ impl SimilarVideos {
     }
 
     #[fun_time(message = "check_for_similar_videos", level = "debug")]
-    fn check_for_similar_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
+    fn check_for_similar_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         self.common_data.extensions.set_and_validate_allowed_extensions(VIDEO_FILES_EXTENSIONS);
         if !self.common_data.extensions.set_any_extensions() {
-            return true;
+            return WorkContinueStatus::Continue;
         }
 
         let result = DirTraversalBuilder::new()
@@ -164,10 +164,10 @@ impl SimilarVideos {
                     .collect();
                 self.common_data.text_messages.warnings.extend(warnings);
                 debug!("check_files - Found {} video files.", self.videos_to_check.len());
-                true
+                WorkContinueStatus::Continue
             }
 
-            DirTraversalResult::Stopped => false,
+            DirTraversalResult::Stopped => WorkContinueStatus::Stop,
         }
     }
 
@@ -197,9 +197,9 @@ impl SimilarVideos {
     }
 
     #[fun_time(message = "sort_videos", level = "debug")]
-    fn sort_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
+    fn sort_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.videos_to_check.is_empty() {
-            return true;
+            return WorkContinueStatus::Continue;
         }
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache_at_start();
@@ -221,7 +221,7 @@ impl SimilarVideos {
                 }
                 let mut file_entry = file_entry.1.clone();
 
-                let vhash = match VideoHash::from_path(&file_entry.path) {
+                let vhash = match ffmpeg_builder::VideoHashBuilder::default().hash(file_entry.path.clone()) {
                     Ok(t) => t,
                     Err(e) => {
                         return {
@@ -259,7 +259,7 @@ impl SimilarVideos {
 
         // Break if stop was clicked after saving to cache
         if check_was_stopped.load(Ordering::Relaxed) {
-            return false;
+            return WorkContinueStatus::Stop;
         }
 
         self.match_groups_of_videos(vector_of_hashes, &hashmap_with_file_entries);
@@ -281,7 +281,7 @@ impl SimilarVideos {
         self.videos_hashes = Default::default();
         self.videos_to_check = Default::default();
 
-        true
+        WorkContinueStatus::Continue
     }
 
     #[fun_time(message = "save_cache", level = "debug")]
@@ -300,7 +300,12 @@ impl SimilarVideos {
 
     #[fun_time(message = "match_groups_of_videos", level = "debug")]
     fn match_groups_of_videos(&mut self, vector_of_hashes: Vec<VideoHash>, hashmap_with_file_entries: &HashMap<String, VideosEntry>) {
-        let match_group = vid_dup_finder_lib::search(vector_of_hashes, NormalizedTolerance::new(self.get_params().tolerance as f64 / 100.0f64));
+        // Tolerance in library is a value between 0 and 1
+        // Tolerance in this app is a value between 0 and 20
+        // Default tolerance in library is 0.30
+        // We need to allow to set value in range 0 - 0.5
+        let match_group = vid_dup_finder_lib::search(vector_of_hashes, self.get_params().tolerance as f64 / 40.0f64);
+
         let mut collected_similar_videos: Vec<Vec<VideosEntry>> = Default::default();
         for i in match_group {
             let mut temp_vector: Vec<VideosEntry> = Vec::new();
@@ -308,8 +313,7 @@ impl SimilarVideos {
             for j in i.duplicates() {
                 let file_entry = &hashmap_with_file_entries[&j.to_string_lossy().to_string()];
                 if self.get_params().exclude_videos_with_same_size {
-                    if !bt_size.contains(&file_entry.size) {
-                        bt_size.insert(file_entry.size);
+                    if bt_size.insert(file_entry.size) {
                         temp_vector.push(file_entry.clone());
                     }
                 } else {
@@ -406,18 +410,6 @@ impl PrintResults for SimilarVideos {
             self.save_results_to_file_as_json_internal(file_name, &self.similar_vectors, pretty_print)
         }
     }
-}
-
-pub fn check_if_ffmpeg_is_installed() -> bool {
-    let vid = "9999czekoczekoczekolada999.txt";
-    if let Err(DetermineVideo {
-        src_path: _a,
-        error: FfmpegNotFound,
-    }) = VideoHash::from_path(vid)
-    {
-        return false;
-    }
-    true
 }
 
 impl SimilarVideos {

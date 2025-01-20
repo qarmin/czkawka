@@ -15,7 +15,7 @@ import { Preview } from "preview.slint";
 
 export component PopupSelectResults inherits Rectangle {
     callback show_popup();
-    property <[SelectModel]> model: GuiState.select_results_list; 
+    property <[SelectModel]> model: GuiState.select_results_list;
     property <length> item_height: 30px;
     out property <length> item_width: 200px;
     out property <length> all_items_height: item_height * model.length;
@@ -24,7 +24,7 @@ export component PopupSelectResults inherits Rectangle {
         width: item_width;
         height: all_items_height;
 
-        close-on-click: true;
+        close-policy: PopupClosePolicy.close-on-click-outside;
         Rectangle {
             width: parent.width;
             height: parent.height;
@@ -35,7 +35,6 @@ export component PopupSelectResults inherits Rectangle {
                     text: i.name;
                     height: item_height;
                     width: item_width;
-    
                     clicked => {
                         Callabler.select_items(i.data);
                         popup_window.close();

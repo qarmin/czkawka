@@ -54,6 +54,7 @@ pub fn get_progress_bar_for_collect_files() -> ProgressBar {
     let pb = ProgressBar::new_spinner();
     pb.enable_steady_tick(Duration::from_millis(120));
     pb.set_style(
+        // #[allow(clippy::literal_string_with_formatting_args)] // TODO - enable after being backported to stable
         ProgressStyle::with_template("{msg} {spinner:.blue}")
             .expect("Failed to create progress bar style")
             .tick_strings(&["▹▹▹▹▹", "▸▹▹▹▹", "▹▸▹▹▹", "▹▹▸▹▹", "▹▹▹▸▹", "▹▹▹▹▸", "▪▪▪▪▪"]),

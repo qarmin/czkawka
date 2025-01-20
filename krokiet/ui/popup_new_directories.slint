@@ -25,7 +25,7 @@ export component PopupNewDirectories inherits Rectangle {
 
         property <bool> included_directories;
         private property <string> text_data;
-        close-on-click: false;
+        close-policy: PopupClosePolicy.no-auto-close;
         HorizontalLayout {
             alignment: LayoutAlignment.center;
             VerticalLayout {

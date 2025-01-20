@@ -108,6 +108,19 @@ SLINT_STYLE=material-light cargo run -- --path .
 SLINT_STYLE=material-dark cargo run -- --path .
 ```
 
+## Sanitizer build
+```
+rustup install nightly
+rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
+rustup component add llvm-tools-preview --toolchain nightly-x86_64-unknown-linux-gnu
+
+export RUST_BACKTRACE=1 # or full depending on project
+export ASAN_SYMBOLIZER_PATH=$(which llvm-symbolizer-18)
+export ASAN_OPTIONS="symbolize=1:detect_leaks=0" # Leak check is disabled, because is slow and ususally not needed
+RUSTFLAGS="-Zsanitizer=address" cargo +nightly run --bin krokiet --target x86_64-unknown-linux-gnu
+
+```
+
 ## How to help?
 
 - Suggesting possible design changes in the gui - of course, they should be possible to be simply implemented in the

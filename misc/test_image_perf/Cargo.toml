@@ -1,0 +1,15 @@
+[package]
+name = "test_image_perf"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+walkdir = "2.5.0"
+humansize = "2.1.3"
+rayon = "1.10.0"
+strum = { version = "0.26.3", features = ["strum_macros", "derive"] }
+image_hasher = "3.0.0"
+image = "0.25.5"
+
+[features]
+fast_image_resize = ["image_hasher/fast_resize_unstable"]

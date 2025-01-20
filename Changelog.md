@@ -1,3 +1,26 @@
+## Version 9.0.0 - ?
+
+### Breaking changes
+- Video cache is now incompatible with previous versions, and needs to be regenerated
+
+### Known regressions
+- Crashes when using similar videos(when hashing invalid files)
+
+### CI
+
+### Core
+- Updated vid_dup_finder, now it is able to find similar videos shorter than 30 seconds - [#]()
+- More supported jxl image formats(using built-in jxl -> image-rs converter) - [#]()
+- Rotating all images by default, basing on their exif orientation - [#]()
+- Using reusable and bigger buffer for reading files in duplicate mode - [#]()
+
+### Krokiet
+
+### GTK GUI
+
+### CLI
+
+
 ## Version 8.0.0 - 11.10.2024r
 
 ### Breaking changes

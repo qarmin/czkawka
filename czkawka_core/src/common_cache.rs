@@ -15,7 +15,11 @@ use crate::duplicate::HashType;
 use crate::similar_images::{convert_algorithm_to_string, convert_filters_to_string};
 
 const CACHE_VERSION: &str = "70";
+#[cfg(feature = "fast_image_resize")]
+const CACHE_IMAGE_VERSION: &str = "90_fast_resize";
+#[cfg(not(feature = "fast_image_resize"))]
 const CACHE_IMAGE_VERSION: &str = "90";
+const CACHE_VIDEO_VERSION: &str = "90";
 
 pub fn get_broken_files_cache_file() -> String {
     format!("cache_broken_files_{CACHE_VERSION}.bin")
@@ -30,7 +34,7 @@ pub fn get_similar_images_cache_file(hash_size: &u8, hash_alg: &HashAlg, image_f
 }
 
 pub fn get_similar_videos_cache_file() -> String {
-    format!("cache_similar_videos_{CACHE_VERSION}.bin")
+    format!("cache_similar_videos_{CACHE_VIDEO_VERSION}.bin")
 }
 pub fn get_similar_music_cache_file(checking_tags: bool) -> String {
     if checking_tags {

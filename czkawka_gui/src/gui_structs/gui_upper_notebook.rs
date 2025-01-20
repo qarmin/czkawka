@@ -190,7 +190,7 @@ impl GuiUpperNotebook {
             ], // Included folders
         ];
 
-        for (notebook_index, tree_view) in [self.tree_view_included_directories.clone()].iter().enumerate() {
+        for (notebook_index, tree_view) in std::iter::once(&self.tree_view_included_directories.clone()).enumerate() {
             for (column_index, column) in tree_view.columns().iter().enumerate() {
                 column.set_title(&names_of_columns[notebook_index][column_index]);
             }

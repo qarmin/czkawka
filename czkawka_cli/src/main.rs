@@ -113,7 +113,7 @@ fn duplicates(duplicates: DuplicatesArgs, stop_receiver: &Receiver<()>, progress
 
     item.find_duplicates(Some(stop_receiver), Some(progress_sender));
 
-    save_and_print_results(&mut item, &common_cli_items);
+    save_and_print_results(&item, &common_cli_items);
 }
 
 fn empty_folders(empty_folders: EmptyFoldersArgs, stop_receiver: &Receiver<()>, progress_sender: &Sender<ProgressData>) {
@@ -128,7 +128,7 @@ fn empty_folders(empty_folders: EmptyFoldersArgs, stop_receiver: &Receiver<()>, 
 
     item.find_empty_folders(Some(stop_receiver), Some(progress_sender));
 
-    save_and_print_results(&mut item, &common_cli_items);
+    save_and_print_results(&item, &common_cli_items);
 }
 
 fn biggest_files(biggest_files: BiggestFilesArgs, stop_receiver: &Receiver<()>, progress_sender: &Sender<ProgressData>) {
@@ -150,7 +150,7 @@ fn biggest_files(biggest_files: BiggestFilesArgs, stop_receiver: &Receiver<()>, 
 
     item.find_big_files(Some(stop_receiver), Some(progress_sender));
 
-    save_and_print_results(&mut item, &common_cli_items);
+    save_and_print_results(&item, &common_cli_items);
 }
 
 fn empty_files(empty_files: EmptyFilesArgs, stop_receiver: &Receiver<()>, progress_sender: &Sender<ProgressData>) {
@@ -165,7 +165,7 @@ fn empty_files(empty_files: EmptyFilesArgs, stop_receiver: &Receiver<()>, progre
 
     item.find_empty_files(Some(stop_receiver), Some(progress_sender));
 
-    save_and_print_results(&mut item, &common_cli_items);
+    save_and_print_results(&item, &common_cli_items);
 }
 
 fn temporary(temporary: TemporaryArgs, stop_receiver: &Receiver<()>, progress_sender: &Sender<ProgressData>) {
@@ -180,7 +180,7 @@ fn temporary(temporary: TemporaryArgs, stop_receiver: &Receiver<()>, progress_se
 
     item.find_temporary_files(Some(stop_receiver), Some(progress_sender));
 
-    save_and_print_results(&mut item, &common_cli_items);
+    save_and_print_results(&item, &common_cli_items);
 }
 
 fn similar_images(similar_images: SimilarImagesArgs, stop_receiver: &Receiver<()>, progress_sender: &Sender<ProgressData>) {
@@ -218,7 +218,7 @@ fn similar_images(similar_images: SimilarImagesArgs, stop_receiver: &Receiver<()
 
     item.find_similar_images(Some(stop_receiver), Some(progress_sender));
 
-    save_and_print_results(&mut item, &common_cli_items);
+    save_and_print_results(&item, &common_cli_items);
 }
 
 fn same_music(same_music: SameMusicArgs, stop_receiver: &Receiver<()>, progress_sender: &Sender<ProgressData>) {
@@ -255,7 +255,7 @@ fn same_music(same_music: SameMusicArgs, stop_receiver: &Receiver<()>, progress_
 
     item.find_same_music(Some(stop_receiver), Some(progress_sender));
 
-    save_and_print_results(&mut item, &common_cli_items);
+    save_and_print_results(&item, &common_cli_items);
 }
 
 fn invalid_symlinks(invalid_symlinks: InvalidSymlinksArgs, stop_receiver: &Receiver<()>, progress_sender: &Sender<ProgressData>) {
@@ -270,7 +270,7 @@ fn invalid_symlinks(invalid_symlinks: InvalidSymlinksArgs, stop_receiver: &Recei
 
     item.find_invalid_links(Some(stop_receiver), Some(progress_sender));
 
-    save_and_print_results(&mut item, &common_cli_items);
+    save_and_print_results(&item, &common_cli_items);
 }
 
 fn broken_files(broken_files: BrokenFilesArgs, stop_receiver: &Receiver<()>, progress_sender: &Sender<ProgressData>) {
@@ -294,7 +294,7 @@ fn broken_files(broken_files: BrokenFilesArgs, stop_receiver: &Receiver<()>, pro
 
     item.find_broken_files(Some(stop_receiver), Some(progress_sender));
 
-    save_and_print_results(&mut item, &common_cli_items);
+    save_and_print_results(&item, &common_cli_items);
 }
 
 fn similar_videos(similar_videos: SimilarVideosArgs, stop_receiver: &Receiver<()>, progress_sender: &Sender<ProgressData>) {
@@ -321,7 +321,7 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_receiver: &Receiver<()
 
     item.find_similar_videos(Some(stop_receiver), Some(progress_sender));
 
-    save_and_print_results(&mut item, &common_cli_items);
+    save_and_print_results(&item, &common_cli_items);
 }
 
 fn bad_extensions(bad_extensions: BadExtensionsArgs, stop_receiver: &Receiver<()>, progress_sender: &Sender<ProgressData>) {
@@ -334,10 +334,10 @@ fn bad_extensions(bad_extensions: BadExtensionsArgs, stop_receiver: &Receiver<()
 
     item.find_bad_extensions_files(Some(stop_receiver), Some(progress_sender));
 
-    save_and_print_results(&mut item, &common_cli_items);
+    save_and_print_results(&item, &common_cli_items);
 }
 
-fn save_and_print_results<T: CommonData + PrintResults>(component: &mut T, common_cli_items: &CommonCliItems) {
+fn save_and_print_results<T: CommonData + PrintResults>(component: &T, common_cli_items: &CommonCliItems) {
     if let Some(file_name) = common_cli_items.file_to_save.file_name() {
         if let Err(e) = component.print_results_to_file(file_name) {
             error!("Failed to save results to file {e}");

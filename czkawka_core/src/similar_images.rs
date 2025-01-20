@@ -8,6 +8,7 @@ use std::{mem, panic};
 use bk_tree::BKTree;
 use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
+use hamming_bitwise_fast::hamming_bitwise_fast;
 use humansize::{format_size, BINARY};
 use image::GenericImageView;
 use image_hasher::{FilterType, HashAlg, HasherConfig};
@@ -16,8 +17,8 @@ use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::common::{
-    check_if_stop_received, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS,
-    JXL_IMAGE_EXTENSIONS, RAW_IMAGE_EXTENSIONS,
+    check_if_stop_received, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, WorkContinueStatus, HEIC_EXTENSIONS,
+    IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, JXL_IMAGE_EXTENSIONS, RAW_IMAGE_EXTENSIONS,
 };
 use crate::common_cache::{extract_loaded_cache, get_similar_images_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{inode, take_1_per_inode, DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
@@ -92,7 +93,7 @@ struct Hamming;
 
 impl bk_tree::Metric<ImHash> for Hamming {
     fn distance(&self, a: &ImHash, b: &ImHash) -> u32 {
-        hamming::distance_fast(a, b).expect("Calculating hamming distance, cannot fail") as u32
+        hamming_bitwise_fast(a, b)
     }
 
     fn threshold_distance(&self, a: &ImHash, b: &ImHash, _threshold: u32) -> Option<u32> {
@@ -159,15 +160,15 @@ impl SimilarImages {
     pub fn find_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) {
         self.prepare_items();
         self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
-        if !self.check_for_similar_images(stop_receiver, progress_sender) {
+        if self.check_for_similar_images(stop_receiver, progress_sender) == WorkContinueStatus::Stop {
             self.common_data.stopped_search = true;
             return;
         }
-        if !self.hash_images(stop_receiver, progress_sender) {
+        if self.hash_images(stop_receiver, progress_sender) == WorkContinueStatus::Stop {
             self.common_data.stopped_search = true;
             return;
         }
-        if !self.find_similar_hashes(stop_receiver, progress_sender) {
+        if self.find_similar_hashes(stop_receiver, progress_sender) == WorkContinueStatus::Stop {
             self.common_data.stopped_search = true;
             return;
         }
@@ -176,7 +177,7 @@ impl SimilarImages {
     }
 
     #[fun_time(message = "check_for_similar_images", level = "debug")]
-    fn check_for_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
+    fn check_for_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if cfg!(feature = "heif") {
             self.common_data
                 .extensions
@@ -188,7 +189,7 @@ impl SimilarImages {
         }
 
         if !self.common_data.extensions.set_any_extensions() {
-            return true;
+            return WorkContinueStatus::Continue;
         }
 
         let result = DirTraversalBuilder::new()
@@ -213,10 +214,10 @@ impl SimilarImages {
                     .collect();
                 self.common_data.text_messages.warnings.extend(warnings);
                 debug!("check_files - Found {} image files.", self.images_to_check.len());
-                true
+                WorkContinueStatus::Continue
             }
 
-            DirTraversalResult::Stopped => false,
+            DirTraversalResult::Stopped => WorkContinueStatus::Stop,
         }
     }
 
@@ -265,9 +266,9 @@ impl SimilarImages {
     // - Join all hashes and save it to file
 
     #[fun_time(message = "hash_images", level = "debug")]
-    fn hash_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
+    fn hash_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.images_to_check.is_empty() {
-            return true;
+            return WorkContinueStatus::Continue;
         }
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.hash_images_load_cache();
@@ -322,10 +323,10 @@ impl SimilarImages {
 
         // Break if stop was clicked after saving to cache
         if check_was_stopped.load(Ordering::Relaxed) {
-            return false;
+            return WorkContinueStatus::Stop;
         }
 
-        true
+        WorkContinueStatus::Continue
     }
 
     #[fun_time(message = "save_to_cache", level = "debug")]
@@ -447,7 +448,7 @@ impl SimilarImages {
         progress_sender: Option<&Sender<ProgressData>>,
         stop_receiver: Option<&Receiver<()>>,
         tolerance: u32,
-    ) -> bool {
+    ) -> WorkContinueStatus {
         // Don't use hashes with multiple images in bktree, because they will always be master of group and cannot be find by other hashes
         let (base_hashes, hashes_with_multiple_images) = self.split_hashes(all_hashed_images);
 
@@ -502,7 +503,7 @@ impl SimilarImages {
 
             if check_was_stopped.load(Ordering::Relaxed) {
                 send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-                return false;
+                return WorkContinueStatus::Stop;
             }
 
             self.connect_results(partial_results, &mut hashes_parents, &mut hashes_similarity, &hashes_with_multiple_images);
@@ -513,7 +514,7 @@ impl SimilarImages {
         debug_check_for_duplicated_things(self.common_data.use_reference_folders, &hashes_parents, &hashes_similarity, all_hashed_images, "LATTER");
         self.collect_hash_compare_result(hashes_parents, &hashes_with_multiple_images, all_hashed_images, collected_similar_images, hashes_similarity);
 
-        true
+        WorkContinueStatus::Continue
     }
 
     #[fun_time(message = "connect_results", level = "debug")]
@@ -581,9 +582,9 @@ impl SimilarImages {
     }
 
     #[fun_time(message = "find_similar_hashes", level = "debug")]
-    fn find_similar_hashes(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
+    fn find_similar_hashes(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.image_hashes.is_empty() {
-            return true;
+            return WorkContinueStatus::Continue;
         }
 
         let tolerance = self.get_params().similarity;
@@ -600,8 +601,10 @@ impl SimilarImages {
                     collected_similar_images.insert(hash, vec_file_entry);
                 }
             }
-        } else if !self.compare_hashes_with_non_zero_tolerance(&all_hashed_images, &mut collected_similar_images, progress_sender, stop_receiver, tolerance) {
-            return false;
+        } else if self.compare_hashes_with_non_zero_tolerance(&all_hashed_images, &mut collected_similar_images, progress_sender, stop_receiver, tolerance)
+            == WorkContinueStatus::Stop
+        {
+            return WorkContinueStatus::Stop;
         }
 
         self.verify_duplicated_items(&collected_similar_images);
@@ -630,7 +633,7 @@ impl SimilarImages {
         self.images_to_check = Default::default();
         self.bktree = BKTree::new(Hamming);
 
-        true
+        WorkContinueStatus::Continue
     }
 
     #[fun_time(message = "exclude_items_with_same_size", level = "debug")]
@@ -640,8 +643,7 @@ impl SimilarImages {
                 let mut bt_sizes: BTreeSet<u64> = Default::default();
                 let mut vec_values = Vec::new();
                 for file_entry in vec_file_entry {
-                    if !bt_sizes.contains(&file_entry.size) {
-                        bt_sizes.insert(file_entry.size);
+                    if bt_sizes.insert(file_entry.size) {
                         vec_values.push(file_entry);
                     }
                 }

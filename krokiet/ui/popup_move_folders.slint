@@ -23,7 +23,7 @@ export component PopupMoveFolders inherits Rectangle {
         width: popup_width;
         height: popup_height;
 
-        close-on-click: false;
+        close-policy: PopupClosePolicy.no-auto-close;
         Rectangle {
             width: parent.width;
             height: parent.height;

@@ -1,0 +1,11 @@
+[package]
+name = "test_read_perf"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+czkawka_core = { path = "../../czkawka_core" }
+walkdir = "2.5.0"
+humansize = "2.1.3"
+rayon = "1.10.0"
+strum = { version = "0.26.3", features = ["strum_macros", "derive"] }

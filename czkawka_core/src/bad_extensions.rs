@@ -12,7 +12,7 @@ use mime_guess::get_mime_extensions;
 use rayon::prelude::*;
 use serde::Serialize;
 
-use crate::common::{check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
+use crate::common::{check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, WorkContinueStatus};
 use crate::common_dir_traversal::{DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
 use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::*;
@@ -233,11 +233,11 @@ impl BadExtensions {
     #[fun_time(message = "find_bad_extensions_files", level = "info")]
     pub fn find_bad_extensions_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) {
         self.prepare_items();
-        if !self.check_files(stop_receiver, progress_sender) {
+        if self.check_files(stop_receiver, progress_sender) == WorkContinueStatus::Stop {
             self.common_data.stopped_search = true;
             return;
         }
-        if !self.look_for_bad_extensions_files(stop_receiver, progress_sender) {
+        if self.look_for_bad_extensions_files(stop_receiver, progress_sender) == WorkContinueStatus::Stop {
             self.common_data.stopped_search = true;
             return;
         }
@@ -245,7 +245,7 @@ impl BadExtensions {
     }
 
     #[fun_time(message = "check_files", level = "debug")]
-    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
+    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let result = DirTraversalBuilder::new()
             .common_data(&self.common_data)
             .group_by(|_fe| ())
@@ -259,17 +259,17 @@ impl BadExtensions {
                 self.files_to_check = grouped_file_entries.into_values().flatten().collect();
                 self.common_data.text_messages.warnings.extend(warnings);
 
-                true
+                WorkContinueStatus::Continue
             }
 
-            DirTraversalResult::Stopped => false,
+            DirTraversalResult::Stopped => WorkContinueStatus::Stop,
         }
     }
 
     #[fun_time(message = "look_for_bad_extensions_files", level = "debug")]
-    fn look_for_bad_extensions_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> bool {
+    fn look_for_bad_extensions_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.files_to_check.is_empty() {
-            return true;
+            return WorkContinueStatus::Continue;
         }
 
         let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
@@ -288,14 +288,14 @@ impl BadExtensions {
 
         // Break if stop was clicked
         if check_was_stopped.load(Ordering::Relaxed) {
-            return false;
+            return WorkContinueStatus::Stop;
         }
 
         self.information.number_of_files_with_bad_extension = self.bad_extensions_files.len();
 
         debug!("Found {} files with invalid extension.", self.information.number_of_files_with_bad_extension);
 
-        true
+        WorkContinueStatus::Continue
     }
 
     #[fun_time(message = "verify_extensions", level = "debug")]

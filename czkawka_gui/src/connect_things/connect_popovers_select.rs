@@ -393,6 +393,8 @@ fn popover_custom_select_unselect(
                             return;
                         }
                     } else {
+                        // Trivial regex is used, because I need here regex
+                        #[allow(clippy::trivial_regex)]
                         Regex::new("").expect("Empty regex should compile properly.")
                     };
 

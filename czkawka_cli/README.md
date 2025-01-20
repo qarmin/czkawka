@@ -39,7 +39,7 @@ on linux to build fully static binary with eyra you need to use (this is only fo
 above if you don't know what you are doing)
 
 ```shell
-rustup default nightly-2024-09-25 # or any newer nightly that works fine with eyra
+rustup default nightly-2025-01-01 # or any newer nightly that works fine with eyra
 cd czkawka_cli
 cargo add eyra --rename=std
 echo 'fn main() { println!("cargo:rustc-link-arg=-nostartfiles"); }' > build.rs

@@ -82,8 +82,8 @@ pub enum ErrorType {
 impl Display for ErrorType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ErrorType::InfiniteRecursion => write!(f, "Infinite recursion"),
-            ErrorType::NonExistentFile => write!(f, "Non existent file"),
+            Self::InfiniteRecursion => write!(f, "Infinite recursion"),
+            Self::NonExistentFile => write!(f, "Non existent file"),
         }
     }
 }
@@ -134,14 +134,14 @@ pub struct DirTraversal<'a, 'b, F> {
     collect: Collect,
 }
 
-impl<'a, 'b> Default for DirTraversalBuilder<'a, 'b, ()> {
+impl Default for DirTraversalBuilder<'_, '_, ()> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<'a, 'b> DirTraversalBuilder<'a, 'b, ()> {
-    pub fn new() -> DirTraversalBuilder<'a, 'b, ()> {
+impl DirTraversalBuilder<'_, '_, ()> {
+    pub fn new() -> Self {
         DirTraversalBuilder {
             group_by: None,
             root_dirs: vec![],
@@ -302,7 +302,7 @@ fn entry_type(file_type: FileType) -> EntryType {
     }
 }
 
-impl<'a, 'b, F, T> DirTraversal<'a, 'b, F>
+impl<F, T> DirTraversal<'_, '_, F>
 where
     F: Fn(&FileEntry) -> T,
     T: Ord + PartialOrd,
@@ -720,7 +720,7 @@ mod tests {
                     actual
                 );
             }
-            _ => {
+            DirTraversalResult::Stopped => {
                 panic!("Expect SuccessFiles.");
             }
         };
@@ -760,7 +760,7 @@ mod tests {
                     actual
                 );
             }
-            _ => {
+            DirTraversalResult::Stopped => {
                 panic!("Expect SuccessFiles.");
             }
         };

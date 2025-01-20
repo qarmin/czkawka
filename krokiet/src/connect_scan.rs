@@ -433,17 +433,16 @@ fn scan_similar_images(
             let messages = item.get_text_messages().create_messages_text();
             let hash_size = custom_settings.similar_images_sub_hash_size;
 
-            let mut vector;
-            if item.get_use_reference() {
-                vector = item
-                    .get_similar_images_referenced()
+            let mut vector: Vec<_> = if item.get_use_reference() {
+                item.get_similar_images_referenced()
                     .iter()
                     .cloned()
                     .map(|(original, others)| (Some(original), others))
-                    .collect::<Vec<_>>();
+                    .collect()
             } else {
-                vector = item.get_similar_images().iter().cloned().map(|items| (None, items)).collect::<Vec<_>>();
-            }
+                item.get_similar_images().iter().cloned().map(|items| (None, items)).collect()
+            };
+
             for (_first_entry, vec_fe) in &mut vector {
                 vec_fe.par_sort_unstable_by_key(|e| e.similarity);
             }
@@ -521,17 +520,15 @@ fn scan_similar_videos(
 
             let messages = item.get_text_messages().create_messages_text();
 
-            let mut vector;
-            if item.get_use_reference() {
-                vector = item
-                    .get_similar_videos_referenced()
+            let mut vector: Vec<_> = if item.get_use_reference() {
+                item.get_similar_videos_referenced()
                     .iter()
                     .cloned()
                     .map(|(original, others)| (Some(original), others))
-                    .collect::<Vec<_>>();
+                    .collect()
             } else {
-                vector = item.get_similar_videos().iter().cloned().map(|items| (None, items)).collect::<Vec<_>>();
-            }
+                item.get_similar_videos().iter().cloned().map(|items| (None, items)).collect()
+            };
             for (_first_entry, vec_fe) in &mut vector {
                 vec_fe.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
             }
@@ -636,17 +633,15 @@ fn scan_similar_music(
 
             let messages = item.get_text_messages().create_messages_text();
 
-            let mut vector;
-            if item.get_use_reference() {
-                vector = item
-                    .get_similar_music_referenced()
+            let mut vector: Vec<_> = if item.get_use_reference() {
+                item.get_similar_music_referenced()
                     .iter()
                     .cloned()
                     .map(|(original, others)| (Some(original), others))
-                    .collect::<Vec<_>>();
+                    .collect()
             } else {
-                vector = item.get_duplicated_music_entries().iter().cloned().map(|items| (None, items)).collect::<Vec<_>>();
-            }
+                item.get_duplicated_music_entries().iter().cloned().map(|items| (None, items)).collect()
+            };
             for (_first_entry, vec_fe) in &mut vector {
                 vec_fe.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
             }

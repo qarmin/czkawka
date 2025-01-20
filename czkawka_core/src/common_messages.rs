@@ -10,13 +10,13 @@ impl Messages {
         Default::default()
     }
     pub fn new_from_errors(errors: Vec<String>) -> Self {
-        Messages { errors, ..Default::default() }
+        Self { errors, ..Default::default() }
     }
     pub fn new_from_warnings(warnings: Vec<String>) -> Self {
-        Messages { warnings, ..Default::default() }
+        Self { warnings, ..Default::default() }
     }
     pub fn new_from_messages(messages: Vec<String>) -> Self {
-        Messages { messages, ..Default::default() }
+        Self { messages, ..Default::default() }
     }
     pub fn print_messages(&self) {
         println!("{}", self.create_messages_text());
@@ -63,7 +63,7 @@ impl Messages {
         self.errors.extend(errors);
     }
 
-    pub fn extend_with_another_messages(&mut self, messages: Messages) {
+    pub fn extend_with_another_messages(&mut self, messages: Self) {
         let (messages, warnings, errors) = (messages.messages, messages.warnings, messages.errors);
         self.messages.extend(messages);
         self.warnings.extend(warnings);

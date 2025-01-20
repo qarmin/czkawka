@@ -3,7 +3,7 @@ name = "czkawka_core"
 version = "8.0.0"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2021"
-rust-version = "1.80.0"
+rust-version = "1.82.0"
 description = "Core of Czkawka app"
 license = "MIT"
 homepage = "https://github.com/qarmin/czkawka"
@@ -19,14 +19,14 @@ crossbeam-channel = "0.5"
 directories-next = "2.0"
 
 # Needed by similar images
-image_hasher = "2.0"
+image_hasher = "3.0"
 bk-tree = "0.5"
-image = { version = "0.25", default-features = false, features = ["bmp", "dds", "exr", "ff", "gif", "hdr", "ico", "jpeg", "png", "pnm", "qoi", "tga", "tiff", "webp"] }
-hamming = "0.1"
+image = { version = "0.25", default-features = false, features = ["bmp", "dds", "exr", "ff", "gif", "hdr", "ico", "jpeg", "png", "pnm", "qoi", "tga", "tiff", "webp", "rayon"] }
+hamming-bitwise-fast = "1.0"
 
 # Needed by same music
 bitflags = "2.6"
-lofty = "0.21"
+lofty = "0.22"
 
 # Needed by broken files
 zip = { version = "2.2", features = ["aes-crypto", "bzip2", "deflate", "time"], default-features = false }
@@ -34,7 +34,7 @@ audio_checker = "0.1"
 pdf = "0.9"
 
 # Needed by audio similarity feature
-rusty-chromaprint = "0.2"
+rusty-chromaprint = "0.3"
 symphonia = { version = "0.5", features = ["all"] }
 
 # Hashes for duplicate files
@@ -45,8 +45,8 @@ xxhash-rust = { version = "0.8", features = ["xxh3"] }
 tempfile = "3.13"
 
 # Video Duplicates
-vid_dup_finder_lib = "0.1"
-ffmpeg_cmdline_utils = "0.1"
+vid_dup_finder_lib = "0.2"
+ffmpeg_cmdline_utils = "0.3"
 
 # Saving/Loading Cache
 serde = "1.0"
@@ -65,7 +65,7 @@ once_cell = "1.20"
 rawloader = "0.37"
 imagepipe = "0.5"
 libraw-rs = { version = "0.0.4", optional = true }
-jxl-oxide = { version = "0.9.0", default-features = false }
+jxl-oxide = { version = "0.11.0", features = ["image"] }
 
 # Checking for invalid extensions
 mime_guess = "2.0"
@@ -85,7 +85,7 @@ os_info = { version = "3", default-features = false }
 log = "0.4.22"
 handsome_logger = "0.8"
 fun_time = { version = "0.3", features = ["log"] }
-itertools = "0.13"
+itertools = "0.14"
 
 # Don't update anymore! This crate has a bug. I've submitted a patch upstream, but the change is breaking. The current code relies on the bug to work correctly!
 # Warning by CalunVier 2024.7.15
@@ -95,8 +95,17 @@ file-id = "=0.2.1"
 [build-dependencies]
 rustc_version = "0.4"
 
+[dev-dependencies]
+criterion = "0.5"
+const_format = "0.2"
+
+[[bench]]
+name = "hash_calculation_benchmark"
+harness = false
+
 [features]
 default = []
 heif = ["dep:libheif-rs", "dep:libheif-sys"]
 libraw = ["dep:libraw-rs"]
 libavif = ["image/avif-native", "image/avif"]
+fast_image_resize = ["image_hasher/fast_resize_unstable"]
