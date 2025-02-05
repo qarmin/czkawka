@@ -47,6 +47,7 @@ pub fn get_jxl_image(path: &str) -> anyhow::Result<DynamicImage> {
 pub fn get_dynamic_image_from_path(path: &str) -> Result<DynamicImage, String> {
     let path_lower = Path::new(path).extension().unwrap_or_default().to_string_lossy().to_lowercase();
 
+    debug!("decoding file {}", path);
     let res = panic::catch_unwind(|| {
         if HEIC_EXTENSIONS.iter().any(|ext| path_lower.ends_with(ext)) {
             #[cfg(feature = "heif")]
