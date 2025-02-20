@@ -89,14 +89,50 @@ pub fn print_version_mode() {
     #[cfg(feature = "fast_image_resize")]
     features.push("fast_image_resize");
 
+    #[allow(unused_mut)]
+    let mut app_cpu_version = "Baseline";
+    let mut os_cpu_version = "Baseline";
+    if cfg!(target_feature = "sse2") {
+        app_cpu_version = "x86-64-v1 (SSE2)";
+    }
+    if is_x86_feature_detected!("sse2") {
+        os_cpu_version = "x86-64-v1 (SSE2)";
+    }
+
+    if cfg!(target_feature = "popcnt") {
+        app_cpu_version = "x86-64-v2 (SSE4.2 + POPCNT)";
+    }
+    if is_x86_feature_detected!("popcnt") {
+        os_cpu_version = "x86-64-v2 (SSE4.2 + POPCNT)";
+    }
+
+    if cfg!(target_feature = "avx2") {
+        app_cpu_version = "x86-64-v3 (AVX2) or x86-64-v4 (AVX-512)";
+    }
+    if is_x86_feature_detected!("avx2") {
+        os_cpu_version = "x86-64-v3 (AVX2)";
+    }
+
+    // TODO - https://github.com/rust-lang/rust/issues/44839 - remove "or" from above when fixed
+    // Currently this is always false, because cfg!(target_feature = "avx512f") is not working
+    // What is strange, because is_x86_feature_detected!("avx512f") is working
+    if cfg!(target_feature = "avx512f") {
+        app_cpu_version = "x86-64-v4 (AVX-512)";
+    }
+    if is_x86_feature_detected!("avx512f") {
+        os_cpu_version = "x86-64-v4 (AVX-512)";
+    }
+
     info!(
-        "App version: {CZKAWKA_VERSION}, {debug_release} mode, rust {rust_version}, os {} {} [{} {}], {processors} cpu/threads, features({}): [{}]",
+        "App version: {CZKAWKA_VERSION}, {debug_release} mode, rust {rust_version}, os {} {} [{} {}], {processors} cpu/threads, features({}): [{}], app cpu version: [{}], os cpu version: [{}]",
         info.os_type(),
         info.version(),
         std::env::consts::ARCH,
         info.bitness(),
         features.len(),
-        features.join(", ")
+        features.join(", "),
+        app_cpu_version,
+        os_cpu_version,
     );
     if cfg!(debug_assertions) {
         warn!("You are running debug version of app which is a lot of slower than release version.");
