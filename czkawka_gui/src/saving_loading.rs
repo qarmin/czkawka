@@ -19,7 +19,7 @@ use crate::gui_structs::gui_settings::GuiSettings;
 use crate::gui_structs::gui_upper_notebook::GuiUpperNotebook;
 use crate::help_combo_box::DUPLICATES_CHECK_METHOD_COMBO_BOX;
 use crate::help_functions::*;
-use crate::language_functions::{get_language_from_combo_box_text, LANGUAGES_ALL};
+use crate::language_functions::{LANGUAGES_ALL, get_language_from_combo_box_text};
 
 const SAVE_FILE_NAME: &str = "czkawka_gui_config_4.txt";
 

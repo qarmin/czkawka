@@ -6,8 +6,8 @@ use std::ffi::OsString;
 use std::fs::{DirEntry, File, OpenOptions};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize};
-use std::sync::{atomic, Arc};
-use std::thread::{sleep, JoinHandle};
+use std::sync::{Arc, atomic};
+use std::thread::{JoinHandle, sleep};
 use std::time::{Duration, Instant, SystemTime};
 use std::{fs, panic, thread};
 
@@ -25,13 +25,13 @@ use jxl_oxide::{JxlImage, PixelFormat};
 use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
 #[cfg(feature = "libraw")]
 use libraw::Processor;
-use log::{debug, error, info, warn, LevelFilter, Record};
+use log::{LevelFilter, Record, debug, error, info, warn};
 use nom_exif::{ExifIter, ExifTag, MediaParser, MediaSource};
 use rawloader::RawLoader;
 use symphonia::core::conv::IntoSample;
 
 use crate::common;
-use crate::common::{create_crash_message, HEIC_EXTENSIONS, IMAGE_RS_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, JXL_IMAGE_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
+use crate::common::{HEIC_EXTENSIONS, IMAGE_RS_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, JXL_IMAGE_EXTENSIONS, RAW_IMAGE_EXTENSIONS, create_crash_message};
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
 

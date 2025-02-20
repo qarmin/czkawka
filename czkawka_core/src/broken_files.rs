@@ -8,16 +8,16 @@ use std::{fs, mem, panic};
 use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
 use log::debug;
-use pdf::file::FileOptions;
-use pdf::object::ParseOptions;
 use pdf::PdfError;
 use pdf::PdfError::Try;
+use pdf::file::FileOptions;
+use pdf::object::ParseOptions;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::common::{
-    check_if_stop_received, create_crash_message, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, WorkContinueStatus, AUDIO_FILES_EXTENSIONS,
-    IMAGE_RS_BROKEN_FILES_EXTENSIONS, PDF_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS,
+    AUDIO_FILES_EXTENSIONS, IMAGE_RS_BROKEN_FILES_EXTENSIONS, PDF_FILES_EXTENSIONS, WorkContinueStatus, ZIP_FILES_EXTENSIONS, check_if_stop_received, create_crash_message,
+    prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads,
 };
 use crate::common_cache::{extract_loaded_cache, get_broken_files_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};

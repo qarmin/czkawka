@@ -7,14 +7,14 @@ use crossbeam_channel::Receiver;
 use czkawka_core::common_dir_traversal::ToolType;
 use czkawka_core::progress_data::{CurrentStage, ProgressData};
 use glib::MainContext;
-use gtk4::prelude::*;
 use gtk4::ProgressBar;
+use gtk4::prelude::*;
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::localizer_core::generate_translation_hashmap;
-use crate::taskbar_progress::tbp_flags::TBPF_INDETERMINATE;
 use crate::taskbar_progress::TaskbarProgress;
+use crate::taskbar_progress::tbp_flags::TBPF_INDETERMINATE;
 
 #[allow(clippy::too_many_arguments)]
 pub fn connect_progress_window(gui_data: &GuiData, progress_receiver: Receiver<ProgressData>) {

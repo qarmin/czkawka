@@ -12,7 +12,7 @@ use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::{
     count_number_of_groups, get_all_direct_children, get_full_name_from_path_name, get_max_file_name, get_pixbuf_from_dynamic_image, resize_pixbuf_dimension,
 };
-use crate::notebook_info::{NotebookObject, NOTEBOOKS_INFO};
+use crate::notebook_info::{NOTEBOOKS_INFO, NotebookObject};
 
 const BIG_PREVIEW_SIZE: i32 = 600;
 const SMALL_PREVIEW_SIZE: i32 = 130;
@@ -245,7 +245,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
         let this_tree_path = shared_using_for_preview.borrow().0.clone().expect("Missing left preview path");
         if main_tree_path == this_tree_path {
             return; // Selected header, so we don't need to select result in treeview
-                    // TODO this should be handled by disabling entirely check box
+            // TODO this should be handled by disabling entirely check box
         }
 
         let is_active = check_button_left_preview_text.is_active();
@@ -276,7 +276,7 @@ pub fn connect_button_compare(gui_data: &GuiData) {
         let this_tree_path = shared_using_for_preview.borrow().1.clone().expect("Missing right preview path");
         if main_tree_path == this_tree_path {
             return; // Selected header, so we don't need to select result in treeview
-                    // TODO this should be handled by disabling entirely check box
+            // TODO this should be handled by disabling entirely check box
         }
 
         let is_active = check_button_right_preview_text.is_active();

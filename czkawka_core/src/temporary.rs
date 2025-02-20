@@ -2,16 +2,16 @@ use std::fs;
 use std::fs::DirEntry;
 use std::io::prelude::*;
 use std::path::PathBuf;
-use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
 use rayon::prelude::*;
 use serde::Serialize;
 
-use crate::common::{check_folder_children, check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, WorkContinueStatus};
-use crate::common_dir_traversal::{common_read_dir, get_modified_time, ToolType};
+use crate::common::{WorkContinueStatus, check_folder_children, check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
+use crate::common_dir_traversal::{ToolType, common_read_dir, get_modified_time};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::*;
 use crate::progress_data::{CurrentStage, ProgressData};

@@ -1,6 +1,6 @@
 use gdk4::{Key, ModifierType};
-use gtk4::prelude::*;
 use gtk4::GestureClick;
+use gtk4::prelude::*;
 
 use crate::help_functions::*;
 use crate::notebook_enums::NotebookUpperEnum;

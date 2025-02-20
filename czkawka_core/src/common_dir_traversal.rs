@@ -629,11 +629,7 @@ pub fn inode(_fe: &FileEntry) -> Option<u64> {
 
 #[cfg(target_family = "unix")]
 pub fn inode(fe: &FileEntry) -> Option<u64> {
-    if let Ok(meta) = fs::metadata(&fe.path) {
-        Some(meta.ino())
-    } else {
-        None
-    }
+    if let Ok(meta) = fs::metadata(&fe.path) { Some(meta.ino()) } else { None }
 }
 
 pub fn take_1_per_inode((k, mut v): (Option<u64>, Vec<FileEntry>)) -> Vec<FileEntry> {

@@ -1,7 +1,7 @@
 use gtk4::prelude::*;
 
 use crate::help_functions::set_icon_of_button;
-use crate::{flg, CZK_ICON_INFO, CZK_ICON_SETTINGS};
+use crate::{CZK_ICON_INFO, CZK_ICON_SETTINGS, flg};
 
 #[derive(Clone)]
 pub struct GuiHeader {

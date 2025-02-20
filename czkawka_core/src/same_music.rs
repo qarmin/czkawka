@@ -2,31 +2,31 @@ use std::collections::{BTreeMap, HashSet};
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::{mem, panic};
 
 use anyhow::Context;
 use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
-use humansize::{format_size, BINARY};
+use humansize::{BINARY, format_size};
 use lofty::file::{AudioFile, TaggedFileExt};
 use lofty::prelude::*;
 use lofty::read_from;
 use log::debug;
 use rayon::prelude::*;
-use rusty_chromaprint::{match_fingerprints, Configuration, Fingerprinter};
+use rusty_chromaprint::{Configuration, Fingerprinter, match_fingerprints};
 use serde::{Deserialize, Serialize};
 use symphonia::core::audio::SampleBuffer;
-use symphonia::core::codecs::{DecoderOptions, CODEC_TYPE_NULL};
+use symphonia::core::codecs::{CODEC_TYPE_NULL, DecoderOptions};
 use symphonia::core::formats::FormatOptions;
 use symphonia::core::io::MediaSourceStream;
 use symphonia::core::meta::MetadataOptions;
 use symphonia::core::probe::Hint;
 
 use crate::common::{
-    check_if_stop_received, create_crash_message, delete_files_custom, filter_reference_folders_generic, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads,
-    WorkContinueStatus, AUDIO_FILES_EXTENSIONS,
+    AUDIO_FILES_EXTENSIONS, WorkContinueStatus, check_if_stop_received, create_crash_message, delete_files_custom, filter_reference_folders_generic, prepare_thread_handler_common,
+    send_info_and_wait_for_ending_all_threads,
 };
 use crate::common_cache::{extract_loaded_cache, get_similar_music_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
@@ -615,11 +615,7 @@ impl SameMusic {
                         Err(e) => return Some(Err(format!("Error while comparing fingerprints: {e}"))),
                     };
                     segments.retain(|s| s.duration(configuration) > minimum_segment_duration && s.score < maximum_difference);
-                    if segments.is_empty() {
-                        None
-                    } else {
-                        Some(Ok((e_string, e_entry)))
-                    }
+                    if segments.is_empty() { None } else { Some(Ok((e_string, e_entry))) }
                 })
                 .flatten()
                 .partition_map(|res| match res {

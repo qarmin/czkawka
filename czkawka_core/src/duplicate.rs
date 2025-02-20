@@ -13,13 +13,13 @@ use std::{fs, mem};
 
 use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
-use humansize::{format_size, BINARY};
+use humansize::{BINARY, format_size};
 use log::debug;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use xxhash_rust::xxh3::Xxh3;
 
-use crate::common::{check_if_stop_received, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, WorkContinueStatus};
+use crate::common::{WorkContinueStatus, check_if_stop_received, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crate::common_cache::{get_duplicate_cache_file, load_cache_from_file_generalized_by_size, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
@@ -1365,7 +1365,7 @@ impl CommonData for DuplicateFinder {
 
 #[cfg(test)]
 mod tests {
-    use std::fs::{read_dir, File, Metadata};
+    use std::fs::{File, Metadata, read_dir};
     use std::io;
     #[cfg(target_family = "windows")]
     use std::os::fs::MetadataExt;

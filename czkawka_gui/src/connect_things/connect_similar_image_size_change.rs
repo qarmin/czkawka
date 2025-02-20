@@ -1,4 +1,4 @@
-use czkawka_core::similar_images::{get_string_from_similarity, SIMILAR_VALUES};
+use czkawka_core::similar_images::{SIMILAR_VALUES, get_string_from_similarity};
 use gtk4::prelude::*;
 
 use crate::gui_structs::gui_data::GuiData;

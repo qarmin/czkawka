@@ -1,9 +1,9 @@
 use gtk4::prelude::*;
-use i18n_embed::unic_langid::LanguageIdentifier;
 use i18n_embed::DesktopLanguageRequester;
+use i18n_embed::unic_langid::LanguageIdentifier;
 
 use crate::language_functions::get_language_from_combo_box_text;
-use crate::{localizer_gui, GuiData, LANGUAGES_ALL};
+use crate::{GuiData, LANGUAGES_ALL, localizer_gui};
 
 // use i18n_embed::{DesktopLanguageRequester, Localizer};
 

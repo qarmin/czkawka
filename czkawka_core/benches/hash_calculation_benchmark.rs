@@ -3,8 +3,8 @@ use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
 
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use czkawka_core::duplicate::{hash_calculation, DuplicateEntry, HashType};
+use criterion::{Criterion, black_box, criterion_group, criterion_main};
+use czkawka_core::duplicate::{DuplicateEntry, HashType, hash_calculation};
 
 fn setup_test_file(size: u64) -> PathBuf {
     let mut path = temp_dir();

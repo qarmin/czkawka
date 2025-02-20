@@ -3,8 +3,8 @@ use std::ffi::OsString;
 use std::fs::{DirEntry, File, OpenOptions};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize};
-use std::sync::{atomic, Arc};
-use std::thread::{sleep, JoinHandle};
+use std::sync::{Arc, atomic};
+use std::thread::{JoinHandle, sleep};
 use std::time::{Duration, Instant};
 use std::{fs, thread};
 
@@ -12,8 +12,9 @@ use crossbeam_channel::Sender;
 use directories_next::ProjectDirs;
 use fun_time::fun_time;
 use handsome_logger::{ColorChoice, ConfigBuilder, TerminalMode};
-use log::{debug, info, warn, LevelFilter, Record};
+use log::{LevelFilter, Record, debug, info, warn};
 
+use crate::CZKAWKA_VERSION;
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
 use crate::common_dir_traversal::{CheckingMethod, ToolType};
@@ -24,7 +25,6 @@ use crate::common_tool::DeleteMethod;
 use crate::common_traits::ResultEntry;
 use crate::duplicate::make_hard_link;
 use crate::progress_data::{CurrentStage, ProgressData};
-use crate::CZKAWKA_VERSION;
 
 static NUMBER_OF_THREADS: state::InitCell<usize> = state::InitCell::new();
 static ALL_AVAILABLE_THREADS: state::InitCell<usize> = state::InitCell::new();
@@ -39,11 +39,7 @@ pub enum WorkContinueStatus {
 
 pub fn get_number_of_threads() -> usize {
     let data = NUMBER_OF_THREADS.get();
-    if *data >= 1 {
-        *data
-    } else {
-        get_all_available_threads()
-    }
+    if *data >= 1 { *data } else { get_all_available_threads() }
 }
 
 fn filtering_messages(record: &Record) -> bool {
@@ -336,7 +332,9 @@ pub fn split_path_compare(path_a: &Path, path_b: &Path) -> Ordering {
 }
 
 pub fn create_crash_message(library_name: &str, file_path: &str, home_library_url: &str) -> String {
-    format!("{library_name} library crashed when opening \"{file_path}\", please check if this is fixed with the latest version of {library_name} and if it is not fixed, please report bug here - {home_library_url}")
+    format!(
+        "{library_name} library crashed when opening \"{file_path}\", please check if this is fixed with the latest version of {library_name} and if it is not fixed, please report bug here - {home_library_url}"
+    )
 }
 
 pub fn regex_check(expression_item: &SingleExcludedItem, directory_name: &str) -> bool {
