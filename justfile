@@ -43,6 +43,8 @@ check:
 check_all:
     cargo check
 
+check_r:
+    CARGO_PROFILE_DEV_CODEGEN_BACKEND=cranelift cargo +nightly check -Zcodegen-backend
 
 build_krokiet:
     cargo build --bin krokiet

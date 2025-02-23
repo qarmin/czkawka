@@ -82,7 +82,7 @@ impl Temporary {
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let mut folders_to_check: Vec<PathBuf> = self.common_data.directories.included_directories.clone();
 
-        let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
+        let (progress_thread_handle, progress_thread_run, items_counter, _check_was_stopped) =
             prepare_thread_handler_common(progress_sender, CurrentStage::CollectingFiles, 0, self.get_test_type());
 
         while !folders_to_check.is_empty() {
@@ -121,7 +121,7 @@ impl Temporary {
                                 &self.common_data.excluded_items,
                             );
                         } else if file_type.is_file() {
-                            if let Some(file_entry) = self.get_file_entry(&atomic_counter, &entry_data, &mut warnings) {
+                            if let Some(file_entry) = self.get_file_entry(&items_counter, &entry_data, &mut warnings) {
                                 fe_result.push(file_entry);
                             }
                         }
@@ -148,8 +148,8 @@ impl Temporary {
 
         WorkContinueStatus::Continue
     }
-    pub fn get_file_entry(&self, atomic_counter: &Arc<AtomicUsize>, entry_data: &DirEntry, warnings: &mut Vec<String>) -> Option<TemporaryFileEntry> {
-        atomic_counter.fetch_add(1, Ordering::Relaxed);
+    pub fn get_file_entry(&self, items_counter: &Arc<AtomicUsize>, entry_data: &DirEntry, warnings: &mut Vec<String>) -> Option<TemporaryFileEntry> {
+        items_counter.fetch_add(1, Ordering::Relaxed);
 
         let current_file_name = entry_data.path();
         if self.common_data.excluded_items.is_excluded(&current_file_name) {

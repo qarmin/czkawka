@@ -272,7 +272,7 @@ impl BadExtensions {
             return WorkContinueStatus::Continue;
         }
 
-        let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
+        let (progress_thread_handle, progress_thread_run, items_counter, check_was_stopped) =
             prepare_thread_handler_common(progress_sender, CurrentStage::BadExtensionsChecking, self.files_to_check.len(), self.get_test_type());
 
         let files_to_check = mem::take(&mut self.files_to_check);
@@ -282,7 +282,7 @@ impl BadExtensions {
             hashmap_workarounds.entry(found).or_default().push(proper);
         }
 
-        self.bad_extensions_files = self.verify_extensions(files_to_check, &atomic_counter, stop_receiver, &check_was_stopped, &hashmap_workarounds);
+        self.bad_extensions_files = self.verify_extensions(files_to_check, &items_counter, stop_receiver, &check_was_stopped, &hashmap_workarounds);
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
@@ -302,7 +302,7 @@ impl BadExtensions {
     fn verify_extensions(
         &self,
         files_to_check: Vec<FileEntry>,
-        atomic_counter: &Arc<AtomicUsize>,
+        items_counter: &Arc<AtomicUsize>,
         stop_receiver: Option<&Receiver<()>>,
         check_was_stopped: &AtomicBool,
         hashmap_workarounds: &HashMap<&str, Vec<&str>>,
@@ -310,7 +310,7 @@ impl BadExtensions {
         files_to_check
             .into_par_iter()
             .map(|file_entry| {
-                atomic_counter.fetch_add(1, Ordering::Relaxed);
+                items_counter.fetch_add(1, Ordering::Relaxed);
                 if check_if_stop_received(stop_receiver) {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;

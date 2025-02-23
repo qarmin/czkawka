@@ -62,6 +62,8 @@ pub struct ProgressData {
     pub max_stage_idx: u8,
     pub entries_checked: usize,
     pub entries_to_check: usize,
+    pub bytes_checked: u64,
+    pub bytes_to_check: u64,
     pub tool_type: ToolType,
 }
 

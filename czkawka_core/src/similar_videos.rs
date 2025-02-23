@@ -204,7 +204,7 @@ impl SimilarVideos {
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache_at_start();
 
-        let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) = prepare_thread_handler_common(
+        let (progress_thread_handle, progress_thread_run, items_counter, check_was_stopped, size_counter) = prepare_thread_handler_common(
             progress_sender,
             CurrentStage::SimilarVideosCalculatingHashes,
             non_cached_files_to_check.len(),
@@ -214,7 +214,7 @@ impl SimilarVideos {
         let mut vec_file_entry: Vec<VideosEntry> = non_cached_files_to_check
             .par_iter()
             .map(|file_entry| {
-                atomic_counter.fetch_add(1, Ordering::Relaxed);
+                items_counter.fetch_add(1, Ordering::Relaxed);
                 if check_if_stop_received(stop_receiver) {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;

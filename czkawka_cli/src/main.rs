@@ -61,7 +61,7 @@ fn main() {
             Commands::BrokenFiles(broken_files_args) => broken_files(broken_files_args, &stop_receiver, &progress_sender),
             Commands::SimilarVideos(similar_videos_args) => similar_videos(similar_videos_args, &stop_receiver, &progress_sender),
             Commands::BadExtensions(bad_extensions_args) => bad_extensions(bad_extensions_args, &stop_receiver, &progress_sender),
-            Commands::Tester {} => test_image_conversion_speed(),
+            Commands::Tester => test_image_conversion_speed(),
         })
         .expect("Failed to spawn calculation thread");
     ctrlc::set_handler(move || {

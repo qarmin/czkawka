@@ -2,7 +2,7 @@ use std::cmp::Ordering;
 use std::ffi::OsString;
 use std::fs::{DirEntry, File, OpenOptions};
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicBool, AtomicUsize};
+use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize};
 use std::sync::{Arc, atomic};
 use std::thread::{JoinHandle, sleep};
 use std::time::{Duration, Instant};
@@ -557,18 +557,20 @@ where
 pub fn prepare_thread_handler_common(
     progress_sender: Option<&Sender<ProgressData>>,
     sstage: CurrentStage,
-    max_value: usize,
+    max_items: usize,
     test_type: (ToolType, CheckingMethod),
-) -> (JoinHandle<()>, Arc<AtomicBool>, Arc<AtomicUsize>, AtomicBool) {
+    max_size: u64,
+) -> (JoinHandle<()>, Arc<AtomicBool>, Arc<AtomicUsize>, AtomicBool, Arc<AtomicU64>) {
     let (tool_type, checking_method) = test_type;
-    assert_ne!(tool_type, ToolType::None, "ToolType::None should not exist");
+    assert_ne!(tool_type, ToolType::None, "Cannot send progress data for ToolType::None");
     let progress_thread_run = Arc::new(AtomicBool::new(true));
-    let atomic_counter = Arc::new(AtomicUsize::new(0));
+    let items_counter = Arc::new(AtomicUsize::new(0));
+    let size_counter = Arc::new(AtomicU64::new(0));
     let check_was_stopped = AtomicBool::new(false);
     let progress_thread_sender = if let Some(progress_sender) = progress_sender {
         let progress_send = progress_sender.clone();
         let progress_thread_run = progress_thread_run.clone();
-        let atomic_counter = atomic_counter.clone();
+        let items_counter = items_counter.clone();
         thread::spawn(move || {
             // Use earlier time, to send immediately first message
             let mut time_since_last_send = Instant::now().checked_sub(Duration::from_secs(10u64)).unwrap_or_else(Instant::now);
@@ -580,8 +582,10 @@ pub fn prepare_thread_handler_common(
                         checking_method,
                         current_stage_idx: sstage.get_current_stage(),
                         max_stage_idx: tool_type.get_max_stage(checking_method),
-                        entries_checked: atomic_counter.load(atomic::Ordering::Relaxed),
-                        entries_to_check: max_value,
+                        entries_checked: items_counter.load(atomic::Ordering::Relaxed),
+                        entries_to_check: max_items,
+                        bytes_checked: size_counter.load(atomic::Ordering::Relaxed),
+                        bytes_to_check: max_size,
                         tool_type,
                     };
 
@@ -599,7 +603,7 @@ pub fn prepare_thread_handler_common(
     } else {
         thread::spawn(|| {})
     };
-    (progress_thread_sender, progress_thread_run, atomic_counter, check_was_stopped)
+    (progress_thread_sender, progress_thread_run, items_counter, check_was_stopped, size_counter)
 }
 
 #[inline]

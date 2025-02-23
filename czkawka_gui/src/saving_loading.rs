@@ -559,27 +559,27 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
     // Comboboxes main notebook
     saving_struct.save_var(
         hashmap_ls[&LoadText::ComboBoxDuplicateHashType].clone(),
-        &main_notebook.combo_box_duplicate_hash_type.active().unwrap_or(0),
+        &main_notebook.combo_box_duplicate_hash_type.active().unwrap_or_default(),
     );
     saving_struct.save_var(
         hashmap_ls[&LoadText::ComboBoxDuplicateCheckMethod].clone(),
-        &main_notebook.combo_box_duplicate_check_method.active().unwrap_or(0),
+        &main_notebook.combo_box_duplicate_check_method.active().unwrap_or_default(),
     );
     saving_struct.save_var(
         hashmap_ls[&LoadText::ComboBoxImageResizeAlgorithm].clone(),
-        &main_notebook.combo_box_image_resize_algorithm.active().unwrap_or(0),
+        &main_notebook.combo_box_image_resize_algorithm.active().unwrap_or_default(),
     );
     saving_struct.save_var(
         hashmap_ls[&LoadText::ComboBoxImageHashType].clone(),
-        &main_notebook.combo_box_image_hash_algorithm.active().unwrap_or(0),
+        &main_notebook.combo_box_image_hash_algorithm.active().unwrap_or_default(),
     );
     saving_struct.save_var(
         hashmap_ls[&LoadText::ComboBoxImageHashSize].clone(),
-        &main_notebook.combo_box_image_hash_size.active().unwrap_or(0),
+        &main_notebook.combo_box_image_hash_size.active().unwrap_or_default(),
     );
     saving_struct.save_var(
         hashmap_ls[&LoadText::ComboBoxBigFiles].clone(),
-        &main_notebook.combo_box_big_files_mode.active().unwrap_or(0),
+        &main_notebook.combo_box_big_files_mode.active().unwrap_or_default(),
     );
 
     // Other2

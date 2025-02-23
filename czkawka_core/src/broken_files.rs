@@ -303,14 +303,14 @@ impl BrokenFiles {
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache();
 
-        let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
+        let (progress_thread_handle, progress_thread_run, items_counter, _check_was_stopped) =
             prepare_thread_handler_common(progress_sender, CurrentStage::BrokenFilesChecking, non_cached_files_to_check.len(), self.get_test_type());
 
         debug!("look_for_broken_files - started finding for broken files");
         let mut vec_file_entry: Vec<BrokenEntry> = non_cached_files_to_check
             .into_par_iter()
             .map(|(_, file_entry)| {
-                atomic_counter.fetch_add(1, Ordering::Relaxed);
+                items_counter.fetch_add(1, Ordering::Relaxed);
                 if check_if_stop_received(stop_receiver) {
                     return None;
                 }
