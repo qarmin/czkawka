@@ -303,8 +303,8 @@ impl SameMusic {
             self.music_to_check = mem::take(&mut self.music_entries).into_iter().map(|e| (e.path.to_string_lossy().to_string(), e)).collect();
         }
 
-        let (progress_thread_handle, progress_thread_run, _items_counter, _check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicCacheLoadingFingerprints, 0, self.get_test_type());
+        let (progress_thread_handle, progress_thread_run, _items_counter, _check_was_stopped, _size_counter) =
+            prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicCacheLoadingFingerprints, 0, self.get_test_type(), 0);
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache(false);
 
@@ -313,11 +313,12 @@ impl SameMusic {
             return WorkContinueStatus::Stop;
         }
 
-        let (progress_thread_handle, progress_thread_run, items_counter, check_was_stopped) = prepare_thread_handler_common(
+        let (progress_thread_handle, progress_thread_run, items_counter, check_was_stopped, _size_counter) = prepare_thread_handler_common(
             progress_sender,
             CurrentStage::SameMusicCalculatingFingerprints,
             non_cached_files_to_check.len(),
             self.get_test_type(),
+            0,
         );
         let configuration = &self.hash_preset_config;
 
@@ -344,8 +345,8 @@ impl SameMusic {
         debug!("calculate_fingerprint - ended fingerprinting");
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-        let (progress_thread_handle, progress_thread_run, _items_counter, _check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicCacheSavingFingerprints, 0, self.get_test_type());
+        let (progress_thread_handle, progress_thread_run, _items_counter, _check_was_stopped, _size_counter) =
+            prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicCacheSavingFingerprints, 0, self.get_test_type(), 0);
 
         // Just connect loaded results with already calculated
         vec_file_entry.extend(records_already_cached.into_values());
@@ -368,8 +369,8 @@ impl SameMusic {
             return WorkContinueStatus::Continue;
         }
 
-        let (progress_thread_handle, progress_thread_run, _items_counter, _check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicCacheLoadingTags, 0, self.get_test_type());
+        let (progress_thread_handle, progress_thread_run, _items_counter, _check_was_stopped, _size_counter) =
+            prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicCacheLoadingTags, 0, self.get_test_type(), 0);
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache(true);
 
@@ -378,8 +379,13 @@ impl SameMusic {
             return WorkContinueStatus::Stop;
         }
 
-        let (progress_thread_handle, progress_thread_run, items_counter, check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicReadingTags, non_cached_files_to_check.len(), self.get_test_type());
+        let (progress_thread_handle, progress_thread_run, items_counter, check_was_stopped, _size_counter) = prepare_thread_handler_common(
+            progress_sender,
+            CurrentStage::SameMusicReadingTags,
+            non_cached_files_to_check.len(),
+            self.get_test_type(),
+            0,
+        );
 
         debug!("read_tags - starting reading tags");
         // Clean for duplicate files
@@ -403,8 +409,8 @@ impl SameMusic {
         debug!("read_tags - ended reading tags");
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-        let (progress_thread_handle, progress_thread_run, _items_counter, _check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicCacheSavingTags, 0, self.get_test_type());
+        let (progress_thread_handle, progress_thread_run, _items_counter, _check_was_stopped, _size_counter) =
+            prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicCacheSavingTags, 0, self.get_test_type(), 0);
 
         // Just connect loaded results with already calculated
         vec_file_entry.extend(records_already_cached.into_values());
@@ -427,8 +433,8 @@ impl SameMusic {
         if self.music_entries.is_empty() {
             return WorkContinueStatus::Continue;
         }
-        let (progress_thread_handle, progress_thread_run, items_counter, _check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicComparingTags, self.music_entries.len(), self.get_test_type());
+        let (progress_thread_handle, progress_thread_run, items_counter, _check_was_stopped, _size_counter) =
+            prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicComparingTags, self.music_entries.len(), self.get_test_type(), 0);
 
         let mut old_duplicates: Vec<Vec<MusicEntry>> = vec![self.music_entries.clone()];
         let mut new_duplicates: Vec<Vec<MusicEntry>> = Vec::new();
@@ -649,8 +655,8 @@ impl SameMusic {
         let grouped_files_to_check = self.split_fingerprints_to_check();
         let base_files_number = grouped_files_to_check.iter().map(|g| g.base_files.len()).sum::<usize>();
 
-        let (progress_thread_handle, progress_thread_run, items_counter, _check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicComparingFingerprints, base_files_number, self.get_test_type());
+        let (progress_thread_handle, progress_thread_run, items_counter, _check_was_stopped, _size_counter) =
+            prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicComparingFingerprints, base_files_number, self.get_test_type(), 0);
 
         let mut duplicated_music_entries = Vec::new();
         for group in grouped_files_to_check {

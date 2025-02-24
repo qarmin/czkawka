@@ -317,8 +317,8 @@ where
         // Add root folders for finding
         let mut folders_to_check: Vec<PathBuf> = self.root_dirs.clone();
 
-        let (progress_thread_handle, progress_thread_run, items_counter, _check_was_stopped) =
-            prepare_thread_handler_common(self.progress_sender, CurrentStage::CollectingFiles, 0, (self.tool_type, self.checking_method));
+        let (progress_thread_handle, progress_thread_run, items_counter, _check_was_stopped, _size_counter) =
+            prepare_thread_handler_common(self.progress_sender, CurrentStage::CollectingFiles, 0, (self.tool_type, self.checking_method), 0);
 
         let DirTraversal {
             collect,

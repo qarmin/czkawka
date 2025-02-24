@@ -82,8 +82,8 @@ impl Temporary {
     fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let mut folders_to_check: Vec<PathBuf> = self.common_data.directories.included_directories.clone();
 
-        let (progress_thread_handle, progress_thread_run, items_counter, _check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, CurrentStage::CollectingFiles, 0, self.get_test_type());
+        let (progress_thread_handle, progress_thread_run, items_counter, _check_was_stopped, _size_counter) =
+            prepare_thread_handler_common(progress_sender, CurrentStage::CollectingFiles, 0, self.get_test_type(), 0);
 
         while !folders_to_check.is_empty() {
             if check_if_stop_received(stop_receiver) {

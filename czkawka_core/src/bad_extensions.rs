@@ -272,8 +272,8 @@ impl BadExtensions {
             return WorkContinueStatus::Continue;
         }
 
-        let (progress_thread_handle, progress_thread_run, items_counter, check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, CurrentStage::BadExtensionsChecking, self.files_to_check.len(), self.get_test_type());
+        let (progress_thread_handle, progress_thread_run, items_counter, check_was_stopped, _size_counter) =
+            prepare_thread_handler_common(progress_sender, CurrentStage::BadExtensionsChecking, self.files_to_check.len(), self.get_test_type(), 0);
 
         let files_to_check = mem::take(&mut self.files_to_check);
 

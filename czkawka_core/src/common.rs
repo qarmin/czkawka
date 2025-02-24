@@ -571,6 +571,7 @@ pub fn prepare_thread_handler_common(
         let progress_send = progress_sender.clone();
         let progress_thread_run = progress_thread_run.clone();
         let items_counter = items_counter.clone();
+        let size_counter = size_counter.clone();
         thread::spawn(move || {
             // Use earlier time, to send immediately first message
             let mut time_since_last_send = Instant::now().checked_sub(Duration::from_secs(10u64)).unwrap_or_else(Instant::now);
