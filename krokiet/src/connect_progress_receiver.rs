@@ -3,6 +3,7 @@ use std::thread;
 use crossbeam_channel::Receiver;
 use czkawka_core::common_dir_traversal::ToolType;
 use czkawka_core::progress_data::{CurrentStage, ProgressData};
+use humansize::{format_size, BINARY};
 use slint::ComponentHandle;
 
 use crate::{MainWindow, ProgressToSend};
@@ -107,10 +108,22 @@ fn progress_default(item: &ProgressData) -> ProgressToSend {
             format!("Checking {}/{} file", item.entries_checked, item.entries_to_check)
         }
         CurrentStage::DuplicatePreHashing => {
-            format!("Analyzing partial hash of {}/{} files", item.entries_checked, item.entries_to_check)
+            format!(
+                "Analyzing partial hash of {}/{} files ({}/{})",
+                item.entries_checked,
+                item.entries_to_check,
+                format_size(item.bytes_checked, BINARY),
+                format_size(item.bytes_to_check, BINARY)
+            )
         }
         CurrentStage::DuplicateFullHashing => {
-            format!("Analyzing full hash of {}/{} files", item.entries_checked, item.entries_to_check)
+            format!(
+                "Analyzing full hash of {}/{} files ({}/{})",
+                item.entries_checked,
+                item.entries_to_check,
+                format_size(item.bytes_checked, BINARY),
+                format_size(item.bytes_to_check, BINARY)
+            )
         }
         _ => unreachable!(),
     };

@@ -2,6 +2,7 @@ use std::env::temp_dir;
 use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
+use std::sync::Arc;
 
 use criterion::{Criterion, black_box, criterion_group, criterion_main};
 use czkawka_core::duplicate::{DuplicateEntry, HashType, hash_calculation};
@@ -31,7 +32,7 @@ fn benchmark_hash_calculation_vec<const FILE_SIZE: u64, const BUFFER_SIZE: usize
     c.bench_function(&function_name, |b| {
         b.iter(|| {
             let mut buffer = vec![0u8; BUFFER_SIZE];
-            hash_calculation(black_box(&mut buffer), black_box(&file_entry), black_box(HashType::Blake3), black_box(u64::MAX)).expect("Failed to calculate hash");
+            hash_calculation(black_box(&mut buffer), black_box(&file_entry), black_box(HashType::Blake3), &Arc::default(), None).expect("Failed to calculate hash");
         });
     });
 }
@@ -43,7 +44,7 @@ fn benchmark_hash_calculation_arr<const FILE_SIZE: u64, const BUFFER_SIZE: usize
     c.bench_function(&function_name, |b| {
         b.iter(|| {
             let mut buffer = [0u8; BUFFER_SIZE];
-            hash_calculation(black_box(&mut buffer), black_box(&file_entry), black_box(HashType::Blake3), black_box(u64::MAX)).expect("Failed to calculate hash");
+            hash_calculation(black_box(&mut buffer), black_box(&file_entry), black_box(HashType::Blake3), &Arc::default(), None).expect("Failed to calculate hash");
         });
     });
 }

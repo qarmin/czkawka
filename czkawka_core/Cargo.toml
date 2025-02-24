@@ -86,6 +86,7 @@ log = "0.4.22"
 handsome_logger = "0.8"
 fun_time = { version = "0.3", features = ["log"] }
 itertools = "0.14"
+static_assertions = "1.1.0"
 
 # Don't update anymore! This crate has a bug. I've submitted a patch upstream, but the change is breaking. The current code relies on the bug to work correctly!
 # Warning by CalunVier 2024.7.15

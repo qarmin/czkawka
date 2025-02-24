@@ -1,3 +1,5 @@
+use log::error;
+
 use crate::common_dir_traversal::{CheckingMethod, ToolType};
 // Empty files
 // 0 - Collecting files
@@ -123,6 +125,14 @@ impl ProgressData {
                 self.sstage
             );
         }
+
+        // This could be an assert, but it is possible that in duplicate finder, file that will
+        // be checked, will increase the size of the file between collecting file to scan and
+        // scanning it. So it is better to just log it
+        if self.bytes_checked <= self.bytes_to_check {
+            error!("Bytes checked: {}, bytes to check: {}, stage {:?}", self.bytes_checked, self.bytes_to_check, self.sstage);
+        };
+
         let tool_type_checking_method: Option<ToolType> = match self.checking_method {
             CheckingMethod::AudioTags | CheckingMethod::AudioContent => Some(ToolType::SameMusic),
             CheckingMethod::Name | CheckingMethod::SizeName | CheckingMethod::Size | CheckingMethod::Hash => Some(ToolType::Duplicate),

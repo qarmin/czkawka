@@ -9,6 +9,7 @@ use czkawka_core::progress_data::{CurrentStage, ProgressData};
 use glib::MainContext;
 use gtk4::ProgressBar;
 use gtk4::prelude::*;
+use humansize::{BINARY, format_size};
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
@@ -179,5 +180,10 @@ fn file_number_tm(item: &ProgressData) -> HashMap<&'static str, String> {
 }
 
 fn progress_ratio_tm(item: &ProgressData) -> HashMap<&'static str, String> {
-    generate_translation_hashmap(vec![("file_checked", item.entries_checked.to_string()), ("all_files", item.entries_to_check.to_string())])
+    let mut v = vec![("file_checked", item.entries_checked.to_string()), ("all_files", item.entries_to_check.to_string())];
+    if item.bytes_to_check != 0 {
+        v.push(("data_to_check", format_size(item.bytes_checked, BINARY)));
+        v.push(("all_data", format_size(item.bytes_to_check, BINARY)));
+    }
+    generate_translation_hashmap(v)
 }

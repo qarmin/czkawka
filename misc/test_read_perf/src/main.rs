@@ -5,6 +5,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::env;
 use std::process::Command;
+use std::sync::Arc;
 use std::time::UNIX_EPOCH;
 use strum::Display;
 use walkdir::WalkDir;
@@ -127,7 +128,7 @@ fn vec1024_locking(files: &Vec<DuplicateEntry>) {
 fn vec1024_thread(files: &Vec<DuplicateEntry>) {
     files.into_par_iter().for_each(|f| {
         BUFFER.with(|buffer| {
-            let _ = hash_calculation(&mut buffer.borrow_mut(), &f, HashType::Blake3, u64::MAX);
+            let _ = hash_calculation(&mut buffer.borrow_mut(), &f, HashType::Blake3, u64::MAX, Arc::default(), None);
         });
     });
 }
