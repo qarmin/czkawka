@@ -157,14 +157,21 @@ fn progress_default(gui_data: &GuiData, item: &ProgressData) {
 }
 
 fn common_set_data(item: &ProgressData, progress_bar_all_stages: &ProgressBar, progress_bar_current_stage: &ProgressBar, taskbar_state: &Rc<RefCell<TaskbarProgress>>) {
+    let (current_items_checked, current_stage_items_to_check) = if item.bytes_to_check > 0 {
+        (item.bytes_checked, item.bytes_to_check)
+    } else {
+        (item.entries_checked as u64, item.entries_to_check as u64)
+    };
+
     if item.entries_to_check != 0 {
-        let all_stages = (item.current_stage_idx as f64 + item.entries_checked as f64 / item.entries_to_check as f64) / (item.max_stage_idx + 1) as f64;
+        let all_stages = (item.current_stage_idx as f64 + current_items_checked as f64 / current_stage_items_to_check as f64) / (item.max_stage_idx + 1) as f64;
         let all_stages = all_stages.min(0.99);
         progress_bar_all_stages.set_fraction(all_stages);
-        progress_bar_current_stage.set_fraction(item.entries_checked as f64 / item.entries_to_check as f64);
+        progress_bar_current_stage.set_fraction(current_items_checked as f64 / item.entries_to_check as f64);
+
         taskbar_state.borrow().set_progress_value(
-            ((item.current_stage_idx as usize) * item.entries_to_check + item.entries_checked) as u64,
-            item.entries_to_check as u64 * (item.max_stage_idx + 1) as u64,
+            (item.current_stage_idx as u64) * current_stage_items_to_check + current_items_checked,
+            current_stage_items_to_check * (item.max_stage_idx + 1) as u64,
         );
     } else {
         let all_stages = (item.current_stage_idx as f64) / (item.max_stage_idx + 1) as f64;

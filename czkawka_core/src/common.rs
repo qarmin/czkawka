@@ -91,21 +91,24 @@ pub fn print_version_mode() {
     if cfg!(target_feature = "sse2") {
         app_cpu_version = "x86-64-v1 (SSE2)";
     }
-    if cfg!(any(target_arch = "x86", target_arch = "x86_64")) && is_x86_feature_detected!("sse2") {
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    if is_x86_feature_detected!("sse2") {
         os_cpu_version = "x86-64-v1 (SSE2)";
     }
 
     if cfg!(target_feature = "popcnt") {
         app_cpu_version = "x86-64-v2 (SSE4.2 + POPCNT)";
     }
-    if cfg!(any(target_arch = "x86", target_arch = "x86_64")) && is_x86_feature_detected!("popcnt") {
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    if is_x86_feature_detected!("popcnt") {
         os_cpu_version = "x86-64-v2 (SSE4.2 + POPCNT)";
     }
 
     if cfg!(target_feature = "avx2") {
         app_cpu_version = "x86-64-v3 (AVX2) or x86-64-v4 (AVX-512)";
     }
-    if cfg!(any(target_arch = "x86", target_arch = "x86_64")) && is_x86_feature_detected!("avx2") {
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    if is_x86_feature_detected!("avx2") {
         os_cpu_version = "x86-64-v3 (AVX2)";
     }
 
@@ -115,7 +118,8 @@ pub fn print_version_mode() {
     if cfg!(target_feature = "avx512f") {
         app_cpu_version = "x86-64-v4 (AVX-512)";
     }
-    if cfg!(any(target_arch = "x86", target_arch = "x86_64")) && is_x86_feature_detected!("avx512f") {
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    if is_x86_feature_detected!("avx512f") {
         os_cpu_version = "x86-64-v4 (AVX-512)";
     }
 

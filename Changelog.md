@@ -19,14 +19,14 @@
 - Using reusable and bigger buffer for reading files in duplicate mode - [#1425](https://github.com/qarmin/czkawka/pull/1425)
 - Option to use a lot of faster image resizing, to speedup image hashing - [#1458](https://github.com/qarmin/czkawka/pull/1458)
 - Added to logs info about os and compiled app features - [#1458](https://github.com/qarmin/czkawka/pull/1458)
-- Added size progress in duplicate mode - [#1458](https://github.com/qarmin/czkawka/pull/1458)
+- Added size progress in duplicate and similar images mode - [#1458](https://github.com/qarmin/czkawka/pull/1458)
 - Ability to stop calculating hash of bigger files in the middle of process - [#1458](https://github.com/qarmin/czkawka/pull/1458)
 - Using multithreading, to filter out hard links - [#1458](https://github.com/qarmin/czkawka/pull/1458)
 - Decreased prehash read file size to max 4k bytes - [#1458](https://github.com/qarmin/czkawka/pull/1458) 
 
 ### Krokiet
 - Changed default tab to duplicate files - [#1368](https://github.com/qarmin/czkawka/pull/1368)
-- Progress bar in duplicate mode, now shows progress of processed bytes, not files - [#1458](https://github.com/qarmin/czkawka/pull/1458)
+- Progress bar in duplicate and similar images mode, now shows progress of processed bytes, not files - [#1458](https://github.com/qarmin/czkawka/pull/1458)
 
 ### GTK GUI
 - Added window icon in wayland - [#1400](https://github.com/qarmin/czkawka/pull/1400)

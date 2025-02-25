@@ -274,12 +274,12 @@ impl SimilarImages {
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.hash_images_load_cache();
 
-        let (progress_thread_handle, progress_thread_run, items_counter, check_was_stopped, _size_counter) = prepare_thread_handler_common(
+        let (progress_thread_handle, progress_thread_run, items_counter, check_was_stopped, size_counter) = prepare_thread_handler_common(
             progress_sender,
             CurrentStage::SimilarImagesCalculatingHashes,
             non_cached_files_to_check.len(),
             self.get_test_type(),
-            0,
+            non_cached_files_to_check.values().map(|entry| entry.size).sum(),
         );
 
         debug!("hash_images - start hashing images");
@@ -291,6 +291,7 @@ impl SimilarImages {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
+                size_counter.fetch_add(file_entry.size, Ordering::Relaxed);
                 if let Err(e) = self.collect_image_file_entry(&mut file_entry) {
                     return Some(Err(e));
                 }

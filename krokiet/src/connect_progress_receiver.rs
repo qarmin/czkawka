@@ -95,7 +95,13 @@ fn progress_default(item: &ProgressData) -> ProgressToSend {
             format!("Comparing content of {}/{} audio file", item.entries_checked, item.entries_to_check)
         }
         CurrentStage::SimilarImagesCalculatingHashes => {
-            format!("Hashing of {}/{} image", item.entries_checked, item.entries_to_check)
+            format!(
+                "Hashing of {}/{} image ({}/{})",
+                item.entries_checked,
+                item.entries_to_check,
+                format_size(item.bytes_checked, BINARY),
+                format_size(item.bytes_to_check, BINARY)
+            )
         }
         CurrentStage::SimilarImagesComparingHashes => {
             format!("Comparing {}/{} image hash", item.entries_checked, item.entries_to_check)
@@ -148,11 +154,17 @@ fn no_current_stage_get_data(item: &ProgressData) -> (i32, i32) {
 
 // Used to calculate number of files to check and also to calculate current progress according to number of files to check and checked
 fn common_get_data(item: &ProgressData) -> (i32, i32, i32) {
+    let (current_items_checked, current_stage_items_to_check) = if item.bytes_to_check > 0 {
+        (item.bytes_checked, item.bytes_to_check)
+    } else {
+        (item.entries_checked as u64, item.entries_to_check as u64)
+    };
+
     if item.entries_to_check != 0 {
-        let all_stages = (item.current_stage_idx as f64 + item.entries_checked as f64 / item.entries_to_check as f64) / (item.max_stage_idx + 1) as f64;
+        let all_stages = (item.current_stage_idx as f64 + current_items_checked as f64 / current_stage_items_to_check as f64) / (item.max_stage_idx + 1) as f64;
         let all_stages = all_stages.min(0.99);
 
-        let current_stage = item.entries_checked as f64 / item.entries_to_check as f64;
+        let current_stage = current_items_checked as f64 / current_stage_items_to_check as f64;
         let current_stage = current_stage.min(0.99);
 
         let current_stage_size = if item.bytes_to_check != 0 {
