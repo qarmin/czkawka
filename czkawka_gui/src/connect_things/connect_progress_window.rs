@@ -167,7 +167,7 @@ fn common_set_data(item: &ProgressData, progress_bar_all_stages: &ProgressBar, p
         let all_stages = (item.current_stage_idx as f64 + current_items_checked as f64 / current_stage_items_to_check as f64) / (item.max_stage_idx + 1) as f64;
         let all_stages = all_stages.min(0.99);
         progress_bar_all_stages.set_fraction(all_stages);
-        progress_bar_current_stage.set_fraction(current_items_checked as f64 / item.entries_to_check as f64);
+        progress_bar_current_stage.set_fraction(current_items_checked as f64 / current_stage_items_to_check as f64);
 
         taskbar_state.borrow().set_progress_value(
             (item.current_stage_idx as u64) * current_stage_items_to_check + current_items_checked,
@@ -189,7 +189,7 @@ fn file_number_tm(item: &ProgressData) -> HashMap<&'static str, String> {
 fn progress_ratio_tm(item: &ProgressData) -> HashMap<&'static str, String> {
     let mut v = vec![("file_checked", item.entries_checked.to_string()), ("all_files", item.entries_to_check.to_string())];
     if item.bytes_to_check != 0 {
-        v.push(("data_to_check", format_size(item.bytes_checked, BINARY)));
+        v.push(("data_checked", format_size(item.bytes_checked, BINARY)));
         v.push(("all_data", format_size(item.bytes_to_check, BINARY)));
     }
     generate_translation_hashmap(v)

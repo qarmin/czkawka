@@ -30,6 +30,7 @@
 
 ### GTK GUI
 - Added window icon in wayland - [#1400](https://github.com/qarmin/czkawka/pull/1400)
+- Disabled broken sort button - [#1400](https://github.com/qarmin/czkawka/pull/1400)
 
 ### CLI
 
