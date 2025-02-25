@@ -24,7 +24,7 @@ jobs:
           brew link --overwrite python@3.13
 
       - name: Setup rust version
-        run: rustup default stable
+        run: rustup default 1.85.0
 
       - name: Enable LTO
         run: sed -i '' 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
