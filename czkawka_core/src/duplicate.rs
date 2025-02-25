@@ -408,18 +408,22 @@ impl DuplicateFinder {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
                 self.common_data.text_messages.warnings.extend(warnings);
 
-                for (size, vec) in grouped_file_entries {
-                    if vec.len() <= 1 {
-                        continue;
-                    }
+                self.files_with_identical_size = grouped_file_entries
+                    .into_par_iter()
+                    .filter_map(|(size, vec)| {
+                        if vec.len() <= 1 {
+                            return None;
+                        }
 
-                    let vector = if self.get_params().ignore_hard_links { filter_hard_links(&vec) } else { vec };
+                        let vector = if self.get_params().ignore_hard_links { filter_hard_links(&vec) } else { vec };
 
-                    if vector.len() > 1 {
-                        self.files_with_identical_size
-                            .insert(size, vector.into_iter().map(FileEntry::into_duplicate_entry).collect());
-                    }
-                }
+                        if vector.len() > 1 {
+                            Some((size, vector.into_iter().map(FileEntry::into_duplicate_entry).collect()))
+                        } else {
+                            None
+                        }
+                    })
+                    .collect();
 
                 self.filter_reference_folders_by_size();
                 self.calculate_size_stats();
@@ -605,10 +609,12 @@ impl DuplicateFinder {
                         }
                         if check_if_stop_received(stop_receiver) {
                             check_was_stopped.store(true, Ordering::Relaxed);
-                            return;
+                            return None;
                         }
                     }
-                });
+
+                    Some(())
+                })?;
 
                 Some((size, hashmap_with_hash, errors))
             })
@@ -809,15 +815,13 @@ impl DuplicateFinder {
                 let size_counter = size_counter.clone();
                 let mut hashmap_with_hash: BTreeMap<String, Vec<DuplicateEntry>> = Default::default();
                 let mut errors: Vec<String> = Vec::new();
-                let mut exam_stopped = false;
                 items_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
 
                 THREAD_BUFFER.with_borrow_mut(|buffer| {
                     for mut file_entry in vec_file_entry {
                         if check_if_stop_received(stop_receiver) {
                             check_was_stopped.store(true, Ordering::Relaxed);
-                            exam_stopped = true;
-                            break;
+                            return None;
                         }
 
                         match hash_calculation(buffer, &file_entry, check_type, &size_counter, stop_receiver) {
@@ -826,17 +830,14 @@ impl DuplicateFinder {
                                     file_entry.hash = hash_string.clone();
                                     hashmap_with_hash.entry(hash_string).or_default().push(file_entry);
                                 } else {
-                                    exam_stopped = true;
-                                    break;
+                                    return None;
                                 }
                             }
                             Err(s) => errors.push(s),
                         }
                     }
-                });
-                if exam_stopped {
-                    return None;
-                }
+                    Some(())
+                })?;
 
                 Some((size, hashmap_with_hash, errors))
             })

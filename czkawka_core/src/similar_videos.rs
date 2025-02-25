@@ -158,7 +158,7 @@ impl SimilarVideos {
         match result {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
                 self.videos_to_check = grouped_file_entries
-                    .into_iter()
+                    .into_par_iter()
                     .flat_map(if self.get_params().ignore_hard_links { |(_, fes)| fes } else { take_1_per_inode })
                     .map(|fe| (fe.path.to_string_lossy().to_string(), fe.into_videos_entry()))
                     .collect();

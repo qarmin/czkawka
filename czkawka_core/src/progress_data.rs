@@ -129,7 +129,7 @@ impl ProgressData {
         // This could be an assert, but it is possible that in duplicate finder, file that will
         // be checked, will increase the size of the file between collecting file to scan and
         // scanning it. So it is better to just log it
-        if self.bytes_checked <= self.bytes_to_check {
+        if self.bytes_checked > self.bytes_to_check {
             error!("Bytes checked: {}, bytes to check: {}, stage {:?}", self.bytes_checked, self.bytes_to_check, self.sstage);
         };
 

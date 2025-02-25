@@ -91,21 +91,21 @@ pub fn print_version_mode() {
     if cfg!(target_feature = "sse2") {
         app_cpu_version = "x86-64-v1 (SSE2)";
     }
-    if is_x86_feature_detected!("sse2") {
+    if cfg!(any(target_arch = "x86", target_arch = "x86_64")) && is_x86_feature_detected!("sse2") {
         os_cpu_version = "x86-64-v1 (SSE2)";
     }
 
     if cfg!(target_feature = "popcnt") {
         app_cpu_version = "x86-64-v2 (SSE4.2 + POPCNT)";
     }
-    if is_x86_feature_detected!("popcnt") {
+    if cfg!(any(target_arch = "x86", target_arch = "x86_64")) && is_x86_feature_detected!("popcnt") {
         os_cpu_version = "x86-64-v2 (SSE4.2 + POPCNT)";
     }
 
     if cfg!(target_feature = "avx2") {
         app_cpu_version = "x86-64-v3 (AVX2) or x86-64-v4 (AVX-512)";
     }
-    if is_x86_feature_detected!("avx2") {
+    if cfg!(any(target_arch = "x86", target_arch = "x86_64")) && is_x86_feature_detected!("avx2") {
         os_cpu_version = "x86-64-v3 (AVX2)";
     }
 
@@ -115,9 +115,11 @@ pub fn print_version_mode() {
     if cfg!(target_feature = "avx512f") {
         app_cpu_version = "x86-64-v4 (AVX-512)";
     }
-    if is_x86_feature_detected!("avx512f") {
+    if cfg!(any(target_arch = "x86", target_arch = "x86_64")) && is_x86_feature_detected!("avx512f") {
         os_cpu_version = "x86-64-v4 (AVX-512)";
     }
+
+    // TODO - probably needs to add arm and other architectures, need help, because I don't have access to them
 
     info!(
         "App version: {CZKAWKA_VERSION}, {debug_release} mode, rust {rust_version}, os {} {} [{} {}], {processors} cpu/threads, features({}): [{}], app cpu version: [{}], os cpu version: [{}]",

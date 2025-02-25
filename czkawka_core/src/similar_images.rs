@@ -203,7 +203,7 @@ impl SimilarImages {
         match result {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
                 self.images_to_check = grouped_file_entries
-                    .into_iter()
+                    .into_par_iter()
                     .flat_map(if self.get_params().ignore_hard_links { |(_, fes)| fes } else { take_1_per_inode })
                     .map(|fe| {
                         let fe_str = fe.path.to_string_lossy().to_string();
@@ -212,6 +212,7 @@ impl SimilarImages {
                         (fe_str, image_entry)
                     })
                     .collect();
+
                 self.common_data.text_messages.warnings.extend(warnings);
                 debug!("check_files - Found {} image files.", self.images_to_check.len());
                 WorkContinueStatus::Continue
