@@ -30,7 +30,7 @@ use crate::progress_data::{CurrentStage, ProgressData};
 
 const TEMP_HARDLINK_FILE: &str = "rzeczek.rxrxrxl";
 
-pub const PREHASHING_BUFFER_SIZE: u64 = 1024 * 32;
+pub const PREHASHING_BUFFER_SIZE: u64 = 1024 * 8;
 pub const THREAD_BUFFER_SIZE: usize = 2 * 1024 * 1024;
 
 thread_local! {

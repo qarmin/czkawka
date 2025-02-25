@@ -43,10 +43,11 @@ fn progress_save_load_cache(item: &ProgressData) -> ProgressToSend {
         CurrentStage::DuplicateCacheSaving => "Saving hash cache",
         _ => unreachable!(),
     };
-    let (all_progress, current_progress) = common_get_data(item);
+    let (all_progress, current_progress, current_progress_size) = common_get_data(item);
     ProgressToSend {
         all_progress,
         current_progress,
+        current_progress_size,
         step_name: step_name.into(),
     }
 }
@@ -74,6 +75,7 @@ fn progress_collect_items(item: &ProgressData, files: bool) -> ProgressToSend {
     ProgressToSend {
         all_progress,
         current_progress,
+        current_progress_size: -1,
         step_name: step_name.into(),
     }
 }
@@ -127,10 +129,11 @@ fn progress_default(item: &ProgressData) -> ProgressToSend {
         }
         _ => unreachable!(),
     };
-    let (all_progress, current_progress) = common_get_data(item);
+    let (all_progress, current_progress, current_progress_size) = common_get_data(item);
     ProgressToSend {
         all_progress,
         current_progress,
+        current_progress_size,
         step_name: step_name.into(),
     }
 }
@@ -144,17 +147,24 @@ fn no_current_stage_get_data(item: &ProgressData) -> (i32, i32) {
 }
 
 // Used to calculate number of files to check and also to calculate current progress according to number of files to check and checked
-fn common_get_data(item: &ProgressData) -> (i32, i32) {
+fn common_get_data(item: &ProgressData) -> (i32, i32, i32) {
     if item.entries_to_check != 0 {
         let all_stages = (item.current_stage_idx as f64 + item.entries_checked as f64 / item.entries_to_check as f64) / (item.max_stage_idx + 1) as f64;
         let all_stages = all_stages.min(0.99);
 
         let current_stage = item.entries_checked as f64 / item.entries_to_check as f64;
         let current_stage = current_stage.min(0.99);
-        ((all_stages * 100.0) as i32, (current_stage * 100.0) as i32)
+
+        let current_stage_size = if item.bytes_to_check != 0 {
+            ((item.bytes_checked as f64 / item.bytes_to_check as f64).min(0.99) * 100.0) as i32
+        } else {
+            -1
+        };
+
+        ((all_stages * 100.0) as i32, (current_stage * 100.0) as i32, current_stage_size)
     } else {
         let all_stages = (item.current_stage_idx as f64) / (item.max_stage_idx + 1) as f64;
         let all_stages = all_stages.min(0.99);
-        ((all_stages * 100.0) as i32, 0)
+        ((all_stages * 100.0) as i32, 0, -1)
     }
 }

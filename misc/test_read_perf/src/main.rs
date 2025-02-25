@@ -97,38 +97,38 @@ fn main() {
 fn array16(files: &Vec<DuplicateEntry>) {
     files.into_par_iter().for_each(|f| {
         let mut buffer = [0u8; 16 * 1024];
-        let _ = hash_calculation(&mut buffer, &f, HashType::Blake3, u64::MAX);
+        let _ = hash_calculation(&mut buffer, &f, HashType::Blake3, Arc::default(), None);
     });
 }
 fn array256(files: &Vec<DuplicateEntry>) {
     files.into_par_iter().for_each(|f| {
         let mut buffer = [0u8; 256 * 1024];
-        let _ = hash_calculation(&mut buffer, &f, HashType::Blake3, u64::MAX);
+        let _ = hash_calculation(&mut buffer, &f, HashType::Blake3, Arc::default(), None);
     });
 }
 fn vec16(files: &Vec<DuplicateEntry>) {
     files.into_par_iter().for_each(|f| {
         let mut buffer = vec![0u8; 16 * 1024];
-        let _ = hash_calculation(&mut buffer, &f, HashType::Blake3, u64::MAX);
+        let _ = hash_calculation(&mut buffer, &f, HashType::Blake3, Arc::default(), None);
     });
 }
 fn vec1024(files: &Vec<DuplicateEntry>) {
     files.into_par_iter().for_each(|f| {
         let mut buffer = vec![0u8; 1024 * 1024];
-        let _ = hash_calculation(&mut buffer, &f, HashType::Blake3, u64::MAX);
+        let _ = hash_calculation(&mut buffer, &f, HashType::Blake3, Arc::default(), None);
     });
 }
 fn vec1024_locking(files: &Vec<DuplicateEntry>) {
     files.into_par_iter().for_each(|f| {
         let _lock = GLOBAL_HDD_LOCK.lock().unwrap();
         let mut buffer = vec![0u8; 1024 * 1024];
-        let _ = hash_calculation(&mut buffer, &f, HashType::Blake3, u64::MAX);
+        let _ = hash_calculation(&mut buffer, &f, HashType::Blake3, Arc::default(), None);
     });
 }
 fn vec1024_thread(files: &Vec<DuplicateEntry>) {
     files.into_par_iter().for_each(|f| {
         BUFFER.with(|buffer| {
-            let _ = hash_calculation(&mut buffer.borrow_mut(), &f, HashType::Blake3, u64::MAX, Arc::default(), None);
+            let _ = hash_calculation(&mut buffer.borrow_mut(), &f, HashType::Blake3, Arc::default(), None);
         });
     });
 }

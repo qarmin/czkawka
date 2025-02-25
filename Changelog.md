@@ -3,9 +3,11 @@
 ### Breaking changes
 - Video cache is now incompatible with previous versions, and needs to be regenerated
 - Image cache, due using by now exif orientation, is incompatible with previous versions, and needs to be regenerated
+- Duplicate cache, due using smaller prehash size, is incompatible with previous versions, and needs to be regenerated
+
 
 ### Known regressions
-- Crashes when using similar videos(when hashing some broken video files)
+- Rarely crashes when using similar videos tool with some broken videos
 
 ### CI
 
@@ -20,9 +22,11 @@
 - Added size progress in duplicate mode - [#1458](https://github.com/qarmin/czkawka/pull/1458)
 - Ability to stop calculating hash of bigger files in the middle of process - [#1458](https://github.com/qarmin/czkawka/pull/1458)
 - Using multithreading, to filter out hard links - [#1458](https://github.com/qarmin/czkawka/pull/1458)
+- Decreased prehash read file size to max 4k bytes - [#1458](https://github.com/qarmin/czkawka/pull/1458) 
 
 ### Krokiet
 - Changed default tab to duplicate files - [#1368](https://github.com/qarmin/czkawka/pull/1368)
+- Progress bar in duplicate mode, now shows progress of processed bytes, not files - [#1458](https://github.com/qarmin/czkawka/pull/1458)
 
 ### GTK GUI
 - Added window icon in wayland - [#1400](https://github.com/qarmin/czkawka/pull/1400)
