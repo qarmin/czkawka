@@ -9,7 +9,7 @@ use bk_tree::BKTree;
 use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
 use hamming_bitwise_fast::hamming_bitwise_fast;
-use humansize::{format_size, BINARY};
+use humansize::{BINARY, format_size};
 use image::GenericImageView;
 use image_hasher::{FilterType, HashAlg, HasherConfig};
 use log::debug;
@@ -17,11 +17,11 @@ use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::common::{
-    check_if_stop_received, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, WorkContinueStatus, HEIC_EXTENSIONS,
-    IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, JXL_IMAGE_EXTENSIONS, RAW_IMAGE_EXTENSIONS,
+    HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, JXL_IMAGE_EXTENSIONS, RAW_IMAGE_EXTENSIONS, WorkContinueStatus, check_if_stop_received, delete_files_custom,
+    prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads,
 };
 use crate::common_cache::{extract_loaded_cache, get_similar_images_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
-use crate::common_dir_traversal::{inode, take_1_per_inode, DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
+use crate::common_dir_traversal::{DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType, inode, take_1_per_inode};
 use crate::common_image::get_dynamic_image_from_path;
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::{DebugPrint, PrintResults, ResultEntry};
@@ -203,7 +203,7 @@ impl SimilarImages {
         match result {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
                 self.images_to_check = grouped_file_entries
-                    .into_iter()
+                    .into_par_iter()
                     .flat_map(if self.get_params().ignore_hard_links { |(_, fes)| fes } else { take_1_per_inode })
                     .map(|fe| {
                         let fe_str = fe.path.to_string_lossy().to_string();
@@ -212,6 +212,7 @@ impl SimilarImages {
                         (fe_str, image_entry)
                     })
                     .collect();
+
                 self.common_data.text_messages.warnings.extend(warnings);
                 debug!("check_files - Found {} image files.", self.images_to_check.len());
                 WorkContinueStatus::Continue
@@ -273,22 +274,24 @@ impl SimilarImages {
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.hash_images_load_cache();
 
-        let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) = prepare_thread_handler_common(
+        let (progress_thread_handle, progress_thread_run, items_counter, check_was_stopped, size_counter) = prepare_thread_handler_common(
             progress_sender,
             CurrentStage::SimilarImagesCalculatingHashes,
             non_cached_files_to_check.len(),
             self.get_test_type(),
+            non_cached_files_to_check.values().map(|entry| entry.size).sum(),
         );
 
         debug!("hash_images - start hashing images");
         let (mut vec_file_entry, errors): (Vec<ImagesEntry>, Vec<String>) = non_cached_files_to_check
             .into_par_iter()
             .map(|(_s, mut file_entry)| {
-                atomic_counter.fetch_add(1, Ordering::Relaxed);
+                items_counter.fetch_add(1, Ordering::Relaxed);
                 if check_if_stop_received(stop_receiver) {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
+                size_counter.fetch_add(file_entry.size, Ordering::Relaxed);
                 if let Err(e) = self.collect_image_file_entry(&mut file_entry) {
                     return Some(Err(e));
                 }
@@ -452,8 +455,8 @@ impl SimilarImages {
         // Don't use hashes with multiple images in bktree, because they will always be master of group and cannot be find by other hashes
         let (base_hashes, hashes_with_multiple_images) = self.split_hashes(all_hashed_images);
 
-        let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, CurrentStage::SimilarImagesComparingHashes, base_hashes.len(), self.get_test_type());
+        let (progress_thread_handle, progress_thread_run, items_counter, check_was_stopped, _size_counter) =
+            prepare_thread_handler_common(progress_sender, CurrentStage::SimilarImagesComparingHashes, base_hashes.len(), self.get_test_type(), 0);
 
         let mut hashes_parents: HashMap<ImHash, u32> = Default::default(); // Hashes used as parent (hash, children_number_of_hash)
         let mut hashes_similarity: HashMap<ImHash, (ImHash, u32)> = Default::default(); // Hashes used as child, (parent_hash, similarity)
@@ -465,7 +468,7 @@ impl SimilarImages {
             let partial_results = chunk
                 .into_par_iter()
                 .map(|hash_to_check| {
-                    atomic_counter.fetch_add(1, Ordering::Relaxed);
+                    items_counter.fetch_add(1, Ordering::Relaxed);
 
                     if check_if_stop_received(stop_receiver) {
                         check_was_stopped.store(true, Ordering::Relaxed);

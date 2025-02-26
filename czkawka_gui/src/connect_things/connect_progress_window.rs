@@ -7,14 +7,15 @@ use crossbeam_channel::Receiver;
 use czkawka_core::common_dir_traversal::ToolType;
 use czkawka_core::progress_data::{CurrentStage, ProgressData};
 use glib::MainContext;
-use gtk4::prelude::*;
 use gtk4::ProgressBar;
+use gtk4::prelude::*;
+use humansize::{BINARY, format_size};
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::localizer_core::generate_translation_hashmap;
-use crate::taskbar_progress::tbp_flags::TBPF_INDETERMINATE;
 use crate::taskbar_progress::TaskbarProgress;
+use crate::taskbar_progress::tbp_flags::TBPF_INDETERMINATE;
 
 #[allow(clippy::too_many_arguments)]
 pub fn connect_progress_window(gui_data: &GuiData, progress_receiver: Receiver<ProgressData>) {
@@ -156,14 +157,21 @@ fn progress_default(gui_data: &GuiData, item: &ProgressData) {
 }
 
 fn common_set_data(item: &ProgressData, progress_bar_all_stages: &ProgressBar, progress_bar_current_stage: &ProgressBar, taskbar_state: &Rc<RefCell<TaskbarProgress>>) {
+    let (current_items_checked, current_stage_items_to_check) = if item.bytes_to_check > 0 {
+        (item.bytes_checked, item.bytes_to_check)
+    } else {
+        (item.entries_checked as u64, item.entries_to_check as u64)
+    };
+
     if item.entries_to_check != 0 {
-        let all_stages = (item.current_stage_idx as f64 + item.entries_checked as f64 / item.entries_to_check as f64) / (item.max_stage_idx + 1) as f64;
+        let all_stages = (item.current_stage_idx as f64 + current_items_checked as f64 / current_stage_items_to_check as f64) / (item.max_stage_idx + 1) as f64;
         let all_stages = all_stages.min(0.99);
         progress_bar_all_stages.set_fraction(all_stages);
-        progress_bar_current_stage.set_fraction(item.entries_checked as f64 / item.entries_to_check as f64);
+        progress_bar_current_stage.set_fraction(current_items_checked as f64 / current_stage_items_to_check as f64);
+
         taskbar_state.borrow().set_progress_value(
-            ((item.current_stage_idx as usize) * item.entries_to_check + item.entries_checked) as u64,
-            item.entries_to_check as u64 * (item.max_stage_idx + 1) as u64,
+            (item.current_stage_idx as u64) * current_stage_items_to_check + current_items_checked,
+            current_stage_items_to_check * (item.max_stage_idx + 1) as u64,
         );
     } else {
         let all_stages = (item.current_stage_idx as f64) / (item.max_stage_idx + 1) as f64;
@@ -179,5 +187,10 @@ fn file_number_tm(item: &ProgressData) -> HashMap<&'static str, String> {
 }
 
 fn progress_ratio_tm(item: &ProgressData) -> HashMap<&'static str, String> {
-    generate_translation_hashmap(vec![("file_checked", item.entries_checked.to_string()), ("all_files", item.entries_to_check.to_string())])
+    let mut v = vec![("file_checked", item.entries_checked.to_string()), ("all_files", item.entries_to_check.to_string())];
+    if item.bytes_to_check != 0 {
+        v.push(("data_checked", format_size(item.bytes_checked, BINARY)));
+        v.push(("all_data", format_size(item.bytes_to_check, BINARY)));
+    }
+    generate_translation_hashmap(v)
 }

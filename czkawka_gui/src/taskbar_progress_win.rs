@@ -5,13 +5,13 @@ use std::cell::RefCell;
 use std::convert::From;
 use std::ptr;
 
+use winapi::Interface;
 use winapi::ctypes::c_void;
 use winapi::shared::windef::HWND;
 use winapi::shared::winerror::{E_POINTER, S_OK};
 use winapi::shared::wtypesbase::CLSCTX_INPROC_SERVER;
 use winapi::um::shobjidl_core::{CLSID_TaskbarList, ITaskbarList3, TBPFLAG};
 use winapi::um::{combaseapi, objbase, winuser};
-use winapi::Interface;
 
 pub mod tbp_flags {
     pub use winapi::um::shobjidl_core::{TBPF_ERROR, TBPF_INDETERMINATE, TBPF_NOPROGRESS, TBPF_NORMAL, TBPF_PAUSED};

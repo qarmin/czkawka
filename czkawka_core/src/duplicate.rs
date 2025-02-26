@@ -8,18 +8,20 @@ use std::io::{self, Error, ErrorKind};
 #[cfg(target_family = "unix")]
 use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
-use std::sync::atomic::Ordering;
+use std::sync::Arc;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::{fs, mem};
 
 use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
-use humansize::{format_size, BINARY};
+use humansize::{BINARY, format_size};
 use log::debug;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
+use static_assertions::const_assert;
 use xxhash_rust::xxh3::Xxh3;
 
-use crate::common::{check_if_stop_received, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, WorkContinueStatus};
+use crate::common::{WorkContinueStatus, check_if_stop_received, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crate::common_cache::{get_duplicate_cache_file, load_cache_from_file_generalized_by_size, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
@@ -28,8 +30,11 @@ use crate::progress_data::{CurrentStage, ProgressData};
 
 const TEMP_HARDLINK_FILE: &str = "rzeczek.rxrxrxl";
 
+pub const PREHASHING_BUFFER_SIZE: u64 = 1024 * 8;
+pub const THREAD_BUFFER_SIZE: usize = 2 * 1024 * 1024;
+
 thread_local! {
-    static THREAD_BUFFER: RefCell<Vec<u8>> = RefCell::new(vec![0u8; 1024 * 2024]);
+    static THREAD_BUFFER: RefCell<Vec<u8>> = RefCell::new(vec![0u8; THREAD_BUFFER_SIZE]);
 }
 
 #[derive(PartialEq, Eq, Clone, Debug, Copy, Default)]
@@ -403,18 +408,22 @@ impl DuplicateFinder {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
                 self.common_data.text_messages.warnings.extend(warnings);
 
-                for (size, vec) in grouped_file_entries {
-                    if vec.len() <= 1 {
-                        continue;
-                    }
+                self.files_with_identical_size = grouped_file_entries
+                    .into_par_iter()
+                    .filter_map(|(size, vec)| {
+                        if vec.len() <= 1 {
+                            return None;
+                        }
 
-                    let vector = if self.get_params().ignore_hard_links { filter_hard_links(&vec) } else { vec };
+                        let vector = if self.get_params().ignore_hard_links { filter_hard_links(&vec) } else { vec };
 
-                    if vector.len() > 1 {
-                        self.files_with_identical_size
-                            .insert(size, vector.into_iter().map(FileEntry::into_duplicate_entry).collect());
-                    }
-                }
+                        if vector.len() > 1 {
+                            Some((size, vector.into_iter().map(FileEntry::into_duplicate_entry).collect()))
+                        } else {
+                            None
+                        }
+                    })
+                    .collect();
 
                 self.filter_reference_folders_by_size();
                 self.calculate_size_stats();
@@ -556,8 +565,8 @@ impl DuplicateFinder {
         }
 
         let check_type = self.get_params().hash_type;
-        let (progress_thread_handle, progress_thread_run, _atomic_counter, _check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, CurrentStage::DuplicatePreHashCacheLoading, 0, self.get_test_type());
+        let (progress_thread_handle, progress_thread_run, _items_counter, _check_was_stopped, _size_counter) =
+            prepare_thread_handler_common(progress_sender, CurrentStage::DuplicatePreHashCacheLoading, 0, self.get_test_type(), 0);
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.prehash_load_cache_at_start();
 
@@ -565,11 +574,15 @@ impl DuplicateFinder {
         if check_if_stop_received(stop_receiver) {
             return WorkContinueStatus::Stop;
         }
-        let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) = prepare_thread_handler_common(
+        let (progress_thread_handle, progress_thread_run, items_counter, check_was_stopped, size_counter) = prepare_thread_handler_common(
             progress_sender,
             CurrentStage::DuplicatePreHashing,
             non_cached_files_to_check.values().map(Vec::len).sum(),
             self.get_test_type(),
+            non_cached_files_to_check
+                .iter()
+                .map(|(size, items)| items.len() as u64 * PREHASHING_BUFFER_SIZE.min(*size))
+                .sum::<u64>(),
         );
 
         debug!("Starting calculating prehash");
@@ -580,34 +593,41 @@ impl DuplicateFinder {
                 let mut hashmap_with_hash: BTreeMap<String, Vec<DuplicateEntry>> = Default::default();
                 let mut errors: Vec<String> = Vec::new();
 
-                atomic_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
+                items_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
                 if check_if_stop_received(stop_receiver) {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
                 THREAD_BUFFER.with_borrow_mut(|buffer| {
                     for mut file_entry in vec_file_entry {
-                        match hash_calculation(buffer, &file_entry, check_type, 1024 * 32) {
+                        match hash_calculation_limit(buffer, &file_entry, check_type, PREHASHING_BUFFER_SIZE, &size_counter) {
                             Ok(hash_string) => {
                                 file_entry.hash = hash_string.clone();
                                 hashmap_with_hash.entry(hash_string).or_default().push(file_entry);
                             }
                             Err(s) => errors.push(s),
                         }
+                        if check_if_stop_received(stop_receiver) {
+                            check_was_stopped.store(true, Ordering::Relaxed);
+                            return None;
+                        }
                     }
-                });
+
+                    Some(())
+                })?;
 
                 Some((size, hashmap_with_hash, errors))
             })
             .while_some()
             .collect();
+
         debug!("Completed calculating prehash");
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
 
         // Saving into cache
-        let (progress_thread_handle, progress_thread_run, _atomic_counter, _check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, CurrentStage::DuplicatePreHashCacheSaving, 0, self.get_test_type());
+        let (progress_thread_handle, progress_thread_run, _items_counter, _check_was_stopped, _size_counter) =
+            prepare_thread_handler_common(progress_sender, CurrentStage::DuplicatePreHashCacheSaving, 0, self.get_test_type(), 0);
 
         // Add data from cache
         for (size, vec_file_entry) in &records_already_cached {
@@ -769,8 +789,8 @@ impl DuplicateFinder {
             return WorkContinueStatus::Continue;
         }
 
-        let (progress_thread_handle, progress_thread_run, _atomic_counter, _check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, CurrentStage::DuplicateCacheLoading, 0, self.get_test_type());
+        let (progress_thread_handle, progress_thread_run, _items_counter, _check_was_stopped, _size_counter) =
+            prepare_thread_handler_common(progress_sender, CurrentStage::DuplicateCacheLoading, 0, self.get_test_type(), 0);
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.full_hashing_load_cache_at_start(pre_checked_map);
 
@@ -779,11 +799,12 @@ impl DuplicateFinder {
             return WorkContinueStatus::Stop;
         }
 
-        let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) = prepare_thread_handler_common(
+        let (progress_thread_handle, progress_thread_run, items_counter, check_was_stopped, size_counter) = prepare_thread_handler_common(
             progress_sender,
             CurrentStage::DuplicateFullHashing,
             non_cached_files_to_check.values().map(Vec::len).sum(),
             self.get_test_type(),
+            non_cached_files_to_check.iter().map(|(size, items)| (*size) * items.len() as u64).sum::<u64>(),
         );
 
         let check_type = self.get_params().hash_type;
@@ -791,31 +812,32 @@ impl DuplicateFinder {
         let mut full_hash_results: Vec<(u64, BTreeMap<String, Vec<DuplicateEntry>>, Vec<String>)> = non_cached_files_to_check
             .into_par_iter()
             .map(|(size, vec_file_entry)| {
+                let size_counter = size_counter.clone();
                 let mut hashmap_with_hash: BTreeMap<String, Vec<DuplicateEntry>> = Default::default();
                 let mut errors: Vec<String> = Vec::new();
-                let mut exam_stopped = false;
-                atomic_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
+                items_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
 
                 THREAD_BUFFER.with_borrow_mut(|buffer| {
                     for mut file_entry in vec_file_entry {
                         if check_if_stop_received(stop_receiver) {
                             check_was_stopped.store(true, Ordering::Relaxed);
-                            exam_stopped = true;
-                            break;
+                            return None;
                         }
 
-                        match hash_calculation(buffer, &file_entry, check_type, u64::MAX) {
+                        match hash_calculation(buffer, &file_entry, check_type, &size_counter, stop_receiver) {
                             Ok(hash_string) => {
-                                file_entry.hash = hash_string.clone();
-                                hashmap_with_hash.entry(hash_string.clone()).or_default().push(file_entry);
+                                if let Some(hash_string) = hash_string {
+                                    file_entry.hash = hash_string.clone();
+                                    hashmap_with_hash.entry(hash_string).or_default().push(file_entry);
+                                } else {
+                                    return None;
+                                }
                             }
                             Err(s) => errors.push(s),
                         }
                     }
-                });
-                if exam_stopped {
-                    return None;
-                }
+                    Some(())
+                })?;
 
                 Some((size, hashmap_with_hash, errors))
             })
@@ -825,8 +847,8 @@ impl DuplicateFinder {
 
         // Even if clicked stop, save items to cache and show results
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-        let (progress_thread_handle, progress_thread_run, _atomic_counter, _check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, CurrentStage::DuplicateCacheSaving, 0, self.get_test_type());
+        let (progress_thread_handle, progress_thread_run, _items_counter, _check_was_stopped, _size_counter) =
+            prepare_thread_handler_common(progress_sender, CurrentStage::DuplicateCacheSaving, 0, self.get_test_type(), 0);
 
         self.full_hashing_save_cache_at_exit(records_already_cached, &mut full_hash_results, loaded_hash_map);
 
@@ -1300,13 +1322,45 @@ pub trait MyHasher {
     fn finalize(&self) -> String;
 }
 
-pub fn hash_calculation(buffer: &mut [u8], file_entry: &DuplicateEntry, hash_type: HashType, limit: u64) -> Result<String, String> {
+pub fn hash_calculation_limit(buffer: &mut [u8], file_entry: &DuplicateEntry, hash_type: HashType, limit: u64, size_counter: &Arc<AtomicU64>) -> Result<String, String> {
+    // This function is used only to calculate hash of file with limit
+    // We must ensure that buffer is big enough to store all data
+    // We don't need to check that each time
+    const_assert!(PREHASHING_BUFFER_SIZE <= THREAD_BUFFER_SIZE as u64);
+
     let mut file_handler = match File::open(&file_entry.path) {
         Ok(t) => t,
-        Err(e) => return Err(format!("Unable to check hash of file {:?}, reason {e}", file_entry.path)),
+        Err(e) => {
+            size_counter.fetch_add(limit, Ordering::Relaxed);
+            return Err(format!("Unable to check hash of file {:?}, reason {e}", file_entry.path));
+        }
     };
     let hasher = &mut *hash_type.hasher();
-    let mut current_file_read_bytes: u64 = 0;
+    let n = match file_handler.read(&mut buffer[..limit as usize]) {
+        Ok(t) => t,
+        Err(e) => return Err(format!("Error happened when checking hash of file {:?}, reason {}", file_entry.path, e)),
+    };
+
+    hasher.update(&buffer[..n]);
+    size_counter.fetch_add(n as u64, Ordering::Relaxed);
+    Ok(hasher.finalize())
+}
+
+pub fn hash_calculation(
+    buffer: &mut [u8],
+    file_entry: &DuplicateEntry,
+    hash_type: HashType,
+    size_counter: &Arc<AtomicU64>,
+    stop_receiver: Option<&Receiver<()>>,
+) -> Result<Option<String>, String> {
+    let mut file_handler = match File::open(&file_entry.path) {
+        Ok(t) => t,
+        Err(e) => {
+            size_counter.fetch_add(file_entry.size, Ordering::Relaxed);
+            return Err(format!("Unable to check hash of file {:?}, reason {e}", file_entry.path));
+        }
+    };
+    let hasher = &mut *hash_type.hasher();
     loop {
         let n = match file_handler.read(buffer) {
             Ok(0) => break,
@@ -1314,14 +1368,13 @@ pub fn hash_calculation(buffer: &mut [u8], file_entry: &DuplicateEntry, hash_typ
             Err(e) => return Err(format!("Error happened when checking hash of file {:?}, reason {}", file_entry.path, e)),
         };
 
-        current_file_read_bytes += n as u64;
         hasher.update(&buffer[..n]);
-
-        if current_file_read_bytes >= limit {
-            break;
+        size_counter.fetch_add(n as u64, Ordering::Relaxed);
+        if check_if_stop_received(stop_receiver) {
+            return Ok(None);
         }
     }
-    Ok(hasher.finalize())
+    Ok(Some(hasher.finalize()))
 }
 
 impl MyHasher for blake3::Hasher {
@@ -1365,7 +1418,7 @@ impl CommonData for DuplicateFinder {
 
 #[cfg(test)]
 mod tests {
-    use std::fs::{read_dir, File, Metadata};
+    use std::fs::{File, Metadata, read_dir};
     use std::io;
     #[cfg(target_family = "windows")]
     use std::os::fs::MetadataExt;
@@ -1462,26 +1515,38 @@ mod tests {
         let mut buf = [0u8; 1 << 10];
         let src = dir.path().join("a");
         let mut file = File::create(&src)?;
-        file.write_all(b"aa")?;
+        file.write_all(b"aaAAAAAAAAAAAAAAFFFFFFFFFFFFFFFFFFFFGGGGGGGGG")?;
         let e = DuplicateEntry { path: src, ..Default::default() };
-        let r = hash_calculation(&mut buf, &e, HashType::Blake3, 0).expect("hash_calculation failed");
+        let size_counter = Arc::new(AtomicU64::new(0));
+        let r = hash_calculation(&mut buf, &e, HashType::Blake3, &size_counter, None)
+            .expect("hash_calculation failed")
+            .expect("hash_calculation returned None");
         assert!(!r.is_empty());
+        assert_eq!(size_counter.load(Ordering::Relaxed), 45);
         Ok(())
     }
 
     #[test]
     fn test_hash_calculation_limit() -> io::Result<()> {
         let dir = tempfile::Builder::new().tempdir()?;
-        let mut buf = [0u8; 1];
+        let mut buf = [0u8; 1000];
         let src = dir.path().join("a");
         let mut file = File::create(&src)?;
         file.write_all(b"aa")?;
         let e = DuplicateEntry { path: src, ..Default::default() };
-        let r1 = hash_calculation(&mut buf, &e, HashType::Blake3, 1).expect("hash_calculation failed");
-        let r2 = hash_calculation(&mut buf, &e, HashType::Blake3, 2).expect("hash_calculation failed");
-        let r3 = hash_calculation(&mut buf, &e, HashType::Blake3, u64::MAX).expect("hash_calculation failed");
+        let size_counter_1 = Arc::new(AtomicU64::new(0));
+        let size_counter_2 = Arc::new(AtomicU64::new(0));
+        let size_counter_3 = Arc::new(AtomicU64::new(0));
+        let r1 = hash_calculation_limit(&mut buf, &e, HashType::Blake3, 1, &size_counter_1).expect("hash_calculation failed");
+        let r2 = hash_calculation_limit(&mut buf, &e, HashType::Blake3, 2, &size_counter_2).expect("hash_calculation failed");
+        let r3 = hash_calculation_limit(&mut buf, &e, HashType::Blake3, 1000, &size_counter_3).expect("hash_calculation failed");
         assert_ne!(r1, r2);
         assert_eq!(r2, r3);
+
+        assert_eq!(1, size_counter_1.load(Ordering::Relaxed));
+        assert_eq!(2, size_counter_2.load(Ordering::Relaxed));
+        assert_eq!(2, size_counter_3.load(Ordering::Relaxed));
+
         Ok(())
     }
 
@@ -1491,7 +1556,7 @@ mod tests {
         let mut buf = [0u8; 1 << 10];
         let src = dir.path().join("a");
         let e = DuplicateEntry { path: src, ..Default::default() };
-        let r = hash_calculation(&mut buf, &e, HashType::Blake3, 0).expect_err("hash_calculation succeeded");
+        let r = hash_calculation(&mut buf, &e, HashType::Blake3, &Arc::default(), None).expect_err("hash_calculation succeeded");
         assert!(!r.is_empty());
         Ok(())
     }

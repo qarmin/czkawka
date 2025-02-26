@@ -19,7 +19,7 @@ use crate::gui_structs::gui_settings::GuiSettings;
 use crate::gui_structs::gui_upper_notebook::GuiUpperNotebook;
 use crate::help_combo_box::DUPLICATES_CHECK_METHOD_COMBO_BOX;
 use crate::help_functions::*;
-use crate::language_functions::{get_language_from_combo_box_text, LANGUAGES_ALL};
+use crate::language_functions::{LANGUAGES_ALL, get_language_from_combo_box_text};
 
 const SAVE_FILE_NAME: &str = "czkawka_gui_config_4.txt";
 
@@ -559,27 +559,27 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
     // Comboboxes main notebook
     saving_struct.save_var(
         hashmap_ls[&LoadText::ComboBoxDuplicateHashType].clone(),
-        &main_notebook.combo_box_duplicate_hash_type.active().unwrap_or(0),
+        &main_notebook.combo_box_duplicate_hash_type.active().unwrap_or_default(),
     );
     saving_struct.save_var(
         hashmap_ls[&LoadText::ComboBoxDuplicateCheckMethod].clone(),
-        &main_notebook.combo_box_duplicate_check_method.active().unwrap_or(0),
+        &main_notebook.combo_box_duplicate_check_method.active().unwrap_or_default(),
     );
     saving_struct.save_var(
         hashmap_ls[&LoadText::ComboBoxImageResizeAlgorithm].clone(),
-        &main_notebook.combo_box_image_resize_algorithm.active().unwrap_or(0),
+        &main_notebook.combo_box_image_resize_algorithm.active().unwrap_or_default(),
     );
     saving_struct.save_var(
         hashmap_ls[&LoadText::ComboBoxImageHashType].clone(),
-        &main_notebook.combo_box_image_hash_algorithm.active().unwrap_or(0),
+        &main_notebook.combo_box_image_hash_algorithm.active().unwrap_or_default(),
     );
     saving_struct.save_var(
         hashmap_ls[&LoadText::ComboBoxImageHashSize].clone(),
-        &main_notebook.combo_box_image_hash_size.active().unwrap_or(0),
+        &main_notebook.combo_box_image_hash_size.active().unwrap_or_default(),
     );
     saving_struct.save_var(
         hashmap_ls[&LoadText::ComboBoxBigFiles].clone(),
-        &main_notebook.combo_box_big_files_mode.active().unwrap_or(0),
+        &main_notebook.combo_box_big_files_mode.active().unwrap_or_default(),
     );
 
     // Other2

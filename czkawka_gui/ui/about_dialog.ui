@@ -1,12 +1,14 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- Created with Cambalache 0.92.0 -->
+<!-- Created with Cambalache 0.94.1 -->
 <interface>
   <!-- interface-name about_dialog.ui -->
   <requires lib="gtk" version="4.6"/>
   <object class="GtkAboutDialog" id="about_dialog">
     <property name="comments" translatable="yes">2020 - 2025
 Rafał Mikrut (qarmin) and contributors
-This program is free to use and will always be.</property>
+This program is free to use and will always be.
+App is now in maintenance mode, so check Krokiet, the sucessor of Czkawka.
+</property>
     <property name="license-type">mit-x11</property>
     <property name="logo-icon-name">help-about-symbolic</property>
     <property name="program-name">Czkawka</property>

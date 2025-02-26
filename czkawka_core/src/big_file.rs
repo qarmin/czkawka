@@ -3,7 +3,7 @@ use std::io::Write;
 
 use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
-use humansize::{format_size, BINARY};
+use humansize::{BINARY, format_size};
 use log::debug;
 use rayon::prelude::*;
 

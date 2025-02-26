@@ -15,9 +15,10 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Setup rust version
-        run: rustup default stable
+        run: rustup default 1.85.0
 
       - name: Enable LTO
+        if: ${{ github.ref == 'refs/heads/master' }}
         run: sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
 
       - name: Build Release Krokiet
@@ -50,9 +51,10 @@ jobs:
         run: sudo apt update || true; sudo apt install libheif-dev libraw-dev -y
 
       - name: Setup rust version
-        run: rustup default stable
+        run: rustup default 1.85.0
 
       - name: Enable LTO
+        if: ${{ github.ref == 'refs/heads/master' }}
         run: sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
 
       - name: Build Release Krokiet heif
@@ -85,9 +87,10 @@ jobs:
         run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev -y
 
       - name: Setup rust version
-        run: rustup default stable
+        run: rustup default 1.85.0
 
       - name: Enable LTO
+        if: ${{ github.ref == 'refs/heads/master' }}
         run: sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
 
       - name: Build Release Heif Libraw
@@ -130,9 +133,10 @@ jobs:
         run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev librsvg2-dev wget fuse libfuse2 desktop-file-utils -y
 
       - name: Setup rust version
-        run: rustup default stable
+        run: rustup default 1.85.0
 
       - name: Enable LTO
+        if: ${{ github.ref == 'refs/heads/master' }}
         run: sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
 
       - name: Build Release
@@ -173,7 +177,9 @@ jobs:
           rm -rf czkawka_gui
           cp target/release/czkawka_gui .
           strip czkawka_gui
-          wget https://github.com/AppImageCommunity/pkg2appimage/releases/download/continuous/pkg2appimage--x86_64.AppImage -O pkg2.appimage
+          wget https://github.com/qarmin/Automated-Fuzzer/releases/download/test/pkg2appimage-1eceb30-x86_64.AppImage -O pkg2.appimage
+          # TODO - official link from below, no longer works and there is no official releases except continuous versions which have no stable version numbering
+          # wget https://github.com/AppImageCommunity/pkg2appimage/releases/download/continuous/pkg2appimage--x86_64.AppImage -O pkg2.appimage
           chmod +x ./pkg2.appimage
           ./pkg2.appimage misc/czkawka-appimage-recipe.yml
           mv out/Czkawka*.AppImage out/czkawka_gui-minimal.AppImage
@@ -205,7 +211,7 @@ jobs:
         run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev librsvg2-dev wget fuse libfuse2 -y xvfb
 
       - name: Setup rust version
-        run: rustup default stable
+        run: rustup default 1.85.0
 
       - name: Test
         run: xvfb-run cargo test

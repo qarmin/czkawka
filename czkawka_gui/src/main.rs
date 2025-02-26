@@ -27,13 +27,13 @@ use connect_things::connect_selection_of_directories::*;
 use connect_things::connect_settings::*;
 use connect_things::connect_show_hide_ui::*;
 use connect_things::connect_similar_image_size_change::*;
-use crossbeam_channel::{unbounded, Receiver, Sender};
+use crossbeam_channel::{Receiver, Sender, unbounded};
 use czkawka_core::common::{get_number_of_threads, print_version_mode, set_number_of_threads, setup_logger};
 use czkawka_core::progress_data::ProgressData;
 use czkawka_core::*;
+use gtk4::Application;
 use gtk4::gio::ApplicationFlags;
 use gtk4::prelude::*;
-use gtk4::Application;
 use gui_structs::gui_data::*;
 use log::info;
 

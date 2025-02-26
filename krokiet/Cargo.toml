@@ -3,7 +3,7 @@ name = "krokiet"
 version = "8.0.0"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2021"
-rust-version = "1.82.0"
+rust-version = "1.85.0"
 description = "Slint frontend of Czkawka Core"
 license = "GPL-3.0-only"
 homepage = "https://github.com/qarmin/czkawka"
@@ -11,12 +11,10 @@ repository = "https://github.com/qarmin/czkawka"
 build = "build.rs"
 
 [dependencies]
-rand = "0.8"
 czkawka_core = { version = "8.0.0", path = "../czkawka_core" }
 chrono = "0.4.38"
 open = "5.3"
 crossbeam-channel = "0.5"
-handsome_logger = "0.8"
 rfd = { version = "0.15", default-features = false, features = ["xdg-portal", "async-std"] }
 home = "0.5"
 log = "0.4.22"

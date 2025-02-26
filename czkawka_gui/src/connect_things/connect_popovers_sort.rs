@@ -230,4 +230,59 @@ mod test {
             list_store.iter_next(&curr_iter);
         }
     }
+
+    // TODO - This test uncovers a bug in the code, so it is disabled for now, with sort button
+    // #[gtk4::test]
+    // pub fn _fuzzer_test() {
+    //     for _ in 0..10000 {
+    //         let columns_types: &[Type] = &[Type::BOOL, Type::STRING];
+    //         let list_store = gtk4::ListStore::new(columns_types);
+    //         let tree_view = TreeView::builder().model(&list_store).build();
+    //         let popover = Popover::new();
+    //
+    //         let first_row: &[(u32, &dyn ToValue)] = &[(0, &true), (1, &"AAA")];
+    //         list_store.set(&list_store.append(), first_row);
+    //
+    //         let mut since_last_header = 0;
+    //
+    //         (0..(random::<u32>() % 10 + 5)).for_each(|_| {
+    //             let bool_val = if since_last_header < 2 {
+    //                 since_last_header += 1;
+    //                 false
+    //             } else {
+    //                 since_last_header = 0;
+    //                 random()
+    //             };
+    //             let string_val = rand::random::<u32>().to_string();
+    //             let a: Vec<(u32, &dyn ToValue)> = vec![(0, &bool_val), (1, &string_val)];
+    //
+    //             list_store.set(&list_store.append(), &a);
+    //         });
+    //
+    //         if since_last_header < 2 {
+    //             // This is invalid, and should be vec![(0, &false), (1, &"AAA")]
+    //             // but this triggers the bug
+    //             let a: Vec<(u32, &dyn ToValue)> = vec![(0, &true), (1, &"AAA")];
+    //             list_store.set(&list_store.append(), &a);
+    //             let b: Vec<(u32, &dyn ToValue)> = vec![(0, &false), (1, &"BBB")];
+    //             list_store.set(&list_store.append(), &b);
+    //         }
+    //
+    //         print_two_items_model(&list_store);
+    //
+    //         popover_sort_general::<String>(&popover, &tree_view, 1, 0);
+    //     }
+    // }
+    //
+    // fn print_two_items_model(model: &gtk4::ListStore) {
+    //     let iter = model.iter_first().expect("Failed to get first iter");
+    //     loop {
+    //         let bool_val = model.get::<bool>(&iter, 0);
+    //         let string_val = model.get::<String>(&iter, 1);
+    //         println!("{bool_val} {string_val}");
+    //         if !model.iter_next(&iter) {
+    //             break;
+    //         }
+    //     }
+    // }
 }

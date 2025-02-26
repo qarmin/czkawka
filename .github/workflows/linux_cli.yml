@@ -18,9 +18,10 @@ jobs:
         run: sudo apt update || true; sudo apt install libheif-dev libraw-dev ffmpeg -y
 
       - name: Setup rust version
-        run: rustup default stable
+        run: rustup default 1.85.0
 
       - name: Enable LTO
+        if: ${{ github.ref == 'refs/heads/master' }}
         run: sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
 
       - name: Build Release with fast_image_resize
