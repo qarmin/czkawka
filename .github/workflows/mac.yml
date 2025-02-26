@@ -107,7 +107,7 @@ jobs:
           token: ${{ secrets.PAT_REPOSITORY }}
 
   macos_arm:
-    runs-on: macos-14-xlarge
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
 
