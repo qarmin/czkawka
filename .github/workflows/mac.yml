@@ -27,6 +27,7 @@ jobs:
         run: rustup default 1.85.0
 
       - name: Enable LTO
+        if: ${{ github.ref == 'refs/heads/master' }}
         run: sed -i '' 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
 
       - name: Build Release
@@ -124,6 +125,7 @@ jobs:
         run: rustup default 1.85.0
 
       - name: Enable LTO
+        if: ${{ github.ref == 'refs/heads/master' }}
         run: sed -i '' 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
 
       - name: Build Release

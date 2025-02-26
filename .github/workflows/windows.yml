@@ -28,6 +28,7 @@ jobs:
           rustup target add x86_64-pc-windows-gnu
 
       - name: Enable LTO
+        if: ${{ github.ref == 'refs/heads/master' }}
         run: sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
 
       - name: Compile Krokiet
@@ -90,6 +91,7 @@ jobs:
         run: rustup default 1.85.0-x86_64-pc-windows-gnu
 
       - name: Enable LTO
+        if: ${{ github.ref == 'refs/heads/master' }}
         run: sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
 
       - name: Compile Krokiet
