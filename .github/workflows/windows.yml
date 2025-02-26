@@ -139,7 +139,7 @@ jobs:
             windows_krokiet_on_windows_console.exe
           token: ${{ secrets.PAT_REPOSITORY }}
 
-  container_4_10:
+  container_4_12:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/mglolenstine/gtk4-cross:gtk-4.12
