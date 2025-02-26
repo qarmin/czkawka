@@ -5,11 +5,8 @@
 - Image cache, due using by now exif orientation, is incompatible with previous versions, and needs to be regenerated
 - Duplicate cache, due using smaller prehash size, is incompatible with previous versions, and needs to be regenerated
 
-
 ### Known regressions
 - Rarely crashes when using similar videos tool with some broken videos
-
-### CI
 
 ### Core
 - Rotating all images by default, basing on their exif orientation - [#1368](https://github.com/qarmin/czkawka/pull/1368)
@@ -31,6 +28,8 @@
 ### GTK GUI
 - Added window icon in wayland - [#1400](https://github.com/qarmin/czkawka/pull/1400)
 - Disabled broken sort button - [#1400](https://github.com/qarmin/czkawka/pull/1400)
+
+### CI
 
 ### CLI
 
