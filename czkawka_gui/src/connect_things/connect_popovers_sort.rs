@@ -142,7 +142,6 @@ mod test {
     use glib::types::Type;
     use gtk4::prelude::*;
     use gtk4::{Popover, TreeView};
-    use rand::random;
 
     use crate::connect_things::connect_popovers_sort::{popover_sort_general, sort_iters};
 
