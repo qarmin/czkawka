@@ -25,7 +25,7 @@ use jxl_oxide::{JxlImage, PixelFormat};
 use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
 #[cfg(feature = "libraw")]
 use libraw::Processor;
-use log::{LevelFilter, Record, debug, error, info, warn};
+use log::{LevelFilter, Record, debug, error, info, trace, warn};
 use nom_exif::{ExifIter, ExifTag, MediaParser, MediaSource};
 use rawloader::RawLoader;
 use symphonia::core::conv::IntoSample;
@@ -47,6 +47,7 @@ pub fn get_jxl_image(path: &str) -> anyhow::Result<DynamicImage> {
 pub fn get_dynamic_image_from_path(path: &str) -> Result<DynamicImage, String> {
     let path_lower = Path::new(path).extension().unwrap_or_default().to_string_lossy().to_lowercase();
 
+    trace!("decoding file {}", path);
     let res = panic::catch_unwind(|| {
         if HEIC_EXTENSIONS.iter().any(|ext| path_lower.ends_with(ext)) {
             #[cfg(feature = "heif")]
@@ -161,7 +162,7 @@ pub fn get_raw_image(path: impl AsRef<Path> + std::fmt::Debug) -> Result<Dynamic
     times.push(("After creating dynamic image", start_timer.elapsed()));
 
     let str_timer = times.into_iter().map(|(name, time)| format!("{name}: {time:?}")).collect::<Vec<_>>().join(", ");
-    debug!("Loading raw image --- {str_timer}");
+    trace!("Loading raw image --- {str_timer}");
     Ok(res)
 }
 
