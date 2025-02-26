@@ -1,5 +1,5 @@
-use gtk4::prelude::*;
 use gtk4::Builder;
+use gtk4::prelude::*;
 
 use crate::flg;
 

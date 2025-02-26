@@ -6,17 +6,17 @@ use std::sync::atomic::Ordering;
 
 use crossbeam_channel::{Receiver, Sender};
 use fun_time::fun_time;
-use humansize::{format_size, BINARY};
+use humansize::{BINARY, format_size};
 use log::debug;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
-use vid_dup_finder_lib::{ffmpeg_builder, VideoHash};
+use vid_dup_finder_lib::{VideoHash, ffmpeg_builder};
 
 use crate::common::{
-    check_if_stop_received, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, WorkContinueStatus, VIDEO_FILES_EXTENSIONS,
+    VIDEO_FILES_EXTENSIONS, WorkContinueStatus, check_if_stop_received, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads,
 };
 use crate::common_cache::{extract_loaded_cache, get_similar_videos_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
-use crate::common_dir_traversal::{inode, take_1_per_inode, DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
+use crate::common_dir_traversal::{DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType, inode, take_1_per_inode};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::{DebugPrint, PrintResults, ResultEntry};
 use crate::flc;
@@ -158,7 +158,7 @@ impl SimilarVideos {
         match result {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
                 self.videos_to_check = grouped_file_entries
-                    .into_iter()
+                    .into_par_iter()
                     .flat_map(if self.get_params().ignore_hard_links { |(_, fes)| fes } else { take_1_per_inode })
                     .map(|fe| (fe.path.to_string_lossy().to_string(), fe.into_videos_entry()))
                     .collect();
@@ -204,17 +204,18 @@ impl SimilarVideos {
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache_at_start();
 
-        let (progress_thread_handle, progress_thread_run, atomic_counter, check_was_stopped) = prepare_thread_handler_common(
+        let (progress_thread_handle, progress_thread_run, items_counter, check_was_stopped, _size_counter) = prepare_thread_handler_common(
             progress_sender,
             CurrentStage::SimilarVideosCalculatingHashes,
             non_cached_files_to_check.len(),
             self.get_test_type(),
+            0,
         );
 
         let mut vec_file_entry: Vec<VideosEntry> = non_cached_files_to_check
             .par_iter()
             .map(|file_entry| {
-                atomic_counter.fetch_add(1, Ordering::Relaxed);
+                items_counter.fetch_add(1, Ordering::Relaxed);
                 if check_if_stop_received(stop_receiver) {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;

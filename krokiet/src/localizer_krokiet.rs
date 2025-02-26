@@ -21,7 +21,7 @@ macro_rules! flk {
         i18n_embed_fl::fl!($crate::localizer_krokiet::LANGUAGE_LOADER_GUI, $message_id)
     }};
 
-    ($message_id:literal, $($args:expr),*) => {{
+    ($message_id:literal, $($args:expr_2021),*) => {{
         i18n_embed_fl::fl!($crate::localizer_krokiet::LANGUAGE_LOADER_GUI, $message_id, $($args), *)
     }};
 }

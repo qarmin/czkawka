@@ -2,21 +2,34 @@
 
 ### Breaking changes
 - Video cache is now incompatible with previous versions, and needs to be regenerated
+- Image cache, due using by now exif orientation, is incompatible with previous versions, and needs to be regenerated
+- Duplicate cache, due using smaller prehash size, is incompatible with previous versions, and needs to be regenerated
 
 ### Known regressions
-- Crashes when using similar videos(when hashing invalid files)
-
-### CI
+- Rarely crashes when using similar videos tool with some broken videos
 
 ### Core
-- Updated vid_dup_finder, now it is able to find similar videos shorter than 30 seconds - [#]()
-- More supported jxl image formats(using built-in jxl -> image-rs converter) - [#]()
-- Rotating all images by default, basing on their exif orientation - [#]()
-- Using reusable and bigger buffer for reading files in duplicate mode - [#]()
+- Rotating all images by default, basing on their exif orientation - [#1368](https://github.com/qarmin/czkawka/pull/1368)
+- Fixed negative time crash in some OS - [#1369](https://github.com/qarmin/czkawka/pull/1369)
+- Updated vid_dup_finder, now it is able to find similar videos shorter than 30 seconds - [#1425](https://github.com/qarmin/czkawka/pull/1425)
+- More supported jxl image formats(using built-in jxl -> image-rs converter) - [#1425](https://github.com/qarmin/czkawka/pull/1425)
+- Using reusable and bigger buffer for reading files in duplicate mode - [#1425](https://github.com/qarmin/czkawka/pull/1425)
+- Option to use a lot of faster image resizing, to speedup image hashing - [#1458](https://github.com/qarmin/czkawka/pull/1458)
+- Added to logs info about os and compiled app features - [#1458](https://github.com/qarmin/czkawka/pull/1458)
+- Added size progress in duplicate and similar images mode - [#1458](https://github.com/qarmin/czkawka/pull/1458)
+- Ability to stop calculating hash of bigger files in the middle of process - [#1458](https://github.com/qarmin/czkawka/pull/1458)
+- Using multithreading, to filter out hard links - [#1458](https://github.com/qarmin/czkawka/pull/1458)
+- Decreased prehash read file size to max 4k bytes - [#1458](https://github.com/qarmin/czkawka/pull/1458) 
 
 ### Krokiet
+- Changed default tab to duplicate files - [#1368](https://github.com/qarmin/czkawka/pull/1368)
+- Progress bar in duplicate and similar images mode, now shows progress of processed bytes, not files - [#1458](https://github.com/qarmin/czkawka/pull/1458)
 
 ### GTK GUI
+- Added window icon in wayland - [#1400](https://github.com/qarmin/czkawka/pull/1400)
+- Disabled broken sort button - [#1400](https://github.com/qarmin/czkawka/pull/1400)
+
+### CI
 
 ### CLI
 

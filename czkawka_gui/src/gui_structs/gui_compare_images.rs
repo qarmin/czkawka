@@ -5,7 +5,7 @@ use gtk4::prelude::*;
 use gtk4::{Builder, TreePath};
 
 use crate::help_functions::set_icon_of_button;
-use crate::{flg, CZK_ICON_LEFT, CZK_ICON_RIGHT};
+use crate::{CZK_ICON_LEFT, CZK_ICON_RIGHT, flg};
 
 #[derive(Clone)]
 pub struct GuiCompareImages {

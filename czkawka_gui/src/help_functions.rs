@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::io::BufReader;
-use std::path::{PathBuf, MAIN_SEPARATOR};
+use std::path::{MAIN_SEPARATOR, PathBuf};
 use std::rc::Rc;
 
 use czkawka_core::bad_extensions::BadExtensions;
@@ -28,7 +28,7 @@ use once_cell::sync::OnceCell;
 
 use crate::flg;
 use crate::notebook_enums::{NotebookMainEnum, NotebookUpperEnum};
-use crate::notebook_info::{NotebookObject, NOTEBOOKS_INFO};
+use crate::notebook_info::{NOTEBOOKS_INFO, NotebookObject};
 
 pub const KEY_DELETE: u32 = 119;
 pub const KEY_ENTER: u32 = 36;
@@ -319,6 +319,14 @@ pub fn add_text_to_text_view(text_view: &TextView, string_to_append: &str) {
 
 pub fn set_buttons(hashmap: &mut HashMap<BottomButtonsEnum, bool>, buttons_array: &[Widget], button_names: &[BottomButtonsEnum]) {
     for (index, button) in buttons_array.iter().enumerate() {
+        if button_names[index] == BottomButtonsEnum::Sort {
+            // TODO - sort button is broken, I don't have skills and time to fix it
+            // The problem is that to speedup sorting, we operate on item iters
+            // To fix this, we should just take entire model and sort it, which will be slow in some cases
+            // Alternatively, just current operations on iters should be fixed(I cannot find exact problem)
+            continue;
+        }
+
         if *hashmap.get_mut(&button_names[index]).expect("Invalid button name") {
             button.show();
         } else {
@@ -805,8 +813,8 @@ pub fn scale_step_function(scale: &Scale, _scroll_type: ScrollType, value: f64) 
 
 #[cfg(test)]
 mod test {
-    use glib::types::Type;
     use glib::Value;
+    use glib::types::Type;
     use gtk4::prelude::*;
     use gtk4::{Orientation, TreeView};
     use image::DynamicImage;

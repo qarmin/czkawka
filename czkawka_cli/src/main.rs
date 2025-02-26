@@ -6,11 +6,11 @@ use std::thread;
 
 use clap::Parser;
 use commands::Commands;
-use crossbeam_channel::{bounded, unbounded, Receiver, Sender};
+use crossbeam_channel::{Receiver, Sender, bounded, unbounded};
 use czkawka_core::bad_extensions::{BadExtensions, BadExtensionsParameters};
 use czkawka_core::big_file::{BigFile, BigFileParameters, SearchMode};
 use czkawka_core::broken_files::{BrokenFiles, BrokenFilesParameters, CheckedTypes};
-use czkawka_core::common::{print_version_mode, set_number_of_threads, setup_logger, DEFAULT_THREAD_SIZE};
+use czkawka_core::common::{DEFAULT_THREAD_SIZE, print_version_mode, set_number_of_threads, setup_logger};
 use czkawka_core::common_tool::{CommonData, DeleteMethod};
 #[allow(unused_imports)] // It is used in release for print_results_to_output().
 use czkawka_core::common_traits::*;
@@ -20,7 +20,7 @@ use czkawka_core::empty_folder::EmptyFolder;
 use czkawka_core::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::progress_data::ProgressData;
 use czkawka_core::same_music::{SameMusic, SameMusicParameters};
-use czkawka_core::similar_images::{return_similarity_from_similarity_preset, test_image_conversion_speed, SimilarImages, SimilarImagesParameters};
+use czkawka_core::similar_images::{SimilarImages, SimilarImagesParameters, return_similarity_from_similarity_preset, test_image_conversion_speed};
 use czkawka_core::similar_videos::{SimilarVideos, SimilarVideosParameters};
 use czkawka_core::temporary::Temporary;
 use log::error;
@@ -61,7 +61,7 @@ fn main() {
             Commands::BrokenFiles(broken_files_args) => broken_files(broken_files_args, &stop_receiver, &progress_sender),
             Commands::SimilarVideos(similar_videos_args) => similar_videos(similar_videos_args, &stop_receiver, &progress_sender),
             Commands::BadExtensions(bad_extensions_args) => bad_extensions(bad_extensions_args, &stop_receiver, &progress_sender),
-            Commands::Tester {} => test_image_conversion_speed(),
+            Commands::Tester => test_image_conversion_speed(),
         })
         .expect("Failed to spawn calculation thread");
     ctrlc::set_handler(move || {

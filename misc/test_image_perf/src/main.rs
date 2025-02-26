@@ -4,12 +4,13 @@ use std::env;
 use std::process::Command;
 use walkdir::WalkDir;
 
-const DIR_TO_CHECK: &str = "/media/rafal/Kotyk/Rafał/Camera";
+const DIR_TO_CHECK: &str = "/home/rafal/Desktop/TODOOOOOOOOOOOOOOOOOO/DCIM/Camera";
 
+const ITERATIONS_ON_IMAGE: usize = 10;
 const ITERATIONS: usize = 5;
 const HASH_ALG: HashAlg = HashAlg::Gradient;
 const FILTER_TYPE: FilterType = FilterType::Lanczos3;
-const HASH_SIZE: u32 = 64;
+const HASH_SIZE: u32 = 8;
 
 #[cfg(not(feature = "fast_image_resize"))]
 const MODE: &str = "NORMAL";
@@ -37,7 +38,7 @@ fn main() {
         })
         .collect::<Vec<String>>();
 
-    println!("Collected {} image files", collected_image_files.len());
+    println!("Collected {} image files with mode {MODE}", collected_image_files.len());
 
     let mut times = vec![];
 
@@ -48,7 +49,9 @@ fn main() {
         let start = std::time::Instant::now();
 
         collected_image_files.par_iter().for_each(|e| {
-            let _ = hash_image(e);
+            for _ in 0..ITERATIONS_ON_IMAGE {
+                let _ = hash_image(e);
+            }
         });
 
         let elapsed = start.elapsed();

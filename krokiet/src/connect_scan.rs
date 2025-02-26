@@ -55,6 +55,7 @@ pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressDat
         app.set_progress_datas(ProgressToSend {
             all_progress: 0,
             current_progress: -1,
+            current_progress_size: -1,
             step_name: "".into(),
         });
 

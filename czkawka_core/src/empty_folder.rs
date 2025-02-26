@@ -10,8 +10,8 @@ use fun_time::fun_time;
 use log::debug;
 use rayon::prelude::*;
 
-use crate::common::{check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads, WorkContinueStatus};
-use crate::common_dir_traversal::{common_get_entry_data, common_get_metadata_dir, common_read_dir, get_modified_time, ToolType};
+use crate::common::{WorkContinueStatus, check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
+use crate::common_dir_traversal::{ToolType, common_get_entry_data, common_get_metadata_dir, common_read_dir, get_modified_time};
 use crate::common_directory::Directories;
 use crate::common_items::ExcludedItems;
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
@@ -105,8 +105,8 @@ impl EmptyFolder {
     fn check_for_empty_folders(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let mut folders_to_check: Vec<PathBuf> = self.common_data.directories.included_directories.clone();
 
-        let (progress_thread_handle, progress_thread_run, atomic_counter, _check_was_stopped) =
-            prepare_thread_handler_common(progress_sender, CurrentStage::CollectingFiles, 0, self.get_test_type());
+        let (progress_thread_handle, progress_thread_run, items_counter, _check_was_stopped, _size_counter) =
+            prepare_thread_handler_common(progress_sender, CurrentStage::CollectingFiles, 0, self.get_test_type(), 0);
 
         let excluded_items = self.common_data.excluded_items.clone();
         let directories = self.common_data.directories.clone();
@@ -173,7 +173,7 @@ impl EmptyFolder {
                     }
                     if counter > 0 {
                         // Increase counter in batch, because usually it may be slow to add multiple times atomic value
-                        atomic_counter.fetch_add(counter, Ordering::Relaxed);
+                        items_counter.fetch_add(counter, Ordering::Relaxed);
                     }
 
                     (dir_result, warnings, non_empty_folder, folder_entries_list)

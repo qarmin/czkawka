@@ -37,7 +37,7 @@ export component Progress {
                     ProgressIndicator {
                         visible: progress_datas.current_progress >= -0.001;
                         height: 8px;
-                        progress: progress_datas.current_progress / 100.0;
+                        progress: progress_datas.current_progress_size == -1 ? progress_datas.current_progress / 100.0 : progress_datas.current_progress_size / 100.0;
                     }
                 }
 
@@ -55,7 +55,7 @@ export component Progress {
                 Text {
                     visible: progress_datas.current_progress >= -0.001;
                     vertical-alignment: TextVerticalAlignment.center;
-                    text: progress_datas.current_progress + "%";
+                    text: (progress_datas.current_progress_size == -1 ? progress_datas.current_progress : progress_datas.current_progress_size) + "%";
                 }
 
                 Text {

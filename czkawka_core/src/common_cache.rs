@@ -15,6 +15,7 @@ use crate::duplicate::HashType;
 use crate::similar_images::{convert_algorithm_to_string, convert_filters_to_string};
 
 const CACHE_VERSION: &str = "70";
+const CACHE_DUPLICATE_VERSION: &str = "90";
 #[cfg(feature = "fast_image_resize")]
 const CACHE_IMAGE_VERSION: &str = "90_fast_resize";
 #[cfg(not(feature = "fast_image_resize"))]
@@ -46,7 +47,7 @@ pub fn get_similar_music_cache_file(checking_tags: bool) -> String {
 
 pub fn get_duplicate_cache_file(type_of_hash: &HashType, is_prehash: bool) -> String {
     let prehash_str = if is_prehash { "_prehash" } else { "" };
-    format!("cache_duplicates_{type_of_hash:?}{prehash_str}_{CACHE_VERSION}.bin")
+    format!("cache_duplicates_{type_of_hash:?}{prehash_str}_{CACHE_DUPLICATE_VERSION}.bin")
 }
 
 #[fun_time(message = "save_cache_to_file_generalized", level = "debug")]

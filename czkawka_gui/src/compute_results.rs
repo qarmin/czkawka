@@ -24,7 +24,7 @@ use czkawka_core::temporary::Temporary;
 use fun_time::fun_time;
 use gtk4::prelude::*;
 use gtk4::{Entry, ListStore, TextView, TreeView, Widget};
-use humansize::{format_size, BINARY};
+use humansize::{BINARY, format_size};
 use rayon::prelude::*;
 
 use crate::flg;

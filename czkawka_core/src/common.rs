@@ -2,9 +2,9 @@ use std::cmp::Ordering;
 use std::ffi::OsString;
 use std::fs::{DirEntry, File, OpenOptions};
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicBool, AtomicUsize};
-use std::sync::{atomic, Arc};
-use std::thread::{sleep, JoinHandle};
+use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize};
+use std::sync::{Arc, atomic};
+use std::thread::{JoinHandle, sleep};
 use std::time::{Duration, Instant};
 use std::{fs, thread};
 
@@ -12,8 +12,9 @@ use crossbeam_channel::Sender;
 use directories_next::ProjectDirs;
 use fun_time::fun_time;
 use handsome_logger::{ColorChoice, ConfigBuilder, TerminalMode};
-use log::{debug, info, warn, LevelFilter, Record};
+use log::{LevelFilter, Record, debug, info, warn};
 
+use crate::CZKAWKA_VERSION;
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
 use crate::common_dir_traversal::{CheckingMethod, ToolType};
@@ -24,7 +25,6 @@ use crate::common_tool::DeleteMethod;
 use crate::common_traits::ResultEntry;
 use crate::duplicate::make_hard_link;
 use crate::progress_data::{CurrentStage, ProgressData};
-use crate::CZKAWKA_VERSION;
 
 static NUMBER_OF_THREADS: state::InitCell<usize> = state::InitCell::new();
 static ALL_AVAILABLE_THREADS: state::InitCell<usize> = state::InitCell::new();
@@ -39,11 +39,7 @@ pub enum WorkContinueStatus {
 
 pub fn get_number_of_threads() -> usize {
     let data = NUMBER_OF_THREADS.get();
-    if *data >= 1 {
-        *data
-    } else {
-        get_all_available_threads()
-    }
+    if *data >= 1 { *data } else { get_all_available_threads() }
 }
 
 fn filtering_messages(record: &Record) -> bool {
@@ -89,14 +85,56 @@ pub fn print_version_mode() {
     #[cfg(feature = "fast_image_resize")]
     features.push("fast_image_resize");
 
+    #[allow(unused_mut)]
+    let mut app_cpu_version = "Baseline";
+    let mut os_cpu_version = "Baseline";
+    if cfg!(target_feature = "sse2") {
+        app_cpu_version = "x86-64-v1 (SSE2)";
+    }
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    if is_x86_feature_detected!("sse2") {
+        os_cpu_version = "x86-64-v1 (SSE2)";
+    }
+
+    if cfg!(target_feature = "popcnt") {
+        app_cpu_version = "x86-64-v2 (SSE4.2 + POPCNT)";
+    }
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    if is_x86_feature_detected!("popcnt") {
+        os_cpu_version = "x86-64-v2 (SSE4.2 + POPCNT)";
+    }
+
+    if cfg!(target_feature = "avx2") {
+        app_cpu_version = "x86-64-v3 (AVX2) or x86-64-v4 (AVX-512)";
+    }
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    if is_x86_feature_detected!("avx2") {
+        os_cpu_version = "x86-64-v3 (AVX2)";
+    }
+
+    // TODO - https://github.com/rust-lang/rust/issues/44839 - remove "or" from above when fixed
+    // Currently this is always false, because cfg!(target_feature = "avx512f") is not working
+    // What is strange, because is_x86_feature_detected!("avx512f") is working
+    if cfg!(target_feature = "avx512f") {
+        app_cpu_version = "x86-64-v4 (AVX-512)";
+    }
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    if is_x86_feature_detected!("avx512f") {
+        os_cpu_version = "x86-64-v4 (AVX-512)";
+    }
+
+    // TODO - probably needs to add arm and other architectures, need help, because I don't have access to them
+
     info!(
-        "App version: {CZKAWKA_VERSION}, {debug_release} mode, rust {rust_version}, os {} {} [{} {}], {processors} cpu/threads, features({}): [{}]",
+        "App version: {CZKAWKA_VERSION}, {debug_release} mode, rust {rust_version}, os {} {} [{} {}], {processors} cpu/threads, features({}): [{}], app cpu version: [{}], os cpu version: [{}]",
         info.os_type(),
         info.version(),
         std::env::consts::ARCH,
         info.bitness(),
         features.len(),
-        features.join(", ")
+        features.join(", "),
+        app_cpu_version,
+        os_cpu_version,
     );
     if cfg!(debug_assertions) {
         warn!("You are running debug version of app which is a lot of slower than release version.");
@@ -300,7 +338,9 @@ pub fn split_path_compare(path_a: &Path, path_b: &Path) -> Ordering {
 }
 
 pub fn create_crash_message(library_name: &str, file_path: &str, home_library_url: &str) -> String {
-    format!("{library_name} library crashed when opening \"{file_path}\", please check if this is fixed with the latest version of {library_name} and if it is not fixed, please report bug here - {home_library_url}")
+    format!(
+        "{library_name} library crashed when opening \"{file_path}\", please check if this is fixed with the latest version of {library_name} and if it is not fixed, please report bug here - {home_library_url}"
+    )
 }
 
 pub fn regex_check(expression_item: &SingleExcludedItem, directory_name: &str) -> bool {
@@ -523,18 +563,21 @@ where
 pub fn prepare_thread_handler_common(
     progress_sender: Option<&Sender<ProgressData>>,
     sstage: CurrentStage,
-    max_value: usize,
+    max_items: usize,
     test_type: (ToolType, CheckingMethod),
-) -> (JoinHandle<()>, Arc<AtomicBool>, Arc<AtomicUsize>, AtomicBool) {
+    max_size: u64,
+) -> (JoinHandle<()>, Arc<AtomicBool>, Arc<AtomicUsize>, AtomicBool, Arc<AtomicU64>) {
     let (tool_type, checking_method) = test_type;
-    assert_ne!(tool_type, ToolType::None, "ToolType::None should not exist");
+    assert_ne!(tool_type, ToolType::None, "Cannot send progress data for ToolType::None");
     let progress_thread_run = Arc::new(AtomicBool::new(true));
-    let atomic_counter = Arc::new(AtomicUsize::new(0));
+    let items_counter = Arc::new(AtomicUsize::new(0));
+    let size_counter = Arc::new(AtomicU64::new(0));
     let check_was_stopped = AtomicBool::new(false);
     let progress_thread_sender = if let Some(progress_sender) = progress_sender {
         let progress_send = progress_sender.clone();
         let progress_thread_run = progress_thread_run.clone();
-        let atomic_counter = atomic_counter.clone();
+        let items_counter = items_counter.clone();
+        let size_counter = size_counter.clone();
         thread::spawn(move || {
             // Use earlier time, to send immediately first message
             let mut time_since_last_send = Instant::now().checked_sub(Duration::from_secs(10u64)).unwrap_or_else(Instant::now);
@@ -546,8 +589,10 @@ pub fn prepare_thread_handler_common(
                         checking_method,
                         current_stage_idx: sstage.get_current_stage(),
                         max_stage_idx: tool_type.get_max_stage(checking_method),
-                        entries_checked: atomic_counter.load(atomic::Ordering::Relaxed),
-                        entries_to_check: max_value,
+                        entries_checked: items_counter.load(atomic::Ordering::Relaxed),
+                        entries_to_check: max_items,
+                        bytes_checked: size_counter.load(atomic::Ordering::Relaxed),
+                        bytes_to_check: max_size,
                         tool_type,
                     };
 
@@ -565,7 +610,7 @@ pub fn prepare_thread_handler_common(
     } else {
         thread::spawn(|| {})
     };
-    (progress_thread_sender, progress_thread_run, atomic_counter, check_was_stopped)
+    (progress_thread_sender, progress_thread_run, items_counter, check_was_stopped, size_counter)
 }
 
 #[inline]

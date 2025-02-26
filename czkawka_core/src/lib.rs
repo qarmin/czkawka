@@ -6,6 +6,7 @@
 
 #[macro_use]
 extern crate bitflags;
+extern crate core;
 
 pub mod big_file;
 pub mod broken_files;

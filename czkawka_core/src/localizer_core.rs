@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use i18n_embed::fluent::{fluent_language_loader, FluentLanguageLoader};
+use i18n_embed::fluent::{FluentLanguageLoader, fluent_language_loader};
 use i18n_embed::{DefaultLocalizer, LanguageLoader, Localizer};
 use once_cell::sync::Lazy;
 use rust_embed::RustEmbed;

@@ -17,6 +17,12 @@ jobs:
       - name: Install Gtk 4
         run: sudo apt update || true; sudo apt install -y libgtk-4-dev libraw-dev libheif-dev libavif-dev libdav1d-dev -y
 
+      - name: Setup rust version
+        run: |
+          rustup default 1.85.0
+          rustup component add rustfmt
+          rustup component add clippy
+
       - name: Check the format
         run: cargo fmt --all -- --check
 
