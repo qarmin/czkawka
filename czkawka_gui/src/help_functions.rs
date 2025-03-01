@@ -633,7 +633,7 @@ pub fn resize_pixbuf_dimension(pixbuf: &Pixbuf, requested_size: (i32, i32), inte
             new_size = (std::cmp::max(new_size.0, 1), std::cmp::max(new_size.1, 1));
         }
         Ordering::Equal => {
-            new_size = (requested_size.0, requested_size.1);
+            new_size = requested_size;
             new_size = (std::cmp::max(new_size.0, 1), std::cmp::max(new_size.1, 1));
         }
     }

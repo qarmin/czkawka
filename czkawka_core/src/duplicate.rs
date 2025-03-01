@@ -585,10 +585,14 @@ impl DuplicateFinder {
                 .sum::<u64>(),
         );
 
+        // Convert to vector to be able to use with_max_len method from rayon
+        let non_cached_files_to_check: Vec<(u64, Vec<DuplicateEntry>)> = non_cached_files_to_check.into_iter().collect();
+
         debug!("Starting calculating prehash");
         #[allow(clippy::type_complexity)]
         let pre_hash_results: Vec<(u64, BTreeMap<String, Vec<DuplicateEntry>>, Vec<String>)> = non_cached_files_to_check
             .into_par_iter()
+            .with_max_len(3) // Vectors and BTreeMaps for really big inputs, leave some jobs to 0 thread, to avoid that I minimized max tasks for each thread to 3, which improved performance
             .map(|(size, vec_file_entry)| {
                 let mut hashmap_with_hash: BTreeMap<String, Vec<DuplicateEntry>> = Default::default();
                 let mut errors: Vec<String> = Vec::new();
@@ -807,10 +811,16 @@ impl DuplicateFinder {
             non_cached_files_to_check.iter().map(|(size, items)| (*size) * items.len() as u64).sum::<u64>(),
         );
 
+        let non_cached_files_to_check: Vec<(u64, Vec<DuplicateEntry>)> = non_cached_files_to_check.into_iter().collect();
+
         let check_type = self.get_params().hash_type;
-        debug!("Starting full hashing of {} files", non_cached_files_to_check.values().map(Vec::len).sum::<usize>());
+        debug!(
+            "Starting full hashing of {} files",
+            non_cached_files_to_check.iter().map(|(_size, v)| v.len() as u64).sum::<u64>()
+        );
         let mut full_hash_results: Vec<(u64, BTreeMap<String, Vec<DuplicateEntry>>, Vec<String>)> = non_cached_files_to_check
             .into_par_iter()
+            .with_max_len(3)
             .map(|(size, vec_file_entry)| {
                 let size_counter = size_counter.clone();
                 let mut hashmap_with_hash: BTreeMap<String, Vec<DuplicateEntry>> = Default::default();
