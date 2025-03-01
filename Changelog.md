@@ -21,6 +21,7 @@
 - Using multithreading, to filter out hard links - [#1458](https://github.com/qarmin/czkawka/pull/1458)
 - Decreased prehash read file size to max 4k bytes - [#1458](https://github.com/qarmin/czkawka/pull/1458) 
 - Fix strange slowdown at end of scan, when with big number of CPU cores and files searching for duplicates - []() 
+- Small performance improvement, due not sorting files when collecting them from folders - []()
 
 ### Krokiet
 - Changed default tab to duplicate files - [#1368](https://github.com/qarmin/czkawka/pull/1368)

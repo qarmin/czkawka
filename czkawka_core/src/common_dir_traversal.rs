@@ -541,11 +541,14 @@ fn process_symlink_in_symlink_mode(
 pub fn common_read_dir(current_folder: &Path, warnings: &mut Vec<String>) -> Option<Vec<Result<DirEntry, std::io::Error>>> {
     match fs::read_dir(current_folder) {
         Ok(t) => {
-            // Make directory traversal order stable
+            #[allow(unused_mut)]
             let mut r: Vec<_> = t.collect();
-            r.sort_by_key(|d| match d {
-                Ok(f) => f.path(),
-                _ => PathBuf::new(),
+
+            // Sorting results to make them deterministic, takes some time, so it is enabled only in tests, because it is not needed in normal usage
+            #[cfg(test)]
+            r.sort_by_cached_key(|d| match d {
+                Ok(f) => f.path().to_string_lossy().to_string(),
+                _ => String::new(),
             });
             Some(r)
         }

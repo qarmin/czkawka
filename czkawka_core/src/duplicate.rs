@@ -408,8 +408,11 @@ impl DuplicateFinder {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
                 self.common_data.text_messages.warnings.extend(warnings);
 
+                let grouped_file_entries: Vec<(u64, Vec<FileEntry>)> = grouped_file_entries.into_iter().collect();
+                let rayon_max_len = if self.get_params().ignore_hard_links { 3 } else { 100 };
                 self.files_with_identical_size = grouped_file_entries
                     .into_par_iter()
+                    .with_max_len(rayon_max_len)
                     .filter_map(|(size, vec)| {
                         if vec.len() <= 1 {
                             return None;
