@@ -2,7 +2,7 @@
 
 ### Breaking changes
 - Video cache is now incompatible with previous versions, and needs to be regenerated
-- Image cache, due using by now exif orientation, is incompatible with previous versions, and needs to be regenerated
+- Image cache, due using by now exif orientation and faster resize implementation(which gives slightly different resize results), is incompatible with previous versions, and needs to be regenerated
 - Duplicate cache, due using smaller prehash size, is incompatible with previous versions, and needs to be regenerated
 
 ### Known regressions

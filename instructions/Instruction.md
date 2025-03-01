@@ -87,23 +87,54 @@ Mac - `/Users/Username/Library/Caches/pl.Qarmin.Czkawka`
 Windows - `C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache`
 
 ## Tips, Tricks and Known Bugs
+- **Speedup of CPU bounds tasks with LTO**
+  You can easily compile app with lto, by adding/modyfing in `Cargo.toml` file, this lines(small performance boost, big decrease in binary size):
+```
+[profile.release]
+lto = "thin" # or "fat"
+```
+- **Speedup of CPU-bound tasks using native CPU optimizations**
+  When doing CPU bound tasks, compiling with native CPU optimizations can give a significant speedup(speedup on x86_64_v4, when hashing images is usually 10-20%):
+```
+RUSTFLAGS="-C target-cpu=native" cargo build --release
+```
+or adding it globally to `~/.cargo/config.toml`
+```
+[target.x86_64-unknown-linux-gnu]
+linker = "clang"
+rustflags = [
+       "-C", "target-cpu=native",
+]
+
+```
+- **Faster checking for similar images**
+- New `fast_image_resize` feature allows to resize images faster with 
 - **Manually adding multiple directories**  
-  You can manually edit config file `czkawka_gui_config.txt` and add/remove/change directories as you want. After set required values, configuration must be loaded to Czkawka.
+  You can manually edit config file `czkawka_gui_config.txt` and add/remove/change directories as you want.  
+  After set required values, configuration must be loaded to Czkawka.
 - **Slow checking of little number similar images/duplicates/broken files**  
-  If you checked before a large number of files (several tens of thousands), then the required information about all of them are loaded and saved to the cache, even if you are working with only few files. You can rename one of cache file which starts from `cache_similar_image`(to be able to use it again) or delete it - cache will then regenerate but with smaller number of entries and this way it should load and save cache faster.
+  If you checked before a large number of files (several tens of thousands), then the required information about all of them are loaded and saved to the cache, even if you are working with only few files.  
+  You can rename one of cache file which starts from `cache_similar_image`(to be able to use it again) or delete it - cache will then regenerate but with smaller number of entries and this way it should load and save cache faster.
 - **Not all columns are always visible**
-  For now it is possible that some columns will not be visible when some are too wide. There are 2 workarounds for now
+  For now it is possible that some columns will not be visible when some are too wide.  
+  There are 2 workarounds for now
     - View can be scrolled via horizontal scroll bar (1 on image)
     - Size of other columns can be slimmed (2)
   This is checked if is possible to do in https://github.com/qarmin/czkawka/issues/169
 ![AA](https://user-images.githubusercontent.com/41945903/125684641-728e264a-34ab-41b1-9853-ab45dc25551f.png)
 - **Opening parent folders**
-    - It is possible to open parent folder of selected items with double click with right mouse button(RMB)
-  it is also possible to open such item with double click with left mouse button(LMB).
+    - It is possible to open parent folder of selected items with double click with right mouse button(RMB) it is also possible to open such item with double click with left mouse button(LMB).
 - **Faster scanning for big number of duplicates**  
-  By default for all files grouped by same size are computed partial hash(hash from only of 2KB each file). Such hash is computed usually very fast, especially on SSD and fast multicore processors. But when scanning a hundred of thousands or millions of files with HDD or slow processor, typically this step can take much time. In settings exists option `Use prehash cache` which enables caching such things. It is disabled by default because can increase time of loading/saving cache, with big number of entries.
+  By default for all files grouped by same size are computed partial hash(hash from only of start 4KB each file). 
+- Such hash is computed usually very fast, especially on SSD and fast multicore processors.  
+  But when scanning a hundred of thousands or millions of files with HDD or slow processor, typically this step can take much time.  
+  In settings exists option `Use prehash cache` which enables caching such things.  
+  It is disabled by default because can increase time of loading/saving cache, with big number of entries.
 - **Permanent store of cache entries**  
-  After each scan, entries in cache are validated and outdated ones(which points at non-existent files) are removed. This may be problematic when scanning external drivers(like pendrives, disks etc.) and later unplugging and plugging them again. In settings exists option `Delete outdated cache entries automatically` which automatically clear this, but this can be disabled. Disabling such option may create big cache files, so button `Remove outdated results` will do it manually.
+  After each scan, entries in cache are validated and outdated ones(which points at non-existent files) are removed.  
+  This may be problematic when scanning external drivers(like pendrives, disks etc.) and later unplugging and plugging them again.  
+  In settings exists option `Delete outdated cache entries automatically` which automatically clear this, but this can be disabled.  
+  Disabling such option may create big cache files, so button `Remove outdated results` will do it manually.
 - **Partial scanning**
   If you know that you can't scan all files at once, you can still try to scan all files and during scan just stop it, so already calculated hashes/data will be saved to cache and will speedup later scans.
 

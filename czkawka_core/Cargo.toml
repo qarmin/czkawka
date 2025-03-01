@@ -104,7 +104,7 @@ name = "hash_calculation_benchmark"
 harness = false
 
 [features]
-default = []
+default = ["fast_image_resize"]
 heif = ["dep:libheif-rs", "dep:libheif-sys"]
 libraw = ["dep:libraw-rs"]
 libavif = ["image/avif-native", "image/avif"]

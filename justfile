@@ -71,3 +71,7 @@ fix_nightly:
     #    -Wclippy::missing_panics_doc
     #    -Wclippy::option_if_let_else
     #    -Wclippy::tuple_array_conversions
+
+test_resize arg:
+    cd misc/test_image_perf; cargo build --release; sudo ./target/release/test_image_perf "{{arg}}"
+    cd misc/test_image_perf; cargo build --release --features fast_image_resize; sudo ./target/release/test_image_perf "{{arg}}"

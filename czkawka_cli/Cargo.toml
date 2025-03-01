@@ -24,7 +24,7 @@ crossbeam-channel = { version = "0.5", features = [] }
 ctrlc = { version = "3.4", features = ["termination"] }
 
 [features]
-default = []
+default = ["fast_image_resize"]
 heif = ["czkawka_core/heif"]
 libraw = ["czkawka_core/libraw"]
 libavif = ["czkawka_core/libavif"]
