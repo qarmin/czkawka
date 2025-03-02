@@ -21,7 +21,7 @@
 use std::rc::Rc;
 use std::sync::Arc;
 
-use crossbeam_channel::{unbounded, Receiver, Sender};
+use crossbeam_channel::{Receiver, Sender, unbounded};
 use czkawka_core::common::{print_version_mode, setup_logger};
 use czkawka_core::progress_data::ProgressData;
 use slint::VecModel;

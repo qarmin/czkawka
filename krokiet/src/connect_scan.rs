@@ -7,7 +7,7 @@ use crossbeam_channel::{Receiver, Sender};
 use czkawka_core::bad_extensions::{BadExtensions, BadExtensionsParameters, BadFileEntry};
 use czkawka_core::big_file::{BigFile, BigFileParameters, SearchMode};
 use czkawka_core::broken_files::{BrokenEntry, BrokenFiles, BrokenFilesParameters, CheckedTypes};
-use czkawka_core::common::{split_path, split_path_compare, DEFAULT_THREAD_SIZE};
+use czkawka_core::common::{DEFAULT_THREAD_SIZE, split_path, split_path_compare};
 use czkawka_core::common_dir_traversal::{CheckingMethod, FileEntry};
 use czkawka_core::common_tool::CommonData;
 use czkawka_core::common_traits::ResultEntry;
@@ -21,15 +21,15 @@ use czkawka_core::similar_images;
 use czkawka_core::similar_images::{ImagesEntry, SimilarImages, SimilarImagesParameters};
 use czkawka_core::similar_videos::{SimilarVideos, SimilarVideosParameters, VideosEntry};
 use czkawka_core::temporary::{Temporary, TemporaryFileEntry};
-use humansize::{format_size, BINARY};
+use humansize::{BINARY, format_size};
 use rayon::prelude::*;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
 
 use crate::common::{check_if_all_included_dirs_are_referenced, check_if_there_are_any_included_folders, split_u64_into_i32s};
 use crate::settings::{
-    collect_settings, get_audio_check_type_idx, get_biggest_item_idx, get_duplicates_check_method_idx, get_duplicates_hash_type_idx, get_image_hash_alg_idx,
-    get_resize_algorithm_idx, SettingsCustom, ALLOWED_AUDIO_CHECK_TYPE_VALUES, ALLOWED_BIG_FILE_SIZE_VALUES, ALLOWED_DUPLICATES_CHECK_METHOD_VALUES,
-    ALLOWED_DUPLICATES_HASH_TYPE_VALUES, ALLOWED_IMAGE_HASH_ALG_VALUES, ALLOWED_RESIZE_ALGORITHM_VALUES,
+    ALLOWED_AUDIO_CHECK_TYPE_VALUES, ALLOWED_BIG_FILE_SIZE_VALUES, ALLOWED_DUPLICATES_CHECK_METHOD_VALUES, ALLOWED_DUPLICATES_HASH_TYPE_VALUES, ALLOWED_IMAGE_HASH_ALG_VALUES,
+    ALLOWED_RESIZE_ALGORITHM_VALUES, SettingsCustom, collect_settings, get_audio_check_type_idx, get_biggest_item_idx, get_duplicates_check_method_idx,
+    get_duplicates_hash_type_idx, get_image_hash_alg_idx, get_resize_algorithm_idx,
 };
 use crate::shared_models::SharedModels;
 use crate::{CurrentTab, GuiState, MainListModel, MainWindow, ProgressToSend};

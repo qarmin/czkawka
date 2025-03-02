@@ -1,5 +1,5 @@
 use std::fs;
-use std::path::{Path, MAIN_SEPARATOR};
+use std::path::{MAIN_SEPARATOR, Path};
 
 use czkawka_core::common_messages::Messages;
 use slint::{ComponentHandle, ModelRc, VecModel};

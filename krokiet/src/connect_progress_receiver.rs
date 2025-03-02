@@ -3,7 +3,7 @@ use std::thread;
 use crossbeam_channel::Receiver;
 use czkawka_core::common_dir_traversal::ToolType;
 use czkawka_core::progress_data::{CurrentStage, ProgressData};
-use humansize::{format_size, BINARY};
+use humansize::{BINARY, format_size};
 use slint::ComponentHandle;
 
 use crate::{MainWindow, ProgressToSend};
@@ -11,23 +11,25 @@ use crate::{MainWindow, ProgressToSend};
 pub fn connect_progress_gathering(app: &MainWindow, progress_receiver: Receiver<ProgressData>) {
     let a = app.as_weak();
 
-    thread::spawn(move || loop {
-        let Ok(progress_data) = progress_receiver.recv() else {
-            return; // Channel closed, so exit the thread since app closing
-        };
-
-        a.upgrade_in_event_loop(move |app| {
-            let to_send = if progress_data.current_stage_idx == 0 {
-                progress_collect_items(&progress_data, progress_data.tool_type != ToolType::EmptyFolders)
-            } else if progress_data.sstage.check_if_loading_saving_cache() {
-                progress_save_load_cache(&progress_data)
-            } else {
-                progress_default(&progress_data)
+    thread::spawn(move || {
+        loop {
+            let Ok(progress_data) = progress_receiver.recv() else {
+                return; // Channel closed, so exit the thread since app closing
             };
 
-            app.set_progress_datas(to_send);
-        })
-        .expect("Failed to spawn thread for progress gathering");
+            a.upgrade_in_event_loop(move |app| {
+                let to_send = if progress_data.current_stage_idx == 0 {
+                    progress_collect_items(&progress_data, progress_data.tool_type != ToolType::EmptyFolders)
+                } else if progress_data.sstage.check_if_loading_saving_cache() {
+                    progress_save_load_cache(&progress_data)
+                } else {
+                    progress_default(&progress_data)
+                };
+
+                app.set_progress_datas(to_send);
+            })
+            .expect("Failed to spawn thread for progress gathering");
+        }
     });
 }
 
