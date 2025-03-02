@@ -340,6 +340,7 @@ where
 
             let segments: Vec<_> = folders_to_check
                 .into_par_iter()
+                .with_max_len(2) // Avoiding checking too much folders in batch
                 .map(|current_folder| {
                     let mut dir_result = vec![];
                     let mut warnings = vec![];

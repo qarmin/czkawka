@@ -303,26 +303,40 @@ impl BrokenFiles {
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache();
 
-        let (progress_thread_handle, progress_thread_run, items_counter, _check_was_stopped, _size_counter) =
-            prepare_thread_handler_common(progress_sender, CurrentStage::BrokenFilesChecking, non_cached_files_to_check.len(), self.get_test_type(), 0);
+        let (progress_thread_handle, progress_thread_run, items_counter, _check_was_stopped, size_counter) = prepare_thread_handler_common(
+            progress_sender,
+            CurrentStage::BrokenFilesChecking,
+            non_cached_files_to_check.len(),
+            self.get_test_type(),
+            non_cached_files_to_check.values().map(|item| item.size).sum::<u64>(),
+        );
+
+        let non_cached_files_to_check = non_cached_files_to_check.into_iter().collect::<Vec<_>>();
 
         debug!("look_for_broken_files - started finding for broken files");
         let mut vec_file_entry: Vec<BrokenEntry> = non_cached_files_to_check
             .into_par_iter()
+            .with_max_len(3)
             .map(|(_, file_entry)| {
                 items_counter.fetch_add(1, Ordering::Relaxed);
                 if check_if_stop_received(stop_receiver) {
                     return None;
                 }
 
-                match file_entry.type_of_file {
+                let size = file_entry.size;
+
+                let res = match file_entry.type_of_file {
                     TypeOfFile::Image => Some(self.check_broken_image(file_entry)),
                     TypeOfFile::ArchiveZip => Some(self.check_broken_zip(file_entry)),
                     TypeOfFile::Audio => Some(self.check_broken_audio(file_entry)),
                     TypeOfFile::PDF => Some(self.check_broken_pdf(file_entry)),
                     // This means that cache read invalid value because maybe cache comes from different czkawka version
                     TypeOfFile::Unknown => Some(None),
-                }
+                };
+
+                size_counter.fetch_add(size, Ordering::Relaxed);
+
+                res
             })
             .while_some()
             .flatten()

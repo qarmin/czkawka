@@ -522,7 +522,7 @@ impl DuplicateFinder {
     fn prehash_save_cache_at_exit(
         &mut self,
         loaded_hash_map: BTreeMap<u64, Vec<DuplicateEntry>>,
-        pre_hash_results: &Vec<(u64, BTreeMap<String, Vec<DuplicateEntry>>, Vec<String>)>,
+        pre_hash_results: Vec<(u64, BTreeMap<String, Vec<DuplicateEntry>>, Vec<String>)>,
     ) {
         if self.get_params().use_prehash_cache {
             // All results = records already cached + computed results
@@ -537,8 +537,8 @@ impl DuplicateFinder {
             }
 
             for (size, hash_map, _errors) in pre_hash_results {
-                if *size >= self.get_params().minimal_prehash_cache_file_size {
-                    for vec_file_entry in hash_map.values() {
+                if size >= self.get_params().minimal_prehash_cache_file_size {
+                    for vec_file_entry in hash_map.into_values() {
                         for file_entry in vec_file_entry {
                             save_cache_to_hashmap.insert(file_entry.path.to_string_lossy().to_string(), file_entry.clone());
                         }
@@ -637,8 +637,8 @@ impl DuplicateFinder {
             prepare_thread_handler_common(progress_sender, CurrentStage::DuplicatePreHashCacheSaving, 0, self.get_test_type(), 0);
 
         // Add data from cache
-        for (size, vec_file_entry) in &records_already_cached {
-            pre_checked_map.entry(*size).or_default().append(&mut vec_file_entry.clone());
+        for (size, mut vec_file_entry) in records_already_cached {
+            pre_checked_map.entry(size).or_default().append(&mut vec_file_entry);
         }
 
         // Check results
@@ -653,7 +653,7 @@ impl DuplicateFinder {
             }
         }
 
-        self.prehash_save_cache_at_exit(loaded_hash_map, &pre_hash_results);
+        self.prehash_save_cache_at_exit(loaded_hash_map, pre_hash_results);
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
         if check_was_stopped.load(Ordering::Relaxed) || check_if_stop_received(stop_receiver) {

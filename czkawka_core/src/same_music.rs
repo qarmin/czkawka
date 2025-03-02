@@ -313,18 +313,21 @@ impl SameMusic {
             return WorkContinueStatus::Stop;
         }
 
-        let (progress_thread_handle, progress_thread_run, items_counter, check_was_stopped, _size_counter) = prepare_thread_handler_common(
+        let (progress_thread_handle, progress_thread_run, items_counter, check_was_stopped, size_counter) = prepare_thread_handler_common(
             progress_sender,
             CurrentStage::SameMusicCalculatingFingerprints,
             non_cached_files_to_check.len(),
             self.get_test_type(),
-            0,
+            non_cached_files_to_check.values().map(|e| e.size).sum::<u64>(),
         );
         let configuration = &self.hash_preset_config;
+
+        let non_cached_files_to_check = non_cached_files_to_check.into_iter().collect::<Vec<_>>();
 
         debug!("calculate_fingerprint - starting fingerprinting");
         let mut vec_file_entry = non_cached_files_to_check
             .into_par_iter()
+            .with_max_len(2)
             .map(|(path, mut music_entry)| {
                 items_counter.fetch_add(1, Ordering::Relaxed);
                 if check_if_stop_received(stop_receiver) {
@@ -333,8 +336,10 @@ impl SameMusic {
                 }
 
                 let Ok(fingerprint) = calc_fingerprint_helper(path, configuration) else {
+                    size_counter.fetch_add(music_entry.size, Ordering::Relaxed);
                     return Some(None);
                 };
+                size_counter.fetch_add(music_entry.size, Ordering::Relaxed);
                 music_entry.fingerprint = fingerprint;
 
                 Some(Some(music_entry))

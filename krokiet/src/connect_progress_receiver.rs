@@ -83,57 +83,41 @@ fn progress_collect_items(item: &ProgressData, files: bool) -> ProgressToSend {
 }
 
 fn progress_default(item: &ProgressData) -> ProgressToSend {
+    let items_stats = format!("{}/{}", item.entries_checked, item.entries_to_check);
+    let size_stats = format!("{}/{}", format_size(item.bytes_checked, BINARY), format_size(item.bytes_to_check, BINARY));
     let step_name = match item.sstage {
         CurrentStage::SameMusicReadingTags => {
-            format!("Checking tags of {}/{} audio file", item.entries_checked, item.entries_to_check)
+            format!("Checking tags of {items_stats}",)
         }
         CurrentStage::SameMusicCalculatingFingerprints => {
-            format!("Checking content of {}/{} audio file", item.entries_checked, item.entries_to_check)
+            format!("Checking content of {items_stats} ({size_stats})")
         }
         CurrentStage::SameMusicComparingTags => {
-            format!("Comparing tags of {}/{} audio file", item.entries_checked, item.entries_to_check)
+            format!("Comparing tags of {items_stats}")
         }
         CurrentStage::SameMusicComparingFingerprints => {
-            format!("Comparing content of {}/{} audio file", item.entries_checked, item.entries_to_check)
+            format!("Comparing content of {items_stats}")
         }
         CurrentStage::SimilarImagesCalculatingHashes => {
-            format!(
-                "Hashing of {}/{} image ({}/{})",
-                item.entries_checked,
-                item.entries_to_check,
-                format_size(item.bytes_checked, BINARY),
-                format_size(item.bytes_to_check, BINARY)
-            )
+            format!("Hashing of {items_stats} image ({size_stats})")
         }
         CurrentStage::SimilarImagesComparingHashes => {
-            format!("Comparing {}/{} image hash", item.entries_checked, item.entries_to_check)
+            format!("Comparing {items_stats} image hash")
         }
         CurrentStage::SimilarVideosCalculatingHashes => {
-            format!("Hashing of {}/{} video", item.entries_checked, item.entries_to_check)
+            format!("Hashing of {items_stats} video")
         }
         CurrentStage::BrokenFilesChecking => {
-            format!("Checking {}/{} file", item.entries_checked, item.entries_to_check)
+            format!("Checking {items_stats} file ({size_stats})")
         }
         CurrentStage::BadExtensionsChecking => {
-            format!("Checking {}/{} file", item.entries_checked, item.entries_to_check)
+            format!("Checking {items_stats} file")
         }
         CurrentStage::DuplicatePreHashing => {
-            format!(
-                "Analyzing partial hash of {}/{} files ({}/{})",
-                item.entries_checked,
-                item.entries_to_check,
-                format_size(item.bytes_checked, BINARY),
-                format_size(item.bytes_to_check, BINARY)
-            )
+            format!("Analyzing partial hash of {items_stats} files ({size_stats})")
         }
         CurrentStage::DuplicateFullHashing => {
-            format!(
-                "Analyzing full hash of {}/{} files ({}/{})",
-                item.entries_checked,
-                item.entries_to_check,
-                format_size(item.bytes_checked, BINARY),
-                format_size(item.bytes_to_check, BINARY)
-            )
+            format!("Analyzing full hash of {items_stats} files ({size_stats})")
         }
         _ => unreachable!(),
     };
