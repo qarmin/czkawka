@@ -75,3 +75,14 @@ fix_nightly:
 test_resize arg:
     cd misc/test_image_perf; cargo build --release; sudo ./target/release/test_image_perf "{{arg}}"
     cd misc/test_image_perf; cargo build --release --features fast_image_resize; sudo ./target/release/test_image_perf "{{arg}}"
+
+unused_features:
+    unused-features analyze
+    unused-features build-report --input krokiet/report.json
+    unused-features build-report --input czkawka_cli/report.json
+    unused-features build-report --input czkawka_core/report.json
+    unused-features build-report --input czkawka_gui/report.json
+    xdg-open krokiet/report.html
+    xdg-open czkawka_cli/report.html
+    xdg-open czkawka_core/report.html
+    xdg-open czkawka_gui/report.html
