@@ -348,12 +348,16 @@ where
                     let mut fe_result = vec![];
 
                     let Some(read_dir) = common_read_dir(&current_folder, &mut warnings) else {
-                        return (dir_result, warnings, fe_result);
+                        return Some((dir_result, warnings, fe_result));
                     };
 
                     let mut counter = 0;
                     // Check every sub folder/file/link etc.
                     for entry in read_dir {
+                        if check_if_stop_received(stop_flag) {
+                            return None;
+                        }
+
                         let Some(entry_data) = common_get_entry_data(&entry, &mut warnings, &current_folder) else {
                             continue;
                         };
@@ -392,8 +396,9 @@ where
                         // Increase counter in batch, because usually it may be slow to add multiple times atomic value
                         items_counter.fetch_add(counter, Ordering::Relaxed);
                     }
-                    (dir_result, warnings, fe_result)
+                    Some((dir_result, warnings, fe_result))
                 })
+                .while_some()
                 .collect();
 
             let required_size = segments.iter().map(|(segment, _, _)| segment.len()).sum::<usize>();

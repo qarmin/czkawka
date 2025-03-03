@@ -40,7 +40,6 @@ pub fn connect_compute_results(gui_data: &GuiData, result_receiver: Receiver<Mes
     let buttons_search = gui_data.bottom_buttons.buttons_search.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let entry_info = gui_data.entry_info.clone();
-    let stop_flag = gui_data.stop_flag.clone();
     let tree_view_empty_folder_finder = gui_data.main_notebook.tree_view_empty_folder_finder.clone();
     let tree_view_empty_files_finder = gui_data.main_notebook.tree_view_empty_files_finder.clone();
     let tree_view_duplicate_finder = gui_data.main_notebook.tree_view_duplicate_finder.clone();
@@ -78,159 +77,155 @@ pub fn connect_compute_results(gui_data: &GuiData, result_receiver: Receiver<Mes
 
     glib::spawn_future_local(async move {
         loop {
-            loop {
-                if let Ok(msg) = result_receiver.try_recv() {
-                    buttons_search.show();
+            while let Ok(msg) = result_receiver.try_recv() {
+                buttons_search.show();
 
-                    notebook_main.set_sensitive(true);
-                    notebook_upper.set_sensitive(true);
-                    button_settings.set_sensitive(true);
-                    button_app_info.set_sensitive(true);
+                notebook_main.set_sensitive(true);
+                notebook_upper.set_sensitive(true);
+                button_settings.set_sensitive(true);
+                button_app_info.set_sensitive(true);
 
-                    window_progress.hide();
+                window_progress.hide();
 
-                    taskbar_state.borrow().hide();
+                taskbar_state.borrow().hide();
 
-                    let hash_size_index = combo_box_image_hash_size.active().expect("Failed to get active item") as usize;
-                    let hash_size = IMAGES_HASH_SIZE_COMBO_BOX[hash_size_index] as u8;
+                let hash_size_index = combo_box_image_hash_size.active().expect("Failed to get active item") as usize;
+                let hash_size = IMAGES_HASH_SIZE_COMBO_BOX[hash_size_index] as u8;
 
-                    match msg {
-                        Message::Duplicates(df) => {
-                            compute_duplicate_finder(
-                                df,
-                                &entry_info,
-                                &tree_view_duplicate_finder,
-                                &text_view_errors,
-                                &shared_duplication_state,
-                                &shared_buttons,
-                                &buttons_array,
-                                &buttons_names,
-                            );
-                        }
-                        Message::EmptyFolders(ef) => {
-                            compute_empty_folders(
-                                ef,
-                                &entry_info,
-                                &tree_view_empty_folder_finder,
-                                &text_view_errors,
-                                &shared_empty_folders_state,
-                                &shared_buttons,
-                                &buttons_array,
-                                &buttons_names,
-                            );
-                        }
-                        Message::EmptyFiles(vf) => {
-                            compute_empty_files(
-                                vf,
-                                &entry_info,
-                                &tree_view_empty_files_finder,
-                                &text_view_errors,
-                                &shared_empty_files_state,
-                                &shared_buttons,
-                                &buttons_array,
-                                &buttons_names,
-                            );
-                        }
-                        Message::BigFiles(bf) => {
-                            compute_big_files(
-                                bf,
-                                &entry_info,
-                                &tree_view_big_files_finder,
-                                &text_view_errors,
-                                &shared_big_files_state,
-                                &shared_buttons,
-                                &buttons_array,
-                                &buttons_names,
-                            );
-                        }
-                        Message::Temporary(tf) => {
-                            compute_temporary_files(
-                                tf,
-                                &entry_info,
-                                &tree_view_temporary_files_finder,
-                                &text_view_errors,
-                                &shared_temporary_files_state,
-                                &shared_buttons,
-                                &buttons_array,
-                                &buttons_names,
-                            );
-                        }
-                        Message::SimilarImages(sf) => {
-                            compute_similar_images(
-                                sf,
-                                &entry_info,
-                                &tree_view_similar_images_finder,
-                                &text_view_errors,
-                                &shared_similar_images_state,
-                                &shared_buttons,
-                                &buttons_array,
-                                &buttons_names,
-                                hash_size,
-                            );
-                        }
-                        Message::SimilarVideos(ff) => {
-                            compute_similar_videos(
-                                ff,
-                                &entry_info,
-                                &tree_view_similar_videos_finder,
-                                &text_view_errors,
-                                &shared_similar_videos_state,
-                                &shared_buttons,
-                                &buttons_array,
-                                &buttons_names,
-                            );
-                        }
-                        Message::SameMusic(mf) => {
-                            compute_same_music(
-                                mf,
-                                &entry_info,
-                                &tree_view_same_music_finder,
-                                &text_view_errors,
-                                &shared_same_music_state,
-                                &shared_buttons,
-                                &buttons_array,
-                                &buttons_names,
-                            );
-                        }
-                        Message::InvalidSymlinks(ifs) => {
-                            compute_invalid_symlinks(
-                                ifs,
-                                &entry_info,
-                                &tree_view_invalid_symlinks,
-                                &text_view_errors,
-                                &shared_same_invalid_symlinks,
-                                &shared_buttons,
-                                &buttons_array,
-                                &buttons_names,
-                            );
-                        }
-                        Message::BrokenFiles(br) => {
-                            compute_broken_files(
-                                br,
-                                &entry_info,
-                                &tree_view_broken_files,
-                                &text_view_errors,
-                                &shared_broken_files_state,
-                                &shared_buttons,
-                                &buttons_array,
-                                &buttons_names,
-                            );
-                        }
-                        Message::BadExtensions(be) => {
-                            compute_bad_extensions(
-                                be,
-                                &entry_info,
-                                &tree_view_bad_extensions,
-                                &text_view_errors,
-                                &shared_bad_extensions_state,
-                                &shared_buttons,
-                                &buttons_array,
-                                &buttons_names,
-                            );
-                        }
+                match msg {
+                    Message::Duplicates(df) => {
+                        compute_duplicate_finder(
+                            df,
+                            &entry_info,
+                            &tree_view_duplicate_finder,
+                            &text_view_errors,
+                            &shared_duplication_state,
+                            &shared_buttons,
+                            &buttons_array,
+                            &buttons_names,
+                        );
                     }
-                } else {
-                    break;
+                    Message::EmptyFolders(ef) => {
+                        compute_empty_folders(
+                            ef,
+                            &entry_info,
+                            &tree_view_empty_folder_finder,
+                            &text_view_errors,
+                            &shared_empty_folders_state,
+                            &shared_buttons,
+                            &buttons_array,
+                            &buttons_names,
+                        );
+                    }
+                    Message::EmptyFiles(vf) => {
+                        compute_empty_files(
+                            vf,
+                            &entry_info,
+                            &tree_view_empty_files_finder,
+                            &text_view_errors,
+                            &shared_empty_files_state,
+                            &shared_buttons,
+                            &buttons_array,
+                            &buttons_names,
+                        );
+                    }
+                    Message::BigFiles(bf) => {
+                        compute_big_files(
+                            bf,
+                            &entry_info,
+                            &tree_view_big_files_finder,
+                            &text_view_errors,
+                            &shared_big_files_state,
+                            &shared_buttons,
+                            &buttons_array,
+                            &buttons_names,
+                        );
+                    }
+                    Message::Temporary(tf) => {
+                        compute_temporary_files(
+                            tf,
+                            &entry_info,
+                            &tree_view_temporary_files_finder,
+                            &text_view_errors,
+                            &shared_temporary_files_state,
+                            &shared_buttons,
+                            &buttons_array,
+                            &buttons_names,
+                        );
+                    }
+                    Message::SimilarImages(sf) => {
+                        compute_similar_images(
+                            sf,
+                            &entry_info,
+                            &tree_view_similar_images_finder,
+                            &text_view_errors,
+                            &shared_similar_images_state,
+                            &shared_buttons,
+                            &buttons_array,
+                            &buttons_names,
+                            hash_size,
+                        );
+                    }
+                    Message::SimilarVideos(ff) => {
+                        compute_similar_videos(
+                            ff,
+                            &entry_info,
+                            &tree_view_similar_videos_finder,
+                            &text_view_errors,
+                            &shared_similar_videos_state,
+                            &shared_buttons,
+                            &buttons_array,
+                            &buttons_names,
+                        );
+                    }
+                    Message::SameMusic(mf) => {
+                        compute_same_music(
+                            mf,
+                            &entry_info,
+                            &tree_view_same_music_finder,
+                            &text_view_errors,
+                            &shared_same_music_state,
+                            &shared_buttons,
+                            &buttons_array,
+                            &buttons_names,
+                        );
+                    }
+                    Message::InvalidSymlinks(ifs) => {
+                        compute_invalid_symlinks(
+                            ifs,
+                            &entry_info,
+                            &tree_view_invalid_symlinks,
+                            &text_view_errors,
+                            &shared_same_invalid_symlinks,
+                            &shared_buttons,
+                            &buttons_array,
+                            &buttons_names,
+                        );
+                    }
+                    Message::BrokenFiles(br) => {
+                        compute_broken_files(
+                            br,
+                            &entry_info,
+                            &tree_view_broken_files,
+                            &text_view_errors,
+                            &shared_broken_files_state,
+                            &shared_buttons,
+                            &buttons_array,
+                            &buttons_names,
+                        );
+                    }
+                    Message::BadExtensions(be) => {
+                        compute_bad_extensions(
+                            be,
+                            &entry_info,
+                            &tree_view_bad_extensions,
+                            &text_view_errors,
+                            &shared_bad_extensions_state,
+                            &shared_buttons,
+                            &buttons_array,
+                            &buttons_names,
+                        );
+                    }
                 }
             }
             glib::timeout_future(Duration::from_millis(300)).await;
