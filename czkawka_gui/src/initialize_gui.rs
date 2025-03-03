@@ -265,10 +265,10 @@ pub fn initialize_gui(gui_data: &GuiData) {
     //// Window progress
     {
         let window_progress = gui_data.progress_window.window_progress.clone();
-        let stop_sender = gui_data.stop_sender.clone();
+        let stop_flag = gui_data.stop_flag.clone();
 
         window_progress.connect_close_request(move |_| {
-            stop_sender.send(()).expect("Failed to send stop signal");
+            stop_flag.store(true, std::sync::atomic::Ordering::Relaxed);
             glib::Propagation::Stop
         });
     }

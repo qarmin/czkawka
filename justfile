@@ -4,24 +4,32 @@ build_all:
     cargo clippy
     cargo test
 
+itests:
+    rm TestFiles.zip
+    wget https://github.com/qarmin/czkawka/releases/download/6.0.0/TestFiles.zip
+    cd ci_tester;cargo build --release;cd ..
+    cargo build --release --bin czkawka_cli
+
+    ci_tester/target/release/ci_tester target/release/czkawka_cli
+
 ## run
 
 czkawka:
-    RUST_BACKTRACE=1 cargo run --bin czkawka_gui
+    cargo run --bin czkawka_gui
 czkawka_r:
-    RUST_BACKTRACE=1 cargo run --bin czkawka_gui --release
+    cargo run --bin czkawka_gui --release
 
 krokiet:
-    RUST_BACKTRACE=1 cargo run --bin krokiet
+    cargo run --bin krokiet
 krokiet_r:
-    RUST_BACKTRACE=1 cargo run --bin krokiet --release
+    cargo run --bin krokiet --release
 krokiet_dark:
-    RUST_BACKTRACE=1 SLINT_STYLE=fluent-dark cargo run --bin krokiet
+    SLINT_STYLE=fluent-dark cargo run --bin krokiet
 
 cli +args:
-    RUST_BACKTRACE=1 cargo run --bin czkawka_cli -- {{args}}
+    cargo run --bin czkawka_cli -- {{args}}
 cli_r +args:
-    RUST_BACKTRACE=1 cargo run --bin czkawka_cli --release -- {{args}}
+    cargo run --bin czkawka_cli --release -- {{args}}
 cli_help:
     cargo run --bin czkawka_cli -- --help
 
@@ -71,3 +79,19 @@ fix_nightly:
     #    -Wclippy::missing_panics_doc
     #    -Wclippy::option_if_let_else
     #    -Wclippy::tuple_array_conversions
+
+test_resize arg:
+    cd misc/test_image_perf; cargo build --release; sudo ./target/release/test_image_perf "{{arg}}"
+    cd misc/test_image_perf; cargo build --release --features fast_image_resize; sudo ./target/release/test_image_perf "{{arg}}"
+
+unused_features:
+    unused-features analyze
+    unused-features build-report --input krokiet/report.json
+    unused-features build-report --input czkawka_cli/report.json
+    unused-features build-report --input czkawka_core/report.json
+    unused-features build-report --input czkawka_gui/report.json
+    xdg-open krokiet/report.html
+    xdg-open czkawka_cli/report.html
+    xdg-open czkawka_core/report.html
+    xdg-open czkawka_gui/report.html
+

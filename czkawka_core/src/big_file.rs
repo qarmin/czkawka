@@ -1,7 +1,9 @@
 use std::fs;
 use std::io::Write;
+use std::sync::Arc;
+use std::sync::atomic::AtomicBool;
 
-use crossbeam_channel::{Receiver, Sender};
+use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use humansize::{BINARY, format_size};
 use log::debug;
@@ -57,9 +59,9 @@ impl BigFile {
     }
 
     #[fun_time(message = "find_big_files", level = "info")]
-    pub fn find_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) {
+    pub fn find_big_files(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) {
         self.prepare_items();
-        if self.look_for_big_files(stop_receiver, progress_sender) == WorkContinueStatus::Stop {
+        if self.look_for_big_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
             self.common_data.stopped_search = true;
             return;
         }
@@ -68,10 +70,10 @@ impl BigFile {
     }
 
     #[fun_time(message = "look_for_big_files", level = "debug")]
-    fn look_for_big_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn look_for_big_files(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let result = DirTraversalBuilder::new()
             .group_by(|_fe| ())
-            .stop_receiver(stop_receiver)
+            .stop_flag(stop_flag)
             .progress_sender(progress_sender)
             .common_data(&self.common_data)
             .minimal_file_size(1)

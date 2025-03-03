@@ -19,7 +19,7 @@ const CACHE_DUPLICATE_VERSION: &str = "90";
 #[cfg(feature = "fast_image_resize")]
 const CACHE_IMAGE_VERSION: &str = "90_fast_resize";
 #[cfg(not(feature = "fast_image_resize"))]
-const CACHE_IMAGE_VERSION: &str = "90";
+const CACHE_IMAGE_VERSION: &str = "90_image_rs_resize";
 const CACHE_VIDEO_VERSION: &str = "90";
 
 pub fn get_broken_files_cache_file() -> String {

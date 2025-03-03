@@ -10,7 +10,7 @@ use std::time::UNIX_EPOCH;
 use strum::Display;
 use walkdir::WalkDir;
 
-const DIR_TO_CHECK: &str = "/media";
+const DIR_TO_CHECK: &str = "/home/rafal/TODO/B/Nefs and raws";
 const ITERATIONS: usize = 1;
 
 thread_local! {
@@ -80,7 +80,7 @@ fn main() {
             times
         };
 
-        let total_time_without_extremes = total_time - times.iter().min().unwrap_or_default() - times.iter().max().unwrap_or_default();
+        let total_time_without_extremes = total_time - times.iter().min().cloned().unwrap_or_default() - times.iter().max().cloned().unwrap_or_default();
         let all_iterations_time_without_extremes = total_time_without_extremes as f64 / 1000.0;
         println!(
             "Mode {}, {} iterations, total time: {} ms, per iteration time {} ms, total time without extremes: {} ms, per iteration time without extremes {} ms",
@@ -97,38 +97,38 @@ fn main() {
 fn array16(files: &Vec<DuplicateEntry>) {
     files.into_par_iter().for_each(|f| {
         let mut buffer = [0u8; 16 * 1024];
-        let _ = hash_calculation(&mut buffer, &f, HashType::Blake3, Arc::default(), None);
+        let _ = hash_calculation(&mut buffer, &f, HashType::Blake3, &Arc::default(), None);
     });
 }
 fn array256(files: &Vec<DuplicateEntry>) {
     files.into_par_iter().for_each(|f| {
         let mut buffer = [0u8; 256 * 1024];
-        let _ = hash_calculation(&mut buffer, &f, HashType::Blake3, Arc::default(), None);
+        let _ = hash_calculation(&mut buffer, &f, HashType::Blake3, &Arc::default(), None);
     });
 }
 fn vec16(files: &Vec<DuplicateEntry>) {
     files.into_par_iter().for_each(|f| {
         let mut buffer = vec![0u8; 16 * 1024];
-        let _ = hash_calculation(&mut buffer, &f, HashType::Blake3, Arc::default(), None);
+        let _ = hash_calculation(&mut buffer, &f, HashType::Blake3, &Arc::default(), None);
     });
 }
 fn vec1024(files: &Vec<DuplicateEntry>) {
     files.into_par_iter().for_each(|f| {
         let mut buffer = vec![0u8; 1024 * 1024];
-        let _ = hash_calculation(&mut buffer, &f, HashType::Blake3, Arc::default(), None);
+        let _ = hash_calculation(&mut buffer, &f, HashType::Blake3, &Arc::default(), None);
     });
 }
 fn vec1024_locking(files: &Vec<DuplicateEntry>) {
     files.into_par_iter().for_each(|f| {
         let _lock = GLOBAL_HDD_LOCK.lock().unwrap();
         let mut buffer = vec![0u8; 1024 * 1024];
-        let _ = hash_calculation(&mut buffer, &f, HashType::Blake3, Arc::default(), None);
+        let _ = hash_calculation(&mut buffer, &f, HashType::Blake3, &Arc::default(), None);
     });
 }
 fn vec1024_thread(files: &Vec<DuplicateEntry>) {
     files.into_par_iter().for_each(|f| {
         BUFFER.with(|buffer| {
-            let _ = hash_calculation(&mut buffer.borrow_mut(), &f, HashType::Blake3, Arc::default(), None);
+            let _ = hash_calculation(&mut buffer.borrow_mut(), &f, HashType::Blake3, &Arc::default(), None);
         });
     });
 }

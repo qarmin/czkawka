@@ -3,11 +3,11 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::{mem, panic};
 
 use anyhow::Context;
-use crossbeam_channel::{Receiver, Sender};
+use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use humansize::{BINARY, format_size};
 use lofty::file::{AudioFile, TaggedFileExt};
@@ -162,34 +162,34 @@ impl SameMusic {
     }
 
     #[fun_time(message = "find_same_music", level = "info")]
-    pub fn find_same_music(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) {
+    pub fn find_same_music(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) {
         self.prepare_items();
         self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
-        if self.check_files(stop_receiver, progress_sender) == WorkContinueStatus::Stop {
+        if self.check_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
             self.common_data.stopped_search = true;
             return;
         }
         match self.params.check_type {
             CheckingMethod::AudioTags => {
-                if self.read_tags(stop_receiver, progress_sender) == WorkContinueStatus::Stop {
+                if self.read_tags(stop_flag, progress_sender) == WorkContinueStatus::Stop {
                     self.common_data.stopped_search = true;
                     return;
                 }
-                if self.check_for_duplicate_tags(stop_receiver, progress_sender) == WorkContinueStatus::Stop {
+                if self.check_for_duplicate_tags(stop_flag, progress_sender) == WorkContinueStatus::Stop {
                     self.common_data.stopped_search = true;
                     return;
                 }
             }
             CheckingMethod::AudioContent => {
-                if self.read_tags(stop_receiver, progress_sender) == WorkContinueStatus::Stop {
+                if self.read_tags(stop_flag, progress_sender) == WorkContinueStatus::Stop {
                     self.common_data.stopped_search = true;
                     return;
                 }
-                if self.calculate_fingerprint(stop_receiver, progress_sender) == WorkContinueStatus::Stop {
+                if self.calculate_fingerprint(stop_flag, progress_sender) == WorkContinueStatus::Stop {
                     self.common_data.stopped_search = true;
                     return;
                 }
-                if self.check_for_duplicate_fingerprints(stop_receiver, progress_sender) == WorkContinueStatus::Stop {
+                if self.check_for_duplicate_fingerprints(stop_flag, progress_sender) == WorkContinueStatus::Stop {
                     self.common_data.stopped_search = true;
                     return;
                 }
@@ -201,7 +201,7 @@ impl SameMusic {
     }
 
     #[fun_time(message = "check_files", level = "debug")]
-    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_files(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         self.common_data.extensions.set_and_validate_allowed_extensions(AUDIO_FILES_EXTENSIONS);
         if !self.common_data.extensions.set_any_extensions() {
             return WorkContinueStatus::Continue;
@@ -209,7 +209,7 @@ impl SameMusic {
 
         let result = DirTraversalBuilder::new()
             .group_by(|_fe| ())
-            .stop_receiver(stop_receiver)
+            .stop_flag(stop_flag)
             .progress_sender(progress_sender)
             .common_data(&self.common_data)
             .checking_method(self.params.check_type)
@@ -283,7 +283,7 @@ impl SameMusic {
     }
 
     #[fun_time(message = "calculate_fingerprint", level = "debug")]
-    fn calculate_fingerprint(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn calculate_fingerprint(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.music_entries.is_empty() {
             return WorkContinueStatus::Continue;
         }
@@ -309,32 +309,39 @@ impl SameMusic {
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache(false);
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-        if check_if_stop_received(stop_receiver) {
+        if check_if_stop_received(stop_flag) {
             return WorkContinueStatus::Stop;
         }
 
-        let (progress_thread_handle, progress_thread_run, items_counter, check_was_stopped, _size_counter) = prepare_thread_handler_common(
+        let (progress_thread_handle, progress_thread_run, items_counter, check_was_stopped, size_counter) = prepare_thread_handler_common(
             progress_sender,
             CurrentStage::SameMusicCalculatingFingerprints,
             non_cached_files_to_check.len(),
             self.get_test_type(),
-            0,
+            non_cached_files_to_check.values().map(|e| e.size).sum::<u64>(),
         );
         let configuration = &self.hash_preset_config;
+
+        let non_cached_files_to_check = non_cached_files_to_check.into_iter().collect::<Vec<_>>();
 
         debug!("calculate_fingerprint - starting fingerprinting");
         let mut vec_file_entry = non_cached_files_to_check
             .into_par_iter()
+            .with_max_len(2)
             .map(|(path, mut music_entry)| {
-                items_counter.fetch_add(1, Ordering::Relaxed);
-                if check_if_stop_received(stop_receiver) {
+                if check_if_stop_received(stop_flag) {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
 
-                let Ok(fingerprint) = calc_fingerprint_helper(path, configuration) else {
+                let res = calc_fingerprint_helper(path, configuration);
+                size_counter.fetch_add(music_entry.size, Ordering::Relaxed);
+                items_counter.fetch_add(1, Ordering::Relaxed);
+
+                let Ok(fingerprint) = res else {
                     return Some(None);
                 };
+
                 music_entry.fingerprint = fingerprint;
 
                 Some(Some(music_entry))
@@ -357,14 +364,14 @@ impl SameMusic {
 
         // Break if stop was clicked after saving to cache
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-        if check_was_stopped.load(Ordering::Relaxed) || check_if_stop_received(stop_receiver) {
+        if check_was_stopped.load(Ordering::Relaxed) || check_if_stop_received(stop_flag) {
             return WorkContinueStatus::Stop;
         }
         WorkContinueStatus::Continue
     }
 
     #[fun_time(message = "read_tags", level = "debug")]
-    fn read_tags(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn read_tags(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.music_to_check.is_empty() {
             return WorkContinueStatus::Continue;
         }
@@ -375,7 +382,7 @@ impl SameMusic {
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache(true);
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-        if check_if_stop_received(stop_receiver) {
+        if check_if_stop_received(stop_flag) {
             return WorkContinueStatus::Stop;
         }
 
@@ -391,17 +398,15 @@ impl SameMusic {
         // Clean for duplicate files
         let mut vec_file_entry = non_cached_files_to_check
             .into_par_iter()
-            .map(|(path, mut music_entry)| {
-                items_counter.fetch_add(1, Ordering::Relaxed);
-                if check_if_stop_received(stop_receiver) {
+            .map(|(path, music_entry)| {
+                if check_if_stop_received(stop_flag) {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
-                if read_single_file_tags(&path, &mut music_entry) {
-                    Some(Some(music_entry))
-                } else {
-                    Some(None)
-                }
+
+                let res = read_single_file_tags(&path, music_entry);
+                items_counter.fetch_add(1, Ordering::Relaxed);
+                Some(res)
             })
             .while_some()
             .flatten()
@@ -429,7 +434,7 @@ impl SameMusic {
     }
 
     #[fun_time(message = "check_for_duplicate_tags", level = "debug")]
-    fn check_for_duplicate_tags(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_for_duplicate_tags(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.music_entries.is_empty() {
             return WorkContinueStatus::Continue;
         }
@@ -440,7 +445,7 @@ impl SameMusic {
         let mut new_duplicates: Vec<Vec<MusicEntry>> = Vec::new();
 
         if (self.params.music_similarity & MusicSimilarity::TRACK_TITLE) == MusicSimilarity::TRACK_TITLE {
-            if check_if_stop_received(stop_receiver) {
+            if check_if_stop_received(stop_flag) {
                 send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                 return WorkContinueStatus::Stop;
             }
@@ -448,7 +453,7 @@ impl SameMusic {
             old_duplicates = self.check_music_item(old_duplicates, &items_counter, |fe| &fe.track_title, self.params.approximate_comparison);
         }
         if (self.params.music_similarity & MusicSimilarity::TRACK_ARTIST) == MusicSimilarity::TRACK_ARTIST {
-            if check_if_stop_received(stop_receiver) {
+            if check_if_stop_received(stop_flag) {
                 send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                 return WorkContinueStatus::Stop;
             }
@@ -456,7 +461,7 @@ impl SameMusic {
             old_duplicates = self.check_music_item(old_duplicates, &items_counter, |fe| &fe.track_artist, self.params.approximate_comparison);
         }
         if (self.params.music_similarity & MusicSimilarity::YEAR) == MusicSimilarity::YEAR {
-            if check_if_stop_received(stop_receiver) {
+            if check_if_stop_received(stop_flag) {
                 send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                 return WorkContinueStatus::Stop;
             }
@@ -464,7 +469,7 @@ impl SameMusic {
             old_duplicates = self.check_music_item(old_duplicates, &items_counter, |fe| &fe.year, false);
         }
         if (self.params.music_similarity & MusicSimilarity::LENGTH) == MusicSimilarity::LENGTH {
-            if check_if_stop_received(stop_receiver) {
+            if check_if_stop_received(stop_flag) {
                 send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                 return WorkContinueStatus::Stop;
             }
@@ -472,7 +477,7 @@ impl SameMusic {
             old_duplicates = self.check_music_item(old_duplicates, &items_counter, |fe| &fe.length, false);
         }
         if (self.params.music_similarity & MusicSimilarity::GENRE) == MusicSimilarity::GENRE {
-            if check_if_stop_received(stop_receiver) {
+            if check_if_stop_received(stop_flag) {
                 send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                 return WorkContinueStatus::Stop;
             }
@@ -480,7 +485,7 @@ impl SameMusic {
             old_duplicates = self.check_music_item(old_duplicates, &items_counter, |fe| &fe.genre, false);
         }
         if (self.params.music_similarity & MusicSimilarity::BITRATE) == MusicSimilarity::BITRATE {
-            if check_if_stop_received(stop_receiver) {
+            if check_if_stop_received(stop_flag) {
                 send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                 return WorkContinueStatus::Stop;
             }
@@ -585,7 +590,7 @@ impl SameMusic {
     #[fun_time(message = "compare_fingerprints", level = "debug")]
     fn compare_fingerprints(
         &mut self,
-        stop_receiver: Option<&Receiver<()>>,
+        stop_flag: Option<&Arc<AtomicBool>>,
         items_counter: &Arc<AtomicUsize>,
         base_files: Vec<MusicEntry>,
         files_to_compare: &[MusicEntry],
@@ -600,7 +605,7 @@ impl SameMusic {
 
         for f_entry in base_files {
             items_counter.fetch_add(1, Ordering::Relaxed);
-            if check_if_stop_received(stop_receiver) {
+            if check_if_stop_received(stop_flag) {
                 return None;
             }
 
@@ -647,7 +652,7 @@ impl SameMusic {
     }
 
     #[fun_time(message = "check_for_duplicate_fingerprints", level = "debug")]
-    fn check_for_duplicate_fingerprints(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_for_duplicate_fingerprints(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.music_entries.is_empty() {
             return WorkContinueStatus::Continue;
         }
@@ -661,7 +666,7 @@ impl SameMusic {
         let mut duplicated_music_entries = Vec::new();
         for group in grouped_files_to_check {
             let GroupedFilesToCheck { base_files, files_to_compare } = group;
-            let Some(temp_music_entries) = self.compare_fingerprints(stop_receiver, &items_counter, base_files, &files_to_compare) else {
+            let Some(temp_music_entries) = self.compare_fingerprints(stop_flag, &items_counter, base_files, &files_to_compare) else {
                 send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                 return WorkContinueStatus::Stop;
             };
@@ -835,18 +840,18 @@ fn calc_fingerprint_helper(path: impl AsRef<Path>, config: &Configuration) -> an
     Ok(printer.fingerprint().to_vec())
 }
 
-fn read_single_file_tags(path: &str, music_entry: &mut MusicEntry) -> bool {
+fn read_single_file_tags(path: &str, mut music_entry: MusicEntry) -> Option<MusicEntry> {
     let Ok(mut file) = File::open(path) else {
-        return false;
+        return None;
     };
 
     let Ok(possible_tagged_file) = panic::catch_unwind(move || read_from(&mut file).ok()) else {
         let message = create_crash_message("Lofty", path, "https://github.com/image-rs/image/issues");
         println!("{message}");
-        return false;
+        return None;
     };
 
-    let Some(tagged_file) = possible_tagged_file else { return true };
+    let Some(tagged_file) = possible_tagged_file else { return Some(music_entry) };
 
     let properties = tagged_file.properties();
 
@@ -911,7 +916,7 @@ fn read_single_file_tags(path: &str, music_entry: &mut MusicEntry) -> bool {
     music_entry.genre = genre;
     music_entry.bitrate = bitrate;
 
-    true
+    Some(music_entry)
 }
 
 impl DebugPrint for SameMusic {

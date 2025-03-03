@@ -483,14 +483,14 @@ progress_scanning_general_file = {$file_number ->
 }
 
 progress_scanning_extension_of_files = Checking extension of {$file_checked}/{$all_files} file
-progress_scanning_broken_files = Checking {$file_checked}/{$all_files} file
+progress_scanning_broken_files = Checking {$file_checked}/{$all_files} file ({$data_checked}/{$all_data})
 progress_scanning_video = Hashing of {$file_checked}/{$all_files} video
 progress_scanning_image = Hashing of {$file_checked}/{$all_files} image ({$data_checked}/{$all_data})
 progress_comparing_image_hashes = Comparing {$file_checked}/{$all_files} image hash
 progress_scanning_music_tags_end = Comparing tags of {$file_checked}/{$all_files} music file
 progress_scanning_music_tags = Reading tags of {$file_checked}/{$all_files} music file
 progress_scanning_music_content_end = Comparing fingerprint of {$file_checked}/{$all_files} music file
-progress_scanning_music_content = Calculating fingerprint of {$file_checked}/{$all_files} music file
+progress_scanning_music_content = Calculating fingerprint of {$file_checked}/{$all_files} music file ({$data_checked}/{$all_data})
 progress_scanning_empty_folders = {$folder_number -> 
         [one] Scanning {$folder_number} folder
        *[other] Scanning {$folder_number} folders

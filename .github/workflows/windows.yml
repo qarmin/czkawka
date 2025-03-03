@@ -139,10 +139,10 @@ jobs:
             windows_krokiet_on_windows_console.exe
           token: ${{ secrets.PAT_REPOSITORY }}
 
-  container_4_10:
+  container_4_12:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/mglolenstine/gtk4-cross:gtk-4.10
+      image: ghcr.io/mglolenstine/gtk4-cross:gtk-4.12
     steps:
       - uses: actions/checkout@v4
       - name: Install additional dependencies
@@ -190,21 +190,21 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: czkawka-windows-${{ github.sha }}-4.10
+          name: czkawka-windows-${{ github.sha }}-4.12
           path: |
             ./package
           if-no-files-found: error
 
       - name: Prepare files to release
         run: |
-          mv ./package windows_czkawka_gui_gtk_410.zip
+          mv ./package windows_czkawka_gui_gtk_412.zip
       - name: Release
         uses: softprops/action-gh-release@v2
         if: ${{ github.ref == 'refs/heads/master' }}
         with:
           tag_name: "Nightly"
           files: |
-            windows_czkawka_gui_gtk_410.zip
+            windows_czkawka_gui_gtk_412.zip
           token: ${{ secrets.PAT_REPOSITORY }}
 
   container_4_6:

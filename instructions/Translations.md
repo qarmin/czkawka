@@ -1,6 +1,6 @@
 # Translations
 
-New feature in Czkawka 4.0 is ability to translate interface of GTK app.
+New feature in Czkawka 4.0 is ability to translate interface of GTK app(only GTK, Slint frontend currently not have ability to do this).
 
 App use Fluent localization system - https://projectfluent.org/
 

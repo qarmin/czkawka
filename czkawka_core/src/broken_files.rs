@@ -2,10 +2,11 @@ use std::collections::{BTreeMap, HashSet};
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::{Path, PathBuf};
-use std::sync::atomic::Ordering;
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::{fs, mem, panic};
 
-use crossbeam_channel::{Receiver, Sender};
+use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use log::debug;
 use pdf::PdfError;
@@ -114,13 +115,13 @@ impl BrokenFiles {
     }
 
     #[fun_time(message = "find_broken_files", level = "info")]
-    pub fn find_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) {
+    pub fn find_broken_files(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) {
         self.prepare_items();
-        if self.check_files(stop_receiver, progress_sender) == WorkContinueStatus::Stop {
+        if self.check_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
             self.common_data.stopped_search = true;
             return;
         }
-        if self.look_for_broken_files(stop_receiver, progress_sender) == WorkContinueStatus::Stop {
+        if self.look_for_broken_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
             self.common_data.stopped_search = true;
             return;
         }
@@ -129,7 +130,7 @@ impl BrokenFiles {
     }
 
     #[fun_time(message = "check_files", level = "debug")]
-    fn check_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_files(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let zip_extensions = ZIP_FILES_EXTENSIONS.iter().collect::<HashSet<_>>();
         let audio_extensions = AUDIO_FILES_EXTENSIONS.iter().collect::<HashSet<_>>();
         let pdf_extensions = PDF_FILES_EXTENSIONS.iter().collect::<HashSet<_>>();
@@ -157,7 +158,7 @@ impl BrokenFiles {
 
         let result = DirTraversalBuilder::new()
             .group_by(|_fe| ())
-            .stop_receiver(stop_receiver)
+            .stop_flag(stop_flag)
             .progress_sender(progress_sender)
             .common_data(&self.common_data)
             .build()
@@ -295,34 +296,51 @@ impl BrokenFiles {
         (loaded_hash_map, records_already_cached, non_cached_files_to_check)
     }
 
+    fn check_file(&self, file_entry: BrokenEntry) -> Option<BrokenEntry> {
+        match file_entry.type_of_file {
+            TypeOfFile::Image => self.check_broken_image(file_entry),
+            TypeOfFile::ArchiveZip => self.check_broken_zip(file_entry),
+            TypeOfFile::Audio => self.check_broken_audio(file_entry),
+            TypeOfFile::PDF => self.check_broken_pdf(file_entry),
+            // This means that cache read invalid value because maybe cache comes from different czkawka version
+            TypeOfFile::Unknown => None,
+        }
+    }
+
     #[fun_time(message = "look_for_broken_files", level = "debug")]
-    fn look_for_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn look_for_broken_files(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.files_to_check.is_empty() {
             return WorkContinueStatus::Continue;
         }
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache();
 
-        let (progress_thread_handle, progress_thread_run, items_counter, _check_was_stopped, _size_counter) =
-            prepare_thread_handler_common(progress_sender, CurrentStage::BrokenFilesChecking, non_cached_files_to_check.len(), self.get_test_type(), 0);
+        let (progress_thread_handle, progress_thread_run, items_counter, _check_was_stopped, size_counter) = prepare_thread_handler_common(
+            progress_sender,
+            CurrentStage::BrokenFilesChecking,
+            non_cached_files_to_check.len(),
+            self.get_test_type(),
+            non_cached_files_to_check.values().map(|item| item.size).sum::<u64>(),
+        );
+
+        let non_cached_files_to_check = non_cached_files_to_check.into_iter().collect::<Vec<_>>();
 
         debug!("look_for_broken_files - started finding for broken files");
         let mut vec_file_entry: Vec<BrokenEntry> = non_cached_files_to_check
             .into_par_iter()
+            .with_max_len(3)
             .map(|(_, file_entry)| {
-                items_counter.fetch_add(1, Ordering::Relaxed);
-                if check_if_stop_received(stop_receiver) {
+                if check_if_stop_received(stop_flag) {
                     return None;
                 }
 
-                match file_entry.type_of_file {
-                    TypeOfFile::Image => Some(self.check_broken_image(file_entry)),
-                    TypeOfFile::ArchiveZip => Some(self.check_broken_zip(file_entry)),
-                    TypeOfFile::Audio => Some(self.check_broken_audio(file_entry)),
-                    TypeOfFile::PDF => Some(self.check_broken_pdf(file_entry)),
-                    // This means that cache read invalid value because maybe cache comes from different czkawka version
-                    TypeOfFile::Unknown => Some(None),
-                }
+                let size = file_entry.size;
+                let res = self.check_file(file_entry);
+
+                items_counter.fetch_add(1, Ordering::Relaxed);
+                size_counter.fetch_add(size, Ordering::Relaxed);
+
+                Some(res)
             })
             .while_some()
             .flatten()

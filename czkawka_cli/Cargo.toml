@@ -16,15 +16,13 @@ clap = { version = "4.5", features = ["derive"] }
 image_hasher = "3.0"
 
 log = "0.4.22"
-handsome_logger = "0.8"
-fun_time = { version = "0.3", features = ["log"] }
 czkawka_core = { path = "../czkawka_core", version = "8.0.0", features = [] }
 indicatif = "0.17"
 crossbeam-channel = { version = "0.5", features = [] }
 ctrlc = { version = "3.4", features = ["termination"] }
 
 [features]
-default = []
+default = ["fast_image_resize"]
 heif = ["czkawka_core/heif"]
 libraw = ["czkawka_core/libraw"]
 libavif = ["czkawka_core/libavif"]

@@ -77,160 +77,155 @@ pub fn connect_compute_results(gui_data: &GuiData, result_receiver: Receiver<Mes
 
     glib::spawn_future_local(async move {
         loop {
-            loop {
-                let msg = result_receiver.try_recv();
-                if let Ok(msg) = msg {
-                    buttons_search.show();
+            while let Ok(msg) = result_receiver.try_recv() {
+                buttons_search.show();
 
-                    notebook_main.set_sensitive(true);
-                    notebook_upper.set_sensitive(true);
-                    button_settings.set_sensitive(true);
-                    button_app_info.set_sensitive(true);
+                notebook_main.set_sensitive(true);
+                notebook_upper.set_sensitive(true);
+                button_settings.set_sensitive(true);
+                button_app_info.set_sensitive(true);
 
-                    window_progress.hide();
+                window_progress.hide();
 
-                    taskbar_state.borrow().hide();
+                taskbar_state.borrow().hide();
 
-                    let hash_size_index = combo_box_image_hash_size.active().expect("Failed to get active item") as usize;
-                    let hash_size = IMAGES_HASH_SIZE_COMBO_BOX[hash_size_index] as u8;
+                let hash_size_index = combo_box_image_hash_size.active().expect("Failed to get active item") as usize;
+                let hash_size = IMAGES_HASH_SIZE_COMBO_BOX[hash_size_index] as u8;
 
-                    match msg {
-                        Message::Duplicates(df) => {
-                            compute_duplicate_finder(
-                                df,
-                                &entry_info,
-                                &tree_view_duplicate_finder,
-                                &text_view_errors,
-                                &shared_duplication_state,
-                                &shared_buttons,
-                                &buttons_array,
-                                &buttons_names,
-                            );
-                        }
-                        Message::EmptyFolders(ef) => {
-                            compute_empty_folders(
-                                ef,
-                                &entry_info,
-                                &tree_view_empty_folder_finder,
-                                &text_view_errors,
-                                &shared_empty_folders_state,
-                                &shared_buttons,
-                                &buttons_array,
-                                &buttons_names,
-                            );
-                        }
-                        Message::EmptyFiles(vf) => {
-                            compute_empty_files(
-                                vf,
-                                &entry_info,
-                                &tree_view_empty_files_finder,
-                                &text_view_errors,
-                                &shared_empty_files_state,
-                                &shared_buttons,
-                                &buttons_array,
-                                &buttons_names,
-                            );
-                        }
-                        Message::BigFiles(bf) => {
-                            compute_big_files(
-                                bf,
-                                &entry_info,
-                                &tree_view_big_files_finder,
-                                &text_view_errors,
-                                &shared_big_files_state,
-                                &shared_buttons,
-                                &buttons_array,
-                                &buttons_names,
-                            );
-                        }
-                        Message::Temporary(tf) => {
-                            compute_temporary_files(
-                                tf,
-                                &entry_info,
-                                &tree_view_temporary_files_finder,
-                                &text_view_errors,
-                                &shared_temporary_files_state,
-                                &shared_buttons,
-                                &buttons_array,
-                                &buttons_names,
-                            );
-                        }
-                        Message::SimilarImages(sf) => {
-                            compute_similar_images(
-                                sf,
-                                &entry_info,
-                                &tree_view_similar_images_finder,
-                                &text_view_errors,
-                                &shared_similar_images_state,
-                                &shared_buttons,
-                                &buttons_array,
-                                &buttons_names,
-                                hash_size,
-                            );
-                        }
-                        Message::SimilarVideos(ff) => {
-                            compute_similar_videos(
-                                ff,
-                                &entry_info,
-                                &tree_view_similar_videos_finder,
-                                &text_view_errors,
-                                &shared_similar_videos_state,
-                                &shared_buttons,
-                                &buttons_array,
-                                &buttons_names,
-                            );
-                        }
-                        Message::SameMusic(mf) => {
-                            compute_same_music(
-                                mf,
-                                &entry_info,
-                                &tree_view_same_music_finder,
-                                &text_view_errors,
-                                &shared_same_music_state,
-                                &shared_buttons,
-                                &buttons_array,
-                                &buttons_names,
-                            );
-                        }
-                        Message::InvalidSymlinks(ifs) => {
-                            compute_invalid_symlinks(
-                                ifs,
-                                &entry_info,
-                                &tree_view_invalid_symlinks,
-                                &text_view_errors,
-                                &shared_same_invalid_symlinks,
-                                &shared_buttons,
-                                &buttons_array,
-                                &buttons_names,
-                            );
-                        }
-                        Message::BrokenFiles(br) => {
-                            compute_broken_files(
-                                br,
-                                &entry_info,
-                                &tree_view_broken_files,
-                                &text_view_errors,
-                                &shared_broken_files_state,
-                                &shared_buttons,
-                                &buttons_array,
-                                &buttons_names,
-                            );
-                        }
-                        Message::BadExtensions(be) => {
-                            compute_bad_extensions(
-                                be,
-                                &entry_info,
-                                &tree_view_bad_extensions,
-                                &text_view_errors,
-                                &shared_bad_extensions_state,
-                                &shared_buttons,
-                                &buttons_array,
-                                &buttons_names,
-                            );
-                        }
+                match msg {
+                    Message::Duplicates(df) => {
+                        compute_duplicate_finder(
+                            df,
+                            &entry_info,
+                            &tree_view_duplicate_finder,
+                            &text_view_errors,
+                            &shared_duplication_state,
+                            &shared_buttons,
+                            &buttons_array,
+                            &buttons_names,
+                        );
                     }
-                } else {
-                    break;
+                    Message::EmptyFolders(ef) => {
+                        compute_empty_folders(
+                            ef,
+                            &entry_info,
+                            &tree_view_empty_folder_finder,
+                            &text_view_errors,
+                            &shared_empty_folders_state,
+                            &shared_buttons,
+                            &buttons_array,
+                            &buttons_names,
+                        );
+                    }
+                    Message::EmptyFiles(vf) => {
+                        compute_empty_files(
+                            vf,
+                            &entry_info,
+                            &tree_view_empty_files_finder,
+                            &text_view_errors,
+                            &shared_empty_files_state,
+                            &shared_buttons,
+                            &buttons_array,
+                            &buttons_names,
+                        );
+                    }
+                    Message::BigFiles(bf) => {
+                        compute_big_files(
+                            bf,
+                            &entry_info,
+                            &tree_view_big_files_finder,
+                            &text_view_errors,
+                            &shared_big_files_state,
+                            &shared_buttons,
+                            &buttons_array,
+                            &buttons_names,
+                        );
+                    }
+                    Message::Temporary(tf) => {
+                        compute_temporary_files(
+                            tf,
+                            &entry_info,
+                            &tree_view_temporary_files_finder,
+                            &text_view_errors,
+                            &shared_temporary_files_state,
+                            &shared_buttons,
+                            &buttons_array,
+                            &buttons_names,
+                        );
+                    }
+                    Message::SimilarImages(sf) => {
+                        compute_similar_images(
+                            sf,
+                            &entry_info,
+                            &tree_view_similar_images_finder,
+                            &text_view_errors,
+                            &shared_similar_images_state,
+                            &shared_buttons,
+                            &buttons_array,
+                            &buttons_names,
+                            hash_size,
+                        );
+                    }
+                    Message::SimilarVideos(ff) => {
+                        compute_similar_videos(
+                            ff,
+                            &entry_info,
+                            &tree_view_similar_videos_finder,
+                            &text_view_errors,
+                            &shared_similar_videos_state,
+                            &shared_buttons,
+                            &buttons_array,
+                            &buttons_names,
+                        );
+                    }
+                    Message::SameMusic(mf) => {
+                        compute_same_music(
+                            mf,
+                            &entry_info,
+                            &tree_view_same_music_finder,
+                            &text_view_errors,
+                            &shared_same_music_state,
+                            &shared_buttons,
+                            &buttons_array,
+                            &buttons_names,
+                        );
+                    }
+                    Message::InvalidSymlinks(ifs) => {
+                        compute_invalid_symlinks(
+                            ifs,
+                            &entry_info,
+                            &tree_view_invalid_symlinks,
+                            &text_view_errors,
+                            &shared_same_invalid_symlinks,
+                            &shared_buttons,
+                            &buttons_array,
+                            &buttons_names,
+                        );
+                    }
+                    Message::BrokenFiles(br) => {
+                        compute_broken_files(
+                            br,
+                            &entry_info,
+                            &tree_view_broken_files,
+                            &text_view_errors,
+                            &shared_broken_files_state,
+                            &shared_buttons,
+                            &buttons_array,
+                            &buttons_names,
+                        );
+                    }
+                    Message::BadExtensions(be) => {
+                        compute_bad_extensions(
+                            be,
+                            &entry_info,
+                            &tree_view_bad_extensions,
+                            &text_view_errors,
+                            &shared_bad_extensions_state,
+                            &shared_buttons,
+                            &buttons_array,
+                            &buttons_names,
+                        );
+                    }
                 }
             }
             glib::timeout_future(Duration::from_millis(300)).await;
@@ -737,17 +732,9 @@ fn compute_similar_images(
             let list_store = get_list_store(tree_view);
 
             if sf.get_use_reference() {
-                let vec_struct_similar: &Vec<(ImagesEntry, Vec<ImagesEntry>)> = sf.get_similar_images_referenced();
-                for (base_file_entry, vec_file_entry) in vec_struct_similar {
-                    // Sort
-                    let vec_file_entry = if vec_file_entry.len() >= 2 {
-                        let mut vec_file_entry = vec_file_entry.clone();
-                        // Use comparison by similarity, because it is more important that path here
-                        vec_file_entry.par_sort_unstable_by_key(|e| e.similarity);
-                        vec_file_entry
-                    } else {
-                        vec_file_entry.clone()
-                    };
+                let vec_struct_similar: Vec<(ImagesEntry, Vec<ImagesEntry>)> = sf.get_similar_images_referenced().clone();
+                for (base_file_entry, mut vec_file_entry) in vec_struct_similar {
+                    vec_file_entry.sort_by_key(|e| e.similarity);
 
                     // Header
                     let (directory, file) = split_path(&base_file_entry.path);
@@ -780,17 +767,9 @@ fn compute_similar_images(
                     }
                 }
             } else {
-                let vec_struct_similar = sf.get_similar_images();
-                for vec_file_entry in vec_struct_similar {
-                    // Sort
-                    let vec_file_entry = if vec_file_entry.len() >= 2 {
-                        let mut vec_file_entry = vec_file_entry.clone();
-                        // Use comparison by similarity, because it is more important that path here
-                        vec_file_entry.par_sort_unstable_by_key(|e| e.similarity);
-                        vec_file_entry
-                    } else {
-                        vec_file_entry.clone()
-                    };
+                let vec_struct_similar = sf.get_similar_images().clone();
+                for mut vec_file_entry in vec_struct_similar {
+                    vec_file_entry.sort_by_key(|e| e.similarity);
 
                     similar_images_add_to_list_store(&list_store, "", "", 0, 0, "", 0, 0, true, false);
                     for file_entry in &vec_file_entry {

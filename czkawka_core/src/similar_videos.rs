@@ -2,9 +2,10 @@ use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::io::Write;
 use std::mem;
 use std::path::{Path, PathBuf};
-use std::sync::atomic::Ordering;
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 
-use crossbeam_channel::{Receiver, Sender};
+use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use humansize::{BINARY, format_size};
 use log::debug;
@@ -114,7 +115,7 @@ impl SimilarVideos {
     }
 
     #[fun_time(message = "find_similar_videos", level = "info")]
-    pub fn find_similar_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) {
+    pub fn find_similar_videos(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) {
         if !ffmpeg_cmdline_utils::ffmpeg_and_ffprobe_are_callable() {
             self.common_data.text_messages.errors.push(flc!("core_ffmpeg_not_found"));
             #[cfg(target_os = "windows")]
@@ -127,11 +128,11 @@ impl SimilarVideos {
         } else {
             self.prepare_items();
             self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
-            if self.check_for_similar_videos(stop_receiver, progress_sender) == WorkContinueStatus::Stop {
+            if self.check_for_similar_videos(stop_flag, progress_sender) == WorkContinueStatus::Stop {
                 self.common_data.stopped_search = true;
                 return;
             }
-            if self.sort_videos(stop_receiver, progress_sender) == WorkContinueStatus::Stop {
+            if self.sort_videos(stop_flag, progress_sender) == WorkContinueStatus::Stop {
                 self.common_data.stopped_search = true;
                 return;
             }
@@ -141,7 +142,7 @@ impl SimilarVideos {
     }
 
     #[fun_time(message = "check_for_similar_videos", level = "debug")]
-    fn check_for_similar_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_for_similar_videos(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         self.common_data.extensions.set_and_validate_allowed_extensions(VIDEO_FILES_EXTENSIONS);
         if !self.common_data.extensions.set_any_extensions() {
             return WorkContinueStatus::Continue;
@@ -149,7 +150,7 @@ impl SimilarVideos {
 
         let result = DirTraversalBuilder::new()
             .group_by(inode)
-            .stop_receiver(stop_receiver)
+            .stop_flag(stop_flag)
             .progress_sender(progress_sender)
             .common_data(&self.common_data)
             .build()
@@ -196,45 +197,51 @@ impl SimilarVideos {
         (loaded_hash_map, records_already_cached, non_cached_files_to_check)
     }
 
+    fn check_video_file_entry(&self, mut file_entry: VideosEntry) -> VideosEntry {
+        let vhash = match ffmpeg_builder::VideoHashBuilder::default().hash(file_entry.path.clone()) {
+            Ok(t) => t,
+            Err(e) => {
+                file_entry.error = format!("Failed to hash file, reason {e}");
+                return file_entry;
+            }
+        };
+
+        file_entry.vhash = vhash;
+
+        file_entry
+    }
+
     #[fun_time(message = "sort_videos", level = "debug")]
-    fn sort_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn sort_videos(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.videos_to_check.is_empty() {
             return WorkContinueStatus::Continue;
         }
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache_at_start();
 
-        let (progress_thread_handle, progress_thread_run, items_counter, check_was_stopped, _size_counter) = prepare_thread_handler_common(
+        let (progress_thread_handle, progress_thread_run, items_counter, check_was_stopped, size_counter) = prepare_thread_handler_common(
             progress_sender,
             CurrentStage::SimilarVideosCalculatingHashes,
             non_cached_files_to_check.len(),
             self.get_test_type(),
-            0,
+            non_cached_files_to_check.values().map(|e| e.size).sum(),
         );
 
         let mut vec_file_entry: Vec<VideosEntry> = non_cached_files_to_check
-            .par_iter()
-            .map(|file_entry| {
-                items_counter.fetch_add(1, Ordering::Relaxed);
-                if check_if_stop_received(stop_receiver) {
+            .into_par_iter()
+            .map(|(_, file_entry)| {
+                if check_if_stop_received(stop_flag) {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
-                let mut file_entry = file_entry.1.clone();
 
-                let vhash = match ffmpeg_builder::VideoHashBuilder::default().hash(file_entry.path.clone()) {
-                    Ok(t) => t,
-                    Err(e) => {
-                        return {
-                            file_entry.error = format!("Failed to hash file, reason {e}");
-                            Some(file_entry)
-                        };
-                    }
-                };
+                let size = file_entry.size;
+                let res = self.check_video_file_entry(file_entry);
 
-                file_entry.vhash = vhash;
+                items_counter.fetch_add(1, Ordering::Relaxed);
+                size_counter.fetch_add(size, Ordering::Relaxed);
 
-                Some(file_entry)
+                Some(res)
             })
             .while_some()
             .collect::<Vec<VideosEntry>>();

@@ -1,13 +1,14 @@
 use std::rc::Rc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
 
 use chrono::DateTime;
-use crossbeam_channel::{Receiver, Sender};
+use crossbeam_channel::Sender;
 use czkawka_core::bad_extensions::{BadExtensions, BadExtensionsParameters, BadFileEntry};
 use czkawka_core::big_file::{BigFile, BigFileParameters, SearchMode};
 use czkawka_core::broken_files::{BrokenEntry, BrokenFiles, BrokenFilesParameters, CheckedTypes};
-use czkawka_core::common::{split_path, split_path_compare, DEFAULT_THREAD_SIZE};
+use czkawka_core::common::{DEFAULT_THREAD_SIZE, split_path, split_path_compare};
 use czkawka_core::common_dir_traversal::{CheckingMethod, FileEntry};
 use czkawka_core::common_tool::CommonData;
 use czkawka_core::common_traits::ResultEntry;
@@ -21,20 +22,20 @@ use czkawka_core::similar_images;
 use czkawka_core::similar_images::{ImagesEntry, SimilarImages, SimilarImagesParameters};
 use czkawka_core::similar_videos::{SimilarVideos, SimilarVideosParameters, VideosEntry};
 use czkawka_core::temporary::{Temporary, TemporaryFileEntry};
-use humansize::{format_size, BINARY};
+use humansize::{BINARY, format_size};
 use rayon::prelude::*;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
 
 use crate::common::{check_if_all_included_dirs_are_referenced, check_if_there_are_any_included_folders, split_u64_into_i32s};
 use crate::settings::{
-    collect_settings, get_audio_check_type_idx, get_biggest_item_idx, get_duplicates_check_method_idx, get_duplicates_hash_type_idx, get_image_hash_alg_idx,
-    get_resize_algorithm_idx, SettingsCustom, ALLOWED_AUDIO_CHECK_TYPE_VALUES, ALLOWED_BIG_FILE_SIZE_VALUES, ALLOWED_DUPLICATES_CHECK_METHOD_VALUES,
-    ALLOWED_DUPLICATES_HASH_TYPE_VALUES, ALLOWED_IMAGE_HASH_ALG_VALUES, ALLOWED_RESIZE_ALGORITHM_VALUES,
+    ALLOWED_AUDIO_CHECK_TYPE_VALUES, ALLOWED_BIG_FILE_SIZE_VALUES, ALLOWED_DUPLICATES_CHECK_METHOD_VALUES, ALLOWED_DUPLICATES_HASH_TYPE_VALUES, ALLOWED_IMAGE_HASH_ALG_VALUES,
+    ALLOWED_RESIZE_ALGORITHM_VALUES, SettingsCustom, collect_settings, get_audio_check_type_idx, get_biggest_item_idx, get_duplicates_check_method_idx,
+    get_duplicates_hash_type_idx, get_image_hash_alg_idx, get_resize_algorithm_idx,
 };
 use crate::shared_models::SharedModels;
 use crate::{CurrentTab, GuiState, MainListModel, MainWindow, ProgressToSend};
 
-pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_receiver: Receiver<()>, shared_models: Arc<Mutex<SharedModels>>) {
+pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>, shared_models: Arc<Mutex<SharedModels>>) {
     let a = app.as_weak();
     app.on_scan_starting(move |active_tab| {
         let app = a.upgrade().expect("Failed to upgrade app :(");
@@ -50,7 +51,7 @@ pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressDat
         }
 
         let progress_sender = progress_sender.clone();
-        let stop_receiver = stop_receiver.clone();
+        let stop_flag = stop_flag.clone();
 
         app.set_progress_datas(ProgressToSend {
             all_progress: 0,
@@ -66,37 +67,37 @@ pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressDat
         let a = app.as_weak();
         match active_tab {
             CurrentTab::DuplicateFiles => {
-                scan_duplicates(a, progress_sender, stop_receiver, custom_settings, cloned_model);
+                scan_duplicates(a, progress_sender, stop_flag, custom_settings, cloned_model);
             }
             CurrentTab::EmptyFolders => {
-                scan_empty_folders(a, progress_sender, stop_receiver, custom_settings, cloned_model);
+                scan_empty_folders(a, progress_sender, stop_flag, custom_settings, cloned_model);
             }
             CurrentTab::BigFiles => {
-                scan_big_files(a, progress_sender, stop_receiver, custom_settings, cloned_model);
+                scan_big_files(a, progress_sender, stop_flag, custom_settings, cloned_model);
             }
             CurrentTab::EmptyFiles => {
-                scan_empty_files(a, progress_sender, stop_receiver, custom_settings, cloned_model);
+                scan_empty_files(a, progress_sender, stop_flag, custom_settings, cloned_model);
             }
             CurrentTab::SimilarImages => {
-                scan_similar_images(a, progress_sender, stop_receiver, custom_settings, cloned_model);
+                scan_similar_images(a, progress_sender, stop_flag, custom_settings, cloned_model);
             }
             CurrentTab::SimilarVideos => {
-                scan_similar_videos(a, progress_sender, stop_receiver, custom_settings, cloned_model);
+                scan_similar_videos(a, progress_sender, stop_flag, custom_settings, cloned_model);
             }
             CurrentTab::SimilarMusic => {
-                scan_similar_music(a, progress_sender, stop_receiver, custom_settings, cloned_model);
+                scan_similar_music(a, progress_sender, stop_flag, custom_settings, cloned_model);
             }
             CurrentTab::InvalidSymlinks => {
-                scan_invalid_symlinks(a, progress_sender, stop_receiver, custom_settings, cloned_model);
+                scan_invalid_symlinks(a, progress_sender, stop_flag, custom_settings, cloned_model);
             }
             CurrentTab::BadExtensions => {
-                scan_bad_extensions(a, progress_sender, stop_receiver, custom_settings, cloned_model);
+                scan_bad_extensions(a, progress_sender, stop_flag, custom_settings, cloned_model);
             }
             CurrentTab::BrokenFiles => {
-                scan_broken_files(a, progress_sender, stop_receiver, custom_settings, cloned_model);
+                scan_broken_files(a, progress_sender, stop_flag, custom_settings, cloned_model);
             }
             CurrentTab::TemporaryFiles => {
-                scan_temporary_files(a, progress_sender, stop_receiver, custom_settings, cloned_model);
+                scan_temporary_files(a, progress_sender, stop_flag, custom_settings, cloned_model);
             }
             CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
         }
@@ -108,7 +109,7 @@ pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressDat
 fn scan_duplicates(
     a: Weak<MainWindow>,
     progress_sender: Sender<ProgressData>,
-    stop_receiver: Receiver<()>,
+    stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
@@ -130,9 +131,9 @@ fn scan_duplicates(
             );
             let mut item = DuplicateFinder::new(params);
 
-            set_common_settings(&mut item, &custom_settings);
+            set_common_settings(&mut item, &custom_settings, &stop_flag);
             item.set_delete_outdated_cache(custom_settings.duplicate_delete_outdated_entries);
-            item.find_duplicates(Some(&stop_receiver), Some(&progress_sender));
+            item.find_duplicates(Some(&stop_flag), Some(&progress_sender));
             let messages = item.get_text_messages().create_messages_text();
 
             let mut vector;
@@ -229,7 +230,7 @@ fn prepare_data_model_duplicates(fe: &DuplicateEntry) -> (ModelRc<SharedString>,
 fn scan_empty_folders(
     a: Weak<MainWindow>,
     progress_sender: Sender<ProgressData>,
-    stop_receiver: Receiver<()>,
+    stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
@@ -237,8 +238,8 @@ fn scan_empty_folders(
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
             let mut item = EmptyFolder::new();
-            set_common_settings(&mut item, &custom_settings);
-            item.find_empty_folders(Some(&stop_receiver), Some(&progress_sender));
+            set_common_settings(&mut item, &custom_settings, &stop_flag);
+            item.find_empty_folders(Some(&stop_flag), Some(&progress_sender));
 
             let mut vector = item.get_empty_folder_list().values().cloned().collect::<Vec<_>>();
             let messages = item.get_text_messages().create_messages_text();
@@ -284,7 +285,7 @@ fn prepare_data_model_empty_folders(fe: &FolderEntry) -> (ModelRc<SharedString>,
 fn scan_big_files(
     a: Weak<MainWindow>,
     progress_sender: Sender<ProgressData>,
-    stop_receiver: Receiver<()>,
+    stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
@@ -295,8 +296,8 @@ fn scan_big_files(
             let params = BigFileParameters::new(custom_settings.biggest_files_sub_number_of_files as usize, big_files_mode);
             let mut item = BigFile::new(params);
 
-            set_common_settings(&mut item, &custom_settings);
-            item.find_big_files(Some(&stop_receiver), Some(&progress_sender));
+            set_common_settings(&mut item, &custom_settings, &stop_flag);
+            item.find_big_files(Some(&stop_flag), Some(&progress_sender));
 
             let mut vector = item.get_big_files().clone();
             let messages = item.get_text_messages().create_messages_text();
@@ -348,7 +349,7 @@ fn prepare_data_model_big_files(fe: &FileEntry) -> (ModelRc<SharedString>, Model
 fn scan_empty_files(
     a: Weak<MainWindow>,
     progress_sender: Sender<ProgressData>,
-    stop_receiver: Receiver<()>,
+    stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
@@ -356,8 +357,8 @@ fn scan_empty_files(
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
             let mut item = EmptyFiles::new();
-            set_common_settings(&mut item, &custom_settings);
-            item.find_empty_files(Some(&stop_receiver), Some(&progress_sender));
+            set_common_settings(&mut item, &custom_settings, &stop_flag);
+            item.find_empty_files(Some(&stop_flag), Some(&progress_sender));
 
             let mut vector = item.get_empty_files().clone();
             let messages = item.get_text_messages().create_messages_text();
@@ -404,7 +405,7 @@ fn prepare_data_model_empty_files(fe: &FileEntry) -> (ModelRc<SharedString>, Mod
 fn scan_similar_images(
     a: Weak<MainWindow>,
     progress_sender: Sender<ProgressData>,
-    stop_receiver: Receiver<()>,
+    stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
@@ -425,11 +426,11 @@ fn scan_similar_images(
             );
             let mut item = SimilarImages::new(params);
 
-            set_common_settings(&mut item, &custom_settings);
+            set_common_settings(&mut item, &custom_settings, &stop_flag);
 
             item.set_delete_outdated_cache(custom_settings.similar_images_delete_outdated_entries);
 
-            item.find_similar_images(Some(&stop_receiver), Some(&progress_sender));
+            item.find_similar_images(Some(&stop_flag), Some(&progress_sender));
 
             let messages = item.get_text_messages().create_messages_text();
             let hash_size = custom_settings.similar_images_sub_hash_size;
@@ -500,7 +501,7 @@ fn prepare_data_model_similar_images(fe: &ImagesEntry, hash_size: u8) -> (ModelR
 fn scan_similar_videos(
     a: Weak<MainWindow>,
     progress_sender: Sender<ProgressData>,
-    stop_receiver: Receiver<()>,
+    stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
@@ -513,11 +514,11 @@ fn scan_similar_videos(
                 custom_settings.similar_videos_hide_hard_links,
             );
             let mut item = SimilarVideos::new(params);
-            set_common_settings(&mut item, &custom_settings);
+            set_common_settings(&mut item, &custom_settings, &stop_flag);
 
             item.set_delete_outdated_cache(custom_settings.similar_videos_delete_outdated_entries);
 
-            item.find_similar_videos(Some(&stop_receiver), Some(&progress_sender));
+            item.find_similar_videos(Some(&stop_flag), Some(&progress_sender));
 
             let messages = item.get_text_messages().create_messages_text();
 
@@ -582,7 +583,7 @@ fn prepare_data_model_similar_videos(fe: &VideosEntry) -> (ModelRc<SharedString>
 fn scan_similar_music(
     a: Weak<MainWindow>,
     progress_sender: Sender<ProgressData>,
-    stop_receiver: Receiver<()>,
+    stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
@@ -628,9 +629,9 @@ fn scan_similar_music(
                 custom_settings.similar_music_compare_fingerprints_only_with_similar_titles,
             );
             let mut item = SameMusic::new(params);
-            set_common_settings(&mut item, &custom_settings);
+            set_common_settings(&mut item, &custom_settings, &stop_flag);
 
-            item.find_same_music(Some(&stop_receiver), Some(&progress_sender));
+            item.find_same_music(Some(&stop_flag), Some(&progress_sender));
 
             let messages = item.get_text_messages().create_messages_text();
 
@@ -701,7 +702,7 @@ fn prepare_data_model_similar_music(fe: &MusicEntry) -> (ModelRc<SharedString>, 
 fn scan_invalid_symlinks(
     a: Weak<MainWindow>,
     progress_sender: Sender<ProgressData>,
-    stop_receiver: Receiver<()>,
+    stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
@@ -709,9 +710,9 @@ fn scan_invalid_symlinks(
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
             let mut item = InvalidSymlinks::new();
-            set_common_settings(&mut item, &custom_settings);
+            set_common_settings(&mut item, &custom_settings, &stop_flag);
 
-            item.find_invalid_links(Some(&stop_receiver), Some(&progress_sender));
+            item.find_invalid_links(Some(&stop_flag), Some(&progress_sender));
 
             let mut vector = item.get_invalid_symlinks().clone();
             let messages = item.get_text_messages().create_messages_text();
@@ -757,7 +758,7 @@ fn prepare_data_model_invalid_symlinks(fe: &SymlinksFileEntry) -> (ModelRc<Share
 fn scan_temporary_files(
     a: Weak<MainWindow>,
     progress_sender: Sender<ProgressData>,
-    stop_receiver: Receiver<()>,
+    stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
@@ -765,9 +766,9 @@ fn scan_temporary_files(
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
             let mut item = Temporary::new();
-            set_common_settings(&mut item, &custom_settings);
+            set_common_settings(&mut item, &custom_settings, &stop_flag);
 
-            item.find_temporary_files(Some(&stop_receiver), Some(&progress_sender));
+            item.find_temporary_files(Some(&stop_flag), Some(&progress_sender));
 
             let mut vector = item.get_temporary_files().clone();
             let messages = item.get_text_messages().create_messages_text();
@@ -812,7 +813,7 @@ fn prepare_data_model_temporary_files(fe: &TemporaryFileEntry) -> (ModelRc<Share
 fn scan_broken_files(
     a: Weak<MainWindow>,
     progress_sender: Sender<ProgressData>,
-    stop_receiver: Receiver<()>,
+    stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
@@ -843,9 +844,9 @@ fn scan_broken_files(
 
             let params = BrokenFilesParameters::new(checked_types);
             let mut item = BrokenFiles::new(params);
-            set_common_settings(&mut item, &custom_settings);
+            set_common_settings(&mut item, &custom_settings, &stop_flag);
 
-            item.find_broken_files(Some(&stop_receiver), Some(&progress_sender));
+            item.find_broken_files(Some(&stop_flag), Some(&progress_sender));
 
             let mut vector = item.get_broken_files().clone();
             let messages = item.get_text_messages().create_messages_text();
@@ -893,7 +894,7 @@ fn prepare_data_model_broken_files(fe: &BrokenEntry) -> (ModelRc<SharedString>, 
 fn scan_bad_extensions(
     a: Weak<MainWindow>,
     progress_sender: Sender<ProgressData>,
-    stop_receiver: Receiver<()>,
+    stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
@@ -902,8 +903,8 @@ fn scan_bad_extensions(
         .spawn(move || {
             let params = BadExtensionsParameters::new();
             let mut item = BadExtensions::new(params);
-            set_common_settings(&mut item, &custom_settings);
-            item.find_bad_extensions_files(Some(&stop_receiver), Some(&progress_sender));
+            set_common_settings(&mut item, &custom_settings, &stop_flag);
+            item.find_bad_extensions_files(Some(&stop_flag), Some(&progress_sender));
 
             let mut vector = item.get_bad_extensions_files().clone();
             let messages = item.get_text_messages().create_messages_text();
@@ -957,10 +958,12 @@ fn insert_data_to_model(items: &Rc<VecModel<MainListModel>>, data_model_str: Mod
     items.push(main);
 }
 
-fn set_common_settings<T>(component: &mut T, custom_settings: &SettingsCustom)
+fn set_common_settings<T>(component: &mut T, custom_settings: &SettingsCustom, stop_flag: &Arc<AtomicBool>)
 where
     T: CommonData,
 {
+    stop_flag.store(false, Ordering::Relaxed);
+
     component.set_included_directory(custom_settings.included_directories.clone());
     component.set_reference_directory(custom_settings.included_directories_referenced.clone());
     component.set_excluded_directory(custom_settings.excluded_directories.clone());

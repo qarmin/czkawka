@@ -5,10 +5,11 @@ use std::fs::{DirEntry, FileType, Metadata};
 #[cfg(target_family = "unix")]
 use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
-use std::sync::atomic::Ordering;
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::UNIX_EPOCH;
 
-use crossbeam_channel::{Receiver, Sender};
+use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use log::debug;
 use rayon::prelude::*;
@@ -105,7 +106,7 @@ enum EntryType {
 pub struct DirTraversalBuilder<'a, 'b, F> {
     group_by: Option<F>,
     root_dirs: Vec<PathBuf>,
-    stop_receiver: Option<&'a Receiver<()>>,
+    stop_flag: Option<&'a Arc<AtomicBool>>,
     progress_sender: Option<&'b Sender<ProgressData>>,
     minimal_file_size: Option<u64>,
     maximal_file_size: Option<u64>,
@@ -121,7 +122,7 @@ pub struct DirTraversalBuilder<'a, 'b, F> {
 pub struct DirTraversal<'a, 'b, F> {
     group_by: F,
     root_dirs: Vec<PathBuf>,
-    stop_receiver: Option<&'a Receiver<()>>,
+    stop_flag: Option<&'a Arc<AtomicBool>>,
     progress_sender: Option<&'b Sender<ProgressData>>,
     recursive_search: bool,
     directories: Directories,
@@ -145,7 +146,7 @@ impl DirTraversalBuilder<'_, '_, ()> {
         DirTraversalBuilder {
             group_by: None,
             root_dirs: vec![],
-            stop_receiver: None,
+            stop_flag: None,
             progress_sender: None,
             checking_method: CheckingMethod::None,
             minimal_file_size: None,
@@ -178,8 +179,8 @@ impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
         self
     }
 
-    pub fn stop_receiver(mut self, stop_receiver: Option<&'a Receiver<()>>) -> Self {
-        self.stop_receiver = stop_receiver;
+    pub fn stop_flag(mut self, stop_flag: Option<&'a Arc<AtomicBool>>) -> Self {
+        self.stop_flag = stop_flag;
         self
     }
 
@@ -249,7 +250,7 @@ impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
         DirTraversalBuilder {
             group_by: Some(group_by),
             root_dirs: self.root_dirs,
-            stop_receiver: self.stop_receiver,
+            stop_flag: self.stop_flag,
             progress_sender: self.progress_sender,
             directories: self.directories,
             extensions: self.extensions,
@@ -267,7 +268,7 @@ impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
         DirTraversal {
             group_by: self.group_by.expect("could not build"),
             root_dirs: self.root_dirs,
-            stop_receiver: self.stop_receiver,
+            stop_flag: self.stop_flag,
             progress_sender: self.progress_sender,
             checking_method: self.checking_method,
             minimal_file_size: self.minimal_file_size.unwrap_or(0),
@@ -328,30 +329,35 @@ where
             recursive_search,
             minimal_file_size,
             maximal_file_size,
-            stop_receiver,
+            stop_flag,
             ..
         } = self;
 
         while !folders_to_check.is_empty() {
-            if check_if_stop_received(stop_receiver) {
+            if check_if_stop_received(stop_flag) {
                 send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                 return DirTraversalResult::Stopped;
             }
 
             let segments: Vec<_> = folders_to_check
                 .into_par_iter()
+                .with_max_len(2) // Avoiding checking too much folders in batch
                 .map(|current_folder| {
                     let mut dir_result = vec![];
                     let mut warnings = vec![];
                     let mut fe_result = vec![];
 
                     let Some(read_dir) = common_read_dir(&current_folder, &mut warnings) else {
-                        return (dir_result, warnings, fe_result);
+                        return Some((dir_result, warnings, fe_result));
                     };
 
                     let mut counter = 0;
                     // Check every sub folder/file/link etc.
                     for entry in read_dir {
+                        if check_if_stop_received(stop_flag) {
+                            return None;
+                        }
+
                         let Some(entry_data) = common_get_entry_data(&entry, &mut warnings, &current_folder) else {
                             continue;
                         };
@@ -390,17 +396,19 @@ where
                         // Increase counter in batch, because usually it may be slow to add multiple times atomic value
                         items_counter.fetch_add(counter, Ordering::Relaxed);
                     }
-                    (dir_result, warnings, fe_result)
+                    Some((dir_result, warnings, fe_result))
                 })
+                .while_some()
                 .collect();
 
             let required_size = segments.iter().map(|(segment, _, _)| segment.len()).sum::<usize>();
             folders_to_check = Vec::with_capacity(required_size);
 
             // Process collected data
-            for (segment, warnings, fe_result) in segments {
+            for (segment, warnings, mut fe_result) in segments {
                 folders_to_check.extend(segment);
                 all_warnings.extend(warnings);
+                fe_result.sort_by_cached_key(|fe| fe.path.to_string_lossy().to_string());
                 for fe in fe_result {
                     let key = (self.group_by)(&fe);
                     grouped_file_entries.entry(key).or_default().push(fe);
@@ -540,15 +548,7 @@ fn process_symlink_in_symlink_mode(
 
 pub fn common_read_dir(current_folder: &Path, warnings: &mut Vec<String>) -> Option<Vec<Result<DirEntry, std::io::Error>>> {
     match fs::read_dir(current_folder) {
-        Ok(t) => {
-            // Make directory traversal order stable
-            let mut r: Vec<_> = t.collect();
-            r.sort_by_key(|d| match d {
-                Ok(f) => f.path(),
-                _ => PathBuf::new(),
-            });
-            Some(r)
-        }
+        Ok(t) => Some(t.collect()),
         Err(e) => {
             warnings.push(flc!("core_cannot_open_dir", dir = current_folder.to_string_lossy().to_string(), reason = e.to_string()));
             None

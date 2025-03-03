@@ -140,8 +140,8 @@ fn check_if_header_is_selected_but_should_not_be(items: &ModelRc<MainListModel>,
 mod tests {
     use slint::{Model, ModelRc, SharedString, VecModel};
 
-    use crate::model_operations::filter_out_checked_items;
     use crate::MainListModel;
+    use crate::model_operations::filter_out_checked_items;
 
     #[test]
     fn test_filter_out_checked_items_empty() {

@@ -24,15 +24,6 @@ jobs:
         if: ${{ github.ref == 'refs/heads/master' }}
         run: sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
 
-      - name: Build Release with fast_image_resize
-        run: cargo build --release --bin czkawka_cli --features "fast_image_resize"
-
-      - name: Store Linux CLI fast_image_resize
-        uses: actions/upload-artifact@v4
-        with:
-          name: czkawka_cli-${{ runner.os }}-fast_image_resize
-          path: target/release/czkawka_cli
-
       - name: Build Release
         run: cargo build --release --bin czkawka_cli
 
@@ -57,6 +48,7 @@ jobs:
       - name: Prepare files to release
         run: |
           mv target/release/czkawka_cli linux_czkawka_cli
+
       - name: Release
         uses: softprops/action-gh-release@v2
         if: ${{ github.ref == 'refs/heads/master' }}

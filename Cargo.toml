@@ -36,3 +36,13 @@ opt-level = 3
 debug-assertions = true # Forces to crash when there is duplicated item in cli
 overflow-checks = true
 opt-level = 3
+
+# Unsafe profile, just to check, how fast and small app could be 
+[profile.fastest]
+inherits = "release"
+panic = "abort"
+lto = "thin"
+strip = "symbols"
+codegen-units = 1
+opt-level = 3
+debug = false

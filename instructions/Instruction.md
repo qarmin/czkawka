@@ -24,8 +24,8 @@ The GUI is built from different pieces:
 <img src="https://user-images.githubusercontent.com/41945903/148279809-54ea8684-8bff-436b-af67-ff9859f468f2.png" width="800" />
 
 ### Translations
-GUI is fully translatable.  
-For now at least 10 languages are supported(some was translated by computers) 
+GTK GUI is fully translatable.  
+For now at least 10 languages are supported(some was translated by automatic translation, so may not be perfect). 
 
 ### Opening/Manipulating files
 It is possible to open selected files by double-clicking on them.
@@ -87,23 +87,56 @@ Mac - `/Users/Username/Library/Caches/pl.Qarmin.Czkawka`
 Windows - `C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache`
 
 ## Tips, Tricks and Known Bugs
+- **Speedup of CPU bounds tasks with LTO**
+  You can easily compile app with lto, by adding/modyfing in `Cargo.toml` file, this lines(small performance boost, big decrease in binary size):
+```
+[profile.release]
+lto = "thin" # or "fat"
+```
+- **Speedup of CPU-bound tasks using native CPU optimizations**
+  When doing CPU bound tasks, compiling with native CPU optimizations can give a significant speedup(speedup on x86_64_v4, when hashing images is usually 10-20%):
+```
+RUSTFLAGS="-C target-cpu=native" cargo build --release
+```
+or adding it globally to `~/.cargo/config.toml`
+```
+[target.x86_64-unknown-linux-gnu]
+linker = "clang"
+rustflags = [
+       "-C", "target-cpu=native",
+]
+
+```
+- **Faster checking for similar images**
+  The new `fast_image_resize` feature enables faster image resizing using a specialized crate.
+  The speedup varies depending on image size: from no noticeable improvement for very small images to a 30–200% increase for larger ones.
+  This feature is enabled by default starting from version 9.0 but can be disabled if needed.
 - **Manually adding multiple directories**  
-  You can manually edit config file `czkawka_gui_config.txt` and add/remove/change directories as you want. After set required values, configuration must be loaded to Czkawka.
-- **Slow checking of little number similar images/duplicates/broken files**  
-  If you checked before a large number of files (several tens of thousands), then the required information about all of them are loaded and saved to the cache, even if you are working with only few files. You can rename one of cache file which starts from `cache_similar_image`(to be able to use it again) or delete it - cache will then regenerate but with smaller number of entries and this way it should load and save cache faster.
-- **Not all columns are always visible**
-  For now it is possible that some columns will not be visible when some are too wide. There are 2 workarounds for now
+  You can manually edit config file `czkawka_gui_config.txt` and add/remove/change directories as you want.  
+  After set required values, configuration must be loaded to Czkawka.
+- **Slow checking due long loading/saving to cache step**  
+  If you checked before a large number of files (several tens of thousands), then the required information about all of them are loaded and saved to the cache, even if you are working with only few files.  
+  You can rename one of cache file which starts from `cache_similar_image`(to be able to use it again) or delete it - cache will then regenerate but with smaller number of entries and this way it should load and save cache faster.
+- **Not all columns with data(modification date, file size) are always visible in gui**
+  For now it is possible that some columns will not be visible when some are too wide.  
+  There are 2 workarounds for now
     - View can be scrolled via horizontal scroll bar (1 on image)
     - Size of other columns can be slimmed (2)
   This is checked if is possible to do in https://github.com/qarmin/czkawka/issues/169
 ![AA](https://user-images.githubusercontent.com/41945903/125684641-728e264a-34ab-41b1-9853-ab45dc25551f.png)
 - **Opening parent folders**
-    - It is possible to open parent folder of selected items with double click with right mouse button(RMB)
-  it is also possible to open such item with double click with left mouse button(LMB).
+    - It is possible to open parent folder of selected items with double click with right mouse button(RMB) it is also possible to open such item with double click with left mouse button(LMB).
 - **Faster scanning for big number of duplicates**  
-  By default for all files grouped by same size are computed partial hash(hash from only of 2KB each file). Such hash is computed usually very fast, especially on SSD and fast multicore processors. But when scanning a hundred of thousands or millions of files with HDD or slow processor, typically this step can take much time. In settings exists option `Use prehash cache` which enables caching such things. It is disabled by default because can increase time of loading/saving cache, with big number of entries.
+  By default for all files grouped by same size are computed partial hash(hash from only of start 4KB each file). 
+- Such hash is computed usually very fast, especially on SSD and fast multicore processors.  
+  But when scanning a hundred of thousands or millions of files with HDD or slow processor, typically this step can take much time.  
+  In settings exists option `Use prehash cache` which enables caching such things.  
+  It is disabled by default because can increase time of loading/saving cache, with big number of entries.
 - **Permanent store of cache entries**  
-  After each scan, entries in cache are validated and outdated ones(which points at non-existent files) are removed. This may be problematic when scanning external drivers(like pendrives, disks etc.) and later unplugging and plugging them again. In settings exists option `Delete outdated cache entries automatically` which automatically clear this, but this can be disabled. Disabling such option may create big cache files, so button `Remove outdated results` will do it manually.
+  After each scan, entries in cache are validated and outdated ones(which points at non-existent files) are removed.  
+  This may be problematic when scanning external drivers(like pendrives, disks etc.) and later unplugging and plugging them again.  
+  In settings exists option `Delete outdated cache entries automatically` which automatically clear this, but this can be disabled.  
+  Disabling such option may create big cache files, so button `Remove outdated results` will do it manually.
 - **Partial scanning**
   If you know that you can't scan all files at once, you can still try to scan all files and during scan just stop it, so already calculated hashes/data will be saved to cache and will speedup later scans.
 
@@ -119,6 +152,8 @@ Duplicate Finder allows you to search for files and group them according to a pr
 
 - **By size** - Compares and groups files by their size (in bytes and perfect matches only). It is as fast as the previous mode and
   usually gives better results with duplicates, but I also do not recommend using it if you do not know what you are doing.
+
+- **By size and name** - A mode that first compares files by size and then by name. Just like checking by size and name, this mode is not reliable.
 
 - **By hash** - A mode containing a check of the hash (cryptographic hash) of a given file which determines with great
   probability whether the files are identical.
@@ -144,140 +179,188 @@ Duplicate Finder allows you to search for files and group them according to a pr
 Searching for empty files is easy and fast, because we only need to check the file metadata and its length.
 
 ### Empty Directories
-At the beginning, a special entry is created for each directory containing - the parent path (only if it is not a folder
-directly selected by the user) and a flag to indicate whether the given directory is empty (at the beginning each one is
-set to be potentially empty).
+At the start, a special entry is created for each directory, including its parent path (unless it is a folder directly selected by the user) and a flag indicating whether the directory is empty. Initially, all directories are assumed to be potentially empty.
 
-First, user-defined folders are put into the pool of folders to be checked.
+First, user-defined folders are added to the pool of directories to be checked.
 
-Each element is checked to see if it is:
-- folder - this folder is added to the check queue as possible empty - `FolderEmptiness::Maybe`
-- anything else - the given folder is "poisoned" with the `FolderEmptiness::No` flag, indicating that the folder is no longer
-  empty. Then each folder directly or indirectly containing the file is also poisoned with the `FolderEmptiness::No` flag.
+Each folder is then examined to determine its status:
 
-Example: there are 4 checked folders which *may* be empty `/cow/`, `/cow/ear/`, `/cow/ear/stack/`, `/cow/ear/flag/`.
+- If it is a folder – it is added to the check queue as potentially empty (FolderEmptiness::Maybe). 
+- If it contains any files or subdirectories – it is marked as not empty (FolderEmptiness::No). In this case, all parent directories, both direct and indirect, are also marked as not empty.
 
-The last folder contains a file, so that means that `/cow/ear/flag` is not empty and also all its parents - `/cow/ear/` and `/cow/`,
-but `/cow/ear/stack/` may still be empty.
+Example
 
-Finally, all folders with the flag `FolderEmptiness::Maybe` are defaulted to empty.
+Consider four folders that may be empty:
+/cow/, /cow/ear/, /cow/ear/stack/, /cow/ear/flag/.
+
+If /cow/ear/flag/ contains a file, then:
+
+- /cow/ear/flag/ is marked as not empty.
+- Its parent folders /cow/ear/ and /cow/ are also marked as not empty.
+- However, /cow/ear/stack/ may still be empty.
+
+Finally, all folders still marked as FolderEmptiness::Maybe are considered empty by default.
 
 ### Big Files
-For each file inside the given path its size is read and then after sorting the list, e.g. 50 largest, files are displayed.
+For each file within the given path, its size is read. Then, depending on the mode, a specified number of either the smallest or largest files are displayed.
 
 ### Temporary Files
-Searching for temporary files only involves comparing their extensions with a previously prepared list.
+Searching for temporary files is done by comparing their extensions against a predefined list.
 
-Currently, files with these extensions are considered temporary files -
+Currently, the following names and extensions are considered temporary:
 ```
 ["#", "thumbs.db", ".bak", "~", ".tmp", ".temp", ".ds_store", ".crdownload", ".part", ".cache", ".dmp", ".download", ".partial"]
 ```
-
-This only removes the most basic temporary files, for more I suggest to use BleachBit.
+This method removes only the most common temporary files. For more thorough cleanup, I recommend using BleachBit.
 
 ### Invalid Symlinks
-To find invalid symlinks we must first find symlinks.
+To find invalid symlinks, we first need to identify all symlinks in the given path.
 
-After searching for them, you should check at which element it points to and if it does not exist, add this symlinks into the list of invalid symlinks, pointing to a non-existent path.
+Once symlinks are located, each one is checked to determine its target. If the target does not exist, the symlink is added to the list of invalid symlinks, as it points to a non-existent path.
 
-The second mode is to detect recursive symlink. Unfortunately, this mode does not work, and it displays when using it an error of a non-existent target element, but it is implemented by counting the jumps of the symlink and after exceeding a certain number (e.g. 20) it is considered that the given symlink is recursive.
-
+The second mode attempts to detect recursive symlinks. 
+However, this feature is currently non-functional and incorrectly reports an error related to a non-existent target. 
+The intended implementation works by counting the number of symlink jumps, and if a certain threshold (e.g., 20) is exceeded, the symlink is considered recursive.
 ### Same Music
-This is a mode to find identical music files through tags.
+Tags are limited to `artist`, `title`, `year`, `bitrate`, `genre`, and `length`.
 
-The number of tags to choose from is limited by an external library.
+**Process**
+- Collect all music files with one of the following extensions: `[".mp3", ".flac", ".m4a"]`
+- Read the tags for each file
 
-First, music files with one of the extensions `[".mp3", ".flac", ".m4a"]` are collected.
+**Additionally in duplicate tags mode**
+- User selects tag groups that will be used to compare files
+- Tags like `artist` are simplified by:
+  - Removing all non-alphanumeric characters
+  - Converting text to lowercase
+  - Removing everything inside parentheses, but only if approximate comparison is selected (e.g., `bataty (feat. romba)` is treated as `bataty`)
+- Only non-empty tags are collected
 
-Then for each music file its tags are read.
+**Additionally in similar content mode**
+- If title-based comparison is selected, files are first grouped by simplified title to reduce the number of hashes that need to be calculated
+- A hash is generated for each file
+- Hashes are compared, respecting the user-defined similarity threshold and the minimum required length of matching fragments
 
-Then, for each selected tag by which we want to search for duplicates, we perform the following steps:
-- For each input file we read the value of the currently checked tag
-- If it is empty, we ignore the file, if it has a value, we throw it into an array whose key is this value
-- After checking all files, arrays containing only one element are deleted
-- The remaining files are used as initial data for checking the next tag selected by the user
-- After checking all tags, the results are displayed in groups
+After checking all tags, results are shown in a table.
 
 ### Similar Images
-It is a tool for finding similar images that differ e.g. in watermark, size etc.
 
-The tool first collects images with specific extensions that can be checked - `[".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".pnm", ".tga", ".ff", ".gif", ".jif", ".jfi", ".ico", ".webp"]`.
+A tool for detecting similar images that may differ in aspects such as watermarks, size, or compression artifacts.
 
-Next cached data is loaded from file to prevent hashing twice the same file.  
-The cache which points to non-existing data, by default is deleted automatically.
+Currently, it works well for images that have not been rotated.
 
-Then a perceptual hash is created for each image which isn't available in cache.
+#### **Process Overview**
 
-Cryptographic hash (used for example in ciphers) for similar inputs gives completely different outputs:  
-11110 ==>  AAAAAB  
-11111 ==>  FWNTLW  
-01110 ==>  TWMQLA
+1. **Collecting Images**
+  - The tool gathers images with specific extensions, including RAWs, JPEGs, and many others.
 
-Perceptual hash at similar inputs, gives similar outputs:  
-11110 ==>  AAAAAB  
-11111 ==>  AABABB  
-01110 ==>  AAAACB
+2. **Loading Cached Data**
+  - Previously computed hashes are loaded from a cache file to avoid re-hashing the same files
+  - Cache entries pointing to non-existent files are automatically removed by default(this can be disabled in settings)
 
+3. **Generating Perceptual Hashes**
+  - Image is resized to 8x8, 16x16, 32x32, or 64x64 pixels (inside `image_hasher` crate) 
+  - A perceptual hash is computed for each image that is not already present in the cache
+  - Unlike cryptographic hashes, which produce completely different outputs for slight variations:
 
-Computed hash data is then thrown into a special tree that allows to compare hashes using [Hamming distance](https://en.wikipedia.org/wiki/Hamming_distance).
+    ```
+    11110 ==>  AAAAAB  
+    11111 ==>  FWNTLW  
+    01110 ==>  TWMQLA  
+    ```  
 
-Next these hashes are saved to file, to be able to open images without needing to hash it more times.
+    Perceptual hashes generate similar outputs for similar images:
 
-Finally, each hash is compared with the others and if the distance between them is less than the maximum distance specified by the user, the images are considered similar and thrown from the pool of images to be searched.  
+    ```
+    11110 ==>  AAAAAB  
+    11111 ==>  AABABB  
+    01110 ==>  AAAACB  
+    ```  
 
-It is possible to choose one of 5 types of hashes - `Gradient`, `Mean`, `VertGradient`, `Blockhash`, `DoubleGradient`.  
-Before calculating hashes usually images are resized with specific algorithm(`Lanczos3`, `Gaussian`, `CatmullRom`, `Triangle`, `Nearest`) to e.g. 8x8 or 16x16 image(allowed sizes - `8x8`, `16x16`, `32x32`, `64x64`), which allows simplifying later computations. Both size and filter can be adjusted in application.
+4. **Storing and Comparing Hashes**
+  - Computed hash data is stored in a specialized tree structure, allowing efficient comparison using [Hamming distance](https://en.wikipedia.org/wiki/Hamming_distance).
+  - The hashes are then saved to a file, ensuring images don’t need to be rehashed in future runs.
+  - Each hash is compared with others, and if the distance between them is below the user-defined threshold, the images are considered similar and removed from the pool of images to be checked.
 
-Each configuration saves results to different cache files to save users from invalid results.
+#### **Hashing and Resizing Options**
 
-Some images broke hash functions and create hashes full of `0` or `255`, so these images are silently excluded from end results(but still are saved to cache).
+- Users can select from **five different hash types**:
+  - `Gradient`
+  - `Mean`
+  - `VertGradient`
+  - `Blockhash`
+  - `DoubleGradient`
 
-You can test each algorithm with provided CLI tool, just put to folder `test.jpg` file and run inside this command `czkawka_cli tester -i`
+- Before hashing, images are typically resized to simplify computations. Supported resizing algorithms:
+  - `Lanczos3`
+  - `Gaussian`
+  - `CatmullRom`
+  - `Triangle`
+  - `Nearest`
 
-Faster compare option allows to only once compare results, so checking should work a lot of faster when using higher number of similarity.
+- Supported hash sizes: `8x8`, `16x16`, `32x32`, `64x64`
+- Both the resizing method and hash size can be adjusted within the application.
 
-Some tidbits:
-- Smaller hash size not always means that calculating it will take more time
-- `Blockhash` is the only algorithm that don't resize images before hashing
-- `Nearest` resize algorithm can be faster even 5 times than any other available but provide worse results
+Each configuration generates separate cache files to prevent invalid results across different settings.
 
-### Similar Videos
-Tool works similar as Similar Images.  
+#### **Additional Features and Considerations**
 
-To work require `FFmpeg`, so it will show an error when it is not found in OS.  
-Also only checks files which are longer than 30s.  
-For now, it is limiting to check video files with almost equal length.
+- Some images may break hash functions, producing hashes filled entirely with `0` or `255`. These images are silently excluded from the final results but remain stored in the cache.
+- A **CLI testing tool** is available. To test an algorithm, place a `test.jpg` file in a folder and run `czkawka_cli tester -i`
 
-At first, it collects video files by extension (`mp4`, `mpv`, `avi` etc.).  
-Next each file is hashed. Implementation is hidden in library but looks that generate 10 images from this video and hash them with help of perceptual hash.
+#### **Faster Comparison Mode**
+The faster comparison option ensures that each pair of results is compared only once, significantly improving performance, especially when using a high similarity threshold.
 
-Such hashes are saved to cache to be able to use them later.
+#### **Tidbits**
+- Smaller hash size does not always mean faster calculation.
+- `Blockhash` is the only algorithm that does not resize images before hashing.
+- The `Nearest` resizing algorithm can be up to **five times faster** than other methods but may produce worse results.
+- The `fast_image_resize` feature speeds up image resizing but may slightly reduce accuracy.
 
-Next, with provided by user tolerance, they are compared to each other and group of similar hashes are returned.
+### **Similar Video Finder**
+
+This tool works similarly to the **Similar Images** feature but is designed for video files.
+
+#### **Requirements and Limitations**
+- Requires **FFmpeg** to function; an error will be displayed if it is not found on the system
+- Currently, it only compares videos with **almost equal lengths**
+
+#### **Process Overview**
+  - Video files are gathered based on their extensions (`.mp4`, `.mpv`, `.avi`, etc.).
+  - Each file is processed using a hashing algorithm.
+  - The implementation is handled by an external library, but the process involves:
+    - Extracting several frames from video
+    - Generating perceptual hashes for each frame
+  - The generated hashes are stored in a cache file for future use, reducing redundant calculations
+  - Using the user-defined **similarity tolerance**, hashes are compared
+  - Groups of similar videos are returned as results
+
 
 ### Broken Files
-This tool finds files which are corrupted or have an invalid extension.
+### **Corrupted or Invalid Files Finder**
 
-At first app collects image and archive files(only this two types are supported now, but also I plan to support audio, but this is currently blocked by https://github.com/RustAudio/rodio/issues/349) and then these files are simply opened.
+This tool detects files that are either corrupted or have an invalid extension.
 
-If an error happens when opening such file it means that this file is corrupted or unsupported.
-
-Only some file extensions are handled, because I rely on external crates. Also, some false positives may be shown(e.g. https://github.com/image-rs/jpeg-decoder/issues/130) so always open file to check if it is really broken.
+- Collected are pdf, audio, music and archive files
+- If an error occurs while opening a file, it is considered either **corrupted**(with some exceptions)
+- Since tool relies on external libraries, **false positives** may occur (e.g., [this issue](https://github.com/image-rs/jpeg-decoder/issues/130)), so it is recommended to manually open the file to confirm if it is truly broken
 
 ### Bad Extensions
-Mode allows to find files with content that not match with their extensions.
+This mode allows finding files whose content does not match their extension.
 
-It works in this way:
-- Takes current file extension e.g. `źrebię.zip` -> `zip`
-- Read few bytes of file
-- Matches bytes with signatures to guess file extension e.g. `7z`
-- Takes mime type(may return more than 1) from extension e.g. `Mime::Archive`
-- Returns all file extensions that are connected to this mime type e.g. `rar,7z,zip,p7`
-- Basing on file extension, adds more elements to list from above(needed because some files e.g. `exe` and `dll` begins with similar/same bytes)
-- If current file extensions is inside list then probably have proper extension, if is not inside, then is shown as file with invalid extension
+It works as follows:
+- Extracts the current file extension, e.g., `źrebię.zip` → `zip`
+- Reads a few bytes from the file
+- Matches these bytes with known signatures to determine the likely file type, e.g., `7z`
+- Retrieves the MIME type (which may return multiple values) based on the detected extension, e.g., `Mime::Archive`
+- Lists all file extensions associated with this MIME type, e.g., `rar, 7z, zip, p7`
+- Expands the list with additional extensions when needed (some files, like `exe` and `dll`, may have similar byte signatures)
+- If the file's current extension is in the list, it is likely correct; otherwise, it is flagged as having an invalid extension
 
-In `Proper Extension` column, inside parentheses is visible extension guessed by Infer library, and outside there are extensions which have same mime type as guessed one. 
+In the **"Proper Extension"** column, the extension detected by the Infer library appears in parentheses, while extensions with the same MIME type are displayed outside.
+
 ![ABC](https://user-images.githubusercontent.com/41945903/167214811-7d811829-6dba-4da0-9788-9e2f780e7279.png)
+
 
 ## Code coverage
 If you want to check code coverage of Czkawka(both in tests or in normal usage) you can execute this simple commands(supports Ubuntu 22.04, but for other OS only installation instruction of packages should be different).
