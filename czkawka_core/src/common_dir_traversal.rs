@@ -399,9 +399,10 @@ where
             folders_to_check = Vec::with_capacity(required_size);
 
             // Process collected data
-            for (segment, warnings, fe_result) in segments {
+            for (segment, warnings, mut fe_result) in segments {
                 folders_to_check.extend(segment);
                 all_warnings.extend(warnings);
+                fe_result.sort_by_cached_key(|fe| fe.path.to_string_lossy().to_string());
                 for fe in fe_result {
                     let key = (self.group_by)(&fe);
                     grouped_file_entries.entry(key).or_default().push(fe);
@@ -541,18 +542,7 @@ fn process_symlink_in_symlink_mode(
 
 pub fn common_read_dir(current_folder: &Path, warnings: &mut Vec<String>) -> Option<Vec<Result<DirEntry, std::io::Error>>> {
     match fs::read_dir(current_folder) {
-        Ok(t) => {
-            #[allow(unused_mut)]
-            let mut r: Vec<_> = t.collect();
-
-            // Sorting results to make them deterministic, takes some time, so it is enabled only in tests, because it is not needed in normal usage
-            #[cfg(test)]
-            r.sort_by_cached_key(|d| match d {
-                Ok(f) => f.path().to_string_lossy().to_string(),
-                _ => String::new(),
-            });
-            Some(r)
-        }
+        Ok(t) => Some(t.collect()),
         Err(e) => {
             warnings.push(flc!("core_cannot_open_dir", dir = current_folder.to_string_lossy().to_string(), reason = e.to_string()));
             None
