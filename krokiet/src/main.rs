@@ -20,6 +20,7 @@
 
 use std::rc::Rc;
 use std::sync::Arc;
+use std::sync::atomic::AtomicBool;
 
 use crossbeam_channel::{Receiver, Sender, unbounded};
 use czkawka_core::common::{print_version_mode, setup_logger};
@@ -69,7 +70,7 @@ fn main() {
     let app = MainWindow::new().expect("Failed to create main window");
 
     let (progress_sender, progress_receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
-    let (stop_sender, stop_receiver): (Sender<()>, Receiver<()>) = unbounded();
+    let stop_flag: Arc<AtomicBool> = Arc::new(AtomicBool::new(false));
 
     zeroing_all_models(&app);
 
@@ -81,8 +82,8 @@ fn main() {
     load_settings_from_file(&app);
 
     connect_delete_button(&app);
-    connect_scan_button(&app, progress_sender, stop_receiver, Arc::clone(&shared_models));
-    connect_stop_button(&app, stop_sender);
+    connect_scan_button(&app, progress_sender, stop_flag.clone(), Arc::clone(&shared_models));
+    connect_stop_button(&app, stop_flag);
     connect_open_items(&app);
     connect_progress_gathering(&app, progress_receiver);
     connect_add_remove_directories(&app);

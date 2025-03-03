@@ -614,11 +614,9 @@ pub fn prepare_thread_handler_common(
 }
 
 #[inline]
-pub fn check_if_stop_received(stop_receiver: Option<&crossbeam_channel::Receiver<()>>) -> bool {
-    if let Some(stop_receiver) = stop_receiver {
-        if stop_receiver.try_recv().is_ok() {
-            return true;
-        }
+pub fn check_if_stop_received(stop_flag: Option<&Arc<AtomicBool>>) -> bool {
+    if let Some(stop_flag) = stop_flag {
+        return stop_flag.load(atomic::Ordering::Relaxed);
     }
     false
 }

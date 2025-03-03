@@ -3,7 +3,7 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread;
 
-use crossbeam_channel::{Receiver, Sender};
+use crossbeam_channel::Sender;
 use czkawka_core::bad_extensions::{BadExtensions, BadExtensionsParameters};
 use czkawka_core::big_file::{BigFile, BigFileParameters};
 use czkawka_core::broken_files::{BrokenFiles, BrokenFilesParameters, CheckedTypes};
@@ -43,7 +43,7 @@ pub fn connect_button_search(gui_data: &GuiData, result_sender: Sender<Message>,
     let notebook_upper = gui_data.upper_notebook.notebook_upper.clone();
     let progress_bar_all_stages = gui_data.progress_window.progress_bar_all_stages.clone();
     let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
-    let stop_receiver = gui_data.stop_receiver.clone();
+    let stop_flag = gui_data.stop_flag.clone();
     let taskbar_state = gui_data.taskbar_state.clone();
     let text_view_errors = gui_data.text_view_errors.clone();
     let tree_view_included_directories = gui_data.upper_notebook.tree_view_included_directories.clone();
@@ -83,26 +83,26 @@ pub fn connect_button_search(gui_data: &GuiData, result_sender: Sender<Message>,
         reset_text_view(&text_view_errors);
 
         let result_sender = result_sender.clone();
-        let stop_receiver = stop_receiver.clone();
-        // Consume any stale stop messages.
-        stop_receiver.try_iter().for_each(|()| ());
+        let stop_flag = stop_flag.clone();
+        // Clear stop flag
+        stop_flag.store(false, Ordering::Relaxed);
 
         label_stage.show();
 
         let progress_sender = progress_sender.clone();
 
         match to_notebook_main_enum(notebook_main.current_page().expect("Current page not set")) {
-            NotebookMainEnum::Duplicate => duplicate_search(&gui_data, loaded_commons, stop_receiver, result_sender, &grid_progress, progress_sender),
-            NotebookMainEnum::EmptyFiles => empty_files_search(&gui_data, loaded_commons, stop_receiver, result_sender, &grid_progress, progress_sender),
-            NotebookMainEnum::EmptyDirectories => empty_dirs_search(&gui_data, loaded_commons, stop_receiver, result_sender, &grid_progress, progress_sender),
-            NotebookMainEnum::BigFiles => big_files_search(&gui_data, loaded_commons, stop_receiver, result_sender, &grid_progress, progress_sender),
-            NotebookMainEnum::Temporary => temporary_files_search(&gui_data, loaded_commons, stop_receiver, result_sender, &grid_progress, progress_sender),
-            NotebookMainEnum::SimilarImages => similar_image_search(&gui_data, loaded_commons, stop_receiver, result_sender, &grid_progress, progress_sender),
-            NotebookMainEnum::SimilarVideos => similar_video_search(&gui_data, loaded_commons, stop_receiver, result_sender, &grid_progress, progress_sender),
-            NotebookMainEnum::SameMusic => same_music_search(&gui_data, loaded_commons, stop_receiver, result_sender, &grid_progress, progress_sender, &show_dialog),
-            NotebookMainEnum::Symlinks => bad_symlinks_search(&gui_data, loaded_commons, stop_receiver, result_sender, &grid_progress, progress_sender),
-            NotebookMainEnum::BrokenFiles => broken_files_search(&gui_data, loaded_commons, stop_receiver, result_sender, &grid_progress, progress_sender, &show_dialog),
-            NotebookMainEnum::BadExtensions => bad_extensions_search(&gui_data, loaded_commons, stop_receiver, result_sender, &grid_progress, progress_sender),
+            NotebookMainEnum::Duplicate => duplicate_search(&gui_data, loaded_commons, stop_flag, result_sender, &grid_progress, progress_sender),
+            NotebookMainEnum::EmptyFiles => empty_files_search(&gui_data, loaded_commons, stop_flag, result_sender, &grid_progress, progress_sender),
+            NotebookMainEnum::EmptyDirectories => empty_dirs_search(&gui_data, loaded_commons, stop_flag, result_sender, &grid_progress, progress_sender),
+            NotebookMainEnum::BigFiles => big_files_search(&gui_data, loaded_commons, stop_flag, result_sender, &grid_progress, progress_sender),
+            NotebookMainEnum::Temporary => temporary_files_search(&gui_data, loaded_commons, stop_flag, result_sender, &grid_progress, progress_sender),
+            NotebookMainEnum::SimilarImages => similar_image_search(&gui_data, loaded_commons, stop_flag, result_sender, &grid_progress, progress_sender),
+            NotebookMainEnum::SimilarVideos => similar_video_search(&gui_data, loaded_commons, stop_flag, result_sender, &grid_progress, progress_sender),
+            NotebookMainEnum::SameMusic => same_music_search(&gui_data, loaded_commons, stop_flag, result_sender, &grid_progress, progress_sender, &show_dialog),
+            NotebookMainEnum::Symlinks => bad_symlinks_search(&gui_data, loaded_commons, stop_flag, result_sender, &grid_progress, progress_sender),
+            NotebookMainEnum::BrokenFiles => broken_files_search(&gui_data, loaded_commons, stop_flag, result_sender, &grid_progress, progress_sender, &show_dialog),
+            NotebookMainEnum::BadExtensions => bad_extensions_search(&gui_data, loaded_commons, stop_flag, result_sender, &grid_progress, progress_sender),
         }
 
         window_progress.set_default_size(1, 1);
@@ -203,7 +203,7 @@ impl LoadedCommonItems {
 fn duplicate_search(
     gui_data: &GuiData,
     loaded_commons: LoadedCommonItems,
-    stop_receiver: Receiver<()>,
+    stop_flag: Arc<AtomicBool>,
     result_sender: Sender<Message>,
     grid_progress: &Grid,
     progress_data_sender: Sender<ProgressData>,
@@ -252,7 +252,7 @@ fn duplicate_search(
 
             set_common_settings(&mut item, &loaded_commons);
             item.set_delete_outdated_cache(delete_outdated_cache);
-            item.find_duplicates(Some(&stop_receiver), Some(&progress_data_sender));
+            item.find_duplicates(Some(&stop_flag), Some(&progress_data_sender));
             result_sender.send(Message::Duplicates(item)).expect("Failed to send Duplicates message");
         })
         .expect("Failed to spawn DuplicateFinder thread");
@@ -261,7 +261,7 @@ fn duplicate_search(
 fn empty_files_search(
     gui_data: &GuiData,
     loaded_commons: LoadedCommonItems,
-    stop_receiver: Receiver<()>,
+    stop_flag: Arc<AtomicBool>,
     result_sender: Sender<Message>,
     grid_progress: &Grid,
     progress_data_sender: Sender<ProgressData>,
@@ -277,7 +277,7 @@ fn empty_files_search(
             let mut item = EmptyFiles::new();
 
             set_common_settings(&mut item, &loaded_commons);
-            item.find_empty_files(Some(&stop_receiver), Some(&progress_data_sender));
+            item.find_empty_files(Some(&stop_flag), Some(&progress_data_sender));
             result_sender.send(Message::EmptyFiles(item)).expect("Failed to send EmptyFiles message");
         })
         .expect("Failed to spawn EmptyFiles thread");
@@ -286,7 +286,7 @@ fn empty_files_search(
 fn empty_dirs_search(
     gui_data: &GuiData,
     loaded_commons: LoadedCommonItems,
-    stop_receiver: Receiver<()>,
+    stop_flag: Arc<AtomicBool>,
     result_sender: Sender<Message>,
     grid_progress: &Grid,
     progress_data_sender: Sender<ProgressData>,
@@ -302,7 +302,7 @@ fn empty_dirs_search(
             let mut item = EmptyFolder::new();
 
             set_common_settings(&mut item, &loaded_commons);
-            item.find_empty_folders(Some(&stop_receiver), Some(&progress_data_sender));
+            item.find_empty_folders(Some(&stop_flag), Some(&progress_data_sender));
             result_sender.send(Message::EmptyFolders(item)).expect("Failed to send EmptyFolders message");
         })
         .expect("Failed to spawn EmptyFolders thread");
@@ -311,7 +311,7 @@ fn empty_dirs_search(
 fn big_files_search(
     gui_data: &GuiData,
     loaded_commons: LoadedCommonItems,
-    stop_receiver: Receiver<()>,
+    stop_flag: Arc<AtomicBool>,
     result_sender: Sender<Message>,
     grid_progress: &Grid,
     progress_data_sender: Sender<ProgressData>,
@@ -335,7 +335,7 @@ fn big_files_search(
             let mut item = BigFile::new(params);
 
             set_common_settings(&mut item, &loaded_commons);
-            item.find_big_files(Some(&stop_receiver), Some(&progress_data_sender));
+            item.find_big_files(Some(&stop_flag), Some(&progress_data_sender));
             result_sender.send(Message::BigFiles(item)).expect("Failed to send BigFiles message");
         })
         .expect("Failed to spawn BigFiles thread");
@@ -344,7 +344,7 @@ fn big_files_search(
 fn temporary_files_search(
     gui_data: &GuiData,
     loaded_commons: LoadedCommonItems,
-    stop_receiver: Receiver<()>,
+    stop_flag: Arc<AtomicBool>,
     result_sender: Sender<Message>,
     grid_progress: &Grid,
     progress_data_sender: Sender<ProgressData>,
@@ -360,7 +360,7 @@ fn temporary_files_search(
             let mut item = Temporary::new();
 
             set_common_settings(&mut item, &loaded_commons);
-            item.find_temporary_files(Some(&stop_receiver), Some(&progress_data_sender));
+            item.find_temporary_files(Some(&stop_flag), Some(&progress_data_sender));
             result_sender.send(Message::Temporary(item)).expect("Failed to send Temporary message");
         })
         .expect("Failed to spawn Temporary thread");
@@ -369,7 +369,7 @@ fn temporary_files_search(
 fn same_music_search(
     gui_data: &GuiData,
     loaded_commons: LoadedCommonItems,
-    stop_receiver: Receiver<()>,
+    stop_flag: Arc<AtomicBool>,
     result_sender: Sender<Message>,
     grid_progress: &Grid,
     progress_data_sender: Sender<ProgressData>,
@@ -437,7 +437,7 @@ fn same_music_search(
                 let mut item = SameMusic::new(params);
 
                 set_common_settings(&mut item, &loaded_commons);
-                item.find_same_music(Some(&stop_receiver), Some(&progress_data_sender));
+                item.find_same_music(Some(&stop_flag), Some(&progress_data_sender));
                 result_sender.send(Message::SameMusic(item)).expect("Failed to send SameMusic message");
             })
             .expect("Failed to spawn SameMusic thread");
@@ -469,7 +469,7 @@ fn same_music_search(
 fn broken_files_search(
     gui_data: &GuiData,
     loaded_commons: LoadedCommonItems,
-    stop_receiver: Receiver<()>,
+    stop_flag: Arc<AtomicBool>,
     result_sender: Sender<Message>,
     grid_progress: &Grid,
     progress_data_sender: Sender<ProgressData>,
@@ -508,7 +508,7 @@ fn broken_files_search(
                 let mut item = BrokenFiles::new(params);
 
                 set_common_settings(&mut item, &loaded_commons);
-                item.find_broken_files(Some(&stop_receiver), Some(&progress_data_sender));
+                item.find_broken_files(Some(&stop_flag), Some(&progress_data_sender));
                 result_sender.send(Message::BrokenFiles(item)).expect("Failed to send BrokenFiles message");
             })
             .expect("Failed to spawn BrokenFiles thread");
@@ -543,7 +543,7 @@ fn broken_files_search(
 fn similar_image_search(
     gui_data: &GuiData,
     loaded_commons: LoadedCommonItems,
-    stop_receiver: Receiver<()>,
+    stop_flag: Arc<AtomicBool>,
     result_sender: Sender<Message>,
     grid_progress: &Grid,
     progress_data_sender: Sender<ProgressData>,
@@ -585,7 +585,7 @@ fn similar_image_search(
 
             set_common_settings(&mut item, &loaded_commons);
             item.set_delete_outdated_cache(delete_outdated_cache);
-            item.find_similar_images(Some(&stop_receiver), Some(&progress_data_sender));
+            item.find_similar_images(Some(&stop_flag), Some(&progress_data_sender));
             result_sender.send(Message::SimilarImages(item)).expect("Failed to send SimilarImages message");
         })
         .expect("Failed to spawn SimilarImages thread");
@@ -594,7 +594,7 @@ fn similar_image_search(
 fn similar_video_search(
     gui_data: &GuiData,
     loaded_commons: LoadedCommonItems,
-    stop_receiver: Receiver<()>,
+    stop_flag: Arc<AtomicBool>,
     result_sender: Sender<Message>,
     grid_progress: &Grid,
     progress_data_sender: Sender<ProgressData>,
@@ -621,7 +621,7 @@ fn similar_video_search(
 
             set_common_settings(&mut item, &loaded_commons);
             item.set_delete_outdated_cache(delete_outdated_cache);
-            item.find_similar_videos(Some(&stop_receiver), Some(&progress_data_sender));
+            item.find_similar_videos(Some(&stop_flag), Some(&progress_data_sender));
             result_sender.send(Message::SimilarVideos(item)).expect("Failed to send SimilarVideos message");
         })
         .expect("Failed to spawn SimilarVideos thread");
@@ -630,7 +630,7 @@ fn similar_video_search(
 fn bad_symlinks_search(
     gui_data: &GuiData,
     loaded_commons: LoadedCommonItems,
-    stop_receiver: Receiver<()>,
+    stop_flag: Arc<AtomicBool>,
     result_sender: Sender<Message>,
     grid_progress: &Grid,
     progress_data_sender: Sender<ProgressData>,
@@ -646,7 +646,7 @@ fn bad_symlinks_search(
             let mut item = InvalidSymlinks::new();
 
             set_common_settings(&mut item, &loaded_commons);
-            item.find_invalid_links(Some(&stop_receiver), Some(&progress_data_sender));
+            item.find_invalid_links(Some(&stop_flag), Some(&progress_data_sender));
             result_sender.send(Message::InvalidSymlinks(item)).expect("Failed to send InvalidSymlinks message");
         })
         .expect("Failed to spawn InvalidSymlinks thread");
@@ -655,7 +655,7 @@ fn bad_symlinks_search(
 fn bad_extensions_search(
     gui_data: &GuiData,
     loaded_commons: LoadedCommonItems,
-    stop_receiver: Receiver<()>,
+    stop_flag: Arc<AtomicBool>,
     result_sender: Sender<Message>,
     grid_progress: &Grid,
     progress_data_sender: Sender<ProgressData>,
@@ -672,7 +672,7 @@ fn bad_extensions_search(
             let mut item = BadExtensions::new(params);
 
             set_common_settings(&mut item, &loaded_commons);
-            item.find_bad_extensions_files(Some(&stop_receiver), Some(&progress_data_sender));
+            item.find_bad_extensions_files(Some(&stop_flag), Some(&progress_data_sender));
             result_sender.send(Message::BadExtensions(item)).expect("Failed to send BadExtensions message");
         })
         .expect("Failed to spawn BadExtensions thread");

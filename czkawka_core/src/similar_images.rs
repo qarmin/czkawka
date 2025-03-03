@@ -1,12 +1,13 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::io::Write;
 use std::path::{Path, PathBuf};
-use std::sync::atomic::Ordering;
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Instant;
 use std::{mem, panic};
 
 use bk_tree::BKTree;
-use crossbeam_channel::{Receiver, Sender};
+use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use hamming_bitwise_fast::hamming_bitwise_fast;
 use humansize::{BINARY, format_size};
@@ -157,18 +158,18 @@ impl SimilarImages {
     }
 
     #[fun_time(message = "find_similar_images", level = "info")]
-    pub fn find_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) {
+    pub fn find_similar_images(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) {
         self.prepare_items();
         self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
-        if self.check_for_similar_images(stop_receiver, progress_sender) == WorkContinueStatus::Stop {
+        if self.check_for_similar_images(stop_flag, progress_sender) == WorkContinueStatus::Stop {
             self.common_data.stopped_search = true;
             return;
         }
-        if self.hash_images(stop_receiver, progress_sender) == WorkContinueStatus::Stop {
+        if self.hash_images(stop_flag, progress_sender) == WorkContinueStatus::Stop {
             self.common_data.stopped_search = true;
             return;
         }
-        if self.find_similar_hashes(stop_receiver, progress_sender) == WorkContinueStatus::Stop {
+        if self.find_similar_hashes(stop_flag, progress_sender) == WorkContinueStatus::Stop {
             self.common_data.stopped_search = true;
             return;
         }
@@ -177,7 +178,7 @@ impl SimilarImages {
     }
 
     #[fun_time(message = "check_for_similar_images", level = "debug")]
-    fn check_for_similar_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_for_similar_images(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if cfg!(feature = "heif") {
             self.common_data
                 .extensions
@@ -194,7 +195,7 @@ impl SimilarImages {
 
         let result = DirTraversalBuilder::new()
             .group_by(inode)
-            .stop_receiver(stop_receiver)
+            .stop_flag(stop_flag)
             .progress_sender(progress_sender)
             .common_data(&self.common_data)
             .build()
@@ -267,7 +268,7 @@ impl SimilarImages {
     // - Join all hashes and save it to file
 
     #[fun_time(message = "hash_images", level = "debug")]
-    fn hash_images(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn hash_images(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.images_to_check.is_empty() {
             return WorkContinueStatus::Continue;
         }
@@ -286,7 +287,7 @@ impl SimilarImages {
         let (mut vec_file_entry, errors): (Vec<ImagesEntry>, Vec<String>) = non_cached_files_to_check
             .into_par_iter()
             .map(|(_s, file_entry)| {
-                if check_if_stop_received(stop_receiver) {
+                if check_if_stop_received(stop_flag) {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
@@ -448,7 +449,7 @@ impl SimilarImages {
         all_hashed_images: &HashMap<ImHash, Vec<ImagesEntry>>,
         collected_similar_images: &mut HashMap<ImHash, Vec<ImagesEntry>>,
         progress_sender: Option<&Sender<ProgressData>>,
-        stop_receiver: Option<&Receiver<()>>,
+        stop_flag: Option<&Arc<AtomicBool>>,
         tolerance: u32,
     ) -> WorkContinueStatus {
         // Don't use hashes with multiple images in bktree, because they will always be master of group and cannot be find by other hashes
@@ -469,7 +470,7 @@ impl SimilarImages {
                 .map(|hash_to_check| {
                     items_counter.fetch_add(1, Ordering::Relaxed);
 
-                    if check_if_stop_received(stop_receiver) {
+                    if check_if_stop_received(stop_flag) {
                         check_was_stopped.store(true, Ordering::Relaxed);
                         return None;
                     }
@@ -584,7 +585,7 @@ impl SimilarImages {
     }
 
     #[fun_time(message = "find_similar_hashes", level = "debug")]
-    fn find_similar_hashes(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn find_similar_hashes(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.image_hashes.is_empty() {
             return WorkContinueStatus::Continue;
         }
@@ -603,8 +604,7 @@ impl SimilarImages {
                     collected_similar_images.insert(hash, vec_file_entry);
                 }
             }
-        } else if self.compare_hashes_with_non_zero_tolerance(&all_hashed_images, &mut collected_similar_images, progress_sender, stop_receiver, tolerance)
-            == WorkContinueStatus::Stop
+        } else if self.compare_hashes_with_non_zero_tolerance(&all_hashed_images, &mut collected_similar_images, progress_sender, stop_flag, tolerance) == WorkContinueStatus::Stop
         {
             return WorkContinueStatus::Stop;
         }

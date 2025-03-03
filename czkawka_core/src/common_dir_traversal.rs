@@ -5,10 +5,11 @@ use std::fs::{DirEntry, FileType, Metadata};
 #[cfg(target_family = "unix")]
 use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
-use std::sync::atomic::Ordering;
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::UNIX_EPOCH;
 
-use crossbeam_channel::{Receiver, Sender};
+use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use log::debug;
 use rayon::prelude::*;
@@ -105,7 +106,7 @@ enum EntryType {
 pub struct DirTraversalBuilder<'a, 'b, F> {
     group_by: Option<F>,
     root_dirs: Vec<PathBuf>,
-    stop_receiver: Option<&'a Receiver<()>>,
+    stop_flag: Option<&'a Arc<AtomicBool>>,
     progress_sender: Option<&'b Sender<ProgressData>>,
     minimal_file_size: Option<u64>,
     maximal_file_size: Option<u64>,
@@ -121,7 +122,7 @@ pub struct DirTraversalBuilder<'a, 'b, F> {
 pub struct DirTraversal<'a, 'b, F> {
     group_by: F,
     root_dirs: Vec<PathBuf>,
-    stop_receiver: Option<&'a Receiver<()>>,
+    stop_flag: Option<&'a Arc<AtomicBool>>,
     progress_sender: Option<&'b Sender<ProgressData>>,
     recursive_search: bool,
     directories: Directories,
@@ -145,7 +146,7 @@ impl DirTraversalBuilder<'_, '_, ()> {
         DirTraversalBuilder {
             group_by: None,
             root_dirs: vec![],
-            stop_receiver: None,
+            stop_flag: None,
             progress_sender: None,
             checking_method: CheckingMethod::None,
             minimal_file_size: None,
@@ -178,8 +179,8 @@ impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
         self
     }
 
-    pub fn stop_receiver(mut self, stop_receiver: Option<&'a Receiver<()>>) -> Self {
-        self.stop_receiver = stop_receiver;
+    pub fn stop_flag(mut self, stop_flag: Option<&'a Arc<AtomicBool>>) -> Self {
+        self.stop_flag = stop_flag;
         self
     }
 
@@ -249,7 +250,7 @@ impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
         DirTraversalBuilder {
             group_by: Some(group_by),
             root_dirs: self.root_dirs,
-            stop_receiver: self.stop_receiver,
+            stop_flag: self.stop_flag,
             progress_sender: self.progress_sender,
             directories: self.directories,
             extensions: self.extensions,
@@ -267,7 +268,7 @@ impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
         DirTraversal {
             group_by: self.group_by.expect("could not build"),
             root_dirs: self.root_dirs,
-            stop_receiver: self.stop_receiver,
+            stop_flag: self.stop_flag,
             progress_sender: self.progress_sender,
             checking_method: self.checking_method,
             minimal_file_size: self.minimal_file_size.unwrap_or(0),
@@ -328,12 +329,12 @@ where
             recursive_search,
             minimal_file_size,
             maximal_file_size,
-            stop_receiver,
+            stop_flag,
             ..
         } = self;
 
         while !folders_to_check.is_empty() {
-            if check_if_stop_received(stop_receiver) {
+            if check_if_stop_received(stop_flag) {
                 send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                 return DirTraversalResult::Stopped;
             }

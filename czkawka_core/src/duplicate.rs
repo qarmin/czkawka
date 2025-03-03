@@ -9,10 +9,10 @@ use std::io::{self, Error, ErrorKind};
 use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::{fs, mem};
 
-use crossbeam_channel::{Receiver, Sender};
+use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use humansize::{BINARY, format_size};
 use log::debug;
@@ -171,35 +171,35 @@ impl DuplicateFinder {
     }
 
     #[fun_time(message = "find_duplicates", level = "info")]
-    pub fn find_duplicates(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) {
+    pub fn find_duplicates(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) {
         self.prepare_items();
         self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
 
         match self.get_params().check_method {
             CheckingMethod::Name => {
-                self.common_data.stopped_search = self.check_files_name(stop_receiver, progress_sender) == WorkContinueStatus::Stop;
+                self.common_data.stopped_search = self.check_files_name(stop_flag, progress_sender) == WorkContinueStatus::Stop;
                 if self.common_data.stopped_search {
                     return;
                 }
             }
             CheckingMethod::SizeName => {
-                self.common_data.stopped_search = self.check_files_size_name(stop_receiver, progress_sender) == WorkContinueStatus::Stop;
+                self.common_data.stopped_search = self.check_files_size_name(stop_flag, progress_sender) == WorkContinueStatus::Stop;
                 if self.common_data.stopped_search {
                     return;
                 }
             }
             CheckingMethod::Size => {
-                self.common_data.stopped_search = self.check_files_size(stop_receiver, progress_sender) == WorkContinueStatus::Stop;
+                self.common_data.stopped_search = self.check_files_size(stop_flag, progress_sender) == WorkContinueStatus::Stop;
                 if self.common_data.stopped_search {
                     return;
                 }
             }
             CheckingMethod::Hash => {
-                self.common_data.stopped_search = self.check_files_size(stop_receiver, progress_sender) == WorkContinueStatus::Stop;
+                self.common_data.stopped_search = self.check_files_size(stop_flag, progress_sender) == WorkContinueStatus::Stop;
                 if self.common_data.stopped_search {
                     return;
                 }
-                self.common_data.stopped_search = self.check_files_hash(stop_receiver, progress_sender) == WorkContinueStatus::Stop;
+                self.common_data.stopped_search = self.check_files_hash(stop_flag, progress_sender) == WorkContinueStatus::Stop;
                 if self.common_data.stopped_search {
                     return;
                 }
@@ -211,7 +211,7 @@ impl DuplicateFinder {
     }
 
     #[fun_time(message = "check_files_name", level = "debug")]
-    fn check_files_name(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_files_name(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let group_by_func = if self.get_params().case_sensitive_name_comparison {
             |fe: &FileEntry| {
                 fe.path
@@ -233,7 +233,7 @@ impl DuplicateFinder {
         let result = DirTraversalBuilder::new()
             .common_data(&self.common_data)
             .group_by(group_by_func)
-            .stop_receiver(stop_receiver)
+            .stop_flag(stop_flag)
             .progress_sender(progress_sender)
             .checking_method(CheckingMethod::Name)
             .build()
@@ -298,7 +298,7 @@ impl DuplicateFinder {
     }
 
     #[fun_time(message = "check_files_size_name", level = "debug")]
-    fn check_files_size_name(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_files_size_name(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let group_by_func = if self.get_params().case_sensitive_name_comparison {
             |fe: &FileEntry| {
                 (
@@ -326,7 +326,7 @@ impl DuplicateFinder {
         let result = DirTraversalBuilder::new()
             .common_data(&self.common_data)
             .group_by(group_by_func)
-            .stop_receiver(stop_receiver)
+            .stop_flag(stop_flag)
             .progress_sender(progress_sender)
             .checking_method(CheckingMethod::SizeName)
             .build()
@@ -394,11 +394,11 @@ impl DuplicateFinder {
     }
 
     #[fun_time(message = "check_files_size", level = "debug")]
-    fn check_files_size(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_files_size(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let result = DirTraversalBuilder::new()
             .common_data(&self.common_data)
             .group_by(|fe| fe.size)
-            .stop_receiver(stop_receiver)
+            .stop_flag(stop_flag)
             .progress_sender(progress_sender)
             .checking_method(self.get_params().check_method)
             .build()
@@ -559,7 +559,7 @@ impl DuplicateFinder {
     #[fun_time(message = "prehashing", level = "debug")]
     fn prehashing(
         &mut self,
-        stop_receiver: Option<&Receiver<()>>,
+        stop_flag: Option<&Arc<AtomicBool>>,
         progress_sender: Option<&Sender<ProgressData>>,
         pre_checked_map: &mut BTreeMap<u64, Vec<DuplicateEntry>>,
     ) -> WorkContinueStatus {
@@ -574,7 +574,7 @@ impl DuplicateFinder {
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.prehash_load_cache_at_start();
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-        if check_if_stop_received(stop_receiver) {
+        if check_if_stop_received(stop_flag) {
             return WorkContinueStatus::Stop;
         }
         let (progress_thread_handle, progress_thread_run, items_counter, check_was_stopped, size_counter) = prepare_thread_handler_common(
@@ -602,7 +602,7 @@ impl DuplicateFinder {
 
                 THREAD_BUFFER.with_borrow_mut(|buffer| {
                     for mut file_entry in vec_file_entry {
-                        if check_if_stop_received(stop_receiver) {
+                        if check_if_stop_received(stop_flag) {
                             check_was_stopped.store(true, Ordering::Relaxed);
                             return None;
                         }
@@ -652,7 +652,7 @@ impl DuplicateFinder {
         self.prehash_save_cache_at_exit(loaded_hash_map, pre_hash_results);
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-        if check_was_stopped.load(Ordering::Relaxed) || check_if_stop_received(stop_receiver) {
+        if check_was_stopped.load(Ordering::Relaxed) || check_if_stop_received(stop_flag) {
             return WorkContinueStatus::Stop;
         }
 
@@ -784,7 +784,7 @@ impl DuplicateFinder {
     #[fun_time(message = "full_hashing", level = "debug")]
     fn full_hashing(
         &mut self,
-        stop_receiver: Option<&Receiver<()>>,
+        stop_flag: Option<&Arc<AtomicBool>>,
         progress_sender: Option<&Sender<ProgressData>>,
         pre_checked_map: BTreeMap<u64, Vec<DuplicateEntry>>,
     ) -> WorkContinueStatus {
@@ -798,7 +798,7 @@ impl DuplicateFinder {
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.full_hashing_load_cache_at_start(pre_checked_map);
 
         send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-        if check_if_stop_received(stop_receiver) {
+        if check_if_stop_received(stop_flag) {
             return WorkContinueStatus::Stop;
         }
 
@@ -826,12 +826,12 @@ impl DuplicateFinder {
 
                 THREAD_BUFFER.with_borrow_mut(|buffer| {
                     for mut file_entry in vec_file_entry {
-                        if check_if_stop_received(stop_receiver) {
+                        if check_if_stop_received(stop_flag) {
                             check_was_stopped.store(true, Ordering::Relaxed);
                             return None;
                         }
 
-                        match hash_calculation(buffer, &file_entry, check_type, &size_counter, stop_receiver) {
+                        match hash_calculation(buffer, &file_entry, check_type, &size_counter, stop_flag) {
                             Ok(hash_string) => {
                                 if let Some(hash_string) = hash_string {
                                     file_entry.hash = hash_string.clone();
@@ -927,15 +927,15 @@ impl DuplicateFinder {
     }
 
     #[fun_time(message = "check_files_hash", level = "debug")]
-    fn check_files_hash(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_files_hash(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         assert_eq!(self.get_params().check_method, CheckingMethod::Hash);
 
         let mut pre_checked_map: BTreeMap<u64, Vec<DuplicateEntry>> = Default::default();
-        if self.prehashing(stop_receiver, progress_sender, &mut pre_checked_map) == WorkContinueStatus::Stop {
+        if self.prehashing(stop_flag, progress_sender, &mut pre_checked_map) == WorkContinueStatus::Stop {
             return WorkContinueStatus::Stop;
         }
 
-        if self.full_hashing(stop_receiver, progress_sender, pre_checked_map) == WorkContinueStatus::Stop {
+        if self.full_hashing(stop_flag, progress_sender, pre_checked_map) == WorkContinueStatus::Stop {
             return WorkContinueStatus::Stop;
         }
 
@@ -1360,7 +1360,7 @@ pub fn hash_calculation(
     file_entry: &DuplicateEntry,
     hash_type: HashType,
     size_counter: &Arc<AtomicU64>,
-    stop_receiver: Option<&Receiver<()>>,
+    stop_flag: Option<&Arc<AtomicBool>>,
 ) -> Result<Option<String>, String> {
     let mut file_handler = match File::open(&file_entry.path) {
         Ok(t) => t,
@@ -1379,7 +1379,7 @@ pub fn hash_calculation(
 
         hasher.update(&buffer[..n]);
         size_counter.fetch_add(n as u64, Ordering::Relaxed);
-        if check_if_stop_received(stop_receiver) {
+        if check_if_stop_received(stop_flag) {
             return Ok(None);
         }
     }

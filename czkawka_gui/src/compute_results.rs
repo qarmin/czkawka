@@ -40,6 +40,7 @@ pub fn connect_compute_results(gui_data: &GuiData, result_receiver: Receiver<Mes
     let buttons_search = gui_data.bottom_buttons.buttons_search.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let entry_info = gui_data.entry_info.clone();
+    let stop_flag = gui_data.stop_flag.clone();
     let tree_view_empty_folder_finder = gui_data.main_notebook.tree_view_empty_folder_finder.clone();
     let tree_view_empty_files_finder = gui_data.main_notebook.tree_view_empty_files_finder.clone();
     let tree_view_duplicate_finder = gui_data.main_notebook.tree_view_duplicate_finder.clone();
@@ -78,8 +79,7 @@ pub fn connect_compute_results(gui_data: &GuiData, result_receiver: Receiver<Mes
     glib::spawn_future_local(async move {
         loop {
             loop {
-                let msg = result_receiver.try_recv();
-                if let Ok(msg) = msg {
+                if let Ok(msg) = result_receiver.try_recv() {
                     buttons_search.show();
 
                     notebook_main.set_sensitive(true);

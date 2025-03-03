@@ -2,8 +2,9 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::io::BufReader;
 use std::rc::Rc;
+use std::sync::Arc;
+use std::sync::atomic::AtomicBool;
 
-use crossbeam_channel::bounded;
 use czkawka_core::bad_extensions::BadExtensions;
 use czkawka_core::big_file::BigFile;
 use czkawka_core::broken_files::BrokenFiles;
@@ -103,8 +104,7 @@ pub struct GuiData {
     pub scrolled_window_errors: gtk4::ScrolledWindow,
 
     // Used for sending stop signal to thread
-    pub stop_sender: crossbeam_channel::Sender<()>,
-    pub stop_receiver: crossbeam_channel::Receiver<()>,
+    pub stop_flag: Arc<AtomicBool>,
 }
 
 impl GuiData {
@@ -195,7 +195,7 @@ impl GuiData {
         scrolled_window_errors.show(); // Not sure why needed, but without it text view errors sometimes hide itself
 
         // Used for sending stop signal to thread
-        let (stop_sender, stop_receiver): (crossbeam_channel::Sender<()>, crossbeam_channel::Receiver<()>) = bounded(1);
+        let stop_flag = Arc::new(AtomicBool::new(false));
 
         Self {
             window_main,
@@ -228,8 +228,7 @@ impl GuiData {
             entry_info,
             text_view_errors,
             scrolled_window_errors,
-            stop_sender,
-            stop_receiver,
+            stop_flag,
         }
     }
 
