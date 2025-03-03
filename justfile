@@ -4,6 +4,14 @@ build_all:
     cargo clippy
     cargo test
 
+itests:
+    rm TestFiles.zip
+    wget https://github.com/qarmin/czkawka/releases/download/6.0.0/TestFiles.zip
+    cd ci_tester;cargo build --release;cd ..
+    cargo build --release --bin czkawka_cli
+
+    ci_tester/target/release/ci_tester target/release/czkawka_cli
+
 ## run
 
 czkawka:
@@ -86,3 +94,4 @@ unused_features:
     xdg-open czkawka_cli/report.html
     xdg-open czkawka_core/report.html
     xdg-open czkawka_gui/report.html
+
