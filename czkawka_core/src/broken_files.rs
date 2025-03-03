@@ -295,6 +295,17 @@ impl BrokenFiles {
         (loaded_hash_map, records_already_cached, non_cached_files_to_check)
     }
 
+    fn check_file(&self, file_entry: BrokenEntry) -> Option<BrokenEntry> {
+        match file_entry.type_of_file {
+            TypeOfFile::Image => self.check_broken_image(file_entry),
+            TypeOfFile::ArchiveZip => self.check_broken_zip(file_entry),
+            TypeOfFile::Audio => self.check_broken_audio(file_entry),
+            TypeOfFile::PDF => self.check_broken_pdf(file_entry),
+            // This means that cache read invalid value because maybe cache comes from different czkawka version
+            TypeOfFile::Unknown => None,
+        }
+    }
+
     #[fun_time(message = "look_for_broken_files", level = "debug")]
     fn look_for_broken_files(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.files_to_check.is_empty() {
@@ -318,25 +329,17 @@ impl BrokenFiles {
             .into_par_iter()
             .with_max_len(3)
             .map(|(_, file_entry)| {
-                items_counter.fetch_add(1, Ordering::Relaxed);
                 if check_if_stop_received(stop_receiver) {
                     return None;
                 }
 
                 let size = file_entry.size;
+                let res = self.check_file(file_entry);
 
-                let res = match file_entry.type_of_file {
-                    TypeOfFile::Image => Some(self.check_broken_image(file_entry)),
-                    TypeOfFile::ArchiveZip => Some(self.check_broken_zip(file_entry)),
-                    TypeOfFile::Audio => Some(self.check_broken_audio(file_entry)),
-                    TypeOfFile::PDF => Some(self.check_broken_pdf(file_entry)),
-                    // This means that cache read invalid value because maybe cache comes from different czkawka version
-                    TypeOfFile::Unknown => Some(None),
-                };
-
+                items_counter.fetch_add(1, Ordering::Relaxed);
                 size_counter.fetch_add(size, Ordering::Relaxed);
 
-                res
+                Some(res)
             })
             .while_some()
             .flatten()

@@ -329,17 +329,19 @@ impl SameMusic {
             .into_par_iter()
             .with_max_len(2)
             .map(|(path, mut music_entry)| {
-                items_counter.fetch_add(1, Ordering::Relaxed);
                 if check_if_stop_received(stop_receiver) {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
 
-                let Ok(fingerprint) = calc_fingerprint_helper(path, configuration) else {
-                    size_counter.fetch_add(music_entry.size, Ordering::Relaxed);
+                let res = calc_fingerprint_helper(path, configuration);
+                size_counter.fetch_add(music_entry.size, Ordering::Relaxed);
+                items_counter.fetch_add(1, Ordering::Relaxed);
+
+                let Ok(fingerprint) = res else {
                     return Some(None);
                 };
-                size_counter.fetch_add(music_entry.size, Ordering::Relaxed);
+
                 music_entry.fingerprint = fingerprint;
 
                 Some(Some(music_entry))
@@ -396,17 +398,15 @@ impl SameMusic {
         // Clean for duplicate files
         let mut vec_file_entry = non_cached_files_to_check
             .into_par_iter()
-            .map(|(path, mut music_entry)| {
-                items_counter.fetch_add(1, Ordering::Relaxed);
+            .map(|(path, music_entry)| {
                 if check_if_stop_received(stop_receiver) {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
-                if read_single_file_tags(&path, &mut music_entry) {
-                    Some(Some(music_entry))
-                } else {
-                    Some(None)
-                }
+
+                let res = read_single_file_tags(&path, music_entry);
+                items_counter.fetch_add(1, Ordering::Relaxed);
+                Some(res)
             })
             .while_some()
             .flatten()
@@ -840,18 +840,18 @@ fn calc_fingerprint_helper(path: impl AsRef<Path>, config: &Configuration) -> an
     Ok(printer.fingerprint().to_vec())
 }
 
-fn read_single_file_tags(path: &str, music_entry: &mut MusicEntry) -> bool {
+fn read_single_file_tags(path: &str, mut music_entry: MusicEntry) -> Option<MusicEntry> {
     let Ok(mut file) = File::open(path) else {
-        return false;
+        return None;
     };
 
     let Ok(possible_tagged_file) = panic::catch_unwind(move || read_from(&mut file).ok()) else {
         let message = create_crash_message("Lofty", path, "https://github.com/image-rs/image/issues");
         println!("{message}");
-        return false;
+        return None;
     };
 
-    let Some(tagged_file) = possible_tagged_file else { return true };
+    let Some(tagged_file) = possible_tagged_file else { return Some(music_entry) };
 
     let properties = tagged_file.properties();
 
@@ -916,7 +916,7 @@ fn read_single_file_tags(path: &str, music_entry: &mut MusicEntry) -> bool {
     music_entry.genre = genre;
     music_entry.bitrate = bitrate;
 
-    true
+    Some(music_entry)
 }
 
 impl DebugPrint for SameMusic {

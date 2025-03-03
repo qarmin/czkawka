@@ -600,13 +600,12 @@ impl DuplicateFinder {
                 let mut hashmap_with_hash: BTreeMap<String, Vec<DuplicateEntry>> = Default::default();
                 let mut errors: Vec<String> = Vec::new();
 
-                items_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
-                if check_if_stop_received(stop_receiver) {
-                    check_was_stopped.store(true, Ordering::Relaxed);
-                    return None;
-                }
                 THREAD_BUFFER.with_borrow_mut(|buffer| {
                     for mut file_entry in vec_file_entry {
+                        if check_if_stop_received(stop_receiver) {
+                            check_was_stopped.store(true, Ordering::Relaxed);
+                            return None;
+                        }
                         match hash_calculation_limit(buffer, &file_entry, check_type, PREHASHING_BUFFER_SIZE, &size_counter) {
                             Ok(hash_string) => {
                                 file_entry.hash = hash_string.clone();
@@ -614,10 +613,7 @@ impl DuplicateFinder {
                             }
                             Err(s) => errors.push(s),
                         }
-                        if check_if_stop_received(stop_receiver) {
-                            check_was_stopped.store(true, Ordering::Relaxed);
-                            return None;
-                        }
+                        items_counter.fetch_add(1, Ordering::Relaxed);
                     }
 
                     Some(())
@@ -825,10 +821,8 @@ impl DuplicateFinder {
             .into_par_iter()
             .with_max_len(3)
             .map(|(size, vec_file_entry)| {
-                let size_counter = size_counter.clone();
                 let mut hashmap_with_hash: BTreeMap<String, Vec<DuplicateEntry>> = Default::default();
                 let mut errors: Vec<String> = Vec::new();
-                items_counter.fetch_add(vec_file_entry.len(), Ordering::Relaxed);
 
                 THREAD_BUFFER.with_borrow_mut(|buffer| {
                     for mut file_entry in vec_file_entry {
@@ -847,7 +841,9 @@ impl DuplicateFinder {
                                 }
                             }
                             Err(s) => errors.push(s),
-                        }
+                        };
+
+                        items_counter.fetch_add(1, Ordering::Relaxed);
                     }
                     Some(())
                 })?;

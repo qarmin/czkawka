@@ -86,39 +86,28 @@ fn progress_default(item: &ProgressData) -> ProgressToSend {
     let items_stats = format!("{}/{}", item.entries_checked, item.entries_to_check);
     let size_stats = format!("{}/{}", format_size(item.bytes_checked, BINARY), format_size(item.bytes_to_check, BINARY));
     let step_name = match item.sstage {
-        CurrentStage::SameMusicReadingTags => {
-            format!("Checking tags of {items_stats}",)
-        }
-        CurrentStage::SameMusicCalculatingFingerprints => {
-            format!("Checking content of {items_stats} ({size_stats})")
-        }
-        CurrentStage::SameMusicComparingTags => {
-            format!("Comparing tags of {items_stats}")
-        }
-        CurrentStage::SameMusicComparingFingerprints => {
-            format!("Comparing content of {items_stats}")
-        }
-        CurrentStage::SimilarImagesCalculatingHashes => {
-            format!("Hashing of {items_stats} image ({size_stats})")
-        }
-        CurrentStage::SimilarImagesComparingHashes => {
-            format!("Comparing {items_stats} image hash")
-        }
-        CurrentStage::SimilarVideosCalculatingHashes => {
-            format!("Hashing of {items_stats} video")
-        }
-        CurrentStage::BrokenFilesChecking => {
-            format!("Checking {items_stats} file ({size_stats})")
-        }
-        CurrentStage::BadExtensionsChecking => {
-            format!("Checking {items_stats} file")
-        }
-        CurrentStage::DuplicatePreHashing => {
-            format!("Analyzing partial hash of {items_stats} files ({size_stats})")
-        }
-        CurrentStage::DuplicateFullHashing => {
-            format!("Analyzing full hash of {items_stats} files ({size_stats})")
-        }
+        CurrentStage::SameMusicReadingTags => format!("Checked tags of {items_stats}"),
+
+        CurrentStage::SameMusicCalculatingFingerprints => format!("Checked content of {items_stats} ({size_stats})"),
+
+        CurrentStage::SameMusicComparingTags => format!("Compared tags of {items_stats}"),
+
+        CurrentStage::SameMusicComparingFingerprints => format!("Compared content of {items_stats}"),
+
+        CurrentStage::SimilarImagesCalculatingHashes => format!("Hashed of {items_stats} image ({size_stats})"),
+
+        CurrentStage::SimilarImagesComparingHashes => format!("Compared {items_stats} image hash"),
+
+        CurrentStage::SimilarVideosCalculatingHashes => format!("Hashed of {items_stats} video"),
+
+        CurrentStage::BrokenFilesChecking => format!("Checked {items_stats} file ({size_stats})"),
+
+        CurrentStage::BadExtensionsChecking => format!("Checked {items_stats} file"),
+
+        CurrentStage::DuplicatePreHashing => format!("Analyzed partial hash of {items_stats} files ({size_stats})"),
+
+        CurrentStage::DuplicateFullHashing => format!("Analyzed full hash of {items_stats} files ({size_stats})"),
+
         _ => unreachable!(),
     };
     let (all_progress, current_progress, current_progress_size) = common_get_data(item);

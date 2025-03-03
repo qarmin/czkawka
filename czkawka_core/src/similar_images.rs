@@ -285,18 +285,17 @@ impl SimilarImages {
         debug!("hash_images - start hashing images");
         let (mut vec_file_entry, errors): (Vec<ImagesEntry>, Vec<String>) = non_cached_files_to_check
             .into_par_iter()
-            .map(|(_s, mut file_entry)| {
-                items_counter.fetch_add(1, Ordering::Relaxed);
+            .map(|(_s, file_entry)| {
                 if check_if_stop_received(stop_receiver) {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
-                size_counter.fetch_add(file_entry.size, Ordering::Relaxed);
-                if let Err(e) = self.collect_image_file_entry(&mut file_entry) {
-                    return Some(Err(e));
-                }
+                let size = file_entry.size;
+                let res = self.collect_image_file_entry(file_entry);
+                items_counter.fetch_add(1, Ordering::Relaxed);
+                size_counter.fetch_add(size, Ordering::Relaxed);
 
-                Some(Ok(file_entry))
+                Some(res)
             })
             .while_some()
             .partition_map(|res| match res {
@@ -351,7 +350,7 @@ impl SimilarImages {
         }
     }
 
-    fn collect_image_file_entry(&self, file_entry: &mut ImagesEntry) -> Result<(), String> {
+    fn collect_image_file_entry(&self, mut file_entry: ImagesEntry) -> Result<ImagesEntry, String> {
         let img = get_dynamic_image_from_path(&file_entry.path.to_string_lossy())?;
 
         let dimensions = img.dimensions();
@@ -367,7 +366,7 @@ impl SimilarImages {
         let hash = hasher.hash_image(&img);
         file_entry.hash = hash.as_bytes().to_vec();
 
-        Ok(())
+        Ok(file_entry)
     }
 
     // Split hashes at 2 parts, base hashes and hashes to compare, 3 argument is set of hashes with multiple images

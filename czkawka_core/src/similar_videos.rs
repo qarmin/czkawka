@@ -196,6 +196,20 @@ impl SimilarVideos {
         (loaded_hash_map, records_already_cached, non_cached_files_to_check)
     }
 
+    fn check_video_file_entry(&self, mut file_entry: VideosEntry) -> VideosEntry {
+        let vhash = match ffmpeg_builder::VideoHashBuilder::default().hash(file_entry.path.clone()) {
+            Ok(t) => t,
+            Err(e) => {
+                file_entry.error = format!("Failed to hash file, reason {e}");
+                return file_entry;
+            }
+        };
+
+        file_entry.vhash = vhash;
+
+        file_entry
+    }
+
     #[fun_time(message = "sort_videos", level = "debug")]
     fn sort_videos(&mut self, stop_receiver: Option<&Receiver<()>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.videos_to_check.is_empty() {
@@ -204,37 +218,29 @@ impl SimilarVideos {
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache_at_start();
 
-        let (progress_thread_handle, progress_thread_run, items_counter, check_was_stopped, _size_counter) = prepare_thread_handler_common(
+        let (progress_thread_handle, progress_thread_run, items_counter, check_was_stopped, size_counter) = prepare_thread_handler_common(
             progress_sender,
             CurrentStage::SimilarVideosCalculatingHashes,
             non_cached_files_to_check.len(),
             self.get_test_type(),
-            0,
+            non_cached_files_to_check.values().map(|e| e.size).sum(),
         );
 
         let mut vec_file_entry: Vec<VideosEntry> = non_cached_files_to_check
-            .par_iter()
-            .map(|file_entry| {
-                items_counter.fetch_add(1, Ordering::Relaxed);
+            .into_par_iter()
+            .map(|(_, file_entry)| {
                 if check_if_stop_received(stop_receiver) {
                     check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
-                let mut file_entry = file_entry.1.clone();
 
-                let vhash = match ffmpeg_builder::VideoHashBuilder::default().hash(file_entry.path.clone()) {
-                    Ok(t) => t,
-                    Err(e) => {
-                        return {
-                            file_entry.error = format!("Failed to hash file, reason {e}");
-                            Some(file_entry)
-                        };
-                    }
-                };
+                let size = file_entry.size;
+                let res = self.check_video_file_entry(file_entry);
 
-                file_entry.vhash = vhash;
+                items_counter.fetch_add(1, Ordering::Relaxed);
+                size_counter.fetch_add(size, Ordering::Relaxed);
 
-                Some(file_entry)
+                Some(res)
             })
             .while_some()
             .collect::<Vec<VideosEntry>>();

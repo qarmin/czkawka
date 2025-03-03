@@ -737,17 +737,9 @@ fn compute_similar_images(
             let list_store = get_list_store(tree_view);
 
             if sf.get_use_reference() {
-                let vec_struct_similar: &Vec<(ImagesEntry, Vec<ImagesEntry>)> = sf.get_similar_images_referenced();
-                for (base_file_entry, vec_file_entry) in vec_struct_similar {
-                    // Sort
-                    let vec_file_entry = if vec_file_entry.len() >= 2 {
-                        let mut vec_file_entry = vec_file_entry.clone();
-                        // Use comparison by similarity, because it is more important that path here
-                        vec_file_entry.par_sort_unstable_by_key(|e| e.similarity);
-                        vec_file_entry
-                    } else {
-                        vec_file_entry.clone()
-                    };
+                let vec_struct_similar: Vec<(ImagesEntry, Vec<ImagesEntry>)> = sf.get_similar_images_referenced().clone();
+                for (base_file_entry, mut vec_file_entry) in vec_struct_similar {
+                    vec_file_entry.sort_by_key(|e| e.similarity);
 
                     // Header
                     let (directory, file) = split_path(&base_file_entry.path);
@@ -780,17 +772,9 @@ fn compute_similar_images(
                     }
                 }
             } else {
-                let vec_struct_similar = sf.get_similar_images();
-                for vec_file_entry in vec_struct_similar {
-                    // Sort
-                    let vec_file_entry = if vec_file_entry.len() >= 2 {
-                        let mut vec_file_entry = vec_file_entry.clone();
-                        // Use comparison by similarity, because it is more important that path here
-                        vec_file_entry.par_sort_unstable_by_key(|e| e.similarity);
-                        vec_file_entry
-                    } else {
-                        vec_file_entry.clone()
-                    };
+                let vec_struct_similar = sf.get_similar_images().clone();
+                for mut vec_file_entry in vec_struct_similar {
+                    vec_file_entry.sort_by_key(|e| e.similarity);
 
                     similar_images_add_to_list_store(&list_store, "", "", 0, 0, "", 0, 0, true, false);
                     for file_entry in &vec_file_entry {

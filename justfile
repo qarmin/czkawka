@@ -15,21 +15,21 @@ itests:
 ## run
 
 czkawka:
-    RUST_BACKTRACE=1 cargo run --bin czkawka_gui
+    cargo run --bin czkawka_gui
 czkawka_r:
-    RUST_BACKTRACE=1 cargo run --bin czkawka_gui --release
+    cargo run --bin czkawka_gui --release
 
 krokiet:
-    RUST_BACKTRACE=1 cargo run --bin krokiet
+    cargo run --bin krokiet
 krokiet_r:
-    RUST_BACKTRACE=1 cargo run --bin krokiet --release
+    cargo run --bin krokiet --release
 krokiet_dark:
-    RUST_BACKTRACE=1 SLINT_STYLE=fluent-dark cargo run --bin krokiet
+    SLINT_STYLE=fluent-dark cargo run --bin krokiet
 
 cli +args:
-    RUST_BACKTRACE=1 cargo run --bin czkawka_cli -- {{args}}
+    cargo run --bin czkawka_cli -- {{args}}
 cli_r +args:
-    RUST_BACKTRACE=1 cargo run --bin czkawka_cli --release -- {{args}}
+    cargo run --bin czkawka_cli --release -- {{args}}
 cli_help:
     cargo run --bin czkawka_cli -- --help
 
