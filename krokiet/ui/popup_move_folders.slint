@@ -38,6 +38,7 @@ export component PopupMoveFolders inherits Rectangle {
                     horizontal-alignment: center;
                     font-size: 13px;
                 }
+
                 Text {
                     vertical-stretch: 1.0;
                     text: "Moving entries to folder\n" + folder_name + "\nAre you want to continue?";
@@ -54,6 +55,7 @@ export component PopupMoveFolders inherits Rectangle {
                             text: "Copy files instead of moving";
                         }
                     }
+
                     HorizontalLayout {
                         alignment: center;
                         preserve_folder_checkbox := CheckBox {
@@ -70,9 +72,9 @@ export component PopupMoveFolders inherits Rectangle {
                             Callabler.move_items(preserve_folder_checkbox.checked, copy_checkbox.checked, folder_name);
                         }
                     }
-                    Rectangle {
 
-                    }
+                    Rectangle { }
+
                     Button {
                         text: "No";
                         clicked => {

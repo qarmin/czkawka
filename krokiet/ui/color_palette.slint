@@ -17,8 +17,7 @@ export global ColorPalette {
     // Popup
     in-out property <color> popup_background: dark_scheme ? #353535 : #5e5e5e;
 
-
-    public pure function  get_listview_color(selected: bool, hovered: bool) -> color {
+    public pure function get_listview_color(selected: bool, hovered: bool) -> color {
         if (selected) {
             return hovered ? self.list_view_item_selected_hovered_color : self.list_view_item_selected_color;
         } else {

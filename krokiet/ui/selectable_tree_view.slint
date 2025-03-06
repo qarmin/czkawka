@@ -31,7 +31,7 @@ export component SelectableTableView inherits Rectangle {
 
             HorizontalLayout {
                 spacing: 5px;
-                for title [idx] in root.columns: HorizontalLayout {
+                for title[idx] in root.columns: HorizontalLayout {
                     width: root.column_sizes[idx];
                     Text {
                         overflow: elide;
@@ -68,9 +68,8 @@ export component SelectableTableView inherits Rectangle {
         list_view := ListView {
             padding: 0px;
             min-width: 100px;
-            for r [idx] in root.values: Rectangle {
+            for r[idx] in root.values: Rectangle {
                 width: list_view_width;
-            
                 border-radius: 5px;
                 height: 20px;
                 background: ColorPalette.get_listview_color_with_header(r.selected_row, touch-area.has-hover, r.header_row);
@@ -131,7 +130,7 @@ export component SelectableTableView inherits Rectangle {
 
                     HorizontalLayout {
                         spacing: 5px;
-                        for f [idx] in r.val_str: Text {
+                        for f[idx] in r.val_str: Text {
                             width: root.column_sizes[idx + 1];
                             text: f;
                             font-size: 12px;
@@ -165,7 +164,7 @@ export component SelectableTableView inherits Rectangle {
             if (root.selected_item != -1 && !root.values[root.selected_item].header_row) {
                 root.values[root.selected_item].checked = !root.values[root.selected_item].checked;
             }
-        } else if (event.text == "\n" ) {
+        } else if (event.text == "\n") {
             if (root.selected_item != -1) {
                 openSelectedItem();
             }

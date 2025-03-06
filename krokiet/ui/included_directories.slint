@@ -10,7 +10,6 @@ export component IncludedDirectories {
     in-out property <int> current_index <=> Settings.included_directories_model_selected_idx;
 
     in-out property <length> size_referenced_folder: 33px;
-    
     min-width: 50px;
     VerticalLayout {
         HorizontalLayout {
@@ -20,13 +19,15 @@ export component IncludedDirectories {
                 width: size_referenced_folder;
                 horizontal-alignment: center;
             }
-            Text{
+
+            Text {
                 horizontal-stretch: 1.0;
                 text: "Path";
             }
         }
+
         ListView {
-            for r[idx] in model : Rectangle {
+            for r[idx] in model: Rectangle {
                 height: 30px;
                 border_radius: 5px;
                 width: parent.width;
@@ -48,7 +49,7 @@ export component IncludedDirectories {
                         Callabler.item_opened(r.path);
                     }
                 }
-                
+
                 HorizontalLayout {
                     spacing: 5px;
                     width: parent.width;
@@ -60,6 +61,7 @@ export component IncludedDirectories {
                         }
                         width: size_referenced_folder;
                     }
+
                     Text {
                         horizontal-stretch: 1.0;
                         text: r.path;
@@ -84,8 +86,9 @@ export component ExcludedDirectories {
                 text: "Path";
             }
         }
+
         ListView {
-            for r[idx] in model : Rectangle {
+            for r[idx] in model: Rectangle {
                 height: 30px;
                 border_radius: 5px;
                 width: parent.width;
@@ -108,7 +111,7 @@ export component ExcludedDirectories {
                         Callabler.item_opened(r.path);
                     }
                 }
-                
+
                 Text {
                     x: 5px;
                     width: parent.width;

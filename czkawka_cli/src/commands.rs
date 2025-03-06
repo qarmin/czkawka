@@ -80,7 +80,11 @@ pub enum Commands {
         after_help = "EXAMPLE:\n    czkawka ext -d /home/czokolada/ -f results.txt"
     )]
     BadExtensions(BadExtensionsArgs),
-    #[clap(name = "tester", about = "Small utility to test supported speed of ", after_help = "EXAMPLE:\n    czkawka tester")]
+    #[clap(
+        name = "tester",
+        about = "Small utility to test supported speed of converting images",
+        after_help = "EXAMPLE:\n    czkawka tester"
+    )]
     Tester,
 }
 
@@ -275,7 +279,7 @@ pub struct SameMusicArgs {
     pub dry_run: DryRun,
     #[clap(short, long, help = "Approximate comparison of music tags.")]
     pub approximate_comparison: bool,
-    #[clap(short, long, help = "Compare only m.")]
+    #[clap(short, long, help = "Compare fingerprints only with similar titles.")]
     pub compare_fingerprints_only_with_similar_titles: bool,
     #[clap(
         short = 'z',

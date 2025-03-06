@@ -19,7 +19,7 @@ resolver = "2"
 # until you are ready to occasional crashes
 panic = "unwind"
 
-# Should find more panics, that now are hidden from user
+# Should find more panics, that now are hidden from user - in long term it should decrease bugs in app
 # There is one big disadvantage - in case of overflow/underflow entire app crashes and panic cannot be catched and app aborts
 # So feel free to disable it, if you want
 overflow-checks = true

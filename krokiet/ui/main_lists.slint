@@ -39,7 +39,6 @@ export component MainList {
     out property <length> name_px: 100px;
     out property <length> mod_px: 150px;
     out property <length> size_px: 75px;
-    
     duplicates := SelectableTableView {
         visible: GuiState.active_tab == CurrentTab.DuplicateFiles;
         min-width: 200px;
@@ -99,7 +98,15 @@ export component MainList {
         visible: GuiState.active_tab == CurrentTab.SimilarImages;
         min-width: 200px;
         height: parent.height;
-        columns: ["Selection", "Similarity", "Size", "Dimensions", "File Name", "Path", "Modification Date"];
+        columns: [
+            "Selection",
+            "Similarity",
+            "Size",
+            "Dimensions",
+            "File Name",
+            "Path",
+            "Modification Date"
+        ];
         column_sizes: [35px, 80px, 80px, 80px, name_px, path_px, mod_px];
         values <=> similar_images_model;
         parentPathIdx: 5;
@@ -121,7 +128,19 @@ export component MainList {
         visible: GuiState.active_tab == CurrentTab.SimilarMusic;
         min-width: 200px;
         height: parent.height;
-        columns: ["Selection", "Size", "File Name", "Title","Artist", "Year", "Bitrate", "Length", "Genre", "Path", "Modification Date"];
+        columns: [
+            "Selection",
+            "Size",
+            "File Name",
+            "Title",
+            "Artist",
+            "Year",
+            "Bitrate",
+            "Length",
+            "Genre",
+            "Path",
+            "Modification Date"
+        ];
         column_sizes: [35px, size_px, name_px, 80px, 80px, 80px, 80px, 80px, 80px, path_px, mod_px];
         values <=> similar_music_model;
         parentPathIdx: 9;
@@ -132,7 +151,13 @@ export component MainList {
         visible: GuiState.active_tab == CurrentTab.InvalidSymlinks;
         min-width: 200px;
         height: parent.height;
-        columns: ["Selection", "Symlink Name", "Symlink Folder", "Destination Path", "Modification Date"];
+        columns: [
+            "Selection",
+            "Symlink Name",
+            "Symlink Folder",
+            "Destination Path",
+            "Modification Date"
+        ];
         column_sizes: [35px, name_px, path_px, path_px, mod_px];
         values <=> invalid_symlinks_model;
         parentPathIdx: 2;
@@ -143,7 +168,14 @@ export component MainList {
         visible: GuiState.active_tab == CurrentTab.BrokenFiles;
         min-width: 200px;
         height: parent.height;
-        columns: ["Selection", "File Name", "Path", "Type of Error", "Size", "Modification Date"];
+        columns: [
+            "Selection",
+            "File Name",
+            "Path",
+            "Type of Error",
+            "Size",
+            "Modification Date"
+        ];
         column_sizes: [35px, name_px, path_px, 200px, size_px, mod_px];
         values <=> broken_files_model;
         parentPathIdx: 2;
@@ -206,6 +238,7 @@ export component MainList {
             accept
         }
     }
+
     changed_current_tab() => {
         empty_folders.deselect_selected_item();
         empty_files.deselect_selected_item();

@@ -36,7 +36,6 @@ export component MainWindow inherits Window {
     preferred-width: 800px;
     min-height: 300px;
     preferred-height: 600px;
-    
     in-out property <string> text_summary_text: "";
     in-out property <bool> stop_requested: false;
     in-out property <bool> scanning: false;
@@ -92,6 +91,7 @@ export component MainWindow inherits Window {
                         broken_files_model <=> root.broken_files_model;
                         bad_extensions_model <=> root.bad_extensions_model;
                     }
+
                     preview_or_tool_settings := Rectangle {
                         visible: (GuiState.preview_visible || tool_settings.visible) && GuiState.is_tool_tab_active;
                         height: parent.height;
@@ -104,6 +104,7 @@ export component MainWindow inherits Window {
                             source: GuiState.preview_image;
                             image-fit: ImageFit.contain;
                         }
+
                         tool_settings := ToolSettings {
                             height: parent.height;
                             width: parent.width;
@@ -168,6 +169,7 @@ export component MainWindow inherits Window {
                 text: text_summary_text;
                 read-only: true;
             }
+
             Text {
                 text: "Krokiet\n8.0.0";
                 vertical-alignment: center;
@@ -196,10 +198,8 @@ export component MainWindow inherits Window {
     select_popup_window := PopupSelectResults {
         property <length> x_offset: 0;
         property <length> y_offset: 0;
-        
         x: parent.x + x_offset - self.item_width / 2.0;
         y: parent.y + y_offset - self.all_items_height - 5px;
-        
         height: root.height;
         width: root.width;
     }

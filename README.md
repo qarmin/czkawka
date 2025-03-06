@@ -7,7 +7,7 @@ files from your computer.
 
 ## Features
 
-- Written in memory-safe Rust
+- Written in memory-safe Rust - almost 100% unsafe code free
 - Amazingly fast - due to using more or less advanced algorithms and multithreading
 - Free, Open Source without ads
 - Multiplatform - works on Linux, Windows, macOS, FreeBSD and many more
@@ -90,8 +90,7 @@ There are many similar applications to Czkawka on the Internet, which do some th
 - [DupeGuru](https://github.com/arsenetar/dupeguru) - Many options to customize; great photo compare tool
 - [FSlint](https://github.com/pixelb/fslint) - A little outdated, but still have some tools not available in Czkawka
 - [AntiDupl.NET](https://github.com/ermig1979/AntiDupl) - Shows a lot of metadata of compared images
-- [Video Duplicate Finder](https://github.com/0x90d/videoduplicatefinder) - Finds similar videos(surprising, isn't it),
-  supports video thumbnails
+- [Video Duplicate Finder](https://github.com/0x90d/videoduplicatefinder) - Finds similar videos(surprising, isn't it), supports video thumbnails
 
 ### CLI
 

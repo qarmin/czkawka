@@ -18,6 +18,7 @@ export component TextComponent inherits HorizontalLayout {
         vertical-alignment: TextVerticalAlignment.center;
         text: name;
     }
+
     LineEdit {
         horizontal-stretch: 1.0;
         height: SettingsSize.item_height;
@@ -35,7 +36,8 @@ component CheckBoxComponent inherits HorizontalLayout {
         checked <=> model;
         text: name;
     }
-    Rectangle {}
+
+    Rectangle { }
 }
 
 component ThreadSliderComponent inherits HorizontalLayout {
@@ -45,12 +47,12 @@ component ThreadSliderComponent inherits HorizontalLayout {
     spacing: 5px;
 
     callback changed <=> slider.changed;
-    
     Text {
         text <=> name;
         vertical-alignment: TextVerticalAlignment.center;
         height: SettingsSize.item_height;
     }
+
     slider := Slider {
         enabled: true;
         height: SettingsSize.item_height;
@@ -58,6 +60,7 @@ component ThreadSliderComponent inherits HorizontalLayout {
         maximum <=> maximum_number;
         value <=> Settings.thread_number;
     }
+
     Text {
         height: SettingsSize.item_height;
         vertical-alignment: TextVerticalAlignment.center;
@@ -69,24 +72,28 @@ component MinMaxSizeComponent inherits HorizontalLayout {
     spacing: 20px;
     Text {
         horizontal-stretch: 0.0;
-        text:"File Size(Kilobytes)";
+        text: "File Size(Kilobytes)";
         vertical-alignment: TextVerticalAlignment.center;
     }
+
     HorizontalLayout {
         spacing: 5px;
         horizontal-stretch: 1.0;
         Text {
-            text:"Min:";
+            text: "Min:";
             vertical-alignment: TextVerticalAlignment.center;
         }
+
         LineEdit {
             height: SettingsSize.item_height;
             text <=> Settings.minimum_file_size;
         }
+
         Text {
-            text:"Max:";
+            text: "Max:";
             vertical-alignment: TextVerticalAlignment.center;
         }
+
         LineEdit {
             height: SettingsSize.item_height;
             text <=> Settings.maximum_file_size;
@@ -100,9 +107,10 @@ component Presets inherits Rectangle {
     if !edit_name: HorizontalLayout {
         spacing: 5px;
         Text {
-            text : "Current Preset:";
+            text: "Current Preset:";
             vertical-alignment: TextVerticalAlignment.center;
         }
+
         combo_box := ComboBox {
             current-index <=> Settings.settings_preset_idx;
             model: Settings.settings_presets;
@@ -111,6 +119,7 @@ component Presets inherits Rectangle {
                 Callabler.changed_settings_preset();
             }
         }
+
         Button {
             text: "Edit name";
             clicked => {
@@ -118,15 +127,17 @@ component Presets inherits Rectangle {
             }
         }
     }
-    if edit_name : HorizontalLayout{
+    if edit_name: HorizontalLayout {
         spacing: 5px;
         Text {
             text: "Choose name for prefix " + (Settings.settings_preset_idx + 1);
             vertical-alignment: TextVerticalAlignment.center;
         }
+
         current_name := LineEdit {
             text: Settings.settings_presets[Settings.settings_preset_idx];
         }
+
         Button {
             text: "Save";
             clicked => {
@@ -162,6 +173,7 @@ component ConfigCacheButtons inherits HorizontalLayout {
             Callabler.open_config_folder();
         }
     }
+
     Button {
         text: "Open cache folder";
         clicked => {
@@ -182,12 +194,13 @@ export component SettingsList inherits VerticalLayout {
         horizontal-alignment: TextHorizontalAlignment.center;
         font-size: 20px;
     }
+
     ScrollView {
         VerticalLayout {
             padding-right: 15px;
             padding-bottom: 10px;
             spacing: 5px;
-            Presets{
+            Presets {
                 height: SettingsSize.item_height;
             }
             // TODO Maybe someday
@@ -197,41 +210,49 @@ export component SettingsList inherits VerticalLayout {
             HeaderText {
                 text: "General settings";
             }
+
             TextComponent {
                 name: "Excluded item:";
                 model <=> Settings.excluded_items;
             }
+
             TextComponent {
                 name: "Allowed extensions:";
                 model <=> Settings.allowed_extensions;
             }
+
             TextComponent {
                 name: "Excluded extensions:";
                 model <=> Settings.excluded_extensions;
             }
-            MinMaxSizeComponent {
 
-            }
+            MinMaxSizeComponent { }
+
             CheckBoxComponent {
                 name: "Recursive search";
                 model <=> Settings.recursive_search;
             }
+
             CheckBoxComponent {
                 name: "Use cache";
                 model <=> Settings.use_cache;
             }
+
             CheckBoxComponent {
                 name: "Also save cache as JSON file";
                 model <=> Settings.save_as_json;
             }
+
             CheckBoxComponent {
                 name: "Move deleted files to trash";
                 model <=> Settings.move_to_trash;
             }
+
             CheckBoxComponent {
                 name: "Ignore other filesystems (only Linux)";
                 model <=> Settings.ignore_other_filesystems;
             }
+
             ThreadSliderComponent {
                 name: "Thread number";
                 maximum_number <=> GuiState.maximum_threads;
@@ -239,6 +260,7 @@ export component SettingsList inherits VerticalLayout {
                     restart_required = true;
                 }
             }
+
             if restart_required: Text {
                 text: "---You need to restart app to apply changes in thread number---";
                 horizontal-alignment: TextHorizontalAlignment.center;
@@ -246,68 +268,83 @@ export component SettingsList inherits VerticalLayout {
             HeaderText {
                 text: "Duplicate tool";
             }
+
             CheckBoxComponent {
                 name: "Image preview";
                 model <=> Settings.duplicate_image_preview;
             }
+
             CheckBoxComponent {
                 name: "Hide hard links";
                 model <=> Settings.duplicate_hide_hard_links;
             }
+
             TextComponent {
                 name: "Minimal size of cached files - Hash (KB)";
                 model <=> Settings.duplicate_minimal_hash_cache_size;
             }
+
             CheckBoxComponent {
                 name: "Use prehash";
                 model <=> Settings.duplicate_use_prehash;
             }
+
             TextComponent {
                 name: "Minimal size of cached files - Prehash (KB)";
                 model <=> Settings.duplicate_minimal_prehash_cache_size;
             }
+
             CheckBoxComponent {
                 name: "Delete automatically outdated entries";
                 model <=> Settings.duplicate_delete_outdated_entries;
             }
+
             HeaderText {
                 text: "Similar Images tool";
             }
+
             CheckBoxComponent {
                 name: "Image preview";
                 model <=> Settings.similar_images_show_image_preview;
             }
+
             CheckBoxComponent {
                 name: "Hide hard links";
                 model <=> Settings.similar_images_hide_hard_links;
             }
+
             CheckBoxComponent {
                 name: "Delete automatically outdated entries";
                 model <=> Settings.similar_images_delete_outdated_entries;
             }
+
             HeaderText {
                 text: "Similar Videos tool";
             }
+
             CheckBoxComponent {
                 name: "Hide hard links";
                 model <=> Settings.similar_videos_hide_hard_links;
             }
+
             CheckBoxComponent {
                 name: "Delete automatically outdated entries";
                 model <=> Settings.similar_videos_delete_outdated_entries;
             }
+
             HeaderText {
                 text: "Similar Music tool";
             }
+
             CheckBoxComponent {
                 name: "Delete automatically outdated entries";
                 model <=> Settings.similar_music_delete_outdated_entries;
             }
-            ConfigCacheButtons {
 
-            }
+            ConfigCacheButtons { }
         }
     }
+
     HorizontalLayout {
         spacing: 5px;
         Button {
@@ -316,12 +353,14 @@ export component SettingsList inherits VerticalLayout {
                 Callabler.save_current_preset();
             }
         }
+
         Button {
             text: "Load";
             clicked => {
                 Callabler.load_current_preset();
             }
         }
+
         Button {
             text: "Reset";
             clicked => {
