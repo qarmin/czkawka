@@ -8,18 +8,6 @@
 extern crate bitflags;
 extern crate core;
 
-pub mod big_file;
-pub mod broken_files;
-pub mod duplicate;
-pub mod empty_files;
-pub mod empty_folder;
-pub mod invalid_symlinks;
-pub mod same_music;
-pub mod similar_images;
-pub mod similar_videos;
-pub mod temporary;
-
-pub mod bad_extensions;
 pub mod common;
 pub mod common_cache;
 pub mod common_dir_traversal;
@@ -32,5 +20,6 @@ pub mod common_tool;
 pub mod common_traits;
 pub mod localizer_core;
 pub mod progress_data;
+pub mod tools;
 
 pub const CZKAWKA_VERSION: &str = env!("CARGO_PKG_VERSION");

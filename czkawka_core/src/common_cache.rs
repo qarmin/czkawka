@@ -11,8 +11,8 @@ use serde::{Deserialize, Serialize};
 use crate::common;
 use crate::common_messages::Messages;
 use crate::common_traits::ResultEntry;
-use crate::duplicate::HashType;
-use crate::similar_images::{convert_algorithm_to_string, convert_filters_to_string};
+use crate::tools::duplicate::HashType;
+use crate::tools::similar_images::{convert_algorithm_to_string, convert_filters_to_string};
 
 const CACHE_VERSION: &str = "70";
 const CACHE_DUPLICATE_VERSION: &str = "90";

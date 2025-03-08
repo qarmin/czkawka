@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use criterion::{Criterion, black_box, criterion_group, criterion_main};
-use czkawka_core::duplicate::{DuplicateEntry, HashType, hash_calculation};
+use czkawka_core::tools::duplicate::{DuplicateEntry, HashType, hash_calculation};
 
 fn setup_test_file(size: u64) -> PathBuf {
     let mut path = temp_dir();

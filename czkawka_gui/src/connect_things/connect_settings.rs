@@ -6,7 +6,7 @@ use czkawka_core::common_cache::{
     save_cache_to_file_generalized,
 };
 use czkawka_core::common_messages::Messages;
-use czkawka_core::duplicate::HashType;
+use czkawka_core::tools::duplicate::HashType;
 use directories_next::ProjectDirs;
 use gtk4::prelude::*;
 use gtk4::{Label, ResponseType, Window};
@@ -184,7 +184,7 @@ pub fn connect_settings(gui_data: &GuiData) {
                                     HashAlg::Mean,
                                     HashAlg::Median,
                                 ] {
-                                    let (mut messages, loaded_items) = load_cache_from_file_generalized_by_path::<czkawka_core::similar_images::ImagesEntry>(
+                                    let (mut messages, loaded_items) = load_cache_from_file_generalized_by_path::<czkawka_core::tools::similar_images::ImagesEntry>(
                                         &get_similar_images_cache_file(hash_size, hash_alg, image_filter),
                                         true,
                                         &Default::default(),
@@ -219,8 +219,11 @@ pub fn connect_settings(gui_data: &GuiData) {
 
                 dialog.connect_response(move |dialog, response_type| {
                     if response_type == ResponseType::Ok {
-                        let (mut messages, loaded_items) =
-                            load_cache_from_file_generalized_by_path::<czkawka_core::similar_videos::VideosEntry>(&get_similar_videos_cache_file(), true, &Default::default());
+                        let (mut messages, loaded_items) = load_cache_from_file_generalized_by_path::<czkawka_core::tools::similar_videos::VideosEntry>(
+                            &get_similar_videos_cache_file(),
+                            true,
+                            &Default::default(),
+                        );
 
                         if let Some(cache_entries) = loaded_items {
                             let save_messages = save_cache_to_file_generalized(&get_similar_videos_cache_file(), &cache_entries, false, 0);

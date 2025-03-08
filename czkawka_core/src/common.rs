@@ -1,12 +1,13 @@
 use std::cmp::Ordering;
 use std::ffi::OsString;
 use std::fs::{DirEntry, File, OpenOptions};
+use std::io::{Error, ErrorKind};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize};
 use std::sync::{Arc, atomic};
 use std::thread::{JoinHandle, sleep};
 use std::time::{Duration, Instant};
-use std::{fs, thread};
+use std::{fs, io, thread};
 
 use crossbeam_channel::Sender;
 use directories_next::ProjectDirs;
@@ -23,13 +24,14 @@ use crate::common_items::{ExcludedItems, SingleExcludedItem};
 use crate::common_messages::Messages;
 use crate::common_tool::DeleteMethod;
 use crate::common_traits::ResultEntry;
-use crate::duplicate::make_hard_link;
 use crate::progress_data::{CurrentStage, ProgressData};
 
 static NUMBER_OF_THREADS: state::InitCell<usize> = state::InitCell::new();
 static ALL_AVAILABLE_THREADS: state::InitCell<usize> = state::InitCell::new();
 pub const DEFAULT_THREAD_SIZE: usize = 8 * 1024 * 1024; // 8 MB
 pub const DEFAULT_WORKER_THREAD_SIZE: usize = 4 * 1024 * 1024; // 4 MB
+
+const TEMP_HARDLINK_FILE: &str = "rzeczek.rxrxrxl";
 
 #[derive(Debug, PartialEq)]
 pub enum WorkContinueStatus {
@@ -621,6 +623,18 @@ pub fn check_if_stop_received(stop_flag: Option<&Arc<AtomicBool>>) -> bool {
     false
 }
 
+pub fn make_hard_link(src: &Path, dst: &Path) -> io::Result<()> {
+    let dst_dir = dst.parent().ok_or_else(|| Error::new(ErrorKind::Other, "No parent"))?;
+    let temp = dst_dir.join(TEMP_HARDLINK_FILE);
+    fs::rename(dst, temp.as_path())?;
+    let result = fs::hard_link(src, dst);
+    if result.is_err() {
+        fs::rename(temp.as_path(), dst)?;
+    }
+    fs::remove_file(temp)?;
+    result
+}
+
 #[fun_time(message = "send_info_and_wait_for_ending_all_threads", level = "debug")]
 pub fn send_info_and_wait_for_ending_all_threads(progress_thread_run: &Arc<AtomicBool>, progress_thread_handle: JoinHandle<()>) {
     progress_thread_run.store(false, atomic::Ordering::Relaxed);
@@ -629,14 +643,66 @@ pub fn send_info_and_wait_for_ending_all_threads(progress_thread_run: &Arc<Atomi
 
 #[cfg(test)]
 mod test {
-    use std::fs;
+    use std::fs::{File, Metadata, read_dir};
     use std::io::Write;
+    #[cfg(target_family = "windows")]
+    use std::os::fs::MetadataExt;
+    #[cfg(target_family = "unix")]
+    use std::os::unix::fs::MetadataExt;
     use std::path::{Path, PathBuf};
+    use std::{fs, io};
 
     use tempfile::tempdir;
 
-    use crate::common::{normalize_windows_path, regex_check, remove_folder_if_contains_only_empty_folders};
+    use crate::common::{make_hard_link, normalize_windows_path, regex_check, remove_folder_if_contains_only_empty_folders};
     use crate::common_items::new_excluded_item;
+
+    #[cfg(target_family = "unix")]
+    fn assert_inode(before: &Metadata, after: &Metadata) {
+        assert_eq!(before.ino(), after.ino());
+    }
+
+    #[cfg(target_family = "windows")]
+    fn assert_inode(_: &Metadata, _: &Metadata) {}
+
+    #[test]
+    fn test_make_hard_link() -> io::Result<()> {
+        let dir = tempfile::Builder::new().tempdir()?;
+        let (src, dst) = (dir.path().join("a"), dir.path().join("b"));
+        File::create(&src)?;
+        let metadata = fs::metadata(&src)?;
+        File::create(&dst)?;
+
+        make_hard_link(&src, &dst)?;
+
+        assert_inode(&metadata, &fs::metadata(&dst)?);
+        assert_eq!(metadata.permissions(), fs::metadata(&dst)?.permissions());
+        assert_eq!(metadata.modified()?, fs::metadata(&dst)?.modified()?);
+        assert_inode(&metadata, &fs::metadata(&src)?);
+        assert_eq!(metadata.permissions(), fs::metadata(&src)?.permissions());
+        assert_eq!(metadata.modified()?, fs::metadata(&src)?.modified()?);
+
+        let mut actual = read_dir(&dir)?.flatten().map(|e| e.path()).collect::<Vec<PathBuf>>();
+        actual.sort_unstable();
+        assert_eq!(vec![src, dst], actual);
+        Ok(())
+    }
+    #[test]
+    fn test_make_hard_link_fails() -> io::Result<()> {
+        let dir = tempfile::Builder::new().tempdir()?;
+        let (src, dst) = (dir.path().join("a"), dir.path().join("b"));
+        File::create(&dst)?;
+        let metadata = fs::metadata(&dst)?;
+
+        assert!(make_hard_link(&src, &dst).is_err());
+
+        assert_inode(&metadata, &fs::metadata(&dst)?);
+        assert_eq!(metadata.permissions(), fs::metadata(&dst)?.permissions());
+        assert_eq!(metadata.modified()?, fs::metadata(&dst)?.modified()?);
+
+        assert_eq!(vec![dst], read_dir(&dir)?.flatten().map(|e| e.path()).collect::<Vec<PathBuf>>());
+        Ok(())
+    }
 
     #[test]
     fn test_remove_folder_if_contains_only_empty_folders() {

@@ -4,7 +4,7 @@ use std::fmt::Debug;
 use std::fs::File;
 use std::hash::Hasher;
 use std::io::prelude::*;
-use std::io::{self, Error, ErrorKind};
+use std::io::{self};
 #[cfg(target_family = "unix")]
 use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
@@ -27,8 +27,6 @@ use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraver
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::*;
 use crate::progress_data::{CurrentStage, ProgressData};
-
-const TEMP_HARDLINK_FILE: &str = "rzeczek.rxrxrxl";
 
 pub const PREHASHING_BUFFER_SIZE: u64 = 1024 * 8;
 pub const THREAD_BUFFER_SIZE: usize = 2 * 1024 * 1024;
@@ -1314,18 +1312,6 @@ fn filter_hard_links(vec_file_entry: &[FileEntry]) -> Vec<FileEntry> {
     identical
 }
 
-pub fn make_hard_link(src: &Path, dst: &Path) -> io::Result<()> {
-    let dst_dir = dst.parent().ok_or_else(|| Error::new(ErrorKind::Other, "No parent"))?;
-    let temp = dst_dir.join(TEMP_HARDLINK_FILE);
-    fs::rename(dst, temp.as_path())?;
-    let result = fs::hard_link(src, dst);
-    if result.is_err() {
-        fs::rename(temp.as_path(), dst)?;
-    }
-    fs::remove_file(temp)?;
-    result
-}
-
 pub trait MyHasher {
     fn update(&mut self, bytes: &[u8]);
     fn finalize(&self) -> String;
@@ -1427,63 +1413,10 @@ impl CommonData for DuplicateFinder {
 
 #[cfg(test)]
 mod tests {
-    use std::fs::{File, Metadata, read_dir};
+    use std::fs::File;
     use std::io;
-    #[cfg(target_family = "windows")]
-    use std::os::fs::MetadataExt;
-    #[cfg(target_family = "unix")]
-    use std::os::unix::fs::MetadataExt;
-    use std::path::PathBuf;
 
     use super::*;
-
-    #[cfg(target_family = "unix")]
-    fn assert_inode(before: &Metadata, after: &Metadata) {
-        assert_eq!(before.ino(), after.ino());
-    }
-
-    #[cfg(target_family = "windows")]
-    fn assert_inode(_: &Metadata, _: &Metadata) {}
-
-    #[test]
-    fn test_make_hard_link() -> io::Result<()> {
-        let dir = tempfile::Builder::new().tempdir()?;
-        let (src, dst) = (dir.path().join("a"), dir.path().join("b"));
-        File::create(&src)?;
-        let metadata = fs::metadata(&src)?;
-        File::create(&dst)?;
-
-        make_hard_link(&src, &dst)?;
-
-        assert_inode(&metadata, &fs::metadata(&dst)?);
-        assert_eq!(metadata.permissions(), fs::metadata(&dst)?.permissions());
-        assert_eq!(metadata.modified()?, fs::metadata(&dst)?.modified()?);
-        assert_inode(&metadata, &fs::metadata(&src)?);
-        assert_eq!(metadata.permissions(), fs::metadata(&src)?.permissions());
-        assert_eq!(metadata.modified()?, fs::metadata(&src)?.modified()?);
-
-        let mut actual = read_dir(&dir)?.flatten().map(|e| e.path()).collect::<Vec<PathBuf>>();
-        actual.sort_unstable();
-        assert_eq!(vec![src, dst], actual);
-        Ok(())
-    }
-
-    #[test]
-    fn test_make_hard_link_fails() -> io::Result<()> {
-        let dir = tempfile::Builder::new().tempdir()?;
-        let (src, dst) = (dir.path().join("a"), dir.path().join("b"));
-        File::create(&dst)?;
-        let metadata = fs::metadata(&dst)?;
-
-        assert!(make_hard_link(&src, &dst).is_err());
-
-        assert_inode(&metadata, &fs::metadata(&dst)?);
-        assert_eq!(metadata.permissions(), fs::metadata(&dst)?.permissions());
-        assert_eq!(metadata.modified()?, fs::metadata(&dst)?.modified()?);
-
-        assert_eq!(vec![dst], read_dir(&dir)?.flatten().map(|e| e.path()).collect::<Vec<PathBuf>>());
-        Ok(())
-    }
 
     #[test]
     fn test_filter_hard_links_empty() {

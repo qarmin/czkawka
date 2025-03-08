@@ -1043,7 +1043,7 @@ impl CommonData for SameMusic {
 
 #[cfg(test)]
 mod tests {
-    use crate::same_music::get_simplified_name;
+    use crate::tools::same_music::get_simplified_name;
 
     #[test]
     fn test_strings() {

@@ -1,12 +1,12 @@
 use std::path::PathBuf;
 
 use czkawka_core::CZKAWKA_VERSION;
-use czkawka_core::broken_files::CheckedTypes;
 use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::common_tool::DeleteMethod;
-use czkawka_core::duplicate::HashType;
-use czkawka_core::same_music::MusicSimilarity;
-use czkawka_core::similar_images::SimilarityPreset;
+use czkawka_core::tools::broken_files::CheckedTypes;
+use czkawka_core::tools::duplicate::HashType;
+use czkawka_core::tools::same_music::MusicSimilarity;
+use czkawka_core::tools::similar_images::SimilarityPreset;
 use image_hasher::{FilterType, HashAlg};
 
 #[derive(clap::Parser)]

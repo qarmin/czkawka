@@ -1020,7 +1020,7 @@ mod tests {
     use image_hasher::HashAlg;
 
     use crate::common_tool::CommonData;
-    use crate::similar_images::{Hamming, ImHash, ImagesEntry, SimilarImages, SimilarImagesParameters};
+    use crate::tools::similar_images::{Hamming, ImHash, ImagesEntry, SimilarImages, SimilarImagesParameters};
 
     fn get_default_parameters() -> SimilarImagesParameters {
         SimilarImagesParameters {

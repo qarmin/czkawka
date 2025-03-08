@@ -2,11 +2,11 @@ use std::cmp::{max, min};
 use std::env;
 use std::path::PathBuf;
 
-use czkawka_core::big_file::SearchMode;
 use czkawka_core::common::{get_all_available_threads, set_number_of_threads};
 use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::common_items::{DEFAULT_EXCLUDED_DIRECTORIES, DEFAULT_EXCLUDED_ITEMS};
-use czkawka_core::duplicate::HashType;
+use czkawka_core::tools::big_file::SearchMode;
+use czkawka_core::tools::duplicate::HashType;
 use directories_next::ProjectDirs;
 use home::home_dir;
 use image_hasher::{FilterType, HashAlg};

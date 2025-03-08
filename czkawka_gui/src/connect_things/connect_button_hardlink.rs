@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::PathBuf;
 
-use czkawka_core::duplicate::make_hard_link;
+use czkawka_core::common::make_hard_link;
 use gtk4::prelude::*;
 use gtk4::{Align, CheckButton, Dialog, Orientation, ResponseType, TextView, TreeIter, TreePath};
 
