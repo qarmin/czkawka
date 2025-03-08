@@ -1,9 +1,3 @@
-use crossbeam_channel::Sender;
-use directories_next::ProjectDirs;
-use fun_time::fun_time;
-use handsome_logger::{ColorChoice, ConfigBuilder, TerminalMode};
-use log::{LevelFilter, Record, debug, info, warn};
-use once_cell::sync::OnceCell;
 use std::cmp::Ordering;
 use std::ffi::OsString;
 use std::fs::{DirEntry, File, OpenOptions};
@@ -14,9 +8,14 @@ use std::sync::{Arc, atomic};
 use std::thread::{JoinHandle, sleep};
 use std::time::{Duration, Instant};
 use std::{fs, io, thread};
-// #[cfg(feature = "heif")]
-// use libheif_rs::LibHeif;
-use crate::CZKAWKA_VERSION;
+
+use crossbeam_channel::Sender;
+use directories_next::ProjectDirs;
+use fun_time::fun_time;
+use handsome_logger::{ColorChoice, ConfigBuilder, TerminalMode};
+use log::{LevelFilter, Record, debug, info, warn};
+use once_cell::sync::OnceCell;
+
 use crate::common_dir_traversal::{CheckingMethod, ToolType};
 use crate::common_directory::Directories;
 use crate::common_items::{ExcludedItems, SingleExcludedItem};
@@ -24,6 +23,9 @@ use crate::common_messages::Messages;
 use crate::common_tool::DeleteMethod;
 use crate::common_traits::ResultEntry;
 use crate::progress_data::{CurrentStage, ProgressData};
+// #[cfg(feature = "heif")]
+// use libheif_rs::LibHeif;
+use crate::CZKAWKA_VERSION;
 
 static NUMBER_OF_THREADS: state::InitCell<usize> = state::InitCell::new();
 static ALL_AVAILABLE_THREADS: state::InitCell<usize> = state::InitCell::new();
@@ -47,7 +49,7 @@ pub struct ConfigCachePath {
 }
 
 pub fn get_config_cache_path() -> &'static Option<ConfigCachePath> {
-    CONFIG_CACHE_PATH.get().unwrap()
+    CONFIG_CACHE_PATH.get().expect("Cannot fail if set_config_cache_path was called before")
 }
 
 pub fn set_config_cache_path() {
@@ -65,29 +67,40 @@ pub fn set_config_cache_path() {
     }
 
     let resolve_folder = |env_var: &str, default_folder: Option<PathBuf>, name: &'static str| {
+        let default_folder_str = default_folder.as_ref().map(|t| t.to_string_lossy().to_string()).unwrap_or("<not available>".to_string());
+
         if env_var.is_empty() {
             default_folder
         } else {
-            let folder_path = PathBuf::from(env_var).canonicalize();
-            if let Ok(folder_path) = folder_path {
-                if !folder_path.exists() {
+            let folder_path = PathBuf::from(env_var);
+            if !folder_path.exists() {
+                warn!(
+                    "{name} folder \"{}\" does not exist, using default folder \"{}\"",
+                    folder_path.to_string_lossy(),
+                    default_folder_str
+                );
+                return default_folder;
+            };
+            if !folder_path.is_dir() {
+                warn!(
+                    "{name} folder \"{}\" is not a directory, using default folder \"{}\"",
+                    folder_path.to_string_lossy(),
+                    default_folder_str
+                );
+                return default_folder;
+            }
+
+            match folder_path.canonicalize() {
+                Ok(t) => Some(t),
+                Err(_e) => {
                     warn!(
-                        "{name} folder \"{}\" does not exist, using default folder \"{:?}\"",
-                        folder_path.to_string_lossy(),
-                        default_folder
+                        "Cannot canonicalize {} folder \"{}\", using default folder \"{}\"",
+                        name.to_ascii_lowercase(),
+                        env_var,
+                        default_folder_str
                     );
                     default_folder
-                } else {
-                    Some(folder_path)
                 }
-            } else {
-                warn!(
-                    "Cannot canonicalize {} folder \"{}\", using default folder \"{:?}\"",
-                    name.to_ascii_lowercase(),
-                    env_var,
-                    default_folder
-                );
-                default_folder
             }
         }
     };
