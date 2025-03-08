@@ -1,3 +1,9 @@
+use crossbeam_channel::Sender;
+use directories_next::ProjectDirs;
+use fun_time::fun_time;
+use handsome_logger::{ColorChoice, ConfigBuilder, TerminalMode};
+use log::{LevelFilter, Record, debug, info, warn};
+use once_cell::sync::OnceCell;
 use std::cmp::Ordering;
 use std::ffi::OsString;
 use std::fs::{DirEntry, File, OpenOptions};
@@ -8,16 +14,9 @@ use std::sync::{Arc, atomic};
 use std::thread::{JoinHandle, sleep};
 use std::time::{Duration, Instant};
 use std::{fs, io, thread};
-
-use crossbeam_channel::Sender;
-use directories_next::ProjectDirs;
-use fun_time::fun_time;
-use handsome_logger::{ColorChoice, ConfigBuilder, TerminalMode};
-use log::{LevelFilter, Record, debug, info, warn};
-
-use crate::CZKAWKA_VERSION;
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
+use crate::CZKAWKA_VERSION;
 use crate::common_dir_traversal::{CheckingMethod, ToolType};
 use crate::common_directory::Directories;
 use crate::common_items::{ExcludedItems, SingleExcludedItem};
@@ -28,6 +27,8 @@ use crate::progress_data::{CurrentStage, ProgressData};
 
 static NUMBER_OF_THREADS: state::InitCell<usize> = state::InitCell::new();
 static ALL_AVAILABLE_THREADS: state::InitCell<usize> = state::InitCell::new();
+static CONFIG_CACHE_PATH: OnceCell<Option<ConfigCachePath>> = OnceCell::new();
+
 pub const DEFAULT_THREAD_SIZE: usize = 8 * 1024 * 1024; // 8 MB
 pub const DEFAULT_WORKER_THREAD_SIZE: usize = 4 * 1024 * 1024; // 4 MB
 
@@ -37,6 +38,76 @@ const TEMP_HARDLINK_FILE: &str = "rzeczek.rxrxrxl";
 pub enum WorkContinueStatus {
     Continue,
     Stop,
+}
+
+#[derive(Debug)]
+pub struct ConfigCachePath {
+    pub config_folder: PathBuf,
+    pub cache_folder: PathBuf,
+}
+
+pub fn get_config_cache_path() -> &'static Option<ConfigCachePath> {
+    CONFIG_CACHE_PATH.get().unwrap()
+}
+
+pub fn set_config_cache_path() {
+    let config_folder_env = std::env::var("CONFIG_PATH").unwrap_or_default().trim().to_string();
+    let cache_folder_env = std::env::var("CACHE_PATH").unwrap_or_default().trim().to_string();
+
+    let default_config_folder;
+    let default_cache_folder;
+    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
+        default_cache_folder = Some(proj_dirs.cache_dir().to_path_buf());
+        default_config_folder = Some(proj_dirs.config_dir().to_path_buf());
+    } else {
+        default_cache_folder = None;
+        default_config_folder = None;
+    }
+
+    let resolve_folder = |env_var: &str, default_folder: Option<PathBuf>, name: &'static str| {
+        if env_var.is_empty() {
+            default_folder
+        } else {
+            let folder_path = PathBuf::from(env_var).canonicalize();
+            if let Ok(folder_path) = folder_path {
+                if !folder_path.exists() {
+                    warn!(
+                        "{name} folder \"{}\" does not exist, using default folder \"{:?}\"",
+                        folder_path.to_string_lossy(),
+                        default_folder
+                    );
+                    default_folder
+                } else {
+                    Some(folder_path)
+                }
+            } else {
+                warn!(
+                    "Cannot canonicalize {} folder \"{}\", using default folder \"{:?}\"",
+                    name.to_ascii_lowercase(),
+                    env_var,
+                    default_folder
+                );
+                default_folder
+            }
+        }
+    };
+
+    let config_folder = resolve_folder(&config_folder_env, default_config_folder, "Config");
+    let cache_folder = resolve_folder(&cache_folder_env, default_cache_folder, "Cache");
+
+    let config_cache_path = if let (Some(config_folder), Some(cache_folder)) = (config_folder, cache_folder) {
+        info!(
+            "Config folder set to \"{}\" and cache folder set to \"{}\"",
+            config_folder.to_string_lossy(),
+            cache_folder.to_string_lossy()
+        );
+        Some(ConfigCachePath { config_folder, cache_folder })
+    } else {
+        warn!("Cannot set config/cache path - config and cache will not be used.");
+        None
+    };
+
+    CONFIG_CACHE_PATH.set(config_cache_path).expect("Cannot set config/cache path twice");
 }
 
 pub fn get_number_of_threads() -> usize {

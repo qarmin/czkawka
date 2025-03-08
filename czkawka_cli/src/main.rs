@@ -9,7 +9,7 @@ use std::thread;
 use clap::Parser;
 use commands::Commands;
 use crossbeam_channel::{Receiver, Sender, unbounded};
-use czkawka_core::common::{DEFAULT_THREAD_SIZE, print_version_mode, set_number_of_threads, setup_logger};
+use czkawka_core::common::{DEFAULT_THREAD_SIZE, print_version_mode, set_config_cache_path, set_number_of_threads, setup_logger};
 use czkawka_core::common_tool::{CommonData, DeleteMethod};
 #[allow(unused_imports)] // It is used in release for print_results_to_output().
 use czkawka_core::common_traits::*;
@@ -41,6 +41,7 @@ fn main() {
 
     setup_logger(true);
     print_version_mode();
+    set_config_cache_path();
 
     if cfg!(debug_assertions) {
         println!("{command:?}");

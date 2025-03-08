@@ -28,7 +28,7 @@ use connect_things::connect_settings::*;
 use connect_things::connect_show_hide_ui::*;
 use connect_things::connect_similar_image_size_change::*;
 use crossbeam_channel::{Receiver, Sender, unbounded};
-use czkawka_core::common::{get_number_of_threads, print_version_mode, set_number_of_threads, setup_logger};
+use czkawka_core::common::{get_number_of_threads, print_version_mode, set_config_cache_path, set_number_of_threads, setup_logger};
 use czkawka_core::progress_data::ProgressData;
 use czkawka_core::*;
 use gtk4::Application;
@@ -76,6 +76,7 @@ fn main() {
     application.connect_command_line(move |app, cmdline| {
         setup_logger(false);
         print_version_mode();
+        set_config_cache_path();
         build_ui(app, &cmdline.arguments());
         0
     });

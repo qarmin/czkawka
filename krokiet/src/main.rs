@@ -23,7 +23,7 @@ use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
 use crossbeam_channel::{Receiver, Sender, unbounded};
-use czkawka_core::common::{print_version_mode, setup_logger};
+use czkawka_core::common::{print_version_mode, set_config_cache_path, setup_logger};
 use czkawka_core::progress_data::ProgressData;
 use slint::VecModel;
 
@@ -66,6 +66,7 @@ slint::include_modules!();
 fn main() {
     setup_logger(false);
     print_version_mode();
+    set_config_cache_path();
 
     let app = MainWindow::new().expect("Failed to create main window");
 
