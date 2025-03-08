@@ -1,15 +1,14 @@
 use std::collections::HashMap;
+use std::env;
 use std::ffi::OsString;
 use std::fs::File;
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
-use std::{env, fs};
 
-use czkawka_core::common::get_all_available_threads;
+use czkawka_core::common::{get_all_available_threads, get_config_cache_path};
 use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::common_items::DEFAULT_EXCLUDED_ITEMS;
 use czkawka_core::tools::similar_images::SIMILAR_VALUES;
-use directories_next::ProjectDirs;
 use gtk4::prelude::*;
 use gtk4::{ComboBoxText, ScrolledWindow, TextView, TreeView};
 
@@ -187,63 +186,11 @@ impl LoadSaveStruct {
 
     #[allow(clippy::unused_self)]
     pub fn open_save_file(&self, text_view_errors: &TextView, save_configuration: bool, manual_execution: bool) -> Option<(File, PathBuf)> {
-        if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
-            // Lin: /home/username/.config/czkawka
-            // Win: C:\Users\Username\AppData\Roaming\Qarmin\Czkawka\config
-            // Mac: /Users/Username/Library/Application Support/pl.Qarmin.Czkawka
+        let config_dir = get_config_cache_path()?.config_folder;
+        let config_file = config_dir.join(Path::new(SAVE_FILE_NAME));
 
-            let config_dir = proj_dirs.config_dir();
-            let config_file = config_dir.join(Path::new(SAVE_FILE_NAME));
-
-            if save_configuration {
-                if config_dir.exists() {
-                    if !config_dir.is_dir() {
-                        add_text_to_text_view(
-                            text_view_errors,
-                            &flg!("saving_loading_folder_config_instead_file", path = config_dir.to_string_lossy().to_string()),
-                        );
-                        return None;
-                    }
-                } else if let Err(e) = fs::create_dir_all(config_dir) {
-                    add_text_to_text_view(
-                        text_view_errors,
-                        &flg!(
-                            "saving_loading_failed_to_create_configuration_folder",
-                            path = config_dir.to_string_lossy().to_string(),
-                            reason = e.to_string()
-                        ),
-                    );
-                    return None;
-                }
-
-                let config_file_handler = match File::create(&config_file) {
-                    Ok(t) => t,
-                    Err(e) => {
-                        add_text_to_text_view(
-                            text_view_errors,
-                            &flg!(
-                                "saving_loading_failed_to_create_config_file",
-                                path = config_file.to_string_lossy().to_string(),
-                                reason = e.to_string()
-                            ),
-                        );
-                        return None;
-                    }
-                };
-                return Some((config_file_handler, config_file));
-            }
-            if !config_file.is_file() {
-                if manual_execution {
-                    // Don't show errors when there is no configuration file when starting app
-                    add_text_to_text_view(
-                        text_view_errors,
-                        &flg!("saving_loading_failed_to_read_config_file", path = config_file.to_string_lossy().to_string()),
-                    );
-                }
-                return None;
-            }
-
-            let config_file_handler = match File::open(&config_file) {
+        if save_configuration {
+            let config_file_handler = match File::create(&config_file) {
                 Ok(t) => t,
                 Err(e) => {
                     add_text_to_text_view(
@@ -259,9 +206,32 @@ impl LoadSaveStruct {
             };
             return Some((config_file_handler, config_file));
         }
-        add_text_to_text_view(text_view_errors, flg!("saving_loading_failed_to_get_home_directory").as_str());
+        if !config_file.is_file() {
+            if manual_execution {
+                // Don't show errors when there is no configuration file when starting app
+                add_text_to_text_view(
+                    text_view_errors,
+                    &flg!("saving_loading_failed_to_read_config_file", path = config_file.to_string_lossy().to_string()),
+                );
+            }
+            return None;
+        }
 
-        None
+        let config_file_handler = match File::open(&config_file) {
+            Ok(t) => t,
+            Err(e) => {
+                add_text_to_text_view(
+                    text_view_errors,
+                    &flg!(
+                        "saving_loading_failed_to_create_config_file",
+                        path = config_file.to_string_lossy().to_string(),
+                        reason = e.to_string()
+                    ),
+                );
+                return None;
+            }
+        };
+        Some((config_file_handler, config_file))
     }
 
     pub fn open_and_read_content(&mut self, text_view_errors: &TextView, manual_execution: bool) {

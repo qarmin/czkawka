@@ -5,18 +5,6 @@
 #![allow(clippy::collapsible_if)]
 #![allow(clippy::collapsible_else_if)]
 #![allow(clippy::should_panic_without_expect)]
-#![allow(clippy::struct_field_names)] // Generated code
-#![allow(clippy::overly_complex_bool_expr)] // Generated code
-#![allow(clippy::semicolon_if_nothing_returned)] // Generated code
-#![allow(clippy::used_underscore_binding)] // Generated code
-#![allow(clippy::unreadable_literal)] // Generated code
-#![allow(clippy::float_cmp)] // Generated code
-#![allow(clippy::no_effect_underscore_binding)] // Generated code
-#![allow(clippy::uninlined_format_args)] // Generated code
-#![allow(clippy::needless_pass_by_value)] // Generated code
-#![allow(clippy::redundant_closure_for_method_calls)] // Generated code
-#![allow(clippy::items_after_statements)] // Generated code
-#![allow(clippy::match_same_arms)] // Generated code
 
 use std::rc::Rc;
 use std::sync::Arc;
@@ -66,7 +54,7 @@ slint::include_modules!();
 fn main() {
     setup_logger(false);
     print_version_mode();
-    set_config_cache_path();
+    set_config_cache_path("Czkawka", "Krokiet");
 
     let app = MainWindow::new().expect("Failed to create main window");
 

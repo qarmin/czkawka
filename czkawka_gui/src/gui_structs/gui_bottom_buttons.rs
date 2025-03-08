@@ -157,6 +157,8 @@ fn test_hardlinks() -> bool {
 
     let mut hardlinked = false;
 
+    // TODO - use temporary files instead of project dirs
+
     if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
         let cache_dir = proj_dirs.cache_dir();
         let cache_file = cache_dir.join(Path::new("GILLES_FROM_NOSE.temp"));

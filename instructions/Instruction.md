@@ -6,7 +6,7 @@
 - [Tips, tricks and known bugs](#tips-tricks-and-known-bugs)
 - [Tools](#tools)
 
-Czkawka for now contains two independent frontends - the terminal and graphical interface which share the core module.
+Czkawka for now contains three independent frontends - the terminal app and two graphical apps which share the core module.
 
 ## GUI GTK
 <img src="https://user-images.githubusercontent.com/41945903/148281103-13c00d08-7881-43e8-b6e3-5178473bce85.png" width="800" />

@@ -76,7 +76,7 @@ fn main() {
     application.connect_command_line(move |app, cmdline| {
         setup_logger(false);
         print_version_mode();
-        set_config_cache_path();
+        set_config_cache_path("Czkawka", "Czkawka");
         build_ui(app, &cmdline.arguments());
         0
     });

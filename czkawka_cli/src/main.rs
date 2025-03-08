@@ -41,7 +41,7 @@ fn main() {
 
     setup_logger(true);
     print_version_mode();
-    set_config_cache_path();
+    set_config_cache_path("Czkawka", "Czkawka");
 
     if cfg!(debug_assertions) {
         println!("{command:?}");

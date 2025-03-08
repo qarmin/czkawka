@@ -1,17 +1,18 @@
 use std::collections::BTreeMap;
 use std::default::Default;
 
+use czkawka_core::common::get_config_cache_path;
 use czkawka_core::common_cache::{
     get_duplicate_cache_file, get_similar_images_cache_file, get_similar_videos_cache_file, load_cache_from_file_generalized_by_path, load_cache_from_file_generalized_by_size,
     save_cache_to_file_generalized,
 };
 use czkawka_core::common_messages::Messages;
 use czkawka_core::tools::duplicate::HashType;
-use directories_next::ProjectDirs;
 use gtk4::prelude::*;
 use gtk4::{Label, ResponseType, Window};
 use image::imageops::FilterType;
 use image_hasher::HashAlg;
+use log::error;
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
@@ -82,12 +83,12 @@ pub fn connect_settings(gui_data: &GuiData) {
     {
         let button_settings_open_cache_folder = gui_data.settings.button_settings_open_cache_folder.clone();
         button_settings_open_cache_folder.connect_clicked(move |_| {
-            if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
-                let cache_dir = proj_dirs.cache_dir();
-
-                if let Err(e) = open::that(cache_dir) {
-                    println!("Failed to open config folder {cache_dir:?}, reason {e}");
+            if let Some(config_cache_path) = get_config_cache_path() {
+                if let Err(e) = open::that(&config_cache_path.cache_folder) {
+                    error!("Failed to open config folder \"{}\", reason {e}", config_cache_path.cache_folder.to_string_lossy());
                 };
+            } else {
+                error!("Failed to get cache folder path");
             }
         });
     }
@@ -95,12 +96,12 @@ pub fn connect_settings(gui_data: &GuiData) {
     {
         let button_settings_open_settings_folder = gui_data.settings.button_settings_open_settings_folder.clone();
         button_settings_open_settings_folder.connect_clicked(move |_| {
-            if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
-                let config_dir = proj_dirs.config_dir();
-
-                if let Err(e) = open::that(config_dir) {
-                    println!("Failed to open config folder {config_dir:?}, reason {e}");
+            if let Some(config_cache_path) = get_config_cache_path() {
+                if let Err(e) = open::that(&config_cache_path.config_folder) {
+                    error!("Failed to open config folder \"{}\", reason {e}", config_cache_path.config_folder.to_string_lossy());
                 };
+            } else {
+                error!("Failed to get settings folder path");
             }
         });
     }

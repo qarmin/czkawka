@@ -16,6 +16,9 @@ use handsome_logger::{ColorChoice, ConfigBuilder, TerminalMode};
 use log::{LevelFilter, Record, debug, info, warn};
 use once_cell::sync::OnceCell;
 
+// #[cfg(feature = "heif")]
+// use libheif_rs::LibHeif;
+use crate::CZKAWKA_VERSION;
 use crate::common_dir_traversal::{CheckingMethod, ToolType};
 use crate::common_directory::Directories;
 use crate::common_items::{ExcludedItems, SingleExcludedItem};
@@ -23,9 +26,6 @@ use crate::common_messages::Messages;
 use crate::common_tool::DeleteMethod;
 use crate::common_traits::ResultEntry;
 use crate::progress_data::{CurrentStage, ProgressData};
-// #[cfg(feature = "heif")]
-// use libheif_rs::LibHeif;
-use crate::CZKAWKA_VERSION;
 
 static NUMBER_OF_THREADS: state::InitCell<usize> = state::InitCell::new();
 static ALL_AVAILABLE_THREADS: state::InitCell<usize> = state::InitCell::new();
@@ -42,37 +42,46 @@ pub enum WorkContinueStatus {
     Stop,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ConfigCachePath {
     pub config_folder: PathBuf,
     pub cache_folder: PathBuf,
 }
 
-pub fn get_config_cache_path() -> &'static Option<ConfigCachePath> {
-    CONFIG_CACHE_PATH.get().expect("Cannot fail if set_config_cache_path was called before")
+pub fn get_config_cache_path() -> Option<ConfigCachePath> {
+    CONFIG_CACHE_PATH.get().expect("Cannot fail if set_config_cache_path was called before").clone()
 }
 
-pub fn set_config_cache_path() {
+pub fn set_config_cache_path(cache_name: &'static str, config_name: &'static str) {
+    // By default, such folders are used:
+    // Lin: /home/username/.config/czkawka
+    // Win: C:\Users\Username\AppData\Roaming\Qarmin\Czkawka\config
+    // Mac: /Users/Username/Library/Application Support/pl.Qarmin.Czkawka
+
     let config_folder_env = std::env::var("CONFIG_PATH").unwrap_or_default().trim().to_string();
     let cache_folder_env = std::env::var("CACHE_PATH").unwrap_or_default().trim().to_string();
 
     let default_config_folder;
     let default_cache_folder;
-    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
+    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", cache_name) {
         default_cache_folder = Some(proj_dirs.cache_dir().to_path_buf());
-        default_config_folder = Some(proj_dirs.config_dir().to_path_buf());
     } else {
         default_cache_folder = None;
+    }
+    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", config_name) {
+        default_config_folder = Some(proj_dirs.config_dir().to_path_buf());
+    } else {
         default_config_folder = None;
     }
 
     let resolve_folder = |env_var: &str, default_folder: Option<PathBuf>, name: &'static str| {
-        let default_folder_str = default_folder.as_ref().map(|t| t.to_string_lossy().to_string()).unwrap_or("<not available>".to_string());
+        let default_folder_str = default_folder.as_ref().map_or("<not available>".to_string(), |t| t.to_string_lossy().to_string());
 
         if env_var.is_empty() {
             default_folder
         } else {
             let folder_path = PathBuf::from(env_var);
+            let _ = fs::create_dir_all(&folder_path);
             if !folder_path.exists() {
                 warn!(
                     "{name} folder \"{}\" does not exist, using default folder \"{}\"",
@@ -114,6 +123,16 @@ pub fn set_config_cache_path() {
             config_folder.to_string_lossy(),
             cache_folder.to_string_lossy()
         );
+        if !config_folder.exists() {
+            if let Err(e) = fs::create_dir_all(&config_folder) {
+                warn!("Cannot create config folder \"{}\", reason {e}", config_folder.to_string_lossy());
+            }
+        }
+        if !cache_folder.exists() {
+            if let Err(e) = fs::create_dir_all(&cache_folder) {
+                warn!("Cannot create cache folder \"{}\", reason {e}", cache_folder.to_string_lossy());
+            }
+        }
         Some(ConfigCachePath { config_folder, cache_folder })
     } else {
         warn!("Cannot set config/cache path - config and cache will not be used.");
@@ -356,56 +375,43 @@ pub fn remove_folder_if_contains_only_empty_folders(path: impl AsRef<Path>, remo
 }
 
 pub fn open_cache_folder(cache_file_name: &str, save_to_cache: bool, use_json: bool, warnings: &mut Vec<String>) -> Option<((Option<File>, PathBuf), (Option<File>, PathBuf))> {
-    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
-        let cache_dir = PathBuf::from(proj_dirs.cache_dir());
-        let cache_file = cache_dir.join(cache_file_name);
-        let cache_file_json = cache_dir.join(cache_file_name.replace(".bin", ".json"));
+    let cache_dir = get_config_cache_path()?.cache_folder;
+    let cache_file = cache_dir.join(cache_file_name);
+    let cache_file_json = cache_dir.join(cache_file_name.replace(".bin", ".json"));
 
-        let mut file_handler_default = None;
-        let mut file_handler_json = None;
+    let mut file_handler_default = None;
+    let mut file_handler_json = None;
 
-        if save_to_cache {
-            if cache_dir.exists() {
-                if !cache_dir.is_dir() {
-                    warnings.push(format!("Config dir \"{}\" is a file!", cache_dir.to_string_lossy()));
-                    return None;
-                }
-            } else if let Err(e) = fs::create_dir_all(&cache_dir) {
-                warnings.push(format!("Cannot create config dir \"{}\", reason {e}", cache_dir.to_string_lossy()));
+    if save_to_cache {
+        file_handler_default = Some(match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
+            Ok(t) => t,
+            Err(e) => {
+                warnings.push(format!("Cannot create or open cache file \"{}\", reason {e}", cache_file.to_string_lossy()));
                 return None;
             }
-
-            file_handler_default = Some(match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
+        });
+        if use_json {
+            file_handler_json = Some(match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file_json) {
                 Ok(t) => t,
                 Err(e) => {
-                    warnings.push(format!("Cannot create or open cache file \"{}\", reason {e}", cache_file.to_string_lossy()));
+                    warnings.push(format!("Cannot create or open cache file \"{}\", reason {e}", cache_file_json.to_string_lossy()));
                     return None;
                 }
             });
-            if use_json {
-                file_handler_json = Some(match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file_json) {
-                    Ok(t) => t,
-                    Err(e) => {
-                        warnings.push(format!("Cannot create or open cache file \"{}\", reason {e}", cache_file_json.to_string_lossy()));
-                        return None;
-                    }
-                });
-            }
+        }
+    } else {
+        if let Ok(t) = OpenOptions::new().read(true).open(&cache_file) {
+            file_handler_default = Some(t);
         } else {
-            if let Ok(t) = OpenOptions::new().read(true).open(&cache_file) {
-                file_handler_default = Some(t);
+            if use_json {
+                file_handler_json = Some(OpenOptions::new().read(true).open(&cache_file_json).ok()?);
             } else {
-                if use_json {
-                    file_handler_json = Some(OpenOptions::new().read(true).open(&cache_file_json).ok()?);
-                } else {
-                    // messages.push(format!("Cannot find or open cache file {cache_file:?}")); // No error or warning
-                    return None;
-                }
+                // messages.push(format!("Cannot find or open cache file {cache_file:?}")); // No error or warning
+                return None;
             }
-        };
-        return Some(((file_handler_default, cache_file), (file_handler_json, cache_file_json)));
-    }
-    None
+        }
+    };
+    Some(((file_handler_default, cache_file), (file_handler_json, cache_file_json)))
 }
 
 pub fn split_path(path: &Path) -> (String, String) {

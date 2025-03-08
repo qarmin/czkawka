@@ -4365,7 +4365,6 @@ dependencies = [
  "chrono",
  "crossbeam-channel",
  "czkawka_core",
- "directories-next",
  "fs_extra",
  "home",
  "humansize",
