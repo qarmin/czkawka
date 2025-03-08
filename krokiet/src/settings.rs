@@ -302,6 +302,7 @@ pub fn load_settings_from_file(app: &MainWindow) {
 
     // Validate here values and set "proper"
     // preset_names should have 10 items
+    #[allow(clippy::comparison_chain)]
     if base_settings.preset_names.len() > 10 {
         base_settings.preset_names.truncate(10);
     } else if base_settings.preset_names.len() < 10 {

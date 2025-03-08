@@ -1,10 +1,9 @@
 // Remove console window in Windows OS
 #![windows_subsystem = "windows"]
 #![allow(unknown_lints)] // May be disabled, but locally I use nightly clippy
-#![allow(clippy::comparison_chain)]
 #![allow(clippy::collapsible_if)]
 #![allow(clippy::collapsible_else_if)]
-#![allow(clippy::should_panic_without_expect)]
+// #![warn(clippy::unwrap_used)] // Cannot use due unwrap used in a lot of places
 
 use std::rc::Rc;
 use std::sync::Arc;

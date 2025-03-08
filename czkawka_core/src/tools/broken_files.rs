@@ -8,7 +8,7 @@ use std::{fs, mem, panic};
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
-use log::debug;
+use log::{debug, error};
 use pdf::PdfError;
 use pdf::PdfError::Try;
 use pdf::file::FileOptions;
@@ -458,15 +458,15 @@ fn check_extension_availability(
     audio_extensions: &HashSet<&&'static str>,
     pdf_extensions: &HashSet<&&'static str>,
 ) -> TypeOfFile {
-    let Some(extension) = full_name.extension() else {
-        debug_assert!(false, "Missing extension");
+    let Some(file_name) = full_name.file_name() else {
+        error!("Missing file name in file - \"{}\"", full_name.to_string_lossy());
+        debug_assert!(false, "Missing file name in file - \"{}\"", full_name.to_string_lossy());
         return TypeOfFile::Unknown;
     };
+    let Some(file_name_str) = file_name.to_str() else { return TypeOfFile::Unknown };
+    let Some(extension_idx) = file_name_str.rfind('.') else { return TypeOfFile::Unknown };
+    let extension_str = &file_name_str[extension_idx + 1..];
 
-    let Some(extension_str) = extension.to_str() else {
-        debug_assert!(false, "Extension not really fully str");
-        return TypeOfFile::Unknown;
-    };
     let extension_lowercase = extension_str.to_ascii_lowercase();
 
     if images_extensions.contains(&extension_lowercase.as_str()) {
@@ -478,8 +478,8 @@ fn check_extension_availability(
     } else if pdf_extensions.contains(&extension_lowercase.as_str()) {
         TypeOfFile::PDF
     } else {
-        eprintln!("File with unknown extension: \"{}\" - {extension_lowercase}", full_name.to_string_lossy());
-        debug_assert!(false, "File with unknown extension");
+        error!("File with unknown extension: \"{}\" - {extension_lowercase}", full_name.to_string_lossy());
+        debug_assert!(false, "File with unknown extension - \"{}\" - {extension_lowercase}", full_name.to_string_lossy());
         TypeOfFile::Unknown
     }
 }
@@ -518,5 +518,97 @@ impl CommonData for BrokenFiles {
     }
     fn get_cd_mut(&mut self) -> &mut CommonToolData {
         &mut self.common_data
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::collections::HashSet;
+    use std::path::Path;
+
+    use super::*;
+
+    #[test]
+    fn test_check_extension_availability_image() {
+        let images_extensions: HashSet<&&str> = ["jpg", "png", "gif"].iter().collect();
+        let zip_extensions: HashSet<&&str> = HashSet::new();
+        let audio_extensions: HashSet<&&str> = HashSet::new();
+        let pdf_extensions: HashSet<&&str> = HashSet::new();
+
+        let path = Path::new("test.jpg");
+        assert_eq!(
+            check_extension_availability(path, &images_extensions, &zip_extensions, &audio_extensions, &pdf_extensions),
+            TypeOfFile::Image
+        );
+    }
+
+    #[test]
+    fn test_check_extension_availability_zip() {
+        let images_extensions: HashSet<&&str> = HashSet::new();
+        let zip_extensions: HashSet<&&str> = ["zip", "rar"].iter().collect();
+        let audio_extensions: HashSet<&&str> = HashSet::new();
+        let pdf_extensions: HashSet<&&str> = HashSet::new();
+
+        let path = Path::new("test.zip");
+        assert_eq!(
+            check_extension_availability(path, &images_extensions, &zip_extensions, &audio_extensions, &pdf_extensions),
+            TypeOfFile::ArchiveZip
+        );
+    }
+
+    #[test]
+    fn test_check_extension_availability_audio() {
+        let images_extensions: HashSet<&&str> = HashSet::new();
+        let zip_extensions: HashSet<&&str> = HashSet::new();
+        let audio_extensions: HashSet<&&str> = ["mp3", "wav"].iter().collect();
+        let pdf_extensions: HashSet<&&str> = HashSet::new();
+
+        let path = Path::new("test.mp3");
+        assert_eq!(
+            check_extension_availability(path, &images_extensions, &zip_extensions, &audio_extensions, &pdf_extensions),
+            TypeOfFile::Audio
+        );
+    }
+
+    #[test]
+    fn test_check_extension_availability_pdf() {
+        let images_extensions: HashSet<&&str> = HashSet::new();
+        let zip_extensions: HashSet<&&str> = HashSet::new();
+        let audio_extensions: HashSet<&&str> = HashSet::new();
+        let pdf_extensions: HashSet<&&str> = std::iter::once(&"pdf").collect();
+
+        let path = Path::new("test.pdf");
+        assert_eq!(
+            check_extension_availability(path, &images_extensions, &zip_extensions, &audio_extensions, &pdf_extensions),
+            TypeOfFile::PDF
+        );
+    }
+
+    #[test]
+    fn test_check_extension_availability_no_extension() {
+        let images_extensions: HashSet<&&str> = HashSet::new();
+        let zip_extensions: HashSet<&&str> = HashSet::new();
+        let audio_extensions: HashSet<&&str> = HashSet::new();
+        let pdf_extensions: HashSet<&&str> = HashSet::new();
+
+        let path = Path::new("test");
+        assert_eq!(
+            check_extension_availability(path, &images_extensions, &zip_extensions, &audio_extensions, &pdf_extensions),
+            TypeOfFile::Unknown
+        );
+    }
+
+    #[test]
+    fn test_check_no_extension() {
+        let images_extensions: HashSet<&&str> = HashSet::new();
+        let zip_extensions: HashSet<&&str> = HashSet::new();
+        let audio_extensions: HashSet<&&str> = ["mp3", "wav"].iter().collect();
+        let pdf_extensions: HashSet<&&str> = HashSet::new();
+
+        let path = Path::new("/home/.mp3");
+        assert_eq!(
+            check_extension_availability(path, &images_extensions, &zip_extensions, &audio_extensions, &pdf_extensions),
+            TypeOfFile::Audio
+        );
     }
 }
