@@ -1,39 +1,41 @@
 ## Version 9.0.0 - ?
 
-### Breaking changes
-- Video, Duplicate(smaller prehash size) and Image cache(exif orientation + faster resize implementation) are incompatible with previous versions, and needs to be regenerated
+## Changes and Fixes
+
+-  Video, Duplicate (smaller prehash size), and Image cache (EXIF orientation + faster resize implementation) are incompatible with previous versions and need to be regenerated.
 
 ### Core
-- Rotating all images by default, basing on their exif orientation - [#1368](https://github.com/qarmin/czkawka/pull/1368)
-- Fixed negative time crash in some OS - [#1369](https://github.com/qarmin/czkawka/pull/1369)
-- Updated vid_dup_finder, now it is able to find similar videos shorter than 30 seconds - [#1425](https://github.com/qarmin/czkawka/pull/1425)
-- More supported jxl image formats(using built-in jxl -> image-rs converter) - [#1425](https://github.com/qarmin/czkawka/pull/1425)
-- Using reusable and bigger buffer for reading files in duplicate mode - [#1425](https://github.com/qarmin/czkawka/pull/1425)
-- Option to use a lot of faster image resizing, to speedup image hashing - [#1458](https://github.com/qarmin/czkawka/pull/1458)
-- Added to logs info about os and compiled app features - [#1458](https://github.com/qarmin/czkawka/pull/1458)
-- Added size progress in some modes - [#1458](https://github.com/qarmin/czkawka/pull/1458), [#1464](https://github.com/qarmin/czkawka/pull/1464)
-- Ability to stop calculating hash of bigger files in the middle of process - [#1458](https://github.com/qarmin/czkawka/pull/1458)
-- Using multithreading, to speedup filter out hard links - [#1458](https://github.com/qarmin/czkawka/pull/1458)
-- Decreased prehash read file size to max 4k bytes - [#1458](https://github.com/qarmin/czkawka/pull/1458) 
-- Fix strange slowdown at end of scan, when with big number of CPU cores and files searching for duplicates - [#1460](https://github.com/qarmin/czkawka/pull/1460)
-- Faster stopping scanning, when collecting files to check - [#1460](https://github.com/qarmin/czkawka/pull/1460)
-- Ability to configure config/cache path, by setting CONFIG_PATH and CACHE_PATH env - [#1464](https://github.com/qarmin/czkawka/pull/1464)
-
+- Automatically rotating all images based on their EXIF orientation - [#1368](https://github.com/qarmin/czkawka/pull/1368)
+- Fixed a crash caused by negative time values on some operating systems - [#1369](https://github.com/qarmin/czkawka/pull/1369)
+- Updated `vid_dup_finder`; it can now detect similar videos shorter than 30 seconds - [#1425](https://github.com/qarmin/czkawka/pull/1425)
+- Added support for more JXL image formats (using a built-in JXL → image-rs converter) - [#1425](https://github.com/qarmin/czkawka/pull/1425)
+- Improved duplicate file detection by using a larger, reusable buffer for file reading - [#1425](https://github.com/qarmin/czkawka/pull/1425)
+- Added an option for significantly faster image resizing to speed up image hashing - [#1458](https://github.com/qarmin/czkawka/pull/1458)
+- Logs now include information about the operating system and compiled app features(only x86_64 versions) - [#1458](https://github.com/qarmin/czkawka/pull/1458)
+- Added size progress tracking in certain modes - [#1458](https://github.com/qarmin/czkawka/pull/1458), [#1464](https://github.com/qarmin/czkawka/pull/1464)
+- Ability to stop hash calculations for large files mid-process - [#1458](https://github.com/qarmin/czkawka/pull/1458)
+- Implemented multithreading to speed up filtering of hard links - [#1458](https://github.com/qarmin/czkawka/pull/1458)
+- Reduced prehash read file size to a maximum of 4 KB - [#1458](https://github.com/qarmin/czkawka/pull/1458)
+- Fixed a slowdown at the end of scans when searching for duplicates on systems with a high number of CPU cores - [#1460](https://github.com/qarmin/czkawka/pull/1460)
+- Improved scan cancellation speed when collecting files to check - [#1460](https://github.com/qarmin/czkawka/pull/1460)
+- Added support for configuring config/cache paths using the `CONFIG_PATH` and `CACHE_PATH` environment variables - [#1464](https://github.com/qarmin/czkawka/pull/1464)
 
 ### Krokiet
-- Changed default tab to duplicate files - [#1368](https://github.com/qarmin/czkawka/pull/1368)
+- Changed the default tab to "Duplicate Files" - [#1368](https://github.com/qarmin/czkawka/pull/1368)
 
 ### GTK GUI
-- Added window icon in wayland - [#1400](https://github.com/qarmin/czkawka/pull/1400)
-- Disabled broken sort button - [#1400](https://github.com/qarmin/czkawka/pull/1400)
-- GTK 4.12 builds on windows instead 4.10 builds - [#1460](https://github.com/qarmin/czkawka/pull/1460)
+- Added a window icon in Wayland - [#1400](https://github.com/qarmin/czkawka/pull/1400)
+- Disabled the broken sort button - [#1400](https://github.com/qarmin/czkawka/pull/1400)
+- GTK 4.12 builds are now used on Windows instead of 4.10 builds - [#1460](https://github.com/qarmin/czkawka/pull/1460)
 
 ### CI
+(No updates listed)
 
 ### CLI
-- Fixes crash in debug mode, when checking broken files with name `.mp3` - [#1464](https://github.com/qarmin/czkawka/pull/1464)
-- Added `-N` and `-M` flags, that allows to not print results/warnings to console - [#1464](https://github.com/qarmin/czkawka/pull/1464)
-- Fixed not clearing message at the end of scan - [#1464](https://github.com/qarmin/czkawka/pull/1464)
+- Fixed a crash in debug mode when checking broken files named `.mp3` - [#1464](https://github.com/qarmin/czkawka/pull/1464)
+- Added `-N` and `-M` flags to suppress printing results/warnings to the console - [#1464](https://github.com/qarmin/czkawka/pull/1464)
+- Fixed an issue where messages were not cleared at the end of a scan - [#1464](https://github.com/qarmin/czkawka/pull/1464)
+
 
 ## Version 8.0.0 - 11.10.2024r
 
