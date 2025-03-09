@@ -51,7 +51,7 @@ pub fn connect_progress(progress_receiver: &Receiver<ProgressData>) {
             }
         }
     }
-    pb.finish();
+    pb.finish_and_clear();
 }
 
 pub fn get_progress_message(progress_data: &ProgressData) -> String {
@@ -67,7 +67,7 @@ pub fn get_progress_message(progress_data: &ProgressData) -> String {
         CurrentStage::SimilarVideosCalculatingHashes => "Reading similar values",
         CurrentStage::BrokenFilesChecking => "Checking broken files",
         CurrentStage::BadExtensionsChecking => "Checking extensions of files",
-        _ => panic!("Unknown stage {:?}", progress_data.sstage),
+        _ => panic!("Unsupported stage {:?}", progress_data.sstage),
     }
     .to_string()
 }
