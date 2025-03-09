@@ -11,13 +11,14 @@
 - Using reusable and bigger buffer for reading files in duplicate mode - [#1425](https://github.com/qarmin/czkawka/pull/1425)
 - Option to use a lot of faster image resizing, to speedup image hashing - [#1458](https://github.com/qarmin/czkawka/pull/1458)
 - Added to logs info about os and compiled app features - [#1458](https://github.com/qarmin/czkawka/pull/1458)
-- Added size progress in duplicate and similar images mode - [#1458](https://github.com/qarmin/czkawka/pull/1458)
+- Added size progress in some modes - [#1458](https://github.com/qarmin/czkawka/pull/1458), [#1464](https://github.com/qarmin/czkawka/pull/1464)
 - Ability to stop calculating hash of bigger files in the middle of process - [#1458](https://github.com/qarmin/czkawka/pull/1458)
-- Using multithreading, to filter out hard links - [#1458](https://github.com/qarmin/czkawka/pull/1458)
+- Using multithreading, to speedup filter out hard links - [#1458](https://github.com/qarmin/czkawka/pull/1458)
 - Decreased prehash read file size to max 4k bytes - [#1458](https://github.com/qarmin/czkawka/pull/1458) 
 - Fix strange slowdown at end of scan, when with big number of CPU cores and files searching for duplicates - [#1460](https://github.com/qarmin/czkawka/pull/1460)
 - Faster stopping scanning, when collecting files to check - [#1460](https://github.com/qarmin/czkawka/pull/1460)
-- Progress bar in duplicate and similar images mode, now shows progress of processed bytes, not files - [#1458](https://github.com/qarmin/czkawka/pull/1458)
+- Ability to configure config/cache path, by setting CONFIG_PATH and CACHE_PATH env - [#1464](https://github.com/qarmin/czkawka/pull/1464)
+
 
 ### Krokiet
 - Changed default tab to duplicate files - [#1368](https://github.com/qarmin/czkawka/pull/1368)
@@ -30,7 +31,9 @@
 ### CI
 
 ### CLI
-
+- Fixes crash in debug mode, when checking broken files with name `.mp3` - [#1464](https://github.com/qarmin/czkawka/pull/1464)
+- Added `-N` and `-M` flags, that allows to not print results/warnings to console - [#1464](https://github.com/qarmin/czkawka/pull/1464)
+- Fixed not clearing message at the end of scan - [#1464](https://github.com/qarmin/czkawka/pull/1464)
 
 ## Version 8.0.0 - 11.10.2024r
 

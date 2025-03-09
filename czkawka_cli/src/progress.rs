@@ -67,7 +67,7 @@ pub fn get_progress_message(progress_data: &ProgressData) -> String {
         CurrentStage::SimilarVideosCalculatingHashes => "Reading similar values",
         CurrentStage::BrokenFilesChecking => "Checking broken files",
         CurrentStage::BadExtensionsChecking => "Checking extensions of files",
-        _ => panic!("Unsupported stage {:?}", progress_data.sstage),
+        _ => unreachable!("Unsupported stage {:?}", progress_data.sstage),
     }
     .to_string()
 }
@@ -86,7 +86,7 @@ pub fn get_progress_bar_for_collect_files() -> ProgressBar {
 pub fn get_progress_known_values(max_value: u64) -> ProgressBar {
     let pb = ProgressBar::new(max_value);
     pb.set_style(
-        ProgressStyle::with_template("{msg} [{bar}] ")
+        ProgressStyle::with_template("{msg} [{bar}]")
             .expect("Failed to create progress bar style")
             .progress_chars("=> "),
     );
