@@ -1482,6 +1482,7 @@ dependencies = [
  "crossbeam-channel",
  "ctrlc",
  "czkawka_core",
+ "humansize",
  "image_hasher",
  "indicatif",
  "log",

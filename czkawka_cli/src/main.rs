@@ -22,7 +22,7 @@ use czkawka_core::tools::empty_files::EmptyFiles;
 use czkawka_core::tools::empty_folder::EmptyFolder;
 use czkawka_core::tools::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::tools::same_music::{SameMusic, SameMusicParameters};
-use czkawka_core::tools::similar_images::{SimilarImages, SimilarImagesParameters, return_similarity_from_similarity_preset, test_image_conversion_speed};
+use czkawka_core::tools::similar_images::{SimilarImages, SimilarImagesParameters, return_similarity_from_similarity_preset};
 use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters};
 use czkawka_core::tools::temporary::Temporary;
 use log::error;
@@ -51,24 +51,34 @@ fn main() {
     let stop_flag = Arc::new(AtomicBool::new(false));
     let store_flag_cloned = stop_flag.clone();
 
+    let found_any_files = Arc::new(AtomicBool::new(false));
+    let found_any_files_clone = found_any_files.clone();
+
     let calculate_thread = thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
-        .spawn(move || match command {
-            Commands::Duplicates(duplicates_args) => duplicates(duplicates_args, &stop_flag, &progress_sender),
-            Commands::EmptyFolders(empty_folders_args) => empty_folders(empty_folders_args, &stop_flag, &progress_sender),
-            Commands::BiggestFiles(biggest_files_args) => biggest_files(biggest_files_args, &stop_flag, &progress_sender),
-            Commands::EmptyFiles(empty_files_args) => empty_files(empty_files_args, &stop_flag, &progress_sender),
-            Commands::Temporary(temporary_args) => temporary(temporary_args, &stop_flag, &progress_sender),
-            Commands::SimilarImages(similar_images_args) => similar_images(similar_images_args, &stop_flag, &progress_sender),
-            Commands::SameMusic(same_music_args) => same_music(same_music_args, &stop_flag, &progress_sender),
-            Commands::InvalidSymlinks(invalid_symlinks_args) => invalid_symlinks(invalid_symlinks_args, &stop_flag, &progress_sender),
-            Commands::BrokenFiles(broken_files_args) => broken_files(broken_files_args, &stop_flag, &progress_sender),
-            Commands::SimilarVideos(similar_videos_args) => similar_videos(similar_videos_args, &stop_flag, &progress_sender),
-            Commands::BadExtensions(bad_extensions_args) => bad_extensions(bad_extensions_args, &stop_flag, &progress_sender),
-            Commands::Tester => test_image_conversion_speed(),
+        .spawn(move || {
+            let found_files = match command {
+                Commands::Duplicates(duplicates_args) => duplicates(duplicates_args, &stop_flag, &progress_sender),
+                Commands::EmptyFolders(empty_folders_args) => empty_folders(empty_folders_args, &stop_flag, &progress_sender),
+                Commands::BiggestFiles(biggest_files_args) => biggest_files(biggest_files_args, &stop_flag, &progress_sender),
+                Commands::EmptyFiles(empty_files_args) => empty_files(empty_files_args, &stop_flag, &progress_sender),
+                Commands::Temporary(temporary_args) => temporary(temporary_args, &stop_flag, &progress_sender),
+                Commands::SimilarImages(similar_images_args) => similar_images(similar_images_args, &stop_flag, &progress_sender),
+                Commands::SameMusic(same_music_args) => same_music(same_music_args, &stop_flag, &progress_sender),
+                Commands::InvalidSymlinks(invalid_symlinks_args) => invalid_symlinks(invalid_symlinks_args, &stop_flag, &progress_sender),
+                Commands::BrokenFiles(broken_files_args) => broken_files(broken_files_args, &stop_flag, &progress_sender),
+                Commands::SimilarVideos(similar_videos_args) => similar_videos(similar_videos_args, &stop_flag, &progress_sender),
+                Commands::BadExtensions(bad_extensions_args) => bad_extensions(bad_extensions_args, &stop_flag, &progress_sender),
+            };
+
+            found_any_files_clone.store(found_files, std::sync::atomic::Ordering::SeqCst);
         })
         .expect("Failed to spawn calculation thread");
+
     ctrlc::set_handler(move || {
+        if store_flag_cloned.load(std::sync::atomic::Ordering::SeqCst) {
+            return;
+        }
         println!("Get Ctrl+C signal, stopping...");
         store_flag_cloned.store(true, std::sync::atomic::Ordering::SeqCst);
     })
@@ -77,9 +87,15 @@ fn main() {
     connect_progress(&progress_receiver);
 
     calculate_thread.join().expect("Failed to join calculation thread");
+
+    if found_any_files.load(std::sync::atomic::Ordering::SeqCst) {
+        std::process::exit(0);
+    } else {
+        std::process::exit(1);
+    }
 }
 
-fn duplicates(duplicates: DuplicatesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) {
+fn duplicates(duplicates: DuplicatesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> bool {
     let DuplicatesArgs {
         common_cli_items,
         reference_directories,
@@ -116,9 +132,14 @@ fn duplicates(duplicates: DuplicatesArgs, stop_flag: &Arc<AtomicBool>, progress_
     item.find_duplicates(Some(stop_flag), Some(progress_sender));
 
     save_and_print_results(&item, &common_cli_items);
+
+    item.get_information().number_of_duplicated_files_by_hash > 0
+        || item.get_information().number_of_duplicated_files_by_name > 0
+        || item.get_information().number_of_duplicated_files_by_size > 0
+        || item.get_information().number_of_duplicated_files_by_size_name > 0
 }
 
-fn empty_folders(empty_folders: EmptyFoldersArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) {
+fn empty_folders(empty_folders: EmptyFoldersArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> bool {
     let EmptyFoldersArgs { common_cli_items, delete_folders } = empty_folders;
 
     let mut item = EmptyFolder::new();
@@ -131,9 +152,11 @@ fn empty_folders(empty_folders: EmptyFoldersArgs, stop_flag: &Arc<AtomicBool>, p
     item.find_empty_folders(Some(stop_flag), Some(progress_sender));
 
     save_and_print_results(&item, &common_cli_items);
+
+    item.get_information().number_of_empty_folders > 0
 }
 
-fn biggest_files(biggest_files: BiggestFilesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) {
+fn biggest_files(biggest_files: BiggestFilesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> bool {
     let BiggestFilesArgs {
         common_cli_items,
         number_of_files,
@@ -153,9 +176,11 @@ fn biggest_files(biggest_files: BiggestFilesArgs, stop_flag: &Arc<AtomicBool>, p
     item.find_big_files(Some(stop_flag), Some(progress_sender));
 
     save_and_print_results(&item, &common_cli_items);
+
+    item.get_information().number_of_real_files > 0
 }
 
-fn empty_files(empty_files: EmptyFilesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) {
+fn empty_files(empty_files: EmptyFilesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> bool {
     let EmptyFilesArgs { common_cli_items, delete_files } = empty_files;
 
     let mut item = EmptyFiles::new();
@@ -168,9 +193,11 @@ fn empty_files(empty_files: EmptyFilesArgs, stop_flag: &Arc<AtomicBool>, progres
     item.find_empty_files(Some(stop_flag), Some(progress_sender));
 
     save_and_print_results(&item, &common_cli_items);
+
+    item.get_information().number_of_empty_files > 0
 }
 
-fn temporary(temporary: TemporaryArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) {
+fn temporary(temporary: TemporaryArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> bool {
     let TemporaryArgs { common_cli_items, delete_files } = temporary;
 
     let mut item = Temporary::new();
@@ -183,9 +210,11 @@ fn temporary(temporary: TemporaryArgs, stop_flag: &Arc<AtomicBool>, progress_sen
     item.find_temporary_files(Some(stop_flag), Some(progress_sender));
 
     save_and_print_results(&item, &common_cli_items);
+
+    item.get_information().number_of_temporary_files > 0
 }
 
-fn similar_images(similar_images: SimilarImagesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) {
+fn similar_images(similar_images: SimilarImagesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> bool {
     let SimilarImagesArgs {
         common_cli_items,
         reference_directories,
@@ -221,9 +250,11 @@ fn similar_images(similar_images: SimilarImagesArgs, stop_flag: &Arc<AtomicBool>
     item.find_similar_images(Some(stop_flag), Some(progress_sender));
 
     save_and_print_results(&item, &common_cli_items);
+
+    item.get_information().number_of_duplicates > 0
 }
 
-fn same_music(same_music: SameMusicArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) {
+fn same_music(same_music: SameMusicArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> bool {
     let SameMusicArgs {
         common_cli_items,
         reference_directories,
@@ -258,9 +289,11 @@ fn same_music(same_music: SameMusicArgs, stop_flag: &Arc<AtomicBool>, progress_s
     item.find_same_music(Some(stop_flag), Some(progress_sender));
 
     save_and_print_results(&item, &common_cli_items);
+
+    item.get_information().number_of_duplicates > 0
 }
 
-fn invalid_symlinks(invalid_symlinks: InvalidSymlinksArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) {
+fn invalid_symlinks(invalid_symlinks: InvalidSymlinksArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> bool {
     let InvalidSymlinksArgs { common_cli_items, delete_files } = invalid_symlinks;
 
     let mut item = InvalidSymlinks::new();
@@ -273,9 +306,11 @@ fn invalid_symlinks(invalid_symlinks: InvalidSymlinksArgs, stop_flag: &Arc<Atomi
     item.find_invalid_links(Some(stop_flag), Some(progress_sender));
 
     save_and_print_results(&item, &common_cli_items);
+
+    item.get_information().number_of_invalid_symlinks > 0
 }
 
-fn broken_files(broken_files: BrokenFilesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) {
+fn broken_files(broken_files: BrokenFilesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> bool {
     let BrokenFilesArgs {
         common_cli_items,
         delete_files,
@@ -297,9 +332,11 @@ fn broken_files(broken_files: BrokenFilesArgs, stop_flag: &Arc<AtomicBool>, prog
     item.find_broken_files(Some(stop_flag), Some(progress_sender));
 
     save_and_print_results(&item, &common_cli_items);
+
+    item.get_information().number_of_broken_files > 0
 }
 
-fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) {
+fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> bool {
     let SimilarVideosArgs {
         reference_directories,
         common_cli_items,
@@ -324,9 +361,11 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>
     item.find_similar_videos(Some(stop_flag), Some(progress_sender));
 
     save_and_print_results(&item, &common_cli_items);
+
+    item.get_information().number_of_duplicates > 0
 }
 
-fn bad_extensions(bad_extensions: BadExtensionsArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) {
+fn bad_extensions(bad_extensions: BadExtensionsArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> bool {
     let BadExtensionsArgs { common_cli_items } = bad_extensions;
 
     let params = BadExtensionsParameters::new();
@@ -337,6 +376,8 @@ fn bad_extensions(bad_extensions: BadExtensionsArgs, stop_flag: &Arc<AtomicBool>
     item.find_bad_extensions_files(Some(stop_flag), Some(progress_sender));
 
     save_and_print_results(&item, &common_cli_items);
+
+    item.get_information().number_of_files_with_bad_extension > 0
 }
 
 fn save_and_print_results<T: CommonData + PrintResults>(component: &T, common_cli_items: &CommonCliItems) {
@@ -356,9 +397,13 @@ fn save_and_print_results<T: CommonData + PrintResults>(component: &T, common_cl
         }
     }
 
-    component.print_results_to_output();
+    if !common_cli_items.do_not_print.do_not_print_results {
+        component.print_results_to_output();
+    }
 
-    component.get_text_messages().print_messages();
+    if !common_cli_items.do_not_print.do_not_print_messages {
+        component.get_text_messages().print_messages();
+    }
 }
 
 fn set_common_settings<T>(component: &mut T, common_cli_items: &CommonCliItems, reference_directories: Option<&Vec<PathBuf>>)

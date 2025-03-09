@@ -80,12 +80,6 @@ pub enum Commands {
         after_help = "EXAMPLE:\n    czkawka ext -d /home/czokolada/ -f results.txt"
     )]
     BadExtensions(BadExtensionsArgs),
-    #[clap(
-        name = "tester",
-        about = "Small utility to test supported speed of converting images",
-        after_help = "EXAMPLE:\n    czkawka tester"
-    )]
-    Tester,
 }
 
 #[derive(Debug, clap::Args)]
@@ -486,6 +480,16 @@ pub struct CommonCliItems {
     #[cfg(target_family = "unix")]
     #[clap(short = 'X', long, help = "Exclude files on other filesystems")]
     pub exclude_other_filesystems: bool,
+    #[clap(flatten)]
+    pub do_not_print: DoNotPrint,
+}
+
+#[derive(Debug, clap::Args)]
+pub struct DoNotPrint {
+    #[clap(short = 'N', long, help = "Do not print the results to the console")]
+    pub do_not_print_results: bool,
+    #[clap(short = 'M', long, help = "Do not print info/warnings/errors from the program to console")]
+    pub do_not_print_messages: bool,
 }
 
 #[derive(Debug, clap::Args)]

@@ -71,7 +71,6 @@ Currently, Czkawka stores few config and cache files on disk:
 - `cache_duplicates_HASH.txt` - stores cache data of duplicated files, to not suffer too big of a performance hit when saving/loading file, only already fully hashed files bigger than 5MB are stored. Similar files with replaced `Blake3` to e.g. `SHA256` may be shown, when support for new hashes will be introduced in Czkawka.
 - `cache_similar_videos.bin/json` - stores cache data of video files.
 
-Editing `bin` files may cause showing strange crashes, so in case of having any, removing these files should help.  
 It is possible to modify files with JSON extension(may be helpful when moving files to different disk or trying to use cache file on different computer). To do this, it is required to enable in settings option to generate also cache json file. Next file can be changed/modified. By default, cache files with `bin` extension are loaded, but if it is missing(can be renamed or removed), then data from json file is loaded if exists.
 
 Config files are located in this path:
@@ -85,6 +84,23 @@ Cache should be here:
 Linux - `/home/username/.cache/czkawka`  
 Mac - `/Users/Username/Library/Caches/pl.Qarmin.Czkawka`  
 Windows - `C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache`
+
+it is possible to change cache/config location by using `CONFIG_PATH` and `CACHE_PATH` env
+e.g.
+```
+CONFIG_PATH="/media/rafal/Ventoy/config" CACHE_PATH="/media/rafal/Ventoy/cache" krokiet
+```
+It is possible to create portable version of app, by using running czkawka/krokiet with such script from pendrive:
+
+`open_czkawka.sh` - on pendrive(along with czkawka/krokiet binary)
+```shell
+#!/bin/bash
+
+CONFIG_PATH="$(dirname "$(realpath "$0")")/config"
+CACHE_PATH="$(dirname "$(realpath "$0")")/cache"
+
+./czkawka_gui
+```
 
 ## Tips, Tricks and Known Bugs
 - **Speedup of CPU bounds tasks with LTO**

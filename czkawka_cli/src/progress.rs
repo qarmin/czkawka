@@ -3,6 +3,7 @@ use std::time::Duration;
 use crossbeam_channel::Receiver;
 use czkawka_core::common_dir_traversal::ToolType;
 use czkawka_core::progress_data::{CurrentStage, ProgressData};
+use humansize::{BINARY, format_size};
 use indicatif::{ProgressBar, ProgressStyle};
 
 pub fn connect_progress(progress_receiver: &Receiver<ProgressData>) {
@@ -16,17 +17,38 @@ pub fn connect_progress(progress_receiver: &Receiver<ProgressData>) {
                 pb = get_progress_bar_for_collect_files();
             } else if progress_data.sstage.check_if_loading_saving_cache() {
                 pb = get_progress_loading_saving_cache(progress_data.sstage.check_if_loading_cache());
+            } else if progress_data.bytes_to_check != 0 {
+                pb = get_progress_known_values(progress_data.bytes_to_check);
             } else {
-                pb = get_progress_known_values(progress_data.entries_to_check, &get_progress_message(&progress_data));
+                pb = get_progress_known_values(progress_data.entries_to_check as u64);
             }
             latest_id = Some(progress_data.current_stage_idx);
         }
 
-        pb.set_position(progress_data.entries_checked as u64);
         if progress_data.sstage == CurrentStage::CollectingFiles && progress_data.tool_type != ToolType::EmptyFolders {
             pb.set_message(format!("Collecting files: {}", progress_data.entries_checked));
         } else if progress_data.sstage == CurrentStage::CollectingFiles {
             pb.set_message(format!("Collecting folders: {}", progress_data.entries_checked));
+        } else if !progress_data.sstage.check_if_loading_saving_cache() {
+            if progress_data.bytes_to_check != 0 {
+                pb.set_position(progress_data.bytes_checked);
+                pb.set_message(format!(
+                    "{}: {}/{} ({}/{})",
+                    get_progress_message(&progress_data),
+                    progress_data.entries_checked,
+                    progress_data.entries_to_check,
+                    format_size(progress_data.bytes_checked, BINARY),
+                    format_size(progress_data.bytes_to_check, BINARY)
+                ));
+            } else {
+                pb.set_position(progress_data.entries_checked as u64);
+                pb.set_message(format!(
+                    "{}: {}/{}",
+                    get_progress_message(&progress_data),
+                    progress_data.entries_checked,
+                    progress_data.entries_to_check
+                ));
+            }
         }
     }
     pb.finish();
@@ -45,7 +67,7 @@ pub fn get_progress_message(progress_data: &ProgressData) -> String {
         CurrentStage::SimilarVideosCalculatingHashes => "Reading similar values",
         CurrentStage::BrokenFilesChecking => "Checking broken files",
         CurrentStage::BadExtensionsChecking => "Checking extensions of files",
-        _ => unreachable!(),
+        _ => panic!("Unknown stage {:?}", progress_data.sstage),
     }
     .to_string()
 }
@@ -54,7 +76,6 @@ pub fn get_progress_bar_for_collect_files() -> ProgressBar {
     let pb = ProgressBar::new_spinner();
     pb.enable_steady_tick(Duration::from_millis(120));
     pb.set_style(
-        // #[allow(clippy::literal_string_with_formatting_args)] // TODO - enable after being backported to stable
         ProgressStyle::with_template("{msg} {spinner:.blue}")
             .expect("Failed to create progress bar style")
             .tick_strings(&["▹▹▹▹▹", "▸▹▹▹▹", "▹▸▹▹▹", "▹▹▸▹▹", "▹▹▹▸▹", "▹▹▹▹▸", "▪▪▪▪▪"]),
@@ -62,10 +83,10 @@ pub fn get_progress_bar_for_collect_files() -> ProgressBar {
     pb
 }
 
-pub fn get_progress_known_values(max_value: usize, msg: &str) -> ProgressBar {
-    let pb = ProgressBar::new(max_value as u64);
+pub fn get_progress_known_values(max_value: u64) -> ProgressBar {
+    let pb = ProgressBar::new(max_value);
     pb.set_style(
-        ProgressStyle::with_template(&format!("{msg} [{{bar}}] {{pos}}/{{len}} "))
+        ProgressStyle::with_template("{msg} [{bar}] ")
             .expect("Failed to create progress bar style")
             .progress_chars("=> "),
     );
