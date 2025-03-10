@@ -1,7 +1,7 @@
 use std::cmp::Ordering;
 use std::ffi::OsString;
 use std::fs::{DirEntry, File, OpenOptions};
-use std::io::{Error, ErrorKind};
+use std::io::Error;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize};
 use std::sync::{Arc, atomic};
@@ -714,7 +714,7 @@ pub fn check_if_stop_received(stop_flag: Option<&Arc<AtomicBool>>) -> bool {
 }
 
 pub fn make_hard_link(src: &Path, dst: &Path) -> io::Result<()> {
-    let dst_dir = dst.parent().ok_or_else(|| Error::new(ErrorKind::Other, "No parent"))?;
+    let dst_dir = dst.parent().ok_or_else(|| Error::other("No parent"))?;
     let temp = dst_dir.join(TEMP_HARDLINK_FILE);
     fs::rename(dst, temp.as_path())?;
     let result = fs::hard_link(src, dst);
