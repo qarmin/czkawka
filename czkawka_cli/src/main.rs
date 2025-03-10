@@ -89,9 +89,9 @@ fn main() {
     calculate_thread.join().expect("Failed to join calculation thread");
 
     if found_any_files.load(std::sync::atomic::Ordering::SeqCst) {
-        std::process::exit(0);
-    } else {
         std::process::exit(11);
+    } else {
+        std::process::exit(0);
     }
 }
 
