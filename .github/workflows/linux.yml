@@ -59,7 +59,7 @@ jobs:
         if: ${{ github.ref != 'refs/heads/master' }}
         uses: actions/upload-artifact@v4
         with:
-          name: czkawka_cli-${{ runner.os }}-debug
+          name: krokiet-${{ runner.os }}-debug
           path: target/debug/krokiet
 
       # Storing in releases
@@ -246,7 +246,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install basic libraries
-        run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev ffmpeg -y
+        run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev ffmpeg libdav1d-dev -y
 
       - name: Setup rust version
         run: rustup default 1.85.0
@@ -278,7 +278,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install basic libraries
-        run: sudo apt update || true;
+        run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev -y
 
       - name: Setup rust version
         run: rustup default 1.85.0
