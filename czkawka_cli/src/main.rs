@@ -91,7 +91,7 @@ fn main() {
     if found_any_files.load(std::sync::atomic::Ordering::SeqCst) {
         std::process::exit(0);
     } else {
-        std::process::exit(1);
+        std::process::exit(11);
     }
 }
 
@@ -133,10 +133,11 @@ fn duplicates(duplicates: DuplicatesArgs, stop_flag: &Arc<AtomicBool>, progress_
 
     save_and_print_results(&item, &common_cli_items);
 
-    item.get_information().number_of_duplicated_files_by_hash > 0
-        || item.get_information().number_of_duplicated_files_by_name > 0
-        || item.get_information().number_of_duplicated_files_by_size > 0
-        || item.get_information().number_of_duplicated_files_by_size_name > 0
+    !common_cli_items.ignore_error_code_on_found
+        && (item.get_information().number_of_duplicated_files_by_hash > 0
+            || item.get_information().number_of_duplicated_files_by_name > 0
+            || item.get_information().number_of_duplicated_files_by_size > 0
+            || item.get_information().number_of_duplicated_files_by_size_name > 0)
 }
 
 fn empty_folders(empty_folders: EmptyFoldersArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> bool {
@@ -153,7 +154,7 @@ fn empty_folders(empty_folders: EmptyFoldersArgs, stop_flag: &Arc<AtomicBool>, p
 
     save_and_print_results(&item, &common_cli_items);
 
-    item.get_information().number_of_empty_folders > 0
+    !common_cli_items.ignore_error_code_on_found && item.get_information().number_of_empty_folders > 0
 }
 
 fn biggest_files(biggest_files: BiggestFilesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> bool {
@@ -177,7 +178,7 @@ fn biggest_files(biggest_files: BiggestFilesArgs, stop_flag: &Arc<AtomicBool>, p
 
     save_and_print_results(&item, &common_cli_items);
 
-    item.get_information().number_of_real_files > 0
+    !common_cli_items.ignore_error_code_on_found && item.get_information().number_of_real_files > 0
 }
 
 fn empty_files(empty_files: EmptyFilesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> bool {
@@ -194,7 +195,7 @@ fn empty_files(empty_files: EmptyFilesArgs, stop_flag: &Arc<AtomicBool>, progres
 
     save_and_print_results(&item, &common_cli_items);
 
-    item.get_information().number_of_empty_files > 0
+    !common_cli_items.ignore_error_code_on_found && item.get_information().number_of_empty_files > 0
 }
 
 fn temporary(temporary: TemporaryArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> bool {
@@ -211,7 +212,7 @@ fn temporary(temporary: TemporaryArgs, stop_flag: &Arc<AtomicBool>, progress_sen
 
     save_and_print_results(&item, &common_cli_items);
 
-    item.get_information().number_of_temporary_files > 0
+    !common_cli_items.ignore_error_code_on_found && item.get_information().number_of_temporary_files > 0
 }
 
 fn similar_images(similar_images: SimilarImagesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> bool {
@@ -251,7 +252,7 @@ fn similar_images(similar_images: SimilarImagesArgs, stop_flag: &Arc<AtomicBool>
 
     save_and_print_results(&item, &common_cli_items);
 
-    item.get_information().number_of_duplicates > 0
+    !common_cli_items.ignore_error_code_on_found && item.get_information().number_of_duplicates > 0
 }
 
 fn same_music(same_music: SameMusicArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> bool {
@@ -290,7 +291,7 @@ fn same_music(same_music: SameMusicArgs, stop_flag: &Arc<AtomicBool>, progress_s
 
     save_and_print_results(&item, &common_cli_items);
 
-    item.get_information().number_of_duplicates > 0
+    !common_cli_items.ignore_error_code_on_found && item.get_information().number_of_duplicates > 0
 }
 
 fn invalid_symlinks(invalid_symlinks: InvalidSymlinksArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> bool {
@@ -307,7 +308,7 @@ fn invalid_symlinks(invalid_symlinks: InvalidSymlinksArgs, stop_flag: &Arc<Atomi
 
     save_and_print_results(&item, &common_cli_items);
 
-    item.get_information().number_of_invalid_symlinks > 0
+    !common_cli_items.ignore_error_code_on_found && item.get_information().number_of_invalid_symlinks > 0
 }
 
 fn broken_files(broken_files: BrokenFilesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> bool {
@@ -333,7 +334,7 @@ fn broken_files(broken_files: BrokenFilesArgs, stop_flag: &Arc<AtomicBool>, prog
 
     save_and_print_results(&item, &common_cli_items);
 
-    item.get_information().number_of_broken_files > 0
+    !common_cli_items.ignore_error_code_on_found && item.get_information().number_of_broken_files > 0
 }
 
 fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> bool {
@@ -362,7 +363,7 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>
 
     save_and_print_results(&item, &common_cli_items);
 
-    item.get_information().number_of_duplicates > 0
+    !common_cli_items.ignore_error_code_on_found && item.get_information().number_of_duplicates > 0
 }
 
 fn bad_extensions(bad_extensions: BadExtensionsArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> bool {
@@ -377,7 +378,7 @@ fn bad_extensions(bad_extensions: BadExtensionsArgs, stop_flag: &Arc<AtomicBool>
 
     save_and_print_results(&item, &common_cli_items);
 
-    item.get_information().number_of_files_with_bad_extension > 0
+    !common_cli_items.ignore_error_code_on_found && item.get_information().number_of_files_with_bad_extension > 0
 }
 
 fn save_and_print_results<T: CommonData + PrintResults>(component: &T, common_cli_items: &CommonCliItems) {

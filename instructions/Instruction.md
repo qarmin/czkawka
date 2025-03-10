@@ -63,6 +63,8 @@ If you want to get more detailed info about certain tool, just add after its nam
 
 By default, all tools only write about results to console, but it is possible with specific arguments to delete some files/arguments or save it to file.
 
+App returns exit code 0 when everything is ok, 1 when some error occurred and 11 when some files were found.
+
 ## Config/Cache files
 Currently, Czkawka stores few config and cache files on disk:
 - `czkawka_gui_config.txt` - stores configuration of GUI which may be loaded at startup
