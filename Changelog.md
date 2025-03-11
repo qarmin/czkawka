@@ -26,16 +26,16 @@
 ### GTK GUI
 - Added a window icon in Wayland - [#1400](https://github.com/qarmin/czkawka/pull/1400)
 - Disabled the broken sort button - [#1400](https://github.com/qarmin/czkawka/pull/1400)
-- GTK 4.12 builds are now used on Windows instead of 4.10 builds - [#1460](https://github.com/qarmin/czkawka/pull/1460)
-
-### CI
-(No updates listed)
 
 ### CLI
 - Fixed a crash in debug mode when checking broken files named `.mp3` - [#1464](https://github.com/qarmin/czkawka/pull/1464)
 - Added `-N` and `-M` flags to suppress printing results/warnings to the console - [#1464](https://github.com/qarmin/czkawka/pull/1464)
 - Fixed an issue where messages were not cleared at the end of a scan - [#1464](https://github.com/qarmin/czkawka/pull/1464)
 
+### Prebuild-binaries
+- This release is last version, that supports Ubuntu 20.04 - github actions drops this OS in its runners
+- Linux and Mac binaries now are provided with two options x86_64 and arm64
+- Gtk 4.12 is used to build windows gtk gui instead gtk 4.10
 
 ## Version 8.0.0 - 11.10.2024r
 

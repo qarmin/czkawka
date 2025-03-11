@@ -23,6 +23,11 @@ jobs:
           rustup component add rustfmt
           rustup component add clippy
 
+      - name: Disable optimizations
+        run: |
+          sed -i 's/^\(\[profile\.dev\.package.*\)/#\1/' Cargo.toml
+          sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
+
       - name: Check the format
         run: cargo fmt --all -- --check
 
