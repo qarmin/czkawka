@@ -1,12 +1,12 @@
 use std::path::PathBuf;
 
 use czkawka_core::CZKAWKA_VERSION;
-use czkawka_core::broken_files::CheckedTypes;
 use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::common_tool::DeleteMethod;
-use czkawka_core::duplicate::HashType;
-use czkawka_core::same_music::MusicSimilarity;
-use czkawka_core::similar_images::SimilarityPreset;
+use czkawka_core::tools::broken_files::CheckedTypes;
+use czkawka_core::tools::duplicate::HashType;
+use czkawka_core::tools::same_music::MusicSimilarity;
+use czkawka_core::tools::similar_images::SimilarityPreset;
 use image_hasher::{FilterType, HashAlg};
 
 #[derive(clap::Parser)]
@@ -80,8 +80,6 @@ pub enum Commands {
         after_help = "EXAMPLE:\n    czkawka ext -d /home/czokolada/ -f results.txt"
     )]
     BadExtensions(BadExtensionsArgs),
-    #[clap(name = "tester", about = "Small utility to test supported speed of ", after_help = "EXAMPLE:\n    czkawka tester")]
-    Tester,
 }
 
 #[derive(Debug, clap::Args)]
@@ -275,7 +273,7 @@ pub struct SameMusicArgs {
     pub dry_run: DryRun,
     #[clap(short, long, help = "Approximate comparison of music tags.")]
     pub approximate_comparison: bool,
-    #[clap(short, long, help = "Compare only m.")]
+    #[clap(short, long, help = "Compare fingerprints only with similar titles.")]
     pub compare_fingerprints_only_with_similar_titles: bool,
     #[clap(
         short = 'z',
@@ -482,6 +480,18 @@ pub struct CommonCliItems {
     #[cfg(target_family = "unix")]
     #[clap(short = 'X', long, help = "Exclude files on other filesystems")]
     pub exclude_other_filesystems: bool,
+    #[clap(flatten)]
+    pub do_not_print: DoNotPrint,
+    #[clap(short = 'W', long, help = "Ignore error code when files are found")]
+    pub ignore_error_code_on_found: bool,
+}
+
+#[derive(Debug, clap::Args)]
+pub struct DoNotPrint {
+    #[clap(short = 'N', long, help = "Do not print the results to the console")]
+    pub do_not_print_results: bool,
+    #[clap(short = 'M', long, help = "Do not print info/warnings/errors from the program to console")]
+    pub do_not_print_messages: bool,
 }
 
 #[derive(Debug, clap::Args)]

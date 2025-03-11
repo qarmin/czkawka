@@ -1,17 +1,17 @@
 use std::sync::{Arc, Mutex};
 
-use czkawka_core::bad_extensions::BadExtensions;
-use czkawka_core::big_file::BigFile;
-use czkawka_core::broken_files::BrokenFiles;
 use czkawka_core::common_traits::PrintResults;
-use czkawka_core::duplicate::DuplicateFinder;
-use czkawka_core::empty_files::EmptyFiles;
-use czkawka_core::empty_folder::EmptyFolder;
-use czkawka_core::invalid_symlinks::InvalidSymlinks;
-use czkawka_core::same_music::SameMusic;
-use czkawka_core::similar_images::SimilarImages;
-use czkawka_core::similar_videos::SimilarVideos;
-use czkawka_core::temporary::Temporary;
+use czkawka_core::tools::bad_extensions::BadExtensions;
+use czkawka_core::tools::big_file::BigFile;
+use czkawka_core::tools::broken_files::BrokenFiles;
+use czkawka_core::tools::duplicate::DuplicateFinder;
+use czkawka_core::tools::empty_files::EmptyFiles;
+use czkawka_core::tools::empty_folder::EmptyFolder;
+use czkawka_core::tools::invalid_symlinks::InvalidSymlinks;
+use czkawka_core::tools::same_music::SameMusic;
+use czkawka_core::tools::similar_images::SimilarImages;
+use czkawka_core::tools::similar_videos::SimilarVideos;
+use czkawka_core::tools::temporary::Temporary;
 
 use crate::CurrentTab;
 

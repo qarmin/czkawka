@@ -25,6 +25,7 @@ component ComboBoxWrapper inherits HorizontalLayout {
         text <=> root.text;
         vertical_alignment: TextVerticalAlignment.center;
     }
+
     ComboBox {
         model: root.model;
         current_index <=> root.current_index;
@@ -32,9 +33,7 @@ component ComboBoxWrapper inherits HorizontalLayout {
     }
 }
 
-component CheckBoxWrapper inherits CheckBox {
-    
-}
+component CheckBoxWrapper inherits CheckBox { }
 
 component SubsettingsHeader inherits Text {
     text: "Subsettings";
@@ -51,12 +50,14 @@ component SliderWrapper inherits HorizontalLayout {
     Text {
         text: root.text;
     }
+
     Slider {
         min-width: 30px;
         minimum: 0;
         maximum <=> root.maximum;
         value <=> root.value;
     }
+
     Text {
         text: root.end_text;
         width: root.end_text_size;
@@ -70,28 +71,33 @@ export component ToolSettings {
             spacing: 5px;
             padding: 10px;
             SubsettingsHeader { }
+
             ComboBoxWrapper {
                 text: "Hash size";
                 model: Settings.similar_images_sub_available_hash_size;
                 current_index <=> Settings.similar_images_sub_hash_size_index;
                 current_value <=> Settings.similar_images_sub_hash_size_value;
             }
+
             ComboBoxWrapper {
                 text: "Resize Algorithm";
                 model: Settings.similar_images_sub_available_resize_algorithm;
                 current_index <=> Settings.similar_images_sub_resize_algorithm_index;
                 current_value <=> Settings.similar_images_sub_resize_algorithm_value;
             }
+
             ComboBoxWrapper {
                 text: "Hash type";
                 model: Settings.similar_images_sub_available_hash_type;
                 current_index <=> Settings.similar_images_sub_hash_alg_index;
                 current_value <=> Settings.similar_images_sub_hash_alg_value;
             }
+
             CheckBoxWrapper {
                 text: "Ignore same size";
                 checked <=> Settings.similar_images_sub_ignore_same_size;
             }
+
             SliderWrapper {
                 text: "Max difference";
                 end_text: "(" + round(Settings.similar_images_sub_current_similarity) + "/" + round(Settings.similar_images_sub_max_similarity) + ")";
@@ -99,53 +105,65 @@ export component ToolSettings {
                 maximum <=> Settings.similar_images_sub_max_similarity;
                 value <=> Settings.similar_images_sub_current_similarity;
             }
-            Rectangle {}
+
+            Rectangle { }
         }
+
         VerticalLayout {
             visible: GuiState.active_tab == CurrentTab.DuplicateFiles;
             spacing: 5px;
             padding: 10px;
             SubsettingsHeader { }
+
             ComboBoxWrapper {
                 text: "Check method";
                 model: Settings.duplicates_sub_check_method;
                 current_index <=> Settings.duplicates_sub_check_method_index;
                 current_value <=> Settings.duplicates_sub_check_method_value;
             }
+
             ComboBoxWrapper {
                 text: "Hash type";
                 model: Settings.duplicates_sub_available_hash_type;
                 current_index <=> Settings.duplicates_sub_available_hash_type_index;
                 current_value <=> Settings.duplicates_sub_available_hash_type_value;
             }
+
             CheckBoxWrapper {
                 text: "Case Sensitive(only name modes)";
                 checked <=> Settings.duplicates_sub_name_case_sensitive;
             }
-            Rectangle {}
+
+            Rectangle { }
         }
+
         VerticalLayout {
             visible: GuiState.active_tab == CurrentTab.BigFiles;
             spacing: 5px;
             padding: 10px;
             SubsettingsHeader { }
+
             ComboBoxWrapper {
                 text: "Checked files";
                 model: Settings.biggest_files_sub_method;
                 current_index <=> Settings.biggest_files_sub_method_index;
                 current_value <=> Settings.biggest_files_sub_method_value;
             }
+
             TextComponent {
                 name: "Number of files";
                 model <=> Settings.biggest_files_sub_number_of_files;
             }
-            Rectangle {}
+
+            Rectangle { }
         }
+
         VerticalLayout {
             visible: GuiState.active_tab == CurrentTab.SimilarVideos;
             spacing: 5px;
             padding: 10px;
             SubsettingsHeader { }
+
             SliderWrapper {
                 text: "Max difference";
                 end_text: "(" + round(Settings.similar_videos_sub_current_similarity) + "/" + round(Settings.similar_videos_sub_max_similarity) + ")";
@@ -153,17 +171,21 @@ export component ToolSettings {
                 maximum <=> Settings.similar_videos_sub_max_similarity;
                 value <=> Settings.similar_videos_sub_current_similarity;
             }
+
             CheckBoxWrapper {
                 text: "Ignore same size";
                 checked <=> Settings.similar_images_sub_ignore_same_size;
             }
-            Rectangle {}
+
+            Rectangle { }
         }
+
         VerticalLayout {
             visible: GuiState.active_tab == CurrentTab.SimilarMusic;
             spacing: 5px;
             padding: 10px;
             SubsettingsHeader { }
+
             ComboBoxWrapper {
                 text: "Audio check type";
                 model: Settings.similar_music_sub_audio_check_type;
@@ -178,30 +200,37 @@ export component ToolSettings {
                     text: "Approximate Tag Comparison";
                     checked <=> Settings.similar_music_sub_approximate_comparison;
                 }
+
                 Text {
                     text: "Compared tags";
                     font-size: 12px;
                 }
+
                 CheckBoxWrapper {
                     text: "Title";
                     checked <=> Settings.similar_music_sub_title;
                 }
+
                 CheckBoxWrapper {
                     text: "Artist";
                     checked <=> Settings.similar_music_sub_artist;
                 }
+
                 CheckBoxWrapper {
                     text: "Bitrate";
                     checked <=> Settings.similar_music_sub_bitrate;
                 }
+
                 CheckBoxWrapper {
                     text: "Genre";
                     checked <=> Settings.similar_music_sub_genre;
                 }
+
                 CheckBoxWrapper {
                     text: "Year";
                     checked <=> Settings.similar_music_sub_year;
                 }
+
                 CheckBoxWrapper {
                     text: "Length";
                     checked <=> Settings.similar_music_sub_length;
@@ -216,6 +245,7 @@ export component ToolSettings {
                     maximum <=> Settings.similar_music_sub_maximum_difference_max;
                     value <=> Settings.similar_music_sub_maximum_difference_value;
                 }
+
                 SliderWrapper {
                     text: "Minimal fragment duration";
                     end_text: round(Settings.similar_music_sub_minimal_fragment_duration_value);
@@ -223,40 +253,47 @@ export component ToolSettings {
                     maximum <=> Settings.similar_music_sub_minimal_fragment_duration_max;
                     value <=> Settings.similar_music_sub_minimal_fragment_duration_value;
                 }
+
                 CheckBoxWrapper {
                     text: "Compare only with similar titles";
                     checked <=> Settings.similar_music_compare_fingerprints_only_with_similar_titles;
                 }
             }
-            Rectangle {}
+            Rectangle { }
         }
+
         VerticalLayout {
             visible: GuiState.active_tab == CurrentTab.BrokenFiles;
             spacing: 5px;
             padding: 10px;
             SubsettingsHeader { }
+
             Text {
                 text: "Type of files to check";
                 font-size: 12px;
             }
+
             CheckBoxWrapper {
                 text: "Audio";
                 checked <=> Settings.broken_files_sub_audio;
             }
+
             CheckBoxWrapper {
                 text: "Pdf";
                 checked <=> Settings.broken_files_sub_pdf;
             }
+
             CheckBoxWrapper {
                 text: "Archive";
                 checked <=> Settings.broken_files_sub_archive;
             }
+
             CheckBoxWrapper {
                 text: "Image";
                 checked <=> Settings.broken_files_sub_image;
             }
-            
-            Rectangle {}
+
+            Rectangle { }
         }
     }
 }

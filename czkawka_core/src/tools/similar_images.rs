@@ -3,7 +3,6 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::time::Instant;
 use std::{mem, panic};
 
 use bk_tree::BKTree;
@@ -871,52 +870,6 @@ pub fn convert_algorithm_to_string(hash_alg: &HashAlg) -> String {
     .to_string()
 }
 
-pub fn test_image_conversion_speed() {
-    let file_name: &str = "test.jpg";
-    let file_path = Path::new(file_name);
-    match image::open(file_path) {
-        Ok(img_open) => {
-            for alg in [
-                HashAlg::Blockhash,
-                HashAlg::Gradient,
-                HashAlg::DoubleGradient,
-                HashAlg::VertGradient,
-                HashAlg::Mean,
-                HashAlg::Median,
-            ] {
-                for filter in [
-                    FilterType::Lanczos3,
-                    FilterType::CatmullRom,
-                    FilterType::Gaussian,
-                    FilterType::Nearest,
-                    FilterType::Triangle,
-                ] {
-                    for size in [8, 16, 32, 64] {
-                        let hasher_config = HasherConfig::new().hash_alg(alg).resize_filter(filter).hash_size(size, size);
-
-                        let start = Instant::now();
-
-                        let hasher = hasher_config.to_hasher();
-                        let _hash = hasher.hash_image(&img_open);
-
-                        println!("{:?} us {:?} {:?} {}x{}", start.elapsed().as_micros(), alg, filter, size, size);
-                    }
-                }
-            }
-        }
-        Err(e) => {
-            println!(
-                "Failed to open test file {}, reason {}",
-                match file_path.canonicalize() {
-                    Ok(t) => t.to_string_lossy().to_string(),
-                    Err(_inspected) => file_name.to_string(),
-                },
-                e
-            );
-        }
-    }
-}
-
 #[allow(dead_code)]
 #[allow(unreachable_code)]
 #[allow(unused_variables)]
@@ -1020,7 +973,7 @@ mod tests {
     use image_hasher::HashAlg;
 
     use crate::common_tool::CommonData;
-    use crate::similar_images::{Hamming, ImHash, ImagesEntry, SimilarImages, SimilarImagesParameters};
+    use crate::tools::similar_images::{Hamming, ImHash, ImagesEntry, SimilarImages, SimilarImagesParameters};
 
     fn get_default_parameters() -> SimilarImagesParameters {
         SimilarImagesParameters {

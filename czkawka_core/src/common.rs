@@ -1,40 +1,145 @@
 use std::cmp::Ordering;
 use std::ffi::OsString;
 use std::fs::{DirEntry, File, OpenOptions};
+use std::io::Error;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize};
 use std::sync::{Arc, atomic};
 use std::thread::{JoinHandle, sleep};
 use std::time::{Duration, Instant};
-use std::{fs, thread};
+use std::{fs, io, thread};
 
 use crossbeam_channel::Sender;
 use directories_next::ProjectDirs;
 use fun_time::fun_time;
 use handsome_logger::{ColorChoice, ConfigBuilder, TerminalMode};
 use log::{LevelFilter, Record, debug, info, warn};
+use once_cell::sync::OnceCell;
 
-use crate::CZKAWKA_VERSION;
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
+use crate::CZKAWKA_VERSION;
 use crate::common_dir_traversal::{CheckingMethod, ToolType};
 use crate::common_directory::Directories;
 use crate::common_items::{ExcludedItems, SingleExcludedItem};
 use crate::common_messages::Messages;
 use crate::common_tool::DeleteMethod;
 use crate::common_traits::ResultEntry;
-use crate::duplicate::make_hard_link;
 use crate::progress_data::{CurrentStage, ProgressData};
 
 static NUMBER_OF_THREADS: state::InitCell<usize> = state::InitCell::new();
 static ALL_AVAILABLE_THREADS: state::InitCell<usize> = state::InitCell::new();
+static CONFIG_CACHE_PATH: OnceCell<Option<ConfigCachePath>> = OnceCell::new();
+
 pub const DEFAULT_THREAD_SIZE: usize = 8 * 1024 * 1024; // 8 MB
 pub const DEFAULT_WORKER_THREAD_SIZE: usize = 4 * 1024 * 1024; // 4 MB
+
+const TEMP_HARDLINK_FILE: &str = "rzeczek.rxrxrxl";
 
 #[derive(Debug, PartialEq)]
 pub enum WorkContinueStatus {
     Continue,
     Stop,
+}
+
+#[derive(Debug, Clone)]
+pub struct ConfigCachePath {
+    pub config_folder: PathBuf,
+    pub cache_folder: PathBuf,
+}
+
+pub fn get_config_cache_path() -> Option<ConfigCachePath> {
+    CONFIG_CACHE_PATH.get().expect("Cannot fail if set_config_cache_path was called before").clone()
+}
+
+pub fn set_config_cache_path(cache_name: &'static str, config_name: &'static str) {
+    // By default, such folders are used:
+    // Lin: /home/username/.config/czkawka
+    // Win: C:\Users\Username\AppData\Roaming\Qarmin\Czkawka\config
+    // Mac: /Users/Username/Library/Application Support/pl.Qarmin.Czkawka
+
+    let config_folder_env = std::env::var("CONFIG_PATH").unwrap_or_default().trim().to_string();
+    let cache_folder_env = std::env::var("CACHE_PATH").unwrap_or_default().trim().to_string();
+
+    let default_config_folder;
+    let default_cache_folder;
+    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", cache_name) {
+        default_cache_folder = Some(proj_dirs.cache_dir().to_path_buf());
+    } else {
+        default_cache_folder = None;
+    }
+    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", config_name) {
+        default_config_folder = Some(proj_dirs.config_dir().to_path_buf());
+    } else {
+        default_config_folder = None;
+    }
+
+    let resolve_folder = |env_var: &str, default_folder: Option<PathBuf>, name: &'static str| {
+        let default_folder_str = default_folder.as_ref().map_or("<not available>".to_string(), |t| t.to_string_lossy().to_string());
+
+        if env_var.is_empty() {
+            default_folder
+        } else {
+            let folder_path = PathBuf::from(env_var);
+            let _ = fs::create_dir_all(&folder_path);
+            if !folder_path.exists() {
+                warn!(
+                    "{name} folder \"{}\" does not exist, using default folder \"{}\"",
+                    folder_path.to_string_lossy(),
+                    default_folder_str
+                );
+                return default_folder;
+            };
+            if !folder_path.is_dir() {
+                warn!(
+                    "{name} folder \"{}\" is not a directory, using default folder \"{}\"",
+                    folder_path.to_string_lossy(),
+                    default_folder_str
+                );
+                return default_folder;
+            }
+
+            match folder_path.canonicalize() {
+                Ok(t) => Some(t),
+                Err(_e) => {
+                    warn!(
+                        "Cannot canonicalize {} folder \"{}\", using default folder \"{}\"",
+                        name.to_ascii_lowercase(),
+                        env_var,
+                        default_folder_str
+                    );
+                    default_folder
+                }
+            }
+        }
+    };
+
+    let config_folder = resolve_folder(&config_folder_env, default_config_folder, "Config");
+    let cache_folder = resolve_folder(&cache_folder_env, default_cache_folder, "Cache");
+
+    let config_cache_path = if let (Some(config_folder), Some(cache_folder)) = (config_folder, cache_folder) {
+        info!(
+            "Config folder set to \"{}\" and cache folder set to \"{}\"",
+            config_folder.to_string_lossy(),
+            cache_folder.to_string_lossy()
+        );
+        if !config_folder.exists() {
+            if let Err(e) = fs::create_dir_all(&config_folder) {
+                warn!("Cannot create config folder \"{}\", reason {e}", config_folder.to_string_lossy());
+            }
+        }
+        if !cache_folder.exists() {
+            if let Err(e) = fs::create_dir_all(&cache_folder) {
+                warn!("Cannot create cache folder \"{}\", reason {e}", cache_folder.to_string_lossy());
+            }
+        }
+        Some(ConfigCachePath { config_folder, cache_folder })
+    } else {
+        warn!("Cannot set config/cache path - config and cache will not be used.");
+        None
+    };
+
+    CONFIG_CACHE_PATH.set(config_cache_path).expect("Cannot set config/cache path twice");
 }
 
 pub fn get_number_of_threads() -> usize {
@@ -270,56 +375,43 @@ pub fn remove_folder_if_contains_only_empty_folders(path: impl AsRef<Path>, remo
 }
 
 pub fn open_cache_folder(cache_file_name: &str, save_to_cache: bool, use_json: bool, warnings: &mut Vec<String>) -> Option<((Option<File>, PathBuf), (Option<File>, PathBuf))> {
-    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
-        let cache_dir = PathBuf::from(proj_dirs.cache_dir());
-        let cache_file = cache_dir.join(cache_file_name);
-        let cache_file_json = cache_dir.join(cache_file_name.replace(".bin", ".json"));
+    let cache_dir = get_config_cache_path()?.cache_folder;
+    let cache_file = cache_dir.join(cache_file_name);
+    let cache_file_json = cache_dir.join(cache_file_name.replace(".bin", ".json"));
 
-        let mut file_handler_default = None;
-        let mut file_handler_json = None;
+    let mut file_handler_default = None;
+    let mut file_handler_json = None;
 
-        if save_to_cache {
-            if cache_dir.exists() {
-                if !cache_dir.is_dir() {
-                    warnings.push(format!("Config dir \"{}\" is a file!", cache_dir.to_string_lossy()));
-                    return None;
-                }
-            } else if let Err(e) = fs::create_dir_all(&cache_dir) {
-                warnings.push(format!("Cannot create config dir \"{}\", reason {e}", cache_dir.to_string_lossy()));
+    if save_to_cache {
+        file_handler_default = Some(match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
+            Ok(t) => t,
+            Err(e) => {
+                warnings.push(format!("Cannot create or open cache file \"{}\", reason {e}", cache_file.to_string_lossy()));
                 return None;
             }
-
-            file_handler_default = Some(match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
+        });
+        if use_json {
+            file_handler_json = Some(match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file_json) {
                 Ok(t) => t,
                 Err(e) => {
-                    warnings.push(format!("Cannot create or open cache file \"{}\", reason {e}", cache_file.to_string_lossy()));
+                    warnings.push(format!("Cannot create or open cache file \"{}\", reason {e}", cache_file_json.to_string_lossy()));
                     return None;
                 }
             });
-            if use_json {
-                file_handler_json = Some(match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file_json) {
-                    Ok(t) => t,
-                    Err(e) => {
-                        warnings.push(format!("Cannot create or open cache file \"{}\", reason {e}", cache_file_json.to_string_lossy()));
-                        return None;
-                    }
-                });
-            }
+        }
+    } else {
+        if let Ok(t) = OpenOptions::new().read(true).open(&cache_file) {
+            file_handler_default = Some(t);
         } else {
-            if let Ok(t) = OpenOptions::new().read(true).open(&cache_file) {
-                file_handler_default = Some(t);
+            if use_json {
+                file_handler_json = Some(OpenOptions::new().read(true).open(&cache_file_json).ok()?);
             } else {
-                if use_json {
-                    file_handler_json = Some(OpenOptions::new().read(true).open(&cache_file_json).ok()?);
-                } else {
-                    // messages.push(format!("Cannot find or open cache file {cache_file:?}")); // No error or warning
-                    return None;
-                }
+                // messages.push(format!("Cannot find or open cache file {cache_file:?}")); // No error or warning
+                return None;
             }
-        };
-        return Some(((file_handler_default, cache_file), (file_handler_json, cache_file_json)));
-    }
-    None
+        }
+    };
+    Some(((file_handler_default, cache_file), (file_handler_json, cache_file_json)))
 }
 
 pub fn split_path(path: &Path) -> (String, String) {
@@ -621,6 +713,18 @@ pub fn check_if_stop_received(stop_flag: Option<&Arc<AtomicBool>>) -> bool {
     false
 }
 
+pub fn make_hard_link(src: &Path, dst: &Path) -> io::Result<()> {
+    let dst_dir = dst.parent().ok_or_else(|| Error::other("No parent"))?;
+    let temp = dst_dir.join(TEMP_HARDLINK_FILE);
+    fs::rename(dst, temp.as_path())?;
+    let result = fs::hard_link(src, dst);
+    if result.is_err() {
+        fs::rename(temp.as_path(), dst)?;
+    }
+    fs::remove_file(temp)?;
+    result
+}
+
 #[fun_time(message = "send_info_and_wait_for_ending_all_threads", level = "debug")]
 pub fn send_info_and_wait_for_ending_all_threads(progress_thread_run: &Arc<AtomicBool>, progress_thread_handle: JoinHandle<()>) {
     progress_thread_run.store(false, atomic::Ordering::Relaxed);
@@ -629,14 +733,66 @@ pub fn send_info_and_wait_for_ending_all_threads(progress_thread_run: &Arc<Atomi
 
 #[cfg(test)]
 mod test {
-    use std::fs;
+    use std::fs::{File, Metadata, read_dir};
     use std::io::Write;
+    #[cfg(target_family = "windows")]
+    use std::os::fs::MetadataExt;
+    #[cfg(target_family = "unix")]
+    use std::os::unix::fs::MetadataExt;
     use std::path::{Path, PathBuf};
+    use std::{fs, io};
 
     use tempfile::tempdir;
 
-    use crate::common::{normalize_windows_path, regex_check, remove_folder_if_contains_only_empty_folders};
+    use crate::common::{make_hard_link, normalize_windows_path, regex_check, remove_folder_if_contains_only_empty_folders};
     use crate::common_items::new_excluded_item;
+
+    #[cfg(target_family = "unix")]
+    fn assert_inode(before: &Metadata, after: &Metadata) {
+        assert_eq!(before.ino(), after.ino());
+    }
+
+    #[cfg(target_family = "windows")]
+    fn assert_inode(_: &Metadata, _: &Metadata) {}
+
+    #[test]
+    fn test_make_hard_link() -> io::Result<()> {
+        let dir = tempfile::Builder::new().tempdir()?;
+        let (src, dst) = (dir.path().join("a"), dir.path().join("b"));
+        File::create(&src)?;
+        let metadata = fs::metadata(&src)?;
+        File::create(&dst)?;
+
+        make_hard_link(&src, &dst)?;
+
+        assert_inode(&metadata, &fs::metadata(&dst)?);
+        assert_eq!(metadata.permissions(), fs::metadata(&dst)?.permissions());
+        assert_eq!(metadata.modified()?, fs::metadata(&dst)?.modified()?);
+        assert_inode(&metadata, &fs::metadata(&src)?);
+        assert_eq!(metadata.permissions(), fs::metadata(&src)?.permissions());
+        assert_eq!(metadata.modified()?, fs::metadata(&src)?.modified()?);
+
+        let mut actual = read_dir(&dir)?.flatten().map(|e| e.path()).collect::<Vec<PathBuf>>();
+        actual.sort_unstable();
+        assert_eq!(vec![src, dst], actual);
+        Ok(())
+    }
+    #[test]
+    fn test_make_hard_link_fails() -> io::Result<()> {
+        let dir = tempfile::Builder::new().tempdir()?;
+        let (src, dst) = (dir.path().join("a"), dir.path().join("b"));
+        File::create(&dst)?;
+        let metadata = fs::metadata(&dst)?;
+
+        assert!(make_hard_link(&src, &dst).is_err());
+
+        assert_inode(&metadata, &fs::metadata(&dst)?);
+        assert_eq!(metadata.permissions(), fs::metadata(&dst)?.permissions());
+        assert_eq!(metadata.modified()?, fs::metadata(&dst)?.modified()?);
+
+        assert_eq!(vec![dst], read_dir(&dir)?.flatten().map(|e| e.path()).collect::<Vec<PathBuf>>());
+        Ok(())
+    }
 
     #[test]
     fn test_remove_folder_if_contains_only_empty_folders() {

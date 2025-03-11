@@ -37,6 +37,7 @@ export component PopupSave inherits Rectangle {
                     horizontal-alignment: center;
                     font-size: 13px;
                 }
+
                 Text {
                     vertical-stretch: 1.0;
                     text: "This will save results to 3 different files" + "\nAre you want to continue?";
@@ -54,9 +55,9 @@ export component PopupSave inherits Rectangle {
                             Callabler.save_results();
                         }
                     }
-                    Rectangle {
 
-                    }
+                    Rectangle { }
+
                     Button {
                         text: "No";
                         clicked => {

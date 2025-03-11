@@ -15,15 +15,15 @@ pub fn connect_select(app: &MainWindow) {
         let current_model = get_tool_model(&app, active_tab);
 
         let new_model = match select_mode {
-            SelectMode::SelectAll => select_all(current_model),
-            SelectMode::UnselectAll => deselect_all(current_model),
-            SelectMode::InvertSelection => invert_selection(current_model),
-            SelectMode::SelectTheBiggestSize => select_by_size_date(current_model, active_tab, true, true),
-            SelectMode::SelectTheSmallestSize => select_by_size_date(current_model, active_tab, false, true),
-            SelectMode::SelectTheBiggestResolution => select_by_resolution(current_model, active_tab, true),
-            SelectMode::SelectTheSmallestResolution => select_by_resolution(current_model, active_tab, false),
-            SelectMode::SelectNewest => select_by_size_date(current_model, active_tab, true, false),
-            SelectMode::SelectOldest => select_by_size_date(current_model, active_tab, false, false),
+            SelectMode::SelectAll => select_all(&current_model),
+            SelectMode::UnselectAll => deselect_all(&current_model),
+            SelectMode::InvertSelection => invert_selection(&current_model),
+            SelectMode::SelectTheBiggestSize => select_by_size_date(&current_model, active_tab, true, true),
+            SelectMode::SelectTheSmallestSize => select_by_size_date(&current_model, active_tab, false, true),
+            SelectMode::SelectTheBiggestResolution => select_by_resolution(&current_model, active_tab, true),
+            SelectMode::SelectTheSmallestResolution => select_by_resolution(&current_model, active_tab, false),
+            SelectMode::SelectNewest => select_by_size_date(&current_model, active_tab, true, false),
+            SelectMode::SelectOldest => select_by_size_date(&current_model, active_tab, false, false),
         };
         set_tool_model(&app, active_tab, new_model);
     });
@@ -96,7 +96,7 @@ fn translate_select_mode(select_mode: SelectMode) -> String {
 }
 
 // TODO, when model will be able to contain i64 instead two i32, this function could be merged with select_by_size_date
-fn select_by_resolution(model: ModelRc<MainListModel>, active_tab: CurrentTab, biggest: bool) -> ModelRc<MainListModel> {
+fn select_by_resolution(model: &ModelRc<MainListModel>, active_tab: CurrentTab, biggest: bool) -> ModelRc<MainListModel> {
     let is_header_mode = get_is_header_mode(active_tab);
     assert!(is_header_mode); // non header modes not really have reason to use this function
 
@@ -140,7 +140,7 @@ fn select_by_resolution(model: ModelRc<MainListModel>, active_tab: CurrentTab, b
     ModelRc::new(VecModel::from(old_data))
 }
 
-fn select_by_size_date(model: ModelRc<MainListModel>, active_tab: CurrentTab, biggest_newest: bool, size: bool) -> ModelRc<MainListModel> {
+fn select_by_size_date(model: &ModelRc<MainListModel>, active_tab: CurrentTab, biggest_newest: bool, size: bool) -> ModelRc<MainListModel> {
     let is_header_mode = get_is_header_mode(active_tab);
     assert!(is_header_mode); // non header modes not really have reason to use this function
 
@@ -187,7 +187,7 @@ fn select_by_size_date(model: ModelRc<MainListModel>, active_tab: CurrentTab, bi
     ModelRc::new(VecModel::from(old_data))
 }
 
-fn select_all(model: ModelRc<MainListModel>) -> ModelRc<MainListModel> {
+fn select_all(model: &ModelRc<MainListModel>) -> ModelRc<MainListModel> {
     let mut old_data = model.iter().collect::<Vec<_>>();
     for x in &mut old_data {
         if !x.header_row {
@@ -197,13 +197,13 @@ fn select_all(model: ModelRc<MainListModel>) -> ModelRc<MainListModel> {
     ModelRc::new(VecModel::from(old_data))
 }
 
-fn deselect_all(model: ModelRc<MainListModel>) -> ModelRc<MainListModel> {
+fn deselect_all(model: &ModelRc<MainListModel>) -> ModelRc<MainListModel> {
     let mut old_data = model.iter().collect::<Vec<_>>();
     old_data.iter_mut().for_each(|x| x.checked = false);
     ModelRc::new(VecModel::from(old_data))
 }
 
-fn invert_selection(model: ModelRc<MainListModel>) -> ModelRc<MainListModel> {
+fn invert_selection(model: &ModelRc<MainListModel>) -> ModelRc<MainListModel> {
     let mut old_data = model.iter().collect::<Vec<_>>();
     for x in &mut old_data {
         if !x.header_row {

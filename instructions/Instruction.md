@@ -6,7 +6,7 @@
 - [Tips, tricks and known bugs](#tips-tricks-and-known-bugs)
 - [Tools](#tools)
 
-Czkawka for now contains two independent frontends - the terminal and graphical interface which share the core module.
+Czkawka for now contains three independent frontends - the terminal app and two graphical apps which share the core module.
 
 ## GUI GTK
 <img src="https://user-images.githubusercontent.com/41945903/148281103-13c00d08-7881-43e8-b6e3-5178473bce85.png" width="800" />
@@ -63,6 +63,8 @@ If you want to get more detailed info about certain tool, just add after its nam
 
 By default, all tools only write about results to console, but it is possible with specific arguments to delete some files/arguments or save it to file.
 
+App returns exit code 0 when everything is ok, 1 when some error occurred and 11 when some files were found.
+
 ## Config/Cache files
 Currently, Czkawka stores few config and cache files on disk:
 - `czkawka_gui_config.txt` - stores configuration of GUI which may be loaded at startup
@@ -71,7 +73,6 @@ Currently, Czkawka stores few config and cache files on disk:
 - `cache_duplicates_HASH.txt` - stores cache data of duplicated files, to not suffer too big of a performance hit when saving/loading file, only already fully hashed files bigger than 5MB are stored. Similar files with replaced `Blake3` to e.g. `SHA256` may be shown, when support for new hashes will be introduced in Czkawka.
 - `cache_similar_videos.bin/json` - stores cache data of video files.
 
-Editing `bin` files may cause showing strange crashes, so in case of having any, removing these files should help.  
 It is possible to modify files with JSON extension(may be helpful when moving files to different disk or trying to use cache file on different computer). To do this, it is required to enable in settings option to generate also cache json file. Next file can be changed/modified. By default, cache files with `bin` extension are loaded, but if it is missing(can be renamed or removed), then data from json file is loaded if exists.
 
 Config files are located in this path:
@@ -85,6 +86,23 @@ Cache should be here:
 Linux - `/home/username/.cache/czkawka`  
 Mac - `/Users/Username/Library/Caches/pl.Qarmin.Czkawka`  
 Windows - `C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache`
+
+it is possible to change cache/config location by using `CONFIG_PATH` and `CACHE_PATH` env
+e.g.
+```
+CONFIG_PATH="/media/rafal/Ventoy/config" CACHE_PATH="/media/rafal/Ventoy/cache" krokiet
+```
+It is possible to create portable version of app, by using running czkawka/krokiet with such script from pendrive:
+
+`open_czkawka.sh` - on pendrive(along with czkawka/krokiet binary)
+```shell
+#!/bin/bash
+
+CONFIG_PATH="$(dirname "$(realpath "$0")")/config"
+CACHE_PATH="$(dirname "$(realpath "$0")")/cache"
+
+./czkawka_gui
+```
 
 ## Tips, Tricks and Known Bugs
 - **Speedup of CPU bounds tasks with LTO**

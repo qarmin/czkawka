@@ -38,6 +38,7 @@ export component PopupRenameFiles inherits Rectangle {
                     horizontal-alignment: center;
                     font-size: 13px;
                 }
+
                 Text {
                     vertical-stretch: 1.0;
                     text: "This will rename extensions of selected files to more proper\n" + "\nAre you want to continue?";
@@ -55,9 +56,9 @@ export component PopupRenameFiles inherits Rectangle {
                             Callabler.rename_files();
                         }
                     }
-                    Rectangle {
 
-                    }
+                    Rectangle { }
+
                     Button {
                         text: "No";
                         clicked => {

@@ -37,6 +37,7 @@ export component PopupDelete inherits Rectangle {
                     font-size: 13px;
                     padding: 10px;
                 }
+
                 Text {
                     vertical-stretch: 1.0;
                     text: "Are you sure you want to delete the selected items?";
@@ -45,6 +46,7 @@ export component PopupDelete inherits Rectangle {
                     font-size: 13px;
                     padding: 10px;
                 }
+
                 HorizontalLayout {
                     Button {
                         text: "Yes";
@@ -53,9 +55,9 @@ export component PopupDelete inherits Rectangle {
                             Callabler.delete_selected_items();
                         }
                     }
-                    Rectangle {
 
-                    }
+                    Rectangle { }
+
                     Button {
                         text: "No";
                         clicked => {

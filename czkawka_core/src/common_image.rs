@@ -223,6 +223,6 @@ pub fn get_rotation_from_exif(path: &str) -> Result<Option<ExifOrientation>, nom
     res.unwrap_or_else(|_| {
         let message = create_crash_message("nom-exif", path, "https://github.com/mindeng/nom-exif");
         println!("{message}");
-        Err(nom_exif::Error::IOError(std::io::Error::new(std::io::ErrorKind::Other, "Panic in get_rotation_from_exif")))
+        Err(nom_exif::Error::IOError(std::io::Error::other("Panic in get_rotation_from_exif")))
     })
 }

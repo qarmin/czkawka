@@ -42,10 +42,10 @@ fn rename_selected_items(files_with_new_extensions: Vec<(String, String, String)
     let mut errors = vec![];
     for (folder, file_name, new_extension) in files_with_new_extensions {
         let file_stem = Path::new(&file_name).file_stem().map(|e| e.to_string_lossy().to_string()).unwrap_or_default();
-        let new_full_path = format!("{}{}{}.{}", folder, MAIN_SEPARATOR, file_stem, new_extension);
-        let old_full_path = format!("{}{}{}", folder, MAIN_SEPARATOR, file_name);
+        let new_full_path = format!("{folder}{MAIN_SEPARATOR}{file_stem}.{new_extension}");
+        let old_full_path = format!("{folder}{MAIN_SEPARATOR}{file_name}");
         if let Err(e) = fs::rename(&old_full_path, &new_full_path) {
-            errors.push(format!("Failed to rename file {} to {} with error {}", old_full_path, new_full_path, e));
+            errors.push(format!("Failed to rename file {old_full_path} to {new_full_path} with error {e}"));
         }
     }
     errors

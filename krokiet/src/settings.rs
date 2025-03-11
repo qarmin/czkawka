@@ -2,12 +2,11 @@ use std::cmp::{max, min};
 use std::env;
 use std::path::PathBuf;
 
-use czkawka_core::big_file::SearchMode;
-use czkawka_core::common::{get_all_available_threads, set_number_of_threads};
+use czkawka_core::common::{get_all_available_threads, get_config_cache_path, set_number_of_threads};
 use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::common_items::{DEFAULT_EXCLUDED_DIRECTORIES, DEFAULT_EXCLUDED_ITEMS};
-use czkawka_core::duplicate::HashType;
-use directories_next::ProjectDirs;
+use czkawka_core::tools::big_file::SearchMode;
+use czkawka_core::tools::duplicate::HashType;
 use home::home_dir;
 use image_hasher::{FilterType, HashAlg};
 use log::{debug, error, info, warn};
@@ -303,6 +302,7 @@ pub fn load_settings_from_file(app: &MainWindow) {
 
     // Validate here values and set "proper"
     // preset_names should have 10 items
+    #[allow(clippy::comparison_chain)]
     if base_settings.preset_names.len() > 10 {
         base_settings.preset_names.truncate(10);
     } else if base_settings.preset_names.len() < 10 {
@@ -401,14 +401,12 @@ where
 }
 
 pub fn get_base_config_file() -> Option<PathBuf> {
-    let configs = ProjectDirs::from("pl", "Qarmin", "Krokiet")?;
-    let config_folder = configs.config_dir();
+    let config_folder = get_config_cache_path()?.config_folder;
     let base_config_file = config_folder.join("config_general.json");
     Some(base_config_file)
 }
 pub fn get_config_file(number: i32) -> Option<PathBuf> {
-    let configs = ProjectDirs::from("pl", "Qarmin", "Krokiet")?;
-    let config_folder = configs.config_dir();
+    let config_folder = get_config_cache_path()?.config_folder;
     let config_file = config_folder.join(format!("config_preset_{number}.json"));
     Some(config_file)
 }

@@ -11,12 +11,13 @@ export component About inherits VerticalLayout {
         source: @image-url("../icons/logo.png");
         image-fit: ImageFit.contain;
     }
+
     Text {
         text: "8.0.0";
         horizontal-alignment: center;
         font-size: max(min(img.width / 20, 17px), 10px);
     }
-    
+
     VerticalLayout {
         spacing: 10px;
         padding-bottom: 10px;
@@ -25,18 +26,20 @@ export component About inherits VerticalLayout {
             horizontal-alignment: center;
             font-size: 15px;
         }
+
         Text {
             text: "This program is free to use and will always be.\nSee the The MIT/GPL License for details.";
             horizontal-alignment: center;
             font-size: 13px;
         }
+
         Text {
             text: "You may not look at unicorn, but unicorn always looks at you.";
             horizontal-alignment: center;
             font-size: 13px;
         }
     }
-    
+
     HorizontalLayout {
         spacing: 5px;
         Button {
@@ -45,18 +48,21 @@ export component About inherits VerticalLayout {
                 Callabler.open_link("https://github.com/qarmin/czkawka");
             }
         }
+
         Button {
             text: "Instruction";
             clicked => {
                 Callabler.open_link("https://github.com/qarmin/czkawka/blob/master/instructions/Instruction.md");
             }
         }
+
         Button {
             text: "Donation";
             clicked => {
                 Callabler.open_link("https://github.com/sponsors/qarmin");
             }
         }
+
         Button {
             text: "Translation";
             clicked => {
