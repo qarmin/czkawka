@@ -265,7 +265,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install basic libraries
-        run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev -y
+        run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev ffmpeg -y
 
       - name: Setup rust version
         run: rustup default 1.85.0
