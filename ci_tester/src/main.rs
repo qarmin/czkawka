@@ -23,7 +23,7 @@ fn test_args() {
         println!("Testing mode {}", mode);
         let _ = fs::remove_dir_all("RandomDirWithoutContent");
         fs::create_dir_all("RandomDirWithoutContent").expect("Should not fail in tests");
-        run_with_good_status(&[CZKAWKA_PATH.get().as_str(), mode, "-d", "RandomDirWithoutContent"], true);
+        run_with_good_status(&[CZKAWKA_PATH.get().as_str(), mode, "-d", "RandomDirWithoutContent", "-W"], true);
     }
 }
 
