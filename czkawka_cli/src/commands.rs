@@ -482,7 +482,7 @@ pub struct CommonCliItems {
     pub exclude_other_filesystems: bool,
     #[clap(flatten)]
     pub do_not_print: DoNotPrint,
-    #[clap(short = 'T', long, help = "Ignore error code when files are found")]
+    #[clap(short = 'W', long, help = "Ignore error code when files are found")]
     pub ignore_error_code_on_found: bool,
 }
 

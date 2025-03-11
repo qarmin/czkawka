@@ -244,13 +244,10 @@ jobs:
             linux_czkawka_gui_minimal.AppImage
           token: ${{ secrets.PAT_REPOSITORY }}
 
-  linux-tests-on-minimal-rust-version:
+  linux-tests:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install basic libraries
-        run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev ffmpeg -y
 
       - name: Setup rust version
         run: rustup default 1.85.0
@@ -259,10 +256,21 @@ jobs:
         run: |
           xvfb-run cargo test
 
+  linux-regression-tests-on-minimal-rust-version:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install basic libraries
+        run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev -y
+
+      - name: Setup rust version
+        run: rustup default 1.85.0
+
       - name: Build
         run: |
-          cargo build
-          cargo build --features "heif,libraw"
+          cargo check
+          cargo check --features "heif,libraw"
 
       - name: Build test version
         run: cargo build --profile test --bin czkawka_cli

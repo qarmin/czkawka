@@ -89,16 +89,16 @@ fn main() {
 }
 fn test_remove_videos_one_oldest() {
     info!("test_remove_videos_one_oldest");
-    run_test(&["video", "-d", "TestFiles", "-D", "OO", "-T"], vec!["Videos/V3.webm"], vec![], vec![]);
+    run_test(&["video", "-d", "TestFiles", "-D", "OO", "-W"], vec!["Videos/V3.webm"], vec![], vec![]);
 }
 fn test_remove_videos_one_newest() {
     info!("test_remove_videos_one_newest");
-    run_test(&["video", "-d", "TestFiles", "-D", "ON", "-T"], vec!["Videos/V5.mp4"], vec![], vec![]);
+    run_test(&["video", "-d", "TestFiles", "-D", "ON", "-W"], vec!["Videos/V5.mp4"], vec![], vec![]);
 }
 fn test_remove_videos_all_expect_oldest() {
     info!("test_remove_videos_all_expect_oldest");
     run_test(
-        &["video", "-d", "TestFiles", "-D", "AEO", "-T"],
+        &["video", "-d", "TestFiles", "-D", "AEO", "-W"],
         vec!["Videos/V1.mp4", "Videos/V2.mp4", "Videos/V5.mp4"],
         vec![],
         vec![],
@@ -107,7 +107,7 @@ fn test_remove_videos_all_expect_oldest() {
 fn test_remove_videos_all_expect_newest() {
     info!("test_remove_videos_all_expect_newest");
     run_test(
-        &["video", "-d", "TestFiles", "-D", "AEN", "-T"],
+        &["video", "-d", "TestFiles", "-D", "AEN", "-W"],
         vec!["Videos/V1.mp4", "Videos/V2.mp4", "Videos/V3.webm"],
         vec![],
         vec![],
@@ -115,16 +115,16 @@ fn test_remove_videos_all_expect_newest() {
 }
 fn test_remove_videos_one_smallest() {
     info!("test_remove_videos_one_smallest");
-    run_test(&["video", "-d", "TestFiles", "-D", "OS", "-T"], vec!["Videos/V2.mp4"], vec![], vec![]);
+    run_test(&["video", "-d", "TestFiles", "-D", "OS", "-W"], vec!["Videos/V2.mp4"], vec![], vec![]);
 }
 fn test_remove_videos_one_biggest() {
     info!("test_remove_videos_one_biggest");
-    run_test(&["video", "-d", "TestFiles", "-D", "OB", "-T"], vec!["Videos/V3.webm"], vec![], vec![]);
+    run_test(&["video", "-d", "TestFiles", "-D", "OB", "-W"], vec!["Videos/V3.webm"], vec![], vec![]);
 }
 fn test_remove_videos_all_expect_smallest() {
     info!("test_remove_videos_all_expect_smallest");
     run_test(
-        &["video", "-d", "TestFiles", "-D", "AES", "-T"],
+        &["video", "-d", "TestFiles", "-D", "AES", "-W"],
         vec!["Videos/V1.mp4", "Videos/V3.webm", "Videos/V5.mp4"],
         vec![],
         vec![],
@@ -133,7 +133,7 @@ fn test_remove_videos_all_expect_smallest() {
 fn test_remove_videos_all_expect_biggest() {
     info!("test_remove_videos_all_expect_biggest");
     run_test(
-        &["video", "-d", "TestFiles", "-D", "AEB", "-T"],
+        &["video", "-d", "TestFiles", "-D", "AEB", "-W"],
         vec!["Videos/V1.mp4", "Videos/V2.mp4", "Videos/V5.mp4"],
         vec![],
         vec![],
@@ -143,7 +143,7 @@ fn test_remove_videos_all_expect_biggest() {
 fn test_remove_same_music_content_one_newest() {
     info!("test_remove_same_music_content_one_newest");
     run_test(
-        &["music", "-d", "TestFiles", "-s", "CONTENT", "-l", "2.0", "-D", "ON", "-T"],
+        &["music", "-d", "TestFiles", "-s", "CONTENT", "-l", "2.0", "-D", "ON", "-W"],
         vec!["Music/M2.mp3"],
         vec![],
         vec![],
@@ -152,7 +152,7 @@ fn test_remove_same_music_content_one_newest() {
 fn test_remove_same_music_content_all_expect_newest() {
     info!("test_remove_same_music_content_all_expect_newest");
     run_test(
-        &["music", "-d", "TestFiles", "-s", "CONTENT", "-l", "2.0", "-D", "AEN", "-T"],
+        &["music", "-d", "TestFiles", "-s", "CONTENT", "-l", "2.0", "-D", "AEN", "-W"],
         vec!["Music/M1.mp3", "Music/M3.flac", "Music/M5.mp3"],
         vec![],
         vec![],
@@ -162,7 +162,7 @@ fn test_remove_same_music_content_all_expect_newest() {
 fn test_remove_same_music_content_all_expect_oldest() {
     info!("test_remove_same_music_content_all_expect_oldest");
     run_test(
-        &["music", "-d", "TestFiles", "-s", "CONTENT", "-l", "2.0", "-D", "AEO", "-T"],
+        &["music", "-d", "TestFiles", "-s", "CONTENT", "-l", "2.0", "-D", "AEO", "-W"],
         vec!["Music/M1.mp3", "Music/M2.mp3", "Music/M3.flac"],
         vec![],
         vec![],
@@ -172,7 +172,7 @@ fn test_remove_same_music_content_all_expect_oldest() {
 fn test_remove_same_music_content_one_oldest() {
     info!("test_remove_same_music_content_one_oldest");
     run_test(
-        &["music", "-d", "TestFiles", "-s", "CONTENT", "-l", "2.0", "-D", "OO", "-T"],
+        &["music", "-d", "TestFiles", "-s", "CONTENT", "-l", "2.0", "-D", "OO", "-W"],
         vec!["Music/M5.mp3"],
         vec![],
         vec![],
@@ -181,7 +181,7 @@ fn test_remove_same_music_content_one_oldest() {
 fn test_remove_same_music_content_one_biggest() {
     info!("test_remove_same_music_content_one_biggest");
     run_test(
-        &["music", "-d", "TestFiles", "-s", "CONTENT", "-l", "2.0", "-D", "OB", "-T"],
+        &["music", "-d", "TestFiles", "-s", "CONTENT", "-l", "2.0", "-D", "OB", "-W"],
         vec!["Music/M3.flac"],
         vec![],
         vec![],
@@ -190,7 +190,7 @@ fn test_remove_same_music_content_one_biggest() {
 fn test_remove_same_music_content_all_expect_biggest() {
     info!("test_remove_same_music_content_all_expect_biggest");
     run_test(
-        &["music", "-d", "TestFiles", "-s", "CONTENT", "-l", "2.0", "-D", "AEB", "-T"],
+        &["music", "-d", "TestFiles", "-s", "CONTENT", "-l", "2.0", "-D", "AEB", "-W"],
         vec!["Music/M1.mp3", "Music/M2.mp3", "Music/M5.mp3"],
         vec![],
         vec![],
@@ -200,7 +200,7 @@ fn test_remove_same_music_content_all_expect_biggest() {
 fn test_remove_same_music_content_all_expect_smallest() {
     info!("test_remove_same_music_content_all_expect_smallest");
     run_test(
-        &["music", "-d", "TestFiles", "-s", "CONTENT", "-l", "2.0", "-D", "AES", "-T"],
+        &["music", "-d", "TestFiles", "-s", "CONTENT", "-l", "2.0", "-D", "AES", "-W"],
         vec!["Music/M1.mp3", "Music/M3.flac", "Music/M5.mp3"],
         vec![],
         vec![],
@@ -210,7 +210,7 @@ fn test_remove_same_music_content_all_expect_smallest() {
 fn test_remove_same_music_content_one_smallest() {
     info!("test_remove_same_music_content_one_smallest");
     run_test(
-        &["music", "-d", "TestFiles", "-s", "CONTENT", "-l", "2.0", "-D", "OS", "-T"],
+        &["music", "-d", "TestFiles", "-s", "CONTENT", "-l", "2.0", "-D", "OS", "-W"],
         vec!["Music/M2.mp3"],
         vec![],
         vec![],
@@ -218,16 +218,16 @@ fn test_remove_same_music_content_one_smallest() {
 }
 fn test_remove_same_music_tags_one_oldest() {
     info!("test_remove_same_music_one_oldest");
-    run_test(&["music", "-d", "TestFiles", "-D", "OO", "-T"], vec!["Music/M5.mp3"], vec![], vec![]);
+    run_test(&["music", "-d", "TestFiles", "-D", "OO", "-W"], vec!["Music/M5.mp3"], vec![], vec![]);
 }
 fn test_remove_same_music_tags_one_newest() {
     info!("test_remove_same_music_one_newest");
-    run_test(&["music", "-d", "TestFiles", "-D", "ON", "-T"], vec!["Music/M2.mp3"], vec![], vec![]);
+    run_test(&["music", "-d", "TestFiles", "-D", "ON", "-W"], vec!["Music/M2.mp3"], vec![], vec![]);
 }
 fn test_remove_same_music_tags_all_expect_oldest() {
     info!("test_remove_same_music_all_expect_oldest");
     run_test(
-        &["music", "-d", "TestFiles", "-D", "AEO", "-T"],
+        &["music", "-d", "TestFiles", "-D", "AEO", "-W"],
         vec!["Music/M1.mp3", "Music/M2.mp3", "Music/M3.flac"],
         vec![],
         vec![],
@@ -236,7 +236,7 @@ fn test_remove_same_music_tags_all_expect_oldest() {
 fn test_remove_same_music_tags_all_expect_newest() {
     info!("test_remove_same_music_all_expect_newest");
     run_test(
-        &["music", "-d", "TestFiles", "-D", "AEN", "-T"],
+        &["music", "-d", "TestFiles", "-D", "AEN", "-W"],
         vec!["Music/M1.mp3", "Music/M3.flac", "Music/M5.mp3"],
         vec![],
         vec![],
@@ -244,16 +244,16 @@ fn test_remove_same_music_tags_all_expect_newest() {
 }
 fn test_remove_same_music_tags_one_smallest() {
     info!("test_remove_same_music_one_smallest");
-    run_test(&["music", "-d", "TestFiles", "-D", "OS", "-T"], vec!["Music/M1.mp3"], vec![], vec![]);
+    run_test(&["music", "-d", "TestFiles", "-D", "OS", "-W"], vec!["Music/M1.mp3"], vec![], vec![]);
 }
 fn test_remove_same_music_tags_one_biggest() {
     info!("test_remove_same_music_one_biggest");
-    run_test(&["music", "-d", "TestFiles", "-D", "OB", "-T"], vec!["Music/M3.flac"], vec![], vec![]);
+    run_test(&["music", "-d", "TestFiles", "-D", "OB", "-W"], vec!["Music/M3.flac"], vec![], vec![]);
 }
 fn test_remove_same_music_tags_all_expect_smallest() {
     info!("test_remove_same_music_all_expect_smallest");
     run_test(
-        &["music", "-d", "TestFiles", "-D", "AES", "-T"],
+        &["music", "-d", "TestFiles", "-D", "AES", "-W"],
         vec!["Music/M2.mp3", "Music/M3.flac", "Music/M5.mp3"],
         vec![],
         vec![],
@@ -262,7 +262,7 @@ fn test_remove_same_music_tags_all_expect_smallest() {
 fn test_remove_same_music_tags_all_expect_biggest() {
     info!("test_remove_same_music_all_expect_biggest");
     run_test(
-        &["music", "-d", "TestFiles", "-D", "AEB", "-T"],
+        &["music", "-d", "TestFiles", "-D", "AEB", "-W"],
         vec!["Music/M1.mp3", "Music/M2.mp3", "Music/M5.mp3"],
         vec![],
         vec![],
@@ -271,7 +271,7 @@ fn test_remove_same_music_tags_all_expect_biggest() {
 fn test_remove_duplicates_all_expect_oldest() {
     info!("test_remove_duplicates_all_expect_oldest");
     run_test(
-        &["dup", "-d", "TestFiles", "-D", "AEO", "-T"],
+        &["dup", "-d", "TestFiles", "-D", "AEO", "-W"],
         vec!["Images/A1.jpg", "Images/A5.jpg", "Music/M1.mp3", "Music/M2.mp3", "Videos/V1.mp4", "Videos/V5.mp4"],
         vec![],
         vec![],
@@ -280,7 +280,7 @@ fn test_remove_duplicates_all_expect_oldest() {
 fn test_remove_duplicates_all_expect_newest() {
     info!("test_remove_duplicates_all_expect_newest");
     run_test(
-        &["dup", "-d", "TestFiles", "-D", "AEN", "-T"],
+        &["dup", "-d", "TestFiles", "-D", "AEN", "-W"],
         vec!["Images/A2.jpg", "Images/A5.jpg", "Music/M1.mp3", "Music/M5.mp3", "Videos/V1.mp4", "Videos/V2.mp4"],
         vec![],
         vec![],
@@ -290,7 +290,7 @@ fn test_remove_duplicates_all_expect_newest() {
 fn test_remove_duplicates_one_newest() {
     info!("test_remove_duplicates_one_newest");
     run_test(
-        &["dup", "-d", "TestFiles", "-D", "ON", "-T"],
+        &["dup", "-d", "TestFiles", "-D", "ON", "-W"],
         vec!["Images/A1.jpg", "Music/M2.mp3", "Videos/V5.mp4"],
         vec![],
         vec![],
@@ -299,7 +299,7 @@ fn test_remove_duplicates_one_newest() {
 fn test_remove_duplicates_one_oldest() {
     info!("test_remove_duplicates_one_oldest");
     run_test(
-        &["dup", "-d", "TestFiles", "-D", "OO", "-T"],
+        &["dup", "-d", "TestFiles", "-D", "OO", "-W"],
         vec!["Images/A2.jpg", "Music/M5.mp3", "Videos/V2.mp4"],
         vec![],
         vec![],
@@ -308,7 +308,7 @@ fn test_remove_duplicates_one_oldest() {
 fn test_remove_duplicates_all_expect_smallest() {
     info!("test_remove_duplicates_all_expect_smallest");
     run_test(
-        &["dup", "-d", "TestFiles", "-D", "AES", "-T"],
+        &["dup", "-d", "TestFiles", "-D", "AES", "-W"],
         vec!["Images/A2.jpg", "Images/A5.jpg", "Music/M2.mp3", "Music/M5.mp3", "Videos/V2.mp4", "Videos/V5.mp4"],
         vec![],
         vec![],
@@ -317,7 +317,7 @@ fn test_remove_duplicates_all_expect_smallest() {
 fn test_remove_duplicates_all_expect_biggest() {
     info!("test_remove_duplicates_all_expect_biggest");
     run_test(
-        &["dup", "-d", "TestFiles", "-D", "AEN", "-T"],
+        &["dup", "-d", "TestFiles", "-D", "AEN", "-W"],
         vec!["Images/A2.jpg", "Images/A5.jpg", "Music/M1.mp3", "Music/M5.mp3", "Videos/V1.mp4", "Videos/V2.mp4"],
         vec![],
         vec![],
@@ -327,7 +327,7 @@ fn test_remove_duplicates_all_expect_biggest() {
 fn test_remove_duplicates_one_biggest() {
     info!("test_remove_duplicates_one_biggest");
     run_test(
-        &["dup", "-d", "TestFiles", "-D", "ON", "-T"],
+        &["dup", "-d", "TestFiles", "-D", "ON", "-W"],
         vec!["Images/A1.jpg", "Music/M2.mp3", "Videos/V5.mp4"],
         vec![],
         vec![],
@@ -336,7 +336,7 @@ fn test_remove_duplicates_one_biggest() {
 fn test_remove_duplicates_one_smallest() {
     info!("test_remove_duplicates_one_smallest");
     run_test(
-        &["dup", "-d", "TestFiles", "-D", "OS", "-T"],
+        &["dup", "-d", "TestFiles", "-D", "OS", "-W"],
         vec!["Images/A1.jpg", "Music/M1.mp3", "Videos/V1.mp4"],
         vec![],
         vec![],
@@ -345,16 +345,16 @@ fn test_remove_duplicates_one_smallest() {
 
 fn test_symlinks_files() {
     info!("test_symlinks_files");
-    run_test(&["symlinks", "-d", "TestFiles", "-D", "-T"], vec![], vec![], vec!["Symlinks/EmptyFiles"]);
+    run_test(&["symlinks", "-d", "TestFiles", "-D", "-W"], vec![], vec![], vec!["Symlinks/EmptyFiles"]);
 }
 fn test_temporary_files() {
     info!("test_temporary_files");
-    run_test(&["temp", "-d", "TestFiles", "-D", "-T"], vec!["Temporary/Boczze.cache"], vec![], vec![]);
+    run_test(&["temp", "-d", "TestFiles", "-D", "-W"], vec!["Temporary/Boczze.cache"], vec![], vec![]);
 }
 fn test_empty_folders() {
     info!("test_empty_folders");
     run_test(
-        &["empty-folders", "-d", "TestFiles", "-D", "-T"],
+        &["empty-folders", "-d", "TestFiles", "-D", "-W"],
         vec![],
         vec!["EmptyFolders/One", "EmptyFolders/Two", "EmptyFolders/Two/TwoInside"],
         vec![],
@@ -364,7 +364,7 @@ fn test_empty_folders() {
 fn test_biggest_files() {
     info!("test_biggest_files");
     run_test(
-        &["big", "-d", "TestFiles", "-n", "6", "-D", "-T"],
+        &["big", "-d", "TestFiles", "-n", "6", "-D", "-W"],
         vec!["Music/M3.flac", "Music/M4.mp3", "Videos/V2.mp4", "Videos/V3.webm", "Videos/V1.mp4", "Videos/V5.mp4"],
         vec![],
         vec![],
@@ -374,7 +374,7 @@ fn test_biggest_files() {
 fn test_smallest_files() {
     info!("test_smallest_files");
     run_test(
-        &["big", "-d", "TestFiles", "-J", "-n", "5", "-D", "-T"],
+        &["big", "-d", "TestFiles", "-J", "-n", "5", "-D", "-W"],
         vec!["Broken/Br.jpg", "Broken/Br.mp3", "Broken/Br.pdf", "Broken/Br.zip", "EmptyFolders/ThreeButNot/KEKEKE"],
         vec![],
         vec![],
@@ -383,12 +383,12 @@ fn test_smallest_files() {
 
 fn test_empty_files() {
     info!("test_empty_files");
-    run_test(&["empty-files", "-d", "TestFiles", "-D", "-T"], vec!["EmptyFile"], vec![], vec![]);
+    run_test(&["empty-files", "-d", "TestFiles", "-D", "-W"], vec!["EmptyFile"], vec![], vec![]);
 }
 
 fn test_big_files() {
     info!("test_big_files");
-    run_test(&["big", "-d", "TestFiles", "-n", "2", "-D", "-T"], vec!["Music/M4.mp3", "Videos/V3.webm"], vec![], vec![]);
+    run_test(&["big", "-d", "TestFiles", "-n", "2", "-D", "-W"], vec!["Music/M4.mp3", "Videos/V3.webm"], vec![], vec![]);
 }
 
 ////////////////////////////////////
