@@ -24,7 +24,7 @@ jobs:
         run: rustup default 1.85.0
 
       - name: Build Release
-        run:
+        run: |
           sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
           cargo build --release --bin czkawka_cli --bin krokiet
 
@@ -300,7 +300,7 @@ jobs:
         run: rustup default 1.85.0
 
       - name: Build Release
-        run:
+        run: |
           sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
           cargo build --release
 

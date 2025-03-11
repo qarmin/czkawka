@@ -58,8 +58,8 @@ pub fn set_config_cache_path(cache_name: &'static str, config_name: &'static str
     // Win: C:\Users\Username\AppData\Roaming\Qarmin\Czkawka\config
     // Mac: /Users/Username/Library/Application Support/pl.Qarmin.Czkawka
 
-    let config_folder_env = std::env::var("CONFIG_PATH").unwrap_or_default().trim().to_string();
-    let cache_folder_env = std::env::var("CACHE_PATH").unwrap_or_default().trim().to_string();
+    let config_folder_env = std::env::var("CZKAWKA_CONFIG_PATH").unwrap_or_default().trim().to_string();
+    let cache_folder_env = std::env::var("CZKAWKA_CACHE_PATH").unwrap_or_default().trim().to_string();
 
     let default_config_folder;
     let default_cache_folder;

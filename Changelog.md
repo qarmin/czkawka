@@ -18,7 +18,7 @@
 - Reduced prehash read file size to a maximum of 4 KB - [#1458](https://github.com/qarmin/czkawka/pull/1458)
 - Fixed a slowdown at the end of scans when searching for duplicates on systems with a high number of CPU cores - [#1460](https://github.com/qarmin/czkawka/pull/1460)
 - Improved scan cancellation speed when collecting files to check - [#1460](https://github.com/qarmin/czkawka/pull/1460)
-- Added support for configuring config/cache paths using the `CONFIG_PATH` and `CACHE_PATH` environment variables - [#1464](https://github.com/qarmin/czkawka/pull/1464)
+- Added support for configuring config/cache paths using the `CZKAWKA_CONFIG_PATH` and `CZKAWKA_CACHE_PATH` environment variables - [#1464](https://github.com/qarmin/czkawka/pull/1464)
 
 ### Krokiet
 - Changed the default tab to "Duplicate Files" - [#1368](https://github.com/qarmin/czkawka/pull/1368)
