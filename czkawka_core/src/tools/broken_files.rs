@@ -200,7 +200,7 @@ impl BrokenFiles {
         })
         .unwrap_or_else(|_| {
             let message = create_crash_message("Image-rs", &file_entry_clone.path.to_string_lossy(), "https://github.com/Serial-ATA/lofty-rs");
-            println!("{message}");
+            error!("{message}");
             file_entry_clone.error_string = message;
             Some(file_entry_clone)
         })
@@ -229,7 +229,7 @@ impl BrokenFiles {
                 })
                 .unwrap_or_else(|_| {
                     let message = create_crash_message("Symphonia", &file_entry_clone.path.to_string_lossy(), "https://github.com/pdeljanov/Symphonia");
-                    println!("{message}");
+                    error!("{message}");
                     file_entry_clone.error_string = message;
                     Some(file_entry_clone)
                 })
@@ -268,7 +268,7 @@ impl BrokenFiles {
         })
         .unwrap_or_else(|_| {
             let message = create_crash_message("PDF-rs", &file_entry_clone.path.to_string_lossy(), "https://github.com/pdf-rs/pdf");
-            println!("{message}");
+            error!("{message}");
             file_entry_clone.error_string = message;
             Some(file_entry_clone)
         })

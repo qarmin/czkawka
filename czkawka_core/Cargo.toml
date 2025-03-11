@@ -81,7 +81,7 @@ trash = "5.1"
 
 os_info = { version = "3", default-features = false }
 log = "0.4.22"
-handsome_logger = "0.8"
+handsome_logger = "0.9"
 fun_time = { version = "0.3", features = ["log"] }
 itertools = "0.14"
 static_assertions = "1.1.0"

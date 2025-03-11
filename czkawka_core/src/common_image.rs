@@ -86,7 +86,7 @@ pub fn get_dynamic_image_from_path(path: &str) -> Result<DynamicImage, String> {
         }
     } else {
         let message = create_crash_message("Image-rs or libraw-rs or jxl-oxide", path, "https://github.com/image-rs/image/issues");
-        println!("{message}");
+        error!("{message}");
         Err(message)
     }
 }
@@ -129,6 +129,7 @@ pub fn get_raw_image(path: impl AsRef<Path>) -> anyhow::Result<DynamicImage> {
 
 #[cfg(not(feature = "libraw"))]
 pub fn get_raw_image(path: impl AsRef<Path> + std::fmt::Debug) -> Result<DynamicImage, String> {
+    // panic!();
     let mut start_timer = Instant::now();
     let mut times = Vec::new();
 
@@ -222,7 +223,7 @@ pub fn get_rotation_from_exif(path: &str) -> Result<Option<ExifOrientation>, nom
 
     res.unwrap_or_else(|_| {
         let message = create_crash_message("nom-exif", path, "https://github.com/mindeng/nom-exif");
-        println!("{message}");
+        error!("{message}");
         Err(nom_exif::Error::IOError(std::io::Error::other("Panic in get_rotation_from_exif")))
     })
 }
