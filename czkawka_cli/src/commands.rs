@@ -484,6 +484,8 @@ pub struct CommonCliItems {
     pub do_not_print: DoNotPrint,
     #[clap(short = 'W', long, help = "Ignore error code when files are found")]
     pub ignore_error_code_on_found: bool,
+    #[clap(short = 'H', long, help = "Disable cache")]
+    pub disable_cache: bool,
 }
 
 #[derive(Debug, clap::Args)]
