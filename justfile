@@ -5,8 +5,7 @@ build_all:
     cargo test
 
 itests:
-    rm TestFiles.zip
-    wget https://github.com/qarmin/czkawka/releases/download/6.0.0/TestFiles.zip
+    [ ! -f TestFiles.zip ] && wget https://github.com/qarmin/czkawka/releases/download/6.0.0/TestFiles.zip || true
     cd ci_tester;cargo build --release;cd ..
     cargo build --release --bin czkawka_cli
 

@@ -249,6 +249,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install basic libraries
+        run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev -y
+
       - name: Setup rust version
         run: rustup default 1.85.0
 
@@ -286,7 +289,7 @@ jobs:
 
   linux-arm-release:
     if: ${{ github.ref == 'refs/heads/master' }}
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-22.04-arm
     steps:
       - uses: actions/checkout@v4
 
