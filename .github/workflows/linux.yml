@@ -37,7 +37,7 @@ jobs:
       - name: Store Linux Krokiet
         uses: actions/upload-artifact@v4
         with:
-          name: czkawka_cli-${{ runner.os }}-release
+          name: krokiet-${{ runner.os }}-release
           path: target/release/krokiet
 
       - name: Prepare files to release

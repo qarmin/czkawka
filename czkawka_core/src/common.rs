@@ -248,6 +248,10 @@ pub fn print_version_mode() {
     if option_env!("USING_CRANELIFT").is_some() {
         warn!("You are running app with cranelift which is intended only for fast compilation, not runtime performance.");
     }
+
+    if cfg!(panic = "abort") {
+        warn!("You are running app compiled with panic='abort', which may cause panics when processing untrusted data.");
+    }
 }
 
 pub fn set_default_number_of_threads() {

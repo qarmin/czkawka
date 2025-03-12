@@ -101,10 +101,13 @@ prepare_binaries:
     cd czkawka_cli; cargo build --profile fastest; cd ..; cp target/fastest/czkawka_cli benchmarks/czkawka_cli_fastest
 
 #benchmark media:
-#    benchmarks/czkawka_cli_fastest dup -d {{ media }} -W -N -M -H
-#    benchmarks/czkawka_cli_v4 dup -d {{ media }} -W -N -M -H
+#    benchmarks/czkawka_cli_fastest dup -d "{{ media }}" -W -N -M -H
+#    benchmarks/czkawka_cli_v4 dup -d "{{ media }}" -W -N -M -H
 
 benchmark media:
+    # benchmarks/czkawka_cli_old dup -d /media/rafal/Kotyk
     # benchmarks/czkawka_cli_fastest dup -d /media/rafal/Kotyk -W -N -M -H
-    sudo echo "AA"
-    hyperfine --prepare "sudo sh -c 'sync; echo 3 > /proc/sys/vm/drop_caches'" 'benchmarks/czkawka_cli_fastest dup -d {{ media }} -W -N -M -H' 'benchmarks/czkawka_cli_v4 dup -d {{ media }} -W -N -M -H'
+    sudo echo "AA" # Needed later by hyperfine
+    #hyperfine --prepare "sudo sh -c 'sync; echo 3 > /proc/sys/vm/drop_caches'; rm cache_duplicates_Blake3_70.bin || true" 'benchmarks/czkawka_cli_fastest dup -d "{{ media }}" -W -N -M -H' 'benchmarks/czkawka_cli_v4 dup -d "{{ media }}" -W -N -M -H' 'benchmarks/czkawka_cli_normal dup -d "{{ media }}" -W -N -M -H' 'benchmarks/czkawka_cli_old image -d "{{ media }}" > /dev/null'
+    hyperfine --prepare "sudo sh -c 'sync; echo 3 > /proc/sys/vm/drop_caches'; rm /home/rafal/.cache/czkawka/cache_similar_images_16_Gradient_Nearest_80.bin || true" 'benchmarks/czkawka_cli_fastest image -d "{{ media }}" -W -N -M -H' 'benchmarks/czkawka_cli_v4 image -d "{{ media }}" -W -N -M -H' 'benchmarks/czkawka_cli_normal image -d "{{ media }}" -W -N -M -H' 'benchmarks/czkawka_cli_old image -d "{{ media }}" > /dev/null'
+
