@@ -129,7 +129,6 @@ pub fn get_raw_image(path: impl AsRef<Path>) -> anyhow::Result<DynamicImage> {
 
 #[cfg(not(feature = "libraw"))]
 pub fn get_raw_image(path: impl AsRef<Path> + std::fmt::Debug) -> Result<DynamicImage, String> {
-    // panic!();
     let mut start_timer = Instant::now();
     let mut times = Vec::new();
 
