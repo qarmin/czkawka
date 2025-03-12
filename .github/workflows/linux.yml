@@ -12,7 +12,7 @@ env:
 # TODO - remove appimage
 jobs:
   linux-cli-krokiet-release:
-    #if: ${{ github.ref == 'refs/heads/master' }}
+    if: ${{ github.ref == 'refs/heads/master' }}
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4

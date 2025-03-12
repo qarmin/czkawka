@@ -10,7 +10,7 @@ exclude = [
     "misc/test_image_perf",
     "ci_tester",
 ]
-resolver = "2"
+resolver = "3"
 
 [profile.release]
 # panic = "unwind" in opposite to "abort", allows to catch panic!()

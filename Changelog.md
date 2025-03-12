@@ -1,6 +1,6 @@
 ## Version 9.0.0 - ?
 
-## Changes and Fixes
+## Breaking changes
 
 -  Video, Duplicate (smaller prehash size), and Image cache (EXIF orientation + faster resize implementation) are incompatible with previous versions and need to be regenerated.
 
@@ -19,6 +19,9 @@
 - Fixed a slowdown at the end of scans when searching for duplicates on systems with a high number of CPU cores - [#1460](https://github.com/qarmin/czkawka/pull/1460)
 - Improved scan cancellation speed when collecting files to check - [#1460](https://github.com/qarmin/czkawka/pull/1460)
 - Added support for configuring config/cache paths using the `CZKAWKA_CONFIG_PATH` and `CZKAWKA_CACHE_PATH` environment variables - [#1464](https://github.com/qarmin/czkawka/pull/1464)
+- Fixed a crash in debug mode when checking broken files named `.mp3` - [#1464](https://github.com/qarmin/czkawka/pull/1464)
+- Catching panics from symphonia crashes in broken files mode - [#1466](https://github.com/qarmin/czkawka/pull/1466)
+- Printing a warning, when using `panic=abort`(this may cause ocassional crashes) - [#1466](https://github.com/qarmin/czkawka/pull/1466)
 
 ### Krokiet
 - Changed the default tab to "Duplicate Files" - [#1368](https://github.com/qarmin/czkawka/pull/1368)
@@ -28,14 +31,15 @@
 - Disabled the broken sort button - [#1400](https://github.com/qarmin/czkawka/pull/1400)
 
 ### CLI
-- Fixed a crash in debug mode when checking broken files named `.mp3` - [#1464](https://github.com/qarmin/czkawka/pull/1464)
 - Added `-N` and `-M` flags to suppress printing results/warnings to the console - [#1464](https://github.com/qarmin/czkawka/pull/1464)
 - Fixed an issue where messages were not cleared at the end of a scan - [#1464](https://github.com/qarmin/czkawka/pull/1464)
+- Ability to disable cache via `-H` flag(useful for benchmarking) - [#1466](https://github.com/qarmin/czkawka/pull/1466)
 
 ### Prebuild-binaries
 - This release is last version, that supports Ubuntu 20.04 - github actions drops this OS in its runners
 - Linux and Mac binaries now are provided with two options x86_64 and arm64
 - Gtk 4.12 is used to build windows gtk gui instead gtk 4.10
+- Dropping support for snap builds - too much time-consuming to maintain and testing(also it is broken currently)
 
 ## Version 8.0.0 - 11.10.2024r
 
