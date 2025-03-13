@@ -58,8 +58,8 @@ pub fn set_config_cache_path(cache_name: &'static str, config_name: &'static str
     // Win: C:\Users\Username\AppData\Roaming\Qarmin\Czkawka\config
     // Mac: /Users/Username/Library/Application Support/pl.Qarmin.Czkawka
 
-    let config_folder_env = std::env::var("CONFIG_PATH").unwrap_or_default().trim().to_string();
-    let cache_folder_env = std::env::var("CACHE_PATH").unwrap_or_default().trim().to_string();
+    let config_folder_env = std::env::var("CZKAWKA_CONFIG_PATH").unwrap_or_default().trim().to_string();
+    let cache_folder_env = std::env::var("CZKAWKA_CACHE_PATH").unwrap_or_default().trim().to_string();
 
     let default_config_folder;
     let default_cache_folder;
@@ -149,7 +149,7 @@ pub fn get_number_of_threads() -> usize {
 
 fn filtering_messages(record: &Record) -> bool {
     if let Some(module_path) = record.module_path() {
-        module_path.starts_with("czkawka") || module_path.starts_with("krokiet")
+        ["czkawka", "krokiet"].iter().any(|t| module_path.starts_with(t))
     } else {
         true
     }
@@ -247,6 +247,10 @@ pub fn print_version_mode() {
 
     if option_env!("USING_CRANELIFT").is_some() {
         warn!("You are running app with cranelift which is intended only for fast compilation, not runtime performance.");
+    }
+
+    if cfg!(panic = "abort") {
+        warn!("You are running app compiled with panic='abort', which may cause panics when processing untrusted data.");
     }
 }
 

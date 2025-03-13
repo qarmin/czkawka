@@ -13,7 +13,7 @@ use humansize::{BINARY, format_size};
 use lofty::file::{AudioFile, TaggedFileExt};
 use lofty::prelude::*;
 use lofty::read_from;
-use log::debug;
+use log::{debug, error};
 use rayon::prelude::*;
 use rusty_chromaprint::{Configuration, Fingerprinter, match_fingerprints};
 use serde::{Deserialize, Serialize};
@@ -774,70 +774,79 @@ impl SameMusic {
 
 // TODO this should be taken from rusty-chromaprint repo, not reimplemented here
 fn calc_fingerprint_helper(path: impl AsRef<Path>, config: &Configuration) -> anyhow::Result<Vec<u32>> {
-    let path = path.as_ref();
-    let src = File::open(path).context("failed to open file")?;
-    let mss = MediaSourceStream::new(Box::new(src), Default::default());
+    let path = path.as_ref().to_path_buf();
+    panic::catch_unwind(|| {
+        let path = &path;
 
-    let mut hint = Hint::new();
-    if let Some(ext) = path.extension().and_then(std::ffi::OsStr::to_str) {
-        hint.with_extension(ext);
-    }
+        let src = File::open(path).context("failed to open file")?;
+        let mss = MediaSourceStream::new(Box::new(src), Default::default());
 
-    let meta_opts: MetadataOptions = Default::default();
-    let fmt_opts: FormatOptions = Default::default();
-
-    let probed = symphonia::default::get_probe().format(&hint, mss, &fmt_opts, &meta_opts).context("unsupported format")?;
-
-    let mut format = probed.format;
-
-    let track = format
-        .tracks()
-        .iter()
-        .find(|t| t.codec_params.codec != CODEC_TYPE_NULL)
-        .context("no supported audio tracks")?;
-
-    let dec_opts: DecoderOptions = Default::default();
-
-    let mut decoder = symphonia::default::get_codecs().make(&track.codec_params, &dec_opts).context("unsupported codec")?;
-
-    let track_id = track.id;
-
-    let mut printer = Fingerprinter::new(config);
-    let sample_rate = track.codec_params.sample_rate.context("missing sample rate")?;
-    let channels = track.codec_params.channels.context("missing audio channels")?.count() as u32;
-    printer.start(sample_rate, channels).context("initializing fingerprinter")?;
-
-    let mut sample_buf = None;
-
-    loop {
-        let Ok(packet) = format.next_packet() else {
-            break;
-        };
-
-        if packet.track_id() != track_id {
-            continue;
+        let mut hint = Hint::new();
+        if let Some(ext) = path.extension().and_then(std::ffi::OsStr::to_str) {
+            hint.with_extension(ext);
         }
 
-        match decoder.decode(&packet) {
-            Ok(audio_buf) => {
-                if sample_buf.is_none() {
-                    let spec = *audio_buf.spec();
-                    let duration = audio_buf.capacity() as u64;
-                    sample_buf = Some(SampleBuffer::<i16>::new(duration, spec));
-                }
+        let meta_opts: MetadataOptions = Default::default();
+        let fmt_opts: FormatOptions = Default::default();
 
-                if let Some(buf) = &mut sample_buf {
-                    buf.copy_interleaved_ref(audio_buf);
-                    printer.consume(buf.samples());
-                }
+        let probed = symphonia::default::get_probe().format(&hint, mss, &fmt_opts, &meta_opts).context("unsupported format")?;
+
+        let mut format = probed.format;
+
+        let track = format
+            .tracks()
+            .iter()
+            .find(|t| t.codec_params.codec != CODEC_TYPE_NULL)
+            .context("no supported audio tracks")?;
+
+        let dec_opts: DecoderOptions = Default::default();
+
+        let mut decoder = symphonia::default::get_codecs().make(&track.codec_params, &dec_opts).context("unsupported codec")?;
+
+        let track_id = track.id;
+
+        let mut printer = Fingerprinter::new(config);
+        let sample_rate = track.codec_params.sample_rate.context("missing sample rate")?;
+        let channels = track.codec_params.channels.context("missing audio channels")?.count() as u32;
+        printer.start(sample_rate, channels).context("initializing fingerprinter")?;
+
+        let mut sample_buf = None;
+
+        loop {
+            let Ok(packet) = format.next_packet() else {
+                break;
+            };
+
+            if packet.track_id() != track_id {
+                continue;
             }
-            Err(symphonia::core::errors::Error::DecodeError(_)) => (),
-            Err(_) => break,
-        }
-    }
 
-    printer.finish();
-    Ok(printer.fingerprint().to_vec())
+            match decoder.decode(&packet) {
+                Ok(audio_buf) => {
+                    if sample_buf.is_none() {
+                        let spec = *audio_buf.spec();
+                        let duration = audio_buf.capacity() as u64;
+                        sample_buf = Some(SampleBuffer::<i16>::new(duration, spec));
+                    }
+
+                    if let Some(buf) = &mut sample_buf {
+                        buf.copy_interleaved_ref(audio_buf);
+                        printer.consume(buf.samples());
+                    }
+                }
+                Err(symphonia::core::errors::Error::DecodeError(_)) => (),
+                Err(_) => break,
+            }
+        }
+
+        printer.finish();
+        Ok(printer.fingerprint().to_vec())
+    })
+    .unwrap_or_else(|_| {
+        let message = create_crash_message("Symphonia", &path.to_string_lossy(), "https://github.com/pdeljanov/Symphonia");
+        error!("{message}");
+        Err(anyhow::anyhow!("{message}"))
+    })
 }
 
 fn read_single_file_tags(path: &str, mut music_entry: MusicEntry) -> Option<MusicEntry> {
@@ -847,7 +856,7 @@ fn read_single_file_tags(path: &str, mut music_entry: MusicEntry) -> Option<Musi
 
     let Ok(possible_tagged_file) = panic::catch_unwind(move || read_from(&mut file).ok()) else {
         let message = create_crash_message("Lofty", path, "https://github.com/image-rs/image/issues");
-        println!("{message}");
+        error!("{message}");
         return None;
     };
 

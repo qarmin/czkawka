@@ -24,7 +24,7 @@ jobs:
         run: rustup default 1.85.0
 
       - name: Build Release
-        run:
+        run: |
           sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
           cargo build --release --bin czkawka_cli --bin krokiet
 
@@ -37,7 +37,7 @@ jobs:
       - name: Store Linux Krokiet
         uses: actions/upload-artifact@v4
         with:
-          name: czkawka_cli-${{ runner.os }}-release
+          name: krokiet-${{ runner.os }}-release
           path: target/release/krokiet
 
       - name: Prepare files to release
@@ -300,7 +300,7 @@ jobs:
         run: rustup default 1.85.0
 
       - name: Build Release
-        run:
+        run: |
           sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
           cargo build --release
 

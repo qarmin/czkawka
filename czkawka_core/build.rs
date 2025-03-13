@@ -9,6 +9,10 @@ fn main() {
     };
     println!("cargo:rustc-env=RUST_VERSION_INTERNAL={rust_version}");
 
+    if let Ok(encoded) = std::env::var("CARGO_ENCODED_RUSTFLAGS") {
+        println!("cargo:rustc-env=UUSED_RUSTFLAGS={encoded}");
+    }
+
     // Find if app is build with cranelift
     if let Ok(codegen) = std::env::var("CARGO_PROFILE_RELEASE_CODEGEN_UNITS") {
         if codegen == "1" {

@@ -87,10 +87,10 @@ Linux - `/home/username/.cache/czkawka`
 Mac - `/Users/Username/Library/Caches/pl.Qarmin.Czkawka`  
 Windows - `C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache`
 
-it is possible to change cache/config location by using `CONFIG_PATH` and `CACHE_PATH` env
+it is possible to change cache/config location by using `CZKAWKA_CONFIG_PATH` and `CZKAWKA_CACHE_PATH` env
 e.g.
 ```
-CONFIG_PATH="/media/rafal/Ventoy/config" CACHE_PATH="/media/rafal/Ventoy/cache" krokiet
+CZKAWKA_CONFIG_PATH="/media/rafal/Ventoy/config" CZKAWKA_CACHE_PATH="/media/rafal/Ventoy/cache" krokiet
 ```
 It is possible to create portable version of app, by using running czkawka/krokiet with such script from pendrive:
 
@@ -98,8 +98,8 @@ It is possible to create portable version of app, by using running czkawka/kroki
 ```shell
 #!/bin/bash
 
-CONFIG_PATH="$(dirname "$(realpath "$0")")/config"
-CACHE_PATH="$(dirname "$(realpath "$0")")/cache"
+CZKAWKA_CONFIG_PATH="$(dirname "$(realpath "$0")")/config"
+CZKAWKA_CACHE_PATH="$(dirname "$(realpath "$0")")/cache"
 
 ./czkawka_gui
 ```
