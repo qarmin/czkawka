@@ -171,7 +171,8 @@ pub fn get_all_available_threads() -> usize {
 }
 
 #[allow(clippy::vec_init_then_push)]
-pub fn print_version_mode() {
+#[allow(unused_mut)]
+pub fn print_version_mode(app: &str) {
     let rust_version = env!("RUST_VERSION_INTERNAL");
     let debug_release = if cfg!(debug_assertions) { "debug" } else { "release" };
 
@@ -179,7 +180,6 @@ pub fn print_version_mode() {
 
     let info = os_info::get();
 
-    #[allow(unused_mut)]
     let mut features: Vec<&str> = vec![];
     #[cfg(feature = "heif")]
     features.push("heif");
@@ -190,7 +190,6 @@ pub fn print_version_mode() {
     #[cfg(feature = "fast_image_resize")]
     features.push("fast_image_resize");
 
-    #[allow(unused_mut)]
     let mut app_cpu_version = "Baseline";
     let mut os_cpu_version = "Baseline";
     if cfg!(target_feature = "sse2") {
@@ -231,7 +230,7 @@ pub fn print_version_mode() {
     // TODO - probably needs to add arm and other architectures, need help, because I don't have access to them
 
     info!(
-        "App version: {CZKAWKA_VERSION}, {debug_release} mode, rust {rust_version}, os {} {} [{} {}], {processors} cpu/threads, features({}): [{}], app cpu version: [{}], os cpu version: [{}]",
+        "{app} version: {CZKAWKA_VERSION}, {debug_release} mode, rust {rust_version}, os {} {} [{} {}], {processors} cpu/threads, features({}): [{}], app cpu version: [{}], os cpu version: [{}]",
         info.os_type(),
         info.version(),
         std::env::consts::ARCH,
