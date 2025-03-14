@@ -246,6 +246,7 @@ bottom_symlink_button = Симв. ссылка
 bottom_hardlink_button = Жёст. ссылка
 bottom_move_button = Переместить
 bottom_sort_button = Сортировать
+bottom_compare_button = Сравнить
 bottom_search_button_tooltip = Начать поиск
 bottom_select_button_tooltip = Выберите записи. Только выбранные файлы/папки будут доступны для последующей обработки.
 bottom_delete_button_tooltip = Удалить выбранные файлы/папки.
@@ -268,6 +269,7 @@ bottom_move_button_tooltip =
     Копирует все файлы в папку без сохранения структуры дерева каталогов.
     При попытке переместить два файла с одинаковым именем в одну и ту же папку второй не будет перемещён и появится сообщение об ошибке.
 bottom_sort_button_tooltip = Сортировка файлов/папок по выбранному методу.
+bottom_compare_button_tooltip = Сравнить изображения в группе.
 bottom_show_errors_tooltip = Показать/скрыть нижнюю текстовую панель.
 bottom_show_upper_notebook_tooltip = Показать/скрыть верхнюю панель блокнота.
 # Progress Window
@@ -414,22 +416,30 @@ compute_found_invalid_symlinks = Найдено битых символьных 
 compute_found_broken_files = Найдено битых файлов: { $number_files }
 compute_found_bad_extensions = Найдено { $number_files } файлов с недопустимыми расширениями
 # Progress window
-progress_scanning_general_file = Сканирование файла: { $file_number }
-progress_scanning_extension_of_files = Проверка расширения { $file_checked }/{ $all_files } файла
-progress_scanning_broken_files = Проверка файла: { $file_checked }/{ $all_files }
-progress_scanning_video = Хэширование видео: { $file_checked }/{ $all_files }
-progress_scanning_image = Хэширование изображения: { $file_checked }/{ $all_files }
-progress_comparing_image_hashes = Сравнение хэша изображений: { $file_checked }/{ $all_files }
-progress_scanning_music_tags_end = Сравнение тегов { $file_checked }/{ $all_files } музыкального файла
-progress_scanning_music_tags = Чтение тэгов музыкальных файлов: { $file_checked }/{ $all_files }
-progress_scanning_music_content_end = Сравнение отпечатка пальца из { $file_checked }/{ $all_files } музыкального файла
-progress_scanning_music_content = Вычисление отпечатка пальца из { $file_checked }/{ $all_files } музыкального файла
-progress_scanning_empty_folders = Сканирование папки { $folder_number }
-progress_scanning_size = Сканирование размера файла { $file_number }
-progress_scanning_size_name = Сканирование имени и размера файла { $file_number }
-progress_scanning_name = Сканирование имени файла { $file_number }
-progress_analyzed_partial_hash = Анализ частичного хэша файла { $file_checked }/{ $all_files }
-progress_analyzed_full_hash = Анализ полного хэша файла { $file_checked }/{ $all_files }
+progress_scanning_general_file =
+    { $file_number ->
+        [one] Просканирован { $file_number } файл
+       *[other] Просканированы { $file_number } файлов
+    }
+progress_scanning_extension_of_files = Проверено расширение { $file_checked }/{ $all_files } файла
+progress_scanning_broken_files = Проверено { $file_checked }/{ $all_files } файл ({ $data_checked }/{ $all_data })
+progress_scanning_video = Хэш { $file_checked }/{ $all_files } видео
+progress_scanning_image = Хэш { $file_checked }/{ $all_files } изображения ({ $data_checked }/{ $all_data })
+progress_comparing_image_hashes = Хэш изображений по сравнению { $file_checked }/{ $all_files }
+progress_scanning_music_tags_end = По сравнению тегов музыкального файла { $file_checked }/{ $all_files }
+progress_scanning_music_tags = Чтение тегов { $file_checked }/{ $all_files } музыкального файла
+progress_scanning_music_content_end = По сравнению с музыкальным файлом { $file_checked }/{ $all_files }
+progress_scanning_music_content = Вычисляется отпечаток звука { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
+progress_scanning_empty_folders =
+    { $folder_number ->
+        [one] Просканирована { $folder_number } папка
+       *[other] Просканированы { $folder_number } папок
+    }
+progress_scanning_size = Отсканированный размер файла { $file_number }
+progress_scanning_size_name = Отсканированное имя и размер файла { $file_number }
+progress_scanning_name = Отсканированное имя файла { $file_number }
+progress_analyzed_partial_hash = Частичный хэш { $file_checked }/{ $all_files } файлов ({ $data_checked }/{ $all_data })
+progress_analyzed_full_hash = Полный хэш { $file_checked }/{ $all_files } файлов ({ $data_checked }/{ $all_data })
 progress_prehash_cache_loading = Загрузка кэша prehash
 progress_prehash_cache_saving = Сохранение кэша prehash
 progress_hash_cache_loading = Загрузка хеш-кэша

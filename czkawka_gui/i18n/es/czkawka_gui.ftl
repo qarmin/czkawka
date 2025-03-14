@@ -18,21 +18,21 @@ music_checking_by_tags = Etiquetas
 music_checking_by_content = Contenido
 same_music_seconds_label = Duración mínima del segundo fragmento
 same_music_similarity_label = Diferencia máxima
-music_compare_only_in_title_group = Comparar sólo en el título
+music_compare_only_in_title_group = Comparar solo en el título
 music_compare_only_in_title_group_tooltip =
-    When enabled, files are grouped by title and then compared to each other.
+    Cuando está activado, los archivos son agrupados por títulos, y luego comparados con otros.
     
-    With 10000 files, instead almost 100 million comparisons usually there will be around 20000 comparisons.
+    Con 10000 archivos, al menos tendríamos unas 100 millones de comparaciones, cuando usualmente serían unas 20000 comparaciones.
 same_music_tooltip =
-    Al buscar archivos de música, por su contenido, podemos usar las siguientes opciones:
+    La búsqueda de archivos de música, por su contenido, puede especificarse mediante los siguientes parámetros:
     
-    - El tiempo mínimo de fragmento después del cual los archivos de música pueden ser identificados como similares
-    - La diferencia máxima entre dos fragmentos probados
+    - El tiempo mínimo de fragmento después del cual los archivos de música pueden ser identificados como similares.
+    - La diferencia máxima entre dos fragmentos probados.
     
-    La clave, para lograr los mejores resultados al buscar. Es proporcionando las mejores combinaciones de estos parámetros:
+    La clave, para lograr los mejores resultados al buscar, es proporcionando las mejores combinaciones de estos parámetros:
     
-    - Establecer el tiempo mínimo a 5 s y la diferencia máxima a 1.0, buscará fragmentos casi idénticos en los archivos.
-    - Un tiempo de 20 años y una diferencia máxima de 6.0, por otro lado, funciona bien para encontrar remixes/versiones en vivo, etc.
+    - Establecer el tiempo mínimo a 5s y la diferencia máxima a 1,0, buscará fragmentos casi idénticos en los archivos.
+    - Un tiempo de 20s y una diferencia máxima de 6,0, por otro lado, funciona bien para encontrar remixes/versiones en vivo, etc.
     
     Por defecto, cada archivo de música se compara entre sí y esto puede llevar mucho tiempo al probar muchos archivos, por lo que normalmente es mejor usar carpetas de referencia y especificar qué archivos deben compararse entre sí (con la misma cantidad de archivos, comparar las huellas dactilares será más rápido al menos 4x que sin carpetas de referencia).
 music_comparison_checkbox_tooltip =
@@ -45,7 +45,7 @@ duplicate_case_sensitive_name_tooltip =
     
      Żołd ↔ Żołd
     
-    En cambio, si deshabilitamos dicha opción, agrupará nombres sin comprobar si cada letra tiene el mismo tamaño. P. ej. 
+    Si deshabilitamos dicha opción, agrupará nombres sin comprobar si cada letra tiene el mismo tamaño. P. ej. 
     
     żoŁD ↔ Żołd
 duplicate_mode_size_name_combo_box = Tamaño y nombre
@@ -55,41 +55,36 @@ duplicate_mode_hash_combo_box = Hash
 duplicate_hash_type_tooltip =
     Czkawka ofrece 3 tipos de hashes, que pueden ser usados:
     
-    Blake3 - función de hash criptográfica. Se usa como algoritmo hash predeterminado porque es muy rápido.
+    Blake3 - función de hash criptográfica. Se usa como algoritmo predeterminado porque es muy rápido.
     
-    CRC32 - función hash simple. Debe ser más rápido que Blake3, pero probablemente tenga algunas colisiones muy raras.
+    CRC32 - función hash simple. Debería ser más rápido que Blake3, pero probablemente tenga algunas colisiones muy raras.
     
-    XXH3 - muy similar en caso de rendimiento y calidad de hash a Blake3 (pero no criptográfico). Por lo que tales modos pueden ser fácilmente usados.
+    XXH3 - muy similar en caso de rendimiento y calidad con Blake3 (pero no criptográfico). Por este motivo, tales modos pueden ser fácilmente usados.
 duplicate_check_method_tooltip =
-    Por ahora, el kawka ofrece tres tipos de métodos para encontrar duplicados por:
+    Por el momento, Czkawka ofrece tres tipos de métodos para encontrar duplicados:
     
     Nombre - Encuentra archivos con el mismo nombre.
     
     Tamaño - Encuentra archivos con el mismo tamaño.
     
-    Hash - Encuentra archivos con el mismo contenido. Este modo molesta el archivo y luego compara este hash para encontrar duplicados. Este modo es la forma más segura de encontrar duplicados. La aplicación utiliza mucho caché, por lo que segundo y más análisis de los mismos datos debe ser mucho más rápido que el primero.
+    Hash - Encuentra archivos con el mismo contenido. Este modo selecciona el archivo y luego compara este hash para encontrar duplicados. Es la forma más segura de encontrar duplicados. La aplicación utiliza mucho caché, por lo que segundo y más análisis de los mismos datos debe ser mucho más rápido que el primero.
 image_hash_size_tooltip =
     Cada imagen seleccionada produce un hash especial que se puede comparar entre sí y una pequeña diferencia entre ellas significa que estas imágenes son similares.
     
-    tamaño de 8 hash es bastante bueno para encontrar imágenes que son un poco similares a las originales. Con un conjunto más grande de imágenes (>1000), esto producirá una gran cantidad de falsos positivos, así que recomiendo usar un mayor tamaño de hash en este caso.
+    El tamaño de 8 hash es bastante bueno para encontrar imágenes que son un poco similares a las originales. Con un conjunto más grande de imágenes (>1000), esto producirá una gran cantidad de falsos positivos, así que recomiendo usar un mayor tamaño de hash en este caso.
     
     16 es el tamaño de hash predeterminado, lo cual es un buen compromiso entre encontrar incluso un poco de imágenes similares y tener sólo una pequeña cantidad de colisiones hash.
     
     32 y 64 hashes sólo encuentran imágenes muy similares, pero no deberían tener casi falsos positivos (tal vez excepto algunas imágenes con canal alfa).
 image_resize_filter_tooltip =
-    Al calcular el hash de una imagen, lo primero que hace la librería es redimensionar esta.
+    Al calcular el hash de una imagen, lo primero que hace la librería es redimensionarla.
     
-    Dependiendo del algoritmo que elijamos, la imagen resultante usada para calcular el hash puede ser demasiado parecida.
+    Dependiendo del algoritmo que elijamos, la imagen resultante usada para calcular el hash puede ser apenas diferente.
     
-    El algoritmo más rápido, es también uno de los que da los peores es el de aproximación cercana o Nearest. Ya que de forma predeterminada, usa un tamaño de hash de 16x16, insuficiente para poder verse.
+    El algoritmo más rápido, pero que da los peores resultados, es Nearest. Está habilitado de forma predeterminada, ya que usa un tamaño de hash de 16x16, haciendo que calidades más bajas no sean visibles.
     
-    Con el tamaño hash de 8x8 se recomienda usar un algoritmo diferente al tipo Nearest, para tener mejores grupos de imágenes.
-image_hash_alg_tooltip =
-    Los usuarios pueden elegir uno de los muchos algoritmos de cálculo del hash.
-    
-    Cada uno tiene puntos fuertes y débiles y a veces dará mejores y a veces peores resultados para diferentes imágenes.
-    
-    Así que, para determinar la mejor para ti, se requiere una prueba manual.
+    Con el tamaño hash de 8x8 se recomienda usar un algoritmo diferente al tipo Nearest, para obtener mejores grupos de imágenes.
+image_hash_alg_tooltip = Los usuarios pueden elegir uno de los muchos algoritmos de cálculo. Cada uno tiene puntos fuertes y débiles y a veces dará mejores y a veces peores resultados para diferentes imágenes. Por lo tanto, para determinar cuál es la mejor para usted, se requiere la prueba manual.
 big_files_mode_combobox_tooltip = Permite buscar archivos de un menor/mayor tamaño
 big_files_mode_label = Archivos marcados
 big_files_mode_smallest_combo_box = El más pequeño
@@ -103,7 +98,7 @@ main_notebook_similar_images = Imágenes similares
 main_notebook_similar_videos = Videos similares
 main_notebook_same_music = Canciones duplicadas
 main_notebook_symlinks = Enlaces simbólicos rotos
-main_notebook_broken_files = Archivos rotos
+main_notebook_broken_files = Archivos dañados
 main_notebook_bad_extensions = Extensiones incorrectas
 main_tree_view_column_file_name = Nombre del archivo
 main_tree_view_column_folder_name = Nombre de carpeta
@@ -118,7 +113,7 @@ main_tree_view_column_year = Año
 main_tree_view_column_bitrate = Tasa de bits
 main_tree_view_column_length = Duración
 main_tree_view_column_genre = Género
-main_tree_view_column_symlink_file_name = Nombre del archivo Symlink
+main_tree_view_column_symlink_file_name = Nombre del "Enlace simbólico"
 main_tree_view_column_symlink_folder = Carpeta Symlink
 main_tree_view_column_destination_path = Ruta de destino
 main_tree_view_column_type_of_error = Tipo de error
@@ -145,7 +140,7 @@ upper_tree_view_included_folder_column_title = Carpetas a buscar
 upper_tree_view_included_reference_column_title = Carpetas de referencia
 upper_recursive_button = Recursivo
 upper_recursive_button_tooltip = Si se selecciona, busca cualquier archivo, sin importar si está o no en una sub-carpeta.
-upper_manual_add_included_button = Añadir manualmente
+upper_manual_add_included_button = Incluir de forma manual
 upper_add_included_button = Añadir
 upper_remove_included_button = Eliminar
 upper_manual_add_excluded_button = Añadir manual
@@ -165,7 +160,7 @@ upper_manual_add_excluded_button_tooltip =
     Para agregar múltiples rutas a la vez, separalas por ;
     
     /home/roman;/home/krokiet añadirá dos directorios /home/roman y /home/keokiet
-upper_add_excluded_button_tooltip = Añadir directorio para ser excluido en la búsqueda.
+upper_add_excluded_button_tooltip = Añadir directorio a excluir en la búsqueda.
 upper_remove_excluded_button_tooltip = Eliminar directorio de excluidos.
 upper_notebook_items_configuration = Configuración de artículos
 upper_notebook_excluded_directories = Directorios excluidos
@@ -250,6 +245,7 @@ bottom_symlink_button = Symlink
 bottom_hardlink_button = Hardlink
 bottom_move_button = Mover
 bottom_sort_button = Ordenar
+bottom_compare_button = Comparar
 bottom_search_button_tooltip = Iniciar búsqueda
 bottom_select_button_tooltip = Seleccionar registros. Sólo los archivos/carpetas seleccionados pueden ser procesados más tarde.
 bottom_delete_button_tooltip = Eliminar archivos/carpetas seleccionadas.
@@ -272,6 +268,7 @@ bottom_move_button_tooltip =
     Copia todos los archivos a la carpeta sin preservar el árbol de directorios.
     Al intentar mover dos archivos con el mismo nombre a la carpeta, el segundo fallará y mostrará el error.
 bottom_sort_button_tooltip = Ordenar archivos/carpetas de acuerdo al método seleccionado.
+bottom_compare_button_tooltip = Comparar imágenes en el grupo.
 bottom_show_errors_tooltip = Mostrar/Ocultar panel de texto inferior.
 bottom_show_upper_notebook_tooltip = Mostrar / Ocultar panel de cuaderno superior.
 # Progress Window
@@ -418,22 +415,30 @@ compute_found_invalid_symlinks = Se encontraron { $number_files } enlaces simbó
 compute_found_broken_files = Se encontraron { $number_files } archivos rotos
 compute_found_bad_extensions = Se encontraron { $number_files } archivos con extensiones no válidas
 # Progress window
-progress_scanning_general_file = Escaneando archivo { $file_number }
-progress_scanning_extension_of_files = Comprobando extensión de { $file_checked }/{ $all_files } archivo
-progress_scanning_broken_files = Comprobando { $file_checked }/{ $all_files } archivo
-progress_scanning_video = Hash de { $file_checked }/{ $all_files } vídeo
-progress_scanning_image = Hash de { $file_checked }/{ $all_files } imagen
-progress_comparing_image_hashes = Comparando hash de imagen { $file_checked }/{ $all_files }
-progress_scanning_music_tags_end = Comparando etiquetas de { $file_checked }/{ $all_files } archivo de música
-progress_scanning_music_tags = Leyendo etiquetas del archivo de música { $file_checked }/{ $all_files }
-progress_scanning_music_content_end = Comparando huella dactilar de { $file_checked }/{ $all_files } archivo de música
-progress_scanning_music_content = Calculando huella dactilar de { $file_checked }/{ $all_files } archivo de música
-progress_scanning_empty_folders = Escaneando carpeta { $folder_number }
-progress_scanning_size = Escaneando tamaño del archivo { $file_number }
-progress_scanning_size_name = Escaneando nombre y tamaño del archivo { $file_number }
-progress_scanning_name = Escaneando nombre del archivo { $file_number }
-progress_analyzed_partial_hash = Has analizado el hash parcial de { $file_checked }/{ $all_files } archivos
-progress_analyzed_full_hash = Se ha analizado el hash completo de { $file_checked }/{ $all_files } archivos
+progress_scanning_general_file =
+    { $file_number ->
+        [one] Escaneado archivo { $file_number }
+       *[other] Escaneados archivos { $file_number }
+    }
+progress_scanning_extension_of_files = Extensión comprobada de archivo { $file_checked }/{ $all_files }
+progress_scanning_broken_files = Verificado archivo { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
+progress_scanning_video = Hash de vídeo { $file_checked }/{ $all_files }
+progress_scanning_image = Hash de { $file_checked }/{ $all_files } imagen ({ $data_checked }/{ $all_data })
+progress_comparing_image_hashes = Hash de imagen { $file_checked }/{ $all_files } comparado
+progress_scanning_music_tags_end = Etiquetas comparadas de archivo de música { $file_checked }/{ $all_files }
+progress_scanning_music_tags = Leer etiquetas del archivo de música { $file_checked }/{ $all_files }
+progress_scanning_music_content_end = Se ha comparado la huella digital de archivo de música { $file_checked }/{ $all_files }
+progress_scanning_music_content = Huella digital calculada de { $file_checked }/{ $all_files } archivo de música ({ $data_checked }/{ $all_data })
+progress_scanning_empty_folders =
+    { $folder_number ->
+        [one] Escaneó la carpeta { $folder_number }
+       *[other] Escaneó las carpetas { $folder_number }
+    }
+progress_scanning_size = Tamaño escaneado del archivo { $file_number }
+progress_scanning_size_name = Nombre y tamaño escaneado del archivo { $file_number }
+progress_scanning_name = Nombre escaneado del archivo { $file_number }
+progress_analyzed_partial_hash = Se ha analizado el hash parcial de archivos { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
+progress_analyzed_full_hash = Se ha analizado el hash completo de archivos { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
 progress_prehash_cache_loading = Cargando caché prehash
 progress_prehash_cache_saving = Guardando caché prehash
 progress_hash_cache_loading = Cargando caché hash

@@ -246,6 +246,7 @@ bottom_symlink_button = Symlink
 bottom_hardlink_button = Hardlink
 bottom_move_button = Verplaatsen
 bottom_sort_button = Sorteren
+bottom_compare_button = Vergelijk
 bottom_search_button_tooltip = Zoeken starten
 bottom_select_button_tooltip = Selecteer records. Alleen geselecteerde bestanden/mappen kunnen later worden verwerkt.
 bottom_delete_button_tooltip = Verwijder geselecteerde bestanden/mappen.
@@ -268,6 +269,7 @@ bottom_move_button_tooltip =
     Het kopieert alle bestanden naar de map zonder de mapstructuur te bewaren.
     Wanneer twee bestanden met dezelfde naam naar de map worden verplaatst, zal de tweede mislukt en de fout worden weergegeven.
 bottom_sort_button_tooltip = Sorteert bestanden/mappen op de geselecteerde methode.
+bottom_compare_button_tooltip = Afbeeldingen in de groep vergelijken.
 bottom_show_errors_tooltip = Onderste tekstvenster tonen/verbergen
 bottom_show_upper_notebook_tooltip = Toon/Verberg bovenste notitieboekpaneel.
 # Progress Window
@@ -414,22 +416,30 @@ compute_found_invalid_symlinks = Gevonden { $number_files } ongeldige symlinks
 compute_found_broken_files = Gevonden { $number_files } gebroken bestanden
 compute_found_bad_extensions = { $number_files } bestanden met ongeldige extensies gevonden
 # Progress window
-progress_scanning_general_file = Scannen van { $file_number } bestand
-progress_scanning_extension_of_files = Extensie van { $file_checked }/{ $all_files } bestand controleren
-progress_scanning_broken_files = Controleren { $file_checked }/{ $all_files } bestand
-progress_scanning_video = Hashing van { $file_checked }/{ $all_files } video
-progress_scanning_image = Hashing van { $file_checked }/{ $all_files } afbeelding
-progress_comparing_image_hashes = Vergelijk { $file_checked }/{ $all_files } afbeelding hash
-progress_scanning_music_tags_end = Tags vergelijken van { $file_checked }/{ $all_files } muziekbestand
-progress_scanning_music_tags = Leestags van { $file_checked }/{ $all_files } muziekbestand
-progress_scanning_music_content_end = Vingerafdruk van { $file_checked }/{ $all_files } muziekbestand vergelijken
-progress_scanning_music_content = Vingerafdruk berekenen van { $file_checked }/{ $all_files } muziekbestand
-progress_scanning_empty_folders = Scannen { $folder_number } map
-progress_scanning_size = Scannen grootte van { $file_number } bestand
-progress_scanning_size_name = Scannen van naam en grootte van { $file_number } bestand
-progress_scanning_name = Scannen van naam { $file_number } bestand
-progress_analyzed_partial_hash = Geanalyseerde gedeeltelijke hash van { $file_checked }/{ $all_files } bestanden
-progress_analyzed_full_hash = Volledige hash van { $file_checked }/{ $all_files } bestanden geanalyseerd
+progress_scanning_general_file =
+    { $file_number ->
+        [one] Gescande { $file_number } bestand
+       *[other] Gescande { $file_number } bestanden
+    }
+progress_scanning_extension_of_files = Gecontroleerde extensie van { $file_checked }/{ $all_files } bestand
+progress_scanning_broken_files = Gecontroleerd { $file_checked }/{ $all_files } bestand ({ $data_checked }/{ $all_data })
+progress_scanning_video = Onderbroken van { $file_checked }/{ $all_files } video
+progress_scanning_image = Bevroren van { $file_checked }/{ $all_files } afbeelding ({ $data_checked }/{ $all_data })
+progress_comparing_image_hashes = Vergeleken { $file_checked }/{ $all_files } afbeelding hash
+progress_scanning_music_tags_end = Vergeleken tags van { $file_checked }/{ $all_files } muziekbestand
+progress_scanning_music_tags = Lees tags van { $file_checked }/{ $all_files } muziekbestand
+progress_scanning_music_content_end = Vergeleken vingerafdruk van { $file_checked }/{ $all_files } muziekbestand
+progress_scanning_music_content = Berekende vingerafdruk van { $file_checked }/{ $all_files } muziekbestand ({ $data_checked }/{ $all_data })
+progress_scanning_empty_folders =
+    { $folder_number ->
+        [one] Gescande { $folder_number } map
+       *[other] Gescande { $folder_number } mappen
+    }
+progress_scanning_size = Gescande grootte van { $file_number } bestand
+progress_scanning_size_name = Gescande naam en grootte van { $file_number } bestand
+progress_scanning_name = Gescande naam van { $file_number } bestand
+progress_analyzed_partial_hash = Geanalyseerde gedeeltelijke hash van { $file_checked }/{ $all_files } bestanden ({ $data_checked }/{ $all_data })
+progress_analyzed_full_hash = Volledige hash van { $file_checked }/{ $all_files } bestanden ({ $data_checked }/{ $all_data } ) geanalyseerd
 progress_prehash_cache_loading = Prehash cache laden
 progress_prehash_cache_saving = Opslaan van prehash cache
 progress_hash_cache_loading = hash-cache laden

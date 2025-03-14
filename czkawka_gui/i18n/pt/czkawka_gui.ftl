@@ -20,9 +20,9 @@ same_music_seconds_label = Duração mínima de segundos do fragmento
 same_music_similarity_label = Diferença máxima
 music_compare_only_in_title_group = Comparar somente no título
 music_compare_only_in_title_group_tooltip =
-    When enabled, files are grouped by title and then compared to each other.
+    Quando ativado, os ficheiros são agrupados por título e então comparados entre si.
     
-    With 10000 files, instead almost 100 million comparisons usually there will be around 20000 comparisons.
+    Com 10 000 ficheiros, em vez de quase 100 milhões de comparações, haverá geralmente cerca de 20 000.
 same_music_tooltip =
     Buscar por arquivos de música semelhantes por seu conteúdo pode ser configurado definindo:
     
@@ -244,6 +244,7 @@ bottom_symlink_button = Ligação simbólica
 bottom_hardlink_button = Ligação hardlink
 bottom_move_button = Mover
 bottom_sort_button = Ordenar
+bottom_compare_button = Comparar
 bottom_search_button_tooltip = Iniciar busca
 bottom_select_button_tooltip = Selecionar registros. Só arquivos/diretórios selecionados podem ser processados posteriormente.
 bottom_delete_button_tooltip = Excluir arquivos/diretórios selecionados.
@@ -265,6 +266,7 @@ bottom_move_button_tooltip =
     Ele copia todos os arquivos para o diretório sem preservar a árvore de diretório.
     Ao tentar mover dois arquivos com nome idêntico para o diretório, a segunda falhará e exibirá um erro.
 bottom_sort_button_tooltip = Ordena arquivos/pastas de acordo com o método selecionado.
+bottom_compare_button_tooltip = Compare as imagens do grupo.
 bottom_show_errors_tooltip = Exibir/ocultar painel de texto inferior.
 bottom_show_upper_notebook_tooltip = Exibir/ocultar painel superior do caderno.
 # Progress Window
@@ -292,11 +294,11 @@ settings_number_of_threads = Número de threads usadas
 settings_number_of_threads_tooltip = Numero de thread usadas. Zero significa que toda thread disponível será usada.
 settings_use_rust_preview = Usar bibliotecas externas em vez de gtk para carregar pré-visualizações
 settings_use_rust_preview_tooltip =
-    Using gtk previews will sometimes be faster and support more formats, but sometimes this could be exactly the opposite.
+    A utilização de pré-visualizações com GTK será por vezes mais rápida e suportará mais formatos, mas outras vezes ocorre exatamente o inverso.
     
-    If you have problems with loading previews, you may can to try to change this setting.
+    Se tiver problemas com o carregamento de pré-visualizações, tente alterar esta configuração.
     
-    On non-linux systems, it is recommended to use this option, because gtk-pixbuf are not always available there so disabling this option will not load previews of some images.
+    Em sistemas não-GNU/Linux, é recomendado usar esta opção porque o GTK-Pixbuf nem sempre está disponível lá, então desativar esta opção irá parar as tentativas falhadas de carregar pré-visualizações de algumas imagens.
 settings_label_restart = Você tem de reiniciar o aplicativo para aplicar as configurações!
 settings_ignore_other_filesystems = Ignorar outros sistemas de arquivos (só Linux)
 settings_ignore_other_filesystems_tooltip =
@@ -411,22 +413,30 @@ compute_found_invalid_symlinks = Achadas { $number_files } ligações simbólica
 compute_found_broken_files = Achados { $number_files } arquivos quebrados
 compute_found_bad_extensions = Achados { $number_files } arquivos com extensões inválidas
 # Progress window
-progress_scanning_general_file = Escaneando { $file_number } arquivo
-progress_scanning_extension_of_files = Verificando extensão de { $file_checked }/{ $all_files } de arquivo
-progress_scanning_broken_files = Verificando { $file_checked }/{ $all_files } arquivo
-progress_scanning_video = Hash de { $file_checked }/{ $all_files } vídeo
-progress_scanning_image = Hash de { $file_checked }/{ $all_files } imagem
-progress_comparing_image_hashes = Comparando de { $file_checked }/{ $all_files } hash de imagem
-progress_scanning_music_tags_end = Comparando etiquetas de { $file_checked }/{ $all_files } arquivo de música
-progress_scanning_music_tags = Lendo etiquetas de { $file_checked }/{ $all_files } arquivo de música
-progress_scanning_music_content_end = Comparação de impressão digital de { $file_checked }/{ $all_files } arquivo de música
-progress_scanning_music_content = Calculando impressão digital de { $file_checked }/{ $all_files } arquivo de música
-progress_scanning_empty_folders = Verificando { $folder_number } diretório
-progress_scanning_size = Verificando tamanho de { $file_number } arquivo
-progress_scanning_size_name = Verificando nome e tamanho de { $file_number } arquivo
-progress_scanning_name = Verificando nome de { $file_number } arquivo
-progress_analyzed_partial_hash = Hash parcial analisado de { $file_checked }/{ $all_files } arquivos
-progress_analyzed_full_hash = Hash completo analisado de { $file_checked }/{ $all_files } arquivos
+progress_scanning_general_file =
+    { $file_number ->
+        [one] Verificado { $file_number } arquivo
+       *[other] Escaneado { $file_number } arquivos
+    }
+progress_scanning_extension_of_files = Extensão marcada do arquivo { $file_checked }/{ $all_files }
+progress_scanning_broken_files = Verificado { $file_checked }/{ $all_files } arquivo ({ $data_checked }/{ $all_data })
+progress_scanning_video = Hash de { $file_checked }/{ $all_files } de vídeo
+progress_scanning_image = Hash de { $file_checked }/{ $all_files } imagem ({ $data_checked }/{ $all_data })
+progress_comparing_image_hashes = Comparado a { $file_checked }/{ $all_files } hash de imagem
+progress_scanning_music_tags_end = Etiquetas comparadas de { $file_checked }/{ $all_files } arquivo de música
+progress_scanning_music_tags = Ler etiquetas de { $file_checked }/{ $all_files } arquivo de música
+progress_scanning_music_content_end = Impressão digital comparada de { $file_checked }/{ $all_files } arquivo de música
+progress_scanning_music_content = Calculada impressão digital de { $file_checked }/ arquivo de música{ $all_files } ({ $data_checked }/{ $all_data })
+progress_scanning_empty_folders =
+    { $folder_number ->
+        [one] Pasta { $folder_number } escaneada
+       *[other] Escaneado { $folder_number } pastas
+    }
+progress_scanning_size = Tamanho digitalizado do arquivo { $file_number }
+progress_scanning_size_name = Nome digitalizado e tamanho do arquivo { $file_number }
+progress_scanning_name = Nome digitalizado do arquivo { $file_number }
+progress_analyzed_partial_hash = Hash parcial analisado de arquivos { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
+progress_analyzed_full_hash = Hash completo analisado de arquivos { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
 progress_prehash_cache_loading = Carregando cache de pré-hash
 progress_prehash_cache_saving = Salvando cache pré-hash
 progress_hash_cache_loading = Carregando cache de hash

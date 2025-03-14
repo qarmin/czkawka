@@ -246,6 +246,7 @@ bottom_symlink_button = Symlink
 bottom_hardlink_button = Hardlink
 bottom_move_button = نقل
 bottom_sort_button = فرز
+bottom_compare_button = قارن
 bottom_search_button_tooltip = بدء البحث
 bottom_select_button_tooltip = حدد السجلات. يمكن معالجة الملفات/المجلدات المحددة في وقت لاحق.
 bottom_delete_button_tooltip = حذف الملفات/المجلدات المحددة.
@@ -268,6 +269,7 @@ bottom_move_button_tooltip =
     ينسخ جميع الملفات إلى الدليل دون الحفاظ على شجرة الدليل.
     عند محاولة نقل ملفين مع نفس الاسم إلى مجلد، سيتم فشل الثانية وإظهار الخطأ.
 bottom_sort_button_tooltip = ترتيب الملفات/المجلدات وفقا للطريقة المحددة.
+bottom_compare_button_tooltip = قارن الصور في المجموعة.
 bottom_show_errors_tooltip = إظهار/إخفاء لوحة النص السفلية.
 bottom_show_upper_notebook_tooltip = إظهار/إخفاء لوحة دفتر الملاحظات العلوية.
 # Progress Window
@@ -414,22 +416,30 @@ compute_found_invalid_symlinks = تم العثور على { $number_files } رو
 compute_found_broken_files = تم العثور على { $number_files } ملفات محطمة
 compute_found_bad_extensions = تم العثور على { $number_files } ملفات ذات ملحقات غير صالحة
 # Progress window
-progress_scanning_general_file = فحص ملف { $file_number }
-progress_scanning_extension_of_files = التحقق من امتداد الملف { $file_checked }/{ $all_files }
-progress_scanning_broken_files = فحص { $file_checked }/{ $all_files } ملف
-progress_scanning_video = تجزئة الفيديو { $file_checked }/{ $all_files }
-progress_scanning_image = تجزئة الصورة { $file_checked }/{ $all_files }
-progress_comparing_image_hashes = مقارنة { $file_checked }/{ $all_files } تجزئة الصور
-progress_scanning_music_tags_end = مقارنة علامات { $file_checked }/{ $all_files } ملف الموسيقى
-progress_scanning_music_tags = قراءة وسوم { $file_checked }/{ $all_files } ملف الموسيقى
-progress_scanning_music_content_end = مقارنة بصمة الإصبع { $file_checked }/{ $all_files } ملف الموسيقى
-progress_scanning_music_content = حساب بصمة الإصبع { $file_checked }/{ $all_files } ملف الموسيقى
-progress_scanning_empty_folders = يتم فحص { $folder_number } مجلد
-progress_scanning_size = حجم البحث لـ { $file_number } ملف
-progress_scanning_size_name = فحص اسم وحجم ملف { $file_number }
-progress_scanning_name = فحص اسم ملف { $file_number }
-progress_analyzed_partial_hash = تم تحليل تجزئة جزئية ل { $file_checked }/{ $all_files } ملفات
-progress_analyzed_full_hash = تم تحليل التجزئة الكاملة لـ { $file_checked }/{ $all_files } ملفات
+progress_scanning_general_file =
+    { $file_number ->
+        [one] تم فحص ملف { $file_number }
+       *[other] تم فحص { $file_number } ملفًا
+    }
+progress_scanning_extension_of_files = تم التحقق من ملحق من ملف { $file_checked }/{ $all_files }
+progress_scanning_broken_files = تم التحقق من الملف { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
+progress_scanning_video = تم تجزئة فيديو { $file_checked }/{ $all_files }
+progress_scanning_image = تجزئة من { $file_checked }/{ $all_files } صورة ({ $data_checked }/{ $all_data })
+progress_comparing_image_hashes = مقارنة { $file_checked }/{ $all_files } هاش الصورة
+progress_scanning_music_tags_end = مقارنة العلامات { $file_checked }/{ $all_files } ملف الموسيقى
+progress_scanning_music_tags = قراءة العلامات { $file_checked }/{ $all_files } ملف الموسيقى
+progress_scanning_music_content_end = مقارنة بصمة الإصبع من { $file_checked }/{ $all_files } ملف موسيقي
+progress_scanning_music_content = تم حساب بصمة الإصبع { $file_checked }/{ $all_files } ملف موسيقي ({ $data_checked }/{ $all_data })
+progress_scanning_empty_folders =
+    { $folder_number ->
+        [one] تم فحص مجلد { $folder_number }
+       *[other] تم فحص { $folder_number } مجلدًا
+    }
+progress_scanning_size = حجم ملف { $file_number } المسح الضوئي
+progress_scanning_size_name = اسم وحجم الملف { $file_number } الذي تم فحصه
+progress_scanning_name = تم فحص اسم الملف { $file_number }
+progress_analyzed_partial_hash = تم تحليل التجزئة الجزئية ل { $file_checked }/{ $all_files } ملفات ({ $data_checked }/{ $all_data })
+progress_analyzed_full_hash = تم تحليل التجزئة الكاملة من ملفات { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
 progress_prehash_cache_loading = تحميل ذاكرة التخزين المؤقت
 progress_prehash_cache_saving = حفظ ذاكرة التخزين المؤقت
 progress_hash_cache_loading = تحميل ذاكرة التخزين المؤقت للتجزئة

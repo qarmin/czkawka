@@ -246,6 +246,7 @@ bottom_symlink_button = Symlink
 bottom_hardlink_button = Hardlink
 bottom_move_button = Mutare
 bottom_sort_button = Sortează
+bottom_compare_button = Compară
 bottom_search_button_tooltip = Începe căutarea
 bottom_select_button_tooltip = Selectaţi înregistrările. Numai fişierele/dosarele selectate pot fi procesate ulterior.
 bottom_delete_button_tooltip = Ştergeţi fişierele/dosarele selectate.
@@ -268,6 +269,7 @@ bottom_move_button_tooltip =
     Copiază toate fișierele în director fără a păstra directorul arborescent.
     Când se încearcă mutarea a două fișiere cu nume identic în folder, al doilea va eșua și va afișa eroarea.
 bottom_sort_button_tooltip = Sortează fișierele/dosarele în funcție de metoda selectată.
+bottom_compare_button_tooltip = Compară imaginile din grup.
 bottom_show_errors_tooltip = Arată/ascunde panoul de text de jos.
 bottom_show_upper_notebook_tooltip = Arată/Ascunde panoul de notebook-uri de sus.
 # Progress Window
@@ -414,22 +416,30 @@ compute_found_invalid_symlinks = { $number_files } link-uri simbolice invalide g
 compute_found_broken_files = Fișiere defecte { $number_files } găsite
 compute_found_bad_extensions = Fișiere { $number_files } cu extensii invalide
 # Progress window
-progress_scanning_general_file = Se scanează fişierul { $file_number }
-progress_scanning_extension_of_files = Se verifică extensia fișierului { $file_checked }/{ $all_files }
-progress_scanning_broken_files = Se verifică fişierul { $file_checked }/{ $all_files }
-progress_scanning_video = Hashing of { $file_checked }/{ $all_files } video
-progress_scanning_image = Hashing of { $file_checked }/{ $all_files } image
-progress_comparing_image_hashes = Comparare hash imagine { $file_checked }/{ $all_files }
-progress_scanning_music_tags_end = Compararea etichetelor fișierului de muzică { $file_checked }/{ $all_files }
-progress_scanning_music_tags = Citirea etichetelor din fişierul de muzică { $file_checked }/{ $all_files }
-progress_scanning_music_content_end = Compararea amprentelor fișierului de muzică { $file_checked }/{ $all_files }
-progress_scanning_music_content = Calcularea amprentei fişierului de muzică { $file_checked }/{ $all_files }
-progress_scanning_empty_folders = Se scanează directorul { $folder_number }
-progress_scanning_size = Dimensiune scanare fișier { $file_number }
-progress_scanning_size_name = Se scanează numele și dimensiunea fișierului { $file_number }
-progress_scanning_name = Se scanează numele fișierului { $file_number }
-progress_analyzed_partial_hash = S-a analizat hash-ul parțial al fișierelor { $file_checked }/{ $all_files }
-progress_analyzed_full_hash = A fost analizat hash complet al fişierelor { $file_checked }/{ $all_files }
+progress_scanning_general_file =
+    { $file_number ->
+        [one] a scanat { $file_number } fişierul
+       *[other] Scanat { $file_number } fişiere
+    }
+progress_scanning_extension_of_files = S-a verificat extensia fișierului { $file_checked }/{ $all_files }
+progress_scanning_broken_files = Fişier verificat { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
+progress_scanning_video = Hashed of { $file_checked }/{ $all_files } video
+progress_scanning_image = Hashed of { $file_checked }/{ $all_files } image ({ $data_checked }/{ $all_data })
+progress_comparing_image_hashes = Imaginea a fost comparată { $file_checked }/{ $all_files }
+progress_scanning_music_tags_end = Tag-uri comparate ale fișierului de muzică { $file_checked }/{ $all_files }
+progress_scanning_music_tags = Citește etichetele fișierului de muzică { $file_checked }/{ $all_files }
+progress_scanning_music_content_end = Față de amprenta fișierului de muzică { $file_checked }/{ $all_files }
+progress_scanning_music_content = Amprenta calculată a fișierului de muzică { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
+progress_scanning_empty_folders =
+    { $folder_number ->
+        [one] Dosar Scanat { $folder_number }
+       *[other] Scanat { $folder_number } dosare
+    }
+progress_scanning_size = Dimensiune scanată pentru fişierul { $file_number }
+progress_scanning_size_name = Numele scanat şi dimensiunea fişierului { $file_number }
+progress_scanning_name = Numele scanat al fişierului { $file_number }
+progress_analyzed_partial_hash = S-a analizat hash parțial al fișierelor { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
+progress_analyzed_full_hash = S-a analizat hash complet al fişierelor { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
 progress_prehash_cache_loading = Se încarcă cache-ul prehash
 progress_prehash_cache_saving = Salvare cache prehash
 progress_hash_cache_loading = Încărcare cache hash

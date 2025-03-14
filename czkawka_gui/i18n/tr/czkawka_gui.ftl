@@ -18,11 +18,11 @@ music_checking_by_tags = Etiketler
 music_checking_by_content = İçerik
 same_music_seconds_label = Minimal parça saniyesel süresi
 same_music_similarity_label = Maksimum fark
-music_compare_only_in_title_group = Compare only in title
+music_compare_only_in_title_group = Yalnızca başlıkla karşılaştırın
 music_compare_only_in_title_group_tooltip =
-    When enabled, files are grouped by title and then compared to each other.
+    Etkinleştirildiğinde dosyalar başlığa göre gruplandırılır ve ardından birbirleriyle karşılaştırılır.
     
-    With 10000 files, instead almost 100 million comparisons usually there will be around 20000 comparisons.
+    10.000 dosya ile neredeyse 100 milyon karşılaştırma yerine genellikle 20.000 civarında karşılaştırma olacaktır.
 same_music_tooltip =
     İçeriğine göre benzer müzik dosyalarının aranması ayarlanarak yapılandırılabilir:
     
@@ -87,13 +87,13 @@ image_hash_size_tooltip =
     
     32 ve 64 hash'ler yalnızca çok benzer görüntüleri bulur, ancak neredeyse hiç piksel farkı olmamalıdır (belki alfa kanallı bazı görüntüler hariç).
 image_resize_filter_tooltip =
-    To compute hash of image, the library must first resize it.
+    Görüntünün hash'ini hesaplamak için kütüphanenin önce görüntüyü yeniden boyutlandırması gerekir.
     
-    Depend on chosen algorithm, the resulting image used to calculate hash will looks a little different.
+    Seçilen algoritmaya bağlı olarak, hash hesaplamak için kullanılan sonuç görüntüsü biraz farklı görünecektir.
     
-    The fastest algorithm to use, but also the one which gives the worst results, is Nearest. It is enabled by default, because with 16x16 hash size lower quality it is not really visible.
+    Kullanılacak en hızlı ve aynı zamanda en kötü sonuçları veren algoritma Nearest'tir. Varsayılan olarak etkindir, çünkü 16x16 hash boyutunda daha düşük kalitede gerçekten görünmez.
     
-    With 8x8 hash size it is recommended to use a different algorithm than Nearest, to have better groups of images.
+    8x8 karma boyutunda, daha iyi görüntü grupları elde etmek için Nearest'ten farklı bir algoritma kullanılması önerilir.
 image_hash_alg_tooltip =
     Kullanıcılar, SUÇ oluşturmanın birçok algoritmasından birini seçebilir. 
     Her birinin hem güçlü hem de zayıf noktaları vardır ve farklı görüntüler için 
@@ -265,6 +265,7 @@ bottom_symlink_button = Sembolik bağlantı
 bottom_hardlink_button = Sabit bağlantı
 bottom_move_button = Taşı
 bottom_sort_button = Sırala
+bottom_compare_button = Compare
 bottom_search_button_tooltip = Aramayı başlatır.
 bottom_select_button_tooltip = Kayıtları seçer. Yalnızca seçilen dosyalara/klasörlere işlem uygulanabilir.
 bottom_delete_button_tooltip = Seçili dosyaları/klasörleri siler.
@@ -287,6 +288,7 @@ bottom_move_button_tooltip =
     Dizin ağacını korumadan tüm dosyaları dizine taşır.
     Aynı ada sahip iki dosyayı klasöre taşımaya çalışırken, ikincisi başarısız olur ve hata gösterir.
 bottom_sort_button_tooltip = Dosyaları/Dizinleri seçilen metoda göre sırala.
+bottom_compare_button_tooltip = Compare images in the group.
 bottom_show_errors_tooltip = Alt çıktı panelini göster/gizle.
 bottom_show_upper_notebook_tooltip = Üst denetim panelini göster/gizle.
 # Progress Window
@@ -312,13 +314,13 @@ header_about_button_tooltip = Czkawka hakkında bilgi içeren iletişim kutusunu
 
 settings_number_of_threads = Kullanılan iş parçacığı sayısı
 settings_number_of_threads_tooltip = Kullanılan iş parçacığı sayısı, 0 tüm uygun iş parçacıklarının kullanılacağı anlamına gelir.
-settings_use_rust_preview = Use external libraries instead gtk to load previews
+settings_use_rust_preview = Ön izlemeleri yüklemek için gtk yerine harici kitaplıkları kullanın
 settings_use_rust_preview_tooltip =
-    Using gtk previews will sometimes be faster and support more formats, but sometimes this could be exactly the opposite.
+    Gtk ön izlemelerini kullanmak bazen daha hızlı olabilir ve daha fazla biçimi destekler, ancak bazen bu tam tersi de olabilir.
     
-    If you have problems with loading previews, you may can to try to change this setting.
+    Ön izlemeleri yüklemede sorun yaşıyorsanız bu ayarı değiştirmeyi deneyebilirsiniz.
     
-    On non-linux systems, it is recommended to use this option, because gtk-pixbuf are not always available there so disabling this option will not load previews of some images.
+    Linux dışı sistemlerde bu seçeneğin kullanılması önerilir çünkü gtk-pixbuf her zaman mevcut değildir, dolayısıyla bu seçeneğin devre dışı bırakılması bazı görüntülerin ön izlemelerini yüklemeyecektir.
 settings_label_restart = Ayarları uygulamak için uygulamayı yeniden başlatmanız gerekir!
 settings_ignore_other_filesystems = Öteki dosya sistemlerini yoksay (sadece Linux)
 settings_ignore_other_filesystems_tooltip =
@@ -447,22 +449,30 @@ compute_found_invalid_symlinks = { $number_files } adet geçersiz sembolik bağl
 compute_found_broken_files = { $number_files } adet bozuk dosya bulundu.
 compute_found_bad_extensions = { $number_files } adet geçersiz uzantıya sahip dosya bulundu.
 # Progress window
-progress_scanning_general_file = { $file_number } dosya tarandı.
-progress_scanning_extension_of_files = { $file_checked }/{ $all_files } dosyanın uzantısı kontrol edildi.
-progress_scanning_broken_files = { $file_checked }/{ $all_files } dosya kontrol edildi.
-progress_scanning_video = { $file_checked }/{ $all_files } videonun SUÇ kaydı oluşturuldu. ;-)
-progress_scanning_image = { $file_checked }/{ $all_files } resmin SURÇ kaydı oluşturuldu. ;-)
-progress_comparing_image_hashes = { $file_checked }/{ $all_files } resim SURÇ kaydı karşılaştırıldı.
-progress_scanning_music_tags_end = { $file_checked }/{ $all_files } müzik dosyasının etiketleri karşılaştırıldı.
-progress_scanning_music_tags = { $file_checked }/{ $all_files } müzik dosyasının etiketleri okundu.
-progress_scanning_music_content_end = Müzik dosyası { $file_checked }/{ $all_files } için parmak izi karşılaştırılıyor
-progress_scanning_music_content = Müzik dosyası { $file_checked }/{ $all_files } için parmak izi hesaplanıyor
-progress_scanning_empty_folders = { $folder_number } klasör tarandı.
-progress_scanning_size = { $file_number } dosyanın boyutu tarandı.
-progress_scanning_size_name = { $file_number } dosyasının ismi ve boyutu aranıyor
-progress_scanning_name = { $file_number } dosyanın adı tarandı.
-progress_analyzed_partial_hash = { $file_checked }/{ $all_files } dosyanın kısmi-SUÇ kaydı analiz edildi. ;-)
-progress_analyzed_full_hash = { $file_checked }/{ $all_files } dosyanın tam SUÇ kaydı analiz edildi. ;-)
+progress_scanning_general_file =
+    { $file_number ->
+        [one] { $file_number } dosya tarandı
+       *[other] { $file_number } dosya tarandı
+    }
+progress_scanning_extension_of_files = Checked extension of { $file_checked }/{ $all_files } file
+progress_scanning_broken_files = Checked { $file_checked }/{ $all_files } file ({ $data_checked }/{ $all_data })
+progress_scanning_video = Hashed of { $file_checked }/{ $all_files } video
+progress_scanning_image = Hashed of { $file_checked }/{ $all_files } image ({ $data_checked }/{ $all_data })
+progress_comparing_image_hashes = Compared { $file_checked }/{ $all_files } image hash
+progress_scanning_music_tags_end = Compared tags of { $file_checked }/{ $all_files } music file
+progress_scanning_music_tags = Read tags of { $file_checked }/{ $all_files } music file
+progress_scanning_music_content_end = Compared fingerprint of { $file_checked }/{ $all_files } music file
+progress_scanning_music_content = Calculated fingerprint of { $file_checked }/{ $all_files } music file ({ $data_checked }/{ $all_data })
+progress_scanning_empty_folders =
+    { $folder_number ->
+        [one] { $folder_number } klasör tarandı
+       *[other] { $folder_number } klasör tarandı
+    }
+progress_scanning_size = Scanned size of { $file_number } file
+progress_scanning_size_name = Scanned name and size of { $file_number } file
+progress_scanning_name = Scanned name of { $file_number } file
+progress_analyzed_partial_hash = Analyzed partial hash of { $file_checked }/{ $all_files } files ({ $data_checked }/{ $all_data })
+progress_analyzed_full_hash = Analyzed full hash of { $file_checked }/{ $all_files } files ({ $data_checked }/{ $all_data })
 progress_prehash_cache_loading = Prehash önbelleği yükleniyor
 progress_prehash_cache_saving = Prehash önbelleği kaydediliyor
 progress_hash_cache_loading = Hash önbelleği yükleniyor

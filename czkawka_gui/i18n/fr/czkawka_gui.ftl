@@ -20,9 +20,9 @@ same_music_seconds_label = Durée minimale de seconde de fragment
 same_music_similarity_label = Différence maximale
 music_compare_only_in_title_group = Comparer seulement dans le titre
 music_compare_only_in_title_group_tooltip =
-    When enabled, files are grouped by title and then compared to each other.
+    Lorsque cette option est activée, les fichiers sont regroupés par titre, puis comparés l'un à l'autre.
     
-    With 10000 files, instead almost 100 million comparisons usually there will be around 20000 comparisons.
+    Pour 10000 fichiers, au lieu de près de 100 millions de comparaisons en général, il y aura environ 20000 comparaisons.
 same_music_tooltip =
     La recherche de fichiers musicaux aux contenus similaires peut être configurée en définissant :
     
@@ -246,6 +246,7 @@ bottom_symlink_button = Lien symbolique
 bottom_hardlink_button = Lien dur
 bottom_move_button = Déplacer
 bottom_sort_button = Trier
+bottom_compare_button = Comparer
 bottom_search_button_tooltip = Lancer la recherche
 bottom_select_button_tooltip = Sélectionnez les enregistrements. Seuls les fichiers/dossiers sélectionnés pourront être traités plus tard.
 bottom_delete_button_tooltip = Supprimer les fichiers/dossiers sélectionnés.
@@ -268,6 +269,7 @@ bottom_move_button_tooltip =
     Ceci copie tous les fichiers dans le répertoire cible sans préserver l'arborescence du répertoire source.
     Si on tente de déplacer deux fichiers avec le même nom vers le dossier, le second échouera et un message d'erreur s'affichera.
 bottom_sort_button_tooltip = Trie les fichiers/dossiers selon la méthode sélectionnée.
+bottom_compare_button_tooltip = Comparer les images dans le groupe.
 bottom_show_errors_tooltip = Afficher/Masquer le panneau de texte du bas.
 bottom_show_upper_notebook_tooltip = Afficher/Masquer le panneau supérieur du bloc-notes.
 # Progress Window
@@ -295,11 +297,11 @@ settings_number_of_threads = Nombre de threads utilisés
 settings_number_of_threads_tooltip = Nombre de threads utilisés. « 0 » signifie que tous les threads disponibles seront utilisés.
 settings_use_rust_preview = Utiliser des bibliothèques externes à la place gtk pour charger les aperçus
 settings_use_rust_preview_tooltip =
-    Using gtk previews will sometimes be faster and support more formats, but sometimes this could be exactly the opposite.
+    L'utilisation des prévisualisations gtk sera parfois plus rapide et gèrera plus de formats, mais cela pourrait aussi être l'inverse.
     
-    If you have problems with loading previews, you may can to try to change this setting.
+    Si vous avez des problèmes de chargement des prévisualisations, vous pouvez essayer de modifier ce paramètre.
     
-    On non-linux systems, it is recommended to use this option, because gtk-pixbuf are not always available there so disabling this option will not load previews of some images.
+    Pour les systèmes non-Linux, il est recommandé d'utiliser cette option, car gtk-pixbuf n'y est pas toujours disponible, aussi la désactivation de cette option ne chargera pas les prévisualisations pour certaines images.
 settings_label_restart = Vous devez redémarrer l’application pour appliquer les réglages !
 settings_ignore_other_filesystems = Ignorer les autres systèmes de fichiers (Linux uniquement)
 settings_ignore_other_filesystems_tooltip =
@@ -414,22 +416,30 @@ compute_found_invalid_symlinks = { $number_files } liens symboliques invalides t
 compute_found_broken_files = { $number_files } fichiers cassés trouvés
 compute_found_bad_extensions = { $number_files } fichiers avec des extensions invalides trouvés
 # Progress window
-progress_scanning_general_file = Analyse du fichier { $file_number }
-progress_scanning_extension_of_files = Vérification de l'extension du fichier { $file_checked }/{ $all_files }
-progress_scanning_broken_files = Vérification du fichier { $file_checked }/{ $all_files }
-progress_scanning_video = Hachage de la vidéo { $file_checked }/{ $all_files }
-progress_scanning_image = Hachage de l'image { $file_checked }/{ $all_files }
-progress_comparing_image_hashes = Comparaison du hachage de l'image { $file_checked }/{ $all_files }
-progress_scanning_music_tags_end = Comparaison des tags du fichier audio { $file_checked }/{ $all_files }
-progress_scanning_music_tags = Lecture des balises du fichier audio { $file_checked }/{ $all_files }
-progress_scanning_music_content_end = Comparaison de l'empreinte numérique du fichier audio { $file_checked }/{ $all_files }
-progress_scanning_music_content = Calcul de l'empreinte numérique du fichier audio { $file_checked }/{ $all_files }
-progress_scanning_empty_folders = Analyse du dossier { $folder_number }
-progress_scanning_size = Analyse de la taille du fichier { $file_number }
-progress_scanning_size_name = Analyse du nom et de la taille du fichier { $file_number }
-progress_scanning_name = Analyse du nom du fichier { $file_number }
-progress_analyzed_partial_hash = Analyse partielle du hash de { $file_checked }/{ $all_files } fichiers
-progress_analyzed_full_hash = Analyse complète du hash de { $file_checked }/{ $all_files } fichiers
+progress_scanning_general_file =
+    { $file_number ->
+        [one] Fichier { $file_number }
+       *[other] Fichiers { $file_number }
+     } Scannés
+progress_scanning_extension_of_files = Extension du fichier { $file_checked }/{ $all_files } vérifiée
+progress_scanning_broken_files = Fichier { $file_checked }/{ $all_files } vérifié ({ $data_checked }/{ $all_data })
+progress_scanning_video = Haché de la vidéo { $file_checked }/{ $all_files }
+progress_scanning_image = Haché de l'image { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
+progress_comparing_image_hashes = Hachage d'image { $file_checked }/{ $all_files } comparé
+progress_scanning_music_tags_end = Tags comparés au fichier de musique { $file_checked }/{ $all_files }
+progress_scanning_music_tags = Lire les tags du fichier de musique { $file_checked }/{ $all_files }
+progress_scanning_music_content_end = Empreinte par rapport au fichier de musique { $file_checked }/{ $all_files }
+progress_scanning_music_content = Empreinte calculée du fichier de musique { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
+progress_scanning_empty_folders =
+    { $folder_number ->
+        [one] Répertoire { $folder_number }
+       *[other] Dossiers { $folder_number }
+     } numérisés
+progress_scanning_size = Taille numérisée du fichier { $file_number }
+progress_scanning_size_name = Nom numérisé et taille du fichier { $file_number }
+progress_scanning_name = Nom numérisé du fichier { $file_number }
+progress_analyzed_partial_hash = Hash partiel analysé des fichiers { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
+progress_analyzed_full_hash = Hash complet analysé des fichiers { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
 progress_prehash_cache_loading = Chargement du cache du prehash
 progress_prehash_cache_saving = Sauvegarde du cache du prehash
 progress_hash_cache_loading = Chargement du cache de hachage
