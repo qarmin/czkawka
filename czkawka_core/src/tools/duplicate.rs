@@ -28,7 +28,7 @@ use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::*;
 use crate::progress_data::{CurrentStage, ProgressData};
 
-pub const PREHASHING_BUFFER_SIZE: u64 = 1024 * 8;
+pub const PREHASHING_BUFFER_SIZE: u64 = 4 * 1024;
 pub const THREAD_BUFFER_SIZE: usize = 2 * 1024 * 1024;
 
 thread_local! {
