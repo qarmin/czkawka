@@ -381,7 +381,7 @@ jobs:
             target/debug/krokiet
 
   linux-eyra:
-    #if: ${{ github.ref == 'refs/heads/master' }}
+    if: ${{ github.ref == 'refs/heads/master' }}
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
@@ -415,7 +415,6 @@ jobs:
 
       - name: Release
         uses: softprops/action-gh-release@v2
-        if: ${{ github.ref == 'refs/heads/master' }}
         with:
           tag_name: "Nightly"
           files: |
