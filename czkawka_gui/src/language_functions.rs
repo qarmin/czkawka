@@ -58,6 +58,10 @@ pub const LANGUAGES_ALL: &[Language] = &[
         short_text: "zh",
     },
     Language {
+        combo_box_text: "繁體中文 (Traditional Chinese)",
+        short_text: "zh-TW",
+    },
+    Language {
         combo_box_text: "Español (Spanish)",
         short_text: "es",
     },

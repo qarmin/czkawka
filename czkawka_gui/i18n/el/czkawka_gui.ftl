@@ -246,6 +246,7 @@ bottom_symlink_button = Symlink
 bottom_hardlink_button = Hardlink
 bottom_move_button = Μετακίνηση
 bottom_sort_button = Ταξινόμηση
+bottom_compare_button = Σύγκριση
 bottom_search_button_tooltip = Έναρξη αναζήτησης
 bottom_select_button_tooltip = Επιλέξτε εγγραφές. Μόνο επιλεγμένα αρχεία/φάκελοι μπορούν να υποβληθούν σε μεταγενέστερη επεξεργασία.
 bottom_delete_button_tooltip = Διαγραφή επιλεγμένων αρχείων/φακέλων.
@@ -268,6 +269,7 @@ bottom_move_button_tooltip =
     It copies all files to the directory without preserving the directory tree.
     When trying to move two files with identical name to folder, second will fail and show error.
 bottom_sort_button_tooltip = Ταξινόμηση αρχείων/φακέλων σύμφωνα με την επιλεγμένη μέθοδο.
+bottom_compare_button_tooltip = Σύγκριση εικόνων στην ομάδα.
 bottom_show_errors_tooltip = Εμφάνιση/Απόκρυψη πίνακα κάτω κειμένου.
 bottom_show_upper_notebook_tooltip = Εμφάνιση/Απόκρυψη ανώτερου πίνακα σημειωμάτων.
 # Progress Window
@@ -414,22 +416,30 @@ compute_found_invalid_symlinks = Βρέθηκαν { $number_files } μη έγκ�
 compute_found_broken_files = Βρέθηκαν { $number_files } κατεστραμμένα αρχεία
 compute_found_bad_extensions = Βρέθηκαν { $number_files } αρχεία με μη έγκυρες επεκτάσεις
 # Progress window
-progress_scanning_general_file = Σάρωση { $file_number } αρχείου
-progress_scanning_extension_of_files = Έλεγχος επέκτασης αρχείου { $file_checked }/{ $all_files }
-progress_scanning_broken_files = Έλεγχος αρχείου { $file_checked }/{ $all_files }
-progress_scanning_video = Hashing of { $file_checked }/{ $all_files } βίντεο
-progress_scanning_image = Hashing of { $file_checked }/{ $all_files } image
-progress_comparing_image_hashes = Σύγκριση { $file_checked }/{ $all_files } κατακερματισμού εικόνας
-progress_scanning_music_tags_end = Συγκρίνοντας ετικέτες του αρχείου μουσικής { $file_checked }/{ $all_files }
-progress_scanning_music_tags = Ανάγνωση ετικετών του αρχείου μουσικής { $file_checked }/{ $all_files }
-progress_scanning_music_content_end = Σύγκριση δακτυλικού αποτυπώματος του αρχείου μουσικής { $file_checked }/{ $all_files }
-progress_scanning_music_content = Υπολογισμός δακτυλικού αποτυπώματος του αρχείου μουσικής { $file_checked }/{ $all_files }
-progress_scanning_empty_folders = Σάρωση φακέλου { $folder_number }
-progress_scanning_size = Μέγεθος σάρωσης του αρχείου { $file_number }
-progress_scanning_size_name = Σάρωση ονόματος και μεγέθους αρχείου { $file_number }
-progress_scanning_name = Σάρωση ονόματος αρχείου { $file_number }
-progress_analyzed_partial_hash = Αναλυμένο μερικό κατακερματισμό των αρχείων { $file_checked }/{ $all_files }
-progress_analyzed_full_hash = Ανάλυση πλήρους hash των { $file_checked }/{ $all_files } αρχείων
+progress_scanning_general_file =
+    { $file_number ->
+        [one] Σαρώθηκε { $file_number } αρχείο
+       *[other] Σαρώθηκαν { $file_number } αρχεία
+    }
+progress_scanning_extension_of_files = Επιλεγμένη επέκταση του αρχείου { $file_checked }/{ $all_files }
+progress_scanning_broken_files = Επιλεγμένο αρχείο { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
+progress_scanning_video = Κατακερματισμένο από { $file_checked }/{ $all_files } βίντεο
+progress_scanning_image = Hashed of { $file_checked }/{ $all_files } image ({ $data_checked }/{ $all_data })
+progress_comparing_image_hashes = Compared { $file_checked }/{ $all_files } image hash
+progress_scanning_music_tags_end = Συγκρίθηκαν ετικέτες του αρχείου μουσικής { $file_checked }/{ $all_files }
+progress_scanning_music_tags = Διαβάστε τις ετικέτες του αρχείου μουσικής { $file_checked }/{ $all_files }
+progress_scanning_music_content_end = Συγκρίθηκε δακτυλικό αποτύπωμα του αρχείου μουσικής { $file_checked }/{ $all_files }
+progress_scanning_music_content = Υπολογίζεται το δακτυλικό αποτύπωμα του αρχείου { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
+progress_scanning_empty_folders =
+    { $folder_number ->
+        [one] Σαρώθηκε { $folder_number } φάκελος
+       *[other] Σαρώθηκαν { $folder_number } φάκελοι
+    }
+progress_scanning_size = Σαρωμένο μέγεθος αρχείου { $file_number }
+progress_scanning_size_name = Σαρωμένο όνομα και μέγεθος αρχείου { $file_number }
+progress_scanning_name = Σαρωμένο όνομα αρχείου { $file_number }
+progress_analyzed_partial_hash = Αναλυμένο μερικό hash του { $file_checked }/{ $all_files } αρχεία ({ $data_checked }/{ $all_data })
+progress_analyzed_full_hash = Ανάλυση πλήρους hash του { $file_checked }/{ $all_files } αρχεία ({ $data_checked }/{ $all_data })
 progress_prehash_cache_loading = Φόρτωση προσωρινής μνήμης
 progress_prehash_cache_saving = Αποθήκευση προσωρινής μνήμης prehash
 progress_hash_cache_loading = Φόρτωση προσωρινής μνήμης hash

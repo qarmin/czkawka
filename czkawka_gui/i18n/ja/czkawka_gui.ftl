@@ -65,21 +65,21 @@ duplicate_check_method_tooltip =
     
     ハッシュ - 同じ内容のファイルを探します。ファイルをハッシュ化して比較することにより重複を見つけます。このモードは、重複を見つけるための最も安全な方法です。このツールはキャッシュを多用するので、同じデータの2回目以降のスキャンは最初の時よりずっと速くなるはずです。
 image_hash_size_tooltip =
-    Each checked image produces a special hash which can be compared with each other, and a small difference between them means that these images are similar.
+    チェックした画像はそれぞれ特別なハッシュを生成し、そのハッシュを比較したときに差が小さいほど、この画像は類似していることを意味します。
     
-    8 hash size is quite good to find images that are only a little similar to original. With a bigger set of images (>1000), this will produce a big amount of false positives, so I recommend to use  a bigger hash size in this case.
+    8のハッシュサイズは、オリジナルに少ししか似ていない画像を見つけるのにかなり適しています。しかし、1000枚を超えるような大きな画像では、誤検出が多くなるため、より大きなハッシュサイズを使用することをお勧めします。
     
-    16 is the default hash size which is quite a good compromise between finding even a little similar images and having only a small amount of hash collisions.
+    16はデフォルトのハッシュサイズであり、少しでも類似した画像を見つけることとハッシュの衝突を少なくすることの間でかなり良い妥協点です。
     
-    32 and 64 hashes find only very similar images, but should have almost no false positives (maybe except some images with alpha channel).
+    32と64のハッシュは非常に類似した画像しか見つけられませんが、誤検出はほとんどありません（アルファチャンネルのある一部の画像を除いて）。
 image_resize_filter_tooltip =
-    To compute hash of image, the library must first resize it.
+    画像のハッシュを計算するために、ライブラリはまず画像のサイズを必ず変更します。
     
-    Depend on chosen algorithm, the resulting image used to calculate hash will looks a little different.
+    どのアルゴリズムを選択したかによって、ハッシュを計算するために使用される画像は少し違って見えるかもしれません。
     
-    The fastest algorithm to use, but also the one which gives the worst results, is Nearest. It is enabled by default, because with 16x16 hash size lower quality it is not really visible.
+    最も高速なアルゴリズムは Nearest ですが、最も悪い結果を出すのも Nearest です。16x16のハッシュサイズで低品質の場合、それが明らかになることはないので、デフォルトは Nearest です。
     
-    With 8x8 hash size it is recommended to use a different algorithm than Nearest, to have better groups of images.
+    8x8のハッシュサイズでは、より良い画像群を得るために、Nearestとは異なるアルゴリズムを使用することが推奨されます。
 image_hash_alg_tooltip =
     ハッシュの計算方法は、多くのアルゴリズムの中からユーザーが選択することができます。
     
@@ -246,6 +246,7 @@ bottom_symlink_button = シンボリックリンク
 bottom_hardlink_button = ハードリンク
 bottom_move_button = 移動
 bottom_sort_button = 並び替え
+bottom_compare_button = 比較
 bottom_search_button_tooltip = 検索を開始
 bottom_select_button_tooltip = レコードを選択します。選択したファイル/フォルダのみが後で処理できます。
 bottom_delete_button_tooltip = 選択したファイル/フォルダを削除します。
@@ -268,6 +269,7 @@ bottom_move_button_tooltip =
     ディレクトリツリーを維持したまま、すべてのファイルをフォルダにコピーします。
     同じ名前の2つのファイルをフォルダに移動しようとすると、2番目のファイルが失敗し、エラーが表示されます。
 bottom_sort_button_tooltip = 選択した方法に従ってファイル/フォルダを並べ替えます。
+bottom_compare_button_tooltip = グループ内の画像を比較する
 bottom_show_errors_tooltip = 下部のエラーパネルを表示/非表示にします。
 bottom_show_upper_notebook_tooltip = 上部のノートブックパネルを表示/非表示にします。
 # Progress Window
@@ -295,11 +297,11 @@ settings_number_of_threads = 使用されるスレッドの数
 settings_number_of_threads_tooltip = 使用するスレッドの数、0 は、使用可能なすべてのスレッドが使用されることを意味します。
 settings_use_rust_preview = プレビューの読み込みにgtkの代わりに外部ライブラリを使用する
 settings_use_rust_preview_tooltip =
-    Using gtk previews will sometimes be faster and support more formats, but sometimes this could be exactly the opposite.
+    GTKプレビューはいくらかの場合において高速で多くのフォーマットをサポートしているが、全く逆となる場合もある。
     
-    If you have problems with loading previews, you may can to try to change this setting.
+    プレビューの読み込みに問題がある場合、この設定を変更してみるとよい。
     
-    On non-linux systems, it is recommended to use this option, because gtk-pixbuf are not always available there so disabling this option will not load previews of some images.
+    Linux以外の環境では、gtk-pixbufが常に有効とは限らず、無効にすることによりいくらかの画像のプレビューが読み込まれないため、このオプションの使用が推奨される。
 settings_label_restart = 設定を適用するにはアプリを再起動する必要があります！
 settings_ignore_other_filesystems = 他のファイルシステムを無視(Linuxのみ)
 settings_ignore_other_filesystems_tooltip =
@@ -414,22 +416,30 @@ compute_found_invalid_symlinks = 無効なシンボリックリンクが { $numb
 compute_found_broken_files = 壊れたファイルが { $number_files } 個見つかりました
 compute_found_bad_extensions = 無効な拡張子を持つ { $number_files } 個のファイルが見つかりました
 # Progress window
-progress_scanning_general_file = { $file_number } ファイルをスキャン中
-progress_scanning_extension_of_files = { $file_checked }/{ $all_files } ファイルの拡張子を確認中
-progress_scanning_broken_files = { $file_checked }/{ $all_files } ファイルを確認中
-progress_scanning_video = { $file_checked }/{ $all_files } ビデオのハッシュ
-progress_scanning_image = { $file_checked }/{ $all_files } の画像のハッシュ
-progress_comparing_image_hashes = { $file_checked }/{ $all_files } 画像ハッシュの比較
+progress_scanning_general_file =
+    { $file_number ->
+        [one] スキャン済み { $file_number } ファイル
+       *[other] スキャン済み { $file_number } ファイル
+    }
+progress_scanning_extension_of_files = { $file_checked }/{ $all_files } ファイルの拡張子をチェックしました
+progress_scanning_broken_files = { $file_checked }/{ $all_files } ファイル ({ $data_checked }/{ $all_data } ) をチェックしました。
+progress_scanning_video = { $file_checked }/{ $all_files } ビデオのハッシュ化
+progress_scanning_image = { $file_checked }/{ $all_files } イメージ ({ $data_checked }/{ $all_data } ) のハッシュ化
+progress_comparing_image_hashes = { $file_checked }/{ $all_files } の画像ハッシュ比較
 progress_scanning_music_tags_end = { $file_checked }/{ $all_files } 音楽ファイルのタグの比較
-progress_scanning_music_tags = { $file_checked }/{ $all_files } 音楽ファイルのタグを読み込み中
-progress_scanning_music_content_end = { $file_checked }/{ $all_files } 音楽ファイルのフィンガープリントの比較
-progress_scanning_music_content = { $file_checked }/{ $all_files } 音楽ファイルのフィンガープリントを計算中
-progress_scanning_empty_folders = { $folder_number } フォルダをスキャン中
-progress_scanning_size = { $file_number } ファイルのサイズをスキャン中
-progress_scanning_size_name = 名前と { $file_number } ファイルのサイズをスキャンしています
-progress_scanning_name = { $file_number } ファイルの名前をスキャン中
-progress_analyzed_partial_hash = { $file_checked }/{ $all_files } ファイルの部分ハッシュを分析中
-progress_analyzed_full_hash = { $file_checked }/{ $all_files } ファイルの完全ハッシュを分析中
+progress_scanning_music_tags = { $file_checked }/{ $all_files } 音楽ファイルのタグを読む
+progress_scanning_music_content_end = { $file_checked }/{ $all_files } 音楽ファイルの指紋と比較
+progress_scanning_music_content = { $file_checked }/{ $all_files } 音楽ファイルの計算フィンガープリント ({ $data_checked }/{ $all_data })
+progress_scanning_empty_folders =
+    { $folder_number ->
+        [one] Scanned { $folder_number } folder
+       *[other] Scanned { $folder_number } folders
+    }
+progress_scanning_size = { $file_number } ファイルのスキャンされたサイズ
+progress_scanning_size_name = スキャンされた名前と { $file_number } ファイルのサイズ
+progress_scanning_name = スキャンされた { $file_number } ファイルの名前
+progress_analyzed_partial_hash = { $file_checked }/{ $all_files } 個のファイルの部分ハッシュを分析しました ({ $data_checked }/{ $all_data })
+progress_analyzed_full_hash = { $file_checked }/{ $all_files } 個のファイルの完全ハッシュを分析しました ({ $data_checked }/{ $all_data })
 progress_prehash_cache_loading = プレハッシュキャッシュを読み込み中
 progress_prehash_cache_saving = プレハッシュキャッシュを保存しています
 progress_hash_cache_loading = ハッシュキャッシュを読み込み中

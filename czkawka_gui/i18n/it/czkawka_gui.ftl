@@ -245,6 +245,7 @@ bottom_symlink_button = Collegamenti simbolici
 bottom_hardlink_button = Collegamenti fisici
 bottom_move_button = Sposta
 bottom_sort_button = Ordina
+bottom_compare_button = Confronta
 bottom_search_button_tooltip = Avvia ricerca
 bottom_select_button_tooltip = Seleziona record. Solo i file/cartelle selezionati possono essere elaborati in seguito.
 bottom_delete_button_tooltip = Cancella i file/cartelle selezionati
@@ -267,6 +268,7 @@ bottom_move_button_tooltip =
     Copia tutti i file nella directory senza conservare l'albero delle directory.
     Quando si tenta di spostare due file con il nome identico nella cartella, il secondo fallirà e mostrerà errore.
 bottom_sort_button_tooltip = Ordina file/cartelle in base al metodo selezionato.
+bottom_compare_button_tooltip = Confronta le immagini nel gruppo.
 bottom_show_errors_tooltip = Mostra/Nasconde il pannello di testo inferiore.
 bottom_show_upper_notebook_tooltip = Mostra/Nasconde il pannello comandi.
 # Progress Window
@@ -413,22 +415,30 @@ compute_found_invalid_symlinks = Trovati { $number_files } colegamenti simbolici
 compute_found_broken_files = Trovati { $number_files } file corrotti
 compute_found_bad_extensions = Trovati { $number_files } file con estensioni non valide
 # Progress window
-progress_scanning_general_file = Processando { $file_number } file
-progress_scanning_extension_of_files = Verifica estensione del file { $file_checked }/{ $all_files }
-progress_scanning_broken_files = Verificando { $file_checked }/{ $all_files } file
-progress_scanning_video = Hashing di { $file_checked }/{ $all_files } video
-progress_scanning_image = Hashing di { $file_checked }/{ $all_files } image
-progress_comparing_image_hashes = Confrontando { $file_checked }/{ $all_files } hash delle immagini
-progress_scanning_music_tags_end = Confrontando le etichette di { $file_checked }/{ $all_files } file musicali
-progress_scanning_music_tags = Leggendo le etichette di { $file_checked }/{ $all_files } file musicali
-progress_scanning_music_content_end = Confronto delle impronte digitali di { $file_checked }/{ $all_files } file musicale
-progress_scanning_music_content = Calcolo dell'impronta digitale di { $file_checked }/{ $all_files } file musicale
-progress_scanning_empty_folders = Verificando { $folder_number } cartelle
-progress_scanning_size = Leggendo le dimensioni di { $file_number } file
-progress_scanning_size_name = Scansione nome e dimensione del file { $file_number }
-progress_scanning_name = Leggendo il nome di { $file_number } file
-progress_analyzed_partial_hash = Analizzato gli hash parziali di { $file_checked }/{ $all_files } file
-progress_analyzed_full_hash = Analizzato gli hash completi di { $file_checked }/{ $all_files } file
+progress_scanning_general_file =
+    { $file_number ->
+        [one] Scanned { $file_number } file
+       *[other] Scanned { $file_number } files
+    }
+progress_scanning_extension_of_files = Estensione controllata del file { $file_checked }/{ $all_files }
+progress_scanning_broken_files = Checked { $file_checked }/{ $all_files } file ({ $data_checked }/{ $all_data })
+progress_scanning_video = Hashed of { $file_checked }/{ $all_files } video
+progress_scanning_image = Hashed of { $file_checked }/{ $all_files } image ({ $data_checked }/{ $all_data })
+progress_comparing_image_hashes = Confrontato { $file_checked }/{ $all_files } immagine hash
+progress_scanning_music_tags_end = Etichette confrontate di { $file_checked }/{ $all_files } file musicale
+progress_scanning_music_tags = Leggi i tag di { $file_checked }/{ $all_files } file musicale
+progress_scanning_music_content_end = Impronta digitale comparata di { $file_checked }/{ $all_files } file musicale
+progress_scanning_music_content = Impronta digitale calcolata di { $file_checked }/{ $all_files } file musicale ({ $data_checked }/{ $all_data })
+progress_scanning_empty_folders =
+    { $folder_number ->
+        [one] Scanned { $folder_number } folder
+       *[other] Scanned { $folder_number } folders
+    }
+progress_scanning_size = Dimensione scansionata del file { $file_number }
+progress_scanning_size_name = Nome e dimensione del file { $file_number } scansionato
+progress_scanning_name = Nome scansionato del file { $file_number }
+progress_analyzed_partial_hash = Hash parziale analizzato di { $file_checked }/{ $all_files } file ({ $data_checked }/{ $all_data })
+progress_analyzed_full_hash = Hash completo analizzato di { $file_checked }/{ $all_files } file ({ $data_checked }/{ $all_data })
 progress_prehash_cache_loading = Caricamento della cache prehash
 progress_prehash_cache_saving = Salvataggio della cache prehash
 progress_hash_cache_loading = Caricamento della cache hash

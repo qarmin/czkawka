@@ -246,6 +246,7 @@ bottom_symlink_button = Symlink
 bottom_hardlink_button = Hardlink
 bottom_move_button = Flytta
 bottom_sort_button = Sortera
+bottom_compare_button = Jämför
 bottom_search_button_tooltip = Starta sökning
 bottom_select_button_tooltip = Välj poster. Endast valda filer/mappar kan senare bearbetas.
 bottom_delete_button_tooltip = Ta bort markerade filer/mappar.
@@ -268,6 +269,7 @@ bottom_move_button_tooltip =
     Det kopierar alla filer till katalogen utan att bevara katalogträdet.
     När du försöker flytta två filer med identiskt namn till mappen kommer det andra att misslyckas och visa fel.
 bottom_sort_button_tooltip = Sortera filer/mappar enligt vald metod.
+bottom_compare_button_tooltip = Jämför bilder i gruppen.
 bottom_show_errors_tooltip = Visa/Dölj undertextpanelen.
 bottom_show_upper_notebook_tooltip = Visa/Dölj övre anteckningsbokspanelen.
 # Progress Window
@@ -414,22 +416,30 @@ compute_found_invalid_symlinks = Hittade { $number_files } ogiltiga symboliska l
 compute_found_broken_files = Hittades { $number_files } trasiga filer
 compute_found_bad_extensions = Hittades { $number_files } filer med ogiltiga tillägg
 # Progress window
-progress_scanning_general_file = Scanning { $file_number } fil
-progress_scanning_extension_of_files = Kontrollerar tillägg till { $file_checked }/{ $all_files } fil
-progress_scanning_broken_files = Kontrollerar { $file_checked }/{ $all_files } fil
-progress_scanning_video = Hashning av { $file_checked }/{ $all_files } video
-progress_scanning_image = Hashning av { $file_checked }/{ $all_files } bild
-progress_comparing_image_hashes = Jämföra { $file_checked }/{ $all_files } bildhash
-progress_scanning_music_tags_end = Jämföra taggar för { $file_checked }/{ $all_files } musikfil
-progress_scanning_music_tags = Lästaggar för { $file_checked }/{ $all_files } musikfil
-progress_scanning_music_content_end = Jämföra fingeravtryck av { $file_checked }/{ $all_files } musikfil
-progress_scanning_music_content = Beräknar fingeravtryck av { $file_checked }/{ $all_files } musikfil
-progress_scanning_empty_folders = Skannar { $folder_number } mappen
-progress_scanning_size = Skannar storleken på { $file_number } fil
-progress_scanning_size_name = Skannar namn och storlek på { $file_number } fil
-progress_scanning_name = Skannar namn på { $file_number } fil
-progress_analyzed_partial_hash = Analyserade partiella hash av { $file_checked }/{ $all_files } filer
-progress_analyzed_full_hash = Analyserad full hash av { $file_checked }/{ $all_files } filer
+progress_scanning_general_file =
+    { $file_number ->
+        [one] skannade { $file_number } fil
+       *[other] skannade { $file_number } filer
+    }
+progress_scanning_extension_of_files = Kontrollerad förlängning av { $file_checked }/{ $all_files } fil
+progress_scanning_broken_files = Kontrollerade { $file_checked }/{ $all_files } fil ({ $data_checked }/{ $all_data })
+progress_scanning_video = Hashad av { $file_checked }/{ $all_files } video
+progress_scanning_image = Hashad av { $file_checked }/{ $all_files } bild ({ $data_checked }/{ $all_data })
+progress_comparing_image_hashes = Jämfört { $file_checked }/{ $all_files } bildhash
+progress_scanning_music_tags_end = Jämförda taggar av { $file_checked }/{ $all_files } musikfil
+progress_scanning_music_tags = Läs taggar för { $file_checked }/{ $all_files } musikfil
+progress_scanning_music_content_end = Jämfört fingeravtryck av { $file_checked }/{ $all_files } musikfil
+progress_scanning_music_content = Beräknat fingeravtryck av { $file_checked }/{ $all_files } musikfil ({ $data_checked }/{ $all_data })
+progress_scanning_empty_folders =
+    { $folder_number ->
+        [one] skannade { $folder_number } mapp
+       *[other] skannade { $folder_number } mappar
+    }
+progress_scanning_size = Skannad storlek på { $file_number } fil
+progress_scanning_size_name = Skannat namn och storlek på { $file_number } fil
+progress_scanning_name = Skannat namn på { $file_number } fil
+progress_analyzed_partial_hash = Analyserad partiell hash av { $file_checked }/{ $all_files } filer ({ $data_checked }/{ $all_data })
+progress_analyzed_full_hash = Analyserad full hash av { $file_checked }/{ $all_files } filer ({ $data_checked }/{ $all_data })
 progress_prehash_cache_loading = Laddar prehash cache
 progress_prehash_cache_saving = Sparar Omfattande cache
 progress_hash_cache_loading = Laddar hash-cache

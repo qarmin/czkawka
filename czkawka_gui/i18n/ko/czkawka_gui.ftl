@@ -246,6 +246,7 @@ bottom_symlink_button = 심볼릭 링크
 bottom_hardlink_button = 하드 링크
 bottom_move_button = 이동
 bottom_sort_button = 종류
+bottom_compare_button = Compare
 bottom_search_button_tooltip = 검색을 시작합니다.
 bottom_select_button_tooltip = 항목을 선택합니다. 오직 선택된 것만이 처리됩니다.
 bottom_delete_button_tooltip = 선택된 파일 또는 폴더를 삭제합니다.
@@ -268,6 +269,7 @@ bottom_move_button_tooltip =
     이 동작은 원본이 위치한 경로를 전부 무시하고, 선택한 경로로 파일을 전부 복사합니다.
     만일 2개 이상의 파일이 같은 이름을 가지고 있다면, 첫 번째 이후의 파일은 복사에 실패하고 오류 메시지를 보여줄 것입니다.
 bottom_sort_button_tooltip = 파일/폴더를 선택한 방법으로 정렬합니다.
+bottom_compare_button_tooltip = Compare images in the group.
 bottom_show_errors_tooltip = 하단 텍스트 패널을 보이거나 숨깁니다.
 bottom_show_upper_notebook_tooltip = 상단 패널을 보이거나 숨깁니다.
 # Progress Window
@@ -414,22 +416,30 @@ compute_found_invalid_symlinks = 총 { $number_files } 개의 유효하지 않�
 compute_found_broken_files = { $number_files }개의 손상된 파일을 찾음.
 compute_found_bad_extensions = 총 { $number_files }개의 잘못된 확장자를 가진 파일을 찾음.
 # Progress window
-progress_scanning_general_file = { $file_number }개의 파일 스캔 중
-progress_scanning_extension_of_files = { $file_checked }/{ $all_files }개 파일의 확장자 점검 중
-progress_scanning_broken_files = { $file_checked }/{ $all_files }개 파일 점검 중
-progress_scanning_video = { $file_checked }/{ $all_files }개 영상 해시 계산 중
-progress_scanning_image = { $file_checked }/{ $all_files }개 이미지 해시 계산 중
-progress_comparing_image_hashes = { $file_checked }/{ $all_files }개 이미지 해시 비교 중
-progress_scanning_music_tags_end = { $file_checked }/{ $all_files }개 음악 파일 태그 검색 중
-progress_scanning_music_tags = { $file_checked }/{ $all_files }개 음악 파일 태그 읽는 중
-progress_scanning_music_content_end = Comparing fingerprint of { $file_checked }/{ $all_files } music file
-progress_scanning_music_content = Calculating fingerprint of { $file_checked }/{ $all_files } music file
-progress_scanning_empty_folders = { $folder_number }개 폴더 검색 중
-progress_scanning_size = { $file_number }개 파일의 크기 스캔 중
-progress_scanning_size_name = Scanning name and size of { $file_number } file
-progress_scanning_name = { $file_number }개 파일의 이름 스캔 중
-progress_analyzed_partial_hash = { $file_checked }/{ $all_files }개 파일의 부분 해시 계산 중
-progress_analyzed_full_hash = { $file_checked }/{ $all_files }개 파일의 전체 해시 계산 중
+progress_scanning_general_file =
+    { $file_number ->
+        [one] Scanned { $file_number } file
+       *[other] Scanned { $file_number } files
+    }
+progress_scanning_extension_of_files = Checked extension of { $file_checked }/{ $all_files } file
+progress_scanning_broken_files = Checked { $file_checked }/{ $all_files } file ({ $data_checked }/{ $all_data })
+progress_scanning_video = Hashed of { $file_checked }/{ $all_files } video
+progress_scanning_image = Hashed of { $file_checked }/{ $all_files } image ({ $data_checked }/{ $all_data })
+progress_comparing_image_hashes = Compared { $file_checked }/{ $all_files } image hash
+progress_scanning_music_tags_end = Compared tags of { $file_checked }/{ $all_files } music file
+progress_scanning_music_tags = Read tags of { $file_checked }/{ $all_files } music file
+progress_scanning_music_content_end = Compared fingerprint of { $file_checked }/{ $all_files } music file
+progress_scanning_music_content = Calculated fingerprint of { $file_checked }/{ $all_files } music file ({ $data_checked }/{ $all_data })
+progress_scanning_empty_folders =
+    { $folder_number ->
+        [one] Scanned { $folder_number } folder
+       *[other] Scanned { $folder_number } folders
+    }
+progress_scanning_size = Scanned size of { $file_number } file
+progress_scanning_size_name = Scanned name and size of { $file_number } file
+progress_scanning_name = Scanned name of { $file_number } file
+progress_analyzed_partial_hash = Analyzed partial hash of { $file_checked }/{ $all_files } files ({ $data_checked }/{ $all_data })
+progress_analyzed_full_hash = Analyzed full hash of { $file_checked }/{ $all_files } files ({ $data_checked }/{ $all_data })
 progress_prehash_cache_loading = Loading prehash cache
 progress_prehash_cache_saving = Saving prehash cache
 progress_hash_cache_loading = Loading hash cache

@@ -52,7 +52,7 @@ mod shared_models;
 slint::include_modules!();
 fn main() {
     setup_logger(false);
-    print_version_mode();
+    print_version_mode("Krokiet");
     set_config_cache_path("Czkawka", "Krokiet");
 
     let app = MainWindow::new().expect("Failed to create main window");

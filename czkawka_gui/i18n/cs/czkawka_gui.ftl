@@ -246,6 +246,7 @@ bottom_symlink_button = Symlink
 bottom_hardlink_button = Hardlink
 bottom_move_button = Přesunout
 bottom_sort_button = Seřadit
+bottom_compare_button = Porovnat
 bottom_search_button_tooltip = Začít hledání
 bottom_select_button_tooltip = Vyberte záznamy. Pouze vybrané soubory/složky mohou být později zpracovány.
 bottom_delete_button_tooltip = Odstranit vybrané soubory/složky.
@@ -268,6 +269,7 @@ bottom_move_button_tooltip =
     Zkopíruje všechny soubory do adresáře bez uchování stromu adresáře.
     Při pokusu přesunout dva soubory se stejným názvem do složky, druhý selže a zobrazí chybu.
 bottom_sort_button_tooltip = Seřazuje soubory/složky podle zvolené metody.
+bottom_compare_button_tooltip = Porovnat obrázky ve skupině.
 bottom_show_errors_tooltip = Zobrazit/skrýt spodní textový panel.
 bottom_show_upper_notebook_tooltip = Zobrazit/skrýt horní panel sešitu.
 # Progress Window
@@ -414,22 +416,30 @@ compute_found_invalid_symlinks = Nalezeno { $number_files } neplatných symbolic
 compute_found_broken_files = Nalezeno { $number_files } poškozených souborů
 compute_found_bad_extensions = Nalezeno { $number_files } souborů s neplatnými příponami
 # Progress window
-progress_scanning_general_file = Skenování { $file_number } souboru
-progress_scanning_extension_of_files = Kontrola přípony souboru { $file_checked }/{ $all_files }
-progress_scanning_broken_files = Kontrola souboru { $file_checked }/{ $all_files }
-progress_scanning_video = Hashování { $file_checked }/{ $all_files } videa
-progress_scanning_image = Hashování { $file_checked }/{ $all_files } obrázku
-progress_comparing_image_hashes = Porovnávám { $file_checked }/{ $all_files } hash obrázků
-progress_scanning_music_tags_end = Porovnávání značek s { $file_checked }/{ $all_files } hudebním souborem
-progress_scanning_music_tags = Čtení tagů z { $file_checked }/{ $all_files } hudebního souboru
-progress_scanning_music_content_end = Porovnání otisku prstu v { $file_checked }/{ $all_files } hudebního souboru
-progress_scanning_music_content = Výpočet otisku prstu { $file_checked }/{ $all_files } hudebního souboru
-progress_scanning_empty_folders = Skenování { $folder_number } složky
-progress_scanning_size = Skenování velikosti { $file_number } souboru
-progress_scanning_size_name = Skenování jména a velikosti souboru { $file_number }
-progress_scanning_name = Skenování názvu souboru { $file_number }
-progress_analyzed_partial_hash = Analyzován částečný hash souborů { $file_checked }/{ $all_files }
-progress_analyzed_full_hash = Analyzováno úplné hash souborů { $file_checked }/{ $all_files }
+progress_scanning_general_file =
+    { $file_number ->
+        [one] Naskenovaný { $file_number } soubor
+       *[other] Skenované { $file_number } soubory
+    }
+progress_scanning_extension_of_files = Kontrola přípony { $file_checked }/{ $all_files } souboru
+progress_scanning_broken_files = Kontrola { $file_checked }/{ $all_files } soubor ({ $data_checked }/{ $all_data })
+progress_scanning_video = Hashováno { $file_checked }/{ $all_files } videa
+progress_scanning_image = Hashed of { $file_checked }/{ $all_files } image ({ $data_checked }/{ $all_data })
+progress_comparing_image_hashes = Porovnáno { $file_checked }/{ $all_files } hash obrázků
+progress_scanning_music_tags_end = Porovnávané štítky hudebního souboru { $file_checked }/{ $all_files }
+progress_scanning_music_tags = Číst tagy { $file_checked }/{ $all_files } hudebního souboru
+progress_scanning_music_content_end = Porovnávaný otisk hudby { $file_checked }/{ $all_files }
+progress_scanning_music_content = Vypočítaný otisk hudby { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
+progress_scanning_empty_folders =
+    { $folder_number ->
+        [one] Naskenovaná složka { $folder_number }
+       *[other] Naskenovaná { $folder_number } složky
+    }
+progress_scanning_size = Naskenovaná velikost souboru { $file_number }
+progress_scanning_size_name = Naskenovaný název a velikost { $file_number } souboru
+progress_scanning_name = Naskenované jméno { $file_number } souboru
+progress_analyzed_partial_hash = Analyzováno částečné hash souborů { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
+progress_analyzed_full_hash = Analyzováno plné hash souborů { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
 progress_prehash_cache_loading = Načítání mezipaměti rozpoznání
 progress_prehash_cache_saving = Ukládání mezipaměti rozpoznání
 progress_hash_cache_loading = Načítání hash keše

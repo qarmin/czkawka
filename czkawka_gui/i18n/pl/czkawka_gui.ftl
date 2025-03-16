@@ -244,9 +244,9 @@ bottom_delete_button = Usuń
 bottom_save_button = Zapisz
 bottom_symlink_button = Symlink
 bottom_hardlink_button = Hardlink
-bottom_compare_button = Porównaj
 bottom_move_button = Przenieś
 bottom_sort_button = Sortuj
+bottom_compare_button = Porównaj
 bottom_search_button_tooltip = Rozpocznij wyszukiwanie
 bottom_select_button_tooltip = Wybierz rekordy. Tylko wybrane pliki/foldery mogą być później przetwarzane.
 bottom_delete_button_tooltip = Usuń zaznaczone elementy.
@@ -268,8 +268,8 @@ bottom_move_button_tooltip =
     Przenosi pliki do wybranego katalogu.
     Kopiuje wszystkie pliki do katalogu bez zachowania struktury plików.
     Podczas próby przeniesienia dwóch plików o identycznej nazwie do folderu, drugi plik nie zostanie przeniesiony i pojawi się błąd.
-bottom_compare_button_tooltip = Porównuje pliki/foldery w grupach.
 bottom_sort_button_tooltip = Sortuje pliki/foldery zgodnie z wybraną metodą.
+bottom_compare_button_tooltip = Porównaj obrazy w grupie.
 bottom_show_errors_tooltip = Pokaż/Ukryj dolny panel tekstowy.
 bottom_show_upper_notebook_tooltip = Pokazuje/ukrywa górny panel.
 # Progress Window
@@ -416,24 +416,32 @@ compute_found_invalid_symlinks = Znaleziono { $number_files } niepoprawnych dowi
 compute_found_broken_files = Znaleziono { $number_files } uszkodzonych plików
 compute_found_bad_extensions = Znaleziono { $number_files } plików z nieprawidłowymi rozszerzeniami
 # Progress window
-progress_scanning_general_file = Skanowanie { $file_number } pliku
-progress_scanning_extension_of_files = Sprawdzanie rozszerzenia { $file_checked }/{ $all_files } pliku
-progress_scanning_broken_files = Sprawdzanie { $file_checked }/{ $all_files } plików
-progress_scanning_video = Hashowanie { $file_checked }/{ $all_files } pliku wideo
-progress_scanning_image = Hashowanie { $file_checked }/{ $all_files } obrazu
-progress_comparing_image_hashes = Porównywanie { $file_checked }/{ $all_files } hashu obrazu
-progress_scanning_music_tags_end = Porównywanie tagów { $file_checked }/{ $all_files } pliku audio
-progress_scanning_music_tags = Sczytywanie tagów { $file_checked }/{ $all_files } pliku audio
-progress_scanning_music_content_end = Porównywanie odcisku palca { $file_checked }/{ $all_files } pliku muzycznego
-progress_scanning_music_content = Obliczanie odcisku palca { $file_checked }/{ $all_files } pliku muzycznego
-progress_scanning_empty_folders = Przeszukiwanie { $folder_number } folderu
-progress_scanning_size = Sprawdzanie rozmiaru { $file_number } pliku
-progress_scanning_size_name = Skanowanie nazwy i rozmiaru pliku { $file_number }
-progress_scanning_name = Sprawdzanie nazwy { $file_number } pliku
-progress_analyzed_partial_hash = Obliczanie częściowego hashu { $file_checked }/{ $all_files } pliku
-progress_analyzed_full_hash = Obliczanie pełnego hashu { $file_checked }/{ $all_files } pliku
-progress_prehash_cache_loading = Ładowanie pamięci podręcznej prehashu
-progress_prehash_cache_saving = Zapisywanie pamięci podręcznej prehashu
+progress_scanning_general_file =
+    { $file_number ->
+        [one] Przeskanowano { $file_number } plik
+       *[other] Przeskanowano { $file_number } plików
+    }
+progress_scanning_extension_of_files = Sprawdzono rozszerzenie { $file_checked }/{ $all_files } plików
+progress_scanning_broken_files = Sprawdzono plik { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
+progress_scanning_video = Obliczono hashe dla { $file_checked }/{ $all_files } plików video
+progress_scanning_image = Obliczono hashe dla { $file_checked }/{ $all_files } obrazów ({ $data_checked }/{ $all_data })
+progress_comparing_image_hashes = Porównano { $file_checked }/{ $all_files } hashy obrazów
+progress_scanning_music_tags_end = Porównano { $file_checked }/{ $all_files } tagów plików audio
+progress_scanning_music_tags = Odczytano tagi { $file_checked }/{ $all_files } plików audio
+progress_scanning_music_content_end = Porównano hashe { $file_checked }/{ $all_files } plików audio
+progress_scanning_music_content = Obliczono hash { $file_checked }/{ $all_files } plików audio ({ $data_checked }/{ $all_data })
+progress_scanning_empty_folders =
+    { $folder_number ->
+        [one] Przeskanowano { $folder_number } folder
+       *[other] Przeskanowano { $folder_number } folderów
+    }
+progress_scanning_size = Przeskano rozmiar { $file_number } plików
+progress_scanning_size_name = Sprawdzono rozmiar i nazwę { $file_number } plików
+progress_scanning_name = Sprawdzono nazwę { $file_number } plików
+progress_analyzed_partial_hash = Obliczono częściowy hash { $file_checked }/{ $all_files } plików ({ $data_checked }/{ $all_data })
+progress_analyzed_full_hash = Obliczono pełny hash { $file_checked }/{ $all_files } plików ({ $data_checked }/{ $all_data })
+progress_prehash_cache_loading = Ładowanie pamięci podręcznej częściowego hashu
+progress_prehash_cache_saving = Zapisywanie pamięci podręcznej częściowego hashu
 progress_hash_cache_loading = Ładowanie pamięci podręcznej hash
 progress_hash_cache_saving = Zapisywanie pamięci podręcznej skrótu
 progress_cache_loading = Ładowanie pamięci podręcznej

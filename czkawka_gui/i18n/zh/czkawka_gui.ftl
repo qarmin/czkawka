@@ -1,6 +1,6 @@
 # Window titles
 window_settings_title = 设置
-window_main_title = Czkawka
+window_main_title = Czkawka - (Hiccup)
 window_progress_title = 正在扫描
 window_compare_images = 比较图像
 # General
@@ -55,7 +55,7 @@ duplicate_hash_type_tooltip =
     
     CRC32 - 简单的散列函数。这应该比Blake3更快，但极少情况下可能会有一些冲突。
     
-    XXH3 - 与Blake3非常相似，性能和哈希质量也很高（但不是加密的）。因此，这些模式可以很容易地互换使用。
+    XXH3 - 与Blake3非常相似，性能和哈希质量也很高 （但不是加密的）。因此，这些模式可以很容易地互换使用。
 duplicate_check_method_tooltip =
     目前，Czkawka提供三种方法来查找重复：
     
@@ -71,7 +71,7 @@ image_hash_size_tooltip =
     
     16是默认的散列尺寸，它是一个很好的折衷，既使找到了一些小相似的图像，又仅有少量的散列碰撞。
     
-    32和64 散列只找到非常相似的图像，但是几乎不应该有假正数 (可能只有一些带着Alpha 通道的图像)。
+    32和64 散列只找到非常相似的图像，但是几乎不应该有假正数  (可能只有一些带着Alpha 通道的图像)。
 image_resize_filter_tooltip =
     要计算图像散列，库必须首先调整大小。
     
@@ -160,18 +160,20 @@ upper_manual_add_excluded_button_tooltip =
     
     如需一次性添加多个路径，请用分号;分隔它们
     
-    填写 /home/roman;/home/krokiet 将添加 /home/roman 和 /home/kookiet 两个目录
+    填写 /home/roman;/home/krokiet 将添加 /home/roman 和  /home/kookiet 两个目录
 upper_add_excluded_button_tooltip = 添加在搜索中排除的目录。
 upper_remove_excluded_button_tooltip = 从排除中删除目录。
 upper_notebook_items_configuration = 项目配置
 upper_notebook_excluded_directories = 排除的目录
 upper_notebook_included_directories = 包含的目录
 upper_allowed_extensions_tooltip =
-    允许的文件扩展名必须用逗号分隔（默认情况下全部可用）。
+    允许的扩展名必须用逗号分隔（默认情况下所有扩展名都可用）。
     
-    还提供以下可同时添加多个扩展名的宏：IMAGE（图片）、VIDEO（视频）、MUSIC（音乐）、TEXT（文本）。
+    还可以使用以下可一次添加多个扩展名的宏：IMAGE、VIDEO、MUSIC、TEXT。
     
-    使用示例：".exe, IMAGE, VIDEO, .rar, 7z"，这意味着将扫描图片文件（例如jpg、png）、视频文件（例如avi、mp4）、exe、rar和7z文件。
+    填写 /home/roman;/home/krokiet 将添加 /home/roman 和  /home/kookiet 两个目录
+    
+    用法示例“.exe、IMAGE、VIDEO、.rar、7z” - 这意味着将扫描图像（例如 jpg、png）、视频（例如 avi、mp4）、exe、rar 和 7z 文件。
 upper_excluded_extensions_tooltip =
     在扫描中忽略的已禁用文件列表。
     
@@ -212,7 +214,7 @@ popover_custom_regex_check_button_entry_tooltip =
     示例用法：
     可以使用 /ziem[a-z]+ 查找 /usr/bin/ziemniak.txt
     
-    这使用默认的Rust正则表达式实现。 您可以在此处阅读有关它的更多信息：https://docs.rs/regex。
+    这使用默认的Rust正则表达式实现。 您可以在此处阅读有关它的更多信息: https://docs.rs/regex。
 popover_custom_case_sensitive_check_button_tooltip =
     启用大小写检测。
     
@@ -246,6 +248,7 @@ bottom_symlink_button = 软链接
 bottom_hardlink_button = 硬链接
 bottom_move_button = 移动
 bottom_sort_button = 排序
+bottom_compare_button = 比较
 bottom_search_button_tooltip = 开始搜索
 bottom_select_button_tooltip = 选择记录。只能稍后处理选定的文件/文件夹。
 bottom_delete_button_tooltip = 删除选中的文件/文件夹。
@@ -268,6 +271,7 @@ bottom_move_button_tooltip =
     它复制所有文件到目录，而不保留目录树。
     试图将两个具有相同名称的文件移动到文件夹时，第二个将失败并显示错误。
 bottom_sort_button_tooltip = 根据选定的方法排序文件/文件夹。
+bottom_compare_button_tooltip = 比较群组中的图像。
 bottom_show_errors_tooltip = 显示/隐藏底部文本面板。
 bottom_show_upper_notebook_tooltip = 显示/隐藏主笔记本面板。
 # Progress Window
@@ -333,11 +337,11 @@ settings_multiple_delete_outdated_cache_checkbutton = 自动删除过时的缓�
 settings_multiple_delete_outdated_cache_checkbutton_tooltip =
     删除指向不存在文件的过期缓存结果。
     
-    当启用时，应用程序确保在加载记录时所有记录都指向有效文件（无法访问的文件将被忽略）。
+    当启用时，应用程序确保在加载记录时所有记录都指向有效文件 (无法访问的文件将被忽略)。
     
     禁用此功能将有助于扫描外部驱动器上的文件时，避免在下一次扫描时清除与其相关的缓存条目。
     
-    如果缓存中有数十万条记录，则建议启用此功能，这将加快扫描开始/结束时的缓存加载/保存速度。
+    如果缓存中有数十万条记录，则建议启用此功能。这将加快扫描开始/结束时的缓存加载/保存速度。
 settings_notebook_general = 概况
 settings_notebook_duplicates = 重复项
 settings_notebook_images = 相似图像
@@ -357,17 +361,17 @@ settings_multiple_clear_cache_button = 从缓存中删除过时的结果。
 settings_duplicates_hide_hard_link_button_tooltip =
     隐藏除一个以外的所有文件，如果所有文件都指向同一数据（即为硬链接）。
     
-    例如，在磁盘上有七个文件都硬链接到特定数据，并且还有一个不同的文件，其数据相同，但索引节点不同，那么在重复文件查找器中，只会显示一个唯一的文件和一个硬链接文件。
+    示例：如果（磁盘上）有七个文件硬链接到特定数据，而一个不同文件具有相同数据但不同 inode，则在重复查找器中，将仅显示一个唯一文件和一个来自硬链接文件的文件。
 settings_duplicates_minimal_size_entry_tooltip =
     设置将被缓存的最小文件大小。
     
     选择较小的值将会生成更多的记录。这将加快搜索速度，但会减慢缓存的加载/保存速度。
 settings_duplicates_prehash_checkbutton_tooltip =
-    启用预散列缓存（从文件的一小部分计算出的哈希），以便更早地排除非重复结果。
+    启用预散列缓存 (从文件的一小部分计算出的哈希)，以便更早地排除非重复结果。
     
     默认情况下禁用它，因为在某些情况下可能会导致减慢速度。
     
-    强烈建议在扫描数十万或100万个文件时使用它，因为它可以将搜索加速多倍。
+    强烈建议在扫描数十万或数百万个文件时使用它，因为它可以使搜索速度提高数倍。
 settings_duplicates_prehash_minimal_entry_tooltip = 缓存条目的最小尺寸。
 settings_duplicates_hide_hard_link_button = 隐藏硬链接 (仅限Linux 和 macOS)
 settings_duplicates_prehash_checkbutton = 使用捕捉缓存
@@ -390,7 +394,7 @@ settings_folder_cache_open_tooltip =
     
     修改缓存文件可能会导致显示无效的结果。然而，当将大量文件移动到另一个位置时，修改路径可能会节省时间。
     
-    您可以在计算机之间复制这些文件，以节省再次扫描文件的时间（当然，如果它们具有相似的目录结构）。
+    您可以在计算机之间复制这些文件，以节省再次扫描文件的时间 (当然，如果它们具有相似的目录结构)。
     
     如果出现缓存问题，可以删除这些文件。该应用程序将自动重新生成它们。
 settings_folder_settings_open_tooltip =
@@ -414,22 +418,30 @@ compute_found_invalid_symlinks = 找到 { $number_files } 个无效的符号链�
 compute_found_broken_files = 找到 { $number_files } 个损坏的文件
 compute_found_bad_extensions = 找到 { $number_files } 个文件，其扩展名无效
 # Progress window
-progress_scanning_general_file = 正在扫描 { $file_number } 个文件
-progress_scanning_extension_of_files = 正在检查 { $file_checked }/{ $all_files } 个文件的扩展名
-progress_scanning_broken_files = 正在检查 { $file_checked }/{ $all_files } 个文件
-progress_scanning_video = 散列 { $file_checked }/{ $all_files } 视频
-progress_scanning_image = 散列 { $file_checked }/{ $all_files } 图像
-progress_comparing_image_hashes = 正在比较 { $file_checked }/{ $all_files } 个图像的哈希
-progress_scanning_music_tags_end = 正在对比 { $file_checked }/{ $all_files } 个音乐文件标签
-progress_scanning_music_tags = 正在读取 { $file_checked }/{ $all_files } 个音乐文件标签
-progress_scanning_music_content_end = 正在比较 { $file_checked }/{ $all_files } 个音乐文件指纹
-progress_scanning_music_content = 正在计算 { $file_checked }/{ $all_files } 个音乐文件指纹
-progress_scanning_empty_folders = 正在扫描 { $folder_number } 个文件夹
-progress_scanning_size = 正在扫描 { $file_number } 个文件的大小
-progress_scanning_size_name = 正在扫描 { $file_number } 个文件的名称和大小
-progress_scanning_name = 正在扫描 { $file_number } 个文件的名称
-progress_analyzed_partial_hash = 分析了 { $file_checked }/{ $all_files } 个文件的部分哈希
-progress_analyzed_full_hash = 分析了 { $file_checked }/{ $all_files } 个文件的完整哈希值
+progress_scanning_general_file =
+    { $file_number ->
+        [one] 已掃描 { $file_number } 個文件
+       *[other] 已掃描 { $file_number } 個文件
+    }
+progress_scanning_extension_of_files = 检查了 { $file_checked }/{ $all_files } 文件的扩展
+progress_scanning_broken_files = 签入 { $file_checked }/{ $all_files } 文件({ $data_checked }/{ $all_data })
+progress_scanning_video = Hashed of { $file_checked }/{ $all_files } video
+progress_scanning_image = 对 { $file_checked }/{ $all_files } 图像的哈希值({ $data_checked }/{ $all_data })
+progress_comparing_image_hashes = 比较 { $file_checked }/{ $all_files } 图像哈希
+progress_scanning_music_tags_end = 对比的 { $file_checked }/{ $all_files } 音乐文件标签
+progress_scanning_music_tags = 阅读 { $file_checked }/{ $all_files } 音乐文件的标签
+progress_scanning_music_content_end = 比较了 { $file_checked }/{ $all_files } 音乐文件的指纹
+progress_scanning_music_content = 计算的 { $file_checked }/{ $all_files } 音乐文件 ({ $data_checked }/{ $all_data } ) 的指纹
+progress_scanning_empty_folders =
+    { $folder_number ->
+        [one] 已掃描 { $folder_number } 個資料夾
+       *[other] 已掃描 { $folder_number } 個資料夾
+    }
+progress_scanning_size = 扫描的 { $file_number } 文件大小
+progress_scanning_size_name = 扫描的 { $file_number } 文件的名称和大小
+progress_scanning_name = 扫描的 { $file_number } 文件名称
+progress_analyzed_partial_hash = 分析了 { $file_checked }/{ $all_files } 文件的部分哈希值({ $data_checked }/{ $all_data })
+progress_analyzed_full_hash = 分析了 { $file_checked }/{ $all_files } 文件的完整哈希值({ $data_checked }/{ $all_data })
 progress_prehash_cache_loading = 正在加载逮捕缓存
 progress_prehash_cache_saving = 正在保存抓取缓存
 progress_hash_cache_loading = 加载散列缓存

@@ -40,7 +40,7 @@ fn main() {
     let command = Args::parse().command;
 
     setup_logger(true);
-    print_version_mode();
+    print_version_mode("Czkawka cli");
     set_config_cache_path("Czkawka", "Czkawka");
 
     if cfg!(debug_assertions) {

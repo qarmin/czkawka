@@ -1,8 +1,8 @@
-## Version 9.0.0 - ?
+## Version 9.0.0 - 16.03.2025r
 
 ## Breaking changes
 
--  Video, Duplicate (smaller prehash size), and Image cache (EXIF orientation + faster resize implementation) are incompatible with previous versions and need to be regenerated.
+- Video, Duplicate (smaller prehash size), and Image cache (EXIF orientation + faster resize implementation) are incompatible with previous versions and need to be regenerated.
 
 ### Core
 - Automatically rotating all images based on their EXIF orientation - [#1368](https://github.com/qarmin/czkawka/pull/1368)
@@ -21,7 +21,7 @@
 - Added support for configuring config/cache paths using the `CZKAWKA_CONFIG_PATH` and `CZKAWKA_CACHE_PATH` environment variables - [#1464](https://github.com/qarmin/czkawka/pull/1464)
 - Fixed a crash in debug mode when checking broken files named `.mp3` - [#1464](https://github.com/qarmin/czkawka/pull/1464)
 - Catching panics from symphonia crashes in broken files mode - [#1466](https://github.com/qarmin/czkawka/pull/1466)
-- Printing a warning, when using `panic=abort`(this may cause ocassional crashes) - [#1466](https://github.com/qarmin/czkawka/pull/1466)
+- Printing a warning, when using `panic=abort`(that may speedup app and cause occasional crashes) - [#1466](https://github.com/qarmin/czkawka/pull/1466)
 
 ### Krokiet
 - Changed the default tab to "Duplicate Files" - [#1368](https://github.com/qarmin/czkawka/pull/1368)
@@ -38,8 +38,10 @@
 ### Prebuild-binaries
 - This release is last version, that supports Ubuntu 20.04 - github actions drops this OS in its runners
 - Linux and Mac binaries now are provided with two options x86_64 and arm64
+- Arm linux builds needs at least Ubuntu 24.04
 - Gtk 4.12 is used to build windows gtk gui instead gtk 4.10
 - Dropping support for snap builds - too much time-consuming to maintain and testing(also it is broken currently)
+- Removed native windows build krokiet version - now it is available only cross-compiled version from linux(should not be any difference) 
 
 ## Version 8.0.0 - 11.10.2024r
 
@@ -55,7 +57,7 @@
 ### CI
 
 - Providing nightly builds - [#1360](https://github.com/qarmin/czkawka/pull/1360) - https://github.com/qarmin/czkawka/releases/tag/Nightly
-- Added finding duplicated options in CLI -[#1364](https://github.com/qarmin/czkawka/pull/1364)
+- Added finding duplicated options in CLI - [#1364](https://github.com/qarmin/czkawka/pull/1364)
 
 ### Core
 
@@ -86,7 +88,7 @@
 - Avoid errors when trying to load preview of not supported file - [#1359](https://github.com/qarmin/czkawka/pull/1359)
 - Added ability to show preview of referenced folders - [#1359](https://github.com/qarmin/czkawka/pull/1359)
 - Enable selecting with space and jumping over entries with arrows and opening with enter - [#1359](https://github.com/qarmin/czkawka/pull/1359)
-- Added button to rename files with invalid extension -[#1364](https://github.com/qarmin/czkawka/pull/1364)
+- Added button to rename files with invalid extension - [#1364](https://github.com/qarmin/czkawka/pull/1364)
 
 ### GTK GUI
 
@@ -102,7 +104,7 @@
 - Fixed and added more input parameters to the application - [#1354](https://github.com/qarmin/czkawka/pull/1354)
 - Fixed crash when stopping scan multiple times - [#1355](https://github.com/qarmin/czkawka/pull/1355)
 - Print results also in debug build - [#1355](https://github.com/qarmin/czkawka/pull/1355)
-- Added support for selecting reference directories -[#1364](https://github.com/qarmin/czkawka/pull/1364)
+- Added support for selecting reference directories - [#1364](https://github.com/qarmin/czkawka/pull/1364)
 
 ## Version 7.0.0 - 19.02.2024r
 
@@ -138,7 +140,7 @@
 - Added bigger stack size by default(fixes stack overflow in some musl apps) - [#1102](https://github.com/qarmin/czkawka/pull/1102)
 - Added optional libraw dependency(better single-core performance and support more raw files) - [#1102](https://github.com/qarmin/czkawka/pull/1102)
 - Speedup checking for wildcards and fix invalid recognizing long excluded items - [#1152](https://github.com/qarmin/czkawka/pull/1152)
-- Big speedup when searching for empty folders(especially with multithreading + cached FS schema)  - [#1152](https://github.com/qarmin/czkawka/pull/1152)
+- Big speedup when searching for empty folders(especially with multithreading + cached FS schema) - [#1152](https://github.com/qarmin/czkawka/pull/1152)
 - Collecting files for scan can be a lot of faster due lazy file metadata gathering - [#1152](https://github.com/qarmin/czkawka/pull/1152)
 - Fixed recognizing not accessible folders as non-empty - [#1152](https://github.com/qarmin/czkawka/pull/1152)
 - Unifying code for collecting files to scan - [#1159](https://github.com/qarmin/czkawka/pull/1159)
@@ -203,7 +205,7 @@
 
 - Fixed problem with missing some similar images when using similarity > 0 - [#799](https://github.com/qarmin/czkawka/pull/799)
 - Prebuilt Linux binaries are compiled without heif support - [24b](https://github.com/qarmin/czkawka/commit/24b64a32c65904c506b54270f0977ccbe5098cc8)
-- Similar videos stops to proceed video after certain amount of time(fixes freezes)  - [#815](https://github.com/qarmin/czkawka/pull/815)
+- Similar videos stops to proceed video after certain amount of time(fixes freezes) - [#815](https://github.com/qarmin/czkawka/pull/815)
 - Add --version argument for czkawka_cli - [#806](https://github.com/qarmin/czkawka/pull/806)
 - Rewrite a little nonsense message about minimal file size - [#807](https://github.com/qarmin/czkawka/pull/807)
 
@@ -281,7 +283,7 @@
 - Add support for raw images(NEF, CR2, KDC...) - [#532](https://github.com/qarmin/czkawka/pull/532)
 - Image compare performance and usability improvements - [#529](https://github.com/qarmin/czkawka/pull/529), [#528](https://github.com/qarmin/czkawka/pull/528), [#530](https://github.com/qarmin/czkawka/pull/530), [#525](https://github.com/qarmin/czkawka/pull/525)
 - Reorganize(unify) saving/loading data from file - [#524](https://github.com/qarmin/czkawka/pull/524)
-- Add "reference folders" -  [#516](https://github.com/qarmin/czkawka/pull/516)
+- Add "reference folders" - [#516](https://github.com/qarmin/czkawka/pull/516)
 - Add cache for similar music files - [#558](https://github.com/qarmin/czkawka/pull/558)
 
 ## Version 3.3.1 - 22.11.2021r

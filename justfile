@@ -83,6 +83,7 @@ test_resize arg:
     cd misc/test_image_perf; cargo build --release; sudo ./target/release/test_image_perf "{{arg}}"
     cd misc/test_image_perf; cargo build --release --features fast_image_resize; sudo ./target/release/test_image_perf "{{arg}}"
 
+# Not works, due of edition 2024 and workspaces
 unused_features:
     unused-features analyze
     unused-features build-report --input krokiet/report.json
@@ -96,13 +97,9 @@ unused_features:
 
 prepare_binaries:
     mkdir -p benchmarks
-    #wget https://github.com/qarmin/czkawka/releases/download/Nightly/linux_czkawka_cli -O benchmarks/czkawka_cli_normal
+    wget https://github.com/qarmin/czkawka/releases/download/Nightly/linux_czkawka_cli -O benchmarks/czkawka_cli_normal
     cd czkawka_cli; cargo build --release; cd ..; cp target/release/czkawka_cli benchmarks/czkawka_cli_v4
     cd czkawka_cli; cargo build --profile fastest; cd ..; cp target/fastest/czkawka_cli benchmarks/czkawka_cli_fastest
-
-#benchmark media:
-#    benchmarks/czkawka_cli_fastest dup -d "{{ media }}" -W -N -M -H
-#    benchmarks/czkawka_cli_v4 dup -d "{{ media }}" -W -N -M -H
 
 benchmark media:
     # benchmarks/czkawka_cli_old dup -d /media/rafal/Kotyk
