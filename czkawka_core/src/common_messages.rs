@@ -18,6 +18,7 @@ impl Messages {
     pub fn new_from_messages(messages: Vec<String>) -> Self {
         Self { messages, ..Default::default() }
     }
+    #[allow(clippy::print_stdout)]
     pub fn print_messages(&self) {
         println!("{}", self.create_messages_text());
     }

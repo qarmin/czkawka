@@ -3,7 +3,10 @@
 #![allow(unknown_lints)] // May be disabled, but locally I use nightly clippy
 #![allow(clippy::collapsible_if)]
 #![allow(clippy::collapsible_else_if)]
-// #![warn(clippy::unwrap_used)] // Cannot use due unwrap used in a lot of places
+// #![warn(clippy::unwrap_used)] // Cannot use due unwrap used in a lot of places in generated code
+#![warn(clippy::print_stderr)]
+#![warn(clippy::print_stdout)]
+#![warn(clippy::dbg_macro)]
 
 use std::rc::Rc;
 use std::sync::Arc;

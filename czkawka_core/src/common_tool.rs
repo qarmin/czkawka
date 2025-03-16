@@ -202,6 +202,7 @@ pub trait CommonData {
         self.get_cd_mut().text_messages.extend_with_another_messages(messages);
     }
 
+    #[allow(clippy::print_stdout)]
     fn debug_print_common(&self) {
         println!("---------------DEBUG PRINT COMMON---------------");
         println!("Tool type: {:?}", self.get_cd().tool_type);

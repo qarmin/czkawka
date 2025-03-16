@@ -6,6 +6,7 @@ use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
 use gtk4::prelude::*;
 use gtk4::{Align, CheckButton, Image, ListStore, Orientation, ScrolledWindow, TreeIter, TreeModel, TreePath, TreeSelection, Widget};
 use image::DynamicImage;
+use log::error;
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
@@ -404,12 +405,12 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>,
                             pixbuf = t;
                         }
                         Err(e) => {
-                            println!("Failed to open image {full_path}, reason {e}");
+                            error!("Failed to open image {full_path}, reason {e}");
                         }
                     };
                 }
                 Err(e) => {
-                    println!("Failed to open image {full_path}, reason {e}");
+                    error!("Failed to open image {full_path}, reason {e}");
                 }
             };
         } else {
@@ -418,7 +419,7 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>,
                     pixbuf = t;
                 }
                 Err(e) => {
-                    println!("Failed to open image {full_path}, reason {e}");
+                    error!("Failed to open image {full_path}, reason {e}");
                 }
             };
         }
@@ -426,11 +427,11 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>,
         #[allow(clippy::never_loop)]
         loop {
             let Some(pixbuf_big) = resize_pixbuf_dimension(&pixbuf, (BIG_PREVIEW_SIZE, BIG_PREVIEW_SIZE), InterpType::Bilinear) else {
-                println!("Failed to resize image {full_path}.");
+                error!("Failed to resize image {full_path}.");
                 break;
             };
             let Some(pixbuf_small) = resize_pixbuf_dimension(&pixbuf_big, (SMALL_PREVIEW_SIZE, SMALL_PREVIEW_SIZE), InterpType::Bilinear) else {
-                println!("Failed to resize image {full_path}.");
+                error!("Failed to resize image {full_path}.");
                 break;
             };
 
