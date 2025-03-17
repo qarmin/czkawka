@@ -416,6 +416,7 @@ impl BrokenFiles {
 }
 
 impl DebugPrint for BrokenFiles {
+    #[allow(clippy::print_stdout)]
     fn debug_print(&self) {
         if !cfg!(debug_assertions) {
             return;

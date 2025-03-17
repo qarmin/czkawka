@@ -367,7 +367,7 @@ impl SimilarVideos {
 }
 
 impl DebugPrint for SimilarVideos {
-    #[fun_time(message = "debug_print", level = "debug")]
+    #[allow(clippy::print_stdout)]
     fn debug_print(&self) {
         if !cfg!(debug_assertions) {
             return;

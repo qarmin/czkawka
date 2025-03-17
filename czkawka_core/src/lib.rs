@@ -3,6 +3,9 @@
 #![allow(clippy::needless_late_init)]
 #![allow(clippy::too_many_arguments)]
 #![warn(clippy::unwrap_used)]
+#![warn(clippy::print_stderr)]
+#![warn(clippy::print_stdout)]
+#![warn(clippy::dbg_macro)]
 
 #[macro_use]
 extern crate bitflags;

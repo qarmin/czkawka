@@ -5,6 +5,9 @@
 #![allow(clippy::type_complexity)]
 #![allow(clippy::needless_late_init)]
 #![warn(clippy::unwrap_used)]
+#![warn(clippy::print_stderr)]
+#![warn(clippy::print_stdout)]
+#![warn(clippy::dbg_macro)]
 
 use std::env;
 use std::ffi::OsString;

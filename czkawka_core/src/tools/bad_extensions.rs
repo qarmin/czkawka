@@ -428,6 +428,7 @@ impl BadExtensions {
 }
 
 impl DebugPrint for BadExtensions {
+    #[allow(clippy::print_stdout)]
     fn debug_print(&self) {
         if !cfg!(debug_assertions) {
             return;

@@ -929,7 +929,7 @@ fn read_single_file_tags(path: &str, mut music_entry: MusicEntry) -> Option<Musi
 }
 
 impl DebugPrint for SameMusic {
-    #[fun_time(message = "debug_print", level = "debug")]
+    #[allow(clippy::print_stdout)]
     fn debug_print(&self) {
         if !cfg!(debug_assertions) {
             return;

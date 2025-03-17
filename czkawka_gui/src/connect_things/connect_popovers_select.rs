@@ -2,6 +2,7 @@ use czkawka_core::common::regex_check;
 use czkawka_core::common_items::new_excluded_item;
 use gtk4::prelude::*;
 use gtk4::{ResponseType, TreeIter, Window};
+use log::error;
 use regex::Regex;
 
 use crate::flg;
@@ -388,7 +389,7 @@ fn popover_custom_select_unselect(
                         if let Ok(t) = Regex::new(&regex_wildcard) {
                             t
                         } else {
-                            eprintln!("What? Regex should compile properly.");
+                            error!("What? Regex should compile properly.");
                             confirmation_dialog_select_unselect.close();
                             return;
                         }

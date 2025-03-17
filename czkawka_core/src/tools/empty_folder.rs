@@ -319,6 +319,7 @@ impl Default for EmptyFolder {
 }
 
 impl DebugPrint for EmptyFolder {
+    #[allow(clippy::print_stdout)]
     fn debug_print(&self) {
         if !cfg!(debug_assertions) {
             return;

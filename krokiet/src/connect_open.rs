@@ -9,7 +9,7 @@ pub fn connect_open_items(app: &MainWindow) {
         match open::that(&*path) {
             Ok(()) => {}
             Err(e) => {
-                eprintln!("Failed to open file: {e}");
+                error!("Failed to open file: {e}");
             }
         };
         // TODO - this should be added to line edit
@@ -39,7 +39,7 @@ pub fn connect_open_items(app: &MainWindow) {
         match open::that(link.as_str()) {
             Ok(()) => {}
             Err(e) => {
-                eprintln!("Failed to open link: {e}");
+                error!("Failed to open link: {e}");
             }
         };
     });

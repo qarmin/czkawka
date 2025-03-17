@@ -133,7 +133,7 @@ fn collect_path_and_create_folders(input_path: &str, input_file: &str, output_pa
     let _ = fs::create_dir_all(&output_full_path);
     output_full_path.push(input_file);
 
-    println!("input_full_path: {input_full_path:?}, output_full_path: {output_full_path:?}, output_path: {output_path:?}, input_path: {input_path:?}");
+    // println!("input_full_path: {input_full_path:?}, output_full_path: {output_full_path:?}, output_path: {output_path:?}, input_path: {input_path:?}");
 
     (input_full_path, output_full_path)
 }

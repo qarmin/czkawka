@@ -1,6 +1,7 @@
 use gdk4::{Key, ModifierType};
 use gtk4::GestureClick;
 use gtk4::prelude::*;
+use log::{debug, error};
 
 use crate::help_functions::*;
 use crate::notebook_enums::NotebookUpperEnum;
@@ -20,7 +21,7 @@ pub fn opening_enter_function_ported_upper_directories(
         .expect("Widget is not TreeView");
 
     if cfg!(debug_assertions) {
-        println!("key_code {key_code}");
+        debug!("Clicked at key: {key_code}");
     }
 
     match get_notebook_upper_enum_from_tree_view(&tree_view) {
@@ -87,7 +88,7 @@ pub fn opening_enter_function_ported(event_controller: &gtk4::EventControllerKey
         .downcast::<gtk4::TreeView>()
         .expect("Widget is not TreeView");
     if cfg!(debug_assertions) {
-        println!("key_code {key_code}");
+        debug!("Clicked {key_code}");
     }
 
     let nt_object = get_notebook_object_from_tree_view(&tree_view);
@@ -155,7 +156,7 @@ fn common_open_function(tree_view: &gtk4::TreeView, column_name: i32, column_pat
         };
 
         if let Err(e) = open::that(&end_path) {
-            println!("Failed to open file {end_path}, reason {e}");
+            error!("Failed to open file {end_path}, reason {e}");
         };
     }
 }
@@ -213,7 +214,7 @@ fn common_open_function_upper_directories(tree_view: &gtk4::TreeView, column_ful
         let full_path = tree_model.get::<String>(&tree_model.iter(tree_path).expect("Invalid tree_path"), column_full_path);
 
         if let Err(e) = open::that(&full_path) {
-            println!("Failed to open file {full_path}, reason {e}");
+            error!("Failed to open file {full_path}, reason {e}");
         };
     }
 }

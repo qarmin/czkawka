@@ -11,6 +11,7 @@ use czkawka_core::common_items::DEFAULT_EXCLUDED_ITEMS;
 use czkawka_core::tools::similar_images::SIMILAR_VALUES;
 use gtk4::prelude::*;
 use gtk4::{ComboBoxText, ScrolledWindow, TextView, TreeView};
+use log::error;
 
 use crate::flg;
 use crate::gui_structs::gui_main_notebook::GuiMainNotebook;
@@ -94,10 +95,8 @@ impl LoadSaveStruct {
         default_value
     }
     pub fn get_integer_string(&self, key: String, default_value: String) -> String {
-        if default_value.parse::<i64>().is_err() {
-            println!("Default value {default_value} can't be convert to integer value");
-            panic!();
-        }
+        // This is safe, because default value is const value
+        assert!(default_value.parse::<i64>().is_ok(), "Default value {default_value} can't be convert to integer value");
         let mut returned_value = self.get_string(key, default_value.clone());
         if returned_value.parse::<i64>().is_err() {
             returned_value = default_value;
@@ -127,7 +126,7 @@ impl LoadSaveStruct {
                 if let Ok(t) = item[0].parse::<T>() {
                     t
                 } else {
-                    println!("Failed to decode integer from \"{}\", found {:?}", key, item[0]);
+                    error!("Failed to decode integer from \"{}\", found {:?}", key, item[0]);
                     default_value
                 }
             } else {
@@ -716,7 +715,7 @@ pub fn load_configuration(
                 .collect::<Vec<_>>();
 
             if inc_dir.is_empty() {
-                println!("Arguments {arguments:?} should contains at least one directory to include");
+                error!("Arguments {arguments:?} should contains at least one directory to include");
             } else {
                 included_directories = inc_dir;
                 excluded_directories = exc_dir;

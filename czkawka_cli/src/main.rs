@@ -1,5 +1,8 @@
 #![allow(clippy::needless_late_init)]
 #![warn(clippy::unwrap_used)]
+#![warn(clippy::print_stderr)]
+#![warn(clippy::print_stdout)]
+#![warn(clippy::dbg_macro)]
 
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -11,8 +14,7 @@ use commands::Commands;
 use crossbeam_channel::{Receiver, Sender, unbounded};
 use czkawka_core::common::{DEFAULT_THREAD_SIZE, print_version_mode, set_config_cache_path, set_number_of_threads, setup_logger};
 use czkawka_core::common_tool::{CommonData, DeleteMethod};
-#[allow(unused_imports)] // It is used in release for print_results_to_output().
-use czkawka_core::common_traits::*;
+use czkawka_core::common_traits::PrintResults;
 use czkawka_core::progress_data::ProgressData;
 use czkawka_core::tools::bad_extensions::{BadExtensions, BadExtensionsParameters};
 use czkawka_core::tools::big_file::{BigFile, BigFileParameters, SearchMode};
@@ -25,7 +27,7 @@ use czkawka_core::tools::same_music::{SameMusic, SameMusicParameters};
 use czkawka_core::tools::similar_images::{SimilarImages, SimilarImagesParameters, return_similarity_from_similarity_preset};
 use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters};
 use czkawka_core::tools::temporary::Temporary;
-use log::error;
+use log::{debug, error, info};
 
 use crate::commands::{
     Args, BadExtensionsArgs, BiggestFilesArgs, BrokenFilesArgs, CommonCliItems, DuplicatesArgs, EmptyFilesArgs, EmptyFoldersArgs, InvalidSymlinksArgs, SameMusicArgs,
@@ -44,7 +46,7 @@ fn main() {
     set_config_cache_path("Czkawka", "Czkawka");
 
     if cfg!(debug_assertions) {
-        println!("{command:?}");
+        debug!("Running command - {command:?}");
     }
 
     let (progress_sender, progress_receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
@@ -79,7 +81,7 @@ fn main() {
         if store_flag_cloned.load(std::sync::atomic::Ordering::SeqCst) {
             return;
         }
-        println!("Get Ctrl+C signal, stopping...");
+        info!("Got Ctrl+C signal, stopping...");
         store_flag_cloned.store(true, std::sync::atomic::Ordering::SeqCst);
     })
     .expect("Error setting Ctrl-C handler");

@@ -1,6 +1,7 @@
 use gtk4::prelude::*;
 use i18n_embed::DesktopLanguageRequester;
 use i18n_embed::unic_langid::LanguageIdentifier;
+use log::error;
 
 use crate::language_functions::get_language_from_combo_box_text;
 use crate::{GuiData, LANGUAGES_ALL, localizer_gui};
@@ -28,7 +29,7 @@ fn change_language(gui_data: &GuiData) {
     let lang_identifier = vec![LanguageIdentifier::from_bytes(lang_short.as_bytes()).expect("Failed to create LanguageIdentifier")];
     for (lib, localizer) in localizers {
         if let Err(error) = localizer.select(&lang_identifier) {
-            eprintln!("Error while loadings languages for {lib} {error:?}");
+            error!("Error while loadings languages for {lib} {error:?}");
         }
     }
     gui_data.update_language();
