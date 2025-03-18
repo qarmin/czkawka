@@ -7,5 +7,6 @@ pub mod empty_folder;
 pub mod invalid_symlinks;
 pub mod same_music;
 pub mod similar_images;
+#[cfg(feature = "similar_videos")]
 pub mod similar_videos;
 pub mod temporary;

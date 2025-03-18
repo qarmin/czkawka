@@ -45,8 +45,8 @@ xxhash-rust = { version = "0.8", features = ["xxh3"] }
 tempfile = "3.13"
 
 # Video Duplicates
-vid_dup_finder_lib = "0.2"
-ffmpeg_cmdline_utils = "0.3"
+vid_dup_finder_lib = { version = "0.2", optional = true }
+ffmpeg_cmdline_utils = { version = "0.3", optional = true }
 
 # Saving/Loading Cache
 serde = "1.0"
@@ -103,8 +103,9 @@ name = "hash_calculation_benchmark"
 harness = false
 
 [features]
-default = ["fast_image_resize"]
+default = ["fast_image_resize", "similar_videos"]
 heif = ["dep:libheif-rs", "dep:libheif-sys"]
 libraw = ["dep:libraw-rs"]
 libavif = ["image/avif-native", "image/avif"]
 fast_image_resize = ["image_hasher/fast_resize_unstable"]
+similar_videos = ["vid_dup_finder_lib", "ffmpeg_cmdline_utils"]

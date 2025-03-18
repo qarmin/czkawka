@@ -2,9 +2,10 @@ use std::collections::BTreeMap;
 use std::default::Default;
 
 use czkawka_core::common::get_config_cache_path;
+#[cfg(feature = "similar_videos")]
+use czkawka_core::common_cache::get_similar_videos_cache_file;
 use czkawka_core::common_cache::{
-    get_duplicate_cache_file, get_similar_images_cache_file, get_similar_videos_cache_file, load_cache_from_file_generalized_by_path, load_cache_from_file_generalized_by_size,
-    save_cache_to_file_generalized,
+    get_duplicate_cache_file, get_similar_images_cache_file, load_cache_from_file_generalized_by_path, load_cache_from_file_generalized_by_size, save_cache_to_file_generalized,
 };
 use czkawka_core::common_messages::Messages;
 use czkawka_core::tools::duplicate::HashType;
@@ -207,6 +208,7 @@ pub fn connect_settings(gui_data: &GuiData) {
                 });
             });
         }
+        #[cfg(feature = "similar_videos")]
         {
             let button_settings_similar_videos_clear_cache = gui_data.settings.button_settings_similar_videos_clear_cache.clone();
             let settings_window = gui_data.settings.window_settings.clone();

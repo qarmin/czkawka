@@ -73,6 +73,7 @@ pub enum Commands {
     )]
     BrokenFiles(BrokenFilesArgs),
     #[clap(name = "video", about = "Finds similar video files", after_help = "EXAMPLE:\n    czkawka videos -d /home/rafal -f results.txt")]
+    #[cfg(feature = "similar_videos")]
     SimilarVideos(SimilarVideosArgs),
     #[clap(
         name = "ext",
@@ -386,6 +387,7 @@ pub struct BrokenFilesArgs {
 }
 
 #[derive(Debug, clap::Args)]
+#[cfg(feature = "similar_videos")]
 pub struct SimilarVideosArgs {
     #[clap(flatten)]
     pub common_cli_items: CommonCliItems,
@@ -599,6 +601,7 @@ fn parse_hash_type(src: &str) -> Result<HashType, &'static str> {
     }
 }
 
+#[cfg(feature = "similar_videos")]
 fn parse_tolerance(src: &str) -> Result<i32, &'static str> {
     match src.parse::<i32>() {
         Ok(t) => {

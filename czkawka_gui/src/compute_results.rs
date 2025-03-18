@@ -19,6 +19,7 @@ use czkawka_core::tools::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::tools::same_music::{MusicSimilarity, SameMusic};
 use czkawka_core::tools::similar_images;
 use czkawka_core::tools::similar_images::{ImagesEntry, SimilarImages};
+#[cfg(feature = "similar_videos")]
 use czkawka_core::tools::similar_videos::SimilarVideos;
 use czkawka_core::tools::temporary::Temporary;
 use fun_time::fun_time;
@@ -44,6 +45,7 @@ pub fn connect_compute_results(gui_data: &GuiData, result_receiver: Receiver<Mes
     let tree_view_empty_files_finder = gui_data.main_notebook.tree_view_empty_files_finder.clone();
     let tree_view_duplicate_finder = gui_data.main_notebook.tree_view_duplicate_finder.clone();
     let tree_view_similar_images_finder = gui_data.main_notebook.tree_view_similar_images_finder.clone();
+    #[cfg(feature = "similar_videos")]
     let tree_view_similar_videos_finder = gui_data.main_notebook.tree_view_similar_videos_finder.clone();
     let buttons_array = gui_data.bottom_buttons.buttons_array.clone();
     let text_view_errors = gui_data.text_view_errors.clone();
@@ -61,6 +63,7 @@ pub fn connect_compute_results(gui_data: &GuiData, result_receiver: Receiver<Mes
     let tree_view_bad_extensions = gui_data.main_notebook.tree_view_bad_extensions.clone();
     let shared_temporary_files_state = gui_data.shared_temporary_files_state.clone();
     let shared_similar_images_state = gui_data.shared_similar_images_state.clone();
+    #[cfg(feature = "similar_videos")]
     let shared_similar_videos_state = gui_data.shared_similar_videos_state.clone();
     let shared_bad_extensions_state = gui_data.shared_bad_extensions_state.clone();
     let tree_view_same_music_finder = gui_data.main_notebook.tree_view_same_music_finder.clone();
@@ -166,6 +169,7 @@ pub fn connect_compute_results(gui_data: &GuiData, result_receiver: Receiver<Mes
                             hash_size,
                         );
                     }
+                    #[cfg(feature = "similar_videos")]
                     Message::SimilarVideos(ff) => {
                         compute_similar_videos(
                             ff,
@@ -600,6 +604,7 @@ fn compute_same_music(
 }
 
 #[fun_time(message = "compute_similar_videos", level = "debug")]
+#[cfg(feature = "similar_videos")]
 fn compute_similar_videos(
     ff: SimilarVideos,
     entry_info: &Entry,
@@ -1374,6 +1379,7 @@ fn similar_images_add_to_list_store(
     list_store.set(&list_store.append(), &values);
 }
 
+#[cfg(feature = "similar_videos")]
 fn similar_videos_add_to_list_store(list_store: &ListStore, file: &str, directory: &str, size: u64, modified_date: u64, is_header: bool, is_reference_folder: bool) {
     const COLUMNS_NUMBER: usize = 11;
     let size_str;

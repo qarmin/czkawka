@@ -6,6 +6,8 @@ use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 use std::thread;
 
+#[cfg(feature = "similar_videos")]
+use crate::commands::SimilarVideosArgs;
 use clap::Parser;
 use commands::Commands;
 use crossbeam_channel::{Receiver, Sender, unbounded};
@@ -23,13 +25,14 @@ use czkawka_core::tools::empty_folder::EmptyFolder;
 use czkawka_core::tools::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::tools::same_music::{SameMusic, SameMusicParameters};
 use czkawka_core::tools::similar_images::{SimilarImages, SimilarImagesParameters, return_similarity_from_similarity_preset};
+#[cfg(feature = "similar_videos")]
 use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters};
 use czkawka_core::tools::temporary::Temporary;
 use log::error;
 
 use crate::commands::{
     Args, BadExtensionsArgs, BiggestFilesArgs, BrokenFilesArgs, CommonCliItems, DuplicatesArgs, EmptyFilesArgs, EmptyFoldersArgs, InvalidSymlinksArgs, SameMusicArgs,
-    SimilarImagesArgs, SimilarVideosArgs, TemporaryArgs,
+    SimilarImagesArgs, TemporaryArgs,
 };
 use crate::progress::connect_progress;
 
@@ -67,6 +70,7 @@ fn main() {
                 Commands::SameMusic(same_music_args) => same_music(same_music_args, &stop_flag, &progress_sender),
                 Commands::InvalidSymlinks(invalid_symlinks_args) => invalid_symlinks(invalid_symlinks_args, &stop_flag, &progress_sender),
                 Commands::BrokenFiles(broken_files_args) => broken_files(broken_files_args, &stop_flag, &progress_sender),
+                #[cfg(feature = "similar_videos")]
                 Commands::SimilarVideos(similar_videos_args) => similar_videos(similar_videos_args, &stop_flag, &progress_sender),
                 Commands::BadExtensions(bad_extensions_args) => bad_extensions(bad_extensions_args, &stop_flag, &progress_sender),
             };
@@ -337,6 +341,7 @@ fn broken_files(broken_files: BrokenFilesArgs, stop_flag: &Arc<AtomicBool>, prog
     !common_cli_items.ignore_error_code_on_found && item.get_information().number_of_broken_files > 0
 }
 
+#[cfg(feature = "similar_videos")]
 fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> bool {
     let SimilarVideosArgs {
         reference_directories,

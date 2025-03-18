@@ -16,6 +16,7 @@ use czkawka_core::tools::empty_folder::EmptyFolder;
 use czkawka_core::tools::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::tools::same_music::SameMusic;
 use czkawka_core::tools::similar_images::SimilarImages;
+#[cfg(feature = "similar_videos")]
 use czkawka_core::tools::similar_videos::SimilarVideos;
 use czkawka_core::tools::temporary::Temporary;
 use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
@@ -72,6 +73,7 @@ pub enum Message {
     BigFiles(BigFile),
     Temporary(Temporary),
     SimilarImages(SimilarImages),
+    #[cfg(feature = "similar_videos")]
     SimilarVideos(SimilarVideos),
     SameMusic(SameMusic),
     InvalidSymlinks(InvalidSymlinks),
@@ -715,6 +717,19 @@ pub fn get_all_boxes_from_widget<P: IsA<Widget>>(item: &P) -> Vec<gtk4::Box> {
         }
     }
     boxes
+}
+
+pub fn get_all_children_type_of<T: gtk4::prelude::ObjectType + gtk4::prelude::IsA<gtk4::Widget>, P: IsA<Widget>>(item: &P) -> Vec<T> {
+    let mut widgets_to_check = vec![item.clone().upcast::<Widget>()];
+    let mut items = Vec::new();
+
+    while let Some(widget) = widgets_to_check.pop() {
+        widgets_to_check.extend(get_all_direct_children(&widget));
+        if let Ok(bbox) = widget.clone().downcast::<T>() {
+            items.push(bbox);
+        }
+    }
+    items
 }
 
 pub fn get_all_direct_children<P: IsA<Widget>>(wid: &P) -> Vec<Widget> {
