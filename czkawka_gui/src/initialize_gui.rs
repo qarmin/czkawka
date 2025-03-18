@@ -3,6 +3,7 @@ use std::rc::Rc;
 
 use czkawka_core::common_image::get_dynamic_image_from_path;
 use czkawka_core::tools::similar_images::SIMILAR_VALUES;
+#[cfg(feature = "similar_videos")]
 use czkawka_core::tools::similar_videos::MAX_TOLERANCE;
 use gdk4::gdk_pixbuf::Pixbuf;
 use glib::types::Type;
@@ -89,6 +90,7 @@ pub fn initialize_gui(gui_data: &GuiData) {
             scale_set_min_max_values(&scale_similarity_similar_images, 0_f64, SIMILAR_VALUES[0][5] as f64, 15_f64, Some(1_f64));
         }
         // Set step increment
+        #[cfg(feature = "similar_videos")]
         {
             let scale_similarity_similar_videos = gui_data.main_notebook.scale_similarity_similar_videos.clone();
             scale_set_min_max_values(&scale_similarity_similar_videos, 0_f64, MAX_TOLERANCE as f64, 15_f64, Some(1_f64));

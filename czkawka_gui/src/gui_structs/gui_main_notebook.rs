@@ -1,14 +1,13 @@
+use crate::flg;
+use crate::help_combo_box::{AUDIO_TYPE_CHECK_METHOD_COMBO_BOX, BIG_FILES_CHECK_METHOD_COMBO_BOX, DUPLICATES_CHECK_METHOD_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX};
+use crate::help_functions::{get_all_children_type_of, get_all_direct_children};
+use crate::notebook_enums::{NUMBER_OF_NOTEBOOK_MAIN_TABS, NotebookMainEnum};
 use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::localizer_core::{fnc_get_similarity_minimal, fnc_get_similarity_very_high};
 use czkawka_core::tools::big_file::SearchMode;
 use czkawka_core::tools::similar_images::{SIMILAR_VALUES, get_string_from_similarity};
 use gtk4::prelude::*;
 use gtk4::{Builder, CheckButton, ComboBoxText, Entry, EventControllerKey, GestureClick, Image, Label, Notebook, Scale, ScrolledWindow, TreeView, Widget};
-
-use crate::flg;
-use crate::help_combo_box::{AUDIO_TYPE_CHECK_METHOD_COMBO_BOX, BIG_FILES_CHECK_METHOD_COMBO_BOX, DUPLICATES_CHECK_METHOD_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX};
-use crate::help_functions::get_all_direct_children;
-use crate::notebook_enums::{NUMBER_OF_NOTEBOOK_MAIN_TABS, NotebookMainEnum};
 
 #[derive(Clone)]
 pub struct GuiMainNotebook {
@@ -486,6 +485,22 @@ impl GuiMainNotebook {
                 .downcast::<Label>()
                 .expect("Tab label must be a label")
                 .set_text(&fl_thing);
+
+            if main_enum == NotebookMainEnum::SimilarVideos as usize {
+                let v = get_all_children_type_of::<Label, _>(&self.notebook_main);
+
+                if !cfg!(feature = "similar_videos") {
+                    for child in v {
+                        if child.label() == fl_thing {
+                            let parent = child.parent().expect("Parent must exists");
+                            // parent.hide(); // Shows a lot of warnings and breaks a little layout
+                            parent.set_sensitive(false); // Still allows to select tab, but shows that it is disabled
+                            child.hide();
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         // Change names of columns

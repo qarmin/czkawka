@@ -21,6 +21,7 @@ pub fn connect_button_save(gui_data: &GuiData) {
     let shared_temporary_files_state = gui_data.shared_temporary_files_state.clone();
     let shared_empty_files_state = gui_data.shared_empty_files_state.clone();
     let shared_similar_images_state = gui_data.shared_similar_images_state.clone();
+    #[cfg(feature = "similar_videos")]
     let shared_similar_videos_state = gui_data.shared_similar_videos_state.clone();
     let shared_same_music_state = gui_data.shared_same_music_state.clone();
     let shared_same_invalid_symlinks = gui_data.shared_same_invalid_symlinks.clone();
@@ -51,10 +52,13 @@ pub fn connect_button_save(gui_data: &GuiData) {
                 .borrow()
                 .as_ref()
                 .map(|x| x.save_all_in_one(&current_path, "results_similar_images")),
+            #[cfg(feature = "similar_videos")]
             NotebookMainEnum::SimilarVideos => shared_similar_videos_state
                 .borrow()
                 .as_ref()
                 .map(|x| x.save_all_in_one(&current_path, "results_similar_videos")),
+            #[cfg(not(feature = "similar_videos"))]
+            NotebookMainEnum::SimilarVideos => panic!("Similar videos not enabled"),
             NotebookMainEnum::SameMusic => shared_same_music_state.borrow().as_ref().map(|x| x.save_all_in_one(&current_path, "results_same_music")),
             NotebookMainEnum::Symlinks => shared_same_invalid_symlinks
                 .borrow()

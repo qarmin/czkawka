@@ -17,6 +17,7 @@ use czkawka_core::tools::empty_folder::EmptyFolder;
 use czkawka_core::tools::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::tools::same_music::{MusicSimilarity, SameMusic, SameMusicParameters};
 use czkawka_core::tools::similar_images::{SimilarImages, SimilarImagesParameters};
+#[cfg(feature = "similar_videos")]
 use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters};
 use czkawka_core::tools::temporary::Temporary;
 use fun_time::fun_time;
@@ -54,6 +55,11 @@ pub fn connect_button_search(gui_data: &GuiData, result_sender: Sender<Message>,
 
     let gui_data = gui_data.clone();
     buttons_search_clone.connect_clicked(move |_| {
+        #[cfg(not(feature = "similar_videos"))]
+        if to_notebook_main_enum(notebook_main.current_page().expect("Current page not set")) == NotebookMainEnum::SimilarVideos {
+            return;
+        }
+
         let loaded_commons = LoadedCommonItems::load_items(&gui_data);
 
         // Check if user selected all referenced folders
@@ -98,7 +104,10 @@ pub fn connect_button_search(gui_data: &GuiData, result_sender: Sender<Message>,
             NotebookMainEnum::BigFiles => big_files_search(&gui_data, loaded_commons, stop_flag, result_sender, &grid_progress, progress_sender),
             NotebookMainEnum::Temporary => temporary_files_search(&gui_data, loaded_commons, stop_flag, result_sender, &grid_progress, progress_sender),
             NotebookMainEnum::SimilarImages => similar_image_search(&gui_data, loaded_commons, stop_flag, result_sender, &grid_progress, progress_sender),
+            #[cfg(feature = "similar_videos")]
             NotebookMainEnum::SimilarVideos => similar_video_search(&gui_data, loaded_commons, stop_flag, result_sender, &grid_progress, progress_sender),
+            #[cfg(not(feature = "similar_videos"))]
+            NotebookMainEnum::SimilarVideos => panic!("SimilarVideos not implemented"),
             NotebookMainEnum::SameMusic => same_music_search(&gui_data, loaded_commons, stop_flag, result_sender, &grid_progress, progress_sender, &show_dialog),
             NotebookMainEnum::Symlinks => bad_symlinks_search(&gui_data, loaded_commons, stop_flag, result_sender, &grid_progress, progress_sender),
             NotebookMainEnum::BrokenFiles => broken_files_search(&gui_data, loaded_commons, stop_flag, result_sender, &grid_progress, progress_sender, &show_dialog),
@@ -591,6 +600,7 @@ fn similar_image_search(
         .expect("Failed to spawn SimilarImages thread");
 }
 
+#[cfg(feature = "similar_videos")]
 fn similar_video_search(
     gui_data: &GuiData,
     loaded_commons: LoadedCommonItems,

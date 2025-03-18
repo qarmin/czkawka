@@ -14,6 +14,7 @@ use czkawka_core::tools::empty_folder::EmptyFolder;
 use czkawka_core::tools::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::tools::same_music::SameMusic;
 use czkawka_core::tools::similar_images::SimilarImages;
+#[cfg(feature = "similar_videos")]
 use czkawka_core::tools::similar_videos::SimilarVideos;
 use czkawka_core::tools::temporary::Temporary;
 use gdk4::gdk_pixbuf::Pixbuf;
@@ -88,7 +89,11 @@ pub struct GuiData {
     pub shared_temporary_files_state: SharedState<Temporary>,
     pub shared_big_files_state: SharedState<BigFile>,
     pub shared_similar_images_state: SharedState<SimilarImages>,
+    #[cfg(feature = "similar_videos")]
     pub shared_similar_videos_state: SharedState<SimilarVideos>,
+    #[cfg(not(feature = "similar_videos"))]
+    #[allow(dead_code)]
+    pub shared_similar_videos_state: SharedState<()>,
     pub shared_same_music_state: SharedState<SameMusic>,
     pub shared_same_invalid_symlinks: SharedState<InvalidSymlinks>,
     pub shared_broken_files_state: SharedState<BrokenFiles>,
