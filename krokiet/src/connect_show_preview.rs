@@ -49,10 +49,7 @@ pub fn connect_show_preview(app: &MainWindow) {
             gui_state.set_preview_image(slint_image);
             let set_time = start_set_time.elapsed();
 
-            debug!(
-                "Loading image took: {:?}, converting image took: {:?}, setting image took: {:?}",
-                load_time, convert_time, set_time
-            );
+            debug!("Loading image took: {load_time:?}, converting image took: {convert_time:?}, setting image took: {set_time:?}");
             set_preview_visible(&gui_state, Some(image_path.as_str()));
         } else {
             set_preview_visible(&gui_state, None);

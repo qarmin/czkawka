@@ -240,10 +240,7 @@ where
             };
         }
 
-        debug!(
-            "Starting removing outdated cache entries (removing non existent files from cache - {})",
-            delete_outdated_cache
-        );
+        debug!("Starting removing outdated cache entries (removing non existent files from cache - {delete_outdated_cache})");
         let initial_number_of_entries = vec_loaded_entries.len();
         vec_loaded_entries = vec_loaded_entries
             .into_par_iter()
