@@ -5,7 +5,7 @@ use slint::ComponentHandle;
 use crate::{Callabler, MainWindow};
 
 pub fn connect_open_items(app: &MainWindow) {
-    app.global::<Callabler>().on_item_opened(move |path| {
+    app.global::<Callabler>().on_open_item(move |path| {
         match open::that(&*path) {
             Ok(()) => {}
             Err(e) => {

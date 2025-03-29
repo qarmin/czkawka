@@ -23,6 +23,7 @@ use crate::connect_move::connect_move;
 use crate::connect_open::connect_open_items;
 use crate::connect_progress_receiver::connect_progress_gathering;
 use crate::connect_rename::connect_rename;
+use crate::connect_row_selection::connect_row_selections;
 use crate::connect_save::connect_save;
 use crate::connect_scan::connect_scan_button;
 use crate::connect_select::{connect_select, connect_showing_proper_select_buttons};
@@ -40,6 +41,7 @@ mod connect_move;
 mod connect_open;
 mod connect_progress_receiver;
 mod connect_rename;
+mod connect_row_selection;
 mod connect_save;
 mod connect_scan;
 mod connect_select;
@@ -86,6 +88,7 @@ fn main() {
     connect_move(&app);
     connect_rename(&app);
     connect_save(&app, Arc::clone(&shared_models));
+    connect_row_selections(&app);
 
     app.run().expect("Failed to run app :(");
 
