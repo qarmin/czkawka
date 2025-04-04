@@ -27,6 +27,7 @@ use rayon::prelude::*;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
 
 use crate::common::{check_if_all_included_dirs_are_referenced, check_if_there_are_any_included_folders, split_u64_into_i32s};
+use crate::connect_row_selection::reset_selection;
 use crate::settings::{
     ALLOWED_AUDIO_CHECK_TYPE_VALUES, ALLOWED_BIG_FILE_SIZE_VALUES, ALLOWED_DUPLICATES_CHECK_METHOD_VALUES, ALLOWED_DUPLICATES_HASH_TYPE_VALUES, ALLOWED_IMAGE_HASH_ALG_VALUES,
     ALLOWED_RESIZE_ALGORITHM_VALUES, SettingsCustom, collect_settings, get_audio_check_type_idx, get_biggest_item_idx, get_duplicates_check_method_idx,
@@ -63,6 +64,8 @@ pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressDat
         let custom_settings = collect_settings(&app);
 
         let cloned_model = Arc::clone(&shared_models);
+
+        reset_selection(active_tab);
 
         let a = app.as_weak();
         match active_tab {

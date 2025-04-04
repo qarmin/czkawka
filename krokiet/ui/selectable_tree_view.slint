@@ -145,6 +145,29 @@ export component SelectableTableView inherits Rectangle {
         }
     }
 
+    public function released_key(event: KeyEvent) {
+        debug("Key released: " + event.text + "  CTRL - " + (event.modifiers.control ? "true" : "false") + "  SHIFT - " + (event.modifiers.shift ? "true" : "false") + " ALT - " + (event.modifiers.alt ? "true" : "false"));
+
+        if ((event.text == "a" || event.text == "A") && event.modifiers.control) {
+            debug("CTRL + A released");
+            Callabler.row_select_all();
+        }
+    }
+    // public function pressed_key(event: KeyEvent) {
+    //     debug("Key pressed: " + event.text + "  CTRL - " + (event.modifiers.control ? "true" : "false") + "  SHIFT - " + (event.modifiers.shift ? "true" : "false") + " ALT - " + (event.modifiers.alt ? "true" : "false"));
+        
+    //     if (event.modifiers.control) {
+    //         debug("CTRL pressed");
+    //     }
+    //     if (event.text == "a") {
+    //         debug("A pressed");
+    //     }
+    //     if (event.text == "a" && event.modifiers.control) {
+    //         debug("CTRL + A pressed");
+    //         Callabler.row_select_all();
+    //     }
+    // }
+
     // function showPreview() {
     //     Callabler.load_image_preview(root.values[root.selected_item].val_str[root.parentPathIdx - 1] + "/" + root.values[root.selected_item].val_str[root.fileNameIdx - 1]);
     // }
@@ -154,7 +177,7 @@ export component SelectableTableView inherits Rectangle {
     // }
 
     // TODO this should work with multiple selection and shift and control key - problably logic will need to be set in global state
-    public function released_key(event: KeyEvent) {}
+    // public function released_key(event: KeyEvent) {}
     //     if (event.text == " ") {
     //         if (root.selected_item != -1 && !root.values[root.selected_item].header_row) {
     //             root.values[root.selected_item].checked = !root.values[root.selected_item].checked;

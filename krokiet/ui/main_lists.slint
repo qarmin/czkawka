@@ -237,6 +237,38 @@ export component MainList {
             }
             accept
         }
+
+        // key-pressed(event) => {
+        //     if (!self.visible || !self.has-focus) {
+        //         return accept;
+        //     }
+        //     if (GuiState.active_tab == CurrentTab.EmptyFiles) {
+        //         empty_files.pressed_key(event);
+        //     } else if (GuiState.active_tab == CurrentTab.EmptyFolders) {
+        //         empty_folders.pressed_key(event);
+        //     } else if (GuiState.active_tab == CurrentTab.SimilarImages) {
+        //         similar_images.pressed_key(event);
+        //     } else if (GuiState.active_tab == CurrentTab.BadExtensions) {
+        //         bad_extensions.pressed_key(event);
+        //     } else if (GuiState.active_tab == CurrentTab.BigFiles) {
+        //         big_files.pressed_key(event);
+        //     } else if (GuiState.active_tab == CurrentTab.DuplicateFiles) {
+        //         duplicates.pressed_key(event);
+        //     } else if (GuiState.active_tab == CurrentTab.TemporaryFiles) {
+        //         temporary_files.pressed_key(event);
+        //     } else if (GuiState.active_tab == CurrentTab.SimilarVideos) {
+        //         similar_videos.pressed_key(event);
+        //     } else if (GuiState.active_tab == CurrentTab.SimilarMusic) {
+        //         similar_music.pressed_key(event);
+        //     } else if (GuiState.active_tab == CurrentTab.InvalidSymlinks) {
+        //         invalid_symlink.pressed_key(event);
+        //     } else if (GuiState.active_tab == CurrentTab.BrokenFiles) {
+        //         broken_files.pressed_key(event);
+        //     } else {
+        //         debug("Non handled key in main_lists.slint", event, GuiState.active_tab);
+        //     }
+        //     accept
+        // }
     }
 
     changed_current_tab() => {

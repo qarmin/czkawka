@@ -5,16 +5,6 @@ use slint::ComponentHandle;
 use crate::{Callabler, MainWindow};
 
 pub fn connect_open_items(app: &MainWindow) {
-    app.global::<Callabler>().on_open_item(move |path| {
-        match open::that(&*path) {
-            Ok(()) => {}
-            Err(e) => {
-                error!("Failed to open file: {e}");
-            }
-        };
-        // TODO - this should be added to line edit
-    });
-
     app.global::<Callabler>().on_open_config_folder(move || {
         let Some(config_cache) = get_config_cache_path() else {
             error!("Failed to open config folder");
