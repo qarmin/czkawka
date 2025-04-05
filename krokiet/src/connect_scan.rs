@@ -65,7 +65,7 @@ pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressDat
 
         let cloned_model = Arc::clone(&shared_models);
 
-        reset_selection(active_tab);
+        reset_selection(&app, true);
 
         let a = app.as_weak();
         match active_tab {

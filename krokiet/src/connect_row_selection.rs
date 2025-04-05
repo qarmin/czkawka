@@ -23,11 +23,16 @@ pub(crate) struct SelectionData {
 
 pub(crate) static TOOLS_SELECTION: OnceCell<RwLock<HashMap<CurrentTab, SelectionData>>> = OnceCell::new();
 
-pub(crate) fn reset_selection(active_tab: CurrentTab) {
-    let mut lock = get_write_selection_lock();
-    let selection = lock.get_mut(&active_tab).expect("Failed to get selection data");
-    selection.selected_rows.clear();
-    selection.exceeded_limit = false;
+pub(crate) fn reset_selection(app: &MainWindow, reset_all_selection: bool) {
+    if reset_all_selection {
+        let active_tab = app.global::<GuiState>().get_active_tab();
+        let mut lock = get_write_selection_lock();
+        let selection = lock.get_mut(&active_tab).expect("Failed to get selection data");
+        selection.selected_rows.clear();
+        selection.exceeded_limit = false;
+    }
+
+    app.invoke_reset_selection();
 }
 
 fn initialize_selection_struct() {
@@ -188,16 +193,17 @@ pub fn connect_row_selections(app: &MainWindow) {
     selection::reverse_single_unique_item(app); // LMB
     selection::reverse_checked_on_selection(app); // Space
     selection::reverse_selection_on_specific_item(app); // CTRL + LMB
+    selection::select_items_with_shift(app); // SHIFT + LMB
     opener::open_selected_item(app);
     opener::open_parent_of_selected_item(app);
 }
 mod selection {
-    use log::error;
-    use slint::ComponentHandle;
+    use slint::{ComponentHandle, Model};
 
     use crate::common::get_tool_model;
     use crate::connect_row_selection::{
-        get_write_selection_lock, reverse_selection_of_item_with_id, rows_deselect_all_by_mode, rows_reverse_checked_selection, rows_select_all_by_mode,
+        get_write_selection_lock, reverse_selection_of_item_with_id, row_select_items_with_shift, rows_deselect_all_by_mode, rows_reverse_checked_selection,
+        rows_select_all_by_mode,
     };
     use crate::{Callabler, GuiState, MainWindow};
 
@@ -212,8 +218,6 @@ mod selection {
             let model = get_tool_model(&app, active_tab);
 
             rows_select_all_by_mode(&app, selection, active_tab, &model);
-
-            error!("Clicked on select all rows");
         });
     }
 
@@ -228,8 +232,6 @@ mod selection {
 
             rows_deselect_all_by_mode(&app, selection, active_tab, &model);
             reverse_selection_of_item_with_id(selection, &model, id as usize, active_tab);
-
-            error!("Clicked on select single item rows, with id {id}");
         });
     }
 
@@ -243,8 +245,6 @@ mod selection {
             let model = get_tool_model(&app, active_tab);
 
             rows_reverse_checked_selection(&app, selection, active_tab, &model);
-
-            error!("Clicked on reverse checked items rows");
         });
     }
     pub(crate) fn reverse_selection_on_specific_item(app: &MainWindow) {
@@ -257,10 +257,74 @@ mod selection {
             let model = get_tool_model(&app, active_tab);
 
             reverse_selection_of_item_with_id(selection, &model, id as usize, active_tab);
-
-            error!("Clicked on add single item to selection rows");
         });
     }
+
+    pub(crate) fn select_items_with_shift(app: &MainWindow) {
+        let a = app.as_weak();
+        app.global::<Callabler>().on_row_select_items_with_shift(move |first_idx, second_idx| {
+            let app = a.upgrade().expect("Failed to upgrade app :(");
+            let active_tab = app.global::<GuiState>().get_active_tab();
+            let mut lock = get_write_selection_lock();
+            let selection = lock.get_mut(&active_tab).expect("Failed to get selection data");
+            let model = get_tool_model(&app, active_tab);
+
+            assert!(first_idx >= 0);
+            assert!(second_idx >= 0);
+            assert!((first_idx as usize) < model.row_count());
+            assert!((second_idx as usize) < model.row_count());
+
+            row_select_items_with_shift(&app, selection, &model, (first_idx as usize, second_idx as usize), active_tab);
+        });
+    }
+}
+
+fn row_select_items_with_shift(app: &MainWindow, selection: &mut SelectionData, model: &ModelRc<MainListModel>, indexes: (usize, usize), active_tab: CurrentTab) {
+    let (smaller_idx, bigger_idx) = if indexes.0 < indexes.1 { (indexes.0, indexes.1) } else { (indexes.1, indexes.0) };
+
+    if bigger_idx - smaller_idx > SELECTED_ROWS_LIMIT || selection.exceeded_limit {
+        let new_model: Vec<_> = model
+            .iter()
+            .enumerate()
+            .map(|(idx, mut row)| {
+                if (smaller_idx..=bigger_idx).contains(&idx) {
+                    row.selected_row = true;
+                } else {
+                    row.selected_row = false;
+                }
+                row
+            })
+            .collect();
+        set_tool_model(app, active_tab, ModelRc::new(VecModel::from(new_model)));
+    } else {
+        for idx in &selection.selected_rows {
+            if !(smaller_idx..=bigger_idx).contains(idx) {
+                let mut model_data = model
+                    .row_data(*idx)
+                    .unwrap_or_else(|| panic!("Failed to get row data with id {idx}, in tab {active_tab:?}, with model {} items", model.row_count()));
+                assert!(model_data.selected_row); // Probably can be removed in future
+                model_data.selected_row = false;
+                model.set_row_data(*idx, model_data);
+            }
+        }
+        for idx in smaller_idx..=bigger_idx {
+            let mut model_data = model
+                .row_data(idx)
+                .unwrap_or_else(|| panic!("Failed to get row data with id {idx}, in tab {active_tab:?}, with model {} items", model.row_count()));
+            if !model_data.selected_row {
+                model_data.selected_row = true;
+                model.set_row_data(idx, model_data);
+            }
+        }
+    }
+
+    if bigger_idx - smaller_idx > SELECTED_ROWS_LIMIT {
+        selection.exceeded_limit = true;
+        selection.selected_rows.clear();
+    } else {
+        selection.selected_rows = (smaller_idx..=bigger_idx).into_iter().collect();
+    }
+    selection.number_of_selected_rows = bigger_idx - smaller_idx + 1;
 }
 
 fn rows_reverse_checked_selection(app: &MainWindow, selection: &mut SelectionData, active_tab: CurrentTab, model: &ModelRc<MainListModel>) {
@@ -340,8 +404,6 @@ mod opener {
             let app = a.upgrade().expect("Failed to upgrade app :(");
             let active_tab = app.global::<GuiState>().get_active_tab();
             open_selected_items(&app, &[get_str_path_idx(active_tab), get_str_name_idx(active_tab)]);
-
-            error!("Clicked on, open selected item");
         });
     }
 
@@ -351,7 +413,6 @@ mod opener {
             let app = a.upgrade().expect("Failed to upgrade app :(");
             let active_tab = app.global::<GuiState>().get_active_tab();
             open_selected_items(&app, &[get_str_path_idx(active_tab)]);
-            error!("Clicked on, open parent item");
         });
     }
 }

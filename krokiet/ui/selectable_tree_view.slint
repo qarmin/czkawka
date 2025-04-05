@@ -18,6 +18,7 @@ export component SelectableTableView inherits Rectangle {
     // This idx, starts from zero, but since first is always a checkbox, and is not in model.val values, remove 1 from idx
     in-out property <int> parentPathIdx;
     in-out property <int> fileNameIdx;
+    in-out property <int> end_shift_idx: -1;
     // in-out property <int> selected_item: -1;
     out property <length> list_view_width: max(self.width - 20px, column_sizes[0] + column_sizes[1] + column_sizes[2] + column_sizes[3] + column_sizes[4] + column_sizes[5] + column_sizes[6] + column_sizes[7] + column_sizes[8] + column_sizes[9] + column_sizes[10] + column_sizes[11]);
 
@@ -85,19 +86,19 @@ export component SelectableTableView inherits Rectangle {
                             Callabler.row_reverse_single_unique_item(idx);
                             Callabler.row_open_parent_of_selected_item();
                         } else if (event.button == PointerEventButton.left && event.kind == PointerEventKind.up) {
-                            //
                             if (event.modifiers.control) {
+                                end_shift_idx = idx;
                                 Callabler.row_reverse_item_selection(idx);
                             } else if (event.modifiers.shift) {
-                                // TODO multi-selection
-                                Callabler.row_reverse_single_unique_item(idx);
+                                if (end_shift_idx == -1) {
+                                    end_shift_idx = idx;
+                                }
+                                Callabler.row_select_items_with_shift(idx, end_shift_idx);
                             } else {
+                                end_shift_idx = idx;
                                 Callabler.row_reverse_single_unique_item(idx);
                             }
                         }
-                        //else if (event.button == PointerEventButton.middle && event.kind == PointerEventKind.up) {
-                        //    Callabler.open_item(r.val_str[root.parentPathIdx - 1] + "/" + r.val_str[root.fileNameIdx - 1])
-                        //}
                     }
                 }
 
@@ -126,24 +127,23 @@ export component SelectableTableView inherits Rectangle {
         }
     }
 
-    public function released_key(event: KeyEvent) {
-        debug("Key released: " + event.text + "  CTRL - " + (event.modifiers.control ? "true" : "false") + "  SHIFT - " + (event.modifiers.shift ? "true" : "false") + " ALT - " + (event.modifiers.alt ? "true" : "false"));
+    // Already rust code should deal with selections in the model, but this one is not able to handle
+    public function reset_selection() {
+        end_shift_idx = -1;
+    }
 
-        // if ((event.text == "a" || event.text == "A") && event.modifiers.control) {
-        //     debug("CTRL + A released");
-        //     Callabler.row_select_all();
-        // }
+
+    public function released_key(event: KeyEvent) {
+        // debug("Key released: " + event.text + "  CTRL - " + (event.modifiers.control ? "true" : "false") + "  SHIFT - " + (event.modifiers.shift ? "true" : "false") + " ALT - " + (event.modifiers.alt ? "true" : "false"));
 
         if (event.text == " ") {
-            debug("SPACE released");
             Callabler.row_reverse_checked_selection();
         }
     }
     public function pressed_key(event: KeyEvent) {
-        debug("Key pressed: " + event.text + "  CTRL - " + (event.modifiers.control ? "true" : "false") + "  SHIFT - " + (event.modifiers.shift ? "true" : "false") + " ALT - " + (event.modifiers.alt ? "true" : "false"));
+        // debug("Key pressed: " + event.text + "  CTRL - " + (event.modifiers.control ? "true" : "false") + "  SHIFT - " + (event.modifiers.shift ? "true" : "false") + " ALT - " + (event.modifiers.alt ? "true" : "false"));
         
         if ((event.text == "a" || event.text == "A") && event.modifiers.control && !event.modifiers.shift && !event.modifiers.alt && !event.modifiers.meta) {
-            debug("CTRL + A released");
             Callabler.row_select_all();
         }
     }

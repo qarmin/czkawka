@@ -7,9 +7,12 @@ export global Callabler {
     callback added_manual_directories(bool, string);
 
     // Row selecting
+    callback reset_selection(CurrentTab);
+
     callback row_select_all();
     callback row_reverse_single_unique_item(int);
     callback row_reverse_item_selection(int);
+    callback row_select_items_with_shift(int, int);
 
     callback row_open_selected_item();
     callback row_open_parent_of_selected_item();

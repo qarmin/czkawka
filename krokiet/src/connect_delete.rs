@@ -4,6 +4,7 @@ use rayon::prelude::*;
 use slint::{ComponentHandle, ModelRc, VecModel};
 
 use crate::common::{get_is_header_mode, get_tool_model, set_tool_model};
+use crate::connect_row_selection::reset_selection;
 use crate::model_operations::{collect_full_path_from_model, deselect_all_items, filter_out_checked_items};
 use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow, Settings};
 
@@ -27,6 +28,8 @@ pub fn connect_delete_button(app: &MainWindow) {
         app.global::<GuiState>().set_info_text(Messages::new_from_errors(errors).create_messages_text().into());
 
         app.global::<GuiState>().set_preview_visible(false);
+
+        reset_selection(&app, false);
     });
 }
 

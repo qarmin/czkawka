@@ -29,6 +29,7 @@ export component MainWindow inherits Window {
     callback scan_ended(string);
     callback show_move_folders_dialog(string);
     callback folders_move_choose_requested();
+    callback reset_selection();
 
     title: "Krokiet - Data Cleaner";
 
@@ -245,5 +246,9 @@ export component MainWindow inherits Window {
         text_summary_text = scan_text;
         root.scanning = false;
         root.stop_requested = false;
+    }
+
+    reset_selection => {
+        main_list.reset_selection();
     }
 }

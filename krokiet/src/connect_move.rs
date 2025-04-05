@@ -7,6 +7,7 @@ use rfd::FileDialog;
 use slint::{ComponentHandle, ModelRc, VecModel};
 
 use crate::common::{get_is_header_mode, get_tool_model, set_tool_model};
+use crate::connect_row_selection::reset_selection;
 use crate::model_operations::{collect_path_name_from_model, deselect_all_items, filter_out_checked_items};
 use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow};
 
@@ -22,6 +23,7 @@ pub fn connect_move(app: &MainWindow) {
         let folder_str = folder.to_string_lossy().to_string();
 
         app.invoke_show_move_folders_dialog(folder_str.into());
+        reset_selection(&app, false);
     });
 
     let a = app.as_weak();
@@ -35,6 +37,7 @@ pub fn connect_move(app: &MainWindow) {
             set_tool_model(&app, active_tab, new_model);
         }
         app.global::<GuiState>().set_info_text(Messages::new_from_errors(errors).create_messages_text().into());
+        reset_selection(&app, false);
     });
 }
 
