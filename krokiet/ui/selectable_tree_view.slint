@@ -89,14 +89,23 @@ export component SelectableTableView inherits Rectangle {
                             if (event.modifiers.control) {
                                 end_shift_idx = idx;
                                 Callabler.row_reverse_item_selection(idx);
+                                hidePreview();
                             } else if (event.modifiers.shift) {
                                 if (end_shift_idx == -1) {
                                     end_shift_idx = idx;
                                 }
                                 Callabler.row_select_items_with_shift(idx, end_shift_idx);
+
+                                if (end_shift_idx == idx) {
+                                    showPreview(idx);
+                                } else {
+                                    hidePreview();
+                                }
+
                             } else {
                                 end_shift_idx = idx;
                                 Callabler.row_reverse_single_unique_item(idx);
+                                showPreview(idx);
                             }
                         }
                     }
@@ -148,9 +157,14 @@ export component SelectableTableView inherits Rectangle {
         }
     }
 
-    // function showPreview() {
-    //     Callabler.load_image_preview(root.values[root.selected_item].val_str[root.parentPathIdx - 1] + "/" + root.values[root.selected_item].val_str[root.fileNameIdx - 1]);
-    // }
+    function showPreview(idx: int) {
+        Callabler.load_image_preview(root.values[idx].val_str[root.parentPathIdx - 1] + "/" + root.values[idx].val_str[root.fileNameIdx - 1]);
+    }
+    function hidePreview() {
+        Callabler.load_image_preview("NOT_AVAILABLE.NOT_AVAILABLE");
+    }
+
+    // TODO - re-enable, movement with arrows
 
     // function openSelectedItem() {
     //     Callabler.open_item(root.values[root.selected_item].val_str[root.parentPathIdx - 1] + "/" + root.values[root.selected_item].val_str[root.fileNameIdx - 1]);

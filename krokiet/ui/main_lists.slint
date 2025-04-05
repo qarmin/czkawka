@@ -271,7 +271,6 @@ export component MainList {
     }
 
     public function reset_selection() {
-        debug("Reset selection in main_lists.slint", GuiState.active_tab);
         if (GuiState.active_tab == CurrentTab.EmptyFiles) {
             empty_files.reset_selection();
         } else if (GuiState.active_tab == CurrentTab.EmptyFolders) {
