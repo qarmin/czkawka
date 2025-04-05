@@ -77,42 +77,23 @@ export component SelectableTableView inherits Rectangle {
                 height: 20px;
                 background: ColorPalette.get_listview_color_with_header(r.selected_row, touch-area.has-hover, r.header_row);
                 touch_area := TouchArea {
-                    function clicked_manual() {
-                        Callabler.row_select_single_item(idx);
-                        // We don't allow to select header row
-                        // unless it contains data, which is true only for for modes with reference folders
-                        // if (!r.header_row || r.val_str.length > 0) {
-                        //     // if ()
-
-                        //     if (root.selected_item == -1) {
-                        //         r.selected_row = !r.selected_row;
-                        //         root.selected_item = idx;
-                        //     } else {
-                        //         if (!r.selected_row && root.selected_item != idx) {
-                        //             r.selected_row = !r.selected_row;
-                        //             root.values[root.selected_item].selected_row = false;
-                        //             root.selected_item = idx;
-                        //         }
-                        //     }
-
-                        //     if (root.selected_items_idx.length == 1 && !selected_more_than_available) {
-                        //         showPreview();
-                                
-                        //     } else {
-                        //         GuiState.preview_visible = false;
-                        //     }
-                        // }
-                    }
                     double-clicked => {
                         Callabler.row_open_selected_item();
                     }
                     pointer-event(event) => {
-                        // TODO this should be clicked by double-click - https://github.com/slint-ui/slint/issues/4235
                         if (event.button == PointerEventButton.right && event.kind == PointerEventKind.up) {
-                            Callabler.row_select_single_item(idx);
+                            Callabler.row_reverse_single_unique_item(idx);
                             Callabler.row_open_parent_of_selected_item();
                         } else if (event.button == PointerEventButton.left && event.kind == PointerEventKind.up) {
-                            Callabler.row_select_single_item(idx);
+                            //
+                            if (event.modifiers.control) {
+                                Callabler.row_reverse_item_selection(idx);
+                            } else if (event.modifiers.shift) {
+                                // TODO multi-selection
+                                Callabler.row_reverse_single_unique_item(idx);
+                            } else {
+                                Callabler.row_reverse_single_unique_item(idx);
+                            }
                         }
                         //else if (event.button == PointerEventButton.middle && event.kind == PointerEventKind.up) {
                         //    Callabler.open_item(r.val_str[root.parentPathIdx - 1] + "/" + r.val_str[root.fileNameIdx - 1])
@@ -148,25 +129,24 @@ export component SelectableTableView inherits Rectangle {
     public function released_key(event: KeyEvent) {
         debug("Key released: " + event.text + "  CTRL - " + (event.modifiers.control ? "true" : "false") + "  SHIFT - " + (event.modifiers.shift ? "true" : "false") + " ALT - " + (event.modifiers.alt ? "true" : "false"));
 
-        if ((event.text == "a" || event.text == "A") && event.modifiers.control) {
+        // if ((event.text == "a" || event.text == "A") && event.modifiers.control) {
+        //     debug("CTRL + A released");
+        //     Callabler.row_select_all();
+        // }
+
+        if (event.text == " ") {
+            debug("SPACE released");
+            Callabler.row_reverse_checked_selection();
+        }
+    }
+    public function pressed_key(event: KeyEvent) {
+        debug("Key pressed: " + event.text + "  CTRL - " + (event.modifiers.control ? "true" : "false") + "  SHIFT - " + (event.modifiers.shift ? "true" : "false") + " ALT - " + (event.modifiers.alt ? "true" : "false"));
+        
+        if ((event.text == "a" || event.text == "A") && event.modifiers.control && !event.modifiers.shift && !event.modifiers.alt && !event.modifiers.meta) {
             debug("CTRL + A released");
             Callabler.row_select_all();
         }
     }
-    // public function pressed_key(event: KeyEvent) {
-    //     debug("Key pressed: " + event.text + "  CTRL - " + (event.modifiers.control ? "true" : "false") + "  SHIFT - " + (event.modifiers.shift ? "true" : "false") + " ALT - " + (event.modifiers.alt ? "true" : "false"));
-        
-    //     if (event.modifiers.control) {
-    //         debug("CTRL pressed");
-    //     }
-    //     if (event.text == "a") {
-    //         debug("A pressed");
-    //     }
-    //     if (event.text == "a" && event.modifiers.control) {
-    //         debug("CTRL + A pressed");
-    //         Callabler.row_select_all();
-    //     }
-    // }
 
     // function showPreview() {
     //     Callabler.load_image_preview(root.values[root.selected_item].val_str[root.parentPathIdx - 1] + "/" + root.values[root.selected_item].val_str[root.fileNameIdx - 1]);

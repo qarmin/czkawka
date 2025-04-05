@@ -8,11 +8,13 @@ export global Callabler {
 
     // Row selecting
     callback row_select_all();
-    callback row_select_single_item(int);
-    callback row_deselect_all();
+    callback row_reverse_single_unique_item(int);
+    callback row_reverse_item_selection(int);
 
     callback row_open_selected_item();
     callback row_open_parent_of_selected_item();
+
+    callback row_reverse_checked_selection();
 
     // Right click or middle click opener
     callback open_item(string);

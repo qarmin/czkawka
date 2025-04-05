@@ -142,7 +142,7 @@ fn rows_select_all_by_replacing_models(app: &MainWindow, selection: &SelectionDa
     set_tool_model(app, active_tab, ModelRc::new(VecModel::from(new_model)));
 }
 
-fn reverse_item_with_id(selection: &mut SelectionData, model: &ModelRc<MainListModel>, id: usize, active_tab: CurrentTab) {
+fn reverse_selection_of_item_with_id(selection: &mut SelectionData, model: &ModelRc<MainListModel>, id: usize, active_tab: CurrentTab) {
     let mut model_data = model
         .row_data(id)
         .unwrap_or_else(|| panic!("Failed to get row data with id {id}, in tab {active_tab:?}, with model {} items", model.row_count()));
@@ -184,9 +184,10 @@ impl Eq for CurrentTab {}
 pub fn connect_row_selections(app: &MainWindow) {
     initialize_selection_struct();
 
-    selection::connect_select_all_rows(app);
-    selection::deselect_all_rows(app);
-    selection::select_single_item(app);
+    selection::connect_select_all_rows(app); // CTRL + A
+    selection::reverse_single_unique_item(app); // LMB
+    selection::reverse_checked_on_selection(app); // Space
+    selection::reverse_selection_on_specific_item(app); // CTRL + LMB
     opener::open_selected_item(app);
     opener::open_parent_of_selected_item(app);
 }
@@ -195,7 +196,9 @@ mod selection {
     use slint::ComponentHandle;
 
     use crate::common::get_tool_model;
-    use crate::connect_row_selection::{get_write_selection_lock, reverse_item_with_id, rows_deselect_all_by_mode, rows_select_all_by_mode};
+    use crate::connect_row_selection::{
+        get_write_selection_lock, reverse_selection_of_item_with_id, rows_deselect_all_by_mode, rows_reverse_checked_selection, rows_select_all_by_mode,
+    };
     use crate::{Callabler, GuiState, MainWindow};
 
     pub(crate) fn connect_select_all_rows(app: &MainWindow) {
@@ -214,25 +217,9 @@ mod selection {
         });
     }
 
-    pub(crate) fn deselect_all_rows(app: &MainWindow) {
+    pub(crate) fn reverse_single_unique_item(app: &MainWindow) {
         let a = app.as_weak();
-        app.global::<Callabler>().on_row_deselect_all(move || {
-            let app = a.upgrade().expect("Failed to upgrade app :(");
-            let active_tab = app.global::<GuiState>().get_active_tab();
-
-            let mut lock = get_write_selection_lock();
-            let selection = lock.get_mut(&active_tab).expect("Failed to get selection data");
-            let model = get_tool_model(&app, active_tab);
-
-            rows_deselect_all_by_mode(&app, selection, active_tab, &model);
-
-            error!("Clicked on deselect all rows");
-        });
-    }
-
-    pub(crate) fn select_single_item(app: &MainWindow) {
-        let a = app.as_weak();
-        app.global::<Callabler>().on_row_select_single_item(move |id| {
+        app.global::<Callabler>().on_row_reverse_single_unique_item(move |id| {
             let app = a.upgrade().expect("Failed to upgrade app :(");
             let active_tab = app.global::<GuiState>().get_active_tab();
             let mut lock = get_write_selection_lock();
@@ -240,10 +227,68 @@ mod selection {
             let model = get_tool_model(&app, active_tab);
 
             rows_deselect_all_by_mode(&app, selection, active_tab, &model);
-            reverse_item_with_id(selection, &model, id as usize, active_tab);
+            reverse_selection_of_item_with_id(selection, &model, id as usize, active_tab);
 
             error!("Clicked on select single item rows, with id {id}");
         });
+    }
+
+    pub(crate) fn reverse_checked_on_selection(app: &MainWindow) {
+        let a = app.as_weak();
+        app.global::<Callabler>().on_row_reverse_checked_selection(move || {
+            let app = a.upgrade().expect("Failed to upgrade app :(");
+            let active_tab = app.global::<GuiState>().get_active_tab();
+            let mut lock = get_write_selection_lock();
+            let selection = lock.get_mut(&active_tab).expect("Failed to get selection data");
+            let model = get_tool_model(&app, active_tab);
+
+            rows_reverse_checked_selection(&app, selection, active_tab, &model);
+
+            error!("Clicked on reverse checked items rows");
+        });
+    }
+    pub(crate) fn reverse_selection_on_specific_item(app: &MainWindow) {
+        let a = app.as_weak();
+        app.global::<Callabler>().on_row_reverse_item_selection(move |id| {
+            let app = a.upgrade().expect("Failed to upgrade app :(");
+            let active_tab = app.global::<GuiState>().get_active_tab();
+            let mut lock = get_write_selection_lock();
+            let selection = lock.get_mut(&active_tab).expect("Failed to get selection data");
+            let model = get_tool_model(&app, active_tab);
+
+            reverse_selection_of_item_with_id(selection, &model, id as usize, active_tab);
+
+            error!("Clicked on add single item to selection rows");
+        });
+    }
+}
+
+fn rows_reverse_checked_selection(app: &MainWindow, selection: &mut SelectionData, active_tab: CurrentTab, model: &ModelRc<MainListModel>) {
+    if selection.exceeded_limit {
+        let new_model = model
+            .iter()
+            .map(|mut row| {
+                if row.selected_row {
+                    row.checked = !row.checked;
+                }
+                row
+            })
+            .collect::<Vec<_>>();
+        set_tool_model(app, active_tab, ModelRc::new(VecModel::from(new_model)));
+    } else if !selection.selected_rows.is_empty() {
+        let ids = model
+            .iter()
+            .enumerate()
+            .filter_map(|(idx, e)| if e.selected_row { Some(idx) } else { None })
+            .collect::<Vec<_>>();
+        for id in ids {
+            let mut model_data = model
+                .row_data(id)
+                .unwrap_or_else(|| panic!("Failed to get row data with id {id}, in tab {active_tab:?}, with model {} items", model.row_count()));
+            assert!(model_data.selected_row); // Probably can be removed in future
+            model_data.checked = !model_data.checked;
+            model.set_row_data(id, model_data);
+        }
     }
 }
 
