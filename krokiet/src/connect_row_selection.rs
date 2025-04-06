@@ -384,6 +384,7 @@ fn reverse_selection_of_item_with_id(selection: &mut SelectionData, model: &Mode
         selection.number_of_selected_rows += 1;
     }
 }
+
 fn row_select_items_with_shift(selection: &mut SelectionData, model: &ModelRc<MainListModel>, indexes: (usize, usize)) -> Option<ModelRc<MainListModel>> {
     let (smaller_idx, bigger_idx) = if indexes.0 < indexes.1 { (indexes.0, indexes.1) } else { (indexes.1, indexes.0) };
 
@@ -392,12 +393,16 @@ fn row_select_items_with_shift(selection: &mut SelectionData, model: &ModelRc<Ma
             .iter()
             .enumerate()
             .map(|(idx, mut row)| {
-                row.selected_row = (smaller_idx..=bigger_idx).contains(&idx);
+                row.selected_row = !row.header_row && (smaller_idx..=bigger_idx).contains(&idx);
                 row
             })
             .collect();
+
+        selection.number_of_selected_rows = new_model.iter().filter(|e| e.selected_row).count();
+
         Some(ModelRc::new(VecModel::from(new_model)))
     } else {
+        // Deselect previously selected rows
         for idx in &selection.selected_rows {
             if !(smaller_idx..=bigger_idx).contains(idx) {
                 let mut model_data = model
@@ -408,15 +413,19 @@ fn row_select_items_with_shift(selection: &mut SelectionData, model: &ModelRc<Ma
                 model.set_row_data(*idx, model_data);
             }
         }
+        // select new rows
         for idx in smaller_idx..=bigger_idx {
             let mut model_data = model
                 .row_data(idx)
                 .unwrap_or_else(|| panic!("Failed to get row data with id {idx}, with model {} items", model.row_count()));
-            if !model_data.selected_row {
+            if !model_data.selected_row && !model_data.header_row {
                 model_data.selected_row = true;
                 model.set_row_data(idx, model_data);
             }
         }
+
+        selection.number_of_selected_rows = model.iter().filter(|e| e.selected_row).count();
+
         None
     };
 
@@ -424,9 +433,15 @@ fn row_select_items_with_shift(selection: &mut SelectionData, model: &ModelRc<Ma
         selection.exceeded_limit = true;
         selection.selected_rows.clear();
     } else {
-        selection.selected_rows = (smaller_idx..=bigger_idx).collect();
+        selection.exceeded_limit = false;
+        selection.selected_rows = new_model
+            .as_ref()
+            .unwrap_or(&model)
+            .iter()
+            .enumerate()
+            .filter_map(|(idx, row)| if row.selected_row { Some(idx) } else { None })
+            .collect();
     }
-    selection.number_of_selected_rows = bigger_idx - smaller_idx + 1;
 
     new_model
 }
@@ -437,6 +452,7 @@ fn rows_reverse_checked_selection(selection: &mut SelectionData, model: &ModelRc
             .iter()
             .map(|mut row| {
                 if row.selected_row {
+                    assert!(!row.header_row); // Header row should not be selected
                     row.checked = !row.checked;
                 }
                 row
@@ -444,16 +460,13 @@ fn rows_reverse_checked_selection(selection: &mut SelectionData, model: &ModelRc
             .collect::<Vec<_>>();
         return Some(ModelRc::new(VecModel::from(new_model)));
     } else if !selection.selected_rows.is_empty() {
-        let ids = model
-            .iter()
-            .enumerate()
-            .filter_map(|(idx, e)| if e.selected_row { Some(idx) } else { None })
-            .collect::<Vec<_>>();
+        let ids = model.iter().enumerate().filter_map(|(idx, e)| if e.selected_row { Some(idx) } else { None });
         for id in ids {
             let mut model_data = model
                 .row_data(id)
                 .unwrap_or_else(|| panic!("Failed to get row data with id {id}, with model {} items", model.row_count()));
-            assert!(model_data.selected_row); // Probably can be removed in future
+            assert!(model_data.selected_row);
+            assert!(!model_data.header_row);
             model_data.checked = !model_data.checked;
             model.set_row_data(id, model_data);
         }
@@ -670,5 +683,95 @@ mod tests {
         assert!(!model.row_data(1).unwrap().selected_row);
         assert_eq!(selection.selected_rows, vec![2]);
         assert_eq!(selection.number_of_selected_rows, 1);
+    }
+    #[test]
+    fn row_select_items_with_shift_simple() {
+        let model = get_model_vec(5);
+        let model = create_model_from_model_vec(&model);
+
+        let mut selection = SelectionData {
+            number_of_selected_rows: 0,
+            selected_rows: vec![],
+            exceeded_limit: false,
+        };
+
+        let new_model = row_select_items_with_shift(&mut selection, &model, (1, 3));
+
+        assert!(new_model.is_none());
+        assert!(!model.row_data(0).unwrap().selected_row);
+        assert!(model.row_data(1).unwrap().selected_row);
+        assert!(model.row_data(2).unwrap().selected_row);
+        assert!(model.row_data(3).unwrap().selected_row);
+        assert!(!model.row_data(4).unwrap().selected_row);
+        assert_eq!(selection.selected_rows, vec![1, 2, 3]);
+        assert_eq!(selection.number_of_selected_rows, 3);
+    }
+
+    #[test]
+    fn row_select_items_with_shift_with_header_rows() {
+        let mut model = get_model_vec(5);
+        model[1].header_row = true;
+        model[3].header_row = true;
+        let model = create_model_from_model_vec(&model);
+
+        let mut selection = SelectionData {
+            number_of_selected_rows: 0,
+            selected_rows: vec![],
+            exceeded_limit: false,
+        };
+
+        let new_model = row_select_items_with_shift(&mut selection, &model, (0, 4));
+
+        assert!(new_model.is_none());
+        assert!(model.row_data(0).unwrap().selected_row);
+        assert!(!model.row_data(1).unwrap().selected_row); // header row
+        assert!(model.row_data(2).unwrap().selected_row);
+        assert!(!model.row_data(3).unwrap().selected_row); // header row
+        assert!(model.row_data(4).unwrap().selected_row);
+        assert_eq!(selection.selected_rows, vec![0, 2, 4]);
+        assert_eq!(selection.number_of_selected_rows, 3);
+    }
+
+    #[test]
+    fn rows_reverse_checked_selection_with_selected_rows() {
+        let mut model = get_model_vec(3);
+        model[0].selected_row = true;
+        model[1].selected_row = true;
+        let model = create_model_from_model_vec(&model);
+
+        let mut selection = SelectionData {
+            number_of_selected_rows: 2,
+            selected_rows: vec![0, 1],
+            exceeded_limit: false,
+        };
+
+        let new_model = rows_reverse_checked_selection(&mut selection, &model);
+
+        assert!(new_model.is_none());
+        assert!(model.row_data(0).unwrap().checked);
+        assert!(model.row_data(1).unwrap().checked);
+        assert!(!model.row_data(2).unwrap().checked);
+    }
+
+    #[test]
+    fn rows_reverse_checked_selection_with_exceeded_limit() {
+        let mut model = get_model_vec(3);
+        model[0].selected_row = true;
+        model[1].selected_row = true;
+        let model = create_model_from_model_vec(&model);
+
+        let mut selection = SelectionData {
+            number_of_selected_rows: 2,
+            selected_rows: vec![],
+            exceeded_limit: true,
+        };
+
+        let new_model = rows_reverse_checked_selection(&mut selection, &model);
+
+        assert!(new_model.is_some());
+        let new_model = new_model.unwrap();
+        assert!(new_model.row_data(0).unwrap().checked);
+        assert!(new_model.row_data(1).unwrap().checked);
+        assert!(!new_model.row_data(2).unwrap().checked);
     }
 }
