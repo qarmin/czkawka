@@ -140,86 +140,58 @@ export component SelectableTableView inherits Rectangle {
         last_selected_idx = -1;
     }
 
+    function contains_data(idx: int) -> bool {
+        return root.values[idx].val_str.length > 0;
+    }
+
     public function released_key(event: KeyEvent) {
         // debug("Key released: " + event.text + "  CTRL - " + (event.modifiers.control ? "true" : "false") + "  SHIFT - " + (event.modifiers.shift ? "true" : "false") + " ALT - " + (event.modifiers.alt ? "true" : "false"));
 
         if (event.text == " ") {
             Callabler.row_reverse_checked_selection();
+        } else if (event.text == "\n") {
+           if (last_selected_idx != -1 && contains_data(last_selected_idx)) {
+                Callabler.row_open_item_with_index(last_selected_idx);
+           }
+        } else if (event.text == Key.UpArrow) {
+            if (last_selected_idx != -1) {
+                last_selected_idx = (last_selected_idx - 1).max(0);
+                // If hit at header, try to skip it
+                if (!contains_data(last_selected_idx)) {
+                    last_selected_idx = (last_selected_idx - 1).max(0);
+                }
+
+                if (!event.modifiers.shift) {
+                    start_shift_idx = last_selected_idx;
+                }
+                
+                Callabler.row_select_items_with_shift(start_shift_idx, last_selected_idx);
+                if (start_shift_idx == last_selected_idx) {
+                    showPreview(last_selected_idx);
+                } else {
+                    hidePreview();
+                }
+            }
+        } else if (event.text == Key.DownArrow) {
+            if (last_selected_idx != -1) {
+                last_selected_idx = (last_selected_idx + 1).min(root.values.length - 1);
+                // If hit at header, try to skip it
+                if (!contains_data(last_selected_idx)) {
+                    last_selected_idx = (last_selected_idx + 1).min(root.values.length - 1);
+                }
+
+                if (!event.modifiers.shift) {
+                    start_shift_idx = last_selected_idx;
+                }
+                
+                Callabler.row_select_items_with_shift(start_shift_idx, last_selected_idx);
+                if (start_shift_idx == last_selected_idx) {
+                    showPreview(last_selected_idx);
+                } else {
+                    hidePreview();
+                }
+            }
         }
-//        else if (event.text == "\n") {
-//            if (last_selected_idx != -1) {
-//                Callabler.open_item_with_index(last_selected_idx);
-//            }
-//        } else if (event.text == Key.UpArrow) {
-//            if (last_selected_idx == ) {
-//                Callabler.row_open_parent_of_selected_item();
-//            }
-//        } else if (event.text == Key.DownArrow) {
-//            if (last_selected_idx != -1) {
-//                Callabler.row_open_parent_of_selected_item();
-//            }
-//        }
-        // } else if (event.text == Key.DownArrow) {
-        //     if (root.selected_item != -1) {
-        //         if (root.values.length - 1 == root.selected_item) {
-        //             // Last element, so unselect it
-        //             root.values[root.selected_item].selected_row = false;
-        //             root.selected_item = -1;
-        //         } else {
-        //             // Select next item, if next item is header row, then select second
-        //             // This should be safe, because header row should never be last item
-        //             root.values[root.selected_item].selected_row = false;
-        //             if (root.values[root.selected_item + 1].header_row) {
-        //                 root.selected_item += 2;
-        //             } else {
-        //                 root.selected_item += 1;
-        //             }
-        //             root.values[root.selected_item].selected_row = true;
-        //             showPreview();
-        //         }
-        //     } else {
-        //         // Select last item if nothing is selected
-        //         if (root.values.length > 0) {
-        //             if (root.values[0].header_row) {
-        //                 root.selected_item = 1;
-        //             } else {
-        //                 root.selected_item = 0;
-        //             }
-        //             root.values[root.selected_item].selected_row = true;
-        //             showPreview();
-        //         }
-        //     }
-        // } else if (event.text == Key.UpArrow) {
-        //     if (root.selected_item != -1) {
-        //         if (root.selected_item == 0) {
-        //             // First element, so unselect it
-        //             root.values[root.selected_item].selected_row = false;
-        //             root.selected_item = -1;
-        //         } else {
-        //             root.values[root.selected_item].selected_row = false;
-        //             // Select previous item, if previous item is header row, then select second previous item
-        //             // This is safe, because if there is non header row upper, then can be easily selected,
-        //             // but otherwise is done -2 which for 1 (smallest possible item to set with header row) gives -1, so gives
-        //             // this non selected row
-        //             if (root.values[root.selected_item - 1].header_row) {
-        //                 root.selected_item -= 2;
-        //             } else {
-        //                 root.selected_item -= 1;
-        //             }
-        //             if (root.selected_item != -1) {
-        //                 root.values[root.selected_item].selected_row = true;
-        //                 showPreview();
-        //             }
-        //         }
-        //     } else {
-        //         // Select last item if nothing is selected
-        //         if (root.values.length > 0) {
-        //             root.selected_item = root.values.length - 1;
-        //             root.values[root.selected_item].selected_row = true;
-        //             showPreview();
-        //         }
-        //     }
-        // }
     }
     public function pressed_key(event: KeyEvent) {
         // debug("Key pressed: " + event.text + "  CTRL - " + (event.modifiers.control ? "true" : "false") + "  SHIFT - " + (event.modifiers.shift ? "true" : "false") + " ALT - " + (event.modifiers.alt ? "true" : "false"));
@@ -236,80 +208,4 @@ export component SelectableTableView inherits Rectangle {
     function hidePreview() {
         Callabler.load_image_preview("NOT_AVAILABLE.NOT_AVAILABLE");
     }
-
-    // TODO - re-enable, movement with arrows
-
-
-    // TODO this should work with multiple selection and shift and control key - problably logic will need to be set in global state
-    // public function released_key(event: KeyEvent) {}
-    //     if (event.text == " ") {
-    //         if (root.selected_item != -1 && !root.values[root.selected_item].header_row) {
-    //             root.values[root.selected_item].checked = !root.values[root.selected_item].checked;
-    //         }
-    //     } else if (event.text == "\n") {
-    //         if (root.selected_item != -1) {
-    //             openSelectedItem();
-    //         }
-    //     } else if (event.text == Key.DownArrow) {
-    //         if (root.selected_item != -1) {
-    //             if (root.values.length - 1 == root.selected_item) {
-    //                 // Last element, so unselect it
-    //                 root.values[root.selected_item].selected_row = false;
-    //                 root.selected_item = -1;
-    //             } else {
-    //                 // Select next item, if next item is header row, then select second
-    //                 // This should be safe, because header row should never be last item
-    //                 root.values[root.selected_item].selected_row = false;
-    //                 if (root.values[root.selected_item + 1].header_row) {
-    //                     root.selected_item += 2;
-    //                 } else {
-    //                     root.selected_item += 1;
-    //                 }
-    //                 root.values[root.selected_item].selected_row = true;
-    //                 showPreview();
-    //             }
-    //         } else {
-    //             // Select last item if nothing is selected
-    //             if (root.values.length > 0) {
-    //                 if (root.values[0].header_row) {
-    //                     root.selected_item = 1;
-    //                 } else {
-    //                     root.selected_item = 0;
-    //                 }
-    //                 root.values[root.selected_item].selected_row = true;
-    //                 showPreview();
-    //             }
-    //         }
-    //     } else if (event.text == Key.UpArrow) {
-    //         if (root.selected_item != -1) {
-    //             if (root.selected_item == 0) {
-    //                 // First element, so unselect it
-    //                 root.values[root.selected_item].selected_row = false;
-    //                 root.selected_item = -1;
-    //             } else {
-    //                 root.values[root.selected_item].selected_row = false;
-    //                 // Select previous item, if previous item is header row, then select second previous item
-    //                 // This is safe, because if there is non header row upper, then can be easily selected,
-    //                 // but otherwise is done -2 which for 1 (smallest possible item to set with header row) gives -1, so gives
-    //                 // this non selected row
-    //                 if (root.values[root.selected_item - 1].header_row) {
-    //                     root.selected_item -= 2;
-    //                 } else {
-    //                     root.selected_item -= 1;
-    //                 }
-    //                 if (root.selected_item != -1) {
-    //                     root.values[root.selected_item].selected_row = true;
-    //                     showPreview();
-    //                 }
-    //             }
-    //         } else {
-    //             // Select last item if nothing is selected
-    //             if (root.values.length > 0) {
-    //                 root.selected_item = root.values.length - 1;
-    //                 root.values[root.selected_item].selected_row = true;
-    //                 showPreview();
-    //             }
-    //         }
-    //     }
-    // }
 }
