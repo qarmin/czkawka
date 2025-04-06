@@ -88,6 +88,7 @@ pub fn connect_row_selections(app: &MainWindow) {
     selection::select_items_with_shift(app); // SHIFT + LMB
     opener::open_selected_item(app);
     opener::open_parent_of_selected_item(app);
+    opener::open_provided_item(app);
 }
 
 mod opener {
@@ -98,31 +99,36 @@ mod opener {
     use crate::connect_row_selection::get_write_selection_lock;
     use crate::{Callabler, GuiState, MainWindow};
 
+    fn open_item(app: &MainWindow, items_path_str: &[usize], id: usize) {
+        let active_tab = app.global::<GuiState>().get_active_tab();
+        let model = get_tool_model(app, active_tab);
+        let model_data = model
+            .row_data(id)
+            .unwrap_or_else(|| panic!("Failed to get row data with id {id}, with model {} items", model.row_count()));
+
+        let path_to_open = if items_path_str.len() == 1 {
+            format!("{}", model_data.val_str.iter().nth(items_path_str[0]).expect("Cannot find path"))
+        } else {
+            format!(
+                "{}/{}",
+                model_data.val_str.iter().nth(items_path_str[0]).expect("Cannot find path"),
+                model_data.val_str.iter().nth(items_path_str[1]).expect("Cannot find name")
+            )
+        };
+
+        if let Err(e) = open::that(&path_to_open) {
+            error!("Failed to open file: {e}");
+        };
+    }
+
     fn open_selected_items(app: &MainWindow, items_path_str: &[usize]) {
         let active_tab = app.global::<GuiState>().get_active_tab();
         let mut lock = get_write_selection_lock();
         let selection = lock.get_mut(&active_tab).expect("Failed to get selection data");
-        let model = get_tool_model(app, active_tab);
 
         if selection.selected_rows.len() == 1 {
             let id = selection.selected_rows[0];
-            let model_data = model
-                .row_data(id)
-                .unwrap_or_else(|| panic!("Failed to get row data with id {id}, with model {} items", model.row_count()));
-
-            let path_to_open = if items_path_str.len() == 1 {
-                format!("{}", model_data.val_str.iter().nth(items_path_str[0]).expect("Cannot find path"))
-            } else {
-                format!(
-                    "{}/{}",
-                    model_data.val_str.iter().nth(items_path_str[0]).expect("Cannot find path"),
-                    model_data.val_str.iter().nth(items_path_str[1]).expect("Cannot find name")
-                )
-            };
-
-            if let Err(e) = open::that(&path_to_open) {
-                error!("Failed to open file: {e}");
-            };
+            open_item(app, items_path_str, id);
         } else {
             if selection.selected_rows.is_empty() {
                 error!("Failed to open selected item, because there is no selected item");
@@ -147,6 +153,16 @@ mod opener {
             let app = a.upgrade().expect("Failed to upgrade app :(");
             let active_tab = app.global::<GuiState>().get_active_tab();
             open_selected_items(&app, &[get_str_path_idx(active_tab)]);
+        });
+    }
+
+    pub(crate) fn open_provided_item(app: &MainWindow) {
+        let a = app.as_weak();
+        app.global::<Callabler>().on_row_open_item_with_index(move |idx| {
+            let app = a.upgrade().expect("Failed to upgrade app :(");
+            let active_tab = app.global::<GuiState>().get_active_tab();
+
+            open_item(&app, &[get_str_path_idx(active_tab), get_str_name_idx(active_tab)], idx as usize);
         });
     }
 }
@@ -306,7 +322,7 @@ fn rows_select_all_by_mode(selection: &mut SelectionData, model: &ModelRc<MainLi
     if model.row_count() > SELECTED_ROWS_LIMIT || selection.exceeded_limit {
         selection.exceeded_limit = true;
         selection.selected_rows.clear();
-        selection.number_of_selected_rows = model.iter().filter(|e| e.selected_row).count()
+        selection.number_of_selected_rows = model.iter().filter(|e| e.selected_row).count();
     } else {
         selection.selected_rows = model
             .iter()
@@ -436,7 +452,7 @@ fn row_select_items_with_shift(selection: &mut SelectionData, model: &ModelRc<Ma
         selection.exceeded_limit = false;
         selection.selected_rows = new_model
             .as_ref()
-            .unwrap_or(&model)
+            .unwrap_or(model)
             .iter()
             .enumerate()
             .filter_map(|(idx, row)| if row.selected_row { Some(idx) } else { None })
@@ -446,7 +462,7 @@ fn row_select_items_with_shift(selection: &mut SelectionData, model: &ModelRc<Ma
     new_model
 }
 
-fn rows_reverse_checked_selection(selection: &mut SelectionData, model: &ModelRc<MainListModel>) -> Option<ModelRc<MainListModel>> {
+fn rows_reverse_checked_selection(selection: &SelectionData, model: &ModelRc<MainListModel>) -> Option<ModelRc<MainListModel>> {
     if selection.exceeded_limit {
         let new_model = model
             .iter()
@@ -476,8 +492,9 @@ fn rows_reverse_checked_selection(selection: &mut SelectionData, model: &ModelRc
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use slint::VecModel;
+
+    use super::*;
 
     fn get_main_list_model() -> MainListModel {
         MainListModel {
@@ -492,8 +509,8 @@ mod tests {
     fn get_model_vec(items: usize) -> Vec<MainListModel> {
         (0..items).map(|_| get_main_list_model()).collect::<Vec<_>>()
     }
-    fn create_model_from_model_vec(model_vec: &Vec<MainListModel>) -> ModelRc<MainListModel> {
-        ModelRc::new(VecModel::from(model_vec.clone()))
+    fn create_model_from_model_vec(model_vec: &[MainListModel]) -> ModelRc<MainListModel> {
+        ModelRc::new(VecModel::from(model_vec.to_owned()))
     }
 
     #[test]
@@ -739,13 +756,13 @@ mod tests {
         model[1].selected_row = true;
         let model = create_model_from_model_vec(&model);
 
-        let mut selection = SelectionData {
+        let selection = SelectionData {
             number_of_selected_rows: 2,
             selected_rows: vec![0, 1],
             exceeded_limit: false,
         };
 
-        let new_model = rows_reverse_checked_selection(&mut selection, &model);
+        let new_model = rows_reverse_checked_selection(&selection, &model);
 
         assert!(new_model.is_none());
         assert!(model.row_data(0).unwrap().checked);
@@ -760,13 +777,13 @@ mod tests {
         model[1].selected_row = true;
         let model = create_model_from_model_vec(&model);
 
-        let mut selection = SelectionData {
+        let selection = SelectionData {
             number_of_selected_rows: 2,
             selected_rows: vec![],
             exceeded_limit: true,
         };
 
-        let new_model = rows_reverse_checked_selection(&mut selection, &model);
+        let new_model = rows_reverse_checked_selection(&selection, &model);
 
         assert!(new_model.is_some());
         let new_model = new_model.unwrap();

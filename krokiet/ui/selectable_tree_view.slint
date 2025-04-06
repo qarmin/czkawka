@@ -138,6 +138,7 @@ export component SelectableTableView inherits Rectangle {
     public function reset_selection() {
         start_shift_idx = -1;
         last_selected_idx = -1;
+        hidePreview();
     }
 
     function contains_data(idx: int) -> bool {
