@@ -108,7 +108,7 @@ mod opener {
             let id = selection.selected_rows[0];
             let model_data = model
                 .row_data(id)
-                .unwrap_or_else(|| panic!("Failed to get row data with id {id}, in tab {active_tab:?}, with model {} items", model.row_count()));
+                .unwrap_or_else(|| panic!("Failed to get row data with id {id}, with model {} items", model.row_count()));
 
             let path_to_open = if items_path_str.len() == 1 {
                 format!("{}", model_data.val_str.iter().nth(items_path_str[0]).expect("Cannot find path"))
@@ -188,7 +188,7 @@ mod selection {
             if let Some(new_model) = rows_deselect_all_by_mode(selection, &model) {
                 set_tool_model(&app, active_tab, new_model);
             }
-            reverse_selection_of_item_with_id(selection, &model, id as usize, active_tab);
+            reverse_selection_of_item_with_id(selection, &model, id as usize);
         });
     }
 
@@ -216,7 +216,7 @@ mod selection {
             let selection = lock.get_mut(&active_tab).expect("Failed to get selection data");
             let model = get_tool_model(&app, active_tab);
 
-            reverse_selection_of_item_with_id(selection, &model, id as usize, active_tab);
+            reverse_selection_of_item_with_id(selection, &model, id as usize);
         });
     }
 
@@ -249,7 +249,10 @@ mod selection {
 ////////////////////
 ////////////////////
 ////////////////////
+
+//
 // Deselect
+//
 fn rows_deselect_all_by_mode(selection: &mut SelectionData, model: &ModelRc<MainListModel>) -> Option<ModelRc<MainListModel>> {
     let new_model = if selection.exceeded_limit {
         Some(rows_deselect_all_selected_by_replacing_models(model))
@@ -289,7 +292,9 @@ fn rows_deselect_all_selected_by_replacing_models(model: &ModelRc<MainListModel>
     ModelRc::new(VecModel::from(new_model))
 }
 
-// Select
+//
+// Select All
+//
 fn rows_select_all_by_mode(selection: &mut SelectionData, model: &ModelRc<MainListModel>) -> Option<ModelRc<MainListModel>> {
     let new_model = if model.row_count() - selection.number_of_selected_rows > 100 {
         rows_select_all_by_replacing_models(selection, model)
@@ -301,10 +306,15 @@ fn rows_select_all_by_mode(selection: &mut SelectionData, model: &ModelRc<MainLi
     if model.row_count() > SELECTED_ROWS_LIMIT || selection.exceeded_limit {
         selection.exceeded_limit = true;
         selection.selected_rows.clear();
+        selection.number_of_selected_rows = model.iter().filter(|e| e.selected_row).count()
     } else {
-        selection.selected_rows = (0..model.row_count()).collect();
+        selection.selected_rows = model
+            .iter()
+            .enumerate()
+            .filter_map(|(idx, item)| if item.selected_row { Some(idx) } else { None })
+            .collect();
+        selection.number_of_selected_rows = selection.selected_rows.len();
     }
-    selection.number_of_selected_rows = model.row_count();
 
     new_model
 }
@@ -314,6 +324,10 @@ fn rows_select_all_one_by_one(model: &ModelRc<MainListModel>) {
         let mut model_data = model
             .row_data(id)
             .unwrap_or_else(|| panic!("Failed to get row data with id {id}, with model {} items", model.row_count()));
+
+        if model_data.header_row {
+            continue;
+        }
 
         if model_data.selected_row {
             continue;
@@ -325,6 +339,7 @@ fn rows_select_all_one_by_one(model: &ModelRc<MainListModel>) {
 }
 
 fn rows_select_all_by_replacing_models(selection: &SelectionData, model: &ModelRc<MainListModel>) -> Option<ModelRc<MainListModel>> {
+    // May happen with simple models, but for more advanced with header rows, we need something like "selection.all_items_selected"
     if selection.number_of_selected_rows == model.row_count() {
         return None;
     }
@@ -332,17 +347,25 @@ fn rows_select_all_by_replacing_models(selection: &SelectionData, model: &ModelR
     let new_model = model
         .iter()
         .map(|mut row| {
-            row.selected_row = true;
+            row.selected_row = !row.header_row;
             row
         })
         .collect::<Vec<_>>();
     Some(ModelRc::new(VecModel::from(new_model)))
 }
 
-fn reverse_selection_of_item_with_id(selection: &mut SelectionData, model: &ModelRc<MainListModel>, id: usize, active_tab: CurrentTab) {
+//
+// Reverse selection and selecting
+//
+fn reverse_selection_of_item_with_id(selection: &mut SelectionData, model: &ModelRc<MainListModel>, id: usize) {
     let mut model_data = model
         .row_data(id)
-        .unwrap_or_else(|| panic!("Failed to get row data with id {id}, in tab {active_tab:?}, with model {} items", model.row_count()));
+        .unwrap_or_else(|| panic!("Failed to get row data with id {id}, with model {} items", model.row_count()));
+
+    if model_data.header_row {
+        assert!(!model_data.selected_row);
+        return;
+    }
 
     let was_selected = model_data.selected_row;
     model_data.selected_row = !model_data.selected_row;
@@ -529,5 +552,123 @@ mod tests {
         assert!(selection.selected_rows.is_empty());
         assert!(!selection.exceeded_limit);
         assert_eq!(selection.number_of_selected_rows, 0);
+    }
+
+    #[test]
+    fn rows_select_all_by_mode_with_few_selected_rows() {
+        let mut model = get_model_vec(3);
+        model[0].selected_row = true;
+
+        let model = create_model_from_model_vec(&model);
+
+        let mut selection = SelectionData {
+            number_of_selected_rows: 1,
+            selected_rows: vec![0],
+            exceeded_limit: false,
+        };
+
+        let new_model = rows_select_all_by_mode(&mut selection, &model);
+
+        assert!(new_model.is_none());
+        assert!(model.row_data(0).unwrap().selected_row);
+        assert!(model.row_data(1).unwrap().selected_row);
+        assert!(model.row_data(2).unwrap().selected_row);
+        assert_eq!(selection.selected_rows, vec![0, 1, 2]);
+        assert!(!selection.exceeded_limit);
+        assert_eq!(selection.number_of_selected_rows, 3);
+    }
+
+    #[test]
+    fn rows_select_all_by_mode_with_header_rows() {
+        let mut model = get_model_vec(5);
+        model[0].header_row = true;
+        model[3].header_row = true;
+        let model = create_model_from_model_vec(&model);
+
+        let mut selection = SelectionData {
+            number_of_selected_rows: 0,
+            selected_rows: vec![],
+            exceeded_limit: false,
+        };
+
+        let new_model = rows_select_all_by_mode(&mut selection, &model);
+
+        assert!(new_model.is_none());
+        assert!(!model.row_data(0).unwrap().selected_row); // header row
+        assert!(model.row_data(1).unwrap().selected_row);
+        assert!(model.row_data(2).unwrap().selected_row);
+        assert!(!model.row_data(3).unwrap().selected_row); // header row
+        assert!(model.row_data(4).unwrap().selected_row);
+        assert_eq!(selection.selected_rows, vec![1, 2, 4]);
+        assert!(!selection.exceeded_limit);
+        assert_eq!(selection.number_of_selected_rows, 3);
+    }
+
+    #[test]
+    fn rows_select_all_by_mode_with_exceeded_limit() {
+        let mut model = get_model_vec(500);
+        model[11].header_row = true;
+        let model = create_model_from_model_vec(&model);
+
+        let mut selection = SelectionData {
+            number_of_selected_rows: 0,
+            selected_rows: vec![],
+            exceeded_limit: true,
+        };
+
+        let new_model = rows_select_all_by_mode(&mut selection, &model);
+
+        assert!(new_model.is_some());
+        let new_model = new_model.unwrap();
+        for idx in 0..new_model.row_count() {
+            if idx == 11 {
+                assert!(!new_model.row_data(idx).unwrap().selected_row, "idx: {idx}");
+            } else {
+                assert!(new_model.row_data(idx).unwrap().selected_row, "idx: {idx}");
+            }
+        }
+
+        assert!(selection.selected_rows.is_empty());
+        assert!(selection.exceeded_limit);
+        assert_eq!(selection.number_of_selected_rows, 0);
+    }
+
+    #[test]
+    fn reverse_selection_of_item_with_id_select_item() {
+        let model = get_model_vec(3);
+        let model = create_model_from_model_vec(&model);
+
+        let mut selection = SelectionData {
+            number_of_selected_rows: 0,
+            selected_rows: vec![],
+            exceeded_limit: false,
+        };
+
+        reverse_selection_of_item_with_id(&mut selection, &model, 1);
+
+        assert!(!model.row_data(0).unwrap().selected_row);
+        assert!(model.row_data(1).unwrap().selected_row);
+        assert!(!model.row_data(2).unwrap().selected_row);
+        assert_eq!(selection.selected_rows, vec![1]);
+        assert_eq!(selection.number_of_selected_rows, 1);
+    }
+
+    #[test]
+    fn reverse_selection_of_item_with_id_deselect_item() {
+        let mut model = get_model_vec(3);
+        model[1].header_row = true;
+        let model = create_model_from_model_vec(&model);
+
+        let mut selection = SelectionData {
+            number_of_selected_rows: 1,
+            selected_rows: vec![2],
+            exceeded_limit: false,
+        };
+
+        reverse_selection_of_item_with_id(&mut selection, &model, 1);
+
+        assert!(!model.row_data(1).unwrap().selected_row);
+        assert_eq!(selection.selected_rows, vec![2]);
+        assert_eq!(selection.number_of_selected_rows, 1);
     }
 }
