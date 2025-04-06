@@ -6,7 +6,6 @@ use czkawka_core::TOOLS_NUMBER;
 use once_cell::sync::OnceCell;
 use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
-use crate::common::set_tool_model;
 use crate::{CurrentTab, GuiState, MainListModel, MainWindow};
 
 const SELECTED_ROWS_LIMIT: usize = 1000;
@@ -64,31 +63,35 @@ fn get_write_selection_lock() -> RwLockWriteGuard<'static, HashMap<CurrentTab, S
 }
 
 // Deselect
-fn rows_deselect_all_by_mode(app: &MainWindow, selection: &mut SelectionData, active_tab: CurrentTab, model: &ModelRc<MainListModel>) {
-    if selection.exceeded_limit {
-        rows_deselect_all_selected_by_replacing_models(app, model);
+fn rows_deselect_all_by_mode(selection: &mut SelectionData, model: &ModelRc<MainListModel>) -> Option<ModelRc<MainListModel>> {
+    let new_model = if selection.exceeded_limit {
+        Some(rows_deselect_all_selected_by_replacing_models(model))
     } else if !selection.selected_rows.is_empty() {
-        rows_deselect_all_selected_one_by_one(model, selection, active_tab);
-    }
+        rows_deselect_all_selected_one_by_one(model, selection);
+        None
+    } else {
+        None
+    };
 
     selection.selected_rows.clear();
     selection.exceeded_limit = false;
     selection.number_of_selected_rows = 0;
+
+    new_model
 }
 
-fn rows_deselect_all_selected_one_by_one(model: &ModelRc<MainListModel>, selection: &SelectionData, active_tab: CurrentTab) {
+fn rows_deselect_all_selected_one_by_one(model: &ModelRc<MainListModel>, selection: &SelectionData) {
     for id in &selection.selected_rows {
         let mut model_data = model
             .row_data(*id)
-            .unwrap_or_else(|| panic!("Failed to get row data with id {id}, in tab {active_tab:?}, with model {} items", model.row_count()));
+            .unwrap_or_else(|| panic!("Failed to get row data with id {id}, with model {} items", model.row_count()));
         assert!(model_data.selected_row); // Probably can be removed in future
         model_data.selected_row = false;
         model.set_row_data(*id, model_data);
     }
 }
 
-fn rows_deselect_all_selected_by_replacing_models(app: &MainWindow, model: &ModelRc<MainListModel>) {
-    let active_tab = app.global::<GuiState>().get_active_tab();
+fn rows_deselect_all_selected_by_replacing_models(model: &ModelRc<MainListModel>) -> ModelRc<MainListModel> {
     let new_model = model
         .iter()
         .map(|mut row| {
@@ -96,16 +99,17 @@ fn rows_deselect_all_selected_by_replacing_models(app: &MainWindow, model: &Mode
             row
         })
         .collect::<Vec<_>>();
-    set_tool_model(app, active_tab, ModelRc::new(VecModel::from(new_model)));
+    ModelRc::new(VecModel::from(new_model))
 }
 
 // Select
-fn rows_select_all_by_mode(app: &MainWindow, selection: &mut SelectionData, active_tab: CurrentTab, model: &ModelRc<MainListModel>) {
-    if model.row_count() - selection.number_of_selected_rows > 100 {
-        rows_select_all_by_replacing_models(app, selection, model);
+fn rows_select_all_by_mode(selection: &mut SelectionData, model: &ModelRc<MainListModel>) -> Option<ModelRc<MainListModel>> {
+    let new_model = if model.row_count() - selection.number_of_selected_rows > 100 {
+        rows_select_all_by_replacing_models(selection, model)
     } else {
-        rows_select_all_one_by_one(model, active_tab);
-    }
+        rows_select_all_one_by_one(model);
+        None
+    };
 
     if model.row_count() > SELECTED_ROWS_LIMIT || selection.exceeded_limit {
         selection.exceeded_limit = true;
@@ -114,13 +118,15 @@ fn rows_select_all_by_mode(app: &MainWindow, selection: &mut SelectionData, acti
         selection.selected_rows = (0..model.row_count()).collect();
     }
     selection.number_of_selected_rows = model.row_count();
+
+    new_model
 }
 
-fn rows_select_all_one_by_one(model: &ModelRc<MainListModel>, active_tab: CurrentTab) {
+fn rows_select_all_one_by_one(model: &ModelRc<MainListModel>) {
     for id in 0..model.row_count() {
         let mut model_data = model
             .row_data(id)
-            .unwrap_or_else(|| panic!("Failed to get row data with id {id}, in tab {active_tab:?}, with model {} items", model.row_count()));
+            .unwrap_or_else(|| panic!("Failed to get row data with id {id}, with model {} items", model.row_count()));
 
         if model_data.selected_row {
             continue;
@@ -131,12 +137,11 @@ fn rows_select_all_one_by_one(model: &ModelRc<MainListModel>, active_tab: Curren
     }
 }
 
-fn rows_select_all_by_replacing_models(app: &MainWindow, selection: &SelectionData, model: &ModelRc<MainListModel>) {
+fn rows_select_all_by_replacing_models(selection: &SelectionData, model: &ModelRc<MainListModel>) -> Option<ModelRc<MainListModel>> {
     if selection.number_of_selected_rows == model.row_count() {
-        return;
+        return None;
     }
 
-    let active_tab = app.global::<GuiState>().get_active_tab();
     let new_model = model
         .iter()
         .map(|mut row| {
@@ -144,7 +149,7 @@ fn rows_select_all_by_replacing_models(app: &MainWindow, selection: &SelectionDa
             row
         })
         .collect::<Vec<_>>();
-    set_tool_model(app, active_tab, ModelRc::new(VecModel::from(new_model)));
+    Some(ModelRc::new(VecModel::from(new_model)))
 }
 
 fn reverse_selection_of_item_with_id(selection: &mut SelectionData, model: &ModelRc<MainListModel>, id: usize, active_tab: CurrentTab) {
@@ -200,7 +205,7 @@ pub fn connect_row_selections(app: &MainWindow) {
 mod selection {
     use slint::{ComponentHandle, Model};
 
-    use crate::common::get_tool_model;
+    use crate::common::{get_tool_model, set_tool_model};
     use crate::connect_row_selection::{
         get_write_selection_lock, reverse_selection_of_item_with_id, row_select_items_with_shift, rows_deselect_all_by_mode, rows_reverse_checked_selection,
         rows_select_all_by_mode,
@@ -217,7 +222,9 @@ mod selection {
             let selection = lock.get_mut(&active_tab).expect("Failed to get selection data");
             let model = get_tool_model(&app, active_tab);
 
-            rows_select_all_by_mode(&app, selection, active_tab, &model);
+            if let Some(new_model) = rows_select_all_by_mode(selection, &model) {
+                set_tool_model(&app, active_tab, new_model);
+            };
         });
     }
 
@@ -230,7 +237,9 @@ mod selection {
             let selection = lock.get_mut(&active_tab).expect("Failed to get selection data");
             let model = get_tool_model(&app, active_tab);
 
-            rows_deselect_all_by_mode(&app, selection, active_tab, &model);
+            if let Some(new_model) = rows_deselect_all_by_mode(selection, &model) {
+                set_tool_model(&app, active_tab, new_model);
+            }
             reverse_selection_of_item_with_id(selection, &model, id as usize, active_tab);
         });
     }
@@ -244,7 +253,10 @@ mod selection {
             let selection = lock.get_mut(&active_tab).expect("Failed to get selection data");
             let model = get_tool_model(&app, active_tab);
 
-            rows_reverse_checked_selection(&app, selection, active_tab, &model);
+            let new_model = rows_reverse_checked_selection(selection, &model);
+            if let Some(new_model) = new_model {
+                set_tool_model(&app, active_tab, new_model);
+            }
         });
     }
     pub(crate) fn reverse_selection_on_specific_item(app: &MainWindow) {
@@ -274,34 +286,32 @@ mod selection {
             assert!((first_idx as usize) < model.row_count());
             assert!((second_idx as usize) < model.row_count());
 
-            row_select_items_with_shift(&app, selection, &model, (first_idx as usize, second_idx as usize), active_tab);
+            if let Some(new_model) = row_select_items_with_shift(selection, &model, (first_idx as usize, second_idx as usize)) {
+                set_tool_model(&app, active_tab, new_model);
+            };
         });
     }
 }
 
-fn row_select_items_with_shift(app: &MainWindow, selection: &mut SelectionData, model: &ModelRc<MainListModel>, indexes: (usize, usize), active_tab: CurrentTab) {
+fn row_select_items_with_shift(selection: &mut SelectionData, model: &ModelRc<MainListModel>, indexes: (usize, usize)) -> Option<ModelRc<MainListModel>> {
     let (smaller_idx, bigger_idx) = if indexes.0 < indexes.1 { (indexes.0, indexes.1) } else { (indexes.1, indexes.0) };
 
-    if bigger_idx - smaller_idx > SELECTED_ROWS_LIMIT || selection.exceeded_limit {
+    let new_model = if bigger_idx - smaller_idx > SELECTED_ROWS_LIMIT || selection.exceeded_limit {
         let new_model: Vec<_> = model
             .iter()
             .enumerate()
             .map(|(idx, mut row)| {
-                if (smaller_idx..=bigger_idx).contains(&idx) {
-                    row.selected_row = true;
-                } else {
-                    row.selected_row = false;
-                }
+                row.selected_row = (smaller_idx..=bigger_idx).contains(&idx);
                 row
             })
             .collect();
-        set_tool_model(app, active_tab, ModelRc::new(VecModel::from(new_model)));
+        Some(ModelRc::new(VecModel::from(new_model)))
     } else {
         for idx in &selection.selected_rows {
             if !(smaller_idx..=bigger_idx).contains(idx) {
                 let mut model_data = model
                     .row_data(*idx)
-                    .unwrap_or_else(|| panic!("Failed to get row data with id {idx}, in tab {active_tab:?}, with model {} items", model.row_count()));
+                    .unwrap_or_else(|| panic!("Failed to get row data with id {idx}, with model {} items", model.row_count()));
                 assert!(model_data.selected_row); // Probably can be removed in future
                 model_data.selected_row = false;
                 model.set_row_data(*idx, model_data);
@@ -310,24 +320,27 @@ fn row_select_items_with_shift(app: &MainWindow, selection: &mut SelectionData, 
         for idx in smaller_idx..=bigger_idx {
             let mut model_data = model
                 .row_data(idx)
-                .unwrap_or_else(|| panic!("Failed to get row data with id {idx}, in tab {active_tab:?}, with model {} items", model.row_count()));
+                .unwrap_or_else(|| panic!("Failed to get row data with id {idx}, with model {} items", model.row_count()));
             if !model_data.selected_row {
                 model_data.selected_row = true;
                 model.set_row_data(idx, model_data);
             }
         }
-    }
+        None
+    };
 
     if bigger_idx - smaller_idx > SELECTED_ROWS_LIMIT {
         selection.exceeded_limit = true;
         selection.selected_rows.clear();
     } else {
-        selection.selected_rows = (smaller_idx..=bigger_idx).into_iter().collect();
+        selection.selected_rows = (smaller_idx..=bigger_idx).collect();
     }
     selection.number_of_selected_rows = bigger_idx - smaller_idx + 1;
+
+    new_model
 }
 
-fn rows_reverse_checked_selection(app: &MainWindow, selection: &mut SelectionData, active_tab: CurrentTab, model: &ModelRc<MainListModel>) {
+fn rows_reverse_checked_selection(selection: &mut SelectionData, model: &ModelRc<MainListModel>) -> Option<ModelRc<MainListModel>> {
     if selection.exceeded_limit {
         let new_model = model
             .iter()
@@ -338,7 +351,7 @@ fn rows_reverse_checked_selection(app: &MainWindow, selection: &mut SelectionDat
                 row
             })
             .collect::<Vec<_>>();
-        set_tool_model(app, active_tab, ModelRc::new(VecModel::from(new_model)));
+        return Some(ModelRc::new(VecModel::from(new_model)));
     } else if !selection.selected_rows.is_empty() {
         let ids = model
             .iter()
@@ -348,12 +361,13 @@ fn rows_reverse_checked_selection(app: &MainWindow, selection: &mut SelectionDat
         for id in ids {
             let mut model_data = model
                 .row_data(id)
-                .unwrap_or_else(|| panic!("Failed to get row data with id {id}, in tab {active_tab:?}, with model {} items", model.row_count()));
+                .unwrap_or_else(|| panic!("Failed to get row data with id {id}, with model {} items", model.row_count()));
             assert!(model_data.selected_row); // Probably can be removed in future
             model_data.checked = !model_data.checked;
             model.set_row_data(id, model_data);
         }
     }
+    None
 }
 
 mod opener {
