@@ -8,12 +8,11 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
-# TODO - increase version to 22.04, to unify every job
 # TODO - remove appimage
 jobs:
   linux-cli-krokiet-release:
     if: ${{ github.ref == 'refs/heads/master' }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
@@ -54,9 +53,56 @@ jobs:
             linux_krokiet
           token: ${{ secrets.PAT_REPOSITORY }}
 
+  linux-cli-krokiet-release-musl:
+    if: ${{ github.ref == 'refs/heads/master' }}
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install basic libraries
+        run: |
+          sudo apt update || true; sudo apt install libheif-dev libraw-dev ffmpeg -y
+          sudo apt install musl-tools -y
+
+      - name: Setup rust version
+        run: |
+          rustup default 1.85.0
+          rustup target add x86_64-unknown-linux-musl
+
+      - name: Build Release
+        run: |
+          sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
+          cargo build --release --bin czkawka_cli --bin krokiet --target x86_64-unknown-linux-musl
+
+      - name: Store Linux CLI
+        uses: actions/upload-artifact@v4
+        with:
+          name: czkawka_cli-${{ runner.os }}-release
+          path: target/release/czkawka_cli
+
+      - name: Store Linux Krokiet
+        uses: actions/upload-artifact@v4
+        with:
+          name: krokiet-${{ runner.os }}-release
+          path: target/release/krokiet
+
+      - name: Prepare files to release
+        run: |
+          mv target/release/czkawka_cli linux_czkawka_cli
+          mv target/release/krokiet linux_krokiet
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "Nightly"
+          files: |
+            linux_czkawka_cli
+            linux_krokiet
+          token: ${{ secrets.PAT_REPOSITORY }}
+
   linux-cli-krokiet-debug:
     if: ${{ github.ref != 'refs/heads/master' }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
