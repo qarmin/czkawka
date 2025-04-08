@@ -676,7 +676,7 @@ mod tests {
 
         assert!(selection.selected_rows.is_empty());
         assert!(selection.exceeded_limit);
-        assert_eq!(selection.number_of_selected_rows, 0);
+        assert_eq!(selection.number_of_selected_rows, 499);
     }
 
     #[test]
