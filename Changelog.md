@@ -7,12 +7,12 @@
 ### Krokiet
 - Multiple selection of items with mouse and keyboard - [#1478](https://github.com/qarmin/czkawka/pull/1478)
 
-
 ### External
 – There is a new, unofficial Tauri-based frontend for Czkawka - [Czkawka Tauri](https://github.com/shixinhuang99/czkawka-tauri)
 
 ### Prebuild-binaries
 - CI now creates linux binaries on ubuntu 22.04 instead 20.04(some types of builds were build on 24.04)
+- Musl builds of czkawka_cli are provided instead eyra builds(a little easier to maintain) - sadly no gui builds, due musl and eyra limitations :(
 
 ## Version 9.0.0 - 16.03.2025r
 
