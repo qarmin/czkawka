@@ -167,6 +167,7 @@ mod opener {
     }
 }
 mod selection {
+    use log::trace;
     use slint::{ComponentHandle, Model};
 
     use crate::common::{get_tool_model, set_tool_model};
@@ -179,6 +180,7 @@ mod selection {
     pub(crate) fn connect_select_all_rows(app: &MainWindow) {
         let a = app.as_weak();
         app.global::<Callabler>().on_row_select_all(move || {
+            trace!("Clicked select all");
             let app = a.upgrade().expect("Failed to upgrade app :(");
             let active_tab = app.global::<GuiState>().get_active_tab();
 
@@ -195,15 +197,22 @@ mod selection {
     pub(crate) fn reverse_single_unique_item(app: &MainWindow) {
         let a = app.as_weak();
         app.global::<Callabler>().on_row_reverse_single_unique_item(move |id| {
+            trace!("Clicked reverse single unique item");
             let app = a.upgrade().expect("Failed to upgrade app :(");
             let active_tab = app.global::<GuiState>().get_active_tab();
             let mut lock = get_write_selection_lock();
             let selection = lock.get_mut(&active_tab).expect("Failed to get selection data");
-            let model = get_tool_model(&app, active_tab);
 
-            if let Some(new_model) = rows_deselect_all_by_mode(selection, &model) {
-                set_tool_model(&app, active_tab, new_model);
+            {
+                let model = get_tool_model(&app, active_tab);
+
+                if let Some(new_model) = rows_deselect_all_by_mode(selection, &model) {
+                    set_tool_model(&app, active_tab, new_model);
+                }
             }
+
+            // needs to get model again, because it could be replaced
+            let model = get_tool_model(&app, active_tab);
             reverse_selection_of_item_with_id(selection, &model, id as usize);
         });
     }
@@ -211,6 +220,7 @@ mod selection {
     pub(crate) fn reverse_checked_on_selection(app: &MainWindow) {
         let a = app.as_weak();
         app.global::<Callabler>().on_row_reverse_checked_selection(move || {
+            trace!("Clicked reverse checked on selection");
             let app = a.upgrade().expect("Failed to upgrade app :(");
             let active_tab = app.global::<GuiState>().get_active_tab();
             let mut lock = get_write_selection_lock();
@@ -226,6 +236,7 @@ mod selection {
     pub(crate) fn reverse_selection_on_specific_item(app: &MainWindow) {
         let a = app.as_weak();
         app.global::<Callabler>().on_row_reverse_item_selection(move |id| {
+            trace!("Clicked reverse selection on specific item");
             let app = a.upgrade().expect("Failed to upgrade app :(");
             let active_tab = app.global::<GuiState>().get_active_tab();
             let mut lock = get_write_selection_lock();
@@ -239,6 +250,7 @@ mod selection {
     pub(crate) fn select_items_with_shift(app: &MainWindow) {
         let a = app.as_weak();
         app.global::<Callabler>().on_row_select_items_with_shift(move |first_idx, second_idx| {
+            trace!("Clicked select items with shift");
             let app = a.upgrade().expect("Failed to upgrade app :(");
             let active_tab = app.global::<GuiState>().get_active_tab();
             let mut lock = get_write_selection_lock();
@@ -276,6 +288,7 @@ fn rows_deselect_all_by_mode(selection: &mut SelectionData, model: &ModelRc<Main
         rows_deselect_all_selected_one_by_one(model, selection);
         None
     } else {
+        assert_ne!(model.row_count(), 0);
         None
     };
 
@@ -322,9 +335,11 @@ fn rows_select_all_by_mode(selection: &mut SelectionData, model: &ModelRc<MainLi
     if model.row_count() > SELECTED_ROWS_LIMIT || selection.exceeded_limit {
         selection.exceeded_limit = true;
         selection.selected_rows.clear();
-        selection.number_of_selected_rows = model.iter().filter(|e| e.selected_row).count();
+        selection.number_of_selected_rows = new_model.as_ref().unwrap_or(model).iter().filter(|e| e.selected_row).count();
     } else {
-        selection.selected_rows = model
+        selection.selected_rows = new_model
+            .as_ref()
+            .unwrap_or(model)
             .iter()
             .enumerate()
             .filter_map(|(idx, item)| if item.selected_row { Some(idx) } else { None })
@@ -388,6 +403,7 @@ fn reverse_selection_of_item_with_id(selection: &mut SelectionData, model: &Mode
     model.set_row_data(id, model_data);
 
     if was_selected {
+        assert!(selection.number_of_selected_rows > 0);
         if !selection.exceeded_limit {
             selection.selected_rows.retain(|&x| x != id);
         }
