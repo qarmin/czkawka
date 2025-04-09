@@ -38,6 +38,7 @@ and
 Icons
 czkawka_gui/icons/*.svg
 krokiet/icons/*.svg
+krokiet/icons/*.png
 
 Copyright (c) 2020-2025 Rafał Mikrut
 

@@ -4,6 +4,9 @@
 - Converts println/eprintln into log functions - [#1478](https://github.com/qarmin/czkawka/pull/1478)
 - Speedup a little cache loading/saving - [#1478](https://github.com/qarmin/czkawka/pull/1478)
 
+### GTK Gui
+- Using newly created icons - uglier, but released under really free under the clear CC BY license - [#1478](https://github.com/qarmin/czkawka/pull/1478)
+
 ### Krokiet
 - Multiple selection of items with mouse and keyboard - [#1478](https://github.com/qarmin/czkawka/pull/1478)
 
