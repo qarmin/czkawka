@@ -12,7 +12,7 @@ use hamming_bitwise_fast::hamming_bitwise_fast;
 use humansize::{BINARY, format_size};
 use image::GenericImageView;
 use image_hasher::{FilterType, HashAlg, HasherConfig};
-use log::debug;
+use log::{debug, error};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -687,12 +687,12 @@ impl SimilarImages {
 
         for vec_file_entry in collected_similar_images.values() {
             if vec_file_entry.is_empty() {
-                println!("Empty group");
+                error!("Found empty group");
                 found = true;
                 continue;
             }
             if vec_file_entry.len() == 1 {
-                println!("Single Element {vec_file_entry:?}");
+                error!("Found simple element {vec_file_entry:?}");
                 found = true;
                 continue;
             }
@@ -700,7 +700,7 @@ impl SimilarImages {
                 let st = file_entry.path.to_string_lossy().to_string();
                 if result_hashset.contains(&st) {
                     found = true;
-                    println!("Duplicated Element {st}");
+                    error!("Duplicated Element {st}");
                 } else {
                     result_hashset.insert(st);
                 }
@@ -724,6 +724,7 @@ fn is_in_reference_folder(reference_directories: &[PathBuf], path: &Path) -> boo
 }
 
 impl DebugPrint for SimilarImages {
+    #[allow(clippy::print_stdout)]
     fn debug_print(&self) {
         if !cfg!(debug_assertions) {
             return;
@@ -897,7 +898,7 @@ fn debug_check_for_duplicated_things(
     for (hash, number_of_children) in hashes_parents {
         if *number_of_children > 0 {
             if hashmap_hashes.contains(hash) {
-                println!("------1--HASH--{}  {:?}", numm, all_hashed_images[hash]);
+                debug!("------1--HASH--{}  {:?}", numm, all_hashed_images[hash]);
                 found_broken_thing = true;
             }
             hashmap_hashes.insert((*hash).clone());
@@ -905,7 +906,7 @@ fn debug_check_for_duplicated_things(
             for i in &all_hashed_images[hash] {
                 let name = i.path.to_string_lossy().to_string();
                 if hashmap_names.contains(&name) {
-                    println!("------1--NAME--{numm}  {name:?}");
+                    debug!("------1--NAME--{numm}  {name:?}");
                     found_broken_thing = true;
                 }
                 hashmap_names.insert(name);
@@ -914,7 +915,7 @@ fn debug_check_for_duplicated_things(
     }
     for hash in hashes_similarity.keys() {
         if hashmap_hashes.contains(hash) {
-            println!("------2--HASH--{}  {:?}", numm, all_hashed_images[hash]);
+            debug!("------2--HASH--{}  {:?}", numm, all_hashed_images[hash]);
             found_broken_thing = true;
         }
         hashmap_hashes.insert((*hash).clone());
@@ -922,7 +923,7 @@ fn debug_check_for_duplicated_things(
         for i in &all_hashed_images[hash] {
             let name = i.path.to_string_lossy().to_string();
             if hashmap_names.contains(&name) {
-                println!("------2--NAME--{numm}  {name:?}");
+                debug!("------2--NAME--{numm}  {name:?}");
                 found_broken_thing = true;
             }
             hashmap_names.insert(name);

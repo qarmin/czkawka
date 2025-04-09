@@ -3,7 +3,10 @@
 #![allow(unknown_lints)] // May be disabled, but locally I use nightly clippy
 #![allow(clippy::collapsible_if)]
 #![allow(clippy::collapsible_else_if)]
-// #![warn(clippy::unwrap_used)] // Cannot use due unwrap used in a lot of places
+// #![warn(clippy::unwrap_used)] // Cannot use due unwrap used in a lot of places in generated code
+#![warn(clippy::print_stderr)]
+#![warn(clippy::print_stdout)]
+#![warn(clippy::dbg_macro)]
 
 use std::rc::Rc;
 use std::sync::Arc;
@@ -12,6 +15,7 @@ use std::sync::atomic::AtomicBool;
 use crossbeam_channel::{Receiver, Sender, unbounded};
 use czkawka_core::common::{print_version_mode, set_config_cache_path, setup_logger};
 use czkawka_core::progress_data::ProgressData;
+use log::{info, warn};
 use slint::VecModel;
 
 use crate::connect_delete::connect_delete_button;
@@ -20,6 +24,7 @@ use crate::connect_move::connect_move;
 use crate::connect_open::connect_open_items;
 use crate::connect_progress_receiver::connect_progress_gathering;
 use crate::connect_rename::connect_rename;
+use crate::connect_row_selection::connect_row_selections;
 use crate::connect_save::connect_save;
 use crate::connect_scan::connect_scan_button;
 use crate::connect_select::{connect_select, connect_showing_proper_select_buttons};
@@ -37,6 +42,7 @@ mod connect_move;
 mod connect_open;
 mod connect_progress_receiver;
 mod connect_rename;
+mod connect_row_selection;
 mod connect_save;
 mod connect_scan;
 mod connect_select;
@@ -53,6 +59,7 @@ slint::include_modules!();
 fn main() {
     setup_logger(false);
     print_version_mode("Krokiet");
+    print_krokiet_features();
     set_config_cache_path("Czkawka", "Krokiet");
 
     let app = MainWindow::new().expect("Failed to create main window");
@@ -83,6 +90,7 @@ fn main() {
     connect_move(&app);
     connect_rename(&app);
     connect_save(&app, Arc::clone(&shared_models));
+    connect_row_selections(&app);
 
     app.run().expect("Failed to run app :(");
 
@@ -101,4 +109,29 @@ pub fn zeroing_all_models(app: &MainWindow) {
     app.set_similar_videos_model(Rc::new(VecModel::default()).into());
     app.set_invalid_symlinks_model(Rc::new(VecModel::default()).into());
     app.set_temporary_files_model(Rc::new(VecModel::default()).into());
+}
+
+#[allow(clippy::vec_init_then_push)]
+#[allow(unused_mut)]
+pub fn print_krokiet_features() {
+    let mut features: Vec<&str> = vec![];
+
+    #[cfg(feature = "skia_opengl")]
+    features.push("skia_opengl");
+    #[cfg(feature = "skia_vulkan")]
+    features.push("skia_vulkan");
+    #[cfg(feature = "software")]
+    features.push("software");
+    #[cfg(feature = "femtovg")]
+    features.push("femtovg");
+    #[cfg(feature = "winit_femtovg")]
+    features.push("winit_femtovg");
+    #[cfg(feature = "winit_skia_opengl")]
+    features.push("winit_skia_opengl");
+    #[cfg(feature = "winit_skia_vulkan")]
+    features.push("winit_skia_vulkan");
+    #[cfg(feature = "winit_software")]
+    features.push("winit_software");
+
+    info!("Krokiet features({}): [{}]", features.len(), features.join(", "));
 }

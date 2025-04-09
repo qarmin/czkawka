@@ -10,7 +10,7 @@ use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
-use std::{fs, mem};
+use std::{fs, mem, thread};
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
@@ -940,7 +940,8 @@ impl DuplicateFinder {
         self.hash_reference_folders();
 
         // Clean unused data
-        self.files_with_identical_size = Default::default();
+        let files_with_identical_size = mem::take(&mut self.files_with_identical_size);
+        thread::spawn(move || drop(files_with_identical_size));
 
         WorkContinueStatus::Continue
     }
@@ -1026,6 +1027,7 @@ impl DuplicateFinder {
 }
 
 impl DebugPrint for DuplicateFinder {
+    #[allow(clippy::print_stdout)]
     fn debug_print(&self) {
         if !cfg!(debug_assertions) {
             return;

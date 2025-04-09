@@ -124,6 +124,7 @@ impl BigFile {
 }
 
 impl DebugPrint for BigFile {
+    #[allow(clippy::print_stdout)]
     fn debug_print(&self) {
         if !cfg!(debug_assertions) {
             return;

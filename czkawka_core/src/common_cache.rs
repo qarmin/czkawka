@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use std::fs;
 use std::io::{BufReader, BufWriter};
 use std::path::Path;
@@ -119,7 +119,20 @@ pub fn load_cache_from_file_generalized_by_path<T>(cache_file_name: &str, delete
 where
     for<'a> T: Deserialize<'a> + ResultEntry + Sized + Send + Sync + Clone,
 {
-    let (text_messages, vec_loaded_cache) = load_cache_from_file_generalized(cache_file_name, delete_outdated_cache, used_files);
+    let check_file = |file_entry: &T| {
+        let file_entry_path_str = file_entry.get_path().to_string_lossy();
+        if let Some(used_file) = used_files.get(file_entry_path_str.as_ref()) {
+            if file_entry.get_size() != used_file.get_size() {
+                return false;
+            }
+            if file_entry.get_modified_date() != used_file.get_modified_date() {
+                return false;
+            }
+        }
+        true
+    };
+
+    let (text_messages, vec_loaded_cache) = load_cache_from_file_generalized(cache_file_name, delete_outdated_cache, check_file);
     let Some(vec_loaded_entries) = vec_loaded_cache else {
         return (text_messages, None);
     };
@@ -143,14 +156,30 @@ pub fn load_cache_from_file_generalized_by_size<T>(
 where
     for<'a> T: Deserialize<'a> + ResultEntry + Sized + Send + Sync + Clone,
 {
-    debug!("Converting cache BtreeMap<u64, Vec<T>> into BTreeMap<String, T>");
-    let mut used_files: BTreeMap<String, T> = Default::default();
-    for file_entry in cache_not_converted.values().flatten() {
-        used_files.insert(file_entry.get_path().to_string_lossy().into_owned(), file_entry.clone());
-    }
-    debug!("Converted cache BtreeMap<u64, Vec<T>> into BTreeMap<String, T>");
+    debug!("Converting cache BtreeMap<u64, Vec<T>> into HashMap<String, (u64, u64)>");
+    let used_files: HashMap<String, (u64, u64)> = cache_not_converted
+        .iter()
+        .flat_map(|(size, vec)| {
+            vec.iter()
+                .map(move |file_entry| (file_entry.get_path().to_string_lossy().into_owned(), (*size, file_entry.get_modified_date())))
+        })
+        .collect();
+    debug!("Converted cache BtreeMap<u64, Vec<T>> into HashMap<String, (u64, u64)>");
 
-    let (text_messages, vec_loaded_cache) = load_cache_from_file_generalized(cache_file_name, delete_outdated_cache, &used_files);
+    let check_file = |file_entry: &T| {
+        let file_entry_path_str = file_entry.get_path().to_string_lossy();
+        if let Some((size, modification_date)) = used_files.get(file_entry_path_str.as_ref()) {
+            if file_entry.get_size() != *size {
+                return false;
+            }
+            if file_entry.get_modified_date() != *modification_date {
+                return false;
+            }
+        }
+        true
+    };
+
+    let (text_messages, vec_loaded_cache) = load_cache_from_file_generalized(cache_file_name, delete_outdated_cache, check_file);
     let Some(vec_loaded_entries) = vec_loaded_cache else {
         return (text_messages, None);
     };
@@ -165,41 +194,11 @@ where
     (text_messages, Some(map_loaded_entries))
 }
 
-#[fun_time(message = "load_cache_from_file_generalized_by_path_from_size", level = "debug")]
-pub fn load_cache_from_file_generalized_by_path_from_size<T>(
-    cache_file_name: &str,
-    delete_outdated_cache: bool,
-    cache_not_converted: &BTreeMap<u64, Vec<T>>,
-) -> (Messages, Option<BTreeMap<String, T>>)
-where
-    for<'a> T: Deserialize<'a> + ResultEntry + Sized + Send + Sync + Clone,
-{
-    debug!("Converting cache BtreeMap<u64, Vec<T>> into BTreeMap<String, T>");
-    let mut used_files: BTreeMap<String, T> = Default::default();
-    for file_entry in cache_not_converted.values().flatten() {
-        used_files.insert(file_entry.get_path().to_string_lossy().into_owned(), file_entry.clone());
-    }
-    debug!("Converted cache BtreeMap<u64, Vec<T>> into BTreeMap<String, T>");
-
-    let (text_messages, vec_loaded_cache) = load_cache_from_file_generalized(cache_file_name, delete_outdated_cache, &used_files);
-    let Some(vec_loaded_entries) = vec_loaded_cache else {
-        return (text_messages, None);
-    };
-
-    debug!("Converting cache Vec<T> into BTreeMap<String, T>");
-    let map_loaded_entries: BTreeMap<String, T> = vec_loaded_entries
-        .into_iter()
-        .map(|file_entry| (file_entry.get_path().to_string_lossy().into_owned(), file_entry))
-        .collect();
-    debug!("Converted cache Vec<T> into BTreeMap<String, T>");
-
-    (text_messages, Some(map_loaded_entries))
-}
-
 #[fun_time(message = "load_cache_from_file_generalized", level = "debug")]
-fn load_cache_from_file_generalized<T>(cache_file_name: &str, delete_outdated_cache: bool, used_files: &BTreeMap<String, T>) -> (Messages, Option<Vec<T>>)
+fn load_cache_from_file_generalized<T, F>(cache_file_name: &str, delete_outdated_cache: bool, check_func: F) -> (Messages, Option<Vec<T>>)
 where
     for<'a> T: Deserialize<'a> + ResultEntry + Sized + Send + Sync + Clone,
+    F: Fn(&T) -> bool + Send + Sync,
 {
     let mut text_messages = Messages::new();
 
@@ -240,27 +239,16 @@ where
             };
         }
 
-        debug!(
-            "Starting removing outdated cache entries (removing non existent files from cache - {})",
-            delete_outdated_cache
-        );
+        debug!("Starting removing outdated cache entries (removing non existent files from cache - {delete_outdated_cache})");
         let initial_number_of_entries = vec_loaded_entries.len();
         vec_loaded_entries = vec_loaded_entries
             .into_par_iter()
             .filter(|file_entry| {
-                let path = file_entry.get_path();
-
-                let file_entry_path_str = path.to_string_lossy().to_string();
-                if let Some(used_file) = used_files.get(&file_entry_path_str) {
-                    if file_entry.get_size() != used_file.get_size() {
-                        return false;
-                    }
-                    if file_entry.get_modified_date() != used_file.get_modified_date() {
-                        return false;
-                    }
+                if !check_func(file_entry) {
+                    return false;
                 }
 
-                if delete_outdated_cache && !path.exists() {
+                if delete_outdated_cache && !file_entry.get_path().exists() {
                     return false;
                 }
 

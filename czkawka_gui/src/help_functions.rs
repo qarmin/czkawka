@@ -24,6 +24,7 @@ use gtk4::prelude::*;
 use gtk4::{ListStore, Scale, ScrollType, TextView, TreeView, Widget};
 use image::codecs::jpeg::JpegEncoder;
 use image::{DynamicImage, EncodableLayout};
+use log::debug;
 use once_cell::sync::OnceCell;
 
 use crate::flg;
@@ -693,14 +694,14 @@ pub fn debug_print_widget<P: IsA<Widget>>(item: &P) {
     let mut widgets_to_check = vec![(0, 0, item.clone().upcast::<Widget>())];
 
     let mut next_free_number = 1;
-    println!("{}, {}, {:?} ", widgets_to_check[0].0, widgets_to_check[0].1, widgets_to_check[0].2);
+    debug!("{}, {}, {:?} ", widgets_to_check[0].0, widgets_to_check[0].1, widgets_to_check[0].2);
 
     while let Some((current_number, parent_number, widget)) = widgets_to_check.pop() {
         for widget in get_all_direct_children(&widget) {
             widgets_to_check.push((next_free_number, current_number, widget));
             next_free_number += 1;
         }
-        println!("{current_number}, {parent_number}, {widget:?} ");
+        debug!("{current_number}, {parent_number}, {widget:?} ");
     }
 }
 

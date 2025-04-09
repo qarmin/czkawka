@@ -178,6 +178,7 @@ impl Default for InvalidSymlinks {
 }
 
 impl DebugPrint for InvalidSymlinks {
+    #[allow(clippy::print_stdout)]
     fn debug_print(&self) {
         if !cfg!(debug_assertions) {
             return;

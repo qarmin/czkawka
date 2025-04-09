@@ -33,7 +33,6 @@ export component MainList {
     in-out property <[MainListModel]> bad_extensions_model: [];
 
     callback changed_current_tab();
-    callback released_key(string);
 
     out property <length> path_px: 350px;
     out property <length> name_px: 100px;
@@ -237,11 +236,73 @@ export component MainList {
             }
             accept
         }
+
+        key-pressed(event) => {
+            if (!self.visible || !self.has-focus) {
+                return accept;
+            }
+            if (GuiState.active_tab == CurrentTab.EmptyFiles) {
+                empty_files.pressed_key(event);
+            } else if (GuiState.active_tab == CurrentTab.EmptyFolders) {
+                empty_folders.pressed_key(event);
+            } else if (GuiState.active_tab == CurrentTab.SimilarImages) {
+                similar_images.pressed_key(event);
+            } else if (GuiState.active_tab == CurrentTab.BadExtensions) {
+                bad_extensions.pressed_key(event);
+            } else if (GuiState.active_tab == CurrentTab.BigFiles) {
+                big_files.pressed_key(event);
+            } else if (GuiState.active_tab == CurrentTab.DuplicateFiles) {
+                duplicates.pressed_key(event);
+            } else if (GuiState.active_tab == CurrentTab.TemporaryFiles) {
+                temporary_files.pressed_key(event);
+            } else if (GuiState.active_tab == CurrentTab.SimilarVideos) {
+                similar_videos.pressed_key(event);
+            } else if (GuiState.active_tab == CurrentTab.SimilarMusic) {
+                similar_music.pressed_key(event);
+            } else if (GuiState.active_tab == CurrentTab.InvalidSymlinks) {
+                invalid_symlink.pressed_key(event);
+            } else if (GuiState.active_tab == CurrentTab.BrokenFiles) {
+                broken_files.pressed_key(event);
+            } else {
+                debug("Non handled key in main_lists.slint", event, GuiState.active_tab);
+            }
+            accept
+        }
     }
 
+    public function reset_selection() {
+        if (GuiState.active_tab == CurrentTab.EmptyFiles) {
+            empty_files.reset_selection();
+        } else if (GuiState.active_tab == CurrentTab.EmptyFolders) {
+            empty_folders.reset_selection();
+        } else if (GuiState.active_tab == CurrentTab.SimilarImages) {
+            similar_images.reset_selection();
+        } else if (GuiState.active_tab == CurrentTab.BadExtensions) {
+            bad_extensions.reset_selection();
+        } else if (GuiState.active_tab == CurrentTab.BigFiles) {
+            big_files.reset_selection();
+        } else if (GuiState.active_tab == CurrentTab.DuplicateFiles) {
+            duplicates.reset_selection();
+        } else if (GuiState.active_tab == CurrentTab.TemporaryFiles) {
+            temporary_files.reset_selection();
+        } else if (GuiState.active_tab == CurrentTab.SimilarVideos) {
+            similar_videos.reset_selection();
+        } else if (GuiState.active_tab == CurrentTab.SimilarMusic) {
+            similar_music.reset_selection();
+        } else if (GuiState.active_tab == CurrentTab.InvalidSymlinks) {
+            invalid_symlink.reset_selection();
+        } else if (GuiState.active_tab == CurrentTab.BrokenFiles) {
+            broken_files.reset_selection();
+        } else {
+            debug("Non handled reset selection in main_lists.slint", GuiState.active_tab);
+        }
+    }
+
+
     changed_current_tab() => {
-        empty_folders.deselect_selected_item();
-        empty_files.deselect_selected_item();
-        similar_images.deselect_selected_item();
+        // TODO - not sure why this exists, but if needed it needs to be updated to use new functions
+        // empty_folders.deselect_selected_item();
+        // empty_files.deselect_selected_item();
+        // similar_images.deselect_selected_item();
     }
 }

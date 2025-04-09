@@ -5,6 +5,7 @@ use czkawka_core::common_messages::Messages;
 use slint::{ComponentHandle, ModelRc, VecModel};
 
 use crate::common::{get_is_header_mode, get_tool_model, set_tool_model};
+use crate::connect_row_selection::reset_selection;
 use crate::model_operations::{collect_path_name_and_proper_extension_from_model, deselect_all_items, filter_out_checked_items};
 use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow};
 
@@ -20,6 +21,7 @@ pub fn connect_rename(app: &MainWindow) {
             set_tool_model(&app, active_tab, new_model);
         }
         app.global::<GuiState>().set_info_text(Messages::new_from_errors(errors).create_messages_text().into());
+        reset_selection(&app, false);
     });
 }
 

@@ -1,12 +1,28 @@
 import { SelectMode } from "common.slint";
+import {CurrentTab} from "common.slint";
 
 export global Callabler {
     // Bottom panel operations
     callback remove_item_directories(bool);
     callback added_manual_directories(bool, string);
 
+    // Row selecting
+    callback reset_selection(CurrentTab);
+
+    callback row_select_all();
+    callback row_reverse_single_unique_item(int);
+    callback row_reverse_item_selection(int);
+    callback row_select_items_with_shift(int, int);
+
+    callback row_open_selected_item();
+    callback row_open_parent_of_selected_item();
+
+    callback row_reverse_checked_selection();
+    callback row_open_item_with_index(int);
+
     // Right click or middle click opener
-    callback item_opened(string);
+    callback open_item(string);
+    callback open_selected_item(CurrentTab);
 
     callback delete_selected_items();
     callback select_items(SelectMode);

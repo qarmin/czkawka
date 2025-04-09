@@ -8,12 +8,11 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
-# TODO - increase version to 22.04, to unify every job
 # TODO - remove appimage
 jobs:
   linux-cli-krokiet-release:
     if: ${{ github.ref == 'refs/heads/master' }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
@@ -54,9 +53,51 @@ jobs:
             linux_krokiet
           token: ${{ secrets.PAT_REPOSITORY }}
 
+  # GUI not works :(
+  # https://github.com/slint-ui/slint/issues/7586
+  # https://github.com/rust-windowing/winit/issues/1818
+  linux-cli-release-musl:
+    #if: ${{ github.ref == 'refs/heads/master' }}
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install basic libraries
+        run: |
+          sudo apt update || true; sudo apt install libheif-dev libraw-dev ffmpeg -y
+          sudo apt install musl-tools -y
+
+      - name: Setup rust version
+        run: |
+          rustup default 1.85.0
+          rustup target add x86_64-unknown-linux-musl
+
+      - name: Build Release
+        run: |
+          sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
+          cargo build --release --bin czkawka_cli --bin krokiet --target x86_64-unknown-linux-musl
+
+      - name: Store Linux CLI
+        uses: actions/upload-artifact@v4
+        with:
+          name: czkawka_cli-${{ runner.os }}-release-musl
+          path: target/x86_64-unknown-linux-musl/release/czkawka_cli
+
+      - name: Prepare files to release
+        run: |
+          mv target/x86_64-unknown-linux-musl/release/czkawka_cli linux_czkawka_cli_musl
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "Nightly"
+          files: |
+            linux_czkawka_cli_musl
+          token: ${{ secrets.PAT_REPOSITORY }}
+
   linux-cli-krokiet-debug:
     if: ${{ github.ref != 'refs/heads/master' }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
@@ -379,44 +420,3 @@ jobs:
           name: krokiet-${{ runner.os }}-arm-debug
           path: |
             target/debug/krokiet
-
-  linux-eyra:
-    if: ${{ github.ref == 'refs/heads/master' }}
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v4
-
-      # New versions of nightly rust may call new unimplemented in eyra functions, so use const version
-      - name: Setup rust version
-        run: rustup default nightly-2025-03-15
-
-      - name: Add eyra
-        run: |
-          cd czkawka_cli
-          cargo add eyra --rename=std
-          echo 'fn main() { println!("cargo:rustc-link-arg=-nostartfiles"); }' > build.rs
-          cd ..
-
-      - name: Enable LTO
-        run: sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
-
-      - name: Build Release
-        run: cargo build --release --bin czkawka_cli
-
-      - name: Store Linux CLI Eyra
-        uses: actions/upload-artifact@v4
-        with:
-          name: czkawka_cli-eyra-${{ runner.os }}
-          path: target/release/czkawka_cli
-
-      - name: Prepare files to release
-        run: |
-          mv target/release/czkawka_cli linux_czkawka_cli_eyra
-
-      - name: Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: "Nightly"
-          files: |
-            linux_czkawka_cli_eyra
-          token: ${{ secrets.PAT_REPOSITORY }}

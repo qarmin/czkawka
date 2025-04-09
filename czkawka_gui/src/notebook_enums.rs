@@ -1,4 +1,6 @@
-pub const NUMBER_OF_NOTEBOOK_MAIN_TABS: usize = 11;
+use czkawka_core::TOOLS_NUMBER;
+
+pub const NUMBER_OF_NOTEBOOK_MAIN_TABS: usize = TOOLS_NUMBER;
 // pub const NUMBER_OF_NOTEBOOK_UPPER_TABS: usize = 3;
 
 // Needs to be updated when changed order of notebook tabs

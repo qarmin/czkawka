@@ -107,6 +107,7 @@ impl Default for EmptyFiles {
 }
 
 impl DebugPrint for EmptyFiles {
+    #[allow(clippy::print_stdout)]
     fn debug_print(&self) {
         if !cfg!(debug_assertions) {
             return;
