@@ -33,7 +33,7 @@ pub fn connect_about_buttons(gui_data: &GuiData) {
     let button_translation = gui_data.about.button_translation.clone();
     button_translation.connect_clicked(move |_| {
         if let Err(e) = open::that(TRANSLATION_SITE) {
-            error!("Failed to open repository site: {TRANSLATION_SITE}, reason {e}");
+            error!("Failed to open translation site: {TRANSLATION_SITE}, reason {e}");
         };
     });
 }
