@@ -20,8 +20,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-
-
+========================================================================================================================
+========================================================================================================================
+========================================================================================================================
 
 Icons
 data/icons/com.github.qarmin.czkawka.Devel.svg
@@ -31,6 +32,15 @@ data/icons/com.github.qarmin.czkawka-symbolic.svg
 CC BY 4.0 License
 
 Copyright (c) 2020 [jannuary](https://github.com/jannuary)
+
+and
+
+Icons
+czkawka_gui/icons/*.svg
+krokiet/icons/*.svg
+
+Copyright (c) 2020-2025 Rafał Mikrut
+
 
 License: CC-BY-4.0
  Creative Commons Attribution 4.0 International Public License
@@ -345,6 +355,11 @@ License: CC-BY-4.0
  processes of any jurisdiction or authority.
 
 
+
+========================================================================================================================
+========================================================================================================================
+========================================================================================================================
+
 GTK theme for Windows binaries
 MIT License
 
@@ -368,21 +383,3 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-Icons used inside GUI version
-Reshot license - https://www.reshot.com/
-
-czkawka_gui/icons/*
-
-Photos, Icons or Illustrations from Reshot can be used in:
-
-- Social Media posts
-- Online marketing ads
-- Educational projects
-- Commercial projects
-- Editorial projects
-
-Items under the Reshot Free License can be used in your commercial and non-commercial projects, for free.
-
-You’re granted a copyright license to download, copy, modify, distribute, publicly perform and broadcast the Items.
-Your rights are non-exclusive, worldwide, sub-licensable and ongoing. Attribution is not required, however, we would
-appreciate it if you credit Reshot where reasonably possible.
