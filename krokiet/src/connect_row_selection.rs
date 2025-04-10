@@ -3,6 +3,7 @@ use std::hash::{Hash, Hasher};
 use std::sync::{RwLock, RwLockWriteGuard};
 
 use czkawka_core::TOOLS_NUMBER;
+use log::trace;
 use once_cell::sync::OnceCell;
 use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
@@ -351,6 +352,8 @@ fn rows_select_all_by_mode(selection: &mut SelectionData, model: &ModelRc<MainLi
 }
 
 fn rows_select_all_one_by_one(model: &ModelRc<MainListModel>) {
+    let items_to_update = model.iter().filter_map(|e| if !e.selected_row && !e.header_row { Some(e) } else { None }).count();
+    trace!("[FAST][ONE_BY_ONE] select all {}/{} items", items_to_update, model.row_count());
     for id in 0..model.row_count() {
         let mut model_data = model
             .row_data(id)
@@ -372,8 +375,13 @@ fn rows_select_all_one_by_one(model: &ModelRc<MainListModel>) {
 fn rows_select_all_by_replacing_models(selection: &SelectionData, model: &ModelRc<MainListModel>) -> Option<ModelRc<MainListModel>> {
     // May happen with simple models, but for more advanced with header rows, we need something like "selection.all_items_selected"
     if selection.number_of_selected_rows == model.row_count() {
+        trace!(
+            "[SLOW][REPLACE_MODEL], but no need to replace it - {} items both exists and selected",
+            selection.number_of_selected_rows
+        );
         return None;
     }
+    trace!("[SLOW][REPLACE_MODEL] select all {} items", model.row_count());
 
     let new_model = model
         .iter()
@@ -421,20 +429,38 @@ fn row_select_items_with_shift(selection: &mut SelectionData, model: &ModelRc<Ma
     let (smaller_idx, bigger_idx) = if indexes.0 < indexes.1 { (indexes.0, indexes.1) } else { (indexes.1, indexes.0) };
 
     let new_model = if bigger_idx - smaller_idx > SELECTED_ROWS_LIMIT || selection.exceeded_limit {
+        trace!("[SLOW][REPLACE_MODEL] selecting from {} items", model.row_count());
+        // To not iterate twice over the same model, which may be slow, we check if we exceeded limit
+        // This may not be 100% correct, because we may select only 501 items and 500 headers
+        // But gains are bigger than selecting
+        selection.exceeded_limit = bigger_idx - smaller_idx > SELECTED_ROWS_LIMIT;
+        selection.selected_rows.clear();
+        selection.number_of_selected_rows = 0;
+
         let new_model: Vec<_> = model
             .iter()
             .enumerate()
             .map(|(idx, mut row)| {
                 row.selected_row = !row.header_row && (smaller_idx..=bigger_idx).contains(&idx);
+                if row.selected_row {
+                    selection.number_of_selected_rows += 1;
+                    if !selection.exceeded_limit {
+                        selection.selected_rows.push(idx);
+                    }
+                }
                 row
             })
             .collect();
 
-        selection.number_of_selected_rows = new_model.iter().filter(|e| e.selected_row).count();
-
         Some(ModelRc::new(VecModel::from(new_model)))
     } else {
-        // Deselect previously selected rows
+        trace!(
+            "[FAST][ONE_BY_ONE] deselecting {} items, and later selecting, maybe {}/{} items",
+            selection.selected_rows.len(),
+            bigger_idx - smaller_idx,
+            model.row_count()
+        );
+        // Deselect all previously selected rows, that are not in the range
         for idx in &selection.selected_rows {
             if !(smaller_idx..=bigger_idx).contains(idx) {
                 let mut model_data = model
@@ -445,41 +471,40 @@ fn row_select_items_with_shift(selection: &mut SelectionData, model: &ModelRc<Ma
                 model.set_row_data(*idx, model_data);
             }
         }
+
         // select new rows
+        selection.number_of_selected_rows = 0;
+        selection.selected_rows.clear();
+        selection.exceeded_limit = false;
+
         for idx in smaller_idx..=bigger_idx {
             let mut model_data = model
                 .row_data(idx)
                 .unwrap_or_else(|| panic!("Failed to get row data with id {idx}, with model {} items", model.row_count()));
+
+            // Every item in range is selected
+            // We don't set this in if below, because this doesn't take in to account,
+            // already selected items, that we don't deselect in above for loop
+            if !model_data.header_row {
+                selection.selected_rows.push(idx);
+                selection.number_of_selected_rows += 1;
+            }
+
             if !model_data.selected_row && !model_data.header_row {
                 model_data.selected_row = true;
                 model.set_row_data(idx, model_data);
             }
         }
 
-        selection.number_of_selected_rows = model.iter().filter(|e| e.selected_row).count();
-
         None
     };
-
-    if bigger_idx - smaller_idx > SELECTED_ROWS_LIMIT {
-        selection.exceeded_limit = true;
-        selection.selected_rows.clear();
-    } else {
-        selection.exceeded_limit = false;
-        selection.selected_rows = new_model
-            .as_ref()
-            .unwrap_or(model)
-            .iter()
-            .enumerate()
-            .filter_map(|(idx, row)| if row.selected_row { Some(idx) } else { None })
-            .collect();
-    }
 
     new_model
 }
 
 fn rows_reverse_checked_selection(selection: &SelectionData, model: &ModelRc<MainListModel>) -> Option<ModelRc<MainListModel>> {
     if selection.exceeded_limit {
+        trace!("[SLOW][REPLACE_MODEL] reverse checked selection(SPACE)");
         let new_model = model
             .iter()
             .map(|mut row| {
@@ -492,15 +517,15 @@ fn rows_reverse_checked_selection(selection: &SelectionData, model: &ModelRc<Mai
             .collect::<Vec<_>>();
         return Some(ModelRc::new(VecModel::from(new_model)));
     } else if !selection.selected_rows.is_empty() {
-        let ids = model.iter().enumerate().filter_map(|(idx, e)| if e.selected_row { Some(idx) } else { None });
-        for id in ids {
+        trace!("[FAST][ONE_BY_ONE] reverse selection(SPACE)");
+        for id in &selection.selected_rows {
             let mut model_data = model
-                .row_data(id)
+                .row_data(*id)
                 .unwrap_or_else(|| panic!("Failed to get row data with id {id}, with model {} items", model.row_count()));
             assert!(model_data.selected_row);
             assert!(!model_data.header_row);
             model_data.checked = !model_data.checked;
-            model.set_row_data(id, model_data);
+            model.set_row_data(*id, model_data);
         }
     }
     None
