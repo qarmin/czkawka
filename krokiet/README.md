@@ -159,6 +159,7 @@ So only Slint left with its cons and pros.
 ## License
 
 Code is licensed under MIT license but entire project is licensed under GPL-3.0 license, due Slint license restrictions.
+Icons
 
 ## Name
 

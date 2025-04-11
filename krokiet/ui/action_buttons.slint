@@ -169,6 +169,17 @@ export component ActionButtons inherits HorizontalLayout {
         }
     }
 
+//    sort_button := Button {
+//        visible: lists_enabled;
+//        height: parent.height;
+//        enabled: !scanning && self.visible && results_available;
+//        text: "Sort";
+//        icon: @image-url("../icons/krokiet_sort.svg");
+//        clicked => {
+//            show_sort_popup();
+//        }
+//    }
+
     rename_button := Button {
         visible: lists_enabled && GuiState.active_tab == CurrentTab.BadExtensions;
         height: parent.height;

@@ -75,7 +75,7 @@ export component LeftSidePanel {
             height: 80px;
             Image {
                 width: parent.height;
-                source: @image-url("../icons/logo_small.png");
+                source: @image-url("../icons/krokiet_logo_small.png");
                 image-fit: ImageFit.contain;
             }
 
@@ -125,7 +125,7 @@ export component LeftSidePanel {
                     min-height: 20px;
                     max-height: self.width;
                     preferred-height: self.width;
-                    icon: @image-url("../icons/settings.svg");
+                    icon: @image-url("../icons/krokiet_settings.svg");
                     clicked => {
                         GuiState.active_tab = CurrentTab.Settings;
                         Callabler.tab_changed();
@@ -144,7 +144,7 @@ export component LeftSidePanel {
                     min-height: 20px;
                     max-height: self.width;
                     preferred-height: self.width;
-                    icon: @image-url("../icons/subsettings.svg");
+                    icon: @image-url("../icons/krokiet_subsettings.svg");
                     clicked => {
                         GuiState.visible_tool_settings = !GuiState.visible_tool_settings;
                     }

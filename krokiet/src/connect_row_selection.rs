@@ -93,7 +93,7 @@ pub fn connect_row_selections(app: &MainWindow) {
 }
 
 mod opener {
-    use log::error;
+    use log::{debug, error};
     use slint::{ComponentHandle, Model};
 
     use crate::common::{get_str_name_idx, get_str_path_idx, get_tool_model};
@@ -132,9 +132,9 @@ mod opener {
             open_item(app, items_path_str, id);
         } else {
             if selection.selected_rows.is_empty() {
-                error!("Failed to open selected item, because there is no selected item");
+                debug!("Failed to open selected item, because there is no selected item");
             } else {
-                error!("Failed to open selected item, because there is more than one selected item");
+                debug!("Failed to open selected item, because there is more than one selected item");
             }
         }
     }
