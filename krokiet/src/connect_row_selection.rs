@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
-use std::sync::{RwLock, RwLockWriteGuard};
+use std::mem;
+use std::sync::{LazyLock, RwLock, RwLockWriteGuard};
 
 use czkawka_core::TOOLS_NUMBER;
 use log::trace;
-use once_cell::sync::OnceCell;
 use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
 use crate::{CurrentTab, GuiState, MainListModel, MainWindow};
@@ -21,7 +21,7 @@ pub(crate) struct SelectionData {
     exceeded_limit: bool,
 }
 
-pub(crate) static TOOLS_SELECTION: OnceCell<RwLock<HashMap<CurrentTab, SelectionData>>> = OnceCell::new();
+pub(crate) static TOOLS_SELECTION: LazyLock<RwLock<HashMap<CurrentTab, SelectionData>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
 
 pub(crate) fn reset_selection(app: &MainWindow, reset_all_selection: bool) {
     if reset_all_selection {
@@ -35,7 +35,31 @@ pub(crate) fn reset_selection(app: &MainWindow, reset_all_selection: bool) {
     app.invoke_reset_selection();
 }
 
-fn initialize_selection_struct() {
+// E.g. when sorting things, selected rows in vector, may be invalid
+// So we need to recalculate them
+pub(crate) fn recalculate_small_selection_if_needed(model: &ModelRc<MainListModel>, active_tab: CurrentTab) {
+    let mut lock = get_write_selection_lock();
+    let selection = lock.get_mut(&active_tab).expect("Failed to get selection data");
+
+    if selection.exceeded_limit || selection.selected_rows.is_empty() {
+        return;
+    }
+
+    let selection_not_changed = selection.selected_rows.iter().all(|e| {
+        let model_data = model
+            .row_data(*e)
+            .unwrap_or_else(|| panic!("Failed to get row data with id {}, with model {} items", e, model.row_count()));
+        model_data.selected_row
+    });
+
+    if selection_not_changed {
+        return;
+    }
+
+    selection.selected_rows = model.iter().enumerate().filter_map(|(idx, e)| if e.selected_row { Some(idx) } else { None }).collect();
+}
+
+pub(crate) fn initialize_selection_struct() {
     let tools: [CurrentTab; TOOLS_NUMBER] = [
         CurrentTab::DuplicateFiles,
         CurrentTab::EmptyFolders,
@@ -51,7 +75,13 @@ fn initialize_selection_struct() {
     ];
 
     let map: HashMap<_, _> = tools.into_iter().map(|tool| (tool, SelectionData::default())).collect();
-    TOOLS_SELECTION.set(RwLock::new(map)).expect("Failed to set selection data, it was already set");
+    let mut item = TOOLS_SELECTION.write().expect("Failed to get write selection lock");
+    if !cfg!(test) {
+        let data = mem::replace(&mut *item, map);
+        assert!(data.is_empty(), "Selection data is already initialized, but it should be empty");
+    } else {
+        let _ = mem::replace(&mut *item, map);
+    }
 }
 
 // fn get_read_selection_lock() -> RwLockReadGuard<'static, HashMap<CurrentTab, SelectionData>> {
@@ -59,8 +89,7 @@ fn initialize_selection_struct() {
 //     selection.read().expect("Failed to lock selection data")
 // }
 fn get_write_selection_lock() -> RwLockWriteGuard<'static, HashMap<CurrentTab, SelectionData>> {
-    let selection = TOOLS_SELECTION.get().expect("Selection data is not initialized");
-    selection.write().expect("Failed to lock selection data")
+    TOOLS_SELECTION.write().expect("Selection data is not initialized")
 }
 
 impl Hash for CurrentTab {
@@ -305,7 +334,7 @@ fn rows_deselect_all_selected_one_by_one(model: &ModelRc<MainListModel>, selecti
         let mut model_data = model
             .row_data(*id)
             .unwrap_or_else(|| panic!("Failed to get row data with id {id}, with model {} items", model.row_count()));
-        assert!(model_data.selected_row); // Probably can be removed in future
+        assert!(model_data.selected_row);
         model_data.selected_row = false;
         model.set_row_data(*id, model_data);
     }

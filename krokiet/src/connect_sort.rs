@@ -3,6 +3,7 @@ use std::mem;
 use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
 use crate::common::{connect_i32_into_u64, get_int_size_idx, get_is_header_mode, get_tool_model, set_tool_model};
+use crate::connect_row_selection::recalculate_small_selection_if_needed;
 use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow, SortMode};
 
 pub fn connect_sort(app: &MainWindow) {
@@ -35,7 +36,9 @@ mod sorts {
         if !get_is_header_mode(active_tab) {
             let mut items = model.iter().collect::<Vec<_>>();
             items.reverse();
-            return ModelRc::new(VecModel::from(items));
+            let new_model = ModelRc::new(VecModel::from(items));
+            recalculate_small_selection_if_needed(&new_model, active_tab);
+            return new_model;
         }
 
         let mut grouped_items = group_by_header(model);
@@ -43,7 +46,9 @@ mod sorts {
             items.reverse();
         }
 
-        convert_group_header_into_rc_model(grouped_items, model.row_count())
+        let new_model = convert_group_header_into_rc_model(grouped_items, model.row_count());
+        recalculate_small_selection_if_needed(&new_model, active_tab);
+        new_model
     }
 
     pub(super) fn sort_checked(model: &ModelRc<MainListModel>, active_tab: CurrentTab) -> ModelRc<MainListModel> {
@@ -117,7 +122,9 @@ fn common_sort_function<T: Ord>(model: &ModelRc<MainListModel>, active_tab: Curr
     if !get_is_header_mode(active_tab) {
         let mut items = model.iter().collect::<Vec<_>>();
         items.sort_by_cached_key(&sort_function);
-        return ModelRc::new(VecModel::from(items));
+        let new_model = ModelRc::new(VecModel::from(items));
+        recalculate_small_selection_if_needed(&new_model, active_tab);
+        return new_model;
     }
 
     let mut grouped_items = group_by_header(model);
@@ -125,7 +132,9 @@ fn common_sort_function<T: Ord>(model: &ModelRc<MainListModel>, active_tab: Curr
         items.sort_by_cached_key(&sort_function);
     }
 
-    convert_group_header_into_rc_model(grouped_items, model.row_count())
+    let new_model = convert_group_header_into_rc_model(grouped_items, model.row_count());
+    recalculate_small_selection_if_needed(&new_model, active_tab);
+    new_model
 }
 
 fn convert_group_header_into_rc_model(grouped: Vec<(MainListModel, Vec<MainListModel>)>, model_size: usize) -> ModelRc<MainListModel> {
@@ -172,6 +181,7 @@ mod tests {
     use slint::Model;
 
     use crate::common::{get_int_modification_date_idx, get_int_size_idx, get_is_header_mode, get_str_name_idx, get_str_path_idx};
+    use crate::connect_row_selection::initialize_selection_struct;
     use crate::connect_sort::sorts::{reverse_sort, sort_by_full_name, sort_by_name, sort_by_parent_name, sort_by_size, sort_checked, sort_modification_date, sort_selection};
     use crate::connect_sort::{convert_group_header_into_rc_model, group_by_header};
     use crate::test_common::{create_model_from_model_vec, get_model_vec};
@@ -179,6 +189,7 @@ mod tests {
 
     #[test]
     fn group_by_header_splits_items_into_groups_correctly() {
+        initialize_selection_struct();
         let mut model = get_model_vec(6);
         model[0].header_row = true;
         model[1].header_row = false;
@@ -203,6 +214,7 @@ mod tests {
 
     #[test]
     fn group_by_header_handles_empty_model() {
+        initialize_selection_struct();
         let model = create_model_from_model_vec(&[]);
 
         let grouped = group_by_header(&model);
@@ -213,6 +225,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn group_by_header_panics_when_no_header_before_items() {
+        initialize_selection_struct();
         let mut model = get_model_vec(3);
         model[0].header_row = false;
         model[1].header_row = false;
@@ -225,6 +238,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn group_by_header_panics_when_group_is_empty() {
+        initialize_selection_struct();
         let mut model = get_model_vec(3);
         model[0].header_row = true;
         model[1].header_row = true;
@@ -236,6 +250,7 @@ mod tests {
 
     #[test]
     fn convert_group_header_into_rc_model_combines_groups_correctly() {
+        initialize_selection_struct();
         let mut model = get_model_vec(6);
         model[0].header_row = true;
         model[1].header_row = false;
@@ -262,6 +277,7 @@ mod tests {
 
     #[test]
     fn convert_group_header_into_rc_model_handles_empty_groups() {
+        initialize_selection_struct();
         let grouped: Vec<(MainListModel, Vec<MainListModel>)> = vec![];
 
         let combined_model = convert_group_header_into_rc_model(grouped, 0);
@@ -271,6 +287,7 @@ mod tests {
 
     #[test]
     fn sort_by_size_sorts_flat_model_correctly() {
+        initialize_selection_struct();
         let current_tab = CurrentTab::BigFiles;
         // To be sure that we set correct values in val_int, which must be equal to index
         assert_eq!(get_int_size_idx(current_tab), 2);
@@ -291,6 +308,7 @@ mod tests {
 
     #[test]
     fn sort_by_size_sorts_grouped_model_correctly() {
+        initialize_selection_struct();
         let current_tab = CurrentTab::SimilarImages;
         // To be sure that we set correct values in val_int, which must be equal to index
         assert_eq!(get_int_size_idx(current_tab), 2);
@@ -321,6 +339,7 @@ mod tests {
 
     #[test]
     fn sort_by_size_handles_empty_model() {
+        initialize_selection_struct();
         let model = create_model_from_model_vec(&[]);
 
         let sorted_model = sort_by_size(&model, CurrentTab::SimilarImages);
@@ -330,6 +349,7 @@ mod tests {
 
     #[test]
     fn sort_by_parent_name_sorts_flat_model_correctly() {
+        initialize_selection_struct();
         let current_tab = CurrentTab::BigFiles;
         // To be sure that we set correct values in val_int, which must be equal to index
         assert_eq!(get_str_path_idx(current_tab), 2);
@@ -354,6 +374,7 @@ mod tests {
 
     #[test]
     fn sort_by_name_sorts_flat_model_correctly() {
+        initialize_selection_struct();
         let current_tab = CurrentTab::BigFiles;
         // To be sure that we set correct values in val_int, which must be equal to index
         assert_eq!(get_str_name_idx(current_tab), 1);
@@ -378,6 +399,7 @@ mod tests {
 
     #[test]
     fn sort_by_full_name_sorts_flat_model_correctly() {
+        initialize_selection_struct();
         let current_tab = CurrentTab::BigFiles;
         // To be sure that we set correct values in val_int, which must be equal to index
         assert_eq!(get_str_name_idx(current_tab), 1);
@@ -403,6 +425,7 @@ mod tests {
 
     #[test]
     fn sort_by_modification_date_sorts_flat_model_correctly() {
+        initialize_selection_struct();
         let current_tab = CurrentTab::BigFiles;
         // To be sure that we set correct values in val_int, which must be equal to index
         assert_eq!(get_int_modification_date_idx(current_tab), 0);
@@ -427,6 +450,7 @@ mod tests {
 
     #[test]
     fn sort_by_checked_sorts_flat_model_correctly() {
+        initialize_selection_struct();
         let current_tab = CurrentTab::BigFiles;
         // To be sure that we set correct values in val_int, which must be equal to index
         assert!(!get_is_header_mode(current_tab));
@@ -456,6 +480,7 @@ mod tests {
 
     #[test]
     fn sort_by_selection_sorts_flat_model_correctly() {
+        initialize_selection_struct();
         let current_tab = CurrentTab::BigFiles;
         // To be sure that we set correct values in val_int, which must be equal to index
         assert!(!get_is_header_mode(current_tab));
@@ -485,6 +510,7 @@ mod tests {
 
     #[test]
     fn sort_reverse_sorts_flat_model_correctly() {
+        initialize_selection_struct();
         let current_tab = CurrentTab::BigFiles;
         // To be sure that we set correct values in val_int, which must be equal to index
         assert_eq!(get_int_modification_date_idx(current_tab), 0);
