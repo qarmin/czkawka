@@ -1,4 +1,4 @@
-import { SelectMode } from "common.slint";
+import { SelectMode, SortMode } from "common.slint";
 import {CurrentTab} from "common.slint";
 
 export global Callabler {
@@ -26,6 +26,7 @@ export global Callabler {
 
     callback delete_selected_items();
     callback select_items(SelectMode);
+    callback sort_items(SortMode);
 
     // Preview
     callback load_image_preview(string);

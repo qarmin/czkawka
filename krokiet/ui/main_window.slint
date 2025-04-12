@@ -18,6 +18,7 @@ import {PopupMoveFolders} from "popup_move_folders.slint";
 import { PopupSelectResults } from "popup_select_results.slint";
 import {PopupRenameFiles} from "popup_rename_files.slint";
 import {PopupSave} from "popup_save.slint";
+import {PopupSortResults} from "popup_sort.slint";
 import { ToolSettings } from "tool_settings.slint";
 
 export {Settings, Callabler, GuiState}
@@ -162,6 +163,11 @@ export component MainWindow inherits Window {
             show_save_popup => {
                 save_popup_window.show_popup();
             }
+            show_sort_popup(x_offset, y_offset) => {
+                sort_popup_window.x_offset = x_offset;
+                sort_popup_window.y_offset = y_offset;
+                sort_popup_window.show_popup();
+            }
         }
 
         HorizontalLayout {
@@ -235,6 +241,15 @@ export component MainWindow inherits Window {
 
         x: parent.x + (root.width - self.popup_width) / 2.0;
         y: parent.y + (parent.height - self.popup_height) / 2.0;
+    }
+
+    sort_popup_window := PopupSortResults {
+        property <length> x_offset: 0;
+        property <length> y_offset: 0;
+        x: parent.x + x_offset - self.item_width / 2.0;
+        y: parent.y + y_offset - self.all_items_height - 5px;
+        height: root.height;
+        width: root.width;
     }
 
     show_move_folders_dialog(folder_name) => {

@@ -228,3 +228,56 @@ fn find_header_idx_and_deselect_all(old_data: &mut [MainListModel]) -> Vec<usize
     }
     header_idx
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::test_common::{create_model_from_model_vec, get_model_vec};
+
+    #[test]
+    fn select_all_marks_all_non_header_rows_as_checked() {
+        let mut model = get_model_vec(5);
+        model[1].header_row = true;
+        let model = create_model_from_model_vec(&model);
+
+        let new_model = select_all(&model);
+
+        assert!(new_model.row_data(0).unwrap().checked);
+        assert!(!new_model.row_data(1).unwrap().checked); // header row
+        assert!(new_model.row_data(2).unwrap().checked);
+        assert!(new_model.row_data(3).unwrap().checked);
+        assert!(new_model.row_data(4).unwrap().checked);
+    }
+
+    #[test]
+    fn deselect_all_unmarks_all_rows_as_checked() {
+        let mut model = get_model_vec(5);
+        model.iter_mut().for_each(|row| row.checked = true);
+        let model = create_model_from_model_vec(&model);
+
+        let new_model = deselect_all(&model);
+
+        assert!(!new_model.row_data(0).unwrap().checked);
+        assert!(!new_model.row_data(1).unwrap().checked);
+        assert!(!new_model.row_data(2).unwrap().checked);
+        assert!(!new_model.row_data(3).unwrap().checked);
+        assert!(!new_model.row_data(4).unwrap().checked);
+    }
+
+    #[test]
+    fn invert_selection_toggles_checked_state_for_non_header_rows() {
+        let mut model = get_model_vec(5);
+        model[1].header_row = true;
+        model[0].checked = true;
+        model[2].checked = false;
+        let model = create_model_from_model_vec(&model);
+
+        let new_model = invert_selection(&model);
+
+        assert!(!new_model.row_data(0).unwrap().checked);
+        assert!(!new_model.row_data(1).unwrap().checked); // header row
+        assert!(new_model.row_data(2).unwrap().checked);
+        assert!(new_model.row_data(3).unwrap().checked);
+        assert!(new_model.row_data(4).unwrap().checked);
+    }
+}

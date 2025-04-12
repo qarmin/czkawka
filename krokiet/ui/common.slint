@@ -68,3 +68,18 @@ export struct SelectModel {
     data: SelectMode,
     name: string
 }
+
+export enum SortMode {
+    ItemName,
+    ParentName,
+    FullName,
+    Size,
+    ModificationDate,
+    Selection,
+    Reverse,
+}
+
+export struct SortModel {
+    data: SortMode,
+    name: string
+}

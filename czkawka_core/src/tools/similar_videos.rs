@@ -11,7 +11,7 @@ use humansize::{BINARY, format_size};
 use log::debug;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
-use vid_dup_finder_lib::{VideoHash, ffmpeg_builder};
+use vid_dup_finder_lib::{VideoHash, VideoHashBuilder};
 
 use crate::common::{
     VIDEO_FILES_EXTENSIONS, WorkContinueStatus, check_if_stop_received, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads,
@@ -198,7 +198,7 @@ impl SimilarVideos {
     }
 
     fn check_video_file_entry(&self, mut file_entry: VideosEntry) -> VideosEntry {
-        let vhash = match ffmpeg_builder::VideoHashBuilder::default().hash(file_entry.path.clone()) {
+        let vhash = match VideoHashBuilder::default().hash(file_entry.path.clone()) {
             Ok(t) => t,
             Err(e) => {
                 file_entry.error = format!("Failed to hash file, reason {e}");

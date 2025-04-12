@@ -533,26 +533,8 @@ fn rows_reverse_checked_selection(selection: &SelectionData, model: &ModelRc<Mai
 
 #[cfg(test)]
 mod tests {
-    use slint::VecModel;
-
     use super::*;
-
-    fn get_main_list_model() -> MainListModel {
-        MainListModel {
-            selected_row: false,
-            val_int: Default::default(),
-            checked: false,
-            filled_header_row: false,
-            header_row: false,
-            val_str: Default::default(),
-        }
-    }
-    fn get_model_vec(items: usize) -> Vec<MainListModel> {
-        (0..items).map(|_| get_main_list_model()).collect::<Vec<_>>()
-    }
-    fn create_model_from_model_vec(model_vec: &[MainListModel]) -> ModelRc<MainListModel> {
-        ModelRc::new(VecModel::from(model_vec.to_owned()))
-    }
+    use crate::test_common::{create_model_from_model_vec, get_model_vec};
 
     #[test]
     fn rows_deselect_all_by_mode_with_exceeded_limit() {

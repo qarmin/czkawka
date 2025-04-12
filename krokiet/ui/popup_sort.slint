@@ -5,7 +5,7 @@ import {MainList} from "main_lists.slint";
 import {CurrentTab, ProgressToSend} from "common.slint";
 import { ActionButtons } from "action_buttons.slint";
 import { Progress } from "progress.slint";
-import {MainListModel, SelectMode, SelectModel} from "common.slint";
+import {MainListModel, SortModel} from "common.slint";
 import {Settings} from "settings.slint";
 import {Callabler} from "callabler.slint";
 import { BottomPanel } from "bottom_panel.slint";
@@ -15,7 +15,7 @@ import { Preview } from "preview.slint";
 
 export component PopupSortResults inherits Rectangle {
     callback show_popup();
-    property <[SelectModel]> model: GuiState.select_results_list;
+    property <[SortModel]> model: GuiState.sort_results_list;
     property <length> item_height: 30px;
     out property <length> item_width: 200px;
     out property <length> all_items_height: item_height * model.length;
@@ -36,7 +36,7 @@ export component PopupSortResults inherits Rectangle {
                     height: item_height;
                     width: item_width;
                     clicked => {
-                        Callabler.select_items(i.data);
+                        Callabler.sort_items(i.data);
                         popup_window.close();
                     }
                 }

@@ -47,6 +47,7 @@ mod connect_save;
 mod connect_scan;
 mod connect_select;
 mod connect_show_preview;
+mod connect_sort;
 mod connect_stop;
 mod connect_translation;
 mod localizer_krokiet;
@@ -54,6 +55,8 @@ mod model_operations;
 mod set_initial_gui_info;
 mod settings;
 mod shared_models;
+#[cfg(test)]
+mod test_common;
 
 slint::include_modules!();
 fn main() {
