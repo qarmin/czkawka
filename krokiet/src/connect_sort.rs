@@ -17,7 +17,10 @@ pub fn connect_sort(app: &MainWindow) {
             SortMode::ParentName => sorts::sort_by_parent_name(&current_model, active_tab),
             SortMode::ItemName => sorts::sort_by_name(&current_model, active_tab),
             SortMode::FullName => sorts::sort_by_full_name(&current_model, active_tab),
-            _ => todo!(),
+            SortMode::ModificationDate => sorts::sort_modification_date(&current_model, active_tab),
+            SortMode::Selection => sorts::sort_selection(&current_model, active_tab),
+            SortMode::Reverse => sorts::reverse_sort(&current_model, active_tab),
+            SortMode::Checked => sorts::sort_checked(&current_model, active_tab),
         };
 
         set_tool_model(&app, active_tab, new_model);
@@ -26,7 +29,44 @@ pub fn connect_sort(app: &MainWindow) {
 
 mod sorts {
     use super::*;
-    use crate::common::{get_str_name_idx, get_str_path_idx};
+    use crate::common::{get_int_modification_date_idx, get_str_name_idx, get_str_path_idx};
+
+    pub(super) fn reverse_sort(model: &ModelRc<MainListModel>, active_tab: CurrentTab) -> ModelRc<MainListModel> {
+        if !get_is_header_mode(active_tab) {
+            let mut items = model.iter().collect::<Vec<_>>();
+            items.reverse();
+            return ModelRc::new(VecModel::from(items));
+        }
+
+        let mut grouped_items = group_by_header(model);
+        for (_, items) in &mut grouped_items {
+            items.reverse();
+        }
+
+        convert_group_header_into_rc_model(grouped_items, model.row_count())
+    }
+
+    pub(super) fn sort_checked(model: &ModelRc<MainListModel>, active_tab: CurrentTab) -> ModelRc<MainListModel> {
+        let sort_function = |e: &MainListModel| !e.checked;
+
+        common_sort_function(model, active_tab, sort_function)
+    }
+
+    pub(super) fn sort_selection(model: &ModelRc<MainListModel>, active_tab: CurrentTab) -> ModelRc<MainListModel> {
+        let sort_function = |e: &MainListModel| !e.selected_row;
+
+        common_sort_function(model, active_tab, sort_function)
+    }
+
+    pub(super) fn sort_modification_date(model: &ModelRc<MainListModel>, active_tab: CurrentTab) -> ModelRc<MainListModel> {
+        let sort_function = |e: &MainListModel| {
+            let modification_date = get_int_modification_date_idx(active_tab);
+            let items = e.val_int.iter().collect::<Vec<_>>();
+            connect_i32_into_u64(items[modification_date], items[modification_date + 1])
+        };
+
+        common_sort_function(model, active_tab, sort_function)
+    }
 
     pub(super) fn sort_by_full_name(model: &ModelRc<MainListModel>, active_tab: CurrentTab) -> ModelRc<MainListModel> {
         let sort_function = |e: &MainListModel| {
@@ -131,8 +171,8 @@ fn group_by_header(model: &ModelRc<MainListModel>) -> Vec<(MainListModel, Vec<Ma
 mod tests {
     use slint::Model;
 
-    use crate::common::{get_int_size_idx, get_is_header_mode, get_str_name_idx, get_str_path_idx};
-    use crate::connect_sort::sorts::{sort_by_full_name, sort_by_name, sort_by_parent_name, sort_by_size};
+    use crate::common::{get_int_modification_date_idx, get_int_size_idx, get_is_header_mode, get_str_name_idx, get_str_path_idx};
+    use crate::connect_sort::sorts::{reverse_sort, sort_by_full_name, sort_by_name, sort_by_parent_name, sort_by_size, sort_checked, sort_modification_date, sort_selection};
     use crate::connect_sort::{convert_group_header_into_rc_model, group_by_header};
     use crate::test_common::{create_model_from_model_vec, get_model_vec};
     use crate::{CurrentTab, MainListModel};
@@ -170,30 +210,29 @@ mod tests {
         assert!(grouped.is_empty());
     }
 
-    // TODO
-    // #[test]
-    // #[should_panic]
-    // fn group_by_header_panics_when_no_header_before_items() {
-    //     let mut model = get_model_vec(3);
-    //     model[0].header_row = false;
-    //     model[1].header_row = false;
-    //     model[2].header_row = false;
-    //     let model = create_model_from_model_vec(&model);
-    //
-    //     group_by_header(&model);
-    // }
-    //
-    // #[test]
-    // #[should_panic]
-    // fn group_by_header_panics_when_group_is_empty() {
-    //     let mut model = get_model_vec(3);
-    //     model[0].header_row = true;
-    //     model[1].header_row = true;
-    //     model[2].header_row = true;
-    //     let model = create_model_from_model_vec(&model);
-    //
-    //     group_by_header(&model);
-    // }
+    #[test]
+    #[should_panic]
+    fn group_by_header_panics_when_no_header_before_items() {
+        let mut model = get_model_vec(3);
+        model[0].header_row = false;
+        model[1].header_row = false;
+        model[2].header_row = false;
+        let model = create_model_from_model_vec(&model);
+
+        group_by_header(&model);
+    }
+
+    #[test]
+    #[should_panic]
+    fn group_by_header_panics_when_group_is_empty() {
+        let mut model = get_model_vec(3);
+        model[0].header_row = true;
+        model[1].header_row = true;
+        model[2].header_row = true;
+        let model = create_model_from_model_vec(&model);
+
+        group_by_header(&model);
+    }
 
     #[test]
     fn convert_group_header_into_rc_model_combines_groups_correctly() {
@@ -257,25 +296,27 @@ mod tests {
         assert_eq!(get_int_size_idx(current_tab), 2);
         assert!(get_is_header_mode(current_tab));
 
-        let mut model = get_model_vec(6);
+        let mut model = get_model_vec(7);
         model[0].header_row = true;
         model[1].val_int = create_model_from_model_vec(&[0, 0, 0, 15]);
         model[2].val_int = create_model_from_model_vec(&[0, 0, 0, 5]);
         model[3].header_row = true;
-        model[4].val_int = create_model_from_model_vec(&[0, 0, 0, 25]);
+        model[4].val_int = create_model_from_model_vec(&[0, 0, 1, 15]);
         model[5].val_int = create_model_from_model_vec(&[0, 0, 0, 10]);
+        model[6].val_int = create_model_from_model_vec(&[0, 0, 0, 35]);
         let model = create_model_from_model_vec(&model);
 
         let sorted_model = sort_by_size(&model, current_tab);
 
         // Group 1
         assert!(sorted_model.row_data(0).unwrap().header_row);
-        assert_eq!(sorted_model.row_data(1).unwrap().val_int.iter().skip(2).collect::<Vec<_>>(), vec![0, 5]); // smallest
-        assert_eq!(sorted_model.row_data(2).unwrap().val_int.iter().skip(2).collect::<Vec<_>>(), vec![0, 15]); // largest
+        assert_eq!(sorted_model.row_data(1).unwrap().val_int.iter().skip(2).collect::<Vec<_>>(), vec![0, 5]);
+        assert_eq!(sorted_model.row_data(2).unwrap().val_int.iter().skip(2).collect::<Vec<_>>(), vec![0, 15]);
         // Group 2
         assert!(sorted_model.row_data(3).unwrap().header_row);
-        assert_eq!(sorted_model.row_data(4).unwrap().val_int.iter().skip(2).collect::<Vec<_>>(), vec![0, 10]); // smallest
-        assert_eq!(sorted_model.row_data(5).unwrap().val_int.iter().skip(2).collect::<Vec<_>>(), vec![0, 25]); // largest
+        assert_eq!(sorted_model.row_data(4).unwrap().val_int.iter().skip(2).collect::<Vec<_>>(), vec![0, 10]);
+        assert_eq!(sorted_model.row_data(5).unwrap().val_int.iter().skip(2).collect::<Vec<_>>(), vec![0, 35]);
+        assert_eq!(sorted_model.row_data(6).unwrap().val_int.iter().skip(2).collect::<Vec<_>>(), vec![1, 15]);
     }
 
     #[test]
@@ -304,11 +345,11 @@ mod tests {
 
         let sorted_model = sort_by_parent_name(&model, current_tab);
 
-        assert_eq!(sorted_model.row_data(0).unwrap().val_str.iter().collect::<Vec<_>>(), vec!["", "", "A"]);
-        assert_eq!(sorted_model.row_data(1).unwrap().val_str.iter().collect::<Vec<_>>(), vec!["", "", "B"]);
-        assert_eq!(sorted_model.row_data(2).unwrap().val_str.iter().collect::<Vec<_>>(), vec!["", "", "C"]);
-        assert_eq!(sorted_model.row_data(3).unwrap().val_str.iter().collect::<Vec<_>>(), vec!["", "", "D"]);
-        assert_eq!(sorted_model.row_data(4).unwrap().val_str.iter().collect::<Vec<_>>(), vec!["", "", "E"]);
+        assert_eq!(sorted_model.row_data(0).unwrap().val_str.iter().skip(2).collect::<Vec<_>>(), vec!["A"]);
+        assert_eq!(sorted_model.row_data(1).unwrap().val_str.iter().skip(2).collect::<Vec<_>>(), vec!["B"]);
+        assert_eq!(sorted_model.row_data(2).unwrap().val_str.iter().skip(2).collect::<Vec<_>>(), vec!["C"]);
+        assert_eq!(sorted_model.row_data(3).unwrap().val_str.iter().skip(2).collect::<Vec<_>>(), vec!["D"]);
+        assert_eq!(sorted_model.row_data(4).unwrap().val_str.iter().skip(2).collect::<Vec<_>>(), vec!["E"]);
     }
 
     #[test]
@@ -328,11 +369,11 @@ mod tests {
 
         let sorted_model = sort_by_name(&model, current_tab);
 
-        assert_eq!(sorted_model.row_data(0).unwrap().val_str.iter().collect::<Vec<_>>(), vec!["", "A"]);
-        assert_eq!(sorted_model.row_data(1).unwrap().val_str.iter().collect::<Vec<_>>(), vec!["", "B"]);
-        assert_eq!(sorted_model.row_data(2).unwrap().val_str.iter().collect::<Vec<_>>(), vec!["", "C"]);
-        assert_eq!(sorted_model.row_data(3).unwrap().val_str.iter().collect::<Vec<_>>(), vec!["", "D"]);
-        assert_eq!(sorted_model.row_data(4).unwrap().val_str.iter().collect::<Vec<_>>(), vec!["", "E"]);
+        assert_eq!(sorted_model.row_data(0).unwrap().val_str.iter().skip(1).collect::<Vec<_>>(), vec!["A"]);
+        assert_eq!(sorted_model.row_data(1).unwrap().val_str.iter().skip(1).collect::<Vec<_>>(), vec!["B"]);
+        assert_eq!(sorted_model.row_data(2).unwrap().val_str.iter().skip(1).collect::<Vec<_>>(), vec!["C"]);
+        assert_eq!(sorted_model.row_data(3).unwrap().val_str.iter().skip(1).collect::<Vec<_>>(), vec!["D"]);
+        assert_eq!(sorted_model.row_data(4).unwrap().val_str.iter().skip(1).collect::<Vec<_>>(), vec!["E"]);
     }
 
     #[test]
@@ -353,10 +394,116 @@ mod tests {
 
         let sorted_model = sort_by_full_name(&model, current_tab);
 
-        assert_eq!(sorted_model.row_data(0).unwrap().val_str.iter().collect::<Vec<_>>(), vec!["", "E", "A"]);
-        assert_eq!(sorted_model.row_data(1).unwrap().val_str.iter().collect::<Vec<_>>(), vec!["", "D", "B"]);
-        assert_eq!(sorted_model.row_data(2).unwrap().val_str.iter().collect::<Vec<_>>(), vec!["", "F", "B"]);
-        assert_eq!(sorted_model.row_data(3).unwrap().val_str.iter().collect::<Vec<_>>(), vec!["", "A", "C"]);
-        assert_eq!(sorted_model.row_data(4).unwrap().val_str.iter().collect::<Vec<_>>(), vec!["", "A", "D"]);
+        assert_eq!(sorted_model.row_data(0).unwrap().val_str.iter().skip(1).collect::<Vec<_>>(), vec!["E", "A"]);
+        assert_eq!(sorted_model.row_data(1).unwrap().val_str.iter().skip(1).collect::<Vec<_>>(), vec!["D", "B"]);
+        assert_eq!(sorted_model.row_data(2).unwrap().val_str.iter().skip(1).collect::<Vec<_>>(), vec!["F", "B"]);
+        assert_eq!(sorted_model.row_data(3).unwrap().val_str.iter().skip(1).collect::<Vec<_>>(), vec!["A", "C"]);
+        assert_eq!(sorted_model.row_data(4).unwrap().val_str.iter().skip(1).collect::<Vec<_>>(), vec!["A", "D"]);
+    }
+
+    #[test]
+    fn sort_by_modification_date_sorts_flat_model_correctly() {
+        let current_tab = CurrentTab::BigFiles;
+        // To be sure that we set correct values in val_int, which must be equal to index
+        assert_eq!(get_int_modification_date_idx(current_tab), 0);
+        assert!(!get_is_header_mode(current_tab));
+
+        let mut model = get_model_vec(5);
+        model[0].val_int = create_model_from_model_vec(&[15, 17]);
+        model[1].val_int = create_model_from_model_vec(&[14, 50]);
+        model[2].val_int = create_model_from_model_vec(&[9, 10]);
+        model[3].val_int = create_model_from_model_vec(&[9, 9]);
+        model[4].val_int = create_model_from_model_vec(&[29, 0]);
+        let model = create_model_from_model_vec(&model);
+
+        let sorted_model = sort_modification_date(&model, current_tab);
+
+        assert_eq!(sorted_model.row_data(0).unwrap().val_int.iter().collect::<Vec<_>>(), vec![9, 9]);
+        assert_eq!(sorted_model.row_data(1).unwrap().val_int.iter().collect::<Vec<_>>(), vec![9, 10]);
+        assert_eq!(sorted_model.row_data(2).unwrap().val_int.iter().collect::<Vec<_>>(), vec![14, 50]);
+        assert_eq!(sorted_model.row_data(3).unwrap().val_int.iter().collect::<Vec<_>>(), vec![15, 17]);
+        assert_eq!(sorted_model.row_data(4).unwrap().val_int.iter().collect::<Vec<_>>(), vec![29, 0]);
+    }
+
+    #[test]
+    fn sort_by_checked_sorts_flat_model_correctly() {
+        let current_tab = CurrentTab::BigFiles;
+        // To be sure that we set correct values in val_int, which must be equal to index
+        assert!(!get_is_header_mode(current_tab));
+
+        let mut model = get_model_vec(4);
+        model[0].checked = true;
+        model[0].val_int = create_model_from_model_vec(&[15]);
+        model[1].checked = false;
+        model[1].val_int = create_model_from_model_vec(&[14]);
+        model[2].checked = true;
+        model[2].val_int = create_model_from_model_vec(&[9]);
+        model[3].checked = false;
+        model[3].val_int = create_model_from_model_vec(&[29]);
+        let model = create_model_from_model_vec(&model);
+
+        let sorted_model = sort_checked(&model, current_tab);
+
+        assert!(sorted_model.row_data(0).unwrap().checked);
+        assert_eq!(sorted_model.row_data(0).unwrap().val_int.iter().collect::<Vec<_>>(), vec![15]);
+        assert!(sorted_model.row_data(1).unwrap().checked);
+        assert_eq!(sorted_model.row_data(1).unwrap().val_int.iter().collect::<Vec<_>>(), vec![9]);
+        assert!(!sorted_model.row_data(2).unwrap().checked);
+        assert_eq!(sorted_model.row_data(2).unwrap().val_int.iter().collect::<Vec<_>>(), vec![14]);
+        assert!(!sorted_model.row_data(3).unwrap().checked);
+        assert_eq!(sorted_model.row_data(3).unwrap().val_int.iter().collect::<Vec<_>>(), vec![29]);
+    }
+
+    #[test]
+    fn sort_by_selection_sorts_flat_model_correctly() {
+        let current_tab = CurrentTab::BigFiles;
+        // To be sure that we set correct values in val_int, which must be equal to index
+        assert!(!get_is_header_mode(current_tab));
+
+        let mut model = get_model_vec(4);
+        model[0].selected_row = true;
+        model[0].val_int = create_model_from_model_vec(&[15]);
+        model[1].selected_row = false;
+        model[1].val_int = create_model_from_model_vec(&[14]);
+        model[2].selected_row = true;
+        model[2].val_int = create_model_from_model_vec(&[9]);
+        model[3].selected_row = false;
+        model[3].val_int = create_model_from_model_vec(&[29]);
+        let model = create_model_from_model_vec(&model);
+
+        let sorted_model = sort_selection(&model, current_tab);
+
+        assert!(sorted_model.row_data(0).unwrap().selected_row);
+        assert_eq!(sorted_model.row_data(0).unwrap().val_int.iter().collect::<Vec<_>>(), vec![15]);
+        assert!(sorted_model.row_data(1).unwrap().selected_row);
+        assert_eq!(sorted_model.row_data(1).unwrap().val_int.iter().collect::<Vec<_>>(), vec![9]);
+        assert!(!sorted_model.row_data(2).unwrap().selected_row);
+        assert_eq!(sorted_model.row_data(2).unwrap().val_int.iter().collect::<Vec<_>>(), vec![14]);
+        assert!(!sorted_model.row_data(3).unwrap().selected_row);
+        assert_eq!(sorted_model.row_data(3).unwrap().val_int.iter().collect::<Vec<_>>(), vec![29]);
+    }
+
+    #[test]
+    fn sort_reverse_sorts_flat_model_correctly() {
+        let current_tab = CurrentTab::BigFiles;
+        // To be sure that we set correct values in val_int, which must be equal to index
+        assert_eq!(get_int_modification_date_idx(current_tab), 0);
+        assert!(!get_is_header_mode(current_tab));
+
+        let mut model = get_model_vec(5);
+        model[0].val_int = create_model_from_model_vec(&[9, 9]);
+        model[1].val_int = create_model_from_model_vec(&[9, 10]);
+        model[2].val_int = create_model_from_model_vec(&[14, 50]);
+        model[3].val_int = create_model_from_model_vec(&[15, 17]);
+        model[4].val_int = create_model_from_model_vec(&[29, 0]);
+        let model = create_model_from_model_vec(&model);
+
+        let sorted_model = reverse_sort(&model, current_tab);
+
+        assert_eq!(sorted_model.row_data(0).unwrap().val_int.iter().collect::<Vec<_>>(), vec![29, 0]);
+        assert_eq!(sorted_model.row_data(1).unwrap().val_int.iter().collect::<Vec<_>>(), vec![15, 17]);
+        assert_eq!(sorted_model.row_data(2).unwrap().val_int.iter().collect::<Vec<_>>(), vec![14, 50]);
+        assert_eq!(sorted_model.row_data(3).unwrap().val_int.iter().collect::<Vec<_>>(), vec![9, 10]);
+        assert_eq!(sorted_model.row_data(4).unwrap().val_int.iter().collect::<Vec<_>>(), vec![9, 9]);
     }
 }

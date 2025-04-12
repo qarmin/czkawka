@@ -267,8 +267,8 @@ mod tests {
     #[test]
     fn invert_selection_toggles_checked_state_for_non_header_rows() {
         let mut model = get_model_vec(5);
-        model[1].header_row = true;
         model[0].checked = true;
+        model[1].header_row = true;
         model[2].checked = false;
         let model = create_model_from_model_vec(&model);
 
