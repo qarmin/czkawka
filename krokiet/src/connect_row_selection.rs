@@ -1,9 +1,10 @@
 use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
-use std::sync::{RwLock, RwLockWriteGuard};
+use std::mem;
+use std::sync::{LazyLock, RwLock, RwLockWriteGuard};
 
 use czkawka_core::TOOLS_NUMBER;
-use once_cell::sync::OnceCell;
+use log::trace;
 use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
 use crate::{CurrentTab, GuiState, MainListModel, MainWindow};
@@ -20,7 +21,7 @@ pub(crate) struct SelectionData {
     exceeded_limit: bool,
 }
 
-pub(crate) static TOOLS_SELECTION: OnceCell<RwLock<HashMap<CurrentTab, SelectionData>>> = OnceCell::new();
+pub(crate) static TOOLS_SELECTION: LazyLock<RwLock<HashMap<CurrentTab, SelectionData>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
 
 pub(crate) fn reset_selection(app: &MainWindow, reset_all_selection: bool) {
     if reset_all_selection {
@@ -34,7 +35,31 @@ pub(crate) fn reset_selection(app: &MainWindow, reset_all_selection: bool) {
     app.invoke_reset_selection();
 }
 
-fn initialize_selection_struct() {
+// E.g. when sorting things, selected rows in vector, may be invalid
+// So we need to recalculate them
+pub(crate) fn recalculate_small_selection_if_needed(model: &ModelRc<MainListModel>, active_tab: CurrentTab) {
+    let mut lock = get_write_selection_lock();
+    let selection = lock.get_mut(&active_tab).expect("Failed to get selection data");
+
+    if selection.exceeded_limit || selection.selected_rows.is_empty() {
+        return;
+    }
+
+    let selection_not_changed = selection.selected_rows.iter().all(|e| {
+        let model_data = model
+            .row_data(*e)
+            .unwrap_or_else(|| panic!("Failed to get row data with id {}, with model {} items", e, model.row_count()));
+        model_data.selected_row
+    });
+
+    if selection_not_changed {
+        return;
+    }
+
+    selection.selected_rows = model.iter().enumerate().filter_map(|(idx, e)| if e.selected_row { Some(idx) } else { None }).collect();
+}
+
+pub(crate) fn initialize_selection_struct() {
     let tools: [CurrentTab; TOOLS_NUMBER] = [
         CurrentTab::DuplicateFiles,
         CurrentTab::EmptyFolders,
@@ -50,7 +75,13 @@ fn initialize_selection_struct() {
     ];
 
     let map: HashMap<_, _> = tools.into_iter().map(|tool| (tool, SelectionData::default())).collect();
-    TOOLS_SELECTION.set(RwLock::new(map)).expect("Failed to set selection data, it was already set");
+    let mut item = TOOLS_SELECTION.write().expect("Failed to get write selection lock");
+    if !cfg!(test) {
+        let data = mem::replace(&mut *item, map);
+        assert!(data.is_empty(), "Selection data is already initialized, but it should be empty");
+    } else {
+        let _ = mem::replace(&mut *item, map);
+    }
 }
 
 // fn get_read_selection_lock() -> RwLockReadGuard<'static, HashMap<CurrentTab, SelectionData>> {
@@ -58,8 +89,7 @@ fn initialize_selection_struct() {
 //     selection.read().expect("Failed to lock selection data")
 // }
 fn get_write_selection_lock() -> RwLockWriteGuard<'static, HashMap<CurrentTab, SelectionData>> {
-    let selection = TOOLS_SELECTION.get().expect("Selection data is not initialized");
-    selection.write().expect("Failed to lock selection data")
+    TOOLS_SELECTION.write().expect("Selection data is not initialized")
 }
 
 impl Hash for CurrentTab {
@@ -92,7 +122,7 @@ pub fn connect_row_selections(app: &MainWindow) {
 }
 
 mod opener {
-    use log::error;
+    use log::{debug, error};
     use slint::{ComponentHandle, Model};
 
     use crate::common::{get_str_name_idx, get_str_path_idx, get_tool_model};
@@ -131,9 +161,9 @@ mod opener {
             open_item(app, items_path_str, id);
         } else {
             if selection.selected_rows.is_empty() {
-                error!("Failed to open selected item, because there is no selected item");
+                debug!("Failed to open selected item, because there is no selected item");
             } else {
-                error!("Failed to open selected item, because there is more than one selected item");
+                debug!("Failed to open selected item, because there is more than one selected item");
             }
         }
     }
@@ -304,7 +334,7 @@ fn rows_deselect_all_selected_one_by_one(model: &ModelRc<MainListModel>, selecti
         let mut model_data = model
             .row_data(*id)
             .unwrap_or_else(|| panic!("Failed to get row data with id {id}, with model {} items", model.row_count()));
-        assert!(model_data.selected_row); // Probably can be removed in future
+        assert!(model_data.selected_row);
         model_data.selected_row = false;
         model.set_row_data(*id, model_data);
     }
@@ -351,6 +381,8 @@ fn rows_select_all_by_mode(selection: &mut SelectionData, model: &ModelRc<MainLi
 }
 
 fn rows_select_all_one_by_one(model: &ModelRc<MainListModel>) {
+    let items_to_update = model.iter().filter_map(|e| if !e.selected_row && !e.header_row { Some(e) } else { None }).count();
+    trace!("[FAST][ONE_BY_ONE] select all {}/{} items", items_to_update, model.row_count());
     for id in 0..model.row_count() {
         let mut model_data = model
             .row_data(id)
@@ -372,8 +404,13 @@ fn rows_select_all_one_by_one(model: &ModelRc<MainListModel>) {
 fn rows_select_all_by_replacing_models(selection: &SelectionData, model: &ModelRc<MainListModel>) -> Option<ModelRc<MainListModel>> {
     // May happen with simple models, but for more advanced with header rows, we need something like "selection.all_items_selected"
     if selection.number_of_selected_rows == model.row_count() {
+        trace!(
+            "[SLOW][REPLACE_MODEL], but no need to replace it - {} items both exists and selected",
+            selection.number_of_selected_rows
+        );
         return None;
     }
+    trace!("[SLOW][REPLACE_MODEL] select all {} items", model.row_count());
 
     let new_model = model
         .iter()
@@ -421,20 +458,38 @@ fn row_select_items_with_shift(selection: &mut SelectionData, model: &ModelRc<Ma
     let (smaller_idx, bigger_idx) = if indexes.0 < indexes.1 { (indexes.0, indexes.1) } else { (indexes.1, indexes.0) };
 
     let new_model = if bigger_idx - smaller_idx > SELECTED_ROWS_LIMIT || selection.exceeded_limit {
+        trace!("[SLOW][REPLACE_MODEL] selecting from {} items", model.row_count());
+        // To not iterate twice over the same model, which may be slow, we check if we exceeded limit
+        // This may not be 100% correct, because we may select only 501 items and 500 headers
+        // But gains are bigger than selecting
+        selection.exceeded_limit = bigger_idx - smaller_idx > SELECTED_ROWS_LIMIT;
+        selection.selected_rows.clear();
+        selection.number_of_selected_rows = 0;
+
         let new_model: Vec<_> = model
             .iter()
             .enumerate()
             .map(|(idx, mut row)| {
                 row.selected_row = !row.header_row && (smaller_idx..=bigger_idx).contains(&idx);
+                if row.selected_row {
+                    selection.number_of_selected_rows += 1;
+                    if !selection.exceeded_limit {
+                        selection.selected_rows.push(idx);
+                    }
+                }
                 row
             })
             .collect();
 
-        selection.number_of_selected_rows = new_model.iter().filter(|e| e.selected_row).count();
-
         Some(ModelRc::new(VecModel::from(new_model)))
     } else {
-        // Deselect previously selected rows
+        trace!(
+            "[FAST][ONE_BY_ONE] deselecting {} items, and later selecting, maybe {}/{} items",
+            selection.selected_rows.len(),
+            bigger_idx - smaller_idx,
+            model.row_count()
+        );
+        // Deselect all previously selected rows, that are not in the range
         for idx in &selection.selected_rows {
             if !(smaller_idx..=bigger_idx).contains(idx) {
                 let mut model_data = model
@@ -445,41 +500,40 @@ fn row_select_items_with_shift(selection: &mut SelectionData, model: &ModelRc<Ma
                 model.set_row_data(*idx, model_data);
             }
         }
+
         // select new rows
+        selection.number_of_selected_rows = 0;
+        selection.selected_rows.clear();
+        selection.exceeded_limit = false;
+
         for idx in smaller_idx..=bigger_idx {
             let mut model_data = model
                 .row_data(idx)
                 .unwrap_or_else(|| panic!("Failed to get row data with id {idx}, with model {} items", model.row_count()));
+
+            // Every item in range is selected
+            // We don't set this in if below, because this doesn't take in to account,
+            // already selected items, that we don't deselect in above for loop
+            if !model_data.header_row {
+                selection.selected_rows.push(idx);
+                selection.number_of_selected_rows += 1;
+            }
+
             if !model_data.selected_row && !model_data.header_row {
                 model_data.selected_row = true;
                 model.set_row_data(idx, model_data);
             }
         }
 
-        selection.number_of_selected_rows = model.iter().filter(|e| e.selected_row).count();
-
         None
     };
-
-    if bigger_idx - smaller_idx > SELECTED_ROWS_LIMIT {
-        selection.exceeded_limit = true;
-        selection.selected_rows.clear();
-    } else {
-        selection.exceeded_limit = false;
-        selection.selected_rows = new_model
-            .as_ref()
-            .unwrap_or(model)
-            .iter()
-            .enumerate()
-            .filter_map(|(idx, row)| if row.selected_row { Some(idx) } else { None })
-            .collect();
-    }
 
     new_model
 }
 
 fn rows_reverse_checked_selection(selection: &SelectionData, model: &ModelRc<MainListModel>) -> Option<ModelRc<MainListModel>> {
     if selection.exceeded_limit {
+        trace!("[SLOW][REPLACE_MODEL] reverse checked selection(SPACE)");
         let new_model = model
             .iter()
             .map(|mut row| {
@@ -492,15 +546,15 @@ fn rows_reverse_checked_selection(selection: &SelectionData, model: &ModelRc<Mai
             .collect::<Vec<_>>();
         return Some(ModelRc::new(VecModel::from(new_model)));
     } else if !selection.selected_rows.is_empty() {
-        let ids = model.iter().enumerate().filter_map(|(idx, e)| if e.selected_row { Some(idx) } else { None });
-        for id in ids {
+        trace!("[FAST][ONE_BY_ONE] reverse selection(SPACE)");
+        for id in &selection.selected_rows {
             let mut model_data = model
-                .row_data(id)
+                .row_data(*id)
                 .unwrap_or_else(|| panic!("Failed to get row data with id {id}, with model {} items", model.row_count()));
             assert!(model_data.selected_row);
             assert!(!model_data.header_row);
             model_data.checked = !model_data.checked;
-            model.set_row_data(id, model_data);
+            model.set_row_data(*id, model_data);
         }
     }
     None
@@ -508,26 +562,8 @@ fn rows_reverse_checked_selection(selection: &SelectionData, model: &ModelRc<Mai
 
 #[cfg(test)]
 mod tests {
-    use slint::VecModel;
-
     use super::*;
-
-    fn get_main_list_model() -> MainListModel {
-        MainListModel {
-            selected_row: false,
-            val_int: Default::default(),
-            checked: false,
-            filled_header_row: false,
-            header_row: false,
-            val_str: Default::default(),
-        }
-    }
-    fn get_model_vec(items: usize) -> Vec<MainListModel> {
-        (0..items).map(|_| get_main_list_model()).collect::<Vec<_>>()
-    }
-    fn create_model_from_model_vec(model_vec: &[MainListModel]) -> ModelRc<MainListModel> {
-        ModelRc::new(VecModel::from(model_vec.to_owned()))
-    }
+    use crate::test_common::{create_model_from_model_vec, get_model_vec};
 
     #[test]
     fn rows_deselect_all_by_mode_with_exceeded_limit() {

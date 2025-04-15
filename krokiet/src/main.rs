@@ -29,6 +29,7 @@ use crate::connect_save::connect_save;
 use crate::connect_scan::connect_scan_button;
 use crate::connect_select::{connect_select, connect_showing_proper_select_buttons};
 use crate::connect_show_preview::connect_show_preview;
+use crate::connect_sort::connect_sort;
 use crate::connect_stop::connect_stop_button;
 use crate::connect_translation::connect_translations;
 use crate::set_initial_gui_info::set_initial_gui_infos;
@@ -47,6 +48,7 @@ mod connect_save;
 mod connect_scan;
 mod connect_select;
 mod connect_show_preview;
+mod connect_sort;
 mod connect_stop;
 mod connect_translation;
 mod localizer_krokiet;
@@ -54,6 +56,8 @@ mod model_operations;
 mod set_initial_gui_info;
 mod settings;
 mod shared_models;
+#[cfg(test)]
+mod test_common;
 
 slint::include_modules!();
 fn main() {
@@ -91,6 +95,7 @@ fn main() {
     connect_rename(&app);
     connect_save(&app, Arc::clone(&shared_models));
     connect_row_selections(&app);
+    connect_sort(&app);
 
     app.run().expect("Failed to run app :(");
 

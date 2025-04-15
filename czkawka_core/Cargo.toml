@@ -45,8 +45,8 @@ xxhash-rust = { version = "0.8", features = ["xxh3"] }
 tempfile = "3.13"
 
 # Video Duplicates
-vid_dup_finder_lib = "0.2"
-ffmpeg_cmdline_utils = "0.3"
+vid_dup_finder_lib = "0.3"
+ffmpeg_cmdline_utils = "0.4"
 
 # Saving/Loading Cache
 serde = "1.0"
