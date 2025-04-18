@@ -91,21 +91,9 @@ export component LeftSidePanel {
 
         ListView {
             out property <length> element_size: 25px;
-            out property <[{name: string, tab: CurrentTab}]> speed_model: [
-                { name: "Duplicate Files", tab: CurrentTab.DuplicateFiles },
-                { name: "Empty Folders", tab: CurrentTab.EmptyFolders },
-                { name: "Big Files", tab: CurrentTab.BigFiles },
-                { name: "Empty Files", tab: CurrentTab.EmptyFiles },
-                { name: "Temporary Files", tab: CurrentTab.TemporaryFiles },
-                { name: "Similar Images", tab: CurrentTab.SimilarImages },
-                { name: "Similar Videos", tab: CurrentTab.SimilarVideos },
-                { name: "Music Duplicates", tab: CurrentTab.SimilarMusic },
-                { name: "Invalid Symlinks", tab: CurrentTab.InvalidSymlinks },
-                { name: "Broken Files", tab: CurrentTab.BrokenFiles },
-                { name: "Bad Extensions", tab: CurrentTab.BadExtensions }
-            ];
+            out property <[{name: string, tab: CurrentTab}]> tools_model <=> GuiState.tools_model;
 
-            for r[idx] in speed_model: TabItem {
+            for r[idx] in tools_model: TabItem {
                 height: parent.element_size;
                 scanning: scanning;
                 text: r.name;

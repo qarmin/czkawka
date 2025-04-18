@@ -1,9 +1,14 @@
 
 import {IncludedDirectoriesModel, ExcludedDirectoriesModel} from "common.slint";
+import {CurrentTab, BottomPanelVisibility} from "common.slint";
 
 export global Settings {
     in-out property <int> settings_preset_idx: 0;
     in-out property <[string]> settings_presets: ["Preset 1", "Preset 2"];
+    
+    in-out property <[string]> languages_list: ["Ponglish"];
+    in-out property <int> language_index: 0;
+
     in-out property <[IncludedDirectoriesModel]> included_directories_model: [{ path: "/home/path", referenced_folder: false, selected_row: false }];
     in-out property <int> included_directories_model_selected_idx: -1;
     in-out property <[ExcludedDirectoriesModel]> excluded_directories_model: [{ path:"/home/path", selected_row: false }, { path:"/home/a", selected_row: false }];

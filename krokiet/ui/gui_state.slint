@@ -21,6 +21,7 @@ export global GuiState {
     in-out property <CurrentTab> active_tab: CurrentTab.DuplicateFiles;
     in-out property <bool> is_tool_tab_active: active_tab != CurrentTab.Settings && active_tab != CurrentTab.About;
 
+    // TODO - not translated yet
     in-out property <[SelectModel]> select_results_list: [
         { data: SelectMode.SelectAll, name: "Select All" },
         { data: SelectMode.UnselectAll, name: "Deselect All" },
@@ -29,15 +30,30 @@ export global GuiState {
             name: "Select the smallest resolution"
         }
     ];
-   in-out property <[SortModel]> sort_results_list: [
-       { data: SortMode.ItemName, name: "Sort by item name" },
-       { data: SortMode.ParentName, name: "Sort by parent name" },
-       { data: SortMode.FullName, name: "Sort by full name" },
-       { data: SortMode.Size, name: "Sort by size" },
-       { data: SortMode.ModificationDate, name: "Sort by modification date" },
-       { data: SortMode.Selection, name: "Sort by selection" },
-       { data: SortMode.Reverse, name: "Reverse sort" }
-   ];
+
+    in-out property <[SortModel]> sort_results_list: [
+        { data: SortMode.ItemName, name: "Sort by item name" },
+        { data: SortMode.ParentName, name: "Sort by parent name" },
+        { data: SortMode.FullName, name: "Sort by full name" },
+        { data: SortMode.Size, name: "Sort by size" },
+        { data: SortMode.ModificationDate, name: "Sort by modification date" },
+        { data: SortMode.Selection, name: "Sort by selection" },
+        { data: SortMode.Reverse, name: "Reverse sort" }
+    ];
+
+    in-out property <[{name: string, tab: CurrentTab}]> tools_model: [
+        { name: "Duplicate Files", tab: CurrentTab.DuplicateFiles },
+        { name: "Empty Folders", tab: CurrentTab.EmptyFolders },
+        { name: "Big Files", tab: CurrentTab.BigFiles },
+        { name: "Empty Files", tab: CurrentTab.EmptyFiles },
+        { name: "Temporary Files", tab: CurrentTab.TemporaryFiles },
+        { name: "Similar Images", tab: CurrentTab.SimilarImages },
+        { name: "Similar Videos", tab: CurrentTab.SimilarVideos },
+        { name: "Music Duplicates", tab: CurrentTab.SimilarMusic },
+        { name: "Invalid Symlinks", tab: CurrentTab.InvalidSymlinks },
+        { name: "Broken Files", tab: CurrentTab.BrokenFiles },
+        { name: "Bad Extensions", tab: CurrentTab.BadExtensions }
+    ];
 
     in-out property <BottomPanelVisibility> bottom_panel_visibility: BottomPanelVisibility.Directories;
 }

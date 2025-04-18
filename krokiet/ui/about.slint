@@ -2,6 +2,7 @@ import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListV
 import { Settings } from "settings.slint";
 import { Callabler } from "callabler.slint";
 import { GuiState } from "gui_state.slint";
+import { Translations } from "translations.slint";
 
 export component About inherits VerticalLayout {
     preferred-height: 300px;
@@ -28,13 +29,13 @@ export component About inherits VerticalLayout {
         }
 
         Text {
-            text: "This program is free to use and will always be.\nSee the The MIT/GPL License for details.";
+            text <=> Translations.motto_text;
             horizontal-alignment: center;
             font-size: 13px;
         }
 
         Text {
-            text: "You may not look at unicorn, but unicorn always looks at you.";
+            text <=> Translations.unicorn_text;
             horizontal-alignment: center;
             font-size: 13px;
         }
@@ -43,28 +44,28 @@ export component About inherits VerticalLayout {
     HorizontalLayout {
         spacing: 5px;
         Button {
-            text: "Repository";
+            text <=> Translations.repository_text;
             clicked => {
                 Callabler.open_link("https://github.com/qarmin/czkawka");
             }
         }
 
         Button {
-            text: "Instruction";
+            text <=> Translations.instruction_text;
             clicked => {
                 Callabler.open_link("https://github.com/qarmin/czkawka/blob/master/instructions/Instruction.md");
             }
         }
 
         Button {
-            text: "Donation";
+            text <=> Translations.donation_text;
             clicked => {
                 Callabler.open_link("https://github.com/sponsors/qarmin");
             }
         }
 
         Button {
-            text: "Translation";
+            text <=> Translations.translation_text;
             clicked => {
                 Callabler.open_link("https://crwd.in/czkawka");
             }

@@ -148,16 +148,6 @@ component Presets inherits Rectangle {
     }
 }
 
-// component Language inherits HorizontalLayout {
-//     spacing: 5px;
-//     Text {     
-//         text: Callabler.translate("settings_language", []);
-//         vertical-alignment: TextVerticalAlignment.center;
-//     }
-//     ComboBox {
-//         model: ["English"];
-//     }
-// }
 component HeaderText inherits Text {
     font-size: 15px;
     height: SettingsSize.item_height;
@@ -178,6 +168,23 @@ component ConfigCacheButtons inherits HorizontalLayout {
         text: "Open cache folder";
         clicked => {
             Callabler.open_cache_folder();
+        }
+    }
+}
+
+component Languages inherits HorizontalLayout {
+    spacing: 5px;
+    Text {
+        text: "Language";
+        vertical-alignment: TextVerticalAlignment.center;
+    }
+
+    combo_box := ComboBox {
+        current_index <=> Settings.language_index;
+        model <=> Settings.languages_list;
+        selected(item) => {
+            Settings.language_index = self.current_index;
+            Callabler.changed_language();
         }
     }
 }
@@ -203,10 +210,9 @@ export component SettingsList inherits VerticalLayout {
             Presets {
                 height: SettingsSize.item_height;
             }
-            // TODO Maybe someday
-            // Language {
-            //     height: SettingsSize.item_height;
-            // }
+            Languages {
+                height: SettingsSize.item_height;
+            }
             HeaderText {
                 text: "General settings";
             }
