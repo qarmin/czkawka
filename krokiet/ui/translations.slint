@@ -46,10 +46,95 @@ export global Translations {
     in-out property <string> tool_broken_files_text: "Broken Files";
     in-out property <string> tool_bad_extensions_text: "Bad Extensions";
 
+    // Progress
+    in-out property <string> stage_current_text: "Current Stage:";
+    in-out property <string> stage_all_text: "All Stages:";
 
+    // Subsettings
+    in-out property <string> subsettings_text: "Subsettings";
+    in-out property <string> subsettings_images_hash_size_test: "Hash Size";
+    in-out property <string> subsettings_images_resize_algorithm_text: "Resize Algorithm";
+    in-out property <string> subsettings_images_ignore_same_size_text: "Ignore same size";
+    in-out property <string> subsettings_images_max_difference_text: "Max difference";
 
+    in-out property <string> subsettings_images_duplicates_hash_type_text: "Hash Type";
 
+    in-out property <string> subsettings_duplicates_check_method_text: "Check method";
+    in-out property <string> subsettings_duplicates_name_case_sensitive_text: "Case Sensitive(only name modes)";
 
+    in-out property <string> subsettings_biggest_files_sub_method_text: "Method";
+    in-out property <string> subsettings_biggest_files_sub_number_of_files_text: "Number of files";
 
+    in-out property <string> subsettings_videos_max_difference_text: "Max difference";
+    in-out property <string> subsettings_videos_ignore_same_size_text: "Ignore same size";
 
+    in-out property <string> subsettings_music_audio_check_type_text: "Audio check type";
+    in-out property <string> subsettings_music_approximate_comparison_text: "Approximate Tag Comparison";
+    in-out property <string> subsettings_music_compared_tags_text: "Compared tags";
+    in-out property <string> subsettings_music_title_text: "Title";
+    in-out property <string> subsettings_music_artist_text: "Artist";
+    in-out property <string> subsettings_music_bitrate_text: "Bitrate";
+    in-out property <string> subsettings_music_genre_text: "Genre";
+    in-out property <string> subsettings_music_year_text: "Year";
+    in-out property <string> subsettings_music_length_text: "Length";
+    in-out property <string> subsettings_music_max_difference_text: "Max difference";
+    in-out property <string> subsettings_music_minimal_fragment_duration_text: "Minimal fragment duration";
+    in-out property <string> subsettings_music_compare_fingerprints_only_with_similar_titles_text: "Compare only with similar titles";
+
+    in-out property <string> subsettings_broken_files_type_text: "Type of files to check";
+    in-out property <string> subsettings_broken_files_audio_text: "Audio";
+    in-out property <string> subsettings_broken_files_pdf_text: "Pdf";
+    in-out property <string> subsettings_broken_files_archive_text: "Archive";
+    in-out property <string> subsettings_broken_files_image_text: "Image";
+
+    // Settings
+
+    in-out property <string> settings_excluded_items_text: "Excluded item:";
+    in-out property <string> settings_allowed_extensions_text: "Allowed extensions:";
+    in-out property <string> settings_excluded_extensions_text: "Excluded extensions:";
+    in-out property <string> settings_file_size_text: "File Size(Kilobytes)";
+    in-out property <string> settings_minimum_file_size_text: "Min:";
+    in-out property <string> settings_maximum_file_size_text: "Max:";
+    in-out property <string> settings_recursive_search_text: "Recursive search";
+    in-out property <string> settings_use_cache_text: "Use cache";
+    in-out property <string> settings_save_as_json_text: "Also save cache as JSON file";
+    in-out property <string> settings_move_to_trash_text: "Move deleted files to trash";
+    in-out property <string> settings_ignore_other_filesystems_text: "Ignore other filesystems (only Linux)";
+    in-out property <string> settings_thread_number_text: "Thread number";
+    in-out property <string> settings_restart_required_text: "---You need to restart app to apply changes in thread number---";
+    in-out property <string> settings_duplicate_image_preview_text: "Image preview";
+    in-out property <string> settings_duplicate_hide_hard_links_text: "Hide hard links";
+    in-out property <string> settings_duplicate_minimal_hash_cache_size_text: "Minimal size of cached files - Hash (KB)";
+    in-out property <string> settings_duplicate_use_prehash_text: "Use prehash";
+    in-out property <string> settings_duplicate_minimal_prehash_cache_size_text: "Minimal size of cached files - Prehash (KB)";
+    in-out property <string> settings_duplicate_delete_outdated_entries_text: "Delete automatically outdated entries";
+    in-out property <string> settings_similar_images_show_image_preview_text: "Image preview";
+    in-out property <string> settings_similar_images_hide_hard_links_text: "Hide hard links";
+    in-out property <string> settings_similar_images_delete_outdated_entries_text: "Delete automatically outdated entries";
+    in-out property <string> settings_similar_videos_hide_hard_links_text: "Hide hard links";
+    in-out property <string> settings_similar_videos_delete_outdated_entries_text: "Delete automatically outdated entries";
+    in-out property <string> settings_similar_music_delete_outdated_entries_text: "Delete automatically outdated entries";
+    in-out property <string> settings_open_config_folder_text: "Open config folder";
+    in-out property <string> settings_open_cache_folder_text: "Open cache folder";
+    in-out property <string> settings_language_text: "Language";
+    in-out property <string> settings_current_preset_text: "Current Preset:";
+    in-out property <string> settings_edit_name_text: "Edit name";
+    in-out property <string> settings_choose_name_for_prefix_text: "Choose name for prefix ";
+    in-out property <string> settings_save_text: "Save";
+    in-out property <string> settings_load_text: "Load";
+    in-out property <string> settings_reset_text: "Reset";
+    in-out property <string> settings_similar_videos_tool_text: "Similar Videos tool";
+    in-out property <string> settings_similar_images_tool_text: "Similar Images tool";
+    in-out property <string> settings_similar_music_tool_text: "Similar Music tool";
+    in-out property <string> settings_duplicate_tool_text: "Duplicate tool";
+    in-out property <string> settings_general_settings_text: "General Settings";
+    in-out property <string> settings_settings_text: "Settings";
+
+    // Popup Save
+    in-out property <string> popup_save_title_text: "Saving results";
+    in-out property <string> popup_save_message_text: "This will save results to 3 different files\nAre you want to continue?";
+
+    // Popup rename
+    in-out property <string> popup_rename_title_text: "Renaming files";
+    in-out property <string> popup_rename_message_text: "This will rename extensions of selected files to more proper\n\nAre you want to continue?";
 }

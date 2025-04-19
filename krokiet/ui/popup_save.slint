@@ -12,6 +12,7 @@ import { BottomPanel } from "bottom_panel.slint";
 import {ColorPalette} from "color_palette.slint";
 import {GuiState} from "gui_state.slint";
 import { Preview } from "preview.slint";
+import { Translations } from "translations.slint";
 
 export component PopupSave inherits Rectangle {
     out property <length> popup_width: 500px;
@@ -32,7 +33,7 @@ export component PopupSave inherits Rectangle {
                 Text {
                     vertical-stretch: 0.0;
                     min-height: 30px;
-                    text: "Saving results";
+                    text <=> Translations.popup_save_title_text;
                     vertical-alignment: top;
                     horizontal-alignment: center;
                     font-size: 13px;
@@ -40,7 +41,7 @@ export component PopupSave inherits Rectangle {
 
                 Text {
                     vertical-stretch: 1.0;
-                    text: "This will save results to 3 different files" + "\nAre you want to continue?";
+                    text <=> Translations.popup_save_message_text;
                     vertical-alignment: center;
                     horizontal-alignment: center;
                     font-size: 13px;
