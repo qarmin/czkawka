@@ -67,7 +67,7 @@ component TabItem {
 export component LeftSidePanel {
     in-out property <bool> scanning;
     callback changed_current_tab();
-    width: 120px;
+    preferred-width: GuiState.left_panel_width;
     VerticalLayout {
         spacing: 2px;
         Rectangle {

@@ -1,22 +1,25 @@
+use crate::{Callabler, CurrentTab, GuiState, MainWindow, SelectMode, Settings, SortMode, SortModel, Translations, flk, localizer_krokiet};
+use czkawka_core::TOOLS_NUMBER;
 use i18n_embed::unic_langid::LanguageIdentifier;
 use log::error;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel};
 
-use crate::{Callabler, MainWindow, Settings, Translations, flk, localizer_krokiet};
-
 struct Language {
     long_name: &'static str,
     short_name: &'static str,
+    left_panel_size: f32, // Currently don't know how to automatically calculate this, so each language has its own size
 }
 
 const LANGUAGE_LIST: &[Language] = &[
     Language {
         long_name: "English",
         short_name: "en",
+        left_panel_size: 120.0,
     },
     Language {
         long_name: "Polski (Polish)",
         short_name: "pl",
+        left_panel_size: 150.0,
     },
 ];
 
@@ -38,15 +41,16 @@ fn change_language(app: &MainWindow) {
     ];
 
     let lang = app.global::<Settings>().get_language_index();
-    let language = LANGUAGE_LIST[lang as usize].short_name;
+    let lang_items = &LANGUAGE_LIST[lang as usize];
 
-    let lang_identifier = vec![LanguageIdentifier::from_bytes(language.as_bytes()).expect("Failed to create LanguageIdentifier")];
+    let lang_identifier = vec![LanguageIdentifier::from_bytes(lang_items.short_name.as_bytes()).expect("Failed to create LanguageIdentifier")];
     for (lib, localizer) in localizers {
         if let Err(error) = localizer.select(&lang_identifier) {
             error!("Error while loadings languages for {lib} {error:?}");
         }
     }
 
+    app.global::<GuiState>().set_left_panel_width(lang_items.left_panel_size);
     translate_items(app);
 }
 
@@ -109,7 +113,13 @@ fn translate_items(app: &MainWindow) {
     translation.set_sort_reverse_text(flk!("sort_reverse").into());
     translation.set_selection_all_text(flk!("selection_all").into());
     translation.set_selection_deselect_all_text(flk!("selection_deselect_all").into());
+    translation.set_selection_invert_selection_text(flk!("selection_invert_selection").into());
+    translation.set_selection_the_biggest_size_text(flk!("selection_the_biggest_size").into());
+    translation.set_selection_the_biggest_resolution_text(flk!("selection_the_biggest_resolution").into());
+    translation.set_selection_the_smallest_size_text(flk!("selection_the_smallest_size").into());
     translation.set_selection_the_smallest_resolution_text(flk!("selection_the_smallest_resolution").into());
+    translation.set_selection_newest_text(flk!("selection_newest").into());
+    translation.set_selection_oldest_text(flk!("selection_oldest").into());
     translation.set_stage_current_text(flk!("stage_current").into());
     translation.set_stage_all_text(flk!("stage_all").into());
     translation.set_subsettings_text(flk!("subsettings").into());
@@ -192,4 +202,67 @@ fn translate_items(app: &MainWindow) {
     translation.set_delete_confirmation_text(flk!("delete_confirmation").into());
     translation.set_stopping_scan_text(flk!("stopping_scan").into());
     translation.set_searching_text(flk!("searching").into());
+
+    let tools_model: [(SharedString, CurrentTab); TOOLS_NUMBER] = [
+        (flk!("tool_duplicate_files").into(), CurrentTab::DuplicateFiles),
+        (flk!("tool_empty_folders").into(), CurrentTab::EmptyFolders),
+        (flk!("tool_big_files").into(), CurrentTab::BigFiles),
+        (flk!("tool_empty_files").into(), CurrentTab::EmptyFiles),
+        (flk!("tool_temporary_files").into(), CurrentTab::TemporaryFiles),
+        (flk!("tool_similar_images").into(), CurrentTab::SimilarImages),
+        (flk!("tool_similar_videos").into(), CurrentTab::SimilarVideos),
+        (flk!("tool_music_duplicates").into(), CurrentTab::SimilarMusic),
+        (flk!("tool_invalid_symlinks").into(), CurrentTab::InvalidSymlinks),
+        (flk!("tool_broken_files").into(), CurrentTab::BrokenFiles),
+        (flk!("tool_bad_extensions").into(), CurrentTab::BadExtensions),
+    ];
+    let gui_state = app.global::<GuiState>();
+    gui_state.set_tools_model(ModelRc::new(VecModel::from(tools_model.to_vec())));
+
+    let sort_model: [SortModel; 7] = [
+        SortModel {
+            data: SortMode::ItemName,
+            name: flk!("sort_by_item_name").into(),
+        },
+        SortModel {
+            data: SortMode::ParentName,
+            name: flk!("sort_by_parent_name").into(),
+        },
+        SortModel {
+            data: SortMode::FullName,
+            name: flk!("sort_by_full_name").into(),
+        },
+        SortModel {
+            data: SortMode::Size,
+            name: flk!("sort_by_size").into(),
+        },
+        SortModel {
+            data: SortMode::ModificationDate,
+            name: flk!("sort_by_modification_date").into(),
+        },
+        SortModel {
+            data: SortMode::Selection,
+            name: flk!("sort_by_selection").into(),
+        },
+        SortModel {
+            data: SortMode::Reverse,
+            name: flk!("sort_reverse").into(),
+        },
+    ];
+
+    gui_state.set_sort_results_list(ModelRc::new(VecModel::from(sort_model.to_vec())));
+}
+
+pub(crate) fn translate_select_mode(select_mode: SelectMode) -> SharedString {
+    match select_mode {
+        SelectMode::SelectAll => flk!("selection_all_text").into(),
+        SelectMode::UnselectAll => flk!("selection_deselect_all_text").into(),
+        SelectMode::InvertSelection => flk!("selection_invert_selection_text").into(),
+        SelectMode::SelectTheBiggestSize => flk!("selection_the_biggest_size_text").into(),
+        SelectMode::SelectTheBiggestResolution => flk!("selection_the_biggest_resolution_text").into(),
+        SelectMode::SelectTheSmallestSize => flk!("selection_the_smallest_size_text").into(),
+        SelectMode::SelectTheSmallestResolution => flk!("selection_the_smallest_resolution_text").into(),
+        SelectMode::SelectNewest => flk!("selection_newest_text").into(),
+        SelectMode::SelectOldest => flk!("selection_oldest_text").into(),
+    }
 }
