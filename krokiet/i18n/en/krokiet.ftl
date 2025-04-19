@@ -1,3 +1,8 @@
+# In Rust translations
+rust_loaded_preset = Loaded preset { $preset_idx }
+rust_cannot_load_preset = Cannot load preset { $preset_idx }, reason: { $reason }
+
+# Slint translations
 yes_button = Yes
 no_button = No
 ok_button = Ok

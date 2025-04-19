@@ -255,14 +255,14 @@ fn translate_items(app: &MainWindow) {
 
 pub(crate) fn translate_select_mode(select_mode: SelectMode) -> SharedString {
     match select_mode {
-        SelectMode::SelectAll => flk!("selection_all_text").into(),
-        SelectMode::UnselectAll => flk!("selection_deselect_all_text").into(),
-        SelectMode::InvertSelection => flk!("selection_invert_selection_text").into(),
-        SelectMode::SelectTheBiggestSize => flk!("selection_the_biggest_size_text").into(),
-        SelectMode::SelectTheBiggestResolution => flk!("selection_the_biggest_resolution_text").into(),
-        SelectMode::SelectTheSmallestSize => flk!("selection_the_smallest_size_text").into(),
-        SelectMode::SelectTheSmallestResolution => flk!("selection_the_smallest_resolution_text").into(),
-        SelectMode::SelectNewest => flk!("selection_newest_text").into(),
-        SelectMode::SelectOldest => flk!("selection_oldest_text").into(),
+        SelectMode::SelectAll => flk!("selection_all").into(),
+        SelectMode::UnselectAll => flk!("selection_deselect_all").into(),
+        SelectMode::InvertSelection => flk!("selection_invert_selection").into(),
+        SelectMode::SelectTheBiggestSize => flk!("selection_the_biggest_size").into(),
+        SelectMode::SelectTheBiggestResolution => flk!("selection_the_biggest_resolution").into(),
+        SelectMode::SelectTheSmallestSize => flk!("selection_the_smallest_size").into(),
+        SelectMode::SelectTheSmallestResolution => flk!("selection_the_smallest_resolution").into(),
+        SelectMode::SelectNewest => flk!("selection_newest").into(),
+        SelectMode::SelectOldest => flk!("selection_oldest").into(),
     }
 }

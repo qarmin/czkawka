@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
 use slint::{ComponentHandle, Model, ModelRc, SharedString, VecModel};
 
 use crate::common::{create_excluded_directories_model_from_pathbuf, create_included_directories_model_from_pathbuf, create_vec_model_from_vec_string};
-use crate::{Callabler, GuiState, MainWindow, Settings};
+use crate::{Callabler, GuiState, MainWindow, Settings, flk};
 
 pub const DEFAULT_MINIMUM_SIZE_KB: i32 = 16;
 pub const DEFAULT_MAXIMUM_SIZE_KB: i32 = i32::MAX / 1024;
@@ -249,11 +249,11 @@ pub fn connect_changing_settings_preset(app: &MainWindow) {
         match loaded_data {
             Ok(loaded_data) => {
                 set_settings_to_gui(&app, &loaded_data);
-                app.set_text_summary_text(format!("Loaded preset {}", current_item + 1).into());
+                app.set_text_summary_text(flk!("rust_loaded_preset", preset_idx = (current_item + 1)).into())
             }
             Err(e) => {
                 set_settings_to_gui(&app, &SettingsCustom::default());
-                let err_message = format!("Cannot load preset {} - reason {e}", current_item + 1);
+                let err_message = flk!("rust_cannot_load_preset", preset_idx = (current_item + 1), reason = e).into();
                 app.set_text_summary_text(err_message.into());
                 error!("{e}");
             }
