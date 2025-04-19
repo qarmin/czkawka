@@ -1,7 +1,13 @@
 export global Translations {
     in-out property <string> yes_button_text: "Yes";
     in-out property <string> no_button_text: "No";
+    in-out property <string> ok_button_text: "Ok";
+    in-out property <string> cancel_button_text: "Cancel";
+    in-out property <string> are_you_want_to_continue_text: "Are you want to continue?";
     
+    // Main window
+    in-out property <string> main_window_title_text: "Krokiet - Data Cleaner";
+
     // Bottom buttons
     in-out property <string> scan_button_text: "Scan";
     in-out property <string> stop_button_text: "Stop";
@@ -28,10 +34,6 @@ export global Translations {
     in-out property <string> excluded_directories_text: "Excluded Directories";
     in-out property <string> ref_text: "Ref";
     in-out property <string> path_text: "Path";
-
-    // Popup delete
-    in-out property <string> delete_text: "Delete items";
-    in-out property <string> delete_confirmation_text: "Are you sure you want to delete the selected items?";
 
     // Tools
     in-out property <string> tool_duplicate_files_text: "Duplicate Files";
@@ -110,10 +112,8 @@ export global Translations {
     in-out property <string> settings_duplicate_delete_outdated_entries_text: "Delete automatically outdated entries";
     in-out property <string> settings_similar_images_show_image_preview_text: "Image preview";
     in-out property <string> settings_similar_images_hide_hard_links_text: "Hide hard links";
-    in-out property <string> settings_similar_images_delete_outdated_entries_text: "Delete automatically outdated entries";
+    in-out property <string> settings_delete_outdated_entries_text: "Delete automatically outdated entries";
     in-out property <string> settings_similar_videos_hide_hard_links_text: "Hide hard links";
-    in-out property <string> settings_similar_videos_delete_outdated_entries_text: "Delete automatically outdated entries";
-    in-out property <string> settings_similar_music_delete_outdated_entries_text: "Delete automatically outdated entries";
     in-out property <string> settings_open_config_folder_text: "Open config folder";
     in-out property <string> settings_open_cache_folder_text: "Open cache folder";
     in-out property <string> settings_language_text: "Language";
@@ -132,9 +132,27 @@ export global Translations {
 
     // Popup Save
     in-out property <string> popup_save_title_text: "Saving results";
-    in-out property <string> popup_save_message_text: "This will save results to 3 different files\nAre you want to continue?";
+    in-out property <string> popup_save_message_text: "This will save results to 3 different files";
 
     // Popup rename
     in-out property <string> popup_rename_title_text: "Renaming files";
-    in-out property <string> popup_rename_message_text: "This will rename extensions of selected files to more proper\n\nAre you want to continue?";
+    in-out property <string> popup_rename_message_text: "This will rename extensions of selected files to more proper";
+
+    // Popup new directories
+    in-out property <string> popup_new_directories_title_text: "Please add directories one per line";
+
+    // Popup move folders
+    in-out property <string> popup_move_title_text: "Moving files";
+    in-out property <string> popup_move_message_text: "Moving entries to folder";
+    in-out property <string> popup_move_copy_checkbox_text: "Copy files instead of moving";
+    in-out property <string> popup_move_preserve_folder_checkbox_text: "Preserve folder structure";
+
+    // Popup delete
+    in-out property <string> delete_text: "Delete items";
+    in-out property <string> delete_confirmation_text: "Are you sure you want to delete the selected items?";
+
+    // Main window
+    in-out property <string> stopping_scan_text: "Stopping scan, please wait...";
+    in-out property <string> searching_text: "Searching...";
+
 }

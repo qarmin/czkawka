@@ -41,7 +41,7 @@ export component PopupSave inherits Rectangle {
 
                 Text {
                     vertical-stretch: 1.0;
-                    text <=> Translations.popup_save_message_text;
+                    text: Translations.popup_save_message_text + "\n" + Translations.are_you_want_to_continue_text;
                     vertical-alignment: center;
                     horizontal-alignment: center;
                     font-size: 13px;
@@ -50,7 +50,7 @@ export component PopupSave inherits Rectangle {
 
                 HorizontalLayout {
                     Button {
-                        text: "Yes";
+                        text <=> Translations.yes_button_text;
                         clicked => {
                             popup_window.close();
                             Callabler.save_results();
@@ -60,7 +60,7 @@ export component PopupSave inherits Rectangle {
                     Rectangle { }
 
                     Button {
-                        text: "No";
+                        text <=> Translations.no_button_text;
                         clicked => {
                             popup_window.close();
                         }

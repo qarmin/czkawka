@@ -33,7 +33,7 @@ export component MainWindow inherits Window {
     callback folders_move_choose_requested();
     callback reset_selection();
 
-    title: "Krokiet - Data Cleaner";
+    title <=> Translations.main_window_title_text;
 
     min-width: 300px;
     preferred-width: 800px;
@@ -140,11 +140,11 @@ export component MainWindow inherits Window {
             scanning <=> root.scanning;
             stop_requested <=> root.stop_requested;
             scan_stopping => {
-                text_summary_text = "Stopping scan, please wait...";
+                text_summary_text = Translations.stopping_scan_text;
                 root.scan_stopping();
             }
             scan_starting(item) => {
-                text_summary_text = "Searching...";
+                text_summary_text = Translations.searching_text;
                 root.scan_starting(item);
             }
             show_select_popup(x_offset, y_offset) => {
