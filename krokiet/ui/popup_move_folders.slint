@@ -12,6 +12,7 @@ import { BottomPanel } from "bottom_panel.slint";
 import {ColorPalette} from "color_palette.slint";
 import {GuiState} from "gui_state.slint";
 import { Preview } from "preview.slint";
+import { Translations } from "translations.slint";
 
 export component PopupMoveFolders inherits Rectangle {
     out property <length> popup_width: 500px;
@@ -33,7 +34,7 @@ export component PopupMoveFolders inherits Rectangle {
                 Text {
                     vertical-stretch: 0.0;
                     min-height: 30px;
-                    text: "Moving files";
+                    text <=> Translations.popup_move_title_text;
                     vertical-alignment: top;
                     horizontal-alignment: center;
                     font-size: 13px;
@@ -41,7 +42,7 @@ export component PopupMoveFolders inherits Rectangle {
 
                 Text {
                     vertical-stretch: 1.0;
-                    text: "Moving entries to folder\n" + folder_name + "\nAre you want to continue?";
+                    text: Translations.popup_move_message_text + "\n" + folder_name + "\n" + Translations.are_you_want_to_continue_text;
                     vertical-alignment: center;
                     horizontal-alignment: center;
                     font-size: 13px;
@@ -52,21 +53,21 @@ export component PopupMoveFolders inherits Rectangle {
                     HorizontalLayout {
                         alignment: center;
                         copy_checkbox := CheckBox {
-                            text: "Copy files instead of moving";
+                            text <=> Translations.popup_move_copy_checkbox_text;
                         }
                     }
 
                     HorizontalLayout {
                         alignment: center;
                         preserve_folder_checkbox := CheckBox {
-                            text: "Preserve folder structure";
+                            text <=> Translations.popup_move_preserve_folder_checkbox_text;
                         }
                     }
                 }
 
                 HorizontalLayout {
                     Button {
-                        text: "Yes";
+                        text <=> Translations.yes_button_text;
                         clicked => {
                             popup_window.close();
                             Callabler.move_items(preserve_folder_checkbox.checked, copy_checkbox.checked, folder_name);
@@ -76,7 +77,7 @@ export component PopupMoveFolders inherits Rectangle {
                     Rectangle { }
 
                     Button {
-                        text: "No";
+                        text <=> Translations.no_button_text;
                         clicked => {
                             popup_window.close();
                         }

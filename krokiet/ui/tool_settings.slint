@@ -14,6 +14,7 @@ import {GuiState} from "gui_state.slint";
 import { Preview } from "preview.slint";
 import {PopupNewDirectories} from "popup_new_directories.slint";
 import {TextComponent} from "settings_list.slint";
+import { Translations } from "translations.slint";
 
 component ComboBoxWrapper inherits HorizontalLayout {
     in-out property <string> text;
@@ -36,7 +37,7 @@ component ComboBoxWrapper inherits HorizontalLayout {
 component CheckBoxWrapper inherits CheckBox { }
 
 component SubsettingsHeader inherits Text {
-    text: "Subsettings";
+    text: Translations.subsettings_text;
     font-size: 15px;
 }
 
@@ -73,33 +74,33 @@ export component ToolSettings {
             SubsettingsHeader { }
 
             ComboBoxWrapper {
-                text: "Hash size";
+                text: Translations.subsettings_images_hash_size_text;
                 model: Settings.similar_images_sub_available_hash_size;
                 current_index <=> Settings.similar_images_sub_hash_size_index;
                 current_value <=> Settings.similar_images_sub_hash_size_value;
             }
 
             ComboBoxWrapper {
-                text: "Resize Algorithm";
+                text: Translations.subsettings_images_resize_algorithm_text;
                 model: Settings.similar_images_sub_available_resize_algorithm;
                 current_index <=> Settings.similar_images_sub_resize_algorithm_index;
                 current_value <=> Settings.similar_images_sub_resize_algorithm_value;
             }
 
             ComboBoxWrapper {
-                text: "Hash type";
+                text: Translations.subsettings_images_duplicates_hash_type_text;
                 model: Settings.similar_images_sub_available_hash_type;
                 current_index <=> Settings.similar_images_sub_hash_alg_index;
                 current_value <=> Settings.similar_images_sub_hash_alg_value;
             }
 
             CheckBoxWrapper {
-                text: "Ignore same size";
+                text: Translations.subsettings_images_ignore_same_size_text;
                 checked <=> Settings.similar_images_sub_ignore_same_size;
             }
 
             SliderWrapper {
-                text: "Max difference";
+                text: Translations.subsettings_images_max_difference_text;
                 end_text: "(" + round(Settings.similar_images_sub_current_similarity) + "/" + round(Settings.similar_images_sub_max_similarity) + ")";
                 end_text_size: 40px;
                 maximum <=> Settings.similar_images_sub_max_similarity;
@@ -116,21 +117,21 @@ export component ToolSettings {
             SubsettingsHeader { }
 
             ComboBoxWrapper {
-                text: "Check method";
+                text: Translations.subsettings_duplicates_check_method_text;
                 model: Settings.duplicates_sub_check_method;
                 current_index <=> Settings.duplicates_sub_check_method_index;
                 current_value <=> Settings.duplicates_sub_check_method_value;
             }
 
             ComboBoxWrapper {
-                text: "Hash type";
+                text: Translations.subsettings_images_duplicates_hash_type_text;
                 model: Settings.duplicates_sub_available_hash_type;
                 current_index <=> Settings.duplicates_sub_available_hash_type_index;
                 current_value <=> Settings.duplicates_sub_available_hash_type_value;
             }
 
             CheckBoxWrapper {
-                text: "Case Sensitive(only name modes)";
+                text: Translations.subsettings_duplicates_name_case_sensitive_text;
                 checked <=> Settings.duplicates_sub_name_case_sensitive;
             }
 
@@ -144,14 +145,14 @@ export component ToolSettings {
             SubsettingsHeader { }
 
             ComboBoxWrapper {
-                text: "Checked files";
+                text: Translations.subsettings_biggest_files_sub_method_text;
                 model: Settings.biggest_files_sub_method;
                 current_index <=> Settings.biggest_files_sub_method_index;
                 current_value <=> Settings.biggest_files_sub_method_value;
             }
 
             TextComponent {
-                name: "Number of files";
+                name: Translations.subsettings_biggest_files_sub_number_of_files_text;
                 model <=> Settings.biggest_files_sub_number_of_files;
             }
 
@@ -165,7 +166,7 @@ export component ToolSettings {
             SubsettingsHeader { }
 
             SliderWrapper {
-                text: "Max difference";
+                text: Translations.subsettings_videos_max_difference_text;
                 end_text: "(" + round(Settings.similar_videos_sub_current_similarity) + "/" + round(Settings.similar_videos_sub_max_similarity) + ")";
                 end_text_size: 40px;
                 maximum <=> Settings.similar_videos_sub_max_similarity;
@@ -173,7 +174,7 @@ export component ToolSettings {
             }
 
             CheckBoxWrapper {
-                text: "Ignore same size";
+                text: Translations.subsettings_videos_ignore_same_size_text;
                 checked <=> Settings.similar_images_sub_ignore_same_size;
             }
 
@@ -187,59 +188,57 @@ export component ToolSettings {
             SubsettingsHeader { }
 
             ComboBoxWrapper {
-                text: "Audio check type";
+                text: Translations.subsettings_music_audio_check_type_text;
                 model: Settings.similar_music_sub_audio_check_type;
                 current_index <=> Settings.similar_music_sub_audio_check_type_index;
                 current_value <=> Settings.similar_music_sub_audio_check_type_value;
             }
-            // A little bit of a hack
-            // Mode should be set with a enum, not index, but it's not possible in slint(maybe yet)
             if Settings.similar_music_sub_audio_check_type_index == 0: VerticalLayout {
                 spacing: 5px;
                 CheckBoxWrapper {
-                    text: "Approximate Tag Comparison";
+                    text: Translations.subsettings_music_approximate_comparison_text;
                     checked <=> Settings.similar_music_sub_approximate_comparison;
                 }
 
                 Text {
-                    text: "Compared tags";
+                    text: Translations.subsettings_music_compared_tags_text;
                     font-size: 12px;
                 }
 
                 CheckBoxWrapper {
-                    text: "Title";
+                    text: Translations.subsettings_music_title_text;
                     checked <=> Settings.similar_music_sub_title;
                 }
 
                 CheckBoxWrapper {
-                    text: "Artist";
+                    text: Translations.subsettings_music_artist_text;
                     checked <=> Settings.similar_music_sub_artist;
                 }
 
                 CheckBoxWrapper {
-                    text: "Bitrate";
+                    text: Translations.subsettings_music_bitrate_text;
                     checked <=> Settings.similar_music_sub_bitrate;
                 }
 
                 CheckBoxWrapper {
-                    text: "Genre";
+                    text: Translations.subsettings_music_genre_text;
                     checked <=> Settings.similar_music_sub_genre;
                 }
 
                 CheckBoxWrapper {
-                    text: "Year";
+                    text: Translations.subsettings_music_year_text;
                     checked <=> Settings.similar_music_sub_year;
                 }
 
                 CheckBoxWrapper {
-                    text: "Length";
+                    text: Translations.subsettings_music_length_text;
                     checked <=> Settings.similar_music_sub_length;
                 }
             }
             if Settings.similar_music_sub_audio_check_type_index == 1: VerticalLayout {
                 spacing: 5px;
                 SliderWrapper {
-                    text: "Max difference";
+                    text: Translations.subsettings_music_max_difference_text;
                     end_text: "(" + round(Settings.similar_music_sub_maximum_difference_value) + "/" + round(Settings.similar_music_sub_maximum_difference_max) + ")";
                     end_text_size: 40px;
                     maximum <=> Settings.similar_music_sub_maximum_difference_max;
@@ -247,7 +246,7 @@ export component ToolSettings {
                 }
 
                 SliderWrapper {
-                    text: "Minimal fragment duration";
+                    text: Translations.subsettings_music_minimal_fragment_duration_text;
                     end_text: round(Settings.similar_music_sub_minimal_fragment_duration_value);
                     end_text_size: 40px;
                     maximum <=> Settings.similar_music_sub_minimal_fragment_duration_max;
@@ -255,7 +254,7 @@ export component ToolSettings {
                 }
 
                 CheckBoxWrapper {
-                    text: "Compare only with similar titles";
+                    text: Translations.subsettings_music_compare_fingerprints_only_with_similar_titles_text;
                     checked <=> Settings.similar_music_compare_fingerprints_only_with_similar_titles;
                 }
             }
@@ -269,27 +268,27 @@ export component ToolSettings {
             SubsettingsHeader { }
 
             Text {
-                text: "Type of files to check";
+                text: Translations.subsettings_broken_files_type_text;
                 font-size: 12px;
             }
 
             CheckBoxWrapper {
-                text: "Audio";
+                text: Translations.subsettings_broken_files_audio_text;
                 checked <=> Settings.broken_files_sub_audio;
             }
 
             CheckBoxWrapper {
-                text: "Pdf";
+                text: Translations.subsettings_broken_files_pdf_text;
                 checked <=> Settings.broken_files_sub_pdf;
             }
 
             CheckBoxWrapper {
-                text: "Archive";
+                text: Translations.subsettings_broken_files_archive_text;
                 checked <=> Settings.broken_files_sub_archive;
             }
 
             CheckBoxWrapper {
-                text: "Image";
+                text: Translations.subsettings_broken_files_image_text;
                 checked <=> Settings.broken_files_sub_image;
             }
 

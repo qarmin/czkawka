@@ -4,6 +4,7 @@ import {Callabler} from "callabler.slint";
 import {IncludedDirectoriesModel, ExcludedDirectoriesModel} from "common.slint";
 import {ColorPalette} from "color_palette.slint";
 import {Settings} from "settings.slint";
+import { Translations } from "translations.slint";
 
 export component IncludedDirectories {
     in-out property <[IncludedDirectoriesModel]> model <=> Settings.included_directories_model;
@@ -15,14 +16,14 @@ export component IncludedDirectories {
         HorizontalLayout {
             spacing: 5px;
             Text {
-                text: "Ref";
+                text <=> Translations.ref_text;
                 width: size_referenced_folder;
                 horizontal-alignment: center;
             }
 
             Text {
                 horizontal-stretch: 1.0;
-                text: "Path";
+                text <=> Translations.path_text;
             }
         }
 
@@ -83,7 +84,7 @@ export component ExcludedDirectories {
             spacing: 5px;
             padding-left: 5px;
             Text {
-                text: "Path";
+                text <=> Translations.path_text;
             }
         }
 

@@ -12,6 +12,7 @@ import { BottomPanel } from "bottom_panel.slint";
 import {ColorPalette} from "color_palette.slint";
 import {GuiState} from "gui_state.slint";
 import { Preview } from "preview.slint";
+import { Translations } from "translations.slint";
 
 export component PopupDelete inherits Rectangle {
     out property <length> popup_width: 350px;
@@ -31,7 +32,7 @@ export component PopupDelete inherits Rectangle {
             VerticalLayout {
                 Text {
                     vertical-stretch: 0.0;
-                    text: "Delete items";
+                    text <=> Translations.delete_text;
                     vertical-alignment: center;
                     horizontal-alignment: center;
                     font-size: 13px;
@@ -40,7 +41,7 @@ export component PopupDelete inherits Rectangle {
 
                 Text {
                     vertical-stretch: 1.0;
-                    text: "Are you sure you want to delete the selected items?";
+                    text <=> Translations.delete_confirmation_text;
                     vertical-alignment: center;
                     horizontal-alignment: center;
                     font-size: 13px;
@@ -49,7 +50,7 @@ export component PopupDelete inherits Rectangle {
 
                 HorizontalLayout {
                     Button {
-                        text: "Yes";
+                        text <=> Translations.yes_button_text;
                         clicked => {
                             popup_window.close();
                             Callabler.delete_selected_items();
@@ -59,7 +60,7 @@ export component PopupDelete inherits Rectangle {
                     Rectangle { }
 
                     Button {
-                        text: "No";
+                        text <=> Translations.no_button_text;
                         clicked => {
                             popup_window.close();
                         }

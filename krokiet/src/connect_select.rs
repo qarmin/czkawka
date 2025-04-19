@@ -3,6 +3,7 @@ use slint::{ComponentHandle, Model, ModelRc, VecModel};
 use crate::common::{
     connect_i32_into_u64, get_int_height_idx, get_int_modification_date_idx, get_int_size_idx, get_int_width_idx, get_is_header_mode, get_tool_model, set_tool_model,
 };
+use crate::connect_translation::translate_select_mode;
 use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow, SelectMode, SelectModel};
 
 // TODO optimize this, not sure if it is possible to not copy entire model to just select item
@@ -73,26 +74,12 @@ fn set_select_buttons(app: &MainWindow) {
     let new_select_model = base_buttons
         .into_iter()
         .map(|e| SelectModel {
-            name: translate_select_mode(e).into(),
+            name: translate_select_mode(e),
             data: e,
         })
         .collect::<Vec<_>>();
 
     app.global::<GuiState>().set_select_results_list(ModelRc::new(VecModel::from(new_select_model)));
-}
-
-fn translate_select_mode(select_mode: SelectMode) -> String {
-    match select_mode {
-        SelectMode::SelectAll => "Select all".into(),
-        SelectMode::UnselectAll => "Unselect all".into(),
-        SelectMode::InvertSelection => "Invert selection".into(),
-        SelectMode::SelectTheBiggestSize => "Select the biggest size".into(),
-        SelectMode::SelectTheBiggestResolution => "Select the biggest resolution".into(),
-        SelectMode::SelectTheSmallestSize => "Select the smallest size".into(),
-        SelectMode::SelectTheSmallestResolution => "Select the smallest resolution".into(),
-        SelectMode::SelectNewest => "Select newest".into(),
-        SelectMode::SelectOldest => "Select oldest".into(),
-    }
 }
 
 // TODO, when model will be able to contain i64 instead two i32, this function could be merged with select_by_size_date

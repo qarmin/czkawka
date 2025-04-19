@@ -4,6 +4,7 @@ import {LeftSidePanel} from "left_side_panel.slint";
 import {MainList} from "main_lists.slint";
 import {CurrentTab, ProgressToSend} from "common.slint";
 import { ProgressIndicator } from "std-widgets.slint";
+import { Translations } from "translations.slint";
 
 export component Progress {
     in-out property <ProgressToSend> progress_datas;
@@ -21,12 +22,12 @@ export component Progress {
                 spacing: 5px;
                 Text {
                     vertical-alignment: TextVerticalAlignment.center;
-                    text: "Current Stage:";
+                    text: Translations.stage_current_text;
                 }
 
                 Text {
                     vertical-alignment: TextVerticalAlignment.center;
-                    text: "All Stages:";
+                    text: Translations.stage_all_text;
                 }
             }
 

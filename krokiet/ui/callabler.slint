@@ -36,6 +36,7 @@ export global Callabler {
     callback save_current_preset();
     callback load_current_preset();
     callback reset_current_preset();
+    callback changed_language();
 
     callback tab_changed();
 
@@ -43,9 +44,6 @@ export global Callabler {
     callback save_results();
     callback move_items(bool, bool, string);
     callback rename_files();
-
-    // Translations
-    pure callback translate(string, [{key: string, value: string}]) -> string;
 
     // Only Slint
     callback open_select_popup();
