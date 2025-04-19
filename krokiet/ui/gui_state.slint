@@ -1,5 +1,6 @@
 import {CurrentTab} from "common.slint";
 import {SelectModel, SortModel, SelectMode, SortMode, BottomPanelVisibility} from "common.slint";
+import { Translations } from "translations.slint";
 
 // State Gui state that shows the current state of the GUI
 // It extends Settings global state with settings that are not saved to the settings file
@@ -21,38 +22,37 @@ export global GuiState {
     in-out property <CurrentTab> active_tab: CurrentTab.DuplicateFiles;
     in-out property <bool> is_tool_tab_active: active_tab != CurrentTab.Settings && active_tab != CurrentTab.About;
 
-    // TODO - not translated yet
     in-out property <[SelectModel]> select_results_list: [
-        { data: SelectMode.SelectAll, name: "Select All" },
-        { data: SelectMode.UnselectAll, name: "Deselect All" },
+        { data: SelectMode.SelectAll, name: Translations.selection_all_text },
+        { data: SelectMode.UnselectAll, name: Translations.selection_deselect_all_text },
         {
             data: SelectMode.SelectTheSmallestResolution,
-            name: "Select the smallest resolution"
+            name: Translations.selection_the_smallest_resolution_text
         }
     ];
 
     in-out property <[SortModel]> sort_results_list: [
-        { data: SortMode.ItemName, name: "Sort by item name" },
-        { data: SortMode.ParentName, name: "Sort by parent name" },
-        { data: SortMode.FullName, name: "Sort by full name" },
-        { data: SortMode.Size, name: "Sort by size" },
-        { data: SortMode.ModificationDate, name: "Sort by modification date" },
-        { data: SortMode.Selection, name: "Sort by selection" },
-        { data: SortMode.Reverse, name: "Reverse sort" }
+        { data: SortMode.ItemName, name: Translations.sort_by_item_name_text },
+        { data: SortMode.ParentName, name: Translations.sort_by_parent_name_text },
+        { data: SortMode.FullName, name: Translations.sort_by_full_name_text },
+        { data: SortMode.Size, name: Translations.sort_by_size_text },
+        { data: SortMode.ModificationDate, name: Translations.sort_by_modification_date_text },
+        { data: SortMode.Selection, name: Translations.sort_by_selection_text },
+        { data: SortMode.Reverse, name: Translations.sort_reverse_text }
     ];
 
     in-out property <[{name: string, tab: CurrentTab}]> tools_model: [
-        { name: "Duplicate Files", tab: CurrentTab.DuplicateFiles },
-        { name: "Empty Folders", tab: CurrentTab.EmptyFolders },
-        { name: "Big Files", tab: CurrentTab.BigFiles },
-        { name: "Empty Files", tab: CurrentTab.EmptyFiles },
-        { name: "Temporary Files", tab: CurrentTab.TemporaryFiles },
-        { name: "Similar Images", tab: CurrentTab.SimilarImages },
-        { name: "Similar Videos", tab: CurrentTab.SimilarVideos },
-        { name: "Music Duplicates", tab: CurrentTab.SimilarMusic },
-        { name: "Invalid Symlinks", tab: CurrentTab.InvalidSymlinks },
-        { name: "Broken Files", tab: CurrentTab.BrokenFiles },
-        { name: "Bad Extensions", tab: CurrentTab.BadExtensions }
+        { name: Translations.tool_duplicate_files_text, tab: CurrentTab.DuplicateFiles },
+        { name: Translations.tool_empty_folders_text, tab: CurrentTab.EmptyFolders },
+        { name: Translations.tool_big_files_text, tab: CurrentTab.BigFiles },
+        { name: Translations.tool_empty_files_text, tab: CurrentTab.EmptyFiles },
+        { name: Translations.tool_temporary_files_text, tab: CurrentTab.TemporaryFiles },
+        { name: Translations.tool_similar_images_text, tab: CurrentTab.SimilarImages },
+        { name: Translations.tool_similar_videos_text, tab: CurrentTab.SimilarVideos },
+        { name: Translations.tool_music_duplicates_text, tab: CurrentTab.SimilarMusic },
+        { name: Translations.tool_invalid_symlinks_text, tab: CurrentTab.InvalidSymlinks },
+        { name: Translations.tool_broken_files_text, tab: CurrentTab.BrokenFiles },
+        { name: Translations.tool_bad_extensions_text, tab: CurrentTab.BadExtensions }
     ];
 
     in-out property <BottomPanelVisibility> bottom_panel_visibility: BottomPanelVisibility.Directories;
