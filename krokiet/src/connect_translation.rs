@@ -1,17 +1,18 @@
 use czkawka_core::TOOLS_NUMBER;
+use i18n_embed::DesktopLanguageRequester;
 use i18n_embed::unic_langid::LanguageIdentifier;
-use log::error;
+use log::{error, info};
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel};
 
 use crate::{Callabler, CurrentTab, GuiState, MainWindow, SelectMode, Settings, SortMode, SortModel, Translations, flk, localizer_krokiet};
 
-struct Language {
-    long_name: &'static str,
-    short_name: &'static str,
-    left_panel_size: f32, // Currently don't know how to automatically calculate this, so each language has its own size
+pub struct Language {
+    pub long_name: &'static str,
+    pub short_name: &'static str,
+    pub left_panel_size: f32, // Currently don't know how to automatically calculate this, so each language has its own size
 }
 
-const LANGUAGE_LIST: &[Language] = &[
+pub const LANGUAGE_LIST: &[Language] = &[
     Language {
         long_name: "English",
         short_name: "en",
@@ -25,7 +26,6 @@ const LANGUAGE_LIST: &[Language] = &[
 ];
 
 pub fn connect_translations(app: &MainWindow) {
-    init_languages(app);
     translate_items(app);
 
     let a = app.as_weak();
@@ -33,6 +33,25 @@ pub fn connect_translations(app: &MainWindow) {
         let app = a.upgrade().unwrap();
         change_language(&app);
     });
+}
+
+pub fn find_the_closest_language_idx_to_system() -> usize {
+    let requested_languages = DesktopLanguageRequester::requested_languages();
+
+    if let Some(language) = requested_languages.first() {
+        let strip_function = |s: &str| s.chars().take_while(|c| c.is_ascii_alphabetic()).collect::<String>();
+
+        let system_language = strip_function(&language.to_string());
+        info!("System language: {system_language}");
+        for (idx, lang) in LANGUAGE_LIST.iter().enumerate() {
+            let lang_short = strip_function(lang.short_name);
+            info!("Language: {}", lang.short_name);
+            if system_language == lang_short {
+                return idx;
+            }
+        }
+    }
+    0
 }
 
 fn change_language(app: &MainWindow) {
@@ -53,13 +72,6 @@ fn change_language(app: &MainWindow) {
 
     app.global::<GuiState>().set_left_panel_width(lang_items.left_panel_size);
     translate_items(app);
-}
-
-fn init_languages(app: &MainWindow) {
-    let new_languages_model: Vec<SharedString> = LANGUAGE_LIST.iter().map(|e| e.long_name.into()).collect::<Vec<_>>();
-
-    app.global::<Settings>().set_languages_list(ModelRc::new(VecModel::from(new_languages_model)));
-    app.global::<Settings>().set_language_index(0); // TODO loaded from settings
 }
 
 // To generate this, check misc folder

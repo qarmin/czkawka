@@ -11,9 +11,10 @@ use home::home_dir;
 use image_hasher::{FilterType, HashAlg};
 use log::{debug, error, info, warn};
 use serde::{Deserialize, Serialize};
-use slint::{ComponentHandle, Model, ModelRc, SharedString, VecModel};
+use slint::{ComponentHandle, Model, ModelRc, PhysicalSize, SharedString, VecModel, WindowSize};
 
 use crate::common::{create_excluded_directories_model_from_pathbuf, create_included_directories_model_from_pathbuf, create_vec_model_from_vec_string};
+use crate::connect_translation::{LANGUAGE_LIST, find_the_closest_language_idx_to_system};
 use crate::{Callabler, GuiState, MainWindow, Settings, flk};
 
 pub const DEFAULT_MINIMUM_SIZE_KB: i32 = 16;
@@ -184,12 +185,16 @@ impl Default for SettingsCustom {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BasicSettings {
-    #[serde(default = "default_language")]
-    pub language: String,
     #[serde(default)]
     pub default_preset: i32,
     #[serde(default = "default_preset_names")]
     pub preset_names: Vec<String>,
+    #[serde(default)]
+    pub window_width: u32,
+    #[serde(default)]
+    pub window_height: u32,
+    #[serde(default = "detect_language")]
+    pub language: String,
 }
 
 impl Default for BasicSettings {
@@ -413,9 +418,20 @@ pub fn get_config_file(number: i32) -> Option<PathBuf> {
 
 pub fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicSettings) {
     let settings = app.global::<Settings>();
-    // settings.set_language(basic_settings.language.clone());
+    let lang_idx = LANGUAGE_LIST.iter().position(|x| x.short_name == basic_settings.language).unwrap_or_default();
+    let new_languages_model: Vec<SharedString> = LANGUAGE_LIST.iter().map(|e| e.long_name.into()).collect::<Vec<_>>();
+
+    dbg!(&lang_idx, &new_languages_model);
+    settings.set_languages_list(ModelRc::new(VecModel::from(new_languages_model)));
+    settings.set_language_index(-1);
+    settings.set_language_index(lang_idx as i32);
+
     settings.set_settings_preset_idx(basic_settings.default_preset);
     settings.set_settings_presets(ModelRc::new(create_vec_model_from_vec_string(basic_settings.preset_names.clone())));
+
+    let width = min(max(basic_settings.window_width, 100), 1920 * 4);
+    let height = min(max(basic_settings.window_height, 100), 1080 * 4);
+    app.window().set_size(WindowSize::Physical(PhysicalSize { width, height }));
 }
 pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
     let settings = app.global::<Settings>();
@@ -698,13 +714,23 @@ pub fn collect_base_settings(app: &MainWindow) -> BasicSettings {
 
     let default_preset = settings.get_settings_preset_idx();
     let preset_names = settings.get_settings_presets().iter().map(|x| x.to_string()).collect::<Vec<_>>();
-
+    let window_width = app.window().size().width;
+    let window_height = app.window().size().height;
     assert_eq!(preset_names.len(), 10);
+    let lang_idx = settings.get_language_index();
+    let language = LANGUAGE_LIST[lang_idx as usize].short_name.to_string();
     BasicSettings {
-        language: "en".to_string(),
+        language,
         default_preset,
         preset_names,
+        window_width,
+        window_height,
     }
+}
+
+fn detect_language() -> String {
+    let lang_idx = find_the_closest_language_idx_to_system();
+    LANGUAGE_LIST[lang_idx].short_name.to_string()
 }
 
 fn default_included_directories() -> Vec<PathBuf> {
@@ -758,10 +784,6 @@ pub fn default_image_similarity() -> i32 {
 }
 fn default_excluded_items() -> String {
     DEFAULT_EXCLUDED_ITEMS.to_string()
-}
-
-fn default_language() -> String {
-    "en".to_string()
 }
 
 fn default_preset_names() -> Vec<String> {

@@ -33,9 +33,8 @@ pub struct BigFileParameters {
 
 impl BigFileParameters {
     pub fn new(number_of_files: usize, search_mode: SearchMode) -> Self {
-        let number_of_files_to_check = if number_of_files == 0 { 1 } else { number_of_files };
         Self {
-            number_of_files_to_check,
+            number_of_files_to_check: number_of_files.max(1),
             search_mode,
         }
     }
