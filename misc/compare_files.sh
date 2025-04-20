@@ -15,13 +15,13 @@ echo "MD5_RELEASE_2: $MD5_RELEASE_2"
 
 if [ "$MD5_DEBUG_1" == "$MD5_DEBUG_2" ]; then
     echo "DEBUG files are the same"
-    exit 1
 else
     echo "DEBUG files are different"
+    exit 1
 fi
 if [ "$MD5_RELEASE_1" == "$MD5_RELEASE_2" ]; then
     echo "RELEASE files are the same"
-    exit 1
 else
     echo "RELEASE files are different"
+    exit 1
 fi
