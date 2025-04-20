@@ -1,8 +1,9 @@
-use crate::{Callabler, CurrentTab, GuiState, MainWindow, SelectMode, Settings, SortMode, SortModel, Translations, flk, localizer_krokiet};
 use czkawka_core::TOOLS_NUMBER;
 use i18n_embed::unic_langid::LanguageIdentifier;
 use log::error;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel};
+
+use crate::{Callabler, CurrentTab, GuiState, MainWindow, SelectMode, Settings, SortMode, SortModel, Translations, flk, localizer_krokiet};
 
 struct Language {
     long_name: &'static str,

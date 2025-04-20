@@ -249,7 +249,7 @@ pub fn connect_changing_settings_preset(app: &MainWindow) {
         match loaded_data {
             Ok(loaded_data) => {
                 set_settings_to_gui(&app, &loaded_data);
-                app.set_text_summary_text(flk!("rust_loaded_preset", preset_idx = (current_item + 1)).into())
+                app.set_text_summary_text(flk!("rust_loaded_preset", preset_idx = (current_item + 1)).into());
             }
             Err(e) => {
                 set_settings_to_gui(&app, &SettingsCustom::default());

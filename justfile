@@ -13,24 +13,14 @@ itests:
 
 ## run
 
-czkawka:
-    cargo run --bin czkawka_gui
-czkawka_r:
-    cargo run --bin czkawka_gui --release
+run +args:
+    cargo run --bin {{args}}
 
-krokiet:
-    cargo run --bin krokiet
-krokiet_r:
-    cargo run --bin krokiet --release
-krokiet_dark:
-    SLINT_STYLE=fluent-dark cargo run --bin krokiet
+runr +args:
+    cargo run --bin {{args}} --release
 
-cli +args:
-    cargo run --bin czkawka_cli -- {{args}}
-cli_r +args:
-    cargo run --bin czkawka_cli --release -- {{args}}
-cli_help:
-    cargo run --bin czkawka_cli -- --help
+runc +args:
+    CARGO_PROFILE_DEV_CODEGEN_BACKEND=cranelift cargo +nightly run -Zcodegen-backend --bin {{args}}
 
 ## Other
 
@@ -40,24 +30,6 @@ bench:
 
 bench_clean:
     rm -rf target/criterion
-
-build:
-    cargo build --bin czkawka_gui
-
-check:
-    cargo check --bin czkawka_gui
-
-check_all:
-    cargo check
-
-checkc:
-    CARGO_PROFILE_DEV_CODEGEN_BACKEND=cranelift cargo +nightly check -Zcodegen-backend
-
-build_krokiet:
-    cargo build --bin krokiet
-
-build_czkawka:
-    cargo build --bin czkawka_gui
 
 upgrade:
     cargo +nightly -Z unstable-options update --breaking

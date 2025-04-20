@@ -457,7 +457,7 @@ fn reverse_selection_of_item_with_id(selection: &mut SelectionData, model: &Mode
 fn row_select_items_with_shift(selection: &mut SelectionData, model: &ModelRc<MainListModel>, indexes: (usize, usize)) -> Option<ModelRc<MainListModel>> {
     let (smaller_idx, bigger_idx) = if indexes.0 < indexes.1 { (indexes.0, indexes.1) } else { (indexes.1, indexes.0) };
 
-    let new_model = if bigger_idx - smaller_idx > SELECTED_ROWS_LIMIT || selection.exceeded_limit {
+    if bigger_idx - smaller_idx > SELECTED_ROWS_LIMIT || selection.exceeded_limit {
         trace!("[SLOW][REPLACE_MODEL] selecting from {} items", model.row_count());
         // To not iterate twice over the same model, which may be slow, we check if we exceeded limit
         // This may not be 100% correct, because we may select only 501 items and 500 headers
@@ -526,9 +526,7 @@ fn row_select_items_with_shift(selection: &mut SelectionData, model: &ModelRc<Ma
         }
 
         None
-    };
-
-    new_model
+    }
 }
 
 fn rows_reverse_checked_selection(selection: &SelectionData, model: &ModelRc<MainListModel>) -> Option<ModelRc<MainListModel>> {

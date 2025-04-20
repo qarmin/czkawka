@@ -230,7 +230,7 @@ pub fn print_version_mode(app: &str) {
     // TODO - probably needs to add arm and other architectures, need help, because I don't have access to them
 
     info!(
-        "{app} version: {CZKAWKA_VERSION}, {debug_release} mode, rust {rust_version}, os {} {} [{} {}], {processors} cpu/threads, features({}): [{}], app cpu version: [{}], os cpu version: [{}]",
+        "{app} version: {CZKAWKA_VERSION}, {debug_release} mode, rust {rust_version}, os {} {} ({} {}), {processors} cpu/threads, features({}): [{}], app cpu version: {}, os cpu version: {}",
         info.os_type(),
         info.version(),
         std::env::consts::ARCH,
