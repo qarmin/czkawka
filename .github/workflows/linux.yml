@@ -248,25 +248,25 @@ jobs:
           cargo build
           mv target/debug/czkawka_cli czkawka_cli_debug_1
           mv target/debug/czkawka_gui czkawka_gui_debug_1
-          mv target/debug/krokiet czkawka_krokiet_debug_1
+          mv target/debug/krokiet krokiet_debug_1
           
           rm -rf target || true
           cargo build --release
           mv target/release/czkawka_cli czkawka_cli_release_1
           mv target/release/czkawka_gui czkawka_gui_release_1
-          mv target/release/krokiet czkawka_krokiet_release_1
+          mv target/release/krokiet krokiet_release_1
           
           rm -rf target || true
           cargo build
           mv target/debug/czkawka_cli czkawka_cli_debug_2
           mv target/debug/czkawka_gui czkawka_gui_debug_2
-          mv target/debug/krokiet czkawka_krokiet_debug_2
+          mv target/debug/krokiet krokiet_debug_2
           
           rm -rf target || true
           cargo build --release
           mv target/release/czkawka_cli czkawka_cli_release_2
           mv target/release/czkawka_gui czkawka_gui_release_2
-          mv target/release/krokiet czkawka_krokiet_release_2
+          mv target/release/krokiet krokiet_release_2
           
           misc/compare_files.sh
           
