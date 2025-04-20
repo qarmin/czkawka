@@ -8,10 +8,15 @@
 - Using newly created icons - uglier, but released under really free under the clear CC BY license - [#1478](https://github.com/qarmin/czkawka/pull/1478)
 
 ### Krokiet
-- Multiple selection of items with mouse and keyboard - [#1478](https://github.com/qarmin/czkawka/pull/1478)
+- Ability to select multiple items with mouse and keyboard - [#1478](https://github.com/qarmin/czkawka/pull/1478)
+- Added sort buttons - [#1501](https://github.com/qarmin/czkawka/pull/1501)
 
 ### External
 – There is a new, unofficial Tauri-based frontend for Czkawka - [Czkawka Tauri](https://github.com/shixinhuang99/czkawka-tauri)
+
+### CI
+- Compilation for 32 bit targets is checked in CI
+- Czkawka binaries are now checked if are reproducible(currently they are not, due possible bug in rustc - https://github.com/rust-lang/rust/issues/140061)
 
 ### Prebuild-binaries
 - CI now creates linux binaries on ubuntu 22.04 instead 20.04(some types of builds were build on 24.04)
