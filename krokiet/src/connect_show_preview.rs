@@ -83,7 +83,7 @@ fn load_image(image_path: &Path) -> Option<(Duration, DynamicImage)> {
     let img = match get_dynamic_image_from_path(&image_path.to_string_lossy()) {
         Ok(img) => img,
         Err(e) => {
-            error!("{e}");
+            error!("Failed to load image: {e}");
             return None;
         }
     };

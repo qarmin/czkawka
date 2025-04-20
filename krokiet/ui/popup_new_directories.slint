@@ -33,13 +33,14 @@ export component PopupNewDirectories inherits Rectangle {
                 alignment: LayoutAlignment.center;
                 Rectangle {
                     clip: true;
-                    width: root.width - 20px;
-                    height: root.height - 20px;
+                    width: 400px;
+                    height: 200px;
                     border-radius: 20px;
                     background: ColorPalette.popup_background;
                     VerticalLayout {
                         Text {
                             text <=> Translations.popup_new_directories_title_text;
+                            font-size: 13px;
                             horizontal-alignment: TextHorizontalAlignment.center;
                         }
 

@@ -228,7 +228,7 @@ pub fn connect_changing_settings_preset(app: &MainWindow) {
             }
             Err(e) => {
                 app.set_text_summary_text(format!("Cannot save preset {} - reason {e}", current_item + 1).into());
-                error!("{e}");
+                error!("Failed to save preset - {e}");
             }
         }
     });
@@ -253,9 +253,9 @@ pub fn connect_changing_settings_preset(app: &MainWindow) {
             }
             Err(e) => {
                 set_settings_to_gui(&app, &SettingsCustom::default());
-                let err_message = flk!("rust_cannot_load_preset", preset_idx = (current_item + 1), reason = e).into();
+                let err_message = flk!("rust_cannot_load_preset", preset_idx = (current_item + 1), reason = (&e));
                 app.set_text_summary_text(err_message.into());
-                error!("{e}");
+                error!("Failed to load preset - {e}, using default instead");
             }
         }
     });
@@ -328,7 +328,7 @@ pub fn save_base_settings_to_file(app: &MainWindow) {
     let result = save_data_to_file(get_base_config_file(), &collect_base_settings(app));
 
     if let Err(e) = result {
-        error!("{e}");
+        error!("Failed to save base settings - {e}");
     }
 }
 
@@ -337,7 +337,7 @@ pub fn save_custom_settings_to_file(app: &MainWindow) {
     let result = save_data_to_file(get_config_file(current_item), &collect_settings(app));
 
     if let Err(e) = result {
-        error!("{e}");
+        error!("Failed to save custom settings - {e}");
     }
 }
 
