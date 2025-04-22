@@ -54,7 +54,7 @@ pub fn find_the_closest_language_idx_to_system() -> usize {
     0
 }
 
-fn change_language(app: &MainWindow) {
+pub(crate) fn change_language(app: &MainWindow) {
     let localizers = vec![
         ("czkawka_core", czkawka_core::localizer_core::localizer_core()),
         ("krokiet", localizer_krokiet::localizer_krokiet()),

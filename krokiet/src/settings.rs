@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
 use slint::{ComponentHandle, Model, ModelRc, PhysicalSize, SharedString, VecModel, WindowSize};
 
 use crate::common::{create_excluded_directories_model_from_pathbuf, create_included_directories_model_from_pathbuf, create_vec_model_from_vec_string};
-use crate::connect_translation::{LANGUAGE_LIST, find_the_closest_language_idx_to_system};
+use crate::connect_translation::{LANGUAGE_LIST, change_language, find_the_closest_language_idx_to_system};
 use crate::{Callabler, GuiState, MainWindow, Settings, flk};
 
 pub const DEFAULT_MINIMUM_SIZE_KB: i32 = 16;
@@ -421,16 +421,17 @@ pub fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicSettings
     let lang_idx = LANGUAGE_LIST.iter().position(|x| x.short_name == basic_settings.language).unwrap_or_default();
     let new_languages_model: Vec<SharedString> = LANGUAGE_LIST.iter().map(|e| e.long_name.into()).collect::<Vec<_>>();
 
-    dbg!(&lang_idx, &new_languages_model);
-    settings.set_languages_list(ModelRc::new(VecModel::from(new_languages_model)));
-    settings.set_language_index(-1);
-    settings.set_language_index(lang_idx as i32);
+    settings.set_languages_list(ModelRc::new(VecModel::from(new_languages_model.clone())));
+    settings.set_language_value(LANGUAGE_LIST[lang_idx].long_name.into()); // TODO - still visible is old language
+    settings.set_language_index(lang_idx as i32); // TODO - visible is old language
+    println!("Value of language is {}", LANGUAGE_LIST[lang_idx].long_name);
+    change_language(app);
 
     settings.set_settings_preset_idx(basic_settings.default_preset);
     settings.set_settings_presets(ModelRc::new(create_vec_model_from_vec_string(basic_settings.preset_names.clone())));
 
-    let width = min(max(basic_settings.window_width, 100), 1920 * 4);
-    let height = min(max(basic_settings.window_height, 100), 1080 * 4);
+    let width = basic_settings.window_width.clamp(100, 1920 * 4);
+    let height = basic_settings.window_height.clamp(100, 1080 * 4);
     app.window().set_size(WindowSize::Physical(PhysicalSize { width, height }));
 }
 pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {

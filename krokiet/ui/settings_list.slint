@@ -183,8 +183,9 @@ component Languages inherits HorizontalLayout {
     combo_box := ComboBox {
         current_index <=> Settings.language_index;
         model <=> Settings.languages_list;
+        current-value <=> Settings.language_value;
+
         selected(item) => {
-            Settings.language_index = self.current_index;
             Callabler.changed_language();
         }
     }

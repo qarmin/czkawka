@@ -13,7 +13,7 @@ use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
 use crossbeam_channel::{Receiver, Sender, unbounded};
-use czkawka_core::common::{print_version_mode, set_config_cache_path, setup_logger};
+use czkawka_core::common::{print_infos_and_warnings, print_version_mode, set_config_cache_path, setup_logger};
 use czkawka_core::progress_data::ProgressData;
 use log::{info, warn};
 use slint::VecModel;
@@ -61,10 +61,11 @@ mod test_common;
 
 slint::include_modules!();
 fn main() {
-    setup_logger(false);
+    let (infos, warnings) = set_config_cache_path("Czkawka", "Krokiet");
+    setup_logger(false, "krokiet");
     print_version_mode("Krokiet");
+    print_infos_and_warnings(infos, warnings);
     print_krokiet_features();
-    set_config_cache_path("Czkawka", "Krokiet");
 
     let app = MainWindow::new().expect("Failed to create main window");
 
