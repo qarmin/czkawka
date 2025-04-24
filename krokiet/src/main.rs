@@ -15,7 +15,7 @@ use std::sync::atomic::AtomicBool;
 use crossbeam_channel::{Receiver, Sender, unbounded};
 use czkawka_core::common::{print_infos_and_warnings, print_version_mode, set_config_cache_path, setup_logger};
 use czkawka_core::progress_data::ProgressData;
-use log::{info, warn};
+use log::{error, info, warn};
 use slint::VecModel;
 
 use crate::connect_delete::connect_delete_button;
@@ -97,6 +97,10 @@ fn main() {
     connect_save(&app, Arc::clone(&shared_models));
     connect_row_selections(&app);
     connect_sort(&app);
+
+    error!("AA Lang IDX {}", app.global::<Settings>().get_language_index());
+    error!("AA Lang Value {}", app.global::<Settings>().get_language_value());
+    error!("AA Lang model {:?}", app.global::<Settings>().get_languages_list());
 
     app.run().expect("Failed to run app :(");
 

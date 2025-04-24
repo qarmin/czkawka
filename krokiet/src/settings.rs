@@ -421,10 +421,14 @@ pub fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicSettings
     let lang_idx = LANGUAGE_LIST.iter().position(|x| x.short_name == basic_settings.language).unwrap_or_default();
     let new_languages_model: Vec<SharedString> = LANGUAGE_LIST.iter().map(|e| e.long_name.into()).collect::<Vec<_>>();
 
-    settings.set_languages_list(ModelRc::new(VecModel::from(new_languages_model.clone())));
+    settings.set_languages_list(ModelRc::new(VecModel::from(new_languages_model)));
     settings.set_language_value(LANGUAGE_LIST[lang_idx].long_name.into()); // TODO - still visible is old language
     settings.set_language_index(lang_idx as i32); // TODO - visible is old language
     println!("Value of language is {}", LANGUAGE_LIST[lang_idx].long_name);
+
+    error!("Lang IDX {}", settings.get_language_index());
+    error!("Lang Value {}", settings.get_language_value());
+    error!("Lang model {:?}", settings.get_languages_list());
     change_language(app);
 
     settings.set_settings_preset_idx(basic_settings.default_preset);
@@ -720,6 +724,9 @@ pub fn collect_base_settings(app: &MainWindow) -> BasicSettings {
     assert_eq!(preset_names.len(), 10);
     let lang_idx = settings.get_language_index();
     let language = LANGUAGE_LIST[lang_idx as usize].short_name.to_string();
+    error!("Save Lang IDX {}", settings.get_language_index());
+    error!("Save Lang Value {}", settings.get_language_value());
+    error!("Save Lang model {:?}", settings.get_languages_list());
     BasicSettings {
         language,
         default_preset,
