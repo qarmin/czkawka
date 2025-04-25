@@ -451,6 +451,7 @@ fn scan_similar_images(
             for (_first_entry, vec_fe) in &mut vector {
                 vec_fe.par_sort_unstable_by_key(|e| e.similarity);
             }
+            vector.sort_by_key(|(_header, vc)| u64::MAX - vc.iter().map(|e| e.size).sum::<u64>()); // Also sorts by size, to show the biggest groups first
 
             shared_models.lock().unwrap().shared_similar_images_state = Some(item);
 
@@ -537,6 +538,7 @@ fn scan_similar_videos(
             for (_first_entry, vec_fe) in &mut vector {
                 vec_fe.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
             }
+            vector.sort_by_key(|(_header, vc)| u64::MAX - vc.iter().map(|e| e.size).sum::<u64>()); // Also sorts by size, to show the biggest groups first
 
             shared_models.lock().unwrap().shared_similar_videos_state = Some(item);
 
