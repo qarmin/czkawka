@@ -1,4 +1,5 @@
 use std::cmp::{max, min};
+use std::collections::HashMap;
 use std::env;
 use std::path::PathBuf;
 
@@ -10,10 +11,13 @@ use czkawka_core::tools::duplicate::HashType;
 use home::home_dir;
 use image_hasher::{FilterType, HashAlg};
 use log::{debug, error, info, warn};
+use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
+use serde_json::Value::String;
 use slint::{ComponentHandle, Model, ModelRc, PhysicalSize, SharedString, VecModel, WindowSize};
 
 use crate::common::{create_excluded_directories_model_from_pathbuf, create_included_directories_model_from_pathbuf, create_vec_model_from_vec_string};
+use crate::connect_row_selection::reset_selection;
 use crate::connect_translation::{LANGUAGE_LIST, change_language, find_the_closest_language_idx_to_system};
 use crate::{Callabler, GuiState, MainWindow, Settings, flk};
 
@@ -27,45 +31,143 @@ pub const DEFAULT_VIDEO_SIMILARITY: i32 = 15;
 pub const DEFAULT_HASH_SIZE: u8 = 16;
 pub const DEFAULT_MAXIMUM_DIFFERENCE_VALUE: f32 = 3.0;
 pub const DEFAULT_MINIMAL_FRAGMENT_DURATION_VALUE: f32 = 5.0;
+pub const MAX_HASH_SIZE: u8 = 40;
+pub const DEFAULT_SUB_HASH_SIZE: u8 = 16;
 
-// (Hash size, Maximum difference) - Ehh... to simplify it, just use everywhere 40 as maximum similarity - for now I'm to lazy to change it, when hash size changes
-// So if you want to change it, you need to change it in multiple places
-pub const ALLOWED_HASH_SIZE_VALUES: &[(u8, u8)] = &[(8, 40), (16, 40), (32, 40), (64, 40)];
+pub struct StringComboBoxItem<T> {
+    pub config_name: String,
+    pub display_name: String,
+    pub value: T,
+}
 
-pub const ALLOWED_RESIZE_ALGORITHM_VALUES: &[(&str, &str, FilterType)] = &[
-    ("lanczos3", "Lanczos3", FilterType::Lanczos3),
-    ("gaussian", "Gaussian", FilterType::Gaussian),
-    ("catmullrom", "CatmullRom", FilterType::CatmullRom),
-    ("triangle", "Triangle", FilterType::Triangle),
-    ("nearest", "Nearest", FilterType::Nearest),
-];
+pub struct StringComboBoxItems {
+    hash_size: Vec<StringComboBoxItem<u8>>,
+    resize_algorithm: Vec<StringComboBoxItem<FilterType>>,
+    image_hash_alg: Vec<StringComboBoxItem<HashAlg>>,
+    duplicates_hash_type: Vec<StringComboBoxItem<HashType>>,
+    biggest_files_method: Vec<StringComboBoxItem<SearchMode>>,
+    audio_check_type: Vec<StringComboBoxItem<CheckingMethod>>,
+    duplicates_check_method: Vec<StringComboBoxItem<CheckingMethod>>,
+}
 
-pub const ALLOWED_IMAGE_HASH_ALG_VALUES: &[(&str, &str, HashAlg)] = &[
-    ("mean", "Mean", HashAlg::Mean),
-    ("gradient", "Gradient", HashAlg::Gradient),
-    ("blockhash", "BlockHash", HashAlg::Blockhash),
-    ("vertgradient", "VertGradient", HashAlg::VertGradient),
-    ("doublegradient", "DoubleGradient", HashAlg::DoubleGradient),
-    ("median", "Median", HashAlg::Median),
-];
-pub const ALLOWED_BIG_FILE_SIZE_VALUES: &[(&str, &str, SearchMode)] = &[
-    ("biggest", "The Biggest", SearchMode::BiggestFiles),
-    ("smallest", "The Smallest", SearchMode::SmallestFiles),
-];
-pub const ALLOWED_AUDIO_CHECK_TYPE_VALUES: &[(&str, &str, CheckingMethod)] =
-    &[("tags", "Tags", CheckingMethod::AudioTags), ("fingerprint", "Fingerprint", CheckingMethod::AudioContent)];
+impl StringComboBoxItems {
+    pub fn get_item_and_idx_from_config_name<T>(config_name: &str, items: &Vec<StringComboBoxItem<T>>) -> (usize, Vec<SharedString>) {
+        let position = items.iter().position(|e| e.config_name == config_name).unwrap_or_else(|| {
+            warn!("Trying to get non existent item - \"{config_name}\" from {items:?}");
+            0
+        });
+        let display_names = items.iter().map(|e| e.display_name.into()).collect::<Vec<_>>();
+        (position, display_names)
+    }
 
-pub const ALLOWED_DUPLICATES_CHECK_METHOD_VALUES: &[(&str, &str, CheckingMethod)] = &[
-    ("hash", "Hash", CheckingMethod::Hash),
-    ("size", "Size", CheckingMethod::Size),
-    ("name", "Name", CheckingMethod::Name),
-    ("size_and_name", "Size and Name", CheckingMethod::SizeName),
-];
-pub const ALLOWED_DUPLICATES_HASH_TYPE_VALUES: &[(&str, &str, HashType)] = &[
-    ("blake3", "Blake3", HashType::Blake3),
-    ("crc32", "CRC32", HashType::Crc32),
-    ("xxh3", "XXH3", HashType::Xxh3),
-];
+    pub fn get_config_name_from_idx<T>(idx: usize, items: &Vec<StringComboBoxItem<T>>) -> String {
+        if idx < items.len() {
+            items[idx].config_name.clone()
+        } else {
+            warn!("Trying to get non existent item - \"{idx}\" from {items:?}");
+            items[0].config_name.clone()
+        }
+    }
+
+    fn regenerate_items() -> Self {
+        let hash_size = Self::convert_to_combobox_items(&[("8", "8", 8), ("16", "16", 16), ("32", "32", 32), ("64", "64", 64)]);
+        let resize_algorithm = Self::convert_to_combobox_items(&[
+            ("lanczos3", "Lanczos3", FilterType::Lanczos3),
+            ("gaussian", "Gaussian", FilterType::Gaussian),
+            ("catmullrom", "CatmullRom", FilterType::CatmullRom),
+            ("triangle", "Triangle", FilterType::Triangle),
+            ("nearest", "Nearest", FilterType::Nearest),
+        ]);
+
+        let image_hash_alg = Self::convert_to_combobox_items(&[
+            ("mean", "Mean", HashAlg::Mean),
+            ("gradient", "Gradient", HashAlg::Gradient),
+            ("blockhash", "BlockHash", HashAlg::Blockhash),
+            ("vertgradient", "VertGradient", HashAlg::VertGradient),
+            ("doublegradient", "DoubleGradient", HashAlg::DoubleGradient),
+            ("median", "Median", HashAlg::Median),
+        ]);
+
+        let duplicates_hash_type = Self::convert_to_combobox_items(&[
+            ("blake3", "Blake3", HashType::Blake3),
+            ("crc32", "CRC32", HashType::Crc32),
+            ("xxh3", "XXH3", HashType::Xxh3),
+        ]);
+
+        let biggest_files_method = Self::convert_to_combobox_items(&[
+            ("biggest", "The Biggest", SearchMode::BiggestFiles),
+            ("smallest", "The Smallest", SearchMode::SmallestFiles),
+        ]);
+
+        let audio_check_type = Self::convert_to_combobox_items(&[("tags", "Tags", CheckingMethod::AudioTags), ("fingerprint", "Fingerprint", CheckingMethod::AudioContent)]);
+
+        let duplicates_check_method = Self::convert_to_combobox_items(&[
+            ("hash", "Hash", CheckingMethod::Hash),
+            ("size", "Size", CheckingMethod::Size),
+            ("name", "Name", CheckingMethod::Name),
+            ("size_and_name", "Size and Name", CheckingMethod::SizeName),
+        ]);
+
+        Self {
+            hash_size,
+            resize_algorithm,
+            image_hash_alg,
+            duplicates_hash_type,
+            biggest_files_method,
+            audio_check_type,
+            duplicates_check_method,
+        }
+    }
+
+    fn convert_to_combobox_items<T>(input: &[(&str, &str, T)]) -> Vec<StringComboBoxItem<T>>
+    where
+        T: Copy,
+    {
+        input
+            .iter()
+            .map(|(config_name, display_name, value)| StringComboBoxItem {
+                config_name: config_name.to_string(),
+                display_name: display_name.to_string(),
+                value: *value,
+            })
+            .collect()
+    }
+}
+
+// pub const ALLOWED_RESIZE_ALGORITHM_VALUES: &[(&str, &str, FilterType)] = &[
+//     ("lanczos3", "Lanczos3", FilterType::Lanczos3),
+//     ("gaussian", "Gaussian", FilterType::Gaussian),
+//     ("catmullrom", "CatmullRom", FilterType::CatmullRom),
+//     ("triangle", "Triangle", FilterType::Triangle),
+//     ("nearest", "Nearest", FilterType::Nearest),
+// ];
+//
+// pub const ALLOWED_IMAGE_HASH_ALG_VALUES: &[(&str, &str, HashAlg)] = &[
+//     ("mean", "Mean", HashAlg::Mean),
+//     ("gradient", "Gradient", HashAlg::Gradient),
+//     ("blockhash", "BlockHash", HashAlg::Blockhash),
+//     ("vertgradient", "VertGradient", HashAlg::VertGradient),
+//     ("doublegradient", "DoubleGradient", HashAlg::DoubleGradient),
+//     ("median", "Median", HashAlg::Median),
+// ];
+// pub const ALLOWED_BIG_FILE_SIZE_VALUES: &[(&str, &str, SearchMode)] = &[
+//     ("biggest", "The Biggest", SearchMode::BiggestFiles),
+//     ("smallest", "The Smallest", SearchMode::SmallestFiles),
+// ];
+// pub const ALLOWED_AUDIO_CHECK_TYPE_VALUES: &[(&str, &str, CheckingMethod)] =
+//     &[("tags", "Tags", CheckingMethod::AudioTags), ("fingerprint", "Fingerprint", CheckingMethod::AudioContent)];
+//
+// pub const ALLOWED_DUPLICATES_CHECK_METHOD_VALUES: &[(&str, &str, CheckingMethod)] = &[
+//     ("hash", "Hash", CheckingMethod::Hash),
+//     ("size", "Size", CheckingMethod::Size),
+//     ("name", "Name", CheckingMethod::Name),
+//     ("size_and_name", "Size and Name", CheckingMethod::SizeName),
+// ];
+// pub const ALLOWED_DUPLICATES_HASH_TYPE_VALUES: &[(&str, &str, HashType)] = &[
+//     ("blake3", "Blake3", HashType::Blake3),
+//     ("crc32", "CRC32", HashType::Crc32),
+//     ("xxh3", "XXH3", HashType::Xxh3),
+// ];
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SettingsCustom {
@@ -438,6 +540,54 @@ pub fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicSettings
     let height = basic_settings.window_height.clamp(100, 1080 * 4);
     app.window().set_size(WindowSize::Physical(PhysicalSize { width, height }));
 }
+
+pub fn set_combobox_items(settings: &Settings, custom_settings: &SettingsCustom) {
+    let collected_items = StringComboBoxItems::regenerate_items();
+    // TODO - Set here also language
+
+    // Hash size
+    let (idx, display_names) = StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.similar_images_sub_hash_size.to_string(), &collected_items.hash_size);
+    // settings.set_similar_images_sub_hash_size_model(display_names); // TODO - replace with
+    settings.set_similar_images_sub_hash_size_index(idx as i32);
+    settings.set_similar_images_sub_hash_size_value(display_names[idx].clone());
+
+    // Hash type
+    let (idx, display_names) = StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.similar_images_sub_hash_alg, &collected_items.image_hash_alg);
+    // settings.set_similar_images_sub_hash_alg_model(display_names);
+    settings.set_similar_images_sub_hash_alg_index(idx as i32);
+    settings.set_similar_images_sub_hash_alg_value(display_names[idx].clone());
+
+    // Resize algorithm
+    let (idx, display_names) = StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.similar_images_sub_resize_algorithm, &collected_items.resize_algorithm);
+    // settings.set_similar_images_sub_resize_algorithm_model(display_names);
+    settings.set_similar_images_sub_resize_algorithm_index(idx as i32);
+    settings.set_similar_images_sub_resize_algorithm_value(display_names[idx].clone());
+
+    // Duplicates check method
+    let (idx, display_names) = StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.duplicates_sub_check_method, &collected_items.duplicates_check_method);
+    // settings.set_duplicates_sub_check_method_model(display_names);
+    settings.set_duplicates_sub_check_method_index(idx as i32);
+    settings.set_duplicates_sub_check_method_value(display_names[idx].clone());
+
+    // Duplicates hash type
+    let (idx, display_names) = StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.duplicates_sub_available_hash_type, &collected_items.duplicates_hash_type);
+    // settings.set_duplicates_sub_available_hash_type_model(display_names);
+    settings.set_duplicates_sub_available_hash_type_index(idx as i32);
+    settings.set_duplicates_sub_available_hash_type_value(display_names[idx].clone());
+
+    // Biggest files method
+    let (idx, display_names) = StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.biggest_files_sub_method, &collected_items.biggest_files_method);
+    // settings.set_biggest_files_sub_method_model(display_names);
+    settings.set_biggest_files_sub_method_index(idx as i32);
+    settings.set_biggest_files_sub_method_value(display_names[idx].clone());
+
+    // Audio check type
+    let (idx, display_names) = StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.similar_music_sub_audio_check_type, &collected_items.audio_check_type);
+    // settings.set_duplicates_sub_available_hash_type_model(display_names);
+    settings.set_similar_music_sub_audio_check_type_index(idx as i32);
+    settings.set_similar_music_sub_audio_check_type_value(display_names[idx].clone());
+}
+
 pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
     let settings = app.global::<Settings>();
 
@@ -476,82 +626,18 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
     settings.set_similar_music_compare_fingerprints_only_with_similar_titles(custom_settings.similar_music_compare_fingerprints_only_with_similar_titles);
     settings.set_similar_music_delete_outdated_entries(custom_settings.similar_music_delete_outdated_entries);
 
-    let similar_images_sub_hash_size_idx = get_allowed_hash_size_idx(custom_settings.similar_images_sub_hash_size).unwrap_or_else(|| {
-        warn!(
-            "Value of hash size \"{}\" is invalid, setting it to default value",
-            custom_settings.similar_images_sub_hash_size
-        );
-        0
-    });
-    settings.set_similar_images_sub_hash_size_index(similar_images_sub_hash_size_idx as i32);
-    settings.set_similar_images_sub_hash_size_value(ALLOWED_HASH_SIZE_VALUES[similar_images_sub_hash_size_idx].0.to_string().into());
-    // TODO all items with _value are not necessary, but due bug in slint are required, because combobox is not updated properly
-    let similar_images_sub_hash_alg_idx = get_image_hash_alg_idx(&custom_settings.similar_images_sub_hash_alg).unwrap_or_else(|| {
-        warn!(
-            "Value of hash type \"{}\" is invalid, setting it to default value",
-            custom_settings.similar_images_sub_hash_alg
-        );
-        0
-    });
-    settings.set_similar_images_sub_hash_alg_index(similar_images_sub_hash_alg_idx as i32);
-    let similar_images_sub_resize_algorithm_idx = get_resize_algorithm_idx(&custom_settings.similar_images_sub_resize_algorithm).unwrap_or_else(|| {
-        warn!(
-            "Value of resize algorithm \"{}\" is invalid, setting it to default value",
-            custom_settings.similar_images_sub_resize_algorithm
-        );
-        0
-    });
-    settings.set_similar_images_sub_resize_algorithm_index(similar_images_sub_resize_algorithm_idx as i32);
-    settings.set_similar_images_sub_resize_algorithm_value(ALLOWED_RESIZE_ALGORITHM_VALUES[similar_images_sub_resize_algorithm_idx].1.to_string().into());
+    set_combobox_items(&settings, &custom_settings);
+
     settings.set_similar_images_sub_ignore_same_size(custom_settings.similar_images_sub_ignore_same_size);
-    settings.set_similar_images_sub_max_similarity(40.0);
+    settings.set_similar_images_sub_max_similarity(MAX_HASH_SIZE);
     settings.set_similar_images_sub_current_similarity(custom_settings.similar_images_sub_similarity as f32);
 
-    let duplicates_sub_check_method_idx = get_duplicates_check_method_idx(&custom_settings.duplicates_sub_check_method).unwrap_or_else(|| {
-        warn!(
-            "Value of duplicates check method \"{}\" is invalid, setting it to default value",
-            custom_settings.duplicates_sub_check_method
-        );
-        0
-    });
-    settings.set_duplicates_sub_check_method_index(duplicates_sub_check_method_idx as i32);
-    settings.set_duplicates_sub_check_method_value(ALLOWED_DUPLICATES_CHECK_METHOD_VALUES[duplicates_sub_check_method_idx].1.to_string().into());
-    let duplicates_sub_available_hash_type_idx = get_duplicates_hash_type_idx(&custom_settings.duplicates_sub_available_hash_type).unwrap_or_else(|| {
-        warn!(
-            "Value of duplicates hash type \"{}\" is invalid, setting it to default value",
-            custom_settings.duplicates_sub_available_hash_type
-        );
-        0
-    });
-    settings.set_duplicates_sub_available_hash_type_index(duplicates_sub_available_hash_type_idx as i32);
-    settings.set_duplicates_sub_available_hash_type_value(ALLOWED_DUPLICATES_HASH_TYPE_VALUES[duplicates_sub_available_hash_type_idx].1.to_string().into());
-
-    let biggest_files_sub_method_idx = get_biggest_item_idx(&custom_settings.biggest_files_sub_method).unwrap_or_else(|| {
-        warn!(
-            "Value of biggest files method \"{}\" is invalid, setting it to default value",
-            custom_settings.biggest_files_sub_method
-        );
-        0
-    });
-    settings.set_biggest_files_sub_method_index(biggest_files_sub_method_idx as i32);
-    settings.set_biggest_files_sub_method_value(ALLOWED_BIG_FILE_SIZE_VALUES[biggest_files_sub_method_idx].1.to_string().into());
     settings.set_biggest_files_sub_number_of_files(custom_settings.biggest_files_sub_number_of_files.to_string().into());
-    let all_gui_items: Vec<SharedString> = ALLOWED_BIG_FILE_SIZE_VALUES.iter().map(|(_, gui_name, _)| (*gui_name).into()).collect::<Vec<_>>();
-    settings.set_biggest_files_sub_method(ModelRc::new(VecModel::from(all_gui_items)));
 
     settings.set_similar_videos_sub_ignore_same_size(custom_settings.similar_videos_sub_ignore_same_size);
     settings.set_similar_videos_sub_current_similarity(custom_settings.similar_videos_sub_similarity as f32);
     settings.set_similar_videos_sub_max_similarity(20.0);
 
-    let similar_music_sub_audio_check_type_idx = get_audio_check_type_idx(&custom_settings.similar_music_sub_audio_check_type).unwrap_or_else(|| {
-        warn!(
-            "Value of audio check type \"{}\" is invalid, setting it to default value",
-            custom_settings.similar_music_sub_audio_check_type
-        );
-        0
-    });
-    settings.set_similar_music_sub_audio_check_type_index(similar_music_sub_audio_check_type_idx as i32);
-    settings.set_similar_music_sub_audio_check_type_value(ALLOWED_AUDIO_CHECK_TYPE_VALUES[similar_music_sub_audio_check_type_idx].1.to_string().into());
     settings.set_similar_music_sub_approximate_comparison(custom_settings.similar_music_sub_approximate_comparison);
     settings.set_similar_music_sub_title(custom_settings.similar_music_sub_title);
     settings.set_similar_music_sub_artist(custom_settings.similar_music_sub_artist);
@@ -573,6 +659,8 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
 
 pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let settings = app.global::<Settings>();
+
+    let collected_items = StringComboBoxItems::regenerate_items();
 
     let included_directories_model = settings.get_included_directories_model();
     let included_directories = included_directories_model.iter().map(|model| PathBuf::from(model.path.as_str())).collect::<Vec<_>>();
@@ -620,28 +708,28 @@ pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let similar_music_delete_outdated_entries = settings.get_similar_music_delete_outdated_entries();
 
     let similar_images_sub_hash_size_idx = settings.get_similar_images_sub_hash_size_index();
-    let similar_images_sub_hash_size = ALLOWED_HASH_SIZE_VALUES[similar_images_sub_hash_size_idx as usize].0;
+    let similar_images_sub_hash_size = StringComboBoxItems::get_config_name_from_idx(similar_images_sub_hash_size_idx as usize, &collected_items.hash_size);
     let similar_images_sub_hash_alg_idx = settings.get_similar_images_sub_hash_alg_index();
-    let similar_images_sub_hash_alg = ALLOWED_IMAGE_HASH_ALG_VALUES[similar_images_sub_hash_alg_idx as usize].0.to_string();
+    let similar_images_sub_hash_alg = StringComboBoxItems::get_config_name_from_idx(similar_images_sub_hash_alg_idx as usize, &collected_items.image_hash_alg);
     let similar_images_sub_resize_algorithm_idx = settings.get_similar_images_sub_resize_algorithm_index();
-    let similar_images_sub_resize_algorithm = ALLOWED_RESIZE_ALGORITHM_VALUES[similar_images_sub_resize_algorithm_idx as usize].0.to_string();
+    let similar_images_sub_resize_algorithm = StringComboBoxItems::get_config_name_from_idx(similar_images_sub_resize_algorithm_idx as usize, &collected_items.resize_algorithm);
     let similar_images_sub_ignore_same_size = settings.get_similar_images_sub_ignore_same_size();
     let similar_images_sub_similarity = settings.get_similar_images_sub_current_similarity().round() as i32;
 
     let duplicates_sub_check_method_idx = settings.get_duplicates_sub_check_method_index();
-    let duplicates_sub_check_method = ALLOWED_DUPLICATES_CHECK_METHOD_VALUES[duplicates_sub_check_method_idx as usize].0.to_string();
+    let duplicates_sub_check_method = StringComboBoxItems::get_config_name_from_idx(duplicates_sub_check_method_idx as usize, &collected_items.duplicates_check_method);
     let duplicates_sub_available_hash_type_idx = settings.get_duplicates_sub_available_hash_type_index();
-    let duplicates_sub_available_hash_type = ALLOWED_DUPLICATES_HASH_TYPE_VALUES[duplicates_sub_available_hash_type_idx as usize].0.to_string();
+    let duplicates_sub_available_hash_type = StringComboBoxItems::get_config_name_from_idx(duplicates_sub_available_hash_type_idx as usize, &collected_items.duplicates_hash_type);
 
     let biggest_files_sub_method_idx = settings.get_biggest_files_sub_method_index();
-    let biggest_files_sub_method = ALLOWED_BIG_FILE_SIZE_VALUES[biggest_files_sub_method_idx as usize].0.to_string();
+    let biggest_files_sub_method = StringComboBoxItems::get_config_name_from_idx(biggest_files_sub_method_idx as usize, &collected_items.biggest_files_method);
     let biggest_files_sub_number_of_files = settings.get_biggest_files_sub_number_of_files().parse().unwrap_or(DEFAULT_BIGGEST_FILES);
 
     let similar_videos_sub_ignore_same_size = settings.get_similar_videos_sub_ignore_same_size();
     let similar_videos_sub_similarity = settings.get_similar_videos_sub_current_similarity().round() as i32;
 
     let similar_music_sub_audio_check_type_idx = settings.get_similar_music_sub_audio_check_type_index();
-    let similar_music_sub_audio_check_type = ALLOWED_AUDIO_CHECK_TYPE_VALUES[similar_music_sub_audio_check_type_idx as usize].0.to_string();
+    let similar_music_sub_audio_check_type = StringComboBoxItems::get_config_name_from_idx(similar_music_sub_audio_check_type_idx as usize, &collected_items.audio_check_type);
     let similar_music_sub_approximate_comparison = settings.get_similar_music_sub_approximate_comparison();
     let similar_music_sub_title = settings.get_similar_music_sub_title();
     let similar_music_sub_artist = settings.get_similar_music_sub_artist();
@@ -763,7 +851,7 @@ fn default_excluded_directories() -> Vec<PathBuf> {
     excluded_directories
 }
 fn default_duplicates_check_method() -> String {
-    ALLOWED_DUPLICATES_CHECK_METHOD_VALUES[0].0.to_string()
+    "hash".to_string()
 }
 fn default_maximum_difference_value() -> f32 {
     DEFAULT_MAXIMUM_DIFFERENCE_VALUE
@@ -772,13 +860,13 @@ fn default_minimal_fragment_duration_value() -> f32 {
     DEFAULT_MINIMAL_FRAGMENT_DURATION_VALUE
 }
 fn default_duplicates_hash_type() -> String {
-    ALLOWED_DUPLICATES_HASH_TYPE_VALUES[0].0.to_string()
+    "blake3".to_string()
 }
 fn default_biggest_method() -> String {
-    ALLOWED_BIG_FILE_SIZE_VALUES[0].0.to_string()
+    "biggest".to_string()
 }
 fn default_audio_check_type() -> String {
-    ALLOWED_AUDIO_CHECK_TYPE_VALUES[0].0.to_string()
+    "tags".to_string()
 }
 fn default_video_similarity() -> i32 {
     DEFAULT_VIDEO_SIMILARITY
@@ -815,47 +903,11 @@ fn minimal_prehash_cache_size() -> i32 {
 }
 
 pub fn default_resize_algorithm() -> String {
-    ALLOWED_RESIZE_ALGORITHM_VALUES[0].0.to_string()
+    "lanczos3".to_string()
 }
 pub fn default_hash_type() -> String {
-    ALLOWED_IMAGE_HASH_ALG_VALUES[0].0.to_string()
+    "mean".to_string()
 }
 pub fn default_sub_hash_size() -> u8 {
     DEFAULT_HASH_SIZE
-}
-
-fn get_allowed_hash_size_idx(h_size: u8) -> Option<usize> {
-    ALLOWED_HASH_SIZE_VALUES.iter().position(|(hash_size, _max_similarity)| *hash_size == h_size)
-}
-
-pub fn get_image_hash_alg_idx(string_hash_type: &str) -> Option<usize> {
-    ALLOWED_IMAGE_HASH_ALG_VALUES
-        .iter()
-        .position(|(settings_key, gui_name, _hash_type)| *settings_key == string_hash_type || *gui_name == string_hash_type)
-}
-pub fn get_resize_algorithm_idx(string_resize_algorithm: &str) -> Option<usize> {
-    ALLOWED_RESIZE_ALGORITHM_VALUES
-        .iter()
-        .position(|(settings_key, gui_name, _resize_alg)| *settings_key == string_resize_algorithm || *gui_name == string_resize_algorithm)
-}
-pub fn get_biggest_item_idx(string_biggest_item: &str) -> Option<usize> {
-    ALLOWED_BIG_FILE_SIZE_VALUES
-        .iter()
-        .position(|(settings_key, gui_name, _search_mode)| *settings_key == string_biggest_item || *gui_name == string_biggest_item)
-}
-
-pub fn get_duplicates_check_method_idx(string_duplicates_check_method: &str) -> Option<usize> {
-    ALLOWED_DUPLICATES_CHECK_METHOD_VALUES
-        .iter()
-        .position(|(settings_key, gui_name, _check_method)| *settings_key == string_duplicates_check_method || *gui_name == string_duplicates_check_method)
-}
-pub fn get_duplicates_hash_type_idx(string_duplicates_hash_type: &str) -> Option<usize> {
-    ALLOWED_DUPLICATES_HASH_TYPE_VALUES
-        .iter()
-        .position(|(settings_key, gui_name, _hash_type)| *settings_key == string_duplicates_hash_type || *gui_name == string_duplicates_hash_type)
-}
-pub fn get_audio_check_type_idx(string_audio_check_type: &str) -> Option<usize> {
-    ALLOWED_AUDIO_CHECK_TYPE_VALUES
-        .iter()
-        .position(|(settings_key, gui_name, _audio_check_type)| *settings_key == string_audio_check_type || *gui_name == string_audio_check_type)
 }
