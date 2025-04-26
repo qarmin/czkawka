@@ -28,11 +28,7 @@ use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
 
 use crate::common::{check_if_all_included_dirs_are_referenced, check_if_there_are_any_included_folders, split_u64_into_i32s};
 use crate::connect_row_selection::reset_selection;
-use crate::settings::{
-    ALLOWED_AUDIO_CHECK_TYPE_VALUES, ALLOWED_BIG_FILE_SIZE_VALUES, ALLOWED_DUPLICATES_CHECK_METHOD_VALUES, ALLOWED_DUPLICATES_HASH_TYPE_VALUES, ALLOWED_IMAGE_HASH_ALG_VALUES,
-    ALLOWED_RESIZE_ALGORITHM_VALUES, SettingsCustom, collect_settings, get_audio_check_type_idx, get_biggest_item_idx, get_duplicates_check_method_idx,
-    get_duplicates_hash_type_idx, get_image_hash_alg_idx, get_resize_algorithm_idx,
-};
+use crate::settings::{SettingsCustom, StringComboBoxItems, collect_settings};
 use crate::shared_models::SharedModels;
 use crate::{CurrentTab, GuiState, MainListModel, MainWindow, ProgressToSend};
 
@@ -119,10 +115,11 @@ fn scan_duplicates(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let hash_type =
-                ALLOWED_DUPLICATES_HASH_TYPE_VALUES[get_duplicates_hash_type_idx(&custom_settings.duplicates_sub_available_hash_type).expect("Failed to get hash type")].2;
-            let check_method =
-                ALLOWED_DUPLICATES_CHECK_METHOD_VALUES[get_duplicates_check_method_idx(&custom_settings.duplicates_sub_check_method).expect("Failed to get check method")].2;
+            let collected_items = StringComboBoxItems::get_items();
+
+            let hash_type = StringComboBoxItems::get_value_from_config_name(&custom_settings.duplicates_sub_available_hash_type, &collected_items.duplicates_hash_type);
+            let check_method = StringComboBoxItems::get_value_from_config_name(&custom_settings.duplicates_sub_check_method, &collected_items.duplicates_check_method);
+
             let params = DuplicateFinderParameters::new(
                 check_method,
                 hash_type,
@@ -295,7 +292,9 @@ fn scan_big_files(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let big_files_mode = ALLOWED_BIG_FILE_SIZE_VALUES[get_biggest_item_idx(&custom_settings.biggest_files_sub_method).expect("Failed to get big files mode")].2;
+            let collected_items = StringComboBoxItems::get_items();
+            let big_files_mode = StringComboBoxItems::get_value_from_config_name(&custom_settings.biggest_files_sub_method, &collected_items.biggest_files_method);
+
             let params = BigFileParameters::new(custom_settings.biggest_files_sub_number_of_files as usize, big_files_mode);
             let mut item = BigFile::new(params);
 
@@ -415,13 +414,17 @@ fn scan_similar_images(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let hash_alg = ALLOWED_IMAGE_HASH_ALG_VALUES[get_image_hash_alg_idx(&custom_settings.similar_images_sub_hash_alg).expect("Failed to get hash algorithm")].2;
-            let resize_algorithm =
-                ALLOWED_RESIZE_ALGORITHM_VALUES[get_resize_algorithm_idx(&custom_settings.similar_images_sub_resize_algorithm).expect("Failed to get resize algorithm")].2;
+            let collected_items = StringComboBoxItems::get_items();
+            let hash_alg = StringComboBoxItems::get_value_from_config_name(&custom_settings.similar_images_sub_hash_alg, &collected_items.image_hash_alg);
+            let resize_algorithm = StringComboBoxItems::get_value_from_config_name(&custom_settings.similar_images_sub_resize_algorithm, &collected_items.resize_algorithm);
+            let hash_size = custom_settings
+                .similar_images_sub_hash_size
+                .parse()
+                .unwrap_or_else(|_| panic!("Cannot parse hash size {}", custom_settings.similar_images_sub_hash_size));
 
             let params = SimilarImagesParameters::new(
                 custom_settings.similar_images_sub_similarity as u32,
-                custom_settings.similar_images_sub_hash_size,
+                hash_size,
                 hash_alg,
                 resize_algorithm,
                 custom_settings.similar_images_sub_ignore_same_size,
@@ -436,7 +439,6 @@ fn scan_similar_images(
             item.find_similar_images(Some(&stop_flag), Some(&progress_sender));
 
             let messages = item.get_text_messages().create_messages_text();
-            let hash_size = custom_settings.similar_images_sub_hash_size;
 
             let mut vector: Vec<_> = if item.get_use_reference() {
                 item.get_similar_images_referenced()
@@ -622,8 +624,9 @@ fn scan_similar_music(
                 .expect("Cannot upgrade in event loop :(");
                 return Ok(());
             }
-            let audio_check_type =
-                ALLOWED_AUDIO_CHECK_TYPE_VALUES[get_audio_check_type_idx(&custom_settings.similar_music_sub_audio_check_type).expect("Failed to get audio check type")].2;
+
+            let collected_items = StringComboBoxItems::get_items();
+            let audio_check_type = StringComboBoxItems::get_value_from_config_name(&custom_settings.similar_music_sub_audio_check_type, &collected_items.audio_check_type);
 
             let params = SameMusicParameters::new(
                 music_similarity,

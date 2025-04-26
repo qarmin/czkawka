@@ -1,3 +1,8 @@
+use std::collections::{BTreeMap, HashMap};
+use std::fs;
+use std::io::{BufReader, BufWriter};
+use std::path::Path;
+
 use bincode::Options;
 use fun_time::fun_time;
 use humansize::{BINARY, format_size};
@@ -6,10 +11,6 @@ use image_hasher::HashAlg;
 use log::{debug, error};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use serde::{Deserialize, Serialize};
-use std::collections::{BTreeMap, HashMap};
-use std::fs;
-use std::io::{BufReader, BufWriter};
-use std::path::Path;
 
 use crate::common;
 use crate::common_messages::Messages;

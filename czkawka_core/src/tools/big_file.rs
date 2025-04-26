@@ -15,7 +15,7 @@ use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::{DebugPrint, PrintResults};
 use crate::progress_data::ProgressData;
 
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum SearchMode {
     BiggestFiles,
     SmallestFiles,

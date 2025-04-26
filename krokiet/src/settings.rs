@@ -1,7 +1,8 @@
 use std::cmp::{max, min};
-use std::collections::HashMap;
 use std::env;
+use std::fmt::Debug;
 use std::path::PathBuf;
+use std::sync::{Arc, Mutex, MutexGuard};
 
 use czkawka_core::common::{get_all_available_threads, get_config_cache_path, set_number_of_threads};
 use czkawka_core::common_dir_traversal::CheckingMethod;
@@ -13,11 +14,9 @@ use image_hasher::{FilterType, HashAlg};
 use log::{debug, error, info, warn};
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
-use serde_json::Value::String;
-use slint::{ComponentHandle, Model, ModelRc, PhysicalSize, SharedString, VecModel, WindowSize};
+use slint::{ComponentHandle, Model, ModelRc, PhysicalSize, SharedString, WindowSize};
 
 use crate::common::{create_excluded_directories_model_from_pathbuf, create_included_directories_model_from_pathbuf, create_vec_model_from_vec_string};
-use crate::connect_row_selection::reset_selection;
 use crate::connect_translation::{LANGUAGE_LIST, change_language, find_the_closest_language_idx_to_system};
 use crate::{Callabler, GuiState, MainWindow, Settings, flk};
 
@@ -28,39 +27,54 @@ pub const DEFAULT_MINIMUM_PREHASH_CACHE_SIZE: i32 = 256;
 pub const DEFAULT_BIGGEST_FILES: i32 = 50;
 pub const DEFAULT_IMAGE_SIMILARITY: i32 = 10;
 pub const DEFAULT_VIDEO_SIMILARITY: i32 = 15;
-pub const DEFAULT_HASH_SIZE: u8 = 16;
+pub const DEFAULT_HASH_SIZE: &str = "16";
 pub const DEFAULT_MAXIMUM_DIFFERENCE_VALUE: f32 = 3.0;
 pub const DEFAULT_MINIMAL_FRAGMENT_DURATION_VALUE: f32 = 5.0;
-pub const MAX_HASH_SIZE: u8 = 40;
-pub const DEFAULT_SUB_HASH_SIZE: u8 = 16;
+pub const MAX_HASH_SIZE: f32 = 40.0;
 
-pub struct StringComboBoxItem<T> {
+#[derive(Debug, Clone)]
+pub struct StringComboBoxItem<T>
+where
+    T: Clone + Debug,
+{
     pub config_name: String,
     pub display_name: String,
     pub value: T,
 }
 
 pub struct StringComboBoxItems {
-    hash_size: Vec<StringComboBoxItem<u8>>,
-    resize_algorithm: Vec<StringComboBoxItem<FilterType>>,
-    image_hash_alg: Vec<StringComboBoxItem<HashAlg>>,
-    duplicates_hash_type: Vec<StringComboBoxItem<HashType>>,
-    biggest_files_method: Vec<StringComboBoxItem<SearchMode>>,
-    audio_check_type: Vec<StringComboBoxItem<CheckingMethod>>,
-    duplicates_check_method: Vec<StringComboBoxItem<CheckingMethod>>,
+    pub languages: Vec<StringComboBoxItem<String>>,
+    pub hash_size: Vec<StringComboBoxItem<u8>>,
+    pub resize_algorithm: Vec<StringComboBoxItem<FilterType>>,
+    pub image_hash_alg: Vec<StringComboBoxItem<HashAlg>>,
+    pub duplicates_hash_type: Vec<StringComboBoxItem<HashType>>,
+    pub biggest_files_method: Vec<StringComboBoxItem<SearchMode>>,
+    pub audio_check_type: Vec<StringComboBoxItem<CheckingMethod>>,
+    pub duplicates_check_method: Vec<StringComboBoxItem<CheckingMethod>>,
 }
 
+pub static STRING_COMBO_BOX_ITEMS: Lazy<Arc<Mutex<StringComboBoxItems>>> = Lazy::new(|| {
+    let l = StringComboBoxItems::regenerate_items();
+    Arc::new(Mutex::new(l))
+});
+
 impl StringComboBoxItems {
-    pub fn get_item_and_idx_from_config_name<T>(config_name: &str, items: &Vec<StringComboBoxItem<T>>) -> (usize, Vec<SharedString>) {
+    pub fn get_item_and_idx_from_config_name<T>(config_name: &str, items: &Vec<StringComboBoxItem<T>>) -> (usize, Vec<SharedString>)
+    where
+        T: Clone + Debug,
+    {
         let position = items.iter().position(|e| e.config_name == config_name).unwrap_or_else(|| {
             warn!("Trying to get non existent item - \"{config_name}\" from {items:?}");
             0
         });
-        let display_names = items.iter().map(|e| e.display_name.into()).collect::<Vec<_>>();
+        let display_names = items.iter().map(|e| e.display_name.clone().into()).collect::<Vec<_>>();
         (position, display_names)
     }
 
-    pub fn get_config_name_from_idx<T>(idx: usize, items: &Vec<StringComboBoxItem<T>>) -> String {
+    pub fn get_config_name_from_idx<T>(idx: usize, items: &Vec<StringComboBoxItem<T>>) -> String
+    where
+        T: Clone + Debug,
+    {
         if idx < items.len() {
             items[idx].config_name.clone()
         } else {
@@ -69,7 +83,33 @@ impl StringComboBoxItems {
         }
     }
 
-    fn regenerate_items() -> Self {
+    pub fn get_value_from_config_name<T>(config_name: &str, items: &Vec<StringComboBoxItem<T>>) -> T
+    where
+        T: Clone + Debug,
+    {
+        let position = items.iter().position(|e| e.config_name == config_name).unwrap_or_else(|| {
+            panic!("Trying to get non existent item - \"{config_name}\" from {items:?}");
+        });
+        items[position].value.clone()
+    }
+
+    pub fn get_display_names<T>(items: &[StringComboBoxItem<T>]) -> Vec<SharedString>
+    where
+        T: Clone + Debug,
+    {
+        items.iter().map(|e| e.display_name.clone().into()).collect()
+    }
+
+    pub(crate) fn regenerate_items() -> Self {
+        let languages = LANGUAGE_LIST
+            .iter()
+            .map(|e| StringComboBoxItem {
+                config_name: e.short_name.to_string(),
+                display_name: e.long_name.to_string(),
+                value: e.short_name.to_string(),
+            })
+            .collect();
+
         let hash_size = Self::convert_to_combobox_items(&[("8", "8", 8), ("16", "16", 16), ("32", "32", 32), ("64", "64", 64)]);
         let resize_algorithm = Self::convert_to_combobox_items(&[
             ("lanczos3", "Lanczos3", FilterType::Lanczos3),
@@ -109,6 +149,7 @@ impl StringComboBoxItems {
         ]);
 
         Self {
+            languages,
             hash_size,
             resize_algorithm,
             image_hash_alg,
@@ -121,16 +162,24 @@ impl StringComboBoxItems {
 
     fn convert_to_combobox_items<T>(input: &[(&str, &str, T)]) -> Vec<StringComboBoxItem<T>>
     where
-        T: Copy,
+        T: Clone + Debug,
     {
         input
             .iter()
             .map(|(config_name, display_name, value)| StringComboBoxItem {
                 config_name: config_name.to_string(),
                 display_name: display_name.to_string(),
-                value: *value,
+                value: value.clone(),
             })
             .collect()
+    }
+
+    pub fn get_items() -> MutexGuard<'static, Self> {
+        STRING_COMBO_BOX_ITEMS.lock().expect("Can't lock string combobox items")
+    }
+
+    fn regenerate_and_set() {
+        *STRING_COMBO_BOX_ITEMS.lock().expect("Can't lock string combobox items") = Self::regenerate_items();
     }
 }
 
@@ -222,7 +271,7 @@ pub struct SettingsCustom {
     #[serde(default = "ttrue")]
     pub similar_music_delete_outdated_entries: bool,
     #[serde(default = "default_sub_hash_size")]
-    pub similar_images_sub_hash_size: u8,
+    pub similar_images_sub_hash_size: String,
     #[serde(default = "default_hash_type")]
     pub similar_images_sub_hash_alg: String,
     #[serde(default = "default_resize_algorithm")]
@@ -387,6 +436,8 @@ pub fn create_default_settings_files() {
 }
 
 pub fn load_settings_from_file(app: &MainWindow) {
+    StringComboBoxItems::regenerate_and_set();
+
     let result_base_settings = load_data_from_file::<BasicSettings>(get_base_config_file());
 
     let mut base_settings;
@@ -520,17 +571,13 @@ pub fn get_config_file(number: i32) -> Option<PathBuf> {
 
 pub fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicSettings) {
     let settings = app.global::<Settings>();
-    let lang_idx = LANGUAGE_LIST.iter().position(|x| x.short_name == basic_settings.language).unwrap_or_default();
-    let new_languages_model: Vec<SharedString> = LANGUAGE_LIST.iter().map(|e| e.long_name.into()).collect::<Vec<_>>();
+    // let lang_idx = LANGUAGE_LIST.iter().position(|x| x.short_name == basic_settings.language).unwrap_or_default();
+    // let new_languages_model: Vec<SharedString> = LANGUAGE_LIST.iter().map(|e| e.long_name.into()).collect::<Vec<_>>();
 
-    settings.set_languages_list(ModelRc::new(VecModel::from(new_languages_model)));
-    settings.set_language_value(LANGUAGE_LIST[lang_idx].long_name.into()); // TODO - still visible is old language
-    settings.set_language_index(lang_idx as i32); // TODO - visible is old language
-    println!("Value of language is {}", LANGUAGE_LIST[lang_idx].long_name);
+    // settings.set_languages_list(ModelRc::new(VecModel::from(new_languages_model)));
+    // settings.set_language_value(LANGUAGE_LIST[lang_idx].long_name.into()); // TODO - still visible is old language
+    // settings.set_language_index(lang_idx as i32); // TODO - visible is old language
 
-    error!("Lang IDX {}", settings.get_language_index());
-    error!("Lang Value {}", settings.get_language_value());
-    error!("Lang model {:?}", settings.get_languages_list());
     change_language(app);
 
     settings.set_settings_preset_idx(basic_settings.default_preset);
@@ -539,11 +586,22 @@ pub fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicSettings
     let width = basic_settings.window_width.clamp(100, 1920 * 4);
     let height = basic_settings.window_height.clamp(100, 1080 * 4);
     app.window().set_size(WindowSize::Physical(PhysicalSize { width, height }));
+
+    set_combobox_basic_settings_items(&settings, basic_settings);
 }
 
-pub fn set_combobox_items(settings: &Settings, custom_settings: &SettingsCustom) {
-    let collected_items = StringComboBoxItems::regenerate_items();
-    // TODO - Set here also language
+pub fn set_combobox_basic_settings_items(settings: &Settings, basic_settings: &BasicSettings) {
+    let collected_items = StringComboBoxItems::get_items();
+
+    // Language
+    let (idx, display_names) = StringComboBoxItems::get_item_and_idx_from_config_name(&basic_settings.language, &collected_items.languages);
+    // settings.set_language_model(display_names); // TODO - replace with
+    settings.set_language_index(idx as i32);
+    settings.set_language_value(display_names[idx].clone());
+}
+
+pub fn set_combobox_custom_settings_items(settings: &Settings, custom_settings: &SettingsCustom) {
+    let collected_items = StringComboBoxItems::get_items();
 
     // Hash size
     let (idx, display_names) = StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.similar_images_sub_hash_size.to_string(), &collected_items.hash_size);
@@ -626,7 +684,7 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
     settings.set_similar_music_compare_fingerprints_only_with_similar_titles(custom_settings.similar_music_compare_fingerprints_only_with_similar_titles);
     settings.set_similar_music_delete_outdated_entries(custom_settings.similar_music_delete_outdated_entries);
 
-    set_combobox_items(&settings, &custom_settings);
+    set_combobox_custom_settings_items(&settings, custom_settings);
 
     settings.set_similar_images_sub_ignore_same_size(custom_settings.similar_images_sub_ignore_same_size);
     settings.set_similar_images_sub_max_similarity(MAX_HASH_SIZE);
@@ -804,6 +862,7 @@ pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
 
 pub fn collect_base_settings(app: &MainWindow) -> BasicSettings {
     let settings = app.global::<Settings>();
+    let collected_items = StringComboBoxItems::regenerate_items();
 
     let default_preset = settings.get_settings_preset_idx();
     let preset_names = settings.get_settings_presets().iter().map(|x| x.to_string()).collect::<Vec<_>>();
@@ -811,10 +870,8 @@ pub fn collect_base_settings(app: &MainWindow) -> BasicSettings {
     let window_height = app.window().size().height;
     assert_eq!(preset_names.len(), 10);
     let lang_idx = settings.get_language_index();
-    let language = LANGUAGE_LIST[lang_idx as usize].short_name.to_string();
-    error!("Save Lang IDX {}", settings.get_language_index());
-    error!("Save Lang Value {}", settings.get_language_value());
-    error!("Save Lang model {:?}", settings.get_languages_list());
+    let language = StringComboBoxItems::get_config_name_from_idx(lang_idx as usize, &collected_items.languages);
+    // let language = LANGUAGE_LIST[lang_idx as usize].short_name.to_string();
     BasicSettings {
         language,
         default_preset,
@@ -908,6 +965,6 @@ pub fn default_resize_algorithm() -> String {
 pub fn default_hash_type() -> String {
     "mean".to_string()
 }
-pub fn default_sub_hash_size() -> u8 {
-    DEFAULT_HASH_SIZE
+pub fn default_sub_hash_size() -> String {
+    DEFAULT_HASH_SIZE.to_string()
 }
