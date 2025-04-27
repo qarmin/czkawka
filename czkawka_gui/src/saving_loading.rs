@@ -64,7 +64,7 @@ pub const DEFAULT_MINIMAL_FILE_SIZE: &str = "16384";
 pub const DEFAULT_MAXIMAL_FILE_SIZE: &str = "999999999999";
 
 #[cfg(target_family = "unix")]
-const DEFAULT_EXCLUDED_DIRECTORIES: &[&str] = &["/proc", "/dev", "/sys", "/run", "/snap"];
+const DEFAULT_EXCLUDED_DIRECTORIES: &[&str] = &["/proc", "/dev", "/sys", "/snap"];
 #[cfg(not(target_family = "unix"))]
 const DEFAULT_EXCLUDED_DIRECTORIES: &[&str] = &["C:\\Windows"];
 

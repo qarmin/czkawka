@@ -3,6 +3,7 @@ use std::fs;
 use std::io::{BufReader, BufWriter};
 use std::path::Path;
 
+use bincode::Options;
 use fun_time::fun_time;
 use humansize::{BINARY, format_size};
 use image::imageops::FilterType;
@@ -24,6 +25,8 @@ const CACHE_IMAGE_VERSION: &str = "90_fast_resize";
 #[cfg(not(feature = "fast_image_resize"))]
 const CACHE_IMAGE_VERSION: &str = "90_image_rs_resize";
 const CACHE_VIDEO_VERSION: &str = "90";
+
+const MEMORY_LIMIT: u64 = 4 * 1024 * 1024 * 1024;
 
 pub fn get_broken_files_cache_file() -> String {
     format!("cache_broken_files_{CACHE_VERSION}.bin")
@@ -70,9 +73,10 @@ where
 
         {
             let writer = BufWriter::new(file_handler.expect("Cannot fail, because for saving, this always exists"));
-            if let Err(e) = bincode::serialize_into(writer, &hashmap_to_save) {
+            let options = bincode::DefaultOptions::new().with_limit(MEMORY_LIMIT);
+            if let Err(e) = options.serialize_into(writer, &hashmap_to_save) {
                 text_messages.warnings.push(format!("Cannot write data to cache file {cache_file:?}, reason {e}"));
-                debug!("Failed to save cache to file {cache_file:?}");
+                debug!("Failed to save cache to file {cache_file:?} - {e}");
                 return text_messages;
             }
             debug!("Saved cache to binary file {cache_file:?} with size {}", get_cache_size(&cache_file));
@@ -82,7 +86,7 @@ where
                 let writer = BufWriter::new(file_handler_json);
                 if let Err(e) = serde_json::to_writer(writer, &hashmap_to_save) {
                     text_messages.warnings.push(format!("Cannot write data to cache file {cache_file_json:?}, reason {e}"));
-                    debug!("Failed to save cache to file {cache_file_json:?}");
+                    debug!("Failed to save cache to file {cache_file_json:?} - {e}");
                     return text_messages;
                 }
                 debug!("Saved cache to json file {cache_file_json:?} with size {}", get_cache_size(&cache_file_json));
@@ -209,18 +213,12 @@ where
             cache_full_name = cache_file.clone();
             let reader = BufReader::new(file_handler);
 
-            // TODO cannot use limits
-            // Probably also save function needs to be updated
-            // Without it loading not working
-
-            // let options = bincode::DefaultOptions::new().with_limit(4 * 1024 * 1024 * 1024);
-            // vec_loaded_entries = match options.deserialize_from(reader) {
-
-            vec_loaded_entries = match bincode::deserialize_from(reader) {
+            let options = bincode::DefaultOptions::new().with_limit(MEMORY_LIMIT);
+            vec_loaded_entries = match options.deserialize_from(reader) {
                 Ok(t) => t,
                 Err(e) => {
                     text_messages.warnings.push(format!("Failed to load data from cache file {cache_file:?}, reason {e}"));
-                    error!("Failed to load cache from file {cache_file:?}");
+                    error!("Failed to load cache from file {cache_file:?} - {e}");
                     return (text_messages, None);
                 }
             };
@@ -233,7 +231,7 @@ where
                     text_messages
                         .warnings
                         .push(format!("Failed to load data from json cache file {cache_file_json:?}, reason {e}"));
-                    debug!("Failed to load cache from file {cache_file:?}");
+                    debug!("Failed to load cache from file {cache_file:?} - {e}");
                     return (text_messages, None);
                 }
             };

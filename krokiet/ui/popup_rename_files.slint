@@ -12,6 +12,7 @@ import { BottomPanel } from "bottom_panel.slint";
 import {ColorPalette} from "color_palette.slint";
 import {GuiState} from "gui_state.slint";
 import { Preview } from "preview.slint";
+import { Translations } from "translations.slint";
 
 export component PopupRenameFiles inherits Rectangle {
     out property <length> popup_width: 500px;
@@ -33,7 +34,7 @@ export component PopupRenameFiles inherits Rectangle {
                 Text {
                     vertical-stretch: 0.0;
                     min-height: 30px;
-                    text: "Renaming files";
+                    text <=> Translations.popup_rename_title_text;
                     vertical-alignment: top;
                     horizontal-alignment: center;
                     font-size: 13px;
@@ -41,7 +42,7 @@ export component PopupRenameFiles inherits Rectangle {
 
                 Text {
                     vertical-stretch: 1.0;
-                    text: "This will rename extensions of selected files to more proper\n" + "\nAre you want to continue?";
+                    text: Translations.popup_rename_message_text  + "\n\n" + Translations.are_you_want_to_continue_text;
                     vertical-alignment: center;
                     horizontal-alignment: center;
                     font-size: 13px;
@@ -50,7 +51,7 @@ export component PopupRenameFiles inherits Rectangle {
 
                 HorizontalLayout {
                     Button {
-                        text: "Yes";
+                        text <=> Translations.yes_button_text;
                         clicked => {
                             popup_window.close();
                             Callabler.rename_files();
@@ -60,7 +61,7 @@ export component PopupRenameFiles inherits Rectangle {
                     Rectangle { }
 
                     Button {
-                        text: "No";
+                        text <=> Translations.no_button_text;
                         clicked => {
                             popup_window.close();
                         }

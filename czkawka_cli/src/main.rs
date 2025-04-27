@@ -12,7 +12,7 @@ use std::thread;
 use clap::Parser;
 use commands::Commands;
 use crossbeam_channel::{Receiver, Sender, unbounded};
-use czkawka_core::common::{DEFAULT_THREAD_SIZE, print_version_mode, set_config_cache_path, set_number_of_threads, setup_logger};
+use czkawka_core::common::{DEFAULT_THREAD_SIZE, print_infos_and_warnings, print_version_mode, set_config_cache_path, set_number_of_threads, setup_logger};
 use czkawka_core::common_tool::{CommonData, DeleteMethod};
 use czkawka_core::common_traits::PrintResults;
 use czkawka_core::progress_data::ProgressData;
@@ -41,9 +41,10 @@ mod progress;
 fn main() {
     let command = Args::parse().command;
 
-    setup_logger(true);
+    let (infos, warnings) = set_config_cache_path("Czkawka", "Czkawka");
+    setup_logger(true, "czkawka_cli");
     print_version_mode("Czkawka cli");
-    set_config_cache_path("Czkawka", "Czkawka");
+    print_infos_and_warnings(infos, warnings);
 
     if cfg!(debug_assertions) {
         debug!("Running command - {command:?}");

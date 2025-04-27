@@ -232,7 +232,7 @@ export component MainList {
             } else if (GuiState.active_tab == CurrentTab.BrokenFiles) {
                 broken_files.released_key(event);
             } else {
-                debug("Non handled key in main_lists.slint", event, GuiState.active_tab);
+                // debug("Non handled key in main_lists.slint", event, GuiState.active_tab);
             }
             accept
         }
@@ -264,7 +264,7 @@ export component MainList {
             } else if (GuiState.active_tab == CurrentTab.BrokenFiles) {
                 broken_files.pressed_key(event);
             } else {
-                debug("Non handled key in main_lists.slint", event, GuiState.active_tab);
+                // debug("Non handled key in main_lists.slint", event, GuiState.active_tab);
             }
             accept
         }
@@ -294,7 +294,7 @@ export component MainList {
         } else if (GuiState.active_tab == CurrentTab.BrokenFiles) {
             broken_files.reset_selection();
         } else {
-            debug("Non handled reset selection in main_lists.slint", GuiState.active_tab);
+            // debug("Non handled reset selection in main_lists.slint", GuiState.active_tab);
         }
     }
 

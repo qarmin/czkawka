@@ -12,6 +12,7 @@ import { BottomPanel } from "bottom_panel.slint";
 import { ColorPalette } from "color_palette.slint";
 import { GuiState } from "gui_state.slint";
 import { Preview } from "preview.slint";
+import { Translations } from "translations.slint";
 
 export component PopupNewDirectories inherits Rectangle {
     width: 400px;
@@ -32,13 +33,14 @@ export component PopupNewDirectories inherits Rectangle {
                 alignment: LayoutAlignment.center;
                 Rectangle {
                     clip: true;
-                    width: root.width - 20px;
-                    height: root.height - 20px;
+                    width: 400px;
+                    height: 200px;
                     border-radius: 20px;
                     background: ColorPalette.popup_background;
                     VerticalLayout {
                         Text {
-                            text: "Please add directories one per line";
+                            text <=> Translations.popup_new_directories_title_text;
+                            font-size: 13px;
                             horizontal-alignment: TextHorizontalAlignment.center;
                         }
 
@@ -51,7 +53,7 @@ export component PopupNewDirectories inherits Rectangle {
                             min-height: 20px;
                             Button {
                                 enabled: text_data != "";
-                                text: "OK";
+                                text <=> Translations.ok_button_text;
                                 clicked => {
                                     Callabler.added_manual_directories(GuiState.choosing_include_directories, text_data);
                                     popup_window.close();
@@ -59,7 +61,7 @@ export component PopupNewDirectories inherits Rectangle {
                             }
 
                             Button {
-                                text: "Cancel";
+                                text <=> Translations.cancel_button_text;
                                 clicked => {
                                     popup_window.close();
                                 }

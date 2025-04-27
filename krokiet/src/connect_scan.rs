@@ -28,13 +28,9 @@ use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
 
 use crate::common::{check_if_all_included_dirs_are_referenced, check_if_there_are_any_included_folders, split_u64_into_i32s};
 use crate::connect_row_selection::reset_selection;
-use crate::settings::{
-    ALLOWED_AUDIO_CHECK_TYPE_VALUES, ALLOWED_BIG_FILE_SIZE_VALUES, ALLOWED_DUPLICATES_CHECK_METHOD_VALUES, ALLOWED_DUPLICATES_HASH_TYPE_VALUES, ALLOWED_IMAGE_HASH_ALG_VALUES,
-    ALLOWED_RESIZE_ALGORITHM_VALUES, SettingsCustom, collect_settings, get_audio_check_type_idx, get_biggest_item_idx, get_duplicates_check_method_idx,
-    get_duplicates_hash_type_idx, get_image_hash_alg_idx, get_resize_algorithm_idx,
-};
+use crate::settings::{SettingsCustom, StringComboBoxItems, collect_settings};
 use crate::shared_models::SharedModels;
-use crate::{CurrentTab, GuiState, MainListModel, MainWindow, ProgressToSend};
+use crate::{CurrentTab, GuiState, MainListModel, MainWindow, ProgressToSend, flk};
 
 pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>, shared_models: Arc<Mutex<SharedModels>>) {
     let a = app.as_weak();
@@ -42,12 +38,12 @@ pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressDat
         let app = a.upgrade().expect("Failed to upgrade app :(");
 
         if !check_if_there_are_any_included_folders(&app) {
-            app.invoke_scan_ended("Cannot start scan when no included directories are set.".into());
+            app.invoke_scan_ended(flk!("rust_no_included_directories").into());
             return;
         }
 
         if check_if_all_included_dirs_are_referenced(&app) {
-            app.invoke_scan_ended("Cannot start scan when all included directories are set as referenced folders.".into());
+            app.invoke_scan_ended(flk!("rust_all_dirs_referenced").into());
             return;
         }
 
@@ -119,10 +115,11 @@ fn scan_duplicates(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let hash_type =
-                ALLOWED_DUPLICATES_HASH_TYPE_VALUES[get_duplicates_hash_type_idx(&custom_settings.duplicates_sub_available_hash_type).expect("Failed to get hash type")].2;
-            let check_method =
-                ALLOWED_DUPLICATES_CHECK_METHOD_VALUES[get_duplicates_check_method_idx(&custom_settings.duplicates_sub_check_method).expect("Failed to get check method")].2;
+            let collected_items = StringComboBoxItems::get_items();
+
+            let hash_type = StringComboBoxItems::get_value_from_config_name(&custom_settings.duplicates_sub_available_hash_type, &collected_items.duplicates_hash_type);
+            let check_method = StringComboBoxItems::get_value_from_config_name(&custom_settings.duplicates_sub_check_method, &collected_items.duplicates_check_method);
+
             let params = DuplicateFinderParameters::new(
                 check_method,
                 hash_type,
@@ -209,7 +206,7 @@ fn write_duplicate_results(app: &MainWindow, vector: Vec<(Option<DuplicateEntry>
         }
     }
     app.set_duplicate_files_model(items.into());
-    app.invoke_scan_ended(format!("Found {items_found} similar duplicates files").into());
+    app.invoke_scan_ended(flk!("rust_found_duplicate_files", items_found = items_found).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 fn prepare_data_model_duplicates(fe: &DuplicateEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
@@ -265,7 +262,7 @@ fn write_empty_folders_results(app: &MainWindow, vector: Vec<FolderEntry>, messa
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_empty_folder_model(items.into());
-    app.invoke_scan_ended(format!("Found {items_found} empty folders").into());
+    app.invoke_scan_ended(flk!("rust_found_empty_folders", items_found = items_found).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 
@@ -295,7 +292,9 @@ fn scan_big_files(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let big_files_mode = ALLOWED_BIG_FILE_SIZE_VALUES[get_biggest_item_idx(&custom_settings.biggest_files_sub_method).expect("Failed to get big files mode")].2;
+            let collected_items = StringComboBoxItems::get_items();
+            let big_files_mode = StringComboBoxItems::get_value_from_config_name(&custom_settings.biggest_files_sub_method, &collected_items.biggest_files_method);
+
             let params = BigFileParameters::new(custom_settings.biggest_files_sub_number_of_files as usize, big_files_mode);
             let mut item = BigFile::new(params);
 
@@ -327,7 +326,7 @@ fn write_big_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages: S
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_big_files_model(items.into());
-    app.invoke_scan_ended(format!("Found {items_found} files").into());
+    app.invoke_scan_ended(flk!("rust_found_big_files", items_found = items_found).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 
@@ -384,7 +383,7 @@ fn write_empty_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages:
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_empty_files_model(items.into());
-    app.invoke_scan_ended(format!("Found {items_found} empty files").into());
+    app.invoke_scan_ended(flk!("rust_found_empty_files", items_found = items_found).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 
@@ -415,13 +414,17 @@ fn scan_similar_images(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let hash_alg = ALLOWED_IMAGE_HASH_ALG_VALUES[get_image_hash_alg_idx(&custom_settings.similar_images_sub_hash_alg).expect("Failed to get hash algorithm")].2;
-            let resize_algorithm =
-                ALLOWED_RESIZE_ALGORITHM_VALUES[get_resize_algorithm_idx(&custom_settings.similar_images_sub_resize_algorithm).expect("Failed to get resize algorithm")].2;
+            let collected_items = StringComboBoxItems::get_items();
+            let hash_alg = StringComboBoxItems::get_value_from_config_name(&custom_settings.similar_images_sub_hash_alg, &collected_items.image_hash_alg);
+            let resize_algorithm = StringComboBoxItems::get_value_from_config_name(&custom_settings.similar_images_sub_resize_algorithm, &collected_items.resize_algorithm);
+            let hash_size = custom_settings
+                .similar_images_sub_hash_size
+                .parse()
+                .unwrap_or_else(|_| panic!("Cannot parse hash size {}", custom_settings.similar_images_sub_hash_size));
 
             let params = SimilarImagesParameters::new(
                 custom_settings.similar_images_sub_similarity as u32,
-                custom_settings.similar_images_sub_hash_size,
+                hash_size,
                 hash_alg,
                 resize_algorithm,
                 custom_settings.similar_images_sub_ignore_same_size,
@@ -436,7 +439,6 @@ fn scan_similar_images(
             item.find_similar_images(Some(&stop_flag), Some(&progress_sender));
 
             let messages = item.get_text_messages().create_messages_text();
-            let hash_size = custom_settings.similar_images_sub_hash_size;
 
             let mut vector: Vec<_> = if item.get_use_reference() {
                 item.get_similar_images_referenced()
@@ -451,6 +453,7 @@ fn scan_similar_images(
             for (_first_entry, vec_fe) in &mut vector {
                 vec_fe.par_sort_unstable_by_key(|e| e.similarity);
             }
+            vector.sort_by_key(|(_header, vc)| u64::MAX - vc.iter().map(|e| e.size).sum::<u64>()); // Also sorts by size, to show the biggest groups first
 
             shared_models.lock().unwrap().shared_similar_images_state = Some(item);
 
@@ -477,7 +480,7 @@ fn write_similar_images_results(app: &MainWindow, vector: Vec<(Option<ImagesEntr
         }
     }
     app.set_similar_images_model(items.into());
-    app.invoke_scan_ended(format!("Found {items_found} similar image files").into());
+    app.invoke_scan_ended(flk!("rust_found_similar_images", items_found = items_found).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 fn prepare_data_model_similar_images(fe: &ImagesEntry, hash_size: u8) -> (ModelRc<SharedString>, ModelRc<i32>) {
@@ -537,6 +540,7 @@ fn scan_similar_videos(
             for (_first_entry, vec_fe) in &mut vector {
                 vec_fe.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
             }
+            vector.sort_by_key(|(_header, vc)| u64::MAX - vc.iter().map(|e| e.size).sum::<u64>()); // Also sorts by size, to show the biggest groups first
 
             shared_models.lock().unwrap().shared_similar_videos_state = Some(item);
 
@@ -563,7 +567,7 @@ fn write_similar_videos_results(app: &MainWindow, vector: Vec<(Option<VideosEntr
         }
     }
     app.set_similar_videos_model(items.into());
-    app.invoke_scan_ended(format!("Found {items_found} similar video files").into());
+    app.invoke_scan_ended(flk!("rust_found_similar_videos", items_found = items_found).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 fn prepare_data_model_similar_videos(fe: &VideosEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
@@ -615,13 +619,14 @@ fn scan_similar_music(
 
             if music_similarity == MusicSimilarity::NONE {
                 a.upgrade_in_event_loop(move |app| {
-                    app.invoke_scan_ended("Cannot find similar music files without any similarity method selected.".into());
+                    app.invoke_scan_ended(flk!("rust_no_similarity_method_selected").into());
                 })
                 .expect("Cannot upgrade in event loop :(");
                 return Ok(());
             }
-            let audio_check_type =
-                ALLOWED_AUDIO_CHECK_TYPE_VALUES[get_audio_check_type_idx(&custom_settings.similar_music_sub_audio_check_type).expect("Failed to get audio check type")].2;
+
+            let collected_items = StringComboBoxItems::get_items();
+            let audio_check_type = StringComboBoxItems::get_value_from_config_name(&custom_settings.similar_music_sub_audio_check_type, &collected_items.audio_check_type);
 
             let params = SameMusicParameters::new(
                 music_similarity,
@@ -676,7 +681,7 @@ fn write_similar_music_results(app: &MainWindow, vector: Vec<(Option<MusicEntry>
         }
     }
     app.set_similar_music_model(items.into());
-    app.invoke_scan_ended(format!("Found {items_found} similar music files").into());
+    app.invoke_scan_ended(flk!("rust_found_similar_music_files", items_found = items_found).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 fn prepare_data_model_similar_music(fe: &MusicEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
@@ -738,7 +743,7 @@ fn write_invalid_symlinks_results(app: &MainWindow, vector: Vec<SymlinksFileEntr
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_invalid_symlinks_model(items.into());
-    app.invoke_scan_ended(format!("Found {items_found} invalid symlinks").into());
+    app.invoke_scan_ended(flk!("rust_found_invalid_symlinks", items_found = items_found).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 
@@ -794,7 +799,7 @@ fn write_temporary_files_results(app: &MainWindow, vector: Vec<TemporaryFileEntr
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_temporary_files_model(items.into());
-    app.invoke_scan_ended(format!("Found {items_found} files").into());
+    app.invoke_scan_ended(flk!("rust_found_temporary_files", items_found = items_found).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 
@@ -839,7 +844,7 @@ fn scan_broken_files(
 
             if checked_types == CheckedTypes::NONE {
                 a.upgrade_in_event_loop(move |app| {
-                    app.invoke_scan_ended("Cannot find broken files without any file type selected.".into());
+                    app.invoke_scan_ended(flk!("rust_no_file_type_selected").into());
                 })
                 .expect("Cannot upgrade in event loop :(");
                 return Ok(());
@@ -872,7 +877,7 @@ fn write_broken_files_results(app: &MainWindow, vector: Vec<BrokenEntry>, messag
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_broken_files_model(items.into());
-    app.invoke_scan_ended(format!("Found {items_found} files").into());
+    app.invoke_scan_ended(flk!("rust_found_broken_files", items_found = items_found).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 
@@ -930,7 +935,7 @@ fn write_bad_extensions_results(app: &MainWindow, vector: Vec<BadFileEntry>, mes
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_bad_extensions_model(items.into());
-    app.invoke_scan_ended(format!("Found {items_found} files with bad extensions").into());
+    app.invoke_scan_ended(flk!("rust_found_bad_extensions", items_found = items_found).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 

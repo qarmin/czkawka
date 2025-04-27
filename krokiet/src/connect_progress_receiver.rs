@@ -6,7 +6,7 @@ use czkawka_core::progress_data::{CurrentStage, ProgressData};
 use humansize::{BINARY, format_size};
 use slint::ComponentHandle;
 
-use crate::{MainWindow, ProgressToSend};
+use crate::{MainWindow, ProgressToSend, flk};
 
 pub fn connect_progress_gathering(app: &MainWindow, progress_receiver: Receiver<ProgressData>) {
     let a = app.as_weak();
@@ -35,14 +35,14 @@ pub fn connect_progress_gathering(app: &MainWindow, progress_receiver: Receiver<
 
 fn progress_save_load_cache(item: &ProgressData) -> ProgressToSend {
     let step_name = match item.sstage {
-        CurrentStage::SameMusicCacheLoadingTags => "Loading tags cache",
-        CurrentStage::SameMusicCacheLoadingFingerprints => "Loading fingerprints cache",
-        CurrentStage::SameMusicCacheSavingTags => "Saving tags cache",
-        CurrentStage::SameMusicCacheSavingFingerprints => "Saving fingerprints cache",
-        CurrentStage::DuplicatePreHashCacheLoading => "Loading prehash cache",
-        CurrentStage::DuplicatePreHashCacheSaving => "Saving prehash cache",
-        CurrentStage::DuplicateCacheLoading => "Loading hash cache",
-        CurrentStage::DuplicateCacheSaving => "Saving hash cache",
+        CurrentStage::SameMusicCacheLoadingTags => flk!("rust_loading_tags_cache"),
+        CurrentStage::SameMusicCacheLoadingFingerprints => flk!("rust_loading_fingerprints_cache"),
+        CurrentStage::SameMusicCacheSavingTags => flk!("rust_saving_tags_cache"),
+        CurrentStage::SameMusicCacheSavingFingerprints => flk!("rust_saving_fingerprints_cache"),
+        CurrentStage::DuplicatePreHashCacheLoading => flk!("rust_loading_prehash_cache"),
+        CurrentStage::DuplicatePreHashCacheSaving => flk!("rust_saving_prehash_cache"),
+        CurrentStage::DuplicateCacheLoading => flk!("rust_loading_hash_cache"),
+        CurrentStage::DuplicateCacheSaving => flk!("rust_saving_hash_cache"),
         _ => unreachable!(),
     };
     let (all_progress, current_progress, current_progress_size) = common_get_data(item);
@@ -56,20 +56,14 @@ fn progress_save_load_cache(item: &ProgressData) -> ProgressToSend {
 
 fn progress_collect_items(item: &ProgressData, files: bool) -> ProgressToSend {
     let step_name = match item.sstage {
-        CurrentStage::DuplicateScanningName => {
-            format!("Scanning name of {} file", item.entries_checked)
-        }
-        CurrentStage::DuplicateScanningSizeName => {
-            format!("Scanning size and name of {} file", item.entries_checked)
-        }
-        CurrentStage::DuplicateScanningSize => {
-            format!("Scanning size of {} file", item.entries_checked)
-        }
+        CurrentStage::DuplicateScanningName => flk!("rust_scanning_name", entries_checked = item.entries_checked),
+        CurrentStage::DuplicateScanningSizeName => flk!("rust_scanning_size_name", entries_checked = item.entries_checked),
+        CurrentStage::DuplicateScanningSize => flk!("rust_scanning_size", entries_checked = item.entries_checked),
         _ => {
             if files {
-                format!("Scanning {} file", item.entries_checked)
+                flk!("rust_scanning_file", entries_checked = item.entries_checked)
             } else {
-                format!("Scanning {} folder", item.entries_checked)
+                flk!("rust_scanning_folder", entries_checked = item.entries_checked)
             }
         }
     };
@@ -86,17 +80,17 @@ fn progress_default(item: &ProgressData) -> ProgressToSend {
     let items_stats = format!("{}/{}", item.entries_checked, item.entries_to_check);
     let size_stats = format!("{}/{}", format_size(item.bytes_checked, BINARY), format_size(item.bytes_to_check, BINARY));
     let step_name = match item.sstage {
-        CurrentStage::SameMusicReadingTags => format!("Checked tags of {items_stats}"),
-        CurrentStage::SameMusicCalculatingFingerprints => format!("Checked content of {items_stats} ({size_stats})"),
-        CurrentStage::SameMusicComparingTags => format!("Compared tags of {items_stats}"),
-        CurrentStage::SameMusicComparingFingerprints => format!("Compared content of {items_stats}"),
-        CurrentStage::SimilarImagesCalculatingHashes => format!("Hashed of {items_stats} image ({size_stats})"),
-        CurrentStage::SimilarImagesComparingHashes => format!("Compared {items_stats} image hash"),
-        CurrentStage::SimilarVideosCalculatingHashes => format!("Hashed of {items_stats} video"),
-        CurrentStage::BrokenFilesChecking => format!("Checked {items_stats} file ({size_stats})"),
-        CurrentStage::BadExtensionsChecking => format!("Checked {items_stats} file"),
-        CurrentStage::DuplicatePreHashing => format!("Analyzed partial hash of {items_stats} files ({size_stats})"),
-        CurrentStage::DuplicateFullHashing => format!("Analyzed full hash of {items_stats} files ({size_stats})"),
+        CurrentStage::SameMusicReadingTags => flk!("rust_checked_tags", items_stats = items_stats),
+        CurrentStage::SameMusicCalculatingFingerprints => flk!("rust_checked_content", items_stats = items_stats, size_stats = size_stats),
+        CurrentStage::SameMusicComparingTags => flk!("rust_compared_tags", items_stats = items_stats),
+        CurrentStage::SameMusicComparingFingerprints => flk!("rust_compared_content", items_stats = items_stats),
+        CurrentStage::SimilarImagesCalculatingHashes => flk!("rust_hashed_images", items_stats = items_stats, size_stats = size_stats),
+        CurrentStage::SimilarImagesComparingHashes => flk!("rust_compared_image_hashes", items_stats = items_stats),
+        CurrentStage::SimilarVideosCalculatingHashes => flk!("rust_hashed_videos", items_stats = items_stats),
+        CurrentStage::BrokenFilesChecking => flk!("rust_checked_files", items_stats = items_stats, size_stats = size_stats),
+        CurrentStage::BadExtensionsChecking => flk!("rust_checked_files_bad_extensions", items_stats = items_stats),
+        CurrentStage::DuplicatePreHashing => flk!("rust_analyzed_partial_hash", items_stats = items_stats, size_stats = size_stats),
+        CurrentStage::DuplicateFullHashing => flk!("rust_analyzed_full_hash", items_stats = items_stats, size_stats = size_stats),
 
         _ => unreachable!(),
     };

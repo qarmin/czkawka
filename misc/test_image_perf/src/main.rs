@@ -75,7 +75,7 @@ fn print_items() {
     // TODO - probably needs to add arm and other architectures, need help, because I don't have access to them
 
     info!(
-        "App version: {debug_release} mode, os {} {} [{} {}], {processors} cpu/threads, features({}): [{}], app cpu version: [{}], os cpu version: [{}]",
+        "App version: {debug_release} mode, os {} {} [{} {}], {processors} cpu/threads, features({}): [{}], app cpu version: {}, os cpu version: {}",
         info.os_type(),
         info.version(),
         env::consts::ARCH,

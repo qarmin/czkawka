@@ -45,7 +45,7 @@ xxhash-rust = { version = "0.8", features = ["xxh3"] }
 tempfile = "3.13"
 
 # Video Duplicates
-vid_dup_finder_lib = "0.3"
+vid_dup_finder_lib = "0.4"
 ffmpeg_cmdline_utils = "0.4"
 
 # Saving/Loading Cache
@@ -85,6 +85,7 @@ handsome_logger = "0.9"
 fun_time = { version = "0.3", features = ["log"] }
 itertools = "0.14"
 static_assertions = "1.1.0"
+file-rotate = "0.8.0"
 
 
 # Don't update anymore! This crate has a bug. I've submitted a patch upstream, but the change is breaking. The current code relies on the bug to work correctly!

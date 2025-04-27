@@ -6,7 +6,7 @@ use crate::common::regex_check;
 use crate::common_messages::Messages;
 
 #[cfg(target_family = "unix")]
-pub const DEFAULT_EXCLUDED_DIRECTORIES: &[&str] = &["/proc", "/dev", "/sys", "/run", "/snap"];
+pub const DEFAULT_EXCLUDED_DIRECTORIES: &[&str] = &["/proc", "/dev", "/sys", "/snap"];
 #[cfg(not(target_family = "unix"))]
 pub const DEFAULT_EXCLUDED_DIRECTORIES: &[&str] = &["C:\\Windows"];
 

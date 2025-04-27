@@ -28,7 +28,7 @@ overflow-checks = true
 # But it is used to optimize release builds(and probably also in CI, where time is not so important as in local development)
 #lto = "thin"
 
-# Optimize all dependencies except application/workspaces, even in debug builds
+# Optimize all dependencies except application/workspaces, even in debug builds to get reasonable performance e.g. when opening images
 [profile.dev.package."*"] # OPT PACKAGES
 opt-level = 3 # OPT PACKAGES
 

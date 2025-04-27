@@ -11,8 +11,11 @@ use std::{fs, io, thread};
 
 use crossbeam_channel::Sender;
 use directories_next::ProjectDirs;
+use file_rotate::compression::Compression;
+use file_rotate::suffix::{AppendTimestamp, FileLimit};
+use file_rotate::{ContentLimit, FileRotate};
 use fun_time::fun_time;
-use handsome_logger::{ColorChoice, ConfigBuilder, TerminalMode};
+use handsome_logger::{ColorChoice, CombinedLogger, ConfigBuilder, SharedLogger, TermLogger, TerminalMode, WriteLogger};
 use log::{LevelFilter, Record, debug, info, warn};
 use once_cell::sync::OnceCell;
 
@@ -52,11 +55,23 @@ pub fn get_config_cache_path() -> Option<ConfigCachePath> {
     CONFIG_CACHE_PATH.get().expect("Cannot fail if set_config_cache_path was called before").clone()
 }
 
-pub fn set_config_cache_path(cache_name: &'static str, config_name: &'static str) {
+pub fn print_infos_and_warnings(infos: Vec<String>, warnings: Vec<String>) {
+    for info in infos {
+        info!("{info}");
+    }
+    for warning in warnings {
+        warn!("{warning}");
+    }
+}
+
+pub fn set_config_cache_path(cache_name: &'static str, config_name: &'static str) -> (Vec<String>, Vec<String>) {
     // By default, such folders are used:
     // Lin: /home/username/.config/czkawka
     // Win: C:\Users\Username\AppData\Roaming\Qarmin\Czkawka\config
     // Mac: /Users/Username/Library/Application Support/pl.Qarmin.Czkawka
+
+    let mut infos = vec![];
+    let mut warnings = vec![];
 
     let config_folder_env = std::env::var("CZKAWKA_CONFIG_PATH").unwrap_or_default().trim().to_string();
     let cache_folder_env = std::env::var("CZKAWKA_CACHE_PATH").unwrap_or_default().trim().to_string();
@@ -74,7 +89,7 @@ pub fn set_config_cache_path(cache_name: &'static str, config_name: &'static str
         default_config_folder = None;
     }
 
-    let resolve_folder = |env_var: &str, default_folder: Option<PathBuf>, name: &'static str| {
+    let mut resolve_folder = |env_var: &str, default_folder: Option<PathBuf>, name: &'static str| {
         let default_folder_str = default_folder.as_ref().map_or("<not available>".to_string(), |t| t.to_string_lossy().to_string());
 
         if env_var.is_empty() {
@@ -83,31 +98,31 @@ pub fn set_config_cache_path(cache_name: &'static str, config_name: &'static str
             let folder_path = PathBuf::from(env_var);
             let _ = fs::create_dir_all(&folder_path);
             if !folder_path.exists() {
-                warn!(
+                warnings.push(format!(
                     "{name} folder \"{}\" does not exist, using default folder \"{}\"",
                     folder_path.to_string_lossy(),
                     default_folder_str
-                );
+                ));
                 return default_folder;
             };
             if !folder_path.is_dir() {
-                warn!(
+                warnings.push(format!(
                     "{name} folder \"{}\" is not a directory, using default folder \"{}\"",
                     folder_path.to_string_lossy(),
                     default_folder_str
-                );
+                ));
                 return default_folder;
             }
 
             match folder_path.canonicalize() {
                 Ok(t) => Some(t),
                 Err(_e) => {
-                    warn!(
+                    warnings.push(format!(
                         "Cannot canonicalize {} folder \"{}\", using default folder \"{}\"",
                         name.to_ascii_lowercase(),
                         env_var,
                         default_folder_str
-                    );
+                    ));
                     default_folder
                 }
             }
@@ -118,28 +133,30 @@ pub fn set_config_cache_path(cache_name: &'static str, config_name: &'static str
     let cache_folder = resolve_folder(&cache_folder_env, default_cache_folder, "Cache");
 
     let config_cache_path = if let (Some(config_folder), Some(cache_folder)) = (config_folder, cache_folder) {
-        info!(
+        infos.push(format!(
             "Config folder set to \"{}\" and cache folder set to \"{}\"",
             config_folder.to_string_lossy(),
             cache_folder.to_string_lossy()
-        );
+        ));
         if !config_folder.exists() {
             if let Err(e) = fs::create_dir_all(&config_folder) {
-                warn!("Cannot create config folder \"{}\", reason {e}", config_folder.to_string_lossy());
+                warnings.push(format!("Cannot create config folder \"{}\", reason {e}", config_folder.to_string_lossy()));
             }
         }
         if !cache_folder.exists() {
             if let Err(e) = fs::create_dir_all(&cache_folder) {
-                warn!("Cannot create cache folder \"{}\", reason {e}", cache_folder.to_string_lossy());
+                warnings.push(format!("Cannot create cache folder \"{}\", reason {e}", cache_folder.to_string_lossy()));
             }
         }
         Some(ConfigCachePath { config_folder, cache_folder })
     } else {
-        warn!("Cannot set config/cache path - config and cache will not be used.");
+        warnings.push("Cannot set config/cache path - config and cache will not be used.".to_string());
         None
     };
 
     CONFIG_CACHE_PATH.set(config_cache_path).expect("Cannot set config/cache path twice");
+
+    (infos, warnings)
 }
 
 pub fn get_number_of_threads() -> usize {
@@ -155,11 +172,47 @@ fn filtering_messages(record: &Record) -> bool {
     }
 }
 
-pub fn setup_logger(disabled_printing: bool) {
-    let log_level = if disabled_printing { LevelFilter::Off } else { LevelFilter::Info };
+#[allow(clippy::print_stdout)]
+pub fn setup_logger(disabled_terminal_printing: bool, app_name: &str) {
+    let terminal_log_level = if disabled_terminal_printing { LevelFilter::Off } else { LevelFilter::Info };
+    let file_log_level = LevelFilter::Debug;
 
-    let config = ConfigBuilder::default().set_level(log_level).set_message_filtering(Some(filtering_messages)).build();
-    handsome_logger::TermLogger::init(config, TerminalMode::Mixed, ColorChoice::Always).expect("Cannot initialize logger");
+    let term_config = ConfigBuilder::default()
+        .set_level(terminal_log_level)
+        .set_message_filtering(Some(filtering_messages))
+        .build();
+    let file_config = ConfigBuilder::default().set_level(file_log_level).set_message_filtering(Some(filtering_messages)).build();
+
+    let combined_logger = (|| {
+        let Some(config_cache_path) = get_config_cache_path() else {
+            println!("No config cache path configured, using default config folder");
+            return None;
+        };
+
+        let cache_logs_path = config_cache_path.cache_folder.join(format!("{app_name}.log"));
+
+        let write_rotater = FileRotate::new(
+            &cache_logs_path,
+            AppendTimestamp::default(FileLimit::MaxFiles(3)),
+            ContentLimit::BytesSurpassed(10 * 1024 * 1024),
+            Compression::None,
+            None,
+        );
+
+        let combined_logs: Vec<Box<dyn SharedLogger>> = if [Ok("1".to_string()), Ok("true".to_string())].contains(&std::env::var("DISABLE_FILE_LOGGING")) {
+            vec![TermLogger::new_from_config(term_config.clone())]
+        } else {
+            vec![TermLogger::new_from_config(term_config.clone()), WriteLogger::new(file_config, write_rotater)]
+        };
+
+        CombinedLogger::init(combined_logs).ok().inspect(|()| {
+            info!("Logging to file \"{}\" and terminal", cache_logs_path.to_string_lossy());
+        })
+    })();
+
+    if combined_logger.is_none() {
+        TermLogger::init(term_config, TerminalMode::Mixed, ColorChoice::Always).expect("Cannot initialize logger");
+    }
 }
 
 pub fn get_all_available_threads() -> usize {
@@ -230,7 +283,7 @@ pub fn print_version_mode(app: &str) {
     // TODO - probably needs to add arm and other architectures, need help, because I don't have access to them
 
     info!(
-        "{app} version: {CZKAWKA_VERSION}, {debug_release} mode, rust {rust_version}, os {} {} [{} {}], {processors} cpu/threads, features({}): [{}], app cpu version: [{}], os cpu version: [{}]",
+        "{app} version: {CZKAWKA_VERSION}, {debug_release} mode, rust {rust_version}, os {} {} ({} {}), {processors} cpu/threads, features({}): [{}], app cpu version: {}, os cpu version: {}",
         info.os_type(),
         info.version(),
         std::env::consts::ARCH,

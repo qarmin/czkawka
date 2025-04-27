@@ -5,6 +5,7 @@ import {BottomPanelVisibility} from "common.slint";
 import {Callabler} from "callabler.slint";
 import {GuiState} from "gui_state.slint";
 import {IncludedDirectories, ExcludedDirectories} from "included_directories.slint";
+import { Translations } from "translations.slint";
 
 component DirectoriesPanel inherits HorizontalLayout {
     callback folder_choose_requested(bool);
@@ -16,21 +17,21 @@ component DirectoriesPanel inherits HorizontalLayout {
         horizontal-stretch: 0.0;
         spacing: 5px;
         Button {
-            text: "Add";
+            text <=> Translations.add_button_text;
             clicked => {
                 folder_choose_requested(true);
             }
         }
 
         Button {
-            text: "Remove";
+            text <=> Translations.remove_button_text;
             clicked => {
                 Callabler.remove_item_directories(true);
             }
         }
 
         Button {
-            text: "Manual Add";
+            text <=> Translations.manual_add_button_text;
             clicked => {
                 show_manual_add_dialog(true);
             }
@@ -45,7 +46,7 @@ component DirectoriesPanel inherits HorizontalLayout {
         horizontal-stretch: 1.0;
         Rectangle {
             Text {
-                text: "Included Directories";
+                text <=> Translations.included_directories_text;
             }
         }
 
@@ -57,21 +58,21 @@ component DirectoriesPanel inherits HorizontalLayout {
         horizontal-stretch: 0.0;
         spacing: 5px;
         Button {
-            text: "Add";
+            text <=> Translations.add_button_text;
             clicked => {
                 folder_choose_requested(false);
             }
         }
 
         Button {
-            text: "Remove";
+            text <=> Translations.remove_button_text;
             clicked => {
                 Callabler.remove_item_directories(false);
             }
         }
 
         Button {
-            text: "Manual Add";
+            text <=> Translations.manual_add_button_text;
             clicked => {
                 show_manual_add_dialog(false);
             }
@@ -86,7 +87,7 @@ component DirectoriesPanel inherits HorizontalLayout {
         horizontal-stretch: 1.0;
         Rectangle {
             Text {
-                text: "Excluded Directories";
+                text <=> Translations.excluded_directories_text;
             }
         }
 

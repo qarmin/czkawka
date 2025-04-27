@@ -3,15 +3,25 @@
 ### Core
 - Converts println/eprintln into log functions - [#1478](https://github.com/qarmin/czkawka/pull/1478)
 - Speedup a little cache loading/saving - [#1478](https://github.com/qarmin/czkawka/pull/1478)
+- Logging logs also to files - [#1508](https://github.com/qarmin/czkawka/pull/1508)
+- Added 4GB memory limit when loading/saving cache and avoiding crashes - [#1508](https://github.com/qarmin/czkawka/pull/1508)
 
 ### GTK Gui
 - Using newly created icons - uglier, but released under really free under the clear CC BY license - [#1478](https://github.com/qarmin/czkawka/pull/1478)
+- Fixed crash when removing outdated cache - [#1508](https://github.com/qarmin/czkawka/pull/1508)
 
 ### Krokiet
-- Multiple selection of items with mouse and keyboard - [#1478](https://github.com/qarmin/czkawka/pull/1478)
+- Ability to select multiple items with mouse and keyboard - [#1478](https://github.com/qarmin/czkawka/pull/1478)
+- Added sort buttons - [#1501](https://github.com/qarmin/czkawka/pull/1501)
+- Remembering window size - [#1508](https://github.com/qarmin/czkawka/pull/1508)
+- Added tranlations - [#1508](https://github.com/qarmin/czkawka/pull/1508)
 
 ### External
 – There is a new, unofficial Tauri-based frontend for Czkawka - [Czkawka Tauri](https://github.com/shixinhuang99/czkawka-tauri)
+
+### CI
+- Compilation for 32 bit targets is checked in CI
+- Czkawka binaries are now checked if are reproducible(currently they are not, due possible bug in rustc - https://github.com/kellpossible/cargo-i18n/pull/151)
 
 ### Prebuild-binaries
 - CI now creates linux binaries on ubuntu 22.04 instead 20.04(some types of builds were build on 24.04)
