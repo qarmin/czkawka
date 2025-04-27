@@ -172,6 +172,7 @@ fn filtering_messages(record: &Record) -> bool {
     }
 }
 
+#[allow(clippy::print_stdout)]
 pub fn setup_logger(disabled_terminal_printing: bool, app_name: &str) {
     let terminal_log_level = if disabled_terminal_printing { LevelFilter::Off } else { LevelFilter::Info };
     let file_log_level = LevelFilter::Debug;
@@ -184,7 +185,7 @@ pub fn setup_logger(disabled_terminal_printing: bool, app_name: &str) {
 
     let combined_logger = (|| {
         let Some(config_cache_path) = get_config_cache_path() else {
-            warn!("No config cache path configured, using default config folder");
+            println!("No config cache path configured, using default config folder");
             return None;
         };
 
