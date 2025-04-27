@@ -166,7 +166,7 @@ pub fn get_number_of_threads() -> usize {
 
 fn filtering_messages(record: &Record) -> bool {
     if let Some(module_path) = record.module_path() {
-        ["czkawka", "krokiet"].iter().any(|t| module_path.starts_with(t))
+        ["krokiet", "czkawka_core", "czkawka_gui"].iter().any(|t| module_path.starts_with(t))
     } else {
         true
     }
@@ -174,6 +174,8 @@ fn filtering_messages(record: &Record) -> bool {
 
 #[allow(clippy::print_stdout)]
 pub fn setup_logger(disabled_terminal_printing: bool, app_name: &str) {
+    log_panics::init();
+
     let terminal_log_level = if disabled_terminal_printing { LevelFilter::Off } else { LevelFilter::Info };
     let file_log_level = LevelFilter::Debug;
 

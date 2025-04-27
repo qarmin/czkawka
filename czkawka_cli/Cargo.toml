@@ -21,7 +21,6 @@ indicatif = "0.17"
 crossbeam-channel = { version = "0.5", features = [] }
 ctrlc = { version = "3.4", features = ["termination"] }
 humansize = "2.1"
-log-panics = { version = "2.1.0", features = ["with-backtrace"] }
 
 [features]
 default = ["fast_image_resize"]
