@@ -30,7 +30,7 @@ use crate::common::{check_if_all_included_dirs_are_referenced, check_if_there_ar
 use crate::connect_row_selection::reset_selection;
 use crate::settings::{SettingsCustom, StringComboBoxItems, collect_settings};
 use crate::shared_models::SharedModels;
-use crate::{CurrentTab, GuiState, MainListModel, MainWindow, ProgressToSend};
+use crate::{CurrentTab, GuiState, MainListModel, MainWindow, ProgressToSend, flk};
 
 pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>, shared_models: Arc<Mutex<SharedModels>>) {
     let a = app.as_weak();
@@ -38,12 +38,12 @@ pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressDat
         let app = a.upgrade().expect("Failed to upgrade app :(");
 
         if !check_if_there_are_any_included_folders(&app) {
-            app.invoke_scan_ended("Cannot start scan when no included directories are set.".into());
+            app.invoke_scan_ended(flk!("rust_no_included_directories").into());
             return;
         }
 
         if check_if_all_included_dirs_are_referenced(&app) {
-            app.invoke_scan_ended("Cannot start scan when all included directories are set as referenced folders.".into());
+            app.invoke_scan_ended(flk!("rust_all_dirs_referenced").into());
             return;
         }
 
@@ -206,7 +206,7 @@ fn write_duplicate_results(app: &MainWindow, vector: Vec<(Option<DuplicateEntry>
         }
     }
     app.set_duplicate_files_model(items.into());
-    app.invoke_scan_ended(format!("Found {items_found} similar duplicates files").into());
+    app.invoke_scan_ended(flk!("rust_found_duplicate_files", items_found = items_found).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 fn prepare_data_model_duplicates(fe: &DuplicateEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
@@ -262,7 +262,7 @@ fn write_empty_folders_results(app: &MainWindow, vector: Vec<FolderEntry>, messa
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_empty_folder_model(items.into());
-    app.invoke_scan_ended(format!("Found {items_found} empty folders").into());
+    app.invoke_scan_ended(flk!("rust_found_empty_folders", items_found = items_found).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 
@@ -326,7 +326,7 @@ fn write_big_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages: S
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_big_files_model(items.into());
-    app.invoke_scan_ended(format!("Found {items_found} files").into());
+    app.invoke_scan_ended(flk!("rust_found_big_files", items_found = items_found).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 
@@ -383,7 +383,7 @@ fn write_empty_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages:
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_empty_files_model(items.into());
-    app.invoke_scan_ended(format!("Found {items_found} empty files").into());
+    app.invoke_scan_ended(flk!("rust_found_empty_files", items_found = items_found).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 
@@ -480,7 +480,7 @@ fn write_similar_images_results(app: &MainWindow, vector: Vec<(Option<ImagesEntr
         }
     }
     app.set_similar_images_model(items.into());
-    app.invoke_scan_ended(format!("Found {items_found} similar image files").into());
+    app.invoke_scan_ended(flk!("rust_found_similar_images", items_found = items_found).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 fn prepare_data_model_similar_images(fe: &ImagesEntry, hash_size: u8) -> (ModelRc<SharedString>, ModelRc<i32>) {
@@ -567,7 +567,7 @@ fn write_similar_videos_results(app: &MainWindow, vector: Vec<(Option<VideosEntr
         }
     }
     app.set_similar_videos_model(items.into());
-    app.invoke_scan_ended(format!("Found {items_found} similar video files").into());
+    app.invoke_scan_ended(flk!("rust_found_similar_videos", items_found = items_found).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 fn prepare_data_model_similar_videos(fe: &VideosEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
@@ -619,7 +619,7 @@ fn scan_similar_music(
 
             if music_similarity == MusicSimilarity::NONE {
                 a.upgrade_in_event_loop(move |app| {
-                    app.invoke_scan_ended("Cannot find similar music files without any similarity method selected.".into());
+                    app.invoke_scan_ended(flk!("rust_no_similarity_method_selected").into());
                 })
                 .expect("Cannot upgrade in event loop :(");
                 return Ok(());
@@ -681,7 +681,7 @@ fn write_similar_music_results(app: &MainWindow, vector: Vec<(Option<MusicEntry>
         }
     }
     app.set_similar_music_model(items.into());
-    app.invoke_scan_ended(format!("Found {items_found} similar music files").into());
+    app.invoke_scan_ended(flk!("rust_found_similar_music_files", items_found = items_found).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 fn prepare_data_model_similar_music(fe: &MusicEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
@@ -743,7 +743,7 @@ fn write_invalid_symlinks_results(app: &MainWindow, vector: Vec<SymlinksFileEntr
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_invalid_symlinks_model(items.into());
-    app.invoke_scan_ended(format!("Found {items_found} invalid symlinks").into());
+    app.invoke_scan_ended(flk!("rust_found_invalid_symlinks", items_found = items_found).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 
@@ -799,7 +799,7 @@ fn write_temporary_files_results(app: &MainWindow, vector: Vec<TemporaryFileEntr
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_temporary_files_model(items.into());
-    app.invoke_scan_ended(format!("Found {items_found} files").into());
+    app.invoke_scan_ended(flk!("rust_found_temporary_files", items_found = items_found).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 
@@ -844,7 +844,7 @@ fn scan_broken_files(
 
             if checked_types == CheckedTypes::NONE {
                 a.upgrade_in_event_loop(move |app| {
-                    app.invoke_scan_ended("Cannot find broken files without any file type selected.".into());
+                    app.invoke_scan_ended(flk!("rust_no_file_type_selected").into());
                 })
                 .expect("Cannot upgrade in event loop :(");
                 return Ok(());
@@ -877,7 +877,7 @@ fn write_broken_files_results(app: &MainWindow, vector: Vec<BrokenEntry>, messag
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_broken_files_model(items.into());
-    app.invoke_scan_ended(format!("Found {items_found} files").into());
+    app.invoke_scan_ended(flk!("rust_found_broken_files", items_found = items_found).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 
@@ -935,7 +935,7 @@ fn write_bad_extensions_results(app: &MainWindow, vector: Vec<BadFileEntry>, mes
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_bad_extensions_model(items.into());
-    app.invoke_scan_ended(format!("Found {items_found} files with bad extensions").into());
+    app.invoke_scan_ended(flk!("rust_found_bad_extensions", items_found = items_found).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 

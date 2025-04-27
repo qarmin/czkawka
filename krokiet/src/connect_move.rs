@@ -9,7 +9,7 @@ use slint::{ComponentHandle, ModelRc, VecModel};
 use crate::common::{get_is_header_mode, get_tool_model, set_tool_model};
 use crate::connect_row_selection::reset_selection;
 use crate::model_operations::{collect_path_name_from_model, deselect_all_items, filter_out_checked_items};
-use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow};
+use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow, flk};
 
 pub fn connect_move(app: &MainWindow) {
     let a = app.as_weak();
@@ -63,7 +63,7 @@ fn move_operation(
 
 fn move_selected_items(items_to_move: Vec<(String, String)>, preserve_structure: bool, copy_mode: bool, output_folder: &str) -> Vec<String> {
     if let Err(err) = fs::create_dir_all(output_folder) {
-        return vec![format!("Error while creating folder: {err}")];
+        return vec![flk!("rust_error_creating_folder", error = err.to_string())];
     }
 
     // TODO option to override files
@@ -74,7 +74,7 @@ fn move_selected_items(items_to_move: Vec<(String, String)>, preserve_structure:
                 let (input_file, output_file) = collect_path_and_create_folders(&path, &name, output_folder, preserve_structure);
 
                 if output_file.exists() {
-                    return Some(format!("File {output_file:?} already exists, and will not be overridden"));
+                    return Some(flk!("rust_file_already_exists", file = output_file.to_string_lossy().to_string()));
                 }
                 try_to_copy_item(&input_file, &output_file)?;
                 None
@@ -87,7 +87,7 @@ fn move_selected_items(items_to_move: Vec<(String, String)>, preserve_structure:
                 let (input_file, output_file) = collect_path_and_create_folders(&path, &name, output_folder, preserve_structure);
 
                 if output_file.exists() {
-                    return Some(format!("File {output_file:?} already exists, and will not be overridden"));
+                    return Some(flk!("rust_file_already_exists", file = output_file.to_string_lossy().to_string()));
                 }
 
                 // Try to rename file, may fail due various reasons
@@ -100,7 +100,11 @@ fn move_selected_items(items_to_move: Vec<(String, String)>, preserve_structure:
                 try_to_copy_item(&input_file, &output_file)?;
 
                 if let Err(e) = fs::remove_file(&input_file) {
-                    return Some(format!("Error while removing file {input_file:?}(after copying into different partition), reason {e}"));
+                    return Some(flk!(
+                        "rust_error_removing_file_after_copy",
+                        file = input_file.to_string_lossy().to_string(),
+                        reason = e.to_string()
+                    ));
                 }
 
                 None
@@ -119,7 +123,12 @@ fn try_to_copy_item(input_file: &Path, output_file: &Path) -> Option<String> {
         fs_extra::file::copy(input_file, output_file, &options)
     };
     if let Err(e) = res {
-        return Some(format!("Error while copying {input_file:?} to {output_file:?}, reason {e}"));
+        return Some(flk!(
+            "rust_error_copying_file",
+            input = input_file.to_string_lossy().to_string(),
+            output = output_file.to_string_lossy().to_string(),
+            reason = e.to_string()
+        ));
     }
     None
 }

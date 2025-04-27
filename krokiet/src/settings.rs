@@ -93,12 +93,12 @@ impl StringComboBoxItems {
         items[position].value.clone()
     }
 
-    pub fn get_display_names<T>(items: &[StringComboBoxItem<T>]) -> Vec<SharedString>
-    where
-        T: Clone + Debug,
-    {
-        items.iter().map(|e| e.display_name.clone().into()).collect()
-    }
+    // pub fn get_display_names<T>(items: &[StringComboBoxItem<T>]) -> Vec<SharedString>
+    // where
+    //     T: Clone + Debug,
+    // {
+    //     items.iter().map(|e| e.display_name.clone().into()).collect()
+    // }
 
     pub(crate) fn regenerate_items() -> Self {
         let languages = LANGUAGE_LIST
@@ -182,41 +182,6 @@ impl StringComboBoxItems {
         *STRING_COMBO_BOX_ITEMS.lock().expect("Can't lock string combobox items") = Self::regenerate_items();
     }
 }
-
-// pub const ALLOWED_RESIZE_ALGORITHM_VALUES: &[(&str, &str, FilterType)] = &[
-//     ("lanczos3", "Lanczos3", FilterType::Lanczos3),
-//     ("gaussian", "Gaussian", FilterType::Gaussian),
-//     ("catmullrom", "CatmullRom", FilterType::CatmullRom),
-//     ("triangle", "Triangle", FilterType::Triangle),
-//     ("nearest", "Nearest", FilterType::Nearest),
-// ];
-//
-// pub const ALLOWED_IMAGE_HASH_ALG_VALUES: &[(&str, &str, HashAlg)] = &[
-//     ("mean", "Mean", HashAlg::Mean),
-//     ("gradient", "Gradient", HashAlg::Gradient),
-//     ("blockhash", "BlockHash", HashAlg::Blockhash),
-//     ("vertgradient", "VertGradient", HashAlg::VertGradient),
-//     ("doublegradient", "DoubleGradient", HashAlg::DoubleGradient),
-//     ("median", "Median", HashAlg::Median),
-// ];
-// pub const ALLOWED_BIG_FILE_SIZE_VALUES: &[(&str, &str, SearchMode)] = &[
-//     ("biggest", "The Biggest", SearchMode::BiggestFiles),
-//     ("smallest", "The Smallest", SearchMode::SmallestFiles),
-// ];
-// pub const ALLOWED_AUDIO_CHECK_TYPE_VALUES: &[(&str, &str, CheckingMethod)] =
-//     &[("tags", "Tags", CheckingMethod::AudioTags), ("fingerprint", "Fingerprint", CheckingMethod::AudioContent)];
-//
-// pub const ALLOWED_DUPLICATES_CHECK_METHOD_VALUES: &[(&str, &str, CheckingMethod)] = &[
-//     ("hash", "Hash", CheckingMethod::Hash),
-//     ("size", "Size", CheckingMethod::Size),
-//     ("name", "Name", CheckingMethod::Name),
-//     ("size_and_name", "Size and Name", CheckingMethod::SizeName),
-// ];
-// pub const ALLOWED_DUPLICATES_HASH_TYPE_VALUES: &[(&str, &str, HashType)] = &[
-//     ("blake3", "Blake3", HashType::Blake3),
-//     ("crc32", "CRC32", HashType::Crc32),
-//     ("xxh3", "XXH3", HashType::Xxh3),
-// ];
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SettingsCustom {
@@ -363,11 +328,11 @@ pub fn connect_changing_settings_preset(app: &MainWindow) {
         match loaded_data {
             Ok(loaded_data) => {
                 set_settings_to_gui(&app, &loaded_data);
-                app.set_text_summary_text(format!("Changed and loaded properly preset {}", current_item + 1).into());
+                app.set_text_summary_text(flk!("rust_loaded_preset", preset_idx = (current_item + 1)).into());
             }
             Err(e) => {
                 set_settings_to_gui(&app, &SettingsCustom::default());
-                app.set_text_summary_text(format!("Cannot change and load preset {} - reason {e}", current_item + 1).into());
+                app.set_text_summary_text(flk!("rust_cannot_load_preset", preset_idx = (current_item + 1), reason = (&e)).into());
                 error!("Failed to change preset - {e}, using default instead");
             }
         }
@@ -380,10 +345,10 @@ pub fn connect_changing_settings_preset(app: &MainWindow) {
         let result = save_data_to_file(get_config_file(current_item), &collect_settings(&app));
         match result {
             Ok(()) => {
-                app.set_text_summary_text(format!("Saved preset {}", current_item + 1).into());
+                app.set_text_summary_text(flk!("rust_saved_preset", preset_idx = (current_item + 1)).into());
             }
             Err(e) => {
-                app.set_text_summary_text(format!("Cannot save preset {} - reason {e}", current_item + 1).into());
+                app.set_text_summary_text(flk!("rust_cannot_save_preset", preset_idx = (current_item + 1), reason = (&e)).into());
                 error!("Failed to save preset - {e}");
             }
         }
@@ -394,7 +359,7 @@ pub fn connect_changing_settings_preset(app: &MainWindow) {
         let settings = app.global::<Settings>();
         let current_item = settings.get_settings_preset_idx();
         set_settings_to_gui(&app, &SettingsCustom::default());
-        app.set_text_summary_text(format!("Reset preset {}", current_item + 1).into());
+        app.set_text_summary_text(flk!("rust_reset_preset", preset_idx = (current_item + 1)).into());
     });
     let a = app.as_weak();
     app.global::<Callabler>().on_load_current_preset(move || {

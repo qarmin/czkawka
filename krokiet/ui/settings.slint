@@ -6,9 +6,10 @@ export global Settings {
     in-out property <int> settings_preset_idx: 0;
     in-out property <[string]> settings_presets: ["Preset 1", "Preset 2"];
     
-    in-out property <[string]> languages_list: ["Ponglish"];
+    in-out property <[string]> languages_list: ["English", "Polski (Polish)"];
+    // in-out property <[string]> languages_list: ["English", "Français (French)", "Italiano (Italian)", "Polski (Polish)", "Русский (Russian)", "український (Ukrainian)", "한국인 (Korean)", "Česky (Czech)", "Deutsch (German)", "やまと (Japanese)", "Português (Portuguese)", "Português Brasileiro (Brazilian Portuguese)", "简体中文 (Simplified Chinese)", "繁體中文 (Traditional Chinese)", "Español (Spanish)", "Norsk (Norwegian)", "Swedish (Svenska)", "المملكة العربية السعودية (Saudi Arabia)", "България (Bulgaria)", "Ελλάδα (Greece)", "Nederland (Netherlands)", "România (Romania)"];
     in-out property <int> language_index: 0;
-    in-out property <string> language_value: "Ponglish";
+    in-out property <string> language_value: "English";
 
     in-out property <[IncludedDirectoriesModel]> included_directories_model: [{ path: "/home/path", referenced_folder: false, selected_row: false }];
     in-out property <int> included_directories_model_selected_idx: -1;
@@ -48,17 +49,17 @@ export global Settings {
     // Allowed subsettings
     // Similar Images
     in-out property <[string]> similar_images_sub_available_hash_size: ["8", "16", "32", "64"];
-    in-out property <int> similar_images_sub_hash_size_index: 0;
-    in-out property <string> similar_images_sub_hash_size_value: "8";
+    in-out property <int> similar_images_sub_hash_size_index: 1;
+    in-out property <string> similar_images_sub_hash_size_value: "16";
     in-out property <[string]> similar_images_sub_available_resize_algorithm: ["Lanczos3", "Nearest", "Triangle", "Gaussian", "CatmullRom"];
     in-out property <int> similar_images_sub_resize_algorithm_index: 0;
     in-out property <string> similar_images_sub_resize_algorithm_value: "Lanczos3";
-    in-out property <[string]> similar_images_sub_available_hash_type: ["Gradient", "Mean", "VertGradient", "BlockHash", "DoubleGradient", "Median"];
-    in-out property <int> similar_images_sub_hash_alg_index: 0;
+    in-out property <[string]> similar_images_sub_available_hash_type: ["Mean", "Gradient", "BlockHash", "VertGradient", "DoubleGradient", "Median"];
+    in-out property <int> similar_images_sub_hash_alg_index: 10;
     in-out property <string> similar_images_sub_hash_alg_value: "Gradient";
     in-out property <float> similar_images_sub_max_similarity: 40;
     in-out property <float> similar_images_sub_current_similarity: 20;
-    in-out property <bool> similar_images_sub_ignore_same_size;
+    in-out property <bool> similar_images_sub_ignore_same_size: false;
 
     // Duplicates
     in-out property <[string]> duplicates_sub_check_method: ["Hash", "Size", "Name", "Size and Name"];

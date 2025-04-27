@@ -7,7 +7,7 @@ use slint::{ComponentHandle, ModelRc, VecModel};
 use crate::common::{get_is_header_mode, get_tool_model, set_tool_model};
 use crate::connect_row_selection::reset_selection;
 use crate::model_operations::{collect_path_name_and_proper_extension_from_model, deselect_all_items, filter_out_checked_items};
-use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow};
+use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow, flk};
 
 pub fn connect_rename(app: &MainWindow) {
     let a = app.as_weak();
@@ -47,7 +47,12 @@ fn rename_selected_items(files_with_new_extensions: Vec<(String, String, String)
         let new_full_path = format!("{folder}{MAIN_SEPARATOR}{file_stem}.{new_extension}");
         let old_full_path = format!("{folder}{MAIN_SEPARATOR}{file_name}");
         if let Err(e) = fs::rename(&old_full_path, &new_full_path) {
-            errors.push(format!("Failed to rename file {old_full_path} to {new_full_path} with error {e}"));
+            errors.push(flk!(
+                "rust_failed_to_rename_file",
+                old_path = old_full_path,
+                new_path = new_full_path,
+                error = e.to_string()
+            ));
         }
     }
     errors

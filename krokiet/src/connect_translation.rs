@@ -26,7 +26,7 @@ pub const LANGUAGE_LIST: &[Language] = &[
 ];
 
 pub fn connect_translations(app: &MainWindow) {
-    translate_items(app);
+    change_language(app);
 
     let a = app.as_weak();
     app.global::<Callabler>().on_changed_language(move || {

@@ -15,7 +15,7 @@ use std::sync::atomic::AtomicBool;
 use crossbeam_channel::{Receiver, Sender, unbounded};
 use czkawka_core::common::{print_infos_and_warnings, print_version_mode, set_config_cache_path, setup_logger};
 use czkawka_core::progress_data::ProgressData;
-use log::{error, info, warn};
+use log::{info, warn};
 use slint::VecModel;
 
 use crate::connect_delete::connect_delete_button;
@@ -32,7 +32,9 @@ use crate::connect_show_preview::connect_show_preview;
 use crate::connect_sort::connect_sort;
 use crate::connect_stop::connect_stop_button;
 use crate::connect_translation::connect_translations;
-use crate::set_initial_gui_info::set_initial_gui_infos;
+// TODO - at start this should be used, to be sure that rust models are in sync with slint models
+// currently I need to do this manually - https://github.com/slint-ui/slint/issues/7632
+// use crate::set_initial_gui_info::set_initial_gui_infos;
 use crate::settings::{connect_changing_settings_preset, create_default_settings_files, load_settings_from_file, save_all_settings_to_file};
 use crate::shared_models::SharedModels;
 
@@ -76,7 +78,7 @@ fn main() {
 
     let shared_models = SharedModels::new_shared();
 
-    set_initial_gui_infos(&app);
+    // set_initial_gui_infos(&app);
 
     create_default_settings_files();
     load_settings_from_file(&app);
@@ -97,10 +99,6 @@ fn main() {
     connect_save(&app, Arc::clone(&shared_models));
     connect_row_selections(&app);
     connect_sort(&app);
-
-    error!("AA Lang IDX {}", app.global::<Settings>().get_language_index());
-    error!("AA Lang Value {}", app.global::<Settings>().get_language_value());
-    error!("AA Lang model {:?}", app.global::<Settings>().get_languages_list());
 
     app.run().expect("Failed to run app :(");
 
