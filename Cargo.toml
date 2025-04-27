@@ -46,3 +46,8 @@ strip = "symbols"
 codegen-units = 1
 opt-level = 3
 debug = false
+
+[patch.crates-io]
+i18n-embed = { git = "https://github.com/qarmin/cargo-i18n.git", branch = "fix_build_stability" }
+i18n-embed-fl = { git = "https://github.com/qarmin/cargo-i18n.git", branch = "fix_build_stability" }
+i18n-config = { git = "https://github.com/qarmin/cargo-i18n.git", branch = "fix_build_stability" }
