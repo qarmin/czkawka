@@ -3573,8 +3573,7 @@ dependencies = [
 [[package]]
 name = "i18n-embed"
 version = "0.15.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "669ffc2c93f97e6ddf06ddbe999fcd6782e3342978bb85f7d3c087c7978404c4"
+source = "git+https://github.com/qarmin/cargo-i18n.git?branch=fix_build_stability#5352ed9a4c049705bd44ffa016511dec213b5bfc"
 dependencies = [
  "arc-swap",
  "fluent",
@@ -3594,8 +3593,7 @@ dependencies = [
 [[package]]
 name = "i18n-embed-fl"
 version = "0.9.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "04b2969d0b3fc6143776c535184c19722032b43e6a642d710fa3f88faec53c2d"
+source = "git+https://github.com/qarmin/cargo-i18n.git?branch=fix_build_stability#5352ed9a4c049705bd44ffa016511dec213b5bfc"
 dependencies = [
  "find-crate",
  "fluent",
@@ -3613,8 +3611,7 @@ dependencies = [
 [[package]]
 name = "i18n-embed-impl"
 version = "0.8.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0f2cc0e0523d1fe6fc2c6f66e5038624ea8091b3e7748b5e8e0c84b1698db6c2"
+source = "git+https://github.com/qarmin/cargo-i18n.git?branch=fix_build_stability#5352ed9a4c049705bd44ffa016511dec213b5bfc"
 dependencies = [
  "find-crate",
  "i18n-config",
@@ -6050,9 +6047,9 @@ checksum = "a993555f31e5a609f617c12db6250dedcac1b0a85076912c436e6fc9b2c8e6a3"
 
 [[package]]
 name = "quick-xml"
-version = "0.37.4"
+version = "0.37.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a4ce8c88de324ff838700f36fb6ab86c96df0e3c4ab6ef3a9b2044465cce1369"
+checksum = "331e97a1af0bf59823e6eadffe373d7b27f485be8748f71471c662c1f269b7fb"
 dependencies = [
  "memchr",
 ]
@@ -9431,13 +9428,3 @@ dependencies = [
  "syn 2.0.101",
  "winnow 0.7.7",
 ]
-
-[[patch.unused]]
-name = "i18n-embed"
-version = "0.15.4"
-source = "git+https://github.com/qarmin/cargo-i18n.git?branch=fix_build_stability#5352ed9a4c049705bd44ffa016511dec213b5bfc"
-
-[[patch.unused]]
-name = "i18n-embed-fl"
-version = "0.9.4"
-source = "git+https://github.com/qarmin/cargo-i18n.git?branch=fix_build_stability#5352ed9a4c049705bd44ffa016511dec213b5bfc"
