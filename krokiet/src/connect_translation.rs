@@ -78,6 +78,7 @@ pub(crate) fn change_language(app: &MainWindow) {
 // This is ugly workaround for missing fluent language support in slint
 fn translate_items(app: &MainWindow) {
     let translation = app.global::<Translations>();
+    let settings = app.global::<Settings>();
 
     translation.set_yes_button_text(flk!("yes_button").into());
     translation.set_no_button_text(flk!("no_button").into());
@@ -264,6 +265,43 @@ fn translate_items(app: &MainWindow) {
     ];
 
     gui_state.set_sort_results_list(ModelRc::new(VecModel::from(sort_model.to_vec())));
+
+    let selection = flk!("column_selection");
+    let size = flk!("column_size");
+    let file_name = flk!("column_file_name");
+    let path = flk!("column_path");
+    let mod_date = flk!("column_modification_date");
+    let similarity = flk!("column_similarity");
+    let dimensions = flk!("column_dimensions");
+    let title = flk!("column_title");
+    let artist = flk!("column_artist");
+    let year = flk!("column_year");
+    let bitrate = flk!("column_bitrate");
+    let length = flk!("column_length");
+    let genre = flk!("column_genre");
+    let type_of_error = flk!("column_type_of_error");
+    let symlink_name = flk!("column_symlink_name");
+    let symlink_folder = flk!("column_symlink_folder");
+    let destination_path = flk!("column_destination_path");
+    let current_extension = flk!("column_current_extension");
+    let proper_extension = flk!("column_proper_extension");
+
+    let fnm = |model: &[&str]| {
+        let shared_string = model.iter().map(|s| (*s).into()).collect::<Vec<SharedString>>();
+        ModelRc::new(VecModel::from(shared_string))
+    };
+
+    settings.set_duplicates_column_name(fnm(&[&selection, &size, &file_name, &path, &mod_date]));
+    settings.set_empty_folders_column_name(fnm(&[&selection, &file_name, &path, &mod_date]));
+    settings.set_empty_files_column_name(fnm(&[&selection, &file_name, &path, &mod_date]));
+    settings.set_temporary_files_column_name(fnm(&[&selection, &file_name, &path, &mod_date]));
+    settings.set_big_files_column_name(fnm(&[&selection, &size, &file_name, &path, &mod_date]));
+    settings.set_similar_images_column_name(fnm(&[&selection, &similarity, &size, &dimensions, &file_name, &path, &mod_date]));
+    settings.set_similar_videos_column_name(fnm(&[&selection, &size, &file_name, &path, &mod_date]));
+    settings.set_similar_music_column_name(fnm(&[&selection, &size, &file_name, &title, &artist, &year, &bitrate, &length, &genre, &path, &mod_date]));
+    settings.set_invalid_symlink_column_name(fnm(&[&selection, &symlink_name, &symlink_folder, &destination_path, &mod_date]));
+    settings.set_broken_files_column_name(fnm(&[&selection, &file_name, &path, &type_of_error, &size, &mod_date]));
+    settings.set_bad_extensions_column_name(fnm(&[&selection, &file_name, &path, &current_extension, &proper_extension]));
 }
 
 pub(crate) fn translate_select_mode(select_mode: SelectMode) -> SharedString {

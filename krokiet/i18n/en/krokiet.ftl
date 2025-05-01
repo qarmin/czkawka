@@ -54,6 +54,28 @@ rust_saved_preset = Saved preset { $preset_idx }
 rust_cannot_save_preset = Cannot save preset { $preset_idx } - reason { $reason }
 rust_reset_preset = Reset preset { $preset_idx }
 
+# Slint translations, but in arrays
+
+column_selection = Selection
+column_size = Size
+column_file_name = File Name
+column_path = Path
+column_modification_date = Modification Date
+column_similarity = Similarity
+column_dimensions = Dimensions
+column_title = Title
+column_artist = Artist
+column_year = Year
+column_bitrate = Bitrate
+column_length = Length
+column_genre = Genre
+column_type_of_error = Type of Error
+column_symlink_name = Symlink Name
+column_symlink_folder = Symlink Folder
+column_destination_path = Destination Path
+column_current_extension = Current Extension
+column_proper_extension = Proper Extension
+
 # Slint translations
 yes_button = Yes
 no_button = No

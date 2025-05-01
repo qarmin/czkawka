@@ -54,6 +54,28 @@ rust_saved_preset = Zapisano preset { $preset_idx }
 rust_cannot_save_preset = Nie można zapisać presetu { $preset_idx } - powód: { $reason }
 rust_reset_preset = Zresetowano preset { $preset_idx }
 
+# Slint translations, but in arrays
+
+column_selection = Zaznaczenie
+column_size = Rozmiar
+column_file_name = Nazwa pliku
+column_path = Ścieżka
+column_modification_date = Data modyfikacji
+column_similarity = Podobieństwo
+column_dimensions = Wymiary
+column_title = Tytuł
+column_artist = Artysta
+column_year = Rok
+column_bitrate = Przepływność
+column_length = Długość
+column_genre = Gatunek
+column_type_of_error = Typ błędu
+column_symlink_name = Nazwa dowiązania symbolicznego
+column_symlink_folder = Folder dowiązania symbolicznego
+column_destination_path = Ścieżka docelowa
+column_current_extension = Obecne rozszerzenie
+column_proper_extension = Właściwe rozszerzenie
+
 # Slint translations
 yes_button = Tak
 no_button = Nie

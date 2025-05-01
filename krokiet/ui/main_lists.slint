@@ -6,6 +6,7 @@ import {MainListModel} from "common.slint";
 import {SettingsList} from "settings_list.slint";
 import {GuiState} from "gui_state.slint";
 import {About} from "about.slint";
+import {Settings} from "settings.slint";
 
 export component MainList {
     in-out property <[MainListModel]> duplicate_files_model: [];
@@ -34,16 +35,12 @@ export component MainList {
 
     callback changed_current_tab();
 
-    out property <length> path_px: 350px;
-    out property <length> name_px: 100px;
-    out property <length> mod_px: 150px;
-    out property <length> size_px: 75px;
     duplicates := SelectableTableView {
         visible: GuiState.active_tab == CurrentTab.DuplicateFiles;
         min-width: 200px;
         height: parent.height;
-        columns: ["Selection", "Size", "File Name", "Path", "Modification Date"];
-        column_sizes: [35px, size_px, name_px, path_px, mod_px];
+        columns <=> Settings.duplicates_column_name;
+        column_sizes <=> Settings.duplicates_column_size;
         values <=> duplicate_files_model;
         parentPathIdx: 3;
         fileNameIdx: 2;
@@ -53,8 +50,8 @@ export component MainList {
         visible: GuiState.active_tab == CurrentTab.EmptyFolders;
         min-width: 200px;
         height: parent.height;
-        columns: ["Selection", "Folder Name", "Path", "Modification Date"];
-        column_sizes: [35px, name_px, path_px, mod_px];
+        columns <=> Settings.empty_folders_column_name;
+        column_sizes <=> Settings.empty_folders_column_size;
         values <=> empty_folder_model;
         parentPathIdx: 2;
         fileNameIdx: 1;
@@ -64,8 +61,8 @@ export component MainList {
         visible: GuiState.active_tab == CurrentTab.BigFiles;
         min-width: 200px;
         height: parent.height;
-        columns: ["Selection", "Size", "File Name", "Path", "Modification Date"];
-        column_sizes: [35px, size_px, name_px, path_px, mod_px];
+        columns <=> Settings.big_files_column_name;
+        column_sizes <=> Settings.big_files_column_size;
         values <=> big_files_model;
         parentPathIdx: 3;
         fileNameIdx: 2;
@@ -75,8 +72,8 @@ export component MainList {
         visible: GuiState.active_tab == CurrentTab.EmptyFiles;
         min-width: 200px;
         height: parent.height;
-        columns: ["Selection", "File Name", "Path", "Modification Date"];
-        column_sizes: [35px, name_px, path_px, mod_px];
+        columns <=> Settings.empty_files_column_name;
+        column_sizes <=> Settings.empty_files_column_size;
         values <=> empty_files_model;
         parentPathIdx: 2;
         fileNameIdx: 1;
@@ -86,8 +83,8 @@ export component MainList {
         visible: GuiState.active_tab == CurrentTab.TemporaryFiles;
         min-width: 200px;
         height: parent.height;
-        columns: ["Selection", "File Name", "Path", "Modification Date"];
-        column_sizes: [35px, name_px, path_px, mod_px];
+        columns <=> Settings.temporary_files_column_name;
+        column_sizes <=> Settings.temporary_files_column_size;
         values <=> temporary_files_model;
         parentPathIdx: 2;
         fileNameIdx: 1;
@@ -97,16 +94,8 @@ export component MainList {
         visible: GuiState.active_tab == CurrentTab.SimilarImages;
         min-width: 200px;
         height: parent.height;
-        columns: [
-            "Selection",
-            "Similarity",
-            "Size",
-            "Dimensions",
-            "File Name",
-            "Path",
-            "Modification Date"
-        ];
-        column_sizes: [35px, 80px, 80px, 80px, name_px, path_px, mod_px];
+        columns <=> Settings.similar_images_column_name;
+        column_sizes <=> Settings.similar_images_column_size;
         values <=> similar_images_model;
         parentPathIdx: 5;
         fileNameIdx: 4;
@@ -116,8 +105,8 @@ export component MainList {
         visible: GuiState.active_tab == CurrentTab.SimilarVideos;
         min-width: 200px;
         height: parent.height;
-        columns: ["Selection", "Size", "File Name", "Path", "Modification Date"];
-        column_sizes: [35px, size_px, name_px, path_px, mod_px];
+        columns <=> Settings.similar_videos_column_name;
+        column_sizes <=> Settings.similar_videos_column_size;
         values <=> similar_videos_model;
         parentPathIdx: 3;
         fileNameIdx: 2;
@@ -127,20 +116,8 @@ export component MainList {
         visible: GuiState.active_tab == CurrentTab.SimilarMusic;
         min-width: 200px;
         height: parent.height;
-        columns: [
-            "Selection",
-            "Size",
-            "File Name",
-            "Title",
-            "Artist",
-            "Year",
-            "Bitrate",
-            "Length",
-            "Genre",
-            "Path",
-            "Modification Date"
-        ];
-        column_sizes: [35px, size_px, name_px, 80px, 80px, 80px, 80px, 80px, 80px, path_px, mod_px];
+        columns <=> Settings.similar_music_column_name;
+        column_sizes <=> Settings.similar_music_column_size;
         values <=> similar_music_model;
         parentPathIdx: 9;
         fileNameIdx: 2;
@@ -150,14 +127,8 @@ export component MainList {
         visible: GuiState.active_tab == CurrentTab.InvalidSymlinks;
         min-width: 200px;
         height: parent.height;
-        columns: [
-            "Selection",
-            "Symlink Name",
-            "Symlink Folder",
-            "Destination Path",
-            "Modification Date"
-        ];
-        column_sizes: [35px, name_px, path_px, path_px, mod_px];
+        columns <=> Settings.invalid_symlink_column_name;
+        column_sizes <=> Settings.invalid_symlink_column_size;
         values <=> invalid_symlinks_model;
         parentPathIdx: 2;
         fileNameIdx: 1;
@@ -167,15 +138,8 @@ export component MainList {
         visible: GuiState.active_tab == CurrentTab.BrokenFiles;
         min-width: 200px;
         height: parent.height;
-        columns: [
-            "Selection",
-            "File Name",
-            "Path",
-            "Type of Error",
-            "Size",
-            "Modification Date"
-        ];
-        column_sizes: [35px, name_px, path_px, 200px, size_px, mod_px];
+        columns <=> Settings.broken_files_column_name;
+        column_sizes <=> Settings.broken_files_column_size;
         values <=> broken_files_model;
         parentPathIdx: 2;
         fileNameIdx: 1;
@@ -185,8 +149,8 @@ export component MainList {
         visible: GuiState.active_tab == CurrentTab.BadExtensions;
         min-width: 200px;
         height: parent.height;
-        columns: ["Selection", "File Name", "Path", "Current Extension", "Proper Extension"];
-        column_sizes: [35px, name_px, path_px, 40px, 200px];
+        columns <=> Settings.bad_extensions_column_name;
+        column_sizes <=> Settings.bad_extensions_column_size;
         values <=> bad_extensions_model;
         parentPathIdx: 2;
         fileNameIdx: 1;
