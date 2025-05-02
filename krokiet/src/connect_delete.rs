@@ -29,7 +29,7 @@ pub fn connect_delete_button(app: &MainWindow) {
 
         app.global::<GuiState>().set_preview_visible(false);
 
-        reset_selection(&app, false);
+        reset_selection(&app, true);
     });
 }
 
