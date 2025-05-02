@@ -272,7 +272,7 @@ bottom_move_button_tooltip =
     Esta opção permite copiar todos os arquivos para o diretório sem preservar a estrutura dos diretórios e dos arquivos.
     Ao tentar mover dois arquivos com nomes idênticos para um diretório, o segundo arquivo não será movido e ocorrerá um erro.
 bottom_sort_button_tooltip = Ordenar os arquivos ou os diretórios de acordo com o método que foi selecionado.
-bottom_compare_button_tooltip = Compare as imagens do grupo.
+bottom_compare_button_tooltip = Comparar os arquivos e os diretórios nos grupos.
 bottom_show_errors_tooltip = Exibir ou ocultar o painel de texto inferior.
 bottom_show_upper_notebook_tooltip = Exibir ou ocultar o painel de texto superior.
 # Progress Window
@@ -419,28 +419,20 @@ compute_found_invalid_symlinks = As { $number_files } ligações simbólicas nã
 compute_found_broken_files = Foram encontrados { $number_files } arquivos corrompidos
 compute_found_bad_extensions = Foram encontrados { $number_files } arquivos com extensões que não são válidas
 # Progress window
-progress_scanning_general_file =
-    { $file_number ->
-        [one] Verificado { $file_number } arquivo
-       *[other] Escaneado { $file_number } arquivos
-    }
-progress_scanning_extension_of_files = Extensão marcada do arquivo { $file_checked }/{ $all_files }
+progress_scanning_general_file = Pesquisando em { $file_number } arquivos
+progress_scanning_extension_of_files = Pesquisando por tipo da extensão dos arquivos { $file_checked } de { $all_files }
 progress_scanning_broken_files = Verificado { $file_checked }/{ $all_files } arquivo ({ $data_checked }/{ $all_data })
-progress_scanning_video = Hash de { $file_checked }/{ $all_files } de vídeo
+progress_scanning_video = Criando o código ‘hash’ dos arquivos de vídeo { $file_checked } de { $all_files }
 progress_scanning_image = Hash de { $file_checked }/{ $all_files } imagem ({ $data_checked }/{ $all_data })
-progress_comparing_image_hashes = Comparado a { $file_checked }/{ $all_files } hash de imagem
-progress_scanning_music_tags_end = Etiquetas comparadas de { $file_checked }/{ $all_files } arquivo de música
-progress_scanning_music_tags = Ler etiquetas de { $file_checked }/{ $all_files } arquivo de música
-progress_scanning_music_content_end = Impressão digital comparada de { $file_checked }/{ $all_files } arquivo de música
+progress_comparing_image_hashes = Comparando o código ‘hash’ dos arquivos de imagem { $file_checked } de { $all_files }
+progress_scanning_music_tags_end = Comparando as informações dos arquivos de música { $file_checked } de { $all_files }
+progress_scanning_music_tags = Lendo as informações dos arquivos de música { $file_checked } de { $all_files }
+progress_scanning_music_content_end = Comparando a impressão digital dos arquivos de música { $file_checked } de { $all_files }
 progress_scanning_music_content = Calculada impressão digital de { $file_checked }/ arquivo de música{ $all_files } ({ $data_checked }/{ $all_data })
-progress_scanning_empty_folders =
-    { $folder_number ->
-        [one] Pasta { $folder_number } escaneada
-       *[other] Escaneado { $folder_number } pastas
-    }
-progress_scanning_size = Tamanho digitalizado do arquivo { $file_number }
-progress_scanning_size_name = Nome digitalizado e tamanho do arquivo { $file_number }
-progress_scanning_name = Nome digitalizado do arquivo { $file_number }
+progress_scanning_empty_folders = Pesquisando nas { $folder_number } pastas
+progress_scanning_size = Pesquisando por nome nos { $file_number } arquivos
+progress_scanning_size_name = Pesquisando por nome e tamanho do arquivo { $file_number }
+progress_scanning_name = Pesquisando por nome do arquivo { $file_number }
 progress_analyzed_partial_hash = Hash parcial analisado de arquivos { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
 progress_analyzed_full_hash = Hash completo analisado de arquivos { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
 progress_prehash_cache_loading = Carregando o ‘hash’ parcial dos arquivos do ‘cache’

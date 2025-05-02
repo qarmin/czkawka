@@ -23,6 +23,106 @@ pub const LANGUAGE_LIST: &[Language] = &[
         short_name: "pl",
         left_panel_size: 150.0,
     },
+    Language {
+        long_name: "Français (French)",
+        short_name: "fr",
+        left_panel_size: 180.0,
+    },
+    Language {
+        long_name: "Italiano (Italian)",
+        short_name: "it",
+        left_panel_size: 145.0,
+    },
+    Language {
+        long_name: "Русский (Russian)",
+        short_name: "ru",
+        left_panel_size: 185.0,
+    },
+    Language {
+        long_name: "український (Ukrainian)",
+        short_name: "uk",
+        left_panel_size: 185.0,
+    },
+    Language {
+        long_name: "한국인 (Korean)",
+        short_name: "ko",
+        left_panel_size: 145.0,
+    },
+    Language {
+        long_name: "Česky (Czech)",
+        short_name: "cs",
+        left_panel_size: 170.0,
+    },
+    Language {
+        long_name: "Deutsch (German)",
+        short_name: "de",
+        left_panel_size: 155.0,
+    },
+    Language {
+        long_name: "やまと (Japanese)",
+        short_name: "ja",
+        left_panel_size: 155.0,
+    },
+    Language {
+        long_name: "Português (Portuguese)",
+        short_name: "pt-PT",
+        left_panel_size: 165.0,
+    },
+    Language {
+        long_name: "Português Brasileiro (Brazilian Portuguese)",
+        short_name: "pt-BR",
+        left_panel_size: 165.0,
+    },
+    Language {
+        long_name: "简体中文 (Simplified Chinese)",
+        short_name: "zh-CN",
+        left_panel_size: 115.0,
+    },
+    Language {
+        long_name: "繁體中文 (Traditional Chinese)",
+        short_name: "zh-TW",
+        left_panel_size: 135.0,
+    },
+    Language {
+        long_name: "Español (Spanish)",
+        short_name: "es-ES",
+        left_panel_size: 165.0,
+    },
+    Language {
+        long_name: "Norsk (Norwegian)",
+        short_name: "no",
+        left_panel_size: 135.0,
+    },
+    Language {
+        long_name: "Swedish (Svenska)",
+        short_name: "sv-SE",
+        left_panel_size: 130.0,
+    },
+    Language {
+        long_name: "المملكة العربية السعودية (Saudi Arabia)",
+        short_name: "ar",
+        left_panel_size: 135.0,
+    },
+    Language {
+        long_name: "България (Bulgaria)",
+        short_name: "bg",
+        left_panel_size: 165.0,
+    },
+    Language {
+        long_name: "Ελλάδα (Greece)",
+        short_name: "el",
+        left_panel_size: 160.0,
+    },
+    Language {
+        long_name: "Nederland (Netherlands)",
+        short_name: "nl",
+        left_panel_size: 165.0,
+    },
+    Language {
+        long_name: "România (Romania)",
+        short_name: "ro",
+        left_panel_size: 140.0,
+    },
 ];
 
 pub fn connect_translations(app: &MainWindow) {

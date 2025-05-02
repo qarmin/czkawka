@@ -47,7 +47,7 @@ pub const LANGUAGES_ALL: &[Language] = &[
     },
     Language {
         combo_box_text: "Português (Portuguese)",
-        short_text: "pt",
+        short_text: "pt-PT",
     },
     Language {
         combo_box_text: "Português Brasileiro (Brazilian Portuguese)",
@@ -55,7 +55,7 @@ pub const LANGUAGES_ALL: &[Language] = &[
     },
     Language {
         combo_box_text: "简体中文 (Simplified Chinese)",
-        short_text: "zh",
+        short_text: "zh-CN",
     },
     Language {
         combo_box_text: "繁體中文 (Traditional Chinese)",
@@ -63,7 +63,7 @@ pub const LANGUAGES_ALL: &[Language] = &[
     },
     Language {
         combo_box_text: "Español (Spanish)",
-        short_text: "es",
+        short_text: "es-ES",
     },
     Language {
         combo_box_text: "Norsk (Norwegian)",
@@ -71,7 +71,7 @@ pub const LANGUAGES_ALL: &[Language] = &[
     },
     Language {
         combo_box_text: "Swedish (Svenska)",
-        short_text: "sv",
+        short_text: "sv-SE",
     },
     Language {
         combo_box_text: "المملكة العربية السعودية (Saudi Arabia)",

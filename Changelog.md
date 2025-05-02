@@ -1,5 +1,9 @@
 ## Version ?.?.? - ?
 
+### Breaking changes
+- Some languages, unified names with crowdin(like es -> es-ES), so GUI could not find them and use default language
+- Cache files now uses memory limits, and are incompatible with previous versions
+
 ### Core
 - Converts println/eprintln into log functions - [#1478](https://github.com/qarmin/czkawka/pull/1478)
 - Speedup a little cache loading/saving - [#1478](https://github.com/qarmin/czkawka/pull/1478)
