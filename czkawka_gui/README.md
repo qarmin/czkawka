@@ -112,10 +112,9 @@ Not all available features and/or components implemented here, this is the list 
 - Windows version does not support heif and webp files with prebuilt binaries(msys2 version support them)
 - Prebuilt binaries for mac arm do not exist
 - On Windows, text may appear very small on high resolution displays, a solution is to manually change DPI scaling for
-  this app, see :
+  this app, see:
     - recommended
-      fix: [#787#issuecomment-1292253437](https://github.com/qarmin/czkawka/issues/787#issuecomment-1292253437) (modify
-      gtk.css),
+      fix: [#787#issuecomment-1292253437](https://github.com/qarmin/czkawka/issues/787#issuecomment-1292253437) (modify gtk.css),
     - or this
       workaround: [#867#issuecomment-1416761308](https://github.com/qarmin/czkawka/issues/863#issuecomment-1416761308) (
       modify windows DPI settings for this app (this works too but the text is a bit blurry)).
@@ -127,8 +126,6 @@ Code is distributed under MIT license.
 Icon was created by [jannuary](https://github.com/jannuary) and licensed CC-BY-4.0.
 
 Windows dark theme is used from project [WhiteSur](https://github.com/slypy/whitesur-gtk4-theme) with MIT license.
-
-Some icons were taken from [ReShot](https://www.reshot.com) site and are licensed under Reshot Free License.
 
 The program is completely free to use.
 

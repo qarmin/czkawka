@@ -12,7 +12,6 @@ assignees: ''
 **Steps to reproduce:**
 <!-- Please describe what you expected to see and what you saw instead. Also include screenshots or screencasts if needed. -->
 
-
 **Terminal output** (optional):
 
 ```

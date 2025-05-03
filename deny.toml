@@ -14,7 +14,6 @@ deny = []
 skip = []
 skip-tree = []
 
-
 [licenses]
 unlicensed = "allow"
 allow-osi-fsf-free = "either"

@@ -118,7 +118,6 @@ jobs:
           sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
           cargo build --target i686-unknown-linux-gnu --bin czkawka_cli --bin krokiet
 
-
   linux-cli-krokiet-debug:
     if: ${{ github.ref != 'refs/heads/master' }}
     runs-on: ubuntu-22.04
