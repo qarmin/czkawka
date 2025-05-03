@@ -166,6 +166,7 @@ pub fn get_number_of_threads() -> usize {
 
 fn filtering_messages(record: &Record) -> bool {
     if let Some(module_path) = record.module_path() {
+        // Printing not supported modules
         // if !["krokiet", "czkawka", "log_panics", "smithay_client_toolkit", "sctk_adwaita"]
         //     .iter()
         //     .any(|t| module_path.starts_with(t))
