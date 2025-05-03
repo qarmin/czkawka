@@ -4,6 +4,12 @@ Czkawka GUI is a graphical user interface for Czkawka Core written with GTK 4.
 
 ![Screenshot from 2023-11-26 12-43-32](https://github.com/qarmin/czkawka/assets/41945903/722ed490-0be1-4dac-bcfc-182a4d0787dc)
 
+## Maintenance mode
+
+Czkawka Gtk is currently in maintenance mode.  
+While no new features will be added (at least by me), bug fixes and compatibility updates with the Czkawka core package will continue to be provided.  
+Active development is now focused on the Krokiet GUI.
+
 ## Requirements
 
 Requirements depend on your platform.
@@ -17,11 +23,6 @@ Additional features like heif, libraw, libavif require additional libraries to b
 #### Prebuild binaries
 
 Ubuntu - `sudo apt install libgtk-4-bin libheif1 libraw-bin ffmpeg -y`
-
-#### Snap -
-
-none - all needed libraries are bundled in
-snap [except ffmpeg](https://github.com/snapcrafters/ffmpeg/issues/73)  - https://snapcraft.io/czkawka
 
 #### Flatpak
 

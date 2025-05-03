@@ -67,6 +67,7 @@ impl Extensions {
         messages
     }
 
+    #[allow(clippy::string_slice)] // Valid, because we address go to dot, which is known ascii character
     pub fn check_if_entry_have_valid_extension(&self, entry_data: &DirEntry) -> bool {
         if self.allowed_extensions_hashset.is_empty() && self.excluded_extensions_hashset.is_empty() {
             return true;

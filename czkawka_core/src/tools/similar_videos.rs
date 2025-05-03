@@ -120,11 +120,6 @@ impl SimilarVideos {
             self.common_data.text_messages.errors.push(flc!("core_ffmpeg_not_found"));
             #[cfg(target_os = "windows")]
             self.common_data.text_messages.errors.push(flc!("core_ffmpeg_not_found_windows"));
-            #[cfg(target_os = "linux")]
-            self.common_data
-                .text_messages
-                .errors
-                .push(flc!("core_ffmpeg_missing_in_snap", url = "https://github.com/snapcrafters/ffmpeg/issues/73"));
         } else {
             self.prepare_items();
             self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();

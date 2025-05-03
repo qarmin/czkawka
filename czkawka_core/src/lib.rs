@@ -6,6 +6,7 @@
 #![warn(clippy::print_stderr)]
 #![warn(clippy::print_stdout)]
 #![warn(clippy::dbg_macro)]
+#![warn(clippy::string_slice)]
 
 #[macro_use]
 extern crate bitflags;

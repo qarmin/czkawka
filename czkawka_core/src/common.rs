@@ -503,6 +503,7 @@ pub fn create_crash_message(library_name: &str, file_path: &str, home_library_ur
     )
 }
 
+#[allow(clippy::string_slice)]
 pub fn regex_check(expression_item: &SingleExcludedItem, directory_name: &str) -> bool {
     if expression_item.expression_splits.is_empty() {
         return true;
@@ -546,6 +547,7 @@ pub fn regex_check(expression_item: &SingleExcludedItem, directory_name: &str) -
     true
 }
 
+#[allow(clippy::string_slice)] // Is in char boundary
 pub fn normalize_windows_path(path_to_change: impl AsRef<Path>) -> PathBuf {
     let path = path_to_change.as_ref();
 
