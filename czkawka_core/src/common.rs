@@ -19,9 +19,9 @@ use handsome_logger::{ColorChoice, CombinedLogger, ConfigBuilder, SharedLogger, 
 use log::{LevelFilter, Record, debug, info, warn};
 use once_cell::sync::OnceCell;
 
+use crate::CZKAWKA_VERSION;
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
-use crate::CZKAWKA_VERSION;
 use crate::common_dir_traversal::{CheckingMethod, ToolType};
 use crate::common_directory::Directories;
 use crate::common_items::{ExcludedItems, SingleExcludedItem};
@@ -166,7 +166,7 @@ pub fn get_number_of_threads() -> usize {
 
 fn filtering_messages(record: &Record) -> bool {
     if let Some(module_path) = record.module_path() {
-        // if !["krokiet", "czkawka_core", "czkawka_gui", "log_panics", "smithay_client_toolkit", "sctk_adwaita"]
+        // if !["krokiet", "czkawka", "log_panics", "smithay_client_toolkit", "sctk_adwaita"]
         //     .iter()
         //     .any(|t| module_path.starts_with(t))
         // {
@@ -176,7 +176,7 @@ fn filtering_messages(record: &Record) -> bool {
         //     return false;
         // }
 
-        ["krokiet", "czkawka_core", "czkawka_gui", "log_panics"].iter().any(|t| module_path.starts_with(t))
+        ["krokiet", "czkawka", "log_panics"].iter().any(|t| module_path.starts_with(t))
     } else {
         true
     }
