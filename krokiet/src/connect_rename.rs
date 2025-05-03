@@ -21,7 +21,7 @@ pub fn connect_rename(app: &MainWindow) {
             set_tool_model(&app, active_tab, new_model);
         }
         app.global::<GuiState>().set_info_text(Messages::new_from_errors(errors).create_messages_text().into());
-        reset_selection(&app, false);
+        reset_selection(&app, true);
     });
 }
 

@@ -1,9 +1,13 @@
 ## Version ?.?.? - ?
 
+### Breaking changes
+- Some languages, unified names with crowdin(like es -> es-ES), so GUI could not find them and use default language
+- Cache files now uses memory limits, and are incompatible with previous versions
+
 ### Core
 - Converts println/eprintln into log functions - [#1478](https://github.com/qarmin/czkawka/pull/1478)
 - Speedup a little cache loading/saving - [#1478](https://github.com/qarmin/czkawka/pull/1478)
-- Logging logs also to files - [#1508](https://github.com/qarmin/czkawka/pull/1508)
+- Logging messages and panics also to files - [#1508](https://github.com/qarmin/czkawka/pull/1508)
 - Added 4GB memory limit when loading/saving cache and avoiding crashes - [#1508](https://github.com/qarmin/czkawka/pull/1508)
 
 ### GTK Gui
@@ -14,7 +18,7 @@
 - Ability to select multiple items with mouse and keyboard - [#1478](https://github.com/qarmin/czkawka/pull/1478)
 - Added sort buttons - [#1501](https://github.com/qarmin/czkawka/pull/1501)
 - Remembering window size - [#1508](https://github.com/qarmin/czkawka/pull/1508)
-- Added tranlations - [#1508](https://github.com/qarmin/czkawka/pull/1508)
+- Added translations - [#1508](https://github.com/qarmin/czkawka/pull/1508)[#1513], (https://github.com/qarmin/czkawka/pull/1513)
 
 ### External
 – There is a new, unofficial Tauri-based frontend for Czkawka - [Czkawka Tauri](https://github.com/shixinhuang99/czkawka-tauri)
@@ -26,6 +30,7 @@
 ### Prebuild-binaries
 - CI now creates linux binaries on ubuntu 22.04 instead 20.04(some types of builds were build on 24.04)
 - Musl builds of czkawka_cli are provided instead eyra builds(a little easier to maintain) - sadly no gui builds, due musl and eyra limitations :(
+- No longer prebuild windows console binaries are provided - logs are saved to file and are easier to read than in terminal
 
 ## Version 9.0.0 - 16.03.2025r
 

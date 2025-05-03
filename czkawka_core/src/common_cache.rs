@@ -18,13 +18,13 @@ use crate::common_traits::ResultEntry;
 use crate::tools::duplicate::HashType;
 use crate::tools::similar_images::{convert_algorithm_to_string, convert_filters_to_string};
 
-const CACHE_VERSION: &str = "70";
-const CACHE_DUPLICATE_VERSION: &str = "90";
+const CACHE_VERSION: &str = "100";
+const CACHE_DUPLICATE_VERSION: &str = "100";
 #[cfg(feature = "fast_image_resize")]
-const CACHE_IMAGE_VERSION: &str = "90_fast_resize";
+const CACHE_IMAGE_VERSION: &str = "100_fast_resize";
 #[cfg(not(feature = "fast_image_resize"))]
-const CACHE_IMAGE_VERSION: &str = "90_image_rs_resize";
-const CACHE_VIDEO_VERSION: &str = "90";
+const CACHE_IMAGE_VERSION: &str = "100_image_rs_resize";
+const CACHE_VIDEO_VERSION: &str = "100";
 
 const MEMORY_LIMIT: u64 = 4 * 1024 * 1024 * 1024;
 

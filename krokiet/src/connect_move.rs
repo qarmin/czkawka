@@ -23,7 +23,7 @@ pub fn connect_move(app: &MainWindow) {
         let folder_str = folder.to_string_lossy().to_string();
 
         app.invoke_show_move_folders_dialog(folder_str.into());
-        reset_selection(&app, false);
+        reset_selection(&app, true);
     });
 
     let a = app.as_weak();
@@ -37,7 +37,7 @@ pub fn connect_move(app: &MainWindow) {
             set_tool_model(&app, active_tab, new_model);
         }
         app.global::<GuiState>().set_info_text(Messages::new_from_errors(errors).create_messages_text().into());
-        reset_selection(&app, false);
+        reset_selection(&app, true);
     });
 }
 

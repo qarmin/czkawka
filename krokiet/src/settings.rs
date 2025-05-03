@@ -1,4 +1,5 @@
 use std::cmp::{max, min};
+use std::collections::BTreeMap;
 use std::env;
 use std::fmt::Debug;
 use std::path::PathBuf;
@@ -14,7 +15,7 @@ use image_hasher::{FilterType, HashAlg};
 use log::{debug, error, info, warn};
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
-use slint::{ComponentHandle, Model, ModelRc, PhysicalSize, SharedString, WindowSize};
+use slint::{ComponentHandle, Model, ModelRc, PhysicalSize, SharedString, VecModel, WindowSize};
 
 use crate::common::{create_excluded_directories_model_from_pathbuf, create_included_directories_model_from_pathbuf, create_vec_model_from_vec_string};
 use crate::connect_translation::{LANGUAGE_LIST, change_language, find_the_closest_language_idx_to_system};
@@ -291,6 +292,8 @@ pub struct SettingsCustom {
     pub broken_files_sub_archive: bool,
     #[serde(default)]
     pub broken_files_sub_image: bool,
+    #[serde(default)]
+    pub column_sizes: BTreeMap<String, Vec<f32>>,
 }
 
 impl Default for SettingsCustom {
@@ -676,6 +679,35 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
     settings.set_broken_files_sub_archive(custom_settings.broken_files_sub_archive);
     settings.set_broken_files_sub_image(custom_settings.broken_files_sub_image);
 
+    let sel_px = 35.0;
+    let path_px = 350.0;
+    let name_px = 100.0;
+    let mod_px = 150.0;
+    let size_px = 75.0;
+
+    let fnm = |default_model: &[f32], name: &str| {
+        let model = default_model.iter().map(|s| (*s).clamp(30.0, 2500.0));
+        let model = model
+            .into_iter()
+            .enumerate()
+            .map(|(idx, data)| *custom_settings.column_sizes.get(name).cloned().unwrap_or_default().get(idx).unwrap_or(&data))
+            .collect::<Vec<_>>();
+
+        ModelRc::new(VecModel::from(model))
+    };
+
+    settings.set_duplicates_column_size(fnm(&[sel_px, size_px, name_px, path_px, mod_px], "duplicates"));
+    settings.set_empty_folders_column_size(fnm(&[sel_px, name_px, path_px, mod_px], "empty_folders"));
+    settings.set_empty_files_column_size(fnm(&[sel_px, name_px, path_px, mod_px], "empty_files"));
+    settings.set_temporary_files_column_size(fnm(&[sel_px, name_px, path_px, mod_px], "temporary_files"));
+    settings.set_big_files_column_size(fnm(&[sel_px, size_px, name_px, path_px, mod_px], "big_files"));
+    settings.set_similar_images_column_size(fnm(&[sel_px, 80.0, 80.0, 80.0, name_px, path_px, mod_px], "similar_images"));
+    settings.set_similar_videos_column_size(fnm(&[sel_px, size_px, name_px, path_px, mod_px], "similar_videos"));
+    settings.set_similar_music_column_size(fnm(&[sel_px, size_px, name_px, 80.0, 80.0, 80.0, 80.0, 80.0, 80.0, path_px, mod_px], "similar_music"));
+    settings.set_invalid_symlink_column_size(fnm(&[sel_px, name_px, path_px, path_px, mod_px], "invalid_symlink"));
+    settings.set_broken_files_column_size(fnm(&[sel_px, name_px, path_px, 200.0, size_px, mod_px], "broken_files"));
+    settings.set_bad_extensions_column_size(fnm(&[sel_px, name_px, path_px, 40.0, 200.0], "bad_extensions"));
+
     // Clear text
     app.global::<GuiState>().set_info_text("".into());
 }
@@ -768,6 +800,20 @@ pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let broken_files_sub_archive = settings.get_broken_files_sub_archive();
     let broken_files_sub_image = settings.get_broken_files_sub_image();
 
+    let column_sizes = BTreeMap::from([
+        ("duplicates".to_string(), settings.get_duplicates_column_size().iter().collect::<Vec<_>>()),
+        ("empty_folders".to_string(), settings.get_empty_folders_column_size().iter().collect::<Vec<_>>()),
+        ("empty_files".to_string(), settings.get_empty_files_column_size().iter().collect::<Vec<_>>()),
+        ("temporary_files".to_string(), settings.get_temporary_files_column_size().iter().collect::<Vec<_>>()),
+        ("big_files".to_string(), settings.get_big_files_column_size().iter().collect::<Vec<_>>()),
+        ("similar_images".to_string(), settings.get_similar_images_column_size().iter().collect::<Vec<_>>()),
+        ("similar_videos".to_string(), settings.get_similar_videos_column_size().iter().collect::<Vec<_>>()),
+        ("similar_music".to_string(), settings.get_similar_music_column_size().iter().collect::<Vec<_>>()),
+        ("invalid_symlink".to_string(), settings.get_invalid_symlink_column_size().iter().collect::<Vec<_>>()),
+        ("broken_files".to_string(), settings.get_broken_files_column_size().iter().collect::<Vec<_>>()),
+        ("bad_extensions".to_string(), settings.get_bad_extensions_column_size().iter().collect::<Vec<_>>()),
+    ]);
+
     SettingsCustom {
         included_directories,
         included_directories_referenced,
@@ -822,6 +868,7 @@ pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
         broken_files_sub_pdf,
         broken_files_sub_archive,
         broken_files_sub_image,
+        column_sizes,
     }
 }
 

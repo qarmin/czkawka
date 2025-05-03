@@ -5,9 +5,8 @@ import {CurrentTab, BottomPanelVisibility} from "common.slint";
 export global Settings {
     in-out property <int> settings_preset_idx: 0;
     in-out property <[string]> settings_presets: ["Preset 1", "Preset 2"];
-    
-    in-out property <[string]> languages_list: ["English", "Polski (Polish)"];
-    // in-out property <[string]> languages_list: ["English", "Français (French)", "Italiano (Italian)", "Polski (Polish)", "Русский (Russian)", "український (Ukrainian)", "한국인 (Korean)", "Česky (Czech)", "Deutsch (German)", "やまと (Japanese)", "Português (Portuguese)", "Português Brasileiro (Brazilian Portuguese)", "简体中文 (Simplified Chinese)", "繁體中文 (Traditional Chinese)", "Español (Spanish)", "Norsk (Norwegian)", "Swedish (Svenska)", "المملكة العربية السعودية (Saudi Arabia)", "България (Bulgaria)", "Ελλάδα (Greece)", "Nederland (Netherlands)", "România (Romania)"];
+
+    in-out property <[string]> languages_list: ["English", "Polski (Polish)", "Français (French)", "Italiano (Italian)", "Русский (Russian)", "український (Ukrainian)", "한국인 (Korean)", "Česky (Czech)", "Deutsch (German)", "やまと (Japanese)", "Português (Portuguese)", "Português Brasileiro (Brazilian Portuguese)", "简体中文 (Simplified Chinese)", "繁體中文 (Traditional Chinese)", "Español (Spanish)", "Norsk (Norwegian)", "Swedish (Svenska)", "المملكة العربية السعودية (Saudi Arabia)", "България (Bulgaria)", "Ελλάδα (Greece)", "Nederland (Netherlands)", "România (Romania)"];
     in-out property <int> language_index: 0;
     in-out property <string> language_value: "English";
 
@@ -45,7 +44,6 @@ export global Settings {
 
     in-out property <bool> similar_music_delete_outdated_entries;
 
-
     // Allowed subsettings
     // Similar Images
     in-out property <[string]> similar_images_sub_available_hash_size: ["8", "16", "32", "64"];
@@ -69,7 +67,6 @@ export global Settings {
     in-out property <int> duplicates_sub_available_hash_type_index: 0;
     in-out property <string> duplicates_sub_available_hash_type_value: "Blake3";
     in-out property <bool> duplicates_sub_name_case_sensitive: false;
-
 
     // Big files
     in-out property <[string]> biggest_files_sub_method: ["The Biggest", "The Smallest"];
@@ -104,4 +101,32 @@ export global Settings {
     in-out property <bool> broken_files_sub_pdf: false;
     in-out property <bool> broken_files_sub_archive: false;
     in-out property <bool> broken_files_sub_image: false;
+
+    out property <length> path_px: 350px;
+    out property <length> name_px: 100px;
+    out property <length> mod_px: 150px;
+    out property <length> size_px: 75px;
+
+    in-out property <[string]> duplicates_column_name: ["Selection", "Size", "File Name", "Path", "Modification Date"];
+    in-out property <[length]> duplicates_column_size: [35px, size_px, name_px, path_px, mod_px];
+    in-out property <[string]> empty_folders_column_name: ["Selection", "Folder Name", "Path", "Modification Date"];
+    in-out property <[length]> empty_folders_column_size: [35px, name_px, path_px, mod_px];
+    in-out property <[string]> big_files_column_name: ["Selection", "Size", "File Name", "Path", "Modification Date"];
+    in-out property <[length]> big_files_column_size: [35px, size_px, name_px, path_px, mod_px];
+    in-out property <[string]> empty_files_column_name: ["Selection", "File Name", "Path", "Modification Date"];
+    in-out property <[length]> empty_files_column_size: [35px, name_px, path_px, mod_px];
+    in-out property <[string]> temporary_files_column_name: ["Selection", "File Name", "Path", "Modification Date"];
+    in-out property <[length]> temporary_files_column_size: [35px, name_px, path_px, mod_px];
+    in-out property <[string]> similar_images_column_name: ["Selection", "Similarity", "Size", "Dimensions", "File Name", "Path", "Modification Date"];
+    in-out property <[length]> similar_images_column_size: [35px, 80px, 80px, 80px, name_px, path_px, mod_px];
+    in-out property <[string]> similar_videos_column_name: ["Selection", "Size", "File Name", "Path", "Modification Date"];
+    in-out property <[length]> similar_videos_column_size: [35px, size_px, name_px, path_px, mod_px];
+    in-out property <[string]> similar_music_column_name: ["Selection", "Size", "File Name", "Title", "Artist", "Year", "Bitrate", "Length", "Genre", "Path", "Modification Date"];
+    in-out property <[length]> similar_music_column_size: [35px, size_px, name_px, 80px, 80px, 80px, 80px, 80px, 80px, path_px, mod_px];
+    in-out property <[string]> invalid_symlink_column_name: ["Selection", "Symlink Name", "Symlink Folder", "Destination Path", "Modification Date"];
+    in-out property <[length]> invalid_symlink_column_size: [35px, name_px, path_px, path_px, mod_px];
+    in-out property <[string]> broken_files_column_name: ["Selection", "File Name", "Path", "Type of Error", "Size", "Modification Date"];
+    in-out property <[length]> broken_files_column_size: [35px, name_px, path_px, 200px, size_px, mod_px];
+    in-out property <[string]> bad_extensions_column_name: ["Selection", "File Name", "Path", "Current Extension", "Proper Extension"];
+    in-out property <[length]> bad_extensions_column_size: [35px, name_px, path_px, 40px, 200px];
 }

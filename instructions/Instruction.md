@@ -353,7 +353,6 @@ This tool works similarly to the **Similar Images** feature but is designed for 
   - Using the user-defined **similarity tolerance**, hashes are compared
   - Groups of similar videos are returned as results
 
-
 ### Broken Files
 ### **Corrupted or Invalid Files Finder**
 
@@ -378,7 +377,6 @@ It works as follows:
 In the **"Proper Extension"** column, the extension detected by the Infer library appears in parentheses, while extensions with the same MIME type are displayed outside.
 
 ![ABC](https://user-images.githubusercontent.com/41945903/167214811-7d811829-6dba-4da0-9788-9e2f780e7279.png)
-
 
 ## Code coverage
 If you want to check code coverage of Czkawka(both in tests or in normal usage) you can execute this simple commands(supports Ubuntu 22.04, but for other OS only installation instruction of packages should be different).

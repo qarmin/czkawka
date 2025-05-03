@@ -452,6 +452,7 @@ impl PrintResults for BrokenFiles {
     }
 }
 
+#[allow(clippy::string_slice)] // Valid, because we address go to dot, which is known ascii character
 fn check_extension_availability(
     full_name: &Path,
     images_extensions: &HashSet<&&'static str>,
@@ -500,6 +501,7 @@ fn unpack_pdf_error(e: PdfError) -> PdfError {
     }
 }
 
+#[allow(clippy::string_slice)] // Safe slicing
 fn validate_pdf_error(file_entry: &mut BrokenEntry, e: PdfError) -> PdfError {
     let mut error_string = e.to_string();
     // Workaround for strange error message https://github.com/qarmin/czkawka/issues/898

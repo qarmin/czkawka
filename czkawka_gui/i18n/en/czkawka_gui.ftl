@@ -211,7 +211,6 @@ upper_excluded_items = Excluded Items:
 upper_allowed_extensions = Allowed Extensions:
 upper_excluded_extensions = Disabled Extensions:
 
-
 # Popovers
 popover_select_all = Select all
 popover_unselect_all = Unselect all
@@ -530,7 +529,6 @@ saving_loading_failed_to_read_config_file = Cannot load configuration from "{ $p
 saving_loading_failed_to_read_data_from_file = Cannot read data from file "{ $path }", reason "{ $reason }".
 saving_loading_orphan_data = Found orphan data "{ $data }" in line "{ $line }".
 saving_loading_not_valid = Setting "{ $data }" does not exist in current app version.
-
 
 # Invalid symlinks
 invalid_symlink_infinite_recursion = Infinite recursion

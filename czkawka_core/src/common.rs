@@ -19,9 +19,9 @@ use handsome_logger::{ColorChoice, CombinedLogger, ConfigBuilder, SharedLogger, 
 use log::{LevelFilter, Record, debug, info, warn};
 use once_cell::sync::OnceCell;
 
+use crate::CZKAWKA_VERSION;
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
-use crate::CZKAWKA_VERSION;
 use crate::common_dir_traversal::{CheckingMethod, ToolType};
 use crate::common_directory::Directories;
 use crate::common_items::{ExcludedItems, SingleExcludedItem};
@@ -166,7 +166,18 @@ pub fn get_number_of_threads() -> usize {
 
 fn filtering_messages(record: &Record) -> bool {
     if let Some(module_path) = record.module_path() {
-        ["czkawka", "krokiet"].iter().any(|t| module_path.starts_with(t))
+        // Printing not supported modules
+        // if !["krokiet", "czkawka", "log_panics", "smithay_client_toolkit", "sctk_adwaita"]
+        //     .iter()
+        //     .any(|t| module_path.starts_with(t))
+        // {
+        //     println!("{:?}", module_path);
+        //     return true;
+        // } else {
+        //     return false;
+        // }
+
+        ["krokiet", "czkawka", "log_panics"].iter().any(|t| module_path.starts_with(t))
     } else {
         true
     }
@@ -174,6 +185,8 @@ fn filtering_messages(record: &Record) -> bool {
 
 #[allow(clippy::print_stdout)]
 pub fn setup_logger(disabled_terminal_printing: bool, app_name: &str) {
+    log_panics::init();
+
     let terminal_log_level = if disabled_terminal_printing { LevelFilter::Off } else { LevelFilter::Info };
     let file_log_level = LevelFilter::Debug;
 
@@ -491,6 +504,7 @@ pub fn create_crash_message(library_name: &str, file_path: &str, home_library_ur
     )
 }
 
+#[allow(clippy::string_slice)]
 pub fn regex_check(expression_item: &SingleExcludedItem, directory_name: &str) -> bool {
     if expression_item.expression_splits.is_empty() {
         return true;
@@ -534,6 +548,7 @@ pub fn regex_check(expression_item: &SingleExcludedItem, directory_name: &str) -
     true
 }
 
+#[allow(clippy::string_slice)] // Is in char boundary
 pub fn normalize_windows_path(path_to_change: impl AsRef<Path>) -> PathBuf {
     let path = path_to_change.as_ref();
 

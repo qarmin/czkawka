@@ -26,4 +26,4 @@ core_ffmpeg_not_found = Instalação adequada do FFmpeg não encontrada
 core_ffmpeg_not_found_windows = Certifique-se de que o ffmpeg.exe e ffprobe.exe estão disponíveis no PATH ou são colocados diretamente na mesma pasta onde o aplicativo é executável
 core_ffmpeg_missing_in_snap = Vídeos similares não funcionam atualmente com o snap, se você quiser ajudar a olhar - { $url }
 core_saving_to_cache = Salvo no arquivo { $number } entradas de cache
-core_loading_from_cache = Carregado do cache { $number } entradas
+core_loading_from_cache = Foram carregados "{ $number }" dados do arquivo de ‘cache’

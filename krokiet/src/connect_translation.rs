@@ -23,6 +23,106 @@ pub const LANGUAGE_LIST: &[Language] = &[
         short_name: "pl",
         left_panel_size: 150.0,
     },
+    Language {
+        long_name: "Français (French)",
+        short_name: "fr",
+        left_panel_size: 180.0,
+    },
+    Language {
+        long_name: "Italiano (Italian)",
+        short_name: "it",
+        left_panel_size: 145.0,
+    },
+    Language {
+        long_name: "Русский (Russian)",
+        short_name: "ru",
+        left_panel_size: 185.0,
+    },
+    Language {
+        long_name: "український (Ukrainian)",
+        short_name: "uk",
+        left_panel_size: 185.0,
+    },
+    Language {
+        long_name: "한국인 (Korean)",
+        short_name: "ko",
+        left_panel_size: 145.0,
+    },
+    Language {
+        long_name: "Česky (Czech)",
+        short_name: "cs",
+        left_panel_size: 170.0,
+    },
+    Language {
+        long_name: "Deutsch (German)",
+        short_name: "de",
+        left_panel_size: 155.0,
+    },
+    Language {
+        long_name: "やまと (Japanese)",
+        short_name: "ja",
+        left_panel_size: 155.0,
+    },
+    Language {
+        long_name: "Português (Portuguese)",
+        short_name: "pt-PT",
+        left_panel_size: 165.0,
+    },
+    Language {
+        long_name: "Português Brasileiro (Brazilian Portuguese)",
+        short_name: "pt-BR",
+        left_panel_size: 165.0,
+    },
+    Language {
+        long_name: "简体中文 (Simplified Chinese)",
+        short_name: "zh-CN",
+        left_panel_size: 115.0,
+    },
+    Language {
+        long_name: "繁體中文 (Traditional Chinese)",
+        short_name: "zh-TW",
+        left_panel_size: 135.0,
+    },
+    Language {
+        long_name: "Español (Spanish)",
+        short_name: "es-ES",
+        left_panel_size: 165.0,
+    },
+    Language {
+        long_name: "Norsk (Norwegian)",
+        short_name: "no",
+        left_panel_size: 135.0,
+    },
+    Language {
+        long_name: "Swedish (Svenska)",
+        short_name: "sv-SE",
+        left_panel_size: 130.0,
+    },
+    Language {
+        long_name: "المملكة العربية السعودية (Saudi Arabia)",
+        short_name: "ar",
+        left_panel_size: 135.0,
+    },
+    Language {
+        long_name: "България (Bulgaria)",
+        short_name: "bg",
+        left_panel_size: 165.0,
+    },
+    Language {
+        long_name: "Ελλάδα (Greece)",
+        short_name: "el",
+        left_panel_size: 160.0,
+    },
+    Language {
+        long_name: "Nederland (Netherlands)",
+        short_name: "nl",
+        left_panel_size: 165.0,
+    },
+    Language {
+        long_name: "România (Romania)",
+        short_name: "ro",
+        left_panel_size: 140.0,
+    },
 ];
 
 pub fn connect_translations(app: &MainWindow) {
@@ -78,6 +178,7 @@ pub(crate) fn change_language(app: &MainWindow) {
 // This is ugly workaround for missing fluent language support in slint
 fn translate_items(app: &MainWindow) {
     let translation = app.global::<Translations>();
+    let settings = app.global::<Settings>();
 
     translation.set_yes_button_text(flk!("yes_button").into());
     translation.set_no_button_text(flk!("no_button").into());
@@ -264,6 +365,43 @@ fn translate_items(app: &MainWindow) {
     ];
 
     gui_state.set_sort_results_list(ModelRc::new(VecModel::from(sort_model.to_vec())));
+
+    let selection = flk!("column_selection");
+    let size = flk!("column_size");
+    let file_name = flk!("column_file_name");
+    let path = flk!("column_path");
+    let mod_date = flk!("column_modification_date");
+    let similarity = flk!("column_similarity");
+    let dimensions = flk!("column_dimensions");
+    let title = flk!("column_title");
+    let artist = flk!("column_artist");
+    let year = flk!("column_year");
+    let bitrate = flk!("column_bitrate");
+    let length = flk!("column_length");
+    let genre = flk!("column_genre");
+    let type_of_error = flk!("column_type_of_error");
+    let symlink_name = flk!("column_symlink_name");
+    let symlink_folder = flk!("column_symlink_folder");
+    let destination_path = flk!("column_destination_path");
+    let current_extension = flk!("column_current_extension");
+    let proper_extension = flk!("column_proper_extension");
+
+    let fnm = |model: &[&str]| {
+        let shared_string = model.iter().map(|s| (*s).into()).collect::<Vec<SharedString>>();
+        ModelRc::new(VecModel::from(shared_string))
+    };
+
+    settings.set_duplicates_column_name(fnm(&[&selection, &size, &file_name, &path, &mod_date]));
+    settings.set_empty_folders_column_name(fnm(&[&selection, &file_name, &path, &mod_date]));
+    settings.set_empty_files_column_name(fnm(&[&selection, &file_name, &path, &mod_date]));
+    settings.set_temporary_files_column_name(fnm(&[&selection, &file_name, &path, &mod_date]));
+    settings.set_big_files_column_name(fnm(&[&selection, &size, &file_name, &path, &mod_date]));
+    settings.set_similar_images_column_name(fnm(&[&selection, &similarity, &size, &dimensions, &file_name, &path, &mod_date]));
+    settings.set_similar_videos_column_name(fnm(&[&selection, &size, &file_name, &path, &mod_date]));
+    settings.set_similar_music_column_name(fnm(&[&selection, &size, &file_name, &title, &artist, &year, &bitrate, &length, &genre, &path, &mod_date]));
+    settings.set_invalid_symlink_column_name(fnm(&[&selection, &symlink_name, &symlink_folder, &destination_path, &mod_date]));
+    settings.set_broken_files_column_name(fnm(&[&selection, &file_name, &path, &type_of_error, &size, &mod_date]));
+    settings.set_bad_extensions_column_name(fnm(&[&selection, &file_name, &path, &current_extension, &proper_extension]));
 }
 
 pub(crate) fn translate_select_mode(select_mode: SelectMode) -> SharedString {
