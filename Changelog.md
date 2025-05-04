@@ -13,6 +13,7 @@
 ### GTK Gui
 - Using newly created icons - uglier, but released under really free under the clear CC BY license - [#1478](https://github.com/qarmin/czkawka/pull/1478)
 - Fixed crash when removing outdated cache - [#1508](https://github.com/qarmin/czkawka/pull/1508)
+- Fixed missing file and folder names with similar videos in reference folders - [#1520](https://github.com/qarmin/czkawka/pull/1520) 
 
 ### Krokiet
 - Ability to select multiple items with mouse and keyboard - [#1478](https://github.com/qarmin/czkawka/pull/1478)
