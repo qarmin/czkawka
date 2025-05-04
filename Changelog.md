@@ -19,6 +19,7 @@
 - Added sort buttons - [#1501](https://github.com/qarmin/czkawka/pull/1501)
 - Remembering window size - [#1508](https://github.com/qarmin/czkawka/pull/1508)
 - Added translations - [#1508](https://github.com/qarmin/czkawka/pull/1508), [#1513](https://github.com/qarmin/czkawka/pull/1513)
+- Improved
 
 ### External
 – There is a new, unofficial Tauri-based frontend for Czkawka - [Czkawka Tauri](https://github.com/shixinhuang99/czkawka-tauri)
