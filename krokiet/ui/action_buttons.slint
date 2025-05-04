@@ -104,6 +104,7 @@ export component ActionButtons inherits HorizontalLayout {
             visible: !scanning && lists_enabled;
             text <=> Translations.scan_button_text;
             icon: @image-url("../icons/krokiet_search.svg");
+            colorize-icon: true;
             clicked => {
                 root.scanning = true;
                 root.scan_starting(GuiState.active_tab);
@@ -116,6 +117,7 @@ export component ActionButtons inherits HorizontalLayout {
             enabled: scanning && !stop_requested && root.lists_enabled;
             text <=> Translations.stop_button_text;
             icon: @image-url("../icons/krokiet_stop.svg");
+            colorize-icon: true;
             clicked => {
                 root.scan_stopping();
                 root.stop_requested = true;
@@ -133,6 +135,7 @@ export component ActionButtons inherits HorizontalLayout {
         enabled: !scanning && self.visible && results_available;
         text <=> Translations.select_button_text;
         icon: @image-url("../icons/krokiet_select.svg");
+        colorize-icon: true;
         clicked => {
             show_select_popup(self.x + self.width / 2, self.y + parent.y);
         }
@@ -144,6 +147,7 @@ export component ActionButtons inherits HorizontalLayout {
         enabled: !scanning && self.visible && results_available;
         text <=> Translations.move_button_text;
         icon: @image-url("../icons/krokiet_move.svg");
+        colorize-icon: true;
         clicked => {
             request_folder_to_move();
         }
@@ -155,6 +159,7 @@ export component ActionButtons inherits HorizontalLayout {
         enabled: !scanning && self.visible && results_available;
         text <=> Translations.delete_button_text;
         icon: @image-url("../icons/krokiet_delete.svg");
+        colorize-icon: true;
         clicked => {
             show_remove_popup();
         }
@@ -166,6 +171,7 @@ export component ActionButtons inherits HorizontalLayout {
         enabled: !scanning && self.visible && results_available;
         text <=> Translations.save_button_text;
         icon: @image-url("../icons/krokiet_save.svg");
+        colorize-icon: true;
         clicked => {
             show_save_popup();
         }
@@ -177,6 +183,7 @@ export component ActionButtons inherits HorizontalLayout {
         enabled: !scanning && self.visible && results_available;
         text <=> Translations.sort_button_text;
         icon: @image-url("../icons/krokiet_sort.svg");
+        colorize-icon: true;
         clicked => {
             show_sort_popup(self.x + self.width / 2, self.y + parent.y);
         }
@@ -188,6 +195,7 @@ export component ActionButtons inherits HorizontalLayout {
         enabled: !scanning && self.visible && results_available;
         text <=> Translations.rename_button_text;
         icon: @image-url("../icons/krokiet_rename.svg");
+        colorize-icon: true;
         clicked => {
             show_rename_popup();
         }
@@ -206,6 +214,7 @@ export component ActionButtons inherits HorizontalLayout {
             button_visibility: BottomPanelVisibility.Directories;
             bottom_panel_visibility <=> bottom_panel_visibility;
             icon: @image-url("../icons/krokiet_dir.svg");
+            colorize-icon: true;
         }
 
         VisibilityButton {
@@ -214,6 +223,7 @@ export component ActionButtons inherits HorizontalLayout {
             button_visibility: BottomPanelVisibility.TextErrors;
             bottom_panel_visibility <=> bottom_panel_visibility;
             icon: @image-url("../icons/krokiet_info.svg");
+            colorize-icon: true;
         }
     }
 }

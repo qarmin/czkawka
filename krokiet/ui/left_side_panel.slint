@@ -114,6 +114,7 @@ export component LeftSidePanel {
                     max-height: self.width;
                     preferred-height: self.width;
                     icon: @image-url("../icons/krokiet_settings.svg");
+                    colorize-icon: true;
                     clicked => {
                         GuiState.active_tab = CurrentTab.Settings;
                         Callabler.tab_changed();
@@ -133,6 +134,7 @@ export component LeftSidePanel {
                     max-height: self.width;
                     preferred-height: self.width;
                     icon: @image-url("../icons/krokiet_subsettings.svg");
+                    colorize-icon: true;
                     clicked => {
                         GuiState.visible_tool_settings = !GuiState.visible_tool_settings;
                     }
