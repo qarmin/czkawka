@@ -32,11 +32,5 @@ export component PopupSave inherits Rectangle {
     show_popup() => {
         popup_window.show();
     }
-    Button {
-        text <=> Translations.add_button_text;
-        clicked => {
-            show_popup();
-        }
-    }
 }
 

@@ -32,6 +32,8 @@ pub const DEFAULT_HASH_SIZE: &str = "16";
 pub const DEFAULT_MAXIMUM_DIFFERENCE_VALUE: f32 = 3.0;
 pub const DEFAULT_MINIMAL_FRAGMENT_DURATION_VALUE: f32 = 5.0;
 pub const MAX_HASH_SIZE: f32 = 40.0;
+pub const DEFAULT_WINDOW_WIDTH: u32 = 800;
+pub const DEFAULT_WINDOW_HEIGHT: u32 = 600;
 
 #[derive(Debug, Clone)]
 pub struct StringComboBoxItem<T>
@@ -308,12 +310,14 @@ pub struct BasicSettings {
     pub default_preset: i32,
     #[serde(default = "default_preset_names")]
     pub preset_names: Vec<String>,
-    #[serde(default)]
+    #[serde(default = "default_window_width")]
     pub window_width: u32,
-    #[serde(default)]
+    #[serde(default = "default_window_height")]
     pub window_height: u32,
     #[serde(default = "detect_language")]
     pub language: String,
+    #[serde(default = "ttrue")]
+    pub dark_theme: bool,
 }
 
 impl Default for BasicSettings {
@@ -539,13 +543,6 @@ pub fn get_config_file(number: i32) -> Option<PathBuf> {
 
 pub fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicSettings) {
     let settings = app.global::<Settings>();
-    // let lang_idx = LANGUAGE_LIST.iter().position(|x| x.short_name == basic_settings.language).unwrap_or_default();
-    // let new_languages_model: Vec<SharedString> = LANGUAGE_LIST.iter().map(|e| e.long_name.into()).collect::<Vec<_>>();
-
-    // settings.set_languages_list(ModelRc::new(VecModel::from(new_languages_model)));
-    // settings.set_language_value(LANGUAGE_LIST[lang_idx].long_name.into()); // TODO - still visible is old language
-    // settings.set_language_index(lang_idx as i32); // TODO - visible is old language
-
     change_language(app);
 
     settings.set_settings_preset_idx(basic_settings.default_preset);
@@ -554,6 +551,9 @@ pub fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicSettings
     let width = basic_settings.window_width.clamp(100, 1920 * 4);
     let height = basic_settings.window_height.clamp(100, 1080 * 4);
     app.window().set_size(WindowSize::Physical(PhysicalSize { width, height }));
+
+    settings.set_dark_theme(basic_settings.dark_theme);
+    app.global::<Callabler>().invoke_theme_changed();
 
     set_combobox_basic_settings_items(&settings, basic_settings);
 }
@@ -884,12 +884,14 @@ pub fn collect_base_settings(app: &MainWindow) -> BasicSettings {
     let lang_idx = settings.get_language_index();
     let language = StringComboBoxItems::get_config_name_from_idx(lang_idx as usize, &collected_items.languages);
     // let language = LANGUAGE_LIST[lang_idx as usize].short_name.to_string();
+    let dark_theme = settings.get_dark_theme();
     BasicSettings {
         language,
         default_preset,
         preset_names,
         window_width,
         window_height,
+        dark_theme,
     }
 }
 
@@ -979,4 +981,10 @@ pub fn default_hash_type() -> String {
 }
 pub fn default_sub_hash_size() -> String {
     DEFAULT_HASH_SIZE.to_string()
+}
+fn default_window_width() -> u32 {
+    DEFAULT_WINDOW_WIDTH
+}
+fn default_window_height() -> u32 {
+    DEFAULT_WINDOW_HEIGHT
 }
