@@ -19,10 +19,12 @@
 - Added sort buttons - [#1501](https://github.com/qarmin/czkawka/pull/1501)
 - Remembering window size - [#1508](https://github.com/qarmin/czkawka/pull/1508)
 - Added translations - [#1508](https://github.com/qarmin/czkawka/pull/1508), [#1513](https://github.com/qarmin/czkawka/pull/1513)
-- Improved
+- Improved popups - [#1520](https://github.com/qarmin/czkawka/pull/1520)
+- Dark/White theme can be changed in runtime - [#1520](https://github.com/qarmin/czkawka/pull/1520)
 
 ### External
 – There is a new, unofficial Tauri-based frontend for Czkawka - [Czkawka Tauri](https://github.com/shixinhuang99/czkawka-tauri)
+- 
 
 ### CI
 - Compilation for 32 bit targets is checked in CI
