@@ -201,6 +201,9 @@ export component MainWindow inherits Window {
     new_directory_popup_window := PopupNewDirectories {
         height: root.height;
         width: root.width;
+
+        x: parent.x + (root.width - self.popup_width) / 2.0;
+        y: parent.y + (parent.height - self.popup_height) / 2.0;
     }
 
     select_popup_window := PopupSelectResults {

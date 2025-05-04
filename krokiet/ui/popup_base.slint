@@ -1,0 +1,74 @@
+import { Button, VerticalBox ,TextEdit, HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox, LineEdit} from "std-widgets.slint";
+import {SelectableTableView} from "selectable_tree_view.slint";
+import {LeftSidePanel} from "left_side_panel.slint";
+import {MainList} from "main_lists.slint";
+import {CurrentTab, ProgressToSend} from "common.slint";
+import { ActionButtons } from "action_buttons.slint";
+import { Progress } from "progress.slint";
+import {MainListModel, SelectMode, SelectModel} from "common.slint";
+import {Settings} from "settings.slint";
+import {Callabler} from "callabler.slint";
+import { BottomPanel } from "bottom_panel.slint";
+import {ColorPalette} from "color_palette.slint";
+import {GuiState} from "gui_state.slint";
+import { Preview } from "preview.slint";
+import { Translations } from "translations.slint";
+
+export component PopupBase inherits PopupWindow {
+    in-out property <string> title_text: "TODO - needs to be changed";
+    in-out property <string> ok_text <=> Translations.ok_button_text;
+    in-out property <string> cancel_text <=> Translations.cancel_button_text;
+    in-out property <bool> enabled_ok_button: true;
+
+    callback ok_clicked();
+    callback cancel_clicked();
+
+    close-policy: PopupClosePolicy.no-auto-close;
+    rect := Rectangle {
+        width: parent.width;
+        height: parent.height;
+        border-radius: 10px;
+        border-color: black;
+        border-width: 2px;
+        background: ColorPalette.popup_background;
+        clip: true;
+        VerticalLayout {
+            Rectangle {
+                width: rect.width;
+                background: ColorPalette.popup_background_title_line;
+
+                Text {
+                    vertical-stretch: 0.0;
+                    min-height: 30px;
+                    text <=> title_text;
+                    vertical-alignment: center;
+                    horizontal-alignment: center;
+                    font-size: 13px;
+                }
+            }
+
+            @children
+
+            HorizontalLayout {
+                padding: 10px;
+                Button {
+                    enabled <=> enabled_ok_button;
+                    text <=> ok_text;
+                    clicked => {
+                        root.close();
+                        ok_clicked();
+                    }
+                }
+
+                Rectangle { }
+
+                Button {
+                    text <=> cancel_text;
+                    clicked => {
+                        root.close();
+                    }
+                }
+            }
+        }
+    }
+}

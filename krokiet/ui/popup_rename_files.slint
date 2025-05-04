@@ -1,73 +1,33 @@
 import { Button, VerticalBox ,TextEdit, HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox, LineEdit} from "std-widgets.slint";
-import {SelectableTableView} from "selectable_tree_view.slint";
-import {LeftSidePanel} from "left_side_panel.slint";
-import {MainList} from "main_lists.slint";
 import {CurrentTab, ProgressToSend} from "common.slint";
 import { ActionButtons } from "action_buttons.slint";
 import { Progress } from "progress.slint";
 import {MainListModel, SelectMode, SelectModel} from "common.slint";
-import {Settings} from "settings.slint";
 import {Callabler} from "callabler.slint";
-import { BottomPanel } from "bottom_panel.slint";
-import {ColorPalette} from "color_palette.slint";
-import {GuiState} from "gui_state.slint";
-import { Preview } from "preview.slint";
 import { Translations } from "translations.slint";
+import { PopupBase } from "popup_base.slint";
+import { PopupCenteredText } from "popup_centered_text.slint";
 
 export component PopupRenameFiles inherits Rectangle {
     out property <length> popup_width: 500px;
     out property <length> popup_height: 150px;
-    in-out property <string> folder_name: "";
     callback show_popup();
 
-    popup_window := PopupWindow {
+    in-out property <string> folder_name: "";
+
+    popup_window := PopupBase {
         width: popup_width;
         height: popup_height;
+        title_text <=> Translations.popup_rename_title_text;
 
-        close-policy: PopupClosePolicy.no-auto-close;
-        Rectangle {
-            width: parent.width;
-            height: parent.height;
-            border-radius: 5px;
-            background: ColorPalette.popup_background;
-            VerticalLayout {
-                Text {
-                    vertical-stretch: 0.0;
-                    min-height: 30px;
-                    text <=> Translations.popup_rename_title_text;
-                    vertical-alignment: top;
-                    horizontal-alignment: center;
-                    font-size: 13px;
-                }
-
-                Text {
-                    vertical-stretch: 1.0;
-                    text: Translations.popup_rename_message_text  + "\n\n" + Translations.are_you_want_to_continue_text;
-                    vertical-alignment: center;
-                    horizontal-alignment: center;
-                    font-size: 13px;
-                    padding: 10px;
-                }
-
-                HorizontalLayout {
-                    Button {
-                        text <=> Translations.yes_button_text;
-                        clicked => {
-                            popup_window.close();
-                            Callabler.rename_files();
-                        }
-                    }
-
-                    Rectangle { }
-
-                    Button {
-                        text <=> Translations.no_button_text;
-                        clicked => {
-                            popup_window.close();
-                        }
-                    }
-                }
+        VerticalLayout {
+            PopupCenteredText {
+                text: Translations.popup_rename_message_text  + "\n\n" + Translations.are_you_want_to_continue_text;
             }
+        }
+
+        ok_clicked => {
+            Callabler.rename_files();
         }
     }
 
