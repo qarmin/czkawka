@@ -70,31 +70,17 @@ export component ActionButtons inherits HorizontalLayout {
     changed active_tab => {check_if_enable_buttons();}
 
     function check_if_enable_buttons() {
-        if (active_tab == CurrentTab.DuplicateFiles && duplicate_files_model.length > 0) {
-            results_available = true;
-        } else if (active_tab == CurrentTab.EmptyFolders && empty_folder_model.length > 0) {
-            results_available = true;
-        } else if (active_tab == CurrentTab.BigFiles && big_files_model.length > 0) {
-            results_available = true;
-        } else if (active_tab == CurrentTab.EmptyFiles && empty_files_model.length > 0) {
-            results_available = true;
-        } else if (active_tab == CurrentTab.TemporaryFiles && temporary_files_model.length > 0) {
-            results_available = true;
-        } else if (active_tab == CurrentTab.SimilarImages && similar_images_model.length > 0) {
-            results_available = true;
-        } else if (active_tab == CurrentTab.SimilarVideos && similar_videos_model.length > 0) {
-            results_available = true;
-        } else if (active_tab == CurrentTab.SimilarMusic && similar_music_model.length > 0) {
-            results_available = true;
-        } else if (active_tab == CurrentTab.InvalidSymlinks && invalid_symlinks_model.length > 0) {
-            results_available = true;
-        } else if (active_tab == CurrentTab.BrokenFiles && broken_files_model.length > 0) {
-            results_available = true;
-        } else if (active_tab == CurrentTab.BadExtensions && bad_extensions_model.length > 0) {
-            results_available = true;
-        } else {
-            results_available = false;
-        }
+        results_available = (active_tab == CurrentTab.DuplicateFiles && duplicate_files_model.length > 0) ||
+                            (active_tab == CurrentTab.EmptyFolders && empty_folder_model.length > 0) ||
+                            (active_tab == CurrentTab.BigFiles && big_files_model.length > 0) ||
+                            (active_tab == CurrentTab.EmptyFiles && empty_files_model.length > 0) ||
+                            (active_tab == CurrentTab.TemporaryFiles && temporary_files_model.length > 0) ||
+                            (active_tab == CurrentTab.SimilarImages && similar_images_model.length > 0) ||
+                            (active_tab == CurrentTab.SimilarVideos && similar_videos_model.length > 0) ||
+                            (active_tab == CurrentTab.SimilarMusic && similar_music_model.length > 0) ||
+                            (active_tab == CurrentTab.InvalidSymlinks && invalid_symlinks_model.length > 0) ||
+                            (active_tab == CurrentTab.BrokenFiles && broken_files_model.length > 0) ||
+                            (active_tab == CurrentTab.BadExtensions && bad_extensions_model.length > 0);
     }
 
     Rectangle {
@@ -102,7 +88,7 @@ export component ActionButtons inherits HorizontalLayout {
             height: parent.height;
             enabled: !scanning && lists_enabled;
             visible: !scanning && lists_enabled;
-            text <=> Translations.scan_button_text;
+            text: !self.visible ? "" : Translations.scan_button_text;
             icon: @image-url("../icons/krokiet_search.svg");
             colorize-icon: true;
             clicked => {
@@ -115,7 +101,7 @@ export component ActionButtons inherits HorizontalLayout {
             height: parent.height;
             visible: scanning;
             enabled: scanning && !stop_requested && root.lists_enabled;
-            text <=> Translations.stop_button_text;
+            text: !self.visible ? "" : Translations.stop_button_text;
             icon: @image-url("../icons/krokiet_stop.svg");
             colorize-icon: true;
             clicked => {
@@ -133,7 +119,7 @@ export component ActionButtons inherits HorizontalLayout {
         visible: lists_enabled;
         height: parent.height;
         enabled: !scanning && self.visible && results_available;
-        text <=> Translations.select_button_text;
+        text: !self.visible ? "" : Translations.select_button_text;
         icon: @image-url("../icons/krokiet_select.svg");
         colorize-icon: true;
         clicked => {
@@ -145,7 +131,7 @@ export component ActionButtons inherits HorizontalLayout {
         visible: lists_enabled;
         height: parent.height;
         enabled: !scanning && self.visible && results_available;
-        text <=> Translations.move_button_text;
+        text: !self.visible ? "" : Translations.move_button_text;
         icon: @image-url("../icons/krokiet_move.svg");
         colorize-icon: true;
         clicked => {
@@ -157,7 +143,7 @@ export component ActionButtons inherits HorizontalLayout {
         visible: lists_enabled;
         height: parent.height;
         enabled: !scanning && self.visible && results_available;
-        text <=> Translations.delete_button_text;
+        text: !self.visible ? "" : Translations.delete_button_text;
         icon: @image-url("../icons/krokiet_delete.svg");
         colorize-icon: true;
         clicked => {
@@ -169,7 +155,7 @@ export component ActionButtons inherits HorizontalLayout {
         visible: lists_enabled;
         height: parent.height;
         enabled: !scanning && self.visible && results_available;
-        text <=> Translations.save_button_text;
+        text: !self.visible ? "" : Translations.save_button_text;
         icon: @image-url("../icons/krokiet_save.svg");
         colorize-icon: true;
         clicked => {
@@ -181,7 +167,7 @@ export component ActionButtons inherits HorizontalLayout {
         visible: lists_enabled;
         height: parent.height;
         enabled: !scanning && self.visible && results_available;
-        text <=> Translations.sort_button_text;
+        text: !self.visible ? "" : Translations.sort_button_text;
         icon: @image-url("../icons/krokiet_sort.svg");
         colorize-icon: true;
         clicked => {
@@ -193,7 +179,7 @@ export component ActionButtons inherits HorizontalLayout {
         visible: lists_enabled && GuiState.active_tab == CurrentTab.BadExtensions;
         height: parent.height;
         enabled: !scanning && self.visible && results_available;
-        text <=> Translations.rename_button_text;
+        text: !self.visible ? "" : Translations.rename_button_text;
         icon: @image-url("../icons/krokiet_rename.svg");
         colorize-icon: true;
         clicked => {
