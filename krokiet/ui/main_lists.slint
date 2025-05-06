@@ -1,12 +1,10 @@
-import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox} from "std-widgets.slint";
-import {SelectableTableView} from "selectable_tree_view.slint";
-import {LeftSidePanel} from "left_side_panel.slint";
-import {CurrentTab, TypeOfOpenedItem} from "common.slint";
-import {MainListModel} from "common.slint";
-import {SettingsList} from "settings_list.slint";
-import {GuiState} from "gui_state.slint";
-import {About} from "about.slint";
-import {Settings} from "settings.slint";
+import { SelectableTableView } from "selectable_tree_view.slint";
+import { CurrentTab } from "common.slint";
+import { MainListModel } from "common.slint";
+import { SettingsList } from "settings_list.slint";
+import { GuiState } from "gui_state.slint";
+import { About } from "about.slint";
+import { Settings } from "settings.slint";
 
 export component MainList {
     in-out property <[MainListModel]> duplicate_files_model: [];

@@ -1,12 +1,9 @@
-import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox} from "std-widgets.slint";
-import {LeftSidePanel} from "left_side_panel.slint";
-import {MainList} from "main_lists.slint";
-import {CurrentTab} from "common.slint";
-import {BottomPanelVisibility} from "common.slint";
-import {Callabler} from "callabler.slint";
-import {GuiState} from "gui_state.slint";
-import {MainListModel} from "common.slint";
-import {Translations} from "translations.slint";
+import { Button } from "std-widgets.slint";
+import { CurrentTab } from "common.slint";
+import { BottomPanelVisibility } from "common.slint";
+import { GuiState } from "gui_state.slint";
+import { MainListModel } from "common.slint";
+import { Translations } from "translations.slint";
 
 export component VisibilityButton inherits Button {
     in-out property <BottomPanelVisibility> button_visibility;

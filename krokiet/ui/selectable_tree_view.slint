@@ -1,9 +1,7 @@
-import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox, ScrollView} from "std-widgets.slint";
-import {TypeOfOpenedItem} from "common.slint";
-import {ColorPalette} from "color_palette.slint";
-import {MainListModel} from "common.slint";
-import {Callabler} from "callabler.slint";
-import {GuiState} from "gui_state.slint";
+import { VerticalBox, ListView, CheckBox, ScrollView } from "std-widgets.slint";
+import { ColorPalette } from "color_palette.slint";
+import { MainListModel } from "common.slint";
+import { Callabler } from "callabler.slint";
 
 export component SelectableTableView inherits Rectangle {
     in property <[string]> columns;

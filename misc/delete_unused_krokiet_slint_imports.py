@@ -39,7 +39,7 @@ for file_path in collected_files:
         used_items = []
         for item in imported_items:
             regex = rf"\b{item}\b"
-            if len(re.findall(regex, non_imported_content)) > 1:
+            if len(re.findall(regex, non_imported_content)) >= 1:
                 used_items.append(item)
 
         if used_items:
@@ -51,7 +51,8 @@ for file_path in collected_files:
         updated_lines.append("")
 
     updated_lines.extend(non_import_lines)
-    updated_lines.append("\n")
+    if len(updated_lines) > 0 and len(updated_lines[-1].strip()) > 0:
+        updated_lines.append("")
 
     with open(file_path, "w", encoding="utf-8") as file:
         file.write("\n".join(updated_lines))
