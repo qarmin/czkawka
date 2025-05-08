@@ -48,6 +48,7 @@ export component Progress {
             }
 
             VerticalLayout {
+                visible: progress_datas.all_progress > -0.001;
                 spacing: 5px;
                 Text {
                     visible: progress_datas.current_progress >= -0.001;

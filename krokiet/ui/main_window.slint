@@ -64,7 +64,6 @@ export component MainWindow inherits Window {
             preferred-height: 300px;
             LeftSidePanel {
                 horizontal-stretch: 0.0;
-                scanning <=> root.scanning;
                 changed_current_tab() => {
                     GuiState.preview_visible = false;
                     main_list.changed_current_tab();
