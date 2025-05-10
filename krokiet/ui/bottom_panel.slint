@@ -16,7 +16,7 @@ component DirectoriesPanel inherits HorizontalLayout {
         horizontal-stretch: 0.0;
         spacing: 5px;
         Button {
-            icon: @image-url("../icons/krokiet_add.svg");
+            icon: Settings.show_only_icons ? @image-url("../icons/krokiet_add.svg"): @image-url("");
             text: Settings.show_only_icons ? "" : Translations.add_button_text;
             colorize-icon: true;
             clicked => {
@@ -25,7 +25,7 @@ component DirectoriesPanel inherits HorizontalLayout {
         }
 
         Button {
-            icon: @image-url("../icons/krokiet_remove.svg");
+            icon: Settings.show_only_icons ? @image-url("../icons/krokiet_remove.svg"): @image-url("");
             text: Settings.show_only_icons ? "" : Translations.remove_button_text;
             colorize-icon: true;
             clicked => {
@@ -34,7 +34,7 @@ component DirectoriesPanel inherits HorizontalLayout {
         }
 
         Button {
-            icon: @image-url("../icons/krokiet_manual_add.svg");
+            icon: Settings.show_only_icons ? @image-url("../icons/krokiet_manual_add.svg"): @image-url("");
             text: Settings.show_only_icons ? "" : Translations.manual_add_button_text;
             colorize-icon: true;
             clicked => {
@@ -63,7 +63,7 @@ component DirectoriesPanel inherits HorizontalLayout {
         horizontal-stretch: 0.0;
         spacing: 5px;
         Button {
-            icon: @image-url("../icons/krokiet_add.svg");
+            icon: Settings.show_only_icons ? @image-url("../icons/krokiet_add.svg"): @image-url("");
             text: Settings.show_only_icons ? "" : Translations.add_button_text;
             colorize-icon: true;
             clicked => {
@@ -72,7 +72,7 @@ component DirectoriesPanel inherits HorizontalLayout {
         }
 
         Button {
-            icon: @image-url("../icons/krokiet_remove.svg");
+            icon: Settings.show_only_icons ? @image-url("../icons/krokiet_remove.svg"): @image-url("");
             text: Settings.show_only_icons ? "" : Translations.remove_button_text;
             colorize-icon: true;
             clicked => {
@@ -81,7 +81,7 @@ component DirectoriesPanel inherits HorizontalLayout {
         }
 
         Button {
-            icon: @image-url("../icons/krokiet_manual_add.svg");
+            icon: Settings.show_only_icons ? @image-url("../icons/krokiet_manual_add.svg"): @image-url("");
             text: Settings.show_only_icons ? "" : Translations.manual_add_button_text;
             colorize-icon: true;
             clicked => {

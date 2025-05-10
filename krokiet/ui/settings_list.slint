@@ -212,6 +212,11 @@ export component SettingsList inherits VerticalLayout {
             padding-right: 15px;
             padding-bottom: 10px;
             spacing: 5px;
+
+            HeaderText {
+                text <=> Translations.settings_global_settings_text;
+            }
+
             Presets {
                 height: SettingsSize.item_height;
             }

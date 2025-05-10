@@ -169,8 +169,7 @@ export component ActionButtons inherits HorizontalLayout {
         }
     }
 
-    rename_button := Button {
-        visible: lists_enabled && GuiState.active_tab == CurrentTab.BadExtensions;
+    if lists_enabled && GuiState.active_tab == CurrentTab.BadExtensions: rename_button := Button {
         height: parent.height;
         enabled: !scanning && self.visible && results_available;
         text: self.visible && Settings.show_only_icons ? "" : Translations.rename_button_text;

@@ -120,8 +120,8 @@ Not all available features and/or components implemented here, this is the list 
 - Prebuilt binaries for mac arm do not exist
 - On Windows, text may appear very small on high resolution displays, a solution is to manually change DPI scaling for
   this app, see:
-    - recommended fix: [#787#issuecomment-1292253437](https://github.com/qarmin/czkawka/issues/787#issuecomment-1292253437) (modify gtk.css),
-    - or this workaround: [#867#issuecomment-1416761308](https://github.com/qarmin/czkawka/issues/863#issuecomment-1416761308) (modify windows DPI settings for this app (this works too but the text is a bit blurry)).
+    - [recommended fix](https://github.com/qarmin/czkawka/issues/787#issuecomment-1292253437) (modify gtk.css),
+    - [or this workaround](https://github.com/qarmin/czkawka/issues/863#issuecomment-1416761308) (modify windows DPI settings for this app (this works too but the text is a bit blurry)).
 
 ## License
 

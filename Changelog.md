@@ -23,6 +23,7 @@
 - Improved popup styling - [#1520](https://github.com/qarmin/czkawka/pull/1520)
 - Dark/Light theme can now be switched at runtime - [#1520](https://github.com/qarmin/czkawka/pull/1520)
 - Changed icon color to white for dark theme to improve visibility - [#1520](https://github.com/qarmin/czkawka/pull/1520)
+- Added ability to disable text on buttons - [#1520](https://github.com/qarmin/czkawka/pull/1520)
 
 ### External
 - There is a new unofficial Tauri-based frontend for Czkawka - [Czkawka Tauri](https://github.com/shixinhuang99/czkawka-tauri)
