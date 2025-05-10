@@ -1,11 +1,10 @@
-
-import {Button, StandardListView, VerticalBox, ScrollView, TextEdit} from "std-widgets.slint";
-import {Settings} from "settings.slint";
-import {BottomPanelVisibility} from "common.slint";
-import {Callabler} from "callabler.slint";
-import {GuiState} from "gui_state.slint";
-import {IncludedDirectories, ExcludedDirectories} from "included_directories.slint";
+import { Button, TextEdit } from "std-widgets.slint";
+import { BottomPanelVisibility } from "common.slint";
+import { Callabler } from "callabler.slint";
+import { GuiState } from "gui_state.slint";
+import { IncludedDirectories, ExcludedDirectories } from "included_directories.slint";
 import { Translations } from "translations.slint";
+import { Settings } from "settings.slint";
 
 component DirectoriesPanel inherits HorizontalLayout {
     callback folder_choose_requested(bool);
@@ -17,21 +16,27 @@ component DirectoriesPanel inherits HorizontalLayout {
         horizontal-stretch: 0.0;
         spacing: 5px;
         Button {
-            text <=> Translations.add_button_text;
+            icon: Settings.show_only_icons ? @image-url("../icons/krokiet_add.svg"): @image-url("");
+            text: Settings.show_only_icons ? "" : Translations.add_button_text;
+            colorize-icon: true;
             clicked => {
                 folder_choose_requested(true);
             }
         }
 
         Button {
-            text <=> Translations.remove_button_text;
+            icon: Settings.show_only_icons ? @image-url("../icons/krokiet_remove.svg"): @image-url("");
+            text: Settings.show_only_icons ? "" : Translations.remove_button_text;
+            colorize-icon: true;
             clicked => {
                 Callabler.remove_item_directories(true);
             }
         }
 
         Button {
-            text <=> Translations.manual_add_button_text;
+            icon: Settings.show_only_icons ? @image-url("../icons/krokiet_manual_add.svg"): @image-url("");
+            text: Settings.show_only_icons ? "" : Translations.manual_add_button_text;
+            colorize-icon: true;
             clicked => {
                 show_manual_add_dialog(true);
             }
@@ -58,21 +63,27 @@ component DirectoriesPanel inherits HorizontalLayout {
         horizontal-stretch: 0.0;
         spacing: 5px;
         Button {
-            text <=> Translations.add_button_text;
+            icon: Settings.show_only_icons ? @image-url("../icons/krokiet_add.svg"): @image-url("");
+            text: Settings.show_only_icons ? "" : Translations.add_button_text;
+            colorize-icon: true;
             clicked => {
                 folder_choose_requested(false);
             }
         }
 
         Button {
-            text <=> Translations.remove_button_text;
+            icon: Settings.show_only_icons ? @image-url("../icons/krokiet_remove.svg"): @image-url("");
+            text: Settings.show_only_icons ? "" : Translations.remove_button_text;
+            colorize-icon: true;
             clicked => {
                 Callabler.remove_item_directories(false);
             }
         }
 
         Button {
-            text <=> Translations.manual_add_button_text;
+            icon: Settings.show_only_icons ? @image-url("../icons/krokiet_manual_add.svg"): @image-url("");
+            text: Settings.show_only_icons ? "" : Translations.manual_add_button_text;
+            colorize-icon: true;
             clicked => {
                 show_manual_add_dialog(false);
             }

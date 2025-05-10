@@ -1,36 +1,43 @@
 ## Version ?.?.? - ?
 
 ### Breaking changes
-- Some languages, unified names with crowdin(like es -> es-ES), so GUI could not find them and use default language
-- Cache files now uses memory limits, and are incompatible with previous versions
+- Some languages have unified names in Crowdin (like `es` → `es-ES`), so the GUI may not find them and will fall back to the default language.
+- Cache files now use memory limits and are incompatible with previous versions.
 
 ### Core
-- Converts println/eprintln into log functions - [#1478](https://github.com/qarmin/czkawka/pull/1478)
-- Speedup a little cache loading/saving - [#1478](https://github.com/qarmin/czkawka/pull/1478)
-- Logging messages and panics also to files - [#1508](https://github.com/qarmin/czkawka/pull/1508)
-- Added 4GB memory limit when loading/saving cache and avoiding crashes - [#1508](https://github.com/qarmin/czkawka/pull/1508)
+- Converted `println`/`eprintln` to logging functions - [#1478](https://github.com/qarmin/czkawka/pull/1478)
+- Slightly improved cache loading/saving speed - [#1478](https://github.com/qarmin/czkawka/pull/1478)
+- Messages and panics are now also logged to a file (can be disabled via `DISABLE_FILE_LOGGING`) - [#1508](https://github.com/qarmin/czkawka/pull/1508)
+- Added a 4GB memory limit when loading/saving cache to avoid crashes - [#1508](https://github.com/qarmin/czkawka/pull/1508)
 
 ### GTK Gui
-- Using newly created icons - uglier, but released under really free under the clear CC BY license - [#1478](https://github.com/qarmin/czkawka/pull/1478)
+- Now uses new icons — less pretty, but released under a truly free CC BY license - [#1478](https://github.com/qarmin/czkawka/pull/1478)
 - Fixed crash when removing outdated cache - [#1508](https://github.com/qarmin/czkawka/pull/1508)
+- Fixed missing file/folder names for similar videos in reference folders - [#1520](https://github.com/qarmin/czkawka/pull/1520)
 
 ### Krokiet
-- Ability to select multiple items with mouse and keyboard - [#1478](https://github.com/qarmin/czkawka/pull/1478)
-- Added sort buttons - [#1501](https://github.com/qarmin/czkawka/pull/1501)
-- Remembering window size - [#1508](https://github.com/qarmin/czkawka/pull/1508)
-- Added translations - [#1508](https://github.com/qarmin/czkawka/pull/1508)[#1513], (https://github.com/qarmin/czkawka/pull/1513)
+- Added ability to select multiple items with mouse and keyboard - [#1478](https://github.com/qarmin/czkawka/pull/1478)
+- Added sort button - [#1501](https://github.com/qarmin/czkawka/pull/1501)
+- Window size is now remembered - [#1508](https://github.com/qarmin/czkawka/pull/1508)
+- Added translations - [#1508](https://github.com/qarmin/czkawka/pull/1508), [#1513](https://github.com/qarmin/czkawka/pull/1513)
+- Improved popup styling - [#1520](https://github.com/qarmin/czkawka/pull/1520)
+- Dark/Light theme can now be switched at runtime - [#1520](https://github.com/qarmin/czkawka/pull/1520)
+- Changed icon color to white for dark theme to improve visibility - [#1520](https://github.com/qarmin/czkawka/pull/1520)
+- Added ability to disable text on buttons - [#1520](https://github.com/qarmin/czkawka/pull/1520)
 
 ### External
-– There is a new, unofficial Tauri-based frontend for Czkawka - [Czkawka Tauri](https://github.com/shixinhuang99/czkawka-tauri)
+- There is a new unofficial Tauri-based frontend for Czkawka - [Czkawka Tauri](https://github.com/shixinhuang99/czkawka-tauri)
+- Czkawka 8.0.0 is now available in Debian Sid - https://packages.debian.org/sid/czkawka-cli
 
 ### CI
-- Compilation for 32 bit targets is checked in CI
-- Czkawka binaries are now checked if are reproducible(currently they are not, due possible bug in rustc - https://github.com/kellpossible/cargo-i18n/pull/151)
+- Compilation for 32-bit targets is now checked in CI
+- Czkawka binaries are now checked for reproducibility (currently not reproducible due to a possible `rustc` bug - https://github.com/kellpossible/cargo-i18n/pull/151)
 
 ### Prebuild-binaries
-- CI now creates linux binaries on ubuntu 22.04 instead 20.04(some types of builds were build on 24.04)
-- Musl builds of czkawka_cli are provided instead eyra builds(a little easier to maintain) - sadly no gui builds, due musl and eyra limitations :(
-- No longer prebuild windows console binaries are provided - logs are saved to file and are easier to read than in terminal
+- CI now builds Linux binaries on Ubuntu 22.04 instead of 20.04 (some were built on 24.04)
+- `musl` builds of `czkawka_cli` are now provided instead of `eyra` builds (slightly easier to maintain) — GUI builds are not included due to limitations of `musl` and `eyra` :(
+- Prebuilt Windows console binaries are no longer provided — logs are now saved to file, which is easier to read than terminal output
+
 
 ## Version 9.0.0 - 16.03.2025r
 

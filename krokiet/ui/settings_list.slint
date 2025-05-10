@@ -1,4 +1,4 @@
-import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox, ScrollView, LineEdit, SpinBox, ComboBox, TextEdit, Slider} from "std-widgets.slint";
+import { Button, CheckBox, ScrollView, LineEdit, ComboBox, Slider } from "std-widgets.slint";
 import { Settings } from "settings.slint";
 import { Callabler } from "callabler.slint";
 import { GuiState } from "gui_state.slint";
@@ -30,14 +30,17 @@ export component TextComponent inherits HorizontalLayout {
 component CheckBoxComponent inherits HorizontalLayout {
     in-out property <bool> model;
     in property <string> name;
+    callback toggled();
     spacing: 5px;
     CheckBox {
         horizontal-stretch: 1.0;
         height: SettingsSize.item_height;
         checked <=> model;
         text: name;
+        toggled => {
+            root.toggled();
+        }
     }
-
     Rectangle { }
 }
 
@@ -209,12 +212,31 @@ export component SettingsList inherits VerticalLayout {
             padding-right: 15px;
             padding-bottom: 10px;
             spacing: 5px;
+
+            HeaderText {
+                text <=> Translations.settings_global_settings_text;
+            }
+
             Presets {
                 height: SettingsSize.item_height;
             }
             Languages {
                 height: SettingsSize.item_height;
             }
+
+            CheckBoxComponent {
+                name <=> Translations.settings_dark_theme_text;
+                model <=> Settings.dark_theme;
+                toggled => {
+                    Callabler.theme_changed();
+                }   
+            }
+
+            CheckBoxComponent {
+                name <=> Translations.settings_show_only_icons_text;
+                model <=> Settings.show_only_icons;
+            }
+
             HeaderText {
                 text <=> Translations.settings_general_settings_text;
             }

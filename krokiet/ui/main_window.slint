@@ -1,28 +1,27 @@
-import { Button, VerticalBox ,TextEdit, HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox, LineEdit} from "std-widgets.slint";
-import {SelectableTableView} from "selectable_tree_view.slint";
-import {LeftSidePanel} from "left_side_panel.slint";
-import {MainList} from "main_lists.slint";
-import {CurrentTab, ProgressToSend} from "common.slint";
+import { VerticalBox, HorizontalBox, LineEdit } from "std-widgets.slint";
+import { LeftSidePanel } from "left_side_panel.slint";
+import { MainList } from "main_lists.slint";
+import { CurrentTab, ProgressToSend } from "common.slint";
 import { ActionButtons } from "action_buttons.slint";
 import { Progress } from "progress.slint";
-import {MainListModel} from "common.slint";
-import {Settings} from "settings.slint";
-import {Callabler} from "callabler.slint";
+import { MainListModel } from "common.slint";
+import { Settings } from "settings.slint";
+import { Callabler } from "callabler.slint";
 import { BottomPanel } from "bottom_panel.slint";
-import {ColorPalette} from "color_palette.slint";
-import {GuiState} from "gui_state.slint";
+import { GuiState } from "gui_state.slint";
 import { Preview } from "preview.slint";
-import {PopupNewDirectories} from "popup_new_directories.slint";
-import {PopupDelete} from "popup_delete.slint";
-import {PopupMoveFolders} from "popup_move_folders.slint";
+import { PopupNewDirectories } from "popup_new_directories.slint";
+import { PopupDelete } from "popup_delete.slint";
+import { PopupMoveFolders } from "popup_move_folders.slint";
 import { PopupSelectResults } from "popup_select_results.slint";
-import {PopupRenameFiles} from "popup_rename_files.slint";
-import {PopupSave} from "popup_save.slint";
-import {PopupSortResults} from "popup_sort.slint";
+import { PopupRenameFiles } from "popup_rename_files.slint";
+import { PopupSave } from "popup_save.slint";
+import { PopupSortResults } from "popup_sort.slint";
 import { ToolSettings } from "tool_settings.slint";
 import { Translations } from "translations.slint";
+import { Palette } from "std-widgets.slint";
 
-export {Settings, Callabler, GuiState, Translations}
+export {Settings, Callabler, GuiState, Translations, Palette}
 
 export component MainWindow inherits Window {
     callback scan_stopping;
@@ -65,7 +64,6 @@ export component MainWindow inherits Window {
             preferred-height: 300px;
             LeftSidePanel {
                 horizontal-stretch: 0.0;
-                scanning <=> root.scanning;
                 changed_current_tab() => {
                     GuiState.preview_visible = false;
                     main_list.changed_current_tab();
@@ -201,6 +199,9 @@ export component MainWindow inherits Window {
     new_directory_popup_window := PopupNewDirectories {
         height: root.height;
         width: root.width;
+
+        x: parent.x + (root.width - self.popup_width) / 2.0;
+        y: parent.y + (parent.height - self.popup_height) / 2.0;
     }
 
     select_popup_window := PopupSelectResults {

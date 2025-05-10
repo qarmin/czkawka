@@ -194,7 +194,11 @@ pub fn setup_logger(disabled_terminal_printing: bool, app_name: &str) {
         .set_level(terminal_log_level)
         .set_message_filtering(Some(filtering_messages))
         .build();
-    let file_config = ConfigBuilder::default().set_level(file_log_level).set_message_filtering(Some(filtering_messages)).build();
+    let file_config = ConfigBuilder::default()
+        .set_level(file_log_level)
+        .set_write_once(true)
+        .set_message_filtering(Some(filtering_messages))
+        .build();
 
     let combined_logger = (|| {
         let Some(config_cache_path) = get_config_cache_path() else {
@@ -207,7 +211,7 @@ pub fn setup_logger(disabled_terminal_printing: bool, app_name: &str) {
         let write_rotater = FileRotate::new(
             &cache_logs_path,
             AppendTimestamp::default(FileLimit::MaxFiles(3)),
-            ContentLimit::BytesSurpassed(10 * 1024 * 1024),
+            ContentLimit::BytesSurpassed(20 * 1024 * 1024),
             Compression::None,
             None,
         );

@@ -648,7 +648,8 @@ fn compute_similar_videos(
                         vec_file_entry.clone()
                     };
 
-                    similar_videos_add_to_list_store(&list_store, "", "", base_file_entry.size, base_file_entry.modified_date, true, true);
+                    let (directory, file) = split_path(&base_file_entry.path);
+                    similar_videos_add_to_list_store(&list_store, &file, &directory, base_file_entry.size, base_file_entry.modified_date, true, true);
                     for file_entry in &vec_file_entry {
                         let (directory, file) = split_path(&file_entry.path);
                         similar_videos_add_to_list_store(&list_store, &file, &directory, file_entry.size, file_entry.modified_date, false, true);

@@ -88,6 +88,8 @@ const WORKAROUNDS: &[(&str, &str)] = &[
     ("gz", "crate"),      // Cargo
     ("gz", "svgz"),       // Archive svg
     ("gz", "tgz"),        // Archive
+    ("heic", "heif"),     // Image
+    ("heif", "heic"),     // Image
     ("html", "dtd"),      // Mingw
     ("html", "ent"),      // Mingw
     ("html", "md"),       // Markdown

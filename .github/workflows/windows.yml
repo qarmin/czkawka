@@ -103,6 +103,7 @@ jobs:
           unzip gtk4_theme.zip
           rm gtk4_theme.zip
           cd ../..
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -113,7 +114,8 @@ jobs:
 
       - name: Prepare files to release
         run: |
-          mv ./package windows_czkawka_gui_gtk_412.zip
+          zip -r windows_czkawka_gui_gtk_412.zip ./package
+
       - name: Release
         uses: softprops/action-gh-release@v2
         if: ${{ github.ref == 'refs/heads/master' }}
@@ -172,6 +174,7 @@ jobs:
           unzip gtk4_theme.zip
           rm gtk4_theme.zip
           cd ../..
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -182,7 +185,8 @@ jobs:
 
       - name: Prepare files to release
         run: |
-          mv ./package windows_czkawka_gui_gtk_46.zip
+          zip -r windows_czkawka_gui_gtk_46.zip ./package
+
       - name: Release
         uses: softprops/action-gh-release@v2
         if: ${{ github.ref == 'refs/heads/master' }}

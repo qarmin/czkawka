@@ -1,72 +1,26 @@
-import { Button, VerticalBox ,TextEdit, HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox, LineEdit} from "std-widgets.slint";
-import {SelectableTableView} from "selectable_tree_view.slint";
-import {LeftSidePanel} from "left_side_panel.slint";
-import {MainList} from "main_lists.slint";
-import {CurrentTab, ProgressToSend} from "common.slint";
-import { ActionButtons } from "action_buttons.slint";
-import { Progress } from "progress.slint";
-import {MainListModel, SelectMode, SelectModel} from "common.slint";
-import {Settings} from "settings.slint";
-import {Callabler} from "callabler.slint";
-import { BottomPanel } from "bottom_panel.slint";
-import {ColorPalette} from "color_palette.slint";
-import {GuiState} from "gui_state.slint";
-import { Preview } from "preview.slint";
+import { Callabler } from "callabler.slint";
 import { Translations } from "translations.slint";
+import { PopupBase } from "popup_base.slint";
+import { PopupCenteredText } from "popup_centered_text.slint";
 
 export component PopupDelete inherits Rectangle {
     out property <length> popup_width: 350px;
     out property <length> popup_height: 150px;
     callback show_popup();
 
-    popup_window := PopupWindow {
+    popup_window := PopupBase {
         width: popup_width;
         height: popup_height;
+        title_text <=> Translations.delete_text;
 
-        close-policy: PopupClosePolicy.close-on-click-outside;
-        Rectangle {
-            width: parent.width;
-            height: parent.height;
-            border-radius: 5px;
-            background: ColorPalette.popup_background;
-            VerticalLayout {
-                Text {
-                    vertical-stretch: 0.0;
-                    text <=> Translations.delete_text;
-                    vertical-alignment: center;
-                    horizontal-alignment: center;
-                    font-size: 13px;
-                    padding: 10px;
-                }
-
-                Text {
-                    vertical-stretch: 1.0;
-                    text <=> Translations.delete_confirmation_text;
-                    vertical-alignment: center;
-                    horizontal-alignment: center;
-                    font-size: 13px;
-                    padding: 10px;
-                }
-
-                HorizontalLayout {
-                    Button {
-                        text <=> Translations.yes_button_text;
-                        clicked => {
-                            popup_window.close();
-                            Callabler.delete_selected_items();
-                        }
-                    }
-
-                    Rectangle { }
-
-                    Button {
-                        text <=> Translations.no_button_text;
-                        clicked => {
-                            popup_window.close();
-                        }
-                    }
-                }
+        VerticalLayout {
+            PopupCenteredText {
+                text <=> Translations.delete_confirmation_text;
             }
+        }
+
+        ok_clicked => {
+            Callabler.delete_selected_items();
         }
     }
 

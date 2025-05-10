@@ -1,6 +1,4 @@
-
-import {IncludedDirectoriesModel, ExcludedDirectoriesModel} from "common.slint";
-import {CurrentTab, BottomPanelVisibility} from "common.slint";
+import { IncludedDirectoriesModel, ExcludedDirectoriesModel } from "common.slint";
 
 export global Settings {
     in-out property <int> settings_preset_idx: 0;
@@ -16,6 +14,8 @@ export global Settings {
     in-out property <int> excluded_directories_model_selected_idx: -1;
 
     // Settings
+    in-out property <bool> dark_theme: true;
+    in-out property <bool> show_only_icons: false;
     in-out property <string> excluded_items: "Excluded items";
     in-out property <string> allowed_extensions: "Allowed extensions";
     in-out property <string> excluded_extensions: "Excluded extensions";

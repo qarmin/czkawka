@@ -1,8 +1,4 @@
-import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox} from "std-widgets.slint";
-import {SelectableTableView} from "selectable_tree_view.slint";
-import {LeftSidePanel} from "left_side_panel.slint";
-import {MainList} from "main_lists.slint";
-import {CurrentTab, ProgressToSend} from "common.slint";
+import { ProgressToSend } from "common.slint";
 import { ProgressIndicator } from "std-widgets.slint";
 import { Translations } from "translations.slint";
 
@@ -52,6 +48,7 @@ export component Progress {
             }
 
             VerticalLayout {
+                visible: progress_datas.all_progress > -0.001;
                 spacing: 5px;
                 Text {
                     visible: progress_datas.current_progress >= -0.001;

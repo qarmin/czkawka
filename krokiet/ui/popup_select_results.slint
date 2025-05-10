@@ -1,17 +1,8 @@
-import { Button, VerticalBox ,TextEdit, HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox, LineEdit} from "std-widgets.slint";
-import {SelectableTableView} from "selectable_tree_view.slint";
-import {LeftSidePanel} from "left_side_panel.slint";
-import {MainList} from "main_lists.slint";
-import {CurrentTab, ProgressToSend} from "common.slint";
-import { ActionButtons } from "action_buttons.slint";
-import { Progress } from "progress.slint";
-import {MainListModel, SelectMode, SelectModel} from "common.slint";
-import {Settings} from "settings.slint";
-import {Callabler} from "callabler.slint";
-import { BottomPanel } from "bottom_panel.slint";
-import {ColorPalette} from "color_palette.slint";
-import {GuiState} from "gui_state.slint";
-import { Preview } from "preview.slint";
+import { Button } from "std-widgets.slint";
+import { SelectModel } from "common.slint";
+import { Callabler } from "callabler.slint";
+import { ColorPalette } from "color_palette.slint";
+import { GuiState } from "gui_state.slint";
 
 export component PopupSelectResults inherits Rectangle {
     callback show_popup();

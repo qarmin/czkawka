@@ -1,0 +1,62 @@
+import { Button } from "std-widgets.slint";
+import { ColorPalette } from "color_palette.slint";
+import { Translations } from "translations.slint";
+
+export component PopupBase inherits PopupWindow {
+    in-out property <string> title_text: "TODO - needs to be changed";
+    in-out property <string> ok_text <=> Translations.ok_button_text;
+    in-out property <string> cancel_text <=> Translations.cancel_button_text;
+    in-out property <bool> enabled_ok_button: true;
+
+    callback ok_clicked();
+    callback cancel_clicked();
+
+    close-policy: PopupClosePolicy.no-auto-close;
+    rect := Rectangle {
+        width: parent.width;
+        height: parent.height;
+        border-radius: 10px;
+        border-color: ColorPalette.popup_border_color;
+        border-width: 2px;
+        background: ColorPalette.popup_background;
+        clip: true;
+        VerticalLayout {
+            Rectangle {
+                width: rect.width;
+                background: ColorPalette.popup_background_title_line;
+
+                Text {
+                    vertical-stretch: 0.0;
+                    min-height: 30px;
+                    text <=> title_text;
+                    vertical-alignment: center;
+                    horizontal-alignment: center;
+                    font-size: 13px;
+                }
+            }
+
+            @children
+
+            HorizontalLayout {
+                padding: 10px;
+                Button {
+                    enabled <=> enabled_ok_button;
+                    text <=> ok_text;
+                    clicked => {
+                        root.close();
+                        ok_clicked();
+                    }
+                }
+
+                Rectangle { }
+
+                Button {
+                    text <=> cancel_text;
+                    clicked => {
+                        root.close();
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,12 +1,10 @@
-import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox} from "std-widgets.slint";
-import {LeftSidePanel} from "left_side_panel.slint";
-import {MainList} from "main_lists.slint";
-import {CurrentTab} from "common.slint";
-import {BottomPanelVisibility} from "common.slint";
-import {Callabler} from "callabler.slint";
-import {GuiState} from "gui_state.slint";
-import {MainListModel} from "common.slint";
-import {Translations} from "translations.slint";
+import { Button } from "std-widgets.slint";
+import { CurrentTab } from "common.slint";
+import { BottomPanelVisibility } from "common.slint";
+import { GuiState } from "gui_state.slint";
+import { MainListModel } from "common.slint";
+import { Translations } from "translations.slint";
+import { Settings } from "settings.slint";
 
 export component VisibilityButton inherits Button {
     in-out property <BottomPanelVisibility> button_visibility;
@@ -70,56 +68,40 @@ export component ActionButtons inherits HorizontalLayout {
     changed active_tab => {check_if_enable_buttons();}
 
     function check_if_enable_buttons() {
-        if (active_tab == CurrentTab.DuplicateFiles && duplicate_files_model.length > 0) {
-            results_available = true;
-        } else if (active_tab == CurrentTab.EmptyFolders && empty_folder_model.length > 0) {
-            results_available = true;
-        } else if (active_tab == CurrentTab.BigFiles && big_files_model.length > 0) {
-            results_available = true;
-        } else if (active_tab == CurrentTab.EmptyFiles && empty_files_model.length > 0) {
-            results_available = true;
-        } else if (active_tab == CurrentTab.TemporaryFiles && temporary_files_model.length > 0) {
-            results_available = true;
-        } else if (active_tab == CurrentTab.SimilarImages && similar_images_model.length > 0) {
-            results_available = true;
-        } else if (active_tab == CurrentTab.SimilarVideos && similar_videos_model.length > 0) {
-            results_available = true;
-        } else if (active_tab == CurrentTab.SimilarMusic && similar_music_model.length > 0) {
-            results_available = true;
-        } else if (active_tab == CurrentTab.InvalidSymlinks && invalid_symlinks_model.length > 0) {
-            results_available = true;
-        } else if (active_tab == CurrentTab.BrokenFiles && broken_files_model.length > 0) {
-            results_available = true;
-        } else if (active_tab == CurrentTab.BadExtensions && bad_extensions_model.length > 0) {
-            results_available = true;
-        } else {
-            results_available = false;
+        results_available = (active_tab == CurrentTab.DuplicateFiles && duplicate_files_model.length > 0) ||
+                            (active_tab == CurrentTab.EmptyFolders && empty_folder_model.length > 0) ||
+                            (active_tab == CurrentTab.BigFiles && big_files_model.length > 0) ||
+                            (active_tab == CurrentTab.EmptyFiles && empty_files_model.length > 0) ||
+                            (active_tab == CurrentTab.TemporaryFiles && temporary_files_model.length > 0) ||
+                            (active_tab == CurrentTab.SimilarImages && similar_images_model.length > 0) ||
+                            (active_tab == CurrentTab.SimilarVideos && similar_videos_model.length > 0) ||
+                            (active_tab == CurrentTab.SimilarMusic && similar_music_model.length > 0) ||
+                            (active_tab == CurrentTab.InvalidSymlinks && invalid_symlinks_model.length > 0) ||
+                            (active_tab == CurrentTab.BrokenFiles && broken_files_model.length > 0) ||
+                            (active_tab == CurrentTab.BadExtensions && bad_extensions_model.length > 0);
+    }
+
+    if (!scanning && lists_enabled): scan_button :=  Button {
+        height: parent.height;
+        enabled: !scanning && lists_enabled;
+        text: Settings.show_only_icons ? "" : Translations.scan_button_text;
+        icon: @image-url("../icons/krokiet_search.svg");
+        colorize-icon: true;
+        clicked => {
+            root.scanning = true;
+            root.scan_starting(GuiState.active_tab);
         }
     }
 
-    Rectangle {
-        scan_button := Button {
-            height: parent.height;
-            enabled: !scanning && lists_enabled;
-            visible: !scanning && lists_enabled;
-            text <=> Translations.scan_button_text;
-            icon: @image-url("../icons/krokiet_search.svg");
-            clicked => {
-                root.scanning = true;
-                root.scan_starting(GuiState.active_tab);
-            }
-        }
-
-        stop_button := Button {
-            height: parent.height;
-            visible: scanning;
-            enabled: scanning && !stop_requested && root.lists_enabled;
-            text <=> Translations.stop_button_text;
-            icon: @image-url("../icons/krokiet_stop.svg");
-            clicked => {
-                root.scan_stopping();
-                root.stop_requested = true;
-            }
+    if (scanning): stop_button := Button {
+        height: parent.height;
+        enabled: scanning && !stop_requested && root.lists_enabled;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.stop_button_text;
+        icon: @image-url("../icons/krokiet_stop.svg");
+        colorize-icon: true;
+        clicked => {
+            root.scan_stopping();
+            root.stop_requested = true;
         }
     }
 
@@ -131,8 +113,9 @@ export component ActionButtons inherits HorizontalLayout {
         visible: lists_enabled;
         height: parent.height;
         enabled: !scanning && self.visible && results_available;
-        text <=> Translations.select_button_text;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.select_button_text;
         icon: @image-url("../icons/krokiet_select.svg");
+        colorize-icon: true;
         clicked => {
             show_select_popup(self.x + self.width / 2, self.y + parent.y);
         }
@@ -142,8 +125,9 @@ export component ActionButtons inherits HorizontalLayout {
         visible: lists_enabled;
         height: parent.height;
         enabled: !scanning && self.visible && results_available;
-        text <=> Translations.move_button_text;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.move_button_text;
         icon: @image-url("../icons/krokiet_move.svg");
+        colorize-icon: true;
         clicked => {
             request_folder_to_move();
         }
@@ -153,8 +137,9 @@ export component ActionButtons inherits HorizontalLayout {
         visible: lists_enabled;
         height: parent.height;
         enabled: !scanning && self.visible && results_available;
-        text <=> Translations.delete_button_text;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.delete_button_text;
         icon: @image-url("../icons/krokiet_delete.svg");
+        colorize-icon: true;
         clicked => {
             show_remove_popup();
         }
@@ -164,8 +149,9 @@ export component ActionButtons inherits HorizontalLayout {
         visible: lists_enabled;
         height: parent.height;
         enabled: !scanning && self.visible && results_available;
-        text <=> Translations.save_button_text;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.save_button_text;
         icon: @image-url("../icons/krokiet_save.svg");
+        colorize-icon: true;
         clicked => {
             show_save_popup();
         }
@@ -175,19 +161,20 @@ export component ActionButtons inherits HorizontalLayout {
         visible: lists_enabled;
         height: parent.height;
         enabled: !scanning && self.visible && results_available;
-        text <=> Translations.sort_button_text;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.sort_button_text;
         icon: @image-url("../icons/krokiet_sort.svg");
+        colorize-icon: true;
         clicked => {
             show_sort_popup(self.x + self.width / 2, self.y + parent.y);
         }
     }
 
-    rename_button := Button {
-        visible: lists_enabled && GuiState.active_tab == CurrentTab.BadExtensions;
+    if lists_enabled && GuiState.active_tab == CurrentTab.BadExtensions: rename_button := Button {
         height: parent.height;
         enabled: !scanning && self.visible && results_available;
-        text <=> Translations.rename_button_text;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.rename_button_text;
         icon: @image-url("../icons/krokiet_rename.svg");
+        colorize-icon: true;
         clicked => {
             show_rename_popup();
         }
@@ -206,6 +193,7 @@ export component ActionButtons inherits HorizontalLayout {
             button_visibility: BottomPanelVisibility.Directories;
             bottom_panel_visibility <=> bottom_panel_visibility;
             icon: @image-url("../icons/krokiet_dir.svg");
+            colorize-icon: true;
         }
 
         VisibilityButton {
@@ -214,6 +202,7 @@ export component ActionButtons inherits HorizontalLayout {
             button_visibility: BottomPanelVisibility.TextErrors;
             bottom_panel_visibility <=> bottom_panel_visibility;
             icon: @image-url("../icons/krokiet_info.svg");
+            colorize-icon: true;
         }
     }
 }

@@ -1,11 +1,10 @@
-import { Button, VerticalBox , HorizontalBox, TabWidget, ListView, StandardListView, StandardTableView, CheckBox} from "std-widgets.slint";
-import {CurrentTab, BottomPanelVisibility} from "common.slint";
-import {ColorPalette} from "color_palette.slint";
-import {GuiState} from "gui_state.slint";
-import {Callabler} from "callabler.slint";
+import { Button, ListView } from "std-widgets.slint";
+import { CurrentTab, BottomPanelVisibility } from "common.slint";
+import { ColorPalette } from "color_palette.slint";
+import { GuiState } from "gui_state.slint";
+import { Callabler } from "callabler.slint";
 
 component TabItem {
-    in property <bool> scanning;
     in property <string> text;
     in property <CurrentTab> curr_tab;
     callback changed_current_tab();
@@ -65,7 +64,6 @@ component TabItem {
 }
 
 export component LeftSidePanel {
-    in-out property <bool> scanning;
     callback changed_current_tab();
     preferred-width: GuiState.left_panel_width;
     VerticalLayout {
@@ -95,7 +93,6 @@ export component LeftSidePanel {
 
             for r[idx] in tools_model: TabItem {
                 height: parent.element_size;
-                scanning: scanning;
                 text: r.name;
                 curr_tab: r.tab;
                 changed_current_tab() => {
@@ -105,6 +102,7 @@ export component LeftSidePanel {
         }
 
         Rectangle {
+            min-width: 90px;
             HorizontalLayout {
                 alignment: start;
                 Button {
@@ -114,6 +112,7 @@ export component LeftSidePanel {
                     max-height: self.width;
                     preferred-height: self.width;
                     icon: @image-url("../icons/krokiet_settings.svg");
+                    colorize-icon: true;
                     clicked => {
                         GuiState.active_tab = CurrentTab.Settings;
                         Callabler.tab_changed();
@@ -133,6 +132,7 @@ export component LeftSidePanel {
                     max-height: self.width;
                     preferred-height: self.width;
                     icon: @image-url("../icons/krokiet_subsettings.svg");
+                    colorize-icon: true;
                     clicked => {
                         GuiState.visible_tool_settings = !GuiState.visible_tool_settings;
                     }

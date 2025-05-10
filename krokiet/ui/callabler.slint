@@ -1,5 +1,7 @@
 import { SelectMode, SortMode } from "common.slint";
-import {CurrentTab} from "common.slint";
+import { CurrentTab } from "common.slint";
+import { Palette } from "std-widgets.slint";
+import { Settings } from "settings.slint";
 
 export global Callabler {
     // Bottom panel operations
@@ -52,4 +54,9 @@ export global Callabler {
     callback open_cache_folder();
 
     callback open_link(string);
+
+    callback theme_changed();
+    theme_changed => {
+        Palette.color-scheme = Settings.dark_theme ? ColorScheme.dark : ColorScheme.light;
+    }
 }

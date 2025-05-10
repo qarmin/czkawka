@@ -1,21 +1,23 @@
-import { StyleMetrics, Palette } from "std-widgets.slint";
+import { Settings } from "settings.slint";
 
 export global ColorPalette {
-    in-out property <bool> dark_scheme: Palette.color-scheme == ColorScheme.dark;
     // Tabs at left side
-    in-out property <color> tab_selected_color: dark_scheme ? #353535 : #5e5e5e;
-    in-out property <color> tab_hovered_color: dark_scheme ? #49494926 : #80808014;
+    in-out property <color> tab_selected_color: Settings.dark_theme ? #353535 : #5e5e5e;
+    in-out property <color> tab_hovered_color: Settings.dark_theme ? #49494926 : #80808014;
     // ListView
-    in-out property <color> list_view_item_color: dark_scheme ? #222222 : #dddddd;
-    in-out property <color> list_view_item_hovered_color: dark_scheme ? #333333 : #d2d2d2;
-    in-out property <color> list_view_item_selected_color: dark_scheme ? #444444 : #cccccc;
-    in-out property <color> list_view_item_selected_hovered_color: dark_scheme ? #555555 : #bbbbbb;
+    in-out property <color> list_view_item_color: Settings.dark_theme ? #222222 : #dddddd;
+    in-out property <color> list_view_item_hovered_color: Settings.dark_theme ? #333333 : #d2d2d2;
+    in-out property <color> list_view_item_selected_color: Settings.dark_theme ? #444444 : #cccccc;
+    in-out property <color> list_view_item_selected_hovered_color: Settings.dark_theme ? #555555 : #bbbbbb;
 
-    in-out property <color> list_view_header_color: dark_scheme ? #111111 : #888888;
-    in-out property <color> list_view_clicked_header_color: dark_scheme ? #1a1a1a : #808080;
+    in-out property <color> list_view_header_color: Settings.dark_theme ? #111111 : #888888;
+    in-out property <color> list_view_clicked_header_color: Settings.dark_theme ? #1a1a1a : #808080;
     
     // Popup
-    in-out property <color> popup_background: dark_scheme ? #353535 : #5e5e5e;
+    in-out property <color> popup_background: Settings.dark_theme ? #353535 : #cecece;
+    in-out property <color> popup_background_border: Settings.dark_theme ? #222222 : #808080;
+    in-out property <color> popup_background_title_line: Settings.dark_theme ? #252525 : #9e9e9e;
+    in-out property <color> popup_border_color: Settings.dark_theme ? #000000 : #808080;
 
     public pure function get_listview_color(selected: bool, hovered: bool) -> color {
         if (selected) {
