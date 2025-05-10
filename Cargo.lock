@@ -3570,8 +3570,7 @@ dependencies = [
 [[package]]
 name = "i18n-config"
 version = "0.4.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8e88074831c0be5b89181b05e6748c4915f77769ecc9a4c372f88b169a8509c9"
+source = "git+https://github.com/qarmin/cargo-i18n.git?branch=fix_build_stability#5352ed9a4c049705bd44ffa016511dec213b5bfc"
 dependencies = [
  "basic-toml",
  "log",
@@ -3584,8 +3583,7 @@ dependencies = [
 [[package]]
 name = "i18n-embed"
 version = "0.15.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "669ffc2c93f97e6ddf06ddbe999fcd6782e3342978bb85f7d3c087c7978404c4"
+source = "git+https://github.com/qarmin/cargo-i18n.git?branch=fix_build_stability#5352ed9a4c049705bd44ffa016511dec213b5bfc"
 dependencies = [
  "arc-swap",
  "fluent",
@@ -3605,8 +3603,7 @@ dependencies = [
 [[package]]
 name = "i18n-embed-fl"
 version = "0.9.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "04b2969d0b3fc6143776c535184c19722032b43e6a642d710fa3f88faec53c2d"
+source = "git+https://github.com/qarmin/cargo-i18n.git?branch=fix_build_stability#5352ed9a4c049705bd44ffa016511dec213b5bfc"
 dependencies = [
  "find-crate",
  "fluent",
@@ -3624,8 +3621,7 @@ dependencies = [
 [[package]]
 name = "i18n-embed-impl"
 version = "0.8.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0f2cc0e0523d1fe6fc2c6f66e5038624ea8091b3e7748b5e8e0c84b1698db6c2"
+source = "git+https://github.com/qarmin/cargo-i18n.git?branch=fix_build_stability#5352ed9a4c049705bd44ffa016511dec213b5bfc"
 dependencies = [
  "find-crate",
  "i18n-config",
