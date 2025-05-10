@@ -78,6 +78,7 @@ fn main() {
 
     let shared_models = SharedModels::new_shared();
 
+    // Disabled for now, due invalid settings model at start
     // set_initial_gui_infos(&app);
 
     create_default_settings_files();
@@ -99,6 +100,10 @@ fn main() {
     connect_save(&app, Arc::clone(&shared_models));
     connect_row_selections(&app);
     connect_sort(&app);
+
+    // Popups gather their size, after starting/closing popup at least once
+    // This is simpler solution, than setting sizes of popups manually for each language
+    app.invoke_initialize_popup_sizes();
 
     app.run().expect("Failed to run app :(");
 

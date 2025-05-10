@@ -6,13 +6,14 @@ import { GuiState } from "gui_state.slint";
 
 export component PopupSortResults inherits Rectangle {
     callback show_popup();
+    callback close_popup();
     property <[SortModel]> model: GuiState.sort_results_list;
     property <length> item_height: 30px;
-    out property <length> item_width: 200px;
+    out property <length> item_width;
     out property <length> all_items_height: item_height * model.length;
 
     popup_window := PopupWindow {
-        width: item_width;
+        width <=> item_width;
         height: all_items_height;
 
         close-policy: PopupClosePolicy.close-on-click-outside;
@@ -25,7 +26,6 @@ export component PopupSortResults inherits Rectangle {
                 for i in model: Button {
                     text: i.name;
                     height: item_height;
-                    width: item_width;
                     clicked => {
                         Callabler.sort_items(i.data);
                         popup_window.close();
@@ -37,5 +37,8 @@ export component PopupSortResults inherits Rectangle {
 
     show_popup() => {
         popup_window.show();
+    }
+    close_popup() => {
+        popup_window.close();
     }
 }

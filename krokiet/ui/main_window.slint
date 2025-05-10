@@ -31,6 +31,7 @@ export component MainWindow inherits Window {
     callback show_move_folders_dialog(string);
     callback folders_move_choose_requested();
     callback reset_selection();
+    callback initialize_popup_sizes();
 
     title <=> Translations.main_window_title_text;
 
@@ -267,5 +268,12 @@ export component MainWindow inherits Window {
 
     reset_selection => {
         main_list.reset_selection();
+    }
+
+    initialize_popup_sizes => {
+        sort_popup_window.show_popup();
+        sort_popup_window.close_popup();
+        select_popup_window.show_popup();
+        select_popup_window.close_popup();
     }
 }
