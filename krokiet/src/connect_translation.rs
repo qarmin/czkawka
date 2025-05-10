@@ -333,7 +333,7 @@ fn translate_items(app: &MainWindow) {
     let gui_state = app.global::<GuiState>();
     gui_state.set_tools_model(ModelRc::new(VecModel::from(tools_model.to_vec())));
 
-    let sort_model: [SortModel; 7] = [
+    let sort_model: [SortModel; 8] = [
         SortModel {
             data: SortMode::ItemName,
             name: flk!("sort_by_item_name").into(),
@@ -357,6 +357,10 @@ fn translate_items(app: &MainWindow) {
         SortModel {
             data: SortMode::Selection,
             name: flk!("sort_by_selection").into(),
+        },
+        SortModel {
+            data: SortMode::Checked,
+            name: flk!("sort_by_checked").into(),
         },
         SortModel {
             data: SortMode::Reverse,
