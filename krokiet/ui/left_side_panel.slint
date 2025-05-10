@@ -5,7 +5,6 @@ import { GuiState } from "gui_state.slint";
 import { Callabler } from "callabler.slint";
 
 component TabItem {
-    in property <bool> scanning;
     in property <string> text;
     in property <CurrentTab> curr_tab;
     callback changed_current_tab();
@@ -65,7 +64,6 @@ component TabItem {
 }
 
 export component LeftSidePanel {
-    in-out property <bool> scanning;
     callback changed_current_tab();
     preferred-width: GuiState.left_panel_width;
     VerticalLayout {
@@ -95,7 +93,6 @@ export component LeftSidePanel {
 
             for r[idx] in tools_model: TabItem {
                 height: parent.element_size;
-                scanning: scanning;
                 text: r.name;
                 curr_tab: r.tab;
                 changed_current_tab() => {

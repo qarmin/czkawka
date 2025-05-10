@@ -4,6 +4,7 @@ import { BottomPanelVisibility } from "common.slint";
 import { GuiState } from "gui_state.slint";
 import { MainListModel } from "common.slint";
 import { Translations } from "translations.slint";
+import { Settings } from "settings.slint";
 
 export component VisibilityButton inherits Button {
     in-out property <BottomPanelVisibility> button_visibility;
@@ -85,7 +86,7 @@ export component ActionButtons inherits HorizontalLayout {
             height: parent.height;
             enabled: !scanning && lists_enabled;
             visible: !scanning && lists_enabled;
-            text: !self.visible ? "" : Translations.scan_button_text;
+            text: self.visible && Settings.show_only_icons ? "" : Translations.scan_button_text;
             icon: @image-url("../icons/krokiet_search.svg");
             colorize-icon: true;
             clicked => {
@@ -98,7 +99,7 @@ export component ActionButtons inherits HorizontalLayout {
             height: parent.height;
             visible: scanning;
             enabled: scanning && !stop_requested && root.lists_enabled;
-            text: !self.visible ? "" : Translations.stop_button_text;
+            text: self.visible && Settings.show_only_icons ? "" : Translations.stop_button_text;
             icon: @image-url("../icons/krokiet_stop.svg");
             colorize-icon: true;
             clicked => {
@@ -116,7 +117,7 @@ export component ActionButtons inherits HorizontalLayout {
         visible: lists_enabled;
         height: parent.height;
         enabled: !scanning && self.visible && results_available;
-        text: !self.visible ? "" : Translations.select_button_text;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.select_button_text;
         icon: @image-url("../icons/krokiet_select.svg");
         colorize-icon: true;
         clicked => {
@@ -128,7 +129,7 @@ export component ActionButtons inherits HorizontalLayout {
         visible: lists_enabled;
         height: parent.height;
         enabled: !scanning && self.visible && results_available;
-        text: !self.visible ? "" : Translations.move_button_text;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.move_button_text;
         icon: @image-url("../icons/krokiet_move.svg");
         colorize-icon: true;
         clicked => {
@@ -140,7 +141,7 @@ export component ActionButtons inherits HorizontalLayout {
         visible: lists_enabled;
         height: parent.height;
         enabled: !scanning && self.visible && results_available;
-        text: !self.visible ? "" : Translations.delete_button_text;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.delete_button_text;
         icon: @image-url("../icons/krokiet_delete.svg");
         colorize-icon: true;
         clicked => {
@@ -152,7 +153,7 @@ export component ActionButtons inherits HorizontalLayout {
         visible: lists_enabled;
         height: parent.height;
         enabled: !scanning && self.visible && results_available;
-        text: !self.visible ? "" : Translations.save_button_text;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.save_button_text;
         icon: @image-url("../icons/krokiet_save.svg");
         colorize-icon: true;
         clicked => {
@@ -164,7 +165,7 @@ export component ActionButtons inherits HorizontalLayout {
         visible: lists_enabled;
         height: parent.height;
         enabled: !scanning && self.visible && results_available;
-        text: !self.visible ? "" : Translations.sort_button_text;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.sort_button_text;
         icon: @image-url("../icons/krokiet_sort.svg");
         colorize-icon: true;
         clicked => {
@@ -176,7 +177,7 @@ export component ActionButtons inherits HorizontalLayout {
         visible: lists_enabled && GuiState.active_tab == CurrentTab.BadExtensions;
         height: parent.height;
         enabled: !scanning && self.visible && results_available;
-        text: !self.visible ? "" : Translations.rename_button_text;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.rename_button_text;
         icon: @image-url("../icons/krokiet_rename.svg");
         colorize-icon: true;
         clicked => {

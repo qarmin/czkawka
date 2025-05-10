@@ -227,6 +227,11 @@ export component SettingsList inherits VerticalLayout {
                 }   
             }
 
+            CheckBoxComponent {
+                name <=> Translations.settings_show_only_icons_text;
+                model <=> Settings.show_only_icons;
+            }
+
             HeaderText {
                 text <=> Translations.settings_general_settings_text;
             }

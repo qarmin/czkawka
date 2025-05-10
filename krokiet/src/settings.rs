@@ -318,6 +318,8 @@ pub struct BasicSettings {
     pub language: String,
     #[serde(default = "ttrue")]
     pub dark_theme: bool,
+    #[serde(default)]
+    pub show_only_icons: bool,
 }
 
 impl Default for BasicSettings {
@@ -553,6 +555,7 @@ pub fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicSettings
     app.window().set_size(WindowSize::Physical(PhysicalSize { width, height }));
 
     settings.set_dark_theme(basic_settings.dark_theme);
+    settings.set_show_only_icons(basic_settings.show_only_icons);
     app.global::<Callabler>().invoke_theme_changed();
 
     set_combobox_basic_settings_items(&settings, basic_settings);
@@ -885,6 +888,7 @@ pub fn collect_base_settings(app: &MainWindow) -> BasicSettings {
     let language = StringComboBoxItems::get_config_name_from_idx(lang_idx as usize, &collected_items.languages);
     // let language = LANGUAGE_LIST[lang_idx as usize].short_name.to_string();
     let dark_theme = settings.get_dark_theme();
+    let show_only_icons = settings.get_show_only_icons();
     BasicSettings {
         language,
         default_preset,
@@ -892,6 +896,7 @@ pub fn collect_base_settings(app: &MainWindow) -> BasicSettings {
         window_width,
         window_height,
         dark_theme,
+        show_only_icons,
     }
 }
 
