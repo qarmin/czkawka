@@ -81,31 +81,27 @@ export component ActionButtons inherits HorizontalLayout {
                             (active_tab == CurrentTab.BadExtensions && bad_extensions_model.length > 0);
     }
 
-    Rectangle {
-        scan_button := Button {
-            height: parent.height;
-            enabled: !scanning && lists_enabled;
-            visible: !scanning && lists_enabled;
-            text: self.visible && Settings.show_only_icons ? "" : Translations.scan_button_text;
-            icon: @image-url("../icons/krokiet_search.svg");
-            colorize-icon: true;
-            clicked => {
-                root.scanning = true;
-                root.scan_starting(GuiState.active_tab);
-            }
+    if (!scanning && lists_enabled): scan_button :=  Button {
+        height: parent.height;
+        enabled: !scanning && lists_enabled;
+        text: Settings.show_only_icons ? "" : Translations.scan_button_text;
+        icon: @image-url("../icons/krokiet_search.svg");
+        colorize-icon: true;
+        clicked => {
+            root.scanning = true;
+            root.scan_starting(GuiState.active_tab);
         }
+    }
 
-        stop_button := Button {
-            height: parent.height;
-            visible: scanning;
-            enabled: scanning && !stop_requested && root.lists_enabled;
-            text: self.visible && Settings.show_only_icons ? "" : Translations.stop_button_text;
-            icon: @image-url("../icons/krokiet_stop.svg");
-            colorize-icon: true;
-            clicked => {
-                root.scan_stopping();
-                root.stop_requested = true;
-            }
+    if (scanning): stop_button := Button {
+        height: parent.height;
+        enabled: scanning && !stop_requested && root.lists_enabled;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.stop_button_text;
+        icon: @image-url("../icons/krokiet_stop.svg");
+        colorize-icon: true;
+        clicked => {
+            root.scan_stopping();
+            root.stop_requested = true;
         }
     }
 
