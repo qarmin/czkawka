@@ -10,6 +10,6 @@ Comment[zh_CN]=可用于清理文件副本、空文件夹、相似文件等的�
 Comment[zh_TW]=可用於清理重複檔案、空資料夾、相似檔案等的系統清理工具
 Icon=com.github.qarmin.czkawka
 Categories=System;FileTools
-Keywords=Hiccup;duplicate;same;similar;cleaner
+Keywords=Hiccup;duplicate;same;similar;cleaner;copy;copies;compare;files;
 StartupWMClass=czkawka_gui
 TryExec=czkawka_gui
