@@ -196,7 +196,8 @@ impl SimilarVideos {
         let vhash = match VideoHashBuilder::default().hash(file_entry.path.clone()) {
             Ok(t) => t,
             Err(e) => {
-                file_entry.error = format!("Failed to hash file, reason {e}");
+                let path = file_entry.path.to_string_lossy();
+                file_entry.error = format!("Failed to hash file {path}: reason {e}");
                 return file_entry;
             }
         };
