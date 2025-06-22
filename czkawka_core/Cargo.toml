@@ -29,7 +29,7 @@ bitflags = "2.6"
 lofty = "0.22"
 
 # Needed by broken files
-zip = { version = "2.2", features = ["aes-crypto", "bzip2", "deflate", "time"], default-features = false }
+zip = { version = "4.0", features = ["aes-crypto", "bzip2", "deflate", "time"], default-features = false }
 audio_checker = "0.1"
 pdf = "0.9"
 
@@ -89,16 +89,14 @@ file-rotate = "0.8.0"
 
 log-panics = { version = "2.1.0", features = ["with-backtrace"] }
 
-# Don't update anymore! This crate has a bug. I've submitted a patch upstream, but the change is breaking. The current code relies on the bug to work correctly!
-# Warning by CalunVier 2024.7.15
 [target.'cfg(windows)'.dependencies]
-file-id = "=0.2.1"
+file-id = "0.2.2"
 
 [build-dependencies]
 rustc_version = "0.4"
 
 [dev-dependencies]
-criterion = "0.5"
+criterion =  { version = "0.6", default-features = false, features = [] }
 
 [[bench]]
 name = "hash_calculation_benchmark"

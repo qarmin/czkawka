@@ -186,7 +186,9 @@ fn select_all(model: &ModelRc<MainListModel>) -> ModelRc<MainListModel> {
 
 fn deselect_all(model: &ModelRc<MainListModel>) -> ModelRc<MainListModel> {
     let mut old_data = model.iter().collect::<Vec<_>>();
-    old_data.iter_mut().for_each(|x| x.checked = false);
+    for x in &mut old_data {
+        x.checked = false;
+    }
     ModelRc::new(VecModel::from(old_data))
 }
 
