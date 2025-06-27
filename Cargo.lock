@@ -1500,6 +1500,7 @@ dependencies = [
  "crc32fast",
  "criterion",
  "crossbeam-channel",
+ "deunicode",
  "directories-next",
  "ffmpeg_cmdline_utils",
  "file-id",
@@ -1728,6 +1729,12 @@ dependencies = [
  "quote",
  "syn 2.0.104",
 ]
+
+[[package]]
+name = "deunicode"
+version = "1.6.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "abd57806937c9cc163efc8ea3910e00a62e2aeb0b8119f1793a978088f8f6b04"
 
 [[package]]
 name = "digest"

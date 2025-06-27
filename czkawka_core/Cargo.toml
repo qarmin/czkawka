@@ -88,6 +88,7 @@ static_assertions = "1.1.0"
 file-rotate = "0.8.0"
 
 log-panics = { version = "2.1.0", features = ["with-backtrace"] }
+deunicode = "1.6.2"
 
 [target.'cfg(windows)'.dependencies]
 file-id = "0.2.2"
