@@ -1027,7 +1027,7 @@ fn get_simplified_name_internal(what: &str, ignore_numbers: bool) -> String {
 
                         // If is equal, then we trying to deunicode e.g. dot, comma etc.
                         // We just ignore char, because it is mostly useless, but we add space instead it if it wasn't added already
-                        if new_items.iter().next() == Some(&character) {
+                        if new_items.first() == Some(&character) {
                             if !space_before {
                                 new_what.push(' ');
                                 space_before = true;
@@ -1082,7 +1082,7 @@ mod tests {
     use crate::tools::same_music::get_simplified_name;
 
     #[test]
-    fn test_strings() {
+    fn test_simplified_names() {
         let cases = [
             ("roman ( ziemniak ) ", "roman"),
             ("  HH)    ", "HH"),

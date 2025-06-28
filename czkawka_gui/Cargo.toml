@@ -36,6 +36,8 @@ rayon = "1.10"
 
 czkawka_core = { path = "../czkawka_core", version = "9.0.0", features = [] }
 
+resvg = { version = "0.45.1", default-features = false }
+
 [dev-dependencies]
 rand = "0.9.0"
 
