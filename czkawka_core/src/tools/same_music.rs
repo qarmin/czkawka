@@ -587,7 +587,6 @@ impl SameMusic {
         }
     }
 
-    #[fun_time(message = "compare_fingerprints", level = "debug")]
     fn compare_fingerprints(
         &mut self,
         stop_flag: Option<&Arc<AtomicBool>>,
