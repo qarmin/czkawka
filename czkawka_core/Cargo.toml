@@ -78,6 +78,7 @@ nom-exif = "2.1.0"
 
 state = "0.6"
 trash = "5.1"
+dunce = "1.0.5"
 
 os_info = { version = "3", default-features = false }
 log = "0.4.22"

@@ -116,23 +116,10 @@ impl Directories {
             return (None, messages);
         }
 
-        // Try to canonicalize them
-        if cfg!(windows) {
-            // Only canonicalize if it's not a network path
-            // This can be done by checking if path starts with \\?\UNC\
-            if let Ok(dir_can) = directory.canonicalize() {
-                let dir_can_str = dir_can.to_string_lossy().to_string();
-                if let Some(dir_can_str) = dir_can_str.strip_prefix(r"\\?\") {
-                    if dir_can_str.chars().nth(1) == Some(':') {
-                        directory = PathBuf::from(dir_can_str);
-                    }
-                }
-            }
-        } else {
-            if let Ok(dir) = directory.canonicalize() {
-                directory = dir;
-            }
+        if let Ok(dir) = dunce::canonicalize(&directory) {
+            directory = dir;
         }
+
         (Some(directory), messages)
     }
 
