@@ -15,7 +15,7 @@ use file_rotate::compression::Compression;
 use file_rotate::suffix::{AppendTimestamp, FileLimit};
 use file_rotate::{ContentLimit, FileRotate};
 use fun_time::fun_time;
-use handsome_logger::{ColorChoice, CombinedLogger, ConfigBuilder, SharedLogger, TermLogger, TerminalMode, WriteLogger};
+use handsome_logger::{ColorChoice, CombinedLogger, ConfigBuilder, FormatText, SharedLogger, TermLogger, TerminalMode, TimeFormat, WriteLogger};
 use log::{LevelFilter, Record, debug, info, warn};
 use once_cell::sync::OnceCell;
 
@@ -198,6 +198,8 @@ pub fn setup_logger(disabled_terminal_printing: bool, app_name: &str) {
         .set_level(file_log_level)
         .set_write_once(true)
         .set_message_filtering(Some(filtering_messages))
+        .set_time_format(TimeFormat::TimeWithMicro, None)
+        .set_format_text(FormatText::DefaultWithThreadFile.get(), None)
         .build();
 
     let combined_logger = (|| {
