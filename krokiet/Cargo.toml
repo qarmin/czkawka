@@ -28,8 +28,8 @@ fs_extra = "1.3" # TODO replace with less buggy library
 trash = "5.1"
 
 # Translations
-i18n-embed = { version = "0.15", features = ["fluent-system", "desktop-requester"] }
-i18n-embed-fl = "0.9"
+i18n-embed = { version = "0.16", features = ["fluent-system", "desktop-requester"] }
+i18n-embed-fl = "0.10"
 rust-embed = { version = "8.5", features = ["debug-embed"] }
 once_cell = "1.20"
 
