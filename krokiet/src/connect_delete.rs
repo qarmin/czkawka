@@ -1,11 +1,12 @@
-use czkawka_core::common::remove_folder_if_contains_only_empty_folders;
+use std::path::MAIN_SEPARATOR;
+
 use czkawka_core::common_messages::Messages;
 use rayon::prelude::*;
-use slint::{ComponentHandle, ModelRc, VecModel};
+use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
-use crate::common::{get_is_header_mode, get_tool_model, set_tool_model};
+use crate::common::{get_str_name_idx, get_str_path_idx, get_tool_model, set_tool_model};
 use crate::connect_row_selection::reset_selection;
-use crate::model_operations::{collect_full_path_from_model, filter_out_checked_items};
+use crate::model_operations::{ModelProcessor, get_shared_str_item};
 use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow, Settings, flk};
 
 pub fn connect_delete_button(app: &MainWindow) {
@@ -19,11 +20,15 @@ pub fn connect_delete_button(app: &MainWindow) {
 
         let settings = app.global::<Settings>();
 
-        let (errors, new_model) = handle_delete_items(&app, &model, active_tab, settings.get_move_to_trash());
+        let processor = ModelProcessor::new(&model, active_tab);
+        let Some((new_model, errors, _items_queued_to_delete, items_deleted)) = processor.delete_selected_items(settings.get_move_to_trash()) else {
+            app.global::<GuiState>().set_info_text("".into());
+            return;
+        };
 
-        if let Some(new_model) = new_model {
-            set_tool_model(&app, active_tab, new_model);
-        }
+        app.set_text_summary_text(flk!("rust_delete_summary", deleted = items_deleted, failed = errors.len()).into());
+
+        set_tool_model(&app, active_tab, ModelRc::new(VecModel::from(new_model)));
 
         app.global::<GuiState>().set_info_text(Messages::new_from_errors(errors).create_messages_text().into());
 
@@ -33,45 +38,128 @@ pub fn connect_delete_button(app: &MainWindow) {
     });
 }
 
-fn handle_delete_items(app: &MainWindow, items: &ModelRc<MainListModel>, active_tab: CurrentTab, remove_to_trash: bool) -> (Vec<String>, Option<ModelRc<MainListModel>>) {
-    let (entries_to_delete, entries_left) = filter_out_checked_items(items, get_is_header_mode(active_tab));
+impl<'a> ModelProcessor<'a> {
+    pub fn delete_selected_items(&self, remove_to_trash: bool) -> Option<(Vec<MainListModel>, Vec<String>, usize, usize)> {
+        let is_empty_folder_tab = self.active_tab == CurrentTab::EmptyFolders;
+        let path_idx = get_str_path_idx(self.active_tab);
+        let name_idx = get_str_name_idx(self.active_tab);
 
-    if !entries_to_delete.is_empty() {
-        let vec_items_to_remove = collect_full_path_from_model(&entries_to_delete, active_tab);
-        let errors = remove_selected_items(vec_items_to_remove, active_tab, remove_to_trash);
-        // deselect_all_items(&mut entries_left); // TODO - this now probably is not needed, because selected items were removed
-        app.set_text_summary_text(flk!("rust_delete_summary", deleted = (entries_to_delete.len() - errors.len()), failed = errors.len()).into());
-        let r = ModelRc::new(VecModel::from(entries_left)); // TODO here maybe should also stay old model if entries cannot be removed
-        return (errors, Some(r));
+        let items = self.items.iter().collect::<Vec<_>>();
+        let items_queued_to_delete = items.iter().filter(|item| item.checked).count();
+        if items_queued_to_delete == 0 {
+            return None;
+        }
+
+        let items_simplified = items
+            .iter()
+            .map(|model| {
+                if model.checked {
+                    Some(format!("{}{MAIN_SEPARATOR}{}", get_shared_str_item(model, path_idx), get_shared_str_item(model, name_idx)))
+                } else {
+                    None
+                }
+            })
+            .enumerate()
+            .collect::<Vec<_>>();
+
+        let mut output: Vec<_> = items_simplified
+            .into_par_iter()
+            .map(|(idx, data)| {
+                let Some(data) = data else {
+                    return (idx, None);
+                };
+
+                let res = remove_single_item(&data, is_empty_folder_tab, remove_to_trash);
+                (idx, Some(res))
+            })
+            .collect();
+        output.sort_by_key(|(idx, _)| *idx);
+        let mut errors = vec![];
+        let mut items_deleted = 0;
+
+        let new_model = output
+            .into_iter()
+            .map(|(_idx, res)| res)
+            .zip(items)
+            .filter_map(|(res, model)| match res {
+                Some(Ok(())) => {
+                    items_deleted += 1;
+                    None
+                }
+                Some(Err(err)) => {
+                    errors.push(err);
+                    Some(model)
+                }
+                None => Some(model),
+            })
+            .collect();
+
+        let new_model = self.remove_single_items_in_groups(new_model);
+
+        Some((new_model, errors, items_queued_to_delete, items_deleted))
     }
-    (vec![], None)
 }
 
-// TODO delete in parallel items, consider to add progress bar
-// For empty folders double check if folders are really empty - this function probably should be run in thread
-// and at the end should be send signal to main thread to update model
-fn remove_selected_items(items_to_remove: Vec<String>, active_tab: CurrentTab, remove_to_trash: bool) -> Vec<String> {
-    // Iterate over empty folders and not delete them if they are not empty
-    if active_tab == CurrentTab::EmptyFolders {
-        items_to_remove
-            .into_par_iter()
-            .filter_map(|item| remove_folder_if_contains_only_empty_folders(item, remove_to_trash).err())
-            .collect()
+#[cfg(not(test))]
+fn remove_single_item(item: &str, is_folder_tab: bool, remove_to_trash: bool) -> Result<(), String> {
+    log::error!("remove_single_item: {item:?}, is_folder_tab: {is_folder_tab}, remove_to_trash: {remove_to_trash}");
+    if is_folder_tab {
+        return czkawka_core::common::remove_folder_if_contains_only_empty_folders(item, remove_to_trash);
+    }
+    if remove_to_trash {
+        if let Err(e) = trash::delete(item) {
+            return Err(flk!("rust_error_moving_to_trash", error = e.to_string()));
+        }
     } else {
-        items_to_remove
-            .into_par_iter()
-            .filter_map(|item| {
-                if remove_to_trash {
-                    if let Err(e) = trash::delete(item) {
-                        return Some(flk!("rust_error_moving_to_trash", error = e.to_string()));
-                    }
-                } else {
-                    if let Err(e) = std::fs::remove_file(item) {
-                        return Some(flk!("rust_error_removing_file", error = e.to_string()));
-                    }
-                }
-                None
-            })
-            .collect()
+        if let Err(e) = std::fs::remove_file(item) {
+            return Err(flk!("rust_error_removing_file", error = e.to_string()));
+        }
+    }
+    Ok(())
+}
+
+#[cfg(test)]
+fn remove_single_item(item: &str, _is_folder_tab: bool, _remove_to_trash: bool) -> Result<(), String> {
+    if item.contains("test_error") {
+        return Err(format!("Test error for item: {item}"));
+    }
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::test_common::{create_model_from_model_vec, get_model_vec};
+
+    #[test]
+    fn test_no_delete_items() {
+        let model = get_model_vec(10);
+        let model = create_model_from_model_vec(&model);
+        let processor = ModelProcessor::new(&model, CurrentTab::EmptyFolders);
+        assert!(processor.delete_selected_items(false).is_none());
+    }
+
+    #[test]
+    fn test_delete_selected_items() {
+        let mut model = get_model_vec(10);
+        model[0].checked = true;
+        model[0].val_str = ModelRc::new(VecModel::from(vec!["normal1".to_string().into(); 10]));
+        model[1].checked = true;
+        model[1].val_str = ModelRc::new(VecModel::from(vec!["normal2".to_string().into(); 10]));
+        model[3].checked = true;
+        model[3].val_str = ModelRc::new(VecModel::from(vec!["test_error".to_string().into(); 10]));
+        let model = create_model_from_model_vec(&model);
+        let processor = ModelProcessor::new(&model, CurrentTab::EmptyFolders);
+        let (new_model, errors, items_queued_to_delete, items_deleted) = processor.delete_selected_items(false).unwrap();
+
+        assert_eq!(new_model.len(), 8);
+        assert_eq!(errors.len(), 1);
+        assert_eq!(items_queued_to_delete, 3);
+        assert_eq!(items_deleted, 2);
+
+        assert!(new_model[1].checked);
+        assert!(new_model[1].val_str.iter().all(|s| s == "test_error"));
+        assert!(!new_model[0].checked);
+        assert!(new_model.iter().skip(2).all(|model| !model.checked));
     }
 }

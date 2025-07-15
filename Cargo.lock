@@ -4113,6 +4113,7 @@ dependencies = [
  "i18n-embed-fl",
  "image 0.25.6",
  "image_hasher",
+ "itertools 0.14.0",
  "log",
  "once_cell",
  "open",

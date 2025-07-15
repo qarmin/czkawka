@@ -1,8 +1,6 @@
-use std::path::MAIN_SEPARATOR;
-
 use slint::{Model, ModelRc, SharedString};
 
-use crate::common::{get_str_name_idx, get_str_path_idx, get_str_proper_extension};
+use crate::common::{get_is_header_mode, get_str_name_idx, get_str_path_idx, get_str_proper_extension};
 use crate::{CurrentTab, MainListModel};
 
 pub fn deselect_all_items(items: &mut [MainListModel]) {
@@ -20,18 +18,6 @@ pub fn select_all_items(items: &mut [MainListModel]) {
     }
 }
 
-pub fn collect_full_path_from_model(items: &[MainListModel], active_tab: CurrentTab) -> Vec<String> {
-    let path_idx = get_str_path_idx(active_tab);
-    let name_idx = get_str_name_idx(active_tab);
-    items
-        .iter()
-        .map(|item| {
-            let path = get_shared_str_item(item, path_idx);
-            let name = get_shared_str_item(item, name_idx);
-            format!("{path}{MAIN_SEPARATOR}{name}")
-        })
-        .collect::<Vec<_>>()
-}
 pub fn collect_path_name_from_model(items: &[MainListModel], active_tab: CurrentTab) -> Vec<(String, String)> {
     let path_idx = get_str_path_idx(active_tab);
     let name_idx = get_str_name_idx(active_tab);
@@ -50,11 +36,45 @@ pub fn collect_path_name_and_proper_extension_from_model(items: &[MainListModel]
 
 #[inline]
 pub fn get_str_item(main_list_model: &MainListModel, idx: usize) -> String {
-    main_list_model.val_str.iter().nth(idx).unwrap_or_else(|| panic!("Failed to get {idx} element")).to_string()
+    main_list_model
+        .val_str
+        .iter()
+        .nth(idx)
+        .unwrap_or_else(|| debug_print_main_list_model_items(main_list_model, idx))
+        .to_string()
 }
 #[inline]
 pub fn get_shared_str_item(main_list_model: &MainListModel, idx: usize) -> SharedString {
-    main_list_model.val_str.iter().nth(idx).unwrap_or_else(|| panic!("Failed to get {idx} element"))
+    main_list_model
+        .val_str
+        .iter()
+        .nth(idx)
+        .unwrap_or_else(|| debug_print_main_list_model_items(main_list_model, idx))
+}
+
+pub fn debug_print_main_list_model_items(list_model: &MainListModel, idx: usize) -> ! {
+    let val_int = list_model.val_int.iter().collect::<Vec<_>>();
+    let val_str = list_model.val_str.iter().collect::<Vec<_>>();
+    panic!(
+        "Failed to get idx {idx} element, with items: checked: {}, filled_header_row: {}, header_row: {}, selected_row: {}, val_int: {val_int:?}, val_str: {val_str:?}",
+        list_model.checked, list_model.filled_header_row, list_model.header_row, list_model.selected_row
+    );
+}
+
+pub struct ModelProcessor<'a> {
+    pub items: &'a ModelRc<MainListModel>,
+    pub active_tab: CurrentTab,
+}
+
+impl<'a> ModelProcessor<'a> {
+    pub fn new(items: &'a ModelRc<MainListModel>, active_tab: CurrentTab) -> Self {
+        Self { items, active_tab }
+    }
+
+    pub fn remove_single_items_in_groups(&self, items: Vec<MainListModel>) -> Vec<MainListModel> {
+        let have_header = get_is_header_mode(self.active_tab);
+        remove_single_items_in_groups(items, have_header)
+    }
 }
 
 // Removes orphan items in groups
