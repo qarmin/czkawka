@@ -5,7 +5,7 @@ use slint::{ComponentHandle, ModelRc, VecModel};
 
 use crate::common::{get_is_header_mode, get_tool_model, set_tool_model};
 use crate::connect_row_selection::reset_selection;
-use crate::model_operations::{collect_full_path_from_model, deselect_all_items, filter_out_checked_items};
+use crate::model_operations::{collect_full_path_from_model, filter_out_checked_items};
 use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow, Settings, flk};
 
 pub fn connect_delete_button(app: &MainWindow) {
@@ -34,12 +34,12 @@ pub fn connect_delete_button(app: &MainWindow) {
 }
 
 fn handle_delete_items(app: &MainWindow, items: &ModelRc<MainListModel>, active_tab: CurrentTab, remove_to_trash: bool) -> (Vec<String>, Option<ModelRc<MainListModel>>) {
-    let (entries_to_delete, mut entries_left) = filter_out_checked_items(items, get_is_header_mode(active_tab));
+    let (entries_to_delete, entries_left) = filter_out_checked_items(items, get_is_header_mode(active_tab));
 
     if !entries_to_delete.is_empty() {
         let vec_items_to_remove = collect_full_path_from_model(&entries_to_delete, active_tab);
         let errors = remove_selected_items(vec_items_to_remove, active_tab, remove_to_trash);
-        deselect_all_items(&mut entries_left); // TODO - this now probably is not needed, because selected items were removed
+        // deselect_all_items(&mut entries_left); // TODO - this now probably is not needed, because selected items were removed
         app.set_text_summary_text(flk!("rust_delete_summary", deleted = (entries_to_delete.len() - errors.len()), failed = errors.len()).into());
         let r = ModelRc::new(VecModel::from(entries_left)); // TODO here maybe should also stay old model if entries cannot be removed
         return (errors, Some(r));

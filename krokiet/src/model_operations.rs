@@ -57,58 +57,67 @@ pub fn get_shared_str_item(main_list_model: &MainListModel, idx: usize) -> Share
     main_list_model.val_str.iter().nth(idx).unwrap_or_else(|| panic!("Failed to get {idx} element"))
 }
 
-pub fn filter_out_checked_items(items: &ModelRc<MainListModel>, have_header: bool) -> (Vec<MainListModel>, Vec<MainListModel>) {
-    if cfg!(debug_assertions) {
-        check_if_header_is_checked(items);
-        check_if_header_is_selected_but_should_not_be(items, have_header);
-    }
-
-    let (entries_to_delete, mut entries_left): (Vec<_>, Vec<_>) = items.iter().partition(|item| item.checked);
-
+// Removes orphan items in groups
+pub fn remove_single_items_in_groups(mut items: Vec<MainListModel>, have_header: bool) -> Vec<MainListModel> {
     // When have header, we must also throw out orphaned items
-    if have_header && !entries_left.is_empty() {
+    if have_header && !items.is_empty() {
         // First row must be header
         // If assert fails, that means, that we checked that for mode that not have headers
-        // And this needs to be changed
-        assert!(entries_left[0].header_row);
-        let is_filled_header = entries_left[0].filled_header_row;
+        // or that we somehow removed header row, which should be
+        assert!(items[0].header_row);
+        assert!(!items[0].checked);
+        assert!(!items[0].selected_row);
+        let is_filled_header = items[0].filled_header_row;
 
-        if is_filled_header && entries_left.len() <= 2 {
-            if entries_left.len() == 2 {
-                if entries_left[1].header_row {
-                    entries_left.clear();
+        if is_filled_header && items.len() <= 2 {
+            if items.len() == 2 {
+                if items[1].header_row {
+                    items.clear();
                 }
             } else {
-                entries_left.clear();
+                items.clear();
             }
-        } else if !is_filled_header && entries_left.len() <= 3 {
-            if entries_left.len() == 3 {
-                if entries_left[1].header_row || entries_left[2].header_row {
-                    entries_left.clear();
+        } else if !is_filled_header && items.len() <= 3 {
+            if items.len() == 3 {
+                if items[1].header_row || items[2].header_row {
+                    items.clear();
                 }
             } else {
-                entries_left.clear();
+                items.clear();
             }
         } else {
             let header_step = if is_filled_header { 1 } else { 2 };
 
             let mut last_header = 0;
             let mut new_items: Vec<MainListModel> = Vec::new();
-            for i in 1..entries_left.len() {
-                if entries_left[i].header_row {
+            for i in 1..items.len() {
+                if items[i].header_row {
                     if i - last_header > header_step {
-                        new_items.extend(entries_left[last_header..i].iter().cloned());
+                        new_items.extend(items[last_header..i].iter().cloned());
                     }
                     last_header = i;
                 }
             }
-            if entries_left.len() - last_header > header_step {
-                new_items.extend(entries_left[last_header..].iter().cloned());
+            if items.len() - last_header > header_step {
+                new_items.extend(items[last_header..].iter().cloned());
             }
 
-            entries_left = new_items;
+            items = new_items;
         }
     }
+
+    items
+}
+
+pub fn filter_out_checked_items(items: &ModelRc<MainListModel>, have_header: bool) -> (Vec<MainListModel>, Vec<MainListModel>) {
+    if cfg!(debug_assertions) {
+        check_if_header_is_checked(items);
+        check_if_header_is_selected_but_should_not_be(items, have_header);
+    }
+
+    let (entries_to_delete, entries_left): (Vec<_>, Vec<_>) = items.iter().partition(|item| item.checked);
+
+    let entries_left = remove_single_items_in_groups(entries_left, have_header);
 
     (entries_to_delete, entries_left)
 }
