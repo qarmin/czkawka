@@ -39,29 +39,19 @@ pub fn connect_delete_button(app: &MainWindow) {
 }
 
 impl<'a> ModelProcessor<'a> {
-    pub fn delete_selected_items(&self, remove_to_trash: bool) -> Option<(Vec<MainListModel>, Vec<String>, usize, usize)> {
+    fn delete_selected_items(&self, remove_to_trash: bool) -> Option<(Vec<MainListModel>, Vec<String>, usize, usize)> {
         let is_empty_folder_tab = self.active_tab == CurrentTab::EmptyFolders;
-        let path_idx = get_str_path_idx(self.active_tab);
-        let name_idx = get_str_name_idx(self.active_tab);
 
-        let items = self.items.iter().collect::<Vec<_>>();
-        let items_queued_to_delete = items.iter().filter(|item| item.checked).count();
-        if items_queued_to_delete == 0 {
-            return None;
-        }
+        let (items, items_simplified, items_queued_to_delete) = self.prepare_delete_models()?;
 
-        let items_simplified = items
-            .iter()
-            .map(|model| {
-                if model.checked {
-                    Some(format!("{}{MAIN_SEPARATOR}{}", get_shared_str_item(model, path_idx), get_shared_str_item(model, name_idx)))
-                } else {
-                    None
-                }
-            })
-            .enumerate()
-            .collect::<Vec<_>>();
+        let output = self.delete_items(items_simplified, is_empty_folder_tab, remove_to_trash);
 
+        let (new_model, errors, items_deleted) = self.collect_delete_model(output, items);
+
+        Some((new_model, errors, items_queued_to_delete, items_deleted))
+    }
+
+    fn delete_items(&self, items_simplified: Vec<(usize, Option<String>)>, is_empty_folder_tab: bool, remove_to_trash: bool) -> Vec<(usize, Option<Result<(), String>>)> {
         let mut output: Vec<_> = items_simplified
             .into_par_iter()
             .map(|(idx, data)| {
@@ -74,6 +64,11 @@ impl<'a> ModelProcessor<'a> {
             })
             .collect();
         output.sort_by_key(|(idx, _)| *idx);
+
+        output
+    }
+
+    fn collect_delete_model(&self, output: Vec<(usize, Option<Result<(), String>>)>, items: Vec<MainListModel>) -> (Vec<MainListModel>, Vec<String>, usize) {
         let mut errors = vec![];
         let mut items_deleted = 0;
 
@@ -96,22 +91,48 @@ impl<'a> ModelProcessor<'a> {
 
         let new_model = self.remove_single_items_in_groups(new_model);
 
-        Some((new_model, errors, items_queued_to_delete, items_deleted))
+        (new_model, errors, items_deleted)
+    }
+
+    fn prepare_delete_models(&self) -> Option<(Vec<MainListModel>, Vec<(usize, Option<String>)>, usize)> {
+        let path_idx = get_str_path_idx(self.active_tab);
+        let name_idx = get_str_name_idx(self.active_tab);
+
+        let items = self.items.iter().collect::<Vec<_>>();
+        let items_queued_to_delete = items.iter().filter(|item| item.checked).count();
+        if items_queued_to_delete == 0 {
+            return None;
+        }
+
+        // Due to slint limitation in sending MainListModel to Rayon, we need to extract Sized arguments, that are used
+        // and then put them to rayon and then sort, to be able to remove items that were deleted
+        // It is quite inefficient, but it is the only way to do it()
+        let items_simplified = items
+            .iter()
+            .map(|model| {
+                if model.checked {
+                    Some(format!("{}{MAIN_SEPARATOR}{}", get_shared_str_item(model, path_idx), get_shared_str_item(model, name_idx)))
+                } else {
+                    None
+                }
+            })
+            .enumerate()
+            .collect::<Vec<_>>();
+        Some((items, items_simplified, items_queued_to_delete))
     }
 }
 
 #[cfg(not(test))]
-fn remove_single_item(item: &str, is_folder_tab: bool, remove_to_trash: bool) -> Result<(), String> {
-    log::error!("remove_single_item: {item:?}, is_folder_tab: {is_folder_tab}, remove_to_trash: {remove_to_trash}");
+fn remove_single_item(full_path: &str, is_folder_tab: bool, remove_to_trash: bool) -> Result<(), String> {
     if is_folder_tab {
-        return czkawka_core::common::remove_folder_if_contains_only_empty_folders(item, remove_to_trash);
+        return czkawka_core::common::remove_folder_if_contains_only_empty_folders(full_path, remove_to_trash);
     }
     if remove_to_trash {
-        if let Err(e) = trash::delete(item) {
+        if let Err(e) = trash::delete(full_path) {
             return Err(flk!("rust_error_moving_to_trash", error = e.to_string()));
         }
     } else {
-        if let Err(e) = std::fs::remove_file(item) {
+        if let Err(e) = std::fs::remove_file(full_path) {
             return Err(flk!("rust_error_removing_file", error = e.to_string()));
         }
     }
@@ -119,9 +140,9 @@ fn remove_single_item(item: &str, is_folder_tab: bool, remove_to_trash: bool) ->
 }
 
 #[cfg(test)]
-fn remove_single_item(item: &str, _is_folder_tab: bool, _remove_to_trash: bool) -> Result<(), String> {
-    if item.contains("test_error") {
-        return Err(format!("Test error for item: {item}"));
+fn remove_single_item(full_path: &str, _is_folder_tab: bool, _remove_to_trash: bool) -> Result<(), String> {
+    if full_path.contains("test_error") {
+        return Err(format!("Test error for item: {full_path}"));
     }
     Ok(())
 }

@@ -224,6 +224,32 @@ mod tests {
     use crate::test_common::{create_model_from_model_vec, get_model_vec};
 
     #[test]
+    fn find_header_idx_returns_correct_indices_for_headers() {
+        let mut model = get_model_vec(5);
+        model[1].header_row = true;
+        model[3].header_row = true;
+
+        let header_indices = find_header_idx_and_deselect_all(&mut model);
+
+        assert_eq!(header_indices, vec![1, 3, 5]);
+    }
+
+    #[test]
+    fn find_header_idx_marks_all_non_header_rows_as_unchecked() {
+        let mut model = get_model_vec(5);
+        model.iter_mut().for_each(|row| row.checked = true);
+        model[1].header_row = true;
+
+        find_header_idx_and_deselect_all(&mut model);
+
+        assert!(!model[0].checked);
+        assert!(model[1].checked); // header row
+        assert!(!model[2].checked);
+        assert!(!model[3].checked);
+        assert!(!model[4].checked);
+    }
+
+    #[test]
     fn select_all_marks_all_non_header_rows_as_checked() {
         let mut model = get_model_vec(5);
         model[1].header_row = true;
