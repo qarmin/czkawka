@@ -7,13 +7,15 @@
 ### Core
 - Converted `println`/`eprintln` to logging functions - [#1478](https://github.com/qarmin/czkawka/pull/1478)
 - Slightly improved cache loading/saving speed - [#1478](https://github.com/qarmin/czkawka/pull/1478)
-- Messages and panics are now also logged to a file (can be disabled via `DISABLE_FILE_LOGGING`) - [#1508](https://github.com/qarmin/czkawka/pull/1508)
-- Added a 4GB memory limit when loading/saving cache to avoid crashes - [#1508](https://github.com/qarmin/czkawka/pull/1508)
+- Messages and panics are now also logged to a file (can be disabled by setting env `DISABLE_FILE_LOGGING`) - [#1508](https://github.com/qarmin/czkawka/pull/1508)
+- Added a 4GB memory limit when loading/saving cache to avoid out of memory crashes with broken cache - [#1508](https://github.com/qarmin/czkawka/pull/1508)
+- Czkawka binaries are now reproducible after fixing 
 
 ### GTK Gui
-- Now uses new icons — less pretty, but released under a truly free CC BY license - [#1478](https://github.com/qarmin/czkawka/pull/1478)
+- New icons — less pretty, but created by me and released under a truly free CC BY license - [#1478](https://github.com/qarmin/czkawka/pull/1478)
 - Fixed crash when removing outdated cache - [#1508](https://github.com/qarmin/czkawka/pull/1508)
 - Fixed missing file/folder names for similar videos in reference folders - [#1520](https://github.com/qarmin/czkawka/pull/1520)
+- Fixed crashes when svg pixbuf loader is not available - []()
 
 ### Krokiet
 - Added ability to select multiple items with mouse and keyboard - [#1478](https://github.com/qarmin/czkawka/pull/1478)
@@ -23,7 +25,9 @@
 - Improved popup styling - [#1520](https://github.com/qarmin/czkawka/pull/1520)
 - Dark/Light theme can now be switched at runtime - [#1520](https://github.com/qarmin/czkawka/pull/1520)
 - Changed icon color to white for dark theme to improve visibility - [#1520](https://github.com/qarmin/czkawka/pull/1520)
-- Added ability to disable text on buttons - [#1520](https://github.com/qarmin/czkawka/pull/1520)
+- Added ability to hide text on buttons - [#1520](https://github.com/qarmin/czkawka/pull/1520)
+- Multithreaded removing of files - []()
+- Failed to remove/rename files, do not hide from results list - []()
 
 ### External
 - There is a new unofficial Tauri-based frontend for Czkawka - [Czkawka Tauri](https://github.com/shixinhuang99/czkawka-tauri)
@@ -31,7 +35,7 @@
 
 ### CI
 - Compilation for 32-bit targets is now checked in CI
-- Czkawka binaries are now checked for reproducibility (currently not reproducible due to a possible `rustc` bug - https://github.com/kellpossible/cargo-i18n/pull/151)
+- Czkawka binaries are now checked for reproducibility in CI
 
 ### Prebuild-binaries
 - CI now builds Linux binaries on Ubuntu 22.04 instead of 20.04 (some were built on 24.04)
