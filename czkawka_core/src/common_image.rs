@@ -1,21 +1,15 @@
 #![allow(unused_imports)]
-// I don't wanna fight with unused(heif) imports in this file, so simply ignore it to avoid too much complexity
+// I don't want to fight with unused(heif) imports in this file, so simply ignore it to avoid too much complexity
 
-use std::cmp::Ordering;
-use std::ffi::OsString;
-use std::fs::{DirEntry, File, OpenOptions};
-use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicBool, AtomicUsize};
+use std::fs::File;
+use std::path::Path;
 use std::sync::{Arc, atomic};
 use std::thread::{JoinHandle, sleep};
 use std::time::{Duration, Instant, SystemTime};
 use std::{fs, panic, thread};
 
 use anyhow::anyhow;
-use crossbeam_channel::Sender;
-use directories_next::ProjectDirs;
 use fun_time::fun_time;
-use handsome_logger::{ColorChoice, ConfigBuilder, TerminalMode};
 use image::{DynamicImage, ImageBuffer, Rgb, Rgba};
 use imagepipe::{ImageSource, Pipeline};
 use jxl_oxide::image::BitDepth;

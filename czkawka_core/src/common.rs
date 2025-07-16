@@ -198,7 +198,7 @@ pub fn setup_logger(disabled_terminal_printing: bool, app_name: &str) {
         .set_level(file_log_level)
         .set_write_once(true)
         .set_message_filtering(Some(filtering_messages))
-        .set_time_format(TimeFormat::TimeWithMicro, None)
+        .set_time_format(TimeFormat::DateTimeWithMicro, None)
         .set_format_text(FormatText::DefaultWithThreadFile.get(), None)
         .build();
 
@@ -333,9 +333,12 @@ pub fn set_number_of_threads(thread_number: usize) {
     NUMBER_OF_THREADS.set(thread_number);
 
     let additional_message = if thread_number == 0 {
-        " (0 - means that all available threads will be used)"
+        format!(
+            " (0 - means that all available threads will be used({}))",
+            thread::available_parallelism().map(std::num::NonZeroUsize::get).unwrap_or(1)
+        )
     } else {
-        ""
+        "".to_string()
     };
     debug!("Number of threads set to {thread_number}{additional_message}");
 

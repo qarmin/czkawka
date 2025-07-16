@@ -9,6 +9,8 @@ use crate::connect_row_selection::reset_selection;
 use crate::model_operations::{ModelProcessor, get_shared_str_item};
 use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow, Settings, flk};
 
+type DeleteModel = Option<(Vec<MainListModel>, Vec<(usize, Option<String>)>, usize)>;
+
 pub fn connect_delete_button(app: &MainWindow) {
     let a = app.as_weak();
     app.global::<Callabler>().on_delete_selected_items(move || {
@@ -94,7 +96,7 @@ impl<'a> ModelProcessor<'a> {
         (new_model, errors, items_deleted)
     }
 
-    fn prepare_delete_models(&self) -> Option<(Vec<MainListModel>, Vec<(usize, Option<String>)>, usize)> {
+    fn prepare_delete_models(&self) -> DeleteModel {
         let path_idx = get_str_path_idx(self.active_tab);
         let name_idx = get_str_name_idx(self.active_tab);
 
