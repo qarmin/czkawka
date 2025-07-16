@@ -56,7 +56,9 @@ use crate::common_dir_traversal::{CheckingMethod, ToolType};
 // Duplicates - Name or SizeName or Size
 // 0 - Collecting files
 
-#[derive(Debug)]
+// Deleting files
+
+#[derive(Debug, Clone, Copy)]
 pub struct ProgressData {
     pub sstage: CurrentStage,
     pub checking_method: CheckingMethod,
@@ -71,6 +73,7 @@ pub struct ProgressData {
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum CurrentStage {
+    DeletingFiles,
     CollectingFiles,
     DuplicateCacheSaving,
     DuplicateCacheLoading,
@@ -142,7 +145,7 @@ impl ProgressData {
             assert_eq!(self.tool_type, tool_type, "Tool type: {:?}, checking method: {:?}", self.tool_type, self.checking_method);
         }
         let tool_type_current_stage: Option<ToolType> = match self.sstage {
-            CurrentStage::CollectingFiles => None,
+            CurrentStage::CollectingFiles | CurrentStage::DeletingFiles => None,
             CurrentStage::DuplicateCacheSaving | CurrentStage::DuplicateCacheLoading | CurrentStage::DuplicatePreHashCacheSaving | CurrentStage::DuplicatePreHashCacheLoading => {
                 Some(ToolType::Duplicate)
             }
@@ -191,6 +194,7 @@ impl CurrentStage {
     pub fn get_current_stage(&self) -> u8 {
         #[allow(clippy::match_same_arms)] // Now it is easier to read
         match self {
+            Self::DeletingFiles => 0,
             Self::CollectingFiles => 0,
             Self::DuplicateScanningName => 0,
             Self::DuplicateScanningSizeName => 0,

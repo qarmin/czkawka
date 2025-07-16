@@ -53,6 +53,7 @@ rust_cannot_load_preset = Cannot change and load preset { $preset_idx } - reason
 rust_saved_preset = Saved preset { $preset_idx }
 rust_cannot_save_preset = Cannot save preset { $preset_idx } - reason { $reason }
 rust_reset_preset = Reset preset { $preset_idx }
+rust_deleting_files = Deleting { $items_stats } file
 
 # Slint translations, but in arrays
 

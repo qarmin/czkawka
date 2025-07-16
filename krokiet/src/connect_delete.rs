@@ -1,6 +1,10 @@
 use std::path::MAIN_SEPARATOR;
 
+use crossbeam_channel::Sender;
+use czkawka_core::common_dir_traversal::{CheckingMethod, ToolType};
 use czkawka_core::common_messages::Messages;
+use czkawka_core::progress_data::{CurrentStage, ProgressData};
+use log::error;
 use rayon::prelude::*;
 use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
@@ -11,9 +15,10 @@ use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow, Settings
 
 type DeleteModel = Option<(Vec<MainListModel>, Vec<(usize, Option<String>)>, usize)>;
 
-pub fn connect_delete_button(app: &MainWindow) {
+pub fn connect_delete_button(app: &MainWindow, progress_sender: Sender<ProgressData>) {
     let a = app.as_weak();
     app.global::<Callabler>().on_delete_selected_items(move || {
+        let progress_sender = progress_sender.clone();
         let app = a.upgrade().expect("Failed to upgrade app :(");
 
         let active_tab = app.global::<GuiState>().get_active_tab();
@@ -23,7 +28,7 @@ pub fn connect_delete_button(app: &MainWindow) {
         let settings = app.global::<Settings>();
 
         let processor = ModelProcessor::new(&model, active_tab);
-        let Some((new_model, errors, _items_queued_to_delete, items_deleted)) = processor.delete_selected_items(settings.get_move_to_trash()) else {
+        let Some((new_model, errors, _items_queued_to_delete, items_deleted)) = processor.delete_selected_items(settings.get_move_to_trash(), &progress_sender) else {
             app.global::<GuiState>().set_info_text("".into());
             return;
         };
@@ -41,14 +46,34 @@ pub fn connect_delete_button(app: &MainWindow) {
 }
 
 impl<'a> ModelProcessor<'a> {
-    fn delete_selected_items(&self, remove_to_trash: bool) -> Option<(Vec<MainListModel>, Vec<String>, usize, usize)> {
+    fn delete_selected_items(&self, remove_to_trash: bool, progress_sender: &Sender<ProgressData>) -> Option<(Vec<MainListModel>, Vec<String>, usize, usize)> {
         let is_empty_folder_tab = self.active_tab == CurrentTab::EmptyFolders;
 
+        let mut base_progress = ProgressData {
+            sstage: CurrentStage::DeletingFiles,
+            checking_method: CheckingMethod::None,
+            current_stage_idx: 0,
+            max_stage_idx: 0,
+            entries_checked: 0,
+            entries_to_check: 0,
+            bytes_checked: 0,
+            bytes_to_check: 0,
+            tool_type: ToolType::None,
+        };
+
+        let _ = progress_sender.send(base_progress).map_err(|e| error!("Failed to send progress data: {e}"));
+
         let (items, items_simplified, items_queued_to_delete) = self.prepare_delete_models()?;
+
+        base_progress.entries_to_check = items_queued_to_delete;
+        let _ = progress_sender.send(base_progress).map_err(|e| error!("Failed to send progress data: {e}"));
 
         let output = self.delete_items(items_simplified, is_empty_folder_tab, remove_to_trash);
 
         let (new_model, errors, items_deleted) = self.collect_delete_model(output, items);
+
+        base_progress.entries_checked = items_deleted + errors.len();
+        let _ = progress_sender.send(base_progress).map_err(|e| error!("Failed to send progress data: {e}"));
 
         Some((new_model, errors, items_queued_to_delete, items_deleted))
     }
@@ -151,19 +176,23 @@ fn remove_single_item(full_path: &str, _is_folder_tab: bool, _remove_to_trash: b
 
 #[cfg(test)]
 mod tests {
+    use crossbeam_channel::{Receiver, unbounded};
+
     use super::*;
     use crate::test_common::{create_model_from_model_vec, get_model_vec};
 
     #[test]
     fn test_no_delete_items() {
+        let (progress, _receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
         let model = get_model_vec(10);
         let model = create_model_from_model_vec(&model);
         let processor = ModelProcessor::new(&model, CurrentTab::EmptyFolders);
-        assert!(processor.delete_selected_items(false).is_none());
+        assert!(processor.delete_selected_items(false, &progress).is_none());
     }
 
     #[test]
     fn test_delete_selected_items() {
+        let (progress, _receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
         let mut model = get_model_vec(10);
         model[0].checked = true;
         model[0].val_str = ModelRc::new(VecModel::from(vec!["normal1".to_string().into(); 10]));
@@ -173,7 +202,7 @@ mod tests {
         model[3].val_str = ModelRc::new(VecModel::from(vec!["test_error".to_string().into(); 10]));
         let model = create_model_from_model_vec(&model);
         let processor = ModelProcessor::new(&model, CurrentTab::EmptyFolders);
-        let (new_model, errors, items_queued_to_delete, items_deleted) = processor.delete_selected_items(false).unwrap();
+        let (new_model, errors, items_queued_to_delete, items_deleted) = processor.delete_selected_items(false, &progress).unwrap();
 
         assert_eq!(new_model.len(), 8);
         assert_eq!(errors.len(), 1);
