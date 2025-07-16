@@ -58,6 +58,7 @@ mod model_operations;
 mod set_initial_gui_info;
 mod settings;
 mod shared_models;
+mod simpler_model;
 #[cfg(test)]
 mod test_common;
 

@@ -42,6 +42,7 @@ export component MainWindow inherits Window {
     in-out property <string> text_summary_text: "";
     in-out property <bool> stop_requested: false;
     in-out property <bool> scanning: false;
+    in-out property <bool> deleting: false;
     in-out property <ProgressToSend> progress_datas: {
         current_progress: 15,
         all_progress: 20,
@@ -115,7 +116,7 @@ export component MainWindow inherits Window {
                     }
                 }
 
-                if root.scanning: Progress {
+                if root.scanning || root.deleting: Progress {
                     horizontal-stretch: 0.0;
                     progress_datas <=> root.progress_datas;
                 }

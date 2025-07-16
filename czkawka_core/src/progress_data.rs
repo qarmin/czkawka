@@ -191,6 +191,10 @@ impl ToolType {
 }
 
 impl CurrentStage {
+    pub fn is_special_non_tool_stage(&self) -> bool {
+        matches!(self, Self::DeletingFiles)
+    }
+
     pub fn get_current_stage(&self) -> u8 {
         #[allow(clippy::match_same_arms)] // Now it is easier to read
         match self {

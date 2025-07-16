@@ -4,6 +4,7 @@ use crossbeam_channel::Receiver;
 use czkawka_core::common_dir_traversal::ToolType;
 use czkawka_core::progress_data::{CurrentStage, ProgressData};
 use humansize::{BINARY, format_size};
+use log::error;
 use slint::ComponentHandle;
 
 use crate::{MainWindow, ProgressToSend, flk};
@@ -17,9 +18,13 @@ pub fn connect_progress_gathering(app: &MainWindow, progress_receiver: Receiver<
                 return; // Channel closed, so exit the thread since app closing
             };
 
+            error!("Received progress data: {:?}", progress_data);
+
             a.upgrade_in_event_loop(move |app| {
-                let to_send = if progress_data.current_stage_idx == 0 {
-                    progress_collect_items(&progress_data, progress_data.tool_type != ToolType::EmptyFolders)
+                let removing_empty_folders = progress_data.tool_type == ToolType::EmptyFolders;
+
+                let to_send = if progress_data.current_stage_idx == 0 && !progress_data.sstage.is_special_non_tool_stage() {
+                    progress_collect_items(&progress_data, !removing_empty_folders)
                 } else if progress_data.sstage.check_if_loading_saving_cache() {
                     progress_save_load_cache(&progress_data)
                 } else {
@@ -96,6 +101,10 @@ fn progress_default(item: &ProgressData) -> ProgressToSend {
         _ => unreachable!(),
     };
     let (all_progress, current_progress, current_progress_size) = common_get_data(item);
+
+    // Deleting is a single operation, so we don't need to show two same progress bars
+    let all_progress = if item.sstage.is_special_non_tool_stage() { -1 } else { all_progress };
+
     ProgressToSend {
         all_progress,
         current_progress,

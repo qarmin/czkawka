@@ -1,3 +1,5 @@
+#![allow(dead_code)] // TODO
+#![allow(unused)]
 use slint::{Model, ModelRc, SharedString};
 
 use crate::common::{get_is_header_mode, get_str_name_idx, get_str_path_idx, get_str_proper_extension};
@@ -61,14 +63,13 @@ pub fn debug_print_main_list_model_items(list_model: &MainListModel, idx: usize)
     );
 }
 
-pub struct ModelProcessor<'a> {
-    pub items: &'a ModelRc<MainListModel>,
+pub struct ModelProcessor {
     pub active_tab: CurrentTab,
 }
 
-impl<'a> ModelProcessor<'a> {
-    pub fn new(items: &'a ModelRc<MainListModel>, active_tab: CurrentTab) -> Self {
-        Self { items, active_tab }
+impl ModelProcessor {
+    pub fn new(active_tab: CurrentTab) -> Self {
+        Self { active_tab }
     }
 
     pub fn remove_single_items_in_groups(&self, items: Vec<MainListModel>) -> Vec<MainListModel> {
