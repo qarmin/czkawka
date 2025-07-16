@@ -18,7 +18,7 @@ pub fn connect_progress_gathering(app: &MainWindow, progress_receiver: Receiver<
                 return; // Channel closed, so exit the thread since app closing
             };
 
-            error!("Received progress data: {:?}", progress_data);
+            error!("Received progress data: {progress_data:?}");
 
             a.upgrade_in_event_loop(move |app| {
                 let removing_empty_folders = progress_data.tool_type == ToolType::EmptyFolders;

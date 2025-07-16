@@ -71,6 +71,22 @@ pub struct ProgressData {
     pub tool_type: ToolType,
 }
 
+impl ProgressData {
+    pub fn get_base_deleting_state() -> Self {
+        Self {
+            sstage: CurrentStage::DeletingFiles,
+            checking_method: CheckingMethod::None,
+            current_stage_idx: 0,
+            max_stage_idx: 0,
+            entries_checked: 0,
+            entries_to_check: 0,
+            bytes_checked: 0,
+            bytes_to_check: 0,
+            tool_type: ToolType::None,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum CurrentStage {
     DeletingFiles,

@@ -1,8 +1,9 @@
 #![allow(dead_code)] // TODO
 #![allow(unused)]
 
-use crate::MainListModel;
 use slint::{Model, ModelExt, ModelRc, SharedString, VecModel};
+
+use crate::MainListModel;
 
 #[derive(Clone)]
 pub struct SimplerMainListModel {
@@ -21,20 +22,20 @@ impl From<&MainListModel> for SimplerMainListModel {
             filled_header_row: model.filled_header_row,
             header_row: model.header_row,
             selected_row: model.selected_row,
-            val_int: model.val_int.iter().map(|e| e).collect(),
+            val_int: model.val_int.iter().collect(),
             val_str: model.val_str.iter().map(|e| e.to_string()).collect(),
         }
     }
 }
-impl Into<MainListModel> for SimplerMainListModel {
-    fn into(self) -> MainListModel {
-        MainListModel {
-            checked: self.checked,
-            filled_header_row: self.filled_header_row,
-            header_row: self.header_row,
-            selected_row: self.selected_row,
-            val_int: ModelRc::new(VecModel::from(self.val_int)),
-            val_str: ModelRc::new(VecModel::from(self.val_str.into_iter().map(|s| s.into()).collect::<Vec<SharedString>>())),
+impl From<SimplerMainListModel> for MainListModel {
+    fn from(val: SimplerMainListModel) -> Self {
+        Self {
+            checked: val.checked,
+            filled_header_row: val.filled_header_row,
+            header_row: val.header_row,
+            selected_row: val.selected_row,
+            val_int: ModelRc::new(VecModel::from(val.val_int)),
+            val_str: ModelRc::new(VecModel::from(val.val_str.into_iter().map(|s| s.into()).collect::<Vec<SharedString>>())),
         }
     }
 }
