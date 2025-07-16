@@ -311,6 +311,15 @@ mod selection {
 //
 // Deselect
 //
+// TODO - better name for this function
+pub(crate) fn pl_rows_deselect_all_by_mode(model: ModelRc<MainListModel>, active_tab: CurrentTab) -> ModelRc<MainListModel> {
+    let mut lock = get_write_selection_lock();
+
+    let selection = lock.get_mut(&active_tab).expect("Failed to get selection data");
+
+    rows_deselect_all_by_mode(selection, &model).unwrap_or(model)
+}
+
 fn rows_deselect_all_by_mode(selection: &mut SelectionData, model: &ModelRc<MainListModel>) -> Option<ModelRc<MainListModel>> {
     let new_model = if selection.exceeded_limit {
         Some(rows_deselect_all_selected_by_replacing_models(model))

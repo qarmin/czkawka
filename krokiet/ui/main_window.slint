@@ -138,6 +138,7 @@ export component MainWindow inherits Window {
 
             vertical-stretch: 0.0;
             scanning <=> root.scanning;
+            deleting <=> root.deleting;
             stop_requested <=> root.stop_requested;
             scan_stopping => {
                 text_summary_text = Translations.stopping_scan_text;

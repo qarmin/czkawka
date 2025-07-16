@@ -1,6 +1,6 @@
 use std::path::MAIN_SEPARATOR;
 use std::sync::Arc;
-use std::sync::atomic::AtomicUsize;
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::thread;
 use std::time::Duration;
 
@@ -13,16 +13,20 @@ use slint::{ComponentHandle, ModelRc, VecModel, Weak};
 
 use crate::common::delayed_sender::DelayedSender;
 use crate::common::{get_str_name_idx, get_str_path_idx, get_tool_model, set_tool_model};
-use crate::connect_row_selection::reset_selection;
-use crate::model_operations::ModelProcessor;
+use crate::connect_row_selection::{pl_rows_deselect_all_by_mode, reset_selection};
+use crate::model_operations::{ModelProcessor, deselect_all_items};
 use crate::simpler_model::{SimplerMainListModel, ToSimplerVec, ToSlintModel};
-use crate::{Callabler, CurrentTab, GuiState, MainWindow, Settings};
+use crate::{Callabler, CurrentTab, GuiState, MainWindow, Settings, flk};
 
-pub fn connect_delete_button(app: &MainWindow, progress_sender: Sender<ProgressData>) {
+type DeleteResults = Vec<(usize, SimplerMainListModel, Option<Result<(), String>>)>;
+
+pub fn connect_delete_button(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
     let a = app.as_weak();
     app.global::<Callabler>().on_delete_selected_items(move || {
         let weak_app = a.clone();
         let progress_sender = progress_sender.clone();
+        let stop_flag = stop_flag.clone();
+        stop_flag.store(false, Ordering::Relaxed);
         let app = a.upgrade().expect("Failed to upgrade app :(");
 
         let active_tab = app.global::<GuiState>().get_active_tab();
@@ -30,7 +34,7 @@ pub fn connect_delete_button(app: &MainWindow, progress_sender: Sender<ProgressD
         let settings = app.global::<Settings>();
 
         let processor = ModelProcessor::new(active_tab);
-        processor.delete_selected_items(settings.get_move_to_trash(), progress_sender, weak_app);
+        processor.delete_selected_items(settings.get_move_to_trash(), progress_sender, weak_app, stop_flag);
     });
 }
 
@@ -41,22 +45,12 @@ pub fn connect_delete_button(app: &MainWindow, progress_sender: Sender<ProgressD
 // ModelRc<MainListModel> --cloning when iterating + converting--> SimplerMainListModel --conversion before setting to model--> ModelRc<MainListModel> --cloning when iterating to remove useless items--> ModelRc<MainListModel>
 
 impl ModelProcessor {
-    fn delete_selected_items(self, remove_to_trash: bool, progress_sender: Sender<ProgressData>, weak_app: Weak<MainWindow>) {
+    fn delete_selected_items(self, remove_to_trash: bool, progress_sender: Sender<ProgressData>, weak_app: Weak<MainWindow>, stop_flag: Arc<AtomicBool>) {
         let is_empty_folder_tab = self.active_tab == CurrentTab::EmptyFolders;
         let model = get_tool_model(&weak_app.upgrade().expect("Failed to upgrade app :("), self.active_tab);
         let simpler_model = model.to_simpler_enumerated_vec();
         thread::spawn(move || {
             let mut base_progress = ProgressData::get_base_deleting_state();
-
-            let items_queued_to_delete = simpler_model.iter().filter(|(_idx, e)| e.checked).count();
-            if items_queued_to_delete == 0 {
-                weak_app
-                    .upgrade_in_event_loop(move |app| {
-                        app.global::<GuiState>().set_info_text("".into()); // TODO NOT DELETE ANYTHING message should be added here
-                    })
-                    .expect("Failed to update app info text");
-                return;
-            }
 
             weak_app
                 .upgrade_in_event_loop(move |app| {
@@ -64,24 +58,45 @@ impl ModelProcessor {
                 })
                 .expect("Failed to update app info text");
 
+            let items_queued_to_delete = simpler_model.iter().filter(|(_idx, e)| e.checked).count();
+            if items_queued_to_delete == 0 {
+                weak_app
+                    .upgrade_in_event_loop(move |app| {
+                        app.global::<GuiState>().set_info_text("".into()); // TODO NOT DELETE ANYTHING message should be added here
+                        stop_flag.store(false, Ordering::Relaxed);
+                        app.set_stop_requested(false);
+                        app.set_deleting(false);
+                    })
+                    .expect("Failed to update app info text");
+                return;
+            }
+
             // Sending progress data about how many items are queued to delete
             base_progress.entries_to_check = items_queued_to_delete;
             let _ = progress_sender.send(base_progress).map_err(|e| error!("Failed to send progress data: {e}"));
 
-            thread::sleep(Duration::from_secs(2));
-
-            let results = self.delete_items(simpler_model, is_empty_folder_tab, remove_to_trash, items_queued_to_delete, progress_sender.clone());
+            let results = self.delete_items(
+                simpler_model,
+                is_empty_folder_tab,
+                remove_to_trash,
+                items_queued_to_delete,
+                progress_sender.clone(),
+                stop_flag.clone(),
+            );
             let (new_simple_model, errors, items_deleted) = self.remove_deleted_items_from_model(results);
 
             // Sending progress data at the end of deletion, to indicate that deletion is finished
             base_progress.entries_checked = items_deleted + errors.len();
+
             let _ = progress_sender.send(base_progress).map_err(|e| error!("Failed to send progress data: {e}"));
 
             weak_app
                 .upgrade_in_event_loop(move |app| {
-                    // app.set_text_summary_text(flk!("rust_delete_summary", deleted = items_deleted, failed = errors.len()).into());
+                    app.set_text_summary_text(flk!("rust_delete_summary", deleted = items_deleted, failed = errors.len(), total = items_queued_to_delete).into());
 
-                    let new_model_after_removing_useless_items = self.remove_single_items_in_groups(new_simple_model.to_vec_model());
+                    let mut new_model_after_removing_useless_items = self.remove_single_items_in_groups(new_simple_model.to_vec_model());
+                    // Selection cache was invalidated, so we need to reset it
+                    new_model_after_removing_useless_items.iter_mut().for_each(|e| e.selected_row = false);
                     set_tool_model(&app, self.active_tab, ModelRc::new(VecModel::from(new_model_after_removing_useless_items)));
 
                     app.global::<GuiState>().set_info_text(Messages::new_from_errors(errors).create_messages_text().into());
@@ -91,6 +106,9 @@ impl ModelProcessor {
                     reset_selection(&app, true);
 
                     app.set_deleting(false);
+                    reset_selection(&app, true);
+                    stop_flag.store(false, Ordering::Relaxed);
+                    app.set_stop_requested(false);
                 })
                 .expect("Failed to update app after deletion");
         });
@@ -103,7 +121,8 @@ impl ModelProcessor {
         remove_to_trash: bool,
         items_queued_to_delete: usize,
         sender: Sender<ProgressData>,
-    ) -> Vec<(usize, SimplerMainListModel, Option<Result<(), String>>)> {
+        stop_flag: Arc<AtomicBool>,
+    ) -> DeleteResults {
         let path_idx = get_str_path_idx(self.active_tab);
         let name_idx = get_str_name_idx(self.active_tab);
 
@@ -113,8 +132,12 @@ impl ModelProcessor {
         let mut output: Vec<_> = items_simplified
             .into_par_iter()
             .map(|(idx, data)| {
-                // TODO missing logic of sending progress data about how many items are queued to delete
                 if !data.checked {
+                    return (idx, data, None);
+                }
+
+                // Stop requested, so
+                if stop_flag.load(std::sync::atomic::Ordering::Relaxed) {
                     return (idx, data, None);
                 }
 
@@ -137,7 +160,7 @@ impl ModelProcessor {
         output
     }
 
-    fn remove_deleted_items_from_model(&self, results: Vec<(usize, SimplerMainListModel, Option<Result<(), String>>)>) -> (Vec<SimplerMainListModel>, Vec<String>, usize) {
+    fn remove_deleted_items_from_model(&self, results: DeleteResults) -> (Vec<SimplerMainListModel>, Vec<String>, usize) {
         let mut errors = vec![];
         let mut items_deleted = 0;
 

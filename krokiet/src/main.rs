@@ -85,7 +85,7 @@ fn main() {
     create_default_settings_files();
     load_settings_from_file(&app);
 
-    connect_delete_button(&app, progress_sender.clone());
+    connect_delete_button(&app, progress_sender.clone(), stop_flag.clone());
     connect_scan_button(&app, progress_sender, stop_flag.clone(), Arc::clone(&shared_models));
     connect_stop_button(&app, stop_flag);
     connect_open_items(&app);
