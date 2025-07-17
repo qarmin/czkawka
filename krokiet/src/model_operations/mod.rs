@@ -1,19 +1,8 @@
-#![allow(dead_code)] // TODO
-#![allow(unused)]
-
 pub mod model_processor;
 
-use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
-use std::time::Duration;
-
-use crossbeam_channel::Sender;
-use czkawka_core::progress_data::ProgressData;
-use rayon::iter::*;
 use slint::{Model, ModelRc, SharedString};
 
-use crate::common::delayed_sender::DelayedSender;
-use crate::common::{get_is_header_mode, get_str_name_idx, get_str_path_idx, get_str_proper_extension};
+use crate::common::{get_str_name_idx, get_str_path_idx, get_str_proper_extension};
 use crate::simpler_model::SimplerMainListModel;
 use crate::{CurrentTab, MainListModel};
 
@@ -22,15 +11,6 @@ pub type ProcessingResult = Vec<(usize, SimplerMainListModel, Option<Result<(), 
 pub fn deselect_all_items(items: &mut [MainListModel]) {
     for item in items {
         item.checked = false;
-    }
-}
-
-#[allow(unused)]
-pub fn select_all_items(items: &mut [MainListModel]) {
-    for item in items {
-        if !item.header_row {
-            item.checked = true;
-        }
     }
 }
 
@@ -58,14 +38,6 @@ pub fn get_str_item(main_list_model: &MainListModel, idx: usize) -> String {
         .nth(idx)
         .unwrap_or_else(|| debug_print_main_list_model_items(main_list_model, idx))
         .to_string()
-}
-#[inline]
-pub fn get_shared_str_item(main_list_model: &MainListModel, idx: usize) -> SharedString {
-    main_list_model
-        .val_str
-        .iter()
-        .nth(idx)
-        .unwrap_or_else(|| debug_print_main_list_model_items(main_list_model, idx))
 }
 
 pub fn debug_print_main_list_model_items(list_model: &MainListModel, idx: usize) -> ! {
