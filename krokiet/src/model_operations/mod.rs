@@ -1,35 +1,13 @@
 pub mod model_processor;
 
-use slint::{Model, ModelRc};
+use slint::Model;
 
-use crate::common::{get_str_name_idx, get_str_path_idx};
+use crate::MainListModel;
 use crate::simpler_model::SimplerMainListModel;
-use crate::{CurrentTab, MainListModel};
 
 pub type ProcessingResult = Vec<(usize, SimplerMainListModel, Option<Result<(), String>>)>;
 
-pub fn deselect_all_items(items: &mut [MainListModel]) {
-    for item in items {
-        item.checked = false;
-    }
-}
-
-pub fn collect_path_name_from_model(items: &[MainListModel], active_tab: CurrentTab) -> Vec<(String, String)> {
-    let path_idx = get_str_path_idx(active_tab);
-    let name_idx = get_str_name_idx(active_tab);
-    items.iter().map(|item| (get_str_item(item, path_idx), get_str_item(item, name_idx))).collect::<Vec<_>>()
-}
-
-#[inline]
-pub fn get_str_item(main_list_model: &MainListModel, idx: usize) -> String {
-    main_list_model
-        .val_str
-        .iter()
-        .nth(idx)
-        .unwrap_or_else(|| debug_print_main_list_model_items(main_list_model, idx))
-        .to_string()
-}
-
+#[allow(dead_code)]
 pub fn debug_print_main_list_model_items(list_model: &MainListModel, idx: usize) -> ! {
     let val_int = list_model.val_int.iter().collect::<Vec<_>>();
     let val_str = list_model.val_str.iter().collect::<Vec<_>>();
@@ -39,13 +17,14 @@ pub fn debug_print_main_list_model_items(list_model: &MainListModel, idx: usize)
     );
 }
 
+// TODO - tests
 // Removes orphan items in groups
 pub fn remove_single_items_in_groups(mut items: Vec<MainListModel>, have_header: bool) -> Vec<MainListModel> {
     // When have header, we must also throw out orphaned items
     if have_header && !items.is_empty() {
         // First row must be header
         // If assert fails, that means, that we checked that for mode that not have headers
-        // or that we somehow removed header row, which should be
+        // or that we somehow removed header row, which cannot happen without serious bug
         assert!(items[0].header_row);
         assert!(!items[0].checked);
         assert!(!items[0].selected_row);
@@ -90,283 +69,105 @@ pub fn remove_single_items_in_groups(mut items: Vec<MainListModel>, have_header:
 
     items
 }
-
-pub fn filter_out_checked_items(items: &ModelRc<MainListModel>, have_header: bool) -> (Vec<MainListModel>, Vec<MainListModel>) {
-    if cfg!(debug_assertions) {
-        check_if_header_is_checked(items);
-        check_if_header_is_selected_but_should_not_be(items, have_header);
-    }
-
-    let (entries_to_delete, entries_left): (Vec<_>, Vec<_>) = items.iter().partition(|item| item.checked);
-
-    let entries_left = remove_single_items_in_groups(entries_left, have_header);
-
-    (entries_to_delete, entries_left)
-}
-
-// Function to verify if really headers are not checked
-// Checked header is big bug
-fn check_if_header_is_checked(items: &ModelRc<MainListModel>) {
-    if cfg!(debug_assertions) {
-        for item in items.iter() {
-            if item.header_row {
-                assert!(!item.checked);
-            }
-        }
-    }
-}
-
-// In some modes header should not be visible, but if are, then it is a bug
-fn check_if_header_is_selected_but_should_not_be(items: &ModelRc<MainListModel>, can_have_header: bool) {
-    if cfg!(debug_assertions) {
-        if !can_have_header {
-            for item in items.iter() {
-                assert!(!item.header_row);
-            }
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use slint::{Model, ModelRc, SharedString, VecModel};
-
-    use crate::MainListModel;
-    use crate::model_operations::filter_out_checked_items;
+    use super::*;
+    use crate::test_common::get_model_vec;
 
     #[test]
-    fn test_filter_out_checked_items_empty() {
-        let items: ModelRc<MainListModel> = create_new_model(vec![]);
+    fn remove_single_items_elements() {
+        let mut items = get_model_vec(3);
+        items[0].header_row = true;
+        items[1].header_row = true;
+        let result = remove_single_items_in_groups(items, true);
+        assert!(result.is_empty());
 
-        let (to_delete, left) = filter_out_checked_items(&items, false);
-        assert!(to_delete.is_empty());
-        assert!(left.is_empty());
-        let (to_delete, left) = filter_out_checked_items(&items, true);
-        assert!(to_delete.is_empty());
-        assert!(left.is_empty());
-    }
-    #[test]
-    fn test_filter_one_simple_header() {
-        let items = create_new_model(vec![(false, false, false, false, vec![])]);
-        let (to_delete, left) = filter_out_checked_items(&items, false);
-        assert!(to_delete.is_empty());
-        assert_eq!(left.len(), items.iter().count());
-    }
+        let mut items = get_model_vec(3);
+        items[0].header_row = true;
+        items[2].header_row = true;
+        let result = remove_single_items_in_groups(items, true);
+        assert!(result.is_empty());
 
-    #[test]
-    fn test_filter_one_filled_header() {
-        let items = create_new_model(vec![(false, true, true, false, vec![])]);
-        let (to_delete, left) = filter_out_checked_items(&items, true);
-        assert!(to_delete.is_empty());
-        assert!(left.is_empty());
-    }
+        let mut items = get_model_vec(3);
+        items[0].header_row = true;
+        let result = remove_single_items_in_groups(items, true);
+        assert_eq!(result.len(), 3);
 
-    #[test]
-    fn test_filter_one_empty_header() {
-        let items = create_new_model(vec![(false, true, false, false, vec![])]);
-        let (to_delete, left) = filter_out_checked_items(&items, true);
-        assert!(to_delete.is_empty());
-        assert!(left.is_empty());
+        let mut items = get_model_vec(3);
+        items[0].header_row = true;
+        items[0].filled_header_row = true;
+        items[2].header_row = true;
+        items[2].filled_header_row = true;
+        let result = remove_single_items_in_groups(items, true);
+        assert_eq!(result.len(), 2);
+        assert!(result[0].header_row);
+        assert!(!result[1].header_row);
+
+        let mut items = get_model_vec(2);
+        items[0].header_row = true;
+        let result = remove_single_items_in_groups(items, true);
+        assert_eq!(result.len(), 0);
+
+        let mut items = get_model_vec(10);
+        items[0].header_row = true;
+        items[9].header_row = true;
+        let result = remove_single_items_in_groups(items, true);
+        assert_eq!(result.len(), 9);
+
+        let mut items = get_model_vec(2);
+        items[0].header_row = true;
+        items[0].filled_header_row = true;
+        items[1].header_row = false;
+        let result = remove_single_items_in_groups(items, true);
+        assert_eq!(result.len(), 2);
+
+        let mut items = get_model_vec(2);
+        items[0].header_row = true;
+        items[0].filled_header_row = true;
+        items[1].header_row = true;
+        let result = remove_single_items_in_groups(items, true);
+        assert!(result.is_empty());
+
+        let mut items = get_model_vec(1);
+        items[0].header_row = true;
+        items[0].filled_header_row = true;
+        let result = remove_single_items_in_groups(items, true);
+        assert!(result.is_empty());
+
+        let items = Vec::new();
+        let result = remove_single_items_in_groups(items, true);
+        assert!(result.is_empty());
+
+        let mut items = get_model_vec(4);
+        items[0].header_row = true;
+        items[0].filled_header_row = true;
+        let result = remove_single_items_in_groups(items.clone(), true);
+        assert_eq!(result.len(), 4);
     }
 
     #[test]
     #[should_panic]
-    fn test_filter_invalid_non_header() {
-        let items = create_new_model(vec![(false, true, true, false, vec![])]);
-        filter_out_checked_items(&items, false);
+    fn panics_when_first_row_is_not_header_but_have_header() {
+        let mut items = get_model_vec(2);
+        items[0].header_row = false;
+        remove_single_items_in_groups(items, true);
     }
+
     #[test]
     #[should_panic]
-    fn test_filter_invalid_header() {
-        let items = create_new_model(vec![(false, false, true, false, vec![])]);
-        filter_out_checked_items(&items, true);
+    fn panics_when_first_row_is_checked_but_have_header() {
+        let mut items = get_model_vec(2);
+        items[0].header_row = true;
+        items[0].checked = true;
+        remove_single_items_in_groups(items, true);
     }
 
     #[test]
-    fn test_filter_filled_header() {
-        let items = create_new_model(vec![(false, true, true, false, vec!["1"]), (false, false, false, false, vec!["2"])]);
-        let (to_delete, left) = filter_out_checked_items(&items, true);
-        let to_delete_data = get_single_data_str_from_model(&to_delete);
-        let left_data = get_single_data_str_from_model(&left);
-
-        assert_eq!(to_delete_data, Vec::<String>::new());
-        assert_eq!(left_data, vec!["1", "2"]);
-
-        let items = create_new_model(vec![
-            (false, true, true, false, vec!["1"]),
-            (false, false, false, false, vec!["2"]),
-            (false, false, false, false, vec!["3"]),
-        ]);
-        let (to_delete, left) = filter_out_checked_items(&items, true);
-        let to_delete_data = get_single_data_str_from_model(&to_delete);
-        let left_data = get_single_data_str_from_model(&left);
-
-        assert_eq!(to_delete_data, Vec::<String>::new());
-        assert_eq!(left_data, vec!["1", "2", "3"]);
-
-        let items = create_new_model(vec![
-            (false, true, true, false, vec!["1"]),
-            (false, false, false, false, vec!["2"]),
-            (false, true, true, false, vec!["3"]),
-        ]);
-        let (to_delete, left) = filter_out_checked_items(&items, true);
-        let to_delete_data = get_single_data_str_from_model(&to_delete);
-        let left_data = get_single_data_str_from_model(&left);
-
-        assert_eq!(to_delete_data, Vec::<String>::new());
-        assert_eq!(left_data, vec!["1", "2"]);
-
-        let items = create_new_model(vec![
-            (false, true, true, false, vec!["1"]),
-            (true, false, false, false, vec!["2"]),
-            (false, false, false, false, vec!["3"]),
-        ]);
-        let (to_delete, left) = filter_out_checked_items(&items, true);
-        let to_delete_data = get_single_data_str_from_model(&to_delete);
-        let left_data = get_single_data_str_from_model(&left);
-
-        assert_eq!(to_delete_data, vec!["2"]);
-        assert_eq!(left_data, vec!["1", "3"]);
-
-        let items = create_new_model(vec![
-            (false, true, true, false, vec!["1"]),
-            (false, false, false, false, vec!["2"]),
-            (false, false, false, false, vec!["3"]),
-            (false, false, false, false, vec!["4"]),
-            (false, true, true, false, vec!["5"]),
-            (false, false, false, false, vec!["6"]),
-            (false, false, false, false, vec!["7"]),
-            (false, true, true, false, vec!["8"]),
-            (false, false, false, false, vec!["9"]),
-            (false, true, true, false, vec!["10"]),
-        ]);
-        let (to_delete, left) = filter_out_checked_items(&items, true);
-        let to_delete_data = get_single_data_str_from_model(&to_delete);
-        let left_data = get_single_data_str_from_model(&left);
-
-        assert_eq!(to_delete_data, Vec::<String>::new());
-        assert_eq!(left_data, vec!["1", "2", "3", "4", "5", "6", "7", "8", "9"]);
-
-        for i in 1..20 {
-            let mut vec_items = vec![(false, true, true, false, vec!["First"])];
-            for j in i..21 {
-                let is_header = (j - i) % 5 == 0;
-                let item = if is_header {
-                    (false, true, true, false, vec!["Header"])
-                } else {
-                    (false, false, false, false, vec!["Non header"])
-                };
-                vec_items.push(item);
-            }
-            filter_out_checked_items(&create_new_model(vec_items), true);
-        }
-    }
-
-    #[test]
-    fn test_filter_empty_header() {
-        let items = create_new_model(vec![(false, true, false, false, vec!["1"]), (false, false, false, false, vec!["2"])]);
-        let (to_delete, left) = filter_out_checked_items(&items, true);
-        let to_delete_data = get_single_data_str_from_model(&to_delete);
-        let left_data = get_single_data_str_from_model(&left);
-
-        assert_eq!(to_delete_data, Vec::<String>::new());
-        assert_eq!(left_data, Vec::<String>::new());
-
-        let items = create_new_model(vec![
-            (false, true, false, false, vec!["1"]),
-            (false, false, false, false, vec!["2"]),
-            (false, false, false, false, vec!["3"]),
-        ]);
-        let (to_delete, left) = filter_out_checked_items(&items, true);
-        let to_delete_data = get_single_data_str_from_model(&to_delete);
-        let left_data = get_single_data_str_from_model(&left);
-
-        assert_eq!(to_delete_data, Vec::<String>::new());
-        assert_eq!(left_data, vec!["1", "2", "3"]);
-
-        let items = create_new_model(vec![
-            (false, true, false, false, vec!["1"]),
-            (false, false, false, false, vec!["2"]),
-            (false, true, false, false, vec!["3"]),
-        ]);
-        let (to_delete, left) = filter_out_checked_items(&items, true);
-        let to_delete_data = get_single_data_str_from_model(&to_delete);
-        let left_data = get_single_data_str_from_model(&left);
-
-        assert_eq!(to_delete_data, Vec::<String>::new());
-        assert_eq!(left_data, Vec::<String>::new());
-
-        let items = create_new_model(vec![
-            (false, true, false, false, vec!["1"]),
-            (true, false, false, false, vec!["2"]),
-            (false, false, false, false, vec!["3"]),
-        ]);
-        let (to_delete, left) = filter_out_checked_items(&items, true);
-        let to_delete_data = get_single_data_str_from_model(&to_delete);
-        let left_data = get_single_data_str_from_model(&left);
-
-        assert_eq!(to_delete_data, vec!["2"]);
-        assert_eq!(left_data, Vec::<String>::new());
-
-        let items = create_new_model(vec![
-            (false, true, false, false, vec!["1"]),
-            (false, false, false, false, vec!["2"]),
-            (false, false, false, false, vec!["3"]),
-            (false, false, false, false, vec!["4"]),
-            (false, true, false, false, vec!["5"]),
-            (false, false, false, false, vec!["6"]),
-            (false, false, false, false, vec!["7"]),
-            (false, true, false, false, vec!["8"]),
-            (false, false, false, false, vec!["9"]),
-            (false, true, false, false, vec!["10"]),
-        ]);
-        let (to_delete, left) = filter_out_checked_items(&items, true);
-        let to_delete_data = get_single_data_str_from_model(&to_delete);
-        let left_data = get_single_data_str_from_model(&left);
-
-        assert_eq!(to_delete_data, Vec::<String>::new());
-        assert_eq!(left_data, vec!["1", "2", "3", "4", "5", "6", "7"]);
-
-        for i in 1..20 {
-            let mut vec_items = vec![(false, true, false, false, vec!["First"])];
-            for j in i..21 {
-                let is_header = (j - i) % 5 == 0;
-                let item = if is_header {
-                    (false, true, false, false, vec!["Header"])
-                } else {
-                    (false, false, false, false, vec!["Non header"])
-                };
-                vec_items.push(item);
-            }
-            filter_out_checked_items(&create_new_model(vec_items), true);
-        }
-    }
-    fn get_single_data_str_from_model(model: &[MainListModel]) -> Vec<String> {
-        let mut d = model
-            .iter()
-            .map(|item| item.val_str.iter().next().expect("Failed to get first element").to_string())
-            .collect::<Vec<_>>();
-        d.sort();
-        d
-    }
-
-    fn create_new_model(items: Vec<(bool, bool, bool, bool, Vec<&'static str>)>) -> ModelRc<MainListModel> {
-        let model = VecModel::default();
-        for item in items {
-            let all_items: Vec<SharedString> = item.4.iter().map(|item| (*item).into()).collect::<Vec<_>>();
-            let all_items = VecModel::from(all_items);
-            if item.2 {
-                assert!(item.1); // Header must be set when full header is set
-            }
-            model.push(MainListModel {
-                checked: item.0,
-                header_row: item.1,
-                filled_header_row: item.2,
-                selected_row: item.3,
-                val_str: ModelRc::new(all_items),
-                val_int: ModelRc::new(VecModel::default()),
-            });
-        }
-        ModelRc::new(model)
+    #[should_panic]
+    fn panics_when_first_row_is_selected_but_have_header() {
+        let mut items = get_model_vec(2);
+        items[0].header_row = true;
+        items[0].selected_row = true;
+        remove_single_items_in_groups(items, true);
     }
 }

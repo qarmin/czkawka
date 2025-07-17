@@ -5,7 +5,6 @@ use std::{fs, path, thread};
 
 use crossbeam_channel::Sender;
 use czkawka_core::progress_data::ProgressData;
-use rayon::prelude::*;
 use rfd::FileDialog;
 use slint::{ComponentHandle, Weak};
 
@@ -79,21 +78,16 @@ fn move_single_item(data: &SimplerMainListModel, path_idx: usize, name_idx: usiz
     let path = &data.val_str[path_idx];
     let name = &data.val_str[name_idx];
 
-    if copy_mode {
-        let (input_file, output_file) = collect_path_and_create_folders(path, name, output_folder, preserve_structure);
+    let (input_file, output_file) = collect_path_and_create_folders(path, name, output_folder, preserve_structure);
+    if output_file.exists() {
+        return Err(flk!("rust_file_already_exists", file = output_file.to_string_lossy().to_string()));
+    }
 
-        if output_file.exists() {
-            return Err(flk!("rust_file_already_exists", file = output_file.to_string_lossy().to_string()));
-        }
+    if copy_mode {
         try_to_copy_item(&input_file, &output_file)
     } else {
-        let (input_file, output_file) = collect_path_and_create_folders(path, name, output_folder, preserve_structure);
-
-        if output_file.exists() {
-            return Err(flk!("rust_file_already_exists", file = output_file.to_string_lossy().to_string()));
-        }
-
-        // Try to rename file, may fail due various reasons, but
+        // Try to rename file, may fail due various reasons
+        // It is the easiest way to move file, but only on same partition
         if fs::rename(&input_file, &output_file).is_ok() {
             return Ok(());
         }
