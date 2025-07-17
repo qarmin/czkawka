@@ -32,6 +32,7 @@ export component MainWindow inherits Window {
     callback folders_move_choose_requested();
     callback reset_selection();
     callback initialize_popup_sizes();
+    callback processing_ended(string);
 
     title <=> Translations.main_window_title_text;
 
@@ -265,6 +266,12 @@ export component MainWindow inherits Window {
     scan_ended(scan_text) => {
         text_summary_text = scan_text;
         root.scanning = false;
+        root.stop_requested = false;
+    }
+
+    processing_ended(process_text) => {
+        text_summary_text = process_text;
+        root.processing = false;
         root.stop_requested = false;
     }
 

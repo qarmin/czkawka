@@ -1,7 +1,16 @@
 #![allow(dead_code)] // TODO
 #![allow(unused)]
+
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+use std::time::Duration;
+
+use crossbeam_channel::Sender;
+use czkawka_core::progress_data::ProgressData;
+use rayon::iter::*;
 use slint::{Model, ModelRc, SharedString};
 
+use crate::common::delayed_sender::DelayedSender;
 use crate::common::{get_is_header_mode, get_str_name_idx, get_str_path_idx, get_str_proper_extension};
 use crate::simpler_model::SimplerMainListModel;
 use crate::{CurrentTab, MainListModel};
@@ -100,6 +109,43 @@ impl ModelProcessor {
             .collect();
 
         (new_model, errors, items_deleted)
+    }
+    pub fn process_items(
+        &self,
+        items_simplified: Vec<(usize, SimplerMainListModel)>,
+        items_queued_to_delete: usize,
+        sender: Sender<ProgressData>,
+        stop_flag: &Arc<AtomicBool>,
+        process_function: impl Fn(&SimplerMainListModel) -> Result<(), String> + Send + Sync + 'static,
+    ) -> ProcessingResult {
+        let rm_idx = Arc::new(AtomicUsize::new(0));
+        let delayed_sender = DelayedSender::new(sender, Duration::from_millis(200));
+
+        let mut output: Vec<_> = items_simplified
+            .into_par_iter()
+            .map(|(idx, data)| {
+                if !data.checked {
+                    return (idx, data, None);
+                }
+
+                // Stop requested, so just return items
+                if stop_flag.load(Ordering::Relaxed) {
+                    return (idx, data, None);
+                }
+
+                let rm_idx = rm_idx.fetch_add(1, Ordering::Relaxed);
+                let mut progress = ProgressData::get_base_deleting_state();
+                progress.entries_to_check = items_queued_to_delete;
+                progress.entries_checked = rm_idx;
+                delayed_sender.send(progress);
+
+                let res = process_function(&data);
+                (idx, data, Some(res))
+            })
+            .collect();
+        output.sort_by_key(|(idx, _, _)| *idx);
+
+        output
     }
 }
 

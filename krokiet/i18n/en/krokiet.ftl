@@ -54,6 +54,7 @@ rust_saved_preset = Saved preset { $preset_idx }
 rust_cannot_save_preset = Cannot save preset { $preset_idx } - reason { $reason }
 rust_reset_preset = Reset preset { $preset_idx }
 rust_deleting_files = Deleting { $items_stats } file
+rust_no_files_deleted = Not selected any files/folders to delete
 
 # Slint translations, but in arrays
 
