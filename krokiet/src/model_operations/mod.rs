@@ -1,6 +1,8 @@
 #![allow(dead_code)] // TODO
 #![allow(unused)]
 
+pub mod model_processor;
+
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::time::Duration;
@@ -73,80 +75,6 @@ pub fn debug_print_main_list_model_items(list_model: &MainListModel, idx: usize)
         "Failed to get idx {idx} element, with items: checked: {}, filled_header_row: {}, header_row: {}, selected_row: {}, val_int: {val_int:?}, val_str: {val_str:?}",
         list_model.checked, list_model.filled_header_row, list_model.header_row, list_model.selected_row
     );
-}
-
-pub struct ModelProcessor {
-    pub active_tab: CurrentTab,
-}
-
-impl ModelProcessor {
-    pub fn new(active_tab: CurrentTab) -> Self {
-        Self { active_tab }
-    }
-
-    pub fn remove_single_items_in_groups(&self, items: Vec<MainListModel>) -> Vec<MainListModel> {
-        let have_header = get_is_header_mode(self.active_tab);
-        remove_single_items_in_groups(items, have_header)
-    }
-
-    pub fn remove_deleted_items_from_model(&self, results: ProcessingResult) -> (Vec<SimplerMainListModel>, Vec<String>, usize) {
-        let mut errors = vec![];
-        let mut items_deleted = 0;
-
-        let new_model: Vec<SimplerMainListModel> = results
-            .into_iter()
-            .filter_map(|(_idx, item, delete_res)| match delete_res {
-                Some(Ok(())) => {
-                    items_deleted += 1;
-                    None
-                }
-                Some(Err(err)) => {
-                    errors.push(err);
-                    Some(item)
-                }
-                None => Some(item),
-            })
-            .collect();
-
-        (new_model, errors, items_deleted)
-    }
-    pub fn process_items(
-        &self,
-        items_simplified: Vec<(usize, SimplerMainListModel)>,
-        items_queued_to_delete: usize,
-        sender: Sender<ProgressData>,
-        stop_flag: &Arc<AtomicBool>,
-        process_function: impl Fn(&SimplerMainListModel) -> Result<(), String> + Send + Sync + 'static,
-    ) -> ProcessingResult {
-        let rm_idx = Arc::new(AtomicUsize::new(0));
-        let delayed_sender = DelayedSender::new(sender, Duration::from_millis(200));
-
-        let mut output: Vec<_> = items_simplified
-            .into_par_iter()
-            .map(|(idx, data)| {
-                if !data.checked {
-                    return (idx, data, None);
-                }
-
-                // Stop requested, so just return items
-                if stop_flag.load(Ordering::Relaxed) {
-                    return (idx, data, None);
-                }
-
-                let rm_idx = rm_idx.fetch_add(1, Ordering::Relaxed);
-                let mut progress = ProgressData::get_base_deleting_state();
-                progress.entries_to_check = items_queued_to_delete;
-                progress.entries_checked = rm_idx;
-                delayed_sender.send(progress);
-
-                let res = process_function(&data);
-                (idx, data, Some(res))
-            })
-            .collect();
-        output.sort_by_key(|(idx, _, _)| *idx);
-
-        output
-    }
 }
 
 // Removes orphan items in groups

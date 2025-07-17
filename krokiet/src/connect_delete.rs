@@ -11,7 +11,7 @@ use slint::{ComponentHandle, ModelRc, VecModel, Weak};
 
 use crate::common::{get_str_name_idx, get_str_path_idx, get_tool_model, set_tool_model};
 use crate::connect_row_selection::reset_selection;
-use crate::model_operations::ModelProcessor;
+use crate::model_operations::model_processor::ModelProcessor;
 use crate::simpler_model::{SimplerMainListModel, ToSimplerVec, ToSlintModel};
 use crate::{Callabler, CurrentTab, GuiState, MainWindow, Settings, flk};
 
@@ -32,12 +32,6 @@ pub fn connect_delete_button(app: &MainWindow, progress_sender: Sender<ProgressD
         processor.delete_selected_items(settings.get_move_to_trash(), progress_sender, weak_app, stop_flag);
     });
 }
-
-// This is quite ugly workaround for Slint strange limitation, where model cannot be passed to another thread
-// This was needed by me, because I wanted to process deletion without blocking main gui thread, with additional sending progress about entire operation.
-// After trying different solutions, looks that the simplest and quite not really efficient solution is to convert slint model, to simpler model, which can be passed to another thread.
-// Models are converted multiple times, so this have some big overhead
-// ModelRc<MainListModel> --cloning when iterating + converting--> SimplerMainListModel --conversion before setting to model--> ModelRc<MainListModel> --cloning when iterating to remove useless items--> ModelRc<MainListModel>
 
 impl ModelProcessor {
     fn delete_selected_items(self, remove_to_trash: bool, progress_sender: Sender<ProgressData>, weak_app: Weak<MainWindow>, stop_flag: Arc<AtomicBool>) {
