@@ -10,7 +10,6 @@ use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use slint::{ComponentHandle, ModelRc, VecModel, Weak};
 
 use crate::common::delayed_sender::DelayedSender;
-use crate::common::{get_is_header_mode, set_tool_model};
 use crate::connect_row_selection::reset_selection;
 use crate::model_operations::ProcessingResult;
 use crate::simpler_model::{SimplerMainListModel, ToSlintModel};
@@ -63,7 +62,7 @@ impl ModelProcessor {
     }
 
     pub fn remove_single_items_in_groups(&self, items: Vec<MainListModel>) -> Vec<MainListModel> {
-        let have_header = get_is_header_mode(self.active_tab);
+        let have_header = self.active_tab.get_is_header_mode();
         model_operations::remove_single_items_in_groups(items, have_header)
     }
 
@@ -175,7 +174,7 @@ impl ModelProcessor {
                 let mut new_model_after_removing_useless_items = self.remove_single_items_in_groups(new_simple_model.to_vec_model());
                 // Selection cache was invalidated, so we need to reset it
                 new_model_after_removing_useless_items.iter_mut().for_each(|e| e.selected_row = false);
-                set_tool_model(&app, self.active_tab, ModelRc::new(VecModel::from(new_model_after_removing_useless_items)));
+                self.active_tab.set_tool_model(&app, ModelRc::new(VecModel::from(new_model_after_removing_useless_items)));
 
                 app.global::<GuiState>()
                     .set_info_text(Messages::new_from_errors(errors.clone()).create_messages_text().into());

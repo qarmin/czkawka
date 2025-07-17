@@ -257,7 +257,6 @@ export component SelectableTableView inherits Rectangle {
         }
 
         key-pressed(event) => {
-            debug("PRESSED" + event.text);
             if (!self.visible || !self.has-focus) {
                 return accept;
             }

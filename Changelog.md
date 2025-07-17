@@ -26,8 +26,9 @@
 - Dark/Light theme can now be switched at runtime - [#1520](https://github.com/qarmin/czkawka/pull/1520)
 - Changed icon color to white for dark theme to improve visibility - [#1520](https://github.com/qarmin/czkawka/pull/1520)
 - Added ability to hide text on buttons - [#1520](https://github.com/qarmin/czkawka/pull/1520)
-- Multithreaded removing of files - []()
-- Failed to remove/rename files, do not hide from results list - []()
+- Multithreaded removing/moving/renaming of files - []()
+- Failed to remove/rename/move files, do not are not deleted from list of results - []()
+- Progress info when removing/renaming/moving files and ability to stop process []()
 
 ### External
 - There is a new unofficial Tauri-based frontend for Czkawka - [Czkawka Tauri](https://github.com/shixinhuang99/czkawka-tauri)

@@ -6,7 +6,6 @@ use crossbeam_channel::Sender;
 use czkawka_core::progress_data::ProgressData;
 use slint::{ComponentHandle, Weak};
 
-use crate::common::{get_str_name_idx, get_str_path_idx, get_str_proper_extension, get_tool_model};
 use crate::model_operations::model_processor::{MessageType, ModelProcessor};
 use crate::simpler_model::{SimplerMainListModel, ToSimplerVec};
 use crate::{Callabler, GuiState, MainWindow};
@@ -28,12 +27,12 @@ pub fn connect_rename(app: &MainWindow, progress_sender: Sender<ProgressData>, s
 
 impl ModelProcessor {
     fn rename_selected_items(self, progress_sender: Sender<ProgressData>, weak_app: Weak<MainWindow>, stop_flag: Arc<AtomicBool>) {
-        let model = get_tool_model(&weak_app.upgrade().expect("Failed to upgrade app :("), self.active_tab);
+        let model = self.active_tab.get_tool_model(&weak_app.upgrade().expect("Failed to upgrade app :("));
         let simpler_model = model.to_simpler_enumerated_vec();
         thread::spawn(move || {
-            let path_idx = get_str_path_idx(self.active_tab);
-            let name_idx = get_str_name_idx(self.active_tab);
-            let ext_idx = get_str_proper_extension(self.active_tab);
+            let path_idx = self.active_tab.get_str_path_idx();
+            let name_idx = self.active_tab.get_str_name_idx();
+            let ext_idx = self.active_tab.get_str_proper_extension();
 
             let rm_fnc = move |data: &SimplerMainListModel| rename_single_item(data, path_idx, name_idx, ext_idx);
 

@@ -4,7 +4,6 @@ use crossbeam_channel::Receiver;
 use czkawka_core::common_dir_traversal::ToolType;
 use czkawka_core::progress_data::{CurrentStage, ProgressData};
 use humansize::{BINARY, format_size};
-use log::error;
 use slint::ComponentHandle;
 
 use crate::{MainWindow, ProgressToSend, flk};
@@ -17,8 +16,6 @@ pub fn connect_progress_gathering(app: &MainWindow, progress_receiver: Receiver<
             let Ok(progress_data) = progress_receiver.recv() else {
                 return; // Channel closed, so exit the thread since app closing
             };
-
-            error!("Received progress data: {progress_data:?}");
 
             a.upgrade_in_event_loop(move |app| {
                 let removing_empty_folders = progress_data.tool_type == ToolType::EmptyFolders;
@@ -97,9 +94,9 @@ fn progress_default(item: &ProgressData) -> ProgressToSend {
         CurrentStage::DuplicatePreHashing => flk!("rust_analyzed_partial_hash", items_stats = items_stats, size_stats = size_stats),
         CurrentStage::DuplicateFullHashing => flk!("rust_analyzed_full_hash", items_stats = items_stats, size_stats = size_stats),
 
-        CurrentStage::DeletingFiles => flk!("rust_deleting_files", items_stats = items_stats),
+        CurrentStage::DeletingFiles => flk!("rust_deleting_files", items_stats = items_stats, size_stats = size_stats),
         CurrentStage::RenamingFiles => flk!("rust_renaming_files", items_stats = items_stats),
-        CurrentStage::MovingFiles => flk!("rust_moving_files", items_stats = items_stats),
+        CurrentStage::MovingFiles => flk!("rust_moving_files", items_stats = items_stats, size_stats = size_stats),
         _ => unreachable!(),
     };
     let (all_progress, current_progress, current_progress_size) = common_get_data(item);

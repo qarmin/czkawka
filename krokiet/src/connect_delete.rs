@@ -7,7 +7,6 @@ use crossbeam_channel::Sender;
 use czkawka_core::progress_data::ProgressData;
 use slint::{ComponentHandle, Weak};
 
-use crate::common::{get_str_name_idx, get_str_path_idx, get_tool_model};
 use crate::model_operations::model_processor::{MessageType, ModelProcessor};
 use crate::simpler_model::{SimplerMainListModel, ToSimplerVec};
 use crate::{Callabler, CurrentTab, GuiState, MainWindow, Settings};
@@ -31,11 +30,11 @@ pub fn connect_delete_button(app: &MainWindow, progress_sender: Sender<ProgressD
 impl ModelProcessor {
     fn delete_selected_items(self, remove_to_trash: bool, progress_sender: Sender<ProgressData>, weak_app: Weak<MainWindow>, stop_flag: Arc<AtomicBool>) {
         let is_empty_folder_tab = self.active_tab == CurrentTab::EmptyFolders;
-        let model = get_tool_model(&weak_app.upgrade().expect("Failed to upgrade app :("), self.active_tab);
+        let model = self.active_tab.get_tool_model(&weak_app.upgrade().expect("Failed to upgrade app :("));
         let simpler_model = model.to_simpler_enumerated_vec();
         thread::spawn(move || {
-            let path_idx = get_str_path_idx(self.active_tab);
-            let name_idx = get_str_name_idx(self.active_tab);
+            let path_idx = self.active_tab.get_str_path_idx();
+            let name_idx = self.active_tab.get_str_name_idx();
 
             let dlt_fnc = move |data: &SimplerMainListModel| {
                 remove_single_item(
