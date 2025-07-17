@@ -14,11 +14,9 @@ use slint::{ComponentHandle, ModelRc, VecModel, Weak};
 use crate::common::delayed_sender::DelayedSender;
 use crate::common::{get_str_name_idx, get_str_path_idx, get_tool_model, set_tool_model};
 use crate::connect_row_selection::reset_selection;
-use crate::model_operations::ModelProcessor;
+use crate::model_operations::{ModelProcessor, ProcessingResult};
 use crate::simpler_model::{SimplerMainListModel, ToSimplerVec, ToSlintModel};
 use crate::{Callabler, CurrentTab, GuiState, MainWindow, Settings, flk};
-
-type DeleteResults = Vec<(usize, SimplerMainListModel, Option<Result<(), String>>)>;
 
 pub fn connect_delete_button(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
     let a = app.as_weak();
@@ -54,7 +52,7 @@ impl ModelProcessor {
 
             weak_app
                 .upgrade_in_event_loop(move |app| {
-                    app.set_deleting(true);
+                    app.set_processing(true);
                 })
                 .expect("Failed to update app info text");
 
@@ -65,7 +63,7 @@ impl ModelProcessor {
                         app.global::<GuiState>().set_info_text("".into()); // TODO NOT DELETE ANYTHING message should be added here
                         stop_flag.store(false, Ordering::Relaxed);
                         app.set_stop_requested(false);
-                        app.set_deleting(false);
+                        app.set_processing(false);
                     })
                     .expect("Failed to update app info text");
                 return;
@@ -105,7 +103,7 @@ impl ModelProcessor {
 
                     reset_selection(&app, true);
 
-                    app.set_deleting(false);
+                    app.set_processing(false);
                     reset_selection(&app, true);
                     stop_flag.store(false, Ordering::Relaxed);
                     app.set_stop_requested(false);
@@ -122,7 +120,7 @@ impl ModelProcessor {
         items_queued_to_delete: usize,
         sender: Sender<ProgressData>,
         stop_flag: &Arc<AtomicBool>,
-    ) -> DeleteResults {
+    ) -> ProcessingResult {
         let path_idx = get_str_path_idx(self.active_tab);
         let name_idx = get_str_name_idx(self.active_tab);
 
@@ -136,12 +134,12 @@ impl ModelProcessor {
                     return (idx, data, None);
                 }
 
-                // Stop requested, so
-                if stop_flag.load(std::sync::atomic::Ordering::Relaxed) {
+                // Stop requested, so just return items
+                if stop_flag.load(Ordering::Relaxed) {
                     return (idx, data, None);
                 }
 
-                let rm_idx = rm_idx.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                let rm_idx = rm_idx.fetch_add(1, Ordering::Relaxed);
                 let mut progress = ProgressData::get_base_deleting_state();
                 progress.entries_to_check = items_queued_to_delete;
                 progress.entries_checked = rm_idx;
@@ -158,28 +156,6 @@ impl ModelProcessor {
         output.sort_by_key(|(idx, _, _)| *idx);
 
         output
-    }
-
-    fn remove_deleted_items_from_model(&self, results: DeleteResults) -> (Vec<SimplerMainListModel>, Vec<String>, usize) {
-        let mut errors = vec![];
-        let mut items_deleted = 0;
-
-        let new_model: Vec<SimplerMainListModel> = results
-            .into_iter()
-            .filter_map(|(_idx, item, delete_res)| match delete_res {
-                Some(Ok(())) => {
-                    items_deleted += 1;
-                    None
-                }
-                Some(Err(err)) => {
-                    errors.push(err);
-                    Some(item)
-                }
-                None => Some(item),
-            })
-            .collect();
-
-        (new_model, errors, items_deleted)
     }
 }
 

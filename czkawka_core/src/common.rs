@@ -892,7 +892,7 @@ mod test {
 
         // Test with directory containing a file
         fs::create_dir(&sub_dir).expect("Cannot create directory");
-        let mut file = fs::File::create(sub_dir.join("file.txt")).expect("Cannot create file");
+        let mut file = File::create(sub_dir.join("file.txt")).expect("Cannot create file");
         writeln!(file, "Hello, world!").expect("Cannot write to file");
         assert!(remove_folder_if_contains_only_empty_folders(&sub_dir, false).is_err());
         assert!(Path::new(&sub_dir).exists());

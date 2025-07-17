@@ -743,8 +743,8 @@ fn svg_to_dynamic_image(svg_data: &[u8]) -> Option<DynamicImage> {
     let opt = Options::default();
     let tree = Tree::from_data(svg_data, &opt).ok()?;
 
-    let mut pixmap = crate::help_functions::tiny_skia::Pixmap::new(tree.size().width() as u32, tree.size().height() as u32)?;
-    resvg::render(&tree, resvg::tiny_skia::Transform::default(), &mut (pixmap.as_mut()));
+    let mut pixmap = tiny_skia::Pixmap::new(tree.size().width() as u32, tree.size().height() as u32)?;
+    resvg::render(&tree, tiny_skia::Transform::default(), &mut (pixmap.as_mut()));
 
     let rgba = RgbaImage::from_raw(pixmap.width(), pixmap.height(), pixmap.data().to_vec())?;
 

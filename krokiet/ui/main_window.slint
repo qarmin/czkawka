@@ -42,7 +42,7 @@ export component MainWindow inherits Window {
     in-out property <string> text_summary_text: "";
     in-out property <bool> stop_requested: false;
     in-out property <bool> scanning: false;
-    in-out property <bool> deleting: false;
+    in-out property <bool> processing: false;
     in-out property <ProgressToSend> progress_datas: {
         current_progress: 15,
         all_progress: 20,
@@ -116,7 +116,7 @@ export component MainWindow inherits Window {
                     }
                 }
 
-                if root.scanning || root.deleting: Progress {
+                if root.scanning || root.processing: Progress {
                     horizontal-stretch: 0.0;
                     progress_datas <=> root.progress_datas;
                 }
@@ -138,7 +138,7 @@ export component MainWindow inherits Window {
 
             vertical-stretch: 0.0;
             scanning <=> root.scanning;
-            deleting <=> root.deleting;
+            processing <=> root.processing;
             stop_requested <=> root.stop_requested;
             scan_stopping => {
                 text_summary_text = Translations.stopping_scan_text;

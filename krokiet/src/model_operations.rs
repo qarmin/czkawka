@@ -3,7 +3,10 @@
 use slint::{Model, ModelRc, SharedString};
 
 use crate::common::{get_is_header_mode, get_str_name_idx, get_str_path_idx, get_str_proper_extension};
+use crate::simpler_model::SimplerMainListModel;
 use crate::{CurrentTab, MainListModel};
+
+pub type ProcessingResult = Vec<(usize, SimplerMainListModel, Option<Result<(), String>>)>;
 
 pub fn deselect_all_items(items: &mut [MainListModel]) {
     for item in items {
@@ -75,6 +78,28 @@ impl ModelProcessor {
     pub fn remove_single_items_in_groups(&self, items: Vec<MainListModel>) -> Vec<MainListModel> {
         let have_header = get_is_header_mode(self.active_tab);
         remove_single_items_in_groups(items, have_header)
+    }
+
+    pub fn remove_deleted_items_from_model(&self, results: ProcessingResult) -> (Vec<SimplerMainListModel>, Vec<String>, usize) {
+        let mut errors = vec![];
+        let mut items_deleted = 0;
+
+        let new_model: Vec<SimplerMainListModel> = results
+            .into_iter()
+            .filter_map(|(_idx, item, delete_res)| match delete_res {
+                Some(Ok(())) => {
+                    items_deleted += 1;
+                    None
+                }
+                Some(Err(err)) => {
+                    errors.push(err);
+                    Some(item)
+                }
+                None => Some(item),
+            })
+            .collect();
+
+        (new_model, errors, items_deleted)
     }
 }
 

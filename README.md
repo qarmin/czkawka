@@ -33,7 +33,7 @@ files from your computer.
 
 ![Krokiet](https://github.com/user-attachments/assets/906cbbc3-f011-4306-81da-9e4e53b49a9f)
 
-Changelog about each version can be found in [CHANGELOG.md](CHANGELOG.md).
+Changelog about each version can be found in [CHANGELOG.md](Changelog.md).
 
 New releases can be found in [Github releases](https://github.com/qarmin/czkawka/releases) and nightly builds also in [Nightly releases](https://github.com/qarmin/czkawka/releases/tag/Nightly)
 

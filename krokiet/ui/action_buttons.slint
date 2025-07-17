@@ -48,8 +48,8 @@ export component ActionButtons inherits HorizontalLayout {
     in-out property <BottomPanelVisibility> bottom_panel_visibility <=> GuiState.bottom_panel_visibility;
     in-out property <bool> stop_requested: false;
     in-out property <bool> scanning;
-    in-out property <bool> deleting;
-    in-out property <bool> base_buttons_may_be_available: !scanning && !deleting && results_available;
+    in-out property <bool> processing;
+    in-out property <bool> base_buttons_may_be_available: !scanning && !processing && results_available;
     in-out property <bool> lists_enabled: GuiState.is_tool_tab_active;
     in-out property <bool> results_available: false;
     out property <int> name;
@@ -83,9 +83,9 @@ export component ActionButtons inherits HorizontalLayout {
                             (active_tab == CurrentTab.BadExtensions && bad_extensions_model.length > 0);
     }
 
-    if (!scanning && !deleting && lists_enabled): scan_button :=  Button {
+    if (!scanning && !processing && lists_enabled): scan_button :=  Button {
         height: parent.height;
-        enabled: !scanning && !deleting && lists_enabled;
+        enabled: !scanning && !processing && lists_enabled;
         text: Settings.show_only_icons ? "" : Translations.scan_button_text;
         icon: @image-url("../icons/krokiet_search.svg");
         colorize-icon: true;
@@ -95,9 +95,9 @@ export component ActionButtons inherits HorizontalLayout {
         }
     }
 
-    if (scanning || deleting): stop_button := Button {
+    if (scanning || processing): stop_button := Button {
         height: parent.height;
-        enabled: (scanning || deleting) && !stop_requested && root.lists_enabled;
+        enabled: (scanning || processing) && !stop_requested && root.lists_enabled;
         text: self.visible && Settings.show_only_icons ? "" : Translations.stop_button_text;
         icon: @image-url("../icons/krokiet_stop.svg");
         colorize-icon: true;

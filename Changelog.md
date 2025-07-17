@@ -9,7 +9,7 @@
 - Slightly improved cache loading/saving speed - [#1478](https://github.com/qarmin/czkawka/pull/1478)
 - Messages and panics are now also logged to a file (can be disabled by setting env `DISABLE_FILE_LOGGING`) - [#1508](https://github.com/qarmin/czkawka/pull/1508)
 - Added a 4GB memory limit when loading/saving cache to avoid out of memory crashes with broken cache - [#1508](https://github.com/qarmin/czkawka/pull/1508)
-- Czkawka binaries are now reproducible after fixing 
+- Czkawka binaries are now reproducible - []()
 
 ### GTK Gui
 - New icons — less pretty, but created by me and released under a truly free CC BY license - [#1478](https://github.com/qarmin/czkawka/pull/1478)
@@ -38,10 +38,9 @@
 - Czkawka binaries are now checked for reproducibility in CI
 
 ### Prebuild-binaries
-- CI now builds Linux binaries on Ubuntu 22.04 instead of 20.04 (some were built on 24.04)
+- CI now builds Linux binaries on Ubuntu 22.04 instead of 20.04 (except some, that are built on 24.04)
 - `musl` builds of `czkawka_cli` are now provided instead of `eyra` builds (slightly easier to maintain) — GUI builds are not included due to limitations of `musl` and `eyra` :(
 - Prebuilt Windows console binaries are no longer provided — logs are now saved to file, which is easier to read than terminal output
-
 
 ## Version 9.0.0 - 16.03.2025r
 
