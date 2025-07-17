@@ -3,6 +3,9 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
 
+/// A sender that delays sending values until a specified wait time has passed since the last sent value.
+/// This is useful for batching updates or reducing the frequency of sending messages in a multi-threaded environment.
+/// It is not ideal - using mutexes in send function from multiple threads can lead to performance issues(waiting for), but at least for now I don't see too much performance impact.
 pub struct DelayedSender<T: Send + 'static> {
     slot: Arc<Mutex<Option<T>>>,
     stop_flag: Arc<AtomicBool>,
