@@ -256,8 +256,8 @@ impl CurrentTab {
             Self::Settings | Self::About => panic!("Button should be disabled"),
         }
     }
-    pub fn get_int_size_idx(&self) -> usize {
-        match self {
+    pub fn get_int_size_opt_idx(&self) -> Option<usize> {
+        let res = match self {
             Self::EmptyFiles => IntDataEmptyFiles::SizePart1 as usize,
             Self::SimilarImages => IntDataSimilarImages::SizePart1 as usize,
             Self::DuplicateFiles => IntDataDuplicateFiles::SizePart1 as usize,
@@ -266,9 +266,13 @@ impl CurrentTab {
             Self::SimilarMusic => IntDataSimilarMusic::SizePart1 as usize,
             Self::BrokenFiles => IntDataBrokenFiles::SizePart1 as usize,
             Self::BadExtensions => IntDataBadExtensions::SizePart1 as usize,
-            Self::Settings | Self::About => panic!("Button should be disabled"),
-            Self::EmptyFolders | Self::InvalidSymlinks | Self::TemporaryFiles => panic!("Unable to get size from this tab"),
-        }
+            Self::Settings | Self::About => return None,
+            Self::EmptyFolders | Self::InvalidSymlinks | Self::TemporaryFiles => return None,
+        };
+        Some(res)
+    }
+    pub fn get_int_size_idx(&self) -> usize {
+        self.get_int_size_opt_idx().expect("Unable to get size index for tab: {self:?}")
     }
     pub fn get_int_width_idx(&self) -> usize {
         match self {

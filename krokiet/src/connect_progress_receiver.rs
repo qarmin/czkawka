@@ -94,9 +94,12 @@ fn progress_default(item: &ProgressData) -> ProgressToSend {
         CurrentStage::DuplicatePreHashing => flk!("rust_analyzed_partial_hash", items_stats = items_stats, size_stats = size_stats),
         CurrentStage::DuplicateFullHashing => flk!("rust_analyzed_full_hash", items_stats = items_stats, size_stats = size_stats),
 
-        CurrentStage::DeletingFiles => flk!("rust_deleting_files", items_stats = items_stats, size_stats = size_stats),
+        CurrentStage::DeletingFiles if item.bytes_to_check != 0 => flk!("rust_deleting_files", items_stats = items_stats, size_stats = size_stats),
+        CurrentStage::DeletingFiles => flk!("rust_deleting_no_size_files", items_stats = items_stats),
         CurrentStage::RenamingFiles => flk!("rust_renaming_files", items_stats = items_stats),
-        CurrentStage::MovingFiles => flk!("rust_moving_files", items_stats = items_stats, size_stats = size_stats),
+        CurrentStage::MovingFiles if item.bytes_to_check != 0 => flk!("rust_moving_files", items_stats = items_stats, size_stats = size_stats),
+        CurrentStage::MovingFiles => flk!("rust_moving_no_size_files", items_stats = items_stats),
+
         _ => unreachable!(),
     };
     let (all_progress, current_progress, current_progress_size) = common_get_data(item);

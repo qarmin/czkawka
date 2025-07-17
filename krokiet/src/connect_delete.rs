@@ -116,6 +116,7 @@ mod tests {
                 &Arc::new(AtomicBool::new(false)),
                 dlt_fnc,
                 MessageType::Delete,
+                self.active_tab.get_int_size_opt_idx(),
             );
 
             let (new_simple_model, errors, items_deleted) = self.remove_deleted_items_from_model(output);

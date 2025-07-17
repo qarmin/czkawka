@@ -1,5 +1,5 @@
 use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
 use std::time::Duration;
 
 use crossbeam_channel::Sender;
@@ -87,6 +87,7 @@ impl ModelProcessor {
 
         (new_model, errors, items_deleted)
     }
+    #[allow(clippy::too_many_arguments)]
     pub fn process_items(
         &self,
         items_simplified: Vec<(usize, SimplerMainListModel)>,
@@ -95,8 +96,10 @@ impl ModelProcessor {
         stop_flag: &Arc<AtomicBool>,
         process_function: impl Fn(&SimplerMainListModel) -> Result<(), String> + Send + Sync + 'static,
         message_type: MessageType,
+        size_idx: Option<usize>,
     ) -> ProcessingResult {
         let rm_idx = Arc::new(AtomicUsize::new(0));
+        let size = Arc::new(AtomicU64::new(0));
         let delayed_sender = DelayedSender::new(sender, Duration::from_millis(200));
 
         let mut output: Vec<_> = items_simplified
@@ -112,9 +115,11 @@ impl ModelProcessor {
                 }
 
                 let rm_idx = rm_idx.fetch_add(1, Ordering::Relaxed);
+                let size = size.fetch_add(size_idx.map(|size_idx| data.get_size(size_idx)).unwrap_or_default(), Ordering::Relaxed);
                 let mut progress = message_type.get_base_progress();
                 progress.entries_to_check = items_queued_to_delete;
                 progress.entries_checked = rm_idx;
+                progress.bytes_checked = size;
                 delayed_sender.send(progress);
 
                 let res = process_function(&data);
@@ -155,12 +160,17 @@ impl ModelProcessor {
             return;
         }
 
+        let size_idx = self.active_tab.get_int_size_opt_idx();
+
         // Sending progress data about how many items are queued to delete
         let mut base_progress = message_type.get_base_progress();
         base_progress.entries_to_check = items_queued_to_delete;
+        base_progress.bytes_to_check = size_idx
+            .map(|size_idx| simpler_model.iter().map(|(_idx, m)| m.get_size(size_idx)).sum())
+            .unwrap_or_default();
         let _ = progress_sender.send(base_progress).map_err(|e| error!("Failed to send progress data: {e}"));
 
-        let results = self.process_items(simpler_model, items_queued_to_delete, progress_sender.clone(), &stop_flag, dlt_fnc, message_type);
+        let results = self.process_items(simpler_model, items_queued_to_delete, progress_sender.clone(), &stop_flag, dlt_fnc, message_type, size_idx);
         let (new_simple_model, errors, items_deleted) = self.remove_deleted_items_from_model(results);
         let errors_len = errors.len();
 

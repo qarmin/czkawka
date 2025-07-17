@@ -4,6 +4,7 @@
 use slint::{Model, ModelExt, ModelRc, SharedString, VecModel};
 
 use crate::MainListModel;
+use crate::common::connect_i32_into_u64;
 
 #[derive(Clone)]
 pub struct SimplerMainListModel {
@@ -13,6 +14,12 @@ pub struct SimplerMainListModel {
     pub selected_row: bool,
     pub val_int: Vec<i32>,
     pub val_str: Vec<String>,
+}
+
+impl SimplerMainListModel {
+    pub fn get_size(&self, size_idx: usize) -> u64 {
+        connect_i32_into_u64(self.val_int[size_idx], self.val_int[size_idx + 1])
+    }
 }
 
 impl From<&MainListModel> for SimplerMainListModel {
