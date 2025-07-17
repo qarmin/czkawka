@@ -96,7 +96,7 @@ fn main() {
     connect_changing_settings_preset(&app);
     connect_select(&app);
     connect_showing_proper_select_buttons(&app);
-    connect_move(&app);
+    connect_move(&app, progress_sender.clone(), stop_flag.clone());
     connect_rename(&app, progress_sender, stop_flag);
     connect_save(&app, Arc::clone(&shared_models));
     connect_row_selections(&app);

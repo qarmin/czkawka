@@ -52,13 +52,17 @@ rust_cannot_load_preset = Cannot change and load preset { $preset_idx } - reason
 rust_saved_preset = Saved preset { $preset_idx }
 rust_cannot_save_preset = Cannot save preset { $preset_idx } - reason { $reason }
 rust_reset_preset = Reset preset { $preset_idx }
+rust_cannot_create_output_folder = Cannot create output folder { $output_folder }, reason: { $error }
 
 rust_delete_summary = Deleted { $deleted } items, failed to remove { $failed } items, from { $total } items
 rust_rename_summary = Renamed { $renamed } items, failed to rename { $failed } items, from { $total } items
+rust_move_summary = Moved { $moved } items, failed to move { $failed } items, from { $total } items
 rust_deleting_files = Deleting { $items_stats } file
 rust_renaming_files = Renaming { $items_stats } file
+rust_moving_files = Moving { $items_stats } file
 rust_no_files_deleted = Not selected any files/folders to delete
 rust_no_files_renamed = Not selected any files/folders to rename
+rust_no_files_moved = Not selected any files/folders to move
 
 
 # Slint translations, but in arrays

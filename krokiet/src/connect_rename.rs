@@ -31,15 +31,13 @@ impl ModelProcessor {
         let model = get_tool_model(&weak_app.upgrade().expect("Failed to upgrade app :("), self.active_tab);
         let simpler_model = model.to_simpler_enumerated_vec();
         thread::spawn(move || {
-            let base_progress = ProgressData::get_base_renaming_state();
-
             let path_idx = get_str_path_idx(self.active_tab);
             let name_idx = get_str_name_idx(self.active_tab);
             let ext_idx = get_str_proper_extension(self.active_tab);
 
             let rm_fnc = move |data: &SimplerMainListModel| rename_single_item(data, path_idx, name_idx, ext_idx);
 
-            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, base_progress, simpler_model, rm_fnc, MessageType::Rename);
+            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, rm_fnc, MessageType::Rename);
         });
     }
 }
@@ -100,7 +98,14 @@ mod tests {
 
             let rm_fnc = move |data: &SimplerMainListModel| rename_single_item(data, path_idx, name_idx, ext_idx);
 
-            let output = self.process_items(simplified_model, items_queued_to_delete, progress_sender, &Arc::new(AtomicBool::new(false)), rm_fnc);
+            let output = self.process_items(
+                simplified_model,
+                items_queued_to_delete,
+                progress_sender,
+                &Arc::new(AtomicBool::new(false)),
+                rm_fnc,
+                MessageType::Rename,
+            );
 
             let (new_simple_model, errors, items_deleted) = self.remove_deleted_items_from_model(output);
 
@@ -109,7 +114,7 @@ mod tests {
     }
 
     #[test]
-    fn test_no_delete_items() {
+    fn test_no_rename_items() {
         let (progress, _receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
         let model = get_model_vec(10);
         let model = create_model_from_model_vec(&model);
@@ -118,7 +123,7 @@ mod tests {
     }
 
     #[test]
-    fn test_delete_selected_items() {
+    fn test_rename_selected_items() {
         let (progress, _receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
         let mut model = get_model_vec(10);
         model[0].checked = true;

@@ -4,7 +4,7 @@ use std::time::Duration;
 
 use crossbeam_channel::Sender;
 use czkawka_core::common_messages::Messages;
-use czkawka_core::progress_data::ProgressData;
+use czkawka_core::progress_data::{CurrentStage, ProgressData};
 use log::error;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use slint::{ComponentHandle, ModelRc, VecModel, Weak};
@@ -15,6 +15,7 @@ use crate::connect_row_selection::reset_selection;
 use crate::model_operations::ProcessingResult;
 use crate::simpler_model::{SimplerMainListModel, ToSlintModel};
 use crate::{CurrentTab, GuiState, MainListModel, MainWindow, flk, model_operations};
+
 // This is quite ugly workaround for Slint strange limitation, where model cannot be passed to another thread
 // This was needed by me, because I wanted to process deletion without blocking main gui thread, with additional sending progress about entire operation.
 // After trying different solutions, looks that the simplest and quite not really efficient solution is to convert slint model, to simpler model, which can be passed to another thread.
@@ -25,9 +26,11 @@ pub struct ModelProcessor {
     pub active_tab: CurrentTab,
 }
 
+#[derive(Clone, Copy)]
 pub enum MessageType {
     Delete,
     Rename,
+    Move,
 }
 
 impl MessageType {
@@ -35,12 +38,21 @@ impl MessageType {
         match self {
             Self::Delete => flk!("rust_no_files_deleted"),
             Self::Rename => flk!("rust_no_files_renamed"),
+            Self::Move => flk!("rust_no_files_moved"),
         }
     }
     fn get_summary_message(&self, deleted: usize, failed: usize, total: usize) -> String {
         match self {
             Self::Delete => flk!("rust_delete_summary", deleted = deleted, failed = failed, total = total),
             Self::Rename => flk!("rust_rename_summary", renamed = deleted, failed = failed, total = total),
+            Self::Move => flk!("rust_move_summary", moved = deleted, failed = failed, total = total),
+        }
+    }
+    fn get_base_progress(&self) -> ProgressData {
+        match self {
+            Self::Delete => ProgressData::get_empty_state(CurrentStage::DeletingFiles),
+            Self::Rename => ProgressData::get_empty_state(CurrentStage::RenamingFiles),
+            Self::Move => ProgressData::get_empty_state(CurrentStage::MovingFiles),
         }
     }
 }
@@ -83,6 +95,7 @@ impl ModelProcessor {
         sender: Sender<ProgressData>,
         stop_flag: &Arc<AtomicBool>,
         process_function: impl Fn(&SimplerMainListModel) -> Result<(), String> + Send + Sync + 'static,
+        message_type: MessageType,
     ) -> ProcessingResult {
         let rm_idx = Arc::new(AtomicUsize::new(0));
         let delayed_sender = DelayedSender::new(sender, Duration::from_millis(200));
@@ -100,7 +113,7 @@ impl ModelProcessor {
                 }
 
                 let rm_idx = rm_idx.fetch_add(1, Ordering::Relaxed);
-                let mut progress = ProgressData::get_base_deleting_state();
+                let mut progress = message_type.get_base_progress();
                 progress.entries_to_check = items_queued_to_delete;
                 progress.entries_checked = rm_idx;
                 delayed_sender.send(progress);
@@ -120,7 +133,6 @@ impl ModelProcessor {
         weak_app: &Weak<MainWindow>,
         stop_flag: Arc<AtomicBool>,
         progress_sender: &Sender<ProgressData>,
-        mut base_progress: ProgressData,
         simpler_model: Vec<(usize, SimplerMainListModel)>,
         dlt_fnc: impl Fn(&SimplerMainListModel) -> Result<(), String> + Send + Sync + 'static,
         message_type: MessageType,
@@ -145,14 +157,16 @@ impl ModelProcessor {
         }
 
         // Sending progress data about how many items are queued to delete
+        let mut base_progress = message_type.get_base_progress();
         base_progress.entries_to_check = items_queued_to_delete;
         let _ = progress_sender.send(base_progress).map_err(|e| error!("Failed to send progress data: {e}"));
 
-        let results = self.process_items(simpler_model, items_queued_to_delete, progress_sender.clone(), &stop_flag, dlt_fnc);
+        let results = self.process_items(simpler_model, items_queued_to_delete, progress_sender.clone(), &stop_flag, dlt_fnc, message_type);
         let (new_simple_model, errors, items_deleted) = self.remove_deleted_items_from_model(results);
+        let errors_len = errors.len();
 
         // Sending progress data at the end of deletion, to indicate that deletion is finished
-        base_progress.entries_checked = items_deleted + errors.len();
+        base_progress.entries_checked = items_deleted + errors_len;
 
         let _ = progress_sender.send(base_progress).map_err(|e| error!("Failed to send progress data: {e}"));
 
@@ -170,7 +184,7 @@ impl ModelProcessor {
 
                 reset_selection(&app, true);
                 stop_flag.store(false, Ordering::Relaxed);
-                app.invoke_processing_ended(message_type.get_summary_message(items_deleted, errors.len(), items_queued_to_delete).into());
+                app.invoke_processing_ended(message_type.get_summary_message(items_deleted, errors_len, items_queued_to_delete).into());
             })
             .expect("Failed to update app after deletion");
     }

@@ -1,17 +1,21 @@
 use std::path::{Path, PathBuf};
-use std::{fs, path};
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::{fs, path, thread};
 
-use czkawka_core::common_messages::Messages;
+use crossbeam_channel::Sender;
+use czkawka_core::progress_data::ProgressData;
 use rayon::prelude::*;
 use rfd::FileDialog;
-use slint::{ComponentHandle, ModelRc, VecModel};
+use slint::{ComponentHandle, Weak};
 
-use crate::common::{get_is_header_mode, get_tool_model, set_tool_model};
+use crate::common::{get_str_name_idx, get_str_path_idx, get_tool_model};
 use crate::connect_row_selection::reset_selection;
-use crate::model_operations::{collect_path_name_from_model, deselect_all_items, filter_out_checked_items};
-use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow, flk};
+use crate::model_operations::model_processor::{MessageType, ModelProcessor};
+use crate::simpler_model::{SimplerMainListModel, ToSimplerVec};
+use crate::{Callabler, GuiState, MainWindow, flk};
 
-pub fn connect_move(app: &MainWindow) {
+pub fn connect_move(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
     let a = app.as_weak();
     app.on_folders_move_choose_requested(move || {
         let app = a.upgrade().expect("Failed to upgrade app :(");
@@ -28,93 +32,89 @@ pub fn connect_move(app: &MainWindow) {
 
     let a = app.as_weak();
     app.global::<Callabler>().on_move_items(move |preserve_structure, copy_mode, output_folder| {
+        let weak_app = a.clone();
+        let progress_sender = progress_sender.clone();
+        let stop_flag = stop_flag.clone();
+        stop_flag.store(false, Ordering::Relaxed);
         let app = a.upgrade().expect("Failed to upgrade app :(");
         let active_tab = app.global::<GuiState>().get_active_tab();
-        let current_model = get_tool_model(&app, active_tab);
 
-        let (errors, new_model) = move_operation(&current_model, preserve_structure, copy_mode, &output_folder, active_tab);
-        if let Some(new_model) = new_model {
-            set_tool_model(&app, active_tab, new_model);
-        }
-        app.global::<GuiState>().set_info_text(Messages::new_from_errors(errors).create_messages_text().into());
-        reset_selection(&app, true);
+        let processor = ModelProcessor::new(active_tab);
+        processor.move_selected_items(progress_sender, weak_app, stop_flag, preserve_structure, copy_mode, &output_folder);
     });
 }
 
-fn move_operation(
-    items: &ModelRc<MainListModel>,
-    preserve_structure: bool,
-    copy_mode: bool,
-    output_folder: &str,
-    active_tab: CurrentTab,
-) -> (Vec<String>, Option<ModelRc<MainListModel>>) {
-    let (entries_to_move, mut entries_left) = filter_out_checked_items(items, get_is_header_mode(active_tab));
+impl ModelProcessor {
+    fn move_selected_items(
+        self,
+        progress_sender: Sender<ProgressData>,
+        weak_app: Weak<MainWindow>,
+        stop_flag: Arc<AtomicBool>,
+        preserve_structure: bool,
+        copy_mode: bool,
+        output_folder: &str,
+    ) {
+        if let Err(err) = fs::create_dir_all(output_folder) {
+            let app = weak_app.upgrade().expect("Failed to upgrade app :(");
+            app.global::<GuiState>()
+                .set_info_text(flk!("rust_cannot_create_output_folder", output_folder = output_folder, error = err.to_string()).into());
+            return;
+        }
 
-    if !entries_to_move.is_empty() {
-        let vec_items_to_move = collect_path_name_from_model(&entries_to_move, active_tab);
-        let errors = move_selected_items(vec_items_to_move, preserve_structure, copy_mode, output_folder);
-        deselect_all_items(&mut entries_left);
+        let model = get_tool_model(&weak_app.upgrade().expect("Failed to upgrade app :("), self.active_tab);
+        let simpler_model = model.to_simpler_enumerated_vec();
+        let output_folder = output_folder.to_string();
+        thread::spawn(move || {
+            let path_idx = get_str_path_idx(self.active_tab);
+            let name_idx = get_str_name_idx(self.active_tab);
 
-        let r = ModelRc::new(VecModel::from(entries_left));
-        return (errors, Some(r));
+            let mlt_fnc = move |data: &SimplerMainListModel| move_single_item(data, path_idx, name_idx, &output_folder, preserve_structure, copy_mode);
+
+            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, mlt_fnc, MessageType::Move);
+        });
     }
-    (vec![], None)
 }
 
-fn move_selected_items(items_to_move: Vec<(String, String)>, preserve_structure: bool, copy_mode: bool, output_folder: &str) -> Vec<String> {
-    if let Err(err) = fs::create_dir_all(output_folder) {
-        return vec![flk!("rust_error_creating_folder", error = err.to_string())];
-    }
+fn move_single_item(data: &SimplerMainListModel, path_idx: usize, name_idx: usize, output_folder: &str, preserve_structure: bool, copy_mode: bool) -> Result<(), String> {
+    let path = &data.val_str[path_idx];
+    let name = &data.val_str[name_idx];
 
-    // TODO option to override files
     if copy_mode {
-        items_to_move
-            .into_par_iter()
-            .filter_map(|(path, name)| {
-                let (input_file, output_file) = collect_path_and_create_folders(&path, &name, output_folder, preserve_structure);
+        let (input_file, output_file) = collect_path_and_create_folders(path, name, output_folder, preserve_structure);
 
-                if output_file.exists() {
-                    return Some(flk!("rust_file_already_exists", file = output_file.to_string_lossy().to_string()));
-                }
-                try_to_copy_item(&input_file, &output_file)?;
-                None
-            })
-            .collect()
+        if output_file.exists() {
+            return Err(flk!("rust_file_already_exists", file = output_file.to_string_lossy().to_string()));
+        }
+        try_to_copy_item(&input_file, &output_file)
     } else {
-        items_to_move
-            .into_par_iter()
-            .filter_map(|(path, name)| {
-                let (input_file, output_file) = collect_path_and_create_folders(&path, &name, output_folder, preserve_structure);
+        let (input_file, output_file) = collect_path_and_create_folders(path, name, output_folder, preserve_structure);
 
-                if output_file.exists() {
-                    return Some(flk!("rust_file_already_exists", file = output_file.to_string_lossy().to_string()));
-                }
+        if output_file.exists() {
+            return Err(flk!("rust_file_already_exists", file = output_file.to_string_lossy().to_string()));
+        }
 
-                // Try to rename file, may fail due various reasons
-                if fs::rename(&input_file, &output_file).is_ok() {
-                    return None;
-                }
+        // Try to rename file, may fail due various reasons, but
+        if fs::rename(&input_file, &output_file).is_ok() {
+            return Ok(());
+        }
 
-                // It is possible that this failed, because file is on different partition, so
-                // we need to copy file and then remove old
-                try_to_copy_item(&input_file, &output_file)?;
+        // It is possible that this failed, because file is on different partition, so
+        // we need to copy file and then remove old
+        try_to_copy_item(&input_file, &output_file)?;
 
-                if let Err(e) = fs::remove_file(&input_file) {
-                    return Some(flk!(
-                        "rust_error_removing_file_after_copy",
-                        file = input_file.to_string_lossy().to_string(),
-                        reason = e.to_string()
-                    ));
-                }
-
-                None
-            })
-            .collect()
+        if let Err(e) = fs::remove_file(&input_file) {
+            return Err(flk!(
+                "rust_error_removing_file_after_copy",
+                file = input_file.to_string_lossy().to_string(),
+                reason = e.to_string()
+            ));
+        }
+        Ok(())
     }
 }
 
 // Tries to copy file/folder, and returns error if it fails
-fn try_to_copy_item(input_file: &Path, output_file: &Path) -> Option<String> {
+fn try_to_copy_item(input_file: &Path, output_file: &Path) -> Result<(), String> {
     let res = if input_file.is_dir() {
         let options = fs_extra::dir::CopyOptions::new();
         fs_extra::dir::copy(input_file, output_file, &options) // TODO consider to use less buggy library
@@ -123,14 +123,14 @@ fn try_to_copy_item(input_file: &Path, output_file: &Path) -> Option<String> {
         fs_extra::file::copy(input_file, output_file, &options)
     };
     if let Err(e) = res {
-        return Some(flk!(
+        return Err(flk!(
             "rust_error_copying_file",
             input = input_file.to_string_lossy().to_string(),
             output = output_file.to_string_lossy().to_string(),
             reason = e.to_string()
         ));
     }
-    None
+    Ok(())
 }
 
 // Create input/output paths, and create output folder
@@ -144,8 +144,6 @@ fn collect_path_and_create_folders(input_path: &str, input_file: &str, output_pa
     };
     let _ = fs::create_dir_all(&output_full_path);
     output_full_path.push(input_file);
-
-    // println!("input_full_path: {input_full_path:?}, output_full_path: {output_full_path:?}, output_path: {output_path:?}, input_path: {input_path:?}");
 
     (input_full_path, output_full_path)
 }

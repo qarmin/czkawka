@@ -99,6 +99,7 @@ fn progress_default(item: &ProgressData) -> ProgressToSend {
 
         CurrentStage::DeletingFiles => flk!("rust_deleting_files", items_stats = items_stats),
         CurrentStage::RenamingFiles => flk!("rust_renaming_files", items_stats = items_stats),
+        CurrentStage::MovingFiles => flk!("rust_moving_files", items_stats = items_stats),
         _ => unreachable!(),
     };
     let (all_progress, current_progress, current_progress_size) = common_get_data(item);
