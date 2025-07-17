@@ -3,15 +3,18 @@ use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::time::Duration;
 
 use crossbeam_channel::Sender;
+use czkawka_core::common_messages::Messages;
 use czkawka_core::progress_data::ProgressData;
+use log::error;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
+use slint::{ComponentHandle, ModelRc, VecModel, Weak};
 
 use crate::common::delayed_sender::DelayedSender;
-use crate::common::get_is_header_mode;
+use crate::common::{get_is_header_mode, set_tool_model};
+use crate::connect_row_selection::reset_selection;
 use crate::model_operations::ProcessingResult;
-use crate::simpler_model::SimplerMainListModel;
-use crate::{CurrentTab, MainListModel, model_operations};
-
+use crate::simpler_model::{SimplerMainListModel, ToSlintModel};
+use crate::{CurrentTab, GuiState, MainListModel, MainWindow, flk, model_operations};
 // This is quite ugly workaround for Slint strange limitation, where model cannot be passed to another thread
 // This was needed by me, because I wanted to process deletion without blocking main gui thread, with additional sending progress about entire operation.
 // After trying different solutions, looks that the simplest and quite not really efficient solution is to convert slint model, to simpler model, which can be passed to another thread.
@@ -20,6 +23,26 @@ use crate::{CurrentTab, MainListModel, model_operations};
 
 pub struct ModelProcessor {
     pub active_tab: CurrentTab,
+}
+
+pub enum MessageType {
+    Delete,
+    Rename,
+}
+
+impl MessageType {
+    fn get_empty_message(&self) -> String {
+        match self {
+            Self::Delete => flk!("rust_no_files_deleted"),
+            Self::Rename => flk!("rust_no_files_renamed"),
+        }
+    }
+    fn get_summary_message(&self, deleted: usize, failed: usize, total: usize) -> String {
+        match self {
+            Self::Delete => flk!("rust_delete_summary", deleted = deleted, failed = failed, total = total),
+            Self::Rename => flk!("rust_rename_summary", renamed = deleted, failed = failed, total = total),
+        }
+    }
 }
 
 impl ModelProcessor {
@@ -89,5 +112,66 @@ impl ModelProcessor {
         output.sort_by_key(|(idx, _, _)| *idx);
 
         output
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub fn process_and_update_gui_state(
+        self,
+        weak_app: &Weak<MainWindow>,
+        stop_flag: Arc<AtomicBool>,
+        progress_sender: &Sender<ProgressData>,
+        mut base_progress: ProgressData,
+        simpler_model: Vec<(usize, SimplerMainListModel)>,
+        dlt_fnc: impl Fn(&SimplerMainListModel) -> Result<(), String> + Send + Sync + 'static,
+        message_type: MessageType,
+    ) {
+        weak_app
+            .upgrade_in_event_loop(move |app| {
+                app.set_processing(true); // TODO processing should be probably set in gui
+            })
+            .expect("Failed to update app info text");
+
+        let items_queued_to_delete = simpler_model.iter().filter(|(_idx, e)| e.checked).count();
+        if items_queued_to_delete == 0 {
+            weak_app
+                .upgrade_in_event_loop(move |app| {
+                    app.global::<GuiState>().set_info_text(message_type.get_empty_message().into());
+                    stop_flag.store(false, Ordering::Relaxed);
+                    app.set_stop_requested(false);
+                    app.set_processing(false);
+                })
+                .expect("Failed to update app info text");
+            return;
+        }
+
+        // Sending progress data about how many items are queued to delete
+        base_progress.entries_to_check = items_queued_to_delete;
+        let _ = progress_sender.send(base_progress).map_err(|e| error!("Failed to send progress data: {e}"));
+
+        let results = self.process_items(simpler_model, items_queued_to_delete, progress_sender.clone(), &stop_flag, dlt_fnc);
+        let (new_simple_model, errors, items_deleted) = self.remove_deleted_items_from_model(results);
+
+        // Sending progress data at the end of deletion, to indicate that deletion is finished
+        base_progress.entries_checked = items_deleted + errors.len();
+
+        let _ = progress_sender.send(base_progress).map_err(|e| error!("Failed to send progress data: {e}"));
+
+        weak_app
+            .upgrade_in_event_loop(move |app| {
+                let mut new_model_after_removing_useless_items = self.remove_single_items_in_groups(new_simple_model.to_vec_model());
+                // Selection cache was invalidated, so we need to reset it
+                new_model_after_removing_useless_items.iter_mut().for_each(|e| e.selected_row = false);
+                set_tool_model(&app, self.active_tab, ModelRc::new(VecModel::from(new_model_after_removing_useless_items)));
+
+                app.global::<GuiState>()
+                    .set_info_text(Messages::new_from_errors(errors.clone()).create_messages_text().into());
+
+                app.global::<GuiState>().set_preview_visible(false);
+
+                reset_selection(&app, true);
+                stop_flag.store(false, Ordering::Relaxed);
+                app.invoke_processing_ended(message_type.get_summary_message(items_deleted, errors.len(), items_queued_to_delete).into());
+            })
+            .expect("Failed to update app after deletion");
     }
 }

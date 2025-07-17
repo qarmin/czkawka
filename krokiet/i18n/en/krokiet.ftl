@@ -3,7 +3,6 @@ rust_loaded_preset = Loaded preset { $preset_idx }
 rust_cannot_load_preset = Cannot load preset { $preset_idx }, reason: { $reason }
 rust_error_moving_to_trash = Error while moving to trash: { $error }
 rust_error_removing_file = Error while removing file: { $error }
-rust_delete_summary = Deleted { $deleted } items, failed to remove { $failed } items, from { $total } items
 rust_error_creating_folder = Error while creating folder: { $error }
 rust_file_already_exists = File \"{ $file }\" already exists, and will not be overridden
 rust_error_removing_file_after_copy = Error while removing file \"{ $file }\" (after copying into different partition), reason: { $reason }
@@ -53,8 +52,14 @@ rust_cannot_load_preset = Cannot change and load preset { $preset_idx } - reason
 rust_saved_preset = Saved preset { $preset_idx }
 rust_cannot_save_preset = Cannot save preset { $preset_idx } - reason { $reason }
 rust_reset_preset = Reset preset { $preset_idx }
+
+rust_delete_summary = Deleted { $deleted } items, failed to remove { $failed } items, from { $total } items
+rust_rename_summary = Renamed { $renamed } items, failed to rename { $failed } items, from { $total } items
 rust_deleting_files = Deleting { $items_stats } file
+rust_renaming_files = Renaming { $items_stats } file
 rust_no_files_deleted = Not selected any files/folders to delete
+rust_no_files_renamed = Not selected any files/folders to rename
+
 
 # Slint translations, but in arrays
 

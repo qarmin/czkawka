@@ -86,8 +86,8 @@ fn main() {
     load_settings_from_file(&app);
 
     connect_delete_button(&app, progress_sender.clone(), stop_flag.clone());
-    connect_scan_button(&app, progress_sender, stop_flag.clone(), Arc::clone(&shared_models));
-    connect_stop_button(&app, stop_flag);
+    connect_scan_button(&app, progress_sender.clone(), stop_flag.clone(), Arc::clone(&shared_models));
+    connect_stop_button(&app, stop_flag.clone());
     connect_open_items(&app);
     connect_progress_gathering(&app, progress_receiver);
     connect_add_remove_directories(&app);
@@ -97,7 +97,7 @@ fn main() {
     connect_select(&app);
     connect_showing_proper_select_buttons(&app);
     connect_move(&app);
-    connect_rename(&app);
+    connect_rename(&app, progress_sender, stop_flag);
     connect_save(&app, Arc::clone(&shared_models));
     connect_row_selections(&app);
     connect_sort(&app);

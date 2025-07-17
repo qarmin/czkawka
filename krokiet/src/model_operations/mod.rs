@@ -1,8 +1,8 @@
 pub mod model_processor;
 
-use slint::{Model, ModelRc, SharedString};
+use slint::{Model, ModelRc};
 
-use crate::common::{get_str_name_idx, get_str_path_idx, get_str_proper_extension};
+use crate::common::{get_str_name_idx, get_str_path_idx};
 use crate::simpler_model::SimplerMainListModel;
 use crate::{CurrentTab, MainListModel};
 
@@ -18,16 +18,6 @@ pub fn collect_path_name_from_model(items: &[MainListModel], active_tab: Current
     let path_idx = get_str_path_idx(active_tab);
     let name_idx = get_str_name_idx(active_tab);
     items.iter().map(|item| (get_str_item(item, path_idx), get_str_item(item, name_idx))).collect::<Vec<_>>()
-}
-
-pub fn collect_path_name_and_proper_extension_from_model(items: &[MainListModel], active_tab: CurrentTab) -> Vec<(String, String, String)> {
-    let path_idx = get_str_path_idx(active_tab);
-    let name_idx = get_str_name_idx(active_tab);
-    let ext_idx = get_str_proper_extension(active_tab);
-    items
-        .iter()
-        .map(|item| (get_str_item(item, path_idx), get_str_item(item, name_idx), get_str_item(item, ext_idx)))
-        .collect::<Vec<_>>()
 }
 
 #[inline]
