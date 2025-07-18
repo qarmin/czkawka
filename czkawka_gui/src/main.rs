@@ -34,6 +34,7 @@ use crossbeam_channel::{Receiver, Sender, unbounded};
 use czkawka_core::common::{get_number_of_threads, print_infos_and_warnings, print_version_mode, set_config_cache_path, set_number_of_threads, setup_logger};
 use czkawka_core::progress_data::ProgressData;
 use czkawka_core::*;
+use glib::ExitCode;
 use gtk4::Application;
 use gtk4::gio::ApplicationFlags;
 use gtk4::prelude::*;
@@ -83,7 +84,7 @@ fn main() {
         print_infos_and_warnings(infos, warnings);
 
         build_ui(app, &cmdline.arguments());
-        0
+        ExitCode::new(0)
     });
     application.run_with_args(&env::args().collect::<Vec<_>>());
 }

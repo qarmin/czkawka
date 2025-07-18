@@ -42,6 +42,7 @@ export component SelectableTableView inherits Rectangle {
                         width: 1px;
                         background: gray;
                         TouchArea {
+                            forward-focus: focus_item;
                             width: 8px;
                             x: (parent.width - self.width) / 2;
                             property <length> cached;
@@ -74,6 +75,7 @@ export component SelectableTableView inherits Rectangle {
                 height: item_height;
                 background: ColorPalette.get_listview_color_with_header(r.selected_row, touch-area.has-hover, r.header_row);
                 touch_area := TouchArea {
+                    forward-focus: focus_item;
                     double-clicked => {
                         Callabler.row_open_selected_item();
                     }
@@ -238,5 +240,28 @@ export component SelectableTableView inherits Rectangle {
 
     function hidePreview() {
         Callabler.load_image_preview("NOT_AVAILABLE.NOT_AVAILABLE");
+    }
+
+    focus_item := FocusScope {
+        // TODO hack works and not steal first click anymore, but key-released event is not working with it
+        // width: 0px; // Hack to not steal first click from other components - https://github.com/slint-ui/slint/issues/3503
+        // Hack not works https://github.com/slint-ui/slint/issues/3503#issuecomment-1817809834 because disables key-released event
+
+
+        key-released(event) => {
+            if (!self.visible || !self.has-focus) {
+                return accept;
+            }
+            released_key(event);
+            accept
+        }
+
+        key-pressed(event) => {
+            if (!self.visible || !self.has-focus) {
+                return accept;
+            }
+            pressed_key(event);
+            accept
+        }
     }
 }

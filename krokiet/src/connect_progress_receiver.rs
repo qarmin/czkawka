@@ -18,8 +18,10 @@ pub fn connect_progress_gathering(app: &MainWindow, progress_receiver: Receiver<
             };
 
             a.upgrade_in_event_loop(move |app| {
-                let to_send = if progress_data.current_stage_idx == 0 {
-                    progress_collect_items(&progress_data, progress_data.tool_type != ToolType::EmptyFolders)
+                let removing_empty_folders = progress_data.tool_type == ToolType::EmptyFolders;
+
+                let to_send = if progress_data.current_stage_idx == 0 && !progress_data.sstage.is_special_non_tool_stage() {
+                    progress_collect_items(&progress_data, !removing_empty_folders)
                 } else if progress_data.sstage.check_if_loading_saving_cache() {
                     progress_save_load_cache(&progress_data)
                 } else {
@@ -92,9 +94,19 @@ fn progress_default(item: &ProgressData) -> ProgressToSend {
         CurrentStage::DuplicatePreHashing => flk!("rust_analyzed_partial_hash", items_stats = items_stats, size_stats = size_stats),
         CurrentStage::DuplicateFullHashing => flk!("rust_analyzed_full_hash", items_stats = items_stats, size_stats = size_stats),
 
+        CurrentStage::DeletingFiles if item.bytes_to_check != 0 => flk!("rust_deleting_files", items_stats = items_stats, size_stats = size_stats),
+        CurrentStage::DeletingFiles => flk!("rust_deleting_no_size_files", items_stats = items_stats),
+        CurrentStage::RenamingFiles => flk!("rust_renaming_files", items_stats = items_stats),
+        CurrentStage::MovingFiles if item.bytes_to_check != 0 => flk!("rust_moving_files", items_stats = items_stats, size_stats = size_stats),
+        CurrentStage::MovingFiles => flk!("rust_moving_no_size_files", items_stats = items_stats),
+
         _ => unreachable!(),
     };
     let (all_progress, current_progress, current_progress_size) = common_get_data(item);
+
+    // Deleting is a single operation, so we don't need to show two same progress bars
+    let all_progress = if item.sstage.is_special_non_tool_stage() { -1 } else { all_progress };
+
     ProgressToSend {
         all_progress,
         current_progress,

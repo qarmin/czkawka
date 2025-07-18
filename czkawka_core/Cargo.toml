@@ -29,7 +29,7 @@ bitflags = "2.6"
 lofty = "0.22"
 
 # Needed by broken files
-zip = { version = "2.2", features = ["aes-crypto", "bzip2", "deflate", "time"], default-features = false }
+zip = { version = "4.0", features = ["aes-crypto", "bzip2", "deflate", "time"], default-features = false }
 audio_checker = "0.1"
 pdf = "0.9"
 
@@ -50,12 +50,12 @@ ffmpeg_cmdline_utils = "0.4"
 
 # Saving/Loading Cache
 serde = "1.0"
-bincode = "<2.0" # TODO - wait for bugfix releases for 2.0 version - this may be a little unstable now, but entire cache system depends on it
+bincode = "<2.0" # TODO - looks that newer bincode requires to add for all structs specific derives, but not all structs are in my control - maybe there is a better way to handle this
 serde_json = "1.0"
 
 # Language
-i18n-embed = { version = "0.15", features = ["fluent-system", "desktop-requester"] }
-i18n-embed-fl = "0.9"
+i18n-embed = { version = "0.16", features = ["fluent-system", "desktop-requester"] }
+i18n-embed-fl = "0.10"
 rust-embed = { version = "8.5", features = ["debug-embed"] }
 once_cell = "1.20"
 
@@ -78,6 +78,7 @@ nom-exif = "2.1.0"
 
 state = "0.6"
 trash = "5.1"
+dunce = "1.0.5"
 
 os_info = { version = "3", default-features = false }
 log = "0.4.22"
@@ -88,17 +89,18 @@ static_assertions = "1.1.0"
 file-rotate = "0.8.0"
 
 log-panics = { version = "2.1.0", features = ["with-backtrace"] }
+deunicode = "1.6.2"
 
-# Don't update anymore! This crate has a bug. I've submitted a patch upstream, but the change is breaking. The current code relies on the bug to work correctly!
-# Warning by CalunVier 2024.7.15
+fast_image_resize = "=5.1.4" # TODO, greater versions uses unstable features, that were stabilized after 1.85.0
+
 [target.'cfg(windows)'.dependencies]
-file-id = "=0.2.1"
+file-id = "0.2.2"
 
 [build-dependencies]
 rustc_version = "0.4"
 
 [dev-dependencies]
-criterion = "0.5"
+criterion =  { version = "0.6", default-features = false, features = [] }
 
 [[bench]]
 name = "hash_calculation_benchmark"

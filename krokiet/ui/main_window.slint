@@ -31,6 +31,8 @@ export component MainWindow inherits Window {
     callback show_move_folders_dialog(string);
     callback folders_move_choose_requested();
     callback reset_selection();
+    callback initialize_popup_sizes();
+    callback processing_ended(string);
 
     title <=> Translations.main_window_title_text;
 
@@ -41,6 +43,7 @@ export component MainWindow inherits Window {
     in-out property <string> text_summary_text: "";
     in-out property <bool> stop_requested: false;
     in-out property <bool> scanning: false;
+    in-out property <bool> processing: false;
     in-out property <ProgressToSend> progress_datas: {
         current_progress: 15,
         all_progress: 20,
@@ -114,7 +117,7 @@ export component MainWindow inherits Window {
                     }
                 }
 
-                if root.scanning: Progress {
+                if root.scanning || root.processing: Progress {
                     horizontal-stretch: 0.0;
                     progress_datas <=> root.progress_datas;
                 }
@@ -136,6 +139,7 @@ export component MainWindow inherits Window {
 
             vertical-stretch: 0.0;
             scanning <=> root.scanning;
+            processing <=> root.processing;
             stop_requested <=> root.stop_requested;
             scan_stopping => {
                 text_summary_text = Translations.stopping_scan_text;
@@ -265,7 +269,20 @@ export component MainWindow inherits Window {
         root.stop_requested = false;
     }
 
+    processing_ended(process_text) => {
+        text_summary_text = process_text;
+        root.processing = false;
+        root.stop_requested = false;
+    }
+
     reset_selection => {
         main_list.reset_selection();
+    }
+
+    initialize_popup_sizes => {
+        sort_popup_window.show_popup();
+        sort_popup_window.close_popup();
+        select_popup_window.show_popup();
+        select_popup_window.close_popup();
     }
 }

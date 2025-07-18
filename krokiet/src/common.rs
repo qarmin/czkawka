@@ -1,4 +1,7 @@
 #![allow(dead_code)]
+
+pub mod delayed_sender;
+
 use std::path::PathBuf;
 
 use slint::{ComponentHandle, Model, ModelRc, SharedString, VecModel};
@@ -194,142 +197,138 @@ pub enum StrDataBadExtensions {
     ProperExtension,
 }
 
-// Remember to match updated this according to ui/main_lists.slint and connect_scan.rs files
-pub fn get_str_path_idx(active_tab: CurrentTab) -> usize {
-    match active_tab {
-        CurrentTab::EmptyFolders => StrDataEmptyFolders::Path as usize,
-        CurrentTab::EmptyFiles => StrDataEmptyFiles::Path as usize,
-        CurrentTab::SimilarImages => StrDataSimilarImages::Path as usize,
-        CurrentTab::DuplicateFiles => StrDataDuplicateFiles::Path as usize,
-        CurrentTab::BigFiles => StrDataBigFiles::Path as usize,
-        CurrentTab::TemporaryFiles => StrDataTemporaryFiles::Path as usize,
-        CurrentTab::SimilarVideos => StrDataSimilarVideos::Path as usize,
-        CurrentTab::SimilarMusic => StrDataSimilarMusic::Path as usize,
-        CurrentTab::InvalidSymlinks => StrDataInvalidSymlinks::SymlinkFolder as usize,
-        CurrentTab::BrokenFiles => StrDataBrokenFiles::Path as usize,
-        CurrentTab::BadExtensions => StrDataBadExtensions::Path as usize,
-        CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
+impl CurrentTab {
+    // Remember to match updated this according to ui/main_lists.slint and connect_scan.rs files
+    pub fn get_str_path_idx(&self) -> usize {
+        match self {
+            Self::EmptyFolders => StrDataEmptyFolders::Path as usize,
+            Self::EmptyFiles => StrDataEmptyFiles::Path as usize,
+            Self::SimilarImages => StrDataSimilarImages::Path as usize,
+            Self::DuplicateFiles => StrDataDuplicateFiles::Path as usize,
+            Self::BigFiles => StrDataBigFiles::Path as usize,
+            Self::TemporaryFiles => StrDataTemporaryFiles::Path as usize,
+            Self::SimilarVideos => StrDataSimilarVideos::Path as usize,
+            Self::SimilarMusic => StrDataSimilarMusic::Path as usize,
+            Self::InvalidSymlinks => StrDataInvalidSymlinks::SymlinkFolder as usize,
+            Self::BrokenFiles => StrDataBrokenFiles::Path as usize,
+            Self::BadExtensions => StrDataBadExtensions::Path as usize,
+            Self::Settings | Self::About => panic!("Button should be disabled"),
+        }
     }
-}
 
-pub fn get_str_name_idx(active_tab: CurrentTab) -> usize {
-    match active_tab {
-        CurrentTab::EmptyFolders => StrDataEmptyFolders::Name as usize,
-        CurrentTab::EmptyFiles => StrDataEmptyFiles::Name as usize,
-        CurrentTab::SimilarImages => StrDataSimilarImages::Name as usize,
-        CurrentTab::DuplicateFiles => StrDataDuplicateFiles::Name as usize,
-        CurrentTab::BigFiles => StrDataBigFiles::Name as usize,
-        CurrentTab::TemporaryFiles => StrDataTemporaryFiles::Name as usize,
-        CurrentTab::SimilarVideos => StrDataSimilarVideos::Name as usize,
-        CurrentTab::SimilarMusic => StrDataSimilarMusic::Name as usize,
-        CurrentTab::InvalidSymlinks => StrDataInvalidSymlinks::SymlinkName as usize,
-        CurrentTab::BrokenFiles => StrDataBrokenFiles::Name as usize,
-        CurrentTab::BadExtensions => StrDataBadExtensions::Name as usize,
-        CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
+    pub fn get_str_name_idx(&self) -> usize {
+        match self {
+            Self::EmptyFolders => StrDataEmptyFolders::Name as usize,
+            Self::EmptyFiles => StrDataEmptyFiles::Name as usize,
+            Self::SimilarImages => StrDataSimilarImages::Name as usize,
+            Self::DuplicateFiles => StrDataDuplicateFiles::Name as usize,
+            Self::BigFiles => StrDataBigFiles::Name as usize,
+            Self::TemporaryFiles => StrDataTemporaryFiles::Name as usize,
+            Self::SimilarVideos => StrDataSimilarVideos::Name as usize,
+            Self::SimilarMusic => StrDataSimilarMusic::Name as usize,
+            Self::InvalidSymlinks => StrDataInvalidSymlinks::SymlinkName as usize,
+            Self::BrokenFiles => StrDataBrokenFiles::Name as usize,
+            Self::BadExtensions => StrDataBadExtensions::Name as usize,
+            Self::Settings | Self::About => panic!("Button should be disabled"),
+        }
     }
-}
 
-pub fn get_str_proper_extension(active_tab: CurrentTab) -> usize {
-    match active_tab {
-        CurrentTab::BadExtensions => StrDataBadExtensions::ProperExtension as usize,
-        CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
-        _ => panic!("Unable to get proper extension from this tab"),
+    pub fn get_str_proper_extension(&self) -> usize {
+        match self {
+            Self::BadExtensions => StrDataBadExtensions::ProperExtension as usize,
+            Self::Settings | Self::About => panic!("Button should be disabled"),
+            _ => panic!("Unable to get proper extension from this tab"),
+        }
     }
-}
-
-pub fn get_int_modification_date_idx(active_tab: CurrentTab) -> usize {
-    match active_tab {
-        CurrentTab::EmptyFiles => IntDataEmptyFiles::ModificationDatePart1 as usize,
-        CurrentTab::EmptyFolders => IntDataEmptyFolders::ModificationDatePart1 as usize,
-        CurrentTab::SimilarImages => IntDataSimilarImages::ModificationDatePart1 as usize,
-        CurrentTab::DuplicateFiles => IntDataDuplicateFiles::ModificationDatePart1 as usize,
-        CurrentTab::BigFiles => IntDataBigFiles::ModificationDatePart1 as usize,
-        CurrentTab::TemporaryFiles => IntDataTemporaryFiles::ModificationDatePart1 as usize,
-        CurrentTab::SimilarVideos => IntDataSimilarVideos::ModificationDatePart1 as usize,
-        CurrentTab::SimilarMusic => IntDataSimilarMusic::ModificationDatePart1 as usize,
-        CurrentTab::InvalidSymlinks => IntDataInvalidSymlinks::ModificationDatePart1 as usize,
-        CurrentTab::BrokenFiles => IntDataBrokenFiles::ModificationDatePart1 as usize,
-        CurrentTab::BadExtensions => IntDataBadExtensions::ModificationDatePart1 as usize,
-        CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
+    pub fn get_int_modification_date_idx(&self) -> usize {
+        match self {
+            Self::EmptyFiles => IntDataEmptyFiles::ModificationDatePart1 as usize,
+            Self::EmptyFolders => IntDataEmptyFolders::ModificationDatePart1 as usize,
+            Self::SimilarImages => IntDataSimilarImages::ModificationDatePart1 as usize,
+            Self::DuplicateFiles => IntDataDuplicateFiles::ModificationDatePart1 as usize,
+            Self::BigFiles => IntDataBigFiles::ModificationDatePart1 as usize,
+            Self::TemporaryFiles => IntDataTemporaryFiles::ModificationDatePart1 as usize,
+            Self::SimilarVideos => IntDataSimilarVideos::ModificationDatePart1 as usize,
+            Self::SimilarMusic => IntDataSimilarMusic::ModificationDatePart1 as usize,
+            Self::InvalidSymlinks => IntDataInvalidSymlinks::ModificationDatePart1 as usize,
+            Self::BrokenFiles => IntDataBrokenFiles::ModificationDatePart1 as usize,
+            Self::BadExtensions => IntDataBadExtensions::ModificationDatePart1 as usize,
+            Self::Settings | Self::About => panic!("Button should be disabled"),
+        }
     }
-}
-
-pub fn get_int_size_idx(active_tab: CurrentTab) -> usize {
-    match active_tab {
-        CurrentTab::EmptyFiles => IntDataEmptyFiles::SizePart1 as usize,
-        CurrentTab::SimilarImages => IntDataSimilarImages::SizePart1 as usize,
-        CurrentTab::DuplicateFiles => IntDataDuplicateFiles::SizePart1 as usize,
-        CurrentTab::BigFiles => IntDataBigFiles::SizePart1 as usize,
-        CurrentTab::SimilarVideos => IntDataSimilarVideos::SizePart1 as usize,
-        CurrentTab::SimilarMusic => IntDataSimilarMusic::SizePart1 as usize,
-        CurrentTab::BrokenFiles => IntDataBrokenFiles::SizePart1 as usize,
-        CurrentTab::BadExtensions => IntDataBadExtensions::SizePart1 as usize,
-        CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
-        CurrentTab::EmptyFolders | CurrentTab::InvalidSymlinks | CurrentTab::TemporaryFiles => panic!("Unable to get size from this tab"),
+    pub fn get_int_size_opt_idx(&self) -> Option<usize> {
+        let res = match self {
+            Self::EmptyFiles => IntDataEmptyFiles::SizePart1 as usize,
+            Self::SimilarImages => IntDataSimilarImages::SizePart1 as usize,
+            Self::DuplicateFiles => IntDataDuplicateFiles::SizePart1 as usize,
+            Self::BigFiles => IntDataBigFiles::SizePart1 as usize,
+            Self::SimilarVideos => IntDataSimilarVideos::SizePart1 as usize,
+            Self::SimilarMusic => IntDataSimilarMusic::SizePart1 as usize,
+            Self::BrokenFiles => IntDataBrokenFiles::SizePart1 as usize,
+            Self::BadExtensions => IntDataBadExtensions::SizePart1 as usize,
+            Self::Settings | Self::About => return None,
+            Self::EmptyFolders | Self::InvalidSymlinks | Self::TemporaryFiles => return None,
+        };
+        Some(res)
     }
-}
-
-pub fn get_int_width_idx(active_tab: CurrentTab) -> usize {
-    match active_tab {
-        CurrentTab::SimilarImages => IntDataSimilarImages::Width as usize,
-        CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
-        _ => panic!("Unable to get height from this tab"),
+    pub fn get_int_size_idx(&self) -> usize {
+        self.get_int_size_opt_idx().expect("Unable to get size index for tab: {self:?}")
     }
-}
-
-pub fn get_int_height_idx(active_tab: CurrentTab) -> usize {
-    match active_tab {
-        CurrentTab::SimilarImages => IntDataSimilarImages::Height as usize,
-        CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
-        _ => panic!("Unable to get height from this tab"),
+    pub fn get_int_width_idx(&self) -> usize {
+        match self {
+            Self::SimilarImages => IntDataSimilarImages::Width as usize,
+            Self::Settings | Self::About => panic!("Button should be disabled"),
+            _ => panic!("Unable to get height from this tab"),
+        }
     }
-}
 
-pub fn get_is_header_mode(active_tab: CurrentTab) -> bool {
-    match active_tab {
-        CurrentTab::EmptyFolders
-        | CurrentTab::EmptyFiles
-        | CurrentTab::BrokenFiles
-        | CurrentTab::BigFiles
-        | CurrentTab::TemporaryFiles
-        | CurrentTab::InvalidSymlinks
-        | CurrentTab::BadExtensions => false,
-        CurrentTab::SimilarImages | CurrentTab::DuplicateFiles | CurrentTab::SimilarVideos | CurrentTab::SimilarMusic => true,
-        CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
+    pub fn get_int_height_idx(&self) -> usize {
+        match self {
+            Self::SimilarImages => IntDataSimilarImages::Height as usize,
+            Self::Settings | Self::About => panic!("Button should be disabled"),
+            _ => panic!("Unable to get height from this tab"),
+        }
     }
-}
 
-pub fn get_tool_model(app: &MainWindow, tab: CurrentTab) -> ModelRc<MainListModel> {
-    match tab {
-        CurrentTab::EmptyFolders => app.get_empty_folder_model(),
-        CurrentTab::SimilarImages => app.get_similar_images_model(),
-        CurrentTab::EmptyFiles => app.get_empty_files_model(),
-        CurrentTab::DuplicateFiles => app.get_duplicate_files_model(),
-        CurrentTab::BigFiles => app.get_big_files_model(),
-        CurrentTab::TemporaryFiles => app.get_temporary_files_model(),
-        CurrentTab::SimilarVideos => app.get_similar_videos_model(),
-        CurrentTab::SimilarMusic => app.get_similar_music_model(),
-        CurrentTab::InvalidSymlinks => app.get_invalid_symlinks_model(),
-        CurrentTab::BrokenFiles => app.get_broken_files_model(),
-        CurrentTab::BadExtensions => app.get_bad_extensions_model(),
-        CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
+    pub fn get_is_header_mode(&self) -> bool {
+        match self {
+            Self::EmptyFolders | Self::EmptyFiles | Self::BrokenFiles | Self::BigFiles | Self::TemporaryFiles | Self::InvalidSymlinks | Self::BadExtensions => false,
+            Self::SimilarImages | Self::DuplicateFiles | Self::SimilarVideos | Self::SimilarMusic => true,
+            Self::Settings | Self::About => panic!("Button should be disabled"),
+        }
     }
-}
+    pub fn get_tool_model(&self, app: &MainWindow) -> ModelRc<MainListModel> {
+        match self {
+            Self::EmptyFolders => app.get_empty_folder_model(),
+            Self::SimilarImages => app.get_similar_images_model(),
+            Self::EmptyFiles => app.get_empty_files_model(),
+            Self::DuplicateFiles => app.get_duplicate_files_model(),
+            Self::BigFiles => app.get_big_files_model(),
+            Self::TemporaryFiles => app.get_temporary_files_model(),
+            Self::SimilarVideos => app.get_similar_videos_model(),
+            Self::SimilarMusic => app.get_similar_music_model(),
+            Self::InvalidSymlinks => app.get_invalid_symlinks_model(),
+            Self::BrokenFiles => app.get_broken_files_model(),
+            Self::BadExtensions => app.get_bad_extensions_model(),
+            Self::Settings | Self::About => panic!("Button should be disabled"),
+        }
+    }
 
-pub fn set_tool_model(app: &MainWindow, tab: CurrentTab, model: ModelRc<MainListModel>) {
-    match tab {
-        CurrentTab::EmptyFolders => app.set_empty_folder_model(model),
-        CurrentTab::SimilarImages => app.set_similar_images_model(model),
-        CurrentTab::EmptyFiles => app.set_empty_files_model(model),
-        CurrentTab::DuplicateFiles => app.set_duplicate_files_model(model),
-        CurrentTab::BigFiles => app.set_big_files_model(model),
-        CurrentTab::TemporaryFiles => app.set_temporary_files_model(model),
-        CurrentTab::SimilarVideos => app.set_similar_videos_model(model),
-        CurrentTab::SimilarMusic => app.set_similar_music_model(model),
-        CurrentTab::InvalidSymlinks => app.set_invalid_symlinks_model(model),
-        CurrentTab::BrokenFiles => app.set_broken_files_model(model),
-        CurrentTab::BadExtensions => app.set_bad_extensions_model(model),
-        CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
+    pub fn set_tool_model(&self, app: &MainWindow, model: ModelRc<MainListModel>) {
+        match self {
+            Self::EmptyFolders => app.set_empty_folder_model(model),
+            Self::SimilarImages => app.set_similar_images_model(model),
+            Self::EmptyFiles => app.set_empty_files_model(model),
+            Self::DuplicateFiles => app.set_duplicate_files_model(model),
+            Self::BigFiles => app.set_big_files_model(model),
+            Self::TemporaryFiles => app.set_temporary_files_model(model),
+            Self::SimilarVideos => app.set_similar_videos_model(model),
+            Self::SimilarMusic => app.set_similar_music_model(model),
+            Self::InvalidSymlinks => app.set_invalid_symlinks_model(model),
+            Self::BrokenFiles => app.set_broken_files_model(model),
+            Self::BadExtensions => app.set_bad_extensions_model(model),
+            Self::Settings | Self::About => panic!("Button should be disabled"),
+        }
     }
 }
 

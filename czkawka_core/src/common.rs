@@ -15,7 +15,7 @@ use file_rotate::compression::Compression;
 use file_rotate::suffix::{AppendTimestamp, FileLimit};
 use file_rotate::{ContentLimit, FileRotate};
 use fun_time::fun_time;
-use handsome_logger::{ColorChoice, CombinedLogger, ConfigBuilder, SharedLogger, TermLogger, TerminalMode, WriteLogger};
+use handsome_logger::{ColorChoice, CombinedLogger, ConfigBuilder, FormatText, SharedLogger, TermLogger, TerminalMode, TimeFormat, WriteLogger};
 use log::{LevelFilter, Record, debug, info, warn};
 use once_cell::sync::OnceCell;
 
@@ -198,6 +198,8 @@ pub fn setup_logger(disabled_terminal_printing: bool, app_name: &str) {
         .set_level(file_log_level)
         .set_write_once(true)
         .set_message_filtering(Some(filtering_messages))
+        .set_time_format(TimeFormat::DateTimeWithMicro, None)
+        .set_format_text(FormatText::DefaultWithThreadFile.get(), None)
         .build();
 
     let combined_logger = (|| {
@@ -331,9 +333,12 @@ pub fn set_number_of_threads(thread_number: usize) {
     NUMBER_OF_THREADS.set(thread_number);
 
     let additional_message = if thread_number == 0 {
-        " (0 - means that all available threads will be used)"
+        format!(
+            " (0 - means that all available threads will be used({}))",
+            thread::available_parallelism().map(std::num::NonZeroUsize::get).unwrap_or(1)
+        )
     } else {
-        ""
+        "".to_string()
     };
     debug!("Number of threads set to {thread_number}{additional_message}");
 
@@ -887,7 +892,7 @@ mod test {
 
         // Test with directory containing a file
         fs::create_dir(&sub_dir).expect("Cannot create directory");
-        let mut file = fs::File::create(sub_dir.join("file.txt")).expect("Cannot create file");
+        let mut file = File::create(sub_dir.join("file.txt")).expect("Cannot create file");
         writeln!(file, "Hello, world!").expect("Cannot write to file");
         assert!(remove_folder_if_contains_only_empty_folders(&sub_dir, false).is_err());
         assert!(Path::new(&sub_dir).exists());

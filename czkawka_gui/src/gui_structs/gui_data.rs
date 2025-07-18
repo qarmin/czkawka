@@ -118,7 +118,8 @@ impl GuiData {
         window_main.set_title(Some(&flg!("window_main_title")));
         window_main.show();
 
-        let pixbuf = Pixbuf::from_read(BufReader::new(ICON_ABOUT)).expect("Couldn't load icon");
+        let pixbuf = Pixbuf::from_read(BufReader::new(ICON_ABOUT))
+            .unwrap_or(Pixbuf::new(gdk4::gdk_pixbuf::Colorspace::Rgb, false, 8, 1, 1).expect("Crash is a lot of less likely than loading png file"));
 
         window_main.set_application(Some(application));
 

@@ -1,7 +1,6 @@
 use std::cell::RefCell;
 use std::cmp::Ordering;
 use std::collections::HashMap;
-use std::io::BufReader;
 use std::path::{MAIN_SEPARATOR, PathBuf};
 use std::rc::Rc;
 
@@ -19,13 +18,16 @@ use czkawka_core::tools::similar_images::SimilarImages;
 use czkawka_core::tools::similar_videos::SimilarVideos;
 use czkawka_core::tools::temporary::Temporary;
 use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
-use glib::Error;
+use glib::{Bytes, Error};
+use gtk4::gdk_pixbuf::Colorspace;
 use gtk4::prelude::*;
 use gtk4::{ListStore, Scale, ScrollType, TextView, TreeView, Widget};
 use image::codecs::jpeg::JpegEncoder;
-use image::{DynamicImage, EncodableLayout};
+use image::{DynamicImage, EncodableLayout, GenericImageView, RgbaImage};
 use log::debug;
 use once_cell::sync::OnceCell;
+use resvg::tiny_skia;
+use resvg::usvg::{Options, Tree};
 
 use crate::flg;
 use crate::notebook_enums::{NotebookMainEnum, NotebookUpperEnum};
@@ -737,10 +739,31 @@ pub fn get_all_direct_children<P: IsA<Widget>>(wid: &P) -> Vec<Widget> {
 const SIZE_OF_ICON: i32 = 18;
 const TYPE_OF_INTERPOLATION: InterpType = InterpType::Tiles;
 
+fn svg_to_dynamic_image(svg_data: &[u8]) -> Option<DynamicImage> {
+    let opt = Options::default();
+    let tree = Tree::from_data(svg_data, &opt).ok()?;
+
+    let mut pixmap = tiny_skia::Pixmap::new(tree.size().width() as u32, tree.size().height() as u32)?;
+    resvg::render(&tree, tiny_skia::Transform::default(), &mut (pixmap.as_mut()));
+
+    let rgba = RgbaImage::from_raw(pixmap.width(), pixmap.height(), pixmap.data().to_vec())?;
+
+    Some(DynamicImage::ImageRgba8(rgba))
+}
+
+fn dynamic_image_to_pixbuf(img: DynamicImage) -> Pixbuf {
+    let (width, height) = img.dimensions();
+    let rgba = img.into_rgba8();
+    let bytes = Bytes::from(&rgba.into_raw());
+
+    let pixbuf = Pixbuf::from_bytes(&bytes, Colorspace::Rgb, true, 8, width as i32, height as i32, (4 * width) as i32);
+    pixbuf.scale_simple(SIZE_OF_ICON, SIZE_OF_ICON, TYPE_OF_INTERPOLATION).expect("Failed to scale pixbuf")
+}
+
 pub fn set_icon_of_button<P: IsA<Widget>>(button: &P, data: &'static [u8]) {
     let image = get_custom_image_from_widget(&button.clone());
-    let pixbuf = Pixbuf::from_read(BufReader::new(data)).expect("Failed to create pixbuf from data");
-    let pixbuf = pixbuf.scale_simple(SIZE_OF_ICON, SIZE_OF_ICON, TYPE_OF_INTERPOLATION).expect("Failed to scale pixbuf");
+    let dynamic_image = svg_to_dynamic_image(data).expect("Failed to convert SVG data to DynamicImage");
+    let pixbuf = dynamic_image_to_pixbuf(dynamic_image);
     image.set_from_pixbuf(Some(&pixbuf));
 }
 

@@ -125,13 +125,12 @@ mod opener {
     use log::{debug, error};
     use slint::{ComponentHandle, Model};
 
-    use crate::common::{get_str_name_idx, get_str_path_idx, get_tool_model};
     use crate::connect_row_selection::get_write_selection_lock;
     use crate::{Callabler, GuiState, MainWindow};
 
     fn open_item(app: &MainWindow, items_path_str: &[usize], id: usize) {
         let active_tab = app.global::<GuiState>().get_active_tab();
-        let model = get_tool_model(app, active_tab);
+        let model = active_tab.get_tool_model(app);
         let model_data = model
             .row_data(id)
             .unwrap_or_else(|| panic!("Failed to get row data with id {id}, with model {} items", model.row_count()));
@@ -173,7 +172,7 @@ mod opener {
         app.global::<Callabler>().on_row_open_selected_item(move || {
             let app = a.upgrade().expect("Failed to upgrade app :(");
             let active_tab = app.global::<GuiState>().get_active_tab();
-            open_selected_items(&app, &[get_str_path_idx(active_tab), get_str_name_idx(active_tab)]);
+            open_selected_items(&app, &[active_tab.get_str_path_idx(), active_tab.get_str_name_idx()]);
         });
     }
 
@@ -182,7 +181,7 @@ mod opener {
         app.global::<Callabler>().on_row_open_parent_of_selected_item(move || {
             let app = a.upgrade().expect("Failed to upgrade app :(");
             let active_tab = app.global::<GuiState>().get_active_tab();
-            open_selected_items(&app, &[get_str_path_idx(active_tab)]);
+            open_selected_items(&app, &[active_tab.get_str_path_idx()]);
         });
     }
 
@@ -192,7 +191,7 @@ mod opener {
             let app = a.upgrade().expect("Failed to upgrade app :(");
             let active_tab = app.global::<GuiState>().get_active_tab();
 
-            open_item(&app, &[get_str_path_idx(active_tab), get_str_name_idx(active_tab)], idx as usize);
+            open_item(&app, &[active_tab.get_str_path_idx(), active_tab.get_str_name_idx()], idx as usize);
         });
     }
 }
@@ -200,7 +199,6 @@ mod selection {
     use log::trace;
     use slint::{ComponentHandle, Model};
 
-    use crate::common::{get_tool_model, set_tool_model};
     use crate::connect_row_selection::{
         get_write_selection_lock, reverse_selection_of_item_with_id, row_select_items_with_shift, rows_deselect_all_by_mode, rows_reverse_checked_selection,
         rows_select_all_by_mode,
@@ -216,10 +214,10 @@ mod selection {
 
             let mut lock = get_write_selection_lock();
             let selection = lock.get_mut(&active_tab).expect("Failed to get selection data");
-            let model = get_tool_model(&app, active_tab);
+            let model = active_tab.get_tool_model(&app);
 
             if let Some(new_model) = rows_select_all_by_mode(selection, &model) {
-                set_tool_model(&app, active_tab, new_model);
+                active_tab.set_tool_model(&app, new_model);
             };
         });
     }
@@ -234,15 +232,15 @@ mod selection {
             let selection = lock.get_mut(&active_tab).expect("Failed to get selection data");
 
             {
-                let model = get_tool_model(&app, active_tab);
+                let model = active_tab.get_tool_model(&app);
 
                 if let Some(new_model) = rows_deselect_all_by_mode(selection, &model) {
-                    set_tool_model(&app, active_tab, new_model);
+                    active_tab.set_tool_model(&app, new_model);
                 }
             }
 
             // needs to get model again, because it could be replaced
-            let model = get_tool_model(&app, active_tab);
+            let model = active_tab.get_tool_model(&app);
             reverse_selection_of_item_with_id(selection, &model, id as usize);
         });
     }
@@ -255,11 +253,11 @@ mod selection {
             let active_tab = app.global::<GuiState>().get_active_tab();
             let mut lock = get_write_selection_lock();
             let selection = lock.get_mut(&active_tab).expect("Failed to get selection data");
-            let model = get_tool_model(&app, active_tab);
+            let model = active_tab.get_tool_model(&app);
 
             let new_model = rows_reverse_checked_selection(selection, &model);
             if let Some(new_model) = new_model {
-                set_tool_model(&app, active_tab, new_model);
+                active_tab.set_tool_model(&app, new_model);
             }
         });
     }
@@ -271,7 +269,7 @@ mod selection {
             let active_tab = app.global::<GuiState>().get_active_tab();
             let mut lock = get_write_selection_lock();
             let selection = lock.get_mut(&active_tab).expect("Failed to get selection data");
-            let model = get_tool_model(&app, active_tab);
+            let model = active_tab.get_tool_model(&app);
 
             reverse_selection_of_item_with_id(selection, &model, id as usize);
         });
@@ -285,7 +283,7 @@ mod selection {
             let active_tab = app.global::<GuiState>().get_active_tab();
             let mut lock = get_write_selection_lock();
             let selection = lock.get_mut(&active_tab).expect("Failed to get selection data");
-            let model = get_tool_model(&app, active_tab);
+            let model = active_tab.get_tool_model(&app);
 
             assert!(first_idx >= 0);
             assert!(second_idx >= 0);
@@ -293,7 +291,7 @@ mod selection {
             assert!((second_idx as usize) < model.row_count());
 
             if let Some(new_model) = row_select_items_with_shift(selection, &model, (first_idx as usize, second_idx as usize)) {
-                set_tool_model(&app, active_tab, new_model);
+                active_tab.set_tool_model(&app, new_model);
             };
         });
     }
@@ -311,6 +309,7 @@ mod selection {
 //
 // Deselect
 //
+
 fn rows_deselect_all_by_mode(selection: &mut SelectionData, model: &ModelRc<MainListModel>) -> Option<ModelRc<MainListModel>> {
     let new_model = if selection.exceeded_limit {
         Some(rows_deselect_all_selected_by_replacing_models(model))

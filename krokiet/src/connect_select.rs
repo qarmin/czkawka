@@ -1,8 +1,6 @@
 use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
-use crate::common::{
-    connect_i32_into_u64, get_int_height_idx, get_int_modification_date_idx, get_int_size_idx, get_int_width_idx, get_is_header_mode, get_tool_model, set_tool_model,
-};
+use crate::common::connect_i32_into_u64;
 use crate::connect_translation::translate_select_mode;
 use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow, SelectMode, SelectModel};
 
@@ -13,7 +11,7 @@ pub fn connect_select(app: &MainWindow) {
     app.global::<Callabler>().on_select_items(move |select_mode| {
         let app = a.upgrade().expect("Failed to upgrade app :(");
         let active_tab = app.global::<GuiState>().get_active_tab();
-        let current_model = get_tool_model(&app, active_tab);
+        let current_model = active_tab.get_tool_model(&app);
 
         let new_model = match select_mode {
             SelectMode::SelectAll => select_all(&current_model),
@@ -26,7 +24,7 @@ pub fn connect_select(app: &MainWindow) {
             SelectMode::SelectNewest => select_by_size_date(&current_model, active_tab, true, false),
             SelectMode::SelectOldest => select_by_size_date(&current_model, active_tab, false, false),
         };
-        set_tool_model(&app, active_tab, new_model);
+        active_tab.set_tool_model(&app, new_model);
     });
 }
 
@@ -84,13 +82,13 @@ fn set_select_buttons(app: &MainWindow) {
 
 // TODO, when model will be able to contain i64 instead two i32, this function could be merged with select_by_size_date
 fn select_by_resolution(model: &ModelRc<MainListModel>, active_tab: CurrentTab, biggest: bool) -> ModelRc<MainListModel> {
-    let is_header_mode = get_is_header_mode(active_tab);
+    let is_header_mode = active_tab.get_is_header_mode();
     assert!(is_header_mode); // non header modes not really have reason to use this function
 
     let mut old_data = model.iter().collect::<Vec<_>>();
     let headers_idx = find_header_idx_and_deselect_all(&mut old_data);
-    let width_idx = get_int_width_idx(active_tab);
-    let height_idx = get_int_height_idx(active_tab);
+    let width_idx = active_tab.get_int_width_idx();
+    let height_idx = active_tab.get_int_height_idx();
 
     if biggest {
         for i in 0..(headers_idx.len() - 1) {
@@ -128,15 +126,15 @@ fn select_by_resolution(model: &ModelRc<MainListModel>, active_tab: CurrentTab, 
 }
 
 fn select_by_size_date(model: &ModelRc<MainListModel>, active_tab: CurrentTab, biggest_newest: bool, size: bool) -> ModelRc<MainListModel> {
-    let is_header_mode = get_is_header_mode(active_tab);
+    let is_header_mode = active_tab.get_is_header_mode();
     assert!(is_header_mode); // non header modes not really have reason to use this function
 
     let mut old_data = model.iter().collect::<Vec<_>>();
     let headers_idx = find_header_idx_and_deselect_all(&mut old_data);
     let item_idx = if size {
-        get_int_size_idx(active_tab)
+        active_tab.get_int_size_idx()
     } else {
-        get_int_modification_date_idx(active_tab)
+        active_tab.get_int_modification_date_idx()
     };
 
     if biggest_newest {
@@ -186,7 +184,9 @@ fn select_all(model: &ModelRc<MainListModel>) -> ModelRc<MainListModel> {
 
 fn deselect_all(model: &ModelRc<MainListModel>) -> ModelRc<MainListModel> {
     let mut old_data = model.iter().collect::<Vec<_>>();
-    old_data.iter_mut().for_each(|x| x.checked = false);
+    for x in &mut old_data {
+        x.checked = false;
+    }
     ModelRc::new(VecModel::from(old_data))
 }
 
@@ -220,6 +220,32 @@ fn find_header_idx_and_deselect_all(old_data: &mut [MainListModel]) -> Vec<usize
 mod tests {
     use super::*;
     use crate::test_common::{create_model_from_model_vec, get_model_vec};
+
+    #[test]
+    fn find_header_idx_returns_correct_indices_for_headers() {
+        let mut model = get_model_vec(5);
+        model[1].header_row = true;
+        model[3].header_row = true;
+
+        let header_indices = find_header_idx_and_deselect_all(&mut model);
+
+        assert_eq!(header_indices, vec![1, 3, 5]);
+    }
+
+    #[test]
+    fn find_header_idx_marks_all_non_header_rows_as_unchecked() {
+        let mut model = get_model_vec(5);
+        model.iter_mut().for_each(|row| row.checked = true);
+        model[1].header_row = true;
+
+        find_header_idx_and_deselect_all(&mut model);
+
+        assert!(!model[0].checked);
+        assert!(model[1].checked); // header row
+        assert!(!model[2].checked);
+        assert!(!model[3].checked);
+        assert!(!model[4].checked);
+    }
 
     #[test]
     fn select_all_marks_all_non_header_rows_as_checked() {

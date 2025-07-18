@@ -3,7 +3,6 @@ rust_loaded_preset = Loaded preset { $preset_idx }
 rust_cannot_load_preset = Cannot load preset { $preset_idx }, reason: { $reason }
 rust_error_moving_to_trash = Error while moving to trash: { $error }
 rust_error_removing_file = Error while removing file: { $error }
-rust_delete_summary = Deleted { $deleted } items, failed to remove { $failed } items
 rust_error_creating_folder = Error while creating folder: { $error }
 rust_file_already_exists = File \"{ $file }\" already exists, and will not be overridden
 rust_error_removing_file_after_copy = Error while removing file \"{ $file }\" (after copying into different partition), reason: { $reason }
@@ -53,6 +52,20 @@ rust_cannot_load_preset = Cannot change and load preset { $preset_idx } - reason
 rust_saved_preset = Saved preset { $preset_idx }
 rust_cannot_save_preset = Cannot save preset { $preset_idx } - reason { $reason }
 rust_reset_preset = Reset preset { $preset_idx }
+rust_cannot_create_output_folder = Cannot create output folder { $output_folder }, reason: { $error }
+
+rust_delete_summary = Deleted { $deleted } items, failed to remove { $failed } items, from all { $total } items
+rust_rename_summary = Renamed { $renamed } items, failed to rename { $failed } items, from all { $total } items
+rust_move_summary = Moved { $moved } items, failed to move { $failed } items, from all { $total } items
+rust_deleting_files = Deleting { $items_stats } file ({ $size_stats })
+rust_deleting_no_size_files = Deleting { $items_stats } file
+rust_renaming_files = Renaming { $items_stats } file
+rust_moving_files = Moving { $items_stats } file ({ $size_stats })
+rust_moving_no_size_files = Moving { $items_stats } file
+rust_no_files_deleted = Not selected any files/folders to delete
+rust_no_files_renamed = Not selected any files/folders to rename
+rust_no_files_moved = Not selected any files/folders to move
+
 
 # Slint translations, but in arrays
 
@@ -116,12 +129,13 @@ tool_invalid_symlinks = Invalid Symlinks
 tool_broken_files = Broken Files
 tool_bad_extensions = Bad Extensions
 sort_by_item_name = Sort by item name
-sort_by_parent_name = Sort by parent name
+sort_by_parent_name = Sort by parent folder
 sort_by_full_name = Sort by full name
 sort_by_size = Sort by size
 sort_by_modification_date = Sort by modification date
 sort_by_selection = Sort by selection
-sort_reverse = Reverse sort
+sort_by_checked = Sort by check status
+sort_reverse = Reverse order
 selection_all = Select all
 selection_deselect_all = Unselect all
 selection_invert_selection = Invert selection

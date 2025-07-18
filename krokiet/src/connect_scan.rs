@@ -538,7 +538,11 @@ fn scan_similar_videos(
                 item.get_similar_videos().iter().cloned().map(|items| (None, items)).collect()
             };
             for (_first_entry, vec_fe) in &mut vector {
-                vec_fe.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+                vec_fe.par_sort_unstable_by(|a, b| match a.size.cmp(&b.size) {
+                    std::cmp::Ordering::Equal => split_path_compare(a.path.as_path(), b.path.as_path()),
+                    std::cmp::Ordering::Less => std::cmp::Ordering::Greater,
+                    std::cmp::Ordering::Greater => std::cmp::Ordering::Less,
+                });
             }
             vector.sort_by_key(|(_header, vc)| u64::MAX - vc.iter().map(|e| e.size).sum::<u64>()); // Also sorts by size, to show the biggest groups first
 

@@ -552,6 +552,7 @@ pub fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicSettings
 
     let width = basic_settings.window_width.clamp(100, 1920 * 4);
     let height = basic_settings.window_height.clamp(100, 1080 * 4);
+
     app.window().set_size(WindowSize::Physical(PhysicalSize { width, height }));
 
     settings.set_dark_theme(basic_settings.dark_theme);
@@ -881,8 +882,9 @@ pub fn collect_base_settings(app: &MainWindow) -> BasicSettings {
 
     let default_preset = settings.get_settings_preset_idx();
     let preset_names = settings.get_settings_presets().iter().map(|x| x.to_string()).collect::<Vec<_>>();
-    let window_width = app.window().size().width;
-    let window_height = app.window().size().height;
+    let window_width = (app.window().size().width as f32 / app.window().scale_factor()) as u32;
+    let window_height = (app.window().size().height as f32 / app.window().scale_factor()) as u32;
+
     assert_eq!(preset_names.len(), 10);
     let lang_idx = settings.get_language_index();
     let language = StringComboBoxItems::get_config_name_from_idx(lang_idx as usize, &collected_items.languages);

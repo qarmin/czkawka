@@ -108,7 +108,9 @@ fn add_included_directories(settings: &Settings, folders: &[String]) {
 
     let filtered_folders = folders.iter().filter(|x| !old_folders_path.contains(x)).collect::<Vec<_>>();
 
-    new_folders.iter_mut().for_each(|x| x.selected_row = false);
+    for x in &mut new_folders {
+        x.selected_row = false;
+    }
 
     new_folders.extend(filtered_folders.iter().map(|path| IncludedDirectoriesModel {
         path: (*path).into(),
@@ -129,7 +131,9 @@ fn add_excluded_directories(settings: &Settings, folders: &[String]) {
 
     let filtered_folders = folders.iter().filter(|x| !old_folders_path.contains(x)).collect::<Vec<_>>();
 
-    new_folders.iter_mut().for_each(|x| x.selected_row = false);
+    for x in &mut new_folders {
+        x.selected_row = false;
+    }
 
     new_folders.extend(filtered_folders.iter().map(|path| ExcludedDirectoriesModel {
         path: (*path).into(),

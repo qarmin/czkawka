@@ -1287,7 +1287,7 @@ fn filter_hard_links(vec_file_entry: &[FileEntry]) -> Vec<FileEntry> {
     let mut inodes: HashSet<u128> = HashSet::with_capacity(vec_file_entry.len());
     let mut identical: Vec<FileEntry> = Vec::with_capacity(vec_file_entry.len());
     for f in vec_file_entry {
-        if let Ok(meta) = file_id::get_low_res_file_id(&f.path) {
+        if let Ok(meta) = file_id::get_high_res_file_id(&f.path) {
             if let file_id::FileId::HighRes { file_id, .. } = meta {
                 if !inodes.insert(file_id) {
                     continue;

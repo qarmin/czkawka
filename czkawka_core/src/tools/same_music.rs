@@ -587,7 +587,6 @@ impl SameMusic {
         }
     }
 
-    #[fun_time(message = "compare_fingerprints", level = "debug")]
     fn compare_fingerprints(
         &mut self,
         stop_flag: Option<&Arc<AtomicBool>>,
@@ -995,11 +994,11 @@ fn write_music_entry<T: Write>(writer: &mut T, file_entry: &MusicEntry) -> std::
     )
 }
 
-fn get_simplified_name(what: &str) -> String {
+fn get_simplified_name_internal(what: &str, ignore_numbers: bool) -> String {
     let mut new_what = String::with_capacity(what.len());
     let mut tab_number = 0;
     let mut space_before = true;
-    for character in what.chars() {
+    for character in what.chars().map(|e| if e.is_whitespace() { ' ' } else { e }) {
         match character {
             '(' | '[' => {
                 tab_number += 1;
@@ -1019,13 +1018,23 @@ fn get_simplified_name(what: &str) -> String {
             }
             ch => {
                 if tab_number == 0 {
-                    // Ignore all non alphabetic ascii characters like " or .
-                    if !ch.is_ascii() || ch.is_ascii_alphabetic() {
+                    if ch.is_ascii_alphabetic() || (!ignore_numbers && ch.is_numeric()) {
                         space_before = false;
                         new_what.push(ch);
-                    } else if !space_before {
-                        new_what.push(' ');
-                        space_before = true;
+                    } else {
+                        let new_items = deunicode::deunicode(&character.to_string()).trim().chars().collect::<Vec<_>>();
+
+                        // If is equal, then we trying to deunicode e.g. dot, comma etc.
+                        // We just ignore char, because it is mostly useless, but we add space instead it if it wasn't added already
+                        if new_items.first() == Some(&character) {
+                            if !space_before {
+                                new_what.push(' ');
+                                space_before = true;
+                            }
+                        } else {
+                            new_what.extend(new_items.into_iter());
+                            space_before = false;
+                        }
                     }
                 }
             }
@@ -1036,6 +1045,23 @@ fn get_simplified_name(what: &str) -> String {
         new_what.pop();
     }
     new_what
+}
+fn get_simplified_name(what: &str) -> String {
+    let new_what = get_simplified_name_internal(what, true);
+    if !new_what.is_empty() {
+        return new_what;
+    }
+    let new_what = get_simplified_name_internal(what, false);
+    if !new_what.is_empty() {
+        return new_what;
+    }
+    let simplified_unicode = deunicode::deunicode(what).trim().to_string();
+    if !simplified_unicode.is_empty() {
+        return simplified_unicode;
+    }
+    // If everything failed, we return original string
+    // this is more useful than returning empty string, which is ignored by other functions
+    what.trim().to_string()
 }
 
 impl CommonData for SameMusic {
@@ -1055,21 +1081,22 @@ mod tests {
     use crate::tools::same_music::get_simplified_name;
 
     #[test]
-    fn test_strings() {
-        let what = "roman ( ziemniak ) ".to_string();
-        let res = get_simplified_name(&what);
-        assert_eq!(res, "roman");
+    fn test_simplified_names() {
+        let cases = [
+            ("roman ( ziemniak ) ", "roman"),
+            ("  HH)    ", "HH"),
+            ("  fsf.f.  ", "fsf f"),
+            ("  śśśśćććć  ", "sssscccc"),
+            ("rr\t", "rr"),
+            ("Kekistan (feat. roman) [Mix on Mix]", "Kekistan"),
+            ("23", "23"),
+            ("23 (random)", "23"),
+            ("(23)", "(23)"),
+        ];
 
-        let what = "  HH)    ".to_string();
-        let res = get_simplified_name(&what);
-        assert_eq!(res, "HH");
-
-        let what = "  fsf.f.  ".to_string();
-        let res = get_simplified_name(&what);
-        assert_eq!(res, "fsf f");
-
-        let what = "Kekistan (feat. roman) [Mix on Mix]".to_string();
-        let res = get_simplified_name(&what);
-        assert_eq!(res, "Kekistan");
+        for (input, expected) in cases {
+            let res = get_simplified_name(input);
+            assert_eq!(res, expected, "Input: {input}, Expected: {expected}, Got: {res}");
+        }
     }
 }

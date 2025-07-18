@@ -1,10 +1,11 @@
 use std::env::temp_dir;
 use std::fs::File;
+use std::hint::black_box;
 use std::io::Write;
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use criterion::{Criterion, black_box, criterion_group, criterion_main};
+use criterion::{Criterion, criterion_group, criterion_main};
 use czkawka_core::tools::duplicate::{DuplicateEntry, HashType, hash_calculation};
 
 fn setup_test_file(size: u64) -> PathBuf {

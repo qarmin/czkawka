@@ -58,6 +58,7 @@ mod model_operations;
 mod set_initial_gui_info;
 mod settings;
 mod shared_models;
+mod simpler_model;
 #[cfg(test)]
 mod test_common;
 
@@ -78,14 +79,15 @@ fn main() {
 
     let shared_models = SharedModels::new_shared();
 
+    // Disabled for now, due invalid settings model at start
     // set_initial_gui_infos(&app);
 
     create_default_settings_files();
     load_settings_from_file(&app);
 
-    connect_delete_button(&app);
-    connect_scan_button(&app, progress_sender, stop_flag.clone(), Arc::clone(&shared_models));
-    connect_stop_button(&app, stop_flag);
+    connect_delete_button(&app, progress_sender.clone(), stop_flag.clone());
+    connect_scan_button(&app, progress_sender.clone(), stop_flag.clone(), Arc::clone(&shared_models));
+    connect_stop_button(&app, stop_flag.clone());
     connect_open_items(&app);
     connect_progress_gathering(&app, progress_receiver);
     connect_add_remove_directories(&app);
@@ -94,11 +96,15 @@ fn main() {
     connect_changing_settings_preset(&app);
     connect_select(&app);
     connect_showing_proper_select_buttons(&app);
-    connect_move(&app);
-    connect_rename(&app);
+    connect_move(&app, progress_sender.clone(), stop_flag.clone());
+    connect_rename(&app, progress_sender, stop_flag);
     connect_save(&app, Arc::clone(&shared_models));
     connect_row_selections(&app);
     connect_sort(&app);
+
+    // Popups gather their size, after starting/closing popup at least once
+    // This is simpler solution, than setting sizes of popups manually for each language
+    app.invoke_initialize_popup_sizes();
 
     app.run().expect("Failed to run app :(");
 

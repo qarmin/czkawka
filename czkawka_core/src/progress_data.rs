@@ -56,7 +56,10 @@ use crate::common_dir_traversal::{CheckingMethod, ToolType};
 // Duplicates - Name or SizeName or Size
 // 0 - Collecting files
 
-#[derive(Debug)]
+// Deleting files
+// Renaming files
+
+#[derive(Debug, Clone, Copy)]
 pub struct ProgressData {
     pub sstage: CurrentStage,
     pub checking_method: CheckingMethod,
@@ -69,8 +72,28 @@ pub struct ProgressData {
     pub tool_type: ToolType,
 }
 
+impl ProgressData {
+    pub fn get_empty_state(current_stage: CurrentStage) -> Self {
+        Self {
+            sstage: current_stage,
+            checking_method: CheckingMethod::None,
+            current_stage_idx: 0,
+            max_stage_idx: 0,
+            entries_checked: 0,
+            entries_to_check: 0,
+            bytes_checked: 0,
+            bytes_to_check: 0,
+            tool_type: ToolType::None,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum CurrentStage {
+    DeletingFiles,
+    RenamingFiles,
+    MovingFiles,
+
     CollectingFiles,
     DuplicateCacheSaving,
     DuplicateCacheLoading,
@@ -142,7 +165,7 @@ impl ProgressData {
             assert_eq!(self.tool_type, tool_type, "Tool type: {:?}, checking method: {:?}", self.tool_type, self.checking_method);
         }
         let tool_type_current_stage: Option<ToolType> = match self.sstage {
-            CurrentStage::CollectingFiles => None,
+            CurrentStage::CollectingFiles | CurrentStage::DeletingFiles | CurrentStage::RenamingFiles | CurrentStage::MovingFiles => None,
             CurrentStage::DuplicateCacheSaving | CurrentStage::DuplicateCacheLoading | CurrentStage::DuplicatePreHashCacheSaving | CurrentStage::DuplicatePreHashCacheLoading => {
                 Some(ToolType::Duplicate)
             }
@@ -188,9 +211,16 @@ impl ToolType {
 }
 
 impl CurrentStage {
+    pub fn is_special_non_tool_stage(&self) -> bool {
+        matches!(self, Self::DeletingFiles | Self::RenamingFiles | Self::MovingFiles)
+    }
+
     pub fn get_current_stage(&self) -> u8 {
         #[allow(clippy::match_same_arms)] // Now it is easier to read
         match self {
+            Self::DeletingFiles => 0,
+            Self::RenamingFiles => 0,
+            Self::MovingFiles => 0,
             Self::CollectingFiles => 0,
             Self::DuplicateScanningName => 0,
             Self::DuplicateScanningSizeName => 0,
