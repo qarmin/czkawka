@@ -1,6 +1,3 @@
-#![allow(dead_code)] // TODO
-#![allow(unused)]
-
 use slint::{Model, ModelExt, ModelRc, SharedString, VecModel};
 
 use crate::MainListModel;
@@ -48,15 +45,10 @@ impl From<SimplerMainListModel> for MainListModel {
 }
 
 pub trait ToSimplerVec {
-    fn to_simpler_vec(self) -> Vec<SimplerMainListModel>;
     fn to_simpler_enumerated_vec(self) -> Vec<(usize, SimplerMainListModel)>;
 }
 
 impl ToSimplerVec for ModelRc<MainListModel> {
-    fn to_simpler_vec(self) -> Vec<SimplerMainListModel> {
-        let vec_model = self.as_any().downcast_ref::<VecModel<MainListModel>>().expect("Only VecModel is supported");
-        vec_model.iter().map(|model| SimplerMainListModel::from(&model)).collect()
-    }
     fn to_simpler_enumerated_vec(self) -> Vec<(usize, SimplerMainListModel)> {
         let vec_model = self.as_any().downcast_ref::<VecModel<MainListModel>>().expect("Only VecModel is supported");
         vec_model.iter().enumerate().map(|(index, model)| (index, SimplerMainListModel::from(&model))).collect()
@@ -64,13 +56,9 @@ impl ToSimplerVec for ModelRc<MainListModel> {
 }
 
 pub trait ToSlintModel {
-    fn to_rc_model(self) -> ModelRc<SimplerMainListModel>;
     fn to_vec_model(self) -> Vec<MainListModel>;
 }
 impl ToSlintModel for Vec<SimplerMainListModel> {
-    fn to_rc_model(self) -> ModelRc<SimplerMainListModel> {
-        ModelRc::new(VecModel::from(self))
-    }
     fn to_vec_model(self) -> Vec<MainListModel> {
         self.into_iter().map(|model| model.into()).collect()
     }

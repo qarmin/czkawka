@@ -2,14 +2,14 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::fs::FileType;
 
-use gtk4::prelude::*;
-use gtk4::{Align, CheckButton, Dialog, Orientation, ResponseType, TextView};
-
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::*;
 use crate::notebook_enums::*;
 use crate::notebook_info::NOTEBOOKS_INFO;
+use czkawka_core::common::check_if_folder_contains_only_empty_folders;
+use gtk4::prelude::*;
+use gtk4::{Align, CheckButton, Dialog, Orientation, ResponseType, TextView};
 
 // TODO add support for checking if really symlink doesn't point to correct directory/file
 
@@ -298,6 +298,9 @@ pub fn empty_folder_remover(
 
         let name = model.get::<String>(&iter, column_file_name);
         let path = model.get::<String>(&iter, column_path);
+        let full_path = get_full_name_from_path_name(&path, &name);
+
+        if let Ok(()) = check_if_folder_contains_only_empty_folders(&full_path) {}
 
         // We must check if folder is really empty or contains only other empty folders
         let mut error_happened = false;
@@ -347,14 +350,14 @@ pub fn empty_folder_remover(
 
         if !error_happened {
             if !use_trash {
-                match fs::remove_dir_all(get_full_name_from_path_name(&path, &name)) {
+                match fs::remove_dir_all(full_path) {
                     Ok(()) => {
                         model.remove(&iter);
                     }
                     Err(_inspected) => error_happened = true,
                 }
             } else {
-                match trash::delete(get_full_name_from_path_name(&path, &name)) {
+                match trash::delete(full_path) {
                     Ok(()) => {
                         model.remove(&iter);
                     }
@@ -363,7 +366,7 @@ pub fn empty_folder_remover(
             }
         }
         if error_happened {
-            messages += &flg!("delete_folder_failed", dir = get_full_name_from_path_name(&path, &name));
+            messages += &flg!("delete_folder_failed", dir = full_path);
             messages += "\n";
         }
     }
