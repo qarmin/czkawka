@@ -1,4 +1,4 @@
-use slint::{Model, ModelExt, ModelRc, SharedString, VecModel};
+use slint::{Model, ModelRc, SharedString, VecModel};
 
 use crate::MainListModel;
 use crate::common::connect_i32_into_u64;
