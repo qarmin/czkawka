@@ -268,7 +268,7 @@ jobs:
           mv target/release/czkawka_gui czkawka_gui_release_2
           mv target/release/krokiet krokiet_release_2
           
-          misc/compare_files.sh
+          bash misc/compare_files.sh
           
 
   linux-appimage-gui:
