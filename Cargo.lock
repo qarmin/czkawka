@@ -1442,6 +1442,7 @@ dependencies = [
  "deunicode",
  "directories-next",
  "dunce",
+ "fast_image_resize",
  "ffmpeg_cmdline_utils",
  "file-id",
  "file-rotate",
@@ -2063,9 +2064,9 @@ dependencies = [
 
 [[package]]
 name = "fast_image_resize"
-version = "5.2.0"
+version = "5.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "65b170c19bafa740b919227a619d8b958fbc9fb5899b9af68bd075c3b3284fc0"
+checksum = "d372ab3252d8f162d858d675a3d88a8c33ba24a6238837c50c8851911c7e89cd"
 dependencies = [
  "bytemuck",
  "cfg-if",
