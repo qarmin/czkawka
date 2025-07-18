@@ -230,6 +230,47 @@ jobs:
             linux_czkawka_gui
           token: ${{ secrets.PAT_REPOSITORY }}
 
+  linux-stability:
+    # if: ${{ github.ref == 'refs/heads/master' }} # TODO - needs to run only on master, because it is time consuming
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install basic libraries
+        run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev -y
+
+      - name: Setup rust version
+        run: rustup default 1.85.0
+
+      - name: Build packages
+        run: |
+          rm -rf target || true
+          cargo build
+          mv target/debug/czkawka_cli czkawka_cli_debug_1
+          mv target/debug/czkawka_gui czkawka_gui_debug_1
+          mv target/debug/krokiet krokiet_debug_1
+          
+          rm -rf target || true
+          cargo build --release
+          mv target/release/czkawka_cli czkawka_cli_release_1
+          mv target/release/czkawka_gui czkawka_gui_release_1
+          mv target/release/krokiet krokiet_release_1
+          
+          rm -rf target || true
+          cargo build
+          mv target/debug/czkawka_cli czkawka_cli_debug_2
+          mv target/debug/czkawka_gui czkawka_gui_debug_2
+          mv target/debug/krokiet krokiet_debug_2
+          
+          rm -rf target || true
+          cargo build --release
+          mv target/release/czkawka_cli czkawka_cli_release_2
+          mv target/release/czkawka_gui czkawka_gui_release_2
+          mv target/release/krokiet krokiet_release_2
+          
+          bash misc/compare_files.sh
+          
+
   linux-appimage-gui:
     runs-on: ubuntu-22.04
     steps:
