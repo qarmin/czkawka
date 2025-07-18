@@ -272,7 +272,7 @@ impl CurrentTab {
         Some(res)
     }
     pub fn get_int_size_idx(&self) -> usize {
-        self.get_int_size_opt_idx().expect("Unable to get size index for tab: {self:?}")
+        self.get_int_size_opt_idx().expect(&format!("Unable to get size index for tab: {self:?}"))
     }
     pub fn get_int_width_idx(&self) -> usize {
         match self {
