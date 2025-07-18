@@ -449,7 +449,7 @@ pub fn check_if_folder_contains_only_empty_folders(path: impl AsRef<Path>) -> Re
 }
 
 pub fn remove_folder_if_contains_only_empty_folders(path: impl AsRef<Path>, remove_to_trash: bool) -> Result<(), String> {
-    check_if_folder_contains_only_empty_folders(path)?;
+    check_if_folder_contains_only_empty_folders(&path)?;
 
     let path = path.as_ref();
 
