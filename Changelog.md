@@ -9,13 +9,13 @@
 - Slightly improved cache loading/saving speed - [#1478](https://github.com/qarmin/czkawka/pull/1478)
 - Messages and panics are now also logged to a file (can be disabled by setting env `DISABLE_FILE_LOGGING`) - [#1508](https://github.com/qarmin/czkawka/pull/1508)
 - Added a 4GB memory limit when loading/saving cache to avoid out of memory crashes with broken cache - [#1508](https://github.com/qarmin/czkawka/pull/1508)
-- Czkawka binaries are now reproducible - []()
+- Czkawka binaries are now reproducible - [#1565](https://github.com/qarmin/czkawka/pull/1565)
 
 ### GTK Gui
 - New icons — less pretty, but created by me and released under a truly free CC BY license - [#1478](https://github.com/qarmin/czkawka/pull/1478)
 - Fixed crash when removing outdated cache - [#1508](https://github.com/qarmin/czkawka/pull/1508)
 - Fixed missing file/folder names for similar videos in reference folders - [#1520](https://github.com/qarmin/czkawka/pull/1520)
-- Fixed crashes when svg pixbuf loader is not available - []()
+- Fixed crashes when svg pixbuf loader is not available - [#1565](https://github.com/qarmin/czkawka/pull/1565)
 
 ### Krokiet
 - Added ability to select multiple items with mouse and keyboard - [#1478](https://github.com/qarmin/czkawka/pull/1478)
@@ -26,9 +26,9 @@
 - Dark/Light theme can now be switched at runtime - [#1520](https://github.com/qarmin/czkawka/pull/1520)
 - Changed icon color to white for dark theme to improve visibility - [#1520](https://github.com/qarmin/czkawka/pull/1520)
 - Added ability to hide text on buttons - [#1520](https://github.com/qarmin/czkawka/pull/1520)
-- Multithreaded removing/moving/renaming of files - []()
-- Failed to remove/rename/move files, do not are not deleted from list of results - []()
-- Progress info when removing/renaming/moving files and ability to stop process []()
+- Multithreaded removing/moving/renaming of files - [#1565](https://github.com/qarmin/czkawka/pull/1565)
+- Failed to remove/rename/move files, do not are not deleted from list of results - [#1565](https://github.com/qarmin/czkawka/pull/1565)
+- Progress info when removing/renaming/moving files and ability to stop process [#1565](https://github.com/qarmin/czkawka/pull/1565)
 
 ### External
 - There is a new unofficial Tauri-based frontend for Czkawka - [Czkawka Tauri](https://github.com/shixinhuang99/czkawka-tauri)
@@ -39,6 +39,8 @@
 - Czkawka binaries are now checked for reproducibility in CI
 
 ### Prebuild-binaries
+- Appimage binaries are no longer provided, due random bugs, problems and minimial additional value over prebuilt Linux binaries or flatpak
+- Heif Mac binaries are now provided
 - CI now builds Linux binaries on Ubuntu 22.04 instead of 20.04 (except some, that are built on 24.04)
 - `musl` builds of `czkawka_cli` are now provided instead of `eyra` builds (slightly easier to maintain) — GUI builds are not included due to limitations of `musl` and `eyra` :(
 - Prebuilt Windows console binaries are no longer provided — logs are now saved to file, which is easier to read than terminal output
