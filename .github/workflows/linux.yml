@@ -8,7 +8,6 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
-# TODO - remove appimage
 jobs:
   linux-cli-krokiet-release:
     if: ${{ github.ref == 'refs/heads/master' }}
@@ -231,7 +230,7 @@ jobs:
           token: ${{ secrets.PAT_REPOSITORY }}
 
   linux-stability:
-    # if: ${{ github.ref == 'refs/heads/master' }} # TODO - needs to run only on master, because it is time consuming
+    if: ${{ github.ref == 'refs/heads/master' }} # Runs only in master, because it is time consuming
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
