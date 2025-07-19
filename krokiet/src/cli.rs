@@ -21,20 +21,19 @@ pub fn process_cli_args(args: Vec<String>) -> Option<CliResult> {
 
     if ["--help", "-h"].iter().any(|&arg| args.contains(&arg.to_string())) {
         println!("Krokiet");
-        println!("Krokiet allows to set from CLI the folders to search for files, and also to exclude some folders from the search.");
-        println!("If used, it will automatically use the last - 11 preset, and load its options.");
-        println!("Running app without arguments, will run Krokiet GUI normally, with default/saved options.");
+        println!("Krokiet allows you to specify folders to search for files via the CLI, and also to exclude or reference folders.");
+        println!("If used, it will automatically apply the last preset (preset 11) and load its options.");
+        println!("Running the app without arguments will launch the Krokiet GUI with default or saved options.");
         println!("Usage: krokiet [OPTIONS] [FOLDERS...]");
         println!("Options:");
-        println!("  FOLDER    Include a folder in the search");
-        println!("  -e FOLDER  or  --exclude FOLDER    Exclude a folder from the search");
-        println!("  -r FOLDER  or  --referenced FOLDER  Include a folder and set it as referenced");
-        println!("  --help, -h          Show this help message");
-        println!("  --version, -v       Show version information");
-        println!("Example:");
+        println!("  FOLDER                Include a folder in the search");
+        println!("  -e FOLDER, --exclude FOLDER      Exclude a folder from the search");
+        println!("  -r FOLDER, --referenced FOLDER   Include a folder and set it as referenced");
+        println!("  --help, -h            Show this help message");
+        println!("  --version, -v         Show version information");
+        println!("Examples:");
         println!("  krokiet /path/absolute/to/folder -e relative_path/2 -r /path/to/referenced");
         println!("  krokiet . folder2 folder3");
-
         println!("If no folders are specified, the program will exit without doing anything.");
         process::exit(0);
     }
