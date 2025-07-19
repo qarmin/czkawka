@@ -68,7 +68,6 @@ jobs:
             macos_krokiet_x86_64
           token: ${{ secrets.PAT_REPOSITORY }}
 
-      # TODO - compilation is broken, not sure why, if you want to use it you need to fix it(I'm too lazy and don't have MacOS)
       - name: Build Release Heif
         run: cargo build --release --features heif
 
