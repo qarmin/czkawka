@@ -419,13 +419,12 @@ pub fn load_settings_from_file(app: &MainWindow, cli_result: Option<CliResult>) 
 
     let result_base_settings = load_data_from_file::<BasicSettings>(get_base_config_file());
 
-    let mut base_settings;
-    if let Ok(base_settings_temp) = result_base_settings {
-        base_settings = base_settings_temp;
+    let mut base_settings = if let Ok(base_settings_temp) = result_base_settings {
+        base_settings_temp
     } else {
         info!("Cannot load base settings, using default instead");
-        base_settings = BasicSettings::default();
-    }
+        BasicSettings::default()
+    };
 
     let preset_to_load = if cli_result.is_some() { RESERVER_PRESET_IDX } else { base_settings.default_preset };
 

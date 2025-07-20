@@ -183,7 +183,9 @@ impl ModelProcessor {
             .upgrade_in_event_loop(move |app| {
                 let mut new_model_after_removing_useless_items = self.remove_single_items_in_groups(new_simple_model.to_vec_model());
                 // Selection cache was invalidated, so we need to reset it
-                new_model_after_removing_useless_items.iter_mut().for_each(|e| e.selected_row = false);
+                for e in &mut new_model_after_removing_useless_items {
+                    e.selected_row = false;
+                }
                 self.active_tab.set_tool_model(&app, ModelRc::new(VecModel::from(new_model_after_removing_useless_items)));
 
                 app.global::<GuiState>()

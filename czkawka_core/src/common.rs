@@ -76,18 +76,8 @@ pub fn set_config_cache_path(cache_name: &'static str, config_name: &'static str
     let config_folder_env = std::env::var("CZKAWKA_CONFIG_PATH").unwrap_or_default().trim().to_string();
     let cache_folder_env = std::env::var("CZKAWKA_CACHE_PATH").unwrap_or_default().trim().to_string();
 
-    let default_config_folder;
-    let default_cache_folder;
-    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", cache_name) {
-        default_cache_folder = Some(proj_dirs.cache_dir().to_path_buf());
-    } else {
-        default_cache_folder = None;
-    }
-    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", config_name) {
-        default_config_folder = Some(proj_dirs.config_dir().to_path_buf());
-    } else {
-        default_config_folder = None;
-    }
+    let default_cache_folder = ProjectDirs::from("pl", "Qarmin", cache_name).map(|proj_dirs| proj_dirs.cache_dir().to_path_buf());
+    let default_config_folder = ProjectDirs::from("pl", "Qarmin", config_name).map(|proj_dirs| proj_dirs.config_dir().to_path_buf());
 
     let mut resolve_folder = |env_var: &str, default_folder: Option<PathBuf>, name: &'static str| {
         let default_folder_str = default_folder.as_ref().map_or("<not available>".to_string(), |t| t.to_string_lossy().to_string());
