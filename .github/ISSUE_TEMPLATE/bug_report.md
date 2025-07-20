@@ -33,12 +33,9 @@ Very helpful in this situation will be logs from czkawka run with RUST_LOG envir
 
 <!-- OS and Czkawka/Krokiet version and other os info, you can just copy from logs, if you run app from terminal or find it in logs file (usually Linux - `/home/username/.cache/czkawka`, Mac - `/Users/Username/Library/Caches/pl.Qarmin.Czkawka`, Windows - `C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache`). -->
 <!-- Example of logs: -->
-<!-- Czkawka gtk version: 9.0.0, debug mode, rust 1.88.0 (2025-06-23), os Ubuntu 25.4.0 (x86_64 64-bit), 24 cpu/threads, features(1): [fast_image_resize], app cpu version: x86-64-v3 (AVX2) or x86-64-v4 (AVX-512), os cpu version: x86-64-v4 (AVX-512) !-->
-<!-- 10:32:45.184 [INFO] czkawka_core::common: Logging to file "/home/rafal/.cache/czkawka/czkawka_gui.log" and terminal -->
-<!-- 10:32:45.192 [INFO] czkawka_core::common: Czkawka gtk version: 9.0.0, debug mode, rust 1.88.0 (2025-06-23), os Ubuntu 25.4.0 (x86_64 64-bit), 24 cpu/threads, features(1): [fast_image_resize], app cpu version: x86-64-v3 (AVX2) or x86-64-v4 (AVX-512), os cpu version: x86-64-v4 (AVX-512) -->
-<!-- 10:32:45.192 [WARN] czkawka_core::common: You are running debug version of app which is a lot of slower than release version. -->
-<!-- 10:32:45.192 [INFO] czkawka_core::common: Config folder set to "/home/rafal/.config/czkawka" and cache folder set to "/home/rafal/.cache/czkawka" -->
-<!-- 10:32:45.361 [INFO] czkawka_gui: Czkawka Gui - used thread number: 24, gtk version 4.18.5 -->
+<!-- Czkawka gtk version: 9.0.0, debug mode, rust 1.88.0 (2025-06-23), os Ubuntu 25.4.0 (x86_64 64-bit), 24 cpu/threads, features(1): [fast_image_resize], app cpu version: x86-64-v3 (AVX2) or x86-64-v4 (AVX-512), os cpu version: x86-64-v4 (AVX-512) -->
+<!-- Config folder set to "/home/rafal/.config/czkawka" and cache folder set to "/home/rafal/.cache/czkawka" -->
+<!-- Czkawka Gui - used thread number: 24, gtk version 4.18.5 -->
 
 <!-- Please do not report feature request unique for Gtk Czkawka gui, because it is in maintenance mode. -->
 

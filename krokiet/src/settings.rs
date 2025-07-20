@@ -312,7 +312,7 @@ impl Default for SettingsCustom {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BasicSettings {
     #[serde(default)]
-    pub default_preset: i32, // Preset that is saved to file
+    pub default_preset: i32,
     #[serde(default = "default_preset_names")]
     pub preset_names: Vec<String>,
     #[serde(default = "default_window_width")]
@@ -492,7 +492,7 @@ where
         return Err("Cannot get config file".into());
     };
     if !config_file.is_file() {
-        return Err(format!("Config file \"{}\" doesn't exists", config_file.to_string_lossy()));
+        return Err(format!("Config file \"{}\" doesn't exist", config_file.to_string_lossy()));
     }
 
     let result = match std::fs::read_to_string(&config_file) {

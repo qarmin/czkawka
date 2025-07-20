@@ -24,7 +24,7 @@ pub fn process_cli_args(args: Vec<String>) -> Option<CliResult> {
     if ["--help", "-h"].iter().any(|&arg| args.contains(&arg.to_string())) {
         println!("Krokiet");
         println!("Krokiet allows you to specify folders to search for files via the CLI, and also to exclude or reference folders.");
-        println!("If used, it will automatically apply the last preset (preset 11) and load its options.");
+        println!("If used, it will automatically apply the last preset and load its options.");
         println!("Running the app without arguments will launch the Krokiet GUI with default or saved options.");
         println!("Usage: krokiet [OPTIONS] [FOLDERS...]");
         println!("Options:");

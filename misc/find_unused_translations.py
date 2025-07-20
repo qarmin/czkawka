@@ -56,4 +56,4 @@ for ftl_file in ftl_files:
         found = True
 
 if found:
-    os.exit(1)
+    sys.exit(1)
