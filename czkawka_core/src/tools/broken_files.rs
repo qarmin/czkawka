@@ -9,10 +9,7 @@ use std::{fs, mem, panic};
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use log::{debug, error};
-use pdf::PdfError;
-use pdf::PdfError::Try;
-use pdf::file::FileOptions;
-use pdf::object::ParseOptions;
+use lopdf::Document;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -238,36 +235,22 @@ impl BrokenFiles {
         }
     }
     fn check_broken_pdf(&self, mut file_entry: BrokenEntry) -> Option<BrokenEntry> {
-        let parser_options = ParseOptions::tolerant(); // Only show as broken files with really big bugs
-
         let mut file_entry_clone = file_entry.clone();
         panic::catch_unwind(|| {
-            match FileOptions::cached().parse_options(parser_options).open(&file_entry.path) {
+            match File::open(&file_entry.path) {
                 Ok(file) => {
-                    for idx in 0..file.num_pages() {
-                        if let Err(e) = file.get_page(idx) {
-                            let err = validate_pdf_error(&mut file_entry, e);
-                            if matches!(err, PdfError::InvalidPassword) {
-                                return None;
-                            }
-                            break;
-                        }
+                    if let Err(e) = Document::load_from(file) {
+                        file_entry.error_string = e.to_string();
                     }
                 }
                 Err(e) => {
-                    if let PdfError::Io { .. } = e {
-                        return None;
-                    }
-                    let err = validate_pdf_error(&mut file_entry, e);
-                    if matches!(err, PdfError::InvalidPassword) {
-                        return None;
-                    }
+                    file_entry.error_string = e.to_string();
                 }
             }
             Some(file_entry)
         })
         .unwrap_or_else(|_| {
-            let message = create_crash_message("PDF-rs", &file_entry_clone.path.to_string_lossy(), "https://github.com/pdf-rs/pdf");
+            let message = create_crash_message("lopdf", &file_entry_clone.path.to_string_lossy(), "https://github.com/pdf-rs/pdf");
             error!("{message}");
             file_entry_clone.error_string = message;
             Some(file_entry_clone)
@@ -484,35 +467,6 @@ fn check_extension_availability(
         debug_assert!(false, "File with unknown extension - \"{}\" - {extension_lowercase}", full_name.to_string_lossy());
         TypeOfFile::Unknown
     }
-}
-
-fn unpack_pdf_error(e: PdfError) -> PdfError {
-    if let Try {
-        file: _,
-        line: _,
-        column: _,
-        context: _,
-        source,
-    } = e
-    {
-        unpack_pdf_error(*source)
-    } else {
-        e
-    }
-}
-
-#[allow(clippy::string_slice)] // Safe slicing
-fn validate_pdf_error(file_entry: &mut BrokenEntry, e: PdfError) -> PdfError {
-    let mut error_string = e.to_string();
-    // Workaround for strange error message https://github.com/qarmin/czkawka/issues/898
-    if error_string.starts_with("Try at") {
-        if let Some(start_index) = error_string.find("/pdf-") {
-            error_string = format!("Decoding error in pdf-rs library - {}", &error_string[start_index..]);
-        }
-    }
-
-    file_entry.error_string = error_string;
-    unpack_pdf_error(e)
 }
 
 impl CommonData for BrokenFiles {

@@ -1,47 +1,52 @@
 ## Version ?.?.? - ?
 
 ### Breaking changes
-- Some languages have unified names in Crowdin (like `es` → `es-ES`), so the GUI may not find them and will fall back to the default language.
+- Some languages now have unified names in Crowdin (e.g. `es` → `es-ES`). The GUI may not find them and will fall back to the default language.
 - Cache files now use memory limits and are incompatible with previous versions.
 
 ### Core
-- Converted `println`/`eprintln` to logging functions - [#1478](https://github.com/qarmin/czkawka/pull/1478)
-- Slightly improved cache loading/saving speed - [#1478](https://github.com/qarmin/czkawka/pull/1478)
-- Messages and panics are now also logged to a file (can be disabled by setting env `DISABLE_FILE_LOGGING`) - [#1508](https://github.com/qarmin/czkawka/pull/1508)
-- Added a 4GB memory limit when loading/saving cache to avoid out of memory crashes with broken cache - [#1508](https://github.com/qarmin/czkawka/pull/1508)
-- Czkawka binaries are now reproducible - []()
+- Replaced `println`/`eprintln` with logging functions - [#1478](https://github.com/qarmin/czkawka/pull/1478)
+- Slightly improved cache loading and saving speed - [#1478](https://github.com/qarmin/czkawka/pull/1478)
+- Messages and panics are now also logged to a file (can be disabled by setting the `DISABLE_FILE_LOGGING` environment variable) - [#1508](https://github.com/qarmin/czkawka/pull/1508)
+- Added a 4GB memory limit when loading or saving cache to avoid out-of-memory crashes with broken cache files - [#1508](https://github.com/qarmin/czkawka/pull/1508)
+- Czkawka binaries are now reproducible - [#1565](https://github.com/qarmin/czkawka/pull/1565)
+- Added protection against deleting a folder that is no longer empty since the scan - [#1566](https://github.com/qarmin/czkawka/pull/1566)
+- Change pdf-rs, to lower level lopdf library to decrease dependencies number - [#1566](https://github.com/qarmin/czkawka/pull/1566)
 
-### GTK Gui
-- New icons — less pretty, but created by me and released under a truly free CC BY license - [#1478](https://github.com/qarmin/czkawka/pull/1478)
+### GTK GUI
+- New icons — less visually appealing, but created by me and released under a truly free CC BY license - [#1478](https://github.com/qarmin/czkawka/pull/1478)
 - Fixed crash when removing outdated cache - [#1508](https://github.com/qarmin/czkawka/pull/1508)
-- Fixed missing file/folder names for similar videos in reference folders - [#1520](https://github.com/qarmin/czkawka/pull/1520)
-- Fixed crashes when svg pixbuf loader is not available - []()
+- Fixed missing file and folder names for similar videos in reference folders - [#1520](https://github.com/qarmin/czkawka/pull/1520)
+- Fixed crashes when the SVG pixbuf loader is not available - [#1565](https://github.com/qarmin/czkawka/pull/1565)
 
 ### Krokiet
-- Added ability to select multiple items with mouse and keyboard - [#1478](https://github.com/qarmin/czkawka/pull/1478)
+- Added the ability to select multiple items with mouse and keyboard - [#1478](https://github.com/qarmin/czkawka/pull/1478)
 - Added sort button - [#1501](https://github.com/qarmin/czkawka/pull/1501)
 - Window size is now remembered - [#1508](https://github.com/qarmin/czkawka/pull/1508)
 - Added translations - [#1508](https://github.com/qarmin/czkawka/pull/1508), [#1513](https://github.com/qarmin/czkawka/pull/1513)
 - Improved popup styling - [#1520](https://github.com/qarmin/czkawka/pull/1520)
-- Dark/Light theme can now be switched at runtime - [#1520](https://github.com/qarmin/czkawka/pull/1520)
+- Dark and light themes can now be switched at runtime - [#1520](https://github.com/qarmin/czkawka/pull/1520)
 - Changed icon color to white for dark theme to improve visibility - [#1520](https://github.com/qarmin/czkawka/pull/1520)
-- Added ability to hide text on buttons - [#1520](https://github.com/qarmin/czkawka/pull/1520)
-- Multithreaded removing/moving/renaming of files - []()
-- Failed to remove/rename/move files, do not are not deleted from list of results - []()
-- Progress info when removing/renaming/moving files and ability to stop process []()
+- Added the ability to hide text on buttons - [#1520](https://github.com/qarmin/czkawka/pull/1520)
+- Multithreaded removing, moving, and renaming of files - [#1565](https://github.com/qarmin/czkawka/pull/1565)
+- Files that fail to be removed, renamed, or moved are no longer deleted from the results list - [#1565](https://github.com/qarmin/czkawka/pull/1565)
+- Progress information is shown when removing, renaming, or moving files, with the ability to stop the process - [#1565](https://github.com/qarmin/czkawka/pull/1565)
+- Folders to scan can be now set via cli e.g. `krokiet /home/rafal` - for more info see `krokiet --help` - [#1566](https://github.com/qarmin/czkawka/pull/1566)
 
 ### External
-- There is a new unofficial Tauri-based frontend for Czkawka - [Czkawka Tauri](https://github.com/shixinhuang99/czkawka-tauri)
+- There is a new unofficial Tauri-based frontend for Czkawka(inspired by Krokiet ui) - [Czkawka Tauri](https://github.com/shixinhuang99/czkawka-tauri)
 - Czkawka 8.0.0 is now available in Debian Sid - https://packages.debian.org/sid/czkawka-cli
 
 ### CI
-- Compilation for 32-bit targets is now checked in CI
-- Czkawka binaries are now checked for reproducibility in CI
+- Compilation for 32-bit targets is now checked in CI.
+- Czkawka binaries are now checked for reproducibility in CI.
 
-### Prebuild-binaries
-- CI now builds Linux binaries on Ubuntu 22.04 instead of 20.04 (except some, that are built on 24.04)
-- `musl` builds of `czkawka_cli` are now provided instead of `eyra` builds (slightly easier to maintain) — GUI builds are not included due to limitations of `musl` and `eyra` :(
-- Prebuilt Windows console binaries are no longer provided — logs are now saved to file, which is easier to read than terminal output
+### Prebuilt binaries
+- AppImage binaries are no longer provided due to random bugs (not present in other packaging formats) and minimal added value compared to prebuilt Linux binaries or Flatpak.\
+- HEIF Mac binaries are now provided.
+- CI now builds Linux binaries on Ubuntu 22.04 instead of 20.04(github removed 20.04 images).
+- `musl` builds of `czkawka_cli` are now provided instead of `eyra` builds (slightly easier to maintain). GUI builds are not included due to limitations of `musl` and `eyra` :(
+- Prebuilt Windows console binaries are no longer provided — logs are now saved to a file, which is easier to read than terminal output.
 
 ## Version 9.0.0 - 16.03.2025r
 

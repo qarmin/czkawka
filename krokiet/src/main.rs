@@ -18,6 +18,7 @@ use czkawka_core::progress_data::ProgressData;
 use log::{info, warn};
 use slint::VecModel;
 
+use crate::cli::process_cli_args;
 use crate::connect_delete::connect_delete_button;
 use crate::connect_directories_changes::connect_add_remove_directories;
 use crate::connect_move::connect_move;
@@ -38,6 +39,7 @@ use crate::connect_translation::connect_translations;
 use crate::settings::{connect_changing_settings_preset, create_default_settings_files, load_settings_from_file, save_all_settings_to_file};
 use crate::shared_models::SharedModels;
 
+mod cli;
 mod common;
 mod connect_delete;
 mod connect_directories_changes;
@@ -66,6 +68,7 @@ slint::include_modules!();
 fn main() {
     let (infos, warnings) = set_config_cache_path("Czkawka", "Krokiet");
     setup_logger(false, "krokiet");
+    let cli_args = process_cli_args(std::env::args().skip(1).collect());
     print_version_mode("Krokiet");
     print_infos_and_warnings(infos, warnings);
     print_krokiet_features();
@@ -83,7 +86,7 @@ fn main() {
     // set_initial_gui_infos(&app);
 
     create_default_settings_files();
-    load_settings_from_file(&app);
+    let original_preset_idx = load_settings_from_file(&app, cli_args);
 
     connect_delete_button(&app, progress_sender.clone(), stop_flag.clone());
     connect_scan_button(&app, progress_sender.clone(), stop_flag.clone(), Arc::clone(&shared_models));
@@ -108,7 +111,7 @@ fn main() {
 
     app.run().expect("Failed to run app :(");
 
-    save_all_settings_to_file(&app);
+    save_all_settings_to_file(&app, original_preset_idx);
 }
 
 pub fn zeroing_all_models(app: &MainWindow) {

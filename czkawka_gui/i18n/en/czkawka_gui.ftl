@@ -521,9 +521,6 @@ saving_loading_invalid_bool = For key "{ $key }" found invalid result - "{ $resu
 saving_loading_decode_problem_bool = Failed to decode bool from key "{ $key }" found "{ $result }" but allowed values are 0, 1, true or false.
 saving_loading_saving_same_keys = Trying to save setting with duplicated key "{ $key }".
 
-saving_loading_failed_to_get_home_directory = Failed to get home directory to open/save config file.
-saving_loading_folder_config_instead_file = Cannot create or open save configuration file in path "{ $path }" because already there is a folder.
-saving_loading_failed_to_create_configuration_folder = Failed configuration to create configuration folder "{ $path }", reason "{ $reason }".
 saving_loading_failed_to_create_config_file = Failed to create config file "{ $path }", reason "{ $reason }".
 saving_loading_failed_to_read_config_file = Cannot load configuration from "{ $path }" because it does not exist or is not a file.
 saving_loading_failed_to_read_data_from_file = Cannot read data from file "{ $path }", reason "{ $reason }".

@@ -1,3 +1,5 @@
+#![allow(clippy::useless_let_if_seq)]
+
 use std::collections::{BTreeMap, HashMap};
 use std::fs;
 use std::io::{BufReader, BufWriter};

@@ -17,6 +17,7 @@ use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use slint::{ComponentHandle, Model, ModelRc, PhysicalSize, SharedString, VecModel, WindowSize};
 
+use crate::cli::CliResult;
 use crate::common::{create_excluded_directories_model_from_pathbuf, create_included_directories_model_from_pathbuf, create_vec_model_from_vec_string};
 use crate::connect_translation::{LANGUAGE_LIST, change_language, find_the_closest_language_idx_to_system};
 use crate::{Callabler, GuiState, MainWindow, Settings, flk};
@@ -34,6 +35,10 @@ pub const DEFAULT_MINIMAL_FRAGMENT_DURATION_VALUE: f32 = 5.0;
 pub const MAX_HASH_SIZE: f32 = 40.0;
 pub const DEFAULT_WINDOW_WIDTH: u32 = 800;
 pub const DEFAULT_WINDOW_HEIGHT: u32 = 600;
+
+pub const PRESET_NUMBER: usize = 11; // 10 normal presets + 1 reserved preset for custom settings
+pub const RESERVER_PRESET_IDX: i32 = PRESET_NUMBER as i32 - 1; // 10 normal presets + 1 reserved preset for custom settings
+pub const PRESET_NAME_RESERVED: &str = "CLI Folders";
 
 #[derive(Debug, Clone)]
 pub struct StringComboBoxItem<T>
@@ -336,11 +341,11 @@ pub fn connect_changing_settings_preset(app: &MainWindow) {
         let loaded_data = load_data_from_file::<SettingsCustom>(get_config_file(current_item));
         match loaded_data {
             Ok(loaded_data) => {
-                set_settings_to_gui(&app, &loaded_data);
+                set_settings_to_gui(&app, &loaded_data, None);
                 app.set_text_summary_text(flk!("rust_loaded_preset", preset_idx = (current_item + 1)).into());
             }
             Err(e) => {
-                set_settings_to_gui(&app, &SettingsCustom::default());
+                set_settings_to_gui(&app, &SettingsCustom::default(), None);
                 app.set_text_summary_text(flk!("rust_cannot_load_preset", preset_idx = (current_item + 1), reason = (&e)).into());
                 error!("Failed to change preset - {e}, using default instead");
             }
@@ -367,7 +372,7 @@ pub fn connect_changing_settings_preset(app: &MainWindow) {
         let app = a.upgrade().expect("Failed to upgrade app :(");
         let settings = app.global::<Settings>();
         let current_item = settings.get_settings_preset_idx();
-        set_settings_to_gui(&app, &SettingsCustom::default());
+        set_settings_to_gui(&app, &SettingsCustom::default(), None);
         app.set_text_summary_text(flk!("rust_reset_preset", preset_idx = (current_item + 1)).into());
     });
     let a = app.as_weak();
@@ -378,11 +383,11 @@ pub fn connect_changing_settings_preset(app: &MainWindow) {
         let loaded_data = load_data_from_file::<SettingsCustom>(get_config_file(current_item));
         match loaded_data {
             Ok(loaded_data) => {
-                set_settings_to_gui(&app, &loaded_data);
+                set_settings_to_gui(&app, &loaded_data, None);
                 app.set_text_summary_text(flk!("rust_loaded_preset", preset_idx = (current_item + 1)).into());
             }
             Err(e) => {
-                set_settings_to_gui(&app, &SettingsCustom::default());
+                set_settings_to_gui(&app, &SettingsCustom::default(), None);
                 let err_message = flk!("rust_cannot_load_preset", preset_idx = (current_item + 1), reason = (&e));
                 app.set_text_summary_text(err_message.into());
                 error!("Failed to load preset - {e}, using default instead");
@@ -399,8 +404,8 @@ pub fn create_default_settings_files() {
         }
     }
 
-    for i in 0..10 {
-        let config_file = get_config_file(i);
+    for i in 0..PRESET_NUMBER {
+        let config_file = get_config_file(i as i32);
         if let Some(config_file) = config_file {
             if !config_file.is_file() {
                 let _ = save_data_to_file(Some(config_file), &SettingsCustom::default());
@@ -409,55 +414,59 @@ pub fn create_default_settings_files() {
     }
 }
 
-pub fn load_settings_from_file(app: &MainWindow) {
+pub fn load_settings_from_file(app: &MainWindow, cli_result: Option<CliResult>) -> i32 {
     StringComboBoxItems::regenerate_and_set();
 
     let result_base_settings = load_data_from_file::<BasicSettings>(get_base_config_file());
 
-    let mut base_settings;
-    if let Ok(base_settings_temp) = result_base_settings {
-        base_settings = base_settings_temp;
+    let mut base_settings = if let Ok(base_settings_temp) = result_base_settings {
+        base_settings_temp
     } else {
         info!("Cannot load base settings, using default instead");
-        base_settings = BasicSettings::default();
-    }
+        BasicSettings::default()
+    };
 
-    let results_custom_settings = load_data_from_file::<SettingsCustom>(get_config_file(base_settings.default_preset));
+    let preset_to_load = if cli_result.is_some() { RESERVER_PRESET_IDX } else { base_settings.default_preset };
 
-    let mut custom_settings;
-    if let Ok(custom_settings_temp) = results_custom_settings {
-        custom_settings = custom_settings_temp;
-    } else {
-        info!("Cannot load custom settings, using default instead");
-        custom_settings = SettingsCustom::default();
-    }
+    let mut custom_settings = load_data_from_file::<SettingsCustom>(get_config_file(preset_to_load)).unwrap_or_else(|e| {
+        error!("Cannot load custom settings for preset {preset_to_load} - {e}, using default instead");
+        SettingsCustom::default()
+    });
 
-    // Validate here values and set "proper"
-    // preset_names should have 10 items
     #[allow(clippy::comparison_chain)]
-    if base_settings.preset_names.len() > 10 {
-        base_settings.preset_names.truncate(10);
-    } else if base_settings.preset_names.len() < 10 {
-        while base_settings.preset_names.len() < 10 {
+    if base_settings.preset_names.len() > PRESET_NUMBER {
+        base_settings.preset_names.truncate(PRESET_NUMBER);
+    } else if base_settings.preset_names.len() < PRESET_NUMBER {
+        while base_settings.preset_names.len() < PRESET_NUMBER - 1 {
             base_settings.preset_names.push(format!("Preset {}", base_settings.preset_names.len() + 1));
         }
+        base_settings.preset_names.push(PRESET_NAME_RESERVED.to_string());
     }
-    base_settings.default_preset = base_settings.default_preset.clamp(0, 9);
+    base_settings.default_preset = base_settings.default_preset.clamp(0, PRESET_NUMBER as i32 - 2);
     custom_settings.thread_number = max(min(custom_settings.thread_number, get_all_available_threads() as i32), 0);
 
     // Ended validating
-    set_settings_to_gui(app, &custom_settings);
-    set_base_settings_to_gui(app, &base_settings);
+    set_settings_to_gui(app, &custom_settings, cli_result);
+    set_base_settings_to_gui(app, &base_settings, preset_to_load);
     set_number_of_threads(custom_settings.thread_number as usize);
+
+    base_settings.default_preset
 }
 
-pub fn save_all_settings_to_file(app: &MainWindow) {
-    save_base_settings_to_file(app);
+pub fn save_all_settings_to_file(app: &MainWindow, original_preset_idx: i32) {
+    save_base_settings_to_file(app, original_preset_idx);
     save_custom_settings_to_file(app);
 }
 
-pub fn save_base_settings_to_file(app: &MainWindow) {
-    let result = save_data_to_file(get_base_config_file(), &collect_base_settings(app));
+pub fn save_base_settings_to_file(app: &MainWindow, original_preset_idx: i32) {
+    let mut collected_config_from_file = collect_base_settings(app);
+
+    // We cannot normally start app with disallowed preset, so we restore it to original value
+    if collected_config_from_file.default_preset == PRESET_NUMBER as i32 - 1 {
+        collected_config_from_file.default_preset = original_preset_idx;
+    }
+
+    let result = save_data_to_file(get_base_config_file(), &collected_config_from_file);
 
     if let Err(e) = result {
         error!("Failed to save base settings - {e}");
@@ -482,7 +491,7 @@ where
         return Err("Cannot get config file".into());
     };
     if !config_file.is_file() {
-        return Err("Config file doesn't exists".into());
+        return Err(format!("Config file \"{}\" doesn't exist", config_file.to_string_lossy()));
     }
 
     let result = match std::fs::read_to_string(&config_file) {
@@ -543,11 +552,11 @@ pub fn get_config_file(number: i32) -> Option<PathBuf> {
     Some(config_file)
 }
 
-pub fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicSettings) {
+pub fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicSettings, preset_idx: i32) {
     let settings = app.global::<Settings>();
     change_language(app);
 
-    settings.set_settings_preset_idx(basic_settings.default_preset);
+    settings.set_settings_preset_idx(preset_idx);
     settings.set_settings_presets(ModelRc::new(create_vec_model_from_vec_string(basic_settings.preset_names.clone())));
 
     let width = basic_settings.window_width.clamp(100, 1920 * 4);
@@ -618,15 +627,25 @@ pub fn set_combobox_custom_settings_items(settings: &Settings, custom_settings: 
     settings.set_similar_music_sub_audio_check_type_value(display_names[idx].clone());
 }
 
-pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom) {
+pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom, cli_args: Option<CliResult>) {
     let settings = app.global::<Settings>();
 
+    let (included, referenced, excluded) = if let Some(cli_args) = cli_args {
+        let vs_to_vp = |vec: Vec<String>| vec.into_iter().map(PathBuf::from).collect::<Vec<_>>();
+        (vs_to_vp(cli_args.included_items), vs_to_vp(cli_args.referenced_items), vs_to_vp(cli_args.excluded_items))
+    } else {
+        (
+            custom_settings.included_directories.clone(),
+            custom_settings.included_directories_referenced.clone(),
+            custom_settings.excluded_directories.clone(),
+        )
+    };
     // Included directories
-    let included_directories = create_included_directories_model_from_pathbuf(&custom_settings.included_directories, &custom_settings.included_directories_referenced);
+    let included_directories = create_included_directories_model_from_pathbuf(&included, &referenced);
     settings.set_included_directories_model(included_directories);
 
     // Excluded directories
-    let excluded_directories = create_excluded_directories_model_from_pathbuf(&custom_settings.excluded_directories);
+    let excluded_directories = create_excluded_directories_model_from_pathbuf(&excluded);
     settings.set_excluded_directories_model(excluded_directories);
 
     settings.set_excluded_items(custom_settings.excluded_items.clone().into());
@@ -885,7 +904,7 @@ pub fn collect_base_settings(app: &MainWindow) -> BasicSettings {
     let window_width = (app.window().size().width as f32 / app.window().scale_factor()) as u32;
     let window_height = (app.window().size().height as f32 / app.window().scale_factor()) as u32;
 
-    assert_eq!(preset_names.len(), 10);
+    assert_eq!(preset_names.len(), PRESET_NUMBER);
     let lang_idx = settings.get_language_index();
     let language = StringComboBoxItems::get_config_name_from_idx(lang_idx as usize, &collected_items.languages);
     // let language = LANGUAGE_LIST[lang_idx as usize].short_name.to_string();
@@ -961,7 +980,9 @@ fn default_excluded_items() -> String {
 }
 
 fn default_preset_names() -> Vec<String> {
-    (0..10).map(|x| format!("Preset {}", x + 1)).collect::<Vec<_>>()
+    let mut v = (0..(PRESET_NUMBER - 1)).map(|x| format!("Preset {}", x + 1)).collect::<Vec<_>>();
+    v.push(PRESET_NAME_RESERVED.to_string());
+    v
 }
 
 fn minimum_file_size() -> i32 {

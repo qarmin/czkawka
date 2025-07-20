@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::fs;
 use std::fs::DirEntry;
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -11,7 +10,9 @@ use fun_time::fun_time;
 use log::debug;
 use rayon::prelude::*;
 
-use crate::common::{WorkContinueStatus, check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
+use crate::common::{
+    WorkContinueStatus, check_if_stop_received, prepare_thread_handler_common, remove_folder_if_contains_only_empty_folders, send_info_and_wait_for_ending_all_threads,
+};
 use crate::common_dir_traversal::{ToolType, common_get_entry_data, common_get_metadata_dir, common_read_dir, get_modified_time};
 use crate::common_directory::Directories;
 use crate::common_items::ExcludedItems;
@@ -300,13 +301,7 @@ impl EmptyFolder {
 
         let errors: Vec<_> = folders_to_remove
             .into_par_iter()
-            .filter_map(|name| {
-                if let Err(e) = fs::remove_dir_all(name) {
-                    Some(format!("Failed to remove folder {name:?}, reason {e}"))
-                } else {
-                    None
-                }
-            })
+            .filter_map(|name| remove_folder_if_contains_only_empty_folders(name, false).err())
             .collect();
         self.get_text_messages_mut().errors.extend(errors);
     }

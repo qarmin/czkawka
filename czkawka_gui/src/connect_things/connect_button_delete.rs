@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use std::fs;
-use std::fs::FileType;
 
+use czkawka_core::common::check_if_folder_contains_only_empty_folders;
 use gtk4::prelude::*;
 use gtk4::{Align, CheckButton, Dialog, Orientation, ResponseType, TextView};
 
@@ -298,63 +298,21 @@ pub fn empty_folder_remover(
 
         let name = model.get::<String>(&iter, column_file_name);
         let path = model.get::<String>(&iter, column_path);
+        let full_path = get_full_name_from_path_name(&path, &name);
 
         // We must check if folder is really empty or contains only other empty folders
-        let mut error_happened = false;
-        let mut folders_to_check: Vec<String> = vec![get_full_name_from_path_name(&path, &name)];
-        let mut next_folder: String;
-        'dir: while let Some(current_folder) = folders_to_check.pop() {
-            let read_dir = match fs::read_dir(&current_folder) {
-                Ok(t) => t,
-                Err(_inspected) => {
-                    error_happened = true;
-                    break 'dir;
-                }
-            };
-
-            for entry in read_dir {
-                let entry_data = match entry {
-                    Ok(t) => t,
-                    Err(_inspected) => {
-                        error_happened = true;
-                        break 'dir;
-                    }
-                };
-                let file_type: FileType = match entry_data.file_type() {
-                    Ok(t) => t,
-                    Err(_inspected) => {
-                        error_happened = true;
-                        break 'dir;
-                    }
-                };
-                if file_type.is_dir() {
-                    next_folder = String::new()
-                        + &current_folder
-                        + "/"
-                        + match &entry_data.file_name().into_string() {
-                            Ok(t) => t,
-                            Err(_inspected) => {
-                                error_happened = true;
-                                break 'dir;
-                            }
-                        };
-                    folders_to_check.push(next_folder.clone());
-                } else {
-                    error_happened = true;
-                }
-            }
-        }
+        let mut error_happened = check_if_folder_contains_only_empty_folders(&full_path).is_err();
 
         if !error_happened {
             if !use_trash {
-                match fs::remove_dir_all(get_full_name_from_path_name(&path, &name)) {
+                match fs::remove_dir_all(&full_path) {
                     Ok(()) => {
                         model.remove(&iter);
                     }
                     Err(_inspected) => error_happened = true,
                 }
             } else {
-                match trash::delete(get_full_name_from_path_name(&path, &name)) {
+                match trash::delete(&full_path) {
                     Ok(()) => {
                         model.remove(&iter);
                     }
@@ -362,8 +320,10 @@ pub fn empty_folder_remover(
                 }
             }
         }
+
+        // This could be changed to add more specific error message, what exactly happened
         if error_happened {
-            messages += &flg!("delete_folder_failed", dir = get_full_name_from_path_name(&path, &name));
+            messages += &flg!("delete_folder_failed", dir = full_path);
             messages += "\n";
         }
     }

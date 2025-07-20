@@ -76,18 +76,8 @@ pub fn set_config_cache_path(cache_name: &'static str, config_name: &'static str
     let config_folder_env = std::env::var("CZKAWKA_CONFIG_PATH").unwrap_or_default().trim().to_string();
     let cache_folder_env = std::env::var("CZKAWKA_CACHE_PATH").unwrap_or_default().trim().to_string();
 
-    let default_config_folder;
-    let default_cache_folder;
-    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", cache_name) {
-        default_cache_folder = Some(proj_dirs.cache_dir().to_path_buf());
-    } else {
-        default_cache_folder = None;
-    }
-    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", config_name) {
-        default_config_folder = Some(proj_dirs.config_dir().to_path_buf());
-    } else {
-        default_config_folder = None;
-    }
+    let default_cache_folder = ProjectDirs::from("pl", "Qarmin", cache_name).map(|proj_dirs| proj_dirs.cache_dir().to_path_buf());
+    let default_config_folder = ProjectDirs::from("pl", "Qarmin", config_name).map(|proj_dirs| proj_dirs.config_dir().to_path_buf());
 
     let mut resolve_folder = |env_var: &str, default_folder: Option<PathBuf>, name: &'static str| {
         let default_folder_str = default_folder.as_ref().map_or("<not available>".to_string(), |t| t.to_string_lossy().to_string());
@@ -114,7 +104,7 @@ pub fn set_config_cache_path(cache_name: &'static str, config_name: &'static str
                 return default_folder;
             }
 
-            match folder_path.canonicalize() {
+            match dunce::canonicalize(folder_path) {
                 Ok(t) => Some(t),
                 Err(_e) => {
                     warnings.push(format!(
@@ -393,7 +383,7 @@ pub const VIDEO_FILES_EXTENSIONS: &[&str] = &[
 pub const LOOP_DURATION: u32 = 20; //ms
 pub const SEND_PROGRESS_DATA_TIME_BETWEEN: u32 = 200; //ms
 
-pub fn remove_folder_if_contains_only_empty_folders(path: impl AsRef<Path>, remove_to_trash: bool) -> Result<(), String> {
+pub fn check_if_folder_contains_only_empty_folders(path: impl AsRef<Path>) -> Result<(), String> {
     let path = path.as_ref();
     if !path.is_dir() {
         return Err(format!("Trying to remove folder \"{}\" which is not a directory", path.to_string_lossy()));
@@ -444,6 +434,14 @@ pub fn remove_folder_if_contains_only_empty_folders(path: impl AsRef<Path>, remo
             }
         }
     }
+
+    Ok(())
+}
+
+pub fn remove_folder_if_contains_only_empty_folders(path: impl AsRef<Path>, remove_to_trash: bool) -> Result<(), String> {
+    check_if_folder_contains_only_empty_folders(&path)?;
+
+    let path = path.as_ref();
 
     if remove_to_trash {
         trash::delete(path).map_err(|e| format!("Cannot move folder \"{}\" to trash, reason {e}", path.to_string_lossy()))
