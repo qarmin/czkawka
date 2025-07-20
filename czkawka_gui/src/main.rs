@@ -72,17 +72,17 @@ mod taskbar_progress_win;
 mod tests;
 
 fn main() {
+    let (infos, warnings) = set_config_cache_path("Czkawka", "Czkawka");
+    setup_logger(false, "czkawka_gui");
+    print_version_mode("Czkawka gtk");
+    print_infos_and_warnings(infos, warnings);
+
     let application = Application::new(None::<String>, ApplicationFlags::HANDLES_OPEN | ApplicationFlags::HANDLES_COMMAND_LINE);
 
     #[cfg(target_os = "linux")]
     glib::set_prgname(Some("com.github.qarmin.czkawka"));
 
     application.connect_command_line(move |app, cmdline| {
-        let (infos, warnings) = set_config_cache_path("Czkawka", "Czkawka");
-        setup_logger(false, "czkawka_gui");
-        print_version_mode("Czkawka gtk");
-        print_infos_and_warnings(infos, warnings);
-
         build_ui(app, &cmdline.arguments());
         ExitCode::new(0)
     });
@@ -111,7 +111,8 @@ fn build_ui(application: &Application, arguments: &[OsString]) {
         arguments,
     );
     set_number_of_threads(gui_data.settings.scale_settings_number_of_threads.value().round() as usize);
-    info!("Set thread number to {}", get_number_of_threads());
+
+    print_czkawka_gui_info(get_number_of_threads());
 
     // Needs to run when entire GUI is initialized
     connect_change_language(&gui_data);
@@ -152,4 +153,10 @@ fn build_ui(application: &Application, arguments: &[OsString]) {
         taskbar_state.borrow_mut().release();
         glib::Propagation::Proceed
     });
+}
+
+pub fn print_czkawka_gui_info(thread_number: usize) {
+    let gtk_version = format!("{}.{}.{}", gtk4::major_version(), gtk4::minor_version(), gtk4::micro_version());
+
+    info!("Czkawka Gui - used thread number: {thread_number}, gtk version {gtk_version}");
 }

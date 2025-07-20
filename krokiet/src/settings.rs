@@ -37,6 +37,7 @@ pub const DEFAULT_WINDOW_WIDTH: u32 = 800;
 pub const DEFAULT_WINDOW_HEIGHT: u32 = 600;
 
 pub const PRESET_NUMBER: usize = 11; // 10 normal presets + 1 reserved preset for custom settings
+pub const RESERVER_PRESET_IDX: i32 = PRESET_NUMBER as i32 - 1; // 10 normal presets + 1 reserved preset for custom settings
 pub const PRESET_NAME_RESERVED: &str = "CLI Folders";
 
 #[derive(Debug, Clone)]
@@ -426,27 +427,21 @@ pub fn load_settings_from_file(app: &MainWindow, cli_result: Option<CliResult>) 
         base_settings = BasicSettings::default();
     }
 
-    let preset_to_load = if cli_result.is_some() { PRESET_NUMBER as i32 - 1 } else { base_settings.default_preset };
+    let preset_to_load = if cli_result.is_some() { RESERVER_PRESET_IDX } else { base_settings.default_preset };
 
     let mut custom_settings = load_data_from_file::<SettingsCustom>(get_config_file(preset_to_load)).unwrap_or_else(|e| {
         error!("Cannot load custom settings for preset {preset_to_load} - {e}, using default instead");
         SettingsCustom::default()
     });
 
-    // Validate here values and set "proper"
-    // preset_names should have 11 items
     #[allow(clippy::comparison_chain)]
     if base_settings.preset_names.len() > PRESET_NUMBER {
         base_settings.preset_names.truncate(PRESET_NUMBER);
     } else if base_settings.preset_names.len() < PRESET_NUMBER {
-        while base_settings.preset_names.len() < PRESET_NUMBER {
-            let preset_name = if base_settings.preset_names.len() + 1 == PRESET_NUMBER {
-                PRESET_NAME_RESERVED.to_string()
-            } else {
-                format!("Preset {}", base_settings.preset_names.len() + 1)
-            };
-            base_settings.preset_names.push(preset_name);
+        while base_settings.preset_names.len() < PRESET_NUMBER - 1 {
+            base_settings.preset_names.push(format!("Preset {}", base_settings.preset_names.len() + 1));
         }
+        base_settings.preset_names.push(PRESET_NAME_RESERVED.to_string());
     }
     base_settings.default_preset = base_settings.default_preset.clamp(0, PRESET_NUMBER as i32 - 2);
     custom_settings.thread_number = max(min(custom_settings.thread_number, get_all_available_threads() as i32), 0);
@@ -465,10 +460,9 @@ pub fn save_all_settings_to_file(app: &MainWindow, original_preset_idx: i32) {
 }
 
 pub fn save_base_settings_to_file(app: &MainWindow, original_preset_idx: i32) {
-    // TODO - should set default preset to this which is in settings_file - because cli mode should not be default mode
     let mut collected_config_from_file = collect_base_settings(app);
 
-    // We cannot normally start app with disallowed preset
+    // We cannot normally start app with disallowed preset, so we restore it to original value
     if collected_config_from_file.default_preset == PRESET_NUMBER as i32 - 1 {
         collected_config_from_file.default_preset = original_preset_idx;
     }

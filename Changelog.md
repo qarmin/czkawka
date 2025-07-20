@@ -10,6 +10,7 @@
 - Messages and panics are now also logged to a file (can be disabled by setting the `DISABLE_FILE_LOGGING` environment variable) - [#1508](https://github.com/qarmin/czkawka/pull/1508)
 - Added a 4GB memory limit when loading or saving cache to avoid out-of-memory crashes with broken cache files - [#1508](https://github.com/qarmin/czkawka/pull/1508)
 - Czkawka binaries are now reproducible - [#1565](https://github.com/qarmin/czkawka/pull/1565)
+- Added protection against deleting a folder that is no longer empty since the scan - [#1566](https://github.com/qarmin/czkawka/pull/1566)
 
 ### GTK GUI
 - New icons — less visually appealing, but created by me and released under a truly free CC BY license - [#1478](https://github.com/qarmin/czkawka/pull/1478)
@@ -29,9 +30,10 @@
 - Multithreaded removing, moving, and renaming of files - [#1565](https://github.com/qarmin/czkawka/pull/1565)
 - Files that fail to be removed, renamed, or moved are no longer deleted from the results list - [#1565](https://github.com/qarmin/czkawka/pull/1565)
 - Progress information is shown when removing, renaming, or moving files, with the ability to stop the process - [#1565](https://github.com/qarmin/czkawka/pull/1565)
+- Folders to scan can be now set via cli e.g. `krokiet /home/rafal` - for more info see `krokiet --help` - [#1566](https://github.com/qarmin/czkawka/pull/1566)
 
 ### External
-- There is a new unofficial Tauri-based frontend for Czkawka - [Czkawka Tauri](https://github.com/shixinhuang99/czkawka-tauri)
+- There is a new unofficial Tauri-based frontend for Czkawka(inspired by Krokiet ui) - [Czkawka Tauri](https://github.com/shixinhuang99/czkawka-tauri)
 - Czkawka 8.0.0 is now available in Debian Sid - https://packages.debian.org/sid/czkawka-cli
 
 ### CI
@@ -39,9 +41,9 @@
 - Czkawka binaries are now checked for reproducibility in CI.
 
 ### Prebuilt binaries
-- AppImage binaries are no longer provided due to random bugs, problems, and minimal additional value over prebuilt Linux binaries or Flatpak.
+- AppImage binaries are no longer provided due to random bugs (not present in other packaging formats) and minimal added value compared to prebuilt Linux binaries or Flatpak.\
 - HEIF Mac binaries are now provided.
-- CI now builds Linux binaries on Ubuntu 22.04 instead of 20.04 (except some, which are built on 24.04).
+- CI now builds Linux binaries on Ubuntu 22.04 instead of 20.04(github removed 20.04 images).
 - `musl` builds of `czkawka_cli` are now provided instead of `eyra` builds (slightly easier to maintain). GUI builds are not included due to limitations of `musl` and `eyra` :(
 - Prebuilt Windows console binaries are no longer provided — logs are now saved to a file, which is easier to read than terminal output.
 
