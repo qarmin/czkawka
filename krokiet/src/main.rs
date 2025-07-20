@@ -86,7 +86,7 @@ fn main() {
     // set_initial_gui_infos(&app);
 
     create_default_settings_files();
-    load_settings_from_file(&app, cli_args.clone());
+    let original_preset_idx = load_settings_from_file(&app, cli_args);
 
     connect_delete_button(&app, progress_sender.clone(), stop_flag.clone());
     connect_scan_button(&app, progress_sender.clone(), stop_flag.clone(), Arc::clone(&shared_models));
@@ -111,7 +111,7 @@ fn main() {
 
     app.run().expect("Failed to run app :(");
 
-    save_all_settings_to_file(&app, cli_args);
+    save_all_settings_to_file(&app, original_preset_idx);
 }
 
 pub fn zeroing_all_models(app: &MainWindow) {

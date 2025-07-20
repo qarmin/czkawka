@@ -413,7 +413,7 @@ pub fn create_default_settings_files() {
     }
 }
 
-pub fn load_settings_from_file(app: &MainWindow, cli_result: Option<CliResult>) {
+pub fn load_settings_from_file(app: &MainWindow, cli_result: Option<CliResult>) -> i32 {
     StringComboBoxItems::regenerate_and_set();
 
     let result_base_settings = load_data_from_file::<BasicSettings>(get_base_config_file());
@@ -455,16 +455,25 @@ pub fn load_settings_from_file(app: &MainWindow, cli_result: Option<CliResult>) 
     set_settings_to_gui(app, &custom_settings, cli_result);
     set_base_settings_to_gui(app, &base_settings, preset_to_load);
     set_number_of_threads(custom_settings.thread_number as usize);
+
+    base_settings.default_preset
 }
 
-pub fn save_all_settings_to_file(app: &MainWindow, cli_result: Option<CliResult>) {
-    save_base_settings_to_file(app, cli_result);
+pub fn save_all_settings_to_file(app: &MainWindow, original_preset_idx: i32) {
+    save_base_settings_to_file(app, original_preset_idx);
     save_custom_settings_to_file(app);
 }
 
-pub fn save_base_settings_to_file(app: &MainWindow, cli_result: Option<CliResult>) {
+pub fn save_base_settings_to_file(app: &MainWindow, original_preset_idx: i32) {
     // TODO - should set default preset to this which is in settings_file - because cli mode should not be default mode
-    let result = save_data_to_file(get_base_config_file(), &collect_base_settings(app));
+    let mut collected_config_from_file = collect_base_settings(app);
+
+    // We cannot normally start app with disallowed preset
+    if collected_config_from_file.default_preset == PRESET_NUMBER as i32 - 1 {
+        collected_config_from_file.default_preset = original_preset_idx;
+    }
+
+    let result = save_data_to_file(get_base_config_file(), &collected_config_from_file);
 
     if let Err(e) = result {
         error!("Failed to save base settings - {e}");
