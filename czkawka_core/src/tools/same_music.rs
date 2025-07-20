@@ -1022,9 +1022,7 @@ fn get_simplified_name_internal(what: &str, ignore_numbers: bool) -> String {
                         space_before = false;
                         new_what.push(ch);
                     } else {
-                        let new_items = deunicode::deunicode_char(character)
-                            .map(|e| e.trim().to_string().chars().collect::<Vec<_>>())
-                            .unwrap_or_else(|| vec![character; 1]);
+                        let new_items = deunicode::deunicode_char(character).map_or_else(|| vec![character; 1], |e| e.trim().to_string().chars().collect::<Vec<_>>());
 
                         // If is equal, then we're trying to deunicode e.g. dot, comma etc.
                         // We just ignore char, because it is mostly useless, but we add space instead it if it wasn't added already

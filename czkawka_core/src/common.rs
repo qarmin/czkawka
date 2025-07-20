@@ -114,7 +114,7 @@ pub fn set_config_cache_path(cache_name: &'static str, config_name: &'static str
                 return default_folder;
             }
 
-            match folder_path.canonicalize() {
+            match dunce::canonicalize(folder_path) {
                 Ok(t) => Some(t),
                 Err(_e) => {
                     warnings.push(format!(

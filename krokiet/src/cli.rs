@@ -1,7 +1,9 @@
-use czkawka_core::CZKAWKA_VERSION;
-use log::warn;
 use std::process;
 
+use czkawka_core::CZKAWKA_VERSION;
+use log::warn;
+
+#[derive(Clone)]
 pub struct CliResult {
     pub included_items: Vec<String>,
     pub excluded_items: Vec<String>,
@@ -16,9 +18,9 @@ enum ExpectedArgs {
 
 // Manual processing of CLI arguments, because Clap would be too heavy for this simple task
 
+#[allow(clippy::print_stdout)]
+#[allow(clippy::print_stderr)]
 pub fn process_cli_args(args: Vec<String>) -> Option<CliResult> {
-    // let args: Vec<String> = std::env::args().skip(1).collect();
-
     if ["--help", "-h"].iter().any(|&arg| args.contains(&arg.to_string())) {
         println!("Krokiet");
         println!("Krokiet allows you to specify folders to search for files via the CLI, and also to exclude or reference folders.");
@@ -56,7 +58,7 @@ pub fn process_cli_args(args: Vec<String>) -> Option<CliResult> {
                 "-e" | "--exclude" => expected_arg = ExpectedArgs::Exclude,
                 "-r" | "--referenced" => expected_arg = ExpectedArgs::Referenced,
                 _ => {
-                    eprintln!("Unknown option: {}", arg);
+                    eprintln!("Unknown option: {arg}");
                     process::exit(1);
                 }
             }
@@ -73,7 +75,7 @@ pub fn process_cli_args(args: Vec<String>) -> Option<CliResult> {
                 ExpectedArgs::Referenced => match check_if_folder_is_valid(&arg) {
                     Ok(folder) => {
                         cli_result.included_items.push(folder.clone());
-                        cli_result.referenced_items.push(folder)
+                        cli_result.referenced_items.push(folder);
                     }
                     Err(e) => errors.push(e),
                 },
@@ -90,7 +92,7 @@ pub fn process_cli_args(args: Vec<String>) -> Option<CliResult> {
         warn!("Errors encountered while processing CLI arguments:");
     }
     for error in &errors {
-        warn!("{}", error);
+        warn!("{error}");
     }
 
     if cli_result.included_items.is_empty() && cli_result.excluded_items.is_empty() && cli_result.referenced_items.is_empty() {
@@ -109,12 +111,12 @@ fn deduplicate_folders(folder_list: &mut Vec<String>) {
 fn check_if_folder_is_valid(folder: &str) -> Result<String, String> {
     let path = std::path::Path::new(folder);
     if !path.exists() {
-        return Err(format!("Folder does not exist: {}", folder));
+        return Err(format!("Folder does not exist: {folder}"));
     }
     if !path.is_dir() {
-        return Err(format!("Path is not a directory: {}", folder));
+        return Err(format!("Path is not a directory: {folder}"));
     }
-    let canonical_path = path.canonicalize().map_err(|e| format!("Failed to canonicalize path: {}. Error: {}", folder, e))?;
+    let canonical_path = dunce::canonicalize(path).map_err(|e| format!("Failed to canonicalize path: {folder}. Error: {e}"))?;
 
     Ok(canonical_path.to_string_lossy().to_string())
 }

@@ -37,7 +37,7 @@ pub const DEFAULT_WINDOW_WIDTH: u32 = 800;
 pub const DEFAULT_WINDOW_HEIGHT: u32 = 600;
 
 pub const PRESET_NUMBER: usize = 11; // 10 normal presets + 1 reserved preset for custom settings
-pub const PRESET_NAME_RESERVED: &str = "Reserved";
+pub const PRESET_NAME_RESERVED: &str = "CLI Folders";
 
 #[derive(Debug, Clone)]
 pub struct StringComboBoxItem<T>
@@ -428,15 +428,10 @@ pub fn load_settings_from_file(app: &MainWindow, cli_result: Option<CliResult>) 
 
     let preset_to_load = if cli_result.is_some() { PRESET_NUMBER as i32 - 1 } else { base_settings.default_preset };
 
-    let results_custom_settings = load_data_from_file::<SettingsCustom>(get_config_file(preset_to_load));
-
-    let mut custom_settings;
-    if let Ok(custom_settings_temp) = results_custom_settings {
-        custom_settings = custom_settings_temp;
-    } else {
-        info!("Cannot load custom settings, using default instead");
-        custom_settings = SettingsCustom::default();
-    }
+    let mut custom_settings = load_data_from_file::<SettingsCustom>(get_config_file(preset_to_load)).unwrap_or_else(|e| {
+        error!("Cannot load custom settings for preset {preset_to_load} - {e}, using default instead");
+        SettingsCustom::default()
+    });
 
     // Validate here values and set "proper"
     // preset_names should have 11 items
@@ -458,16 +453,17 @@ pub fn load_settings_from_file(app: &MainWindow, cli_result: Option<CliResult>) 
 
     // Ended validating
     set_settings_to_gui(app, &custom_settings, cli_result);
-    set_base_settings_to_gui(app, &base_settings);
+    set_base_settings_to_gui(app, &base_settings, preset_to_load);
     set_number_of_threads(custom_settings.thread_number as usize);
 }
 
-pub fn save_all_settings_to_file(app: &MainWindow) {
-    save_base_settings_to_file(app);
+pub fn save_all_settings_to_file(app: &MainWindow, cli_result: Option<CliResult>) {
+    save_base_settings_to_file(app, cli_result);
     save_custom_settings_to_file(app);
 }
 
-pub fn save_base_settings_to_file(app: &MainWindow) {
+pub fn save_base_settings_to_file(app: &MainWindow, cli_result: Option<CliResult>) {
+    // TODO - should set default preset to this which is in settings_file - because cli mode should not be default mode
     let result = save_data_to_file(get_base_config_file(), &collect_base_settings(app));
 
     if let Err(e) = result {
@@ -493,7 +489,7 @@ where
         return Err("Cannot get config file".into());
     };
     if !config_file.is_file() {
-        return Err("Config file doesn't exists".into());
+        return Err(format!("Config file \"{}\" doesn't exists", config_file.to_string_lossy()));
     }
 
     let result = match std::fs::read_to_string(&config_file) {
@@ -554,11 +550,11 @@ pub fn get_config_file(number: i32) -> Option<PathBuf> {
     Some(config_file)
 }
 
-pub fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicSettings) {
+pub fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicSettings, preset_idx: i32) {
     let settings = app.global::<Settings>();
     change_language(app);
 
-    settings.set_settings_preset_idx(basic_settings.default_preset);
+    settings.set_settings_preset_idx(preset_idx);
     settings.set_settings_presets(ModelRc::new(create_vec_model_from_vec_string(basic_settings.preset_names.clone())));
 
     let width = basic_settings.window_width.clamp(100, 1920 * 4);
