@@ -11,6 +11,7 @@
 - Added a 4GB memory limit when loading or saving cache to avoid out-of-memory crashes with broken cache files - [#1508](https://github.com/qarmin/czkawka/pull/1508)
 - Czkawka binaries are now reproducible - [#1565](https://github.com/qarmin/czkawka/pull/1565)
 - Added protection against deleting a folder that is no longer empty since the scan - [#1566](https://github.com/qarmin/czkawka/pull/1566)
+- Change pdf-rs, to lower level lopdf library to decrease dependencies number - [#1566](https://github.com/qarmin/czkawka/pull/1566)
 
 ### GTK GUI
 - New icons — less visually appealing, but created by me and released under a truly free CC BY license - [#1478](https://github.com/qarmin/czkawka/pull/1478)
