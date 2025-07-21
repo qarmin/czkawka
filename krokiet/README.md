@@ -66,8 +66,7 @@ Slint: Build config: debug; Backend: software
 
 ## Scaling application
 
-If you have high DPI monitor, you may want to scale application. You can do it by setting `SLINT_SCALE_FACTOR`
-environment
+By default, slint application will automatically scale, to match your system scaling, but it is also possible to manually set scalling factor with `SLINT_SCALE_FACTOR` environment
 
 ```
 SLINT_SCALE_FACTOR=2 cargo run 
@@ -83,19 +82,6 @@ SLINT_STYLE=material-light cargo run -- --path .
 SLINT_STYLE=material-dark cargo run -- --path .
 ```
 
-## Sanitizer build
-```
-rustup install nightly
-rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
-rustup component add llvm-tools-preview --toolchain nightly-x86_64-unknown-linux-gnu
-
-export RUST_BACKTRACE=1 # or full depending on project
-export ASAN_SYMBOLIZER_PATH=$(which llvm-symbolizer-18)
-export ASAN_OPTIONS="symbolize=1:detect_leaks=0" # Leak check is disabled, because is slow and ususally not needed
-RUSTFLAGS="-Zsanitizer=address" cargo +nightly run --bin krokiet --target x86_64-unknown-linux-gnu
-
-```
-
 ## How to help?
 
 - Suggesting possible design changes in the gui - of course, they should be possible to be simply implemented in the
@@ -105,31 +91,25 @@ RUSTFLAGS="-Zsanitizer=address" cargo +nightly run --bin krokiet --target x86_64
   preview - [slint live preview example](https://slint.dev/releases/1.3.0/editor/?load_demo=examples/printerdemo/ui/printerdemo.slint)
 - Improving app rust code
 
-## Why Slint?
 
-There are multiple reasons why I decided to use Slint as toolkit for Krokiet over other toolkits.
+## Why Create a New Frontend Instead of Improving the Existing Czkawka GTK 4 Frontend?
 
-| Toolkit | Pros                                                                                                                                                                                                                                                        | Cons                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Gtk 4   | - Good Linux support </br> - Cambalache can be used to create graphically gui </br> - Good gtk4-rs bindings(but sometimes not really intuitive)                                                                                                             | - Hard compilation/cross compilation and bundling all required libraries - mostly on windows </br> - Forcing the use of a specific gui creation style </br> - Strange crashes, not working basic features, etc.(again, mostly on windows) </br> - Forcing to use bugged/outdated but dynamically loaded version of libraries on linux (e.g. 4.6 on Ubuntu 22.04) - not all fixes are backported                                                                                                                                 |
-| Qt      | - QML support - simplify creating of gui from code it is easy to use and powerful </br> - Very flexible framework <br/> - Typescript/javascript <=> qml interoperability </br> - Probably the most mature GUI library                                       | - New and limited qt bindings <br/> - Hard to cross-compile <br/>  - Very easy to create and use invalid state in QML(unexpected null/undefined values, messed properties bindings etc.) <br/> - Commercial license or GPL                                                                                                                                                                                                                                                                                                      |
-| Slint   | - Internal language is compiled to native code <br/> - Live gui preview with Vscode/Vscodium without needing to use rust <br/> - Full rust solution - easy to compile/cross compile, minimal runtime requirements </br> - Static type checks in slint files | - Internal .slint language is more limited than QML <br/> - Out of bounds and similar errors are quietly being corrected instead printing error - this can lead to hard to debug problems <br/> - Only GPL is only available open-source license <br/> - Popup windows almost not exists <br/> - Internal widgets are almost not customizable and usually quite limited </br> - Creating big/good looking with custom widgets gui is very hard                                                                                  |
-| Iced    | - ~100% rust code - so compilation is simple </br> - Elm architecture - simple to understand                                                                                                                                                                | - Mostly maintained by one person - slows down fixing bugs and implementing new features </br> - GUI can be created only from rust code, which really is bad for creating complex GUIs(mostly due rust compile times)  </br> - Docs are almost non-existent                                                                                                                                                                                                                                                                     |
-| Tauri   | - Easy to create ui(at least for web developers) - uses html/css/js</br>- Quite portable                                                                                                                                                                    | - Webview dependency - it is not really lightweight and can be hard to compile on some platforms and on Linux e.g. webRTC not working</br>- Cannot select directory - file chooser only can choose files - small thing but important for me</br>- Not very performant Rust <=> Javascript communication (less problematic with [Tauri 2](https://github.com/tauri-apps/tauri/pull/7170#issuecomment-1583279023)) </br> - Uses Javascript/Typescript which is a lot of harder to update/maintain than rust due being less strict |
+For many, it might seem like a surprising decision to abandon the existing GTK 4 frontend of Czkawka—especially considering that GTK is one of the most popular GUI frameworks and replace it with a new one based on Slint, which is still relatively unknown.
 
-Since I don't have time to create really complex and good looking GUI, I needed a helper tool to create GUI not from
-Rust(I don't want to use different language, because this will make communication with czkawka_core harder) so I decided
-to not look at Iced which only allows to create GUI from Rust.
+This decision was driven by several key factors:
+- **GTK on Windows and macOS performs poorly** – There are random bugs that don’t appear on Linux, nor on other systems with similar environments. Slint, on the other hand, behaves consistently and reliably across all platforms.
 
-GTK and QT also I throw away due cross compilation problems caused mostly by using C/C++ internally. Using GTK in
-Czkawka was a reason why I started to find other toolkits.
+- **Complicated compilation and cross-compilation** – Due to GTK’s complexity on Windows, the easiest way to compile the application is by using a Docker image with Linux. This makes testing and debugging on Windows much more difficult.
 
-Tauri - I don't really like to use Javascript because I already used it with Qt(C++) + QML + Typescript combination and
-I found that creating ui in such language may be simple at start but later any bigger changes cause a lot of runtime
-errors. Despite these problems, my next project(closed source), will just use Tauri + slint, because actually in that
-case it is rather the best option.
+- **External dependencies** – I’m a fan of applications that work right after downloading, without requiring installation. With GTK, this is rarely the case. On Linux and macOS, several dynamically linked libraries must be installed first and they may exist in different versions across systems. On Windows, you often have to manually include DLLs. This wouldn't be such an issue if the GTK team officially distributed these libraries and maintained a list of required files, but they don’t, so you’re left compiling everything yourself or, like in my case, relying on external Docker images. With Slint, all I need is a single binary file that runs out of the box on almost any system.
 
-So only Slint left with its cons and pros.
+- **GTK version fragmentation across platforms** – On Linux, GTK is dynamically linked, and different versions may introduce unique bugs or inconsistencies. On Windows, the libraries are bundled, but outdated in my app, since newer ones aren’t available on docker image which I use and some versions crashes on some os. macOS (with Homebrew) is in the best position here, as it usually keeps GTK up to date. With Slint, each Krokiet release is bundled with the latest Slint version, ensuring consistency across all systems and reducing platform-specific issues.
+
+- **Cambalache is the only nocode GUI tool** – While Cambalache itself works reasonably well, it isn’t officially supported or maintained by the GTK team, but by an independent developer. In contrast, while Slint GUI is mostly created via code, it offers live previews in VS Code/VSCodium, which is extremely convenient.
+
+- **Difficult to modify built-in widgets** – GTK enforces a specific visual style, which can be very restrictive. In my case, I had to tweak internal widget parameters just to achieve the desired look, this is something that might cause a lot of issues in future. Slint takes the opposite approach: its built-in widgets are quite limited, which often makes it easier to build fully custom components from scratch.
+
+- **GTK is still C code** – Even though the library is wrapped and provides a relatively safe Rust interface, you still occasionally have to work with low-level structures, which have caused issues and crashes for me in the past. Another downside is the large number of warnings printed to the console, even with correct code, due to internal GTK issues. These warnings are often unhelpful and rarely assist in identifying actual bugs.
 
 ## License
 
