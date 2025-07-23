@@ -36,7 +36,7 @@
 
 ### External
 - There is a new unofficial Tauri-based frontend for Czkawka(inspired by Krokiet ui) - [Czkawka Tauri](https://github.com/shixinhuang99/czkawka-tauri)
-- Czkawka 8.0.0 is now available in Debian Sid - https://packages.debian.org/sid/czkawka-cli
+- Czkawka 8.0.0 is now available in Debian Sid - [Cli](https://packages.debian.org/sid/czkawka-cli)/[Gui Gtk](https://packages.debian.org/sid/czkawka-gui) 
 
 ### CI
 - Compilation for 32-bit targets is now checked in CI.
