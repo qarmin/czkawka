@@ -1,7 +1,7 @@
 import { Button, TextEdit } from "std-widgets.slint";
 import { BottomPanelVisibility } from "common.slint";
 import { GuiState } from "gui_state.slint";
-import { IncludedDirectories, ExcludedDirectories } from "included_directories.slint";
+import { ExcludedDirectories, IncludedDirectories } from "included_directories.slint";
 import { Translations } from "translations.slint";
 import { ColorPalette } from "color_palette.slint";
 
@@ -32,11 +32,20 @@ component DirectoriesPanel inherits HorizontalLayout {
                     folder_choose_requested(true);
                 }
             }
+
+            Rectangle {
+                width: 5px;
+            }
+            
             Rectangle {
                 horizontal-stretch: 1.0;
                 Text {
                     text <=> Translations.included_directories_text;
                 }
+            }
+            
+            Rectangle {
+                width: 5px;
             }
 
             Button {
@@ -76,10 +85,18 @@ component DirectoriesPanel inherits HorizontalLayout {
             }
 
             Rectangle {
+                width: 5px;
+            }
+
+            Rectangle {
                 horizontal-stretch: 1.0;
                 Text {
                     text <=> Translations.excluded_directories_text;
                 }
+            }
+
+            Rectangle {
+                width: 5px;
             }
 
             Button {

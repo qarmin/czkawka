@@ -29,6 +29,8 @@ for file_path in collected_files:
 
     non_imported_content = "\n".join(non_import_lines)
 
+    imports = {}
+
     for import_line in imports_to_check:
         imported_items = [i.strip() for i in import_line.split("{")[1].split("}")[0].split(",") if len(i.strip()) > 0]
         if not imported_items:
@@ -43,9 +45,15 @@ for file_path in collected_files:
                 used_items.append(item)
 
         if used_items:
-            updated_line = f"import {{ {', '.join(used_items)} }} from {from_file}"
-            updated_line = updated_line.replace(";;", ";")
-            updated_lines.append(updated_line)
+            imports.setdefault(from_file, set()).update(used_items)
+
+
+    for from_file, used_items in imports.items():
+        items = [i for i in used_items]
+        items.sort()
+        updated_line = f"import {{ {', '.join(items)} }} from {from_file}"
+        updated_line = updated_line.replace(";;", ";")
+        updated_lines.append(updated_line)
 
     if len(updated_lines) != 0:
         updated_lines.append("")

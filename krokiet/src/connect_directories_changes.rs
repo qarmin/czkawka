@@ -28,12 +28,7 @@ fn connect_add_manual_directories(app: &MainWindow) {
 }
 
 fn filter_model<T: Clone>(model: &ModelRc<T>, index_to_remove: i32) -> Vec<T> {
-    model
-        .iter()
-        .enumerate()
-        .filter(|(idx, _)| *idx as i32 != index_to_remove)
-        .map(|(_, item)| item)
-        .collect()
+    model.iter().enumerate().filter(|(idx, _)| *idx as i32 != index_to_remove).map(|(_, item)| item).collect()
 }
 
 fn connect_remove_directories(app: &MainWindow) {
