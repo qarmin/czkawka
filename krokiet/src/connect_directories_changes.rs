@@ -27,53 +27,28 @@ fn connect_add_manual_directories(app: &MainWindow) {
     });
 }
 
+fn filter_model<T: Clone>(model: &ModelRc<T>, index_to_remove: i32) -> Vec<T> {
+    model.iter().enumerate().filter(|(idx, _)| *idx as i32 != index_to_remove).map(|(_, item)| item).collect()
+}
+
 fn connect_remove_directories(app: &MainWindow) {
     let a = app.as_weak();
-    app.global::<Callabler>().on_remove_item_directories(move |included_directories| {
+    app.global::<Callabler>().on_remove_item_directories(move |included_directories, index_to_remove| {
         let app = a.upgrade().expect("Failed to upgrade app :(");
         let settings = app.global::<Settings>();
 
-        let current_index = if included_directories {
-            settings.get_included_directories_model_selected_idx()
-        } else {
-            settings.get_excluded_directories_model_selected_idx()
-        };
-
-        // Nothing selected
-        if current_index == -1 {
-            return;
-        }
-
         if included_directories {
             let included_model = settings.get_included_directories_model();
-            let model_count = included_model.iter().count();
+            let new_model = filter_model(&included_model, index_to_remove);
 
-            if model_count > current_index as usize {
-                let mut included_model = included_model.iter().collect::<Vec<_>>();
-                included_model.remove(current_index as usize);
-                if current_index as usize != model_count - 1 {
-                    included_model[current_index as usize].selected_row = true;
-                    settings.set_included_directories_model_selected_idx(current_index);
-                } else {
-                    settings.set_included_directories_model_selected_idx(-1);
-                }
-                settings.set_included_directories_model(ModelRc::new(VecModel::from(included_model)));
-            }
+            assert_eq!(included_model.iter().count(), new_model.len() + 1, "Removing item should reduce model size by 1");
+            settings.set_included_directories_model(ModelRc::new(VecModel::from(new_model)));
         } else {
             let excluded_model = settings.get_excluded_directories_model();
-            let model_count = excluded_model.iter().count();
+            let new_model = filter_model(&excluded_model, index_to_remove);
 
-            if model_count > current_index as usize {
-                let mut excluded_model = excluded_model.iter().collect::<Vec<_>>();
-                excluded_model.remove(current_index as usize);
-                if current_index as usize != model_count - 1 {
-                    excluded_model[current_index as usize].selected_row = true;
-                    settings.set_excluded_directories_model_selected_idx(current_index);
-                } else {
-                    settings.set_excluded_directories_model_selected_idx(-1);
-                }
-                settings.set_excluded_directories_model(ModelRc::new(VecModel::from(excluded_model)));
-            }
+            assert_eq!(excluded_model.iter().count(), new_model.len() + 1, "Removing item should reduce model size by 1");
+            settings.set_excluded_directories_model(ModelRc::new(VecModel::from(new_model)));
         }
     });
 }

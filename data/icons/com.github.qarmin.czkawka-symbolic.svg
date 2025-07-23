@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg height="16px" viewBox="0 0 16 16" width="16px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <filter id="a" height="100%" width="100%" x="0%" y="0%">
-        <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0"/>
-    </filter>
-    <mask id="b">
-        <g filter="url(#a)">
-            <rect fill-opacity="0.104" height="16" width="16"/>
-        </g>
-    </mask>
-    <linearGradient id="c" gradientUnits="userSpaceOnUse">
-        <stop offset="0"/>
-        <stop offset="1" stop-opacity="0"/>
-    </linearGradient>
+    <defs>
+        <filter id="a" height="100%" width="100%" x="0%" y="0%">
+            <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0"/>
+        </filter>
+        <mask id="b">
+            <g filter="url(#a)">
+                <rect fill-opacity="0.104" height="16" width="16"/>
+            </g>
+        </mask>
+        <linearGradient id="c" gradientUnits="userSpaceOnUse">
+            <stop offset="0"/>
+            <stop offset="1" stop-opacity="0"/>
+        </linearGradient>
+    </defs>
     <radialGradient id="d" cx="448.010223" cy="51.543747" gradientTransform="matrix(0.112144 0.00038317 -0.00021629 0.0633011 26.761475 154.313576)" r="224" xlink:href="#c"/>
     <clipPath id="e">
         <rect height="152" width="192"/>

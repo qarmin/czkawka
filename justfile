@@ -22,7 +22,19 @@ runr +args:
 runc +args:
     CARGO_PROFILE_DEV_CODEGEN_BACKEND=cranelift cargo +nightly run -Zcodegen-backend --bin {{args}}
 
+runs +args:
+    export RUST_BACKTRACE=1 # or full depending on project
+    export ASAN_SYMBOLIZER_PATH=$(which llvm-symbolizer) # Version depends on your system
+    export ASAN_OPTIONS="symbolize=1:detect_leaks=0" # Leak check is disabled, because is slow and ususally not needed
+    ASAN_OPTIONS="symbolize=1:detect_leaks=0" RUSTFLAGS="-Zsanitizer=address" cargo +nightly run --target x86_64-unknown-linux-gnu --bin {{args}}
+
 ## Other
+
+setup_sanitizer:
+    rustup install nightly
+    rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
+    rustup component add llvm-tools-preview --toolchain nightly-x86_64-unknown-linux-gnu
+
 
 bench:
     cd czkawka_core && cargo bench
@@ -81,7 +93,19 @@ prepare_binaries:
 benchmark media:
     # benchmarks/czkawka_cli_old dup -d /media/rafal/Kotyk
     # benchmarks/czkawka_cli_fastest dup -d /media/rafal/Kotyk -W -N -M -H
-    sudo echo "AA" # Needed later by hyperfine
+    sudo echo "AA" # Ability to run as root is needed later by hyperfine
     #hyperfine --prepare "sudo sh -c 'sync; echo 3 > /proc/sys/vm/drop_caches'; rm cache_duplicates_Blake3_70.bin || true" 'benchmarks/czkawka_cli_fastest dup -d "{{ media }}" -W -N -M -H' 'benchmarks/czkawka_cli_v4 dup -d "{{ media }}" -W -N -M -H' 'benchmarks/czkawka_cli_normal dup -d "{{ media }}" -W -N -M -H' 'benchmarks/czkawka_cli_old image -d "{{ media }}" > /dev/null'
     hyperfine --prepare "sudo sh -c 'sync; echo 3 > /proc/sys/vm/drop_caches'; rm /home/rafal/.cache/czkawka/cache_similar_images_16_Gradient_Nearest_80.bin || true" 'benchmarks/czkawka_cli_fastest image -d "{{ media }}" -W -N -M -H' 'benchmarks/czkawka_cli_v4 image -d "{{ media }}" -W -N -M -H' 'benchmarks/czkawka_cli_normal image -d "{{ media }}" -W -N -M -H' 'benchmarks/czkawka_cli_old image -d "{{ media }}" > /dev/null'
 
+setup_verify:
+    cargo install cargo-llvm-lines
+    cargo install cargo-bloat
+
+debug_verify:
+    cargo llvm-lines -p krokiet --bin krokiet | head -40
+    cargo llvm-lines -p czkawka_gui --bin czkawka_gui | head -40
+    cargo llvm-lines -p czkawka_cli --bin czkawka_cli | head -40
+
+    cargo bloat --release --bin czkawka_cli -n 30
+    cargo bloat --release --bin czkawka_gui -n 30
+    cargo bloat --release --bin krokiet -n 30

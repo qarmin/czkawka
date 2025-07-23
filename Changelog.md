@@ -32,10 +32,11 @@
 - Files that fail to be removed, renamed, or moved are no longer deleted from the results list - [#1565](https://github.com/qarmin/czkawka/pull/1565)
 - Progress information is shown when removing, renaming, or moving files, with the ability to stop the process - [#1565](https://github.com/qarmin/czkawka/pull/1565)
 - Folders to scan can be now set via cli e.g. `krokiet /home/rafal` - for more info see `krokiet --help` - [#1566](https://github.com/qarmin/czkawka/pull/1566)
+- Improved appearance of bottom directories panel - [#1569](https://github.com/qarmin/czkawka/pull/1569)
 
 ### External
 - There is a new unofficial Tauri-based frontend for Czkawka(inspired by Krokiet ui) - [Czkawka Tauri](https://github.com/shixinhuang99/czkawka-tauri)
-- Czkawka 8.0.0 is now available in Debian Sid - https://packages.debian.org/sid/czkawka-cli
+- Czkawka 8.0.0 is now available in Debian Sid - [Cli](https://packages.debian.org/sid/czkawka-cli)/[Gui Gtk](https://packages.debian.org/sid/czkawka-gui) 
 
 ### CI
 - Compilation for 32-bit targets is now checked in CI.

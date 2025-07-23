@@ -119,6 +119,7 @@ pub fn connect_row_selections(app: &MainWindow) {
     opener::open_selected_item(app);
     opener::open_parent_of_selected_item(app);
     opener::open_provided_item(app);
+    opener::connect_on_open_item(app);
 }
 
 mod opener {
@@ -127,6 +128,24 @@ mod opener {
 
     use crate::connect_row_selection::get_write_selection_lock;
     use crate::{Callabler, GuiState, MainWindow};
+
+    pub(crate) fn connect_on_open_item(app: &MainWindow) {
+        app.global::<Callabler>().on_open_item(move |path| {
+            open_item_simple(path.as_str());
+        });
+        app.global::<Callabler>().on_open_parent(move |path| {
+            let Some(parent_path) = std::path::Path::new(&path).parent() else {
+                return error!("Failed to get parent path for {path}");
+            };
+            open_item_simple(&parent_path.to_string_lossy());
+        });
+    }
+
+    fn open_item_simple(path_to_open: &str) {
+        if let Err(e) = open::that(path_to_open) {
+            error!("Failed to open file: {e}");
+        };
+    }
 
     fn open_item(app: &MainWindow, items_path_str: &[usize], id: usize) {
         let active_tab = app.global::<GuiState>().get_active_tab();
@@ -144,10 +163,7 @@ mod opener {
                 model_data.val_str.iter().nth(items_path_str[1]).expect("Cannot find name")
             )
         };
-
-        if let Err(e) = open::that(&path_to_open) {
-            error!("Failed to open file: {e}");
-        };
+        open_item_simple(&path_to_open);
     }
 
     fn open_selected_items(app: &MainWindow, items_path_str: &[usize]) {

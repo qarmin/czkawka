@@ -1,10 +1,9 @@
 import { Button, TextEdit } from "std-widgets.slint";
 import { BottomPanelVisibility } from "common.slint";
-import { Callabler } from "callabler.slint";
 import { GuiState } from "gui_state.slint";
-import { IncludedDirectories, ExcludedDirectories } from "included_directories.slint";
+import { ExcludedDirectories, IncludedDirectories } from "included_directories.slint";
 import { Translations } from "translations.slint";
-import { Settings } from "settings.slint";
+import { ColorPalette } from "color_palette.slint";
 
 component DirectoriesPanel inherits HorizontalLayout {
     callback folder_choose_requested(bool);
@@ -15,91 +14,102 @@ component DirectoriesPanel inherits HorizontalLayout {
     VerticalLayout {
         horizontal-stretch: 0.0;
         spacing: 5px;
-        Button {
-            icon: Settings.show_only_icons ? @image-url("../icons/krokiet_add.svg"): @image-url("");
-            text: Settings.show_only_icons ? "" : Translations.add_button_text;
-            colorize-icon: true;
-            clicked => {
-                folder_choose_requested(true);
-            }
-        }
-
-        Button {
-            icon: Settings.show_only_icons ? @image-url("../icons/krokiet_remove.svg"): @image-url("");
-            text: Settings.show_only_icons ? "" : Translations.remove_button_text;
-            colorize-icon: true;
-            clicked => {
-                Callabler.remove_item_directories(true);
-            }
-        }
-
-        Button {
-            icon: Settings.show_only_icons ? @image-url("../icons/krokiet_manual_add.svg"): @image-url("");
-            text: Settings.show_only_icons ? "" : Translations.manual_add_button_text;
-            colorize-icon: true;
-            clicked => {
-                show_manual_add_dialog(true);
-            }
-        }
-
         Rectangle {
             vertical-stretch: 1.0;
         }
     }
 
+    // Included directories 
     VerticalLayout {
         horizontal-stretch: 1.0;
-        Rectangle {
-            Text {
-                text <=> Translations.included_directories_text;
+        padding-top: 5px;
+        padding-bottom: 5px;
+        HorizontalLayout {
+            Button {
+                icon: @image-url("../icons/krokiet_add.svg");
+                colorize-icon: true;
+                clicked => {
+                    folder_choose_requested(true);
+                }
             }
+
+            Rectangle {
+                width: 5px;
+            }
+            
+            Rectangle {
+                horizontal-stretch: 1.0;
+                Text {
+                    text <=> Translations.included_directories_text;
+                }
+            }
+            
+            Rectangle {
+                width: 5px;
+            }
+
+            Button {
+                icon: @image-url("../icons/krokiet_manual_add.svg");
+                colorize-icon: true;
+                clicked => {
+                    show_manual_add_dialog(true);
+                }
+            }
+        }
+
+        Rectangle {
+            height: 5px;
         }
 
         included_list := IncludedDirectories { }
     }
 
-    // Excluded directories 
-    VerticalLayout {
+    Rectangle {
+        width: 3px;
         horizontal-stretch: 0.0;
-        spacing: 5px;
-        Button {
-            icon: Settings.show_only_icons ? @image-url("../icons/krokiet_add.svg"): @image-url("");
-            text: Settings.show_only_icons ? "" : Translations.add_button_text;
-            colorize-icon: true;
-            clicked => {
-                folder_choose_requested(false);
-            }
-        }
-
-        Button {
-            icon: Settings.show_only_icons ? @image-url("../icons/krokiet_remove.svg"): @image-url("");
-            text: Settings.show_only_icons ? "" : Translations.remove_button_text;
-            colorize-icon: true;
-            clicked => {
-                Callabler.remove_item_directories(false);
-            }
-        }
-
-        Button {
-            icon: Settings.show_only_icons ? @image-url("../icons/krokiet_manual_add.svg"): @image-url("");
-            text: Settings.show_only_icons ? "" : Translations.manual_add_button_text;
-            colorize-icon: true;
-            clicked => {
-                show_manual_add_dialog(false);
-            }
-        }
-
-        Rectangle {
-            vertical-stretch: 1.0;
-        }
+        background: ColorPalette.line_item_color;
     }
 
+    // Excluded directories 
     VerticalLayout {
         horizontal-stretch: 1.0;
-        Rectangle {
-            Text {
-                text <=> Translations.excluded_directories_text;
+        padding-top: 5px;
+        padding-right: 5px;
+        HorizontalLayout {
+            Button {
+                icon: @image-url("../icons/krokiet_add.svg");
+                colorize-icon: true;
+                clicked => {
+                    folder_choose_requested(false);
+                }
             }
+
+            Rectangle {
+                width: 5px;
+            }
+
+            Rectangle {
+                horizontal-stretch: 1.0;
+                Text {
+                    text <=> Translations.excluded_directories_text;
+                }
+            }
+
+            Rectangle {
+                width: 5px;
+            }
+
+            Button {
+                icon: @image-url("../icons/krokiet_manual_add.svg");
+                colorize-icon: true;
+                clicked => {
+                    show_manual_add_dialog(false);
+                }
+            }
+        }
+
+        Rectangle {
+            height: 5px;
         }
 
         excluded_list := ExcludedDirectories { }

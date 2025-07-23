@@ -1,6 +1,6 @@
-import { ListView, CheckBox } from "std-widgets.slint";
+import { Button, CheckBox, ListView } from "std-widgets.slint";
 import { Callabler } from "callabler.slint";
-import { IncludedDirectoriesModel, ExcludedDirectoriesModel } from "common.slint";
+import { ExcludedDirectoriesModel, IncludedDirectoriesModel } from "common.slint";
 import { ColorPalette } from "color_palette.slint";
 import { Settings } from "settings.slint";
 import { Translations } from "translations.slint";
@@ -35,22 +35,35 @@ export component IncludedDirectories {
                 background: ColorPalette.get_listview_color(r.selected_row, touch-area.has-hover);
                 touch_area := TouchArea {
                     clicked => {
-                        if (current_index == -1) {
-                            r.selected_row = true;
-                        } else {
-                            if (current_index != idx) {
-                                model[current_index].selected_row = false;
-                            }
-                            r.selected_row = true;
-                        }
-                        current_index = idx;
+                        handle_click(true);
                     }
                     double-clicked => {
                         Callabler.open_item(r.path);
+                        handle_click(false);
+                    }
+                    pointer-event(event) => {
+                        if (event.button == PointerEventButton.right && event.kind == PointerEventKind.up) {
+                            Callabler.open_parent(r.path);
+                        }
+                    }
+
+                    function handle_click(can_unselect: bool) {
+                        if (current_index != -1) {
+                            if (current_index != idx) {
+                                model[current_index].selected_row = false;
+                            } else if (can_unselect) {
+                                r.selected_row = false;
+                                current_index = -1;
+                                return;
+                            }
+                        }
+                        r.selected_row = true;
+                        current_index = idx;
                     }
                 }
 
                 HorizontalLayout {
+                    padding-left: 7.5px;
                     spacing: 5px;
                     width: parent.width;
 
@@ -62,10 +75,26 @@ export component IncludedDirectories {
                         width: size_referenced_folder;
                     }
 
-                    Text {
+
+                    HorizontalLayout {
                         horizontal-stretch: 1.0;
-                        text: r.path;
-                        vertical-alignment: center;
+                        padding-left: 5px;
+                        Text {
+                            horizontal-stretch: 1.0;
+                            height: parent.height;
+                            text: r.path;
+                            vertical-alignment: center;
+                        }
+
+                        Button {
+                            width: 50px;
+                            horizontal-stretch: 1.0;
+                            icon: @image-url("../icons/krokiet_delete.svg");
+                            colorize-icon: true;
+                            clicked => {
+                                Callabler.remove_item_directories(true, idx);
+                            }
+                        }
                     }
                 }
             }
@@ -97,27 +126,52 @@ export component ExcludedDirectories {
 
                 touch_area := TouchArea {
                     clicked => {
-                        if (current_index == -1) {
-                            r.selected_row = true;
-                        } else {
-                            if (current_index != idx) {
-                                model[current_index].selected_row = false;
-                            }
-                            r.selected_row = true;
-                        }
-                        current_index = idx;
+                        handle_click(true);
                     }
                     double-clicked => {
                         Callabler.open_item(r.path);
+                        handle_click(false);
+                    }
+                    pointer-event(event) => {
+                        if (event.button == PointerEventButton.right && event.kind == PointerEventKind.up) {
+                            Callabler.open_parent(r.path);
+                        }
+                    }
+
+                    function handle_click(can_unselect: bool) {
+                        if (current_index != -1) {
+                            if (current_index != idx) {
+                                model[current_index].selected_row = false;
+                            } else if (can_unselect) {
+                                r.selected_row = false;
+                                current_index = -1;
+                                return;
+                            }
+                        }
+                        r.selected_row = true;
+                        current_index = idx;
                     }
                 }
 
-                Text {
-                    x: 5px;
+                HorizontalLayout {
                     width: parent.width;
-                    height: parent.height;
-                    text: r.path;
-                    vertical-alignment: center;
+                    padding-left: 5px;
+                    Text {
+                        horizontal-stretch: 1.0;
+                        height: parent.height;
+                        text: r.path;
+                        vertical-alignment: center;
+                    }
+
+                    Button {
+                        width: 50px;
+                        horizontal-stretch: 1.0;
+                        icon: @image-url("../icons/krokiet_delete.svg");
+                        colorize-icon: true;
+                        clicked => {
+                            Callabler.remove_item_directories(false, idx);
+                        }
+                    }
                 }
             }
         }
