@@ -77,7 +77,7 @@ options to choose than other).
 |  Non stripped binaries   |             |             |   ✔    |                   |             |
 |   Redundant whitespace   |             |             |   ✔    |                   |             |
 |    Overwriting files     |             |             |   ✔    |                   |      ✔      |
-|    Multiple languages    |      ✔      |             |   ✔    |         ✔         |      ✔      |
+|    Multiple languages    |      ✔      |      ✔      |   ✔    |         ✔         |      ✔      |
 |      Cache support       |      ✔      |      ✔      |        |         ✔         |             |
 |  In active development   |     Yes     |     Yes     |   No   |        Yes        |     Yes     |
 
@@ -147,7 +147,7 @@ The entire code in this repository is licensed under the [MIT](https://mit-licen
 
 All images are licensed under the [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) license.
 
-The GTK GUI and CLI applications are licensed under the [MIT](https://mit-license.org/) license, while the Slint(due) application is licensed under the [GPL-3.0-only](https://www.gnu.org/licenses/gpl-3.0.en.html) license.
+The Czkawka GTK GUI and CLI applications are licensed under the [MIT](https://mit-license.org/) license, while the Krokiet is licensed under the [GPL-3.0-only](https://www.gnu.org/licenses/gpl-3.0.en.html) license.
 
 ## Donations
 

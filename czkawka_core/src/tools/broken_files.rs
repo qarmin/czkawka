@@ -250,7 +250,7 @@ impl BrokenFiles {
             Some(file_entry)
         })
         .unwrap_or_else(|_| {
-            let message = create_crash_message("lopdf", &file_entry_clone.path.to_string_lossy(), "https://github.com/pdf-rs/pdf");
+            let message = create_crash_message("lopdf", &file_entry_clone.path.to_string_lossy(), "https://github.com/J-F-Liu/lopdf");
             error!("{message}");
             file_entry_clone.error_string = message;
             Some(file_entry_clone)

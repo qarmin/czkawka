@@ -203,7 +203,7 @@ pub fn setup_logger(disabled_terminal_printing: bool, app_name: &str) {
         let write_rotater = FileRotate::new(
             &cache_logs_path,
             AppendTimestamp::default(FileLimit::MaxFiles(3)),
-            ContentLimit::BytesSurpassed(20 * 1024 * 1024),
+            ContentLimit::BytesSurpassed(100 * 1024 * 1024),
             Compression::None,
             None,
         );

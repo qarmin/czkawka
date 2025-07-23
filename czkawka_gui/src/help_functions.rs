@@ -1,6 +1,7 @@
 use std::cell::RefCell;
 use std::cmp::Ordering;
 use std::collections::HashMap;
+use std::io::{BufReader, Cursor};
 use std::path::{MAIN_SEPARATOR, PathBuf};
 use std::rc::Rc;
 
@@ -767,20 +768,12 @@ pub fn set_icon_of_button<P: IsA<Widget>>(button: &P, data: &'static [u8]) {
     image.set_from_pixbuf(Some(&pixbuf));
 }
 
-static mut IMAGE_PREVIEW_ARRAY: OnceCell<Vec<u8>> = OnceCell::new();
-
-pub fn get_pixbuf_from_dynamic_image(dynamic_image: &DynamicImage) -> Result<Pixbuf, Error> {
+pub fn get_pixbuf_from_dynamic_image(dynamic_image: &DynamicImage) -> Result<Pixbuf, String> {
     let mut output = Vec::new();
-    JpegEncoder::new(&mut output).encode_image(dynamic_image).expect("Failed to encode jpeg image"); // TODO remove here unwrap
-    let arra;
-    // TODO - this code can really be broken, but I couldn't find better solution
-    #[allow(static_mut_refs)]
-    unsafe {
-        IMAGE_PREVIEW_ARRAY.take();
-        IMAGE_PREVIEW_ARRAY.set(output).expect("Setting image preview array failed");
-        arra = IMAGE_PREVIEW_ARRAY.get().expect("Getting image preview array failed").as_bytes();
-    }
-    Pixbuf::from_read(arra)
+    JpegEncoder::new(&mut output)
+        .encode_image(dynamic_image)
+        .map_err(|e| format!("Failed to encode image: {}", e))?;
+    Pixbuf::from_read(BufReader::new(Cursor::new(output))).map_err(|e| format!("Failed to create Pixbuf from DynamicImage: {}", e))
 }
 
 pub fn check_if_value_is_in_list_store(list_store: &ListStore, column: i32, value: &str) -> bool {
