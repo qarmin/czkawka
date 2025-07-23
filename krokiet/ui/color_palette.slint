@@ -19,6 +19,8 @@ export global ColorPalette {
     in-out property <color> popup_background_title_line: Settings.dark_theme ? #252525 : #9e9e9e;
     in-out property <color> popup_border_color: Settings.dark_theme ? #000000 : #808080;
 
+    in-out property <color> line_item_color: Settings.dark_theme ? #222222 : #dddddd;
+
     public pure function get_listview_color(selected: bool, hovered: bool) -> color {
         if (selected) {
             return hovered ? self.list_view_item_selected_hovered_color : self.list_view_item_selected_color;

@@ -1,4 +1,4 @@
-import { ListView, CheckBox } from "std-widgets.slint";
+import { ListView, CheckBox, Button } from "std-widgets.slint";
 import { Callabler } from "callabler.slint";
 import { IncludedDirectoriesModel, ExcludedDirectoriesModel } from "common.slint";
 import { ColorPalette } from "color_palette.slint";
@@ -51,6 +51,7 @@ export component IncludedDirectories {
                 }
 
                 HorizontalLayout {
+                    padding-left: 7.5px;
                     spacing: 5px;
                     width: parent.width;
 
@@ -62,10 +63,26 @@ export component IncludedDirectories {
                         width: size_referenced_folder;
                     }
 
-                    Text {
+
+                    HorizontalLayout {
                         horizontal-stretch: 1.0;
-                        text: r.path;
-                        vertical-alignment: center;
+                        padding-left: 5px;
+                        Text {
+                            horizontal-stretch: 1.0;
+                            height: parent.height;
+                            text: r.path;
+                            vertical-alignment: center;
+                        }
+
+                        Button {
+                            width: 50px;
+                            horizontal-stretch: 1.0;
+                            icon: @image-url("../icons/krokiet_delete.svg");
+                            colorize-icon: true;
+                            clicked => {
+                                Callabler.remove_item_directories(true, idx);
+                            }
+                        }
                     }
                 }
             }
@@ -112,12 +129,25 @@ export component ExcludedDirectories {
                     }
                 }
 
-                Text {
-                    x: 5px;
+                HorizontalLayout {
                     width: parent.width;
-                    height: parent.height;
-                    text: r.path;
-                    vertical-alignment: center;
+                    padding-left: 5px;
+                    Text {
+                        horizontal-stretch: 1.0;
+                        height: parent.height;
+                        text: r.path;
+                        vertical-alignment: center;
+                    }
+
+                    Button {
+                        width: 50px;
+                        horizontal-stretch: 1.0;
+                        icon: @image-url("../icons/krokiet_delete.svg");
+                        colorize-icon: true;
+                        clicked => {
+                            Callabler.remove_item_directories(false, idx);
+                        }
+                    }
                 }
             }
         }

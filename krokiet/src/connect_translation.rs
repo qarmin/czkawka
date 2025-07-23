@@ -200,9 +200,6 @@ fn translate_items(app: &MainWindow) {
     translation.set_instruction_text(flk!("instruction").into());
     translation.set_donation_text(flk!("donation").into());
     translation.set_translation_text(flk!("translation").into());
-    translation.set_add_button_text(flk!("add_button").into());
-    translation.set_remove_button_text(flk!("remove_button").into());
-    translation.set_manual_add_button_text(flk!("manual_add_button").into());
     translation.set_included_directories_text(flk!("included_directories").into());
     translation.set_excluded_directories_text(flk!("excluded_directories").into());
     translation.set_ref_text(flk!("ref").into());
