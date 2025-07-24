@@ -10,14 +10,12 @@ use fun_time::fun_time;
 use log::debug;
 use rayon::prelude::*;
 
-use crate::common::{
-    WorkContinueStatus, check_if_stop_received, prepare_thread_handler_common, remove_folder_if_contains_only_empty_folders, send_info_and_wait_for_ending_all_threads,
-};
+use crate::common::{WorkContinueStatus, check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crate::common_dir_traversal::{ToolType, common_get_entry_data, common_get_metadata_dir, common_read_dir, get_modified_time};
 use crate::common_directory::Directories;
 use crate::common_items::ExcludedItems;
-use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
-use crate::common_traits::{DebugPrint, PrintResults};
+use crate::common_tool::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
+use crate::common_traits::{DebugPrint, DeletingItems, PrintResults, ResultEntry};
 use crate::progress_data::{CurrentStage, ProgressData};
 
 #[derive(Clone, Debug)]
@@ -32,6 +30,20 @@ pub struct FolderEntry {
 impl FolderEntry {
     pub fn get_modified_date(&self) -> u64 {
         self.modified_date
+    }
+}
+
+impl ResultEntry for FolderEntry {
+    fn get_path(&self) -> &Path {
+        &self.path
+    }
+
+    fn get_modified_date(&self) -> u64 {
+        self.modified_date
+    }
+
+    fn get_size(&self) -> u64 {
+        0
     }
 }
 
@@ -80,7 +92,11 @@ impl EmptyFolder {
         }
         self.optimize_folders();
 
-        self.delete_files();
+        if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+            self.common_data.stopped_search = true;
+            return;
+        };
+
         self.debug_print();
     }
 
@@ -291,19 +307,21 @@ impl EmptyFolder {
             modified_date: get_modified_time(&metadata, warnings, current_folder, true),
         });
     }
+}
 
+impl DeletingItems for EmptyFolder {
     #[fun_time(message = "delete_files", level = "debug")]
-    fn delete_files(&mut self) {
-        if self.get_delete_method() == DeleteMethod::None {
-            return;
+    fn delete_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+        match self.common_data.delete_method {
+            DeleteMethod::Delete => self.delete_elements_and_add_to_messages(
+                self.empty_folder_list.values().cloned().collect::<Vec<_>>(),
+                stop_flag,
+                progress_sender,
+                DeleteItemType::DeletingFolders,
+            ),
+            DeleteMethod::None => WorkContinueStatus::Continue,
+            _ => unreachable!(),
         }
-        let folders_to_remove = self.empty_folder_list.keys().collect::<Vec<_>>();
-
-        let errors: Vec<_> = folders_to_remove
-            .into_par_iter()
-            .filter_map(|name| remove_folder_if_contains_only_empty_folders(name, false).err())
-            .collect();
-        self.get_text_messages_mut().errors.extend(errors);
     }
 }
 

@@ -4,7 +4,7 @@ use std::io::prelude::*;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::{fs, mem, panic};
+use std::{mem, panic};
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
@@ -19,7 +19,7 @@ use crate::common::{
 };
 use crate::common_cache::{extract_loaded_cache, get_broken_files_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
-use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
+use crate::common_tool::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
 use crate::common_traits::*;
 use crate::progress_data::{CurrentStage, ProgressData};
 
@@ -122,7 +122,10 @@ impl BrokenFiles {
             self.common_data.stopped_search = true;
             return;
         }
-        self.delete_files();
+        if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+            self.common_data.stopped_search = true;
+            return;
+        };
         self.debug_print();
     }
 
@@ -363,23 +366,15 @@ impl BrokenFiles {
             self.get_text_messages_mut().extend_with_another_messages(messages);
         }
     }
+}
 
+impl DeletingItems for BrokenFiles {
     #[fun_time(message = "delete_files", level = "debug")]
-    fn delete_files(&mut self) {
+    fn delete_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         match self.common_data.delete_method {
-            DeleteMethod::Delete => {
-                for file_entry in &self.broken_files {
-                    if fs::remove_file(&file_entry.path).is_err() {
-                        self.common_data.text_messages.warnings.push(file_entry.path.to_string_lossy().to_string());
-                    }
-                }
-            }
-            DeleteMethod::None => {
-                //Just do nothing
-            }
-            _ => {
-                unreachable!()
-            }
+            DeleteMethod::Delete => self.delete_elements_and_add_to_messages(self.broken_files.clone(), stop_flag, progress_sender, DeleteItemType::DeletingFiles),
+            DeleteMethod::None => WorkContinueStatus::Continue,
+            _ => unreachable!(),
         }
     }
 }

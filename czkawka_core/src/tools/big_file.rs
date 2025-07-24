@@ -109,18 +109,10 @@ impl BigFile {
 }
 
 impl DeletingItems for BigFile {
+    #[fun_time(message = "delete_files", level = "debug")]
     fn delete_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         match self.common_data.delete_method {
-            DeleteMethod::Delete => {
-                let delete_results = self.delete_elements(self.big_files.clone(), stop_flag, progress_sender, DeleteItemType::DeletingFiles);
-
-                if stop_flag.load(std::sync::atomic::Ordering::Relaxed) {
-                    WorkContinueStatus::Stop
-                } else {
-                    delete_results.add_to_messages(&mut self.common_data.text_messages);
-                    WorkContinueStatus::Continue
-                }
-            }
+            DeleteMethod::Delete => self.delete_elements_and_add_to_messages(self.big_files.clone(), stop_flag, progress_sender, DeleteItemType::DeletingFiles),
             DeleteMethod::None => WorkContinueStatus::Continue,
             _ => unreachable!(),
         }

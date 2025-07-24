@@ -30,9 +30,10 @@ use crate::common::{
 };
 use crate::common_cache::{extract_loaded_cache, get_similar_music_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
-use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
+use crate::common_tool::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
 use crate::common_traits::*;
 use crate::progress_data::{CurrentStage, ProgressData};
+use crate::tools::broken_files::BrokenFiles;
 
 bitflags! {
     #[derive(PartialEq, Copy, Clone, Debug)]
@@ -196,7 +197,10 @@ impl SameMusic {
             }
             _ => panic!(),
         }
-        self.delete_files();
+        if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+            self.common_data.stopped_search = true;
+            return;
+        };
         self.debug_print();
     }
 
@@ -729,15 +733,22 @@ impl SameMusic {
 
         new_duplicates
     }
+}
 
+// TODO - missing implementation of stopping and using hardlinking
+impl DeletingItems for SameMusic {
     #[fun_time(message = "delete_files", level = "debug")]
-    fn delete_files(&mut self) {
-        if self.common_data.delete_method == DeleteMethod::None {
-            return;
+    fn delete_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+        match self.common_data.delete_method {
+            DeleteMethod::Delete => {
+                let vec_files = self.duplicated_music_entries.iter().collect::<Vec<_>>();
+                delete_files_custom(&vec_files, &self.common_data.delete_method, &mut self.common_data.text_messages, self.common_data.dry_run);
+                WorkContinueStatus::Continue
+                // self.delete_elements_and_add_to_messages(self.broken_files.clone(), stop_flag, progress_sender, DeleteItemType::DeletingFiles)
+            },
+            DeleteMethod::None => WorkContinueStatus::Continue,
+            _ => unreachable!(),
         }
-
-        let vec_files = self.duplicated_music_entries.iter().collect::<Vec<_>>();
-        delete_files_custom(&vec_files, &self.common_data.delete_method, &mut self.common_data.text_messages, self.common_data.dry_run);
     }
 }
 

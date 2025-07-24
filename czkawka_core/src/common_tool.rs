@@ -7,7 +7,7 @@ use std::time::Duration;
 use crossbeam_channel::Sender;
 use rayon::prelude::*;
 
-use crate::common::remove_folder_if_contains_only_empty_folders;
+use crate::common::{WorkContinueStatus, remove_folder_if_contains_only_empty_folders};
 use crate::common_dir_traversal::{CheckingMethod, ToolType};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
@@ -234,6 +234,23 @@ pub trait CommonData {
         // Optimizes directories and removes recursive calls
         let messages = self.get_cd_mut().directories.optimize_directories(recursive_search);
         self.get_cd_mut().text_messages.extend_with_another_messages(messages);
+    }
+
+    fn delete_elements_and_add_to_messages<T: ResultEntry + Sized + Send>(
+        &mut self,
+        files_to_delete: Vec<T>,
+        stop_flag: &Arc<AtomicBool>,
+        progress_sender: Option<&Sender<ProgressData>>,
+        delete_item_type: DeleteItemType,
+    ) -> WorkContinueStatus {
+        let delete_results = self.delete_elements(files_to_delete, stop_flag, progress_sender, delete_item_type);
+
+        if stop_flag.load(std::sync::atomic::Ordering::Relaxed) {
+            WorkContinueStatus::Stop
+        } else {
+            delete_results.add_to_messages(self.get_text_messages_mut());
+            WorkContinueStatus::Continue
+        }
     }
 
     fn delete_elements<T: ResultEntry + Sized + Send>(
