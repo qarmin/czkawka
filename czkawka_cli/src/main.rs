@@ -38,7 +38,7 @@ use crate::progress::connect_progress;
 mod commands;
 mod progress;
 
-pub struct CliResult {
+pub struct CliOutput {
     pub found_any_files: bool,
     pub ignored_error_code_on_found: bool,
     pub output: String,
@@ -89,18 +89,18 @@ fn main() {
 
     connect_progress(&progress_receiver);
 
-    let cli_result = calculate_thread.join().expect("Failed to join calculation thread");
+    let cli_output = calculate_thread.join().expect("Failed to join calculation thread");
 
-    println!("{}", cli_result.output);
+    println!("{}", cli_output.output);
 
-    if cli_result.found_any_files && !cli_result.ignored_error_code_on_found {
+    if cli_output.found_any_files && !cli_output.ignored_error_code_on_found {
         std::process::exit(11);
     } else {
         std::process::exit(0);
     }
 }
 
-fn duplicates(duplicates: DuplicatesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliResult {
+fn duplicates(duplicates: DuplicatesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
     let DuplicatesArgs {
         common_cli_items,
         reference_directories,
@@ -139,7 +139,7 @@ fn duplicates(duplicates: DuplicatesArgs, stop_flag: &Arc<AtomicBool>, progress_
     save_and_write_results_to_writer(&item, &common_cli_items)
 }
 
-fn empty_folders(empty_folders: EmptyFoldersArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliResult {
+fn empty_folders(empty_folders: EmptyFoldersArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
     let EmptyFoldersArgs { common_cli_items, delete_folders } = empty_folders;
 
     let mut item = EmptyFolder::new();
@@ -154,7 +154,7 @@ fn empty_folders(empty_folders: EmptyFoldersArgs, stop_flag: &Arc<AtomicBool>, p
     save_and_write_results_to_writer(&item, &common_cli_items)
 }
 
-fn biggest_files(biggest_files: BiggestFilesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliResult {
+fn biggest_files(biggest_files: BiggestFilesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
     let BiggestFilesArgs {
         common_cli_items,
         number_of_files,
@@ -176,7 +176,7 @@ fn biggest_files(biggest_files: BiggestFilesArgs, stop_flag: &Arc<AtomicBool>, p
     save_and_write_results_to_writer(&item, &common_cli_items)
 }
 
-fn empty_files(empty_files: EmptyFilesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliResult {
+fn empty_files(empty_files: EmptyFilesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
     let EmptyFilesArgs { common_cli_items, delete_files } = empty_files;
 
     let mut item = EmptyFiles::new();
@@ -191,7 +191,7 @@ fn empty_files(empty_files: EmptyFilesArgs, stop_flag: &Arc<AtomicBool>, progres
     save_and_write_results_to_writer(&item, &common_cli_items)
 }
 
-fn temporary(temporary: TemporaryArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliResult {
+fn temporary(temporary: TemporaryArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
     let TemporaryArgs { common_cli_items, delete_files } = temporary;
 
     let mut item = Temporary::new();
@@ -206,7 +206,7 @@ fn temporary(temporary: TemporaryArgs, stop_flag: &Arc<AtomicBool>, progress_sen
     save_and_write_results_to_writer(&item, &common_cli_items)
 }
 
-fn similar_images(similar_images: SimilarImagesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliResult {
+fn similar_images(similar_images: SimilarImagesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
     let SimilarImagesArgs {
         common_cli_items,
         reference_directories,
@@ -244,7 +244,7 @@ fn similar_images(similar_images: SimilarImagesArgs, stop_flag: &Arc<AtomicBool>
     save_and_write_results_to_writer(&item, &common_cli_items)
 }
 
-fn same_music(same_music: SameMusicArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliResult {
+fn same_music(same_music: SameMusicArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
     let SameMusicArgs {
         common_cli_items,
         reference_directories,
@@ -281,7 +281,7 @@ fn same_music(same_music: SameMusicArgs, stop_flag: &Arc<AtomicBool>, progress_s
     save_and_write_results_to_writer(&item, &common_cli_items)
 }
 
-fn invalid_symlinks(invalid_symlinks: InvalidSymlinksArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliResult {
+fn invalid_symlinks(invalid_symlinks: InvalidSymlinksArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
     let InvalidSymlinksArgs { common_cli_items, delete_files } = invalid_symlinks;
 
     let mut item = InvalidSymlinks::new();
@@ -296,7 +296,7 @@ fn invalid_symlinks(invalid_symlinks: InvalidSymlinksArgs, stop_flag: &Arc<Atomi
     save_and_write_results_to_writer(&item, &common_cli_items)
 }
 
-fn broken_files(broken_files: BrokenFilesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliResult {
+fn broken_files(broken_files: BrokenFilesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
     let BrokenFilesArgs {
         common_cli_items,
         delete_files,
@@ -320,7 +320,7 @@ fn broken_files(broken_files: BrokenFilesArgs, stop_flag: &Arc<AtomicBool>, prog
     save_and_write_results_to_writer(&item, &common_cli_items)
 }
 
-fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliResult {
+fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
     let SimilarVideosArgs {
         reference_directories,
         common_cli_items,
@@ -347,7 +347,7 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>
     save_and_write_results_to_writer(&item, &common_cli_items)
 }
 
-fn bad_extensions(bad_extensions: BadExtensionsArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliResult {
+fn bad_extensions(bad_extensions: BadExtensionsArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
     let BadExtensionsArgs { common_cli_items } = bad_extensions;
 
     let params = BadExtensionsParameters::new();
@@ -360,7 +360,7 @@ fn bad_extensions(bad_extensions: BadExtensionsArgs, stop_flag: &Arc<AtomicBool>
     save_and_write_results_to_writer(&item, &common_cli_items)
 }
 
-fn save_and_write_results_to_writer<T: CommonData + PrintResults>(component: &T, common_cli_items: &CommonCliItems) -> CliResult {
+fn save_and_write_results_to_writer<T: CommonData + PrintResults>(component: &T, common_cli_items: &CommonCliItems) -> CliOutput {
     if let Some(file_name) = common_cli_items.file_to_save.file_name() {
         if let Err(e) = component.print_results_to_file(file_name) {
             error!("Failed to save results to file {e}");
@@ -390,7 +390,7 @@ fn save_and_write_results_to_writer<T: CommonData + PrintResults>(component: &T,
         });
     }
 
-    let mut cli_result = CliResult {
+    let mut cli_output = CliOutput {
         found_any_files: component.found_any_broken_files(),
         ignored_error_code_on_found: common_cli_items.ignore_error_code_on_found,
         output: String::new(),
@@ -398,11 +398,11 @@ fn save_and_write_results_to_writer<T: CommonData + PrintResults>(component: &T,
 
     if let Ok(file_vec) = buf_writer.into_inner() {
         if let Ok(output) = String::from_utf8(file_vec) {
-            cli_result.output = output;
+            cli_output.output = output;
         }
     }
 
-    cli_result
+    cli_output
 }
 
 fn set_common_settings<T>(component: &mut T, common_cli_items: &CommonCliItems, reference_directories: Option<&Vec<PathBuf>>)
