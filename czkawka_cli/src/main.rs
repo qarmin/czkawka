@@ -136,7 +136,7 @@ fn duplicates(duplicates: DuplicatesArgs, stop_flag: &Arc<AtomicBool>, progress_
 
     item.find_duplicates(Some(stop_flag), Some(progress_sender));
 
-    save_and_print_results(&item, &common_cli_items)
+    save_and_write_results_to_writer(&item, &common_cli_items)
 }
 
 fn empty_folders(empty_folders: EmptyFoldersArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliResult {
@@ -151,7 +151,7 @@ fn empty_folders(empty_folders: EmptyFoldersArgs, stop_flag: &Arc<AtomicBool>, p
 
     item.find_empty_folders(Some(stop_flag), Some(progress_sender));
 
-    save_and_print_results(&item, &common_cli_items)
+    save_and_write_results_to_writer(&item, &common_cli_items)
 }
 
 fn biggest_files(biggest_files: BiggestFilesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliResult {
@@ -173,7 +173,7 @@ fn biggest_files(biggest_files: BiggestFilesArgs, stop_flag: &Arc<AtomicBool>, p
 
     item.find_big_files(Some(stop_flag), Some(progress_sender));
 
-    save_and_print_results(&item, &common_cli_items)
+    save_and_write_results_to_writer(&item, &common_cli_items)
 }
 
 fn empty_files(empty_files: EmptyFilesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliResult {
@@ -188,7 +188,7 @@ fn empty_files(empty_files: EmptyFilesArgs, stop_flag: &Arc<AtomicBool>, progres
 
     item.find_empty_files(Some(stop_flag), Some(progress_sender));
 
-    save_and_print_results(&item, &common_cli_items)
+    save_and_write_results_to_writer(&item, &common_cli_items)
 }
 
 fn temporary(temporary: TemporaryArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliResult {
@@ -203,7 +203,7 @@ fn temporary(temporary: TemporaryArgs, stop_flag: &Arc<AtomicBool>, progress_sen
 
     item.find_temporary_files(Some(stop_flag), Some(progress_sender));
 
-    save_and_print_results(&item, &common_cli_items)
+    save_and_write_results_to_writer(&item, &common_cli_items)
 }
 
 fn similar_images(similar_images: SimilarImagesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliResult {
@@ -241,7 +241,7 @@ fn similar_images(similar_images: SimilarImagesArgs, stop_flag: &Arc<AtomicBool>
 
     item.find_similar_images(Some(stop_flag), Some(progress_sender));
 
-    save_and_print_results(&item, &common_cli_items)
+    save_and_write_results_to_writer(&item, &common_cli_items)
 }
 
 fn same_music(same_music: SameMusicArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliResult {
@@ -278,7 +278,7 @@ fn same_music(same_music: SameMusicArgs, stop_flag: &Arc<AtomicBool>, progress_s
 
     item.find_same_music(Some(stop_flag), Some(progress_sender));
 
-    save_and_print_results(&item, &common_cli_items)
+    save_and_write_results_to_writer(&item, &common_cli_items)
 }
 
 fn invalid_symlinks(invalid_symlinks: InvalidSymlinksArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliResult {
@@ -293,7 +293,7 @@ fn invalid_symlinks(invalid_symlinks: InvalidSymlinksArgs, stop_flag: &Arc<Atomi
 
     item.find_invalid_links(Some(stop_flag), Some(progress_sender));
 
-    save_and_print_results(&item, &common_cli_items)
+    save_and_write_results_to_writer(&item, &common_cli_items)
 }
 
 fn broken_files(broken_files: BrokenFilesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliResult {
@@ -317,7 +317,7 @@ fn broken_files(broken_files: BrokenFilesArgs, stop_flag: &Arc<AtomicBool>, prog
 
     item.find_broken_files(Some(stop_flag), Some(progress_sender));
 
-    save_and_print_results(&item, &common_cli_items)
+    save_and_write_results_to_writer(&item, &common_cli_items)
 }
 
 fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliResult {
@@ -344,7 +344,7 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>
 
     item.find_similar_videos(Some(stop_flag), Some(progress_sender));
 
-    save_and_print_results(&item, &common_cli_items)
+    save_and_write_results_to_writer(&item, &common_cli_items)
 }
 
 fn bad_extensions(bad_extensions: BadExtensionsArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliResult {
@@ -357,10 +357,10 @@ fn bad_extensions(bad_extensions: BadExtensionsArgs, stop_flag: &Arc<AtomicBool>
 
     item.find_bad_extensions_files(Some(stop_flag), Some(progress_sender));
 
-    save_and_print_results(&item, &common_cli_items)
+    save_and_write_results_to_writer(&item, &common_cli_items)
 }
 
-fn save_and_print_results<T: CommonData + PrintResults>(component: &T, common_cli_items: &CommonCliItems) -> CliResult {
+fn save_and_write_results_to_writer<T: CommonData + PrintResults>(component: &T, common_cli_items: &CommonCliItems) -> CliResult {
     if let Some(file_name) = common_cli_items.file_to_save.file_name() {
         if let Err(e) = component.print_results_to_file(file_name) {
             error!("Failed to save results to file {e}");

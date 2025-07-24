@@ -28,7 +28,7 @@ const CACHE_IMAGE_VERSION: &str = "100_fast_resize";
 const CACHE_IMAGE_VERSION: &str = "100_image_rs_resize";
 const CACHE_VIDEO_VERSION: &str = "100";
 
-const MEMORY_LIMIT: u64 = 4 * 1024 * 1024 * 1024;
+const MEMORY_LIMIT: u64 = 8 * 1024 * 1024 * 1024;
 
 pub fn get_broken_files_cache_file() -> String {
     format!("cache_broken_files_{CACHE_VERSION}.bin")
