@@ -784,11 +784,8 @@ pub fn prepare_thread_handler_common(
 }
 
 #[inline]
-pub fn check_if_stop_received(stop_flag: Option<&Arc<AtomicBool>>) -> bool {
-    if let Some(stop_flag) = stop_flag {
-        return stop_flag.load(atomic::Ordering::Relaxed);
-    }
-    false
+pub fn check_if_stop_received(stop_flag: &Arc<AtomicBool>) -> bool {
+    stop_flag.load(atomic::Ordering::Relaxed)
 }
 
 pub fn make_hard_link(src: &Path, dst: &Path) -> io::Result<()> {

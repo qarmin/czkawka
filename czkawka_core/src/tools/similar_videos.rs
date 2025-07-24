@@ -118,7 +118,7 @@ impl SimilarVideos {
     }
 
     #[fun_time(message = "find_similar_videos", level = "info")]
-    pub fn find_similar_videos(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) {
+    pub fn find_similar_videos(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
         if !ffmpeg_cmdline_utils::ffmpeg_and_ffprobe_are_callable() {
             self.common_data.text_messages.errors.push(flc!("core_ffmpeg_not_found"));
             #[cfg(target_os = "windows")]
@@ -140,7 +140,7 @@ impl SimilarVideos {
     }
 
     #[fun_time(message = "check_for_similar_videos", level = "debug")]
-    fn check_for_similar_videos(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_for_similar_videos(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         self.common_data.extensions.set_and_validate_allowed_extensions(VIDEO_FILES_EXTENSIONS);
         if !self.common_data.extensions.set_any_extensions() {
             return WorkContinueStatus::Continue;
@@ -211,7 +211,7 @@ impl SimilarVideos {
     }
 
     #[fun_time(message = "sort_videos", level = "debug")]
-    fn sort_videos(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn sort_videos(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.videos_to_check.is_empty() {
             return WorkContinueStatus::Continue;
         }

@@ -162,7 +162,7 @@ impl SameMusic {
     }
 
     #[fun_time(message = "find_same_music", level = "info")]
-    pub fn find_same_music(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) {
+    pub fn find_same_music(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
         self.prepare_items();
         self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
         if self.check_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
@@ -201,7 +201,7 @@ impl SameMusic {
     }
 
     #[fun_time(message = "check_files", level = "debug")]
-    fn check_files(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         self.common_data.extensions.set_and_validate_allowed_extensions(AUDIO_FILES_EXTENSIONS);
         if !self.common_data.extensions.set_any_extensions() {
             return WorkContinueStatus::Continue;
@@ -283,7 +283,7 @@ impl SameMusic {
     }
 
     #[fun_time(message = "calculate_fingerprint", level = "debug")]
-    fn calculate_fingerprint(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn calculate_fingerprint(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.music_entries.is_empty() {
             return WorkContinueStatus::Continue;
         }
@@ -371,7 +371,7 @@ impl SameMusic {
     }
 
     #[fun_time(message = "read_tags", level = "debug")]
-    fn read_tags(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn read_tags(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.music_to_check.is_empty() {
             return WorkContinueStatus::Continue;
         }
@@ -434,7 +434,7 @@ impl SameMusic {
     }
 
     #[fun_time(message = "check_for_duplicate_tags", level = "debug")]
-    fn check_for_duplicate_tags(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_for_duplicate_tags(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.music_entries.is_empty() {
             return WorkContinueStatus::Continue;
         }
@@ -589,7 +589,7 @@ impl SameMusic {
 
     fn compare_fingerprints(
         &mut self,
-        stop_flag: Option<&Arc<AtomicBool>>,
+        stop_flag: &Arc<AtomicBool>,
         items_counter: &Arc<AtomicUsize>,
         base_files: Vec<MusicEntry>,
         files_to_compare: &[MusicEntry],
@@ -651,7 +651,7 @@ impl SameMusic {
     }
 
     #[fun_time(message = "check_for_duplicate_fingerprints", level = "debug")]
-    fn check_for_duplicate_fingerprints(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_for_duplicate_fingerprints(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.music_entries.is_empty() {
             return WorkContinueStatus::Continue;
         }

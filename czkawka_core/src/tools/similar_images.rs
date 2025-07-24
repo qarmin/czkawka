@@ -157,7 +157,7 @@ impl SimilarImages {
     }
 
     #[fun_time(message = "find_similar_images", level = "info")]
-    pub fn find_similar_images(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) {
+    pub fn find_similar_images(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
         self.prepare_items();
         self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
         if self.check_for_similar_images(stop_flag, progress_sender) == WorkContinueStatus::Stop {
@@ -177,7 +177,7 @@ impl SimilarImages {
     }
 
     #[fun_time(message = "check_for_similar_images", level = "debug")]
-    fn check_for_similar_images(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_for_similar_images(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if cfg!(feature = "heif") {
             self.common_data
                 .extensions
@@ -267,7 +267,7 @@ impl SimilarImages {
     // - Join all hashes and save it to file
 
     #[fun_time(message = "hash_images", level = "debug")]
-    fn hash_images(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn hash_images(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.images_to_check.is_empty() {
             return WorkContinueStatus::Continue;
         }
@@ -448,7 +448,7 @@ impl SimilarImages {
         all_hashed_images: &HashMap<ImHash, Vec<ImagesEntry>>,
         collected_similar_images: &mut HashMap<ImHash, Vec<ImagesEntry>>,
         progress_sender: Option<&Sender<ProgressData>>,
-        stop_flag: Option<&Arc<AtomicBool>>,
+        stop_flag: &Arc<AtomicBool>,
         tolerance: u32,
     ) -> WorkContinueStatus {
         // Don't use hashes with multiple images in bktree, because they will always be master of group and cannot be find by other hashes
@@ -584,7 +584,7 @@ impl SimilarImages {
     }
 
     #[fun_time(message = "find_similar_hashes", level = "debug")]
-    fn find_similar_hashes(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn find_similar_hashes(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.image_hashes.is_empty() {
             return WorkContinueStatus::Continue;
         }
@@ -976,6 +976,7 @@ mod tests {
     use image::imageops::FilterType;
     use image_hasher::HashAlg;
 
+    use super::*;
     use crate::common_tool::CommonData;
     use crate::tools::similar_images::{Hamming, ImHash, ImagesEntry, SimilarImages, SimilarImagesParameters};
 
@@ -994,7 +995,7 @@ mod tests {
     fn test_compare_no_images() {
         for _ in 0..100 {
             let mut similar_images = SimilarImages::new(get_default_parameters());
-            similar_images.find_similar_images(None, None);
+            similar_images.find_similar_images(&Arc::default(), None);
             assert_eq!(similar_images.get_similar_images().len(), 0);
         }
     }
@@ -1014,7 +1015,7 @@ mod tests {
 
             add_hashes(&mut similar_images.image_hashes, vec![fe1.clone(), fe2.clone(), fe3.clone(), fe4.clone(), fe5.clone()]);
 
-            similar_images.find_similar_hashes(None, None);
+            similar_images.find_similar_hashes(&Arc::default(), None);
             assert_eq!(similar_images.get_similar_images().len(), 2);
             let first_group = similar_images.get_similar_images()[0].iter().map(|e| &e.path).collect::<Vec<_>>();
             let second_group = similar_images.get_similar_images()[1].iter().map(|e| &e.path).collect::<Vec<_>>();
@@ -1041,7 +1042,7 @@ mod tests {
 
             add_hashes(&mut similar_images.image_hashes, vec![fe1, fe2]);
 
-            similar_images.find_similar_hashes(None, None);
+            similar_images.find_similar_hashes(&Arc::default(), None);
             assert_eq!(similar_images.get_similar_images().len(), 1);
         }
     }
@@ -1060,7 +1061,7 @@ mod tests {
 
             add_hashes(&mut similar_images.image_hashes, vec![fe1, fe2, fe3]);
 
-            similar_images.find_similar_hashes(None, None);
+            similar_images.find_similar_hashes(&Arc::default(), None);
             assert_eq!(similar_images.get_similar_images().len(), 1);
             assert_eq!(similar_images.get_similar_images()[0].len(), 3);
         }
@@ -1081,7 +1082,7 @@ mod tests {
 
             add_hashes(&mut similar_images.image_hashes, vec![fe1, fe2]);
 
-            similar_images.find_similar_hashes(None, None);
+            similar_images.find_similar_hashes(&Arc::default(), None);
             assert_eq!(similar_images.get_similar_images().len(), 0);
         }
     }
@@ -1101,7 +1102,7 @@ mod tests {
 
             add_hashes(&mut similar_images.image_hashes, vec![fe1, fe2]);
 
-            similar_images.find_similar_hashes(None, None);
+            similar_images.find_similar_hashes(&Arc::default(), None);
             assert_eq!(similar_images.get_similar_images_referenced().len(), 1);
             assert_eq!(similar_images.get_similar_images_referenced()[0].1.len(), 1);
         }
@@ -1124,7 +1125,7 @@ mod tests {
 
             add_hashes(&mut similar_images.image_hashes, vec![fe1, fe2, fe3, fe4]);
 
-            similar_images.find_similar_hashes(None, None);
+            similar_images.find_similar_hashes(&Arc::default(), None);
             let res = similar_images.get_similar_images_referenced();
             assert_eq!(res.len(), 1);
             assert_eq!(res[0].1.len(), 2);
@@ -1146,7 +1147,7 @@ mod tests {
 
             add_hashes(&mut similar_images.image_hashes, vec![fe1, fe2, fe3]);
 
-            similar_images.find_similar_hashes(None, None);
+            similar_images.find_similar_hashes(&Arc::default(), None);
             let res = similar_images.get_similar_images();
             assert!(res.is_empty());
         }
@@ -1166,7 +1167,7 @@ mod tests {
 
             add_hashes(&mut similar_images.image_hashes, vec![fe1, fe2, fe3]);
 
-            similar_images.find_similar_hashes(None, None);
+            similar_images.find_similar_hashes(&Arc::default(), None);
             let res = similar_images.get_similar_images();
             assert_eq!(res.len(), 1);
             let mut path = res[0].iter().map(|e| e.path.to_string_lossy().to_string()).collect::<Vec<_>>();
@@ -1196,7 +1197,7 @@ mod tests {
 
             add_hashes(&mut similar_images.image_hashes, vec![fe1, fe2]);
 
-            similar_images.find_similar_hashes(None, None);
+            similar_images.find_similar_hashes(&Arc::default(), None);
             let res = similar_images.get_similar_images_referenced();
             assert_eq!(res.len(), 1);
             assert_eq!(res[0].1.len(), 1);
@@ -1220,7 +1221,7 @@ mod tests {
 
             add_hashes(&mut similar_images.image_hashes, vec![fe1, fe2]);
 
-            similar_images.find_similar_hashes(None, None);
+            similar_images.find_similar_hashes(&Arc::default(), None);
             let res = similar_images.get_similar_images_referenced();
             assert_eq!(res.len(), 0);
         }
@@ -1243,7 +1244,7 @@ mod tests {
 
             add_hashes(&mut similar_images.image_hashes, vec![fe1, fe2, fe3, fe4]);
 
-            similar_images.find_similar_hashes(None, None);
+            similar_images.find_similar_hashes(&Arc::default(), None);
             let res = similar_images.get_similar_images_referenced();
             assert_eq!(res.len(), 2);
             assert_eq!(res[0].1.len(), 1);
@@ -1273,7 +1274,7 @@ mod tests {
 
             add_hashes(&mut similar_images.image_hashes, vec![fe1, fe2]);
 
-            similar_images.find_similar_hashes(None, None);
+            similar_images.find_similar_hashes(&Arc::default(), None);
             let res = similar_images.get_similar_images_referenced();
             assert_eq!(res.len(), 1);
             assert_eq!(res[0].1.len(), 1);
@@ -1298,7 +1299,7 @@ mod tests {
 
             add_hashes(&mut similar_images.image_hashes, vec![fe0, fe1, fe2, fe3, fe4]);
 
-            similar_images.find_similar_hashes(None, None);
+            similar_images.find_similar_hashes(&Arc::default(), None);
             let res = similar_images.get_similar_images_referenced();
             assert_eq!(res.len(), 1);
             assert_eq!(res[0].1.len(), 2);

@@ -179,8 +179,8 @@ impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
         self
     }
 
-    pub fn stop_flag(mut self, stop_flag: Option<&'a Arc<AtomicBool>>) -> Self {
-        self.stop_flag = stop_flag;
+    pub fn stop_flag(mut self, stop_flag: &'a Arc<AtomicBool>) -> Self {
+        self.stop_flag = Some(stop_flag);
         self
     }
 
@@ -332,6 +332,7 @@ where
             stop_flag,
             ..
         } = self;
+        let stop_flag = stop_flag.expect("Stop flag must be always initialized");
 
         while !folders_to_check.is_empty() {
             if check_if_stop_received(stop_flag) {

@@ -134,7 +134,7 @@ fn duplicates(duplicates: DuplicatesArgs, stop_flag: &Arc<AtomicBool>, progress_
     item.set_delete_method(delete_method.delete_method);
     item.set_dry_run(dry_run.dry_run);
 
-    item.find_duplicates(Some(stop_flag), Some(progress_sender));
+    item.find_duplicates(stop_flag, Some(progress_sender));
 
     save_and_write_results_to_writer(&item, &common_cli_items)
 }
@@ -149,7 +149,7 @@ fn empty_folders(empty_folders: EmptyFoldersArgs, stop_flag: &Arc<AtomicBool>, p
         item.set_delete_method(DeleteMethod::Delete);
     }
 
-    item.find_empty_folders(Some(stop_flag), Some(progress_sender));
+    item.find_empty_folders(stop_flag, Some(progress_sender));
 
     save_and_write_results_to_writer(&item, &common_cli_items)
 }
@@ -171,7 +171,7 @@ fn biggest_files(biggest_files: BiggestFilesArgs, stop_flag: &Arc<AtomicBool>, p
         item.set_delete_method(DeleteMethod::Delete);
     }
 
-    item.find_big_files(Some(stop_flag), Some(progress_sender));
+    item.find_big_files(stop_flag, Some(progress_sender));
 
     save_and_write_results_to_writer(&item, &common_cli_items)
 }
@@ -186,7 +186,7 @@ fn empty_files(empty_files: EmptyFilesArgs, stop_flag: &Arc<AtomicBool>, progres
         item.set_delete_method(DeleteMethod::Delete);
     }
 
-    item.find_empty_files(Some(stop_flag), Some(progress_sender));
+    item.find_empty_files(stop_flag, Some(progress_sender));
 
     save_and_write_results_to_writer(&item, &common_cli_items)
 }
@@ -201,7 +201,7 @@ fn temporary(temporary: TemporaryArgs, stop_flag: &Arc<AtomicBool>, progress_sen
         item.set_delete_method(DeleteMethod::Delete);
     }
 
-    item.find_temporary_files(Some(stop_flag), Some(progress_sender));
+    item.find_temporary_files(stop_flag, Some(progress_sender));
 
     save_and_write_results_to_writer(&item, &common_cli_items)
 }
@@ -239,7 +239,7 @@ fn similar_images(similar_images: SimilarImagesArgs, stop_flag: &Arc<AtomicBool>
     item.set_delete_method(delete_method.delete_method);
     item.set_dry_run(dry_run.dry_run);
 
-    item.find_similar_images(Some(stop_flag), Some(progress_sender));
+    item.find_similar_images(stop_flag, Some(progress_sender));
 
     save_and_write_results_to_writer(&item, &common_cli_items)
 }
@@ -276,7 +276,7 @@ fn same_music(same_music: SameMusicArgs, stop_flag: &Arc<AtomicBool>, progress_s
     item.set_delete_method(delete_method.delete_method);
     item.set_dry_run(dry_run.dry_run);
 
-    item.find_same_music(Some(stop_flag), Some(progress_sender));
+    item.find_same_music(stop_flag, Some(progress_sender));
 
     save_and_write_results_to_writer(&item, &common_cli_items)
 }
@@ -291,7 +291,7 @@ fn invalid_symlinks(invalid_symlinks: InvalidSymlinksArgs, stop_flag: &Arc<Atomi
         item.set_delete_method(DeleteMethod::Delete);
     }
 
-    item.find_invalid_links(Some(stop_flag), Some(progress_sender));
+    item.find_invalid_links(stop_flag, Some(progress_sender));
 
     save_and_write_results_to_writer(&item, &common_cli_items)
 }
@@ -315,7 +315,7 @@ fn broken_files(broken_files: BrokenFilesArgs, stop_flag: &Arc<AtomicBool>, prog
         item.set_delete_method(DeleteMethod::Delete);
     }
 
-    item.find_broken_files(Some(stop_flag), Some(progress_sender));
+    item.find_broken_files(stop_flag, Some(progress_sender));
 
     save_and_write_results_to_writer(&item, &common_cli_items)
 }
@@ -342,7 +342,7 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>
     item.set_delete_method(delete_method.delete_method);
     item.set_dry_run(dry_run.dry_run);
 
-    item.find_similar_videos(Some(stop_flag), Some(progress_sender));
+    item.find_similar_videos(stop_flag, Some(progress_sender));
 
     save_and_write_results_to_writer(&item, &common_cli_items)
 }
@@ -355,7 +355,7 @@ fn bad_extensions(bad_extensions: BadExtensionsArgs, stop_flag: &Arc<AtomicBool>
 
     set_common_settings(&mut item, &common_cli_items, None);
 
-    item.find_bad_extensions_files(Some(stop_flag), Some(progress_sender));
+    item.find_bad_extensions_files(stop_flag, Some(progress_sender));
 
     save_and_write_results_to_writer(&item, &common_cli_items)
 }

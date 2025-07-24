@@ -33,7 +33,14 @@ fn benchmark_hash_calculation_vec<const FILE_SIZE: u64, const BUFFER_SIZE: usize
     c.bench_function(&function_name, |b| {
         b.iter(|| {
             let mut buffer = vec![0u8; BUFFER_SIZE];
-            hash_calculation(black_box(&mut buffer), black_box(&file_entry), black_box(HashType::Blake3), &Arc::default(), None).expect("Failed to calculate hash");
+            hash_calculation(
+                black_box(&mut buffer),
+                black_box(&file_entry),
+                black_box(HashType::Blake3),
+                &Arc::default(),
+                &Arc::default(),
+            )
+            .expect("Failed to calculate hash");
         });
     });
 }
@@ -45,7 +52,14 @@ fn benchmark_hash_calculation_arr<const FILE_SIZE: u64, const BUFFER_SIZE: usize
     c.bench_function(&function_name, |b| {
         b.iter(|| {
             let mut buffer = [0u8; BUFFER_SIZE];
-            hash_calculation(black_box(&mut buffer), black_box(&file_entry), black_box(HashType::Blake3), &Arc::default(), None).expect("Failed to calculate hash");
+            hash_calculation(
+                black_box(&mut buffer),
+                black_box(&file_entry),
+                black_box(HashType::Blake3),
+                &Arc::default(),
+                &Arc::default(),
+            )
+            .expect("Failed to calculate hash");
         });
     });
 }

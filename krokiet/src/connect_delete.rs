@@ -113,7 +113,7 @@ mod tests {
                 simplified_model,
                 items_queued_to_delete,
                 progress_sender,
-                &Arc::new(AtomicBool::new(false)),
+                &Arc::default(),
                 dlt_fnc,
                 MessageType::Delete,
                 self.active_tab.get_int_size_opt_idx(),

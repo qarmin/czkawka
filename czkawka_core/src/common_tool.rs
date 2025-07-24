@@ -3,8 +3,10 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 use std::time::Duration;
+
 use crossbeam_channel::Sender;
 use rayon::prelude::*;
+
 use crate::common::remove_folder_if_contains_only_empty_folders;
 use crate::common_dir_traversal::{CheckingMethod, ToolType};
 use crate::common_directory::Directories;
@@ -36,11 +38,18 @@ pub struct CommonToolData {
 
 #[derive(Debug, Clone, Default)]
 pub struct DeleteResult {
-     deleted_files: usize,
-     gained_bytes: u64,
-     failed_to_delete_files: usize  ,
-     errors: Vec<String>,
+    deleted_files: usize,
+    gained_bytes: u64,
+    failed_to_delete_files: usize,
+    errors: Vec<String>,
     infos: Vec<String>,
+}
+
+impl DeleteResult {
+    pub fn add_to_messages(&self, messages: &mut Messages) {
+        messages.errors.extend(self.errors.clone());
+        messages.messages.extend(self.infos.clone());
+    }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -227,46 +236,55 @@ pub trait CommonData {
         self.get_cd_mut().text_messages.extend_with_another_messages(messages);
     }
 
-    fn delete_elements<T: ResultEntry + Sized + ParallelIterator + IntoParallelIterator>(&self, files_to_delete: Vec<T>, stop_flag: &Arc<AtomicBool>, progress_sender: Sender<ProgressData>, delete_item_type: DeleteItemType) {
+    fn delete_elements<T: ResultEntry + Sized + Send>(
+        &self,
+        files_to_delete: Vec<T>,
+        stop_flag: &Arc<AtomicBool>,
+        progress_sender: Option<&Sender<ProgressData>>,
+        delete_item_type: DeleteItemType,
+    ) -> DeleteResult {
         let dry_run = self.get_cd().dry_run;
-        let mut progress= ProgressData::get_empty_state(CurrentStage::DeletingFiles);
+        let mut progress = ProgressData::get_empty_state(CurrentStage::DeletingFiles);
         progress.bytes_to_check = files_to_delete.iter().map(|e| e.get_size()).sum();
         progress.entries_to_check = files_to_delete.len();
 
-        let delayed_sender = DelayedSender::new(progress_sender, Duration::from_millis(200));
+        let delayed_sender = progress_sender.map(|e| DelayedSender::new(e.clone(), Duration::from_millis(200)));
 
         let bytes_processed = Arc::new(std::sync::atomic::AtomicU64::new(0));
         let files_processed = Arc::new(std::sync::atomic::AtomicUsize::new(0));
 
-        let res = files_to_delete.into_par_iter().map(|e|{
-            if stop_flag.load(std::sync::atomic::Ordering::Relaxed) {
-                return None;
-            }
-
-            let mut progress_tmp = progress.clone();
-            progress_tmp.bytes_checked = bytes_processed.fetch_add(e.get_size(), std::sync::atomic::Ordering::Relaxed);
-            progress_tmp.entries_checked = files_processed.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-
-            delayed_sender.send(progress_tmp);
-
-            if dry_run {
-                return Some((e, None));
-            }
-
-            let delete_res = if delete_item_type == DeleteItemType::DeletingFiles {
-                fs::remove_file(e.get_path()).map_err(|err|format!("Failed to delete \"{}\": {err}", e.get_path().to_string_lossy()))
-            } else {
-                remove_folder_if_contains_only_empty_folders(e.get_path(), false)
-            };
-
-            match delete_res {
-                Ok(_) => Some((e, None)),
-                Err(err) => {
-                    Some((e, Some(err)))
+        let res = files_to_delete
+            .into_par_iter()
+            .map(|e| {
+                if stop_flag.load(std::sync::atomic::Ordering::Relaxed) {
+                    return None;
                 }
-            }
-        }).while_some().collect::<Vec<_>>();
 
+                let mut progress_tmp = progress;
+                progress_tmp.bytes_checked = bytes_processed.fetch_add(e.get_size(), std::sync::atomic::Ordering::Relaxed);
+                progress_tmp.entries_checked = files_processed.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+
+                if let Some(e) = delayed_sender.as_ref() {
+                    e.send(progress_tmp);
+                }
+
+                if dry_run {
+                    return Some((e, None));
+                }
+
+                let delete_res = if delete_item_type == DeleteItemType::DeletingFiles {
+                    fs::remove_file(e.get_path()).map_err(|err| format!("Failed to delete \"{}\": {err}", e.get_path().to_string_lossy()))
+                } else {
+                    remove_folder_if_contains_only_empty_folders(e.get_path(), false)
+                };
+
+                match delete_res {
+                    Ok(()) => Some((e, None)),
+                    Err(err) => Some((e, Some(err))),
+                }
+            })
+            .while_some()
+            .collect::<Vec<_>>();
 
         let mut delete_result = DeleteResult::default();
 
@@ -282,6 +300,8 @@ pub trait CommonData {
                 delete_result.gained_bytes += file_entry.get_size();
             }
         }
+
+        delete_result
     }
 
     #[allow(clippy::print_stdout)]

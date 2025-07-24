@@ -72,7 +72,7 @@ impl EmptyFolder {
     }
 
     #[fun_time(message = "find_empty_folders", level = "info")]
-    pub fn find_empty_folders(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) {
+    pub fn find_empty_folders(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
         self.prepare_items();
         if self.check_for_empty_folders(stop_flag, progress_sender) == WorkContinueStatus::Stop {
             self.common_data.stopped_search = true;
@@ -104,7 +104,7 @@ impl EmptyFolder {
     }
 
     #[fun_time(message = "check_for_empty_folders", level = "debug")]
-    fn check_for_empty_folders(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_for_empty_folders(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let mut folders_to_check: Vec<PathBuf> = self.common_data.directories.included_directories.clone();
 
         let (progress_thread_handle, progress_thread_run, items_counter, _check_was_stopped, _size_counter) =

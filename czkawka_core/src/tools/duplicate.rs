@@ -169,7 +169,7 @@ impl DuplicateFinder {
     }
 
     #[fun_time(message = "find_duplicates", level = "info")]
-    pub fn find_duplicates(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) {
+    pub fn find_duplicates(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
         self.prepare_items();
         self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
 
@@ -209,7 +209,7 @@ impl DuplicateFinder {
     }
 
     #[fun_time(message = "check_files_name", level = "debug")]
-    fn check_files_name(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_files_name(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let group_by_func = if self.get_params().case_sensitive_name_comparison {
             |fe: &FileEntry| {
                 fe.path
@@ -296,7 +296,7 @@ impl DuplicateFinder {
     }
 
     #[fun_time(message = "check_files_size_name", level = "debug")]
-    fn check_files_size_name(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_files_size_name(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let group_by_func = if self.get_params().case_sensitive_name_comparison {
             |fe: &FileEntry| {
                 (
@@ -392,7 +392,7 @@ impl DuplicateFinder {
     }
 
     #[fun_time(message = "check_files_size", level = "debug")]
-    fn check_files_size(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_files_size(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let result = DirTraversalBuilder::new()
             .common_data(&self.common_data)
             .group_by(|fe| fe.size)
@@ -557,7 +557,7 @@ impl DuplicateFinder {
     #[fun_time(message = "prehashing", level = "debug")]
     fn prehashing(
         &mut self,
-        stop_flag: Option<&Arc<AtomicBool>>,
+        stop_flag: &Arc<AtomicBool>,
         progress_sender: Option<&Sender<ProgressData>>,
         pre_checked_map: &mut BTreeMap<u64, Vec<DuplicateEntry>>,
     ) -> WorkContinueStatus {
@@ -782,7 +782,7 @@ impl DuplicateFinder {
     #[fun_time(message = "full_hashing", level = "debug")]
     fn full_hashing(
         &mut self,
-        stop_flag: Option<&Arc<AtomicBool>>,
+        stop_flag: &Arc<AtomicBool>,
         progress_sender: Option<&Sender<ProgressData>>,
         pre_checked_map: BTreeMap<u64, Vec<DuplicateEntry>>,
     ) -> WorkContinueStatus {
@@ -925,7 +925,7 @@ impl DuplicateFinder {
     }
 
     #[fun_time(message = "check_files_hash", level = "debug")]
-    fn check_files_hash(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_files_hash(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         assert_eq!(self.get_params().check_method, CheckingMethod::Hash);
 
         let mut pre_checked_map: BTreeMap<u64, Vec<DuplicateEntry>> = Default::default();
@@ -1348,7 +1348,7 @@ pub fn hash_calculation(
     file_entry: &DuplicateEntry,
     hash_type: HashType,
     size_counter: &Arc<AtomicU64>,
-    stop_flag: Option<&Arc<AtomicBool>>,
+    stop_flag: &Arc<AtomicBool>,
 ) -> Result<Option<String>, String> {
     let mut file_handler = match File::open(&file_entry.path) {
         Ok(t) => t,
@@ -1468,7 +1468,7 @@ mod tests {
         file.write_all(b"aaAAAAAAAAAAAAAAFFFFFFFFFFFFFFFFFFFFGGGGGGGGG")?;
         let e = DuplicateEntry { path: src, ..Default::default() };
         let size_counter = Arc::new(AtomicU64::new(0));
-        let r = hash_calculation(&mut buf, &e, HashType::Blake3, &size_counter, None)
+        let r = hash_calculation(&mut buf, &e, HashType::Blake3, &size_counter, &Arc::default())
             .expect("hash_calculation failed")
             .expect("hash_calculation returned None");
         assert!(!r.is_empty());
@@ -1506,7 +1506,7 @@ mod tests {
         let mut buf = [0u8; 1 << 10];
         let src = dir.path().join("a");
         let e = DuplicateEntry { path: src, ..Default::default() };
-        let r = hash_calculation(&mut buf, &e, HashType::Blake3, &Arc::default(), None).expect_err("hash_calculation succeeded");
+        let r = hash_calculation(&mut buf, &e, HashType::Blake3, &Arc::default(), &Arc::default()).expect_err("hash_calculation succeeded");
         assert!(!r.is_empty());
         Ok(())
     }

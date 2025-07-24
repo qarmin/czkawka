@@ -76,7 +76,7 @@ fn main() {
     let app = MainWindow::new().expect("Failed to create main window");
 
     let (progress_sender, progress_receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
-    let stop_flag: Arc<AtomicBool> = Arc::new(AtomicBool::new(false));
+    let stop_flag: Arc<AtomicBool> = Arc::default();
 
     zeroing_all_models(&app);
 

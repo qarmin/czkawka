@@ -252,7 +252,7 @@ fn duplicate_search(
 
             set_common_settings(&mut item, &loaded_commons);
             item.set_delete_outdated_cache(delete_outdated_cache);
-            item.find_duplicates(Some(&stop_flag), Some(&progress_data_sender));
+            item.find_duplicates(&stop_flag, Some(&progress_data_sender));
             result_sender.send(Message::Duplicates(item)).expect("Failed to send Duplicates message");
         })
         .expect("Failed to spawn DuplicateFinder thread");
@@ -277,7 +277,7 @@ fn empty_files_search(
             let mut item = EmptyFiles::new();
 
             set_common_settings(&mut item, &loaded_commons);
-            item.find_empty_files(Some(&stop_flag), Some(&progress_data_sender));
+            item.find_empty_files(&stop_flag, Some(&progress_data_sender));
             result_sender.send(Message::EmptyFiles(item)).expect("Failed to send EmptyFiles message");
         })
         .expect("Failed to spawn EmptyFiles thread");
@@ -302,7 +302,7 @@ fn empty_dirs_search(
             let mut item = EmptyFolder::new();
 
             set_common_settings(&mut item, &loaded_commons);
-            item.find_empty_folders(Some(&stop_flag), Some(&progress_data_sender));
+            item.find_empty_folders(&stop_flag, Some(&progress_data_sender));
             result_sender.send(Message::EmptyFolders(item)).expect("Failed to send EmptyFolders message");
         })
         .expect("Failed to spawn EmptyFolders thread");
@@ -335,7 +335,7 @@ fn big_files_search(
             let mut item = BigFile::new(params);
 
             set_common_settings(&mut item, &loaded_commons);
-            item.find_big_files(Some(&stop_flag), Some(&progress_data_sender));
+            item.find_big_files(&stop_flag, Some(&progress_data_sender));
             result_sender.send(Message::BigFiles(item)).expect("Failed to send BigFiles message");
         })
         .expect("Failed to spawn BigFiles thread");
@@ -360,7 +360,7 @@ fn temporary_files_search(
             let mut item = Temporary::new();
 
             set_common_settings(&mut item, &loaded_commons);
-            item.find_temporary_files(Some(&stop_flag), Some(&progress_data_sender));
+            item.find_temporary_files(&stop_flag, Some(&progress_data_sender));
             result_sender.send(Message::Temporary(item)).expect("Failed to send Temporary message");
         })
         .expect("Failed to spawn Temporary thread");
@@ -437,7 +437,7 @@ fn same_music_search(
                 let mut item = SameMusic::new(params);
 
                 set_common_settings(&mut item, &loaded_commons);
-                item.find_same_music(Some(&stop_flag), Some(&progress_data_sender));
+                item.find_same_music(&stop_flag, Some(&progress_data_sender));
                 result_sender.send(Message::SameMusic(item)).expect("Failed to send SameMusic message");
             })
             .expect("Failed to spawn SameMusic thread");
@@ -508,7 +508,7 @@ fn broken_files_search(
                 let mut item = BrokenFiles::new(params);
 
                 set_common_settings(&mut item, &loaded_commons);
-                item.find_broken_files(Some(&stop_flag), Some(&progress_data_sender));
+                item.find_broken_files(&stop_flag, Some(&progress_data_sender));
                 result_sender.send(Message::BrokenFiles(item)).expect("Failed to send BrokenFiles message");
             })
             .expect("Failed to spawn BrokenFiles thread");
@@ -585,7 +585,7 @@ fn similar_image_search(
 
             set_common_settings(&mut item, &loaded_commons);
             item.set_delete_outdated_cache(delete_outdated_cache);
-            item.find_similar_images(Some(&stop_flag), Some(&progress_data_sender));
+            item.find_similar_images(&stop_flag, Some(&progress_data_sender));
             result_sender.send(Message::SimilarImages(item)).expect("Failed to send SimilarImages message");
         })
         .expect("Failed to spawn SimilarImages thread");
@@ -621,7 +621,7 @@ fn similar_video_search(
 
             set_common_settings(&mut item, &loaded_commons);
             item.set_delete_outdated_cache(delete_outdated_cache);
-            item.find_similar_videos(Some(&stop_flag), Some(&progress_data_sender));
+            item.find_similar_videos(&stop_flag, Some(&progress_data_sender));
             result_sender.send(Message::SimilarVideos(item)).expect("Failed to send SimilarVideos message");
         })
         .expect("Failed to spawn SimilarVideos thread");
@@ -646,7 +646,7 @@ fn bad_symlinks_search(
             let mut item = InvalidSymlinks::new();
 
             set_common_settings(&mut item, &loaded_commons);
-            item.find_invalid_links(Some(&stop_flag), Some(&progress_data_sender));
+            item.find_invalid_links(&stop_flag, Some(&progress_data_sender));
             result_sender.send(Message::InvalidSymlinks(item)).expect("Failed to send InvalidSymlinks message");
         })
         .expect("Failed to spawn InvalidSymlinks thread");
@@ -672,7 +672,7 @@ fn bad_extensions_search(
             let mut item = BadExtensions::new(params);
 
             set_common_settings(&mut item, &loaded_commons);
-            item.find_bad_extensions_files(Some(&stop_flag), Some(&progress_data_sender));
+            item.find_bad_extensions_files(&stop_flag, Some(&progress_data_sender));
             result_sender.send(Message::BadExtensions(item)).expect("Failed to send BadExtensions message");
         })
         .expect("Failed to spawn BadExtensions thread");

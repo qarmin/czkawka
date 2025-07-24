@@ -68,7 +68,7 @@ impl Temporary {
     }
 
     #[fun_time(message = "find_temporary_files", level = "info")]
-    pub fn find_temporary_files(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) {
+    pub fn find_temporary_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
         self.prepare_items();
         if self.check_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
             self.common_data.stopped_search = true;
@@ -79,7 +79,7 @@ impl Temporary {
     }
 
     #[fun_time(message = "check_files", level = "debug")]
-    fn check_files(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let mut folders_to_check: Vec<PathBuf> = self.common_data.directories.included_directories.clone();
 
         let (progress_thread_handle, progress_thread_run, items_counter, _check_was_stopped, _size_counter) =

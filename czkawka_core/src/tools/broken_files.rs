@@ -112,7 +112,7 @@ impl BrokenFiles {
     }
 
     #[fun_time(message = "find_broken_files", level = "info")]
-    pub fn find_broken_files(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) {
+    pub fn find_broken_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
         self.prepare_items();
         if self.check_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
             self.common_data.stopped_search = true;
@@ -127,7 +127,7 @@ impl BrokenFiles {
     }
 
     #[fun_time(message = "check_files", level = "debug")]
-    fn check_files(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let zip_extensions = ZIP_FILES_EXTENSIONS.iter().collect::<HashSet<_>>();
         let audio_extensions = AUDIO_FILES_EXTENSIONS.iter().collect::<HashSet<_>>();
         let pdf_extensions = PDF_FILES_EXTENSIONS.iter().collect::<HashSet<_>>();
@@ -291,7 +291,7 @@ impl BrokenFiles {
     }
 
     #[fun_time(message = "look_for_broken_files", level = "debug")]
-    fn look_for_broken_files(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn look_for_broken_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.files_to_check.is_empty() {
             return WorkContinueStatus::Continue;
         }
