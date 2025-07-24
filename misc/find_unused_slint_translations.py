@@ -1,5 +1,4 @@
 import os
-import re
 import sys
 
 
@@ -8,7 +7,7 @@ import sys
 # Check if in all items from translations are used in a way f"set_{}(" in src/connect_translation.rs
 
 
-def find_files(root: str, ext: str, folder: str | None):
+def find_files(root: str, ext: str, folder: str | None) -> list[str]:
     files = []
     for dirpath, _, filenames in os.walk(root):
         for f in filenames:
@@ -38,6 +37,18 @@ def extract_ftl_keys(ftl_path: str) -> list[str]:
     return keys
 
 
+def extract_slint_properties(slint_path: str) -> list[str]:
+    properties = []
+    with open(slint_path, "r", encoding="utf-8") as f:
+        lines = f.readlines()
+        for slint_line in lines:
+            if "property " not in slint_line:
+                continue
+            properties.append(slint_line.split(">")[1].split(":")[0].strip())
+    properties.sort()
+    return properties
+
+
 if len(sys.argv) < 2:
     print("Usage: python find_unused_slint_translations.py <folder>")
     sys.exit(1)
@@ -47,38 +58,34 @@ rust_translation_content = open(f"{folder}/src/connect_translation.rs", "r", enc
 
 missing_in_slint = []
 
-# Special step in Krokiet
-if folder == "krokiet":
-    slint_translation_content = open(f"{folder}/ui/translations.slint", "r", encoding="utf-8").read()
-    slint_files = find_files(folder, ".slint", folder)
-    assert any(
-        [file for file in slint_files if "translations.slint" in file]), "No translations.slint found in krokiet folder"
-    slint_files = [file for file in slint_files if "translations.slint" not in file]
-    slint_files_content = read_files(slint_files)
-    arguments = []
-    for slint_line in slint_translation_content.splitlines():
-        if "property " not in slint_line:
-            continue
-        arguments.append(slint_line.split(">")[1].split(":")[0].strip())
-    print(f"Found {len(arguments)} arguments in translations.slint")
+slint_files = find_files(folder, ".slint", folder)
+assert any([file for file in slint_files if "translations.slint" in file]), (
+    "No translations.slint found in krokiet folder"
+)
+slint_files = [file for file in slint_files if "translations.slint" not in file]
+slint_files_content = read_files(slint_files)
+arguments = extract_slint_properties(f"{folder}/ui/translations.slint")
+print(f"Found {len(arguments)} arguments in translations.slint")
 
-    # Check if all arguments are used in Slint files
-    for argument in arguments:
-        if f"Translations.{argument}" not in slint_files_content:
-            missing_in_slint.append(argument)
-    missing_in_slint.sort()
+# Check if all arguments are used in Slint files
+for argument in arguments:
+    if f"Translations.{argument}" not in slint_files_content:
+        missing_in_slint.append(argument)
+missing_in_slint.sort()
 
-    missing_in_rust = []
-    for argument in arguments:
-        if f"set_{argument}(" not in rust_translation_content:
-            missing_in_rust.append(argument)
-    missing_in_rust.sort()
+missing_in_rust = []
+for argument in arguments:
+    if f"set_{argument}(" not in rust_translation_content:
+        missing_in_rust.append(argument)
+missing_in_rust.sort()
 
-    if len(missing_in_rust) > 0:
-        print("---- Arguments not used in Rust translation file: " + ", ".join(f"\033[32m{arg}\033[0m" for arg in missing_in_rust))
-    if len(missing_in_slint) > 0:
-        print("---- Arguments not used in Slint files: " + ", ".join(f"\033[32m{arg}\033[0m" for arg in missing_in_slint))
+if len(missing_in_rust) > 0:
+    print(
+        "---- Arguments not used in Rust translation file: "
+        + ", ".join(f"\033[32m{arg}\033[0m" for arg in missing_in_rust)
+    )
+if len(missing_in_slint) > 0:
+    print("---- Arguments not used in Slint files: " + ", ".join(f"\033[32m{arg}\033[0m" for arg in missing_in_slint))
 
-    if len(missing_in_slint) > 0 or len(missing_in_rust) > 0:
-        sys.exit(1)
-
+if len(missing_in_slint) > 0 or len(missing_in_rust) > 0:
+    sys.exit(1)

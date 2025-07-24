@@ -48,6 +48,7 @@ upgrade:
     cargo update
 
 fix:
+    ruff format --line-length 120
     python3 misc/delete_unused_krokiet_slint_imports.py
     python3 misc/find_unused_fluent_translations.py czkawka_gui
     python3 misc/find_unused_fluent_translations.py krokiet

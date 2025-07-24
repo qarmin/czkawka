@@ -1,8 +1,8 @@
 import os
-import re
 import sys
 
-def find_files(root: str, ext: str, folder: str| None):
+
+def find_files(root: str, ext: str, folder: str | None) -> list[str]:
     files = []
     for dirpath, _, filenames in os.walk(root):
         for f in filenames:
@@ -10,12 +10,14 @@ def find_files(root: str, ext: str, folder: str| None):
                 files.append(os.path.join(dirpath, f))
     return files
 
+
 def read_files(files: list[str]) -> str:
     content = ""
     for f in files:
         with open(f, "r", encoding="utf-8") as file:
             content += file.read() + "\n"
     return content
+
 
 def extract_ftl_keys(ftl_path: str) -> list[str]:
     keys = []
@@ -28,6 +30,7 @@ def extract_ftl_keys(ftl_path: str) -> list[str]:
             key = line.split("=")[0].strip()
             keys.append(key)
     return keys
+
 
 if len(sys.argv) < 2:
     print("Usage: python find_unused_fluent_translations.py <folder>")
@@ -47,7 +50,7 @@ for ftl_file in ftl_files:
     keys = extract_ftl_keys(ftl_file)
     print(f"Found {len(keys)} keys in {ftl_file}")
     for key in keys:
-        if not re.search(rf'"\b{re.escape(key)}\b"', rust_content):
+        if f'"{key}"' not in rust_content:
             unused.append(key)
     if unused:
         print(f"Unused keys in {ftl_file}:")
