@@ -23,6 +23,11 @@ impl Messages {
         println!("{}", self.create_messages_text());
     }
 
+    pub fn print_messages_to_writer<T: std::io::Write>(&self, writer: &mut T) -> std::io::Result<()> {
+        let text = self.create_messages_text();
+        writer.write_all(text.as_bytes())
+    }
+
     pub fn create_messages_text(&self) -> String {
         let mut text_to_return: String = String::new();
 

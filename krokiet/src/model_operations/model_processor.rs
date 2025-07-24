@@ -4,12 +4,12 @@ use std::time::Duration;
 
 use crossbeam_channel::Sender;
 use czkawka_core::common_messages::Messages;
+use czkawka_core::delayed_sender::DelayedSender;
 use czkawka_core::progress_data::{CurrentStage, ProgressData};
 use log::error;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use slint::{ComponentHandle, ModelRc, VecModel, Weak};
 
-use crate::common::delayed_sender::DelayedSender;
 use crate::connect_row_selection::reset_selection;
 use crate::model_operations::ProcessingResult;
 use crate::simpler_model::{SimplerMainListModel, ToSlintModel};

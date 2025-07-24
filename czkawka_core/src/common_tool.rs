@@ -72,6 +72,7 @@ pub trait CommonData {
     fn get_test_type(&self) -> (ToolType, CheckingMethod) {
         (self.get_cd().tool_type, self.get_check_method())
     }
+    fn found_any_broken_files(&self) -> bool;
 
     fn get_tool_type(&self) -> ToolType {
         self.get_cd().tool_type

@@ -1074,6 +1074,9 @@ impl CommonData for SameMusic {
     fn get_check_method(&self) -> CheckingMethod {
         self.get_params().check_type
     }
+    fn found_any_broken_files(&self) -> bool {
+        self.information.number_of_duplicates > 0
+    }
 }
 
 #[cfg(test)]

@@ -17,7 +17,7 @@ run +args:
     cargo run --bin {{args}}
 
 runr +args:
-    cargo run --bin {{args}} --release
+    cargo run --release --bin {{args}}
 
 runc +args:
     CARGO_PROFILE_DEV_CODEGEN_BACKEND=cranelift cargo +nightly run -Zcodegen-backend --bin {{args}}

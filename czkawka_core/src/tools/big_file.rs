@@ -181,6 +181,9 @@ impl CommonData for BigFile {
     fn get_cd_mut(&mut self) -> &mut CommonToolData {
         &mut self.common_data
     }
+    fn found_any_broken_files(&self) -> bool {
+        self.information.number_of_real_files > 0
+    }
 }
 
 impl BigFile {

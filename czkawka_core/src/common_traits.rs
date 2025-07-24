@@ -35,6 +35,11 @@ pub trait PrintResults {
         Ok(())
     }
 
+    #[fun_time(message = "print_results_to_writer", level = "debug")]
+    fn print_results_to_writer<T: Write>(&self, writer: &mut T) -> std::io::Result<()> {
+        self.write_results(writer)
+    }
+
     fn save_results_to_file_as_json(&self, file_name: &str, pretty_print: bool) -> std::io::Result<()>;
 
     fn save_results_to_file_as_json_internal<T: Serialize + std::fmt::Debug>(&self, file_name: &str, item_to_serialize: &T, pretty_print: bool) -> std::io::Result<()> {

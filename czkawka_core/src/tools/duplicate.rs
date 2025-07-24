@@ -1411,6 +1411,12 @@ impl CommonData for DuplicateFinder {
     fn get_check_method(&self) -> CheckingMethod {
         self.get_params().check_method
     }
+    fn found_any_broken_files(&self) -> bool {
+        self.get_information().number_of_duplicated_files_by_hash > 0
+            || self.get_information().number_of_duplicated_files_by_name > 0
+            || self.get_information().number_of_duplicated_files_by_size > 0
+            || self.get_information().number_of_duplicated_files_by_size_name > 0
+    }
 }
 
 #[cfg(test)]
