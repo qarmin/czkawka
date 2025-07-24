@@ -1,10 +1,19 @@
+use std::fs;
 use std::path::PathBuf;
-
+use std::sync::Arc;
+use std::sync::atomic::AtomicBool;
+use std::time::Duration;
+use crossbeam_channel::Sender;
+use rayon::prelude::*;
+use crate::common::remove_folder_if_contains_only_empty_folders;
 use crate::common_dir_traversal::{CheckingMethod, ToolType};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
+use crate::common_traits::ResultEntry;
+use crate::delayed_sender::DelayedSender;
+use crate::progress_data::{CurrentStage, ProgressData};
 
 #[derive(Debug, Clone, Default)]
 pub struct CommonToolData {
@@ -23,6 +32,21 @@ pub struct CommonToolData {
     pub(crate) save_also_as_json: bool,
     pub(crate) use_reference_folders: bool,
     pub(crate) dry_run: bool,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct DeleteResult {
+     deleted_files: usize,
+     gained_bytes: u64,
+     failed_to_delete_files: usize  ,
+     errors: Vec<String>,
+    infos: Vec<String>,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum DeleteItemType {
+    DeletingFiles,
+    DeletingFolders,
 }
 
 #[derive(Eq, PartialEq, Clone, Debug, Copy, Default)]
@@ -201,6 +225,63 @@ pub trait CommonData {
         // Optimizes directories and removes recursive calls
         let messages = self.get_cd_mut().directories.optimize_directories(recursive_search);
         self.get_cd_mut().text_messages.extend_with_another_messages(messages);
+    }
+
+    fn delete_elements<T: ResultEntry + Sized + ParallelIterator + IntoParallelIterator>(&self, files_to_delete: Vec<T>, stop_flag: &Arc<AtomicBool>, progress_sender: Sender<ProgressData>, delete_item_type: DeleteItemType) {
+        let dry_run = self.get_cd().dry_run;
+        let mut progress= ProgressData::get_empty_state(CurrentStage::DeletingFiles);
+        progress.bytes_to_check = files_to_delete.iter().map(|e| e.get_size()).sum();
+        progress.entries_to_check = files_to_delete.len();
+
+        let delayed_sender = DelayedSender::new(progress_sender, Duration::from_millis(200));
+
+        let bytes_processed = Arc::new(std::sync::atomic::AtomicU64::new(0));
+        let files_processed = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+
+        let res = files_to_delete.into_par_iter().map(|e|{
+            if stop_flag.load(std::sync::atomic::Ordering::Relaxed) {
+                return None;
+            }
+
+            let mut progress_tmp = progress.clone();
+            progress_tmp.bytes_checked = bytes_processed.fetch_add(e.get_size(), std::sync::atomic::Ordering::Relaxed);
+            progress_tmp.entries_checked = files_processed.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+
+            delayed_sender.send(progress_tmp);
+
+            if dry_run {
+                return Some((e, None));
+            }
+
+            let delete_res = if delete_item_type == DeleteItemType::DeletingFiles {
+                fs::remove_file(e.get_path()).map_err(|err|format!("Failed to delete \"{}\": {err}", e.get_path().to_string_lossy()))
+            } else {
+                remove_folder_if_contains_only_empty_folders(e.get_path(), false)
+            };
+
+            match delete_res {
+                Ok(_) => Some((e, None)),
+                Err(err) => {
+                    Some((e, Some(err)))
+                }
+            }
+        }).while_some().collect::<Vec<_>>();
+
+
+        let mut delete_result = DeleteResult::default();
+
+        for (file_entry, delete_err) in res {
+            if let Some(err) = delete_err {
+                delete_result.errors.push(err);
+                delete_result.failed_to_delete_files += 1;
+            } else {
+                if dry_run {
+                    delete_result.infos.push(format!("Would delete: \"{}\"", file_entry.get_path().to_string_lossy()));
+                }
+                delete_result.deleted_files += 1;
+                delete_result.gained_bytes += file_entry.get_size();
+            }
+        }
     }
 
     #[allow(clippy::print_stdout)]

@@ -27,3 +27,4 @@ misc/*/*.lock
 misc/*/target/
 misc/*/.idea
 benchmarks
+TestFiles
