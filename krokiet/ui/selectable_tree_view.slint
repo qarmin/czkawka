@@ -163,7 +163,11 @@ export component SelectableTableView inherits Rectangle {
             last_selected_idx = (last_selected_idx - items).max(0);
             // If hit at header, try to skip it
             if (!contains_data(last_selected_idx)) {
-                last_selected_idx = (last_selected_idx - 1).max(0);
+                if (last_selected_idx == 0) {
+                    last_selected_idx = 1; // If 0 item don't have data, that means that it is header, so skip it
+                } else {
+                    last_selected_idx = (last_selected_idx - 1).max(0);
+                }
             }
 
             if (!modifiers.shift) {
