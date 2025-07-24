@@ -19,14 +19,13 @@ use czkawka_core::tools::similar_images::SimilarImages;
 use czkawka_core::tools::similar_videos::SimilarVideos;
 use czkawka_core::tools::temporary::Temporary;
 use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
-use glib::{Bytes, Error};
+use glib::Bytes;
 use gtk4::gdk_pixbuf::Colorspace;
 use gtk4::prelude::*;
 use gtk4::{ListStore, Scale, ScrollType, TextView, TreeView, Widget};
 use image::codecs::jpeg::JpegEncoder;
-use image::{DynamicImage, EncodableLayout, GenericImageView, RgbaImage};
+use image::{DynamicImage, GenericImageView, RgbaImage};
 use log::debug;
-use once_cell::sync::OnceCell;
 use resvg::tiny_skia;
 use resvg::usvg::{Options, Tree};
 
@@ -772,8 +771,8 @@ pub fn get_pixbuf_from_dynamic_image(dynamic_image: &DynamicImage) -> Result<Pix
     let mut output = Vec::new();
     JpegEncoder::new(&mut output)
         .encode_image(dynamic_image)
-        .map_err(|e| format!("Failed to encode image: {}", e))?;
-    Pixbuf::from_read(BufReader::new(Cursor::new(output))).map_err(|e| format!("Failed to create Pixbuf from DynamicImage: {}", e))
+        .map_err(|e| format!("Failed to encode image: {e}"))?;
+    Pixbuf::from_read(BufReader::new(Cursor::new(output))).map_err(|e| format!("Failed to create Pixbuf from DynamicImage: {e}"))
 }
 
 pub fn check_if_value_is_in_list_store(list_store: &ListStore, column: i32, value: &str) -> bool {

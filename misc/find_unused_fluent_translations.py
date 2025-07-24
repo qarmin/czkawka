@@ -30,7 +30,7 @@ def extract_ftl_keys(ftl_path: str) -> list[str]:
     return keys
 
 if len(sys.argv) < 2:
-    print("Usage: python find_unused_translations.py <folder>")
+    print("Usage: python find_unused_fluent_translations.py <folder>")
     sys.exit(1)
 
 folder = sys.argv[1]
