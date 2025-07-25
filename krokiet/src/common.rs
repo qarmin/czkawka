@@ -1,7 +1,5 @@
 #![allow(dead_code)]
 
-pub mod delayed_sender;
-
 use std::path::PathBuf;
 
 use slint::{ComponentHandle, Model, ModelRc, SharedString, VecModel};
