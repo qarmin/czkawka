@@ -56,18 +56,21 @@ impl DeleteResult {
 pub enum DeleteItemType<T: ResultEntry + Sized + Send + Sync> {
     DeletingFiles(Vec<T>),
     DeletingFolders(Vec<T>),
+    HardlinkingFiles(Vec<(T, Vec<T>)>),
 }
 
 impl<T: ResultEntry + Sized + Send + Sync> DeleteItemType<T> {
     fn calculate_size_to_delete(&self) -> u64 {
         match &self {
             Self::DeletingFiles(items) | Self::DeletingFolders(items) => items.iter().map(|item| item.get_size()).sum(),
+            Self::HardlinkingFiles(items) => items.iter().map(|(item, _)| item.get_size()).sum(),
         }
     }
 
     fn calculate_entries_to_delete(&self) -> usize {
         match &self {
             Self::DeletingFiles(items) | Self::DeletingFolders(items) => items.len(),
+            Self::HardlinkingFiles(items) => items.iter().map(|(_original, files)| files.len()).sum(),
         }
     }
 }
@@ -299,21 +302,54 @@ pub trait CommonData {
                     }
 
                     if dry_run {
-                        return Some((e, None));
+                        return Some(vec![(e, None)]);
                     }
 
                     let delete_res = if matches!(delete_item_type, DeleteItemType::DeletingFiles(_)) {
                         fs::remove_file(e.get_path()).map_err(|err| format!("Failed to delete \"{}\": {err}", e.get_path().to_string_lossy()))
                     } else {
-                        remove_folder_if_contains_only_empty_folders(e.get_path(), false)
+                        remove_folder_if_contains_only_empty_folders(e.get_path(), false) // TODO remove to trash should be an option
                     };
 
                     match delete_res {
-                        Ok(()) => Some((e, None)),
-                        Err(err) => Some((e, Some(err))),
+                        Ok(()) => Some(vec![(e, None)]),
+                        Err(err) => Some(vec![(e, Some(err))]),
                     }
                 })
                 .while_some()
+                .flatten()
+                .collect::<Vec<_>>(),
+            DeleteItemType::HardlinkingFiles(ref items) => items
+                .into_par_iter()
+                .map(|(original, files)| {
+                    if stop_flag.load(std::sync::atomic::Ordering::Relaxed) {
+                        return None;
+                    }
+
+                    let mut progress_tmp = progress;
+                    progress_tmp.bytes_checked = bytes_processed.fetch_add(files.iter().map(|e|e.get_size()).sum(), std::sync::atomic::Ordering::Relaxed);
+                    progress_tmp.entries_checked = files_processed.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+
+                    if let Some(e) = delayed_sender.as_ref() {
+                        e.send(progress_tmp);
+                    }
+
+                    if dry_run {
+                        return Some(files.into_iter().map(|e| (e, None)).collect::<Vec<_>>());
+                    }
+
+                    let res = files.into_iter().map(|file| {
+                        let err = match fs::hard_link(original.get_path(), file.get_path()) {
+                            Ok(()) => None,
+                            Err(err) => Some(format!("Failed to hardlink \"{}\" to \"{}\": {err}", original.get_path().to_string_lossy(), file.get_path().to_string_lossy())),
+                        };
+                        (file, err)
+                    }).collect::<Vec<_>>();
+
+                    return Some(res);
+                })
+                .while_some()
+                .flatten()
                 .collect::<Vec<_>>(),
         };
 
