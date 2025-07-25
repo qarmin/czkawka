@@ -22,7 +22,7 @@ pub mod common_items;
 pub mod common_messages;
 pub mod common_tool;
 pub mod common_traits;
-pub mod delayed_sender;
+pub mod helpers;
 pub mod localizer_core;
 pub mod progress_data;
 pub mod tools;

@@ -5,7 +5,7 @@ use std::time::{Duration, Instant};
 
 /// A sender that delays sending values until a specified wait time has passed since the last sent value.
 /// This is useful for batching updates or reducing the frequency of sending messages in a multi-threaded environment.
-/// It is not ideal - using mutexes in send function from multiple threads can lead to performance issues(waiting for), but at least for now I don't see too much performance impact.
+/// It is not ideal - using mutexes in send function from multiple threads can lead to performance issues(waiting for mutex release), but at least for now I don't see too much performance impact.
 /// In future here could be used something like one element channel which would drop all other messages, but not sure if currently something like this exists
 pub struct DelayedSender<T: Send + 'static> {
     slot: Arc<Mutex<Option<T>>>,
