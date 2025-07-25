@@ -53,9 +53,23 @@ impl DeleteResult {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum DeleteItemType {
-    DeletingFiles,
-    DeletingFolders,
+pub enum DeleteItemType<T: ResultEntry + Sized + Send + Sync> {
+    DeletingFiles(Vec<T>),
+    DeletingFolders(Vec<T>),
+}
+
+impl<T: ResultEntry + Sized + Send + Sync> DeleteItemType<T> {
+    fn calculate_size_to_delete(&self) -> u64 {
+        match &self {
+            Self::DeletingFiles(items) | Self::DeletingFolders(items) => items.iter().map(|item| item.get_size()).sum(),
+        }
+    }
+
+    fn calculate_entries_to_delete(&self) -> usize {
+        match &self {
+            Self::DeletingFiles(items) | Self::DeletingFolders(items) => items.len(),
+        }
+    }
 }
 
 #[derive(Eq, PartialEq, Clone, Debug, Copy, Default)]
@@ -236,14 +250,13 @@ pub trait CommonData {
         self.get_cd_mut().text_messages.extend_with_another_messages(messages);
     }
 
-    fn delete_elements_and_add_to_messages<T: ResultEntry + Sized + Send>(
+    fn delete_elements_and_add_to_messages<T: ResultEntry + Sized + Send + Sync>(
         &mut self,
-        files_to_delete: Vec<T>,
         stop_flag: &Arc<AtomicBool>,
         progress_sender: Option<&Sender<ProgressData>>,
-        delete_item_type: DeleteItemType,
+        delete_item_type: DeleteItemType<T>,
     ) -> WorkContinueStatus {
-        let delete_results = self.delete_elements(files_to_delete, stop_flag, progress_sender, delete_item_type);
+        let delete_results = self.delete_elements(stop_flag, progress_sender, delete_item_type);
 
         if stop_flag.load(std::sync::atomic::Ordering::Relaxed) {
             WorkContinueStatus::Stop
@@ -253,55 +266,56 @@ pub trait CommonData {
         }
     }
 
-    fn delete_elements<T: ResultEntry + Sized + Send>(
+    fn delete_elements<T: ResultEntry + Sized + Send + Sync>(
         &self,
-        files_to_delete: Vec<T>,
         stop_flag: &Arc<AtomicBool>,
         progress_sender: Option<&Sender<ProgressData>>,
-        delete_item_type: DeleteItemType,
+        delete_item_type: DeleteItemType<T>,
     ) -> DeleteResult {
         let dry_run = self.get_cd().dry_run;
         let mut progress = ProgressData::get_empty_state(CurrentStage::DeletingFiles);
-        progress.bytes_to_check = files_to_delete.iter().map(|e| e.get_size()).sum();
-        progress.entries_to_check = files_to_delete.len();
+        progress.bytes_to_check = delete_item_type.calculate_size_to_delete();
+        progress.entries_to_check = delete_item_type.calculate_entries_to_delete();
 
         let delayed_sender = progress_sender.map(|e| DelayedSender::new(e.clone(), Duration::from_millis(200)));
 
         let bytes_processed = Arc::new(std::sync::atomic::AtomicU64::new(0));
         let files_processed = Arc::new(std::sync::atomic::AtomicUsize::new(0));
 
-        let res = files_to_delete
-            .into_par_iter()
-            .map(|e| {
-                if stop_flag.load(std::sync::atomic::Ordering::Relaxed) {
-                    return None;
-                }
+        let res = match delete_item_type {
+            DeleteItemType::DeletingFiles(ref items) | DeleteItemType::DeletingFolders(ref items) => items
+                .into_par_iter()
+                .map(|e| {
+                    if stop_flag.load(std::sync::atomic::Ordering::Relaxed) {
+                        return None;
+                    }
 
-                let mut progress_tmp = progress;
-                progress_tmp.bytes_checked = bytes_processed.fetch_add(e.get_size(), std::sync::atomic::Ordering::Relaxed);
-                progress_tmp.entries_checked = files_processed.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                    let mut progress_tmp = progress;
+                    progress_tmp.bytes_checked = bytes_processed.fetch_add(e.get_size(), std::sync::atomic::Ordering::Relaxed);
+                    progress_tmp.entries_checked = files_processed.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
 
-                if let Some(e) = delayed_sender.as_ref() {
-                    e.send(progress_tmp);
-                }
+                    if let Some(e) = delayed_sender.as_ref() {
+                        e.send(progress_tmp);
+                    }
 
-                if dry_run {
-                    return Some((e, None));
-                }
+                    if dry_run {
+                        return Some((e, None));
+                    }
 
-                let delete_res = if delete_item_type == DeleteItemType::DeletingFiles {
-                    fs::remove_file(e.get_path()).map_err(|err| format!("Failed to delete \"{}\": {err}", e.get_path().to_string_lossy()))
-                } else {
-                    remove_folder_if_contains_only_empty_folders(e.get_path(), false)
-                };
+                    let delete_res = if matches!(delete_item_type, DeleteItemType::DeletingFiles(_)) {
+                        fs::remove_file(e.get_path()).map_err(|err| format!("Failed to delete \"{}\": {err}", e.get_path().to_string_lossy()))
+                    } else {
+                        remove_folder_if_contains_only_empty_folders(e.get_path(), false)
+                    };
 
-                match delete_res {
-                    Ok(()) => Some((e, None)),
-                    Err(err) => Some((e, Some(err))),
-                }
-            })
-            .while_some()
-            .collect::<Vec<_>>();
+                    match delete_res {
+                        Ok(()) => Some((e, None)),
+                        Err(err) => Some((e, Some(err))),
+                    }
+                })
+                .while_some()
+                .collect::<Vec<_>>(),
+        };
 
         let mut delete_result = DeleteResult::default();
 

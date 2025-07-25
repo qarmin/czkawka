@@ -693,7 +693,13 @@ mod tests {
         common_data.directories.set_included_directory([dir.path().to_owned()].to_vec());
         common_data.set_minimal_file_size(0);
 
-        match DirTraversalBuilder::new().group_by(|_fe| ()).stop_flag(&Arc::default()).common_data(&common_data).build().run() {
+        match DirTraversalBuilder::new()
+            .group_by(|_fe| ())
+            .stop_flag(&Arc::default())
+            .common_data(&common_data)
+            .build()
+            .run()
+        {
             DirTraversalResult::SuccessFiles {
                 warnings: _,
                 grouped_file_entries,
@@ -738,7 +744,13 @@ mod tests {
         common_data.directories.set_included_directory([dir.path().to_owned()].to_vec());
         common_data.set_minimal_file_size(0);
 
-        match DirTraversalBuilder::new().group_by(inode).stop_flag(&Arc::default()).common_data(&common_data).build().run() {
+        match DirTraversalBuilder::new()
+            .group_by(inode)
+            .stop_flag(&Arc::default())
+            .common_data(&common_data)
+            .build()
+            .run()
+        {
             DirTraversalResult::SuccessFiles {
                 warnings: _,
                 grouped_file_entries,
@@ -778,7 +790,13 @@ mod tests {
         common_data.directories.set_included_directory([dir.path().to_owned()].to_vec());
         common_data.set_minimal_file_size(0);
 
-        match DirTraversalBuilder::new().group_by(inode).stop_flag(&Arc::default()).common_data(&common_data).build().run() {
+        match DirTraversalBuilder::new()
+            .group_by(inode)
+            .stop_flag(&Arc::default())
+            .common_data(&common_data)
+            .build()
+            .run()
+        {
             DirTraversalResult::SuccessFiles {
                 warnings: _,
                 grouped_file_entries,

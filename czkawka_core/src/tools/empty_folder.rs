@@ -314,10 +314,9 @@ impl DeletingItems for EmptyFolder {
     fn delete_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         match self.common_data.delete_method {
             DeleteMethod::Delete => self.delete_elements_and_add_to_messages(
-                self.empty_folder_list.values().cloned().collect::<Vec<_>>(),
                 stop_flag,
                 progress_sender,
-                DeleteItemType::DeletingFolders,
+                DeleteItemType::DeletingFolders(self.empty_folder_list.values().cloned().collect::<Vec<_>>()),
             ),
             DeleteMethod::None => WorkContinueStatus::Continue,
             _ => unreachable!(),
