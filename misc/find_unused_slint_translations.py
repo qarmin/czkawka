@@ -49,6 +49,10 @@ def extract_slint_properties(slint_path: str) -> list[str]:
     return properties
 
 
+def format_green(text: str) -> str:
+    return f"\033[92m{text}\033[0m"
+
+
 if len(sys.argv) < 2:
     print("Usage: python find_unused_slint_translations.py <folder>")
     sys.exit(1)
@@ -81,11 +85,10 @@ missing_in_rust.sort()
 
 if len(missing_in_rust) > 0:
     print(
-        "---- Arguments not used in Rust translation file: "
-        + ", ".join(f"\033[32m{arg}\033[0m" for arg in missing_in_rust)
+        "---- Arguments not used in Rust translation file: " + ", ".join(format_green(arg) for arg in missing_in_rust)
     )
 if len(missing_in_slint) > 0:
-    print("---- Arguments not used in Slint files: " + ", ".join(f"\033[32m{arg}\033[0m" for arg in missing_in_slint))
+    print("---- Arguments not used in Slint files: " + ", ".join(format_green(arg) for arg in missing_in_slint))
 
 if len(missing_in_slint) > 0 or len(missing_in_rust) > 0:
     sys.exit(1)

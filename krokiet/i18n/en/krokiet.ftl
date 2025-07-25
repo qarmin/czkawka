@@ -1,6 +1,5 @@
 # In Rust translations
 rust_loaded_preset = Loaded preset { $preset_idx }
-rust_cannot_load_preset = Cannot load preset { $preset_idx }, reason: { $reason }
 rust_error_moving_to_trash = Error while moving to trash: { $error }
 rust_error_removing_file = Error while removing file: { $error }
 rust_file_already_exists = File \"{ $file }\" already exists, and will not be overridden
@@ -46,7 +45,6 @@ rust_found_broken_files = Found { $items_found } broken files
 rust_found_bad_extensions = Found { $items_found } files with bad extensions
 rust_found_duplicate_files = Found { $items_found } similar duplicate files
 rust_found_big_files = Found { $items_found } big files
-rust_loaded_preset = Loaded preset { $preset_idx }
 rust_cannot_load_preset = Cannot change and load preset { $preset_idx } - reason { $reason }, using default settings instead
 rust_saved_preset = Saved preset { $preset_idx }
 rust_cannot_save_preset = Cannot save preset { $preset_idx } - reason { $reason }
@@ -128,7 +126,6 @@ sort_by_full_name = Sort by full name
 sort_by_size = Sort by size
 sort_by_modification_date = Sort by modification date
 sort_by_selection = Sort by selection
-sort_by_checked = Sort by check status
 sort_reverse = Reverse order
 sort_by_checked = Sort by check status
 selection_all = Select all

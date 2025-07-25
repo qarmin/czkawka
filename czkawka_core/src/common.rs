@@ -555,7 +555,7 @@ pub fn regex_check(expression_item: &SingleExcludedItem, directory_name: &str) -
 }
 
 #[allow(clippy::string_slice)] // Is in char boundary
-pub(crate) fn normalize_windows_path(path_to_change: impl AsRef<Path>) -> PathBuf {
+pub fn normalize_windows_path(path_to_change: impl AsRef<Path>) -> PathBuf {
     let path = path_to_change.as_ref();
 
     // Don't do anything, because network path may be case intensive

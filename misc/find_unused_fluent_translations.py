@@ -29,7 +29,25 @@ def extract_ftl_keys(ftl_path: str) -> list[str]:
                 continue
             key = line.split("=")[0].strip()
             keys.append(key)
+
+    # Find duplicated keys
+    seen = set()
+    duplicates = set()
+    for key in keys:
+        if key in seen:
+            duplicates.add(key)
+        else:
+            seen.add(key)
+
+    if duplicates:
+        print(f"Warning: Found duplicated keys in {format_green(ftl_path)}: {format_green(', '.join(duplicates))}")
+        exit(1)
+
     return keys
+
+
+def format_green(text: str) -> str:
+    return f"\033[92m{text}\033[0m"
 
 
 if len(sys.argv) < 2:
@@ -55,7 +73,7 @@ for ftl_file in ftl_files:
     if unused:
         print(f"Unused keys in {ftl_file}:")
         for key in unused:
-            print(f"  {key}")
+            print(f"  {format_green(key)}")
         found = True
 
 if found:
