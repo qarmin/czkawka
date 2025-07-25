@@ -6,10 +6,10 @@ build_all:
 
 itests:
     [ ! -f TestFiles.zip ] && wget https://github.com/qarmin/czkawka/releases/download/6.0.0/TestFiles.zip || true
-    cd ci_tester;cargo build --release;cd ..
+    cd ci_tester && cargo build --release && cd ..
     cargo build --release --bin czkawka_cli
 
-    ci_tester/target/release/ci_tester target/release/czkawka_cli
+    RUST_BACKTRACE=1 ci_tester/target/release/ci_tester target/release/czkawka_cli
 
 ## run
 

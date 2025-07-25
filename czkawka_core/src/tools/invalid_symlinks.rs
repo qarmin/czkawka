@@ -1,4 +1,3 @@
-use std::fs;
 use std::io::prelude::*;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -14,7 +13,6 @@ use crate::common_dir_traversal::{Collect, DirTraversalBuilder, DirTraversalResu
 use crate::common_tool::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
 use crate::common_traits::*;
 use crate::progress_data::ProgressData;
-use crate::tools::empty_files::EmptyFiles;
 
 #[derive(Default)]
 pub struct Info {

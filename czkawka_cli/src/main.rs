@@ -38,6 +38,7 @@ use crate::progress::connect_progress;
 mod commands;
 mod progress;
 
+#[derive(Debug)]
 pub struct CliOutput {
     pub found_any_files: bool,
     pub ignored_error_code_on_found: bool,
@@ -90,8 +91,6 @@ fn main() {
     connect_progress(&progress_receiver);
 
     let cli_output = calculate_thread.join().expect("Failed to join calculation thread");
-
-    println!("{}", cli_output.output);
 
     if cli_output.found_any_files && !cli_output.ignored_error_code_on_found {
         std::process::exit(11);

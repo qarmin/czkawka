@@ -9,8 +9,9 @@ edition = "2021"
 [profile.release]
 debug-assertions = true
 overflow-checks = true
+debug = true
 
 [dependencies]
 state = "0.6.0"
-handsome_logger = "0.8.0"
+handsome_logger = "0.9.1"
 log = "0.4.20"
