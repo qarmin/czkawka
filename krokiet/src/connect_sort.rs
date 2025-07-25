@@ -6,7 +6,7 @@ use crate::common::connect_i32_into_u64;
 use crate::connect_row_selection::recalculate_small_selection_if_needed;
 use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow, SortMode};
 
-pub fn connect_sort(app: &MainWindow) {
+pub(crate) fn connect_sort(app: &MainWindow) {
     let a = app.as_weak();
     app.global::<Callabler>().on_sort_items(move |sort_mode| {
         let app = a.upgrade().expect("Failed to upgrade app :(");

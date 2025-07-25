@@ -21,7 +21,7 @@ use serde::{Deserialize, Serialize};
 use static_assertions::const_assert;
 use xxhash_rust::xxh3::Xxh3;
 
-use crate::common::{WorkContinueStatus, check_if_stop_received, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
+use crate::common::{WorkContinueStatus, check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crate::common_cache::{get_duplicate_cache_file, load_cache_from_file_generalized_by_size, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
@@ -169,7 +169,7 @@ impl DuplicateFinder {
     }
 
     #[fun_time(message = "find_duplicates", level = "info")]
-    pub fn find_duplicates(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) {
+    pub fn find_duplicates(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
         self.prepare_items();
         self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
 
@@ -204,12 +204,15 @@ impl DuplicateFinder {
             }
             _ => panic!(),
         }
-        self.delete_files();
+        if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+            self.common_data.stopped_search = true;
+            return;
+        };
         self.debug_print();
     }
 
     #[fun_time(message = "check_files_name", level = "debug")]
-    fn check_files_name(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_files_name(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let group_by_func = if self.get_params().case_sensitive_name_comparison {
             |fe: &FileEntry| {
                 fe.path
@@ -296,7 +299,7 @@ impl DuplicateFinder {
     }
 
     #[fun_time(message = "check_files_size_name", level = "debug")]
-    fn check_files_size_name(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_files_size_name(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let group_by_func = if self.get_params().case_sensitive_name_comparison {
             |fe: &FileEntry| {
                 (
@@ -392,7 +395,7 @@ impl DuplicateFinder {
     }
 
     #[fun_time(message = "check_files_size", level = "debug")]
-    fn check_files_size(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_files_size(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let result = DirTraversalBuilder::new()
             .common_data(&self.common_data)
             .group_by(|fe| fe.size)
@@ -557,7 +560,7 @@ impl DuplicateFinder {
     #[fun_time(message = "prehashing", level = "debug")]
     fn prehashing(
         &mut self,
-        stop_flag: Option<&Arc<AtomicBool>>,
+        stop_flag: &Arc<AtomicBool>,
         progress_sender: Option<&Sender<ProgressData>>,
         pre_checked_map: &mut BTreeMap<u64, Vec<DuplicateEntry>>,
     ) -> WorkContinueStatus {
@@ -782,7 +785,7 @@ impl DuplicateFinder {
     #[fun_time(message = "full_hashing", level = "debug")]
     fn full_hashing(
         &mut self,
-        stop_flag: Option<&Arc<AtomicBool>>,
+        stop_flag: &Arc<AtomicBool>,
         progress_sender: Option<&Sender<ProgressData>>,
         pre_checked_map: BTreeMap<u64, Vec<DuplicateEntry>>,
     ) -> WorkContinueStatus {
@@ -925,7 +928,7 @@ impl DuplicateFinder {
     }
 
     #[fun_time(message = "check_files_hash", level = "debug")]
-    fn check_files_hash(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_files_hash(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         assert_eq!(self.get_params().check_method, CheckingMethod::Hash);
 
         let mut pre_checked_map: BTreeMap<u64, Vec<DuplicateEntry>> = Default::default();
@@ -947,32 +950,19 @@ impl DuplicateFinder {
     }
 
     #[fun_time(message = "delete_files", level = "debug")]
-    fn delete_files(&mut self) {
+    fn delete_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.common_data.delete_method == DeleteMethod::None {
-            return;
+            return WorkContinueStatus::Continue;
         }
 
-        match self.get_params().check_method {
-            CheckingMethod::Name => {
-                let vec_files = self.files_with_identical_names.values().collect::<Vec<_>>();
-                delete_files_custom(&vec_files, &self.common_data.delete_method, &mut self.common_data.text_messages, self.common_data.dry_run);
-            }
-            CheckingMethod::SizeName => {
-                let vec_files = self.files_with_identical_size_names.values().collect::<Vec<_>>();
-                delete_files_custom(&vec_files, &self.common_data.delete_method, &mut self.common_data.text_messages, self.common_data.dry_run);
-            }
-            CheckingMethod::Hash => {
-                for vec_files in self.files_with_identical_hashes.values() {
-                    let vev: Vec<&Vec<DuplicateEntry>> = vec_files.iter().collect::<Vec<_>>();
-                    delete_files_custom(&vev, &self.common_data.delete_method, &mut self.common_data.text_messages, self.common_data.dry_run);
-                }
-            }
-            CheckingMethod::Size => {
-                let vec_files = self.files_with_identical_size.values().collect::<Vec<_>>();
-                delete_files_custom(&vec_files, &self.common_data.delete_method, &mut self.common_data.text_messages, self.common_data.dry_run);
-            }
+        let files_to_delete = match self.get_params().check_method {
+            CheckingMethod::Name => self.files_with_identical_names.values().cloned().collect::<Vec<_>>(),
+            CheckingMethod::SizeName => self.files_with_identical_size_names.values().cloned().collect::<Vec<_>>(),
+            CheckingMethod::Hash => self.files_with_identical_hashes.values().flatten().cloned().collect::<Vec<_>>(),
+            CheckingMethod::Size => self.files_with_identical_size.values().cloned().collect::<Vec<_>>(),
             _ => panic!(),
-        }
+        };
+        self.delete_advanced_elements_and_add_to_messages(stop_flag, progress_sender, files_to_delete)
     }
 }
 
@@ -1319,7 +1309,7 @@ pub trait MyHasher {
     fn finalize(&self) -> String;
 }
 
-pub fn hash_calculation_limit(buffer: &mut [u8], file_entry: &DuplicateEntry, hash_type: HashType, limit: u64, size_counter: &Arc<AtomicU64>) -> Result<String, String> {
+pub(crate) fn hash_calculation_limit(buffer: &mut [u8], file_entry: &DuplicateEntry, hash_type: HashType, limit: u64, size_counter: &Arc<AtomicU64>) -> Result<String, String> {
     // This function is used only to calculate hash of file with limit
     // We must ensure that buffer is big enough to store all data
     // We don't need to check that each time
@@ -1348,7 +1338,7 @@ pub fn hash_calculation(
     file_entry: &DuplicateEntry,
     hash_type: HashType,
     size_counter: &Arc<AtomicU64>,
-    stop_flag: Option<&Arc<AtomicBool>>,
+    stop_flag: &Arc<AtomicBool>,
 ) -> Result<Option<String>, String> {
     let mut file_handler = match File::open(&file_entry.path) {
         Ok(t) => t,
@@ -1411,6 +1401,12 @@ impl CommonData for DuplicateFinder {
     fn get_check_method(&self) -> CheckingMethod {
         self.get_params().check_method
     }
+    fn found_any_broken_files(&self) -> bool {
+        self.get_information().number_of_duplicated_files_by_hash > 0
+            || self.get_information().number_of_duplicated_files_by_name > 0
+            || self.get_information().number_of_duplicated_files_by_size > 0
+            || self.get_information().number_of_duplicated_files_by_size_name > 0
+    }
 }
 
 #[cfg(test)]
@@ -1462,7 +1458,7 @@ mod tests {
         file.write_all(b"aaAAAAAAAAAAAAAAFFFFFFFFFFFFFFFFFFFFGGGGGGGGG")?;
         let e = DuplicateEntry { path: src, ..Default::default() };
         let size_counter = Arc::new(AtomicU64::new(0));
-        let r = hash_calculation(&mut buf, &e, HashType::Blake3, &size_counter, None)
+        let r = hash_calculation(&mut buf, &e, HashType::Blake3, &size_counter, &Arc::default())
             .expect("hash_calculation failed")
             .expect("hash_calculation returned None");
         assert!(!r.is_empty());
@@ -1500,7 +1496,7 @@ mod tests {
         let mut buf = [0u8; 1 << 10];
         let src = dir.path().join("a");
         let e = DuplicateEntry { path: src, ..Default::default() };
-        let r = hash_calculation(&mut buf, &e, HashType::Blake3, &Arc::default(), None).expect_err("hash_calculation succeeded");
+        let r = hash_calculation(&mut buf, &e, HashType::Blake3, &Arc::default(), &Arc::default()).expect_err("hash_calculation succeeded");
         assert!(!r.is_empty());
         Ok(())
     }

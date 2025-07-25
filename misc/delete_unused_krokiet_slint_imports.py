@@ -5,9 +5,7 @@ script_path = os.path.dirname(os.path.abspath(__file__))
 ui_path = f"{script_path}/../krokiet/ui"
 
 collected_files = [
-    os.path.join(root, file)
-    for root, _, files in os.walk(ui_path)
-    for file in files if file.endswith(".slint")
+    os.path.join(root, file) for root, _, files in os.walk(ui_path) for file in files if file.endswith(".slint")
 ]
 
 for file_path in collected_files:
@@ -15,7 +13,7 @@ for file_path in collected_files:
         content = file.read()
         lines = content.splitlines()
 
-    non_import_lines = []
+    non_import_lines: list[str] = []
     imports_to_check = []
     updated_lines = []
 
@@ -27,9 +25,9 @@ for file_path in collected_files:
                 continue
             non_import_lines.append(line)
 
-    non_imported_content = "\n".join(non_import_lines)
+    non_imported_content = "\n".join(list(non_import_lines))
 
-    imports = {}
+    imports: dict[str, set[str]] = {}
 
     for import_line in imports_to_check:
         imported_items = [i.strip() for i in import_line.split("{")[1].split("}")[0].split(",") if len(i.strip()) > 0]
@@ -38,7 +36,7 @@ for file_path in collected_files:
 
         from_file = import_line.split("from")[1].strip()
 
-        used_items = []
+        used_items: list[str] = []
         for item in imported_items:
             regex = rf"\b{item}\b"
             if len(re.findall(regex, non_imported_content)) >= 1:
@@ -47,11 +45,10 @@ for file_path in collected_files:
         if used_items:
             imports.setdefault(from_file, set()).update(used_items)
 
-
-    for from_file, used_items in imports.items():
-        items = [i for i in used_items]
+    for from_file2, used_items2 in imports.items():
+        items = list(used_items2)
         items.sort()
-        updated_line = f"import {{ {', '.join(items)} }} from {from_file}"
+        updated_line = f"import {{ {', '.join(items)} }} from {from_file2}"
         updated_line = updated_line.replace(";;", ";")
         updated_lines.append(updated_line)
 

@@ -21,7 +21,7 @@ impl Directories {
         Default::default()
     }
 
-    pub fn set_reference_directory(&mut self, reference_directory: &[PathBuf]) -> Messages {
+    pub(crate) fn set_reference_directory(&mut self, reference_directory: &[PathBuf]) -> Messages {
         let mut messages: Messages = Messages::new();
 
         self.reference_directories = reference_directory
@@ -38,7 +38,7 @@ impl Directories {
         messages
     }
 
-    pub fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) -> Messages {
+    pub(crate) fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) -> Messages {
         let mut messages: Messages = Messages::new();
 
         if included_directory.is_empty() {
@@ -69,7 +69,7 @@ impl Directories {
         messages
     }
 
-    pub fn set_excluded_directory(&mut self, excluded_directory: Vec<PathBuf>) -> Messages {
+    pub(crate) fn set_excluded_directory(&mut self, excluded_directory: Vec<PathBuf>) -> Messages {
         let mut messages: Messages = Messages::new();
 
         if excluded_directory.is_empty() {
@@ -124,11 +124,11 @@ impl Directories {
     }
 
     #[cfg(target_family = "unix")]
-    pub fn set_exclude_other_filesystems(&mut self, exclude_other_filesystems: bool) {
+    pub(crate) fn set_exclude_other_filesystems(&mut self, exclude_other_filesystems: bool) {
         self.exclude_other_filesystems = Some(exclude_other_filesystems);
     }
 
-    pub fn optimize_directories(&mut self, recursive_search: bool) -> Messages {
+    pub(crate) fn optimize_directories(&mut self, recursive_search: bool) -> Messages {
         let mut messages: Messages = Messages::new();
 
         let mut optimized_included: Vec<PathBuf> = Vec::new();
@@ -280,11 +280,11 @@ impl Directories {
         messages
     }
 
-    pub fn is_in_referenced_directory(&self, path: &Path) -> bool {
+    pub(crate) fn is_in_referenced_directory(&self, path: &Path) -> bool {
         self.reference_directories.iter().any(|e| path.starts_with(e))
     }
 
-    pub fn is_excluded(&self, path: &Path) -> bool {
+    pub(crate) fn is_excluded(&self, path: &Path) -> bool {
         #[cfg(target_family = "windows")]
         let path = normalize_windows_path(path);
         // We're assuming that `excluded_directories` are already normalized
@@ -292,12 +292,12 @@ impl Directories {
     }
 
     #[cfg(target_family = "unix")]
-    pub fn exclude_other_filesystems(&self) -> bool {
+    pub(crate) fn exclude_other_filesystems(&self) -> bool {
         self.exclude_other_filesystems.unwrap_or(false)
     }
 
     #[cfg(target_family = "unix")]
-    pub fn is_on_other_filesystems(&self, path: impl AsRef<Path>) -> Result<bool, String> {
+    pub(crate) fn is_on_other_filesystems(&self, path: impl AsRef<Path>) -> Result<bool, String> {
         let path = path.as_ref();
         match fs::metadata(path) {
             Ok(m) => Ok(!self.included_dev_ids.iter().any(|&id| id == m.dev())),

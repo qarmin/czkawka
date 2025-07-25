@@ -1,10 +1,21 @@
+use std::fs;
 use std::path::PathBuf;
+use std::sync::Arc;
+use std::sync::atomic::AtomicBool;
+use std::time::Duration;
 
+use crossbeam_channel::Sender;
+use rayon::prelude::*;
+
+use crate::common::{WorkContinueStatus, remove_folder_if_contains_only_empty_folders};
 use crate::common_dir_traversal::{CheckingMethod, ToolType};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
+use crate::common_traits::ResultEntry;
+use crate::delayed_sender::DelayedSender;
+use crate::progress_data::{CurrentStage, ProgressData};
 
 #[derive(Debug, Clone, Default)]
 pub struct CommonToolData {
@@ -23,6 +34,45 @@ pub struct CommonToolData {
     pub(crate) save_also_as_json: bool,
     pub(crate) use_reference_folders: bool,
     pub(crate) dry_run: bool,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct DeleteResult {
+    deleted_files: usize,
+    gained_bytes: u64,
+    failed_to_delete_files: usize,
+    errors: Vec<String>,
+    infos: Vec<String>,
+}
+
+impl DeleteResult {
+    pub(crate) fn add_to_messages(&self, messages: &mut Messages) {
+        messages.errors.extend(self.errors.clone());
+        messages.messages.extend(self.infos.clone());
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum DeleteItemType<T: ResultEntry + Sized + Send + Sync> {
+    DeletingFiles(Vec<T>),
+    DeletingFolders(Vec<T>),
+    HardlinkingFiles(Vec<(T, Vec<T>)>),
+}
+
+impl<T: ResultEntry + Sized + Send + Sync> DeleteItemType<T> {
+    fn calculate_size_to_delete(&self) -> u64 {
+        match &self {
+            Self::DeletingFiles(items) | Self::DeletingFolders(items) => items.iter().map(|item| item.get_size()).sum(),
+            Self::HardlinkingFiles(items) => items.iter().map(|(item, _)| item.get_size()).sum(),
+        }
+    }
+
+    fn calculate_entries_to_delete(&self) -> usize {
+        match &self {
+            Self::DeletingFiles(items) | Self::DeletingFolders(items) => items.len(),
+            Self::HardlinkingFiles(items) => items.iter().map(|(_original, files)| files.len()).sum(),
+        }
+    }
 }
 
 #[derive(Eq, PartialEq, Clone, Debug, Copy, Default)]
@@ -72,6 +122,7 @@ pub trait CommonData {
     fn get_test_type(&self) -> (ToolType, CheckingMethod) {
         (self.get_cd().tool_type, self.get_check_method())
     }
+    fn found_any_broken_files(&self) -> bool;
 
     fn get_tool_type(&self) -> ToolType {
         self.get_cd().tool_type
@@ -200,6 +251,196 @@ pub trait CommonData {
         // Optimizes directories and removes recursive calls
         let messages = self.get_cd_mut().directories.optimize_directories(recursive_search);
         self.get_cd_mut().text_messages.extend_with_another_messages(messages);
+    }
+
+    fn delete_simple_elements_and_add_to_messages<T: ResultEntry + Sized + Send + Sync>(
+        &mut self,
+        stop_flag: &Arc<AtomicBool>,
+        progress_sender: Option<&Sender<ProgressData>>,
+        delete_item_type: DeleteItemType<T>,
+    ) -> WorkContinueStatus {
+        let delete_results = self.delete_elements(stop_flag, progress_sender, delete_item_type);
+
+        if stop_flag.load(std::sync::atomic::Ordering::Relaxed) {
+            WorkContinueStatus::Stop
+        } else {
+            delete_results.add_to_messages(self.get_text_messages_mut());
+            WorkContinueStatus::Continue
+        }
+    }
+
+    fn delete_advanced_elements_and_add_to_messages<T: ResultEntry + Sized + Send + Sync + Clone>(
+        &mut self,
+        stop_flag: &Arc<AtomicBool>,
+        progress_sender: Option<&Sender<ProgressData>>,
+        files_to_process: Vec<Vec<T>>,
+    ) -> WorkContinueStatus {
+        let delete_method = self.get_cd().delete_method;
+        let sorting_by_size = matches!(
+            delete_method,
+            DeleteMethod::AllExceptBiggest | DeleteMethod::AllExceptSmallest | DeleteMethod::OneBiggest | DeleteMethod::OneSmallest
+        );
+        let sort_items = |mut input: Vec<T>| -> Vec<T> {
+            input.sort_unstable_by_key(if sorting_by_size { ResultEntry::get_size } else { ResultEntry::get_modified_date });
+            input
+        };
+
+        let delete_results = if delete_method == DeleteMethod::HardLink {
+            let res = files_to_process
+                .into_iter()
+                .map(|values| {
+                    let mut all_values = sort_items(values);
+                    let original = all_values.remove(0);
+                    (original, all_values)
+                })
+                .collect::<Vec<_>>();
+            self.delete_elements(stop_flag, progress_sender, DeleteItemType::HardlinkingFiles(res))
+        } else {
+            let res = files_to_process
+                .into_iter()
+                .flat_map(|values| {
+                    // TODO - probably a little too much cloning, so later could be this optimized
+                    let len = values.len();
+                    let all_values = sort_items(values);
+                    match delete_method {
+                        DeleteMethod::Delete => &all_values,
+                        DeleteMethod::AllExceptNewest | DeleteMethod::AllExceptBiggest => &all_values[..(len - 1)],
+                        DeleteMethod::AllExceptOldest | DeleteMethod::AllExceptSmallest => &all_values[1..],
+                        DeleteMethod::OneOldest | DeleteMethod::OneSmallest => &all_values[..1],
+                        DeleteMethod::OneNewest | DeleteMethod::OneBiggest => &all_values[(len - 1)..],
+                        DeleteMethod::HardLink | DeleteMethod::None => unreachable!("HardLink and None should be handled before"),
+                    }
+                    .to_vec()
+                })
+                .collect::<Vec<_>>();
+            self.delete_elements(stop_flag, progress_sender, DeleteItemType::DeletingFiles(res))
+        };
+
+        if stop_flag.load(std::sync::atomic::Ordering::Relaxed) {
+            WorkContinueStatus::Stop
+        } else {
+            delete_results.add_to_messages(self.get_text_messages_mut());
+            WorkContinueStatus::Continue
+        }
+    }
+
+    fn delete_elements<T: ResultEntry + Sized + Send + Sync>(
+        &self,
+        stop_flag: &Arc<AtomicBool>,
+        progress_sender: Option<&Sender<ProgressData>>,
+        delete_item_type: DeleteItemType<T>,
+    ) -> DeleteResult {
+        let dry_run = self.get_cd().dry_run;
+        let mut progress = ProgressData::get_empty_state(CurrentStage::DeletingFiles);
+        progress.bytes_to_check = delete_item_type.calculate_size_to_delete();
+        progress.entries_to_check = delete_item_type.calculate_entries_to_delete();
+
+        let delayed_sender = progress_sender.map(|e| DelayedSender::new(e.clone(), Duration::from_millis(200)));
+
+        let bytes_processed = Arc::new(std::sync::atomic::AtomicU64::new(0));
+        let files_processed = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+
+        let res = match delete_item_type {
+            DeleteItemType::DeletingFiles(ref items) | DeleteItemType::DeletingFolders(ref items) => items
+                .into_par_iter()
+                .map(|e| {
+                    if stop_flag.load(std::sync::atomic::Ordering::Relaxed) {
+                        return None;
+                    }
+
+                    let mut progress_tmp = progress;
+                    progress_tmp.bytes_checked = bytes_processed.fetch_add(e.get_size(), std::sync::atomic::Ordering::Relaxed);
+                    progress_tmp.entries_checked = files_processed.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+
+                    if let Some(e) = delayed_sender.as_ref() {
+                        e.send(progress_tmp);
+                    }
+
+                    if dry_run {
+                        return Some(vec![(e, None)]);
+                    }
+
+                    let delete_res = if matches!(delete_item_type, DeleteItemType::DeletingFiles(_)) {
+                        fs::remove_file(e.get_path()).map_err(|err| format!("Failed to delete \"{}\": {err}", e.get_path().to_string_lossy()))
+                    } else {
+                        remove_folder_if_contains_only_empty_folders(e.get_path(), false) // TODO remove to trash should be an option
+                    };
+
+                    match delete_res {
+                        Ok(()) => Some(vec![(e, None)]),
+                        Err(err) => Some(vec![(e, Some(err))]),
+                    }
+                })
+                .while_some()
+                .flatten()
+                .collect::<Vec<_>>(),
+            DeleteItemType::HardlinkingFiles(ref items) => items
+                .into_par_iter()
+                .map(|(original, files)| {
+                    if stop_flag.load(std::sync::atomic::Ordering::Relaxed) {
+                        return None;
+                    }
+
+                    let mut progress_tmp = progress;
+                    progress_tmp.bytes_checked = bytes_processed.fetch_add(files.iter().map(|e| e.get_size()).sum(), std::sync::atomic::Ordering::Relaxed);
+                    progress_tmp.entries_checked = files_processed.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+
+                    if let Some(e) = delayed_sender.as_ref() {
+                        e.send(progress_tmp);
+                    }
+
+                    if dry_run {
+                        return Some(files.iter().map(|e| (e, None)).collect::<Vec<_>>());
+                    }
+
+                    let res = files
+                        .iter()
+                        .map(|file| {
+                            let err = match fs::hard_link(original.get_path(), file.get_path()) {
+                                Ok(()) => None,
+                                Err(err) => Some(format!(
+                                    "Failed to hardlink \"{}\" to \"{}\": {err}",
+                                    original.get_path().to_string_lossy(),
+                                    file.get_path().to_string_lossy()
+                                )),
+                            };
+                            (file, err)
+                        })
+                        .collect::<Vec<_>>();
+
+                    Some(res)
+                })
+                .while_some()
+                .flatten()
+                .collect::<Vec<_>>(),
+        };
+
+        let mut delete_result = DeleteResult::default();
+
+        let is_hardlinking = matches!(delete_item_type, DeleteItemType::HardlinkingFiles(_));
+
+        for (file_entry, delete_err) in res {
+            if let Some(err) = delete_err {
+                delete_result.errors.push(err);
+                delete_result.failed_to_delete_files += 1;
+            } else {
+                if dry_run {
+                    if is_hardlinking {
+                        delete_result.infos.push(format!(
+                            "Would hardlink: \"{}\" to \"{}\"",
+                            file_entry.get_path().to_string_lossy(),
+                            file_entry.get_path().to_string_lossy()
+                        ));
+                    } else {
+                        delete_result.infos.push(format!("Would delete: \"{}\"", file_entry.get_path().to_string_lossy()));
+                    }
+                }
+                delete_result.deleted_files += 1;
+                delete_result.gained_bytes += file_entry.get_size();
+            }
+        }
+
+        delete_result
     }
 
     #[allow(clippy::print_stdout)]

@@ -13,13 +13,11 @@ use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use vid_dup_finder_lib::{VideoHash, VideoHashBuilder};
 
-use crate::common::{
-    VIDEO_FILES_EXTENSIONS, WorkContinueStatus, check_if_stop_received, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads,
-};
+use crate::common::{VIDEO_FILES_EXTENSIONS, WorkContinueStatus, check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crate::common_cache::{extract_loaded_cache, get_similar_videos_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType, inode, take_1_per_inode};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
-use crate::common_traits::{DebugPrint, PrintResults, ResultEntry};
+use crate::common_traits::{DebugPrint, DeletingItems, PrintResults, ResultEntry};
 use crate::flc;
 use crate::progress_data::{CurrentStage, ProgressData};
 
@@ -93,6 +91,9 @@ impl CommonData for SimilarVideos {
     fn get_cd_mut(&mut self) -> &mut CommonToolData {
         &mut self.common_data
     }
+    fn found_any_broken_files(&self) -> bool {
+        self.information.number_of_duplicates > 0
+    }
 }
 
 #[derive(Default)]
@@ -115,7 +116,7 @@ impl SimilarVideos {
     }
 
     #[fun_time(message = "find_similar_videos", level = "info")]
-    pub fn find_similar_videos(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) {
+    pub fn find_similar_videos(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
         if !ffmpeg_cmdline_utils::ffmpeg_and_ffprobe_are_callable() {
             self.common_data.text_messages.errors.push(flc!("core_ffmpeg_not_found"));
             #[cfg(target_os = "windows")]
@@ -132,12 +133,15 @@ impl SimilarVideos {
                 return;
             }
         }
-        self.delete_files();
+        if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+            self.common_data.stopped_search = true;
+            return;
+        };
         self.debug_print();
     }
 
     #[fun_time(message = "check_for_similar_videos", level = "debug")]
-    fn check_for_similar_videos(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_for_similar_videos(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         self.common_data.extensions.set_and_validate_allowed_extensions(VIDEO_FILES_EXTENSIONS);
         if !self.common_data.extensions.set_any_extensions() {
             return WorkContinueStatus::Continue;
@@ -208,7 +212,7 @@ impl SimilarVideos {
     }
 
     #[fun_time(message = "sort_videos", level = "debug")]
-    fn sort_videos(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn sort_videos(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.videos_to_check.is_empty() {
             return WorkContinueStatus::Continue;
         }
@@ -351,14 +355,16 @@ impl SimilarVideos {
                 .collect::<Vec<(VideosEntry, Vec<VideosEntry>)>>();
         }
     }
+}
 
-    fn delete_files(&mut self) {
-        if self.common_data.delete_method == DeleteMethod::None {
-            return;
+impl DeletingItems for SimilarVideos {
+    #[fun_time(message = "delete_files", level = "debug")]
+    fn delete_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+        if self.get_cd().delete_method == DeleteMethod::None {
+            return WorkContinueStatus::Continue;
         }
-
-        let vec_files = self.similar_vectors.iter().collect::<Vec<_>>();
-        delete_files_custom(&vec_files, &self.common_data.delete_method, &mut self.common_data.text_messages, self.common_data.dry_run);
+        let files_to_delete = self.similar_vectors.clone();
+        self.delete_advanced_elements_and_add_to_messages(stop_flag, progress_sender, files_to_delete)
     }
 }
 

@@ -32,7 +32,7 @@ pub struct GuiCompareImages {
 }
 
 impl GuiCompareImages {
-    pub fn create_from_builder(window_main: &gtk4::Window) -> Self {
+    pub(crate) fn create_from_builder(window_main: &gtk4::Window) -> Self {
         let glade_src = include_str!("../../ui/compare_images.ui").to_string();
         let builder = Builder::from_string(glade_src.as_str());
 
@@ -80,7 +80,7 @@ impl GuiCompareImages {
             shared_using_for_preview,
         }
     }
-    pub fn update_language(&self) {
+    pub(crate) fn update_language(&self) {
         self.window_compare.set_title(Some(&flg!("window_compare_images")));
     }
 }

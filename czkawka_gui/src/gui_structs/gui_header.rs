@@ -10,7 +10,7 @@ pub struct GuiHeader {
 }
 
 impl GuiHeader {
-    pub fn create_from_builder(builder: &gtk4::Builder) -> Self {
+    pub(crate) fn create_from_builder(builder: &gtk4::Builder) -> Self {
         let button_settings: gtk4::Button = builder.object("button_settings").expect("Cambalache");
         let button_app_info: gtk4::Button = builder.object("button_app_info").expect("Cambalache");
 
@@ -20,7 +20,7 @@ impl GuiHeader {
         Self { button_settings, button_app_info }
     }
 
-    pub fn update_language(&self) {
+    pub(crate) fn update_language(&self) {
         self.button_settings.set_tooltip_text(Some(&flg!("header_setting_button_tooltip")));
         self.button_app_info.set_tooltip_text(Some(&flg!("header_about_button_tooltip")));
     }

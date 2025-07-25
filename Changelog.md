@@ -1,17 +1,23 @@
 ## Version ?.?.? - ?
 
-### Breaking changes
+### Breaking changes[Users]
 - Some languages now have unified names in Crowdin (e.g. `es` → `es-ES`). The GUI may not find them and will fall back to the default language.
 - Cache files now use memory limits and are incompatible with previous versions.
+
+### Breaking changes[Devs]
+- `stop_flag` is now required argument in most of the core functions
 
 ### Core
 - Replaced `println`/`eprintln` with logging functions - [#1478](https://github.com/qarmin/czkawka/pull/1478)
 - Slightly improved cache loading and saving speed - [#1478](https://github.com/qarmin/czkawka/pull/1478)
 - Messages and panics are now also logged to a file (can be disabled by setting the `DISABLE_FILE_LOGGING` environment variable) - [#1508](https://github.com/qarmin/czkawka/pull/1508)
-- Added a 4GB memory limit when loading or saving cache to avoid out-of-memory crashes with broken cache files - [#1508](https://github.com/qarmin/czkawka/pull/1508)
+- Added a 8GB memory limit when loading or saving cache to avoid out-of-memory crashes with broken cache files - [#1508](https://github.com/qarmin/czkawka/pull/1508)
 - Czkawka binaries are now reproducible - [#1565](https://github.com/qarmin/czkawka/pull/1565)
 - Added protection against deleting a folder that is no longer empty since the scan - [#1566](https://github.com/qarmin/czkawka/pull/1566)
-- Change pdf-rs, to lower level lopdf library to decrease dependencies number - [#1566](https://github.com/qarmin/czkawka/pull/1566)
+- Replaced `pdf-rs` with the more popular `lopdf` library, which also has fewer dependencies - [#1566](https://github.com/qarmin/czkawka/pull/1566)
+
+### CLI
+- Improved logic for deleting files and added progress bar for this operation - [#1571](https://github.com/qarmin/czkawka/pull/1571)
 
 ### GTK GUI
 - New icons — less visually appealing, but created by me and released under a truly free CC BY license - [#1478](https://github.com/qarmin/czkawka/pull/1478)

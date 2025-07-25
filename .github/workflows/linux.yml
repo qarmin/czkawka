@@ -305,7 +305,7 @@ jobs:
 
       - name: Linux Regression Test
         run: |
-          wget https://github.com/qarmin/czkawka/releases/download/6.0.0/TestFiles.zip
+          wget -q https://github.com/qarmin/czkawka/releases/download/6.0.0/TestFiles.zip
           cd ci_tester
           cargo build --release
           cd ..

@@ -14,7 +14,7 @@ impl Extensions {
         Default::default()
     }
 
-    pub fn filter_extensions(mut file_extensions: String) -> (HashSet<String>, Messages) {
+    pub(crate) fn filter_extensions(mut file_extensions: String) -> (HashSet<String>, Messages) {
         let mut messages = Messages::new();
         let mut extensions_hashset = HashSet::new();
 
@@ -53,14 +53,14 @@ impl Extensions {
 
     /// List of allowed extensions, only files with this extensions will be checking if are duplicates
     /// After, extensions cannot contain any dot, commas etc.
-    pub fn set_allowed_extensions(&mut self, allowed_extensions: String) -> Messages {
+    pub(crate) fn set_allowed_extensions(&mut self, allowed_extensions: String) -> Messages {
         let (extensions, messages) = Self::filter_extensions(allowed_extensions);
 
         self.allowed_extensions_hashset = extensions;
         messages
     }
 
-    pub fn set_excluded_extensions(&mut self, excluded_extensions: String) -> Messages {
+    pub(crate) fn set_excluded_extensions(&mut self, excluded_extensions: String) -> Messages {
         let (extensions, messages) = Self::filter_extensions(excluded_extensions);
 
         self.excluded_extensions_hashset = extensions;
@@ -68,7 +68,7 @@ impl Extensions {
     }
 
     #[allow(clippy::string_slice)] // Valid, because we address go to dot, which is known ascii character
-    pub fn check_if_entry_have_valid_extension(&self, entry_data: &DirEntry) -> bool {
+    pub(crate) fn check_if_entry_have_valid_extension(&self, entry_data: &DirEntry) -> bool {
         if self.allowed_extensions_hashset.is_empty() && self.excluded_extensions_hashset.is_empty() {
             return true;
         }
@@ -94,7 +94,7 @@ impl Extensions {
         }
     }
 
-    pub fn set_any_extensions(&self) -> bool {
+    pub(crate) fn set_any_extensions(&self) -> bool {
         !self.allowed_extensions_hashset.is_empty()
     }
 
@@ -119,7 +119,7 @@ impl Extensions {
         self.allowed_extensions_hashset = new_extensions;
     }
 
-    pub fn set_and_validate_allowed_extensions(&mut self, file_extensions: &[&str]) {
+    pub(crate) fn set_and_validate_allowed_extensions(&mut self, file_extensions: &[&str]) {
         if self.allowed_extensions_hashset.is_empty() {
             self.extend_allowed_extensions(file_extensions);
         } else {

@@ -5,19 +5,19 @@ use crate::help_functions::*;
 
 // When adding new column do not forget to update translations
 
-pub fn create_tree_view_included_directories(tree_view: &TreeView) {
+pub(crate) fn create_tree_view_included_directories(tree_view: &TreeView) {
     let model = get_list_store(tree_view);
 
     create_default_column(tree_view, ColumnsIncludedDirectory::Path as i32, Some(None), None);
     create_default_selection_button_column(tree_view, ColumnsIncludedDirectory::ReferenceButton as i32, model, None);
 }
 
-pub fn create_tree_view_excluded_directories(tree_view: &TreeView) {
+pub(crate) fn create_tree_view_excluded_directories(tree_view: &TreeView) {
     tree_view.set_headers_visible(false);
     create_default_column(tree_view, ColumnsExcludedDirectory::Path as i32, Some(None), None);
 }
 
-pub fn create_tree_view_duplicates(tree_view: &TreeView) {
+pub(crate) fn create_tree_view_duplicates(tree_view: &TreeView) {
     tree_view.set_vexpand(true);
 
     let model = get_list_store(tree_view);
@@ -32,7 +32,7 @@ pub fn create_tree_view_duplicates(tree_view: &TreeView) {
     create_default_column(tree_view, ColumnsDuplicates::Modification as i32, None, Some(columns_colors));
 }
 
-pub fn create_tree_view_empty_folders(tree_view: &TreeView) {
+pub(crate) fn create_tree_view_empty_folders(tree_view: &TreeView) {
     tree_view.set_vexpand(true);
 
     let model = get_list_store(tree_view);
@@ -49,7 +49,7 @@ pub fn create_tree_view_empty_folders(tree_view: &TreeView) {
     );
 }
 
-pub fn create_tree_view_big_files(tree_view: &TreeView) {
+pub(crate) fn create_tree_view_big_files(tree_view: &TreeView) {
     tree_view.set_vexpand(true);
 
     let model = get_list_store(tree_view);
@@ -67,7 +67,7 @@ pub fn create_tree_view_big_files(tree_view: &TreeView) {
     );
 }
 
-pub fn create_tree_view_temporary_files(tree_view: &TreeView) {
+pub(crate) fn create_tree_view_temporary_files(tree_view: &TreeView) {
     tree_view.set_vexpand(true);
 
     let model = get_list_store(tree_view);
@@ -84,7 +84,7 @@ pub fn create_tree_view_temporary_files(tree_view: &TreeView) {
     );
 }
 
-pub fn create_tree_view_empty_files(tree_view: &TreeView) {
+pub(crate) fn create_tree_view_empty_files(tree_view: &TreeView) {
     tree_view.set_vexpand(true);
 
     let model = get_list_store(tree_view);
@@ -101,7 +101,7 @@ pub fn create_tree_view_empty_files(tree_view: &TreeView) {
     );
 }
 
-pub fn create_tree_view_similar_images(tree_view: &TreeView) {
+pub(crate) fn create_tree_view_similar_images(tree_view: &TreeView) {
     tree_view.set_vexpand(true);
 
     let model = get_list_store(tree_view);
@@ -118,7 +118,7 @@ pub fn create_tree_view_similar_images(tree_view: &TreeView) {
     create_default_column(tree_view, ColumnsSimilarImages::Modification as i32, None, Some(columns_colors));
 }
 
-pub fn create_tree_view_similar_videos(tree_view: &TreeView) {
+pub(crate) fn create_tree_view_similar_videos(tree_view: &TreeView) {
     tree_view.set_vexpand(true);
 
     let model = get_list_store(tree_view);
@@ -133,7 +133,7 @@ pub fn create_tree_view_similar_videos(tree_view: &TreeView) {
     create_default_column(tree_view, ColumnsSimilarVideos::Modification as i32, None, Some(columns_colors));
 }
 
-pub fn create_tree_view_same_music(tree_view: &TreeView) {
+pub(crate) fn create_tree_view_same_music(tree_view: &TreeView) {
     tree_view.set_vexpand(true);
 
     let model = get_list_store(tree_view);
@@ -154,7 +154,7 @@ pub fn create_tree_view_same_music(tree_view: &TreeView) {
     create_default_column(tree_view, ColumnsSameMusic::Modification as i32, None, Some(columns_colors));
 }
 
-pub fn create_tree_view_invalid_symlinks(tree_view: &TreeView) {
+pub(crate) fn create_tree_view_invalid_symlinks(tree_view: &TreeView) {
     tree_view.set_vexpand(true);
 
     let model = get_list_store(tree_view);
@@ -173,7 +173,7 @@ pub fn create_tree_view_invalid_symlinks(tree_view: &TreeView) {
     );
 }
 
-pub fn create_tree_view_broken_files(tree_view: &TreeView) {
+pub(crate) fn create_tree_view_broken_files(tree_view: &TreeView) {
     tree_view.set_vexpand(true);
 
     let model = get_list_store(tree_view);
@@ -191,7 +191,7 @@ pub fn create_tree_view_broken_files(tree_view: &TreeView) {
     );
 }
 
-pub fn create_tree_view_bad_extensions(tree_view: &TreeView) {
+pub(crate) fn create_tree_view_bad_extensions(tree_view: &TreeView) {
     tree_view.set_vexpand(true);
 
     let model = get_list_store(tree_view);

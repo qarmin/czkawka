@@ -18,7 +18,7 @@ use crate::notebook_info::{NOTEBOOKS_INFO, NotebookObject};
 const BIG_PREVIEW_SIZE: i32 = 600;
 const SMALL_PREVIEW_SIZE: i32 = 130;
 
-pub fn connect_button_compare(gui_data: &GuiData) {
+pub(crate) fn connect_button_compare(gui_data: &GuiData) {
     let button_compare = gui_data.bottom_buttons.buttons_compare.clone();
     let window_compare = gui_data.compare_images.window_compare.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();

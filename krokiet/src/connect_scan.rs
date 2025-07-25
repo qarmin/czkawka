@@ -32,7 +32,7 @@ use crate::settings::{SettingsCustom, StringComboBoxItems, collect_settings};
 use crate::shared_models::SharedModels;
 use crate::{CurrentTab, GuiState, MainListModel, MainWindow, ProgressToSend, flk};
 
-pub fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>, shared_models: Arc<Mutex<SharedModels>>) {
+pub(crate) fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>, shared_models: Arc<Mutex<SharedModels>>) {
     let a = app.as_weak();
     app.on_scan_starting(move |active_tab| {
         let app = a.upgrade().expect("Failed to upgrade app :(");
@@ -133,7 +133,7 @@ fn scan_duplicates(
 
             set_common_settings(&mut item, &custom_settings, &stop_flag);
             item.set_delete_outdated_cache(custom_settings.duplicate_delete_outdated_entries);
-            item.find_duplicates(Some(&stop_flag), Some(&progress_sender));
+            item.find_duplicates(&stop_flag, Some(&progress_sender));
             let messages = item.get_text_messages().create_messages_text();
 
             let mut vector;
@@ -239,7 +239,7 @@ fn scan_empty_folders(
         .spawn(move || {
             let mut item = EmptyFolder::new();
             set_common_settings(&mut item, &custom_settings, &stop_flag);
-            item.find_empty_folders(Some(&stop_flag), Some(&progress_sender));
+            item.find_empty_folders(&stop_flag, Some(&progress_sender));
 
             let mut vector = item.get_empty_folder_list().values().cloned().collect::<Vec<_>>();
             let messages = item.get_text_messages().create_messages_text();
@@ -299,7 +299,7 @@ fn scan_big_files(
             let mut item = BigFile::new(params);
 
             set_common_settings(&mut item, &custom_settings, &stop_flag);
-            item.find_big_files(Some(&stop_flag), Some(&progress_sender));
+            item.find_big_files(&stop_flag, Some(&progress_sender));
 
             let mut vector = item.get_big_files().clone();
             let messages = item.get_text_messages().create_messages_text();
@@ -360,7 +360,7 @@ fn scan_empty_files(
         .spawn(move || {
             let mut item = EmptyFiles::new();
             set_common_settings(&mut item, &custom_settings, &stop_flag);
-            item.find_empty_files(Some(&stop_flag), Some(&progress_sender));
+            item.find_empty_files(&stop_flag, Some(&progress_sender));
 
             let mut vector = item.get_empty_files().clone();
             let messages = item.get_text_messages().create_messages_text();
@@ -436,7 +436,7 @@ fn scan_similar_images(
 
             item.set_delete_outdated_cache(custom_settings.similar_images_delete_outdated_entries);
 
-            item.find_similar_images(Some(&stop_flag), Some(&progress_sender));
+            item.find_similar_images(&stop_flag, Some(&progress_sender));
 
             let messages = item.get_text_messages().create_messages_text();
 
@@ -524,7 +524,7 @@ fn scan_similar_videos(
 
             item.set_delete_outdated_cache(custom_settings.similar_videos_delete_outdated_entries);
 
-            item.find_similar_videos(Some(&stop_flag), Some(&progress_sender));
+            item.find_similar_videos(&stop_flag, Some(&progress_sender));
 
             let messages = item.get_text_messages().create_messages_text();
 
@@ -643,7 +643,7 @@ fn scan_similar_music(
             let mut item = SameMusic::new(params);
             set_common_settings(&mut item, &custom_settings, &stop_flag);
 
-            item.find_same_music(Some(&stop_flag), Some(&progress_sender));
+            item.find_same_music(&stop_flag, Some(&progress_sender));
 
             let messages = item.get_text_messages().create_messages_text();
 
@@ -724,7 +724,7 @@ fn scan_invalid_symlinks(
             let mut item = InvalidSymlinks::new();
             set_common_settings(&mut item, &custom_settings, &stop_flag);
 
-            item.find_invalid_links(Some(&stop_flag), Some(&progress_sender));
+            item.find_invalid_links(&stop_flag, Some(&progress_sender));
 
             let mut vector = item.get_invalid_symlinks().clone();
             let messages = item.get_text_messages().create_messages_text();
@@ -780,7 +780,7 @@ fn scan_temporary_files(
             let mut item = Temporary::new();
             set_common_settings(&mut item, &custom_settings, &stop_flag);
 
-            item.find_temporary_files(Some(&stop_flag), Some(&progress_sender));
+            item.find_temporary_files(&stop_flag, Some(&progress_sender));
 
             let mut vector = item.get_temporary_files().clone();
             let messages = item.get_text_messages().create_messages_text();
@@ -858,7 +858,7 @@ fn scan_broken_files(
             let mut item = BrokenFiles::new(params);
             set_common_settings(&mut item, &custom_settings, &stop_flag);
 
-            item.find_broken_files(Some(&stop_flag), Some(&progress_sender));
+            item.find_broken_files(&stop_flag, Some(&progress_sender));
 
             let mut vector = item.get_broken_files().clone();
             let messages = item.get_text_messages().create_messages_text();
@@ -916,7 +916,7 @@ fn scan_bad_extensions(
             let params = BadExtensionsParameters::new();
             let mut item = BadExtensions::new(params);
             set_common_settings(&mut item, &custom_settings, &stop_flag);
-            item.find_bad_extensions_files(Some(&stop_flag), Some(&progress_sender));
+            item.find_bad_extensions_files(&stop_flag, Some(&progress_sender));
 
             let mut vector = item.get_bad_extensions_files().clone();
             let messages = item.get_text_messages().create_messages_text();

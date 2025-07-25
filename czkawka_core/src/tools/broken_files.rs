@@ -4,7 +4,7 @@ use std::io::prelude::*;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::{fs, mem, panic};
+use std::{mem, panic};
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
@@ -19,7 +19,7 @@ use crate::common::{
 };
 use crate::common_cache::{extract_loaded_cache, get_broken_files_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
-use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
+use crate::common_tool::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
 use crate::common_traits::*;
 use crate::progress_data::{CurrentStage, ProgressData};
 
@@ -112,7 +112,7 @@ impl BrokenFiles {
     }
 
     #[fun_time(message = "find_broken_files", level = "info")]
-    pub fn find_broken_files(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) {
+    pub fn find_broken_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
         self.prepare_items();
         if self.check_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
             self.common_data.stopped_search = true;
@@ -122,12 +122,15 @@ impl BrokenFiles {
             self.common_data.stopped_search = true;
             return;
         }
-        self.delete_files();
+        if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+            self.common_data.stopped_search = true;
+            return;
+        };
         self.debug_print();
     }
 
     #[fun_time(message = "check_files", level = "debug")]
-    fn check_files(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let zip_extensions = ZIP_FILES_EXTENSIONS.iter().collect::<HashSet<_>>();
         let audio_extensions = AUDIO_FILES_EXTENSIONS.iter().collect::<HashSet<_>>();
         let pdf_extensions = PDF_FILES_EXTENSIONS.iter().collect::<HashSet<_>>();
@@ -250,7 +253,7 @@ impl BrokenFiles {
             Some(file_entry)
         })
         .unwrap_or_else(|_| {
-            let message = create_crash_message("lopdf", &file_entry_clone.path.to_string_lossy(), "https://github.com/pdf-rs/pdf");
+            let message = create_crash_message("lopdf", &file_entry_clone.path.to_string_lossy(), "https://github.com/J-F-Liu/lopdf");
             error!("{message}");
             file_entry_clone.error_string = message;
             Some(file_entry_clone)
@@ -291,7 +294,7 @@ impl BrokenFiles {
     }
 
     #[fun_time(message = "look_for_broken_files", level = "debug")]
-    fn look_for_broken_files(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn look_for_broken_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.files_to_check.is_empty() {
             return WorkContinueStatus::Continue;
         }
@@ -363,23 +366,15 @@ impl BrokenFiles {
             self.get_text_messages_mut().extend_with_another_messages(messages);
         }
     }
+}
 
+impl DeletingItems for BrokenFiles {
     #[fun_time(message = "delete_files", level = "debug")]
-    fn delete_files(&mut self) {
+    fn delete_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         match self.common_data.delete_method {
-            DeleteMethod::Delete => {
-                for file_entry in &self.broken_files {
-                    if fs::remove_file(&file_entry.path).is_err() {
-                        self.common_data.text_messages.warnings.push(file_entry.path.to_string_lossy().to_string());
-                    }
-                }
-            }
-            DeleteMethod::None => {
-                //Just do nothing
-            }
-            _ => {
-                unreachable!()
-            }
+            DeleteMethod::Delete => self.delete_simple_elements_and_add_to_messages(stop_flag, progress_sender, DeleteItemType::DeletingFiles(self.broken_files.clone())),
+            DeleteMethod::None => WorkContinueStatus::Continue,
+            _ => unreachable!(),
         }
     }
 }
@@ -389,7 +384,7 @@ impl BrokenFiles {
         &self.broken_files
     }
 
-    pub fn get_params(&self) -> &BrokenFilesParameters {
+    pub(crate) fn get_params(&self) -> &BrokenFilesParameters {
         &self.params
     }
 
@@ -475,6 +470,9 @@ impl CommonData for BrokenFiles {
     }
     fn get_cd_mut(&mut self) -> &mut CommonToolData {
         &mut self.common_data
+    }
+    fn found_any_broken_files(&self) -> bool {
+        self.information.number_of_broken_files > 0
     }
 }
 

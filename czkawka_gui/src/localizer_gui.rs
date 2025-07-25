@@ -27,6 +27,6 @@ macro_rules! flg {
 }
 
 // Get the `Localizer` to be used for localizing this library.
-pub fn localizer_gui() -> Box<dyn Localizer> {
+pub(crate) fn localizer_gui() -> Box<dyn Localizer> {
     Box::from(DefaultLocalizer::new(&*LANGUAGE_LOADER_GUI, &Localizations))
 }

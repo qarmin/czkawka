@@ -25,7 +25,7 @@ use symphonia::core::meta::MetadataOptions;
 use symphonia::core::probe::Hint;
 
 use crate::common::{
-    AUDIO_FILES_EXTENSIONS, WorkContinueStatus, check_if_stop_received, create_crash_message, delete_files_custom, filter_reference_folders_generic, prepare_thread_handler_common,
+    AUDIO_FILES_EXTENSIONS, WorkContinueStatus, check_if_stop_received, create_crash_message, filter_reference_folders_generic, prepare_thread_handler_common,
     send_info_and_wait_for_ending_all_threads,
 };
 use crate::common_cache::{extract_loaded_cache, get_similar_music_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
@@ -162,7 +162,7 @@ impl SameMusic {
     }
 
     #[fun_time(message = "find_same_music", level = "info")]
-    pub fn find_same_music(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) {
+    pub fn find_same_music(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
         self.prepare_items();
         self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
         if self.check_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
@@ -196,12 +196,15 @@ impl SameMusic {
             }
             _ => panic!(),
         }
-        self.delete_files();
+        if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+            self.common_data.stopped_search = true;
+            return;
+        };
         self.debug_print();
     }
 
     #[fun_time(message = "check_files", level = "debug")]
-    fn check_files(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         self.common_data.extensions.set_and_validate_allowed_extensions(AUDIO_FILES_EXTENSIONS);
         if !self.common_data.extensions.set_any_extensions() {
             return WorkContinueStatus::Continue;
@@ -283,7 +286,7 @@ impl SameMusic {
     }
 
     #[fun_time(message = "calculate_fingerprint", level = "debug")]
-    fn calculate_fingerprint(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn calculate_fingerprint(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.music_entries.is_empty() {
             return WorkContinueStatus::Continue;
         }
@@ -371,7 +374,7 @@ impl SameMusic {
     }
 
     #[fun_time(message = "read_tags", level = "debug")]
-    fn read_tags(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn read_tags(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.music_to_check.is_empty() {
             return WorkContinueStatus::Continue;
         }
@@ -434,7 +437,7 @@ impl SameMusic {
     }
 
     #[fun_time(message = "check_for_duplicate_tags", level = "debug")]
-    fn check_for_duplicate_tags(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_for_duplicate_tags(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.music_entries.is_empty() {
             return WorkContinueStatus::Continue;
         }
@@ -589,7 +592,7 @@ impl SameMusic {
 
     fn compare_fingerprints(
         &mut self,
-        stop_flag: Option<&Arc<AtomicBool>>,
+        stop_flag: &Arc<AtomicBool>,
         items_counter: &Arc<AtomicUsize>,
         base_files: Vec<MusicEntry>,
         files_to_compare: &[MusicEntry],
@@ -651,7 +654,7 @@ impl SameMusic {
     }
 
     #[fun_time(message = "check_for_duplicate_fingerprints", level = "debug")]
-    fn check_for_duplicate_fingerprints(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_for_duplicate_fingerprints(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.music_entries.is_empty() {
             return WorkContinueStatus::Continue;
         }
@@ -729,15 +732,16 @@ impl SameMusic {
 
         new_duplicates
     }
+}
 
+impl DeletingItems for SameMusic {
     #[fun_time(message = "delete_files", level = "debug")]
-    fn delete_files(&mut self) {
-        if self.common_data.delete_method == DeleteMethod::None {
-            return;
+    fn delete_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+        if self.get_cd().delete_method == DeleteMethod::None {
+            return WorkContinueStatus::Continue;
         }
-
-        let vec_files = self.duplicated_music_entries.iter().collect::<Vec<_>>();
-        delete_files_custom(&vec_files, &self.common_data.delete_method, &mut self.common_data.text_messages, self.common_data.dry_run);
+        let files_to_delete = self.duplicated_music_entries.clone();
+        self.delete_advanced_elements_and_add_to_messages(stop_flag, progress_sender, files_to_delete)
     }
 }
 
@@ -1073,6 +1077,9 @@ impl CommonData for SameMusic {
     }
     fn get_check_method(&self) -> CheckingMethod {
         self.get_params().check_type
+    }
+    fn found_any_broken_files(&self) -> bool {
+        self.information.number_of_duplicates > 0
     }
 }
 

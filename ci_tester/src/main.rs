@@ -1,8 +1,10 @@
 use std::collections::BTreeSet;
 use std::fs;
 use std::process::{Command, Stdio};
-
+use std::env;
 use log::info;
+use std::path::Path;
+use std::process::Output;
 
 #[derive(Default, Clone, Debug)]
 struct CollectedFiles {
@@ -15,7 +17,15 @@ static CZKAWKA_PATH: state::InitCell<String> = state::InitCell::new();
 static COLLECTED_FILES: state::InitCell<CollectedFiles> = state::InitCell::new();
 
 const ATTEMPTS: u32 = 10;
-const PRINT_MESSAGES_CZKAWKA: bool = true;
+const PRINT_MESSAGES_TO_TERMINAL_INSTEAD_OUTPUT: bool = true;
+
+pub(crate) fn collect_output(output: &Output) -> String {
+    let stdout = &output.stdout;
+    let stderr = &output.stderr;
+    let stdout_str = String::from_utf8_lossy(stdout);
+    let stderr_str = String::from_utf8_lossy(stderr);
+    format!("{stdout_str}\n{stderr_str}")
+}
 
 fn test_args() {
     let modes = ["dup", "big", "empty-folders", "empty-files", "temp", "image", "symlinks", "broken", "ext", "video", "music"];
@@ -42,6 +52,8 @@ fn main() {
     let all_files = collect_all_files_and_dirs("TestFiles").expect("Should not fail in tests");
     COLLECTED_FILES.set(all_files);
     remove_test_dir();
+
+    println!("Starting checking");
 
     for _ in 0..ATTEMPTS {
         test_empty_files();
@@ -398,12 +410,14 @@ fn test_big_files() {
 ////////////////////////////////////
 
 fn run_test(arguments: &[&str], expected_files_differences: Vec<&'static str>, expected_folders_differences: Vec<&'static str>, expected_symlinks_differences: Vec<&'static str>) {
+    println!("=====================================================");
     unzip_files();
+    assert!(Path::new("TestFiles").exists());
     // Add path_to_czkawka to arguments
     let mut all_arguments = vec![];
     all_arguments.push(CZKAWKA_PATH.get().as_str());
     all_arguments.extend_from_slice(arguments);
-    run_with_good_status(&all_arguments, PRINT_MESSAGES_CZKAWKA);
+    run_with_good_status(&all_arguments, PRINT_MESSAGES_TO_TERMINAL_INSTEAD_OUTPUT);
     file_folder_diffs(
         COLLECTED_FILES.get(),
         expected_files_differences,
@@ -414,7 +428,7 @@ fn run_test(arguments: &[&str], expected_files_differences: Vec<&'static str>, e
     remove_test_dir();
 }
 fn unzip_files() {
-    run_with_good_status(&["unzip", "-X", "TestFiles.zip", "-d", "TestFiles"], false);
+    run_with_good_status(&["unzip", "-qq", "-X", "TestFiles.zip", "-d", "TestFiles"], false);
 }
 fn remove_test_dir() {
     let _ = fs::remove_dir_all("TestFiles");
@@ -423,11 +437,16 @@ fn remove_test_dir() {
 fn run_with_good_status(str_command: &[&str], print_messages: bool) {
     let mut command = Command::new(str_command[0]);
     let mut com = command.args(&str_command[1..]);
+    com.env("RUST_LOG", "error");
+    com.env("RUST_BACKTRACE", "1");
+
     if !print_messages {
         com = com.stderr(Stdio::piped()).stdout(Stdio::piped());
     }
-    let status = com.spawn().expect("failed to execute process").wait().expect("Should not fail in tests");
-    assert!(status.success());
+    let output = com.spawn().unwrap().wait_with_output().unwrap();
+    let all_output = collect_output(&output);
+    let command_copyable = str_command.join(" ");
+    assert!(output.status.success(), "Command \"{command_copyable}\" failed with status: {:?}, from folder {:?}\n\n and output: {all_output}",env::current_dir() ,output.status.code());
 }
 
 fn file_folder_diffs(
@@ -492,16 +511,16 @@ fn collect_all_files_and_dirs(dir: &str) -> std::io::Result<CollectedFiles> {
         }
     }
 
-    for dir in &folders_to_check {
-        println!("Folder \"{}\"", dir)
-    }
-    for symlink in &symlinks {
-        println!("Symlink \"{}\"", symlink)
-    }
-    for file in &files {
-        let metadata = fs::metadata(file)?;
-        println!("File \"{}\" with size {} bytes", file, metadata.len());
-    }
+    // for dir in &folders_to_check {
+    //     println!("Folder \"{}\"", dir)
+    // }
+    // for symlink in &symlinks {
+    //     println!("Symlink \"{}\"", symlink)
+    // }
+    // for file in &files {
+    //     let metadata = fs::metadata(file)?;
+    //     println!("File \"{}\" with size {} bytes", file, metadata.len());
+    // }
 
     folders.remove(dir);
     // println!("Found {} files, {} folders and {} symlinks", files.len(), folders.len(), symlinks.len());

@@ -20,7 +20,7 @@ enum ExpectedArgs {
 
 #[allow(clippy::print_stdout)]
 #[allow(clippy::print_stderr)]
-pub fn process_cli_args(args: Vec<String>) -> Option<CliResult> {
+pub(crate) fn process_cli_args(args: Vec<String>) -> Option<CliResult> {
     if ["--help", "-h"].iter().any(|&arg| args.contains(&arg.to_string())) {
         println!("Krokiet");
         println!("Krokiet allows you to specify folders to search for files via the CLI, and also to exclude or reference folders.");

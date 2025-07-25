@@ -10,7 +10,7 @@ use crate::help_functions::*;
 use crate::notebook_enums::*;
 use crate::notebook_info::NOTEBOOKS_INFO;
 
-pub fn connect_button_move(gui_data: &GuiData) {
+pub(crate) fn connect_button_move(gui_data: &GuiData) {
     let buttons_move = gui_data.bottom_buttons.buttons_move.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
 

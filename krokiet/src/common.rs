@@ -199,7 +199,7 @@ pub enum StrDataBadExtensions {
 
 impl CurrentTab {
     // Remember to match updated this according to ui/main_lists.slint and connect_scan.rs files
-    pub fn get_str_path_idx(&self) -> usize {
+    pub(crate) fn get_str_path_idx(&self) -> usize {
         match self {
             Self::EmptyFolders => StrDataEmptyFolders::Path as usize,
             Self::EmptyFiles => StrDataEmptyFiles::Path as usize,
@@ -216,7 +216,7 @@ impl CurrentTab {
         }
     }
 
-    pub fn get_str_name_idx(&self) -> usize {
+    pub(crate) fn get_str_name_idx(&self) -> usize {
         match self {
             Self::EmptyFolders => StrDataEmptyFolders::Name as usize,
             Self::EmptyFiles => StrDataEmptyFiles::Name as usize,
@@ -233,14 +233,14 @@ impl CurrentTab {
         }
     }
 
-    pub fn get_str_proper_extension(&self) -> usize {
+    pub(crate) fn get_str_proper_extension(&self) -> usize {
         match self {
             Self::BadExtensions => StrDataBadExtensions::ProperExtension as usize,
             Self::Settings | Self::About => panic!("Button should be disabled"),
             _ => panic!("Unable to get proper extension from this tab"),
         }
     }
-    pub fn get_int_modification_date_idx(&self) -> usize {
+    pub(crate) fn get_int_modification_date_idx(&self) -> usize {
         match self {
             Self::EmptyFiles => IntDataEmptyFiles::ModificationDatePart1 as usize,
             Self::EmptyFolders => IntDataEmptyFolders::ModificationDatePart1 as usize,
@@ -256,7 +256,7 @@ impl CurrentTab {
             Self::Settings | Self::About => panic!("Button should be disabled"),
         }
     }
-    pub fn get_int_size_opt_idx(&self) -> Option<usize> {
+    pub(crate) fn get_int_size_opt_idx(&self) -> Option<usize> {
         let res = match self {
             Self::EmptyFiles => IntDataEmptyFiles::SizePart1 as usize,
             Self::SimilarImages => IntDataSimilarImages::SizePart1 as usize,
@@ -271,10 +271,10 @@ impl CurrentTab {
         };
         Some(res)
     }
-    pub fn get_int_size_idx(&self) -> usize {
+    pub(crate) fn get_int_size_idx(&self) -> usize {
         self.get_int_size_opt_idx().unwrap_or_else(|| panic!("Unable to get size index for tab: {self:?}"))
     }
-    pub fn get_int_width_idx(&self) -> usize {
+    pub(crate) fn get_int_width_idx(&self) -> usize {
         match self {
             Self::SimilarImages => IntDataSimilarImages::Width as usize,
             Self::Settings | Self::About => panic!("Button should be disabled"),
@@ -282,7 +282,7 @@ impl CurrentTab {
         }
     }
 
-    pub fn get_int_height_idx(&self) -> usize {
+    pub(crate) fn get_int_height_idx(&self) -> usize {
         match self {
             Self::SimilarImages => IntDataSimilarImages::Height as usize,
             Self::Settings | Self::About => panic!("Button should be disabled"),
@@ -290,14 +290,14 @@ impl CurrentTab {
         }
     }
 
-    pub fn get_is_header_mode(&self) -> bool {
+    pub(crate) fn get_is_header_mode(&self) -> bool {
         match self {
             Self::EmptyFolders | Self::EmptyFiles | Self::BrokenFiles | Self::BigFiles | Self::TemporaryFiles | Self::InvalidSymlinks | Self::BadExtensions => false,
             Self::SimilarImages | Self::DuplicateFiles | Self::SimilarVideos | Self::SimilarMusic => true,
             Self::Settings | Self::About => panic!("Button should be disabled"),
         }
     }
-    pub fn get_tool_model(&self, app: &MainWindow) -> ModelRc<MainListModel> {
+    pub(crate) fn get_tool_model(&self, app: &MainWindow) -> ModelRc<MainListModel> {
         match self {
             Self::EmptyFolders => app.get_empty_folder_model(),
             Self::SimilarImages => app.get_similar_images_model(),
@@ -314,7 +314,7 @@ impl CurrentTab {
         }
     }
 
-    pub fn set_tool_model(&self, app: &MainWindow, model: ModelRc<MainListModel>) {
+    pub(crate) fn set_tool_model(&self, app: &MainWindow, model: ModelRc<MainListModel>) {
         match self {
             Self::EmptyFolders => app.set_empty_folder_model(model),
             Self::SimilarImages => app.set_similar_images_model(model),
@@ -332,30 +332,7 @@ impl CurrentTab {
     }
 }
 
-// pub fn create_string_standard_list_view(items: &[String]) -> ModelRc<StandardListViewItem> {
-//     let new_folders_standard_list_view = items
-//         .iter()
-//         .map(|x| {
-//             let mut element = StandardListViewItem::default();
-//             element.text = x.into();
-//             element
-//         })
-//         .collect::<Vec<_>>();
-//     ModelRc::new(VecModel::from(new_folders_standard_list_view))
-// }
-// pub fn create_string_standard_list_view_from_pathbuf(items: &[PathBuf]) -> ModelRc<StandardListViewItem> {
-//     let new_folders_standard_list_view = items
-//         .iter()
-//         .map(|x| {
-//             let mut element = StandardListViewItem::default();
-//             element.text = x.to_string_lossy().to_string().into();
-//             element
-//         })
-//         .collect::<Vec<_>>();
-//     ModelRc::new(VecModel::from(new_folders_standard_list_view))
-// }
-
-pub fn create_included_directories_model_from_pathbuf(items: &[PathBuf], referenced: &[PathBuf]) -> ModelRc<IncludedDirectoriesModel> {
+pub(crate) fn create_included_directories_model_from_pathbuf(items: &[PathBuf], referenced: &[PathBuf]) -> ModelRc<IncludedDirectoriesModel> {
     let referenced_as_string = referenced.iter().map(|x| x.to_string_lossy().to_string()).collect::<Vec<_>>();
     let converted = items
         .iter()
@@ -371,7 +348,7 @@ pub fn create_included_directories_model_from_pathbuf(items: &[PathBuf], referen
     ModelRc::new(VecModel::from(converted))
 }
 
-pub fn create_excluded_directories_model_from_pathbuf(items: &[PathBuf]) -> ModelRc<ExcludedDirectoriesModel> {
+pub(crate) fn create_excluded_directories_model_from_pathbuf(items: &[PathBuf]) -> ModelRc<ExcludedDirectoriesModel> {
     let converted = items
         .iter()
         .map(|x| ExcludedDirectoriesModel {
@@ -382,29 +359,29 @@ pub fn create_excluded_directories_model_from_pathbuf(items: &[PathBuf]) -> Mode
     ModelRc::new(VecModel::from(converted))
 }
 
-pub fn check_if_there_are_any_included_folders(app: &MainWindow) -> bool {
+pub(crate) fn check_if_there_are_any_included_folders(app: &MainWindow) -> bool {
     let included = app.global::<Settings>().get_included_directories_model();
     included.iter().count() > 0
 }
 
-pub fn check_if_all_included_dirs_are_referenced(app: &MainWindow) -> bool {
+pub(crate) fn check_if_all_included_dirs_are_referenced(app: &MainWindow) -> bool {
     let included = app.global::<Settings>().get_included_directories_model();
     included.iter().all(|x| x.referenced_folder)
 }
 
-pub fn create_vec_model_from_vec_string(items: Vec<String>) -> VecModel<SharedString> {
+pub(crate) fn create_vec_model_from_vec_string(items: Vec<String>) -> VecModel<SharedString> {
     VecModel::from(items.into_iter().map(SharedString::from).collect::<Vec<_>>())
 }
 
 // Workaround for https://github.com/slint-ui/slint/discussions/4596
 // Currently there is no way to save u64 in slint, so we need to split it into two i32
-pub fn split_u64_into_i32s(value: u64) -> (i32, i32) {
+pub(crate) fn split_u64_into_i32s(value: u64) -> (i32, i32) {
     let part1: i32 = (value >> 32) as i32;
     let part2: i32 = value as i32;
     (part1, part2)
 }
 
-pub fn connect_i32_into_u64(part1: i32, part2: i32) -> u64 {
+pub(crate) fn connect_i32_into_u64(part1: i32, part2: i32) -> u64 {
     ((part1 as u64) << 32) | (part2 as u64 & 0xFFFF_FFFF)
 }
 

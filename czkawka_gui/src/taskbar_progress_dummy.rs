@@ -29,16 +29,16 @@ impl TaskbarProgress {
         Self {}
     }
 
-    pub fn set_progress_state(&self, _tbp_flags: TBPFLAG) {}
+    pub(crate) fn set_progress_state(&self, _tbp_flags: TBPFLAG) {}
 
-    pub fn set_progress_value(&self, _completed: u64, _total: u64) {}
+    pub(crate) fn set_progress_value(&self, _completed: u64, _total: u64) {}
 
-    pub fn hide(&self) {}
+    pub(crate) fn hide(&self) {}
 
-    pub fn show(&self) {}
+    pub(crate) fn show(&self) {}
 
     #[allow(clippy::needless_pass_by_ref_mut)]
-    pub fn release(&mut self) {}
+    pub(crate) fn release(&mut self) {}
 }
 
 impl From<HWND> for TaskbarProgress {

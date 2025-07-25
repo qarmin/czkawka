@@ -13,7 +13,7 @@ const MINIMUM_SIMILARITY: f64 = 0.0;
 const MAXIMUM_SIMILARITY: f64 = 10.0;
 const DEFAULT_SIMILARITY: f64 = 5.0;
 
-pub fn connect_same_music_change_mode(gui_data: &GuiData) {
+pub(crate) fn connect_same_music_change_mode(gui_data: &GuiData) {
     let check_button_music_title = gui_data.main_notebook.check_button_music_title.clone();
     let check_button_music_approximate_comparison = gui_data.main_notebook.check_button_music_approximate_comparison.clone();
     let check_button_music_bitrate = gui_data.main_notebook.check_button_music_bitrate.clone();

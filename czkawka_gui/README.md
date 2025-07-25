@@ -79,8 +79,10 @@ lot build and runtime dependencies.
 
 | Program | Minimal version |
 |:-------:|:---------------:|
-|  Rust   |     1.85.0      |
+|  Rust   |     1.85.0      | 
 |   GTK   |       4.6       |
+
+The Rust version corresponds to the latest rustc available in Debian Sid: https://packages.debian.org/sid/rustc
 
 ### Linux (Ubuntu, but on other OS should work similar)
 

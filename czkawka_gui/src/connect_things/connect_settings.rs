@@ -19,7 +19,7 @@ use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::get_dialog_box_child;
 use crate::saving_loading::{load_configuration, reset_configuration, save_configuration};
 
-pub fn connect_settings(gui_data: &GuiData) {
+pub(crate) fn connect_settings(gui_data: &GuiData) {
     // Connect scale
     {
         let label_restart_needed = gui_data.settings.label_restart_needed.clone();

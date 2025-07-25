@@ -125,7 +125,7 @@ pub const LANGUAGE_LIST: &[Language] = &[
     },
 ];
 
-pub fn connect_translations(app: &MainWindow) {
+pub(crate) fn connect_translations(app: &MainWindow) {
     change_language(app);
 
     let a = app.as_weak();
@@ -180,8 +180,6 @@ fn translate_items(app: &MainWindow) {
     let translation = app.global::<Translations>();
     let settings = app.global::<Settings>();
 
-    translation.set_yes_button_text(flk!("yes_button").into());
-    translation.set_no_button_text(flk!("no_button").into());
     translation.set_ok_button_text(flk!("ok_button").into());
     translation.set_cancel_button_text(flk!("cancel_button").into());
     translation.set_are_you_want_to_continue_text(flk!("are_you_want_to_continue").into());
@@ -222,15 +220,12 @@ fn translate_items(app: &MainWindow) {
     translation.set_sort_by_modification_date_text(flk!("sort_by_modification_date").into());
     translation.set_sort_by_selection_text(flk!("sort_by_selection").into());
     translation.set_sort_reverse_text(flk!("sort_reverse").into());
+    translation.set_sort_by_checked_text(flk!("sort_by_checked").into());
+    translation.set_settings_dark_theme_text(flk!("settings_dark_theme").into());
+    translation.set_settings_show_only_icons_text(flk!("settings_show_only_icons").into());
+    translation.set_settings_global_settings_text(flk!("settings_global_settings").into());
     translation.set_selection_all_text(flk!("selection_all").into());
     translation.set_selection_deselect_all_text(flk!("selection_deselect_all").into());
-    translation.set_selection_invert_selection_text(flk!("selection_invert_selection").into());
-    translation.set_selection_the_biggest_size_text(flk!("selection_the_biggest_size").into());
-    translation.set_selection_the_biggest_resolution_text(flk!("selection_the_biggest_resolution").into());
-    translation.set_selection_the_smallest_size_text(flk!("selection_the_smallest_size").into());
-    translation.set_selection_the_smallest_resolution_text(flk!("selection_the_smallest_resolution").into());
-    translation.set_selection_newest_text(flk!("selection_newest").into());
-    translation.set_selection_oldest_text(flk!("selection_oldest").into());
     translation.set_stage_current_text(flk!("stage_current").into());
     translation.set_stage_all_text(flk!("stage_all").into());
     translation.set_subsettings_text(flk!("subsettings").into());
@@ -297,7 +292,6 @@ fn translate_items(app: &MainWindow) {
     translation.set_settings_similar_videos_tool_text(flk!("settings_similar_videos_tool").into());
     translation.set_settings_similar_images_tool_text(flk!("settings_similar_images_tool").into());
     translation.set_settings_similar_music_tool_text(flk!("settings_similar_music_tool").into());
-    translation.set_settings_duplicate_tool_text(flk!("settings_duplicate_tool").into());
     translation.set_settings_general_settings_text(flk!("settings_general_settings").into());
     translation.set_settings_settings_text(flk!("settings_settings").into());
     translation.set_popup_save_title_text(flk!("popup_save_title").into());

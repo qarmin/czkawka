@@ -6,7 +6,7 @@ use crate::help_functions::PopoverTypes;
 use crate::notebook_enums::*;
 use crate::notebook_info::NOTEBOOKS_INFO;
 
-pub fn connect_button_select(gui_data: &GuiData) {
+pub(crate) fn connect_button_select(gui_data: &GuiData) {
     let popovers_select = gui_data.popovers_select.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let gc_buttons_select = gui_data.bottom_buttons.gc_buttons_select.clone();

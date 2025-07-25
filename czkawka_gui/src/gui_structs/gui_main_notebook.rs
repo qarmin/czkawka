@@ -131,7 +131,7 @@ pub struct GuiMainNotebook {
 }
 
 impl GuiMainNotebook {
-    pub fn create_from_builder(builder: &Builder) -> Self {
+    pub(crate) fn create_from_builder(builder: &Builder) -> Self {
         let notebook_main: Notebook = builder.object("notebook_main").expect("Cambalache");
 
         let scrolled_window_duplicate_finder: ScrolledWindow = builder.object("scrolled_window_duplicate_finder").expect("Cambalache");
@@ -356,7 +356,7 @@ impl GuiMainNotebook {
         }
     }
 
-    pub fn get_main_tree_views(&self) -> [TreeView; NUMBER_OF_NOTEBOOK_MAIN_TABS] {
+    pub(crate) fn get_main_tree_views(&self) -> [TreeView; NUMBER_OF_NOTEBOOK_MAIN_TABS] {
         [
             self.tree_view_duplicate_finder.clone(),
             self.tree_view_empty_folder_finder.clone(),
@@ -372,7 +372,7 @@ impl GuiMainNotebook {
         ]
     }
 
-    pub fn update_language(&self) {
+    pub(crate) fn update_language(&self) {
         self.check_button_duplicate_case_sensitive_name.set_label(Some(&flg!("duplicate_case_sensitive_name")));
         self.check_button_music_title.set_label(Some(&flg!("music_title_checkbox")));
         self.check_button_music_artist.set_label(Some(&flg!("music_artist_checkbox")));

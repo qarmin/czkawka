@@ -1,4 +1,3 @@
-use std::fs;
 use std::io::prelude::*;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -11,7 +10,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::common::WorkContinueStatus;
 use crate::common_dir_traversal::{Collect, DirTraversalBuilder, DirTraversalResult, ErrorType, FileEntry, ToolType};
-use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
+use crate::common_tool::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
 use crate::common_traits::*;
 use crate::progress_data::ProgressData;
 
@@ -75,18 +74,21 @@ impl InvalidSymlinks {
     }
 
     #[fun_time(message = "find_invalid_links", level = "info")]
-    pub fn find_invalid_links(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) {
+    pub fn find_invalid_links(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
         self.prepare_items();
         if self.check_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
             self.common_data.stopped_search = true;
             return;
         }
-        self.delete_files();
+        if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+            self.common_data.stopped_search = true;
+            return;
+        };
         self.debug_print();
     }
 
     #[fun_time(message = "check_files", level = "debug")]
-    fn check_files(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let result = DirTraversalBuilder::new()
             .common_data(&self.common_data)
             .group_by(|_fe| ())
@@ -152,20 +154,14 @@ impl InvalidSymlinks {
         }
         Some((destination_path, type_of_error))
     }
+}
 
+impl DeletingItems for InvalidSymlinks {
     #[fun_time(message = "delete_files", level = "debug")]
-    fn delete_files(&mut self) {
+    fn delete_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         match self.common_data.delete_method {
-            DeleteMethod::Delete => {
-                for file_entry in &self.invalid_symlinks {
-                    if fs::remove_file(&file_entry.path).is_err() {
-                        self.common_data.text_messages.warnings.push(file_entry.path.to_string_lossy().to_string());
-                    }
-                }
-            }
-            DeleteMethod::None => {
-                //Just do nothing
-            }
+            DeleteMethod::Delete => self.delete_simple_elements_and_add_to_messages(stop_flag, progress_sender, DeleteItemType::DeletingFiles(self.invalid_symlinks.clone())),
+            DeleteMethod::None => WorkContinueStatus::Continue,
             _ => unreachable!(),
         }
     }
@@ -224,6 +220,9 @@ impl CommonData for InvalidSymlinks {
     }
     fn get_cd_mut(&mut self) -> &mut CommonToolData {
         &mut self.common_data
+    }
+    fn found_any_broken_files(&self) -> bool {
+        self.information.number_of_invalid_symlinks > 0
     }
 }
 

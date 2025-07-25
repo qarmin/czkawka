@@ -19,7 +19,7 @@ pub enum NotebookMainEnum {
     BadExtensions,
 }
 
-pub fn to_notebook_main_enum(notebook_number: u32) -> NotebookMainEnum {
+pub(crate) fn to_notebook_main_enum(notebook_number: u32) -> NotebookMainEnum {
     match notebook_number {
         0 => NotebookMainEnum::Duplicate,
         1 => NotebookMainEnum::EmptyDirectories,
@@ -36,7 +36,7 @@ pub fn to_notebook_main_enum(notebook_number: u32) -> NotebookMainEnum {
     }
 }
 
-pub fn get_all_main_tabs() -> [NotebookMainEnum; NUMBER_OF_NOTEBOOK_MAIN_TABS] {
+pub(crate) fn get_all_main_tabs() -> [NotebookMainEnum; NUMBER_OF_NOTEBOOK_MAIN_TABS] {
     [
         to_notebook_main_enum(0),
         to_notebook_main_enum(1),
@@ -59,7 +59,7 @@ pub enum NotebookUpperEnum {
     ItemsConfiguration,
 }
 
-pub fn to_notebook_upper_enum(notebook_number: u32) -> NotebookUpperEnum {
+pub(crate) fn to_notebook_upper_enum(notebook_number: u32) -> NotebookUpperEnum {
     match notebook_number {
         0 => NotebookUpperEnum::IncludedDirectories,
         1 => NotebookUpperEnum::ExcludedDirectories,
@@ -68,6 +68,6 @@ pub fn to_notebook_upper_enum(notebook_number: u32) -> NotebookUpperEnum {
     }
 }
 
-// pub fn get_all_upper_tabs() -> [NotebookUpperEnum; NUMBER_OF_NOTEBOOK_UPPER_TABS] {
+// pub(crate) fn get_all_upper_tabs() -> [NotebookUpperEnum; NUMBER_OF_NOTEBOOK_UPPER_TABS] {
 //     [to_notebook_upper_enum(0), to_notebook_upper_enum(1), to_notebook_upper_enum(2)]
 // }

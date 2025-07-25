@@ -74,14 +74,14 @@ struct LoadSaveStruct {
 }
 
 impl LoadSaveStruct {
-    pub fn with_text_view(text_view: TextView) -> Self {
+    pub(crate) fn with_text_view(text_view: TextView) -> Self {
         Self {
             loaded_items: Default::default(),
             text_view,
         }
     }
 
-    pub fn get_vector_string(&self, key: &str, default_value: Vec<String>) -> Vec<String> {
+    pub(crate) fn get_vector_string(&self, key: &str, default_value: Vec<String>) -> Vec<String> {
         if self.loaded_items.contains_key(key) {
             let mut new_vector = Vec::new();
             for i in &self.loaded_items[key] {
@@ -94,7 +94,7 @@ impl LoadSaveStruct {
 
         default_value
     }
-    pub fn get_integer_string(&self, key: String, default_value: String) -> String {
+    pub(crate) fn get_integer_string(&self, key: String, default_value: String) -> String {
         // This is safe, because default value is const value
         assert!(default_value.parse::<i64>().is_ok(), "Default value {default_value} can't be convert to integer value");
         let mut returned_value = self.get_string(key, default_value.clone());
@@ -103,7 +103,7 @@ impl LoadSaveStruct {
         }
         returned_value
     }
-    pub fn get_string(&self, key: String, default_value: String) -> String {
+    pub(crate) fn get_string(&self, key: String, default_value: String) -> String {
         if self.loaded_items.contains_key(&key) {
             let item = &self.loaded_items[&key].clone().into_iter().filter(|e| !e.is_empty()).collect::<Vec<String>>();
             return if item.len() == 1 {
@@ -118,7 +118,7 @@ impl LoadSaveStruct {
 
         default_value
     }
-    pub fn get_object<T: std::str::FromStr>(&self, key: String, default_value: T) -> T {
+    pub(crate) fn get_object<T: std::str::FromStr>(&self, key: String, default_value: T) -> T {
         if self.loaded_items.contains_key(&key) {
             let item = &self.loaded_items[&key].clone().into_iter().filter(|e| !e.is_empty()).collect::<Vec<String>>();
 
@@ -137,7 +137,7 @@ impl LoadSaveStruct {
 
         default_value
     }
-    pub fn get_bool(&self, key: String, default_value: bool) -> bool {
+    pub(crate) fn get_bool(&self, key: String, default_value: bool) -> bool {
         if self.loaded_items.contains_key(&key) {
             let item = &self.loaded_items[&key].clone().into_iter().filter(|e| !e.is_empty()).collect::<Vec<String>>();
             return if item.len() == 1 {
@@ -160,7 +160,7 @@ impl LoadSaveStruct {
     }
 
     // Bool, int, string
-    pub fn save_var<T: ToString>(&mut self, key: String, value: &T) {
+    pub(crate) fn save_var<T: ToString>(&mut self, key: String, value: &T) {
         if self.loaded_items.contains_key(&key) {
             add_text_to_text_view(&self.text_view, &flg!("saving_loading_saving_same_keys", key = key.clone()));
         }
@@ -168,7 +168,7 @@ impl LoadSaveStruct {
         self.loaded_items.insert(key, vec![value.to_string()]);
     }
 
-    pub fn save_list_store(&mut self, key: String, tree_view: &TreeView, column_path: i32) {
+    pub(crate) fn save_list_store(&mut self, key: String, tree_view: &TreeView, column_path: i32) {
         let mut vec_string = vec![];
         let list_store = get_list_store(tree_view);
         if let Some(iter) = list_store.iter_first() {
@@ -184,7 +184,7 @@ impl LoadSaveStruct {
     }
 
     #[allow(clippy::unused_self)]
-    pub fn open_save_file(&self, text_view_errors: &TextView, save_configuration: bool, manual_execution: bool) -> Option<(File, PathBuf)> {
+    pub(crate) fn open_save_file(&self, text_view_errors: &TextView, save_configuration: bool, manual_execution: bool) -> Option<(File, PathBuf)> {
         let config_dir = get_config_cache_path()?.config_folder;
         let config_file = config_dir.join(Path::new(SAVE_FILE_NAME));
 
@@ -233,7 +233,7 @@ impl LoadSaveStruct {
         Some((config_file_handler, config_file))
     }
 
-    pub fn open_and_read_content(&mut self, text_view_errors: &TextView, manual_execution: bool) {
+    pub(crate) fn open_and_read_content(&mut self, text_view_errors: &TextView, manual_execution: bool) {
         if let Some((mut config_file_handler, config_file)) = self.open_save_file(text_view_errors, false, manual_execution) {
             let mut loaded_data: String = String::new();
             if let Err(e) = config_file_handler.read_to_string(&mut loaded_data) {
@@ -274,7 +274,7 @@ impl LoadSaveStruct {
         }
     }
 
-    pub fn save_to_file(&self, text_view_errors: &TextView) {
+    pub(crate) fn save_to_file(&self, text_view_errors: &TextView) {
         if let Some((mut config_file_handler, config_file)) = self.open_save_file(text_view_errors, true, false) {
             let mut data_saved: bool = false;
             for (key, vec_string) in &self.loaded_items {
@@ -422,7 +422,7 @@ fn create_hash_map() -> (HashMap<LoadText, String>, HashMap<String, LoadText>) {
     (hashmap_ls, hashmap_sl)
 }
 
-pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNotebook, main_notebook: &GuiMainNotebook, settings: &GuiSettings, text_view_errors: &TextView) {
+pub(crate) fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNotebook, main_notebook: &GuiMainNotebook, settings: &GuiSettings, text_view_errors: &TextView) {
     let check_button_settings_save_at_exit = settings.check_button_settings_save_at_exit.clone();
     let text_view_errors = text_view_errors.clone();
 
@@ -585,7 +585,7 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
     saving_struct.save_to_file(&text_view_errors);
 }
 
-pub fn load_configuration(
+pub(crate) fn load_configuration(
     manual_execution: bool,
     upper_notebook: &GuiUpperNotebook,
     main_notebook: &GuiMainNotebook,
@@ -869,7 +869,7 @@ fn save_proper_value_to_combo_box(combo_box: &ComboBoxText, what_to_save: u32) {
     }
 }
 
-pub fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNotebook, main_notebook: &GuiMainNotebook, settings: &GuiSettings, text_view_errors: &TextView) {
+pub(crate) fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNotebook, main_notebook: &GuiMainNotebook, settings: &GuiSettings, text_view_errors: &TextView) {
     // TODO Maybe add popup dialog to confirm resetting
     let text_view_errors = text_view_errors.clone();
 

@@ -1,4 +1,3 @@
-use std::fs;
 use std::io::prelude::*;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
@@ -9,7 +8,7 @@ use log::debug;
 
 use crate::common::WorkContinueStatus;
 use crate::common_dir_traversal::{DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
-use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
+use crate::common_tool::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
 use crate::common_traits::*;
 use crate::progress_data::ProgressData;
 
@@ -31,6 +30,9 @@ impl CommonData for EmptyFiles {
     fn get_cd_mut(&mut self) -> &mut CommonToolData {
         &mut self.common_data
     }
+    fn found_any_broken_files(&self) -> bool {
+        self.information.number_of_empty_files > 0
+    }
 }
 
 impl EmptyFiles {
@@ -43,18 +45,21 @@ impl EmptyFiles {
     }
 
     #[fun_time(message = "find_empty_files", level = "info")]
-    pub fn find_empty_files(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) {
+    pub fn find_empty_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
         self.prepare_items();
         if self.check_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
             self.common_data.stopped_search = true;
             return;
         }
-        self.delete_files();
+        if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+            self.common_data.stopped_search = true;
+            return;
+        };
         self.debug_print();
     }
 
     #[fun_time(message = "check_files", level = "debug")]
-    fn check_files(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let result = DirTraversalBuilder::new()
             .common_data(&self.common_data)
             .group_by(|_fe| ())
@@ -79,23 +84,15 @@ impl EmptyFiles {
             DirTraversalResult::Stopped => WorkContinueStatus::Stop,
         }
     }
+}
 
+impl DeletingItems for EmptyFiles {
     #[fun_time(message = "delete_files", level = "debug")]
-    fn delete_files(&mut self) {
+    fn delete_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         match self.common_data.delete_method {
-            DeleteMethod::Delete => {
-                for file_entry in &self.empty_files {
-                    if fs::remove_file(&file_entry.path).is_err() {
-                        self.common_data.text_messages.warnings.push(file_entry.path.to_string_lossy().to_string());
-                    }
-                }
-            }
-            DeleteMethod::None => {
-                //Just do nothing
-            }
-            _ => {
-                unreachable!()
-            }
+            DeleteMethod::Delete => self.delete_simple_elements_and_add_to_messages(stop_flag, progress_sender, DeleteItemType::DeletingFiles(self.empty_files.clone())),
+            DeleteMethod::None => WorkContinueStatus::Continue,
+            _ => unreachable!(),
         }
     }
 }

@@ -67,7 +67,7 @@ pub static STRING_COMBO_BOX_ITEMS: Lazy<Arc<Mutex<StringComboBoxItems>>> = Lazy:
 });
 
 impl StringComboBoxItems {
-    pub fn get_item_and_idx_from_config_name<T>(config_name: &str, items: &Vec<StringComboBoxItem<T>>) -> (usize, Vec<SharedString>)
+    pub(crate) fn get_item_and_idx_from_config_name<T>(config_name: &str, items: &Vec<StringComboBoxItem<T>>) -> (usize, Vec<SharedString>)
     where
         T: Clone + Debug,
     {
@@ -79,7 +79,7 @@ impl StringComboBoxItems {
         (position, display_names)
     }
 
-    pub fn get_config_name_from_idx<T>(idx: usize, items: &Vec<StringComboBoxItem<T>>) -> String
+    pub(crate) fn get_config_name_from_idx<T>(idx: usize, items: &Vec<StringComboBoxItem<T>>) -> String
     where
         T: Clone + Debug,
     {
@@ -91,7 +91,7 @@ impl StringComboBoxItems {
         }
     }
 
-    pub fn get_value_from_config_name<T>(config_name: &str, items: &Vec<StringComboBoxItem<T>>) -> T
+    pub(crate) fn get_value_from_config_name<T>(config_name: &str, items: &Vec<StringComboBoxItem<T>>) -> T
     where
         T: Clone + Debug,
     {
@@ -100,13 +100,6 @@ impl StringComboBoxItems {
         });
         items[position].value.clone()
     }
-
-    // pub fn get_display_names<T>(items: &[StringComboBoxItem<T>]) -> Vec<SharedString>
-    // where
-    //     T: Clone + Debug,
-    // {
-    //     items.iter().map(|e| e.display_name.clone().into()).collect()
-    // }
 
     pub(crate) fn regenerate_items() -> Self {
         let languages = LANGUAGE_LIST
@@ -182,7 +175,7 @@ impl StringComboBoxItems {
             .collect()
     }
 
-    pub fn get_items() -> MutexGuard<'static, Self> {
+    pub(crate) fn get_items() -> MutexGuard<'static, Self> {
         STRING_COMBO_BOX_ITEMS.lock().expect("Can't lock string combobox items")
     }
 
@@ -333,7 +326,7 @@ impl Default for BasicSettings {
     }
 }
 
-pub fn connect_changing_settings_preset(app: &MainWindow) {
+pub(crate) fn connect_changing_settings_preset(app: &MainWindow) {
     let a = app.as_weak();
     app.global::<Callabler>().on_changed_settings_preset(move || {
         let app = a.upgrade().expect("Failed to upgrade app :(");
@@ -396,7 +389,7 @@ pub fn connect_changing_settings_preset(app: &MainWindow) {
     });
 }
 
-pub fn create_default_settings_files() {
+pub(crate) fn create_default_settings_files() {
     let base_config_file = get_base_config_file();
     if let Some(base_config_file) = base_config_file {
         if !base_config_file.is_file() {
@@ -414,7 +407,7 @@ pub fn create_default_settings_files() {
     }
 }
 
-pub fn load_settings_from_file(app: &MainWindow, cli_result: Option<CliResult>) -> i32 {
+pub(crate) fn load_settings_from_file(app: &MainWindow, cli_result: Option<CliResult>) -> i32 {
     StringComboBoxItems::regenerate_and_set();
 
     let result_base_settings = load_data_from_file::<BasicSettings>(get_base_config_file());
@@ -453,12 +446,12 @@ pub fn load_settings_from_file(app: &MainWindow, cli_result: Option<CliResult>) 
     base_settings.default_preset
 }
 
-pub fn save_all_settings_to_file(app: &MainWindow, original_preset_idx: i32) {
+pub(crate) fn save_all_settings_to_file(app: &MainWindow, original_preset_idx: i32) {
     save_base_settings_to_file(app, original_preset_idx);
     save_custom_settings_to_file(app);
 }
 
-pub fn save_base_settings_to_file(app: &MainWindow, original_preset_idx: i32) {
+pub(crate) fn save_base_settings_to_file(app: &MainWindow, original_preset_idx: i32) {
     let mut collected_config_from_file = collect_base_settings(app);
 
     // We cannot normally start app with disallowed preset, so we restore it to original value
@@ -473,7 +466,7 @@ pub fn save_base_settings_to_file(app: &MainWindow, original_preset_idx: i32) {
     }
 }
 
-pub fn save_custom_settings_to_file(app: &MainWindow) {
+pub(crate) fn save_custom_settings_to_file(app: &MainWindow) {
     let current_item = app.global::<Settings>().get_settings_preset_idx();
     let result = save_data_to_file(get_config_file(current_item), &collect_settings(app));
 
@@ -482,7 +475,7 @@ pub fn save_custom_settings_to_file(app: &MainWindow) {
     }
 }
 
-pub fn load_data_from_file<T>(config_file: Option<PathBuf>) -> Result<T, String>
+pub(crate) fn load_data_from_file<T>(config_file: Option<PathBuf>) -> Result<T, String>
 where
     for<'de> T: Deserialize<'de>,
 {
@@ -511,7 +504,7 @@ where
     result
 }
 
-pub fn save_data_to_file<T>(config_file: Option<PathBuf>, serializable_data: &T) -> Result<(), String>
+pub(crate) fn save_data_to_file<T>(config_file: Option<PathBuf>, serializable_data: &T) -> Result<(), String>
 where
     T: Serialize,
 {
@@ -541,18 +534,18 @@ where
     Ok(())
 }
 
-pub fn get_base_config_file() -> Option<PathBuf> {
+pub(crate) fn get_base_config_file() -> Option<PathBuf> {
     let config_folder = get_config_cache_path()?.config_folder;
     let base_config_file = config_folder.join("config_general.json");
     Some(base_config_file)
 }
-pub fn get_config_file(number: i32) -> Option<PathBuf> {
+pub(crate) fn get_config_file(number: i32) -> Option<PathBuf> {
     let config_folder = get_config_cache_path()?.config_folder;
     let config_file = config_folder.join(format!("config_preset_{number}.json"));
     Some(config_file)
 }
 
-pub fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicSettings, preset_idx: i32) {
+pub(crate) fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicSettings, preset_idx: i32) {
     let settings = app.global::<Settings>();
     change_language(app);
 
@@ -571,7 +564,7 @@ pub fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicSettings
     set_combobox_basic_settings_items(&settings, basic_settings);
 }
 
-pub fn set_combobox_basic_settings_items(settings: &Settings, basic_settings: &BasicSettings) {
+pub(crate) fn set_combobox_basic_settings_items(settings: &Settings, basic_settings: &BasicSettings) {
     let collected_items = StringComboBoxItems::get_items();
 
     // Language
@@ -581,7 +574,7 @@ pub fn set_combobox_basic_settings_items(settings: &Settings, basic_settings: &B
     settings.set_language_value(display_names[idx].clone());
 }
 
-pub fn set_combobox_custom_settings_items(settings: &Settings, custom_settings: &SettingsCustom) {
+pub(crate) fn set_combobox_custom_settings_items(settings: &Settings, custom_settings: &SettingsCustom) {
     let collected_items = StringComboBoxItems::get_items();
 
     // Hash size
@@ -627,7 +620,7 @@ pub fn set_combobox_custom_settings_items(settings: &Settings, custom_settings: 
     settings.set_similar_music_sub_audio_check_type_value(display_names[idx].clone());
 }
 
-pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom, cli_args: Option<CliResult>) {
+pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom, cli_args: Option<CliResult>) {
     let settings = app.global::<Settings>();
 
     let (included, referenced, excluded) = if let Some(cli_args) = cli_args {
@@ -735,7 +728,7 @@ pub fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom, c
     app.global::<GuiState>().set_info_text("".into());
 }
 
-pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
+pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let settings = app.global::<Settings>();
 
     let collected_items = StringComboBoxItems::regenerate_items();
@@ -895,7 +888,7 @@ pub fn collect_settings(app: &MainWindow) -> SettingsCustom {
     }
 }
 
-pub fn collect_base_settings(app: &MainWindow) -> BasicSettings {
+pub(crate) fn collect_base_settings(app: &MainWindow) -> BasicSettings {
     let settings = app.global::<Settings>();
     let collected_items = StringComboBoxItems::regenerate_items();
 
@@ -972,7 +965,7 @@ fn default_biggest_files() -> i32 {
     DEFAULT_BIGGEST_FILES
 }
 
-pub fn default_image_similarity() -> i32 {
+pub(crate) fn default_image_similarity() -> i32 {
     DEFAULT_IMAGE_SIMILARITY
 }
 fn default_excluded_items() -> String {
@@ -1001,13 +994,13 @@ fn minimal_prehash_cache_size() -> i32 {
     DEFAULT_MINIMUM_PREHASH_CACHE_SIZE
 }
 
-pub fn default_resize_algorithm() -> String {
+pub(crate) fn default_resize_algorithm() -> String {
     "lanczos3".to_string()
 }
-pub fn default_hash_type() -> String {
+pub(crate) fn default_hash_type() -> String {
     "mean".to_string()
 }
-pub fn default_sub_hash_size() -> String {
+pub(crate) fn default_sub_hash_size() -> String {
     DEFAULT_HASH_SIZE.to_string()
 }
 fn default_window_width() -> u32 {

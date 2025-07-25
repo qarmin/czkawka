@@ -28,7 +28,7 @@ const CACHE_IMAGE_VERSION: &str = "100_fast_resize";
 const CACHE_IMAGE_VERSION: &str = "100_image_rs_resize";
 const CACHE_VIDEO_VERSION: &str = "100";
 
-const MEMORY_LIMIT: u64 = 4 * 1024 * 1024 * 1024;
+const MEMORY_LIMIT: u64 = 8 * 1024 * 1024 * 1024;
 
 pub fn get_broken_files_cache_file() -> String {
     format!("cache_broken_files_{CACHE_VERSION}.bin")
@@ -103,7 +103,7 @@ where
     text_messages
 }
 
-pub fn extract_loaded_cache<T>(
+pub(crate) fn extract_loaded_cache<T>(
     loaded_hash_map: &BTreeMap<String, T>,
     files_to_check: BTreeMap<String, T>,
     records_already_cached: &mut BTreeMap<String, T>,

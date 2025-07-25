@@ -233,7 +233,7 @@ impl BadExtensions {
     }
 
     #[fun_time(message = "find_bad_extensions_files", level = "info")]
-    pub fn find_bad_extensions_files(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) {
+    pub fn find_bad_extensions_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
         self.prepare_items();
         if self.check_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
             self.common_data.stopped_search = true;
@@ -247,7 +247,7 @@ impl BadExtensions {
     }
 
     #[fun_time(message = "check_files", level = "debug")]
-    fn check_files(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn check_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let result = DirTraversalBuilder::new()
             .common_data(&self.common_data)
             .group_by(|_fe| ())
@@ -269,7 +269,7 @@ impl BadExtensions {
     }
 
     #[fun_time(message = "look_for_bad_extensions_files", level = "debug")]
-    fn look_for_bad_extensions_files(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn look_for_bad_extensions_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.files_to_check.is_empty() {
             return WorkContinueStatus::Continue;
         }
@@ -340,7 +340,7 @@ impl BadExtensions {
         &self,
         files_to_check: Vec<FileEntry>,
         items_counter: &Arc<AtomicUsize>,
-        stop_flag: Option<&Arc<AtomicBool>>,
+        stop_flag: &Arc<AtomicBool>,
         check_was_stopped: &AtomicBool,
         hashmap_workarounds: &HashMap<&str, Vec<&str>>,
     ) -> Vec<BadFileEntry> {
@@ -484,5 +484,8 @@ impl CommonData for BadExtensions {
     }
     fn get_cd_mut(&mut self) -> &mut CommonToolData {
         &mut self.common_data
+    }
+    fn found_any_broken_files(&self) -> bool {
+        self.get_information().number_of_files_with_bad_extension > 0
     }
 }

@@ -13,7 +13,7 @@ use crate::model_operations::model_processor::{MessageType, ModelProcessor};
 use crate::simpler_model::{SimplerMainListModel, ToSimplerVec};
 use crate::{Callabler, GuiState, MainWindow, flk};
 
-pub fn connect_move(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
+pub(crate) fn connect_move(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
     let a = app.as_weak();
     app.on_folders_move_choose_requested(move || {
         let app = a.upgrade().expect("Failed to upgrade app :(");

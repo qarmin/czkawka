@@ -18,9 +18,10 @@ impl Messages {
     pub fn new_from_messages(messages: Vec<String>) -> Self {
         Self { messages, ..Default::default() }
     }
-    #[allow(clippy::print_stdout)]
-    pub fn print_messages(&self) {
-        println!("{}", self.create_messages_text());
+
+    pub fn print_messages_to_writer<T: std::io::Write>(&self, writer: &mut T) -> std::io::Result<()> {
+        let text = self.create_messages_text();
+        writer.write_all(text.as_bytes())
     }
 
     pub fn create_messages_text(&self) -> String {
@@ -56,12 +57,6 @@ impl Messages {
         }
 
         text_to_return
-    }
-
-    pub fn extend_messages_with(&mut self, messages: Vec<String>, warnings: Vec<String>, errors: Vec<String>) {
-        self.messages.extend(messages);
-        self.warnings.extend(warnings);
-        self.errors.extend(errors);
     }
 
     pub fn extend_with_another_messages(&mut self, messages: Self) {

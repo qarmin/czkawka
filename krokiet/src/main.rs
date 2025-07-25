@@ -76,7 +76,7 @@ fn main() {
     let app = MainWindow::new().expect("Failed to create main window");
 
     let (progress_sender, progress_receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
-    let stop_flag: Arc<AtomicBool> = Arc::new(AtomicBool::new(false));
+    let stop_flag: Arc<AtomicBool> = Arc::default();
 
     zeroing_all_models(&app);
 
@@ -114,7 +114,7 @@ fn main() {
     save_all_settings_to_file(&app, original_preset_idx);
 }
 
-pub fn zeroing_all_models(app: &MainWindow) {
+pub(crate) fn zeroing_all_models(app: &MainWindow) {
     app.set_empty_folder_model(Rc::new(VecModel::default()).into());
     app.set_empty_files_model(Rc::new(VecModel::default()).into());
     app.set_similar_images_model(Rc::new(VecModel::default()).into());
@@ -130,7 +130,7 @@ pub fn zeroing_all_models(app: &MainWindow) {
 
 #[allow(clippy::vec_init_then_push)]
 #[allow(unused_mut)]
-pub fn print_krokiet_features() {
+pub(crate) fn print_krokiet_features() {
     let mut features: Vec<&str> = vec![];
 
     #[cfg(feature = "skia_opengl")]

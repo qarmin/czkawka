@@ -196,7 +196,7 @@ impl GuiData {
         scrolled_window_errors.show(); // Not sure why needed, but without it text view errors sometimes hide itself
 
         // Used for sending stop signal to thread
-        let stop_flag = Arc::new(AtomicBool::new(false));
+        let stop_flag = Arc::default();
 
         Self {
             window_main,
@@ -233,7 +233,7 @@ impl GuiData {
         }
     }
 
-    pub fn update_language(&self) {
+    pub(crate) fn update_language(&self) {
         self.window_main.set_title(Some(&flg!("window_main_title")));
 
         self.main_notebook.update_language();

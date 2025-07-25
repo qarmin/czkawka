@@ -568,7 +568,7 @@ move_files_title_dialog = Choose folder to which you want to move duplicated fil
 move_files_choose_more_than_1_path = Only one path may be selected to be able to copy their duplicated files, selected {$path_number}.
 move_stats = Properly moved {$num_files}/{$all_files} items
 
-save_results_to_file = Saved results both to txt and json files into {$name} folder.
+save_results_to_file = Saved results both to txt and json files into "{$name}" folder.
 
 search_not_choosing_any_music = ERROR: You must select at least one checkbox with music searching types.
 search_not_choosing_any_broken_files = ERROR: You must select at least one checkbox with type of checked broken files.

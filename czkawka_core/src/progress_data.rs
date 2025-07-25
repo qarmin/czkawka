@@ -122,7 +122,7 @@ pub enum CurrentStage {
 }
 
 impl ProgressData {
-    pub fn validate(&self) {
+    pub(crate) fn validate(&self) {
         assert!(
             self.current_stage_idx <= self.max_stage_idx,
             "Current stage index: {}, max stage index: {}, stage {:?}",
@@ -194,7 +194,7 @@ impl ProgressData {
 }
 
 impl ToolType {
-    pub fn get_max_stage(&self, checking_method: CheckingMethod) -> u8 {
+    pub(crate) fn get_max_stage(&self, checking_method: CheckingMethod) -> u8 {
         match *self {
             Self::Duplicate => 6,
             Self::EmptyFolders | Self::EmptyFiles | Self::InvalidSymlinks | Self::BigFile | Self::TemporaryFiles => 0,

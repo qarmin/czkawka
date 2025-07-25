@@ -23,7 +23,7 @@ use crate::notebook_info::NOTEBOOKS_INFO;
 use crate::opening_selecting_records::*;
 use crate::{delete_things, flg};
 
-pub fn initialize_gui(gui_data: &GuiData) {
+pub(crate) fn initialize_gui(gui_data: &GuiData) {
     //// Initialize button
     {
         let buttons = &gui_data.bottom_buttons.buttons_array;
@@ -515,7 +515,7 @@ fn show_preview(
                 match get_pixbuf_from_dynamic_image(&image) {
                     Ok(t) => t,
                     Err(e) => {
-                        add_text_to_text_view(text_view_errors, flg!("preview_image_opening_failure", name = file_name, reason = e.to_string()).as_str());
+                        add_text_to_text_view(text_view_errors, flg!("preview_image_opening_failure", name = file_name, reason = e).as_str());
                         break 'dir;
                     }
                 }

@@ -25,8 +25,6 @@ use crate::CZKAWKA_VERSION;
 use crate::common_dir_traversal::{CheckingMethod, ToolType};
 use crate::common_directory::Directories;
 use crate::common_items::{ExcludedItems, SingleExcludedItem};
-use crate::common_messages::Messages;
-use crate::common_tool::DeleteMethod;
 use crate::common_traits::ResultEntry;
 use crate::progress_data::{CurrentStage, ProgressData};
 
@@ -203,7 +201,7 @@ pub fn setup_logger(disabled_terminal_printing: bool, app_name: &str) {
         let write_rotater = FileRotate::new(
             &cache_logs_path,
             AppendTimestamp::default(FileLimit::MaxFiles(3)),
-            ContentLimit::BytesSurpassed(20 * 1024 * 1024),
+            ContentLimit::BytesSurpassed(100 * 1024 * 1024),
             Compression::None,
             None,
         );
@@ -313,10 +311,6 @@ pub fn print_version_mode(app: &str) {
     if cfg!(panic = "abort") {
         warn!("You are running app compiled with panic='abort', which may cause panics when processing untrusted data.");
     }
-}
-
-pub fn set_default_number_of_threads() {
-    set_number_of_threads(get_all_available_threads());
 }
 
 pub fn set_number_of_threads(thread_number: usize) {
@@ -450,7 +444,12 @@ pub fn remove_folder_if_contains_only_empty_folders(path: impl AsRef<Path>, remo
     }
 }
 
-pub fn open_cache_folder(cache_file_name: &str, save_to_cache: bool, use_json: bool, warnings: &mut Vec<String>) -> Option<((Option<File>, PathBuf), (Option<File>, PathBuf))> {
+pub(crate) fn open_cache_folder(
+    cache_file_name: &str,
+    save_to_cache: bool,
+    use_json: bool,
+    warnings: &mut Vec<String>,
+) -> Option<((Option<File>, PathBuf), (Option<File>, PathBuf))> {
     let cache_dir = get_config_cache_path()?.cache_folder;
     let cache_file = cache_dir.join(cache_file_name);
     let cache_file_json = cache_dir.join(cache_file_name.replace(".bin", ".json"));
@@ -505,7 +504,7 @@ pub fn split_path_compare(path_a: &Path, path_b: &Path) -> Ordering {
     }
 }
 
-pub fn create_crash_message(library_name: &str, file_path: &str, home_library_url: &str) -> String {
+pub(crate) fn create_crash_message(library_name: &str, file_path: &str, home_library_url: &str) -> String {
     format!(
         "{library_name} library crashed when opening \"{file_path}\", please check if this is fixed with the latest version of {library_name} and if it is not fixed, please report bug here - {home_library_url}"
     )
@@ -580,7 +579,7 @@ pub fn normalize_windows_path(path_to_change: impl AsRef<Path>) -> PathBuf {
     }
 }
 
-pub fn check_folder_children(
+pub(crate) fn check_folder_children(
     dir_result: &mut Vec<PathBuf>,
     warnings: &mut Vec<String>,
     entry_data: &DirEntry,
@@ -613,105 +612,7 @@ pub fn check_folder_children(
     dir_result.push(next_item);
 }
 
-// Here we assume, that internal Vec<> have at least 1 object
-#[allow(clippy::ptr_arg)]
-pub fn delete_files_custom<T>(items: &Vec<&Vec<T>>, delete_method: &DeleteMethod, text_messages: &mut Messages, dry_run: bool) -> (u64, usize, usize)
-where
-    T: ResultEntry + Clone,
-{
-    let res = items
-        .iter()
-        .map(|values| {
-            let mut gained_space: u64 = 0;
-            let mut removed_files: usize = 0;
-            let mut failed_to_remove_files: usize = 0;
-            let mut infos = Vec::new();
-            let mut errors = Vec::new();
-
-            let mut all_values = (*values).clone();
-            let len = all_values.len();
-
-            // Sorted from smallest to biggest or oldest to newest
-            all_values.sort_unstable_by_key(match delete_method {
-                DeleteMethod::AllExceptBiggest | DeleteMethod::AllExceptSmallest | DeleteMethod::OneBiggest | DeleteMethod::OneSmallest => ResultEntry::get_size,
-                _ => ResultEntry::get_modified_date,
-            });
-
-            if delete_method == &DeleteMethod::HardLink {
-                let original_file = &all_values[0];
-                for file_entry in &all_values[1..] {
-                    if dry_run {
-                        infos.push(format!(
-                            "dry_run - would create hardlink from \"{}\" to \"{}\"",
-                            original_file.get_path().to_string_lossy(),
-                            file_entry.get_path().to_string_lossy()
-                        ));
-                    } else {
-                        if dry_run {
-                            infos.push(format!(
-                                "Replace file \"{}\" with hard link to \"{}\"",
-                                original_file.get_path().to_string_lossy(),
-                                file_entry.get_path().to_string_lossy()
-                            ));
-                        } else {
-                            if let Err(e) = make_hard_link(original_file.get_path(), file_entry.get_path()) {
-                                errors.push(format!(
-                                    "Cannot create hard link from \"{}\" to \"{}\" - {e}",
-                                    file_entry.get_path().to_string_lossy(),
-                                    original_file.get_path().to_string_lossy()
-                                ));
-                                failed_to_remove_files += 1;
-                            } else {
-                                gained_space += 1;
-                                removed_files += 1;
-                            }
-                        }
-                    }
-                }
-
-                return (infos, errors, gained_space, removed_files, failed_to_remove_files);
-            }
-
-            let items = match delete_method {
-                DeleteMethod::Delete => &all_values,
-                DeleteMethod::AllExceptNewest | DeleteMethod::AllExceptBiggest => &all_values[..(len - 1)],
-                DeleteMethod::AllExceptOldest | DeleteMethod::AllExceptSmallest => &all_values[1..],
-                DeleteMethod::OneOldest | DeleteMethod::OneSmallest => &all_values[..1],
-                DeleteMethod::OneNewest | DeleteMethod::OneBiggest => &all_values[(len - 1)..],
-                DeleteMethod::HardLink | DeleteMethod::None => unreachable!("HardLink and None should be handled before"),
-            };
-
-            for i in items {
-                if dry_run {
-                    infos.push(format!("dry_run - would delete file: \"{}\"", i.get_path().to_string_lossy()));
-                } else {
-                    if let Err(e) = fs::remove_file(i.get_path()) {
-                        errors.push(format!("Cannot delete file: \"{}\" - {e}", i.get_path().to_string_lossy()));
-                        failed_to_remove_files += 1;
-                    } else {
-                        removed_files += 1;
-                        gained_space += i.get_size();
-                    }
-                }
-            }
-            (infos, errors, gained_space, removed_files, failed_to_remove_files)
-        })
-        .collect::<Vec<_>>();
-
-    let mut gained_space = 0;
-    let mut removed_files = 0;
-    let mut failed_to_remove_files = 0;
-    for (infos, errors, gained_space_v, removed_files_v, failed_to_remove_files_v) in res {
-        text_messages.messages.extend(infos);
-        text_messages.errors.extend(errors);
-        gained_space += gained_space_v;
-        removed_files += removed_files_v;
-        failed_to_remove_files += failed_to_remove_files_v;
-    }
-
-    (gained_space, removed_files, failed_to_remove_files)
-}
-pub fn filter_reference_folders_generic<T>(entries_to_check: Vec<Vec<T>>, directories: &Directories) -> Vec<(T, Vec<T>)>
+pub(crate) fn filter_reference_folders_generic<T>(entries_to_check: Vec<Vec<T>>, directories: &Directories) -> Vec<(T, Vec<T>)>
 where
     T: ResultEntry,
 {
@@ -730,7 +631,7 @@ where
         .collect::<Vec<(T, Vec<T>)>>()
 }
 
-pub fn prepare_thread_handler_common(
+pub(crate) fn prepare_thread_handler_common(
     progress_sender: Option<&Sender<ProgressData>>,
     sstage: CurrentStage,
     max_items: usize,
@@ -784,11 +685,8 @@ pub fn prepare_thread_handler_common(
 }
 
 #[inline]
-pub fn check_if_stop_received(stop_flag: Option<&Arc<AtomicBool>>) -> bool {
-    if let Some(stop_flag) = stop_flag {
-        return stop_flag.load(atomic::Ordering::Relaxed);
-    }
-    false
+pub(crate) fn check_if_stop_received(stop_flag: &Arc<AtomicBool>) -> bool {
+    stop_flag.load(atomic::Ordering::Relaxed)
 }
 
 pub fn make_hard_link(src: &Path, dst: &Path) -> io::Result<()> {
@@ -804,7 +702,7 @@ pub fn make_hard_link(src: &Path, dst: &Path) -> io::Result<()> {
 }
 
 #[fun_time(message = "send_info_and_wait_for_ending_all_threads", level = "debug")]
-pub fn send_info_and_wait_for_ending_all_threads(progress_thread_run: &Arc<AtomicBool>, progress_thread_handle: JoinHandle<()>) {
+pub(crate) fn send_info_and_wait_for_ending_all_threads(progress_thread_run: &Arc<AtomicBool>, progress_thread_handle: JoinHandle<()>) {
     progress_thread_run.store(false, atomic::Ordering::Relaxed);
     progress_thread_handle.join().expect("Cannot join progress thread - quite fatal error, but happens rarely");
 }

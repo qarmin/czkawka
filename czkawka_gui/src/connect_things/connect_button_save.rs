@@ -12,7 +12,7 @@ use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::BottomButtonsEnum;
 use crate::notebook_enums::*;
 
-pub fn connect_button_save(gui_data: &GuiData) {
+pub(crate) fn connect_button_save(gui_data: &GuiData) {
     let buttons_save = gui_data.bottom_buttons.buttons_save.clone();
     let buttons_save_clone = gui_data.bottom_buttons.buttons_save.clone();
     let shared_duplication_state = gui_data.shared_duplication_state.clone();

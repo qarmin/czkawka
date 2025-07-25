@@ -11,7 +11,7 @@ Gtk 4 frontend(but of course I want implement most of the features from other pr
 
 Krokiet should not have any special runtime requirements - it should work on almost any device non-antic device.
 
-Prebuild binaries should work on Windows 10,11, Mac, Ubuntu 22.04/24.04(depending on features) and similar - https://github.com/qarmin/czkawka/releases/
+Prebuild binaries should work on Windows 10,11, Mac, Ubuntu 22.04(and similar distros, with same or greater glibc version) - https://github.com/qarmin/czkawka/releases/
 
 ## Compilation
 

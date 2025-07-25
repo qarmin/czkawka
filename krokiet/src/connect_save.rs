@@ -6,7 +6,7 @@ use slint::ComponentHandle;
 use crate::shared_models::SharedModels;
 use crate::{Callabler, GuiState, MainWindow};
 
-pub fn connect_save(app: &MainWindow, shared_models: Arc<Mutex<SharedModels>>) {
+pub(crate) fn connect_save(app: &MainWindow, shared_models: Arc<Mutex<SharedModels>>) {
     let a = app.as_weak();
     app.global::<Callabler>().on_save_results(move || {
         let app = a.upgrade().expect("Failed to upgrade app :(");

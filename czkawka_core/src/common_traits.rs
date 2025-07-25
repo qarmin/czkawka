@@ -1,9 +1,15 @@
 use std::fs::File;
 use std::io::{BufWriter, Write};
 use std::path::Path;
+use std::sync::Arc;
+use std::sync::atomic::AtomicBool;
 
+use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use serde::Serialize;
+
+use crate::common::WorkContinueStatus;
+use crate::progress_data::ProgressData;
 
 pub trait DebugPrint {
     fn debug_print(&self);
@@ -33,6 +39,11 @@ pub trait PrintResults {
         self.write_results(&mut writer)?;
         writer.flush()?;
         Ok(())
+    }
+
+    #[fun_time(message = "print_results_to_writer", level = "debug")]
+    fn print_results_to_writer<T: Write>(&self, writer: &mut T) -> std::io::Result<()> {
+        self.write_results(writer)
     }
 
     fn save_results_to_file_as_json(&self, file_name: &str, pretty_print: bool) -> std::io::Result<()>;
@@ -70,6 +81,11 @@ pub trait PrintResults {
         self.print_results_to_file(&txt_name)?;
         Ok(())
     }
+}
+
+pub trait DeletingItems {
+    #[must_use]
+    fn delete_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus;
 }
 
 pub trait ResultEntry {

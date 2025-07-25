@@ -1,4 +1,3 @@
-use std::fs;
 use std::io::Write;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
@@ -11,8 +10,8 @@ use rayon::prelude::*;
 
 use crate::common::WorkContinueStatus;
 use crate::common_dir_traversal::{DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
-use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
-use crate::common_traits::{DebugPrint, PrintResults};
+use crate::common_tool::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
+use crate::common_traits::{DebugPrint, DeletingItems, PrintResults};
 use crate::progress_data::ProgressData;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
@@ -58,18 +57,21 @@ impl BigFile {
     }
 
     #[fun_time(message = "find_big_files", level = "info")]
-    pub fn find_big_files(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) {
+    pub fn find_big_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
         self.prepare_items();
         if self.look_for_big_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
             self.common_data.stopped_search = true;
             return;
         }
-        self.delete_files();
+        if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+            self.common_data.stopped_search = true;
+            return;
+        };
         self.debug_print();
     }
 
     #[fun_time(message = "look_for_big_files", level = "debug")]
-    fn look_for_big_files(&mut self, stop_flag: Option<&Arc<AtomicBool>>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn look_for_big_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let result = DirTraversalBuilder::new()
             .group_by(|_fe| ())
             .stop_flag(stop_flag)
@@ -104,19 +106,14 @@ impl BigFile {
             DirTraversalResult::Stopped => WorkContinueStatus::Stop,
         }
     }
+}
 
-    fn delete_files(&mut self) {
+impl DeletingItems for BigFile {
+    #[fun_time(message = "delete_files", level = "debug")]
+    fn delete_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         match self.common_data.delete_method {
-            DeleteMethod::Delete => {
-                for file_entry in &self.big_files {
-                    if fs::remove_file(&file_entry.path).is_err() {
-                        self.common_data.text_messages.warnings.push(file_entry.path.to_string_lossy().to_string());
-                    }
-                }
-            }
-            DeleteMethod::None => {
-                //Just do nothing
-            }
+            DeleteMethod::Delete => self.delete_simple_elements_and_add_to_messages(stop_flag, progress_sender, DeleteItemType::DeletingFiles(self.big_files.clone())),
+            DeleteMethod::None => WorkContinueStatus::Continue,
             _ => unreachable!(),
         }
     }
@@ -181,6 +178,9 @@ impl CommonData for BigFile {
     fn get_cd_mut(&mut self) -> &mut CommonToolData {
         &mut self.common_data
     }
+    fn found_any_broken_files(&self) -> bool {
+        self.information.number_of_real_files > 0
+    }
 }
 
 impl BigFile {
@@ -192,7 +192,7 @@ impl BigFile {
         &self.information
     }
 
-    pub fn get_params(&self) -> &BigFileParameters {
+    pub(crate) fn get_params(&self) -> &BigFileParameters {
         &self.params
     }
 }

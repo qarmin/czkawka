@@ -563,7 +563,7 @@ pub struct IgnoreSameSize {
 }
 
 impl FileToSave {
-    pub fn file_name(&self) -> Option<&str> {
+    pub(crate) fn file_name(&self) -> Option<&str> {
         if let Some(file_name) = &self.file_to_save {
             return file_name.to_str();
         }
@@ -572,7 +572,7 @@ impl FileToSave {
     }
 }
 impl JsonCompactFileToSave {
-    pub fn file_name(&self) -> Option<&str> {
+    pub(crate) fn file_name(&self) -> Option<&str> {
         if let Some(file_name) = &self.compact_file_to_save {
             return file_name.to_str();
         }
@@ -581,7 +581,7 @@ impl JsonCompactFileToSave {
     }
 }
 impl JsonPrettyFileToSave {
-    pub fn file_name(&self) -> Option<&str> {
+    pub(crate) fn file_name(&self) -> Option<&str> {
         if let Some(file_name) = &self.pretty_file_to_save {
             return file_name.to_str();
         }

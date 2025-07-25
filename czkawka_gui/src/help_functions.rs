@@ -1,6 +1,7 @@
 use std::cell::RefCell;
 use std::cmp::Ordering;
 use std::collections::HashMap;
+use std::io::{BufReader, Cursor};
 use std::path::{MAIN_SEPARATOR, PathBuf};
 use std::rc::Rc;
 
@@ -18,14 +19,13 @@ use czkawka_core::tools::similar_images::SimilarImages;
 use czkawka_core::tools::similar_videos::SimilarVideos;
 use czkawka_core::tools::temporary::Temporary;
 use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
-use glib::{Bytes, Error};
+use glib::Bytes;
 use gtk4::gdk_pixbuf::Colorspace;
 use gtk4::prelude::*;
 use gtk4::{ListStore, Scale, ScrollType, TextView, TreeView, Widget};
 use image::codecs::jpeg::JpegEncoder;
-use image::{DynamicImage, EncodableLayout, GenericImageView, RgbaImage};
+use image::{DynamicImage, GenericImageView, RgbaImage};
 use log::debug;
-use once_cell::sync::OnceCell;
 use resvg::tiny_skia;
 use resvg::usvg::{Options, Tree};
 
@@ -240,7 +240,7 @@ pub const MAIN_ROW_COLOR: &str = "#222222";
 pub const HEADER_ROW_COLOR: &str = "#111111";
 pub const TEXT_COLOR: &str = "#ffffff";
 
-pub fn get_string_from_list_store(tree_view: &TreeView, column_full_path: i32, column_selection: Option<i32>) -> Vec<String> {
+pub(crate) fn get_string_from_list_store(tree_view: &TreeView, column_full_path: i32, column_selection: Option<i32>) -> Vec<String> {
     let list_store: ListStore = get_list_store(tree_view);
 
     let mut string_vector: Vec<String> = Vec::new();
@@ -266,11 +266,11 @@ pub fn get_string_from_list_store(tree_view: &TreeView, column_full_path: i32, c
     }
 }
 
-pub fn get_path_buf_from_vector_of_strings(vec_string: &[String]) -> Vec<PathBuf> {
+pub(crate) fn get_path_buf_from_vector_of_strings(vec_string: &[String]) -> Vec<PathBuf> {
     vec_string.iter().map(PathBuf::from).collect()
 }
 
-pub fn print_text_messages_to_text_view(text_messages: &Messages, text_view: &TextView) {
+pub(crate) fn print_text_messages_to_text_view(text_messages: &Messages, text_view: &TextView) {
     let mut messages: String = String::new();
     if !text_messages.messages.is_empty() {
         messages += format!("############### {}({}) ###############\n", flg!("text_view_messages"), text_messages.messages.len()).as_str();
@@ -306,11 +306,11 @@ pub fn print_text_messages_to_text_view(text_messages: &Messages, text_view: &Te
     text_view.buffer().set_text(messages.as_str());
 }
 
-pub fn reset_text_view(text_view: &TextView) {
+pub(crate) fn reset_text_view(text_view: &TextView) {
     text_view.buffer().set_text("");
 }
 
-pub fn add_text_to_text_view(text_view: &TextView, string_to_append: &str) {
+pub(crate) fn add_text_to_text_view(text_view: &TextView, string_to_append: &str) {
     let buffer = text_view.buffer();
     let current_text = buffer.text(&buffer.start_iter(), &buffer.end_iter(), true).to_string();
     if current_text.is_empty() {
@@ -320,7 +320,7 @@ pub fn add_text_to_text_view(text_view: &TextView, string_to_append: &str) {
     }
 }
 
-pub fn set_buttons(hashmap: &mut HashMap<BottomButtonsEnum, bool>, buttons_array: &[Widget], button_names: &[BottomButtonsEnum]) {
+pub(crate) fn set_buttons(hashmap: &mut HashMap<BottomButtonsEnum, bool>, buttons_array: &[Widget], button_names: &[BottomButtonsEnum]) {
     for (index, button) in buttons_array.iter().enumerate() {
         if button_names[index] == BottomButtonsEnum::Sort {
             // TODO - sort button is broken, I don't have skills and time to fix it
@@ -338,28 +338,28 @@ pub fn set_buttons(hashmap: &mut HashMap<BottomButtonsEnum, bool>, buttons_array
     }
 }
 
-pub fn hide_all_buttons(buttons_array: &[Widget]) {
+pub(crate) fn hide_all_buttons(buttons_array: &[Widget]) {
     for button in buttons_array {
         button.hide();
     }
 }
 
-pub fn get_text_from_invalid_symlink_cause(error: common_dir_traversal::ErrorType) -> String {
+pub(crate) fn get_text_from_invalid_symlink_cause(error: common_dir_traversal::ErrorType) -> String {
     match error {
         common_dir_traversal::ErrorType::InfiniteRecursion => flg!("invalid_symlink_infinite_recursion"),
         common_dir_traversal::ErrorType::NonExistentFile => flg!("invalid_symlink_non_existent_destination"),
     }
 }
 
-pub fn get_list_store(tree_view: &TreeView) -> ListStore {
+pub(crate) fn get_list_store(tree_view: &TreeView) -> ListStore {
     tree_view.model().expect("Tree view have no model").downcast::<ListStore>().expect("Model is not ListStore")
 }
 
-pub fn get_dialog_box_child(dialog: &gtk4::Dialog) -> gtk4::Box {
+pub(crate) fn get_dialog_box_child(dialog: &gtk4::Dialog) -> gtk4::Box {
     dialog.child().expect("Dialog have no chile").downcast::<gtk4::Box>().expect("Dialog child is not Box")
 }
 
-pub fn change_dimension_to_krotka(dimensions: &str) -> (u64, u64) {
+pub(crate) fn change_dimension_to_krotka(dimensions: &str) -> (u64, u64) {
     #[allow(clippy::single_char_pattern)]
     let vec = dimensions.split::<&str>("x").collect::<Vec<_>>();
     assert_eq!(vec.len(), 2); // 400x400 - should only have two elements, if have more, then something is not good
@@ -368,7 +368,7 @@ pub fn change_dimension_to_krotka(dimensions: &str) -> (u64, u64) {
     (number1, number2)
 }
 
-pub fn get_notebook_enum_from_tree_view(tree_view: &TreeView) -> NotebookMainEnum {
+pub(crate) fn get_notebook_enum_from_tree_view(tree_view: &TreeView) -> NotebookMainEnum {
     match (*tree_view).widget_name().to_string().as_str() {
         "tree_view_duplicate_finder" => NotebookMainEnum::Duplicate,
         "tree_view_empty_folder_finder" => NotebookMainEnum::EmptyDirectories,
@@ -387,7 +387,7 @@ pub fn get_notebook_enum_from_tree_view(tree_view: &TreeView) -> NotebookMainEnu
     }
 }
 
-pub fn get_tree_view_name_from_notebook_enum(notebook_enum: NotebookMainEnum) -> &'static str {
+pub(crate) fn get_tree_view_name_from_notebook_enum(notebook_enum: NotebookMainEnum) -> &'static str {
     match notebook_enum {
         NotebookMainEnum::Duplicate => "tree_view_duplicate_finder",
         NotebookMainEnum::EmptyDirectories => "tree_view_empty_folder_finder",
@@ -403,7 +403,7 @@ pub fn get_tree_view_name_from_notebook_enum(notebook_enum: NotebookMainEnum) ->
     }
 }
 
-pub fn get_notebook_upper_enum_from_tree_view(tree_view: &TreeView) -> NotebookUpperEnum {
+pub(crate) fn get_notebook_upper_enum_from_tree_view(tree_view: &TreeView) -> NotebookUpperEnum {
     match (*tree_view).widget_name().to_string().as_str() {
         "tree_view_upper_included_directories" => NotebookUpperEnum::IncludedDirectories,
         "tree_view_upper_excluded_directories" => NotebookUpperEnum::ExcludedDirectories,
@@ -411,7 +411,7 @@ pub fn get_notebook_upper_enum_from_tree_view(tree_view: &TreeView) -> NotebookU
     }
 }
 
-pub fn get_tree_view_name_from_notebook_upper_enum(notebook_upper_enum: NotebookUpperEnum) -> &'static str {
+pub(crate) fn get_tree_view_name_from_notebook_upper_enum(notebook_upper_enum: NotebookUpperEnum) -> &'static str {
     match notebook_upper_enum {
         NotebookUpperEnum::IncludedDirectories => "tree_view_upper_included_directories",
         NotebookUpperEnum::ExcludedDirectories => "tree_view_upper_excluded_directories",
@@ -419,12 +419,12 @@ pub fn get_tree_view_name_from_notebook_upper_enum(notebook_upper_enum: Notebook
     }
 }
 
-pub fn get_notebook_object_from_tree_view(tree_view: &TreeView) -> &NotebookObject {
+pub(crate) fn get_notebook_object_from_tree_view(tree_view: &TreeView) -> &NotebookObject {
     let nb_enum = get_notebook_enum_from_tree_view(tree_view);
     &NOTEBOOKS_INFO[nb_enum as usize]
 }
 
-pub fn get_full_name_from_path_name(path: &str, name: &str) -> String {
+pub(crate) fn get_full_name_from_path_name(path: &str, name: &str) -> String {
     let mut string = String::with_capacity(path.len() + name.len() + 1);
     string.push_str(path);
     string.push(MAIN_SEPARATOR);
@@ -433,7 +433,7 @@ pub fn get_full_name_from_path_name(path: &str, name: &str) -> String {
 }
 
 // After e.g. deleting files, header may become orphan or have one child, so should be deleted in this case
-pub fn clean_invalid_headers(model: &ListStore, column_header: i32, column_path: i32) {
+pub(crate) fn clean_invalid_headers(model: &ListStore, column_header: i32, column_path: i32) {
     // Remove only child from header
     if let Some(first_iter) = model.iter_first() {
         let mut vec_tree_path_to_delete: Vec<gtk4::TreePath> = Vec::new();
@@ -551,7 +551,7 @@ pub fn clean_invalid_headers(model: &ListStore, column_header: i32, column_path:
     }
 }
 
-pub fn check_how_much_elements_is_selected(tree_view: &TreeView, column_header: Option<i32>, column_selection: i32) -> (u64, u64) {
+pub(crate) fn check_how_much_elements_is_selected(tree_view: &TreeView, column_header: Option<i32>, column_selection: i32) -> (u64, u64) {
     let mut number_of_selected_items: u64 = 0;
     let mut number_of_selected_groups: u64 = 0;
 
@@ -601,7 +601,7 @@ pub fn check_how_much_elements_is_selected(tree_view: &TreeView, column_header: 
     (number_of_selected_items, number_of_selected_groups)
 }
 
-pub fn count_number_of_groups(tree_view: &TreeView, column_header: i32) -> u32 {
+pub(crate) fn count_number_of_groups(tree_view: &TreeView, column_header: i32) -> u32 {
     let mut number_of_selected_groups = 0;
 
     let model = get_list_store(tree_view);
@@ -623,7 +623,7 @@ pub fn count_number_of_groups(tree_view: &TreeView, column_header: i32) -> u32 {
     number_of_selected_groups
 }
 
-pub fn resize_pixbuf_dimension(pixbuf: &Pixbuf, requested_size: (i32, i32), interp_type: InterpType) -> Option<Pixbuf> {
+pub(crate) fn resize_pixbuf_dimension(pixbuf: &Pixbuf, requested_size: (i32, i32), interp_type: InterpType) -> Option<Pixbuf> {
     let current_ratio = pixbuf.width() as f32 / pixbuf.height() as f32;
     let mut new_size;
     match current_ratio.total_cmp(&(requested_size.0 as f32 / requested_size.1 as f32)) {
@@ -643,7 +643,7 @@ pub fn resize_pixbuf_dimension(pixbuf: &Pixbuf, requested_size: (i32, i32), inte
     pixbuf.scale_simple(new_size.0, new_size.1, interp_type)
 }
 
-pub fn get_max_file_name(file_name: &str, max_length: usize) -> String {
+pub(crate) fn get_max_file_name(file_name: &str, max_length: usize) -> String {
     assert!(max_length > 10); // Maybe in future will be supported lower values
     let characters_in_filename = file_name.chars().count();
     if characters_in_filename > max_length {
@@ -667,7 +667,7 @@ pub fn get_max_file_name(file_name: &str, max_length: usize) -> String {
     }
 }
 
-pub fn get_custom_label_from_widget<P: IsA<Widget>>(item: &P) -> gtk4::Label {
+pub(crate) fn get_custom_label_from_widget<P: IsA<Widget>>(item: &P) -> gtk4::Label {
     let mut widgets_to_check = vec![item.clone().upcast::<Widget>()];
 
     while let Some(widget) = widgets_to_check.pop() {
@@ -679,7 +679,7 @@ pub fn get_custom_label_from_widget<P: IsA<Widget>>(item: &P) -> gtk4::Label {
     panic!("Button doesn't have proper custom label child");
 }
 
-pub fn get_custom_image_from_widget<P: IsA<Widget>>(item: &P) -> gtk4::Image {
+pub(crate) fn get_custom_image_from_widget<P: IsA<Widget>>(item: &P) -> gtk4::Image {
     let mut widgets_to_check = vec![item.clone().upcast::<Widget>()];
 
     while let Some(widget) = widgets_to_check.pop() {
@@ -692,7 +692,7 @@ pub fn get_custom_image_from_widget<P: IsA<Widget>>(item: &P) -> gtk4::Image {
 }
 
 #[allow(dead_code)]
-pub fn debug_print_widget<P: IsA<Widget>>(item: &P) {
+pub(crate) fn debug_print_widget<P: IsA<Widget>>(item: &P) {
     let mut widgets_to_check = vec![(0, 0, item.clone().upcast::<Widget>())];
 
     let mut next_free_number = 1;
@@ -707,7 +707,7 @@ pub fn debug_print_widget<P: IsA<Widget>>(item: &P) {
     }
 }
 
-pub fn get_all_boxes_from_widget<P: IsA<Widget>>(item: &P) -> Vec<gtk4::Box> {
+pub(crate) fn get_all_boxes_from_widget<P: IsA<Widget>>(item: &P) -> Vec<gtk4::Box> {
     let mut widgets_to_check = vec![item.clone().upcast::<Widget>()];
     let mut boxes = Vec::new();
 
@@ -720,7 +720,7 @@ pub fn get_all_boxes_from_widget<P: IsA<Widget>>(item: &P) -> Vec<gtk4::Box> {
     boxes
 }
 
-pub fn get_all_direct_children<P: IsA<Widget>>(wid: &P) -> Vec<Widget> {
+pub(crate) fn get_all_direct_children<P: IsA<Widget>>(wid: &P) -> Vec<Widget> {
     let mut vector = vec![];
     if let Some(mut child) = wid.first_child() {
         vector.push(child.clone());
@@ -760,30 +760,22 @@ fn dynamic_image_to_pixbuf(img: DynamicImage) -> Pixbuf {
     pixbuf.scale_simple(SIZE_OF_ICON, SIZE_OF_ICON, TYPE_OF_INTERPOLATION).expect("Failed to scale pixbuf")
 }
 
-pub fn set_icon_of_button<P: IsA<Widget>>(button: &P, data: &'static [u8]) {
+pub(crate) fn set_icon_of_button<P: IsA<Widget>>(button: &P, data: &'static [u8]) {
     let image = get_custom_image_from_widget(&button.clone());
     let dynamic_image = svg_to_dynamic_image(data).expect("Failed to convert SVG data to DynamicImage");
     let pixbuf = dynamic_image_to_pixbuf(dynamic_image);
     image.set_from_pixbuf(Some(&pixbuf));
 }
 
-static mut IMAGE_PREVIEW_ARRAY: OnceCell<Vec<u8>> = OnceCell::new();
-
-pub fn get_pixbuf_from_dynamic_image(dynamic_image: &DynamicImage) -> Result<Pixbuf, Error> {
+pub(crate) fn get_pixbuf_from_dynamic_image(dynamic_image: &DynamicImage) -> Result<Pixbuf, String> {
     let mut output = Vec::new();
-    JpegEncoder::new(&mut output).encode_image(dynamic_image).expect("Failed to encode jpeg image"); // TODO remove here unwrap
-    let arra;
-    // TODO - this code can really be broken, but I couldn't find better solution
-    #[allow(static_mut_refs)]
-    unsafe {
-        IMAGE_PREVIEW_ARRAY.take();
-        IMAGE_PREVIEW_ARRAY.set(output).expect("Setting image preview array failed");
-        arra = IMAGE_PREVIEW_ARRAY.get().expect("Getting image preview array failed").as_bytes();
-    }
-    Pixbuf::from_read(arra)
+    JpegEncoder::new(&mut output)
+        .encode_image(dynamic_image)
+        .map_err(|e| format!("Failed to encode image: {e}"))?;
+    Pixbuf::from_read(BufReader::new(Cursor::new(output))).map_err(|e| format!("Failed to create Pixbuf from DynamicImage: {e}"))
 }
 
-pub fn check_if_value_is_in_list_store(list_store: &ListStore, column: i32, value: &str) -> bool {
+pub(crate) fn check_if_value_is_in_list_store(list_store: &ListStore, column: i32, value: &str) -> bool {
     if let Some(iter) = list_store.iter_first() {
         loop {
             let list_store_value: String = list_store.get::<String>(&iter, column);
@@ -801,7 +793,7 @@ pub fn check_if_value_is_in_list_store(list_store: &ListStore, column: i32, valu
     false
 }
 
-pub fn check_if_list_store_column_have_all_same_values(list_store: &ListStore, column: i32, value: bool) -> bool {
+pub(crate) fn check_if_list_store_column_have_all_same_values(list_store: &ListStore, column: i32, value: bool) -> bool {
     if let Some(iter) = list_store.iter_first() {
         loop {
             let list_store_value: bool = list_store.get::<bool>(&iter, column);
@@ -819,7 +811,7 @@ pub fn check_if_list_store_column_have_all_same_values(list_store: &ListStore, c
     false
 }
 
-pub fn scale_set_min_max_values(scale: &Scale, minimum: f64, maximum: f64, current_value: f64, step: Option<f64>) {
+pub(crate) fn scale_set_min_max_values(scale: &Scale, minimum: f64, maximum: f64, current_value: f64, step: Option<f64>) {
     scale.set_range(minimum, maximum);
     scale.set_fill_level(maximum);
     scale.set_value(current_value);
@@ -828,7 +820,7 @@ pub fn scale_set_min_max_values(scale: &Scale, minimum: f64, maximum: f64, curre
     }
 }
 
-pub fn scale_step_function(scale: &Scale, _scroll_type: ScrollType, value: f64) -> glib::Propagation {
+pub(crate) fn scale_step_function(scale: &Scale, _scroll_type: ScrollType, value: f64) -> glib::Propagation {
     scale.set_increments(1_f64, 1_f64);
     scale.set_round_digits(0);
     scale.set_fill_level(value.round());

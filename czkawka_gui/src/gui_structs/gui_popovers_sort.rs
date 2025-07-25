@@ -15,7 +15,7 @@ pub struct GuiSortPopovers {
 }
 
 impl GuiSortPopovers {
-    pub fn create_from_builder() -> Self {
+    pub(crate) fn create_from_builder() -> Self {
         let glade_src = include_str!("../../ui/popover_sort.ui").to_string();
         let builder = Builder::from_string(glade_src.as_str());
 
@@ -36,7 +36,7 @@ impl GuiSortPopovers {
             popover_sort,
         }
     }
-    pub fn update_language(&self) {
+    pub(crate) fn update_language(&self) {
         self.buttons_popover_sort_file_name.set_label(&flg!("popover_sort_file_name"));
         self.buttons_popover_sort_folder_name.set_label(&flg!("popover_sort_folder_name"));
         self.buttons_popover_sort_full_name.set_label(&flg!("popover_sort_full_name"));

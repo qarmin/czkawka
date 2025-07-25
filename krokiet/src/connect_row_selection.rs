@@ -108,7 +108,7 @@ impl Eq for CurrentTab {}
 ////////////////////
 ////////////////////
 
-pub fn connect_row_selections(app: &MainWindow) {
+pub(crate) fn connect_row_selections(app: &MainWindow) {
     initialize_selection_struct();
 
     selection::connect_select_all_rows(app); // CTRL + A

@@ -196,7 +196,7 @@ fn is_running_as_sudo() -> bool {
     }
 }
 
-pub fn get_raw_image(path: impl AsRef<Path> + std::fmt::Debug) -> Result<DynamicImage, String> {
+pub(crate) fn get_raw_image(path: impl AsRef<Path> + std::fmt::Debug) -> Result<DynamicImage, String> {
     let mut start_timer = Instant::now();
     let mut times = Vec::new();
 

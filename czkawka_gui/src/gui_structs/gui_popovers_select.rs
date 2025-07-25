@@ -33,7 +33,7 @@ pub struct GuiSelectPopovers {
 }
 
 impl GuiSelectPopovers {
-    pub fn create_from_builder() -> Self {
+    pub(crate) fn create_from_builder() -> Self {
         let glade_src = include_str!("../../ui/popover_select.ui").to_string();
         let builder = Builder::from_string(glade_src.as_str());
 
@@ -87,7 +87,7 @@ impl GuiSelectPopovers {
             popover_right_click,
         }
     }
-    pub fn update_language(&self) {
+    pub(crate) fn update_language(&self) {
         self.buttons_popover_select_all.set_label(&flg!("popover_select_all"));
         self.buttons_popover_unselect_all.set_label(&flg!("popover_unselect_all"));
         self.buttons_popover_reverse.set_label(&flg!("popover_reverse"));
