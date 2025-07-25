@@ -8,7 +8,7 @@ const REPOSITORY_SITE: &str = "https://github.com/qarmin/czkawka";
 const INSTRUCTION_SITE: &str = "https://github.com/qarmin/czkawka/blob/master/instructions/Instruction.md";
 const TRANSLATION_SITE: &str = "https://crwd.in/czkawka";
 
-pub fn connect_about_buttons(gui_data: &GuiData) {
+pub(crate) fn connect_about_buttons(gui_data: &GuiData) {
     let button_donation = gui_data.about.button_donation.clone();
     button_donation.connect_clicked(move |_| {
         if let Err(e) = open::that(SPONSOR_SITE) {

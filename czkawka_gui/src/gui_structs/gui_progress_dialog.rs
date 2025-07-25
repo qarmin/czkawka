@@ -22,7 +22,7 @@ pub struct GuiProgressDialog {
 }
 
 impl GuiProgressDialog {
-    pub fn create_from_builder(window_main: &Window) -> Self {
+    pub(crate) fn create_from_builder(window_main: &Window) -> Self {
         let glade_src = include_str!("../../ui/progress.ui").to_string();
         let builder = Builder::from_string(glade_src.as_str());
 
@@ -58,7 +58,7 @@ impl GuiProgressDialog {
             evk_button_stop_in_dialog,
         }
     }
-    pub fn update_language(&self) {
+    pub(crate) fn update_language(&self) {
         self.window_progress.set_title(Some(&flg!("window_progress_title")));
 
         get_custom_label_from_widget(&self.button_stop_in_dialog.clone()).set_text(&flg!("progress_stop_button"));

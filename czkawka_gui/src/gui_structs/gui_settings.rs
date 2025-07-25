@@ -58,7 +58,7 @@ pub struct GuiSettings {
 }
 
 impl GuiSettings {
-    pub fn create_from_builder(window_main: &Window) -> Self {
+    pub(crate) fn create_from_builder(window_main: &Window) -> Self {
         let glade_src = include_str!("../../ui/settings.ui").to_string();
         let builder = Builder::from_string(glade_src.as_str());
 
@@ -159,7 +159,7 @@ impl GuiSettings {
         }
     }
 
-    pub fn update_language(&self) {
+    pub(crate) fn update_language(&self) {
         self.window_settings.set_title(Some(&flg!("window_settings_title")));
 
         if !self.label_restart_needed.label().is_empty() {

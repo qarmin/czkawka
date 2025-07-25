@@ -23,7 +23,7 @@ struct SymHardlinkData {
     files_to_symhardlink: Vec<String>,
 }
 
-pub fn connect_button_hardlink_symlink(gui_data: &GuiData) {
+pub(crate) fn connect_button_hardlink_symlink(gui_data: &GuiData) {
     // Hardlinking
     {
         let buttons_hardlink = gui_data.bottom_buttons.buttons_hardlink.clone();
@@ -302,7 +302,7 @@ pub async fn check_if_changing_one_item_in_group_and_continue(tree_view: &gtk4::
     true
 }
 
-pub fn check_if_anything_is_selected_async(tree_view: &gtk4::TreeView, column_header: i32, column_selection: i32) -> bool {
+pub(crate) fn check_if_anything_is_selected_async(tree_view: &gtk4::TreeView, column_header: i32, column_selection: i32) -> bool {
     let model = get_list_store(tree_view);
 
     if let Some(iter) = model.iter_first() {

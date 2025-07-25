@@ -4,7 +4,7 @@ use slint::ComponentHandle;
 
 use crate::{Callabler, MainWindow};
 
-pub fn connect_open_items(app: &MainWindow) {
+pub(crate) fn connect_open_items(app: &MainWindow) {
     app.global::<Callabler>().on_open_config_folder(move || {
         let Some(config_cache) = get_config_cache_path() else {
             error!("Failed to open config folder");

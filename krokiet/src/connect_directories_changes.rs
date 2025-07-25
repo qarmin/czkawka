@@ -3,7 +3,7 @@ use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
 use crate::{Callabler, ExcludedDirectoriesModel, IncludedDirectoriesModel, MainWindow, Settings};
 
-pub fn connect_add_remove_directories(app: &MainWindow) {
+pub(crate) fn connect_add_remove_directories(app: &MainWindow) {
     connect_add_directories(app);
     connect_remove_directories(app);
     connect_add_manual_directories(app);

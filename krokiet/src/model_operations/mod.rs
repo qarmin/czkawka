@@ -8,7 +8,7 @@ use crate::simpler_model::SimplerMainListModel;
 pub type ProcessingResult = Vec<(usize, SimplerMainListModel, Option<Result<(), String>>)>;
 
 #[allow(dead_code)]
-pub fn debug_print_main_list_model_items(list_model: &MainListModel, idx: usize) -> ! {
+pub(crate) fn debug_print_main_list_model_items(list_model: &MainListModel, idx: usize) -> ! {
     let val_int = list_model.val_int.iter().collect::<Vec<_>>();
     let val_str = list_model.val_str.iter().collect::<Vec<_>>();
     panic!(
@@ -19,7 +19,7 @@ pub fn debug_print_main_list_model_items(list_model: &MainListModel, idx: usize)
 
 // TODO - tests
 // Removes orphan items in groups
-pub fn remove_single_items_in_groups(mut items: Vec<MainListModel>, have_header: bool) -> Vec<MainListModel> {
+pub(crate) fn remove_single_items_in_groups(mut items: Vec<MainListModel>, have_header: bool) -> Vec<MainListModel> {
     // When have header, we must also throw out orphaned items
     if have_header && !items.is_empty() {
         // First row must be header

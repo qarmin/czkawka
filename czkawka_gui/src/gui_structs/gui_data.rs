@@ -233,7 +233,7 @@ impl GuiData {
         }
     }
 
-    pub fn update_language(&self) {
+    pub(crate) fn update_language(&self) {
         self.window_main.set_title(Some(&flg!("window_main_title")));
 
         self.main_notebook.update_language();

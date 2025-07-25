@@ -46,7 +46,7 @@ pub struct DeleteResult {
 }
 
 impl DeleteResult {
-    pub fn add_to_messages(&self, messages: &mut Messages) {
+    pub(crate) fn add_to_messages(&self, messages: &mut Messages) {
         messages.errors.extend(self.errors.clone());
         messages.messages.extend(self.infos.clone());
     }

@@ -2,7 +2,7 @@ use gtk4::prelude::*;
 
 use crate::gui_structs::gui_data::GuiData;
 
-pub fn connect_show_hide_ui(gui_data: &GuiData) {
+pub(crate) fn connect_show_hide_ui(gui_data: &GuiData) {
     let check_button_settings_show_text_view = gui_data.settings.check_button_settings_show_text_view.clone();
     let buttons_show_errors = gui_data.bottom_buttons.buttons_show_errors.clone();
     let scrolled_window_errors = gui_data.scrolled_window_errors.clone();

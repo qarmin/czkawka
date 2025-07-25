@@ -103,7 +103,7 @@ where
     text_messages
 }
 
-pub fn extract_loaded_cache<T>(
+pub(crate) fn extract_loaded_cache<T>(
     loaded_hash_map: &BTreeMap<String, T>,
     files_to_check: BTreeMap<String, T>,
     records_already_cached: &mut BTreeMap<String, T>,

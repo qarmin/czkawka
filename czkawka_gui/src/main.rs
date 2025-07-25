@@ -155,7 +155,7 @@ fn build_ui(application: &Application, arguments: &[OsString]) {
     });
 }
 
-pub fn print_czkawka_gui_info(thread_number: usize) {
+pub(crate) fn print_czkawka_gui_info(thread_number: usize) {
     let gtk_version = format!("{}.{}.{}", gtk4::major_version(), gtk4::minor_version(), gtk4::micro_version());
 
     info!("Czkawka Gui - used thread number: {thread_number}, gtk version {gtk_version}");

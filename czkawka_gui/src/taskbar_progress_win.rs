@@ -32,7 +32,7 @@ impl TaskbarProgress {
         TaskbarProgress::from(hwnd)
     }
 
-    pub fn set_progress_state(&self, tbp_flags: TBPFLAG) {
+    pub(crate) fn set_progress_state(&self, tbp_flags: TBPFLAG) {
         if tbp_flags == *self.current_state.borrow() || !*self.is_active.borrow() {
             return ();
         }
@@ -48,7 +48,7 @@ impl TaskbarProgress {
         }
     }
 
-    pub fn set_progress_value(&self, completed: u64, total: u64) {
+    pub(crate) fn set_progress_value(&self, completed: u64, total: u64) {
         // Don't change the value if the is_active flag is false or the value has not changed.
         // If is_active is true and the value has not changed, but the progress indicator was in NOPROGRESS or INDETERMINATE state, set the value (and NORMAL state).
         if ((completed, total) == *self.current_progress.borrow()
@@ -73,18 +73,18 @@ impl TaskbarProgress {
         }
     }
 
-    pub fn hide(&self) {
+    pub(crate) fn hide(&self) {
         self.set_progress_state(tbp_flags::TBPF_NOPROGRESS);
         *self.is_active.borrow_mut() = false;
     }
 
-    pub fn show(&self) {
+    pub(crate) fn show(&self) {
         *self.is_active.borrow_mut() = true;
     }
 
     /// Releases the ITaskbarList3 pointer, uninitialises the COM API and sets the struct to a valid "empty" state.
     /// It's required for proper use of the COM API, because `drop` is never called (objects moved to GTK closures have `static` lifetime).
-    pub fn release(&mut self) {
+    pub(crate) fn release(&mut self) {
         unsafe {
             if let Some(list) = self.taskbar_list.as_ref() {
                 list.Release();

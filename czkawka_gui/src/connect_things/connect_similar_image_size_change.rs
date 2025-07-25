@@ -4,7 +4,7 @@ use gtk4::prelude::*;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_combo_box::IMAGES_HASH_SIZE_COMBO_BOX;
 
-pub fn connect_similar_image_size_change(gui_data: &GuiData) {
+pub(crate) fn connect_similar_image_size_change(gui_data: &GuiData) {
     let label_similar_images_minimal_similarity = gui_data.main_notebook.label_similar_images_minimal_similarity.clone();
     label_similar_images_minimal_similarity.set_text(&get_string_from_similarity(&SIMILAR_VALUES[0][5], 8));
 

@@ -14,7 +14,7 @@ pub struct SimplerMainListModel {
 }
 
 impl SimplerMainListModel {
-    pub fn get_size(&self, size_idx: usize) -> u64 {
+    pub(crate) fn get_size(&self, size_idx: usize) -> u64 {
         connect_i32_into_u64(self.val_int[size_idx], self.val_int[size_idx + 1])
     }
 }

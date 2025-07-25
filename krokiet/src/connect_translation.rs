@@ -125,7 +125,7 @@ pub const LANGUAGE_LIST: &[Language] = &[
     },
 ];
 
-pub fn connect_translations(app: &MainWindow) {
+pub(crate) fn connect_translations(app: &MainWindow) {
     change_language(app);
 
     let a = app.as_weak();

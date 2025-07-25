@@ -8,7 +8,7 @@ use crate::notebook_enums::NotebookUpperEnum;
 
 // TODO add option to open files and folders from context menu activated by pressing ONCE with right mouse button
 
-pub fn opening_enter_function_ported_upper_directories(
+pub(crate) fn opening_enter_function_ported_upper_directories(
     event_controller: &gtk4::EventControllerKey,
     _key_value: Key,
     key_code: u32,
@@ -44,7 +44,7 @@ pub fn opening_enter_function_ported_upper_directories(
     glib::Propagation::Proceed
 }
 
-pub fn opening_middle_mouse_function(gesture_click: &GestureClick, _number_of_clicks: i32, _b: f64, _c: f64) {
+pub(crate) fn opening_middle_mouse_function(gesture_click: &GestureClick, _number_of_clicks: i32, _b: f64, _c: f64) {
     let tree_view = gesture_click
         .widget()
         .expect("Item has no widget")
@@ -59,7 +59,7 @@ pub fn opening_middle_mouse_function(gesture_click: &GestureClick, _number_of_cl
     }
 }
 
-pub fn opening_double_click_function_directories(gesture_click: &GestureClick, number_of_clicks: i32, _b: f64, _c: f64) {
+pub(crate) fn opening_double_click_function_directories(gesture_click: &GestureClick, number_of_clicks: i32, _b: f64, _c: f64) {
     let tree_view = gesture_click
         .widget()
         .expect("Item has no widget")
@@ -81,7 +81,7 @@ pub fn opening_double_click_function_directories(gesture_click: &GestureClick, n
     }
 }
 
-pub fn opening_enter_function_ported(event_controller: &gtk4::EventControllerKey, _key: Key, key_code: u32, _modifier_type: ModifierType) -> glib::Propagation {
+pub(crate) fn opening_enter_function_ported(event_controller: &gtk4::EventControllerKey, _key: Key, key_code: u32, _modifier_type: ModifierType) -> glib::Propagation {
     let tree_view = event_controller
         .widget()
         .expect("Item has no widget")
@@ -103,7 +103,7 @@ pub fn opening_enter_function_ported(event_controller: &gtk4::EventControllerKey
     glib::Propagation::Proceed // True catches signal, and don't send it to function, e.g. up button is caught and don't move selection
 }
 
-pub fn opening_double_click_function(gesture_click: &GestureClick, number_of_clicks: i32, _b: f64, _c: f64) {
+pub(crate) fn opening_double_click_function(gesture_click: &GestureClick, number_of_clicks: i32, _b: f64, _c: f64) {
     let tree_view = gesture_click
         .widget()
         .expect("Item has no widget")
@@ -245,22 +245,47 @@ fn handle_tree_keypress(tree_view: &gtk4::TreeView, key_code: u32, name_column: 
     }
 }
 
-pub fn select_function_duplicates(_tree_selection: &gtk4::TreeSelection, tree_model: &gtk4::TreeModel, tree_path: &gtk4::TreePath, _is_path_currently_selected: bool) -> bool {
+pub(crate) fn select_function_duplicates(
+    _tree_selection: &gtk4::TreeSelection,
+    tree_model: &gtk4::TreeModel,
+    tree_path: &gtk4::TreePath,
+    _is_path_currently_selected: bool,
+) -> bool {
     !tree_model.get::<bool>(&tree_model.iter(tree_path).expect("Invalid tree_path"), ColumnsDuplicates::IsHeader as i32)
 }
 
-pub fn select_function_same_music(_tree_selection: &gtk4::TreeSelection, tree_model: &gtk4::TreeModel, tree_path: &gtk4::TreePath, _is_path_currently_selected: bool) -> bool {
+pub(crate) fn select_function_same_music(
+    _tree_selection: &gtk4::TreeSelection,
+    tree_model: &gtk4::TreeModel,
+    tree_path: &gtk4::TreePath,
+    _is_path_currently_selected: bool,
+) -> bool {
     !tree_model.get::<bool>(&tree_model.iter(tree_path).expect("Invalid tree_path"), ColumnsSameMusic::IsHeader as i32)
 }
 
-pub fn select_function_similar_images(_tree_selection: &gtk4::TreeSelection, tree_model: &gtk4::TreeModel, tree_path: &gtk4::TreePath, _is_path_currently_selected: bool) -> bool {
+pub(crate) fn select_function_similar_images(
+    _tree_selection: &gtk4::TreeSelection,
+    tree_model: &gtk4::TreeModel,
+    tree_path: &gtk4::TreePath,
+    _is_path_currently_selected: bool,
+) -> bool {
     !tree_model.get::<bool>(&tree_model.iter(tree_path).expect("Invalid tree_path"), ColumnsSimilarImages::IsHeader as i32)
 }
 
-pub fn select_function_similar_videos(_tree_selection: &gtk4::TreeSelection, tree_model: &gtk4::TreeModel, tree_path: &gtk4::TreePath, _is_path_currently_selected: bool) -> bool {
+pub(crate) fn select_function_similar_videos(
+    _tree_selection: &gtk4::TreeSelection,
+    tree_model: &gtk4::TreeModel,
+    tree_path: &gtk4::TreePath,
+    _is_path_currently_selected: bool,
+) -> bool {
     !tree_model.get::<bool>(&tree_model.iter(tree_path).expect("Invalid tree_path"), ColumnsSimilarVideos::IsHeader as i32)
 }
 
-pub fn select_function_always_true(_tree_selection: &gtk4::TreeSelection, _tree_model: &gtk4::TreeModel, _tree_path: &gtk4::TreePath, _is_path_currently_selected: bool) -> bool {
+pub(crate) fn select_function_always_true(
+    _tree_selection: &gtk4::TreeSelection,
+    _tree_model: &gtk4::TreeModel,
+    _tree_path: &gtk4::TreePath,
+    _is_path_currently_selected: bool,
+) -> bool {
     true
 }

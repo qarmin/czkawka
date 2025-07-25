@@ -18,7 +18,7 @@ use crate::taskbar_progress::TaskbarProgress;
 use crate::taskbar_progress::tbp_flags::TBPF_INDETERMINATE;
 
 #[allow(clippy::too_many_arguments)]
-pub fn connect_progress_window(gui_data: &GuiData, progress_receiver: Receiver<ProgressData>) {
+pub(crate) fn connect_progress_window(gui_data: &GuiData, progress_receiver: Receiver<ProgressData>) {
     let main_context = MainContext::default();
     let _guard = main_context.acquire().expect("Failed to acquire main context");
 

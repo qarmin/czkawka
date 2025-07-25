@@ -4,7 +4,7 @@ use gtk4::prelude::*;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_combo_box::DUPLICATES_CHECK_METHOD_COMBO_BOX;
 
-pub fn connect_duplicate_combo_box(gui_data: &GuiData) {
+pub(crate) fn connect_duplicate_combo_box(gui_data: &GuiData) {
     let combo_box_duplicate_check_method = gui_data.main_notebook.combo_box_duplicate_check_method.clone();
     let combo_box_duplicate_hash_type = gui_data.main_notebook.combo_box_duplicate_hash_type.clone();
     let label_duplicate_hash_type = gui_data.main_notebook.label_duplicate_hash_type.clone();

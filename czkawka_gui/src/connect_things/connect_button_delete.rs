@@ -13,7 +13,7 @@ use crate::notebook_info::NOTEBOOKS_INFO;
 
 // TODO add support for checking if really symlink doesn't point to correct directory/file
 
-pub fn connect_button_delete(gui_data: &GuiData) {
+pub(crate) fn connect_button_delete(gui_data: &GuiData) {
     let buttons_delete = gui_data.bottom_buttons.buttons_delete.clone();
 
     let gui_data = gui_data.clone(); // TODO this maybe can be replaced, not sure if worth to clone everything
@@ -261,7 +261,7 @@ pub async fn check_if_deleting_all_files_in_group(
     false
 }
 
-pub fn empty_folder_remover(
+pub(crate) fn empty_folder_remover(
     tree_view: &gtk4::TreeView,
     column_file_name: i32,
     column_path: i32,
@@ -331,7 +331,7 @@ pub fn empty_folder_remover(
     text_view_errors.buffer().set_text(messages.as_str());
 }
 
-pub fn basic_remove(
+pub(crate) fn basic_remove(
     tree_view: &gtk4::TreeView,
     column_file_name: i32,
     column_path: i32,
@@ -398,7 +398,7 @@ pub fn basic_remove(
 }
 
 // Remove all occurrences - remove every element which have same path and name as even non selected ones
-pub fn tree_remove(
+pub(crate) fn tree_remove(
     tree_view: &gtk4::TreeView,
     column_file_name: i32,
     column_path: i32,

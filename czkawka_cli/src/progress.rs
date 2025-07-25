@@ -6,7 +6,7 @@ use czkawka_core::progress_data::{CurrentStage, ProgressData};
 use humansize::{BINARY, format_size};
 use indicatif::{ProgressBar, ProgressStyle};
 
-pub fn connect_progress(progress_receiver: &Receiver<ProgressData>) {
+pub(crate) fn connect_progress(progress_receiver: &Receiver<ProgressData>) {
     let mut pb = ProgressBar::new(1);
     let mut latest_id = None;
     while let Ok(progress_data) = progress_receiver.recv() {
@@ -54,7 +54,7 @@ pub fn connect_progress(progress_receiver: &Receiver<ProgressData>) {
     pb.finish_and_clear();
 }
 
-pub fn get_progress_message(progress_data: &ProgressData) -> String {
+pub(crate) fn get_progress_message(progress_data: &ProgressData) -> String {
     match progress_data.sstage {
         CurrentStage::SameMusicReadingTags => "Reading tags",
         CurrentStage::SameMusicCalculatingFingerprints => "Calculating fingerprints",
@@ -74,7 +74,7 @@ pub fn get_progress_message(progress_data: &ProgressData) -> String {
     .to_string()
 }
 
-pub fn get_progress_bar_for_collect_files() -> ProgressBar {
+pub(crate) fn get_progress_bar_for_collect_files() -> ProgressBar {
     let pb = ProgressBar::new_spinner();
     pb.enable_steady_tick(Duration::from_millis(120));
     pb.set_style(
@@ -85,7 +85,7 @@ pub fn get_progress_bar_for_collect_files() -> ProgressBar {
     pb
 }
 
-pub fn get_progress_known_values(max_value: u64) -> ProgressBar {
+pub(crate) fn get_progress_known_values(max_value: u64) -> ProgressBar {
     let pb = ProgressBar::new(max_value);
     pb.set_style(
         ProgressStyle::with_template("{msg} [{bar}]")
@@ -95,7 +95,7 @@ pub fn get_progress_known_values(max_value: u64) -> ProgressBar {
     pb
 }
 
-pub fn get_progress_loading_saving_cache(loading: bool) -> ProgressBar {
+pub(crate) fn get_progress_loading_saving_cache(loading: bool) -> ProgressBar {
     let msg = if loading { "Loading cache" } else { "Saving cache" };
     let pb = ProgressBar::new_spinner();
     pb.enable_steady_tick(Duration::from_millis(120));

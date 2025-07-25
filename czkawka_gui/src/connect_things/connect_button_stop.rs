@@ -11,7 +11,7 @@ fn send_stop_message(stop_flag: &Arc<AtomicBool>) {
     stop_flag.store(true, std::sync::atomic::Ordering::Relaxed);
 }
 
-pub fn connect_button_stop(gui_data: &GuiData) {
+pub(crate) fn connect_button_stop(gui_data: &GuiData) {
     let evk_button_stop_in_dialog = gui_data.progress_window.evk_button_stop_in_dialog.clone();
     let stop_dialog = gui_data.progress_window.window_progress.clone();
     let stop_flag = gui_data.stop_flag.clone();

@@ -27,6 +27,6 @@ macro_rules! flk {
 }
 
 // Get the `Localizer` to be used for localizing this library.
-pub fn localizer_krokiet() -> Box<dyn Localizer> {
+pub(crate) fn localizer_krokiet() -> Box<dyn Localizer> {
     Box::from(DefaultLocalizer::new(&*LANGUAGE_LOADER_KROKIET, &Localizations))
 }

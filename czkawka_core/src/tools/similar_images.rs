@@ -680,7 +680,7 @@ impl SimilarImages {
 
     #[allow(unused_variables)]
     // TODO this probably not works good when reference folders are used
-    pub fn verify_duplicated_items(&self, collected_similar_images: &HashMap<ImHash, Vec<ImagesEntry>>) {
+    pub(crate) fn verify_duplicated_items(&self, collected_similar_images: &HashMap<ImHash, Vec<ImagesEntry>>) {
         if !cfg!(debug_assertions) {
             return;
         }
@@ -852,7 +852,7 @@ pub fn return_similarity_from_similarity_preset(similarity_preset: &SimilarityPr
     }
 }
 
-pub fn convert_filters_to_string(image_filter: &FilterType) -> String {
+pub(crate) fn convert_filters_to_string(image_filter: &FilterType) -> String {
     match image_filter {
         FilterType::Lanczos3 => "Lanczos3",
         FilterType::Nearest => "Nearest",
@@ -863,7 +863,7 @@ pub fn convert_filters_to_string(image_filter: &FilterType) -> String {
     .to_string()
 }
 
-pub fn convert_algorithm_to_string(hash_alg: &HashAlg) -> String {
+pub(crate) fn convert_algorithm_to_string(hash_alg: &HashAlg) -> String {
     match hash_alg {
         HashAlg::Mean => "Mean",
         HashAlg::Gradient => "Gradient",

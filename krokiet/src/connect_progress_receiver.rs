@@ -8,7 +8,7 @@ use slint::ComponentHandle;
 
 use crate::{MainWindow, ProgressToSend, flk};
 
-pub fn connect_progress_gathering(app: &MainWindow, progress_receiver: Receiver<ProgressData>) {
+pub(crate) fn connect_progress_gathering(app: &MainWindow, progress_receiver: Receiver<ProgressData>) {
     let a = app.as_weak();
 
     thread::spawn(move || {

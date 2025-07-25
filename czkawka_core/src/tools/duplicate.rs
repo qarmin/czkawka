@@ -1309,7 +1309,7 @@ pub trait MyHasher {
     fn finalize(&self) -> String;
 }
 
-pub fn hash_calculation_limit(buffer: &mut [u8], file_entry: &DuplicateEntry, hash_type: HashType, limit: u64, size_counter: &Arc<AtomicU64>) -> Result<String, String> {
+pub(crate) fn hash_calculation_limit(buffer: &mut [u8], file_entry: &DuplicateEntry, hash_type: HashType, limit: u64, size_counter: &Arc<AtomicU64>) -> Result<String, String> {
     // This function is used only to calculate hash of file with limit
     // We must ensure that buffer is big enough to store all data
     // We don't need to check that each time

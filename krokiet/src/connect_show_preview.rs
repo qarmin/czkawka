@@ -10,7 +10,7 @@ use crate::{Callabler, CurrentTab, GuiState, MainWindow, Settings};
 
 pub type ImageBufferRgba = image::ImageBuffer<image::Rgba<u8>, Vec<u8>>;
 
-pub fn connect_show_preview(app: &MainWindow) {
+pub(crate) fn connect_show_preview(app: &MainWindow) {
     let a = app.as_weak();
     app.global::<Callabler>().on_load_image_preview(move |image_path| {
         let app = a.upgrade().expect("Failed to upgrade app :(");

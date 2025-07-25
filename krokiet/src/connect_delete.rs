@@ -11,7 +11,7 @@ use crate::model_operations::model_processor::{MessageType, ModelProcessor};
 use crate::simpler_model::{SimplerMainListModel, ToSimplerVec};
 use crate::{Callabler, CurrentTab, GuiState, MainWindow, Settings};
 
-pub fn connect_delete_button(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
+pub(crate) fn connect_delete_button(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
     let a = app.as_weak();
     app.global::<Callabler>().on_delete_selected_items(move || {
         let weak_app = a.clone();
@@ -85,7 +85,7 @@ mod tests {
     use crate::test_common::{create_model_from_model_vec, get_model_vec};
 
     impl ModelProcessor {
-        pub fn process_deletion_test(
+        pub(crate) fn process_deletion_test(
             &self,
             remove_to_trash: bool,
             progress_sender: Sender<ProgressData>,

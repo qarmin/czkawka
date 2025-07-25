@@ -192,7 +192,7 @@ impl BigFile {
         &self.information
     }
 
-    pub fn get_params(&self) -> &BigFileParameters {
+    pub(crate) fn get_params(&self) -> &BigFileParameters {
         &self.params
     }
 }

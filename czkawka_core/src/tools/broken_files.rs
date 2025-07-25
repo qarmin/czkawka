@@ -384,7 +384,7 @@ impl BrokenFiles {
         &self.broken_files
     }
 
-    pub fn get_params(&self) -> &BrokenFilesParameters {
+    pub(crate) fn get_params(&self) -> &BrokenFilesParameters {
         &self.params
     }
 

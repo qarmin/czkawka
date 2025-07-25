@@ -6,7 +6,7 @@ use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow, SelectMo
 
 // TODO optimize this, not sure if it is possible to not copy entire model to just select item
 // https://github.com/slint-ui/slint/discussions/4595
-pub fn connect_select(app: &MainWindow) {
+pub(crate) fn connect_select(app: &MainWindow) {
     let a = app.as_weak();
     app.global::<Callabler>().on_select_items(move |select_mode| {
         let app = a.upgrade().expect("Failed to upgrade app :(");
@@ -28,7 +28,7 @@ pub fn connect_select(app: &MainWindow) {
     });
 }
 
-pub fn connect_showing_proper_select_buttons(app: &MainWindow) {
+pub(crate) fn connect_showing_proper_select_buttons(app: &MainWindow) {
     set_select_buttons(app);
     let a = app.as_weak();
     app.global::<Callabler>().on_tab_changed(move || {

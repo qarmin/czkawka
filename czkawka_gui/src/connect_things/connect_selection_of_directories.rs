@@ -12,7 +12,7 @@ use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::{ColumnsExcludedDirectory, ColumnsIncludedDirectory, check_if_value_is_in_list_store, get_list_store};
 use crate::notebook_enums::{NotebookUpperEnum, to_notebook_upper_enum};
 
-pub fn connect_selection_of_directories(gui_data: &GuiData) {
+pub(crate) fn connect_selection_of_directories(gui_data: &GuiData) {
     // Add manually directory
     {
         let tree_view_included_directories = gui_data.upper_notebook.tree_view_included_directories.clone();
@@ -248,7 +248,7 @@ fn remove_ending_slashes(original_string: &mut String) {
 }
 
 #[test]
-pub fn test_remove_ending_slashes() {
+pub(crate) fn test_remove_ending_slashes() {
     let mut original = "/home/rafal".to_string();
     remove_ending_slashes(&mut original);
     assert_eq!(&original, "/home/rafal");

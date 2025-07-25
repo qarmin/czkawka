@@ -23,7 +23,7 @@ use crate::notebook_info::NOTEBOOKS_INFO;
 use crate::opening_selecting_records::*;
 use crate::{delete_things, flg};
 
-pub fn initialize_gui(gui_data: &GuiData) {
+pub(crate) fn initialize_gui(gui_data: &GuiData) {
     //// Initialize button
     {
         let buttons = &gui_data.bottom_buttons.buttons_array;

@@ -2,7 +2,7 @@ use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::*;
 use crate::notebook_enums::*;
 
-pub fn connect_notebook_tabs(gui_data: &GuiData) {
+pub(crate) fn connect_notebook_tabs(gui_data: &GuiData) {
     let shared_buttons = gui_data.shared_buttons.clone();
     let buttons_array = gui_data.bottom_buttons.buttons_array.clone();
     let notebook_main_clone = gui_data.main_notebook.notebook_main.clone();

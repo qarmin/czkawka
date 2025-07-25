@@ -16,7 +16,7 @@ pub struct GuiAbout {
 }
 
 impl GuiAbout {
-    pub fn create_from_builder(window_main: &Window, logo: &Pixbuf) -> Self {
+    pub(crate) fn create_from_builder(window_main: &Window, logo: &Pixbuf) -> Self {
         let glade_src = include_str!("../../ui/about_dialog.ui").to_string();
         let builder = Builder::from_string(glade_src.as_str());
 
@@ -127,7 +127,7 @@ impl GuiAbout {
         }
     }
 
-    pub fn update_language(&self) {
+    pub(crate) fn update_language(&self) {
         let mut comment_text: String = "2020 - 2025  Rafał Mikrut(qarmin)\n\n".to_string();
         comment_text += &flg!("about_window_motto");
         self.about_dialog.set_comments(Some(&comment_text));

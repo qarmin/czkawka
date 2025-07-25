@@ -10,7 +10,7 @@ use crate::model_operations::model_processor::{MessageType, ModelProcessor};
 use crate::simpler_model::{SimplerMainListModel, ToSimplerVec};
 use crate::{Callabler, GuiState, MainWindow};
 
-pub fn connect_rename(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
+pub(crate) fn connect_rename(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
     let a = app.as_weak();
     app.global::<Callabler>().on_rename_files(move || {
         let weak_app = a.clone();
@@ -84,7 +84,7 @@ mod tests {
     use crate::{CurrentTab, MainListModel};
 
     impl ModelProcessor {
-        pub fn process_rename_test(&self, progress_sender: Sender<ProgressData>, model: ModelRc<MainListModel>) -> Option<(Vec<MainListModel>, Vec<String>, usize, usize)> {
+        pub(crate) fn process_rename_test(&self, progress_sender: Sender<ProgressData>, model: ModelRc<MainListModel>) -> Option<(Vec<MainListModel>, Vec<String>, usize, usize)> {
             let items_queued_to_delete = model.iter().filter(|e| e.checked).count();
             if items_queued_to_delete == 0 {
                 return None; // No items to delete

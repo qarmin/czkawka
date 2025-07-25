@@ -63,7 +63,7 @@ where
     }
 }
 
-pub fn connect_popover_sort(gui_data: &GuiData) {
+pub(crate) fn connect_popover_sort(gui_data: &GuiData) {
     let popover_sort = gui_data.popovers_sort.popover_sort.clone();
     let buttons_popover_file_name = gui_data.popovers_sort.buttons_popover_sort_file_name.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
@@ -176,7 +176,7 @@ mod test {
     }
 
     #[gtk4::test]
-    pub fn test_popover_sort_general_simple() {
+    pub(crate) fn test_popover_sort_general_simple() {
         let columns_types: &[Type] = &[Type::BOOL, Type::STRING];
         let list_store = gtk4::ListStore::new(columns_types);
         let tree_view = TreeView::builder().model(&list_store).build();
@@ -199,7 +199,7 @@ mod test {
     }
 
     #[gtk4::test]
-    pub fn test_popover_sort_general() {
+    pub(crate) fn test_popover_sort_general() {
         let columns_types: &[Type] = &[Type::BOOL, Type::STRING];
         let list_store = gtk4::ListStore::new(columns_types);
         let tree_view = TreeView::builder().model(&list_store).build();
@@ -233,7 +233,7 @@ mod test {
 
     // TODO - This test uncovers a bug in the code, so it is disabled for now, with sort button
     // #[gtk4::test]
-    // pub fn _fuzzer_test() {
+    // pub(crate) fn _fuzzer_test() {
     //     for _ in 0..10000 {
     //         let columns_types: &[Type] = &[Type::BOOL, Type::STRING];
     //         let list_store = gtk4::ListStore::new(columns_types);

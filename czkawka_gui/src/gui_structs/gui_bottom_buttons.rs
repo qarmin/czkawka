@@ -33,7 +33,7 @@ pub struct GuiBottomButtons {
 }
 
 impl GuiBottomButtons {
-    pub fn create_from_builder(builder: &gtk4::Builder, popover_select: &gtk4::Popover, popover_sort: &gtk4::Popover) -> Self {
+    pub(crate) fn create_from_builder(builder: &gtk4::Builder, popover_select: &gtk4::Popover, popover_sort: &gtk4::Popover) -> Self {
         let buttons_search: gtk4::Button = builder.object("buttons_search").expect("Cambalache");
         let buttons_select: gtk4::MenuButton = builder.object("buttons_select").expect("Cambalache");
         let buttons_delete: gtk4::Button = builder.object("buttons_delete").expect("Cambalache");
@@ -117,7 +117,7 @@ impl GuiBottomButtons {
             gc_buttons_sort,
         }
     }
-    pub fn update_language(&self) {
+    pub(crate) fn update_language(&self) {
         get_custom_label_from_widget(&self.buttons_search.clone()).set_text(&flg!("bottom_search_button"));
         self.label_buttons_select.set_text(&flg!("bottom_select_button"));
         get_custom_label_from_widget(&self.buttons_delete.clone()).set_text(&flg!("bottom_delete_button"));

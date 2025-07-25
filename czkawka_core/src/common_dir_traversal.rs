@@ -162,12 +162,7 @@ impl DirTraversalBuilder<'_, '_, ()> {
 }
 
 impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
-    pub fn root_dirs(mut self, dirs: Vec<PathBuf>) -> Self {
-        self.root_dirs = dirs;
-        self
-    }
-
-    pub fn common_data(mut self, common_tool_data: &CommonToolData) -> Self {
+    pub(crate) fn common_data(mut self, common_tool_data: &CommonToolData) -> Self {
         self.root_dirs = common_tool_data.directories.included_directories.clone();
         self.extensions = Some(common_tool_data.extensions.clone());
         self.excluded_items = Some(common_tool_data.excluded_items.clone());
@@ -179,71 +174,37 @@ impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
         self
     }
 
-    pub fn stop_flag(mut self, stop_flag: &'a Arc<AtomicBool>) -> Self {
+    pub(crate) fn stop_flag(mut self, stop_flag: &'a Arc<AtomicBool>) -> Self {
         self.stop_flag = Some(stop_flag);
         self
     }
 
-    pub fn progress_sender(mut self, progress_sender: Option<&'b Sender<ProgressData>>) -> Self {
+    pub(crate) fn progress_sender(mut self, progress_sender: Option<&'b Sender<ProgressData>>) -> Self {
         self.progress_sender = progress_sender;
         self
     }
 
-    pub fn checking_method(mut self, checking_method: CheckingMethod) -> Self {
+    pub(crate) fn checking_method(mut self, checking_method: CheckingMethod) -> Self {
         self.checking_method = checking_method;
         self
     }
 
-    pub fn minimal_file_size(mut self, minimal_file_size: u64) -> Self {
+    pub(crate) fn minimal_file_size(mut self, minimal_file_size: u64) -> Self {
         self.minimal_file_size = Some(minimal_file_size);
         self
     }
 
-    pub fn maximal_file_size(mut self, maximal_file_size: u64) -> Self {
+    pub(crate) fn maximal_file_size(mut self, maximal_file_size: u64) -> Self {
         self.maximal_file_size = Some(maximal_file_size);
         self
     }
 
-    pub fn collect(mut self, collect: Collect) -> Self {
+    pub(crate) fn collect(mut self, collect: Collect) -> Self {
         self.collect = collect;
         self
     }
 
-    pub fn directories(mut self, directories: Directories) -> Self {
-        self.directories = Some(directories);
-        self
-    }
-
-    pub fn extensions(mut self, extensions: Extensions) -> Self {
-        self.extensions = Some(extensions);
-        self
-    }
-
-    pub fn excluded_items(mut self, excluded_items: ExcludedItems) -> Self {
-        self.excluded_items = Some(excluded_items);
-        self
-    }
-
-    pub fn recursive_search(mut self, recursive_search: bool) -> Self {
-        self.recursive_search = recursive_search;
-        self
-    }
-
-    pub fn tool_type(mut self, tool_type: ToolType) -> Self {
-        self.tool_type = tool_type;
-        self
-    }
-
-    #[cfg(target_family = "unix")]
-    pub fn exclude_other_filesystems(mut self, exclude_other_filesystems: bool) -> Self {
-        match self.directories {
-            Some(ref mut directories) => directories.set_exclude_other_filesystems(exclude_other_filesystems),
-            None => panic!("Directories is None"),
-        }
-        self
-    }
-
-    pub fn group_by<G, T>(self, group_by: G) -> DirTraversalBuilder<'a, 'b, G>
+    pub(crate) fn group_by<G, T>(self, group_by: G) -> DirTraversalBuilder<'a, 'b, G>
     where
         G: Fn(&FileEntry) -> T,
     {
@@ -264,7 +225,7 @@ impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
         }
     }
 
-    pub fn build(self) -> DirTraversal<'a, 'b, F> {
+    pub(crate) fn build(self) -> DirTraversal<'a, 'b, F> {
         DirTraversal {
             group_by: self.group_by.expect("could not build"),
             root_dirs: self.root_dirs,
@@ -309,7 +270,7 @@ where
     T: Ord + PartialOrd,
 {
     #[fun_time(message = "run(collecting files/dirs)", level = "debug")]
-    pub fn run(self) -> DirTraversalResult<T> {
+    pub(crate) fn run(self) -> DirTraversalResult<T> {
         assert_ne!(self.tool_type, ToolType::None, "Tool type cannot be None");
 
         let mut all_warnings = vec![];
@@ -547,7 +508,7 @@ fn process_symlink_in_symlink_mode(
     fe_result.push(fe);
 }
 
-pub fn common_read_dir(current_folder: &Path, warnings: &mut Vec<String>) -> Option<Vec<Result<DirEntry, std::io::Error>>> {
+pub(crate) fn common_read_dir(current_folder: &Path, warnings: &mut Vec<String>) -> Option<Vec<Result<DirEntry, std::io::Error>>> {
     match fs::read_dir(current_folder) {
         Ok(t) => Some(t.collect()),
         Err(e) => {
@@ -556,7 +517,7 @@ pub fn common_read_dir(current_folder: &Path, warnings: &mut Vec<String>) -> Opt
         }
     }
 }
-pub fn common_get_entry_data<'a>(entry: &'a Result<DirEntry, std::io::Error>, warnings: &mut Vec<String>, current_folder: &Path) -> Option<&'a DirEntry> {
+pub(crate) fn common_get_entry_data<'a>(entry: &'a Result<DirEntry, std::io::Error>, warnings: &mut Vec<String>, current_folder: &Path) -> Option<&'a DirEntry> {
     let entry_data = match entry {
         Ok(t) => t,
         Err(e) => {
@@ -570,7 +531,7 @@ pub fn common_get_entry_data<'a>(entry: &'a Result<DirEntry, std::io::Error>, wa
     };
     Some(entry_data)
 }
-pub fn common_get_metadata_dir(entry_data: &DirEntry, warnings: &mut Vec<String>, current_folder: &Path) -> Option<Metadata> {
+pub(crate) fn common_get_metadata_dir(entry_data: &DirEntry, warnings: &mut Vec<String>, current_folder: &Path) -> Option<Metadata> {
     let metadata: Metadata = match entry_data.metadata() {
         Ok(t) => t,
         Err(e) => {
@@ -585,13 +546,7 @@ pub fn common_get_metadata_dir(entry_data: &DirEntry, warnings: &mut Vec<String>
     Some(metadata)
 }
 
-pub fn common_get_entry_data_metadata<'a>(entry: &'a Result<DirEntry, std::io::Error>, warnings: &mut Vec<String>, current_folder: &Path) -> Option<(&'a DirEntry, Metadata)> {
-    let entry_data = common_get_entry_data(entry, warnings, current_folder)?;
-    let metadata = common_get_metadata_dir(entry_data, warnings, current_folder)?;
-    Some((entry_data, metadata))
-}
-
-pub fn get_modified_time(metadata: &Metadata, warnings: &mut Vec<String>, current_file_name: &Path, is_folder: bool) -> u64 {
+pub(crate) fn get_modified_time(metadata: &Metadata, warnings: &mut Vec<String>, current_file_name: &Path, is_folder: bool) -> u64 {
     match metadata.modified() {
         Ok(t) => match t.duration_since(UNIX_EPOCH) {
             Ok(d) => d.as_secs(),
@@ -624,16 +579,16 @@ pub fn get_modified_time(metadata: &Metadata, warnings: &mut Vec<String>, curren
 }
 
 #[cfg(target_family = "windows")]
-pub fn inode(_fe: &FileEntry) -> Option<u64> {
+pub(crate) fn inode(_fe: &FileEntry) -> Option<u64> {
     None
 }
 
 #[cfg(target_family = "unix")]
-pub fn inode(fe: &FileEntry) -> Option<u64> {
+pub(crate) fn inode(fe: &FileEntry) -> Option<u64> {
     if let Ok(meta) = fs::metadata(&fe.path) { Some(meta.ino()) } else { None }
 }
 
-pub fn take_1_per_inode((k, mut v): (Option<u64>, Vec<FileEntry>)) -> Vec<FileEntry> {
+pub(crate) fn take_1_per_inode((k, mut v): (Option<u64>, Vec<FileEntry>)) -> Vec<FileEntry> {
     if k.is_some() {
         v.drain(1..);
     }

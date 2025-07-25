@@ -27,12 +27,6 @@ pub struct FolderEntry {
     pub modified_date: u64,
 }
 
-impl FolderEntry {
-    pub fn get_modified_date(&self) -> u64 {
-        self.modified_date
-    }
-}
-
 impl ResultEntry for FolderEntry {
     fn get_path(&self) -> &Path {
         &self.path

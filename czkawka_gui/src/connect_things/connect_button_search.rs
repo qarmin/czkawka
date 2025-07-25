@@ -34,7 +34,7 @@ use crate::taskbar_progress::tbp_flags::TBPF_NOPROGRESS;
 use crate::{DEFAULT_MAXIMAL_FILE_SIZE, DEFAULT_MINIMAL_CACHE_SIZE, DEFAULT_MINIMAL_FILE_SIZE, flg};
 
 #[allow(clippy::too_many_arguments)]
-pub fn connect_button_search(gui_data: &GuiData, result_sender: Sender<Message>, progress_sender: Sender<ProgressData>) {
+pub(crate) fn connect_button_search(gui_data: &GuiData, result_sender: Sender<Message>, progress_sender: Sender<ProgressData>) {
     let buttons_array = gui_data.bottom_buttons.buttons_array.clone();
     let buttons_search_clone = gui_data.bottom_buttons.buttons_search.clone();
     let grid_progress = gui_data.progress_window.grid_progress.clone();

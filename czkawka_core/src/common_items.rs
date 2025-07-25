@@ -39,7 +39,7 @@ impl ExcludedItems {
         s
     }
 
-    pub fn set_excluded_items(&mut self, excluded_items: Vec<String>) -> Messages {
+    pub(crate) fn set_excluded_items(&mut self, excluded_items: Vec<String>) -> Messages {
         let mut warnings: Vec<String> = Vec::new();
         if excluded_items.is_empty() {
             return Messages::new();
@@ -82,10 +82,10 @@ impl ExcludedItems {
         }
     }
 
-    pub fn get_excluded_items(&self) -> &Vec<String> {
+    pub(crate) fn get_excluded_items(&self) -> &Vec<String> {
         &self.expressions
     }
-    pub fn is_excluded(&self, path: &Path) -> bool {
+    pub(crate) fn is_excluded(&self, path: &Path) -> bool {
         if self.connected_expressions.is_empty() {
             return false;
         }

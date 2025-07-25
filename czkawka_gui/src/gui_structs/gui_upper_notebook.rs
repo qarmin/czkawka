@@ -46,7 +46,7 @@ pub struct GuiUpperNotebook {
 }
 
 impl GuiUpperNotebook {
-    pub fn create_from_builder(builder: &gtk4::Builder) -> Self {
+    pub(crate) fn create_from_builder(builder: &gtk4::Builder) -> Self {
         let notebook_upper: gtk4::Notebook = builder.object("notebook_upper").expect("Cambalache");
 
         let scrolled_window_included_directories: gtk4::ScrolledWindow = builder.object("scrolled_window_included_directories").expect("Cambalache");
@@ -125,7 +125,7 @@ impl GuiUpperNotebook {
             label_general_max_size,
         }
     }
-    pub fn update_language(&self) {
+    pub(crate) fn update_language(&self) {
         self.check_button_recursive.set_label(Some(&flg!("upper_recursive_button")));
         self.check_button_recursive.set_tooltip_text(Some(&flg!("upper_recursive_button_tooltip")));
 

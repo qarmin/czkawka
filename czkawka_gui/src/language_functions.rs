@@ -95,7 +95,7 @@ pub const LANGUAGES_ALL: &[Language] = &[
     },
 ];
 
-pub fn get_language_from_combo_box_text(combo_box_text: &str) -> Language {
+pub(crate) fn get_language_from_combo_box_text(combo_box_text: &str) -> Language {
     for lang in LANGUAGES_ALL {
         if lang.combo_box_text == combo_box_text {
             return lang.clone();

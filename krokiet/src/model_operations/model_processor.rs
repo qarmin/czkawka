@@ -61,12 +61,12 @@ impl ModelProcessor {
         Self { active_tab }
     }
 
-    pub fn remove_single_items_in_groups(&self, items: Vec<MainListModel>) -> Vec<MainListModel> {
+    pub(crate) fn remove_single_items_in_groups(&self, items: Vec<MainListModel>) -> Vec<MainListModel> {
         let have_header = self.active_tab.get_is_header_mode();
         model_operations::remove_single_items_in_groups(items, have_header)
     }
 
-    pub fn remove_deleted_items_from_model(&self, results: ProcessingResult) -> (Vec<SimplerMainListModel>, Vec<String>, usize) {
+    pub(crate) fn remove_deleted_items_from_model(&self, results: ProcessingResult) -> (Vec<SimplerMainListModel>, Vec<String>, usize) {
         let mut errors = vec![];
         let mut items_deleted = 0;
 
@@ -88,7 +88,7 @@ impl ModelProcessor {
         (new_model, errors, items_deleted)
     }
     #[allow(clippy::too_many_arguments)]
-    pub fn process_items(
+    pub(crate) fn process_items(
         &self,
         items_simplified: Vec<(usize, SimplerMainListModel)>,
         items_queued_to_delete: usize,
@@ -132,7 +132,7 @@ impl ModelProcessor {
     }
 
     #[allow(clippy::too_many_arguments)]
-    pub fn process_and_update_gui_state(
+    pub(crate) fn process_and_update_gui_state(
         self,
         weak_app: &Weak<MainWindow>,
         stop_flag: Arc<AtomicBool>,

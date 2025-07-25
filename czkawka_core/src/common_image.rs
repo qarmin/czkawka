@@ -29,7 +29,7 @@ use crate::common::{HEIC_EXTENSIONS, IMAGE_RS_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGE
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
 
-pub fn get_jxl_image(path: &str) -> anyhow::Result<DynamicImage> {
+pub(crate) fn get_jxl_image(path: &str) -> anyhow::Result<DynamicImage> {
     let file = File::open(path)?;
     let decoder = JxlDecoder::new(file)?;
 
@@ -86,7 +86,7 @@ pub fn get_dynamic_image_from_path(path: &str) -> Result<DynamicImage, String> {
 }
 
 #[cfg(feature = "heif")]
-pub fn get_dynamic_image_from_heic(path: &str) -> anyhow::Result<DynamicImage> {
+pub(crate) fn get_dynamic_image_from_heic(path: &str) -> anyhow::Result<DynamicImage> {
     // let libheif = LibHeif::new();
     let im = HeifContext::read_from_file(path)?;
     let handle = im.primary_image_handle()?;
@@ -102,7 +102,7 @@ pub fn get_dynamic_image_from_heic(path: &str) -> anyhow::Result<DynamicImage> {
 }
 
 #[cfg(feature = "libraw")]
-pub fn get_raw_image(path: impl AsRef<Path>) -> anyhow::Result<DynamicImage> {
+pub(crate) fn get_raw_image(path: impl AsRef<Path>) -> anyhow::Result<DynamicImage> {
     let buf = fs::read(path.as_ref())?;
 
     let processor = Processor::new();
@@ -122,7 +122,7 @@ pub fn get_raw_image(path: impl AsRef<Path>) -> anyhow::Result<DynamicImage> {
 }
 
 #[cfg(not(feature = "libraw"))]
-pub fn get_raw_image(path: impl AsRef<Path> + std::fmt::Debug) -> Result<DynamicImage, String> {
+pub(crate) fn get_raw_image(path: impl AsRef<Path> + std::fmt::Debug) -> Result<DynamicImage, String> {
     let mut start_timer = Instant::now();
     let mut times = Vec::new();
 
@@ -186,7 +186,7 @@ pub enum ExifOrientation {
     Rotate270CW,
 }
 
-pub fn get_rotation_from_exif(path: &str) -> Result<Option<ExifOrientation>, nom_exif::Error> {
+pub(crate) fn get_rotation_from_exif(path: &str) -> Result<Option<ExifOrientation>, nom_exif::Error> {
     let res = panic::catch_unwind(|| {
         let mut parser = MediaParser::new();
         let ms = MediaSource::file_path(path)?;

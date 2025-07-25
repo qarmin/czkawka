@@ -8,7 +8,7 @@ use crate::{GuiData, LANGUAGES_ALL, localizer_gui};
 
 // use i18n_embed::{DesktopLanguageRequester, Localizer};
 
-pub fn connect_change_language(gui_data: &GuiData) {
+pub(crate) fn connect_change_language(gui_data: &GuiData) {
     change_language(gui_data);
 
     let combo_box_settings_language = gui_data.settings.combo_box_settings_language.clone();
@@ -35,7 +35,7 @@ fn change_language(gui_data: &GuiData) {
     gui_data.update_language();
 }
 
-pub fn load_system_language(gui_data: &GuiData) {
+pub(crate) fn load_system_language(gui_data: &GuiData) {
     let requested_languages = DesktopLanguageRequester::requested_languages();
 
     if let Some(language) = requested_languages.first() {
