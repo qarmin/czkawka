@@ -1,7 +1,6 @@
-use std::fs;
 use std::fs::DirEntry;
 use std::io::prelude::*;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 
@@ -12,7 +11,7 @@ use serde::Serialize;
 
 use crate::common::{WorkContinueStatus, check_folder_children, check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crate::common_dir_traversal::{ToolType, common_read_dir, get_modified_time};
-use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
+use crate::common_tool::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
 use crate::common_traits::*;
 use crate::progress_data::{CurrentStage, ProgressData};
 
@@ -36,13 +35,17 @@ const TEMP_EXTENSIONS: &[&str] = &[
 pub struct TemporaryFileEntry {
     pub path: PathBuf,
     pub modified_date: u64,
+    pub size: u64,
 }
 
-impl TemporaryFileEntry {
-    pub fn get_path(&self) -> &PathBuf {
+impl ResultEntry for TemporaryFileEntry {
+    fn get_path(&self) -> &Path {
         &self.path
     }
-    pub fn get_modified_date(&self) -> u64 {
+    fn get_size(&self) -> u64 {
+        self.size
+    }
+    fn get_modified_date(&self) -> u64 {
         self.modified_date
     }
 }
@@ -74,7 +77,10 @@ impl Temporary {
             self.common_data.stopped_search = true;
             return;
         }
-        self.delete_files();
+        if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+            self.common_data.stopped_search = true;
+            return;
+        };
         self.debug_print();
     }
 
@@ -170,27 +176,20 @@ impl Temporary {
         // Creating new file entry
         Some(TemporaryFileEntry {
             modified_date: get_modified_time(&metadata, warnings, &current_file_name, false),
+            size: metadata.len(),
             path: current_file_name,
         })
     }
+}
 
+impl DeletingItems for Temporary {
     #[fun_time(message = "delete_files", level = "debug")]
-    fn delete_files(&mut self) {
-        match self.common_data.delete_method {
-            DeleteMethod::Delete => {
-                let mut warnings = Vec::new();
-                for file_entry in &self.temporary_files {
-                    if fs::remove_file(&file_entry.path).is_err() {
-                        warnings.push(file_entry.path.to_string_lossy().to_string());
-                    }
-                }
-                self.common_data.text_messages.warnings.extend(warnings);
-            }
-            DeleteMethod::None => {
-                //Just do nothing
-            }
-            _ => unreachable!(),
+    fn delete_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+        if self.get_cd().delete_method == DeleteMethod::None {
+            return WorkContinueStatus::Continue;
         }
+        let files_to_delete = self.temporary_files.clone();
+        self.delete_simple_elements_and_add_to_messages(stop_flag, progress_sender, DeleteItemType::DeletingFiles(files_to_delete))
     }
 }
 

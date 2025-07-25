@@ -160,7 +160,7 @@ impl DeletingItems for InvalidSymlinks {
     #[fun_time(message = "delete_files", level = "debug")]
     fn delete_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         match self.common_data.delete_method {
-            DeleteMethod::Delete => self.delete_elements_and_add_to_messages(stop_flag, progress_sender, DeleteItemType::DeletingFiles(self.invalid_symlinks.clone())),
+            DeleteMethod::Delete => self.delete_simple_elements_and_add_to_messages(stop_flag, progress_sender, DeleteItemType::DeletingFiles(self.invalid_symlinks.clone())),
             DeleteMethod::None => WorkContinueStatus::Continue,
             _ => unreachable!(),
         }

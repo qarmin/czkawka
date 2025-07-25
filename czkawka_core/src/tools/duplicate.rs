@@ -21,7 +21,7 @@ use serde::{Deserialize, Serialize};
 use static_assertions::const_assert;
 use xxhash_rust::xxh3::Xxh3;
 
-use crate::common::{WorkContinueStatus, check_if_stop_received, delete_files_custom, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
+use crate::common::{WorkContinueStatus, check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crate::common_cache::{get_duplicate_cache_file, load_cache_from_file_generalized_by_size, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
@@ -204,7 +204,10 @@ impl DuplicateFinder {
             }
             _ => panic!(),
         }
-        self.delete_files();
+        if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+            self.common_data.stopped_search = true;
+            return;
+        };
         self.debug_print();
     }
 
@@ -947,32 +950,19 @@ impl DuplicateFinder {
     }
 
     #[fun_time(message = "delete_files", level = "debug")]
-    fn delete_files(&mut self) {
+    fn delete_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.common_data.delete_method == DeleteMethod::None {
-            return;
+            return WorkContinueStatus::Continue;
         }
 
-        match self.get_params().check_method {
-            CheckingMethod::Name => {
-                let vec_files = self.files_with_identical_names.values().collect::<Vec<_>>();
-                delete_files_custom(&vec_files, &self.common_data.delete_method, &mut self.common_data.text_messages, self.common_data.dry_run);
-            }
-            CheckingMethod::SizeName => {
-                let vec_files = self.files_with_identical_size_names.values().collect::<Vec<_>>();
-                delete_files_custom(&vec_files, &self.common_data.delete_method, &mut self.common_data.text_messages, self.common_data.dry_run);
-            }
-            CheckingMethod::Hash => {
-                for vec_files in self.files_with_identical_hashes.values() {
-                    let vev: Vec<&Vec<DuplicateEntry>> = vec_files.iter().collect::<Vec<_>>();
-                    delete_files_custom(&vev, &self.common_data.delete_method, &mut self.common_data.text_messages, self.common_data.dry_run);
-                }
-            }
-            CheckingMethod::Size => {
-                let vec_files = self.files_with_identical_size.values().collect::<Vec<_>>();
-                delete_files_custom(&vec_files, &self.common_data.delete_method, &mut self.common_data.text_messages, self.common_data.dry_run);
-            }
+        let files_to_delete = match self.get_params().check_method {
+            CheckingMethod::Name => self.files_with_identical_names.values().cloned().collect::<Vec<_>>(),
+            CheckingMethod::SizeName => self.files_with_identical_size_names.values().cloned().collect::<Vec<_>>(),
+            CheckingMethod::Hash => self.files_with_identical_hashes.values().flatten().cloned().collect::<Vec<_>>(),
+            CheckingMethod::Size => self.files_with_identical_size.values().cloned().collect::<Vec<_>>(),
             _ => panic!(),
-        }
+        };
+        self.delete_advanced_elements_and_add_to_messages(stop_flag, progress_sender, files_to_delete)
     }
 }
 
