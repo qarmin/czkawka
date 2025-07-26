@@ -437,7 +437,7 @@ fn remove_test_dir() {
 fn run_with_good_status(str_command: &[&str], print_messages: bool) {
     let mut command = Command::new(str_command[0]);
     let mut com = command.args(&str_command[1..]);
-    com.env("RUST_LOG", "error");
+    com.env("ENABLE_TERMINAL_LOGS_IN_CLI", "1");
     com.env("RUST_BACKTRACE", "1");
 
     if !print_messages {

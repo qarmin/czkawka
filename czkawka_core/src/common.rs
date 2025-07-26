@@ -7,7 +7,7 @@ use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize};
 use std::sync::{Arc, atomic};
 use std::thread::{JoinHandle, sleep};
 use std::time::{Duration, Instant};
-use std::{fs, io, thread};
+use std::{env, fs, io, thread};
 
 use crossbeam_channel::Sender;
 use directories_next::ProjectDirs;
@@ -175,7 +175,11 @@ fn filtering_messages(record: &Record) -> bool {
 pub fn setup_logger(disabled_terminal_printing: bool, app_name: &str) {
     log_panics::init();
 
-    let terminal_log_level = if disabled_terminal_printing { LevelFilter::Off } else { LevelFilter::Info };
+    let terminal_log_level = if disabled_terminal_printing && ![Ok("1"), Ok("true")].contains(&env::var("ENABLE_TERMINAL_LOGS_IN_CLI").as_deref()) {
+        LevelFilter::Off
+    } else {
+        LevelFilter::Info
+    };
     let file_log_level = LevelFilter::Debug;
 
     let term_config = ConfigBuilder::default()
@@ -192,7 +196,7 @@ pub fn setup_logger(disabled_terminal_printing: bool, app_name: &str) {
 
     let combined_logger = (|| {
         let Some(config_cache_path) = get_config_cache_path() else {
-            println!("No config cache path configured, using default config folder");
+            // println!("No config cache path configured, using default config folder");
             return None;
         };
 
@@ -206,7 +210,7 @@ pub fn setup_logger(disabled_terminal_printing: bool, app_name: &str) {
             None,
         );
 
-        let combined_logs: Vec<Box<dyn SharedLogger>> = if [Ok("1".to_string()), Ok("true".to_string())].contains(&std::env::var("DISABLE_FILE_LOGGING")) {
+        let combined_logs: Vec<Box<dyn SharedLogger>> = if [Ok("1"), Ok("true")].contains(&env::var("DISABLE_FILE_LOGGING").as_deref()) {
             vec![TermLogger::new_from_config(term_config.clone())]
         } else {
             vec![TermLogger::new_from_config(term_config.clone()), WriteLogger::new(file_config, write_rotater)]
@@ -219,6 +223,7 @@ pub fn setup_logger(disabled_terminal_printing: bool, app_name: &str) {
 
     if combined_logger.is_none() {
         TermLogger::init(term_config, TerminalMode::Mixed, ColorChoice::Always).expect("Cannot initialize logger");
+        info!("Logging to terminal only, file logging is disabled");
     }
 }
 
@@ -334,7 +339,7 @@ pub fn set_number_of_threads(thread_number: usize) {
 }
 
 pub const RAW_IMAGE_EXTENSIONS: &[&str] = &[
-    "mrw", "arw", "srf", "sr2", "mef", "orf", "srw", "erf", "kdc", "kdc", "dcs", "rw2", "raf", "dcr", "dng", "pef", "crw", "iiq", "3fr", "nrw", "nef", "mos", "cr2", "ari", "cr3",
+    "ari", "cr3", "cr2", "crw", "erf", "raf", "3fr", "kdc", "dcs", "dcr", "iiq", "mos", "mef", "mrw", "nef", "nrw", "orf", "rw2", "pef", "srw", "arw", "srf", "sr2",
 ];
 
 pub const JXL_IMAGE_EXTENSIONS: &[&str] = &["jxl"];

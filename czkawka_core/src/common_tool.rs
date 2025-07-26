@@ -5,6 +5,8 @@ use std::sync::atomic::AtomicBool;
 use std::time::Duration;
 
 use crossbeam_channel::Sender;
+use humansize::{BINARY, format_size};
+use log::info;
 use rayon::prelude::*;
 
 use crate::common::{WorkContinueStatus, remove_folder_if_contains_only_empty_folders};
@@ -259,6 +261,7 @@ pub trait CommonData {
         progress_sender: Option<&Sender<ProgressData>>,
         delete_item_type: DeleteItemType<T>,
     ) -> WorkContinueStatus {
+        info!("Simple");
         let delete_results = self.delete_elements(stop_flag, progress_sender, delete_item_type);
 
         if stop_flag.load(std::sync::atomic::Ordering::Relaxed) {
@@ -284,6 +287,7 @@ pub trait CommonData {
             input.sort_unstable_by_key(if sorting_by_size { ResultEntry::get_size } else { ResultEntry::get_modified_date });
             input
         };
+        info!("Advanced");
 
         let delete_results = if delete_method == DeleteMethod::HardLink {
             let res = files_to_process
@@ -334,6 +338,19 @@ pub trait CommonData {
         let mut progress = ProgressData::get_empty_state(CurrentStage::DeletingFiles);
         progress.bytes_to_check = delete_item_type.calculate_size_to_delete();
         progress.entries_to_check = delete_item_type.calculate_entries_to_delete();
+
+        let is_hardlinking = matches!(delete_item_type, DeleteItemType::HardlinkingFiles(_));
+
+        let msg_common = format!(
+            "{} items, total size: {} bytes, dry_run: {dry_run}",
+            progress.entries_to_check,
+            format_size(progress.bytes_to_check, BINARY)
+        );
+        if is_hardlinking {
+            info!("Hardlinking {msg_common}");
+        } else {
+            info!("Deleting {msg_common}");
+        }
 
         let delayed_sender = progress_sender.map(|e| DelayedSender::new(e.clone(), Duration::from_millis(200)));
 
@@ -417,8 +434,6 @@ pub trait CommonData {
 
         let mut delete_result = DeleteResult::default();
 
-        let is_hardlinking = matches!(delete_item_type, DeleteItemType::HardlinkingFiles(_));
-
         for (file_entry, delete_err) in res {
             if let Some(err) = delete_err {
                 delete_result.errors.push(err);
@@ -438,6 +453,15 @@ pub trait CommonData {
                 delete_result.deleted_files += 1;
                 delete_result.gained_bytes += file_entry.get_size();
             }
+        }
+
+        if !dry_run {
+            info!(
+                "{} items deleted, {} bytes gained, {} failed to delete",
+                delete_result.deleted_files,
+                format_size(delete_result.gained_bytes, BINARY),
+                delete_result.failed_to_delete_files
+            );
         }
 
         delete_result
