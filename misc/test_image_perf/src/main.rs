@@ -1,14 +1,16 @@
-use image::{DynamicImage, ImageBuffer, Rgb};
-use image_hasher::{FilterType, HashAlg, HasherConfig};
-use imagepipe::{ImageSource, Pipeline};
-use log::{info, trace};
-use rawloader::RawLoader;
-use rayon::prelude::*;
 use std::env;
 use std::path::Path;
 use std::process::Command;
 use std::thread::available_parallelism;
-use std::time::Instant;
+use std::time::{Duration, Instant};
+
+use image::{DynamicImage};
+use image_hasher::{FilterType, HashAlg, HasherConfig};
+use log::{info, trace};
+use rawler::decoders::RawDecodeParams;
+use rawler::imgop::develop::RawDevelop;
+use rawler::rawsource::RawSource;
+use rayon::prelude::*;
 use walkdir::WalkDir;
 
 const ITERATIONS_ON_IMAGE: usize = 3;
@@ -197,39 +199,69 @@ fn is_running_as_sudo() -> bool {
 }
 
 pub(crate) fn get_raw_image(path: impl AsRef<Path> + std::fmt::Debug) -> Result<DynamicImage, String> {
-    let mut start_timer = Instant::now();
-    let mut times = Vec::new();
+    let mut timer = Timer::new("Rawler");
 
-    let loader = RawLoader::new();
-    let raw = loader.decode_file(path.as_ref()).map_err(|e| format!("Error decoding file: {e:?}"))?;
+    let raw_source = RawSource::new(path.as_ref()).map_err(|err| format!("Failed to create RawSource from path {path:?}: {err}"))?;
 
-    times.push(("After decoding", start_timer.elapsed()));
-    start_timer = Instant::now();
+    timer.checkpoint("After creating RawSource");
 
-    let source = ImageSource::Raw(raw);
+    let decoder = rawler::get_decoder(&raw_source).map_err(|e| e.to_string())?;
 
-    times.push(("After creating source", start_timer.elapsed()));
-    start_timer = Instant::now();
+    timer.checkpoint("After getting decoder");
+    let raw_image = decoder.raw_image(&raw_source, &RawDecodeParams::default(), false).map_err(|e| e.to_string())?;
 
-    let mut pipeline = Pipeline::new_from_source(source).map_err(|e| format!("Error creating pipeline: {e:?}"))?;
+    timer.checkpoint("After decoding raw image");
 
-    times.push(("After creating pipeline", start_timer.elapsed()));
-    start_timer = Instant::now();
+    let developer = RawDevelop::default();
+    let developed_image = developer.develop_intermediate(&raw_image).map_err(|e| e.to_string())?;
 
-    pipeline.run(None);
-    let image = pipeline.output_8bit(None).map_err(|e| format!("Error running pipeline: {e:?}"))?;
+    timer.checkpoint("After developing raw image");
 
-    times.push(("After creating image", start_timer.elapsed()));
-    start_timer = Instant::now();
+    let dynamic_image = developed_image.to_dynamic_image().ok_or("Failed to convert image to DynamicImage".to_string())?;
 
-    let image = ImageBuffer::<Rgb<u8>, Vec<u8>>::from_raw(image.width as u32, image.height as u32, image.data).ok_or_else(|| "Failed to create image buffer".to_string())?;
+    timer.checkpoint("After converting to DynamicImage");
 
-    times.push(("After creating image buffer", start_timer.elapsed()));
-    start_timer = Instant::now();
-    let res = DynamicImage::ImageRgb8(image);
-    times.push(("After creating dynamic image", start_timer.elapsed()));
+    let rgb_image = DynamicImage::from(dynamic_image.to_rgb8());
 
-    let str_timer = times.into_iter().map(|(name, time)| format!("{name}: {time:?}")).collect::<Vec<_>>().join(", ");
-    trace!("Loading raw image --- {str_timer}");
-    Ok(res)
+    timer.checkpoint("After reconverting to RGB");
+
+    trace!("{}", timer.report(false));
+
+    Ok(rgb_image)
+}
+
+pub struct Timer {
+    base: String,
+    start_time: Instant,
+    last_time: Instant,
+    times: Vec<(String, Duration)>,
+}
+
+impl Timer {
+    pub fn new(base: &str) -> Self {
+        Self {
+            base: base.to_string(),
+            start_time: Instant::now(),
+            last_time: Instant::now(),
+            times: Vec::new(),
+        }
+    }
+
+    pub fn checkpoint(&mut self, name: &str) {
+        let elapsed = self.last_time.elapsed();
+        self.times.push((name.to_string(), elapsed));
+        self.last_time = Instant::now();
+    }
+
+    pub fn report(&mut self, in_one_line: bool) -> String {
+        let all_elapsed = self.start_time.elapsed();
+        self.times.push(("Everything".to_string(), all_elapsed));
+
+        let joiner = if in_one_line { ", " } else { ", \n" };
+        self.times
+            .iter()
+            .map(|(name, time)| format!("{} - {name}: {time:?}", self.base))
+            .collect::<Vec<_>>()
+            .join(joiner)
+    }
 }

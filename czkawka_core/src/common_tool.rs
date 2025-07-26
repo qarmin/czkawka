@@ -14,7 +14,7 @@ use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
 use crate::common_messages::Messages;
 use crate::common_traits::ResultEntry;
-use crate::delayed_sender::DelayedSender;
+use crate::helpers::delayed_sender::DelayedSender;
 use crate::progress_data::{CurrentStage, ProgressData};
 
 #[derive(Debug, Clone, Default)]

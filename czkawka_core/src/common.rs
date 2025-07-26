@@ -334,7 +334,7 @@ pub fn set_number_of_threads(thread_number: usize) {
 }
 
 pub const RAW_IMAGE_EXTENSIONS: &[&str] = &[
-    "mrw", "arw", "srf", "sr2", "mef", "orf", "srw", "erf", "kdc", "kdc", "dcs", "rw2", "raf", "dcr", "dng", "pef", "crw", "iiq", "3fr", "nrw", "nef", "mos", "cr2", "ari",
+    "mrw", "arw", "srf", "sr2", "mef", "orf", "srw", "erf", "kdc", "kdc", "dcs", "rw2", "raf", "dcr", "dng", "pef", "crw", "iiq", "3fr", "nrw", "nef", "mos", "cr2", "ari", "cr3",
 ];
 
 pub const JXL_IMAGE_EXTENSIONS: &[&str] = &["jxl"];
