@@ -27,7 +27,7 @@ jobs:
       - name: Install GTK4
         run: |
           brew link --overwrite python@3.13
-          brew install gtk4 libheif libavif || true
+          brew install gtk4 libheif libavif dav1d || true
           brew link --overwrite python@3.13
 
       - name: Build Release
@@ -35,6 +35,8 @@ jobs:
         run: |
           set -e
           sed -i '' 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
+          
+          export LIBRARY_PATH=$LIBRARY_PATH:$(brew --prefix)/lib
           
           cargo build --release
           mv target/release/czkawka_cli macos_czkawka_cli_${{ runner.arch }}
@@ -52,8 +54,8 @@ jobs:
           set -e
           sed -i '' 's/^\(\[profile\.dev\.package.*\)/#\1/' Cargo.toml
           sed -i '' 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
-
-          cargo build --bin czkawka_cli --bin krokiet
+          
+          export LIBRARY_PATH=$LIBRARY_PATH:$(brew --prefix)/lib
           
           cargo build
           mv target/debug/czkawka_cli macos_czkawka_cli_${{ runner.arch }}
@@ -68,7 +70,7 @@ jobs:
       - name: Store MacOS
         uses: actions/upload-artifact@v4
         with:
-          name: all-${{ runner.os }}-release-${{ runner.arch }}-${{ matrix.btype }}
+          name: all-${{ runner.os }}-${{ runner.arch }}
           path: |
             macos_czkawka_cli_heif_avif_${{ runner.arch }}
             macos_czkawka_gui_heif_avif_${{ runner.arch }}
