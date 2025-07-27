@@ -28,7 +28,7 @@ jobs:
         run: |
           brew link --overwrite python@3.13
           brew install gtk4 libheif libavif dav1d || true
-          brew link --overwrite python@3.13
+          # brew link --overwrite python@3.13
 
       - name: Build Release
         #if: ${{ github.ref == 'refs/heads/master' }}
