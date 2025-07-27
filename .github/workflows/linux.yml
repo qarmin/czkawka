@@ -9,62 +9,99 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  linux-cli-krokiet-release:
-    if: ${{ github.ref == 'refs/heads/master' }}
-    runs-on: ubuntu-22.04
+  linux-all:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, ubuntu-22.04-arm]
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup env
+        run: |
+          ARCHNAME=$([ "${{ runner.arch }}" = "ARM64" ] && echo arm64 || echo x86_64)
+          echo "ARCHNAME=$ARCHNAME" >> $GITHUB_ENV
+
       - name: Install basic libraries
-        run: sudo apt update || true; sudo apt install libheif-dev libraw-dev ffmpeg -y
+        run: sudo apt update || true; sudo apt install libheif-dev libraw-dev ffmpeg libgtk-4-dev -y
 
       - name: Setup rust version
         run: rustup default 1.85.0
 
       - name: Build Release
+        if: ${{ github.ref == 'refs/heads/master' }}
         run: |
           sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
-          cargo build --release --bin czkawka_cli --bin krokiet
+          
+          echo "VERS=release" >> $GITHUB_ENV
+          
+          cargo build --release
+          mv target/release/czkawka_cli linux_czkawka_cli_${{ env.ARCHNAME }}
+          mv target/release/czkawka_gui linux_czkawka_gui_${{ env.ARCHNAME }}
+          mv target/release/krokiet linux_krokiet_${{ env.ARCHNAME }}
+          
+          cargo build --release --features "heif,libraw"
+          mv target/release/czkawka_cli linux_czkawka_cli_heif_raw_${{ env.ARCHNAME }}
+          mv target/release/czkawka_gui linux_czkawka_gui_heif_raw_${{ env.ARCHNAME }}
+          mv target/release/krokiet linux_krokiet_heif_raw_${{ env.ARCHNAME }}
 
-      - name: Store Linux CLI
-        uses: actions/upload-artifact@v4
-        with:
-          name: czkawka_cli-${{ runner.os }}-release
-          path: target/release/czkawka_cli
-
-      - name: Store Linux Krokiet
-        uses: actions/upload-artifact@v4
-        with:
-          name: krokiet-${{ runner.os }}-release
-          path: target/release/krokiet
-
-      - name: Prepare files to release
+      - name: Build Debug
+        if: ${{ github.ref != 'refs/heads/master' }}
         run: |
-          mv target/release/czkawka_cli linux_czkawka_cli
-          mv target/release/krokiet linux_krokiet
+          sed -i 's/^\(\[profile\.dev\.package.*\)/#\1/' Cargo.toml
+          sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
+          
+          echo "VERS=debug" >> $GITHUB_ENV
+          
+          cargo build
+          mv target/debug/czkawka_cli linux_czkawka_cli_${{ env.ARCHNAME }}
+          mv target/debug/czkawka_gui linux_czkawka_gui_${{ env.ARCHNAME }}
+          mv target/debug/krokiet linux_krokiet_${{ env.ARCHNAME }}
+          
+          cargo build --features "heif,libraw"
+          mv target/debug/czkawka_cli linux_czkawka_cli_heif_raw_${{ env.ARCHNAME }}
+          mv target/debug/czkawka_gui linux_czkawka_gui_heif_raw_${{ env.ARCHNAME }}
+          mv target/debug/krokiet linux_krokiet_heif_raw_${{ env.ARCHNAME }}
+
+      - name: Store
+        uses: actions/upload-artifact@v4
+        with:
+          name: all-${{ runner.os }}-${{ runner.arch }}-${{ env.VERS }}
+          path: |
+            linux_czkawka_cli_${{ env.ARCHNAME }}
+            linux_czkawka_gui_${{ env.ARCHNAME }}
+            linux_krokiet_${{ env.ARCHNAME }}
+            linux_czkawka_cli_heif_raw_${{ env.ARCHNAME }}
+            linux_czkawka_gui_heif_raw_${{ env.ARCHNAME }}
+            linux_krokiet_heif_raw_${{ env.ARCHNAME }}
 
       - name: Release
+        if: ${{ github.ref == 'refs/heads/master' }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: "Nightly"
           files: |
-            linux_czkawka_cli
-            linux_krokiet
+            linux_czkawka_cli_${{ env.ARCHNAME }}
+            linux_czkawka_gui_${{ env.ARCHNAME }}
+            linux_krokiet_${{ env.ARCHNAME }}
+            linux_czkawka_cli_heif_raw_${{ env.ARCHNAME }}
+            linux_czkawka_gui_heif_raw_${{ env.ARCHNAME }}
+            linux_krokiet_heif_raw_${{ env.ARCHNAME }}
           token: ${{ secrets.PAT_REPOSITORY }}
 
-  # GUI not works :(
+  ### MUSL CLI and Krokiet Release and Debug
+  # GUI not works with MUSL :(
   # https://github.com/slint-ui/slint/issues/7586
   # https://github.com/rust-windowing/winit/issues/1818
-  linux-cli-release-musl:
-    if: ${{ github.ref == 'refs/heads/master' }}
+  linux-cli-musl:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
       - name: Install basic libraries
         run: |
-          sudo apt update || true; sudo apt install libheif-dev libraw-dev ffmpeg -y
-          sudo apt install musl-tools -y
+          sudo apt update || true; sudo apt install  musl-tools -y
 
       - name: Setup rust version
         run: |
@@ -72,19 +109,28 @@ jobs:
           rustup target add x86_64-unknown-linux-musl
 
       - name: Build Release
+        if: ${{ github.ref == 'refs/heads/master' }}
         run: |
           sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
           cargo build --release --bin czkawka_cli --target x86_64-unknown-linux-musl
+          
+          mv target/x86_64-unknown-linux-musl/release/czkawka_cli linux_czkawka_cli_musl
+
+      - name: Build Debug
+        if: ${{ github.ref != 'refs/heads/master' }}
+        run: |
+          sed -i 's/^\(\[profile\.dev\.package.*\)/#\1/' Cargo.toml
+          sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
+          cargo build --bin czkawka_cli --target x86_64-unknown-linux-musl
+          
+          mv target/x86_64-unknown-linux-musl/debug/czkawka_cli linux_czkawka_cli_musl
 
       - name: Store Linux CLI
         uses: actions/upload-artifact@v4
         with:
-          name: czkawka_cli-${{ runner.os }}-release-musl
-          path: target/x86_64-unknown-linux-musl/release/czkawka_cli
-
-      - name: Prepare files to release
-        run: |
-          mv target/x86_64-unknown-linux-musl/release/czkawka_cli linux_czkawka_cli_musl
+          name: czkawka_cli-${{ runner.os }}-musl
+          path: |
+            linux_czkawka_cli_musl
 
       - name: Release
         uses: softprops/action-gh-release@v2
@@ -94,7 +140,9 @@ jobs:
             linux_czkawka_cli_musl
           token: ${{ secrets.PAT_REPOSITORY }}
 
-  # TODO - also test czkawka_gui - this requires now gtk4:i386
+  ### Below, builds that do not produce artifacts
+
+  ### 32 bit CLI and Krokiet Release and Debug - TODO test also gtk gui but it requires gtk4:i386 and also would be good to test libraw and heif
   linux-all-debug-32bit:
     if: ${{ github.ref != 'refs/heads/master' }}
     runs-on: ubuntu-22.04
@@ -104,7 +152,7 @@ jobs:
       - name: Install basic libraries
         run: |
           sudo apt update || true
-          sudo apt install libheif-dev libraw-dev ffmpeg libgtk-4-dev gcc-multilib -y
+          sudo apt install gcc-multilib -y
 
       - name: Setup rust version and target
         run: |
@@ -117,120 +165,8 @@ jobs:
           sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
           cargo build --target i686-unknown-linux-gnu --bin czkawka_cli --bin krokiet
 
-  linux-cli-krokiet-debug:
-    if: ${{ github.ref != 'refs/heads/master' }}
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install basic libraries
-        run: sudo apt update || true; sudo apt install libheif-dev libraw-dev ffmpeg -y
-
-      - name: Setup rust version
-        run: rustup default 1.85.0
-
-      - name: Build Debug
-        run: |
-          sed -i 's/^\(\[profile\.dev\.package.*\)/#\1/' Cargo.toml
-          sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
-          cargo build --bin czkawka_cli --bin krokiet
-
-      - name: Store Linux CLI Debug
-        uses: actions/upload-artifact@v4
-        with:
-          name: czkawka_cli-${{ runner.os }}-debug
-          path: target/debug/czkawka_cli
-
-      - name: Store Linux Krokiet Debug
-        uses: actions/upload-artifact@v4
-        with:
-          name: krokiet-${{ runner.os }}-debug
-          path: target/debug/krokiet
-
-
-  linux-krokiet-gui-heif:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install basic libraries
-        run: sudo apt update || true; sudo apt install libheif-dev libraw-dev -y
-
-      - name: Setup rust version
-        run: rustup default 1.85.0
-
-      - name: Enable LTO
-        if: ${{ github.ref == 'refs/heads/master' }}
-        run: sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
-
-      - name: Build Release Krokiet heif
-        run: cargo build --release --bin krokiet --features "heif,libraw"
-
-      - name: Store Linux GUI Krokiet heif libraw
-        uses: actions/upload-artifact@v4
-        with:
-          name: krokiet-${{ runner.os }}-heif-libraw
-          path: target/release/krokiet
-
-      - name: Prepare files to release
-        run: |
-          mv target/release/krokiet linux_krokiet_heif_raw_gui
-      - name: Release
-        uses: softprops/action-gh-release@v2
-        if: ${{ github.ref == 'refs/heads/master' }}
-        with:
-          tag_name: "Nightly"
-          files: |
-            linux_krokiet_heif_raw_gui
-          token: ${{ secrets.PAT_REPOSITORY }}
-
-  linux-gui:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install basic libraries
-        run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev -y
-
-      - name: Setup rust version
-        run: rustup default 1.85.0
-
-      - name: Enable LTO
-        if: ${{ github.ref == 'refs/heads/master' }}
-        run: sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
-
-      - name: Build Release Heif Libraw
-        run: cargo build --release --bin czkawka_gui --features "heif,libraw"
-
-      - name: Store Linux GUI Heif Libraw
-        uses: actions/upload-artifact@v4
-        with:
-          name: czkawka_gui-${{ runner.os }}-heif-libraw
-          path: target/release/czkawka_gui
-
-      - name: Build Release
-        run: cargo build --release --bin czkawka_gui
-
-      - name: Store Linux GUI
-        uses: actions/upload-artifact@v4
-        with:
-          name: czkawka_gui-${{ runner.os }}
-          path: target/release/czkawka_gui
-
-      - name: Prepare files to release
-        run: |
-          mv target/release/czkawka_gui linux_czkawka_gui
-      - name: Release
-        uses: softprops/action-gh-release@v2
-        if: ${{ github.ref == 'refs/heads/master' }}
-        with:
-          tag_name: "Nightly"
-          files: |
-            linux_czkawka_gui
-          token: ${{ secrets.PAT_REPOSITORY }}
-
   linux-stability:
-    if: ${{ github.ref == 'refs/heads/master' }} # Runs only in master, because it is time consuming
+    if: ${{ github.ref == 'refs/heads/master' }} # Runs only in master, because it is really time consumig
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -244,25 +180,25 @@ jobs:
       - name: Build packages
         run: |
           rm -rf target || true
-          cargo build
+          cargo build --features "heif,libraw"
           mv target/debug/czkawka_cli czkawka_cli_debug_1
           mv target/debug/czkawka_gui czkawka_gui_debug_1
           mv target/debug/krokiet krokiet_debug_1
           
           rm -rf target || true
-          cargo build --release
+          cargo build --release --features "heif,libraw"
           mv target/release/czkawka_cli czkawka_cli_release_1
           mv target/release/czkawka_gui czkawka_gui_release_1
           mv target/release/krokiet krokiet_release_1
           
           rm -rf target || true
-          cargo build
+          cargo build --features "heif,libraw"
           mv target/debug/czkawka_cli czkawka_cli_debug_2
           mv target/debug/czkawka_gui czkawka_gui_debug_2
           mv target/debug/krokiet krokiet_debug_2
           
           rm -rf target || true
-          cargo build --release
+          cargo build --release --features "heif,libraw"
           mv target/release/czkawka_cli czkawka_cli_release_2
           mv target/release/czkawka_gui czkawka_gui_release_2
           mv target/release/krokiet krokiet_release_2
@@ -282,6 +218,8 @@ jobs:
 
       - name: Test
         run: |
+          sed -i 's/^\(\[profile\.dev\.package.*\)/#\1/' Cargo.toml
+          sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
           xvfb-run cargo test
 
   linux-regression-tests-on-minimal-rust-version:
@@ -295,13 +233,11 @@ jobs:
       - name: Setup rust version
         run: rustup default 1.85.0
 
-      - name: Build
-        run: |
-          cargo check
-          cargo check --features "heif,libraw"
-
       - name: Build test version
-        run: cargo build --profile test --bin czkawka_cli
+        run: |
+          sed -i 's/^\(\[profile\.dev\.package.*\)/#\1/' Cargo.toml
+          sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
+          cargo build --profile test --bin czkawka_cli
 
       - name: Linux Regression Test
         run: |
@@ -312,95 +248,3 @@ jobs:
 
           ci_tester/target/release/ci_tester target/debug/czkawka_cli
 
-  linux-arm-release:
-    if: ${{ github.ref == 'refs/heads/master' }}
-    runs-on: ubuntu-22.04-arm
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install basic libraries
-        run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev -y
-
-      - name: Setup rust version
-        run: rustup default 1.85.0
-
-      - name: Build Release
-        run: |
-          sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
-          cargo build --release
-
-      - name: Store cli
-        uses: actions/upload-artifact@v4
-        with:
-          name: czkawka_cli-${{ runner.os }}-arm-release
-          path: |
-            target/release/czkawka_cli
-
-      - name: Store gui
-        uses: actions/upload-artifact@v4
-        with:
-          name: czkawka_gui-${{ runner.os }}-arm-release
-          path: |
-            target/release/czkawka_gui
-
-      - name: Store krokiet
-        uses: actions/upload-artifact@v4
-        with:
-          name: krokiet-${{ runner.os }}-arm-release
-          path: |
-            target/release/krokiet
-
-      - name: Prepare files to release
-        run: |
-          mv target/release/czkawka_cli linux_czkawka_cli_arm
-          mv target/release/czkawka_gui linux_czkawka_gui_arm
-          mv target/release/krokiet linux_krokiet_arm
-
-      - name: Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: "Nightly"
-          files: |
-            linux_czkawka_cli_arm
-            linux_czkawka_gui_arm
-            linux_krokiet_arm
-          token: ${{ secrets.PAT_REPOSITORY }}
-
-  linux-arm-debug:
-    if: ${{ github.ref != 'refs/heads/master' }}
-    runs-on: ubuntu-22.04-arm
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install basic libraries
-        run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev -y
-
-      - name: Setup rust version
-        run: rustup default 1.85.0
-
-      - name: Build Debug
-        run: |
-          sed -i 's/^\(\[profile\.dev\.package.*\)/#\1/' Cargo.toml
-          sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
-          cargo build
-
-      - name: Store cli
-        uses: actions/upload-artifact@v4
-        with:
-          name: czkawka_cli-${{ runner.os }}-arm-debug
-          path: |
-            target/debug/czkawka_cli
-
-      - name: Store gui
-        uses: actions/upload-artifact@v4
-        with:
-          name: czkawka_gui-${{ runner.os }}-arm-debug
-          path: |
-            target/debug/czkawka_gui
-
-      - name: Store krokiet
-        uses: actions/upload-artifact@v4
-        with:
-          name: krokiet-${{ runner.os }}-arm-debug
-          path: |
-            target/debug/krokiet

@@ -858,7 +858,7 @@ fn read_single_file_tags(path: &str, mut music_entry: MusicEntry) -> Option<Musi
     };
 
     let Ok(possible_tagged_file) = panic::catch_unwind(move || read_from(&mut file).ok()) else {
-        let message = create_crash_message("Lofty", path, "https://github.com/image-rs/image/issues");
+        let message = create_crash_message("Lofty", path, "https://github.com/Serial-ATA/lofty-rs");
         error!("{message}");
         return None;
     };

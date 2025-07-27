@@ -27,24 +27,28 @@ jobs:
           rustup default 1.85.0
           rustup target add x86_64-pc-windows-gnu
 
-      - name: Enable LTO
+      - name: Compile Krokiet Release
         if: ${{ github.ref == 'refs/heads/master' }}
-        run: sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
+        run: |
+          sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
+          cargo build --release --target x86_64-pc-windows-gnu --bin krokiet
+          mv target/x86_64-pc-windows-gnu/release/krokiet.exe windows_krokiet_on_linux.exe
 
-      - name: Compile Krokiet
-        run: cargo build --release --target x86_64-pc-windows-gnu --bin krokiet
+      - name: Compile Krokiet Debug
+        if: ${{ github.ref != 'refs/heads/master' }}
+        run: |
+          sed -i 's/^\(\[profile\.dev\.package.*\)/#\1/' Cargo.toml
+          sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
+          cargo build --target x86_64-pc-windows-gnu --bin krokiet
+          mv target/x86_64-pc-windows-gnu/debug/krokiet.exe windows_krokiet_on_linux.exe
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: krokiet-windows-c-on-linux-${{ github.sha }}
           path: |
-            target/x86_64-pc-windows-gnu/release/krokiet.exe
+            ./windows_krokiet_on_linux.exe
           if-no-files-found: error
-
-      - name: Prepare files to release
-        run: |
-          mv target/x86_64-pc-windows-gnu/release/krokiet.exe windows_krokiet_on_linux.exe
 
       - name: Release
         uses: softprops/action-gh-release@v2
@@ -70,7 +74,8 @@ jobs:
           rustup default 1.85.0
           rustup target add x86_64-pc-windows-gnu
 
-      - name: Cross compile for Windows
+      - name: Cross compile for Windows - Release
+        if: ${{ github.ref == 'refs/heads/master' }}
         run: |
           source "$HOME/.cargo/env"
           #!/bin/bash
@@ -80,6 +85,18 @@ jobs:
           mkdir -p package
           cp target/x86_64-pc-windows-gnu/release/czkawka_gui.exe package/
           cp target/x86_64-pc-windows-gnu/release/czkawka_cli.exe package/
+
+      - name: Cross compile for Windows - Debug
+        if: ${{ github.ref != 'refs/heads/master' }}
+        run: |
+          source "$HOME/.cargo/env"
+          #!/bin/bash
+          set -euo pipefail
+          export PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/share/pkgconfig:$MINGW_PREFIX/lib/pkgconfig/:/usr/x86_64-w64-mingw32/lib/pkgconfig/
+          cargo build --target=x86_64-pc-windows-gnu --locked
+          mkdir -p package
+          cp target/x86_64-pc-windows-gnu/debug/czkawka_gui.exe package/
+          cp target/x86_64-pc-windows-gnu/debug/czkawka_cli.exe package/
 
       - name: Package
         run: |
@@ -141,7 +158,8 @@ jobs:
           rustup default 1.85.0
           rustup target add x86_64-pc-windows-gnu
 
-      - name: Cross compile for Windows
+      - name: Cross compile for Windows - Release
+        if: ${{ github.ref == 'refs/heads/master' }}
         run: |
           source "$HOME/.cargo/env"
           #!/bin/bash
@@ -151,6 +169,18 @@ jobs:
           mkdir -p package
           cp target/x86_64-pc-windows-gnu/release/czkawka_gui.exe package/
           cp target/x86_64-pc-windows-gnu/release/czkawka_cli.exe package/
+
+      - name: Cross compile for Windows - Debug
+        if: ${{ github.ref != 'refs/heads/master' }}
+        run: |
+          source "$HOME/.cargo/env"
+          #!/bin/bash
+          set -euo pipefail
+          export PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/share/pkgconfig:$MINGW_PREFIX/lib/pkgconfig/:/usr/x86_64-w64-mingw32/lib/pkgconfig/
+          cargo build --target=x86_64-pc-windows-gnu --locked
+          mkdir -p package
+          cp target/x86_64-pc-windows-gnu/debug/czkawka_gui.exe package/
+          cp target/x86_64-pc-windows-gnu/debug/czkawka_cli.exe package/
 
       - name: Package
         run: |
