@@ -41,7 +41,7 @@ jobs:
           set -e
           sed -i '' 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
           
-          echo "VERS=\"release\"" >> $GITHUB_ENV
+          echo "VERS=release" >> $GITHUB_ENV
           
           export LIBRARY_PATH=$LIBRARY_PATH:$(brew --prefix)/lib
           
@@ -62,7 +62,7 @@ jobs:
           sed -i '' 's/^\(\[profile\.dev\.package.*\)/#\1/' Cargo.toml
           sed -i '' 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
           
-          echo "VERS=\"debug\"" >> $GITHUB_ENV
+          echo "VERS=debug" >> $GITHUB_ENV
           
           export LIBRARY_PATH=$LIBRARY_PATH:$(brew --prefix)/lib
           

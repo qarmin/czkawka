@@ -34,7 +34,7 @@ jobs:
         run: |
           sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
           
-          echo "VERS=\"release\"" >> $GITHUB_ENV
+          echo "VERS=release" >> $GITHUB_ENV
           
           cargo build --release
           mv target/release/czkawka_cli linux_czkawka_cli_${{ env.ARCHNAME }}
@@ -52,7 +52,7 @@ jobs:
           sed -i 's/^\(\[profile\.dev\.package.*\)/#\1/' Cargo.toml
           sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
           
-          echo "VERS=\"debug\"" >> $GITHUB_ENV
+          echo "VERS=debug" >> $GITHUB_ENV
           
           cargo build
           mv target/debug/czkawka_cli linux_czkawka_cli_${{ env.ARCHNAME }}
