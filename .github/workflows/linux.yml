@@ -18,54 +18,63 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup env
+        run: |
+          if [ "${{ runner.arch }}" = "ARM64" ]; then
+            ARCHNAME="arm64"
+          else
+            ARCHNAME="x86_64"
+          fi
+          echo "ARCHNAME=$ARCHNAME" >> $GITHUB_ENV
+
       - name: Install basic libraries
-        run: sudo apt update || true; sudo apt install libheif-dev libraw-dev ffmpeg -y
+        run: sudo apt update || true; sudo apt install libheif-dev libraw-dev ffmpeg libgtk-4-dev -y
 
       - name: Setup rust version
         run: rustup default 1.85.0
 
       - name: Build Release
-        # if: ${{ github.ref == 'refs/heads/master' }}
+        if: ${{ github.ref == 'refs/heads/master' }}
         run: |
           sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
           
           cargo build --release
-          mv target/release/czkawka_cli linux_czkawka_cli_${{ runner.arch }}
-          mv target/release/czkawka_gui linux_czkawka_gui_${{ runner.arch }}
-          mv target/release/krokiet linux_krokiet_${{ runner.arch }}
+          mv target/release/czkawka_cli linux_czkawka_cli_${{ env.ARCHNAME }}
+          mv target/release/czkawka_gui linux_czkawka_gui_${{ env.ARCHNAME }}
+          mv target/release/krokiet linux_krokiet_${{ env.ARCHNAME }}
           
           cargo build --release --features "heif,libraw"
-          mv target/release/czkawka_cli linux_czkawka_cli_heif_raw_${{ runner.arch }}
-          mv target/release/czkawka_gui linux_czkawka_gui_heif_raw_${{ runner.arch }}
-          mv target/release/krokiet linux_krokiet_heif_raw_${{ runner.arch }}
+          mv target/release/czkawka_cli linux_czkawka_cli_heif_raw_${{ env.ARCHNAME }}
+          mv target/release/czkawka_gui linux_czkawka_gui_heif_raw_${{ env.ARCHNAME }}
+          mv target/release/krokiet linux_krokiet_heif_raw_${{ env.ARCHNAME }}
 
       - name: Build Debug
-        # if: ${{ github.ref == 'refs/heads/master' }}
+        if: ${{ github.ref != 'refs/heads/master' }}
         run: |
           sed -i 's/^\(\[profile\.dev\.package.*\)/#\1/' Cargo.toml
           sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
           
           cargo build
-          mv target/debug/czkawka_cli linux_czkawka_cli_${{ runner.arch }}
-          mv target/debug/czkawka_gui linux_czkawka_gui_${{ runner.arch }}
-          mv target/debug/krokiet linux_krokiet_${{ runner.arch }}
+          mv target/debug/czkawka_cli linux_czkawka_cli_${{ env.ARCHNAME }}
+          mv target/debug/czkawka_gui linux_czkawka_gui_${{ env.ARCHNAME }}
+          mv target/debug/krokiet linux_krokiet_${{ env.ARCHNAME }}
           
           cargo build --features "heif,libraw"
-          mv target/debug/czkawka_cli linux_czkawka_cli_heif_raw_${{ runner.arch }}
-          mv target/debug/czkawka_gui linux_czkawka_gui_heif_raw_${{ runner.arch }}
-          mv target/debug/krokiet linux_krokiet_heif_raw_${{ runner.arch }}
+          mv target/debug/czkawka_cli linux_czkawka_cli_heif_raw_${{ env.ARCHNAME }}
+          mv target/debug/czkawka_gui linux_czkawka_gui_heif_raw_${{ env.ARCHNAME }}
+          mv target/debug/krokiet linux_krokiet_heif_raw_${{ env.ARCHNAME }}
 
       - name: Store
         uses: actions/upload-artifact@v4
         with:
           name: all-${{ runner.os }}-${{ runner.arch }}
           path: |
-            linux_czkawka_cli_${{ runner.arch }}
-            linux_czkawka_gui_${{ runner.arch }}
-            linux_krokiet_${{ runner.arch }}
-            linux_czkawka_cli_heif_raw_${{ runner.arch }}
-            linux_czkawka_gui_heif_raw_${{ runner.arch }}
-            linux_krokiet_heif_raw_${{ runner.arch }}
+            linux_czkawka_cli_${{ env.ARCHNAME }}
+            linux_czkawka_gui_${{ env.ARCHNAME }}
+            linux_krokiet_${{ env.ARCHNAME }}
+            linux_czkawka_cli_heif_raw_${{ env.ARCHNAME }}
+            linux_czkawka_gui_heif_raw_${{ env.ARCHNAME }}
+            linux_krokiet_heif_raw_${{ env.ARCHNAME }}
 
       - name: Release
         if: ${{ github.ref == 'refs/heads/master' }}
@@ -73,12 +82,12 @@ jobs:
         with:
           tag_name: "Nightly"
           files: |
-            linux_czkawka_cli_${{ runner.arch }}
-            linux_czkawka_gui_${{ runner.arch }}
-            linux_krokiet_${{ runner.arch }}
-            linux_czkawka_cli_heif_raw_${{ runner.arch }}
-            linux_czkawka_gui_heif_raw_${{ runner.arch }}
-            linux_krokiet_heif_raw_${{ runner.arch }}
+            linux_czkawka_cli_${{ env.ARCHNAME }}
+            linux_czkawka_gui_${{ env.ARCHNAME }}
+            linux_krokiet_${{ env.ARCHNAME }}
+            linux_czkawka_cli_heif_raw_${{ env.ARCHNAME }}
+            linux_czkawka_gui_heif_raw_${{ env.ARCHNAME }}
+            linux_krokiet_heif_raw_${{ env.ARCHNAME }}
           token: ${{ secrets.PAT_REPOSITORY }}
 
   ### MUSL CLI and Krokiet Release and Debug
@@ -100,7 +109,7 @@ jobs:
           rustup target add x86_64-unknown-linux-musl
 
       - name: Build Release
-        # if: ${{ github.ref == 'refs/heads/master' }}
+        if: ${{ github.ref == 'refs/heads/master' }}
         run: |
           sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
           cargo build --release --bin czkawka_cli --target x86_64-unknown-linux-musl
@@ -108,7 +117,7 @@ jobs:
           mv target/x86_64-unknown-linux-musl/release/czkawka_cli linux_czkawka_cli_musl
 
       - name: Build Debug
-        # if: ${{ github.ref != 'refs/heads/master' }}
+        if: ${{ github.ref != 'refs/heads/master' }}
         run: |
           sed -i 's/^\(\[profile\.dev\.package.*\)/#\1/' Cargo.toml
           sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
@@ -157,7 +166,7 @@ jobs:
           cargo build --target i686-unknown-linux-gnu --bin czkawka_cli --bin krokiet
 
   linux-stability:
-    #if: ${{ github.ref == 'refs/heads/master' }} # Runs only in master, because it is really time consuming # TODO - disable again in non master branches
+    if: ${{ github.ref == 'refs/heads/master' }} # Runs only in master, because it is really time consumig
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4

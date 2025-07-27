@@ -18,6 +18,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup env
+        run: |
+          if [ "${{ runner.arch }}" = "ARM64" ]; then
+            ARCHNAME="arm64"
+          else
+            ARCHNAME="x86_64"
+          fi
+          echo "ARCHNAME=$ARCHNAME" >> $GITHUB_ENV
+
       - name: Setup rust version
         run: rustup default 1.85.0
 
@@ -31,7 +40,7 @@ jobs:
           # brew link --overwrite python@3.13
 
       - name: Build Release
-        #if: ${{ github.ref == 'refs/heads/master' }}
+        if: ${{ github.ref == 'refs/heads/master' }}
         run: |
           set -e
           sed -i '' 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
@@ -39,17 +48,17 @@ jobs:
           export LIBRARY_PATH=$LIBRARY_PATH:$(brew --prefix)/lib
           
           cargo build --release
-          mv target/release/czkawka_cli macos_czkawka_cli_${{ runner.arch }}
-          mv target/release/czkawka_gui macos_czkawka_gui_${{ runner.arch }}
-          mv target/release/krokiet macos_krokiet_${{ runner.arch }}
+          mv target/release/czkawka_cli macos_czkawka_cli_${{ env.ARCHNAME }}
+          mv target/release/czkawka_gui macos_czkawka_gui_${{ env.ARCHNAME }}
+          mv target/release/krokiet macos_krokiet_${{ env.ARCHNAME }}
           
           cargo build --release --features "heif,libavif"
-          mv target/release/czkawka_cli macos_czkawka_cli_heif_avif_${{ runner.arch }}
-          mv target/release/czkawka_gui macos_czkawka_gui_heif_avif_${{ runner.arch }}
-          mv target/release/krokiet macos_krokiet_heif_avif_${{ runner.arch }}
+          mv target/release/czkawka_cli macos_czkawka_cli_heif_avif_${{ env.ARCHNAME }}
+          mv target/release/czkawka_gui macos_czkawka_gui_heif_avif_${{ env.ARCHNAME }}
+          mv target/release/krokiet macos_krokiet_heif_avif_${{ env.ARCHNAME }}
 
       - name: Build Debug
-        #if: ${{ github.ref != 'refs/heads/master' }}
+        if: ${{ github.ref != 'refs/heads/master' }}
         run: |
           set -e
           sed -i '' 's/^\(\[profile\.dev\.package.*\)/#\1/' Cargo.toml
@@ -58,26 +67,26 @@ jobs:
           export LIBRARY_PATH=$LIBRARY_PATH:$(brew --prefix)/lib
           
           cargo build
-          mv target/debug/czkawka_cli macos_czkawka_cli_${{ runner.arch }}
-          mv target/debug/czkawka_gui macos_czkawka_gui_${{ runner.arch }}
-          mv target/debug/krokiet macos_krokiet_${{ runner.arch }}
+          mv target/debug/czkawka_cli macos_czkawka_cli_${{ env.ARCHNAME }}
+          mv target/debug/czkawka_gui macos_czkawka_gui_${{ env.ARCHNAME }}
+          mv target/debug/krokiet macos_krokiet_${{ env.ARCHNAME }}
           
           cargo build --features "heif,libavif"
-          mv target/debug/czkawka_cli macos_czkawka_cli_heif_avif_${{ runner.arch }}
-          mv target/debug/czkawka_gui macos_czkawka_gui_heif_avif_${{ runner.arch }}
-          mv target/debug/krokiet macos_krokiet_heif_avif_${{ runner.arch }}
+          mv target/debug/czkawka_cli macos_czkawka_cli_heif_avif_${{ env.ARCHNAME }}
+          mv target/debug/czkawka_gui macos_czkawka_gui_heif_avif_${{ env.ARCHNAME }}
+          mv target/debug/krokiet macos_krokiet_heif_avif_${{ env.ARCHNAME }}
 
       - name: Store MacOS
         uses: actions/upload-artifact@v4
         with:
           name: all-${{ runner.os }}-${{ runner.arch }}
           path: |
-            macos_czkawka_cli_heif_avif_${{ runner.arch }}
-            macos_czkawka_gui_heif_avif_${{ runner.arch }}
-            macos_krokiet_heif_avif_${{ runner.arch }}
-            macos_czkawka_cli_${{ runner.arch }}
-            macos_czkawka_gui_${{ runner.arch }}
-            macos_krokiet_${{ runner.arch }}
+            macos_czkawka_cli_heif_avif_${{ env.ARCHNAME }}
+            macos_czkawka_gui_heif_avif_${{ env.ARCHNAME }}
+            macos_krokiet_heif_avif_${{ env.ARCHNAME }}
+            macos_czkawka_cli_${{ env.ARCHNAME }}
+            macos_czkawka_gui_${{ env.ARCHNAME }}
+            macos_krokiet_${{ env.ARCHNAME }}
 
       - name: Release
         if: ${{ github.ref == 'refs/heads/master' }}
@@ -85,10 +94,10 @@ jobs:
         with:
           tag_name: "Nightly"
           files: |
-            macos_czkawka_cli_heif_avif_${{ runner.arch }}
-            macos_czkawka_gui_heif_avif_${{ runner.arch }}
-            macos_krokiet_heif_avif_${{ runner.arch }}
-            macos_czkawka_cli_${{ runner.arch }}
-            macos_czkawka_gui_${{ runner.arch }}
-            macos_krokiet_${{ runner.arch }}
+            macos_czkawka_cli_heif_avif_${{ env.ARCHNAME }}
+            macos_czkawka_gui_heif_avif_${{ env.ARCHNAME }}
+            macos_krokiet_heif_avif_${{ env.ARCHNAME }}
+            macos_czkawka_cli_${{ env.ARCHNAME }}
+            macos_czkawka_gui_${{ env.ARCHNAME }}
+            macos_krokiet_${{ env.ARCHNAME }}
           token: ${{ secrets.PAT_REPOSITORY }}

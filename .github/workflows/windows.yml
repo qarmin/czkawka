@@ -32,7 +32,7 @@ jobs:
         run: |
           sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
           cargo build --release --target x86_64-pc-windows-gnu --bin krokiet
-          mv target/x86_64-pc-windows-gnu/release/krokiet windows_krokiet_on_linux.exe
+          mv target/x86_64-pc-windows-gnu/release/krokiet.exe windows_krokiet_on_linux.exe
 
       - name: Compile Krokiet Debug
         if: ${{ github.ref != 'refs/heads/master' }}
@@ -40,7 +40,7 @@ jobs:
           sed -i 's/^\(\[profile\.dev\.package.*\)/#\1/' Cargo.toml
           sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
           cargo build --target x86_64-pc-windows-gnu --bin krokiet
-          mv target/x86_64-pc-windows-gnu/debug/krokiet windows_krokiet_on_linux.exe
+          mv target/x86_64-pc-windows-gnu/debug/krokiet.exe windows_krokiet_on_linux.exe
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
