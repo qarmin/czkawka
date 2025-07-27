@@ -20,11 +20,7 @@ jobs:
 
       - name: Setup env
         run: |
-          if [ "${{ runner.arch }}" = "ARM64" ]; then
-            ARCHNAME="arm64"
-          else
-            ARCHNAME="x86_64"
-          fi
+          ARCHNAME=$([ "${{ runner.arch }}" = "ARM64" ] && echo arm64 || echo x86_64)
           echo "ARCHNAME=$ARCHNAME" >> $GITHUB_ENV
 
       - name: Install basic libraries
@@ -37,6 +33,8 @@ jobs:
         if: ${{ github.ref == 'refs/heads/master' }}
         run: |
           sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
+          
+          echo "VERS=\"release\"" >> $GITHUB_ENV
           
           cargo build --release
           mv target/release/czkawka_cli linux_czkawka_cli_${{ env.ARCHNAME }}
@@ -54,6 +52,8 @@ jobs:
           sed -i 's/^\(\[profile\.dev\.package.*\)/#\1/' Cargo.toml
           sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
           
+          echo "VERS=\"debug\"" >> $GITHUB_ENV
+          
           cargo build
           mv target/debug/czkawka_cli linux_czkawka_cli_${{ env.ARCHNAME }}
           mv target/debug/czkawka_gui linux_czkawka_gui_${{ env.ARCHNAME }}
@@ -67,7 +67,7 @@ jobs:
       - name: Store
         uses: actions/upload-artifact@v4
         with:
-          name: all-${{ runner.os }}-${{ runner.arch }}
+          name: all-${{ runner.os }}-${{ runner.arch }}-${{ env.VERS }}
           path: |
             linux_czkawka_cli_${{ env.ARCHNAME }}
             linux_czkawka_gui_${{ env.ARCHNAME }}

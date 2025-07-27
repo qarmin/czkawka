@@ -20,11 +20,7 @@ jobs:
 
       - name: Setup env
         run: |
-          if [ "${{ runner.arch }}" = "ARM64" ]; then
-            ARCHNAME="arm64"
-          else
-            ARCHNAME="x86_64"
-          fi
+          ARCHNAME=$([ "${{ runner.arch }}" = "ARM64" ] && echo arm64 || echo x86_64)
           echo "ARCHNAME=$ARCHNAME" >> $GITHUB_ENV
 
       - name: Setup rust version
@@ -45,6 +41,8 @@ jobs:
           set -e
           sed -i '' 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
           
+          echo "VERS=\"release\"" >> $GITHUB_ENV
+          
           export LIBRARY_PATH=$LIBRARY_PATH:$(brew --prefix)/lib
           
           cargo build --release
@@ -64,6 +62,8 @@ jobs:
           sed -i '' 's/^\(\[profile\.dev\.package.*\)/#\1/' Cargo.toml
           sed -i '' 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
           
+          echo "VERS=\"debug\"" >> $GITHUB_ENV
+          
           export LIBRARY_PATH=$LIBRARY_PATH:$(brew --prefix)/lib
           
           cargo build
@@ -79,7 +79,7 @@ jobs:
       - name: Store MacOS
         uses: actions/upload-artifact@v4
         with:
-          name: all-${{ runner.os }}-${{ runner.arch }}
+          name: all-${{ runner.os }}-${{ runner.arch }}-${{ env.VERS }}
           path: |
             macos_czkawka_cli_heif_avif_${{ env.ARCHNAME }}
             macos_czkawka_gui_heif_avif_${{ env.ARCHNAME }}
