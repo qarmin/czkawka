@@ -12,9 +12,9 @@ jobs:
   macos:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [macos-latest, macos-13]
-        btype: [release, debug]
     steps:
       - uses: actions/checkout@v4
 
@@ -30,9 +30,8 @@ jobs:
           brew install gtk4 libheif libavif || true
           brew link --overwrite python@3.13
 
-
       - name: Build Release
-        if: ${{ matrix.btype == 'release' }}
+        #if: ${{ github.ref == 'refs/heads/master' }}
         run: |
           set -e
           sed -i '' 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
@@ -48,11 +47,12 @@ jobs:
           mv target/release/krokiet macos_krokiet_heif_avif_${{ runner.arch }}
 
       - name: Build Debug
-        if: ${{ matrix.btype == 'debug' }}
+        #if: ${{ github.ref != 'refs/heads/master' }}
         run: |
           set -e
-          sed -i 's/^\(\[profile\.dev\.package.*\)/#\1/' Cargo.toml
-          sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
+          sed -i '' 's/^\(\[profile\.dev\.package.*\)/#\1/' Cargo.toml
+          sed -i '' 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
+
           cargo build --bin czkawka_cli --bin krokiet
           
           cargo build
