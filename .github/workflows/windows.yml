@@ -74,7 +74,8 @@ jobs:
           rustup default 1.85.0
           rustup target add x86_64-pc-windows-gnu
 
-      - name: Cross compile for Windows
+      - name: Cross compile for Windows - Release
+        if: ${{ github.ref == 'refs/heads/master' }}
         run: |
           source "$HOME/.cargo/env"
           #!/bin/bash
@@ -84,6 +85,18 @@ jobs:
           mkdir -p package
           cp target/x86_64-pc-windows-gnu/release/czkawka_gui.exe package/
           cp target/x86_64-pc-windows-gnu/release/czkawka_cli.exe package/
+
+      - name: Cross compile for Windows - Debug
+        if: ${{ github.ref != 'refs/heads/master' }}
+        run: |
+          source "$HOME/.cargo/env"
+          #!/bin/bash
+          set -euo pipefail
+          export PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/share/pkgconfig:$MINGW_PREFIX/lib/pkgconfig/:/usr/x86_64-w64-mingw32/lib/pkgconfig/
+          cargo build --target=x86_64-pc-windows-gnu --locked
+          mkdir -p package
+          cp target/x86_64-pc-windows-gnu/debug/czkawka_gui.exe package/
+          cp target/x86_64-pc-windows-gnu/debug/czkawka_cli.exe package/
 
       - name: Package
         run: |
@@ -145,7 +158,8 @@ jobs:
           rustup default 1.85.0
           rustup target add x86_64-pc-windows-gnu
 
-      - name: Cross compile for Windows
+      - name: Cross compile for Windows - Release
+        if: ${{ github.ref == 'refs/heads/master' }}
         run: |
           source "$HOME/.cargo/env"
           #!/bin/bash
@@ -155,6 +169,18 @@ jobs:
           mkdir -p package
           cp target/x86_64-pc-windows-gnu/release/czkawka_gui.exe package/
           cp target/x86_64-pc-windows-gnu/release/czkawka_cli.exe package/
+
+      - name: Cross compile for Windows - Debug
+        if: ${{ github.ref != 'refs/heads/master' }}
+        run: |
+          source "$HOME/.cargo/env"
+          #!/bin/bash
+          set -euo pipefail
+          export PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/share/pkgconfig:$MINGW_PREFIX/lib/pkgconfig/:/usr/x86_64-w64-mingw32/lib/pkgconfig/
+          cargo build --target=x86_64-pc-windows-gnu --locked
+          mkdir -p package
+          cp target/x86_64-pc-windows-gnu/debug/czkawka_gui.exe package/
+          cp target/x86_64-pc-windows-gnu/debug/czkawka_cli.exe package/
 
       - name: Package
         run: |

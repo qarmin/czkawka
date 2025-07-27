@@ -218,6 +218,8 @@ jobs:
 
       - name: Test
         run: |
+          sed -i 's/^\(\[profile\.dev\.package.*\)/#\1/' Cargo.toml
+          sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
           xvfb-run cargo test
 
   linux-regression-tests-on-minimal-rust-version:
@@ -232,7 +234,10 @@ jobs:
         run: rustup default 1.85.0
 
       - name: Build test version
-        run: cargo build --profile test --bin czkawka_cli
+        run: |
+          sed -i 's/^\(\[profile\.dev\.package.*\)/#\1/' Cargo.toml
+          sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
+          cargo build --profile test --bin czkawka_cli
 
       - name: Linux Regression Test
         run: |

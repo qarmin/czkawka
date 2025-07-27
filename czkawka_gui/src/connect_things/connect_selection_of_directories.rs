@@ -201,9 +201,10 @@ fn add_manually_directories(window_main: &Window, tree_view: &TreeView, excluded
     dialog.connect_response(move |dialog, response_type| {
         if response_type == ResponseType::Ok {
             for text in entry.text().split(';') {
-                let mut text = text.trim().to_string();
+                let text = text.trim().to_string();
                 #[cfg(target_family = "windows")]
-                let mut text = normalize_windows_path(text).to_string_lossy().to_string();
+                let text = normalize_windows_path(text).to_string_lossy().to_string();
+                let mut text = text;
 
                 remove_ending_slashes(&mut text);
 

@@ -98,7 +98,7 @@ cargo run --release --bin czkawka_gui --features "heif,libraw,libavif"
 
 ```shell
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-brew install rustup gtk4 adwaita-icon-theme ffmpeg librsvg libheif libraw pkg-config
+brew install rustup gtk4 adwaita-icon-theme ffmpeg librsvg libheif libraw dav1d pkg-config
 rustup-init
 cargo run --release --bin czkawka_gui
 # Or with support for heif, libraw, libavif
