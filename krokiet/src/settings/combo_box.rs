@@ -9,7 +9,7 @@ use image_hasher::HashAlg;
 use log::warn;
 use once_cell::sync::Lazy;
 use slint::SharedString;
-
+use vid_dup_finder_lib::Cropdetect;
 use crate::connect_translation::LANGUAGE_LIST;
 
 #[derive(Debug, Clone)]
@@ -31,6 +31,7 @@ pub struct StringComboBoxItems {
     pub biggest_files_method: Vec<StringComboBoxItem<SearchMode>>,
     pub audio_check_type: Vec<StringComboBoxItem<CheckingMethod>>,
     pub duplicates_check_method: Vec<StringComboBoxItem<CheckingMethod>>,
+    pub videos_crop_detect: Vec<StringComboBoxItem<Cropdetect>>,
 }
 
 pub static STRING_COMBO_BOX_ITEMS: Lazy<Arc<Mutex<StringComboBoxItems>>> = Lazy::new(|| {
@@ -121,6 +122,12 @@ impl StringComboBoxItems {
             ("size_and_name", "Size and Name", CheckingMethod::SizeName),
         ]);
 
+        let videos_crop_detect = Self::convert_to_combobox_items(&[
+            ("letterbox", "LetterBox", Cropdetect::Letterbox),
+            ("motion", "Motion", Cropdetect::Motion),
+            ("none", "None", Cropdetect::None),
+        ]);
+
         Self {
             languages,
             hash_size,
@@ -130,6 +137,7 @@ impl StringComboBoxItems {
             biggest_files_method,
             audio_check_type,
             duplicates_check_method,
+            videos_crop_detect
         }
     }
 

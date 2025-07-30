@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use czkawka_core::common_items::{DEFAULT_EXCLUDED_DIRECTORIES, DEFAULT_EXCLUDED_ITEMS};
 use home::home_dir;
 use serde::{Deserialize, Serialize};
-
+use czkawka_core::tools::similar_videos::{crop_detect_to_str, DEFAULT_CROP_DETECT, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION};
 use crate::connect_translation::{LANGUAGE_LIST, find_the_closest_language_idx_to_system};
 
 pub const DEFAULT_MINIMUM_SIZE_KB: i32 = 16;
@@ -134,6 +134,12 @@ pub struct SettingsCustom {
     pub broken_files_sub_archive: bool,
     #[serde(default)]
     pub broken_files_sub_image: bool,
+    #[serde(default = "default_similar_videos_skip_forward_amount")]
+    pub similar_videos_skip_forward_amount: u32,
+    #[serde(default = "default_similar_videos_vid_hash_duration")]
+    pub similar_videos_vid_hash_duration: u32,
+    #[serde(default = "default_similar_videos_crop_detect")]
+    pub similar_videos_crop_detect: String,
     #[serde(default)]
     pub column_sizes: BTreeMap<String, Vec<f32>>,
 }
@@ -194,6 +200,16 @@ fn default_excluded_directories() -> Vec<PathBuf> {
     excluded_directories.sort();
     excluded_directories
 }
+fn default_similar_videos_skip_forward_amount() -> u32 {
+    DEFAULT_SKIP_FORWARD_AMOUNT
+}
+fn default_similar_videos_vid_hash_duration() -> u32 {
+    DEFAULT_VID_HASH_DURATION
+}
+fn default_similar_videos_crop_detect() -> String {
+    crop_detect_to_str(DEFAULT_CROP_DETECT)
+}
+
 fn default_duplicates_check_method() -> String {
     "hash".to_string()
 }

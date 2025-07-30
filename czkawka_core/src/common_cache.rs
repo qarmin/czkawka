@@ -13,7 +13,7 @@ use image_hasher::HashAlg;
 use log::{debug, error};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use serde::{Deserialize, Serialize};
-
+use vid_dup_finder_lib::Cropdetect;
 use crate::common;
 use crate::common_messages::Messages;
 use crate::common_traits::ResultEntry;
@@ -42,8 +42,15 @@ pub fn get_similar_images_cache_file(hash_size: &u8, hash_alg: &HashAlg, image_f
     )
 }
 
-pub fn get_similar_videos_cache_file() -> String {
-    format!("cache_similar_videos_{CACHE_VIDEO_VERSION}.bin")
+pub fn get_similar_videos_cache_file(    skip_forward_amount: u32,
+                                         duration: u32,
+                                         crop_detect: Cropdetect,) -> String {
+    let crop_detect_str = match crop_detect {
+        Cropdetect::None => "none",
+        Cropdetect::Letterbox => "letterbox",
+        Cropdetect::Motion => "motion",
+    };
+    format!("cache_similar_videos_{CACHE_VIDEO_VERSION}__skip_{skip_forward_amount}__dur_{duration}__cd_{crop_detect_str}.bin")
 }
 pub fn get_similar_music_cache_file(checking_tags: bool) -> String {
     if checking_tags {

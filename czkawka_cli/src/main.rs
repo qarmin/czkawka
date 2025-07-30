@@ -25,7 +25,7 @@ use czkawka_core::tools::empty_folder::EmptyFolder;
 use czkawka_core::tools::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::tools::same_music::{SameMusic, SameMusicParameters};
 use czkawka_core::tools::similar_images::{SimilarImages, SimilarImagesParameters, return_similarity_from_similarity_preset};
-use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters};
+use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters, DEFAULT_CROP_DETECT, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION};
 use czkawka_core::tools::temporary::Temporary;
 use log::{debug, error, info};
 
@@ -332,7 +332,10 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>
         ignore_same_size,
     } = similar_videos;
 
-    let params = SimilarVideosParameters::new(tolerance, ignore_same_size.ignore_same_size, !allow_hard_links.allow_hard_links);
+    let params = SimilarVideosParameters::new(tolerance, ignore_same_size.ignore_same_size, !allow_hard_links.allow_hard_links,
+                                              DEFAULT_SKIP_FORWARD_AMOUNT,
+                                              DEFAULT_VID_HASH_DURATION,
+                                              DEFAULT_CROP_DETECT);
     let mut item = SimilarVideos::new(params);
 
     set_common_settings(&mut item, &common_cli_items, Some(reference_directories.reference_directories.as_ref()));

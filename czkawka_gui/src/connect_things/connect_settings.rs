@@ -13,7 +13,7 @@ use gtk4::{Label, ResponseType, Window};
 use image::imageops::FilterType;
 use image_hasher::HashAlg;
 use log::error;
-
+use czkawka_core::tools::similar_videos::{DEFAULT_CROP_DETECT, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION};
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::get_dialog_box_child;
@@ -213,7 +213,7 @@ pub(crate) fn connect_settings(gui_data: &GuiData) {
 
                 dialog.connect_response(move |dialog, response_type| {
                     if response_type == ResponseType::Ok {
-                        let file_name = get_similar_videos_cache_file();
+                        let file_name = get_similar_videos_cache_file(DEFAULT_SKIP_FORWARD_AMOUNT,DEFAULT_VID_HASH_DURATION,  DEFAULT_CROP_DETECT);
                         let (mut messages, loaded_items) =
                             load_cache_from_file_generalized_by_path::<czkawka_core::tools::similar_videos::VideosEntry>(&file_name, true, &Default::default());
 

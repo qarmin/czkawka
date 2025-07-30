@@ -4058,6 +4058,7 @@ dependencies = [
  "slint",
  "slint-build",
  "trash",
+ "vid_dup_finder_lib",
 ]
 
 [[package]]

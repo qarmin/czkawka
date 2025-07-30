@@ -9,7 +9,8 @@ use czkawka_core::common::{get_all_available_threads, get_config_cache_path, set
 use log::{debug, error, info};
 use serde::{Deserialize, Serialize};
 use slint::{ComponentHandle, Model, ModelRc, PhysicalSize, VecModel, WindowSize};
-
+use czkawka_core::common_dir_traversal::CheckingMethod::AudioContent;
+use czkawka_core::tools::similar_videos::{crop_detect_from_str, ALLOWED_SKIP_FORWARD_AMOUNT, ALLOWED_VID_HASH_DURATION};
 use crate::cli::CliResult;
 use crate::common::{create_excluded_directories_model_from_pathbuf, create_included_directories_model_from_pathbuf, create_vec_model_from_vec_string};
 use crate::connect_translation::change_language;
@@ -314,6 +315,12 @@ pub(crate) fn set_combobox_custom_settings_items(settings: &Settings, custom_set
     // settings.set_duplicates_sub_available_hash_type_model(display_names);
     settings.set_similar_music_sub_audio_check_type_index(idx as i32);
     settings.set_similar_music_sub_audio_check_type_value(display_names[idx].clone());
+
+    // Crop detect
+    let (idx, display_names) = StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.similar_videos_crop_detect, &collected_items.videos_crop_detect);
+    // settings.set_similar_videos_crop_detect_model(display_names);
+    settings.set_similar_videos_crop_detect_index(idx as i32);
+    settings.set_similar_videos_crop_detect_value(display_names[idx].clone());
 }
 
 pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom, cli_args: Option<CliResult>) {
@@ -375,6 +382,8 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_similar_videos_sub_ignore_same_size(custom_settings.similar_videos_sub_ignore_same_size);
     settings.set_similar_videos_sub_current_similarity(custom_settings.similar_videos_sub_similarity as f32);
     settings.set_similar_videos_sub_max_similarity(20.0);
+    settings.set_similar_videos_skip_forward_amount(custom_settings.similar_videos_skip_forward_amount.clamp(*ALLOWED_SKIP_FORWARD_AMOUNT.start(), *ALLOWED_SKIP_FORWARD_AMOUNT.end()) as i32);
+    settings.set_similar_videos_vid_hash_duration(custom_settings.similar_videos_vid_hash_duration.clamp(*ALLOWED_VID_HASH_DURATION.start(), *ALLOWED_VID_HASH_DURATION.end()) as i32);
 
     settings.set_similar_music_sub_approximate_comparison(custom_settings.similar_music_sub_approximate_comparison);
     settings.set_similar_music_sub_title(custom_settings.similar_music_sub_title);
@@ -494,6 +503,10 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
 
     let similar_videos_sub_ignore_same_size = settings.get_similar_videos_sub_ignore_same_size();
     let similar_videos_sub_similarity = settings.get_similar_videos_sub_current_similarity().round() as i32;
+    let similar_videos_crop_detect_idx = settings.get_similar_videos_crop_detect_index();
+    let similar_videos_crop_detect = StringComboBoxItems::get_config_name_from_idx(similar_videos_crop_detect_idx as usize, &collected_items.videos_crop_detect);
+    let similar_videos_skip_forward_amount = settings.get_similar_videos_skip_forward_amount() as u32;
+    let similar_videos_vid_hash_duration = settings.get_similar_videos_vid_hash_duration() as u32;
 
     let similar_music_sub_audio_check_type_idx = settings.get_similar_music_sub_audio_check_type_index();
     let similar_music_sub_audio_check_type = StringComboBoxItems::get_config_name_from_idx(similar_music_sub_audio_check_type_idx as usize, &collected_items.audio_check_type);
@@ -581,6 +594,9 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         broken_files_sub_archive,
         broken_files_sub_image,
         column_sizes,
+        similar_videos_vid_hash_duration,
+        similar_videos_crop_detect,
+        similar_videos_skip_forward_amount,
     }
 }
 

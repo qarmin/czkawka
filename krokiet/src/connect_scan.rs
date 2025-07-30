@@ -20,7 +20,7 @@ use czkawka_core::tools::invalid_symlinks::{InvalidSymlinks, SymlinksFileEntry};
 use czkawka_core::tools::same_music::{MusicEntry, MusicSimilarity, SameMusic, SameMusicParameters};
 use czkawka_core::tools::similar_images;
 use czkawka_core::tools::similar_images::{ImagesEntry, SimilarImages, SimilarImagesParameters};
-use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters, VideosEntry};
+use czkawka_core::tools::similar_videos::{crop_detect_from_str, SimilarVideos, SimilarVideosParameters, VideosEntry, DEFAULT_CROP_DETECT, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION};
 use czkawka_core::tools::temporary::{Temporary, TemporaryFileEntry};
 use humansize::{BINARY, format_size};
 use rayon::prelude::*;
@@ -520,6 +520,9 @@ fn scan_similar_videos(
                 custom_settings.similar_videos_sub_similarity,
                 custom_settings.similar_videos_sub_ignore_same_size,
                 custom_settings.similar_videos_hide_hard_links,
+                custom_settings.similar_videos_skip_forward_amount,
+                custom_settings.similar_videos_vid_hash_duration,
+                crop_detect_from_str(&custom_settings.similar_videos_crop_detect),
             );
             let mut item = SimilarVideos::new(params);
             set_common_settings(&mut item, &custom_settings, &stop_flag);

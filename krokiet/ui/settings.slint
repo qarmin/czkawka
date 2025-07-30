@@ -78,6 +78,11 @@ export global Settings {
     in-out property <bool> similar_videos_sub_ignore_same_size;
     in-out property <float> similar_videos_sub_max_similarity: 20;
     in-out property <float> similar_videos_sub_current_similarity: 15;
+    in-out property <int> similar_videos_skip_forward_amount: 15;
+    in-out property <int> similar_videos_vid_hash_duration: 10;
+    in-out property <[string]> similar_videos_crop_detect: ["LetterBox", "Motion", "None"];
+    in-out property <string> similar_videos_crop_detect_value: "letterbox";
+    in-out property <int> similar_videos_crop_detect_index: 0;
 
     // Same Music
     in-out property <[string]> similar_music_sub_audio_check_type: ["Tags", "Fingerprint"];
