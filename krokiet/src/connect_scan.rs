@@ -28,7 +28,9 @@ use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
 
 use crate::common::{check_if_all_included_dirs_are_referenced, check_if_there_are_any_included_folders, split_u64_into_i32s};
 use crate::connect_row_selection::reset_selection;
-use crate::settings::{SettingsCustom, StringComboBoxItems, collect_settings};
+use crate::settings::collect_settings;
+use crate::settings::combo_box::StringComboBoxItems;
+use crate::settings::model::SettingsCustom;
 use crate::shared_models::SharedModels;
 use crate::{CurrentTab, GuiState, MainListModel, MainWindow, ProgressToSend, flk};
 
