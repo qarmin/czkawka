@@ -10,6 +10,7 @@ use log::warn;
 use once_cell::sync::Lazy;
 use slint::SharedString;
 use vid_dup_finder_lib::Cropdetect;
+
 use crate::connect_translation::LANGUAGE_LIST;
 
 #[derive(Debug, Clone)]
@@ -137,7 +138,7 @@ impl StringComboBoxItems {
             biggest_files_method,
             audio_check_type,
             duplicates_check_method,
-            videos_crop_detect
+            videos_crop_detect,
         }
     }
 

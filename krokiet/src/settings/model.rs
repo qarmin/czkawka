@@ -3,9 +3,10 @@ use std::env;
 use std::path::PathBuf;
 
 use czkawka_core::common_items::{DEFAULT_EXCLUDED_DIRECTORIES, DEFAULT_EXCLUDED_ITEMS};
+use czkawka_core::tools::similar_videos::{DEFAULT_CROP_DETECT, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION, crop_detect_to_str};
 use home::home_dir;
 use serde::{Deserialize, Serialize};
-use czkawka_core::tools::similar_videos::{crop_detect_to_str, DEFAULT_CROP_DETECT, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION};
+
 use crate::connect_translation::{LANGUAGE_LIST, find_the_closest_language_idx_to_system};
 
 pub const DEFAULT_MINIMUM_SIZE_KB: i32 = 16;

@@ -6,11 +6,11 @@ use std::collections::BTreeMap;
 use std::path::PathBuf;
 
 use czkawka_core::common::{get_all_available_threads, get_config_cache_path, set_number_of_threads};
+use czkawka_core::tools::similar_videos::{ALLOWED_SKIP_FORWARD_AMOUNT, ALLOWED_VID_HASH_DURATION};
 use log::{debug, error, info};
 use serde::{Deserialize, Serialize};
 use slint::{ComponentHandle, Model, ModelRc, PhysicalSize, VecModel, WindowSize};
-use czkawka_core::common_dir_traversal::CheckingMethod::AudioContent;
-use czkawka_core::tools::similar_videos::{crop_detect_from_str, ALLOWED_SKIP_FORWARD_AMOUNT, ALLOWED_VID_HASH_DURATION};
+
 use crate::cli::CliResult;
 use crate::common::{create_excluded_directories_model_from_pathbuf, create_included_directories_model_from_pathbuf, create_vec_model_from_vec_string};
 use crate::connect_translation::change_language;
@@ -382,8 +382,20 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_similar_videos_sub_ignore_same_size(custom_settings.similar_videos_sub_ignore_same_size);
     settings.set_similar_videos_sub_current_similarity(custom_settings.similar_videos_sub_similarity as f32);
     settings.set_similar_videos_sub_max_similarity(20.0);
-    settings.set_similar_videos_skip_forward_amount(custom_settings.similar_videos_skip_forward_amount.clamp(*ALLOWED_SKIP_FORWARD_AMOUNT.start(), *ALLOWED_SKIP_FORWARD_AMOUNT.end()) as i32);
-    settings.set_similar_videos_vid_hash_duration(custom_settings.similar_videos_vid_hash_duration.clamp(*ALLOWED_VID_HASH_DURATION.start(), *ALLOWED_VID_HASH_DURATION.end()) as i32);
+    settings.set_similar_videos_skip_forward_amount(
+        custom_settings
+            .similar_videos_skip_forward_amount
+            .clamp(*ALLOWED_SKIP_FORWARD_AMOUNT.start(), *ALLOWED_SKIP_FORWARD_AMOUNT.end()) as f32,
+    );
+    settings.set_similar_videos_skip_forward_amount_min(*ALLOWED_SKIP_FORWARD_AMOUNT.start() as f32);
+    settings.set_similar_videos_skip_forward_amount_max(*ALLOWED_SKIP_FORWARD_AMOUNT.end() as f32);
+    settings.set_similar_videos_vid_hash_duration(
+        custom_settings
+            .similar_videos_vid_hash_duration
+            .clamp(*ALLOWED_VID_HASH_DURATION.start(), *ALLOWED_VID_HASH_DURATION.end()) as f32,
+    );
+    settings.set_similar_videos_vid_hash_duration_min(*ALLOWED_VID_HASH_DURATION.start() as f32);
+    settings.set_similar_videos_vid_hash_duration_max(*ALLOWED_VID_HASH_DURATION.end() as f32);
 
     settings.set_similar_music_sub_approximate_comparison(custom_settings.similar_music_sub_approximate_comparison);
     settings.set_similar_music_sub_title(custom_settings.similar_music_sub_title);

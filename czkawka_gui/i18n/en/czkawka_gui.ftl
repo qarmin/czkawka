@@ -21,7 +21,7 @@ music_checking_by_content = Content
 same_music_seconds_label = Minimal fragment second duration
 same_music_similarity_label = Maximum difference
 
-music_compare_only_in_title_group = Compare only in title
+music_compare_only_in_title_group = Compare within groups of similar titles
 music_compare_only_in_title_group_tooltip =
         When enabled, files are grouped by title and then compared to each other.
 

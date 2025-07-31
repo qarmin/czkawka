@@ -1,7 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::io::Write;
 use std::mem;
-use std::ops::{RangeInclusive};
+use std::ops::RangeInclusive;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -92,9 +92,8 @@ pub fn crop_detect_to_str(crop_detect: Cropdetect) -> String {
 }
 
 impl SimilarVideosParameters {
-    pub fn new(tolerance: i32, exclude_videos_with_same_size: bool, ignore_hard_links: bool,
-                skip_forward_amount: u32, duration: u32, crop_detect: Cropdetect
-    ) -> Self {
+    pub fn new(tolerance: i32, exclude_videos_with_same_size: bool, ignore_hard_links: bool, skip_forward_amount: u32, duration: u32, crop_detect: Cropdetect) -> Self {
+        dbg!(&exclude_videos_with_same_size);
         assert!((0..=MAX_TOLERANCE).contains(&tolerance));
         assert!(ALLOWED_SKIP_FORWARD_AMOUNT.contains(&skip_forward_amount));
         assert!(ALLOWED_VID_HASH_DURATION.contains(&duration));
@@ -213,8 +212,11 @@ impl SimilarVideos {
         let mut non_cached_files_to_check: BTreeMap<String, VideosEntry> = Default::default();
 
         if self.common_data.use_cache {
-            let (messages, loaded_items) =
-                load_cache_from_file_generalized_by_path::<VideosEntry>(&get_similar_videos_cache_file(self.params.skip_forward_amount, self.params.duration, self.params.crop_detect), self.get_delete_outdated_cache(), &self.videos_to_check);
+            let (messages, loaded_items) = load_cache_from_file_generalized_by_path::<VideosEntry>(
+                &get_similar_videos_cache_file(self.params.skip_forward_amount, self.params.duration, self.params.crop_detect),
+                self.get_delete_outdated_cache(),
+                &self.videos_to_check,
+            );
             self.get_text_messages_mut().extend_with_another_messages(messages);
             loaded_hash_map = loaded_items.unwrap_or_default();
 
@@ -341,7 +343,12 @@ impl SimilarVideos {
                 all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
             }
 
-            let messages = save_cache_to_file_generalized(&get_similar_videos_cache_file(self.params.skip_forward_amount, self.params.duration, self.params.crop_detect), &all_results, self.common_data.save_also_as_json, 0);
+            let messages = save_cache_to_file_generalized(
+                &get_similar_videos_cache_file(self.params.skip_forward_amount, self.params.duration, self.params.crop_detect),
+                &all_results,
+                self.common_data.save_also_as_json,
+                0,
+            );
             self.get_text_messages_mut().extend_with_another_messages(messages);
         }
     }
