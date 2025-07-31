@@ -93,7 +93,6 @@ pub fn crop_detect_to_str(crop_detect: Cropdetect) -> String {
 
 impl SimilarVideosParameters {
     pub fn new(tolerance: i32, exclude_videos_with_same_size: bool, ignore_hard_links: bool, skip_forward_amount: u32, duration: u32, crop_detect: Cropdetect) -> Self {
-        dbg!(&exclude_videos_with_same_size);
         assert!((0..=MAX_TOLERANCE).contains(&tolerance));
         assert!(ALLOWED_SKIP_FORWARD_AMOUNT.contains(&skip_forward_amount));
         assert!(ALLOWED_VID_HASH_DURATION.contains(&duration));
