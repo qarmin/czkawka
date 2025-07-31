@@ -222,5 +222,5 @@ delete_confirmation = Are you sure you want to delete the selected items?
 stopping_scan = Stopping scan, please wait...
 searching = Searching...
 subsettings_videos_crop_detect = Crop detect method
-subsettings_videos_skip_forward_amount = Skip forward amount
+subsettings_videos_skip_forward_amount = Skip duration [s]
 subsettings_videos_vid_hash_duration = Video hash duration

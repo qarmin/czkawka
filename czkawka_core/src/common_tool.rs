@@ -261,7 +261,6 @@ pub trait CommonData {
         progress_sender: Option<&Sender<ProgressData>>,
         delete_item_type: DeleteItemType<T>,
     ) -> WorkContinueStatus {
-        info!("Simple");
         let delete_results = self.delete_elements(stop_flag, progress_sender, delete_item_type);
 
         if stop_flag.load(std::sync::atomic::Ordering::Relaxed) {
@@ -287,7 +286,6 @@ pub trait CommonData {
             input.sort_unstable_by_key(if sorting_by_size { ResultEntry::get_size } else { ResultEntry::get_modified_date });
             input
         };
-        info!("Advanced");
 
         let delete_results = if delete_method == DeleteMethod::HardLink {
             let res = files_to_process
