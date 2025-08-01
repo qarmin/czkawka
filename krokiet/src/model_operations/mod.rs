@@ -1,20 +1,39 @@
 pub mod model_processor;
 
-use slint::Model;
+#[allow(dead_code)]
+use slint::{Model, ModelRc};
 
 use crate::MainListModel;
 use crate::simpler_model::SimplerMainListModel;
 
 pub type ProcessingResult = Vec<(usize, SimplerMainListModel, Option<Result<(), String>>)>;
 
-#[allow(dead_code)]
-pub(crate) fn debug_print_main_list_model_items(list_model: &MainListModel, idx: usize) -> ! {
-    let val_int = list_model.val_int.iter().collect::<Vec<_>>();
-    let val_str = list_model.val_str.iter().collect::<Vec<_>>();
-    panic!(
-        "Failed to get idx {idx} element, with items: checked: {}, filled_header_row: {}, header_row: {}, selected_row: {}, val_int: {val_int:?}, val_str: {val_str:?}",
-        list_model.checked, list_model.filled_header_row, list_model.header_row, list_model.selected_row
-    );
+impl MainListModel {
+    #[allow(clippy::print_stdout)]
+    pub(crate) fn debug_print(&self) {
+        let val_int: Vec<i32> = self.val_int.iter().collect();
+        let val_str: Vec<String> = self.val_str.iter().map(|e| e.to_string()).collect();
+        println!(
+            "MainListModel: checked: {}, filled_header_row: {}, header_row: {}, selected_row: {}, val_int: {:?}, val_str: {:?}",
+            self.checked, self.filled_header_row, self.header_row, self.selected_row, val_int, val_str
+        );
+    }
+}
+
+pub trait DebugPrintModelRc {
+    #[allow(dead_code)]
+    fn debug_print_model_rc(&self);
+}
+impl DebugPrintModelRc for ModelRc<MainListModel> {
+    #[allow(clippy::print_stdout)]
+    fn debug_print_model_rc(&self) {
+        println!("=====================START DEBUG PRINT RC MODELS=====================");
+        println!("Model with {} items", self.iter().count());
+        for item in self.iter() {
+            item.debug_print();
+        }
+        println!("=====================END DEBUG PRINT RC MODELS=====================");
+    }
 }
 
 // TODO - tests

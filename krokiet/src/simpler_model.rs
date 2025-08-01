@@ -17,6 +17,13 @@ impl SimplerMainListModel {
     pub(crate) fn get_size(&self, size_idx: usize) -> u64 {
         connect_i32_into_u64(self.val_int[size_idx], self.val_int[size_idx + 1])
     }
+    #[allow(clippy::print_stdout)]
+    pub(crate) fn debug_print(&self) {
+        println!(
+            "SimplerMainListModel: checked: {}, filled_header_row: {}, header_row: {}, selected_row: {}, val_int: {:?}, val_str: {:?}",
+            self.checked, self.filled_header_row, self.header_row, self.selected_row, self.val_int, self.val_str
+        );
+    }
 }
 
 impl From<&MainListModel> for SimplerMainListModel {
@@ -61,5 +68,21 @@ pub trait ToSlintModel {
 impl ToSlintModel for Vec<SimplerMainListModel> {
     fn to_vec_model(self) -> Vec<MainListModel> {
         self.into_iter().map(|model| model.into()).collect()
+    }
+}
+
+pub trait DebugPrintSimplerModel {
+    #[allow(dead_code)]
+    fn debug_print_simpler_models(&self);
+}
+impl DebugPrintSimplerModel for Vec<SimplerMainListModel> {
+    #[allow(clippy::print_stdout)]
+    fn debug_print_simpler_models(&self) {
+        println!("=====================START DEBUG PRINT SIMPLER MODELS=====================");
+        println!("Simpler Model with {} items", self.len());
+        for item in self {
+            item.debug_print();
+        }
+        println!("=====================END DEBUG PRINT SIMPLER MODELS=====================");
     }
 }

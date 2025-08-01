@@ -16,6 +16,7 @@
 - Added protection against deleting a folder that is no longer empty since the scan - [#1566](https://github.com/qarmin/czkawka/pull/1566)
 - Replaced `pdf-rs` with the more popular `lopdf` library, which also has fewer dependencies - [#1566](https://github.com/qarmin/czkawka/pull/1566)
 - Replaced `imagepipe` + `rawloader` with `rawler` which is still supported and faster to decode raw files - [#1572](https://github.com/qarmin/czkawka/pull/1572)
+- Added more configuration options in video finder - [#1578](https://github.com/qarmin/czkawka/pull/1578)
 
 ### CLI
 - Improved logic for deleting files and added progress bar for this operation - [#1571](https://github.com/qarmin/czkawka/pull/1571)

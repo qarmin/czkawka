@@ -453,7 +453,7 @@ fn scan_similar_images(
             };
 
             for (_first_entry, vec_fe) in &mut vector {
-                vec_fe.par_sort_unstable_by_key(|e| e.similarity);
+                vec_fe.par_sort_unstable_by_key(|e| (e.similarity, u64::MAX - e.size));
             }
             vector.sort_by_key(|(_header, vc)| u64::MAX - vc.iter().map(|e| e.size).sum::<u64>()); // Also sorts by size, to show the biggest groups first
 
