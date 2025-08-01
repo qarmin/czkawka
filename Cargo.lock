@@ -1437,6 +1437,7 @@ dependencies = [
  "image_hasher",
  "indicatif",
  "log",
+ "vid_dup_finder_lib",
 ]
 
 [[package]]
