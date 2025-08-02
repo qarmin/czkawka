@@ -40,7 +40,7 @@ Very helpful in this situation will be logs from czkawka run with RUST_LOG envir
 <!-- Please do not report feature request unique for Gtk Czkawka gui, because it is in maintenance mode. -->
 
 - Czkawka/Krokiet version: <!--  e.g. 9.0.0 cli/gui -->
-- OS version: <!--  e.g Ubuntu 22.04, Windows 11, Mac 15.1 ARM -->
+- OS version: <!--  e.g. Ubuntu 22.04, Windows 11, Mac 15.1 ARM -->
 - Installation method: <!-- e.g. github binaries, flatpak, msys2 -->
 
 <!-- If you use flatpak, please include the result of `flatpak info com.github.qarmin.czkawka`. -->

@@ -8,4 +8,4 @@ czkawka_core = { path = "../../czkawka_core", default-features = false }
 walkdir = "2.5.0"
 humansize = "2.1"
 rayon = "1.10.0"
-strum = { version = "0.26.3", features = ["strum_macros", "derive"] }
+strum = { version = "0.27.2", features = ["strum_macros", "derive"] }
