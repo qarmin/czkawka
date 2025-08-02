@@ -20,7 +20,7 @@ use czkawka_core::tools::invalid_symlinks::{InvalidSymlinks, SymlinksFileEntry};
 use czkawka_core::tools::same_music::{MusicEntry, MusicSimilarity, SameMusic, SameMusicParameters};
 use czkawka_core::tools::similar_images;
 use czkawka_core::tools::similar_images::{ImagesEntry, SimilarImages, SimilarImagesParameters};
-use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters, VideosEntry};
+use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters, VideosEntry, crop_detect_from_str};
 use czkawka_core::tools::temporary::{Temporary, TemporaryFileEntry};
 use humansize::{BINARY, format_size};
 use rayon::prelude::*;
@@ -28,7 +28,9 @@ use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
 
 use crate::common::{check_if_all_included_dirs_are_referenced, check_if_there_are_any_included_folders, split_u64_into_i32s};
 use crate::connect_row_selection::reset_selection;
-use crate::settings::{SettingsCustom, StringComboBoxItems, collect_settings};
+use crate::settings::collect_settings;
+use crate::settings::combo_box::StringComboBoxItems;
+use crate::settings::model::SettingsCustom;
 use crate::shared_models::SharedModels;
 use crate::{CurrentTab, GuiState, MainListModel, MainWindow, ProgressToSend, flk};
 
@@ -451,7 +453,7 @@ fn scan_similar_images(
             };
 
             for (_first_entry, vec_fe) in &mut vector {
-                vec_fe.par_sort_unstable_by_key(|e| e.similarity);
+                vec_fe.par_sort_unstable_by_key(|e| (e.similarity, u64::MAX - e.size));
             }
             vector.sort_by_key(|(_header, vc)| u64::MAX - vc.iter().map(|e| e.size).sum::<u64>()); // Also sorts by size, to show the biggest groups first
 
@@ -518,6 +520,9 @@ fn scan_similar_videos(
                 custom_settings.similar_videos_sub_similarity,
                 custom_settings.similar_videos_sub_ignore_same_size,
                 custom_settings.similar_videos_hide_hard_links,
+                custom_settings.similar_videos_skip_forward_amount,
+                custom_settings.similar_videos_vid_hash_duration,
+                crop_detect_from_str(&custom_settings.similar_videos_crop_detect),
             );
             let mut item = SimilarVideos::new(params);
             set_common_settings(&mut item, &custom_settings, &stop_flag);

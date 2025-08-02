@@ -1437,6 +1437,7 @@ dependencies = [
  "image_hasher",
  "indicatif",
  "log",
+ "vid_dup_finder_lib",
 ]
 
 [[package]]
@@ -4058,6 +4059,7 @@ dependencies = [
  "slint",
  "slint-build",
  "trash",
+ "vid_dup_finder_lib",
 ]
 
 [[package]]

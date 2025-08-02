@@ -7,7 +7,9 @@ use czkawka_core::tools::broken_files::CheckedTypes;
 use czkawka_core::tools::duplicate::HashType;
 use czkawka_core::tools::same_music::MusicSimilarity;
 use czkawka_core::tools::similar_images::SimilarityPreset;
+use czkawka_core::tools::similar_videos::{ALLOWED_SKIP_FORWARD_AMOUNT, ALLOWED_VID_HASH_DURATION, DEFAULT_SKIP_FORWARD_AMOUNT, crop_detect_from_str_opt};
 use image_hasher::{FilterType, HashAlg};
+use vid_dup_finder_lib::Cropdetect;
 
 #[derive(clap::Parser)]
 #[clap(
@@ -426,6 +428,33 @@ pub struct SimilarVideosArgs {
         long_help = "Maximum difference between video frames, bigger value means that videos can looks more and more different (allowed values <0,20>)"
     )]
     pub tolerance: i32,
+    #[clap(
+        short = 'U',
+        long,
+        default_value_t = DEFAULT_SKIP_FORWARD_AMOUNT,
+        value_parser = parse_skip_forward_amount,
+        help = "Skip forward amount in seconds (allowed values: 0-300, default: 15)",
+        long_help = "Amount of seconds to skip forward in video. Allowed values are from 0 to 300. 0 means that no skipping will be done. Default is 15."
+    )]
+    pub skip_forward_amount: u32,
+    #[clap(
+        short = 'B',
+        long,
+        default_value = "letterbox",
+        value_parser = parse_crop_detect,
+        help = "Crop detect method (none, letterbox, motion)",
+        long_help = "Method to crop video frames",
+    )]
+    pub crop_detect: Cropdetect,
+    #[clap(
+        short = 'A',
+        long,
+        default_value = "10",
+        value_parser = parse_scan_duration,
+        help = "Scan duration in seconds",
+        long_help = "Duration of scanning video in seconds.",
+    )]
+    pub scan_duration: u32,
 }
 
 #[derive(Debug, clap::Args)]
@@ -590,6 +619,38 @@ impl JsonPrettyFileToSave {
     }
 }
 
+fn parse_scan_duration(s: &str) -> Result<u32, String> {
+    match s.parse::<u32>() {
+        Ok(scan_duration) => {
+            if ALLOWED_VID_HASH_DURATION.contains(&scan_duration) {
+                Ok(scan_duration)
+            } else {
+                Err(format!("Scan duration must be one of: {ALLOWED_VID_HASH_DURATION:?}"))
+            }
+        }
+        Err(e) => Err(e.to_string()),
+    }
+}
+
+fn parse_crop_detect(src: &str) -> Result<Cropdetect, String> {
+    match crop_detect_from_str_opt(src) {
+        Some(crop_detect) => Ok(crop_detect),
+        None => Err(format!("Crop detect \"{src}\" is not valid")),
+    }
+}
+
+fn parse_skip_forward_amount(src: &str) -> Result<u32, String> {
+    match src.parse::<u32>() {
+        Ok(skip_forward_amount) => {
+            if !ALLOWED_SKIP_FORWARD_AMOUNT.contains(&skip_forward_amount) {
+                Err(format!("Skip forward amount must be one of: {ALLOWED_SKIP_FORWARD_AMOUNT:?}"))
+            } else {
+                Ok(skip_forward_amount)
+            }
+        }
+        Err(e) => Err(e.to_string()),
+    }
+}
 fn parse_hash_type(src: &str) -> Result<HashType, &'static str> {
     match src.to_ascii_lowercase().as_str() {
         "blake3" => Ok(HashType::Blake3),

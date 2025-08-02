@@ -17,7 +17,7 @@ use czkawka_core::tools::empty_folder::EmptyFolder;
 use czkawka_core::tools::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::tools::same_music::{MusicSimilarity, SameMusic, SameMusicParameters};
 use czkawka_core::tools::similar_images::{SimilarImages, SimilarImagesParameters};
-use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters};
+use czkawka_core::tools::similar_videos::{DEFAULT_CROP_DETECT, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION, SimilarVideos, SimilarVideosParameters};
 use czkawka_core::tools::temporary::Temporary;
 use fun_time::fun_time;
 use gtk4::Grid;
@@ -616,7 +616,14 @@ fn similar_video_search(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let params = SimilarVideosParameters::new(tolerance, ignore_same_size, loaded_commons.hide_hard_links);
+            let params = SimilarVideosParameters::new(
+                tolerance,
+                ignore_same_size,
+                loaded_commons.hide_hard_links,
+                DEFAULT_SKIP_FORWARD_AMOUNT,
+                DEFAULT_VID_HASH_DURATION,
+                DEFAULT_CROP_DETECT,
+            );
             let mut item = SimilarVideos::new(params);
 
             set_common_settings(&mut item, &loaded_commons);

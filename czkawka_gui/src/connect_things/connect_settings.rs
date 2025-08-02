@@ -8,6 +8,7 @@ use czkawka_core::common_cache::{
 };
 use czkawka_core::common_messages::Messages;
 use czkawka_core::tools::duplicate::{DuplicateEntry, HashType};
+use czkawka_core::tools::similar_videos::{DEFAULT_CROP_DETECT, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION};
 use gtk4::prelude::*;
 use gtk4::{Label, ResponseType, Window};
 use image::imageops::FilterType;
@@ -213,7 +214,7 @@ pub(crate) fn connect_settings(gui_data: &GuiData) {
 
                 dialog.connect_response(move |dialog, response_type| {
                     if response_type == ResponseType::Ok {
-                        let file_name = get_similar_videos_cache_file();
+                        let file_name = get_similar_videos_cache_file(DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION, DEFAULT_CROP_DETECT);
                         let (mut messages, loaded_items) =
                             load_cache_from_file_generalized_by_path::<czkawka_core::tools::similar_videos::VideosEntry>(&file_name, true, &Default::default());
 

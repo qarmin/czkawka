@@ -47,6 +47,10 @@ pub struct CliOutput {
 
 #[allow(clippy::print_stdout)]
 fn main() {
+    if cfg!(debug_assertions) {
+        use clap::CommandFactory;
+        Args::command().debug_assert();
+    }
     let command = Args::parse().command;
 
     let (infos, warnings) = set_config_cache_path("Czkawka", "Czkawka");
@@ -330,9 +334,19 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>
         dry_run,
         allow_hard_links,
         ignore_same_size,
+        skip_forward_amount,
+        crop_detect,
+        scan_duration,
     } = similar_videos;
 
-    let params = SimilarVideosParameters::new(tolerance, ignore_same_size.ignore_same_size, !allow_hard_links.allow_hard_links);
+    let params = SimilarVideosParameters::new(
+        tolerance,
+        ignore_same_size.ignore_same_size,
+        !allow_hard_links.allow_hard_links,
+        skip_forward_amount,
+        scan_duration,
+        crop_detect,
+    );
     let mut item = SimilarVideos::new(params);
 
     set_common_settings(&mut item, &common_cli_items, Some(reference_directories.reference_directories.as_ref()));

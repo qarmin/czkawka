@@ -1,330 +1,25 @@
+pub(crate) mod combo_box;
+pub(crate) mod model;
+
 use std::cmp::{max, min};
 use std::collections::BTreeMap;
-use std::env;
-use std::fmt::Debug;
 use std::path::PathBuf;
-use std::sync::{Arc, Mutex, MutexGuard};
 
 use czkawka_core::common::{get_all_available_threads, get_config_cache_path, set_number_of_threads};
-use czkawka_core::common_dir_traversal::CheckingMethod;
-use czkawka_core::common_items::{DEFAULT_EXCLUDED_DIRECTORIES, DEFAULT_EXCLUDED_ITEMS};
-use czkawka_core::tools::big_file::SearchMode;
-use czkawka_core::tools::duplicate::HashType;
-use home::home_dir;
-use image_hasher::{FilterType, HashAlg};
-use log::{debug, error, info, warn};
-use once_cell::sync::Lazy;
+use czkawka_core::tools::similar_videos::{ALLOWED_SKIP_FORWARD_AMOUNT, ALLOWED_VID_HASH_DURATION};
+use log::{debug, error, info};
 use serde::{Deserialize, Serialize};
-use slint::{ComponentHandle, Model, ModelRc, PhysicalSize, SharedString, VecModel, WindowSize};
+use slint::{ComponentHandle, Model, ModelRc, PhysicalSize, VecModel, WindowSize};
 
 use crate::cli::CliResult;
 use crate::common::{create_excluded_directories_model_from_pathbuf, create_included_directories_model_from_pathbuf, create_vec_model_from_vec_string};
-use crate::connect_translation::{LANGUAGE_LIST, change_language, find_the_closest_language_idx_to_system};
+use crate::connect_translation::change_language;
+use crate::settings::combo_box::StringComboBoxItems;
+use crate::settings::model::{
+    BasicSettings, DEFAULT_BIGGEST_FILES, DEFAULT_MAXIMUM_SIZE_KB, DEFAULT_MINIMUM_CACHE_SIZE, DEFAULT_MINIMUM_PREHASH_CACHE_SIZE, DEFAULT_MINIMUM_SIZE_KB, MAX_HASH_SIZE,
+    PRESET_NAME_RESERVED, PRESET_NUMBER, RESERVER_PRESET_IDX, SettingsCustom,
+};
 use crate::{Callabler, GuiState, MainWindow, Settings, flk};
-
-pub const DEFAULT_MINIMUM_SIZE_KB: i32 = 16;
-pub const DEFAULT_MAXIMUM_SIZE_KB: i32 = i32::MAX / 1024;
-pub const DEFAULT_MINIMUM_CACHE_SIZE: i32 = 256;
-pub const DEFAULT_MINIMUM_PREHASH_CACHE_SIZE: i32 = 256;
-pub const DEFAULT_BIGGEST_FILES: i32 = 50;
-pub const DEFAULT_IMAGE_SIMILARITY: i32 = 10;
-pub const DEFAULT_VIDEO_SIMILARITY: i32 = 15;
-pub const DEFAULT_HASH_SIZE: &str = "16";
-pub const DEFAULT_MAXIMUM_DIFFERENCE_VALUE: f32 = 3.0;
-pub const DEFAULT_MINIMAL_FRAGMENT_DURATION_VALUE: f32 = 5.0;
-pub const MAX_HASH_SIZE: f32 = 40.0;
-pub const DEFAULT_WINDOW_WIDTH: u32 = 800;
-pub const DEFAULT_WINDOW_HEIGHT: u32 = 600;
-
-pub const PRESET_NUMBER: usize = 11; // 10 normal presets + 1 reserved preset for custom settings
-pub const RESERVER_PRESET_IDX: i32 = PRESET_NUMBER as i32 - 1; // 10 normal presets + 1 reserved preset for custom settings
-pub const PRESET_NAME_RESERVED: &str = "CLI Folders";
-
-#[derive(Debug, Clone)]
-pub struct StringComboBoxItem<T>
-where
-    T: Clone + Debug,
-{
-    pub config_name: String,
-    pub display_name: String,
-    pub value: T,
-}
-
-pub struct StringComboBoxItems {
-    pub languages: Vec<StringComboBoxItem<String>>,
-    pub hash_size: Vec<StringComboBoxItem<u8>>,
-    pub resize_algorithm: Vec<StringComboBoxItem<FilterType>>,
-    pub image_hash_alg: Vec<StringComboBoxItem<HashAlg>>,
-    pub duplicates_hash_type: Vec<StringComboBoxItem<HashType>>,
-    pub biggest_files_method: Vec<StringComboBoxItem<SearchMode>>,
-    pub audio_check_type: Vec<StringComboBoxItem<CheckingMethod>>,
-    pub duplicates_check_method: Vec<StringComboBoxItem<CheckingMethod>>,
-}
-
-pub static STRING_COMBO_BOX_ITEMS: Lazy<Arc<Mutex<StringComboBoxItems>>> = Lazy::new(|| {
-    let l = StringComboBoxItems::regenerate_items();
-    Arc::new(Mutex::new(l))
-});
-
-impl StringComboBoxItems {
-    pub(crate) fn get_item_and_idx_from_config_name<T>(config_name: &str, items: &Vec<StringComboBoxItem<T>>) -> (usize, Vec<SharedString>)
-    where
-        T: Clone + Debug,
-    {
-        let position = items.iter().position(|e| e.config_name == config_name).unwrap_or_else(|| {
-            warn!("Trying to get non existent item - \"{config_name}\" from {items:?}");
-            0
-        });
-        let display_names = items.iter().map(|e| e.display_name.clone().into()).collect::<Vec<_>>();
-        (position, display_names)
-    }
-
-    pub(crate) fn get_config_name_from_idx<T>(idx: usize, items: &Vec<StringComboBoxItem<T>>) -> String
-    where
-        T: Clone + Debug,
-    {
-        if idx < items.len() {
-            items[idx].config_name.clone()
-        } else {
-            warn!("Trying to get non existent item - \"{idx}\" from {items:?}");
-            items[0].config_name.clone()
-        }
-    }
-
-    pub(crate) fn get_value_from_config_name<T>(config_name: &str, items: &Vec<StringComboBoxItem<T>>) -> T
-    where
-        T: Clone + Debug,
-    {
-        let position = items.iter().position(|e| e.config_name == config_name).unwrap_or_else(|| {
-            panic!("Trying to get non existent item - \"{config_name}\" from {items:?}");
-        });
-        items[position].value.clone()
-    }
-
-    pub(crate) fn regenerate_items() -> Self {
-        let languages = LANGUAGE_LIST
-            .iter()
-            .map(|e| StringComboBoxItem {
-                config_name: e.short_name.to_string(),
-                display_name: e.long_name.to_string(),
-                value: e.short_name.to_string(),
-            })
-            .collect();
-
-        let hash_size = Self::convert_to_combobox_items(&[("8", "8", 8), ("16", "16", 16), ("32", "32", 32), ("64", "64", 64)]);
-        let resize_algorithm = Self::convert_to_combobox_items(&[
-            ("lanczos3", "Lanczos3", FilterType::Lanczos3),
-            ("gaussian", "Gaussian", FilterType::Gaussian),
-            ("catmullrom", "CatmullRom", FilterType::CatmullRom),
-            ("triangle", "Triangle", FilterType::Triangle),
-            ("nearest", "Nearest", FilterType::Nearest),
-        ]);
-
-        let image_hash_alg = Self::convert_to_combobox_items(&[
-            ("mean", "Mean", HashAlg::Mean),
-            ("gradient", "Gradient", HashAlg::Gradient),
-            ("blockhash", "BlockHash", HashAlg::Blockhash),
-            ("vertgradient", "VertGradient", HashAlg::VertGradient),
-            ("doublegradient", "DoubleGradient", HashAlg::DoubleGradient),
-            ("median", "Median", HashAlg::Median),
-        ]);
-
-        let duplicates_hash_type = Self::convert_to_combobox_items(&[
-            ("blake3", "Blake3", HashType::Blake3),
-            ("crc32", "CRC32", HashType::Crc32),
-            ("xxh3", "XXH3", HashType::Xxh3),
-        ]);
-
-        let biggest_files_method = Self::convert_to_combobox_items(&[
-            ("biggest", "The Biggest", SearchMode::BiggestFiles),
-            ("smallest", "The Smallest", SearchMode::SmallestFiles),
-        ]);
-
-        let audio_check_type = Self::convert_to_combobox_items(&[("tags", "Tags", CheckingMethod::AudioTags), ("fingerprint", "Fingerprint", CheckingMethod::AudioContent)]);
-
-        let duplicates_check_method = Self::convert_to_combobox_items(&[
-            ("hash", "Hash", CheckingMethod::Hash),
-            ("size", "Size", CheckingMethod::Size),
-            ("name", "Name", CheckingMethod::Name),
-            ("size_and_name", "Size and Name", CheckingMethod::SizeName),
-        ]);
-
-        Self {
-            languages,
-            hash_size,
-            resize_algorithm,
-            image_hash_alg,
-            duplicates_hash_type,
-            biggest_files_method,
-            audio_check_type,
-            duplicates_check_method,
-        }
-    }
-
-    fn convert_to_combobox_items<T>(input: &[(&str, &str, T)]) -> Vec<StringComboBoxItem<T>>
-    where
-        T: Clone + Debug,
-    {
-        input
-            .iter()
-            .map(|(config_name, display_name, value)| StringComboBoxItem {
-                config_name: config_name.to_string(),
-                display_name: display_name.to_string(),
-                value: value.clone(),
-            })
-            .collect()
-    }
-
-    pub(crate) fn get_items() -> MutexGuard<'static, Self> {
-        STRING_COMBO_BOX_ITEMS.lock().expect("Can't lock string combobox items")
-    }
-
-    fn regenerate_and_set() {
-        *STRING_COMBO_BOX_ITEMS.lock().expect("Can't lock string combobox items") = Self::regenerate_items();
-    }
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct SettingsCustom {
-    #[serde(default = "default_included_directories")]
-    pub included_directories: Vec<PathBuf>,
-    #[serde(default)]
-    pub included_directories_referenced: Vec<PathBuf>,
-    #[serde(default = "default_excluded_directories")]
-    pub excluded_directories: Vec<PathBuf>,
-    #[serde(default = "default_excluded_items")]
-    pub excluded_items: String,
-    #[serde(default)]
-    pub allowed_extensions: String,
-    #[serde(default)]
-    pub excluded_extensions: String,
-    #[serde(default = "minimum_file_size")]
-    pub minimum_file_size: i32,
-    #[serde(default = "maximum_file_size")]
-    pub maximum_file_size: i32,
-    #[serde(default = "ttrue")]
-    pub recursive_search: bool,
-    #[serde(default = "ttrue")]
-    pub use_cache: bool,
-    #[serde(default)]
-    pub save_also_as_json: bool,
-    #[serde(default)]
-    pub move_deleted_files_to_trash: bool,
-    #[serde(default)]
-    pub ignore_other_file_systems: bool,
-    #[serde(default)]
-    pub thread_number: i32,
-    #[serde(default = "ttrue")]
-    pub duplicate_image_preview: bool,
-    #[serde(default = "ttrue")]
-    pub duplicate_hide_hard_links: bool,
-    #[serde(default = "ttrue")]
-    pub duplicate_use_prehash: bool,
-    #[serde(default = "minimal_hash_cache_size")]
-    pub duplicate_minimal_hash_cache_size: i32,
-    #[serde(default = "minimal_prehash_cache_size")]
-    pub duplicate_minimal_prehash_cache_size: i32,
-    #[serde(default = "ttrue")]
-    pub duplicate_delete_outdated_entries: bool,
-    #[serde(default = "ttrue")]
-    pub similar_images_hide_hard_links: bool,
-    #[serde(default = "ttrue")]
-    pub similar_images_show_image_preview: bool,
-    #[serde(default = "ttrue")]
-    pub similar_images_delete_outdated_entries: bool,
-    #[serde(default = "ttrue")]
-    pub similar_videos_delete_outdated_entries: bool,
-    #[serde(default = "ttrue")]
-    pub similar_music_delete_outdated_entries: bool,
-    #[serde(default = "default_sub_hash_size")]
-    pub similar_images_sub_hash_size: String,
-    #[serde(default = "default_hash_type")]
-    pub similar_images_sub_hash_alg: String,
-    #[serde(default = "default_resize_algorithm")]
-    pub similar_images_sub_resize_algorithm: String,
-    #[serde(default)]
-    pub similar_images_sub_ignore_same_size: bool,
-    #[serde(default = "default_image_similarity")]
-    pub similar_images_sub_similarity: i32,
-    #[serde(default = "default_duplicates_check_method")]
-    pub duplicates_sub_check_method: String,
-    #[serde(default = "default_duplicates_hash_type")]
-    pub duplicates_sub_available_hash_type: String,
-    #[serde(default)]
-    pub duplicates_sub_name_case_sensitive: bool,
-    #[serde(default = "default_biggest_method")]
-    pub biggest_files_sub_method: String,
-    #[serde(default = "default_biggest_files")]
-    pub biggest_files_sub_number_of_files: i32,
-    #[serde(default = "ttrue")]
-    pub similar_videos_hide_hard_links: bool,
-    #[serde(default)]
-    pub similar_videos_sub_ignore_same_size: bool,
-    #[serde(default = "default_video_similarity")]
-    pub similar_videos_sub_similarity: i32,
-    #[serde(default = "default_audio_check_type")]
-    pub similar_music_sub_audio_check_type: String,
-    #[serde(default)]
-    pub similar_music_sub_approximate_comparison: bool,
-    #[serde(default)]
-    pub similar_music_compare_fingerprints_only_with_similar_titles: bool,
-    #[serde(default = "ttrue")]
-    pub similar_music_sub_title: bool,
-    #[serde(default = "ttrue")]
-    pub similar_music_sub_artist: bool,
-    #[serde(default)]
-    pub similar_music_sub_year: bool,
-    #[serde(default)]
-    pub similar_music_sub_bitrate: bool,
-    #[serde(default)]
-    pub similar_music_sub_genre: bool,
-    #[serde(default)]
-    pub similar_music_sub_length: bool,
-    #[serde(default = "default_maximum_difference_value")]
-    pub similar_music_sub_maximum_difference_value: f32,
-    #[serde(default = "default_minimal_fragment_duration_value")]
-    pub similar_music_sub_minimal_fragment_duration_value: f32,
-    #[serde(default = "ttrue")]
-    pub broken_files_sub_audio: bool,
-    #[serde(default)]
-    pub broken_files_sub_pdf: bool,
-    #[serde(default)]
-    pub broken_files_sub_archive: bool,
-    #[serde(default)]
-    pub broken_files_sub_image: bool,
-    #[serde(default)]
-    pub column_sizes: BTreeMap<String, Vec<f32>>,
-}
-
-impl Default for SettingsCustom {
-    fn default() -> Self {
-        serde_json::from_str("{}").expect("Cannot fail creating {} from string")
-    }
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct BasicSettings {
-    #[serde(default)]
-    pub default_preset: i32,
-    #[serde(default = "default_preset_names")]
-    pub preset_names: Vec<String>,
-    #[serde(default = "default_window_width")]
-    pub window_width: u32,
-    #[serde(default = "default_window_height")]
-    pub window_height: u32,
-    #[serde(default = "detect_language")]
-    pub language: String,
-    #[serde(default = "ttrue")]
-    pub dark_theme: bool,
-    #[serde(default)]
-    pub show_only_icons: bool,
-}
-
-impl Default for BasicSettings {
-    fn default() -> Self {
-        serde_json::from_str("{}").expect("Cannot fail creating {} from string")
-    }
-}
 
 pub(crate) fn connect_changing_settings_preset(app: &MainWindow) {
     let a = app.as_weak();
@@ -449,6 +144,8 @@ pub(crate) fn load_settings_from_file(app: &MainWindow, cli_result: Option<CliRe
 pub(crate) fn save_all_settings_to_file(app: &MainWindow, original_preset_idx: i32) {
     save_base_settings_to_file(app, original_preset_idx);
     save_custom_settings_to_file(app);
+
+    info!("Saved settings to file");
 }
 
 pub(crate) fn save_base_settings_to_file(app: &MainWindow, original_preset_idx: i32) {
@@ -618,6 +315,12 @@ pub(crate) fn set_combobox_custom_settings_items(settings: &Settings, custom_set
     // settings.set_duplicates_sub_available_hash_type_model(display_names);
     settings.set_similar_music_sub_audio_check_type_index(idx as i32);
     settings.set_similar_music_sub_audio_check_type_value(display_names[idx].clone());
+
+    // Crop detect
+    let (idx, display_names) = StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.similar_videos_crop_detect, &collected_items.videos_crop_detect);
+    // settings.set_similar_videos_crop_detect_model(display_names);
+    settings.set_similar_videos_crop_detect_index(idx as i32);
+    settings.set_similar_videos_crop_detect_value(display_names[idx].clone());
 }
 
 pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom, cli_args: Option<CliResult>) {
@@ -679,6 +382,20 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_similar_videos_sub_ignore_same_size(custom_settings.similar_videos_sub_ignore_same_size);
     settings.set_similar_videos_sub_current_similarity(custom_settings.similar_videos_sub_similarity as f32);
     settings.set_similar_videos_sub_max_similarity(20.0);
+    settings.set_similar_videos_skip_forward_amount(
+        custom_settings
+            .similar_videos_skip_forward_amount
+            .clamp(*ALLOWED_SKIP_FORWARD_AMOUNT.start(), *ALLOWED_SKIP_FORWARD_AMOUNT.end()) as f32,
+    );
+    settings.set_similar_videos_skip_forward_amount_min(*ALLOWED_SKIP_FORWARD_AMOUNT.start() as f32);
+    settings.set_similar_videos_skip_forward_amount_max(*ALLOWED_SKIP_FORWARD_AMOUNT.end() as f32);
+    settings.set_similar_videos_vid_hash_duration(
+        custom_settings
+            .similar_videos_vid_hash_duration
+            .clamp(*ALLOWED_VID_HASH_DURATION.start(), *ALLOWED_VID_HASH_DURATION.end()) as f32,
+    );
+    settings.set_similar_videos_vid_hash_duration_min(*ALLOWED_VID_HASH_DURATION.start() as f32);
+    settings.set_similar_videos_vid_hash_duration_max(*ALLOWED_VID_HASH_DURATION.end() as f32);
 
     settings.set_similar_music_sub_approximate_comparison(custom_settings.similar_music_sub_approximate_comparison);
     settings.set_similar_music_sub_title(custom_settings.similar_music_sub_title);
@@ -798,6 +515,10 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
 
     let similar_videos_sub_ignore_same_size = settings.get_similar_videos_sub_ignore_same_size();
     let similar_videos_sub_similarity = settings.get_similar_videos_sub_current_similarity().round() as i32;
+    let similar_videos_crop_detect_idx = settings.get_similar_videos_crop_detect_index();
+    let similar_videos_crop_detect = StringComboBoxItems::get_config_name_from_idx(similar_videos_crop_detect_idx as usize, &collected_items.videos_crop_detect);
+    let similar_videos_skip_forward_amount = settings.get_similar_videos_skip_forward_amount() as u32;
+    let similar_videos_vid_hash_duration = settings.get_similar_videos_vid_hash_duration() as u32;
 
     let similar_music_sub_audio_check_type_idx = settings.get_similar_music_sub_audio_check_type_index();
     let similar_music_sub_audio_check_type = StringComboBoxItems::get_config_name_from_idx(similar_music_sub_audio_check_type_idx as usize, &collected_items.audio_check_type);
@@ -885,6 +606,9 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         broken_files_sub_archive,
         broken_files_sub_image,
         column_sizes,
+        similar_videos_vid_hash_duration,
+        similar_videos_crop_detect,
+        similar_videos_skip_forward_amount,
     }
 }
 
@@ -912,100 +636,4 @@ pub(crate) fn collect_base_settings(app: &MainWindow) -> BasicSettings {
         dark_theme,
         show_only_icons,
     }
-}
-
-fn detect_language() -> String {
-    let lang_idx = find_the_closest_language_idx_to_system();
-    LANGUAGE_LIST[lang_idx].short_name.to_string()
-}
-
-fn default_included_directories() -> Vec<PathBuf> {
-    let mut included_directories = vec![];
-    if let Ok(current_dir) = env::current_dir() {
-        included_directories.push(current_dir.to_string_lossy().to_string());
-    } else if let Some(home_dir) = home_dir() {
-        included_directories.push(home_dir.to_string_lossy().to_string());
-    } else if cfg!(target_family = "unix") {
-        included_directories.push("/".to_string());
-    } else {
-        // This could be set to default
-        included_directories.push("C:\\".to_string());
-    };
-    included_directories.sort();
-    included_directories.iter().map(PathBuf::from).collect::<Vec<_>>()
-}
-
-fn default_excluded_directories() -> Vec<PathBuf> {
-    let mut excluded_directories = DEFAULT_EXCLUDED_DIRECTORIES.iter().map(PathBuf::from).collect::<Vec<_>>();
-    excluded_directories.sort();
-    excluded_directories
-}
-fn default_duplicates_check_method() -> String {
-    "hash".to_string()
-}
-fn default_maximum_difference_value() -> f32 {
-    DEFAULT_MAXIMUM_DIFFERENCE_VALUE
-}
-fn default_minimal_fragment_duration_value() -> f32 {
-    DEFAULT_MINIMAL_FRAGMENT_DURATION_VALUE
-}
-fn default_duplicates_hash_type() -> String {
-    "blake3".to_string()
-}
-fn default_biggest_method() -> String {
-    "biggest".to_string()
-}
-fn default_audio_check_type() -> String {
-    "tags".to_string()
-}
-fn default_video_similarity() -> i32 {
-    DEFAULT_VIDEO_SIMILARITY
-}
-fn default_biggest_files() -> i32 {
-    DEFAULT_BIGGEST_FILES
-}
-
-pub(crate) fn default_image_similarity() -> i32 {
-    DEFAULT_IMAGE_SIMILARITY
-}
-fn default_excluded_items() -> String {
-    DEFAULT_EXCLUDED_ITEMS.to_string()
-}
-
-fn default_preset_names() -> Vec<String> {
-    let mut v = (0..(PRESET_NUMBER - 1)).map(|x| format!("Preset {}", x + 1)).collect::<Vec<_>>();
-    v.push(PRESET_NAME_RESERVED.to_string());
-    v
-}
-
-fn minimum_file_size() -> i32 {
-    DEFAULT_MINIMUM_SIZE_KB
-}
-fn maximum_file_size() -> i32 {
-    DEFAULT_MAXIMUM_SIZE_KB
-}
-fn ttrue() -> bool {
-    true
-}
-fn minimal_hash_cache_size() -> i32 {
-    DEFAULT_MINIMUM_CACHE_SIZE
-}
-fn minimal_prehash_cache_size() -> i32 {
-    DEFAULT_MINIMUM_PREHASH_CACHE_SIZE
-}
-
-pub(crate) fn default_resize_algorithm() -> String {
-    "lanczos3".to_string()
-}
-pub(crate) fn default_hash_type() -> String {
-    "mean".to_string()
-}
-pub(crate) fn default_sub_hash_size() -> String {
-    DEFAULT_HASH_SIZE.to_string()
-}
-fn default_window_width() -> u32 {
-    DEFAULT_WINDOW_WIDTH
-}
-fn default_window_height() -> u32 {
-    DEFAULT_WINDOW_HEIGHT
 }

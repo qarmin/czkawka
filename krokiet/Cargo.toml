@@ -28,6 +28,9 @@ fs_extra = "1.3" # TODO replace with less buggy library
 trash = "5.1"
 dunce = "1.0.5"
 
+# Just for enums
+vid_dup_finder_lib = "0.4"
+
 # Translations
 i18n-embed = { version = "0.16", features = ["fluent-system", "desktop-requester"] }
 i18n-embed-fl = "0.10"
