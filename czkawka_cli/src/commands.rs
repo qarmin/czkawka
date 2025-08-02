@@ -438,7 +438,7 @@ pub struct SimilarVideosArgs {
     )]
     pub skip_forward_amount: u32,
     #[clap(
-        short = 'P',
+        short = 'B',
         long,
         default_value = "letterbox",
         value_parser = parse_crop_detect,

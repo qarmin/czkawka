@@ -47,6 +47,10 @@ pub struct CliOutput {
 
 #[allow(clippy::print_stdout)]
 fn main() {
+    if cfg!(debug_assertions) {
+        use clap::CommandFactory;
+        Args::command().debug_assert();
+    }
     let command = Args::parse().command;
 
     let (infos, warnings) = set_config_cache_path("Czkawka", "Czkawka");
