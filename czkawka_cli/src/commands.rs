@@ -447,7 +447,7 @@ pub struct SimilarVideosArgs {
     )]
     pub crop_detect: Cropdetect,
     #[clap(
-        short = 'T',
+        short = 'A',
         long,
         default_value = "10",
         value_parser = parse_scan_duration,
