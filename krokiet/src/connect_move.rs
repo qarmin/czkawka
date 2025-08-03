@@ -4,7 +4,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::{fs, path, thread};
 
 use crossbeam_channel::Sender;
-use czkawka_core::progress_data::ProgressData;
+use czkawka_core::common::progress_data::ProgressData;
 use rfd::FileDialog;
 use slint::{ComponentHandle, Weak};
 

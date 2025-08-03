@@ -3,7 +3,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread;
 
 use crossbeam_channel::Sender;
-use czkawka_core::progress_data::ProgressData;
+use czkawka_core::common::progress_data::ProgressData;
 use slint::{ComponentHandle, Weak};
 
 use crate::model_operations::model_processor::{MessageType, ModelProcessor};

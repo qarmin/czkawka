@@ -9,11 +9,14 @@ use fun_time::fun_time;
 use rayon::prelude::*;
 use serde::Serialize;
 
-use crate::common::{WorkContinueStatus, check_folder_children, check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
+use crate::common::WorkContinueStatus;
+use crate::common::progress_data::{CurrentStage, ProgressData};
+use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crate::common_dir_traversal::{ToolType, common_read_dir, get_modified_time};
+use crate::common_directory::Directories;
+use crate::common_items::ExcludedItems;
 use crate::common_tool::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
 use crate::common_traits::*;
-use crate::progress_data::{CurrentStage, ProgressData};
 
 const TEMP_EXTENSIONS: &[&str] = &[
     "#",
@@ -254,4 +257,37 @@ impl Temporary {
     pub const fn get_information(&self) -> &Info {
         &self.information
     }
+}
+
+pub(crate) fn check_folder_children(
+    dir_result: &mut Vec<PathBuf>,
+    warnings: &mut Vec<String>,
+    entry_data: &DirEntry,
+    recursive_search: bool,
+    directories: &Directories,
+    excluded_items: &ExcludedItems,
+) {
+    if !recursive_search {
+        return;
+    }
+
+    let next_item = entry_data.path();
+    if directories.is_excluded(&next_item) {
+        return;
+    }
+
+    if excluded_items.is_excluded(&next_item) {
+        return;
+    }
+
+    #[cfg(target_family = "unix")]
+    if directories.exclude_other_filesystems() {
+        match directories.is_on_other_filesystems(&next_item) {
+            Ok(true) => return,
+            Err(e) => warnings.push(e),
+            _ => (),
+        }
+    }
+
+    dir_result.push(next_item);
 }

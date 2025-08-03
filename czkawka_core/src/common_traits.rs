@@ -9,7 +9,7 @@ use fun_time::fun_time;
 use serde::Serialize;
 
 use crate::common::WorkContinueStatus;
-use crate::progress_data::ProgressData;
+use crate::common::progress_data::ProgressData;
 
 pub trait DebugPrint {
     fn debug_print(&self);

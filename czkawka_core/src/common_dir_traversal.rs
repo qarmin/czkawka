@@ -15,14 +15,14 @@ use log::debug;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::common::{check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
+use crate::common::progress_data::{CurrentStage, ProgressData};
+use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
 use crate::common_tool::CommonToolData;
 use crate::common_traits::ResultEntry;
 use crate::flc;
-use crate::progress_data::{CurrentStage, ProgressData};
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Default)]
 pub enum ToolType {

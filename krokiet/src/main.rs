@@ -16,7 +16,7 @@ use crossbeam_channel::{Receiver, Sender, unbounded};
 use czkawka_core::common::config_cache_path::set_config_cache_path;
 use czkawka_core::common::logger::{filtering_messages, print_version_mode, setup_logger};
 use czkawka_core::common::print_infos_and_warnings;
-use czkawka_core::progress_data::ProgressData;
+use czkawka_core::common::progress_data::ProgressData;
 use log::{info, warn};
 use slint::VecModel;
 

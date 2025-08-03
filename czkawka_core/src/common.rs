@@ -3,31 +3,23 @@ pub mod config_cache_path;
 pub mod consts;
 pub mod image;
 pub mod logger;
-pub mod progress;
+pub mod progress_data;
+pub mod progress_stop_handler;
 
 use std::cmp::Ordering;
 use std::ffi::OsString;
-use std::fs::DirEntry;
 use std::io::Error;
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize};
-use std::sync::{Arc, atomic};
-use std::thread::{JoinHandle, sleep};
-use std::time::{Duration, Instant};
 use std::{fs, io, thread};
 
-use crossbeam_channel::Sender;
-use fun_time::fun_time;
 use log::{debug, info, warn};
 
 use crate::common::consts::{DEFAULT_WORKER_THREAD_SIZE, TEMP_HARDLINK_FILE};
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
-use crate::common_dir_traversal::{CheckingMethod, ToolType};
 use crate::common_directory::Directories;
-use crate::common_items::{ExcludedItems, SingleExcludedItem};
+use crate::common_items::SingleExcludedItem;
 use crate::common_traits::ResultEntry;
-use crate::progress_data::{CurrentStage, ProgressData};
 
 static NUMBER_OF_THREADS: state::InitCell<usize> = state::InitCell::new();
 static ALL_AVAILABLE_THREADS: state::InitCell<usize> = state::InitCell::new();
@@ -79,50 +71,6 @@ pub fn set_number_of_threads(thread_number: usize) {
         .build_global()
         .expect("Cannot set number of threads");
 }
-
-pub const RAW_IMAGE_EXTENSIONS: &[&str] = &[
-    "ari", "cr3", "cr2", "crw", "erf", "raf", "3fr", "kdc", "dcs", "dcr", "iiq", "mos", "mef", "mrw", "nef", "nrw", "orf", "rw2", "pef", "srw", "arw", "srf", "sr2",
-];
-
-pub const JXL_IMAGE_EXTENSIONS: &[&str] = &["jxl"];
-
-#[cfg(feature = "libavif")]
-pub const IMAGE_RS_EXTENSIONS: &[&str] = &[
-    "jpg", "jpeg", "png", "bmp", "tiff", "tif", "tga", "ff", "jif", "jfi", "webp", "gif", "ico", "exr", "qoi", "avif",
-];
-#[cfg(not(feature = "libavif"))]
-pub const IMAGE_RS_EXTENSIONS: &[&str] = &["jpg", "jpeg", "png", "bmp", "tiff", "tif", "tga", "ff", "jif", "jfi", "webp", "gif", "ico", "exr", "qoi"];
-
-#[cfg(feature = "libavif")]
-pub const IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS: &[&str] = &["jpg", "jpeg", "png", "tiff", "tif", "tga", "ff", "jif", "jfi", "bmp", "webp", "exr", "qoi", "avif"];
-#[cfg(not(feature = "libavif"))]
-pub const IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS: &[&str] = &["jpg", "jpeg", "png", "tiff", "tif", "tga", "ff", "jif", "jfi", "bmp", "webp", "exr", "qoi"];
-
-#[cfg(feature = "libavif")]
-pub const IMAGE_RS_BROKEN_FILES_EXTENSIONS: &[&str] = &[
-    "jpg", "jpeg", "png", "tiff", "tif", "tga", "ff", "jif", "jfi", "gif", "bmp", "ico", "jfif", "jpe", "pnz", "dib", "webp", "exr", "avif",
-];
-#[cfg(not(feature = "libavif"))]
-pub const IMAGE_RS_BROKEN_FILES_EXTENSIONS: &[&str] = &[
-    "jpg", "jpeg", "png", "tiff", "tif", "tga", "ff", "jif", "jfi", "gif", "bmp", "ico", "jfif", "jpe", "pnz", "dib", "webp", "exr",
-];
-
-pub const HEIC_EXTENSIONS: &[&str] = &["heif", "heifs", "heic", "heics", "avci", "avcs"];
-
-pub const ZIP_FILES_EXTENSIONS: &[&str] = &["zip", "jar"];
-
-pub const PDF_FILES_EXTENSIONS: &[&str] = &["pdf"];
-
-pub const AUDIO_FILES_EXTENSIONS: &[&str] = &[
-    "mp3", "flac", "wav", "ogg", "m4a", "aac", "aiff", "pcm", "aif", "aiff", "aifc", "m3a", "mp2", "mp4a", "mp2a", "mpga", "wave", "weba", "wma", "oga",
-];
-
-pub const VIDEO_FILES_EXTENSIONS: &[&str] = &[
-    "mp4", "mpv", "flv", "mp4a", "webm", "mpg", "mp2", "mpeg", "m4p", "m4v", "avi", "wmv", "qt", "mov", "swf", "mkv",
-];
-
-pub const LOOP_DURATION: u32 = 20; //ms
-pub const SEND_PROGRESS_DATA_TIME_BETWEEN: u32 = 200; //ms
 
 pub fn check_if_folder_contains_only_empty_folders(path: impl AsRef<Path>) -> Result<(), String> {
     let path = path.as_ref();
@@ -281,39 +229,6 @@ pub fn normalize_windows_path(path_to_change: impl AsRef<Path>) -> PathBuf {
     }
 }
 
-pub(crate) fn check_folder_children(
-    dir_result: &mut Vec<PathBuf>,
-    warnings: &mut Vec<String>,
-    entry_data: &DirEntry,
-    recursive_search: bool,
-    directories: &Directories,
-    excluded_items: &ExcludedItems,
-) {
-    if !recursive_search {
-        return;
-    }
-
-    let next_item = entry_data.path();
-    if directories.is_excluded(&next_item) {
-        return;
-    }
-
-    if excluded_items.is_excluded(&next_item) {
-        return;
-    }
-
-    #[cfg(target_family = "unix")]
-    if directories.exclude_other_filesystems() {
-        match directories.is_on_other_filesystems(&next_item) {
-            Ok(true) => return,
-            Err(e) => warnings.push(e),
-            _ => (),
-        }
-    }
-
-    dir_result.push(next_item);
-}
-
 pub(crate) fn filter_reference_folders_generic<T>(entries_to_check: Vec<Vec<T>>, directories: &Directories) -> Vec<(T, Vec<T>)>
 where
     T: ResultEntry,
@@ -333,64 +248,6 @@ where
         .collect::<Vec<(T, Vec<T>)>>()
 }
 
-pub(crate) fn prepare_thread_handler_common(
-    progress_sender: Option<&Sender<ProgressData>>,
-    sstage: CurrentStage,
-    max_items: usize,
-    test_type: (ToolType, CheckingMethod),
-    max_size: u64,
-) -> (JoinHandle<()>, Arc<AtomicBool>, Arc<AtomicUsize>, AtomicBool, Arc<AtomicU64>) {
-    let (tool_type, checking_method) = test_type;
-    assert_ne!(tool_type, ToolType::None, "Cannot send progress data for ToolType::None");
-    let progress_thread_run = Arc::new(AtomicBool::new(true));
-    let items_counter = Arc::new(AtomicUsize::new(0));
-    let size_counter = Arc::new(AtomicU64::new(0));
-    let check_was_stopped = AtomicBool::new(false);
-    let progress_thread_sender = if let Some(progress_sender) = progress_sender {
-        let progress_send = progress_sender.clone();
-        let progress_thread_run = progress_thread_run.clone();
-        let items_counter = items_counter.clone();
-        let size_counter = size_counter.clone();
-        thread::spawn(move || {
-            // Use earlier time, to send immediately first message
-            let mut time_since_last_send = Instant::now().checked_sub(Duration::from_secs(10u64)).unwrap_or_else(Instant::now);
-
-            loop {
-                if time_since_last_send.elapsed().as_millis() > SEND_PROGRESS_DATA_TIME_BETWEEN as u128 {
-                    let progress_data = ProgressData {
-                        sstage,
-                        checking_method,
-                        current_stage_idx: sstage.get_current_stage(),
-                        max_stage_idx: tool_type.get_max_stage(checking_method),
-                        entries_checked: items_counter.load(atomic::Ordering::Relaxed),
-                        entries_to_check: max_items,
-                        bytes_checked: size_counter.load(atomic::Ordering::Relaxed),
-                        bytes_to_check: max_size,
-                        tool_type,
-                    };
-
-                    progress_data.validate();
-
-                    progress_send.send(progress_data).expect("Cannot send progress data");
-                    time_since_last_send = Instant::now();
-                }
-                if !progress_thread_run.load(atomic::Ordering::Relaxed) {
-                    break;
-                }
-                sleep(Duration::from_millis(LOOP_DURATION as u64));
-            }
-        })
-    } else {
-        thread::spawn(|| {})
-    };
-    (progress_thread_sender, progress_thread_run, items_counter, check_was_stopped, size_counter)
-}
-
-#[inline]
-pub(crate) fn check_if_stop_received(stop_flag: &Arc<AtomicBool>) -> bool {
-    stop_flag.load(atomic::Ordering::Relaxed)
-}
-
 pub fn make_hard_link(src: &Path, dst: &Path) -> io::Result<()> {
     let dst_dir = dst.parent().ok_or_else(|| Error::other("No parent"))?;
     let temp = dst_dir.join(TEMP_HARDLINK_FILE);
@@ -401,12 +258,6 @@ pub fn make_hard_link(src: &Path, dst: &Path) -> io::Result<()> {
     }
     fs::remove_file(temp)?;
     result
-}
-
-#[fun_time(message = "send_info_and_wait_for_ending_all_threads", level = "debug")]
-pub(crate) fn send_info_and_wait_for_ending_all_threads(progress_thread_run: &Arc<AtomicBool>, progress_thread_handle: JoinHandle<()>) {
-    progress_thread_run.store(false, atomic::Ordering::Relaxed);
-    progress_thread_handle.join().expect("Cannot join progress thread - quite fatal error, but happens rarely");
 }
 
 #[cfg(test)]

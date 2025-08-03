@@ -21,12 +21,13 @@ use serde::{Deserialize, Serialize};
 use static_assertions::const_assert;
 use xxhash_rust::xxh3::Xxh3;
 
+use crate::common::WorkContinueStatus;
 use crate::common::cache::{get_duplicate_cache_file, load_cache_from_file_generalized_by_size, save_cache_to_file_generalized};
-use crate::common::{WorkContinueStatus, check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
+use crate::common::progress_data::{CurrentStage, ProgressData};
+use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::*;
-use crate::progress_data::{CurrentStage, ProgressData};
 
 pub const PREHASHING_BUFFER_SIZE: u64 = 4 * 1024;
 pub const THREAD_BUFFER_SIZE: usize = 2 * 1024 * 1024;

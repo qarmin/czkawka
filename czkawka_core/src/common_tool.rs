@@ -9,6 +9,7 @@ use humansize::{BINARY, format_size};
 use log::info;
 use rayon::prelude::*;
 
+use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::{WorkContinueStatus, remove_folder_if_contains_only_empty_folders};
 use crate::common_dir_traversal::{CheckingMethod, ToolType};
 use crate::common_directory::Directories;
@@ -17,7 +18,6 @@ use crate::common_items::ExcludedItems;
 use crate::common_traits::ResultEntry;
 use crate::helpers::delayed_sender::DelayedSender;
 use crate::helpers::messages::Messages;
-use crate::progress_data::{CurrentStage, ProgressData};
 
 #[derive(Debug, Clone, Default)]
 pub struct CommonToolData {

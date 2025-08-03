@@ -9,10 +9,10 @@ use log::debug;
 use rayon::prelude::*;
 
 use crate::common::WorkContinueStatus;
+use crate::common::progress_data::ProgressData;
 use crate::common_dir_traversal::{DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
 use crate::common_traits::{DebugPrint, DeletingItems, PrintResults};
-use crate::progress_data::ProgressData;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum SearchMode {

@@ -21,7 +21,6 @@ pub mod common_tool;
 pub mod common_traits;
 pub mod helpers;
 pub mod localizer_core;
-pub mod progress_data;
 pub mod tools;
 
 pub const CZKAWKA_VERSION: &str = env!("CARGO_PKG_VERSION");

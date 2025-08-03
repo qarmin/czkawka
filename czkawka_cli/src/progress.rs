@@ -1,8 +1,8 @@
 use std::time::Duration;
 
 use crossbeam_channel::Receiver;
+use czkawka_core::common::progress_data::{CurrentStage, ProgressData};
 use czkawka_core::common_dir_traversal::ToolType;
-use czkawka_core::progress_data::{CurrentStage, ProgressData};
 use humansize::{BINARY, format_size};
 use indicatif::{ProgressBar, ProgressStyle};
 

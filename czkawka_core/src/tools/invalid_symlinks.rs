@@ -9,10 +9,10 @@ use log::debug;
 use serde::{Deserialize, Serialize};
 
 use crate::common::WorkContinueStatus;
+use crate::common::progress_data::ProgressData;
 use crate::common_dir_traversal::{Collect, DirTraversalBuilder, DirTraversalResult, ErrorType, FileEntry, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
 use crate::common_traits::*;
-use crate::progress_data::ProgressData;
 
 #[derive(Default)]
 pub struct Info {

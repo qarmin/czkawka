@@ -27,7 +27,8 @@ use rawler::rawsource::RawSource;
 use symphonia::core::conv::IntoSample;
 
 use crate::common;
-use crate::common::{HEIC_EXTENSIONS, IMAGE_RS_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, JXL_IMAGE_EXTENSIONS, RAW_IMAGE_EXTENSIONS, create_crash_message};
+use crate::common::consts::{HEIC_EXTENSIONS, IMAGE_RS_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, JXL_IMAGE_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
+use crate::common::create_crash_message;
 use crate::helpers::debug_timer::Timer;
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
