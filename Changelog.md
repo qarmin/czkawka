@@ -28,6 +28,7 @@
 - Fixed crash when removing outdated cache - [#1508](https://github.com/qarmin/czkawka/pull/1508)
 - Fixed missing file and folder names for similar videos in reference folders - [#1520](https://github.com/qarmin/czkawka/pull/1520)
 - Fixed crashes when the SVG pixbuf loader is not available - [#1565](https://github.com/qarmin/czkawka/pull/1565)
+- Fixed using custom select on referenced folders - [#1581](https://github.com/qarmin/czkawka/pull/1581)
 
 ### Krokiet
 - Added the ability to select multiple items with mouse and keyboard - [#1478](https://github.com/qarmin/czkawka/pull/1478)

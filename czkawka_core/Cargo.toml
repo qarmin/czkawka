@@ -50,7 +50,9 @@ ffmpeg_cmdline_utils = "0.4"
 
 # Saving/Loading Cache
 serde = "1.0"
-bincode = "<2.0" # TODO - looks that newer bincode requires to add for all structs specific derives, but not all structs are in my control - maybe there is a better way to handle this
+# TODO - looks that newer bincode requires to add for all structs specific derives, but not all structs are in my control
+# Probably the only external struct that is used in cache is `VideoHash` from `vid_dup_finder_lib`
+bincode = "<2.0"
 serde_json = "1.0"
 
 # Language
