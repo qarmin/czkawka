@@ -14,9 +14,9 @@ use crate::common_dir_traversal::{CheckingMethod, ToolType};
 use crate::common_directory::Directories;
 use crate::common_extensions::Extensions;
 use crate::common_items::ExcludedItems;
-use crate::common_messages::Messages;
 use crate::common_traits::ResultEntry;
 use crate::helpers::delayed_sender::DelayedSender;
+use crate::helpers::messages::Messages;
 use crate::progress_data::{CurrentStage, ProgressData};
 
 #[derive(Debug, Clone, Default)]

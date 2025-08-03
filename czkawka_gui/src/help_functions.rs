@@ -6,7 +6,7 @@ use std::path::{MAIN_SEPARATOR, PathBuf};
 use std::rc::Rc;
 
 use czkawka_core::common_dir_traversal;
-use czkawka_core::common_messages::Messages;
+use czkawka_core::helpers::messages::Messages;
 use czkawka_core::tools::bad_extensions::BadExtensions;
 use czkawka_core::tools::big_file::BigFile;
 use czkawka_core::tools::broken_files::BrokenFiles;

@@ -3,8 +3,8 @@ use std::path::{Path, PathBuf};
 use std::{fs, os::unix::fs::MetadataExt};
 
 use crate::common::normalize_windows_path;
-use crate::common_messages::Messages;
 use crate::flc;
+use crate::helpers::messages::Messages;
 
 #[derive(Debug, Clone, Default)]
 pub struct Directories {

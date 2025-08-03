@@ -5,7 +5,8 @@ use std::cmp::{max, min};
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
-use czkawka_core::common::{get_all_available_threads, get_config_cache_path, set_number_of_threads};
+use czkawka_core::common::config_cache_path::get_config_cache_path;
+use czkawka_core::common::{get_all_available_threads, set_number_of_threads};
 use czkawka_core::tools::similar_videos::{ALLOWED_SKIP_FORWARD_AMOUNT, ALLOWED_VID_HASH_DURATION};
 use log::{debug, error, info};
 use serde::{Deserialize, Serialize};

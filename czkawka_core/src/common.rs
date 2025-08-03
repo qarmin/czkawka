@@ -1,25 +1,26 @@
+pub mod cache;
+pub mod config_cache_path;
+pub mod consts;
+pub mod image;
+pub mod logger;
+pub mod progress;
+
 use std::cmp::Ordering;
 use std::ffi::OsString;
-use std::fs::{DirEntry, File, OpenOptions};
+use std::fs::DirEntry;
 use std::io::Error;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize};
 use std::sync::{Arc, atomic};
 use std::thread::{JoinHandle, sleep};
 use std::time::{Duration, Instant};
-use std::{env, fs, io, thread};
+use std::{fs, io, thread};
 
 use crossbeam_channel::Sender;
-use directories_next::ProjectDirs;
-use file_rotate::compression::Compression;
-use file_rotate::suffix::{AppendTimestamp, FileLimit};
-use file_rotate::{ContentLimit, FileRotate};
 use fun_time::fun_time;
-use handsome_logger::{ColorChoice, CombinedLogger, ConfigBuilder, FormatText, SharedLogger, TermLogger, TerminalMode, TimeFormat, WriteLogger};
-use log::{LevelFilter, Record, debug, info, warn};
-use once_cell::sync::OnceCell;
+use log::{debug, info, warn};
 
-use crate::CZKAWKA_VERSION;
+use crate::common::consts::{DEFAULT_WORKER_THREAD_SIZE, TEMP_HARDLINK_FILE};
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
 use crate::common_dir_traversal::{CheckingMethod, ToolType};
@@ -30,27 +31,11 @@ use crate::progress_data::{CurrentStage, ProgressData};
 
 static NUMBER_OF_THREADS: state::InitCell<usize> = state::InitCell::new();
 static ALL_AVAILABLE_THREADS: state::InitCell<usize> = state::InitCell::new();
-static CONFIG_CACHE_PATH: OnceCell<Option<ConfigCachePath>> = OnceCell::new();
-
-pub const DEFAULT_THREAD_SIZE: usize = 8 * 1024 * 1024; // 8 MB
-pub const DEFAULT_WORKER_THREAD_SIZE: usize = 4 * 1024 * 1024; // 4 MB
-
-const TEMP_HARDLINK_FILE: &str = "rzeczek.rxrxrxl";
 
 #[derive(Debug, PartialEq)]
 pub enum WorkContinueStatus {
     Continue,
     Stop,
-}
-
-#[derive(Debug, Clone)]
-pub struct ConfigCachePath {
-    pub config_folder: PathBuf,
-    pub cache_folder: PathBuf,
-}
-
-pub fn get_config_cache_path() -> Option<ConfigCachePath> {
-    CONFIG_CACHE_PATH.get().expect("Cannot fail if set_config_cache_path was called before").clone()
 }
 
 pub fn print_infos_and_warnings(infos: Vec<String>, warnings: Vec<String>) {
@@ -62,169 +47,9 @@ pub fn print_infos_and_warnings(infos: Vec<String>, warnings: Vec<String>) {
     }
 }
 
-pub fn set_config_cache_path(cache_name: &'static str, config_name: &'static str) -> (Vec<String>, Vec<String>) {
-    // By default, such folders are used:
-    // Lin: /home/username/.config/czkawka
-    // Win: C:\Users\Username\AppData\Roaming\Qarmin\Czkawka\config
-    // Mac: /Users/Username/Library/Application Support/pl.Qarmin.Czkawka
-
-    let mut infos = vec![];
-    let mut warnings = vec![];
-
-    let config_folder_env = env::var("CZKAWKA_CONFIG_PATH").unwrap_or_default().trim().to_string();
-    let cache_folder_env = env::var("CZKAWKA_CACHE_PATH").unwrap_or_default().trim().to_string();
-
-    let default_cache_folder = ProjectDirs::from("pl", "Qarmin", cache_name).map(|proj_dirs| proj_dirs.cache_dir().to_path_buf());
-    let default_config_folder = ProjectDirs::from("pl", "Qarmin", config_name).map(|proj_dirs| proj_dirs.config_dir().to_path_buf());
-
-    let mut resolve_folder = |env_var: &str, default_folder: Option<PathBuf>, name: &'static str| {
-        let default_folder_str = default_folder.as_ref().map_or("<not available>".to_string(), |t| t.to_string_lossy().to_string());
-
-        if env_var.is_empty() {
-            default_folder
-        } else {
-            let folder_path = PathBuf::from(env_var);
-            let _ = fs::create_dir_all(&folder_path);
-            if !folder_path.exists() {
-                warnings.push(format!(
-                    "{name} folder \"{}\" does not exist, using default folder \"{}\"",
-                    folder_path.to_string_lossy(),
-                    default_folder_str
-                ));
-                return default_folder;
-            };
-            if !folder_path.is_dir() {
-                warnings.push(format!(
-                    "{name} folder \"{}\" is not a directory, using default folder \"{}\"",
-                    folder_path.to_string_lossy(),
-                    default_folder_str
-                ));
-                return default_folder;
-            }
-
-            match dunce::canonicalize(folder_path) {
-                Ok(t) => Some(t),
-                Err(_e) => {
-                    warnings.push(format!(
-                        "Cannot canonicalize {} folder \"{}\", using default folder \"{}\"",
-                        name.to_ascii_lowercase(),
-                        env_var,
-                        default_folder_str
-                    ));
-                    default_folder
-                }
-            }
-        }
-    };
-
-    let config_folder = resolve_folder(&config_folder_env, default_config_folder, "Config");
-    let cache_folder = resolve_folder(&cache_folder_env, default_cache_folder, "Cache");
-
-    let config_cache_path = if let (Some(config_folder), Some(cache_folder)) = (config_folder, cache_folder) {
-        infos.push(format!(
-            "Config folder set to \"{}\" and cache folder set to \"{}\"",
-            config_folder.to_string_lossy(),
-            cache_folder.to_string_lossy()
-        ));
-        if !config_folder.exists() {
-            if let Err(e) = fs::create_dir_all(&config_folder) {
-                warnings.push(format!("Cannot create config folder \"{}\", reason {e}", config_folder.to_string_lossy()));
-            }
-        }
-        if !cache_folder.exists() {
-            if let Err(e) = fs::create_dir_all(&cache_folder) {
-                warnings.push(format!("Cannot create cache folder \"{}\", reason {e}", cache_folder.to_string_lossy()));
-            }
-        }
-        Some(ConfigCachePath { config_folder, cache_folder })
-    } else {
-        warnings.push("Cannot set config/cache path - config and cache will not be used.".to_string());
-        None
-    };
-
-    CONFIG_CACHE_PATH.set(config_cache_path).expect("Cannot set config/cache path twice");
-
-    (infos, warnings)
-}
-
 pub fn get_number_of_threads() -> usize {
     let data = NUMBER_OF_THREADS.get();
     if *data >= 1 { *data } else { get_all_available_threads() }
-}
-
-fn filtering_messages(record: &Record) -> bool {
-    if let Some(module_path) = record.module_path() {
-        // Printing not supported modules
-        // if !["krokiet", "czkawka", "log_panics", "smithay_client_toolkit", "sctk_adwaita"]
-        //     .iter()
-        //     .any(|t| module_path.starts_with(t))
-        // {
-        //     println!("{:?}", module_path);
-        //     return true;
-        // } else {
-        //     return false;
-        // }
-
-        ["krokiet", "czkawka", "log_panics"].iter().any(|t| module_path.starts_with(t))
-    } else {
-        true
-    }
-}
-
-#[allow(clippy::print_stdout)]
-pub fn setup_logger(disabled_terminal_printing: bool, app_name: &str) {
-    log_panics::init();
-
-    let terminal_log_level = if disabled_terminal_printing && ![Ok("1"), Ok("true")].contains(&env::var("ENABLE_TERMINAL_LOGS_IN_CLI").as_deref()) {
-        LevelFilter::Off
-    } else {
-        LevelFilter::Info
-    };
-    let file_log_level = LevelFilter::Debug;
-
-    let term_config = ConfigBuilder::default()
-        .set_level(terminal_log_level)
-        .set_message_filtering(Some(filtering_messages))
-        .build();
-    let file_config = ConfigBuilder::default()
-        .set_level(file_log_level)
-        .set_write_once(true)
-        .set_message_filtering(Some(filtering_messages))
-        .set_time_format(TimeFormat::DateTimeWithMicro, None)
-        .set_format_text(FormatText::DefaultWithThreadFile.get(), None)
-        .build();
-
-    let combined_logger = (|| {
-        let Some(config_cache_path) = get_config_cache_path() else {
-            // println!("No config cache path configured, using default config folder");
-            return None;
-        };
-
-        let cache_logs_path = config_cache_path.cache_folder.join(format!("{app_name}.log"));
-
-        let write_rotater = FileRotate::new(
-            &cache_logs_path,
-            AppendTimestamp::default(FileLimit::MaxFiles(3)),
-            ContentLimit::BytesSurpassed(100 * 1024 * 1024),
-            Compression::None,
-            None,
-        );
-
-        let combined_logs: Vec<Box<dyn SharedLogger>> = if [Ok("1"), Ok("true")].contains(&env::var("DISABLE_FILE_LOGGING").as_deref()) {
-            vec![TermLogger::new_from_config(term_config.clone())]
-        } else {
-            vec![TermLogger::new_from_config(term_config.clone()), WriteLogger::new(file_config, write_rotater)]
-        };
-
-        CombinedLogger::init(combined_logs).ok().inspect(|()| {
-            info!("Logging to file \"{}\" and terminal", cache_logs_path.to_string_lossy());
-        })
-    })();
-
-    if combined_logger.is_none() {
-        TermLogger::init(term_config, TerminalMode::Mixed, ColorChoice::Always).expect("Cannot initialize logger");
-        info!("Logging to terminal only, file logging is disabled");
-    }
 }
 
 pub fn get_all_available_threads() -> usize {
@@ -233,89 +58,6 @@ pub fn get_all_available_threads() -> usize {
         ALL_AVAILABLE_THREADS.set(available_threads);
         available_threads
     })
-}
-
-#[allow(clippy::vec_init_then_push)]
-#[allow(unused_mut)]
-pub fn print_version_mode(app: &str) {
-    let rust_version = env!("RUST_VERSION_INTERNAL");
-    let debug_release = if cfg!(debug_assertions) { "debug" } else { "release" };
-
-    let processors = get_all_available_threads();
-
-    let info = os_info::get();
-
-    let mut features: Vec<&str> = vec![];
-    #[cfg(feature = "heif")]
-    features.push("heif");
-    #[cfg(feature = "libavif")]
-    features.push("libavif");
-    #[cfg(feature = "libraw")]
-    features.push("libraw");
-    #[cfg(feature = "fast_image_resize")]
-    features.push("fast_image_resize");
-
-    let mut app_cpu_version = "Baseline";
-    let mut os_cpu_version = "Baseline";
-    if cfg!(target_feature = "sse2") {
-        app_cpu_version = "x86-64-v1 (SSE2)";
-    }
-    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-    if is_x86_feature_detected!("sse2") {
-        os_cpu_version = "x86-64-v1 (SSE2)";
-    }
-
-    if cfg!(target_feature = "popcnt") {
-        app_cpu_version = "x86-64-v2 (SSE4.2 + POPCNT)";
-    }
-    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-    if is_x86_feature_detected!("popcnt") {
-        os_cpu_version = "x86-64-v2 (SSE4.2 + POPCNT)";
-    }
-
-    if cfg!(target_feature = "avx2") {
-        app_cpu_version = "x86-64-v3 (AVX2) or x86-64-v4 (AVX-512)";
-    }
-    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-    if is_x86_feature_detected!("avx2") {
-        os_cpu_version = "x86-64-v3 (AVX2)";
-    }
-
-    // TODO - https://github.com/rust-lang/rust/issues/44839 - remove "or" from above when fixed
-    // Currently this is always false, because cfg!(target_feature = "avx512f") is not working
-    // What is strange, because is_x86_feature_detected!("avx512f") is working
-    if cfg!(target_feature = "avx512f") {
-        app_cpu_version = "x86-64-v4 (AVX-512)";
-    }
-    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-    if is_x86_feature_detected!("avx512f") {
-        os_cpu_version = "x86-64-v4 (AVX-512)";
-    }
-
-    // TODO - probably needs to add arm and other architectures, need help, because I don't have access to them
-
-    info!(
-        "{app} version: {CZKAWKA_VERSION}, {debug_release} mode, rust {rust_version}, os {} {} ({} {}), {processors} cpu/threads, features({}): [{}], app cpu version: {}, os cpu version: {}",
-        info.os_type(),
-        info.version(),
-        env::consts::ARCH,
-        info.bitness(),
-        features.len(),
-        features.join(", "),
-        app_cpu_version,
-        os_cpu_version,
-    );
-    if cfg!(debug_assertions) {
-        warn!("You are running debug version of app which is a lot of slower than release version.");
-    }
-
-    if option_env!("USING_CRANELIFT").is_some() {
-        warn!("You are running app with cranelift which is intended only for fast compilation, not runtime performance.");
-    }
-
-    if cfg!(panic = "abort") {
-        warn!("You are running app compiled with panic='abort', which may cause panics when processing untrusted data.");
-    }
 }
 
 pub fn set_number_of_threads(thread_number: usize) {
@@ -447,51 +189,6 @@ pub fn remove_folder_if_contains_only_empty_folders(path: impl AsRef<Path>, remo
     } else {
         fs::remove_dir_all(path).map_err(|e| format!("Cannot remove directory \"{}\", reason {e}", path.to_string_lossy()))
     }
-}
-
-pub(crate) fn open_cache_folder(
-    cache_file_name: &str,
-    save_to_cache: bool,
-    use_json: bool,
-    warnings: &mut Vec<String>,
-) -> Option<((Option<File>, PathBuf), (Option<File>, PathBuf))> {
-    let cache_dir = get_config_cache_path()?.cache_folder;
-    let cache_file = cache_dir.join(cache_file_name);
-    let cache_file_json = cache_dir.join(cache_file_name.replace(".bin", ".json"));
-
-    let mut file_handler_default = None;
-    let mut file_handler_json = None;
-
-    if save_to_cache {
-        file_handler_default = Some(match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
-            Ok(t) => t,
-            Err(e) => {
-                warnings.push(format!("Cannot create or open cache file \"{}\", reason {e}", cache_file.to_string_lossy()));
-                return None;
-            }
-        });
-        if use_json {
-            file_handler_json = Some(match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file_json) {
-                Ok(t) => t,
-                Err(e) => {
-                    warnings.push(format!("Cannot create or open cache file \"{}\", reason {e}", cache_file_json.to_string_lossy()));
-                    return None;
-                }
-            });
-        }
-    } else {
-        if let Ok(t) = OpenOptions::new().read(true).open(&cache_file) {
-            file_handler_default = Some(t);
-        } else {
-            if use_json {
-                file_handler_json = Some(OpenOptions::new().read(true).open(&cache_file_json).ok()?);
-            } else {
-                // messages.push(format!("Cannot find or open cache file {cache_file:?}")); // No error or warning
-                return None;
-            }
-        }
-    };
-    Some(((file_handler_default, cache_file), (file_handler_json, cache_file_json)))
 }
 
 pub fn split_path(path: &Path) -> (String, String) {

@@ -8,6 +8,7 @@ import sys
 
 FAKE_RUN = False
 
+
 def run_cmd(cmd: list[str], cwd: Path | None = None) -> bool:
     print(f"Running: {' '.join(cmd)}")
     if FAKE_RUN:
@@ -17,14 +18,11 @@ def run_cmd(cmd: list[str], cwd: Path | None = None) -> bool:
         print(f"Error: {result.stderr}")
     return result.returncode == 0
 
+
 def simplify_svg(svg_path: Path) -> None:
-    run_cmd([
-        "inkscape",
-        str(svg_path),
-        "--export-type=svg",
-        "--export-text-to-path",
-        "--export-filename=" + str(svg_path)
-    ])
+    run_cmd(
+        ["inkscape", str(svg_path), "--export-type=svg", "--export-text-to-path", "--export-filename=" + str(svg_path)]
+    )
 
     cleaned_path = svg_path.with_suffix(".cleaned.svg")
     if run_cmd(["svgcleaner", str(svg_path), str(cleaned_path)]):
@@ -34,6 +32,7 @@ def simplify_svg(svg_path: Path) -> None:
     elif cleaned_path.exists():
         if not FAKE_RUN:
             cleaned_path.unlink()
+
 
 def main() -> None:
     # First arg is folder to search for svg files
@@ -48,6 +47,7 @@ def main() -> None:
 
     for svg_file in svg_files:
         simplify_svg(svg_file)
+
 
 if __name__ == "__main__":
     main()

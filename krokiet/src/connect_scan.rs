@@ -5,7 +5,8 @@ use std::thread;
 
 use chrono::DateTime;
 use crossbeam_channel::Sender;
-use czkawka_core::common::{DEFAULT_THREAD_SIZE, split_path, split_path_compare};
+use czkawka_core::common::consts::DEFAULT_THREAD_SIZE;
+use czkawka_core::common::{split_path, split_path_compare};
 use czkawka_core::common_dir_traversal::{CheckingMethod, FileEntry};
 use czkawka_core::common_tool::CommonData;
 use czkawka_core::common_traits::ResultEntry;

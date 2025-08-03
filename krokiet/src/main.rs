@@ -13,7 +13,9 @@ use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
 use crossbeam_channel::{Receiver, Sender, unbounded};
-use czkawka_core::common::{print_infos_and_warnings, print_version_mode, set_config_cache_path, setup_logger};
+use czkawka_core::common::config_cache_path::set_config_cache_path;
+use czkawka_core::common::logger::{filtering_messages, print_version_mode, setup_logger};
+use czkawka_core::common::print_infos_and_warnings;
 use czkawka_core::progress_data::ProgressData;
 use log::{info, warn};
 use slint::VecModel;
@@ -67,7 +69,7 @@ mod test_common;
 slint::include_modules!();
 fn main() {
     let (infos, warnings) = set_config_cache_path("Czkawka", "Krokiet");
-    setup_logger(false, "krokiet");
+    setup_logger(false, "krokiet", filtering_messages);
     let cli_args = process_cli_args(std::env::args().skip(1).collect());
     print_version_mode("Krokiet");
     print_infos_and_warnings(infos, warnings);

@@ -16,13 +16,13 @@ use log::{debug, error};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
+use crate::common::cache::{extract_loaded_cache, get_similar_images_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
+use crate::common::image::get_dynamic_image_from_path;
 use crate::common::{
     HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, JXL_IMAGE_EXTENSIONS, RAW_IMAGE_EXTENSIONS, WorkContinueStatus, check_if_stop_received, prepare_thread_handler_common,
     send_info_and_wait_for_ending_all_threads,
 };
-use crate::common_cache::{extract_loaded_cache, get_similar_images_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType, inode, take_1_per_inode};
-use crate::common_image::get_dynamic_image_from_path;
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::{DebugPrint, DeletingItems, PrintResults, ResultEntry};
 use crate::flc;

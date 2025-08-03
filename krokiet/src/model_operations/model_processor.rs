@@ -3,8 +3,8 @@ use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
 use std::time::Duration;
 
 use crossbeam_channel::Sender;
-use czkawka_core::common_messages::Messages;
 use czkawka_core::helpers::delayed_sender::DelayedSender;
+use czkawka_core::helpers::messages::Messages;
 use czkawka_core::progress_data::{CurrentStage, ProgressData};
 use log::error;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};

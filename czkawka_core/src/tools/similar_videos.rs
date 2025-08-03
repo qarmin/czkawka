@@ -14,8 +14,8 @@ use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use vid_dup_finder_lib::{CreationOptions, Cropdetect, VideoHash, VideoHashBuilder};
 
+use crate::common::cache::{extract_loaded_cache, get_similar_videos_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common::{VIDEO_FILES_EXTENSIONS, WorkContinueStatus, check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
-use crate::common_cache::{extract_loaded_cache, get_similar_videos_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType, inode, take_1_per_inode};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::{DebugPrint, DeletingItems, PrintResults, ResultEntry};

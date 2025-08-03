@@ -3,7 +3,7 @@ use std::path::Path;
 #[cfg(not(target_family = "unix"))]
 use crate::common::normalize_windows_path;
 use crate::common::regex_check;
-use crate::common_messages::Messages;
+use crate::helpers::messages::Messages;
 
 #[cfg(target_family = "unix")]
 pub const DEFAULT_EXCLUDED_DIRECTORIES: &[&str] = &["/proc", "/dev", "/sys", "/snap"];

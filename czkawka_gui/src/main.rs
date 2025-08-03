@@ -31,7 +31,9 @@ use connect_things::connect_settings::*;
 use connect_things::connect_show_hide_ui::*;
 use connect_things::connect_similar_image_size_change::*;
 use crossbeam_channel::{Receiver, Sender, unbounded};
-use czkawka_core::common::{get_number_of_threads, print_infos_and_warnings, print_version_mode, set_config_cache_path, set_number_of_threads, setup_logger};
+use czkawka_core::common::config_cache_path::set_config_cache_path;
+use czkawka_core::common::logger::{filtering_messages, print_version_mode, setup_logger};
+use czkawka_core::common::{get_number_of_threads, print_infos_and_warnings, set_number_of_threads};
 use czkawka_core::progress_data::ProgressData;
 use czkawka_core::*;
 use glib::ExitCode;
@@ -73,7 +75,7 @@ mod tests;
 
 fn main() {
     let (infos, warnings) = set_config_cache_path("Czkawka", "Czkawka");
-    setup_logger(false, "czkawka_gui");
+    setup_logger(false, "czkawka_gui", filtering_messages);
     print_version_mode("Czkawka gtk");
     print_infos_and_warnings(infos, warnings);
 

@@ -1,4 +1,4 @@
-use czkawka_core::common::get_config_cache_path;
+use czkawka_core::common::config_cache_path::get_config_cache_path;
 use log::error;
 use slint::ComponentHandle;
 

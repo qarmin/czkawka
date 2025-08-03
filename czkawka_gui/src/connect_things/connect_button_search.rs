@@ -4,7 +4,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread;
 
 use crossbeam_channel::Sender;
-use czkawka_core::common::DEFAULT_THREAD_SIZE;
+use czkawka_core::common::consts::DEFAULT_THREAD_SIZE;
 use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::common_tool::CommonData;
 use czkawka_core::progress_data::ProgressData;

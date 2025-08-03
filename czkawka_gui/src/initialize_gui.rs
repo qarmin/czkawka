@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use czkawka_core::common_image::get_dynamic_image_from_path;
+use czkawka_core::common::image::get_dynamic_image_from_path;
 use czkawka_core::tools::similar_images::SIMILAR_VALUES;
 use czkawka_core::tools::similar_videos::MAX_TOLERANCE;
 use gdk4::gdk_pixbuf::Pixbuf;

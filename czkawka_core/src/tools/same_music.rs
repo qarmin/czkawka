@@ -24,11 +24,11 @@ use symphonia::core::io::MediaSourceStream;
 use symphonia::core::meta::MetadataOptions;
 use symphonia::core::probe::Hint;
 
+use crate::common::cache::{extract_loaded_cache, get_similar_music_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common::{
     AUDIO_FILES_EXTENSIONS, WorkContinueStatus, check_if_stop_received, create_crash_message, filter_reference_folders_generic, prepare_thread_handler_common,
     send_info_and_wait_for_ending_all_threads,
 };
-use crate::common_cache::{extract_loaded_cache, get_similar_music_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::*;

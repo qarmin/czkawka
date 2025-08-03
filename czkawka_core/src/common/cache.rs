@@ -15,9 +15,9 @@ use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use serde::{Deserialize, Serialize};
 use vid_dup_finder_lib::Cropdetect;
 
-use crate::common;
-use crate::common_messages::Messages;
+use crate::common::config_cache_path::open_cache_folder;
 use crate::common_traits::ResultEntry;
+use crate::helpers::messages::Messages;
 use crate::tools::duplicate::HashType;
 use crate::tools::similar_images::{convert_algorithm_to_string, convert_filters_to_string};
 
@@ -74,9 +74,7 @@ where
     T: Serialize + ResultEntry + Sized + Send + Sync,
 {
     let mut text_messages = Messages::new();
-    if let Some(((file_handler, cache_file), (file_handler_json, cache_file_json))) =
-        common::open_cache_folder(cache_file_name, true, save_also_as_json, &mut text_messages.warnings)
-    {
+    if let Some(((file_handler, cache_file), (file_handler_json, cache_file_json))) = open_cache_folder(cache_file_name, true, save_also_as_json, &mut text_messages.warnings) {
         let hashmap_to_save = hashmap.values().filter(|t| t.get_size() >= minimum_file_size).collect::<Vec<_>>();
 
         {
@@ -214,7 +212,7 @@ where
 {
     let mut text_messages = Messages::new();
 
-    if let Some(((file_handler, cache_file), (file_handler_json, cache_file_json))) = common::open_cache_folder(cache_file_name, false, true, &mut text_messages.warnings) {
+    if let Some(((file_handler, cache_file), (file_handler_json, cache_file_json))) = open_cache_folder(cache_file_name, false, true, &mut text_messages.warnings) {
         let cache_full_name;
         let mut vec_loaded_entries: Vec<T>;
         if let Some(file_handler) = file_handler {
