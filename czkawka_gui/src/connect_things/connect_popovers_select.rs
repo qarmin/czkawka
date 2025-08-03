@@ -405,15 +405,17 @@ fn popover_custom_select_unselect(
                         confirmation_dialog_select_unselect.close();
                         return;
                     };
+                    let using_reference_folders = column_header.is_some_and(|e| model.get::<bool>(&iter, e)) && !model.get::<String>(&iter, column_file_name).is_empty();
 
                     let mut number_of_all_things = 0;
                     let mut number_of_already_selected_things = 0;
                     let mut vec_of_iters: Vec<TreeIter> = Vec::new();
                     loop {
+                        // If went to header and all previous items were selected, then deselect last item
                         if let Some(column_header) = column_header {
                             if model.get::<bool>(&iter, column_header) {
                                 if select_things {
-                                    if check_all_selected && (number_of_all_things - number_of_already_selected_things == vec_of_iters.len()) {
+                                    if !using_reference_folders && check_all_selected && (number_of_all_things - number_of_already_selected_things == vec_of_iters.len()) {
                                         vec_of_iters.pop();
                                     }
                                     for iter in vec_of_iters {
@@ -486,9 +488,10 @@ fn popover_custom_select_unselect(
                             }
                         }
 
+                        // If went to last item and all previous items were selected, then deselect last item
                         if !model.iter_next(&iter) {
                             if select_things {
-                                if check_all_selected && (number_of_all_things - number_of_already_selected_things == vec_of_iters.len()) {
+                                if !using_reference_folders && check_all_selected && (number_of_all_things - number_of_already_selected_things == vec_of_iters.len()) {
                                     vec_of_iters.pop();
                                 }
                                 for iter in vec_of_iters {
