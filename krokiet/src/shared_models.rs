@@ -1,6 +1,6 @@
 use std::sync::{Arc, Mutex};
 
-use czkawka_core::common_traits::PrintResults;
+use czkawka_core::common::traits::PrintResults;
 use czkawka_core::tools::bad_extensions::BadExtensions;
 use czkawka_core::tools::big_file::BigFile;
 use czkawka_core::tools::broken_files::BrokenFiles;

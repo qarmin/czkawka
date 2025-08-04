@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use serde::{Deserialize, Serialize};
 use xxhash_rust::xxh3::Xxh3;
 
-use crate::common_traits::ResultEntry;
+use crate::common::traits::ResultEntry;
 use crate::tools::duplicate::MyHasher;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Default)]

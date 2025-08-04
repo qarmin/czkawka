@@ -8,6 +8,7 @@ use czkawka_core::common::consts::DEFAULT_THREAD_SIZE;
 use czkawka_core::common::model::CheckingMethod;
 use czkawka_core::common::progress_data::ProgressData;
 use czkawka_core::common::tool_data::CommonData;
+use czkawka_core::common::traits::Scan;
 use czkawka_core::tools::bad_extensions::{BadExtensions, BadExtensionsParameters};
 use czkawka_core::tools::big_file::{BigFile, BigFileParameters};
 use czkawka_core::tools::broken_files::{BrokenFiles, BrokenFilesParameters, CheckedTypes};
@@ -679,7 +680,7 @@ fn bad_extensions_search(
             let mut item = BadExtensions::new(params);
 
             set_common_settings(&mut item, &loaded_commons);
-            item.find_bad_extensions_files(&stop_flag, Some(&progress_data_sender));
+            item.scan(&stop_flag, Some(&progress_data_sender));
             result_sender.send(Message::BadExtensions(item)).expect("Failed to send BadExtensions message");
         })
         .expect("Failed to spawn BadExtensions thread");

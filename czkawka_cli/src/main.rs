@@ -18,7 +18,7 @@ use czkawka_core::common::logger::{filtering_messages, print_version_mode, setup
 use czkawka_core::common::progress_data::ProgressData;
 use czkawka_core::common::set_number_of_threads;
 use czkawka_core::common::tool_data::{CommonData, DeleteMethod};
-use czkawka_core::common_traits::PrintResults;
+use czkawka_core::common::traits::{PrintResults, Scan};
 use czkawka_core::tools::bad_extensions::{BadExtensions, BadExtensionsParameters};
 use czkawka_core::tools::big_file::{BigFile, BigFileParameters, SearchMode};
 use czkawka_core::tools::broken_files::{BrokenFiles, BrokenFilesParameters, CheckedTypes};
@@ -371,7 +371,7 @@ fn bad_extensions(bad_extensions: BadExtensionsArgs, stop_flag: &Arc<AtomicBool>
 
     set_common_settings(&mut item, &common_cli_items, None);
 
-    item.find_bad_extensions_files(stop_flag, Some(progress_sender));
+    item.scan(stop_flag, Some(progress_sender));
 
     save_and_write_results_to_writer(&item, &common_cli_items)
 }

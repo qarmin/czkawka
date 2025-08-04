@@ -10,6 +10,7 @@ use serde::Serialize;
 
 use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;
+use crate::common::tool_data::CommonData;
 
 pub trait DebugPrint {
     fn debug_print(&self);
@@ -93,3 +94,9 @@ pub trait ResultEntry {
     fn get_modified_date(&self) -> u64;
     fn get_size(&self) -> u64;
 }
+
+pub trait Scan {
+    fn scan(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>);
+}
+
+pub trait AllTraits: DebugPrint + PrintResults + DeletingItems + CommonData + Scan {}

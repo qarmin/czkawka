@@ -16,7 +16,7 @@ use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
-use crate::common_traits::*;
+use crate::common::traits::*;
 
 const TEMP_EXTENSIONS: &[&str] = &[
     "#",

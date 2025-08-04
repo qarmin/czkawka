@@ -9,8 +9,8 @@ use czkawka_core::common::consts::DEFAULT_THREAD_SIZE;
 use czkawka_core::common::model::{CheckingMethod, FileEntry};
 use czkawka_core::common::progress_data::ProgressData;
 use czkawka_core::common::tool_data::CommonData;
+use czkawka_core::common::traits::{ResultEntry, Scan};
 use czkawka_core::common::{split_path, split_path_compare};
-use czkawka_core::common_traits::ResultEntry;
 use czkawka_core::tools::bad_extensions::{BadExtensions, BadExtensionsParameters, BadFileEntry};
 use czkawka_core::tools::big_file::{BigFile, BigFileParameters, SearchMode};
 use czkawka_core::tools::broken_files::{BrokenEntry, BrokenFiles, BrokenFilesParameters, CheckedTypes};
@@ -922,7 +922,7 @@ fn scan_bad_extensions(
             let params = BadExtensionsParameters::new();
             let mut item = BadExtensions::new(params);
             set_common_settings(&mut item, &custom_settings, &stop_flag);
-            item.find_bad_extensions_files(&stop_flag, Some(&progress_sender));
+            item.scan(&stop_flag, Some(&progress_sender));
 
             let mut vector = item.get_bad_extensions_files().clone();
             let messages = item.get_text_messages().create_messages_text();

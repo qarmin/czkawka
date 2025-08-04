@@ -12,7 +12,7 @@ use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{FileEntry, ToolType, WorkContinueStatus};
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
-use crate::common_traits::{DebugPrint, DeletingItems, PrintResults};
+use crate::common::traits::{DebugPrint, DeletingItems, PrintResults};
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum SearchMode {

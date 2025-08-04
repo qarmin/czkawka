@@ -10,7 +10,7 @@ use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{FileEntry, ToolType, WorkContinueStatus};
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
-use crate::common_traits::*;
+use crate::common::traits::*;
 
 #[derive(Default)]
 pub struct Info {

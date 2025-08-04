@@ -15,7 +15,7 @@ use crate::common::items::ExcludedItems;
 use crate::common::model::{CheckingMethod, ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::remove_folder_if_contains_only_empty_folders;
-use crate::common_traits::ResultEntry;
+use crate::common::traits::ResultEntry;
 use crate::helpers::delayed_sender::DelayedSender;
 use crate::helpers::messages::Messages;
 

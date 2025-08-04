@@ -27,7 +27,7 @@ use crate::common::model::{CheckingMethod, FileEntry, HashType, ToolType, WorkCo
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
-use crate::common_traits::*;
+use crate::common::traits::*;
 
 pub const PREHASHING_BUFFER_SIZE: u64 = 4 * 1024;
 pub const THREAD_BUFFER_SIZE: usize = 2 * 1024 * 1024;

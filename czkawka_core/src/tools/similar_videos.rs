@@ -21,7 +21,7 @@ use crate::common::model::{FileEntry, ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
-use crate::common_traits::{DebugPrint, DeletingItems, PrintResults, ResultEntry};
+use crate::common::traits::{DebugPrint, DeletingItems, PrintResults, ResultEntry};
 use crate::flc;
 
 pub const MAX_TOLERANCE: i32 = 20;

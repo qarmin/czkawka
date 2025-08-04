@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use std::{fs, os::unix::fs::MetadataExt};
 
 use crate::common::normalize_windows_path;
-use crate::common_traits::ResultEntry;
+use crate::common::traits::ResultEntry;
 use crate::flc;
 use crate::helpers::messages::Messages;
 

@@ -42,7 +42,7 @@ def main() -> None:
     svg_folder = Path(sys.argv[1])
     svg_files = list(svg_folder.glob("**/*.svg"))
     if not svg_files:
-        print("No svg files")
+        print(f"No SVG files found in the specified directory: {svg_folder}")
         return
 
     for svg_file in svg_files:

@@ -1,4 +1,4 @@
-build_all:
+build_all: && fix
     cargo build --release
     cargo build
     cargo clippy
