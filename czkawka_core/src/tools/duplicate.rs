@@ -21,12 +21,11 @@ use serde::{Deserialize, Serialize};
 use static_assertions::const_assert;
 use xxhash_rust::xxh3::Xxh3;
 
-use crate::common::model::WorkContinueStatus;
 use crate::common::cache::{get_duplicate_cache_file, load_cache_from_file_generalized_by_size, save_cache_to_file_generalized};
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
-use crate::common::model::{CheckingMethod, FileEntry, HashType, ToolType};
+use crate::common::model::{CheckingMethod, FileEntry, HashType, ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
-use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
+use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::*;
 
@@ -36,8 +35,6 @@ pub const THREAD_BUFFER_SIZE: usize = 2 * 1024 * 1024;
 thread_local! {
     static THREAD_BUFFER: RefCell<Vec<u8>> = RefCell::new(vec![0u8; THREAD_BUFFER_SIZE]);
 }
-
-
 
 #[derive(Clone, Serialize, Deserialize, Debug, Default)]
 pub struct DuplicateEntry {
@@ -555,16 +552,15 @@ impl DuplicateFinder {
         }
 
         let check_type = self.get_params().hash_type;
-        let (progress_thread_handle, progress_thread_run, _items_counter, _check_was_stopped, _size_counter) =
-            prepare_thread_handler_common(progress_sender, CurrentStage::DuplicatePreHashCacheLoading, 0, self.get_test_type(), 0);
+        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::DuplicatePreHashCacheLoading, 0, self.get_test_type(), 0);
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.prehash_load_cache_at_start();
 
-        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+        progress_handler.join_thread();
         if check_if_stop_received(stop_flag) {
             return WorkContinueStatus::Stop;
         }
-        let (progress_thread_handle, progress_thread_run, items_counter, check_was_stopped, size_counter) = prepare_thread_handler_common(
+        let progress_handler = prepare_thread_handler_common(
             progress_sender,
             CurrentStage::DuplicatePreHashing,
             non_cached_files_to_check.values().map(Vec::len).sum(),
@@ -590,17 +586,16 @@ impl DuplicateFinder {
                 THREAD_BUFFER.with_borrow_mut(|buffer| {
                     for mut file_entry in vec_file_entry {
                         if check_if_stop_received(stop_flag) {
-                            check_was_stopped.store(true, Ordering::Relaxed);
                             return None;
                         }
-                        match hash_calculation_limit(buffer, &file_entry, check_type, PREHASHING_BUFFER_SIZE, &size_counter) {
+                        match hash_calculation_limit(buffer, &file_entry, check_type, PREHASHING_BUFFER_SIZE, progress_handler.size_counter()) {
                             Ok(hash_string) => {
                                 file_entry.hash = hash_string.clone();
                                 hashmap_with_hash.entry(hash_string).or_default().push(file_entry);
                             }
                             Err(s) => errors.push(s),
                         }
-                        items_counter.fetch_add(1, Ordering::Relaxed);
+                        progress_handler.increase_items(1);
                     }
 
                     Some(())
@@ -613,11 +608,10 @@ impl DuplicateFinder {
 
         debug!("Completed calculating prehash");
 
-        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+        progress_handler.join_thread();
 
         // Saving into cache
-        let (progress_thread_handle, progress_thread_run, _items_counter, _check_was_stopped, _size_counter) =
-            prepare_thread_handler_common(progress_sender, CurrentStage::DuplicatePreHashCacheSaving, 0, self.get_test_type(), 0);
+        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::DuplicatePreHashCacheSaving, 0, self.get_test_type(), 0);
 
         // Add data from cache
         for (size, mut vec_file_entry) in records_already_cached {
@@ -638,8 +632,9 @@ impl DuplicateFinder {
 
         self.prehash_save_cache_at_exit(loaded_hash_map, pre_hash_results);
 
-        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-        if check_was_stopped.load(Ordering::Relaxed) || check_if_stop_received(stop_flag) {
+        progress_handler.join_thread();
+
+        if check_if_stop_received(stop_flag) {
             return WorkContinueStatus::Stop;
         }
 
@@ -779,17 +774,16 @@ impl DuplicateFinder {
             return WorkContinueStatus::Continue;
         }
 
-        let (progress_thread_handle, progress_thread_run, _items_counter, _check_was_stopped, _size_counter) =
-            prepare_thread_handler_common(progress_sender, CurrentStage::DuplicateCacheLoading, 0, self.get_test_type(), 0);
+        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::DuplicateCacheLoading, 0, self.get_test_type(), 0);
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.full_hashing_load_cache_at_start(pre_checked_map);
 
-        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+        progress_handler.join_thread();
         if check_if_stop_received(stop_flag) {
             return WorkContinueStatus::Stop;
         }
 
-        let (progress_thread_handle, progress_thread_run, items_counter, check_was_stopped, size_counter) = prepare_thread_handler_common(
+        let progress_handler = prepare_thread_handler_common(
             progress_sender,
             CurrentStage::DuplicateFullHashing,
             non_cached_files_to_check.values().map(Vec::len).sum(),
@@ -814,11 +808,10 @@ impl DuplicateFinder {
                 THREAD_BUFFER.with_borrow_mut(|buffer| {
                     for mut file_entry in vec_file_entry {
                         if check_if_stop_received(stop_flag) {
-                            check_was_stopped.store(true, Ordering::Relaxed);
                             return None;
                         }
 
-                        match hash_calculation(buffer, &file_entry, check_type, &size_counter, stop_flag) {
+                        match hash_calculation(buffer, &file_entry, check_type, progress_handler.size_counter(), stop_flag) {
                             Ok(hash_string) => {
                                 if let Some(hash_string) = hash_string {
                                     file_entry.hash = hash_string.clone();
@@ -829,8 +822,7 @@ impl DuplicateFinder {
                             }
                             Err(s) => errors.push(s),
                         };
-
-                        items_counter.fetch_add(1, Ordering::Relaxed);
+                        progress_handler.increase_items(1);
                     }
                     Some(())
                 })?;
@@ -842,13 +834,13 @@ impl DuplicateFinder {
         debug!("Finished full hashing");
 
         // Even if clicked stop, save items to cache and show results
-        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-        let (progress_thread_handle, progress_thread_run, _items_counter, _check_was_stopped, _size_counter) =
-            prepare_thread_handler_common(progress_sender, CurrentStage::DuplicateCacheSaving, 0, self.get_test_type(), 0);
+
+        progress_handler.join_thread();
+        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::DuplicateCacheSaving, 0, self.get_test_type(), 0);
 
         self.full_hashing_save_cache_at_exit(records_already_cached, &mut full_hash_results, loaded_hash_map);
 
-        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+        progress_handler.join_thread();
 
         for (size, hash_map, mut errors) in full_hash_results {
             self.common_data.text_messages.warnings.append(&mut errors);

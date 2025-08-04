@@ -163,9 +163,9 @@ pub fn regex_check(expression_item: &SingleExcludedItem, directory_name: &str) -
     // `git*` shouldn't be true for `/gitsfafasfs`
     if !expression_item.expression.starts_with('*')
         && directory_name
-        .find(&expression_item.expression_splits[0])
-        .expect("Cannot fail, because split must exists in directory_name")
-        > 0
+            .find(&expression_item.expression_splits[0])
+            .expect("Cannot fail, because split must exists in directory_name")
+            > 0
     {
         return false;
     }
@@ -230,7 +230,7 @@ pub fn make_hard_link(src: &Path, dst: &Path) -> io::Result<()> {
 
 #[cfg(test)]
 mod test {
-    use std::fs::{read_dir, File, Metadata};
+    use std::fs::{File, Metadata, read_dir};
     use std::io::Write;
     #[cfg(target_family = "windows")]
     use std::os::fs::MetadataExt;

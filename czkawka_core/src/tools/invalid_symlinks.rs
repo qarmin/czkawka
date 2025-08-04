@@ -9,9 +9,8 @@ use fun_time::fun_time;
 use log::debug;
 use serde::{Deserialize, Serialize};
 
-use crate::common::model::WorkContinueStatus;
 use crate::common::dir_traversal::{Collect, DirTraversalBuilder, DirTraversalResult};
-use crate::common::model::{FileEntry, ToolType};
+use crate::common::model::{FileEntry, ToolType, WorkContinueStatus};
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
 use crate::common_traits::*;

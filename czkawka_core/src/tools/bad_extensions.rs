@@ -12,11 +12,10 @@ use mime_guess::get_mime_extensions;
 use rayon::prelude::*;
 use serde::Serialize;
 
-use crate::common::model::WorkContinueStatus;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
-use crate::common::model::{FileEntry, ToolType};
+use crate::common::model::{FileEntry, ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
-use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
+use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::common_traits::*;
 
@@ -276,8 +275,7 @@ impl BadExtensions {
             return WorkContinueStatus::Continue;
         }
 
-        let (progress_thread_handle, progress_thread_run, items_counter, check_was_stopped, _size_counter) =
-            prepare_thread_handler_common(progress_sender, CurrentStage::BadExtensionsChecking, self.files_to_check.len(), self.get_test_type(), 0);
+        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::BadExtensionsChecking, self.files_to_check.len(), self.get_test_type(), 0);
 
         let files_to_check = mem::take(&mut self.files_to_check);
 
@@ -286,12 +284,12 @@ impl BadExtensions {
             hashmap_workarounds.entry(found).or_default().push(proper);
         }
 
-        self.bad_extensions_files = self.verify_extensions(files_to_check, &items_counter, stop_flag, &check_was_stopped, &hashmap_workarounds);
+        self.bad_extensions_files = self.verify_extensions(files_to_check, progress_handler.items_counter(), stop_flag, &hashmap_workarounds);
 
-        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+        progress_handler.join_thread();
 
         // Break if stop was clicked
-        if check_was_stopped.load(Ordering::Relaxed) {
+        if stop_flag.load(Ordering::Relaxed) {
             return WorkContinueStatus::Stop;
         }
 
@@ -343,14 +341,12 @@ impl BadExtensions {
         files_to_check: Vec<FileEntry>,
         items_counter: &Arc<AtomicUsize>,
         stop_flag: &Arc<AtomicBool>,
-        check_was_stopped: &AtomicBool,
         hashmap_workarounds: &HashMap<&str, Vec<&str>>,
     ) -> Vec<BadFileEntry> {
         files_to_check
             .into_par_iter()
             .map(|file_entry| {
                 if check_if_stop_received(stop_flag) {
-                    check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
                 let res = self.verify_extension_of_file(file_entry, hashmap_workarounds);

@@ -9,16 +9,16 @@ use std::{mem, panic};
 use anyhow::Context;
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
-use humansize::{format_size, BINARY};
+use humansize::{BINARY, format_size};
 use lofty::file::{AudioFile, TaggedFileExt};
 use lofty::prelude::*;
 use lofty::read_from;
 use log::{debug, error};
 use rayon::prelude::*;
-use rusty_chromaprint::{match_fingerprints, Configuration, Fingerprinter};
+use rusty_chromaprint::{Configuration, Fingerprinter, match_fingerprints};
 use serde::{Deserialize, Serialize};
 use symphonia::core::audio::SampleBuffer;
-use symphonia::core::codecs::{DecoderOptions, CODEC_TYPE_NULL};
+use symphonia::core::codecs::{CODEC_TYPE_NULL, DecoderOptions};
 use symphonia::core::formats::FormatOptions;
 use symphonia::core::io::MediaSourceStream;
 use symphonia::core::meta::MetadataOptions;
@@ -26,11 +26,11 @@ use symphonia::core::probe::Hint;
 
 use crate::common::cache::{extract_loaded_cache, get_similar_music_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common::consts::AUDIO_FILES_EXTENSIONS;
+use crate::common::create_crash_message;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{CheckingMethod, FileEntry, ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
-use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
-use crate::common::create_crash_message;
+use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::*;
 
@@ -306,17 +306,16 @@ impl SameMusic {
             self.music_to_check = mem::take(&mut self.music_entries).into_iter().map(|e| (e.path.to_string_lossy().to_string(), e)).collect();
         }
 
-        let (progress_thread_handle, progress_thread_run, _items_counter, _check_was_stopped, _size_counter) =
-            prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicCacheLoadingFingerprints, 0, self.get_test_type(), 0);
+        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicCacheLoadingFingerprints, 0, self.get_test_type(), 0);
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache(false);
 
-        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+        progress_handler.join_thread();
         if check_if_stop_received(stop_flag) {
             return WorkContinueStatus::Stop;
         }
 
-        let (progress_thread_handle, progress_thread_run, items_counter, check_was_stopped, size_counter) = prepare_thread_handler_common(
+        let progress_handler = prepare_thread_handler_common(
             progress_sender,
             CurrentStage::SameMusicCalculatingFingerprints,
             non_cached_files_to_check.len(),
@@ -333,13 +332,12 @@ impl SameMusic {
             .with_max_len(2)
             .map(|(path, mut music_entry)| {
                 if check_if_stop_received(stop_flag) {
-                    check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
 
                 let res = calc_fingerprint_helper(path, configuration);
-                size_counter.fetch_add(music_entry.size, Ordering::Relaxed);
-                items_counter.fetch_add(1, Ordering::Relaxed);
+                progress_handler.increase_size(music_entry.size);
+                progress_handler.increase_items(1);
 
                 let Ok(fingerprint) = res else {
                     return Some(None);
@@ -354,9 +352,8 @@ impl SameMusic {
             .collect::<Vec<_>>();
         debug!("calculate_fingerprint - ended fingerprinting");
 
-        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-        let (progress_thread_handle, progress_thread_run, _items_counter, _check_was_stopped, _size_counter) =
-            prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicCacheSavingFingerprints, 0, self.get_test_type(), 0);
+        progress_handler.join_thread();
+        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicCacheSavingFingerprints, 0, self.get_test_type(), 0);
 
         // Just connect loaded results with already calculated
         vec_file_entry.extend(records_already_cached.into_values());
@@ -366,8 +363,9 @@ impl SameMusic {
         self.save_cache(vec_file_entry, loaded_hash_map, false);
 
         // Break if stop was clicked after saving to cache
-        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-        if check_was_stopped.load(Ordering::Relaxed) || check_if_stop_received(stop_flag) {
+
+        progress_handler.join_thread();
+        if check_if_stop_received(stop_flag) {
             return WorkContinueStatus::Stop;
         }
         WorkContinueStatus::Continue
@@ -379,17 +377,16 @@ impl SameMusic {
             return WorkContinueStatus::Continue;
         }
 
-        let (progress_thread_handle, progress_thread_run, _items_counter, _check_was_stopped, _size_counter) =
-            prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicCacheLoadingTags, 0, self.get_test_type(), 0);
+        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicCacheLoadingTags, 0, self.get_test_type(), 0);
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache(true);
 
-        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+        progress_handler.join_thread();
         if check_if_stop_received(stop_flag) {
             return WorkContinueStatus::Stop;
         }
 
-        let (progress_thread_handle, progress_thread_run, items_counter, check_was_stopped, _size_counter) = prepare_thread_handler_common(
+        let progress_handler = prepare_thread_handler_common(
             progress_sender,
             CurrentStage::SameMusicReadingTags,
             non_cached_files_to_check.len(),
@@ -403,12 +400,11 @@ impl SameMusic {
             .into_par_iter()
             .map(|(path, music_entry)| {
                 if check_if_stop_received(stop_flag) {
-                    check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
 
                 let res = read_single_file_tags(&path, music_entry);
-                items_counter.fetch_add(1, Ordering::Relaxed);
+                progress_handler.increase_items(1);
                 Some(res)
             })
             .while_some()
@@ -416,9 +412,8 @@ impl SameMusic {
             .collect::<Vec<_>>();
         debug!("read_tags - ended reading tags");
 
-        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-        let (progress_thread_handle, progress_thread_run, _items_counter, _check_was_stopped, _size_counter) =
-            prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicCacheSavingTags, 0, self.get_test_type(), 0);
+        progress_handler.join_thread();
+        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicCacheSavingTags, 0, self.get_test_type(), 0);
 
         // Just connect loaded results with already calculated
         vec_file_entry.extend(records_already_cached.into_values());
@@ -428,8 +423,9 @@ impl SameMusic {
         self.save_cache(vec_file_entry, loaded_hash_map, true);
 
         // Break if stop was clicked after saving to cache
-        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
-        if check_was_stopped.load(Ordering::Relaxed) {
+
+        progress_handler.join_thread();
+        if stop_flag.load(Ordering::Relaxed) {
             return WorkContinueStatus::Stop;
         }
 
@@ -441,55 +437,54 @@ impl SameMusic {
         if self.music_entries.is_empty() {
             return WorkContinueStatus::Continue;
         }
-        let (progress_thread_handle, progress_thread_run, items_counter, _check_was_stopped, _size_counter) =
-            prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicComparingTags, self.music_entries.len(), self.get_test_type(), 0);
+        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicComparingTags, self.music_entries.len(), self.get_test_type(), 0);
 
         let mut old_duplicates: Vec<Vec<MusicEntry>> = vec![self.music_entries.clone()];
         let mut new_duplicates: Vec<Vec<MusicEntry>> = Vec::new();
 
         if (self.params.music_similarity & MusicSimilarity::TRACK_TITLE) == MusicSimilarity::TRACK_TITLE {
             if check_if_stop_received(stop_flag) {
-                send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+                progress_handler.join_thread();
                 return WorkContinueStatus::Stop;
             }
 
-            old_duplicates = self.check_music_item(old_duplicates, &items_counter, |fe| &fe.track_title, self.params.approximate_comparison);
+            old_duplicates = self.check_music_item(old_duplicates, progress_handler.items_counter(), |fe| &fe.track_title, self.params.approximate_comparison);
         }
         if (self.params.music_similarity & MusicSimilarity::TRACK_ARTIST) == MusicSimilarity::TRACK_ARTIST {
             if check_if_stop_received(stop_flag) {
-                send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+                progress_handler.join_thread();
                 return WorkContinueStatus::Stop;
             }
 
-            old_duplicates = self.check_music_item(old_duplicates, &items_counter, |fe| &fe.track_artist, self.params.approximate_comparison);
+            old_duplicates = self.check_music_item(old_duplicates, progress_handler.items_counter(), |fe| &fe.track_artist, self.params.approximate_comparison);
         }
         if (self.params.music_similarity & MusicSimilarity::YEAR) == MusicSimilarity::YEAR {
             if check_if_stop_received(stop_flag) {
-                send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+                progress_handler.join_thread();
                 return WorkContinueStatus::Stop;
             }
 
-            old_duplicates = self.check_music_item(old_duplicates, &items_counter, |fe| &fe.year, false);
+            old_duplicates = self.check_music_item(old_duplicates, progress_handler.items_counter(), |fe| &fe.year, false);
         }
         if (self.params.music_similarity & MusicSimilarity::LENGTH) == MusicSimilarity::LENGTH {
             if check_if_stop_received(stop_flag) {
-                send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+                progress_handler.join_thread();
                 return WorkContinueStatus::Stop;
             }
 
-            old_duplicates = self.check_music_item(old_duplicates, &items_counter, |fe| &fe.length, false);
+            old_duplicates = self.check_music_item(old_duplicates, progress_handler.items_counter(), |fe| &fe.length, false);
         }
         if (self.params.music_similarity & MusicSimilarity::GENRE) == MusicSimilarity::GENRE {
             if check_if_stop_received(stop_flag) {
-                send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+                progress_handler.join_thread();
                 return WorkContinueStatus::Stop;
             }
 
-            old_duplicates = self.check_music_item(old_duplicates, &items_counter, |fe| &fe.genre, false);
+            old_duplicates = self.check_music_item(old_duplicates, progress_handler.items_counter(), |fe| &fe.genre, false);
         }
         if (self.params.music_similarity & MusicSimilarity::BITRATE) == MusicSimilarity::BITRATE {
             if check_if_stop_received(stop_flag) {
-                send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+                progress_handler.join_thread();
                 return WorkContinueStatus::Stop;
             }
             let old_duplicates_len = old_duplicates.len();
@@ -509,11 +504,11 @@ impl SameMusic {
                     }
                 }
             }
-            items_counter.fetch_add(old_duplicates_len, Ordering::Relaxed);
+            progress_handler.increase_items(old_duplicates_len);
             old_duplicates = new_duplicates;
         }
 
-        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+        progress_handler.join_thread();
 
         self.duplicated_music_entries = old_duplicates;
 
@@ -662,20 +657,19 @@ impl SameMusic {
         let grouped_files_to_check = self.split_fingerprints_to_check();
         let base_files_number = grouped_files_to_check.iter().map(|g| g.base_files.len()).sum::<usize>();
 
-        let (progress_thread_handle, progress_thread_run, items_counter, _check_was_stopped, _size_counter) =
-            prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicComparingFingerprints, base_files_number, self.get_test_type(), 0);
+        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicComparingFingerprints, base_files_number, self.get_test_type(), 0);
 
         let mut duplicated_music_entries = Vec::new();
         for group in grouped_files_to_check {
             let GroupedFilesToCheck { base_files, files_to_compare } = group;
-            let Some(temp_music_entries) = self.compare_fingerprints(stop_flag, &items_counter, base_files, &files_to_compare) else {
-                send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+            let Some(temp_music_entries) = self.compare_fingerprints(stop_flag, progress_handler.items_counter(), base_files, &files_to_compare) else {
+                progress_handler.join_thread();
                 return WorkContinueStatus::Stop;
             };
             duplicated_music_entries.extend(temp_music_entries);
         }
 
-        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+        progress_handler.join_thread();
 
         self.duplicated_music_entries = duplicated_music_entries;
 

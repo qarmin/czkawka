@@ -8,14 +8,13 @@ use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use rayon::prelude::*;
 use serde::Serialize;
-use crate::common::progress_stop_handler::prepare_thread_handler_common2;
-use crate::common::model::WorkContinueStatus;
+
 use crate::common::dir_traversal::{common_read_dir, get_modified_time};
 use crate::common::directories::Directories;
 use crate::common::items::ExcludedItems;
-use crate::common::model::ToolType;
+use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
-use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
+use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
 use crate::common_traits::*;
 
@@ -92,7 +91,7 @@ impl Temporary {
     fn check_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let mut folders_to_check: Vec<PathBuf> = self.common_data.directories.included_directories.clone();
 
-        let progress_handler = prepare_thread_handler_common2(progress_sender, CurrentStage::CollectingFiles, 0, self.get_test_type(), 0);
+        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::CollectingFiles, 0, self.get_test_type(), 0);
 
         while !folders_to_check.is_empty() {
             if check_if_stop_received(stop_flag) {

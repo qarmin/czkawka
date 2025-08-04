@@ -5,7 +5,7 @@ use std::sync::atomic::AtomicBool;
 use std::time::Duration;
 
 use crossbeam_channel::Sender;
-use humansize::{format_size, BINARY};
+use humansize::{BINARY, format_size};
 use log::info;
 use rayon::prelude::*;
 

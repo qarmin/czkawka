@@ -16,14 +16,13 @@ use log::{debug, error};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::common::model::WorkContinueStatus;
 use crate::common::cache::{extract_loaded_cache, get_similar_images_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common::consts::{HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, JXL_IMAGE_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult, inode, take_1_per_inode};
 use crate::common::image::get_dynamic_image_from_path;
-use crate::common::model::{FileEntry, ToolType};
+use crate::common::model::{FileEntry, ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
-use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
+use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::{DebugPrint, DeletingItems, PrintResults, ResultEntry};
 use crate::flc;
@@ -277,7 +276,8 @@ impl SimilarImages {
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.hash_images_load_cache();
 
-        let (progress_thread_handle, progress_thread_run, items_counter, check_was_stopped, size_counter) = prepare_thread_handler_common(
+        let check_was_stopped = Arc::new(AtomicBool::new(false));
+        let progress_handler = prepare_thread_handler_common(
             progress_sender,
             CurrentStage::SimilarImagesCalculatingHashes,
             non_cached_files_to_check.len(),
@@ -295,8 +295,8 @@ impl SimilarImages {
                 }
                 let size = file_entry.size;
                 let res = self.collect_image_file_entry(file_entry);
-                items_counter.fetch_add(1, Ordering::Relaxed);
-                size_counter.fetch_add(size, Ordering::Relaxed);
+                progress_handler.increase_items(1);
+                progress_handler.increase_size(size);
 
                 Some(res)
             })
@@ -309,7 +309,7 @@ impl SimilarImages {
         self.common_data.text_messages.errors.extend(errors);
         debug!("hash_images - end hashing {} images", vec_file_entry.len());
 
-        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+        progress_handler.join_thread();
 
         // Just connect loaded results with already calculated hashes
         for file_entry in records_already_cached.into_values() {
@@ -457,8 +457,7 @@ impl SimilarImages {
         // Don't use hashes with multiple images in bktree, because they will always be master of group and cannot be find by other hashes
         let (base_hashes, hashes_with_multiple_images) = self.split_hashes(all_hashed_images);
 
-        let (progress_thread_handle, progress_thread_run, items_counter, check_was_stopped, _size_counter) =
-            prepare_thread_handler_common(progress_sender, CurrentStage::SimilarImagesComparingHashes, base_hashes.len(), self.get_test_type(), 0);
+        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::SimilarImagesComparingHashes, base_hashes.len(), self.get_test_type(), 0);
 
         let mut hashes_parents: HashMap<ImHash, u32> = Default::default(); // Hashes used as parent (hash, children_number_of_hash)
         let mut hashes_similarity: HashMap<ImHash, (ImHash, u32)> = Default::default(); // Hashes used as child, (parent_hash, similarity)
@@ -470,10 +469,9 @@ impl SimilarImages {
             let partial_results = chunk
                 .into_par_iter()
                 .map(|hash_to_check| {
-                    items_counter.fetch_add(1, Ordering::Relaxed);
+                    progress_handler.increase_items(1);
 
                     if check_if_stop_received(stop_flag) {
-                        check_was_stopped.store(true, Ordering::Relaxed);
                         return None;
                     }
                     let mut found_items = self
@@ -506,15 +504,15 @@ impl SimilarImages {
             //     println!("{hash:?} --- {:?}", vec.iter().map(|e| e.1).collect::<Vec<_>>());
             // }
 
-            if check_was_stopped.load(Ordering::Relaxed) {
-                send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+            if stop_flag.load(Ordering::Relaxed) {
+                progress_handler.join_thread();
                 return WorkContinueStatus::Stop;
             }
 
             self.connect_results(partial_results, &mut hashes_parents, &mut hashes_similarity, &hashes_with_multiple_images);
         }
 
-        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+        progress_handler.join_thread();
 
         debug_check_for_duplicated_things(self.common_data.use_reference_folders, &hashes_parents, &hashes_similarity, all_hashed_images, "LATTER");
         self.collect_hash_compare_result(hashes_parents, &hashes_with_multiple_images, all_hashed_images, collected_similar_images, hashes_similarity);

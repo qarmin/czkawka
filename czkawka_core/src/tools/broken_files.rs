@@ -3,7 +3,7 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::AtomicBool;
 use std::{mem, panic};
 
 use crossbeam_channel::Sender;
@@ -15,11 +15,11 @@ use serde::{Deserialize, Serialize};
 
 use crate::common::cache::{extract_loaded_cache, get_broken_files_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common::consts::{AUDIO_FILES_EXTENSIONS, IMAGE_RS_BROKEN_FILES_EXTENSIONS, PDF_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS};
+use crate::common::create_crash_message;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{FileEntry, ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
-use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
-use crate::common::create_crash_message;
+use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
 use crate::common_traits::*;
 
@@ -301,7 +301,7 @@ impl BrokenFiles {
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache();
 
-        let (progress_thread_handle, progress_thread_run, items_counter, _check_was_stopped, size_counter) = prepare_thread_handler_common(
+        let progress_handler = prepare_thread_handler_common(
             progress_sender,
             CurrentStage::BrokenFilesChecking,
             non_cached_files_to_check.len(),
@@ -323,8 +323,8 @@ impl BrokenFiles {
                 let size = file_entry.size;
                 let res = self.check_file(file_entry);
 
-                items_counter.fetch_add(1, Ordering::Relaxed);
-                size_counter.fetch_add(size, Ordering::Relaxed);
+                progress_handler.increase_items(1);
+                progress_handler.increase_size(size);
 
                 Some(res)
             })
@@ -333,7 +333,7 @@ impl BrokenFiles {
             .collect::<Vec<BrokenEntry>>();
         debug!("look_for_broken_files - ended finding for broken files");
 
-        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+        progress_handler.join_thread();
 
         // Just connect loaded results with already calculated
         vec_file_entry.extend(records_already_cached.into_values());

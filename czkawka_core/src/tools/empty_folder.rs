@@ -3,20 +3,19 @@ use std::fs::DirEntry;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::AtomicBool;
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use log::debug;
 use rayon::prelude::*;
 
-use crate::common::model::WorkContinueStatus;
 use crate::common::dir_traversal::{common_get_entry_data, common_get_metadata_dir, common_read_dir, get_modified_time};
 use crate::common::directories::Directories;
 use crate::common::items::ExcludedItems;
-use crate::common::model::ToolType;
+use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
-use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common, prepare_thread_handler_common2, send_info_and_wait_for_ending_all_threads};
+use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
 use crate::common_traits::{DebugPrint, DeletingItems, PrintResults, ResultEntry};
 
@@ -119,7 +118,7 @@ impl EmptyFolder {
     fn check_for_empty_folders(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let mut folders_to_check: Vec<PathBuf> = self.common_data.directories.included_directories.clone();
 
-        let progress_handler = prepare_thread_handler_common2(progress_sender, CurrentStage::CollectingFiles, 0, self.get_test_type(), 0);
+        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::CollectingFiles, 0, self.get_test_type(), 0);
 
         let excluded_items = self.common_data.excluded_items.clone();
         let directories = self.common_data.directories.clone();

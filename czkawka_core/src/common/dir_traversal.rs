@@ -5,7 +5,7 @@ use std::fs::{DirEntry, FileType, Metadata};
 use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::AtomicBool;
 use std::time::UNIX_EPOCH;
 
 use crossbeam_channel::Sender;
@@ -18,7 +18,7 @@ use crate::common::extensions::Extensions;
 use crate::common::items::ExcludedItems;
 use crate::common::model::{CheckingMethod, FileEntry, ToolType};
 use crate::common::progress_data::{CurrentStage, ProgressData};
-use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
+use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::CommonToolData;
 use crate::flc;
 
@@ -212,8 +212,7 @@ where
         // Add root folders for finding
         let mut folders_to_check: Vec<PathBuf> = self.root_dirs.clone();
 
-        let (progress_thread_handle, progress_thread_run, items_counter, _check_was_stopped, _size_counter) =
-            prepare_thread_handler_common(self.progress_sender, CurrentStage::CollectingFiles, 0, (self.tool_type, self.checking_method), 0);
+        let progress_handler = prepare_thread_handler_common(self.progress_sender, CurrentStage::CollectingFiles, 0, (self.tool_type, self.checking_method), 0);
 
         let DirTraversal {
             collect,
@@ -228,7 +227,7 @@ where
         } = self;
         while !folders_to_check.is_empty() {
             if check_if_stop_received(&stop_flag) {
-                send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+                progress_handler.join_thread();
                 return DirTraversalResult::Stopped;
             }
 
@@ -287,7 +286,7 @@ where
                     }
                     if counter > 0 {
                         // Increase counter in batch, because usually it may be slow to add multiple times atomic value
-                        items_counter.fetch_add(counter, Ordering::Relaxed);
+                        progress_handler.increase_items(counter);
                     }
                     Some((dir_result, warnings, fe_result))
                 })
@@ -309,7 +308,7 @@ where
             }
         }
 
-        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+        progress_handler.join_thread();
 
         debug!("Collected {} files", grouped_file_entries.values().map(Vec::len).sum::<usize>());
 
