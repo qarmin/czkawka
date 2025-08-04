@@ -9,7 +9,7 @@ use czkawka_core::common::consts::DEFAULT_THREAD_SIZE;
 use czkawka_core::common::model::{CheckingMethod, FileEntry};
 use czkawka_core::common::progress_data::ProgressData;
 use czkawka_core::common::{split_path, split_path_compare};
-use czkawka_core::common_tool::CommonData;
+use czkawka_core::common::tool_data::CommonData;
 use czkawka_core::common_traits::ResultEntry;
 use czkawka_core::tools::bad_extensions::{BadExtensions, BadExtensionsParameters, BadFileEntry};
 use czkawka_core::tools::big_file::{BigFile, BigFileParameters, SearchMode};

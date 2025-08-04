@@ -13,7 +13,7 @@ use crate::common::model::WorkContinueStatus;
 use crate::common::dir_traversal::{Collect, DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{FileEntry, ToolType};
 use crate::common::progress_data::ProgressData;
-use crate::common_tool::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
+use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
 use crate::common_traits::*;
 use crate::flc;
 

@@ -17,7 +17,7 @@ use crate::common::items::ExcludedItems;
 use crate::common::model::ToolType;
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
-use crate::common_tool::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
+use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
 use crate::common_traits::{DebugPrint, DeletingItems, PrintResults, ResultEntry};
 
 #[derive(Clone, Debug)]

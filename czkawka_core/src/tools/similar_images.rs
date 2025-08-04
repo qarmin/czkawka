@@ -24,7 +24,7 @@ use crate::common::image::get_dynamic_image_from_path;
 use crate::common::model::{FileEntry, ToolType};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
-use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
+use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::{DebugPrint, DeletingItems, PrintResults, ResultEntry};
 use crate::flc;
 
@@ -981,7 +981,7 @@ mod tests {
     use image_hasher::HashAlg;
 
     use super::*;
-    use crate::common_tool::CommonData;
+    use crate::common::tool_data::CommonData;
     use crate::tools::similar_images::{Hamming, ImHash, ImagesEntry, SimilarImages, SimilarImagesParameters};
 
     fn get_default_parameters() -> SimilarImagesParameters {

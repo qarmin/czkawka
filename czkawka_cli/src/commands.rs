@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use czkawka_core::CZKAWKA_VERSION;
 use czkawka_core::common::model::{CheckingMethod, HashType};
-use czkawka_core::common_tool::DeleteMethod;
+use czkawka_core::common::tool_data::DeleteMethod;
 use czkawka_core::tools::broken_files::CheckedTypes;
 use czkawka_core::tools::same_music::MusicSimilarity;
 use czkawka_core::tools::similar_images::SimilarityPreset;

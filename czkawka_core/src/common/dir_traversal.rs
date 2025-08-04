@@ -19,7 +19,7 @@ use crate::common::items::ExcludedItems;
 use crate::common::model::{CheckingMethod, FileEntry, ToolType};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
-use crate::common_tool::CommonToolData;
+use crate::common::tool_data::CommonToolData;
 use crate::flc;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
@@ -538,7 +538,7 @@ mod tests {
     use tempfile::TempDir;
 
     use super::*;
-    use crate::common_tool::*;
+    use crate::common::tool_data::*;
 
     impl CommonData for CommonToolData {
         fn get_cd(&self) -> &CommonToolData {

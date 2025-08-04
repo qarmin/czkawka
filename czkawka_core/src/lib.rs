@@ -13,7 +13,6 @@ extern crate bitflags;
 extern crate core;
 
 pub mod common;
-pub mod common_tool;
 pub mod common_traits;
 pub mod helpers;
 pub mod localizer_core;

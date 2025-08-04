@@ -17,7 +17,7 @@ use czkawka_core::common::consts::DEFAULT_THREAD_SIZE;
 use czkawka_core::common::logger::{filtering_messages, print_version_mode, setup_logger};
 use czkawka_core::common::progress_data::ProgressData;
 use czkawka_core::common::set_number_of_threads;
-use czkawka_core::common_tool::{CommonData, DeleteMethod};
+use czkawka_core::common::tool_data::{CommonData, DeleteMethod};
 use czkawka_core::common_traits::PrintResults;
 use czkawka_core::tools::bad_extensions::{BadExtensions, BadExtensionsParameters};
 use czkawka_core::tools::big_file::{BigFile, BigFileParameters, SearchMode};

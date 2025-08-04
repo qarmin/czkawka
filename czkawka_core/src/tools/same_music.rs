@@ -31,7 +31,7 @@ use crate::common::model::{CheckingMethod, FileEntry, ToolType, WorkContinueStat
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crate::common::create_crash_message;
-use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
+use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::*;
 
 bitflags! {
