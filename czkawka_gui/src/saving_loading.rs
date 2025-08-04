@@ -8,7 +8,7 @@ use std::path::{Path, PathBuf};
 use czkawka_core::common::config_cache_path::get_config_cache_path;
 use czkawka_core::common::get_all_available_threads;
 use czkawka_core::common::items::DEFAULT_EXCLUDED_ITEMS;
-use czkawka_core::common_dir_traversal::CheckingMethod;
+use czkawka_core::common::model::CheckingMethod;
 use czkawka_core::tools::similar_images::SIMILAR_VALUES;
 use gtk4::prelude::*;
 use gtk4::{ComboBoxText, ScrolledWindow, TextView, TreeView};

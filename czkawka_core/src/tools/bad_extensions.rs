@@ -12,10 +12,11 @@ use mime_guess::get_mime_extensions;
 use rayon::prelude::*;
 use serde::Serialize;
 
-use crate::common::WorkContinueStatus;
+use crate::common::model::WorkContinueStatus;
+use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
+use crate::common::model::{FileEntry, ToolType};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
-use crate::common_dir_traversal::{DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
 use crate::common_tool::{CommonData, CommonToolData};
 use crate::common_traits::*;
 

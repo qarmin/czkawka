@@ -1,4 +1,4 @@
-use czkawka_core::common_dir_traversal::CheckingMethod;
+use czkawka_core::common::model::CheckingMethod;
 use czkawka_core::localizer_core::{fnc_get_similarity_minimal, fnc_get_similarity_very_high};
 use czkawka_core::tools::big_file::SearchMode;
 use czkawka_core::tools::similar_images::{SIMILAR_VALUES, get_string_from_similarity};

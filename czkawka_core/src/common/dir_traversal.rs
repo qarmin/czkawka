@@ -1,5 +1,4 @@
 use std::collections::BTreeMap;
-use std::fmt::Display;
 use std::fs;
 use std::fs::{DirEntry, FileType, Metadata};
 #[cfg(target_family = "unix")]
@@ -13,81 +12,15 @@ use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use log::debug;
 use rayon::prelude::*;
-use serde::{Deserialize, Serialize};
 
 use crate::common::directories::Directories;
 use crate::common::extensions::Extensions;
 use crate::common::items::ExcludedItems;
+use crate::common::model::{CheckingMethod, FileEntry, ToolType};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
 use crate::common_tool::CommonToolData;
-use crate::common_traits::ResultEntry;
 use crate::flc;
-
-#[derive(Debug, PartialEq, Eq, Clone, Copy, Default)]
-pub enum ToolType {
-    Duplicate,
-    EmptyFolders,
-    EmptyFiles,
-    InvalidSymlinks,
-    BrokenFiles,
-    BadExtensions,
-    BigFile,
-    SameMusic,
-    SimilarImages,
-    SimilarVideos,
-    TemporaryFiles,
-    #[default]
-    None,
-}
-
-#[derive(PartialEq, Eq, Clone, Debug, Copy, Default, Deserialize, Serialize)]
-pub enum CheckingMethod {
-    #[default]
-    None,
-    Name,
-    SizeName,
-    Size,
-    Hash,
-    AudioTags,
-    AudioContent,
-}
-
-#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub struct FileEntry {
-    pub path: PathBuf,
-    pub size: u64,
-    pub modified_date: u64,
-}
-
-impl ResultEntry for FileEntry {
-    fn get_path(&self) -> &Path {
-        &self.path
-    }
-    fn get_modified_date(&self) -> u64 {
-        self.modified_date
-    }
-    fn get_size(&self) -> u64 {
-        self.size
-    }
-}
-
-// Symlinks
-
-#[derive(Clone, Debug, PartialEq, Eq, Copy, Deserialize, Serialize)]
-pub enum ErrorType {
-    InfiniteRecursion,
-    NonExistentFile,
-}
-
-impl Display for ErrorType {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::InfiniteRecursion => write!(f, "Infinite recursion"),
-            Self::NonExistentFile => write!(f, "Non existent file"),
-        }
-    }
-}
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum Collect {
@@ -103,10 +36,10 @@ enum EntryType {
     Other,
 }
 
-pub struct DirTraversalBuilder<'a, 'b, F> {
+pub struct DirTraversalBuilder<'b, F> {
     group_by: Option<F>,
     root_dirs: Vec<PathBuf>,
-    stop_flag: Option<&'a Arc<AtomicBool>>,
+    stop_flag: Option<Arc<AtomicBool>>,
     progress_sender: Option<&'b Sender<ProgressData>>,
     minimal_file_size: Option<u64>,
     maximal_file_size: Option<u64>,
@@ -119,10 +52,10 @@ pub struct DirTraversalBuilder<'a, 'b, F> {
     tool_type: ToolType,
 }
 
-pub struct DirTraversal<'a, 'b, F> {
+pub struct DirTraversal<'b, F> {
     group_by: F,
     root_dirs: Vec<PathBuf>,
-    stop_flag: Option<&'a Arc<AtomicBool>>,
+    stop_flag: Arc<AtomicBool>,
     progress_sender: Option<&'b Sender<ProgressData>>,
     recursive_search: bool,
     directories: Directories,
@@ -135,13 +68,13 @@ pub struct DirTraversal<'a, 'b, F> {
     collect: Collect,
 }
 
-impl Default for DirTraversalBuilder<'_, '_, ()> {
+impl Default for DirTraversalBuilder<'_, ()> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl DirTraversalBuilder<'_, '_, ()> {
+impl DirTraversalBuilder<'_, ()> {
     pub fn new() -> Self {
         DirTraversalBuilder {
             group_by: None,
@@ -161,7 +94,7 @@ impl DirTraversalBuilder<'_, '_, ()> {
     }
 }
 
-impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
+impl<'b, F> DirTraversalBuilder<'b, F> {
     pub(crate) fn common_data(mut self, common_tool_data: &CommonToolData) -> Self {
         self.root_dirs = common_tool_data.directories.included_directories.clone();
         self.extensions = Some(common_tool_data.extensions.clone());
@@ -174,8 +107,8 @@ impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
         self
     }
 
-    pub(crate) fn stop_flag(mut self, stop_flag: &'a Arc<AtomicBool>) -> Self {
-        self.stop_flag = Some(stop_flag);
+    pub(crate) fn stop_flag(mut self, stop_flag: &Arc<AtomicBool>) -> Self {
+        self.stop_flag = Some(stop_flag.clone());
         self
     }
 
@@ -204,7 +137,7 @@ impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
         self
     }
 
-    pub(crate) fn group_by<G, T>(self, group_by: G) -> DirTraversalBuilder<'a, 'b, G>
+    pub(crate) fn group_by<G, T>(self, group_by: G) -> DirTraversalBuilder<'b, G>
     where
         G: Fn(&FileEntry) -> T,
     {
@@ -225,11 +158,11 @@ impl<'a, 'b, F> DirTraversalBuilder<'a, 'b, F> {
         }
     }
 
-    pub(crate) fn build(self) -> DirTraversal<'a, 'b, F> {
+    pub(crate) fn build(self) -> DirTraversal<'b, F> {
         DirTraversal {
             group_by: self.group_by.expect("could not build"),
             root_dirs: self.root_dirs,
-            stop_flag: self.stop_flag,
+            stop_flag: self.stop_flag.expect("Stop flag must be always initialized"),
             progress_sender: self.progress_sender,
             checking_method: self.checking_method,
             minimal_file_size: self.minimal_file_size.unwrap_or(0),
@@ -264,7 +197,7 @@ fn entry_type(file_type: FileType) -> EntryType {
     }
 }
 
-impl<F, T> DirTraversal<'_, '_, F>
+impl<F, T> DirTraversal<'_, F>
 where
     F: Fn(&FileEntry) -> T,
     T: Ord + PartialOrd,
@@ -293,10 +226,8 @@ where
             stop_flag,
             ..
         } = self;
-        let stop_flag = stop_flag.expect("Stop flag must be always initialized");
-
         while !folders_to_check.is_empty() {
-            if check_if_stop_received(stop_flag) {
+            if check_if_stop_received(&stop_flag) {
                 send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
                 return DirTraversalResult::Stopped;
             }
@@ -316,7 +247,7 @@ where
                     let mut counter = 0;
                     // Check every sub folder/file/link etc.
                     for entry in read_dir {
-                        if check_if_stop_received(stop_flag) {
+                        if check_if_stop_received(&stop_flag) {
                             return None;
                         }
 

@@ -21,11 +21,12 @@ use serde::{Deserialize, Serialize};
 use static_assertions::const_assert;
 use xxhash_rust::xxh3::Xxh3;
 
-use crate::common::WorkContinueStatus;
+use crate::common::model::WorkContinueStatus;
 use crate::common::cache::{get_duplicate_cache_file, load_cache_from_file_generalized_by_size, save_cache_to_file_generalized};
+use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
+use crate::common::model::{CheckingMethod, FileEntry, HashType, ToolType};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
-use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::*;
 
@@ -36,23 +37,7 @@ thread_local! {
     static THREAD_BUFFER: RefCell<Vec<u8>> = RefCell::new(vec![0u8; THREAD_BUFFER_SIZE]);
 }
 
-#[derive(PartialEq, Eq, Clone, Debug, Copy, Default)]
-pub enum HashType {
-    #[default]
-    Blake3,
-    Crc32,
-    Xxh3,
-}
 
-impl HashType {
-    fn hasher(self) -> Box<dyn MyHasher> {
-        match self {
-            Self::Blake3 => Box::new(blake3::Hasher::new()),
-            Self::Crc32 => Box::new(crc32fast::Hasher::new()),
-            Self::Xxh3 => Box::new(Xxh3::new()),
-        }
-    }
-}
 
 #[derive(Clone, Serialize, Deserialize, Debug, Default)]
 pub struct DuplicateEntry {

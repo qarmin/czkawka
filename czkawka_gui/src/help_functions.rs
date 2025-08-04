@@ -5,7 +5,6 @@ use std::io::{BufReader, Cursor};
 use std::path::{MAIN_SEPARATOR, PathBuf};
 use std::rc::Rc;
 
-use czkawka_core::common_dir_traversal;
 use czkawka_core::helpers::messages::Messages;
 use czkawka_core::tools::bad_extensions::BadExtensions;
 use czkawka_core::tools::big_file::BigFile;
@@ -341,13 +340,6 @@ pub(crate) fn set_buttons(hashmap: &mut HashMap<BottomButtonsEnum, bool>, button
 pub(crate) fn hide_all_buttons(buttons_array: &[Widget]) {
     for button in buttons_array {
         button.hide();
-    }
-}
-
-pub(crate) fn get_text_from_invalid_symlink_cause(error: common_dir_traversal::ErrorType) -> String {
-    match error {
-        common_dir_traversal::ErrorType::InfiniteRecursion => flg!("invalid_symlink_infinite_recursion"),
-        common_dir_traversal::ErrorType::NonExistentFile => flg!("invalid_symlink_non_existent_destination"),
     }
 }
 

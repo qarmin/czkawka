@@ -5,8 +5,8 @@ use std::time::Duration;
 
 use chrono::DateTime;
 use crossbeam_channel::Receiver;
+use czkawka_core::common::model::CheckingMethod;
 use czkawka_core::common::{split_path, split_path_compare};
-use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::common_tool::CommonData;
 use czkawka_core::common_traits::ResultEntry;
 use czkawka_core::tools::bad_extensions::BadExtensions;
@@ -403,7 +403,7 @@ fn compute_invalid_symlinks(
                     (ColumnsInvalidSymlinks::Name as u32, &file),
                     (ColumnsInvalidSymlinks::Path as u32, &directory),
                     (ColumnsInvalidSymlinks::DestinationPath as u32, &symlink_info.destination_path.to_string_lossy().to_string()),
-                    (ColumnsInvalidSymlinks::TypeOfError as u32, &get_text_from_invalid_symlink_cause(symlink_info.type_of_error)),
+                    (ColumnsInvalidSymlinks::TypeOfError as u32, &symlink_info.type_of_error.translate()),
                     (
                         ColumnsInvalidSymlinks::Modification as u32,
                         &(DateTime::from_timestamp(file_entry.modified_date as i64, 0)

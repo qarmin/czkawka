@@ -5,16 +5,16 @@ use std::sync::atomic::AtomicBool;
 use std::time::Duration;
 
 use crossbeam_channel::Sender;
-use humansize::{BINARY, format_size};
+use humansize::{format_size, BINARY};
 use log::info;
 use rayon::prelude::*;
 
 use crate::common::directories::Directories;
 use crate::common::extensions::Extensions;
 use crate::common::items::ExcludedItems;
+use crate::common::model::{CheckingMethod, ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
-use crate::common::{WorkContinueStatus, remove_folder_if_contains_only_empty_folders};
-use crate::common_dir_traversal::{CheckingMethod, ToolType};
+use crate::common::remove_folder_if_contains_only_empty_folders;
 use crate::common_traits::ResultEntry;
 use crate::helpers::delayed_sender::DelayedSender;
 use crate::helpers::messages::Messages;

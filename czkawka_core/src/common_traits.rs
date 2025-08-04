@@ -8,7 +8,7 @@ use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use serde::Serialize;
 
-use crate::common::WorkContinueStatus;
+use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;
 
 pub trait DebugPrint {

@@ -1,11 +1,13 @@
 pub mod cache;
 pub mod config_cache_path;
 pub mod consts;
+pub mod dir_traversal;
 pub mod directories;
 pub mod extensions;
 pub mod image;
 pub mod items;
 pub mod logger;
+pub mod model;
 pub mod progress_data;
 pub mod progress_stop_handler;
 
@@ -22,12 +24,6 @@ use crate::common::consts::{DEFAULT_WORKER_THREAD_SIZE, TEMP_HARDLINK_FILE};
 
 static NUMBER_OF_THREADS: state::InitCell<usize> = state::InitCell::new();
 static ALL_AVAILABLE_THREADS: state::InitCell<usize> = state::InitCell::new();
-
-#[derive(Debug, PartialEq)]
-pub enum WorkContinueStatus {
-    Continue,
-    Stop,
-}
 
 pub fn get_number_of_threads() -> usize {
     let data = NUMBER_OF_THREADS.get();
@@ -166,9 +162,9 @@ pub fn regex_check(expression_item: &SingleExcludedItem, directory_name: &str) -
     // `git*` shouldn't be true for `/gitsfafasfs`
     if !expression_item.expression.starts_with('*')
         && directory_name
-            .find(&expression_item.expression_splits[0])
-            .expect("Cannot fail, because split must exists in directory_name")
-            > 0
+        .find(&expression_item.expression_splits[0])
+        .expect("Cannot fail, because split must exists in directory_name")
+        > 0
     {
         return false;
     }
@@ -233,7 +229,7 @@ pub fn make_hard_link(src: &Path, dst: &Path) -> io::Result<()> {
 
 #[cfg(test)]
 mod test {
-    use std::fs::{File, Metadata, read_dir};
+    use std::fs::{read_dir, File, Metadata};
     use std::io::Write;
     #[cfg(target_family = "windows")]
     use std::os::fs::MetadataExt;

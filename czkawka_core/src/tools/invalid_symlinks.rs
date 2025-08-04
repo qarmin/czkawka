@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use std::io::prelude::*;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -8,11 +9,13 @@ use fun_time::fun_time;
 use log::debug;
 use serde::{Deserialize, Serialize};
 
-use crate::common::WorkContinueStatus;
+use crate::common::model::WorkContinueStatus;
+use crate::common::dir_traversal::{Collect, DirTraversalBuilder, DirTraversalResult};
+use crate::common::model::{FileEntry, ToolType};
 use crate::common::progress_data::ProgressData;
-use crate::common_dir_traversal::{Collect, DirTraversalBuilder, DirTraversalResult, ErrorType, FileEntry, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
 use crate::common_traits::*;
+use crate::flc;
 
 #[derive(Default)]
 pub struct Info {
@@ -20,6 +23,30 @@ pub struct Info {
 }
 
 const MAX_NUMBER_OF_SYMLINK_JUMPS: i32 = 20;
+
+#[derive(Clone, Debug, PartialEq, Eq, Copy, Deserialize, Serialize)]
+pub enum ErrorType {
+    InfiniteRecursion,
+    NonExistentFile,
+}
+
+impl ErrorType {
+    pub fn translate(&self) -> String {
+        match *self {
+            Self::InfiniteRecursion => flc!("core_invalid_symlink_infinite_recursion"),
+            Self::NonExistentFile => flc!("core_invalid_symlink_non_existent_destination"),
+        }
+    }
+}
+
+impl Display for ErrorType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::InfiniteRecursion => write!(f, "Infinite recursion"),
+            Self::NonExistentFile => write!(f, "Non existent file"),
+        }
+    }
+}
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct SymlinkInfo {

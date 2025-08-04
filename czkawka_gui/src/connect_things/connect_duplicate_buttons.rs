@@ -1,4 +1,4 @@
-use czkawka_core::common_dir_traversal::CheckingMethod;
+use czkawka_core::common::model::CheckingMethod;
 use gtk4::prelude::*;
 
 use crate::gui_structs::gui_data::GuiData;

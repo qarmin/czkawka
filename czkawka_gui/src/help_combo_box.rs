@@ -1,6 +1,5 @@
-use czkawka_core::common_dir_traversal::CheckingMethod;
+use czkawka_core::common::model::{CheckingMethod, HashType};
 use czkawka_core::tools::big_file::SearchMode;
-use czkawka_core::tools::duplicate::HashType;
 use image_hasher::{FilterType, HashAlg};
 
 pub struct HashTypeStruct {

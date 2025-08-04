@@ -527,9 +527,6 @@ saving_loading_failed_to_read_data_from_file = Cannot read data from file "{ $pa
 saving_loading_orphan_data = Found orphan data "{ $data }" in line "{ $line }".
 saving_loading_not_valid = Setting "{ $data }" does not exist in current app version.
 
-# Invalid symlinks
-invalid_symlink_infinite_recursion = Infinite recursion
-invalid_symlink_non_existent_destination = Non-existent destination file
 
 # Other
 selected_all_reference_folders = Cannot start search, when all directories are set as reference folders

@@ -16,9 +16,9 @@ use serde::{Deserialize, Serialize};
 use vid_dup_finder_lib::Cropdetect;
 
 use crate::common::config_cache_path::open_cache_folder;
+use crate::common::model::HashType;
 use crate::common_traits::ResultEntry;
 use crate::helpers::messages::Messages;
-use crate::tools::duplicate::HashType;
 use crate::tools::similar_images::{convert_algorithm_to_string, convert_filters_to_string};
 
 const CACHE_VERSION: &str = "100";

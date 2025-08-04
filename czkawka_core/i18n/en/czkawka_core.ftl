@@ -25,3 +25,6 @@ core_directory_unable_to_get_device_id = Directories: Unable to get device id fr
 
 core_ffmpeg_not_found = Cannot find proper installation of FFmpeg, this is external program, that you need to install manually.
 core_ffmpeg_not_found_windows = Be sure that ffmpeg.exe and ffprobe.exe are available in PATH or are put directly to same folder where is app executable
+
+core_invalid_symlink_infinite_recursion = Infinite recursion
+core_invalid_symlink_non_existent_destination = Non-existent destination file

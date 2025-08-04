@@ -7,9 +7,10 @@ use std::time::{Duration, Instant};
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
 
-use crate::common::consts::{LOOP_DURATION, SEND_PROGRESS_DATA_TIME_BETWEEN};
+use crate::common::model::{CheckingMethod, ToolType};
 use crate::common::progress_data::{CurrentStage, ProgressData};
-use crate::common_dir_traversal::{CheckingMethod, ToolType};
+pub const LOOP_DURATION: u32 = 20;
+pub const SEND_PROGRESS_DATA_TIME_BETWEEN: u32 = 200;
 
 pub(crate) fn prepare_thread_handler_common(
     progress_sender: Option<&Sender<ProgressData>>,

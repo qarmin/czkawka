@@ -5,8 +5,8 @@ use std::thread;
 
 use crossbeam_channel::Sender;
 use czkawka_core::common::consts::DEFAULT_THREAD_SIZE;
+use czkawka_core::common::model::CheckingMethod;
 use czkawka_core::common::progress_data::ProgressData;
-use czkawka_core::common_dir_traversal::CheckingMethod;
 use czkawka_core::common_tool::CommonData;
 use czkawka_core::tools::bad_extensions::{BadExtensions, BadExtensionsParameters};
 use czkawka_core::tools::big_file::{BigFile, BigFileParameters};

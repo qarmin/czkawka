@@ -8,9 +8,10 @@ use humansize::{BINARY, format_size};
 use log::debug;
 use rayon::prelude::*;
 
-use crate::common::WorkContinueStatus;
+use crate::common::model::WorkContinueStatus;
+use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
+use crate::common::model::{FileEntry, ToolType};
 use crate::common::progress_data::ProgressData;
-use crate::common_dir_traversal::{DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
 use crate::common_traits::{DebugPrint, DeletingItems, PrintResults};
 

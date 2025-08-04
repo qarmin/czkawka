@@ -1,6 +1,6 @@
 use log::error;
 
-use crate::common_dir_traversal::{CheckingMethod, ToolType};
+use crate::common::model::{CheckingMethod, ToolType};
 // Empty files
 // 0 - Collecting files
 

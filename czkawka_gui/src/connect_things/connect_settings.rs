@@ -7,14 +7,14 @@ use czkawka_core::common::cache::{
 };
 use czkawka_core::common::config_cache_path::get_config_cache_path;
 use czkawka_core::helpers::messages::Messages;
-use czkawka_core::tools::duplicate::{DuplicateEntry, HashType};
+use czkawka_core::tools::duplicate::{DuplicateEntry};
 use czkawka_core::tools::similar_videos::{DEFAULT_CROP_DETECT, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION};
 use gtk4::prelude::*;
 use gtk4::{Label, ResponseType, Window};
 use image::imageops::FilterType;
 use image_hasher::HashAlg;
 use log::error;
-
+use czkawka_core::common::model::HashType;
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::get_dialog_box_child;
