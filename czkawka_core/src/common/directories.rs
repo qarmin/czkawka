@@ -3,6 +3,7 @@ use std::path::{Path, PathBuf};
 use std::{fs, os::unix::fs::MetadataExt};
 
 use crate::common::normalize_windows_path;
+use crate::common_traits::ResultEntry;
 use crate::flc;
 use crate::helpers::messages::Messages;
 
@@ -303,5 +304,23 @@ impl Directories {
             Ok(m) => Ok(!self.included_dev_ids.iter().any(|&id| id == m.dev())),
             Err(_) => Err(flc!("core_directory_unable_to_get_device_id", path = path.to_string_lossy().to_string())),
         }
+    }
+
+    pub(crate) fn filter_reference_folders<T>(&self, entries_to_check: Vec<Vec<T>>) -> Vec<(T, Vec<T>)>
+    where
+        T: ResultEntry,
+    {
+        entries_to_check
+            .into_iter()
+            .filter_map(|vec_file_entry| {
+                let (mut files_from_referenced_folders, normal_files): (Vec<_>, Vec<_>) = vec_file_entry.into_iter().partition(|e| self.is_in_referenced_directory(e.get_path()));
+
+                if normal_files.is_empty() {
+                    None
+                } else {
+                    files_from_referenced_folders.pop().map(|file| (file, normal_files))
+                }
+            })
+            .collect::<Vec<(T, Vec<T>)>>()
     }
 }

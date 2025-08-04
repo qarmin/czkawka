@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 use std::env;
 use std::path::PathBuf;
 
-use czkawka_core::common_items::{DEFAULT_EXCLUDED_DIRECTORIES, DEFAULT_EXCLUDED_ITEMS};
+use czkawka_core::common::items::{DEFAULT_EXCLUDED_DIRECTORIES, DEFAULT_EXCLUDED_ITEMS};
 use czkawka_core::tools::similar_videos::{DEFAULT_CROP_DETECT, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION, crop_detect_to_str};
 use home::home_dir;
 use serde::{Deserialize, Serialize};

@@ -1,7 +1,10 @@
 pub mod cache;
 pub mod config_cache_path;
 pub mod consts;
+pub mod directories;
+pub mod extensions;
 pub mod image;
+pub mod items;
 pub mod logger;
 pub mod progress_data;
 pub mod progress_stop_handler;
@@ -12,14 +15,10 @@ use std::io::Error;
 use std::path::{Path, PathBuf};
 use std::{fs, io, thread};
 
-use log::{debug, info, warn};
+use items::SingleExcludedItem;
+use log::debug;
 
 use crate::common::consts::{DEFAULT_WORKER_THREAD_SIZE, TEMP_HARDLINK_FILE};
-// #[cfg(feature = "heif")]
-// use libheif_rs::LibHeif;
-use crate::common_directory::Directories;
-use crate::common_items::SingleExcludedItem;
-use crate::common_traits::ResultEntry;
 
 static NUMBER_OF_THREADS: state::InitCell<usize> = state::InitCell::new();
 static ALL_AVAILABLE_THREADS: state::InitCell<usize> = state::InitCell::new();
@@ -28,15 +27,6 @@ static ALL_AVAILABLE_THREADS: state::InitCell<usize> = state::InitCell::new();
 pub enum WorkContinueStatus {
     Continue,
     Stop,
-}
-
-pub fn print_infos_and_warnings(infos: Vec<String>, warnings: Vec<String>) {
-    for info in infos {
-        info!("{info}");
-    }
-    for warning in warnings {
-        warn!("{warning}");
-    }
 }
 
 pub fn get_number_of_threads() -> usize {
@@ -229,25 +219,6 @@ pub fn normalize_windows_path(path_to_change: impl AsRef<Path>) -> PathBuf {
     }
 }
 
-pub(crate) fn filter_reference_folders_generic<T>(entries_to_check: Vec<Vec<T>>, directories: &Directories) -> Vec<(T, Vec<T>)>
-where
-    T: ResultEntry,
-{
-    entries_to_check
-        .into_iter()
-        .filter_map(|vec_file_entry| {
-            let (mut files_from_referenced_folders, normal_files): (Vec<_>, Vec<_>) =
-                vec_file_entry.into_iter().partition(|e| directories.is_in_referenced_directory(e.get_path()));
-
-            if normal_files.is_empty() {
-                None
-            } else {
-                files_from_referenced_folders.pop().map(|file| (file, normal_files))
-            }
-        })
-        .collect::<Vec<(T, Vec<T>)>>()
-}
-
 pub fn make_hard_link(src: &Path, dst: &Path) -> io::Result<()> {
     let dst_dir = dst.parent().ok_or_else(|| Error::other("No parent"))?;
     let temp = dst_dir.join(TEMP_HARDLINK_FILE);
@@ -273,8 +244,8 @@ mod test {
 
     use tempfile::tempdir;
 
+    use crate::common::items::new_excluded_item;
     use crate::common::{make_hard_link, normalize_windows_path, regex_check, remove_folder_if_contains_only_empty_folders};
-    use crate::common_items::new_excluded_item;
 
     #[cfg(target_family = "unix")]
     fn assert_inode(before: &Metadata, after: &Metadata) {

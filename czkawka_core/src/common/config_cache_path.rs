@@ -3,6 +3,7 @@ use std::path::PathBuf;
 use std::{env, fs};
 
 use directories_next::ProjectDirs;
+use log::{info, warn};
 use once_cell::sync::OnceCell;
 
 static CONFIG_CACHE_PATH: OnceCell<Option<ConfigCachePath>> = OnceCell::new();
@@ -145,4 +146,15 @@ pub(crate) fn open_cache_folder(
         }
     };
     Some(((file_handler_default, cache_file), (file_handler_json, cache_file_json)))
+}
+
+// When initializing logger or settings config/cache folders, logger is not yet initialized,
+// so we need to delay them until logger is initialized
+pub fn print_infos_and_warnings(infos: Vec<String>, warnings: Vec<String>) {
+    for info in infos {
+        info!("{info}");
+    }
+    for warning in warnings {
+        warn!("{warning}");
+    }
 }

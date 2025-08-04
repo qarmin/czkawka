@@ -28,7 +28,7 @@ use crate::common::cache::{extract_loaded_cache, get_similar_music_cache_file, l
 use crate::common::consts::AUDIO_FILES_EXTENSIONS;
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common, send_info_and_wait_for_ending_all_threads};
-use crate::common::{WorkContinueStatus, create_crash_message, filter_reference_folders_generic};
+use crate::common::{WorkContinueStatus, create_crash_message};
 use crate::common_dir_traversal::{CheckingMethod, DirTraversalBuilder, DirTraversalResult, FileEntry, ToolType};
 use crate::common_tool::{CommonData, CommonToolData, DeleteMethod};
 use crate::common_traits::*;
@@ -517,7 +517,7 @@ impl SameMusic {
         self.duplicated_music_entries = old_duplicates;
 
         if self.common_data.use_reference_folders {
-            self.duplicated_music_entries_referenced = filter_reference_folders_generic(mem::take(&mut self.duplicated_music_entries), &self.common_data.directories);
+            self.duplicated_music_entries_referenced = self.common_data.directories.filter_reference_folders(mem::take(&mut self.duplicated_music_entries));
         }
 
         if self.common_data.use_reference_folders {
@@ -679,7 +679,7 @@ impl SameMusic {
         self.duplicated_music_entries = duplicated_music_entries;
 
         if self.common_data.use_reference_folders {
-            self.duplicated_music_entries_referenced = filter_reference_folders_generic(mem::take(&mut self.duplicated_music_entries), &self.common_data.directories);
+            self.duplicated_music_entries_referenced = self.common_data.directories.filter_reference_folders(mem::take(&mut self.duplicated_music_entries));
         }
 
         if self.common_data.use_reference_folders {
