@@ -50,8 +50,8 @@ impl SharedModels {
         Arc::new(Mutex::new(Self::new()))
     }
 
-    pub(crate) fn save_results(&self, active_tab: CurrentTab, choosen_dir: &str) -> Result<(), String> {
-        let cd = choosen_dir;
+    pub(crate) fn save_results(&self, active_tab: CurrentTab, chosen_dir: &str) -> Result<(), String> {
+        let cd = chosen_dir;
         let result = match active_tab {
             CurrentTab::DuplicateFiles => self.shared_duplication_state.as_ref().map(|x| x.save_all_in_one(cd, "results_duplicates")),
             CurrentTab::EmptyFolders => self.shared_empty_folders_state.as_ref().map(|x| x.save_all_in_one(cd, "results_empty_directories")),

@@ -225,7 +225,7 @@ pub struct SimilarImagesArgs {
         long,
         default_value = "High",
         value_parser = parse_similar_images_similarity,
-        help = "Similairty level (Minimal, VerySmall, Small, Medium, High, VeryHigh, Original)",
+        help = "Similarity level (Minimal, VerySmall, Small, Medium, High, VeryHigh, Original)",
         long_help = "Methods to choose similarity level of images which will be considered as duplicated."
     )]
     pub similarity_preset: SimilarityPreset,
@@ -697,7 +697,7 @@ fn parse_checking_method_same_music(src: &str) -> Result<CheckingMethod, &'stati
     match src.to_ascii_lowercase().as_str() {
         "tags" => Ok(CheckingMethod::AudioTags),
         "content" => Ok(CheckingMethod::AudioContent),
-        _ => Err("Couldn't parse the searc method (allowed: TAGS, CONTENT)"),
+        _ => Err("Couldn't parse the search method (allowed: TAGS, CONTENT)"),
     }
 }
 
@@ -754,9 +754,9 @@ fn parse_similar_image_filter(src: &str) -> Result<FilterType, String> {
         "lanczos3" => FilterType::Lanczos3,
         "nearest" => FilterType::Nearest,
         "triangle" => FilterType::Triangle,
-        "faussian" => FilterType::Gaussian,
+        "gaussian" => FilterType::Gaussian,
         "catmullrom" => FilterType::CatmullRom,
-        _ => return Err("Couldn't parse the image resize filter (allowed: Lanczos3, Nearest, Triangle, Faussian, Catmullrom)".to_string()),
+        _ => return Err("Couldn't parse the image resize filter (allowed: Lanczos3, Nearest, Triangle, Gaussian, Catmullrom)".to_string()),
     };
     Ok(filter_type)
 }

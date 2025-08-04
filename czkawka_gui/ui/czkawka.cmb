@@ -344,7 +344,7 @@
 	(10,7,"GtkButton","buttons_popover_sort_selection",2,None,None,None,4,None,None)
   </object>
   <object_property>
-	(3,1,"GtkAboutDialog","comments","2020 - 2025\nRafał Mikrut (qarmin) and contributors\nThis program is free to use and will always be.\nApp is now in maintenance mode, so check Krokiet, the sucessor of Czkawka",1,None,None,None,None,None,None,None,None),
+	(3,1,"GtkAboutDialog","comments","2020 - 2025\nRafał Mikrut (qarmin) and contributors\nThis program is free to use and will always be.\nApp is now in maintenance mode, so check Krokiet, the successor of Czkawka",1,None,None,None,None,None,None,None,None),
 	(3,1,"GtkAboutDialog","license-type","mit-x11",None,None,None,None,None,None,None,None,None),
 	(3,1,"GtkAboutDialog","logo-icon-name","help-about-symbolic",None,None,None,None,None,None,None,None,None),
 	(3,1,"GtkAboutDialog","program-name","Czkawka",None,None,None,None,None,None,None,None,None),

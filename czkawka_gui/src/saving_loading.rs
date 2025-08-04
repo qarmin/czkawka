@@ -42,7 +42,7 @@ const DEFAULT_IMAGE_REMOVE_AUTO_OUTDATED_CACHE: bool = true;
 const DEFAULT_DUPLICATE_REMOVE_AUTO_OUTDATED_CACHE: bool = true;
 const DEFAULT_DUPLICATE_CASE_SENSITIVE_NAME_CHECKING: bool = false;
 const DEFAULT_GENERAL_IGNORE_OTHER_FILESYSTEMS: bool = false;
-const DEFUALT_USING_RUST_LIBRARIES_TO_SHOW_PREVIEW: bool = true;
+const DEFAULT_USING_RUST_LIBRARIES_TO_SHOW_PREVIEW: bool = true;
 
 const DEFAULT_MUSIC_APPROXIMATE_COMPARISON: bool = false;
 const DEFAULT_MUSIC_GROUP_CONTENT_BY_TITLE: bool = false;
@@ -633,7 +633,7 @@ pub(crate) fn load_configuration(
     let ignore_other_fs: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::GeneralIgnoreOtherFilesystems].clone(), DEFAULT_GENERAL_IGNORE_OTHER_FILESYSTEMS);
     let use_rust_libraries_to_preview: bool = loaded_entries.get_bool(
         hashmap_ls[&LoadText::GeneralUseRustLibrariesToPreview].clone(),
-        DEFUALT_USING_RUST_LIBRARIES_TO_SHOW_PREVIEW,
+        DEFAULT_USING_RUST_LIBRARIES_TO_SHOW_PREVIEW,
     );
 
     let delete_outdated_cache_duplicates: bool = loaded_entries.get_bool(
@@ -947,7 +947,7 @@ pub(crate) fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpp
         settings.entry_settings_prehash_cache_file_minimal_size.set_text(DEFAULT_PREHASH_MINIMAL_CACHE_SIZE);
         settings.combo_box_settings_language.set_active(Some(0));
         settings.check_button_settings_one_filesystem.set_active(DEFAULT_GENERAL_IGNORE_OTHER_FILESYSTEMS);
-        settings.check_button_settings_use_rust_preview.set_active(DEFUALT_USING_RUST_LIBRARIES_TO_SHOW_PREVIEW);
+        settings.check_button_settings_use_rust_preview.set_active(DEFAULT_USING_RUST_LIBRARIES_TO_SHOW_PREVIEW);
 
         main_notebook.combo_box_duplicate_hash_type.set_active(Some(0));
         main_notebook.combo_box_duplicate_check_method.set_active(Some(0));

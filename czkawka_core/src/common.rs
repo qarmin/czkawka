@@ -71,8 +71,8 @@ pub fn set_config_cache_path(cache_name: &'static str, config_name: &'static str
     let mut infos = vec![];
     let mut warnings = vec![];
 
-    let config_folder_env = std::env::var("CZKAWKA_CONFIG_PATH").unwrap_or_default().trim().to_string();
-    let cache_folder_env = std::env::var("CZKAWKA_CACHE_PATH").unwrap_or_default().trim().to_string();
+    let config_folder_env = env::var("CZKAWKA_CONFIG_PATH").unwrap_or_default().trim().to_string();
+    let cache_folder_env = env::var("CZKAWKA_CACHE_PATH").unwrap_or_default().trim().to_string();
 
     let default_cache_folder = ProjectDirs::from("pl", "Qarmin", cache_name).map(|proj_dirs| proj_dirs.cache_dir().to_path_buf());
     let default_config_folder = ProjectDirs::from("pl", "Qarmin", config_name).map(|proj_dirs| proj_dirs.config_dir().to_path_buf());
@@ -298,7 +298,7 @@ pub fn print_version_mode(app: &str) {
         "{app} version: {CZKAWKA_VERSION}, {debug_release} mode, rust {rust_version}, os {} {} ({} {}), {processors} cpu/threads, features({}): [{}], app cpu version: {}, os cpu version: {}",
         info.os_type(),
         info.version(),
-        std::env::consts::ARCH,
+        env::consts::ARCH,
         info.bitness(),
         features.len(),
         features.join(", "),

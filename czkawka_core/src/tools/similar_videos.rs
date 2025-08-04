@@ -85,10 +85,7 @@ pub fn crop_detect_from_str_opt(s: &str) -> Option<Cropdetect> {
 }
 
 pub fn crop_detect_from_str(s: &str) -> Cropdetect {
-    match crop_detect_from_str_opt(s) {
-        Some(crop_detect) => crop_detect,
-        None => DEFAULT_CROP_DETECT,
-    }
+    crop_detect_from_str_opt(s).unwrap_or(DEFAULT_CROP_DETECT)
 }
 pub fn crop_detect_to_str(crop_detect: Cropdetect) -> String {
     match crop_detect {

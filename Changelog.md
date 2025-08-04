@@ -3,9 +3,11 @@
 ### Breaking changes[Users]
 - Some languages now have unified names in Crowdin (e.g. `es` → `es-ES`). The GUI may not find them and will fall back to the default language.
 - Cache files now use memory limits and are incompatible with previous versions.
+- Cli image filter argument changed from `faussian` to `gaussian`
 
 ### Breaking changes[Devs]
 - `stop_flag` is now required argument in most of the core functions
+- Visibility of some core functions has been reduced to `pub(crate)`
 
 ### Core
 - Replaced `println`/`eprintln` with logging functions - [#1478](https://github.com/qarmin/czkawka/pull/1478)
@@ -80,7 +82,7 @@
 - Added support for configuring config/cache paths using the `CZKAWKA_CONFIG_PATH` and `CZKAWKA_CACHE_PATH` environment variables - [#1464](https://github.com/qarmin/czkawka/pull/1464)
 - Fixed a crash in debug mode when checking broken files named `.mp3` - [#1464](https://github.com/qarmin/czkawka/pull/1464)
 - Catching panics from symphonia crashes in broken files mode - [#1466](https://github.com/qarmin/czkawka/pull/1466)
-- Printing a warning, when using `panic=abort`(that may speedup app and cause occasional crashes) - [#1466](https://github.com/qarmin/czkawka/pull/1466)
+- Printing a warning, when using `panic=abort`(that may speed up app and cause occasional crashes) - [#1466](https://github.com/qarmin/czkawka/pull/1466)
 
 ### Krokiet
 - Changed the default tab to "Duplicate Files" - [#1368](https://github.com/qarmin/czkawka/pull/1368)
