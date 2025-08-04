@@ -8,7 +8,7 @@ use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use rayon::prelude::*;
 use serde::Serialize;
-
+use crate::common::progress_stop_handler::prepare_thread_handler_common2;
 use crate::common::model::WorkContinueStatus;
 use crate::common::dir_traversal::{common_read_dir, get_modified_time};
 use crate::common::directories::Directories;
@@ -92,12 +92,11 @@ impl Temporary {
     fn check_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let mut folders_to_check: Vec<PathBuf> = self.common_data.directories.included_directories.clone();
 
-        let (progress_thread_handle, progress_thread_run, items_counter, _check_was_stopped, _size_counter) =
-            prepare_thread_handler_common(progress_sender, CurrentStage::CollectingFiles, 0, self.get_test_type(), 0);
+        let progress_handler = prepare_thread_handler_common2(progress_sender, CurrentStage::CollectingFiles, 0, self.get_test_type(), 0);
 
         while !folders_to_check.is_empty() {
             if check_if_stop_received(stop_flag) {
-                send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+                progress_handler.join_thread();
                 return WorkContinueStatus::Stop;
             }
 
@@ -131,7 +130,7 @@ impl Temporary {
                                 &self.common_data.excluded_items,
                             );
                         } else if file_type.is_file() {
-                            if let Some(file_entry) = self.get_file_entry(&items_counter, &entry_data, &mut warnings) {
+                            if let Some(file_entry) = self.get_file_entry(progress_handler.items_counter(), &entry_data, &mut warnings) {
                                 fe_result.push(file_entry);
                             }
                         }
@@ -153,7 +152,7 @@ impl Temporary {
             }
         }
 
-        send_info_and_wait_for_ending_all_threads(&progress_thread_run, progress_thread_handle);
+        progress_handler.join_thread();
         self.information.number_of_temporary_files = self.temporary_files.len();
 
         WorkContinueStatus::Continue
