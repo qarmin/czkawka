@@ -39,6 +39,9 @@ def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: python simplify_and_minify_svg.py <folder>")
         return
+    if FAKE_RUN:
+        print("FAKE_RUN is enabled, no changes will be made to files.")
+
     svg_folder = Path(sys.argv[1])
     svg_files = list(svg_folder.glob("**/*.svg"))
     if not svg_files:
