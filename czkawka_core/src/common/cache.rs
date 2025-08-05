@@ -19,45 +19,19 @@ use crate::common::config_cache_path::open_cache_folder;
 use crate::common::model::HashType;
 use crate::common::traits::ResultEntry;
 use crate::helpers::messages::Messages;
-use crate::tools::similar_images::{convert_algorithm_to_string, convert_filters_to_string};
 
-const CACHE_VERSION: &str = "100";
-const CACHE_DUPLICATE_VERSION: &str = "100";
+pub(crate) const CACHE_VERSION: &str = "100";
+pub(crate) const CACHE_DUPLICATE_VERSION: &str = "100";
 #[cfg(feature = "fast_image_resize")]
-const CACHE_IMAGE_VERSION: &str = "100_fast_resize";
+pub(crate) const CACHE_IMAGE_VERSION: &str = "100";
 #[cfg(not(feature = "fast_image_resize"))]
-const CACHE_IMAGE_VERSION: &str = "100_image_rs_resize";
-const CACHE_VIDEO_VERSION: &str = "100";
+pub(crate) const CACHE_IMAGE_VERSION: &str = "100_image_rs_resize";
+pub(crate) const CACHE_VIDEO_VERSION: &str = "100";
 
 const MEMORY_LIMIT: u64 = 8 * 1024 * 1024 * 1024;
 
-pub fn get_broken_files_cache_file() -> String {
-    format!("cache_broken_files_{CACHE_VERSION}.bin")
-}
 
-pub fn get_similar_images_cache_file(hash_size: &u8, hash_alg: &HashAlg, image_filter: &FilterType) -> String {
-    format!(
-        "cache_similar_images_{hash_size}_{}_{}_{CACHE_IMAGE_VERSION}.bin",
-        convert_algorithm_to_string(hash_alg),
-        convert_filters_to_string(image_filter),
-    )
-}
 
-pub fn get_similar_videos_cache_file(skip_forward_amount: u32, duration: u32, crop_detect: Cropdetect) -> String {
-    let crop_detect_str = match crop_detect {
-        Cropdetect::None => "none",
-        Cropdetect::Letterbox => "letterbox",
-        Cropdetect::Motion => "motion",
-    };
-    format!("cache_similar_videos_{CACHE_VIDEO_VERSION}__skip_{skip_forward_amount}__dur_{duration}__cd_{crop_detect_str}.bin")
-}
-pub fn get_similar_music_cache_file(checking_tags: bool) -> String {
-    if checking_tags {
-        format!("cache_same_music_tags_{CACHE_VERSION}.bin")
-    } else {
-        format!("cache_same_music_fingerprints_{CACHE_VERSION}.bin")
-    }
-}
 
 pub fn get_duplicate_cache_file(type_of_hash: &HashType, is_prehash: bool) -> String {
     let prehash_str = if is_prehash { "_prehash" } else { "" };

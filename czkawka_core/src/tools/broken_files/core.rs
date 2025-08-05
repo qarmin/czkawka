@@ -11,7 +11,7 @@ use log::{debug, error};
 use lopdf::Document;
 use rayon::prelude::*;
 
-use crate::common::cache::{extract_loaded_cache, get_broken_files_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
+use crate::common::cache::{extract_loaded_cache, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common::consts::{AUDIO_FILES_EXTENSIONS, IMAGE_RS_BROKEN_FILES_EXTENSIONS, PDF_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS};
 use crate::common::create_crash_message;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
@@ -21,6 +21,7 @@ use crate::common::progress_stop_handler::{check_if_stop_received, prepare_threa
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::common::traits::{DebugPrint, DeletingItems, ResultEntry};
 use crate::tools::broken_files::{BrokenEntry, BrokenFiles, BrokenFilesParameters, CheckedTypes, Info, TypeOfFile};
+use crate::common::cache::CACHE_VERSION;
 
 impl BrokenFiles {
     pub fn new(params: BrokenFilesParameters) -> Self {
@@ -322,6 +323,11 @@ fn check_extension_availability(
         debug_assert!(false, "File with unknown extension - \"{}\" - {extension_lowercase}", full_name.to_string_lossy());
         TypeOfFile::Unknown
     }
+}
+
+
+pub fn get_broken_files_cache_file() -> String {
+    format!("cache_broken_files_{CACHE_VERSION}.bin")
 }
 
 #[cfg(test)]
