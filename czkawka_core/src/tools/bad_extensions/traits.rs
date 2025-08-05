@@ -8,8 +8,8 @@ use fun_time::fun_time;
 use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData};
-use crate::common::traits::{AllTraits, DeletingItems, Scan};
-use crate::tools::bad_extensions::{BadExtensions, BadExtensionsParameters, DebugPrint, Info, PrintResults};
+use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, PrintResults, Scan};
+use crate::tools::bad_extensions::{BadExtensions, BadExtensionsParameters, Info};
 
 impl AllTraits for BadExtensions {}
 

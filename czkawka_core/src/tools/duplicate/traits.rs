@@ -1,33 +1,10 @@
-
-use std::cell::RefCell;
-use std::collections::{BTreeMap, HashMap, HashSet};
-use std::fmt::Debug;
-use std::fs::File;
-use std::hash::Hasher;
 use std::io::prelude::*;
 use std::io::{self};
-#[cfg(target_family = "unix")]
-use std::os::unix::fs::MetadataExt;
-use std::path::{Path, PathBuf};
-use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
-use std::{fs, mem, thread};
 
-use crossbeam_channel::Sender;
-use fun_time::fun_time;
 use humansize::{BINARY, format_size};
-use log::debug;
-use rayon::prelude::*;
-use serde::{Deserialize, Serialize};
-use static_assertions::const_assert;
-use xxhash_rust::xxh3::Xxh3;
 
-use crate::common::cache::{get_duplicate_cache_file, load_cache_from_file_generalized_by_size, save_cache_to_file_generalized};
-use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
-use crate::common::model::{CheckingMethod, FileEntry, HashType, ToolType, WorkContinueStatus};
-use crate::common::progress_data::{CurrentStage, ProgressData};
-use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
-use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
+use crate::common::model::CheckingMethod;
+use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::common::traits::*;
 use crate::tools::duplicate::{DuplicateFinder, DuplicateFinderParameters, Info};
 

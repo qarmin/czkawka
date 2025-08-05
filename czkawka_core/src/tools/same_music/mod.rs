@@ -1,40 +1,14 @@
-mod core;
-mod traits;
+pub mod core;
+pub mod traits;
 
-use std::collections::{BTreeMap, HashSet};
-use std::fs::File;
-use std::io::prelude::*;
+use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
-use std::{mem, panic};
 
-use anyhow::Context;
-use crossbeam_channel::Sender;
-use fun_time::fun_time;
-use humansize::{BINARY, format_size};
-use lofty::file::{AudioFile, TaggedFileExt};
-use lofty::prelude::*;
-use lofty::read_from;
-use log::{debug, error};
-use rayon::prelude::*;
-use rusty_chromaprint::{Configuration, Fingerprinter, match_fingerprints};
+use rusty_chromaprint::Configuration;
 use serde::{Deserialize, Serialize};
-use symphonia::core::audio::SampleBuffer;
-use symphonia::core::codecs::{CODEC_TYPE_NULL, DecoderOptions};
-use symphonia::core::formats::FormatOptions;
-use symphonia::core::io::MediaSourceStream;
-use symphonia::core::meta::MetadataOptions;
-use symphonia::core::probe::Hint;
 
-use crate::common::cache::{extract_loaded_cache, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
-use crate::common::consts::AUDIO_FILES_EXTENSIONS;
-use crate::common::create_crash_message;
-use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
-use crate::common::model::{CheckingMethod, FileEntry, ToolType, WorkContinueStatus};
-use crate::common::progress_data::{CurrentStage, ProgressData};
-use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
-use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
+use crate::common::model::{CheckingMethod, FileEntry};
+use crate::common::tool_data::CommonToolData;
 use crate::common::traits::*;
 
 bitflags! {
@@ -151,7 +125,6 @@ pub struct SameMusic {
     params: SameMusicParameters,
 }
 
-
 impl SameMusic {
     pub const fn get_duplicated_music_entries(&self) -> &Vec<Vec<MusicEntry>> {
         &self.duplicated_music_entries
@@ -181,5 +154,3 @@ impl SameMusic {
         self.common_data.use_reference_folders
     }
 }
-
-

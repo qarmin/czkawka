@@ -1,9 +1,6 @@
-
-
 use std::collections::{BTreeMap, HashSet};
 use std::fs::File;
-use std::io::prelude::*;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::{mem, panic};
@@ -18,7 +15,6 @@ use lofty::read_from;
 use log::{debug, error};
 use rayon::prelude::*;
 use rusty_chromaprint::{Configuration, Fingerprinter, match_fingerprints};
-use serde::{Deserialize, Serialize};
 use symphonia::core::audio::SampleBuffer;
 use symphonia::core::codecs::{CODEC_TYPE_NULL, DecoderOptions};
 use symphonia::core::formats::FormatOptions;
@@ -26,17 +22,16 @@ use symphonia::core::io::MediaSourceStream;
 use symphonia::core::meta::MetadataOptions;
 use symphonia::core::probe::Hint;
 
-use crate::common::cache::{extract_loaded_cache, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
+use crate::common::cache::{CACHE_VERSION, extract_loaded_cache, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common::consts::AUDIO_FILES_EXTENSIONS;
 use crate::common::create_crash_message;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
-use crate::common::model::{CheckingMethod, FileEntry, ToolType, WorkContinueStatus};
+use crate::common::model::{CheckingMethod, ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
-use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
+use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::common::traits::*;
 use crate::tools::same_music::{GroupedFilesToCheck, Info, MusicEntry, MusicSimilarity, SameMusic, SameMusicParameters};
-use crate::common::cache::CACHE_VERSION;
 
 impl SameMusic {
     pub fn new(params: SameMusicParameters) -> Self {
@@ -619,7 +614,6 @@ impl SameMusic {
     }
 }
 
-
 // TODO this should be taken from rusty-chromaprint repo, not reimplemented here
 fn calc_fingerprint_helper(path: impl AsRef<Path>, config: &Configuration) -> anyhow::Result<Vec<u32>> {
     let path = path.as_ref().to_path_buf();
@@ -690,11 +684,11 @@ fn calc_fingerprint_helper(path: impl AsRef<Path>, config: &Configuration) -> an
         printer.finish();
         Ok(printer.fingerprint().to_vec())
     })
-        .unwrap_or_else(|_| {
-            let message = create_crash_message("Symphonia", &path.to_string_lossy(), "https://github.com/pdeljanov/Symphonia");
-            error!("{message}");
-            Err(anyhow::anyhow!("{message}"))
-        })
+    .unwrap_or_else(|_| {
+        let message = create_crash_message("Symphonia", &path.to_string_lossy(), "https://github.com/pdeljanov/Symphonia");
+        error!("{message}");
+        Err(anyhow::anyhow!("{message}"))
+    })
 }
 
 fn read_single_file_tags(path: &str, mut music_entry: MusicEntry) -> Option<MusicEntry> {
@@ -775,9 +769,6 @@ fn read_single_file_tags(path: &str, mut music_entry: MusicEntry) -> Option<Musi
 
     Some(music_entry)
 }
-
-
-
 
 fn get_simplified_name_internal(what: &str, ignore_numbers: bool) -> String {
     let mut new_what = String::with_capacity(what.len());

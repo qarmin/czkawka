@@ -1,15 +1,11 @@
-
-
 use std::fs::DirEntry;
-use std::io::prelude::*;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use rayon::prelude::*;
-use serde::Serialize;
 
 use crate::common::dir_traversal::{common_read_dir, get_modified_time};
 use crate::common::directories::Directories;
@@ -17,9 +13,9 @@ use crate::common::items::ExcludedItems;
 use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
-use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
+use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::common::traits::*;
-use crate::tools::temporary::{Info, Temporary, TemporaryFileEntry, TEMP_EXTENSIONS};
+use crate::tools::temporary::{Info, TEMP_EXTENSIONS, Temporary, TemporaryFileEntry};
 
 impl Temporary {
     pub fn new() -> Self {
@@ -140,7 +136,6 @@ impl Temporary {
         })
     }
 }
-
 
 pub(crate) fn check_folder_children(
     dir_result: &mut Vec<PathBuf>,

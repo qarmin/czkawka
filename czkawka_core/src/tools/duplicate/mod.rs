@@ -1,35 +1,26 @@
-mod core;
-mod traits;
+pub mod core;
+pub mod traits;
 
 use std::cell::RefCell;
-use std::collections::{BTreeMap, HashMap, HashSet};
+use std::collections::{BTreeMap, HashSet};
 use std::fmt::Debug;
+use std::fs;
 use std::fs::File;
 use std::hash::Hasher;
 use std::io::prelude::*;
-use std::io::{self};
 #[cfg(target_family = "unix")]
 use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
-use std::{fs, mem, thread};
 
-use crossbeam_channel::Sender;
-use fun_time::fun_time;
-use humansize::{BINARY, format_size};
-use log::debug;
-use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use static_assertions::const_assert;
 use xxhash_rust::xxh3::Xxh3;
 
-use crate::common::cache::{get_duplicate_cache_file, load_cache_from_file_generalized_by_size, save_cache_to_file_generalized};
-use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
-use crate::common::model::{CheckingMethod, FileEntry, HashType, ToolType, WorkContinueStatus};
-use crate::common::progress_data::{CurrentStage, ProgressData};
-use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
-use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
+use crate::common::model::{CheckingMethod, FileEntry, HashType};
+use crate::common::progress_stop_handler::check_if_stop_received;
+use crate::common::tool_data::CommonToolData;
 use crate::common::traits::*;
 
 pub const PREHASHING_BUFFER_SIZE: u64 = 4 * 1024;
@@ -138,8 +129,6 @@ pub struct DuplicateFinder {
     params: DuplicateFinderParameters,
 }
 
-
-
 #[cfg(target_family = "windows")]
 fn filter_hard_links(vec_file_entry: &[FileEntry]) -> Vec<FileEntry> {
     let mut inodes: HashSet<u128> = HashSet::with_capacity(vec_file_entry.len());
@@ -176,7 +165,6 @@ pub trait MyHasher {
     fn update(&mut self, bytes: &[u8]);
     fn finalize(&self) -> String;
 }
-
 
 impl DuplicateFinder {
     pub fn get_params(&self) -> &DuplicateFinderParameters {
@@ -309,7 +297,6 @@ impl MyHasher for Xxh3 {
         self.finish().to_string()
     }
 }
-
 
 #[cfg(test)]
 mod tests {

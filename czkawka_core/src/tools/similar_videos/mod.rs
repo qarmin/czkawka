@@ -1,31 +1,16 @@
-mod core;
-mod traits;
+pub mod core;
+pub mod traits;
 
-use std::collections::{BTreeMap, BTreeSet, HashMap};
-use std::io::Write;
-use std::mem;
+use std::collections::BTreeMap;
 use std::ops::RangeInclusive;
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, Ordering};
 
-use crossbeam_channel::Sender;
-use fun_time::fun_time;
-use humansize::{BINARY, format_size};
-use log::debug;
-use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
-use vid_dup_finder_lib::{CreationOptions, Cropdetect, VideoHash, VideoHashBuilder};
+use vid_dup_finder_lib::{Cropdetect, VideoHash};
 
-use crate::common::cache::{extract_loaded_cache,  load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
-use crate::common::consts::VIDEO_FILES_EXTENSIONS;
-use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult, inode, take_1_per_inode};
-use crate::common::model::{FileEntry, ToolType, WorkContinueStatus};
-use crate::common::progress_data::{CurrentStage, ProgressData};
-use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
-use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
-use crate::common::traits::{DebugPrint, DeletingItems, PrintResults, ResultEntry};
-use crate::flc;
+use crate::common::model::FileEntry;
+use crate::common::tool_data::CommonToolData;
+use crate::common::traits::ResultEntry;
 
 pub const MAX_TOLERANCE: i32 = 20;
 
@@ -127,14 +112,11 @@ pub struct SimilarVideos {
     params: SimilarVideosParameters,
 }
 
-
 #[derive(Default, Clone)]
 pub struct Info {
     pub number_of_duplicates: usize,
     pub number_of_groups: u64,
 }
-
-
 
 impl SimilarVideos {
     pub fn get_params(&self) -> &SimilarVideosParameters {

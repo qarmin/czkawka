@@ -1,37 +1,25 @@
-
-
-use std::cell::RefCell;
-use std::collections::{BTreeMap, HashMap, HashSet};
-use std::fmt::Debug;
-use std::fs::File;
-use std::hash::Hasher;
-use std::io::prelude::*;
-use std::io::{self};
-#[cfg(target_family = "unix")]
-use std::os::unix::fs::MetadataExt;
-use std::path::{Path, PathBuf};
+use std::collections::{BTreeMap, HashMap};
+use std::path::Path;
 use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
-use std::{fs, mem, thread};
+use std::sync::atomic::AtomicBool;
+use std::{mem, thread};
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use humansize::{BINARY, format_size};
 use log::debug;
 use rayon::prelude::*;
-use serde::{Deserialize, Serialize};
-use static_assertions::const_assert;
-use xxhash_rust::xxh3::Xxh3;
 
-use crate::common::cache::{load_cache_from_file_generalized_by_size, save_cache_to_file_generalized};
+use crate::common::cache::{CACHE_DUPLICATE_VERSION, load_cache_from_file_generalized_by_size, save_cache_to_file_generalized};
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{CheckingMethod, FileEntry, HashType, ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
 use crate::common::traits::*;
-use crate::tools::duplicate::{filter_hard_links, hash_calculation, hash_calculation_limit, DuplicateEntry, DuplicateFinder, DuplicateFinderParameters, Info, PREHASHING_BUFFER_SIZE, THREAD_BUFFER};
-use crate::common::cache::CACHE_DUPLICATE_VERSION;
+use crate::tools::duplicate::{
+    DuplicateEntry, DuplicateFinder, DuplicateFinderParameters, Info, PREHASHING_BUFFER_SIZE, THREAD_BUFFER, filter_hard_links, hash_calculation, hash_calculation_limit,
+};
 
 impl DuplicateFinder {
     pub fn new(params: DuplicateFinderParameters) -> Self {
@@ -847,4 +835,3 @@ pub fn get_duplicate_cache_file(type_of_hash: &HashType, is_prehash: bool) -> St
     let prehash_str = if is_prehash { "_prehash" } else { "" };
     format!("cache_duplicates_{type_of_hash:?}{prehash_str}_{CACHE_DUPLICATE_VERSION}.bin")
 }
-

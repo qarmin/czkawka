@@ -1,7 +1,4 @@
-
-
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
-use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -10,26 +7,23 @@ use std::{mem, panic};
 use bk_tree::BKTree;
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
-use hamming_bitwise_fast::hamming_bitwise_fast;
 use humansize::{BINARY, format_size};
 use image::GenericImageView;
 use image_hasher::{FilterType, HashAlg, HasherConfig};
 use log::{debug, error};
 use rayon::prelude::*;
-use serde::{Deserialize, Serialize};
 
-use crate::common::cache::{extract_loaded_cache, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
+use crate::common::cache::{CACHE_IMAGE_VERSION, extract_loaded_cache, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common::consts::{HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, JXL_IMAGE_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult, inode, take_1_per_inode};
 use crate::common::image::get_dynamic_image_from_path;
-use crate::common::model::{FileEntry, ToolType, WorkContinueStatus};
+use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
-use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
-use crate::common::traits::{DebugPrint, DeletingItems, PrintResults, ResultEntry};
+use crate::common::tool_data::{CommonData, CommonToolData};
+use crate::common::traits::{DebugPrint, DeletingItems, ResultEntry};
 use crate::flc;
-use crate::tools::similar_images::{Hamming, ImHash, ImagesEntry, SimilarImages, SimilarImagesParameters, SimilarityPreset, SIMILAR_VALUES};
-use crate::common::cache::CACHE_IMAGE_VERSION;
+use crate::tools::similar_images::{Hamming, ImHash, ImagesEntry, SIMILAR_VALUES, SimilarImages, SimilarImagesParameters, SimilarityPreset};
 
 impl SimilarImages {
     pub fn new(params: SimilarImagesParameters) -> Self {
@@ -601,11 +595,9 @@ impl SimilarImages {
     }
 }
 
-
 fn is_in_reference_folder(reference_directories: &[PathBuf], path: &Path) -> bool {
     reference_directories.iter().any(|e| path.starts_with(e))
 }
-
 
 pub fn get_string_from_similarity(similarity: &u32, hash_size: u8) -> String {
     let index_preset = match hash_size {
@@ -663,7 +655,7 @@ pub(crate) fn convert_filters_to_string(image_filter: &FilterType) -> String {
         FilterType::Gaussian => "Gaussian",
         FilterType::CatmullRom => "CatmullRom",
     }
-        .to_string()
+    .to_string()
 }
 
 pub(crate) fn convert_algorithm_to_string(hash_alg: &HashAlg) -> String {
@@ -675,7 +667,7 @@ pub(crate) fn convert_algorithm_to_string(hash_alg: &HashAlg) -> String {
         HashAlg::DoubleGradient => "DoubleGradient",
         HashAlg::Median => "Median",
     }
-        .to_string()
+    .to_string()
 }
 
 #[allow(dead_code)]
@@ -740,7 +732,6 @@ fn debug_check_for_duplicated_things(
     assert!(!found_broken_thing);
 }
 
-
 pub fn get_similar_images_cache_file(hash_size: &u8, hash_alg: &HashAlg, image_filter: &FilterType) -> String {
     format!(
         "cache_similar_images_{hash_size}_{}_{}_{CACHE_IMAGE_VERSION}.bin",
@@ -748,7 +739,6 @@ pub fn get_similar_images_cache_file(hash_size: &u8, hash_alg: &HashAlg, image_f
         convert_filters_to_string(image_filter),
     )
 }
-
 
 #[cfg(test)]
 mod tests {

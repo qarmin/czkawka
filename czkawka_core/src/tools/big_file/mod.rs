@@ -1,5 +1,5 @@
-mod core;
-mod traits;
+pub mod core;
+pub mod traits;
 
 use crate::common::model::FileEntry;
 use crate::common::tool_data::CommonToolData;

@@ -1,5 +1,5 @@
-mod core;
-mod traits;
+pub mod core;
+pub mod traits;
 mod workarounds;
 
 use std::path::{Path, PathBuf};

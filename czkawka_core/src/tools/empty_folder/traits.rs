@@ -1,24 +1,15 @@
-
-use std::collections::HashMap;
-use std::fs::DirEntry;
 use std::io::Write;
-use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
-use log::debug;
 use rayon::prelude::*;
 
-use crate::common::dir_traversal::{common_get_entry_data, common_get_metadata_dir, common_read_dir, get_modified_time};
-use crate::common::directories::Directories;
-use crate::common::items::ExcludedItems;
-use crate::common::model::{ToolType, WorkContinueStatus};
-use crate::common::progress_data::{CurrentStage, ProgressData};
-use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
+use crate::common::model::WorkContinueStatus;
+use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
-use crate::common::traits::{DebugPrint, DeletingItems, PrintResults, ResultEntry};
+use crate::common::traits::{DebugPrint, DeletingItems, PrintResults};
 use crate::tools::empty_folder::{EmptyFolder, Info};
 
 impl DebugPrint for EmptyFolder {

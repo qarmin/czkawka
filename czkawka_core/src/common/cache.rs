@@ -8,15 +8,11 @@ use std::path::Path;
 use bincode::Options;
 use fun_time::fun_time;
 use humansize::{BINARY, format_size};
-use image::imageops::FilterType;
-use image_hasher::HashAlg;
 use log::{debug, error};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use serde::{Deserialize, Serialize};
-use vid_dup_finder_lib::Cropdetect;
 
 use crate::common::config_cache_path::open_cache_folder;
-use crate::common::model::HashType;
 use crate::common::traits::ResultEntry;
 use crate::helpers::messages::Messages;
 
@@ -29,14 +25,6 @@ pub(crate) const CACHE_IMAGE_VERSION: &str = "100_image_rs_resize";
 pub(crate) const CACHE_VIDEO_VERSION: &str = "100";
 
 const MEMORY_LIMIT: u64 = 8 * 1024 * 1024 * 1024;
-
-
-
-
-pub fn get_duplicate_cache_file(type_of_hash: &HashType, is_prehash: bool) -> String {
-    let prehash_str = if is_prehash { "_prehash" } else { "" };
-    format!("cache_duplicates_{type_of_hash:?}{prehash_str}_{CACHE_DUPLICATE_VERSION}.bin")
-}
 
 fn get_cache_size(file_name: &Path) -> String {
     fs::metadata(file_name).map_or_else(|_| "<unknown size>".to_string(), |metadata| format_size(metadata.len(), BINARY))

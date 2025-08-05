@@ -1,22 +1,12 @@
-
-
-use std::fs::DirEntry;
 use std::io::prelude::*;
-use std::path::{Path, PathBuf};
 use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+use std::sync::atomic::AtomicBool;
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
-use rayon::prelude::*;
-use serde::Serialize;
 
-use crate::common::dir_traversal::{common_read_dir, get_modified_time};
-use crate::common::directories::Directories;
-use crate::common::items::ExcludedItems;
-use crate::common::model::{ToolType, WorkContinueStatus};
-use crate::common::progress_data::{CurrentStage, ProgressData};
-use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
+use crate::common::model::WorkContinueStatus;
+use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
 use crate::common::traits::*;
 use crate::tools::temporary::{Info, Temporary};
@@ -73,7 +63,6 @@ impl CommonData for Temporary {
         self.information.number_of_temporary_files > 0
     }
 }
-
 
 impl DebugPrint for Temporary {
     #[allow(clippy::print_stdout)]

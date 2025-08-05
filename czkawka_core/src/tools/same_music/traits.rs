@@ -1,38 +1,12 @@
-
-
-use std::collections::{BTreeMap, HashSet};
-use std::fs::File;
 use std::io::prelude::*;
-use std::path::{Path, PathBuf};
 use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
-use std::{mem, panic};
+use std::sync::atomic::AtomicBool;
 
-use anyhow::Context;
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
-use humansize::{BINARY, format_size};
-use lofty::file::{AudioFile, TaggedFileExt};
-use lofty::prelude::*;
-use lofty::read_from;
-use log::{debug, error};
-use rayon::prelude::*;
-use rusty_chromaprint::{Configuration, Fingerprinter, match_fingerprints};
-use serde::{Deserialize, Serialize};
-use symphonia::core::audio::SampleBuffer;
-use symphonia::core::codecs::{CODEC_TYPE_NULL, DecoderOptions};
-use symphonia::core::formats::FormatOptions;
-use symphonia::core::io::MediaSourceStream;
-use symphonia::core::meta::MetadataOptions;
-use symphonia::core::probe::Hint;
 
-use crate::common::cache::{extract_loaded_cache, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
-use crate::common::consts::AUDIO_FILES_EXTENSIONS;
-use crate::common::create_crash_message;
-use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
-use crate::common::model::{CheckingMethod, FileEntry, ToolType, WorkContinueStatus};
-use crate::common::progress_data::{CurrentStage, ProgressData};
-use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
+use crate::common::model::{CheckingMethod, WorkContinueStatus};
+use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
 use crate::common::traits::*;
 use crate::tools::same_music::{Info, MusicEntry, SameMusic, SameMusicParameters};
@@ -127,7 +101,6 @@ impl CommonData for SameMusic {
         self.information.number_of_duplicates > 0
     }
 }
-
 
 impl DeletingItems for SameMusic {
     #[fun_time(message = "delete_files", level = "debug")]

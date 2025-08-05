@@ -1,34 +1,17 @@
-mod core;
-mod traits;
+pub mod core;
+pub mod traits;
 
-use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
-use std::io::Write;
+use std::collections::{BTreeMap, HashMap};
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::{mem, panic};
 
 use bk_tree::BKTree;
-use crossbeam_channel::Sender;
-use fun_time::fun_time;
 use hamming_bitwise_fast::hamming_bitwise_fast;
-use humansize::{BINARY, format_size};
-use image::GenericImageView;
-use image_hasher::{FilterType, HashAlg, HasherConfig};
-use log::{debug, error};
-use rayon::prelude::*;
+use image_hasher::{FilterType, HashAlg};
 use serde::{Deserialize, Serialize};
 
-use crate::common::cache::{extract_loaded_cache, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
-use crate::common::consts::{HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, JXL_IMAGE_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
-use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult, inode, take_1_per_inode};
-use crate::common::image::get_dynamic_image_from_path;
-use crate::common::model::{FileEntry, ToolType, WorkContinueStatus};
-use crate::common::progress_data::{CurrentStage, ProgressData};
-use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
-use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
-use crate::common::traits::{DebugPrint, DeletingItems, PrintResults, ResultEntry};
-use crate::flc;
+use crate::common::model::FileEntry;
+use crate::common::tool_data::CommonToolData;
+use crate::common::traits::ResultEntry;
 
 type ImHash = Vec<u8>;
 
@@ -144,9 +127,6 @@ pub struct Info {
     pub number_of_duplicates: usize,
     pub number_of_groups: u64,
 }
-
-
-
 
 impl SimilarImages {
     pub fn get_params(&self) -> &SimilarImagesParameters {

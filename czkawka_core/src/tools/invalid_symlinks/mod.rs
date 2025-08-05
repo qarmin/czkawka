@@ -1,21 +1,13 @@
-mod core;
-mod traits;
+pub mod core;
+pub mod traits;
 
 use std::fmt::Display;
-use std::io::prelude::*;
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
-use std::sync::atomic::AtomicBool;
 
-use crossbeam_channel::Sender;
-use fun_time::fun_time;
-use log::debug;
 use serde::{Deserialize, Serialize};
 
-use crate::common::dir_traversal::{Collect, DirTraversalBuilder, DirTraversalResult};
-use crate::common::model::{FileEntry, ToolType, WorkContinueStatus};
-use crate::common::progress_data::ProgressData;
-use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
+use crate::common::model::FileEntry;
+use crate::common::tool_data::CommonToolData;
 use crate::common::traits::*;
 use crate::flc;
 
@@ -99,7 +91,6 @@ impl Default for InvalidSymlinks {
         Self::new()
     }
 }
-
 
 impl InvalidSymlinks {
     pub const fn get_invalid_symlinks(&self) -> &Vec<SymlinksFileEntry> {

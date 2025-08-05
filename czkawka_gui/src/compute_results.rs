@@ -17,7 +17,7 @@ use czkawka_core::tools::empty_files::EmptyFiles;
 use czkawka_core::tools::empty_folder::EmptyFolder;
 use czkawka_core::tools::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::tools::same_music::{MusicSimilarity, SameMusic};
-use czkawka_core::tools::similar_images;
+use czkawka_core::tools::similar_images::core::get_string_from_similarity;
 use czkawka_core::tools::similar_images::{ImagesEntry, SimilarImages};
 use czkawka_core::tools::similar_videos::SimilarVideos;
 use czkawka_core::tools::temporary::Temporary;
@@ -1344,7 +1344,7 @@ fn similar_images_add_to_list_store(
     if is_header {
         similarity_string = String::new();
     } else {
-        similarity_string = similar_images::get_string_from_similarity(&similarity, hash_size);
+        similarity_string = get_string_from_similarity(&similarity, hash_size);
     };
 
     if is_header && !is_reference_folder {
