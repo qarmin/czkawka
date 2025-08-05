@@ -58,11 +58,15 @@ jobs:
           mv target/debug/czkawka_cli linux_czkawka_cli_${{ env.ARCHNAME }}
           mv target/debug/czkawka_gui linux_czkawka_gui_${{ env.ARCHNAME }}
           mv target/debug/krokiet linux_krokiet_${{ env.ARCHNAME }}
+          cargo build --bin krokiet --no-default-features --features "winit_skia_opengl,winit_software"
+          mv target/debug/krokiet linux_krokiet_skia_opengl_${{ env.ARCHNAME }}
           
           cargo build --features "heif,libraw"
           mv target/debug/czkawka_cli linux_czkawka_cli_heif_raw_${{ env.ARCHNAME }}
           mv target/debug/czkawka_gui linux_czkawka_gui_heif_raw_${{ env.ARCHNAME }}
           mv target/debug/krokiet linux_krokiet_heif_raw_${{ env.ARCHNAME }}
+          cargo build --bin krokiet --no-default-features --features "winit_skia_opengl,winit_software,heif,libraw"
+          mv target/debug/krokiet linux_krokiet_heif_raw_skia_opengl_${{ env.ARCHNAME }}
 
       - name: Store
         uses: actions/upload-artifact@v4
@@ -75,6 +79,8 @@ jobs:
             linux_czkawka_cli_heif_raw_${{ env.ARCHNAME }}
             linux_czkawka_gui_heif_raw_${{ env.ARCHNAME }}
             linux_krokiet_heif_raw_${{ env.ARCHNAME }}
+            linux_krokiet_skia_opengl_${{ env.ARCHNAME }}
+            linux_krokiet_heif_raw_skia_opengl_${{ env.ARCHNAME }}
 
       - name: Release
         if: ${{ github.ref == 'refs/heads/master' }}

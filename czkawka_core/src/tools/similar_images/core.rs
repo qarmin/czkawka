@@ -160,7 +160,6 @@ impl SimilarImages {
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.hash_images_load_cache();
 
-        let check_was_stopped = Arc::new(AtomicBool::new(false));
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
             CurrentStage::SimilarImagesCalculatingHashes,
@@ -174,7 +173,6 @@ impl SimilarImages {
             .into_par_iter()
             .map(|(_s, file_entry)| {
                 if check_if_stop_received(stop_flag) {
-                    check_was_stopped.store(true, Ordering::Relaxed);
                     return None;
                 }
                 let size = file_entry.size;
@@ -211,7 +209,7 @@ impl SimilarImages {
         self.save_to_cache(vec_file_entry, loaded_hash_map);
 
         // Break if stop was clicked after saving to cache
-        if check_was_stopped.load(Ordering::Relaxed) {
+        if stop_flag.load(Ordering::Relaxed) {
             return WorkContinueStatus::Stop;
         }
 
