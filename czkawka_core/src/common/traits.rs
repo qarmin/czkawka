@@ -99,14 +99,4 @@ pub trait Scan {
     fn scan(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>);
 }
 
-pub trait Infos {
-    type Info;
-    fn get_information(&self) -> Self::Info;
-}
-
-pub trait Params {
-    type Parameters;
-    fn get_params(&self) -> Self::Parameters;
-}
-
-pub trait AllTraits: DebugPrint + PrintResults + DeletingItems + CommonData + Scan + Infos + Params {}
+pub trait AllTraits: DebugPrint + PrintResults + DeletingItems + CommonData + Scan {}

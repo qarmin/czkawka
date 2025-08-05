@@ -20,11 +20,12 @@ pub enum SearchMode {
     SmallestFiles,
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct Info {
     pub number_of_real_files: usize,
 }
 
+#[derive(Clone)]
 pub struct BigFileParameters {
     pub number_of_files_to_check: usize,
     pub search_mode: SearchMode,
@@ -172,6 +173,15 @@ impl PrintResults for BigFile {
 }
 
 impl CommonData for BigFile {
+    type Info = Info;
+    type Parameters = BigFileParameters;
+
+    fn get_information(&self) -> Self::Info {
+        self.information.clone()
+    }
+    fn get_params(&self) -> Self::Parameters {
+        self.params.clone()
+    }
     fn get_cd(&self) -> &CommonToolData {
         &self.common_data
     }

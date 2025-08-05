@@ -540,6 +540,10 @@ mod tests {
     use crate::common::tool_data::*;
 
     impl CommonData for CommonToolData {
+        type Info = ();
+        type Parameters = ();
+        fn get_information(&self) -> Self::Info {}
+        fn get_params(&self) -> Self::Parameters {}
         fn get_cd(&self) -> &CommonToolData {
             self
         }

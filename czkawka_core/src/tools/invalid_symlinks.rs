@@ -16,7 +16,7 @@ use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, Delet
 use crate::common::traits::*;
 use crate::flc;
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct Info {
     pub number_of_invalid_symlinks: usize,
 }
@@ -241,6 +241,13 @@ impl PrintResults for InvalidSymlinks {
 }
 
 impl CommonData for InvalidSymlinks {
+    type Info = Info;
+    type Parameters = ();
+
+    fn get_information(&self) -> Self::Info {
+        self.information.clone()
+    }
+    fn get_params(&self) -> Self::Parameters {}
     fn get_cd(&self) -> &CommonToolData {
         &self.common_data
     }

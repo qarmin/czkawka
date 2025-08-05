@@ -100,6 +100,7 @@ impl bk_tree::Metric<ImHash> for Hamming {
     }
 }
 
+#[derive(Clone)]
 pub struct SimilarImagesParameters {
     pub similarity: u32,
     pub hash_size: u8,
@@ -135,7 +136,7 @@ pub struct SimilarImages {
     params: SimilarImagesParameters,
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct Info {
     pub number_of_duplicates: usize,
     pub number_of_groups: u64,
@@ -936,6 +937,15 @@ fn debug_check_for_duplicated_things(
 }
 
 impl CommonData for SimilarImages {
+    type Info = Info;
+    type Parameters = SimilarImagesParameters;
+
+    fn get_information(&self) -> Self::Info {
+        self.information.clone()
+    }
+    fn get_params(&self) -> Self::Parameters {
+        self.params.clone()
+    }
     fn get_cd(&self) -> &CommonToolData {
         &self.common_data
     }

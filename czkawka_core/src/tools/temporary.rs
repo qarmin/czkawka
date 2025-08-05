@@ -53,7 +53,7 @@ impl ResultEntry for TemporaryFileEntry {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct Info {
     pub number_of_temporary_files: usize,
 }
@@ -237,6 +237,13 @@ impl DebugPrint for Temporary {
 }
 
 impl CommonData for Temporary {
+    type Info = Info;
+    type Parameters = ();
+
+    fn get_information(&self) -> Self::Info {
+        self.information.clone()
+    }
+    fn get_params(&self) -> Self::Parameters {}
     fn get_cd(&self) -> &CommonToolData {
         &self.common_data
     }

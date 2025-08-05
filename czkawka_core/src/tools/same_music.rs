@@ -99,12 +99,13 @@ struct GroupedFilesToCheck {
     pub files_to_compare: Vec<MusicEntry>,
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct Info {
     pub number_of_duplicates: usize,
     pub number_of_groups: u64,
 }
 
+#[derive(Clone)]
 pub struct SameMusicParameters {
     pub music_similarity: MusicSimilarity,
     pub approximate_comparison: bool,
@@ -1063,6 +1064,15 @@ fn get_simplified_name(what: &str) -> String {
 }
 
 impl CommonData for SameMusic {
+    type Info = Info;
+    type Parameters = SameMusicParameters;
+
+    fn get_information(&self) -> Self::Info {
+        self.information.clone()
+    }
+    fn get_params(&self) -> Self::Parameters {
+        self.params.clone()
+    }
     fn get_cd(&self) -> &CommonToolData {
         &self.common_data
     }

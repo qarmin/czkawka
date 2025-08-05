@@ -8,8 +8,8 @@ use fun_time::fun_time;
 use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData};
-use crate::common::traits::{AllTraits, DeletingItems, Params, Scan};
-use crate::tools::bad_extensions::{BadExtensions, BadExtensionsParameters, DebugPrint, Info, Infos, PrintResults};
+use crate::common::traits::{AllTraits, DeletingItems, Scan};
+use crate::tools::bad_extensions::{BadExtensions, BadExtensionsParameters, DebugPrint, Info, PrintResults};
 
 impl AllTraits for BadExtensions {}
 
@@ -71,6 +71,15 @@ impl PrintResults for BadExtensions {
 }
 
 impl CommonData for BadExtensions {
+    type Info = Info;
+    type Parameters = BadExtensionsParameters;
+
+    fn get_information(&self) -> Self::Info {
+        self.information.clone()
+    }
+    fn get_params(&self) -> Self::Parameters {
+        self.params.clone()
+    }
     fn get_cd(&self) -> &CommonToolData {
         &self.common_data
     }
@@ -79,18 +88,5 @@ impl CommonData for BadExtensions {
     }
     fn found_any_broken_files(&self) -> bool {
         self.get_information().number_of_files_with_bad_extension > 0
-    }
-}
-
-impl Params for BadExtensions {
-    type Parameters = BadExtensionsParameters;
-    fn get_params(&self) -> Self::Parameters {
-        self.params.clone()
-    }
-}
-impl Infos for BadExtensions {
-    type Info = Info;
-    fn get_information(&self) -> Self::Info {
-        self.information.clone()
     }
 }

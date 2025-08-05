@@ -116,6 +116,12 @@ impl CommonToolData {
 }
 
 pub trait CommonData {
+    type Info;
+    type Parameters;
+
+    fn get_information(&self) -> Self::Info;
+    fn get_params(&self) -> Self::Parameters;
+
     fn get_cd(&self) -> &CommonToolData;
     fn get_cd_mut(&mut self) -> &mut CommonToolData;
     fn get_check_method(&self) -> CheckingMethod {

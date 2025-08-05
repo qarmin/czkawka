@@ -56,7 +56,7 @@ pub(crate) enum FolderEmptiness {
     Maybe,
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct Info {
     pub number_of_empty_folders: usize,
 }
@@ -361,6 +361,13 @@ impl PrintResults for EmptyFolder {
 }
 
 impl CommonData for EmptyFolder {
+    type Info = Info;
+    type Parameters = ();
+
+    fn get_information(&self) -> Self::Info {
+        self.information.clone()
+    }
+    fn get_params(&self) -> Self::Parameters {}
     fn get_cd(&self) -> &CommonToolData {
         &self.common_data
     }

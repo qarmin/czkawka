@@ -12,7 +12,7 @@ use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
 use crate::common::traits::*;
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct Info {
     pub number_of_empty_files: usize,
 }
@@ -24,6 +24,13 @@ pub struct EmptyFiles {
 }
 
 impl CommonData for EmptyFiles {
+    type Info = Info;
+    type Parameters = ();
+
+    fn get_information(&self) -> Self::Info {
+        self.information.clone()
+    }
+    fn get_params(&self) -> Self::Parameters {}
     fn get_cd(&self) -> &CommonToolData {
         &self.common_data
     }

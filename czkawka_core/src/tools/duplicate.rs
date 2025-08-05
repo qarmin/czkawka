@@ -66,7 +66,7 @@ impl FileEntry {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct Info {
     pub number_of_groups_by_size: usize,
     pub number_of_duplicated_files_by_size: usize,
@@ -80,6 +80,7 @@ pub struct Info {
     pub lost_space_by_hash: u64,
 }
 
+#[derive(Clone)]
 pub struct DuplicateFinderParameters {
     pub check_method: CheckingMethod,
     pub hash_type: HashType,
@@ -1370,6 +1371,15 @@ impl MyHasher for Xxh3 {
 }
 
 impl CommonData for DuplicateFinder {
+    type Info = Info;
+    type Parameters = DuplicateFinderParameters;
+
+    fn get_information(&self) -> Self::Info {
+        self.information.clone()
+    }
+    fn get_params(&self) -> Self::Parameters {
+        self.params.clone()
+    }
     fn get_cd(&self) -> &CommonToolData {
         &self.common_data
     }

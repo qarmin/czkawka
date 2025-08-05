@@ -77,11 +77,12 @@ bitflags! {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct Info {
     pub number_of_broken_files: usize,
 }
 
+#[derive(Clone)]
 pub struct BrokenFilesParameters {
     pub checked_types: CheckedTypes,
 }
@@ -465,6 +466,15 @@ fn check_extension_availability(
 }
 
 impl CommonData for BrokenFiles {
+    type Info = Info;
+    type Parameters = BrokenFilesParameters;
+
+    fn get_information(&self) -> Self::Info {
+        self.information.clone()
+    }
+    fn get_params(&self) -> Self::Parameters {
+        self.params.clone()
+    }
     fn get_cd(&self) -> &CommonToolData {
         &self.common_data
     }
