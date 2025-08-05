@@ -16,6 +16,7 @@ use crate::common::progress_stop_handler::{check_if_stop_received, prepare_threa
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::tools::bad_extensions::workarounds::{DISABLED_EXTENSIONS, WORKAROUNDS};
 use crate::tools::bad_extensions::{BadExtensions, BadExtensionsParameters, BadFileEntry, Info};
+
 impl BadExtensions {
     pub fn new(params: BadExtensionsParameters) -> Self {
         Self {
@@ -88,10 +89,10 @@ impl BadExtensions {
         };
         let proper_extension = kind.extension();
 
-        let current_extension = self.get_and_validate_extension(&file_entry, proper_extension)?;
+        let current_extension = Self::get_and_validate_extension(&file_entry, proper_extension)?;
 
         // Check for all extensions that file can use(not sure if it is worth to do it)
-        let (mut all_available_extensions, valid_extensions) = self.check_for_all_extensions_that_file_can_use(hashmap_workarounds, &current_extension, proper_extension);
+        let (mut all_available_extensions, valid_extensions) = Self::check_for_all_extensions_that_file_can_use(hashmap_workarounds, &current_extension, proper_extension);
 
         if all_available_extensions.is_empty() {
             // Not found any extension
@@ -138,8 +139,7 @@ impl BadExtensions {
             .collect::<Vec<_>>()
     }
 
-    #[allow(clippy::unused_self)]
-    fn get_and_validate_extension(&self, file_entry: &FileEntry, proper_extension: &str) -> Option<String> {
+    fn get_and_validate_extension(file_entry: &FileEntry, proper_extension: &str) -> Option<String> {
         let current_extension;
         // Extract current extension from file
         if let Some(extension) = file_entry.path.extension() {
@@ -164,12 +164,7 @@ impl BadExtensions {
         Some(current_extension)
     }
 
-    fn check_for_all_extensions_that_file_can_use(
-        &self,
-        hashmap_workarounds: &HashMap<&str, Vec<&str>>,
-        current_extension: &str,
-        proper_extension: &str,
-    ) -> (BTreeSet<String>, String) {
+    fn check_for_all_extensions_that_file_can_use(hashmap_workarounds: &HashMap<&str, Vec<&str>>, current_extension: &str, proper_extension: &str) -> (BTreeSet<String>, String) {
         let mut all_available_extensions: BTreeSet<String> = Default::default();
         // TODO Isn't this a bug?
         // Why to file without extensions we set this as empty

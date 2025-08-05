@@ -184,7 +184,6 @@ impl LoadSaveStruct {
         self.loaded_items.insert(key, vec_string);
     }
 
-    #[allow(clippy::unused_self)]
     pub(crate) fn open_save_file(&self, text_view_errors: &TextView, save_configuration: bool, manual_execution: bool) -> Option<(File, PathBuf)> {
         let config_dir = get_config_cache_path()?.config_folder;
         let config_file = config_dir.join(Path::new(SAVE_FILE_NAME));

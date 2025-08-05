@@ -7,7 +7,7 @@ use chrono::DateTime;
 use crossbeam_channel::Receiver;
 use czkawka_core::common::model::CheckingMethod;
 use czkawka_core::common::tool_data::CommonData;
-use czkawka_core::common::traits::ResultEntry;
+use czkawka_core::common::traits::{Infos, ResultEntry};
 use czkawka_core::common::{split_path, split_path_compare};
 use czkawka_core::tools::bad_extensions::BadExtensions;
 use czkawka_core::tools::big_file::BigFile;

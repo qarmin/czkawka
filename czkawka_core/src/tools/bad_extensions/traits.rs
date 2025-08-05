@@ -7,9 +7,9 @@ use fun_time::fun_time;
 
 use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;
-use crate::common::tool_data::CommonData;
-use crate::common::traits::{AllTraits, DeletingItems, Scan};
-use crate::tools::bad_extensions::{BadExtensions, DebugPrint, PrintResults};
+use crate::common::tool_data::{CommonData, CommonToolData};
+use crate::common::traits::{AllTraits, DeletingItems, Params, Scan};
+use crate::tools::bad_extensions::{BadExtensions, BadExtensionsParameters, DebugPrint, Info, Infos, PrintResults};
 
 impl AllTraits for BadExtensions {}
 
@@ -67,5 +67,30 @@ impl PrintResults for BadExtensions {
 
     fn save_results_to_file_as_json(&self, file_name: &str, pretty_print: bool) -> std::io::Result<()> {
         self.save_results_to_file_as_json_internal(file_name, &self.bad_extensions_files, pretty_print)
+    }
+}
+
+impl CommonData for BadExtensions {
+    fn get_cd(&self) -> &CommonToolData {
+        &self.common_data
+    }
+    fn get_cd_mut(&mut self) -> &mut CommonToolData {
+        &mut self.common_data
+    }
+    fn found_any_broken_files(&self) -> bool {
+        self.get_information().number_of_files_with_bad_extension > 0
+    }
+}
+
+impl Params for BadExtensions {
+    type Parameters = BadExtensionsParameters;
+    fn get_params(&self) -> Self::Parameters {
+        self.params.clone()
+    }
+}
+impl Infos for BadExtensions {
+    type Info = Info;
+    fn get_information(&self) -> Self::Info {
+        self.information.clone()
     }
 }

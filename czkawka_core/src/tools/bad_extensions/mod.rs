@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use serde::Serialize;
 
 use crate::common::model::FileEntry;
-use crate::common::tool_data::{CommonData, CommonToolData};
+use crate::common::tool_data::CommonToolData;
 use crate::common::traits::*;
 
 #[derive(Clone, Serialize, Debug)]
@@ -32,11 +32,12 @@ impl ResultEntry for BadFileEntry {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct Info {
     pub number_of_files_with_bad_extension: usize,
 }
 
+#[derive(Clone)]
 pub struct BadExtensionsParameters {
     pub include_files_without_extension: bool,
 }
@@ -45,7 +46,7 @@ impl BadExtensionsParameters {
     pub fn new() -> Self {
         Self {
             include_files_without_extension: false,
-        } // TODO add option to all modes
+        }
     }
 }
 impl Default for BadExtensionsParameters {
@@ -65,25 +66,5 @@ pub struct BadExtensions {
 impl BadExtensions {
     pub const fn get_bad_extensions_files(&self) -> &Vec<BadFileEntry> {
         &self.bad_extensions_files
-    }
-
-    pub fn get_params(&self) -> &BadExtensionsParameters {
-        &self.params
-    }
-
-    pub const fn get_information(&self) -> &Info {
-        &self.information
-    }
-}
-
-impl CommonData for BadExtensions {
-    fn get_cd(&self) -> &CommonToolData {
-        &self.common_data
-    }
-    fn get_cd_mut(&mut self) -> &mut CommonToolData {
-        &mut self.common_data
-    }
-    fn found_any_broken_files(&self) -> bool {
-        self.get_information().number_of_files_with_bad_extension > 0
     }
 }
