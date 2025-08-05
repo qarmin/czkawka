@@ -1,3 +1,6 @@
+mod core;
+mod traits;
+
 use std::collections::HashMap;
 use std::fs::DirEntry;
 use std::io::Write;

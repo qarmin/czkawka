@@ -1,7 +1,6 @@
 use std::collections::{BTreeMap, HashSet};
 use std::fs::File;
-use std::io::prelude::*;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 use std::{mem, panic};
@@ -11,95 +10,17 @@ use fun_time::fun_time;
 use log::{debug, error};
 use lopdf::Document;
 use rayon::prelude::*;
-use serde::{Deserialize, Serialize};
 
 use crate::common::cache::{extract_loaded_cache, get_broken_files_cache_file, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common::consts::{AUDIO_FILES_EXTENSIONS, IMAGE_RS_BROKEN_FILES_EXTENSIONS, PDF_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS};
 use crate::common::create_crash_message;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
-use crate::common::model::{FileEntry, ToolType, WorkContinueStatus};
+use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
-use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
-use crate::common::traits::*;
-
-#[derive(Clone, Serialize, Deserialize, Debug)]
-pub struct BrokenEntry {
-    pub path: PathBuf,
-    pub modified_date: u64,
-    pub size: u64,
-    pub type_of_file: TypeOfFile,
-    pub error_string: String,
-}
-impl ResultEntry for BrokenEntry {
-    fn get_path(&self) -> &Path {
-        &self.path
-    }
-    fn get_modified_date(&self) -> u64 {
-        self.modified_date
-    }
-    fn get_size(&self) -> u64 {
-        self.size
-    }
-}
-
-impl FileEntry {
-    fn into_broken_entry(self) -> BrokenEntry {
-        BrokenEntry {
-            size: self.size,
-            path: self.path,
-            modified_date: self.modified_date,
-
-            type_of_file: TypeOfFile::Unknown,
-            error_string: String::new(),
-        }
-    }
-}
-
-#[derive(Copy, Clone, PartialEq, Eq, Serialize, Deserialize, Debug)]
-pub enum TypeOfFile {
-    Unknown = -1,
-    Image = 0,
-    ArchiveZip,
-    Audio,
-    PDF,
-}
-
-bitflags! {
-    #[derive(PartialEq, Copy, Clone, Debug)]
-    pub struct CheckedTypes : u32 {
-        const NONE = 0;
-
-        const PDF = 0b1;
-        const AUDIO = 0b10;
-        const IMAGE = 0b100;
-        const ARCHIVE = 0b1000;
-    }
-}
-
-#[derive(Default, Clone)]
-pub struct Info {
-    pub number_of_broken_files: usize,
-}
-
-#[derive(Clone)]
-pub struct BrokenFilesParameters {
-    pub checked_types: CheckedTypes,
-}
-
-impl BrokenFilesParameters {
-    pub fn new(checked_types: CheckedTypes) -> Self {
-        Self { checked_types }
-    }
-}
-
-pub struct BrokenFiles {
-    common_data: CommonToolData,
-    information: Info,
-    files_to_check: BTreeMap<String, BrokenEntry>,
-    broken_files: Vec<BrokenEntry>,
-    params: BrokenFilesParameters,
-}
+use crate::common::tool_data::{CommonData, CommonToolData};
+use crate::common::traits::{DebugPrint, DeletingItems, ResultEntry};
+use crate::tools::broken_files::{BrokenEntry, BrokenFiles, BrokenFilesParameters, CheckedTypes, Info, TypeOfFile};
 
 impl BrokenFiles {
     pub fn new(params: BrokenFilesParameters) -> Self {
@@ -369,68 +290,6 @@ impl BrokenFiles {
     }
 }
 
-impl DeletingItems for BrokenFiles {
-    #[fun_time(message = "delete_files", level = "debug")]
-    fn delete_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
-        match self.common_data.delete_method {
-            DeleteMethod::Delete => self.delete_simple_elements_and_add_to_messages(stop_flag, progress_sender, DeleteItemType::DeletingFiles(self.broken_files.clone())),
-            DeleteMethod::None => WorkContinueStatus::Continue,
-            _ => unreachable!(),
-        }
-    }
-}
-
-impl BrokenFiles {
-    pub const fn get_broken_files(&self) -> &Vec<BrokenEntry> {
-        &self.broken_files
-    }
-
-    pub(crate) fn get_params(&self) -> &BrokenFilesParameters {
-        &self.params
-    }
-
-    pub const fn get_information(&self) -> &Info {
-        &self.information
-    }
-}
-
-impl DebugPrint for BrokenFiles {
-    #[allow(clippy::print_stdout)]
-    fn debug_print(&self) {
-        if !cfg!(debug_assertions) {
-            return;
-        }
-        self.debug_print_common();
-    }
-}
-
-impl PrintResults for BrokenFiles {
-    fn write_results<T: Write>(&self, writer: &mut T) -> std::io::Result<()> {
-        writeln!(
-            writer,
-            "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
-            self.common_data.directories.included_directories,
-            self.common_data.directories.excluded_directories,
-            self.common_data.excluded_items.get_excluded_items()
-        )?;
-
-        if !self.broken_files.is_empty() {
-            writeln!(writer, "Found {} broken files.", self.information.number_of_broken_files)?;
-            for file_entry in &self.broken_files {
-                writeln!(writer, "\"{}\" - {}", file_entry.path.to_string_lossy(), file_entry.error_string)?;
-            }
-        } else {
-            write!(writer, "Not found any broken files.")?;
-        }
-
-        Ok(())
-    }
-
-    fn save_results_to_file_as_json(&self, file_name: &str, pretty_print: bool) -> std::io::Result<()> {
-        self.save_results_to_file_as_json_internal(file_name, &self.broken_files, pretty_print)
-    }
-}
-
 #[allow(clippy::string_slice)] // Valid, because we address go to dot, which is known ascii character
 fn check_extension_availability(
     full_name: &Path,
@@ -462,27 +321,6 @@ fn check_extension_availability(
         error!("File with unknown extension: \"{}\" - {extension_lowercase}", full_name.to_string_lossy());
         debug_assert!(false, "File with unknown extension - \"{}\" - {extension_lowercase}", full_name.to_string_lossy());
         TypeOfFile::Unknown
-    }
-}
-
-impl CommonData for BrokenFiles {
-    type Info = Info;
-    type Parameters = BrokenFilesParameters;
-
-    fn get_information(&self) -> Self::Info {
-        self.information.clone()
-    }
-    fn get_params(&self) -> Self::Parameters {
-        self.params.clone()
-    }
-    fn get_cd(&self) -> &CommonToolData {
-        &self.common_data
-    }
-    fn get_cd_mut(&mut self) -> &mut CommonToolData {
-        &mut self.common_data
-    }
-    fn found_any_broken_files(&self) -> bool {
-        self.information.number_of_broken_files > 0
     }
 }
 

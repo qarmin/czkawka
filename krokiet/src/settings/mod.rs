@@ -122,10 +122,9 @@ pub(crate) fn load_settings_from_file(app: &MainWindow, cli_result: Option<CliRe
         SettingsCustom::default()
     });
 
-    #[allow(clippy::comparison_chain)]
-    if base_settings.preset_names.len() > PRESET_NUMBER {
-        base_settings.preset_names.truncate(PRESET_NUMBER);
-    } else if base_settings.preset_names.len() < PRESET_NUMBER {
+    base_settings.preset_names.truncate(PRESET_NUMBER);
+
+    if base_settings.preset_names.len() < PRESET_NUMBER {
         while base_settings.preset_names.len() < PRESET_NUMBER - 1 {
             base_settings.preset_names.push(format!("Preset {}", base_settings.preset_names.len() + 1));
         }

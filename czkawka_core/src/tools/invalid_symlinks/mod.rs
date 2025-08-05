@@ -1,3 +1,6 @@
+mod core;
+mod traits;
+
 use std::fmt::Display;
 use std::io::prelude::*;
 use std::path::{Path, PathBuf};

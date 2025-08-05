@@ -1,3 +1,6 @@
+mod core;
+mod traits;
+
 use std::io::prelude::*;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
