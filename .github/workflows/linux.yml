@@ -30,7 +30,7 @@ jobs:
         run: rustup default 1.85.0
 
       - name: Build Release
-        if: ${{ github.ref != 'refs/heads/master' }}
+        if: ${{ github.ref == 'refs/heads/master' }}
         run: |
           sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
           
@@ -51,7 +51,7 @@ jobs:
           mv target/release/krokiet linux_krokiet_heif_raw_skia_opengl_${{ env.ARCHNAME }}
 
       - name: Build Debug
-        if: ${{ github.ref == 'refs/heads/master' }}
+        if: ${{ github.ref != 'refs/heads/master' }}
         run: |
           sed -i 's/^\(\[profile\.dev\.package.*\)/#\1/' Cargo.toml
           sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
@@ -71,6 +71,8 @@ jobs:
           mv target/debug/krokiet linux_krokiet_heif_raw_${{ env.ARCHNAME }}
           cargo build --bin krokiet --no-default-features --features "winit_skia_opengl,winit_software,heif,libraw"
           mv target/debug/krokiet linux_krokiet_heif_raw_skia_opengl_${{ env.ARCHNAME }}
+          
+          strip linux*
 
       - name: Store
         uses: actions/upload-artifact@v4
