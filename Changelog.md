@@ -54,12 +54,14 @@
 - Compilation for 32-bit targets is now checked in CI.
 - Czkawka binaries are now checked for reproducibility in CI.
 
+
 ### Prebuilt binaries
 - AppImage binaries are no longer provided due to random bugs (not present in other packaging formats) and minimal added value compared to prebuilt Linux binaries or Flatpak.\
 - HEIF Mac binaries are now provided.
 - CI now builds Linux binaries on Ubuntu 22.04 instead of 20.04(github removed 20.04 images).
 - `musl` builds of `czkawka_cli` are now provided instead of `eyra` builds (slightly easier to maintain). GUI builds are not included due to limitations of `musl` and `eyra` :(
 - Prebuilt Windows console binaries are no longer provided — logs are now saved to a file, which is easier to read than terminal output.
+- Skia opengl and vulkan backends are provided for Krokiet on Linux 
 
 ## Version 9.0.0 - 16.03.2025r
 

@@ -33,6 +33,10 @@ jobs:
           sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
           cargo build --release --target x86_64-pc-windows-gnu --bin krokiet
           mv target/x86_64-pc-windows-gnu/release/krokiet.exe windows_krokiet_on_linux.exe
+          cargo build --release --target x86_64-pc-windows-gnu --bin krokiet --no-default-features  --features "winit_skia_opengl,winit_software"
+          mv target/x86_64-pc-windows-gnu/release/krokiet.exe windows_krokiet_on_linux_skia_opengl.exe
+          cargo build --release --target x86_64-pc-windows-gnu --bin krokiet --no-default-features  --features "winit_skia_vulkan,winit_software"
+          mv target/x86_64-pc-windows-gnu/release/krokiet.exe windows_krokiet_on_linux_skia_vulkan.exe
 
       - name: Compile Krokiet Debug
         if: ${{ github.ref != 'refs/heads/master' }}
@@ -41,6 +45,10 @@ jobs:
           sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
           cargo build --target x86_64-pc-windows-gnu --bin krokiet
           mv target/x86_64-pc-windows-gnu/debug/krokiet.exe windows_krokiet_on_linux.exe
+          cargo build --target x86_64-pc-windows-gnu --bin krokiet --no-default-features  --features "winit_skia_opengl,winit_software"
+          mv target/x86_64-pc-windows-gnu/debug/krokiet.exe windows_krokiet_on_linux_skia_opengl.exe
+          cargo build--target x86_64-pc-windows-gnu --bin krokiet --no-default-features  --features "winit_skia_vulkan,winit_software"
+          mv target/x86_64-pc-windows-gnu/debug/krokiet.exe windows_krokiet_on_linux_skia_vulkan.exe
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -48,6 +56,8 @@ jobs:
           name: krokiet-windows-c-on-linux-${{ github.sha }}
           path: |
             ./windows_krokiet_on_linux.exe
+            ./windows_krokiet_on_linux_skia_opengl.exe
+            ./windows_krokiet_on_linux_skia_vulkan.exe
           if-no-files-found: error
 
       - name: Release
