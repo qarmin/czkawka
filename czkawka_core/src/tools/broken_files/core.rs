@@ -19,7 +19,7 @@ use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
-use crate::common::traits::{DebugPrint, DeletingItems, ResultEntry};
+use crate::common::traits::ResultEntry;
 use crate::tools::broken_files::{BrokenEntry, BrokenFiles, BrokenFilesParameters, CheckedTypes, Info, TypeOfFile};
 
 impl BrokenFiles {
@@ -33,26 +33,8 @@ impl BrokenFiles {
         }
     }
 
-    #[fun_time(message = "find_broken_files", level = "info")]
-    pub fn find_broken_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
-        self.prepare_items();
-        if self.check_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-            self.common_data.stopped_search = true;
-            return;
-        }
-        if self.look_for_broken_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-            self.common_data.stopped_search = true;
-            return;
-        }
-        if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-            self.common_data.stopped_search = true;
-            return;
-        };
-        self.debug_print();
-    }
-
     #[fun_time(message = "check_files", level = "debug")]
-    fn check_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    pub(crate) fn check_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let zip_extensions = ZIP_FILES_EXTENSIONS.iter().collect::<HashSet<_>>();
         let audio_extensions = AUDIO_FILES_EXTENSIONS.iter().collect::<HashSet<_>>();
         let pdf_extensions = PDF_FILES_EXTENSIONS.iter().collect::<HashSet<_>>();
@@ -216,7 +198,7 @@ impl BrokenFiles {
     }
 
     #[fun_time(message = "look_for_broken_files", level = "debug")]
-    fn look_for_broken_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    pub(crate) fn look_for_broken_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.files_to_check.is_empty() {
             return WorkContinueStatus::Continue;
         }

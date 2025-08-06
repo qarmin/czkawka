@@ -21,7 +21,7 @@ use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
-use crate::common::traits::{DebugPrint, DeletingItems, ResultEntry};
+use crate::common::traits::ResultEntry;
 use crate::flc;
 use crate::tools::similar_images::{Hamming, ImHash, ImagesEntry, SIMILAR_VALUES, SimilarImages, SimilarImagesParameters, SimilarityPreset};
 
@@ -39,31 +39,8 @@ impl SimilarImages {
         }
     }
 
-    #[fun_time(message = "find_similar_images", level = "info")]
-    pub fn find_similar_images(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
-        self.prepare_items();
-        self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
-        if self.check_for_similar_images(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-            self.common_data.stopped_search = true;
-            return;
-        }
-        if self.hash_images(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-            self.common_data.stopped_search = true;
-            return;
-        }
-        if self.find_similar_hashes(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-            self.common_data.stopped_search = true;
-            return;
-        }
-        if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-            self.common_data.stopped_search = true;
-            return;
-        };
-        self.debug_print();
-    }
-
     #[fun_time(message = "check_for_similar_images", level = "debug")]
-    fn check_for_similar_images(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    pub(crate) fn check_for_similar_images(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if cfg!(feature = "heif") {
             self.common_data
                 .extensions
@@ -153,7 +130,7 @@ impl SimilarImages {
     // - Join all hashes and save it to file
 
     #[fun_time(message = "hash_images", level = "debug")]
-    fn hash_images(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    pub(crate) fn hash_images(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.images_to_check.is_empty() {
             return WorkContinueStatus::Continue;
         }
@@ -467,7 +444,7 @@ impl SimilarImages {
     }
 
     #[fun_time(message = "find_similar_hashes", level = "debug")]
-    fn find_similar_hashes(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    pub(crate) fn find_similar_hashes(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.image_hashes.is_empty() {
             return WorkContinueStatus::Continue;
         }
@@ -764,9 +741,10 @@ mod tests {
 
     #[test]
     fn test_compare_no_images() {
+        use crate::common::traits::Search;
         for _ in 0..100 {
             let mut similar_images = SimilarImages::new(get_default_parameters());
-            similar_images.find_similar_images(&Arc::default(), None);
+            similar_images.search(&Arc::default(), None);
             assert_eq!(similar_images.get_similar_images().len(), 0);
         }
     }

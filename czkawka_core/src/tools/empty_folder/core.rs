@@ -16,7 +16,6 @@ use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
-use crate::common::traits::{DebugPrint, DeletingItems};
 use crate::tools::empty_folder::{EmptyFolder, FolderEmptiness, FolderEntry, Info};
 
 impl EmptyFolder {
@@ -36,24 +35,7 @@ impl EmptyFolder {
         &self.information
     }
 
-    #[fun_time(message = "find_empty_folders", level = "info")]
-    pub fn find_empty_folders(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
-        self.prepare_items();
-        if self.check_for_empty_folders(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-            self.common_data.stopped_search = true;
-            return;
-        }
-        self.optimize_folders();
-
-        if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-            self.common_data.stopped_search = true;
-            return;
-        };
-
-        self.debug_print();
-    }
-
-    fn optimize_folders(&mut self) {
+    pub(crate) fn optimize_folders(&mut self) {
         let mut new_directory_folders: HashMap<String, FolderEntry> = Default::default();
 
         for (name, folder_entry) in &self.empty_folder_list {
@@ -73,7 +55,7 @@ impl EmptyFolder {
     }
 
     #[fun_time(message = "check_for_empty_folders", level = "debug")]
-    fn check_for_empty_folders(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    pub(crate) fn check_for_empty_folders(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let mut folders_to_check: Vec<PathBuf> = self.common_data.directories.included_directories.clone();
 
         let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::CollectingFiles, 0, self.get_test_type(), 0);

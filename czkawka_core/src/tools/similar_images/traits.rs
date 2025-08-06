@@ -9,9 +9,36 @@ use humansize::{BINARY, format_size};
 use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
-use crate::common::traits::{DebugPrint, DeletingItems, PrintResults};
+use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, PrintResults, Search};
 use crate::tools::similar_images::core::get_string_from_similarity;
 use crate::tools::similar_images::{Info, SimilarImages, SimilarImagesParameters};
+
+impl AllTraits for SimilarImages {}
+
+impl Search for SimilarImages {
+    #[fun_time(message = "find_similar_images", level = "info")]
+    fn search(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
+        self.prepare_items();
+        self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
+        if self.check_for_similar_images(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+            self.common_data.stopped_search = true;
+            return;
+        }
+        if self.hash_images(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+            self.common_data.stopped_search = true;
+            return;
+        }
+        if self.find_similar_hashes(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+            self.common_data.stopped_search = true;
+            return;
+        }
+        if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+            self.common_data.stopped_search = true;
+            return;
+        };
+        self.debug_print();
+    }
+}
 
 impl DebugPrint for SimilarImages {
     #[allow(clippy::print_stdout)]

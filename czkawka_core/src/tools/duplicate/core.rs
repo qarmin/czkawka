@@ -15,7 +15,7 @@ use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{CheckingMethod, FileEntry, HashType, ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
-use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
+use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::common::traits::*;
 use crate::tools::duplicate::{
     DuplicateEntry, DuplicateFinder, DuplicateFinderParameters, Info, PREHASHING_BUFFER_SIZE, THREAD_BUFFER, filter_hard_links, hash_calculation, hash_calculation_limit,
@@ -38,51 +38,8 @@ impl DuplicateFinder {
         }
     }
 
-    #[fun_time(message = "find_duplicates", level = "info")]
-    pub fn find_duplicates(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
-        self.prepare_items();
-        self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
-
-        match self.get_params().check_method {
-            CheckingMethod::Name => {
-                self.common_data.stopped_search = self.check_files_name(stop_flag, progress_sender) == WorkContinueStatus::Stop;
-                if self.common_data.stopped_search {
-                    return;
-                }
-            }
-            CheckingMethod::SizeName => {
-                self.common_data.stopped_search = self.check_files_size_name(stop_flag, progress_sender) == WorkContinueStatus::Stop;
-                if self.common_data.stopped_search {
-                    return;
-                }
-            }
-            CheckingMethod::Size => {
-                self.common_data.stopped_search = self.check_files_size(stop_flag, progress_sender) == WorkContinueStatus::Stop;
-                if self.common_data.stopped_search {
-                    return;
-                }
-            }
-            CheckingMethod::Hash => {
-                self.common_data.stopped_search = self.check_files_size(stop_flag, progress_sender) == WorkContinueStatus::Stop;
-                if self.common_data.stopped_search {
-                    return;
-                }
-                self.common_data.stopped_search = self.check_files_hash(stop_flag, progress_sender) == WorkContinueStatus::Stop;
-                if self.common_data.stopped_search {
-                    return;
-                }
-            }
-            _ => panic!(),
-        }
-        if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-            self.common_data.stopped_search = true;
-            return;
-        };
-        self.debug_print();
-    }
-
     #[fun_time(message = "check_files_name", level = "debug")]
-    fn check_files_name(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    pub(crate) fn check_files_name(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let group_by_func = if self.get_params().case_sensitive_name_comparison {
             |fe: &FileEntry| {
                 fe.path
@@ -169,7 +126,7 @@ impl DuplicateFinder {
     }
 
     #[fun_time(message = "check_files_size_name", level = "debug")]
-    fn check_files_size_name(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    pub(crate) fn check_files_size_name(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let group_by_func = if self.get_params().case_sensitive_name_comparison {
             |fe: &FileEntry| {
                 (
@@ -265,7 +222,7 @@ impl DuplicateFinder {
     }
 
     #[fun_time(message = "check_files_size", level = "debug")]
-    fn check_files_size(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    pub(crate) fn check_files_size(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let result = DirTraversalBuilder::new()
             .common_data(&self.common_data)
             .group_by(|fe| fe.size)
@@ -793,7 +750,7 @@ impl DuplicateFinder {
     }
 
     #[fun_time(message = "check_files_hash", level = "debug")]
-    fn check_files_hash(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    pub(crate) fn check_files_hash(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         assert_eq!(self.get_params().check_method, CheckingMethod::Hash);
 
         let mut pre_checked_map: BTreeMap<u64, Vec<DuplicateEntry>> = Default::default();
@@ -812,22 +769,6 @@ impl DuplicateFinder {
         thread::spawn(move || drop(files_with_identical_size));
 
         WorkContinueStatus::Continue
-    }
-
-    #[fun_time(message = "delete_files", level = "debug")]
-    fn delete_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
-        if self.common_data.delete_method == DeleteMethod::None {
-            return WorkContinueStatus::Continue;
-        }
-
-        let files_to_delete = match self.get_params().check_method {
-            CheckingMethod::Name => self.files_with_identical_names.values().cloned().collect::<Vec<_>>(),
-            CheckingMethod::SizeName => self.files_with_identical_size_names.values().cloned().collect::<Vec<_>>(),
-            CheckingMethod::Hash => self.files_with_identical_hashes.values().flatten().cloned().collect::<Vec<_>>(),
-            CheckingMethod::Size => self.files_with_identical_size.values().cloned().collect::<Vec<_>>(),
-            _ => panic!(),
-        };
-        self.delete_advanced_elements_and_add_to_messages(stop_flag, progress_sender, files_to_delete)
     }
 }
 

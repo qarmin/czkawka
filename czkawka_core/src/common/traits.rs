@@ -95,8 +95,8 @@ pub trait ResultEntry {
     fn get_size(&self) -> u64;
 }
 
-pub trait Scan {
-    fn scan(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>);
+pub trait Search {
+    fn search(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>);
 }
 
-pub trait AllTraits: DebugPrint + PrintResults + DeletingItems + CommonData + Scan {}
+pub trait AllTraits: DebugPrint + PrintResults + DeletingItems + CommonData + Search {}

@@ -8,14 +8,14 @@ use fun_time::fun_time;
 use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData};
-use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, PrintResults, Scan};
+use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, PrintResults, Search};
 use crate::tools::bad_extensions::{BadExtensions, BadExtensionsParameters, Info};
 
 impl AllTraits for BadExtensions {}
 
-impl Scan for BadExtensions {
+impl Search for BadExtensions {
     #[fun_time(message = "find_bad_extensions_files", level = "info")]
-    fn scan(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
+    fn search(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
         self.prepare_items();
         if self.check_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
             self.common_data.stopped_search = true;

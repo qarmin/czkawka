@@ -10,7 +10,6 @@ use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData};
-use crate::common::traits::{DebugPrint, DeletingItems};
 use crate::tools::big_file::{BigFile, BigFileParameters, Info, SearchMode};
 
 impl BigFile {
@@ -23,22 +22,8 @@ impl BigFile {
         }
     }
 
-    #[fun_time(message = "find_big_files", level = "info")]
-    pub fn find_big_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
-        self.prepare_items();
-        if self.look_for_big_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-            self.common_data.stopped_search = true;
-            return;
-        }
-        if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-            self.common_data.stopped_search = true;
-            return;
-        };
-        self.debug_print();
-    }
-
     #[fun_time(message = "look_for_big_files", level = "debug")]
-    fn look_for_big_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    pub(crate) fn look_for_big_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let result = DirTraversalBuilder::new()
             .group_by(|_fe| ())
             .stop_flag(stop_flag)

@@ -11,6 +11,28 @@ use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, Delet
 use crate::common::traits::*;
 use crate::tools::broken_files::{BrokenFiles, BrokenFilesParameters, Info};
 
+impl AllTraits for BrokenFiles {}
+
+impl Search for BrokenFiles {
+    #[fun_time(message = "find_broken_files", level = "info")]
+    fn search(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
+        self.prepare_items();
+        if self.check_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+            self.common_data.stopped_search = true;
+            return;
+        }
+        if self.look_for_broken_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+            self.common_data.stopped_search = true;
+            return;
+        }
+        if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+            self.common_data.stopped_search = true;
+            return;
+        };
+        self.debug_print();
+    }
+}
+
 impl DebugPrint for BrokenFiles {
     #[allow(clippy::print_stdout)]
     fn debug_print(&self) {

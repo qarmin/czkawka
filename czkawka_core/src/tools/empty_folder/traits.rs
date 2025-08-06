@@ -9,8 +9,29 @@ use rayon::prelude::*;
 use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
-use crate::common::traits::{DebugPrint, DeletingItems, PrintResults};
+use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, PrintResults, Search};
 use crate::tools::empty_folder::{EmptyFolder, Info};
+
+impl AllTraits for EmptyFolder {}
+
+impl Search for EmptyFolder {
+    #[fun_time(message = "find_empty_folders", level = "info")]
+    fn search(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
+        self.prepare_items();
+        if self.check_for_empty_folders(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+            self.common_data.stopped_search = true;
+            return;
+        }
+        self.optimize_folders();
+
+        if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+            self.common_data.stopped_search = true;
+            return;
+        };
+
+        self.debug_print();
+    }
+}
 
 impl DebugPrint for EmptyFolder {
     #[allow(clippy::print_stdout)]

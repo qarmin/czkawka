@@ -9,7 +9,7 @@ use czkawka_core::common::consts::DEFAULT_THREAD_SIZE;
 use czkawka_core::common::model::{CheckingMethod, FileEntry};
 use czkawka_core::common::progress_data::ProgressData;
 use czkawka_core::common::tool_data::CommonData;
-use czkawka_core::common::traits::{ResultEntry, Scan};
+use czkawka_core::common::traits::{ResultEntry, Search};
 use czkawka_core::common::{split_path, split_path_compare};
 use czkawka_core::tools::bad_extensions::{BadExtensions, BadExtensionsParameters, BadFileEntry};
 use czkawka_core::tools::big_file::{BigFile, BigFileParameters, SearchMode};
@@ -132,18 +132,18 @@ fn scan_duplicates(
                 custom_settings.duplicate_minimal_prehash_cache_size as u64,
                 custom_settings.duplicates_sub_name_case_sensitive,
             );
-            let mut item = DuplicateFinder::new(params);
+            let mut tool = DuplicateFinder::new(params);
 
-            set_common_settings(&mut item, &custom_settings, &stop_flag);
-            item.set_delete_outdated_cache(custom_settings.duplicate_delete_outdated_entries);
-            item.find_duplicates(&stop_flag, Some(&progress_sender));
-            let messages = item.get_text_messages().create_messages_text();
+            set_common_settings(&mut tool, &custom_settings, &stop_flag);
+            tool.set_delete_outdated_cache(custom_settings.duplicate_delete_outdated_entries);
+            tool.search(&stop_flag, Some(&progress_sender));
+            let messages = tool.get_text_messages().create_messages_text();
 
             let mut vector;
-            if item.get_use_reference() {
-                match item.get_params().check_method {
+            if tool.get_use_reference() {
+                match tool.get_params().check_method {
                     CheckingMethod::Hash => {
-                        vector = item
+                        vector = tool
                             .get_files_with_identical_hashes_referenced()
                             .values()
                             .flatten()
@@ -152,10 +152,10 @@ fn scan_duplicates(
                             .collect::<Vec<_>>();
                     }
                     CheckingMethod::Name | CheckingMethod::Size | CheckingMethod::SizeName => {
-                        let values: Vec<_> = match item.get_params().check_method {
-                            CheckingMethod::Name => item.get_files_with_identical_name_referenced().values().cloned().collect(),
-                            CheckingMethod::Size => item.get_files_with_identical_size_referenced().values().cloned().collect(),
-                            CheckingMethod::SizeName => item.get_files_with_identical_size_names_referenced().values().cloned().collect(),
+                        let values: Vec<_> = match tool.get_params().check_method {
+                            CheckingMethod::Name => tool.get_files_with_identical_name_referenced().values().cloned().collect(),
+                            CheckingMethod::Size => tool.get_files_with_identical_size_referenced().values().cloned().collect(),
+                            CheckingMethod::SizeName => tool.get_files_with_identical_size_names_referenced().values().cloned().collect(),
                             _ => unreachable!("Invalid check method."),
                         };
                         vector = values.into_iter().map(|(original, other)| (Some(original), other)).collect::<Vec<_>>();
@@ -163,15 +163,15 @@ fn scan_duplicates(
                     _ => unreachable!("Invalid check method."),
                 }
             } else {
-                match item.get_params().check_method {
+                match tool.get_params().check_method {
                     CheckingMethod::Hash => {
-                        vector = item.get_files_sorted_by_hash().values().flatten().cloned().map(|items| (None, items)).collect::<Vec<_>>();
+                        vector = tool.get_files_sorted_by_hash().values().flatten().cloned().map(|items| (None, items)).collect::<Vec<_>>();
                     }
                     CheckingMethod::Name | CheckingMethod::Size | CheckingMethod::SizeName => {
-                        let values: Vec<_> = match item.get_params().check_method {
-                            CheckingMethod::Name => item.get_files_sorted_by_names().values().cloned().collect(),
-                            CheckingMethod::Size => item.get_files_sorted_by_size().values().cloned().collect(),
-                            CheckingMethod::SizeName => item.get_files_sorted_by_size_name().values().cloned().collect(),
+                        let values: Vec<_> = match tool.get_params().check_method {
+                            CheckingMethod::Name => tool.get_files_sorted_by_names().values().cloned().collect(),
+                            CheckingMethod::Size => tool.get_files_sorted_by_size().values().cloned().collect(),
+                            CheckingMethod::SizeName => tool.get_files_sorted_by_size_name().values().cloned().collect(),
                             _ => unreachable!("Invalid check method."),
                         };
                         vector = values.into_iter().map(|items| (None, items)).collect::<Vec<_>>();
@@ -184,7 +184,7 @@ fn scan_duplicates(
                 vec.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
             }
 
-            shared_models.lock().unwrap().shared_duplication_state = Some(item);
+            shared_models.lock().unwrap().shared_duplication_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
                 write_duplicate_results(&app, vector, messages);
@@ -240,16 +240,16 @@ fn scan_empty_folders(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut item = EmptyFolder::new();
-            set_common_settings(&mut item, &custom_settings, &stop_flag);
-            item.find_empty_folders(&stop_flag, Some(&progress_sender));
+            let mut tool = EmptyFolder::new();
+            set_common_settings(&mut tool, &custom_settings, &stop_flag);
+            tool.search(&stop_flag, Some(&progress_sender));
 
-            let mut vector = item.get_empty_folder_list().values().cloned().collect::<Vec<_>>();
-            let messages = item.get_text_messages().create_messages_text();
+            let mut vector = tool.get_empty_folder_list().values().cloned().collect::<Vec<_>>();
+            let messages = tool.get_text_messages().create_messages_text();
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
-            shared_models.lock().unwrap().shared_empty_folders_state = Some(item);
+            shared_models.lock().unwrap().shared_empty_folders_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
                 write_empty_folders_results(&app, vector, messages);
@@ -299,13 +299,13 @@ fn scan_big_files(
             let big_files_mode = StringComboBoxItems::get_value_from_config_name(&custom_settings.biggest_files_sub_method, &collected_items.biggest_files_method);
 
             let params = BigFileParameters::new(custom_settings.biggest_files_sub_number_of_files as usize, big_files_mode);
-            let mut item = BigFile::new(params);
+            let mut tool = BigFile::new(params);
 
-            set_common_settings(&mut item, &custom_settings, &stop_flag);
-            item.find_big_files(&stop_flag, Some(&progress_sender));
+            set_common_settings(&mut tool, &custom_settings, &stop_flag);
+            tool.search(&stop_flag, Some(&progress_sender));
 
-            let mut vector = item.get_big_files().clone();
-            let messages = item.get_text_messages().create_messages_text();
+            let mut vector = tool.get_big_files().clone();
+            let messages = tool.get_text_messages().create_messages_text();
 
             if big_files_mode == SearchMode::BiggestFiles {
                 vector.par_sort_unstable_by_key(|fe| u64::MAX - fe.size);
@@ -313,7 +313,7 @@ fn scan_big_files(
                 vector.par_sort_unstable_by_key(|fe| fe.size);
             }
 
-            shared_models.lock().unwrap().shared_big_files_state = Some(item);
+            shared_models.lock().unwrap().shared_big_files_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
                 write_big_files_results(&app, vector, messages);
@@ -361,16 +361,16 @@ fn scan_empty_files(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut item = EmptyFiles::new();
-            set_common_settings(&mut item, &custom_settings, &stop_flag);
-            item.find_empty_files(&stop_flag, Some(&progress_sender));
+            let mut tool = EmptyFiles::new();
+            set_common_settings(&mut tool, &custom_settings, &stop_flag);
+            tool.search(&stop_flag, Some(&progress_sender));
 
-            let mut vector = item.get_empty_files().clone();
-            let messages = item.get_text_messages().create_messages_text();
+            let mut vector = tool.get_empty_files().clone();
+            let messages = tool.get_text_messages().create_messages_text();
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
-            shared_models.lock().unwrap().shared_empty_files_state = Some(item);
+            shared_models.lock().unwrap().shared_empty_files_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
                 write_empty_files_results(&app, vector, messages);
@@ -433,24 +433,24 @@ fn scan_similar_images(
                 custom_settings.similar_images_sub_ignore_same_size,
                 custom_settings.similar_images_hide_hard_links,
             );
-            let mut item = SimilarImages::new(params);
+            let mut tool = SimilarImages::new(params);
 
-            set_common_settings(&mut item, &custom_settings, &stop_flag);
+            set_common_settings(&mut tool, &custom_settings, &stop_flag);
 
-            item.set_delete_outdated_cache(custom_settings.similar_images_delete_outdated_entries);
+            tool.set_delete_outdated_cache(custom_settings.similar_images_delete_outdated_entries);
 
-            item.find_similar_images(&stop_flag, Some(&progress_sender));
+            tool.search(&stop_flag, Some(&progress_sender));
 
-            let messages = item.get_text_messages().create_messages_text();
+            let messages = tool.get_text_messages().create_messages_text();
 
-            let mut vector: Vec<_> = if item.get_use_reference() {
-                item.get_similar_images_referenced()
+            let mut vector: Vec<_> = if tool.get_use_reference() {
+                tool.get_similar_images_referenced()
                     .iter()
                     .cloned()
                     .map(|(original, others)| (Some(original), others))
                     .collect()
             } else {
-                item.get_similar_images().iter().cloned().map(|items| (None, items)).collect()
+                tool.get_similar_images().iter().cloned().map(|items| (None, items)).collect()
             };
 
             for (_first_entry, vec_fe) in &mut vector {
@@ -458,7 +458,7 @@ fn scan_similar_images(
             }
             vector.sort_by_key(|(_header, vc)| u64::MAX - vc.iter().map(|e| e.size).sum::<u64>()); // Also sorts by size, to show the biggest groups first
 
-            shared_models.lock().unwrap().shared_similar_images_state = Some(item);
+            shared_models.lock().unwrap().shared_similar_images_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
                 write_similar_images_results(&app, vector, messages, hash_size);
@@ -525,23 +525,23 @@ fn scan_similar_videos(
                 custom_settings.similar_videos_vid_hash_duration,
                 crop_detect_from_str(&custom_settings.similar_videos_crop_detect),
             );
-            let mut item = SimilarVideos::new(params);
-            set_common_settings(&mut item, &custom_settings, &stop_flag);
+            let mut tool = SimilarVideos::new(params);
+            set_common_settings(&mut tool, &custom_settings, &stop_flag);
 
-            item.set_delete_outdated_cache(custom_settings.similar_videos_delete_outdated_entries);
+            tool.set_delete_outdated_cache(custom_settings.similar_videos_delete_outdated_entries);
 
-            item.find_similar_videos(&stop_flag, Some(&progress_sender));
+            tool.search(&stop_flag, Some(&progress_sender));
 
-            let messages = item.get_text_messages().create_messages_text();
+            let messages = tool.get_text_messages().create_messages_text();
 
-            let mut vector: Vec<_> = if item.get_use_reference() {
-                item.get_similar_videos_referenced()
+            let mut vector: Vec<_> = if tool.get_use_reference() {
+                tool.get_similar_videos_referenced()
                     .iter()
                     .cloned()
                     .map(|(original, others)| (Some(original), others))
                     .collect()
             } else {
-                item.get_similar_videos().iter().cloned().map(|items| (None, items)).collect()
+                tool.get_similar_videos().iter().cloned().map(|items| (None, items)).collect()
             };
             for (_first_entry, vec_fe) in &mut vector {
                 vec_fe.par_sort_unstable_by(|a, b| match a.size.cmp(&b.size) {
@@ -552,7 +552,7 @@ fn scan_similar_videos(
             }
             vector.sort_by_key(|(_header, vc)| u64::MAX - vc.iter().map(|e| e.size).sum::<u64>()); // Also sorts by size, to show the biggest groups first
 
-            shared_models.lock().unwrap().shared_similar_videos_state = Some(item);
+            shared_models.lock().unwrap().shared_similar_videos_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
                 write_similar_videos_results(&app, vector, messages);
@@ -646,27 +646,27 @@ fn scan_similar_music(
                 custom_settings.similar_music_sub_maximum_difference_value as f64,
                 custom_settings.similar_music_compare_fingerprints_only_with_similar_titles,
             );
-            let mut item = SameMusic::new(params);
-            set_common_settings(&mut item, &custom_settings, &stop_flag);
+            let mut tool = SameMusic::new(params);
+            set_common_settings(&mut tool, &custom_settings, &stop_flag);
 
-            item.find_same_music(&stop_flag, Some(&progress_sender));
+            tool.search(&stop_flag, Some(&progress_sender));
 
-            let messages = item.get_text_messages().create_messages_text();
+            let messages = tool.get_text_messages().create_messages_text();
 
-            let mut vector: Vec<_> = if item.get_use_reference() {
-                item.get_similar_music_referenced()
+            let mut vector: Vec<_> = if tool.get_use_reference() {
+                tool.get_similar_music_referenced()
                     .iter()
                     .cloned()
                     .map(|(original, others)| (Some(original), others))
                     .collect()
             } else {
-                item.get_duplicated_music_entries().iter().cloned().map(|items| (None, items)).collect()
+                tool.get_duplicated_music_entries().iter().cloned().map(|items| (None, items)).collect()
             };
             for (_first_entry, vec_fe) in &mut vector {
                 vec_fe.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
             }
 
-            shared_models.lock().unwrap().shared_same_music_state = Some(item);
+            shared_models.lock().unwrap().shared_same_music_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
                 write_similar_music_results(&app, vector, messages);
@@ -727,17 +727,17 @@ fn scan_invalid_symlinks(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut item = InvalidSymlinks::new();
-            set_common_settings(&mut item, &custom_settings, &stop_flag);
+            let mut tool = InvalidSymlinks::new();
+            set_common_settings(&mut tool, &custom_settings, &stop_flag);
 
-            item.find_invalid_links(&stop_flag, Some(&progress_sender));
+            tool.search(&stop_flag, Some(&progress_sender));
 
-            let mut vector = item.get_invalid_symlinks().clone();
-            let messages = item.get_text_messages().create_messages_text();
+            let mut vector = tool.get_invalid_symlinks().clone();
+            let messages = tool.get_text_messages().create_messages_text();
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
-            shared_models.lock().unwrap().shared_same_invalid_symlinks = Some(item);
+            shared_models.lock().unwrap().shared_same_invalid_symlinks = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
                 write_invalid_symlinks_results(&app, vector, messages);
@@ -783,17 +783,17 @@ fn scan_temporary_files(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut item = Temporary::new();
-            set_common_settings(&mut item, &custom_settings, &stop_flag);
+            let mut tool = Temporary::new();
+            set_common_settings(&mut tool, &custom_settings, &stop_flag);
 
-            item.find_temporary_files(&stop_flag, Some(&progress_sender));
+            tool.search(&stop_flag, Some(&progress_sender));
 
-            let mut vector = item.get_temporary_files().clone();
-            let messages = item.get_text_messages().create_messages_text();
+            let mut vector = tool.get_temporary_files().clone();
+            let messages = tool.get_text_messages().create_messages_text();
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
-            shared_models.lock().unwrap().shared_temporary_files_state = Some(item);
+            shared_models.lock().unwrap().shared_temporary_files_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
                 write_temporary_files_results(&app, vector, messages);
@@ -861,17 +861,17 @@ fn scan_broken_files(
             }
 
             let params = BrokenFilesParameters::new(checked_types);
-            let mut item = BrokenFiles::new(params);
-            set_common_settings(&mut item, &custom_settings, &stop_flag);
+            let mut tool = BrokenFiles::new(params);
+            set_common_settings(&mut tool, &custom_settings, &stop_flag);
 
-            item.find_broken_files(&stop_flag, Some(&progress_sender));
+            tool.search(&stop_flag, Some(&progress_sender));
 
-            let mut vector = item.get_broken_files().clone();
-            let messages = item.get_text_messages().create_messages_text();
+            let mut vector = tool.get_broken_files().clone();
+            let messages = tool.get_text_messages().create_messages_text();
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
-            shared_models.lock().unwrap().shared_broken_files_state = Some(item);
+            shared_models.lock().unwrap().shared_broken_files_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
                 write_broken_files_results(&app, vector, messages);
@@ -920,16 +920,16 @@ fn scan_bad_extensions(
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
             let params = BadExtensionsParameters::new();
-            let mut item = BadExtensions::new(params);
-            set_common_settings(&mut item, &custom_settings, &stop_flag);
-            item.scan(&stop_flag, Some(&progress_sender));
+            let mut tool = BadExtensions::new(params);
+            set_common_settings(&mut tool, &custom_settings, &stop_flag);
+            tool.search(&stop_flag, Some(&progress_sender));
 
-            let mut vector = item.get_bad_extensions_files().clone();
-            let messages = item.get_text_messages().create_messages_text();
+            let mut vector = tool.get_bad_extensions_files().clone();
+            let messages = tool.get_text_messages().create_messages_text();
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
-            shared_models.lock().unwrap().shared_bad_extensions_state = Some(item);
+            shared_models.lock().unwrap().shared_bad_extensions_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
                 write_bad_extensions_results(&app, vector, messages);

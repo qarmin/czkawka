@@ -9,8 +9,10 @@ use humansize::{BINARY, format_size};
 use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
-use crate::common::traits::{DebugPrint, DeletingItems, PrintResults};
+use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, PrintResults, Search};
 use crate::tools::big_file::{BigFile, BigFileParameters, Info, SearchMode};
+
+impl AllTraits for BigFile {}
 
 impl DeletingItems for BigFile {
     #[fun_time(message = "delete_files", level = "debug")]
@@ -72,6 +74,22 @@ impl PrintResults for BigFile {
 
     fn save_results_to_file_as_json(&self, file_name: &str, pretty_print: bool) -> std::io::Result<()> {
         self.save_results_to_file_as_json_internal(file_name, &self.big_files, pretty_print)
+    }
+}
+
+impl Search for BigFile {
+    #[fun_time(message = "find_big_files", level = "info")]
+    fn search(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
+        self.prepare_items();
+        if self.look_for_big_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+            self.common_data.stopped_search = true;
+            return;
+        }
+        if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+            self.common_data.stopped_search = true;
+            return;
+        };
+        self.debug_print();
     }
 }
 

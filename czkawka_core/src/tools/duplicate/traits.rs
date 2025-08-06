@@ -1,12 +1,82 @@
 use std::io::prelude::*;
 use std::io::{self};
+use std::sync::Arc;
+use std::sync::atomic::AtomicBool;
 
+use crossbeam_channel::Sender;
+use fun_time::fun_time;
 use humansize::{BINARY, format_size};
 
-use crate::common::model::CheckingMethod;
-use crate::common::tool_data::{CommonData, CommonToolData};
+use crate::common::model::{CheckingMethod, WorkContinueStatus};
+use crate::common::progress_data::ProgressData;
+use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
 use crate::common::traits::*;
 use crate::tools::duplicate::{DuplicateFinder, DuplicateFinderParameters, Info};
+
+impl AllTraits for DuplicateFinder {}
+
+impl DeletingItems for DuplicateFinder {
+    #[fun_time(message = "delete_files", level = "debug")]
+    fn delete_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+        if self.common_data.delete_method == DeleteMethod::None {
+            return WorkContinueStatus::Continue;
+        }
+
+        let files_to_delete = match self.get_params().check_method {
+            CheckingMethod::Name => self.files_with_identical_names.values().cloned().collect::<Vec<_>>(),
+            CheckingMethod::SizeName => self.files_with_identical_size_names.values().cloned().collect::<Vec<_>>(),
+            CheckingMethod::Hash => self.files_with_identical_hashes.values().flatten().cloned().collect::<Vec<_>>(),
+            CheckingMethod::Size => self.files_with_identical_size.values().cloned().collect::<Vec<_>>(),
+            _ => panic!(),
+        };
+        self.delete_advanced_elements_and_add_to_messages(stop_flag, progress_sender, files_to_delete)
+    }
+}
+
+impl Search for DuplicateFinder {
+    #[fun_time(message = "find_duplicates", level = "info")]
+    fn search(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
+        self.prepare_items();
+        self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
+
+        match self.get_params().check_method {
+            CheckingMethod::Name => {
+                self.common_data.stopped_search = self.check_files_name(stop_flag, progress_sender) == WorkContinueStatus::Stop;
+                if self.common_data.stopped_search {
+                    return;
+                }
+            }
+            CheckingMethod::SizeName => {
+                self.common_data.stopped_search = self.check_files_size_name(stop_flag, progress_sender) == WorkContinueStatus::Stop;
+                if self.common_data.stopped_search {
+                    return;
+                }
+            }
+            CheckingMethod::Size => {
+                self.common_data.stopped_search = self.check_files_size(stop_flag, progress_sender) == WorkContinueStatus::Stop;
+                if self.common_data.stopped_search {
+                    return;
+                }
+            }
+            CheckingMethod::Hash => {
+                self.common_data.stopped_search = self.check_files_size(stop_flag, progress_sender) == WorkContinueStatus::Stop;
+                if self.common_data.stopped_search {
+                    return;
+                }
+                self.common_data.stopped_search = self.check_files_hash(stop_flag, progress_sender) == WorkContinueStatus::Stop;
+                if self.common_data.stopped_search {
+                    return;
+                }
+            }
+            _ => panic!(),
+        }
+        if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+            self.common_data.stopped_search = true;
+            return;
+        };
+        self.debug_print();
+    }
+}
 
 impl DebugPrint for DuplicateFinder {
     #[allow(clippy::print_stdout)]

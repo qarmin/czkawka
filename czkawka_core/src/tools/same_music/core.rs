@@ -26,7 +26,7 @@ use crate::common::cache::{CACHE_VERSION, extract_loaded_cache, load_cache_from_
 use crate::common::consts::AUDIO_FILES_EXTENSIONS;
 use crate::common::create_crash_message;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
-use crate::common::model::{CheckingMethod, ToolType, WorkContinueStatus};
+use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
@@ -47,50 +47,8 @@ impl SameMusic {
         }
     }
 
-    #[fun_time(message = "find_same_music", level = "info")]
-    pub fn find_same_music(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
-        self.prepare_items();
-        self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
-        if self.check_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-            self.common_data.stopped_search = true;
-            return;
-        }
-        match self.params.check_type {
-            CheckingMethod::AudioTags => {
-                if self.read_tags(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-                    self.common_data.stopped_search = true;
-                    return;
-                }
-                if self.check_for_duplicate_tags(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-                    self.common_data.stopped_search = true;
-                    return;
-                }
-            }
-            CheckingMethod::AudioContent => {
-                if self.read_tags(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-                    self.common_data.stopped_search = true;
-                    return;
-                }
-                if self.calculate_fingerprint(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-                    self.common_data.stopped_search = true;
-                    return;
-                }
-                if self.check_for_duplicate_fingerprints(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-                    self.common_data.stopped_search = true;
-                    return;
-                }
-            }
-            _ => panic!(),
-        }
-        if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-            self.common_data.stopped_search = true;
-            return;
-        };
-        self.debug_print();
-    }
-
     #[fun_time(message = "check_files", level = "debug")]
-    fn check_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    pub(crate) fn check_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         self.common_data.extensions.set_and_validate_allowed_extensions(AUDIO_FILES_EXTENSIONS);
         if !self.common_data.extensions.set_any_extensions() {
             return WorkContinueStatus::Continue;
@@ -172,7 +130,7 @@ impl SameMusic {
     }
 
     #[fun_time(message = "calculate_fingerprint", level = "debug")]
-    fn calculate_fingerprint(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    pub(crate) fn calculate_fingerprint(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.music_entries.is_empty() {
             return WorkContinueStatus::Continue;
         }
@@ -258,7 +216,7 @@ impl SameMusic {
     }
 
     #[fun_time(message = "read_tags", level = "debug")]
-    fn read_tags(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    pub(crate) fn read_tags(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.music_to_check.is_empty() {
             return WorkContinueStatus::Continue;
         }
@@ -319,7 +277,7 @@ impl SameMusic {
     }
 
     #[fun_time(message = "check_for_duplicate_tags", level = "debug")]
-    fn check_for_duplicate_tags(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    pub(crate) fn check_for_duplicate_tags(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.music_entries.is_empty() {
             return WorkContinueStatus::Continue;
         }
@@ -535,7 +493,7 @@ impl SameMusic {
     }
 
     #[fun_time(message = "check_for_duplicate_fingerprints", level = "debug")]
-    fn check_for_duplicate_fingerprints(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    pub(crate) fn check_for_duplicate_fingerprints(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.music_entries.is_empty() {
             return WorkContinueStatus::Continue;
         }

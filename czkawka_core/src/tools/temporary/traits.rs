@@ -11,6 +11,24 @@ use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, Delet
 use crate::common::traits::*;
 use crate::tools::temporary::{Info, Temporary};
 
+impl AllTraits for Temporary {}
+
+impl Search for Temporary {
+    #[fun_time(message = "find_temporary_files", level = "info")]
+    fn search(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
+        self.prepare_items();
+        if self.check_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+            self.common_data.stopped_search = true;
+            return;
+        }
+        if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+            self.common_data.stopped_search = true;
+            return;
+        };
+        self.debug_print();
+    }
+}
+
 impl DeletingItems for Temporary {
     #[fun_time(message = "delete_files", level = "debug")]
     fn delete_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {

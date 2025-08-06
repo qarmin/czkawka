@@ -11,6 +11,52 @@ use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
 use crate::common::traits::*;
 use crate::tools::same_music::{Info, MusicEntry, SameMusic, SameMusicParameters};
 
+impl AllTraits for SameMusic {}
+
+impl Search for SameMusic {
+    #[fun_time(message = "find_same_music", level = "info")]
+    fn search(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
+        self.prepare_items();
+        self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
+        if self.check_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+            self.common_data.stopped_search = true;
+            return;
+        }
+        match self.params.check_type {
+            CheckingMethod::AudioTags => {
+                if self.read_tags(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+                    self.common_data.stopped_search = true;
+                    return;
+                }
+                if self.check_for_duplicate_tags(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+                    self.common_data.stopped_search = true;
+                    return;
+                }
+            }
+            CheckingMethod::AudioContent => {
+                if self.read_tags(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+                    self.common_data.stopped_search = true;
+                    return;
+                }
+                if self.calculate_fingerprint(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+                    self.common_data.stopped_search = true;
+                    return;
+                }
+                if self.check_for_duplicate_fingerprints(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+                    self.common_data.stopped_search = true;
+                    return;
+                }
+            }
+            _ => panic!(),
+        }
+        if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+            self.common_data.stopped_search = true;
+            return;
+        };
+        self.debug_print();
+    }
+}
+
 impl DebugPrint for SameMusic {
     #[allow(clippy::print_stdout)]
     fn debug_print(&self) {
