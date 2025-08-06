@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::env;
 use std::rc::Rc;
 
-use czkawka_core::common_traits::PrintResults;
+use czkawka_core::common::traits::PrintResults;
 use gtk4::prelude::*;
 use gtk4::{Button, Entry};
 

@@ -5,7 +5,8 @@ use std::cmp::{max, min};
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
-use czkawka_core::common::{get_all_available_threads, get_config_cache_path, set_number_of_threads};
+use czkawka_core::common::config_cache_path::get_config_cache_path;
+use czkawka_core::common::{get_all_available_threads, set_number_of_threads};
 use czkawka_core::tools::similar_videos::{ALLOWED_SKIP_FORWARD_AMOUNT, ALLOWED_VID_HASH_DURATION};
 use log::{debug, error, info};
 use serde::{Deserialize, Serialize};
@@ -121,10 +122,9 @@ pub(crate) fn load_settings_from_file(app: &MainWindow, cli_result: Option<CliRe
         SettingsCustom::default()
     });
 
-    #[allow(clippy::comparison_chain)]
-    if base_settings.preset_names.len() > PRESET_NUMBER {
-        base_settings.preset_names.truncate(PRESET_NUMBER);
-    } else if base_settings.preset_names.len() < PRESET_NUMBER {
+    base_settings.preset_names.truncate(PRESET_NUMBER);
+
+    if base_settings.preset_names.len() < PRESET_NUMBER {
         while base_settings.preset_names.len() < PRESET_NUMBER - 1 {
             base_settings.preset_names.push(format!("Preset {}", base_settings.preset_names.len() + 1));
         }

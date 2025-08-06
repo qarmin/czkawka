@@ -8,6 +8,7 @@
 ### Breaking changes[Devs]
 - `stop_flag` is now required argument in most of the core functions
 - Visibility of some core functions has been reduced to `pub(crate)`
+- The modules in czkawka_core have been split and reorganized a bit — imports need to be adjusted, although the actual behavior and item names should not be changed too much
 
 ### Core
 - Replaced `println`/`eprintln` with logging functions - [#1478](https://github.com/qarmin/czkawka/pull/1478)
@@ -28,6 +29,7 @@
 - Fixed crash when removing outdated cache - [#1508](https://github.com/qarmin/czkawka/pull/1508)
 - Fixed missing file and folder names for similar videos in reference folders - [#1520](https://github.com/qarmin/czkawka/pull/1520)
 - Fixed crashes when the SVG pixbuf loader is not available - [#1565](https://github.com/qarmin/czkawka/pull/1565)
+- Fixed using custom select on referenced folders - [#1581](https://github.com/qarmin/czkawka/pull/1581)
 
 ### Krokiet
 - Added the ability to select multiple items with mouse and keyboard - [#1478](https://github.com/qarmin/czkawka/pull/1478)
@@ -45,19 +47,21 @@
 - Improved appearance of bottom directories panel - [#1569](https://github.com/qarmin/czkawka/pull/1569)
 
 ### External
-- There is a new unofficial Tauri-based frontend for Czkawka(inspired by Krokiet ui) - [Czkawka Tauri](https://github.com/shixinhuang99/czkawka-tauri)
+- There is a new unofficial Tauri-based frontend for Czkawka - [Czkawka Tauri](https://github.com/shixinhuang99/czkawka-tauri)
 - Czkawka 8.0.0 is now available in Debian Sid - [Cli](https://packages.debian.org/sid/czkawka-cli)/[Gui Gtk](https://packages.debian.org/sid/czkawka-gui) 
 
 ### CI
-- Compilation for 32-bit targets is now checked in CI.
-- Czkawka binaries are now checked for reproducibility in CI.
+- Compilation for 32-bit targets is now checked in CI
+- Czkawka binaries are now checked for reproducibility in CI
+
 
 ### Prebuilt binaries
-- AppImage binaries are no longer provided due to random bugs (not present in other packaging formats) and minimal added value compared to prebuilt Linux binaries or Flatpak.\
-- HEIF Mac binaries are now provided.
-- CI now builds Linux binaries on Ubuntu 22.04 instead of 20.04(github removed 20.04 images).
+- AppImage binaries are no longer provided due to random bugs (not present in other packaging formats) and minimal added value compared to prebuilt Linux binaries or Flatpak
+- HEIF Mac binaries are now provided
+- CI now builds Linux binaries on Ubuntu 22.04 instead of 20.04(github removed 20.04 images)
 - `musl` builds of `czkawka_cli` are now provided instead of `eyra` builds (slightly easier to maintain). GUI builds are not included due to limitations of `musl` and `eyra` :(
-- Prebuilt Windows console binaries are no longer provided — logs are now saved to a file, which is easier to read than terminal output.
+- Prebuilt Windows console binaries are no longer provided — logs are now saved to a file, which is easier to read than terminal output
+- Skia opengl and vulkan backends are provided for Krokiet on Linux(no binaries on Windows, because don't know how to replace `sed`)
 
 ## Version 9.0.0 - 16.03.2025r
 

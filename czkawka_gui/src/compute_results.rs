@@ -5,10 +5,10 @@ use std::time::Duration;
 
 use chrono::DateTime;
 use crossbeam_channel::Receiver;
+use czkawka_core::common::model::CheckingMethod;
+use czkawka_core::common::tool_data::CommonData;
+use czkawka_core::common::traits::ResultEntry;
 use czkawka_core::common::{split_path, split_path_compare};
-use czkawka_core::common_dir_traversal::CheckingMethod;
-use czkawka_core::common_tool::CommonData;
-use czkawka_core::common_traits::ResultEntry;
 use czkawka_core::tools::bad_extensions::BadExtensions;
 use czkawka_core::tools::big_file::BigFile;
 use czkawka_core::tools::broken_files::BrokenFiles;
@@ -17,7 +17,7 @@ use czkawka_core::tools::empty_files::EmptyFiles;
 use czkawka_core::tools::empty_folder::EmptyFolder;
 use czkawka_core::tools::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::tools::same_music::{MusicSimilarity, SameMusic};
-use czkawka_core::tools::similar_images;
+use czkawka_core::tools::similar_images::core::get_string_from_similarity;
 use czkawka_core::tools::similar_images::{ImagesEntry, SimilarImages};
 use czkawka_core::tools::similar_videos::SimilarVideos;
 use czkawka_core::tools::temporary::Temporary;
@@ -403,7 +403,7 @@ fn compute_invalid_symlinks(
                     (ColumnsInvalidSymlinks::Name as u32, &file),
                     (ColumnsInvalidSymlinks::Path as u32, &directory),
                     (ColumnsInvalidSymlinks::DestinationPath as u32, &symlink_info.destination_path.to_string_lossy().to_string()),
-                    (ColumnsInvalidSymlinks::TypeOfError as u32, &get_text_from_invalid_symlink_cause(symlink_info.type_of_error)),
+                    (ColumnsInvalidSymlinks::TypeOfError as u32, &symlink_info.type_of_error.translate()),
                     (
                         ColumnsInvalidSymlinks::Modification as u32,
                         &(DateTime::from_timestamp(file_entry.modified_date as i64, 0)
@@ -1344,7 +1344,7 @@ fn similar_images_add_to_list_store(
     if is_header {
         similarity_string = String::new();
     } else {
-        similarity_string = similar_images::get_string_from_similarity(&similarity, hash_size);
+        similarity_string = get_string_from_similarity(&similarity, hash_size);
     };
 
     if is_header && !is_reference_folder {

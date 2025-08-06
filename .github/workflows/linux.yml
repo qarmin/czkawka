@@ -24,7 +24,7 @@ jobs:
           echo "ARCHNAME=$ARCHNAME" >> $GITHUB_ENV
 
       - name: Install basic libraries
-        run: sudo apt update || true; sudo apt install libheif-dev libraw-dev ffmpeg libgtk-4-dev -y
+        run: sudo apt update || true; sudo apt install libheif-dev libraw-dev ffmpeg libgtk-4-dev p7zip-full -y
 
       - name: Setup rust version
         run: rustup default 1.85.0
@@ -40,11 +40,19 @@ jobs:
           mv target/release/czkawka_cli linux_czkawka_cli_${{ env.ARCHNAME }}
           mv target/release/czkawka_gui linux_czkawka_gui_${{ env.ARCHNAME }}
           mv target/release/krokiet linux_krokiet_${{ env.ARCHNAME }}
+          cargo build --release --bin krokiet --no-default-features --features "winit_skia_opengl,winit_software"
+          mv target/release/krokiet linux_krokiet_skia_opengl_${{ env.ARCHNAME }}
+          cargo build --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software"
+          mv target/release/krokiet linux_krokiet_skia_vulkan_${{ env.ARCHNAME }}
           
           cargo build --release --features "heif,libraw"
           mv target/release/czkawka_cli linux_czkawka_cli_heif_raw_${{ env.ARCHNAME }}
           mv target/release/czkawka_gui linux_czkawka_gui_heif_raw_${{ env.ARCHNAME }}
           mv target/release/krokiet linux_krokiet_heif_raw_${{ env.ARCHNAME }}
+          cargo build --release --bin krokiet --no-default-features --features "winit_skia_opengl,winit_software,heif,libraw"
+          mv target/release/krokiet linux_krokiet_heif_raw_skia_opengl_${{ env.ARCHNAME }}
+          cargo build --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software,heif,libraw"
+          mv target/release/krokiet linux_krokiet_heif_raw_skia_vulkan_${{ env.ARCHNAME }}
 
       - name: Build Debug
         if: ${{ github.ref != 'refs/heads/master' }}
@@ -58,23 +66,45 @@ jobs:
           mv target/debug/czkawka_cli linux_czkawka_cli_${{ env.ARCHNAME }}
           mv target/debug/czkawka_gui linux_czkawka_gui_${{ env.ARCHNAME }}
           mv target/debug/krokiet linux_krokiet_${{ env.ARCHNAME }}
+          cargo build --bin krokiet --no-default-features --features "winit_skia_opengl,winit_software"
+          mv target/debug/krokiet linux_krokiet_skia_opengl_${{ env.ARCHNAME }}
+          cargo build --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software"
+          mv target/debug/krokiet linux_krokiet_skia_vulkan_${{ env.ARCHNAME }}
           
           cargo build --features "heif,libraw"
           mv target/debug/czkawka_cli linux_czkawka_cli_heif_raw_${{ env.ARCHNAME }}
           mv target/debug/czkawka_gui linux_czkawka_gui_heif_raw_${{ env.ARCHNAME }}
           mv target/debug/krokiet linux_krokiet_heif_raw_${{ env.ARCHNAME }}
+          cargo build --bin krokiet --no-default-features --features "winit_skia_opengl,winit_software,heif,libraw"
+          mv target/debug/krokiet linux_krokiet_heif_raw_skia_opengl_${{ env.ARCHNAME }}
+          cargo build --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software,heif,libraw"
+          mv target/debug/krokiet linux_krokiet_heif_raw_skia_vulkan_${{ env.ARCHNAME }}
+          
+          strip linux*
+
+      - name: Pack with 7z
+        run: |
+          # 7z -mx=3 in rust files, takes 40% less space but is 2x slower than zip -mx=1
+          # 7z -mx=3 is 8x faster than 7z -mx=5, but generates 20% bigger 
+          # So looks that -mx=3 is the best option
+          time 7z a -t7z -mx=3 czkawka_all.7z \
+            linux_czkawka_cli_${{ env.ARCHNAME }} \
+            linux_czkawka_gui_${{ env.ARCHNAME }} \
+            linux_krokiet_${{ env.ARCHNAME }} \
+            linux_czkawka_cli_heif_raw_${{ env.ARCHNAME }} \
+            linux_czkawka_gui_heif_raw_${{ env.ARCHNAME }} \
+            linux_krokiet_heif_raw_${{ env.ARCHNAME }} \
+            linux_krokiet_skia_opengl_${{ env.ARCHNAME }} \
+            linux_krokiet_heif_raw_skia_opengl_${{ env.ARCHNAME }} \
+            linux_krokiet_skia_vulkan_${{ env.ARCHNAME }} \
+            linux_krokiet_heif_raw_skia_vulkan_${{ env.ARCHNAME }}
 
       - name: Store
         uses: actions/upload-artifact@v4
         with:
           name: all-${{ runner.os }}-${{ runner.arch }}-${{ env.VERS }}
           path: |
-            linux_czkawka_cli_${{ env.ARCHNAME }}
-            linux_czkawka_gui_${{ env.ARCHNAME }}
-            linux_krokiet_${{ env.ARCHNAME }}
-            linux_czkawka_cli_heif_raw_${{ env.ARCHNAME }}
-            linux_czkawka_gui_heif_raw_${{ env.ARCHNAME }}
-            linux_krokiet_heif_raw_${{ env.ARCHNAME }}
+            czkawka_all.7z
 
       - name: Release
         if: ${{ github.ref == 'refs/heads/master' }}
@@ -88,6 +118,10 @@ jobs:
             linux_czkawka_cli_heif_raw_${{ env.ARCHNAME }}
             linux_czkawka_gui_heif_raw_${{ env.ARCHNAME }}
             linux_krokiet_heif_raw_${{ env.ARCHNAME }}
+            linux_krokiet_skia_opengl_${{ env.ARCHNAME }}
+            linux_krokiet_heif_raw_skia_opengl_${{ env.ARCHNAME }}
+            linux_krokiet_skia_vulkan_${{ env.ARCHNAME }}
+            linux_krokiet_heif_raw_skia_vulkan_${{ env.ARCHNAME }}
           token: ${{ secrets.PAT_REPOSITORY }}
 
   ### MUSL CLI and Krokiet Release and Debug
@@ -165,6 +199,16 @@ jobs:
           sed -i 's/^\(\[profile\.dev\.package.*\)/#\1/' Cargo.toml
           sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
           cargo build --target i686-unknown-linux-gnu --bin czkawka_cli --bin krokiet
+          mv target/i686-unknown-linux-gnu/debug/czkawka_cli linux_czkawka_cli_32bit
+          mv target/i686-unknown-linux-gnu/debug/krokiet linux_krokiet_32bit
+
+      - name: Store
+        uses: actions/upload-artifact@v4
+        with:
+          name: all-32bit-${{ runner.os }}-${{ runner.arch }}-debug
+          path: |
+            linux_czkawka_cli_32bit
+            linux_krokiet_32bit
 
   linux-stability:
     if: ${{ github.ref == 'refs/heads/master' }} # Runs only in master, because it is really time consumig

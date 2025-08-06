@@ -1,13 +1,14 @@
 use std::collections::BTreeMap;
 use std::default::Default;
 
-use czkawka_core::common::get_config_cache_path;
-use czkawka_core::common_cache::{
-    get_duplicate_cache_file, get_similar_images_cache_file, get_similar_videos_cache_file, load_cache_from_file_generalized_by_path, load_cache_from_file_generalized_by_size,
-    save_cache_to_file_generalized,
-};
-use czkawka_core::common_messages::Messages;
-use czkawka_core::tools::duplicate::{DuplicateEntry, HashType};
+use czkawka_core::common::cache::{load_cache_from_file_generalized_by_path, load_cache_from_file_generalized_by_size, save_cache_to_file_generalized};
+use czkawka_core::common::config_cache_path::get_config_cache_path;
+use czkawka_core::common::model::HashType;
+use czkawka_core::helpers::messages::Messages;
+use czkawka_core::tools::duplicate::DuplicateEntry;
+use czkawka_core::tools::duplicate::core::get_duplicate_cache_file;
+use czkawka_core::tools::similar_images::core::get_similar_images_cache_file;
+use czkawka_core::tools::similar_videos::core::get_similar_videos_cache_file;
 use czkawka_core::tools::similar_videos::{DEFAULT_CROP_DETECT, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION};
 use gtk4::prelude::*;
 use gtk4::{Label, ResponseType, Window};

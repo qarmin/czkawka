@@ -4,10 +4,11 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread;
 
 use crossbeam_channel::Sender;
-use czkawka_core::common::DEFAULT_THREAD_SIZE;
-use czkawka_core::common_dir_traversal::CheckingMethod;
-use czkawka_core::common_tool::CommonData;
-use czkawka_core::progress_data::ProgressData;
+use czkawka_core::common::consts::DEFAULT_THREAD_SIZE;
+use czkawka_core::common::model::CheckingMethod;
+use czkawka_core::common::progress_data::ProgressData;
+use czkawka_core::common::tool_data::CommonData;
+use czkawka_core::common::traits::Search;
 use czkawka_core::tools::bad_extensions::{BadExtensions, BadExtensionsParameters};
 use czkawka_core::tools::big_file::{BigFile, BigFileParameters};
 use czkawka_core::tools::broken_files::{BrokenFiles, BrokenFilesParameters, CheckedTypes};
@@ -222,10 +223,10 @@ fn duplicate_search(
     image_preview_duplicates.hide();
     clean_tree_view(&tree_view_duplicate_finder);
 
-    let check_method_index = combo_box_duplicate_check_method.active().expect("Failed to get active item") as usize;
+    let check_method_index = combo_box_duplicate_check_method.active().expect("Failed to get active search") as usize;
     let check_method = DUPLICATES_CHECK_METHOD_COMBO_BOX[check_method_index].check_method;
 
-    let hash_type_index = combo_box_duplicate_hash_type.active().expect("Failed to get active item") as usize;
+    let hash_type_index = combo_box_duplicate_hash_type.active().expect("Failed to get active search") as usize;
     let hash_type = DUPLICATES_HASH_TYPE_COMBO_BOX[hash_type_index].hash_type;
 
     let use_prehash_cache = check_button_duplicates_use_prehash_cache.is_active();
@@ -248,12 +249,12 @@ fn duplicate_search(
                 minimal_prehash_cache_file_size,
                 case_sensitive_name_comparison,
             );
-            let mut item = DuplicateFinder::new(params);
+            let mut tool = DuplicateFinder::new(params);
 
-            set_common_settings(&mut item, &loaded_commons);
-            item.set_delete_outdated_cache(delete_outdated_cache);
-            item.find_duplicates(&stop_flag, Some(&progress_data_sender));
-            result_sender.send(Message::Duplicates(item)).expect("Failed to send Duplicates message");
+            set_common_settings(&mut tool, &loaded_commons);
+            tool.set_delete_outdated_cache(delete_outdated_cache);
+            tool.search(&stop_flag, Some(&progress_data_sender));
+            result_sender.send(Message::Duplicates(tool)).expect("Failed to send Duplicates message");
         })
         .expect("Failed to spawn DuplicateFinder thread");
 }
@@ -274,11 +275,11 @@ fn empty_files_search(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut item = EmptyFiles::new();
+            let mut tool = EmptyFiles::new();
 
-            set_common_settings(&mut item, &loaded_commons);
-            item.find_empty_files(&stop_flag, Some(&progress_data_sender));
-            result_sender.send(Message::EmptyFiles(item)).expect("Failed to send EmptyFiles message");
+            set_common_settings(&mut tool, &loaded_commons);
+            tool.search(&stop_flag, Some(&progress_data_sender));
+            result_sender.send(Message::EmptyFiles(tool)).expect("Failed to send EmptyFiles message");
         })
         .expect("Failed to spawn EmptyFiles thread");
 }
@@ -299,11 +300,11 @@ fn empty_dirs_search(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut item = EmptyFolder::new();
+            let mut tool = EmptyFolder::new();
 
-            set_common_settings(&mut item, &loaded_commons);
-            item.find_empty_folders(&stop_flag, Some(&progress_data_sender));
-            result_sender.send(Message::EmptyFolders(item)).expect("Failed to send EmptyFolders message");
+            set_common_settings(&mut tool, &loaded_commons);
+            tool.search(&stop_flag, Some(&progress_data_sender));
+            result_sender.send(Message::EmptyFolders(tool)).expect("Failed to send EmptyFolders message");
         })
         .expect("Failed to spawn EmptyFolders thread");
 }
@@ -323,7 +324,7 @@ fn big_files_search(
     let tree_view_big_files_finder = gui_data.main_notebook.tree_view_big_files_finder.clone();
     clean_tree_view(&tree_view_big_files_finder);
 
-    let big_files_mode_index = combo_box_big_files_mode.active().expect("Failed to get active item") as usize;
+    let big_files_mode_index = combo_box_big_files_mode.active().expect("Failed to get active search") as usize;
     let big_files_mode = BIG_FILES_CHECK_METHOD_COMBO_BOX[big_files_mode_index].check_method;
 
     let numbers_of_files_to_check = entry_big_files_number.text().as_str().parse::<usize>().unwrap_or(50);
@@ -332,11 +333,11 @@ fn big_files_search(
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
             let params = BigFileParameters::new(numbers_of_files_to_check, big_files_mode);
-            let mut item = BigFile::new(params);
+            let mut tool = BigFile::new(params);
 
-            set_common_settings(&mut item, &loaded_commons);
-            item.find_big_files(&stop_flag, Some(&progress_data_sender));
-            result_sender.send(Message::BigFiles(item)).expect("Failed to send BigFiles message");
+            set_common_settings(&mut tool, &loaded_commons);
+            tool.search(&stop_flag, Some(&progress_data_sender));
+            result_sender.send(Message::BigFiles(tool)).expect("Failed to send BigFiles message");
         })
         .expect("Failed to spawn BigFiles thread");
 }
@@ -357,11 +358,11 @@ fn temporary_files_search(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut item = Temporary::new();
+            let mut tool = Temporary::new();
 
-            set_common_settings(&mut item, &loaded_commons);
-            item.find_temporary_files(&stop_flag, Some(&progress_data_sender));
-            result_sender.send(Message::Temporary(item)).expect("Failed to send Temporary message");
+            set_common_settings(&mut tool, &loaded_commons);
+            tool.search(&stop_flag, Some(&progress_data_sender));
+            result_sender.send(Message::Temporary(tool)).expect("Failed to send Temporary message");
         })
         .expect("Failed to spawn Temporary thread");
 }
@@ -416,7 +417,7 @@ fn same_music_search(
         music_similarity |= MusicSimilarity::LENGTH;
     }
 
-    let check_method_index = combo_box_audio_check_type.active().expect("Failed to get active item") as usize;
+    let check_method_index = combo_box_audio_check_type.active().expect("Failed to get active search") as usize;
     let check_method = AUDIO_TYPE_CHECK_METHOD_COMBO_BOX[check_method_index].check_method;
 
     let maximum_difference = scale_similarity_same_music.value();
@@ -434,11 +435,11 @@ fn same_music_search(
                     maximum_difference,
                     comparison_only_in_title_group,
                 );
-                let mut item = SameMusic::new(params);
+                let mut tool = SameMusic::new(params);
 
-                set_common_settings(&mut item, &loaded_commons);
-                item.find_same_music(&stop_flag, Some(&progress_data_sender));
-                result_sender.send(Message::SameMusic(item)).expect("Failed to send SameMusic message");
+                set_common_settings(&mut tool, &loaded_commons);
+                tool.search(&stop_flag, Some(&progress_data_sender));
+                result_sender.send(Message::SameMusic(tool)).expect("Failed to send SameMusic message");
             })
             .expect("Failed to spawn SameMusic thread");
     } else {
@@ -505,11 +506,11 @@ fn broken_files_search(
             .stack_size(DEFAULT_THREAD_SIZE)
             .spawn(move || {
                 let params = BrokenFilesParameters::new(checked_types);
-                let mut item = BrokenFiles::new(params);
+                let mut tool = BrokenFiles::new(params);
 
-                set_common_settings(&mut item, &loaded_commons);
-                item.find_broken_files(&stop_flag, Some(&progress_data_sender));
-                result_sender.send(Message::BrokenFiles(item)).expect("Failed to send BrokenFiles message");
+                set_common_settings(&mut tool, &loaded_commons);
+                tool.search(&stop_flag, Some(&progress_data_sender));
+                result_sender.send(Message::BrokenFiles(tool)).expect("Failed to send BrokenFiles message");
             })
             .expect("Failed to spawn BrokenFiles thread");
     } else {
@@ -562,13 +563,13 @@ fn similar_image_search(
     clean_tree_view(&tree_view_similar_images_finder);
     image_preview_similar_images.hide();
 
-    let hash_size_index = combo_box_image_hash_size.active().expect("Failed to get active item") as usize;
+    let hash_size_index = combo_box_image_hash_size.active().expect("Failed to get active search") as usize;
     let hash_size = IMAGES_HASH_SIZE_COMBO_BOX[hash_size_index] as u8;
 
-    let image_filter_index = combo_box_image_resize_algorithm.active().expect("Failed to get active item") as usize;
+    let image_filter_index = combo_box_image_resize_algorithm.active().expect("Failed to get active search") as usize;
     let image_filter = IMAGES_RESIZE_ALGORITHM_COMBO_BOX[image_filter_index].filter;
 
-    let hash_alg_index = combo_box_image_hash_algorithm.active().expect("Failed to get active item") as usize;
+    let hash_alg_index = combo_box_image_hash_algorithm.active().expect("Failed to get active search") as usize;
     let hash_alg = IMAGES_HASH_TYPE_COMBO_BOX[hash_alg_index].hash_alg;
 
     let ignore_same_size = check_button_image_ignore_same_size.is_active();
@@ -581,12 +582,12 @@ fn similar_image_search(
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
             let params = SimilarImagesParameters::new(similarity, hash_size, hash_alg, image_filter, ignore_same_size, loaded_commons.hide_hard_links);
-            let mut item = SimilarImages::new(params);
+            let mut tool = SimilarImages::new(params);
 
-            set_common_settings(&mut item, &loaded_commons);
-            item.set_delete_outdated_cache(delete_outdated_cache);
-            item.find_similar_images(&stop_flag, Some(&progress_data_sender));
-            result_sender.send(Message::SimilarImages(item)).expect("Failed to send SimilarImages message");
+            set_common_settings(&mut tool, &loaded_commons);
+            tool.set_delete_outdated_cache(delete_outdated_cache);
+            tool.search(&stop_flag, Some(&progress_data_sender));
+            result_sender.send(Message::SimilarImages(tool)).expect("Failed to send SimilarImages message");
         })
         .expect("Failed to spawn SimilarImages thread");
 }
@@ -624,12 +625,12 @@ fn similar_video_search(
                 DEFAULT_VID_HASH_DURATION,
                 DEFAULT_CROP_DETECT,
             );
-            let mut item = SimilarVideos::new(params);
+            let mut tool = SimilarVideos::new(params);
 
-            set_common_settings(&mut item, &loaded_commons);
-            item.set_delete_outdated_cache(delete_outdated_cache);
-            item.find_similar_videos(&stop_flag, Some(&progress_data_sender));
-            result_sender.send(Message::SimilarVideos(item)).expect("Failed to send SimilarVideos message");
+            set_common_settings(&mut tool, &loaded_commons);
+            tool.set_delete_outdated_cache(delete_outdated_cache);
+            tool.search(&stop_flag, Some(&progress_data_sender));
+            result_sender.send(Message::SimilarVideos(tool)).expect("Failed to send SimilarVideos message");
         })
         .expect("Failed to spawn SimilarVideos thread");
 }
@@ -650,11 +651,11 @@ fn bad_symlinks_search(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut item = InvalidSymlinks::new();
+            let mut tool = InvalidSymlinks::new();
 
-            set_common_settings(&mut item, &loaded_commons);
-            item.find_invalid_links(&stop_flag, Some(&progress_data_sender));
-            result_sender.send(Message::InvalidSymlinks(item)).expect("Failed to send InvalidSymlinks message");
+            set_common_settings(&mut tool, &loaded_commons);
+            tool.search(&stop_flag, Some(&progress_data_sender));
+            result_sender.send(Message::InvalidSymlinks(tool)).expect("Failed to send InvalidSymlinks message");
         })
         .expect("Failed to spawn InvalidSymlinks thread");
 }
@@ -676,11 +677,11 @@ fn bad_extensions_search(
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
             let params = BadExtensionsParameters::new();
-            let mut item = BadExtensions::new(params);
+            let mut tool = BadExtensions::new(params);
 
-            set_common_settings(&mut item, &loaded_commons);
-            item.find_bad_extensions_files(&stop_flag, Some(&progress_data_sender));
-            result_sender.send(Message::BadExtensions(item)).expect("Failed to send BadExtensions message");
+            set_common_settings(&mut tool, &loaded_commons);
+            tool.search(&stop_flag, Some(&progress_data_sender));
+            result_sender.send(Message::BadExtensions(tool)).expect("Failed to send BadExtensions message");
         })
         .expect("Failed to spawn BadExtensions thread");
 }

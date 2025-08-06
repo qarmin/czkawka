@@ -20,8 +20,7 @@ resolver = "3"
 panic = "unwind"
 
 # Should find more panics, that now are hidden from user - in long term it should decrease bugs in app
-# There is one big disadvantage - in case of overflow/underflow entire app crashes and not everywhere I catch this panic so app aborts
-# So feel free to disable it, if you want
+# It may cause some crashes, that are not handled via panic::catch_unwind, so feel free to disable it, if you want
 overflow-checks = true
 
 # LTO setting is disabled by default, because release mode is usually needed to develop app and compilation with LTO would take a lot of time

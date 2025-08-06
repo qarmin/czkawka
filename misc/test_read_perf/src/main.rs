@@ -1,4 +1,5 @@
-use czkawka_core::tools::duplicate::{hash_calculation, DuplicateEntry, HashType};
+use czkawka_core::tools::duplicate::{hash_calculation, DuplicateEntry};
+use czkawka_core::common::model::HashType;
 use humansize::{format_size, BINARY};
 use rayon::prelude::*;
 use std::cell::RefCell;

@@ -75,12 +75,12 @@ pub(crate) fn initialize_selection_struct() {
     ];
 
     let map: HashMap<_, _> = tools.into_iter().map(|tool| (tool, SelectionData::default())).collect();
-    let mut item = TOOLS_SELECTION.write().expect("Failed to get write selection lock");
+    let mut tool = TOOLS_SELECTION.write().expect("Failed to get write selection lock");
     if !cfg!(test) {
-        let data = mem::replace(&mut *item, map);
+        let data = mem::replace(&mut *tool, map);
         assert!(data.is_empty(), "Selection data is already initialized, but it should be empty");
     } else {
-        let _ = mem::replace(&mut *item, map);
+        let _ = mem::replace(&mut *tool, map);
     }
 }
 

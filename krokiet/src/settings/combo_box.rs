@@ -1,9 +1,8 @@
 use std::fmt::Debug;
 use std::sync::{Arc, Mutex, MutexGuard};
 
-use czkawka_core::common_dir_traversal::CheckingMethod;
+use czkawka_core::common::model::{CheckingMethod, HashType};
 use czkawka_core::tools::big_file::SearchMode;
-use czkawka_core::tools::duplicate::HashType;
 use image::imageops::FilterType;
 use image_hasher::HashAlg;
 use log::warn;

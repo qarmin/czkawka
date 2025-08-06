@@ -5,9 +5,10 @@ use std::fs::File;
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 
-use czkawka_core::common::{get_all_available_threads, get_config_cache_path};
-use czkawka_core::common_dir_traversal::CheckingMethod;
-use czkawka_core::common_items::DEFAULT_EXCLUDED_ITEMS;
+use czkawka_core::common::config_cache_path::get_config_cache_path;
+use czkawka_core::common::get_all_available_threads;
+use czkawka_core::common::items::DEFAULT_EXCLUDED_ITEMS;
+use czkawka_core::common::model::CheckingMethod;
 use czkawka_core::tools::similar_images::SIMILAR_VALUES;
 use gtk4::prelude::*;
 use gtk4::{ComboBoxText, ScrolledWindow, TextView, TreeView};
@@ -183,7 +184,6 @@ impl LoadSaveStruct {
         self.loaded_items.insert(key, vec_string);
     }
 
-    #[allow(clippy::unused_self)]
     pub(crate) fn open_save_file(&self, text_view_errors: &TextView, save_configuration: bool, manual_execution: bool) -> Option<(File, PathBuf)> {
         let config_dir = get_config_cache_path()?.config_folder;
         let config_file = config_dir.join(Path::new(SAVE_FILE_NAME));
