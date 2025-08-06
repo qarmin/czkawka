@@ -84,7 +84,7 @@ jobs:
 
       - name: Pack with 7z
         run: |
-          7z a -t7z -mx=5 czkawka_all.7z \
+          7z a -tzip -mx=3 czkawka_all.zip \
             linux_czkawka_cli_${{ env.ARCHNAME }} \
             linux_czkawka_gui_${{ env.ARCHNAME }} \
             linux_krokiet_${{ env.ARCHNAME }} \
@@ -95,12 +95,13 @@ jobs:
             linux_krokiet_heif_raw_skia_opengl_${{ env.ARCHNAME }} \
             linux_krokiet_skia_vulkan_${{ env.ARCHNAME }} \
             linux_krokiet_heif_raw_skia_vulkan_${{ env.ARCHNAME }}
+
       - name: Store
         uses: actions/upload-artifact@v4
         with:
           name: all-${{ runner.os }}-${{ runner.arch }}-${{ env.VERS }}
           path: |
-            czkawka_all.7z
+            czkawka_all.zip
             #            linux_czkawka_cli_${{ env.ARCHNAME }}
             #            linux_czkawka_gui_${{ env.ARCHNAME }}
             #            linux_krokiet_${{ env.ARCHNAME }}

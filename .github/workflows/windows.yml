@@ -17,10 +17,6 @@ jobs:
       - name: Install dependencies(mostly sd)
         run: |
           sudo apt update || true;sudo apt install -y mingw-w64 mingw-w64-x86-64-dev
-          wget https://github.com/chmln/sd/releases/download/v1.0.0/sd-v1.0.0-x86_64-unknown-linux-gnu.tar.gz -O a.tar.gz
-          tar -xzf a.tar.gz
-          cp sd-v1.0.0-x86_64-unknown-linux-gnu/sd .
-          chmod +x ./sd
 
       - name: Setup rust version
         run: |
@@ -33,10 +29,6 @@ jobs:
           sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
           cargo build --release --target x86_64-pc-windows-gnu --bin krokiet
           mv target/x86_64-pc-windows-gnu/release/krokiet.exe windows_krokiet_on_linux.exe
-          cargo build --release --target x86_64-pc-windows-gnu --bin krokiet --no-default-features  --features "winit_skia_opengl,winit_software"
-          mv target/x86_64-pc-windows-gnu/release/krokiet.exe windows_krokiet_on_linux_skia_opengl.exe
-          cargo build --release --target x86_64-pc-windows-gnu --bin krokiet --no-default-features  --features "winit_skia_vulkan,winit_software"
-          mv target/x86_64-pc-windows-gnu/release/krokiet.exe windows_krokiet_on_linux_skia_vulkan.exe
 
       - name: Compile Krokiet Debug
         if: ${{ github.ref != 'refs/heads/master' }}
@@ -45,19 +37,13 @@ jobs:
           sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
           cargo build --target x86_64-pc-windows-gnu --bin krokiet
           mv target/x86_64-pc-windows-gnu/debug/krokiet.exe windows_krokiet_on_linux.exe
-          cargo build --target x86_64-pc-windows-gnu --bin krokiet --no-default-features  --features "winit_skia_opengl,winit_software"
-          mv target/x86_64-pc-windows-gnu/debug/krokiet.exe windows_krokiet_on_linux_skia_opengl.exe
-          cargo build--target x86_64-pc-windows-gnu --bin krokiet --no-default-features  --features "winit_skia_vulkan,winit_software"
-          mv target/x86_64-pc-windows-gnu/debug/krokiet.exe windows_krokiet_on_linux_skia_vulkan.exe
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: krokiet-windows-c-on-linux-${{ github.sha }}
+          name: krokiet-windows-on-linux-${{ github.sha }}
           path: |
             ./windows_krokiet_on_linux.exe
-            ./windows_krokiet_on_linux_skia_opengl.exe
-            ./windows_krokiet_on_linux_skia_vulkan.exe
           if-no-files-found: error
 
       - name: Release
@@ -67,6 +53,54 @@ jobs:
           tag_name: "Nightly"
           files: |
             windows_krokiet_on_linux.exe
+          token: ${{ secrets.PAT_REPOSITORY }}
+
+  krokiet-compiled-on-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup rust version
+        run: |
+          rustup default 1.85.0
+          rustup target add x86_64-pc-windows-gnu
+
+      - name: Compile Krokiet Release
+        if: ${{ github.ref == 'refs/heads/master' }}
+        run: |
+          sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
+          cargo build --release --bin krokiet --no-default-features --features "winit_skia_opengl,winit_software"
+          mv target/release/krokiet.exe windows_krokiet_on_windows_skia_opengl.exe
+          cargo build --release --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software"
+          mv target/release/krokiet.exe windows_krokiet_on_windows_skia_vulkan.exe
+
+      - name: Compile Krokiet Debug
+        if: ${{ github.ref != 'refs/heads/master' }}
+        run: |
+          sed -i 's/^\(\[profile\.dev\.package.*\)/#\1/' Cargo.toml
+          sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
+          cargo build --bin krokiet --no-default-features  --features "winit_skia_opengl,winit_software"
+          mv target/debug/krokiet.exe windows_krokiet_on_windows_skia_opengl.exe
+          cargo build --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software"
+          mv target/debug/krokiet.exe windows_krokiet_on_windows_skia_vulkan.exe
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: krokiet-windows-on-windows-${{ github.sha }}
+          path: |
+            ./windows_krokiet_on_windows_skia_opengl.exe
+            ./windows_krokiet_on_windows_skia_vulkan.exe
+          if-no-files-found: error
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: ${{ github.ref == 'refs/heads/master' }}
+        with:
+          tag_name: "Nightly"
+          files: |
+            windows_krokiet_on_windows_skia_opengl.exe
+            windows_krokiet_on_windows_skia_vulkan.exe
           token: ${{ secrets.PAT_REPOSITORY }}
 
   container_4_12:
