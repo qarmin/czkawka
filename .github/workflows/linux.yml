@@ -84,87 +84,9 @@ jobs:
 
       - name: Pack with 7z
         run: |
-          time 7z a -tzip -mx=1 czkawka_all.zip \
-            linux_czkawka_cli_${{ env.ARCHNAME }} \
-            linux_czkawka_gui_${{ env.ARCHNAME }} \
-            linux_krokiet_${{ env.ARCHNAME }} \
-            linux_czkawka_cli_heif_raw_${{ env.ARCHNAME }} \
-            linux_czkawka_gui_heif_raw_${{ env.ARCHNAME }} \
-            linux_krokiet_heif_raw_${{ env.ARCHNAME }} \
-            linux_krokiet_skia_opengl_${{ env.ARCHNAME }} \
-            linux_krokiet_heif_raw_skia_opengl_${{ env.ARCHNAME }} \
-            linux_krokiet_skia_vulkan_${{ env.ARCHNAME }} \
-            linux_krokiet_heif_raw_skia_vulkan_${{ env.ARCHNAME }}
-          ls -alh czkawka_all.zip
-          
-          time 7z a -tzip -mx=3 czkawka_all.zip \
-            linux_czkawka_cli_${{ env.ARCHNAME }} \
-            linux_czkawka_gui_${{ env.ARCHNAME }} \
-            linux_krokiet_${{ env.ARCHNAME }} \
-            linux_czkawka_cli_heif_raw_${{ env.ARCHNAME }} \
-            linux_czkawka_gui_heif_raw_${{ env.ARCHNAME }} \
-            linux_krokiet_heif_raw_${{ env.ARCHNAME }} \
-            linux_krokiet_skia_opengl_${{ env.ARCHNAME }} \
-            linux_krokiet_heif_raw_skia_opengl_${{ env.ARCHNAME }} \
-            linux_krokiet_skia_vulkan_${{ env.ARCHNAME }} \
-            linux_krokiet_heif_raw_skia_vulkan_${{ env.ARCHNAME }}
-          ls -alh czkawka_all.zip
-          
-          time 7z a -tzip -mx=5 czkawka_all.zip \
-            linux_czkawka_cli_${{ env.ARCHNAME }} \
-            linux_czkawka_gui_${{ env.ARCHNAME }} \
-            linux_krokiet_${{ env.ARCHNAME }} \
-            linux_czkawka_cli_heif_raw_${{ env.ARCHNAME }} \
-            linux_czkawka_gui_heif_raw_${{ env.ARCHNAME }} \
-            linux_krokiet_heif_raw_${{ env.ARCHNAME }} \
-            linux_krokiet_skia_opengl_${{ env.ARCHNAME }} \
-            linux_krokiet_heif_raw_skia_opengl_${{ env.ARCHNAME }} \
-            linux_krokiet_skia_vulkan_${{ env.ARCHNAME }} \
-            linux_krokiet_heif_raw_skia_vulkan_${{ env.ARCHNAME }}
-          ls -alh czkawka_all.zip
-          
-          time 7z a -tzip -mx=7 czkawka_all.zip \
-            linux_czkawka_cli_${{ env.ARCHNAME }} \
-            linux_czkawka_gui_${{ env.ARCHNAME }} \
-            linux_krokiet_${{ env.ARCHNAME }} \
-            linux_czkawka_cli_heif_raw_${{ env.ARCHNAME }} \
-            linux_czkawka_gui_heif_raw_${{ env.ARCHNAME }} \
-            linux_krokiet_heif_raw_${{ env.ARCHNAME }} \
-            linux_krokiet_skia_opengl_${{ env.ARCHNAME }} \
-            linux_krokiet_heif_raw_skia_opengl_${{ env.ARCHNAME }} \
-            linux_krokiet_skia_vulkan_${{ env.ARCHNAME }} \
-            linux_krokiet_heif_raw_skia_vulkan_${{ env.ARCHNAME }}
-          ls -alh czkawka_all.zip
-          
-          time 7z a -tzip -mx=9 czkawka_all.zip \
-            linux_czkawka_cli_${{ env.ARCHNAME }} \
-            linux_czkawka_gui_${{ env.ARCHNAME }} \
-            linux_krokiet_${{ env.ARCHNAME }} \
-            linux_czkawka_cli_heif_raw_${{ env.ARCHNAME }} \
-            linux_czkawka_gui_heif_raw_${{ env.ARCHNAME }} \
-            linux_krokiet_heif_raw_${{ env.ARCHNAME }} \
-            linux_krokiet_skia_opengl_${{ env.ARCHNAME }} \
-            linux_krokiet_heif_raw_skia_opengl_${{ env.ARCHNAME }} \
-            linux_krokiet_skia_vulkan_${{ env.ARCHNAME }} \
-            linux_krokiet_heif_raw_skia_vulkan_${{ env.ARCHNAME }}
-          ls -alh czkawka_all.zip
-          
-          
-          
-          
-          time 7z a -t7z -mx=1 czkawka_all.7z \
-            linux_czkawka_cli_${{ env.ARCHNAME }} \
-            linux_czkawka_gui_${{ env.ARCHNAME }} \
-            linux_krokiet_${{ env.ARCHNAME }} \
-            linux_czkawka_cli_heif_raw_${{ env.ARCHNAME }} \
-            linux_czkawka_gui_heif_raw_${{ env.ARCHNAME }} \
-            linux_krokiet_heif_raw_${{ env.ARCHNAME }} \
-            linux_krokiet_skia_opengl_${{ env.ARCHNAME }} \
-            linux_krokiet_heif_raw_skia_opengl_${{ env.ARCHNAME }} \
-            linux_krokiet_skia_vulkan_${{ env.ARCHNAME }} \
-            linux_krokiet_heif_raw_skia_vulkan_${{ env.ARCHNAME }}
-          ls -alh czkawka_all.7z
-          
+          # 7z -mx=3 in rust files, takes 40% less space but is 2x slower than zip -mx=1
+          # 7z -mx=3 is 8x faster than 7z -mx=5, but generates 20% bigger 
+          # So looks that -mx=3 is the best option
           time 7z a -t7z -mx=3 czkawka_all.7z \
             linux_czkawka_cli_${{ env.ARCHNAME }} \
             linux_czkawka_gui_${{ env.ARCHNAME }} \
@@ -176,65 +98,13 @@ jobs:
             linux_krokiet_heif_raw_skia_opengl_${{ env.ARCHNAME }} \
             linux_krokiet_skia_vulkan_${{ env.ARCHNAME }} \
             linux_krokiet_heif_raw_skia_vulkan_${{ env.ARCHNAME }}
-          ls -alh czkawka_all.7z
-          
-          time 7z a -t7z -mx=5 czkawka_all.7z \
-            linux_czkawka_cli_${{ env.ARCHNAME }} \
-            linux_czkawka_gui_${{ env.ARCHNAME }} \
-            linux_krokiet_${{ env.ARCHNAME }} \
-            linux_czkawka_cli_heif_raw_${{ env.ARCHNAME }} \
-            linux_czkawka_gui_heif_raw_${{ env.ARCHNAME }} \
-            linux_krokiet_heif_raw_${{ env.ARCHNAME }} \
-            linux_krokiet_skia_opengl_${{ env.ARCHNAME }} \
-            linux_krokiet_heif_raw_skia_opengl_${{ env.ARCHNAME }} \
-            linux_krokiet_skia_vulkan_${{ env.ARCHNAME }} \
-            linux_krokiet_heif_raw_skia_vulkan_${{ env.ARCHNAME }}
-          ls -alh czkawka_all.7z
-          
-          time 7z a -t7z -mx=7 czkawka_all.7z \
-            linux_czkawka_cli_${{ env.ARCHNAME }} \
-            linux_czkawka_gui_${{ env.ARCHNAME }} \
-            linux_krokiet_${{ env.ARCHNAME }} \
-            linux_czkawka_cli_heif_raw_${{ env.ARCHNAME }} \
-            linux_czkawka_gui_heif_raw_${{ env.ARCHNAME }} \
-            linux_krokiet_heif_raw_${{ env.ARCHNAME }} \
-            linux_krokiet_skia_opengl_${{ env.ARCHNAME }} \
-            linux_krokiet_heif_raw_skia_opengl_${{ env.ARCHNAME }} \
-            linux_krokiet_skia_vulkan_${{ env.ARCHNAME }} \
-            linux_krokiet_heif_raw_skia_vulkan_${{ env.ARCHNAME }}
-          ls -alh czkawka_all.7z
-          
-          time 7z a -t7z -mx=9 czkawka_all.7z \
-            linux_czkawka_cli_${{ env.ARCHNAME }} \
-            linux_czkawka_gui_${{ env.ARCHNAME }} \
-            linux_krokiet_${{ env.ARCHNAME }} \
-            linux_czkawka_cli_heif_raw_${{ env.ARCHNAME }} \
-            linux_czkawka_gui_heif_raw_${{ env.ARCHNAME }} \
-            linux_krokiet_heif_raw_${{ env.ARCHNAME }} \
-            linux_krokiet_skia_opengl_${{ env.ARCHNAME }} \
-            linux_krokiet_heif_raw_skia_opengl_${{ env.ARCHNAME }} \
-            linux_krokiet_skia_vulkan_${{ env.ARCHNAME }} \
-            linux_krokiet_heif_raw_skia_vulkan_${{ env.ARCHNAME }}
-          ls -alh czkawka_all.7z
-          
-          
 
       - name: Store
         uses: actions/upload-artifact@v4
         with:
           name: all-${{ runner.os }}-${{ runner.arch }}-${{ env.VERS }}
           path: |
-            czkawka_all.zip
-            #            linux_czkawka_cli_${{ env.ARCHNAME }}
-            #            linux_czkawka_gui_${{ env.ARCHNAME }}
-            #            linux_krokiet_${{ env.ARCHNAME }}
-            #            linux_czkawka_cli_heif_raw_${{ env.ARCHNAME }}
-            #            linux_czkawka_gui_heif_raw_${{ env.ARCHNAME }}
-            #            linux_krokiet_heif_raw_${{ env.ARCHNAME }}
-            #            linux_krokiet_skia_opengl_${{ env.ARCHNAME }}
-            #            linux_krokiet_heif_raw_skia_opengl_${{ env.ARCHNAME }}
-            #            linux_krokiet_skia_vulkan_${{ env.ARCHNAME }}
-            #            linux_krokiet_heif_raw_skia_vulkan_${{ env.ARCHNAME }}
+            czkawka_all.7z
 
       - name: Release
         if: ${{ github.ref == 'refs/heads/master' }}
