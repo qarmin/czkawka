@@ -70,7 +70,7 @@ impl BadExtensions {
         progress_handler.join_thread();
 
         // Break if stop was clicked
-        if stop_flag.load(Ordering::Relaxed) {
+        if check_if_stop_received(stop_flag) {
             return WorkContinueStatus::Stop;
         }
 

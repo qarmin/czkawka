@@ -1,7 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::mem;
 use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::AtomicBool;
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
@@ -191,7 +191,7 @@ impl SimilarVideos {
         self.save_cache(vec_file_entry, loaded_hash_map);
 
         // Break if stop was clicked after saving to cache
-        if stop_flag.load(Ordering::Relaxed) {
+        if check_if_stop_received(stop_flag) {
             return WorkContinueStatus::Stop;
         }
 

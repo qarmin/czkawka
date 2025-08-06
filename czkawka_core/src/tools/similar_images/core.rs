@@ -1,7 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::AtomicBool;
 use std::{mem, panic};
 
 use bk_tree::BKTree;
@@ -209,7 +209,7 @@ impl SimilarImages {
         self.save_to_cache(vec_file_entry, loaded_hash_map);
 
         // Break if stop was clicked after saving to cache
-        if stop_flag.load(Ordering::Relaxed) {
+        if check_if_stop_received(stop_flag) {
             return WorkContinueStatus::Stop;
         }
 
@@ -386,7 +386,7 @@ impl SimilarImages {
             //     println!("{hash:?} --- {:?}", vec.iter().map(|e| e.1).collect::<Vec<_>>());
             // }
 
-            if stop_flag.load(Ordering::Relaxed) {
+            if check_if_stop_received(stop_flag) {
                 progress_handler.join_thread();
                 return WorkContinueStatus::Stop;
             }

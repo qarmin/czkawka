@@ -311,7 +311,7 @@ impl SameMusic {
         // Break if stop was clicked after saving to cache
 
         progress_handler.join_thread();
-        if stop_flag.load(Ordering::Relaxed) {
+        if check_if_stop_received(stop_flag) {
             return WorkContinueStatus::Stop;
         }
 
