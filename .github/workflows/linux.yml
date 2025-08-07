@@ -42,7 +42,7 @@ jobs:
           mv target/release/krokiet linux_krokiet_${{ env.ARCHNAME }}
           cargo build --release --bin krokiet --no-default-features --features "winit_skia_opengl,winit_software"
           mv target/release/krokiet linux_krokiet_skia_opengl_${{ env.ARCHNAME }}
-          cargo build --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software"
+          cargo build --release --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software"
           mv target/release/krokiet linux_krokiet_skia_vulkan_${{ env.ARCHNAME }}
           
           cargo build --release --features "heif,libraw"
@@ -51,7 +51,7 @@ jobs:
           mv target/release/krokiet linux_krokiet_heif_raw_${{ env.ARCHNAME }}
           cargo build --release --bin krokiet --no-default-features --features "winit_skia_opengl,winit_software,heif,libraw"
           mv target/release/krokiet linux_krokiet_heif_raw_skia_opengl_${{ env.ARCHNAME }}
-          cargo build --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software,heif,libraw"
+          cargo build --release --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software,heif,libraw"
           mv target/release/krokiet linux_krokiet_heif_raw_skia_vulkan_${{ env.ARCHNAME }}
 
       - name: Build Debug
