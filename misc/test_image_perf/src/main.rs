@@ -19,9 +19,6 @@ const HASH_ALG: HashAlg = HashAlg::Gradient;
 const FILTER_TYPE: FilterType = FilterType::Lanczos3;
 const HASH_SIZE: u32 = 8;
 
-#[cfg(not(feature = "fast_image_resize"))]
-const MODE: &str = "NORMAL";
-#[cfg(feature = "fast_image_resize")]
 const MODE: &str = "FAST_RESIZE";
 
 fn print_items() {
@@ -33,8 +30,6 @@ fn print_items() {
 
     #[allow(unused_mut)]
     let mut features: Vec<&str> = vec![];
-    #[cfg(feature = "fast_image_resize")]
-    features.push("fast_image_resize");
 
     #[allow(unused_mut)]
     let mut app_cpu_version = "Baseline";

@@ -73,7 +73,6 @@ fix_nightly:
 
 test_resize arg:
     cd misc/test_image_perf; cargo build --release; sudo ./target/release/test_image_perf "{{arg}}"
-    cd misc/test_image_perf; cargo build --release --features fast_image_resize; sudo ./target/release/test_image_perf "{{arg}}"
 
 # Not works, due of edition 2024 and workspaces
 unused_features:

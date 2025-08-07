@@ -102,8 +102,6 @@ pub fn print_version_mode(app: &str) {
     features.push("libavif");
     #[cfg(feature = "libraw")]
     features.push("libraw");
-    #[cfg(feature = "fast_image_resize")]
-    features.push("fast_image_resize");
 
     let mut app_cpu_version = "Baseline";
     let mut os_cpu_version = "Baseline";
