@@ -28,3 +28,4 @@ misc/*/target/
 misc/*/.idea
 benchmarks
 TestFiles
+*.txt
