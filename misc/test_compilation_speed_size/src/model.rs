@@ -163,13 +163,6 @@ pub struct Config {
 
 impl Config {
     pub fn to_str(&self) -> String {
-        // format!(
-        //     "{}\n{}\n{}\n",
-        //     self.lto.to_str(),
-        //     self.debug.to_str(),
-        //     self.opt_level.to_str(),
-        // )
-        // All the fields with to_str split by \n, but without name
         format!(
             "{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}",
             self.lto.to_str(),
@@ -183,7 +176,6 @@ impl Config {
         )
     }
     pub fn to_string_short(&self) -> String {
-        // All the fields with to_str split by space, but without name
         format!(
             "LTO: {}, Debug: {}, Opt: {}, Build/Check: {}, Codegen Units: {}, Panic: {}, Split Debug: {}, Overflow Checks: {}, Incremental: {}",
             self.lto.to_str(),

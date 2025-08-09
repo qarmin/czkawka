@@ -116,8 +116,10 @@ export component SelectableTableView inherits Rectangle {
                         checked: r.checked && !r.header_row;
                         width: root.column_sizes[0];
                         toggled => {
-                            r.checked = self.checked;
-                            Callabler.change_number_of_checked_items(self.checked ? 1 : -1);
+                            Callabler.change_number_of_checked_items(r.checked ? -1 : 1);
+                            r.checked = !r.checked; 
+                            // TODO - this is equivalent to r.checked = self.checked, but for now it works better, because self.checked contains sometimes old state
+                            // https://github.com/slint-ui/slint/issues/602
                         }
                     }
 
@@ -136,7 +138,7 @@ export component SelectableTableView inherits Rectangle {
         }
     }
 
-    // Already rust code should deal with selections in the model, but this one is not able to handle
+    // Already rust code should deal with selections in the model, but not all state is available in rust code
     public function reset_selection() {
         start_shift_idx = -1;
         last_selected_idx = -1;

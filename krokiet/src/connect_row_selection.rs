@@ -211,6 +211,7 @@ mod opener {
 }
 mod selection {
     use super::*;
+    use crate::connect_row_selection::checker::change_number_of_enabled_items;
 
     pub(crate) fn connect_select_all_rows(app: &MainWindow) {
         let a = app.as_weak();
@@ -262,10 +263,11 @@ mod selection {
             let selection = lock.get_mut(&active_tab).expect("Failed to get selection data");
             let model = active_tab.get_tool_model(&app);
 
-            let new_model = rows_reverse_checked_selection(selection, &model);
+            let (checked_items, unchecked_items, new_model) = rows_reverse_checked_selection(selection, &model);
             if let Some(new_model) = new_model {
                 active_tab.set_tool_model(&app, new_model);
             }
+            change_number_of_enabled_items(&app, active_tab, checked_items as i64 - unchecked_items as i64);
         });
     }
     pub(crate) fn reverse_selection_on_specific_item(app: &MainWindow) {
@@ -317,6 +319,7 @@ pub(crate) mod checker {
         });
     }
 
+    // TODO - sad day for code readability, because slint not supports i64 - https://github.com/slint-ui/slint/issues/6589
     pub(crate) fn set_number_of_enabled_items(app: &MainWindow, active_tab: CurrentTab, items_number: u64) {
         let (it1, it2) = split_u64_into_i32s(items_number);
         error!("SET {:?}, {}", &active_tab, &items_number);
@@ -661,7 +664,9 @@ fn row_select_items_with_shift(selection: &mut SelectionData, model: &ModelRc<Ma
     }
 }
 
-fn rows_reverse_checked_selection(selection: &SelectionData, model: &ModelRc<MainListModel>) -> Option<ModelRc<MainListModel>> {
+fn rows_reverse_checked_selection(selection: &SelectionData, model: &ModelRc<MainListModel>) -> (u64, u64, Option<ModelRc<MainListModel>>) {
+    let (mut checked_items, mut unchecked_items) = (0, 0);
+
     if selection.exceeded_limit {
         trace!("[SLOW][REPLACE_MODEL] reverse checked selection(SPACE)");
         let new_model = model
@@ -670,11 +675,16 @@ fn rows_reverse_checked_selection(selection: &SelectionData, model: &ModelRc<Mai
                 if row.selected_row {
                     assert!(!row.header_row); // Header row should not be selected
                     row.checked = !row.checked;
+                    if row.checked {
+                        checked_items += 1;
+                    } else {
+                        unchecked_items += 1;
+                    }
                 }
                 row
             })
             .collect::<Vec<_>>();
-        return Some(ModelRc::new(VecModel::from(new_model)));
+        return (checked_items, unchecked_items, Some(ModelRc::new(VecModel::from(new_model))));
     } else if !selection.selected_rows.is_empty() {
         trace!("[FAST][ONE_BY_ONE] reverse selection(SPACE)");
         for id in &selection.selected_rows {
@@ -684,10 +694,15 @@ fn rows_reverse_checked_selection(selection: &SelectionData, model: &ModelRc<Mai
             assert!(model_data.selected_row);
             assert!(!model_data.header_row);
             model_data.checked = !model_data.checked;
+            if model_data.checked {
+                checked_items += 1;
+            } else {
+                unchecked_items += 1;
+            }
             model.set_row_data(*id, model_data);
         }
     }
-    None
+    (checked_items, unchecked_items, None)
 }
 
 #[cfg(test)]
@@ -933,23 +948,27 @@ mod tests {
 
     #[test]
     fn rows_reverse_checked_selection_with_selected_rows() {
-        let mut model = get_model_vec(3);
+        let mut model = get_model_vec(4);
         model[0].selected_row = true;
         model[1].selected_row = true;
+        model[2].selected_row = true;
+        model[2].checked = true;
         let model = create_model_from_model_vec(&model);
 
         let selection = SelectionData {
-            number_of_selected_rows: 2,
-            selected_rows: vec![0, 1],
+            number_of_selected_rows: 3,
+            selected_rows: vec![0, 1, 2],
             exceeded_limit: false,
         };
 
-        let new_model = rows_reverse_checked_selection(&selection, &model);
+        let (checked_items, unchecked_items, new_model) = rows_reverse_checked_selection(&selection, &model);
 
         assert!(new_model.is_none());
         assert!(model.row_data(0).unwrap().checked);
         assert!(model.row_data(1).unwrap().checked);
         assert!(!model.row_data(2).unwrap().checked);
+        assert_eq!(checked_items, 2);
+        assert_eq!(unchecked_items, 1);
     }
 
     #[test]
@@ -965,12 +984,14 @@ mod tests {
             exceeded_limit: true,
         };
 
-        let new_model = rows_reverse_checked_selection(&selection, &model);
+        let (checked_items, unchecked_items, new_model) = rows_reverse_checked_selection(&selection, &model);
 
         assert!(new_model.is_some());
         let new_model = new_model.unwrap();
         assert!(new_model.row_data(0).unwrap().checked);
         assert!(new_model.row_data(1).unwrap().checked);
         assert!(!new_model.row_data(2).unwrap().checked);
+        assert_eq!(checked_items, 2);
+        assert_eq!(unchecked_items, 0);
     }
 }

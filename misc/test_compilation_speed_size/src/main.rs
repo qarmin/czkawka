@@ -6,7 +6,7 @@ use std::path::Path;
 
 use walkdir::WalkDir;
 
-use crate::model::{BuildOrCheck, CodegenUnits, Config, Incremental, LTO, OptLevel, OverflowChecks, Panic, Results, SplitDebug, Debugg};
+use crate::model::{BuildOrCheck, CodegenUnits, Config, Debugg, Incremental, OptLevel, OverflowChecks, Panic, Results, SplitDebug, LTO};
 
 const START_CONFIG_TOML: &str = r#"[workspace]
 members = [
@@ -120,10 +120,10 @@ fn get_configs() -> Vec<Config> {
     release_thin_lto.name = "release + thin lto";
     release_thin_lto.lto = LTO::Thin;
 
-    let mut release_thin_lto = release_base.clone();
-    release_thin_lto.name = "release + thin lto + optimize size";
-    release_thin_lto.lto = LTO::Thin;
-    release_thin_lto.opt_level = OptLevel::S;
+    let mut release_thin_lto_optimize_size = release_base.clone();
+    release_thin_lto_optimize_size.name = "release + thin lto + optimize size";
+    release_thin_lto_optimize_size.lto = LTO::Thin;
+    release_thin_lto_optimize_size.opt_level = OptLevel::S;
 
     let mut release_full_lto = release_base.clone();
     release_full_lto.name = "release + fat lto";
@@ -135,15 +135,26 @@ fn get_configs() -> Vec<Config> {
     release_fastest.codegen_units = CodegenUnits::One;
     release_fastest.panic = Panic::Abort;
 
-
-    vec![debug_base, release_base, release_thin_lto, release_full_lto, debug_fast_check, check_fast_check, release_fastest]
+    vec![
+        debug_base,
+        release_base,
+        release_thin_lto,
+        release_full_lto,
+        debug_fast_check,
+        check_fast_check,
+        release_fastest,
+        release_thin_lto_optimize_size,
+    ]
 }
 
 fn clean_cargo() {
     println!("Cleaning cargo...");
-    let output = std::process::Command::new("cargo").arg("clean")
+    let output = std::process::Command::new("cargo")
+        .arg("clean")
         .stdout(std::process::Stdio::inherit())
-        .stderr(std::process::Stdio::inherit()).output().expect("Failed to execute cargo clean");
+        .stderr(std::process::Stdio::inherit())
+        .output()
+        .expect("Failed to execute cargo clean");
 
     if !output.status.success() {
         panic!("Cargo clean failed: {}", String::from_utf8_lossy(&output.stderr));
@@ -151,11 +162,7 @@ fn clean_cargo() {
 }
 
 fn run_cargo_build(project: &str, threads_number: u32, build: BuildOrCheck) {
-    let build_check = if build == BuildOrCheck::Build {
-        "build"
-    } else {
-        "check"
-    };
+    let build_check = if build == BuildOrCheck::Build { "build" } else { "check" };
     let mut command = std::process::Command::new("cargo");
     command
         .env("CARGO_BUILD_JOBS", threads_number.to_string())
@@ -165,8 +172,7 @@ fn run_cargo_build(project: &str, threads_number: u32, build: BuildOrCheck) {
         .arg("--profile")
         .arg("fff")
         .stdout(std::process::Stdio::inherit())
-        .stderr(std::process::Stdio::inherit())
-    ;
+        .stderr(std::process::Stdio::inherit());
 
     let output = command.output().expect("Failed to execute cargo build");
 
