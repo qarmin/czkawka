@@ -167,6 +167,10 @@ pub struct BasicSettings {
     pub dark_theme: bool,
     #[serde(default)]
     pub show_only_icons: bool,
+    #[serde(default = "ttrue")]
+    pub settings_load_windows_size_at_startup: bool,
+    #[serde(default = "ttrue")]
+    pub settings_load_tabs_sizes_at_startup: bool,
 }
 
 impl Default for BasicSettings {
