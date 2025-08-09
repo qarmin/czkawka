@@ -10,11 +10,11 @@ use log::error;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use slint::{ComponentHandle, ModelRc, VecModel, Weak};
 
+use crate::connect_row_selection::checker::set_number_of_enabled_items;
 use crate::connect_row_selection::reset_selection;
 use crate::model_operations::ProcessingResult;
 use crate::simpler_model::{SimplerMainListModel, ToSlintModel};
 use crate::{CurrentTab, GuiState, MainListModel, MainWindow, flk, model_operations};
-
 // This is quite ugly workaround for Slint strange limitation, where model cannot be passed to another thread
 // This was needed by me, because I wanted to process deletion without blocking main gui thread, with additional sending progress about entire operation.
 // After trying different solutions, looks that the simplest and quite not really efficient solution is to convert slint model, to simpler model, which can be passed to another thread.
@@ -194,6 +194,7 @@ impl ModelProcessor {
                 app.global::<GuiState>().set_preview_visible(false);
 
                 reset_selection(&app, true);
+                set_number_of_enabled_items(&app, self.active_tab, errors_len as u64);
                 stop_flag.store(false, Ordering::Relaxed);
                 app.invoke_processing_ended(message_type.get_summary_message(items_deleted, errors_len, items_queued_to_delete).into());
             })

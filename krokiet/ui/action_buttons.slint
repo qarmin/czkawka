@@ -49,37 +49,37 @@ export component ActionButtons inherits HorizontalLayout {
     in-out property <bool> processing;
     in-out property <bool> base_buttons_may_be_available: !scanning && !processing && results_available;
     in-out property <bool> lists_enabled: GuiState.is_tool_tab_active;
-    in-out property <bool> results_available: false;
     out property <int> name;
+
+    in-out property <bool> checked_anything: (
+        (active_tab == CurrentTab.DuplicateFiles && (GuiState.selected_results_duplicates > 0 || GuiState.selected_results_duplicates2 > 0)) ||
+        (active_tab == CurrentTab.SimilarImages && (GuiState.selected_results_similar_images > 0 || GuiState.selected_results_similar_images2 > 0)) ||
+        (active_tab == CurrentTab.SimilarVideos && (GuiState.selected_results_similar_videos > 0 || GuiState.selected_results_similar_videos2 > 0)) ||
+        (active_tab == CurrentTab.SimilarMusic && (GuiState.selected_results_similar_music > 0 || GuiState.selected_results_similar_music2 > 0)) ||
+        (active_tab == CurrentTab.BigFiles && (GuiState.selected_results_big_files > 0 || GuiState.selected_results_big_files2 > 0)) ||
+        (active_tab == CurrentTab.BrokenFiles && (GuiState.selected_results_broken_files > 0 || GuiState.selected_results_broken_files2 > 0)) ||
+        (active_tab == CurrentTab.InvalidSymlinks && (GuiState.selected_results_invalid_symlinks > 0 || GuiState.selected_results_invalid_symlinks2 > 0)) ||
+        (active_tab == CurrentTab.EmptyFolders && (GuiState.selected_results_empty_folders > 0 || GuiState.selected_results_empty_folders2 > 0)) ||
+        (active_tab == CurrentTab.EmptyFiles && (GuiState.selected_results_empty_files > 0 || GuiState.selected_results_empty_files2 > 0)) ||
+        (active_tab == CurrentTab.TemporaryFiles && (GuiState.selected_results_temporary_files > 0 || GuiState.selected_results_temporary_files2 > 0)) ||
+        (active_tab == CurrentTab.BadExtensions && (GuiState.selected_results_bad_extensions > 0 || GuiState.selected_results_bad_extensions2 > 0))
+    );
+    in-out property <bool> results_available: (
+        (active_tab == CurrentTab.DuplicateFiles && duplicate_files_model.length > 0) ||
+        (active_tab == CurrentTab.EmptyFolders && empty_folder_model.length > 0) ||
+        (active_tab == CurrentTab.BigFiles && big_files_model.length > 0) ||
+        (active_tab == CurrentTab.EmptyFiles && empty_files_model.length > 0) ||
+        (active_tab == CurrentTab.TemporaryFiles && temporary_files_model.length > 0) ||
+        (active_tab == CurrentTab.SimilarImages && similar_images_model.length > 0) ||
+        (active_tab == CurrentTab.SimilarVideos && similar_videos_model.length > 0) ||
+        (active_tab == CurrentTab.SimilarMusic && similar_music_model.length > 0) ||
+        (active_tab == CurrentTab.InvalidSymlinks && invalid_symlinks_model.length > 0) ||
+        (active_tab == CurrentTab.BrokenFiles && broken_files_model.length > 0) ||
+        (active_tab == CurrentTab.BadExtensions && bad_extensions_model.length > 0)
+    );
+
     height: 30px;
     spacing: 4px;
-
-    changed duplicate_files_model => {check_if_enable_buttons();}
-    changed empty_folder_model => {check_if_enable_buttons();}
-    changed big_files_model => {check_if_enable_buttons();}
-    changed empty_files_model => {check_if_enable_buttons();}
-    changed temporary_files_model => {check_if_enable_buttons();}
-    changed similar_images_model => {check_if_enable_buttons();}
-    changed similar_videos_model => {check_if_enable_buttons();}
-    changed similar_music_model => {check_if_enable_buttons();}
-    changed invalid_symlinks_model => {check_if_enable_buttons();}
-    changed broken_files_model => {check_if_enable_buttons();}
-    changed bad_extensions_model => {check_if_enable_buttons();}
-    changed active_tab => {check_if_enable_buttons();}
-
-    function check_if_enable_buttons() {
-        results_available = (active_tab == CurrentTab.DuplicateFiles && duplicate_files_model.length > 0) ||
-                            (active_tab == CurrentTab.EmptyFolders && empty_folder_model.length > 0) ||
-                            (active_tab == CurrentTab.BigFiles && big_files_model.length > 0) ||
-                            (active_tab == CurrentTab.EmptyFiles && empty_files_model.length > 0) ||
-                            (active_tab == CurrentTab.TemporaryFiles && temporary_files_model.length > 0) ||
-                            (active_tab == CurrentTab.SimilarImages && similar_images_model.length > 0) ||
-                            (active_tab == CurrentTab.SimilarVideos && similar_videos_model.length > 0) ||
-                            (active_tab == CurrentTab.SimilarMusic && similar_music_model.length > 0) ||
-                            (active_tab == CurrentTab.InvalidSymlinks && invalid_symlinks_model.length > 0) ||
-                            (active_tab == CurrentTab.BrokenFiles && broken_files_model.length > 0) ||
-                            (active_tab == CurrentTab.BadExtensions && bad_extensions_model.length > 0);
-    }
 
     if (!scanning && !processing && lists_enabled): scan_button :=  Button {
         height: parent.height;
@@ -124,7 +124,7 @@ export component ActionButtons inherits HorizontalLayout {
     move_button := Button {
         visible: lists_enabled;
         height: parent.height;
-        enabled: base_buttons_may_be_available && self.visible;
+        enabled: base_buttons_may_be_available && self.visible && checked_anything;
         text: self.visible && Settings.show_only_icons ? "" : Translations.move_button_text;
         icon: @image-url("../icons/krokiet_move.svg");
         colorize-icon: true;
@@ -136,7 +136,7 @@ export component ActionButtons inherits HorizontalLayout {
     delete_button := Button {
         visible: lists_enabled;
         height: parent.height;
-        enabled: base_buttons_may_be_available && self.visible;
+        enabled: base_buttons_may_be_available && self.visible && checked_anything;
         text: self.visible && Settings.show_only_icons ? "" : Translations.delete_button_text;
         icon: @image-url("../icons/krokiet_delete.svg");
         colorize-icon: true;
@@ -171,7 +171,7 @@ export component ActionButtons inherits HorizontalLayout {
 
     if lists_enabled && GuiState.active_tab == CurrentTab.BadExtensions: rename_button := Button {
         height: parent.height;
-        enabled: base_buttons_may_be_available && self.visible;
+        enabled: base_buttons_may_be_available && self.visible && checked_anything;
         text: self.visible && Settings.show_only_icons ? "" : Translations.rename_button_text;
         icon: @image-url("../icons/krokiet_rename.svg");
         colorize-icon: true;

@@ -8,7 +8,6 @@ use czkawka_core::common::progress_data::ProgressData;
 use rfd::FileDialog;
 use slint::{ComponentHandle, Weak};
 
-use crate::connect_row_selection::reset_selection;
 use crate::model_operations::model_processor::{MessageType, ModelProcessor};
 use crate::simpler_model::{SimplerMainListModel, ToSimplerVec};
 use crate::{Callabler, GuiState, MainWindow, flk};
@@ -25,7 +24,6 @@ pub(crate) fn connect_move(app: &MainWindow, progress_sender: Sender<ProgressDat
         let folder_str = folder.to_string_lossy().to_string();
 
         app.invoke_show_move_folders_dialog(folder_str.into());
-        reset_selection(&app, true);
     });
 
     let a = app.as_weak();

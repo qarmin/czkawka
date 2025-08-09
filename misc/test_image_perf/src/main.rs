@@ -19,9 +19,6 @@ const HASH_ALG: HashAlg = HashAlg::Gradient;
 const FILTER_TYPE: FilterType = FilterType::Lanczos3;
 const HASH_SIZE: u32 = 8;
 
-#[cfg(not(feature = "fast_image_resize"))]
-const MODE: &str = "NORMAL";
-#[cfg(feature = "fast_image_resize")]
 const MODE: &str = "FAST_RESIZE";
 
 fn print_items() {
@@ -33,8 +30,6 @@ fn print_items() {
 
     #[allow(unused_mut)]
     let mut features: Vec<&str> = vec![];
-    #[cfg(feature = "fast_image_resize")]
-    features.push("fast_image_resize");
 
     #[allow(unused_mut)]
     let mut app_cpu_version = "Baseline";
@@ -56,16 +51,13 @@ fn print_items() {
     }
 
     if cfg!(target_feature = "avx2") {
-        app_cpu_version = "x86-64-v3 (AVX2) or x86-64-v4 (AVX-512)";
+        app_cpu_version = "x86-64-v3 (AVX2)";
     }
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     if is_x86_feature_detected!("avx2") {
         os_cpu_version = "x86-64-v3 (AVX2)";
     }
 
-    // TODO - https://github.com/rust-lang/rust/issues/44839 - remove "or" from above when fixed
-    // Currently this is always false, because cfg!(target_feature = "avx512f") is not working
-    // What is strange, because is_x86_feature_detected!("avx512f") is working
     if cfg!(target_feature = "avx512f") {
         app_cpu_version = "x86-64-v4 (AVX-512)";
     }

@@ -18,6 +18,7 @@ impl SimplerMainListModel {
         connect_i32_into_u64(self.val_int[size_idx], self.val_int[size_idx + 1])
     }
     #[allow(clippy::print_stdout)]
+    #[allow(dead_code)]
     pub(crate) fn debug_print(&self) {
         println!(
             "SimplerMainListModel: checked: {}, filled_header_row: {}, header_row: {}, selected_row: {}, val_int: {:?}, val_str: {:?}",

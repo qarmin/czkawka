@@ -19,7 +19,7 @@ crossbeam-channel = "0.5"
 directories-next = "2.0"
 
 # Needed by similar images
-image_hasher = "3.0"
+image_hasher = { version = "3.0", features = ["fast_resize_unstable"] }
 bk-tree = "0.5"
 image = { version = "0.25", default-features = false, features = ["bmp", "dds", "exr", "ff", "gif", "hdr", "ico", "jpeg", "png", "pnm", "qoi", "tga", "tiff", "webp", "rayon"] }
 hamming-bitwise-fast = "1.0"
@@ -108,8 +108,7 @@ name = "hash_calculation_benchmark"
 harness = false
 
 [features]
-default = ["fast_image_resize"]
+default = []
 heif = ["dep:libheif-rs", "dep:libheif-sys"]
 libraw = ["dep:libraw-rs"]
 libavif = ["image/avif-native", "image/avif"]
-fast_image_resize = ["image_hasher/fast_resize_unstable"]

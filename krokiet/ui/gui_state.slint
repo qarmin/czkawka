@@ -54,4 +54,28 @@ export global GuiState {
     ];
 
     in-out property <BottomPanelVisibility> bottom_panel_visibility: BottomPanelVisibility.Directories;
+
+    // Bad workaround for missing i64 support in Slint:
+    in-out property <int> selected_results_duplicates: 0;
+    in-out property <int> selected_results_duplicates2: 0;
+    in-out property <int> selected_results_similar_images: 0;
+    in-out property <int> selected_results_similar_images2: 0;
+    in-out property <int> selected_results_similar_videos: 0;
+    in-out property <int> selected_results_similar_videos2: 0;
+    in-out property <int> selected_results_similar_music: 0;
+    in-out property <int> selected_results_similar_music2: 0;
+    in-out property <int> selected_results_big_files: 0;
+    in-out property <int> selected_results_big_files2: 0;
+    in-out property <int> selected_results_broken_files: 0;
+    in-out property <int> selected_results_broken_files2: 0;
+    in-out property <int> selected_results_invalid_symlinks: 0;
+    in-out property <int> selected_results_invalid_symlinks2: 0;
+    in-out property <int> selected_results_empty_folders: 0;
+    in-out property <int> selected_results_empty_folders2: 0;
+    in-out property <int> selected_results_empty_files: 0;
+    in-out property <int> selected_results_empty_files2: 0;
+    in-out property <int> selected_results_temporary_files: 0;
+    in-out property <int> selected_results_temporary_files2: 0;
+    in-out property <int> selected_results_bad_extensions: 0;
+    in-out property <int> selected_results_bad_extensions2: 0;
 }

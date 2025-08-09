@@ -28,13 +28,14 @@ pub(crate) fn connect_changing_settings_preset(app: &MainWindow) {
         let app = a.upgrade().expect("Failed to upgrade app :(");
         let current_item = app.global::<Settings>().get_settings_preset_idx();
         let loaded_data = load_data_from_file::<SettingsCustom>(get_config_file(current_item));
+        let base_settings = load_data_from_file::<BasicSettings>(get_base_config_file()).unwrap_or_default();
         match loaded_data {
             Ok(loaded_data) => {
-                set_settings_to_gui(&app, &loaded_data, None);
+                set_settings_to_gui(&app, &loaded_data, &base_settings, None);
                 app.set_text_summary_text(flk!("rust_loaded_preset", preset_idx = (current_item + 1)).into());
             }
             Err(e) => {
-                set_settings_to_gui(&app, &SettingsCustom::default(), None);
+                set_settings_to_gui(&app, &SettingsCustom::default(), &base_settings, None);
                 app.set_text_summary_text(flk!("rust_cannot_load_preset", preset_idx = (current_item + 1), reason = (&e)).into());
                 error!("Failed to change preset - {e}, using default instead");
             }
@@ -61,7 +62,8 @@ pub(crate) fn connect_changing_settings_preset(app: &MainWindow) {
         let app = a.upgrade().expect("Failed to upgrade app :(");
         let settings = app.global::<Settings>();
         let current_item = settings.get_settings_preset_idx();
-        set_settings_to_gui(&app, &SettingsCustom::default(), None);
+        let base_settings = load_data_from_file::<BasicSettings>(get_base_config_file()).unwrap_or_default();
+        set_settings_to_gui(&app, &SettingsCustom::default(), &base_settings, None);
         app.set_text_summary_text(flk!("rust_reset_preset", preset_idx = (current_item + 1)).into());
     });
     let a = app.as_weak();
@@ -69,14 +71,15 @@ pub(crate) fn connect_changing_settings_preset(app: &MainWindow) {
         let app = a.upgrade().expect("Failed to upgrade app :(");
         let settings = app.global::<Settings>();
         let current_item = settings.get_settings_preset_idx();
-        let loaded_data = load_data_from_file::<SettingsCustom>(get_config_file(current_item));
-        match loaded_data {
+        let custom_settings = load_data_from_file::<SettingsCustom>(get_config_file(current_item));
+        let base_settings = load_data_from_file::<BasicSettings>(get_base_config_file()).unwrap_or_default();
+        match custom_settings {
             Ok(loaded_data) => {
-                set_settings_to_gui(&app, &loaded_data, None);
+                set_settings_to_gui(&app, &loaded_data, &base_settings, None);
                 app.set_text_summary_text(flk!("rust_loaded_preset", preset_idx = (current_item + 1)).into());
             }
             Err(e) => {
-                set_settings_to_gui(&app, &SettingsCustom::default(), None);
+                set_settings_to_gui(&app, &SettingsCustom::default(), &base_settings, None);
                 let err_message = flk!("rust_cannot_load_preset", preset_idx = (current_item + 1), reason = (&e));
                 app.set_text_summary_text(err_message.into());
                 error!("Failed to load preset - {e}, using default instead");
@@ -133,8 +136,8 @@ pub(crate) fn load_settings_from_file(app: &MainWindow, cli_result: Option<CliRe
     base_settings.default_preset = base_settings.default_preset.clamp(0, PRESET_NUMBER as i32 - 2);
     custom_settings.thread_number = max(min(custom_settings.thread_number, get_all_available_threads() as i32), 0);
 
-    // Ended validating
-    set_settings_to_gui(app, &custom_settings, cli_result);
+    // Ended validating, starting saving settings to GUI
+    set_settings_to_gui(app, &custom_settings, &base_settings, cli_result);
     set_base_settings_to_gui(app, &base_settings, preset_to_load);
     set_number_of_threads(custom_settings.thread_number as usize);
 
@@ -252,11 +255,14 @@ pub(crate) fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicS
     let width = basic_settings.window_width.clamp(100, 1920 * 4);
     let height = basic_settings.window_height.clamp(100, 1080 * 4);
 
-    app.window().set_size(WindowSize::Physical(PhysicalSize { width, height }));
-
+    if basic_settings.settings_load_windows_size_at_startup {
+        app.window().set_size(WindowSize::Physical(PhysicalSize { width, height }));
+    }
     settings.set_dark_theme(basic_settings.dark_theme);
     settings.set_show_only_icons(basic_settings.show_only_icons);
     app.global::<Callabler>().invoke_theme_changed();
+    settings.set_load_tabs_sizes_at_startup(basic_settings.settings_load_tabs_sizes_at_startup);
+    settings.set_load_windows_size_at_startup(basic_settings.settings_load_windows_size_at_startup);
 
     set_combobox_basic_settings_items(&settings, basic_settings);
 }
@@ -323,7 +329,7 @@ pub(crate) fn set_combobox_custom_settings_items(settings: &Settings, custom_set
     settings.set_similar_videos_crop_detect_value(display_names[idx].clone());
 }
 
-pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom, cli_args: Option<CliResult>) {
+pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom, base_settings: &BasicSettings, cli_args: Option<CliResult>) {
     let settings = app.global::<Settings>();
 
     let (included, referenced, excluded) = if let Some(cli_args) = cli_args {
@@ -429,17 +435,19 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
         ModelRc::new(VecModel::from(model))
     };
 
-    settings.set_duplicates_column_size(fnm(&[sel_px, size_px, name_px, path_px, mod_px], "duplicates"));
-    settings.set_empty_folders_column_size(fnm(&[sel_px, name_px, path_px, mod_px], "empty_folders"));
-    settings.set_empty_files_column_size(fnm(&[sel_px, name_px, path_px, mod_px], "empty_files"));
-    settings.set_temporary_files_column_size(fnm(&[sel_px, name_px, path_px, mod_px], "temporary_files"));
-    settings.set_big_files_column_size(fnm(&[sel_px, size_px, name_px, path_px, mod_px], "big_files"));
-    settings.set_similar_images_column_size(fnm(&[sel_px, 80.0, 80.0, 80.0, name_px, path_px, mod_px], "similar_images"));
-    settings.set_similar_videos_column_size(fnm(&[sel_px, size_px, name_px, path_px, mod_px], "similar_videos"));
-    settings.set_similar_music_column_size(fnm(&[sel_px, size_px, name_px, 80.0, 80.0, 80.0, 80.0, 80.0, 80.0, path_px, mod_px], "similar_music"));
-    settings.set_invalid_symlink_column_size(fnm(&[sel_px, name_px, path_px, path_px, mod_px], "invalid_symlink"));
-    settings.set_broken_files_column_size(fnm(&[sel_px, name_px, path_px, 200.0, size_px, mod_px], "broken_files"));
-    settings.set_bad_extensions_column_size(fnm(&[sel_px, name_px, path_px, 40.0, 200.0], "bad_extensions"));
+    if base_settings.settings_load_tabs_sizes_at_startup {
+        settings.set_duplicates_column_size(fnm(&[sel_px, size_px, name_px, path_px, mod_px], "duplicates"));
+        settings.set_empty_folders_column_size(fnm(&[sel_px, name_px, path_px, mod_px], "empty_folders"));
+        settings.set_empty_files_column_size(fnm(&[sel_px, name_px, path_px, mod_px], "empty_files"));
+        settings.set_temporary_files_column_size(fnm(&[sel_px, name_px, path_px, mod_px], "temporary_files"));
+        settings.set_big_files_column_size(fnm(&[sel_px, size_px, name_px, path_px, mod_px], "big_files"));
+        settings.set_similar_images_column_size(fnm(&[sel_px, 80.0, 80.0, 80.0, name_px, path_px, mod_px], "similar_images"));
+        settings.set_similar_videos_column_size(fnm(&[sel_px, size_px, name_px, path_px, mod_px], "similar_videos"));
+        settings.set_similar_music_column_size(fnm(&[sel_px, size_px, name_px, 80.0, 80.0, 80.0, 80.0, 80.0, 80.0, path_px, mod_px], "similar_music"));
+        settings.set_invalid_symlink_column_size(fnm(&[sel_px, name_px, path_px, path_px, mod_px], "invalid_symlink"));
+        settings.set_broken_files_column_size(fnm(&[sel_px, name_px, path_px, 200.0, size_px, mod_px], "broken_files"));
+        settings.set_bad_extensions_column_size(fnm(&[sel_px, name_px, path_px, 40.0, 200.0], "bad_extensions"));
+    }
 
     // Clear text
     app.global::<GuiState>().set_info_text("".into());
@@ -627,6 +635,9 @@ pub(crate) fn collect_base_settings(app: &MainWindow) -> BasicSettings {
     // let language = LANGUAGE_LIST[lang_idx as usize].short_name.to_string();
     let dark_theme = settings.get_dark_theme();
     let show_only_icons = settings.get_show_only_icons();
+
+    let settings_load_tabs_sizes_at_startup = settings.get_load_tabs_sizes_at_startup();
+    let settings_load_windows_size_at_startup = settings.get_load_windows_size_at_startup();
     BasicSettings {
         language,
         default_preset,
@@ -635,5 +646,7 @@ pub(crate) fn collect_base_settings(app: &MainWindow) -> BasicSettings {
         window_height,
         dark_theme,
         show_only_icons,
+        settings_load_tabs_sizes_at_startup,
+        settings_load_windows_size_at_startup,
     }
 }
