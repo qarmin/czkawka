@@ -44,7 +44,7 @@ fn main() {
 
     Results::write_header_to_file(&mut results_file).unwrap();
 
-    for project in ["krokiet"] { //, "krokiet"] {
+    for project in ["krokiet", "czkawka_cli"] {
         for threads_number in [24, 4] {
             for config in get_configs() {
                 let new_content = format!("{new_content_base}\n{}\n", config.to_str());
@@ -109,22 +109,34 @@ fn get_configs() -> Vec<Config> {
     };
 
     let mut debug_fast_check = debug_base.clone();
-    debug_fast_check.name = "debug_fast_check";
+    debug_fast_check.name = "debug + debug disabled";
     debug_fast_check.debug = Debugg::None;
 
     let mut check_fast_check = debug_fast_check.clone();
-    check_fast_check.name = "check_fast_check";
+    check_fast_check.name = "debug(check) + debug disabled";
     check_fast_check.build_or_check = BuildOrCheck::Check;
 
     let mut release_thin_lto = release_base.clone();
-    release_thin_lto.name = "release_thin_lto";
+    release_thin_lto.name = "release + thin lto";
     release_thin_lto.lto = LTO::Thin;
 
+    let mut release_thin_lto = release_base.clone();
+    release_thin_lto.name = "release + thin lto + optimize size";
+    release_thin_lto.lto = LTO::Thin;
+    release_thin_lto.opt_level = OptLevel::S;
+
     let mut release_full_lto = release_base.clone();
-    release_full_lto.name = "release_fat_lto";
+    release_full_lto.name = "release + fat lto";
     release_full_lto.lto = LTO::Fat;
 
-    vec![debug_base, release_base, release_thin_lto, release_full_lto, debug_fast_check, check_fast_check]
+    let mut release_fastest = release_base.clone();
+    release_fastest.name = "release + fat lto + codegen units 1 + panic abort";
+    release_fastest.lto = LTO::Fat;
+    release_fastest.codegen_units = CodegenUnits::One;
+    release_fastest.panic = Panic::Abort;
+
+
+    vec![debug_base, release_base, release_thin_lto, release_full_lto, debug_fast_check, check_fast_check, release_fastest]
 }
 
 fn clean_cargo() {

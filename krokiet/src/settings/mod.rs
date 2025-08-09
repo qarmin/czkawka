@@ -35,7 +35,7 @@ pub(crate) fn connect_changing_settings_preset(app: &MainWindow) {
                 app.set_text_summary_text(flk!("rust_loaded_preset", preset_idx = (current_item + 1)).into());
             }
             Err(e) => {
-                set_settings_to_gui(&app, &SettingsCustom::default(),&base_settings, None);
+                set_settings_to_gui(&app, &SettingsCustom::default(), &base_settings, None);
                 app.set_text_summary_text(flk!("rust_cannot_load_preset", preset_idx = (current_item + 1), reason = (&e)).into());
                 error!("Failed to change preset - {e}, using default instead");
             }
@@ -63,7 +63,7 @@ pub(crate) fn connect_changing_settings_preset(app: &MainWindow) {
         let settings = app.global::<Settings>();
         let current_item = settings.get_settings_preset_idx();
         let base_settings = load_data_from_file::<BasicSettings>(get_base_config_file()).unwrap_or_default();
-        set_settings_to_gui(&app, &SettingsCustom::default(),&base_settings , None);
+        set_settings_to_gui(&app, &SettingsCustom::default(), &base_settings, None);
         app.set_text_summary_text(flk!("rust_reset_preset", preset_idx = (current_item + 1)).into());
     });
     let a = app.as_weak();

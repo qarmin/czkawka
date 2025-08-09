@@ -117,6 +117,7 @@ export component SelectableTableView inherits Rectangle {
                         width: root.column_sizes[0];
                         toggled => {
                             r.checked = self.checked;
+                            Callabler.change_number_of_checked_items(self.checked ? 1 : -1);
                         }
                     }
 

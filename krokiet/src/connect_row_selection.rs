@@ -4,10 +4,11 @@ use std::mem;
 use std::sync::{LazyLock, RwLock, RwLockWriteGuard};
 
 use czkawka_core::TOOLS_NUMBER;
-use log::trace;
+use log::{debug, error, trace};
 use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
-use crate::{CurrentTab, GuiState, MainListModel, MainWindow};
+use crate::common::{connect_i32_into_u64, split_u64_into_i32s};
+use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow};
 
 const SELECTED_ROWS_LIMIT: usize = 1000;
 
@@ -120,14 +121,11 @@ pub(crate) fn connect_row_selections(app: &MainWindow) {
     opener::open_parent_of_selected_item(app);
     opener::open_provided_item(app);
     opener::connect_on_open_item(app);
+    checker::change_number_of_checked_items(app);
 }
 
 mod opener {
-    use log::{debug, error};
-    use slint::{ComponentHandle, Model};
-
-    use crate::connect_row_selection::get_write_selection_lock;
-    use crate::{Callabler, GuiState, MainWindow};
+    use super::*;
 
     pub(crate) fn connect_on_open_item(app: &MainWindow) {
         app.global::<Callabler>().on_open_item(move |path| {
@@ -212,14 +210,7 @@ mod opener {
     }
 }
 mod selection {
-    use log::trace;
-    use slint::{ComponentHandle, Model};
-
-    use crate::connect_row_selection::{
-        get_write_selection_lock, reverse_selection_of_item_with_id, row_select_items_with_shift, rows_deselect_all_by_mode, rows_reverse_checked_selection,
-        rows_select_all_by_mode,
-    };
-    use crate::{Callabler, GuiState, MainWindow};
+    use super::*;
 
     pub(crate) fn connect_select_all_rows(app: &MainWindow) {
         let a = app.as_weak();
@@ -310,6 +301,132 @@ mod selection {
                 active_tab.set_tool_model(&app, new_model);
             };
         });
+    }
+}
+
+pub(crate) mod checker {
+    use super::*;
+
+    pub(crate) fn change_number_of_checked_items(app: &MainWindow) {
+        let a = app.as_weak();
+        app.global::<Callabler>().on_change_number_of_checked_items(move |number_of_changed_items| {
+            trace!("Changing number of checked items with {number_of_changed_items}");
+            let app = a.upgrade().expect("Failed to upgrade app :(");
+            let active_tab = app.global::<GuiState>().get_active_tab();
+            change_number_of_enabled_items(&app, active_tab, number_of_changed_items as i64);
+        });
+    }
+
+    pub(crate) fn set_number_of_enabled_items(app: &MainWindow, active_tab: CurrentTab, items_number: u64) {
+        let (it1, it2) = split_u64_into_i32s(items_number);
+        error!("SET {:?}, {}", &active_tab, &items_number);
+        match active_tab {
+            CurrentTab::DuplicateFiles => {
+                app.global::<GuiState>().set_selected_results_duplicates(it1);
+                app.global::<GuiState>().set_selected_results_duplicates2(it2);
+            }
+            CurrentTab::EmptyFolders => {
+                app.global::<GuiState>().set_selected_results_empty_folders(it1);
+                app.global::<GuiState>().set_selected_results_empty_folders2(it2);
+            }
+            CurrentTab::BigFiles => {
+                app.global::<GuiState>().set_selected_results_big_files(it1);
+                app.global::<GuiState>().set_selected_results_big_files2(it2);
+            }
+            CurrentTab::EmptyFiles => {
+                app.global::<GuiState>().set_selected_results_empty_files(it1);
+                app.global::<GuiState>().set_selected_results_empty_files2(it2);
+            }
+            CurrentTab::TemporaryFiles => {
+                app.global::<GuiState>().set_selected_results_temporary_files(it1);
+                app.global::<GuiState>().set_selected_results_temporary_files2(it2);
+            }
+            CurrentTab::SimilarImages => {
+                app.global::<GuiState>().set_selected_results_similar_images(it1);
+                app.global::<GuiState>().set_selected_results_similar_images2(it2);
+            }
+            CurrentTab::SimilarVideos => {
+                app.global::<GuiState>().set_selected_results_similar_videos(it1);
+                app.global::<GuiState>().set_selected_results_similar_videos2(it2);
+            }
+            CurrentTab::SimilarMusic => {
+                app.global::<GuiState>().set_selected_results_similar_music(it1);
+                app.global::<GuiState>().set_selected_results_similar_music2(it2);
+            }
+            CurrentTab::InvalidSymlinks => {
+                app.global::<GuiState>().set_selected_results_invalid_symlinks(it1);
+                app.global::<GuiState>().set_selected_results_invalid_symlinks2(it2);
+            }
+            CurrentTab::BrokenFiles => {
+                app.global::<GuiState>().set_selected_results_broken_files(it1);
+                app.global::<GuiState>().set_selected_results_broken_files2(it2);
+            }
+            CurrentTab::BadExtensions => {
+                app.global::<GuiState>().set_selected_results_bad_extensions(it1);
+                app.global::<GuiState>().set_selected_results_bad_extensions2(it2);
+            }
+            _ => unreachable!("Current tab is not a tool that has enabled items"),
+        }
+    }
+
+    pub(crate) fn change_number_of_enabled_items(app: &MainWindow, active_tab: CurrentTab, additions: i64) {
+        let before_number_of_items = get_number_of_enabled_items(app, active_tab);
+        let after_number_of_items = before_number_of_items
+            .checked_add_signed(additions)
+            .expect("Failed to add signed number to items, overflowed");
+        set_number_of_enabled_items(app, active_tab, after_number_of_items);
+    }
+    pub(crate) fn get_number_of_enabled_items(app: &MainWindow, active_tab: CurrentTab) -> u64 {
+        let (it1, it2) = match active_tab {
+            CurrentTab::DuplicateFiles => (
+                app.global::<GuiState>().get_selected_results_duplicates(),
+                app.global::<GuiState>().get_selected_results_duplicates2(),
+            ),
+            CurrentTab::EmptyFolders => (
+                app.global::<GuiState>().get_selected_results_empty_folders(),
+                app.global::<GuiState>().get_selected_results_empty_folders2(),
+            ),
+            CurrentTab::BigFiles => (
+                app.global::<GuiState>().get_selected_results_big_files(),
+                app.global::<GuiState>().get_selected_results_big_files2(),
+            ),
+            CurrentTab::EmptyFiles => (
+                app.global::<GuiState>().get_selected_results_empty_files(),
+                app.global::<GuiState>().get_selected_results_empty_files2(),
+            ),
+            CurrentTab::TemporaryFiles => (
+                app.global::<GuiState>().get_selected_results_temporary_files(),
+                app.global::<GuiState>().get_selected_results_temporary_files2(),
+            ),
+            CurrentTab::SimilarImages => (
+                app.global::<GuiState>().get_selected_results_similar_images(),
+                app.global::<GuiState>().get_selected_results_similar_images2(),
+            ),
+            CurrentTab::SimilarVideos => (
+                app.global::<GuiState>().get_selected_results_similar_videos(),
+                app.global::<GuiState>().get_selected_results_similar_videos2(),
+            ),
+            CurrentTab::SimilarMusic => (
+                app.global::<GuiState>().get_selected_results_similar_music(),
+                app.global::<GuiState>().get_selected_results_similar_music2(),
+            ),
+            CurrentTab::InvalidSymlinks => (
+                app.global::<GuiState>().get_selected_results_invalid_symlinks(),
+                app.global::<GuiState>().get_selected_results_invalid_symlinks2(),
+            ),
+            CurrentTab::BrokenFiles => (
+                app.global::<GuiState>().get_selected_results_broken_files(),
+                app.global::<GuiState>().get_selected_results_broken_files2(),
+            ),
+            CurrentTab::BadExtensions => (
+                app.global::<GuiState>().get_selected_results_bad_extensions(),
+                app.global::<GuiState>().get_selected_results_bad_extensions2(),
+            ),
+            _ => unreachable!("Current tab is not a tool that has enabled items"),
+        };
+        let items_number = connect_i32_into_u64(it1, it2);
+        error!("GET {:?}, {}", &active_tab, &items_number);
+        items_number
     }
 }
 

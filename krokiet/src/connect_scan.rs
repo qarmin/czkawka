@@ -28,6 +28,7 @@ use rayon::prelude::*;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
 
 use crate::common::{check_if_all_included_dirs_are_referenced, check_if_there_are_any_included_folders, split_u64_into_i32s};
+use crate::connect_row_selection::checker::set_number_of_enabled_items;
 use crate::connect_row_selection::reset_selection;
 use crate::settings::collect_settings;
 use crate::settings::combo_box::StringComboBoxItems;
@@ -65,6 +66,7 @@ pub(crate) fn connect_scan_button(app: &MainWindow, progress_sender: Sender<Prog
         let cloned_model = Arc::clone(&shared_models);
 
         reset_selection(&app, true);
+        set_number_of_enabled_items(&app, active_tab, 0);
 
         let a = app.as_weak();
         match active_tab {
