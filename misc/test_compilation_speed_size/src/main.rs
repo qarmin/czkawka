@@ -26,8 +26,9 @@ resolver = "3""#;
 fn main() {
     let first_arg = std::env::args().nth(1).expect("Please provide the Czkawka root path");
     let config_toml_path = Path::new(&first_arg).join("Cargo.toml");
-    let config_toml_content = fs::read_to_string(&config_toml_path).expect(format!("Could not read config.toml file at {}", config_toml_path.display()).as_str());
-
+    let config_toml_content = fs::read_to_string(&config_toml_path).unwrap_or_else(|err| {
+        panic!("Could not read config.toml file at {}: {}", config_toml_path.display(), err);
+    });
     if !config_toml_content.starts_with(START_CONFIG_TOML) {
         panic!("The config.toml file does not start with the expected content. Please use czkawka repo.");
     }
@@ -44,20 +45,30 @@ fn main() {
 
     Results::write_header_to_file(&mut results_file).unwrap();
 
-    for project in ["krokiet", "czkawka_cli"] {
-        for threads_number in [24, 4] {
-            for config in get_configs() {
-                let new_content = format!("{new_content_base}\n{}\n", config.to_str());
-                fs::write(&config_toml_path, new_content).expect("Could not write config file");
+    // const CRANELIFT: &[bool] = &[true, false];
+    // const PROJECTS: &[&str] = &["krokiet", "czkawka_cli"];
+    // const THREADS_NUMBERS: &[u32] = &[8, 24];
 
-                let result = check_compilation_speed_and_size(&first_arg, project, config, threads_number);
-                result.save_to_file(&mut results_file).expect("Could not save results to file");
+    const CRANELIFT: &[bool] = &[true];
+    const PROJECTS: &[&str] = &["krokiet"];
+    const THREADS_NUMBERS: &[u32] = &[24];
+
+    for cranelift in CRANELIFT {
+        for project in PROJECTS {
+            for threads_number in THREADS_NUMBERS {
+                for config in get_configs(*cranelift) {
+                    let new_content = format!("{new_content_base}\n{}\n", config.to_str());
+                    fs::write(&config_toml_path, new_content).expect("Could not write config file");
+
+                    let result = check_compilation_speed_and_size(&first_arg, project, config, *threads_number, *cranelift);
+                    result.save_to_file(&mut results_file).expect("Could not save results to file");
+                }
             }
         }
     }
 }
 
-fn get_configs() -> Vec<Config> {
+fn get_configs(cranelift: bool) -> Vec<Config> {
     //[profile.dev]
     // opt-level = 0
     // debug = true
@@ -112,8 +123,8 @@ fn get_configs() -> Vec<Config> {
     debug_fast_check.name = "debug + debug disabled";
     debug_fast_check.debug = Debugg::None;
 
-    let mut check_fast_check = debug_fast_check.clone();
-    check_fast_check.name = "debug(check) + debug disabled";
+    let mut check_fast_check = debug_base.clone();
+    check_fast_check.name = "debug(check)";
     check_fast_check.build_or_check = BuildOrCheck::Check;
 
     let mut release_thin_lto = release_base.clone();
@@ -135,7 +146,7 @@ fn get_configs() -> Vec<Config> {
     release_fastest.codegen_units = CodegenUnits::One;
     release_fastest.panic = Panic::Abort;
 
-    vec![
+    let configs =     vec![
         debug_base,
         release_base,
         release_thin_lto,
@@ -144,7 +155,16 @@ fn get_configs() -> Vec<Config> {
         check_fast_check,
         release_fastest,
         release_thin_lto_optimize_size,
-    ]
+    ];
+
+    // For cranelift filter out configs with lto which is not supported
+    if cranelift {
+        configs.into_iter()
+            .filter(|config| config.lto == LTO::Off)
+            .collect()
+    } else {
+        configs
+    }
 }
 
 fn clean_cargo() {
@@ -161,9 +181,14 @@ fn clean_cargo() {
     }
 }
 
-fn run_cargo_build(project: &str, threads_number: u32, build: BuildOrCheck) {
+fn run_cargo_build(project: &str, threads_number: u32, build: BuildOrCheck, cranelift: bool) {
     let build_check = if build == BuildOrCheck::Build { "build" } else { "check" };
     let mut command = std::process::Command::new("cargo");
+    if cranelift {
+        command.env("CARGO_PROFILE_DEV_CODEGEN_BACKEND", "cranelift");
+        command.env("RUSTUP_TOOLCHAIN", "nightly");
+        command.arg("-Zcodegen-backend");
+    }
     command
         .env("CARGO_BUILD_JOBS", threads_number.to_string())
         .arg(build_check)
@@ -181,7 +206,7 @@ fn run_cargo_build(project: &str, threads_number: u32, build: BuildOrCheck) {
     }
 }
 
-fn check_compilation_speed_and_size(base: &str, project: &str, config: Config, threads_number: u32) -> Results {
+fn check_compilation_speed_and_size(base: &str, project: &str, config: Config, threads_number: u32, cranelift: bool) -> Results {
     clean_cargo();
 
     let start_time = std::time::Instant::now();
@@ -190,7 +215,7 @@ fn check_compilation_speed_and_size(base: &str, project: &str, config: Config, t
 
     println!("Project: {project}, threads: {threads_number}, {}", config.to_string_short());
 
-    run_cargo_build(project, threads_number, config.build_or_check);
+    run_cargo_build(project, threads_number, config.build_or_check, cranelift);
 
     let compilation_time = start_time.elapsed();
 
@@ -204,6 +229,7 @@ fn check_compilation_speed_and_size(base: &str, project: &str, config: Config, t
         config,
         threads_number,
         project: project.to_string(),
+        cranelift,
     }
 }
 

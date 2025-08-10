@@ -322,7 +322,6 @@ pub(crate) mod checker {
     // TODO - sad day for code readability, because slint not supports i64 - https://github.com/slint-ui/slint/issues/6589
     pub(crate) fn set_number_of_enabled_items(app: &MainWindow, active_tab: CurrentTab, items_number: u64) {
         let (it1, it2) = split_u64_into_i32s(items_number);
-        error!("SET {:?}, {}", &active_tab, &items_number);
         match active_tab {
             CurrentTab::DuplicateFiles => {
                 app.global::<GuiState>().set_selected_results_duplicates(it1);
@@ -427,9 +426,7 @@ pub(crate) mod checker {
             ),
             _ => unreachable!("Current tab is not a tool that has enabled items"),
         };
-        let items_number = connect_i32_into_u64(it1, it2);
-        error!("GET {:?}, {}", &active_tab, &items_number);
-        items_number
+        connect_i32_into_u64(it1, it2)
     }
 }
 

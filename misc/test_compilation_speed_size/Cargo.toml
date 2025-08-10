@@ -5,6 +5,8 @@ edition = "2024"
 
 [dependencies]
 walkdir = "2.5.0"
+humansize = "2.1"
+
 
 [profile.release]
 panic = "unwind"

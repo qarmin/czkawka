@@ -142,7 +142,7 @@ Also, I really appreciate work of people that create crates on which Czkawka is 
 to make it even better.
 
 ## Officially Supported Projects
-Only the [prebuild-binaries](https://github.com/qarmin/czkawka/releases), projects on [crates.io](https://crates.io/crates/czkawka_gui) and [flathub](https://flathub.org/apps/com.github.qarmin.czkawka) are directly maintained by me.  
+Only this repository, [prebuild-binaries](https://github.com/qarmin/czkawka/releases), projects on [crates.io](https://crates.io/crates/czkawka_gui) and [flathub](https://flathub.org/apps/com.github.qarmin.czkawka) are directly maintained by me.  
 
 Czkawka does not have an official website, so do not trust any sites that claim to be the official one.  
 

@@ -29,3 +29,5 @@ misc/*/.idea
 benchmarks
 TestFiles
 *.txt
+.venv
+charts

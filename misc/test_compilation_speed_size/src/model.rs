@@ -1,4 +1,5 @@
 use std::io::Write;
+use humansize::{BINARY, format_size};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Debugg {
@@ -52,7 +53,7 @@ impl OptLevel {
             OptLevel::One => "opt-level=1",
             OptLevel::Two => "opt-level=2",
             OptLevel::Three => "opt-level=3",
-            OptLevel::S => "opt-level=s",
+            OptLevel::S => "opt-level=\"s\"",
         }
     }
 }
@@ -198,25 +199,35 @@ pub struct Results {
     pub config: Config,
     pub threads_number: u32,
     pub project: String,
+    pub cranelift: bool,
 }
 
 impl Results {
     pub fn write_header_to_file(file_writer: &mut std::fs::File) -> std::io::Result<()> {
         writeln!(
             file_writer,
-            "Config | Output File Size (bytes) | Target Folder Size (bytes) | Compilation Time (seconds) | Threads"
+            "Config|Output File Size|Output File Size(in bytes)|Target Folder Size|Target Folder Size(in bytes)|Compilation Time(seconds)|Compilation Time|Threads",
         )?;
         Ok(())
     }
     pub fn save_to_file(&self, file_writer: &mut std::fs::File) -> std::io::Result<()> {
+        let cranelift = if self.cranelift {
+            "cranelift"
+        } else {
+            "llvm"
+        };
         writeln!(
             file_writer,
-            "{}_{} | {} | {} | {} | {}",
+            "{} {} __ {}|{}|{}|{}|{}|{}|{:?}|{}",
             self.config.name,
+            cranelift,
             self.project,
+            format_size(self.output_file_size, BINARY),
             self.output_file_size,
+            format_size(self.target_folder_size, BINARY),
             self.target_folder_size,
             self.compilation_time.as_secs(),
+            self.compilation_time,
             self.threads_number
         )?;
         Ok(())
