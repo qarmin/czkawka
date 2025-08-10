@@ -200,6 +200,7 @@ pub struct Results {
     pub threads_number: u32,
     pub project: String,
     pub cranelift: bool,
+    pub use_mold: bool,
 }
 
 impl Results {
@@ -228,11 +229,18 @@ impl Results {
             self.output_file_size.to_string()
         };
 
+        let linker = if self.use_mold {
+            "+ mold"
+        } else {
+            "+ ld"
+        };
+
         writeln!(
             file_writer,
-            "{} {} __ {}|{}|{}|{}|{}|{}|{}|{}",
+            "{} {} {} __ {}|{}|{}|{}|{}|{}|{}|{}",
             self.config.name,
             cranelift,
+            linker,
             self.project,
             file_size_pretty,
             file_size_number,

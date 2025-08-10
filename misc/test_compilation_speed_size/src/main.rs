@@ -45,23 +45,29 @@ fn main() {
 
     Results::write_header_to_file(&mut results_file).unwrap();
 
-    // const CRANELIFT: &[bool] = &[true, false];
-    // const PROJECTS: &[&str] = &["krokiet", "czkawka_cli"];
-    // const THREADS_NUMBERS: &[u32] = &[8, 24];
-
-    const CRANELIFT: &[bool] = &[true];
+    // ALL configs
+    const USE_MOLD: &[bool] = &[true];
+    const CRANELIFT: &[bool] = &[true, false];
     const PROJECTS: &[&str] = &["krokiet"];
     const THREADS_NUMBERS: &[u32] = &[24];
 
-    for cranelift in CRANELIFT {
-        for project in PROJECTS {
-            for threads_number in THREADS_NUMBERS {
-                for config in get_configs(*cranelift) {
-                    let new_content = format!("{new_content_base}\n{}\n", config.to_str());
-                    fs::write(&config_toml_path, new_content).expect("Could not write config file");
+    // TEST config
+    // const USE_MOLD: &[bool] = &[true];
+    // const CRANELIFT: &[bool] = &[false];
+    // const PROJECTS: &[&str] = &["krokiet"];
+    // const THREADS_NUMBERS: &[u32] = &[24];
 
-                    let result = check_compilation_speed_and_size(&first_arg, project, config, *threads_number, *cranelift);
-                    result.save_to_file(&mut results_file).expect("Could not save results to file");
+    for config in get_configs(*cranelift) {
+        for use_mold in USE_MOLD {
+            for cranelift in CRANELIFT {
+                for project in PROJECTS {
+                    for threads_number in THREADS_NUMBERS {
+                        let new_content = format!("{new_content_base}\n{}\n", config.to_str());
+                        fs::write(&config_toml_path, new_content).expect("Could not write config file");
+
+                        let result = check_compilation_speed_and_size(&first_arg, project, config, *threads_number, *cranelift, *use_mold);
+                        result.save_to_file(&mut results_file).expect("Could not save results to file");
+                    }
                 }
             }
         }
@@ -124,7 +130,7 @@ fn get_configs(cranelift: bool) -> Vec<Config> {
     debug_fast_check.debug = Debugg::None;
 
     let mut check_fast_check = debug_base.clone();
-    check_fast_check.name = "debug(check)";
+    check_fast_check.name = "check";
     check_fast_check.build_or_check = BuildOrCheck::Check;
 
     let mut release_thin_lto = release_base.clone();
@@ -146,7 +152,7 @@ fn get_configs(cranelift: bool) -> Vec<Config> {
     release_fastest.codegen_units = CodegenUnits::One;
     release_fastest.panic = Panic::Abort;
 
-    let configs =     vec![
+    let configs = vec![
         debug_base,
         release_base,
         release_thin_lto,
@@ -159,9 +165,7 @@ fn get_configs(cranelift: bool) -> Vec<Config> {
 
     // For cranelift filter out configs with lto which is not supported
     if cranelift {
-        configs.into_iter()
-            .filter(|config| config.lto == LTO::Off)
-            .collect()
+        configs.into_iter().filter(|config| config.lto == LTO::Off).collect()
     } else {
         configs
     }
@@ -181,13 +185,16 @@ fn clean_cargo() {
     }
 }
 
-fn run_cargo_build(project: &str, threads_number: u32, build: BuildOrCheck, cranelift: bool) {
+fn run_cargo_build(project: &str, threads_number: u32, build: BuildOrCheck, cranelift: bool, use_mold: bool) {
     let build_check = if build == BuildOrCheck::Build { "build" } else { "check" };
     let mut command = std::process::Command::new("cargo");
     if cranelift {
         command.env("CARGO_PROFILE_DEV_CODEGEN_BACKEND", "cranelift");
         command.env("RUSTUP_TOOLCHAIN", "nightly");
         command.arg("-Zcodegen-backend");
+    }
+    if use_mold {
+        command.env("RUSTFLAGS", "-C link-arg=-fuse-ld=mold");
     }
     command
         .env("CARGO_BUILD_JOBS", threads_number.to_string())
@@ -206,7 +213,7 @@ fn run_cargo_build(project: &str, threads_number: u32, build: BuildOrCheck, cran
     }
 }
 
-fn check_compilation_speed_and_size(base: &str, project: &str, config: Config, threads_number: u32, cranelift: bool) -> Results {
+fn check_compilation_speed_and_size(base: &str, project: &str, config: Config, threads_number: u32, cranelift: bool, use_mold: bool) -> Results {
     clean_cargo();
 
     let start_time = std::time::Instant::now();
@@ -215,7 +222,7 @@ fn check_compilation_speed_and_size(base: &str, project: &str, config: Config, t
 
     println!("Project: {project}, threads: {threads_number}, {}", config.to_string_short());
 
-    run_cargo_build(project, threads_number, config.build_or_check, cranelift);
+    run_cargo_build(project, threads_number, config.build_or_check, cranelift, use_mold);
 
     let compilation_time = start_time.elapsed();
 
@@ -230,6 +237,7 @@ fn check_compilation_speed_and_size(base: &str, project: &str, config: Config, t
         threads_number,
         project: project.to_string(),
         cranelift,
+        use_mold,
     }
 }
 

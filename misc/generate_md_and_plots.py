@@ -13,22 +13,29 @@ df["Compilation Time (seconds)"] = pd.to_numeric(df["Compilation Time(seconds)"]
 
 os.makedirs("charts", exist_ok=True)
 
+# Sort and plot Compilation Time
+df_sorted = df.sort_values("Compilation Time (seconds)", ascending=False)
 plt.figure(figsize=(12, 6))
-plt.barh(df["Config"], df["Compilation Time (seconds)"])
+plt.barh(df_sorted["Config"], df_sorted["Compilation Time (seconds)"])
 plt.xlabel("Compilation Time (seconds)")
 plt.title("Compilation Time by Config")
 plt.tight_layout()
 plt.savefig("charts/complation_time.png")
 
+# Sort and plot Output File Size
+df_filtered = df.dropna(subset=["Output File Size (bytes)"])
+df_sorted = df_filtered.sort_values("Output File Size (bytes)", ascending=False)
 plt.figure(figsize=(12, 6))
-plt.barh(df["Config"], df["Output File Size (bytes)"] / (1024**2))
+plt.barh(df_sorted["Config"], df_sorted["Output File Size (bytes)"] / (1024**2))
 plt.xlabel("Output File Size (MB)")
 plt.title("Output File Size by Config")
 plt.tight_layout()
 plt.savefig("charts/output_file_size.png")
 
+# Sort and plot Target Folder Size
+df_sorted = df.sort_values("Target Folder Size (bytes)", ascending=False)
 plt.figure(figsize=(12, 6))
-plt.barh(df["Config"], df["Target Folder Size (bytes)"] / (1024**3))
+plt.barh(df_sorted["Config"], df_sorted["Target Folder Size (bytes)"] / (1024**3))
 plt.xlabel("Target Folder Size (GB)")
 plt.title("Target Folder Size by Config")
 plt.tight_layout()
