@@ -212,24 +212,53 @@ impl Results {
     }
     pub fn save_to_file(&self, file_writer: &mut std::fs::File) -> std::io::Result<()> {
         let cranelift = if self.cranelift {
-            "cranelift"
+            "+ cranelift"
         } else {
-            "llvm"
+            "+ llvm"
         };
+
+        let file_size_pretty = if self.output_file_size == 0 {
+            "-".to_string()
+        } else {
+            format_size(self.output_file_size, BINARY)
+        };
+        let file_size_number = if self.output_file_size == 0 {
+            "-".to_string()
+        } else {
+            self.output_file_size.to_string()
+        };
+
         writeln!(
             file_writer,
-            "{} {} __ {}|{}|{}|{}|{}|{}|{:?}|{}",
+            "{} {} __ {}|{}|{}|{}|{}|{}|{}|{}",
             self.config.name,
             cranelift,
             self.project,
-            format_size(self.output_file_size, BINARY),
-            self.output_file_size,
+            file_size_pretty,
+            file_size_number,
             format_size(self.target_folder_size, BINARY),
             self.target_folder_size,
             self.compilation_time.as_secs(),
-            self.compilation_time,
+            duration_to_pretty_time(self.compilation_time),
             self.threads_number
         )?;
         Ok(())
+    }
+}
+
+fn duration_to_pretty_time(duration: std::time::Duration) -> String {
+    let seconds = duration.as_secs();
+    let minutes = seconds / 60;
+    let hours = minutes / 60;
+    let days = hours / 24;
+
+    if days > 0 {
+        format!("{}d {}h {}m {}s", days, hours % 24, minutes % 60, seconds % 60)
+    } else if hours > 0 {
+        format!("{}h {}m {}s", hours, minutes % 60, seconds % 60)
+    } else if minutes > 0 {
+        format!("{}m {}s", minutes, seconds % 60)
+    } else {
+        format!("{}s", seconds)
     }
 }
