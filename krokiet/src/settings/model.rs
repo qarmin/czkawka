@@ -129,11 +129,11 @@ pub struct SettingsCustom {
     pub similar_music_sub_minimal_fragment_duration_value: f32,
     #[serde(default = "ttrue")]
     pub broken_files_sub_audio: bool,
-    #[serde(default)]
+    #[serde(default = "ttrue")]
     pub broken_files_sub_pdf: bool,
-    #[serde(default)]
+    #[serde(default = "ttrue")]
     pub broken_files_sub_archive: bool,
-    #[serde(default)]
+    #[serde(default = "ttrue")]
     pub broken_files_sub_image: bool,
     #[serde(default = "default_similar_videos_skip_forward_amount")]
     pub similar_videos_skip_forward_amount: u32,
