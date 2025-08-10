@@ -375,7 +375,7 @@ pub(crate) mod checker {
         let before_number_of_items = get_number_of_enabled_items(app, active_tab);
         let after_number_of_items = before_number_of_items
             .checked_add_signed(additions)
-            .expect("Failed to add signed number to items, overflowed");
+            .unwrap_or_else(|| panic!("Overflow when adding signed number to items: before_number_of_items = {before_number_of_items}, additions = {additions}"));
         set_number_of_enabled_items(app, active_tab, after_number_of_items);
     }
     pub(crate) fn get_number_of_enabled_items(app: &MainWindow, active_tab: CurrentTab) -> u64 {

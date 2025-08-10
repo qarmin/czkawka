@@ -20,7 +20,7 @@ plt.barh(df_sorted["Config"], df_sorted["Compilation Time (seconds)"])
 plt.xlabel("Compilation Time (seconds)")
 plt.title("Compilation Time by Config")
 plt.tight_layout()
-plt.savefig("charts/complation_time.png")
+plt.savefig("charts/compilation_time.png")
 
 # Sort and plot Output File Size
 df_filtered = df.dropna(subset=["Output File Size (bytes)"])

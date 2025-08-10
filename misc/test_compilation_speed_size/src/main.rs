@@ -57,15 +57,15 @@ fn main() {
     // const PROJECTS: &[&str] = &["krokiet"];
     // const THREADS_NUMBERS: &[u32] = &[24];
 
-    for config in get_configs(*cranelift) {
-        for use_mold in USE_MOLD {
-            for cranelift in CRANELIFT {
+    for cranelift in CRANELIFT {
+        for config in get_configs(*cranelift) {
+            for use_mold in USE_MOLD {
                 for project in PROJECTS {
                     for threads_number in THREADS_NUMBERS {
                         let new_content = format!("{new_content_base}\n{}\n", config.to_str());
                         fs::write(&config_toml_path, new_content).expect("Could not write config file");
 
-                        let result = check_compilation_speed_and_size(&first_arg, project, config, *threads_number, *cranelift, *use_mold);
+                        let result = check_compilation_speed_and_size(&first_arg, project, config.clone(), *threads_number, *cranelift, *use_mold);
                         result.save_to_file(&mut results_file).expect("Could not save results to file");
                     }
                 }
