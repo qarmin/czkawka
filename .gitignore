@@ -28,3 +28,6 @@ misc/*/target/
 misc/*/.idea
 benchmarks
 TestFiles
+*.txt
+.venv
+charts

@@ -8,6 +8,7 @@ members = [
 exclude = [
     "misc/test_read_perf",
     "misc/test_image_perf",
+    "misc/test_compilation_speed_size",
     "ci_tester",
 ]
 resolver = "3"

@@ -141,6 +141,14 @@ articles about it etc.
 Also, I really appreciate work of people that create crates on which Czkawka is based and for that I try to report bugs
 to make it even better.
 
+## Officially Supported Projects
+Only this repository, [prebuild-binaries](https://github.com/qarmin/czkawka/releases), projects on [crates.io](https://crates.io/crates/czkawka_gui) and [flathub](https://flathub.org/apps/com.github.qarmin.czkawka) are directly maintained by me.  
+
+Czkawka does not have an official website, so do not trust any sites that claim to be the official one.  
+
+If you use packages from unofficial sources, make sure they are safe.
+ 
+
 ## License
 
 The entire code in this repository is licensed under the [MIT](https://mit-license.org/) license.

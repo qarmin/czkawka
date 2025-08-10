@@ -1,0 +1,14 @@
+[package]
+name = "test_compilation_speed_size"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+walkdir = "2.5.0"
+humansize = "2.1"
+
+
+[profile.release]
+panic = "unwind"
+overflow-checks = true
+debug = true

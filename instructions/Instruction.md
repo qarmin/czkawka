@@ -125,10 +125,6 @@ rustflags = [
 ]
 
 ```
-- **Faster checking for similar images**
-  The new `fast_image_resize` feature enables faster image resizing using a specialized crate.
-  The speedup varies depending on image size: from no noticeable improvement for very small images to a 30–200% increase for larger ones.
-  This feature is enabled by default starting from version 9.0 but can be disabled if needed.
 - **Manually adding multiple directories**  
   You can manually edit config file `czkawka_gui_config.txt` and add/remove/change directories as you want.  
   After set required values, configuration must be loaded to Czkawka.
@@ -333,7 +329,6 @@ The faster comparison option ensures that each pair of results is compared only 
 - Smaller hash size does not always mean faster calculation.
 - `Blockhash` is the only algorithm that does not resize images before hashing.
 - The `Nearest` resizing algorithm can be up to **five times faster** than other methods but may produce worse results.
-- The `fast_image_resize` feature speeds up image resizing but may slightly reduce accuracy.
 
 ### **Similar Video Finder**
 

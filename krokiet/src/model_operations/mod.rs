@@ -10,6 +10,7 @@ pub type ProcessingResult = Vec<(usize, SimplerMainListModel, Option<Result<(), 
 
 impl MainListModel {
     #[allow(clippy::print_stdout)]
+    #[allow(dead_code)]
     pub(crate) fn debug_print(&self) {
         let val_int: Vec<i32> = self.val_int.iter().collect();
         let val_str: Vec<String> = self.val_str.iter().map(|e| e.to_string()).collect();

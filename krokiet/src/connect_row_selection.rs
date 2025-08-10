@@ -4,10 +4,11 @@ use std::mem;
 use std::sync::{LazyLock, RwLock, RwLockWriteGuard};
 
 use czkawka_core::TOOLS_NUMBER;
-use log::trace;
+use log::{debug, error, trace};
 use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
-use crate::{CurrentTab, GuiState, MainListModel, MainWindow};
+use crate::common::{connect_i32_into_u64, split_u64_into_i32s};
+use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow};
 
 const SELECTED_ROWS_LIMIT: usize = 1000;
 
@@ -120,14 +121,11 @@ pub(crate) fn connect_row_selections(app: &MainWindow) {
     opener::open_parent_of_selected_item(app);
     opener::open_provided_item(app);
     opener::connect_on_open_item(app);
+    checker::change_number_of_checked_items(app);
 }
 
 mod opener {
-    use log::{debug, error};
-    use slint::{ComponentHandle, Model};
-
-    use crate::connect_row_selection::get_write_selection_lock;
-    use crate::{Callabler, GuiState, MainWindow};
+    use super::*;
 
     pub(crate) fn connect_on_open_item(app: &MainWindow) {
         app.global::<Callabler>().on_open_item(move |path| {
@@ -212,14 +210,8 @@ mod opener {
     }
 }
 mod selection {
-    use log::trace;
-    use slint::{ComponentHandle, Model};
-
-    use crate::connect_row_selection::{
-        get_write_selection_lock, reverse_selection_of_item_with_id, row_select_items_with_shift, rows_deselect_all_by_mode, rows_reverse_checked_selection,
-        rows_select_all_by_mode,
-    };
-    use crate::{Callabler, GuiState, MainWindow};
+    use super::*;
+    use crate::connect_row_selection::checker::change_number_of_enabled_items;
 
     pub(crate) fn connect_select_all_rows(app: &MainWindow) {
         let a = app.as_weak();
@@ -271,10 +263,11 @@ mod selection {
             let selection = lock.get_mut(&active_tab).expect("Failed to get selection data");
             let model = active_tab.get_tool_model(&app);
 
-            let new_model = rows_reverse_checked_selection(selection, &model);
+            let (checked_items, unchecked_items, new_model) = rows_reverse_checked_selection(selection, &model);
             if let Some(new_model) = new_model {
                 active_tab.set_tool_model(&app, new_model);
             }
+            change_number_of_enabled_items(&app, active_tab, checked_items as i64 - unchecked_items as i64);
         });
     }
     pub(crate) fn reverse_selection_on_specific_item(app: &MainWindow) {
@@ -310,6 +303,130 @@ mod selection {
                 active_tab.set_tool_model(&app, new_model);
             };
         });
+    }
+}
+
+pub(crate) mod checker {
+    use super::*;
+
+    pub(crate) fn change_number_of_checked_items(app: &MainWindow) {
+        let a = app.as_weak();
+        app.global::<Callabler>().on_change_number_of_checked_items(move |number_of_changed_items| {
+            trace!("Changing number of checked items with {number_of_changed_items}");
+            let app = a.upgrade().expect("Failed to upgrade app :(");
+            let active_tab = app.global::<GuiState>().get_active_tab();
+            change_number_of_enabled_items(&app, active_tab, number_of_changed_items as i64);
+        });
+    }
+
+    // TODO - sad day for code readability, because slint not supports i64 - https://github.com/slint-ui/slint/issues/6589
+    pub(crate) fn set_number_of_enabled_items(app: &MainWindow, active_tab: CurrentTab, items_number: u64) {
+        let (it1, it2) = split_u64_into_i32s(items_number);
+        match active_tab {
+            CurrentTab::DuplicateFiles => {
+                app.global::<GuiState>().set_selected_results_duplicates(it1);
+                app.global::<GuiState>().set_selected_results_duplicates2(it2);
+            }
+            CurrentTab::EmptyFolders => {
+                app.global::<GuiState>().set_selected_results_empty_folders(it1);
+                app.global::<GuiState>().set_selected_results_empty_folders2(it2);
+            }
+            CurrentTab::BigFiles => {
+                app.global::<GuiState>().set_selected_results_big_files(it1);
+                app.global::<GuiState>().set_selected_results_big_files2(it2);
+            }
+            CurrentTab::EmptyFiles => {
+                app.global::<GuiState>().set_selected_results_empty_files(it1);
+                app.global::<GuiState>().set_selected_results_empty_files2(it2);
+            }
+            CurrentTab::TemporaryFiles => {
+                app.global::<GuiState>().set_selected_results_temporary_files(it1);
+                app.global::<GuiState>().set_selected_results_temporary_files2(it2);
+            }
+            CurrentTab::SimilarImages => {
+                app.global::<GuiState>().set_selected_results_similar_images(it1);
+                app.global::<GuiState>().set_selected_results_similar_images2(it2);
+            }
+            CurrentTab::SimilarVideos => {
+                app.global::<GuiState>().set_selected_results_similar_videos(it1);
+                app.global::<GuiState>().set_selected_results_similar_videos2(it2);
+            }
+            CurrentTab::SimilarMusic => {
+                app.global::<GuiState>().set_selected_results_similar_music(it1);
+                app.global::<GuiState>().set_selected_results_similar_music2(it2);
+            }
+            CurrentTab::InvalidSymlinks => {
+                app.global::<GuiState>().set_selected_results_invalid_symlinks(it1);
+                app.global::<GuiState>().set_selected_results_invalid_symlinks2(it2);
+            }
+            CurrentTab::BrokenFiles => {
+                app.global::<GuiState>().set_selected_results_broken_files(it1);
+                app.global::<GuiState>().set_selected_results_broken_files2(it2);
+            }
+            CurrentTab::BadExtensions => {
+                app.global::<GuiState>().set_selected_results_bad_extensions(it1);
+                app.global::<GuiState>().set_selected_results_bad_extensions2(it2);
+            }
+            _ => unreachable!("Current tab is not a tool that has enabled items"),
+        }
+    }
+
+    pub(crate) fn change_number_of_enabled_items(app: &MainWindow, active_tab: CurrentTab, additions: i64) {
+        let before_number_of_items = get_number_of_enabled_items(app, active_tab);
+        let after_number_of_items = before_number_of_items
+            .checked_add_signed(additions)
+            .unwrap_or_else(|| panic!("Overflow when adding signed number to items: before_number_of_items = {before_number_of_items}, additions = {additions}"));
+        set_number_of_enabled_items(app, active_tab, after_number_of_items);
+    }
+    pub(crate) fn get_number_of_enabled_items(app: &MainWindow, active_tab: CurrentTab) -> u64 {
+        let (it1, it2) = match active_tab {
+            CurrentTab::DuplicateFiles => (
+                app.global::<GuiState>().get_selected_results_duplicates(),
+                app.global::<GuiState>().get_selected_results_duplicates2(),
+            ),
+            CurrentTab::EmptyFolders => (
+                app.global::<GuiState>().get_selected_results_empty_folders(),
+                app.global::<GuiState>().get_selected_results_empty_folders2(),
+            ),
+            CurrentTab::BigFiles => (
+                app.global::<GuiState>().get_selected_results_big_files(),
+                app.global::<GuiState>().get_selected_results_big_files2(),
+            ),
+            CurrentTab::EmptyFiles => (
+                app.global::<GuiState>().get_selected_results_empty_files(),
+                app.global::<GuiState>().get_selected_results_empty_files2(),
+            ),
+            CurrentTab::TemporaryFiles => (
+                app.global::<GuiState>().get_selected_results_temporary_files(),
+                app.global::<GuiState>().get_selected_results_temporary_files2(),
+            ),
+            CurrentTab::SimilarImages => (
+                app.global::<GuiState>().get_selected_results_similar_images(),
+                app.global::<GuiState>().get_selected_results_similar_images2(),
+            ),
+            CurrentTab::SimilarVideos => (
+                app.global::<GuiState>().get_selected_results_similar_videos(),
+                app.global::<GuiState>().get_selected_results_similar_videos2(),
+            ),
+            CurrentTab::SimilarMusic => (
+                app.global::<GuiState>().get_selected_results_similar_music(),
+                app.global::<GuiState>().get_selected_results_similar_music2(),
+            ),
+            CurrentTab::InvalidSymlinks => (
+                app.global::<GuiState>().get_selected_results_invalid_symlinks(),
+                app.global::<GuiState>().get_selected_results_invalid_symlinks2(),
+            ),
+            CurrentTab::BrokenFiles => (
+                app.global::<GuiState>().get_selected_results_broken_files(),
+                app.global::<GuiState>().get_selected_results_broken_files2(),
+            ),
+            CurrentTab::BadExtensions => (
+                app.global::<GuiState>().get_selected_results_bad_extensions(),
+                app.global::<GuiState>().get_selected_results_bad_extensions2(),
+            ),
+            _ => unreachable!("Current tab is not a tool that has enabled items"),
+        };
+        connect_i32_into_u64(it1, it2)
     }
 }
 
@@ -544,7 +661,9 @@ fn row_select_items_with_shift(selection: &mut SelectionData, model: &ModelRc<Ma
     }
 }
 
-fn rows_reverse_checked_selection(selection: &SelectionData, model: &ModelRc<MainListModel>) -> Option<ModelRc<MainListModel>> {
+fn rows_reverse_checked_selection(selection: &SelectionData, model: &ModelRc<MainListModel>) -> (u64, u64, Option<ModelRc<MainListModel>>) {
+    let (mut checked_items, mut unchecked_items) = (0, 0);
+
     if selection.exceeded_limit {
         trace!("[SLOW][REPLACE_MODEL] reverse checked selection(SPACE)");
         let new_model = model
@@ -553,11 +672,16 @@ fn rows_reverse_checked_selection(selection: &SelectionData, model: &ModelRc<Mai
                 if row.selected_row {
                     assert!(!row.header_row); // Header row should not be selected
                     row.checked = !row.checked;
+                    if row.checked {
+                        checked_items += 1;
+                    } else {
+                        unchecked_items += 1;
+                    }
                 }
                 row
             })
             .collect::<Vec<_>>();
-        return Some(ModelRc::new(VecModel::from(new_model)));
+        return (checked_items, unchecked_items, Some(ModelRc::new(VecModel::from(new_model))));
     } else if !selection.selected_rows.is_empty() {
         trace!("[FAST][ONE_BY_ONE] reverse selection(SPACE)");
         for id in &selection.selected_rows {
@@ -567,10 +691,15 @@ fn rows_reverse_checked_selection(selection: &SelectionData, model: &ModelRc<Mai
             assert!(model_data.selected_row);
             assert!(!model_data.header_row);
             model_data.checked = !model_data.checked;
+            if model_data.checked {
+                checked_items += 1;
+            } else {
+                unchecked_items += 1;
+            }
             model.set_row_data(*id, model_data);
         }
     }
-    None
+    (checked_items, unchecked_items, None)
 }
 
 #[cfg(test)]
@@ -816,23 +945,27 @@ mod tests {
 
     #[test]
     fn rows_reverse_checked_selection_with_selected_rows() {
-        let mut model = get_model_vec(3);
+        let mut model = get_model_vec(4);
         model[0].selected_row = true;
         model[1].selected_row = true;
+        model[2].selected_row = true;
+        model[2].checked = true;
         let model = create_model_from_model_vec(&model);
 
         let selection = SelectionData {
-            number_of_selected_rows: 2,
-            selected_rows: vec![0, 1],
+            number_of_selected_rows: 3,
+            selected_rows: vec![0, 1, 2],
             exceeded_limit: false,
         };
 
-        let new_model = rows_reverse_checked_selection(&selection, &model);
+        let (checked_items, unchecked_items, new_model) = rows_reverse_checked_selection(&selection, &model);
 
         assert!(new_model.is_none());
         assert!(model.row_data(0).unwrap().checked);
         assert!(model.row_data(1).unwrap().checked);
         assert!(!model.row_data(2).unwrap().checked);
+        assert_eq!(checked_items, 2);
+        assert_eq!(unchecked_items, 1);
     }
 
     #[test]
@@ -848,12 +981,14 @@ mod tests {
             exceeded_limit: true,
         };
 
-        let new_model = rows_reverse_checked_selection(&selection, &model);
+        let (checked_items, unchecked_items, new_model) = rows_reverse_checked_selection(&selection, &model);
 
         assert!(new_model.is_some());
         let new_model = new_model.unwrap();
         assert!(new_model.row_data(0).unwrap().checked);
         assert!(new_model.row_data(1).unwrap().checked);
         assert!(!new_model.row_data(2).unwrap().checked);
+        assert_eq!(checked_items, 2);
+        assert_eq!(unchecked_items, 0);
     }
 }

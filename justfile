@@ -73,7 +73,6 @@ fix_nightly:
 
 test_resize arg:
     cd misc/test_image_perf; cargo build --release; sudo ./target/release/test_image_perf "{{arg}}"
-    cd misc/test_image_perf; cargo build --release --features fast_image_resize; sudo ./target/release/test_image_perf "{{arg}}"
 
 # Not works, due of edition 2024 and workspaces
 unused_features:
@@ -112,3 +111,8 @@ debug_verify:
     cargo bloat --release --bin czkawka_cli -n 30
     cargo bloat --release --bin czkawka_gui -n 30
     cargo bloat --release --bin krokiet -n 30
+
+check_complilations:
+    cargo install --path misc/test_compilation_speed_size
+    test_compilation_speed_size .
+    uv run misc/generate_md_and_plots.py

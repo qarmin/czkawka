@@ -18,10 +18,7 @@ use crate::helpers::messages::Messages;
 
 pub(crate) const CACHE_VERSION: &str = "100";
 pub(crate) const CACHE_DUPLICATE_VERSION: &str = "100";
-#[cfg(feature = "fast_image_resize")]
 pub(crate) const CACHE_IMAGE_VERSION: &str = "100";
-#[cfg(not(feature = "fast_image_resize"))]
-pub(crate) const CACHE_IMAGE_VERSION: &str = "100_image_rs_resize";
 pub(crate) const CACHE_VIDEO_VERSION: &str = "100";
 
 const MEMORY_LIMIT: u64 = 8 * 1024 * 1024 * 1024;

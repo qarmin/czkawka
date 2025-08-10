@@ -1,8 +1,11 @@
 use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
 use crate::common::connect_i32_into_u64;
+use crate::connect_row_selection::checker::change_number_of_enabled_items;
 use crate::connect_translation::translate_select_mode;
 use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow, SelectMode, SelectModel};
+
+type SelectionResult = (u64, u64, ModelRc<MainListModel>);
 
 // TODO optimize this, not sure if it is possible to not copy entire model to just select item
 // https://github.com/slint-ui/slint/discussions/4595
@@ -13,7 +16,7 @@ pub(crate) fn connect_select(app: &MainWindow) {
         let active_tab = app.global::<GuiState>().get_active_tab();
         let current_model = active_tab.get_tool_model(&app);
 
-        let new_model = match select_mode {
+        let (checked_items, unchecked_items, new_model) = match select_mode {
             SelectMode::SelectAll => select_all(&current_model),
             SelectMode::UnselectAll => deselect_all(&current_model),
             SelectMode::InvertSelection => invert_selection(&current_model),
@@ -25,6 +28,7 @@ pub(crate) fn connect_select(app: &MainWindow) {
             SelectMode::SelectOldest => select_by_size_date(&current_model, active_tab, false, false),
         };
         active_tab.set_tool_model(&app, new_model);
+        change_number_of_enabled_items(&app, active_tab, checked_items as i64 - unchecked_items as i64);
     });
 }
 
@@ -81,7 +85,9 @@ fn set_select_buttons(app: &MainWindow) {
 }
 
 // TODO, when model will be able to contain i64 instead two i32, this function could be merged with select_by_size_date
-fn select_by_resolution(model: &ModelRc<MainListModel>, active_tab: CurrentTab, biggest: bool) -> ModelRc<MainListModel> {
+fn select_by_resolution(model: &ModelRc<MainListModel>, active_tab: CurrentTab, biggest: bool) -> SelectionResult {
+    let mut checked_items = 0;
+
     let is_header_mode = active_tab.get_is_header_mode();
     assert!(is_header_mode); // non header modes not really have reason to use this function
 
@@ -103,6 +109,9 @@ fn select_by_resolution(model: &ModelRc<MainListModel>, active_tab: CurrentTab, 
                     max_item_idx = j;
                 }
             }
+            if !old_data[max_item_idx].checked {
+                checked_items += 1;
+            }
             old_data[max_item_idx].checked = true;
         }
     } else {
@@ -118,14 +127,19 @@ fn select_by_resolution(model: &ModelRc<MainListModel>, active_tab: CurrentTab, 
                     min_item_idx = j;
                 }
             }
+            if !old_data[min_item_idx].checked {
+                checked_items += 1;
+            }
             old_data[min_item_idx].checked = true;
         }
     }
 
-    ModelRc::new(VecModel::from(old_data))
+    (checked_items, 0, ModelRc::new(VecModel::from(old_data)))
 }
 
-fn select_by_size_date(model: &ModelRc<MainListModel>, active_tab: CurrentTab, biggest_newest: bool, size: bool) -> ModelRc<MainListModel> {
+fn select_by_size_date(model: &ModelRc<MainListModel>, active_tab: CurrentTab, biggest_newest: bool, size: bool) -> SelectionResult {
+    let mut checked_items = 0;
+
     let is_header_mode = active_tab.get_is_header_mode();
     assert!(is_header_mode); // non header modes not really have reason to use this function
 
@@ -150,6 +164,9 @@ fn select_by_size_date(model: &ModelRc<MainListModel>, active_tab: CurrentTab, b
                     max_item_idx = j;
                 }
             }
+            if !old_data[max_item_idx].checked {
+                checked_items += 1;
+            }
             old_data[max_item_idx].checked = true;
         }
     } else {
@@ -165,39 +182,58 @@ fn select_by_size_date(model: &ModelRc<MainListModel>, active_tab: CurrentTab, b
                     min_item_idx = j;
                 }
             }
+            if !old_data[min_item_idx].checked {
+                checked_items += 1;
+            }
             old_data[min_item_idx].checked = true;
         }
     }
 
-    ModelRc::new(VecModel::from(old_data))
+    (checked_items, 0, ModelRc::new(VecModel::from(old_data)))
 }
 
-fn select_all(model: &ModelRc<MainListModel>) -> ModelRc<MainListModel> {
+fn select_all(model: &ModelRc<MainListModel>) -> SelectionResult {
+    let mut checked_items = 0;
     let mut old_data = model.iter().collect::<Vec<_>>();
     for x in &mut old_data {
         if !x.header_row {
+            if !x.checked {
+                checked_items += 1;
+            }
             x.checked = true;
         }
     }
-    ModelRc::new(VecModel::from(old_data))
+    (checked_items, 0, ModelRc::new(VecModel::from(old_data)))
 }
 
-fn deselect_all(model: &ModelRc<MainListModel>) -> ModelRc<MainListModel> {
+fn deselect_all(model: &ModelRc<MainListModel>) -> SelectionResult {
+    let mut unchecked_items = 0;
     let mut old_data = model.iter().collect::<Vec<_>>();
     for x in &mut old_data {
+        if x.checked {
+            unchecked_items += 1;
+        }
         x.checked = false;
     }
-    ModelRc::new(VecModel::from(old_data))
+    (0, unchecked_items, ModelRc::new(VecModel::from(old_data)))
 }
 
-fn invert_selection(model: &ModelRc<MainListModel>) -> ModelRc<MainListModel> {
+fn invert_selection(model: &ModelRc<MainListModel>) -> SelectionResult {
+    let mut checked_items = 0;
+    let mut unchecked_items = 0;
     let mut old_data = model.iter().collect::<Vec<_>>();
     for x in &mut old_data {
         if !x.header_row {
+            if x.checked {
+                unchecked_items += 1;
+            } else {
+                checked_items += 1;
+            }
+
             x.checked = !x.checked;
         }
     }
-    ModelRc::new(VecModel::from(old_data))
+    (checked_items, unchecked_items, ModelRc::new(VecModel::from(old_data)))
 }
 
 fn find_header_idx_and_deselect_all(old_data: &mut [MainListModel]) -> Vec<usize> {
@@ -253,8 +289,10 @@ mod tests {
         model[1].header_row = true;
         let model = create_model_from_model_vec(&model);
 
-        let new_model = select_all(&model);
+        let (checked_items, unchecked_items, new_model) = select_all(&model);
 
+        assert_eq!(checked_items, 4);
+        assert_eq!(unchecked_items, 0);
         assert!(new_model.row_data(0).unwrap().checked);
         assert!(!new_model.row_data(1).unwrap().checked); // header row
         assert!(new_model.row_data(2).unwrap().checked);
@@ -268,8 +306,10 @@ mod tests {
         model.iter_mut().for_each(|row| row.checked = true);
         let model = create_model_from_model_vec(&model);
 
-        let new_model = deselect_all(&model);
+        let (checked_items, unchecked_items, new_model) = deselect_all(&model);
 
+        assert_eq!(checked_items, 0);
+        assert_eq!(unchecked_items, 5);
         assert!(!new_model.row_data(0).unwrap().checked);
         assert!(!new_model.row_data(1).unwrap().checked);
         assert!(!new_model.row_data(2).unwrap().checked);
@@ -285,8 +325,10 @@ mod tests {
         model[2].checked = false;
         let model = create_model_from_model_vec(&model);
 
-        let new_model = invert_selection(&model);
+        let (checked_items, unchecked_items, new_model) = invert_selection(&model);
 
+        assert_eq!(checked_items, 3);
+        assert_eq!(unchecked_items, 1);
         assert!(!new_model.row_data(0).unwrap().checked);
         assert!(!new_model.row_data(1).unwrap().checked); // header row
         assert!(new_model.row_data(2).unwrap().checked);
