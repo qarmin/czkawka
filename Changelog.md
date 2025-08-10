@@ -1,11 +1,15 @@
 ## Version ?.?.? - ?
+### Release blockers:
+- Missing support for hardlinking/softlinking files in Krokiet
+- Slint bug with selecting items with both mouse and keyboard -  https://github.com/slint-ui/slint/issues/9103
+- Unnecessary tokio dependency in rawler
 
-### Breaking changes[Users]
+### Breaking changes
+#### Users
 - Some languages now have unified names in Crowdin (e.g. `es` → `es-ES`). The GUI may not find them and will fall back to the default language.
 - Cache files now use memory limits and are incompatible with previous versions.
 - Cli image filter argument changed from `faussian` to `gaussian`
-
-### Breaking changes[Devs]
+#### Devs
 - `stop_flag` is now required argument in most of the core functions
 - Visibility of some core functions has been reduced to `pub(crate)`
 - The modules in czkawka_core have been split and reorganized a bit — imports need to be adjusted, although the actual behavior and item names should not be changed too much
@@ -45,6 +49,7 @@
 - Progress information is shown when removing, renaming, or moving files, with the ability to stop the process - [#1565](https://github.com/qarmin/czkawka/pull/1565)
 - Folders to scan can be now set via cli e.g. `krokiet /home/rafal` - for more info see `krokiet --help` - [#1566](https://github.com/qarmin/czkawka/pull/1566)
 - Improved appearance of bottom directories panel - [#1569](https://github.com/qarmin/czkawka/pull/1569)
+- Some buttons, are disabled, when there is no files selected - [#]()
 
 ### External
 - There is a new unofficial Tauri-based frontend for Czkawka - [Czkawka Tauri](https://github.com/shixinhuang99/czkawka-tauri)
