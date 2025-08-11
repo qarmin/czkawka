@@ -181,8 +181,9 @@ fn get_configs(cranelift: bool) -> Vec<Config> {
     ];
 
     // For cranelift filter out configs with lto which is not supported
+    // also build-std panics
     if cranelift {
-        configs.into_iter().filter(|config| config.lto == LTO::Off).collect()
+        configs.into_iter().filter(|config| config.lto == LTO::Off || config.build_std).collect()
     } else {
         configs
     }
