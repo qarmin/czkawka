@@ -3,7 +3,7 @@ mod model;
 use std::fs;
 use std::fs::OpenOptions;
 use std::path::Path;
-
+use std::io::Write;
 use walkdir::WalkDir;
 
 use crate::model::{BuildOrCheck, CodegenUnits, Config, Debugg, Incremental, OptLevel, OverflowChecks, Panic, Results, SplitDebug, LTO};
@@ -46,10 +46,10 @@ fn main() {
     Results::write_header_to_file(&mut results_file).unwrap();
 
     // ALL configs
-    const USE_MOLD: &[bool] = &[true];
-    const CRANELIFT: &[bool] = &[true, false];
+    const USE_MOLD: &[bool] = &[false];
+    const CRANELIFT: &[bool] = &[false];
     const PROJECTS: &[&str] = &["krokiet"];
-    const THREADS_NUMBERS: &[u32] = &[24];
+    const THREADS_NUMBERS: &[u32] = &[0];
 
     // TEST config
     // const USE_MOLD: &[bool] = &[true];
@@ -111,6 +111,7 @@ fn get_configs(cranelift: bool) -> Vec<Config> {
         split_debug: SplitDebug::Off,
         overflow_checks: OverflowChecks::On,
         incremental: Incremental::On,
+        build_std: false,
     };
     let release_base = Config {
         name: "release",
@@ -123,6 +124,7 @@ fn get_configs(cranelift: bool) -> Vec<Config> {
         split_debug: SplitDebug::Off,
         overflow_checks: OverflowChecks::Off,
         incremental: Incremental::Off,
+        build_std: false,
     };
 
     let mut debug_fast_check = debug_base.clone();
@@ -138,19 +140,31 @@ fn get_configs(cranelift: bool) -> Vec<Config> {
     release_thin_lto.lto = LTO::Thin;
 
     let mut release_thin_lto_optimize_size = release_base.clone();
-    release_thin_lto_optimize_size.name = "release + thin lto + optimize size";
-    release_thin_lto_optimize_size.lto = LTO::Thin;
+    release_thin_lto_optimize_size.name = "release + optimize size";
     release_thin_lto_optimize_size.opt_level = OptLevel::S;
 
     let mut release_full_lto = release_base.clone();
     release_full_lto.name = "release + fat lto";
     release_full_lto.lto = LTO::Fat;
 
+    let mut release_codegen_units = release_base.clone();
+    release_codegen_units.name = "release + codegen units 1";
+    release_codegen_units.codegen_units = CodegenUnits::One;
+
+    let mut release_panic_abort = release_base.clone();
+    release_panic_abort.name = "release + panic abort";
+    release_panic_abort.panic = Panic::Abort;
+
+    let mut release_std = release_base.clone();
+    release_std.name = "release + build-std";
+    release_std.build_std = true;
+
     let mut release_fastest = release_base.clone();
-    release_fastest.name = "release + fat lto + codegen units 1 + panic abort";
+    release_fastest.name = "release + fat lto + codegen units 1 + panic abort + build-std";
     release_fastest.lto = LTO::Fat;
     release_fastest.codegen_units = CodegenUnits::One;
     release_fastest.panic = Panic::Abort;
+    release_fastest.build_std = true;
 
     let configs = vec![
         debug_base,
@@ -185,19 +199,35 @@ fn clean_cargo() {
     }
 }
 
-fn run_cargo_build(project: &str, threads_number: u32, build: BuildOrCheck, cranelift: bool, use_mold: bool) {
+fn run_cargo_build(project: &str, threads_number: u32, build: BuildOrCheck, cranelift: bool, use_mold: bool, build_std: bool) {
     let build_check = if build == BuildOrCheck::Build { "build" } else { "check" };
     let mut command = std::process::Command::new("cargo");
+    command.arg("+nightly");
     if cranelift {
         command.env("CARGO_PROFILE_DEV_CODEGEN_BACKEND", "cranelift");
         command.env("RUSTUP_TOOLCHAIN", "nightly");
         command.arg("-Zcodegen-backend");
     }
+    let mut rust_flags = None;
     if use_mold {
-        command.env("RUSTFLAGS", "-C link-arg=-fuse-ld=mold");
+        rust_flags = match rust_flags {
+            None => Some("-C link-arg=-fuse-ld=mold".to_string()),
+            Some(flags) => Some(format!("{} -C link-arg=-fuse-ld=mold", flags)),
+        };
     }
+    if build_std {
+        command.args(&["-Z", "build-std=std"]);
+    }
+
+    if let Some(rust_flags) = rust_flags {
+        command.env("RUSTFLAGS", rust_flags);
+    }
+
+    if threads_number > 0 {
+        command.env("CARGO_BUILD_JOBS", threads_number.to_string());
+    }
+
     command
-        .env("CARGO_BUILD_JOBS", threads_number.to_string())
         .arg(build_check)
         .arg("--package")
         .arg(project)
@@ -206,6 +236,8 @@ fn run_cargo_build(project: &str, threads_number: u32, build: BuildOrCheck, cran
         .stdout(std::process::Stdio::inherit())
         .stderr(std::process::Stdio::inherit());
 
+    println!("Running cargo command: {:?}", command);
+
     let output = command.output().expect("Failed to execute cargo build");
 
     if !output.status.success() {
@@ -213,8 +245,34 @@ fn run_cargo_build(project: &str, threads_number: u32, build: BuildOrCheck, cran
     }
 }
 
+fn clean_changes_to_project_files(project: &str) {
+    let clean_command = std::process::Command::new("git")
+        .arg("checkout")
+        .arg(project)
+        .stdout(std::process::Stdio::inherit())
+        .stderr(std::process::Stdio::inherit())
+        .output()
+        .expect("Failed to execute git checkout");
+    if !clean_command.status.success() {
+        panic!("Git checkout failed: {}", String::from_utf8_lossy(&clean_command.stderr));
+    }
+}
+
+fn add_empty_line_to_file(project: &str) {
+    let file_path = Path::new(project).join("src").join("main.rs");
+    let mut file = OpenOptions::new()
+        .write(true)
+        .append(true)
+        .open(&file_path)
+        .expect("Could not open main.rs file");
+    if let Err(e) = writeln!(file, "// Absolutelly nothing") {
+        panic!("Could not write to main.rs file: {}", e);
+    }
+}
+
 fn check_compilation_speed_and_size(base: &str, project: &str, config: Config, threads_number: u32, cranelift: bool, use_mold: bool) -> Results {
     clean_cargo();
+    clean_changes_to_project_files(project);
 
     let start_time = std::time::Instant::now();
 
@@ -222,12 +280,17 @@ fn check_compilation_speed_and_size(base: &str, project: &str, config: Config, t
 
     println!("Project: {project}, threads: {threads_number}, {}", config.to_string_short());
 
-    run_cargo_build(project, threads_number, config.build_or_check, cranelift, use_mold);
+
+    run_cargo_build(project, threads_number, config.build_or_check, cranelift, use_mold, config.build_std);
 
     let compilation_time = start_time.elapsed();
 
     let output_file_size = get_size_of_output_file(base, project);
     let target_folder_size = get_size_of_target_folder(base);
+
+    let rebuild_time_start = std::time::Instant::now();
+    add_empty_line_to_file(project);
+    let rebuild_time = rebuild_time_start.elapsed();
 
     Results {
         output_file_size,
@@ -238,6 +301,7 @@ fn check_compilation_speed_and_size(base: &str, project: &str, config: Config, t
         project: project.to_string(),
         cranelift,
         use_mold,
+        rebuild_time
     }
 }
 

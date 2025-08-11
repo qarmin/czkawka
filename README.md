@@ -102,35 +102,6 @@ console apps, then take a look at these:
 - [Rmlint](https://github.com/sahib/rmlint) - Nice console interface and also is feature packed
 - [RdFind](https://github.com/pauldreik/rdfind) - Fast, but written in C++ ¯\\\_(ツ)\_/¯
 
-## Contributions
-
-Contributions to this repository are welcome.
-
-You can help by creating:
-
-- Bug reports - memory leaks, unexpected behavior, crashes
-- Feature proposals - proposal to change/add/delete some features
-- Pull Requests - implementing a new feature yourself or fixing bugs.
-  If the change is bigger, then it's a good idea to open a new issue to discuss changes, but issues with
-  label `PR welcome` are already checked and accepted.
-- Documentation - There is an [instruction](instructions/Instruction.md) which you can improve.
-- Translations - Instruction how to translate files is available [here](instructions/Translations.md)
-- External contributions - App use big number of external libraries
-  like [lofty](https://github.com/Serial-ATA/lofty-rs), [image-rs](https://github.com/image-rs/image)
-  or [symphonia](https://github.com/pdeljanov/Symphonia) so improving this libraries will automatically improve Czkawka
-
-You can also help by doing other things:
-
-- Creating text
-  articles - [LinuxUprising](https://www.linuxuprising.com/2021/03/find-and-remove-duplicate-files-similar.html)
-  or [Ubunlog](https://ubunlog.com/en/czkawka-finds-and-removes-empty-and-broken-duplicate-files/)
-- Adding Czkawka to repositories - [Alpine Linux](https://pkgs.alpinelinux.org/packages?name=czkawka&branch=edge)
-  or [NixOS](https://github.com/NixOS/nixpkgs/pull/116441)
-  or [OpenMandriva](https://github.com/OpenMandrivaAssociation/czkawka)
-- Creating videos - [First Video](https://www.youtube.com/watch?v=CWlRiTD4vDc)
-  or [Spanish Tutorial](https://www.youtube.com/watch?v=V9x-pHJRmKY)
-- Recommending it to others
-
 ## Thanks
 
 Big thanks to Pádraig Brady, creator of fantastic FSlint, because without his work I wouldn't create this tool.
@@ -147,7 +118,6 @@ Only this repository, [prebuild-binaries](https://github.com/qarmin/czkawka/rele
 Czkawka does not have an official website, so do not trust any sites that claim to be the official one.  
 
 If you use packages from unofficial sources, make sure they are safe.
- 
 
 ## License
 

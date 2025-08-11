@@ -1,4 +1,5 @@
 use std::io::Write;
+use std::time::Duration;
 use humansize::{BINARY, format_size};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -148,6 +149,7 @@ impl Incremental {
     }
 }
 
+
 #[derive(Debug, Clone)]
 pub struct Config {
     pub name: &'static str,
@@ -160,6 +162,7 @@ pub struct Config {
     pub split_debug: SplitDebug,
     pub overflow_checks: OverflowChecks,
     pub incremental: Incremental,
+    pub build_std: bool
 }
 
 impl Config {
@@ -173,7 +176,7 @@ impl Config {
             self.panic.to_str(),
             self.split_debug.to_str(),
             self.overflow_checks.to_str(),
-            self.incremental.to_str()
+            self.incremental.to_str(),
         )
     }
     pub fn to_string_short(&self) -> String {
@@ -195,19 +198,20 @@ impl Config {
 pub struct Results {
     pub output_file_size: u64,
     pub target_folder_size: u64,
-    pub compilation_time: std::time::Duration,
+    pub compilation_time: Duration,
     pub config: Config,
     pub threads_number: u32,
     pub project: String,
     pub cranelift: bool,
     pub use_mold: bool,
+    pub rebuild_time: Duration
 }
 
 impl Results {
     pub fn write_header_to_file(file_writer: &mut std::fs::File) -> std::io::Result<()> {
         writeln!(
             file_writer,
-            "Config|Output File Size|Output File Size(in bytes)|Target Folder Size|Target Folder Size(in bytes)|Compilation Time(seconds)|Compilation Time|Threads",
+            "Config|Output File Size|Output File Size(in bytes)|Target Folder Size|Target Folder Size(in bytes)|Compilation Time(seconds)|Compilation Time|Threads|Rebuild Time(seconds)|Rebuild Time",
         )?;
         Ok(())
     }
@@ -237,7 +241,7 @@ impl Results {
 
         writeln!(
             file_writer,
-            "{} {} {} __ {}|{}|{}|{}|{}|{}|{}|{}",
+            "{} {} {} __ {}|{}|{}|{}|{}|{}|{}|{}|{}|{}",
             self.config.name,
             cranelift,
             linker,
@@ -248,7 +252,9 @@ impl Results {
             self.target_folder_size,
             self.compilation_time.as_secs(),
             duration_to_pretty_time(self.compilation_time),
-            self.threads_number
+            self.threads_number,
+            self.rebuild_time.as_secs(),
+            duration_to_pretty_time(self.rebuild_time)
         )?;
         Ok(())
     }
