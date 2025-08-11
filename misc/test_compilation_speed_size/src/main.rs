@@ -139,9 +139,9 @@ fn get_configs(cranelift: bool) -> Vec<Config> {
     release_thin_lto.name = "release + thin lto";
     release_thin_lto.lto = LTO::Thin;
 
-    let mut release_thin_lto_optimize_size = release_base.clone();
-    release_thin_lto_optimize_size.name = "release + optimize size";
-    release_thin_lto_optimize_size.opt_level = OptLevel::S;
+    let mut release_optimize_size = release_base.clone();
+    release_optimize_size.name = "release + optimize size";
+    release_optimize_size.opt_level = OptLevel::S;
 
     let mut release_full_lto = release_base.clone();
     release_full_lto.name = "release + fat lto";
@@ -160,11 +160,13 @@ fn get_configs(cranelift: bool) -> Vec<Config> {
     release_std.build_std = true;
 
     let mut release_fastest = release_base.clone();
-    release_fastest.name = "release + fat lto + codegen units 1 + panic abort + build-std";
+    release_fastest.name = "release + fat lto + codegen units 1 + panic abort";
     release_fastest.lto = LTO::Fat;
     release_fastest.codegen_units = CodegenUnits::One;
     release_fastest.panic = Panic::Abort;
-    release_fastest.build_std = true;
+    // release_fastest.build_std = true; // Will use it, but
+
+    return vec![debug_base, release_thin_lto];
 
     let configs = vec![
         debug_base,
@@ -174,7 +176,7 @@ fn get_configs(cranelift: bool) -> Vec<Config> {
         debug_fast_check,
         check_fast_check,
         release_fastest,
-        release_thin_lto_optimize_size,
+        release_optimize_size,
     ];
 
     // For cranelift filter out configs with lto which is not supported
@@ -288,8 +290,9 @@ fn check_compilation_speed_and_size(base: &str, project: &str, config: Config, t
     let output_file_size = get_size_of_output_file(base, project);
     let target_folder_size = get_size_of_target_folder(base);
 
-    let rebuild_time_start = std::time::Instant::now();
     add_empty_line_to_file(project);
+    let rebuild_time_start = std::time::Instant::now();
+    run_cargo_build(project, threads_number, config.build_or_check, cranelift, use_mold, config.build_std);
     let rebuild_time = rebuild_time_start.elapsed();
 
     Results {
