@@ -47,7 +47,7 @@ fn main() {
 
     // ALL configs
     const USE_MOLD: &[bool] = &[false];
-    const CRANELIFT: &[bool] = &[false];
+    const CRANELIFT: &[bool] = &[true, false];
     const PROJECTS: &[&str] = &["krokiet"];
     const THREADS_NUMBERS: &[u32] = &[0];
 
@@ -164,19 +164,20 @@ fn get_configs(cranelift: bool) -> Vec<Config> {
     release_fastest.lto = LTO::Fat;
     release_fastest.codegen_units = CodegenUnits::One;
     release_fastest.panic = Panic::Abort;
-    // release_fastest.build_std = true; // Will use it, but
-
-    return vec![debug_base, release_thin_lto];
+    // release_fastest.build_std = true; // I would use it, but fails to compile with lto enabled
 
     let configs = vec![
         debug_base,
-        release_base,
-        release_thin_lto,
-        release_full_lto,
         debug_fast_check,
         check_fast_check,
-        release_fastest,
+        release_base,
+        release_codegen_units,
+        release_std,
+        release_panic_abort,
         release_optimize_size,
+        release_thin_lto,
+        release_full_lto,
+        release_fastest,
     ];
 
     // For cranelift filter out configs with lto which is not supported
