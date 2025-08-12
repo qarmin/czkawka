@@ -6,7 +6,7 @@ use image::DynamicImage;
 use log::{debug, error};
 use slint::ComponentHandle;
 
-use crate::{Callabler, ActiveTab, GuiState, MainWindow, Settings};
+use crate::{ActiveTab, Callabler, GuiState, MainWindow, Settings};
 
 pub type ImageBufferRgba = image::ImageBuffer<image::Rgba<u8>, Vec<u8>>;
 

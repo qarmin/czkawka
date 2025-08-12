@@ -9,7 +9,7 @@ use slint::{ComponentHandle, Weak};
 
 use crate::model_operations::model_processor::{MessageType, ModelProcessor};
 use crate::simpler_model::{SimplerMainListModel, ToSimplerVec};
-use crate::{Callabler, ActiveTab, GuiState, MainWindow, Settings};
+use crate::{ActiveTab, Callabler, GuiState, MainWindow, Settings};
 
 pub(crate) fn connect_delete_button(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
     let a = app.as_weak();

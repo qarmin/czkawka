@@ -1,11 +1,12 @@
 pub mod model_processor;
 
+use slint::ComponentHandle;
 #[allow(dead_code)]
 use slint::{Model, ModelRc};
-use slint::ComponentHandle;
-use crate::{GuiState, MainListModel, MainWindow};
-use crate::connect_row_selection::checker::{get_number_of_enabled_items, set_number_of_enabled_items};
+
+use crate::connect_row_selection::checker::get_number_of_enabled_items;
 use crate::simpler_model::SimplerMainListModel;
+use crate::{GuiState, MainListModel, MainWindow};
 
 pub type ProcessingResult = Vec<(usize, SimplerMainListModel, Option<Result<(), String>>)>;
 
@@ -97,13 +98,12 @@ pub struct CheckedItemsInfo {
 }
 pub struct CheckedGroupItemsInfo {
     pub groups_with_checked_items: u64,
-    pub number_of_groups_with_all_items_checked: u64
+    pub number_of_groups_with_all_items_checked: u64,
 }
-
 
 // TODO - this will be broken for models with reference folders
 fn get_checked_group_info_from_model(model: &ModelRc<MainListModel>) -> CheckedItemsInfo {
-    if model.iter().nth(0).is_none() {
+    if model.iter().next().is_none() {
         // Here I could panic, but i think that it is still possbile to go here, without doing anything wrong
         return CheckedItemsInfo {
             checked_items_number: 0,
@@ -134,7 +134,7 @@ fn get_checked_group_info_from_model(model: &ModelRc<MainListModel>) -> CheckedI
         } else {
             if item.checked {
                 checked_items_number += 1;
-                group_with_selected_item = true
+                group_with_selected_item = true;
             } else {
                 current_group_all_checked = false;
             }
@@ -149,12 +149,12 @@ fn get_checked_group_info_from_model(model: &ModelRc<MainListModel>) -> CheckedI
         }
     }
 
-    CheckedItemsInfo{
+    CheckedItemsInfo {
         checked_items_number,
         groups_with_checked_items: Some(CheckedGroupItemsInfo {
             groups_with_checked_items,
-            number_of_groups_with_all_items_checked
-        })
+            number_of_groups_with_all_items_checked,
+        }),
     }
 }
 
@@ -164,22 +164,20 @@ pub(crate) fn get_checked_info_from_app(app: &MainWindow) -> CheckedItemsInfo {
     if active_tab.get_is_header_mode() {
         get_checked_group_info_from_model(&model)
     } else {
-        let checked_items_number = get_number_of_enabled_items(
-            &app,
-            active_tab
-        );
-        // Altenativelly, thic can be manually calculated here
+        let checked_items_number = get_number_of_enabled_items(app, active_tab);
+        // Alternatively, this can be manually calculated here
         // let checked_items_number = model.iter().filter(|item| item.checked).count();
         CheckedItemsInfo {
             checked_items_number,
             groups_with_checked_items: None,
         }
-
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use slint::VecModel;
+
     use super::*;
     use crate::test_common::get_model_vec;
 
@@ -278,5 +276,21 @@ mod tests {
         items[0].header_row = true;
         items[0].selected_row = true;
         remove_single_items_in_groups(items, true);
+    }
+
+    #[test]
+    fn check_checked_function() {
+        let mut items = get_model_vec(4);
+        items[0].header_row = true;
+        items[1].checked = true;
+        items[2].checked = true;
+        items[3].checked = true;
+
+        let model = ModelRc::new(VecModel::from(items));
+        let result = get_checked_group_info_from_model(&model);
+        let groups_info = result.groups_with_checked_items.unwrap();
+        assert_eq!(result.checked_items_number, 3);
+        assert_eq!(groups_info.groups_with_checked_items, 1);
+        assert_eq!(groups_info.number_of_groups_with_all_items_checked, 1);
     }
 }

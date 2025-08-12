@@ -4,7 +4,7 @@ use i18n_embed::unic_langid::LanguageIdentifier;
 use log::{error, info};
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel};
 
-use crate::{Callabler, ActiveTab, GuiState, MainWindow, SelectMode, Settings, SortMode, SortModel, Translations, flk, localizer_krokiet};
+use crate::{ActiveTab, Callabler, GuiState, MainWindow, SelectMode, Settings, SortMode, SortModel, Translations, flk, localizer_krokiet};
 
 pub struct Language {
     pub long_name: &'static str,

@@ -4,7 +4,7 @@ use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
 use crate::common::connect_i32_into_u64;
 use crate::connect_row_selection::recalculate_small_selection_if_needed;
-use crate::{Callabler, ActiveTab, GuiState, MainListModel, MainWindow, SortMode};
+use crate::{ActiveTab, Callabler, GuiState, MainListModel, MainWindow, SortMode};
 
 pub(crate) fn connect_sort(app: &MainWindow) {
     let a = app.as_weak();
