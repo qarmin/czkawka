@@ -14,13 +14,23 @@ df["Compilation Time (seconds)"] = pd.to_numeric(df["Compilation Time(seconds)"]
 df["Rebuild Time (seconds)"] = pd.to_numeric(df["Rebuild Time(seconds)"], errors="coerce")
 
 matplotlib.rcParams['font.family'] = 'Noto Sans'
+FONT_SIZE = 13
+matplotlib.rcParams.update({
+    "font.size": FONT_SIZE,
+    "axes.titlesize": FONT_SIZE,
+    "axes.labelsize": FONT_SIZE,
+    "xtick.labelsize": FONT_SIZE,
+    "ytick.labelsize": FONT_SIZE,
+    "legend.fontsize": FONT_SIZE,
+    "figure.titlesize": FONT_SIZE
+})
+
 
 os.makedirs("charts", exist_ok=True)
 
 def plot_barh(
         df,
         value_col,
-        label_col,
         xlabel,
         title,
         filename,
@@ -34,39 +44,40 @@ def plot_barh(
     if dropna:
         data = data.dropna(subset=[value_col])
     data_sorted = data.sort_values(value_col, ascending=False)
-    plt.figure(figsize=(12, 6))
+    plt.figure(figsize=(12, 8))
     bars = plt.barh(
-        data_sorted[label_col],
+        data_sorted["Config"],
         data_sorted[value_col] / unit_div,
         color=color
     )
     plt.xlabel(xlabel)
     plt.title(title)
     plt.tight_layout()
+
     if label_fmt is None:
         label_fmt = fmt
-    plt.bar_label(bars, fmt=label_fmt, color="white", label_type="edge", padding=-50)
+    plt.bar_label(bars, fmt=label_fmt, color="black", padding=5)
     plt.savefig(filename)
     plt.close()
 
 
 plot_barh(
-    df, "Compilation Time (seconds)", "Config",
+    df, "Compilation Time (seconds)",
     "Compilation Time (seconds)", "Compilation Time by Config",
     "charts/compilation_time.png", fmt="{:.1f}s"
 )
 plot_barh(
-    df, "Rebuild Time (seconds)", "Config",
+    df, "Rebuild Time (seconds)",
     "Rebuild Time (seconds)", "Rebuild Time by Config",
     "charts/rebuild_time.png", fmt="{:.1f}s"
 )
 plot_barh(
-    df, "Output File Size (bytes)", "Config",
+    df, "Output File Size (bytes)",
     "Output File Size (MB)", "Output File Size by Config",
     "charts/output_file_size.png", fmt="{:.2f} MB", unit_div=1024**2, dropna=True
 )
 plot_barh(
-    df, "Target Folder Size (bytes)", "Config",
+    df, "Target Folder Size (bytes)",
     "Target Folder Size (GB)", "Target Folder Size by Config",
     "charts/target_folder_size.png", fmt="{:.2f} GB", unit_div=1024**3
 )
