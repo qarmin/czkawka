@@ -25,6 +25,14 @@ pub(crate) fn connect_delete_button(app: &MainWindow, progress_sender: Sender<Pr
         let processor = ModelProcessor::new(active_tab);
         processor.delete_selected_items(settings.get_move_to_trash(), progress_sender, weak_app, stop_flag);
     });
+
+    // let a = app.as_weak();
+    // app.on_delete_popup_dialog_show_requested(move|| {
+    //    let app = a.upgrade().expect("Failed to upgrade app :(");
+    //     let settings = app.global::<Settings>();
+    //     let active_tab = app.global::<GuiState>().get_active_tab();
+    //     let model = active_tab.get_tool_model(&app);
+    // });
 }
 
 impl ModelProcessor {

@@ -32,6 +32,9 @@ export component MainWindow inherits Window {
     callback initialize_popup_sizes();
     callback processing_ended(string);
 
+    callback delete_popup_dialog_show_requested();
+    callback delete_popup_dialog_configured();
+
     title <=> Translations.main_window_title_text;
 
     min-width: 300px;
@@ -156,7 +159,7 @@ export component MainWindow inherits Window {
                 folders_move_choose_requested();
             }
             show_remove_popup => {
-                delete_popup_window.show_popup();
+                delete_popup_dialog_show_requested();
             }
             show_rename_popup => {
                 rename_popup_window.show_popup();
@@ -282,5 +285,9 @@ export component MainWindow inherits Window {
         sort_popup_window.close_popup();
         select_popup_window.show_popup();
         select_popup_window.close_popup();
+    }
+
+    delete_popup_dialog_configured => {
+        delete_popup_window.show_popup();
     }
 }

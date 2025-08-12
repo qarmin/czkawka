@@ -63,6 +63,8 @@ rust_no_files_deleted = Not selected any files/folders to delete
 rust_no_files_renamed = Not selected any files/folders to rename
 rust_no_files_moved = Not selected any files/folders to move
 
+rust_delete_confirmation = Are you sure you want to { $items } the selected items?
+
 
 # Slint translations, but in arrays
 
@@ -220,7 +222,6 @@ popup_move_message = Moving entries to folder
 popup_move_copy_checkbox = Copy files instead of moving
 popup_move_preserve_folder_checkbox = Preserve folder structure
 delete = Delete items
-delete_confirmation = Are you sure you want to delete the selected items?
 stopping_scan = Stopping scan, please wait...
 searching = Searching...
 subsettings_videos_crop_detect = Crop detect method

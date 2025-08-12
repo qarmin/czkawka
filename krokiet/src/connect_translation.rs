@@ -304,7 +304,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_popup_move_copy_checkbox_text(flk!("popup_move_copy_checkbox").into());
     translation.set_popup_move_preserve_folder_checkbox_text(flk!("popup_move_preserve_folder_checkbox").into());
     translation.set_delete_text(flk!("delete").into());
-    translation.set_delete_confirmation_text(flk!("delete_confirmation").into());
+    translation.set_delete_confirmation_text(flk!("rust_delete_confirmation", items = 0).into());
     translation.set_stopping_scan_text(flk!("stopping_scan").into());
     translation.set_searching_text(flk!("searching").into());
     translation.set_subsettings_videos_crop_detect_text(flk!("subsettings_videos_crop_detect").into());

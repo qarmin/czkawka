@@ -3,7 +3,7 @@ pub mod model_processor;
 #[allow(dead_code)]
 use slint::{Model, ModelRc};
 
-use crate::MainListModel;
+use crate::{MainListModel};
 use crate::simpler_model::SimplerMainListModel;
 
 pub type ProcessingResult = Vec<(usize, SimplerMainListModel, Option<Result<(), String>>)>;
@@ -89,6 +89,39 @@ pub(crate) fn remove_single_items_in_groups(mut items: Vec<MainListModel>, have_
 
     items
 }
+//
+// pub struct CheckedGroupItemsInfo {
+//     pub checked_items_number: usize,
+//     pub groups_with_checked_items: usize,
+//     pub number_of_groups_with_all_items_checked: usize
+// }
+// fn get_checked_group_info_from_model(model: &ModelRc<MainListModel>, grouped_mode: bool) -> CheckedGroupItemsInfo {
+//     // TODO - for not grouped models, probably we can use here, cached enabled info
+//     let mut checked_items_number = 0;
+//     if grouped_mode {
+//         let mut groups_with_checked_items = 0;
+//         let mut number_of_groups_with_all_items_checked = 0;
+//     } else {
+//         get_ena
+//         for item in model {
+//             if item.checked {
+//                 checked_items_number += 1;
+//             }
+//         }
+//
+//         CheckedGroupItemsInfo {
+//             checked_items_number,
+//             groups_with_checked_items: None,
+//             number_of_groups_with_all_items_checked: None,
+//         }
+//     }
+// }
+//
+// pub(crate) fn get_checked_info_from_app(app: &MainWindow) {
+//     let current_tab = app.ge();
+//     if
+// }
+
 #[cfg(test)]
 mod tests {
     use super::*;
