@@ -4,7 +4,7 @@ use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
 use crate::common::connect_i32_into_u64;
 use crate::connect_row_selection::recalculate_small_selection_if_needed;
-use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow, SortMode};
+use crate::{Callabler, ActiveTab, GuiState, MainListModel, MainWindow, SortMode};
 
 pub(crate) fn connect_sort(app: &MainWindow) {
     let a = app.as_weak();
@@ -31,7 +31,7 @@ pub(crate) fn connect_sort(app: &MainWindow) {
 mod sorts {
     use super::*;
 
-    pub(super) fn reverse_sort(model: &ModelRc<MainListModel>, active_tab: CurrentTab) -> ModelRc<MainListModel> {
+    pub(super) fn reverse_sort(model: &ModelRc<MainListModel>, active_tab: ActiveTab) -> ModelRc<MainListModel> {
         if !active_tab.get_is_header_mode() {
             let mut items = model.iter().collect::<Vec<_>>();
             items.reverse();
@@ -50,19 +50,19 @@ mod sorts {
         new_model
     }
 
-    pub(super) fn sort_checked(model: &ModelRc<MainListModel>, active_tab: CurrentTab) -> ModelRc<MainListModel> {
+    pub(super) fn sort_checked(model: &ModelRc<MainListModel>, active_tab: ActiveTab) -> ModelRc<MainListModel> {
         let sort_function = |e: &MainListModel| !e.checked;
 
         common_sort_function(model, active_tab, sort_function)
     }
 
-    pub(super) fn sort_selection(model: &ModelRc<MainListModel>, active_tab: CurrentTab) -> ModelRc<MainListModel> {
+    pub(super) fn sort_selection(model: &ModelRc<MainListModel>, active_tab: ActiveTab) -> ModelRc<MainListModel> {
         let sort_function = |e: &MainListModel| !e.selected_row;
 
         common_sort_function(model, active_tab, sort_function)
     }
 
-    pub(super) fn sort_modification_date(model: &ModelRc<MainListModel>, active_tab: CurrentTab) -> ModelRc<MainListModel> {
+    pub(super) fn sort_modification_date(model: &ModelRc<MainListModel>, active_tab: ActiveTab) -> ModelRc<MainListModel> {
         let sort_function = |e: &MainListModel| {
             let modification_date = active_tab.get_int_modification_date_idx();
             let items = e.val_int.iter().collect::<Vec<_>>();
@@ -72,7 +72,7 @@ mod sorts {
         common_sort_function(model, active_tab, sort_function)
     }
 
-    pub(super) fn sort_by_full_name(model: &ModelRc<MainListModel>, active_tab: CurrentTab) -> ModelRc<MainListModel> {
+    pub(super) fn sort_by_full_name(model: &ModelRc<MainListModel>, active_tab: ActiveTab) -> ModelRc<MainListModel> {
         let sort_function = |e: &MainListModel| {
             let name_idx = active_tab.get_str_name_idx();
             let path_idx = active_tab.get_str_path_idx();
@@ -83,7 +83,7 @@ mod sorts {
         common_sort_function(model, active_tab, sort_function)
     }
 
-    pub(super) fn sort_by_name(model: &ModelRc<MainListModel>, active_tab: CurrentTab) -> ModelRc<MainListModel> {
+    pub(super) fn sort_by_name(model: &ModelRc<MainListModel>, active_tab: ActiveTab) -> ModelRc<MainListModel> {
         let sort_function = |e: &MainListModel| {
             let name_idx = active_tab.get_str_name_idx();
             e.val_str
@@ -94,7 +94,7 @@ mod sorts {
 
         common_sort_function(model, active_tab, sort_function)
     }
-    pub(super) fn sort_by_parent_name(model: &ModelRc<MainListModel>, active_tab: CurrentTab) -> ModelRc<MainListModel> {
+    pub(super) fn sort_by_parent_name(model: &ModelRc<MainListModel>, active_tab: ActiveTab) -> ModelRc<MainListModel> {
         let sort_function = |e: &MainListModel| {
             let path_idx = active_tab.get_str_path_idx();
             e.val_str
@@ -106,7 +106,7 @@ mod sorts {
         common_sort_function(model, active_tab, sort_function)
     }
 
-    pub(super) fn sort_by_size(model: &ModelRc<MainListModel>, active_tab: CurrentTab) -> ModelRc<MainListModel> {
+    pub(super) fn sort_by_size(model: &ModelRc<MainListModel>, active_tab: ActiveTab) -> ModelRc<MainListModel> {
         let sort_function = |e: &MainListModel| {
             let size_idx = active_tab.get_int_size_idx();
             let items = e.val_int.iter().collect::<Vec<_>>();
@@ -117,7 +117,7 @@ mod sorts {
     }
 }
 
-fn common_sort_function<T: Ord>(model: &ModelRc<MainListModel>, active_tab: CurrentTab, sort_function: impl Fn(&MainListModel) -> T) -> ModelRc<MainListModel> {
+fn common_sort_function<T: Ord>(model: &ModelRc<MainListModel>, active_tab: ActiveTab, sort_function: impl Fn(&MainListModel) -> T) -> ModelRc<MainListModel> {
     if !active_tab.get_is_header_mode() {
         let mut items = model.iter().collect::<Vec<_>>();
         items.sort_by_cached_key(&sort_function);
@@ -183,7 +183,7 @@ mod tests {
     use crate::connect_sort::sorts::{reverse_sort, sort_by_full_name, sort_by_name, sort_by_parent_name, sort_by_size, sort_checked, sort_modification_date, sort_selection};
     use crate::connect_sort::{convert_group_header_into_rc_model, group_by_header};
     use crate::test_common::{create_model_from_model_vec, get_model_vec};
-    use crate::{CurrentTab, MainListModel};
+    use crate::{ActiveTab, MainListModel};
 
     #[test]
     fn group_by_header_splits_items_into_groups_correctly() {
@@ -286,7 +286,7 @@ mod tests {
     #[test]
     fn sort_by_size_sorts_flat_model_correctly() {
         initialize_selection_struct();
-        let active_tab = CurrentTab::BigFiles;
+        let active_tab = ActiveTab::BigFiles;
         // To be sure that we set correct values in val_int, which must be equal to index
         assert_eq!(active_tab.get_int_size_idx(), 2);
         assert!(!active_tab.get_is_header_mode());
@@ -307,7 +307,7 @@ mod tests {
     #[test]
     fn sort_by_size_sorts_grouped_model_correctly() {
         initialize_selection_struct();
-        let active_tab = CurrentTab::SimilarImages;
+        let active_tab = ActiveTab::SimilarImages;
         // To be sure that we set correct values in val_int, which must be equal to index
         assert_eq!(active_tab.get_int_size_idx(), 2);
         assert!(active_tab.get_is_header_mode());
@@ -340,7 +340,7 @@ mod tests {
         initialize_selection_struct();
         let model = create_model_from_model_vec(&[]);
 
-        let sorted_model = sort_by_size(&model, CurrentTab::SimilarImages);
+        let sorted_model = sort_by_size(&model, ActiveTab::SimilarImages);
 
         assert_eq!(sorted_model.row_count(), 0);
     }
@@ -348,7 +348,7 @@ mod tests {
     #[test]
     fn sort_by_parent_name_sorts_flat_model_correctly() {
         initialize_selection_struct();
-        let active_tab = CurrentTab::BigFiles;
+        let active_tab = ActiveTab::BigFiles;
         // To be sure that we set correct values in val_int, which must be equal to index
         assert_eq!(active_tab.get_str_path_idx(), 2);
         assert!(!active_tab.get_is_header_mode());
@@ -373,7 +373,7 @@ mod tests {
     #[test]
     fn sort_by_name_sorts_flat_model_correctly() {
         initialize_selection_struct();
-        let active_tab = CurrentTab::BigFiles;
+        let active_tab = ActiveTab::BigFiles;
         // To be sure that we set correct values in val_int, which must be equal to index
         assert_eq!(active_tab.get_str_name_idx(), 1);
         assert!(!active_tab.get_is_header_mode());
@@ -398,7 +398,7 @@ mod tests {
     #[test]
     fn sort_by_full_name_sorts_flat_model_correctly() {
         initialize_selection_struct();
-        let active_tab = CurrentTab::BigFiles;
+        let active_tab = ActiveTab::BigFiles;
         // To be sure that we set correct values in val_int, which must be equal to index
         assert_eq!(active_tab.get_str_name_idx(), 1);
         assert_eq!(active_tab.get_str_path_idx(), 2);
@@ -424,7 +424,7 @@ mod tests {
     #[test]
     fn sort_by_modification_date_sorts_flat_model_correctly() {
         initialize_selection_struct();
-        let active_tab = CurrentTab::BigFiles;
+        let active_tab = ActiveTab::BigFiles;
         // To be sure that we set correct values in val_int, which must be equal to index
         assert_eq!(active_tab.get_int_modification_date_idx(), 0);
         assert!(!active_tab.get_is_header_mode());
@@ -449,7 +449,7 @@ mod tests {
     #[test]
     fn sort_by_checked_sorts_flat_model_correctly() {
         initialize_selection_struct();
-        let active_tab = CurrentTab::BigFiles;
+        let active_tab = ActiveTab::BigFiles;
         // To be sure that we set correct values in val_int, which must be equal to index
         assert!(!active_tab.get_is_header_mode());
 
@@ -479,7 +479,7 @@ mod tests {
     #[test]
     fn sort_by_selection_sorts_flat_model_correctly() {
         initialize_selection_struct();
-        let active_tab = CurrentTab::BigFiles;
+        let active_tab = ActiveTab::BigFiles;
         // To be sure that we set correct values in val_int, which must be equal to index
         assert!(!active_tab.get_is_header_mode());
 
@@ -509,7 +509,7 @@ mod tests {
     #[test]
     fn sort_reverse_sorts_flat_model_correctly() {
         initialize_selection_struct();
-        let active_tab = CurrentTab::BigFiles;
+        let active_tab = ActiveTab::BigFiles;
         // To be sure that we set correct values in val_int, which must be equal to index
         assert_eq!(active_tab.get_int_modification_date_idx(), 0);
         assert!(!active_tab.get_is_header_mode());

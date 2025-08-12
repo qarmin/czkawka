@@ -1,5 +1,5 @@
 import { CheckBox, ComboBox, ScrollView, Slider } from "std-widgets.slint";
-import { CurrentTab } from "common.slint";
+import { ActiveTab } from "common.slint";
 import { Settings } from "settings.slint";
 import { GuiState } from "gui_state.slint";
 import { TextComponent } from "settings_list.slint";
@@ -59,7 +59,7 @@ component SliderWrapper inherits HorizontalLayout {
 export component ToolSettings {
     ScrollView {
         VerticalLayout {
-            visible: GuiState.active_tab == CurrentTab.SimilarImages;
+            visible: GuiState.active_tab == ActiveTab.SimilarImages;
             spacing: 5px;
             padding: 10px;
             SubsettingsHeader { }
@@ -110,7 +110,7 @@ export component ToolSettings {
         }
 
         VerticalLayout {
-            visible: GuiState.active_tab == CurrentTab.DuplicateFiles;
+            visible: GuiState.active_tab == ActiveTab.DuplicateFiles;
             spacing: 5px;
             padding: 10px;
             SubsettingsHeader { }
@@ -139,7 +139,7 @@ export component ToolSettings {
         }
 
         VerticalLayout {
-            visible: GuiState.active_tab == CurrentTab.BigFiles;
+            visible: GuiState.active_tab == ActiveTab.BigFiles;
             spacing: 5px;
             padding: 10px;
             SubsettingsHeader { }
@@ -160,7 +160,7 @@ export component ToolSettings {
         }
 
         VerticalLayout {
-            visible: GuiState.active_tab == CurrentTab.SimilarVideos;
+            visible: GuiState.active_tab == ActiveTab.SimilarVideos;
             spacing: 5px;
             padding: 10px;
             SubsettingsHeader { }
@@ -215,7 +215,7 @@ export component ToolSettings {
         }
 
         VerticalLayout {
-            visible: GuiState.active_tab == CurrentTab.SimilarMusic;
+            visible: GuiState.active_tab == ActiveTab.SimilarMusic;
             spacing: 5px;
             padding: 10px;
             SubsettingsHeader { }
@@ -300,7 +300,7 @@ export component ToolSettings {
         }
 
         VerticalLayout {
-            visible: GuiState.active_tab == CurrentTab.BrokenFiles;
+            visible: GuiState.active_tab == ActiveTab.BrokenFiles;
             spacing: 5px;
             padding: 10px;
             SubsettingsHeader { }

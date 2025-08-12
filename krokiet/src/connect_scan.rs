@@ -34,7 +34,7 @@ use crate::settings::collect_settings;
 use crate::settings::combo_box::StringComboBoxItems;
 use crate::settings::model::SettingsCustom;
 use crate::shared_models::SharedModels;
-use crate::{CurrentTab, GuiState, MainListModel, MainWindow, ProgressToSend, flk};
+use crate::{ActiveTab, GuiState, MainListModel, MainWindow, ProgressToSend, flk};
 
 pub(crate) fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>, shared_models: Arc<Mutex<SharedModels>>) {
     let a = app.as_weak();
@@ -70,40 +70,40 @@ pub(crate) fn connect_scan_button(app: &MainWindow, progress_sender: Sender<Prog
 
         let a = app.as_weak();
         match active_tab {
-            CurrentTab::DuplicateFiles => {
+            ActiveTab::DuplicateFiles => {
                 scan_duplicates(a, progress_sender, stop_flag, custom_settings, cloned_model);
             }
-            CurrentTab::EmptyFolders => {
+            ActiveTab::EmptyFolders => {
                 scan_empty_folders(a, progress_sender, stop_flag, custom_settings, cloned_model);
             }
-            CurrentTab::BigFiles => {
+            ActiveTab::BigFiles => {
                 scan_big_files(a, progress_sender, stop_flag, custom_settings, cloned_model);
             }
-            CurrentTab::EmptyFiles => {
+            ActiveTab::EmptyFiles => {
                 scan_empty_files(a, progress_sender, stop_flag, custom_settings, cloned_model);
             }
-            CurrentTab::SimilarImages => {
+            ActiveTab::SimilarImages => {
                 scan_similar_images(a, progress_sender, stop_flag, custom_settings, cloned_model);
             }
-            CurrentTab::SimilarVideos => {
+            ActiveTab::SimilarVideos => {
                 scan_similar_videos(a, progress_sender, stop_flag, custom_settings, cloned_model);
             }
-            CurrentTab::SimilarMusic => {
+            ActiveTab::SimilarMusic => {
                 scan_similar_music(a, progress_sender, stop_flag, custom_settings, cloned_model);
             }
-            CurrentTab::InvalidSymlinks => {
+            ActiveTab::InvalidSymlinks => {
                 scan_invalid_symlinks(a, progress_sender, stop_flag, custom_settings, cloned_model);
             }
-            CurrentTab::BadExtensions => {
+            ActiveTab::BadExtensions => {
                 scan_bad_extensions(a, progress_sender, stop_flag, custom_settings, cloned_model);
             }
-            CurrentTab::BrokenFiles => {
+            ActiveTab::BrokenFiles => {
                 scan_broken_files(a, progress_sender, stop_flag, custom_settings, cloned_model);
             }
-            CurrentTab::TemporaryFiles => {
+            ActiveTab::TemporaryFiles => {
                 scan_temporary_files(a, progress_sender, stop_flag, custom_settings, cloned_model);
             }
-            CurrentTab::Settings | CurrentTab::About => panic!("Button should be disabled"),
+            ActiveTab::Settings | ActiveTab::About => panic!("Button should be disabled"),
         }
     });
 }

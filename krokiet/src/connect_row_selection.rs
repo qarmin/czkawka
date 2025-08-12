@@ -8,7 +8,7 @@ use log::{debug, error, trace};
 use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
 use crate::common::{connect_i32_into_u64, split_u64_into_i32s};
-use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow};
+use crate::{Callabler, ActiveTab, GuiState, MainListModel, MainWindow};
 
 const SELECTED_ROWS_LIMIT: usize = 1000;
 
@@ -22,7 +22,7 @@ pub(crate) struct SelectionData {
     exceeded_limit: bool,
 }
 
-pub(crate) static TOOLS_SELECTION: LazyLock<RwLock<HashMap<CurrentTab, SelectionData>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
+pub(crate) static TOOLS_SELECTION: LazyLock<RwLock<HashMap<ActiveTab, SelectionData>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
 
 pub(crate) fn reset_selection(app: &MainWindow, reset_all_selection: bool) {
     if reset_all_selection {
@@ -38,7 +38,7 @@ pub(crate) fn reset_selection(app: &MainWindow, reset_all_selection: bool) {
 
 // E.g. when sorting things, selected rows in vector, may be invalid
 // So we need to recalculate them
-pub(crate) fn recalculate_small_selection_if_needed(model: &ModelRc<MainListModel>, active_tab: CurrentTab) {
+pub(crate) fn recalculate_small_selection_if_needed(model: &ModelRc<MainListModel>, active_tab: ActiveTab) {
     let mut lock = get_write_selection_lock();
     let selection = lock.get_mut(&active_tab).expect("Failed to get selection data");
 
@@ -61,18 +61,18 @@ pub(crate) fn recalculate_small_selection_if_needed(model: &ModelRc<MainListMode
 }
 
 pub(crate) fn initialize_selection_struct() {
-    let tools: [CurrentTab; TOOLS_NUMBER] = [
-        CurrentTab::DuplicateFiles,
-        CurrentTab::EmptyFolders,
-        CurrentTab::BigFiles,
-        CurrentTab::EmptyFiles,
-        CurrentTab::TemporaryFiles,
-        CurrentTab::SimilarImages,
-        CurrentTab::SimilarVideos,
-        CurrentTab::SimilarMusic,
-        CurrentTab::InvalidSymlinks,
-        CurrentTab::BrokenFiles,
-        CurrentTab::BadExtensions,
+    let tools: [ActiveTab; TOOLS_NUMBER] = [
+        ActiveTab::DuplicateFiles,
+        ActiveTab::EmptyFolders,
+        ActiveTab::BigFiles,
+        ActiveTab::EmptyFiles,
+        ActiveTab::TemporaryFiles,
+        ActiveTab::SimilarImages,
+        ActiveTab::SimilarVideos,
+        ActiveTab::SimilarMusic,
+        ActiveTab::InvalidSymlinks,
+        ActiveTab::BrokenFiles,
+        ActiveTab::BadExtensions,
     ];
 
     let map: HashMap<_, _> = tools.into_iter().map(|tool| (tool, SelectionData::default())).collect();
@@ -85,20 +85,20 @@ pub(crate) fn initialize_selection_struct() {
     }
 }
 
-// fn get_read_selection_lock() -> RwLockReadGuard<'static, HashMap<CurrentTab, SelectionData>> {
+// fn get_read_selection_lock() -> RwLockReadGuard<'static, HashMap<ActiveTab, SelectionData>> {
 //     let selection = TOOLS_SELECTION.get().expect("Selection data is not initialized");
 //     selection.read().expect("Failed to lock selection data")
 // }
-fn get_write_selection_lock() -> RwLockWriteGuard<'static, HashMap<CurrentTab, SelectionData>> {
+fn get_write_selection_lock() -> RwLockWriteGuard<'static, HashMap<ActiveTab, SelectionData>> {
     TOOLS_SELECTION.write().expect("Selection data is not initialized")
 }
 
-impl Hash for CurrentTab {
+impl Hash for ActiveTab {
     fn hash<H: Hasher>(&self, state: &mut H) {
         (*self as u8).hash(state);
     }
 }
-impl Eq for CurrentTab {}
+impl Eq for ActiveTab {}
 
 ////////////////////
 ////////////////////
@@ -320,50 +320,50 @@ pub(crate) mod checker {
     }
 
     // TODO - sad day for code readability, because slint not supports i64 - https://github.com/slint-ui/slint/issues/6589
-    pub(crate) fn set_number_of_enabled_items(app: &MainWindow, active_tab: CurrentTab, items_number: u64) {
+    pub(crate) fn set_number_of_enabled_items(app: &MainWindow, active_tab: ActiveTab, items_number: u64) {
         let (it1, it2) = split_u64_into_i32s(items_number);
         match active_tab {
-            CurrentTab::DuplicateFiles => {
+            ActiveTab::DuplicateFiles => {
                 app.global::<GuiState>().set_selected_results_duplicates(it1);
                 app.global::<GuiState>().set_selected_results_duplicates2(it2);
             }
-            CurrentTab::EmptyFolders => {
+            ActiveTab::EmptyFolders => {
                 app.global::<GuiState>().set_selected_results_empty_folders(it1);
                 app.global::<GuiState>().set_selected_results_empty_folders2(it2);
             }
-            CurrentTab::BigFiles => {
+            ActiveTab::BigFiles => {
                 app.global::<GuiState>().set_selected_results_big_files(it1);
                 app.global::<GuiState>().set_selected_results_big_files2(it2);
             }
-            CurrentTab::EmptyFiles => {
+            ActiveTab::EmptyFiles => {
                 app.global::<GuiState>().set_selected_results_empty_files(it1);
                 app.global::<GuiState>().set_selected_results_empty_files2(it2);
             }
-            CurrentTab::TemporaryFiles => {
+            ActiveTab::TemporaryFiles => {
                 app.global::<GuiState>().set_selected_results_temporary_files(it1);
                 app.global::<GuiState>().set_selected_results_temporary_files2(it2);
             }
-            CurrentTab::SimilarImages => {
+            ActiveTab::SimilarImages => {
                 app.global::<GuiState>().set_selected_results_similar_images(it1);
                 app.global::<GuiState>().set_selected_results_similar_images2(it2);
             }
-            CurrentTab::SimilarVideos => {
+            ActiveTab::SimilarVideos => {
                 app.global::<GuiState>().set_selected_results_similar_videos(it1);
                 app.global::<GuiState>().set_selected_results_similar_videos2(it2);
             }
-            CurrentTab::SimilarMusic => {
+            ActiveTab::SimilarMusic => {
                 app.global::<GuiState>().set_selected_results_similar_music(it1);
                 app.global::<GuiState>().set_selected_results_similar_music2(it2);
             }
-            CurrentTab::InvalidSymlinks => {
+            ActiveTab::InvalidSymlinks => {
                 app.global::<GuiState>().set_selected_results_invalid_symlinks(it1);
                 app.global::<GuiState>().set_selected_results_invalid_symlinks2(it2);
             }
-            CurrentTab::BrokenFiles => {
+            ActiveTab::BrokenFiles => {
                 app.global::<GuiState>().set_selected_results_broken_files(it1);
                 app.global::<GuiState>().set_selected_results_broken_files2(it2);
             }
-            CurrentTab::BadExtensions => {
+            ActiveTab::BadExtensions => {
                 app.global::<GuiState>().set_selected_results_bad_extensions(it1);
                 app.global::<GuiState>().set_selected_results_bad_extensions2(it2);
             }
@@ -371,56 +371,57 @@ pub(crate) mod checker {
         }
     }
 
-    pub(crate) fn change_number_of_enabled_items(app: &MainWindow, active_tab: CurrentTab, additions: i64) {
+    pub(crate) fn change_number_of_enabled_items(app: &MainWindow, active_tab: ActiveTab, additions: i64) {
         let before_number_of_items = get_number_of_enabled_items(app, active_tab);
         let after_number_of_items = before_number_of_items
             .checked_add_signed(additions)
             .unwrap_or_else(|| panic!("Overflow when adding signed number to items: before_number_of_items = {before_number_of_items}, additions = {additions}"));
         set_number_of_enabled_items(app, active_tab, after_number_of_items);
     }
-    pub(crate) fn get_number_of_enabled_items(app: &MainWindow, active_tab: CurrentTab) -> u64 {
+
+    pub(crate) fn get_number_of_enabled_items(app: &MainWindow, active_tab: ActiveTab) -> u64 {
         let (it1, it2) = match active_tab {
-            CurrentTab::DuplicateFiles => (
+            ActiveTab::DuplicateFiles => (
                 app.global::<GuiState>().get_selected_results_duplicates(),
                 app.global::<GuiState>().get_selected_results_duplicates2(),
             ),
-            CurrentTab::EmptyFolders => (
+            ActiveTab::EmptyFolders => (
                 app.global::<GuiState>().get_selected_results_empty_folders(),
                 app.global::<GuiState>().get_selected_results_empty_folders2(),
             ),
-            CurrentTab::BigFiles => (
+            ActiveTab::BigFiles => (
                 app.global::<GuiState>().get_selected_results_big_files(),
                 app.global::<GuiState>().get_selected_results_big_files2(),
             ),
-            CurrentTab::EmptyFiles => (
+            ActiveTab::EmptyFiles => (
                 app.global::<GuiState>().get_selected_results_empty_files(),
                 app.global::<GuiState>().get_selected_results_empty_files2(),
             ),
-            CurrentTab::TemporaryFiles => (
+            ActiveTab::TemporaryFiles => (
                 app.global::<GuiState>().get_selected_results_temporary_files(),
                 app.global::<GuiState>().get_selected_results_temporary_files2(),
             ),
-            CurrentTab::SimilarImages => (
+            ActiveTab::SimilarImages => (
                 app.global::<GuiState>().get_selected_results_similar_images(),
                 app.global::<GuiState>().get_selected_results_similar_images2(),
             ),
-            CurrentTab::SimilarVideos => (
+            ActiveTab::SimilarVideos => (
                 app.global::<GuiState>().get_selected_results_similar_videos(),
                 app.global::<GuiState>().get_selected_results_similar_videos2(),
             ),
-            CurrentTab::SimilarMusic => (
+            ActiveTab::SimilarMusic => (
                 app.global::<GuiState>().get_selected_results_similar_music(),
                 app.global::<GuiState>().get_selected_results_similar_music2(),
             ),
-            CurrentTab::InvalidSymlinks => (
+            ActiveTab::InvalidSymlinks => (
                 app.global::<GuiState>().get_selected_results_invalid_symlinks(),
                 app.global::<GuiState>().get_selected_results_invalid_symlinks2(),
             ),
-            CurrentTab::BrokenFiles => (
+            ActiveTab::BrokenFiles => (
                 app.global::<GuiState>().get_selected_results_broken_files(),
                 app.global::<GuiState>().get_selected_results_broken_files2(),
             ),
-            CurrentTab::BadExtensions => (
+            ActiveTab::BadExtensions => (
                 app.global::<GuiState>().get_selected_results_bad_extensions(),
                 app.global::<GuiState>().get_selected_results_bad_extensions2(),
             ),

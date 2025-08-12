@@ -9,7 +9,7 @@ use slint::{ComponentHandle, Weak};
 
 use crate::model_operations::model_processor::{MessageType, ModelProcessor};
 use crate::simpler_model::{SimplerMainListModel, ToSimplerVec};
-use crate::{Callabler, CurrentTab, GuiState, MainWindow, Settings};
+use crate::{Callabler, ActiveTab, GuiState, MainWindow, Settings};
 
 pub(crate) fn connect_delete_button(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
     let a = app.as_weak();
@@ -37,7 +37,7 @@ pub(crate) fn connect_delete_button(app: &MainWindow, progress_sender: Sender<Pr
 
 impl ModelProcessor {
     fn delete_selected_items(self, remove_to_trash: bool, progress_sender: Sender<ProgressData>, weak_app: Weak<MainWindow>, stop_flag: Arc<AtomicBool>) {
-        let is_empty_folder_tab = self.active_tab == CurrentTab::EmptyFolders;
+        let is_empty_folder_tab = self.active_tab == ActiveTab::EmptyFolders;
         let model = self.active_tab.get_tool_model(&weak_app.upgrade().expect("Failed to upgrade app :("));
         let simpler_model = model.to_simpler_enumerated_vec();
         thread::spawn(move || {
@@ -99,7 +99,7 @@ mod tests {
             progress_sender: Sender<ProgressData>,
             model: ModelRc<MainListModel>,
         ) -> Option<(Vec<MainListModel>, Vec<String>, usize, usize)> {
-            let is_empty_folder_tab = self.active_tab == CurrentTab::EmptyFolders;
+            let is_empty_folder_tab = self.active_tab == ActiveTab::EmptyFolders;
 
             let items_queued_to_delete = model.iter().filter(|e| e.checked).count();
             if items_queued_to_delete == 0 {
@@ -138,7 +138,7 @@ mod tests {
         let (progress, _receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
         let model = get_model_vec(10);
         let model = create_model_from_model_vec(&model);
-        let processor = ModelProcessor::new(CurrentTab::EmptyFolders);
+        let processor = ModelProcessor::new(ActiveTab::EmptyFolders);
         assert!(processor.process_deletion_test(false, progress, model).is_none());
     }
 
@@ -153,7 +153,7 @@ mod tests {
         model[3].checked = true;
         model[3].val_str = ModelRc::new(VecModel::from(vec!["test_error".to_string().into(); 10]));
         let model = create_model_from_model_vec(&model);
-        let processor = ModelProcessor::new(CurrentTab::EmptyFolders);
+        let processor = ModelProcessor::new(ActiveTab::EmptyFolders);
         let (new_model, errors, items_queued_to_delete, items_deleted) = processor.process_deletion_test(false, progress, model).unwrap();
 
         assert_eq!(new_model.len(), 8);

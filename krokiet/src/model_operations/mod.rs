@@ -2,8 +2,9 @@ pub mod model_processor;
 
 #[allow(dead_code)]
 use slint::{Model, ModelRc};
-
-use crate::{MainListModel};
+use slint::ComponentHandle;
+use crate::{GuiState, MainListModel, MainWindow};
+use crate::connect_row_selection::checker::{get_number_of_enabled_items, set_number_of_enabled_items};
 use crate::simpler_model::SimplerMainListModel;
 
 pub type ProcessingResult = Vec<(usize, SimplerMainListModel, Option<Result<(), String>>)>;
@@ -89,38 +90,93 @@ pub(crate) fn remove_single_items_in_groups(mut items: Vec<MainListModel>, have_
 
     items
 }
-//
-// pub struct CheckedGroupItemsInfo {
-//     pub checked_items_number: usize,
-//     pub groups_with_checked_items: usize,
-//     pub number_of_groups_with_all_items_checked: usize
-// }
-// fn get_checked_group_info_from_model(model: &ModelRc<MainListModel>, grouped_mode: bool) -> CheckedGroupItemsInfo {
-//     // TODO - for not grouped models, probably we can use here, cached enabled info
-//     let mut checked_items_number = 0;
-//     if grouped_mode {
-//         let mut groups_with_checked_items = 0;
-//         let mut number_of_groups_with_all_items_checked = 0;
-//     } else {
-//         get_ena
-//         for item in model {
-//             if item.checked {
-//                 checked_items_number += 1;
-//             }
-//         }
-//
-//         CheckedGroupItemsInfo {
-//             checked_items_number,
-//             groups_with_checked_items: None,
-//             number_of_groups_with_all_items_checked: None,
-//         }
-//     }
-// }
-//
-// pub(crate) fn get_checked_info_from_app(app: &MainWindow) {
-//     let current_tab = app.ge();
-//     if
-// }
+
+pub struct CheckedItemsInfo {
+    pub checked_items_number: u64,
+    pub groups_with_checked_items: Option<CheckedGroupItemsInfo>,
+}
+pub struct CheckedGroupItemsInfo {
+    pub groups_with_checked_items: u64,
+    pub number_of_groups_with_all_items_checked: u64
+}
+
+
+// TODO - this will be broken for models with reference folders
+fn get_checked_group_info_from_model(model: &ModelRc<MainListModel>) -> CheckedItemsInfo {
+    if model.iter().nth(0).is_none() {
+        // Here I could panic, but i think that it is still possbile to go here, without doing anything wrong
+        return CheckedItemsInfo {
+            checked_items_number: 0,
+            groups_with_checked_items: None,
+        };
+    }
+
+    let mut checked_items_number = 0;
+    let mut groups_with_checked_items = 0;
+    let mut number_of_groups_with_all_items_checked = 0;
+
+    let mut current_group_all_checked = true;
+    let mut group_with_selected_item = false;
+
+    // TODO Maybe a little useless, check if really needed
+    let model_collected = model.iter().collect::<Vec<_>>();
+    assert!(model_collected[0].header_row);
+    assert!(!model_collected.last().expect("Is not empty").header_row);
+
+    for item in model_collected.iter().skip(1) {
+        if item.header_row {
+            if current_group_all_checked {
+                number_of_groups_with_all_items_checked += 1;
+            }
+            if group_with_selected_item {
+                groups_with_checked_items += 1;
+            }
+        } else {
+            if item.checked {
+                checked_items_number += 1;
+                group_with_selected_item = true
+            } else {
+                current_group_all_checked = false;
+            }
+        }
+    }
+    if model_collected.len() > 1 {
+        if current_group_all_checked {
+            number_of_groups_with_all_items_checked += 1;
+        }
+        if group_with_selected_item {
+            groups_with_checked_items += 1;
+        }
+    }
+
+    CheckedItemsInfo{
+        checked_items_number,
+        groups_with_checked_items: Some(CheckedGroupItemsInfo {
+            groups_with_checked_items,
+            number_of_groups_with_all_items_checked
+        })
+    }
+}
+
+pub(crate) fn get_checked_info_from_app(app: &MainWindow) -> CheckedItemsInfo {
+    let active_tab = app.global::<GuiState>().get_active_tab();
+    let model = active_tab.get_tool_model(app);
+    if active_tab.get_is_header_mode() {
+        get_checked_group_info_from_model(&model)
+    } else {
+        let checked_items_number = get_number_of_enabled_items(
+            &app,
+            active_tab
+        );
+        // Altenativelly, thic can be manually calculated here
+        // let checked_items_number = model.iter().filter(|item| item.checked).count();
+        CheckedItemsInfo {
+            checked_items_number,
+            groups_with_checked_items: None,
+        }
+
+    }
+}
 
 #[cfg(test)]
 mod tests {

@@ -1,4 +1,4 @@
-import { CurrentTab, SelectMode, SortMode } from "common.slint";
+import { ActiveTab, SelectMode, SortMode } from "common.slint";
 import { Palette } from "std-widgets.slint";
 import { Settings } from "settings.slint";
 
@@ -8,7 +8,7 @@ export global Callabler {
     callback added_manual_directories(bool, string);
 
     // Row selecting
-    callback reset_selection(CurrentTab);
+    callback reset_selection(ActiveTab);
     callback change_number_of_checked_items(int);
 
     callback row_select_all();
@@ -25,7 +25,7 @@ export global Callabler {
     // Right click or middle click opener
     callback open_item(string);
     callback open_parent(string);
-    callback open_selected_item(CurrentTab);
+    callback open_selected_item(ActiveTab);
 
     callback delete_selected_items();
     callback select_items(SelectMode);

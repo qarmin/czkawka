@@ -1,5 +1,5 @@
 import { SelectableTableView } from "selectable_tree_view.slint";
-import { CurrentTab, MainListModel } from "common.slint";
+import { ActiveTab, MainListModel } from "common.slint";
 import { SettingsList } from "settings_list.slint";
 import { GuiState } from "gui_state.slint";
 import { About } from "about.slint";
@@ -30,10 +30,10 @@ export component MainList {
     in-out property <[MainListModel]> broken_files_model: [];
     in-out property <[MainListModel]> bad_extensions_model: [];
 
-    callback changed_current_tab();
+    callback changed_active_tab();
 
     duplicates := SelectableTableView {
-        visible: GuiState.active_tab == CurrentTab.DuplicateFiles;
+        visible: GuiState.active_tab == ActiveTab.DuplicateFiles;
         min-width: 200px;
         height: parent.height;
         columns <=> Settings.duplicates_column_name;
@@ -44,7 +44,7 @@ export component MainList {
     }
 
     empty_folders := SelectableTableView {
-        visible: GuiState.active_tab == CurrentTab.EmptyFolders;
+        visible: GuiState.active_tab == ActiveTab.EmptyFolders;
         min-width: 200px;
         height: parent.height;
         columns <=> Settings.empty_folders_column_name;
@@ -55,7 +55,7 @@ export component MainList {
     }
 
     big_files := SelectableTableView {
-        visible: GuiState.active_tab == CurrentTab.BigFiles;
+        visible: GuiState.active_tab == ActiveTab.BigFiles;
         min-width: 200px;
         height: parent.height;
         columns <=> Settings.big_files_column_name;
@@ -66,7 +66,7 @@ export component MainList {
     }
 
     empty_files := SelectableTableView {
-        visible: GuiState.active_tab == CurrentTab.EmptyFiles;
+        visible: GuiState.active_tab == ActiveTab.EmptyFiles;
         min-width: 200px;
         height: parent.height;
         columns <=> Settings.empty_files_column_name;
@@ -77,7 +77,7 @@ export component MainList {
     }
 
     temporary_files := SelectableTableView {
-        visible: GuiState.active_tab == CurrentTab.TemporaryFiles;
+        visible: GuiState.active_tab == ActiveTab.TemporaryFiles;
         min-width: 200px;
         height: parent.height;
         columns <=> Settings.temporary_files_column_name;
@@ -88,7 +88,7 @@ export component MainList {
     }
 
     similar_images := SelectableTableView {
-        visible: GuiState.active_tab == CurrentTab.SimilarImages;
+        visible: GuiState.active_tab == ActiveTab.SimilarImages;
         min-width: 200px;
         height: parent.height;
         columns <=> Settings.similar_images_column_name;
@@ -99,7 +99,7 @@ export component MainList {
     }
 
     similar_videos := SelectableTableView {
-        visible: GuiState.active_tab == CurrentTab.SimilarVideos;
+        visible: GuiState.active_tab == ActiveTab.SimilarVideos;
         min-width: 200px;
         height: parent.height;
         columns <=> Settings.similar_videos_column_name;
@@ -110,7 +110,7 @@ export component MainList {
     }
 
     similar_music := SelectableTableView {
-        visible: GuiState.active_tab == CurrentTab.SimilarMusic;
+        visible: GuiState.active_tab == ActiveTab.SimilarMusic;
         min-width: 200px;
         height: parent.height;
         columns <=> Settings.similar_music_column_name;
@@ -121,7 +121,7 @@ export component MainList {
     }
 
     invalid_symlink := SelectableTableView {
-        visible: GuiState.active_tab == CurrentTab.InvalidSymlinks;
+        visible: GuiState.active_tab == ActiveTab.InvalidSymlinks;
         min-width: 200px;
         height: parent.height;
         columns <=> Settings.invalid_symlink_column_name;
@@ -132,7 +132,7 @@ export component MainList {
     }
 
     broken_files := SelectableTableView {
-        visible: GuiState.active_tab == CurrentTab.BrokenFiles;
+        visible: GuiState.active_tab == ActiveTab.BrokenFiles;
         min-width: 200px;
         height: parent.height;
         columns <=> Settings.broken_files_column_name;
@@ -143,7 +143,7 @@ export component MainList {
     }
 
     bad_extensions := SelectableTableView {
-        visible: GuiState.active_tab == CurrentTab.BadExtensions;
+        visible: GuiState.active_tab == ActiveTab.BadExtensions;
         min-width: 200px;
         height: parent.height;
         columns <=> Settings.bad_extensions_column_name;
@@ -154,42 +154,42 @@ export component MainList {
     }
 
     settings_list := SettingsList {
-        visible: GuiState.active_tab == CurrentTab.Settings;
+        visible: GuiState.active_tab == ActiveTab.Settings;
     }
 
     about_app := About {
-        visible: GuiState.active_tab == CurrentTab.About;
+        visible: GuiState.active_tab == ActiveTab.About;
     }
 
     public function reset_selection() {
-        if (GuiState.active_tab == CurrentTab.EmptyFiles) {
+        if (GuiState.active_tab == ActiveTab.EmptyFiles) {
             empty_files.reset_selection();
-        } else if (GuiState.active_tab == CurrentTab.EmptyFolders) {
+        } else if (GuiState.active_tab == ActiveTab.EmptyFolders) {
             empty_folders.reset_selection();
-        } else if (GuiState.active_tab == CurrentTab.SimilarImages) {
+        } else if (GuiState.active_tab == ActiveTab.SimilarImages) {
             similar_images.reset_selection();
-        } else if (GuiState.active_tab == CurrentTab.BadExtensions) {
+        } else if (GuiState.active_tab == ActiveTab.BadExtensions) {
             bad_extensions.reset_selection();
-        } else if (GuiState.active_tab == CurrentTab.BigFiles) {
+        } else if (GuiState.active_tab == ActiveTab.BigFiles) {
             big_files.reset_selection();
-        } else if (GuiState.active_tab == CurrentTab.DuplicateFiles) {
+        } else if (GuiState.active_tab == ActiveTab.DuplicateFiles) {
             duplicates.reset_selection();
-        } else if (GuiState.active_tab == CurrentTab.TemporaryFiles) {
+        } else if (GuiState.active_tab == ActiveTab.TemporaryFiles) {
             temporary_files.reset_selection();
-        } else if (GuiState.active_tab == CurrentTab.SimilarVideos) {
+        } else if (GuiState.active_tab == ActiveTab.SimilarVideos) {
             similar_videos.reset_selection();
-        } else if (GuiState.active_tab == CurrentTab.SimilarMusic) {
+        } else if (GuiState.active_tab == ActiveTab.SimilarMusic) {
             similar_music.reset_selection();
-        } else if (GuiState.active_tab == CurrentTab.InvalidSymlinks) {
+        } else if (GuiState.active_tab == ActiveTab.InvalidSymlinks) {
             invalid_symlink.reset_selection();
-        } else if (GuiState.active_tab == CurrentTab.BrokenFiles) {
+        } else if (GuiState.active_tab == ActiveTab.BrokenFiles) {
             broken_files.reset_selection();
         } else {
             // debug("Non handled reset selection in main_lists.slint", GuiState.active_tab);
         }
     }
 
-    changed_current_tab() => {
+    changed_active_tab() => {
         // TODO - not sure why this exists, but if needed it needs to be updated to use new functions
         // empty_folders.deselect_selected_item();
         // empty_files.deselect_selected_item();

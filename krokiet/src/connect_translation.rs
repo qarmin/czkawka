@@ -4,7 +4,7 @@ use i18n_embed::unic_langid::LanguageIdentifier;
 use log::{error, info};
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel};
 
-use crate::{Callabler, CurrentTab, GuiState, MainWindow, SelectMode, Settings, SortMode, SortModel, Translations, flk, localizer_krokiet};
+use crate::{Callabler, ActiveTab, GuiState, MainWindow, SelectMode, Settings, SortMode, SortModel, Translations, flk, localizer_krokiet};
 
 pub struct Language {
     pub long_name: &'static str,
@@ -313,18 +313,18 @@ fn translate_items(app: &MainWindow) {
     translation.set_settings_load_tabs_sizes_at_startup_text(flk!("settings_load_tabs_sizes_at_startup").into());
     translation.set_settings_load_windows_size_at_startup_text(flk!("settings_load_windows_size_at_startup").into());
 
-    let tools_model: [(SharedString, CurrentTab); TOOLS_NUMBER] = [
-        (flk!("tool_duplicate_files").into(), CurrentTab::DuplicateFiles),
-        (flk!("tool_empty_folders").into(), CurrentTab::EmptyFolders),
-        (flk!("tool_big_files").into(), CurrentTab::BigFiles),
-        (flk!("tool_empty_files").into(), CurrentTab::EmptyFiles),
-        (flk!("tool_temporary_files").into(), CurrentTab::TemporaryFiles),
-        (flk!("tool_similar_images").into(), CurrentTab::SimilarImages),
-        (flk!("tool_similar_videos").into(), CurrentTab::SimilarVideos),
-        (flk!("tool_music_duplicates").into(), CurrentTab::SimilarMusic),
-        (flk!("tool_invalid_symlinks").into(), CurrentTab::InvalidSymlinks),
-        (flk!("tool_broken_files").into(), CurrentTab::BrokenFiles),
-        (flk!("tool_bad_extensions").into(), CurrentTab::BadExtensions),
+    let tools_model: [(SharedString, ActiveTab); TOOLS_NUMBER] = [
+        (flk!("tool_duplicate_files").into(), ActiveTab::DuplicateFiles),
+        (flk!("tool_empty_folders").into(), ActiveTab::EmptyFolders),
+        (flk!("tool_big_files").into(), ActiveTab::BigFiles),
+        (flk!("tool_empty_files").into(), ActiveTab::EmptyFiles),
+        (flk!("tool_temporary_files").into(), ActiveTab::TemporaryFiles),
+        (flk!("tool_similar_images").into(), ActiveTab::SimilarImages),
+        (flk!("tool_similar_videos").into(), ActiveTab::SimilarVideos),
+        (flk!("tool_music_duplicates").into(), ActiveTab::SimilarMusic),
+        (flk!("tool_invalid_symlinks").into(), ActiveTab::InvalidSymlinks),
+        (flk!("tool_broken_files").into(), ActiveTab::BrokenFiles),
+        (flk!("tool_bad_extensions").into(), ActiveTab::BadExtensions),
     ];
     let gui_state = app.global::<GuiState>();
     gui_state.set_tools_model(ModelRc::new(VecModel::from(tools_model.to_vec())));

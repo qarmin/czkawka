@@ -1,7 +1,7 @@
 import { HorizontalBox, LineEdit, Palette, VerticalBox } from "std-widgets.slint";
 import { LeftSidePanel } from "left_side_panel.slint";
 import { MainList } from "main_lists.slint";
-import { CurrentTab, MainListModel, ProgressToSend } from "common.slint";
+import { ActiveTab, MainListModel, ProgressToSend } from "common.slint";
 import { ActionButtons } from "action_buttons.slint";
 import { Progress } from "progress.slint";
 import { Settings } from "settings.slint";
@@ -23,7 +23,7 @@ export {Settings, Callabler, GuiState, Translations, Palette}
 
 export component MainWindow inherits Window {
     callback scan_stopping;
-    callback scan_starting(CurrentTab);
+    callback scan_starting(ActiveTab);
     callback folder_choose_requested(bool);
     callback scan_ended(string);
     callback show_move_folders_dialog(string);
@@ -68,9 +68,9 @@ export component MainWindow inherits Window {
             preferred-height: 300px;
             LeftSidePanel {
                 horizontal-stretch: 0.0;
-                changed_current_tab() => {
+                changed_active_tab() => {
                     GuiState.preview_visible = false;
-                    main_list.changed_current_tab();
+                    main_list.changed_active_tab();
                 }
             }
 
