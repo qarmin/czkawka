@@ -101,10 +101,9 @@ pub struct CheckedGroupItemsInfo {
     pub number_of_groups_with_all_items_checked: u64,
 }
 
-// TODO - this will be broken for models with reference folders
 fn get_checked_group_info_from_model(model: &ModelRc<MainListModel>) -> CheckedItemsInfo {
     if model.iter().next().is_none() {
-        // Here I could panic, but i think that it is still possbile to go here, without doing anything wrong
+        // Here I could panic, but i think that it is still possible to go here, without doing anything wrong
         return CheckedItemsInfo {
             checked_items_number: 0,
             groups_with_checked_items: None,
@@ -118,10 +117,12 @@ fn get_checked_group_info_from_model(model: &ModelRc<MainListModel>) -> CheckedI
     let mut current_group_all_checked = true;
     let mut group_with_selected_item = false;
 
-    // TODO Maybe a little useless, check if really needed
+    // TODO Maybe collecting is a little useless, check if really needed
     let model_collected = model.iter().collect::<Vec<_>>();
     assert!(model_collected[0].header_row);
     assert!(!model_collected.last().expect("Is not empty").header_row);
+
+    let is_reference_folder = model_collected[0].filled_header_row;
 
     for item in model_collected.iter().skip(1) {
         if item.header_row {
@@ -149,6 +150,11 @@ fn get_checked_group_info_from_model(model: &ModelRc<MainListModel>) -> CheckedI
         if group_with_selected_item {
             groups_with_checked_items += 1;
         }
+    }
+    if is_reference_folder {
+        // In reference folders, this warning is not needed, because it only would make
+        // sense, when also header would be available to be checked, which is not possible
+        number_of_groups_with_all_items_checked = 0;
     }
 
     CheckedItemsInfo {
@@ -311,5 +317,25 @@ mod tests {
         assert_eq!(result.checked_items_number, 3);
         assert_eq!(groups_info.groups_with_checked_items, 2);
         assert_eq!(groups_info.number_of_groups_with_all_items_checked, 1);
+
+        let mut items = get_model_vec(8);
+        items[0].header_row = true;
+        items[0].filled_header_row = true;
+        items[1].checked = true;
+        items[2].checked = true;
+        items[3].checked = false;
+        items[4].header_row = true;
+        items[4].filled_header_row = true;
+        items[5].checked = true;
+        items[6].header_row = true;
+        items[6].filled_header_row = true;
+        items[7].checked = false;
+
+        let model = ModelRc::new(VecModel::from(items));
+        let result = get_checked_group_info_from_model(&model);
+        let groups_info = result.groups_with_checked_items.unwrap();
+        assert_eq!(result.checked_items_number, 3);
+        assert_eq!(groups_info.groups_with_checked_items, 2);
+        assert_eq!(groups_info.number_of_groups_with_all_items_checked, 0);
     }
 }
