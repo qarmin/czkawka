@@ -44,19 +44,30 @@ def plot_barh(
     if dropna:
         data = data.dropna(subset=[value_col])
     data_sorted = data.sort_values(value_col, ascending=False)
+
     plt.figure(figsize=(12, 8))
     bars = plt.barh(
         data_sorted["Config"],
         data_sorted[value_col] / unit_div,
         color=color
     )
+
+    ax = plt.gca()
+    max_val = (data_sorted[value_col] / unit_div).max()
+    if max_val is None or max_val == 0:
+        x_max = 1
+    else:
+        x_max = max_val * 1.15
+    ax.set_xlim(0, x_max)
+
     plt.xlabel(xlabel)
     plt.title(title)
-    plt.tight_layout()
 
     if label_fmt is None:
         label_fmt = fmt
     plt.bar_label(bars, fmt=label_fmt, color="black", padding=5)
+
+    plt.tight_layout()
     plt.savefig(filename)
     plt.close()
 
