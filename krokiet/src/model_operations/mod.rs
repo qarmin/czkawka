@@ -131,6 +131,8 @@ fn get_checked_group_info_from_model(model: &ModelRc<MainListModel>) -> CheckedI
             if group_with_selected_item {
                 groups_with_checked_items += 1;
             }
+            current_group_all_checked = true;
+            group_with_selected_item = false;
         } else {
             if item.checked {
                 checked_items_number += 1;
@@ -291,6 +293,23 @@ mod tests {
         let groups_info = result.groups_with_checked_items.unwrap();
         assert_eq!(result.checked_items_number, 3);
         assert_eq!(groups_info.groups_with_checked_items, 1);
+        assert_eq!(groups_info.number_of_groups_with_all_items_checked, 1);
+
+        let mut items = get_model_vec(8);
+        items[0].header_row = true;
+        items[1].checked = true;
+        items[2].checked = true;
+        items[3].checked = false;
+        items[4].header_row = true;
+        items[5].checked = true;
+        items[6].header_row = true;
+        items[7].checked = false;
+
+        let model = ModelRc::new(VecModel::from(items));
+        let result = get_checked_group_info_from_model(&model);
+        let groups_info = result.groups_with_checked_items.unwrap();
+        assert_eq!(result.checked_items_number, 3);
+        assert_eq!(groups_info.groups_with_checked_items, 2);
         assert_eq!(groups_info.number_of_groups_with_all_items_checked, 1);
     }
 }

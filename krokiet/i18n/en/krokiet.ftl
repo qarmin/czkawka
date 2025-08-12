@@ -22,9 +22,9 @@ rust_checked_tags = Checked tags of { $items_stats }
 rust_checked_content = Checked content of { $items_stats } ({ $size_stats })
 rust_compared_tags = Compared tags of { $items_stats }
 rust_compared_content = Compared content of { $items_stats }
-rust_hashed_images = Hashed of { $items_stats } image ({ $size_stats })
-rust_compared_image_hashes = Compared { $items_stats } image hash
-rust_hashed_videos = Hashed of { $items_stats } video
+rust_hashed_images = Hashed { $items_stats } images ({ $size_stats })
+rust_compared_image_hashes = Compared { $items_stats } image hashes
+rust_hashed_videos = Hashed { $items_stats } videos
 rust_checked_files = Checked { $items_stats } file ({ $size_stats })
 rust_checked_files_bad_extensions = Checked { $items_stats } file
 rust_analyzed_partial_hash = Analyzed partial hash of { $items_stats } files ({ $size_stats })
@@ -43,7 +43,7 @@ rust_found_temporary_files = Found { $items_found } temporary files
 rust_no_file_type_selected = Cannot find broken files without any file type selected.
 rust_found_broken_files = Found { $items_found } broken files
 rust_found_bad_extensions = Found { $items_found } files with bad extensions
-rust_found_duplicate_files = Found { $items_found } similar duplicate files
+rust_found_duplicate_files = Found { $items_found } duplicate files
 rust_found_big_files = Found { $items_found } big files
 rust_cannot_load_preset = Cannot change and load preset { $preset_idx } - reason { $reason }, using default settings instead
 rust_saved_preset = Saved preset { $preset_idx }
@@ -63,8 +63,10 @@ rust_no_files_deleted = Not selected any files/folders to delete
 rust_no_files_renamed = Not selected any files/folders to rename
 rust_no_files_moved = Not selected any files/folders to move
 
-rust_delete_confirmation = Are you sure you want to { $items } the selected items?
-
+rust_delete_confirmation = Are you sure you want the selected items?
+rust_delete_confirmation_number_simple = { $items } items is selected.
+rust_delete_confirmation_number_groups = { $items } items in { $groups } groups are selected.
+rust_delete_confirmation_selected_all_in_group = In { $groups } groups, there are all items selected.
 
 # Slint translations, but in arrays
 
