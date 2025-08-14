@@ -112,6 +112,11 @@ debug_verify:
     cargo bloat --release --bin czkawka_gui -n 30
     cargo bloat --release --bin krokiet -n 30
 
+bloat:
+    cargo bloat --release --crates --bin czkawka_cli
+    cargo bloat --release --crates --bin czkawka_gui
+    cargo bloat --release --crates --bin krokiet
+
 check_complilations:
     cargo install --path misc/test_compilation_speed_size
     test_compilation_speed_size .

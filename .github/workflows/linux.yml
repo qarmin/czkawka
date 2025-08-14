@@ -30,7 +30,7 @@ jobs:
         run: rustup default 1.85.0
 
       - name: Build Release
-        if: ${{ github.ref != 'refs/heads/masterrrrrrrr' }}
+        if: ${{ github.ref == 'refs/heads/master' }}
         run: |
           sed -i 's/#lto = /lto = /g' Cargo.toml
           
@@ -107,7 +107,7 @@ jobs:
             czkawka_all.7z
 
       - name: Release
-        if: ${{ github.ref != 'refs/heads/masterrrrrrrr' }}
+        if: ${{ github.ref == 'refs/heads/master' }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: "Nightly"
@@ -143,7 +143,7 @@ jobs:
           rustup target add x86_64-unknown-linux-musl
 
       - name: Build Release
-        if: ${{ github.ref != 'refs/heads/masterrrrrrrr' }}
+        if: ${{ github.ref == 'refs/heads/master' }}
         run: |
           sed -i 's/#lto = /lto = /g' Cargo.toml
           cargo build --release --bin czkawka_cli --target x86_64-unknown-linux-musl
@@ -168,7 +168,7 @@ jobs:
 
       - name: Release
         uses: softprops/action-gh-release@v2
-        if: ${{ github.ref != 'refs/heads/masterrrrrrrr' }}
+        if: ${{ github.ref == 'refs/heads/master' }}
         with:
           tag_name: "Nightly"
           files: |
@@ -211,7 +211,7 @@ jobs:
             linux_krokiet_32bit
 
   linux-stability:
-    if: ${{ github.ref != 'refs/heads/masterrrrrrrr' }} # Runs only in master, because it is really time consumig
+    if: ${{ github.ref == 'refs/heads/master' }} # Runs only in master, because it is really time consumig
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
