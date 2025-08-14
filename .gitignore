@@ -30,4 +30,4 @@ benchmarks
 TestFiles
 *.txt
 .venv
-charts
+charts*

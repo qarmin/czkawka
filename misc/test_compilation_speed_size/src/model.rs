@@ -1,7 +1,9 @@
 use std::io::Write;
 use std::time::Duration;
+
 use humansize::{BINARY, format_size};
 
+#[allow(unused)]
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Debugg {
     None,
@@ -12,7 +14,7 @@ pub enum Debugg {
 }
 
 impl Debugg {
-    fn to_str(&self) -> &str {
+    fn to_str(self) -> &'static str {
         match self {
             Debugg::None => "debug=\"none\"",
             Debugg::LineDirectivesOnly => "debug=\"line-directives-only\"",
@@ -23,6 +25,7 @@ impl Debugg {
     }
 }
 
+#[allow(unused)]
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum SplitDebug {
     Off,
@@ -30,7 +33,7 @@ pub enum SplitDebug {
     Unpacked,
 }
 impl SplitDebug {
-    fn to_str(&self) -> &str {
+    fn to_str(self) -> &'static str {
         match self {
             SplitDebug::Off => "split-debuginfo=\"off\"",
             SplitDebug::Packed => "split-debuginfo=\"packed\"",
@@ -48,7 +51,7 @@ pub enum OptLevel {
     S,
 }
 impl OptLevel {
-    fn to_str(&self) -> &str {
+    fn to_str(self) -> &'static str {
         match self {
             OptLevel::Zero => "opt-level=0",
             OptLevel::One => "opt-level=1",
@@ -60,18 +63,18 @@ impl OptLevel {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub enum LTO {
+pub enum Lto {
     Off,
     Thin,
     Fat,
 }
 
-impl LTO {
-    fn to_str(&self) -> &str {
+impl Lto {
+    fn to_str(self) -> &'static str {
         match self {
-            LTO::Off => "lto=\"off\"",
-            LTO::Thin => "lto=\"thin\"",
-            LTO::Fat => "lto=\"fat\"",
+            Lto::Off => "lto=\"off\"",
+            Lto::Thin => "lto=\"thin\"",
+            Lto::Fat => "lto=\"fat\"",
         }
     }
 }
@@ -83,7 +86,7 @@ pub enum BuildOrCheck {
 }
 
 impl BuildOrCheck {
-    fn to_str(&self) -> &str {
+    fn to_str(self) -> &'static str {
         match self {
             BuildOrCheck::Build => "build",
             BuildOrCheck::Check => "check",
@@ -98,7 +101,7 @@ pub enum CodegenUnits {
     Default,
 }
 impl CodegenUnits {
-    fn to_str(&self) -> &str {
+    fn to_str(self) -> &'static str {
         match self {
             CodegenUnits::One => "codegen-units=1",
             CodegenUnits::Sixteen => "codegen-units=16",
@@ -113,7 +116,7 @@ pub enum Panic {
     Abort,
 }
 impl Panic {
-    fn to_str(&self) -> &str {
+    fn to_str(self) -> &'static str {
         match self {
             Panic::Unwind => "panic=\"unwind\"",
             Panic::Abort => "panic=\"abort\"",
@@ -127,7 +130,7 @@ pub enum OverflowChecks {
     Off,
 }
 impl OverflowChecks {
-    fn to_str(&self) -> &str {
+    fn to_str(self) -> &'static str {
         match self {
             OverflowChecks::On => "overflow-checks=true",
             OverflowChecks::Off => "overflow-checks=false",
@@ -141,7 +144,7 @@ pub enum Incremental {
     Off,
 }
 impl Incremental {
-    fn to_str(&self) -> &str {
+    fn to_str(self) -> &'static str {
         match self {
             Incremental::On => "incremental=true",
             Incremental::Off => "incremental=false",
@@ -149,11 +152,10 @@ impl Incremental {
     }
 }
 
-
 #[derive(Debug, Clone)]
 pub struct Config {
     pub name: &'static str,
-    pub lto: LTO,
+    pub lto: Lto,
     pub debug: Debugg,
     pub opt_level: OptLevel,
     pub build_or_check: BuildOrCheck,
@@ -162,7 +164,7 @@ pub struct Config {
     pub split_debug: SplitDebug,
     pub overflow_checks: OverflowChecks,
     pub incremental: Incremental,
-    pub build_std: bool
+    pub build_std: bool,
 }
 
 impl Config {
@@ -204,7 +206,7 @@ pub struct Results {
     pub project: String,
     pub cranelift: bool,
     pub use_mold: bool,
-    pub rebuild_time: Duration
+    pub rebuild_time: Duration,
 }
 
 impl Results {
@@ -216,11 +218,7 @@ impl Results {
         Ok(())
     }
     pub fn save_to_file(&self, file_writer: &mut std::fs::File) -> std::io::Result<()> {
-        let cranelift = if self.cranelift {
-            "+ cranelift"
-        } else {
-            "+ llvm"
-        };
+        let cranelift = if self.cranelift { "+ cranelift" } else { "+ llvm" };
 
         let file_size_pretty = if self.output_file_size == 0 {
             "-".to_string()
@@ -233,11 +231,7 @@ impl Results {
             self.output_file_size.to_string()
         };
 
-        let linker = if self.use_mold {
-            "+ mold"
-        } else {
-            "+ ld"
-        };
+        let linker = if self.use_mold { "+ mold" } else { "+ ld" };
 
         writeln!(
             file_writer,
@@ -250,10 +244,10 @@ impl Results {
             file_size_number,
             format_size(self.target_folder_size, BINARY),
             self.target_folder_size,
-            self.compilation_time.as_secs(),
+            self.compilation_time.as_secs_f32(),
             duration_to_pretty_time(self.compilation_time),
             self.threads_number,
-            self.rebuild_time.as_secs(),
+            self.rebuild_time.as_secs_f32(),
             duration_to_pretty_time(self.rebuild_time)
         )?;
         Ok(())

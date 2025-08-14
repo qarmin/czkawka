@@ -2,11 +2,12 @@ mod model;
 
 use std::fs;
 use std::fs::OpenOptions;
-use std::path::Path;
 use std::io::Write;
+use std::path::Path;
+
 use walkdir::WalkDir;
 
-use crate::model::{BuildOrCheck, CodegenUnits, Config, Debugg, Incremental, OptLevel, OverflowChecks, Panic, Results, SplitDebug, LTO};
+use crate::model::{BuildOrCheck, CodegenUnits, Config, Debugg, Incremental, Lto, OptLevel, OverflowChecks, Panic, Results, SplitDebug};
 
 const START_CONFIG_TOML: &str = r#"[workspace]
 members = [
@@ -102,7 +103,7 @@ fn get_configs(cranelift: bool) -> Vec<Config> {
     // rpath = false
     let debug_base = Config {
         name: "debug",
-        lto: LTO::Off,
+        lto: Lto::Off,
         debug: Debugg::Full,
         opt_level: OptLevel::Zero,
         build_or_check: BuildOrCheck::Build,
@@ -115,7 +116,7 @@ fn get_configs(cranelift: bool) -> Vec<Config> {
     };
     let release_base = Config {
         name: "release",
-        lto: LTO::Off,
+        lto: Lto::Off,
         debug: Debugg::None,
         opt_level: OptLevel::Three,
         build_or_check: BuildOrCheck::Build,
@@ -135,9 +136,25 @@ fn get_configs(cranelift: bool) -> Vec<Config> {
     check_fast_check.name = "check";
     check_fast_check.build_or_check = BuildOrCheck::Check;
 
+    // let mut debug_split_debug = debug_base.clone();
+    // debug_split_debug.name = "debug + split debug";
+    // debug_split_debug.split_debug = SplitDebug::Unpacked;
+
+    let mut release_with_debug = release_base.clone();
+    release_with_debug.name = "release + debug info";
+    release_with_debug.debug = Debugg::Full;
+
+    let mut release_o2 = release_base.clone();
+    release_o2.name = "release + opt o2";
+    release_o2.opt_level = OptLevel::Two;
+
+    let mut release_o1 = release_base.clone();
+    release_o1.name = "release + opt o1";
+    release_o1.opt_level = OptLevel::One;
+
     let mut release_thin_lto = release_base.clone();
     release_thin_lto.name = "release + thin lto";
-    release_thin_lto.lto = LTO::Thin;
+    release_thin_lto.lto = Lto::Thin;
 
     let mut release_optimize_size = release_base.clone();
     release_optimize_size.name = "release + optimize size";
@@ -145,10 +162,10 @@ fn get_configs(cranelift: bool) -> Vec<Config> {
 
     let mut release_full_lto = release_base.clone();
     release_full_lto.name = "release + fat lto";
-    release_full_lto.lto = LTO::Fat;
+    release_full_lto.lto = Lto::Fat;
 
     let mut release_codegen_units = release_base.clone();
-    release_codegen_units.name = "release + codegen units 1";
+    release_codegen_units.name = "release + cu 1";
     release_codegen_units.codegen_units = CodegenUnits::One;
 
     let mut release_panic_abort = release_base.clone();
@@ -160,30 +177,46 @@ fn get_configs(cranelift: bool) -> Vec<Config> {
     release_std.build_std = true;
 
     let mut release_fastest = release_base.clone();
-    release_fastest.name = "release + fat lto + codegen units 1 + panic abort";
-    release_fastest.lto = LTO::Fat;
+    release_fastest.name = "release + fat lto + cu 1 + panic abort";
+    release_fastest.lto = Lto::Fat;
     release_fastest.codegen_units = CodegenUnits::One;
     release_fastest.panic = Panic::Abort;
-    // release_fastest.build_std = true; // I would use it, but fails to compile with lto enabled
+
+    let mut release_fastest_with_build_std = release_base.clone();
+    release_fastest_with_build_std.name = "release + fat lto + cu 1 + panic abort + build-std";
+    release_fastest_with_build_std.lto = Lto::Fat;
+    release_fastest_with_build_std.codegen_units = CodegenUnits::One;
+    release_fastest_with_build_std.panic = Panic::Abort;
+    release_fastest_with_build_std.build_std = true;
+
+    let mut release_incremental = release_base.clone();
+    release_incremental.name = "release + incremental";
+    release_incremental.incremental = Incremental::On;
 
     let configs = vec![
+        // debug_split_debug,
+        release_incremental,
         debug_base,
         debug_fast_check,
         check_fast_check,
         release_base,
         release_codegen_units,
+        release_with_debug,
         release_std,
         release_panic_abort,
         release_optimize_size,
         release_thin_lto,
         release_full_lto,
         release_fastest,
+        release_o2,
+        release_o1,
+        release_fastest_with_build_std,
     ];
 
     // For cranelift filter out configs with lto which is not supported
     // also build-std panics
     if cranelift {
-        configs.into_iter().filter(|config| config.lto == LTO::Off && !config.build_std).collect()
+        configs.into_iter().filter(|config| config.lto == Lto::Off && !config.build_std).collect()
     } else {
         configs
     }
@@ -203,7 +236,8 @@ fn clean_cargo() {
     }
 }
 
-fn run_cargo_build(project: &str, threads_number: u32, build: BuildOrCheck, cranelift: bool, use_mold: bool, build_std: bool) {
+fn run_cargo_build(project: &str, threads_number: u32, build: BuildOrCheck, cranelift: bool, use_mold: bool, build_std: bool, panic_abort: Panic) {
+    // return; // TODO only for tests
     let build_check = if build == BuildOrCheck::Build { "build" } else { "check" };
     let mut command = std::process::Command::new("cargo");
     command.arg("+nightly");
@@ -220,7 +254,11 @@ fn run_cargo_build(project: &str, threads_number: u32, build: BuildOrCheck, cran
         };
     }
     if build_std {
-        command.args(&["-Z", "build-std=std"]);
+        if panic_abort == Panic::Abort {
+            command.args(["-Z", "build-std=std,panic_abort"]);
+        } else {
+            command.args(["-Z", "build-std=std"]);
+        }
     }
 
     if let Some(rust_flags) = rust_flags {
@@ -264,11 +302,7 @@ fn clean_changes_to_project_files(project: &str) {
 
 fn add_empty_line_to_file(project: &str) {
     let file_path = Path::new(project).join("src").join("main.rs");
-    let mut file = OpenOptions::new()
-        .write(true)
-        .append(true)
-        .open(&file_path)
-        .expect("Could not open main.rs file");
+    let mut file = OpenOptions::new().append(true).open(&file_path).expect("Could not open main.rs file");
     if let Err(e) = writeln!(file, "// Absolutelly nothing") {
         panic!("Could not write to main.rs file: {}", e);
     }
@@ -284,8 +318,7 @@ fn check_compilation_speed_and_size(base: &str, project: &str, config: Config, t
 
     println!("Project: {project}, threads: {threads_number}, {}", config.to_string_short());
 
-
-    run_cargo_build(project, threads_number, config.build_or_check, cranelift, use_mold, config.build_std);
+    run_cargo_build(project, threads_number, config.build_or_check, cranelift, use_mold, config.build_std, config.panic);
 
     let compilation_time = start_time.elapsed();
 
@@ -294,7 +327,7 @@ fn check_compilation_speed_and_size(base: &str, project: &str, config: Config, t
 
     add_empty_line_to_file(project);
     let rebuild_time_start = std::time::Instant::now();
-    run_cargo_build(project, threads_number, config.build_or_check, cranelift, use_mold, config.build_std);
+    run_cargo_build(project, threads_number, config.build_or_check, cranelift, use_mold, config.build_std, config.panic);
     let rebuild_time = rebuild_time_start.elapsed();
 
     Results {
@@ -306,7 +339,7 @@ fn check_compilation_speed_and_size(base: &str, project: &str, config: Config, t
         project: project.to_string(),
         cranelift,
         use_mold,
-        rebuild_time
+        rebuild_time,
     }
 }
 

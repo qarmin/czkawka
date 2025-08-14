@@ -77,7 +77,7 @@ plot_barh(
     "Compilation Time (seconds)",
     "Compilation Time by Config",
     "charts/compilation_time.png",
-    fmt="{:.0f}s",
+    fmt="{:.1f}s",
 )
 plot_barh(
     df,
@@ -85,7 +85,7 @@ plot_barh(
     "Rebuild Time (seconds)",
     "Rebuild Time by Config",
     "charts/rebuild_time.png",
-    fmt="{:.0f}s",
+    fmt="{:.1f}s",
 )
 plot_barh(
     df,
@@ -93,7 +93,7 @@ plot_barh(
     "Output File Size (MB)",
     "Output File Size by Config",
     "charts/output_file_size.png",
-    fmt="{:.2f} MB",
+    fmt="{:.1f} MB",
     unit_div=1024**2,
     dropna=True,
 )
@@ -103,7 +103,7 @@ plot_barh(
     "Target Folder Size (GB)",
     "Target Folder Size by Config",
     "charts/target_folder_size.png",
-    fmt="{:.2f} GB",
+    fmt="{:.1f} GB",
     unit_div=1024**3,
 )
 
