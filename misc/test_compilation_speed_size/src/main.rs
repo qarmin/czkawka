@@ -136,6 +136,8 @@ fn get_configs(cranelift: bool) -> Vec<Config> {
     check_fast_check.name = "check";
     check_fast_check.build_or_check = BuildOrCheck::Check;
 
+    // Debug split is strange, because resulted binary was same as debug without split debug
+    // Need to verify if it works with this configuration
     // let mut debug_split_debug = debug_base.clone();
     // debug_split_debug.name = "debug + split debug";
     // debug_split_debug.split_debug = SplitDebug::Unpacked;
