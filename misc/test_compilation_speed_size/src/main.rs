@@ -195,9 +195,13 @@ fn get_configs(cranelift: bool) -> Vec<Config> {
     release_incremental.name = "release + incremental";
     release_incremental.incremental = Incremental::On;
 
+    let mut release_incremental_lto = release_base.clone();
+    release_incremental_lto.name = "release + incremental + fat lto";
+    release_incremental_lto.incremental = Incremental::On;
+    release_incremental_lto.lto = Lto::Fat;
+
     let configs = vec![
         // debug_split_debug,
-        release_incremental,
         debug_base,
         debug_fast_check,
         check_fast_check,
@@ -213,6 +217,8 @@ fn get_configs(cranelift: bool) -> Vec<Config> {
         release_o2,
         release_o1,
         release_fastest_with_build_std,
+        release_incremental,
+        release_incremental_lto
     ];
 
     // For cranelift filter out configs with lto which is not supported

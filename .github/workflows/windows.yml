@@ -24,9 +24,9 @@ jobs:
           rustup target add x86_64-pc-windows-gnu
 
       - name: Compile Krokiet Release
-        if: ${{ github.ref == 'refs/heads/master' }}
+        if: ${{ github.ref != 'refs/heads/masterrrrrrrr' }}
         run: |
-          sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
+          sed -i 's/#lto = /lto = /g' Cargo.toml
           cargo build --release --target x86_64-pc-windows-gnu --bin krokiet
           mv target/x86_64-pc-windows-gnu/release/krokiet.exe windows_krokiet_on_linux.exe
 
@@ -53,7 +53,7 @@ jobs:
 
       - name: Release
         uses: softprops/action-gh-release@v2
-        if: ${{ github.ref == 'refs/heads/master' }}
+        if: ${{ github.ref != 'refs/heads/masterrrrrrrr' }}
         with:
           tag_name: "Nightly"
           files: |
@@ -73,9 +73,9 @@ jobs:
   #          rustup default 1.85.0
   #
   #      - name: Compile Krokiet Release
-  #        if: ${{ github.ref == 'refs/heads/master' }}
+  #        if: ${{ github.ref != 'refs/heads/masterrrrrrrr' }}
   #        run: |
-  #          sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
+  #          sed -i 's/#lto = /lto = /g' Cargo.toml
   #          cargo build --release --bin krokiet --no-default-features --features "winit_skia_opengl,winit_software"
   #          mv target/release/krokiet.exe windows_krokiet_on_windows_skia_opengl.exe
   #          cargo build --release --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software"
@@ -102,7 +102,7 @@ jobs:
   #
   #      - name: Release
   #        uses: softprops/action-gh-release@v2
-  #        if: ${{ github.ref == 'refs/heads/master' }}
+  #        if: ${{ github.ref != 'refs/heads/masterrrrrrrr' }}
   #        with:
   #          tag_name: "Nightly"
   #          files: |
@@ -126,7 +126,7 @@ jobs:
           rustup target add x86_64-pc-windows-gnu
 
       - name: Cross compile for Windows - Release
-        if: ${{ github.ref == 'refs/heads/master' }}
+        if: ${{ github.ref != 'refs/heads/masterrrrrrrr' }}
         run: |
           source "$HOME/.cargo/env"
           #!/bin/bash
@@ -186,7 +186,7 @@ jobs:
 
       - name: Release
         uses: softprops/action-gh-release@v2
-        if: ${{ github.ref == 'refs/heads/master' }}
+        if: ${{ github.ref != 'refs/heads/masterrrrrrrr' }}
         with:
           tag_name: "Nightly"
           files: |
@@ -195,7 +195,7 @@ jobs:
 
   container_4_6:
     runs-on: ubuntu-latest
-    if: ${{ github.ref == 'refs/heads/master' }}
+    if: ${{ github.ref != 'refs/heads/masterrrrrrrr' }}
     container:
       image: ghcr.io/piegamesde/gtk4-cross:gtk-4.6
     steps:
@@ -210,7 +210,7 @@ jobs:
           rustup target add x86_64-pc-windows-gnu
 
       - name: Cross compile for Windows - Release
-        if: ${{ github.ref == 'refs/heads/master' }}
+        if: ${{ github.ref != 'refs/heads/masterrrrrrrr' }}
         run: |
           source "$HOME/.cargo/env"
           #!/bin/bash
@@ -270,7 +270,7 @@ jobs:
 
       - name: Release
         uses: softprops/action-gh-release@v2
-        if: ${{ github.ref == 'refs/heads/master' }}
+        if: ${{ github.ref != 'refs/heads/masterrrrrrrr' }}
         with:
           tag_name: "Nightly"
           files: |

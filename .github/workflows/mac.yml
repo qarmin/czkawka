@@ -36,7 +36,7 @@ jobs:
           # brew link --overwrite python@3.13
 
       - name: Build Release
-        if: ${{ github.ref == 'refs/heads/master' }}
+        if: ${{ github.ref != 'refs/heads/masterrrrrrrr' }}
         run: |
           set -e
           sed -i '' 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
@@ -89,7 +89,7 @@ jobs:
             macos_krokiet_${{ env.ARCHNAME }}
 
       - name: Release
-        if: ${{ github.ref == 'refs/heads/master' }}
+        if: ${{ github.ref != 'refs/heads/masterrrrrrrr' }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: "Nightly"
