@@ -1,7 +1,7 @@
 use polars_core::prelude::*;
 use polars_io::prelude::*;
 use std::fs;
-use polars::prelude::GetOutput;
+use plotters::prelude::*;
 
 fn load_dataframe_from_csv(file_path: &str) -> PolarsResult<DataFrame> {
     let mut df = CsvReadOptions::default()
@@ -101,45 +101,166 @@ fn save_as_md(df: &DataFrame, path: &str) -> PolarsResult<()> {
     Ok(())
 }
 
+fn plot_barh(
+    df: &DataFrame,
+    value_col: &str,
+    xlabel: &str,
+    title: &str,
+    filename: &str,
+    _fmt: &str,
+    unit_div: f64,
+    dropna: bool,
+    color: RGBColor,
+) -> PolarsResult<()> {
+    // Helper to find a Series by name, handling possible quotes and whitespace
+    fn find_col<'a>(df: &'a DataFrame, name: &str) -> Option<&'a Series> {
+        let name_trimmed = name.trim();
+        println!("Columns {:?}", df.get_column_names());
+        println!("Looking for column: {}", name_trimmed);
+        df.get_columns().iter().find_map(|s| {
+            let sname = s.name().trim();
+            if sname == name_trimmed
+                || sname == name_trimmed.replace('\"', "")
+                || sname == format!("\"{}\"", name_trimmed)
+            {
+                Some(s)
+            } else {
+                None
+            }
+        }).and_then(|e|e.as_series())
+    }
+
+    let config_col = find_col(df, "BuildConfig")
+        .or_else(|| find_col(df, "Config"))
+        .ok_or_else(|| polars_core::error::PolarsError::ComputeError("Config column not found".into()))?;
+
+    let value_col = find_col(df, value_col)
+        .ok_or_else(|| polars_core::error::PolarsError::ComputeError(format!("{} not found", value_col).into()))?;
+
+    // Use .str()? on Series
+    let config_utf8 = config_col.str()?.into_iter();
+    let value_f64 = value_col.f64()?.into_iter();
+
+    let mut configs = Vec::new();
+    let mut values = Vec::new();
+
+    for (conf, val) in config_utf8.zip(value_f64) {
+        if dropna && val.is_none() {
+            continue;
+        }
+        configs.push(conf.unwrap_or("").to_string());
+        values.push(val.unwrap_or(0.0) / unit_div);
+    }
+
+    // Sort descending by value
+    let mut zipped: Vec<_> = configs.into_iter().zip(values.into_iter()).collect();
+    zipped.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+    let (configs, values): (Vec<_>, Vec<_>) = zipped.into_iter().unzip();
+
+    // Plot with plotters
+    let root = BitMapBackend::new(filename, (1200, 900)).into_drawing_area();
+    root.fill(&WHITE).unwrap();
+
+    let max_val = values.iter().cloned().fold(0.0/0.0, f64::max);
+    let x_max = if max_val.is_finite() && max_val > 0.0 { max_val * 1.15 } else { 1.0 };
+
+    let mut chart = ChartBuilder::on(&root)
+        .caption(title, ("Noto Sans", 30).into_font())
+        .margin(40)
+        .x_label_area_size(60)
+        .y_label_area_size(300)
+        .build_cartesian_2d(0f64..x_max, 0..configs.len())
+        .unwrap();
+
+    chart
+        .configure_mesh()
+        .x_desc(xlabel)
+        .y_desc("")
+        .y_labels(configs.len())
+        .y_label_formatter(&|idx| configs.get(*idx).cloned().unwrap_or_default())
+        .x_label_formatter(&|x| format!("{}", x))
+        .axis_desc_style(("Noto Sans", 20))
+        .label_style(("Noto Sans", 16))
+        .draw()
+        .unwrap();
+
+    for (i, v) in values.iter().enumerate() {
+        chart
+            .draw_series(std::iter::once(Rectangle::new(
+                [(0.0, i), (*v, i + 1)],
+                color.filled(),
+            )))
+            .unwrap()
+            .label(configs[i].clone())
+            .legend(move |(x, y)| {
+                Rectangle::new([(x, y - 5), (x + 20, y + 5)], color.filled())
+            });
+
+        // Draw value label
+        chart
+            .draw_series(std::iter::once(Text::new(
+                format!("{}", v),
+                (*v, i),
+                ("Noto Sans", 16).into_font().color(&BLACK),
+            )))
+            .unwrap();
+    }
+
+    root.present().unwrap();
+
+    Ok(())
+}
+
 pub fn create_graphs() -> PolarsResult<()> {
     let df = load_dataframe_from_csv("compilation_results.txt")?;
 
     // Create output directory
     fs::create_dir_all("charts")?;
 
-    // Plotting helper (stubbed out, as plotlars is not available)
-    /*
-    fn plot_barh(
-        df: &DataFrame,
-        value_col: &str,
-        xlabel: &str,
-        title: &str,
-        filename: &str,
-        fmt: &str,
-        unit_div: f64,
-        dropna: bool,
-        color: Color,
-    ) -> PolarsResult<()> {
-        // ...plotting code...
-        Ok(())
-    }
-    */
-
-    // plot_barh calls removed or commented out
-    /*
     plot_barh(
         &df,
-        "Compilation Time (seconds)",
+        "Compilation Time(seconds)",
         "Compilation Time (seconds)",
         "Compilation Time by Config",
         "charts/compilation_time.png",
         "{:.1}s",
         1.0,
         false,
-        Color::from("#1f77b4"),
+        RGBColor(31, 119, 180),
     )?;
-    // ...other plot_barh calls...
-    */
+    plot_barh(
+        &df,
+        "Rebuild Time(seconds)",
+        "Rebuild Time (seconds)",
+        "Rebuild Time by Config",
+        "charts/rebuild_time.png",
+        "{:.1}s",
+        1.0,
+        false,
+        RGBColor(255, 127, 14),
+    )?;
+    plot_barh(
+        &df,
+        "Output File Size(in bytes)",
+        "Output File Size (MB)",
+        "Output File Size by Config",
+        "charts/output_file_size.png",
+        "{:.1} MB",
+        1024.0 * 1024.0,
+        true,
+        RGBColor(44, 160, 44),
+    )?;
+    plot_barh(
+        &df,
+        "Target Folder Size(bytes)",
+        "Target Folder Size (GB)",
+        "Target Folder Size by Config",
+        "charts/target_folder_size.png",
+        "{:.1} GB",
+        1024.0 * 1024.0 * 1024.0,
+        false,
+        RGBColor(214, 39, 40),
+    )?;
 
     save_as_md(&df, "charts/compilation_results.md")?;
 
