@@ -1,5 +1,10 @@
+mod chart;
 mod model;
 
+use crate::chart::create_graphs;
+use crate::model::{
+    BuildConfig, BuildOrCheck,  Config,  Panic, Project, Results,
+};
 use std::fs;
 use std::fs::OpenOptions;
 use std::io::Write;
@@ -7,19 +12,12 @@ use std::path::Path;
 use std::process::exit;
 use walkdir::WalkDir;
 
-use crate::model::{BuildOrCheck, CodegenUnits, BuildConfig, Debugg, Incremental, Lto, OptLevel, OverflowChecks, Panic, Results, SplitDebug, GeneralConfig, Config, Cranelift, Project};
-
 const PROFILE_NAME: &str = "fff";
 const RESULTS_FILE_NAME: &str = "compilation_results.txt";
 
-
-fn create_graphs() {
-
-}
-
 fn main() {
     let Some(first_arg) = std::env::args().nth(1) else {
-        create_graphs();
+        create_graphs().expect("Failed to create graphs");
         exit(0);
     };
 
@@ -34,15 +32,10 @@ fn main() {
         std::process::exit(1);
     };
 
-    let Some(first_arg) = std::env::args().nth(1) else {
-        eprintln!("Please provide the path to json config info as first argument.");
-        std::process::exit(1);
-    };
     let Ok(config_json_content) = fs::read_to_string(&first_arg) else {
         eprintln!("Could not read content of the provided json file: {}", first_arg);
         std::process::exit(1);
     };
-
 
     let mut config = match serde_json::from_str::<Config>(&config_json_content) {
         Ok(c) => c,
@@ -61,12 +54,12 @@ fn main() {
 
     Results::write_header_to_file(&mut results_file).unwrap();
 
-    config.build_config_converted = config.build_config.clone().into_iter().map(|e|e.into()).collect();
+    config.build_config_converted = config.build_config.clone().into_iter().map(|e| e.into()).collect();
     let g = config.general_config.clone();
     let mut all_configs = vec![];
     for mold in g.mold.to_options() {
         for cranelift in g.cranelift.to_options() {
-            for  build_config in  &config.build_config_converted {
+            for build_config in &config.build_config_converted {
                 all_configs.push((mold, cranelift, build_config.clone()));
             }
         }
@@ -100,13 +93,8 @@ fn clean_cargo() {
     }
 }
 
-fn run_cargo_build(
-    mold: bool,
-    cranelift: bool,
-    build_config: &BuildConfig,
-    project: &Project,
-) {
-    return; // TODO only for tests
+fn run_cargo_build(mold: bool, cranelift: bool, build_config: &BuildConfig, project: &Project) {
+    // return; // TODO only for tests
     let build_check = if build_config.build_or_check == BuildOrCheck::Build { "build" } else { "check" };
     let mut command = std::process::Command::new("cargo");
     command.arg("+nightly");
