@@ -20,11 +20,6 @@
       "build_or_check": "Check"
     },
     {
-      "name": "debug + split debug",
-      "rust_base_config": "Debug",
-      "split_debug": "Unpacked"
-    },
-    {
       "name": "release + debug info",
       "rust_base_config": "Release",
       "debug": "Full"
@@ -83,6 +78,12 @@
       "codegen_units": "One",
       "panic": "Abort",
       "build_std": true
+    },
+    {
+      "name": "release + fat lto + cu 1",
+      "rust_base_config": "Release",
+      "lto": "Fat",
+      "codegen_units": "One"
     },
     {
       "name": "release + incremental",

@@ -118,6 +118,7 @@ bloat:
     cargo bloat --release --crates --bin krokiet
 
 check_complilations:
-    cargo install --path misc/test_compilation_speed_size
-    test_compilation_speed_size .
-    uv run misc/generate_md_and_plots.py
+    git checkout Cargo.toml
+    # cargo install --path misc/test_compilation_speed_size
+    test_compilation_speed_size misc/test_compilation_speed_size/krokiet.json
+    python3 misc/test_compilation_speed_size/generate_md_and_plots.py

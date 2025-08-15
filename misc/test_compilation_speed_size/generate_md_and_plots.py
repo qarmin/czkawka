@@ -1,13 +1,12 @@
+# sudo apt install python3-matplotlib python3-pandas python3-tabulate
 import pandas as pd
 import matplotlib.pyplot as plt  # type: ignore[import-not-found]
 import matplotlib
 import os
 
-# Read the data from the file
 df = pd.read_csv("compilation_results.txt", sep="|", engine="python")
-df = df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)  # Remove whitespace from headers/values
+df = df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
 
-# Convert columns to appropriate types if needed
 df["Output File Size (bytes)"] = pd.to_numeric(df["Output File Size(in bytes)"], errors="coerce")
 df["Target Folder Size (bytes)"] = pd.to_numeric(df["Target Folder Size(in bytes)"], errors="coerce")
 df["Compilation Time (seconds)"] = pd.to_numeric(df["Compilation Time(seconds)"], errors="coerce")
@@ -27,7 +26,6 @@ matplotlib.rcParams.update(
     }
 )
 
-
 os.makedirs("charts", exist_ok=True)
 
 
@@ -42,6 +40,7 @@ def plot_barh(
     label_fmt: str | None = None,
     dropna: bool = False,
     color: str = "C0",
+    config_col: str = "BuildConfig",
 ) -> None:
     data = df
     if dropna:
@@ -49,7 +48,7 @@ def plot_barh(
     data_sorted = data.sort_values(value_col, ascending=False)
 
     plt.figure(figsize=(12, 10))
-    bars = plt.barh(data_sorted["Config"], data_sorted[value_col] / unit_div, color=color)
+    bars = plt.barh(data_sorted[config_col], data_sorted[value_col] / unit_div, color=color)
 
     ax = plt.gca()
     max_val = (data_sorted[value_col] / unit_div).max()
@@ -107,6 +106,6 @@ plot_barh(
     unit_div=1024**3,
 )
 
-columns = [col for col in df.columns if "(" not in col and "Thread" not in col]
+columns = [col for col in df.columns if "(" not in col]
 with open("charts/compilation_results.md", "w") as f:
     f.write(df[columns].to_markdown(index=False))

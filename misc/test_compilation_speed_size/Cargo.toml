@@ -9,10 +9,10 @@ humansize = "2.1"
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.142"
 strum = { version = "0.27.2", features = ["strum_macros"] }
-polars = { version = "0.50.0", features = ["full"] }
-polars-io ="0.50.0"
-polars-core = "0.50.0"
-plotters = "0.3.7"
+#polars = { version = "0.50.0", features = ["full"] }
+#polars-io ="0.50.0"
+#polars-core = "0.50.0"
+#plotters = "0.3.7"
 
 [profile.release]
 panic = "unwind"

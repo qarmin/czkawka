@@ -25,6 +25,8 @@ fn main() {
         exit(1);
     }
 
+    clean_changes_to_project_files("Cargo.toml");
+
     let Ok(cargo_toml_content) = fs::read_to_string(&cargo_toml_path) else {
         eprintln!("Could not read contnet of Cargo.toml file");
         exit(1);
@@ -142,10 +144,10 @@ fn run_cargo_build(mold: bool, cranelift: bool, build_config: &BuildConfig, proj
     }
 }
 
-fn clean_changes_to_project_files(project: &Project) {
+fn clean_changes_to_project_files(path: &str) {
     let clean_command = std::process::Command::new("git")
         .arg("checkout")
-        .arg(&project.path_to_clean_with_git)
+        .arg(path)
         .stdout(std::process::Stdio::inherit())
         .stderr(std::process::Stdio::inherit())
         .output()
@@ -165,7 +167,7 @@ fn add_empty_line_to_file(project: &Project) {
 
 fn check_compilation_speed_and_size(mold: bool, cranelift: bool, build_config: &BuildConfig, project: &Project) -> Results {
     clean_cargo();
-    clean_changes_to_project_files(project);
+    clean_changes_to_project_files(&project.path_to_clean_with_git);
 
     let start_time = std::time::Instant::now();
 
@@ -186,7 +188,7 @@ fn check_compilation_speed_and_size(mold: bool, cranelift: bool, build_config: &
     let rebuild_time = rebuild_time_start.elapsed();
 
     clean_cargo();
-    clean_changes_to_project_files(project);
+    clean_changes_to_project_files(&project.path_to_clean_with_git);
 
     Results {
         output_file_size,
