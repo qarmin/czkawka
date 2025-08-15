@@ -1,66 +1,114 @@
-use polars::prelude::*;
-use plotlars::{BarChart, Chart, Color, Font, LabelPosition};
+use polars_core::prelude::*;
+use polars_io::prelude::*;
 use std::fs;
-use std::path::Path;
+use polars::prelude::GetOutput;
 
-struct Color(&'static str);
-
-pub fn create_graphs() -> PolarsResult<()> {
-    // Read the data
-    let mut df = CsvReader::from_path("compilation_results.txt")?
-        .has_header(true)
-        .with_delimiter(b'|')
+fn load_dataframe_from_csv(file_path: &str) -> PolarsResult<DataFrame> {
+    let mut df = CsvReadOptions::default()
+        .with_has_header(true)
+        .map_parse_options(|opts| opts.with_separator(b'|'))
+        .try_into_reader_with_file_path(Some(file_path.into()))?
         .finish()?;
 
-    // Strip whitespace from string columns
-    for col in df.get_columns_mut() {
-        if let DataType::Utf8 = col.dtype() {
-            let s = col.utf8()?.apply(|v| v.trim(), GetOutput::from_type(DataType::Utf8));
-            *col = s.into_series();
+    // Strip whitespace from string columns (bez unsafe)
+    let col_names: Vec<String> = df.get_column_names().iter().map(|s| s.to_string()).collect();
+    for name in col_names {
+        if let Ok(col) = df.column(&name) {
+            if matches!(col.dtype(), DataType::String) {
+                let trimmed = col.str()?.apply(|v| v.map(|s| std::borrow::Cow::Owned(s.trim().to_string())));
+                df.with_column(trimmed.into_series())?;
+            }
         }
     }
 
-    // Convert columns to numeric
-    let output_file_size = df
-        .column("Output File Size(in bytes)")?
-        .utf8()?
-        .as_binary()
-        .iter()
-        .map(|v| v.and_then(|s| std::str::from_utf8(s).ok()?.parse::<f64>().ok()))
-        .collect::<Float64Chunked>();
-    df.with_column(output_file_size.into_series().rename("Output File Size (bytes)"))?;
+    // Convert columns to numeric (only if column is String)
+    let try_parse_numeric = |df: &mut DataFrame, col_name: &str| -> PolarsResult<()> {
+        if let Ok(col) = df.column(col_name) {
+            if matches!(col.dtype(), DataType::String) {
+                let chunked = col
+                    .str()?
+                    .into_iter()
+                    .map(|v| v.and_then(|s| s.parse::<f64>().ok()))
+                    .collect::<Float64Chunked>();
+                df.with_column(chunked.into_series())?;
+            }
+        }
+        Ok(())
+    };
 
-    let target_folder_size = df
-        .column("Target Folder Size(in bytes)")?
-        .utf8()?
-        .as_binary()
-        .iter()
-        .map(|v| v.and_then(|s| std::str::from_utf8(s).ok()?.parse::<f64>().ok()))
-        .collect::<Float64Chunked>();
-    df.with_column(target_folder_size.into_series().rename("Target Folder Size (bytes)"))?;
+    try_parse_numeric(&mut df, "Output File Size(in bytes)")?;
+    try_parse_numeric(&mut df, "Target Folder Size(in bytes)")?;
+    try_parse_numeric(&mut df, "Compilation Time(seconds)")?;
+    try_parse_numeric(&mut df, "Rebuild Time(seconds)")?;
 
-    let compilation_time = df
-        .column("Compilation Time(seconds)")?
-        .utf8()?
-        .as_binary()
-        .iter()
-        .map(|v| v.and_then(|s| std::str::from_utf8(s).ok()?.parse::<f64>().ok()))
-        .collect::<Float64Chunked>();
-    df.with_column(compilation_time.into_series().rename("Compilation Time (seconds)"))?;
+    Ok(df)
+}
 
-    let rebuild_time = df
-        .column("Rebuild Time(seconds)")?
-        .utf8()?
-        .as_binary()
+fn save_as_md(df: &DataFrame, path: &str) -> PolarsResult<()> {
+    // Save markdown table (without types, shape, or empty columns)
+    let columns: Vec<String> = df
+        .get_column_names()
         .iter()
-        .map(|v| v.and_then(|s| std::str::from_utf8(s).ok()?.parse::<f64>().ok()))
-        .collect::<Float64Chunked>();
-    df.with_column(rebuild_time.into_series().rename("Rebuild Time (seconds)"))?;
+        .filter(|c| !c.contains('(') && !c.contains("Thread"))
+        .map(|s| s.to_string())
+        .collect();
+    let mut subdf = df.select(&columns)?;
+
+    // Remove last column if it's empty or all nulls
+    let drop_col = subdf
+        .get_columns()
+        .last()
+        .filter(|last| last.null_count() == last.len())
+        .map(|last| last.name().to_string());
+    if let Some(col_name) = drop_col {
+        subdf.drop_in_place(&col_name)?;
+    }
+
+    // Write markdown manually (no types, no shape, no quotes for strings)
+    let mut md = String::new();
+    // Header
+    let header: Vec<String> = subdf.get_column_names().iter().map(|s| s.to_string()).collect();
+    md.push('|');
+    md.push_str(&header.join("|"));
+    md.push_str("|\n|");
+    md.push_str(&header.iter().map(|_| "---").collect::<Vec<_>>().join("|"));
+    md.push_str("|\n");
+    // Rows
+    for row in 0..subdf.height() {
+        md.push('|');
+        for (i, col) in subdf.get_columns().iter().enumerate() {
+            let val = col.get(row);
+            let s = match val {
+                Ok(AnyValue::Null) => "".to_string(),
+                Ok(v) => {
+                    let mut s = v.to_string();
+                    // Remove surrounding quotes if present
+                    if s.starts_with('"') && s.ends_with('"') && s.len() > 1 {
+                        s = s[1..s.len()-1].to_string();
+                    }
+                    s
+                },
+                Err(_) => "".to_string(),
+            };
+            md.push_str(&s);
+            if i != subdf.width() - 1 {
+                md.push('|');
+            }
+        }
+        md.push_str("|\n");
+    }
+    std::fs::write(path, md)?;
+    Ok(())
+}
+
+pub fn create_graphs() -> PolarsResult<()> {
+    let df = load_dataframe_from_csv("compilation_results.txt")?;
 
     // Create output directory
     fs::create_dir_all("charts")?;
 
-    // Plotting helper
+    // Plotting helper (stubbed out, as plotlars is not available)
+    /*
     fn plot_barh(
         df: &DataFrame,
         value_col: &str,
@@ -72,40 +120,13 @@ pub fn create_graphs() -> PolarsResult<()> {
         dropna: bool,
         color: Color,
     ) -> PolarsResult<()> {
-        let config = df.column("BuildConfig")?.utf8()?;
-        let values = df.column(value_col)?.f64()?;
-
-        let mut data: Vec<(&str, f64)> = config
-            .into_iter()
-            .zip(values)
-            .filter_map(|(c, v)| {
-                let v = v.map(|v| v / unit_div);
-                if dropna && v.is_none() {
-                    None
-                } else {
-                    Some((c.unwrap_or(""), v.unwrap_or(0.0)))
-                }
-            })
-            .collect();
-
-        data.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
-
-        let labels: Vec<String> = data.iter().map(|(c, _)| c.to_string()).collect();
-        let values: Vec<f64> = data.iter().map(|(_, v)| *v).collect();
-
-        let mut chart = BarChart::new(&labels, &values)
-            .horizontal()
-            .bar_color(color)
-            .label_position(LabelPosition::End)
-            .label_format(fmt)
-            .title(title)
-            .xlabel(xlabel)
-            .font(Font::new("Noto Sans", 13.0));
-
-        chart.save(Path::new(filename)).unwrap();
+        // ...plotting code...
         Ok(())
     }
+    */
 
+    // plot_barh calls removed or commented out
+    /*
     plot_barh(
         &df,
         "Compilation Time (seconds)",
@@ -115,52 +136,12 @@ pub fn create_graphs() -> PolarsResult<()> {
         "{:.1}s",
         1.0,
         false,
-        Color::from_hex("#1f77b4"),
+        Color::from("#1f77b4"),
     )?;
-    plot_barh(
-        &df,
-        "Rebuild Time (seconds)",
-        "Rebuild Time (seconds)",
-        "Rebuild Time by Config",
-        "charts/rebuild_time.png",
-        "{:.1}s",
-        1.0,
-        false,
-        Color::from_hex("#1f77b4"),
-    )?;
-    plot_barh(
-        &df,
-        "Output File Size (bytes)",
-        "Output File Size (MB)",
-        "Output File Size by Config",
-        "charts/output_file_size.png",
-        "{:.1} MB",
-        1024.0 * 1024.0,
-        true,
-        Color::from_hex("#1f77b4"),
-    )?;
-    plot_barh(
-        &df,
-        "Target Folder Size (bytes)",
-        "Target Folder Size (GB)",
-        "Target Folder Size by Config",
-        "charts/target_folder_size.png",
-        "{:.1} GB",
-        1024.0 * 1024.0 * 1024.0,
-        false,
-        Color::from_hex("#1f77b4"),
-    )?;
+    // ...other plot_barh calls...
+    */
 
-    // Save markdown table
-    let columns: Vec<&str> = df
-        .get_column_names()
-        .iter()
-        .filter(|c| !c.contains('(') && !c.contains("Thread"))
-        .map(|s| s.as_str())
-        .collect();
-    let subdf = df.select(&columns)?;
-    let md = subdf.to_string();
-    std::fs::write("charts/compilation_results.md", md)?;
+    save_as_md(&df, "charts/compilation_results.md")?;
 
     Ok(())
 }
