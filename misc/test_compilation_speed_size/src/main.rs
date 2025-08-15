@@ -1,7 +1,5 @@
-mod chart;
 mod model;
 
-use crate::chart::create_graphs;
 use crate::model::{
     BuildConfig, BuildOrCheck,  Config,  Panic, Project, Results,
 };
@@ -17,31 +15,31 @@ const RESULTS_FILE_NAME: &str = "compilation_results.txt";
 
 fn main() {
     let Some(first_arg) = std::env::args().nth(1) else {
-        create_graphs().expect("Failed to create graphs");
-        exit(0);
+        eprintln!("Please provide a path to the configuration json file as the first argument.");
+        exit(1);
     };
 
     let cargo_toml_path = Path::new("Cargo.toml");
     if !cargo_toml_path.is_file() {
         eprintln!("Cannot find Cargo.toml in the current directory. Please run this script from the root cargo directory(must be able to modify profiles).");
-        std::process::exit(1);
+        exit(1);
     }
 
     let Ok(cargo_toml_content) = fs::read_to_string(&cargo_toml_path) else {
         eprintln!("Could not read contnet of Cargo.toml file");
-        std::process::exit(1);
+        exit(1);
     };
 
     let Ok(config_json_content) = fs::read_to_string(&first_arg) else {
         eprintln!("Could not read content of the provided json file: {}", first_arg);
-        std::process::exit(1);
+        exit(1);
     };
 
     let mut config = match serde_json::from_str::<Config>(&config_json_content) {
         Ok(c) => c,
         Err(e) => {
             eprintln!("Could not parse content of the provided json file: {}. Error: {}", first_arg, e);
-            std::process::exit(1);
+            exit(1);
         }
     };
 
