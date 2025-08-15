@@ -124,7 +124,7 @@ impl SimilarVideos {
             CurrentStage::SimilarVideosCalculatingHashes,
             non_cached_files_to_check.len(),
             self.get_test_type(),
-            non_cached_files_to_check.values().map(|e| e.size).sum(),
+            0, // non_cached_files_to_check.values().map(|e| e.size).sum(), // Looks, that at least for now, there is no big difference between checking big and small files, so at least for now, only tracking number of files is enough
         );
 
         let mut vec_file_entry: Vec<VideosEntry> = non_cached_files_to_check

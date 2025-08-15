@@ -1,7 +1,7 @@
 import { HorizontalBox, LineEdit, Palette, VerticalBox } from "std-widgets.slint";
 import { LeftSidePanel } from "left_side_panel.slint";
 import { MainList } from "main_lists.slint";
-import { CurrentTab, MainListModel, ProgressToSend } from "common.slint";
+import { ActiveTab, MainListModel, ProgressToSend } from "common.slint";
 import { ActionButtons } from "action_buttons.slint";
 import { Progress } from "progress.slint";
 import { Settings } from "settings.slint";
@@ -23,7 +23,7 @@ export {Settings, Callabler, GuiState, Translations, Palette}
 
 export component MainWindow inherits Window {
     callback scan_stopping;
-    callback scan_starting(CurrentTab);
+    callback scan_starting(ActiveTab);
     callback folder_choose_requested(bool);
     callback scan_ended(string);
     callback show_move_folders_dialog(string);
@@ -31,6 +31,9 @@ export component MainWindow inherits Window {
     callback reset_selection();
     callback initialize_popup_sizes();
     callback processing_ended(string);
+
+    callback delete_popup_dialog_show_requested();
+    callback delete_popup_dialog_configured();
 
     title <=> Translations.main_window_title_text;
 
@@ -65,9 +68,9 @@ export component MainWindow inherits Window {
             preferred-height: 300px;
             LeftSidePanel {
                 horizontal-stretch: 0.0;
-                changed_current_tab() => {
+                changed_active_tab() => {
                     GuiState.preview_visible = false;
-                    main_list.changed_current_tab();
+                    main_list.changed_active_tab();
                 }
             }
 
@@ -156,7 +159,7 @@ export component MainWindow inherits Window {
                 folders_move_choose_requested();
             }
             show_remove_popup => {
-                delete_popup_window.show_popup();
+                delete_popup_dialog_show_requested();
             }
             show_rename_popup => {
                 rename_popup_window.show_popup();
@@ -282,5 +285,9 @@ export component MainWindow inherits Window {
         sort_popup_window.close_popup();
         select_popup_window.show_popup();
         select_popup_window.close_popup();
+    }
+
+    delete_popup_dialog_configured => {
+        delete_popup_window.show_popup();
     }
 }

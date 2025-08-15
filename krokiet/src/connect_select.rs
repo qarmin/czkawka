@@ -3,7 +3,7 @@ use slint::{ComponentHandle, Model, ModelRc, VecModel};
 use crate::common::connect_i32_into_u64;
 use crate::connect_row_selection::checker::change_number_of_enabled_items;
 use crate::connect_translation::translate_select_mode;
-use crate::{Callabler, CurrentTab, GuiState, MainListModel, MainWindow, SelectMode, SelectModel};
+use crate::{ActiveTab, Callabler, GuiState, MainListModel, MainWindow, SelectMode, SelectModel};
 
 type SelectionResult = (u64, u64, ModelRc<MainListModel>);
 
@@ -46,13 +46,13 @@ fn set_select_buttons(app: &MainWindow) {
     let mut base_buttons = vec![SelectMode::SelectAll, SelectMode::UnselectAll, SelectMode::InvertSelection];
 
     let additional_buttons = match active_tab {
-        CurrentTab::DuplicateFiles | CurrentTab::SimilarVideos | CurrentTab::SimilarMusic => vec![
+        ActiveTab::DuplicateFiles | ActiveTab::SimilarVideos | ActiveTab::SimilarMusic => vec![
             SelectMode::SelectOldest,
             SelectMode::SelectNewest,
             SelectMode::SelectTheSmallestSize,
             SelectMode::SelectTheBiggestSize,
         ],
-        CurrentTab::SimilarImages => vec![
+        ActiveTab::SimilarImages => vec![
             SelectMode::SelectOldest,
             SelectMode::SelectNewest,
             SelectMode::SelectTheSmallestSize,
@@ -60,14 +60,14 @@ fn set_select_buttons(app: &MainWindow) {
             SelectMode::SelectTheSmallestResolution,
             SelectMode::SelectTheBiggestResolution,
         ],
-        CurrentTab::EmptyFolders
-        | CurrentTab::BigFiles
-        | CurrentTab::EmptyFiles
-        | CurrentTab::TemporaryFiles
-        | CurrentTab::InvalidSymlinks
-        | CurrentTab::BrokenFiles
-        | CurrentTab::BadExtensions => vec![],
-        CurrentTab::Settings | CurrentTab::About => vec![], // Not available in settings and about, so may be set any value here
+        ActiveTab::EmptyFolders
+        | ActiveTab::BigFiles
+        | ActiveTab::EmptyFiles
+        | ActiveTab::TemporaryFiles
+        | ActiveTab::InvalidSymlinks
+        | ActiveTab::BrokenFiles
+        | ActiveTab::BadExtensions => vec![],
+        ActiveTab::Settings | ActiveTab::About => vec![], // Not available in settings and about, so may be set any value here
     };
 
     base_buttons.extend(additional_buttons);
@@ -85,7 +85,7 @@ fn set_select_buttons(app: &MainWindow) {
 }
 
 // TODO, when model will be able to contain i64 instead two i32, this function could be merged with select_by_size_date
-fn select_by_resolution(model: &ModelRc<MainListModel>, active_tab: CurrentTab, biggest: bool) -> SelectionResult {
+fn select_by_resolution(model: &ModelRc<MainListModel>, active_tab: ActiveTab, biggest: bool) -> SelectionResult {
     let mut checked_items = 0;
 
     let is_header_mode = active_tab.get_is_header_mode();
@@ -137,7 +137,7 @@ fn select_by_resolution(model: &ModelRc<MainListModel>, active_tab: CurrentTab, 
     (checked_items, 0, ModelRc::new(VecModel::from(old_data)))
 }
 
-fn select_by_size_date(model: &ModelRc<MainListModel>, active_tab: CurrentTab, biggest_newest: bool, size: bool) -> SelectionResult {
+fn select_by_size_date(model: &ModelRc<MainListModel>, active_tab: ActiveTab, biggest_newest: bool, size: bool) -> SelectionResult {
     let mut checked_items = 0;
 
     let is_header_mode = active_tab.get_is_header_mode();

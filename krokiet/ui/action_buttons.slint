@@ -1,5 +1,5 @@
 import { Button } from "std-widgets.slint";
-import { BottomPanelVisibility, CurrentTab, MainListModel } from "common.slint";
+import { ActiveTab, BottomPanelVisibility, MainListModel } from "common.slint";
 import { GuiState } from "gui_state.slint";
 import { Translations } from "translations.slint";
 import { Settings } from "settings.slint";
@@ -21,7 +21,7 @@ export component VisibilityButton inherits Button {
 
 export component ActionButtons inherits HorizontalLayout {
     callback scan_stopping;
-    callback scan_starting(CurrentTab);
+    callback scan_starting(ActiveTab);
     callback show_select_popup(length, length);
     callback show_remove_popup();
     callback show_rename_popup();
@@ -41,7 +41,7 @@ export component ActionButtons inherits HorizontalLayout {
     in-out property <[MainListModel]> broken_files_model: [];
     in-out property <[MainListModel]> bad_extensions_model: [];
 
-    property <CurrentTab> active_tab: GuiState.active_tab;
+    property <ActiveTab> active_tab: GuiState.active_tab;
 
     in-out property <BottomPanelVisibility> bottom_panel_visibility <=> GuiState.bottom_panel_visibility;
     in-out property <bool> stop_requested: false;
@@ -52,30 +52,30 @@ export component ActionButtons inherits HorizontalLayout {
     out property <int> name;
 
     in-out property <bool> checked_anything: (
-        (active_tab == CurrentTab.DuplicateFiles && (GuiState.selected_results_duplicates > 0 || GuiState.selected_results_duplicates2 > 0)) ||
-        (active_tab == CurrentTab.SimilarImages && (GuiState.selected_results_similar_images > 0 || GuiState.selected_results_similar_images2 > 0)) ||
-        (active_tab == CurrentTab.SimilarVideos && (GuiState.selected_results_similar_videos > 0 || GuiState.selected_results_similar_videos2 > 0)) ||
-        (active_tab == CurrentTab.SimilarMusic && (GuiState.selected_results_similar_music > 0 || GuiState.selected_results_similar_music2 > 0)) ||
-        (active_tab == CurrentTab.BigFiles && (GuiState.selected_results_big_files > 0 || GuiState.selected_results_big_files2 > 0)) ||
-        (active_tab == CurrentTab.BrokenFiles && (GuiState.selected_results_broken_files > 0 || GuiState.selected_results_broken_files2 > 0)) ||
-        (active_tab == CurrentTab.InvalidSymlinks && (GuiState.selected_results_invalid_symlinks > 0 || GuiState.selected_results_invalid_symlinks2 > 0)) ||
-        (active_tab == CurrentTab.EmptyFolders && (GuiState.selected_results_empty_folders > 0 || GuiState.selected_results_empty_folders2 > 0)) ||
-        (active_tab == CurrentTab.EmptyFiles && (GuiState.selected_results_empty_files > 0 || GuiState.selected_results_empty_files2 > 0)) ||
-        (active_tab == CurrentTab.TemporaryFiles && (GuiState.selected_results_temporary_files > 0 || GuiState.selected_results_temporary_files2 > 0)) ||
-        (active_tab == CurrentTab.BadExtensions && (GuiState.selected_results_bad_extensions > 0 || GuiState.selected_results_bad_extensions2 > 0))
+        (active_tab == ActiveTab.DuplicateFiles && (GuiState.selected_results_duplicates > 0 || GuiState.selected_results_duplicates2 > 0)) ||
+        (active_tab == ActiveTab.SimilarImages && (GuiState.selected_results_similar_images > 0 || GuiState.selected_results_similar_images2 > 0)) ||
+        (active_tab == ActiveTab.SimilarVideos && (GuiState.selected_results_similar_videos > 0 || GuiState.selected_results_similar_videos2 > 0)) ||
+        (active_tab == ActiveTab.SimilarMusic && (GuiState.selected_results_similar_music > 0 || GuiState.selected_results_similar_music2 > 0)) ||
+        (active_tab == ActiveTab.BigFiles && (GuiState.selected_results_big_files > 0 || GuiState.selected_results_big_files2 > 0)) ||
+        (active_tab == ActiveTab.BrokenFiles && (GuiState.selected_results_broken_files > 0 || GuiState.selected_results_broken_files2 > 0)) ||
+        (active_tab == ActiveTab.InvalidSymlinks && (GuiState.selected_results_invalid_symlinks > 0 || GuiState.selected_results_invalid_symlinks2 > 0)) ||
+        (active_tab == ActiveTab.EmptyFolders && (GuiState.selected_results_empty_folders > 0 || GuiState.selected_results_empty_folders2 > 0)) ||
+        (active_tab == ActiveTab.EmptyFiles && (GuiState.selected_results_empty_files > 0 || GuiState.selected_results_empty_files2 > 0)) ||
+        (active_tab == ActiveTab.TemporaryFiles && (GuiState.selected_results_temporary_files > 0 || GuiState.selected_results_temporary_files2 > 0)) ||
+        (active_tab == ActiveTab.BadExtensions && (GuiState.selected_results_bad_extensions > 0 || GuiState.selected_results_bad_extensions2 > 0))
     );
     in-out property <bool> results_available: (
-        (active_tab == CurrentTab.DuplicateFiles && duplicate_files_model.length > 0) ||
-        (active_tab == CurrentTab.EmptyFolders && empty_folder_model.length > 0) ||
-        (active_tab == CurrentTab.BigFiles && big_files_model.length > 0) ||
-        (active_tab == CurrentTab.EmptyFiles && empty_files_model.length > 0) ||
-        (active_tab == CurrentTab.TemporaryFiles && temporary_files_model.length > 0) ||
-        (active_tab == CurrentTab.SimilarImages && similar_images_model.length > 0) ||
-        (active_tab == CurrentTab.SimilarVideos && similar_videos_model.length > 0) ||
-        (active_tab == CurrentTab.SimilarMusic && similar_music_model.length > 0) ||
-        (active_tab == CurrentTab.InvalidSymlinks && invalid_symlinks_model.length > 0) ||
-        (active_tab == CurrentTab.BrokenFiles && broken_files_model.length > 0) ||
-        (active_tab == CurrentTab.BadExtensions && bad_extensions_model.length > 0)
+        (active_tab == ActiveTab.DuplicateFiles && duplicate_files_model.length > 0) ||
+        (active_tab == ActiveTab.EmptyFolders && empty_folder_model.length > 0) ||
+        (active_tab == ActiveTab.BigFiles && big_files_model.length > 0) ||
+        (active_tab == ActiveTab.EmptyFiles && empty_files_model.length > 0) ||
+        (active_tab == ActiveTab.TemporaryFiles && temporary_files_model.length > 0) ||
+        (active_tab == ActiveTab.SimilarImages && similar_images_model.length > 0) ||
+        (active_tab == ActiveTab.SimilarVideos && similar_videos_model.length > 0) ||
+        (active_tab == ActiveTab.SimilarMusic && similar_music_model.length > 0) ||
+        (active_tab == ActiveTab.InvalidSymlinks && invalid_symlinks_model.length > 0) ||
+        (active_tab == ActiveTab.BrokenFiles && broken_files_model.length > 0) ||
+        (active_tab == ActiveTab.BadExtensions && bad_extensions_model.length > 0)
     );
 
     height: 30px;
@@ -169,7 +169,7 @@ export component ActionButtons inherits HorizontalLayout {
         }
     }
 
-    if lists_enabled && GuiState.active_tab == CurrentTab.BadExtensions: rename_button := Button {
+    if lists_enabled && GuiState.active_tab == ActiveTab.BadExtensions: rename_button := Button {
         height: parent.height;
         enabled: base_buttons_may_be_available && self.visible && checked_anything;
         text: self.visible && Settings.show_only_icons ? "" : Translations.rename_button_text;

@@ -26,7 +26,8 @@ overflow-checks = true
 
 # LTO setting is disabled by default, because release mode is usually needed to develop app and compilation with LTO would take a lot of time
 # But it is used to optimize release builds(and probably also in CI, where time is not so important as in local development)
-#lto = "thin"
+# Fat lto, generates a lot smaller executable than thin lto
+#lto = "fat"
 
 # Optimize all dependencies except application/workspaces, even in debug builds to get reasonable performance e.g. when opening images
 [profile.dev.package."*"] # OPT PACKAGES

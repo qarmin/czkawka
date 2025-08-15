@@ -1,4 +1,4 @@
-import { BottomPanelVisibility, CurrentTab, SelectMode, SelectModel, SortMode, SortModel } from "common.slint";
+import { ActiveTab, BottomPanelVisibility, SelectMode, SelectModel, SortMode, SortModel } from "common.slint";
 import { Translations } from "translations.slint";
 
 // State Gui state that shows the current state of the GUI
@@ -19,9 +19,9 @@ export global GuiState {
     in-out property <bool> choosing_include_directories;
     in-out property <bool> visible_tool_settings;
 
-    in-out property <bool> available_subsettings: active_tab == CurrentTab.SimilarImages || active_tab == CurrentTab.DuplicateFiles || active_tab == CurrentTab.SimilarVideos || active_tab == CurrentTab.SimilarMusic || active_tab == CurrentTab.BigFiles || active_tab == CurrentTab.BrokenFiles;
-    in-out property <CurrentTab> active_tab: CurrentTab.DuplicateFiles;
-    in-out property <bool> is_tool_tab_active: active_tab != CurrentTab.Settings && active_tab != CurrentTab.About;
+    in-out property <bool> available_subsettings: active_tab == ActiveTab.SimilarImages || active_tab == ActiveTab.DuplicateFiles || active_tab == ActiveTab.SimilarVideos || active_tab == ActiveTab.SimilarMusic || active_tab == ActiveTab.BigFiles || active_tab == ActiveTab.BrokenFiles;
+    in-out property <ActiveTab> active_tab: ActiveTab.DuplicateFiles;
+    in-out property <bool> is_tool_tab_active: active_tab != ActiveTab.Settings && active_tab != ActiveTab.About;
 
     in-out property <[SelectModel]> select_results_list: [
         { data: SelectMode.SelectAll, name: Translations.selection_all_text },
@@ -39,18 +39,18 @@ export global GuiState {
         { data: SortMode.Reverse, name: Translations.sort_reverse_text },
     ];
 
-    in-out property <[{name: string, tab: CurrentTab}]> tools_model: [
-        { name: Translations.tool_duplicate_files_text, tab: CurrentTab.DuplicateFiles },
-        { name: Translations.tool_empty_folders_text, tab: CurrentTab.EmptyFolders },
-        { name: Translations.tool_big_files_text, tab: CurrentTab.BigFiles },
-        { name: Translations.tool_empty_files_text, tab: CurrentTab.EmptyFiles },
-        { name: Translations.tool_temporary_files_text, tab: CurrentTab.TemporaryFiles },
-        { name: Translations.tool_similar_images_text, tab: CurrentTab.SimilarImages },
-        { name: Translations.tool_similar_videos_text, tab: CurrentTab.SimilarVideos },
-        { name: Translations.tool_music_duplicates_text, tab: CurrentTab.SimilarMusic },
-        { name: Translations.tool_invalid_symlinks_text, tab: CurrentTab.InvalidSymlinks },
-        { name: Translations.tool_broken_files_text, tab: CurrentTab.BrokenFiles },
-        { name: Translations.tool_bad_extensions_text, tab: CurrentTab.BadExtensions }
+    in-out property <[{name: string, tab: ActiveTab}]> tools_model: [
+        { name: Translations.tool_duplicate_files_text, tab: ActiveTab.DuplicateFiles },
+        { name: Translations.tool_empty_folders_text, tab: ActiveTab.EmptyFolders },
+        { name: Translations.tool_big_files_text, tab: ActiveTab.BigFiles },
+        { name: Translations.tool_empty_files_text, tab: ActiveTab.EmptyFiles },
+        { name: Translations.tool_temporary_files_text, tab: ActiveTab.TemporaryFiles },
+        { name: Translations.tool_similar_images_text, tab: ActiveTab.SimilarImages },
+        { name: Translations.tool_similar_videos_text, tab: ActiveTab.SimilarVideos },
+        { name: Translations.tool_music_duplicates_text, tab: ActiveTab.SimilarMusic },
+        { name: Translations.tool_invalid_symlinks_text, tab: ActiveTab.InvalidSymlinks },
+        { name: Translations.tool_broken_files_text, tab: ActiveTab.BrokenFiles },
+        { name: Translations.tool_bad_extensions_text, tab: ActiveTab.BadExtensions }
     ];
 
     in-out property <BottomPanelVisibility> bottom_panel_visibility: BottomPanelVisibility.Directories;

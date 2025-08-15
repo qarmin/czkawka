@@ -26,7 +26,7 @@ jobs:
       - name: Compile Krokiet Release
         if: ${{ github.ref == 'refs/heads/master' }}
         run: |
-          sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
+          sed -i 's/#lto = /lto = /g' Cargo.toml
           cargo build --release --target x86_64-pc-windows-gnu --bin krokiet
           mv target/x86_64-pc-windows-gnu/release/krokiet.exe windows_krokiet_on_linux.exe
 
@@ -75,7 +75,7 @@ jobs:
   #      - name: Compile Krokiet Release
   #        if: ${{ github.ref == 'refs/heads/master' }}
   #        run: |
-  #          sed -i 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
+  #          sed -i 's/#lto = /lto = /g' Cargo.toml
   #          cargo build --release --bin krokiet --no-default-features --features "winit_skia_opengl,winit_software"
   #          mv target/release/krokiet.exe windows_krokiet_on_windows_skia_opengl.exe
   #          cargo build --release --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software"

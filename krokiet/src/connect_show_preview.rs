@@ -6,7 +6,7 @@ use image::DynamicImage;
 use log::{debug, error};
 use slint::ComponentHandle;
 
-use crate::{Callabler, CurrentTab, GuiState, MainWindow, Settings};
+use crate::{ActiveTab, Callabler, GuiState, MainWindow, Settings};
 
 pub type ImageBufferRgba = image::ImageBuffer<image::Rgba<u8>, Vec<u8>>;
 
@@ -20,8 +20,8 @@ pub(crate) fn connect_show_preview(app: &MainWindow) {
 
         let active_tab = gui_state.get_active_tab();
 
-        if !((active_tab == CurrentTab::SimilarImages && settings.get_similar_images_show_image_preview())
-            || (active_tab == CurrentTab::DuplicateFiles && settings.get_duplicate_image_preview()))
+        if !((active_tab == ActiveTab::SimilarImages && settings.get_similar_images_show_image_preview())
+            || (active_tab == ActiveTab::DuplicateFiles && settings.get_duplicate_image_preview()))
         {
             set_preview_visible(&gui_state, None);
             return;

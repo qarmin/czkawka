@@ -1,13 +1,13 @@
 import { Button, ListView } from "std-widgets.slint";
-import { BottomPanelVisibility, CurrentTab } from "common.slint";
+import { ActiveTab, BottomPanelVisibility } from "common.slint";
 import { ColorPalette } from "color_palette.slint";
 import { GuiState } from "gui_state.slint";
 import { Callabler } from "callabler.slint";
 
 component TabItem {
     in property <string> text;
-    in property <CurrentTab> curr_tab;
-    callback changed_current_tab();
+    in property <ActiveTab> curr_tab;
+    callback changed_active_tab();
 
     Rectangle {
         width: parent.width;
@@ -20,7 +20,7 @@ component TabItem {
                 }
                 GuiState.active_tab = root.curr_tab;
                 Callabler.tab_changed();
-                changed_current_tab();
+                changed_active_tab();
             }
         }
     }
@@ -64,12 +64,12 @@ component TabItem {
 }
 
 export component LeftSidePanel {
-    callback changed_current_tab();
+    callback changed_active_tab();
     preferred-width: GuiState.left_panel_width;
     VerticalLayout {
         spacing: 2px;
         Rectangle {
-            visible: GuiState.active_tab != CurrentTab.About;
+            visible: GuiState.active_tab != ActiveTab.About;
             height: 80px;
             Image {
                 width: parent.height;
@@ -79,9 +79,9 @@ export component LeftSidePanel {
 
             touch_area := TouchArea {
                 clicked => {
-                    GuiState.active_tab = CurrentTab.About;
+                    GuiState.active_tab = ActiveTab.About;
                     Callabler.tab_changed();
-                    root.changed_current_tab();
+                    root.changed_active_tab();
                     GuiState.bottom_panel_visibility = BottomPanelVisibility.NotVisible;
                 }
             }
@@ -89,14 +89,14 @@ export component LeftSidePanel {
 
         ListView {
             out property <length> element_size: 25px;
-            out property <[{name: string, tab: CurrentTab}]> tools_model <=> GuiState.tools_model;
+            out property <[{name: string, tab: ActiveTab}]> tools_model <=> GuiState.tools_model;
 
             for r[idx] in tools_model: TabItem {
                 height: parent.element_size;
                 text: r.name;
                 curr_tab: r.tab;
-                changed_current_tab() => {
-                    root.changed_current_tab();
+                changed_active_tab() => {
+                    root.changed_active_tab();
                 }
             }
         }
@@ -106,7 +106,7 @@ export component LeftSidePanel {
             HorizontalLayout {
                 alignment: start;
                 Button {
-                    visible: GuiState.active_tab != CurrentTab.Settings;
+                    visible: GuiState.active_tab != ActiveTab.Settings;
                     min-width: 20px;
                     min-height: 20px;
                     max-height: self.width;
@@ -114,9 +114,9 @@ export component LeftSidePanel {
                     icon: @image-url("../icons/krokiet_settings.svg");
                     colorize-icon: true;
                     clicked => {
-                        GuiState.active_tab = CurrentTab.Settings;
+                        GuiState.active_tab = ActiveTab.Settings;
                         Callabler.tab_changed();
-                        root.changed_current_tab();
+                        root.changed_active_tab();
                     }
                 }
             }

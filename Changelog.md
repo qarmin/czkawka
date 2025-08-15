@@ -1,7 +1,6 @@
 ## Version ?.?.? - ?
 ### Release blockers:
 - Missing support for hardlinking/softlinking files in Krokiet
-- Slint bug with selecting items with both mouse and keyboard -  https://github.com/slint-ui/slint/issues/9103
 - Unnecessary tokio dependency in rawler
 
 ### Breaking changes
@@ -51,6 +50,7 @@
 - Folders to scan can be now set via cli e.g. `krokiet /home/rafal` - for more info see `krokiet --help` - [#1566](https://github.com/qarmin/czkawka/pull/1566)
 - Improved appearance of bottom directories panel - [#1569](https://github.com/qarmin/czkawka/pull/1569)
 - Some buttons, are disabled, when there is no files selected - [#1586](https://github.com/qarmin/czkawka/pull/1586)
+- Added info about the number of items selected to delete - [#1589](https://github.com/qarmin/czkawka/pull/1589)
 
 ### External
 - There is a new unofficial Tauri-based frontend for Czkawka - [Czkawka Tauri](https://github.com/shixinhuang99/czkawka-tauri)
@@ -68,6 +68,7 @@
 - `musl` builds of `czkawka_cli` are now provided instead of `eyra` builds (slightly easier to maintain). GUI builds are not included due to limitations of `musl` and `eyra` :(
 - Prebuilt Windows console binaries are no longer provided — logs are now saved to a file, which is easier to read than terminal output
 - Skia opengl and vulkan backends are provided for Krokiet on Linux(no binaries on Windows, because don't know how to replace `sed`)
+- Prebuilt binaries are now build with `lto fat` instead `lto thin` to greatly reduce binary size(~25% smaller binaries)
 
 ## Version 9.0.0 - 16.03.2025r
 

@@ -82,17 +82,7 @@ SLINT_STYLE=material-light cargo run -- --path .
 SLINT_STYLE=material-dark cargo run -- --path .
 ```
 
-## How to help?
-
-- Suggesting possible design changes in the gui - of course, they should be possible to be simply implemented in the
-  slint keeping in mind the performance aspect as well
-- Modifying user interface - gui is written in simple language similar to qml, that can be modified in vscode/web with
-  live
-  preview - [slint live preview example](https://slint.dev/releases/1.3.0/editor/?load_demo=examples/printerdemo/ui/printerdemo.slint)
-- Improving app rust code
-
-
-## Why Create a New Frontend Instead of Improving the Existing Czkawka GTK 4 Frontend?
+## Why create app with a new frontend instead of improving the existing Czkawka GTK 4 app?
 
 For many, it might seem like a surprising decision to abandon the existing GTK 4 frontend of Czkawka—especially considering that GTK is one of the most popular GUI frameworks and replace it with a new one based on Slint, which is still relatively unknown.
 

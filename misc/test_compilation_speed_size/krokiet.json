@@ -1,0 +1,100 @@
+{
+  "project": {
+    "name": "krokiet",
+    "path_to_main_rs_file": "krokiet/src/main.rs",
+    "path_to_clean_with_git": "krokiet"
+  },
+  "general_config": {
+    "mold": "Off",
+    "cranelift": "Both"
+  },
+  "build_config": [
+    {
+      "name": "debug + debug disabled",
+      "rust_base_config": "Debug",
+      "debug": "None"
+    },
+    {
+      "name": "check",
+      "rust_base_config": "Debug",
+      "build_or_check": "Check"
+    },
+    {
+      "name": "release + debug info",
+      "rust_base_config": "Release",
+      "debug": "Full"
+    },
+    {
+      "name": "release + opt o2",
+      "rust_base_config": "Release",
+      "opt_level": "Two"
+    },
+    {
+      "name": "release + opt o1",
+      "rust_base_config": "Release",
+      "opt_level": "One"
+    },
+    {
+      "name": "release + thin lto",
+      "rust_base_config": "Release",
+      "lto": "Thin"
+    },
+    {
+      "name": "release + optimize size",
+      "rust_base_config": "Release",
+      "opt_level": "S"
+    },
+    {
+      "name": "release + fat lto",
+      "rust_base_config": "Release",
+      "lto": "Fat"
+    },
+    {
+      "name": "release + cu 1",
+      "rust_base_config": "Release",
+      "codegen_units": "One"
+    },
+    {
+      "name": "release + panic abort",
+      "rust_base_config": "Release",
+      "panic": "Abort"
+    },
+    {
+      "name": "release + build-std",
+      "rust_base_config": "Release",
+      "build_std": true
+    },
+    {
+      "name": "release + fat lto + cu 1 + panic abort",
+      "rust_base_config": "Release",
+      "lto": "Fat",
+      "codegen_units": "One",
+      "panic": "Abort"
+    },
+    {
+      "name": "release + fat lto + cu 1 + panic abort + build-std",
+      "rust_base_config": "Release",
+      "lto": "Fat",
+      "codegen_units": "One",
+      "panic": "Abort",
+      "build_std": true
+    },
+    {
+      "name": "release + fat lto + cu 1",
+      "rust_base_config": "Release",
+      "lto": "Fat",
+      "codegen_units": "One"
+    },
+    {
+      "name": "release + incremental",
+      "rust_base_config": "Release",
+      "incremental": "On"
+    },
+    {
+      "name": "release + incremental + fat lto",
+      "rust_base_config": "Release",
+      "incremental": "On",
+      "lto": "Fat"
+    }
+  ]
+}

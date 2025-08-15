@@ -14,7 +14,7 @@ use crate::connect_row_selection::checker::set_number_of_enabled_items;
 use crate::connect_row_selection::reset_selection;
 use crate::model_operations::ProcessingResult;
 use crate::simpler_model::{SimplerMainListModel, ToSlintModel};
-use crate::{CurrentTab, GuiState, MainListModel, MainWindow, flk, model_operations};
+use crate::{ActiveTab, GuiState, MainListModel, MainWindow, flk, model_operations};
 // This is quite ugly workaround for Slint strange limitation, where model cannot be passed to another thread
 // This was needed by me, because I wanted to process deletion without blocking main gui thread, with additional sending progress about entire operation.
 // After trying different solutions, looks that the simplest and quite not really efficient solution is to convert slint model, to simpler model, which can be passed to another thread.
@@ -22,7 +22,7 @@ use crate::{CurrentTab, GuiState, MainListModel, MainWindow, flk, model_operatio
 // ModelRc<MainListModel> --cloning when iterating + converting--> SimplerMainListModel --conversion before setting to model--> ModelRc<MainListModel> --cloning when iterating to remove useless items--> ModelRc<MainListModel>
 
 pub struct ModelProcessor {
-    pub active_tab: CurrentTab,
+    pub active_tab: ActiveTab,
 }
 
 #[derive(Clone, Copy)]
@@ -57,7 +57,7 @@ impl MessageType {
 }
 
 impl ModelProcessor {
-    pub fn new(active_tab: CurrentTab) -> Self {
+    pub fn new(active_tab: ActiveTab) -> Self {
         Self { active_tab }
     }
 

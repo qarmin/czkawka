@@ -28,6 +28,13 @@ runs +args:
     export ASAN_OPTIONS="symbolize=1:detect_leaks=0" # Leak check is disabled, because is slow and ususally not needed
     ASAN_OPTIONS="symbolize=1:detect_leaks=0" RUSTFLAGS="-Zsanitizer=address" cargo +nightly run --target x86_64-unknown-linux-gnu --bin {{args}}
 
+val bin:
+    valgrind --leak-check=full --show-leak-kinds=definite --track-origins=yes target/debug/{{bin}}
+
+valr bin:
+    valgrind --leak-check=full --show-leak-kinds=definite --track-origins=yes target/release/{{bin}}
+
+
 ## Other
 
 setup_sanitizer:
@@ -112,7 +119,13 @@ debug_verify:
     cargo bloat --release --bin czkawka_gui -n 30
     cargo bloat --release --bin krokiet -n 30
 
+bloat:
+    cargo bloat --release --crates --bin czkawka_cli
+    cargo bloat --release --crates --bin czkawka_gui
+    cargo bloat --release --crates --bin krokiet
+
 check_complilations:
-    cargo install --path misc/test_compilation_speed_size
-    test_compilation_speed_size .
-    uv run misc/generate_md_and_plots.py
+    git checkout Cargo.toml
+    # cargo install --path misc/test_compilation_speed_size
+    test_compilation_speed_size misc/test_compilation_speed_size/krokiet.json
+    python3 misc/test_compilation_speed_size/generate_md_and_plots.py

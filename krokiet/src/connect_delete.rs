@@ -7,9 +7,10 @@ use crossbeam_channel::Sender;
 use czkawka_core::common::progress_data::ProgressData;
 use slint::{ComponentHandle, Weak};
 
+use crate::model_operations::get_checked_info_from_app;
 use crate::model_operations::model_processor::{MessageType, ModelProcessor};
 use crate::simpler_model::{SimplerMainListModel, ToSimplerVec};
-use crate::{Callabler, CurrentTab, GuiState, MainWindow, Settings};
+use crate::{ActiveTab, Callabler, GuiState, MainWindow, Settings, Translations, flk};
 
 pub(crate) fn connect_delete_button(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
     let a = app.as_weak();
@@ -25,11 +26,47 @@ pub(crate) fn connect_delete_button(app: &MainWindow, progress_sender: Sender<Pr
         let processor = ModelProcessor::new(active_tab);
         processor.delete_selected_items(settings.get_move_to_trash(), progress_sender, weak_app, stop_flag);
     });
+
+    let a = app.as_weak();
+    app.on_delete_popup_dialog_show_requested(move || {
+        let app = a.upgrade().expect("Failed to upgrade app :(");
+        let translation = app.global::<Translations>();
+        let res = get_checked_info_from_app(&app);
+        // TODO - items formatting should be done in GUI, not here, but slint not supports fluent strings with arguments
+        let mut base = flk!("rust_delete_confirmation");
+        if let Some(group_res) = res.groups_with_checked_items {
+            base.push_str(
+                format!(
+                    "\n{}",
+                    flk!(
+                        "rust_delete_confirmation_number_groups",
+                        items = res.checked_items_number,
+                        groups = group_res.groups_with_checked_items
+                    )
+                )
+                .as_str(),
+            );
+            if group_res.number_of_groups_with_all_items_checked > 0 {
+                base.push_str(
+                    format!(
+                        "\n{}",
+                        flk!("rust_delete_confirmation_selected_all_in_group", groups = group_res.number_of_groups_with_all_items_checked)
+                    )
+                    .as_str(),
+                );
+            }
+        } else {
+            base.push_str(format!("\n{}", flk!("rust_delete_confirmation_number_simple", items = res.checked_items_number)).as_str());
+        }
+        translation.set_delete_confirmation_text(base.into());
+
+        app.invoke_delete_popup_dialog_configured();
+    });
 }
 
 impl ModelProcessor {
     fn delete_selected_items(self, remove_to_trash: bool, progress_sender: Sender<ProgressData>, weak_app: Weak<MainWindow>, stop_flag: Arc<AtomicBool>) {
-        let is_empty_folder_tab = self.active_tab == CurrentTab::EmptyFolders;
+        let is_empty_folder_tab = self.active_tab == ActiveTab::EmptyFolders;
         let model = self.active_tab.get_tool_model(&weak_app.upgrade().expect("Failed to upgrade app :("));
         let simpler_model = model.to_simpler_enumerated_vec();
         thread::spawn(move || {
@@ -91,7 +128,7 @@ mod tests {
             progress_sender: Sender<ProgressData>,
             model: ModelRc<MainListModel>,
         ) -> Option<(Vec<MainListModel>, Vec<String>, usize, usize)> {
-            let is_empty_folder_tab = self.active_tab == CurrentTab::EmptyFolders;
+            let is_empty_folder_tab = self.active_tab == ActiveTab::EmptyFolders;
 
             let items_queued_to_delete = model.iter().filter(|e| e.checked).count();
             if items_queued_to_delete == 0 {
@@ -130,7 +167,7 @@ mod tests {
         let (progress, _receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
         let model = get_model_vec(10);
         let model = create_model_from_model_vec(&model);
-        let processor = ModelProcessor::new(CurrentTab::EmptyFolders);
+        let processor = ModelProcessor::new(ActiveTab::EmptyFolders);
         assert!(processor.process_deletion_test(false, progress, model).is_none());
     }
 
@@ -145,7 +182,7 @@ mod tests {
         model[3].checked = true;
         model[3].val_str = ModelRc::new(VecModel::from(vec!["test_error".to_string().into(); 10]));
         let model = create_model_from_model_vec(&model);
-        let processor = ModelProcessor::new(CurrentTab::EmptyFolders);
+        let processor = ModelProcessor::new(ActiveTab::EmptyFolders);
         let (new_model, errors, items_queued_to_delete, items_deleted) = processor.process_deletion_test(false, progress, model).unwrap();
 
         assert_eq!(new_model.len(), 8);

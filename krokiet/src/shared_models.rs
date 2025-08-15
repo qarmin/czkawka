@@ -13,7 +13,7 @@ use czkawka_core::tools::similar_images::SimilarImages;
 use czkawka_core::tools::similar_videos::SimilarVideos;
 use czkawka_core::tools::temporary::Temporary;
 
-use crate::CurrentTab;
+use crate::ActiveTab;
 
 pub struct SharedModels {
     pub shared_duplication_state: Option<DuplicateFinder>,
@@ -50,21 +50,21 @@ impl SharedModels {
         Arc::new(Mutex::new(Self::new()))
     }
 
-    pub(crate) fn save_results(&self, active_tab: CurrentTab, chosen_dir: &str) -> Result<(), String> {
+    pub(crate) fn save_results(&self, active_tab: ActiveTab, chosen_dir: &str) -> Result<(), String> {
         let cd = chosen_dir;
         let result = match active_tab {
-            CurrentTab::DuplicateFiles => self.shared_duplication_state.as_ref().map(|x| x.save_all_in_one(cd, "results_duplicates")),
-            CurrentTab::EmptyFolders => self.shared_empty_folders_state.as_ref().map(|x| x.save_all_in_one(cd, "results_empty_directories")),
-            CurrentTab::EmptyFiles => self.shared_empty_files_state.as_ref().map(|x| x.save_all_in_one(cd, "results_empty_files")),
-            CurrentTab::TemporaryFiles => self.shared_temporary_files_state.as_ref().map(|x| x.save_all_in_one(cd, "results_temporary_files")),
-            CurrentTab::BigFiles => self.shared_big_files_state.as_ref().map(|x| x.save_all_in_one(cd, "results_big_files")),
-            CurrentTab::SimilarImages => self.shared_similar_images_state.as_ref().map(|x| x.save_all_in_one(cd, "results_similar_images")),
-            CurrentTab::SimilarVideos => self.shared_similar_videos_state.as_ref().map(|x| x.save_all_in_one(cd, "results_similar_videos")),
-            CurrentTab::SimilarMusic => self.shared_same_music_state.as_ref().map(|x| x.save_all_in_one(cd, "results_same_music")),
-            CurrentTab::InvalidSymlinks => self.shared_same_invalid_symlinks.as_ref().map(|x| x.save_all_in_one(cd, "results_invalid_symlinks")),
-            CurrentTab::BrokenFiles => self.shared_broken_files_state.as_ref().map(|x| x.save_all_in_one(cd, "results_broken_files")),
-            CurrentTab::BadExtensions => self.shared_bad_extensions_state.as_ref().map(|x| x.save_all_in_one(cd, "results_bad_extensions")),
-            CurrentTab::Settings | CurrentTab::About => panic!("Cannot save results for settings or about tab"),
+            ActiveTab::DuplicateFiles => self.shared_duplication_state.as_ref().map(|x| x.save_all_in_one(cd, "results_duplicates")),
+            ActiveTab::EmptyFolders => self.shared_empty_folders_state.as_ref().map(|x| x.save_all_in_one(cd, "results_empty_directories")),
+            ActiveTab::EmptyFiles => self.shared_empty_files_state.as_ref().map(|x| x.save_all_in_one(cd, "results_empty_files")),
+            ActiveTab::TemporaryFiles => self.shared_temporary_files_state.as_ref().map(|x| x.save_all_in_one(cd, "results_temporary_files")),
+            ActiveTab::BigFiles => self.shared_big_files_state.as_ref().map(|x| x.save_all_in_one(cd, "results_big_files")),
+            ActiveTab::SimilarImages => self.shared_similar_images_state.as_ref().map(|x| x.save_all_in_one(cd, "results_similar_images")),
+            ActiveTab::SimilarVideos => self.shared_similar_videos_state.as_ref().map(|x| x.save_all_in_one(cd, "results_similar_videos")),
+            ActiveTab::SimilarMusic => self.shared_same_music_state.as_ref().map(|x| x.save_all_in_one(cd, "results_same_music")),
+            ActiveTab::InvalidSymlinks => self.shared_same_invalid_symlinks.as_ref().map(|x| x.save_all_in_one(cd, "results_invalid_symlinks")),
+            ActiveTab::BrokenFiles => self.shared_broken_files_state.as_ref().map(|x| x.save_all_in_one(cd, "results_broken_files")),
+            ActiveTab::BadExtensions => self.shared_bad_extensions_state.as_ref().map(|x| x.save_all_in_one(cd, "results_bad_extensions")),
+            ActiveTab::Settings | ActiveTab::About => panic!("Cannot save results for settings or about tab"),
         };
 
         let current_path = match std::env::current_dir() {

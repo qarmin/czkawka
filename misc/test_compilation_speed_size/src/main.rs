@@ -1,174 +1,82 @@
 mod model;
 
+use crate::model::{
+    BuildConfig, BuildOrCheck,  Config,  Panic, Project, Results,
+};
 use std::fs;
 use std::fs::OpenOptions;
+use std::io::Write;
 use std::path::Path;
-
+use std::process::exit;
 use walkdir::WalkDir;
 
-use crate::model::{BuildOrCheck, CodegenUnits, Config, Debugg, Incremental, OptLevel, OverflowChecks, Panic, Results, SplitDebug, LTO};
-
-const START_CONFIG_TOML: &str = r#"[workspace]
-members = [
-    "czkawka_core",
-    "czkawka_cli",
-    "czkawka_gui",
-    "krokiet"
-]
-exclude = [
-    "misc/test_read_perf",
-    "misc/test_image_perf",
-    "misc/test_compilation_speed_size",
-    "ci_tester",
-]
-resolver = "3""#;
+const PROFILE_NAME: &str = "fff";
+const RESULTS_FILE_NAME: &str = "compilation_results.txt";
 
 fn main() {
-    let first_arg = std::env::args().nth(1).expect("Please provide the Czkawka root path");
-    let config_toml_path = Path::new(&first_arg).join("Cargo.toml");
-    let config_toml_content = fs::read_to_string(&config_toml_path).unwrap_or_else(|err| {
-        panic!("Could not read config.toml file at {}: {}", config_toml_path.display(), err);
-    });
-    if !config_toml_content.starts_with(START_CONFIG_TOML) {
-        panic!("The config.toml file does not start with the expected content. Please use czkawka repo.");
+    let Some(first_arg) = std::env::args().nth(1) else {
+        eprintln!("Please provide a path to the configuration json file as the first argument.");
+        exit(1);
+    };
+
+    let cargo_toml_path = Path::new("Cargo.toml");
+    if !cargo_toml_path.is_file() {
+        eprintln!("Cannot find Cargo.toml in the current directory. Please run this script from the root cargo directory(must be able to modify profiles).");
+        exit(1);
     }
 
-    let mut new_content_base = START_CONFIG_TOML.to_string();
-    new_content_base.push_str("\n\n\n[profile.fff]\ninherits=\"dev\"");
+    clean_changes_to_project_files("Cargo.toml");
+
+    let Ok(cargo_toml_content) = fs::read_to_string(&cargo_toml_path) else {
+        eprintln!("Could not read content of Cargo.toml file");
+        exit(1);
+    };
+
+    let Ok(config_json_content) = fs::read_to_string(&first_arg) else {
+        eprintln!("Could not read content of the provided json file: {}", first_arg);
+        exit(1);
+    };
+
+    let mut config = match serde_json::from_str::<Config>(&config_json_content) {
+        Ok(c) => c,
+        Err(e) => {
+            eprintln!("Could not parse content of the provided json file: {}. Error: {}", first_arg, e);
+            exit(1);
+        }
+    };
 
     let mut results_file = OpenOptions::new()
         .write(true)
         .create(true)
         .truncate(true)
-        .open(Path::new(&first_arg).join("compilation_results.txt"))
+        .open(Path::new(RESULTS_FILE_NAME))
         .expect("Could not open results file");
 
     Results::write_header_to_file(&mut results_file).unwrap();
 
-    // ALL configs
-    const USE_MOLD: &[bool] = &[true];
-    const CRANELIFT: &[bool] = &[true, false];
-    const PROJECTS: &[&str] = &["krokiet"];
-    const THREADS_NUMBERS: &[u32] = &[24];
-
-    // TEST config
-    // const USE_MOLD: &[bool] = &[true];
-    // const CRANELIFT: &[bool] = &[false];
-    // const PROJECTS: &[&str] = &["krokiet"];
-    // const THREADS_NUMBERS: &[u32] = &[24];
-
-    for cranelift in CRANELIFT {
-        for config in get_configs(*cranelift) {
-            for use_mold in USE_MOLD {
-                for project in PROJECTS {
-                    for threads_number in THREADS_NUMBERS {
-                        let new_content = format!("{new_content_base}\n{}\n", config.to_str());
-                        fs::write(&config_toml_path, new_content).expect("Could not write config file");
-
-                        let result = check_compilation_speed_and_size(&first_arg, project, config.clone(), *threads_number, *cranelift, *use_mold);
-                        result.save_to_file(&mut results_file).expect("Could not save results to file");
-                    }
-                }
+    config.build_config_converted = config.build_config.clone().into_iter().map(|e| e.into()).collect();
+    let g = config.general_config.clone();
+    let mut all_configs = vec![];
+    for mold in g.mold.to_options() {
+        for cranelift in g.cranelift.to_options() {
+            for build_config in &config.build_config_converted {
+                all_configs.push((mold, cranelift, build_config.clone()));
             }
         }
     }
-}
 
-fn get_configs(cranelift: bool) -> Vec<Config> {
-    //[profile.dev]
-    // opt-level = 0
-    // debug = true
-    // split-debuginfo = '...'  # Platform-specific.
-    // strip = "none"
-    // debug-assertions = true
-    // overflow-checks = true
-    // lto = false
-    // panic = 'unwind'
-    // incremental = true
-    // codegen-units = 256
-    // rpath = false
+    println!("Found {} configurations to test", all_configs.len());
 
-    // [profile.release]
-    // opt-level = 3
-    // debug = false
-    // split-debuginfo = '...'  # Platform-specific.
-    // strip = "none"
-    // debug-assertions = false
-    // overflow-checks = false
-    // lto = false
-    // panic = 'unwind'
-    // incremental = false
-    // codegen-units = 16
-    // rpath = false
-    let debug_base = Config {
-        name: "debug",
-        lto: LTO::Off,
-        debug: Debugg::Full,
-        opt_level: OptLevel::Zero,
-        build_or_check: BuildOrCheck::Build,
-        codegen_units: CodegenUnits::Default,
-        panic: Panic::Unwind,
-        split_debug: SplitDebug::Off,
-        overflow_checks: OverflowChecks::On,
-        incremental: Incremental::On,
-    };
-    let release_base = Config {
-        name: "release",
-        lto: LTO::Off,
-        debug: Debugg::None,
-        opt_level: OptLevel::Three,
-        build_or_check: BuildOrCheck::Build,
-        codegen_units: CodegenUnits::Sixteen,
-        panic: Panic::Unwind,
-        split_debug: SplitDebug::Off,
-        overflow_checks: OverflowChecks::Off,
-        incremental: Incremental::Off,
-    };
-
-    let mut debug_fast_check = debug_base.clone();
-    debug_fast_check.name = "debug + debug disabled";
-    debug_fast_check.debug = Debugg::None;
-
-    let mut check_fast_check = debug_base.clone();
-    check_fast_check.name = "check";
-    check_fast_check.build_or_check = BuildOrCheck::Check;
-
-    let mut release_thin_lto = release_base.clone();
-    release_thin_lto.name = "release + thin lto";
-    release_thin_lto.lto = LTO::Thin;
-
-    let mut release_thin_lto_optimize_size = release_base.clone();
-    release_thin_lto_optimize_size.name = "release + thin lto + optimize size";
-    release_thin_lto_optimize_size.lto = LTO::Thin;
-    release_thin_lto_optimize_size.opt_level = OptLevel::S;
-
-    let mut release_full_lto = release_base.clone();
-    release_full_lto.name = "release + fat lto";
-    release_full_lto.lto = LTO::Fat;
-
-    let mut release_fastest = release_base.clone();
-    release_fastest.name = "release + fat lto + codegen units 1 + panic abort";
-    release_fastest.lto = LTO::Fat;
-    release_fastest.codegen_units = CodegenUnits::One;
-    release_fastest.panic = Panic::Abort;
-
-    let configs = vec![
-        debug_base,
-        release_base,
-        release_thin_lto,
-        release_full_lto,
-        debug_fast_check,
-        check_fast_check,
-        release_fastest,
-        release_thin_lto_optimize_size,
-    ];
-
-    // For cranelift filter out configs with lto which is not supported
-    if cranelift {
-        configs.into_iter().filter(|config| config.lto == LTO::Off).collect()
-    } else {
-        configs
+    // let mut results = vec![];
+    for (mold, cranelift, build_config) in all_configs {
+        let new_cargo_toml_content = format!("{cargo_toml_content}\n\n[profile.{PROFILE_NAME}]\n{}\n", build_config.to_str());
+        fs::write(&cargo_toml_path, new_cargo_toml_content).expect("Could not write Cargo.toml file");
+        let result = check_compilation_speed_and_size(*mold, *cranelift, &build_config, &config.project);
+        // results.push(result.clone());
+        result.save_to_file(&mut results_file).expect("Could not save results to file");
     }
+
+    fs::write(&cargo_toml_path, cargo_toml_content).expect("Could not restore content of Cargo.toml file");
 }
 
 fn clean_cargo() {
@@ -185,26 +93,49 @@ fn clean_cargo() {
     }
 }
 
-fn run_cargo_build(project: &str, threads_number: u32, build: BuildOrCheck, cranelift: bool, use_mold: bool) {
-    let build_check = if build == BuildOrCheck::Build { "build" } else { "check" };
+fn run_cargo_build(mold: bool, cranelift: bool, build_config: &BuildConfig, project: &Project) {
+    let build_check = if build_config.build_or_check == BuildOrCheck::Build { "build" } else { "check" };
     let mut command = std::process::Command::new("cargo");
+    command.arg("+nightly");
     if cranelift {
         command.env("CARGO_PROFILE_DEV_CODEGEN_BACKEND", "cranelift");
         command.env("RUSTUP_TOOLCHAIN", "nightly");
         command.arg("-Zcodegen-backend");
     }
-    if use_mold {
-        command.env("RUSTFLAGS", "-C link-arg=-fuse-ld=mold");
+    let mut rust_flags = None;
+    if mold {
+        rust_flags = match rust_flags {
+            None => Some("-C link-arg=-fuse-ld=mold".to_string()),
+            Some(flags) => Some(format!("{} -C link-arg=-fuse-ld=mold", flags)),
+        };
     }
+    if build_config.build_std {
+        if build_config.panic == Panic::Abort {
+            command.args(["-Z", "build-std=std,panic_abort"]);
+        } else {
+            command.args(["-Z", "build-std=std"]);
+        }
+    }
+
+    if let Some(rust_flags) = rust_flags {
+        command.env("RUSTFLAGS", rust_flags);
+    }
+
+    // if threads_number > 0 {
+    // Looks that not all steps uses this variable - but I may be wrong
+    //     command.env("CARGO_BUILD_JOBS", threads_number.to_string());
+    // }
+
     command
-        .env("CARGO_BUILD_JOBS", threads_number.to_string())
         .arg(build_check)
-        .arg("--package")
-        .arg(project)
+        .arg("--bin")
+        .arg(&project.name)
         .arg("--profile")
-        .arg("fff")
+        .arg(PROFILE_NAME)
         .stdout(std::process::Stdio::inherit())
         .stderr(std::process::Stdio::inherit());
+
+    println!("Running cargo command: {:?}", command);
 
     let output = command.output().expect("Failed to execute cargo build");
 
@@ -213,36 +144,66 @@ fn run_cargo_build(project: &str, threads_number: u32, build: BuildOrCheck, cran
     }
 }
 
-fn check_compilation_speed_and_size(base: &str, project: &str, config: Config, threads_number: u32, cranelift: bool, use_mold: bool) -> Results {
+fn clean_changes_to_project_files(path: &str) {
+    let clean_command = std::process::Command::new("git")
+        .arg("checkout")
+        .arg(path)
+        .stdout(std::process::Stdio::inherit())
+        .stderr(std::process::Stdio::inherit())
+        .output()
+        .expect("Failed to execute git checkout");
+    if !clean_command.status.success() {
+        panic!("Git checkout failed: {}", String::from_utf8_lossy(&clean_command.stderr));
+    }
+}
+
+fn add_empty_line_to_file(project: &Project) {
+    let file_path = Path::new(&project.path_to_main_rs_file);
+    let mut file = OpenOptions::new().append(true).open(&file_path).expect("Could not open main.rs file");
+    if let Err(e) = writeln!(file, "// Absolutely nothing") {
+        panic!("Could not write to main.rs file: {}", e);
+    }
+}
+
+fn check_compilation_speed_and_size(mold: bool, cranelift: bool, build_config: &BuildConfig, project: &Project) -> Results {
     clean_cargo();
+    clean_changes_to_project_files(&project.path_to_clean_with_git);
 
     let start_time = std::time::Instant::now();
 
-    println!("Running cargo build for project: {}", project);
+    println!("Running cargo build for project: {}", project.name);
+    println!("Parameters: mold: {}, cranelift: {}, build_config: {}", mold, cranelift, build_config.to_string_short());
 
-    println!("Project: {project}, threads: {threads_number}, {}", config.to_string_short());
-
-    run_cargo_build(project, threads_number, config.build_or_check, cranelift, use_mold);
+    run_cargo_build(mold, cranelift, build_config, project);
 
     let compilation_time = start_time.elapsed();
 
-    let output_file_size = get_size_of_output_file(base, project);
-    let target_folder_size = get_size_of_target_folder(base);
+    let output_file_size = get_size_of_output_file(project);
+    let target_folder_size = get_size_of_target_folder();
+
+    add_empty_line_to_file(project);
+
+    let rebuild_time_start = std::time::Instant::now();
+    run_cargo_build(mold, cranelift, build_config, project);
+    let rebuild_time = rebuild_time_start.elapsed();
+
+    clean_cargo();
+    clean_changes_to_project_files(&project.path_to_clean_with_git);
 
     Results {
         output_file_size,
         target_folder_size,
         compilation_time,
-        config,
-        threads_number,
-        project: project.to_string(),
+        build_config: build_config.clone(),
+        project: project.clone(),
         cranelift,
-        use_mold,
+        mold,
+        rebuild_time,
     }
 }
 
-fn get_size_of_output_file(base: &str, project: &str) -> u64 {
-    let output_path = Path::new(base).join("target").join("fff").join(project);
+fn get_size_of_output_file(project: &Project) -> u64 {
+    let output_path = Path::new("target").join(PROFILE_NAME).join(&project.name);
     if output_path.exists() {
         output_path.metadata().map(|e| e.len()).unwrap_or_default()
     } else {
@@ -250,8 +211,8 @@ fn get_size_of_output_file(base: &str, project: &str) -> u64 {
     }
 }
 
-fn get_size_of_target_folder(base: &str) -> u64 {
-    let target_path = Path::new(base).join("target");
+fn get_size_of_target_folder() -> u64 {
+    let target_path = Path::new("target");
     get_size_of_files_in_folder(&target_path)
 }
 
