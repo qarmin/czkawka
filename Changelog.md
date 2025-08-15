@@ -1,7 +1,6 @@
 ## Version ?.?.? - ?
 ### Release blockers:
 - Missing support for hardlinking/softlinking files in Krokiet
-- Slint bug with selecting items with both mouse and keyboard -  https://github.com/slint-ui/slint/issues/9103
 - Unnecessary tokio dependency in rawler
 
 ### Breaking changes

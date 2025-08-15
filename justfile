@@ -28,6 +28,13 @@ runs +args:
     export ASAN_OPTIONS="symbolize=1:detect_leaks=0" # Leak check is disabled, because is slow and ususally not needed
     ASAN_OPTIONS="symbolize=1:detect_leaks=0" RUSTFLAGS="-Zsanitizer=address" cargo +nightly run --target x86_64-unknown-linux-gnu --bin {{args}}
 
+val bin:
+    valgrind --leak-check=full --show-leak-kinds=definite --track-origins=yes target/debug/{{bin}}
+
+valr bin:
+    valgrind --leak-check=full --show-leak-kinds=definite --track-origins=yes target/release/{{bin}}
+
+
 ## Other
 
 setup_sanitizer:

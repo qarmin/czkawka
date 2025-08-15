@@ -110,15 +110,17 @@ export component SelectableTableView inherits Rectangle {
                 }
 
                 HorizontalLayout {
+                    // Workaround for https://github.com/slint-ui/slint/issues/602
+                    // Alternative solution is to use TouchArea above, to steal clicks from checkbox, but it is more fishy solution
                     CheckBox {
+                        property <bool> from_model: r.checked;
                         visible: !r.header_row;
                         checked: r.checked && !r.header_row;
                         width: root.column_sizes[0];
+                        changed from-model => { self.checked = from-model; }
                         toggled => {
                             Callabler.change_number_of_checked_items(r.checked ? -1 : 1);
-                            r.checked = !r.checked; 
-                            // TODO - this is equivalent to r.checked = self.checked, but for now it works better, because self.checked contains sometimes old state
-                            // https://github.com/slint-ui/slint/issues/602
+                            r.checked = !r.checked;
                         }
                     }
 
