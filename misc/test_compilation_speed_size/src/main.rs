@@ -28,7 +28,7 @@ fn main() {
     clean_changes_to_project_files("Cargo.toml");
 
     let Ok(cargo_toml_content) = fs::read_to_string(&cargo_toml_path) else {
-        eprintln!("Could not read contnet of Cargo.toml file");
+        eprintln!("Could not read content of Cargo.toml file");
         exit(1);
     };
 
@@ -94,7 +94,6 @@ fn clean_cargo() {
 }
 
 fn run_cargo_build(mold: bool, cranelift: bool, build_config: &BuildConfig, project: &Project) {
-    // return; // TODO only for tests
     let build_check = if build_config.build_or_check == BuildOrCheck::Build { "build" } else { "check" };
     let mut command = std::process::Command::new("cargo");
     command.arg("+nightly");
@@ -123,6 +122,7 @@ fn run_cargo_build(mold: bool, cranelift: bool, build_config: &BuildConfig, proj
     }
 
     // if threads_number > 0 {
+    // Looks that not all steps uses this variable - but I may be wrong
     //     command.env("CARGO_BUILD_JOBS", threads_number.to_string());
     // }
 
@@ -160,7 +160,7 @@ fn clean_changes_to_project_files(path: &str) {
 fn add_empty_line_to_file(project: &Project) {
     let file_path = Path::new(&project.path_to_main_rs_file);
     let mut file = OpenOptions::new().append(true).open(&file_path).expect("Could not open main.rs file");
-    if let Err(e) = writeln!(file, "// Absolutelly nothing") {
+    if let Err(e) = writeln!(file, "// Absolutely nothing") {
         panic!("Could not write to main.rs file: {}", e);
     }
 }

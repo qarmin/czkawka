@@ -32,7 +32,7 @@ pub(crate) fn connect_delete_button(app: &MainWindow, progress_sender: Sender<Pr
         let app = a.upgrade().expect("Failed to upgrade app :(");
         let translation = app.global::<Translations>();
         let res = get_checked_info_from_app(&app);
-        // TODO - items formatting should be done in GUI, not here
+        // TODO - items formatting should be done in GUI, not here, but slint not supports fluent strings with arguments
         let mut base = flk!("rust_delete_confirmation");
         if let Some(group_res) = res.groups_with_checked_items {
             base.push_str(

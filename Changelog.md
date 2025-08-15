@@ -50,6 +50,7 @@
 - Folders to scan can be now set via cli e.g. `krokiet /home/rafal` - for more info see `krokiet --help` - [#1566](https://github.com/qarmin/czkawka/pull/1566)
 - Improved appearance of bottom directories panel - [#1569](https://github.com/qarmin/czkawka/pull/1569)
 - Some buttons, are disabled, when there is no files selected - [#1586](https://github.com/qarmin/czkawka/pull/1586)
+- Added info about the number of items selected to delete - [#1589](https://github.com/qarmin/czkawka/pull/1589)
 
 ### External
 - There is a new unofficial Tauri-based frontend for Czkawka - [Czkawka Tauri](https://github.com/shixinhuang99/czkawka-tauri)
