@@ -131,29 +131,29 @@ pub(crate) fn get_raw_image(path: impl AsRef<Path> + std::fmt::Debug) -> Result<
 
     let raw_source = RawSource::new(path.as_ref()).map_err(|err| format!("Failed to create RawSource from path {path:?}: {err}"))?;
 
-    timer.checkpoint("After creating RawSource");
+    timer.checkpoint("Created RawSource");
 
     let decoder = rawler::get_decoder(&raw_source).map_err(|e| e.to_string())?;
 
-    timer.checkpoint("After getting decoder");
+    timer.checkpoint("Got decoder");
     let raw_image = decoder.raw_image(&raw_source, &RawDecodeParams::default(), false).map_err(|e| e.to_string())?;
 
-    timer.checkpoint("After decoding raw image");
+    timer.checkpoint("Decoded raw image");
 
     let developer = RawDevelop::default();
     let developed_image = developer.develop_intermediate(&raw_image).map_err(|e| e.to_string())?;
 
-    timer.checkpoint("After developing raw image");
+    timer.checkpoint("Developed raw image");
 
     let dynamic_image = developed_image.to_dynamic_image().ok_or("Failed to convert image to DynamicImage".to_string())?;
 
-    timer.checkpoint("After converting to DynamicImage");
+    timer.checkpoint("Converted to DynamicImage");
 
     let rgb_image = DynamicImage::from(dynamic_image.to_rgb8());
 
-    timer.checkpoint("After reconverting to RGB");
+    timer.checkpoint("Reconverted to RGB");
 
-    trace!("{}", timer.report(false));
+    trace!("{}", timer.report("Everything", false));
 
     Ok(rgb_image)
 }

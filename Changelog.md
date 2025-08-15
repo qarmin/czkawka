@@ -51,6 +51,7 @@
 - Improved appearance of bottom directories panel - [#1569](https://github.com/qarmin/czkawka/pull/1569)
 - Some buttons, are disabled, when there is no files selected - [#1586](https://github.com/qarmin/czkawka/pull/1586)
 - Added info about the number of items selected to delete - [#1589](https://github.com/qarmin/czkawka/pull/1589)
+- Limit image preview to max 1024 width/height, to speedup preview loading and fixing crash in software renderer - [#]() 
 
 ### External
 - There is a new unofficial Tauri-based frontend for Czkawka - [Czkawka Tauri](https://github.com/shixinhuang99/czkawka-tauri)
