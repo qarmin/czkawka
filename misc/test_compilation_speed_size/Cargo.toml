@@ -6,7 +6,9 @@ edition = "2024"
 [dependencies]
 walkdir = "2.5.0"
 humansize = "2.1"
-
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.142"
+strum = { version = "0.27.2", features = ["strum_macros"] }
 
 [profile.release]
 panic = "unwind"
