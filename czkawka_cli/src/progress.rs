@@ -67,7 +67,6 @@ pub(crate) fn get_progress_message(progress_data: &ProgressData) -> String {
         CurrentStage::SimilarVideosCalculatingHashes => "Reading similar values",
         CurrentStage::BrokenFilesChecking => "Checking broken files",
         CurrentStage::BadExtensionsChecking => "Checking extensions of files",
-
         CurrentStage::DeletingFiles => "Deleting files/folders",
         _ => unreachable!("Unsupported stage {:?}", progress_data.sstage),
     }

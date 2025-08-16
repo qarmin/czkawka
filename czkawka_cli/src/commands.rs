@@ -26,7 +26,7 @@ pub enum Commands {
     #[clap(
         name = "dup",
         about = "Finds duplicate files",
-        after_help = "EXAMPLE:\n    czkawka dup -d /home/rafal - -e /home/rafal/Obrazy  -m 25 -x 7z rar IMAGE -s hash -f results.txt -D aeo"
+        after_help = "EXAMPLE:\n    czkawka dup -d /home/rafal -e /home/rafal/Obrazy  -m 25 -x 7z rar IMAGE -s hash -f results.txt -D aeo"
     )]
     Duplicates(DuplicatesArgs),
     #[clap(
@@ -73,7 +73,7 @@ pub enum Commands {
         after_help = "EXAMPLE:\n    czkawka broken -d /home/kicikici/ /home/szczek -e /home/kicikici/jestempsem -x jpg -f results.txt"
     )]
     BrokenFiles(BrokenFilesArgs),
-    #[clap(name = "video", about = "Finds similar video files", after_help = "EXAMPLE:\n    czkawka videos -d /home/rafal -f results.txt")]
+    #[clap(name = "video", about = "Finds similar video files", after_help = "EXAMPLE:\n    czkawka video -d /home/rafal -f results.txt")]
     SimilarVideos(SimilarVideosArgs),
     #[clap(
         name = "ext",
@@ -281,8 +281,8 @@ pub struct SameMusicArgs {
         long,
         default_value = "track_title,track_artist",
         value_parser = parse_music_duplicate_type,
-        help = "Search method (track_title,track_artist,year,bitrate,genre,length))",
-        long_help = "Sets which rows must be equal to set this files as duplicates(may be mixed, but must be divided by commas)."
+        help = "Search method (track_title,track_artist,year,bitrate,genre,length)",
+        long_help = "Sets which rows must be equal to set these files as duplicates (may be mixed, but must be divided by commas)."
     )]
     pub music_similarity: MusicSimilarity,
     #[clap(
@@ -291,7 +291,7 @@ pub struct SameMusicArgs {
         default_value = "TAGS",
         value_parser = parse_checking_method_same_music,
         help = "Search method (CONTENT, TAGS)",
-        long_help = "Methods to search files.\nCONTENT - finds similar audio files by content, TAGS - finds similar images by tags, needs to set"
+        long_help = "Methods to search files.\nCONTENT - finds similar audio files by content, TAGS - finds similar music by tags."
     )]
     pub search_method: CheckingMethod,
     #[clap(
@@ -724,7 +724,8 @@ fn parse_similar_images_similarity(src: &str) -> Result<SimilarityPreset, &'stat
         "medium" => Ok(SimilarityPreset::Medium),
         "high" => Ok(SimilarityPreset::High),
         "veryhigh" => Ok(SimilarityPreset::VeryHigh),
-        _ => Err("Couldn't parse the image similarity preset (allowed: Minimal, VerySmall, Small, Medium, High, VeryHigh)"),
+        "original" => Ok(SimilarityPreset::Original),
+        _ => Err("Couldn't parse the image similarity preset (allowed: Minimal, VerySmall, Small, Medium, High, VeryHigh, Original)"),
     }
 }
 
@@ -831,7 +832,7 @@ OPTIONS:
 SUBCOMMANDS:
 {subcommands}
 
-    try "{usage} -h" to get more info about a specific tool
+    try "{usage} <COMMAND> -h" to get more info about a specific tool
 
 EXAMPLES:
     {bin} dup -d /home/rafal -e /home/rafal/Obrazy  -m 25 -x 7z rar IMAGE -s hash -f results.txt -D aeo
@@ -840,7 +841,7 @@ EXAMPLES:
     {bin} empty-files -d /home/rafal /home/szczekacz -e /home/rafal/Pulpit -R -f results.txt
     {bin} temp -d /home/rafal/ -E */.git */tmp* *Pulpit -f results.txt -D
     {bin} image -d /home/rafal -e /home/rafal/Pulpit -f results.txt
-    {bin} music -d /home/rafal -e /home/rafal/Pulpit -z "artist,year, ARTISTALBUM, ALBUM___tiTlE"  -f results.txt
+    {bin} music -d /home/rafal -e /home/rafal/Pulpit -z \"artist,year,ARTISTALBUM,ALBUM___tiTlE\"  -f results.txt
     {bin} symlinks -d /home/kicikici/ /home/szczek -e /home/kicikici/jestempsem -x jpg -f results.txt
     {bin} broken -d /home/mikrut/ -e /home/mikrut/trakt -f results.txt
-    {bin} extnp -d /home/mikrut/ -e /home/mikrut/trakt -f results.txt"#;
+    {bin} ext -d /home/mikrut/ -e /home/mikrut/trakt -f results.txt"#;
