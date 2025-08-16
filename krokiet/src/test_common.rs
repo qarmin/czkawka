@@ -4,11 +4,11 @@ use crate::MainListModel;
 
 pub(crate) fn get_main_list_model() -> MainListModel {
     MainListModel {
-        selected_row: false,
-        val_int: Default::default(),
         checked: false,
         filled_header_row: false,
         header_row: false,
+        selected_row: false,
+        val_int: Default::default(),
         val_str: Default::default(),
     }
 }

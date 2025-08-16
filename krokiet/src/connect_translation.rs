@@ -44,7 +44,7 @@ pub const LANGUAGE_LIST: &[Language] = &[
         left_panel_size: 185.0,
     },
     Language {
-        long_name: "한국인 (Korean)",
+        long_name: "한국어 (Korean)",
         short_name: "ko",
         left_panel_size: 145.0,
     },
@@ -59,7 +59,7 @@ pub const LANGUAGE_LIST: &[Language] = &[
         left_panel_size: 155.0,
     },
     Language {
-        long_name: "やまと (Japanese)",
+        long_name: "日本語 (Japanese)",
         short_name: "ja",
         left_panel_size: 155.0,
     },
@@ -94,32 +94,32 @@ pub const LANGUAGE_LIST: &[Language] = &[
         left_panel_size: 135.0,
     },
     Language {
-        long_name: "Swedish (Svenska)",
+        long_name: "Svenska (Swedish)",
         short_name: "sv-SE",
         left_panel_size: 130.0,
     },
     Language {
-        long_name: "المملكة العربية السعودية (Saudi Arabia)",
+        long_name: "العربية (Arabic)",
         short_name: "ar",
         left_panel_size: 135.0,
     },
     Language {
-        long_name: "България (Bulgaria)",
+        long_name: "Български (Bulgarian)",
         short_name: "bg",
         left_panel_size: 165.0,
     },
     Language {
-        long_name: "Ελλάδα (Greece)",
+        long_name: "Ελληνικά (Greek)",
         short_name: "el",
         left_panel_size: 160.0,
     },
     Language {
-        long_name: "Nederland (Netherlands)",
+        long_name: "Nederlands (Dutch)",
         short_name: "nl",
         left_panel_size: 165.0,
     },
     Language {
-        long_name: "România (Romania)",
+        long_name: "Română (Romanian)",
         short_name: "ro",
         left_panel_size: 140.0,
     },
@@ -166,7 +166,7 @@ pub(crate) fn change_language(app: &MainWindow) {
     let lang_identifier = vec![LanguageIdentifier::from_bytes(lang_items.short_name.as_bytes()).expect("Failed to create LanguageIdentifier")];
     for (lib, localizer) in localizers {
         if let Err(error) = localizer.select(&lang_identifier) {
-            error!("Error while loadings languages for {lib} {error:?}");
+            error!("Error while loading languages for {lib} {error:?}");
         }
     }
 
