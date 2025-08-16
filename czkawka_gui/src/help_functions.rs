@@ -348,7 +348,7 @@ pub(crate) fn get_list_store(tree_view: &TreeView) -> ListStore {
 }
 
 pub(crate) fn get_dialog_box_child(dialog: &gtk4::Dialog) -> gtk4::Box {
-    dialog.child().expect("Dialog have no chile").downcast::<gtk4::Box>().expect("Dialog child is not Box")
+    dialog.child().expect("Dialog has no child").downcast::<gtk4::Box>().expect("Dialog child is not Box")
 }
 
 pub(crate) fn change_dimension_to_krotka(dimensions: &str) -> (u64, u64) {

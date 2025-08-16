@@ -29,7 +29,7 @@ fn change_language(gui_data: &GuiData) {
     let lang_identifier = vec![LanguageIdentifier::from_bytes(lang_short.as_bytes()).expect("Failed to create LanguageIdentifier")];
     for (lib, localizer) in localizers {
         if let Err(error) = localizer.select(&lang_identifier) {
-            error!("Error while loadings languages for {lib} {error:?}");
+            error!("Error while loading languages for {lib} {error:?}");
         }
     }
     gui_data.update_language();
@@ -41,7 +41,7 @@ pub(crate) fn load_system_language(gui_data: &GuiData) {
     if let Some(language) = requested_languages.first() {
         let old_short_lang = language.to_string();
         let mut short_lang = String::new();
-        // removes from e.g. en_zb, ending _zd since Czkawka don't support this(maybe could add this in future, but only when)
+        // removes from e.g. en_zb, ending _zd since Czkawka doesn't support this (maybe could add this in future)
         for i in old_short_lang.chars() {
             if i.is_ascii_alphabetic() {
                 short_lang.push(i);
@@ -49,18 +49,11 @@ pub(crate) fn load_system_language(gui_data: &GuiData) {
                 break;
             }
         }
-        // let mut found: bool = false;
         for (index, lang) in LANGUAGES_ALL.iter().enumerate() {
             if lang.short_text == short_lang {
-                // found = true;
                 gui_data.settings.combo_box_settings_language.set_active(Some(index as u32));
                 break;
             }
         }
-        // if found {
-        //     println!("INFO: Default system language {} is available, so choosing them", short_lang);
-        // } else {
-        //     println!("INFO: Default system language {} is not available, using English(en) instead", short_lang);
-        // }
     }
 }

@@ -43,9 +43,9 @@ pub(crate) fn connect_button_move(gui_data: &GuiData) {
             let mut folders: Vec<PathBuf> = Vec::new();
             let g_files = file_chooser.files();
             for index in 0..g_files.n_items() {
-                let file = &g_files.item(index);
+                let file = g_files.item(index);
                 if let Some(file) = file {
-                    let ss = file.clone().downcast::<gtk4::gio::File>().expect("Failed to downcast to gio::File");
+                    let ss = file.downcast::<gtk4::gio::File>().expect("Failed to downcast to gio::File");
                     if let Some(path_buf) = ss.path() {
                         folders.push(path_buf);
                     }
@@ -190,7 +190,7 @@ fn move_files_common(
         let path = model.get::<String>(&iter, column_path);
 
         let thing = get_full_name_from_path_name(&path, &file_name);
-        let destination_file = destination_folder.join(file_name);
+        let destination_file = destination_folder.join(&file_name);
         if Path::new(&thing).is_dir() {
             if let Err(e) = fs_extra::dir::move_dir(&thing, &destination_file, &CopyOptions::new()) {
                 messages += flg!("move_folder_failed", name = thing, reason = e.to_string()).as_str();
