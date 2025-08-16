@@ -4,7 +4,7 @@ use czkawka_core::common::image::{check_if_can_display_image, get_dynamic_image_
 use czkawka_core::helpers::debug_timer::Timer;
 use fast_image_resize::{FilterType, ResizeAlg, ResizeOptions, Resizer};
 use image::DynamicImage;
-use log::{debug, error, warn};
+use log::{debug, error};
 use slint::ComponentHandle;
 
 use crate::{ActiveTab, Callabler, GuiState, MainWindow, Settings};
@@ -50,11 +50,8 @@ pub(crate) fn connect_show_preview(app: &MainWindow) {
 
                 let mut dst_img = DynamicImage::new(new_width, new_height, img.color());
                 timer.checkpoint("creating new image buffer");
-                let resize_options = ResizeOptions::new().resize_alg(ResizeAlg::Interpolation(FilterType::Lanczos3));
-                if let Err(e) = Resizer::new().resize(&img, &mut dst_img, Some(&resize_options)) {
-                    warn!("Error while resizing image: {e:?}");
-                };
 
+                let resize_options = ResizeOptions::new().resize_alg(ResizeAlg::Interpolation(FilterType::Lanczos3));
                 match Resizer::new().resize(&img, &mut dst_img, Some(&resize_options)) {
                     Ok(()) => {
                         timer.checkpoint("resizing image with fast-image-resize");
