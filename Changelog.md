@@ -1,7 +1,6 @@
 ## Version ?.?.? - ?
 ### Release blockers:
-- Missing support for hardlinking/softlinking files in Krokiet
-- Unnecessary tokio dependency in rawler
+- crash when sorting by size, elements in empty folders
 
 ### Breaking changes
 #### Users
@@ -51,7 +50,7 @@
 - Improved appearance of bottom directories panel - [#1569](https://github.com/qarmin/czkawka/pull/1569)
 - Some buttons, are disabled, when there is no files selected - [#1586](https://github.com/qarmin/czkawka/pull/1586)
 - Added info about the number of items selected to delete - [#1589](https://github.com/qarmin/czkawka/pull/1589)
-- Limit image preview to max 1024 width/height, to speedup preview loading and fixing crash in software renderer - [#]() 
+- Limit image preview to max 1024 width/height, to speedup preview loading and fixing crash in software renderer - [#1590](https://github.com/qarmin/czkawka/pull/1590) 
 
 ### External
 - There is a new unofficial Tauri-based frontend for Czkawka - [Czkawka Tauri](https://github.com/shixinhuang99/czkawka-tauri)
@@ -60,7 +59,6 @@
 ### CI
 - Compilation for 32-bit targets is now checked in CI
 - Czkawka binaries are now checked for reproducibility in CI
-
 
 ### Prebuilt binaries
 - AppImage binaries are no longer provided due to random bugs (not present in other packaging formats) and minimal added value compared to prebuilt Linux binaries or Flatpak

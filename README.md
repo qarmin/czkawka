@@ -54,32 +54,35 @@ two apps shouldn't be compared directly or be considered as an alternative to on
 In this comparison remember, that even if app have same features they may work different(e.g. one app may have more
 options to choose than other).
 
-|                          |   Czkawka   |   Krokiet   | FSlint |     DupeGuru      |  Bleachbit  |
-|:------------------------:|:-----------:|:-----------:|:------:|:-----------------:|:-----------:|
-|         Language         |    Rust     |    Rust     | Python |   Python/Obj-C    |   Python    |
-| Framework base language  |      C      |    Rust     |   C    | C/C++/Obj-C/Swift |      C      |
-|        Framework         |    GTK 4    |    Slint    | PyGTK2 | Qt 5 (PyQt)/Cocoa |   PyGTK3    |
-|            OS            | Lin,Mac,Win | Lin,Mac,Win |  Lin   |    Lin,Mac,Win    | Lin,Mac,Win |
-|     Duplicate finder     |      ✔      |      ✔      |   ✔    |         ✔         |             |
-|       Empty files        |      ✔      |      ✔      |   ✔    |                   |             |
-|      Empty folders       |      ✔      |      ✔      |   ✔    |                   |             |
-|     Temporary files      |      ✔      |      ✔      |   ✔    |                   |      ✔      |
-|        Big files         |      ✔      |      ✔      |        |                   |             |
-|      Similar images      |      ✔      |      ✔      |        |         ✔         |             |
-|      Similar videos      |      ✔      |      ✔      |        |                   |             |
-|  Music duplicates(tags)  |      ✔      |      ✔      |        |         ✔         |             |
-|     Invalid symlinks     |      ✔      |      ✔      |   ✔    |                   |             |
-|       Broken files       |      ✔      |      ✔      |        |                   |             |
-|      Names conflict      |      ✔      |      ✔      |   ✔    |                   |             |
-| Invalid names/extensions |      ✔      |      ✔      |   ✔    |                   |             |
-|    Installed packages    |             |             |   ✔    |                   |             |
-|          Bad ID          |             |             |   ✔    |                   |             |
-|  Non stripped binaries   |             |             |   ✔    |                   |             |
-|   Redundant whitespace   |             |             |   ✔    |                   |             |
-|    Overwriting files     |             |             |   ✔    |                   |      ✔      |
-|    Multiple languages    |      ✔      |      ✔      |   ✔    |         ✔         |      ✔      |
-|      Cache support       |      ✔      |      ✔      |        |         ✔         |             |
-|  In active development   |     Yes     |     Yes     |   No   |        Yes        |     Yes     |
+|                           |   Czkawka   |   Krokiet   | FSlint |     DupeGuru      |  Bleachbit  |
+|:-------------------------:|:-----------:|:-----------:|:------:|:-----------------:|:-----------:|
+|         Language          |    Rust     |    Rust     | Python |   Python/Obj-C    |   Python    |
+|  Framework base language  |      C      |    Rust     |   C    | C/C++/Obj-C/Swift |      C      |
+|         Framework         |    GTK 4    |    Slint    | PyGTK2 | Qt 5 (PyQt)/Cocoa |   PyGTK3    |
+|            OS             | Lin,Mac,Win | Lin,Mac,Win |  Lin   |    Lin,Mac,Win    | Lin,Mac,Win |
+|     Duplicate finder      |      ✔      |      ✔      |   ✔    |         ✔         |             |
+|        Empty files        |      ✔      |      ✔      |   ✔    |                   |             |
+|       Empty folders       |      ✔      |      ✔      |   ✔    |                   |             |
+|      Temporary files      |      ✔      |      ✔      |   ✔    |                   |      ✔      |
+|         Big files         |      ✔      |      ✔      |        |                   |             |
+|      Similar images       |      ✔      |      ✔      |        |         ✔         |             |
+|      Similar videos       |      ✔      |      ✔      |        |                   |             |
+|  Music duplicates(tags)   |      ✔      |      ✔      |        |         ✔         |             |
+| Music duplicates(content) |      ✔      |      ✔      |        |                   |             |
+|     Invalid symlinks      |      ✔      |      ✔      |   ✔    |                   |             |
+|       Broken files        |      ✔      |      ✔      |        |                   |             |
+| Invalid names/extensions  |      ✔      |      ✔      |   ✔    |                   |             |
+|      Names conflict       |             |             |   ✔    |                   |             |
+|    Installed packages     |             |             |   ✔    |                   |             |
+|          Bad ID           |             |             |   ✔    |                   |             |
+|   Non stripped binaries   |             |             |   ✔    |                   |             |
+|   Redundant whitespace    |             |             |   ✔    |                   |             |
+|     Overwriting files     |             |             |   ✔    |                   |      ✔      |
+|    Multiple languages     |      ✔      |      ✔      |   ✔    |         ✔         |      ✔      |
+|       Cache support       |      ✔      |      ✔      |        |         ✔         |             |
+|   In active development   |     Yes     |     Yes     |   No   |        No*        |     Yes     |
+
+* Last commit in 2024 and last version released in 2023
 
 ## Other apps
 

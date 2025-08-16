@@ -188,7 +188,7 @@ jobs:
 
       - name: Release
         uses: softprops/action-gh-release@v2
-        #if: ${{ github.ref == 'refs/heads/master' }} # TODO - re-enable after testing
+        if: ${{ github.ref == 'refs/heads/master' }}
         with:
           tag_name: "Nightly"
           files: |

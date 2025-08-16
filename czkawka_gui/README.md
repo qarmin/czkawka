@@ -20,59 +20,73 @@ Additional features like heif, libraw, libavif require additional libraries to b
 
 ### Linux
 
-#### Prebuild binaries
+#### Prebuild binaries/Self compiled
 
 Ubuntu - `sudo apt install libgtk-4-bin libheif1 libraw-bin ffmpeg -y`
 
+### Mac
+
+```
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+brew install gtk4 ffmpeg librsvg libheif libraw dav1d
+```
+
+### Windows
+
+#### Prebuild binaries
+All needed libraries should be bundled in zip(except ffmpeg, which you can install manually and put ffmpeg.exe, to place, where os can find it).
+
+
+## Installation
+
+### Prebuilt binaries(All OS)
+After installing the required dependencies, you can download the prebuilt binaries for your platform from the releases page - https://github.com/qarmin/czkawka/releases
+
+### Linux
 #### Flatpak
+```
+flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+flatpak install flathub com.github.qarmin.czkawka
+```
 
-none - all needed libraries are bundled - https://flathub.org/apps/com.github.qarmin.czkawka
+### Debian package(Unofficial) 
+Requires Debian 13(or based on this version) or later.
+```
+sudo apt install czkawka_gui
+```
 
-#### PPA(Unofficial)
+#### PPA(Unofficial) - debian-like distributions (Ubuntu, Linux Mint, etc.)
 ```
 sudo add-apt-repository ppa:xtradeb/apps
 sudo apt update
 sudo apt install czkawka
 ```
 
+Link - https://launchpad.net/~xtradeb/+archive/ubuntu/apps
+
 ### Mac
 
-### Homebrew
-
-Czkawka gui is available in homebrew - https://formulae.brew.sh/formula/czkawka and can be installed via
-
+#### Homebrew(Unofficial)
 ```
 brew install czkawka
 ```
-
-### Manual installation requirements
-
-```
-
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-brew install gtk4 adwaita-icon-theme ffmpeg librsvg libheif libraw
-
-```
+Link - https://formulae.brew.sh/formula/czkawka
 
 ### Windows
 
-All needed libraries should be bundled in zip (except ffmpeg which you need download and unpack to location
-with `czkawka_gui.exe` - https://ffmpeg.org/download.html#build-windows)
-
-You can also install the app via msys2 (webp and heif should work here) - https://www.msys2.org/#installation (czkawka
-package - https://packages.msys2.org/base/mingw-w64-czkawka)
-
+### Msys2(Unofficial)
 ```
-
 pacman -S mingw-w64-x86_64-czkawka-gui
-
 ```
 
-and you can create a shortcut to `C:\msys64\mingw64\bin\czkawka_gui.exe`
+Link - https://packages.msys2.org/base/mingw-w64-czkawka
+
+File should be installed to `C:\msys64\mingw64\bin\czkawka_gui.exe` and you can run it from there.  
+This version is probably the most feature complete on windows, because it is compiled with optional features enabled.
 
 ## Compilation
 
-Compiling the gui is harder than compiling cli or core, because it uses gtk4 which is written in C and also requires a
+Compiling the gui is harder than compiling cli, core or krokiet, because it uses gtk4 which is written in C and also requires a
 lot build and runtime dependencies.
 
 ### Requirements
@@ -117,9 +131,7 @@ purposes - https://github.com/msys2/MINGW-packages/blob/master/mingw-w64-czkawka
 
 Not all available features and/or components implemented here, this is the list of limitations:
 
-- Snap versions does not allow to use the similar videos feature
 - Windows version does not support heif and webp files with prebuilt binaries(msys2 version support them)
-- Prebuilt binaries for mac arm do not exist
 - On Windows, text may appear very small on high resolution displays, a solution is to manually change DPI scaling for
   this app, see:
     - [recommended fix](https://github.com/qarmin/czkawka/issues/787#issuecomment-1292253437) (modify gtk.css),
