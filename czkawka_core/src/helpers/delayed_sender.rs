@@ -1,18 +1,26 @@
+//! DelayedSender: A utility for batching or throttling messages sent between threads.
+
 use std::sync::atomic::AtomicBool;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
 
 /// A sender that delays sending values until a specified wait time has passed since the last sent value.
+///
 /// This is useful for batching updates or reducing the frequency of sending messages in a multi-threaded environment.
-/// It is not ideal - using mutexes in send function from multiple threads can lead to performance issues(waiting for mutex release), but at least for now I don't see too much performance impact.
-/// In future here could be used something like one element channel which would drop all other messages, but not sure if currently something like this exists
+/// Note: Using mutexes in the send function from multiple threads can lead to performance issues (waiting for mutex release),
+/// but for now, the performance impact is minimal. In the future, a more efficient channel could be used.
 pub struct DelayedSender<T: Send + 'static> {
     slot: Arc<Mutex<Option<T>>>,
     stop_flag: Arc<AtomicBool>,
 }
 
 impl<T: Send + 'static> DelayedSender<T> {
+    /// Creates a new DelayedSender.
+    ///
+    /// # Arguments
+    /// * `sender` - The channel sender to forward values to.
+    /// * `wait_time` - The minimum duration to wait between sends.
     pub fn new(sender: crossbeam_channel::Sender<T>, wait_time: Duration) -> Self {
         let slot = Arc::new(Mutex::new(None));
         let slot_clone = Arc::clone(&slot);
@@ -51,6 +59,7 @@ impl<T: Send + 'static> DelayedSender<T> {
         Self { slot, stop_flag }
     }
 
+    /// Sends a value, replacing any previous value that has not yet been sent.
     pub fn send(&self, value: T) {
         let mut slot = self.slot.lock().expect("Failed to lock slot in DelayedSender");
         *slot = Some(value);
@@ -59,8 +68,8 @@ impl<T: Send + 'static> DelayedSender<T> {
 
 impl<T: Send + 'static> Drop for DelayedSender<T> {
     fn drop(&mut self) {
-        // We need to know, that after dropping DelayedSender, no more values will be sent
-        // Previously some values were cached and sent after other later operations
+        // After dropping DelayedSender, no more values will be sent.
+        // Previously, some values were cached and sent after later operations.
         self.stop_flag.store(true, std::sync::atomic::Ordering::Relaxed);
     }
 }
