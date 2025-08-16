@@ -1,4 +1,5 @@
 mod model;
+mod new_chart;
 
 use crate::model::{
     BuildConfig, BuildOrCheck,  Config,  Panic, Project, Results,
@@ -9,11 +10,13 @@ use std::io::Write;
 use std::path::Path;
 use std::process::exit;
 use walkdir::WalkDir;
+// use crate::new_chart::create_chart;
 
 const PROFILE_NAME: &str = "fff";
 const RESULTS_FILE_NAME: &str = "compilation_results.txt";
 
 fn main() {
+    // create_chart(); // TODO currently is broken a little
     let Some(first_arg) = std::env::args().nth(1) else {
         eprintln!("Please provide a path to the configuration json file as the first argument.");
         exit(1);
@@ -104,9 +107,10 @@ fn run_cargo_build(mold: bool, cranelift: bool, build_config: &BuildConfig, proj
     }
     let mut rust_flags = None;
     if mold {
+        let to_add = "-C link-arg=-fuse-ld=mold";
         rust_flags = match rust_flags {
-            None => Some("-C link-arg=-fuse-ld=mold".to_string()),
-            Some(flags) => Some(format!("{} -C link-arg=-fuse-ld=mold", flags)),
+            None => Some(to_add.to_string()),
+            Some(flags) => Some(format!("{flags} {to_add}")),
         };
     }
     if build_config.build_std {
@@ -115,6 +119,13 @@ fn run_cargo_build(mold: bool, cranelift: bool, build_config: &BuildConfig, proj
         } else {
             command.args(["-Z", "build-std=std"]);
         }
+    }
+    if build_config.native {
+        let to_add = "-C target-cpu=native";
+        rust_flags = match rust_flags {
+            None => Some(to_add.to_string()),
+            Some(flags) => Some(format!("{flags} {to_add}")),
+        };
     }
 
     if let Some(rust_flags) = rust_flags {

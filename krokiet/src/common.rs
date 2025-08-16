@@ -75,6 +75,8 @@ pub enum StrDataEmptyFiles {
 pub enum IntDataTemporaryFiles {
     ModificationDatePart1,
     ModificationDatePart2,
+    SizePart1,
+    SizePart2,
 }
 #[repr(u8)]
 pub enum StrDataTemporaryFiles {
@@ -264,8 +266,9 @@ impl ActiveTab {
             Self::SimilarMusic => IntDataSimilarMusic::SizePart1 as usize,
             Self::BrokenFiles => IntDataBrokenFiles::SizePart1 as usize,
             Self::BadExtensions => IntDataBadExtensions::SizePart1 as usize,
+            Self::TemporaryFiles => IntDataTemporaryFiles::SizePart1 as usize,
             Self::Settings | Self::About => return None,
-            Self::EmptyFolders | Self::InvalidSymlinks | Self::TemporaryFiles => return None,
+            Self::EmptyFolders | Self::InvalidSymlinks => return None,
         };
         Some(res)
     }

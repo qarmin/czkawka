@@ -826,7 +826,8 @@ fn prepare_data_model_temporary_files(fe: &TemporaryFileEntry) -> (ModelRc<Share
             .into(),
     ]);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
-    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1]);
+    let size_split = split_u64_into_i32s(fe.size);
+    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1, size_split.0, size_split.1]);
     (data_model_str, data_model_int)
 }
 ////////////////////////////////////////// Broken Files

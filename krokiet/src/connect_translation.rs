@@ -44,7 +44,7 @@ pub const LANGUAGE_LIST: &[Language] = &[
         left_panel_size: 185.0,
     },
     Language {
-        long_name: "한국인 (Korean)",
+        long_name: "한국어 (Korean)",
         short_name: "ko",
         left_panel_size: 145.0,
     },
@@ -59,7 +59,7 @@ pub const LANGUAGE_LIST: &[Language] = &[
         left_panel_size: 155.0,
     },
     Language {
-        long_name: "やまと (Japanese)",
+        long_name: "日本語 (Japanese)",
         short_name: "ja",
         left_panel_size: 155.0,
     },
@@ -94,32 +94,32 @@ pub const LANGUAGE_LIST: &[Language] = &[
         left_panel_size: 135.0,
     },
     Language {
-        long_name: "Swedish (Svenska)",
+        long_name: "Svenska (Swedish)",
         short_name: "sv-SE",
         left_panel_size: 130.0,
     },
     Language {
-        long_name: "المملكة العربية السعودية (Saudi Arabia)",
+        long_name: "العربية (Arabic)",
         short_name: "ar",
         left_panel_size: 135.0,
     },
     Language {
-        long_name: "България (Bulgaria)",
+        long_name: "Български (Bulgarian)",
         short_name: "bg",
         left_panel_size: 165.0,
     },
     Language {
-        long_name: "Ελλάδα (Greece)",
+        long_name: "Ελληνικά (Greek)",
         short_name: "el",
         left_panel_size: 160.0,
     },
     Language {
-        long_name: "Nederland (Netherlands)",
+        long_name: "Nederlands (Dutch)",
         short_name: "nl",
         left_panel_size: 165.0,
     },
     Language {
-        long_name: "România (Romania)",
+        long_name: "Română (Romanian)",
         short_name: "ro",
         left_panel_size: 140.0,
     },
@@ -166,7 +166,7 @@ pub(crate) fn change_language(app: &MainWindow) {
     let lang_identifier = vec![LanguageIdentifier::from_bytes(lang_items.short_name.as_bytes()).expect("Failed to create LanguageIdentifier")];
     for (lib, localizer) in localizers {
         if let Err(error) = localizer.select(&lang_identifier) {
-            error!("Error while loadings languages for {lib} {error:?}");
+            error!("Error while loading languages for {lib} {error:?}");
         }
     }
 
@@ -415,5 +415,18 @@ pub(crate) fn translate_select_mode(select_mode: SelectMode) -> SharedString {
         SelectMode::SelectTheSmallestResolution => flk!("selection_the_smallest_resolution").into(),
         SelectMode::SelectNewest => flk!("selection_newest").into(),
         SelectMode::SelectOldest => flk!("selection_oldest").into(),
+    }
+}
+
+pub(crate) fn translate_sort_mode(sort_mode: SortMode) -> SharedString {
+    match sort_mode {
+        SortMode::ItemName => flk!("sort_by_item_name").into(),
+        SortMode::ParentName => flk!("sort_by_parent_name").into(),
+        SortMode::FullName => flk!("sort_by_full_name").into(),
+        SortMode::Size => flk!("sort_by_size").into(),
+        SortMode::ModificationDate => flk!("sort_by_modification_date").into(),
+        SortMode::Selection => flk!("sort_by_selection").into(),
+        SortMode::Checked => flk!("sort_by_checked").into(),
+        SortMode::Reverse => flk!("sort_reverse").into(),
     }
 }

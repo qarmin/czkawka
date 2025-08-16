@@ -31,7 +31,7 @@ use crate::connect_save::connect_save;
 use crate::connect_scan::connect_scan_button;
 use crate::connect_select::{connect_select, connect_showing_proper_select_buttons};
 use crate::connect_show_preview::connect_show_preview;
-use crate::connect_sort::connect_sort;
+use crate::connect_sort::{connect_showing_proper_sort_buttons, connect_sort};
 use crate::connect_stop::connect_stop_button;
 use crate::connect_translation::connect_translations;
 // TODO - at start this should be used, to be sure that rust models are in sync with slint models
@@ -105,6 +105,7 @@ fn main() {
     connect_save(&app, Arc::clone(&shared_models));
     connect_row_selections(&app);
     connect_sort(&app);
+    connect_showing_proper_sort_buttons(&app);
 
     // Popups gather their size, after starting/closing popup at least once
     // This is simpler solution, than setting sizes of popups manually for each language

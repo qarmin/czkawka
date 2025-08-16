@@ -124,8 +124,11 @@ bloat:
     cargo bloat --release --crates --bin czkawka_gui
     cargo bloat --release --crates --bin krokiet
 
-check_complilations:
+check_compilations:
     git checkout Cargo.toml
     # cargo install --path misc/test_compilation_speed_size
-    test_compilation_speed_size misc/test_compilation_speed_size/krokiet.json
+    test_compilation_speed_size misc/test_compilation_speed_size/test.json
     python3 misc/test_compilation_speed_size/generate_md_and_plots.py
+
+tags:
+    tags=($(git tag --sort=version:refname | grep -v Nightly)); for ((i=0; i<${#tags[@]}-1; i++)); do from=${tags[$i]}; to=${tags[$i+1]}; echo "$from -> $to : $(git diff --shortstat "$from" "$to")"; done; last=${tags[-1]}; echo "$last -> master : $(git diff --shortstat "$last" master)"

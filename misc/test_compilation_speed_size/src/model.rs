@@ -40,6 +40,7 @@ pub struct BuildConfigRead {
     pub overflow_checks: Option<OverflowChecks>,
     pub incremental: Option<Incremental>,
     pub build_std: Option<bool>,
+    pub native: Option<bool>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -56,6 +57,7 @@ pub struct BuildConfig {
     pub overflow_checks: OverflowChecks,
     pub incremental: Incremental,
     pub build_std: bool,
+    pub native: bool,
 }
 
 impl From<BuildConfigRead> for BuildConfig {
@@ -74,6 +76,7 @@ impl From<BuildConfigRead> for BuildConfig {
                 overflow_checks: OverflowChecks::Off,
                 incremental: Incremental::Off,
                 build_std: false,
+                native: false,
             },
             RustBaseConfig::Debug => BuildConfig {
                 name: "debug".to_string(),
@@ -88,6 +91,7 @@ impl From<BuildConfigRead> for BuildConfig {
                 overflow_checks: OverflowChecks::On,
                 incremental: Incremental::On,
                 build_std: false,
+                native: false,
             }
         };
 
@@ -104,6 +108,7 @@ impl From<BuildConfigRead> for BuildConfig {
             overflow_checks: config.overflow_checks.unwrap_or(base_config.overflow_checks),
             incremental: config.incremental.unwrap_or(base_config.incremental),
             build_std: config.build_std.unwrap_or(false),
+            native: config.native.unwrap_or(false),
         }
     }
 }

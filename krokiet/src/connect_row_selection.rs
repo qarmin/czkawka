@@ -514,7 +514,7 @@ fn rows_select_all_by_mode(selection: &mut SelectionData, model: &ModelRc<MainLi
 }
 
 fn rows_select_all_one_by_one(model: &ModelRc<MainListModel>) {
-    let items_to_update = model.iter().filter_map(|e| if !e.selected_row && !e.header_row { Some(e) } else { None }).count();
+    let items_to_update = model.iter().filter(|e| !e.selected_row && !e.header_row).count();
     trace!("[FAST][ONE_BY_ONE] select all {}/{} items", items_to_update, model.row_count());
     for id in 0..model.row_count() {
         let mut model_data = model

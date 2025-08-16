@@ -4041,6 +4041,7 @@ dependencies = [
  "crossbeam-channel",
  "czkawka_core",
  "dunce",
+ "fast_image_resize",
  "fs_extra",
  "home",
  "humansize",
@@ -4348,9 +4349,9 @@ dependencies = [
 
 [[package]]
 name = "lopdf"
-version = "0.36.0"
+version = "0.37.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "59fa2559e99ba0f26a12458aabc754432c805bbb8cba516c427825a997af1fb7"
+checksum = "674a3504c1224247e00762afb90690991b673c461f6779565e055e91926a49da"
 dependencies = [
  "aes",
  "bitflags 2.9.1",
@@ -4359,6 +4360,7 @@ dependencies = [
  "ecb",
  "encoding_rs",
  "flate2",
+ "getrandom 0.3.3",
  "indexmap",
  "itoa",
  "jiff",
@@ -7337,15 +7339,15 @@ dependencies = [
 
 [[package]]
 name = "trash"
-version = "5.2.2"
+version = "5.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "22746c6b0c6d85d60a8f0d858f7057dfdf11297c132679f452ec908fba42b871"
+checksum = "65a334451012017a39758aa85a30827c13ac684245bf6b08249483c063f64ff3"
 dependencies = [
  "chrono",
  "libc",
  "log",
- "objc2 0.5.2",
- "objc2-foundation 0.2.2",
+ "objc2 0.6.2",
+ "objc2-foundation 0.3.1",
  "once_cell",
  "percent-encoding",
  "scopeguard",

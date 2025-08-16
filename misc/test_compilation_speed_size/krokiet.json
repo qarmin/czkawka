@@ -10,6 +10,10 @@
   },
   "build_config": [
     {
+      "name": "debug",
+      "rust_base_config": "Debug"
+    },
+    {
       "name": "debug + debug disabled",
       "rust_base_config": "Debug",
       "debug": "None"
@@ -20,9 +24,18 @@
       "build_or_check": "Check"
     },
     {
+      "name": "release",
+      "rust_base_config": "Release"
+    },
+    {
       "name": "release + debug info",
       "rust_base_config": "Release",
       "debug": "Full"
+    },
+    {
+      "name": "release + native",
+      "rust_base_config": "Release",
+      "native": true
     },
     {
       "name": "release + opt o2",
@@ -70,6 +83,14 @@
       "lto": "Fat",
       "codegen_units": "One",
       "panic": "Abort"
+    },
+    {
+      "name": "release + fat lto + cu 1 + panic abort + native",
+      "rust_base_config": "Release",
+      "lto": "Fat",
+      "codegen_units": "One",
+      "panic": "Abort",
+      "native": true
     },
     {
       "name": "release + fat lto + cu 1 + panic abort + build-std",

@@ -47,7 +47,7 @@ def plot_barh(
         data = data.dropna(subset=[value_col])
     data_sorted = data.sort_values(value_col, ascending=False)
 
-    plt.figure(figsize=(12, 10))
+    plt.figure(figsize=(12, 10), dpi=300)
     bars = plt.barh(data_sorted[config_col], data_sorted[value_col] / unit_div, color=color)
 
     ax = plt.gca()

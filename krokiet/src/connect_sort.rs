@@ -4,7 +4,8 @@ use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
 use crate::common::connect_i32_into_u64;
 use crate::connect_row_selection::recalculate_small_selection_if_needed;
-use crate::{ActiveTab, Callabler, GuiState, MainListModel, MainWindow, SortMode};
+use crate::connect_translation::translate_sort_mode;
+use crate::{ActiveTab, Callabler, GuiState, MainListModel, MainWindow, SortMode, SortModel};
 
 pub(crate) fn connect_sort(app: &MainWindow) {
     let a = app.as_weak();
@@ -26,6 +27,46 @@ pub(crate) fn connect_sort(app: &MainWindow) {
 
         active_tab.set_tool_model(&app, new_model);
     });
+}
+
+pub(crate) fn connect_showing_proper_sort_buttons(app: &MainWindow) {
+    set_sort_buttons(app);
+    let a = app.as_weak();
+    app.global::<Callabler>().on_tab_changed(move || {
+        let app = a.upgrade().expect("Failed to upgrade app :(");
+        set_sort_buttons(&app);
+    });
+}
+
+fn set_sort_buttons(app: &MainWindow) {
+    let active_tab = app.global::<GuiState>().get_active_tab();
+    let mut base_buttons = vec![
+        SortMode::Checked,
+        SortMode::FullName,
+        SortMode::ItemName,
+        SortMode::ModificationDate,
+        SortMode::ParentName,
+        SortMode::Reverse,
+        SortMode::Selection,
+    ];
+
+    let additional_buttons = match active_tab.get_int_size_opt_idx() {
+        Some(_) => vec![SortMode::Size],
+        None => vec![],
+    };
+
+    base_buttons.extend(additional_buttons);
+    base_buttons.reverse();
+
+    let new_sort_model = base_buttons
+        .into_iter()
+        .map(|e| SortModel {
+            name: translate_sort_mode(e),
+            data: e,
+        })
+        .collect::<Vec<_>>();
+
+    app.global::<GuiState>().set_sort_results_list(ModelRc::new(VecModel::from(new_sort_model)));
 }
 
 mod sorts {
