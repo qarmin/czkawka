@@ -417,3 +417,16 @@ pub(crate) fn translate_select_mode(select_mode: SelectMode) -> SharedString {
         SelectMode::SelectOldest => flk!("selection_oldest").into(),
     }
 }
+
+pub(crate) fn translate_sort_mode(sort_mode: SortMode) -> SharedString {
+    match sort_mode {
+        SortMode::ItemName => flk!("sort_by_item_name").into(),
+        SortMode::ParentName => flk!("sort_by_parent_name").into(),
+        SortMode::FullName => flk!("sort_by_full_name").into(),
+        SortMode::Size => flk!("sort_by_size").into(),
+        SortMode::ModificationDate => flk!("sort_by_modification_date").into(),
+        SortMode::Selection => flk!("sort_by_selection").into(),
+        SortMode::Checked => flk!("sort_by_checked").into(),
+        SortMode::Reverse => flk!("sort_reverse").into(),
+    }
+}

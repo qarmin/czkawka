@@ -33,6 +33,11 @@
       "debug": "Full"
     },
     {
+      "name": "release + native",
+      "rust_base_config": "Release",
+      "native": true
+    },
+    {
       "name": "release + opt o2",
       "rust_base_config": "Release",
       "opt_level": "Two"
