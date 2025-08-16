@@ -182,11 +182,13 @@ jobs:
 
       - name: Prepare files to release
         run: |
-          zip -r windows_czkawka_gui_gtk_412.zip ./package
+          cd package
+          zip -r ../windows_czkawka_gui_gtk_412.zip .
+          cd ..
 
       - name: Release
         uses: softprops/action-gh-release@v2
-        if: ${{ github.ref == 'refs/heads/master' }}
+        #if: ${{ github.ref == 'refs/heads/master' }} # TODO - re-enable after testing
         with:
           tag_name: "Nightly"
           files: |
@@ -266,7 +268,9 @@ jobs:
 
       - name: Prepare files to release
         run: |
-          zip -r windows_czkawka_gui_gtk_46.zip ./package
+          cd package
+          zip -r ../windows_czkawka_gui_gtk_46.zip .
+          cd ..
 
       - name: Release
         uses: softprops/action-gh-release@v2
