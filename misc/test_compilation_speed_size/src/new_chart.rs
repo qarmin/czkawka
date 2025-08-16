@@ -28,7 +28,6 @@ pub fn create_chart() -> Result<(), Box<dyn std::error::Error>> {
         let time: f64 = cols[time_idx].trim().parse().unwrap_or(0.0);
         data.push((config.to_string(), time));
     }
-    dbg!(&data);
 
     // Sort by time descending
     data.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
@@ -42,9 +41,9 @@ pub fn create_chart() -> Result<(), Box<dyn std::error::Error>> {
     let mut chart = ChartBuilder::on(&root)
         .caption("Compilation Time by Config", ("Noto Sans", 50))
         .margin(20)
-        .x_label_area_size(60)
-        .y_label_area_size(300)
-        .build_cartesian_2d(0f64..(max_time * 1.1), 0..data.len())?;
+        .x_label_area_size(80)
+        .y_label_area_size(500)
+        .build_cartesian_2d(0f64..(max_time * 1.2), 0..data.len())?;
 
     chart
         .configure_mesh()
@@ -59,6 +58,7 @@ pub fn create_chart() -> Result<(), Box<dyn std::error::Error>> {
         })
         .y_label_style(("Noto Sans", 30).into_font().style(FontStyle::Bold))
         .x_label_style(("Noto Sans", 30).into_font())
+        .y_label_offset(-150)
         .draw()?;
 
     chart.draw_series(
@@ -66,6 +66,18 @@ pub fn create_chart() -> Result<(), Box<dyn std::error::Error>> {
             Rectangle::new(
                 [(0.0, i), (*value, i + 1)],
                 BLUE.filled(),
+            )
+        }),
+    )?;
+
+    chart.draw_series(
+        data.iter().enumerate().map(|(i, (_label, value))| {
+            let x = *value;
+            let y = i;
+            Text::new(
+                format!("{:.2}", value),
+                (x, y),
+                ("Noto Sans", 35).into_font().color(&RED).pos(Pos::new(HPos::Right, VPos::Center)),
             )
         }),
     )?;
