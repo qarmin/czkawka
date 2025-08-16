@@ -1,4 +1,5 @@
 mod model;
+mod new_chart;
 
 use crate::model::{
     BuildConfig, BuildOrCheck,  Config,  Panic, Project, Results,
@@ -9,11 +10,13 @@ use std::io::Write;
 use std::path::Path;
 use std::process::exit;
 use walkdir::WalkDir;
+use crate::new_chart::create_chart;
 
 const PROFILE_NAME: &str = "fff";
 const RESULTS_FILE_NAME: &str = "compilation_results.txt";
 
 fn main() {
+    create_chart();
     let Some(first_arg) = std::env::args().nth(1) else {
         eprintln!("Please provide a path to the configuration json file as the first argument.");
         exit(1);
