@@ -3,7 +3,7 @@ use std::fs::{self, File};
 use std::io::{BufRead, BufReader}; use plotters::style::text_anchor::Pos;
 use plotters::style::text_anchor::VPos; use plotters::style::text_anchor::HPos;
 
-pub fn create_chart() -> Result<(), Box<dyn std::error::Error>> {
+pub fn _create_chart() -> Result<(), Box<dyn std::error::Error>> {
     // Prepare output directory
     fs::create_dir_all("charts")?;
 
