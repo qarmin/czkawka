@@ -18,7 +18,7 @@ music_checking_by_tags = الوسوم
 music_checking_by_content = محتوى
 same_music_seconds_label = الحد الأدنى من مدة التجزئة الثانية
 same_music_similarity_label = الفرق الأقصى
-music_compare_only_in_title_group = قارن فقط في العنوان
+music_compare_only_in_title_group = مقارنة داخل مجموعات من العناوين المتشابهة
 music_compare_only_in_title_group_tooltip =
     When enabled, files are grouped by title and then compared to each other.
     
@@ -458,17 +458,11 @@ saving_loading_invalid_int = للمفتاح "{ $key }" وجد نتيجة غير 
 saving_loading_invalid_bool = للمفتاح "{ $key }" وجد نتيجة غير صالحة - "{ $result }" الذي ليس برعيا.
 saving_loading_decode_problem_bool = فشل في فك شفرة البول من المفتاح"{ $key }" وجد{ $result }" ولكن القيم المسموح بها هي 0، 1، صحيحة أو خاطئة.
 saving_loading_saving_same_keys = محاولة حفظ الإعداد مع مفتاح مكرر"{ $key }".
-saving_loading_failed_to_get_home_directory = فشل في الحصول على الدليل الرئيسي لفتح/حفظ ملف الإعداد.
-saving_loading_folder_config_instead_file = لا يمكن إنشاء أو فتح ملف التكوين في المسار "{ $path }" لأنه يوجد مجلد بالفعل.
-saving_loading_failed_to_create_configuration_folder = فشل تكوين إنشاء مجلد الإعدادات"{ $path }"، السبب"{ $reason }".
 saving_loading_failed_to_create_config_file = فشل في إنشاء ملف الإعداد"{ $path }"، السبب"{ $reason }".
 saving_loading_failed_to_read_config_file = لا يمكن تحميل التكوين من "{ $path }" لأنه غير موجود أو ليس ملفا.
 saving_loading_failed_to_read_data_from_file = لا يمكن قراءة البيانات من الملف"{ $path }"، السبب"{ $reason }".
 saving_loading_orphan_data = تم العثور على بيانات يتيمة"{ $data }" في السطر "{ $line }".
 saving_loading_not_valid = الإعداد "{ $data }" غير موجود في الإصدار الحالي للتطبيق.
-# Invalid symlinks
-invalid_symlink_infinite_recursion = التكرار اللامتناهي
-invalid_symlink_non_existent_destination = ملف الوجهة غير موجود
 # Other
 selected_all_reference_folders = لا يمكن بدء البحث، عندما يتم تعيين جميع الدلائل كمجلدات مرجعية
 searching_for_data = البحث عن البيانات، قد يستغرق بعض الوقت، يرجى الانتظار...
@@ -499,7 +493,7 @@ move_file_failed = فشل نقل الملف { $name }، السبب { $reason }
 move_files_title_dialog = اختر مجلد تريد نقل الملفات المكررة إليه
 move_files_choose_more_than_1_path = يمكن تحديد مسار واحد فقط لتكون قادرة على نسخ الملفات المكررة، المحددة { $path_number }.
 move_stats = نقل بشكل صحيح { $num_files }/{ $all_files } عناصر
-save_results_to_file = تم حفظ النتائج إلى ملفات txt و json في مجلد { $name }.
+save_results_to_file = حفظت النتائج إلى ملفات txt و json في "{ $name }" مجلد.
 search_not_choosing_any_music = خطأ: يجب عليك تحديد مربع اختيار واحد على الأقل مع أنواع البحث عن الموسيقى.
 search_not_choosing_any_broken_files = خطأ: يجب عليك تحديد مربع اختيار واحد على الأقل مع نوع الملفات المحددة المكسورة.
 include_folders_dialog_title = مجلدات لتضمينها

@@ -18,7 +18,7 @@ music_checking_by_tags = Etiketler
 music_checking_by_content = İçerik
 same_music_seconds_label = Minimal parça saniyesel süresi
 same_music_similarity_label = Maksimum fark
-music_compare_only_in_title_group = Yalnızca başlıkla karşılaştırın
+music_compare_only_in_title_group = Compare within groups of similar titles
 music_compare_only_in_title_group_tooltip =
     Etkinleştirildiğinde dosyalar başlığa göre gruplandırılır ve ardından birbirleriyle karşılaştırılır.
     
@@ -265,7 +265,7 @@ bottom_symlink_button = Sembolik bağlantı
 bottom_hardlink_button = Sabit bağlantı
 bottom_move_button = Taşı
 bottom_sort_button = Sırala
-bottom_compare_button = Compare
+bottom_compare_button = Karşılaştır
 bottom_search_button_tooltip = Aramayı başlatır.
 bottom_select_button_tooltip = Kayıtları seçer. Yalnızca seçilen dosyalara/klasörlere işlem uygulanabilir.
 bottom_delete_button_tooltip = Seçili dosyaları/klasörleri siler.
@@ -288,7 +288,7 @@ bottom_move_button_tooltip =
     Dizin ağacını korumadan tüm dosyaları dizine taşır.
     Aynı ada sahip iki dosyayı klasöre taşımaya çalışırken, ikincisi başarısız olur ve hata gösterir.
 bottom_sort_button_tooltip = Dosyaları/Dizinleri seçilen metoda göre sırala.
-bottom_compare_button_tooltip = Compare images in the group.
+bottom_compare_button_tooltip = Gruptaki görüntüleri karşılaştır.
 bottom_show_errors_tooltip = Alt çıktı panelini göster/gizle.
 bottom_show_upper_notebook_tooltip = Üst denetim panelini göster/gizle.
 # Progress Window
@@ -454,11 +454,11 @@ progress_scanning_general_file =
         [one] { $file_number } dosya tarandı
        *[other] { $file_number } dosya tarandı
     }
-progress_scanning_extension_of_files = Checked extension of { $file_checked }/{ $all_files } file
-progress_scanning_broken_files = Checked { $file_checked }/{ $all_files } file ({ $data_checked }/{ $all_data })
-progress_scanning_video = Hashed of { $file_checked }/{ $all_files } video
-progress_scanning_image = Hashed of { $file_checked }/{ $all_files } image ({ $data_checked }/{ $all_data })
-progress_comparing_image_hashes = Compared { $file_checked }/{ $all_files } image hash
+progress_scanning_extension_of_files = { $file_checked }/{ $all_files } dosyasını kontrol edildi
+progress_scanning_broken_files = Kontrol edilen { $file_checked }/{ $all_files } dosya ({ $data_checked }/{ $all_data })
+progress_scanning_video = Hash işlemi uygulanmış { $file_checked }/{ $all_files } video
+progress_scanning_image = Hash işlemi uygulanmış { $file_checked }/{ $all_files } görsel ({ $data_checked }/{ $all_data })
+progress_comparing_image_hashes = { $file_checked }/{ $all_files } görsel hash kaydı karşılaştırıldı.
 progress_scanning_music_tags_end = Compared tags of { $file_checked }/{ $all_files } music file
 progress_scanning_music_tags = Read tags of { $file_checked }/{ $all_files } music file
 progress_scanning_music_content_end = Compared fingerprint of { $file_checked }/{ $all_files } music file
@@ -468,7 +468,7 @@ progress_scanning_empty_folders =
         [one] { $folder_number } klasör tarandı
        *[other] { $folder_number } klasör tarandı
     }
-progress_scanning_size = Scanned size of { $file_number } file
+progress_scanning_size = Taranan { $file_number } dosyasının boyutu
 progress_scanning_size_name = Scanned name and size of { $file_number } file
 progress_scanning_name = Scanned name of { $file_number } file
 progress_analyzed_partial_hash = Analyzed partial hash of { $file_checked }/{ $all_files } files ({ $data_checked }/{ $all_data })
@@ -491,17 +491,11 @@ saving_loading_invalid_int = "{ $key }" anahtarı için geçersiz sonuç bulundu
 saving_loading_invalid_bool = "{ $key }" anahtarı için geçersiz sonuç bulundu. "{ $result }" D/Y türünde değil.
 saving_loading_decode_problem_bool = "{ $key }" anahtarından D/Y kodu çözülemedi, "{ $result }" bulundu ancak izin verilen değerler 0, 1, doğru veya yanlış.
 saving_loading_saving_same_keys = Ayar, yinelenen "{ $key }" anahtarıyla kaydedilmeye çalışılıyor.
-saving_loading_failed_to_get_home_directory = Yapılandırma dosyasını açmak/kaydetmek için /home dizinine erşilemedi.
-saving_loading_folder_config_instead_file = "{ $path }" yolunda kaydetme yapılandırma dosyası oluşturulamıyor veya açılamıyor çünkü zaten bir klasör var.
-saving_loading_failed_to_create_configuration_folder = Yapılandırma klasörü "{ $path }" dizini oluşturulamadı, nedeni: "{ $reason }".
 saving_loading_failed_to_create_config_file = "{ $path }" dizininde yapılandırma dosyası oluşturulamadı, nedeni:  "{ $reason }".
 saving_loading_failed_to_read_config_file = "{ $path }" dizininden yapılandırma dosyası yüklenemiyor, böyle dosya yok ya da bir dosya değil.
 saving_loading_failed_to_read_data_from_file = "{ $path }" dosyasından veri okunamıyor, nedeni: "{ $reason }".
 saving_loading_orphan_data = "{ $line }" satırda "{ $data }" ilişiksiz veri bulundu.
 saving_loading_not_valid = "{ $data }" ayarı geçerli uygulama sürümünde bulunmuyor.
-# Invalid symlinks
-invalid_symlink_infinite_recursion = Sonsuz özyineleme
-invalid_symlink_non_existent_destination = Var olmayan hedef dosya
 # Other
 selected_all_reference_folders = Tüm dizinler, "Başvuru Klasörü" olarak ayarlandığında arama başlatılamaz.
 searching_for_data = İşleminiz yürütülüyor, bu biraz zaman alabilir, lütfen bekleyin...
@@ -532,7 +526,7 @@ move_file_failed = { $name } dosyası taşınamadı, nedeni: { $reason }
 move_files_title_dialog = Eş dosyaları taşımak istediğiniz klasörü seçin
 move_files_choose_more_than_1_path = Eş dosyaları taşıyabilmek için yalnızca bir yol seçilebilir, { $path_number } seçildi.
 move_stats = { $num_files }/{ $all_files } öğe düzgün şekilde taşındı.
-save_results_to_file = Sonuçları hem txt hem de json formatında { $name } klasörüne kaydeder.
+save_results_to_file = Saved results both to txt and json files into "{ $name }" folder.
 search_not_choosing_any_music = HATA: Müzik araması için en az bir onay kutusu seçmelisiniz.
 search_not_choosing_any_broken_files = HATA: Bozuk dosya araması için en az bir onay kutusu seçmelisiniz.
 include_folders_dialog_title = Aranacak Klasörler

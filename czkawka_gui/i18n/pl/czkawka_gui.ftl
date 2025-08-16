@@ -18,7 +18,7 @@ music_checking_by_tags = Tagi
 music_checking_by_content = Zawartość
 same_music_seconds_label = Minimalny fragment drugi czas trwania
 same_music_similarity_label = Maksymalna różnica
-music_compare_only_in_title_group = Porównaj tylko w tytule
+music_compare_only_in_title_group = Porównaj w grupach o podobnych tytułach
 music_compare_only_in_title_group_tooltip =
     Gdy włączone, pliki są pogrupowane według tytułu, a następnie porównywane do siebie.
     
@@ -458,17 +458,11 @@ saving_loading_invalid_int = Dla klucza "{ $key }" znaleziono niepoprawną warto
 saving_loading_invalid_bool = Dla klucza "{ $key }" znaleziono niepoprawną wartość - "{ $result }" która nie jest typem logicznym.
 saving_loading_decode_problem_bool = Nie udało się zdekodować wartości z klucza "{ $key }", znaleziono "{ $result }" ale dozwolone wartości to 0, 1, true lub false.
 saving_loading_saving_same_keys = Próba zapisania ustawień z zduplikowanym kluczem "{ $key }".
-saving_loading_failed_to_get_home_directory = Nie udało się pobrać informacji o katalogu domowym by otworzyć i zapisać plik konfiguracyjny.
-saving_loading_folder_config_instead_file = Nie można utworzyć lub otworzyć pliku konfiguracyjnego w ścieżce "{ $path }", ponieważ w danej ścieżce istnieje już folder.
-saving_loading_failed_to_create_configuration_folder = Nie udało się utworzyć folderu konfiguracyjnego "{ $path }", powód "{ $reason }".
 saving_loading_failed_to_create_config_file = Nie udało się utworzyć pliku konfiguracyjnego "{ $path }", powód "{ $reason }".
 saving_loading_failed_to_read_config_file = Nie można załadować konfiguracji z "{ $path }" ponieważ nie istnieje lub nie jest plikiem.
 saving_loading_failed_to_read_data_from_file = Nie można odczytać danych z pliku "{ $path }", powód "{ $reason }".
 saving_loading_orphan_data = Znaleziono osierocone dane "{ $data }" w wierszu "{ $line }".
 saving_loading_not_valid = Ustawienie "{ $data }" nie istnieje w bieżącej wersji aplikacji.
-# Invalid symlinks
-invalid_symlink_infinite_recursion = Nieskończona rekurencja
-invalid_symlink_non_existent_destination = Nieistniejący docelowy plik
 # Other
 selected_all_reference_folders = Nie można rozpocząć wyszukiwania, gdy wszystkie katalogi są ustawione jako foldery źródłowe (referencyjne)
 searching_for_data = Przeszukiwanie dysku, może to potrwać chwilę, proszę czekać...
@@ -503,7 +497,7 @@ move_file_failed = Nie można przenieść pliku { $name }, powód { $reason }
 move_files_title_dialog = Wybierz folder, do którego zostaną przeniesione pliki
 move_files_choose_more_than_1_path = Tylko jedna ścieżka może być wybrana, aby móc skopiować zduplikowane pliki, wybrano { $path_number }.
 move_stats = Poprawnie przeniesiono { $num_files }/{ $all_files } elementów
-save_results_to_file = Zapisano wyniki zarówno do plików txt, jak i json w folderze { $name }.
+save_results_to_file = Zapisano wyniki zarówno do plików txt, jak i json w folderze "{ $name }".
 search_not_choosing_any_music = BŁĄD: Musisz zaznaczyć przynajmniej jeden pole, według którego będą wyszukiwane podobne pliki muzyczne.
 search_not_choosing_any_broken_files = BŁĄD: Musisz wybrać co najmniej jedno pole wyboru z rodzajem uszkodzonych plików.
 include_folders_dialog_title = Foldery do przeszukiwania

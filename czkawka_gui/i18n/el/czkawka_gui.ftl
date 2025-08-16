@@ -18,7 +18,7 @@ music_checking_by_tags = Ετικέτες
 music_checking_by_content = Περιεχόμενο
 same_music_seconds_label = Ελάχιστη δεύτερη διάρκεια θραύσματος
 same_music_similarity_label = Μέγιστη διαφορά
-music_compare_only_in_title_group = Σύγκριση μόνο στον τίτλο
+music_compare_only_in_title_group = Σύγκριση μεταξύ ομάδων παρόμοιων τίτλων
 music_compare_only_in_title_group_tooltip =
     Όταν ενεργοποιηθεί, τα αρχεία ομαδοποιούνται κατά τίτλο και στη συνέχεια συγκρίνονται μεταξύ τους.
     
@@ -458,17 +458,11 @@ saving_loading_invalid_int = Για το κλειδί "{ $key }" βρήκε μη
 saving_loading_invalid_bool = Για το κλειδί "{ $key }" βρήκε μη έγκυρο αποτέλεσμα - "{ $result }" που δεν είναι bool.
 saving_loading_decode_problem_bool = Αποτυχία αποκωδικοποίησης bool από το κλειδί "{ $key }" βρέθηκε "{ $result }" αλλά οι επιτρεπόμενες τιμές είναι 0, 1, αληθείς ή ψευδείς.
 saving_loading_saving_same_keys = Προσπάθεια εξοικονόμησης ρυθμίσεων με διπλό κλειδί "{ $key }".
-saving_loading_failed_to_get_home_directory = Αποτυχία λήψης του αρχικού φακέλου για να ανοίξετε/αποθηκεύσετε το αρχείο ρυθμίσεων.
-saving_loading_folder_config_instead_file = Αδυναμία δημιουργίας ή ανοίγματος αρχείου αποθήκευσης στη διαδρομή "{ $path }" επειδή ήδη υπάρχει φάκελος.
-saving_loading_failed_to_create_configuration_folder = Αποτυχία ρύθμισης παραμέτρων για τη δημιουργία φακέλου ρυθμίσεων "{ $path }", λόγος "{ $reason }".
 saving_loading_failed_to_create_config_file = Αποτυχία δημιουργίας αρχείου ρυθμίσεων "{ $path }", λόγος "{ $reason }".
 saving_loading_failed_to_read_config_file = Αδυναμία φόρτωσης ρύθμισης παραμέτρων από το "{ $path }" επειδή δεν υπάρχει ή δεν είναι αρχείο.
 saving_loading_failed_to_read_data_from_file = Αδυναμία ανάγνωσης δεδομένων από το αρχείο "{ $path }", λόγος "{ $reason }".
 saving_loading_orphan_data = Βρέθηκαν ορφανά δεδομένα "{ $data }" στη γραμμή "{ $line }".
 saving_loading_not_valid = Η ρύθμιση "{ $data }" δεν υπάρχει στην τρέχουσα έκδοση εφαρμογών.
-# Invalid symlinks
-invalid_symlink_infinite_recursion = Άπειρη αναδρομή
-invalid_symlink_non_existent_destination = Αρχείο ανύπαρκτου προορισμού
 # Other
 selected_all_reference_folders = Αδυναμία έναρξης αναζήτησης, όταν όλοι οι κατάλογοι ορίζονται ως φάκελοι αναφοράς
 searching_for_data = Αναζήτηση δεδομένων, μπορεί να πάρει λίγο, παρακαλώ περιμένετε...
@@ -499,7 +493,7 @@ move_file_failed = Αποτυχία μετακίνησης αρχείου { $nam
 move_files_title_dialog = Επιλέξτε φάκελο στον οποίο θέλετε να μετακινήσετε διπλότυπα αρχεία
 move_files_choose_more_than_1_path = Μόνο μία διαδρομή μπορεί να επιλεγεί για να είναι σε θέση να αντιγράψει τα διπλά αρχεία τους, επιλεγμένα { $path_number }.
 move_stats = Σωστά μετακινήθηκαν { $num_files }/{ $all_files } στοιχεία
-save_results_to_file = Αποθηκεύτηκε αποτελέσματα τόσο σε txt και αρχεία json στο φάκελο { $name }.
+save_results_to_file = Αποθηκεύτηκε αποτελέσματα τόσο σε txt και αρχεία json στο φάκελο "{ $name }".
 search_not_choosing_any_music = ΣΦΑΛΜΑ: Πρέπει να επιλέξετε τουλάχιστον ένα πλαίσιο ελέγχου με τύπους αναζήτησης μουσικής.
 search_not_choosing_any_broken_files = ΣΦΑΛΜΑ: Πρέπει να επιλέξετε τουλάχιστον ένα πλαίσιο ελέγχου με τον τύπο των επιλεγμένων κατεστραμμένων αρχείων.
 include_folders_dialog_title = Φάκελοι που θα συμπεριληφθούν

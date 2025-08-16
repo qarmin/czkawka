@@ -18,7 +18,7 @@ music_checking_by_tags = Taggar
 music_checking_by_content = Innehåll
 same_music_seconds_label = Minsta fragment sekund varaktighet
 same_music_similarity_label = Maximal skillnad
-music_compare_only_in_title_group = Jämför endast i titeln
+music_compare_only_in_title_group = Jämför inom grupper med liknande titlar
 music_compare_only_in_title_group_tooltip =
     När den är aktiverad grupperas filerna efter titel och jämförs sedan med varandra.
     
@@ -458,17 +458,11 @@ saving_loading_invalid_int = För nyckeln "{ $key }" hittade ogiltigt resultat -
 saving_loading_invalid_bool = För nyckel "{ $key }" hittade ogiltigt resultat - "{ $result }" vilket inte är en bool.
 saving_loading_decode_problem_bool = Det gick inte att avkoda Bollen från nyckel "{ $key }" hittade "{ $result }" men tillåtna värden är 0, 1, sanna eller falska.
 saving_loading_saving_same_keys = Försöker spara inställningen med duplicerad nyckel "{ $key }".
-saving_loading_failed_to_get_home_directory = Det gick inte att hämta hemkatalogen till att öppna/spara konfigurationsfil.
-saving_loading_folder_config_instead_file = Kan inte skapa eller öppna spara konfigurationsfilen i sökvägen "{ $path }" eftersom det redan finns en mapp.
-saving_loading_failed_to_create_configuration_folder = Det gick inte att skapa konfigurationsmappen "{ $path }", orsak "{ $reason }".
 saving_loading_failed_to_create_config_file = Det gick inte att skapa konfigurationsfil "{ $path }", orsak "{ $reason }".
 saving_loading_failed_to_read_config_file = Kan inte ladda konfiguration från "{ $path }" eftersom den inte finns eller inte är en fil.
 saving_loading_failed_to_read_data_from_file = Kan inte läsa data från fil "{ $path }", anledning "{ $reason }".
 saving_loading_orphan_data = Hittade föräldralösa data "{ $data }" i rad "{ $line }".
 saving_loading_not_valid = Inställningen "{ $data }" finns inte i nuvarande appversion.
-# Invalid symlinks
-invalid_symlink_infinite_recursion = Oändlig recursion
-invalid_symlink_non_existent_destination = Icke-existerande målfil
 # Other
 selected_all_reference_folders = Kan inte börja söka, när alla kataloger är inställda som referensmappar
 searching_for_data = Söker data, det kan ta en stund, vänta...
@@ -499,7 +493,7 @@ move_file_failed = Det gick inte att flytta filen { $name } anledning { $reason 
 move_files_title_dialog = Välj mapp som du vill flytta duplicerade filer till
 move_files_choose_more_than_1_path = Endast en sökväg kan väljas för att kunna kopiera sina duplicerade filer, valda { $path_number }.
 move_stats = Korrekt flyttad { $num_files }/{ $all_files } objekt
-save_results_to_file = Sparade resultat både till txt och json filer i { $name } mapp.
+save_results_to_file = Sparade resultat både till txt och json filer i "{ $name }" mapp.
 search_not_choosing_any_music = FEL: Du måste välja minst en kryssruta med söktyper för musik.
 search_not_choosing_any_broken_files = FEL: Du måste välja minst en kryssruta med typ av markerade trasiga filer.
 include_folders_dialog_title = Mappar att inkludera

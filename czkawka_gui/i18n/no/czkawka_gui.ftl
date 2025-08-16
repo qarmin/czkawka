@@ -18,7 +18,7 @@ music_checking_by_tags = Tagger
 music_checking_by_content = Innhold
 same_music_seconds_label = Minste fragment andre varighet
 same_music_similarity_label = Maksimal differanse
-music_compare_only_in_title_group = Sammenlign bare i tittel
+music_compare_only_in_title_group = Sammenlign innenfor grupper av lignende titler
 music_compare_only_in_title_group_tooltip =
     Når aktivert, blir filer gruppert etter tittel og sammenlignes med hverandre.
     
@@ -458,17 +458,11 @@ saving_loading_invalid_int = I nøkkelen "{ $key }" fant du ugyldig resultat - "
 saving_loading_invalid_bool = For nøkkelen "{ $key }" fant ugyldig resultat - "{ $result }" som ikke er en bool.
 saving_loading_decode_problem_bool = Kan ikke dekode bool fra nøkkelen "{ $key }" funnet "{ $result }", men tillatte verdier er 0, 1, sanne eller usann.
 saving_loading_saving_same_keys = Prøver å lagre innstillinger med duplisert nøkkel "{ $key }".
-saving_loading_failed_to_get_home_directory = Klarte ikke å hente hjemmappen for å åpne og lagre konfigurasjonsfilen.
-saving_loading_folder_config_instead_file = Kan ikke opprette eller åpne lagringsfilbanen{ $path }" fordi allerede finnes en mappe.
-saving_loading_failed_to_create_configuration_folder = Kunne ikke konfigurere opprette konfigurasjonsmappen "{ $path }", grunn "{ $reason }".
 saving_loading_failed_to_create_config_file = Kunne ikke opprette konfigurasjonsfilen{ $path }", grunn "{ $reason }".
 saving_loading_failed_to_read_config_file = Kan ikke laste konfigurasjonen fra "{ $path }" fordi den ikke eksisterer eller ikke er en fil.
 saving_loading_failed_to_read_data_from_file = Kan ikke lese data fra filen{ $path }", grunn "{ $reason }".
 saving_loading_orphan_data = Funnet orphan data "{ $data }" i linje "{ $line }".
 saving_loading_not_valid = Setter "{ $data }" finnes ikke i gjeldende appversjon.
-# Invalid symlinks
-invalid_symlink_infinite_recursion = Uendelig rekursjon
-invalid_symlink_non_existent_destination = Ikke-eksisterende målfil
 # Other
 selected_all_reference_folders = Kan ikke starte søk, når alle kataloger er angitt som referanselapper
 searching_for_data = Søker data, det kan ta en stund, vennligst vent...
@@ -499,7 +493,7 @@ move_file_failed = Kunne ikke flytte filen { $name }, årsak { $reason }
 move_files_title_dialog = Velg mappen du vil flytte dupliserte filer til
 move_files_choose_more_than_1_path = Bare én sti kan velges for å kunne kopiere sine dupliserte filer, valgt { $path_number }.
 move_stats = Flott flyttet { $num_files }/{ $all_files } elementer
-save_results_to_file = Lagrede resultater både i txt og json-filer i { $name } mappe.
+save_results_to_file = Lagrede resultater både i txt og json filer inn i "{ $name }"-mappen.
 search_not_choosing_any_music = FEIL: Du må velge minst en avkrysningsboks med musikk som søker.
 search_not_choosing_any_broken_files = FEIL: Du må velge minst en avkrysningsboks med sjekket ødelagte filer.
 include_folders_dialog_title = Mapper å inkludere

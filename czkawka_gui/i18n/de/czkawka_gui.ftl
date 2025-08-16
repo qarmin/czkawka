@@ -18,7 +18,7 @@ music_checking_by_tags = Tags
 music_checking_by_content = Inhalt
 same_music_seconds_label = Minimale Dauer des Fragments, in Sekunden
 same_music_similarity_label = Maximaler Unterschied
-music_compare_only_in_title_group = Nur im Titel vergleichen
+music_compare_only_in_title_group = Vergleiche innerhalb von Gruppen ähnlicher Titel
 music_compare_only_in_title_group_tooltip =
     Wenn aktiviert, werden Dateien nach Titel gruppiert und dann miteinander verglichen.
     
@@ -457,17 +457,11 @@ saving_loading_invalid_int = Für Schlüssel "{ $key }" ungültiges Ergebnis gef
 saving_loading_invalid_bool = Für Schlüssel "{ $key }" ungültiges Ergebnis gefunden: "{ $result }", welches kein Boolean ist.
 saving_loading_decode_problem_bool = Fehler beim Dekodieren von Schlüssel "{ $key }" gefunden: "{ $result }". Erlaubte Werte sind: 0, 1, true oder false.
 saving_loading_saving_same_keys = Versucht die Einstellung mit doppelter Taste "{ $key } " zu speichern.
-saving_loading_failed_to_get_home_directory = Home-Verzeichnis konnte nicht zum Öffnen und Speichern der Konfigurationsdatei geladen werden.
-saving_loading_folder_config_instead_file = Konfigurationsdatei im Pfad "{ $path }" kann nicht erstellt oder geöffnet werden, da bereits ein Ordner vorhanden ist.
-saving_loading_failed_to_create_configuration_folder = Konfigurationsordner konnte nicht erstellt werden "{ $path }", Grund "{ $reason }".
 saving_loading_failed_to_create_config_file = Fehler beim Erstellen der Konfigurationsdatei "{ $path }", Grund "{ $reason }".
 saving_loading_failed_to_read_config_file = Konfiguration kann nicht von "{ $path }" geladen werden, da sie nicht existiert oder keine Datei ist.
 saving_loading_failed_to_read_data_from_file = Daten von Datei "{ $path }" können nicht gelesen werden, Grund "{ $reason }".
 saving_loading_orphan_data = Verwaiste Daten "{ $data }" in Zeile "{ $line }".
 saving_loading_not_valid = Einstellung "{ $data }" existiert nicht in der aktuellen App-Version.
-# Invalid symlinks
-invalid_symlink_infinite_recursion = Endlose Rekursion
-invalid_symlink_non_existent_destination = Nicht existierende Zieldatei
 # Other
 selected_all_reference_folders = Suche kann nicht gestartet werden, wenn alle Verzeichnisse als Referenzordner gesetzt sind
 searching_for_data = Suche nach Daten, es kann eine Weile dauern, bitte warten...
@@ -498,7 +492,7 @@ move_file_failed = Fehler beim Verschieben der Datei { $name }, Grund { $reason 
 move_files_title_dialog = Wählen Sie den Ordner aus, in den Sie doppelte Dateien verschieben möchten
 move_files_choose_more_than_1_path = Es darf nur ein Pfad ausgewählt sein, um Duplikate von dort kopieren zu können, ausgewählt sind { $path_number }.
 move_stats = { $num_files }/{ $all_files } Elemente korrekt verschoben
-save_results_to_file = Ergebnisse sowohl in txt als auch in json Dateien in den Ordner { $name } gespeichert.
+save_results_to_file = Ergebnisse sowohl in txt als auch in json Dateien in den Ordner "{ $name }" gespeichert.
 search_not_choosing_any_music = FEHLER: Sie müssen mindestens ein Kontrollkästchen mit Art der Musiksuche auswählen.
 search_not_choosing_any_broken_files = FEHLER: Sie müssen mindestens ein Kontrollkästchen mit der Art der markierten fehlerhaften Dateien auswählen.
 include_folders_dialog_title = Einbezogene Ordner

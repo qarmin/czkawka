@@ -18,7 +18,7 @@ music_checking_by_tags = Labels
 music_checking_by_content = Inhoud
 same_music_seconds_label = Minimale fragment tweede duur
 same_music_similarity_label = Maximum verschil
-music_compare_only_in_title_group = Vergelijk alleen in de titel
+music_compare_only_in_title_group = Vergelijk binnen groepen van vergelijkbare titels
 music_compare_only_in_title_group_tooltip =
     Wanneer ingeschakeld, worden bestanden gegroepeerd op titel en vervolgens vergeleken met elkaar.
     
@@ -458,17 +458,11 @@ saving_loading_invalid_int = Voor sleutel "{ $key }" vond een ongeldig resultaat
 saving_loading_invalid_bool = Voor sleutel "{ $key }" vond een ongeldig resultaat - "{ $result }" wat geen baas is.
 saving_loading_decode_problem_bool = Kan bool van sleutel niet decoderen "{ $key }" gevonden "{ $result }" maar toegestane waarden zijn 0, 1, waar of onwaar.
 saving_loading_saving_same_keys = Proberen de instelling op te slaan met de gedupliceerde sleutel "{ $key }".
-saving_loading_failed_to_get_home_directory = Fout bij het ophalen van de home directory naar configuratiebestand openen/opslaan.
-saving_loading_folder_config_instead_file = Kan configuratiebestand niet aanmaken of openen in pad "{ $path }" omdat er al een map is.
-saving_loading_failed_to_create_configuration_folder = Configuratie mislukt om configuratiemap "{ $path }", reden "{ $reason } " te maken.
 saving_loading_failed_to_create_config_file = Fout bij het aanmaken van het configuratiebestand "{ $path }", reden "{ $reason }".
 saving_loading_failed_to_read_config_file = Kan configuratie niet laden van "{ $path }" omdat deze niet bestaat of geen bestand is.
 saving_loading_failed_to_read_data_from_file = Kan gegevens niet lezen van bestand "{ $path }", reden "{ $reason }".
 saving_loading_orphan_data = orphan data gevonden "{ $data }" in regel "{ $line }".
 saving_loading_not_valid = Instelling "{ $data }" bestaat niet in de huidige versie van de app.
-# Invalid symlinks
-invalid_symlink_infinite_recursion = Oneindige recursie
-invalid_symlink_non_existent_destination = Niet-bestaand doelbestand
 # Other
 selected_all_reference_folders = Kan zoeken niet starten, als alle mappen als referentie mappen zijn ingesteld
 searching_for_data = Gegevens zoeken, het kan een tijdje duren, even wachten...
@@ -499,7 +493,7 @@ move_file_failed = Kon bestand niet verplaatsen { $name }, reden { $reason }
 move_files_title_dialog = Kies de map waarnaar u gedupliceerde bestanden wilt verplaatsen
 move_files_choose_more_than_1_path = Er kan slechts één pad geselecteerd zijn om hun gedupliceerde bestanden te kopiëren, geselecteerde { $path_number }.
 move_stats = Naar behoren verplaatst { $num_files }/{ $all_files } items
-save_results_to_file = Opgeslagen resultaten zowel in txt als in json bestanden in { $name } map.
+save_results_to_file = Opgeslagen resultaten zowel in txt als json bestanden in de "{ $name }" map.
 search_not_choosing_any_music = FOUT: U moet ten minste één selectievakje met muziekinstypes selecteren.
 search_not_choosing_any_broken_files = FOUT: U moet ten minste één selectievakje selecteren met type van aangevinkte bestanden.
 include_folders_dialog_title = Mappen om op te nemen

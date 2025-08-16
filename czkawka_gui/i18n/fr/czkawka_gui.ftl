@@ -18,7 +18,7 @@ music_checking_by_tags = Tags
 music_checking_by_content = Contenu
 same_music_seconds_label = Durée minimale de seconde de fragment
 same_music_similarity_label = Différence maximale
-music_compare_only_in_title_group = Comparer seulement dans le titre
+music_compare_only_in_title_group = Comparer au sein des groupes de titres similaires
 music_compare_only_in_title_group_tooltip =
     Lorsque cette option est activée, les fichiers sont regroupés par titre, puis comparés l'un à l'autre.
     
@@ -458,17 +458,11 @@ saving_loading_invalid_int = Résultat invalide trouvé pour la clé "{ $key }" 
 saving_loading_invalid_bool = Résultat invalide trouvé pour la clé "{ $key }" - "{ $result }" n'est pas un booléen.
 saving_loading_decode_problem_bool = Impossible de décoder le booléen de la clé "{ $key }". Trouvé "{ $result }" mais les valeurs autorisées sont 0, 1, true ou false.
 saving_loading_saving_same_keys = Tentative de sauvegarde du paramètre avec la clé dupliquée «{ $key }».
-saving_loading_failed_to_get_home_directory = Impossible d'obtenir le répertoire racine pour ouvrir/enregistrer le fichier de configuration.
-saving_loading_folder_config_instead_file = Impossible de créer ou d'ouvrir le fichier de configuration sauvegardé à l'emplacement "{ $path }" car il existe déjà un dossier.
-saving_loading_failed_to_create_configuration_folder = Échec de la configuration pour créer le dossier de configuration "{ $path }". Raison : "{ $reason }".
 saving_loading_failed_to_create_config_file = Impossible de créer le fichier de configuration "{ $path }". Raison : "{ $reason }".
 saving_loading_failed_to_read_config_file = Impossible de charger la configuration depuis "{ $path }" car elle n'existe pas ou n'est pas un fichier.
 saving_loading_failed_to_read_data_from_file = Impossible de lire les données du fichier "{ $path }". Raison : "{ $reason }".
 saving_loading_orphan_data = Données orphelines « { $data } » trouvées à la ligne « { $line } ».
 saving_loading_not_valid = Le paramètre « { $data } » n'existe pas dans la version actuelle de l'application.
-# Invalid symlinks
-invalid_symlink_infinite_recursion = Récursion infinie
-invalid_symlink_non_existent_destination = Fichier de destination inexistant
 # Other
 selected_all_reference_folders = Impossible de lancer la recherche quand tous les répertoires sont définis comme des répertoires de référence
 searching_for_data = Recherche de données. Cela peut prendre un certain temps, veuillez patienter…
@@ -499,7 +493,7 @@ move_file_failed = Impossible de déplacer le fichier { $name }. Raison : { $rea
 move_files_title_dialog = Choisissez le dossier dans lequel vous voulez déplacer les fichiers dupliqués
 move_files_choose_more_than_1_path = Un seul chemin peut être sélectionné pour pouvoir copier leurs fichiers dupliqués. { $path_number } est sélectionné.
 move_stats = Éléments { $num_files }/{ $all_files } correctement déplacés
-save_results_to_file = Résultats enregistrés dans les fichiers txt et json dans le dossier { $name }.
+save_results_to_file = Résultats enregistrés dans les fichiers txt et json dans le dossier "{ $name }".
 search_not_choosing_any_music = ERREUR : vous devez sélectionner au moins une case à cocher parmi les types de recherche de musique.
 search_not_choosing_any_broken_files = ERREUR : vous devez sélectionner au moins une case à cocher parmi les types de fichiers cassés.
 include_folders_dialog_title = Dossiers à inclure

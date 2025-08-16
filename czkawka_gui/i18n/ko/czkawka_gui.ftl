@@ -14,27 +14,29 @@ music_bitrate_checkbox = 비트레이트
 music_genre_checkbox = 장르
 music_length_checkbox = 길이
 music_comparison_checkbox = 근사값 비교
-music_checking_by_tags = Tags
-music_checking_by_content = Content
-same_music_seconds_label = Minimal fragment second duration
-same_music_similarity_label = Maximum difference
-music_compare_only_in_title_group = Compare only in title
+music_checking_by_tags = 태그 기준 검사
+music_checking_by_content = 내용 기준 검사
+same_music_seconds_label = 최소 조각 재생 시간
+same_music_similarity_label = 최대 허용 차이
+music_compare_only_in_title_group = Compare within groups of similar titles
 music_compare_only_in_title_group_tooltip =
-    When enabled, files are grouped by title and then compared to each other.
+    활성화 시, 파일이 제목별로 그룹화된 후에만 서로 비교됩니다.
     
-    With 10000 files, instead almost 100 million comparisons usually there will be around 20000 comparisons.
+    예: 10000개의 파일이 있을 경우, 거의 1억 번의 비교 대신 보통 약 20000번의 비교로 줄어듭니다.
 same_music_tooltip =
-    Searching for similar music files by its content can be configured by setting:
+    음악 파일 유사도 검색은 아래 설정으로 조정할 수 있습니다:
     
-    - The minimum fragment time after which music files can be identified as similar
-    - The maximum difference difference between two tested fragments
+    - 유사도로 식별 가능한 최소 조각 시간
+    - 비교할 조각간 허용 가능한 최대 차이 수치
     
-    The key to good results is to find sensible combinations of these parameters, for provided.
+    좋은 결과를 얻기 위해서는 이 두 값을 상황에 맞게 적절히 조합하는 것이 중요합니다.
     
-    Setting the minimum time to 5s and the maximum difference to 1.0, will look for almost identical fragments in the files.
-    A time of 20s and a maximum difference of 6.0, on the other hand, works well for finding remixes/live versions etc.
+    최소 시간 5초 + 최대 차이 1.0 설정 시 -> 거의 동일한 조각을 찾습니다.
+    최소 시간 20초 + 최대 차이 6.0 설정 시 -> 리믹스/라이브 버전 등 유사한 경우에 효과적입니다.
     
-    By default, each music file is compared to each other and this can take a lot of time when testing many files, so it is usually better to use reference folders and specifying which files are to be compared with each other(with same amount of files, comparing fingerprints will be faster at least 4x than without reference folders).
+    기본적으로 모든 음악 파일끼리 비교하게 되므로, 많은 파일을 비교할 때 시간이 오래 걸릴 수 있습니다.  
+    따라서 일반적으로 **참조 폴더(reference folders)** 옵션을 사용하고 비교할 파일을 지정하면,  
+    지문(fingerprint) 비교는 참조 없이 비교하는 것보다 **최소 4배 빠르게** 진행됩니다.
 music_comparison_checkbox_tooltip =
     기계학습을 통해 각 항목의 괄호를 제거합니다. 예를 들어, 다음 두 파일은 같은 파일로 인식될 것입니다.
     
@@ -44,7 +46,7 @@ duplicate_case_sensitive_name_tooltip =
     대소문자 구분이 켜져 있으면, 완전히 같은 이름만이 중복 파일로 검색됩니다. 예시: Żołd <-> Żołd
     
     대소문자 구분이 꺼져 있으면, 대문자와 소문자 구별을 하지 않고 중복 파일을 검색합니다. 예시: żoŁD <-> Żołd
-duplicate_mode_size_name_combo_box = Size and Name
+duplicate_mode_size_name_combo_box = 크기 및 이름 기준
 duplicate_mode_name_combo_box = 파일명
 duplicate_mode_size_combo_box = 파일 크기
 duplicate_mode_hash_combo_box = 해시
@@ -65,21 +67,27 @@ duplicate_check_method_tooltip =
     
     해시 - 같은 내용을 가진 파일들을 찾습니다. 이 모드에서는 먼저 파일을 해시한 다음, 각 해시값들을 비교하여 중복 파일인지 식별합니다. 때문에 중복 파일을 찾는 데 있어 가장 확실한 방법입니다. Czkawka는 캐시에 매우 의존하므로, 같은 데이터를 두 번째 이후로 스캔하는 경우 첫 번째 스캔보다 더욱 빠르게 스캔이 이루어집니다.
 image_hash_size_tooltip =
-    Each checked image produces a special hash which can be compared with each other, and a small difference between them means that these images are similar.
+    각 확인된 이미지에 특별한 해시가 생성되어 서로 비교될 수 있으며,  
+    작은 해시 차이는 이미지가 유사함을 의미합니다.
     
-    8 hash size is quite good to find images that are only a little similar to original. With a bigger set of images (>1000), this will produce a big amount of false positives, so I recommend to use  a bigger hash size in this case.
+    해시 크기 8은 원본과 약간 유사한 이미지를 찾기에 적절합니다.  
+    다만 이미지 수가 많을 경우(예: 1000개 이상), 거짓 양성(false positives)이 많이 발생할 수 있어  
+    이 경우 더 큰 해시 크기 사용을 권장합니다.
     
-    16 is the default hash size which is quite a good compromise between finding even a little similar images and having only a small amount of hash collisions.
+    기본 해시 크기 16은 유사 이미지 검색과 해시 충돌 최소화를 적절히 균형 잡은 설정입니다.
     
-    32 and 64 hashes find only very similar images, but should have almost no false positives (maybe except some images with alpha channel).
+    해시 크기 32 또는 64는 매우 유사한 이미지만 찾아내며, (알파 채널이 있는 일부 이미지 제외하면)  
+    거의 거짓 양성이 없습니다.
 image_resize_filter_tooltip =
-    To compute hash of image, the library must first resize it.
+    이미지 해시 계산 전에 라이브러리가 먼저 이미지를 리사이징해야 합니다.
     
-    Depend on chosen algorithm, the resulting image used to calculate hash will looks a little different.
+    선택된 알고리즘에 따라 해시 계산에 사용하는 이미지의 형태가 약간 달라집니다.
     
-    The fastest algorithm to use, but also the one which gives the worst results, is Nearest. It is enabled by default, because with 16x16 hash size lower quality it is not really visible.
+    가장 빠른 알고리즘은 `Nearest`이며, 가장 낮은 화질을 제공하지만  
+    기본 해시 크기 16x16일 경우 품질 저하가 눈에 잘 띄지 않습니다.
     
-    With 8x8 hash size it is recommended to use a different algorithm than Nearest, to have better groups of images.
+    이미지 수가 적고 해시 크기 8x8을 사용할 경우,  
+    `Nearest`보다 다른 알고리즘을 사용하면 더 정확한 그룹핑에 도움이 됩니다.
 image_hash_alg_tooltip =
     해시를 계산하는 데 사용되는 알고리즘을 선택할 수 있습니다.
     
@@ -134,7 +142,7 @@ main_check_box_broken_files_pdf = PDF
 main_check_box_broken_files_archive = 압축 파일
 main_check_box_broken_files_image = 이미지
 check_button_general_same_size = 같은 파일크기 무시
-check_button_general_same_size_tooltip = Ignore files with identical size in results - usually these are 1:1 duplicates
+check_button_general_same_size_tooltip = 동일한 크기의 파일은 결과에서 제외합니다 – 대부분 1:1 중복일 가능성이 높습니다
 main_label_size_bytes_tooltip = 스캔할 파일의 크기입니다.
 # Upper window
 upper_tree_view_included_folder_column_title = 검색할 폴더
@@ -181,7 +189,7 @@ upper_excluded_items_tooltip =
     디렉터리를 직접 제외하는 것보다 느립니다. 주의해서 사용하세요.
 upper_excluded_items = 제외할 항목:
 upper_allowed_extensions = 허용할 확장자:
-upper_excluded_extensions = Disabled Extensions:
+upper_excluded_extensions = 비활성 확장자:
 # Popovers
 popover_select_all = 모두 선택
 popover_unselect_all = 모두 선택 해제
@@ -295,13 +303,15 @@ header_about_button_tooltip = 이 앱에 대한 정보창을 엽니다.
 
 settings_number_of_threads = 스레드 수
 settings_number_of_threads_tooltip = 사용할 스레드 수입니다. 0이면 가능한 최대 스레드를 사용합니다.
-settings_use_rust_preview = Use external libraries instead gtk to load previews
+settings_use_rust_preview = 미리보기에 GTK 대신 외부 라이브러리 사용
 settings_use_rust_preview_tooltip =
-    Using gtk previews will sometimes be faster and support more formats, but sometimes this could be exactly the opposite.
+    GTK 미리보기는 일부 경우 더 빠르거나 더 많은 형식을 지원하지만,  
+    반대로 성능이 더 떨어질 수도 있습니다.
     
-    If you have problems with loading previews, you may can to try to change this setting.
+    미리보기 로딩에 문제가 있다면 이 설정을 변경해 보세요.
     
-    On non-linux systems, it is recommended to use this option, because gtk-pixbuf are not always available there so disabling this option will not load previews of some images.
+    리눅스가 아닌 환경에서는 `gtk-pixbuf`가 항상 사용 가능하지 않기 때문에  
+    이 옵션을 끄면 일부 이미지 미리보기가 로드되지 않을 수 있습니다.
 settings_label_restart = 이 설정을 적용하려면 프로그램을 재시작해야 합니다!
 settings_ignore_other_filesystems = 다른 파일시스템 무시(Linux에서만)
 settings_ignore_other_filesystems_tooltip =
@@ -352,7 +362,7 @@ settings_multiple_image_preview_checkbutton = 이미지 미리보기 표시
 settings_multiple_clear_cache_button_tooltip =
     더 이상 존재하지 않는 파일을 캐시에서 제거합니다.
     캐시를 자동으로 정리하는 옵션이 꺼져 있을 때만 사용하세요.
-settings_multiple_clear_cache_button = Remove outdated results from cache.
+settings_multiple_clear_cache_button = 캐시에서 오래된 결과 제거
 
 ## Duplicates
 
@@ -418,34 +428,34 @@ compute_found_bad_extensions = 총 { $number_files }개의 잘못된 확장자�
 # Progress window
 progress_scanning_general_file =
     { $file_number ->
-        [one] Scanned { $file_number } file
-       *[other] Scanned { $file_number } files
+        [one] { $file_number }개 파일 스캔 완료
+       *[other] { $file_number }개 파일 스캔 완료
     }
-progress_scanning_extension_of_files = Checked extension of { $file_checked }/{ $all_files } file
-progress_scanning_broken_files = Checked { $file_checked }/{ $all_files } file ({ $data_checked }/{ $all_data })
-progress_scanning_video = Hashed of { $file_checked }/{ $all_files } video
-progress_scanning_image = Hashed of { $file_checked }/{ $all_files } image ({ $data_checked }/{ $all_data })
-progress_comparing_image_hashes = Compared { $file_checked }/{ $all_files } image hash
-progress_scanning_music_tags_end = Compared tags of { $file_checked }/{ $all_files } music file
-progress_scanning_music_tags = Read tags of { $file_checked }/{ $all_files } music file
-progress_scanning_music_content_end = Compared fingerprint of { $file_checked }/{ $all_files } music file
-progress_scanning_music_content = Calculated fingerprint of { $file_checked }/{ $all_files } music file ({ $data_checked }/{ $all_data })
+progress_scanning_extension_of_files = { $file_checked }/{ $all_files }개의 파일 확장자 확인
+progress_scanning_broken_files = { $file_checked }/{ $all_files }개 파일 확인 (데이터: { $data_checked } / { $all_data })
+progress_scanning_video = { $file_checked }/{ $all_files }개의 비디오 해시 생성
+progress_scanning_image = { $file_checked }/{ $all_files }개의 이미지 해시 생성 (데이터: { $data_checked } / { $all_data })
+progress_comparing_image_hashes = { $file_checked }/{ $all_files }개의 이미지 해시 비교
+progress_scanning_music_tags_end = { $file_checked }/{ $all_files }개의 음악 파일 태그 비교 완료
+progress_scanning_music_tags = { $file_checked }/{ $all_files }개의 음악 파일 태그 읽는 중
+progress_scanning_music_content_end = { $file_checked }/{ $all_files }개의 음악 파일 지문 비교 완료
+progress_scanning_music_content = { $file_checked }/{ $all_files }개의 음악 파일 지문 계산 중 (데이터: { $data_checked } / { $all_data })
 progress_scanning_empty_folders =
     { $folder_number ->
-        [one] Scanned { $folder_number } folder
-       *[other] Scanned { $folder_number } folders
+        [one] { $folder_number }개 폴더 스캔 완료
+       *[other] { $folder_number }개 폴더 스캔 완료
     }
-progress_scanning_size = Scanned size of { $file_number } file
-progress_scanning_size_name = Scanned name and size of { $file_number } file
-progress_scanning_name = Scanned name of { $file_number } file
-progress_analyzed_partial_hash = Analyzed partial hash of { $file_checked }/{ $all_files } files ({ $data_checked }/{ $all_data })
-progress_analyzed_full_hash = Analyzed full hash of { $file_checked }/{ $all_files } files ({ $data_checked }/{ $all_data })
-progress_prehash_cache_loading = Loading prehash cache
-progress_prehash_cache_saving = Saving prehash cache
-progress_hash_cache_loading = Loading hash cache
-progress_hash_cache_saving = Saving hash cache
-progress_cache_loading = Loading cache
-progress_cache_saving = Saving cache
+progress_scanning_size = { $file_number }개의 파일 크기 스캔 완료
+progress_scanning_size_name = { $file_number }개의 파일 이름 및 크기 스캔 완료
+progress_scanning_name = { $file_number }개의 파일 이름 스캔 완료
+progress_analyzed_partial_hash = { $file_checked }/{ $all_files }개 파일 부분 해시 분석 완료 (데이터: { $data_checked } / { $all_data })
+progress_analyzed_full_hash = { $file_checked }/{ $all_files }개 파일 전체 해시 분석 완료 (데이터: { $data_checked } / { $all_data })
+progress_prehash_cache_loading = PreHash 캐시 로드 중
+progress_prehash_cache_saving = PreHash 캐시 저장 중
+progress_hash_cache_loading = 해시 캐시 로드 중
+progress_hash_cache_saving = 해시 캐시 저장 중
+progress_cache_loading = 캐시 로드 중
+progress_cache_saving = 캐시 저장 중
 progress_current_stage = 현재 단계:{ "  " }
 progress_all_stages = 전체 단계:{ "  " }
 # Saving loading 
@@ -458,17 +468,11 @@ saving_loading_invalid_int = 키 "{ $key }"의 값이 올바르지 않습니다.
 saving_loading_invalid_bool = 키 "{ $key }"의 값이 올바르지 않습니다. "{ $result }"은 bool이 아닙니다.
 saving_loading_decode_problem_bool = 키 "{ $key }"의 값을 bool로 해석할 수 없습니다. 허용된 값은 0, 1, true, false 중 하나이지만 실제 값이 "{ $result }"입니다.
 saving_loading_saving_same_keys = 키 "{ $key }"가 중복되어 있습니다.
-saving_loading_failed_to_get_home_directory = 설정 파일을 저장 또는 불러오기 위한 홈 디렉터리를 찾을 수 없습니다.saving_loading_folder_config_instead_file = "{ $path }"에 있는 설정 파일을 열거나 설정 파일을 생성할 수 없습니다. 파일과 같은 이름의 폴더가 존재합니다.
-saving_loading_folder_config_instead_file = "{ $path }"에 설정 파일을 만들거나 열 수 없습니다. 이미 같은 이름의 폴더가 존재합니다.
-saving_loading_failed_to_create_configuration_folder = 설정 폴더를 "{ $path }"에 생성할 수 없습니다. 이유: "{ $reason }".
 saving_loading_failed_to_create_config_file = "{ $path }" 파일에 설정을 저장할 수 없습니다. 이유: "{ $reason }".
 saving_loading_failed_to_read_config_file = "{ $path }" 파일에서 설정을 불러올 수 없습니다. 파일이 없거나, 파일이 아닙니다.
 saving_loading_failed_to_read_data_from_file = "{ $path }" 파일을 읽을 수 없습니다. 이유: "{ $reason }".
 saving_loading_orphan_data = { $line }번 행에 고아 데이터 "{ $data }"가 있습니다.
 saving_loading_not_valid = 설정 "{ $data }"은 현재 프로그램 버전에 존재하지 않습니다.
-# Invalid symlinks
-invalid_symlink_infinite_recursion = 무한 재귀
-invalid_symlink_non_existent_destination = 목표 파일이 없음
 # Other
 selected_all_reference_folders = 모든 디렉터리가 기준 폴더이므로, 검색을 시작할 수 없습니다.
 searching_for_data = 검색 중. 잠시만 기다려주세요...
@@ -499,7 +503,7 @@ move_file_failed = { $name } 파일 이동 실패. 이유: { $reason }
 move_files_title_dialog = 중복 파일을 이동할 폴더를 선택하세요.
 move_files_choose_more_than_1_path = 중복 파일을 복사할 1개의 폴더만 지정해야 하지만, { $path_number }개의 경로를 선택했습니다.
 move_stats = { $num_files }/{ $all_files }개의 항목을 이동함
-save_results_to_file = Saved results both to txt and json files into { $name } folder.
+save_results_to_file = Saved results both to txt and json files into "{ $name }" folder.
 search_not_choosing_any_music = 경고: 최소한 하나의 검색 방법을 선택해야 합니다.
 search_not_choosing_any_broken_files = 경고: 최소한 하나 이상의 검색할 파일 분류를 선택해야 합니다.
 include_folders_dialog_title = 검색할 폴더 추가
@@ -517,6 +521,6 @@ cache_clear_message_label_4 = 경고! 이 동작은 연결되지 않은 외장 �
 preview_image_resize_failure = { $name } 이미지 크기 조정 실패.
 preview_image_opening_failure = { $name } 이미지 열기 실패. 이유: { $reason }
 # Compare images (L is short Left, R is short Right - they can't take too much space)
-compare_groups_number = 그룹 { $current_group }/{ $all_groups } ({ $images_in_group } 이미지)
+compare_groups_number = 그룹 { $current_group } / { $all_groups } ({ $images_in_group } 이미지)
 compare_move_left_button = 이전
 compare_move_right_button = 다음

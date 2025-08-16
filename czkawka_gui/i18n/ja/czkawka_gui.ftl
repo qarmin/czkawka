@@ -18,7 +18,7 @@ music_checking_by_tags = タグ
 music_checking_by_content = コンテンツ
 same_music_seconds_label = フラグメント最小秒の持続時間
 same_music_similarity_label = 最大差
-music_compare_only_in_title_group = タイトルのみ比較
+music_compare_only_in_title_group = 類似したタイトルのグループ内で比較
 music_compare_only_in_title_group_tooltip =
     有効にすると、ファイルはタイトルでグループ化され、それから比較されます。
     
@@ -458,17 +458,11 @@ saving_loading_invalid_int = キー "{ $key }" の場合、整数ではない不
 saving_loading_invalid_bool = キー "{ $key }" の場合、ブールではない不正な結果 - "{ $result }" が見つかりました。
 saving_loading_decode_problem_bool = キー "{ $key }" から bool をデコードできませんでした。"{ $result }"が見つかりましたが、許可されている値は 0、1、true、または false です。
 saving_loading_saving_same_keys = 重複したキー "{ $key }" で設定を保存しようとしています。
-saving_loading_failed_to_get_home_directory = ホームディレクトリの取得に失敗したため、設定ファイルの読み込み/保存ができませんでした。
-saving_loading_folder_config_instead_file = フォルダが既に存在するため、パス "{ $path }" に設定ファイルを作成または読み込み・保存することができません。
-saving_loading_failed_to_create_configuration_folder = 設定フォルダ "{ $path }" の作成に失敗しました、理由 "{ $reason }" 。
 saving_loading_failed_to_create_config_file = 設定ファイル "{ $path }" の作成に失敗しました、理由 "{ $reason }"。
 saving_loading_failed_to_read_config_file = 存在しないか設定ファイルでないため、"{ $path }" から設定を読み込めません。
 saving_loading_failed_to_read_data_from_file = ファイル "{ $path }" からデータを読み取ることができません、理由 "{ $reason } "。
 saving_loading_orphan_data = { $line } 行目に孤立したデータ "{ $data }" が見つかりました。
 saving_loading_not_valid = 設定 "{ $data }" は現在のバージョンのアプリには存在しません。
-# Invalid symlinks
-invalid_symlink_infinite_recursion = 無限再帰性
-invalid_symlink_non_existent_destination = 保存先ファイルが存在しません
 # Other
 selected_all_reference_folders = すべてのディレクトリが参照フォルダとして設定されている場合、検索を開始できません
 searching_for_data = データを検索中、しばらくお待ちください...
@@ -499,7 +493,7 @@ move_file_failed = ファイル { $name } を移動できませんでした、�
 move_files_title_dialog = 重複したファイルの移動先フォルダを選択
 move_files_choose_more_than_1_path = 重複したファイルをコピーするには、1つのパスのみを選択する必要があります、{ $path_number } つ選択されました。
 move_stats = { $num_files }/{ $all_files } アイテムを適切に移動しました
-save_results_to_file = txtファイルとjsonファイルの両方を { $name } フォルダに保存しました。
+save_results_to_file = txtファイルとjsonファイルの両方を"{ $name }"フォルダに保存しました。
 search_not_choosing_any_music = エラー: 音楽検索タイプのチェックボックスを少なくとも1つ選択する必要があります。
 search_not_choosing_any_broken_files = エラー: チェックされた壊れたファイルの種類のチェックボックスを少なくとも1つ選択する必要があります。
 include_folders_dialog_title = 含めるフォルダ

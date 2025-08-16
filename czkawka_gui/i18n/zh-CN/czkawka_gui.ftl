@@ -1,5 +1,5 @@
 # Window titles
-window_settings_title = 设置
+window_settings_title = 设定
 window_main_title = Czkawka - (Hiccup)
 window_progress_title = 正在扫描
 window_compare_images = 比较图像
@@ -18,7 +18,7 @@ music_checking_by_tags = 标签
 music_checking_by_content = 内容
 same_music_seconds_label = 最小分片秒持续时间
 same_music_similarity_label = 最大差异
-music_compare_only_in_title_group = 仅在标题中比较
+music_compare_only_in_title_group = 在相似标题的组中比较
 music_compare_only_in_title_group_tooltip =
     如果启用，文件按标题分类，然后相互比较。
     
@@ -425,7 +425,7 @@ progress_scanning_general_file =
     }
 progress_scanning_extension_of_files = 检查了 { $file_checked }/{ $all_files } 文件的扩展
 progress_scanning_broken_files = 签入 { $file_checked }/{ $all_files } 文件({ $data_checked }/{ $all_data })
-progress_scanning_video = Hashed of { $file_checked }/{ $all_files } video
+progress_scanning_video = 对 { $file_checked }/{ $all_files } 视频的哈希值
 progress_scanning_image = 对 { $file_checked }/{ $all_files } 图像的哈希值({ $data_checked }/{ $all_data })
 progress_comparing_image_hashes = 比较 { $file_checked }/{ $all_files } 图像哈希
 progress_scanning_music_tags_end = 对比的 { $file_checked }/{ $all_files } 音乐文件标签
@@ -460,17 +460,11 @@ saving_loading_invalid_int = 对于密钥"{ $key }" 发现无效的结果 - "{ $
 saving_loading_invalid_bool = 对于密钥"{ $key }" 发现无效的结果 - "{ $result } 不是布尔值。
 saving_loading_decode_problem_bool = 无法解码来自密钥的 "{ $key }" 找到 "{ $result }" ，但允许的值为 0, 1, true 或 false。
 saving_loading_saving_same_keys = 尝试用重复的密钥保存设置 "{ $key }".
-saving_loading_failed_to_get_home_directory = 无法获取打开/保存配置文件的主目录。
-saving_loading_folder_config_instead_file = 无法在路径 "{ $path } 中创建或打开配置文件，因为已经有一个文件夹。
-saving_loading_failed_to_create_configuration_folder = 无法创建配置文件夹 "{ $path }", 原因"{ $reason }".
 saving_loading_failed_to_create_config_file = 无法创建配置文件 "{ $path }", 原因"{ $reason }".
 saving_loading_failed_to_read_config_file = 无法从 "{ $path }" 加载配置，因为它不存在或不是文件。
 saving_loading_failed_to_read_data_from_file = 无法从文件读取数据"{ $path }", 原因"{ $reason }".
 saving_loading_orphan_data = 在行 “{ $line }” 中发现了孤立数据 “{ $data }”。
 saving_loading_not_valid = 设置“{ $data }”在当前应用版本中不存在。
-# Invalid symlinks
-invalid_symlink_infinite_recursion = 无限递归性
-invalid_symlink_non_existent_destination = 目标文件不存在
 # Other
 selected_all_reference_folders = 当所有目录被设置为参考文件夹时，无法开始搜索
 searching_for_data = 正在搜索数据，可能需要一段时间，请稍候...
@@ -501,7 +495,7 @@ move_file_failed = 移动文件 { $name } 失败，原因 { $reason }
 move_files_title_dialog = 选择要移动重复文件的文件夹
 move_files_choose_more_than_1_path = 只能选择一个路径来复制重复的文件，选择 { $path_number }。
 move_stats = 正确移动 { $num_files }/{ $all_files } 个项目
-save_results_to_file = 将结果保存到 txt 和 json 文件到 { $name } 文件夹。
+save_results_to_file = 将结果保存到 txt 和 json 文件到 "{ $name }" 文件夹。
 search_not_choosing_any_music = 错误：您必须选择至少一个带有音乐搜索类型的复选框。
 search_not_choosing_any_broken_files = 错误：您必须选择至少一个带有选中文件类型的复选框。
 include_folders_dialog_title = 要包含的文件夹

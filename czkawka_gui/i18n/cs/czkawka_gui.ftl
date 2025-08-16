@@ -18,7 +18,7 @@ music_checking_by_tags = Štítky
 music_checking_by_content = Obsah
 same_music_seconds_label = Minimální délka trvání druhého fragmentu
 same_music_similarity_label = Maximální rozdíl
-music_compare_only_in_title_group = Porovnat pouze v názvu
+music_compare_only_in_title_group = Porovnat v rámci skupin podobných názvů
 music_compare_only_in_title_group_tooltip =
     Pokud je povoleno, soubory jsou seskupeny podle názvu a poté vzájemně porovnávány.
     
@@ -458,17 +458,11 @@ saving_loading_invalid_int = Pro klíč "{ $key }" byl nalezen neplatný výsled
 saving_loading_invalid_bool = Pro klíč "{ $key }" byl nalezen neplatný výsledek - "{ $result }", což není bool.
 saving_loading_decode_problem_bool = Nepodařilo se dekódovat bool z klíče "{ $key }" nalezeno "{ $result }", ale povolené hodnoty jsou 0, 1, true nebo false.
 saving_loading_saving_same_keys = Pokus o uložení nastavení s duplicitním klíčem "{ $key }".
-saving_loading_failed_to_get_home_directory = Nepodařilo se získat domovský adresář pro otevření/uložení konfiguračního souboru.
-saving_loading_folder_config_instead_file = Nelze vytvořit nebo otevřít konfigurační soubor v cestě "{ $path }", protože již existuje složka.
-saving_loading_failed_to_create_configuration_folder = Nepodařilo se vytvořit konfigurační složku "{ $path }", důvod "{ $reason }".
 saving_loading_failed_to_create_config_file = Nepodařilo se vytvořit konfigurační soubor "{ $path }", důvod "{ $reason }".
 saving_loading_failed_to_read_config_file = Konfiguraci z "{ $path } nelze načíst, protože neexistuje nebo není soubor.
 saving_loading_failed_to_read_data_from_file = Nelze číst data ze souboru "{ $path }", důvod "{ $reason }".
 saving_loading_orphan_data = Nalezena osiřelá data "{ $data }" v řádku "{ $line }".
 saving_loading_not_valid = Nastavení "{ $data }" v aktuální verzi aplikace neexistuje.
-# Invalid symlinks
-invalid_symlink_infinite_recursion = Nekonečná rekurze
-invalid_symlink_non_existent_destination = Neexistující cílový soubor
 # Other
 selected_all_reference_folders = Hledání nelze spustit, pokud jsou všechny adresáře nastaveny jako referenční složky
 searching_for_data = Vyhledávání dat může chvíli trvat, prosím čekejte...
@@ -499,7 +493,7 @@ move_file_failed = Nepodařilo se přesunout soubor { $name }, důvod { $reason 
 move_files_title_dialog = Vyberte složku, do které chcete přesunout duplicitní soubory
 move_files_choose_more_than_1_path = Lze vybrat pouze jednu cestu, aby bylo možné zkopírovat jejich duplikované soubory, vybrané { $path_number }.
 move_stats = Správně přesunuto { $num_files }/{ $all_files } položek
-save_results_to_file = Uloženy výsledky do txt i json souborů do složky { $name }.
+save_results_to_file = Uloženy výsledky do složky txt i json do složky "{ $name }".
 search_not_choosing_any_music = CHYBA: Musíte vybrat alespoň jedno zaškrtávací políčko s prohledáváním hudby.
 search_not_choosing_any_broken_files = CHYBA: Musíte vybrat alespoň jedno zaškrtávací políčko s typem zkontrolovaných poškozených souborů.
 include_folders_dialog_title = Složky, které chcete zahrnout
