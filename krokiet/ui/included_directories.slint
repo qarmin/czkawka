@@ -64,7 +64,7 @@ export component IncludedDirectories {
 
                 HorizontalLayout {
                     padding-left: 7.5px;
-                    spacing: 5px;
+                    spacing: 0px;
                     width: parent.width;
 
                     CheckBox {
@@ -75,20 +75,26 @@ export component IncludedDirectories {
                         width: size_referenced_folder;
                     }
 
-
-                    HorizontalLayout {
+                    Text {
                         horizontal-stretch: 1.0;
-                        padding-left: 5px;
-                        Text {
-                            horizontal-stretch: 1.0;
-                            height: parent.height;
-                            text: r.path;
-                            vertical-alignment: center;
-                        }
-
+                        height: parent.height;
+                        text: r.path;
+                        vertical-alignment: center;
+                        horizontal-alignment: left;
+            
+                    }
+                }
+                    
+                HorizontalLayout {
+                    width: parent.width;
+                    padding-left: 5px;
+                    Rectangle { }
+                    Rectangle {
+                        width: 50px;
+                        background: ColorPalette.remove_item_color_button;
+                        horizontal-stretch: 1.0;
                         Button {
                             width: 50px;
-                            horizontal-stretch: 1.0;
                             icon: @image-url("../icons/krokiet_delete.svg");
                             colorize-icon: true;
                             clicked => {
@@ -153,23 +159,30 @@ export component ExcludedDirectories {
                     }
                 }
 
+                Text {
+                    width: parent.width;
+                    horizontal-stretch: 1.0;
+                    height: parent.height;
+                    text: r.path;
+                    vertical-alignment: center;
+                    horizontal-alignment: left;
+                    x: 5px;
+                }
+                
                 HorizontalLayout {
                     width: parent.width;
-                    padding-left: 5px;
-                    Text {
-                        horizontal-stretch: 1.0;
-                        height: parent.height;
-                        text: r.path;
-                        vertical-alignment: center;
-                    }
-
-                    Button {
+                    Rectangle { }
+                    Rectangle {
                         width: 50px;
+                        background: ColorPalette.remove_item_color_button;
                         horizontal-stretch: 1.0;
-                        icon: @image-url("../icons/krokiet_delete.svg");
-                        colorize-icon: true;
-                        clicked => {
-                            Callabler.remove_item_directories(false, idx);
+                        Button {
+                            width: 50px;
+                            icon: @image-url("../icons/krokiet_delete.svg");
+                            colorize-icon: true;
+                            clicked => {
+                                Callabler.remove_item_directories(false, idx);
+                            }
                         }
                     }
                 }

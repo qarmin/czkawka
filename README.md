@@ -134,3 +134,4 @@ The Czkawka GTK GUI and CLI applications are licensed under the [MIT](https://mi
 
 If you are using the app, I would appreciate a donation for its further development, which can be
 done [here](https://github.com/sponsors/qarmin).
+

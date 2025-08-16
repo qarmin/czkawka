@@ -134,11 +134,12 @@ impl SimilarVideos {
                     return None;
                 }
 
-                let size = file_entry.size;
+                // Currently size is not too much relevant
+                // let size = file_entry.size;
                 let res = self.check_video_file_entry(file_entry);
 
                 progress_handler.increase_items(1);
-                progress_handler.increase_size(size);
+                // progress_handler.increase_size(size);
 
                 Some(res)
             })
