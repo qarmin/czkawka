@@ -18,7 +18,7 @@ music_checking_by_tags = Etichette
 music_checking_by_content = Contenuto
 same_music_seconds_label = Durata minima del frammento
 same_music_similarity_label = Differenza massima
-music_compare_only_in_title_group = Confronta solo nel titolo
+music_compare_only_in_title_group = Confronta all'interno di gruppi di titoli simili
 music_compare_only_in_title_group_tooltip =
     Se abilitato, i file vengono raggruppati per titolo e poi confrontati tra loro.
     
@@ -457,17 +457,11 @@ saving_loading_invalid_int = Trovato risultato non valido nella chiave "{ $key }
 saving_loading_invalid_bool = Trovato risultato non valido nella chiave "{ $key }" - "{ $result }" non è un valore booleano.
 saving_loading_decode_problem_bool = Decodifica booleana fallita per la chiave "{ $key }"; trovato "{ $result }", ma i valori possibili sono 0, 1, 'true' o 'false'.
 saving_loading_saving_same_keys = Tentativo di salvataggio dell'impostazione con chiave duplicata "{ $key }".
-saving_loading_failed_to_get_home_directory = Recupero cartella home fallito, per caricamento/salvataggio del file di configurazione.
-saving_loading_folder_config_instead_file = Impossibile create o caricare/salvare il file di configurazione al percorso "{ $path }" poiché la cartella esiste già.
-saving_loading_failed_to_create_configuration_folder = Creazione cartella di configurazione "{ $path }" fallita, motivo "{ $reason }".
 saving_loading_failed_to_create_config_file = Impossibile creare il file di configurazione "{ $path }", motivo "{ $reason }".
 saving_loading_failed_to_read_config_file = Impossibile caricare la configurazione da "{ $path }" perché non esiste o non è un file.
 saving_loading_failed_to_read_data_from_file = Impossibile leggere il file "{ $path }", motivo "{ $reason }".
 saving_loading_orphan_data = Trovati dati orfani "{ $data }" nella riga "{ $line }".
 saving_loading_not_valid = L'impostazione "{ $data }" non esiste nella versione corrente dell'app.
-# Invalid symlinks
-invalid_symlink_infinite_recursion = Ricorsione infinita
-invalid_symlink_non_existent_destination = File di destinazione inesistente
 # Other
 selected_all_reference_folders = Impossibile avviare la ricerca, quando tutte le directory sono impostate come cartelle di riferimento
 searching_for_data = Ricerca dei dati, può durare a lungo, attendere prego...
@@ -498,7 +492,7 @@ move_file_failed = Spostamento file { $name } fallito, ragione { $reason }
 move_files_title_dialog = Seleziona la cartella dove vuoi spostare i file duplicati
 move_files_choose_more_than_1_path = Solo un percorso può essere selezionato per essere in grado di copiare i file duplicati, selezionato { $path_number }.
 move_stats = { $num_files }/{ $all_files } elementi spostati con successo
-save_results_to_file = Risultati salvati sia in file txt che json nella cartella { $name }.
+save_results_to_file = Risultati salvati sia in file txt che json nella cartella "{ $name }".
 search_not_choosing_any_music = ERRORE: Devi selezionare almeno una casella dei metodi di ricerca musicali.
 search_not_choosing_any_broken_files = ERRORE: è necessario selezionare almeno una casella di controllo selezionando il tipo di file danneggiati.
 include_folders_dialog_title = Cartelle incluse

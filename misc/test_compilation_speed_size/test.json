@@ -4,10 +4,6 @@
     "path_to_main_rs_file": "krokiet/src/main.rs",
     "path_to_clean_with_git": "krokiet"
   },
-  "general_config": {
-    "mold": "Off",
-    "cranelift": "Off"
-  },
   "build_config": [
     {
       "name": "debug + debug disabled",

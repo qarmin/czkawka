@@ -88,25 +88,20 @@ impl BrokenFiles {
         }
     }
 
-    fn check_broken_image(&self, mut file_entry: BrokenEntry) -> Option<BrokenEntry> {
+    fn check_broken_image(&self, mut file_entry: BrokenEntry) -> BrokenEntry {
         let mut file_entry_clone = file_entry.clone();
 
         panic::catch_unwind(|| {
             if let Err(e) = image::open(&file_entry.path) {
-                let error_string = e.to_string();
-                // This error is a problem with image library, remove check when https://github.com/image-rs/jpeg-decoder/issues/130 will be fixed
-                if error_string.contains("spectral selection is not allowed in non-progressive scan") {
-                    return None;
-                }
-                file_entry.error_string = error_string;
+                file_entry.error_string = e.to_string();
             }
-            Some(file_entry)
+            file_entry
         })
         .unwrap_or_else(|_| {
             let message = create_crash_message("Image-rs", &file_entry_clone.path.to_string_lossy(), "https://github.com/Serial-ATA/lofty-rs");
             error!("{message}");
             file_entry_clone.error_string = message;
-            Some(file_entry_clone)
+            file_entry_clone
         })
     }
     fn check_broken_zip(&self, mut file_entry: BrokenEntry) -> Option<BrokenEntry> {
@@ -141,7 +136,7 @@ impl BrokenFiles {
             Err(_inspected) => None,
         }
     }
-    fn check_broken_pdf(&self, mut file_entry: BrokenEntry) -> Option<BrokenEntry> {
+    fn check_broken_pdf(&self, mut file_entry: BrokenEntry) -> BrokenEntry {
         let mut file_entry_clone = file_entry.clone();
         panic::catch_unwind(|| {
             match File::open(&file_entry.path) {
@@ -154,13 +149,13 @@ impl BrokenFiles {
                     file_entry.error_string = e.to_string();
                 }
             }
-            Some(file_entry)
+            file_entry
         })
         .unwrap_or_else(|_| {
             let message = create_crash_message("lopdf", &file_entry_clone.path.to_string_lossy(), "https://github.com/J-F-Liu/lopdf");
             error!("{message}");
             file_entry_clone.error_string = message;
-            Some(file_entry_clone)
+            file_entry_clone
         })
     }
 
@@ -188,10 +183,10 @@ impl BrokenFiles {
 
     fn check_file(&self, file_entry: BrokenEntry) -> Option<BrokenEntry> {
         match file_entry.type_of_file {
-            TypeOfFile::Image => self.check_broken_image(file_entry),
+            TypeOfFile::Image => Some(self.check_broken_image(file_entry)),
             TypeOfFile::ArchiveZip => self.check_broken_zip(file_entry),
             TypeOfFile::Audio => self.check_broken_audio(file_entry),
-            TypeOfFile::PDF => self.check_broken_pdf(file_entry),
+            TypeOfFile::PDF => Some(self.check_broken_pdf(file_entry)),
             // This means that cache read invalid value because maybe cache comes from different czkawka version
             TypeOfFile::Unknown => None,
         }

@@ -664,8 +664,10 @@ fn scan_similar_music(
             } else {
                 tool.get_duplicated_music_entries().iter().cloned().map(|items| (None, items)).collect()
             };
+
+            vector.sort_by_cached_key(|(_, a)| u64::MAX - a.iter().map(|e| e.size).sum::<u64>());
             for (_first_entry, vec_fe) in &mut vector {
-                vec_fe.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+                vec_fe.sort_unstable_by_key(|a| u64::MAX - a.size);
             }
 
             shared_models.lock().unwrap().shared_same_music_state = Some(tool);

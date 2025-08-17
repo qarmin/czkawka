@@ -1,8 +1,12 @@
 # sudo apt install python3-matplotlib python3-pandas python3-tabulate
+from typing import Any
+
 import pandas as pd
 import matplotlib.pyplot as plt  # type: ignore[import-not-found]
 import matplotlib
 import os
+
+from pandas import Series
 
 df = pd.read_csv("compilation_results.txt", sep="|", engine="python")
 df = df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
@@ -29,6 +33,15 @@ matplotlib.rcParams.update(
 os.makedirs("charts", exist_ok=True)
 
 
+def bold_labels(labels: Series[Any]) -> list[str]:
+    return [
+        r"$\bf{" + str(label) + "}$"
+        if ("debug" == str(label).lower() or "release" == str(label).lower())
+        else str(label)
+        for label in labels
+    ]
+
+
 def plot_barh(
     df: pd.DataFrame,
     value_col: str,
@@ -48,7 +61,8 @@ def plot_barh(
     data_sorted = data.sort_values(value_col, ascending=False)
 
     plt.figure(figsize=(12, 10), dpi=300)
-    bars = plt.barh(data_sorted[config_col], data_sorted[value_col] / unit_div, color=color)
+    labels = bold_labels(data_sorted[config_col])
+    bars = plt.barh(labels, data_sorted[value_col] / unit_div, color=color)
 
     ax = plt.gca()
     max_val = (data_sorted[value_col] / unit_div).max()

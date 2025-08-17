@@ -4,14 +4,20 @@
     "path_to_main_rs_file": "krokiet/src/main.rs",
     "path_to_clean_with_git": "krokiet"
   },
-  "general_config": {
-    "mold": "Off",
-    "cranelift": "Both"
-  },
   "build_config": [
+    {
+      "name": "release + overflow checks",
+      "rust_base_config": "Release",
+      "overflow_checks": "On"
+    },
     {
       "name": "debug",
       "rust_base_config": "Debug"
+    },
+    {
+      "name": "debug + cranelift",
+      "rust_base_config": "Debug",
+      "cranelift": true
     },
     {
       "name": "debug + debug disabled",
@@ -26,6 +32,11 @@
     {
       "name": "release",
       "rust_base_config": "Release"
+    },
+    {
+      "name": "release + cranelift",
+      "rust_base_config": "Release",
+      "cranelift": true
     },
     {
       "name": "release + debug info",

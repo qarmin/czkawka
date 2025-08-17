@@ -27,11 +27,18 @@ overflow-checks = true
 # LTO setting is disabled by default, because release mode is usually needed to develop app and compilation with LTO would take a lot of time
 # But it is used to optimize release builds(and probably also in CI, where time is not so important as in local development)
 # Fat lto, generates a lot smaller executable than thin lto
+# Also using codegen-units = 1, to generate smaller binaries
 #lto = "fat"
+#codegen-units = 1
 
 # Optimize all dependencies except application/workspaces, even in debug builds to get reasonable performance e.g. when opening images
 [profile.dev.package."*"] # OPT PACKAGES
 opt-level = 3 # OPT PACKAGES
+
+[profile.fast_release]
+inherits = "release"
+incremental = true
+overflow-checks = true
 
 [profile.test]
 debug-assertions = true # Forces to crash when there is duplicated item in cli

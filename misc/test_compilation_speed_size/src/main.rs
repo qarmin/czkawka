@@ -58,23 +58,18 @@ fn main() {
     Results::write_header_to_file(&mut results_file).unwrap();
 
     config.build_config_converted = config.build_config.clone().into_iter().map(|e| e.into()).collect();
-    let g = config.general_config.clone();
     let mut all_configs = vec![];
-    for mold in g.mold.to_options() {
-        for cranelift in g.cranelift.to_options() {
-            for build_config in &config.build_config_converted {
-                all_configs.push((mold, cranelift, build_config.clone()));
-            }
-        }
+    for build_config in &config.build_config_converted {
+        all_configs.push(build_config.clone());
     }
 
     println!("Found {} configurations to test", all_configs.len());
 
     // let mut results = vec![];
-    for (mold, cranelift, build_config) in all_configs {
+    for build_config in all_configs {
         let new_cargo_toml_content = format!("{cargo_toml_content}\n\n[profile.{PROFILE_NAME}]\n{}\n", build_config.to_str());
         fs::write(&cargo_toml_path, new_cargo_toml_content).expect("Could not write Cargo.toml file");
-        let result = check_compilation_speed_and_size(*mold, *cranelift, &build_config, &config.project);
+        let result = check_compilation_speed_and_size(&build_config, &config.project);
         // results.push(result.clone());
         result.save_to_file(&mut results_file).expect("Could not save results to file");
     }
@@ -96,23 +91,24 @@ fn clean_cargo() {
     }
 }
 
-fn run_cargo_build(mold: bool, cranelift: bool, build_config: &BuildConfig, project: &Project) {
+fn run_cargo_build(build_config: &BuildConfig, project: &Project) {
     let build_check = if build_config.build_or_check == BuildOrCheck::Build { "build" } else { "check" };
     let mut command = std::process::Command::new("cargo");
     command.arg("+nightly");
-    if cranelift {
+    if build_config.cranelift {
         command.env("CARGO_PROFILE_DEV_CODEGEN_BACKEND", "cranelift");
         command.env("RUSTUP_TOOLCHAIN", "nightly");
         command.arg("-Zcodegen-backend");
     }
     let mut rust_flags = None;
-    if mold {
-        let to_add = "-C link-arg=-fuse-ld=mold";
-        rust_flags = match rust_flags {
-            None => Some(to_add.to_string()),
-            Some(flags) => Some(format!("{flags} {to_add}")),
-        };
-    }
+    // TODO - not works currently
+    // if mold {
+    //     let to_add = "-C link-arg=-fuse-ld=mold";
+    //     rust_flags = match rust_flags {
+    //         None => Some(to_add.to_string()),
+    //         Some(flags) => Some(format!("{flags} {to_add}")),
+    //     };
+    // }
     if build_config.build_std {
         if build_config.panic == Panic::Abort {
             command.args(["-Z", "build-std=std,panic_abort"]);
@@ -176,16 +172,16 @@ fn add_empty_line_to_file(project: &Project) {
     }
 }
 
-fn check_compilation_speed_and_size(mold: bool, cranelift: bool, build_config: &BuildConfig, project: &Project) -> Results {
+fn check_compilation_speed_and_size(build_config: &BuildConfig, project: &Project) -> Results {
     clean_cargo();
     clean_changes_to_project_files(&project.path_to_clean_with_git);
 
     let start_time = std::time::Instant::now();
 
     println!("Running cargo build for project: {}", project.name);
-    println!("Parameters: mold: {}, cranelift: {}, build_config: {}", mold, cranelift, build_config.to_string_short());
+    println!("Build_config: {}", build_config.to_string_short());
 
-    run_cargo_build(mold, cranelift, build_config, project);
+    run_cargo_build(build_config, project);
 
     let compilation_time = start_time.elapsed();
 
@@ -195,7 +191,7 @@ fn check_compilation_speed_and_size(mold: bool, cranelift: bool, build_config: &
     add_empty_line_to_file(project);
 
     let rebuild_time_start = std::time::Instant::now();
-    run_cargo_build(mold, cranelift, build_config, project);
+    run_cargo_build(build_config, project);
     let rebuild_time = rebuild_time_start.elapsed();
 
     clean_cargo();
@@ -207,8 +203,6 @@ fn check_compilation_speed_and_size(mold: bool, cranelift: bool, build_config: &
         compilation_time,
         build_config: build_config.clone(),
         project: project.clone(),
-        cranelift,
-        mold,
         rebuild_time,
     }
 }

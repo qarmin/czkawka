@@ -7,7 +7,6 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Config {
     pub project: Project,
-    pub general_config: GeneralConfig,
     pub build_config: Vec<BuildConfigRead>,
     #[serde(skip)]
     pub build_config_converted: Vec<BuildConfig>,
@@ -20,11 +19,6 @@ pub struct Project {
     pub path_to_clean_with_git: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct GeneralConfig {
-    pub mold: Mold,
-    pub cranelift: Cranelift,
-}
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct BuildConfigRead {
@@ -41,6 +35,7 @@ pub struct BuildConfigRead {
     pub incremental: Option<Incremental>,
     pub build_std: Option<bool>,
     pub native: Option<bool>,
+    pub cranelift: Option<bool>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -58,6 +53,7 @@ pub struct BuildConfig {
     pub incremental: Incremental,
     pub build_std: bool,
     pub native: bool,
+    pub cranelift: bool,
 }
 
 impl From<BuildConfigRead> for BuildConfig {
@@ -77,6 +73,7 @@ impl From<BuildConfigRead> for BuildConfig {
                 incremental: Incremental::Off,
                 build_std: false,
                 native: false,
+                cranelift: false
             },
             RustBaseConfig::Debug => BuildConfig {
                 name: "debug".to_string(),
@@ -92,6 +89,7 @@ impl From<BuildConfigRead> for BuildConfig {
                 incremental: Incremental::On,
                 build_std: false,
                 native: false,
+                cranelift: false
             }
         };
 
@@ -109,6 +107,7 @@ impl From<BuildConfigRead> for BuildConfig {
             incremental: config.incremental.unwrap_or(base_config.incremental),
             build_std: config.build_std.unwrap_or(false),
             native: config.native.unwrap_or(false),
+            cranelift: config.cranelift.unwrap_or(false),
         }
     }
 }
@@ -130,7 +129,7 @@ impl BuildConfig {
     }
     pub fn to_string_short(&self) -> String {
         format!(
-            "LTO: {}, Debug: {}, Opt: {}, Build/Check: {}, Codegen Units: {}, Panic: {}, Split Debug: {}, Overflow Checks: {}, Incremental: {}, Build Std: {}",
+            "LTO: {}, Debug: {}, Opt: {}, Build/Check: {}, Codegen Units: {}, Panic: {}, Split Debug: {}, Overflow Checks: {}, Incremental: {}, Build Std: {}, Cranelift: {}",
             self.lto.to_str(),
             self.debug.to_str(),
             self.opt_level.to_str(),
@@ -141,6 +140,7 @@ impl BuildConfig {
             self.overflow_checks.to_str(),
             self.incremental.to_str(),
             self.build_std,
+            self.cranelift
         )
     }
 }
@@ -156,38 +156,6 @@ impl RustBaseConfig {
         match self {
             RustBaseConfig::Release => "inherits=\"release\"",
             RustBaseConfig::Debug => "inherits=\"dev\"",
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq,  Serialize, Deserialize)]
-pub enum Mold {
-    Off,
-    On,
-    Both,
-}
-impl Mold {
-    pub fn to_options(self) -> &'static [bool] {
-        match self {
-            Self::Off => &[false],
-            Self::On => &[true],
-            Self::Both => &[true, false],
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq,  Serialize, Deserialize)]
-pub enum Cranelift {
-    Off,
-    On,
-    Both,
-}
-impl Cranelift {
-    pub fn to_options(self) -> &'static [bool] {
-        match self {
-            Self::Off => &[false],
-            Self::On => &[true],
-            Self::Both => &[true, false],
         }
     }
 }
@@ -349,8 +317,6 @@ pub struct Results {
     pub compilation_time: Duration,
     pub build_config: BuildConfig,
     pub project: Project,
-    pub cranelift: bool,
-    pub mold: bool,
     pub rebuild_time: Duration,
 }
 
@@ -363,8 +329,6 @@ impl Results {
         Ok(())
     }
     pub fn save_to_file(&self, file_writer: &mut std::fs::File) -> std::io::Result<()> {
-        let cranelift = if self.cranelift { "+ cranelift" } else { "+ llvm" };
-
         let file_size_pretty = if self.output_file_size == 0 {
             "-".to_string()
         } else {
@@ -376,14 +340,10 @@ impl Results {
             self.output_file_size.to_string()
         };
 
-        let linker = if self.mold { "+ mold" } else { "+ ld" };
-
         writeln!(
             file_writer,
-            "{} {} {} __ {}|{}|{}|{}|{}|{}|{}|{}|{}",
+            "{} __ {}|{}|{}|{}|{}|{}|{}|{}|{}",
             self.build_config.name,
-            cranelift,
-            linker,
             self.project.name,
             file_size_pretty,
             file_size_number,
@@ -398,7 +358,7 @@ impl Results {
     }
 }
 
-fn duration_to_pretty_time(duration: std::time::Duration) -> String {
+fn duration_to_pretty_time(duration: Duration) -> String {
     let seconds = duration.as_secs();
     let minutes = seconds / 60;
     let hours = minutes / 60;

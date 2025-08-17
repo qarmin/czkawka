@@ -18,7 +18,7 @@ music_checking_by_tags = Etiquetas
 music_checking_by_content = Conteúdo
 same_music_seconds_label = Duração mínima de segundos do fragmento
 same_music_similarity_label = Diferença máxima
-music_compare_only_in_title_group = Comparar somente no título
+music_compare_only_in_title_group = Comparar dentro de grupos de títulos similares
 music_compare_only_in_title_group_tooltip =
     Quando ativado, os ficheiros são agrupados por título e então comparados entre si.
     
@@ -455,17 +455,11 @@ saving_loading_invalid_int = Para a chave "{ $key }" foi achado um resultado inv
 saving_loading_invalid_bool = Para a chave "{ $key }" foi achado um resultado inválido — "{ $result }" que não é um bool.
 saving_loading_decode_problem_bool = Falha ao decodificar o bool da chave "{ $key }" achado "{ $result }", mas valores permitidos são 0, 1, verdadeiro ou falso.
 saving_loading_saving_same_keys = Tentando guardar a configuração com chave duplicada "{ $key }".
-saving_loading_failed_to_get_home_directory = Falha ao obter o diretório inicial para abrir/guardar o arquivo de configuração.
-saving_loading_folder_config_instead_file = Não se pode criar ou abrir o arquivo de configuração no caminho "{ $path }", pois já existe um diretório.
-saving_loading_failed_to_create_configuration_folder = Falha ao criar o diretório de configuração "{ $path }", razão "{ $reason }".
 saving_loading_failed_to_create_config_file = Falha ao criar o arquivo de configuração "{ $path }", razão "{ $reason }".
 saving_loading_failed_to_read_config_file = Não se pode carregar a configuração de "{ $path }", pois ela não existe ou não é um arquivo.
 saving_loading_failed_to_read_data_from_file = Não se pode ler dados do arquivo "{ $path }", razão "{ $reason }".
 saving_loading_orphan_data = Dados órfãos achados "{ $data }" na linha "{ $line }".
 saving_loading_not_valid = A configuração "{ $data }" não existe na versão atual do aplicativo.
-# Invalid symlinks
-invalid_symlink_infinite_recursion = Recursão infinita
-invalid_symlink_non_existent_destination = Arquivo de destino não existe
 # Other
 selected_all_reference_folders = Não é possível iniciar a busca quando todo diretório está definido como pasta de referência
 searching_for_data = Buscando dados, pode demorar um pouco, aguarde...
@@ -496,7 +490,7 @@ move_file_failed = Falha ao mover o arquivo { $name }, razão { $reason }
 move_files_title_dialog = Escolha a pasta para a qual você quer mover arquivos duplicados
 move_files_choose_more_than_1_path = Só um caminho pode ser selecionado para poder copiar seus arquivos duplicados, selecionado { $path_number }.
 move_stats = Devidamente movidos { $num_files }/{ $all_files } itens
-save_results_to_file = Resultados salvos tanto para arquivos txt quanto json na pasta { $name }.
+save_results_to_file = Resultados salvos tanto nos arquivos txt quanto json na pasta "{ $name }".
 search_not_choosing_any_music = ERRO: Você deve selecionar ao menos uma caixa de seleção com tipos de busca de música.
 search_not_choosing_any_broken_files = ERRO: Você deve selecionar ao menos uma caixa de seleção com tipo de arquivos quebrados.
 include_folders_dialog_title = Pastas para incluir

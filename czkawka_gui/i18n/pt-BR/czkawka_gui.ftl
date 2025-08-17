@@ -18,7 +18,7 @@ music_checking_by_tags = Informações do arquivo
 music_checking_by_content = Conteúdo
 same_music_seconds_label = Duração mínima em segundos do fragmento
 same_music_similarity_label = Diferença máxima
-music_compare_only_in_title_group = Comparar somente o título
+music_compare_only_in_title_group = Comparar dentro de grupos de títulos similares
 music_compare_only_in_title_group_tooltip =
     Quando esta opção está ativada, os arquivos são agrupados por título e são comparados entre si.
     
@@ -453,17 +453,11 @@ saving_loading_invalid_int = Para o conteúdo "{ $key }" foi encontrado o result
 saving_loading_invalid_bool = Para o conteúdo "{ $key }" foi encontrado o resultado "{ $result }" que não é do tipo ‘booleano’, ou seja, ‘true’ = verdadeiro = 1 (um) ou ‘false’ = falso = 0 (zero).
 saving_loading_decode_problem_bool = Ocorreu uma falha ao tentar decodificar o dado ‘booleano’ o conteúdo "{ $key }", foi encontrado o resultado "{ $result }", mas os valores permitidos podem ser 0, 1, ‘true’ (verdadeiro) ou ‘false’ (falso).
 saving_loading_saving_same_keys = Tentando salvar as configurações com o conteúdo duplicado "{ $key }".
-saving_loading_failed_to_get_home_directory = Ocorreu uma falha ao acessar o diretório pessoal para abrir e salvar o arquivo de configurações.
-saving_loading_folder_config_instead_file = Não foi possível criar ou abrir o arquivo de configurações no caminho "{ $path }", porque já existe uma pasta neste caminho.
-saving_loading_failed_to_create_configuration_folder = Ocorreu uma falha ao criar a pasta de configurações no caminho "{ $path }", por causa de "{ $reason }".
 saving_loading_failed_to_create_config_file = Ocorreu uma falha ao criar o arquivo de configurações no caminho "{ $path }", por causa de "{ $reason }".
 saving_loading_failed_to_read_config_file = Não foi possível carregar o arquivo de configurações do caminho "{ $path }", porque o arquivo não existe ou porque não é um arquivo de configurações.
 saving_loading_failed_to_read_data_from_file = Não foi possível ler os dados do arquivo do caminho "{ $path }", por causa de "{ $reason }".
 saving_loading_orphan_data = Foram encontrados dados órfãos "{ $data }" na linha "{ $line }".
 saving_loading_not_valid = A configuração "{ $data }" não existe na versão atual do programa.
-# Invalid symlinks
-invalid_symlink_infinite_recursion = Ocorreu um erro de execução na recursão infinita
-invalid_symlink_non_existent_destination = O arquivo de destino não existe
 # Other
 selected_all_reference_folders = Não foi possível iniciar a pesquisa se todas as pastas estiverem definidas como pastas de origem (ou pastas de referência)
 searching_for_data = Pesquisando os dados. Esta ação pode demorar. Por favor, aguarde...
@@ -497,7 +491,7 @@ move_file_failed = Ocorreu uma falha ao mover o arquivo { $name }, por causa de 
 move_files_title_dialog = Escolha a pasta para a qual você quer mover os arquivos duplicados
 move_files_choose_more_than_1_path = Apenas um caminho pode ser selecionado para copiar os arquivos duplicados. A pasta { $path_number } foi selecionada.
 move_stats = Os itens { $num_files } de { $all_files } foram movidos corretamente.
-save_results_to_file = Os resultados foram salvos no arquivo com o formato ‘.txt’ e no arquivo com o formato ‘.json’ na pasta { $name }.
+save_results_to_file = Resultados salvos tanto nos arquivos txt quanto json na pasta "{ $name }".
 search_not_choosing_any_music = Ocorreu um erro: Você deve selecionar pelo menos uma caixa de seleção com o tipo dos arquivos de música que serão pesquisadas.
 search_not_choosing_any_broken_files = Ocorreu um erro: Você deve selecionar pelo menos uma caixa de seleção com o tipo dos arquivos quebrados que serão pesquisados.
 include_folders_dialog_title = Pastas a serem pesquisadas

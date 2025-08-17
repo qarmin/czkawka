@@ -18,7 +18,7 @@ music_checking_by_tags = Etichete
 music_checking_by_content = Conținut
 same_music_seconds_label = Fragment minim a doua durată
 same_music_similarity_label = Diferența maximă
-music_compare_only_in_title_group = Compară numai în titlu
+music_compare_only_in_title_group = Compară în cadrul grupurilor de titluri similare
 music_compare_only_in_title_group_tooltip =
     Când este activat, fișierele sunt grupate după titlu și apoi comparate între ele.
     
@@ -458,17 +458,11 @@ saving_loading_invalid_int = Pentru cheia "{ $key }" a găsit un rezultat invali
 saving_loading_invalid_bool = Pentru cheia "{ $key }" a găsit rezultat nevalid - "{ $result }" care nu este un bool.
 saving_loading_decode_problem_bool = Nu s-a reușit decodificarea boolului de la tasta "{ $key }" găsit "{ $result }" dar valorile permise sunt 0, 1, adevărat sau false.
 saving_loading_saving_same_keys = Se încearcă salvarea setării cu cheie duplicată "{ $key }".
-saving_loading_failed_to_get_home_directory = Nu s-a putut obține directorul acasă pentru a deschide/salva fișierul de configurare.
-saving_loading_folder_config_instead_file = Nu se poate crea sau deschide fișierul de configurare în calea "{ $path }" deoarece există deja un dosar.
-saving_loading_failed_to_create_configuration_folder = Nu s-a reuşit configurarea pentru a crea folderul de configurare "{ $path }", motivul "{ $reason }".
 saving_loading_failed_to_create_config_file = Nu s-a putut crea fișierul de configurare "{ $path }", motivul "{ $reason }".
 saving_loading_failed_to_read_config_file = Nu se poate încărca configurația din "{ $path }" deoarece nu există sau nu este un fișier.
 saving_loading_failed_to_read_data_from_file = Datele din fişierul "{ $path }", motivul "{ $reason }".
 saving_loading_orphan_data = Am găsit date orfane "{ $data }" în rândul "{ $line }".
 saving_loading_not_valid = Setarea "{ $data }" nu există în versiunea curentă a aplicației.
-# Invalid symlinks
-invalid_symlink_infinite_recursion = Recepţie infinită
-invalid_symlink_non_existent_destination = Fișier destinație inexistent
 # Other
 selected_all_reference_folders = Nu se poate începe căutarea, atunci când toate directoarele sunt setate ca dosare de referință
 searching_for_data = Se caută date, poate dura ceva timp, vă rugăm așteptați...
@@ -499,7 +493,7 @@ move_file_failed = Nu s-a reușit mutarea fișierului { $name }, motivul { $reas
 move_files_title_dialog = Alegeți directorul în care doriți să mutați fișierele duplicate
 move_files_choose_more_than_1_path = Poate fi selectată doar o singură cale pentru a putea copia fişierele duplicate, selectate { $path_number }.
 move_stats = Elemente corect mutate { $num_files }/{ $all_files }
-save_results_to_file = Rezultate salvate atât pentru fişierele txt cât şi pentru fişierele json în directorul { $name }.
+save_results_to_file = Rezultate salvate atât pentru fişierele txt cât şi pentru fişierele json în folderul "{ $name }".
 search_not_choosing_any_music = EROARE: Trebuie să selectaţi cel puţin o casetă cu tipuri de căutare de muzică.
 search_not_choosing_any_broken_files = EROARE: Trebuie să selectaţi cel puţin o casetă de selectare cu tipul de fişiere bifate.
 include_folders_dialog_title = Dosare de inclus

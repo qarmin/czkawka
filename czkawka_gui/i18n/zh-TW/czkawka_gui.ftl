@@ -18,7 +18,7 @@ music_checking_by_tags = 標籤
 music_checking_by_content = 內容
 same_music_seconds_label = 最小片段秒數
 same_music_similarity_label = 最大差異
-music_compare_only_in_title_group = Compare only in title
+music_compare_only_in_title_group = Compare within groups of similar titles
 music_compare_only_in_title_group_tooltip =
     When enabled, files are grouped by title and then compared to each other.
     
@@ -458,17 +458,11 @@ saving_loading_invalid_int = 對於金鑰"{ $key }" 發現無效的結果 - "{ $
 saving_loading_invalid_bool = 對於金鑰"{ $key }" 發現無效的結果 - "{ $result } 不是布林值。
 saving_loading_decode_problem_bool = 無法從金鑰 "{ $key }" 解碼布林值，找到的是 "{ $result }" ，允許的值為 0, 1, true 或 false。
 saving_loading_saving_same_keys = 嘗試用重複的金鑰儲存設定 "{ $key }".
-saving_loading_failed_to_get_home_directory = 無法取得開啟/儲存設定檔案的主目錄。
-saving_loading_folder_config_instead_file = 無法在路徑 "{ $path } 中建立或開啟設定檔案，因為已經有一個資料夾。
-saving_loading_failed_to_create_configuration_folder = 無法建立設定資料夾 "{ $path }", 原因"{ $reason }".
 saving_loading_failed_to_create_config_file = 無法建立設定檔案 "{ $path }", 原因"{ $reason }".
 saving_loading_failed_to_read_config_file = 無法從 "{ $path }" 載入設定，因為它不存在或不是檔案。
 saving_loading_failed_to_read_data_from_file = 無法從檔案讀取資料"{ $path }", 原因"{ $reason }".
 saving_loading_orphan_data = 在 "{ $line }" 行中發現了孤兒資料 "{ $data }"。
 saving_loading_not_valid = 設定 "{ $data }" 在目前應用程式的版本中不存在。
-# Invalid symlinks
-invalid_symlink_infinite_recursion = 無限遞迴
-invalid_symlink_non_existent_destination = 目標檔案不存在
 # Other
 selected_all_reference_folders = 當所有目錄被設定為參考資料夾時，無法開始搜尋
 searching_for_data = 正在搜尋資料，可能需要一段時間，請稍候...
@@ -499,7 +493,7 @@ move_file_failed = 移動檔案 { $name } 失敗，原因 { $reason }
 move_files_title_dialog = 選擇要移動重複檔案的資料夾
 move_files_choose_more_than_1_path = 只能選擇一個路徑來複製重複的檔案，選擇 { $path_number }。
 move_stats = 正確移動 { $num_files }/{ $all_files } 專案
-save_results_to_file = Saved results both to txt and json files into { $name } folder.
+save_results_to_file = Saved results both to txt and json files into "{ $name }" folder.
 search_not_choosing_any_music = 錯誤：您必須選擇至少一個帶有音樂搜尋類型的核取方塊。
 search_not_choosing_any_broken_files = 錯誤：您必須選擇至少一個帶有選取檔案類型的核取方塊。
 include_folders_dialog_title = 要包含的資料夾
