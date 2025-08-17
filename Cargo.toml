@@ -35,6 +35,11 @@ overflow-checks = true
 [profile.dev.package."*"] # OPT PACKAGES
 opt-level = 3 # OPT PACKAGES
 
+[profile.fast_release]
+inherits = "release"
+incremental = true
+overflow-checks = true
+
 [profile.test]
 debug-assertions = true # Forces to crash when there is duplicated item in cli
 overflow-checks = true

@@ -130,6 +130,7 @@ pub(crate) const WORKAROUNDS: &[(&str, &str)] = &[
     ("zip", "dat"),       // Multiple - python, brave
     ("zip", "doc"),       // Word
     ("zip", "docx"),      // Word
+    ("zip", "epub"),      // Ebook format
     ("zip", "jar"),       // Java
     ("zip", "kra"),       // Krita
     ("zip", "kgm"),       // Krita
