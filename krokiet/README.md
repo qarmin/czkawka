@@ -2,7 +2,7 @@
 
 Krokiet is new Czkawka frontend written in Slint.
 
-![Krokiet](https://github.com/user-attachments/assets/531cc479-8900-4db6-aa60-598284e7f815)
+![Krokiet](https://github.com/user-attachments/assets/720e98c3-598a-41aa-a04b-0c0c1d8a28e6)
 
 Different toolkit means different look, limitations and features, so you should not expect same features like in Czkawka
 Gtk 4 frontend(but of course I want implement most of the features from other project).

@@ -31,7 +31,7 @@ files from your computer.
 
 ![Czkawka](https://github.com/user-attachments/assets/b0409515-1bec-4e13-8fac-7bdfa15f5848)
 
-![Krokiet](https://github.com/user-attachments/assets/906cbbc3-f011-4306-81da-9e4e53b49a9f)
+![Krokiet](https://github.com/user-attachments/assets/720e98c3-598a-41aa-a04b-0c0c1d8a28e6)
 
 Changelog about each version can be found in [CHANGELOG.md](Changelog.md).
 
