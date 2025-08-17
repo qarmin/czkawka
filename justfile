@@ -126,8 +126,8 @@ bloat:
 
 check_compilations:
     git checkout Cargo.toml
-    # cargo install --path misc/test_compilation_speed_size
-    test_compilation_speed_size misc/test_compilation_speed_size/test.json
+    #cargo install --path misc/test_compilation_speed_size
+    test_compilation_speed_size misc/test_compilation_speed_size/krokiet.json
     python3 misc/test_compilation_speed_size/generate_md_and_plots.py
 
 tags:

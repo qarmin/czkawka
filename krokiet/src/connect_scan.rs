@@ -665,9 +665,7 @@ fn scan_similar_music(
                 tool.get_duplicated_music_entries().iter().cloned().map(|items| (None, items)).collect()
             };
 
-            vector.sort_by_cached_key(|(_, a)| {
-                u64::MAX - a.iter().map(|e|e.size).sum::<u64>()
-            });
+            vector.sort_by_cached_key(|(_, a)| u64::MAX - a.iter().map(|e| e.size).sum::<u64>());
             for (_first_entry, vec_fe) in &mut vector {
                 vec_fe.sort_unstable_by_key(|a| u64::MAX - a.size);
             }

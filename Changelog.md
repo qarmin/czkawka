@@ -1,7 +1,4 @@
 ## Version ?.?.? - ?
-### Release blockers:
-- crash when sorting by size, elements in empty folders
-
 ### Breaking changes
 #### Users
 - Some languages now have unified names in Crowdin (e.g. `es` → `es-ES`). The GUI may not find them and will fall back to the default language.
@@ -67,7 +64,7 @@
 - `musl` builds of `czkawka_cli` are now provided instead of `eyra` builds (slightly easier to maintain). GUI builds are not included due to limitations of `musl` and `eyra` :(
 - Prebuilt Windows console binaries are no longer provided — logs are now saved to a file, which is easier to read than terminal output
 - Skia opengl and vulkan backends are provided for Krokiet on Linux(no binaries on Windows, because don't know how to replace `sed`)
-- Prebuilt binaries are now build with `lto fat` instead `lto thin` to greatly reduce binary size(~25% smaller binaries)
+- Prebuilt binaries are now build with `lto fat` instead `lto thin` and `codegen-units=1` to greatly reduce binary size(~25% smaller binaries)
 
 ## Version 9.0.0 - 16.03.2025r
 
