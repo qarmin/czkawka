@@ -33,7 +33,7 @@ jobs:
         if: ${{ github.ref == 'refs/heads/master' }}
         run: |
           sed -i 's/#lto = /lto = /g' Cargo.toml
-          sed -i 's/#codegen-units /codegen-units = 1/g' Cargo.toml
+          sed -i 's/#codegen-units /codegen-units /g' Cargo.toml
           
           echo "VERS=release" >> $GITHUB_ENV
           
@@ -147,7 +147,7 @@ jobs:
         if: ${{ github.ref == 'refs/heads/master' }}
         run: |
           sed -i 's/#lto = /lto = /g' Cargo.toml
-          sed -i 's/#codegen-units /codegen-units = 1/g' Cargo.toml
+          sed -i 's/#codegen-units /codegen-units /g' Cargo.toml
           cargo build --release --bin czkawka_cli --target x86_64-unknown-linux-musl
           
           mv target/x86_64-unknown-linux-musl/release/czkawka_cli linux_czkawka_cli_musl

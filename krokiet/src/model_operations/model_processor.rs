@@ -6,7 +6,7 @@ use crossbeam_channel::Sender;
 use czkawka_core::common::progress_data::{CurrentStage, ProgressData};
 use czkawka_core::helpers::delayed_sender::DelayedSender;
 use czkawka_core::helpers::messages::Messages;
-use log::error;
+use log::{debug, error};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use slint::{ComponentHandle, ModelRc, VecModel, Weak};
 
@@ -52,6 +52,13 @@ impl MessageType {
             Self::Delete => ProgressData::get_empty_state(CurrentStage::DeletingFiles),
             Self::Rename => ProgressData::get_empty_state(CurrentStage::RenamingFiles),
             Self::Move => ProgressData::get_empty_state(CurrentStage::MovingFiles),
+        }
+    }
+    fn msg_type(&self) -> &'static str {
+        match self {
+            Self::Delete => "delete",
+            Self::Rename => "rename",
+            Self::Move => "move",
         }
     }
 }
@@ -148,6 +155,7 @@ impl ModelProcessor {
             .expect("Failed to update app info text");
 
         let items_queued_to_delete = simpler_model.iter().filter(|(_idx, e)| e.checked).count();
+        debug!("Processing {} items for {}", items_queued_to_delete, message_type.msg_type());
         if items_queued_to_delete == 0 {
             weak_app
                 .upgrade_in_event_loop(move |app| {
@@ -170,8 +178,18 @@ impl ModelProcessor {
             .unwrap_or_default();
         let _ = progress_sender.send(base_progress).map_err(|e| error!("Failed to send progress data: {e}"));
 
+        let start_time = std::time::Instant::now();
         let results = self.process_items(simpler_model, items_queued_to_delete, progress_sender.clone(), &stop_flag, dlt_fnc, message_type, size_idx);
+        let processing_time = start_time.elapsed();
+        let removing_items_from_model = std::time::Instant::now();
         let (new_simple_model, errors, items_deleted) = self.remove_deleted_items_from_model(results);
+        debug!(
+            "Items processed in {processing_time:?}, removing items from model took {:?}, from all {} items, removed from list {}, failed to process {}",
+            removing_items_from_model.elapsed(),
+            items_queued_to_delete,
+            items_deleted,
+            errors.len()
+        );
         let errors_len = errors.len();
 
         // Sending progress data at the end of deletion, to indicate that deletion is finished

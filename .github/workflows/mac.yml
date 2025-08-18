@@ -40,7 +40,7 @@ jobs:
         run: |
           set -e
           sed -i '' 's/#lto = "thin"/lto = "thin"/g' Cargo.toml
-          sed -i '' 's/#codegen-units = 1/codegen-units = 1/g' Cargo.toml
+          sed -i '' 's/#codegen-units /codegen-units /g' Cargo.toml
           
           echo "VERS=release" >> $GITHUB_ENV
           

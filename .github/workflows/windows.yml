@@ -27,7 +27,7 @@ jobs:
         if: ${{ github.ref == 'refs/heads/master' }}
         run: |
           sed -i 's/#lto = /lto = /g' Cargo.toml
-          sed -i 's/#codegen-units /codegen-units = 1/g' Cargo.toml
+          sed -i 's/#codegen-units /codegen-units /g' Cargo.toml
           cargo build --release --target x86_64-pc-windows-gnu --bin krokiet
           mv target/x86_64-pc-windows-gnu/release/krokiet.exe windows_krokiet_on_linux.exe
 
@@ -77,7 +77,7 @@ jobs:
   #        if: ${{ github.ref == 'refs/heads/master' }}
   #        run: |
   #          sed -i 's/#lto = /lto = /g' Cargo.toml
-  #          sed -i 's/#codegen-units /codegen-units = 1/g' Cargo.toml
+  #          sed -i 's/#codegen-units /codegen-units /g' Cargo.toml
   #          cargo build --release --bin krokiet --no-default-features --features "winit_skia_opengl,winit_software"
   #          mv target/release/krokiet.exe windows_krokiet_on_windows_skia_opengl.exe
   #          cargo build --release --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software"
