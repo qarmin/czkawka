@@ -1,6 +1,6 @@
 [package]
 name = "czkawka_gui"
-version = "9.0.0"
+version = "10.0.0"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2024"
 rust-version = "1.85.0"
@@ -34,7 +34,7 @@ log = "0.4.22"
 fun_time = { version = "0.3", features = ["log"] }
 rayon = "1.10"
 
-czkawka_core = { path = "../czkawka_core", version = "9.0.0", features = [] }
+czkawka_core = { path = "../czkawka_core", version = "10.0.0", features = [] }
 
 resvg = { version = "0.45.1", default-features = false }
 
