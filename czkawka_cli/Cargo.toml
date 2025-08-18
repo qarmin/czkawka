@@ -1,6 +1,6 @@
 [package]
 name = "czkawka_cli"
-version = "9.0.0"
+version = "10.0.0"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2024"
 rust-version = "1.85.0"
@@ -17,7 +17,7 @@ image_hasher = "3.0"
 vid_dup_finder_lib = "0.4.0"
 
 log = "0.4.22"
-czkawka_core = { path = "../czkawka_core", version = "9.0.0", features = [] }
+czkawka_core = { path = "../czkawka_core", version = "10.0.0", features = [] }
 indicatif = "0.18"
 crossbeam-channel = { version = "0.5", features = [] }
 ctrlc = { version = "3.4", features = ["termination"] }

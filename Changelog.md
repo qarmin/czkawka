@@ -1,4 +1,4 @@
-## Version ?.?.? - ?
+## Version 10.0.0 - 18.08.2025r
 ### Breaking changes
 #### Users
 - Some languages now have unified names in Crowdin (e.g. `es` → `es-ES`). The GUI may not find them and will fall back to the default language.
