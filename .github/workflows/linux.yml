@@ -30,7 +30,7 @@ jobs:
         run: rustup default 1.85.0
 
       - name: Build Release
-        #if: ${{ github.ref == 'refs/heads/master' }} # TODO - re-enable
+        if: ${{ github.ref == 'refs/heads/master' }}
         run: |
           sed -i 's/#lto = /lto = /g' Cargo.toml
           sed -i 's/#codegen-units /codegen-units /g' Cargo.toml

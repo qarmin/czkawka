@@ -3,6 +3,7 @@ use std::path::{Path, PathBuf};
 use fs_extra::dir::CopyOptions;
 use gtk4::prelude::*;
 use gtk4::{ResponseType, TreePath};
+use log::debug;
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
@@ -182,6 +183,9 @@ fn move_files_common(
 
     let mut moved_files: u32 = 0;
 
+    debug!("Starting to move {} files", selected_rows.len());
+    let start_time = std::time::Instant::now();
+
     // Save to variable paths of files, and remove it when not removing all occurrences.
     'next_result: for tree_path in selected_rows.iter().rev() {
         let iter = model.iter(tree_path).expect("Using invalid tree_path");
@@ -208,6 +212,8 @@ fn move_files_common(
         model.remove(&iter);
         moved_files += 1;
     }
+
+    debug!("Moved {moved_files} files in {:?}", start_time.elapsed());
 
     entry_info.set_text(flg!("move_stats", num_files = moved_files, all_files = selected_rows.len()).as_str());
 

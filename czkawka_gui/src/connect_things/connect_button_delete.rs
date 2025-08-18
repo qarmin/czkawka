@@ -4,6 +4,7 @@ use std::fs;
 use czkawka_core::common::check_if_folder_contains_only_empty_folders;
 use gtk4::prelude::*;
 use gtk4::{Align, CheckButton, Dialog, Orientation, ResponseType, TextView};
+use log::debug;
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
@@ -290,6 +291,10 @@ pub(crate) fn empty_folder_remover(
         return; // No selected rows
     }
 
+    debug!("Starting to delete {} folders", selected_rows.len());
+    let start_time = std::time::Instant::now();
+    let mut deleted_folders: u32 = 0;
+
     let mut messages: String = String::new();
 
     // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
@@ -308,6 +313,7 @@ pub(crate) fn empty_folder_remover(
                 match fs::remove_dir_all(&full_path) {
                     Ok(()) => {
                         model.remove(&iter);
+                        deleted_folders += 1;
                     }
                     Err(_inspected) => error_happened = true,
                 }
@@ -315,6 +321,7 @@ pub(crate) fn empty_folder_remover(
                 match trash::delete(&full_path) {
                     Ok(()) => {
                         model.remove(&iter);
+                        deleted_folders += 1;
                     }
                     Err(_inspected) => error_happened = true,
                 }
@@ -327,6 +334,8 @@ pub(crate) fn empty_folder_remover(
             messages += "\n";
         }
     }
+
+    debug!("Deleted {deleted_folders} folders in {:?}", start_time.elapsed());
 
     text_view_errors.buffer().set_text(messages.as_str());
 }
@@ -363,6 +372,10 @@ pub(crate) fn basic_remove(
         return; // No selected rows
     }
 
+    debug!("Starting to delete {} files", selected_rows.len());
+    let start_time = std::time::Instant::now();
+    let mut deleted_files: u32 = 0;
+
     // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
     for tree_path in selected_rows.iter().rev() {
         let iter = model.iter(tree_path).expect("Using invalid tree_path");
@@ -374,6 +387,7 @@ pub(crate) fn basic_remove(
             match fs::remove_file(get_full_name_from_path_name(&path, &name)) {
                 Ok(()) => {
                     model.remove(&iter);
+                    deleted_files += 1;
                 }
 
                 Err(e) => {
@@ -385,6 +399,7 @@ pub(crate) fn basic_remove(
             match trash::delete(get_full_name_from_path_name(&path, &name)) {
                 Ok(()) => {
                     model.remove(&iter);
+                    deleted_files += 1;
                 }
                 Err(e) => {
                     messages += flg!("delete_file_failed", name = get_full_name_from_path_name(&path, &name), reason = e.to_string()).as_str();
@@ -393,6 +408,8 @@ pub(crate) fn basic_remove(
             }
         }
     }
+
+    debug!("Deleted {deleted_files} files in {:?}", start_time.elapsed());
 
     text_view_errors.buffer().set_text(messages.as_str());
 }
