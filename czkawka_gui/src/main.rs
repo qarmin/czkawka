@@ -110,7 +110,7 @@ fn build_ui(application: &Application, arguments: &[OsString]) {
         &gui_data.settings,
         &gui_data.text_view_errors,
         &gui_data.scrolled_window_errors,
-        arguments,
+        &arguments.into_iter().map(|e|e.to_string_lossy().to_string()).collect(),
     );
     set_number_of_threads(gui_data.settings.scale_settings_number_of_threads.value().round() as usize);
 

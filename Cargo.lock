@@ -1525,6 +1525,8 @@ dependencies = [
  "regex",
  "resvg",
  "rust-embed",
+ "serde",
+ "serde_json",
  "trash",
  "winapi",
 ]
