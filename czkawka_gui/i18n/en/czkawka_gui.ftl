@@ -511,21 +511,13 @@ progress_all_stages = All Stages:{"  "}
 
 # Saving loading 
 saving_loading_saving_success = Saved configuration to file { $name }.
-saving_loading_saving_failure = Failed to save configuration data to file { $name }.
+saving_loading_saving_failure = Failed to save configuration data to file { $name }, reason { $reason }.
 saving_loading_reset_configuration = Current configuration was cleared.
 saving_loading_loading_success = Properly loaded app configuration.
-
-saving_loading_invalid_string = For key "{ $key }" found invalid result - "{ $result }" which is not a string.
-saving_loading_invalid_int = For key "{ $key }" found invalid result - "{ $result }" which is not a integer.
-saving_loading_invalid_bool = For key "{ $key }" found invalid result - "{ $result }" which is not a bool.
-saving_loading_decode_problem_bool = Failed to decode bool from key "{ $key }" found "{ $result }" but allowed values are 0, 1, true or false.
-saving_loading_saving_same_keys = Trying to save setting with duplicated key "{ $key }".
 
 saving_loading_failed_to_create_config_file = Failed to create config file "{ $path }", reason "{ $reason }".
 saving_loading_failed_to_read_config_file = Cannot load configuration from "{ $path }" because it does not exist or is not a file.
 saving_loading_failed_to_read_data_from_file = Cannot read data from file "{ $path }", reason "{ $reason }".
-saving_loading_orphan_data = Found orphan data "{ $data }" in line "{ $line }".
-saving_loading_not_valid = Setting "{ $data }" does not exist in current app version.
 
 
 # Other

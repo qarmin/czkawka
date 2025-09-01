@@ -14,9 +14,7 @@ use czkawka_core::tools::similar_images::SIMILAR_VALUES;
 use gtk4::prelude::*;
 use gtk4::{ComboBoxText, ScrolledWindow, TextView, TreeView};
 use log::error;
-
 use serde::{Deserialize, Serialize};
-use serde_json;
 
 use crate::flg;
 use crate::gui_structs::gui_main_notebook::GuiMainNotebook;
@@ -31,6 +29,7 @@ const SAVE_FILE_NAME_JSON: &str = "czkawka_gui_config.json";
 const DEFAULT_SAVE_ON_EXIT: bool = true;
 const DEFAULT_LOAD_AT_START: bool = true;
 const DEFAULT_CONFIRM_DELETION: bool = true;
+const DEFAULT_CONFIRM_LINK_DELETION: bool = true;
 const DEFAULT_CONFIRM_GROUP_DELETION: bool = true;
 const DEFAULT_SHOW_IMAGE_PREVIEW: bool = true;
 const DEFAULT_SHOW_DUPLICATE_IMAGE_PREVIEW: bool = true;
@@ -144,22 +143,23 @@ impl LoadSaveStruct {
     }
 
     pub(crate) fn save_to_file(&self, text_view_errors: &TextView) {
-        // Write only JSON config; legacy text format compatibility removed
-        let json_file = match self.open_save_file_path() {
-            Some(p) => p,
-            None => {
-                add_text_to_text_view(text_view_errors, &flg!("saving_loading_failed_to_create_config_file", path = SAVE_FILE_NAME_JSON, reason = "config directory not found"));
-                return;
-            }
+        let Some(json_file) = self.open_save_file_path() else {
+            add_text_to_text_view(
+                text_view_errors,
+                &flg!(
+                    "saving_loading_failed_to_create_config_file",
+                    // fluent expects `path` (not `name`)
+                    path = SAVE_FILE_NAME_JSON,
+                    reason = "config directory not found"
+                ),
+            );
+            return;
         };
 
         match serde_json::to_string_pretty(&self.settings) {
             Ok(json_string) => match std::fs::write(&json_file, json_string) {
-                Ok(_) => {
-                    add_text_to_text_view(
-                        text_view_errors,
-                        flg!("saving_loading_saving_success", name = json_file.to_string_lossy().to_string()).as_str(),
-                    );
+                Ok(()) => {
+                    add_text_to_text_view(text_view_errors, &flg!("saving_loading_saving_success", name = json_file.to_string_lossy().to_string()));
                 }
                 Err(e) => {
                     add_text_to_text_view(
@@ -177,11 +177,7 @@ impl LoadSaveStruct {
                 // Reuse existing message id that accepts path and reason.
                 add_text_to_text_view(
                     text_view_errors,
-                    &flg!(
-                        "saving_loading_failed_to_create_config_file",
-                        path = json_file.to_string_lossy().to_string(),
-                        reason = e.to_string()
-                    ),
+                    &flg!("saving_loading_saving_failure", name = json_file.to_string_lossy().to_string(), reason = e.to_string()),
                 );
             }
         }
@@ -228,6 +224,9 @@ pub struct SettingsJson {
 
     #[serde(default = "default_confirm_group_deletion")]
     pub confirm_deletion_all_files_in_group: bool,
+
+    #[serde(default = "default_confirm_link_deletion")]
+    pub confirm_deletion_links: bool,
 
     #[serde(default = "default_show_bottom_text_panel")]
     pub show_bottom_text_panel: bool,
@@ -370,6 +369,9 @@ fn default_confirm_deletion() -> bool {
 fn default_confirm_group_deletion() -> bool {
     DEFAULT_CONFIRM_GROUP_DELETION
 }
+fn default_confirm_link_deletion() -> bool {
+    DEFAULT_CONFIRM_LINK_DELETION
+}
 fn default_show_bottom_text_panel() -> bool {
     DEFAULT_BOTTOM_TEXT_VIEW
 }
@@ -458,12 +460,7 @@ fn default_use_rust_libraries_to_preview() -> bool {
     DEFAULT_USING_RUST_LIBRARIES_TO_SHOW_PREVIEW
 }
 
-fn set_configuration_to_gui_internal(
-    upper_notebook: &GuiUpperNotebook,
-    main_notebook: &GuiMainNotebook,
-    settings: &GuiSettings,
-    default_config: &SettingsJson,
-) {
+fn set_configuration_to_gui_internal(upper_notebook: &GuiUpperNotebook, main_notebook: &GuiMainNotebook, settings: &GuiSettings, default_config: &SettingsJson) {
     // Resetting included directories
     {
         let tree_view_included_directories = upper_notebook.tree_view_included_directories.clone();
@@ -497,7 +494,10 @@ fn set_configuration_to_gui_internal(
         settings.check_button_settings_save_at_exit.set_active(default_config.save_at_exit);
         settings.check_button_settings_load_at_start.set_active(default_config.load_at_start);
         settings.check_button_settings_confirm_deletion.set_active(default_config.confirm_deletion_files);
-        settings.check_button_settings_confirm_group_deletion.set_active(default_config.confirm_deletion_all_files_in_group);
+        settings
+            .check_button_settings_confirm_group_deletion
+            .set_active(default_config.confirm_deletion_all_files_in_group);
+        settings.check_button_settings_confirm_link.set_active(default_config.confirm_deletion_links);
         settings.check_button_settings_show_preview_similar_images.set_active(default_config.image_preview_image);
         settings.check_button_settings_show_preview_duplicates.set_active(default_config.duplicate_preview_image);
         settings.check_button_settings_show_text_view.set_active(default_config.show_bottom_text_panel);
@@ -518,16 +518,21 @@ fn set_configuration_to_gui_internal(
         settings.check_button_duplicates_use_prehash_cache.set_active(default_config.use_prehash_cache);
         settings.entry_settings_prehash_cache_file_minimal_size.set_text(&default_config.minimal_prehash_cache_size);
 
-        let lang_idx = LANGUAGES_ALL.iter().position(|l| l.short_text == &default_config.language).unwrap_or(0);
+        let lang_idx = LANGUAGES_ALL.iter().position(|l| l.short_text == default_config.language).unwrap_or(0);
         settings.combo_box_settings_language.set_active(Some(lang_idx as u32));
 
         settings.check_button_settings_one_filesystem.set_active(default_config.ignore_other_filesystems);
         settings.check_button_settings_use_rust_preview.set_active(default_config.use_rust_libraries_to_preview);
 
+        // Set combo boxes and check buttons as before
         main_notebook.combo_box_duplicate_hash_type.set_active(Some(default_config.combo_box_duplicate_hash_type));
-        main_notebook.combo_box_duplicate_check_method.set_active(Some(default_config.combo_box_duplicate_check_method));
+        main_notebook
+            .combo_box_duplicate_check_method
+            .set_active(Some(default_config.combo_box_duplicate_check_method));
         main_notebook.combo_box_image_hash_algorithm.set_active(Some(default_config.combo_box_image_hash_type));
-        main_notebook.combo_box_image_resize_algorithm.set_active(Some(default_config.combo_box_image_resize_algorithm));
+        main_notebook
+            .combo_box_image_resize_algorithm
+            .set_active(Some(default_config.combo_box_image_resize_algorithm));
         main_notebook.combo_box_image_hash_size.set_active(Some(default_config.combo_box_image_hash_size));
         main_notebook.combo_box_big_files_mode.set_active(Some(default_config.combo_box_big_files_mode));
 
@@ -536,20 +541,40 @@ fn set_configuration_to_gui_internal(
         main_notebook.check_button_broken_files_archive.set_active(default_config.broken_files_archive);
         main_notebook.check_button_broken_files_image.set_active(default_config.broken_files_image);
 
-        main_notebook.scale_similarity_similar_images.set_range(0_f64, SIMILAR_VALUES[0][5] as f64);
-        main_notebook.scale_similarity_similar_images.set_fill_level(SIMILAR_VALUES[0][5] as f64);
+        // Set similarity scale range/value based on chosen image hash size index
+        let index = default_config.combo_box_image_hash_size as usize;
+        let max_similar = SIMILAR_VALUES[index][5] as f64;
+        main_notebook.scale_similarity_similar_images.set_range(0_f64, max_similar);
+        main_notebook.scale_similarity_similar_images.set_fill_level(max_similar);
+        main_notebook.scale_similarity_similar_images.connect_change_value(scale_step_function);
+        main_notebook.scale_similarity_similar_images.set_value(default_config.similar_images_similarity);
 
-        main_notebook
-            .check_button_music_compare_only_in_title_group
-            .set_active(default_config.music_compare_by_title);
+        // Set similar videos scale value
+        main_notebook.scale_similarity_similar_videos.set_value(default_config.similar_videos_similarity);
 
-        main_notebook.check_button_music_approximate_comparison.set_active(default_config.music_approximate_comparison);
+        // Update duplicate-related widget visibility according to chosen method
+        {
+            let combo_chosen_index = main_notebook.combo_box_duplicate_check_method.active().unwrap_or(0) as usize;
+            if DUPLICATES_CHECK_METHOD_COMBO_BOX[combo_chosen_index].check_method == CheckingMethod::Hash {
+                main_notebook.combo_box_duplicate_hash_type.set_visible(true);
+                main_notebook.label_duplicate_hash_type.set_visible(true);
+            } else {
+                main_notebook.combo_box_duplicate_hash_type.set_visible(false);
+                main_notebook.label_duplicate_hash_type.set_visible(false);
+            }
 
-        main_notebook.entry_big_files_number.set_text(&default_config.number_of_biggest_files);
-        main_notebook.scale_similarity_similar_images.set_value(default_config.similar_images_similarity as f64);
-        main_notebook.check_button_image_ignore_same_size.set_active(default_config.similar_images_ignore_same_size);
-        main_notebook.check_button_video_ignore_same_size.set_active(default_config.similar_videos_ignore_same_size);
-        main_notebook.scale_similarity_similar_videos.set_value(default_config.similar_videos_similarity as f64);
+            if [CheckingMethod::Name, CheckingMethod::SizeName].contains(&DUPLICATES_CHECK_METHOD_COMBO_BOX[combo_chosen_index].check_method) {
+                main_notebook.check_button_duplicate_case_sensitive_name.set_visible(true);
+            } else {
+                main_notebook.check_button_duplicate_case_sensitive_name.set_visible(false);
+            }
+        }
+
+        // Threads slider
+        settings.scale_settings_number_of_threads.set_range(0_f64, get_all_available_threads() as f64);
+        settings.scale_settings_number_of_threads.set_fill_level(get_all_available_threads() as f64);
+        settings.scale_settings_number_of_threads.connect_change_value(scale_step_function);
+        settings.scale_settings_number_of_threads.set_value(default_config.thread_number as f64);
     }
 }
 
@@ -568,7 +593,7 @@ fn get_current_directory() -> String {
     }
 }
 
-fn load_arguments(arguments: Vec<String>) -> Option<Vec<String>>{
+fn load_arguments(arguments: &[String]) -> Option<Vec<String>> {
     // Handle here arguments that were added to app e.g. czkawka_gui /home --/home/roman
     if arguments.len() > 1 {
         let iter_i = arguments.iter().skip(1);
@@ -622,21 +647,65 @@ fn load_arguments(arguments: Vec<String>) -> Option<Vec<String>>{
     }
     None
 }
+// New helper: build SettingsJson from current GUI state
+fn gui_to_settings(upper_notebook: &GuiUpperNotebook, main_notebook: &GuiMainNotebook, settings: &GuiSettings) -> SettingsJson {
+    // Gather directories
+    let included_directories = get_string_from_list_store(&upper_notebook.tree_view_included_directories, ColumnsIncludedDirectory::Path as i32, None);
+    let excluded_directories = get_string_from_list_store(&upper_notebook.tree_view_excluded_directories, ColumnsExcludedDirectory::Path as i32, None);
 
-pub(crate) fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNotebook, main_notebook: &GuiMainNotebook, settings: &GuiSettings, text_view_errors: &TextView) {
-    // TODO Maybe add popup dialog to confirm resetting
-    let text_view_errors = text_view_errors.clone();
+    // Language short text
+    let language_text = match settings.combo_box_settings_language.active_text() {
+        Some(t) => get_language_from_combo_box_text(&t).short_text.to_string(),
+        None => String::new(),
+    };
 
-    let mut default_config = SettingsJson::default();
-
-    default_config.included_directories = vec![get_current_directory()];
-
-    reset_text_view(&text_view_errors);
-
-    set_configuration_to_gui_internal(upper_notebook, main_notebook, settings, &default_config);
-
-    if manual_clearing {
-        add_text_to_text_view(&text_view_errors, &flg!("saving_loading_reset_configuration"));
+    SettingsJson {
+        included_directories,
+        excluded_directories,
+        excluded_items: upper_notebook.entry_excluded_items.text().to_string(),
+        allowed_extensions: upper_notebook.entry_allowed_extensions.text().to_string(),
+        minimal_file_size: upper_notebook.entry_general_minimal_size.text().to_string(),
+        maximal_file_size: upper_notebook.entry_general_maximal_size.text().to_string(),
+        save_at_exit: settings.check_button_settings_save_at_exit.is_active(),
+        load_at_start: settings.check_button_settings_load_at_start.is_active(),
+        confirm_deletion_files: settings.check_button_settings_confirm_deletion.is_active(),
+        confirm_deletion_all_files_in_group: settings.check_button_settings_confirm_group_deletion.is_active(),
+        confirm_deletion_links: settings.check_button_settings_confirm_link.is_active(),
+        show_bottom_text_panel: settings.check_button_settings_show_text_view.is_active(),
+        hide_hard_links: settings.check_button_settings_hide_hard_links.is_active(),
+        use_cache: settings.check_button_settings_use_cache.is_active(),
+        use_json_cache_file: settings.check_button_settings_save_also_json.is_active(),
+        delete_to_trash: settings.check_button_settings_use_trash.is_active(),
+        minimal_cache_size: settings.entry_settings_cache_file_minimal_size.text().to_string(),
+        image_preview_image: settings.check_button_settings_show_preview_similar_images.is_active(),
+        duplicate_preview_image: settings.check_button_settings_show_preview_duplicates.is_active(),
+        duplicate_delete_outdated_cache_entries: settings.check_button_settings_duplicates_delete_outdated_cache.is_active(),
+        image_delete_outdated_cache_entries: settings.check_button_settings_similar_images_delete_outdated_cache.is_active(),
+        video_delete_outdated_cache_entries: settings.check_button_settings_similar_videos_delete_outdated_cache.is_active(),
+        use_prehash_cache: settings.check_button_duplicates_use_prehash_cache.is_active(),
+        minimal_prehash_cache_size: settings.entry_settings_prehash_cache_file_minimal_size.text().to_string(),
+        language: language_text,
+        combo_box_duplicate_hash_type: main_notebook.combo_box_duplicate_hash_type.active().unwrap_or(0),
+        combo_box_duplicate_check_method: main_notebook.combo_box_duplicate_check_method.active().unwrap_or(0),
+        combo_box_image_resize_algorithm: main_notebook.combo_box_image_resize_algorithm.active().unwrap_or(0),
+        combo_box_image_hash_type: main_notebook.combo_box_image_hash_algorithm.active().unwrap_or(0),
+        combo_box_image_hash_size: main_notebook.combo_box_image_hash_size.active().unwrap_or(1),
+        number_of_biggest_files: main_notebook.entry_big_files_number.text().to_string(),
+        similar_images_similarity: main_notebook.scale_similarity_similar_images.value(),
+        similar_images_ignore_same_size: main_notebook.check_button_image_ignore_same_size.is_active(),
+        similar_videos_similarity: main_notebook.scale_similarity_similar_videos.value(),
+        similar_videos_ignore_same_size: main_notebook.check_button_video_ignore_same_size.is_active(),
+        music_approximate_comparison: main_notebook.check_button_music_approximate_comparison.is_active(),
+        duplicate_name_case_sensitive: main_notebook.check_button_duplicate_case_sensitive_name.is_active(),
+        combo_box_big_files_mode: main_notebook.combo_box_big_files_mode.active().unwrap_or(0),
+        broken_files_pdf: main_notebook.check_button_broken_files_pdf.is_active(),
+        broken_files_audio: main_notebook.check_button_broken_files_audio.is_active(),
+        broken_files_image: main_notebook.check_button_broken_files_image.is_active(),
+        broken_files_archive: main_notebook.check_button_broken_files_archive.is_active(),
+        ignore_other_filesystems: settings.check_button_settings_one_filesystem.is_active(),
+        thread_number: settings.scale_settings_number_of_threads.value() as u32,
+        music_compare_by_title: main_notebook.check_button_music_compare_only_in_title_group.is_active(),
+        use_rust_libraries_to_preview: settings.check_button_settings_use_rust_preview.is_active(),
     }
 }
 
@@ -647,398 +716,111 @@ pub fn load_configuration(
     settings: &GuiSettings,
     text_view_errors: &TextView,
     scrolled_window_errors: &ScrolledWindow,
-    arguments: &Vec<String>,
+    arguments: &[String],
 ) {
-    // Preserve original public API: first argument is the manual_execution flag.
-    // Minimal loader: read JSON configuration and provide it back via a LoadSaveStruct.
     let mut loader = LoadSaveStruct::with_text_view(text_view_errors.clone());
     loader.open_and_read_content(text_view_errors, manual_execution);
 
-    let folders = load_arguments(arguments.clone()); // TODO - port from krokiet, because contains a lot of better logic
+    // Determine folders from CLI args (if any)
+    let folders = load_arguments(arguments);
     let set_start_folders = folders.is_some();
-    let saving_at_exit = !set_start_folders;
-    let folders = folders.unwrap_or_else(|| vec![get_current_directory()]);
+    let folders_from_args = folders.unwrap_or_default();
 
+    // Loaded settings (from file or defaults)
     let loaded_settings = loader.settings_mut();
+
+    // Show/hide bottom text panel
     if !loaded_settings.show_bottom_text_panel {
         scrolled_window_errors.hide();
     } else {
         scrolled_window_errors.show();
     }
 
-    reset_text_view(&text_view_errors);
+    reset_text_view(text_view_errors);
+
+    // Prepare included/excluded directories to set in GUI
+    let mut included_dirs = if !loaded_settings.included_directories.is_empty() {
+        loaded_settings.included_directories.clone()
+    } else {
+        vec![get_current_directory()]
+    };
+    let mut excluded_dirs = if !loaded_settings.excluded_directories.is_empty() {
+        loaded_settings.excluded_directories.clone()
+    } else {
+        DEFAULT_EXCLUDED_DIRECTORIES.iter().map(|s| s.to_string()).collect()
+    };
+
+    // If CLI provided directories, override included_dirs
+    if set_start_folders && !folders_from_args.is_empty() {
+        included_dirs = folders_from_args;
+    }
+
+    // If manual execution or loading at start or CLI override, set directories in UI
+    if manual_execution || loaded_settings.load_at_start || set_start_folders {
+        set_directories(
+            &upper_notebook.tree_view_included_directories,
+            &upper_notebook.tree_view_excluded_directories,
+            &included_dirs,
+            &excluded_dirs,
+        );
+    }
+
+    // Apply all other settings to GUI
     set_configuration_to_gui_internal(upper_notebook, main_notebook, settings, loaded_settings);
 }
-// pub(crate) fn load_configuration(
-//     manual_execution: bool,
-//     upper_notebook: &GuiUpperNotebook,
-//     main_notebook: &GuiMainNotebook,
-//     settings: &GuiSettings,
-//     text_view_errors: &TextView,
-//     scrolled_window_errors: &ScrolledWindow,
-//     arguments: &[OsString],
-// ) {
-//     let text_view_errors = text_view_errors.clone();
-//
-//     reset_text_view(&text_view_errors);
-//
-//     let mut loaded_entries = LoadSaveStruct::with_text_view(text_view_errors.clone());
-//     loaded_entries.open_and_read_content(&text_view_errors, manual_execution);
-//
-//     // Load here language, default system language could change value in settings so we don't want to lose this value
-//     let short_language = get_language_from_combo_box_text(&settings.combo_box_settings_language.active_text().expect("No active text"))
-//         .short_text
-//         .to_string();
-//
-//     let included_directories = get_string_from_list_store(&upper_notebook.tree_view_included_directories, ColumnsIncludedDirectory::Path as i32, None);
-//     let excluded_directories = get_string_from_list_store(&upper_notebook.tree_view_excluded_directories, ColumnsExcludedDirectory::Path as i32, None);
-//
-//     // Loading data from hashmaps
-//     let (hashmap_ls, _hashmap_sl) = create_hash_map();
-//
-//     let mut included_directories: Vec<String> = loaded_entries.get_vector_string(&hashmap_ls[&LoadText::IncludedDirectories], included_directories);
-//     let mut excluded_directories: Vec<String> = loaded_entries.get_vector_string(&hashmap_ls[&LoadText::ExcludedDirectories], excluded_directories);
-//     let excluded_items: String = loaded_entries.get_string(hashmap_ls[&LoadText::ExcludedItems].clone(), upper_notebook.entry_excluded_items.text().to_string());
-//     let allowed_extensions: String = loaded_entries.get_string(hashmap_ls[&LoadText::AllowedExtensions].clone(), String::new());
-//     let minimal_file_size: String = loaded_entries.get_integer_string(hashmap_ls[&LoadText::MinimalFileSize].clone(), DEFAULT_MINIMAL_FILE_SIZE.to_string());
-//     let maximal_file_size: String = loaded_entries.get_integer_string(hashmap_ls[&LoadText::MaximalFileSize].clone(), DEFAULT_MAXIMAL_FILE_SIZE.to_string());
-//
-//     let loading_at_start: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::LoadAtStart].clone(), DEFAULT_LOAD_AT_START);
-//     let mut saving_at_exit: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::SaveAtExit].clone(), DEFAULT_SAVE_ON_EXIT);
-//     let confirm_deletion: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::ConfirmDeletionFiles].clone(), DEFAULT_CONFIRM_DELETION);
-//     let confirm_group_deletion: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::ConfirmDeletionAllFilesInGroup].clone(), DEFAULT_CONFIRM_GROUP_DELETION);
-//     let show_previews_similar_images: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::ImagePreviewImage].clone(), DEFAULT_SHOW_IMAGE_PREVIEW);
-//     let show_previews_duplicates: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::DuplicatePreviewImage].clone(), DEFAULT_SHOW_DUPLICATE_IMAGE_PREVIEW);
-//     let bottom_text_panel: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::ShowBottomTextPanel].clone(), DEFAULT_BOTTOM_TEXT_VIEW);
-//     let hide_hard_links: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::HideHardLinks].clone(), DEFAULT_HIDE_HARD_LINKS);
-//     let use_cache: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::UseCache].clone(), DEFAULT_USE_CACHE);
-//     let use_json_cache: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::UseJsonCacheFile].clone(), DEFAULT_SAVE_ALSO_AS_JSON);
-//     let use_trash: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::DeleteToTrash].clone(), DEFAULT_USE_TRASH);
-//     let ignore_other_fs: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::GeneralIgnoreOtherFilesystems].clone(), DEFAULT_GENERAL_IGNORE_OTHER_FILESYSTEMS);
-//     let use_rust_libraries_to_preview: bool = loaded_entries.get_bool(
-//         hashmap_ls[&LoadText::GeneralUseRustLibrariesToPreview].clone(),
-//         DEFAULT_USING_RUST_LIBRARIES_TO_SHOW_PREVIEW,
-//     );
-//
-//     let delete_outdated_cache_duplicates: bool = loaded_entries.get_bool(
-//         hashmap_ls[&LoadText::DuplicateDeleteOutdatedCacheEntries].clone(),
-//         DEFAULT_DUPLICATE_REMOVE_AUTO_OUTDATED_CACHE,
-//     );
-//     let delete_outdated_cache_similar_images: bool =
-//         loaded_entries.get_bool(hashmap_ls[&LoadText::ImageDeleteOutdatedCacheEntries].clone(), DEFAULT_IMAGE_REMOVE_AUTO_OUTDATED_CACHE);
-//     let delete_outdated_cache_similar_videos: bool =
-//         loaded_entries.get_bool(hashmap_ls[&LoadText::VideoDeleteOutdatedCacheEntries].clone(), DEFAULT_VIDEO_REMOVE_AUTO_OUTDATED_CACHE);
-//     let use_prehash_cache: bool = loaded_entries.get_bool(hashmap_ls[&LoadText::UsePrehashCache].clone(), DEFAULT_USE_PRECACHE);
-//
-//     let cache_prehash_minimal_size: String =
-//         loaded_entries.get_integer_string(hashmap_ls[&LoadText::MinimalPrehashCacheSize].clone(), DEFAULT_PREHASH_MINIMAL_CACHE_SIZE.to_string());
-//     let cache_minimal_size: String = loaded_entries.get_integer_string(hashmap_ls[&LoadText::MinimalCacheSize].clone(), DEFAULT_MINIMAL_CACHE_SIZE.to_string());
-//     let short_language = loaded_entries.get_string(hashmap_ls[&LoadText::Language].clone(), short_language);
-//
-//     let combo_box_duplicate_hash_type = loaded_entries.get_object(hashmap_ls[&LoadText::ComboBoxDuplicateHashType].clone(), 0);
-//     let combo_box_duplicate_checking_method = loaded_entries.get_object(hashmap_ls[&LoadText::ComboBoxDuplicateCheckMethod].clone(), 0);
-//     let combo_box_image_hash_size = loaded_entries.get_object(hashmap_ls[&LoadText::ComboBoxImageHashSize].clone(), 1); // 16 instead default 8
-//     let combo_box_image_hash_algorithm = loaded_entries.get_object(hashmap_ls[&LoadText::ComboBoxImageHashType].clone(), 0);
-//     let combo_box_image_resize_algorithm = loaded_entries.get_object(hashmap_ls[&LoadText::ComboBoxImageResizeAlgorithm].clone(), 0);
-//     let combo_box_big_files_mode = loaded_entries.get_object(hashmap_ls[&LoadText::ComboBoxBigFiles].clone(), 0);
-//
-//     let number_of_biggest_files = loaded_entries.get_integer_string(hashmap_ls[&LoadText::NumberOfBiggestFiles].clone(), DEFAULT_NUMBER_OF_BIGGEST_FILES.to_string());
-//     let similar_images_similarity = loaded_entries.get_object(hashmap_ls[&LoadText::SimilarImagesSimilarity].clone(), DEFAULT_SIMILAR_IMAGES_SIMILARITY);
-//     let similar_images_ignore_same_size = loaded_entries.get_bool(hashmap_ls[&LoadText::SimilarImagesIgnoreSameSize].clone(), DEFAULT_SIMILAR_IMAGES_IGNORE_SAME_SIZE);
-//     let similar_videos_similarity = loaded_entries.get_object(hashmap_ls[&LoadText::SimilarVideosSimilarity].clone(), DEFAULT_SIMILAR_VIDEOS_SIMILARITY);
-//     let similar_videos_ignore_same_size = loaded_entries.get_bool(hashmap_ls[&LoadText::SimilarVideosIgnoreSameSize].clone(), DEFAULT_SIMILAR_VIDEOS_IGNORE_SAME_SIZE);
-//     let check_button_case_sensitive_name = loaded_entries.get_object(hashmap_ls[&LoadText::DuplicateNameCaseSensitive].clone(), DEFAULT_DUPLICATE_CASE_SENSITIVE_NAME_CHECKING);
-//     let check_button_music_approximate_comparison = loaded_entries.get_object(hashmap_ls[&LoadText::MusicApproximateComparison].clone(), DEFAULT_MUSIC_APPROXIMATE_COMPARISON);
-//     let check_button_music_compare_by_title = loaded_entries.get_object(hashmap_ls[&LoadText::MusicCompareByTitle].clone(), DEFAULT_MUSIC_GROUP_CONTENT_BY_TITLE);
-//
-//     let check_button_broken_files_archive = loaded_entries.get_object(hashmap_ls[&LoadText::BrokenFilesArchive].clone(), DEFAULT_BROKEN_FILES_ARCHIVE);
-//     let check_button_broken_files_pdf = loaded_entries.get_object(hashmap_ls[&LoadText::BrokenFilesPdf].clone(), DEFAULT_BROKEN_FILES_PDF);
-//     let check_button_broken_files_image = loaded_entries.get_object(hashmap_ls[&LoadText::BrokenFilesImage].clone(), DEFAULT_BROKEN_FILES_IMAGE);
-//     let check_button_broken_files_audio = loaded_entries.get_object(hashmap_ls[&LoadText::BrokenFilesAudio].clone(), DEFAULT_BROKEN_FILES_AUDIO);
-//     let thread_number = loaded_entries.get_object(hashmap_ls[&LoadText::ThreadNumber].clone(), DEFAULT_THREAD_NUMBER);
-//
-//     let mut set_start_folders = false;
-//     if !manual_execution {
-//         // Handle here arguments that were added to app e.g. czkawka_gui /home --/home/roman
-//         if arguments.len() > 1 {
-//             let iter_i = arguments.iter().skip(1);
-//             let iter_e = iter_i.clone();
-//             let inc_dir = iter_i
-//                 .filter_map(|e| {
-//                     let r = e.to_string_lossy().to_string();
-//                     if !r.starts_with("--") {
-//                         let path = Path::new(&r);
-//                         if !path.exists() {
-//                             return None;
-//                         }
-//                         match path.canonicalize() {
-//                             Ok(r) => Some(r.to_string_lossy().to_string()),
-//                             Err(_) => None,
-//                         }
-//                     } else {
-//                         None
-//                     }
-//                 })
-//                 .collect::<Vec<_>>();
-//             let exc_dir = iter_e
-//                 .filter_map(|e| {
-//                     let r = e.to_string_lossy().to_string();
-//                     if let Some(r) = r.strip_prefix("--") {
-//                         let path = Path::new(&r);
-//                         if !path.exists() {
-//                             return None;
-//                         }
-//                         match path.canonicalize() {
-//                             Ok(r) => Some(r.to_string_lossy().to_string()),
-//                             Err(_) => None,
-//                         }
-//                     } else {
-//                         None
-//                     }
-//                 })
-//                 .collect::<Vec<_>>();
-//
-//             if inc_dir.is_empty() {
-//                 error!("Arguments {arguments:?} should contains at least one directory to include");
-//             } else {
-//                 included_directories = inc_dir;
-//                 excluded_directories = exc_dir;
-//                 saving_at_exit = false;
-//                 set_start_folders = true;
-//             }
-//         }
-//     }
-//
-//     if manual_execution || loading_at_start || set_start_folders {
-//         set_directories(
-//             &upper_notebook.tree_view_included_directories,
-//             &upper_notebook.tree_view_excluded_directories,
-//             &included_directories,
-//             &excluded_directories,
-//         );
-//     }
-//
-//     // Setting data
-//     if loading_at_start || manual_execution {
-//         //// Language ComboBoxText
-//         {
-//             for (index, lang) in LANGUAGES_ALL.iter().enumerate() {
-//                 if short_language == lang.short_text {
-//                     settings.combo_box_settings_language.set_active(Some(index as u32));
-//                 }
-//             }
-//         }
-//
-//         upper_notebook.entry_excluded_items.set_text(&excluded_items);
-//         upper_notebook.entry_allowed_extensions.set_text(&allowed_extensions);
-//         upper_notebook.entry_general_minimal_size.set_text(&minimal_file_size);
-//         upper_notebook.entry_general_maximal_size.set_text(&maximal_file_size);
-//
-//         //// Buttons
-//         settings.check_button_settings_load_at_start.set_active(loading_at_start);
-//         settings.check_button_settings_save_at_exit.set_active(saving_at_exit);
-//         settings.check_button_settings_confirm_deletion.set_active(confirm_deletion);
-//         settings.check_button_settings_confirm_group_deletion.set_active(confirm_group_deletion);
-//         settings.check_button_settings_show_preview_similar_images.set_active(show_previews_similar_images);
-//         settings.check_button_settings_show_preview_duplicates.set_active(show_previews_duplicates);
-//
-//         settings
-//             .check_button_settings_similar_videos_delete_outdated_cache
-//             .set_active(delete_outdated_cache_similar_videos);
-//         settings
-//             .check_button_settings_similar_images_delete_outdated_cache
-//             .set_active(delete_outdated_cache_similar_images);
-//         settings.check_button_settings_duplicates_delete_outdated_cache.set_active(delete_outdated_cache_duplicates);
-//
-//         settings.check_button_settings_show_text_view.set_active(bottom_text_panel);
-//         if !bottom_text_panel {
-//             scrolled_window_errors.hide();
-//         } else {
-//             scrolled_window_errors.show();
-//         }
-//         settings.check_button_settings_hide_hard_links.set_active(hide_hard_links);
-//         settings.check_button_settings_use_cache.set_active(use_cache);
-//         settings.check_button_settings_save_also_json.set_active(use_json_cache);
-//         settings.check_button_duplicates_use_prehash_cache.set_active(use_prehash_cache);
-//         settings.check_button_settings_use_trash.set_active(use_trash);
-//         settings.entry_settings_cache_file_minimal_size.set_text(&cache_minimal_size);
-//         settings.entry_settings_prehash_cache_file_minimal_size.set_text(&cache_prehash_minimal_size);
-//         settings.check_button_settings_one_filesystem.set_active(ignore_other_fs);
-//         settings.check_button_settings_use_rust_preview.set_active(use_rust_libraries_to_preview);
-//
-//         save_proper_value_to_combo_box(&main_notebook.combo_box_duplicate_hash_type, combo_box_duplicate_hash_type);
-//         save_proper_value_to_combo_box(&main_notebook.combo_box_duplicate_check_method, combo_box_duplicate_checking_method);
-//         save_proper_value_to_combo_box(&main_notebook.combo_box_image_hash_algorithm, combo_box_image_hash_algorithm);
-//         save_proper_value_to_combo_box(&main_notebook.combo_box_image_hash_size, combo_box_image_hash_size);
-//         save_proper_value_to_combo_box(&main_notebook.combo_box_image_resize_algorithm, combo_box_image_resize_algorithm);
-//         save_proper_value_to_combo_box(&main_notebook.combo_box_big_files_mode, combo_box_big_files_mode);
-//
-//         main_notebook.check_button_duplicate_case_sensitive_name.set_active(check_button_case_sensitive_name);
-//         main_notebook.entry_big_files_number.set_text(&number_of_biggest_files);
-//         main_notebook.check_button_image_ignore_same_size.set_active(similar_images_ignore_same_size);
-//         main_notebook.check_button_video_ignore_same_size.set_active(similar_videos_ignore_same_size);
-//         main_notebook.scale_similarity_similar_videos.set_value(similar_videos_similarity as f64);
-//         main_notebook.check_button_music_compare_only_in_title_group.set_active(check_button_music_compare_by_title);
-//         main_notebook
-//             .check_button_music_approximate_comparison
-//             .set_active(check_button_music_approximate_comparison);
-//
-//         main_notebook.check_button_broken_files_audio.set_active(check_button_broken_files_audio);
-//         main_notebook.check_button_broken_files_pdf.set_active(check_button_broken_files_pdf);
-//         main_notebook.check_button_broken_files_image.set_active(check_button_broken_files_image);
-//         main_notebook.check_button_broken_files_archive.set_active(check_button_broken_files_archive);
-//
-//         {
-//             let combo_chosen_index = main_notebook.combo_box_duplicate_check_method.active().expect("Failed to get active item");
-//
-//             if DUPLICATES_CHECK_METHOD_COMBO_BOX[combo_chosen_index as usize].check_method == CheckingMethod::Hash {
-//                 main_notebook.combo_box_duplicate_hash_type.set_visible(true);
-//                 main_notebook.label_duplicate_hash_type.set_visible(true);
-//             } else {
-//                 main_notebook.combo_box_duplicate_hash_type.set_visible(false);
-//                 main_notebook.label_duplicate_hash_type.set_visible(false);
-//             }
-//
-//             if [CheckingMethod::Name, CheckingMethod::SizeName].contains(&DUPLICATES_CHECK_METHOD_COMBO_BOX[combo_chosen_index as usize].check_method) {
-//                 main_notebook.check_button_duplicate_case_sensitive_name.set_visible(true);
-//             } else {
-//                 main_notebook.check_button_duplicate_case_sensitive_name.set_visible(false);
-//             }
-//         }
-//
-//         // Set size of similarity scale gtk node, must be set BEFORE setting value of this
-//         let index = main_notebook.combo_box_image_hash_size.active().expect("Failed to get active item") as usize;
-//
-//         main_notebook.scale_similarity_similar_images.set_range(0_f64, SIMILAR_VALUES[index][5] as f64);
-//         main_notebook.scale_similarity_similar_images.set_fill_level(SIMILAR_VALUES[index][5] as f64);
-//         main_notebook.scale_similarity_similar_images.connect_change_value(scale_step_function);
-//         main_notebook.scale_similarity_similar_images.set_value(similar_images_similarity as f64);
-//
-//         settings.scale_settings_number_of_threads.set_range(0_f64, get_all_available_threads() as f64);
-//         settings.scale_settings_number_of_threads.set_fill_level(get_all_available_threads() as f64);
-//         settings.scale_settings_number_of_threads.connect_change_value(scale_step_function);
-//         settings.scale_settings_number_of_threads.set_value(thread_number as f64);
-//     } else {
-//         settings.check_button_settings_load_at_start.set_active(false);
-//     }
-// }
 
-// pub(crate) fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNotebook, main_notebook: &GuiMainNotebook, settings: &GuiSettings, text_view_errors: &TextView) {
-//     // TODO Maybe add popup dialog to confirm resetting
-//     let text_view_errors = text_view_errors.clone();
-//
-//     reset_text_view(&text_view_errors);
-//
-//     // Resetting included directories
-//     {
-//         let tree_view_included_directories = upper_notebook.tree_view_included_directories.clone();
-//         let list_store = get_list_store(&tree_view_included_directories);
-//         list_store.clear();
-//
-//         let current_dir: String = match env::current_dir() {
-//             Ok(t) => t.to_string_lossy().to_string(),
-//             Err(_inspected) => {
-//                 if cfg!(target_family = "unix") {
-//                     add_text_to_text_view(&text_view_errors, "Failed to read current directory, setting /home instead");
-//                     "/home".to_string()
-//                 } else if cfg!(target_family = "windows") {
-//                     add_text_to_text_view(&text_view_errors, "Failed to read current directory, setting C:\\ instead");
-//                     "C:\\".to_string()
-//                 } else {
-//                     String::new()
-//                 }
-//             }
-//         };
-//
-//         let values: [(u32, &dyn ToValue); 2] = [
-//             (ColumnsIncludedDirectory::Path as u32, &current_dir),
-//             (ColumnsIncludedDirectory::ReferenceButton as u32, &false),
-//         ];
-//         list_store.set(&list_store.append(), &values);
-//     }
-//     // Resetting excluded directories
-//     {
-//         let tree_view_excluded_directories = upper_notebook.tree_view_excluded_directories.clone();
-//         let list_store = get_list_store(&tree_view_excluded_directories);
-//         list_store.clear();
-//         for i in DEFAULT_EXCLUDED_DIRECTORIES {
-//             let values: [(u32, &dyn ToValue); 1] = [(ColumnsExcludedDirectory::Path as u32, &i)];
-//             list_store.set(&list_store.append(), &values);
-//         }
-//     }
-//     // Resetting excluded items
-//     {
-//         upper_notebook.entry_excluded_items.set_text(DEFAULT_EXCLUDED_ITEMS);
-//         upper_notebook.entry_allowed_extensions.set_text("");
-//         upper_notebook.entry_general_minimal_size.set_text(DEFAULT_MINIMAL_FILE_SIZE);
-//         upper_notebook.entry_general_maximal_size.set_text(DEFAULT_MAXIMAL_FILE_SIZE);
-//     }
-//
-//     // Set default settings
-//     {
-//         settings.check_button_settings_save_at_exit.set_active(DEFAULT_SAVE_ON_EXIT);
-//         settings.check_button_settings_load_at_start.set_active(DEFAULT_LOAD_AT_START);
-//         settings.check_button_settings_confirm_deletion.set_active(DEFAULT_CONFIRM_DELETION);
-//         settings.check_button_settings_confirm_group_deletion.set_active(DEFAULT_CONFIRM_GROUP_DELETION);
-//         settings.check_button_settings_show_preview_similar_images.set_active(DEFAULT_SHOW_IMAGE_PREVIEW);
-//         settings.check_button_settings_show_preview_duplicates.set_active(DEFAULT_SHOW_DUPLICATE_IMAGE_PREVIEW);
-//         settings.check_button_settings_show_text_view.set_active(DEFAULT_BOTTOM_TEXT_VIEW);
-//         settings.check_button_settings_hide_hard_links.set_active(DEFAULT_HIDE_HARD_LINKS);
-//         settings.check_button_settings_use_cache.set_active(DEFAULT_USE_CACHE);
-//         settings.check_button_settings_save_also_json.set_active(DEFAULT_SAVE_ALSO_AS_JSON);
-//         settings.check_button_settings_use_trash.set_active(DEFAULT_USE_TRASH);
-//         settings.entry_settings_cache_file_minimal_size.set_text(DEFAULT_MINIMAL_CACHE_SIZE);
-//         settings
-//             .check_button_settings_similar_videos_delete_outdated_cache
-//             .set_active(DEFAULT_VIDEO_REMOVE_AUTO_OUTDATED_CACHE);
-//         settings
-//             .check_button_settings_similar_images_delete_outdated_cache
-//             .set_active(DEFAULT_IMAGE_REMOVE_AUTO_OUTDATED_CACHE);
-//         settings
-//             .check_button_settings_duplicates_delete_outdated_cache
-//             .set_active(DEFAULT_DUPLICATE_REMOVE_AUTO_OUTDATED_CACHE);
-//         settings.check_button_duplicates_use_prehash_cache.set_active(DEFAULT_USE_PRECACHE);
-//         settings.entry_settings_prehash_cache_file_minimal_size.set_text(DEFAULT_PREHASH_MINIMAL_CACHE_SIZE);
-//         settings.combo_box_settings_language.set_active(Some(0));
-//         settings.check_button_settings_one_filesystem.set_active(DEFAULT_GENERAL_IGNORE_OTHER_FILESYSTEMS);
-//         settings.check_button_settings_use_rust_preview.set_active(DEFAULT_USING_RUST_LIBRARIES_TO_SHOW_PREVIEW);
-//
-//         main_notebook.combo_box_duplicate_hash_type.set_active(Some(0));
-//         main_notebook.combo_box_duplicate_check_method.set_active(Some(0));
-//         main_notebook.combo_box_image_hash_algorithm.set_active(Some(0));
-//         main_notebook.combo_box_image_resize_algorithm.set_active(Some(1)); // Nearest by default
-//         main_notebook.combo_box_image_hash_size.set_active(Some(1)); // Set as 16 instead 8
-//         main_notebook.combo_box_big_files_mode.set_active(Some(0));
-//
-//         main_notebook.check_button_broken_files_audio.set_active(DEFAULT_BROKEN_FILES_AUDIO);
-//         main_notebook.check_button_broken_files_pdf.set_active(DEFAULT_BROKEN_FILES_PDF);
-//         main_notebook.check_button_broken_files_archive.set_active(DEFAULT_BROKEN_FILES_ARCHIVE);
-//         main_notebook.check_button_broken_files_image.set_active(DEFAULT_BROKEN_FILES_IMAGE);
-//
-//         main_notebook.scale_similarity_similar_images.set_range(0_f64, SIMILAR_VALUES[0][5] as f64); // DEFAULT FOR MAX of 8
-//         main_notebook.scale_similarity_similar_images.set_fill_level(SIMILAR_VALUES[0][5] as f64);
-//
-//         main_notebook
-//             .check_button_music_compare_only_in_title_group
-//             .set_active(DEFAULT_MUSIC_GROUP_CONTENT_BY_TITLE);
-//
-//         main_notebook.check_button_music_approximate_comparison.set_active(DEFAULT_MUSIC_APPROXIMATE_COMPARISON);
-//
-//         main_notebook.entry_big_files_number.set_text(DEFAULT_NUMBER_OF_BIGGEST_FILES);
-//         main_notebook.scale_similarity_similar_images.set_value(DEFAULT_SIMILAR_IMAGES_SIMILARITY as f64);
-//         main_notebook.check_button_image_ignore_same_size.set_active(DEFAULT_SIMILAR_IMAGES_IGNORE_SAME_SIZE);
-//         main_notebook.check_button_video_ignore_same_size.set_active(DEFAULT_SIMILAR_VIDEOS_IGNORE_SAME_SIZE);
-//         main_notebook.scale_similarity_similar_videos.set_value(DEFAULT_SIMILAR_VIDEOS_SIMILARITY as f64);
-//     }
-//     if manual_clearing {
-//         add_text_to_text_view(&text_view_errors, &flg!("saving_loading_reset_configuration"));
-//     }
-// }
+fn set_directories(tree_view_included_directories: &TreeView, tree_view_excluded_directories: &TreeView, included_directories: &[String], excluded_directories: &[String]) {
+    // Include Directories
+    let list_store = get_list_store(tree_view_included_directories);
+    list_store.clear();
 
-pub fn save_configuration(_save: bool, _upper_notebook: &GuiUpperNotebook, _main_notebook: &GuiMainNotebook, _settings: &GuiSettings, text_view_errors: &TextView) {
-    // Minimal saver: write current settings from GUI into JSON file.
-    // As we don't have direct access to GUI -> SettingsJson conversion here (project-specific),
-    // this currently writes defaults. Replace with conversion from GUI to SettingsJson when available.
-    let saver = LoadSaveStruct::with_text_view(text_view_errors.clone());
-    saver.save_to_file(text_view_errors);
+    for directory in included_directories {
+        let values: [(u32, &dyn ToValue); 2] = [
+            (ColumnsIncludedDirectory::Path as u32, &directory),
+            (ColumnsIncludedDirectory::ReferenceButton as u32, &false),
+        ];
+        list_store.set(&list_store.append(), &values);
+    }
+
+    //// Exclude Directories
+    let list_store = get_list_store(tree_view_excluded_directories);
+    list_store.clear();
+
+    for directory in excluded_directories {
+        let values: [(u32, &dyn ToValue); 1] = [(ColumnsExcludedDirectory::Path as u32, &directory)];
+        list_store.set(&list_store.append(), &values);
+    }
+}
+
+pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNotebook, main_notebook: &GuiMainNotebook, settings: &GuiSettings, text_view_errors: &TextView) {
+    let check_button_settings_save_at_exit = settings.check_button_settings_save_at_exit.clone();
+    let text_view_errors = text_view_errors.clone();
+
+    reset_text_view(&text_view_errors);
+
+    if !manual_execution && !check_button_settings_save_at_exit.is_active() {
+        // When check button is deselected, not save configuration at exit
+        return;
+    }
+
+    let mut saver = LoadSaveStruct::with_text_view(text_view_errors.clone());
+    saver.settings = gui_to_settings(upper_notebook, main_notebook, settings);
+    saver.save_to_file(&text_view_errors);
+}
+pub(crate) fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpperNotebook, main_notebook: &GuiMainNotebook, settings: &GuiSettings, text_view_errors: &TextView) {
+    // TODO Maybe add popup dialog to confirm resetting
+    let text_view_errors = text_view_errors.clone();
+
+    let mut default_config = SettingsJson {
+        included_directories: vec![get_current_directory()],
+        ..Default::default()
+    };
+
+    reset_text_view(&text_view_errors);
+
+    set_configuration_to_gui_internal(upper_notebook, main_notebook, settings, &default_config);
+
+    if manual_clearing {
+        add_text_to_text_view(&text_view_errors, &flg!("saving_loading_reset_configuration"));
+    }
 }
