@@ -173,8 +173,6 @@ impl LoadSaveStruct {
                 }
             },
             Err(e) => {
-                // "saving_loading_failed_to_serialize_json" does not exist in localization.
-                // Reuse existing message id that accepts path and reason.
                 add_text_to_text_view(
                     text_view_errors,
                     &flg!("saving_loading_saving_failure", name = json_file.to_string_lossy().to_string(), reason = e.to_string()),

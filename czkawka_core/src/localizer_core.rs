@@ -19,16 +19,10 @@ pub static LANGUAGE_LOADER_CORE: Lazy<FluentLanguageLoader> = Lazy::new(|| {
 
 #[macro_export]
 macro_rules! flc {
-    ($message_id:literal) => {{
-        i18n_embed_fl::fl!($crate::localizer_core::LANGUAGE_LOADER_CORE, $message_id)
-    }};
-
-    ($message_id:literal, $($args:expr),*) => {{
-        i18n_embed_fl::fl!($crate::localizer_core::LANGUAGE_LOADER_CORE, $message_id, $($args), *)
+    ( $($tt:tt)* ) => {{
+        i18n_embed_fl::fl!($crate::localizer_core::LANGUAGE_LOADER_CORE, $($tt)*)
     }};
 }
-
-// Get the `Localizer` to be used for localizing this library.
 
 pub fn localizer_core() -> Box<dyn Localizer> {
     Box::from(DefaultLocalizer::new(&*LANGUAGE_LOADER_CORE, &Localizations))
