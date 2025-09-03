@@ -15,7 +15,6 @@ pub static LANGUAGE_LOADER_KROKIET: Lazy<FluentLanguageLoader> = Lazy::new(|| {
     loader
 });
 
-
 #[macro_export]
 macro_rules! flk {
     ( $($tt:tt)* ) => {{

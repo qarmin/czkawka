@@ -139,13 +139,13 @@ pub fn print_version_mode(app: &str) {
 
     // TODO - probably needs to add arm and other architectures, need help, because I don't have access to them
 
-    let musl_or_glibc = if cfg!(target_os = "linux" and target_env = "musl") {
-        ", musl"
-    } else if cfg!(target_os = "linux" and target_env = "gnu") {
-        ", glibc"
-    } else {
-        ""
-    };
+    // let musl_or_glibc = if cfg!(target_os = "linux" and target_env = "musl") {
+    //     ", musl"
+    // } else if cfg!(target_os = "linux" and target_env = "gnu") {
+    //     ", glibc"
+    // } else {
+    //     ""
+    // };
 
     info!(
         "{app} version: {CZKAWKA_VERSION}, {debug_release} mode, rust {rust_version}, os {} {} ({} {}), {processors} cpu/threads, features({}): [{}], app cpu version: {}, os cpu version: {}",

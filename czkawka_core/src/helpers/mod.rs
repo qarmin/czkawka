@@ -3,4 +3,3 @@
 pub mod debug_timer;
 pub mod delayed_sender;
 pub mod messages;
-pub mod glibc_musl_version;
