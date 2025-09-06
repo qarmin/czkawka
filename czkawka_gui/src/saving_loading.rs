@@ -91,7 +91,6 @@ impl LoadSaveStruct {
     }
 
     pub(crate) fn open_and_read_content(&mut self, text_view_errors: &TextView, manual_execution: bool) {
-        // Read only JSON config; legacy text format compatibility removed
         let json_file = match get_config_cache_path() {
             Some(cfg) => cfg.config_folder.join(Path::new(SAVE_FILE_NAME_JSON)),
             None => {
@@ -104,7 +103,6 @@ impl LoadSaveStruct {
 
         if !json_file.is_file() {
             if manual_execution {
-                // No config file - that's fine, keep defaults
                 add_text_to_text_view(text_view_errors, &flg!("saving_loading_loading_success"));
             }
             return;
@@ -148,7 +146,6 @@ impl LoadSaveStruct {
                 text_view_errors,
                 &flg!(
                     "saving_loading_failed_to_create_config_file",
-                    // fluent expects `path` (not `name`)
                     path = SAVE_FILE_NAME_JSON,
                     reason = "config directory not found"
                 ),
@@ -631,21 +628,13 @@ fn load_arguments(arguments: &[String]) -> Option<Vec<String>> {
             })
             .collect::<Vec<_>>();
 
-        // if inc_dir.is_empty() {
-        //     error!("Arguments {arguments:?} should contain at least one directory to include");
-        // } else {
-        //     included_directories = inc_dir;
-        //     excluded_directories = exc_dir;
-        //     saving_at_exit = false;
-        //     set_start_folders = true;
-        // }
         if !inc_dir.is_empty() {
             return Some(inc_dir);
         }
     }
     None
 }
-// New helper: build SettingsJson from current GUI state
+
 fn gui_to_settings(upper_notebook: &GuiUpperNotebook, main_notebook: &GuiMainNotebook, settings: &GuiSettings) -> SettingsJson {
     // Gather directories
     let included_directories = get_string_from_list_store(&upper_notebook.tree_view_included_directories, ColumnsIncludedDirectory::Path as i32, None);

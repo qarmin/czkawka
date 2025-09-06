@@ -27,7 +27,7 @@ jobs:
         run: sudo apt update || true; sudo apt install libheif-dev libraw-dev ffmpeg libgtk-4-dev p7zip-full -y
 
       - name: Setup rust version
-        run: rustup default 1.85.0
+        run: rustup default 1.86.0
 
       - name: Build Release
         if: ${{ github.ref == 'refs/heads/master' }}
@@ -140,7 +140,7 @@ jobs:
 
       - name: Setup rust version
         run: |
-          rustup default 1.85.0
+          rustup default 1.86.0
           rustup target add x86_64-unknown-linux-musl
 
       - name: Build Release
@@ -193,7 +193,7 @@ jobs:
 
       - name: Setup rust version and target
         run: |
-          rustup default 1.85.0
+          rustup default 1.86.0
           rustup target add i686-unknown-linux-gnu
 
       - name: Build Debug for 32-bit
@@ -222,7 +222,7 @@ jobs:
         run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev -y
 
       - name: Setup rust version
-        run: rustup default 1.85.0
+        run: rustup default 1.86.0
 
       - name: Build packages
         run: |
@@ -261,7 +261,7 @@ jobs:
         run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev -y
 
       - name: Setup rust version
-        run: rustup default 1.85.0
+        run: rustup default 1.86.0
 
       - name: Test
         run: |
@@ -278,7 +278,7 @@ jobs:
         run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev ffmpeg -y
 
       - name: Setup rust version
-        run: rustup default 1.85.0
+        run: rustup default 1.86.0
 
       - name: Build test version
         run: |

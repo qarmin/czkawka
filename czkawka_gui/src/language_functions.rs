@@ -102,5 +102,6 @@ pub(crate) fn get_language_from_combo_box_text(combo_box_text: &str) -> Language
         }
     }
 
-    panic!("Not found proper text");
+    panic!("Not found proper text"); // Must be valid, because it is loaded from gui, not from untrusted source
 }
+
