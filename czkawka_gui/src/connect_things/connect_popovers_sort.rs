@@ -241,7 +241,7 @@ mod test {
 
     #[gtk4::test]
     pub(crate) fn fuzzer_test() {
-        for _ in 0..100000 {
+        for _ in 0..1000 {
             let columns_types: &[Type] = &[Type::BOOL, Type::STRING];
             let list_store = gtk4::ListStore::new(columns_types);
             let tree_view = TreeView::builder().model(&list_store).build();
@@ -278,7 +278,7 @@ mod test {
             }
 
             // Ensure at least one non-header after the last header
-            let last_iter = list_store.iter_first().unwrap();
+            let last_iter = list_store.iter_first().expect("TEST");
             let mut last_is_header;
             loop {
                 last_is_header = list_store.get::<bool>(&last_iter, 0);

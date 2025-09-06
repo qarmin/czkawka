@@ -271,7 +271,9 @@ mod tests {
     #[test]
     fn find_header_idx_marks_all_non_header_rows_as_unchecked() {
         let mut model = get_model_vec(5);
-        model.iter_mut().for_each(|row| row.checked = true);
+        for row in &mut model {
+            row.checked = true;
+        }
         model[1].header_row = true;
 
         find_header_idx_and_deselect_all(&mut model);
@@ -303,7 +305,9 @@ mod tests {
     #[test]
     fn deselect_all_unmarks_all_rows_as_checked() {
         let mut model = get_model_vec(5);
-        model.iter_mut().for_each(|row| row.checked = true);
+        for row in &mut model {
+            row.checked = true;
+        }
         let model = create_model_from_model_vec(&model);
 
         let (checked_items, unchecked_items, new_model) = deselect_all(&model);
