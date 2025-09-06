@@ -1,3 +1,8 @@
+## Version ?.?.? - ??
+### Core
+- Extensions in similar images mode and in previews, drops validating if extension is correct(most of the time) - [#]() 
+
+
 ## Version 10.0.0 - 18.08.2025r
 ### Breaking changes
 #### Users

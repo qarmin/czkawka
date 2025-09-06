@@ -3,7 +3,7 @@ name = "krokiet"
 version = "10.0.0"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2024"
-rust-version = "1.85.0"
+rust-version = "1.86.0"
 description = "Slint frontend of Czkawka Core"
 license = "GPL-3.0-only"
 homepage = "https://github.com/qarmin/czkawka"
@@ -27,7 +27,7 @@ rayon = "1.10"
 fs_extra = "1.3" # TODO replace with less buggy library
 trash = "5.1"
 dunce = "1.0.5"
-fast_image_resize = { version = "=5.1.4", features = ["image"] } # TODO, greater versions uses unstable features, that were stabilized after 1.85.0
+fast_image_resize = { version = "=5.1.4", features = ["image"] } # TODO, greater versions uses unstable features, that were stabilized in 1.87.0
 
 # Just for enums
 vid_dup_finder_lib = "0.4"
