@@ -24,6 +24,7 @@ regex = "1.11"
 image_hasher = "3.0"
 trash = "5.1"
 fs_extra = "1.3"
+dunce = "1.0.5"
 
 i18n-embed = { version = "0.16", features = ["fluent-system", "desktop-requester"] }
 i18n-embed-fl = "0.10"

@@ -265,6 +265,23 @@ pub(crate) fn get_string_from_list_store(tree_view: &TreeView, column_full_path:
     }
 }
 
+pub(crate) fn get_from_list_store_fnc<T>(tree_view: &TreeView, fnc: &dyn Fn(&ListStore, &gtk4::TreeIter, &mut Vec<T>)) -> Vec<T> {
+    let list_store: ListStore = get_list_store(tree_view);
+
+    let mut result_vector: Vec<T> = Vec::new();
+
+    let Some(tree_iter) = list_store.iter_first() else {
+        return result_vector;
+    };
+    loop {
+        fnc(&list_store, &tree_iter, &mut result_vector);
+
+        if !list_store.iter_next(&tree_iter) {
+            return result_vector;
+        }
+    }
+}
+
 pub(crate) fn get_path_buf_from_vector_of_strings(vec_string: &[String]) -> Vec<PathBuf> {
     vec_string.iter().map(PathBuf::from).collect()
 }

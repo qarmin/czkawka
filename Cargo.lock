@@ -1508,6 +1508,7 @@ dependencies = [
  "crossbeam-channel",
  "czkawka_core",
  "directories-next",
+ "dunce",
  "fs_extra",
  "fun_time",
  "gdk4",

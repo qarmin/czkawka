@@ -1,21 +1,16 @@
-#![allow(unused)]
-use std::collections::HashMap;
 use std::env;
-use std::ffi::OsString;
-use std::fs::File;
-use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
-
+use gdk4::cairo::ffi::cairo_rectangle_list_destroy;
 use czkawka_core::common::config_cache_path::get_config_cache_path;
 use czkawka_core::common::get_all_available_threads;
 use czkawka_core::common::items::DEFAULT_EXCLUDED_ITEMS;
 use czkawka_core::common::model::CheckingMethod;
 use czkawka_core::tools::similar_images::SIMILAR_VALUES;
 use gtk4::prelude::*;
-use gtk4::{ComboBoxText, ScrolledWindow, TextView, TreeView};
-use log::error;
+use gtk4::{ListStore, ScrolledWindow, TextView, TreeView};
 use serde::{Deserialize, Serialize};
 
+use crate::cli::CliResult;
 use crate::flg;
 use crate::gui_structs::gui_main_notebook::GuiMainNotebook;
 use crate::gui_structs::gui_settings::GuiSettings;
@@ -74,14 +69,12 @@ const DEFAULT_EXCLUDED_DIRECTORIES: &[&str] = &["C:\\Windows"];
 
 struct LoadSaveStruct {
     settings: SettingsJson,
-    text_view: TextView,
 }
 
 impl LoadSaveStruct {
-    pub(crate) fn with_text_view(text_view: TextView) -> Self {
+    pub(crate) fn with_text_view() -> Self {
         Self {
             settings: SettingsJson::default(),
-            text_view,
         }
     }
 
@@ -178,10 +171,6 @@ impl LoadSaveStruct {
         }
     }
 
-    // Expose accessors for the new serde-backed settings
-    pub(crate) fn settings(&self) -> &SettingsJson {
-        &self.settings
-    }
     pub(crate) fn settings_mut(&mut self) -> &mut SettingsJson {
         &mut self.settings
     }
@@ -192,6 +181,9 @@ impl LoadSaveStruct {
 pub struct SettingsJson {
     #[serde(default = "default_included_directories")]
     pub included_directories: Vec<String>,
+
+    #[serde(default)]
+    pub reference_directories: Vec<String>,
 
     #[serde(default = "default_excluded_directories")]
     pub excluded_directories: Vec<String>,
@@ -588,66 +580,28 @@ fn get_current_directory() -> String {
     }
 }
 
-fn load_arguments(arguments: &[String]) -> Option<Vec<String>> {
-    // Handle here arguments that were added to app e.g. czkawka_gui /home --/home/roman
-    if arguments.len() > 1 {
-        let iter_i = arguments.iter().skip(1);
-        let iter_e = iter_i.clone();
-        let inc_dir = iter_i
-            .filter_map(|e| {
-                let r = e.to_string();
-                if !r.starts_with("--") {
-                    let path = Path::new(&r);
-                    if !path.exists() {
-                        return None;
-                    }
-                    match path.canonicalize() {
-                        Ok(r) => Some(r.to_string_lossy().to_string()),
-                        Err(_) => None,
-                    }
-                } else {
-                    None
-                }
-            })
-            .collect::<Vec<_>>();
-        let exc_dir = iter_e
-            .filter_map(|e| {
-                let r = e.to_string();
-                if let Some(r) = r.strip_prefix("--") {
-                    let path = Path::new(&r);
-                    if !path.exists() {
-                        return None;
-                    }
-                    match path.canonicalize() {
-                        Ok(r) => Some(r.to_string_lossy().to_string()),
-                        Err(_) => None,
-                    }
-                } else {
-                    None
-                }
-            })
-            .collect::<Vec<_>>();
-
-        if !inc_dir.is_empty() {
-            return Some(inc_dir);
-        }
-    }
-    None
-}
-
 fn gui_to_settings(upper_notebook: &GuiUpperNotebook, main_notebook: &GuiMainNotebook, settings: &GuiSettings) -> SettingsJson {
     // Gather directories
     let included_directories = get_string_from_list_store(&upper_notebook.tree_view_included_directories, ColumnsIncludedDirectory::Path as i32, None);
     let excluded_directories = get_string_from_list_store(&upper_notebook.tree_view_excluded_directories, ColumnsExcludedDirectory::Path as i32, None);
 
+    let ref_fnc: &dyn Fn(&ListStore, &gtk4::TreeIter, &mut Vec<String>) = &|list_store, tree_iter, vec| {
+        if list_store.get::<bool>(tree_iter, ColumnsIncludedDirectory::ReferenceButton as i32) {
+            vec.push(list_store.get::<String>(tree_iter, ColumnsIncludedDirectory::Path as i32));
+        }
+    };
+
+    let reference_directories = get_from_list_store_fnc(&upper_notebook.tree_view_included_directories, ref_fnc);
+
     // Language short text
     let language_text = match settings.combo_box_settings_language.active_text() {
         Some(t) => get_language_from_combo_box_text(&t).short_text.to_string(),
-        None => String::new(),
+        None => "en".to_string(),
     };
 
     SettingsJson {
         included_directories,
+        reference_directories,
         excluded_directories,
         excluded_items: upper_notebook.entry_excluded_items.text().to_string(),
         allowed_extensions: upper_notebook.entry_allowed_extensions.text().to_string(),
@@ -703,15 +657,13 @@ pub fn load_configuration(
     settings: &GuiSettings,
     text_view_errors: &TextView,
     scrolled_window_errors: &ScrolledWindow,
-    arguments: &[String],
+    cli_result: Option<&CliResult>,
 ) {
-    let mut loader = LoadSaveStruct::with_text_view(text_view_errors.clone());
+    let mut loader = LoadSaveStruct::with_text_view();
     loader.open_and_read_content(text_view_errors, manual_execution);
 
     // Determine folders from CLI args (if any)
-    let folders = load_arguments(arguments);
-    let set_start_folders = folders.is_some();
-    let folders_from_args = folders.unwrap_or_default();
+    let set_start_folders = cli_result.is_some();
 
     // Loaded settings (from file or defaults)
     let loaded_settings = loader.settings_mut();
@@ -725,30 +677,48 @@ pub fn load_configuration(
 
     reset_text_view(text_view_errors);
 
-    // Prepare included/excluded directories to set in GUI
-    let mut included_dirs = if !loaded_settings.included_directories.is_empty() {
-        loaded_settings.included_directories.clone()
+    let included_directories;
+    let excluded_directories;
+    let referenced_directories;
+    dbg!(&cli_result);
+    if let Some(cli) = cli_result {
+        included_directories = cli.included_items.clone();
+        excluded_directories = cli.excluded_items.clone();
+        referenced_directories = cli.referenced_items.clone();
     } else {
-        vec![get_current_directory()]
-    };
-    let mut excluded_dirs = if !loaded_settings.excluded_directories.is_empty() {
-        loaded_settings.excluded_directories.clone()
-    } else {
-        DEFAULT_EXCLUDED_DIRECTORIES.iter().map(|s| s.to_string()).collect()
-    };
-
-    // If CLI provided directories, override included_dirs
-    if set_start_folders && !folders_from_args.is_empty() {
-        included_dirs = folders_from_args;
+        included_directories = if !loaded_settings.included_directories.is_empty() {
+            loaded_settings.included_directories.clone()
+        } else {
+            vec![get_current_directory()]
+        };
+        excluded_directories = if !loaded_settings.excluded_directories.is_empty() {
+            loaded_settings.excluded_directories.clone()
+        } else {
+            DEFAULT_EXCLUDED_DIRECTORIES.iter().map(|s| s.to_string()).collect()
+        };
+        dbg!(&loaded_settings.reference_directories);
+        referenced_directories = loaded_settings
+            .reference_directories
+            .clone()
+            .into_iter()
+            .filter(|s| included_directories.contains(s))
+            .collect();
     }
 
+    dbg!(&included_directories);
+    dbg!(&excluded_directories);
+    dbg!(&referenced_directories);
+    dbg!(&manual_execution);
+    dbg!(&loaded_settings.load_at_start);
+    dbg!(&set_start_folders);
     // If manual execution or loading at start or CLI override, set directories in UI
     if manual_execution || loaded_settings.load_at_start || set_start_folders {
         set_directories(
             &upper_notebook.tree_view_included_directories,
             &upper_notebook.tree_view_excluded_directories,
-            &included_dirs,
-            &excluded_dirs,
+            &included_directories,
+            &referenced_directories,
+            &excluded_directories,
         );
     }
 
@@ -756,17 +726,36 @@ pub fn load_configuration(
     set_configuration_to_gui_internal(upper_notebook, main_notebook, settings, loaded_settings);
 }
 
-fn set_directories(tree_view_included_directories: &TreeView, tree_view_excluded_directories: &TreeView, included_directories: &[String], excluded_directories: &[String]) {
+fn set_directories(
+    tree_view_included_directories: &TreeView,
+    tree_view_excluded_directories: &TreeView,
+    included_directories: &[String],
+    referenced_directories: &[String],
+    excluded_directories: &[String],
+) {
+    assert!(
+        referenced_directories.iter().all(|s| included_directories.contains(s)),
+        "Referenced directories must be a subset of included directories"
+    );
     // Include Directories
     let list_store = get_list_store(tree_view_included_directories);
     list_store.clear();
 
-    for directory in included_directories {
-        let values: [(u32, &dyn ToValue); 2] = [
-            (ColumnsIncludedDirectory::Path as u32, &directory),
-            (ColumnsIncludedDirectory::ReferenceButton as u32, &false),
-        ];
-        list_store.set(&list_store.append(), &values);
+    let only_included_directories: Vec<String> = included_directories
+        .iter()
+        .filter(|s| !referenced_directories.contains(s))
+        .cloned()
+        .collect();
+
+    for (directories, is_referenced) in [(only_included_directories.as_ref(), false), (referenced_directories, true)] {
+        dbg!(directories, is_referenced);
+        for directory in directories {
+            let values: [(u32, &dyn ToValue); 2] = [
+                (ColumnsIncludedDirectory::Path as u32, &directory),
+                (ColumnsIncludedDirectory::ReferenceButton as u32, &is_referenced),
+            ];
+            list_store.set(&list_store.append(), &values);
+        }
     }
 
     //// Exclude Directories
@@ -790,7 +779,7 @@ pub fn save_configuration(manual_execution: bool, upper_notebook: &GuiUpperNoteb
         return;
     }
 
-    let mut saver = LoadSaveStruct::with_text_view(text_view_errors.clone());
+    let mut saver = LoadSaveStruct::with_text_view();
     saver.settings = gui_to_settings(upper_notebook, main_notebook, settings);
     saver.save_to_file(&text_view_errors);
 }
@@ -798,7 +787,7 @@ pub(crate) fn reset_configuration(manual_clearing: bool, upper_notebook: &GuiUpp
     // TODO Maybe add popup dialog to confirm resetting
     let text_view_errors = text_view_errors.clone();
 
-    let mut default_config = SettingsJson {
+    let default_config = SettingsJson {
         included_directories: vec![get_current_directory()],
         ..Default::default()
     };
