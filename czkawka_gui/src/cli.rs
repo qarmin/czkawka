@@ -136,7 +136,7 @@ mod tests {
     #[test]
     fn processes_include_folder() {
         let args = vec!["/valid/folder".to_string()];
-        let result = process_cli_args(args).unwrap();
+        let result = process_cli_args(args).expect("TEST");
         assert_eq!(result.included_items, vec!["/valid/folder".to_string()]);
         assert!(result.excluded_items.is_empty());
         assert!(result.referenced_items.is_empty());
@@ -145,7 +145,7 @@ mod tests {
     #[test]
     fn processes_exclude_folder() {
         let args = vec!["-e".to_string(), "/valid/folder".to_string()];
-        let result = process_cli_args(args).unwrap();
+        let result = process_cli_args(args).expect("TEST");
         assert!(result.included_items.is_empty());
         assert_eq!(result.excluded_items, vec!["/valid/folder".to_string()]);
         assert!(result.referenced_items.is_empty());
@@ -154,7 +154,7 @@ mod tests {
     #[test]
     fn processes_referenced_folder() {
         let args = vec!["-r".to_string(), "/valid/folder".to_string()];
-        let result = process_cli_args(args).unwrap();
+        let result = process_cli_args(args).expect("TEST");
         assert_eq!(result.included_items, vec!["/valid/folder".to_string()]);
         assert!(result.excluded_items.is_empty());
         assert_eq!(result.referenced_items, vec!["/valid/folder".to_string()]);
@@ -177,7 +177,7 @@ mod tests {
         .iter()
         .map(|s| s.to_string())
         .collect();
-        let result = process_cli_args(args).unwrap();
+        let result = process_cli_args(args).expect("TEST");
         assert_eq!(result.included_items, vec!["/valid/folder".to_string(), "abcd".to_string(), "normal_folder".to_string()]);
         assert_eq!(result.excluded_items, vec!["/exclu".to_string()]);
         assert_eq!(result.referenced_items, vec!["/valid/folder".to_string()]);

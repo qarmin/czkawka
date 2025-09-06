@@ -447,16 +447,34 @@ fn default_use_rust_libraries_to_preview() -> bool {
     DEFAULT_USING_RUST_LIBRARIES_TO_SHOW_PREVIEW
 }
 
+fn set_included_reference_folders(tree_view_included_directories: &TreeView, included_directories: &[String], referenced_directories: &[String]) {
+    let list_store = get_list_store(tree_view_included_directories);
+    list_store.clear();
+
+    // Referenced directories must be also in included directories
+    let referenced_directories: Vec<String> = referenced_directories.iter().filter(|s| included_directories.contains(s)).cloned().collect();
+
+    let only_included_directories: Vec<String> = included_directories.iter().filter(|s| !referenced_directories.contains(s)).cloned().collect();
+
+    for (directories, is_referenced) in [(only_included_directories, false), (referenced_directories, true)] {
+        for directory in directories {
+            let values: [(u32, &dyn ToValue); 2] = [
+                (ColumnsIncludedDirectory::Path as u32, &directory),
+                (ColumnsIncludedDirectory::ReferenceButton as u32, &is_referenced),
+            ];
+            list_store.set(&list_store.append(), &values);
+        }
+    }
+}
+
 fn set_configuration_to_gui_internal(upper_notebook: &GuiUpperNotebook, main_notebook: &GuiMainNotebook, settings: &GuiSettings, default_config: &SettingsJson) {
     // Resetting included directories
     {
-        let tree_view_included_directories = upper_notebook.tree_view_included_directories.clone();
-        let list_store = get_list_store(&tree_view_included_directories);
-        list_store.clear();
-        for i in default_config.included_directories.clone() {
-            let values: [(u32, &dyn ToValue); 1] = [(ColumnsExcludedDirectory::Path as u32, &i)];
-            list_store.set(&list_store.append(), &values);
-        }
+        set_included_reference_folders(
+            &upper_notebook.tree_view_included_directories,
+            &default_config.included_directories,
+            &default_config.reference_directories,
+        );
     }
     // Resetting excluded directories
     {
@@ -703,8 +721,14 @@ pub fn load_configuration(
             .collect();
     }
 
-    // If manual execution or loading at start or CLI override, set directories in UI
-    if manual_execution || loaded_settings.load_at_start || set_start_folders {
+    // When we manually load configuration, then we want them to be set, so allow it
+    // When we starts app with load_at_start option, then we want to load them too
+    if manual_execution || loaded_settings.load_at_start {
+        set_configuration_to_gui_internal(upper_notebook, main_notebook, settings, loaded_settings);
+    }
+
+    // When starting app wtih arguments, we want to set folders
+    if set_start_folders {
         set_directories(
             &upper_notebook.tree_view_included_directories,
             &upper_notebook.tree_view_excluded_directories,
@@ -713,9 +737,6 @@ pub fn load_configuration(
             &excluded_directories,
         );
     }
-
-    // Apply all other settings to GUI
-    set_configuration_to_gui_internal(upper_notebook, main_notebook, settings, loaded_settings);
 }
 
 fn set_directories(
@@ -725,25 +746,7 @@ fn set_directories(
     referenced_directories: &[String],
     excluded_directories: &[String],
 ) {
-    assert!(
-        referenced_directories.iter().all(|s| included_directories.contains(s)),
-        "Referenced directories must be a subset of included directories"
-    );
-    // Include Directories
-    let list_store = get_list_store(tree_view_included_directories);
-    list_store.clear();
-
-    let only_included_directories: Vec<String> = included_directories.iter().filter(|s| !referenced_directories.contains(s)).cloned().collect();
-
-    for (directories, _is_referenced) in [(only_included_directories.as_ref(), false), (referenced_directories, true)] {
-        for directory in directories {
-            let values: [(u32, &dyn ToValue); 2] = [
-                (ColumnsIncludedDirectory::Path as u32, &directory),
-                (ColumnsIncludedDirectory::ReferenceButton as u32, &false), // TODO is referenced is not setting, not sure why
-            ];
-            list_store.set(&list_store.append(), &values);
-        }
-    }
+    set_included_reference_folders(tree_view_included_directories, included_directories, referenced_directories);
 
     //// Exclude Directories
     let list_store = get_list_store(tree_view_excluded_directories);
