@@ -338,14 +338,6 @@ pub(crate) fn add_text_to_text_view(text_view: &TextView, string_to_append: &str
 
 pub(crate) fn set_buttons(hashmap: &mut HashMap<BottomButtonsEnum, bool>, buttons_array: &[Widget], button_names: &[BottomButtonsEnum]) {
     for (index, button) in buttons_array.iter().enumerate() {
-        if button_names[index] == BottomButtonsEnum::Sort {
-            // TODO - sort button is broken, I don't have skills and time to fix it
-            // The problem is that to speedup sorting, we operate on item iters
-            // To fix this, we should just take entire model and sort it, which will be slow in some cases
-            // Alternatively, just current operations on iters should be fixed(I cannot find exact problem)
-            continue;
-        }
-
         if *hashmap.get_mut(&button_names[index]).expect("Invalid button name") {
             button.show();
         } else {
