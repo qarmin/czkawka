@@ -1,6 +1,6 @@
 use std::env;
 use std::path::{Path, PathBuf};
-use gdk4::cairo::ffi::cairo_rectangle_list_destroy;
+
 use czkawka_core::common::config_cache_path::get_config_cache_path;
 use czkawka_core::common::get_all_available_threads;
 use czkawka_core::common::items::DEFAULT_EXCLUDED_ITEMS;
@@ -680,7 +680,6 @@ pub fn load_configuration(
     let included_directories;
     let excluded_directories;
     let referenced_directories;
-    dbg!(&cli_result);
     if let Some(cli) = cli_result {
         included_directories = cli.included_items.clone();
         excluded_directories = cli.excluded_items.clone();
@@ -696,7 +695,6 @@ pub fn load_configuration(
         } else {
             DEFAULT_EXCLUDED_DIRECTORIES.iter().map(|s| s.to_string()).collect()
         };
-        dbg!(&loaded_settings.reference_directories);
         referenced_directories = loaded_settings
             .reference_directories
             .clone()
@@ -705,12 +703,6 @@ pub fn load_configuration(
             .collect();
     }
 
-    dbg!(&included_directories);
-    dbg!(&excluded_directories);
-    dbg!(&referenced_directories);
-    dbg!(&manual_execution);
-    dbg!(&loaded_settings.load_at_start);
-    dbg!(&set_start_folders);
     // If manual execution or loading at start or CLI override, set directories in UI
     if manual_execution || loaded_settings.load_at_start || set_start_folders {
         set_directories(
@@ -741,18 +733,13 @@ fn set_directories(
     let list_store = get_list_store(tree_view_included_directories);
     list_store.clear();
 
-    let only_included_directories: Vec<String> = included_directories
-        .iter()
-        .filter(|s| !referenced_directories.contains(s))
-        .cloned()
-        .collect();
+    let only_included_directories: Vec<String> = included_directories.iter().filter(|s| !referenced_directories.contains(s)).cloned().collect();
 
-    for (directories, is_referenced) in [(only_included_directories.as_ref(), false), (referenced_directories, true)] {
-        dbg!(directories, is_referenced);
+    for (directories, _is_referenced) in [(only_included_directories.as_ref(), false), (referenced_directories, true)] {
         for directory in directories {
             let values: [(u32, &dyn ToValue); 2] = [
                 (ColumnsIncludedDirectory::Path as u32, &directory),
-                (ColumnsIncludedDirectory::ReferenceButton as u32, &is_referenced),
+                (ColumnsIncludedDirectory::ReferenceButton as u32, &false), // TODO is referenced is not setting, not sure why
             ];
             list_store.set(&list_store.append(), &values);
         }
