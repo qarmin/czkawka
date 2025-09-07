@@ -722,7 +722,7 @@ pub fn load_configuration(
     }
 
     // When we manually load configuration, then we want them to be set, so allow it
-    // When we starts app with load_at_start option, then we want to load them too
+    // When we start app with load_at_start option, then we want to load them too
     if manual_execution || loaded_settings.load_at_start {
         set_configuration_to_gui_internal(upper_notebook, main_notebook, settings, loaded_settings);
     }
@@ -736,6 +736,9 @@ pub fn load_configuration(
             &referenced_directories,
             &excluded_directories,
         );
+        // When using CLI args, disable saving at exit by default
+        // User still may enable it manually
+        settings.check_button_settings_save_at_exit.set_active(false);
     }
 }
 
