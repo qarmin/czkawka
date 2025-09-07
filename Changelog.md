@@ -1,7 +1,18 @@
 ## Version ?.?.? - ??
+### Breaking changes
+#### Users
+- Czkawka gui config file converted from custom format to json, so all settings needs to be set again(old txt file is not removed, so it may be used as reference for changes) 
+
 ### Core
 - Extensions in similar images mode and in previews, drops validating if extension is correct(most of the time) - [#]() 
+- Build and runtime Musl and Glibc versions are printed to logs - [#]()
 
+### GTK GUI
+- Sort button is restored and crashes when sorting are fixed(probably) - [#]()
+- Config now uses json format instead custom one, which fixes some problems - [#]()
+
+### Prebuilt binaries
+- Krokiet Windows binaries with skia backend are available (this is msvc build and requires vc redist installed)
 
 ## Version 10.0.0 - 18.08.2025r
 ### Breaking changes
