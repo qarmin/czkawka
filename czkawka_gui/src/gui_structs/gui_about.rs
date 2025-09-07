@@ -3,6 +3,7 @@ use gtk4::prelude::*;
 use gtk4::{Builder, Button, Orientation, Picture, Window};
 
 use crate::flg;
+use crate::utils::widget_utils::get_all_boxes_from_widget;
 
 #[derive(Clone)]
 pub struct GuiAbout {

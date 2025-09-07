@@ -19,6 +19,7 @@ use log::error;
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::saving_loading::{load_configuration, reset_configuration, save_configuration};
+use crate::utils::helpers::get_dialog_box_child;
 
 pub(crate) fn connect_settings(gui_data: &GuiData) {
     // Connect scale

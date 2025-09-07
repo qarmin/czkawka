@@ -11,6 +11,9 @@ use log::error;
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::notebook_info::{NOTEBOOKS_INFO, NotebookObject};
+use crate::utils::helpers::{get_full_name_from_path_name, get_max_file_name};
+use crate::utils::icon_utils::{get_pixbuf_from_dynamic_image, resize_pixbuf_dimension};
+use crate::utils::widget_utils::get_all_direct_children;
 
 const BIG_PREVIEW_SIZE: i32 = 600;
 const SMALL_PREVIEW_SIZE: i32 = 130;

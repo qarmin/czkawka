@@ -9,6 +9,9 @@ use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::notebook_enums::*;
 use crate::notebook_info::NOTEBOOKS_INFO;
+use crate::utils::helpers::get_full_name_from_path_name;
+use crate::utils::list_store_utils::get_list_store;
+use crate::utils::text_view_utils::{add_text_to_text_view, reset_text_view};
 
 pub(crate) fn connect_button_move(gui_data: &GuiData) {
     let buttons_move = gui_data.bottom_buttons.buttons_move.clone();

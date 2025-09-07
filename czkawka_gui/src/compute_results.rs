@@ -33,6 +33,10 @@ use crate::help_combo_box::IMAGES_HASH_SIZE_COMBO_BOX;
 use crate::notebook_enums::*;
 use crate::notebook_info::NOTEBOOKS_INFO;
 use crate::opening_selecting_records::*;
+use crate::utils::constants::{SharedState, HEADER_ROW_COLOR, MAIN_ROW_COLOR, TEXT_COLOR};
+use crate::utils::enums::{BottomButtonsEnum, ColumnsBadExtensions, ColumnsBigFiles, ColumnsBrokenFiles, ColumnsDuplicates, ColumnsEmptyFiles, ColumnsEmptyFolders, ColumnsInvalidSymlinks, ColumnsSameMusic, ColumnsSimilarImages, ColumnsSimilarVideos, ColumnsTemporaryFiles, Message};
+use crate::utils::list_store_utils::get_list_store;
+use crate::utils::text_view_utils::print_text_messages_to_text_view;
 
 pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Receiver<Message>) {
     let combo_box_image_hash_size = gui_data.main_notebook.combo_box_image_hash_size.clone();

@@ -5,6 +5,7 @@ use gtk4::{ListStore, TreeIter};
 
 use crate::gui_structs::gui_data::GuiData;
 use crate::notebook_info::NOTEBOOKS_INFO;
+use crate::utils::list_store_utils::get_list_store;
 
 fn popover_sort_general<T>(popover: &gtk4::Popover, tree_view: &gtk4::TreeView, column_sort: i32, column_header: i32)
 where
