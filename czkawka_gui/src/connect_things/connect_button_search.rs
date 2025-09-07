@@ -29,7 +29,10 @@ use crate::help_combo_box::{
     AUDIO_TYPE_CHECK_METHOD_COMBO_BOX, BIG_FILES_CHECK_METHOD_COMBO_BOX, DUPLICATES_CHECK_METHOD_COMBO_BOX, DUPLICATES_HASH_TYPE_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX,
     IMAGES_HASH_TYPE_COMBO_BOX, IMAGES_RESIZE_ALGORITHM_COMBO_BOX,
 };
-use crate::help_functions::*;
+use crate::help_functions::{
+    ColumnsExcludedDirectory, ColumnsIncludedDirectory, Message, check_if_list_store_column_have_all_same_values, get_list_store, get_path_buf_from_vector_of_strings,
+    get_string_from_list_store, hide_all_buttons, reset_text_view, set_buttons,
+};
 use crate::notebook_enums::*;
 use crate::taskbar_progress::tbp_flags::TBPF_NOPROGRESS;
 use crate::{DEFAULT_MAXIMAL_FILE_SIZE, DEFAULT_MINIMAL_CACHE_SIZE, DEFAULT_MINIMAL_FILE_SIZE, flg};

@@ -7,7 +7,7 @@ use gtk4::{Align, CheckButton, Dialog, Orientation, ResponseType, TextView, Tree
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::*;
+use crate::help_functions::{add_text_to_text_view, clean_invalid_headers, get_full_name_from_path_name, get_list_store, reset_text_view};
 use crate::notebook_enums::*;
 use crate::notebook_info::NOTEBOOKS_INFO;
 
