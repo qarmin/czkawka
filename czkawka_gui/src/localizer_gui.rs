@@ -17,12 +17,8 @@ pub static LANGUAGE_LOADER_GUI: Lazy<FluentLanguageLoader> = Lazy::new(|| {
 
 #[macro_export]
 macro_rules! flg {
-    ($message_id:literal) => {{
-        i18n_embed_fl::fl!($crate::localizer_gui::LANGUAGE_LOADER_GUI, $message_id)
-    }};
-
-    ($message_id:literal, $($args:expr),*) => {{
-        i18n_embed_fl::fl!($crate::localizer_gui::LANGUAGE_LOADER_GUI, $message_id, $($args), *)
+    ( $($tt:tt)* ) => {{
+        i18n_embed_fl::fl!($crate::localizer_gui::LANGUAGE_LOADER_GUI, $($tt)*)
     }};
 }
 

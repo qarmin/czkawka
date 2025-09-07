@@ -3,7 +3,7 @@ name = "czkawka_core"
 version = "10.0.0"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2024"
-rust-version = "1.85.0"
+rust-version = "1.86.0"
 description = "Core of Czkawka app"
 license = "MIT"
 homepage = "https://github.com/qarmin/czkawka"
@@ -29,9 +29,9 @@ bitflags = "2.6"
 lofty = "0.22"
 
 # Needed by broken files
-zip = { version = "4.0", features = ["aes-crypto", "bzip2", "deflate", "time"], default-features = false }
+zip = { version = "5.0", features = ["aes-crypto", "bzip2", "deflate", "time"], default-features = false }
 audio_checker = "0.1"
-lopdf = "0.37.0"
+lopdf = "0.38.0"
 
 # Needed by audio similarity feature
 rusty-chromaprint = "0.3"
@@ -91,14 +91,16 @@ file-rotate = "0.8.0"
 
 log-panics = { version = "2.1.0", features = ["with-backtrace"] }
 deunicode = "1.6.2"
+glibc_musl_version = "0.1.0"
 
-fast_image_resize = "=5.1.4" # TODO, greater versions uses unstable features, that were stabilized after 1.85.0
+fast_image_resize = "=5.1.4" # TODO, greater versions uses unstable features, that were stabilized in 1.87.0
 
 [target.'cfg(windows)'.dependencies]
 file-id = "0.2.2"
 
 [build-dependencies]
 rustc_version = "0.4"
+glibc_musl_version = "0.1.0"
 
 [dev-dependencies]
 criterion =  { version = "0.7", default-features = false, features = [] }

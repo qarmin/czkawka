@@ -49,7 +49,7 @@ opt-level = 3
 [profile.fastest]
 inherits = "release"
 panic = "abort"
-lto = "thin"
+lto = "fat"
 strip = "symbols"
 codegen-units = 1
 opt-level = 3

@@ -1461,6 +1461,7 @@ dependencies = [
  "file-id",
  "file-rotate",
  "fun_time",
+ "glibc_musl_version",
  "hamming-bitwise-fast",
  "handsome_logger",
  "humansize",
@@ -1507,6 +1508,7 @@ dependencies = [
  "crossbeam-channel",
  "czkawka_core",
  "directories-next",
+ "dunce",
  "fs_extra",
  "fun_time",
  "gdk4",
@@ -1525,6 +1527,8 @@ dependencies = [
  "regex",
  "resvg",
  "rust-embed",
+ "serde",
+ "serde_json",
  "trash",
  "winapi",
 ]
@@ -2713,6 +2717,12 @@ dependencies = [
  "libc",
  "system-deps 7.0.5",
 ]
+
+[[package]]
+name = "glibc_musl_version"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8b03526c417228f37a649e2697eb015f81c59817679bf01ac62445ce6a9b19ef"
 
 [[package]]
 name = "glob"
@@ -4349,9 +4359,9 @@ dependencies = [
 
 [[package]]
 name = "lopdf"
-version = "0.37.0"
+version = "0.38.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "674a3504c1224247e00762afb90690991b673c461f6779565e055e91926a49da"
+checksum = "c7184fdea2bc3cd272a1acec4030c321a8f9875e877b3f92a53f2f6033fdc289"
 dependencies = [
  "aes",
  "bitflags 2.9.2",
@@ -4375,6 +4385,7 @@ dependencies = [
  "stringprep",
  "thiserror 2.0.15",
  "time",
+ "ttf-parser 0.25.1",
  "weezl",
 ]
 
@@ -8848,9 +8859,9 @@ dependencies = [
 
 [[package]]
 name = "zip"
-version = "4.3.0"
+version = "5.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9aed4ac33e8eb078c89e6cbb1d5c4c7703ec6d299fc3e7c3695af8f8b423468b"
+checksum = "b9fdfa5f34b5980f2c21b3a2c68c09ade4debddc7be52c51056695effc73a08c"
 dependencies = [
  "aes",
  "arbitrary",

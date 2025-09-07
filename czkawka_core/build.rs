@@ -19,4 +19,18 @@ fn main() {
     if using_cranelift {
         println!("cargo:rustc-env=USING_CRANELIFT=1");
     }
+
+    if cfg!(target_os = "linux") {
+        if let Ok(ver) = glibc_musl_version::get_os_libc_versions() {
+            println!("cargo:rustc-env=CZKAWKA_LIBC_VERSIONS={ver}");
+        }
+
+        if cfg!(target_env = "gnu") {
+            println!("cargo:rustc-env=CZKAWKA_LIBC=glibc");
+        } else if cfg!(target_env = "musl") {
+            println!("cargo:rustc-env=CZKAWKA_LIBC=musl");
+        } else {
+            println!("cargo:rustc-env=CZKAWKA_LIBC=unknown");
+        }
+    }
 }

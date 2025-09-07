@@ -10,7 +10,6 @@
 #![warn(clippy::dbg_macro)]
 
 use std::env;
-use std::ffi::OsString;
 
 use connect_things::connect_about_buttons::*;
 use connect_things::connect_button_compare::*;
@@ -43,6 +42,7 @@ use gtk4::prelude::*;
 use gui_structs::gui_data::*;
 use log::info;
 
+use crate::cli::{CliResult, process_cli_args};
 use crate::compute_results::*;
 use crate::connect_things::connect_button_sort::connect_button_sort;
 use crate::connect_things::connect_popovers_select::connect_popover_select;
@@ -53,6 +53,7 @@ use crate::language_functions::LANGUAGES_ALL;
 use crate::saving_loading::*;
 use crate::tests::validate_notebook_data;
 
+mod cli;
 mod compute_results;
 mod connect_things;
 mod create_tree_view;
@@ -85,13 +86,14 @@ fn main() {
     glib::set_prgname(Some("com.github.qarmin.czkawka"));
 
     application.connect_command_line(move |app, cmdline| {
-        build_ui(app, &cmdline.arguments());
+        let cli_args = process_cli_args(cmdline.arguments().into_iter().skip(1).map(|x| x.to_string_lossy().to_string()).collect());
+        build_ui(app, cli_args.as_ref());
         ExitCode::new(0)
     });
     application.run_with_args(&env::args().collect::<Vec<_>>());
 }
 
-fn build_ui(application: &Application, arguments: &[OsString]) {
+fn build_ui(application: &Application, cli_args: Option<&CliResult>) {
     let gui_data: GuiData = GuiData::new_with_application(application);
 
     let (result_sender, result_receiver) = unbounded();
@@ -110,7 +112,7 @@ fn build_ui(application: &Application, arguments: &[OsString]) {
         &gui_data.settings,
         &gui_data.text_view_errors,
         &gui_data.scrolled_window_errors,
-        arguments,
+        cli_args,
     );
     set_number_of_threads(gui_data.settings.scale_settings_number_of_threads.value().round() as usize);
 
@@ -145,7 +147,7 @@ fn build_ui(application: &Application, arguments: &[OsString]) {
 
     let window_main = gui_data.window_main.clone();
     let taskbar_state = gui_data.taskbar_state.clone();
-    let used_additional_arguments = arguments.len() > 1;
+    let used_additional_arguments = cli_args.is_some();
     window_main.connect_close_request(move |_| {
         // Not save configuration when using non default arguments
         if !used_additional_arguments {

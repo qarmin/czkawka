@@ -13,28 +13,35 @@ where
 {
     let model = get_list_store(tree_view);
 
-    if let Some(curr_iter) = model.iter_first() {
-        assert!(model.get::<bool>(&curr_iter, column_header)); // First item should be header
-        assert!(model.iter_next(&curr_iter)); // Must be at least two items
+    if let Some(mut curr_iter) = model.iter_first() {
+        assert!(model.get::<bool>(&curr_iter, column_header));
+        assert!(model.iter_next(&curr_iter));
         loop {
             let mut iters = Vec::new();
             let mut all_have = false;
+            let local_iter = curr_iter;
             loop {
-                if model.get::<bool>(&curr_iter, column_header) {
-                    assert!(model.iter_next(&curr_iter), "Empty header, this should not happens");
+                if model.get::<bool>(&local_iter, column_header) {
+                    if !model.iter_next(&local_iter) {
+                        all_have = true;
+                    }
                     break;
                 }
-                iters.push(curr_iter);
-                if !model.iter_next(&curr_iter) {
+                iters.push(local_iter);
+                if !model.iter_next(&local_iter) {
                     all_have = true;
                     break;
                 }
             }
             if iters.len() == 1 {
-                continue; // Can be equal 1 in reference folders
+                curr_iter = local_iter;
+                if all_have {
+                    break;
+                }
+                continue;
             }
-
             sort_iters::<T>(&model, iters, column_sort);
+            curr_iter = local_iter;
             if all_have {
                 break;
             }
@@ -142,6 +149,7 @@ mod test {
     use glib::types::Type;
     use gtk4::prelude::*;
     use gtk4::{Popover, TreeView};
+    use rand::random;
 
     use crate::connect_things::connect_popovers_sort::{popover_sort_general, sort_iters};
 
@@ -231,58 +239,59 @@ mod test {
         }
     }
 
-    // TODO - This test uncovers a bug in the code, so it is disabled for now, with sort button
-    // #[gtk4::test]
-    // pub(crate) fn _fuzzer_test() {
-    //     for _ in 0..10000 {
-    //         let columns_types: &[Type] = &[Type::BOOL, Type::STRING];
-    //         let list_store = gtk4::ListStore::new(columns_types);
-    //         let tree_view = TreeView::builder().model(&list_store).build();
-    //         let popover = Popover::new();
-    //
-    //         let first_row: &[(u32, &dyn ToValue)] = &[(0, &true), (1, &"AAA")];
-    //         list_store.set(&list_store.append(), first_row);
-    //
-    //         let mut since_last_header = 0;
-    //
-    //         (0..(random::<u32>() % 10 + 5)).for_each(|_| {
-    //             let bool_val = if since_last_header < 2 {
-    //                 since_last_header += 1;
-    //                 false
-    //             } else {
-    //                 since_last_header = 0;
-    //                 random()
-    //             };
-    //             let string_val = rand::random::<u32>().to_string();
-    //             let a: Vec<(u32, &dyn ToValue)> = vec![(0, &bool_val), (1, &string_val)];
-    //
-    //             list_store.set(&list_store.append(), &a);
-    //         });
-    //
-    //         if since_last_header < 2 {
-    //             // This is invalid, and should be vec![(0, &false), (1, &"AAA")]
-    //             // but this triggers the bug
-    //             let a: Vec<(u32, &dyn ToValue)> = vec![(0, &true), (1, &"AAA")];
-    //             list_store.set(&list_store.append(), &a);
-    //             let b: Vec<(u32, &dyn ToValue)> = vec![(0, &false), (1, &"BBB")];
-    //             list_store.set(&list_store.append(), &b);
-    //         }
-    //
-    //         print_two_items_model(&list_store);
-    //
-    //         popover_sort_general::<String>(&popover, &tree_view, 1, 0);
-    //     }
-    // }
-    //
-    // fn print_two_items_model(model: &gtk4::ListStore) {
-    //     let iter = model.iter_first().expect("Failed to get first iter");
-    //     loop {
-    //         let bool_val = model.get::<bool>(&iter, 0);
-    //         let string_val = model.get::<String>(&iter, 1);
-    //         println!("{bool_val} {string_val}");
-    //         if !model.iter_next(&iter) {
-    //             break;
-    //         }
-    //     }
-    // }
+    #[gtk4::test]
+    pub(crate) fn fuzzer_test() {
+        for _ in 0..1000 {
+            let columns_types: &[Type] = &[Type::BOOL, Type::STRING];
+            let list_store = gtk4::ListStore::new(columns_types);
+            let tree_view = TreeView::builder().model(&list_store).build();
+            let popover = Popover::new();
+
+            // Always start with a header
+            let first_row: &[(u32, &dyn ToValue)] = &[(0, &true), (1, &"AAA")];
+            list_store.set(&list_store.append(), first_row);
+
+            let mut since_last_header = 0;
+            let mut need_header = false;
+            let num_rows = (random::<u32>() % 10 + 5) as usize;
+            let mut i = 0;
+            while i < num_rows {
+                if need_header {
+                    // Insert a header only if last was not a header
+                    let a: Vec<(u32, &dyn ToValue)> = vec![(0, &true), (1, &"HEADER")];
+                    list_store.set(&list_store.append(), &a);
+                    since_last_header = 0;
+                    need_header = false;
+                    i += 1;
+                    continue;
+                }
+                // Insert a non-header row
+                let string_val = rand::random::<u32>().to_string();
+                let a: Vec<(u32, &dyn ToValue)> = vec![(0, &false), (1, &string_val)];
+                list_store.set(&list_store.append(), &a);
+                since_last_header += 1;
+                // After at least 2 non-header rows, randomly decide to insert a header next
+                if since_last_header >= 2 && random::<u8>() % 3 == 0 {
+                    need_header = true;
+                }
+                i += 1;
+            }
+
+            // Ensure at least one non-header after the last header
+            let last_iter = list_store.iter_first().expect("TEST");
+            let mut last_is_header;
+            loop {
+                last_is_header = list_store.get::<bool>(&last_iter, 0);
+                if !list_store.iter_next(&last_iter) {
+                    break;
+                }
+            }
+            if last_is_header {
+                let a: Vec<(u32, &dyn ToValue)> = vec![(0, &false), (1, &"FINALROW")];
+                list_store.set(&list_store.append(), &a);
+            }
+
+            popover_sort_general::<String>(&popover, &tree_view, 1, 0);
+        }
+    }
 }

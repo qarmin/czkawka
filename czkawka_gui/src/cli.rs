@@ -3,7 +3,7 @@ use std::process;
 use czkawka_core::CZKAWKA_VERSION;
 use log::warn;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CliResult {
     pub included_items: Vec<String>,
     pub excluded_items: Vec<String>,
@@ -22,11 +22,11 @@ enum ExpectedArgs {
 #[allow(clippy::print_stderr)]
 pub(crate) fn process_cli_args(args: Vec<String>) -> Option<CliResult> {
     if ["--help", "-h"].iter().any(|&arg| args.contains(&arg.to_string())) {
-        println!("Krokiet");
-        println!("Krokiet allows you to specify folders to search for files via the CLI, and also to exclude or reference folders.");
+        println!("Czkawka Gui");
+        println!("Czkawka Gui allows you to specify folders to search for files via the CLI, and also to exclude or reference folders.");
         println!("If used, it will automatically apply the last preset and load its options.");
-        println!("Running the app without arguments will launch the Krokiet GUI with default or saved options.");
-        println!("Usage: krokiet [OPTIONS] [FOLDERS...]");
+        println!("Running the app without arguments will launch the Czkawka GUI with default or saved options.");
+        println!("Usage: czkawka_gui [OPTIONS] [FOLDERS...]");
         println!("Options:");
         println!("  FOLDER                Include a folder in the search");
         println!("  -e FOLDER, --exclude FOLDER      Exclude a folder from the search");
@@ -34,13 +34,13 @@ pub(crate) fn process_cli_args(args: Vec<String>) -> Option<CliResult> {
         println!("  --help, -h            Show this help message");
         println!("  --version, -v         Show version information");
         println!("Examples:");
-        println!("  krokiet /path/absolute/to/folder -e relative_path/2 -r /path/to/referenced");
-        println!("  krokiet . folder2 folder3");
+        println!("  czkawka_gui /path/absolute/to/folder -e relative_path/2 -r /path/to/referenced");
+        println!("  czkawka_gui . folder2 folder3");
         println!("If no folders are specified, the program will exit without doing anything.");
         process::exit(0);
     }
     if ["--version", "-v"].iter().any(|&arg| args.contains(&arg.to_string())) {
-        println!("Krokiet version {CZKAWKA_VERSION}");
+        println!("Czkawka Gui version {CZKAWKA_VERSION}");
         process::exit(0);
     }
 

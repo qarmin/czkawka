@@ -10,7 +10,7 @@ use std::{fs, panic, thread};
 
 use anyhow::anyhow;
 use fun_time::fun_time;
-use image::{DynamicImage, ImageBuffer, Rgb, Rgba};
+use image::{DynamicImage, ImageBuffer, ImageReader, Rgb, Rgba};
 use jxl_oxide::image::BitDepth;
 use jxl_oxide::integration::JxlDecoder;
 use jxl_oxide::{JxlImage, PixelFormat};
@@ -42,6 +42,15 @@ pub(crate) fn get_jxl_image(path: &str) -> anyhow::Result<DynamicImage> {
     Ok(image)
 }
 
+// Using this instead of image::open because image::open only reads content of files if extension matches content
+// This is not really helpful when trying to show preview of files with wrong extensions
+pub(crate) fn decode_normal_image(path: &str) -> anyhow::Result<DynamicImage> {
+    let file = File::open(path)?;
+    let img = ImageReader::new(std::io::BufReader::new(file)).with_guessed_format()?.decode()?;
+
+    Ok(img)
+}
+
 pub fn get_dynamic_image_from_path(path: &str) -> Result<DynamicImage, String> {
     let path_lower = Path::new(path).extension().unwrap_or_default().to_string_lossy().to_lowercase();
 
@@ -54,14 +63,14 @@ pub fn get_dynamic_image_from_path(path: &str) -> Result<DynamicImage, String> {
             }
             #[cfg(not(feature = "heif"))]
             {
-                image::open(path).map_err(|e| format!("Cannot open image file \"{path}\": {e}"))
+                decode_normal_image(path).map_err(|e| format!("Cannot open image file \"{path}\": {e}"))
             }
         } else if JXL_IMAGE_EXTENSIONS.iter().any(|ext| path_lower.ends_with(ext)) {
             get_jxl_image(path).map_err(|e| format!("Cannot open jxl image file \"{path}\": {e}"))
         } else if RAW_IMAGE_EXTENSIONS.iter().any(|ext| path_lower.ends_with(ext)) {
             get_raw_image(path).map_err(|e| format!("Cannot open raw image file \"{path}\": {e}"))
         } else {
-            image::open(path).map_err(|e| format!("Cannot open image file \"{path}\": {e}"))
+            decode_normal_image(path).map_err(|e| format!("Cannot open image file \"{path}\": {e}"))
         }
     });
 
