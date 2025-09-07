@@ -31,12 +31,11 @@ use crate::help_combo_box::{
 };
 use crate::notebook_enums::*;
 use crate::taskbar_progress::tbp_flags::TBPF_NOPROGRESS;
-use crate::{DEFAULT_MAXIMAL_FILE_SIZE, DEFAULT_MINIMAL_CACHE_SIZE, DEFAULT_MINIMAL_FILE_SIZE, flg};
 use crate::utils::enums::{ColumnsExcludedDirectory, ColumnsIncludedDirectory, Message};
-use crate::utils::list_store_utils::*;
-use crate::utils::list_store_utils::check_if_list_store_column_have_all_same_values;
-use crate::utils::widget_utils::*;
+use crate::utils::list_store_utils::{check_if_list_store_column_have_all_same_values, *};
 use crate::utils::text_view_utils::reset_text_view;
+use crate::utils::widget_utils::*;
+use crate::{DEFAULT_MAXIMAL_FILE_SIZE, DEFAULT_MINIMAL_CACHE_SIZE, DEFAULT_MINIMAL_FILE_SIZE, flg};
 
 #[allow(clippy::too_many_arguments)]
 pub(crate) fn connect_button_search(gui_data: &GuiData, result_sender: Sender<Message>, progress_sender: Sender<ProgressData>) {

@@ -1,6 +1,8 @@
+use std::collections::HashMap;
+
 use gtk4::Widget;
 use gtk4::prelude::*;
-use std::collections::HashMap;
+
 use crate::utils::enums::BottomButtonsEnum;
 
 pub fn get_custom_label_from_widget<P: IsA<Widget>>(item: &P) -> gtk4::Label {
@@ -85,10 +87,12 @@ pub fn hide_all_buttons(buttons_array: &[Widget]) {
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    use gtk4::prelude::*;
-    use gtk4::{Box as GtkBox, Button, Orientation};
     use std::collections::HashMap;
+
+    use gtk4::Button;
+    use gtk4::prelude::*;
+
+    use super::*;
 
     #[gtk4::test]
     fn test_set_buttons_and_hide_all_buttons() {

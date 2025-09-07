@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
-use gtk4::{ListStore, TreeView};
 use gtk4::prelude::*;
+use gtk4::{ListStore, TreeView};
 
 pub fn get_string_from_list_store(tree_view: &TreeView, column_full_path: i32, column_selection: Option<i32>) -> Vec<String> {
     let list_store: ListStore = get_list_store(tree_view);
@@ -226,11 +226,12 @@ pub fn check_if_list_store_column_have_all_same_values(list_store: &ListStore, c
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use glib::Value;
     use glib::types::Type;
-    use gtk4::prelude::*;
     use gtk4::TreeView;
+    use gtk4::prelude::*;
+
+    use super::*;
 
     #[gtk4::test]
     fn test_get_string_from_list_store() {

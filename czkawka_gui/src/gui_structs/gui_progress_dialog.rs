@@ -1,9 +1,9 @@
 use gtk4::prelude::*;
 use gtk4::{Builder, EventControllerKey, Window};
 
-use crate::{CZK_ICON_STOP, flg};
 use crate::utils::icon_utils::set_icon_of_button;
 use crate::utils::widget_utils::get_custom_label_from_widget;
+use crate::{CZK_ICON_STOP, flg};
 
 #[derive(Clone)]
 pub struct GuiProgressDialog {

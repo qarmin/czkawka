@@ -20,12 +20,12 @@ use crate::localizer_core::generate_translation_hashmap;
 use crate::notebook_enums::{NotebookMainEnum, NotebookUpperEnum};
 use crate::notebook_info::NOTEBOOKS_INFO;
 use crate::opening_selecting_records::*;
-use crate::{delete_things, flg};
 use crate::utils::constants::KEY_DELETE;
 use crate::utils::helpers::{get_full_name_from_path_name, get_tree_view_name_from_notebook_enum, get_tree_view_name_from_notebook_upper_enum, scale_set_min_max_values};
 use crate::utils::icon_utils::{get_pixbuf_from_dynamic_image, resize_pixbuf_dimension};
 use crate::utils::list_store_utils::get_list_store;
 use crate::utils::text_view_utils::add_text_to_text_view;
+use crate::{delete_things, flg};
 
 pub(crate) fn initialize_gui(gui_data: &GuiData) {
     //// Initialize button

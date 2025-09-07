@@ -1,7 +1,8 @@
 use std::path::MAIN_SEPARATOR;
 
-use gtk4::{Box as GtkBox, Dialog, Scale, ScrollType, TreeView};
 use gtk4::prelude::*;
+use gtk4::{Box as GtkBox, Dialog, Scale, ScrollType, TreeView};
+
 use crate::notebook_enums::{NotebookMainEnum, NotebookUpperEnum};
 use crate::notebook_info::{NOTEBOOKS_INFO, NotebookObject};
 
