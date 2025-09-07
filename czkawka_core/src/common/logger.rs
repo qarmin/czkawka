@@ -137,24 +137,29 @@ pub fn print_version_mode(app: &str) {
         os_cpu_version = "x86-64-v4 (AVX-512)";
     }
 
-    // TODO - probably needs to add arm and other architectures, need help, because I don't have access to them
-
     let musl_or_glibc = if cfg!(target_os = "linux") {
-        match glibc_musl_version::get_os_libc_versions() {
+        let libc_versions_str = match glibc_musl_version::get_os_libc_versions() {
             Ok(libc_versions) => {
-                let mut compile_time_version = "".to_string();
-                if let Some(env) = option_env!("CZKAWKA_LIBC_VERSIONS") {
-                    compile_time_version = format!(", compile_time[{env}]");
+                let libc_versions_str = libc_versions.to_string();
+
+                match option_env!("CZKAWKA_LIBC_VERSIONS") {
+                    Some(env) if env == libc_versions_str => {
+                        format!(" [build + runtime ({libc_versions_str})]")
+                    }
+                    Some(env) => {
+                        format!(" [build ({env}), runtime ({libc_versions_str})]")
+                    }
+                    None => {
+                        format!(" [build (unknown), runtime ({libc_versions_str})]")
+                    }
                 }
-
-
-                format!(", glibc versions(runtime[{}]{compile_time_version})", libc_versions)
             }
             Err(e) => {
                 warn!("Cannot get libc version: {e}");
                 "".to_string()
-            },
-        }
+            }
+        };
+        format!(", libc {}{libc_versions_str}", option_env!("CZKAWKA_LIBC").unwrap_or("unknown(cross-compilation?)"))
     } else {
         "".to_string()
     };
