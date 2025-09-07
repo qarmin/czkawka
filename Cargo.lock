@@ -1462,6 +1462,7 @@ dependencies = [
  "file-id",
  "file-rotate",
  "fun_time",
+ "glibc_musl_version",
  "hamming-bitwise-fast",
  "handsome_logger",
  "humansize",
@@ -2743,6 +2744,12 @@ dependencies = [
  "libc",
  "system-deps 7.0.5",
 ]
+
+[[package]]
+name = "glibc_musl_version"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8b03526c417228f37a649e2697eb015f81c59817679bf01ac62445ce6a9b19ef"
 
 [[package]]
 name = "glob"

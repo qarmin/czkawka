@@ -139,6 +139,19 @@ pub fn print_version_mode(app: &str) {
 
     // TODO - probably needs to add arm and other architectures, need help, because I don't have access to them
 
+    let musl_or_glibc = if cfg!(target_os = "linux") {
+        match glibc_musl_version::get_os_libc_versions() {
+            Ok(libc_versions) => {
+                format!("(runtime - {})")
+            }
+            Err(e) => {
+                warn!("Cannot get libc version: {e}");
+                "".to_string()
+            },
+        }
+    } else {
+        "".to_string()
+    };
     // let musl_or_glibc = if cfg!(target_os = "linux" and target_env = "musl") {
     //     ", musl"
     // } else if cfg!(target_os = "linux" and target_env = "gnu") {

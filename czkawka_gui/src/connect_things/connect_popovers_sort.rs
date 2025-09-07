@@ -291,7 +291,6 @@ mod test {
                 list_store.set(&list_store.append(), &a);
             }
 
-            // Optionally: print_two_items_model(&list_store);
             popover_sort_general::<String>(&popover, &tree_view, 1, 0);
         }
     }

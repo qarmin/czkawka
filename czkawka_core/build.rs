@@ -19,4 +19,7 @@ fn main() {
     if using_cranelift {
         println!("cargo:rustc-env=USING_CRANELIFT=1");
     }
+
+    let libc_musl
+
 }

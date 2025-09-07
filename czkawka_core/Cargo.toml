@@ -91,6 +91,7 @@ file-rotate = "0.8.0"
 
 log-panics = { version = "2.1.0", features = ["with-backtrace"] }
 deunicode = "1.6.2"
+glibc_musl_version = "0.1.0"
 
 fast_image_resize = "=5.1.4" # TODO, greater versions uses unstable features, that were stabilized in 1.87.0
 
