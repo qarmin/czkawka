@@ -142,7 +142,13 @@ pub fn print_version_mode(app: &str) {
     let musl_or_glibc = if cfg!(target_os = "linux") {
         match glibc_musl_version::get_os_libc_versions() {
             Ok(libc_versions) => {
-                format!("(runtime - {})")
+                let mut compile_time_version = "".to_string();
+                if let Some(env) = option_env!("CZKAWKA_LIBC_VERSIONS") {
+                    compile_time_version = format!(", compile_time[{env}]");
+                }
+
+
+                format!(", glibc versions(runtime[{}]{compile_time_version})", libc_versions)
             }
             Err(e) => {
                 warn!("Cannot get libc version: {e}");
@@ -152,24 +158,15 @@ pub fn print_version_mode(app: &str) {
     } else {
         "".to_string()
     };
-    // let musl_or_glibc = if cfg!(target_os = "linux" and target_env = "musl") {
-    //     ", musl"
-    // } else if cfg!(target_os = "linux" and target_env = "gnu") {
-    //     ", glibc"
-    // } else {
-    //     ""
-    // };
 
     info!(
-        "{app} version: {CZKAWKA_VERSION}, {debug_release} mode, rust {rust_version}, os {} {} ({} {}), {processors} cpu/threads, features({}): [{}], app cpu version: {}, os cpu version: {}",
+        "{app} version: {CZKAWKA_VERSION}, {debug_release} mode, rust {rust_version}, os {} {} ({} {}), {processors} cpu/threads, features({}): [{}], app cpu version: {app_cpu_version}, os cpu version: {os_cpu_version}{musl_or_glibc}",
         info.os_type(),
         info.version(),
         env::consts::ARCH,
         info.bitness(),
         features.len(),
         features.join(", "),
-        app_cpu_version,
-        os_cpu_version,
     );
     if cfg!(debug_assertions) {
         warn!("You are running debug version of app which is a lot of slower than release version.");
