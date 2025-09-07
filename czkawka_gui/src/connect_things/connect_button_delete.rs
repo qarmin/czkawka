@@ -8,7 +8,6 @@ use log::debug;
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::{check_how_much_elements_is_selected, clean_invalid_headers, get_full_name_from_path_name, get_list_store};
 use crate::notebook_enums::*;
 use crate::notebook_info::NOTEBOOKS_INFO;
 

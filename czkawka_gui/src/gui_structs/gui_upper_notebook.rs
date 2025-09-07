@@ -1,9 +1,10 @@
 use gtk4::prelude::*;
 use gtk4::{EventControllerKey, GestureClick, TreeView};
 
-use crate::help_functions::{get_all_direct_children, get_custom_label_from_widget, set_icon_of_button};
 use crate::notebook_enums::NotebookUpperEnum;
 use crate::{CZK_ICON_ADD, CZK_ICON_DELETE, CZK_ICON_MANUAL_ADD, flg};
+use crate::utils::icon_utils::set_icon_of_button;
+use crate::utils::widget_utils::{get_all_direct_children, get_custom_label_from_widget};
 
 #[derive(Clone)]
 pub struct GuiUpperNotebook {

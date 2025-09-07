@@ -195,4 +195,3 @@ pub enum ColumnsBadExtensions {
     Modification,
     ModificationAsSecs,
 }
-

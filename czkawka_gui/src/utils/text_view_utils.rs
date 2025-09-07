@@ -1,6 +1,8 @@
-use gtk4::TextView;
-use crate::flg;
 use czkawka_core::helpers::messages::Messages;
+use gtk4::TextView;
+use gtk4::prelude::*;
+
+use crate::flg;
 
 pub fn print_text_messages_to_text_view(text_messages: &Messages, text_view: &TextView) {
     let mut messages: String = String::new();
@@ -41,4 +43,3 @@ pub fn add_text_to_text_view(text_view: &TextView, string_to_append: &str) {
         buffer.set_text(format!("{current_text}\n{string_to_append}").as_str());
     }
 }
-

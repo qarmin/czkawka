@@ -10,9 +10,6 @@ use log::error;
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::{
-    count_number_of_groups, get_all_direct_children, get_full_name_from_path_name, get_max_file_name, get_pixbuf_from_dynamic_image, resize_pixbuf_dimension,
-};
 use crate::notebook_info::{NOTEBOOKS_INFO, NotebookObject};
 
 const BIG_PREVIEW_SIZE: i32 = 600;

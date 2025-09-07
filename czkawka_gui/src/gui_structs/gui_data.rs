@@ -31,9 +31,10 @@ use crate::gui_structs::gui_popovers_sort::GuiSortPopovers;
 use crate::gui_structs::gui_progress_dialog::GuiProgressDialog;
 use crate::gui_structs::gui_settings::GuiSettings;
 use crate::gui_structs::gui_upper_notebook::GuiUpperNotebook;
-use crate::help_functions::{BottomButtonsEnum, SharedState};
 use crate::notebook_enums::*;
 use crate::taskbar_progress::TaskbarProgress;
+use crate::utils::constants::SharedState;
+use crate::utils::enums::BottomButtonsEnum;
 
 pub const ICON_ABOUT: &[u8] = include_bytes!("../../icons/icon_about.png");
 pub const CZK_ICON_ADD: &[u8] = include_bytes!("../../icons/czk_add.svg");

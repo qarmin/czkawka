@@ -1,7 +1,9 @@
-use gtk4::{Dialog, Box as GtkBox, TreeView, Scale, ScrollType};
+use std::path::MAIN_SEPARATOR;
+
+use gtk4::{Box as GtkBox, Dialog, Scale, ScrollType, TreeView};
+use gtk4::prelude::*;
 use crate::notebook_enums::{NotebookMainEnum, NotebookUpperEnum};
 use crate::notebook_info::{NOTEBOOKS_INFO, NotebookObject};
-use std::path::MAIN_SEPARATOR;
 
 pub fn get_dialog_box_child(dialog: &Dialog) -> GtkBox {
     dialog.child().expect("Dialog has no child").downcast::<GtkBox>().expect("Dialog child is not Box")
@@ -114,4 +116,3 @@ pub fn scale_step_function(scale: &Scale, _scroll_type: ScrollType, value: f64) 
     scale.set_fill_level(value.round());
     glib::Propagation::Proceed
 }
-

@@ -1,5 +1,5 @@
+use gtk4::Widget;
 use gtk4::prelude::*;
-use gtk4::{Widget};
 
 pub fn get_custom_label_from_widget<P: IsA<Widget>>(item: &P) -> gtk4::Label {
     let mut widgets_to_check = vec![item.clone().upcast::<Widget>()];
@@ -63,4 +63,3 @@ pub fn debug_print_widget<P: IsA<Widget>>(item: &P) {
         debug!("{current_number}, {parent_number}, {widget:?} ");
     }
 }
-

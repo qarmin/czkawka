@@ -1,8 +1,9 @@
-use gtk4::gdk_pixbuf::{InterpType, Pixbuf};
 use glib::Bytes;
-use image::{DynamicImage, RgbaImage};
+use gtk4::gdk_pixbuf::{InterpType, Pixbuf};
+use image::{DynamicImage, GenericImageView, RgbaImage};
 use resvg::tiny_skia;
 use resvg::usvg::{Options, Tree};
+
 use crate::utils::widget_utils::get_custom_image_from_widget;
 
 pub const SIZE_OF_ICON: i32 = 18;
@@ -33,8 +34,9 @@ pub fn set_icon_of_button<P: gtk4::prelude::IsA<gtk4::Widget>>(button: &P, data:
 }
 
 pub fn get_pixbuf_from_dynamic_image(dynamic_image: &DynamicImage) -> Result<Pixbuf, String> {
-    use image::codecs::jpeg::JpegEncoder;
     use std::io::{BufReader, Cursor};
+
+    use image::codecs::jpeg::JpegEncoder;
     let mut output = Vec::new();
     JpegEncoder::new(&mut output)
         .encode_image(dynamic_image)
@@ -62,4 +64,3 @@ pub fn resize_pixbuf_dimension(pixbuf: &Pixbuf, requested_size: (i32, i32), inte
     }
     pixbuf.scale_simple(new_size.0, new_size.1, interp_type)
 }
-

@@ -16,8 +16,11 @@ use crate::gui_structs::gui_main_notebook::GuiMainNotebook;
 use crate::gui_structs::gui_settings::GuiSettings;
 use crate::gui_structs::gui_upper_notebook::GuiUpperNotebook;
 use crate::help_combo_box::DUPLICATES_CHECK_METHOD_COMBO_BOX;
-use crate::help_functions::*;
 use crate::language_functions::{LANGUAGES_ALL, get_language_from_combo_box_text};
+use crate::utils::enums::{ColumnsExcludedDirectory, ColumnsIncludedDirectory};
+use crate::utils::helpers::scale_step_function;
+use crate::utils::list_store_utils::{get_from_list_store_fnc, get_list_store, get_string_from_list_store};
+use crate::utils::text_view_utils::{add_text_to_text_view, reset_text_view};
 
 const SAVE_FILE_NAME_JSON: &str = "czkawka_gui_config.json";
 

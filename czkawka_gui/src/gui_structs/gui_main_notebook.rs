@@ -8,8 +8,8 @@ use gtk4::{Builder, CheckButton, ComboBoxText, Entry, EventControllerKey, Gestur
 
 use crate::flg;
 use crate::help_combo_box::{AUDIO_TYPE_CHECK_METHOD_COMBO_BOX, BIG_FILES_CHECK_METHOD_COMBO_BOX, DUPLICATES_CHECK_METHOD_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX};
-use crate::help_functions::get_all_direct_children;
 use crate::notebook_enums::{NUMBER_OF_NOTEBOOK_MAIN_TABS, NotebookMainEnum};
+use crate::utils::widget_utils::get_all_direct_children;
 
 #[derive(Clone)]
 pub struct GuiMainNotebook {

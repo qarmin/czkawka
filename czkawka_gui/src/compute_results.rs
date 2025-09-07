@@ -30,7 +30,6 @@ use rayon::prelude::*;
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_combo_box::IMAGES_HASH_SIZE_COMBO_BOX;
-use crate::help_functions::*;
 use crate::notebook_enums::*;
 use crate::notebook_info::NOTEBOOKS_INFO;
 use crate::opening_selecting_records::*;

@@ -1,5 +1,4 @@
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::*;
 use crate::notebook_enums::*;
 
 pub(crate) fn connect_notebook_tabs(gui_data: &GuiData) {

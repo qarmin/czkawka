@@ -835,11 +835,7 @@ mod test {
     use gtk4::prelude::*;
     use gtk4::{Orientation, TreeView};
     use image::DynamicImage;
-
-    use crate::help_functions::{
-        change_dimension_to_krotka, check_if_list_store_column_have_all_same_values, check_if_value_is_in_list_store, get_all_boxes_from_widget, get_all_direct_children,
-        get_max_file_name, get_pixbuf_from_dynamic_image, get_string_from_list_store,
-    };
+    use super::*;
 
     #[gtk4::test]
     fn test_get_string_from_list_store() {

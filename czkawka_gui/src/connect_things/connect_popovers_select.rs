@@ -7,9 +7,9 @@ use regex::Regex;
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::*;
 use crate::notebook_info::NOTEBOOKS_INFO;
-
+use crate::utils::helpers::{change_dimension_to_krotka, get_dialog_box_child, get_full_name_from_path_name};
+use crate::utils::list_store_utils::get_list_store;
 // File length variable allows users to choose duplicates which have shorter file name
 // e.g. 'tar.gz' will be selected instead 'tar.gz (copy)' etc.
 

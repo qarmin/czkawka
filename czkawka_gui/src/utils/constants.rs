@@ -10,4 +10,3 @@ pub const HEADER_ROW_COLOR: &str = "#111111";
 pub const TEXT_COLOR: &str = "#ffffff";
 
 pub type SharedState<T> = Rc<RefCell<Option<T>>>;
-
