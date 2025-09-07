@@ -52,6 +52,7 @@ pub fn get_all_direct_children<P: IsA<Widget>>(wid: &P) -> Vec<Widget> {
     vector
 }
 
+#[allow(dead_code)]
 pub fn debug_print_widget<P: IsA<Widget>>(item: &P) {
     use log::debug;
     let mut widgets_to_check = vec![(0, 0, item.clone().upcast::<Widget>())];

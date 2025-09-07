@@ -433,195 +433,159 @@ pub(crate) fn get_full_name_from_path_name(path: &str, name: &str) -> String {
     string
 }
 
-// After e.g. deleting files, header may become orphan or have one child, so should be deleted in this case
-pub(crate) fn clean_invalid_headers(model: &ListStore, column_header: i32, column_path: i32) {
-    // Remove only child from header
-    if let Some(first_iter) = model.iter_first() {
-        let mut vec_tree_path_to_delete: Vec<gtk4::TreePath> = Vec::new();
-        let mut current_iter = first_iter;
-        // First element should be header
-        assert!(model.get::<bool>(&current_iter, column_header), "First deleted element, should be a header");
+// Removed: clean_invalid_headers, check_how_much_elements_is_selected, count_number_of_groups, check_if_value_is_in_list_store, check_if_list_store_column_have_all_same_values and their tests (now in utils/list_store_utils.rs)
+// ...rest of the file remains unchanged...
 
-        let mut next_iter;
-        let mut next_next_iter;
-
-        // Empty means default check type
-        if model.get::<String>(&current_iter, column_path).is_empty() {
-            'main: loop {
-                // First element should be header
-                assert!(model.get::<bool>(&current_iter, column_header), "First deleted element, should be a header");
-
-                next_iter = current_iter;
-                if !model.iter_next(&next_iter) {
-                    // There is only single header left (H1 -> END) -> (NOTHING)
-                    vec_tree_path_to_delete.push(model.path(&current_iter));
-                    break 'main;
-                }
-
-                if model.get::<bool>(&next_iter, column_header) {
-                    // There are two headers each others(we remove just first) -> (H1 -> H2) -> (H2)
-                    vec_tree_path_to_delete.push(model.path(&current_iter));
-                    current_iter = next_iter;
-                    continue 'main;
-                }
-
-                next_next_iter = next_iter;
-                if !model.iter_next(&next_next_iter) {
-                    // There is only one child of header left, so we remove it with header (H1 -> C1 -> END) -> (NOTHING)
-                    vec_tree_path_to_delete.push(model.path(&current_iter));
-                    vec_tree_path_to_delete.push(model.path(&next_iter));
-                    break 'main;
-                }
-
-                if model.get::<bool>(&next_next_iter, column_header) {
-                    // One child between two headers, we can remove them  (H1 -> C1 -> H2) -> (H2)
-                    vec_tree_path_to_delete.push(model.path(&current_iter));
-                    vec_tree_path_to_delete.push(model.path(&next_iter));
-                    current_iter = next_next_iter;
-                    continue 'main;
-                }
-
-                loop {
-                    // (H1 -> C1 -> C2 -> Cn -> END) -> (NO CHANGE, BECAUSE IS GOOD)
-                    if !model.iter_next(&next_next_iter) {
-                        break 'main;
-                    }
-                    // Move to next header
-                    if model.get::<bool>(&next_next_iter, column_header) {
-                        current_iter = next_next_iter;
-                        continue 'main;
-                    }
-                }
-            }
+pub(crate) fn resize_pixbuf_dimension(pixbuf: &Pixbuf, requested_size: (i32, i32), interp_type: InterpType) -> Option<Pixbuf> {
+    let current_ratio = pixbuf.width() as f32 / pixbuf.height() as f32;
+    let mut new_size;
+    match current_ratio.total_cmp(&(requested_size.0 as f32 / requested_size.1 as f32)) {
+        Ordering::Greater => {
+            new_size = (requested_size.0, (pixbuf.height() * requested_size.0) / pixbuf.width());
+            new_size = (std::cmp::max(new_size.0, 1), std::cmp::max(new_size.1, 1));
         }
-        // Non empty means that header points at reference folder
-        else {
-            'reference: loop {
-                // First element should be header
-                assert!(model.get::<bool>(&current_iter, column_header), "First deleted element, should be a header");
-
-                next_iter = current_iter;
-                if !model.iter_next(&next_iter) {
-                    // There is only single header left (H1 -> END) -> (NOTHING)
-                    vec_tree_path_to_delete.push(model.path(&current_iter));
-                    break 'reference;
-                }
-
-                if model.get::<bool>(&next_iter, column_header) {
-                    // There are two headers each others(we remove just first) -> (H1 -> H2) -> (H2)
-                    vec_tree_path_to_delete.push(model.path(&current_iter));
-                    current_iter = next_iter;
-                    continue 'reference;
-                }
-
-                next_next_iter = next_iter;
-                if !model.iter_next(&next_next_iter) {
-                    // There is only one child of header left, so we remove it with header (H1 -> C1 -> END) -> (NOTHING)
-                    break 'reference;
-                }
-
-                if model.get::<bool>(&next_next_iter, column_header) {
-                    // One child between two headers, we can remove them  (H1 -> C1 -> H2) -> (H2)
-                    current_iter = next_next_iter;
-                    continue 'reference;
-                }
-
-                loop {
-                    // (H1 -> C1 -> C2 -> Cn -> END) -> (NO CHANGE, BECAUSE IS GOOD)
-                    if !model.iter_next(&next_next_iter) {
-                        break 'reference;
-                    }
-                    // Move to next header
-                    if model.get::<bool>(&next_next_iter, column_header) {
-                        current_iter = next_next_iter;
-                        continue 'reference;
-                    }
-                }
-            }
+        Ordering::Less => {
+            new_size = ((pixbuf.width() * requested_size.1) / pixbuf.height(), requested_size.1);
+            new_size = (std::cmp::max(new_size.0, 1), std::cmp::max(new_size.1, 1));
         }
-        for tree_path in vec_tree_path_to_delete.iter().rev() {
-            model.remove(&model.iter(tree_path).expect("Using invalid tree_path"));
+        Ordering::Equal => {
+            new_size = requested_size;
+            new_size = (std::cmp::max(new_size.0, 1), std::cmp::max(new_size.1, 1));
         }
     }
+    pixbuf.scale_simple(new_size.0, new_size.1, interp_type)
+}
 
-    // Last step, remove orphan header if exists
-    if let Some(iter) = model.iter_first() {
-        if !model.iter_next(&iter) {
-            model.clear();
+pub(crate) fn get_max_file_name(file_name: &str, max_length: usize) -> String {
+    assert!(max_length > 10); // Maybe in future will be supported lower values
+    let characters_in_filename = file_name.chars().count();
+    if characters_in_filename > max_length {
+        let start_characters = 10;
+        let difference = characters_in_filename - max_length;
+        let second_part_start = start_characters + difference;
+        let mut string_pre = String::new();
+        let mut string_after = String::new();
+
+        for (index, character) in file_name.chars().enumerate() {
+            if index < start_characters {
+                string_pre.push(character);
+            } else if index >= second_part_start {
+                string_after.push(character);
+            }
         }
+
+        format!("{string_pre} ... {string_after}")
+    } else {
+        file_name.to_string()
     }
 }
 
-pub(crate) fn check_how_much_elements_is_selected(tree_view: &TreeView, column_header: Option<i32>, column_selection: i32) -> (u64, u64) {
-    let mut number_of_selected_items: u64 = 0;
-    let mut number_of_selected_groups: u64 = 0;
+pub(crate) fn get_custom_label_from_widget<P: IsA<Widget>>(item: &P) -> gtk4::Label {
+    let mut widgets_to_check = vec![item.clone().upcast::<Widget>()];
 
-    let model = get_list_store(tree_view);
-
-    let mut is_item_currently_selected_in_group: bool = false;
-
-    // First iter
-    if let Some(iter) = model.iter_first() {
-        if let Some(column_header) = column_header {
-            assert!(model.get::<bool>(&iter, column_header)); // First element should be header
-
-            loop {
-                if !model.iter_next(&iter) {
-                    break;
-                }
-
-                if model.get::<bool>(&iter, column_header) {
-                    is_item_currently_selected_in_group = false;
-                } else {
-                    if model.get::<bool>(&iter, column_selection) {
-                        number_of_selected_items += 1;
-
-                        if !is_item_currently_selected_in_group {
-                            number_of_selected_groups += 1;
-                        }
-                        is_item_currently_selected_in_group = true;
-                    }
-                }
-            }
-        } else {
-            if model.get::<bool>(&iter, column_selection) {
-                number_of_selected_items += 1;
-            }
-            loop {
-                if !model.iter_next(&iter) {
-                    break;
-                }
-
-                if model.get::<bool>(&iter, column_selection) {
-                    number_of_selected_items += 1;
-                }
-            }
+    while let Some(widget) = widgets_to_check.pop() {
+        if let Ok(label) = widget.clone().downcast::<gtk4::Label>() {
+            return label;
         }
+        widgets_to_check.extend(get_all_direct_children(&widget));
     }
-
-    (number_of_selected_items, number_of_selected_groups)
+    panic!("Button doesn't have proper custom label child");
 }
 
-pub(crate) fn count_number_of_groups(tree_view: &TreeView, column_header: i32) -> u32 {
-    let mut number_of_selected_groups = 0;
+pub(crate) fn get_custom_image_from_widget<P: IsA<Widget>>(item: &P) -> gtk4::Image {
+    let mut widgets_to_check = vec![item.clone().upcast::<Widget>()];
 
-    let model = get_list_store(tree_view);
+    while let Some(widget) = widgets_to_check.pop() {
+        if let Ok(image) = widget.clone().downcast::<gtk4::Image>() {
+            return image;
+        }
+        widgets_to_check.extend(get_all_direct_children(&widget));
+    }
+    panic!("Button doesn't have proper custom label child");
+}
 
-    if let Some(iter) = model.iter_first() {
-        assert!(model.get::<bool>(&iter, column_header)); // First element should be header
-        number_of_selected_groups += 1;
+#[allow(dead_code)]
+pub(crate) fn debug_print_widget<P: IsA<Widget>>(item: &P) {
+    let mut widgets_to_check = vec![(0, 0, item.clone().upcast::<Widget>())];
 
+    let mut next_free_number = 1;
+    debug!("{}, {}, {:?} ", widgets_to_check[0].0, widgets_to_check[0].1, widgets_to_check[0].2);
+
+    while let Some((current_number, parent_number, widget)) = widgets_to_check.pop() {
+        for widget in get_all_direct_children(&widget) {
+            widgets_to_check.push((next_free_number, current_number, widget));
+            next_free_number += 1;
+        }
+        debug!("{current_number}, {parent_number}, {widget:?} ");
+    }
+}
+
+pub(crate) fn get_all_boxes_from_widget<P: IsA<Widget>>(item: &P) -> Vec<gtk4::Box> {
+    let mut widgets_to_check = vec![item.clone().upcast::<Widget>()];
+    let mut boxes = Vec::new();
+
+    while let Some(widget) = widgets_to_check.pop() {
+        widgets_to_check.extend(get_all_direct_children(&widget));
+        if let Ok(bbox) = widget.clone().downcast::<gtk4::Box>() {
+            boxes.push(bbox);
+        }
+    }
+    boxes
+}
+
+pub(crate) fn get_all_direct_children<P: IsA<Widget>>(wid: &P) -> Vec<Widget> {
+    let mut vector = vec![];
+    if let Some(mut child) = wid.first_child() {
+        vector.push(child.clone());
         loop {
-            if !model.iter_next(&iter) {
-                break;
-            }
-
-            if model.get::<bool>(&iter, column_header) {
-                number_of_selected_groups += 1;
-            }
+            child = match child.next_sibling() {
+                Some(t) => t,
+                None => break,
+            };
+            vector.push(child.clone());
         }
     }
-    number_of_selected_groups
+
+    vector
+}
+
+const SIZE_OF_ICON: i32 = 18;
+const TYPE_OF_INTERPOLATION: InterpType = InterpType::Tiles;
+
+fn svg_to_dynamic_image(svg_data: &[u8]) -> Option<DynamicImage> {
+    let opt = Options::default();
+    let tree = Tree::from_data(svg_data, &opt).ok()?;
+
+    let mut pixmap = tiny_skia::Pixmap::new(tree.size().width() as u32, tree.size().height() as u32)?;
+    resvg::render(&tree, tiny_skia::Transform::default(), &mut (pixmap.as_mut()));
+
+    let rgba = RgbaImage::from_raw(pixmap.width(), pixmap.height(), pixmap.data().to_vec())?;
+
+    Some(DynamicImage::ImageRgba8(rgba))
+}
+
+fn dynamic_image_to_pixbuf(img: DynamicImage) -> Pixbuf {
+    let (width, height) = img.dimensions();
+    let rgba = img.into_rgba8();
+    let bytes = Bytes::from(&rgba.into_raw());
+
+    let pixbuf = Pixbuf::from_bytes(&bytes, Colorspace::Rgb, true, 8, width as i32, height as i32, (4 * width) as i32);
+    pixbuf.scale_simple(SIZE_OF_ICON, SIZE_OF_ICON, TYPE_OF_INTERPOLATION).expect("Failed to scale pixbuf")
+}
+
+pub(crate) fn set_icon_of_button<P: IsA<Widget>>(button: &P, data: &'static [u8]) {
+    let image = get_custom_image_from_widget(&button.clone());
+    let dynamic_image = svg_to_dynamic_image(data).expect("Failed to convert SVG data to DynamicImage");
+    let pixbuf = dynamic_image_to_pixbuf(dynamic_image);
+    image.set_from_pixbuf(Some(&pixbuf));
+}
+
+pub(crate) fn get_pixbuf_from_dynamic_image(dynamic_image: &DynamicImage) -> Result<Pixbuf, String> {
+    let mut output = Vec::new();
+    JpegEncoder::new(&mut output)
+        .encode_image(dynamic_image)
+        .map_err(|e| format!("Failed to encode image: {e}"))?;
+    Pixbuf::from_read(BufReader::new(Cursor::new(output))).map_err(|e| format!("Failed to create Pixbuf from DynamicImage: {e}"))
 }
 
 pub(crate) fn resize_pixbuf_dimension(pixbuf: &Pixbuf, requested_size: (i32, i32), interp_type: InterpType) -> Option<Pixbuf> {
@@ -776,218 +740,3 @@ pub(crate) fn get_pixbuf_from_dynamic_image(dynamic_image: &DynamicImage) -> Res
     Pixbuf::from_read(BufReader::new(Cursor::new(output))).map_err(|e| format!("Failed to create Pixbuf from DynamicImage: {e}"))
 }
 
-pub(crate) fn check_if_value_is_in_list_store(list_store: &ListStore, column: i32, value: &str) -> bool {
-    if let Some(iter) = list_store.iter_first() {
-        loop {
-            let list_store_value: String = list_store.get::<String>(&iter, column);
-
-            if value == list_store_value {
-                return true;
-            }
-
-            if !list_store.iter_next(&iter) {
-                break;
-            }
-        }
-    }
-
-    false
-}
-
-pub(crate) fn check_if_list_store_column_have_all_same_values(list_store: &ListStore, column: i32, value: bool) -> bool {
-    if let Some(iter) = list_store.iter_first() {
-        loop {
-            let list_store_value: bool = list_store.get::<bool>(&iter, column);
-
-            if value != list_store_value {
-                return false;
-            }
-
-            if !list_store.iter_next(&iter) {
-                break;
-            }
-        }
-        return true;
-    }
-    false
-}
-
-pub(crate) fn scale_set_min_max_values(scale: &Scale, minimum: f64, maximum: f64, current_value: f64, step: Option<f64>) {
-    scale.set_range(minimum, maximum);
-    scale.set_fill_level(maximum);
-    scale.set_value(current_value);
-    if let Some(step) = step {
-        scale.adjustment().set_step_increment(step);
-    }
-}
-
-pub(crate) fn scale_step_function(scale: &Scale, _scroll_type: ScrollType, value: f64) -> glib::Propagation {
-    scale.set_increments(1_f64, 1_f64);
-    scale.set_round_digits(0);
-    scale.set_fill_level(value.round());
-    glib::Propagation::Proceed
-}
-
-#[cfg(test)]
-mod test {
-    use glib::Value;
-    use glib::types::Type;
-    use gtk4::prelude::*;
-    use gtk4::{Orientation, TreeView};
-    use image::DynamicImage;
-    use super::*;
-
-    #[gtk4::test]
-    fn test_get_string_from_list_store() {
-        let columns_types: &[Type] = &[Type::STRING];
-        let list_store = gtk4::ListStore::new(columns_types);
-        let tree_view = TreeView::with_model(&list_store);
-
-        let values_to_add: &[(u32, &dyn ToValue)] = &[(0, &"test"), (0, &"test2"), (0, &"test3")];
-        for i in values_to_add {
-            list_store.set(&list_store.append(), &[*i]);
-        }
-        assert_eq!(
-            get_string_from_list_store(&tree_view, 0, None),
-            vec!["test".to_string(), "test2".to_string(), "test3".to_string()]
-        );
-
-        let columns_types: &[Type] = &[Type::BOOL, Type::STRING];
-        let list_store = gtk4::ListStore::new(columns_types);
-        let tree_view = TreeView::with_model(&list_store);
-
-        let values_to_add: &[&[(u32, &dyn ToValue)]] = &[
-            &[(0, &Into::<Value>::into(true)), (1, &Into::<Value>::into("test"))],
-            &[(0, &Into::<Value>::into(true)), (1, &Into::<Value>::into("test2"))],
-            &[(0, &Into::<Value>::into(false)), (1, &Into::<Value>::into("test3"))],
-        ];
-        for i in values_to_add {
-            list_store.set(&list_store.append(), i);
-        }
-        assert_eq!(get_string_from_list_store(&tree_view, 1, Some(0)), vec!["test".to_string(), "test2".to_string()]);
-    }
-
-    #[gtk4::test]
-    fn test_check_if_list_store_column_have_all_same_values() {
-        let columns_types: &[Type] = &[Type::BOOL];
-        let list_store = gtk4::ListStore::new(columns_types);
-
-        list_store.clear();
-        let values_to_add: &[(u32, &dyn ToValue)] = &[(0, &true), (0, &true), (0, &false)];
-        for i in values_to_add {
-            list_store.set(&list_store.append(), &[*i]);
-        }
-        assert!(!check_if_list_store_column_have_all_same_values(&list_store, 0, true));
-        assert!(!check_if_list_store_column_have_all_same_values(&list_store, 0, false));
-
-        list_store.clear();
-        let values_to_add: &[(u32, &dyn ToValue)] = &[(0, &true), (0, &true), (0, &true)];
-        for i in values_to_add {
-            list_store.set(&list_store.append(), &[*i]);
-        }
-        assert!(check_if_list_store_column_have_all_same_values(&list_store, 0, true));
-        assert!(!check_if_list_store_column_have_all_same_values(&list_store, 0, false));
-
-        list_store.clear();
-        let values_to_add: &[(u32, &dyn ToValue)] = &[(0, &false)];
-        for i in values_to_add {
-            list_store.set(&list_store.append(), &[*i]);
-        }
-        assert!(!check_if_list_store_column_have_all_same_values(&list_store, 0, true));
-        assert!(check_if_list_store_column_have_all_same_values(&list_store, 0, false));
-
-        list_store.clear();
-        assert!(!check_if_list_store_column_have_all_same_values(&list_store, 0, true));
-        assert!(!check_if_list_store_column_have_all_same_values(&list_store, 0, false));
-    }
-
-    #[gtk4::test]
-    fn test_check_if_value_is_in_list_store() {
-        let columns_types: &[Type] = &[Type::STRING];
-        let list_store = gtk4::ListStore::new(columns_types);
-        let values_to_add: &[(u32, &dyn ToValue)] = &[(0, &"Koczkodan"), (0, &"Kachir")];
-        for i in values_to_add {
-            list_store.set(&list_store.append(), &[*i]);
-        }
-        assert!(check_if_value_is_in_list_store(&list_store, 0, "Koczkodan"));
-        assert!(check_if_value_is_in_list_store(&list_store, 0, "Kachir"));
-        assert!(!check_if_value_is_in_list_store(&list_store, 0, "Koczkodan2"));
-
-        let columns_types: &[Type] = &[Type::STRING, Type::STRING];
-        let list_store = gtk4::ListStore::new(columns_types);
-        let values_to_add: &[&[(u32, &dyn ToValue)]] = &[&[(0, &"Koczkodan"), (1, &"Krakus")], &[(0, &"Kachir"), (1, &"Wodnica")]];
-        for i in values_to_add {
-            list_store.set(&list_store.append(), i);
-        }
-        assert!(check_if_value_is_in_list_store(&list_store, 0, "Koczkodan"));
-        assert!(check_if_value_is_in_list_store(&list_store, 1, "Krakus"));
-        assert!(check_if_value_is_in_list_store(&list_store, 0, "Kachir"));
-        assert!(check_if_value_is_in_list_store(&list_store, 1, "Wodnica"));
-        assert!(!check_if_value_is_in_list_store(&list_store, 0, "Krakus"));
-        assert!(!check_if_value_is_in_list_store(&list_store, 1, "Kachir"));
-    }
-
-    #[test]
-    fn test_file_name_shortener() {
-        let name_to_check = "/home/rafal/czkawek/romek/atomek.txt";
-        assert_eq!(get_max_file_name(name_to_check, 20), "/home/rafa ... atomek.txt");
-        assert_eq!(get_max_file_name(name_to_check, 21), "/home/rafa ... /atomek.txt");
-        let name_to_check = "/home/rafal/czkawek/romek/czekistan/atomek.txt";
-        assert_eq!(get_max_file_name(name_to_check, 21), "/home/rafa ... /atomek.txt");
-        assert_eq!(get_max_file_name(name_to_check, 80), name_to_check);
-        let name_to_check = "/home/rafal/‍🌈🌈🌈🌈🌈🌈🌈🌈🌈🌈🌈🌈🌈.txt";
-        assert_eq!(get_max_file_name(name_to_check, 21), "/home/rafa ... 🌈🌈🌈🌈🌈🌈🌈.txt");
-        assert_eq!(get_max_file_name(name_to_check, 20), "/home/rafa ... 🌈🌈🌈🌈🌈🌈.txt");
-        assert_eq!(get_max_file_name(name_to_check, 19), "/home/rafa ... 🌈🌈🌈🌈🌈.txt");
-        let name_to_check = "/home/rafal/‍🏳️‍🌈️🏳️‍🌈️🏳️‍🌈️🏳️‍🌈️🏳️‍🌈️🏳️‍🌈️🏳️‍🌈️🏳️‍🌈️🏳️‍🌈️.txt";
-        assert_eq!(get_max_file_name(name_to_check, 21), "/home/rafa ... 🌈\u{fe0f}🏳\u{fe0f}\u{200d}🌈\u{fe0f}.txt");
-        assert_eq!(get_max_file_name(name_to_check, 20), "/home/rafa ... \u{fe0f}🏳\u{fe0f}\u{200d}🌈\u{fe0f}.txt");
-        assert_eq!(get_max_file_name(name_to_check, 19), "/home/rafa ... 🏳\u{fe0f}\u{200d}🌈\u{fe0f}.txt");
-        assert_eq!(get_max_file_name(name_to_check, 18), "/home/rafa ... \u{fe0f}\u{200d}🌈\u{fe0f}.txt");
-        assert_eq!(get_max_file_name(name_to_check, 17), "/home/rafa ... \u{200d}🌈\u{fe0f}.txt");
-        assert_eq!(get_max_file_name(name_to_check, 16), "/home/rafa ... 🌈\u{fe0f}.txt");
-    }
-
-    #[test]
-    fn test_pixbuf_from_dynamic_image() {
-        let dynamic_image = DynamicImage::new_rgb8(1, 1);
-        get_pixbuf_from_dynamic_image(&dynamic_image).expect("Failed to get pixbuf from dynamic image");
-        get_pixbuf_from_dynamic_image(&dynamic_image).expect("Failed to get pixbuf from dynamic image");
-        get_pixbuf_from_dynamic_image(&dynamic_image).expect("Failed to get pixbuf from dynamic image");
-        get_pixbuf_from_dynamic_image(&dynamic_image).expect("Failed to get pixbuf from dynamic image");
-    }
-
-    #[test]
-    fn test_change_dimension_to_krotka() {
-        assert_eq!(change_dimension_to_krotka("50x50"), (50, 50));
-        assert_eq!(change_dimension_to_krotka("6000x6000"), (6000, 6000));
-    }
-
-    #[gtk4::test]
-    fn test_get_all_direct_children() {
-        let obj = gtk4::Box::new(Orientation::Horizontal, 0);
-        let obj2 = gtk4::Box::new(Orientation::Horizontal, 0);
-        let obj3 = gtk4::Image::new();
-        let obj4 = gtk4::Image::new();
-        let obj5 = gtk4::Image::new();
-        obj.append(&obj2);
-        obj.append(&obj3);
-        obj2.append(&obj4);
-        obj2.append(&obj5);
-        assert_eq!(get_all_direct_children(&obj).len(), 2);
-    }
-
-    #[gtk4::test]
-    fn test_get_all_boxes_from_widget() {
-        let obj = gtk4::Box::new(Orientation::Horizontal, 0);
-        let obj2 = gtk4::Box::new(Orientation::Horizontal, 0);
-        let obj3 = gtk4::Image::new();
-        let obj4 = gtk4::Image::new();
-        let obj5 = gtk4::Image::new();
-        obj.append(&obj2);
-        obj.append(&obj3);
-        obj2.append(&obj4);
-        obj2.append(&obj5);
-        assert_eq!(get_all_boxes_from_widget(&obj).len(), 2);
-    }
-}

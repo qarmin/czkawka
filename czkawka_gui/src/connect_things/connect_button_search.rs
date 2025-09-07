@@ -34,6 +34,7 @@ use crate::taskbar_progress::tbp_flags::TBPF_NOPROGRESS;
 use crate::{DEFAULT_MAXIMAL_FILE_SIZE, DEFAULT_MINIMAL_CACHE_SIZE, DEFAULT_MINIMAL_FILE_SIZE, flg};
 use crate::utils::enums::{ColumnsExcludedDirectory, ColumnsIncludedDirectory, Message};
 use crate::utils::list_store_utils::*;
+use crate::utils::list_store_utils::check_if_list_store_column_have_all_same_values;
 use crate::utils::widget_utils::*;
 use crate::utils::text_view_utils::reset_text_view;
 

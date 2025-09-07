@@ -49,3 +49,268 @@ pub fn get_list_store(tree_view: &TreeView) -> ListStore {
     tree_view.model().expect("Tree view have no model").downcast::<ListStore>().expect("Model is not ListStore")
 }
 
+pub fn clean_invalid_headers(model: &ListStore, column_header: i32, column_path: i32) {
+    if let Some(first_iter) = model.iter_first() {
+        let mut vec_tree_path_to_delete: Vec<gtk4::TreePath> = Vec::new();
+        let mut current_iter = first_iter;
+        assert!(model.get::<bool>(&current_iter, column_header), "First deleted element, should be a header");
+        let mut next_iter;
+        let mut next_next_iter;
+        if model.get::<String>(&current_iter, column_path).is_empty() {
+            'main: loop {
+                assert!(model.get::<bool>(&current_iter, column_header), "First deleted element, should be a header");
+                next_iter = current_iter;
+                if !model.iter_next(&next_iter) {
+                    vec_tree_path_to_delete.push(model.path(&current_iter));
+                    break 'main;
+                }
+                if model.get::<bool>(&next_iter, column_header) {
+                    vec_tree_path_to_delete.push(model.path(&current_iter));
+                    current_iter = next_iter;
+                    continue 'main;
+                }
+                next_next_iter = next_iter;
+                if !model.iter_next(&next_next_iter) {
+                    vec_tree_path_to_delete.push(model.path(&current_iter));
+                    vec_tree_path_to_delete.push(model.path(&next_iter));
+                    break 'main;
+                }
+                if model.get::<bool>(&next_next_iter, column_header) {
+                    vec_tree_path_to_delete.push(model.path(&current_iter));
+                    vec_tree_path_to_delete.push(model.path(&next_iter));
+                    current_iter = next_next_iter;
+                    continue 'main;
+                }
+                loop {
+                    if !model.iter_next(&next_next_iter) {
+                        break 'main;
+                    }
+                    if model.get::<bool>(&next_next_iter, column_header) {
+                        current_iter = next_next_iter;
+                        continue 'main;
+                    }
+                }
+            }
+        } else {
+            'reference: loop {
+                assert!(model.get::<bool>(&current_iter, column_header), "First deleted element, should be a header");
+                next_iter = current_iter;
+                if !model.iter_next(&next_iter) {
+                    vec_tree_path_to_delete.push(model.path(&current_iter));
+                    break 'reference;
+                }
+                if model.get::<bool>(&next_iter, column_header) {
+                    vec_tree_path_to_delete.push(model.path(&current_iter));
+                    current_iter = next_iter;
+                    continue 'reference;
+                }
+                next_next_iter = next_iter;
+                if !model.iter_next(&next_next_iter) {
+                    break 'reference;
+                }
+                if model.get::<bool>(&next_next_iter, column_header) {
+                    current_iter = next_next_iter;
+                    continue 'reference;
+                }
+                loop {
+                    if !model.iter_next(&next_next_iter) {
+                        break 'reference;
+                    }
+                    if model.get::<bool>(&next_next_iter, column_header) {
+                        current_iter = next_next_iter;
+                        continue 'reference;
+                    }
+                }
+            }
+        }
+        for tree_path in vec_tree_path_to_delete.iter().rev() {
+            model.remove(&model.iter(tree_path).expect("Using invalid tree_path"));
+        }
+    }
+    if let Some(iter) = model.iter_first() {
+        if !model.iter_next(&iter) {
+            model.clear();
+        }
+    }
+}
+
+pub fn check_how_much_elements_is_selected(tree_view: &TreeView, column_header: Option<i32>, column_selection: i32) -> (u64, u64) {
+    let mut number_of_selected_items: u64 = 0;
+    let mut number_of_selected_groups: u64 = 0;
+    let model = get_list_store(tree_view);
+    let mut is_item_currently_selected_in_group: bool = false;
+    if let Some(iter) = model.iter_first() {
+        if let Some(column_header) = column_header {
+            assert!(model.get::<bool>(&iter, column_header));
+            loop {
+                if !model.iter_next(&iter) {
+                    break;
+                }
+                if model.get::<bool>(&iter, column_header) {
+                    is_item_currently_selected_in_group = false;
+                } else {
+                    if model.get::<bool>(&iter, column_selection) {
+                        number_of_selected_items += 1;
+                        if !is_item_currently_selected_in_group {
+                            number_of_selected_groups += 1;
+                        }
+                        is_item_currently_selected_in_group = true;
+                    }
+                }
+            }
+        } else {
+            if model.get::<bool>(&iter, column_selection) {
+                number_of_selected_items += 1;
+            }
+            loop {
+                if !model.iter_next(&iter) {
+                    break;
+                }
+                if model.get::<bool>(&iter, column_selection) {
+                    number_of_selected_items += 1;
+                }
+            }
+        }
+    }
+    (number_of_selected_items, number_of_selected_groups)
+}
+
+pub fn count_number_of_groups(tree_view: &TreeView, column_header: i32) -> u32 {
+    let mut number_of_selected_groups = 0;
+    let model = get_list_store(tree_view);
+    if let Some(iter) = model.iter_first() {
+        assert!(model.get::<bool>(&iter, column_header));
+        number_of_selected_groups += 1;
+        loop {
+            if !model.iter_next(&iter) {
+                break;
+            }
+            if model.get::<bool>(&iter, column_header) {
+                number_of_selected_groups += 1;
+            }
+        }
+    }
+    number_of_selected_groups
+}
+
+pub fn check_if_value_is_in_list_store(list_store: &ListStore, column: i32, value: &str) -> bool {
+    if let Some(iter) = list_store.iter_first() {
+        loop {
+            let list_store_value: String = list_store.get::<String>(&iter, column);
+            if value == list_store_value {
+                return true;
+            }
+            if !list_store.iter_next(&iter) {
+                break;
+            }
+        }
+    }
+    false
+}
+
+pub fn check_if_list_store_column_have_all_same_values(list_store: &ListStore, column: i32, value: bool) -> bool {
+    if let Some(iter) = list_store.iter_first() {
+        loop {
+            let list_store_value: bool = list_store.get::<bool>(&iter, column);
+            if value != list_store_value {
+                return false;
+            }
+            if !list_store.iter_next(&iter) {
+                break;
+            }
+        }
+        return true;
+    }
+    false
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use glib::Value;
+    use glib::types::Type;
+    use gtk4::prelude::*;
+    use gtk4::TreeView;
+
+    #[gtk4::test]
+    fn test_get_string_from_list_store() {
+        let columns_types: &[Type] = &[Type::STRING];
+        let list_store = gtk4::ListStore::new(columns_types);
+        let tree_view = TreeView::with_model(&list_store);
+        let values_to_add: &[(u32, &dyn ToValue)] = &[(0, &"test"), (0, &"test2"), (0, &"test3")];
+        for i in values_to_add {
+            list_store.set(&list_store.append(), &[*i]);
+        }
+        assert_eq!(
+            get_string_from_list_store(&tree_view, 0, None),
+            vec!["test".to_string(), "test2".to_string(), "test3".to_string()]
+        );
+        let columns_types: &[Type] = &[Type::BOOL, Type::STRING];
+        let list_store = gtk4::ListStore::new(columns_types);
+        let tree_view = TreeView::with_model(&list_store);
+        let values_to_add: &[&[(u32, &dyn ToValue)]] = &[
+            &[(0, &Into::<Value>::into(true)), (1, &Into::<Value>::into("test"))],
+            &[(0, &Into::<Value>::into(true)), (1, &Into::<Value>::into("test2"))],
+            &[(0, &Into::<Value>::into(false)), (1, &Into::<Value>::into("test3"))],
+        ];
+        for i in values_to_add {
+            list_store.set(&list_store.append(), i);
+        }
+        assert_eq!(get_string_from_list_store(&tree_view, 1, Some(0)), vec!["test".to_string(), "test2".to_string()]);
+    }
+
+    #[gtk4::test]
+    fn test_check_if_list_store_column_have_all_same_values() {
+        let columns_types: &[Type] = &[Type::BOOL];
+        let list_store = gtk4::ListStore::new(columns_types);
+        list_store.clear();
+        let values_to_add: &[(u32, &dyn ToValue)] = &[(0, &true), (0, &true), (0, &false)];
+        for i in values_to_add {
+            list_store.set(&list_store.append(), &[*i]);
+        }
+        assert!(!check_if_list_store_column_have_all_same_values(&list_store, 0, true));
+        assert!(!check_if_list_store_column_have_all_same_values(&list_store, 0, false));
+        list_store.clear();
+        let values_to_add: &[(u32, &dyn ToValue)] = &[(0, &true), (0, &true), (0, &true)];
+        for i in values_to_add {
+            list_store.set(&list_store.append(), &[*i]);
+        }
+        assert!(check_if_list_store_column_have_all_same_values(&list_store, 0, true));
+        assert!(!check_if_list_store_column_have_all_same_values(&list_store, 0, false));
+        list_store.clear();
+        let values_to_add: &[(u32, &dyn ToValue)] = &[(0, &false)];
+        for i in values_to_add {
+            list_store.set(&list_store.append(), &[*i]);
+        }
+        assert!(!check_if_list_store_column_have_all_same_values(&list_store, 0, true));
+        assert!(check_if_list_store_column_have_all_same_values(&list_store, 0, false));
+        list_store.clear();
+        assert!(!check_if_list_store_column_have_all_same_values(&list_store, 0, true));
+        assert!(!check_if_list_store_column_have_all_same_values(&list_store, 0, false));
+    }
+
+    #[gtk4::test]
+    fn test_check_if_value_is_in_list_store() {
+        let columns_types: &[Type] = &[Type::STRING];
+        let list_store = gtk4::ListStore::new(columns_types);
+        let values_to_add: &[(u32, &dyn ToValue)] = &[(0, &"Koczkodan"), (0, &"Kachir")];
+        for i in values_to_add {
+            list_store.set(&list_store.append(), &[*i]);
+        }
+        assert!(check_if_value_is_in_list_store(&list_store, 0, "Koczkodan"));
+        assert!(check_if_value_is_in_list_store(&list_store, 0, "Kachir"));
+        assert!(!check_if_value_is_in_list_store(&list_store, 0, "Koczkodan2"));
+        let columns_types: &[Type] = &[Type::STRING, Type::STRING];
+        let list_store = gtk4::ListStore::new(columns_types);
+        let values_to_add: &[&[(u32, &dyn ToValue)]] = &[&[(0, &"Koczkodan"), (1, &"Krakus")], &[(0, &"Kachir"), (1, &"Wodnica")]];
+        for i in values_to_add {
+            list_store.set(&list_store.append(), i);
+        }
+        assert!(check_if_value_is_in_list_store(&list_store, 0, "Koczkodan"));
+        assert!(check_if_value_is_in_list_store(&list_store, 1, "Krakus"));
+        assert!(check_if_value_is_in_list_store(&list_store, 0, "Kachir"));
+        assert!(check_if_value_is_in_list_store(&list_store, 1, "Wodnica"));
+        assert!(!check_if_value_is_in_list_store(&list_store, 0, "Krakus"));
+        assert!(!check_if_value_is_in_list_store(&list_store, 1, "Kachir"));
+    }
+}

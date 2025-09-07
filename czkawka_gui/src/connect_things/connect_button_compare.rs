@@ -13,7 +13,7 @@ use crate::gui_structs::gui_data::GuiData;
 use crate::notebook_info::{NOTEBOOKS_INFO, NotebookObject};
 use crate::utils::helpers::{get_full_name_from_path_name, get_max_file_name};
 use crate::utils::icon_utils::{get_pixbuf_from_dynamic_image, resize_pixbuf_dimension};
-use crate::utils::list_store_utils::*;
+use crate::utils::list_store_utils::count_number_of_groups;
 use crate::utils::widget_utils::get_all_direct_children;
 
 const BIG_PREVIEW_SIZE: i32 = 600;
