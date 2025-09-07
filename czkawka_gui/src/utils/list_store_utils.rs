@@ -48,3 +48,4 @@ pub fn get_path_buf_from_vector_of_strings(vec_string: &[String]) -> Vec<PathBuf
 pub fn get_list_store(tree_view: &TreeView) -> ListStore {
     tree_view.model().expect("Tree view have no model").downcast::<ListStore>().expect("Model is not ListStore")
 }
+

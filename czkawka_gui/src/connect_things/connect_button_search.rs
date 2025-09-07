@@ -33,7 +33,8 @@ use crate::notebook_enums::*;
 use crate::taskbar_progress::tbp_flags::TBPF_NOPROGRESS;
 use crate::{DEFAULT_MAXIMAL_FILE_SIZE, DEFAULT_MINIMAL_CACHE_SIZE, DEFAULT_MINIMAL_FILE_SIZE, flg};
 use crate::utils::enums::{ColumnsExcludedDirectory, ColumnsIncludedDirectory, Message};
-use crate::utils::list_store_utils::{get_list_store, get_path_buf_from_vector_of_strings, get_string_from_list_store};
+use crate::utils::list_store_utils::*;
+use crate::utils::widget_utils::*;
 use crate::utils::text_view_utils::reset_text_view;
 
 #[allow(clippy::too_many_arguments)]

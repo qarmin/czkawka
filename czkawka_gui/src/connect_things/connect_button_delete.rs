@@ -11,6 +11,7 @@ use crate::gui_structs::gui_data::GuiData;
 use crate::notebook_enums::*;
 use crate::notebook_info::NOTEBOOKS_INFO;
 use crate::utils::helpers::get_full_name_from_path_name;
+use crate::utils::list_store_utils::*;
 use crate::utils::list_store_utils::get_list_store;
 // TODO add support for checking if really symlink doesn't point to correct directory/file
 

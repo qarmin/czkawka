@@ -37,6 +37,7 @@ use crate::utils::constants::{SharedState, HEADER_ROW_COLOR, MAIN_ROW_COLOR, TEX
 use crate::utils::enums::{BottomButtonsEnum, ColumnsBadExtensions, ColumnsBigFiles, ColumnsBrokenFiles, ColumnsDuplicates, ColumnsEmptyFiles, ColumnsEmptyFolders, ColumnsInvalidSymlinks, ColumnsSameMusic, ColumnsSimilarImages, ColumnsSimilarVideos, ColumnsTemporaryFiles, Message};
 use crate::utils::list_store_utils::get_list_store;
 use crate::utils::text_view_utils::print_text_messages_to_text_view;
+use crate::utils::widget_utils::*;
 
 pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Receiver<Message>) {
     let combo_box_image_hash_size = gui_data.main_notebook.combo_box_image_hash_size.clone();

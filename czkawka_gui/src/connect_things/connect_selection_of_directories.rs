@@ -11,7 +11,7 @@ use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::notebook_enums::{NotebookUpperEnum, to_notebook_upper_enum};
 use crate::utils::enums::{ColumnsExcludedDirectory, ColumnsIncludedDirectory};
-use crate::utils::list_store_utils::get_list_store;
+use crate::utils::list_store_utils::*;
 
 pub(crate) fn connect_selection_of_directories(gui_data: &GuiData) {
     // Add manually directory

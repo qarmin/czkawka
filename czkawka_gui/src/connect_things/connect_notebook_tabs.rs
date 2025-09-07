@@ -1,5 +1,6 @@
 use crate::gui_structs::gui_data::GuiData;
 use crate::notebook_enums::*;
+use crate::utils::widget_utils::*;
 
 pub(crate) fn connect_notebook_tabs(gui_data: &GuiData) {
     let shared_buttons = gui_data.shared_buttons.clone();
