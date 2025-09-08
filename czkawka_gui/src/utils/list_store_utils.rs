@@ -300,18 +300,62 @@ mod test {
         }
         assert!(check_if_value_is_in_list_store(&list_store, 0, "Koczkodan"));
         assert!(check_if_value_is_in_list_store(&list_store, 0, "Kachir"));
-        assert!(!check_if_value_is_in_list_store(&list_store, 0, "Koczkodan2"));
-        let columns_types: &[Type] = &[Type::STRING, Type::STRING];
+        assert!(!check_if_value_is_in_list_store(&list_store, 0, "NotPresent"));
+        list_store.clear();
+        assert!(!check_if_value_is_in_list_store(&list_store, 0, "Koczkodan"));
+    }
+
+    #[gtk4::test]
+    fn test_count_number_of_groups() {
+        let columns_types: &[Type] = &[Type::BOOL];
         let list_store = gtk4::ListStore::new(columns_types);
-        let values_to_add: &[&[(u32, &dyn ToValue)]] = &[&[(0, &"Koczkodan"), (1, &"Krakus")], &[(0, &"Kachir"), (1, &"Wodnica")]];
-        for i in values_to_add {
-            list_store.set(&list_store.append(), i);
+        let tree_view = TreeView::with_model(&list_store);
+        // Add 3 groups (headers)
+        for _ in 0..3 {
+            let iter = list_store.append();
+            list_store.set(&iter, &[(0, &true)]);
         }
-        assert!(check_if_value_is_in_list_store(&list_store, 0, "Koczkodan"));
-        assert!(check_if_value_is_in_list_store(&list_store, 1, "Krakus"));
-        assert!(check_if_value_is_in_list_store(&list_store, 0, "Kachir"));
-        assert!(check_if_value_is_in_list_store(&list_store, 1, "Wodnica"));
-        assert!(!check_if_value_is_in_list_store(&list_store, 0, "Krakus"));
-        assert!(!check_if_value_is_in_list_store(&list_store, 1, "Kachir"));
+        assert_eq!(count_number_of_groups(&tree_view, 0), 3);
+        list_store.clear();
+        assert_eq!(count_number_of_groups(&tree_view, 0), 0);
+    }
+
+    #[gtk4::test]
+    fn test_check_how_much_elements_is_selected() {
+        let columns_types: &[Type] = &[Type::BOOL, Type::BOOL]; // header, selection
+        let list_store = gtk4::ListStore::new(columns_types);
+        let tree_view = TreeView::with_model(&list_store);
+        // Group 1 (header + 2 selected)
+        let header1 = list_store.append();
+        list_store.set(&header1, &[(0, &true), (1, &false)]);
+        let item1 = list_store.append();
+        list_store.set(&item1, &[(0, &false), (1, &true)]);
+        let item2 = list_store.append();
+        list_store.set(&item2, &[(0, &false), (1, &true)]);
+        // Group 2 (header + 1 selected)
+        let header2 = list_store.append();
+        list_store.set(&header2, &[(0, &true), (1, &false)]);
+        let item3 = list_store.append();
+        list_store.set(&item3, &[(0, &false), (1, &true)]);
+        // Group 3 (header + 0 selected)
+        let header3 = list_store.append();
+        list_store.set(&header3, &[(0, &true), (1, &false)]);
+        let (items, groups) = check_how_much_elements_is_selected(&tree_view, Some(0), 1);
+        assert_eq!(items, 3);
+        assert_eq!(groups, 2); // Only 2 groups have selected items
+    }
+
+    #[gtk4::test]
+    fn test_clean_invalid_headers() {
+        let columns_types: &[Type] = &[Type::BOOL, Type::STRING]; // header, path
+        let list_store = gtk4::ListStore::new(columns_types);
+        // Add a header with empty path (should be removed)
+        let header1 = list_store.append();
+        list_store.set(&header1, &[(0, &true), (1, &"")]);
+        // Add a header with non-empty path (should be removed)
+        let header2 = list_store.append();
+        list_store.set(&header2, &[(0, &true), (1, &"/valid")]);
+        clean_invalid_headers(&list_store, 0, 1);
+        assert!(list_store.iter_first().is_none());
     }
 }
