@@ -3,9 +3,11 @@ use gtk4::GestureClick;
 use gtk4::prelude::*;
 use log::{debug, error};
 
-use crate::help_functions::*;
 use crate::notebook_enums::NotebookUpperEnum;
-
+use crate::utils::constants::{KEY_ENTER, KEY_SPACE};
+use crate::utils::enums::{ColumnsDuplicates, ColumnsExcludedDirectory, ColumnsIncludedDirectory, ColumnsSameMusic, ColumnsSimilarImages, ColumnsSimilarVideos};
+use crate::utils::helpers::{get_full_name_from_path_name, get_notebook_object_from_tree_view, get_notebook_upper_enum_from_tree_view};
+use crate::utils::list_store_utils::get_list_store;
 // TODO add option to open files and folders from context menu activated by pressing ONCE with right mouse button
 
 pub(crate) fn opening_enter_function_ported_upper_directories(

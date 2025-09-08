@@ -59,7 +59,6 @@ mod connect_things;
 mod create_tree_view;
 mod gui_structs;
 mod help_combo_box;
-mod help_functions;
 mod initialize_gui;
 mod language_functions;
 mod localizer_gui;
@@ -73,6 +72,7 @@ mod taskbar_progress_dummy;
 #[cfg(target_os = "windows")]
 mod taskbar_progress_win;
 mod tests;
+mod utils;
 
 fn main() {
     let (infos, warnings) = set_config_cache_path("Czkawka", "Czkawka");

@@ -1,7 +1,8 @@
 use gtk4::prelude::*;
 use gtk4::{CellRendererText, CellRendererToggle, ListStore, TreeView, TreeViewColumn};
 
-use crate::help_functions::*;
+use crate::utils::enums::*;
+use crate::utils::list_store_utils::*;
 
 // When adding new column do not forget to update translations
 

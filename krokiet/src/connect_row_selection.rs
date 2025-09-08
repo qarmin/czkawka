@@ -723,7 +723,6 @@ mod tests {
 
         let new_model = rows_deselect_all_by_mode(&mut selection, &model);
 
-        assert!(new_model.is_some());
         let new_model = new_model.unwrap();
         assert!(!new_model.row_data(0).unwrap().selected_row);
         assert!(!new_model.row_data(1).unwrap().selected_row);
@@ -843,7 +842,6 @@ mod tests {
 
         let new_model = rows_select_all_by_mode(&mut selection, &model);
 
-        assert!(new_model.is_some());
         let new_model = new_model.unwrap();
         for idx in 0..new_model.row_count() {
             if idx == 11 {
@@ -984,7 +982,6 @@ mod tests {
 
         let (checked_items, unchecked_items, new_model) = rows_reverse_checked_selection(&selection, &model);
 
-        assert!(new_model.is_some());
         let new_model = new_model.unwrap();
         assert!(new_model.row_data(0).unwrap().checked);
         assert!(new_model.row_data(1).unwrap().checked);

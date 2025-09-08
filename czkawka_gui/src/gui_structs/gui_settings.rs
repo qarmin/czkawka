@@ -2,7 +2,7 @@ use gtk4::prelude::*;
 use gtk4::{Builder, Window};
 
 use crate::flg;
-use crate::help_functions::get_all_direct_children;
+use crate::utils::widget_utils::get_all_direct_children;
 
 #[derive(Clone)]
 pub struct GuiSettings {
