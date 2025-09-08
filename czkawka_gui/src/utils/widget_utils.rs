@@ -98,20 +98,69 @@ mod test {
     fn test_set_buttons_and_hide_all_buttons() {
         let button1 = Button::with_label("Button1");
         let button2 = Button::with_label("Button2");
-        let button3 = Button::with_label("Button3");
-        let buttons_array = vec![button1.upcast::<Widget>(), button2.upcast::<Widget>(), button3.upcast::<Widget>()];
-        let button_names = vec![BottomButtonsEnum::Search, BottomButtonsEnum::Delete, BottomButtonsEnum::Save];
         let mut hashmap = HashMap::new();
-        hashmap.insert(BottomButtonsEnum::Search, true);
-        hashmap.insert(BottomButtonsEnum::Delete, false);
-        hashmap.insert(BottomButtonsEnum::Save, true);
+        use crate::utils::enums::BottomButtonsEnum::*;
+        let buttons_array = vec![button1.clone().upcast::<Widget>(), button2.clone().upcast::<Widget>()];
+        let button_names = vec![Search, Delete];
+        hashmap.insert(Search, true);
+        hashmap.insert(Delete, false);
         set_buttons(&mut hashmap, &buttons_array, &button_names);
-        assert!(buttons_array[0].is_visible());
-        assert!(!buttons_array[1].is_visible());
-        assert!(buttons_array[2].is_visible());
+        assert!(button1.is_visible());
+        assert!(!button2.is_visible());
         hide_all_buttons(&buttons_array);
-        assert!(!buttons_array[0].is_visible());
-        assert!(!buttons_array[1].is_visible());
-        assert!(!buttons_array[2].is_visible());
+        assert!(!button1.is_visible());
+        assert!(!button2.is_visible());
+    }
+
+    #[gtk4::test]
+    fn test_get_custom_label_from_widget() {
+        let button = Button::new();
+        let label = gtk4::Label::new(Some("TestLabel"));
+        button.set_child(Some(&label));
+        let found_label = get_custom_label_from_widget(&button);
+        assert_eq!(found_label.label(), "TestLabel");
+    }
+
+    #[gtk4::test]
+    #[should_panic]
+    fn test_get_custom_label_from_widget_panic() {
+        let button = Button::new();
+        get_custom_label_from_widget(&button);
+    }
+
+    #[gtk4::test]
+    fn test_get_custom_image_from_widget() {
+        let button = Button::new();
+        let image = gtk4::Image::new();
+        button.set_child(Some(&image));
+        let found_image = get_custom_image_from_widget(&button);
+        assert!(found_image.is::<gtk4::Image>());
+    }
+
+    #[gtk4::test]
+    #[should_panic]
+    fn test_get_custom_image_from_widget_panic() {
+        let button = Button::new();
+        get_custom_image_from_widget(&button);
+    }
+
+    #[gtk4::test]
+    fn test_get_all_boxes_from_widget() {
+        let button = Button::new();
+        let hbox = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+        button.set_child(Some(&hbox));
+        let boxes = get_all_boxes_from_widget(&button);
+        assert_eq!(boxes.len(), 1);
+        assert!(boxes[0].is::<gtk4::Box>());
+    }
+
+    #[gtk4::test]
+    fn test_get_all_direct_children() {
+        let button = Button::new();
+        let label = gtk4::Label::new(Some("child"));
+        button.set_child(Some(&label));
+        let children = get_all_direct_children(&button);
+        assert_eq!(children.len(), 1);
+        assert!(children[0].is::<gtk4::Label>());
     }
 }

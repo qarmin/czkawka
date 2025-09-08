@@ -64,3 +64,70 @@ pub fn resize_pixbuf_dimension(pixbuf: &Pixbuf, requested_size: (i32, i32), inte
     }
     pixbuf.scale_simple(new_size.0, new_size.1, interp_type)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use gtk4::prelude::*;
+    use gtk4::{Button, Image};
+    use image::{DynamicImage, RgbaImage};
+
+    #[test]
+    fn test_constants() {
+        assert_eq!(SIZE_OF_ICON, 18);
+        assert_eq!(TYPE_OF_INTERPOLATION, InterpType::Tiles);
+    }
+
+    #[test]
+    fn test_svg_to_dynamic_image_valid() {
+        let svg = br#"<svg width='1' height='1' xmlns='http://www.w3.org/2000/svg'><rect width='1' height='1' fill='black'/></svg>"#;
+        let img = svg_to_dynamic_image(svg);
+        assert!(img.is_some());
+        let img = img.unwrap();
+        assert_eq!(img.width(), 1);
+        assert_eq!(img.height(), 1);
+    }
+
+    #[test]
+    fn test_svg_to_dynamic_image_invalid() {
+        let svg = b"not an svg";
+        assert!(svg_to_dynamic_image(svg).is_none());
+    }
+
+    #[gtk4::test]
+    fn test_dynamic_image_to_pixbuf_and_resize() {
+        let img = DynamicImage::ImageRgba8(RgbaImage::from_pixel(4, 4, image::Rgba([255, 0, 0, 255])));
+        let pixbuf = dynamic_image_to_pixbuf(img);
+        assert_eq!(pixbuf.width(), SIZE_OF_ICON);
+        assert_eq!(pixbuf.height(), SIZE_OF_ICON);
+
+        let resized = resize_pixbuf_dimension(&pixbuf, (8, 8), InterpType::Bilinear);
+        assert!(resized.is_some());
+        let resized = resized.unwrap();
+        assert_eq!(resized.width(), 8);
+        assert_eq!(resized.height(), 8);
+    }
+
+    #[gtk4::test]
+    fn test_get_pixbuf_from_dynamic_image() {
+        let img = DynamicImage::ImageRgba8(RgbaImage::from_pixel(2, 2, image::Rgba([0, 255, 0, 255])));
+        let pixbuf = get_pixbuf_from_dynamic_image(&img);
+        assert!(pixbuf.is_ok());
+        let pixbuf = pixbuf.unwrap();
+        assert_eq!(pixbuf.width(), 2);
+        assert_eq!(pixbuf.height(), 2);
+    }
+
+    #[gtk4::test]
+    fn test_set_icon_of_button() {
+        let svg = br#"<svg width='2' height='2' xmlns='http://www.w3.org/2000/svg'><rect width='2' height='2' fill='blue'/></svg>"#;
+        let button = Button::new();
+        let image = Image::new();
+        button.set_child(Some(&image));
+        set_icon_of_button(&button, svg);
+        let image = button.first_child().and_then(|w| w.downcast::<Image>().ok());
+        assert!(image.is_some());
+        let image = image.unwrap();
+        assert_eq!(image.widget_name(), "GtkImage");
+    }
+}
