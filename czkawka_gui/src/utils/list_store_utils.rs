@@ -224,6 +224,48 @@ pub fn check_if_list_store_column_have_all_same_values(list_store: &ListStore, c
     false
 }
 
+pub struct ListStoreIter<'a> {
+    list_store: &'a gtk4::ListStore,
+    current: Option<gtk4::TreeIter>,
+}
+
+impl<'a> ListStoreIter<'a> {
+    pub fn new(list_store: &'a gtk4::ListStore) -> Self {
+        let current = list_store.iter_first();
+        Self { list_store, current }
+    }
+}
+
+impl<'a> Iterator for ListStoreIter<'a> {
+    type Item = gtk4::TreeIter;
+    fn next(&mut self) -> Option<Self::Item> {
+        match &mut self.current {
+            None => None,
+            Some(iter) => {
+                // dbg!(&iter);
+                let result = Some(*iter);
+                let next_iter = *iter;
+                if self.list_store.iter_next(&next_iter) {
+                    self.current = Some(next_iter);
+                } else {
+                    self.current = None;
+                }
+                result
+            }
+        }
+    }
+}
+
+pub trait ListStoreIterExt {
+    fn custom_iter(&self) -> ListStoreIter;
+}
+
+impl ListStoreIterExt for gtk4::ListStore {
+    fn custom_iter(&self) -> ListStoreIter {
+        ListStoreIter::new(self)
+    }
+}
+
 #[cfg(test)]
 mod test {
     use glib::Value;
@@ -357,5 +399,23 @@ mod test {
         list_store.set(&header2, &[(0, &true), (1, &"/valid")]);
         clean_invalid_headers(&list_store, 0, 1);
         assert!(list_store.iter_first().is_none());
+    }
+
+    // #[gtk4::test] // TODO - why this freeze? - I created minimal repro, with exactly same code, but there is no problem there
+    // Also looks that dbg!() in that code also fixes problem - which is weird and looks like undefined behaviour, but address sanitizer and valgrind do not report anything
+    fn test_list_store_iter() {
+        let columns_types: &[Type] = &[Type::STRING];
+        let list_store = gtk4::ListStore::new(columns_types);
+        let values = ["a", "b", "c"];
+        for v in &values {
+            let iter = list_store.append();
+            list_store.set(&iter, &[(0, &(*v))]);
+        }
+        let collected: Vec<String> = list_store.custom_iter().map(|iter| list_store.get::<String>(&iter, 0)).collect();
+        assert_eq!(collected, values.iter().map(|s| s.to_string()).collect::<Vec<_>>());
+
+        let empty = gtk4::ListStore::new(&[Type::STRING]);
+        let mut it = empty.custom_iter();
+        assert!(it.next().is_none());
     }
 }
