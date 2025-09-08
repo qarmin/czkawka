@@ -67,10 +67,11 @@ pub fn resize_pixbuf_dimension(pixbuf: &Pixbuf, requested_size: (i32, i32), inte
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use gtk4::prelude::*;
     use gtk4::{Button, Image};
     use image::{DynamicImage, RgbaImage};
+
+    use super::*;
 
     #[test]
     fn test_constants() {
@@ -82,7 +83,6 @@ mod tests {
     fn test_svg_to_dynamic_image_valid() {
         let svg = br#"<svg width='1' height='1' xmlns='http://www.w3.org/2000/svg'><rect width='1' height='1' fill='black'/></svg>"#;
         let img = svg_to_dynamic_image(svg);
-        assert!(img.is_some());
         let img = img.unwrap();
         assert_eq!(img.width(), 1);
         assert_eq!(img.height(), 1);
@@ -102,7 +102,6 @@ mod tests {
         assert_eq!(pixbuf.height(), SIZE_OF_ICON);
 
         let resized = resize_pixbuf_dimension(&pixbuf, (8, 8), InterpType::Bilinear);
-        assert!(resized.is_some());
         let resized = resized.unwrap();
         assert_eq!(resized.width(), 8);
         assert_eq!(resized.height(), 8);
@@ -112,7 +111,6 @@ mod tests {
     fn test_get_pixbuf_from_dynamic_image() {
         let img = DynamicImage::ImageRgba8(RgbaImage::from_pixel(2, 2, image::Rgba([0, 255, 0, 255])));
         let pixbuf = get_pixbuf_from_dynamic_image(&img);
-        assert!(pixbuf.is_ok());
         let pixbuf = pixbuf.unwrap();
         assert_eq!(pixbuf.width(), 2);
         assert_eq!(pixbuf.height(), 2);
@@ -126,7 +124,6 @@ mod tests {
         button.set_child(Some(&image));
         set_icon_of_button(&button, svg);
         let image = button.first_child().and_then(|w| w.downcast::<Image>().ok());
-        assert!(image.is_some());
         let image = image.unwrap();
         assert_eq!(image.widget_name(), "GtkImage");
     }

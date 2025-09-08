@@ -46,9 +46,10 @@ pub fn add_text_to_text_view(text_view: &TextView, string_to_append: &str) {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use czkawka_core::helpers::messages::Messages;
     use gtk4::TextView;
+
+    use super::*;
 
     fn get_buffer_text(text_view: &TextView) -> String {
         let buffer = text_view.buffer();

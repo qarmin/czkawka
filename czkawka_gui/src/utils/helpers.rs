@@ -120,8 +120,9 @@ pub fn scale_step_function(scale: &Scale, _scroll_type: ScrollType, value: f64) 
 
 #[cfg(test)]
 mod tests {
+    use gtk4::{Adjustment, Orientation, Scale, TreeView};
+
     use super::*;
-    use gtk4::{TreeView, Scale, Orientation, Adjustment};
     use crate::notebook_enums::{NotebookMainEnum, NotebookUpperEnum};
 
     #[test]
@@ -140,7 +141,7 @@ mod tests {
     fn test_get_full_name_from_path_name() {
         let path = "/tmp";
         let name = "file.txt";
-        let expected = format!("{}{}{}", path, MAIN_SEPARATOR, name);
+        let expected = format!("{path}{MAIN_SEPARATOR}{name}");
         assert_eq!(get_full_name_from_path_name(path, name), expected);
     }
 
@@ -192,11 +193,11 @@ mod tests {
     fn test_scale_set_min_max_values_and_step_function() {
         let scale = Scale::new(Orientation::Horizontal, None::<&Adjustment>);
         scale_set_min_max_values(&scale, 0.0, 100.0, 50.0, Some(5.0));
-        assert_eq!(scale.value(), 50.0);
-        assert_eq!(scale.adjustment().step_increment(), 5.0);
+        assert_eq!(scale.value() as i32, 50);
+        assert_eq!(scale.adjustment().step_increment() as i32, 5);
         // Test step function
         let prop = scale_step_function(&scale, ScrollType::StepForward, 42.3);
         assert_eq!(prop, glib::Propagation::Proceed);
-        assert_eq!(scale.fill_level(), 42.0);
+        assert_eq!(scale.fill_level() as i32, 42);
     }
 }

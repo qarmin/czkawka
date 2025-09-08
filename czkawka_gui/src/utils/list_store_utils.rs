@@ -257,11 +257,11 @@ impl<'a> Iterator for ListStoreIter<'a> {
 }
 
 pub trait ListStoreIterExt {
-    fn custom_iter(&self) -> ListStoreIter;
+    fn custom_iter(&self) -> ListStoreIter<'_>;
 }
 
 impl ListStoreIterExt for gtk4::ListStore {
-    fn custom_iter(&self) -> ListStoreIter {
+    fn custom_iter(&self) -> ListStoreIter<'_> {
         ListStoreIter::new(self)
     }
 }
@@ -401,7 +401,7 @@ mod test {
         assert!(list_store.iter_first().is_none());
     }
 
-    // #[gtk4::test] // TODO - why this freeze? - I created minimal repro, with exactly same code, but there is no problem there
+    #[gtk4::test] // TODO - why this freeze? - I created minimal repro, with exactly same code, but there is no problem there
     // Also looks that dbg!() in that code also fixes problem - which is weird and looks like undefined behaviour, but address sanitizer and valgrind do not report anything
     fn test_list_store_iter() {
         let columns_types: &[Type] = &[Type::STRING];
@@ -409,7 +409,7 @@ mod test {
         let values = ["a", "b", "c"];
         for v in &values {
             let iter = list_store.append();
-            list_store.set(&iter, &[(0, &(*v))]);
+            list_store.set(&iter, &[(0, v)]);
         }
         let collected: Vec<String> = list_store.custom_iter().map(|iter| list_store.get::<String>(&iter, 0)).collect();
         assert_eq!(collected, values.iter().map(|s| s.to_string()).collect::<Vec<_>>());
