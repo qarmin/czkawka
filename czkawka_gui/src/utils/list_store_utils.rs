@@ -224,11 +224,15 @@ pub fn check_if_list_store_column_have_all_same_values(list_store: &ListStore, c
     false
 }
 
+// TODO - https://github.com/gtk-rs/gtk4-rs/issues/2140
+// NOT TO USE - May be buggy
+#[allow(dead_code)]
 pub struct ListStoreIter<'a> {
     list_store: &'a gtk4::ListStore,
     current: Option<gtk4::TreeIter>,
 }
 
+#[allow(dead_code)]
 impl<'a> ListStoreIter<'a> {
     pub fn new(list_store: &'a gtk4::ListStore) -> Self {
         let current = list_store.iter_first();
@@ -236,6 +240,7 @@ impl<'a> ListStoreIter<'a> {
     }
 }
 
+#[allow(dead_code)]
 impl<'a> Iterator for ListStoreIter<'a> {
     type Item = gtk4::TreeIter;
     fn next(&mut self) -> Option<Self::Item> {
@@ -256,10 +261,12 @@ impl<'a> Iterator for ListStoreIter<'a> {
     }
 }
 
+#[allow(dead_code)]
 pub trait ListStoreIterExt {
     fn custom_iter(&self) -> ListStoreIter<'_>;
 }
 
+#[allow(dead_code)]
 impl ListStoreIterExt for gtk4::ListStore {
     fn custom_iter(&self) -> ListStoreIter<'_> {
         ListStoreIter::new(self)
@@ -401,7 +408,8 @@ mod test {
         assert!(list_store.iter_first().is_none());
     }
 
-    #[gtk4::test] // TODO - why this freeze? - I created minimal repro, with exactly same code, but there is no problem there
+    #[allow(dead_code)]
+    // #[gtk4::test] // TODO - why this freeze? - I created minimal repro, with exactly same code, but there is no problem there
     // Also looks that dbg!() in that code also fixes problem - which is weird and looks like undefined behaviour, but address sanitizer and valgrind do not report anything
     fn test_list_store_iter() {
         let columns_types: &[Type] = &[Type::STRING];
