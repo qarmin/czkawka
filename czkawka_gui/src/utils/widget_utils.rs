@@ -24,7 +24,7 @@ pub fn get_custom_image_from_widget<P: IsA<Widget>>(item: &P) -> gtk4::Image {
         }
         widgets_to_check.extend(get_all_direct_children(&widget));
     }
-    panic!("Button doesn't have proper custom label child");
+    panic!("Button doesn't have proper custom image child");
 }
 
 pub fn get_all_boxes_from_widget<P: IsA<Widget>>(item: &P) -> Vec<gtk4::Box> {

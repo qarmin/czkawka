@@ -58,7 +58,7 @@ pub fn clean_invalid_headers(model: &ListStore, column_header: i32, column_path:
         let mut next_next_iter;
         if model.get::<String>(&current_iter, column_path).is_empty() {
             'main: loop {
-                assert!(model.get::<bool>(&current_iter, column_header), "First deleted element, should be a header");
+                assert!(model.get::<bool>(&current_iter, column_header), "Current deleted element, should be a header");
                 next_iter = current_iter;
                 if !model.iter_next(&next_iter) {
                     vec_tree_path_to_delete.push(model.path(&current_iter));
@@ -93,7 +93,7 @@ pub fn clean_invalid_headers(model: &ListStore, column_header: i32, column_path:
             }
         } else {
             'reference: loop {
-                assert!(model.get::<bool>(&current_iter, column_header), "First deleted element, should be a header");
+                assert!(model.get::<bool>(&current_iter, column_header), "Current deleted element, should be a header");
                 next_iter = current_iter;
                 if !model.iter_next(&next_iter) {
                     vec_tree_path_to_delete.push(model.path(&current_iter));
