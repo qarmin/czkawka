@@ -1,4 +1,4 @@
-![com github qarmin czkawka](https://user-images.githubusercontent.com/41945903/102616149-66490400-4137-11eb-9cd6-813b2b070834.png)
+![com.github.qarmin.czkawka](https://user-images.githubusercontent.com/41945903/102616149-66490400-4137-11eb-9cd6-813b2b070834.png)
 
 **Czkawka** (_tch•kav•ka_ (IPA: [ˈʧ̑kafka]), "hiccup" in Polish) is a simple, fast and free app to remove unnecessary
 files from your computer.
@@ -7,15 +7,14 @@ files from your computer.
 
 ## Features
 
-- Written in memory-safe Rust - almost 100% unsafe code free
-- Amazingly fast - due to using more or less advanced algorithms and multithreading
-- Free and open source without ads
-- Multiplatform - works on Linux, Windows, macOS, FreeBSD and many more
-- Cache support - second and further scans should be much faster than the first one
-- CLI frontend - use via a terminal
-- GUI frontend - uses GTK4 or Slint frameworks
+- Amazingly fast - Due to using more or less advanced algorithms and multithreading
+- Free and open source without advertising
+- Multiplatform - Works on Linux, Windows, macOS, FreeBSD and many more operating systems
+- Cache support - Uses caching to scan faster after the first scan
+- CLI frontend - Use via a terminal
+- GUI frontend - Uses GTK4 or Slint frameworks
 - No spying - Czkawka does not have access to the internet, nor does it collect any user information or statistics
-- Multilingual - supports multiple languages
+- Multilingual - Supports multiple languages
 - Multiple tools to use:
     - Duplicates - Finds duplicates based on file name, size or hash
     - Empty folders - Finds empty folders with the help of an advanced algorithm
