@@ -1,4 +1,4 @@
-![com github qarmin czkawka](https://user-images.githubusercontent.com/41945903/102616149-66490400-4137-11eb-9cd6-813b2b070834.png)
+![com.github.qarmin.czkawka](https://user-images.githubusercontent.com/41945903/102616149-66490400-4137-11eb-9cd6-813b2b070834.png)
 
 **Czkawka** (_tch•kav•ka_ (IPA: [ˈʧ̑kafka]), "hiccup" in Polish) is a simple, fast and free app to remove unnecessary
 files from your computer.
@@ -7,27 +7,26 @@ files from your computer.
 
 ## Features
 
-- Written in memory-safe Rust - almost 100% unsafe code free
-- Amazingly fast - due to using more or less advanced algorithms and multithreading
-- Free, Open Source without ads
-- Multiplatform - works on Linux, Windows, macOS, FreeBSD and many more
-- Cache support - second and further scans should be much faster than the first one
-- CLI frontend - for easy automation
-- GUI frontend - uses GTK 4 or Slint frameworks
-- No spying - Czkawka does not have access to the Internet, nor does it collect any user information or statistics
-- Multilingual - support multiple languages like Polish, English or Italian
+- Amazingly fast - Due to using more or less advanced algorithms and multithreading
+- Free and open source without advertising
+- Multiplatform - Works on FreeBSD, Linux, macOS, Windows, and many more operating systems
+- Cache support - Uses caching to scan faster after the first scan
+- CLI frontend - Use via a terminal
+- GUI frontend - Uses GTK4 or Slint frameworks
+- No spying - Czkawka does not have access to the internet, nor does it collect any user information or statistics
+- Multilingual - Supports multiple languages
 - Multiple tools to use:
     - Duplicates - Finds duplicates based on file name, size or hash
-    - Empty Folders - Finds empty folders with the help of an advanced algorithm
-    - Big Files - Finds the provided number of the biggest files in given location
-    - Empty Files - Looks for empty files across the drive
-    - Temporary Files - Finds temporary files
-    - Similar Images - Finds images which are not exactly the same (different resolution, watermarks)
-    - Similar Videos - Looks for visually similar videos
-    - Same Music - Searches for similar music by tags or by reading content and comparing it
-    - Invalid Symbolic Links - Shows symbolic links which point to non-existent files/directories
-    - Broken Files - Finds files that are invalid or corrupted
-    - Bad Extensions - Lists files whose content not match with their extension
+    - Empty folders - Finds empty folders with the help of an advanced algorithm
+    - Big files - Finds the provided number of the biggest files in given location
+    - Empty files - Looks for empty files across the drive
+    - Temporary files - Finds temporary files
+    - Similar images - Finds images which are not exactly the same (different resolution, watermarks)
+    - Similar videos - Looks for visually similar videos
+    - Similar music - Searches for similar music by tags or by reading file contents and comparing them
+    - Invalid symbolic links - Shows symbolic links which point to non-existent files/directories
+    - Broken files - Finds files that are invalid or corrupted
+    - Bad extensions - Lists files with content that does not match their extension
 
 ![Czkawka](https://github.com/user-attachments/assets/b0409515-1bec-4e13-8fac-7bdfa15f5848)
 
@@ -35,7 +34,7 @@ files from your computer.
 
 Changelog about each version can be found in [CHANGELOG.md](Changelog.md).
 
-New releases can be found in [Github releases](https://github.com/qarmin/czkawka/releases) and nightly builds also in [Nightly releases](https://github.com/qarmin/czkawka/releases/tag/Nightly)
+New releases can be found in [GitHub releases](https://github.com/qarmin/czkawka/releases) and nightly builds also in [Nightly releases](https://github.com/qarmin/czkawka/releases/tag/Nightly)
 
 ## Usage, installation, compilation, requirements, license
 
@@ -48,18 +47,18 @@ Each tool uses different technologies, so you can find instructions for each of 
 
 ## Comparison to other tools
 
-Bleachbit is a master at finding and removing temporary files, while Czkawka only finds the most basic ones. So these
+BleachBit is a master at finding and removing temporary files, while Czkawka only finds the most basic ones. So these
 two apps shouldn't be compared directly or be considered as an alternative to one another.
 
-In this comparison remember, that even if app have same features they may work different(e.g. one app may have more
-options to choose than other).
+In this comparison remember, that even if app have same features they may work different (e.g. one app may have more
+options to choose than the other).
 
-|                           |   Czkawka   |   Krokiet   | FSlint |     DupeGuru      |  Bleachbit  |
+|                           |   Czkawka   |   Krokiet   | FSlint |     DupeGuru      |  BleachBit  |
 |:-------------------------:|:-----------:|:-----------:|:------:|:-----------------:|:-----------:|
 |         Language          |    Rust     |    Rust     | Python |   Python/Obj-C    |   Python    |
 |  Framework base language  |      C      |    Rust     |   C    | C/C++/Obj-C/Swift |      C      |
 |         Framework         |    GTK 4    |    Slint    | PyGTK2 | Qt 5 (PyQt)/Cocoa |   PyGTK3    |
-|            OS             | Lin,Mac,Win | Lin,Mac,Win |  Lin   |    Lin,Mac,Win    | Lin,Mac,Win |
+|            OS             | Linux, macOS, Windows | Linux, macOS, Windows |  Linux   |    Linux, macOS, Windows    | Linux, macOS, Windows |
 |     Duplicate finder      |      ✔      |      ✔      |   ✔    |         ✔         |             |
 |        Empty files        |      ✔      |      ✔      |   ✔    |                   |             |
 |       Empty folders       |      ✔      |      ✔      |   ✔    |                   |             |
@@ -67,8 +66,8 @@ options to choose than other).
 |         Big files         |      ✔      |      ✔      |        |                   |             |
 |      Similar images       |      ✔      |      ✔      |        |         ✔         |             |
 |      Similar videos       |      ✔      |      ✔      |        |                   |             |
-|  Music duplicates(tags)   |      ✔      |      ✔      |        |         ✔         |             |
-| Music duplicates(content) |      ✔      |      ✔      |        |                   |             |
+|  Music duplicates (tags)   |      ✔      |      ✔      |        |         ✔         |             |
+| Music duplicates (content) |      ✔      |      ✔      |        |                   |             |
 |     Invalid symlinks      |      ✔      |      ✔      |   ✔    |                   |             |
 |       Broken files        |      ✔      |      ✔      |        |                   |             |
 | Invalid names/extensions  |      ✔      |      ✔      |   ✔    |                   |             |
@@ -86,37 +85,36 @@ options to choose than other).
 
 ## Other apps
 
-There are many similar applications to Czkawka on the Internet, which do some things better and some things worse:
+There are many similar applications to Czkawka on the internet, which do some things better and some things worse:
 
 ### GUI
 
-- [DupeGuru](https://github.com/arsenetar/dupeguru) - Many options to customize; great photo compare tool
-- [FSlint](https://github.com/pixelb/fslint) - A little outdated, but still have some tools not available in Czkawka
-- [AntiDupl.NET](https://github.com/ermig1979/AntiDupl) - Shows a lot of metadata of compared images
-- [Video Duplicate Finder](https://github.com/0x90d/videoduplicatefinder) - Finds similar videos(surprising, isn't it), supports video thumbnails
+- [DupeGuru](https://github.com/arsenetar/dupeguru)
+- [FSlint](https://github.com/pixelb/fslint)
+- [AntiDupl.NET](https://github.com/ermig1979/AntiDupl)
+- [Video Duplicate Finder](https://github.com/0x90d/videoduplicatefinder)
 
 ### CLI
 
 Due to limited time, the biggest emphasis is on the GUI version so if you are looking for really good and feature-packed
-console apps, then take a look at these:
+command-line apps, then take a look at these:
 
-- [Fclones](https://github.com/pkolaczk/fclones) - One of the fastest tools to find duplicates; it is written also in
-  Rust
-- [Rmlint](https://github.com/sahib/rmlint) - Nice console interface and also is feature packed
-- [RdFind](https://github.com/pauldreik/rdfind) - Fast, but written in C++ ¯\\\_(ツ)\_/¯
+- [Fclones](https://github.com/pkolaczk/fclones)
+- [Rmlint](https://github.com/sahib/rmlint)
+- [RdFind](https://github.com/pauldreik/rdfind)
 
 ## Thanks
 
-Big thanks to Pádraig Brady, creator of fantastic FSlint, because without his work I wouldn't create this tool.
+Big thanks to Pádraig Brady, the creator of FSlint, because without his work I wouldn't have created this tool.
 
-Thanks also to all the people who create patches for this program, make it available on other systems, create videos,
+Thanks also to all the people who have created patches for this program, make it available on other systems, create videos,
 articles about it etc.
 
-Also, I really appreciate work of people that create crates on which Czkawka is based and for that I try to report bugs
+I appreciate work of people that create crates on which Czkawka is based and for that I try to report bugs
 to make it even better.
 
-## Officially Supported Projects
-Only this repository, [prebuild-binaries](https://github.com/qarmin/czkawka/releases), projects on [crates.io](https://crates.io/crates/czkawka_gui) and [flathub](https://flathub.org/apps/com.github.qarmin.czkawka) are directly maintained by me.  
+## Officially supported projects
+Only this repository and its [prebuilt binaries](https://github.com/qarmin/czkawka/releases), projects on [crates.io](https://crates.io/crates/czkawka_gui) and [Flathub](https://flathub.org/apps/com.github.qarmin.czkawka) are directly maintained by me.  
 
 Czkawka does not have an official website, so do not trust any sites that claim to be the official one.  
 
