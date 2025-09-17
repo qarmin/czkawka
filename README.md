@@ -89,33 +89,32 @@ There are many similar applications to Czkawka on the internet, which do some th
 
 ### GUI
 
-- [DupeGuru](https://github.com/arsenetar/dupeguru) - Many options to customize; great photo compare tool
-- [FSlint](https://github.com/pixelb/fslint) - A little outdated, but still have some tools not available in Czkawka
-- [AntiDupl.NET](https://github.com/ermig1979/AntiDupl) - Shows a lot of metadata of compared images
-- [Video Duplicate Finder](https://github.com/0x90d/videoduplicatefinder) - Finds similar videos, supports video thumbnails
+- [DupeGuru](https://github.com/arsenetar/dupeguru)
+- [FSlint](https://github.com/pixelb/fslint)
+- [AntiDupl.NET](https://github.com/ermig1979/AntiDupl)
+- [Video Duplicate Finder](https://github.com/0x90d/videoduplicatefinder)
 
 ### CLI
 
 Due to limited time, the biggest emphasis is on the GUI version so if you are looking for really good and feature-packed
 command-line apps, then take a look at these:
 
-- [Fclones](https://github.com/pkolaczk/fclones) - One of the fastest tools to find duplicates; it is written also in
-  Rust
-- [Rmlint](https://github.com/sahib/rmlint) - Nice console interface and also is feature packed
-- [RdFind](https://github.com/pauldreik/rdfind) - Fast, but written in C++ ¯\\\_(ツ)\_/¯
+- [Fclones](https://github.com/pkolaczk/fclones)
+- [Rmlint](https://github.com/sahib/rmlint)
+- [RdFind](https://github.com/pauldreik/rdfind)
 
 ## Thanks
 
-Big thanks to Pádraig Brady, creator of fantastic FSlint, because without his work I wouldn't have created this tool.
+Big thanks to Pádraig Brady, the creator of FSlint, because without his work I wouldn't have created this tool.
 
 Thanks also to all the people who have created patches for this program, make it available on other systems, create videos,
 articles about it etc.
 
-Also, I really appreciate work of people that create crates on which Czkawka is based and for that I try to report bugs
+I appreciate work of people that create crates on which Czkawka is based and for that I try to report bugs
 to make it even better.
 
 ## Officially supported projects
-Only this repository, [prebuild-binaries](https://github.com/qarmin/czkawka/releases), projects on [crates.io](https://crates.io/crates/czkawka_gui) and [flathub](https://flathub.org/apps/com.github.qarmin.czkawka) are directly maintained by me.  
+Only this repository and its [prebuilt binaries](https://github.com/qarmin/czkawka/releases), projects on [crates.io](https://crates.io/crates/czkawka_gui) and [Flathub](https://flathub.org/apps/com.github.qarmin.czkawka) are directly maintained by me.  
 
 Czkawka does not have an official website, so do not trust any sites that claim to be the official one.  
 
