@@ -9,7 +9,7 @@ files from your computer.
 
 - Amazingly fast - Due to using more or less advanced algorithms and multithreading
 - Free and open source without advertising
-- Multiplatform - Works on Linux, Windows, macOS, FreeBSD and many more operating systems
+- Multiplatform - Works on FreeBSD, Linux, macOS, Windows, and many more operating systems
 - Cache support - Uses caching to scan faster after the first scan
 - CLI frontend - Use via a terminal
 - GUI frontend - Uses GTK4 or Slint frameworks
@@ -58,7 +58,7 @@ options to choose than the other).
 |         Language          |    Rust     |    Rust     | Python |   Python/Obj-C    |   Python    |
 |  Framework base language  |      C      |    Rust     |   C    | C/C++/Obj-C/Swift |      C      |
 |         Framework         |    GTK 4    |    Slint    | PyGTK2 | Qt 5 (PyQt)/Cocoa |   PyGTK3    |
-|            OS             | Lin,Mac,Win | Lin,Mac,Win |  Lin   |    Lin,Mac,Win    | Lin,Mac,Win |
+|            OS             | Linux, macOS, Windows | Linux, macOS, Windows |  Linux   |    Linux, macOS, Windows    | Linux, macOS, Windows |
 |     Duplicate finder      |      ✔      |      ✔      |   ✔    |         ✔         |             |
 |        Empty files        |      ✔      |      ✔      |   ✔    |                   |             |
 |       Empty folders       |      ✔      |      ✔      |   ✔    |                   |             |
