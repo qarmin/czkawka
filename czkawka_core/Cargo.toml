@@ -114,3 +114,6 @@ default = []
 heif = ["dep:libheif-rs", "dep:libheif-sys"]
 libraw = ["dep:libraw-rs"]
 libavif = ["image/avif-native", "image/avif"]
+
+[lints]
+workspace = true
