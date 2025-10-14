@@ -30,7 +30,7 @@ pub struct CommonTreeViews {
 }
 impl CommonTreeViews {
     pub fn get_subview(&self, item: NotebookMainEnum) -> &SubView {
-        &self.subviews.iter().find(|s| s.enum_value == item).expect("Cannot find subview")
+        self.subviews.iter().find(|s| s.enum_value == item).expect("Cannot find subview")
     }
     pub fn get_tree_view_from_its_name(&self, name: &str) -> TreeView {
         for subview in &self.subviews {
@@ -39,18 +39,6 @@ impl CommonTreeViews {
             }
         }
         panic!("Cannot find tree view with name {name}");
-    }
-    pub fn get_current(&self) -> SubView {
-        let nb_number = self.notebook_main.current_page().expect("Current page not set");
-        self.subviews.get(nb_number as usize).expect("Cannot find current notebook tab").clone()
-    }
-    pub fn get_current_tree_view(&self) -> TreeView {
-        let nb_number = self.notebook_main.current_page().expect("Current page not set");
-        self.subviews.get(nb_number as usize).expect("Cannot find current notebook tab").tree_view.clone()
-    }
-    pub fn get_current_model(&self) -> ListStore {
-        let nb_number = self.notebook_main.current_page().expect("Current page not set");
-        self.subviews.get(nb_number as usize).expect("Cannot find current notebook tab").tree_view.get_model()
     }
     pub fn setup(&self, gui_data: &GuiData) {
         for subview in &self.subviews {
@@ -129,6 +117,7 @@ impl SubView {
         let image_preview = preview_str.map(|name| builder.object(name).unwrap_or_else(|| panic!("Cannot find preview image {name}")));
 
         let notebook_object = NOTEBOOKS_INFO[enum_value as usize].clone();
+        assert_eq!(notebook_object.notebook_type, enum_value);
 
         let preview_struct = if let (Some(image_preview), Some(settings_show_preview)) = (image_preview, settings_show_preview) {
             Some(PreviewStruct {
@@ -265,10 +254,10 @@ impl SubView {
                 create_default_columns(
                     tree_view,
                     &[
-                        (ColumnsDuplicates::Size as i32, ColumnSort::Default),
-                        (ColumnsDuplicates::Name as i32, ColumnSort::Default),
-                        (ColumnsDuplicates::Path as i32, ColumnSort::Default),
-                        (ColumnsDuplicates::Modification as i32, ColumnSort::Default),
+                        (ColumnsDuplicates::Size as i32, ColumnSort::None),
+                        (ColumnsDuplicates::Name as i32, ColumnSort::None),
+                        (ColumnsDuplicates::Path as i32, ColumnSort::None),
+                        (ColumnsDuplicates::Modification as i32, ColumnSort::None),
                     ],
                     Some(columns_colors),
                 );
@@ -337,12 +326,12 @@ impl SubView {
                 create_default_columns(
                     tree_view,
                     &[
-                        (ColumnsSimilarImages::Similarity as i32, ColumnSort::Default),
-                        (ColumnsSimilarImages::Size as i32, ColumnSort::Default),
-                        (ColumnsSimilarImages::Dimensions as i32, ColumnSort::Default),
-                        (ColumnsSimilarImages::Name as i32, ColumnSort::Default),
-                        (ColumnsSimilarImages::Path as i32, ColumnSort::Default),
-                        (ColumnsSimilarImages::Modification as i32, ColumnSort::Default),
+                        (ColumnsSimilarImages::Similarity as i32, ColumnSort::None),
+                        (ColumnsSimilarImages::Size as i32, ColumnSort::None),
+                        (ColumnsSimilarImages::Dimensions as i32, ColumnSort::None),
+                        (ColumnsSimilarImages::Name as i32, ColumnSort::None),
+                        (ColumnsSimilarImages::Path as i32, ColumnSort::None),
+                        (ColumnsSimilarImages::Modification as i32, ColumnSort::None),
                     ],
                     Some(columns_colors),
                 );
@@ -355,10 +344,10 @@ impl SubView {
                 create_default_columns(
                     tree_view,
                     &[
-                        (ColumnsSimilarVideos::Size as i32, ColumnSort::Default),
-                        (ColumnsSimilarVideos::Name as i32, ColumnSort::Default),
-                        (ColumnsSimilarVideos::Path as i32, ColumnSort::Default),
-                        (ColumnsSimilarVideos::Modification as i32, ColumnSort::Default),
+                        (ColumnsSimilarVideos::Size as i32, ColumnSort::None),
+                        (ColumnsSimilarVideos::Name as i32, ColumnSort::None),
+                        (ColumnsSimilarVideos::Path as i32, ColumnSort::None),
+                        (ColumnsSimilarVideos::Modification as i32, ColumnSort::None),
                     ],
                     Some(columns_colors),
                 );
@@ -371,16 +360,16 @@ impl SubView {
                 create_default_columns(
                     tree_view,
                     &[
-                        (ColumnsSameMusic::Size as i32, ColumnSort::Default),
-                        (ColumnsSameMusic::Name as i32, ColumnSort::Default),
-                        (ColumnsSameMusic::Title as i32, ColumnSort::Default),
-                        (ColumnsSameMusic::Artist as i32, ColumnSort::Default),
-                        (ColumnsSameMusic::Year as i32, ColumnSort::Default),
-                        (ColumnsSameMusic::Bitrate as i32, ColumnSort::Default),
-                        (ColumnsSameMusic::Length as i32, ColumnSort::Default),
-                        (ColumnsSameMusic::Genre as i32, ColumnSort::Default),
-                        (ColumnsSameMusic::Path as i32, ColumnSort::Default),
-                        (ColumnsSameMusic::Modification as i32, ColumnSort::Default),
+                        (ColumnsSameMusic::Size as i32, ColumnSort::None),
+                        (ColumnsSameMusic::Name as i32, ColumnSort::None),
+                        (ColumnsSameMusic::Title as i32, ColumnSort::None),
+                        (ColumnsSameMusic::Artist as i32, ColumnSort::None),
+                        (ColumnsSameMusic::Year as i32, ColumnSort::None),
+                        (ColumnsSameMusic::Bitrate as i32, ColumnSort::None),
+                        (ColumnsSameMusic::Length as i32, ColumnSort::None),
+                        (ColumnsSameMusic::Genre as i32, ColumnSort::None),
+                        (ColumnsSameMusic::Path as i32, ColumnSort::None),
+                        (ColumnsSameMusic::Modification as i32, ColumnSort::None),
                     ],
                     Some(columns_colors),
                 );

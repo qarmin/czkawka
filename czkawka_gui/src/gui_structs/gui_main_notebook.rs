@@ -481,18 +481,9 @@ impl GuiMainNotebook {
 
             // Skipping first column because it is selection button
             assert_eq!(columns_names.len() + 1, s.tree_view.columns().len(), "Number of columns in tree view and names do not match for {:?}, tree_view - {:?}", key_enum, s.tree_view.widget_name());
-            for (column, name) in s.tree_view.columns().iter().skip(0).zip(columns_names.iter()) {
+            for (column, name) in s.tree_view.columns().iter().skip(1).zip(columns_names.iter()) {
                 column.set_title(name);
             }
-
-
-            // for (column_index, column) in s.tree_view.columns().iter().enumerate() {
-            //     dbg!(&key_enum);
-            //     if column_index == 0 {
-            //         continue; // Selection button - always first
-            //     }
-            //     column.set_title(&columns_names[column_index - 1]);
-            // }
         }
 
         {
