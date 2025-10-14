@@ -4,7 +4,7 @@ use gtk4::prelude::*;
 use gtk4::{ListStore, TreeIter};
 
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::*;
+use crate::help_functions::get_list_store;
 use crate::notebook_info::NOTEBOOKS_INFO;
 
 fn popover_sort_general<T>(popover: &gtk4::Popover, tree_view: &gtk4::TreeView, column_sort: i32, column_header: i32)
@@ -271,7 +271,7 @@ mod test {
                 list_store.set(&list_store.append(), &a);
                 since_last_header += 1;
                 // After at least 2 non-header rows, randomly decide to insert a header next
-                if since_last_header >= 2 && random::<u8>() % 3 == 0 {
+                if since_last_header >= 2 && random::<u8>().is_multiple_of(3) {
                     need_header = true;
                 }
                 i += 1;

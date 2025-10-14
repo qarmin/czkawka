@@ -8,8 +8,8 @@ use log::debug;
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::*;
-use crate::notebook_enums::*;
+use crate::help_functions::{check_how_much_elements_is_selected, clean_invalid_headers, get_full_name_from_path_name, get_list_store};
+use crate::notebook_enums::NotebookMainEnum;
 use crate::notebook_info::NOTEBOOKS_INFO;
 
 // TODO add support for checking if really symlink doesn't point to correct directory/file
@@ -25,8 +25,6 @@ pub(crate) fn connect_button_delete(gui_data: &GuiData) {
 }
 
 pub async fn delete_things(gui_data: GuiData) {
-    // validate_notebook_data(&gui_data);
-
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let window_main = gui_data.window_main.clone();
     let check_button_settings_confirm_deletion = gui_data.settings.check_button_settings_confirm_deletion.clone();
@@ -38,7 +36,7 @@ pub async fn delete_things(gui_data: GuiData) {
 
     let check_button_settings_use_trash = gui_data.settings.check_button_settings_use_trash.clone();
 
-    let preview_path = gui_data.preview_path.clone();
+    let preview_path = gui_data.main_notebook.common_tree_views.preview_path.clone();
 
     let text_view_errors = gui_data.text_view_errors.clone();
 
@@ -79,26 +77,24 @@ pub async fn delete_things(gui_data: GuiData) {
                 &text_view_errors,
             );
         }
+    } else if nb_number == NotebookMainEnum::EmptyDirectories as u32 {
+        empty_folder_remover(
+            tree_view,
+            nb_object.column_name,
+            nb_object.column_path,
+            nb_object.column_selection,
+            &check_button_settings_use_trash,
+            &text_view_errors,
+        );
     } else {
-        if nb_number == NotebookMainEnum::EmptyDirectories as u32 {
-            empty_folder_remover(
-                tree_view,
-                nb_object.column_name,
-                nb_object.column_path,
-                nb_object.column_selection,
-                &check_button_settings_use_trash,
-                &text_view_errors,
-            );
-        } else {
-            basic_remove(
-                tree_view,
-                nb_object.column_name,
-                nb_object.column_path,
-                nb_object.column_selection,
-                &check_button_settings_use_trash,
-                &text_view_errors,
-            );
-        }
+        basic_remove(
+            tree_view,
+            nb_object.column_name,
+            nb_object.column_path,
+            nb_object.column_selection,
+            &check_button_settings_use_trash,
+            &text_view_errors,
+        );
     }
 
     match &nb_object.notebook_type {
@@ -134,7 +130,7 @@ pub async fn check_if_can_delete_files(
             confirmation_dialog_delete.hide();
             confirmation_dialog_delete.close();
             return false;
-        };
+        }
     }
     true
 }
@@ -230,10 +226,8 @@ pub async fn check_if_deleting_all_files_in_group(
                     break;
                 }
                 selected_all_records = true;
-            } else {
-                if !model.get::<bool>(&iter, column_selection) {
-                    selected_all_records = false;
-                }
+            } else if !model.get::<bool>(&iter, column_selection) {
+                selected_all_records = false;
             }
         }
     } else {
@@ -431,7 +425,7 @@ pub(crate) fn tree_remove(
     let mut messages: String = String::new();
 
     // TODO - looks like a but - this var is not deleted
-    #[allow(clippy::collection_is_never_read)]
+    #[expect(clippy::collection_is_never_read)]
     let mut vec_path_to_delete: Vec<(String, String)> = Vec::new();
     let mut map_with_path_to_delete: BTreeMap<String, Vec<String>> = Default::default(); // BTreeMap<Path,Vec<FileName>>
 

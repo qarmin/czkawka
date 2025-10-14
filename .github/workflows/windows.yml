@@ -20,7 +20,7 @@ jobs:
 
       - name: Setup rust version
         run: |
-          rustup default 1.86.0
+          rustup default 1.88.0
           rustup target add x86_64-pc-windows-gnu
 
       - name: Compile Krokiet Release
@@ -70,7 +70,7 @@ jobs:
 
       - name: Setup rust version
         run: |
-          rustup default 1.86.0
+          rustup default 1.88.0
 
       - name: Compile Krokiet Release
         if: ${{ github.ref == 'refs/heads/master' }}
@@ -125,7 +125,7 @@ jobs:
           dnf install curl wget2 unzip mingw64-bzip2.noarch mingw64-poppler mingw64-poppler-glib mingw32-python3 rust-gio-devel adwaita-icon-theme -y && dnf clean all -y
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
           source "$HOME/.cargo/env"
-          rustup default 1.86.0
+          rustup default 1.88.0
           rustup target add x86_64-pc-windows-gnu
 
       - name: Cross compile for Windows - Release
@@ -211,7 +211,7 @@ jobs:
           dnf install curl wget2 unzip mingw64-bzip2.noarch mingw64-poppler mingw64-poppler-glib mingw32-python3 rust-gio-devel adwaita-icon-theme -y && dnf clean all -y
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
           source "$HOME/.cargo/env"
-          rustup default 1.86.0
+          rustup default 1.88.0
           rustup target add x86_64-pc-windows-gnu
 
       - name: Cross compile for Windows - Release

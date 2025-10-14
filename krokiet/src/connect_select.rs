@@ -66,8 +66,9 @@ fn set_select_buttons(app: &MainWindow) {
         | ActiveTab::TemporaryFiles
         | ActiveTab::InvalidSymlinks
         | ActiveTab::BrokenFiles
-        | ActiveTab::BadExtensions => vec![],
-        ActiveTab::Settings | ActiveTab::About => vec![], // Not available in settings and about, so may be set any value here
+        | ActiveTab::BadExtensions
+        | ActiveTab::Settings
+        | ActiveTab::About => vec![], // Not available in settings and about, so may be set any value here
     };
 
     base_buttons.extend(additional_buttons);
@@ -100,7 +101,7 @@ fn select_by_resolution(model: &ModelRc<MainListModel>, active_tab: ActiveTab, b
         for i in 0..(headers_idx.len() - 1) {
             let mut max_item = 0;
             let mut max_item_idx = 1;
-            #[allow(clippy::needless_range_loop)]
+            #[expect(clippy::needless_range_loop)]
             for j in (headers_idx[i] + 1)..headers_idx[i + 1] {
                 let int_data = old_data[j].val_int.iter().collect::<Vec<_>>();
                 let item = int_data[width_idx] * int_data[height_idx];
@@ -118,7 +119,7 @@ fn select_by_resolution(model: &ModelRc<MainListModel>, active_tab: ActiveTab, b
         for i in 0..(headers_idx.len() - 1) {
             let mut min_item = u64::MAX;
             let mut min_item_idx = 1;
-            #[allow(clippy::needless_range_loop)]
+            #[expect(clippy::needless_range_loop)]
             for j in (headers_idx[i] + 1)..headers_idx[i + 1] {
                 let int_data = old_data[j].val_int.iter().collect::<Vec<_>>();
                 let item = (int_data[width_idx] * int_data[height_idx]) as u64;
@@ -155,7 +156,7 @@ fn select_by_size_date(model: &ModelRc<MainListModel>, active_tab: ActiveTab, bi
         for i in 0..(headers_idx.len() - 1) {
             let mut max_item = 0;
             let mut max_item_idx = 1;
-            #[allow(clippy::needless_range_loop)]
+            #[expect(clippy::needless_range_loop)]
             for j in (headers_idx[i] + 1)..headers_idx[i + 1] {
                 let int_data = old_data[j].val_int.iter().collect::<Vec<_>>();
                 let item = connect_i32_into_u64(int_data[item_idx], int_data[item_idx + 1]);
@@ -173,7 +174,7 @@ fn select_by_size_date(model: &ModelRc<MainListModel>, active_tab: ActiveTab, bi
         for i in 0..(headers_idx.len() - 1) {
             let mut min_item = u64::MAX;
             let mut min_item_idx = 1;
-            #[allow(clippy::needless_range_loop)]
+            #[expect(clippy::needless_range_loop)]
             for j in (headers_idx[i] + 1)..headers_idx[i + 1] {
                 let int_data = old_data[j].val_int.iter().collect::<Vec<_>>();
                 let item = connect_i32_into_u64(int_data[item_idx], int_data[item_idx + 1]);

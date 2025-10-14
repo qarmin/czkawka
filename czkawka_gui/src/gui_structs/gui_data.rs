@@ -32,7 +32,7 @@ use crate::gui_structs::gui_progress_dialog::GuiProgressDialog;
 use crate::gui_structs::gui_settings::GuiSettings;
 use crate::gui_structs::gui_upper_notebook::GuiUpperNotebook;
 use crate::help_functions::{BottomButtonsEnum, SharedState};
-use crate::notebook_enums::*;
+use crate::notebook_enums::{NotebookMainEnum, get_all_main_tabs};
 use crate::taskbar_progress::TaskbarProgress;
 
 pub const ICON_ABOUT: &[u8] = include_bytes!("../../icons/icon_about.png");
@@ -94,8 +94,6 @@ pub struct GuiData {
     pub shared_broken_files_state: SharedState<BrokenFiles>,
     pub shared_bad_extensions_state: SharedState<BadExtensions>,
 
-    pub preview_path: Rc<RefCell<String>>,
-
     //// Entry
     pub entry_info: gtk4::Entry,
 
@@ -123,7 +121,6 @@ impl GuiData {
 
         window_main.set_application(Some(application));
 
-        let main_notebook = GuiMainNotebook::create_from_builder(&builder);
         let upper_notebook = GuiUpperNotebook::create_from_builder(&builder);
         let popovers_select = GuiSelectPopovers::create_from_builder();
         let popovers_sort = GuiSortPopovers::create_from_builder();
@@ -133,6 +130,7 @@ impl GuiData {
         let header = GuiHeader::create_from_builder(&builder);
         let settings = GuiSettings::create_from_builder(&window_main);
         let compare_images = GuiCompareImages::create_from_builder(&window_main);
+        let main_notebook = GuiMainNotebook::create_from_builder(&builder, &settings);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -185,8 +183,6 @@ impl GuiData {
         let shared_broken_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
         let shared_bad_extensions_state: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
 
-        let preview_path: Rc<RefCell<_>> = Rc::new(RefCell::new(String::new()));
-
         //// Entry
         let entry_info: gtk4::Entry = builder.object("entry_info").expect("Cambalache");
 
@@ -225,12 +221,15 @@ impl GuiData {
             shared_same_invalid_symlinks,
             shared_broken_files_state,
             shared_bad_extensions_state,
-            preview_path,
             entry_info,
             text_view_errors,
             scrolled_window_errors,
             stop_flag,
         }
+    }
+
+    pub(crate) fn setup(&self) {
+        self.main_notebook.setup(self);
     }
 
     pub(crate) fn update_language(&self) {

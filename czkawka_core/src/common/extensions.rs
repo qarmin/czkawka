@@ -67,7 +67,7 @@ impl Extensions {
         messages
     }
 
-    #[allow(clippy::string_slice)] // Valid, because we address go to dot, which is known ascii character
+    #[expect(clippy::string_slice)] // Valid, because we address go to dot, which is known ascii character
     pub(crate) fn check_if_entry_have_valid_extension(&self, entry_data: &DirEntry) -> bool {
         if self.allowed_extensions_hashset.is_empty() && self.excluded_extensions_hashset.is_empty() {
             return true;
@@ -85,12 +85,10 @@ impl Extensions {
             } else {
                 self.allowed_extensions_hashset.contains(&extension.to_lowercase())
             }
+        } else if extension.chars().all(|c| c.is_ascii_lowercase()) {
+            !self.excluded_extensions_hashset.contains(extension)
         } else {
-            if extension.chars().all(|c| c.is_ascii_lowercase()) {
-                !self.excluded_extensions_hashset.contains(extension)
-            } else {
-                !self.excluded_extensions_hashset.contains(&extension.to_lowercase())
-            }
+            !self.excluded_extensions_hashset.contains(&extension.to_lowercase())
         }
     }
 

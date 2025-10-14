@@ -59,11 +59,14 @@ debug = false
 clippy.unreachable = "allow" # This is a legitimate use case in most places
 clippy.enum_variant_names = "allow" # Not always is possible to use different names
 clippy.too_many_arguments = "allow" # Sometimes such functions are needed
+clippy.type_complexity = "allow" # Sometimes such types are needed
+clippy.collapsible_else_if = "allow" # Sometimes it is more readable
 
 clippy.doc_broken_link = "warn"
 clippy.ip_constant = "warn"
 clippy.unnecessary_semicolon = "warn"
-clippy.trivially_copy_pass_by_ref = "warn" # TODO - a lot of changes, not sure if worth it
+clippy.trivially_copy_pass_by_ref = "warn"
+clippy.indexing_slicing = "warn"
 
 clippy.allow_attributes = "warn"
 clippy.assertions_on_result_states = "warn"
@@ -105,7 +108,6 @@ clippy.manual_let_else = "warn"
 clippy.manual_ok_or = "warn"
 clippy.map_unwrap_or = "warn"
 clippy.match_bool = "warn"
-clippy.match_on_vec_items = "warn"
 clippy.match_same_arms = "warn"
 clippy.match_wildcard_for_single_variants = "warn"
 clippy.mutex_atomic = "warn"

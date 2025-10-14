@@ -1,8 +1,6 @@
 pub mod model_processor;
 
-use slint::ComponentHandle;
-#[allow(dead_code)]
-use slint::{Model, ModelRc};
+use slint::{ComponentHandle, Model, ModelRc};
 
 use crate::connect_row_selection::checker::get_number_of_enabled_items;
 use crate::simpler_model::SimplerMainListModel;
@@ -11,8 +9,8 @@ use crate::{GuiState, MainListModel, MainWindow};
 pub type ProcessingResult = Vec<(usize, SimplerMainListModel, Option<Result<(), String>>)>;
 
 impl MainListModel {
-    #[allow(clippy::print_stdout)]
-    #[allow(dead_code)]
+    #[expect(clippy::print_stdout)]
+    #[expect(dead_code)]
     pub(crate) fn debug_print(&self) {
         let val_int: Vec<i32> = self.val_int.iter().collect();
         let val_str: Vec<String> = self.val_str.iter().map(|e| e.to_string()).collect();
@@ -24,11 +22,11 @@ impl MainListModel {
 }
 
 pub trait DebugPrintModelRc {
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     fn debug_print_model_rc(&self);
 }
 impl DebugPrintModelRc for ModelRc<MainListModel> {
-    #[allow(clippy::print_stdout)]
+    #[expect(clippy::print_stdout)]
     fn debug_print_model_rc(&self) {
         println!("=====================START DEBUG PRINT RC MODELS=====================");
         println!("Model with {} items", self.iter().count());
@@ -134,13 +132,11 @@ fn get_checked_group_info_from_model(model: &ModelRc<MainListModel>) -> CheckedI
             }
             current_group_all_checked = true;
             group_with_selected_item = false;
+        } else if item.checked {
+            checked_items_number += 1;
+            group_with_selected_item = true;
         } else {
-            if item.checked {
-                checked_items_number += 1;
-                group_with_selected_item = true;
-            } else {
-                current_group_all_checked = false;
-            }
+            current_group_all_checked = false;
         }
     }
     if model_collected.len() > 1 {

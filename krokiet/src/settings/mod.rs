@@ -90,18 +90,18 @@ pub(crate) fn connect_changing_settings_preset(app: &MainWindow) {
 
 pub(crate) fn create_default_settings_files() {
     let base_config_file = get_base_config_file();
-    if let Some(base_config_file) = base_config_file {
-        if !base_config_file.is_file() {
-            let _ = save_data_to_file(Some(base_config_file), &BasicSettings::default());
-        }
+    if let Some(base_config_file) = base_config_file
+        && !base_config_file.is_file()
+    {
+        let _ = save_data_to_file(Some(base_config_file), &BasicSettings::default());
     }
 
     for i in 0..PRESET_NUMBER {
         let config_file = get_config_file(i as i32);
-        if let Some(config_file) = config_file {
-            if !config_file.is_file() {
-                let _ = save_data_to_file(Some(config_file), &SettingsCustom::default());
-            }
+        if let Some(config_file) = config_file
+            && !config_file.is_file()
+        {
+            let _ = save_data_to_file(Some(config_file), &SettingsCustom::default());
         }
     }
 }
@@ -213,10 +213,10 @@ where
         return Err("Cannot get config file".into());
     };
     // Create dirs if not exists
-    if let Some(parent) = config_file.parent() {
-        if let Err(e) = std::fs::create_dir_all(parent) {
-            return Err(format!("Cannot create config folder: {e}"));
-        }
+    if let Some(parent) = config_file.parent()
+        && let Err(e) = std::fs::create_dir_all(parent)
+    {
+        return Err(format!("Cannot create config folder: {e}"));
     }
 
     match serde_json::to_string_pretty(&serializable_data) {

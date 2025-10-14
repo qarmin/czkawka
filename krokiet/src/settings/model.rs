@@ -195,7 +195,7 @@ fn default_included_directories() -> Vec<PathBuf> {
     } else {
         // This could be set to default
         included_directories.push("C:\\".to_string());
-    };
+    }
     included_directories.sort();
     included_directories.iter().map(PathBuf::from).collect::<Vec<_>>()
 }

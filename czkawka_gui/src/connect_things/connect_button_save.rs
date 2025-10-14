@@ -10,7 +10,7 @@ use gtk4::{Button, Entry};
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::BottomButtonsEnum;
-use crate::notebook_enums::*;
+use crate::notebook_enums::{NotebookMainEnum, to_notebook_main_enum};
 
 pub(crate) fn connect_button_save(gui_data: &GuiData) {
     let buttons_save = gui_data.bottom_buttons.buttons_save.clone();

@@ -199,7 +199,7 @@ pub enum StrDataBadExtensions {
 
 impl ActiveTab {
     // Remember to match updated this according to ui/main_lists.slint and connect_scan.rs files
-    pub(crate) fn get_str_path_idx(&self) -> usize {
+    pub(crate) fn get_str_path_idx(self) -> usize {
         match self {
             Self::EmptyFolders => StrDataEmptyFolders::Path as usize,
             Self::EmptyFiles => StrDataEmptyFiles::Path as usize,
@@ -216,7 +216,7 @@ impl ActiveTab {
         }
     }
 
-    pub(crate) fn get_str_name_idx(&self) -> usize {
+    pub(crate) fn get_str_name_idx(self) -> usize {
         match self {
             Self::EmptyFolders => StrDataEmptyFolders::Name as usize,
             Self::EmptyFiles => StrDataEmptyFiles::Name as usize,
@@ -233,14 +233,14 @@ impl ActiveTab {
         }
     }
 
-    pub(crate) fn get_str_proper_extension(&self) -> usize {
+    pub(crate) fn get_str_proper_extension(self) -> usize {
         match self {
             Self::BadExtensions => StrDataBadExtensions::ProperExtension as usize,
             Self::Settings | Self::About => panic!("Button should be disabled"),
             _ => panic!("Unable to get proper extension from this tab"),
         }
     }
-    pub(crate) fn get_int_modification_date_idx(&self) -> usize {
+    pub(crate) fn get_int_modification_date_idx(self) -> usize {
         match self {
             Self::EmptyFiles => IntDataEmptyFiles::ModificationDatePart1 as usize,
             Self::EmptyFolders => IntDataEmptyFolders::ModificationDatePart1 as usize,
@@ -256,7 +256,7 @@ impl ActiveTab {
             Self::Settings | Self::About => panic!("Button should be disabled"),
         }
     }
-    pub(crate) fn get_int_size_opt_idx(&self) -> Option<usize> {
+    pub(crate) fn get_int_size_opt_idx(self) -> Option<usize> {
         let res = match self {
             Self::EmptyFiles => IntDataEmptyFiles::SizePart1 as usize,
             Self::SimilarImages => IntDataSimilarImages::SizePart1 as usize,
@@ -267,15 +267,14 @@ impl ActiveTab {
             Self::BrokenFiles => IntDataBrokenFiles::SizePart1 as usize,
             Self::BadExtensions => IntDataBadExtensions::SizePart1 as usize,
             Self::TemporaryFiles => IntDataTemporaryFiles::SizePart1 as usize,
-            Self::Settings | Self::About => return None,
-            Self::EmptyFolders | Self::InvalidSymlinks => return None,
+            Self::Settings | Self::About | Self::EmptyFolders | Self::InvalidSymlinks => return None,
         };
         Some(res)
     }
-    pub(crate) fn get_int_size_idx(&self) -> usize {
+    pub(crate) fn get_int_size_idx(self) -> usize {
         self.get_int_size_opt_idx().unwrap_or_else(|| panic!("Unable to get size index for tab: {self:?}"))
     }
-    pub(crate) fn get_int_width_idx(&self) -> usize {
+    pub(crate) fn get_int_width_idx(self) -> usize {
         match self {
             Self::SimilarImages => IntDataSimilarImages::Width as usize,
             Self::Settings | Self::About => panic!("Button should be disabled"),
@@ -283,7 +282,7 @@ impl ActiveTab {
         }
     }
 
-    pub(crate) fn get_int_height_idx(&self) -> usize {
+    pub(crate) fn get_int_height_idx(self) -> usize {
         match self {
             Self::SimilarImages => IntDataSimilarImages::Height as usize,
             Self::Settings | Self::About => panic!("Button should be disabled"),
@@ -291,14 +290,14 @@ impl ActiveTab {
         }
     }
 
-    pub(crate) fn get_is_header_mode(&self) -> bool {
+    pub(crate) fn get_is_header_mode(self) -> bool {
         match self {
             Self::EmptyFolders | Self::EmptyFiles | Self::BrokenFiles | Self::BigFiles | Self::TemporaryFiles | Self::InvalidSymlinks | Self::BadExtensions => false,
             Self::SimilarImages | Self::DuplicateFiles | Self::SimilarVideos | Self::SimilarMusic => true,
             Self::Settings | Self::About => panic!("Button should be disabled"),
         }
     }
-    pub(crate) fn get_tool_model(&self, app: &MainWindow) -> ModelRc<MainListModel> {
+    pub(crate) fn get_tool_model(self, app: &MainWindow) -> ModelRc<MainListModel> {
         match self {
             Self::EmptyFolders => app.get_empty_folder_model(),
             Self::SimilarImages => app.get_similar_images_model(),
@@ -315,7 +314,7 @@ impl ActiveTab {
         }
     }
 
-    pub(crate) fn set_tool_model(&self, app: &MainWindow, model: ModelRc<MainListModel>) {
+    pub(crate) fn set_tool_model(self, app: &MainWindow, model: ModelRc<MainListModel>) {
         match self {
             Self::EmptyFolders => app.set_empty_folder_model(model),
             Self::SimilarImages => app.set_similar_images_model(model),

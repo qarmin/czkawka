@@ -117,10 +117,8 @@ impl EmptyFolder {
                                 &mut non_empty_folder,
                                 &mut folder_entries_list,
                             );
-                        } else {
-                            if non_empty_folder.is_none() {
-                                non_empty_folder = Some(current_folder_as_string.clone());
-                            }
+                        } else if non_empty_folder.is_none() {
+                            non_empty_folder = Some(current_folder_as_string.clone());
                         }
                     }
                     if counter > 0 {

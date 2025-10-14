@@ -3,7 +3,7 @@ use gtk4::prelude::*;
 use crate::gui_structs::gui_data::GuiData;
 use crate::gui_structs::gui_popovers_select::GuiSelectPopovers;
 use crate::help_functions::PopoverTypes;
-use crate::notebook_enums::*;
+use crate::notebook_enums::{NotebookMainEnum, to_notebook_main_enum};
 use crate::notebook_info::NOTEBOOKS_INFO;
 
 pub(crate) fn connect_button_select(gui_data: &GuiData) {

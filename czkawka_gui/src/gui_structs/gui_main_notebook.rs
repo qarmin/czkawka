@@ -1,12 +1,18 @@
+use std::cell::RefCell;
+use std::rc::Rc;
+use std::collections::HashMap;
 use czkawka_core::common::model::CheckingMethod;
 use czkawka_core::localizer_core::{fnc_get_similarity_minimal, fnc_get_similarity_very_high};
 use czkawka_core::tools::big_file::SearchMode;
 use czkawka_core::tools::similar_images::SIMILAR_VALUES;
 use czkawka_core::tools::similar_images::core::get_string_from_similarity;
 use gtk4::prelude::*;
-use gtk4::{Builder, CheckButton, ComboBoxText, Entry, EventControllerKey, GestureClick, Image, Label, Notebook, Scale, ScrolledWindow, TreeView, Widget};
+use gtk4::{Builder, CheckButton, ComboBoxText, Entry, Label, Notebook, Picture, Scale, TreeView, Widget};
 
 use crate::flg;
+use crate::gui_structs::common_tree_view::{CommonTreeViews, SubView};
+use crate::gui_structs::gui_data::GuiData;
+use crate::gui_structs::gui_settings::GuiSettings;
 use crate::help_combo_box::{AUDIO_TYPE_CHECK_METHOD_COMBO_BOX, BIG_FILES_CHECK_METHOD_COMBO_BOX, DUPLICATES_CHECK_METHOD_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX};
 use crate::help_functions::get_all_direct_children;
 use crate::notebook_enums::{NUMBER_OF_NOTEBOOK_MAIN_TABS, NotebookMainEnum};
@@ -14,18 +20,6 @@ use crate::notebook_enums::{NUMBER_OF_NOTEBOOK_MAIN_TABS, NotebookMainEnum};
 #[derive(Clone)]
 pub struct GuiMainNotebook {
     pub notebook_main: Notebook,
-
-    pub scrolled_window_duplicate_finder: ScrolledWindow,
-    pub scrolled_window_empty_folder_finder: ScrolledWindow,
-    pub scrolled_window_empty_files_finder: ScrolledWindow,
-    pub scrolled_window_temporary_files_finder: ScrolledWindow,
-    pub scrolled_window_big_files_finder: ScrolledWindow,
-    pub scrolled_window_similar_images_finder: ScrolledWindow,
-    pub scrolled_window_similar_videos_finder: ScrolledWindow,
-    pub scrolled_window_same_music_finder: ScrolledWindow,
-    pub scrolled_window_invalid_symlinks: ScrolledWindow,
-    pub scrolled_window_broken_files: ScrolledWindow,
-    pub scrolled_window_bad_extensions: ScrolledWindow,
 
     pub tree_view_duplicate_finder: TreeView,
     pub tree_view_empty_folder_finder: TreeView,
@@ -39,30 +33,6 @@ pub struct GuiMainNotebook {
     pub tree_view_broken_files: TreeView,
     pub tree_view_bad_extensions: TreeView,
 
-    pub evk_tree_view_duplicate_finder: EventControllerKey,
-    pub evk_tree_view_empty_folder_finder: EventControllerKey,
-    pub evk_tree_view_empty_files_finder: EventControllerKey,
-    pub evk_tree_view_temporary_files_finder: EventControllerKey,
-    pub evk_tree_view_big_files_finder: EventControllerKey,
-    pub evk_tree_view_similar_images_finder: EventControllerKey,
-    pub evk_tree_view_similar_videos_finder: EventControllerKey,
-    pub evk_tree_view_same_music_finder: EventControllerKey,
-    pub evk_tree_view_invalid_symlinks: EventControllerKey,
-    pub evk_tree_view_broken_files: EventControllerKey,
-    pub evk_tree_view_bad_extensions: EventControllerKey,
-
-    pub gc_tree_view_duplicate_finder: GestureClick,
-    pub gc_tree_view_empty_folder_finder: GestureClick,
-    pub gc_tree_view_empty_files_finder: GestureClick,
-    pub gc_tree_view_temporary_files_finder: GestureClick,
-    pub gc_tree_view_big_files_finder: GestureClick,
-    pub gc_tree_view_similar_images_finder: GestureClick,
-    pub gc_tree_view_similar_videos_finder: GestureClick,
-    pub gc_tree_view_same_music_finder: GestureClick,
-    pub gc_tree_view_invalid_symlinks: GestureClick,
-    pub gc_tree_view_broken_files: GestureClick,
-    pub gc_tree_view_bad_extensions: GestureClick,
-
     // General
 
     // Duplicate
@@ -72,7 +42,7 @@ pub struct GuiMainNotebook {
     pub label_duplicate_hash_type: Label,
     pub check_button_duplicate_case_sensitive_name: CheckButton,
 
-    pub image_preview_duplicates: Image,
+    pub image_preview_duplicates: Picture,
 
     // Big file
     pub label_big_shown_files: Label,
@@ -97,7 +67,7 @@ pub struct GuiMainNotebook {
     pub label_image_similarity: Label,
     pub label_image_similarity_max: Label,
 
-    pub image_preview_similar_images: Image,
+    pub image_preview_similar_images: Picture,
     pub label_similar_images_minimal_similarity: Label,
 
     // Video
@@ -122,89 +92,20 @@ pub struct GuiMainNotebook {
     pub check_button_music_length: CheckButton,
     pub check_button_music_approximate_comparison: CheckButton,
     pub check_button_music_compare_only_in_title_group: CheckButton,
-    #[allow(unused)]
+    #[expect(unused)]
     pub label_audio_check_type: Label,
     pub combo_box_audio_check_type: ComboBoxText,
     pub label_same_music_seconds: Label,
     pub label_same_music_similarity: Label,
     pub scale_seconds_same_music: Scale,
     pub scale_similarity_same_music: Scale,
+
+    pub common_tree_views: CommonTreeViews,
 }
 
 impl GuiMainNotebook {
-    pub(crate) fn create_from_builder(builder: &Builder) -> Self {
+    pub(crate) fn create_from_builder(builder: &Builder, settings: &GuiSettings) -> Self {
         let notebook_main: Notebook = builder.object("notebook_main").expect("Cambalache");
-
-        let scrolled_window_duplicate_finder: ScrolledWindow = builder.object("scrolled_window_duplicate_finder").expect("Cambalache");
-        let scrolled_window_empty_folder_finder: ScrolledWindow = builder.object("scrolled_window_empty_folder_finder").expect("Cambalache");
-        let scrolled_window_empty_files_finder: ScrolledWindow = builder.object("scrolled_window_empty_files_finder").expect("Cambalache");
-        let scrolled_window_temporary_files_finder: ScrolledWindow = builder.object("scrolled_window_temporary_files_finder").expect("Cambalache");
-        let scrolled_window_big_files_finder: ScrolledWindow = builder.object("scrolled_window_big_files_finder").expect("Cambalache");
-        let scrolled_window_similar_images_finder: ScrolledWindow = builder.object("scrolled_window_similar_images_finder").expect("Cambalache");
-        let scrolled_window_similar_videos_finder: ScrolledWindow = builder.object("scrolled_window_similar_videos_finder").expect("Cambalache");
-        let scrolled_window_same_music_finder: ScrolledWindow = builder.object("scrolled_window_same_music_finder").expect("Cambalache");
-        let scrolled_window_invalid_symlinks: ScrolledWindow = builder.object("scrolled_window_invalid_symlinks").expect("Cambalache");
-        let scrolled_window_broken_files: ScrolledWindow = builder.object("scrolled_window_broken_files").expect("Cambalache");
-        let scrolled_window_bad_extensions: ScrolledWindow = builder.object("scrolled_window_bad_extensions").expect("Cambalache");
-
-        let tree_view_duplicate_finder: TreeView = TreeView::new();
-        tree_view_duplicate_finder.set_widget_name("PIERD");
-        let tree_view_empty_folder_finder: TreeView = TreeView::new();
-        let tree_view_empty_files_finder: TreeView = TreeView::new();
-        let tree_view_temporary_files_finder: TreeView = TreeView::new();
-        let tree_view_big_files_finder: TreeView = TreeView::new();
-        let tree_view_similar_images_finder: TreeView = TreeView::new();
-        let tree_view_similar_videos_finder: TreeView = TreeView::new();
-        let tree_view_same_music_finder: TreeView = TreeView::new();
-        let tree_view_invalid_symlinks: TreeView = TreeView::new();
-        let tree_view_broken_files: TreeView = TreeView::new();
-        let tree_view_bad_extensions: TreeView = TreeView::new();
-
-        let evk_tree_view_duplicate_finder: EventControllerKey = EventControllerKey::new();
-        tree_view_duplicate_finder.add_controller(evk_tree_view_duplicate_finder.clone());
-        let evk_tree_view_empty_folder_finder: EventControllerKey = EventControllerKey::new();
-        tree_view_empty_folder_finder.add_controller(evk_tree_view_empty_folder_finder.clone());
-        let evk_tree_view_empty_files_finder: EventControllerKey = EventControllerKey::new();
-        tree_view_empty_files_finder.add_controller(evk_tree_view_empty_files_finder.clone());
-        let evk_tree_view_temporary_files_finder: EventControllerKey = EventControllerKey::new();
-        tree_view_temporary_files_finder.add_controller(evk_tree_view_temporary_files_finder.clone());
-        let evk_tree_view_big_files_finder: EventControllerKey = EventControllerKey::new();
-        tree_view_big_files_finder.add_controller(evk_tree_view_big_files_finder.clone());
-        let evk_tree_view_similar_images_finder: EventControllerKey = EventControllerKey::new();
-        tree_view_similar_images_finder.add_controller(evk_tree_view_similar_images_finder.clone());
-        let evk_tree_view_similar_videos_finder: EventControllerKey = EventControllerKey::new();
-        tree_view_similar_videos_finder.add_controller(evk_tree_view_similar_videos_finder.clone());
-        let evk_tree_view_same_music_finder: EventControllerKey = EventControllerKey::new();
-        tree_view_same_music_finder.add_controller(evk_tree_view_same_music_finder.clone());
-        let evk_tree_view_invalid_symlinks: EventControllerKey = EventControllerKey::new();
-        tree_view_invalid_symlinks.add_controller(evk_tree_view_invalid_symlinks.clone());
-        let evk_tree_view_broken_files: EventControllerKey = EventControllerKey::new();
-        tree_view_broken_files.add_controller(evk_tree_view_broken_files.clone());
-        let evk_tree_view_bad_extensions: EventControllerKey = EventControllerKey::new();
-        tree_view_bad_extensions.add_controller(evk_tree_view_bad_extensions.clone());
-
-        let gc_tree_view_duplicate_finder: GestureClick = GestureClick::new();
-        tree_view_duplicate_finder.add_controller(gc_tree_view_duplicate_finder.clone());
-        let gc_tree_view_empty_folder_finder: GestureClick = GestureClick::new();
-        tree_view_empty_folder_finder.add_controller(gc_tree_view_empty_folder_finder.clone());
-        let gc_tree_view_empty_files_finder: GestureClick = GestureClick::new();
-        tree_view_empty_files_finder.add_controller(gc_tree_view_empty_files_finder.clone());
-        let gc_tree_view_temporary_files_finder: GestureClick = GestureClick::new();
-        tree_view_temporary_files_finder.add_controller(gc_tree_view_temporary_files_finder.clone());
-        let gc_tree_view_big_files_finder: GestureClick = GestureClick::new();
-        tree_view_big_files_finder.add_controller(gc_tree_view_big_files_finder.clone());
-        let gc_tree_view_similar_images_finder: GestureClick = GestureClick::new();
-        tree_view_similar_images_finder.add_controller(gc_tree_view_similar_images_finder.clone());
-        let gc_tree_view_similar_videos_finder: GestureClick = GestureClick::new();
-        tree_view_similar_videos_finder.add_controller(gc_tree_view_similar_videos_finder.clone());
-        let gc_tree_view_same_music_finder: GestureClick = GestureClick::new();
-        tree_view_same_music_finder.add_controller(gc_tree_view_same_music_finder.clone());
-        let gc_tree_view_invalid_symlinks: GestureClick = GestureClick::new();
-        tree_view_invalid_symlinks.add_controller(gc_tree_view_invalid_symlinks.clone());
-        let gc_tree_view_broken_files: GestureClick = GestureClick::new();
-        tree_view_broken_files.add_controller(gc_tree_view_broken_files.clone());
-        let gc_tree_view_bad_extensions: GestureClick = GestureClick::new();
-        tree_view_bad_extensions.add_controller(gc_tree_view_bad_extensions.clone());
 
         let combo_box_duplicate_check_method: ComboBoxText = builder.object("combo_box_duplicate_check_method").expect("Cambalache");
         let combo_box_duplicate_hash_type: ComboBoxText = builder.object("combo_box_duplicate_hash_type").expect("Cambalache");
@@ -253,8 +154,8 @@ impl GuiMainNotebook {
         let label_video_similarity_max: Label = builder.object("label_video_similarity_max").expect("Cambalache");
         let label_big_files_mode: Label = builder.object("label_big_files_mode").expect("Cambalache");
 
-        let image_preview_similar_images: Image = builder.object("image_preview_similar_images").expect("Cambalache");
-        let image_preview_duplicates: Image = builder.object("image_preview_duplicates").expect("Cambalache");
+        let image_preview_similar_images: Picture = builder.object("image_preview_similar_images").expect("Cambalache");
+        let image_preview_duplicates: Picture = builder.object("image_preview_duplicates").expect("Cambalache");
 
         let label_audio_check_type: Label = builder.object("label_audio_check_type").expect("Cambalache");
         let combo_box_audio_check_type: ComboBoxText = builder.object("combo_box_audio_check_type").expect("Cambalache");
@@ -263,19 +164,44 @@ impl GuiMainNotebook {
         let scale_seconds_same_music: Scale = builder.object("scale_seconds_same_music").expect("Cambalache");
         let scale_similarity_same_music: Scale = builder.object("scale_similarity_same_music").expect("Cambalache");
 
+        #[rustfmt::skip]
+        let subviews: Vec<_> = [
+            SubView::new(builder, "scrolled_window_duplicate_finder", NotebookMainEnum::Duplicate, Some("image_preview_duplicates"), "tree_view_duplicate_finder", Some(settings.check_button_settings_show_preview_duplicates.clone())),
+            SubView::new(builder, "scrolled_window_empty_folder_finder", NotebookMainEnum::EmptyDirectories, None, "tree_view_empty_folder_finder", None),
+            SubView::new(builder, "scrolled_window_empty_files_finder", NotebookMainEnum::EmptyFiles, None, "tree_view_empty_files_finder", None),
+            SubView::new(builder, "scrolled_window_temporary_files_finder", NotebookMainEnum::Temporary, None, "tree_view_temporary_files_finder", None),
+            SubView::new(builder, "scrolled_window_big_files_finder", NotebookMainEnum::BigFiles, None, "tree_view_big_files_finder", None),
+            SubView::new(builder, "scrolled_window_similar_images_finder", NotebookMainEnum::SimilarImages, Some("image_preview_similar_images"), "tree_view_similar_images_finder", Some(settings.check_button_settings_show_preview_similar_images.clone())),
+            SubView::new(builder, "scrolled_window_similar_videos_finder", NotebookMainEnum::SimilarVideos, None, "tree_view_similar_videos_finder", None),
+            SubView::new(builder, "scrolled_window_same_music_finder", NotebookMainEnum::SameMusic, None, "tree_view_same_music_finder", None),
+            SubView::new(builder, "scrolled_window_invalid_symlinks", NotebookMainEnum::Symlinks, None, "tree_view_invalid_symlinks", None),
+            SubView::new(builder, "scrolled_window_broken_files", NotebookMainEnum::BrokenFiles, None, "tree_view_broken_files", None),
+            SubView::new(builder, "scrolled_window_bad_extensions", NotebookMainEnum::BadExtensions, None, "tree_view_bad_extensions", None),
+        ]
+        .into_iter()
+        .collect();
+
+        let common_tree_views = CommonTreeViews {
+            notebook_main: notebook_main.clone(),
+            subviews,
+            preview_path: Rc::new(RefCell::new(String::new())),
+        };
+
+        // TODO - This can be removed when common_tree_views will take all tree views
+        let tree_view_duplicate_finder: TreeView = common_tree_views.get_subview(NotebookMainEnum::Duplicate).tree_view.clone();
+        let tree_view_empty_folder_finder: TreeView = common_tree_views.get_subview(NotebookMainEnum::EmptyDirectories).tree_view.clone();
+        let tree_view_empty_files_finder: TreeView = common_tree_views.get_subview(NotebookMainEnum::EmptyFiles).tree_view.clone();
+        let tree_view_temporary_files_finder: TreeView = common_tree_views.get_subview(NotebookMainEnum::Temporary).tree_view.clone();
+        let tree_view_big_files_finder: TreeView = common_tree_views.get_subview(NotebookMainEnum::BigFiles).tree_view.clone();
+        let tree_view_similar_images_finder: TreeView = common_tree_views.get_subview(NotebookMainEnum::SimilarImages).tree_view.clone();
+        let tree_view_similar_videos_finder: TreeView = common_tree_views.get_subview(NotebookMainEnum::SimilarVideos).tree_view.clone();
+        let tree_view_same_music_finder: TreeView = common_tree_views.get_subview(NotebookMainEnum::SameMusic).tree_view.clone();
+        let tree_view_invalid_symlinks: TreeView = common_tree_views.get_subview(NotebookMainEnum::Symlinks).tree_view.clone();
+        let tree_view_broken_files: TreeView = common_tree_views.get_subview(NotebookMainEnum::BrokenFiles).tree_view.clone();
+        let tree_view_bad_extensions: TreeView = common_tree_views.get_subview(NotebookMainEnum::BadExtensions).tree_view.clone();
+
         Self {
             notebook_main,
-            scrolled_window_duplicate_finder,
-            scrolled_window_empty_folder_finder,
-            scrolled_window_empty_files_finder,
-            scrolled_window_temporary_files_finder,
-            scrolled_window_big_files_finder,
-            scrolled_window_similar_images_finder,
-            scrolled_window_similar_videos_finder,
-            scrolled_window_same_music_finder,
-            scrolled_window_invalid_symlinks,
-            scrolled_window_broken_files,
-            scrolled_window_bad_extensions,
             tree_view_duplicate_finder,
             tree_view_empty_folder_finder,
             tree_view_empty_files_finder,
@@ -287,28 +213,6 @@ impl GuiMainNotebook {
             tree_view_invalid_symlinks,
             tree_view_broken_files,
             tree_view_bad_extensions,
-            evk_tree_view_duplicate_finder,
-            evk_tree_view_empty_folder_finder,
-            evk_tree_view_empty_files_finder,
-            evk_tree_view_temporary_files_finder,
-            evk_tree_view_big_files_finder,
-            evk_tree_view_similar_images_finder,
-            evk_tree_view_similar_videos_finder,
-            evk_tree_view_same_music_finder,
-            evk_tree_view_invalid_symlinks,
-            evk_tree_view_broken_files,
-            evk_tree_view_bad_extensions,
-            gc_tree_view_duplicate_finder,
-            gc_tree_view_empty_folder_finder,
-            gc_tree_view_empty_files_finder,
-            gc_tree_view_temporary_files_finder,
-            gc_tree_view_big_files_finder,
-            gc_tree_view_similar_images_finder,
-            gc_tree_view_similar_videos_finder,
-            gc_tree_view_same_music_finder,
-            gc_tree_view_invalid_symlinks,
-            gc_tree_view_broken_files,
-            gc_tree_view_bad_extensions,
             combo_box_duplicate_check_method,
             combo_box_duplicate_hash_type,
             label_duplicate_check_method,
@@ -354,7 +258,12 @@ impl GuiMainNotebook {
             label_same_music_similarity,
             scale_seconds_same_music,
             scale_similarity_same_music,
+            common_tree_views,
         }
+    }
+
+    pub(crate) fn setup(&self, gui_data: &GuiData) {
+        self.common_tree_views.setup(gui_data);
     }
 
     pub(crate) fn get_main_tree_views(&self) -> [TreeView; NUMBER_OF_NOTEBOOK_MAIN_TABS] {
@@ -490,89 +399,100 @@ impl GuiMainNotebook {
         }
 
         // Change names of columns
-        let names_of_columns = [
-            vec![
-                flg!("main_tree_view_column_size"),
-                flg!("main_tree_view_column_file_name"),
-                flg!("main_tree_view_column_path"),
-                flg!("main_tree_view_column_modification"),
-            ], // Duplicates
-            vec![
-                flg!("main_tree_view_column_folder_name"),
-                flg!("main_tree_view_column_path"),
-                flg!("main_tree_view_column_modification"),
-            ], // Empty Folders
-            vec![
-                flg!("main_tree_view_column_size"),
-                flg!("main_tree_view_column_file_name"),
-                flg!("main_tree_view_column_path"),
-                flg!("main_tree_view_column_modification"),
-            ], // Big files
-            vec![
-                flg!("main_tree_view_column_file_name"),
-                flg!("main_tree_view_column_path"),
-                flg!("main_tree_view_column_modification"),
-            ], // Empty files
-            vec![
-                flg!("main_tree_view_column_file_name"),
-                flg!("main_tree_view_column_path"),
-                flg!("main_tree_view_column_modification"),
-            ], // Temporary Files
-            vec![
-                flg!("main_tree_view_column_similarity"),
-                flg!("main_tree_view_column_size"),
-                flg!("main_tree_view_column_dimensions"),
-                flg!("main_tree_view_column_file_name"),
-                flg!("main_tree_view_column_path"),
-                flg!("main_tree_view_column_modification"),
-            ], // Similar Images
-            vec![
-                flg!("main_tree_view_column_size"),
-                flg!("main_tree_view_column_file_name"),
-                flg!("main_tree_view_column_path"),
-                flg!("main_tree_view_column_modification"),
-            ], // Similar Videos
-            vec![
-                flg!("main_tree_view_column_size"),
-                flg!("main_tree_view_column_file_name"),
-                flg!("main_tree_view_column_title"),
-                flg!("main_tree_view_column_artist"),
-                flg!("main_tree_view_column_year"),
-                flg!("main_tree_view_column_bitrate"),
-                flg!("main_tree_view_column_length"),
-                flg!("main_tree_view_column_genre"),
-                flg!("main_tree_view_column_path"),
-                flg!("main_tree_view_column_modification"),
-            ], // Music Duplicates
-            vec![
-                flg!("main_tree_view_column_symlink_file_name"),
-                flg!("main_tree_view_column_symlink_folder"),
-                flg!("main_tree_view_column_destination_path"),
-                flg!("main_tree_view_column_type_of_error"),
-                flg!("main_tree_view_column_modification"),
-            ], // Invalid Symlinks
-            vec![
-                flg!("main_tree_view_column_file_name"),
-                flg!("main_tree_view_column_path"),
-                flg!("main_tree_view_column_type_of_error"),
-                flg!("main_tree_view_column_modification"),
-            ], // Broken Files
-            vec![
-                flg!("main_tree_view_column_file_name"),
-                flg!("main_tree_view_column_path"),
-                flg!("main_tree_view_column_current_extension"),
-                flg!("main_tree_view_column_proper_extensions"),
-                flg!("main_tree_view_column_modification"),
-            ], // Broken Files
-        ];
+        let mut names_of_columns: HashMap<NotebookMainEnum, Vec<String>> = HashMap::new();
 
-        for (notebook_index, tree_view) in self.get_main_tree_views().iter().enumerate() {
-            for (column_index, column) in tree_view.columns().iter().enumerate() {
-                if column_index == 0 {
-                    continue; // Selection button
-                }
-                column.set_title(&names_of_columns[notebook_index][column_index - 1]);
+        names_of_columns.insert(NotebookMainEnum::Duplicate, vec![
+            flg!("main_tree_view_column_size"),
+            flg!("main_tree_view_column_file_name"),
+            flg!("main_tree_view_column_path"),
+            flg!("main_tree_view_column_modification"),
+        ]);
+        names_of_columns.insert(NotebookMainEnum::EmptyDirectories, vec![
+            flg!("main_tree_view_column_folder_name"),
+            flg!("main_tree_view_column_path"),
+            flg!("main_tree_view_column_modification"),
+        ]);
+        names_of_columns.insert(NotebookMainEnum::BigFiles, vec![
+            flg!("main_tree_view_column_size"),
+            flg!("main_tree_view_column_file_name"),
+            flg!("main_tree_view_column_path"),
+            flg!("main_tree_view_column_modification"),
+        ]);
+        names_of_columns.insert(NotebookMainEnum::EmptyFiles, vec![
+            flg!("main_tree_view_column_file_name"),
+            flg!("main_tree_view_column_path"),
+            flg!("main_tree_view_column_modification"),
+        ]);
+        names_of_columns.insert(NotebookMainEnum::Temporary, vec![
+            flg!("main_tree_view_column_file_name"),
+            flg!("main_tree_view_column_path"),
+            flg!("main_tree_view_column_modification"),
+        ]);
+        names_of_columns.insert(NotebookMainEnum::SimilarImages, vec![
+            flg!("main_tree_view_column_similarity"),
+            flg!("main_tree_view_column_size"),
+            flg!("main_tree_view_column_dimensions"),
+            flg!("main_tree_view_column_file_name"),
+            flg!("main_tree_view_column_path"),
+            flg!("main_tree_view_column_modification"),
+        ]);
+        names_of_columns.insert(NotebookMainEnum::SimilarVideos, vec![
+            flg!("main_tree_view_column_size"),
+            flg!("main_tree_view_column_file_name"),
+            flg!("main_tree_view_column_path"),
+            flg!("main_tree_view_column_modification"),
+        ]);
+        names_of_columns.insert(NotebookMainEnum::SameMusic, vec![
+            flg!("main_tree_view_column_size"),
+            flg!("main_tree_view_column_file_name"),
+            flg!("main_tree_view_column_title"),
+            flg!("main_tree_view_column_artist"),
+            flg!("main_tree_view_column_year"),
+            flg!("main_tree_view_column_bitrate"),
+            flg!("main_tree_view_column_length"),
+            flg!("main_tree_view_column_genre"),
+            flg!("main_tree_view_column_path"),
+            flg!("main_tree_view_column_modification"),
+        ]);
+        names_of_columns.insert(NotebookMainEnum::Symlinks, vec![
+            flg!("main_tree_view_column_symlink_file_name"),
+            flg!("main_tree_view_column_symlink_folder"),
+            flg!("main_tree_view_column_destination_path"),
+            flg!("main_tree_view_column_type_of_error"),
+            flg!("main_tree_view_column_modification"),
+        ]);
+        names_of_columns.insert(NotebookMainEnum::BrokenFiles, vec![
+            flg!("main_tree_view_column_file_name"),
+            flg!("main_tree_view_column_path"),
+            flg!("main_tree_view_column_type_of_error"),
+            flg!("main_tree_view_column_modification"),
+        ]);
+        names_of_columns.insert(NotebookMainEnum::BadExtensions, vec![
+            flg!("main_tree_view_column_file_name"),
+            flg!("main_tree_view_column_path"),
+            flg!("main_tree_view_column_current_extension"),
+            flg!("main_tree_view_column_proper_extensions"),
+            // flg!("main_tree_view_column_modification"), // TODO - too much data?
+        ]);
+
+
+        for (key_enum, columns_names) in names_of_columns {
+            let s = &self.common_tree_views.get_subview(key_enum);
+
+            // Skipping first column because it is selection button
+            assert_eq!(columns_names.len() + 1, s.tree_view.columns().len(), "Number of columns in tree view and names do not match for {:?}, tree_view - {:?}", key_enum, s.tree_view.widget_name());
+            for (column, name) in s.tree_view.columns().iter().skip(0).zip(columns_names.iter()) {
+                column.set_title(name);
             }
+
+
+            // for (column_index, column) in s.tree_view.columns().iter().enumerate() {
+            //     dbg!(&key_enum);
+            //     if column_index == 0 {
+            //         continue; // Selection button - always first
+            //     }
+            //     column.set_title(&columns_names[column_index - 1]);
+            // }
         }
 
         {

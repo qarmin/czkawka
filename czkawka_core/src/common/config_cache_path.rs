@@ -48,7 +48,7 @@ pub fn set_config_cache_path(cache_name: &'static str, config_name: &'static str
                     default_folder_str
                 ));
                 return default_folder;
-            };
+            }
             if !folder_path.is_dir() {
                 warnings.push(format!(
                     "{name} folder \"{}\" is not a directory, using default folder \"{}\"",
@@ -82,15 +82,15 @@ pub fn set_config_cache_path(cache_name: &'static str, config_name: &'static str
             config_folder.to_string_lossy(),
             cache_folder.to_string_lossy()
         ));
-        if !config_folder.exists() {
-            if let Err(e) = fs::create_dir_all(&config_folder) {
-                warnings.push(format!("Cannot create config folder \"{}\", reason {e}", config_folder.to_string_lossy()));
-            }
+        if !config_folder.exists()
+            && let Err(e) = fs::create_dir_all(&config_folder)
+        {
+            warnings.push(format!("Cannot create config folder \"{}\", reason {e}", config_folder.to_string_lossy()));
         }
-        if !cache_folder.exists() {
-            if let Err(e) = fs::create_dir_all(&cache_folder) {
-                warnings.push(format!("Cannot create cache folder \"{}\", reason {e}", cache_folder.to_string_lossy()));
-            }
+        if !cache_folder.exists()
+            && let Err(e) = fs::create_dir_all(&cache_folder)
+        {
+            warnings.push(format!("Cannot create cache folder \"{}\", reason {e}", cache_folder.to_string_lossy()));
         }
         Some(ConfigCachePath { config_folder, cache_folder })
     } else {
@@ -133,18 +133,14 @@ pub(crate) fn open_cache_folder(
                 }
             });
         }
+    } else if let Ok(t) = OpenOptions::new().read(true).open(&cache_file) {
+        file_handler_default = Some(t);
+    } else if use_json {
+        file_handler_json = Some(OpenOptions::new().read(true).open(&cache_file_json).ok()?);
     } else {
-        if let Ok(t) = OpenOptions::new().read(true).open(&cache_file) {
-            file_handler_default = Some(t);
-        } else {
-            if use_json {
-                file_handler_json = Some(OpenOptions::new().read(true).open(&cache_file_json).ok()?);
-            } else {
-                // messages.push(format!("Cannot find or open cache file {cache_file:?}")); // No error or warning
-                return None;
-            }
-        }
-    };
+        // messages.push(format!("Cannot find or open cache file {cache_file:?}")); // No error or warning
+        return None;
+    }
     Some(((file_handler_default, cache_file), (file_handler_json, cache_file_json)))
 }
 

@@ -25,12 +25,10 @@ pub(crate) fn connect_open_items(app: &MainWindow) {
         }
     });
 
-    app.global::<Callabler>().on_open_link(move |link| {
-        match open::that(link.as_str()) {
-            Ok(()) => {}
-            Err(e) => {
-                error!("Failed to open link: {e}");
-            }
-        };
+    app.global::<Callabler>().on_open_link(move |link| match open::that(link.as_str()) {
+        Ok(()) => {}
+        Err(e) => {
+            error!("Failed to open link: {e}");
+        }
     });
 }

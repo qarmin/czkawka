@@ -19,6 +19,18 @@ pub enum NotebookMainEnum {
     BadExtensions,
 }
 
+// impl NotebookMainEnum {
+//     pub fn get_is_header_idx(&self) -> Option<u32> {
+//         match self {
+//             NotebookMainEnum::Duplicate => Some(ColumnsDuplicates::IsHeader as u32),
+//             NotebookMainEnum::SameMusic => Some(ColumnsSameMusic::IsHeader as u32),
+//             NotebookMainEnum::SimilarImages => Some(ColumnsSimilarImages::IsHeader as u32),
+//             NotebookMainEnum::SimilarVideos => Some(ColumnsSimilarVideos::IsHeader as u32),
+//             _ => None,
+//         }
+//     }
+// }
+
 pub(crate) fn to_notebook_main_enum(notebook_number: u32) -> NotebookMainEnum {
     match notebook_number {
         0 => NotebookMainEnum::Duplicate,

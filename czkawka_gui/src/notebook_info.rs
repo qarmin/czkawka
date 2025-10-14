@@ -6,18 +6,18 @@ use crate::help_functions::{
 };
 use crate::notebook_enums::{NUMBER_OF_NOTEBOOK_MAIN_TABS, NotebookMainEnum};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NotebookObject {
     pub notebook_type: NotebookMainEnum,
     pub available_modes: &'static [PopoverTypes],
-    #[allow(unused)]
+    #[expect(unused)]
     pub column_activatable_button: Option<i32>,
     pub column_path: i32,
     pub column_name: i32,
     pub column_selection: i32,
     pub column_header: Option<i32>,
     pub column_dimensions: Option<i32>,
-    #[allow(unused)]
+    #[expect(unused)]
     pub column_size: Option<i32>,
     pub column_size_as_bytes: Option<i32>,
     pub column_modification_as_secs: Option<i32>,

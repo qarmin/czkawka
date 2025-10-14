@@ -10,7 +10,7 @@ use humansize::{BINARY, format_size};
 use crate::common::model::{CheckingMethod, WorkContinueStatus};
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
-use crate::common::traits::*;
+use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, PrintResults, Search};
 use crate::tools::duplicate::{DuplicateFinder, DuplicateFinderParameters, Info};
 
 impl AllTraits for DuplicateFinder {}
@@ -73,13 +73,13 @@ impl Search for DuplicateFinder {
         if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
             self.common_data.stopped_search = true;
             return;
-        };
+        }
         self.debug_print();
     }
 }
 
 impl DebugPrint for DuplicateFinder {
-    #[allow(clippy::print_stdout)]
+    #[expect(clippy::print_stdout)]
     fn debug_print(&self) {
         if !cfg!(debug_assertions) {
             return;

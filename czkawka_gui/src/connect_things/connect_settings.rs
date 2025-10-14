@@ -88,7 +88,7 @@ pub(crate) fn connect_settings(gui_data: &GuiData) {
             if let Some(config_cache_path) = get_config_cache_path() {
                 if let Err(e) = open::that(&config_cache_path.cache_folder) {
                     error!("Failed to open config folder \"{}\", reason {e}", config_cache_path.cache_folder.to_string_lossy());
-                };
+                }
             } else {
                 error!("Failed to get cache folder path");
             }
@@ -101,7 +101,7 @@ pub(crate) fn connect_settings(gui_data: &GuiData) {
             if let Some(config_cache_path) = get_config_cache_path() {
                 if let Err(e) = open::that(&config_cache_path.config_folder) {
                     error!("Failed to open config folder \"{}\", reason {e}", config_cache_path.config_folder.to_string_lossy());
-                };
+                }
             } else {
                 error!("Failed to get settings folder path");
             }

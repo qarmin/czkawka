@@ -33,28 +33,28 @@ pub enum MessageType {
 }
 
 impl MessageType {
-    fn get_empty_message(&self) -> String {
+    fn get_empty_message(self) -> String {
         match self {
             Self::Delete => flk!("rust_no_files_deleted"),
             Self::Rename => flk!("rust_no_files_renamed"),
             Self::Move => flk!("rust_no_files_moved"),
         }
     }
-    fn get_summary_message(&self, deleted: usize, failed: usize, total: usize) -> String {
+    fn get_summary_message(self, deleted: usize, failed: usize, total: usize) -> String {
         match self {
             Self::Delete => flk!("rust_delete_summary", deleted = deleted, failed = failed, total = total),
             Self::Rename => flk!("rust_rename_summary", renamed = deleted, failed = failed, total = total),
             Self::Move => flk!("rust_move_summary", moved = deleted, failed = failed, total = total),
         }
     }
-    fn get_base_progress(&self) -> ProgressData {
+    fn get_base_progress(self) -> ProgressData {
         match self {
             Self::Delete => ProgressData::get_empty_state(CurrentStage::DeletingFiles),
             Self::Rename => ProgressData::get_empty_state(CurrentStage::RenamingFiles),
             Self::Move => ProgressData::get_empty_state(CurrentStage::MovingFiles),
         }
     }
-    fn msg_type(&self) -> &'static str {
+    fn msg_type(self) -> &'static str {
         match self {
             Self::Delete => "delete",
             Self::Rename => "rename",
@@ -73,7 +73,7 @@ impl ModelProcessor {
         model_operations::remove_single_items_in_groups(items, have_header)
     }
 
-    pub(crate) fn remove_deleted_items_from_model(&self, results: ProcessingResult) -> (Vec<SimplerMainListModel>, Vec<String>, usize) {
+    pub(crate) fn remove_deleted_items_from_model(results: ProcessingResult) -> (Vec<SimplerMainListModel>, Vec<String>, usize) {
         let mut errors = vec![];
         let mut items_deleted = 0;
 
@@ -94,9 +94,8 @@ impl ModelProcessor {
 
         (new_model, errors, items_deleted)
     }
-    #[allow(clippy::too_many_arguments)]
+
     pub(crate) fn process_items(
-        &self,
         items_simplified: Vec<(usize, SimplerMainListModel)>,
         items_queued_to_delete: usize,
         sender: Sender<ProgressData>,
@@ -138,7 +137,6 @@ impl ModelProcessor {
         output
     }
 
-    #[allow(clippy::too_many_arguments)]
     pub(crate) fn process_and_update_gui_state(
         self,
         weak_app: &Weak<MainWindow>,
@@ -179,10 +177,10 @@ impl ModelProcessor {
         let _ = progress_sender.send(base_progress).map_err(|e| error!("Failed to send progress data: {e}"));
 
         let start_time = std::time::Instant::now();
-        let results = self.process_items(simpler_model, items_queued_to_delete, progress_sender.clone(), &stop_flag, dlt_fnc, message_type, size_idx);
+        let results = Self::process_items(simpler_model, items_queued_to_delete, progress_sender.clone(), &stop_flag, dlt_fnc, message_type, size_idx);
         let processing_time = start_time.elapsed();
         let removing_items_from_model = std::time::Instant::now();
-        let (new_simple_model, errors, items_deleted) = self.remove_deleted_items_from_model(results);
+        let (new_simple_model, errors, items_deleted) = Self::remove_deleted_items_from_model(results);
         debug!(
             "Items processed in {processing_time:?}, removing items from model took {:?}, from all {} items, removed from list {}, failed to process {}",
             removing_items_from_model.elapsed(),

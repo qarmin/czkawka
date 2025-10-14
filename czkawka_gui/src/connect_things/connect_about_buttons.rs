@@ -13,27 +13,27 @@ pub(crate) fn connect_about_buttons(gui_data: &GuiData) {
     button_donation.connect_clicked(move |_| {
         if let Err(e) = open::that(SPONSOR_SITE) {
             error!("Failed to open sponsor site: {SPONSOR_SITE}, reason {e}");
-        };
+        }
     });
 
     let button_instruction = gui_data.about.button_instruction.clone();
     button_instruction.connect_clicked(move |_| {
         if let Err(e) = open::that(INSTRUCTION_SITE) {
             error!("Failed to open instruction site: {INSTRUCTION_SITE}, reason {e}");
-        };
+        }
     });
 
     let button_repository = gui_data.about.button_repository.clone();
     button_repository.connect_clicked(move |_| {
         if let Err(e) = open::that(REPOSITORY_SITE) {
             error!("Failed to open repository site: {REPOSITORY_SITE}, reason {e}");
-        };
+        }
     });
 
     let button_translation = gui_data.about.button_translation.clone();
     button_translation.connect_clicked(move |_| {
         if let Err(e) = open::that(TRANSLATION_SITE) {
             error!("Failed to open translation site: {TRANSLATION_SITE}, reason {e}");
-        };
+        }
     });
 }

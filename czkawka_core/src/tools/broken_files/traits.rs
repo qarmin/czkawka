@@ -8,7 +8,7 @@ use fun_time::fun_time;
 use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
-use crate::common::traits::*;
+use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, PrintResults, Search};
 use crate::tools::broken_files::{BrokenFiles, BrokenFilesParameters, Info};
 
 impl AllTraits for BrokenFiles {}
@@ -28,13 +28,12 @@ impl Search for BrokenFiles {
         if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
             self.common_data.stopped_search = true;
             return;
-        };
+        }
         self.debug_print();
     }
 }
 
 impl DebugPrint for BrokenFiles {
-    #[allow(clippy::print_stdout)]
     fn debug_print(&self) {
         if !cfg!(debug_assertions) {
             return;

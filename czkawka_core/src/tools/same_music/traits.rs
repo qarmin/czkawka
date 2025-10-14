@@ -8,7 +8,7 @@ use fun_time::fun_time;
 use crate::common::model::{CheckingMethod, WorkContinueStatus};
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
-use crate::common::traits::*;
+use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, PrintResults, Search};
 use crate::tools::same_music::{Info, MusicEntry, SameMusic, SameMusicParameters};
 
 impl AllTraits for SameMusic {}
@@ -52,13 +52,13 @@ impl Search for SameMusic {
         if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
             self.common_data.stopped_search = true;
             return;
-        };
+        }
         self.debug_print();
     }
 }
 
 impl DebugPrint for SameMusic {
-    #[allow(clippy::print_stdout)]
+    #[expect(clippy::print_stdout)]
     fn debug_print(&self) {
         if !cfg!(debug_assertions) {
             return;

@@ -18,8 +18,8 @@ enum ExpectedArgs {
 
 // Manual processing of CLI arguments, because Clap would be too heavy for this simple task
 
-#[allow(clippy::print_stdout)]
-#[allow(clippy::print_stderr)]
+#[expect(clippy::print_stdout)]
+#[expect(clippy::print_stderr)]
 pub(crate) fn process_cli_args(args: Vec<String>) -> Option<CliResult> {
     if ["--help", "-h"].iter().any(|&arg| args.contains(&arg.to_string())) {
         println!("Krokiet");

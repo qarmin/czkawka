@@ -10,7 +10,6 @@ use crate::CZKAWKA_VERSION;
 use crate::common::config_cache_path::get_config_cache_path;
 use crate::common::get_all_available_threads;
 
-#[allow(clippy::print_stdout)]
 pub fn setup_logger(disabled_terminal_printing: bool, app_name: &str, filtering_messages_func: fn(&Record) -> bool) {
     log_panics::init();
 
@@ -85,8 +84,10 @@ pub fn filtering_messages(record: &Record) -> bool {
     }
 }
 
-#[allow(clippy::vec_init_then_push)]
-#[allow(unused_mut)]
+#[allow(clippy::allow_attributes)]
+#[allow(unfulfilled_lint_expectations)] // Happens only on release build
+#[expect(clippy::vec_init_then_push)]
+#[expect(unused_mut)]
 pub fn print_version_mode(app: &str) {
     let rust_version = env!("RUST_VERSION_INTERNAL");
     let debug_release = if cfg!(debug_assertions) { "debug" } else { "release" };

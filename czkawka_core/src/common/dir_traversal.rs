@@ -618,7 +618,7 @@ mod tests {
             DirTraversalResult::Stopped => {
                 panic!("Expect SuccessFiles.");
             }
-        };
+        }
         Ok(())
     }
 
@@ -664,7 +664,7 @@ mod tests {
             DirTraversalResult::Stopped => {
                 panic!("Expect SuccessFiles.");
             }
-        };
+        }
         Ok(())
     }
 

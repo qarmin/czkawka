@@ -19,8 +19,8 @@ pub struct GuiCompareImages {
     pub check_button_left_preview_text: gtk4::CheckButton,
     pub check_button_right_preview_text: gtk4::CheckButton,
 
-    pub image_compare_left: gtk4::Image,
-    pub image_compare_right: gtk4::Image,
+    pub image_compare_left: gtk4::Picture,
+    pub image_compare_right: gtk4::Picture,
 
     pub scrolled_window_compare_choose_images: gtk4::ScrolledWindow,
 
@@ -49,8 +49,8 @@ impl GuiCompareImages {
         let check_button_left_preview_text: gtk4::CheckButton = builder.object("check_button_left_preview_text").expect("Cambalache");
         let check_button_right_preview_text: gtk4::CheckButton = builder.object("check_button_right_preview_text").expect("Cambalache");
 
-        let image_compare_left: gtk4::Image = builder.object("image_compare_left").expect("Cambalache");
-        let image_compare_right: gtk4::Image = builder.object("image_compare_right").expect("Cambalache");
+        let image_compare_left: gtk4::Picture = builder.object("image_compare_left").expect("Cambalache");
+        let image_compare_right: gtk4::Picture = builder.object("image_compare_right").expect("Cambalache");
 
         let scrolled_window_compare_choose_images: gtk4::ScrolledWindow = builder.object("scrolled_window_compare_choose_images").expect("Cambalache");
 

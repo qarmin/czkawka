@@ -7,7 +7,7 @@ use regex::Regex;
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::*;
+use crate::help_functions::{change_dimension_to_krotka, get_dialog_box_child, get_full_name_from_path_name, get_list_store};
 use crate::notebook_info::NOTEBOOKS_INFO;
 
 // File length variable allows users to choose duplicates which have shorter file name
@@ -120,12 +120,10 @@ fn popover_all_except_oldest_newest(
                         modification_time_min_max = modification;
                         used_index = Some(current_index);
                     }
-                } else {
-                    if modification > modification_time_min_max || (modification == modification_time_min_max && current_file_length < file_length) {
-                        file_length = current_file_length;
-                        modification_time_min_max = modification;
-                        used_index = Some(current_index);
-                    }
+                } else if modification > modification_time_min_max || (modification == modification_time_min_max && current_file_length < file_length) {
+                    file_length = current_file_length;
+                    modification_time_min_max = modification;
+                    used_index = Some(current_index);
                 }
                 current_index += 1;
 
@@ -191,12 +189,10 @@ fn popover_one_oldest_newest(
                         modification_time_min_max = modification;
                         used_index = Some(current_index);
                     }
-                } else {
-                    if modification > modification_time_min_max || (modification == modification_time_min_max && current_file_length > file_length) {
-                        file_length = current_file_length;
-                        modification_time_min_max = modification;
-                        used_index = Some(current_index);
-                    }
+                } else if modification > modification_time_min_max || (modification == modification_time_min_max && current_file_length > file_length) {
+                    file_length = current_file_length;
+                    modification_time_min_max = modification;
+                    used_index = Some(current_index);
                 }
 
                 current_index += 1;
@@ -395,7 +391,7 @@ fn popover_custom_select_unselect(
                         }
                     } else {
                         // Trivial regex is used, because I need here regex
-                        #[allow(clippy::trivial_regex)]
+                        #[expect(clippy::trivial_regex)]
                         Regex::new("").expect("Empty regex should compile properly.")
                     };
 
@@ -412,30 +408,30 @@ fn popover_custom_select_unselect(
                     let mut vec_of_iters: Vec<TreeIter> = Vec::new();
                     loop {
                         // If went to header and all previous items were selected, then deselect last item
-                        if let Some(column_header) = column_header {
-                            if model.get::<bool>(&iter, column_header) {
-                                if select_things {
-                                    if !using_reference_folders && check_all_selected && (number_of_all_things - number_of_already_selected_things == vec_of_iters.len()) {
-                                        vec_of_iters.pop();
-                                    }
-                                    for iter in vec_of_iters {
-                                        model.set_value(&iter, column_button_selection, &true.to_value());
-                                    }
-                                } else {
-                                    for iter in vec_of_iters {
-                                        model.set_value(&iter, column_button_selection, &false.to_value());
-                                    }
+                        if let Some(column_header) = column_header
+                            && model.get::<bool>(&iter, column_header)
+                        {
+                            if select_things {
+                                if !using_reference_folders && check_all_selected && (number_of_all_things - number_of_already_selected_things == vec_of_iters.len()) {
+                                    vec_of_iters.pop();
                                 }
-
-                                if !model.iter_next(&iter) {
-                                    break;
+                                for iter in vec_of_iters {
+                                    model.set_value(&iter, column_button_selection, &true.to_value());
                                 }
-
-                                number_of_all_things = 0;
-                                number_of_already_selected_things = 0;
-                                vec_of_iters = Vec::new();
-                                continue;
+                            } else {
+                                for iter in vec_of_iters {
+                                    model.set_value(&iter, column_button_selection, &false.to_value());
+                                }
                             }
+
+                            if !model.iter_next(&iter) {
+                                break;
+                            }
+
+                            number_of_all_things = 0;
+                            number_of_already_selected_things = 0;
+                            vec_of_iters = Vec::new();
+                            continue;
                         }
 
                         let is_selected = model.get::<bool>(&iter, column_button_selection as i32);
@@ -455,10 +451,8 @@ fn popover_custom_select_unselect(
                                     if regex_check(&name_wildcard_excluded, &name) {
                                         need_to_change_thing = true;
                                     }
-                                } else {
-                                    if regex_check(&name_wildcard_lowercase_excluded, &name.to_lowercase()) {
-                                        need_to_change_thing = true;
-                                    }
+                                } else if regex_check(&name_wildcard_lowercase_excluded, &name.to_lowercase()) {
+                                    need_to_change_thing = true;
                                 }
                             }
                             if check_path {
@@ -466,10 +460,8 @@ fn popover_custom_select_unselect(
                                     if regex_check(&path_wildcard_excluded, &path) {
                                         need_to_change_thing = true;
                                     }
-                                } else {
-                                    if regex_check(&path_wildcard_lowercase_excluded, &path.to_lowercase()) {
-                                        need_to_change_thing = true;
-                                    }
+                                } else if regex_check(&path_wildcard_lowercase_excluded, &path.to_lowercase()) {
+                                    need_to_change_thing = true;
                                 }
                             }
                         }
@@ -477,15 +469,11 @@ fn popover_custom_select_unselect(
                         if select_things {
                             if is_selected {
                                 number_of_already_selected_things += 1;
-                            } else {
-                                if need_to_change_thing {
-                                    vec_of_iters.push(iter);
-                                }
-                            }
-                        } else {
-                            if need_to_change_thing {
+                            } else if need_to_change_thing {
                                 vec_of_iters.push(iter);
                             }
+                        } else if need_to_change_thing {
+                            vec_of_iters.push(iter);
                         }
 
                         // If went to last item and all previous items were selected, then deselect last item
@@ -555,25 +543,19 @@ fn popover_all_except_biggest_smallest(
                             size_as_bytes_min_max = size_as_bytes;
                             used_index = Some(current_index);
                         }
-                    } else {
-                        if number_of_pixels < number_of_pixels_min_max || (number_of_pixels == number_of_pixels_min_max && size_as_bytes < size_as_bytes_min_max) {
-                            number_of_pixels_min_max = number_of_pixels;
-                            size_as_bytes_min_max = size_as_bytes;
-                            used_index = Some(current_index);
-                        }
+                    } else if number_of_pixels < number_of_pixels_min_max || (number_of_pixels == number_of_pixels_min_max && size_as_bytes < size_as_bytes_min_max) {
+                        number_of_pixels_min_max = number_of_pixels;
+                        size_as_bytes_min_max = size_as_bytes;
+                        used_index = Some(current_index);
                     }
-                } else {
-                    if except_biggest {
-                        if size_as_bytes > size_as_bytes_min_max {
-                            size_as_bytes_min_max = size_as_bytes;
-                            used_index = Some(current_index);
-                        }
-                    } else {
-                        if size_as_bytes < size_as_bytes_min_max {
-                            size_as_bytes_min_max = size_as_bytes;
-                            used_index = Some(current_index);
-                        }
+                } else if except_biggest {
+                    if size_as_bytes > size_as_bytes_min_max {
+                        size_as_bytes_min_max = size_as_bytes;
+                        used_index = Some(current_index);
                     }
+                } else if size_as_bytes < size_as_bytes_min_max {
+                    size_as_bytes_min_max = size_as_bytes;
+                    used_index = Some(current_index);
                 }
 
                 current_index += 1;

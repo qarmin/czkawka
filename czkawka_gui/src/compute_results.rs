@@ -30,10 +30,16 @@ use rayon::prelude::*;
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_combo_box::IMAGES_HASH_SIZE_COMBO_BOX;
-use crate::help_functions::*;
-use crate::notebook_enums::*;
+use crate::help_functions::{
+    BottomButtonsEnum, ColumnsBadExtensions, ColumnsBigFiles, ColumnsBrokenFiles, ColumnsDuplicates, ColumnsEmptyFiles, ColumnsEmptyFolders, ColumnsInvalidSymlinks,
+    ColumnsSameMusic, ColumnsSimilarImages, ColumnsSimilarVideos, ColumnsTemporaryFiles, HEADER_ROW_COLOR, MAIN_ROW_COLOR, Message, SharedState, TEXT_COLOR, get_list_store,
+    print_text_messages_to_text_view, set_buttons,
+};
+use crate::notebook_enums::NotebookMainEnum;
 use crate::notebook_info::NOTEBOOKS_INFO;
-use crate::opening_selecting_records::*;
+use crate::opening_selecting_records::{
+    select_function_always_true, select_function_duplicates, select_function_same_music, select_function_similar_images, select_function_similar_videos,
+};
 
 pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Receiver<Message>) {
     let combo_box_image_hash_size = gui_data.main_notebook.combo_box_image_hash_size.clone();
@@ -1305,7 +1311,7 @@ fn duplicates_add_to_list_store(list_store: &ListStore, file: &str, directory: &
         string_date = DateTime::from_timestamp(modified_date as i64, 0)
             .expect("Modified date always should be in valid range")
             .to_string();
-    };
+    }
 
     let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
         (ColumnsDuplicates::ActivatableSelectButton as u32, &(!is_header)),
@@ -1338,14 +1344,8 @@ fn similar_images_add_to_list_store(
     const COLUMNS_NUMBER: usize = 13;
     let size_str;
     let string_date;
-    let similarity_string;
     let color = if is_header { HEADER_ROW_COLOR } else { MAIN_ROW_COLOR };
-
-    if is_header {
-        similarity_string = String::new();
-    } else {
-        similarity_string = get_string_from_similarity(&similarity, hash_size);
-    };
+    let similarity_string = if is_header { String::new() } else { get_string_from_similarity(&similarity, hash_size) };
 
     if is_header && !is_reference_folder {
         size_str = String::new();
@@ -1388,7 +1388,7 @@ fn similar_videos_add_to_list_store(list_store: &ListStore, file: &str, director
         string_date = DateTime::from_timestamp(modified_date as i64, 0)
             .expect("Modified date always should be in valid range")
             .to_string();
-    };
+    }
 
     let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
         (ColumnsSimilarVideos::ActivatableSelectButton as u32, &(!is_header)),
@@ -1435,7 +1435,7 @@ fn same_music_add_to_list_store(
         string_date = DateTime::from_timestamp(modified_date as i64, 0)
             .expect("Modified date always should be in valid range")
             .to_string();
-    };
+    }
 
     let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
         (ColumnsSameMusic::ActivatableSelectButton as u32, &(!is_header)),

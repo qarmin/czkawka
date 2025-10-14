@@ -7,8 +7,8 @@ use gtk4::{Align, CheckButton, Dialog, Orientation, ResponseType, TextView, Tree
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::*;
-use crate::notebook_enums::*;
+use crate::help_functions::{add_text_to_text_view, clean_invalid_headers, get_full_name_from_path_name, get_list_store, reset_text_view};
+use crate::notebook_enums::NotebookMainEnum;
 use crate::notebook_info::NOTEBOOKS_INFO;
 
 #[derive(PartialEq, Eq, Copy, Clone)]
@@ -55,7 +55,7 @@ async fn sym_hard_link_things(gui_data: GuiData, hardlinking: TypeOfTool) {
     let image_preview_duplicates = gui_data.main_notebook.image_preview_duplicates.clone();
 
     let text_view_errors = gui_data.text_view_errors.clone();
-    let preview_path = gui_data.preview_path.clone();
+    let preview_path = gui_data.main_notebook.common_tree_views.preview_path.clone();
     let window_main = gui_data.window_main.clone();
 
     let nb_number = notebook_main.current_page().expect("Current page not set");
@@ -146,10 +146,10 @@ fn hardlink_symlink(
     let mut current_selected_index = 0;
     loop {
         if model.get::<bool>(&current_iter, column_header) {
-            if let Some(current_symhardlink_data) = current_symhardlink_data {
-                if !current_symhardlink_data.files_to_symhardlink.is_empty() {
-                    vec_symhardlink_data.push(current_symhardlink_data);
-                }
+            if let Some(current_symhardlink_data) = current_symhardlink_data
+                && !current_symhardlink_data.files_to_symhardlink.is_empty()
+            {
+                vec_symhardlink_data.push(current_symhardlink_data);
             }
 
             current_symhardlink_data = None;
@@ -176,20 +176,20 @@ fn hardlink_symlink(
             if current_selected_index != selected_rows.len() - 1 {
                 current_selected_index += 1;
             } else {
-                if let Some(current_symhardlink_data) = current_symhardlink_data {
-                    if !current_symhardlink_data.files_to_symhardlink.is_empty() {
-                        vec_symhardlink_data.push(current_symhardlink_data);
-                    }
+                if let Some(current_symhardlink_data) = current_symhardlink_data
+                    && !current_symhardlink_data.files_to_symhardlink.is_empty()
+                {
+                    vec_symhardlink_data.push(current_symhardlink_data);
                 }
                 break; // There is no more selected items, so we just end checking
             }
         }
 
         if !model.iter_next(&current_iter) {
-            if let Some(current_symhardlink_data) = current_symhardlink_data {
-                if !current_symhardlink_data.files_to_symhardlink.is_empty() {
-                    vec_symhardlink_data.push(current_symhardlink_data);
-                }
+            if let Some(current_symhardlink_data) = current_symhardlink_data
+                && !current_symhardlink_data.files_to_symhardlink.is_empty()
+            {
+                vec_symhardlink_data.push(current_symhardlink_data);
             }
 
             break;
@@ -209,13 +209,13 @@ fn hardlink_symlink(
                 if let Err(e) = fs::remove_file(&file_to_symlink) {
                     add_text_to_text_view(text_view_errors, flg!("delete_file_failed", name = file_to_symlink, reason = e.to_string()).as_str());
                     continue;
-                };
+                }
 
                 #[cfg(target_family = "unix")]
                 {
                     if let Err(e) = std::os::unix::fs::symlink(&symhardlink_data.original_data, &file_to_symlink) {
                         add_text_to_text_view(text_view_errors, flg!("delete_file_failed", name = file_to_symlink, reason = e.to_string()).as_str());
-                    };
+                    }
                 }
                 #[cfg(target_family = "windows")]
                 {
@@ -276,10 +276,8 @@ pub async fn check_if_changing_one_item_in_group_and_continue(tree_view: &gtk4::
                     break;
                 }
                 selected_values_in_group = 0;
-            } else {
-                if model.get::<bool>(&iter, column_selection) {
-                    selected_values_in_group += 1;
-                }
+            } else if model.get::<bool>(&iter, column_selection) {
+                selected_values_in_group += 1;
             }
         }
     } else {
@@ -337,7 +335,7 @@ pub async fn check_if_can_link_files(check_button_settings_confirm_link: &CheckB
             confirmation_dialog_link.hide();
             confirmation_dialog_link.close();
             return false;
-        };
+        }
     }
     true
 }

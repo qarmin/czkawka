@@ -8,7 +8,7 @@ use serde::Serialize;
 
 use crate::common::model::FileEntry;
 use crate::common::tool_data::CommonToolData;
-use crate::common::traits::*;
+use crate::common::traits::ResultEntry;
 
 #[derive(Clone, Serialize, Debug)]
 pub struct BadFileEntry {

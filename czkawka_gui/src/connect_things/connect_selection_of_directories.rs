@@ -110,10 +110,10 @@ fn configure_directory_drop(tree_view: &TreeView, excluded_items: bool) {
                 if let Some(path) = f.path() {
                     if path.is_dir() {
                         folders.insert(path);
-                    } else if let Some(parent) = path.parent() {
-                        if parent.is_dir() {
-                            folders.insert(parent.to_path_buf());
-                        }
+                    } else if let Some(parent) = path.parent()
+                        && parent.is_dir()
+                    {
+                        folders.insert(parent.to_path_buf());
                     }
                 }
             }
@@ -216,11 +216,9 @@ fn add_manually_directories(window_main: &Window, tree_view: &TreeView, excluded
                             let values: [(u32, &dyn ToValue); 1] = [(ColumnsExcludedDirectory::Path as u32, &text)];
                             list_store.set(&list_store.append(), &values);
                         }
-                    } else {
-                        if !check_if_value_is_in_list_store(&list_store, ColumnsIncludedDirectory::Path as i32, &text) {
-                            let values: [(u32, &dyn ToValue); 2] = [(ColumnsIncludedDirectory::Path as u32, &text), (ColumnsIncludedDirectory::ReferenceButton as u32, &false)];
-                            list_store.set(&list_store.append(), &values);
-                        }
+                    } else if !check_if_value_is_in_list_store(&list_store, ColumnsIncludedDirectory::Path as i32, &text) {
+                        let values: [(u32, &dyn ToValue); 2] = [(ColumnsIncludedDirectory::Path as u32, &text), (ColumnsIncludedDirectory::ReferenceButton as u32, &false)];
+                        list_store.set(&list_store.append(), &values);
                     }
                 }
             }
@@ -232,15 +230,13 @@ fn add_manually_directories(window_main: &Window, tree_view: &TreeView, excluded
 fn remove_ending_slashes(original_string: &mut String) {
     let mut windows_disk_path: bool = false;
     let mut chars = original_string.chars();
-    if let Some(first_character) = chars.next() {
-        if first_character.is_alphabetic() {
-            if let Some(second_character) = chars.next() {
-                if second_character == ':' {
-                    windows_disk_path = true;
-                    original_string.push('/'); // In case of adding window path without ending slash e.g. C: instead C:/ or C:\
-                }
-            }
-        }
+    if let Some(first_character) = chars.next()
+        && first_character.is_alphabetic()
+        && let Some(second_character) = chars.next()
+        && second_character == ':'
+    {
+        windows_disk_path = true;
+        original_string.push('/'); // In case of adding window path without ending slash e.g. C: instead C:/ or C:\
     }
 
     while (original_string != "/" && (original_string.ends_with('/') || original_string.ends_with('\\'))) && (!windows_disk_path || original_string.len() > 3) {
