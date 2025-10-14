@@ -25,13 +25,12 @@ pub(crate) fn connect_button_move(gui_data: &GuiData) {
 
     let preview_path = gui_data.main_notebook.common_tree_views.preview_path.clone();
     let file_dialog_move_to_folder = gui_data.file_dialog_move_to_folder.clone();
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
 
     file_dialog_move_to_folder.connect_response(move |file_chooser, response_type| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
+        let sv = common_tree_views.get_current_subview();
 
-        let (number_of_selected_items, _number_of_selected_groups) = check_how_much_elements_is_selected(tree_view, nb_object.column_header, nb_object.column_selection);
+        let (number_of_selected_items, _number_of_selected_groups) = check_how_much_elements_is_selected(&sv.tree_view, sv.nb_object.column_header, sv.nb_object.column_selection);
 
         // Nothing is selected
         if number_of_selected_items == 0 {
@@ -57,23 +56,23 @@ pub(crate) fn connect_button_move(gui_data: &GuiData) {
                 add_text_to_text_view(&text_view_errors, flg!("move_files_choose_more_than_1_path", path_number = folders.len()).as_str());
             } else {
                 let folder = folders[0].clone();
-                if let Some(column_header) = nb_object.column_header {
+                if let Some(column_header) = sv.nb_object.column_header {
                     move_with_tree(
-                        tree_view,
-                        nb_object.column_name,
-                        nb_object.column_path,
+                        &sv.tree_view,
+                        sv.nb_object.column_name,
+                        sv.nb_object.column_path,
                         column_header,
-                        nb_object.column_selection,
+                        sv.nb_object.column_selection,
                         &folder,
                         &entry_info,
                         &text_view_errors,
                     );
                 } else {
                     move_with_list(
-                        tree_view,
-                        nb_object.column_name,
-                        nb_object.column_path,
-                        nb_object.column_selection,
+                        &sv.tree_view,
+                        sv.nb_object.column_name,
+                        sv.nb_object.column_path,
+                        sv.nb_object.column_selection,
                         &folder,
                         &entry_info,
                         &text_view_errors,
@@ -81,9 +80,9 @@ pub(crate) fn connect_button_move(gui_data: &GuiData) {
                 }
             }
         }
-        match &nb_object.notebook_type {
+        match &sv.nb_object.notebook_type {
             NotebookMainEnum::SimilarImages | NotebookMainEnum::Duplicate => {
-                if nb_object.notebook_type == NotebookMainEnum::SimilarImages {
+                if sv.nb_object.notebook_type == NotebookMainEnum::SimilarImages {
                     image_preview_similar_images.hide();
                 } else {
                     image_preview_duplicates.hide();

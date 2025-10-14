@@ -32,6 +32,11 @@ impl CommonTreeViews {
     pub fn get_subview(&self, item: NotebookMainEnum) -> &SubView {
         self.subviews.iter().find(|s| s.enum_value == item).expect("Cannot find subview")
     }
+    pub fn get_current_subview(&self) -> &SubView {
+        let current_page = self.notebook_main.current_page().expect("Cannot get current page from notebook");
+        let enum_value = NOTEBOOKS_INFO[current_page as usize].notebook_type;
+        self.get_subview(enum_value)
+    }
     pub fn get_tree_view_from_its_name(&self, name: &str) -> TreeView {
         for subview in &self.subviews {
             if subview.tree_view_name == name {
@@ -87,7 +92,7 @@ pub struct SubView {
     pub tree_view: TreeView,
     pub gesture_click: GestureClick,
     pub event_controller_key: EventControllerKey,
-    pub notebook_object: NotebookObject,
+    pub nb_object: NotebookObject,
     pub enum_value: NotebookMainEnum,
     pub tree_view_name: String,
     pub preview_struct: Option<PreviewStruct>,
@@ -116,8 +121,8 @@ impl SubView {
 
         let image_preview = preview_str.map(|name| builder.object(name).unwrap_or_else(|| panic!("Cannot find preview image {name}")));
 
-        let notebook_object = NOTEBOOKS_INFO[enum_value as usize].clone();
-        assert_eq!(notebook_object.notebook_type, enum_value);
+        let nb_object = NOTEBOOKS_INFO[enum_value as usize].clone();
+        assert_eq!(nb_object.notebook_type, enum_value);
 
         let preview_struct = if let (Some(image_preview), Some(settings_show_preview)) = (image_preview, settings_show_preview) {
             Some(PreviewStruct {
@@ -133,7 +138,7 @@ impl SubView {
             tree_view,
             gesture_click,
             event_controller_key,
-            notebook_object,
+            nb_object,
             enum_value,
             preview_struct,
             tree_view_name: tree_view_name.to_string(),
@@ -141,10 +146,10 @@ impl SubView {
     }
 
     fn _setup_tree_view(&self) {
-        self.tree_view.set_model(Some(&ListStore::new(self.notebook_object.columns_types)));
+        self.tree_view.set_model(Some(&ListStore::new(self.nb_object.columns_types)));
         self.tree_view.selection().set_mode(SelectionMode::Multiple);
 
-        if let Some(column_header) = self.notebook_object.column_header {
+        if let Some(column_header) = self.nb_object.column_header {
             self.tree_view.selection().set_select_function(select_function_header(column_header));
         }
 
@@ -182,7 +187,7 @@ impl SubView {
         if let Some(preview_struct) = self.preview_struct.clone() {
             self.tree_view.set_property("activate-on-single-click", true);
             let preview_path = preview_path.clone();
-            let notebook_object = self.notebook_object.clone();
+            let nb_object = self.nb_object.clone();
 
             self.tree_view.clone().connect_row_activated(move |tree_view, _b, _c| {
                 show_preview(
@@ -191,8 +196,8 @@ impl SubView {
                     &preview_struct.settings_show_preview,
                     &preview_struct.image_preview,
                     &preview_path,
-                    notebook_object.column_path,
-                    notebook_object.column_name,
+                    nb_object.column_path,
+                    nb_object.column_name,
                     use_rust_preview.is_active(),
                 );
             });
@@ -207,7 +212,7 @@ impl SubView {
 
         self.event_controller_key.connect_key_pressed(opening_enter_function_ported);
         let preview_path = preview_path.clone();
-        let notebook_object = self.notebook_object.clone();
+        let nb_object = self.nb_object.clone();
 
         self.event_controller_key
             .clone()
@@ -221,8 +226,8 @@ impl SubView {
                     &check_button_settings_show_preview,
                     &image_preview,
                     &preview_path,
-                    notebook_object.column_path,
-                    notebook_object.column_name,
+                    nb_object.column_path,
+                    nb_object.column_name,
                     use_rust_preview.is_active(),
                 );
             });

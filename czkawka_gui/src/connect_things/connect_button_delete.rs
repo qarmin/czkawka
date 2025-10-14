@@ -25,14 +25,12 @@ pub(crate) fn connect_button_delete(gui_data: &GuiData) {
 }
 
 pub async fn delete_things(gui_data: GuiData) {
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let window_main = gui_data.window_main.clone();
     let check_button_settings_confirm_deletion = gui_data.settings.check_button_settings_confirm_deletion.clone();
     let check_button_settings_confirm_group_deletion = gui_data.settings.check_button_settings_confirm_group_deletion.clone();
     let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
     let image_preview_duplicates = gui_data.main_notebook.image_preview_duplicates.clone();
 
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
 
     let check_button_settings_use_trash = gui_data.settings.check_button_settings_use_trash.clone();
 
@@ -40,11 +38,9 @@ pub async fn delete_things(gui_data: GuiData) {
 
     let text_view_errors = gui_data.text_view_errors.clone();
 
-    let nb_number = notebook_main.current_page().expect("Current page not set");
-    let tree_view = &main_tree_views[nb_number as usize];
-    let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
+    let sv = gui_data.main_notebook.common_tree_views.get_current_subview();
 
-    let (number_of_selected_items, number_of_selected_groups) = check_how_much_elements_is_selected(tree_view, nb_object.column_header, nb_object.column_selection);
+    let (number_of_selected_items, number_of_selected_groups) = check_how_much_elements_is_selected(&sv.tree_view, sv.nb_object.column_header, sv.nb_object.column_selection);
 
     // Nothing is selected
     if number_of_selected_items == 0 {
@@ -55,51 +51,51 @@ pub async fn delete_things(gui_data: GuiData) {
         return;
     }
 
-    if let Some(column_header) = nb_object.column_header {
+    if let Some(column_header) = sv.nb_object.column_header {
         if !check_button_settings_confirm_group_deletion.is_active()
             || !check_if_deleting_all_files_in_group(
-                tree_view,
+                &sv.tree_view,
                 column_header,
-                nb_object.column_selection,
-                nb_object.column_path,
+                sv.nb_object.column_selection,
+                sv.nb_object.column_path,
                 &window_main,
                 &check_button_settings_confirm_group_deletion,
             )
             .await
         {
             tree_remove(
-                tree_view,
-                nb_object.column_name,
-                nb_object.column_path,
+                &sv.tree_view,
+                sv.nb_object.column_name,
+                sv.nb_object.column_path,
                 column_header,
-                nb_object.column_selection,
+                sv.nb_object.column_selection,
                 &check_button_settings_use_trash,
                 &text_view_errors,
             );
         }
-    } else if nb_number == NotebookMainEnum::EmptyDirectories as u32 {
+    } else if sv.nb_object.notebook_type == NotebookMainEnum::EmptyDirectories {
         empty_folder_remover(
-            tree_view,
-            nb_object.column_name,
-            nb_object.column_path,
-            nb_object.column_selection,
+            &sv.tree_view,
+            sv.nb_object.column_name,
+            sv.nb_object.column_path,
+            sv.nb_object.column_selection,
             &check_button_settings_use_trash,
             &text_view_errors,
         );
     } else {
         basic_remove(
-            tree_view,
-            nb_object.column_name,
-            nb_object.column_path,
-            nb_object.column_selection,
+            &sv.tree_view,
+            sv.nb_object.column_name,
+            sv.nb_object.column_path,
+            sv.nb_object.column_selection,
             &check_button_settings_use_trash,
             &text_view_errors,
         );
     }
 
-    match &nb_object.notebook_type {
+    match &sv.nb_object.notebook_type {
         NotebookMainEnum::SimilarImages | NotebookMainEnum::Duplicate => {
-            if nb_object.notebook_type == NotebookMainEnum::SimilarImages {
+            if sv.nb_object.notebook_type == NotebookMainEnum::SimilarImages {
                 image_preview_similar_images.hide();
             } else {
                 image_preview_duplicates.hide();
