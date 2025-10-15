@@ -213,12 +213,12 @@ pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Recei
                     }
                 };
 
-                set_specific_buttons_as_active(shared_buttons, msg_type, found_duplicates);
+                set_specific_buttons_as_active(&shared_buttons, msg_type, found_duplicates);
 
                 set_buttons(
                     &mut *shared_buttons.borrow_mut().get_mut(&msg_type).expect("Failed to borrow buttons"),
-                    buttons_array,
-                    buttons_names,
+                    &buttons_array,
+                    &buttons_names,
                 );
             }
             glib::timeout_future(Duration::from_millis(300)).await;
