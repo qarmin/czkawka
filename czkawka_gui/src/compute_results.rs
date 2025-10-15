@@ -41,6 +41,56 @@ use crate::opening_selecting_records::{
     select_function_always_true, select_function_duplicates, select_function_same_music, select_function_similar_images, select_function_similar_videos,
 };
 
+// Helper functions for deduplication
+
+/// Check if search was stopped and update UI accordingly
+fn handle_stopped_search<T: CommonData>(tool: &T, entry_info: &Entry) -> bool {
+    if tool.get_stopped_search() {
+        entry_info.set_text(&flg!("compute_stopped_by_user"));
+        true
+    } else {
+        false
+    }
+}
+
+/// Update shared state and return whether items were found
+fn finalize_compute<T>(
+    shared_state: &SharedState<T>,
+    tool: T,
+    items_found: usize,
+) -> Option<bool> {
+    *shared_state.borrow_mut() = Some(tool);
+    Some(items_found > 0)
+}
+
+/// Sort entries that implement ResultEntry trait - conditional version (only if >= 2 elements)
+fn conditional_sort_vector<T>(vector: &[T]) -> Vec<T>
+where
+    T: ResultEntry + Clone + Send,
+{
+    if vector.len() >= 2 {
+        let mut vector = vector.to_vec();
+        vector.par_sort_unstable_by(|a, b| split_path_compare(a.get_path(), b.get_path()));
+        vector
+    } else {
+        vector.to_vec()
+    }
+}
+
+/// Helper to format file size and date for list store entries
+fn format_size_and_date(size: u64, modified_date: u64, is_header: bool, is_reference_folder: bool) -> (String, String) {
+    if is_header && !is_reference_folder {
+        (String::new(), String::new())
+    } else {
+        (format_size(size, BINARY), get_dt_timestamp_string(modified_date))
+    }
+}
+
+/// Helper to get row color based on header status
+fn get_row_color(is_header: bool) -> &'static str {
+    if is_header { HEADER_ROW_COLOR } else { MAIN_ROW_COLOR }
+}
+
 pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Receiver<Message>) {
     let combo_box_image_hash_size = gui_data.main_notebook.combo_box_image_hash_size.clone();
     let buttons_search = gui_data.bottom_buttons.buttons_search.clone();
@@ -137,88 +187,65 @@ pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Recei
 
 #[fun_time(message = "compute_bad_extensions", level = "debug")]
 fn compute_bad_extensions(be: BadExtensions, entry_info: &Entry, tree_view: &TreeView, text_view_errors: &TextView, shared_state: &SharedState<BadExtensions>) -> Option<bool> {
-    const COLUMNS_NUMBER: usize = 7;
-    if be.get_stopped_search() {
-        entry_info.set_text(&flg!("compute_stopped_by_user"));
+    if handle_stopped_search(&be, entry_info) {
         return None;
     }
     let information = be.get_information();
     let text_messages = be.get_text_messages();
+    let bad_extensions_number = information.number_of_files_with_bad_extension;
 
-    let bad_extensions_number: usize = information.number_of_files_with_bad_extension;
     entry_info.set_text(flg!("compute_found_bad_extensions", number_files = bad_extensions_number).as_str());
 
-    // Create GUI
-    {
-        let list_store = get_list_store(tree_view);
+    let list_store = get_list_store(tree_view);
+    let mut vector = be.get_bad_extensions_files().clone();
+    vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
-        let vector = be.get_bad_extensions_files();
-
-        // Sort
-        let mut vector = vector.clone();
-        vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
-
-        for file_entry in vector {
-            let (directory, file) = split_path(&file_entry.path);
-            let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                (ColumnsBadExtensions::SelectionButton as u32, &false),
-                (ColumnsBadExtensions::Name as u32, &file),
-                (ColumnsBadExtensions::Path as u32, &directory),
-                (ColumnsBadExtensions::CurrentExtension as u32, &file_entry.current_extension),
-                (ColumnsBadExtensions::ValidExtensions as u32, &file_entry.proper_extensions_group),
-                (ColumnsBadExtensions::Modification as u32, &(get_dt_timestamp_string(file_entry.modified_date))),
-                (ColumnsBadExtensions::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
-            ];
-            list_store.set(&list_store.append(), &values);
-        }
-        print_text_messages_to_text_view(text_messages, text_view_errors);
+    for file_entry in vector {
+        let (directory, file) = split_path(&file_entry.path);
+        let values: [(u32, &dyn ToValue); 7] = [
+            (ColumnsBadExtensions::SelectionButton as u32, &false),
+            (ColumnsBadExtensions::Name as u32, &file),
+            (ColumnsBadExtensions::Path as u32, &directory),
+            (ColumnsBadExtensions::CurrentExtension as u32, &file_entry.current_extension),
+            (ColumnsBadExtensions::ValidExtensions as u32, &file_entry.proper_extensions_group),
+            (ColumnsBadExtensions::Modification as u32, &(get_dt_timestamp_string(file_entry.modified_date))),
+            (ColumnsBadExtensions::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
+        ];
+        list_store.set(&list_store.append(), &values);
     }
-
-    *shared_state.borrow_mut() = Some(be);
-    Some(bad_extensions_number > 0)
+    print_text_messages_to_text_view(text_messages, text_view_errors);
+    finalize_compute(shared_state, be, bad_extensions_number)
 }
 
 #[fun_time(message = "compute_broken_files", level = "debug")]
 fn compute_broken_files(br: BrokenFiles, entry_info: &Entry, tree_view: &TreeView, text_view_errors: &TextView, shared_state: &SharedState<BrokenFiles>) -> Option<bool> {
-    const COLUMNS_NUMBER: usize = 6;
-    if br.get_stopped_search() {
-        entry_info.set_text(&flg!("compute_stopped_by_user"));
+    if handle_stopped_search(&br, entry_info) {
         return None;
     }
     let information = br.get_information();
     let text_messages = br.get_text_messages();
-
-    let broken_files_number: usize = information.number_of_broken_files;
+    let broken_files_number = information.number_of_broken_files;
 
     entry_info.set_text(flg!("compute_found_broken_files", number_files = broken_files_number).as_str());
 
-    // Create GUI
-    {
-        let list_store = get_list_store(tree_view);
+    let list_store = get_list_store(tree_view);
+    let mut vector = br.get_broken_files().clone();
+    vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
-        let vector = br.get_broken_files();
-
-        // Sort
-        let mut vector = vector.clone();
-        vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
-
-        for file_entry in vector {
-            let (directory, file) = split_path(&file_entry.path);
-            let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                (ColumnsBrokenFiles::SelectionButton as u32, &false),
-                (ColumnsBrokenFiles::Name as u32, &file),
-                (ColumnsBrokenFiles::Path as u32, &directory),
-                (ColumnsBrokenFiles::ErrorType as u32, &file_entry.error_string),
-                (ColumnsBrokenFiles::Modification as u32, &(get_dt_timestamp_string(file_entry.modified_date))),
-                (ColumnsBrokenFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
-            ];
-            list_store.set(&list_store.append(), &values);
-        }
-        print_text_messages_to_text_view(text_messages, text_view_errors);
+    for file_entry in vector {
+        let (directory, file) = split_path(&file_entry.path);
+        let values: [(u32, &dyn ToValue); 6] = [
+            (ColumnsBrokenFiles::SelectionButton as u32, &false),
+            (ColumnsBrokenFiles::Name as u32, &file),
+            (ColumnsBrokenFiles::Path as u32, &directory),
+            (ColumnsBrokenFiles::ErrorType as u32, &file_entry.error_string),
+            (ColumnsBrokenFiles::Modification as u32, &(get_dt_timestamp_string(file_entry.modified_date))),
+            (ColumnsBrokenFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
+        ];
+        list_store.set(&list_store.append(), &values);
     }
-
-    *shared_state.borrow_mut() = Some(br);
-    Some(broken_files_number > 0)
+    print_text_messages_to_text_view(text_messages, text_view_errors);
+    finalize_compute(shared_state, br, broken_files_number)
 }
 
 #[fun_time(message = "compute_invalid_symlinks", level = "debug")]
@@ -229,43 +256,34 @@ fn compute_invalid_symlinks(
     text_view_errors: &TextView,
     shared_state: &SharedState<InvalidSymlinks>,
 ) -> Option<bool> {
-    const COLUMNS_NUMBER: usize = 7;
-    if ifs.get_stopped_search() {
-        entry_info.set_text(&flg!("compute_stopped_by_user"));
+    if handle_stopped_search(&ifs, entry_info) {
         return None;
     }
     let information = ifs.get_information();
     let text_messages = ifs.get_text_messages();
-
-    let invalid_symlinks: usize = information.number_of_invalid_symlinks;
+    let invalid_symlinks = information.number_of_invalid_symlinks;
 
     entry_info.set_text(flg!("compute_found_invalid_symlinks", number_files = invalid_symlinks).as_str());
 
-    // Create GUI
-    {
-        let list_store = get_list_store(tree_view);
+    let list_store = get_list_store(tree_view);
+    let vector = conditional_sort_vector(ifs.get_invalid_symlinks());
 
-        let vector = vector_sort_simple_unstable_entry_by_path(ifs.get_invalid_symlinks());
-
-        for file_entry in vector {
-            let (directory, file) = split_path(&file_entry.path);
-            let symlink_info = file_entry.symlink_info;
-            let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                (ColumnsInvalidSymlinks::SelectionButton as u32, &false),
-                (ColumnsInvalidSymlinks::Name as u32, &file),
-                (ColumnsInvalidSymlinks::Path as u32, &directory),
-                (ColumnsInvalidSymlinks::DestinationPath as u32, &symlink_info.destination_path.to_string_lossy().to_string()),
-                (ColumnsInvalidSymlinks::TypeOfError as u32, &symlink_info.type_of_error.translate()),
-                (ColumnsInvalidSymlinks::Modification as u32, &(get_dt_timestamp_string(file_entry.modified_date))),
-                (ColumnsInvalidSymlinks::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
-            ];
-            list_store.set(&list_store.append(), &values);
-        }
-        print_text_messages_to_text_view(text_messages, text_view_errors);
+    for file_entry in vector {
+        let (directory, file) = split_path(&file_entry.path);
+        let symlink_info = file_entry.symlink_info;
+        let values: [(u32, &dyn ToValue); 7] = [
+            (ColumnsInvalidSymlinks::SelectionButton as u32, &false),
+            (ColumnsInvalidSymlinks::Name as u32, &file),
+            (ColumnsInvalidSymlinks::Path as u32, &directory),
+            (ColumnsInvalidSymlinks::DestinationPath as u32, &symlink_info.destination_path.to_string_lossy().to_string()),
+            (ColumnsInvalidSymlinks::TypeOfError as u32, &symlink_info.type_of_error.translate()),
+            (ColumnsInvalidSymlinks::Modification as u32, &(get_dt_timestamp_string(file_entry.modified_date))),
+            (ColumnsInvalidSymlinks::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
+        ];
+        list_store.set(&list_store.append(), &values);
     }
-
-    *shared_state.borrow_mut() = Some(ifs);
-    Some(invalid_symlinks > 0)
+    print_text_messages_to_text_view(text_messages, text_view_errors);
+    finalize_compute(shared_state, ifs, invalid_symlinks)
 }
 
 #[fun_time(message = "compute_same_music", level = "debug")]
@@ -597,163 +615,123 @@ fn compute_similar_images(
 
 #[fun_time(message = "compute_temporary_files", level = "debug")]
 fn compute_temporary_files(tf: Temporary, entry_info: &Entry, tree_view: &TreeView, text_view_errors: &TextView, shared_state: &SharedState<Temporary>) -> Option<bool> {
-    const COLUMNS_NUMBER: usize = 5;
-    if tf.get_stopped_search() {
-        entry_info.set_text(&flg!("compute_stopped_by_user"));
+    if handle_stopped_search(&tf, entry_info) {
         return None;
     }
     let information = tf.get_information();
     let text_messages = tf.get_text_messages();
+    let temporary_files_number = information.number_of_temporary_files;
 
-    let temporary_files_number: usize = information.number_of_temporary_files;
     entry_info.set_text(flg!("compute_found_temporary_files", number_files = temporary_files_number).as_str());
 
-    // Create GUI
-    {
-        let list_store = get_list_store(tree_view);
+    let list_store = get_list_store(tree_view);
+    let mut vector = tf.get_temporary_files().clone();
+    vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
-        let vector = tf.get_temporary_files();
-
-        // Sort // TODO maybe simplify this via common file entry
-        let mut vector = vector.clone();
-        vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
-
-        for file_entry in vector {
-            let (directory, file) = split_path(&file_entry.path);
-            let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                (ColumnsTemporaryFiles::SelectionButton as u32, &false),
-                (ColumnsTemporaryFiles::Name as u32, &file),
-                (ColumnsTemporaryFiles::Path as u32, &directory),
-                (ColumnsTemporaryFiles::Modification as u32, &(get_dt_timestamp_string(file_entry.modified_date))),
-                (ColumnsTemporaryFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
-            ];
-            list_store.set(&list_store.append(), &values);
-        }
-        print_text_messages_to_text_view(text_messages, text_view_errors);
+    for file_entry in vector {
+        let (directory, file) = split_path(&file_entry.path);
+        let values: [(u32, &dyn ToValue); 5] = [
+            (ColumnsTemporaryFiles::SelectionButton as u32, &false),
+            (ColumnsTemporaryFiles::Name as u32, &file),
+            (ColumnsTemporaryFiles::Path as u32, &directory),
+            (ColumnsTemporaryFiles::Modification as u32, &(get_dt_timestamp_string(file_entry.modified_date))),
+            (ColumnsTemporaryFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
+        ];
+        list_store.set(&list_store.append(), &values);
     }
-
-    *shared_state.borrow_mut() = Some(tf);
-    Some(temporary_files_number > 0)
+    print_text_messages_to_text_view(text_messages, text_view_errors);
+    finalize_compute(shared_state, tf, temporary_files_number)
 }
 
 #[fun_time(message = "compute_big_files", level = "debug")]
 fn compute_big_files(bf: BigFile, entry_info: &Entry, tree_view: &TreeView, text_view_errors: &TextView, shared_state: &SharedState<BigFile>) -> Option<bool> {
-    const COLUMNS_NUMBER: usize = 7;
-    if bf.get_stopped_search() {
-        entry_info.set_text(&flg!("compute_stopped_by_user"));
+    if handle_stopped_search(&bf, entry_info) {
         return None;
     }
     let information = bf.get_information();
     let text_messages = bf.get_text_messages();
-
-    let biggest_files_number: usize = information.number_of_real_files;
+    let biggest_files_number = information.number_of_real_files;
 
     entry_info.set_text(flg!("compute_found_big_files", number_files = biggest_files_number).as_str());
 
-    // Create GUI
-    {
-        let list_store = get_list_store(tree_view);
+    let list_store = get_list_store(tree_view);
+    let vector = bf.get_big_files();
 
-        let vector = bf.get_big_files();
-
-        for file_entry in vector {
-            let (directory, file) = split_path(&file_entry.path);
-            let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                (ColumnsBigFiles::SelectionButton as u32, &false),
-                (ColumnsBigFiles::Size as u32, &(format_size(file_entry.size, BINARY))),
-                (ColumnsBigFiles::Name as u32, &file),
-                (ColumnsBigFiles::Path as u32, &directory),
-                (ColumnsBigFiles::Modification as u32, &(get_dt_timestamp_string(file_entry.modified_date))),
-                (ColumnsBigFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
-                (ColumnsBigFiles::SizeAsBytes as u32, &(file_entry.size)),
-            ];
-            list_store.set(&list_store.append(), &values);
-        }
-        print_text_messages_to_text_view(text_messages, text_view_errors);
+    for file_entry in vector {
+        let (directory, file) = split_path(&file_entry.path);
+        let values: [(u32, &dyn ToValue); 7] = [
+            (ColumnsBigFiles::SelectionButton as u32, &false),
+            (ColumnsBigFiles::Size as u32, &(format_size(file_entry.size, BINARY))),
+            (ColumnsBigFiles::Name as u32, &file),
+            (ColumnsBigFiles::Path as u32, &directory),
+            (ColumnsBigFiles::Modification as u32, &(get_dt_timestamp_string(file_entry.modified_date))),
+            (ColumnsBigFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
+            (ColumnsBigFiles::SizeAsBytes as u32, &(file_entry.size)),
+        ];
+        list_store.set(&list_store.append(), &values);
     }
-
-    *shared_state.borrow_mut() = Some(bf);
-    Some(biggest_files_number > 0)
+    print_text_messages_to_text_view(text_messages, text_view_errors);
+    finalize_compute(shared_state, bf, biggest_files_number)
 }
 
 #[fun_time(message = "compute_empty_files", level = "debug")]
 fn compute_empty_files(vf: EmptyFiles, entry_info: &Entry, tree_view: &TreeView, text_view_errors: &TextView, shared_state: &SharedState<EmptyFiles>) -> Option<bool> {
-    const COLUMNS_NUMBER: usize = 5;
-    if vf.get_stopped_search() {
-        entry_info.set_text(&flg!("compute_stopped_by_user"));
+    if handle_stopped_search(&vf, entry_info) {
         return None;
     }
     let information = vf.get_information();
     let text_messages = vf.get_text_messages();
-
-    let empty_files_number: usize = information.number_of_empty_files;
+    let empty_files_number = information.number_of_empty_files;
 
     entry_info.set_text(flg!("compute_found_empty_files", number_files = empty_files_number).as_str());
 
-    // Create GUI
-    {
-        let list_store = get_list_store(tree_view);
+    let list_store = get_list_store(tree_view);
+    let vector = conditional_sort_vector(vf.get_empty_files());
 
-        let vector = vf.get_empty_files();
-        let vector = vector_sort_simple_unstable_entry_by_path(vector);
-
-        for file_entry in vector {
-            let (directory, file) = split_path(&file_entry.path);
-            let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                (ColumnsEmptyFiles::SelectionButton as u32, &false),
-                (ColumnsEmptyFiles::Name as u32, &file),
-                (ColumnsEmptyFiles::Path as u32, &directory),
-                (ColumnsEmptyFiles::Modification as u32, &(get_dt_timestamp_string(file_entry.modified_date))),
-                (ColumnsEmptyFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
-            ];
-            list_store.set(&list_store.append(), &values);
-        }
-        print_text_messages_to_text_view(text_messages, text_view_errors);
+    for file_entry in vector {
+        let (directory, file) = split_path(&file_entry.path);
+        let values: [(u32, &dyn ToValue); 5] = [
+            (ColumnsEmptyFiles::SelectionButton as u32, &false),
+            (ColumnsEmptyFiles::Name as u32, &file),
+            (ColumnsEmptyFiles::Path as u32, &directory),
+            (ColumnsEmptyFiles::Modification as u32, &(get_dt_timestamp_string(file_entry.modified_date))),
+            (ColumnsEmptyFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
+        ];
+        list_store.set(&list_store.append(), &values);
     }
-
-    *shared_state.borrow_mut() = Some(vf);
-    Some(empty_files_number > 0)
+    print_text_messages_to_text_view(text_messages, text_view_errors);
+    finalize_compute(shared_state, vf, empty_files_number)
 }
 
 #[fun_time(message = "compute_empty_folders", level = "debug")]
 fn compute_empty_folders(ef: EmptyFolder, entry_info: &Entry, tree_view: &TreeView, text_view_errors: &TextView, shared_state: &SharedState<EmptyFolder>) -> Option<bool> {
-    const COLUMNS_NUMBER: usize = 5;
-    if ef.get_stopped_search() {
-        entry_info.set_text(&flg!("compute_stopped_by_user"));
+    if handle_stopped_search(&ef, entry_info) {
         return None;
     }
     let information = ef.get_information();
     let text_messages = ef.get_text_messages();
-
-    let empty_folder_number: usize = information.number_of_empty_folders;
+    let empty_folder_number = information.number_of_empty_folders;
 
     entry_info.set_text(flg!("compute_found_empty_folders", number_files = empty_folder_number).as_str());
 
-    // Create GUI
-    {
-        let list_store = get_list_store(tree_view);
+    let list_store = get_list_store(tree_view);
+    let hashmap = ef.get_empty_folder_list();
+    let mut vector = hashmap.values().collect::<Vec<_>>();
+    vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
-        let hashmap = ef.get_empty_folder_list();
-        let mut vector = hashmap.values().collect::<Vec<_>>();
-
-        vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
-
-        for fe in vector {
-            let (directory, file) = split_path(&fe.path);
-            let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                (ColumnsEmptyFolders::SelectionButton as u32, &false),
-                (ColumnsEmptyFolders::Name as u32, &file),
-                (ColumnsEmptyFolders::Path as u32, &directory),
-                (ColumnsEmptyFolders::Modification as u32, &(get_dt_timestamp_string(fe.modified_date))),
-                (ColumnsEmptyFolders::ModificationAsSecs as u32, &(fe.modified_date)),
-            ];
-            list_store.set(&list_store.append(), &values);
-        }
-        print_text_messages_to_text_view(text_messages, text_view_errors);
+    for fe in vector {
+        let (directory, file) = split_path(&fe.path);
+        let values: [(u32, &dyn ToValue); 5] = [
+            (ColumnsEmptyFolders::SelectionButton as u32, &false),
+            (ColumnsEmptyFolders::Name as u32, &file),
+            (ColumnsEmptyFolders::Path as u32, &directory),
+            (ColumnsEmptyFolders::Modification as u32, &(get_dt_timestamp_string(fe.modified_date))),
+            (ColumnsEmptyFolders::ModificationAsSecs as u32, &(fe.modified_date)),
+        ];
+        list_store.set(&list_store.append(), &values);
     }
-
-    *shared_state.borrow_mut() = Some(ef);
-    Some(empty_folder_number > 0)
+    print_text_messages_to_text_view(text_messages, text_view_errors);
+    finalize_compute(shared_state, ef, empty_folder_number)
 }
 
 #[fun_time(message = "compute_duplicate_finder", level = "debug")]
@@ -970,17 +948,8 @@ where
 
 fn duplicates_add_to_list_store(list_store: &ListStore, file: &str, directory: &str, size: u64, modified_date: u64, is_header: bool, is_reference_folder: bool) {
     const COLUMNS_NUMBER: usize = 11;
-    let size_str;
-    let string_date;
-    let color = if is_header { HEADER_ROW_COLOR } else { MAIN_ROW_COLOR };
-
-    if is_header && !is_reference_folder {
-        size_str = String::new();
-        string_date = String::new();
-    } else {
-        size_str = format_size(size, BINARY);
-        string_date = get_dt_timestamp_string(modified_date);
-    }
+    let (size_str, string_date) = format_size_and_date(size, modified_date, is_header, is_reference_folder);
+    let color = get_row_color(is_header);
 
     let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
         (ColumnsDuplicates::ActivatableSelectButton as u32, &(!is_header)),
@@ -1011,18 +980,9 @@ fn similar_images_add_to_list_store(
     is_reference_folder: bool,
 ) {
     const COLUMNS_NUMBER: usize = 13;
-    let size_str;
-    let string_date;
-    let color = if is_header { HEADER_ROW_COLOR } else { MAIN_ROW_COLOR };
+    let (size_str, string_date) = format_size_and_date(size, modified_date, is_header, is_reference_folder);
+    let color = get_row_color(is_header);
     let similarity_string = if is_header { String::new() } else { get_string_from_similarity(&similarity, hash_size) };
-
-    if is_header && !is_reference_folder {
-        size_str = String::new();
-        string_date = String::new();
-    } else {
-        size_str = format_size(size, BINARY);
-        string_date = get_dt_timestamp_string(modified_date);
-    }
 
     let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
         (ColumnsSimilarImages::ActivatableSelectButton as u32, &(!is_header)),
@@ -1044,16 +1004,8 @@ fn similar_images_add_to_list_store(
 
 fn similar_videos_add_to_list_store(list_store: &ListStore, file: &str, directory: &str, size: u64, modified_date: u64, is_header: bool, is_reference_folder: bool) {
     const COLUMNS_NUMBER: usize = 11;
-    let size_str;
-    let string_date;
-    let color = if is_header { HEADER_ROW_COLOR } else { MAIN_ROW_COLOR };
-    if is_header && !is_reference_folder {
-        size_str = String::new();
-        string_date = String::new();
-    } else {
-        size_str = format_size(size, BINARY);
-        string_date = get_dt_timestamp_string(modified_date);
-    }
+    let (size_str, string_date) = format_size_and_date(size, modified_date, is_header, is_reference_folder);
+    let color = get_row_color(is_header);
 
     let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
         (ColumnsSimilarVideos::ActivatableSelectButton as u32, &(!is_header)),
@@ -1089,16 +1041,8 @@ fn same_music_add_to_list_store(
     is_reference_folder: bool,
 ) {
     const COLUMNS_NUMBER: usize = 18;
-    let size_str;
-    let string_date;
-    let color = if is_header { HEADER_ROW_COLOR } else { MAIN_ROW_COLOR };
-    if is_header && !is_reference_folder {
-        size_str = String::new();
-        string_date = String::new();
-    } else {
-        size_str = format_size(size, BINARY);
-        string_date = get_dt_timestamp_string(modified_date);
-    }
+    let (size_str, string_date) = format_size_and_date(size, modified_date, is_header, is_reference_folder);
+    let color = get_row_color(is_header);
 
     let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
         (ColumnsSameMusic::ActivatableSelectButton as u32, &(!is_header)),
