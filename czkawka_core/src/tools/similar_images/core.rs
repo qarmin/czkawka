@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
@@ -10,6 +10,7 @@ use fun_time::fun_time;
 use humansize::{BINARY, format_size};
 use image::GenericImageView;
 use image_hasher::{FilterType, HashAlg, HasherConfig};
+use indexmap::{IndexMap, IndexSet};
 use log::{debug, error};
 use rayon::prelude::*;
 
@@ -233,8 +234,8 @@ impl SimilarImages {
 
     // Split hashes at 2 parts, base hashes and hashes to compare, 3 argument is set of hashes with multiple images
     #[fun_time(message = "split_hashes", level = "debug")]
-    fn split_hashes(&mut self, all_hashed_images: &HashMap<ImHash, Vec<ImagesEntry>>) -> (Vec<ImHash>, HashSet<ImHash>) {
-        let hashes_with_multiple_images: HashSet<ImHash> = all_hashed_images
+    fn split_hashes(&mut self, all_hashed_images: &IndexMap<ImHash, Vec<ImagesEntry>>) -> (Vec<ImHash>, IndexSet<ImHash>) {
+        let hashes_with_multiple_images: IndexSet<ImHash> = all_hashed_images
             .iter()
             .filter_map(|(hash, vec_file_entry)| {
                 if vec_file_entry.len() >= 2 {
@@ -245,8 +246,8 @@ impl SimilarImages {
             .collect();
         let mut base_hashes = Vec::new(); // Initial hashes
         if self.common_data.use_reference_folders {
-            let mut files_from_referenced_folders: HashMap<ImHash, Vec<ImagesEntry>> = HashMap::new();
-            let mut normal_files: HashMap<ImHash, Vec<ImagesEntry>> = HashMap::new();
+            let mut files_from_referenced_folders: IndexMap<ImHash, Vec<ImagesEntry>> = IndexMap::new();
+            let mut normal_files: IndexMap<ImHash, Vec<ImagesEntry>> = IndexMap::new();
 
             all_hashed_images.clone().into_iter().for_each(|(hash, vec_file_entry)| {
                 for file_entry in vec_file_entry {
@@ -277,11 +278,11 @@ impl SimilarImages {
     #[fun_time(message = "collect_hash_compare_result", level = "debug")]
     fn collect_hash_compare_result(
         &self,
-        hashes_parents: HashMap<ImHash, u32>,
-        hashes_with_multiple_images: &HashSet<ImHash>,
-        all_hashed_images: &HashMap<ImHash, Vec<ImagesEntry>>,
-        collected_similar_images: &mut HashMap<ImHash, Vec<ImagesEntry>>,
-        hashes_similarity: HashMap<ImHash, (ImHash, u32)>,
+        hashes_parents: IndexMap<ImHash, u32>,
+        hashes_with_multiple_images: &IndexSet<ImHash>,
+        all_hashed_images: &IndexMap<ImHash, Vec<ImagesEntry>>,
+        collected_similar_images: &mut IndexMap<ImHash, Vec<ImagesEntry>>,
+        hashes_similarity: IndexMap<ImHash, (ImHash, u32)>,
     ) {
         // Collecting results to vector
         for (parent_hash, child_number) in hashes_parents {
@@ -307,8 +308,8 @@ impl SimilarImages {
     #[fun_time(message = "compare_hashes_with_non_zero_tolerance", level = "debug")]
     fn compare_hashes_with_non_zero_tolerance(
         &mut self,
-        all_hashed_images: &HashMap<ImHash, Vec<ImagesEntry>>,
-        collected_similar_images: &mut HashMap<ImHash, Vec<ImagesEntry>>,
+        all_hashed_images: &IndexMap<ImHash, Vec<ImagesEntry>>,
+        collected_similar_images: &mut IndexMap<ImHash, Vec<ImagesEntry>>,
         progress_sender: Option<&Sender<ProgressData>>,
         stop_flag: &Arc<AtomicBool>,
         tolerance: u32,
@@ -318,8 +319,8 @@ impl SimilarImages {
 
         let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::SimilarImagesComparingHashes, base_hashes.len(), self.get_test_type(), 0);
 
-        let mut hashes_parents: HashMap<ImHash, u32> = Default::default(); // Hashes used as parent (hash, children_number_of_hash)
-        let mut hashes_similarity: HashMap<ImHash, (ImHash, u32)> = Default::default(); // Hashes used as child, (parent_hash, similarity)
+        let mut hashes_parents: IndexMap<ImHash, u32> = Default::default(); // Hashes used as parent (hash, children_number_of_hash)
+        let mut hashes_similarity: IndexMap<ImHash, (ImHash, u32)> = Default::default(); // Hashes used as child, (parent_hash, similarity)
 
         // Check them in chunks, to decrease number of used memory
         // println!();
@@ -383,9 +384,9 @@ impl SimilarImages {
     fn connect_results(
         &self,
         partial_results: Vec<(&ImHash, Vec<(u32, &ImHash)>)>,
-        hashes_parents: &mut HashMap<ImHash, u32>,
-        hashes_similarity: &mut HashMap<ImHash, (ImHash, u32)>,
-        hashes_with_multiple_images: &HashSet<ImHash>,
+        hashes_parents: &mut IndexMap<ImHash, u32>,
+        hashes_similarity: &mut IndexMap<ImHash, (ImHash, u32)>,
+        hashes_with_multiple_images: &IndexSet<ImHash>,
     ) {
         for (original_hash, vec_compared_hashes) in partial_results {
             let mut number_of_added_child_items = 0;
@@ -408,10 +409,10 @@ impl SimilarImages {
 
                         *hashes_parents.get_mut(current_parent_hash).expect("Cannot find parent hash") -= 1;
                         if hashes_parents.get(current_parent_hash) == Some(&0) && !hashes_with_multiple_images.contains(current_parent_hash) {
-                            hashes_parents.remove(current_parent_hash);
+                            hashes_parents.swap_remove(current_parent_hash);
                         }
                         hashes_similarity
-                            .remove(original_hash)
+                            .swap_remove(original_hash)
                             .expect("This should never fail, because we are iterating over this hash");
                     }
                 } else {
@@ -452,7 +453,7 @@ impl SimilarImages {
         let tolerance = self.get_params().similarity;
 
         // Results
-        let mut collected_similar_images: HashMap<ImHash, Vec<ImagesEntry>> = Default::default();
+        let mut collected_similar_images: IndexMap<ImHash, Vec<ImagesEntry>> = Default::default();
 
         let all_hashed_images = mem::take(&mut self.image_hashes);
 
@@ -537,12 +538,12 @@ impl SimilarImages {
 
     #[allow(unused_variables)]
     // TODO this probably not works good when reference folders are used
-    pub(crate) fn verify_duplicated_items(&self, collected_similar_images: &HashMap<ImHash, Vec<ImagesEntry>>) {
+    pub(crate) fn verify_duplicated_items(&self, collected_similar_images: &IndexMap<ImHash, Vec<ImagesEntry>>) {
         if !cfg!(debug_assertions) {
             return;
         }
         // Validating if group contains duplicated results
-        let mut result_hashset: HashSet<String> = Default::default();
+        let mut result_hashset: IndexSet<String> = Default::default();
         let mut found = false;
 
         for vec_file_entry in collected_similar_images.values() {
@@ -653,9 +654,9 @@ pub(crate) fn convert_algorithm_to_string(hash_alg: &HashAlg) -> String {
 // cause accidentally delete more pictures that user wanted
 fn debug_check_for_duplicated_things(
     use_reference_folders: bool,
-    hashes_parents: &HashMap<ImHash, u32>,
-    hashes_similarity: &HashMap<ImHash, (ImHash, u32)>,
-    all_hashed_images: &HashMap<ImHash, Vec<ImagesEntry>>,
+    hashes_parents: &IndexMap<ImHash, u32>,
+    hashes_similarity: &IndexMap<ImHash, (ImHash, u32)>,
+    all_hashed_images: &IndexMap<ImHash, Vec<ImagesEntry>>,
     numm: &str,
 ) {
     if !cfg!(debug_assertions) {
@@ -667,8 +668,8 @@ fn debug_check_for_duplicated_things(
     }
 
     let mut found_broken_thing = false;
-    let mut hashmap_hashes: HashSet<_> = Default::default();
-    let mut hashmap_names: HashSet<_> = Default::default();
+    let mut hashmap_hashes: IndexSet<_> = Default::default();
+    let mut hashmap_names: IndexSet<_> = Default::default();
     for (hash, number_of_children) in hashes_parents {
         if *number_of_children > 0 {
             if hashmap_hashes.contains(hash) {
@@ -717,12 +718,12 @@ pub fn get_similar_images_cache_file(hash_size: &u8, hash_alg: &HashAlg, image_f
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
     use std::path::PathBuf;
 
     use bk_tree::BKTree;
     use image::imageops::FilterType;
     use image_hasher::HashAlg;
+    use indexmap::IndexMap;
 
     use super::*;
     use crate::common::tool_data::CommonData;
@@ -1084,7 +1085,7 @@ mod tests {
         assert_eq!(similarity, 1);
     }
 
-    fn add_hashes(hashmap: &mut HashMap<ImHash, Vec<ImagesEntry>>, file_entries: Vec<ImagesEntry>) {
+    fn add_hashes(hashmap: &mut IndexMap<ImHash, Vec<ImagesEntry>>, file_entries: Vec<ImagesEntry>) {
         for fe in file_entries {
             hashmap.entry(fe.hash.clone()).or_default().push(fe);
         }

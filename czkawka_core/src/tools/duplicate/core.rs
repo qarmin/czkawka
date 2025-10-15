@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 use std::path::Path;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
@@ -7,6 +7,7 @@ use std::{mem, thread};
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use humansize::{BINARY, format_size};
+use indexmap::IndexMap;
 use log::debug;
 use rayon::prelude::*;
 
@@ -497,12 +498,12 @@ impl DuplicateFinder {
         for (size, mut vec_file_entry) in used_map {
             if let Some(cached_vec_file_entry) = loaded_hash_map.get(&size) {
                 // TODO maybe hashmap is not needed when using < 4 elements
-                let mut cached_path_entries: HashMap<&Path, DuplicateEntry> = HashMap::new();
+                let mut cached_path_entries: IndexMap<&Path, DuplicateEntry> = IndexMap::new();
                 for file_entry in cached_vec_file_entry {
                     cached_path_entries.insert(&file_entry.path, file_entry.clone());
                 }
                 for file_entry in vec_file_entry {
-                    if let Some(cached_file_entry) = cached_path_entries.remove(file_entry.path.as_path()) {
+                    if let Some(cached_file_entry) = cached_path_entries.swap_remove(file_entry.path.as_path()) {
                         records_already_cached.entry(size).or_default().push(cached_file_entry);
                     } else {
                         non_cached_files_to_check.entry(size).or_default().push(file_entry);

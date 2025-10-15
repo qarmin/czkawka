@@ -1,10 +1,11 @@
-use std::collections::{BTreeMap, BTreeSet, HashMap};
+use std::collections::{BTreeMap, BTreeSet};
 use std::mem;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
+use indexmap::IndexMap;
 use log::debug;
 use rayon::prelude::*;
 use vid_dup_finder_lib::{CreationOptions, Cropdetect, VideoHash, VideoHashBuilder};
@@ -151,7 +152,7 @@ impl SimilarVideos {
         // Just connect loaded results with already calculated hashes
         vec_file_entry.extend(records_already_cached.into_values());
 
-        let mut hashmap_with_file_entries: HashMap<String, VideosEntry> = Default::default();
+        let mut hashmap_with_file_entries: IndexMap<String, VideosEntry> = Default::default();
         let mut vector_of_hashes: Vec<VideoHash> = Vec::new();
         for file_entry in &vec_file_entry {
             // 0 means that images was not hashed correctly, e.g. could be improperly
@@ -212,7 +213,7 @@ impl SimilarVideos {
     }
 
     #[fun_time(message = "match_groups_of_videos", level = "debug")]
-    fn match_groups_of_videos(&mut self, vector_of_hashes: Vec<VideoHash>, hashmap_with_file_entries: &HashMap<String, VideosEntry>) {
+    fn match_groups_of_videos(&mut self, vector_of_hashes: Vec<VideoHash>, hashmap_with_file_entries: &IndexMap<String, VideosEntry>) {
         // Tolerance in library is a value between 0 and 1
         // Tolerance in this app is a value between 0 and 20
         // Default tolerance in library is 0.30

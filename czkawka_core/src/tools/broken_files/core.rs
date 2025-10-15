@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, HashSet};
+use std::collections::BTreeMap;
 use std::fs::File;
 use std::path::Path;
 use std::sync::Arc;
@@ -7,6 +7,7 @@ use std::{mem, panic};
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
+use indexmap::IndexSet;
 use log::{debug, error};
 use lopdf::Document;
 use rayon::prelude::*;
@@ -35,10 +36,10 @@ impl BrokenFiles {
 
     #[fun_time(message = "check_files", level = "debug")]
     pub(crate) fn check_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
-        let zip_extensions = ZIP_FILES_EXTENSIONS.iter().collect::<HashSet<_>>();
-        let audio_extensions = AUDIO_FILES_EXTENSIONS.iter().collect::<HashSet<_>>();
-        let pdf_extensions = PDF_FILES_EXTENSIONS.iter().collect::<HashSet<_>>();
-        let images_extensions = IMAGE_RS_BROKEN_FILES_EXTENSIONS.iter().collect::<HashSet<_>>();
+        let zip_extensions = ZIP_FILES_EXTENSIONS.iter().copied().collect::<IndexSet<_>>();
+        let audio_extensions = AUDIO_FILES_EXTENSIONS.iter().copied().collect::<IndexSet<_>>();
+        let pdf_extensions = PDF_FILES_EXTENSIONS.iter().copied().collect::<IndexSet<_>>();
+        let images_extensions = IMAGE_RS_BROKEN_FILES_EXTENSIONS.iter().copied().collect::<IndexSet<_>>();
 
         let mut extensions = Vec::new();
         let vec_extensions = [
@@ -270,10 +271,10 @@ impl BrokenFiles {
 #[allow(clippy::string_slice)] // Valid, because we address go to dot, which is known ascii character
 fn check_extension_availability(
     full_name: &Path,
-    images_extensions: &HashSet<&&'static str>,
-    zip_extensions: &HashSet<&&'static str>,
-    audio_extensions: &HashSet<&&'static str>,
-    pdf_extensions: &HashSet<&&'static str>,
+    images_extensions: &IndexSet<&'static str>,
+    zip_extensions: &IndexSet<&'static str>,
+    audio_extensions: &IndexSet<&'static str>,
+    pdf_extensions: &IndexSet<&'static str>,
 ) -> TypeOfFile {
     let Some(file_name) = full_name.file_name() else {
         error!("Missing file name in file - \"{}\"", full_name.to_string_lossy());
@@ -307,17 +308,18 @@ pub fn get_broken_files_cache_file() -> String {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashSet;
     use std::path::Path;
+
+    use indexmap::{IndexSet, indexset};
 
     use super::*;
 
     #[test]
     fn test_check_extension_availability_image() {
-        let images_extensions: HashSet<&&str> = ["jpg", "png", "gif"].iter().collect();
-        let zip_extensions: HashSet<&&str> = HashSet::new();
-        let audio_extensions: HashSet<&&str> = HashSet::new();
-        let pdf_extensions: HashSet<&&str> = HashSet::new();
+        let images_extensions: IndexSet<&str> = indexset! {"jpg", "png", "gif"};
+        let zip_extensions: IndexSet<&str> = IndexSet::new();
+        let audio_extensions: IndexSet<&str> = IndexSet::new();
+        let pdf_extensions: IndexSet<&str> = IndexSet::new();
 
         let path = Path::new("test.jpg");
         assert_eq!(
@@ -328,10 +330,10 @@ mod tests {
 
     #[test]
     fn test_check_extension_availability_zip() {
-        let images_extensions: HashSet<&&str> = HashSet::new();
-        let zip_extensions: HashSet<&&str> = ["zip", "rar"].iter().collect();
-        let audio_extensions: HashSet<&&str> = HashSet::new();
-        let pdf_extensions: HashSet<&&str> = HashSet::new();
+        let images_extensions: IndexSet<&str> = IndexSet::new();
+        let zip_extensions: IndexSet<&str> = indexset! {"zip", "rar"};
+        let audio_extensions: IndexSet<&str> = IndexSet::new();
+        let pdf_extensions: IndexSet<&str> = IndexSet::new();
 
         let path = Path::new("test.zip");
         assert_eq!(
@@ -342,10 +344,10 @@ mod tests {
 
     #[test]
     fn test_check_extension_availability_audio() {
-        let images_extensions: HashSet<&&str> = HashSet::new();
-        let zip_extensions: HashSet<&&str> = HashSet::new();
-        let audio_extensions: HashSet<&&str> = ["mp3", "wav"].iter().collect();
-        let pdf_extensions: HashSet<&&str> = HashSet::new();
+        let images_extensions: IndexSet<&str> = IndexSet::new();
+        let zip_extensions: IndexSet<&str> = IndexSet::new();
+        let audio_extensions: IndexSet<&str> = indexset! {"mp3", "wav"};
+        let pdf_extensions: IndexSet<&str> = IndexSet::new();
 
         let path = Path::new("test.mp3");
         assert_eq!(
@@ -356,10 +358,10 @@ mod tests {
 
     #[test]
     fn test_check_extension_availability_pdf() {
-        let images_extensions: HashSet<&&str> = HashSet::new();
-        let zip_extensions: HashSet<&&str> = HashSet::new();
-        let audio_extensions: HashSet<&&str> = HashSet::new();
-        let pdf_extensions: HashSet<&&str> = std::iter::once(&"pdf").collect();
+        let images_extensions: IndexSet<&str> = IndexSet::new();
+        let zip_extensions: IndexSet<&str> = IndexSet::new();
+        let audio_extensions: IndexSet<&str> = IndexSet::new();
+        let pdf_extensions: IndexSet<&str> = indexset! {"pdf"};
 
         let path = Path::new("test.pdf");
         assert_eq!(
@@ -370,10 +372,10 @@ mod tests {
 
     #[test]
     fn test_check_extension_availability_no_extension() {
-        let images_extensions: HashSet<&&str> = HashSet::new();
-        let zip_extensions: HashSet<&&str> = HashSet::new();
-        let audio_extensions: HashSet<&&str> = HashSet::new();
-        let pdf_extensions: HashSet<&&str> = HashSet::new();
+        let images_extensions: IndexSet<&str> = IndexSet::new();
+        let zip_extensions: IndexSet<&str> = IndexSet::new();
+        let audio_extensions: IndexSet<&str> = IndexSet::new();
+        let pdf_extensions: IndexSet<&str> = IndexSet::new();
 
         let path = Path::new("test");
         assert_eq!(
@@ -384,10 +386,10 @@ mod tests {
 
     #[test]
     fn test_check_no_extension() {
-        let images_extensions: HashSet<&&str> = HashSet::new();
-        let zip_extensions: HashSet<&&str> = HashSet::new();
-        let audio_extensions: HashSet<&&str> = ["mp3", "wav"].iter().collect();
-        let pdf_extensions: HashSet<&&str> = HashSet::new();
+        let images_extensions: IndexSet<&str> = IndexSet::new();
+        let zip_extensions: IndexSet<&str> = IndexSet::new();
+        let audio_extensions: IndexSet<&str> = indexset! {"mp3", "wav"};
+        let pdf_extensions: IndexSet<&str> = IndexSet::new();
 
         let path = Path::new("/home/.mp3");
         assert_eq!(

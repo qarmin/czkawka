@@ -152,5 +152,8 @@ pub(crate) fn check_folder_children(
         }
     }
 
+    #[cfg(target_family = "windows")]
+    let _ = warnings; // Silence unused variable warning on Windows
+
     dir_result.push(next_item);
 }

@@ -233,8 +233,6 @@ pub fn make_hard_link(src: &Path, dst: &Path) -> io::Result<()> {
 mod test {
     use std::fs::{File, Metadata, read_dir};
     use std::io::Write;
-    #[cfg(target_family = "windows")]
-    use std::os::fs::MetadataExt;
     #[cfg(target_family = "unix")]
     use std::os::unix::fs::MetadataExt;
     use std::path::{Path, PathBuf};
