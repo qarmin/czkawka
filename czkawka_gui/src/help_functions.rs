@@ -81,6 +81,24 @@ pub enum Message {
     BadExtensions(BadExtensions),
 }
 
+impl Message {
+    pub(crate) fn get_message_type(&self) -> NotebookMainEnum {
+        match self {
+            Self::Duplicates(_) => NotebookMainEnum::Duplicate,
+            Self::EmptyFolders(_) => NotebookMainEnum::EmptyDirectories,
+            Self::EmptyFiles(_) => NotebookMainEnum::EmptyFiles,
+            Self::BigFiles(_) => NotebookMainEnum::BigFiles,
+            Self::Temporary(_) => NotebookMainEnum::Temporary,
+            Self::SimilarImages(_) => NotebookMainEnum::SimilarImages,
+            Self::SimilarVideos(_) => NotebookMainEnum::SimilarVideos,
+            Self::SameMusic(_) => NotebookMainEnum::SameMusic,
+            Self::InvalidSymlinks(_) => NotebookMainEnum::Symlinks,
+            Self::BrokenFiles(_) => NotebookMainEnum::BrokenFiles,
+            Self::BadExtensions(_) => NotebookMainEnum::BadExtensions,
+        }
+    }
+}
+
 #[derive(Clone, Copy)]
 pub enum ColumnsDuplicates {
     // Columns for duplicate treeview

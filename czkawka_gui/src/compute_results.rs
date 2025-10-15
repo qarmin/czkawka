@@ -98,7 +98,8 @@ pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Recei
                 let hash_size_index = combo_box_image_hash_size.active().expect("Failed to get active item") as usize;
                 let hash_size = IMAGES_HASH_SIZE_COMBO_BOX[hash_size_index] as u8;
 
-                match msg {
+                let msg_type = msg.get_message_type();
+                let found_duplicates: Option<bool> = match msg {
                     Message::Duplicates(df) => {
                         compute_duplicate_finder(
                             df,
@@ -106,10 +107,8 @@ pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Recei
                             &tree_view_duplicate_finder,
                             &text_view_errors,
                             &shared_duplication_state,
-                            &shared_buttons,
-                            &buttons_array,
-                            &buttons_names,
-                        );
+
+                        )
                     }
                     Message::EmptyFolders(ef) => {
                         compute_empty_folders(
@@ -118,10 +117,8 @@ pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Recei
                             &tree_view_empty_folder_finder,
                             &text_view_errors,
                             &shared_empty_folders_state,
-                            &shared_buttons,
-                            &buttons_array,
-                            &buttons_names,
-                        );
+
+                        )
                     }
                     Message::EmptyFiles(vf) => {
                         compute_empty_files(
@@ -130,10 +127,8 @@ pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Recei
                             &tree_view_empty_files_finder,
                             &text_view_errors,
                             &shared_empty_files_state,
-                            &shared_buttons,
-                            &buttons_array,
-                            &buttons_names,
-                        );
+
+                        )
                     }
                     Message::BigFiles(bf) => {
                         compute_big_files(
@@ -142,10 +137,8 @@ pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Recei
                             &tree_view_big_files_finder,
                             &text_view_errors,
                             &shared_big_files_state,
-                            &shared_buttons,
-                            &buttons_array,
-                            &buttons_names,
-                        );
+
+                        )
                     }
                     Message::Temporary(tf) => {
                         compute_temporary_files(
@@ -154,10 +147,8 @@ pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Recei
                             &tree_view_temporary_files_finder,
                             &text_view_errors,
                             &shared_temporary_files_state,
-                            &shared_buttons,
-                            &buttons_array,
-                            &buttons_names,
-                        );
+
+                        )
                     }
                     Message::SimilarImages(sf) => {
                         compute_similar_images(
@@ -166,11 +157,9 @@ pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Recei
                             &tree_view_similar_images_finder,
                             &text_view_errors,
                             &shared_similar_images_state,
-                            &shared_buttons,
-                            &buttons_array,
-                            &buttons_names,
+
                             hash_size,
-                        );
+                        )
                     }
                     Message::SimilarVideos(ff) => {
                         compute_similar_videos(
@@ -179,10 +168,8 @@ pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Recei
                             &tree_view_similar_videos_finder,
                             &text_view_errors,
                             &shared_similar_videos_state,
-                            &shared_buttons,
-                            &buttons_array,
-                            &buttons_names,
-                        );
+
+                        )
                     }
                     Message::SameMusic(mf) => {
                         compute_same_music(
@@ -191,10 +178,8 @@ pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Recei
                             &tree_view_same_music_finder,
                             &text_view_errors,
                             &shared_same_music_state,
-                            &shared_buttons,
-                            &buttons_array,
-                            &buttons_names,
-                        );
+
+                        )
                     }
                     Message::InvalidSymlinks(ifs) => {
                         compute_invalid_symlinks(
@@ -203,10 +188,8 @@ pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Recei
                             &tree_view_invalid_symlinks,
                             &text_view_errors,
                             &shared_same_invalid_symlinks,
-                            &shared_buttons,
-                            &buttons_array,
-                            &buttons_names,
-                        );
+
+                        )
                     }
                     Message::BrokenFiles(br) => {
                         compute_broken_files(
@@ -215,10 +198,8 @@ pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Recei
                             &tree_view_broken_files,
                             &text_view_errors,
                             &shared_broken_files_state,
-                            &shared_buttons,
-                            &buttons_array,
-                            &buttons_names,
-                        );
+
+                        )
                     }
                     Message::BadExtensions(be) => {
                         compute_bad_extensions(
@@ -227,12 +208,18 @@ pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Recei
                             &tree_view_bad_extensions,
                             &text_view_errors,
                             &shared_bad_extensions_state,
-                            &shared_buttons,
-                            &buttons_array,
-                            &buttons_names,
-                        );
+
+                        )
                     }
-                }
+                };
+
+                set_specific_buttons_as_active(shared_buttons, msg_type, found_duplicates);
+
+                set_buttons(
+                    &mut *shared_buttons.borrow_mut().get_mut(&msg_type).expect("Failed to borrow buttons"),
+                    buttons_array,
+                    buttons_names,
+                );
             }
             glib::timeout_future(Duration::from_millis(300)).await;
         }
@@ -246,9 +233,7 @@ fn compute_bad_extensions(
     tree_view: &TreeView,
     text_view_errors: &TextView,
     shared_state: &SharedState<BadExtensions>,
-    shared_buttons: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>,
-    buttons_array: &[Widget; 9],
-    buttons_names: &[BottomButtonsEnum; 9],
+
 ) {
     const COLUMNS_NUMBER: usize = 7;
     if be.get_stopped_search() {
@@ -313,9 +298,7 @@ fn compute_broken_files(
     tree_view: &TreeView,
     text_view_errors: &TextView,
     shared_state: &SharedState<BrokenFiles>,
-    shared_buttons: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>,
-    buttons_array: &[Widget; 9],
-    buttons_names: &[BottomButtonsEnum; 9],
+
 ) {
     const COLUMNS_NUMBER: usize = 6;
     if br.get_stopped_search() {
@@ -380,9 +363,7 @@ fn compute_invalid_symlinks(
     tree_view: &TreeView,
     text_view_errors: &TextView,
     shared_state: &SharedState<InvalidSymlinks>,
-    shared_buttons: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>,
-    buttons_array: &[Widget; 9],
-    buttons_names: &[BottomButtonsEnum; 9],
+
 ) {
     const COLUMNS_NUMBER: usize = 7;
     if ifs.get_stopped_search() {
@@ -445,9 +426,7 @@ fn compute_same_music(
     tree_view: &TreeView,
     text_view_errors: &TextView,
     shared_state: &SharedState<SameMusic>,
-    shared_buttons: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>,
-    buttons_array: &[Widget; 9],
-    buttons_names: &[BottomButtonsEnum; 9],
+
 ) {
     if mf.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
@@ -612,9 +591,7 @@ fn compute_similar_videos(
     tree_view: &TreeView,
     text_view_errors: &TextView,
     shared_state: &SharedState<SimilarVideos>,
-    shared_buttons: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>,
-    buttons_array: &[Widget; 9],
-    buttons_names: &[BottomButtonsEnum; 9],
+
 ) {
     if ff.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
@@ -707,9 +684,7 @@ fn compute_similar_images(
     tree_view: &TreeView,
     text_view_errors: &TextView,
     shared_state: &SharedState<SimilarImages>,
-    shared_buttons: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>,
-    buttons_array: &[Widget; 9],
-    buttons_names: &[BottomButtonsEnum; 9],
+
     hash_size: u8,
 ) {
     if sf.get_stopped_search() {
@@ -822,9 +797,7 @@ fn compute_temporary_files(
     tree_view: &TreeView,
     text_view_errors: &TextView,
     shared_state: &SharedState<Temporary>,
-    shared_buttons: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>,
-    buttons_array: &[Widget; 9],
-    buttons_names: &[BottomButtonsEnum; 9],
+
 ) {
     const COLUMNS_NUMBER: usize = 5;
     if tf.get_stopped_search() {
@@ -887,9 +860,7 @@ fn compute_big_files(
     tree_view: &TreeView,
     text_view_errors: &TextView,
     shared_state: &SharedState<BigFile>,
-    shared_buttons: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>,
-    buttons_array: &[Widget; 9],
-    buttons_names: &[BottomButtonsEnum; 9],
+
 ) {
     const COLUMNS_NUMBER: usize = 7;
     if bf.get_stopped_search() {
@@ -951,9 +922,7 @@ fn compute_empty_files(
     tree_view: &TreeView,
     text_view_errors: &TextView,
     shared_state: &SharedState<EmptyFiles>,
-    shared_buttons: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>,
-    buttons_array: &[Widget; 9],
-    buttons_names: &[BottomButtonsEnum; 9],
+
 ) {
     const COLUMNS_NUMBER: usize = 5;
     if vf.get_stopped_search() {
@@ -1014,9 +983,7 @@ fn compute_empty_folders(
     tree_view: &TreeView,
     text_view_errors: &TextView,
     shared_state: &SharedState<EmptyFolder>,
-    shared_buttons: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>,
-    buttons_array: &[Widget; 9],
-    buttons_names: &[BottomButtonsEnum; 9],
+
 ) {
     const COLUMNS_NUMBER: usize = 5;
     if ef.get_stopped_search() {
@@ -1079,9 +1046,7 @@ fn compute_duplicate_finder(
     tree_view_duplicate_finder: &TreeView,
     text_view_errors: &TextView,
     shared_state: &SharedState<DuplicateFinder>,
-    shared_buttons: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>,
-    buttons_array: &[Widget; 9],
-    buttons_names: &[BottomButtonsEnum; 9],
+
 ) {
     if df.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
