@@ -23,7 +23,7 @@ use czkawka_core::tools::similar_videos::SimilarVideos;
 use czkawka_core::tools::temporary::Temporary;
 use fun_time::fun_time;
 use gtk4::prelude::*;
-use gtk4::{Entry, ListStore, TextView, TreeView, Widget};
+use gtk4::{Entry, ListStore, TextView, TreeView};
 use humansize::{BINARY, format_size};
 use rayon::prelude::*;
 
@@ -100,126 +100,35 @@ pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Recei
 
                 let msg_type = msg.get_message_type();
                 let found_duplicates: Option<bool> = match msg {
-                    Message::Duplicates(df) => {
-                        compute_duplicate_finder(
-                            df,
-                            &entry_info,
-                            &tree_view_duplicate_finder,
-                            &text_view_errors,
-                            &shared_duplication_state,
-
-                        )
-                    }
-                    Message::EmptyFolders(ef) => {
-                        compute_empty_folders(
-                            ef,
-                            &entry_info,
-                            &tree_view_empty_folder_finder,
-                            &text_view_errors,
-                            &shared_empty_folders_state,
-
-                        )
-                    }
-                    Message::EmptyFiles(vf) => {
-                        compute_empty_files(
-                            vf,
-                            &entry_info,
-                            &tree_view_empty_files_finder,
-                            &text_view_errors,
-                            &shared_empty_files_state,
-
-                        )
-                    }
-                    Message::BigFiles(bf) => {
-                        compute_big_files(
-                            bf,
-                            &entry_info,
-                            &tree_view_big_files_finder,
-                            &text_view_errors,
-                            &shared_big_files_state,
-
-                        )
-                    }
-                    Message::Temporary(tf) => {
-                        compute_temporary_files(
-                            tf,
-                            &entry_info,
-                            &tree_view_temporary_files_finder,
-                            &text_view_errors,
-                            &shared_temporary_files_state,
-
-                        )
-                    }
-                    Message::SimilarImages(sf) => {
-                        compute_similar_images(
-                            sf,
-                            &entry_info,
-                            &tree_view_similar_images_finder,
-                            &text_view_errors,
-                            &shared_similar_images_state,
-
-                            hash_size,
-                        )
-                    }
-                    Message::SimilarVideos(ff) => {
-                        compute_similar_videos(
-                            ff,
-                            &entry_info,
-                            &tree_view_similar_videos_finder,
-                            &text_view_errors,
-                            &shared_similar_videos_state,
-
-                        )
-                    }
-                    Message::SameMusic(mf) => {
-                        compute_same_music(
-                            mf,
-                            &entry_info,
-                            &tree_view_same_music_finder,
-                            &text_view_errors,
-                            &shared_same_music_state,
-
-                        )
-                    }
-                    Message::InvalidSymlinks(ifs) => {
-                        compute_invalid_symlinks(
-                            ifs,
-                            &entry_info,
-                            &tree_view_invalid_symlinks,
-                            &text_view_errors,
-                            &shared_same_invalid_symlinks,
-
-                        )
-                    }
-                    Message::BrokenFiles(br) => {
-                        compute_broken_files(
-                            br,
-                            &entry_info,
-                            &tree_view_broken_files,
-                            &text_view_errors,
-                            &shared_broken_files_state,
-
-                        )
-                    }
-                    Message::BadExtensions(be) => {
-                        compute_bad_extensions(
-                            be,
-                            &entry_info,
-                            &tree_view_bad_extensions,
-                            &text_view_errors,
-                            &shared_bad_extensions_state,
-
-                        )
-                    }
+                    Message::Duplicates(df) => compute_duplicate_finder(df, &entry_info, &tree_view_duplicate_finder, &text_view_errors, &shared_duplication_state),
+                    Message::EmptyFolders(ef) => compute_empty_folders(ef, &entry_info, &tree_view_empty_folder_finder, &text_view_errors, &shared_empty_folders_state),
+                    Message::EmptyFiles(vf) => compute_empty_files(vf, &entry_info, &tree_view_empty_files_finder, &text_view_errors, &shared_empty_files_state),
+                    Message::BigFiles(bf) => compute_big_files(bf, &entry_info, &tree_view_big_files_finder, &text_view_errors, &shared_big_files_state),
+                    Message::Temporary(tf) => compute_temporary_files(tf, &entry_info, &tree_view_temporary_files_finder, &text_view_errors, &shared_temporary_files_state),
+                    Message::SimilarImages(sf) => compute_similar_images(
+                        sf,
+                        &entry_info,
+                        &tree_view_similar_images_finder,
+                        &text_view_errors,
+                        &shared_similar_images_state,
+                        hash_size,
+                    ),
+                    Message::SimilarVideos(ff) => compute_similar_videos(ff, &entry_info, &tree_view_similar_videos_finder, &text_view_errors, &shared_similar_videos_state),
+                    Message::SameMusic(mf) => compute_same_music(mf, &entry_info, &tree_view_same_music_finder, &text_view_errors, &shared_same_music_state),
+                    Message::InvalidSymlinks(ifs) => compute_invalid_symlinks(ifs, &entry_info, &tree_view_invalid_symlinks, &text_view_errors, &shared_same_invalid_symlinks),
+                    Message::BrokenFiles(br) => compute_broken_files(br, &entry_info, &tree_view_broken_files, &text_view_errors, &shared_broken_files_state),
+                    Message::BadExtensions(be) => compute_bad_extensions(be, &entry_info, &tree_view_bad_extensions, &text_view_errors, &shared_bad_extensions_state),
                 };
 
-                set_specific_buttons_as_active(&shared_buttons, msg_type, found_duplicates);
+                if let Some(found_duplicates) = found_duplicates {
+                    set_specific_buttons_as_active(&shared_buttons, msg_type, found_duplicates);
 
-                set_buttons(
-                    &mut *shared_buttons.borrow_mut().get_mut(&msg_type).expect("Failed to borrow buttons"),
-                    &buttons_array,
-                    &buttons_names,
-                );
+                    set_buttons(
+                        &mut *shared_buttons.borrow_mut().get_mut(&msg_type).expect("Failed to borrow buttons"),
+                        &buttons_array,
+                        &buttons_names,
+                    );
+                }
             }
             glib::timeout_future(Duration::from_millis(300)).await;
         }
@@ -227,18 +136,11 @@ pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Recei
 }
 
 #[fun_time(message = "compute_bad_extensions", level = "debug")]
-fn compute_bad_extensions(
-    be: BadExtensions,
-    entry_info: &Entry,
-    tree_view: &TreeView,
-    text_view_errors: &TextView,
-    shared_state: &SharedState<BadExtensions>,
-
-) {
+fn compute_bad_extensions(be: BadExtensions, entry_info: &Entry, tree_view: &TreeView, text_view_errors: &TextView, shared_state: &SharedState<BadExtensions>) -> Option<bool> {
     const COLUMNS_NUMBER: usize = 7;
     if be.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
-        return;
+        return None;
     }
     let information = be.get_information();
     let text_messages = be.get_text_messages();
@@ -277,33 +179,16 @@ fn compute_bad_extensions(
         print_text_messages_to_text_view(text_messages, text_view_errors);
     }
 
-    // Set state
-    {
-        *shared_state.borrow_mut() = Some(be);
-
-        set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::Temporary, bad_extensions_number > 0);
-
-        set_buttons(
-            &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Temporary).expect("Failed to borrow buttons"),
-            buttons_array,
-            buttons_names,
-        );
-    }
+    *shared_state.borrow_mut() = Some(be);
+    Some(bad_extensions_number > 0)
 }
 
 #[fun_time(message = "compute_broken_files", level = "debug")]
-fn compute_broken_files(
-    br: BrokenFiles,
-    entry_info: &Entry,
-    tree_view: &TreeView,
-    text_view_errors: &TextView,
-    shared_state: &SharedState<BrokenFiles>,
-
-) {
+fn compute_broken_files(br: BrokenFiles, entry_info: &Entry, tree_view: &TreeView, text_view_errors: &TextView, shared_state: &SharedState<BrokenFiles>) -> Option<bool> {
     const COLUMNS_NUMBER: usize = 6;
     if br.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
-        return;
+        return None;
     }
     let information = br.get_information();
     let text_messages = br.get_text_messages();
@@ -342,18 +227,8 @@ fn compute_broken_files(
         print_text_messages_to_text_view(text_messages, text_view_errors);
     }
 
-    // Set state
-    {
-        *shared_state.borrow_mut() = Some(br);
-
-        set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::BrokenFiles, broken_files_number > 0);
-
-        set_buttons(
-            &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BrokenFiles).expect("Failed to borrow buttons"),
-            buttons_array,
-            buttons_names,
-        );
-    }
+    *shared_state.borrow_mut() = Some(br);
+    Some(broken_files_number > 0)
 }
 
 #[fun_time(message = "compute_invalid_symlinks", level = "debug")]
@@ -363,12 +238,11 @@ fn compute_invalid_symlinks(
     tree_view: &TreeView,
     text_view_errors: &TextView,
     shared_state: &SharedState<InvalidSymlinks>,
-
-) {
+) -> Option<bool> {
     const COLUMNS_NUMBER: usize = 7;
     if ifs.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
-        return;
+        return None;
     }
     let information = ifs.get_information();
     let text_messages = ifs.get_text_messages();
@@ -405,32 +279,15 @@ fn compute_invalid_symlinks(
         print_text_messages_to_text_view(text_messages, text_view_errors);
     }
 
-    // Set state
-    {
-        *shared_state.borrow_mut() = Some(ifs);
-
-        set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::Symlinks, invalid_symlinks > 0);
-
-        set_buttons(
-            &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Symlinks).expect("Failed to borrow buttons"),
-            buttons_array,
-            buttons_names,
-        );
-    }
+    *shared_state.borrow_mut() = Some(ifs);
+    Some(invalid_symlinks > 0)
 }
 
 #[fun_time(message = "compute_same_music", level = "debug")]
-fn compute_same_music(
-    mf: SameMusic,
-    entry_info: &Entry,
-    tree_view: &TreeView,
-    text_view_errors: &TextView,
-    shared_state: &SharedState<SameMusic>,
-
-) {
+fn compute_same_music(mf: SameMusic, entry_info: &Entry, tree_view: &TreeView, text_view_errors: &TextView, shared_state: &SharedState<SameMusic>) -> Option<bool> {
     if mf.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
-        return;
+        return None;
     }
     if mf.get_use_reference() {
         tree_view.selection().set_select_function(select_function_always_true);
@@ -570,32 +427,15 @@ fn compute_same_music(
         print_text_messages_to_text_view(text_messages, text_view_errors);
     }
 
-    // Set state
-    {
-        *shared_state.borrow_mut() = Some(mf);
-
-        set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::SameMusic, same_music_number > 0);
-
-        set_buttons(
-            &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).expect("Failed to borrow buttons"),
-            buttons_array,
-            buttons_names,
-        );
-    }
+    *shared_state.borrow_mut() = Some(mf);
+    Some(same_music_number > 0)
 }
 
 #[fun_time(message = "compute_similar_videos", level = "debug")]
-fn compute_similar_videos(
-    ff: SimilarVideos,
-    entry_info: &Entry,
-    tree_view: &TreeView,
-    text_view_errors: &TextView,
-    shared_state: &SharedState<SimilarVideos>,
-
-) {
+fn compute_similar_videos(ff: SimilarVideos, entry_info: &Entry, tree_view: &TreeView, text_view_errors: &TextView, shared_state: &SharedState<SimilarVideos>) -> Option<bool> {
     if ff.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
-        return;
+        return None;
     }
     if ff.get_use_reference() {
         tree_view.selection().set_select_function(select_function_always_true);
@@ -663,18 +503,8 @@ fn compute_similar_videos(
         print_text_messages_to_text_view(text_messages, text_view_errors);
     }
 
-    // Set state
-    {
-        *shared_state.borrow_mut() = Some(ff);
-
-        set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::SimilarVideos, found_any_duplicates);
-
-        set_buttons(
-            &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).expect("Failed to borrow buttons"),
-            buttons_array,
-            buttons_names,
-        );
-    }
+    *shared_state.borrow_mut() = Some(ff);
+    Some(found_any_duplicates)
 }
 
 #[fun_time(message = "compute_similar_images", level = "debug")]
@@ -686,10 +516,10 @@ fn compute_similar_images(
     shared_state: &SharedState<SimilarImages>,
 
     hash_size: u8,
-) {
+) -> Option<bool> {
     if sf.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
-        return;
+        return None;
     }
     if sf.get_use_reference() {
         tree_view.selection().set_select_function(select_function_always_true);
@@ -776,33 +606,16 @@ fn compute_similar_images(
         print_text_messages_to_text_view(text_messages, text_view_errors);
     }
 
-    // Set state
-    {
-        *shared_state.borrow_mut() = Some(sf);
-
-        set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::SimilarImages, found_any_duplicates);
-
-        set_buttons(
-            &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarImages).expect("Failed to borrow buttons"),
-            buttons_array,
-            buttons_names,
-        );
-    }
+    *shared_state.borrow_mut() = Some(sf);
+    Some(found_any_duplicates)
 }
 
 #[fun_time(message = "compute_temporary_files", level = "debug")]
-fn compute_temporary_files(
-    tf: Temporary,
-    entry_info: &Entry,
-    tree_view: &TreeView,
-    text_view_errors: &TextView,
-    shared_state: &SharedState<Temporary>,
-
-) {
+fn compute_temporary_files(tf: Temporary, entry_info: &Entry, tree_view: &TreeView, text_view_errors: &TextView, shared_state: &SharedState<Temporary>) -> Option<bool> {
     const COLUMNS_NUMBER: usize = 5;
     if tf.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
-        return;
+        return None;
     }
     let information = tf.get_information();
     let text_messages = tf.get_text_messages();
@@ -839,33 +652,16 @@ fn compute_temporary_files(
         print_text_messages_to_text_view(text_messages, text_view_errors);
     }
 
-    // Set state
-    {
-        *shared_state.borrow_mut() = Some(tf);
-
-        set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::Temporary, temporary_files_number > 0);
-
-        set_buttons(
-            &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Temporary).expect("Failed to borrow buttons"),
-            buttons_array,
-            buttons_names,
-        );
-    }
+    *shared_state.borrow_mut() = Some(tf);
+    Some(temporary_files_number > 0)
 }
 
 #[fun_time(message = "compute_big_files", level = "debug")]
-fn compute_big_files(
-    bf: BigFile,
-    entry_info: &Entry,
-    tree_view: &TreeView,
-    text_view_errors: &TextView,
-    shared_state: &SharedState<BigFile>,
-
-) {
+fn compute_big_files(bf: BigFile, entry_info: &Entry, tree_view: &TreeView, text_view_errors: &TextView, shared_state: &SharedState<BigFile>) -> Option<bool> {
     const COLUMNS_NUMBER: usize = 7;
     if bf.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
-        return;
+        return None;
     }
     let information = bf.get_information();
     let text_messages = bf.get_text_messages();
@@ -901,33 +697,16 @@ fn compute_big_files(
         print_text_messages_to_text_view(text_messages, text_view_errors);
     }
 
-    // Set state
-    {
-        *shared_state.borrow_mut() = Some(bf);
-
-        set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::BigFiles, biggest_files_number > 0);
-
-        set_buttons(
-            &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BigFiles).expect("Failed to borrow buttons"),
-            buttons_array,
-            buttons_names,
-        );
-    }
+    *shared_state.borrow_mut() = Some(bf);
+    Some(biggest_files_number > 0)
 }
 
 #[fun_time(message = "compute_empty_files", level = "debug")]
-fn compute_empty_files(
-    vf: EmptyFiles,
-    entry_info: &Entry,
-    tree_view: &TreeView,
-    text_view_errors: &TextView,
-    shared_state: &SharedState<EmptyFiles>,
-
-) {
+fn compute_empty_files(vf: EmptyFiles, entry_info: &Entry, tree_view: &TreeView, text_view_errors: &TextView, shared_state: &SharedState<EmptyFiles>) -> Option<bool> {
     const COLUMNS_NUMBER: usize = 5;
     if vf.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
-        return;
+        return None;
     }
     let information = vf.get_information();
     let text_messages = vf.get_text_messages();
@@ -962,33 +741,16 @@ fn compute_empty_files(
         print_text_messages_to_text_view(text_messages, text_view_errors);
     }
 
-    // Set state
-    {
-        *shared_state.borrow_mut() = Some(vf);
-
-        set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::EmptyFiles, empty_files_number > 0);
-
-        set_buttons(
-            &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyFiles).expect("Failed to borrow buttons"),
-            buttons_array,
-            buttons_names,
-        );
-    }
+    *shared_state.borrow_mut() = Some(vf);
+    Some(empty_files_number > 0)
 }
 
 #[fun_time(message = "compute_empty_folders", level = "debug")]
-fn compute_empty_folders(
-    ef: EmptyFolder,
-    entry_info: &Entry,
-    tree_view: &TreeView,
-    text_view_errors: &TextView,
-    shared_state: &SharedState<EmptyFolder>,
-
-) {
+fn compute_empty_folders(ef: EmptyFolder, entry_info: &Entry, tree_view: &TreeView, text_view_errors: &TextView, shared_state: &SharedState<EmptyFolder>) -> Option<bool> {
     const COLUMNS_NUMBER: usize = 5;
     if ef.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
-        return;
+        return None;
     }
     let information = ef.get_information();
     let text_messages = ef.get_text_messages();
@@ -1025,18 +787,8 @@ fn compute_empty_folders(
         print_text_messages_to_text_view(text_messages, text_view_errors);
     }
 
-    // Set state
-    {
-        *shared_state.borrow_mut() = Some(ef);
-
-        set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::EmptyDirectories, empty_folder_number > 0);
-
-        set_buttons(
-            &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyDirectories).expect("Failed to borrow buttons"),
-            buttons_array,
-            buttons_names,
-        );
-    }
+    *shared_state.borrow_mut() = Some(ef);
+    Some(empty_folder_number > 0)
 }
 
 #[fun_time(message = "compute_duplicate_finder", level = "debug")]
@@ -1046,11 +798,10 @@ fn compute_duplicate_finder(
     tree_view_duplicate_finder: &TreeView,
     text_view_errors: &TextView,
     shared_state: &SharedState<DuplicateFinder>,
-
-) {
+) -> Option<bool> {
     if df.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
-        return;
+        return None;
     }
     if df.get_use_reference() {
         tree_view_duplicate_finder.selection().set_select_function(select_function_always_true);
@@ -1226,18 +977,8 @@ fn compute_duplicate_finder(
         print_text_messages_to_text_view(text_messages, text_view_errors);
     }
 
-    // Set state
-    {
-        *shared_state.borrow_mut() = Some(df);
-
-        set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::Duplicate, duplicates_number > 0);
-
-        set_buttons(
-            &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Duplicate).expect("Failed to borrow buttons"),
-            buttons_array,
-            buttons_names,
-        );
-    }
+    *shared_state.borrow_mut() = Some(df);
+    Some(duplicates_number > 0)
 }
 
 fn vector_sort_unstable_entry_by_path<T>(vector: &[T]) -> Vec<T>
