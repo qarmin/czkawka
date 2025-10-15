@@ -253,56 +253,56 @@ fn compute_bad_extensions(
     const COLUMNS_NUMBER: usize = 7;
     if be.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
-    } else {
-        let information = be.get_information();
-        let text_messages = be.get_text_messages();
+        return;
+    }
+    let information = be.get_information();
+    let text_messages = be.get_text_messages();
 
-        let bad_extensions_number: usize = information.number_of_files_with_bad_extension;
-        entry_info.set_text(flg!("compute_found_bad_extensions", number_files = bad_extensions_number).as_str());
+    let bad_extensions_number: usize = information.number_of_files_with_bad_extension;
+    entry_info.set_text(flg!("compute_found_bad_extensions", number_files = bad_extensions_number).as_str());
 
-        // Create GUI
-        {
-            let list_store = get_list_store(tree_view);
+    // Create GUI
+    {
+        let list_store = get_list_store(tree_view);
 
-            let vector = be.get_bad_extensions_files();
+        let vector = be.get_bad_extensions_files();
 
-            // Sort
-            let mut vector = vector.clone();
-            vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+        // Sort
+        let mut vector = vector.clone();
+        vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
-            for file_entry in vector {
-                let (directory, file) = split_path(&file_entry.path);
-                let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                    (ColumnsBadExtensions::SelectionButton as u32, &false),
-                    (ColumnsBadExtensions::Name as u32, &file),
-                    (ColumnsBadExtensions::Path as u32, &directory),
-                    (ColumnsBadExtensions::CurrentExtension as u32, &file_entry.current_extension),
-                    (ColumnsBadExtensions::ValidExtensions as u32, &file_entry.proper_extensions_group),
-                    (
-                        ColumnsBadExtensions::Modification as u32,
-                        &(DateTime::from_timestamp(file_entry.modified_date as i64, 0)
-                            .expect("Modified date always should be in valid range")
-                            .to_string()),
-                    ),
-                    (ColumnsBadExtensions::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
-                ];
-                list_store.set(&list_store.append(), &values);
-            }
-            print_text_messages_to_text_view(text_messages, text_view_errors);
+        for file_entry in vector {
+            let (directory, file) = split_path(&file_entry.path);
+            let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
+                (ColumnsBadExtensions::SelectionButton as u32, &false),
+                (ColumnsBadExtensions::Name as u32, &file),
+                (ColumnsBadExtensions::Path as u32, &directory),
+                (ColumnsBadExtensions::CurrentExtension as u32, &file_entry.current_extension),
+                (ColumnsBadExtensions::ValidExtensions as u32, &file_entry.proper_extensions_group),
+                (
+                    ColumnsBadExtensions::Modification as u32,
+                    &(DateTime::from_timestamp(file_entry.modified_date as i64, 0)
+                        .expect("Modified date always should be in valid range")
+                        .to_string()),
+                ),
+                (ColumnsBadExtensions::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
+            ];
+            list_store.set(&list_store.append(), &values);
         }
+        print_text_messages_to_text_view(text_messages, text_view_errors);
+    }
 
-        // Set state
-        {
-            *shared_state.borrow_mut() = Some(be);
+    // Set state
+    {
+        *shared_state.borrow_mut() = Some(be);
 
-            set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::Temporary, bad_extensions_number > 0);
+        set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::Temporary, bad_extensions_number > 0);
 
-            set_buttons(
-                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Temporary).expect("Failed to borrow buttons"),
-                buttons_array,
-                buttons_names,
-            );
-        }
+        set_buttons(
+            &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Temporary).expect("Failed to borrow buttons"),
+            buttons_array,
+            buttons_names,
+        );
     }
 }
 
@@ -320,56 +320,56 @@ fn compute_broken_files(
     const COLUMNS_NUMBER: usize = 6;
     if br.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
-    } else {
-        let information = br.get_information();
-        let text_messages = br.get_text_messages();
+        return;
+    }
+    let information = br.get_information();
+    let text_messages = br.get_text_messages();
 
-        let broken_files_number: usize = information.number_of_broken_files;
+    let broken_files_number: usize = information.number_of_broken_files;
 
-        entry_info.set_text(flg!("compute_found_broken_files", number_files = broken_files_number).as_str());
+    entry_info.set_text(flg!("compute_found_broken_files", number_files = broken_files_number).as_str());
 
-        // Create GUI
-        {
-            let list_store = get_list_store(tree_view);
+    // Create GUI
+    {
+        let list_store = get_list_store(tree_view);
 
-            let vector = br.get_broken_files();
+        let vector = br.get_broken_files();
 
-            // Sort
-            let mut vector = vector.clone();
-            vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+        // Sort
+        let mut vector = vector.clone();
+        vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
-            for file_entry in vector {
-                let (directory, file) = split_path(&file_entry.path);
-                let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                    (ColumnsBrokenFiles::SelectionButton as u32, &false),
-                    (ColumnsBrokenFiles::Name as u32, &file),
-                    (ColumnsBrokenFiles::Path as u32, &directory),
-                    (ColumnsBrokenFiles::ErrorType as u32, &file_entry.error_string),
-                    (
-                        ColumnsBrokenFiles::Modification as u32,
-                        &(DateTime::from_timestamp(file_entry.modified_date as i64, 0)
-                            .expect("Modified date always should be in valid range")
-                            .to_string()),
-                    ),
-                    (ColumnsBrokenFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
-                ];
-                list_store.set(&list_store.append(), &values);
-            }
-            print_text_messages_to_text_view(text_messages, text_view_errors);
+        for file_entry in vector {
+            let (directory, file) = split_path(&file_entry.path);
+            let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
+                (ColumnsBrokenFiles::SelectionButton as u32, &false),
+                (ColumnsBrokenFiles::Name as u32, &file),
+                (ColumnsBrokenFiles::Path as u32, &directory),
+                (ColumnsBrokenFiles::ErrorType as u32, &file_entry.error_string),
+                (
+                    ColumnsBrokenFiles::Modification as u32,
+                    &(DateTime::from_timestamp(file_entry.modified_date as i64, 0)
+                        .expect("Modified date always should be in valid range")
+                        .to_string()),
+                ),
+                (ColumnsBrokenFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
+            ];
+            list_store.set(&list_store.append(), &values);
         }
+        print_text_messages_to_text_view(text_messages, text_view_errors);
+    }
 
-        // Set state
-        {
-            *shared_state.borrow_mut() = Some(br);
+    // Set state
+    {
+        *shared_state.borrow_mut() = Some(br);
 
-            set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::BrokenFiles, broken_files_number > 0);
+        set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::BrokenFiles, broken_files_number > 0);
 
-            set_buttons(
-                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BrokenFiles).expect("Failed to borrow buttons"),
-                buttons_array,
-                buttons_names,
-            );
-        }
+        set_buttons(
+            &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BrokenFiles).expect("Failed to borrow buttons"),
+            buttons_array,
+            buttons_names,
+        );
     }
 }
 
@@ -387,54 +387,54 @@ fn compute_invalid_symlinks(
     const COLUMNS_NUMBER: usize = 7;
     if ifs.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
-    } else {
-        let information = ifs.get_information();
-        let text_messages = ifs.get_text_messages();
+        return;
+    }
+    let information = ifs.get_information();
+    let text_messages = ifs.get_text_messages();
 
-        let invalid_symlinks: usize = information.number_of_invalid_symlinks;
+    let invalid_symlinks: usize = information.number_of_invalid_symlinks;
 
-        entry_info.set_text(flg!("compute_found_invalid_symlinks", number_files = invalid_symlinks).as_str());
+    entry_info.set_text(flg!("compute_found_invalid_symlinks", number_files = invalid_symlinks).as_str());
 
-        // Create GUI
-        {
-            let list_store = get_list_store(tree_view);
+    // Create GUI
+    {
+        let list_store = get_list_store(tree_view);
 
-            let vector = vector_sort_simple_unstable_entry_by_path(ifs.get_invalid_symlinks());
+        let vector = vector_sort_simple_unstable_entry_by_path(ifs.get_invalid_symlinks());
 
-            for file_entry in vector {
-                let (directory, file) = split_path(&file_entry.path);
-                let symlink_info = file_entry.symlink_info;
-                let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                    (ColumnsInvalidSymlinks::SelectionButton as u32, &false),
-                    (ColumnsInvalidSymlinks::Name as u32, &file),
-                    (ColumnsInvalidSymlinks::Path as u32, &directory),
-                    (ColumnsInvalidSymlinks::DestinationPath as u32, &symlink_info.destination_path.to_string_lossy().to_string()),
-                    (ColumnsInvalidSymlinks::TypeOfError as u32, &symlink_info.type_of_error.translate()),
-                    (
-                        ColumnsInvalidSymlinks::Modification as u32,
-                        &(DateTime::from_timestamp(file_entry.modified_date as i64, 0)
-                            .expect("Modified date always should be in valid range")
-                            .to_string()),
-                    ),
-                    (ColumnsInvalidSymlinks::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
-                ];
-                list_store.set(&list_store.append(), &values);
-            }
-            print_text_messages_to_text_view(text_messages, text_view_errors);
+        for file_entry in vector {
+            let (directory, file) = split_path(&file_entry.path);
+            let symlink_info = file_entry.symlink_info;
+            let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
+                (ColumnsInvalidSymlinks::SelectionButton as u32, &false),
+                (ColumnsInvalidSymlinks::Name as u32, &file),
+                (ColumnsInvalidSymlinks::Path as u32, &directory),
+                (ColumnsInvalidSymlinks::DestinationPath as u32, &symlink_info.destination_path.to_string_lossy().to_string()),
+                (ColumnsInvalidSymlinks::TypeOfError as u32, &symlink_info.type_of_error.translate()),
+                (
+                    ColumnsInvalidSymlinks::Modification as u32,
+                    &(DateTime::from_timestamp(file_entry.modified_date as i64, 0)
+                        .expect("Modified date always should be in valid range")
+                        .to_string()),
+                ),
+                (ColumnsInvalidSymlinks::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
+            ];
+            list_store.set(&list_store.append(), &values);
         }
+        print_text_messages_to_text_view(text_messages, text_view_errors);
+    }
 
-        // Set state
-        {
-            *shared_state.borrow_mut() = Some(ifs);
+    // Set state
+    {
+        *shared_state.borrow_mut() = Some(ifs);
 
-            set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::Symlinks, invalid_symlinks > 0);
+        set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::Symlinks, invalid_symlinks > 0);
 
-            set_buttons(
-                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Symlinks).expect("Failed to borrow buttons"),
-                buttons_array,
-                buttons_names,
-            );
-        }
+        set_buttons(
+            &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Symlinks).expect("Failed to borrow buttons"),
+            buttons_array,
+            buttons_names,
+        );
     }
 }
 
@@ -451,157 +451,157 @@ fn compute_same_music(
 ) {
     if mf.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
+        return;
+    }
+    if mf.get_use_reference() {
+        tree_view.selection().set_select_function(select_function_always_true);
     } else {
+        tree_view.selection().set_select_function(select_function_same_music);
+    }
+
+    let information = mf.get_information();
+    let text_messages = mf.get_text_messages();
+
+    let same_music_number: usize = information.number_of_duplicates;
+
+    entry_info.set_text(
+        flg!(
+            "compute_found_music",
+            number_files = information.number_of_duplicates,
+            number_groups = information.number_of_groups
+        )
+        .as_str(),
+    );
+
+    // Create GUI
+    {
+        let list_store = get_list_store(tree_view);
+
+        let music_similarity = mf.get_params().music_similarity;
+
+        let is_track_title = (MusicSimilarity::TRACK_TITLE & music_similarity) != MusicSimilarity::NONE;
+        let is_track_artist = (MusicSimilarity::TRACK_ARTIST & music_similarity) != MusicSimilarity::NONE;
+        let is_year = (MusicSimilarity::YEAR & music_similarity) != MusicSimilarity::NONE;
+        let is_bitrate = (MusicSimilarity::BITRATE & music_similarity) != MusicSimilarity::NONE;
+        let is_length = (MusicSimilarity::LENGTH & music_similarity) != MusicSimilarity::NONE;
+        let is_genre = (MusicSimilarity::GENRE & music_similarity) != MusicSimilarity::NONE;
+
         if mf.get_use_reference() {
-            tree_view.selection().set_select_function(select_function_always_true);
-        } else {
-            tree_view.selection().set_select_function(select_function_same_music);
-        }
+            let vector = mf.get_similar_music_referenced();
 
-        let information = mf.get_information();
-        let text_messages = mf.get_text_messages();
+            for (base_file_entry, vec_file_entry) in vector {
+                // Sort
+                let vec_file_entry = if vec_file_entry.len() >= 2 {
+                    let mut vec_file_entry = vec_file_entry.clone();
+                    vec_file_entry.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+                    vec_file_entry
+                } else {
+                    vec_file_entry.clone()
+                };
 
-        let same_music_number: usize = information.number_of_duplicates;
-
-        entry_info.set_text(
-            flg!(
-                "compute_found_music",
-                number_files = information.number_of_duplicates,
-                number_groups = information.number_of_groups
-            )
-            .as_str(),
-        );
-
-        // Create GUI
-        {
-            let list_store = get_list_store(tree_view);
-
-            let music_similarity = mf.get_params().music_similarity;
-
-            let is_track_title = (MusicSimilarity::TRACK_TITLE & music_similarity) != MusicSimilarity::NONE;
-            let is_track_artist = (MusicSimilarity::TRACK_ARTIST & music_similarity) != MusicSimilarity::NONE;
-            let is_year = (MusicSimilarity::YEAR & music_similarity) != MusicSimilarity::NONE;
-            let is_bitrate = (MusicSimilarity::BITRATE & music_similarity) != MusicSimilarity::NONE;
-            let is_length = (MusicSimilarity::LENGTH & music_similarity) != MusicSimilarity::NONE;
-            let is_genre = (MusicSimilarity::GENRE & music_similarity) != MusicSimilarity::NONE;
-
-            if mf.get_use_reference() {
-                let vector = mf.get_similar_music_referenced();
-
-                for (base_file_entry, vec_file_entry) in vector {
-                    // Sort
-                    let vec_file_entry = if vec_file_entry.len() >= 2 {
-                        let mut vec_file_entry = vec_file_entry.clone();
-                        vec_file_entry.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
-                        vec_file_entry
-                    } else {
-                        vec_file_entry.clone()
-                    };
-
-                    let (directory, file) = split_path(&base_file_entry.path);
+                let (directory, file) = split_path(&base_file_entry.path);
+                same_music_add_to_list_store(
+                    &list_store,
+                    &file,
+                    &directory,
+                    base_file_entry.size,
+                    base_file_entry.modified_date,
+                    &base_file_entry.track_title,
+                    &base_file_entry.track_artist,
+                    &base_file_entry.year,
+                    base_file_entry.bitrate,
+                    &format!("{} kbps", base_file_entry.bitrate),
+                    &base_file_entry.genre,
+                    &base_file_entry.length,
+                    true,
+                    true,
+                );
+                for file_entry in vec_file_entry {
+                    let (directory, file) = split_path(&file_entry.path);
                     same_music_add_to_list_store(
                         &list_store,
                         &file,
                         &directory,
-                        base_file_entry.size,
-                        base_file_entry.modified_date,
-                        &base_file_entry.track_title,
-                        &base_file_entry.track_artist,
-                        &base_file_entry.year,
-                        base_file_entry.bitrate,
-                        &format!("{} kbps", base_file_entry.bitrate),
-                        &base_file_entry.genre,
-                        &base_file_entry.length,
-                        true,
-                        true,
-                    );
-                    for file_entry in vec_file_entry {
-                        let (directory, file) = split_path(&file_entry.path);
-                        same_music_add_to_list_store(
-                            &list_store,
-                            &file,
-                            &directory,
-                            file_entry.size,
-                            file_entry.modified_date,
-                            &file_entry.track_title,
-                            &file_entry.track_artist,
-                            &file_entry.year,
-                            file_entry.bitrate,
-                            &format!("{} kbps", file_entry.bitrate),
-                            &file_entry.genre,
-                            &file_entry.length,
-                            false,
-                            true,
-                        );
-                    }
-                }
-            } else {
-                let vector = mf.get_duplicated_music_entries();
-
-                let text: &str = if mf.get_params().check_type == CheckingMethod::AudioTags { "-----" } else { "" };
-
-                for vec_file_entry in vector {
-                    // Sort
-                    let vec_file_entry = if vec_file_entry.len() >= 2 {
-                        let mut vec_file_entry = vec_file_entry.clone();
-                        vec_file_entry.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
-                        vec_file_entry
-                    } else {
-                        vec_file_entry.clone()
-                    };
-
-                    same_music_add_to_list_store(
-                        &list_store,
-                        "",
-                        "",
-                        0,
-                        0,
-                        if is_track_title { text } else { "" },
-                        if is_track_artist { text } else { "" },
-                        if is_year { text } else { "" },
-                        0,
-                        if is_bitrate { text } else { "" },
-                        if is_genre { text } else { "" },
-                        if is_length { text } else { "" },
-                        true,
+                        file_entry.size,
+                        file_entry.modified_date,
+                        &file_entry.track_title,
+                        &file_entry.track_artist,
+                        &file_entry.year,
+                        file_entry.bitrate,
+                        &format!("{} kbps", file_entry.bitrate),
+                        &file_entry.genre,
+                        &file_entry.length,
                         false,
+                        true,
                     );
-                    for file_entry in vec_file_entry {
-                        let (directory, file) = split_path(&file_entry.path);
-                        same_music_add_to_list_store(
-                            &list_store,
-                            &file,
-                            &directory,
-                            file_entry.size,
-                            file_entry.modified_date,
-                            &file_entry.track_title,
-                            &file_entry.track_artist,
-                            &file_entry.year,
-                            file_entry.bitrate,
-                            &format!("{} kbps", file_entry.bitrate),
-                            &file_entry.genre,
-                            &file_entry.length,
-                            false,
-                            false,
-                        );
-                    }
                 }
             }
-            print_text_messages_to_text_view(text_messages, text_view_errors);
+        } else {
+            let vector = mf.get_duplicated_music_entries();
+
+            let text: &str = if mf.get_params().check_type == CheckingMethod::AudioTags { "-----" } else { "" };
+
+            for vec_file_entry in vector {
+                // Sort
+                let vec_file_entry = if vec_file_entry.len() >= 2 {
+                    let mut vec_file_entry = vec_file_entry.clone();
+                    vec_file_entry.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+                    vec_file_entry
+                } else {
+                    vec_file_entry.clone()
+                };
+
+                same_music_add_to_list_store(
+                    &list_store,
+                    "",
+                    "",
+                    0,
+                    0,
+                    if is_track_title { text } else { "" },
+                    if is_track_artist { text } else { "" },
+                    if is_year { text } else { "" },
+                    0,
+                    if is_bitrate { text } else { "" },
+                    if is_genre { text } else { "" },
+                    if is_length { text } else { "" },
+                    true,
+                    false,
+                );
+                for file_entry in vec_file_entry {
+                    let (directory, file) = split_path(&file_entry.path);
+                    same_music_add_to_list_store(
+                        &list_store,
+                        &file,
+                        &directory,
+                        file_entry.size,
+                        file_entry.modified_date,
+                        &file_entry.track_title,
+                        &file_entry.track_artist,
+                        &file_entry.year,
+                        file_entry.bitrate,
+                        &format!("{} kbps", file_entry.bitrate),
+                        &file_entry.genre,
+                        &file_entry.length,
+                        false,
+                        false,
+                    );
+                }
+            }
         }
+        print_text_messages_to_text_view(text_messages, text_view_errors);
+    }
 
-        // Set state
-        {
-            *shared_state.borrow_mut() = Some(mf);
+    // Set state
+    {
+        *shared_state.borrow_mut() = Some(mf);
 
-            set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::SameMusic, same_music_number > 0);
+        set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::SameMusic, same_music_number > 0);
 
-            set_buttons(
-                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).expect("Failed to borrow buttons"),
-                buttons_array,
-                buttons_names,
-            );
-        }
+        set_buttons(
+            &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SameMusic).expect("Failed to borrow buttons"),
+            buttons_array,
+            buttons_names,
+        );
     }
 }
 
@@ -618,85 +618,85 @@ fn compute_similar_videos(
 ) {
     if ff.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
+        return;
+    }
+    if ff.get_use_reference() {
+        tree_view.selection().set_select_function(select_function_always_true);
     } else {
+        tree_view.selection().set_select_function(select_function_similar_videos);
+    }
+    let information = ff.get_information();
+    let text_messages = ff.get_text_messages();
+    let found_any_duplicates = information.number_of_duplicates > 0;
+
+    entry_info.set_text(
+        flg!(
+            "compute_found_videos",
+            number_files = information.number_of_duplicates,
+            number_groups = information.number_of_groups
+        )
+        .as_str(),
+    );
+
+    // Create GUI
+    {
+        let list_store = get_list_store(tree_view);
+
         if ff.get_use_reference() {
-            tree_view.selection().set_select_function(select_function_always_true);
-        } else {
-            tree_view.selection().set_select_function(select_function_similar_videos);
-        }
-        let information = ff.get_information();
-        let text_messages = ff.get_text_messages();
-        let found_any_duplicates = information.number_of_duplicates > 0;
+            let vec_struct_similar = ff.get_similar_videos_referenced();
 
-        entry_info.set_text(
-            flg!(
-                "compute_found_videos",
-                number_files = information.number_of_duplicates,
-                number_groups = information.number_of_groups
-            )
-            .as_str(),
-        );
+            for (base_file_entry, vec_file_entry) in vec_struct_similar {
+                // Sort
+                let vec_file_entry = if vec_file_entry.len() >= 2 {
+                    let mut vec_file_entry = vec_file_entry.clone();
+                    vec_file_entry.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+                    vec_file_entry
+                } else {
+                    vec_file_entry.clone()
+                };
 
-        // Create GUI
-        {
-            let list_store = get_list_store(tree_view);
-
-            if ff.get_use_reference() {
-                let vec_struct_similar = ff.get_similar_videos_referenced();
-
-                for (base_file_entry, vec_file_entry) in vec_struct_similar {
-                    // Sort
-                    let vec_file_entry = if vec_file_entry.len() >= 2 {
-                        let mut vec_file_entry = vec_file_entry.clone();
-                        vec_file_entry.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
-                        vec_file_entry
-                    } else {
-                        vec_file_entry.clone()
-                    };
-
-                    let (directory, file) = split_path(&base_file_entry.path);
-                    similar_videos_add_to_list_store(&list_store, &file, &directory, base_file_entry.size, base_file_entry.modified_date, true, true);
-                    for file_entry in &vec_file_entry {
-                        let (directory, file) = split_path(&file_entry.path);
-                        similar_videos_add_to_list_store(&list_store, &file, &directory, file_entry.size, file_entry.modified_date, false, true);
-                    }
-                }
-            } else {
-                let vec_struct_similar = ff.get_similar_videos();
-
-                for vec_file_entry in vec_struct_similar {
-                    // Sort
-                    let vec_file_entry = if vec_file_entry.len() >= 2 {
-                        let mut vec_file_entry = vec_file_entry.clone();
-                        vec_file_entry.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
-                        vec_file_entry
-                    } else {
-                        vec_file_entry.clone()
-                    };
-
-                    similar_videos_add_to_list_store(&list_store, "", "", 0, 0, true, false);
-                    for file_entry in &vec_file_entry {
-                        let (directory, file) = split_path(&file_entry.path);
-                        similar_videos_add_to_list_store(&list_store, &file, &directory, file_entry.size, file_entry.modified_date, false, false);
-                    }
+                let (directory, file) = split_path(&base_file_entry.path);
+                similar_videos_add_to_list_store(&list_store, &file, &directory, base_file_entry.size, base_file_entry.modified_date, true, true);
+                for file_entry in &vec_file_entry {
+                    let (directory, file) = split_path(&file_entry.path);
+                    similar_videos_add_to_list_store(&list_store, &file, &directory, file_entry.size, file_entry.modified_date, false, true);
                 }
             }
+        } else {
+            let vec_struct_similar = ff.get_similar_videos();
 
-            print_text_messages_to_text_view(text_messages, text_view_errors);
+            for vec_file_entry in vec_struct_similar {
+                // Sort
+                let vec_file_entry = if vec_file_entry.len() >= 2 {
+                    let mut vec_file_entry = vec_file_entry.clone();
+                    vec_file_entry.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+                    vec_file_entry
+                } else {
+                    vec_file_entry.clone()
+                };
+
+                similar_videos_add_to_list_store(&list_store, "", "", 0, 0, true, false);
+                for file_entry in &vec_file_entry {
+                    let (directory, file) = split_path(&file_entry.path);
+                    similar_videos_add_to_list_store(&list_store, &file, &directory, file_entry.size, file_entry.modified_date, false, false);
+                }
+            }
         }
 
-        // Set state
-        {
-            *shared_state.borrow_mut() = Some(ff);
+        print_text_messages_to_text_view(text_messages, text_view_errors);
+    }
 
-            set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::SimilarVideos, found_any_duplicates);
+    // Set state
+    {
+        *shared_state.borrow_mut() = Some(ff);
 
-            set_buttons(
-                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).expect("Failed to borrow buttons"),
-                buttons_array,
-                buttons_names,
-            );
-        }
+        set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::SimilarVideos, found_any_duplicates);
+
+        set_buttons(
+            &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarVideos).expect("Failed to borrow buttons"),
+            buttons_array,
+            buttons_names,
+        );
     }
 }
 
@@ -714,104 +714,104 @@ fn compute_similar_images(
 ) {
     if sf.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
+        return;
+    }
+    if sf.get_use_reference() {
+        tree_view.selection().set_select_function(select_function_always_true);
     } else {
+        tree_view.selection().set_select_function(select_function_similar_images);
+    }
+    let information = sf.get_information();
+    let text_messages = sf.get_text_messages();
+
+    let found_any_duplicates = information.number_of_duplicates > 0;
+
+    entry_info.set_text(
+        flg!(
+            "compute_found_images",
+            number_files = information.number_of_duplicates,
+            number_groups = information.number_of_groups
+        )
+        .as_str(),
+    );
+
+    // Create GUI
+    {
+        let list_store = get_list_store(tree_view);
+
         if sf.get_use_reference() {
-            tree_view.selection().set_select_function(select_function_always_true);
-        } else {
-            tree_view.selection().set_select_function(select_function_similar_images);
-        }
-        let information = sf.get_information();
-        let text_messages = sf.get_text_messages();
+            let vec_struct_similar: Vec<(ImagesEntry, Vec<ImagesEntry>)> = sf.get_similar_images_referenced().clone();
+            for (base_file_entry, mut vec_file_entry) in vec_struct_similar {
+                vec_file_entry.sort_by_key(|e| e.similarity);
 
-        let found_any_duplicates = information.number_of_duplicates > 0;
-
-        entry_info.set_text(
-            flg!(
-                "compute_found_images",
-                number_files = information.number_of_duplicates,
-                number_groups = information.number_of_groups
-            )
-            .as_str(),
-        );
-
-        // Create GUI
-        {
-            let list_store = get_list_store(tree_view);
-
-            if sf.get_use_reference() {
-                let vec_struct_similar: Vec<(ImagesEntry, Vec<ImagesEntry>)> = sf.get_similar_images_referenced().clone();
-                for (base_file_entry, mut vec_file_entry) in vec_struct_similar {
-                    vec_file_entry.sort_by_key(|e| e.similarity);
-
-                    // Header
-                    let (directory, file) = split_path(&base_file_entry.path);
+                // Header
+                let (directory, file) = split_path(&base_file_entry.path);
+                similar_images_add_to_list_store(
+                    &list_store,
+                    &file,
+                    &directory,
+                    base_file_entry.size,
+                    base_file_entry.modified_date,
+                    &format!("{}x{}", base_file_entry.width, base_file_entry.height),
+                    0,
+                    hash_size,
+                    true,
+                    true,
+                );
+                for file_entry in &vec_file_entry {
+                    let (directory, file) = split_path(&file_entry.path);
                     similar_images_add_to_list_store(
                         &list_store,
                         &file,
                         &directory,
-                        base_file_entry.size,
-                        base_file_entry.modified_date,
-                        &format!("{}x{}", base_file_entry.width, base_file_entry.height),
-                        0,
+                        file_entry.size,
+                        file_entry.modified_date,
+                        &format!("{}x{}", file_entry.width, file_entry.height),
+                        file_entry.similarity,
                         hash_size,
-                        true,
+                        false,
                         true,
                     );
-                    for file_entry in &vec_file_entry {
-                        let (directory, file) = split_path(&file_entry.path);
-                        similar_images_add_to_list_store(
-                            &list_store,
-                            &file,
-                            &directory,
-                            file_entry.size,
-                            file_entry.modified_date,
-                            &format!("{}x{}", file_entry.width, file_entry.height),
-                            file_entry.similarity,
-                            hash_size,
-                            false,
-                            true,
-                        );
-                    }
-                }
-            } else {
-                let vec_struct_similar = sf.get_similar_images().clone();
-                for mut vec_file_entry in vec_struct_similar {
-                    vec_file_entry.sort_by_key(|e| e.similarity);
-
-                    similar_images_add_to_list_store(&list_store, "", "", 0, 0, "", 0, 0, true, false);
-                    for file_entry in &vec_file_entry {
-                        let (directory, file) = split_path(&file_entry.path);
-                        similar_images_add_to_list_store(
-                            &list_store,
-                            &file,
-                            &directory,
-                            file_entry.size,
-                            file_entry.modified_date,
-                            &format!("{}x{}", file_entry.width, file_entry.height),
-                            file_entry.similarity,
-                            hash_size,
-                            false,
-                            false,
-                        );
-                    }
                 }
             }
+        } else {
+            let vec_struct_similar = sf.get_similar_images().clone();
+            for mut vec_file_entry in vec_struct_similar {
+                vec_file_entry.sort_by_key(|e| e.similarity);
 
-            print_text_messages_to_text_view(text_messages, text_view_errors);
+                similar_images_add_to_list_store(&list_store, "", "", 0, 0, "", 0, 0, true, false);
+                for file_entry in &vec_file_entry {
+                    let (directory, file) = split_path(&file_entry.path);
+                    similar_images_add_to_list_store(
+                        &list_store,
+                        &file,
+                        &directory,
+                        file_entry.size,
+                        file_entry.modified_date,
+                        &format!("{}x{}", file_entry.width, file_entry.height),
+                        file_entry.similarity,
+                        hash_size,
+                        false,
+                        false,
+                    );
+                }
+            }
         }
 
-        // Set state
-        {
-            *shared_state.borrow_mut() = Some(sf);
+        print_text_messages_to_text_view(text_messages, text_view_errors);
+    }
 
-            set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::SimilarImages, found_any_duplicates);
+    // Set state
+    {
+        *shared_state.borrow_mut() = Some(sf);
 
-            set_buttons(
-                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarImages).expect("Failed to borrow buttons"),
-                buttons_array,
-                buttons_names,
-            );
-        }
+        set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::SimilarImages, found_any_duplicates);
+
+        set_buttons(
+            &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::SimilarImages).expect("Failed to borrow buttons"),
+            buttons_array,
+            buttons_names,
+        );
     }
 }
 
@@ -829,54 +829,54 @@ fn compute_temporary_files(
     const COLUMNS_NUMBER: usize = 5;
     if tf.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
-    } else {
-        let information = tf.get_information();
-        let text_messages = tf.get_text_messages();
+        return;
+    }
+    let information = tf.get_information();
+    let text_messages = tf.get_text_messages();
 
-        let temporary_files_number: usize = information.number_of_temporary_files;
-        entry_info.set_text(flg!("compute_found_temporary_files", number_files = temporary_files_number).as_str());
+    let temporary_files_number: usize = information.number_of_temporary_files;
+    entry_info.set_text(flg!("compute_found_temporary_files", number_files = temporary_files_number).as_str());
 
-        // Create GUI
-        {
-            let list_store = get_list_store(tree_view);
+    // Create GUI
+    {
+        let list_store = get_list_store(tree_view);
 
-            let vector = tf.get_temporary_files();
+        let vector = tf.get_temporary_files();
 
-            // Sort // TODO maybe simplify this via common file entry
-            let mut vector = vector.clone();
-            vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+        // Sort // TODO maybe simplify this via common file entry
+        let mut vector = vector.clone();
+        vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
-            for file_entry in vector {
-                let (directory, file) = split_path(&file_entry.path);
-                let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                    (ColumnsTemporaryFiles::SelectionButton as u32, &false),
-                    (ColumnsTemporaryFiles::Name as u32, &file),
-                    (ColumnsTemporaryFiles::Path as u32, &directory),
-                    (
-                        ColumnsTemporaryFiles::Modification as u32,
-                        &(DateTime::from_timestamp(file_entry.modified_date as i64, 0)
-                            .expect("Modified date always should be in valid range")
-                            .to_string()),
-                    ),
-                    (ColumnsTemporaryFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
-                ];
-                list_store.set(&list_store.append(), &values);
-            }
-            print_text_messages_to_text_view(text_messages, text_view_errors);
+        for file_entry in vector {
+            let (directory, file) = split_path(&file_entry.path);
+            let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
+                (ColumnsTemporaryFiles::SelectionButton as u32, &false),
+                (ColumnsTemporaryFiles::Name as u32, &file),
+                (ColumnsTemporaryFiles::Path as u32, &directory),
+                (
+                    ColumnsTemporaryFiles::Modification as u32,
+                    &(DateTime::from_timestamp(file_entry.modified_date as i64, 0)
+                        .expect("Modified date always should be in valid range")
+                        .to_string()),
+                ),
+                (ColumnsTemporaryFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
+            ];
+            list_store.set(&list_store.append(), &values);
         }
+        print_text_messages_to_text_view(text_messages, text_view_errors);
+    }
 
-        // Set state
-        {
-            *shared_state.borrow_mut() = Some(tf);
+    // Set state
+    {
+        *shared_state.borrow_mut() = Some(tf);
 
-            set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::Temporary, temporary_files_number > 0);
+        set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::Temporary, temporary_files_number > 0);
 
-            set_buttons(
-                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Temporary).expect("Failed to borrow buttons"),
-                buttons_array,
-                buttons_names,
-            );
-        }
+        set_buttons(
+            &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Temporary).expect("Failed to borrow buttons"),
+            buttons_array,
+            buttons_names,
+        );
     }
 }
 
@@ -894,53 +894,53 @@ fn compute_big_files(
     const COLUMNS_NUMBER: usize = 7;
     if bf.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
-    } else {
-        let information = bf.get_information();
-        let text_messages = bf.get_text_messages();
+        return;
+    }
+    let information = bf.get_information();
+    let text_messages = bf.get_text_messages();
 
-        let biggest_files_number: usize = information.number_of_real_files;
+    let biggest_files_number: usize = information.number_of_real_files;
 
-        entry_info.set_text(flg!("compute_found_big_files", number_files = biggest_files_number).as_str());
+    entry_info.set_text(flg!("compute_found_big_files", number_files = biggest_files_number).as_str());
 
-        // Create GUI
-        {
-            let list_store = get_list_store(tree_view);
+    // Create GUI
+    {
+        let list_store = get_list_store(tree_view);
 
-            let vector = bf.get_big_files();
+        let vector = bf.get_big_files();
 
-            for file_entry in vector {
-                let (directory, file) = split_path(&file_entry.path);
-                let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                    (ColumnsBigFiles::SelectionButton as u32, &false),
-                    (ColumnsBigFiles::Size as u32, &(format_size(file_entry.size, BINARY))),
-                    (ColumnsBigFiles::Name as u32, &file),
-                    (ColumnsBigFiles::Path as u32, &directory),
-                    (
-                        ColumnsBigFiles::Modification as u32,
-                        &(DateTime::from_timestamp(file_entry.modified_date as i64, 0)
-                            .expect("Modified date always should be in valid range")
-                            .to_string()),
-                    ),
-                    (ColumnsBigFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
-                    (ColumnsBigFiles::SizeAsBytes as u32, &(file_entry.size)),
-                ];
-                list_store.set(&list_store.append(), &values);
-            }
-            print_text_messages_to_text_view(text_messages, text_view_errors);
+        for file_entry in vector {
+            let (directory, file) = split_path(&file_entry.path);
+            let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
+                (ColumnsBigFiles::SelectionButton as u32, &false),
+                (ColumnsBigFiles::Size as u32, &(format_size(file_entry.size, BINARY))),
+                (ColumnsBigFiles::Name as u32, &file),
+                (ColumnsBigFiles::Path as u32, &directory),
+                (
+                    ColumnsBigFiles::Modification as u32,
+                    &(DateTime::from_timestamp(file_entry.modified_date as i64, 0)
+                        .expect("Modified date always should be in valid range")
+                        .to_string()),
+                ),
+                (ColumnsBigFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
+                (ColumnsBigFiles::SizeAsBytes as u32, &(file_entry.size)),
+            ];
+            list_store.set(&list_store.append(), &values);
         }
+        print_text_messages_to_text_view(text_messages, text_view_errors);
+    }
 
-        // Set state
-        {
-            *shared_state.borrow_mut() = Some(bf);
+    // Set state
+    {
+        *shared_state.borrow_mut() = Some(bf);
 
-            set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::BigFiles, biggest_files_number > 0);
+        set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::BigFiles, biggest_files_number > 0);
 
-            set_buttons(
-                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BigFiles).expect("Failed to borrow buttons"),
-                buttons_array,
-                buttons_names,
-            );
-        }
+        set_buttons(
+            &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::BigFiles).expect("Failed to borrow buttons"),
+            buttons_array,
+            buttons_names,
+        );
     }
 }
 
@@ -958,52 +958,52 @@ fn compute_empty_files(
     const COLUMNS_NUMBER: usize = 5;
     if vf.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
-    } else {
-        let information = vf.get_information();
-        let text_messages = vf.get_text_messages();
+        return;
+    }
+    let information = vf.get_information();
+    let text_messages = vf.get_text_messages();
 
-        let empty_files_number: usize = information.number_of_empty_files;
+    let empty_files_number: usize = information.number_of_empty_files;
 
-        entry_info.set_text(flg!("compute_found_empty_files", number_files = empty_files_number).as_str());
+    entry_info.set_text(flg!("compute_found_empty_files", number_files = empty_files_number).as_str());
 
-        // Create GUI
-        {
-            let list_store = get_list_store(tree_view);
+    // Create GUI
+    {
+        let list_store = get_list_store(tree_view);
 
-            let vector = vf.get_empty_files();
-            let vector = vector_sort_simple_unstable_entry_by_path(vector);
+        let vector = vf.get_empty_files();
+        let vector = vector_sort_simple_unstable_entry_by_path(vector);
 
-            for file_entry in vector {
-                let (directory, file) = split_path(&file_entry.path);
-                let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                    (ColumnsEmptyFiles::SelectionButton as u32, &false),
-                    (ColumnsEmptyFiles::Name as u32, &file),
-                    (ColumnsEmptyFiles::Path as u32, &directory),
-                    (
-                        ColumnsEmptyFiles::Modification as u32,
-                        &(DateTime::from_timestamp(file_entry.modified_date as i64, 0)
-                            .expect("Modified date always should be in valid range")
-                            .to_string()),
-                    ),
-                    (ColumnsEmptyFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
-                ];
-                list_store.set(&list_store.append(), &values);
-            }
-            print_text_messages_to_text_view(text_messages, text_view_errors);
+        for file_entry in vector {
+            let (directory, file) = split_path(&file_entry.path);
+            let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
+                (ColumnsEmptyFiles::SelectionButton as u32, &false),
+                (ColumnsEmptyFiles::Name as u32, &file),
+                (ColumnsEmptyFiles::Path as u32, &directory),
+                (
+                    ColumnsEmptyFiles::Modification as u32,
+                    &(DateTime::from_timestamp(file_entry.modified_date as i64, 0)
+                        .expect("Modified date always should be in valid range")
+                        .to_string()),
+                ),
+                (ColumnsEmptyFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
+            ];
+            list_store.set(&list_store.append(), &values);
         }
+        print_text_messages_to_text_view(text_messages, text_view_errors);
+    }
 
-        // Set state
-        {
-            *shared_state.borrow_mut() = Some(vf);
+    // Set state
+    {
+        *shared_state.borrow_mut() = Some(vf);
 
-            set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::EmptyFiles, empty_files_number > 0);
+        set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::EmptyFiles, empty_files_number > 0);
 
-            set_buttons(
-                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyFiles).expect("Failed to borrow buttons"),
-                buttons_array,
-                buttons_names,
-            );
-        }
+        set_buttons(
+            &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyFiles).expect("Failed to borrow buttons"),
+            buttons_array,
+            buttons_names,
+        );
     }
 }
 
@@ -1021,54 +1021,54 @@ fn compute_empty_folders(
     const COLUMNS_NUMBER: usize = 5;
     if ef.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
-    } else {
-        let information = ef.get_information();
-        let text_messages = ef.get_text_messages();
+        return;
+    }
+    let information = ef.get_information();
+    let text_messages = ef.get_text_messages();
 
-        let empty_folder_number: usize = information.number_of_empty_folders;
+    let empty_folder_number: usize = information.number_of_empty_folders;
 
-        entry_info.set_text(flg!("compute_found_empty_folders", number_files = empty_folder_number).as_str());
+    entry_info.set_text(flg!("compute_found_empty_folders", number_files = empty_folder_number).as_str());
 
-        // Create GUI
-        {
-            let list_store = get_list_store(tree_view);
+    // Create GUI
+    {
+        let list_store = get_list_store(tree_view);
 
-            let hashmap = ef.get_empty_folder_list();
-            let mut vector = hashmap.values().collect::<Vec<_>>();
+        let hashmap = ef.get_empty_folder_list();
+        let mut vector = hashmap.values().collect::<Vec<_>>();
 
-            vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+        vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
-            for fe in vector {
-                let (directory, file) = split_path(&fe.path);
-                let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
-                    (ColumnsEmptyFolders::SelectionButton as u32, &false),
-                    (ColumnsEmptyFolders::Name as u32, &file),
-                    (ColumnsEmptyFolders::Path as u32, &directory),
-                    (
-                        ColumnsEmptyFolders::Modification as u32,
-                        &(DateTime::from_timestamp(fe.modified_date as i64, 0)
-                            .expect("Modified date always should be in valid range")
-                            .to_string()),
-                    ),
-                    (ColumnsEmptyFolders::ModificationAsSecs as u32, &(fe.modified_date)),
-                ];
-                list_store.set(&list_store.append(), &values);
-            }
-            print_text_messages_to_text_view(text_messages, text_view_errors);
+        for fe in vector {
+            let (directory, file) = split_path(&fe.path);
+            let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
+                (ColumnsEmptyFolders::SelectionButton as u32, &false),
+                (ColumnsEmptyFolders::Name as u32, &file),
+                (ColumnsEmptyFolders::Path as u32, &directory),
+                (
+                    ColumnsEmptyFolders::Modification as u32,
+                    &(DateTime::from_timestamp(fe.modified_date as i64, 0)
+                        .expect("Modified date always should be in valid range")
+                        .to_string()),
+                ),
+                (ColumnsEmptyFolders::ModificationAsSecs as u32, &(fe.modified_date)),
+            ];
+            list_store.set(&list_store.append(), &values);
         }
+        print_text_messages_to_text_view(text_messages, text_view_errors);
+    }
 
-        // Set state
-        {
-            *shared_state.borrow_mut() = Some(ef);
+    // Set state
+    {
+        *shared_state.borrow_mut() = Some(ef);
 
-            set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::EmptyDirectories, empty_folder_number > 0);
+        set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::EmptyDirectories, empty_folder_number > 0);
 
-            set_buttons(
-                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyDirectories).expect("Failed to borrow buttons"),
-                buttons_array,
-                buttons_names,
-            );
-        }
+        set_buttons(
+            &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::EmptyDirectories).expect("Failed to borrow buttons"),
+            buttons_array,
+            buttons_names,
+        );
     }
 }
 
@@ -1085,193 +1085,193 @@ fn compute_duplicate_finder(
 ) {
     if df.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
+        return;
+    }
+    if df.get_use_reference() {
+        tree_view_duplicate_finder.selection().set_select_function(select_function_always_true);
     } else {
+        tree_view_duplicate_finder.selection().set_select_function(select_function_duplicates);
+    }
+
+    let information = df.get_information();
+    let text_messages = df.get_text_messages();
+
+    let duplicates_number: usize;
+    let duplicates_size: u64;
+    let duplicates_group: usize;
+
+    match df.get_params().check_method {
+        CheckingMethod::Name => {
+            duplicates_number = information.number_of_duplicated_files_by_name;
+            duplicates_size = 0;
+            duplicates_group = information.number_of_groups_by_name;
+        }
+        CheckingMethod::Hash => {
+            duplicates_number = information.number_of_duplicated_files_by_hash;
+            duplicates_size = information.lost_space_by_hash;
+            duplicates_group = information.number_of_groups_by_hash;
+        }
+        CheckingMethod::Size => {
+            duplicates_number = information.number_of_duplicated_files_by_size;
+            duplicates_size = information.lost_space_by_size;
+            duplicates_group = information.number_of_groups_by_size;
+        }
+        CheckingMethod::SizeName => {
+            duplicates_number = information.number_of_duplicated_files_by_size_name;
+            duplicates_size = information.lost_space_by_size;
+            duplicates_group = information.number_of_groups_by_size_name;
+        }
+        _ => panic!(),
+    }
+    if duplicates_size == 0 {
+        entry_info.set_text(flg!("compute_found_duplicates_name", number_files = duplicates_number, number_groups = duplicates_group).as_str());
+    } else {
+        entry_info.set_text(
+            flg!(
+                "compute_found_duplicates_hash_size",
+                number_files = duplicates_number,
+                number_groups = duplicates_group,
+                size = format_size(duplicates_size, BINARY)
+            )
+            .as_str(),
+        );
+    }
+
+    // Create GUI
+    {
+        let list_store = get_list_store(tree_view_duplicate_finder);
+
         if df.get_use_reference() {
-            tree_view_duplicate_finder.selection().set_select_function(select_function_always_true);
-        } else {
-            tree_view_duplicate_finder.selection().set_select_function(select_function_duplicates);
-        }
+            match df.get_params().check_method {
+                CheckingMethod::Name => {
+                    let btreemap = df.get_files_with_identical_name_referenced();
 
-        let information = df.get_information();
-        let text_messages = df.get_text_messages();
+                    for (_name, (base_file_entry, vector)) in btreemap.iter().rev() {
+                        let vector = vector_sort_unstable_entry_by_path(vector);
+                        let (directory, file) = split_path(&base_file_entry.path);
+                        duplicates_add_to_list_store(&list_store, &file, &directory, base_file_entry.size, base_file_entry.modified_date, true, true);
 
-        let duplicates_number: usize;
-        let duplicates_size: u64;
-        let duplicates_group: usize;
-
-        match df.get_params().check_method {
-            CheckingMethod::Name => {
-                duplicates_number = information.number_of_duplicated_files_by_name;
-                duplicates_size = 0;
-                duplicates_group = information.number_of_groups_by_name;
-            }
-            CheckingMethod::Hash => {
-                duplicates_number = information.number_of_duplicated_files_by_hash;
-                duplicates_size = information.lost_space_by_hash;
-                duplicates_group = information.number_of_groups_by_hash;
-            }
-            CheckingMethod::Size => {
-                duplicates_number = information.number_of_duplicated_files_by_size;
-                duplicates_size = information.lost_space_by_size;
-                duplicates_group = information.number_of_groups_by_size;
-            }
-            CheckingMethod::SizeName => {
-                duplicates_number = information.number_of_duplicated_files_by_size_name;
-                duplicates_size = information.lost_space_by_size;
-                duplicates_group = information.number_of_groups_by_size_name;
-            }
-            _ => panic!(),
-        }
-        if duplicates_size == 0 {
-            entry_info.set_text(flg!("compute_found_duplicates_name", number_files = duplicates_number, number_groups = duplicates_group).as_str());
-        } else {
-            entry_info.set_text(
-                flg!(
-                    "compute_found_duplicates_hash_size",
-                    number_files = duplicates_number,
-                    number_groups = duplicates_group,
-                    size = format_size(duplicates_size, BINARY)
-                )
-                .as_str(),
-            );
-        }
-
-        // Create GUI
-        {
-            let list_store = get_list_store(tree_view_duplicate_finder);
-
-            if df.get_use_reference() {
-                match df.get_params().check_method {
-                    CheckingMethod::Name => {
-                        let btreemap = df.get_files_with_identical_name_referenced();
-
-                        for (_name, (base_file_entry, vector)) in btreemap.iter().rev() {
-                            let vector = vector_sort_unstable_entry_by_path(vector);
-                            let (directory, file) = split_path(&base_file_entry.path);
-                            duplicates_add_to_list_store(&list_store, &file, &directory, base_file_entry.size, base_file_entry.modified_date, true, true);
-
-                            for entry in vector {
-                                let (directory, file) = split_path(&entry.path);
-                                duplicates_add_to_list_store(&list_store, &file, &directory, entry.size, entry.modified_date, false, true);
-                            }
+                        for entry in vector {
+                            let (directory, file) = split_path(&entry.path);
+                            duplicates_add_to_list_store(&list_store, &file, &directory, entry.size, entry.modified_date, false, true);
                         }
                     }
-                    CheckingMethod::Hash => {
-                        let btreemap = df.get_files_with_identical_hashes_referenced();
-
-                        for (_size, vectors_vector) in btreemap.iter().rev() {
-                            for (base_file_entry, vector) in vectors_vector {
-                                let vector = vector_sort_unstable_entry_by_path(vector);
-                                let (directory, file) = split_path(&base_file_entry.path);
-                                duplicates_add_to_list_store(&list_store, &file, &directory, base_file_entry.size, base_file_entry.modified_date, true, true);
-                                for entry in vector {
-                                    let (directory, file) = split_path(&entry.path);
-                                    duplicates_add_to_list_store(&list_store, &file, &directory, entry.size, entry.modified_date, false, true);
-                                }
-                            }
-                        }
-                    }
-                    CheckingMethod::Size => {
-                        let btreemap = df.get_files_with_identical_size_referenced();
-
-                        for (_size, (base_file_entry, vector)) in btreemap.iter().rev() {
-                            let vector = vector_sort_unstable_entry_by_path(vector);
-                            let (directory, file) = split_path(&base_file_entry.path);
-                            duplicates_add_to_list_store(&list_store, &file, &directory, base_file_entry.size, base_file_entry.modified_date, true, true);
-                            for entry in vector {
-                                let (directory, file) = split_path(&entry.path);
-                                duplicates_add_to_list_store(&list_store, &file, &directory, entry.size, entry.modified_date, false, true);
-                            }
-                        }
-                    }
-                    CheckingMethod::SizeName => {
-                        let btreemap = df.get_files_with_identical_size_names_referenced();
-
-                        for (_size, (base_file_entry, vector)) in btreemap.iter().rev() {
-                            let vector = vector_sort_unstable_entry_by_path(vector);
-                            let (directory, file) = split_path(&base_file_entry.path);
-                            duplicates_add_to_list_store(&list_store, &file, &directory, base_file_entry.size, base_file_entry.modified_date, true, true);
-                            for entry in vector {
-                                let (directory, file) = split_path(&entry.path);
-                                duplicates_add_to_list_store(&list_store, &file, &directory, entry.size, entry.modified_date, false, true);
-                            }
-                        }
-                    }
-                    _ => panic!(),
                 }
-            } else {
-                match df.get_params().check_method {
-                    CheckingMethod::Name => {
-                        let btreemap = df.get_files_sorted_by_names();
+                CheckingMethod::Hash => {
+                    let btreemap = df.get_files_with_identical_hashes_referenced();
 
-                        for (_name, vector) in btreemap.iter().rev() {
+                    for (_size, vectors_vector) in btreemap.iter().rev() {
+                        for (base_file_entry, vector) in vectors_vector {
                             let vector = vector_sort_unstable_entry_by_path(vector);
-                            duplicates_add_to_list_store(&list_store, "", "", 0, 0, true, false);
+                            let (directory, file) = split_path(&base_file_entry.path);
+                            duplicates_add_to_list_store(&list_store, &file, &directory, base_file_entry.size, base_file_entry.modified_date, true, true);
                             for entry in vector {
                                 let (directory, file) = split_path(&entry.path);
-                                duplicates_add_to_list_store(&list_store, &file, &directory, entry.size, entry.modified_date, false, false);
+                                duplicates_add_to_list_store(&list_store, &file, &directory, entry.size, entry.modified_date, false, true);
                             }
                         }
                     }
-                    CheckingMethod::Hash => {
-                        let btreemap = df.get_files_sorted_by_hash();
-
-                        for (_size, vectors_vector) in btreemap.iter().rev() {
-                            for vector in vectors_vector {
-                                let vector = vector_sort_unstable_entry_by_path(vector);
-                                duplicates_add_to_list_store(&list_store, "", "", 0, 0, true, false);
-
-                                for entry in vector {
-                                    let (directory, file) = split_path(&entry.path);
-                                    duplicates_add_to_list_store(&list_store, &file, &directory, entry.size, entry.modified_date, false, false);
-                                }
-                            }
-                        }
-                    }
-                    CheckingMethod::Size => {
-                        let btreemap = df.get_files_sorted_by_size();
-
-                        for (_size, vector) in btreemap.iter().rev() {
-                            let vector = vector_sort_unstable_entry_by_path(vector);
-                            duplicates_add_to_list_store(&list_store, "", "", 0, 0, true, false);
-
-                            for entry in vector {
-                                let (directory, file) = split_path(&entry.path);
-                                duplicates_add_to_list_store(&list_store, &file, &directory, entry.size, entry.modified_date, false, false);
-                            }
-                        }
-                    }
-                    CheckingMethod::SizeName => {
-                        let btreemap = df.get_files_sorted_by_size_name();
-
-                        for (_size, vector) in btreemap.iter().rev() {
-                            let vector = vector_sort_unstable_entry_by_path(vector);
-                            duplicates_add_to_list_store(&list_store, "", "", 0, 0, true, false);
-
-                            for entry in vector {
-                                let (directory, file) = split_path(&entry.path);
-                                duplicates_add_to_list_store(&list_store, &file, &directory, entry.size, entry.modified_date, false, false);
-                            }
-                        }
-                    }
-                    _ => panic!(),
                 }
+                CheckingMethod::Size => {
+                    let btreemap = df.get_files_with_identical_size_referenced();
+
+                    for (_size, (base_file_entry, vector)) in btreemap.iter().rev() {
+                        let vector = vector_sort_unstable_entry_by_path(vector);
+                        let (directory, file) = split_path(&base_file_entry.path);
+                        duplicates_add_to_list_store(&list_store, &file, &directory, base_file_entry.size, base_file_entry.modified_date, true, true);
+                        for entry in vector {
+                            let (directory, file) = split_path(&entry.path);
+                            duplicates_add_to_list_store(&list_store, &file, &directory, entry.size, entry.modified_date, false, true);
+                        }
+                    }
+                }
+                CheckingMethod::SizeName => {
+                    let btreemap = df.get_files_with_identical_size_names_referenced();
+
+                    for (_size, (base_file_entry, vector)) in btreemap.iter().rev() {
+                        let vector = vector_sort_unstable_entry_by_path(vector);
+                        let (directory, file) = split_path(&base_file_entry.path);
+                        duplicates_add_to_list_store(&list_store, &file, &directory, base_file_entry.size, base_file_entry.modified_date, true, true);
+                        for entry in vector {
+                            let (directory, file) = split_path(&entry.path);
+                            duplicates_add_to_list_store(&list_store, &file, &directory, entry.size, entry.modified_date, false, true);
+                        }
+                    }
+                }
+                _ => panic!(),
             }
-            print_text_messages_to_text_view(text_messages, text_view_errors);
+        } else {
+            match df.get_params().check_method {
+                CheckingMethod::Name => {
+                    let btreemap = df.get_files_sorted_by_names();
+
+                    for (_name, vector) in btreemap.iter().rev() {
+                        let vector = vector_sort_unstable_entry_by_path(vector);
+                        duplicates_add_to_list_store(&list_store, "", "", 0, 0, true, false);
+                        for entry in vector {
+                            let (directory, file) = split_path(&entry.path);
+                            duplicates_add_to_list_store(&list_store, &file, &directory, entry.size, entry.modified_date, false, false);
+                        }
+                    }
+                }
+                CheckingMethod::Hash => {
+                    let btreemap = df.get_files_sorted_by_hash();
+
+                    for (_size, vectors_vector) in btreemap.iter().rev() {
+                        for vector in vectors_vector {
+                            let vector = vector_sort_unstable_entry_by_path(vector);
+                            duplicates_add_to_list_store(&list_store, "", "", 0, 0, true, false);
+
+                            for entry in vector {
+                                let (directory, file) = split_path(&entry.path);
+                                duplicates_add_to_list_store(&list_store, &file, &directory, entry.size, entry.modified_date, false, false);
+                            }
+                        }
+                    }
+                }
+                CheckingMethod::Size => {
+                    let btreemap = df.get_files_sorted_by_size();
+
+                    for (_size, vector) in btreemap.iter().rev() {
+                        let vector = vector_sort_unstable_entry_by_path(vector);
+                        duplicates_add_to_list_store(&list_store, "", "", 0, 0, true, false);
+
+                        for entry in vector {
+                            let (directory, file) = split_path(&entry.path);
+                            duplicates_add_to_list_store(&list_store, &file, &directory, entry.size, entry.modified_date, false, false);
+                        }
+                    }
+                }
+                CheckingMethod::SizeName => {
+                    let btreemap = df.get_files_sorted_by_size_name();
+
+                    for (_size, vector) in btreemap.iter().rev() {
+                        let vector = vector_sort_unstable_entry_by_path(vector);
+                        duplicates_add_to_list_store(&list_store, "", "", 0, 0, true, false);
+
+                        for entry in vector {
+                            let (directory, file) = split_path(&entry.path);
+                            duplicates_add_to_list_store(&list_store, &file, &directory, entry.size, entry.modified_date, false, false);
+                        }
+                    }
+                }
+                _ => panic!(),
+            }
         }
+        print_text_messages_to_text_view(text_messages, text_view_errors);
+    }
 
-        // Set state
-        {
-            *shared_state.borrow_mut() = Some(df);
+    // Set state
+    {
+        *shared_state.borrow_mut() = Some(df);
 
-            set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::Duplicate, duplicates_number > 0);
+        set_specific_buttons_as_active(shared_buttons, NotebookMainEnum::Duplicate, duplicates_number > 0);
 
-            set_buttons(
-                &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Duplicate).expect("Failed to borrow buttons"),
-                buttons_array,
-                buttons_names,
-            );
-        }
+        set_buttons(
+            &mut *shared_buttons.borrow_mut().get_mut(&NotebookMainEnum::Duplicate).expect("Failed to borrow buttons"),
+            buttons_array,
+            buttons_names,
+        );
     }
 }
 

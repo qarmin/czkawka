@@ -8,7 +8,6 @@ use regex::Regex;
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::{change_dimension_to_krotka, get_dialog_box_child, get_full_name_from_path_name, get_list_store};
-use crate::notebook_info::NOTEBOOKS_INFO;
 
 // File length variable allows users to choose duplicates which have shorter file name
 // e.g. 'tar.gz' will be selected instead 'tar.gz (copy)' etc.
@@ -588,201 +587,178 @@ fn popover_all_except_biggest_smallest(
 pub(crate) fn connect_popover_select(gui_data: &GuiData) {
     let popover_select = gui_data.popovers_select.popover_select.clone();
     let buttons_popover_select_all = gui_data.popovers_select.buttons_popover_select_all.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
 
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
     buttons_popover_select_all.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
+        let sv = common_tree_views.get_current_subview();
 
-        popover_select_all(&popover_select, tree_view, nb_object.column_selection as u32, nb_object.column_header);
+        popover_select_all(&popover_select, &sv.tree_view, sv.nb_object.column_selection as u32, sv.nb_object.column_header);
     });
 
     let popover_select = gui_data.popovers_select.popover_select.clone();
     let buttons_popover_unselect_all = gui_data.popovers_select.buttons_popover_unselect_all.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
-    buttons_popover_unselect_all.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
 
-        popover_unselect_all(&popover_select, tree_view, nb_object.column_selection as u32);
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
+    buttons_popover_unselect_all.connect_clicked(move |_| {
+        let sv = common_tree_views.get_current_subview();
+
+        popover_unselect_all(&popover_select, &sv.tree_view, sv.nb_object.column_selection as u32);
     });
 
     let popover_select = gui_data.popovers_select.popover_select.clone();
     let buttons_popover_reverse = gui_data.popovers_select.buttons_popover_reverse.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
-    buttons_popover_reverse.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
 
-        popover_reverse(&popover_select, tree_view, nb_object.column_selection as u32, nb_object.column_header);
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
+    buttons_popover_reverse.connect_clicked(move |_| {
+        let sv = common_tree_views.get_current_subview();
+
+        popover_reverse(&popover_select, &sv.tree_view, sv.nb_object.column_selection as u32, sv.nb_object.column_header);
     });
 
     let popover_select = gui_data.popovers_select.popover_select.clone();
     let buttons_popover_select_all_except_oldest = gui_data.popovers_select.buttons_popover_select_all_except_oldest.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
+
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
     buttons_popover_select_all_except_oldest.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
+        let sv = common_tree_views.get_current_subview();
 
         popover_all_except_oldest_newest(
             &popover_select,
-            tree_view,
-            nb_object.column_header.expect("AEO can't be used without headers"),
-            nb_object.column_modification_as_secs.expect("AEO needs modification as secs column"),
-            nb_object.column_name,
-            nb_object.column_selection as u32,
+            &sv.tree_view,
+            sv.nb_object.column_header.expect("AEO can't be used without headers"),
+            sv.nb_object.column_modification_as_secs.expect("AEO needs modification as secs column"),
+            sv.nb_object.column_name,
+            sv.nb_object.column_selection as u32,
             true,
         );
     });
 
     let popover_select = gui_data.popovers_select.popover_select.clone();
     let buttons_popover_select_all_except_newest = gui_data.popovers_select.buttons_popover_select_all_except_newest.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
+
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
     buttons_popover_select_all_except_newest.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
+        let sv = common_tree_views.get_current_subview();
 
         popover_all_except_oldest_newest(
             &popover_select,
-            tree_view,
-            nb_object.column_header.expect("AEN can't be used without headers"),
-            nb_object.column_modification_as_secs.expect("AEN needs modification as secs column"),
-            nb_object.column_name,
-            nb_object.column_selection as u32,
+            &sv.tree_view,
+            sv.nb_object.column_header.expect("AEN can't be used without headers"),
+            sv.nb_object.column_modification_as_secs.expect("AEN needs modification as secs column"),
+            sv.nb_object.column_name,
+            sv.nb_object.column_selection as u32,
             false,
         );
     });
 
     let popover_select = gui_data.popovers_select.popover_select.clone();
     let buttons_popover_select_one_oldest = gui_data.popovers_select.buttons_popover_select_one_oldest.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
+
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
     buttons_popover_select_one_oldest.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
+        let sv = common_tree_views.get_current_subview();
 
         popover_one_oldest_newest(
             &popover_select,
-            tree_view,
-            nb_object.column_header.expect("OO can't be used without headers"),
-            nb_object.column_modification_as_secs.expect("OO needs modification as secs column"),
-            nb_object.column_name,
-            nb_object.column_selection as u32,
+            &sv.tree_view,
+            sv.nb_object.column_header.expect("OO can't be used without headers"),
+            sv.nb_object.column_modification_as_secs.expect("OO needs modification as secs column"),
+            sv.nb_object.column_name,
+            sv.nb_object.column_selection as u32,
             true,
         );
     });
 
     let popover_select = gui_data.popovers_select.popover_select.clone();
     let buttons_popover_select_one_newest = gui_data.popovers_select.buttons_popover_select_one_newest.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
+
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
     buttons_popover_select_one_newest.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
+        let sv = common_tree_views.get_current_subview();
 
         popover_one_oldest_newest(
             &popover_select,
-            tree_view,
-            nb_object.column_header.expect("ON can't be used without headers"),
-            nb_object.column_modification_as_secs.expect("ON needs modification as secs column"),
-            nb_object.column_name,
-            nb_object.column_selection as u32,
+            &sv.tree_view,
+            sv.nb_object.column_header.expect("ON can't be used without headers"),
+            sv.nb_object.column_modification_as_secs.expect("ON needs modification as secs column"),
+            sv.nb_object.column_name,
+            sv.nb_object.column_selection as u32,
             false,
         );
     });
 
     let popover_select = gui_data.popovers_select.popover_select.clone();
     let buttons_popover_select_custom = gui_data.popovers_select.buttons_popover_select_custom.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
+
     let window_main = gui_data.window_main.clone();
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
     buttons_popover_select_custom.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
+        let sv = common_tree_views.get_current_subview();
 
         popover_custom_select_unselect(
             &popover_select,
             &window_main,
-            tree_view,
-            nb_object.column_header,
-            nb_object.column_name,
-            nb_object.column_path,
-            nb_object.column_selection as u32,
+            &sv.tree_view,
+            sv.nb_object.column_header,
+            sv.nb_object.column_name,
+            sv.nb_object.column_path,
+            sv.nb_object.column_selection as u32,
             true,
         );
     });
 
     let popover_select = gui_data.popovers_select.popover_select.clone();
     let buttons_popover_unselect_custom = gui_data.popovers_select.buttons_popover_unselect_custom.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
+
     let window_main = gui_data.window_main.clone();
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
     buttons_popover_unselect_custom.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
+        let sv = common_tree_views.get_current_subview();
 
         popover_custom_select_unselect(
             &popover_select,
             &window_main,
-            tree_view,
-            nb_object.column_header,
-            nb_object.column_name,
-            nb_object.column_path,
-            nb_object.column_selection as u32,
+            &sv.tree_view,
+            sv.nb_object.column_header,
+            sv.nb_object.column_name,
+            sv.nb_object.column_path,
+            sv.nb_object.column_selection as u32,
             false,
         );
     });
 
     let popover_select = gui_data.popovers_select.popover_select.clone();
     let buttons_popover_select_all_images_except_biggest = gui_data.popovers_select.buttons_popover_select_all_images_except_biggest.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
+
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
     buttons_popover_select_all_images_except_biggest.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
+        let sv = common_tree_views.get_current_subview();
 
         popover_all_except_biggest_smallest(
             &popover_select,
-            tree_view,
-            nb_object.column_header.expect("AEB can't be used without headers"),
-            nb_object.column_size_as_bytes.expect("AEB needs size as bytes column"),
-            nb_object.column_dimensions,
-            nb_object.column_selection as u32,
+            &sv.tree_view,
+            sv.nb_object.column_header.expect("AEB can't be used without headers"),
+            sv.nb_object.column_size_as_bytes.expect("AEB needs size as bytes column"),
+            sv.nb_object.column_dimensions,
+            sv.nb_object.column_selection as u32,
             true,
         );
     });
 
     let popover_select = gui_data.popovers_select.popover_select.clone();
     let buttons_popover_select_all_images_except_smallest = gui_data.popovers_select.buttons_popover_select_all_images_except_smallest.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
+
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
     buttons_popover_select_all_images_except_smallest.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
+        let sv = common_tree_views.get_current_subview();
 
         popover_all_except_biggest_smallest(
             &popover_select,
-            tree_view,
-            nb_object.column_header.expect("AES can't be used without headers"),
-            nb_object.column_size_as_bytes.expect("AES needs size as bytes column"),
-            nb_object.column_dimensions,
-            nb_object.column_selection as u32,
+            &sv.tree_view,
+            sv.nb_object.column_header.expect("AES can't be used without headers"),
+            sv.nb_object.column_size_as_bytes.expect("AES needs size as bytes column"),
+            sv.nb_object.column_dimensions,
+            sv.nb_object.column_selection as u32,
             false,
         );
     });

@@ -37,14 +37,14 @@ impl CommonTreeViews {
         let enum_value = NOTEBOOKS_INFO[current_page as usize].notebook_type;
         self.get_subview(enum_value)
     }
-    pub fn get_tree_view_from_its_name(&self, name: &str) -> TreeView {
-        for subview in &self.subviews {
-            if subview.tree_view_name == name {
-                return subview.tree_view.clone();
-            }
-        }
-        panic!("Cannot find tree view with name {name}");
-    }
+    // pub fn get_tree_view_from_its_name(&self, name: &str) -> TreeView {
+    //     for subview in &self.subviews {
+    //         if subview.tree_view_name == name {
+    //             return subview.tree_view.clone();
+    //         }
+    //     }
+    //     panic!("Cannot find tree view with name {name}");
+    // }
     pub fn setup(&self, gui_data: &GuiData) {
         for subview in &self.subviews {
             subview.setup(&self.preview_path, gui_data);

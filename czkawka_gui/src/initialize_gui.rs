@@ -25,36 +25,42 @@ pub(crate) fn initialize_gui(gui_data: &GuiData) {
         gui_data.bottom_buttons.buttons_search.show();
     }
     //// Initialize language combo box
-    gui_data.settings.combo_box_settings_language.set_model_and_first(
-        LANGUAGES_ALL.iter().map(|e|&e.combo_box_text)
-    );
+    gui_data
+        .settings
+        .combo_box_settings_language
+        .set_model_and_first(LANGUAGES_ALL.iter().map(|e| &e.combo_box_text));
 
-    gui_data.main_notebook.combo_box_duplicate_check_method.set_model_and_first(
-        DUPLICATES_CHECK_METHOD_COMBO_BOX.iter().map(|e|&e.eng_name)
-    );
-    gui_data.main_notebook.combo_box_duplicate_hash_type.set_model_and_first(
-        DUPLICATES_HASH_TYPE_COMBO_BOX.iter().map(|e|&e.eng_name)
-    );
+    gui_data
+        .main_notebook
+        .combo_box_duplicate_check_method
+        .set_model_and_first(DUPLICATES_CHECK_METHOD_COMBO_BOX.iter().map(|e| &e.eng_name));
+    gui_data
+        .main_notebook
+        .combo_box_duplicate_hash_type
+        .set_model_and_first(DUPLICATES_HASH_TYPE_COMBO_BOX.iter().map(|e| &e.eng_name));
 
-    gui_data.main_notebook.combo_box_image_hash_algorithm.set_model_and_first(
-        IMAGES_HASH_TYPE_COMBO_BOX.iter().map(|e|&e.eng_name)
-    );
-    gui_data.main_notebook.combo_box_image_hash_size.set_model_and_first(
-        IMAGES_HASH_SIZE_COMBO_BOX.iter().map(|e|e.to_string())
-    );
-    gui_data.main_notebook.combo_box_image_resize_algorithm.set_model_and_first(
-        IMAGES_RESIZE_ALGORITHM_COMBO_BOX.iter().map(|e|&e.eng_name)
-    );
+    gui_data
+        .main_notebook
+        .combo_box_image_hash_algorithm
+        .set_model_and_first(IMAGES_HASH_TYPE_COMBO_BOX.iter().map(|e| &e.eng_name));
+    gui_data
+        .main_notebook
+        .combo_box_image_hash_size
+        .set_model_and_first(IMAGES_HASH_SIZE_COMBO_BOX.iter().map(|e| e.to_string()));
+    gui_data
+        .main_notebook
+        .combo_box_image_resize_algorithm
+        .set_model_and_first(IMAGES_RESIZE_ALGORITHM_COMBO_BOX.iter().map(|e| &e.eng_name));
 
     //// Initialize main scrolled view with notebook
     {
         // Set step increment
-            let scale_similarity_similar_images = gui_data.main_notebook.scale_similarity_similar_images.clone();
-            scale_set_min_max_values(&scale_similarity_similar_images, 0_f64, SIMILAR_VALUES[0][5] as f64, 15_f64, Some(1_f64));
+        let scale_similarity_similar_images = gui_data.main_notebook.scale_similarity_similar_images.clone();
+        scale_set_min_max_values(&scale_similarity_similar_images, 0_f64, SIMILAR_VALUES[0][5] as f64, 15_f64, Some(1_f64));
 
         // Set step increment
-            let scale_similarity_similar_videos = gui_data.main_notebook.scale_similarity_similar_videos.clone();
-            scale_set_min_max_values(&scale_similarity_similar_videos, 0_f64, MAX_TOLERANCE as f64, 15_f64, Some(1_f64));
+        let scale_similarity_similar_videos = gui_data.main_notebook.scale_similarity_similar_videos.clone();
+        scale_set_min_max_values(&scale_similarity_similar_videos, 0_f64, MAX_TOLERANCE as f64, 15_f64, Some(1_f64));
     }
 
     //// Initialize upper notebook

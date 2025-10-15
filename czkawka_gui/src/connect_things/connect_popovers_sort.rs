@@ -5,7 +5,6 @@ use gtk4::{ListStore, TreeIter};
 
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::get_list_store;
-use crate::notebook_info::NOTEBOOKS_INFO;
 
 fn popover_sort_general<T>(popover: &gtk4::Popover, tree_view: &gtk4::TreeView, column_sort: i32, column_header: i32)
 where
@@ -73,73 +72,60 @@ where
 pub(crate) fn connect_popover_sort(gui_data: &GuiData) {
     let popover_sort = gui_data.popovers_sort.popover_sort.clone();
     let buttons_popover_file_name = gui_data.popovers_sort.buttons_popover_sort_file_name.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
 
     buttons_popover_file_name.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
+        let sv = common_tree_views.get_current_subview();
 
         popover_sort_general::<String>(
             &popover_sort,
-            tree_view,
-            nb_object.column_name,
-            nb_object.column_header.expect("Failed to get header column"),
+            &sv.tree_view,
+            sv.nb_object.column_name,
+            sv.nb_object.column_header.expect("Failed to get header column"),
         );
     });
 
     let popover_sort = gui_data.popovers_sort.popover_sort.clone();
     let buttons_popover_sort_folder_name = gui_data.popovers_sort.buttons_popover_sort_folder_name.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
 
     buttons_popover_sort_folder_name.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
+        let sv = common_tree_views.get_current_subview();
 
         popover_sort_general::<String>(
             &popover_sort,
-            tree_view,
-            nb_object.column_path,
-            nb_object.column_header.expect("Failed to get header column"),
+            &sv.tree_view,
+            sv.nb_object.column_path,
+            sv.nb_object.column_header.expect("Failed to get header column"),
         );
     });
 
     let popover_sort = gui_data.popovers_sort.popover_sort.clone();
     let buttons_popover_sort_selection = gui_data.popovers_sort.buttons_popover_sort_selection.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
 
     buttons_popover_sort_selection.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
+        let sv = common_tree_views.get_current_subview();
 
         popover_sort_general::<bool>(
             &popover_sort,
-            tree_view,
-            nb_object.column_selection,
-            nb_object.column_header.expect("Failed to get header column"),
+            &sv.tree_view,
+            sv.nb_object.column_selection,
+            sv.nb_object.column_header.expect("Failed to get header column"),
         );
     });
 
     let popover_sort = gui_data.popovers_sort.popover_sort.clone();
     let buttons_popover_sort_size = gui_data.popovers_sort.buttons_popover_sort_size.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
-
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
     buttons_popover_sort_size.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
+        let sv = common_tree_views.get_current_subview();
 
         popover_sort_general::<u64>(
             &popover_sort,
-            tree_view,
-            nb_object.column_size_as_bytes.expect("Failed to get size as bytes column"),
-            nb_object.column_header.expect("Failed to get header column"),
+            &sv.tree_view,
+            sv.nb_object.column_size_as_bytes.expect("Failed to get size as bytes column"),
+            sv.nb_object.column_header.expect("Failed to get header column"),
         );
     });
 }

@@ -10,7 +10,6 @@ use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::{check_how_much_elements_is_selected, clean_invalid_headers, get_full_name_from_path_name, get_list_store};
 use crate::notebook_enums::NotebookMainEnum;
-use crate::notebook_info::NOTEBOOKS_INFO;
 
 // TODO add support for checking if really symlink doesn't point to correct directory/file
 
@@ -30,7 +29,6 @@ pub async fn delete_things(gui_data: GuiData) {
     let check_button_settings_confirm_group_deletion = gui_data.settings.check_button_settings_confirm_group_deletion.clone();
     let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
     let image_preview_duplicates = gui_data.main_notebook.image_preview_duplicates.clone();
-
 
     let check_button_settings_use_trash = gui_data.settings.check_button_settings_use_trash.clone();
 

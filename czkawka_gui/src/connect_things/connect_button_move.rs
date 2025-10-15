@@ -9,13 +9,9 @@ use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::{add_text_to_text_view, check_how_much_elements_is_selected, clean_invalid_headers, get_full_name_from_path_name, get_list_store, reset_text_view};
 use crate::notebook_enums::NotebookMainEnum;
-use crate::notebook_info::NOTEBOOKS_INFO;
 
 pub(crate) fn connect_button_move(gui_data: &GuiData) {
     let buttons_move = gui_data.bottom_buttons.buttons_move.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
 
     let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
     let image_preview_duplicates = gui_data.main_notebook.image_preview_duplicates.clone();

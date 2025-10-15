@@ -4,7 +4,7 @@ use std::rc::Rc;
 use czkawka_core::common::image::get_dynamic_image_from_path;
 use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
 use gtk4::prelude::*;
-use gtk4::{Align, CheckButton, Image, ListStore, Orientation, Picture, ScrolledWindow, TreeIter, TreeModel, TreePath, TreeSelection, Widget};
+use gtk4::{Align, CheckButton, Image, Orientation, Picture, ScrolledWindow, TreeIter, TreeModel, TreePath, TreeSelection, Widget};
 use image::DynamicImage;
 use log::error;
 
@@ -14,7 +14,7 @@ use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::{
     count_number_of_groups, get_all_direct_children, get_full_name_from_path_name, get_max_file_name, get_pixbuf_from_dynamic_image, resize_pixbuf_dimension,
 };
-use crate::notebook_info::{NOTEBOOKS_INFO, NotebookObject};
+use crate::notebook_info::NotebookObject;
 
 const BIG_PREVIEW_SIZE: i32 = 600;
 const SMALL_PREVIEW_SIZE: i32 = 130;
@@ -57,7 +57,8 @@ pub(crate) fn connect_button_compare(gui_data: &GuiData) {
         }
 
         // Check selected items
-        let (current_group, tree_path) = get_current_group_and_iter_from_selection(&model, &sub_view.tree_view.selection(), sub_view.nb_object.column_header.expect("Missing column_header"));
+        let (current_group, tree_path) =
+            get_current_group_and_iter_from_selection(&model, &sub_view.tree_view.selection(), sub_view.nb_object.column_header.expect("Missing column_header"));
 
         *shared_current_of_groups.borrow_mut() = current_group;
         *shared_numbers_of_groups.borrow_mut() = group_number;
@@ -165,8 +166,6 @@ pub(crate) fn connect_button_compare(gui_data: &GuiData) {
     let button_go_previous_compare_group = gui_data.compare_images.button_go_previous_compare_group.clone();
     let button_go_next_compare_group = gui_data.compare_images.button_go_next_compare_group.clone();
     let label_group_info = gui_data.compare_images.label_group_info.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
     let scrolled_window_compare_choose_images = gui_data.compare_images.scrolled_window_compare_choose_images.clone();
 
     let check_button_left_preview_text = gui_data.compare_images.check_button_left_preview_text.clone();
@@ -182,12 +181,11 @@ pub(crate) fn connect_button_compare(gui_data: &GuiData) {
     let image_compare_right = gui_data.compare_images.image_compare_right.clone();
 
     let check_button_settings_use_rust_preview = gui_data.settings.check_button_settings_use_rust_preview.clone();
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
 
     button_go_next_compare_group.connect_clicked(move |button_go_next_compare_group| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
-        let model = tree_view.model().expect("Missing tree_view model");
+        let sv = common_tree_views.get_current_subview();
+        let model = sv.tree_view.model().expect("Missing tree_view model");
 
         *shared_current_of_groups.borrow_mut() += 1;
 
@@ -197,12 +195,12 @@ pub(crate) fn connect_button_compare(gui_data: &GuiData) {
         let tree_path = move_iter(
             &model,
             shared_current_path.borrow().as_ref().expect("Missing current path"),
-            nb_object.column_header.expect("Missing column_header"),
+            sv.nb_object.column_header.expect("Missing column_header"),
             true,
         );
 
         populate_groups_at_start(
-            nb_object,
+            &sv.nb_object,
             &model,
             &shared_current_path,
             tree_path,
@@ -224,18 +222,11 @@ pub(crate) fn connect_button_compare(gui_data: &GuiData) {
 
     let check_button_left_preview_text = gui_data.compare_images.check_button_left_preview_text.clone();
     let shared_using_for_preview = gui_data.compare_images.shared_using_for_preview.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let shared_current_path = gui_data.compare_images.shared_current_path.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
     check_button_left_preview_text.connect_toggled(move |check_button_left_preview_text| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
-        let model = tree_view
-            .model()
-            .expect("Missing tree_view model")
-            .downcast::<ListStore>()
-            .expect("Failed to downcast to ListStore");
+        let sv = common_tree_views.get_current_subview();
+        let model = sv.tree_view.get_model();
 
         let main_tree_path = shared_current_path.borrow().as_ref().expect("Missing current path").clone();
         let this_tree_path = shared_using_for_preview.borrow().0.clone().expect("Missing left preview path");
@@ -247,7 +238,7 @@ pub(crate) fn connect_button_compare(gui_data: &GuiData) {
         let is_active = check_button_left_preview_text.is_active();
         model.set_value(
             &model.iter(&this_tree_path).expect("Using invalid tree_path"),
-            nb_object.column_selection as u32,
+            sv.nb_object.column_selection as u32,
             &is_active.to_value(),
         );
     });
@@ -255,18 +246,11 @@ pub(crate) fn connect_button_compare(gui_data: &GuiData) {
     let check_button_right_preview_text = gui_data.compare_images.check_button_right_preview_text.clone();
     let shared_using_for_preview = gui_data.compare_images.shared_using_for_preview.clone();
     let shared_current_path = gui_data.compare_images.shared_current_path.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
 
     check_button_right_preview_text.connect_toggled(move |check_button_right_preview_text| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
-        let model = tree_view
-            .model()
-            .expect("Missing tree_view model")
-            .downcast::<ListStore>()
-            .expect("Failed to downcast to ListStore");
+        let sv = common_tree_views.get_current_subview();
+        let model = sv.tree_view.get_model();
 
         let main_tree_path = shared_current_path.borrow().as_ref().expect("Missing current path").clone();
         let this_tree_path = shared_using_for_preview.borrow().1.clone().expect("Missing right preview path");
@@ -278,7 +262,7 @@ pub(crate) fn connect_button_compare(gui_data: &GuiData) {
         let is_active = check_button_right_preview_text.is_active();
         model.set_value(
             &model.iter(&this_tree_path).expect("Using invalid tree_path"),
-            nb_object.column_selection as u32,
+            sv.nb_object.column_selection as u32,
             &is_active.to_value(),
         );
     });

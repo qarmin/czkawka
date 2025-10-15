@@ -9,7 +9,6 @@ use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::{add_text_to_text_view, clean_invalid_headers, get_full_name_from_path_name, get_list_store, reset_text_view};
 use crate::notebook_enums::NotebookMainEnum;
-use crate::notebook_info::NOTEBOOKS_INFO;
 
 #[derive(PartialEq, Eq, Copy, Clone)]
 enum TypeOfTool {
@@ -48,9 +47,6 @@ pub(crate) fn connect_button_hardlink_symlink(gui_data: &GuiData) {
 }
 
 async fn sym_hard_link_things(gui_data: GuiData, hardlinking: TypeOfTool) {
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
-
     let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
     let image_preview_duplicates = gui_data.main_notebook.image_preview_duplicates.clone();
 
@@ -58,15 +54,14 @@ async fn sym_hard_link_things(gui_data: GuiData, hardlinking: TypeOfTool) {
     let preview_path = gui_data.main_notebook.common_tree_views.preview_path.clone();
     let window_main = gui_data.window_main.clone();
 
-    let nb_number = notebook_main.current_page().expect("Current page not set");
-    let tree_view = &main_tree_views[nb_number as usize];
-    let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
+    let common_tree_views = &gui_data.main_notebook.common_tree_views.clone();
+    let sv = common_tree_views.get_current_subview();
 
-    let column_header = nb_object.column_header.expect("Linking can be only used for tree views with grouped results");
+    let column_header = sv.nb_object.column_header.expect("Linking can be only used for tree views with grouped results");
 
     let check_button_settings_confirm_link = gui_data.settings.check_button_settings_confirm_link.clone();
 
-    if !check_if_anything_is_selected_async(tree_view, column_header, nb_object.column_selection) {
+    if !check_if_anything_is_selected_async(&sv.tree_view, column_header, sv.nb_object.column_selection) {
         return;
     }
 
@@ -74,23 +69,23 @@ async fn sym_hard_link_things(gui_data: GuiData, hardlinking: TypeOfTool) {
         return;
     }
 
-    if !check_if_changing_one_item_in_group_and_continue(tree_view, column_header, nb_object.column_selection, &window_main).await {
+    if !check_if_changing_one_item_in_group_and_continue(&sv.tree_view, column_header, sv.nb_object.column_selection, &window_main).await {
         return;
     }
 
     hardlink_symlink(
-        tree_view,
-        nb_object.column_name,
-        nb_object.column_path,
+        &sv.tree_view,
+        sv.nb_object.column_name,
+        sv.nb_object.column_path,
         column_header,
-        nb_object.column_selection,
+        sv.nb_object.column_selection,
         hardlinking,
         &text_view_errors,
     );
 
-    match &nb_object.notebook_type {
+    match &sv.nb_object.notebook_type {
         NotebookMainEnum::SimilarImages | NotebookMainEnum::Duplicate => {
-            if nb_object.notebook_type == NotebookMainEnum::SimilarImages {
+            if sv.nb_object.notebook_type == NotebookMainEnum::SimilarImages {
                 image_preview_similar_images.hide();
             } else {
                 image_preview_duplicates.hide();

@@ -52,6 +52,7 @@ mod cli;
 mod compute_results;
 mod connect_things;
 mod create_tree_view;
+mod dicom_traits;
 mod gui_structs;
 mod help_combo_box;
 mod help_functions;
@@ -67,7 +68,6 @@ mod taskbar_progress;
 mod taskbar_progress_dummy;
 #[cfg(target_os = "windows")]
 mod taskbar_progress_win;
-mod dicom_traits;
 
 fn main() {
     let (infos, warnings) = set_config_cache_path("Czkawka", "Czkawka");

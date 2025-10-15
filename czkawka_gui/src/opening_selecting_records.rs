@@ -229,40 +229,30 @@ fn handle_tree_keypress(tree_view: &gtk4::TreeView, key_code: u32, name_column: 
     }
 }
 
-pub(crate) fn select_function_duplicates(
-    _tree_selection: &gtk4::TreeSelection,
-    tree_model: &gtk4::TreeModel,
-    tree_path: &gtk4::TreePath,
-    _is_path_currently_selected: bool,
-) -> bool {
-    select_function_header(ColumnsDuplicates::IsHeader as i32)(_tree_selection, tree_model, tree_path, _is_path_currently_selected)
+pub(crate) fn select_function_duplicates(tree_selection: &gtk4::TreeSelection, tree_model: &gtk4::TreeModel, tree_path: &gtk4::TreePath, is_path_currently_selected: bool) -> bool {
+    select_function_header(ColumnsDuplicates::IsHeader as i32)(tree_selection, tree_model, tree_path, is_path_currently_selected)
 }
 
-pub(crate) fn select_function_same_music(
-    _tree_selection: &gtk4::TreeSelection,
-    tree_model: &gtk4::TreeModel,
-    tree_path: &gtk4::TreePath,
-    _is_path_currently_selected: bool,
-) -> bool {
-    select_function_header(ColumnsSameMusic::IsHeader as i32)(_tree_selection, tree_model, tree_path, _is_path_currently_selected)
+pub(crate) fn select_function_same_music(tree_selection: &gtk4::TreeSelection, tree_model: &gtk4::TreeModel, tree_path: &gtk4::TreePath, is_path_currently_selected: bool) -> bool {
+    select_function_header(ColumnsSameMusic::IsHeader as i32)(tree_selection, tree_model, tree_path, is_path_currently_selected)
 }
 
 pub(crate) fn select_function_similar_images(
-    _tree_selection: &gtk4::TreeSelection,
+    tree_selection: &gtk4::TreeSelection,
     tree_model: &gtk4::TreeModel,
     tree_path: &gtk4::TreePath,
-    _is_path_currently_selected: bool,
+    is_path_currently_selected: bool,
 ) -> bool {
-    select_function_header(ColumnsSimilarImages::IsHeader as i32)(_tree_selection, tree_model, tree_path, _is_path_currently_selected)
+    select_function_header(ColumnsSimilarImages::IsHeader as i32)(tree_selection, tree_model, tree_path, is_path_currently_selected)
 }
 
 pub(crate) fn select_function_similar_videos(
-    _tree_selection: &gtk4::TreeSelection,
+    tree_selection: &gtk4::TreeSelection,
     tree_model: &gtk4::TreeModel,
     tree_path: &gtk4::TreePath,
-    _is_path_currently_selected: bool,
+    is_path_currently_selected: bool,
 ) -> bool {
-    select_function_header(ColumnsSimilarVideos::IsHeader as i32)(_tree_selection, tree_model, tree_path, _is_path_currently_selected)
+    select_function_header(ColumnsSimilarVideos::IsHeader as i32)(tree_selection, tree_model, tree_path, is_path_currently_selected)
 }
 
 pub(crate) fn select_function_header(header_id: i32) -> Box<dyn Fn(&TreeSelection, &TreeModel, &TreePath, bool) -> bool> {
@@ -273,9 +263,9 @@ pub(crate) fn select_function_header(header_id: i32) -> Box<dyn Fn(&TreeSelectio
     )
 }
 
-pub(crate) fn select_function_always_true_no_args() -> Box<dyn Fn(&TreeSelection, &TreeModel, &TreePath, bool) -> bool> {
-    Box::new(|_tree_selection: &gtk4::TreeSelection, _tree_model: &gtk4::TreeModel, _tree_path: &gtk4::TreePath, _is_path_currently_selected: bool| true)
-}
+// pub(crate) fn select_function_always_true_no_args() -> Box<dyn Fn(&TreeSelection, &TreeModel, &TreePath, bool) -> bool> {
+//     Box::new(|_tree_selection: &gtk4::TreeSelection, _tree_model: &gtk4::TreeModel, _tree_path: &gtk4::TreePath, _is_path_currently_selected: bool| true)
+// }
 
 pub(crate) fn select_function_always_true(
     _tree_selection: &gtk4::TreeSelection,
