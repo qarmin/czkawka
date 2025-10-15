@@ -166,12 +166,7 @@ fn compute_bad_extensions(be: BadExtensions, entry_info: &Entry, tree_view: &Tre
                 (ColumnsBadExtensions::Path as u32, &directory),
                 (ColumnsBadExtensions::CurrentExtension as u32, &file_entry.current_extension),
                 (ColumnsBadExtensions::ValidExtensions as u32, &file_entry.proper_extensions_group),
-                (
-                    ColumnsBadExtensions::Modification as u32,
-                    &(DateTime::from_timestamp(file_entry.modified_date as i64, 0)
-                        .expect("Modified date always should be in valid range")
-                        .to_string()),
-                ),
+                (ColumnsBadExtensions::Modification as u32, &(get_dt_timestamp_string(file_entry.modified_date))),
                 (ColumnsBadExtensions::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
             ];
             list_store.set(&list_store.append(), &values);
@@ -214,12 +209,7 @@ fn compute_broken_files(br: BrokenFiles, entry_info: &Entry, tree_view: &TreeVie
                 (ColumnsBrokenFiles::Name as u32, &file),
                 (ColumnsBrokenFiles::Path as u32, &directory),
                 (ColumnsBrokenFiles::ErrorType as u32, &file_entry.error_string),
-                (
-                    ColumnsBrokenFiles::Modification as u32,
-                    &(DateTime::from_timestamp(file_entry.modified_date as i64, 0)
-                        .expect("Modified date always should be in valid range")
-                        .to_string()),
-                ),
+                (ColumnsBrokenFiles::Modification as u32, &(get_dt_timestamp_string(file_entry.modified_date))),
                 (ColumnsBrokenFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
             ];
             list_store.set(&list_store.append(), &values);
@@ -266,12 +256,7 @@ fn compute_invalid_symlinks(
                 (ColumnsInvalidSymlinks::Path as u32, &directory),
                 (ColumnsInvalidSymlinks::DestinationPath as u32, &symlink_info.destination_path.to_string_lossy().to_string()),
                 (ColumnsInvalidSymlinks::TypeOfError as u32, &symlink_info.type_of_error.translate()),
-                (
-                    ColumnsInvalidSymlinks::Modification as u32,
-                    &(DateTime::from_timestamp(file_entry.modified_date as i64, 0)
-                        .expect("Modified date always should be in valid range")
-                        .to_string()),
-                ),
+                (ColumnsInvalidSymlinks::Modification as u32, &(get_dt_timestamp_string(file_entry.modified_date))),
                 (ColumnsInvalidSymlinks::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
             ];
             list_store.set(&list_store.append(), &values);
@@ -639,12 +624,7 @@ fn compute_temporary_files(tf: Temporary, entry_info: &Entry, tree_view: &TreeVi
                 (ColumnsTemporaryFiles::SelectionButton as u32, &false),
                 (ColumnsTemporaryFiles::Name as u32, &file),
                 (ColumnsTemporaryFiles::Path as u32, &directory),
-                (
-                    ColumnsTemporaryFiles::Modification as u32,
-                    &(DateTime::from_timestamp(file_entry.modified_date as i64, 0)
-                        .expect("Modified date always should be in valid range")
-                        .to_string()),
-                ),
+                (ColumnsTemporaryFiles::Modification as u32, &(get_dt_timestamp_string(file_entry.modified_date))),
                 (ColumnsTemporaryFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
             ];
             list_store.set(&list_store.append(), &values);
@@ -683,12 +663,7 @@ fn compute_big_files(bf: BigFile, entry_info: &Entry, tree_view: &TreeView, text
                 (ColumnsBigFiles::Size as u32, &(format_size(file_entry.size, BINARY))),
                 (ColumnsBigFiles::Name as u32, &file),
                 (ColumnsBigFiles::Path as u32, &directory),
-                (
-                    ColumnsBigFiles::Modification as u32,
-                    &(DateTime::from_timestamp(file_entry.modified_date as i64, 0)
-                        .expect("Modified date always should be in valid range")
-                        .to_string()),
-                ),
+                (ColumnsBigFiles::Modification as u32, &(get_dt_timestamp_string(file_entry.modified_date))),
                 (ColumnsBigFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
                 (ColumnsBigFiles::SizeAsBytes as u32, &(file_entry.size)),
             ];
@@ -728,12 +703,7 @@ fn compute_empty_files(vf: EmptyFiles, entry_info: &Entry, tree_view: &TreeView,
                 (ColumnsEmptyFiles::SelectionButton as u32, &false),
                 (ColumnsEmptyFiles::Name as u32, &file),
                 (ColumnsEmptyFiles::Path as u32, &directory),
-                (
-                    ColumnsEmptyFiles::Modification as u32,
-                    &(DateTime::from_timestamp(file_entry.modified_date as i64, 0)
-                        .expect("Modified date always should be in valid range")
-                        .to_string()),
-                ),
+                (ColumnsEmptyFiles::Modification as u32, &(get_dt_timestamp_string(file_entry.modified_date))),
                 (ColumnsEmptyFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
             ];
             list_store.set(&list_store.append(), &values);
@@ -774,12 +744,7 @@ fn compute_empty_folders(ef: EmptyFolder, entry_info: &Entry, tree_view: &TreeVi
                 (ColumnsEmptyFolders::SelectionButton as u32, &false),
                 (ColumnsEmptyFolders::Name as u32, &file),
                 (ColumnsEmptyFolders::Path as u32, &directory),
-                (
-                    ColumnsEmptyFolders::Modification as u32,
-                    &(DateTime::from_timestamp(fe.modified_date as i64, 0)
-                        .expect("Modified date always should be in valid range")
-                        .to_string()),
-                ),
+                (ColumnsEmptyFolders::Modification as u32, &(get_dt_timestamp_string(fe.modified_date))),
                 (ColumnsEmptyFolders::ModificationAsSecs as u32, &(fe.modified_date)),
             ];
             list_store.set(&list_store.append(), &values);
@@ -1014,9 +979,7 @@ fn duplicates_add_to_list_store(list_store: &ListStore, file: &str, directory: &
         string_date = String::new();
     } else {
         size_str = format_size(size, BINARY);
-        string_date = DateTime::from_timestamp(modified_date as i64, 0)
-            .expect("Modified date always should be in valid range")
-            .to_string();
+        string_date = get_dt_timestamp_string(modified_date);
     }
 
     let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
@@ -1058,9 +1021,7 @@ fn similar_images_add_to_list_store(
         string_date = String::new();
     } else {
         size_str = format_size(size, BINARY);
-        string_date = DateTime::from_timestamp(modified_date as i64, 0)
-            .expect("Modified date always should be in valid range")
-            .to_string();
+        string_date = get_dt_timestamp_string(modified_date);
     }
 
     let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
@@ -1091,9 +1052,7 @@ fn similar_videos_add_to_list_store(list_store: &ListStore, file: &str, director
         string_date = String::new();
     } else {
         size_str = format_size(size, BINARY);
-        string_date = DateTime::from_timestamp(modified_date as i64, 0)
-            .expect("Modified date always should be in valid range")
-            .to_string();
+        string_date = get_dt_timestamp_string(modified_date);
     }
 
     let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
@@ -1138,9 +1097,7 @@ fn same_music_add_to_list_store(
         string_date = String::new();
     } else {
         size_str = format_size(size, BINARY);
-        string_date = DateTime::from_timestamp(modified_date as i64, 0)
-            .expect("Modified date always should be in valid range")
-            .to_string();
+        string_date = get_dt_timestamp_string(modified_date);
     }
 
     let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
@@ -1165,6 +1122,12 @@ fn same_music_add_to_list_store(
     ];
 
     list_store.set(&list_store.append(), &values);
+}
+
+fn get_dt_timestamp_string(timestamp: u64) -> String {
+    DateTime::from_timestamp(timestamp as i64, 0)
+        .expect("Modified date always should be in valid range")
+        .to_string()
 }
 
 fn set_specific_buttons_as_active(buttons_array: &Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>, notebook_enum: NotebookMainEnum, value_to_set: bool) {
