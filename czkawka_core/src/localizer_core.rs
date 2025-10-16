@@ -1,6 +1,7 @@
+use std::collections::HashMap;
+
 use i18n_embed::fluent::{FluentLanguageLoader, fluent_language_loader};
 use i18n_embed::{DefaultLocalizer, LanguageLoader, Localizer};
-use indexmap::IndexMap;
 use once_cell::sync::Lazy;
 use rust_embed::RustEmbed;
 
@@ -27,8 +28,8 @@ pub fn localizer_core() -> Box<dyn Localizer> {
     Box::from(DefaultLocalizer::new(&*LANGUAGE_LOADER_CORE, &Localizations))
 }
 
-pub fn generate_translation_hashmap(vec: Vec<(&'static str, String)>) -> IndexMap<&'static str, String> {
-    let mut hashmap: IndexMap<&'static str, String> = Default::default();
+pub fn generate_translation_hashmap(vec: Vec<(&'static str, String)>) -> HashMap<&'static str, String> {
+    let mut hashmap: HashMap<&'static str, String> = Default::default();
     for (key, value) in vec {
         hashmap.insert(key, value);
     }
