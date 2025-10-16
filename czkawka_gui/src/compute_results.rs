@@ -43,6 +43,22 @@ use crate::opening_selecting_records::{
 
 // Helper functions for deduplication
 
+/// Sort vector with path field if it has >= 2 elements
+fn conditional_sort_by_path<T>(vector: &[T]) -> Vec<T>
+where
+    T: Clone + Send,
+    T: std::ops::Deref,
+    <T as std::ops::Deref>::Target: AsRef<std::path::Path>,
+{
+    if vector.len() >= 2 {
+        let mut vector = vector.to_vec();
+        vector.par_sort_unstable_by(|a, b| split_path_compare((**a).as_ref(), (**b).as_ref()));
+        vector
+    } else {
+        vector.to_vec()
+    }
+}
+
 /// Check if search was stopped and update UI accordingly
 fn handle_stopped_search<T: CommonData>(tool: &T, entry_info: &Entry) -> bool {
     if tool.get_stopped_search() {
@@ -329,14 +345,7 @@ fn compute_same_music(mf: SameMusic, entry_info: &Entry, tree_view: &TreeView, t
             let vector = mf.get_similar_music_referenced();
 
             for (base_file_entry, vec_file_entry) in vector {
-                // Sort
-                let vec_file_entry = if vec_file_entry.len() >= 2 {
-                    let mut vec_file_entry = vec_file_entry.clone();
-                    vec_file_entry.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
-                    vec_file_entry
-                } else {
-                    vec_file_entry.clone()
-                };
+                let vec_file_entry = vector_sort_unstable_entry_by_path(&vec_file_entry);
 
                 let (directory, file) = split_path(&base_file_entry.path);
                 same_music_add_to_list_store(
@@ -381,14 +390,7 @@ fn compute_same_music(mf: SameMusic, entry_info: &Entry, tree_view: &TreeView, t
             let text: &str = if mf.get_params().check_type == CheckingMethod::AudioTags { "-----" } else { "" };
 
             for vec_file_entry in vector {
-                // Sort
-                let vec_file_entry = if vec_file_entry.len() >= 2 {
-                    let mut vec_file_entry = vec_file_entry.clone();
-                    vec_file_entry.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
-                    vec_file_entry
-                } else {
-                    vec_file_entry.clone()
-                };
+                let vec_file_entry = vector_sort_unstable_entry_by_path(&vec_file_entry);
 
                 same_music_add_to_list_store(
                     &list_store,
@@ -466,14 +468,7 @@ fn compute_similar_videos(ff: SimilarVideos, entry_info: &Entry, tree_view: &Tre
             let vec_struct_similar = ff.get_similar_videos_referenced();
 
             for (base_file_entry, vec_file_entry) in vec_struct_similar {
-                // Sort
-                let vec_file_entry = if vec_file_entry.len() >= 2 {
-                    let mut vec_file_entry = vec_file_entry.clone();
-                    vec_file_entry.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
-                    vec_file_entry
-                } else {
-                    vec_file_entry.clone()
-                };
+                let vec_file_entry = vector_sort_unstable_entry_by_path(&vec_file_entry);
 
                 let (directory, file) = split_path(&base_file_entry.path);
                 similar_videos_add_to_list_store(&list_store, &file, &directory, base_file_entry.size, base_file_entry.modified_date, true, true);
@@ -486,14 +481,7 @@ fn compute_similar_videos(ff: SimilarVideos, entry_info: &Entry, tree_view: &Tre
             let vec_struct_similar = ff.get_similar_videos();
 
             for vec_file_entry in vec_struct_similar {
-                // Sort
-                let vec_file_entry = if vec_file_entry.len() >= 2 {
-                    let mut vec_file_entry = vec_file_entry.clone();
-                    vec_file_entry.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
-                    vec_file_entry
-                } else {
-                    vec_file_entry.clone()
-                };
+                let vec_file_entry = vector_sort_unstable_entry_by_path(&vec_file_entry);
 
                 similar_videos_add_to_list_store(&list_store, "", "", 0, 0, true, false);
                 for file_entry in &vec_file_entry {
