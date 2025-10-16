@@ -56,6 +56,12 @@ pub const CZK_ICON_STOP: &[u8] = include_bytes!("../../icons/czk_stop.svg");
 pub const CZK_ICON_SYMLINK: &[u8] = include_bytes!("../../icons/czk_symlink.svg");
 pub const CZK_ICON_TRASH: &[u8] = include_bytes!("../../icons/czk_trash.svg");
 
+// pub enum SS {
+//     DuplicateFinder(SharedState<DuplicateFinder>),
+//     EmptyFolder(SharedState<EmptyFolder>),
+//
+// }
+
 #[derive(Clone)]
 pub struct GuiData {
     // Windows

@@ -32,6 +32,10 @@ impl CommonTreeViews {
     pub fn get_subview(&self, item: NotebookMainEnum) -> &SubView {
         self.subviews.iter().find(|s| s.enum_value == item).expect("Cannot find subview")
     }
+    pub fn get_current_page(&self) -> NotebookMainEnum {
+        let current_page = self.notebook_main.current_page().expect("Cannot get current page from notebook");
+        NOTEBOOKS_INFO[current_page as usize].notebook_type
+    }
     pub fn get_current_subview(&self) -> &SubView {
         let current_page = self.notebook_main.current_page().expect("Cannot get current page from notebook");
         let enum_value = NOTEBOOKS_INFO[current_page as usize].notebook_type;

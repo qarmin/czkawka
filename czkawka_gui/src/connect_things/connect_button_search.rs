@@ -94,7 +94,8 @@ pub(crate) fn connect_button_search(gui_data: &GuiData, result_sender: Sender<Me
 
         let progress_sender = progress_sender.clone();
 
-        match to_notebook_main_enum(notebook_main.current_page().expect("Current page not set")) {
+        let current_data = gui_data.main_notebook.common_tree_views.clone();
+        match current_data.get_current_page() {
             NotebookMainEnum::Duplicate => duplicate_search(&gui_data, loaded_commons, stop_flag, result_sender, &grid_progress, progress_sender),
             NotebookMainEnum::EmptyFiles => empty_files_search(&gui_data, loaded_commons, stop_flag, result_sender, &grid_progress, progress_sender),
             NotebookMainEnum::EmptyDirectories => empty_dirs_search(&gui_data, loaded_commons, stop_flag, result_sender, &grid_progress, progress_sender),
@@ -220,10 +221,9 @@ fn duplicate_search(
     let check_button_settings_duplicates_delete_outdated_cache = gui_data.settings.check_button_settings_duplicates_delete_outdated_cache.clone();
     let entry_settings_prehash_cache_file_minimal_size = gui_data.settings.entry_settings_prehash_cache_file_minimal_size.clone();
     let image_preview_duplicates = gui_data.main_notebook.image_preview_duplicates.clone();
-    let tree_view_duplicate_finder = gui_data.main_notebook.tree_view_duplicate_finder.clone();
 
     image_preview_duplicates.hide();
-    clean_tree_view(&tree_view_duplicate_finder);
+    clean_tree_view(&gui_data.main_notebook.common_tree_views.get_current_subview().tree_view);
 
     let check_method_index = combo_box_duplicate_check_method.active().expect("Failed to get active search") as usize;
     let check_method = DUPLICATES_CHECK_METHOD_COMBO_BOX[check_method_index].check_method;
@@ -271,8 +271,7 @@ fn empty_files_search(
 ) {
     grid_progress.hide();
 
-    let tree_view_empty_files_finder = gui_data.main_notebook.tree_view_empty_files_finder.clone();
-    clean_tree_view(&tree_view_empty_files_finder);
+    clean_tree_view(&gui_data.main_notebook.common_tree_views.get_current_subview().tree_view);
     // Find empty files
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
@@ -296,8 +295,7 @@ fn empty_dirs_search(
 ) {
     grid_progress.hide();
 
-    let tree_view_empty_folder_finder = gui_data.main_notebook.tree_view_empty_folder_finder.clone();
-    clean_tree_view(&tree_view_empty_folder_finder);
+    clean_tree_view(&gui_data.main_notebook.common_tree_views.get_current_subview().tree_view);
 
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
@@ -323,8 +321,7 @@ fn big_files_search(
 
     let combo_box_big_files_mode = gui_data.main_notebook.combo_box_big_files_mode.clone();
     let entry_big_files_number = gui_data.main_notebook.entry_big_files_number.clone();
-    let tree_view_big_files_finder = gui_data.main_notebook.tree_view_big_files_finder.clone();
-    clean_tree_view(&tree_view_big_files_finder);
+    clean_tree_view(&gui_data.main_notebook.common_tree_views.get_current_subview().tree_view);
 
     let big_files_mode_index = combo_box_big_files_mode.active().expect("Failed to get active search") as usize;
     let big_files_mode = BIG_FILES_CHECK_METHOD_COMBO_BOX[big_files_mode_index].check_method;
@@ -354,8 +351,7 @@ fn temporary_files_search(
 ) {
     grid_progress.hide();
 
-    let tree_view_temporary_files_finder = gui_data.main_notebook.tree_view_temporary_files_finder.clone();
-    clean_tree_view(&tree_view_temporary_files_finder);
+    clean_tree_view(&gui_data.main_notebook.common_tree_views.get_current_subview().tree_view);
 
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
@@ -386,14 +382,13 @@ fn same_music_search(
     let check_button_music_genre: gtk4::CheckButton = gui_data.main_notebook.check_button_music_genre.clone();
     let check_button_music_length: gtk4::CheckButton = gui_data.main_notebook.check_button_music_length.clone();
     let check_button_music_bitrate: gtk4::CheckButton = gui_data.main_notebook.check_button_music_bitrate.clone();
-    let tree_view_same_music_finder = gui_data.main_notebook.tree_view_same_music_finder.clone();
     let combo_box_audio_check_type = gui_data.main_notebook.combo_box_audio_check_type.clone();
     let check_button_music_approximate_comparison = gui_data.main_notebook.check_button_music_approximate_comparison.clone();
     let check_button_music_compare_only_in_title_group = gui_data.main_notebook.check_button_music_compare_only_in_title_group.clone();
     let scale_seconds_same_music = gui_data.main_notebook.scale_seconds_same_music.clone();
     let scale_similarity_same_music = gui_data.main_notebook.scale_similarity_same_music.clone();
 
-    clean_tree_view(&tree_view_same_music_finder);
+    clean_tree_view(&gui_data.main_notebook.common_tree_views.get_current_subview().tree_view);
 
     let approximate_comparison = check_button_music_approximate_comparison.is_active();
     let comparison_only_in_title_group = check_button_music_compare_only_in_title_group.is_active();
@@ -484,9 +479,8 @@ fn broken_files_search(
     let check_button_broken_files_pdf: gtk4::CheckButton = gui_data.main_notebook.check_button_broken_files_pdf.clone();
     let check_button_broken_files_audio: gtk4::CheckButton = gui_data.main_notebook.check_button_broken_files_audio.clone();
     let check_button_broken_files_image: gtk4::CheckButton = gui_data.main_notebook.check_button_broken_files_image.clone();
-    let tree_view_broken_files = gui_data.main_notebook.tree_view_broken_files.clone();
 
-    clean_tree_view(&tree_view_broken_files);
+    clean_tree_view(&gui_data.main_notebook.common_tree_views.get_current_subview().tree_view);
 
     let mut checked_types: CheckedTypes = CheckedTypes::NONE;
 
@@ -560,9 +554,8 @@ fn similar_image_search(
     let check_button_settings_similar_images_delete_outdated_cache = gui_data.settings.check_button_settings_similar_images_delete_outdated_cache.clone();
     let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
     let scale_similarity_similar_images = gui_data.main_notebook.scale_similarity_similar_images.clone();
-    let tree_view_similar_images_finder = gui_data.main_notebook.tree_view_similar_images_finder.clone();
 
-    clean_tree_view(&tree_view_similar_images_finder);
+    clean_tree_view(&gui_data.main_notebook.common_tree_views.get_current_subview().tree_view);
     image_preview_similar_images.hide();
 
     let hash_size_index = combo_box_image_hash_size.active().expect("Failed to get active search") as usize;
@@ -607,8 +600,7 @@ fn similar_video_search(
     let check_button_video_ignore_same_size = gui_data.main_notebook.check_button_video_ignore_same_size.clone();
     let check_button_settings_similar_videos_delete_outdated_cache = gui_data.settings.check_button_settings_similar_videos_delete_outdated_cache.clone();
     let scale_similarity_similar_videos = gui_data.main_notebook.scale_similarity_similar_videos.clone();
-    let tree_view_similar_videos_finder = gui_data.main_notebook.tree_view_similar_videos_finder.clone();
-    clean_tree_view(&tree_view_similar_videos_finder);
+    clean_tree_view(&gui_data.main_notebook.common_tree_views.get_current_subview().tree_view);
 
     let tolerance = scale_similarity_similar_videos.value() as i32;
 
@@ -647,8 +639,7 @@ fn bad_symlinks_search(
 ) {
     grid_progress.hide();
 
-    let tree_view_invalid_symlinks = gui_data.main_notebook.tree_view_invalid_symlinks.clone();
-    clean_tree_view(&tree_view_invalid_symlinks);
+    clean_tree_view(&gui_data.main_notebook.common_tree_views.get_current_subview().tree_view);
 
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
@@ -672,8 +663,7 @@ fn bad_extensions_search(
 ) {
     grid_progress.show();
 
-    let tree_view_bad_extensions = gui_data.main_notebook.tree_view_bad_extensions.clone();
-    clean_tree_view(&tree_view_bad_extensions);
+    clean_tree_view(&gui_data.main_notebook.common_tree_views.get_current_subview().tree_view);
 
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)

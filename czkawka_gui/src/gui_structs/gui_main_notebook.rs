@@ -22,18 +22,6 @@ use crate::notebook_enums::NotebookMainEnum;
 pub struct GuiMainNotebook {
     pub notebook_main: Notebook,
 
-    pub tree_view_duplicate_finder: TreeView,
-    pub tree_view_empty_folder_finder: TreeView,
-    pub tree_view_empty_files_finder: TreeView,
-    pub tree_view_temporary_files_finder: TreeView,
-    pub tree_view_big_files_finder: TreeView,
-    pub tree_view_similar_images_finder: TreeView,
-    pub tree_view_similar_videos_finder: TreeView,
-    pub tree_view_same_music_finder: TreeView,
-    pub tree_view_invalid_symlinks: TreeView,
-    pub tree_view_broken_files: TreeView,
-    pub tree_view_bad_extensions: TreeView,
-
     // General
 
     // Duplicate
@@ -188,32 +176,8 @@ impl GuiMainNotebook {
             preview_path: Rc::new(RefCell::new(String::new())),
         };
 
-        // TODO - This can be removed when common_tree_views will take all tree views
-        let tree_view_duplicate_finder: TreeView = common_tree_views.get_subview(NotebookMainEnum::Duplicate).tree_view.clone();
-        let tree_view_empty_folder_finder: TreeView = common_tree_views.get_subview(NotebookMainEnum::EmptyDirectories).tree_view.clone();
-        let tree_view_empty_files_finder: TreeView = common_tree_views.get_subview(NotebookMainEnum::EmptyFiles).tree_view.clone();
-        let tree_view_temporary_files_finder: TreeView = common_tree_views.get_subview(NotebookMainEnum::Temporary).tree_view.clone();
-        let tree_view_big_files_finder: TreeView = common_tree_views.get_subview(NotebookMainEnum::BigFiles).tree_view.clone();
-        let tree_view_similar_images_finder: TreeView = common_tree_views.get_subview(NotebookMainEnum::SimilarImages).tree_view.clone();
-        let tree_view_similar_videos_finder: TreeView = common_tree_views.get_subview(NotebookMainEnum::SimilarVideos).tree_view.clone();
-        let tree_view_same_music_finder: TreeView = common_tree_views.get_subview(NotebookMainEnum::SameMusic).tree_view.clone();
-        let tree_view_invalid_symlinks: TreeView = common_tree_views.get_subview(NotebookMainEnum::Symlinks).tree_view.clone();
-        let tree_view_broken_files: TreeView = common_tree_views.get_subview(NotebookMainEnum::BrokenFiles).tree_view.clone();
-        let tree_view_bad_extensions: TreeView = common_tree_views.get_subview(NotebookMainEnum::BadExtensions).tree_view.clone();
-
         Self {
             notebook_main,
-            tree_view_duplicate_finder,
-            tree_view_empty_folder_finder,
-            tree_view_empty_files_finder,
-            tree_view_temporary_files_finder,
-            tree_view_big_files_finder,
-            tree_view_similar_images_finder,
-            tree_view_similar_videos_finder,
-            tree_view_same_music_finder,
-            tree_view_invalid_symlinks,
-            tree_view_broken_files,
-            tree_view_bad_extensions,
             combo_box_duplicate_check_method,
             combo_box_duplicate_hash_type,
             label_duplicate_check_method,

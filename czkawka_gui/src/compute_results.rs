@@ -26,7 +26,7 @@ use gtk4::prelude::*;
 use gtk4::{Entry, ListStore, TextView, TreeView};
 use humansize::{BINARY, format_size};
 use rayon::prelude::*;
-
+use crate::connect_things::connect_button_delete::tree_remove;
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_combo_box::IMAGES_HASH_SIZE_COMBO_BOX;
@@ -42,22 +42,6 @@ use crate::opening_selecting_records::{
 };
 
 // Helper functions for deduplication
-
-/// Sort vector with path field if it has >= 2 elements
-fn conditional_sort_by_path<T>(vector: &[T]) -> Vec<T>
-where
-    T: Clone + Send,
-    T: std::ops::Deref,
-    <T as std::ops::Deref>::Target: AsRef<std::path::Path>,
-{
-    if vector.len() >= 2 {
-        let mut vector = vector.to_vec();
-        vector.par_sort_unstable_by(|a, b| split_path_compare((**a).as_ref(), (**b).as_ref()));
-        vector
-    } else {
-        vector.to_vec()
-    }
-}
 
 /// Check if search was stopped and update UI accordingly
 fn handle_stopped_search<T: CommonData>(tool: &T, entry_info: &Entry) -> bool {
@@ -112,11 +96,6 @@ pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Recei
     let buttons_search = gui_data.bottom_buttons.buttons_search.clone();
     let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let entry_info = gui_data.entry_info.clone();
-    let tree_view_empty_folder_finder = gui_data.main_notebook.tree_view_empty_folder_finder.clone();
-    let tree_view_empty_files_finder = gui_data.main_notebook.tree_view_empty_files_finder.clone();
-    let tree_view_duplicate_finder = gui_data.main_notebook.tree_view_duplicate_finder.clone();
-    let tree_view_similar_images_finder = gui_data.main_notebook.tree_view_similar_images_finder.clone();
-    let tree_view_similar_videos_finder = gui_data.main_notebook.tree_view_similar_videos_finder.clone();
     let buttons_array = gui_data.bottom_buttons.buttons_array.clone();
     let text_view_errors = gui_data.text_view_errors.clone();
     let shared_duplication_state = gui_data.shared_duplication_state.clone();
@@ -124,18 +103,12 @@ pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Recei
     let shared_empty_folders_state = gui_data.shared_empty_folders_state.clone();
     let shared_empty_files_state = gui_data.shared_empty_files_state.clone();
     let shared_broken_files_state = gui_data.shared_broken_files_state.clone();
-    let tree_view_big_files_finder = gui_data.main_notebook.tree_view_big_files_finder.clone();
-    let tree_view_broken_files = gui_data.main_notebook.tree_view_broken_files.clone();
-    let tree_view_invalid_symlinks = gui_data.main_notebook.tree_view_invalid_symlinks.clone();
     let shared_big_files_state = gui_data.shared_big_files_state.clone();
     let shared_same_invalid_symlinks = gui_data.shared_same_invalid_symlinks.clone();
-    let tree_view_temporary_files_finder = gui_data.main_notebook.tree_view_temporary_files_finder.clone();
-    let tree_view_bad_extensions = gui_data.main_notebook.tree_view_bad_extensions.clone();
     let shared_temporary_files_state = gui_data.shared_temporary_files_state.clone();
     let shared_similar_images_state = gui_data.shared_similar_images_state.clone();
     let shared_similar_videos_state = gui_data.shared_similar_videos_state.clone();
     let shared_bad_extensions_state = gui_data.shared_bad_extensions_state.clone();
-    let tree_view_same_music_finder = gui_data.main_notebook.tree_view_same_music_finder.clone();
     let shared_same_music_state = gui_data.shared_same_music_state.clone();
     let buttons_names = gui_data.bottom_buttons.buttons_names;
     let window_progress = gui_data.progress_window.window_progress.clone();
@@ -143,6 +116,7 @@ pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Recei
     let notebook_upper = gui_data.upper_notebook.notebook_upper.clone();
     let button_settings = gui_data.header.button_settings.clone();
     let button_app_info = gui_data.header.button_app_info.clone();
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
 
     let main_context = glib::MainContext::default();
     let _guard = main_context.acquire().expect("Failed to acquire main context");
@@ -165,25 +139,27 @@ pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Recei
                 let hash_size = IMAGES_HASH_SIZE_COMBO_BOX[hash_size_index] as u8;
 
                 let msg_type = msg.get_message_type();
+                let tree_view = &common_tree_views.get_subview(msg_type).tree_view;
+
                 let found_duplicates: Option<bool> = match msg {
-                    Message::Duplicates(df) => compute_duplicate_finder(df, &entry_info, &tree_view_duplicate_finder, &text_view_errors, &shared_duplication_state),
-                    Message::EmptyFolders(ef) => compute_empty_folders(ef, &entry_info, &tree_view_empty_folder_finder, &text_view_errors, &shared_empty_folders_state),
-                    Message::EmptyFiles(vf) => compute_empty_files(vf, &entry_info, &tree_view_empty_files_finder, &text_view_errors, &shared_empty_files_state),
-                    Message::BigFiles(bf) => compute_big_files(bf, &entry_info, &tree_view_big_files_finder, &text_view_errors, &shared_big_files_state),
-                    Message::Temporary(tf) => compute_temporary_files(tf, &entry_info, &tree_view_temporary_files_finder, &text_view_errors, &shared_temporary_files_state),
+                    Message::Duplicates(df) => compute_duplicate_finder(df, &entry_info, &tree_view, &text_view_errors, &shared_duplication_state),
+                    Message::EmptyFolders(ef) => compute_empty_folders(ef, &entry_info, &tree_view, &text_view_errors, &shared_empty_folders_state),
+                    Message::EmptyFiles(vf) => compute_empty_files(vf, &entry_info, &tree_view, &text_view_errors, &shared_empty_files_state),
+                    Message::BigFiles(bf) => compute_big_files(bf, &entry_info, &tree_view, &text_view_errors, &shared_big_files_state),
+                    Message::Temporary(tf) => compute_temporary_files(tf, &entry_info, &tree_view, &text_view_errors, &shared_temporary_files_state),
                     Message::SimilarImages(sf) => compute_similar_images(
                         sf,
                         &entry_info,
-                        &tree_view_similar_images_finder,
+                        &tree_view,
                         &text_view_errors,
                         &shared_similar_images_state,
                         hash_size,
                     ),
-                    Message::SimilarVideos(ff) => compute_similar_videos(ff, &entry_info, &tree_view_similar_videos_finder, &text_view_errors, &shared_similar_videos_state),
-                    Message::SameMusic(mf) => compute_same_music(mf, &entry_info, &tree_view_same_music_finder, &text_view_errors, &shared_same_music_state),
-                    Message::InvalidSymlinks(ifs) => compute_invalid_symlinks(ifs, &entry_info, &tree_view_invalid_symlinks, &text_view_errors, &shared_same_invalid_symlinks),
-                    Message::BrokenFiles(br) => compute_broken_files(br, &entry_info, &tree_view_broken_files, &text_view_errors, &shared_broken_files_state),
-                    Message::BadExtensions(be) => compute_bad_extensions(be, &entry_info, &tree_view_bad_extensions, &text_view_errors, &shared_bad_extensions_state),
+                    Message::SimilarVideos(ff) => compute_similar_videos(ff, &entry_info, &tree_view, &text_view_errors, &shared_similar_videos_state),
+                    Message::SameMusic(mf) => compute_same_music(mf, &entry_info, &tree_view, &text_view_errors, &shared_same_music_state),
+                    Message::InvalidSymlinks(ifs) => compute_invalid_symlinks(ifs, &entry_info, &tree_view, &text_view_errors, &shared_same_invalid_symlinks),
+                    Message::BrokenFiles(br) => compute_broken_files(br, &entry_info, &tree_view, &text_view_errors, &shared_broken_files_state),
+                    Message::BadExtensions(be) => compute_bad_extensions(be, &entry_info, &tree_view, &text_view_errors, &shared_bad_extensions_state),
                 };
 
                 if let Some(found_duplicates) = found_duplicates {
@@ -726,7 +702,7 @@ fn compute_empty_folders(ef: EmptyFolder, entry_info: &Entry, tree_view: &TreeVi
 fn compute_duplicate_finder(
     df: DuplicateFinder,
     entry_info: &Entry,
-    tree_view_duplicate_finder: &TreeView,
+    tree_view: &TreeView,
     text_view_errors: &TextView,
     shared_state: &SharedState<DuplicateFinder>,
 ) -> Option<bool> {
@@ -735,9 +711,9 @@ fn compute_duplicate_finder(
         return None;
     }
     if df.get_use_reference() {
-        tree_view_duplicate_finder.selection().set_select_function(select_function_always_true);
+        tree_view.selection().set_select_function(select_function_always_true);
     } else {
-        tree_view_duplicate_finder.selection().set_select_function(select_function_duplicates);
+        tree_view.selection().set_select_function(select_function_duplicates);
     }
 
     let information = df.get_information();
@@ -786,7 +762,7 @@ fn compute_duplicate_finder(
 
     // Create GUI
     {
-        let list_store = get_list_store(tree_view_duplicate_finder);
+        let list_store = get_list_store(tree_view);
 
         if df.get_use_reference() {
             match df.get_params().check_method {
@@ -925,14 +901,6 @@ where
     }
 }
 
-fn vector_sort_simple_unstable_entry_by_path<T>(vector: &[T]) -> Vec<T>
-where
-    T: ResultEntry + Clone + Send,
-{
-    let mut vector = vector.to_vec();
-    vector.par_sort_unstable_by(|a, b| split_path_compare(a.get_path(), b.get_path()));
-    vector
-}
 
 fn duplicates_add_to_list_store(list_store: &ListStore, file: &str, directory: &str, size: u64, modified_date: u64, is_header: bool, is_reference_folder: bool) {
     const COLUMNS_NUMBER: usize = 11;
