@@ -47,10 +47,10 @@ pub(crate) fn connect_button_compare(gui_data: &GuiData) {
     window_compare.set_default_size(700, 700);
 
     button_compare.connect_clicked(move |_| {
-        let sub_view = common_tree_views.get_current_subview();
-        let model = sub_view.tree_view.model().expect("Missing tree_view model");
+        let subview = common_tree_views.get_current_subview();
+        let model = subview.tree_view.model().expect("Missing tree_view model");
 
-        let group_number = count_number_of_groups(&sub_view.tree_view, sub_view.nb_object.column_header.expect("Missing column_header"));
+        let group_number = count_number_of_groups(&subview.tree_view, subview.nb_object.column_header.expect("Missing column_header"));
 
         if group_number == 0 {
             return;
@@ -58,13 +58,13 @@ pub(crate) fn connect_button_compare(gui_data: &GuiData) {
 
         // Check selected items
         let (current_group, tree_path) =
-            get_current_group_and_iter_from_selection(&model, &sub_view.tree_view.selection(), sub_view.nb_object.column_header.expect("Missing column_header"));
+            get_current_group_and_iter_from_selection(&model, &subview.tree_view.selection(), subview.nb_object.column_header.expect("Missing column_header"));
 
         *shared_current_of_groups.borrow_mut() = current_group;
         *shared_numbers_of_groups.borrow_mut() = group_number;
 
         populate_groups_at_start(
-            &sub_view.nb_object,
+            &subview.nb_object,
             &model,
             &shared_current_path,
             tree_path,
