@@ -158,13 +158,9 @@ pub(crate) fn get_raw_image(path: impl AsRef<Path> + std::fmt::Debug) -> Result<
 
     timer.checkpoint("Converted to DynamicImage");
 
-    let rgb_image = DynamicImage::from(dynamic_image.to_rgb8());
-
-    timer.checkpoint("Reconverted to RGB");
-
     trace!("{}", timer.report("Everything", false));
 
-    Ok(rgb_image)
+    Ok(dynamic_image)
 }
 
 pub fn check_if_can_display_image(path: &str) -> bool {
