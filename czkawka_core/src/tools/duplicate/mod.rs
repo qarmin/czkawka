@@ -4,6 +4,8 @@ pub mod traits;
 use std::cell::RefCell;
 use std::collections::BTreeMap;
 use std::fmt::Debug;
+#[cfg(target_family = "unix")]
+use std::fs;
 use std::fs::File;
 use std::hash::Hasher;
 use std::io::prelude::*;
