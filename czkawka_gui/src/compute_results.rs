@@ -1,4 +1,3 @@
-use std::arch::x86_64::_subborrow_u32;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -23,19 +22,18 @@ use czkawka_core::tools::similar_images::{ImagesEntry, SimilarImages};
 use czkawka_core::tools::similar_videos::SimilarVideos;
 use czkawka_core::tools::temporary::Temporary;
 use fun_time::fun_time;
-use glib::shared::Shared;
 use gtk4::prelude::*;
-use gtk4::{Entry, ListStore, TextView, TreeView};
+use gtk4::{Entry, ListStore, TextView};
 use humansize::{BINARY, format_size};
 use rayon::prelude::*;
-use crate::connect_things::connect_button_delete::tree_remove;
+
 use crate::flg;
 use crate::gui_structs::common_tree_view::{SharedModelEnum, SubView};
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_combo_box::IMAGES_HASH_SIZE_COMBO_BOX;
 use crate::help_functions::{
     BottomButtonsEnum, ColumnsBadExtensions, ColumnsBigFiles, ColumnsBrokenFiles, ColumnsDuplicates, ColumnsEmptyFiles, ColumnsEmptyFolders, ColumnsInvalidSymlinks,
-    ColumnsSameMusic, ColumnsSimilarImages, ColumnsSimilarVideos, ColumnsTemporaryFiles, HEADER_ROW_COLOR, MAIN_ROW_COLOR, Message, SharedState, TEXT_COLOR, get_list_store,
+    ColumnsSameMusic, ColumnsSimilarImages, ColumnsSimilarVideos, ColumnsTemporaryFiles, HEADER_ROW_COLOR, MAIN_ROW_COLOR, Message, TEXT_COLOR, get_list_store,
     print_text_messages_to_text_view, set_buttons,
 };
 use crate::notebook_enums::NotebookMainEnum;
@@ -57,11 +55,8 @@ fn handle_stopped_search<T: CommonData>(tool: &T, entry_info: &Entry) -> bool {
 }
 
 /// Update shared state and return whether items were found
-fn finalize_compute<T: Into<SharedModelEnum>>(
-    subview: &SubView,
-    tool: T,
-    items_found: usize,
-) -> Option<bool> {
+#[expect(clippy::unnecessary_wraps)]
+fn finalize_compute<T: Into<SharedModelEnum>>(subview: &SubView, tool: T, items_found: usize) -> Option<bool> {
     subview.shared_model_enum.replace(tool.into());
     Some(items_found > 0)
 }
@@ -139,13 +134,7 @@ pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Recei
                     Message::EmptyFiles(vf) => compute_empty_files(vf, &entry_info, &text_view_errors, subview),
                     Message::BigFiles(bf) => compute_big_files(bf, &entry_info, &text_view_errors, subview),
                     Message::Temporary(tf) => compute_temporary_files(tf, &entry_info, &text_view_errors, subview),
-                    Message::SimilarImages(sf) => compute_similar_images(
-                        sf,
-                        &entry_info,
-                        &text_view_errors,
-                        subview,
-                        hash_size,
-                    ),
+                    Message::SimilarImages(sf) => compute_similar_images(sf, &entry_info, &text_view_errors, subview, hash_size),
                     Message::SimilarVideos(ff) => compute_similar_videos(ff, &entry_info, &text_view_errors, subview),
                     Message::SameMusic(mf) => compute_same_music(mf, &entry_info, &text_view_errors, subview),
                     Message::InvalidSymlinks(ifs) => compute_invalid_symlinks(ifs, &entry_info, &text_view_errors, subview),
@@ -169,8 +158,7 @@ pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Recei
 }
 
 #[fun_time(message = "compute_bad_extensions", level = "debug")]
-fn compute_bad_extensions(be: BadExtensions, entry_info: &Entry,  text_view_errors: &TextView,
-                          subview: &SubView,) -> Option<bool> {
+fn compute_bad_extensions(be: BadExtensions, entry_info: &Entry, text_view_errors: &TextView, subview: &SubView) -> Option<bool> {
     if handle_stopped_search(&be, entry_info) {
         return None;
     }
@@ -202,8 +190,7 @@ fn compute_bad_extensions(be: BadExtensions, entry_info: &Entry,  text_view_erro
 }
 
 #[fun_time(message = "compute_broken_files", level = "debug")]
-fn compute_broken_files(br: BrokenFiles, entry_info: &Entry,  text_view_errors: &TextView,
-                        subview: &SubView,) -> Option<bool> {
+fn compute_broken_files(br: BrokenFiles, entry_info: &Entry, text_view_errors: &TextView, subview: &SubView) -> Option<bool> {
     if handle_stopped_search(&br, entry_info) {
         return None;
     }
@@ -234,12 +221,7 @@ fn compute_broken_files(br: BrokenFiles, entry_info: &Entry,  text_view_errors: 
 }
 
 #[fun_time(message = "compute_invalid_symlinks", level = "debug")]
-fn compute_invalid_symlinks(
-    ifs: InvalidSymlinks,
-    entry_info: &Entry,
-    text_view_errors: &TextView,
-    subview: &SubView,
-) -> Option<bool> {
+fn compute_invalid_symlinks(ifs: InvalidSymlinks, entry_info: &Entry, text_view_errors: &TextView, subview: &SubView) -> Option<bool> {
     if handle_stopped_search(&ifs, entry_info) {
         return None;
     }
@@ -271,16 +253,15 @@ fn compute_invalid_symlinks(
 }
 
 #[fun_time(message = "compute_same_music", level = "debug")]
-fn compute_same_music(mf: SameMusic, entry_info: &Entry, text_view_errors: &TextView,
-                      subview: &SubView,) -> Option<bool> {
+fn compute_same_music(mf: SameMusic, entry_info: &Entry, text_view_errors: &TextView, subview: &SubView) -> Option<bool> {
     if mf.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
         return None;
     }
     if mf.get_use_reference() {
-        &subview.tree_view.selection().set_select_function(select_function_always_true);
+        subview.tree_view.selection().set_select_function(select_function_always_true);
     } else {
-        &subview.tree_view.selection().set_select_function(select_function_same_music);
+        subview.tree_view.selection().set_select_function(select_function_same_music);
     }
 
     let information = mf.get_information();
@@ -314,7 +295,7 @@ fn compute_same_music(mf: SameMusic, entry_info: &Entry, text_view_errors: &Text
             let vector = mf.get_similar_music_referenced();
 
             for (base_file_entry, vec_file_entry) in vector {
-                let vec_file_entry = vector_sort_unstable_entry_by_path(&vec_file_entry);
+                let vec_file_entry = vector_sort_unstable_entry_by_path(vec_file_entry);
 
                 let (directory, file) = split_path(&base_file_entry.path);
                 same_music_add_to_list_store(
@@ -359,7 +340,7 @@ fn compute_same_music(mf: SameMusic, entry_info: &Entry, text_view_errors: &Text
             let text: &str = if mf.get_params().check_type == CheckingMethod::AudioTags { "-----" } else { "" };
 
             for vec_file_entry in vector {
-                let vec_file_entry = vector_sort_unstable_entry_by_path(&vec_file_entry);
+                let vec_file_entry = vector_sort_unstable_entry_by_path(vec_file_entry);
 
                 same_music_add_to_list_store(
                     &list_store,
@@ -405,16 +386,15 @@ fn compute_same_music(mf: SameMusic, entry_info: &Entry, text_view_errors: &Text
 }
 
 #[fun_time(message = "compute_similar_videos", level = "debug")]
-fn compute_similar_videos(ff: SimilarVideos, entry_info: &Entry, text_view_errors: &TextView,
-                          subview: &SubView,) -> Option<bool> {
+fn compute_similar_videos(ff: SimilarVideos, entry_info: &Entry, text_view_errors: &TextView, subview: &SubView) -> Option<bool> {
     if ff.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
         return None;
     }
     if ff.get_use_reference() {
-        &subview.tree_view.selection().set_select_function(select_function_always_true);
+        subview.tree_view.selection().set_select_function(select_function_always_true);
     } else {
-        &subview.tree_view.selection().set_select_function(select_function_similar_videos);
+        subview.tree_view.selection().set_select_function(select_function_similar_videos);
     }
     let information = ff.get_information();
     let text_messages = ff.get_text_messages();
@@ -437,7 +417,7 @@ fn compute_similar_videos(ff: SimilarVideos, entry_info: &Entry, text_view_error
             let vec_struct_similar = ff.get_similar_videos_referenced();
 
             for (base_file_entry, vec_file_entry) in vec_struct_similar {
-                let vec_file_entry = vector_sort_unstable_entry_by_path(&vec_file_entry);
+                let vec_file_entry = vector_sort_unstable_entry_by_path(vec_file_entry);
 
                 let (directory, file) = split_path(&base_file_entry.path);
                 similar_videos_add_to_list_store(&list_store, &file, &directory, base_file_entry.size, base_file_entry.modified_date, true, true);
@@ -450,7 +430,7 @@ fn compute_similar_videos(ff: SimilarVideos, entry_info: &Entry, text_view_error
             let vec_struct_similar = ff.get_similar_videos();
 
             for vec_file_entry in vec_struct_similar {
-                let vec_file_entry = vector_sort_unstable_entry_by_path(&vec_file_entry);
+                let vec_file_entry = vector_sort_unstable_entry_by_path(vec_file_entry);
 
                 similar_videos_add_to_list_store(&list_store, "", "", 0, 0, true, false);
                 for file_entry in &vec_file_entry {
@@ -467,22 +447,15 @@ fn compute_similar_videos(ff: SimilarVideos, entry_info: &Entry, text_view_error
 }
 
 #[fun_time(message = "compute_similar_images", level = "debug")]
-fn compute_similar_images(
-    sf: SimilarImages,
-    entry_info: &Entry,
-    text_view_errors: &TextView,
-    subview: &SubView,
-
-    hash_size: u8,
-) -> Option<bool> {
+fn compute_similar_images(sf: SimilarImages, entry_info: &Entry, text_view_errors: &TextView, subview: &SubView, hash_size: u8) -> Option<bool> {
     if sf.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
         return None;
     }
     if sf.get_use_reference() {
-        &subview.tree_view.selection().set_select_function(select_function_always_true);
+        subview.tree_view.selection().set_select_function(select_function_always_true);
     } else {
-        &subview.tree_view.selection().set_select_function(select_function_similar_images);
+        subview.tree_view.selection().set_select_function(select_function_similar_images);
     }
     let information = sf.get_information();
     let text_messages = sf.get_text_messages();
@@ -568,8 +541,7 @@ fn compute_similar_images(
 }
 
 #[fun_time(message = "compute_temporary_files", level = "debug")]
-fn compute_temporary_files(tf: Temporary, entry_info: &Entry, text_view_errors: &TextView,
-                           subview: &SubView,) -> Option<bool> {
+fn compute_temporary_files(tf: Temporary, entry_info: &Entry, text_view_errors: &TextView, subview: &SubView) -> Option<bool> {
     if handle_stopped_search(&tf, entry_info) {
         return None;
     }
@@ -599,8 +571,7 @@ fn compute_temporary_files(tf: Temporary, entry_info: &Entry, text_view_errors: 
 }
 
 #[fun_time(message = "compute_big_files", level = "debug")]
-fn compute_big_files(bf: BigFile, entry_info: &Entry, text_view_errors: &TextView,
-                     subview: &SubView,) -> Option<bool> {
+fn compute_big_files(bf: BigFile, entry_info: &Entry, text_view_errors: &TextView, subview: &SubView) -> Option<bool> {
     if handle_stopped_search(&bf, entry_info) {
         return None;
     }
@@ -631,8 +602,7 @@ fn compute_big_files(bf: BigFile, entry_info: &Entry, text_view_errors: &TextVie
 }
 
 #[fun_time(message = "compute_empty_files", level = "debug")]
-fn compute_empty_files(vf: EmptyFiles, entry_info: &Entry, text_view_errors: &TextView,
-                       subview: &SubView) -> Option<bool> {
+fn compute_empty_files(vf: EmptyFiles, entry_info: &Entry, text_view_errors: &TextView, subview: &SubView) -> Option<bool> {
     if handle_stopped_search(&vf, entry_info) {
         return None;
     }
@@ -661,8 +631,7 @@ fn compute_empty_files(vf: EmptyFiles, entry_info: &Entry, text_view_errors: &Te
 }
 
 #[fun_time(message = "compute_empty_folders", level = "debug")]
-fn compute_empty_folders(ef: EmptyFolder, entry_info: &Entry, text_view_errors: &TextView,
-                         subview: &SubView,) -> Option<bool> {
+fn compute_empty_folders(ef: EmptyFolder, entry_info: &Entry, text_view_errors: &TextView, subview: &SubView) -> Option<bool> {
     if handle_stopped_search(&ef, entry_info) {
         return None;
     }
@@ -693,18 +662,13 @@ fn compute_empty_folders(ef: EmptyFolder, entry_info: &Entry, text_view_errors: 
 }
 
 #[fun_time(message = "compute_duplicate_finder", level = "debug")]
-fn compute_duplicate_finder(
-    df: DuplicateFinder,
-    entry_info: &Entry,
-    text_view_errors: &TextView,
-    subview: &SubView,
-) -> Option<bool> {
+fn compute_duplicate_finder(df: DuplicateFinder, entry_info: &Entry, text_view_errors: &TextView, subview: &SubView) -> Option<bool> {
     if df.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
         return None;
     }
     if df.get_use_reference() {
-     subview.tree_view.selection().set_select_function(select_function_always_true);
+        subview.tree_view.selection().set_select_function(select_function_always_true);
     } else {
         subview.tree_view.selection().set_select_function(select_function_duplicates);
     }
@@ -892,7 +856,6 @@ where
         vector.to_vec()
     }
 }
-
 
 fn duplicates_add_to_list_store(list_store: &ListStore, file: &str, directory: &str, size: u64, modified_date: u64, is_header: bool, is_reference_folder: bool) {
     const COLUMNS_NUMBER: usize = 11;

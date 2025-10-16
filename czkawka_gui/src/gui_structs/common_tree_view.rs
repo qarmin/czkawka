@@ -2,14 +2,8 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use czkawka_core::common::image::get_dynamic_image_from_path;
-use czkawka_core::localizer_core::generate_translation_hashmap;
-use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
-use gtk4::prelude::*;
-use gtk4::{
-    Builder, CellRendererText, CellRendererToggle, CheckButton, EventControllerKey, GestureClick, ListStore, Notebook, Picture, ScrolledWindow, SelectionMode, TextView, TreeView,
-    TreeViewColumn,
-};
 use czkawka_core::common::traits::PrintResults;
+use czkawka_core::localizer_core::generate_translation_hashmap;
 use czkawka_core::tools::bad_extensions::BadExtensions;
 use czkawka_core::tools::big_file::BigFile;
 use czkawka_core::tools::broken_files::BrokenFiles;
@@ -21,17 +15,24 @@ use czkawka_core::tools::same_music::SameMusic;
 use czkawka_core::tools::similar_images::SimilarImages;
 use czkawka_core::tools::similar_videos::SimilarVideos;
 use czkawka_core::tools::temporary::Temporary;
+use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
+use gtk4::prelude::*;
+use gtk4::{
+    Builder, CellRendererText, CellRendererToggle, CheckButton, EventControllerKey, GestureClick, ListStore, Notebook, Picture, ScrolledWindow, SelectionMode, TextView, TreeView,
+    TreeViewColumn,
+};
+
 use crate::connect_things::connect_button_delete::delete_things;
 use crate::flg;
-use crate::gui_structs::gui_data::{GuiData};
-use crate::help_functions::{ColumnsBadExtensions, ColumnsBigFiles, ColumnsBrokenFiles, ColumnsDuplicates, ColumnsEmptyFiles, ColumnsEmptyFolders, ColumnsInvalidSymlinks, ColumnsSameMusic, ColumnsSimilarImages, ColumnsSimilarVideos, ColumnsTemporaryFiles, KEY_DELETE, add_text_to_text_view, get_full_name_from_path_name, get_pixbuf_from_dynamic_image, resize_pixbuf_dimension, SharedState};
+use crate::gui_structs::gui_data::GuiData;
+use crate::help_functions::{
+    ColumnsBadExtensions, ColumnsBigFiles, ColumnsBrokenFiles, ColumnsDuplicates, ColumnsEmptyFiles, ColumnsEmptyFolders, ColumnsInvalidSymlinks, ColumnsSameMusic,
+    ColumnsSimilarImages, ColumnsSimilarVideos, ColumnsTemporaryFiles, KEY_DELETE, SharedState, add_text_to_text_view, get_full_name_from_path_name, get_pixbuf_from_dynamic_image,
+    resize_pixbuf_dimension,
+};
 use crate::notebook_enums::NotebookMainEnum;
 use crate::notebook_info::{NOTEBOOKS_INFO, NotebookObject};
 use crate::opening_selecting_records::{opening_double_click_function, opening_enter_function_ported, opening_middle_mouse_function, select_function_header};
-
-
-
-
 
 #[derive(Clone)]
 pub struct CommonTreeViews {
@@ -111,7 +112,7 @@ pub struct SubView {
     pub enum_value: NotebookMainEnum,
     pub tree_view_name: String,
     pub preview_struct: Option<PreviewStruct>,
-    pub shared_model_enum: SharedModelEnum
+    pub shared_model_enum: SharedModelEnum,
 }
 
 #[derive(Clone)]
@@ -159,7 +160,7 @@ impl SubView {
             enum_value,
             preview_struct,
             tree_view_name: tree_view_name.to_string(),
-            shared_model_enum
+            shared_model_enum,
         }
     }
 
@@ -610,90 +611,114 @@ pub enum SharedModelEnum {
 impl SharedModelEnum {
     pub(crate) fn save_all_in_one(&self, path: &str) -> Result<(), String> {
         match self {
-            SharedModelEnum::Duplicates(state) => state.borrow().as_ref().map(|x| x.save_all_in_one(path, "results_duplicates")),
-            SharedModelEnum::EmptyFolder(state) => state.borrow().as_ref().map(|x| x.save_all_in_one(path, "results_empty_directories")),
-            SharedModelEnum::EmptyFiles(state) => state.borrow().as_ref().map(|x| x.save_all_in_one(path, "results_empty_files")),
-            SharedModelEnum::Temporary(state) => state.borrow().as_ref().map(|x| x.save_all_in_one(path, "results_temporary_files")),
-            SharedModelEnum::BigFile(state) => state.borrow().as_ref().map(|x| x.save_all_in_one(path, "results_big_files")),
-            SharedModelEnum::SimilarImages(state) => state.borrow().as_ref().map(|x| x.save_all_in_one(path, "results_similar_images")),
-            SharedModelEnum::SimilarVideos(state) => state.borrow().as_ref().map(|x| x.save_all_in_one(path, "results_similar_videos")),
-            SharedModelEnum::SameMusic(state) => state.borrow().as_ref().map(|x| x.save_all_in_one(path,  "results_same_music")),
-            SharedModelEnum::Symlinks(state) => state.borrow().as_ref().map(|x| x.save_all_in_one(path,  "results_invalid_symlinks")),
-            SharedModelEnum::BrokenFiles(state) => state.borrow().as_ref().map(|x| x.save_all_in_one(path,  "results_broken_files")),
-            SharedModelEnum::BadExtensions(state) => state.borrow().as_ref().map(|x| x.save_all_in_one(path,  "results_bad_extensions")),
-        }.transpose().map_err(|e|e.to_string())?;
+            Self::Duplicates(state) => state.borrow().as_ref().map(|x| x.save_all_in_one(path, "results_duplicates")),
+            Self::EmptyFolder(state) => state.borrow().as_ref().map(|x| x.save_all_in_one(path, "results_empty_directories")),
+            Self::EmptyFiles(state) => state.borrow().as_ref().map(|x| x.save_all_in_one(path, "results_empty_files")),
+            Self::Temporary(state) => state.borrow().as_ref().map(|x| x.save_all_in_one(path, "results_temporary_files")),
+            Self::BigFile(state) => state.borrow().as_ref().map(|x| x.save_all_in_one(path, "results_big_files")),
+            Self::SimilarImages(state) => state.borrow().as_ref().map(|x| x.save_all_in_one(path, "results_similar_images")),
+            Self::SimilarVideos(state) => state.borrow().as_ref().map(|x| x.save_all_in_one(path, "results_similar_videos")),
+            Self::SameMusic(state) => state.borrow().as_ref().map(|x| x.save_all_in_one(path, "results_same_music")),
+            Self::Symlinks(state) => state.borrow().as_ref().map(|x| x.save_all_in_one(path, "results_invalid_symlinks")),
+            Self::BrokenFiles(state) => state.borrow().as_ref().map(|x| x.save_all_in_one(path, "results_broken_files")),
+            Self::BadExtensions(state) => state.borrow().as_ref().map(|x| x.save_all_in_one(path, "results_bad_extensions")),
+        }
+        .transpose()
+        .map_err(|e| e.to_string())?;
 
         Ok(())
     }
-    pub(crate) fn replace(&self, new_item: SharedModelEnum) {
+    pub(crate) fn replace(&self, new_item: Self) {
         match (self, new_item) {
-            (SharedModelEnum::Duplicates(old), SharedModelEnum::Duplicates(new)) => {old.borrow_mut().replace(new.take().expect("TEST"))}
-            (SharedModelEnum::EmptyFolder(old), SharedModelEnum::EmptyFolder(new)) => {old.borrow_mut().replace(new.take().expect("TEST"))}
-            (SharedModelEnum::EmptyFiles(old), SharedModelEnum::EmptyFiles(new)) => {old.borrow_mut().replace(new.take().expect("TEST"))}
-            (SharedModelEnum::Temporary(old), SharedModelEnum::Temporary(new)) => {old.borrow_mut().replace(new.take().expect("TEST"))}
-            (SharedModelEnum::BigFile(old), SharedModelEnum::BigFile(new)) => {old.borrow_mut().replace(new.take().expect("TEST"))}
-            (SharedModelEnum::SimilarImages(old), SharedModelEnum::SimilarImages(new)) => {old.borrow_mut().replace(new.take().expect("TEST"))}
-            (SharedModelEnum::SimilarVideos(old), SharedModelEnum::SimilarVideos(new)) => {old.borrow_mut().replace(new.take().expect("TEST"))}
-            (SharedModelEnum::SameMusic(old), SharedModelEnum::SameMusic(new)) => {old.borrow_mut().replace(new.take().expect("TEST"))}
-            (SharedModelEnum::Symlinks(old), SharedModelEnum::Symlinks(new)) => {old.borrow_mut().replace(new.take().expect("TEST"))}
-            (SharedModelEnum::BrokenFiles(old), SharedModelEnum::BrokenFiles(new)) => {old.borrow_mut().replace(new.take().expect("TEST"))}
-            (SharedModelEnum::BadExtensions(old), SharedModelEnum::BadExtensions(new)) => {old.borrow_mut().replace(new.take().expect("TEST"))}
+            (Self::Duplicates(old), Self::Duplicates(new)) => {
+                old.borrow_mut().replace(new.take().expect("TEST"));
+            }
+            (Self::EmptyFolder(old), Self::EmptyFolder(new)) => {
+                old.borrow_mut().replace(new.take().expect("TEST"));
+            }
+            (Self::EmptyFiles(old), Self::EmptyFiles(new)) => {
+                old.borrow_mut().replace(new.take().expect("TEST"));
+            }
+            (Self::Temporary(old), Self::Temporary(new)) => {
+                old.borrow_mut().replace(new.take().expect("TEST"));
+            }
+            (Self::BigFile(old), Self::BigFile(new)) => {
+                old.borrow_mut().replace(new.take().expect("TEST"));
+            }
+            (Self::SimilarImages(old), Self::SimilarImages(new)) => {
+                old.borrow_mut().replace(new.take().expect("TEST"));
+            }
+            (Self::SimilarVideos(old), Self::SimilarVideos(new)) => {
+                old.borrow_mut().replace(new.take().expect("TEST"));
+            }
+            (Self::SameMusic(old), Self::SameMusic(new)) => {
+                old.borrow_mut().replace(new.take().expect("TEST"));
+            }
+            (Self::Symlinks(old), Self::Symlinks(new)) => {
+                old.borrow_mut().replace(new.take().expect("TEST"));
+            }
+            (Self::BrokenFiles(old), Self::BrokenFiles(new)) => {
+                old.borrow_mut().replace(new.take().expect("TEST"));
+            }
+            (Self::BadExtensions(old), Self::BadExtensions(new)) => {
+                old.borrow_mut().replace(new.take().expect("TEST"));
+            }
             _ => panic!("Mismatched SharedModelEnum variants"),
-        };
+        }
     }
 }
 impl From<DuplicateFinder> for SharedModelEnum {
     fn from(value: DuplicateFinder) -> Self {
-        SharedModelEnum::Duplicates(Rc::new(RefCell::new(Some(value))))
+        Self::Duplicates(Rc::new(RefCell::new(Some(value))))
     }
 }
 impl From<EmptyFolder> for SharedModelEnum {
     fn from(value: EmptyFolder) -> Self {
-        SharedModelEnum::EmptyFolder(Rc::new(RefCell::new(Some(value))))
+        Self::EmptyFolder(Rc::new(RefCell::new(Some(value))))
     }
 }
 impl From<EmptyFiles> for SharedModelEnum {
     fn from(value: EmptyFiles) -> Self {
-        SharedModelEnum::EmptyFiles(Rc::new(RefCell::new(Some(value))))
+        Self::EmptyFiles(Rc::new(RefCell::new(Some(value))))
     }
 }
 impl From<Temporary> for SharedModelEnum {
     fn from(value: Temporary) -> Self {
-        SharedModelEnum::Temporary(Rc::new(RefCell::new(Some(value))))
+        Self::Temporary(Rc::new(RefCell::new(Some(value))))
     }
 }
 impl From<BigFile> for SharedModelEnum {
     fn from(value: BigFile) -> Self {
-        SharedModelEnum::BigFile(Rc::new(RefCell::new(Some(value))))
+        Self::BigFile(Rc::new(RefCell::new(Some(value))))
     }
 }
 impl From<SimilarImages> for SharedModelEnum {
     fn from(value: SimilarImages) -> Self {
-        SharedModelEnum::SimilarImages(Rc::new(RefCell::new(Some(value))))
+        Self::SimilarImages(Rc::new(RefCell::new(Some(value))))
     }
 }
 impl From<SimilarVideos> for SharedModelEnum {
     fn from(value: SimilarVideos) -> Self {
-        SharedModelEnum::SimilarVideos(Rc::new(RefCell::new(Some(value))))
+        Self::SimilarVideos(Rc::new(RefCell::new(Some(value))))
     }
 }
 impl From<SameMusic> for SharedModelEnum {
     fn from(value: SameMusic) -> Self {
-        SharedModelEnum::SameMusic(Rc::new(RefCell::new(Some(value))))
+        Self::SameMusic(Rc::new(RefCell::new(Some(value))))
     }
 }
 impl From<InvalidSymlinks> for SharedModelEnum {
     fn from(value: InvalidSymlinks) -> Self {
-        SharedModelEnum::Symlinks(Rc::new(RefCell::new(Some(value))))
+        Self::Symlinks(Rc::new(RefCell::new(Some(value))))
     }
 }
 impl From<BrokenFiles> for SharedModelEnum {
     fn from(value: BrokenFiles) -> Self {
-        SharedModelEnum::BrokenFiles(Rc::new(RefCell::new(Some(value))))
+        Self::BrokenFiles(Rc::new(RefCell::new(Some(value))))
     }
 }
 impl From<BadExtensions> for SharedModelEnum {
     fn from(value: BadExtensions) -> Self {
-        SharedModelEnum::BadExtensions(Rc::new(RefCell::new(Some(value))))
+        Self::BadExtensions(Rc::new(RefCell::new(Some(value))))
     }
 }

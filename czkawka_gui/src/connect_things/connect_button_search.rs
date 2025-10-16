@@ -33,7 +33,7 @@ use crate::help_functions::{
     ColumnsExcludedDirectory, ColumnsIncludedDirectory, Message, check_if_list_store_column_have_all_same_values, get_list_store, get_path_buf_from_vector_of_strings,
     get_string_from_list_store, hide_all_buttons, reset_text_view, set_buttons,
 };
-use crate::notebook_enums::{NotebookMainEnum, to_notebook_main_enum};
+use crate::notebook_enums::NotebookMainEnum;
 use crate::taskbar_progress::tbp_flags::TBPF_NOPROGRESS;
 use crate::{DEFAULT_MAXIMAL_FILE_SIZE, DEFAULT_MINIMAL_CACHE_SIZE, DEFAULT_MINIMAL_FILE_SIZE, flg};
 

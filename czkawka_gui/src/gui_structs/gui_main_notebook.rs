@@ -4,19 +4,19 @@ use std::rc::Rc;
 
 use czkawka_core::common::model::CheckingMethod;
 use czkawka_core::localizer_core::{fnc_get_similarity_minimal, fnc_get_similarity_very_high};
-use czkawka_core::tools::big_file::{BigFile, SearchMode};
-use czkawka_core::tools::similar_images::{SimilarImages, SIMILAR_VALUES};
+use czkawka_core::tools::big_file::SearchMode;
+use czkawka_core::tools::similar_images::SIMILAR_VALUES;
 use czkawka_core::tools::similar_images::core::get_string_from_similarity;
 use gtk4::prelude::*;
-use gtk4::{Builder, CheckButton, ComboBoxText, Entry, Label, Notebook, Picture, Scale, TreeView, Widget};
+use gtk4::{Builder, CheckButton, ComboBoxText, Entry, Label, Notebook, Picture, Scale, Widget};
+
 use crate::flg;
 use crate::gui_structs::common_tree_view::{CommonTreeViews, SharedModelEnum, SubView};
 use crate::gui_structs::gui_data::GuiData;
 use crate::gui_structs::gui_settings::GuiSettings;
 use crate::help_combo_box::{AUDIO_TYPE_CHECK_METHOD_COMBO_BOX, BIG_FILES_CHECK_METHOD_COMBO_BOX, DUPLICATES_CHECK_METHOD_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX};
-use crate::help_functions::{get_all_direct_children, SharedState};
+use crate::help_functions::get_all_direct_children;
 use crate::notebook_enums::NotebookMainEnum;
-
 
 #[derive(Clone)]
 pub struct GuiMainNotebook {

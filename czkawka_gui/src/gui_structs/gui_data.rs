@@ -5,17 +5,6 @@ use std::rc::Rc;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
-use czkawka_core::tools::bad_extensions::BadExtensions;
-use czkawka_core::tools::big_file::BigFile;
-use czkawka_core::tools::broken_files::BrokenFiles;
-use czkawka_core::tools::duplicate::DuplicateFinder;
-use czkawka_core::tools::empty_files::EmptyFiles;
-use czkawka_core::tools::empty_folder::EmptyFolder;
-use czkawka_core::tools::invalid_symlinks::InvalidSymlinks;
-use czkawka_core::tools::same_music::SameMusic;
-use czkawka_core::tools::similar_images::SimilarImages;
-use czkawka_core::tools::similar_videos::SimilarVideos;
-use czkawka_core::tools::temporary::Temporary;
 use gdk4::gdk_pixbuf::Pixbuf;
 use gtk4::prelude::*;
 use gtk4::{Builder, FileChooserNative};
@@ -31,7 +20,7 @@ use crate::gui_structs::gui_popovers_sort::GuiSortPopovers;
 use crate::gui_structs::gui_progress_dialog::GuiProgressDialog;
 use crate::gui_structs::gui_settings::GuiSettings;
 use crate::gui_structs::gui_upper_notebook::GuiUpperNotebook;
-use crate::help_functions::{BottomButtonsEnum, SharedState};
+use crate::help_functions::BottomButtonsEnum;
 use crate::notebook_enums::{NotebookMainEnum, get_all_main_tabs};
 use crate::taskbar_progress::TaskbarProgress;
 

@@ -3,14 +3,13 @@ use std::collections::HashMap;
 use std::env;
 use std::rc::Rc;
 
-use czkawka_core::common::traits::PrintResults;
 use gtk4::prelude::*;
 use gtk4::{Button, Entry};
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::BottomButtonsEnum;
-use crate::notebook_enums::{NotebookMainEnum, to_notebook_main_enum};
+use crate::notebook_enums::NotebookMainEnum;
 
 pub(crate) fn connect_button_save(gui_data: &GuiData) {
     let buttons_save = gui_data.bottom_buttons.buttons_save.clone();
@@ -32,13 +31,7 @@ pub(crate) fn connect_button_save(gui_data: &GuiData) {
             return;
         }
 
-        post_save_things(
-            subview.enum_value,
-            &shared_buttons,
-            &entry_info,
-            &buttons_save_clone,
-            current_path,
-        );
+        post_save_things(subview.enum_value, &shared_buttons, &entry_info, &buttons_save_clone, current_path);
     });
 }
 
