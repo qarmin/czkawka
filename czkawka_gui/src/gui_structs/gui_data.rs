@@ -56,12 +56,6 @@ pub const CZK_ICON_STOP: &[u8] = include_bytes!("../../icons/czk_stop.svg");
 pub const CZK_ICON_SYMLINK: &[u8] = include_bytes!("../../icons/czk_symlink.svg");
 pub const CZK_ICON_TRASH: &[u8] = include_bytes!("../../icons/czk_trash.svg");
 
-// pub enum SS {
-//     DuplicateFinder(SharedState<DuplicateFinder>),
-//     EmptyFolder(SharedState<EmptyFolder>),
-//
-// }
-
 #[derive(Clone)]
 pub struct GuiData {
     // Windows
@@ -86,19 +80,6 @@ pub struct GuiData {
 
     // Buttons state
     pub shared_buttons: Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>,
-
-    // State of search results
-    pub shared_duplication_state: SharedState<DuplicateFinder>,
-    pub shared_empty_folders_state: SharedState<EmptyFolder>,
-    pub shared_empty_files_state: SharedState<EmptyFiles>,
-    pub shared_temporary_files_state: SharedState<Temporary>,
-    pub shared_big_files_state: SharedState<BigFile>,
-    pub shared_similar_images_state: SharedState<SimilarImages>,
-    pub shared_similar_videos_state: SharedState<SimilarVideos>,
-    pub shared_same_music_state: SharedState<SameMusic>,
-    pub shared_same_invalid_symlinks: SharedState<InvalidSymlinks>,
-    pub shared_broken_files_state: SharedState<BrokenFiles>,
-    pub shared_bad_extensions_state: SharedState<BadExtensions>,
 
     //// Entry
     pub entry_info: gtk4::Entry,
@@ -175,20 +156,6 @@ impl GuiData {
             .modal(true)
             .build();
 
-        // State of search results
-
-        let shared_duplication_state: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
-        let shared_empty_folders_state: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
-        let shared_empty_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
-        let shared_temporary_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
-        let shared_big_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
-        let shared_similar_images_state: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
-        let shared_similar_videos_state: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
-        let shared_same_music_state: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
-        let shared_same_invalid_symlinks: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
-        let shared_broken_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
-        let shared_bad_extensions_state: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
-
         //// Entry
         let entry_info: gtk4::Entry = builder.object("entry_info").expect("Cambalache");
 
@@ -216,17 +183,6 @@ impl GuiData {
             file_dialog_move_to_folder,
             taskbar_state,
             shared_buttons,
-            shared_duplication_state,
-            shared_empty_folders_state,
-            shared_empty_files_state,
-            shared_temporary_files_state,
-            shared_big_files_state,
-            shared_similar_images_state,
-            shared_similar_videos_state,
-            shared_same_music_state,
-            shared_same_invalid_symlinks,
-            shared_broken_files_state,
-            shared_bad_extensions_state,
             entry_info,
             text_view_errors,
             scrolled_window_errors,

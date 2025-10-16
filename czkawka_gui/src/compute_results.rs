@@ -1,3 +1,4 @@
+use std::arch::x86_64::_subborrow_u32;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -28,6 +29,7 @@ use humansize::{BINARY, format_size};
 use rayon::prelude::*;
 use crate::connect_things::connect_button_delete::tree_remove;
 use crate::flg;
+use crate::gui_structs::common_tree_view::SubView;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_combo_box::IMAGES_HASH_SIZE_COMBO_BOX;
 use crate::help_functions::{
@@ -98,18 +100,7 @@ pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Recei
     let entry_info = gui_data.entry_info.clone();
     let buttons_array = gui_data.bottom_buttons.buttons_array.clone();
     let text_view_errors = gui_data.text_view_errors.clone();
-    let shared_duplication_state = gui_data.shared_duplication_state.clone();
     let shared_buttons = gui_data.shared_buttons.clone();
-    let shared_empty_folders_state = gui_data.shared_empty_folders_state.clone();
-    let shared_empty_files_state = gui_data.shared_empty_files_state.clone();
-    let shared_broken_files_state = gui_data.shared_broken_files_state.clone();
-    let shared_big_files_state = gui_data.shared_big_files_state.clone();
-    let shared_same_invalid_symlinks = gui_data.shared_same_invalid_symlinks.clone();
-    let shared_temporary_files_state = gui_data.shared_temporary_files_state.clone();
-    let shared_similar_images_state = gui_data.shared_similar_images_state.clone();
-    let shared_similar_videos_state = gui_data.shared_similar_videos_state.clone();
-    let shared_bad_extensions_state = gui_data.shared_bad_extensions_state.clone();
-    let shared_same_music_state = gui_data.shared_same_music_state.clone();
     let buttons_names = gui_data.bottom_buttons.buttons_names;
     let window_progress = gui_data.progress_window.window_progress.clone();
     let taskbar_state = gui_data.taskbar_state.clone();
@@ -139,27 +130,26 @@ pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Recei
                 let hash_size = IMAGES_HASH_SIZE_COMBO_BOX[hash_size_index] as u8;
 
                 let msg_type = msg.get_message_type();
-                let tree_view = &common_tree_views.get_subview(msg_type).tree_view;
+                let subview = common_tree_views.get_subview(msg_type).clone();
 
                 let found_duplicates: Option<bool> = match msg {
-                    Message::Duplicates(df) => compute_duplicate_finder(df, &entry_info, &tree_view, &text_view_errors, &shared_duplication_state),
-                    Message::EmptyFolders(ef) => compute_empty_folders(ef, &entry_info, &tree_view, &text_view_errors, &shared_empty_folders_state),
-                    Message::EmptyFiles(vf) => compute_empty_files(vf, &entry_info, &tree_view, &text_view_errors, &shared_empty_files_state),
-                    Message::BigFiles(bf) => compute_big_files(bf, &entry_info, &tree_view, &text_view_errors, &shared_big_files_state),
-                    Message::Temporary(tf) => compute_temporary_files(tf, &entry_info, &tree_view, &text_view_errors, &shared_temporary_files_state),
+                    Message::Duplicates(df) => compute_duplicate_finder(df, &entry_info, &text_view_errors, subview),
+                    Message::EmptyFolders(ef) => compute_empty_folders(ef, &entry_info, &text_view_errors, subview),
+                    Message::EmptyFiles(vf) => compute_empty_files(vf, &entry_info, &text_view_errors, &subview),
+                    Message::BigFiles(bf) => compute_big_files(bf, &entry_info, &text_view_errors, &subview),
+                    Message::Temporary(tf) => compute_temporary_files(tf, &entry_info, &text_view_errors, &subview),
                     Message::SimilarImages(sf) => compute_similar_images(
                         sf,
                         &entry_info,
-                        &tree_view,
                         &text_view_errors,
-                        &shared_similar_images_state,
+                        &subview,
                         hash_size,
                     ),
-                    Message::SimilarVideos(ff) => compute_similar_videos(ff, &entry_info, &tree_view, &text_view_errors, &shared_similar_videos_state),
-                    Message::SameMusic(mf) => compute_same_music(mf, &entry_info, &tree_view, &text_view_errors, &shared_same_music_state),
-                    Message::InvalidSymlinks(ifs) => compute_invalid_symlinks(ifs, &entry_info, &tree_view, &text_view_errors, &shared_same_invalid_symlinks),
-                    Message::BrokenFiles(br) => compute_broken_files(br, &entry_info, &tree_view, &text_view_errors, &shared_broken_files_state),
-                    Message::BadExtensions(be) => compute_bad_extensions(be, &entry_info, &tree_view, &text_view_errors, &shared_bad_extensions_state),
+                    Message::SimilarVideos(ff) => compute_similar_videos(ff, &entry_info, &text_view_errors, &subview),
+                    Message::SameMusic(mf) => compute_same_music(mf, &entry_info, &text_view_errors, &subview),
+                    Message::InvalidSymlinks(ifs) => compute_invalid_symlinks(ifs, &entry_info, &text_view_errors, &subview),
+                    Message::BrokenFiles(br) => compute_broken_files(br, &entry_info, &text_view_errors, &subview),
+                    Message::BadExtensions(be) => compute_bad_extensions(be, &entry_info, &text_view_errors, &subview),
                 };
 
                 if let Some(found_duplicates) = found_duplicates {
@@ -702,18 +692,17 @@ fn compute_empty_folders(ef: EmptyFolder, entry_info: &Entry, tree_view: &TreeVi
 fn compute_duplicate_finder(
     df: DuplicateFinder,
     entry_info: &Entry,
-    tree_view: &TreeView,
     text_view_errors: &TextView,
-    shared_state: &SharedState<DuplicateFinder>,
+    sub_view: &SubView,
 ) -> Option<bool> {
     if df.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
         return None;
     }
     if df.get_use_reference() {
-        tree_view.selection().set_select_function(select_function_always_true);
+     sub_view.tree_view.selection().set_select_function(select_function_always_true);
     } else {
-        tree_view.selection().set_select_function(select_function_duplicates);
+        sub_view.tree_view.selection().set_select_function(select_function_duplicates);
     }
 
     let information = df.get_information();
@@ -762,7 +751,7 @@ fn compute_duplicate_finder(
 
     // Create GUI
     {
-        let list_store = get_list_store(tree_view);
+        let list_store = get_list_store(&sub_view.tree_view);
 
         if df.get_use_reference() {
             match df.get_params().check_method {
@@ -884,7 +873,7 @@ fn compute_duplicate_finder(
         print_text_messages_to_text_view(text_messages, text_view_errors);
     }
 
-    *shared_state.borrow_mut() = Some(df);
+    sub_view.shared_model_enum.replace(df.into());
     Some(duplicates_number > 0)
 }
 

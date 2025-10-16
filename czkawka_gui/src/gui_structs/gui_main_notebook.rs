@@ -4,19 +4,19 @@ use std::rc::Rc;
 
 use czkawka_core::common::model::CheckingMethod;
 use czkawka_core::localizer_core::{fnc_get_similarity_minimal, fnc_get_similarity_very_high};
-use czkawka_core::tools::big_file::SearchMode;
-use czkawka_core::tools::similar_images::SIMILAR_VALUES;
+use czkawka_core::tools::big_file::{BigFile, SearchMode};
+use czkawka_core::tools::similar_images::{SimilarImages, SIMILAR_VALUES};
 use czkawka_core::tools::similar_images::core::get_string_from_similarity;
 use gtk4::prelude::*;
 use gtk4::{Builder, CheckButton, ComboBoxText, Entry, Label, Notebook, Picture, Scale, TreeView, Widget};
-
 use crate::flg;
-use crate::gui_structs::common_tree_view::{CommonTreeViews, SubView};
+use crate::gui_structs::common_tree_view::{CommonTreeViews, SharedModelEnum, SubView};
 use crate::gui_structs::gui_data::GuiData;
 use crate::gui_structs::gui_settings::GuiSettings;
 use crate::help_combo_box::{AUDIO_TYPE_CHECK_METHOD_COMBO_BOX, BIG_FILES_CHECK_METHOD_COMBO_BOX, DUPLICATES_CHECK_METHOD_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX};
-use crate::help_functions::get_all_direct_children;
+use crate::help_functions::{get_all_direct_children, SharedState};
 use crate::notebook_enums::NotebookMainEnum;
+
 
 #[derive(Clone)]
 pub struct GuiMainNotebook {
@@ -155,17 +155,17 @@ impl GuiMainNotebook {
 
         #[rustfmt::skip]
         let subviews: Vec<_> = [
-            SubView::new(builder, "scrolled_window_duplicate_finder", NotebookMainEnum::Duplicate, Some("image_preview_duplicates"), "tree_view_duplicate_finder", Some(settings.check_button_settings_show_preview_duplicates.clone())),
-            SubView::new(builder, "scrolled_window_empty_folder_finder", NotebookMainEnum::EmptyDirectories, None, "tree_view_empty_folder_finder", None),
-            SubView::new(builder, "scrolled_window_empty_files_finder", NotebookMainEnum::EmptyFiles, None, "tree_view_empty_files_finder", None),
-            SubView::new(builder, "scrolled_window_temporary_files_finder", NotebookMainEnum::Temporary, None, "tree_view_temporary_files_finder", None),
-            SubView::new(builder, "scrolled_window_big_files_finder", NotebookMainEnum::BigFiles, None, "tree_view_big_files_finder", None),
-            SubView::new(builder, "scrolled_window_similar_images_finder", NotebookMainEnum::SimilarImages, Some("image_preview_similar_images"), "tree_view_similar_images_finder", Some(settings.check_button_settings_show_preview_similar_images.clone())),
-            SubView::new(builder, "scrolled_window_similar_videos_finder", NotebookMainEnum::SimilarVideos, None, "tree_view_similar_videos_finder", None),
-            SubView::new(builder, "scrolled_window_same_music_finder", NotebookMainEnum::SameMusic, None, "tree_view_same_music_finder", None),
-            SubView::new(builder, "scrolled_window_invalid_symlinks", NotebookMainEnum::Symlinks, None, "tree_view_invalid_symlinks", None),
-            SubView::new(builder, "scrolled_window_broken_files", NotebookMainEnum::BrokenFiles, None, "tree_view_broken_files", None),
-            SubView::new(builder, "scrolled_window_bad_extensions", NotebookMainEnum::BadExtensions, None, "tree_view_bad_extensions", None),
+            SubView::new(builder, "scrolled_window_duplicate_finder", NotebookMainEnum::Duplicate, Some("image_preview_duplicates"), "tree_view_duplicate_finder", Some(settings.check_button_settings_show_preview_duplicates.clone()), SharedModelEnum::Duplicates(Rc::default())),
+            SubView::new(builder, "scrolled_window_empty_folder_finder", NotebookMainEnum::EmptyDirectories, None, "tree_view_empty_folder_finder", None, SharedModelEnum::EmptyFolder(Rc::default())),
+            SubView::new(builder, "scrolled_window_empty_files_finder", NotebookMainEnum::EmptyFiles, None, "tree_view_empty_files_finder", None, SharedModelEnum::EmptyFiles(Rc::default())),
+            SubView::new(builder, "scrolled_window_temporary_files_finder", NotebookMainEnum::Temporary, None, "tree_view_temporary_files_finder", None, SharedModelEnum::Temporary(Rc::default())),
+            SubView::new(builder, "scrolled_window_big_files_finder", NotebookMainEnum::BigFiles, None, "tree_view_big_files_finder", None, SharedModelEnum::BigFile(Rc::default())),
+            SubView::new(builder, "scrolled_window_similar_images_finder", NotebookMainEnum::SimilarImages, Some("image_preview_similar_images"), "tree_view_similar_images_finder", Some(settings.check_button_settings_show_preview_similar_images.clone()), SharedModelEnum::SimilarImages(Rc::default())),
+            SubView::new(builder, "scrolled_window_similar_videos_finder", NotebookMainEnum::SimilarVideos, None, "tree_view_similar_videos_finder", None, SharedModelEnum::SimilarVideos(Rc::default())),
+            SubView::new(builder, "scrolled_window_same_music_finder", NotebookMainEnum::SameMusic, None, "tree_view_same_music_finder", None, SharedModelEnum::SameMusic(Rc::default())),
+            SubView::new(builder, "scrolled_window_invalid_symlinks", NotebookMainEnum::Symlinks, None, "tree_view_invalid_symlinks", None, SharedModelEnum::Symlinks(Rc::default())),
+            SubView::new(builder, "scrolled_window_broken_files", NotebookMainEnum::BrokenFiles, None, "tree_view_broken_files", None, SharedModelEnum::BrokenFiles(Rc::default())),
+            SubView::new(builder, "scrolled_window_bad_extensions", NotebookMainEnum::BadExtensions, None, "tree_view_bad_extensions", None, SharedModelEnum::BadExtensions(Rc::default())),
         ]
         .into_iter()
         .collect();
