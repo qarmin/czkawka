@@ -1,15 +1,10 @@
 use std::env;
-use std::path::Path;
-use std::process::Command;
 use std::thread::available_parallelism;
 use std::time::{Duration, Instant};
 
-use image::{DynamicImage};
+use czkawka_core::common::image::get_dynamic_image_from_path;
 use image_hasher::{FilterType, HashAlg, HasherConfig};
-use log::{info, trace};
-use rawler::decoders::RawDecodeParams;
-use rawler::imgop::develop::RawDevelop;
-use rawler::rawsource::RawSource;
+use log::info;
 use rayon::prelude::*;
 use walkdir::WalkDir;
 
@@ -85,12 +80,15 @@ fn main() {
     handsome_logger::init().expect("TEST");
     print_items();
 
-    if !is_running_as_sudo() {
-        println!("Please run this program as root");
-        return;
-    }
+    #[cfg(unix)]
+    {
+        if !is_running_as_sudo() {
+            println!("Please run this program as root");
+            return;
+        }
 
-    clean_disk_cache();
+        clean_disk_cache();
+    }
 
     let Some(test_path) = env::args().nth(1) else {
         println!("Please provide path to test images");
@@ -121,6 +119,7 @@ fn main() {
 
     for i in 0..ITERATIONS {
         println!("Iteration {}", i + 1);
+        #[cfg(unix)]
         clean_disk_cache();
 
         let start = std::time::Instant::now();
@@ -154,15 +153,7 @@ fn main() {
 }
 
 fn hash_image(hash_image: &str) -> Result<(), String> {
-    let hash_image_lower = hash_image.to_lowercase();
-    let img = if [".cr2", ".crw", ".nef", ".arw", ".dng", ".avif", ".cr3", ".cr2"]
-        .iter()
-        .any(|e| hash_image_lower.ends_with(e))
-    {
-        get_raw_image(hash_image)?
-    } else {
-        image::open(hash_image).map_err(|e| format!("Cannot open image file \"{hash_image}\": {e}"))?
-    };
+    let img = get_dynamic_image_from_path(hash_image)?;
 
     let hasher_config = HasherConfig::new().hash_size(HASH_SIZE, HASH_SIZE).hash_alg(HASH_ALG).resize_filter(FILTER_TYPE);
     let hasher = hasher_config.to_hasher();
@@ -171,6 +162,7 @@ fn hash_image(hash_image: &str) -> Result<(), String> {
     Ok(())
 }
 
+#[cfg(unix)]
 fn clean_disk_cache() {
     let _sync = Command::new("sync").output().expect("Failed to execute sync");
     let _drop_caches = Command::new("sh")
@@ -180,6 +172,7 @@ fn clean_disk_cache() {
         .expect("Failed to execute drop_caches");
 }
 
+#[cfg(unix)]
 fn is_running_as_sudo() -> bool {
     match env::var("EUID") {
         Ok(euid) => euid == "0",
@@ -188,38 +181,6 @@ fn is_running_as_sudo() -> bool {
             Err(_) => false,
         },
     }
-}
-
-pub(crate) fn get_raw_image(path: impl AsRef<Path> + std::fmt::Debug) -> Result<DynamicImage, String> {
-    let mut timer = Timer::new("Rawler");
-
-    let raw_source = RawSource::new(path.as_ref()).map_err(|err| format!("Failed to create RawSource from path {path:?}: {err}"))?;
-
-    timer.checkpoint("After creating RawSource");
-
-    let decoder = rawler::get_decoder(&raw_source).map_err(|e| e.to_string())?;
-
-    timer.checkpoint("After getting decoder");
-    let raw_image = decoder.raw_image(&raw_source, &RawDecodeParams::default(), false).map_err(|e| e.to_string())?;
-
-    timer.checkpoint("After decoding raw image");
-
-    let developer = RawDevelop::default();
-    let developed_image = developer.develop_intermediate(&raw_image).map_err(|e| e.to_string())?;
-
-    timer.checkpoint("After developing raw image");
-
-    let dynamic_image = developed_image.to_dynamic_image().ok_or("Failed to convert image to DynamicImage".to_string())?;
-
-    timer.checkpoint("After converting to DynamicImage");
-
-    let rgb_image = DynamicImage::from(dynamic_image.to_rgb8());
-
-    timer.checkpoint("After reconverting to RGB");
-
-    trace!("{}", timer.report(false));
-
-    Ok(rgb_image)
 }
 
 pub struct Timer {
