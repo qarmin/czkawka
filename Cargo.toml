@@ -67,6 +67,7 @@ clippy.ip_constant = "warn"
 clippy.unnecessary_semicolon = "warn"
 clippy.trivially_copy_pass_by_ref = "warn"
 clippy.indexing_slicing = "warn"
+clippy.non_std_lazy_statics = "warn"
 
 clippy.allow_attributes = "warn"
 clippy.assertions_on_result_states = "warn"

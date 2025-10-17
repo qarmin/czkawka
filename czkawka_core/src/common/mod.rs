@@ -22,12 +22,11 @@ use std::{fs, io, thread};
 
 use items::SingleExcludedItem;
 use log::debug;
-use once_cell::sync::Lazy;
 
 use crate::common::consts::{DEFAULT_WORKER_THREAD_SIZE, TEMP_HARDLINK_FILE};
 
-static NUMBER_OF_THREADS: Lazy<Mutex<Option<usize>>> = Lazy::new(|| Mutex::new(None));
-static ALL_AVAILABLE_THREADS: Lazy<Mutex<Option<usize>>> = Lazy::new(|| Mutex::new(None));
+static NUMBER_OF_THREADS: std::sync::LazyLock<Mutex<Option<usize>>> = std::sync::LazyLock::new(|| Mutex::new(None));
+static ALL_AVAILABLE_THREADS: std::sync::LazyLock<Mutex<Option<usize>>> = std::sync::LazyLock::new(|| Mutex::new(None));
 
 pub fn get_number_of_threads() -> usize {
     let data = NUMBER_OF_THREADS.lock().expect("Cannot fail").expect("Should be set before get");

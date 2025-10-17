@@ -2,14 +2,13 @@ use std::collections::HashMap;
 
 use i18n_embed::fluent::{FluentLanguageLoader, fluent_language_loader};
 use i18n_embed::{DefaultLocalizer, LanguageLoader, Localizer};
-use once_cell::sync::Lazy;
 use rust_embed::RustEmbed;
 
 #[derive(RustEmbed)]
 #[folder = "i18n/"]
 struct Localizations;
 
-pub static LANGUAGE_LOADER_CORE: Lazy<FluentLanguageLoader> = Lazy::new(|| {
+pub static LANGUAGE_LOADER_CORE: std::sync::LazyLock<FluentLanguageLoader> = std::sync::LazyLock::new(|| {
     let loader: FluentLanguageLoader = fluent_language_loader!();
 
     loader.load_fallback_language(&Localizations).expect("Error while loading fallback language");

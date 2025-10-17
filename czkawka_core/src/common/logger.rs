@@ -60,7 +60,7 @@ pub fn setup_logger(disabled_terminal_printing: bool, app_name: &str, filtering_
     })();
 
     if combined_logger.is_none() {
-        TermLogger::init(term_config, TerminalMode::Mixed, ColorChoice::Always).expect("Cannot initialize logger");
+        let _ = TermLogger::init(term_config, TerminalMode::Mixed, ColorChoice::Always);
         info!("Logging to terminal only, file logging is disabled");
     }
 }

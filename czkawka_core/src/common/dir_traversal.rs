@@ -533,7 +533,6 @@ mod tests {
     use std::time::{Duration, SystemTime};
     use std::{fs, io};
 
-    use once_cell::sync::Lazy;
     use tempfile::TempDir;
 
     use super::*;
@@ -555,7 +554,7 @@ mod tests {
         }
     }
 
-    static NOW: Lazy<SystemTime> = Lazy::new(|| SystemTime::UNIX_EPOCH + Duration::new(100, 0));
+    static NOW: std::sync::LazyLock<SystemTime> = std::sync::LazyLock::new(|| SystemTime::UNIX_EPOCH + Duration::new(100, 0));
     const CONTENT: &[u8; 1] = b"a";
 
     fn create_files(dir: &TempDir) -> io::Result<(PathBuf, PathBuf, PathBuf)> {
