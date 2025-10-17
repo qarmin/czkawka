@@ -43,7 +43,8 @@
         </child>
         <child>
           <object class="GtkBox">
-            <property name="homogeneous">1</property>
+            <property name="hexpand">True</property>
+            <property name="hexpand-set">True</property>
             <child>
               <object class="GtkCheckButton" id="check_button_left_preview_text">
                 <property name="focusable">1</property>
