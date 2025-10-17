@@ -15,6 +15,7 @@ pub struct GuiCompareImages {
 
     pub button_go_previous_compare_group: gtk4::Button,
     pub button_go_next_compare_group: gtk4::Button,
+    pub button_replace_group: gtk4::Button,
 
     pub check_button_left_preview_text: gtk4::CheckButton,
     pub check_button_right_preview_text: gtk4::CheckButton,
@@ -45,6 +46,7 @@ impl GuiCompareImages {
 
         let button_go_previous_compare_group: gtk4::Button = builder.object("button_go_previous_compare_group").expect("Cambalache");
         let button_go_next_compare_group: gtk4::Button = builder.object("button_go_next_compare_group").expect("Cambalache");
+        let button_replace_group: gtk4::Button = builder.object("button_replace_group").expect("Cambalache");
 
         let check_button_left_preview_text: gtk4::CheckButton = builder.object("check_button_left_preview_text").expect("Cambalache");
         let check_button_right_preview_text: gtk4::CheckButton = builder.object("check_button_right_preview_text").expect("Cambalache");
@@ -68,6 +70,7 @@ impl GuiCompareImages {
             label_group_info,
             button_go_previous_compare_group,
             button_go_next_compare_group,
+            button_replace_group,
             check_button_left_preview_text,
             check_button_right_preview_text,
             image_compare_left,
