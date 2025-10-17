@@ -6,6 +6,7 @@ use gtk4::{Builder, TreePath};
 
 use crate::help_functions::set_icon_of_button;
 use crate::{CZK_ICON_LEFT, CZK_ICON_RIGHT, flg};
+use crate::gui_structs::gui_data::CZK_ICON_REPLACE;
 
 #[derive(Clone)]
 pub struct GuiCompareImages {
@@ -64,6 +65,7 @@ impl GuiCompareImages {
 
         set_icon_of_button(&button_go_previous_compare_group, CZK_ICON_LEFT);
         set_icon_of_button(&button_go_next_compare_group, CZK_ICON_RIGHT);
+        set_icon_of_button(&button_replace_group, CZK_ICON_REPLACE);
 
         Self {
             window_compare,

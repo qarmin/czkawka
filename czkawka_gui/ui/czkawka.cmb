@@ -3,8 +3,8 @@
 <!-- Created with Cambalache 0.96.1 -->
 <cambalache-project version="0.96.0" target_tk="gtk-4.0">
   <ui filename="about_dialog.ui" sha256="7f97a25703398a41685c8f1ae828be264074dfef8849e5edf3060da0e70122c6"/>
-  <ui filename="compare_images.ui" sha256="bd9169f6861c2a7cf31ffae43c32d4cde5cb0c39e1e3ab93b85372a6342a7635"/>
-  <ui filename="main_window.ui" sha256="fbcbeaf550abf62e08564341abce40058ada07b72b3f5c43873c31e27c45ba40"/>
+  <ui filename="compare_images.ui" sha256="6999b64ad34a98d8dcbaea1c5a3c19aebbc7b7a0dabbf35bf64724928499ffb0"/>
+  <ui filename="main_window.ui" sha256="f15f0c56c020108438aa7d2f24a8f40748a755b16d877ef6f12ba842f06ef1bc"/>
   <ui filename="popover_right_click.ui" sha256="79b76370c90b258d19a7e91db96324c74c00e2923c5fd7f390a41521c622f730"/>
   <ui filename="popover_select.ui" sha256="e73afc190d745d39735147022ee01c47439f3261bcc5d07b82a016d92e47e083"/>
   <ui filename="progress.ui" sha256="f1fd37dbf8ecc0a517598511dea23a0dc38fe62c0044fb3fdba6f3ee4e29f63a"/>

@@ -223,9 +223,7 @@ pub(crate) fn connect_button_compare(gui_data: &GuiData) {
     let button_replace_group = gui_data.compare_images.button_replace_group.clone();
     let image_compare_right = gui_data.compare_images.image_compare_right.clone();
     let image_compare_left = gui_data.compare_images.image_compare_left.clone();
-    button_replace_group.connect_clicked(move |button_replace_group| {
-        // `Picture` doesn't implement PixbufLoader methods like `pixbuf()`/`set_pixbuf()`.
-        // Use `paintable()` / `set_paintable()` which are available for `Picture`.
+    button_replace_group.connect_clicked(move |_| {
         let tmp = image_compare_left.paintable();
         image_compare_left.set_paintable(image_compare_right.paintable().as_ref());
         image_compare_right.set_paintable(tmp.as_ref());
