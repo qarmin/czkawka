@@ -3,8 +3,21 @@ use std::fmt::Debug;
 use gtk4::prelude::*;
 use gtk4::{ListStore, TreeIter};
 
+use crate::gui_structs::common_tree_view::SubView;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::get_list_store;
+
+fn popover_sort_general_abs<T>(popover: &gtk4::Popover, sv: &SubView)
+where
+    T: Ord + for<'b> glib::value::FromValue<'b> + 'static + Debug,
+{
+    popover_sort_general::<T>(
+        popover,
+        &sv.tree_view,
+        sv.nb_object.column_size_as_bytes.expect("Failed to get size as bytes column"),
+        sv.nb_object.column_header.expect("Failed to get header column"),
+    );
+}
 
 fn popover_sort_general<T>(popover: &gtk4::Popover, tree_view: &gtk4::TreeView, column_sort: i32, column_header: i32)
 where
@@ -75,14 +88,7 @@ pub(crate) fn connect_popover_sort(gui_data: &GuiData) {
     let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
 
     buttons_popover_file_name.connect_clicked(move |_| {
-        let sv = common_tree_views.get_current_subview();
-
-        popover_sort_general::<String>(
-            &popover_sort,
-            &sv.tree_view,
-            sv.nb_object.column_name,
-            sv.nb_object.column_header.expect("Failed to get header column"),
-        );
+        popover_sort_general_abs::<String>(&popover_sort, common_tree_views.get_current_subview());
     });
 
     let popover_sort = gui_data.popovers_sort.popover_sort.clone();
@@ -90,14 +96,7 @@ pub(crate) fn connect_popover_sort(gui_data: &GuiData) {
     let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
 
     buttons_popover_sort_folder_name.connect_clicked(move |_| {
-        let sv = common_tree_views.get_current_subview();
-
-        popover_sort_general::<String>(
-            &popover_sort,
-            &sv.tree_view,
-            sv.nb_object.column_path,
-            sv.nb_object.column_header.expect("Failed to get header column"),
-        );
+        popover_sort_general_abs::<String>(&popover_sort, common_tree_views.get_current_subview());
     });
 
     let popover_sort = gui_data.popovers_sort.popover_sort.clone();
@@ -105,28 +104,14 @@ pub(crate) fn connect_popover_sort(gui_data: &GuiData) {
     let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
 
     buttons_popover_sort_selection.connect_clicked(move |_| {
-        let sv = common_tree_views.get_current_subview();
-
-        popover_sort_general::<bool>(
-            &popover_sort,
-            &sv.tree_view,
-            sv.nb_object.column_selection,
-            sv.nb_object.column_header.expect("Failed to get header column"),
-        );
+        popover_sort_general_abs::<bool>(&popover_sort, common_tree_views.get_current_subview());
     });
 
     let popover_sort = gui_data.popovers_sort.popover_sort.clone();
     let buttons_popover_sort_size = gui_data.popovers_sort.buttons_popover_sort_size.clone();
     let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
     buttons_popover_sort_size.connect_clicked(move |_| {
-        let sv = common_tree_views.get_current_subview();
-
-        popover_sort_general::<u64>(
-            &popover_sort,
-            &sv.tree_view,
-            sv.nb_object.column_size_as_bytes.expect("Failed to get size as bytes column"),
-            sv.nb_object.column_header.expect("Failed to get header column"),
-        );
+        popover_sort_general_abs::<u64>(&popover_sort, common_tree_views.get_current_subview());
     });
 }
 

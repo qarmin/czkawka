@@ -79,7 +79,3 @@ pub(crate) fn to_notebook_upper_enum(notebook_number: u32) -> NotebookUpperEnum 
         _ => panic!("Invalid Upper Notebook Tab"),
     }
 }
-
-// pub(crate) fn get_all_upper_tabs() -> [NotebookUpperEnum; NUMBER_OF_NOTEBOOK_UPPER_TABS] {
-//     [to_notebook_upper_enum(0), to_notebook_upper_enum(1), to_notebook_upper_enum(2)]
-// }

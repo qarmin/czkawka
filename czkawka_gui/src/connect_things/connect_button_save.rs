@@ -13,12 +13,11 @@ use crate::notebook_enums::NotebookMainEnum;
 
 pub(crate) fn connect_button_save(gui_data: &GuiData) {
     let buttons_save = gui_data.bottom_buttons.buttons_save.clone();
-    let buttons_save_clone = gui_data.bottom_buttons.buttons_save.clone();
     let shared_buttons = gui_data.shared_buttons.clone();
     let entry_info = gui_data.entry_info.clone();
     let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
 
-    buttons_save.connect_clicked(move |_| {
+    buttons_save.connect_clicked(move |buttons_save| {
         let current_path = match env::current_dir() {
             Ok(t) => t.to_string_lossy().to_string(),
             Err(_) => "__unknown__".to_string(),
@@ -31,7 +30,7 @@ pub(crate) fn connect_button_save(gui_data: &GuiData) {
             return;
         }
 
-        post_save_things(subview.enum_value, &shared_buttons, &entry_info, &buttons_save_clone, current_path);
+        post_save_things(subview.enum_value, &shared_buttons, &entry_info, buttons_save, current_path);
     });
 }
 

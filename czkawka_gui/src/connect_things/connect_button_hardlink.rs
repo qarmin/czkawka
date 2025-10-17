@@ -6,8 +6,9 @@ use gtk4::prelude::*;
 use gtk4::{Align, CheckButton, Dialog, Orientation, ResponseType, TextView, TreeIter, TreePath};
 
 use crate::flg;
+use crate::gui_structs::common_tree_view::SubView;
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::{add_text_to_text_view, clean_invalid_headers, get_full_name_from_path_name, get_list_store, reset_text_view};
+use crate::help_functions::{add_text_to_text_view, clean_invalid_headers, get_full_name_from_path_name, reset_text_view};
 use crate::notebook_enums::NotebookMainEnum;
 
 #[derive(PartialEq, Eq, Copy, Clone)]
@@ -57,11 +58,9 @@ async fn sym_hard_link_things(gui_data: GuiData, hardlinking: TypeOfTool) {
     let common_tree_views = &gui_data.main_notebook.common_tree_views.clone();
     let sv = common_tree_views.get_current_subview();
 
-    let column_header = sv.nb_object.column_header.expect("Linking can be only used for tree views with grouped results");
-
     let check_button_settings_confirm_link = gui_data.settings.check_button_settings_confirm_link.clone();
 
-    if !check_if_anything_is_selected_async(&sv.tree_view, column_header, sv.nb_object.column_selection) {
+    if !check_if_anything_is_selected_async(sv) {
         return;
     }
 
@@ -69,19 +68,11 @@ async fn sym_hard_link_things(gui_data: GuiData, hardlinking: TypeOfTool) {
         return;
     }
 
-    if !check_if_changing_one_item_in_group_and_continue(&sv.tree_view, column_header, sv.nb_object.column_selection, &window_main).await {
+    if !check_if_changing_one_item_in_group_and_continue(sv, &window_main).await {
         return;
     }
 
-    hardlink_symlink(
-        &sv.tree_view,
-        sv.nb_object.column_name,
-        sv.nb_object.column_path,
-        column_header,
-        sv.nb_object.column_selection,
-        hardlinking,
-        &text_view_errors,
-    );
+    hardlink_symlink(sv, hardlinking, &text_view_errors);
 
     match &sv.nb_object.notebook_type {
         NotebookMainEnum::SimilarImages | NotebookMainEnum::Duplicate => {
@@ -96,18 +87,11 @@ async fn sym_hard_link_things(gui_data: GuiData, hardlinking: TypeOfTool) {
     }
 }
 
-fn hardlink_symlink(
-    tree_view: &gtk4::TreeView,
-    column_file_name: i32,
-    column_path: i32,
-    column_header: i32,
-    column_selection: i32,
-    hardlinking: TypeOfTool,
-    text_view_errors: &TextView,
-) {
+fn hardlink_symlink(sv: &SubView, hardlinking: TypeOfTool, text_view_errors: &TextView) {
     reset_text_view(text_view_errors);
 
-    let model = get_list_store(tree_view);
+    let column_header = sv.nb_object.column_header.expect("Linking can be only used for tree views with grouped results");
+    let model = sv.get_model();
 
     let mut vec_tree_path_to_remove: Vec<TreePath> = Vec::new(); // List of hardlinked files without its root
     let mut vec_symhardlink_data: Vec<SymHardlinkData> = Vec::new();
@@ -120,7 +104,7 @@ fn hardlink_symlink(
     let mut selected_rows = Vec::new();
     if let Some(iter) = model.iter_first() {
         loop {
-            if model.get::<bool>(&iter, column_selection) {
+            if model.get::<bool>(&iter, sv.nb_object.column_selection) {
                 if !model.get::<bool>(&iter, column_header) {
                     selected_rows.push(model.path(&iter));
                 } else {
@@ -153,8 +137,8 @@ fn hardlink_symlink(
         }
 
         if model.path(&current_iter) == selected_rows[current_selected_index] {
-            let file_name = model.get::<String>(&current_iter, column_file_name);
-            let path = model.get::<String>(&current_iter, column_path);
+            let file_name = model.get::<String>(&current_iter, sv.nb_object.column_name);
+            let path = model.get::<String>(&current_iter, sv.nb_object.column_path);
             let full_file_path = get_full_name_from_path_name(&path, &file_name);
 
             if let Some(mut current_data) = current_symhardlink_data {
@@ -225,7 +209,7 @@ fn hardlink_symlink(
         model.remove(&model.iter(tree_path).expect("Using invalid tree_path"));
     }
 
-    clean_invalid_headers(&model, column_header, column_path);
+    clean_invalid_headers(&model, column_header, sv.nb_object.column_path);
 }
 
 fn create_dialog_non_group(window_main: &gtk4::Window) -> Dialog {
@@ -253,8 +237,9 @@ fn create_dialog_non_group(window_main: &gtk4::Window) -> Dialog {
     dialog
 }
 
-pub async fn check_if_changing_one_item_in_group_and_continue(tree_view: &gtk4::TreeView, column_header: i32, column_selection: i32, window_main: &gtk4::Window) -> bool {
-    let model = get_list_store(tree_view);
+pub async fn check_if_changing_one_item_in_group_and_continue(sv: &SubView, window_main: &gtk4::Window) -> bool {
+    let model = sv.get_model();
+    let column_header = sv.nb_object.column_header.expect("Column header must exists for linking");
 
     let mut selected_values_in_group = 0;
 
@@ -271,7 +256,7 @@ pub async fn check_if_changing_one_item_in_group_and_continue(tree_view: &gtk4::
                     break;
                 }
                 selected_values_in_group = 0;
-            } else if model.get::<bool>(&iter, column_selection) {
+            } else if model.get::<bool>(&iter, sv.nb_object.column_selection) {
                 selected_values_in_group += 1;
             }
         }
@@ -295,8 +280,10 @@ pub async fn check_if_changing_one_item_in_group_and_continue(tree_view: &gtk4::
     true
 }
 
-pub(crate) fn check_if_anything_is_selected_async(tree_view: &gtk4::TreeView, column_header: i32, column_selection: i32) -> bool {
-    let model = get_list_store(tree_view);
+pub(crate) fn check_if_anything_is_selected_async(sv: &SubView) -> bool {
+    let model = sv.get_model();
+
+    let column_header = sv.nb_object.column_header.expect("Column header must exists for linking");
 
     if let Some(iter) = model.iter_first() {
         assert!(model.get::<bool>(&iter, column_header)); // First element should be header
@@ -306,7 +293,7 @@ pub(crate) fn check_if_anything_is_selected_async(tree_view: &gtk4::TreeView, co
                 break;
             }
 
-            if !model.get::<bool>(&iter, column_header) && model.get::<bool>(&iter, column_selection) {
+            if !model.get::<bool>(&iter, column_header) && model.get::<bool>(&iter, sv.nb_object.column_selection) {
                 return true;
             }
         }

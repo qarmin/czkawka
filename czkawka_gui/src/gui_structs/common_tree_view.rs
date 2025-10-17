@@ -122,6 +122,9 @@ pub struct PreviewStruct {
 }
 
 impl SubView {
+    pub fn get_model(&self) -> ListStore {
+        self.tree_view.get_model()
+    }
     pub fn new(
         builder: &Builder,
         scrolled_name: &str,

@@ -1,22 +1,21 @@
 use gtk4::prelude::*;
 
+use crate::gui_structs::common_tree_view::SubView;
 use crate::gui_structs::gui_data::GuiData;
 use crate::gui_structs::gui_popovers_select::GuiSelectPopovers;
 use crate::help_functions::PopoverTypes;
-use crate::notebook_enums::{NotebookMainEnum, to_notebook_main_enum};
-use crate::notebook_info::NOTEBOOKS_INFO;
 
 pub(crate) fn connect_button_select(gui_data: &GuiData) {
     let popovers_select = gui_data.popovers_select.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
     let gc_buttons_select = gui_data.bottom_buttons.gc_buttons_select.clone();
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
 
     gc_buttons_select.connect_pressed(move |_, _, _, _| {
-        show_required_popovers(&popovers_select, to_notebook_main_enum(notebook_main.current_page().expect("Current page not set")));
+        show_required_popovers(&popovers_select, common_tree_views.get_current_subview());
     });
 }
 
-fn show_required_popovers(popovers_select: &GuiSelectPopovers, current_mode: NotebookMainEnum) {
+fn show_required_popovers(popovers_select: &GuiSelectPopovers, sv: &SubView) {
     let buttons_popover_select_all = popovers_select.buttons_popover_select_all.clone();
     let buttons_popover_unselect_all = popovers_select.buttons_popover_unselect_all.clone();
     let buttons_popover_reverse = popovers_select.buttons_popover_reverse.clone();
@@ -34,7 +33,7 @@ fn show_required_popovers(popovers_select: &GuiSelectPopovers, current_mode: Not
     let separator_select_image_size = popovers_select.separator_select_image_size.clone();
     let separator_select_reverse = popovers_select.separator_select_reverse.clone();
 
-    let arr = &NOTEBOOKS_INFO[current_mode as usize].available_modes;
+    let arr = sv.nb_object.available_modes;
 
     if arr.contains(&PopoverTypes::All) {
         buttons_popover_select_all.show();
