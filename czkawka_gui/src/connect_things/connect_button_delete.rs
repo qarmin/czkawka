@@ -9,7 +9,7 @@ use log::debug;
 use crate::flg;
 use crate::gui_structs::common_tree_view::SubView;
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::{check_how_much_elements_is_selected, clean_invalid_headers, get_full_name_from_path_name, get_list_store};
+use crate::help_functions::{check_how_much_elements_is_selected, clean_invalid_headers, get_full_name_from_path_name};
 use crate::notebook_enums::NotebookMainEnum;
 
 // TODO add support for checking if really symlink doesn't point to correct directory/file
@@ -39,7 +39,7 @@ pub async fn delete_things(gui_data: GuiData) {
 
     let sv = gui_data.main_notebook.common_tree_views.get_current_subview();
 
-    let (number_of_selected_items, number_of_selected_groups) = check_how_much_elements_is_selected(&sv.tree_view, sv.nb_object.column_header, sv.nb_object.column_selection);
+    let (number_of_selected_items, number_of_selected_groups) = check_how_much_elements_is_selected(sv);
 
     // Nothing is selected
     if number_of_selected_items == 0 {
@@ -51,16 +51,7 @@ pub async fn delete_things(gui_data: GuiData) {
     }
 
     if let Some(column_header) = sv.nb_object.column_header {
-        if !check_button_settings_confirm_group_deletion.is_active()
-            || !check_if_deleting_all_files_in_group(
-                &sv.tree_view,
-                column_header,
-                sv.nb_object.column_selection,
-                sv.nb_object.column_path,
-                &window_main,
-                &check_button_settings_confirm_group_deletion,
-            )
-            .await
+        if !check_button_settings_confirm_group_deletion.is_active() || !check_if_deleting_all_files_in_group(sv, &window_main, &check_button_settings_confirm_group_deletion).await
         {
             tree_remove(sv, column_header, &check_button_settings_use_trash, &text_view_errors);
         }
@@ -169,15 +160,9 @@ fn create_dialog_group_deletion(window_main: &gtk4::Window) -> (Dialog, CheckBut
     (dialog, check_button)
 }
 
-pub async fn check_if_deleting_all_files_in_group(
-    tree_view: &gtk4::TreeView,
-    column_header: i32,
-    column_selection: i32,
-    column_path: i32,
-    window_main: &gtk4::Window,
-    check_button_settings_confirm_group_deletion: &CheckButton,
-) -> bool {
-    let model = get_list_store(tree_view);
+pub async fn check_if_deleting_all_files_in_group(sv: &SubView, window_main: &gtk4::Window, check_button_settings_confirm_group_deletion: &CheckButton) -> bool {
+    let column_header = sv.nb_object.column_header.expect("Column header must exist here");
+    let model = sv.get_model();
 
     let mut selected_all_records: bool = true;
 
@@ -185,7 +170,7 @@ pub async fn check_if_deleting_all_files_in_group(
         assert!(model.get::<bool>(&iter, column_header)); // First element should be header
 
         // It is safe to remove any number of files in reference mode
-        if !model.get::<String>(&iter, column_path).is_empty() {
+        if !model.get::<String>(&iter, sv.nb_object.column_path).is_empty() {
             return false;
         }
 
@@ -199,7 +184,7 @@ pub async fn check_if_deleting_all_files_in_group(
                     break;
                 }
                 selected_all_records = true;
-            } else if !model.get::<bool>(&iter, column_selection) {
+            } else if !model.get::<bool>(&iter, sv.nb_object.column_selection) {
                 selected_all_records = false;
             }
         }

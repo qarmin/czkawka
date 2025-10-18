@@ -4,12 +4,12 @@ use std::rc::Rc;
 use czkawka_core::common::image::get_dynamic_image_from_path;
 use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
 use gtk4::prelude::*;
-use gtk4::{Align, CheckButton, Image, Orientation, Picture, ScrolledWindow, TreeIter, TreeModel, TreePath, TreeSelection, Widget};
+use gtk4::{Align, CheckButton, Image, Orientation, Picture, ScrolledWindow, TreeIter, TreeModel, TreePath, Widget};
 use image::DynamicImage;
 use log::error;
 
 use crate::flg;
-use crate::gui_structs::common_tree_view::TreeViewListStoreTrait;
+use crate::gui_structs::common_tree_view::SubView;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::{
     count_number_of_groups, get_all_direct_children, get_full_name_from_path_name, get_max_file_name, get_pixbuf_from_dynamic_image, resize_pixbuf_dimension,
@@ -50,15 +50,14 @@ pub(crate) fn connect_button_compare(gui_data: &GuiData) {
         let subview = common_tree_views.get_current_subview();
         let model = subview.tree_view.model().expect("Missing tree_view model");
 
-        let group_number = count_number_of_groups(&subview.tree_view, subview.nb_object.column_header.expect("Missing column_header"));
+        let group_number = count_number_of_groups(subview);
 
         if group_number == 0 {
             return;
         }
 
         // Check selected items
-        let (current_group, tree_path) =
-            get_current_group_and_iter_from_selection(&model, &subview.tree_view.selection(), subview.nb_object.column_header.expect("Missing column_header"));
+        let (current_group, tree_path) = get_current_group_and_iter_from_selection(subview);
 
         *shared_current_of_groups.borrow_mut() = current_group;
         *shared_numbers_of_groups.borrow_mut() = group_number;
@@ -128,7 +127,7 @@ pub(crate) fn connect_button_compare(gui_data: &GuiData) {
 
     button_go_previous_compare_group.connect_clicked(move |button_go_previous_compare_group| {
         let sv = common_tree_views.get_current_subview();
-        let model = sv.tree_view.model().expect("Missing tree_view model");
+        let model = sv.get_tree_model();
 
         *shared_current_of_groups.borrow_mut() -= 1;
 
@@ -185,7 +184,7 @@ pub(crate) fn connect_button_compare(gui_data: &GuiData) {
 
     button_go_next_compare_group.connect_clicked(move |button_go_next_compare_group| {
         let sv = common_tree_views.get_current_subview();
-        let model = sv.tree_view.model().expect("Missing tree_view model");
+        let model = sv.get_tree_model();
 
         *shared_current_of_groups.borrow_mut() += 1;
 
@@ -235,7 +234,7 @@ pub(crate) fn connect_button_compare(gui_data: &GuiData) {
     let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
     check_button_left_preview_text.connect_toggled(move |check_button_left_preview_text| {
         let sv = common_tree_views.get_current_subview();
-        let model = sv.tree_view.get_model();
+        let model = sv.get_model();
 
         let main_tree_path = shared_current_path.borrow().as_ref().expect("Missing current path").clone();
         let this_tree_path = shared_using_for_preview.borrow().0.clone().expect("Missing left preview path");
@@ -259,7 +258,7 @@ pub(crate) fn connect_button_compare(gui_data: &GuiData) {
 
     check_button_right_preview_text.connect_toggled(move |check_button_right_preview_text| {
         let sv = common_tree_views.get_current_subview();
-        let model = sv.tree_view.get_model();
+        let model = sv.get_model();
 
         let main_tree_path = shared_current_path.borrow().as_ref().expect("Missing current path").clone();
         let this_tree_path = shared_using_for_preview.borrow().1.clone().expect("Missing right preview path");
@@ -615,11 +614,15 @@ fn update_bottom_buttons(
     }
 }
 
-fn get_current_group_and_iter_from_selection(model: &TreeModel, selection: &TreeSelection, column_header: i32) -> (u32, TreePath) {
+fn get_current_group_and_iter_from_selection(sv: &SubView) -> (u32, TreePath) {
     let mut current_group = 1;
     let mut possible_group = 1;
     let mut header_clone: TreeIter;
     let mut possible_header: TreeIter;
+
+    let column_header = sv.nb_object.column_header.expect("Missing column_header");
+    let model = sv.get_tree_model();
+    let selection = sv.get_tree_selection();
 
     let selected_records = selection.selected_rows().0;
 

@@ -1,10 +1,11 @@
-use glib::types::Type;
 use czkawka_core::TOOLS_NUMBER;
+use glib::types::Type;
+
 use crate::help_functions::{
     BottomButtonsEnum, ColumnsBadExtensions, ColumnsBigFiles, ColumnsBrokenFiles, ColumnsDuplicates, ColumnsEmptyFiles, ColumnsEmptyFolders, ColumnsInvalidSymlinks,
     ColumnsSameMusic, ColumnsSimilarImages, ColumnsSimilarVideos, ColumnsTemporaryFiles, PopoverTypes,
 };
-use crate::notebook_enums::{NotebookMainEnum};
+use crate::notebook_enums::NotebookMainEnum;
 
 #[derive(Debug, Clone)]
 pub struct NotebookObject {

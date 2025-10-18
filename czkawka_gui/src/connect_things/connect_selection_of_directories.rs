@@ -7,11 +7,11 @@ use gdk4::{DragAction, FileList};
 use gtk4::prelude::*;
 use gtk4::{DropTarget, FileChooserNative, Notebook, Orientation, ResponseType, TreeView, Window};
 
+use crate::connect_things::file_chooser_helpers::extract_paths_from_file_chooser;
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::{ColumnsExcludedDirectory, ColumnsIncludedDirectory, check_if_value_is_in_list_store, get_list_store};
 use crate::notebook_enums::{NotebookUpperEnum, to_notebook_upper_enum};
-use crate::connect_things::file_chooser_helpers::extract_paths_from_file_chooser;
 
 pub(crate) fn connect_selection_of_directories(gui_data: &GuiData) {
     // Add manually directory

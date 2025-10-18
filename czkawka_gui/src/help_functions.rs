@@ -29,6 +29,7 @@ use resvg::tiny_skia;
 use resvg::usvg::{Options, Tree};
 
 use crate::flg;
+use crate::gui_structs::common_tree_view::SubView;
 use crate::notebook_enums::{NotebookMainEnum, NotebookUpperEnum};
 use crate::notebook_info::{NOTEBOOKS_INFO, NotebookObject};
 
@@ -554,17 +555,17 @@ pub(crate) fn clean_invalid_headers(model: &ListStore, column_header: i32, colum
     }
 }
 
-pub(crate) fn check_how_much_elements_is_selected(tree_view: &TreeView, column_header: Option<i32>, column_selection: i32) -> (u64, u64) {
+pub(crate) fn check_how_much_elements_is_selected(sv: &SubView) -> (u64, u64) {
     let mut number_of_selected_items: u64 = 0;
     let mut number_of_selected_groups: u64 = 0;
 
-    let model = get_list_store(tree_view);
+    let model = sv.get_model();
 
     let mut is_item_currently_selected_in_group: bool = false;
 
     // First iter
     if let Some(iter) = model.iter_first() {
-        if let Some(column_header) = column_header {
+        if let Some(column_header) = sv.nb_object.column_header {
             assert!(model.get::<bool>(&iter, column_header)); // First element should be header
 
             loop {
@@ -574,7 +575,7 @@ pub(crate) fn check_how_much_elements_is_selected(tree_view: &TreeView, column_h
 
                 if model.get::<bool>(&iter, column_header) {
                     is_item_currently_selected_in_group = false;
-                } else if model.get::<bool>(&iter, column_selection) {
+                } else if model.get::<bool>(&iter, sv.nb_object.column_selection) {
                     number_of_selected_items += 1;
 
                     if !is_item_currently_selected_in_group {
@@ -584,7 +585,7 @@ pub(crate) fn check_how_much_elements_is_selected(tree_view: &TreeView, column_h
                 }
             }
         } else {
-            if model.get::<bool>(&iter, column_selection) {
+            if model.get::<bool>(&iter, sv.nb_object.column_selection) {
                 number_of_selected_items += 1;
             }
             loop {
@@ -592,7 +593,7 @@ pub(crate) fn check_how_much_elements_is_selected(tree_view: &TreeView, column_h
                     break;
                 }
 
-                if model.get::<bool>(&iter, column_selection) {
+                if model.get::<bool>(&iter, sv.nb_object.column_selection) {
                     number_of_selected_items += 1;
                 }
             }
@@ -602,10 +603,11 @@ pub(crate) fn check_how_much_elements_is_selected(tree_view: &TreeView, column_h
     (number_of_selected_items, number_of_selected_groups)
 }
 
-pub(crate) fn count_number_of_groups(tree_view: &TreeView, column_header: i32) -> u32 {
+pub(crate) fn count_number_of_groups(sv: &SubView) -> u32 {
     let mut number_of_selected_groups = 0;
+    let column_header = sv.nb_object.column_header.expect("Column header should be present to count number of groups");
 
-    let model = get_list_store(tree_view);
+    let model = sv.get_model();
 
     if let Some(iter) = model.iter_first() {
         assert!(model.get::<bool>(&iter, column_header)); // First element should be header

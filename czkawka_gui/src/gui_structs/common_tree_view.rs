@@ -18,8 +18,8 @@ use czkawka_core::tools::temporary::Temporary;
 use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
 use gtk4::prelude::*;
 use gtk4::{
-    Builder, CellRendererText, CellRendererToggle, CheckButton, EventControllerKey, GestureClick, ListStore, Notebook, Picture, ScrolledWindow, SelectionMode, TextView, TreeView,
-    TreeViewColumn,
+    Builder, CellRendererText, CellRendererToggle, CheckButton, EventControllerKey, GestureClick, ListStore, Notebook, Picture, ScrolledWindow, SelectionMode, TextView, TreeModel,
+    TreeSelection, TreeView, TreeViewColumn,
 };
 
 use crate::connect_things::connect_button_delete::delete_things;
@@ -124,6 +124,12 @@ pub struct PreviewStruct {
 impl SubView {
     pub fn get_model(&self) -> ListStore {
         self.tree_view.get_model()
+    }
+    pub fn get_tree_model(&self) -> TreeModel {
+        self.tree_view.model().expect("TreeView has no model")
+    }
+    pub fn get_tree_selection(&self) -> TreeSelection {
+        self.tree_view.selection()
     }
     pub fn new(
         builder: &Builder,
@@ -272,7 +278,7 @@ impl SubView {
     }
     fn _setup_tree_view_config(&self) {
         let tree_view = &self.tree_view;
-        let model = tree_view.get_model();
+        let model = self.get_model();
         match self.enum_value {
             NotebookMainEnum::Duplicate => {
                 let columns_colors = (ColumnsDuplicates::Color as i32, ColumnsDuplicates::TextColor as i32);

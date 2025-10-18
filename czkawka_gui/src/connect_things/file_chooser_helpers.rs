@@ -1,4 +1,5 @@
 use std::path::PathBuf;
+
 use gtk4::prelude::*;
 
 pub fn extract_paths_from_file_chooser(file_chooser: &gtk4::FileChooserNative) -> Vec<PathBuf> {
@@ -14,4 +15,3 @@ pub fn extract_paths_from_file_chooser(file_chooser: &gtk4::FileChooserNative) -
     }
     folders
 }
-
