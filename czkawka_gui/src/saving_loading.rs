@@ -17,8 +17,8 @@ use crate::gui_structs::gui_settings::GuiSettings;
 use crate::gui_structs::gui_upper_notebook::GuiUpperNotebook;
 use crate::help_combo_box::DUPLICATES_CHECK_METHOD_COMBO_BOX;
 use crate::help_functions::{
-    ColumnsExcludedDirectory, ColumnsIncludedDirectory, add_text_to_text_view, get_from_list_store_fnc, get_list_store, get_string_from_list_store, reset_text_view,
-    scale_step_function,
+    ColumnsExcludedDirectory, ColumnsIncludedDirectory, add_text_to_text_view, append_row_to_list_store, get_from_list_store_fnc, get_list_store, get_string_from_list_store,
+    reset_text_view, scale_step_function,
 };
 use crate::language_functions::{LANGUAGES_ALL, get_language_from_combo_box_text};
 
@@ -465,7 +465,7 @@ fn set_included_reference_folders(tree_view_included_directories: &TreeView, inc
                 (ColumnsIncludedDirectory::Path as u32, &directory),
                 (ColumnsIncludedDirectory::ReferenceButton as u32, &is_referenced),
             ];
-            list_store.set(&list_store.append(), &values);
+            append_row_to_list_store(&list_store, &values);
         }
     }
 }
@@ -486,7 +486,7 @@ fn set_configuration_to_gui_internal(upper_notebook: &GuiUpperNotebook, main_not
         list_store.clear();
         for i in default_config.excluded_directories.clone() {
             let values: [(u32, &dyn ToValue); 1] = [(ColumnsExcludedDirectory::Path as u32, &i)];
-            list_store.set(&list_store.append(), &values);
+            append_row_to_list_store(&list_store, &values);
         }
     }
     // Resetting excluded items
@@ -761,7 +761,7 @@ fn set_directories(
 
     for directory in excluded_directories {
         let values: [(u32, &dyn ToValue); 1] = [(ColumnsExcludedDirectory::Path as u32, &directory)];
-        list_store.set(&list_store.append(), &values);
+        append_row_to_list_store(&list_store, &values);
     }
 }
 

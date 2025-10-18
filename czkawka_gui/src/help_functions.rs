@@ -830,6 +830,10 @@ pub(crate) fn scale_step_function(scale: &Scale, _scroll_type: ScrollType, value
     glib::Propagation::Proceed
 }
 
+pub(crate) fn append_row_to_list_store(list_store: &ListStore, values: &[(u32, &dyn ToValue)]) {
+    list_store.set(&list_store.append(), values);
+}
+
 #[cfg(test)]
 mod test {
     use glib::Value;
@@ -839,8 +843,8 @@ mod test {
     use image::DynamicImage;
 
     use crate::help_functions::{
-        change_dimension_to_krotka, check_if_list_store_column_have_all_same_values, check_if_value_is_in_list_store, get_all_boxes_from_widget, get_all_direct_children,
-        get_max_file_name, get_pixbuf_from_dynamic_image, get_string_from_list_store,
+        append_row_to_list_store, change_dimension_to_krotka, check_if_list_store_column_have_all_same_values, check_if_value_is_in_list_store, get_all_boxes_from_widget,
+        get_all_direct_children, get_max_file_name, get_pixbuf_from_dynamic_image, get_string_from_list_store,
     };
 
     #[gtk4::test]
@@ -851,7 +855,7 @@ mod test {
 
         let values_to_add: &[(u32, &dyn ToValue)] = &[(0, &"test"), (0, &"test2"), (0, &"test3")];
         for i in values_to_add {
-            list_store.set(&list_store.append(), &[*i]);
+            append_row_to_list_store(&list_store, &[*i]);
         }
         assert_eq!(
             get_string_from_list_store(&tree_view, 0, None),
@@ -868,7 +872,7 @@ mod test {
             &[(0, &Into::<Value>::into(false)), (1, &Into::<Value>::into("test3"))],
         ];
         for i in values_to_add {
-            list_store.set(&list_store.append(), i);
+            append_row_to_list_store(&list_store, i);
         }
         assert_eq!(get_string_from_list_store(&tree_view, 1, Some(0)), vec!["test".to_string(), "test2".to_string()]);
     }
@@ -881,7 +885,7 @@ mod test {
         list_store.clear();
         let values_to_add: &[(u32, &dyn ToValue)] = &[(0, &true), (0, &true), (0, &false)];
         for i in values_to_add {
-            list_store.set(&list_store.append(), &[*i]);
+            append_row_to_list_store(&list_store, &[*i]);
         }
         assert!(!check_if_list_store_column_have_all_same_values(&list_store, 0, true));
         assert!(!check_if_list_store_column_have_all_same_values(&list_store, 0, false));
@@ -889,7 +893,7 @@ mod test {
         list_store.clear();
         let values_to_add: &[(u32, &dyn ToValue)] = &[(0, &true), (0, &true), (0, &true)];
         for i in values_to_add {
-            list_store.set(&list_store.append(), &[*i]);
+            append_row_to_list_store(&list_store, &[*i]);
         }
         assert!(check_if_list_store_column_have_all_same_values(&list_store, 0, true));
         assert!(!check_if_list_store_column_have_all_same_values(&list_store, 0, false));
@@ -897,7 +901,7 @@ mod test {
         list_store.clear();
         let values_to_add: &[(u32, &dyn ToValue)] = &[(0, &false)];
         for i in values_to_add {
-            list_store.set(&list_store.append(), &[*i]);
+            append_row_to_list_store(&list_store, &[*i]);
         }
         assert!(!check_if_list_store_column_have_all_same_values(&list_store, 0, true));
         assert!(check_if_list_store_column_have_all_same_values(&list_store, 0, false));
@@ -913,7 +917,7 @@ mod test {
         let list_store = gtk4::ListStore::new(columns_types);
         let values_to_add: &[(u32, &dyn ToValue)] = &[(0, &"Koczkodan"), (0, &"Kachir")];
         for i in values_to_add {
-            list_store.set(&list_store.append(), &[*i]);
+            append_row_to_list_store(&list_store, &[*i]);
         }
         assert!(check_if_value_is_in_list_store(&list_store, 0, "Koczkodan"));
         assert!(check_if_value_is_in_list_store(&list_store, 0, "Kachir"));
@@ -923,7 +927,7 @@ mod test {
         let list_store = gtk4::ListStore::new(columns_types);
         let values_to_add: &[&[(u32, &dyn ToValue)]] = &[&[(0, &"Koczkodan"), (1, &"Krakus")], &[(0, &"Kachir"), (1, &"Wodnica")]];
         for i in values_to_add {
-            list_store.set(&list_store.append(), i);
+            append_row_to_list_store(&list_store, i);
         }
         assert!(check_if_value_is_in_list_store(&list_store, 0, "Koczkodan"));
         assert!(check_if_value_is_in_list_store(&list_store, 1, "Krakus"));

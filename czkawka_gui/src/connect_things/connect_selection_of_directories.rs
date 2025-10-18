@@ -10,7 +10,7 @@ use gtk4::{DropTarget, FileChooserNative, Notebook, Orientation, ResponseType, T
 use crate::connect_things::file_chooser_helpers::extract_paths_from_file_chooser;
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::{ColumnsExcludedDirectory, ColumnsIncludedDirectory, check_if_value_is_in_list_store, get_list_store};
+use crate::help_functions::{ColumnsExcludedDirectory, ColumnsIncludedDirectory, append_row_to_list_store, check_if_value_is_in_list_store, get_list_store};
 use crate::notebook_enums::{NotebookUpperEnum, to_notebook_upper_enum};
 
 pub(crate) fn connect_selection_of_directories(gui_data: &GuiData) {
@@ -155,7 +155,7 @@ fn add_directories(tree_view: &TreeView, folders: &Vec<PathBuf>, excluded_items:
     if excluded_items {
         for file_entry in folders {
             let values: [(u32, &dyn ToValue); 1] = [(ColumnsExcludedDirectory::Path as u32, &file_entry.to_string_lossy().to_string())];
-            list_store.set(&list_store.append(), &values);
+            append_row_to_list_store(&list_store, &values);
         }
     } else {
         for file_entry in folders {
@@ -163,7 +163,7 @@ fn add_directories(tree_view: &TreeView, folders: &Vec<PathBuf>, excluded_items:
                 (ColumnsIncludedDirectory::Path as u32, &file_entry.to_string_lossy().to_string()),
                 (ColumnsIncludedDirectory::ReferenceButton as u32, &false),
             ];
-            list_store.set(&list_store.append(), &values);
+            append_row_to_list_store(&list_store, &values);
         }
     }
 }
@@ -205,11 +205,11 @@ fn add_manually_directories(window_main: &Window, tree_view: &TreeView, excluded
                     if excluded_items {
                         if !check_if_value_is_in_list_store(&list_store, ColumnsExcludedDirectory::Path as i32, &text) {
                             let values: [(u32, &dyn ToValue); 1] = [(ColumnsExcludedDirectory::Path as u32, &text)];
-                            list_store.set(&list_store.append(), &values);
+                            append_row_to_list_store(&list_store, &values);
                         }
                     } else if !check_if_value_is_in_list_store(&list_store, ColumnsIncludedDirectory::Path as i32, &text) {
                         let values: [(u32, &dyn ToValue); 2] = [(ColumnsIncludedDirectory::Path as u32, &text), (ColumnsIncludedDirectory::ReferenceButton as u32, &false)];
-                        list_store.set(&list_store.append(), &values);
+                        append_row_to_list_store(&list_store, &values);
                     }
                 }
             }

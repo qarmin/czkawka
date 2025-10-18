@@ -123,6 +123,7 @@ mod test {
     use rand::random;
 
     use crate::connect_things::connect_popovers_sort::{popover_sort_general, sort_iters};
+    use crate::help_functions::append_row_to_list_store;
 
     #[gtk4::test]
     fn test_sort_iters() {
@@ -131,7 +132,7 @@ mod test {
 
         let values_to_add: &[&[(u32, &dyn ToValue)]] = &[&[(0, &2), (1, &"AAA")], &[(0, &3), (1, &"CCC")], &[(0, &1), (1, &"BBB")]];
         for i in values_to_add {
-            list_store.set(&list_store.append(), i);
+            append_row_to_list_store(&list_store, i);
         }
         let mut iters = Vec::new();
         let iter = list_store.iter_first().expect("Failed to get first iter");
@@ -163,7 +164,7 @@ mod test {
 
         let values_to_add: &[&[(u32, &dyn ToValue)]] = &[&[(0, &true), (1, &"DDD")], &[(0, &false), (1, &"CCC")], &[(0, &false), (1, &"BBB")]];
         for i in values_to_add {
-            list_store.set(&list_store.append(), i);
+            append_row_to_list_store(&list_store, i);
         }
 
         popover_sort_general::<String>(&popover, &tree_view, 1, 0);
@@ -196,7 +197,7 @@ mod test {
             &[(0, &false), (1, &"ZZZ")],
         ];
         for i in values_to_add {
-            list_store.set(&list_store.append(), i);
+            append_row_to_list_store(&list_store, i);
         }
 
         popover_sort_general::<String>(&popover, &tree_view, 1, 0);
@@ -220,7 +221,7 @@ mod test {
 
             // Always start with a header
             let first_row: &[(u32, &dyn ToValue)] = &[(0, &true), (1, &"AAA")];
-            list_store.set(&list_store.append(), first_row);
+            append_row_to_list_store(&list_store, first_row);
 
             let mut since_last_header = 0;
             let mut need_header = false;
@@ -230,7 +231,7 @@ mod test {
                 if need_header {
                     // Insert a header only if last was not a header
                     let a: Vec<(u32, &dyn ToValue)> = vec![(0, &true), (1, &"HEADER")];
-                    list_store.set(&list_store.append(), &a);
+                    append_row_to_list_store(&list_store, &a);
                     since_last_header = 0;
                     need_header = false;
                     i += 1;
@@ -239,7 +240,7 @@ mod test {
                 // Insert a non-header row
                 let string_val = rand::random::<u32>().to_string();
                 let a: Vec<(u32, &dyn ToValue)> = vec![(0, &false), (1, &string_val)];
-                list_store.set(&list_store.append(), &a);
+                append_row_to_list_store(&list_store, &a);
                 since_last_header += 1;
                 // After at least 2 non-header rows, randomly decide to insert a header next
                 if since_last_header >= 2 && random::<u8>().is_multiple_of(3) {
@@ -259,7 +260,7 @@ mod test {
             }
             if last_is_header {
                 let a: Vec<(u32, &dyn ToValue)> = vec![(0, &false), (1, &"FINALROW")];
-                list_store.set(&list_store.append(), &a);
+                append_row_to_list_store(&list_store, &a);
             }
 
             popover_sort_general::<String>(&popover, &tree_view, 1, 0);

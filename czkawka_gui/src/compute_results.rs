@@ -33,8 +33,8 @@ use crate::gui_structs::gui_data::GuiData;
 use crate::help_combo_box::IMAGES_HASH_SIZE_COMBO_BOX;
 use crate::help_functions::{
     BottomButtonsEnum, ColumnsBadExtensions, ColumnsBigFiles, ColumnsBrokenFiles, ColumnsDuplicates, ColumnsEmptyFiles, ColumnsEmptyFolders, ColumnsInvalidSymlinks,
-    ColumnsSameMusic, ColumnsSimilarImages, ColumnsSimilarVideos, ColumnsTemporaryFiles, HEADER_ROW_COLOR, MAIN_ROW_COLOR, Message, TEXT_COLOR, get_list_store,
-    print_text_messages_to_text_view, set_buttons,
+    ColumnsSameMusic, ColumnsSimilarImages, ColumnsSimilarVideos, ColumnsTemporaryFiles, HEADER_ROW_COLOR, MAIN_ROW_COLOR, Message, TEXT_COLOR, append_row_to_list_store,
+    get_list_store, print_text_messages_to_text_view, set_buttons,
 };
 use crate::notebook_enums::NotebookMainEnum;
 use crate::notebook_info::NOTEBOOKS_INFO;
@@ -183,7 +183,7 @@ fn compute_bad_extensions(be: BadExtensions, entry_info: &Entry, text_view_error
             (ColumnsBadExtensions::Modification as u32, &(get_dt_timestamp_string(file_entry.modified_date))),
             (ColumnsBadExtensions::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
         ];
-        list_store.set(&list_store.append(), &values);
+        append_row_to_list_store(&list_store, &values);
     }
     print_text_messages_to_text_view(text_messages, text_view_errors);
     finalize_compute(subview, be, bad_extensions_number)
@@ -214,7 +214,7 @@ fn compute_broken_files(br: BrokenFiles, entry_info: &Entry, text_view_errors: &
             (ColumnsBrokenFiles::Modification as u32, &(get_dt_timestamp_string(file_entry.modified_date))),
             (ColumnsBrokenFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
         ];
-        list_store.set(&list_store.append(), &values);
+        append_row_to_list_store(&list_store, &values);
     }
     print_text_messages_to_text_view(text_messages, text_view_errors);
     finalize_compute(subview, br, broken_files_number)
@@ -246,7 +246,7 @@ fn compute_invalid_symlinks(ifs: InvalidSymlinks, entry_info: &Entry, text_view_
             (ColumnsInvalidSymlinks::Modification as u32, &(get_dt_timestamp_string(file_entry.modified_date))),
             (ColumnsInvalidSymlinks::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
         ];
-        list_store.set(&list_store.append(), &values);
+        append_row_to_list_store(&list_store, &values);
     }
     print_text_messages_to_text_view(text_messages, text_view_errors);
     finalize_compute(subview, ifs, invalid_symlinks)
@@ -564,7 +564,7 @@ fn compute_temporary_files(tf: Temporary, entry_info: &Entry, text_view_errors: 
             (ColumnsTemporaryFiles::Modification as u32, &(get_dt_timestamp_string(file_entry.modified_date))),
             (ColumnsTemporaryFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
         ];
-        list_store.set(&list_store.append(), &values);
+        append_row_to_list_store(&list_store, &values);
     }
     print_text_messages_to_text_view(text_messages, text_view_errors);
     finalize_compute(subview, tf, temporary_files_number)
@@ -595,7 +595,7 @@ fn compute_big_files(bf: BigFile, entry_info: &Entry, text_view_errors: &TextVie
             (ColumnsBigFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
             (ColumnsBigFiles::SizeAsBytes as u32, &(file_entry.size)),
         ];
-        list_store.set(&list_store.append(), &values);
+        append_row_to_list_store(&list_store, &values);
     }
     print_text_messages_to_text_view(text_messages, text_view_errors);
     finalize_compute(subview, bf, biggest_files_number)
@@ -624,7 +624,7 @@ fn compute_empty_files(vf: EmptyFiles, entry_info: &Entry, text_view_errors: &Te
             (ColumnsEmptyFiles::Modification as u32, &(get_dt_timestamp_string(file_entry.modified_date))),
             (ColumnsEmptyFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
         ];
-        list_store.set(&list_store.append(), &values);
+        append_row_to_list_store(&list_store, &values);
     }
     print_text_messages_to_text_view(text_messages, text_view_errors);
     finalize_compute(subview, vf, empty_files_number)
@@ -655,7 +655,7 @@ fn compute_empty_folders(ef: EmptyFolder, entry_info: &Entry, text_view_errors: 
             (ColumnsEmptyFolders::Modification as u32, &(get_dt_timestamp_string(fe.modified_date))),
             (ColumnsEmptyFolders::ModificationAsSecs as u32, &(fe.modified_date)),
         ];
-        list_store.set(&list_store.append(), &values);
+        append_row_to_list_store(&list_store, &values);
     }
     print_text_messages_to_text_view(text_messages, text_view_errors);
     finalize_compute(subview, ef, empty_folder_number)
@@ -875,7 +875,7 @@ fn duplicates_add_to_list_store(list_store: &ListStore, file: &str, directory: &
         (ColumnsDuplicates::IsHeader as u32, &is_header),
         (ColumnsDuplicates::TextColor as u32, &TEXT_COLOR),
     ];
-    list_store.set(&list_store.append(), &values);
+    append_row_to_list_store(list_store, &values);
 }
 
 fn similar_images_add_to_list_store(
@@ -910,7 +910,7 @@ fn similar_images_add_to_list_store(
         (ColumnsSimilarImages::IsHeader as u32, &is_header),
         (ColumnsSimilarImages::TextColor as u32, &TEXT_COLOR),
     ];
-    list_store.set(&list_store.append(), &values);
+    append_row_to_list_store(list_store, &values);
 }
 
 fn similar_videos_add_to_list_store(list_store: &ListStore, file: &str, directory: &str, size: u64, modified_date: u64, is_header: bool, is_reference_folder: bool) {
@@ -932,7 +932,7 @@ fn similar_videos_add_to_list_store(list_store: &ListStore, file: &str, director
         (ColumnsSimilarVideos::TextColor as u32, &TEXT_COLOR),
     ];
 
-    list_store.set(&list_store.append(), &values);
+    append_row_to_list_store(list_store, &values);
 }
 
 fn same_music_add_to_list_store(
@@ -976,7 +976,7 @@ fn same_music_add_to_list_store(
         (ColumnsSameMusic::TextColor as u32, &TEXT_COLOR),
     ];
 
-    list_store.set(&list_store.append(), &values);
+    append_row_to_list_store(list_store, &values);
 }
 
 fn get_dt_timestamp_string(timestamp: u64) -> String {
