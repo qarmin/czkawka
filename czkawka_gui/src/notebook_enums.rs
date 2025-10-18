@@ -1,8 +1,5 @@
 use czkawka_core::TOOLS_NUMBER;
 
-pub const NUMBER_OF_NOTEBOOK_MAIN_TABS: usize = TOOLS_NUMBER;
-// pub const NUMBER_OF_NOTEBOOK_UPPER_TABS: usize = 3;
-
 // Needs to be updated when changed order of notebook tabs
 #[derive(Eq, PartialEq, Hash, Clone, Debug, Copy)]
 pub enum NotebookMainEnum {
@@ -18,18 +15,6 @@ pub enum NotebookMainEnum {
     BrokenFiles,
     BadExtensions,
 }
-
-// impl NotebookMainEnum {
-//     pub fn get_is_header_idx(&self) -> Option<u32> {
-//         match self {
-//             NotebookMainEnum::Duplicate => Some(ColumnsDuplicates::IsHeader as u32),
-//             NotebookMainEnum::SameMusic => Some(ColumnsSameMusic::IsHeader as u32),
-//             NotebookMainEnum::SimilarImages => Some(ColumnsSimilarImages::IsHeader as u32),
-//             NotebookMainEnum::SimilarVideos => Some(ColumnsSimilarVideos::IsHeader as u32),
-//             _ => None,
-//         }
-//     }
-// }
 
 pub(crate) fn to_notebook_main_enum(notebook_number: u32) -> NotebookMainEnum {
     match notebook_number {
@@ -48,7 +33,7 @@ pub(crate) fn to_notebook_main_enum(notebook_number: u32) -> NotebookMainEnum {
     }
 }
 
-pub(crate) fn get_all_main_tabs() -> [NotebookMainEnum; NUMBER_OF_NOTEBOOK_MAIN_TABS] {
+pub(crate) fn get_all_main_tabs() -> [NotebookMainEnum; TOOLS_NUMBER] {
     [
         to_notebook_main_enum(0),
         to_notebook_main_enum(1),

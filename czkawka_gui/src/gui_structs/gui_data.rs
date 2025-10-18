@@ -130,7 +130,7 @@ impl GuiData {
             shared_buttons.borrow_mut().insert(*i, temp_hashmap);
         }
 
-        // File Dialogs - Native file dialogs must exists all the time in opposite to normal dialog
+        // File Dialogs - Native file dialogs must exist all the time in opposite to normal dialog
 
         let file_dialog_include_exclude_folder_selection = FileChooserNative::builder()
             .action(gtk4::FileChooserAction::SelectFolder)
