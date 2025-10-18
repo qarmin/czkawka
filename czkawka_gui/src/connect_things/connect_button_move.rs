@@ -1,10 +1,10 @@
-use std::path::{Path, PathBuf};
+use std::path::{Path};
 
 use fs_extra::dir::CopyOptions;
 use gtk4::prelude::*;
 use gtk4::{ResponseType, TreePath};
 use log::debug;
-
+use crate::connect_things::file_chooser_helpers::extract_paths_from_file_chooser;
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::{add_text_to_text_view, check_how_much_elements_is_selected, clean_invalid_headers, get_full_name_from_path_name, get_list_store, reset_text_view};
@@ -36,17 +36,7 @@ pub(crate) fn connect_button_move(gui_data: &GuiData) {
         reset_text_view(&text_view_errors);
 
         if response_type == ResponseType::Accept {
-            let mut folders: Vec<PathBuf> = Vec::new();
-            let g_files = file_chooser.files();
-            for index in 0..g_files.n_items() {
-                let file = g_files.item(index);
-                if let Some(file) = file {
-                    let ss = file.downcast::<gtk4::gio::File>().expect("Failed to downcast to gio::File");
-                    if let Some(path_buf) = ss.path() {
-                        folders.push(path_buf);
-                    }
-                }
-            }
+            let folders = extract_paths_from_file_chooser(file_chooser);
 
             if folders.len() != 1 {
                 add_text_to_text_view(&text_view_errors, flg!("move_files_choose_more_than_1_path", path_number = folders.len()).as_str());
