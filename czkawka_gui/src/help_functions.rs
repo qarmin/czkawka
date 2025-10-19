@@ -30,6 +30,7 @@ use resvg::usvg::{Options, Tree};
 
 use crate::flg;
 use crate::gui_structs::common_tree_view::SubView;
+use crate::model_iter::iter_list;
 use crate::notebook_enums::{NotebookMainEnum, NotebookUpperEnum};
 use crate::notebook_info::{NOTEBOOKS_INFO, NotebookObject};
 
@@ -563,19 +564,17 @@ pub(crate) fn check_how_much_elements_is_selected(sv: &SubView) -> (u64, u64) {
 
     let mut is_item_currently_selected_in_group: bool = false;
 
-    // First iter
-    if let Some(iter) = model.iter_first() {
-        if let Some(column_header) = sv.nb_object.column_header {
-            assert!(model.get::<bool>(&iter, column_header)); // First element should be header
-
-            loop {
-                if !model.iter_next(&iter) {
-                    break;
-                }
-
-                if model.get::<bool>(&iter, column_header) {
+    if let Some(column_header) = sv.nb_object.column_header {
+        iter_list(
+            &model,
+            |m, i| {
+                assert!(m.get::<bool>(&i, column_header)); // First element should be header
+                m.iter_next(&i)
+            },
+            |m, i| {
+                if m.get::<bool>(&i, column_header) {
                     is_item_currently_selected_in_group = false;
-                } else if model.get::<bool>(&iter, sv.nb_object.column_selection) {
+                } else if m.get::<bool>(&i, sv.nb_object.column_selection) {
                     number_of_selected_items += 1;
 
                     if !is_item_currently_selected_in_group {
@@ -583,21 +582,18 @@ pub(crate) fn check_how_much_elements_is_selected(sv: &SubView) -> (u64, u64) {
                     }
                     is_item_currently_selected_in_group = true;
                 }
-            }
-        } else {
-            if model.get::<bool>(&iter, sv.nb_object.column_selection) {
-                number_of_selected_items += 1;
-            }
-            loop {
-                if !model.iter_next(&iter) {
-                    break;
-                }
-
-                if model.get::<bool>(&iter, sv.nb_object.column_selection) {
+            },
+        );
+    } else {
+        iter_list(
+            &model,
+            |_m, _i| true,
+            |m, i| {
+                if m.get::<bool>(&i, sv.nb_object.column_selection) {
                     number_of_selected_items += 1;
                 }
-            }
-        }
+            },
+        );
     }
 
     (number_of_selected_items, number_of_selected_groups)

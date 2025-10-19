@@ -2,14 +2,16 @@ use gtk4::prelude::*;
 use gtk4::{ListStore, TreeIter};
 
 
-pub fn iter_list<F, G>(model: &ListStore, f: F, init_asserts: G)
+pub fn iter_list<G, F>(model: &ListStore, init: G, mut f: F)
 where
-    F: Fn(&ListStore, &TreeIter) -> bool,
-    G: Fn(&ListStore, &TreeIter) -> (),
+    G: Fn(&ListStore, &TreeIter) -> bool,
+    F: FnMut(&ListStore, &TreeIter) -> (),
 
 {
     if let Some(iter) = model.iter_first() {
-        init_asserts(model, &iter);
+        if !init(model, &iter) {
+            return;
+        }
         loop {
             f(model, &iter);
 
