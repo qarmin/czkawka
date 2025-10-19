@@ -59,6 +59,7 @@ mod help_functions;
 mod initialize_gui;
 mod language_functions;
 mod localizer_gui;
+mod model_iter;
 mod notebook_enums;
 mod notebook_info;
 mod opening_selecting_records;
@@ -68,7 +69,6 @@ mod taskbar_progress;
 mod taskbar_progress_dummy;
 #[cfg(target_os = "windows")]
 mod taskbar_progress_win;
-mod model_iter;
 
 fn main() {
     let (infos, warnings) = set_config_cache_path("Czkawka", "Czkawka");

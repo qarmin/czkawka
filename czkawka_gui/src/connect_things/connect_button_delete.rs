@@ -10,7 +10,7 @@ use crate::flg;
 use crate::gui_structs::common_tree_view::SubView;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::{check_how_much_elements_is_selected, clean_invalid_headers, get_full_name_from_path_name};
-use crate::model_iter::{iter_list, iter_list_with_init};
+use crate::model_iter::iter_list;
 use crate::notebook_enums::NotebookMainEnum;
 
 // TODO add support for checking if really symlink doesn't point to correct directory/file
@@ -210,8 +210,8 @@ pub(crate) fn empty_folder_remover(sv: &SubView, check_button_settings_use_trash
     let mut selected_rows = Vec::new();
 
     iter_list(&model, |m, i| {
-        if m.get::<bool>(&i, sv.nb_object.column_selection) {
-            selected_rows.push(m.path(&i));
+        if m.get::<bool>(i, sv.nb_object.column_selection) {
+            selected_rows.push(m.path(i));
         }
     });
 
@@ -278,8 +278,8 @@ pub(crate) fn basic_remove(sv: &SubView, check_button_settings_use_trash: &Check
     let mut selected_rows = Vec::new();
 
     iter_list(&model, |m, i| {
-        if m.get::<bool>(&i, sv.nb_object.column_selection) {
-            selected_rows.push(m.path(&i));
+        if m.get::<bool>(i, sv.nb_object.column_selection) {
+            selected_rows.push(m.path(i));
         }
     });
 
@@ -345,9 +345,9 @@ pub(crate) fn tree_remove(sv: &SubView, column_header: i32, check_button_setting
     let mut selected_rows = Vec::new();
 
     iter_list(&model, |m, i| {
-        if m.get::<bool>(&i, sv.nb_object.column_selection) {
-            if !m.get::<bool>(&i, column_header) {
-                selected_rows.push(m.path(&i));
+        if m.get::<bool>(i, sv.nb_object.column_selection) {
+            if !m.get::<bool>(i, column_header) {
+                selected_rows.push(m.path(i));
             } else {
                 panic!("Header row shouldn't be selected, please report bug.");
             }

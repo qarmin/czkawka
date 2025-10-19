@@ -560,13 +560,13 @@ pub(crate) fn check_how_much_elements_is_selected(sv: &SubView) -> (u64, u64) {
         iter_list_with_init(
             &model,
             |m, i| {
-                assert!(m.get::<bool>(&i, column_header)); // First element should be header
-                m.iter_next(&i)
+                assert!(m.get::<bool>(i, column_header)); // First element should be header
+                m.iter_next(i)
             },
             |m, i| {
-                if m.get::<bool>(&i, column_header) {
+                if m.get::<bool>(i, column_header) {
                     is_item_currently_selected_in_group = false;
-                } else if m.get::<bool>(&i, sv.nb_object.column_selection) {
+                } else if m.get::<bool>(i, sv.nb_object.column_selection) {
                     number_of_selected_items += 1;
 
                     if !is_item_currently_selected_in_group {
@@ -577,14 +577,11 @@ pub(crate) fn check_how_much_elements_is_selected(sv: &SubView) -> (u64, u64) {
             },
         );
     } else {
-        iter_list(
-            &model,
-            |m, i| {
-                if m.get::<bool>(&i, sv.nb_object.column_selection) {
-                    number_of_selected_items += 1;
-                }
-            },
-        );
+        iter_list(&model, |m, i| {
+            if m.get::<bool>(i, sv.nb_object.column_selection) {
+                number_of_selected_items += 1;
+            }
+        });
     }
 
     (number_of_selected_items, number_of_selected_groups)
@@ -831,15 +828,52 @@ pub(crate) fn append_row_to_list_store(list_store: &ListStore, values: &[(u32, &
 
 #[cfg(test)]
 mod test {
+    use std::path::PathBuf;
+
     use glib::Value;
     use glib::types::Type;
     use gtk4::prelude::*;
     use gtk4::{Orientation, TreeView};
     use image::DynamicImage;
-    use std::path::PathBuf;
-    use crate::notebook_enums::{NotebookMainEnum, NotebookUpperEnum};
 
     use super::*;
+    use crate::notebook_enums::{NotebookMainEnum, NotebookUpperEnum};
+
+    // Helper to create a minimal SubView for Duplicate notebook along with its ListStore
+    fn get_test_sv_duplicate() -> (crate::gui_structs::common_tree_view::SubView, gtk4::ListStore) {
+        use std::cell::RefCell;
+        use std::rc::Rc;
+
+        use czkawka_core::tools::duplicate::DuplicateFinder;
+
+        use crate::gui_structs::common_tree_view::SharedModelEnum;
+
+        let nb_object = NOTEBOOKS_INFO[NotebookMainEnum::Duplicate as usize].clone();
+
+        let list_store = gtk4::ListStore::new(nb_object.columns_types);
+        let tree_view = gtk4::TreeView::new();
+        tree_view.set_model(Some(&list_store));
+
+        let scrolled_window = gtk4::ScrolledWindow::new();
+        let gesture_click = gtk4::GestureClick::new();
+        let event_controller_key = gtk4::EventControllerKey::new();
+        tree_view.add_controller(event_controller_key.clone());
+        tree_view.add_controller(gesture_click.clone());
+
+        let sv = crate::gui_structs::common_tree_view::SubView {
+            scrolled_window,
+            tree_view: tree_view,
+            gesture_click,
+            event_controller_key,
+            nb_object,
+            enum_value: NotebookMainEnum::Duplicate,
+            tree_view_name: "tree_view_duplicate_finder".to_string(),
+            preview_struct: None,
+            shared_model_enum: SharedModelEnum::Duplicates(Rc::new(RefCell::new(None::<DuplicateFinder>))),
+        };
+
+        (sv, list_store)
+    }
 
     #[gtk4::test]
     fn test_get_string_from_list_store() {
@@ -1026,49 +1060,103 @@ mod test {
 
     #[test]
     fn test_get_tree_view_name_from_notebook_upper_enum() {
-        assert_eq!(get_tree_view_name_from_notebook_upper_enum(NotebookUpperEnum::IncludedDirectories), "tree_view_upper_included_directories");
-        assert_eq!(get_tree_view_name_from_notebook_upper_enum(NotebookUpperEnum::ExcludedDirectories), "tree_view_upper_excluded_directories");
+        assert_eq!(
+            get_tree_view_name_from_notebook_upper_enum(NotebookUpperEnum::IncludedDirectories),
+            "tree_view_upper_included_directories"
+        );
+        assert_eq!(
+            get_tree_view_name_from_notebook_upper_enum(NotebookUpperEnum::ExcludedDirectories),
+            "tree_view_upper_excluded_directories"
+        );
     }
 
     #[gtk4::test]
     fn test_count_number_of_groups() {
-        use std::rc::Rc;
-        use std::cell::RefCell;
-        use czkawka_core::tools::duplicate::DuplicateFinder;
-        use crate::gui_structs::common_tree_view::SharedModelEnum;
-        use crate::notebook_info::NOTEBOOKS_INFO;
+        // Use helper that builds SubView + ListStore
+        let (sv, list_store) = get_test_sv_duplicate();
 
-        let nb_object = NOTEBOOKS_INFO[NotebookMainEnum::Duplicate as usize].clone();
+        let column_header = sv.nb_object.column_header.expect("Duplicate NB must have header column");
 
-        let list_store = ListStore::new(nb_object.columns_types);
-        let tree_view = TreeView::new();
-        tree_view.set_model(Some(&list_store));
-
-        let column_header = nb_object.column_header.expect("Duplicate NB must have header column");
-
+        // Build rows: H, C, H, C -> expected 2 groups
         append_row_to_list_store(&list_store, &[(column_header as u32, &Into::<Value>::into(true))]);
         append_row_to_list_store(&list_store, &[(column_header as u32, &Into::<Value>::into(false))]);
         append_row_to_list_store(&list_store, &[(column_header as u32, &Into::<Value>::into(true))]);
         append_row_to_list_store(&list_store, &[(column_header as u32, &Into::<Value>::into(false))]);
 
-        let scrolled_window = gtk4::ScrolledWindow::new();
-        let gesture_click = gtk4::GestureClick::new();
-        let event_controller_key = gtk4::EventControllerKey::new();
-        tree_view.add_controller(event_controller_key.clone());
-        tree_view.add_controller(gesture_click.clone());
+        assert_eq!(crate::help_functions::count_number_of_groups(&sv), 2);
+    }
 
-        let sv = SubView {
-            scrolled_window,
-            tree_view,
-            gesture_click,
-            event_controller_key,
-            nb_object,
-            enum_value: NotebookMainEnum::Duplicate,
-            tree_view_name: "tree_view_duplicate_finder".to_string(),
-            preview_struct: None,
-            shared_model_enum: SharedModelEnum::Duplicates(Rc::new(RefCell::new(None::<DuplicateFinder>))),
-        };
+    #[gtk4::test]
+    fn test_check_how_much_elements_is_selected() {
+        let (sv, list_store) = get_test_sv_duplicate();
 
-        assert_eq!(count_number_of_groups(&sv), 2);
+        let column_header = sv.nb_object.column_header.expect("Duplicate NB must have header column");
+        let column_selection = sv.nb_object.column_selection;
+
+        // Build rows: H, C(selected), C(not selected), H, C(selected) => 2 selected items in 2 groups
+        append_row_to_list_store(
+            &list_store,
+            &[(column_header as u32, &Into::<Value>::into(true)), (column_selection as u32, &Into::<Value>::into(false))],
+        );
+        append_row_to_list_store(
+            &list_store,
+            &[(column_header as u32, &Into::<Value>::into(false)), (column_selection as u32, &Into::<Value>::into(true))],
+        );
+        append_row_to_list_store(
+            &list_store,
+            &[(column_header as u32, &Into::<Value>::into(false)), (column_selection as u32, &Into::<Value>::into(false))],
+        );
+        append_row_to_list_store(
+            &list_store,
+            &[(column_header as u32, &Into::<Value>::into(true)), (column_selection as u32, &Into::<Value>::into(false))],
+        );
+        append_row_to_list_store(
+            &list_store,
+            &[(column_header as u32, &Into::<Value>::into(false)), (column_selection as u32, &Into::<Value>::into(true))],
+        );
+
+        let res = check_how_much_elements_is_selected(&sv);
+        assert_eq!(res, (2, 2));
+    }
+
+    #[gtk4::test]
+    fn test_get_from_list_store_fnc() {
+        let columns_types: &[Type] = &[Type::STRING];
+        let list_store = gtk4::ListStore::new(columns_types);
+        let tree_view = TreeView::with_model(&list_store);
+
+        // Append literals directly to avoid lifetime/coercion issues
+        append_row_to_list_store(&list_store, &[(0, &"a")]);
+        append_row_to_list_store(&list_store, &[(0, &"b")]);
+        append_row_to_list_store(&list_store, &[(0, &"c")]);
+
+        let collected: Vec<String> = get_from_list_store_fnc(&tree_view, &|m, i, vec: &mut Vec<String>| {
+            vec.push(m.get::<String>(i, 0));
+        });
+
+        assert_eq!(collected, vec!["a".to_string(), "b".to_string(), "c".to_string()]);
+    }
+
+    #[gtk4::test]
+    fn test_set_and_hide_buttons() {
+        use std::collections::HashMap;
+        let btn1 = gtk4::Button::new();
+        let btn2 = gtk4::Button::new();
+        let w1: Widget = btn1.upcast();
+        let w2: Widget = btn2.upcast();
+        let buttons = vec![w1, w2];
+
+        let mut map: HashMap<BottomButtonsEnum, bool> = HashMap::new();
+        map.insert(BottomButtonsEnum::Save, true);
+        map.insert(BottomButtonsEnum::Delete, false);
+        let names = [BottomButtonsEnum::Save, BottomButtonsEnum::Delete];
+
+        set_buttons(&mut map, &buttons, &names);
+        assert!(buttons[0].is_visible());
+        assert!(!buttons[1].is_visible());
+
+        hide_all_buttons(&buttons);
+        assert!(!buttons[0].is_visible());
+        assert!(!buttons[1].is_visible());
     }
 }
