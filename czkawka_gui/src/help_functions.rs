@@ -836,11 +836,10 @@ mod test {
     use gtk4::prelude::*;
     use gtk4::{Orientation, TreeView};
     use image::DynamicImage;
+    use std::path::PathBuf;
+    use crate::notebook_enums::{NotebookMainEnum, NotebookUpperEnum};
 
-    use crate::help_functions::{
-        append_row_to_list_store, change_dimension_to_krotka, check_if_list_store_column_have_all_same_values, check_if_value_is_in_list_store, get_all_boxes_from_widget,
-        get_all_direct_children, get_max_file_name, get_pixbuf_from_dynamic_image, get_string_from_list_store,
-    };
+    use super::*;
 
     #[gtk4::test]
     fn test_get_string_from_list_store() {
@@ -994,5 +993,82 @@ mod test {
         obj2.append(&obj4);
         obj2.append(&obj5);
         assert_eq!(get_all_boxes_from_widget(&obj).len(), 2);
+    }
+
+    #[test]
+    fn test_get_path_buf_from_vector_of_strings() {
+        let input = vec!["/tmp/test1".to_string(), "relative/path".to_string()];
+        let result = get_path_buf_from_vector_of_strings(&input);
+        assert_eq!(result, vec![PathBuf::from("/tmp/test1"), PathBuf::from("relative/path")]);
+    }
+
+    #[test]
+    fn test_get_full_name_from_path_name() {
+        let path = "/home/user";
+        let name = "file.txt";
+        let expected = format!("{}{}{}", path, std::path::MAIN_SEPARATOR, name);
+        assert_eq!(get_full_name_from_path_name(path, name), expected);
+    }
+
+    #[gtk4::test]
+    fn test_get_notebook_enum_from_tree_view() {
+        let tv = gtk4::TreeView::new();
+        tv.set_widget_name("tree_view_duplicate_finder");
+        assert_eq!(get_notebook_enum_from_tree_view(&tv), NotebookMainEnum::Duplicate);
+    }
+
+    #[gtk4::test]
+    fn test_get_notebook_upper_enum_from_tree_view() {
+        let tv = gtk4::TreeView::new();
+        tv.set_widget_name("tree_view_upper_included_directories");
+        assert_eq!(get_notebook_upper_enum_from_tree_view(&tv), NotebookUpperEnum::IncludedDirectories);
+    }
+
+    #[test]
+    fn test_get_tree_view_name_from_notebook_upper_enum() {
+        assert_eq!(get_tree_view_name_from_notebook_upper_enum(NotebookUpperEnum::IncludedDirectories), "tree_view_upper_included_directories");
+        assert_eq!(get_tree_view_name_from_notebook_upper_enum(NotebookUpperEnum::ExcludedDirectories), "tree_view_upper_excluded_directories");
+    }
+
+    #[gtk4::test]
+    fn test_count_number_of_groups() {
+        use std::rc::Rc;
+        use std::cell::RefCell;
+        use czkawka_core::tools::duplicate::DuplicateFinder;
+        use crate::gui_structs::common_tree_view::SharedModelEnum;
+        use crate::notebook_info::NOTEBOOKS_INFO;
+
+        let nb_object = NOTEBOOKS_INFO[NotebookMainEnum::Duplicate as usize].clone();
+
+        let list_store = ListStore::new(nb_object.columns_types);
+        let tree_view = TreeView::new();
+        tree_view.set_model(Some(&list_store));
+
+        let column_header = nb_object.column_header.expect("Duplicate NB must have header column");
+
+        append_row_to_list_store(&list_store, &[(column_header as u32, &Into::<Value>::into(true))]);
+        append_row_to_list_store(&list_store, &[(column_header as u32, &Into::<Value>::into(false))]);
+        append_row_to_list_store(&list_store, &[(column_header as u32, &Into::<Value>::into(true))]);
+        append_row_to_list_store(&list_store, &[(column_header as u32, &Into::<Value>::into(false))]);
+
+        let scrolled_window = gtk4::ScrolledWindow::new();
+        let gesture_click = gtk4::GestureClick::new();
+        let event_controller_key = gtk4::EventControllerKey::new();
+        tree_view.add_controller(event_controller_key.clone());
+        tree_view.add_controller(gesture_click.clone());
+
+        let sv = SubView {
+            scrolled_window,
+            tree_view,
+            gesture_click,
+            event_controller_key,
+            nb_object,
+            enum_value: NotebookMainEnum::Duplicate,
+            tree_view_name: "tree_view_duplicate_finder".to_string(),
+            preview_struct: None,
+            shared_model_enum: SharedModelEnum::Duplicates(Rc::new(RefCell::new(None::<DuplicateFinder>))),
+        };
+
+        assert_eq!(count_number_of_groups(&sv), 2);
     }
 }
