@@ -10,18 +10,13 @@ use crate::flg;
 use crate::gui_structs::common_tree_view::SubView;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::{add_text_to_text_view, check_how_much_elements_is_selected, clean_invalid_headers, get_full_name_from_path_name, reset_text_view};
-use crate::notebook_enums::NotebookMainEnum;
 
 pub(crate) fn connect_button_move(gui_data: &GuiData) {
     let buttons_move = gui_data.bottom_buttons.buttons_move.clone();
 
-    let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
-    let image_preview_duplicates = gui_data.main_notebook.image_preview_duplicates.clone();
-
     let entry_info = gui_data.entry_info.clone();
     let text_view_errors = gui_data.text_view_errors.clone();
 
-    let preview_path = gui_data.main_notebook.common_tree_views.preview_path.clone();
     let file_dialog_move_to_folder = gui_data.file_dialog_move_to_folder.clone();
     let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
 
@@ -51,17 +46,7 @@ pub(crate) fn connect_button_move(gui_data: &GuiData) {
                 }
             }
         }
-        match &sv.nb_object.notebook_type {
-            NotebookMainEnum::SimilarImages | NotebookMainEnum::Duplicate => {
-                if sv.nb_object.notebook_type == NotebookMainEnum::SimilarImages {
-                    image_preview_similar_images.hide();
-                } else {
-                    image_preview_duplicates.hide();
-                }
-                *preview_path.borrow_mut() = String::new();
-            }
-            _ => {}
-        }
+        common_tree_views.hide_preview();
     });
 
     buttons_move.connect_clicked(move |_| {

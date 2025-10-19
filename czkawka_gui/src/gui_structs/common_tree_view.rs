@@ -53,6 +53,13 @@ impl CommonTreeViews {
         let enum_value = NOTEBOOKS_INFO[current_page as usize].notebook_type;
         self.get_subview(enum_value)
     }
+    pub fn hide_preview(&self) {
+        let current_subview = self.get_current_subview();
+        if let Some(preview_struct) = &current_subview.preview_struct {
+            preview_struct.image_preview.hide();
+        }
+        *self.preview_path.borrow_mut() = String::new();
+    }
     // pub fn get_tree_view_from_its_name(&self, name: &str) -> TreeView {
     //     for subview in &self.subviews {
     //         if subview.tree_view_name == name {

@@ -28,15 +28,12 @@ pub async fn delete_things(gui_data: GuiData) {
     let window_main = gui_data.window_main.clone();
     let check_button_settings_confirm_deletion = gui_data.settings.check_button_settings_confirm_deletion.clone();
     let check_button_settings_confirm_group_deletion = gui_data.settings.check_button_settings_confirm_group_deletion.clone();
-    let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
-    let image_preview_duplicates = gui_data.main_notebook.image_preview_duplicates.clone();
 
     let check_button_settings_use_trash = gui_data.settings.check_button_settings_use_trash.clone();
 
-    let preview_path = gui_data.main_notebook.common_tree_views.preview_path.clone();
-
     let text_view_errors = gui_data.text_view_errors.clone();
 
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
     let sv = gui_data.main_notebook.common_tree_views.get_current_subview();
 
     let (number_of_selected_items, number_of_selected_groups) = check_how_much_elements_is_selected(sv);
@@ -61,17 +58,7 @@ pub async fn delete_things(gui_data: GuiData) {
         basic_remove(sv, &check_button_settings_use_trash, &text_view_errors);
     }
 
-    match &sv.nb_object.notebook_type {
-        NotebookMainEnum::SimilarImages | NotebookMainEnum::Duplicate => {
-            if sv.nb_object.notebook_type == NotebookMainEnum::SimilarImages {
-                image_preview_similar_images.hide();
-            } else {
-                image_preview_duplicates.hide();
-            }
-            *preview_path.borrow_mut() = String::new();
-        }
-        _ => {}
-    }
+    common_tree_views.hide_preview();
 }
 
 pub async fn check_if_can_delete_files(
