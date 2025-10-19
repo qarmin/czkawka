@@ -9,6 +9,7 @@ use crate::flg;
 use crate::gui_structs::common_tree_view::SubView;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::{add_text_to_text_view, clean_invalid_headers, get_full_name_from_path_name, reset_text_view};
+use crate::model_iter::iter_list_with_init;
 
 #[derive(PartialEq, Eq, Copy, Clone)]
 enum TypeOfTool {
@@ -270,21 +271,20 @@ pub(crate) fn check_if_anything_is_selected_async(sv: &SubView) -> bool {
 
     let column_header = sv.nb_object.column_header.expect("Column header must exists for linking");
 
-    if let Some(iter) = model.iter_first() {
-        assert!(model.get::<bool>(&iter, column_header)); // First element should be header
 
-        loop {
-            if !model.iter_next(&iter) {
-                break;
-            }
+    let mut non_header_selected = false;
 
-            if !model.get::<bool>(&iter, column_header) && model.get::<bool>(&iter, sv.nb_object.column_selection) {
-                return true;
-            }
+    iter_list_break_with_init(&model, |_m,_i| {
+        assert!(m.get::<bool>(&i, column_header)); // First element should be header
+    }, |m, i| {
+        if !m.get::<bool>(&i, column_header) && m.get::<bool>(&i, sv.nb_object.column_selection) {
+            non_header_selected = true;
+            return false;
         }
-    }
+        true
+    });
 
-    false
+    non_header_selected
 }
 
 pub async fn check_if_can_link_files(check_button_settings_confirm_link: &CheckButton, window_main: &gtk4::Window) -> bool {
