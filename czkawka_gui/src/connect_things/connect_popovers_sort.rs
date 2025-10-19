@@ -6,7 +6,6 @@ use gtk4::{ListStore, TreeIter};
 use crate::gui_structs::common_tree_view::SubView;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::get_list_store;
-use crate::model_iter::iter_list;
 
 fn popover_sort_general_abs<T>(popover: &gtk4::Popover, sv: &SubView)
 where

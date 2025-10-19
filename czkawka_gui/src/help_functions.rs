@@ -30,7 +30,7 @@ use resvg::usvg::{Options, Tree};
 
 use crate::flg;
 use crate::gui_structs::common_tree_view::SubView;
-use crate::model_iter::{iter_list, iter_list_with_init};
+use crate::model_iter::{iter_list, iter_list_with_break_init};
 use crate::notebook_enums::{NotebookMainEnum, NotebookUpperEnum};
 use crate::notebook_info::{NOTEBOOKS_INFO, NotebookObject};
 
@@ -557,7 +557,7 @@ pub(crate) fn check_how_much_elements_is_selected(sv: &SubView) -> (u64, u64) {
     let mut is_item_currently_selected_in_group: bool = false;
 
     if let Some(column_header) = sv.nb_object.column_header {
-        iter_list_with_init(
+        iter_list_with_break_init(
             &model,
             |m, i| {
                 assert!(m.get::<bool>(i, column_header)); // First element should be header
@@ -593,7 +593,7 @@ pub(crate) fn count_number_of_groups(sv: &SubView) -> u32 {
 
     let model = sv.get_model();
 
-    iter_list_with_init(
+    iter_list_with_break_init(
         &model,
         |_m, i| {
             assert!(model.get::<bool>(i, column_header)); // First element should be header

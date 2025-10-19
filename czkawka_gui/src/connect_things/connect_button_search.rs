@@ -33,6 +33,7 @@ use crate::help_functions::{
     ColumnsExcludedDirectory, ColumnsIncludedDirectory, Message, check_if_list_store_column_have_all_same_values, get_list_store, get_path_buf_from_vector_of_strings,
     get_string_from_list_store, hide_all_buttons, reset_text_view, set_buttons,
 };
+use crate::model_iter::iter_list;
 use crate::notebook_enums::NotebookMainEnum;
 use crate::taskbar_progress::tbp_flags::TBPF_NOPROGRESS;
 use crate::{DEFAULT_MAXIMAL_FILE_SIZE, DEFAULT_MINIMAL_CACHE_SIZE, DEFAULT_MINIMAL_FILE_SIZE, flg};
@@ -699,16 +700,10 @@ where
 #[fun_time(message = "clean_tree_view", level = "debug")]
 fn clean_tree_view(tree_view: &gtk4::TreeView) {
     let list_store = get_list_store(tree_view);
-    let mut all_iters = Vec::new();
-    let first_iter = list_store.iter_first();
-    if let Some(first_iter) = first_iter {
-        loop {
-            all_iters.push(first_iter);
-            if !list_store.iter_next(&first_iter) {
-                break;
-            }
-        }
-    }
+    let mut all_iters: Vec<gtk4::TreeIter> = Vec::new();
+    iter_list(&list_store, |_m, i| {
+        all_iters.push(*i);
+    });
     all_iters.reverse();
     for iter in all_iters {
         list_store.remove(&iter);

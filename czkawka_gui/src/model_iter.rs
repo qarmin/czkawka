@@ -1,7 +1,7 @@
 use gtk4::prelude::*;
 use gtk4::{ListStore, TreeIter};
 
-pub fn iter_list_with_init<G, F>(model: &ListStore, init: G, mut f: F)
+pub fn iter_list_with_break_init<G, F>(model: &ListStore, init: G, mut f: F)
 where
     G: Fn(&ListStore, &TreeIter) -> bool,
     F: FnMut(&ListStore, &TreeIter),
@@ -21,13 +21,11 @@ where
 }
 pub fn iter_list_break_with_init<G, F>(model: &ListStore, init: G, mut f: F)
 where
-    G: Fn(&ListStore, &TreeIter) -> bool,
+    G: Fn(&ListStore, &TreeIter),
     F: FnMut(&ListStore, &TreeIter) -> bool,
 {
     if let Some(iter) = model.iter_first() {
-        if !init(model, &iter) {
-            return;
-        }
+        init(model, &iter);
         loop {
             if !f(model, &iter) {
                 break;
