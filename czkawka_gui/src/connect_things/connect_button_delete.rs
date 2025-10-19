@@ -10,6 +10,7 @@ use crate::flg;
 use crate::gui_structs::common_tree_view::SubView;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::{check_how_much_elements_is_selected, clean_invalid_headers, get_full_name_from_path_name};
+use crate::model_iter::{iter_list, iter_list_with_init};
 use crate::notebook_enums::NotebookMainEnum;
 
 // TODO add support for checking if really symlink doesn't point to correct directory/file
@@ -208,16 +209,11 @@ pub(crate) fn empty_folder_remover(sv: &SubView, check_button_settings_use_trash
 
     let mut selected_rows = Vec::new();
 
-    if let Some(iter) = model.iter_first() {
-        loop {
-            if model.get::<bool>(&iter, sv.nb_object.column_selection) {
-                selected_rows.push(model.path(&iter));
-            }
-            if !model.iter_next(&iter) {
-                break;
-            }
+    iter_list(&model, |m, i| {
+        if m.get::<bool>(&i, sv.nb_object.column_selection) {
+            selected_rows.push(m.path(&i));
         }
-    }
+    });
 
     if selected_rows.is_empty() {
         return; // No selected rows
@@ -281,17 +277,11 @@ pub(crate) fn basic_remove(sv: &SubView, check_button_settings_use_trash: &Check
 
     let mut selected_rows = Vec::new();
 
-    if let Some(iter) = model.iter_first() {
-        loop {
-            if model.get::<bool>(&iter, sv.nb_object.column_selection) {
-                selected_rows.push(model.path(&iter));
-            }
-
-            if !model.iter_next(&iter) {
-                break;
-            }
+    iter_list(&model, |m, i| {
+        if m.get::<bool>(&i, sv.nb_object.column_selection) {
+            selected_rows.push(m.path(&i));
         }
-    }
+    });
 
     if selected_rows.is_empty() {
         return; // No selected rows
@@ -354,24 +344,18 @@ pub(crate) fn tree_remove(sv: &SubView, column_header: i32, check_button_setting
 
     let mut selected_rows = Vec::new();
 
-    if let Some(iter) = model.iter_first() {
-        loop {
-            if model.get::<bool>(&iter, sv.nb_object.column_selection) {
-                if !model.get::<bool>(&iter, column_header) {
-                    selected_rows.push(model.path(&iter));
-                } else {
-                    panic!("Header row shouldn't be selected, please report bug.");
-                }
-            }
-
-            if !model.iter_next(&iter) {
-                break;
+    iter_list(&model, |m, i| {
+        if m.get::<bool>(&i, sv.nb_object.column_selection) {
+            if !m.get::<bool>(&i, column_header) {
+                selected_rows.push(m.path(&i));
+            } else {
+                panic!("Header row shouldn't be selected, please report bug.");
             }
         }
-    }
+    });
 
     if selected_rows.is_empty() {
-        return; // No selected rows
+        return;
     }
 
     // Save to variable paths of files, and remove it when not removing all occurrences.
@@ -404,6 +388,8 @@ pub(crate) fn tree_remove(sv: &SubView, column_header: i32, check_button_setting
             vec_path_to_delete.push((path.clone(), file_name.clone()));
         }
     }
+
+    // TODO use vec_path_to_delete
 
     clean_invalid_headers(&model, column_header, sv.nb_object.column_path);
 

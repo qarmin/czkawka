@@ -264,25 +264,22 @@ pub(crate) fn get_string_from_list_store(tree_view: &TreeView, column_full_path:
 
     let mut string_vector: Vec<String> = Vec::new();
 
-    let Some(tree_iter) = list_store.iter_first() else {
-        return string_vector;
-    };
     match column_selection {
-        Some(column_selection) => loop {
-            if list_store.get::<bool>(&tree_iter, column_selection) {
-                string_vector.push(list_store.get::<String>(&tree_iter, column_full_path));
-            }
-            if !list_store.iter_next(&tree_iter) {
-                return string_vector;
-            }
-        },
-        None => loop {
-            string_vector.push(list_store.get::<String>(&tree_iter, column_full_path));
-            if !list_store.iter_next(&tree_iter) {
-                return string_vector;
-            }
-        },
+        Some(column_selection) => {
+            iter_list(&list_store, |m, i| {
+                if m.get::<bool>(i, column_selection) {
+                    string_vector.push(m.get::<String>(i, column_full_path));
+                }
+            });
+        }
+        None => {
+            iter_list(&list_store, |m, i| {
+                string_vector.push(m.get::<String>(i, column_full_path));
+            });
+        }
     }
+
+    string_vector
 }
 
 pub(crate) fn get_from_list_store_fnc<T>(tree_view: &TreeView, fnc: &dyn Fn(&ListStore, &gtk4::TreeIter, &mut Vec<T>)) -> Vec<T> {
@@ -290,16 +287,11 @@ pub(crate) fn get_from_list_store_fnc<T>(tree_view: &TreeView, fnc: &dyn Fn(&Lis
 
     let mut result_vector: Vec<T> = Vec::new();
 
-    let Some(tree_iter) = list_store.iter_first() else {
-        return result_vector;
-    };
-    loop {
-        fnc(&list_store, &tree_iter, &mut result_vector);
+    iter_list(&list_store, |m, i| {
+        fnc(m, i, &mut result_vector);
+    });
 
-        if !list_store.iter_next(&tree_iter) {
-            return result_vector;
-        }
-    }
+    result_vector
 }
 
 pub(crate) fn get_path_buf_from_vector_of_strings(vec_string: &[String]) -> Vec<PathBuf> {
@@ -618,6 +610,14 @@ pub(crate) fn count_number_of_groups(sv: &SubView) -> u32 {
             }
         }
     }
+    // iter_list_with_init(&model,|m, i| {
+    //     assert!(model.get::<bool>(&i, column_header)); // First element should be header
+    //     true
+    // }, |m, i| {
+    //     if m.get::<bool>(&i, column_header) {
+    //         number_of_selected_groups += 1;
+    //     }
+    // });
     number_of_selected_groups
 }
 

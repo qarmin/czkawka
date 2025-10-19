@@ -22,7 +22,7 @@ where
     }
 }
 
-pub fn iter_list<G, F>(model: &ListStore, mut f: F)
+pub fn iter_list<F>(model: &ListStore, mut f: F)
 where
     F: FnMut(&ListStore, &TreeIter) -> (),
 
