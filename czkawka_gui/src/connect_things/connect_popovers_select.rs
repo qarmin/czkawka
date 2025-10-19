@@ -9,6 +9,7 @@ use crate::flg;
 use crate::gui_structs::common_tree_view::SubView;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::{change_dimension_to_krotka, get_dialog_box_child, get_full_name_from_path_name, get_list_store};
+use crate::model_iter::iter_list;
 
 // File length variable allows users to choose duplicates which have shorter file name
 // e.g. 'tar.gz' will be selected instead 'tar.gz (copy)' etc.
@@ -42,15 +43,9 @@ fn popover_select_all(popover: &gtk4::Popover, tree_view: &gtk4::TreeView, colum
 fn popover_unselect_all(popover: &gtk4::Popover, tree_view: &gtk4::TreeView, column_button_selection: u32) {
     let model = get_list_store(tree_view);
 
-    if let Some(iter) = model.iter_first() {
-        loop {
-            model.set_value(&iter, column_button_selection, &false.to_value());
-
-            if !model.iter_next(&iter) {
-                break;
-            }
-        }
-    }
+    iter_list(&model, |m, i| {
+        m.set_value(i, column_button_selection, &false.to_value());
+    });
     popover.popdown();
 }
 

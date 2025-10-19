@@ -10,6 +10,7 @@ use crate::flg;
 use crate::gui_structs::common_tree_view::SubView;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::{add_text_to_text_view, check_how_much_elements_is_selected, clean_invalid_headers, get_full_name_from_path_name, reset_text_view};
+use crate::model_iter::iter_list;
 
 pub(crate) fn connect_button_move(gui_data: &GuiData) {
     let buttons_move = gui_data.bottom_buttons.buttons_move.clone();
@@ -60,21 +61,15 @@ fn move_with_tree(sv: &SubView, destination_folder: &Path, entry_info: &gtk4::En
 
     let mut selected_rows = Vec::new();
 
-    if let Some(iter) = model.iter_first() {
-        loop {
-            if model.get::<bool>(&iter, sv.nb_object.column_selection) {
-                if !model.get::<bool>(&iter, column_header) {
-                    selected_rows.push(model.path(&iter));
-                } else {
-                    panic!("Header row shouldn't be selected, please report bug.");
-                }
-            }
-
-            if !model.iter_next(&iter) {
-                break;
+    iter_list(&model, |m, i| {
+        if m.get::<bool>(i, sv.nb_object.column_selection) {
+            if !m.get::<bool>(i, column_header) {
+                selected_rows.push(m.path(i));
+            } else {
+                panic!("Header row shouldn't be selected, please report bug.");
             }
         }
-    }
+    });
 
     if selected_rows.is_empty() {
         return; // No selected rows
@@ -98,17 +93,11 @@ fn move_with_list(sv: &SubView, destination_folder: &Path, entry_info: &gtk4::En
 
     let mut selected_rows = Vec::new();
 
-    if let Some(iter) = model.iter_first() {
-        loop {
-            if model.get::<bool>(&iter, sv.nb_object.column_selection) {
-                selected_rows.push(model.path(&iter));
-            }
-
-            if !model.iter_next(&iter) {
-                break;
-            }
+    iter_list(&model, |m, i| {
+        if m.get::<bool>(i, sv.nb_object.column_selection) {
+            selected_rows.push(m.path(i));
         }
-    }
+    });
 
     if selected_rows.is_empty() {
         return; // No selected rows
