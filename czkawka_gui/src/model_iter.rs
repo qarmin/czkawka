@@ -2,7 +2,7 @@ use gtk4::prelude::*;
 use gtk4::{ListStore, TreeIter};
 
 
-pub fn iter_list<G, F>(model: &ListStore, init: G, mut f: F)
+pub fn iter_list_with_init<G, F>(model: &ListStore, init: G, mut f: F)
 where
     G: Fn(&ListStore, &TreeIter) -> bool,
     F: FnMut(&ListStore, &TreeIter) -> (),
@@ -22,3 +22,18 @@ where
     }
 }
 
+pub fn iter_list<G, F>(model: &ListStore, mut f: F)
+where
+    F: FnMut(&ListStore, &TreeIter) -> (),
+
+{
+    if let Some(iter) = model.iter_first() {
+        loop {
+            f(model, &iter);
+
+            if !model.iter_next(&iter) {
+                break;
+            }
+        }
+    }
+}
