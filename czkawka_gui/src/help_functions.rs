@@ -593,28 +593,18 @@ pub(crate) fn count_number_of_groups(sv: &SubView) -> u32 {
 
     let model = sv.get_model();
 
-    if let Some(iter) = model.iter_first() {
-        assert!(model.get::<bool>(&iter, column_header)); // First element should be header
-        number_of_selected_groups += 1;
-
-        loop {
-            if !model.iter_next(&iter) {
-                break;
-            }
-
-            if model.get::<bool>(&iter, column_header) {
+    iter_list_with_init(
+        &model,
+        |_m, i| {
+            assert!(model.get::<bool>(i, column_header)); // First element should be header
+            true
+        },
+        |m, i| {
+            if m.get::<bool>(i, column_header) {
                 number_of_selected_groups += 1;
             }
-        }
-    }
-    // iter_list_with_init(&model,|m, i| {
-    //     assert!(model.get::<bool>(&i, column_header)); // First element should be header
-    //     true
-    // }, |m, i| {
-    //     if m.get::<bool>(&i, column_header) {
-    //         number_of_selected_groups += 1;
-    //     }
-    // });
+        },
+    );
     number_of_selected_groups
 }
 
@@ -862,7 +852,7 @@ mod test {
 
         let sv = crate::gui_structs::common_tree_view::SubView {
             scrolled_window,
-            tree_view: tree_view,
+            tree_view,
             gesture_click,
             event_controller_key,
             nb_object,
