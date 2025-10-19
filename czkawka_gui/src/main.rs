@@ -68,6 +68,7 @@ mod taskbar_progress;
 mod taskbar_progress_dummy;
 #[cfg(target_os = "windows")]
 mod taskbar_progress_win;
+mod model_iter;
 
 fn main() {
     let (infos, warnings) = set_config_cache_path("Czkawka", "Czkawka");
