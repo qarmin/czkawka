@@ -1,6 +1,6 @@
 #![allow(clippy::useless_let_if_seq)]
 
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 use std::fs;
 use std::io::{BufReader, BufWriter};
 use std::path::Path;
@@ -8,6 +8,7 @@ use std::path::Path;
 use bincode::Options;
 use fun_time::fun_time;
 use humansize::{BINARY, format_size};
+use indexmap::IndexMap;
 use log::{debug, error};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use serde::{Deserialize, Serialize};
@@ -125,15 +126,15 @@ pub fn load_cache_from_file_generalized_by_size<T>(
 where
     for<'a> T: Deserialize<'a> + ResultEntry + Sized + Send + Sync + Clone,
 {
-    debug!("Converting cache BtreeMap<u64, Vec<T>> into HashMap<String, (u64, u64)>");
-    let used_files: HashMap<String, (u64, u64)> = cache_not_converted
+    debug!("Converting cache BtreeMap<u64, Vec<T>> into IndexMap<String, (u64, u64)>");
+    let used_files: IndexMap<String, (u64, u64)> = cache_not_converted
         .iter()
         .flat_map(|(size, vec)| {
             vec.iter()
                 .map(move |file_entry| (file_entry.get_path().to_string_lossy().into_owned(), (*size, file_entry.get_modified_date())))
         })
         .collect();
-    debug!("Converted cache BtreeMap<u64, Vec<T>> into HashMap<String, (u64, u64)>");
+    debug!("Converted cache BtreeMap<u64, Vec<T>> into IndexMap<String, (u64, u64)>");
 
     let check_file = |file_entry: &T| {
         let file_entry_path_str = file_entry.get_path().to_string_lossy();

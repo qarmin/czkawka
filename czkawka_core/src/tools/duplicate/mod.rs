@@ -2,8 +2,9 @@ pub mod core;
 pub mod traits;
 
 use std::cell::RefCell;
-use std::collections::{BTreeMap, HashSet};
+use std::collections::BTreeMap;
 use std::fmt::Debug;
+#[cfg(target_family = "unix")]
 use std::fs;
 use std::fs::File;
 use std::hash::Hasher;
@@ -14,6 +15,7 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 
+use indexmap::IndexSet;
 use serde::{Deserialize, Serialize};
 use static_assertions::const_assert;
 use xxhash_rust::xxh3::Xxh3;
@@ -131,7 +133,7 @@ pub struct DuplicateFinder {
 
 #[cfg(target_family = "windows")]
 fn filter_hard_links(vec_file_entry: &[FileEntry]) -> Vec<FileEntry> {
-    let mut inodes: HashSet<u128> = HashSet::with_capacity(vec_file_entry.len());
+    let mut inodes: IndexSet<u128> = IndexSet::with_capacity(vec_file_entry.len());
     let mut identical: Vec<FileEntry> = Vec::with_capacity(vec_file_entry.len());
     for f in vec_file_entry {
         if let Ok(meta) = file_id::get_high_res_file_id(&f.path) {
@@ -148,7 +150,7 @@ fn filter_hard_links(vec_file_entry: &[FileEntry]) -> Vec<FileEntry> {
 
 #[cfg(target_family = "unix")]
 fn filter_hard_links(vec_file_entry: &[FileEntry]) -> Vec<FileEntry> {
-    let mut inodes: HashSet<u64> = HashSet::with_capacity(vec_file_entry.len());
+    let mut inodes: IndexSet<u64> = IndexSet::with_capacity(vec_file_entry.len());
     let mut identical: Vec<FileEntry> = Vec::with_capacity(vec_file_entry.len());
     for f in vec_file_entry {
         if let Ok(meta) = fs::metadata(&f.path) {

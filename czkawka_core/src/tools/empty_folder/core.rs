@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::fs::DirEntry;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -6,6 +5,7 @@ use std::sync::atomic::AtomicBool;
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
+use indexmap::IndexMap;
 use log::debug;
 use rayon::prelude::*;
 
@@ -27,7 +27,7 @@ impl EmptyFolder {
         }
     }
 
-    pub const fn get_empty_folder_list(&self) -> &HashMap<String, FolderEntry> {
+    pub const fn get_empty_folder_list(&self) -> &IndexMap<String, FolderEntry> {
         &self.empty_folder_list
     }
 
@@ -36,7 +36,7 @@ impl EmptyFolder {
     }
 
     pub(crate) fn optimize_folders(&mut self) {
-        let mut new_directory_folders: HashMap<String, FolderEntry> = Default::default();
+        let mut new_directory_folders: IndexMap<String, FolderEntry> = Default::default();
 
         for (name, folder_entry) in &self.empty_folder_list {
             match &folder_entry.parent_path {
@@ -148,7 +148,7 @@ impl EmptyFolder {
             }
         }
 
-        let mut folder_entries: HashMap<String, FolderEntry> = HashMap::with_capacity(start_folder_entries.len() + new_folder_entries_list.iter().map(Vec::len).sum::<usize>());
+        let mut folder_entries: IndexMap<String, FolderEntry> = IndexMap::with_capacity(start_folder_entries.len() + new_folder_entries_list.iter().map(Vec::len).sum::<usize>());
         for fe in start_folder_entries {
             folder_entries.insert(fe.path.to_string_lossy().to_string(), fe);
         }
@@ -174,7 +174,7 @@ impl EmptyFolder {
         WorkContinueStatus::Continue
     }
 
-    pub(crate) fn set_as_not_empty_folder(folder_entries: &mut HashMap<String, FolderEntry>, current_folder: &str) {
+    pub(crate) fn set_as_not_empty_folder(folder_entries: &mut IndexMap<String, FolderEntry>, current_folder: &str) {
         let mut d = folder_entries
             .get_mut(current_folder)
             .unwrap_or_else(|| panic!("Folder {current_folder} not found in folder_entries"));

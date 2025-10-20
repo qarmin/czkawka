@@ -1,10 +1,11 @@
-use std::collections::{BTreeSet, HashMap};
+use std::collections::BTreeSet;
 use std::mem;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
+use indexmap::IndexMap;
 use log::debug;
 use mime_guess::get_mime_extensions;
 use rayon::prelude::*;
@@ -60,7 +61,7 @@ impl BadExtensions {
 
         let files_to_check = mem::take(&mut self.files_to_check);
 
-        let mut hashmap_workarounds: HashMap<&str, Vec<&str>> = Default::default();
+        let mut hashmap_workarounds: IndexMap<&str, Vec<&str>> = Default::default();
         for (proper, found) in WORKAROUNDS {
             hashmap_workarounds.entry(found).or_default().push(proper);
         }
@@ -81,7 +82,7 @@ impl BadExtensions {
         WorkContinueStatus::Continue
     }
 
-    fn verify_extension_of_file(&self, file_entry: FileEntry, hashmap_workarounds: &HashMap<&str, Vec<&str>>) -> Option<BadFileEntry> {
+    fn verify_extension_of_file(&self, file_entry: FileEntry, hashmap_workarounds: &IndexMap<&str, Vec<&str>>) -> Option<BadFileEntry> {
         // Check what exactly content file contains
         let kind = match infer::get_from_path(&file_entry.path) {
             Ok(k) => k?,
@@ -122,7 +123,7 @@ impl BadExtensions {
         files_to_check: Vec<FileEntry>,
         items_counter: &Arc<AtomicUsize>,
         stop_flag: &Arc<AtomicBool>,
-        hashmap_workarounds: &HashMap<&str, Vec<&str>>,
+        hashmap_workarounds: &IndexMap<&str, Vec<&str>>,
     ) -> Vec<BadFileEntry> {
         files_to_check
             .into_par_iter()
@@ -164,7 +165,7 @@ impl BadExtensions {
         Some(current_extension)
     }
 
-    fn check_for_all_extensions_that_file_can_use(hashmap_workarounds: &HashMap<&str, Vec<&str>>, current_extension: &str, proper_extension: &str) -> (BTreeSet<String>, String) {
+    fn check_for_all_extensions_that_file_can_use(hashmap_workarounds: &IndexMap<&str, Vec<&str>>, current_extension: &str, proper_extension: &str) -> (BTreeSet<String>, String) {
         let mut all_available_extensions: BTreeSet<String> = Default::default();
         // TODO Isn't this a bug?
         // Why to file without extensions we set this as empty
