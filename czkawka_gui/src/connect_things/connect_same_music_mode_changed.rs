@@ -4,7 +4,7 @@ use gtk4::{CheckButton, Widget};
 
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_combo_box::AUDIO_TYPE_CHECK_METHOD_COMBO_BOX;
-use crate::help_functions::scale_set_min_max_values;
+use crate::utils::helpers::scale_set_min_max_values;
 
 const MINIMUM_SECONDS: f64 = 0.5;
 const MAXIMUM_SECONDS: f64 = 180.0;

@@ -29,9 +29,12 @@ use crate::help_combo_box::{
     AUDIO_TYPE_CHECK_METHOD_COMBO_BOX, BIG_FILES_CHECK_METHOD_COMBO_BOX, DUPLICATES_CHECK_METHOD_COMBO_BOX, DUPLICATES_HASH_TYPE_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX,
     IMAGES_HASH_TYPE_COMBO_BOX, IMAGES_RESIZE_ALGORITHM_COMBO_BOX,
 };
-use crate::help_functions::*;
 use crate::notebook_enums::*;
 use crate::taskbar_progress::tbp_flags::TBPF_NOPROGRESS;
+use crate::utils::enums::{ColumnsExcludedDirectory, ColumnsIncludedDirectory, Message};
+use crate::utils::list_store_utils::{check_if_list_store_column_have_all_same_values, *};
+use crate::utils::text_view_utils::reset_text_view;
+use crate::utils::widget_utils::*;
 use crate::{DEFAULT_MAXIMAL_FILE_SIZE, DEFAULT_MINIMAL_CACHE_SIZE, DEFAULT_MINIMAL_FILE_SIZE, flg};
 
 #[allow(clippy::too_many_arguments)]
