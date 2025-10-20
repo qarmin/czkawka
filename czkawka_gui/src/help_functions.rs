@@ -773,11 +773,9 @@ pub(crate) fn check_if_value_is_in_list_store(model: &ListStore, column: i32, va
     is_in_store
 }
 
-
-
 pub(crate) fn check_if_list_store_column_have_all_same_values(model: &ListStore, column: i32, value: bool) -> bool {
     let mut all_are_same = false;
-    iter_list_with_break(&model, |m, i| {
+    iter_list_with_break(model, |m, i| {
         all_are_same = true;
         if m.get::<bool>(i, column) != value {
             all_are_same = false;
@@ -789,8 +787,6 @@ pub(crate) fn check_if_list_store_column_have_all_same_values(model: &ListStore,
 
     all_are_same
 }
-
-
 
 pub(crate) fn scale_set_min_max_values(scale: &Scale, minimum: f64, maximum: f64, current_value: f64, step: Option<f64>) {
     scale.set_range(minimum, maximum);
@@ -1143,14 +1139,15 @@ mod test {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use std::path::MAIN_SEPARATOR;
+
+    use super::*;
 
     #[test]
     fn test_get_full_name_from_path_name() {
         let path = "some_dir";
         let name = "file.txt";
-        let expected = format!("{}{}{}", path, MAIN_SEPARATOR, name);
+        let expected = format!("{path}{MAIN_SEPARATOR}{name}");
         assert_eq!(get_full_name_from_path_name(path, name), expected);
     }
 
