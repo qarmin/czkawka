@@ -30,7 +30,7 @@ use resvg::usvg::{Options, Tree};
 
 use crate::flg;
 use crate::gui_structs::common_tree_view::SubView;
-use crate::model_iter::{iter_list, iter_list_with_break_init};
+use crate::model_iter::{iter_list, iter_list_with_break, iter_list_with_break_init};
 use crate::notebook_enums::{NotebookMainEnum, NotebookUpperEnum};
 use crate::notebook_info::{NOTEBOOKS_INFO, NotebookObject};
 
@@ -746,7 +746,7 @@ fn dynamic_image_to_pixbuf(img: DynamicImage) -> Pixbuf {
 }
 
 pub(crate) fn set_icon_of_button<P: IsA<Widget>>(button: &P, data: &'static [u8]) {
-    let image = get_custom_image_from_widget(&button.clone());
+    let image = get_custom_image_from_widget(button);
     let dynamic_image = svg_to_dynamic_image(data).expect("Failed to convert SVG data to DynamicImage");
     let pixbuf = dynamic_image_to_pixbuf(dynamic_image);
     image.set_from_pixbuf(Some(&pixbuf));
@@ -760,41 +760,37 @@ pub(crate) fn get_pixbuf_from_dynamic_image(dynamic_image: &DynamicImage) -> Res
     Pixbuf::from_read(BufReader::new(Cursor::new(output))).map_err(|e| format!("Failed to create Pixbuf from DynamicImage: {e}"))
 }
 
-pub(crate) fn check_if_value_is_in_list_store(list_store: &ListStore, column: i32, value: &str) -> bool {
-    if let Some(iter) = list_store.iter_first() {
-        loop {
-            let list_store_value: String = list_store.get::<String>(&iter, column);
-
-            if value == list_store_value {
-                return true;
-            }
-
-            if !list_store.iter_next(&iter) {
-                break;
-            }
+pub(crate) fn check_if_value_is_in_list_store(model: &ListStore, column: i32, value: &str) -> bool {
+    let mut is_in_store = false;
+    iter_list_with_break(model, |m, i| {
+        if m.get::<String>(i, column) == value {
+            is_in_store = true;
+            return false;
         }
-    }
+        true
+    });
 
-    false
+    is_in_store
 }
 
-pub(crate) fn check_if_list_store_column_have_all_same_values(list_store: &ListStore, column: i32, value: bool) -> bool {
-    if let Some(iter) = list_store.iter_first() {
-        loop {
-            let list_store_value: bool = list_store.get::<bool>(&iter, column);
 
-            if value != list_store_value {
-                return false;
-            }
 
-            if !list_store.iter_next(&iter) {
-                break;
-            }
+pub(crate) fn check_if_list_store_column_have_all_same_values(model: &ListStore, column: i32, value: bool) -> bool {
+    let mut all_are_same = false;
+    iter_list_with_break(&model, |m, i| {
+        all_are_same = true;
+        if m.get::<bool>(i, column) != value {
+            all_are_same = false;
+            return false;
         }
-        return true;
-    }
-    false
+
+        true
+    });
+
+    all_are_same
 }
+
+
 
 pub(crate) fn scale_set_min_max_values(scale: &Scale, minimum: f64, maximum: f64, current_value: f64, step: Option<f64>) {
     scale.set_range(minimum, maximum);

@@ -52,3 +52,19 @@ where
         }
     }
 }
+pub fn iter_list_with_break<F>(model: &ListStore, mut f: F)
+where
+    F: FnMut(&ListStore, &TreeIter) -> bool,
+{
+    if let Some(iter) = model.iter_first() {
+        loop {
+            if !f(model, &iter) {
+                break;
+            }
+
+            if !model.iter_next(&iter) {
+                break;
+            }
+        }
+    }
+}
