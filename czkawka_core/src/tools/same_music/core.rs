@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, HashSet};
+use std::collections::BTreeMap;
 use std::fs::File;
 use std::path::Path;
 use std::sync::Arc;
@@ -9,6 +9,7 @@ use anyhow::Context;
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use humansize::{BINARY, format_size};
+use indexmap::IndexSet;
 use lofty::file::{AudioFile, TaggedFileExt};
 use lofty::prelude::*;
 use lofty::read_from;
@@ -437,7 +438,7 @@ impl SameMusic {
         base_files: Vec<MusicEntry>,
         files_to_compare: &[MusicEntry],
     ) -> Option<Vec<Vec<MusicEntry>>> {
-        let mut used_paths: HashSet<String> = Default::default();
+        let mut used_paths: IndexSet<String> = Default::default();
 
         let configuration = &self.hash_preset_config;
         let minimum_segment_duration = self.params.minimum_segment_duration;

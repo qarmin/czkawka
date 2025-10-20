@@ -1,8 +1,9 @@
 pub mod core;
 pub mod traits;
 
-use std::collections::HashMap;
 use std::path::{Path, PathBuf};
+
+use indexmap::IndexMap;
 
 use crate::common::tool_data::CommonToolData;
 use crate::common::traits::ResultEntry;
@@ -33,7 +34,7 @@ impl ResultEntry for FolderEntry {
 pub struct EmptyFolder {
     common_data: CommonToolData,
     information: Info,
-    empty_folder_list: HashMap<String, FolderEntry>, // Path, FolderEntry
+    empty_folder_list: IndexMap<String, FolderEntry>, // Path, FolderEntry
 }
 
 /// Enum with values which show if folder is empty.

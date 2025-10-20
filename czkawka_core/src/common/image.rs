@@ -145,26 +145,36 @@ pub(crate) fn get_raw_image(path: impl AsRef<Path> + std::fmt::Debug) -> Result<
     let decoder = rawler::get_decoder(&raw_source).map_err(|e| e.to_string())?;
 
     timer.checkpoint("Got decoder");
-    let raw_image = decoder.raw_image(&raw_source, &RawDecodeParams::default(), false).map_err(|e| e.to_string())?;
 
-    timer.checkpoint("Decoded raw image");
+    let params = RawDecodeParams::default();
 
-    let developer = RawDevelop::default();
-    let developed_image = developer.develop_intermediate(&raw_image).map_err(|e| e.to_string())?;
+    let dynamic_image = match decoder.full_image(&raw_source, &params).map_err(|e| e.to_string())? {
+        Some(img) => {
+            timer.checkpoint("Decoded full image");
 
-    timer.checkpoint("Developed raw image");
+            img
+        }
+        None => {
+            let raw_image = decoder.raw_image(&raw_source, &params, false).map_err(|e| e.to_string())?;
 
-    let dynamic_image = developed_image.to_dynamic_image().ok_or("Failed to convert image to DynamicImage".to_string())?;
+            timer.checkpoint("Decoded raw image");
 
-    timer.checkpoint("Converted to DynamicImage");
+            let developer = RawDevelop::default();
+            let developed_image = developer.develop_intermediate(&raw_image).map_err(|e| e.to_string())?;
 
-    let rgb_image = DynamicImage::from(dynamic_image.to_rgb8());
+            timer.checkpoint("Developed raw image");
 
-    timer.checkpoint("Reconverted to RGB");
+            let dynamic_image = developed_image.to_dynamic_image().ok_or("Failed to convert image to DynamicImage")?;
+
+            timer.checkpoint("Converted to DynamicImage");
+
+            dynamic_image
+        }
+    };
 
     trace!("{}", timer.report("Everything", false));
 
-    Ok(rgb_image)
+    Ok(dynamic_image)
 }
 
 pub fn check_if_can_display_image(path: &str) -> bool {

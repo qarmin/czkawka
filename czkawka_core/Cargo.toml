@@ -15,6 +15,9 @@ humansize = "2.1"
 rayon = "1.10"
 crossbeam-channel = "0.5"
 
+# For stable iteration over hashmaps.
+indexmap = "2.11"
+
 # For saving/loading config files to specific directories
 directories-next = "2.0"
 

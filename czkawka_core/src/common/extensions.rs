@@ -1,12 +1,13 @@
-use std::collections::HashSet;
 use std::fs::DirEntry;
+
+use indexmap::IndexSet;
 
 use crate::helpers::messages::Messages;
 
 #[derive(Debug, Clone, Default)]
 pub struct Extensions {
-    allowed_extensions_hashset: HashSet<String>,
-    excluded_extensions_hashset: HashSet<String>,
+    allowed_extensions_hashset: IndexSet<String>,
+    excluded_extensions_hashset: IndexSet<String>,
 }
 
 impl Extensions {
@@ -14,15 +15,15 @@ impl Extensions {
         Default::default()
     }
 
-    pub(crate) fn filter_extensions(mut file_extensions: String) -> (HashSet<String>, Messages) {
+    pub(crate) fn filter_extensions(mut file_extensions: String) -> (IndexSet<String>, Messages) {
         let mut messages = Messages::new();
-        let mut extensions_hashset = HashSet::new();
+        let mut extensions_hashset = IndexSet::new();
 
         if file_extensions.trim().is_empty() {
             return (Default::default(), messages);
         }
         file_extensions = file_extensions.replace("IMAGE", "jpg,kra,gif,png,bmp,tiff,hdr,svg");
-        file_extensions = file_extensions.replace("VIDEO", "mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp");
+        file_extensions = file_extensions.replace("VIDEO", "mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,mts,m2ts");
         file_extensions = file_extensions.replace("MUSIC", "mp3,flac,ogg,tta,wma,webm");
         file_extensions = file_extensions.replace("TEXT", "txt,doc,docx,odt,rtf");
 
@@ -107,7 +108,7 @@ impl Extensions {
     // it will be only "mp4" because "jpg" is not valid extension for videos
 
     fn union_allowed_extensions(&mut self, file_extensions: &[&str]) {
-        let mut new_extensions = HashSet::new();
+        let mut new_extensions = IndexSet::new();
         for extension in file_extensions {
             let extension_without_dot = extension.trim_start_matches('.');
             if !self.allowed_extensions_hashset.contains(extension_without_dot) {

@@ -1,12 +1,13 @@
 pub mod core;
 pub mod traits;
 
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 use bk_tree::BKTree;
 use hamming_bitwise_fast::hamming_bitwise_fast;
 use image_hasher::{FilterType, HashAlg};
+use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 
 use crate::common::model::FileEntry;
@@ -117,7 +118,7 @@ pub struct SimilarImages {
     similar_vectors: Vec<Vec<ImagesEntry>>,
     similar_referenced_vectors: Vec<(ImagesEntry, Vec<ImagesEntry>)>,
     // Hashmap with image hashes and Vector with names of files
-    image_hashes: HashMap<ImHash, Vec<ImagesEntry>>,
+    image_hashes: IndexMap<ImHash, Vec<ImagesEntry>>,
     images_to_check: BTreeMap<String, ImagesEntry>,
     params: SimilarImagesParameters,
 }

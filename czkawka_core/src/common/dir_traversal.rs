@@ -349,6 +349,9 @@ fn process_file_in_file_mode(
         }
     }
 
+    #[cfg(windows)]
+    let _ = directories; // Silence unused variable warning on Windows
+
     let Some(metadata) = common_get_metadata_dir(entry_data, warnings, &current_file_name) else {
         return;
     };
@@ -395,6 +398,9 @@ fn process_dir_in_file_symlink_mode(
         }
     }
 
+    #[cfg(windows)]
+    let _ = warnings; // Silence unused variable warning on Windows
+
     dir_result.push(dir_path);
 }
 
@@ -423,6 +429,9 @@ fn process_symlink_in_symlink_mode(
             _ => (),
         }
     }
+
+    #[cfg(windows)]
+    let _ = directories; // Silence unused variable warning on Windows
 
     let Some(metadata) = common_get_metadata_dir(entry_data, warnings, &current_file_name) else {
         return;
@@ -527,12 +536,13 @@ pub(crate) fn take_1_per_inode((k, mut v): (Option<u64>, Vec<FileEntry>)) -> Vec
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashSet;
     use std::fs::File;
     use std::io::prelude::*;
     use std::time::{Duration, SystemTime};
     use std::{fs, io};
 
+    use indexmap::IndexSet;
+    use once_cell::sync::Lazy;
     use tempfile::TempDir;
 
     use super::*;
@@ -592,9 +602,9 @@ mod tests {
                 warnings: _,
                 grouped_file_entries,
             } => {
-                let actual: HashSet<_> = grouped_file_entries.into_values().flatten().collect();
+                let actual: IndexSet<_> = grouped_file_entries.into_values().flatten().collect();
                 assert_eq!(
-                    HashSet::from([
+                    IndexSet::from([
                         FileEntry {
                             path: src,
                             size: 1,
@@ -643,9 +653,9 @@ mod tests {
                 warnings: _,
                 grouped_file_entries,
             } => {
-                let actual: HashSet<_> = grouped_file_entries.into_iter().flat_map(take_1_per_inode).collect();
+                let actual: IndexSet<_> = grouped_file_entries.into_iter().flat_map(take_1_per_inode).collect();
                 assert_eq!(
-                    HashSet::from([
+                    IndexSet::from([
                         FileEntry {
                             path: src,
                             size: 1,
@@ -689,9 +699,9 @@ mod tests {
                 warnings: _,
                 grouped_file_entries,
             } => {
-                let actual: HashSet<_> = grouped_file_entries.into_iter().flat_map(take_1_per_inode).collect();
+                let actual: IndexSet<_> = grouped_file_entries.into_iter().flat_map(take_1_per_inode).collect();
                 assert_eq!(
-                    HashSet::from([
+                    IndexSet::from([
                         FileEntry {
                             path: src,
                             size: 1,
