@@ -671,7 +671,8 @@ fn gui_to_settings(upper_notebook: &GuiUpperNotebook, main_notebook: &GuiMainNot
     }
 }
 
-#[expect(clippy::useless_let_if_seq)]
+#[allow(clippy::allow_attributes)]
+#[allow(clippy::useless_let_if_seq)] // TODO - rust with some version shows this
 pub fn load_configuration(
     manual_execution: bool,
     upper_notebook: &GuiUpperNotebook,

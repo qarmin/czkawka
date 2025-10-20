@@ -542,7 +542,6 @@ mod tests {
     use std::{fs, io};
 
     use indexmap::IndexSet;
-    use once_cell::sync::Lazy;
     use tempfile::TempDir;
 
     use super::*;

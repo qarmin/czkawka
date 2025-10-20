@@ -68,7 +68,7 @@ fix:
     cargo +nightly fmt
     cargo fmt
 
-fix_nightly:
+fixn:
     cargo +nightly fmt
     cargo +nightly clippy --fix --allow-dirty --allow-staged --all-features --all-targets
     cargo +nightly fmt

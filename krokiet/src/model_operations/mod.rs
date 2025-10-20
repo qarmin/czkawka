@@ -9,8 +9,9 @@ use crate::{GuiState, MainListModel, MainWindow};
 pub type ProcessingResult = Vec<(usize, SimplerMainListModel, Option<Result<(), String>>)>;
 
 impl MainListModel {
+    #[allow(clippy::allow_attributes)]
     #[expect(clippy::print_stdout)]
-    #[expect(dead_code)]
+    #[allow(dead_code)] // TODO - rust with some version shows this
     pub(crate) fn debug_print(&self) {
         let val_int: Vec<i32> = self.val_int.iter().collect();
         let val_str: Vec<String> = self.val_str.iter().map(|e| e.to_string()).collect();

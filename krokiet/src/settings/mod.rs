@@ -216,7 +216,7 @@ where
     if let Some(parent) = config_file.parent()
         && let Err(e) = std::fs::create_dir_all(parent)
     {
-        return Err(format!("Cannot create config folder: {e}"));
+        return Err(format!("Cannot create config folder \"{}\": {e}", parent.to_string_lossy()));
     }
 
     match serde_json::to_string_pretty(&serializable_data) {
