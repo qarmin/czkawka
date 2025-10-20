@@ -981,12 +981,6 @@ mod test {
         get_pixbuf_from_dynamic_image(&dynamic_image).expect("Failed to get pixbuf from dynamic image");
     }
 
-    #[test]
-    fn test_change_dimension_to_krotka() {
-        assert_eq!(change_dimension_to_krotka("50x50"), (50, 50));
-        assert_eq!(change_dimension_to_krotka("6000x6000"), (6000, 6000));
-    }
-
     #[gtk4::test]
     fn test_get_all_direct_children() {
         let obj = gtk4::Box::new(Orientation::Horizontal, 0);
@@ -1144,5 +1138,45 @@ mod test {
         hide_all_buttons(&buttons);
         assert!(!buttons[0].is_visible());
         assert!(!buttons[1].is_visible());
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::MAIN_SEPARATOR;
+
+    #[test]
+    fn test_get_full_name_from_path_name() {
+        let path = "some_dir";
+        let name = "file.txt";
+        let expected = format!("{}{}{}", path, MAIN_SEPARATOR, name);
+        assert_eq!(get_full_name_from_path_name(path, name), expected);
+    }
+
+    #[test]
+    fn test_change_dimension_to_krotka() {
+        let dim = "1024x768";
+        let (w, h) = change_dimension_to_krotka(dim);
+        assert_eq!((w, h), (1024, 768));
+    }
+
+    #[test]
+    fn test_get_max_file_name_truncation() {
+        let name = "very_long_filename_example.txt";
+        // use max_length smaller than name length to trigger truncation
+        let out = get_max_file_name(name, 20);
+        // Should contain ellipsis and keep the first 10 chars
+        assert!(out.contains(" ... "));
+        assert!(out.starts_with(&name.chars().take(10).collect::<String>()));
+    }
+
+    #[test]
+    fn test_get_path_buf_from_vector_of_strings() {
+        let v = vec!["a".to_string(), "b".to_string()];
+        let res = get_path_buf_from_vector_of_strings(&v);
+        assert_eq!(res.len(), 2);
+        assert_eq!(res[0], PathBuf::from("a"));
+        assert_eq!(res[1], PathBuf::from("b"));
     }
 }
