@@ -1,17 +1,3 @@
-#![allow(clippy::collapsible_else_if)]
-#![allow(clippy::type_complexity)]
-#![allow(clippy::needless_late_init)]
-#![allow(clippy::too_many_arguments)]
-#![warn(clippy::unwrap_used)]
-#![warn(clippy::print_stderr)]
-#![warn(clippy::print_stdout)]
-#![warn(clippy::dbg_macro)]
-#![warn(clippy::string_slice)]
-
-#[macro_use]
-extern crate bitflags;
-extern crate core;
-
 pub mod common;
 pub mod helpers;
 pub mod localizer_core;

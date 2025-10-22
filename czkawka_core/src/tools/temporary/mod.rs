@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use serde::Serialize;
 
 use crate::common::tool_data::CommonToolData;
-use crate::common::traits::*;
+use crate::common::traits::ResultEntry;
 
 const TEMP_EXTENSIONS: &[&str] = &[
     "#",

@@ -89,7 +89,7 @@ impl BrokenFiles {
         }
     }
 
-    fn check_broken_image(&self, mut file_entry: BrokenEntry) -> BrokenEntry {
+    fn check_broken_image(mut file_entry: BrokenEntry) -> BrokenEntry {
         let mut file_entry_clone = file_entry.clone();
 
         panic::catch_unwind(|| {
@@ -105,7 +105,7 @@ impl BrokenFiles {
             file_entry_clone
         })
     }
-    fn check_broken_zip(&self, mut file_entry: BrokenEntry) -> Option<BrokenEntry> {
+    fn check_broken_zip(mut file_entry: BrokenEntry) -> Option<BrokenEntry> {
         match File::open(&file_entry.path) {
             Ok(file) => {
                 if let Err(e) = zip::ZipArchive::new(file) {
@@ -116,7 +116,7 @@ impl BrokenFiles {
             Err(_inspected) => None,
         }
     }
-    fn check_broken_audio(&self, mut file_entry: BrokenEntry) -> Option<BrokenEntry> {
+    fn check_broken_audio(mut file_entry: BrokenEntry) -> Option<BrokenEntry> {
         match File::open(&file_entry.path) {
             Ok(file) => {
                 let mut file_entry_clone = file_entry.clone();
@@ -137,7 +137,7 @@ impl BrokenFiles {
             Err(_inspected) => None,
         }
     }
-    fn check_broken_pdf(&self, mut file_entry: BrokenEntry) -> BrokenEntry {
+    fn check_broken_pdf(mut file_entry: BrokenEntry) -> BrokenEntry {
         let mut file_entry_clone = file_entry.clone();
         panic::catch_unwind(|| {
             match File::open(&file_entry.path) {
@@ -182,12 +182,12 @@ impl BrokenFiles {
         (loaded_hash_map, records_already_cached, non_cached_files_to_check)
     }
 
-    fn check_file(&self, file_entry: BrokenEntry) -> Option<BrokenEntry> {
+    fn check_file(file_entry: BrokenEntry) -> Option<BrokenEntry> {
         match file_entry.type_of_file {
-            TypeOfFile::Image => Some(self.check_broken_image(file_entry)),
-            TypeOfFile::ArchiveZip => self.check_broken_zip(file_entry),
-            TypeOfFile::Audio => self.check_broken_audio(file_entry),
-            TypeOfFile::PDF => Some(self.check_broken_pdf(file_entry)),
+            TypeOfFile::Image => Some(Self::check_broken_image(file_entry)),
+            TypeOfFile::ArchiveZip => Self::check_broken_zip(file_entry),
+            TypeOfFile::Audio => Self::check_broken_audio(file_entry),
+            TypeOfFile::PDF => Some(Self::check_broken_pdf(file_entry)),
             // This means that cache read invalid value because maybe cache comes from different czkawka version
             TypeOfFile::Unknown => None,
         }
@@ -221,7 +221,7 @@ impl BrokenFiles {
                 }
 
                 let size = file_entry.size;
-                let res = self.check_file(file_entry);
+                let res = Self::check_file(file_entry);
 
                 progress_handler.increase_items(1);
                 progress_handler.increase_size(size);
@@ -268,7 +268,7 @@ impl BrokenFiles {
     }
 }
 
-#[allow(clippy::string_slice)] // Valid, because we address go to dot, which is known ascii character
+#[expect(clippy::string_slice)] // Valid, because we address go to dot, which is known ascii character
 fn check_extension_availability(
     full_name: &Path,
     images_extensions: &IndexSet<&'static str>,

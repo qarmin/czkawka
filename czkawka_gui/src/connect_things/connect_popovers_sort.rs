@@ -3,9 +3,21 @@ use std::fmt::Debug;
 use gtk4::prelude::*;
 use gtk4::{ListStore, TreeIter};
 
+use crate::gui_structs::common_tree_view::SubView;
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::*;
-use crate::notebook_info::NOTEBOOKS_INFO;
+use crate::help_functions::get_list_store;
+
+fn popover_sort_general_abs<T>(popover: &gtk4::Popover, sv: &SubView)
+where
+    T: Ord + for<'b> glib::value::FromValue<'b> + 'static + Debug,
+{
+    popover_sort_general::<T>(
+        popover,
+        &sv.tree_view,
+        sv.nb_object.column_size_as_bytes.expect("Failed to get size as bytes column"),
+        sv.nb_object.column_header.expect("Failed to get header column"),
+    );
+}
 
 fn popover_sort_general<T>(popover: &gtk4::Popover, tree_view: &gtk4::TreeView, column_sort: i32, column_header: i32)
 where
@@ -73,74 +85,33 @@ where
 pub(crate) fn connect_popover_sort(gui_data: &GuiData) {
     let popover_sort = gui_data.popovers_sort.popover_sort.clone();
     let buttons_popover_file_name = gui_data.popovers_sort.buttons_popover_sort_file_name.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
 
     buttons_popover_file_name.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
-
-        popover_sort_general::<String>(
-            &popover_sort,
-            tree_view,
-            nb_object.column_name,
-            nb_object.column_header.expect("Failed to get header column"),
-        );
+        popover_sort_general_abs::<String>(&popover_sort, common_tree_views.get_current_subview());
     });
 
     let popover_sort = gui_data.popovers_sort.popover_sort.clone();
     let buttons_popover_sort_folder_name = gui_data.popovers_sort.buttons_popover_sort_folder_name.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
 
     buttons_popover_sort_folder_name.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
-
-        popover_sort_general::<String>(
-            &popover_sort,
-            tree_view,
-            nb_object.column_path,
-            nb_object.column_header.expect("Failed to get header column"),
-        );
+        popover_sort_general_abs::<String>(&popover_sort, common_tree_views.get_current_subview());
     });
 
     let popover_sort = gui_data.popovers_sort.popover_sort.clone();
     let buttons_popover_sort_selection = gui_data.popovers_sort.buttons_popover_sort_selection.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
 
     buttons_popover_sort_selection.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
-
-        popover_sort_general::<bool>(
-            &popover_sort,
-            tree_view,
-            nb_object.column_selection,
-            nb_object.column_header.expect("Failed to get header column"),
-        );
+        popover_sort_general_abs::<bool>(&popover_sort, common_tree_views.get_current_subview());
     });
 
     let popover_sort = gui_data.popovers_sort.popover_sort.clone();
     let buttons_popover_sort_size = gui_data.popovers_sort.buttons_popover_sort_size.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
-
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
     buttons_popover_sort_size.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
-
-        popover_sort_general::<u64>(
-            &popover_sort,
-            tree_view,
-            nb_object.column_size_as_bytes.expect("Failed to get size as bytes column"),
-            nb_object.column_header.expect("Failed to get header column"),
-        );
+        popover_sort_general_abs::<u64>(&popover_sort, common_tree_views.get_current_subview());
     });
 }
 
@@ -152,6 +123,7 @@ mod test {
     use rand::random;
 
     use crate::connect_things::connect_popovers_sort::{popover_sort_general, sort_iters};
+    use crate::help_functions::append_row_to_list_store;
 
     #[gtk4::test]
     fn test_sort_iters() {
@@ -160,7 +132,7 @@ mod test {
 
         let values_to_add: &[&[(u32, &dyn ToValue)]] = &[&[(0, &2), (1, &"AAA")], &[(0, &3), (1, &"CCC")], &[(0, &1), (1, &"BBB")]];
         for i in values_to_add {
-            list_store.set(&list_store.append(), i);
+            append_row_to_list_store(&list_store, i);
         }
         let mut iters = Vec::new();
         let iter = list_store.iter_first().expect("Failed to get first iter");
@@ -192,7 +164,7 @@ mod test {
 
         let values_to_add: &[&[(u32, &dyn ToValue)]] = &[&[(0, &true), (1, &"DDD")], &[(0, &false), (1, &"CCC")], &[(0, &false), (1, &"BBB")]];
         for i in values_to_add {
-            list_store.set(&list_store.append(), i);
+            append_row_to_list_store(&list_store, i);
         }
 
         popover_sort_general::<String>(&popover, &tree_view, 1, 0);
@@ -225,7 +197,7 @@ mod test {
             &[(0, &false), (1, &"ZZZ")],
         ];
         for i in values_to_add {
-            list_store.set(&list_store.append(), i);
+            append_row_to_list_store(&list_store, i);
         }
 
         popover_sort_general::<String>(&popover, &tree_view, 1, 0);
@@ -249,7 +221,7 @@ mod test {
 
             // Always start with a header
             let first_row: &[(u32, &dyn ToValue)] = &[(0, &true), (1, &"AAA")];
-            list_store.set(&list_store.append(), first_row);
+            append_row_to_list_store(&list_store, first_row);
 
             let mut since_last_header = 0;
             let mut need_header = false;
@@ -259,7 +231,7 @@ mod test {
                 if need_header {
                     // Insert a header only if last was not a header
                     let a: Vec<(u32, &dyn ToValue)> = vec![(0, &true), (1, &"HEADER")];
-                    list_store.set(&list_store.append(), &a);
+                    append_row_to_list_store(&list_store, &a);
                     since_last_header = 0;
                     need_header = false;
                     i += 1;
@@ -268,10 +240,10 @@ mod test {
                 // Insert a non-header row
                 let string_val = rand::random::<u32>().to_string();
                 let a: Vec<(u32, &dyn ToValue)> = vec![(0, &false), (1, &string_val)];
-                list_store.set(&list_store.append(), &a);
+                append_row_to_list_store(&list_store, &a);
                 since_last_header += 1;
                 // After at least 2 non-header rows, randomly decide to insert a header next
-                if since_last_header >= 2 && random::<u8>() % 3 == 0 {
+                if since_last_header >= 2 && random::<u8>().is_multiple_of(3) {
                     need_header = true;
                 }
                 i += 1;
@@ -288,7 +260,7 @@ mod test {
             }
             if last_is_header {
                 let a: Vec<(u32, &dyn ToValue)> = vec![(0, &false), (1, &"FINALROW")];
-                list_store.set(&list_store.append(), &a);
+                append_row_to_list_store(&list_store, &a);
             }
 
             popover_sort_general::<String>(&popover, &tree_view, 1, 0);

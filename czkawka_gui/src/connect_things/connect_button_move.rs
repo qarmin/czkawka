@@ -1,37 +1,30 @@
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use fs_extra::dir::CopyOptions;
 use gtk4::prelude::*;
 use gtk4::{ResponseType, TreePath};
 use log::debug;
 
+use crate::connect_things::file_chooser_helpers::extract_paths_from_file_chooser;
 use crate::flg;
+use crate::gui_structs::common_tree_view::SubView;
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::*;
-use crate::notebook_enums::*;
-use crate::notebook_info::NOTEBOOKS_INFO;
+use crate::help_functions::{add_text_to_text_view, check_how_much_elements_is_selected, clean_invalid_headers, get_full_name_from_path_name, reset_text_view};
+use crate::model_iter::iter_list;
 
 pub(crate) fn connect_button_move(gui_data: &GuiData) {
     let buttons_move = gui_data.bottom_buttons.buttons_move.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
-
-    let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
-    let image_preview_duplicates = gui_data.main_notebook.image_preview_duplicates.clone();
 
     let entry_info = gui_data.entry_info.clone();
     let text_view_errors = gui_data.text_view_errors.clone();
 
-    let preview_path = gui_data.preview_path.clone();
     let file_dialog_move_to_folder = gui_data.file_dialog_move_to_folder.clone();
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
 
     file_dialog_move_to_folder.connect_response(move |file_chooser, response_type| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
+        let sv = common_tree_views.get_current_subview();
 
-        let (number_of_selected_items, _number_of_selected_groups) = check_how_much_elements_is_selected(tree_view, nb_object.column_header, nb_object.column_selection);
+        let (number_of_selected_items, _number_of_selected_groups) = check_how_much_elements_is_selected(sv);
 
         // Nothing is selected
         if number_of_selected_items == 0 {
@@ -41,57 +34,20 @@ pub(crate) fn connect_button_move(gui_data: &GuiData) {
         reset_text_view(&text_view_errors);
 
         if response_type == ResponseType::Accept {
-            let mut folders: Vec<PathBuf> = Vec::new();
-            let g_files = file_chooser.files();
-            for index in 0..g_files.n_items() {
-                let file = g_files.item(index);
-                if let Some(file) = file {
-                    let ss = file.downcast::<gtk4::gio::File>().expect("Failed to downcast to gio::File");
-                    if let Some(path_buf) = ss.path() {
-                        folders.push(path_buf);
-                    }
-                }
-            }
+            let folders = extract_paths_from_file_chooser(file_chooser);
 
             if folders.len() != 1 {
                 add_text_to_text_view(&text_view_errors, flg!("move_files_choose_more_than_1_path", path_number = folders.len()).as_str());
             } else {
                 let folder = folders[0].clone();
-                if let Some(column_header) = nb_object.column_header {
-                    move_with_tree(
-                        tree_view,
-                        nb_object.column_name,
-                        nb_object.column_path,
-                        column_header,
-                        nb_object.column_selection,
-                        &folder,
-                        &entry_info,
-                        &text_view_errors,
-                    );
+                if sv.nb_object.column_header.is_some() {
+                    move_with_tree(sv, &folder, &entry_info, &text_view_errors);
                 } else {
-                    move_with_list(
-                        tree_view,
-                        nb_object.column_name,
-                        nb_object.column_path,
-                        nb_object.column_selection,
-                        &folder,
-                        &entry_info,
-                        &text_view_errors,
-                    );
+                    move_with_list(sv, &folder, &entry_info, &text_view_errors);
                 }
             }
         }
-        match &nb_object.notebook_type {
-            NotebookMainEnum::SimilarImages | NotebookMainEnum::Duplicate => {
-                if nb_object.notebook_type == NotebookMainEnum::SimilarImages {
-                    image_preview_similar_images.hide();
-                } else {
-                    image_preview_duplicates.hide();
-                }
-                *preview_path.borrow_mut() = String::new();
-            }
-            _ => {}
-        }
+        common_tree_views.hide_preview();
     });
 
     buttons_move.connect_clicked(move |_| {
@@ -99,75 +55,63 @@ pub(crate) fn connect_button_move(gui_data: &GuiData) {
     });
 }
 
-fn move_with_tree(
-    tree_view: &gtk4::TreeView,
-    column_file_name: i32,
-    column_path: i32,
-    column_header: i32,
-    column_selection: i32,
-    destination_folder: &Path,
-    entry_info: &gtk4::Entry,
-    text_view_errors: &gtk4::TextView,
-) {
-    let model = get_list_store(tree_view);
+fn move_with_tree(sv: &SubView, destination_folder: &Path, entry_info: &gtk4::Entry, text_view_errors: &gtk4::TextView) {
+    let model = sv.get_model();
+    let column_header = sv.nb_object.column_header.expect("Using move_with_tree without header column");
 
     let mut selected_rows = Vec::new();
 
-    if let Some(iter) = model.iter_first() {
-        loop {
-            if model.get::<bool>(&iter, column_selection) {
-                if !model.get::<bool>(&iter, column_header) {
-                    selected_rows.push(model.path(&iter));
-                } else {
-                    panic!("Header row shouldn't be selected, please report bug.");
-                }
-            }
-
-            if !model.iter_next(&iter) {
-                break;
+    iter_list(&model, |m, i| {
+        if m.get::<bool>(i, sv.nb_object.column_selection) {
+            if !m.get::<bool>(i, column_header) {
+                selected_rows.push(m.path(i));
+            } else {
+                panic!("Header row shouldn't be selected, please report bug.");
             }
         }
-    }
+    });
 
     if selected_rows.is_empty() {
         return; // No selected rows
     }
 
-    move_files_common(&selected_rows, &model, column_file_name, column_path, destination_folder, entry_info, text_view_errors);
+    move_files_common(
+        &selected_rows,
+        &model,
+        sv.nb_object.column_name,
+        sv.nb_object.column_path,
+        destination_folder,
+        entry_info,
+        text_view_errors,
+    );
 
-    clean_invalid_headers(&model, column_header, column_path);
+    clean_invalid_headers(&model, column_header, sv.nb_object.column_path);
 }
 
-fn move_with_list(
-    tree_view: &gtk4::TreeView,
-    column_file_name: i32,
-    column_path: i32,
-    column_selection: i32,
-    destination_folder: &Path,
-    entry_info: &gtk4::Entry,
-    text_view_errors: &gtk4::TextView,
-) {
-    let model = get_list_store(tree_view);
+fn move_with_list(sv: &SubView, destination_folder: &Path, entry_info: &gtk4::Entry, text_view_errors: &gtk4::TextView) {
+    let model = sv.get_model();
 
     let mut selected_rows = Vec::new();
 
-    if let Some(iter) = model.iter_first() {
-        loop {
-            if model.get::<bool>(&iter, column_selection) {
-                selected_rows.push(model.path(&iter));
-            }
-
-            if !model.iter_next(&iter) {
-                break;
-            }
+    iter_list(&model, |m, i| {
+        if m.get::<bool>(i, sv.nb_object.column_selection) {
+            selected_rows.push(m.path(i));
         }
-    }
+    });
 
     if selected_rows.is_empty() {
         return; // No selected rows
     }
 
-    move_files_common(&selected_rows, &model, column_file_name, column_path, destination_folder, entry_info, text_view_errors);
+    move_files_common(
+        &selected_rows,
+        &model,
+        sv.nb_object.column_name,
+        sv.nb_object.column_path,
+        destination_folder,
+        entry_info,
+        text_view_errors,
+    );
 }
 
 fn move_files_common(
@@ -201,13 +145,11 @@ fn move_files_common(
                 messages += "\n";
                 continue 'next_result;
             }
-        } else {
-            if let Err(e) = fs_extra::file::move_file(&thing, &destination_file, &fs_extra::file::CopyOptions::new()) {
-                messages += flg!("move_file_failed", name = thing, reason = e.to_string()).as_str();
-                messages += "\n";
+        } else if let Err(e) = fs_extra::file::move_file(&thing, &destination_file, &fs_extra::file::CopyOptions::new()) {
+            messages += flg!("move_file_failed", name = thing, reason = e.to_string()).as_str();
+            messages += "\n";
 
-                continue 'next_result;
-            }
+            continue 'next_result;
         }
         model.remove(&iter);
         moved_files += 1;

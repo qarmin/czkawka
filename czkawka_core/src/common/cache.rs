@@ -47,16 +47,14 @@ where
             }
             debug!("Saved cache to binary file {cache_file:?} with size {}", get_cache_size(&cache_file));
         }
-        if save_also_as_json {
-            if let Some(file_handler_json) = file_handler_json {
-                let writer = BufWriter::new(file_handler_json);
-                if let Err(e) = serde_json::to_writer(writer, &hashmap_to_save) {
-                    text_messages.warnings.push(format!("Cannot write data to cache file {cache_file_json:?}, reason {e}"));
-                    debug!("Failed to save cache to file {cache_file_json:?} - {e}");
-                    return text_messages;
-                }
-                debug!("Saved cache to json file {cache_file_json:?} with size {}", get_cache_size(&cache_file_json));
+        if save_also_as_json && let Some(file_handler_json) = file_handler_json {
+            let writer = BufWriter::new(file_handler_json);
+            if let Err(e) = serde_json::to_writer(writer, &hashmap_to_save) {
+                text_messages.warnings.push(format!("Cannot write data to cache file {cache_file_json:?}, reason {e}"));
+                debug!("Failed to save cache to file {cache_file_json:?} - {e}");
+                return text_messages;
             }
+            debug!("Saved cache to json file {cache_file_json:?} with size {}", get_cache_size(&cache_file_json));
         }
 
         text_messages.messages.push(format!("Properly saved to file {} cache entries.", hashmap.len()));

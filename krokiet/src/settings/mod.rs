@@ -90,18 +90,18 @@ pub(crate) fn connect_changing_settings_preset(app: &MainWindow) {
 
 pub(crate) fn create_default_settings_files() {
     let base_config_file = get_base_config_file();
-    if let Some(base_config_file) = base_config_file {
-        if !base_config_file.is_file() {
-            let _ = save_data_to_file(Some(base_config_file), &BasicSettings::default());
-        }
+    if let Some(base_config_file) = base_config_file
+        && !base_config_file.is_file()
+    {
+        let _ = save_data_to_file(Some(base_config_file), &BasicSettings::default());
     }
 
     for i in 0..PRESET_NUMBER {
         let config_file = get_config_file(i as i32);
-        if let Some(config_file) = config_file {
-            if !config_file.is_file() {
-                let _ = save_data_to_file(Some(config_file), &SettingsCustom::default());
-            }
+        if let Some(config_file) = config_file
+            && !config_file.is_file()
+        {
+            let _ = save_data_to_file(Some(config_file), &SettingsCustom::default());
         }
     }
 }
@@ -213,10 +213,10 @@ where
         return Err("Cannot get config file".into());
     };
     // Create dirs if not exists
-    if let Some(parent) = config_file.parent() {
-        if let Err(e) = std::fs::create_dir_all(parent) {
-            return Err(format!("Cannot create config folder: {e}"));
-        }
+    if let Some(parent) = config_file.parent()
+        && let Err(e) = std::fs::create_dir_all(parent)
+    {
+        return Err(format!("Cannot create config folder \"{}\": {e}", parent.to_string_lossy()));
     }
 
     match serde_json::to_string_pretty(&serializable_data) {
@@ -281,7 +281,7 @@ pub(crate) fn set_combobox_custom_settings_items(settings: &Settings, custom_set
     let collected_items = StringComboBoxItems::get_items();
 
     // Hash size
-    let (idx, display_names) = StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.similar_images_sub_hash_size.to_string(), &collected_items.hash_size);
+    let (idx, display_names) = StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.similar_images_sub_hash_size, &collected_items.hash_size);
     // settings.set_similar_images_sub_hash_size_model(display_names); // TODO - replace with
     settings.set_similar_images_sub_hash_size_index(idx as i32);
     settings.set_similar_images_sub_hash_size_value(display_names[idx].clone());

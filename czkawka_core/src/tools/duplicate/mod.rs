@@ -23,7 +23,7 @@ use xxhash_rust::xxh3::Xxh3;
 use crate::common::model::{CheckingMethod, FileEntry, HashType};
 use crate::common::progress_stop_handler::check_if_stop_received;
 use crate::common::tool_data::CommonToolData;
-use crate::common::traits::*;
+use crate::common::traits::ResultEntry;
 
 pub const PREHASHING_BUFFER_SIZE: u64 = 4 * 1024;
 pub const THREAD_BUFFER_SIZE: usize = 2 * 1024 * 1024;
@@ -153,10 +153,10 @@ fn filter_hard_links(vec_file_entry: &[FileEntry]) -> Vec<FileEntry> {
     let mut inodes: IndexSet<u64> = IndexSet::with_capacity(vec_file_entry.len());
     let mut identical: Vec<FileEntry> = Vec::with_capacity(vec_file_entry.len());
     for f in vec_file_entry {
-        if let Ok(meta) = fs::metadata(&f.path) {
-            if !inodes.insert(meta.ino()) {
-                continue;
-            }
+        if let Ok(meta) = fs::metadata(&f.path)
+            && !inodes.insert(meta.ino())
+        {
+            continue;
         }
         identical.push(f.clone());
     }
@@ -232,11 +232,13 @@ pub(crate) fn hash_calculation_limit(buffer: &mut [u8], file_entry: &DuplicateEn
         }
     };
     let hasher = &mut *hash_type.hasher();
+    #[expect(clippy::indexing_slicing)] // Safe, because limit is always <= buffer size
     let n = match file_handler.read(&mut buffer[..limit as usize]) {
         Ok(t) => t,
         Err(e) => return Err(format!("Error happened when checking hash of file {:?}, reason {}", file_entry.path, e)),
     };
 
+    #[expect(clippy::indexing_slicing)] // Safe, because we read only n bytes, which is always <= limit <= buffer size
     hasher.update(&buffer[..n]);
     size_counter.fetch_add(n as u64, Ordering::Relaxed);
     Ok(hasher.finalize())
@@ -264,6 +266,7 @@ pub fn hash_calculation(
             Err(e) => return Err(format!("Error happened when checking hash of file {:?}, reason {}", file_entry.path, e)),
         };
 
+        #[expect(clippy::indexing_slicing)] // Safe, because we read only n bytes, which is always <= buffer size
         hasher.update(&buffer[..n]);
         size_counter.fetch_add(n as u64, Ordering::Relaxed);
         if check_if_stop_received(stop_flag) {

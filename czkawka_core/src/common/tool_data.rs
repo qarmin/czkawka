@@ -277,6 +277,7 @@ pub trait CommonData {
         }
     }
 
+    #[expect(clippy::indexing_slicing)] // Safe, because input is always checked to have at least 1 element
     fn delete_advanced_elements_and_add_to_messages<T: ResultEntry + Sized + Send + Sync + Clone>(
         &mut self,
         stop_flag: &Arc<AtomicBool>,
@@ -471,7 +472,7 @@ pub trait CommonData {
         delete_result
     }
 
-    #[allow(clippy::print_stdout)]
+    #[expect(clippy::print_stdout)]
     fn debug_print_common(&self) {
         println!("---------------DEBUG PRINT COMMON---------------");
         println!("Tool type: {:?}", self.get_cd().tool_type);

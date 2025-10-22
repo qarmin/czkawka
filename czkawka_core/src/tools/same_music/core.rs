@@ -31,7 +31,7 @@ use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
-use crate::common::traits::*;
+use crate::common::traits::ResultEntry;
 use crate::tools::same_music::{GroupedFilesToCheck, Info, MusicEntry, MusicSimilarity, SameMusic, SameMusicParameters};
 
 impl SameMusic {
@@ -412,6 +412,7 @@ impl SameMusic {
                     // When there is 0 files in base files or files to compare there will be no comparison, so removing it from the list
                     // Also when there is only one file in base files and files to compare and they are the same file, there will be no comparison
 
+                    #[expect(clippy::indexing_slicing)] // Validated that base_files/files_to_compare are not empty
                     if base_files.is_empty()
                         || files_to_compare.is_empty()
                         || (base_files.len() == 1 && files_to_compare.len() == 1 && (base_files[0].path == files_to_compare[0].path))
@@ -681,25 +682,25 @@ fn read_single_file_tags(path: &str, mut music_entry: MusicEntry) -> Option<Musi
     }
 
     for tag in tagged_file.tags() {
-        if track_title.is_empty() {
-            if let Some(tag_value) = tag.get_string(&ItemKey::TrackTitle) {
-                track_title = tag_value.to_string();
-            }
+        if track_title.is_empty()
+            && let Some(tag_value) = tag.get_string(&ItemKey::TrackTitle)
+        {
+            track_title = tag_value.to_string();
         }
-        if track_artist.is_empty() {
-            if let Some(tag_value) = tag.get_string(&ItemKey::TrackArtist) {
-                track_artist = tag_value.to_string();
-            }
+        if track_artist.is_empty()
+            && let Some(tag_value) = tag.get_string(&ItemKey::TrackArtist)
+        {
+            track_artist = tag_value.to_string();
         }
-        if year.is_empty() {
-            if let Some(tag_value) = tag.get_string(&ItemKey::Year) {
-                year = tag_value.to_string();
-            }
+        if year.is_empty()
+            && let Some(tag_value) = tag.get_string(&ItemKey::Year)
+        {
+            year = tag_value.to_string();
         }
-        if genre.is_empty() {
-            if let Some(tag_value) = tag.get_string(&ItemKey::Genre) {
-                genre = tag_value.to_string();
-            }
+        if genre.is_empty()
+            && let Some(tag_value) = tag.get_string(&ItemKey::Genre)
+        {
+            genre = tag_value.to_string();
         }
     }
 

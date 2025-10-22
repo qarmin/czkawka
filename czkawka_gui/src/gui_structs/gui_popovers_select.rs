@@ -22,13 +22,13 @@ pub struct GuiSelectPopovers {
     pub separator_select_date: gtk4::Separator,
     pub separator_select_custom: gtk4::Separator,
 
-    #[allow(unused)]
+    #[expect(unused)]
     pub buttons_popover_right_click_open_file: gtk4::Button,
-    #[allow(unused)]
+    #[expect(unused)]
     pub buttons_popover_right_click_open_folder: gtk4::Button,
 
     pub popover_select: gtk4::Popover,
-    #[allow(unused)]
+    #[expect(unused)]
     pub popover_right_click: gtk4::Popover,
 }
 

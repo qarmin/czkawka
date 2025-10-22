@@ -17,6 +17,7 @@ use std::cmp::Ordering;
 use std::ffi::OsString;
 use std::io::Error;
 use std::path::{Path, PathBuf};
+use std::sync::Mutex;
 use std::{fs, io, thread};
 
 use items::SingleExcludedItem;
@@ -24,24 +25,28 @@ use log::debug;
 
 use crate::common::consts::{DEFAULT_WORKER_THREAD_SIZE, TEMP_HARDLINK_FILE};
 
-static NUMBER_OF_THREADS: state::InitCell<usize> = state::InitCell::new();
-static ALL_AVAILABLE_THREADS: state::InitCell<usize> = state::InitCell::new();
+static NUMBER_OF_THREADS: std::sync::LazyLock<Mutex<Option<usize>>> = std::sync::LazyLock::new(|| Mutex::new(None));
+static ALL_AVAILABLE_THREADS: std::sync::LazyLock<Mutex<Option<usize>>> = std::sync::LazyLock::new(|| Mutex::new(None));
 
 pub fn get_number_of_threads() -> usize {
-    let data = NUMBER_OF_THREADS.get();
-    if *data >= 1 { *data } else { get_all_available_threads() }
+    let data = NUMBER_OF_THREADS.lock().expect("Cannot fail").expect("Should be set before get");
+    if data >= 1 { data } else { get_all_available_threads() }
 }
 
 pub fn get_all_available_threads() -> usize {
-    *ALL_AVAILABLE_THREADS.get_or_init(|| {
-        let available_threads = thread::available_parallelism().map(std::num::NonZeroUsize::get).unwrap_or(1);
-        ALL_AVAILABLE_THREADS.set(available_threads);
+    let mut available_threads = ALL_AVAILABLE_THREADS.lock().expect("Cannot fail");
+
+    if let Some(available_threads) = *available_threads {
         available_threads
-    })
+    } else {
+        let threads = thread::available_parallelism().map(std::num::NonZeroUsize::get).unwrap_or(1);
+        *available_threads = Some(threads);
+        threads
+    }
 }
 
 pub fn set_number_of_threads(thread_number: usize) {
-    NUMBER_OF_THREADS.set(thread_number);
+    *NUMBER_OF_THREADS.lock().expect("Cannot fail") = Some(thread_number);
 
     let additional_message = if thread_number == 0 {
         format!(
@@ -148,7 +153,8 @@ pub(crate) fn create_crash_message(library_name: &str, file_path: &str, home_lib
     )
 }
 
-#[allow(clippy::string_slice)]
+#[expect(clippy::string_slice)]
+#[expect(clippy::indexing_slicing)]
 pub fn regex_check(expression_item: &SingleExcludedItem, directory_name: &str) -> bool {
     if expression_item.expression_splits.is_empty() {
         return true;
@@ -192,7 +198,7 @@ pub fn regex_check(expression_item: &SingleExcludedItem, directory_name: &str) -
     true
 }
 
-#[allow(clippy::string_slice)] // Is in char boundary
+#[expect(clippy::string_slice)] // Is in char boundary
 pub fn normalize_windows_path(path_to_change: impl AsRef<Path>) -> PathBuf {
     let path = path_to_change.as_ref();
 
@@ -297,13 +303,13 @@ mod test {
         fs::create_dir(&sub_dir).expect("Cannot create directory");
 
         // Test with empty directory
-        assert!(remove_folder_if_contains_only_empty_folders(&sub_dir, false).is_ok());
+        remove_folder_if_contains_only_empty_folders(&sub_dir, false).unwrap();
         assert!(!Path::new(&sub_dir).exists());
 
         // Test with directory containing an empty directory
         fs::create_dir(&sub_dir).expect("Cannot create directory");
         fs::create_dir(sub_dir.join("empty_sub_dir")).expect("Cannot create directory");
-        assert!(remove_folder_if_contains_only_empty_folders(&sub_dir, false).is_ok());
+        remove_folder_if_contains_only_empty_folders(&sub_dir, false).unwrap();
         assert!(!Path::new(&sub_dir).exists());
 
         // Test with directory containing a file

@@ -6,10 +6,10 @@ use gtk4::prelude::*;
 use gtk4::{Align, CheckButton, Dialog, Orientation, ResponseType, TextView, TreeIter, TreePath};
 
 use crate::flg;
+use crate::gui_structs::common_tree_view::SubView;
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::*;
-use crate::notebook_enums::*;
-use crate::notebook_info::NOTEBOOKS_INFO;
+use crate::help_functions::{add_text_to_text_view, clean_invalid_headers, get_full_name_from_path_name, reset_text_view};
+use crate::model_iter::{iter_list, iter_list_break_with_init};
 
 #[derive(PartialEq, Eq, Copy, Clone)]
 enum TypeOfTool {
@@ -48,25 +48,15 @@ pub(crate) fn connect_button_hardlink_symlink(gui_data: &GuiData) {
 }
 
 async fn sym_hard_link_things(gui_data: GuiData, hardlinking: TypeOfTool) {
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
-
-    let image_preview_similar_images = gui_data.main_notebook.image_preview_similar_images.clone();
-    let image_preview_duplicates = gui_data.main_notebook.image_preview_duplicates.clone();
-
     let text_view_errors = gui_data.text_view_errors.clone();
-    let preview_path = gui_data.preview_path.clone();
     let window_main = gui_data.window_main.clone();
 
-    let nb_number = notebook_main.current_page().expect("Current page not set");
-    let tree_view = &main_tree_views[nb_number as usize];
-    let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
-
-    let column_header = nb_object.column_header.expect("Linking can be only used for tree views with grouped results");
+    let common_tree_views = &gui_data.main_notebook.common_tree_views.clone();
+    let sv = common_tree_views.get_current_subview();
 
     let check_button_settings_confirm_link = gui_data.settings.check_button_settings_confirm_link.clone();
 
-    if !check_if_anything_is_selected_async(tree_view, column_header, nb_object.column_selection) {
+    if !check_if_anything_is_selected_async(sv) {
         return;
     }
 
@@ -74,45 +64,20 @@ async fn sym_hard_link_things(gui_data: GuiData, hardlinking: TypeOfTool) {
         return;
     }
 
-    if !check_if_changing_one_item_in_group_and_continue(tree_view, column_header, nb_object.column_selection, &window_main).await {
+    if !check_if_changing_one_item_in_group_and_continue(sv, &window_main).await {
         return;
     }
 
-    hardlink_symlink(
-        tree_view,
-        nb_object.column_name,
-        nb_object.column_path,
-        column_header,
-        nb_object.column_selection,
-        hardlinking,
-        &text_view_errors,
-    );
+    hardlink_symlink(sv, hardlinking, &text_view_errors);
 
-    match &nb_object.notebook_type {
-        NotebookMainEnum::SimilarImages | NotebookMainEnum::Duplicate => {
-            if nb_object.notebook_type == NotebookMainEnum::SimilarImages {
-                image_preview_similar_images.hide();
-            } else {
-                image_preview_duplicates.hide();
-            }
-            *preview_path.borrow_mut() = String::new();
-        }
-        _ => {}
-    }
+    common_tree_views.hide_preview();
 }
 
-fn hardlink_symlink(
-    tree_view: &gtk4::TreeView,
-    column_file_name: i32,
-    column_path: i32,
-    column_header: i32,
-    column_selection: i32,
-    hardlinking: TypeOfTool,
-    text_view_errors: &TextView,
-) {
+fn hardlink_symlink(sv: &SubView, hardlinking: TypeOfTool, text_view_errors: &TextView) {
     reset_text_view(text_view_errors);
 
-    let model = get_list_store(tree_view);
+    let column_header = sv.nb_object.column_header.expect("Linking can be only used for tree views with grouped results");
+    let model = sv.get_model();
 
     let mut vec_tree_path_to_remove: Vec<TreePath> = Vec::new(); // List of hardlinked files without its root
     let mut vec_symhardlink_data: Vec<SymHardlinkData> = Vec::new();
@@ -123,20 +88,15 @@ fn hardlink_symlink(
     };
 
     let mut selected_rows = Vec::new();
-    if let Some(iter) = model.iter_first() {
-        loop {
-            if model.get::<bool>(&iter, column_selection) {
-                if !model.get::<bool>(&iter, column_header) {
-                    selected_rows.push(model.path(&iter));
-                } else {
-                    panic!("Header row shouldn't be selected, please report bug.");
-                }
-            }
-            if !model.iter_next(&iter) {
-                break;
+    iter_list(&model, |m, i| {
+        if m.get::<bool>(i, sv.nb_object.column_selection) {
+            if !m.get::<bool>(i, column_header) {
+                selected_rows.push(m.path(i));
+            } else {
+                panic!("Header row shouldn't be selected, please report bug.");
             }
         }
-    }
+    });
 
     if selected_rows.is_empty() {
         return; // No selected rows
@@ -146,10 +106,10 @@ fn hardlink_symlink(
     let mut current_selected_index = 0;
     loop {
         if model.get::<bool>(&current_iter, column_header) {
-            if let Some(current_symhardlink_data) = current_symhardlink_data {
-                if !current_symhardlink_data.files_to_symhardlink.is_empty() {
-                    vec_symhardlink_data.push(current_symhardlink_data);
-                }
+            if let Some(current_symhardlink_data) = current_symhardlink_data
+                && !current_symhardlink_data.files_to_symhardlink.is_empty()
+            {
+                vec_symhardlink_data.push(current_symhardlink_data);
             }
 
             current_symhardlink_data = None;
@@ -158,8 +118,8 @@ fn hardlink_symlink(
         }
 
         if model.path(&current_iter) == selected_rows[current_selected_index] {
-            let file_name = model.get::<String>(&current_iter, column_file_name);
-            let path = model.get::<String>(&current_iter, column_path);
+            let file_name = model.get::<String>(&current_iter, sv.nb_object.column_name);
+            let path = model.get::<String>(&current_iter, sv.nb_object.column_path);
             let full_file_path = get_full_name_from_path_name(&path, &file_name);
 
             if let Some(mut current_data) = current_symhardlink_data {
@@ -176,20 +136,20 @@ fn hardlink_symlink(
             if current_selected_index != selected_rows.len() - 1 {
                 current_selected_index += 1;
             } else {
-                if let Some(current_symhardlink_data) = current_symhardlink_data {
-                    if !current_symhardlink_data.files_to_symhardlink.is_empty() {
-                        vec_symhardlink_data.push(current_symhardlink_data);
-                    }
+                if let Some(current_symhardlink_data) = current_symhardlink_data
+                    && !current_symhardlink_data.files_to_symhardlink.is_empty()
+                {
+                    vec_symhardlink_data.push(current_symhardlink_data);
                 }
                 break; // There is no more selected items, so we just end checking
             }
         }
 
         if !model.iter_next(&current_iter) {
-            if let Some(current_symhardlink_data) = current_symhardlink_data {
-                if !current_symhardlink_data.files_to_symhardlink.is_empty() {
-                    vec_symhardlink_data.push(current_symhardlink_data);
-                }
+            if let Some(current_symhardlink_data) = current_symhardlink_data
+                && !current_symhardlink_data.files_to_symhardlink.is_empty()
+            {
+                vec_symhardlink_data.push(current_symhardlink_data);
             }
 
             break;
@@ -209,13 +169,13 @@ fn hardlink_symlink(
                 if let Err(e) = fs::remove_file(&file_to_symlink) {
                     add_text_to_text_view(text_view_errors, flg!("delete_file_failed", name = file_to_symlink, reason = e.to_string()).as_str());
                     continue;
-                };
+                }
 
                 #[cfg(target_family = "unix")]
                 {
                     if let Err(e) = std::os::unix::fs::symlink(&symhardlink_data.original_data, &file_to_symlink) {
                         add_text_to_text_view(text_view_errors, flg!("delete_file_failed", name = file_to_symlink, reason = e.to_string()).as_str());
-                    };
+                    }
                 }
                 #[cfg(target_family = "windows")]
                 {
@@ -230,7 +190,7 @@ fn hardlink_symlink(
         model.remove(&model.iter(tree_path).expect("Using invalid tree_path"));
     }
 
-    clean_invalid_headers(&model, column_header, column_path);
+    clean_invalid_headers(&model, column_header, sv.nb_object.column_path);
 }
 
 fn create_dialog_non_group(window_main: &gtk4::Window) -> Dialog {
@@ -258,8 +218,9 @@ fn create_dialog_non_group(window_main: &gtk4::Window) -> Dialog {
     dialog
 }
 
-pub async fn check_if_changing_one_item_in_group_and_continue(tree_view: &gtk4::TreeView, column_header: i32, column_selection: i32, window_main: &gtk4::Window) -> bool {
-    let model = get_list_store(tree_view);
+pub async fn check_if_changing_one_item_in_group_and_continue(sv: &SubView, window_main: &gtk4::Window) -> bool {
+    let model = sv.get_model();
+    let column_header = sv.nb_object.column_header.expect("Column header must exists for linking");
 
     let mut selected_values_in_group = 0;
 
@@ -276,10 +237,8 @@ pub async fn check_if_changing_one_item_in_group_and_continue(tree_view: &gtk4::
                     break;
                 }
                 selected_values_in_group = 0;
-            } else {
-                if model.get::<bool>(&iter, column_selection) {
-                    selected_values_in_group += 1;
-                }
+            } else if model.get::<bool>(&iter, sv.nb_object.column_selection) {
+                selected_values_in_group += 1;
             }
         }
     } else {
@@ -302,24 +261,28 @@ pub async fn check_if_changing_one_item_in_group_and_continue(tree_view: &gtk4::
     true
 }
 
-pub(crate) fn check_if_anything_is_selected_async(tree_view: &gtk4::TreeView, column_header: i32, column_selection: i32) -> bool {
-    let model = get_list_store(tree_view);
+pub(crate) fn check_if_anything_is_selected_async(sv: &SubView) -> bool {
+    let model = sv.get_model();
 
-    if let Some(iter) = model.iter_first() {
-        assert!(model.get::<bool>(&iter, column_header)); // First element should be header
+    let column_header = sv.nb_object.column_header.expect("Column header must exists for linking");
 
-        loop {
-            if !model.iter_next(&iter) {
-                break;
+    let mut non_header_selected = false;
+
+    iter_list_break_with_init(
+        &model,
+        |m, i| {
+            assert!(m.get::<bool>(i, column_header)); // First element should be header
+        },
+        |m, i| {
+            if !m.get::<bool>(i, column_header) && m.get::<bool>(i, sv.nb_object.column_selection) {
+                non_header_selected = true;
+                return false;
             }
+            true
+        },
+    );
 
-            if !model.get::<bool>(&iter, column_header) && model.get::<bool>(&iter, column_selection) {
-                return true;
-            }
-        }
-    }
-
-    false
+    non_header_selected
 }
 
 pub async fn check_if_can_link_files(check_button_settings_confirm_link: &CheckButton, window_main: &gtk4::Window) -> bool {
@@ -337,7 +300,7 @@ pub async fn check_if_can_link_files(check_button_settings_confirm_link: &CheckB
             confirmation_dialog_link.hide();
             confirmation_dialog_link.close();
             return false;
-        };
+        }
     }
     true
 }

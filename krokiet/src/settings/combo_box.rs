@@ -6,7 +6,6 @@ use czkawka_core::tools::big_file::SearchMode;
 use image::imageops::FilterType;
 use image_hasher::HashAlg;
 use log::warn;
-use once_cell::sync::Lazy;
 use slint::SharedString;
 use vid_dup_finder_lib::Cropdetect;
 
@@ -34,7 +33,7 @@ pub struct StringComboBoxItems {
     pub videos_crop_detect: Vec<StringComboBoxItem<Cropdetect>>,
 }
 
-pub static STRING_COMBO_BOX_ITEMS: Lazy<Arc<Mutex<StringComboBoxItems>>> = Lazy::new(|| {
+pub static STRING_COMBO_BOX_ITEMS: std::sync::LazyLock<Arc<Mutex<StringComboBoxItems>>> = std::sync::LazyLock::new(|| {
     let l = StringComboBoxItems::regenerate_items();
     Arc::new(Mutex::new(l))
 });

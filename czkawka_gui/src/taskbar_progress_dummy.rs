@@ -9,7 +9,7 @@ enum HWND__ {}
 
 type HWND = *mut HWND__;
 
-#[allow(non_camel_case_types, dead_code)]
+#[expect(non_camel_case_types, dead_code)]
 pub enum TBPFLAG {
     TBPF_NOPROGRESS = 0,
     TBPF_INDETERMINATE = 0x1,
@@ -37,7 +37,7 @@ impl TaskbarProgress {
 
     pub(crate) fn show(&self) {}
 
-    #[allow(clippy::needless_pass_by_ref_mut)]
+    #[expect(clippy::needless_pass_by_ref_mut)]
     pub(crate) fn release(&mut self) {}
 }
 

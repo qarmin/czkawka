@@ -70,7 +70,10 @@ fn set_sort_buttons(app: &MainWindow) {
 }
 
 mod sorts {
-    use super::*;
+    use super::{
+        ActiveTab, MainListModel, Model, ModelRc, VecModel, common_sort_function, connect_i32_into_u64, convert_group_header_into_rc_model, group_by_header,
+        recalculate_small_selection_if_needed,
+    };
 
     pub(super) fn reverse_sort(model: &ModelRc<MainListModel>, active_tab: ActiveTab) -> ModelRc<MainListModel> {
         if !active_tab.get_is_header_mode() {

@@ -125,7 +125,7 @@ pub(crate) fn connect_row_selections(app: &MainWindow) {
 }
 
 mod opener {
-    use super::*;
+    use super::{Callabler, ComponentHandle, GuiState, MainWindow, Model, debug, error, get_write_selection_lock};
 
     pub(crate) fn connect_on_open_item(app: &MainWindow) {
         app.global::<Callabler>().on_open_item(move |path| {
@@ -142,7 +142,7 @@ mod opener {
     fn open_item_simple(path_to_open: &str) {
         if let Err(e) = open::that(path_to_open) {
             error!("Failed to open file: {e}");
-        };
+        }
     }
 
     fn open_item(app: &MainWindow, items_path_str: &[usize], id: usize) {
@@ -172,12 +172,10 @@ mod opener {
         if selection.selected_rows.len() == 1 {
             let id = selection.selected_rows[0];
             open_item(app, items_path_str, id);
+        } else if selection.selected_rows.is_empty() {
+            debug!("Failed to open selected item, because there is no selected item");
         } else {
-            if selection.selected_rows.is_empty() {
-                debug!("Failed to open selected item, because there is no selected item");
-            } else {
-                debug!("Failed to open selected item, because there is more than one selected item");
-            }
+            debug!("Failed to open selected item, because there is more than one selected item");
         }
     }
 
@@ -210,7 +208,10 @@ mod opener {
     }
 }
 mod selection {
-    use super::*;
+    use super::{
+        Callabler, ComponentHandle, GuiState, MainWindow, Model, get_write_selection_lock, reverse_selection_of_item_with_id, row_select_items_with_shift,
+        rows_deselect_all_by_mode, rows_reverse_checked_selection, rows_select_all_by_mode, trace,
+    };
     use crate::connect_row_selection::checker::change_number_of_enabled_items;
 
     pub(crate) fn connect_select_all_rows(app: &MainWindow) {
@@ -226,7 +227,7 @@ mod selection {
 
             if let Some(new_model) = rows_select_all_by_mode(selection, &model) {
                 active_tab.set_tool_model(&app, new_model);
-            };
+            }
         });
     }
 
@@ -301,13 +302,13 @@ mod selection {
 
             if let Some(new_model) = row_select_items_with_shift(selection, &model, (first_idx as usize, second_idx as usize)) {
                 active_tab.set_tool_model(&app, new_model);
-            };
+            }
         });
     }
 }
 
 pub(crate) mod checker {
-    use super::*;
+    use super::{ActiveTab, Callabler, ComponentHandle, GuiState, MainWindow, connect_i32_into_u64, split_u64_into_i32s, trace};
 
     pub(crate) fn change_number_of_checked_items(app: &MainWindow) {
         let a = app.as_weak();

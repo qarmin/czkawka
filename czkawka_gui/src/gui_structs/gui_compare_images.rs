@@ -4,6 +4,7 @@ use std::rc::Rc;
 use gtk4::prelude::*;
 use gtk4::{Builder, TreePath};
 
+use crate::gui_structs::gui_data::CZK_ICON_REPLACE;
 use crate::help_functions::set_icon_of_button;
 use crate::{CZK_ICON_LEFT, CZK_ICON_RIGHT, flg};
 
@@ -15,12 +16,13 @@ pub struct GuiCompareImages {
 
     pub button_go_previous_compare_group: gtk4::Button,
     pub button_go_next_compare_group: gtk4::Button,
+    pub button_replace_group: gtk4::Button,
 
     pub check_button_left_preview_text: gtk4::CheckButton,
     pub check_button_right_preview_text: gtk4::CheckButton,
 
-    pub image_compare_left: gtk4::Image,
-    pub image_compare_right: gtk4::Image,
+    pub image_compare_left: gtk4::Picture,
+    pub image_compare_right: gtk4::Picture,
 
     pub scrolled_window_compare_choose_images: gtk4::ScrolledWindow,
 
@@ -45,12 +47,13 @@ impl GuiCompareImages {
 
         let button_go_previous_compare_group: gtk4::Button = builder.object("button_go_previous_compare_group").expect("Cambalache");
         let button_go_next_compare_group: gtk4::Button = builder.object("button_go_next_compare_group").expect("Cambalache");
+        let button_replace_group: gtk4::Button = builder.object("button_replace_group").expect("Cambalache");
 
         let check_button_left_preview_text: gtk4::CheckButton = builder.object("check_button_left_preview_text").expect("Cambalache");
         let check_button_right_preview_text: gtk4::CheckButton = builder.object("check_button_right_preview_text").expect("Cambalache");
 
-        let image_compare_left: gtk4::Image = builder.object("image_compare_left").expect("Cambalache");
-        let image_compare_right: gtk4::Image = builder.object("image_compare_right").expect("Cambalache");
+        let image_compare_left: gtk4::Picture = builder.object("image_compare_left").expect("Cambalache");
+        let image_compare_right: gtk4::Picture = builder.object("image_compare_right").expect("Cambalache");
 
         let scrolled_window_compare_choose_images: gtk4::ScrolledWindow = builder.object("scrolled_window_compare_choose_images").expect("Cambalache");
 
@@ -62,12 +65,14 @@ impl GuiCompareImages {
 
         set_icon_of_button(&button_go_previous_compare_group, CZK_ICON_LEFT);
         set_icon_of_button(&button_go_next_compare_group, CZK_ICON_RIGHT);
+        set_icon_of_button(&button_replace_group, CZK_ICON_REPLACE);
 
         Self {
             window_compare,
             label_group_info,
             button_go_previous_compare_group,
             button_go_next_compare_group,
+            button_replace_group,
             check_button_left_preview_text,
             check_button_right_preview_text,
             image_compare_left,

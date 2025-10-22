@@ -164,6 +164,7 @@ fn hash_image(hash_image: &str) -> Result<(), String> {
 
 #[cfg(unix)]
 fn clean_disk_cache() {
+    use std::process::Command;
     let _sync = Command::new("sync").output().expect("Failed to execute sync");
     let _drop_caches = Command::new("sh")
         .arg("-c")

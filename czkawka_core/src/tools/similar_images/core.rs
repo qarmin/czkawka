@@ -240,7 +240,7 @@ impl SimilarImages {
             .filter_map(|(hash, vec_file_entry)| {
                 if vec_file_entry.len() >= 2 {
                     return Some(hash.clone());
-                };
+                }
                 None
             })
             .collect();
@@ -469,7 +469,7 @@ impl SimilarImages {
             return WorkContinueStatus::Stop;
         }
 
-        self.verify_duplicated_items(&collected_similar_images);
+        Self::verify_duplicated_items(&collected_similar_images);
 
         // Info about hashes is not needed anymore, so we drop this info
         self.similar_vectors = collected_similar_images.into_values().collect();
@@ -536,9 +536,8 @@ impl SimilarImages {
         }
     }
 
-    #[allow(unused_variables)]
     // TODO this probably not works good when reference folders are used
-    pub(crate) fn verify_duplicated_items(&self, collected_similar_images: &IndexMap<ImHash, Vec<ImagesEntry>>) {
+    pub(crate) fn verify_duplicated_items(collected_similar_images: &IndexMap<ImHash, Vec<ImagesEntry>>) {
         if !cfg!(debug_assertions) {
             return;
         }
@@ -575,6 +574,7 @@ fn is_in_reference_folder(reference_directories: &[PathBuf], path: &Path) -> boo
     reference_directories.iter().any(|e| path.starts_with(e))
 }
 
+#[expect(clippy::indexing_slicing)] // Because hash size is validated before
 pub fn get_string_from_similarity(similarity: &u32, hash_size: u8) -> String {
     let index_preset = match hash_size {
         8 => 0,
@@ -603,6 +603,7 @@ pub fn get_string_from_similarity(similarity: &u32, hash_size: u8) -> String {
     }
 }
 
+#[expect(clippy::indexing_slicing)] // Because hash size is validated before
 pub fn return_similarity_from_similarity_preset(similarity_preset: &SimilarityPreset, hash_size: u8) -> u32 {
     let index_preset = match hash_size {
         8 => 0,
@@ -623,7 +624,7 @@ pub fn return_similarity_from_similarity_preset(similarity_preset: &SimilarityPr
     }
 }
 
-pub(crate) fn convert_filters_to_string(image_filter: &FilterType) -> String {
+pub(crate) fn convert_filters_to_string(image_filter: FilterType) -> String {
     match image_filter {
         FilterType::Lanczos3 => "Lanczos3",
         FilterType::Nearest => "Nearest",
@@ -634,7 +635,7 @@ pub(crate) fn convert_filters_to_string(image_filter: &FilterType) -> String {
     .to_string()
 }
 
-pub(crate) fn convert_algorithm_to_string(hash_alg: &HashAlg) -> String {
+pub(crate) fn convert_algorithm_to_string(hash_alg: HashAlg) -> String {
     match hash_alg {
         HashAlg::Mean => "Mean",
         HashAlg::Gradient => "Gradient",
@@ -646,9 +647,11 @@ pub(crate) fn convert_algorithm_to_string(hash_alg: &HashAlg) -> String {
     .to_string()
 }
 
-#[allow(dead_code)]
-#[allow(unreachable_code)]
-#[allow(unused_variables)]
+#[allow(clippy::allow_attributes)]
+#[allow(unfulfilled_lint_expectations)] // Happens only on release build
+#[expect(dead_code)]
+#[expect(unreachable_code)]
+#[expect(unused_variables)]
 // Function to validate if after first check there are any duplicated entries
 // E.g. /a.jpg is used also as master and similar image which is forbidden, because may
 // cause accidentally delete more pictures that user wanted
@@ -711,8 +714,8 @@ fn debug_check_for_duplicated_things(
 pub fn get_similar_images_cache_file(hash_size: &u8, hash_alg: &HashAlg, image_filter: &FilterType) -> String {
     format!(
         "cache_similar_images_{hash_size}_{}_{}_{CACHE_IMAGE_VERSION}.bin",
-        convert_algorithm_to_string(hash_alg),
-        convert_filters_to_string(image_filter),
+        convert_algorithm_to_string(*hash_alg),
+        convert_filters_to_string(*image_filter),
     )
 }
 
@@ -999,6 +1002,8 @@ mod tests {
             assert_eq!(res.len(), 2);
             assert_eq!(res[0].1.len(), 1);
             assert_eq!(res[1].1.len(), 1);
+            #[allow(clippy::allow_attributes)]
+            #[allow(clippy::cmp_owned)] // TODO Bug in nightly
             if res[0].1[0].path == PathBuf::from("/home/kk/bcd.txt") {
                 assert_eq!(res[0].0.path, PathBuf::from("/home/rr/abc.txt"));
                 assert_eq!(res[1].0.path, PathBuf::from("/home/rr/krkr.txt"));

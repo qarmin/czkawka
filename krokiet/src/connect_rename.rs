@@ -97,7 +97,7 @@ mod tests {
 
             let rm_fnc = move |data: &SimplerMainListModel| rename_single_item(data, path_idx, name_idx, ext_idx);
 
-            let output = self.process_items(
+            let output = Self::process_items(
                 simplified_model,
                 items_queued_to_delete,
                 progress_sender,
@@ -107,7 +107,7 @@ mod tests {
                 self.active_tab.get_int_size_opt_idx(),
             );
 
-            let (new_simple_model, errors, items_deleted) = self.remove_deleted_items_from_model(output);
+            let (new_simple_model, errors, items_deleted) = Self::remove_deleted_items_from_model(output);
 
             Some((new_simple_model.to_vec_model(), errors, items_queued_to_delete, items_deleted))
         }

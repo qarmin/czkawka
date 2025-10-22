@@ -1,9 +1,13 @@
 use gdk4::{Key, ModifierType};
-use gtk4::GestureClick;
 use gtk4::prelude::*;
+use gtk4::{GestureClick, TreeModel, TreePath, TreeSelection};
 use log::{debug, error};
 
-use crate::help_functions::*;
+use crate::gui_structs::common_tree_view::GetTreeViewTrait;
+use crate::help_functions::{
+    ColumnsDuplicates, ColumnsExcludedDirectory, ColumnsIncludedDirectory, ColumnsSameMusic, ColumnsSimilarImages, ColumnsSimilarVideos, KEY_ENTER, KEY_SPACE,
+    get_full_name_from_path_name, get_list_store, get_notebook_object_from_tree_view, get_notebook_upper_enum_from_tree_view,
+};
 use crate::notebook_enums::NotebookUpperEnum;
 
 // TODO add option to open files and folders from context menu activated by pressing ONCE with right mouse button
@@ -14,11 +18,7 @@ pub(crate) fn opening_enter_function_ported_upper_directories(
     key_code: u32,
     _modifier_type: ModifierType,
 ) -> glib::Propagation {
-    let tree_view = event_controller
-        .widget()
-        .expect("Item has no widget")
-        .downcast::<gtk4::TreeView>()
-        .expect("Widget is not TreeView");
+    let tree_view = event_controller.get_tree_view();
 
     if cfg!(debug_assertions) {
         debug!("Clicked at key: {key_code}");
@@ -45,26 +45,18 @@ pub(crate) fn opening_enter_function_ported_upper_directories(
 }
 
 pub(crate) fn opening_middle_mouse_function(gesture_click: &GestureClick, _number_of_clicks: i32, _b: f64, _c: f64) {
-    let tree_view = gesture_click
-        .widget()
-        .expect("Item has no widget")
-        .downcast::<gtk4::TreeView>()
-        .expect("Widget is not TreeView");
+    let tree_view = gesture_click.get_tree_view();
 
     let nt_object = get_notebook_object_from_tree_view(&tree_view);
-    if let Some(column_header) = nt_object.column_header {
-        if gesture_click.current_button() == 2 {
-            reverse_selection(&tree_view, column_header, nt_object.column_selection);
-        }
+    if let Some(column_header) = nt_object.column_header
+        && gesture_click.current_button() == 2
+    {
+        reverse_selection(&tree_view, column_header, nt_object.column_selection);
     }
 }
 
 pub(crate) fn opening_double_click_function_directories(gesture_click: &GestureClick, number_of_clicks: i32, _b: f64, _c: f64) {
-    let tree_view = gesture_click
-        .widget()
-        .expect("Item has no widget")
-        .downcast::<gtk4::TreeView>()
-        .expect("Widget is not TreeView");
+    let tree_view = gesture_click.get_tree_view();
 
     if number_of_clicks == 2 && (gesture_click.current_button() == 1 || gesture_click.current_button() == 3) {
         match get_notebook_upper_enum_from_tree_view(&tree_view) {
@@ -82,11 +74,7 @@ pub(crate) fn opening_double_click_function_directories(gesture_click: &GestureC
 }
 
 pub(crate) fn opening_enter_function_ported(event_controller: &gtk4::EventControllerKey, _key: Key, key_code: u32, _modifier_type: ModifierType) -> glib::Propagation {
-    let tree_view = event_controller
-        .widget()
-        .expect("Item has no widget")
-        .downcast::<gtk4::TreeView>()
-        .expect("Widget is not TreeView");
+    let tree_view = event_controller.get_tree_view();
     if cfg!(debug_assertions) {
         debug!("Clicked {key_code}");
     }
@@ -104,11 +92,7 @@ pub(crate) fn opening_enter_function_ported(event_controller: &gtk4::EventContro
 }
 
 pub(crate) fn opening_double_click_function(gesture_click: &GestureClick, number_of_clicks: i32, _b: f64, _c: f64) {
-    let tree_view = gesture_click
-        .widget()
-        .expect("Item has no widget")
-        .downcast::<gtk4::TreeView>()
-        .expect("Widget is not TreeView");
+    let tree_view = gesture_click.get_tree_view();
 
     let nt_object = get_notebook_object_from_tree_view(&tree_view);
     if number_of_clicks == 2 {
@@ -132,10 +116,10 @@ fn common_mark_function(tree_view: &gtk4::TreeView, column_selection: i32, colum
     let model = get_list_store(tree_view);
 
     for tree_path in selected_rows.iter().rev() {
-        if let Some(column_header) = column_header {
-            if model.get::<bool>(&model.iter(tree_path).expect("Using invalid tree_path"), column_header) {
-                continue;
-            }
+        if let Some(column_header) = column_header
+            && model.get::<bool>(&model.iter(tree_path).expect("Using invalid tree_path"), column_header)
+        {
+            continue;
         }
         let value = !tree_model.get::<bool>(&tree_model.iter(tree_path).expect("Invalid tree_path"), column_selection);
         model.set_value(&tree_model.iter(tree_path).expect("Invalid tree_path"), column_selection as u32, &value.to_value());
@@ -157,7 +141,7 @@ fn common_open_function(tree_view: &gtk4::TreeView, column_name: i32, column_pat
 
         if let Err(e) = open::that(&end_path) {
             error!("Failed to open file {end_path}, reason {e}");
-        };
+        }
     }
 }
 
@@ -215,7 +199,7 @@ fn common_open_function_upper_directories(tree_view: &gtk4::TreeView, column_ful
 
         if let Err(e) = open::that(&full_path) {
             error!("Failed to open file {full_path}, reason {e}");
-        };
+        }
     }
 }
 
@@ -245,41 +229,43 @@ fn handle_tree_keypress(tree_view: &gtk4::TreeView, key_code: u32, name_column: 
     }
 }
 
-pub(crate) fn select_function_duplicates(
-    _tree_selection: &gtk4::TreeSelection,
-    tree_model: &gtk4::TreeModel,
-    tree_path: &gtk4::TreePath,
-    _is_path_currently_selected: bool,
-) -> bool {
-    !tree_model.get::<bool>(&tree_model.iter(tree_path).expect("Invalid tree_path"), ColumnsDuplicates::IsHeader as i32)
+pub(crate) fn select_function_duplicates(tree_selection: &gtk4::TreeSelection, tree_model: &gtk4::TreeModel, tree_path: &gtk4::TreePath, is_path_currently_selected: bool) -> bool {
+    select_function_header(ColumnsDuplicates::IsHeader as i32)(tree_selection, tree_model, tree_path, is_path_currently_selected)
 }
 
-pub(crate) fn select_function_same_music(
-    _tree_selection: &gtk4::TreeSelection,
-    tree_model: &gtk4::TreeModel,
-    tree_path: &gtk4::TreePath,
-    _is_path_currently_selected: bool,
-) -> bool {
-    !tree_model.get::<bool>(&tree_model.iter(tree_path).expect("Invalid tree_path"), ColumnsSameMusic::IsHeader as i32)
+pub(crate) fn select_function_same_music(tree_selection: &gtk4::TreeSelection, tree_model: &gtk4::TreeModel, tree_path: &gtk4::TreePath, is_path_currently_selected: bool) -> bool {
+    select_function_header(ColumnsSameMusic::IsHeader as i32)(tree_selection, tree_model, tree_path, is_path_currently_selected)
 }
 
 pub(crate) fn select_function_similar_images(
-    _tree_selection: &gtk4::TreeSelection,
+    tree_selection: &gtk4::TreeSelection,
     tree_model: &gtk4::TreeModel,
     tree_path: &gtk4::TreePath,
-    _is_path_currently_selected: bool,
+    is_path_currently_selected: bool,
 ) -> bool {
-    !tree_model.get::<bool>(&tree_model.iter(tree_path).expect("Invalid tree_path"), ColumnsSimilarImages::IsHeader as i32)
+    select_function_header(ColumnsSimilarImages::IsHeader as i32)(tree_selection, tree_model, tree_path, is_path_currently_selected)
 }
 
 pub(crate) fn select_function_similar_videos(
-    _tree_selection: &gtk4::TreeSelection,
+    tree_selection: &gtk4::TreeSelection,
     tree_model: &gtk4::TreeModel,
     tree_path: &gtk4::TreePath,
-    _is_path_currently_selected: bool,
+    is_path_currently_selected: bool,
 ) -> bool {
-    !tree_model.get::<bool>(&tree_model.iter(tree_path).expect("Invalid tree_path"), ColumnsSimilarVideos::IsHeader as i32)
+    select_function_header(ColumnsSimilarVideos::IsHeader as i32)(tree_selection, tree_model, tree_path, is_path_currently_selected)
 }
+
+pub(crate) fn select_function_header(header_id: i32) -> Box<dyn Fn(&TreeSelection, &TreeModel, &TreePath, bool) -> bool> {
+    Box::new(
+        move |_tree_selection: &gtk4::TreeSelection, tree_model: &gtk4::TreeModel, tree_path: &gtk4::TreePath, _is_path_currently_selected: bool| {
+            !tree_model.get::<bool>(&tree_model.iter(tree_path).expect("Invalid tree_path"), header_id)
+        },
+    )
+}
+
+// pub(crate) fn select_function_always_true_no_args() -> Box<dyn Fn(&TreeSelection, &TreeModel, &TreePath, bool) -> bool> {
+//     Box::new(|_tree_selection: &gtk4::TreeSelection, _tree_model: &gtk4::TreeModel, _tree_path: &gtk4::TreePath, _is_path_currently_selected: bool| true)
+// }
 
 pub(crate) fn select_function_always_true(
     _tree_selection: &gtk4::TreeSelection,

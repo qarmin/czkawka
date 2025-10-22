@@ -17,7 +17,7 @@ use crate::common::model::{CheckingMethod, FileEntry, HashType, ToolType, WorkCo
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
-use crate::common::traits::*;
+use crate::common::traits::ResultEntry;
 use crate::tools::duplicate::{
     DuplicateEntry, DuplicateFinder, DuplicateFinderParameters, Info, PREHASHING_BUFFER_SIZE, THREAD_BUFFER, filter_hard_links, hash_calculation, hash_calculation_limit,
 };
@@ -420,7 +420,7 @@ impl DuplicateFinder {
         let non_cached_files_to_check: Vec<(u64, Vec<DuplicateEntry>)> = non_cached_files_to_check.into_iter().collect();
 
         debug!("Starting calculating prehash");
-        #[allow(clippy::type_complexity)]
+        #[expect(clippy::type_complexity)]
         let pre_hash_results: Vec<(u64, BTreeMap<String, Vec<DuplicateEntry>>, Vec<String>)> = non_cached_files_to_check
             .into_par_iter()
             .with_max_len(3) // Vectors and BTreeMaps for really big inputs, leave some jobs to 0 thread, to avoid that I minimized max tasks for each thread to 3, which improved performance
@@ -666,7 +666,7 @@ impl DuplicateFinder {
                                 }
                             }
                             Err(s) => errors.push(s),
-                        };
+                        }
                         progress_handler.increase_items(1);
                     }
                     Some(())
@@ -726,6 +726,7 @@ impl DuplicateFinder {
                     }
                 })
                 .collect::<Vec<Vec<(DuplicateEntry, Vec<DuplicateEntry>)>>>();
+            #[expect(clippy::indexing_slicing)] // Safe, because here, empty vectors cannot exist
             for vec_of_vec in vec {
                 self.files_with_identical_hashes_referenced.insert(vec_of_vec[0].0.size, vec_of_vec);
             }

@@ -20,3 +20,4 @@ pub mod connect_selection_of_directories;
 pub mod connect_settings;
 pub mod connect_show_hide_ui;
 pub mod connect_similar_image_size_change;
+pub mod file_chooser_helpers;

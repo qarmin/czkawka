@@ -1,23 +1,24 @@
+use czkawka_core::TOOLS_NUMBER;
 use glib::types::Type;
 
 use crate::help_functions::{
     BottomButtonsEnum, ColumnsBadExtensions, ColumnsBigFiles, ColumnsBrokenFiles, ColumnsDuplicates, ColumnsEmptyFiles, ColumnsEmptyFolders, ColumnsInvalidSymlinks,
     ColumnsSameMusic, ColumnsSimilarImages, ColumnsSimilarVideos, ColumnsTemporaryFiles, PopoverTypes,
 };
-use crate::notebook_enums::{NUMBER_OF_NOTEBOOK_MAIN_TABS, NotebookMainEnum};
+use crate::notebook_enums::NotebookMainEnum;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NotebookObject {
     pub notebook_type: NotebookMainEnum,
     pub available_modes: &'static [PopoverTypes],
-    #[allow(unused)]
+    #[expect(unused)]
     pub column_activatable_button: Option<i32>,
     pub column_path: i32,
     pub column_name: i32,
     pub column_selection: i32,
     pub column_header: Option<i32>,
     pub column_dimensions: Option<i32>,
-    #[allow(unused)]
+    #[expect(unused)]
     pub column_size: Option<i32>,
     pub column_size_as_bytes: Option<i32>,
     pub column_modification_as_secs: Option<i32>,
@@ -25,7 +26,7 @@ pub struct NotebookObject {
     pub bottom_buttons: &'static [BottomButtonsEnum],
 }
 
-pub static NOTEBOOKS_INFO: [NotebookObject; NUMBER_OF_NOTEBOOK_MAIN_TABS] = [
+pub static NOTEBOOKS_INFO: [NotebookObject; TOOLS_NUMBER] = [
     NotebookObject {
         notebook_type: NotebookMainEnum::Duplicate,
         available_modes: &[

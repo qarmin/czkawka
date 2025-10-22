@@ -10,8 +10,7 @@ use czkawka_core::common::model::HashType;
 use czkawka_core::tools::duplicate::{DuplicateEntry, hash_calculation};
 
 fn setup_test_file(size: u64) -> PathBuf {
-    let mut path = temp_dir();
-    path.push("test_file");
+    let path = temp_dir().join("test_file");
     let mut file = File::create(&path).expect("Failed to create test file");
     file.write_all(&vec![0u8; size as usize]).expect("Failed to write to test file");
     path

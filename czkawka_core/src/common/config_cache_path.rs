@@ -18,6 +18,47 @@ pub fn get_config_cache_path() -> Option<ConfigCachePath> {
     CONFIG_CACHE_PATH.get().expect("Cannot fail if set_config_cache_path was called before").clone()
 }
 
+fn resolve_folder(env_var: &str, default_folder: Option<PathBuf>, name: &'static str, warnings: &mut Vec<String>) -> Option<PathBuf> {
+    let default_folder_str = default_folder.as_ref().map_or("<not available>".to_string(), |t| t.to_string_lossy().to_string());
+
+    if env_var.is_empty() {
+        default_folder
+    } else {
+        let folder_path = PathBuf::from(env_var);
+        let _ = fs::create_dir_all(&folder_path);
+        if !folder_path.exists() {
+            warnings.push(format!(
+                "{name} folder \"{}\" does not exist, using default folder \"{}\"",
+                folder_path.to_string_lossy(),
+                default_folder_str
+            ));
+            return default_folder;
+        }
+        if !folder_path.is_dir() {
+            warnings.push(format!(
+                "{name} folder \"{}\" is not a directory, using default folder \"{}\"",
+                folder_path.to_string_lossy(),
+                default_folder_str
+            ));
+            return default_folder;
+        }
+
+        match dunce::canonicalize(folder_path) {
+            Ok(t) => Some(t),
+            Err(_e) => {
+                warnings.push(format!(
+                    "Cannot canonicalize {} folder \"{}\", using default folder \"{}\"",
+                    name.to_ascii_lowercase(),
+                    env_var,
+                    default_folder_str
+                ));
+                default_folder
+            }
+        }
+    }
+}
+
+// This function must be executed, to not crash, when gathering config/cache path
 pub fn set_config_cache_path(cache_name: &'static str, config_name: &'static str) -> (Vec<String>, Vec<String>) {
     // By default, such folders are used:
     // Lin: /home/username/.config/czkawka
@@ -33,48 +74,8 @@ pub fn set_config_cache_path(cache_name: &'static str, config_name: &'static str
     let default_cache_folder = ProjectDirs::from("pl", "Qarmin", cache_name).map(|proj_dirs| proj_dirs.cache_dir().to_path_buf());
     let default_config_folder = ProjectDirs::from("pl", "Qarmin", config_name).map(|proj_dirs| proj_dirs.config_dir().to_path_buf());
 
-    let mut resolve_folder = |env_var: &str, default_folder: Option<PathBuf>, name: &'static str| {
-        let default_folder_str = default_folder.as_ref().map_or("<not available>".to_string(), |t| t.to_string_lossy().to_string());
-
-        if env_var.is_empty() {
-            default_folder
-        } else {
-            let folder_path = PathBuf::from(env_var);
-            let _ = fs::create_dir_all(&folder_path);
-            if !folder_path.exists() {
-                warnings.push(format!(
-                    "{name} folder \"{}\" does not exist, using default folder \"{}\"",
-                    folder_path.to_string_lossy(),
-                    default_folder_str
-                ));
-                return default_folder;
-            };
-            if !folder_path.is_dir() {
-                warnings.push(format!(
-                    "{name} folder \"{}\" is not a directory, using default folder \"{}\"",
-                    folder_path.to_string_lossy(),
-                    default_folder_str
-                ));
-                return default_folder;
-            }
-
-            match dunce::canonicalize(folder_path) {
-                Ok(t) => Some(t),
-                Err(_e) => {
-                    warnings.push(format!(
-                        "Cannot canonicalize {} folder \"{}\", using default folder \"{}\"",
-                        name.to_ascii_lowercase(),
-                        env_var,
-                        default_folder_str
-                    ));
-                    default_folder
-                }
-            }
-        }
-    };
-
-    let config_folder = resolve_folder(&config_folder_env, default_config_folder, "Config");
-    let cache_folder = resolve_folder(&cache_folder_env, default_cache_folder, "Cache");
+    let config_folder = resolve_folder(&config_folder_env, default_config_folder, "Config", &mut warnings);
+    let cache_folder = resolve_folder(&cache_folder_env, default_cache_folder, "Cache", &mut warnings);
 
     let config_cache_path = if let (Some(config_folder), Some(cache_folder)) = (config_folder, cache_folder) {
         infos.push(format!(
@@ -82,15 +83,15 @@ pub fn set_config_cache_path(cache_name: &'static str, config_name: &'static str
             config_folder.to_string_lossy(),
             cache_folder.to_string_lossy()
         ));
-        if !config_folder.exists() {
-            if let Err(e) = fs::create_dir_all(&config_folder) {
-                warnings.push(format!("Cannot create config folder \"{}\", reason {e}", config_folder.to_string_lossy()));
-            }
+        if !config_folder.exists()
+            && let Err(e) = fs::create_dir_all(&config_folder)
+        {
+            warnings.push(format!("Cannot create config folder \"{}\", reason {e}", config_folder.to_string_lossy()));
         }
-        if !cache_folder.exists() {
-            if let Err(e) = fs::create_dir_all(&cache_folder) {
-                warnings.push(format!("Cannot create cache folder \"{}\", reason {e}", cache_folder.to_string_lossy()));
-            }
+        if !cache_folder.exists()
+            && let Err(e) = fs::create_dir_all(&cache_folder)
+        {
+            warnings.push(format!("Cannot create cache folder \"{}\", reason {e}", cache_folder.to_string_lossy()));
         }
         Some(ConfigCachePath { config_folder, cache_folder })
     } else {
@@ -133,18 +134,14 @@ pub(crate) fn open_cache_folder(
                 }
             });
         }
+    } else if let Ok(t) = OpenOptions::new().read(true).open(&cache_file) {
+        file_handler_default = Some(t);
+    } else if use_json {
+        file_handler_json = Some(OpenOptions::new().read(true).open(&cache_file_json).ok()?);
     } else {
-        if let Ok(t) = OpenOptions::new().read(true).open(&cache_file) {
-            file_handler_default = Some(t);
-        } else {
-            if use_json {
-                file_handler_json = Some(OpenOptions::new().read(true).open(&cache_file_json).ok()?);
-            } else {
-                // messages.push(format!("Cannot find or open cache file {cache_file:?}")); // No error or warning
-                return None;
-            }
-        }
-    };
+        // messages.push(format!("Cannot find or open cache file {cache_file:?}")); // No error or warning
+        return None;
+    }
     Some(((file_handler_default, cache_file), (file_handler_json, cache_file_json)))
 }
 

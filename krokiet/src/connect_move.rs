@@ -126,13 +126,12 @@ fn try_to_copy_item(input_file: &Path, output_file: &Path) -> Result<(), String>
 
 // Create input/output paths, and create output folder
 fn collect_path_and_create_folders(input_path: &str, input_file: &str, output_path: &str, preserve_structure: bool) -> (PathBuf, PathBuf) {
-    let mut input_full_path = PathBuf::from(input_path);
-    input_full_path.push(input_file);
+    let input_full_path = PathBuf::from(input_path).join(input_file);
 
     let mut output_full_path = PathBuf::from(output_path);
     if preserve_structure {
         output_full_path.extend(Path::new(input_path).components().filter(|c| matches!(c, path::Component::Normal(_))));
-    };
+    }
     let _ = fs::create_dir_all(&output_full_path);
     output_full_path.push(input_file);
 

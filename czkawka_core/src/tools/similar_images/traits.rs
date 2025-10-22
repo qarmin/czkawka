@@ -35,13 +35,13 @@ impl Search for SimilarImages {
         if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
             self.common_data.stopped_search = true;
             return;
-        };
+        }
         self.debug_print();
     }
 }
 
 impl DebugPrint for SimilarImages {
-    #[allow(clippy::print_stdout)]
+    #[expect(clippy::print_stdout)]
     fn debug_print(&self) {
         if !cfg!(debug_assertions) {
             return;

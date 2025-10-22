@@ -13,6 +13,7 @@
 
 ### Prebuilt binaries
 - Krokiet Windows binaries with skia backend are available (this is msvc build and requires vc redist installed)
+- Intel Mac binaries, are now built with the latest available MacOS(15 at the moment)
 
 ## Version 10.0.0 - 18.08.2025r
 ### Breaking changes

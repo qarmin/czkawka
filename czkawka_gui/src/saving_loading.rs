@@ -16,7 +16,10 @@ use crate::gui_structs::gui_main_notebook::GuiMainNotebook;
 use crate::gui_structs::gui_settings::GuiSettings;
 use crate::gui_structs::gui_upper_notebook::GuiUpperNotebook;
 use crate::help_combo_box::DUPLICATES_CHECK_METHOD_COMBO_BOX;
-use crate::help_functions::*;
+use crate::help_functions::{
+    ColumnsExcludedDirectory, ColumnsIncludedDirectory, add_text_to_text_view, append_row_to_list_store, get_from_list_store_fnc, get_list_store, get_string_from_list_store,
+    reset_text_view, scale_step_function,
+};
 use crate::language_functions::{LANGUAGES_ALL, get_language_from_combo_box_text};
 
 const SAVE_FILE_NAME_JSON: &str = "czkawka_gui_config.json";
@@ -78,7 +81,7 @@ impl LoadSaveStruct {
         }
     }
 
-    fn open_save_file_path(&self) -> Option<PathBuf> {
+    fn open_save_file_path() -> Option<PathBuf> {
         let config_dir = get_config_cache_path()?.config_folder;
         Some(config_dir.join(Path::new(SAVE_FILE_NAME_JSON)))
     }
@@ -134,7 +137,7 @@ impl LoadSaveStruct {
     }
 
     pub(crate) fn save_to_file(&self, text_view_errors: &TextView) {
-        let Some(json_file) = self.open_save_file_path() else {
+        let Some(json_file) = Self::open_save_file_path() else {
             add_text_to_text_view(
                 text_view_errors,
                 &flg!(
@@ -462,7 +465,7 @@ fn set_included_reference_folders(tree_view_included_directories: &TreeView, inc
                 (ColumnsIncludedDirectory::Path as u32, &directory),
                 (ColumnsIncludedDirectory::ReferenceButton as u32, &is_referenced),
             ];
-            list_store.set(&list_store.append(), &values);
+            append_row_to_list_store(&list_store, &values);
         }
     }
 }
@@ -483,7 +486,7 @@ fn set_configuration_to_gui_internal(upper_notebook: &GuiUpperNotebook, main_not
         list_store.clear();
         for i in default_config.excluded_directories.clone() {
             let values: [(u32, &dyn ToValue); 1] = [(ColumnsExcludedDirectory::Path as u32, &i)];
-            list_store.set(&list_store.append(), &values);
+            append_row_to_list_store(&list_store, &values);
         }
     }
     // Resetting excluded items
@@ -668,6 +671,8 @@ fn gui_to_settings(upper_notebook: &GuiUpperNotebook, main_notebook: &GuiMainNot
     }
 }
 
+#[allow(clippy::allow_attributes)]
+#[allow(clippy::useless_let_if_seq)] // TODO - rust with some version shows this
 pub fn load_configuration(
     manual_execution: bool,
     upper_notebook: &GuiUpperNotebook,
@@ -757,7 +762,7 @@ fn set_directories(
 
     for directory in excluded_directories {
         let values: [(u32, &dyn ToValue); 1] = [(ColumnsExcludedDirectory::Path as u32, &directory)];
-        list_store.set(&list_store.append(), &values);
+        append_row_to_list_store(&list_store, &values);
     }
 }
 

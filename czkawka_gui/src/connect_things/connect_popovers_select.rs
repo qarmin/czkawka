@@ -6,9 +6,10 @@ use log::error;
 use regex::Regex;
 
 use crate::flg;
+use crate::gui_structs::common_tree_view::SubView;
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::*;
-use crate::notebook_info::NOTEBOOKS_INFO;
+use crate::help_functions::{change_dimension_to_krotka, get_dialog_box_child, get_full_name_from_path_name, get_list_store};
+use crate::model_iter::iter_list;
 
 // File length variable allows users to choose duplicates which have shorter file name
 // e.g. 'tar.gz' will be selected instead 'tar.gz (copy)' etc.
@@ -42,15 +43,9 @@ fn popover_select_all(popover: &gtk4::Popover, tree_view: &gtk4::TreeView, colum
 fn popover_unselect_all(popover: &gtk4::Popover, tree_view: &gtk4::TreeView, column_button_selection: u32) {
     let model = get_list_store(tree_view);
 
-    if let Some(iter) = model.iter_first() {
-        loop {
-            model.set_value(&iter, column_button_selection, &false.to_value());
-
-            if !model.iter_next(&iter) {
-                break;
-            }
-        }
-    }
+    iter_list(&model, |m, i| {
+        m.set_value(i, column_button_selection, &false.to_value());
+    });
     popover.popdown();
 }
 
@@ -120,12 +115,10 @@ fn popover_all_except_oldest_newest(
                         modification_time_min_max = modification;
                         used_index = Some(current_index);
                     }
-                } else {
-                    if modification > modification_time_min_max || (modification == modification_time_min_max && current_file_length < file_length) {
-                        file_length = current_file_length;
-                        modification_time_min_max = modification;
-                        used_index = Some(current_index);
-                    }
+                } else if modification > modification_time_min_max || (modification == modification_time_min_max && current_file_length < file_length) {
+                    file_length = current_file_length;
+                    modification_time_min_max = modification;
+                    used_index = Some(current_index);
                 }
                 current_index += 1;
 
@@ -156,14 +149,17 @@ fn popover_all_except_oldest_newest(
 
 fn popover_one_oldest_newest(
     popover: &gtk4::Popover,
-    tree_view: &gtk4::TreeView,
-    column_header: i32,
-    column_modification_as_secs: i32,
-    column_file_name: i32,
-    column_button_selection: u32,
+    sv: &SubView,
+    // tree_view: &gtk4::TreeView,
+    // column_header: i32,
+    // column_modification_as_secs: i32,
+    // column_file_name: i32,
+    // column_button_selection: u32,
     check_oldest: bool,
 ) {
-    let model = get_list_store(tree_view);
+    let model = sv.get_model();
+    let column_header = sv.nb_object.column_header.expect("OO/ON can't be used without headers");
+    let column_modification_as_secs = sv.nb_object.column_modification_as_secs.expect("OO/ON needs modification as secs column");
 
     if let Some(iter) = model.iter_first() {
         let mut end: bool = false;
@@ -184,19 +180,17 @@ fn popover_one_oldest_newest(
                 }
                 tree_iter_array.push(iter);
                 let modification = model.get::<u64>(&iter, column_modification_as_secs);
-                let current_file_length = model.get::<String>(&iter, column_file_name).len();
+                let current_file_length = model.get::<String>(&iter, sv.nb_object.column_name).len();
                 if check_oldest {
                     if modification < modification_time_min_max || (modification == modification_time_min_max && current_file_length > file_length) {
                         file_length = current_file_length;
                         modification_time_min_max = modification;
                         used_index = Some(current_index);
                     }
-                } else {
-                    if modification > modification_time_min_max || (modification == modification_time_min_max && current_file_length > file_length) {
-                        file_length = current_file_length;
-                        modification_time_min_max = modification;
-                        used_index = Some(current_index);
-                    }
+                } else if modification > modification_time_min_max || (modification == modification_time_min_max && current_file_length > file_length) {
+                    file_length = current_file_length;
+                    modification_time_min_max = modification;
+                    used_index = Some(current_index);
                 }
 
                 current_index += 1;
@@ -212,9 +206,9 @@ fn popover_one_oldest_newest(
 
             for (index, tree_iter) in tree_iter_array.iter().enumerate() {
                 if index == used_index {
-                    model.set_value(tree_iter, column_button_selection, &true.to_value());
+                    model.set_value(tree_iter, sv.nb_object.column_selection as u32, &true.to_value());
                 } else {
-                    model.set_value(tree_iter, column_button_selection, &false.to_value());
+                    model.set_value(tree_iter, sv.nb_object.column_selection as u32, &false.to_value());
                 }
             }
 
@@ -230,11 +224,12 @@ fn popover_one_oldest_newest(
 fn popover_custom_select_unselect(
     popover: &gtk4::Popover,
     window_main: &Window,
-    tree_view: &gtk4::TreeView,
-    column_header: Option<i32>,
-    column_file_name: i32,
-    column_path: i32,
-    column_button_selection: u32,
+    sv: &SubView,
+    // tree_view: &gtk4::TreeView,
+    // column_header: Option<i32>,
+    // column_file_name: i32,
+    // column_path: i32,
+    // column_button_selection: u32,
     select_things: bool,
 ) {
     popover.popdown();
@@ -360,7 +355,7 @@ fn popover_custom_select_unselect(
             dialog.show();
         }
 
-        let tree_view = tree_view.clone();
+        let sv = sv.clone();
         dialog.connect_response(move |confirmation_dialog_select_unselect, response_type| {
             let name_wildcard = entry_name.text().trim().to_string();
             let path_wildcard = entry_path.text().trim().to_string();
@@ -395,52 +390,53 @@ fn popover_custom_select_unselect(
                         }
                     } else {
                         // Trivial regex is used, because I need here regex
-                        #[allow(clippy::trivial_regex)]
+                        #[expect(clippy::trivial_regex)]
                         Regex::new("").expect("Empty regex should compile properly.")
                     };
 
-                    let model = get_list_store(&tree_view);
+                    let model = sv.get_model();
 
                     let Some(iter) = model.iter_first() else {
                         confirmation_dialog_select_unselect.close();
                         return;
                     };
-                    let using_reference_folders = column_header.is_some_and(|e| model.get::<bool>(&iter, e)) && !model.get::<String>(&iter, column_file_name).is_empty();
+                    let using_reference_folders =
+                        sv.nb_object.column_header.is_some_and(|e| model.get::<bool>(&iter, e)) && !model.get::<String>(&iter, sv.nb_object.column_name).is_empty();
 
                     let mut number_of_all_things = 0;
                     let mut number_of_already_selected_things = 0;
                     let mut vec_of_iters: Vec<TreeIter> = Vec::new();
                     loop {
                         // If went to header and all previous items were selected, then deselect last item
-                        if let Some(column_header) = column_header {
-                            if model.get::<bool>(&iter, column_header) {
-                                if select_things {
-                                    if !using_reference_folders && check_all_selected && (number_of_all_things - number_of_already_selected_things == vec_of_iters.len()) {
-                                        vec_of_iters.pop();
-                                    }
-                                    for iter in vec_of_iters {
-                                        model.set_value(&iter, column_button_selection, &true.to_value());
-                                    }
-                                } else {
-                                    for iter in vec_of_iters {
-                                        model.set_value(&iter, column_button_selection, &false.to_value());
-                                    }
+                        if let Some(column_header) = sv.nb_object.column_header
+                            && model.get::<bool>(&iter, column_header)
+                        {
+                            if select_things {
+                                if !using_reference_folders && check_all_selected && (number_of_all_things - number_of_already_selected_things == vec_of_iters.len()) {
+                                    vec_of_iters.pop();
                                 }
-
-                                if !model.iter_next(&iter) {
-                                    break;
+                                for iter in vec_of_iters {
+                                    model.set_value(&iter, sv.nb_object.column_selection as u32, &true.to_value());
                                 }
-
-                                number_of_all_things = 0;
-                                number_of_already_selected_things = 0;
-                                vec_of_iters = Vec::new();
-                                continue;
+                            } else {
+                                for iter in vec_of_iters {
+                                    model.set_value(&iter, sv.nb_object.column_selection as u32, &false.to_value());
+                                }
                             }
+
+                            if !model.iter_next(&iter) {
+                                break;
+                            }
+
+                            number_of_all_things = 0;
+                            number_of_already_selected_things = 0;
+                            vec_of_iters = Vec::new();
+                            continue;
                         }
 
-                        let is_selected = model.get::<bool>(&iter, column_button_selection as i32);
-                        let path = model.get::<String>(&iter, column_path);
-                        let name = model.get::<String>(&iter, column_file_name);
+                        let is_selected = model.get::<bool>(&iter, sv.nb_object.column_selection);
+                        let path = model.get::<String>(&iter, sv.nb_object.column_path);
+                        let name = model.get::<String>(&iter, sv.nb_object.column_name);
 
                         let path_and_name = get_full_name_from_path_name(&path, &name);
 
@@ -455,10 +451,8 @@ fn popover_custom_select_unselect(
                                     if regex_check(&name_wildcard_excluded, &name) {
                                         need_to_change_thing = true;
                                     }
-                                } else {
-                                    if regex_check(&name_wildcard_lowercase_excluded, &name.to_lowercase()) {
-                                        need_to_change_thing = true;
-                                    }
+                                } else if regex_check(&name_wildcard_lowercase_excluded, &name.to_lowercase()) {
+                                    need_to_change_thing = true;
                                 }
                             }
                             if check_path {
@@ -466,10 +460,8 @@ fn popover_custom_select_unselect(
                                     if regex_check(&path_wildcard_excluded, &path) {
                                         need_to_change_thing = true;
                                     }
-                                } else {
-                                    if regex_check(&path_wildcard_lowercase_excluded, &path.to_lowercase()) {
-                                        need_to_change_thing = true;
-                                    }
+                                } else if regex_check(&path_wildcard_lowercase_excluded, &path.to_lowercase()) {
+                                    need_to_change_thing = true;
                                 }
                             }
                         }
@@ -477,15 +469,11 @@ fn popover_custom_select_unselect(
                         if select_things {
                             if is_selected {
                                 number_of_already_selected_things += 1;
-                            } else {
-                                if need_to_change_thing {
-                                    vec_of_iters.push(iter);
-                                }
-                            }
-                        } else {
-                            if need_to_change_thing {
+                            } else if need_to_change_thing {
                                 vec_of_iters.push(iter);
                             }
+                        } else if need_to_change_thing {
+                            vec_of_iters.push(iter);
                         }
 
                         // If went to last item and all previous items were selected, then deselect last item
@@ -495,11 +483,11 @@ fn popover_custom_select_unselect(
                                     vec_of_iters.pop();
                                 }
                                 for iter in vec_of_iters {
-                                    model.set_value(&iter, column_button_selection, &true.to_value());
+                                    model.set_value(&iter, sv.nb_object.column_selection as u32, &true.to_value());
                                 }
                             } else {
                                 for iter in vec_of_iters {
-                                    model.set_value(&iter, column_button_selection, &false.to_value());
+                                    model.set_value(&iter, sv.nb_object.column_selection as u32, &false.to_value());
                                 }
                             }
                             break;
@@ -514,14 +502,17 @@ fn popover_custom_select_unselect(
 
 fn popover_all_except_biggest_smallest(
     popover: &gtk4::Popover,
-    tree_view: &gtk4::TreeView,
-    column_header: i32,
-    column_size_as_bytes: i32,
-    column_dimensions: Option<i32>,
-    column_button_selection: u32,
+    sv: &SubView,
+    // tree_view: &gtk4::TreeView,
+    // column_header: i32,
+    // column_size_as_bytes: i32,
+    // column_dimensions: Option<i32>,
+    // column_button_selection: u32,
     except_biggest: bool,
 ) {
-    let model = get_list_store(tree_view);
+    let model = sv.get_model();
+    let column_header = sv.nb_object.column_header.expect("AEB/AES can't be used without headers");
+    let column_size_as_bytes = sv.nb_object.column_size_as_bytes.expect("AEB/AES needs size as bytes column");
 
     if let Some(iter) = model.iter_first() {
         let mut end: bool = false;
@@ -543,7 +534,7 @@ fn popover_all_except_biggest_smallest(
                 let size_as_bytes = model.get::<u64>(&iter, column_size_as_bytes);
 
                 // If dimension exists, then needs to be checked images
-                if let Some(column_dimensions) = column_dimensions {
+                if let Some(column_dimensions) = sv.nb_object.column_dimensions {
                     let dimensions_string = model.get::<String>(&iter, column_dimensions);
 
                     let dimensions = change_dimension_to_krotka(&dimensions_string);
@@ -555,25 +546,19 @@ fn popover_all_except_biggest_smallest(
                             size_as_bytes_min_max = size_as_bytes;
                             used_index = Some(current_index);
                         }
-                    } else {
-                        if number_of_pixels < number_of_pixels_min_max || (number_of_pixels == number_of_pixels_min_max && size_as_bytes < size_as_bytes_min_max) {
-                            number_of_pixels_min_max = number_of_pixels;
-                            size_as_bytes_min_max = size_as_bytes;
-                            used_index = Some(current_index);
-                        }
+                    } else if number_of_pixels < number_of_pixels_min_max || (number_of_pixels == number_of_pixels_min_max && size_as_bytes < size_as_bytes_min_max) {
+                        number_of_pixels_min_max = number_of_pixels;
+                        size_as_bytes_min_max = size_as_bytes;
+                        used_index = Some(current_index);
                     }
-                } else {
-                    if except_biggest {
-                        if size_as_bytes > size_as_bytes_min_max {
-                            size_as_bytes_min_max = size_as_bytes;
-                            used_index = Some(current_index);
-                        }
-                    } else {
-                        if size_as_bytes < size_as_bytes_min_max {
-                            size_as_bytes_min_max = size_as_bytes;
-                            used_index = Some(current_index);
-                        }
+                } else if except_biggest {
+                    if size_as_bytes > size_as_bytes_min_max {
+                        size_as_bytes_min_max = size_as_bytes;
+                        used_index = Some(current_index);
                     }
+                } else if size_as_bytes < size_as_bytes_min_max {
+                    size_as_bytes_min_max = size_as_bytes;
+                    used_index = Some(current_index);
                 }
 
                 current_index += 1;
@@ -588,9 +573,9 @@ fn popover_all_except_biggest_smallest(
             };
             for (index, tree_iter) in tree_iter_array.iter().enumerate() {
                 if index != used_index {
-                    model.set_value(tree_iter, column_button_selection, &true.to_value());
+                    model.set_value(tree_iter, sv.nb_object.column_selection as u32, &true.to_value());
                 } else {
-                    model.set_value(tree_iter, column_button_selection, &false.to_value());
+                    model.set_value(tree_iter, sv.nb_object.column_selection as u32, &false.to_value());
                 }
             }
 
@@ -606,202 +591,129 @@ fn popover_all_except_biggest_smallest(
 pub(crate) fn connect_popover_select(gui_data: &GuiData) {
     let popover_select = gui_data.popovers_select.popover_select.clone();
     let buttons_popover_select_all = gui_data.popovers_select.buttons_popover_select_all.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
 
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
     buttons_popover_select_all.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
+        let sv = common_tree_views.get_current_subview();
 
-        popover_select_all(&popover_select, tree_view, nb_object.column_selection as u32, nb_object.column_header);
+        popover_select_all(&popover_select, &sv.tree_view, sv.nb_object.column_selection as u32, sv.nb_object.column_header);
     });
 
     let popover_select = gui_data.popovers_select.popover_select.clone();
     let buttons_popover_unselect_all = gui_data.popovers_select.buttons_popover_unselect_all.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
-    buttons_popover_unselect_all.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
 
-        popover_unselect_all(&popover_select, tree_view, nb_object.column_selection as u32);
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
+    buttons_popover_unselect_all.connect_clicked(move |_| {
+        let sv = common_tree_views.get_current_subview();
+
+        popover_unselect_all(&popover_select, &sv.tree_view, sv.nb_object.column_selection as u32);
     });
 
     let popover_select = gui_data.popovers_select.popover_select.clone();
     let buttons_popover_reverse = gui_data.popovers_select.buttons_popover_reverse.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
-    buttons_popover_reverse.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
 
-        popover_reverse(&popover_select, tree_view, nb_object.column_selection as u32, nb_object.column_header);
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
+    buttons_popover_reverse.connect_clicked(move |_| {
+        let sv = common_tree_views.get_current_subview();
+
+        popover_reverse(&popover_select, &sv.tree_view, sv.nb_object.column_selection as u32, sv.nb_object.column_header);
     });
 
     let popover_select = gui_data.popovers_select.popover_select.clone();
     let buttons_popover_select_all_except_oldest = gui_data.popovers_select.buttons_popover_select_all_except_oldest.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
+
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
     buttons_popover_select_all_except_oldest.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
+        let sv = common_tree_views.get_current_subview();
 
         popover_all_except_oldest_newest(
             &popover_select,
-            tree_view,
-            nb_object.column_header.expect("AEO can't be used without headers"),
-            nb_object.column_modification_as_secs.expect("AEO needs modification as secs column"),
-            nb_object.column_name,
-            nb_object.column_selection as u32,
+            &sv.tree_view,
+            sv.nb_object.column_header.expect("AEO can't be used without headers"),
+            sv.nb_object.column_modification_as_secs.expect("AEO needs modification as secs column"),
+            sv.nb_object.column_name,
+            sv.nb_object.column_selection as u32,
             true,
         );
     });
 
     let popover_select = gui_data.popovers_select.popover_select.clone();
     let buttons_popover_select_all_except_newest = gui_data.popovers_select.buttons_popover_select_all_except_newest.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
+
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
     buttons_popover_select_all_except_newest.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
+        let sv = common_tree_views.get_current_subview();
 
         popover_all_except_oldest_newest(
             &popover_select,
-            tree_view,
-            nb_object.column_header.expect("AEN can't be used without headers"),
-            nb_object.column_modification_as_secs.expect("AEN needs modification as secs column"),
-            nb_object.column_name,
-            nb_object.column_selection as u32,
+            &sv.tree_view,
+            sv.nb_object.column_header.expect("AEN can't be used without headers"),
+            sv.nb_object.column_modification_as_secs.expect("AEN needs modification as secs column"),
+            sv.nb_object.column_name,
+            sv.nb_object.column_selection as u32,
             false,
         );
     });
 
     let popover_select = gui_data.popovers_select.popover_select.clone();
     let buttons_popover_select_one_oldest = gui_data.popovers_select.buttons_popover_select_one_oldest.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
-    buttons_popover_select_one_oldest.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
 
-        popover_one_oldest_newest(
-            &popover_select,
-            tree_view,
-            nb_object.column_header.expect("OO can't be used without headers"),
-            nb_object.column_modification_as_secs.expect("OO needs modification as secs column"),
-            nb_object.column_name,
-            nb_object.column_selection as u32,
-            true,
-        );
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
+    buttons_popover_select_one_oldest.connect_clicked(move |_| {
+        let sv = common_tree_views.get_current_subview();
+
+        popover_one_oldest_newest(&popover_select, sv, true);
     });
 
     let popover_select = gui_data.popovers_select.popover_select.clone();
     let buttons_popover_select_one_newest = gui_data.popovers_select.buttons_popover_select_one_newest.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
-    buttons_popover_select_one_newest.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
 
-        popover_one_oldest_newest(
-            &popover_select,
-            tree_view,
-            nb_object.column_header.expect("ON can't be used without headers"),
-            nb_object.column_modification_as_secs.expect("ON needs modification as secs column"),
-            nb_object.column_name,
-            nb_object.column_selection as u32,
-            false,
-        );
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
+    buttons_popover_select_one_newest.connect_clicked(move |_| {
+        let sv = common_tree_views.get_current_subview();
+
+        popover_one_oldest_newest(&popover_select, sv, false);
     });
 
     let popover_select = gui_data.popovers_select.popover_select.clone();
     let buttons_popover_select_custom = gui_data.popovers_select.buttons_popover_select_custom.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
-    let window_main = gui_data.window_main.clone();
-    buttons_popover_select_custom.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
 
-        popover_custom_select_unselect(
-            &popover_select,
-            &window_main,
-            tree_view,
-            nb_object.column_header,
-            nb_object.column_name,
-            nb_object.column_path,
-            nb_object.column_selection as u32,
-            true,
-        );
+    let window_main = gui_data.window_main.clone();
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
+    buttons_popover_select_custom.connect_clicked(move |_| {
+        let sv = common_tree_views.get_current_subview();
+
+        popover_custom_select_unselect(&popover_select, &window_main, sv, true);
     });
 
     let popover_select = gui_data.popovers_select.popover_select.clone();
     let buttons_popover_unselect_custom = gui_data.popovers_select.buttons_popover_unselect_custom.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
-    let window_main = gui_data.window_main.clone();
-    buttons_popover_unselect_custom.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
 
-        popover_custom_select_unselect(
-            &popover_select,
-            &window_main,
-            tree_view,
-            nb_object.column_header,
-            nb_object.column_name,
-            nb_object.column_path,
-            nb_object.column_selection as u32,
-            false,
-        );
+    let window_main = gui_data.window_main.clone();
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
+    buttons_popover_unselect_custom.connect_clicked(move |_| {
+        let sv = common_tree_views.get_current_subview();
+
+        popover_custom_select_unselect(&popover_select, &window_main, sv, false);
     });
 
     let popover_select = gui_data.popovers_select.popover_select.clone();
     let buttons_popover_select_all_images_except_biggest = gui_data.popovers_select.buttons_popover_select_all_images_except_biggest.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
-    buttons_popover_select_all_images_except_biggest.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
 
-        popover_all_except_biggest_smallest(
-            &popover_select,
-            tree_view,
-            nb_object.column_header.expect("AEB can't be used without headers"),
-            nb_object.column_size_as_bytes.expect("AEB needs size as bytes column"),
-            nb_object.column_dimensions,
-            nb_object.column_selection as u32,
-            true,
-        );
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
+    buttons_popover_select_all_images_except_biggest.connect_clicked(move |_| {
+        let sv = common_tree_views.get_current_subview();
+
+        popover_all_except_biggest_smallest(&popover_select, sv, true);
     });
 
     let popover_select = gui_data.popovers_select.popover_select.clone();
     let buttons_popover_select_all_images_except_smallest = gui_data.popovers_select.buttons_popover_select_all_images_except_smallest.clone();
-    let notebook_main = gui_data.main_notebook.notebook_main.clone();
-    let main_tree_views = gui_data.main_notebook.get_main_tree_views();
-    buttons_popover_select_all_images_except_smallest.connect_clicked(move |_| {
-        let nb_number = notebook_main.current_page().expect("Current page not set");
-        let tree_view = &main_tree_views[nb_number as usize];
-        let nb_object = &NOTEBOOKS_INFO[nb_number as usize];
 
-        popover_all_except_biggest_smallest(
-            &popover_select,
-            tree_view,
-            nb_object.column_header.expect("AES can't be used without headers"),
-            nb_object.column_size_as_bytes.expect("AES needs size as bytes column"),
-            nb_object.column_dimensions,
-            nb_object.column_selection as u32,
-            false,
-        );
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
+    buttons_popover_select_all_images_except_smallest.connect_clicked(move |_| {
+        let sv = common_tree_views.get_current_subview();
+
+        popover_all_except_biggest_smallest(&popover_select, sv, false);
     });
 }

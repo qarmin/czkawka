@@ -426,7 +426,7 @@ settings_duplicates_prehash_checkbutton_tooltip =
 
 settings_duplicates_prehash_minimal_entry_tooltip = Minimal size of cached entry.
 
-settings_duplicates_hide_hard_link_button = Hide hard links (only Linux and macOS)
+settings_duplicates_hide_hard_link_button = Hide hard links
 settings_duplicates_prehash_checkbutton = Use prehash cache
 
 settings_duplicates_minimal_size_cache_label = Minimal size of files (in bytes) saved to cache

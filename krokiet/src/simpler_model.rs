@@ -17,8 +17,9 @@ impl SimplerMainListModel {
     pub(crate) fn get_size(&self, size_idx: usize) -> u64 {
         connect_i32_into_u64(self.val_int[size_idx], self.val_int[size_idx + 1])
     }
-    #[allow(clippy::print_stdout)]
-    #[allow(dead_code)]
+    #[allow(clippy::allow_attributes)]
+    #[expect(clippy::print_stdout)]
+    #[allow(dead_code)] // TODO - rust with some version shows this
     pub(crate) fn debug_print(&self) {
         println!(
             "SimplerMainListModel: checked: {}, filled_header_row: {}, header_row: {}, selected_row: {}, val_int: {:?}, val_str: {:?}",
@@ -73,11 +74,11 @@ impl ToSlintModel for Vec<SimplerMainListModel> {
 }
 
 pub trait DebugPrintSimplerModel {
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     fn debug_print_simpler_models(&self);
 }
 impl DebugPrintSimplerModel for Vec<SimplerMainListModel> {
-    #[allow(clippy::print_stdout)]
+    #[expect(clippy::print_stdout)]
     fn debug_print_simpler_models(&self) {
         println!("=====================START DEBUG PRINT SIMPLER MODELS=====================");
         println!("Simpler Model with {} items", self.len());

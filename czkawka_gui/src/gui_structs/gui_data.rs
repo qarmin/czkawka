@@ -5,17 +5,6 @@ use std::rc::Rc;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
-use czkawka_core::tools::bad_extensions::BadExtensions;
-use czkawka_core::tools::big_file::BigFile;
-use czkawka_core::tools::broken_files::BrokenFiles;
-use czkawka_core::tools::duplicate::DuplicateFinder;
-use czkawka_core::tools::empty_files::EmptyFiles;
-use czkawka_core::tools::empty_folder::EmptyFolder;
-use czkawka_core::tools::invalid_symlinks::InvalidSymlinks;
-use czkawka_core::tools::same_music::SameMusic;
-use czkawka_core::tools::similar_images::SimilarImages;
-use czkawka_core::tools::similar_videos::SimilarVideos;
-use czkawka_core::tools::temporary::Temporary;
 use gdk4::gdk_pixbuf::Pixbuf;
 use gtk4::prelude::*;
 use gtk4::{Builder, FileChooserNative};
@@ -31,8 +20,8 @@ use crate::gui_structs::gui_popovers_sort::GuiSortPopovers;
 use crate::gui_structs::gui_progress_dialog::GuiProgressDialog;
 use crate::gui_structs::gui_settings::GuiSettings;
 use crate::gui_structs::gui_upper_notebook::GuiUpperNotebook;
-use crate::help_functions::{BottomButtonsEnum, SharedState};
-use crate::notebook_enums::*;
+use crate::help_functions::BottomButtonsEnum;
+use crate::notebook_enums::{NotebookMainEnum, get_all_main_tabs};
 use crate::taskbar_progress::TaskbarProgress;
 
 pub const ICON_ABOUT: &[u8] = include_bytes!("../../icons/icon_about.png");
@@ -55,6 +44,7 @@ pub const CZK_ICON_SORT: &[u8] = include_bytes!("../../icons/czk_sort.svg");
 pub const CZK_ICON_STOP: &[u8] = include_bytes!("../../icons/czk_stop.svg");
 pub const CZK_ICON_SYMLINK: &[u8] = include_bytes!("../../icons/czk_symlink.svg");
 pub const CZK_ICON_TRASH: &[u8] = include_bytes!("../../icons/czk_trash.svg");
+pub const CZK_ICON_REPLACE: &[u8] = include_bytes!("../../icons/czk_replace.svg");
 
 #[derive(Clone)]
 pub struct GuiData {
@@ -80,21 +70,6 @@ pub struct GuiData {
 
     // Buttons state
     pub shared_buttons: Rc<RefCell<HashMap<NotebookMainEnum, HashMap<BottomButtonsEnum, bool>>>>,
-
-    // State of search results
-    pub shared_duplication_state: SharedState<DuplicateFinder>,
-    pub shared_empty_folders_state: SharedState<EmptyFolder>,
-    pub shared_empty_files_state: SharedState<EmptyFiles>,
-    pub shared_temporary_files_state: SharedState<Temporary>,
-    pub shared_big_files_state: SharedState<BigFile>,
-    pub shared_similar_images_state: SharedState<SimilarImages>,
-    pub shared_similar_videos_state: SharedState<SimilarVideos>,
-    pub shared_same_music_state: SharedState<SameMusic>,
-    pub shared_same_invalid_symlinks: SharedState<InvalidSymlinks>,
-    pub shared_broken_files_state: SharedState<BrokenFiles>,
-    pub shared_bad_extensions_state: SharedState<BadExtensions>,
-
-    pub preview_path: Rc<RefCell<String>>,
 
     //// Entry
     pub entry_info: gtk4::Entry,
@@ -123,7 +98,6 @@ impl GuiData {
 
         window_main.set_application(Some(application));
 
-        let main_notebook = GuiMainNotebook::create_from_builder(&builder);
         let upper_notebook = GuiUpperNotebook::create_from_builder(&builder);
         let popovers_select = GuiSelectPopovers::create_from_builder();
         let popovers_sort = GuiSortPopovers::create_from_builder();
@@ -133,6 +107,7 @@ impl GuiData {
         let header = GuiHeader::create_from_builder(&builder);
         let settings = GuiSettings::create_from_builder(&window_main);
         let compare_images = GuiCompareImages::create_from_builder(&window_main);
+        let main_notebook = GuiMainNotebook::create_from_builder(&builder, &settings);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -155,7 +130,7 @@ impl GuiData {
             shared_buttons.borrow_mut().insert(*i, temp_hashmap);
         }
 
-        // File Dialogs - Native file dialogs must exists all the time in opposite to normal dialog
+        // File Dialogs - Native file dialogs must exist all the time in opposite to normal dialog
 
         let file_dialog_include_exclude_folder_selection = FileChooserNative::builder()
             .action(gtk4::FileChooserAction::SelectFolder)
@@ -170,22 +145,6 @@ impl GuiData {
             .select_multiple(false)
             .modal(true)
             .build();
-
-        // State of search results
-
-        let shared_duplication_state: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
-        let shared_empty_folders_state: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
-        let shared_empty_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
-        let shared_temporary_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
-        let shared_big_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
-        let shared_similar_images_state: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
-        let shared_similar_videos_state: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
-        let shared_same_music_state: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
-        let shared_same_invalid_symlinks: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
-        let shared_broken_files_state: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
-        let shared_bad_extensions_state: Rc<RefCell<_>> = Rc::new(RefCell::new(None));
-
-        let preview_path: Rc<RefCell<_>> = Rc::new(RefCell::new(String::new()));
 
         //// Entry
         let entry_info: gtk4::Entry = builder.object("entry_info").expect("Cambalache");
@@ -214,23 +173,15 @@ impl GuiData {
             file_dialog_move_to_folder,
             taskbar_state,
             shared_buttons,
-            shared_duplication_state,
-            shared_empty_folders_state,
-            shared_empty_files_state,
-            shared_temporary_files_state,
-            shared_big_files_state,
-            shared_similar_images_state,
-            shared_similar_videos_state,
-            shared_same_music_state,
-            shared_same_invalid_symlinks,
-            shared_broken_files_state,
-            shared_bad_extensions_state,
-            preview_path,
             entry_info,
             text_view_errors,
             scrolled_window_errors,
             stop_flag,
         }
+    }
+
+    pub(crate) fn setup(&self) {
+        self.main_notebook.setup(self);
     }
 
     pub(crate) fn update_language(&self) {

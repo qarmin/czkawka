@@ -7,7 +7,7 @@ use fun_time::fun_time;
 
 use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;
-use crate::common::tool_data::{CommonData, CommonToolData};
+use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
 use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, PrintResults, Search};
 use crate::tools::bad_extensions::{BadExtensions, BadExtensionsParameters, Info};
 
@@ -30,13 +30,17 @@ impl Search for BadExtensions {
 }
 
 impl DeletingItems for BadExtensions {
-    fn delete_files(&mut self, _stop_flag: &Arc<AtomicBool>, _progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
-        todo!()
+    fn delete_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+        match self.common_data.delete_method {
+            DeleteMethod::Delete => self.delete_simple_elements_and_add_to_messages(stop_flag, progress_sender, DeleteItemType::DeletingFolders(self.bad_extensions_files.clone())),
+            DeleteMethod::None => WorkContinueStatus::Continue,
+            _ => unreachable!(),
+        }
     }
 }
 
 impl DebugPrint for BadExtensions {
-    #[allow(clippy::print_stdout)]
+    #[expect(clippy::print_stdout)]
     fn debug_print(&self) {
         if !cfg!(debug_assertions) {
             return;

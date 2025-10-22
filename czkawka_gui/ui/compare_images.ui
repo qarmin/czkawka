@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- Created with Cambalache 0.94.1 -->
+<!-- Created with Cambalache 0.96.1 -->
 <interface>
   <!-- interface-name compare_images.ui -->
   <requires lib="gtk" version="4.6"/>
@@ -43,16 +43,32 @@
         </child>
         <child>
           <object class="GtkBox">
-            <property name="homogeneous">1</property>
+            <property name="hexpand">True</property>
+            <property name="hexpand-set">True</property>
             <child>
               <object class="GtkCheckButton" id="check_button_left_preview_text">
                 <property name="focusable">1</property>
+                <property name="hexpand">True</property>
+                <property name="hexpand-set">True</property>
                 <property name="label" translatable="yes">First Game</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="button_replace_group">
+                <property name="focusable">1</property>
+                <property name="receives-default">1</property>
+                <child>
+                  <object class="GtkImage">
+                    <property name="icon-name">image-missing</property>
+                  </object>
+                </child>
               </object>
             </child>
             <child>
               <object class="GtkCheckButton" id="check_button_right_preview_text">
                 <property name="focusable">1</property>
+                <property name="hexpand">True</property>
+                <property name="hexpand-set">True</property>
                 <property name="label" translatable="yes">Second Game</property>
               </object>
             </child>
@@ -63,12 +79,12 @@
             <property name="homogeneous">1</property>
             <property name="vexpand">1</property>
             <child>
-              <object class="GtkImage" id="image_compare_left">
+              <object class="GtkPicture" id="image_compare_left">
                 <property name="height-request">100</property>
               </object>
             </child>
             <child>
-              <object class="GtkImage" id="image_compare_right">
+              <object class="GtkPicture" id="image_compare_right">
                 <property name="height-request">100</property>
               </object>
             </child>

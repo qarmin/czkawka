@@ -66,10 +66,10 @@ impl Temporary {
                                 &self.common_data.directories,
                                 &self.common_data.excluded_items,
                             );
-                        } else if file_type.is_file() {
-                            if let Some(file_entry) = self.get_file_entry(progress_handler.items_counter(), &entry_data, &mut warnings) {
-                                fe_result.push(file_entry);
-                            }
+                        } else if file_type.is_file()
+                            && let Some(file_entry) = self.get_file_entry(progress_handler.items_counter(), &entry_data, &mut warnings)
+                        {
+                            fe_result.push(file_entry);
                         }
                     }
                     (dir_result, warnings, fe_result)

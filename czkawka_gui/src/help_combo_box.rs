@@ -48,7 +48,7 @@ pub const DUPLICATES_CHECK_METHOD_COMBO_BOX: [CheckMethodStruct; 4] = [
 
 #[derive(Copy, Clone)]
 pub struct AudioTypeStruct {
-    #[allow(unused)]
+    #[expect(unused)]
     pub eng_name: &'static str,
     pub check_method: CheckingMethod,
 }
@@ -66,7 +66,7 @@ pub const AUDIO_TYPE_CHECK_METHOD_COMBO_BOX: [AudioTypeStruct; 2] = [
 
 #[derive(Copy, Clone)]
 pub struct SearchModeStruct {
-    #[allow(unused)]
+    #[expect(unused)]
     pub eng_name: &'static str,
     pub check_method: SearchMode,
 }
