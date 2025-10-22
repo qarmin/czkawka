@@ -10,6 +10,7 @@ use std::sync::Arc;
 use std::time::UNIX_EPOCH;
 use strum::Display;
 use walkdir::WalkDir;
+use std::process::Command;
 
 const DIR_TO_CHECK: &str = "/home/rafal/TODO/B/Nefs and raws";
 const ITERATIONS: usize = 1;

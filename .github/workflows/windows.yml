@@ -234,10 +234,10 @@ jobs:
           #!/bin/bash
           set -euo pipefail
           export PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/share/pkgconfig:$MINGW_PREFIX/lib/pkgconfig/:/usr/x86_64-w64-mingw32/lib/pkgconfig/
-          cargo build --target=x86_64-pc-windows-gnu --locked
+          cargo build --target=x86_64-pc-windows-gnu --profile fastci --locked
           mkdir -p package
-          cp target/x86_64-pc-windows-gnu/debug/czkawka_gui.exe package/
-          cp target/x86_64-pc-windows-gnu/debug/czkawka_cli.exe package/
+          cp target/x86_64-pc-windows-gnu/fastci/czkawka_gui.exe package/
+          cp target/x86_64-pc-windows-gnu/fastci/czkawka_cli.exe package/
           rm -rf target
 
       - name: Package
