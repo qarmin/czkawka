@@ -5,12 +5,10 @@ use rayon::prelude::*;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::env;
-use std::process::Command;
 use std::sync::Arc;
 use std::time::UNIX_EPOCH;
 use strum::Display;
 use walkdir::WalkDir;
-use std::process::Command;
 
 const DIR_TO_CHECK: &str = "/home/rafal/TODO/B/Nefs and raws";
 const ITERATIONS: usize = 1;
@@ -157,6 +155,7 @@ fn collect_files_to_test() -> Vec<DuplicateEntry> {
 }
 
 fn clean_disk_cache() {
+    use std::process::Command;
     let _sync = Command::new("sync").output().expect("Failed to execute sync");
     let _drop_caches = Command::new("sh")
         .arg("-c")

@@ -127,16 +127,15 @@ jobs:
           source "$HOME/.cargo/env"
           rustup default 1.88.0
           rustup target add x86_64-pc-windows-gnu
+          
+          mkdir -p package
 
       - name: Cross compile for Windows - Release
         if: ${{ github.ref == 'refs/heads/master' }}
         run: |
           source "$HOME/.cargo/env"
-          #!/bin/bash
-          set -euo pipefail
           export PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/share/pkgconfig:$MINGW_PREFIX/lib/pkgconfig/:/usr/x86_64-w64-mingw32/lib/pkgconfig/
           cargo build --target=x86_64-pc-windows-gnu --release --locked
-          mkdir -p package
           cp target/x86_64-pc-windows-gnu/release/czkawka_gui.exe package/
           cp target/x86_64-pc-windows-gnu/release/czkawka_cli.exe package/
 
@@ -144,13 +143,10 @@ jobs:
         if: ${{ github.ref != 'refs/heads/master' }}
         run: |
           source "$HOME/.cargo/env"
-          #!/bin/bash
-          set -euo pipefail
           export PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/share/pkgconfig:$MINGW_PREFIX/lib/pkgconfig/:/usr/x86_64-w64-mingw32/lib/pkgconfig/
-          cargo build --target=x86_64-pc-windows-gnu --locked
-          mkdir -p package
-          cp target/x86_64-pc-windows-gnu/debug/czkawka_gui.exe package/
-          cp target/x86_64-pc-windows-gnu/debug/czkawka_cli.exe package/
+          cargo build --target=x86_64-pc-windows-gnu --locked --profile fastci
+          cp target/x86_64-pc-windows-gnu/fastci/czkawka_gui.exe package/
+          cp target/x86_64-pc-windows-gnu/fastci/czkawka_cli.exe package/
 
       - name: Package
         run: |
@@ -174,6 +170,11 @@ jobs:
           unzip gtk4_theme.zip
           rm gtk4_theme.zip
           cd ../..
+          
+          wget2 https://github.com/qarmin/Automated-Fuzzer/releases/download/test/libGL.zip
+          unzip libGL.zip
+          mv libEGL.dll package/
+          mv libGLESv2.dll package/
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -213,16 +214,15 @@ jobs:
           source "$HOME/.cargo/env"
           rustup default 1.88.0
           rustup target add x86_64-pc-windows-gnu
+          
+          mkdir -p package
 
       - name: Cross compile for Windows - Release
         if: ${{ github.ref == 'refs/heads/master' }}
         run: |
           source "$HOME/.cargo/env"
-          #!/bin/bash
-          set -euo pipefail
           export PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/share/pkgconfig:$MINGW_PREFIX/lib/pkgconfig/:/usr/x86_64-w64-mingw32/lib/pkgconfig/
           cargo build --target=x86_64-pc-windows-gnu --release --locked
-          mkdir -p package
           cp target/x86_64-pc-windows-gnu/release/czkawka_gui.exe package/
           cp target/x86_64-pc-windows-gnu/release/czkawka_cli.exe package/
           rm -rf target
@@ -231,19 +231,14 @@ jobs:
         if: ${{ github.ref != 'refs/heads/master' }}
         run: |
           source "$HOME/.cargo/env"
-          #!/bin/bash
-          set -euo pipefail
           export PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/share/pkgconfig:$MINGW_PREFIX/lib/pkgconfig/:/usr/x86_64-w64-mingw32/lib/pkgconfig/
           cargo build --target=x86_64-pc-windows-gnu --profile fastci --locked
-          mkdir -p package
           cp target/x86_64-pc-windows-gnu/fastci/czkawka_gui.exe package/
           cp target/x86_64-pc-windows-gnu/fastci/czkawka_cli.exe package/
           rm -rf target
 
       - name: Package
         run: |
-          #!/bin/bash
-          set -euo pipefail
           cp -t package $(pds -vv -f package/*.exe)
           # Add gdbus which is recommended on Windows (why?)
           cp $MINGW_PREFIX/bin/gdbus.exe package
@@ -262,6 +257,11 @@ jobs:
           unzip gtk4_theme.zip
           rm gtk4_theme.zip
           cd ../..
+          
+          wget2 https://github.com/qarmin/Automated-Fuzzer/releases/download/test/libGL.zip
+          unzip libGL.zip
+          mv libEGL.dll package/
+          mv libGLESv2.dll package/
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
