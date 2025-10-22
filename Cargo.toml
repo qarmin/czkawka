@@ -45,6 +45,13 @@ debug-assertions = true # Forces to crash when there is duplicated item in cli
 overflow-checks = true
 opt-level = 3
 
+# Fast compilation and small binary size
+[profile.fastci]
+inherits = "dev"
+strip = "symbols"
+debug = false
+lto = "off"
+
 # Unsafe profile, just to check, how fast and small app could be 
 [profile.fastest]
 inherits = "release"

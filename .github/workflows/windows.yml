@@ -225,6 +225,7 @@ jobs:
           mkdir -p package
           cp target/x86_64-pc-windows-gnu/release/czkawka_gui.exe package/
           cp target/x86_64-pc-windows-gnu/release/czkawka_cli.exe package/
+          rm -rf target
 
       - name: Cross compile for Windows - Debug
         if: ${{ github.ref != 'refs/heads/master' }}
@@ -237,6 +238,7 @@ jobs:
           mkdir -p package
           cp target/x86_64-pc-windows-gnu/debug/czkawka_gui.exe package/
           cp target/x86_64-pc-windows-gnu/debug/czkawka_cli.exe package/
+          rm -rf target
 
       - name: Package
         run: |
