@@ -24,6 +24,7 @@ use fun_time::fun_time;
 use gtk4::Grid;
 use gtk4::prelude::*;
 
+use crate::gui_structs::common_upper_tree_view::UpperTreeViewEnum;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_combo_box::{
     AUDIO_TYPE_CHECK_METHOD_COMBO_BOX, BIG_FILES_CHECK_METHOD_COMBO_BOX, DUPLICATES_CHECK_METHOD_COMBO_BOX, DUPLICATES_HASH_TYPE_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX,
@@ -50,7 +51,11 @@ pub(crate) fn connect_button_search(gui_data: &GuiData, result_sender: Sender<Me
     let stop_flag = gui_data.stop_flag.clone();
     let taskbar_state = gui_data.taskbar_state.clone();
     let text_view_errors = gui_data.text_view_errors.clone();
-    let tree_view_included_directories = gui_data.upper_notebook.tree_view_included_directories.clone();
+    let tree_view_included_directories = gui_data
+        .upper_notebook
+        .common_upper_tree_views
+        .get_tree_view(UpperTreeViewEnum::IncludedDirectories)
+        .clone();
     let window_progress = gui_data.progress_window.window_progress.clone();
     let entry_info = gui_data.entry_info.clone();
     let button_settings = gui_data.header.button_settings.clone();
@@ -150,8 +155,16 @@ impl LoadedCommonItems {
         let entry_general_maximal_size = gui_data.upper_notebook.entry_general_maximal_size.clone();
         let entry_general_minimal_size = gui_data.upper_notebook.entry_general_minimal_size.clone();
         let entry_settings_cache_file_minimal_size = gui_data.settings.entry_settings_cache_file_minimal_size.clone();
-        let tree_view_excluded_directories = gui_data.upper_notebook.tree_view_excluded_directories.clone();
-        let tree_view_included_directories = gui_data.upper_notebook.tree_view_included_directories.clone();
+        let tree_view_excluded_directories = gui_data
+            .upper_notebook
+            .common_upper_tree_views
+            .get_tree_view(UpperTreeViewEnum::ExcludedDirectories)
+            .clone();
+        let tree_view_included_directories = gui_data
+            .upper_notebook
+            .common_upper_tree_views
+            .get_tree_view(UpperTreeViewEnum::IncludedDirectories)
+            .clone();
         let check_button_settings_save_also_json = gui_data.settings.check_button_settings_save_also_json.clone();
 
         let included_directories = get_path_buf_from_vector_of_strings(&get_string_from_list_store(&tree_view_included_directories, ColumnsIncludedDirectory::Path as i32, None));

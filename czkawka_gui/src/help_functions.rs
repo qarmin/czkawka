@@ -389,21 +389,13 @@ pub(crate) fn get_notebook_upper_enum_from_tree_view(tree_view: &TreeView) -> No
     }
 }
 
-pub(crate) fn get_tree_view_name_from_notebook_upper_enum(notebook_upper_enum: NotebookUpperEnum) -> &'static str {
-    match notebook_upper_enum {
-        NotebookUpperEnum::IncludedDirectories => "tree_view_upper_included_directories",
-        NotebookUpperEnum::ExcludedDirectories => "tree_view_upper_excluded_directories",
-        NotebookUpperEnum::ItemsConfiguration => panic!(),
-    }
-}
-
 pub(crate) fn get_notebook_object_from_tree_view(tree_view: &TreeView) -> &NotebookObject {
     let tree_view_name = (*tree_view).widget_name().to_string();
 
-    NOTEBOOKS_INFO.iter().find(|nb_object| nb_object.tree_view_name == tree_view_name).map_or_else(
-        || panic!("Tree view name '{tree_view_name}' not found in NOTEBOOKS_INFO"),
-        |nb_object| nb_object,
-    )
+    NOTEBOOKS_INFO
+        .iter()
+        .find(|nb_object| nb_object.tree_view_name == tree_view_name)
+        .map_or_else(|| panic!("Tree view name '{tree_view_name}' not found in NOTEBOOKS_INFO"), |nb_object| nb_object)
 }
 
 pub(crate) fn get_full_name_from_path_name(path: &str, name: &str) -> String {
@@ -804,7 +796,7 @@ mod test {
     use image::DynamicImage;
 
     use super::*;
-    use crate::notebook_enums::{NotebookMainEnum, NotebookUpperEnum};
+    use crate::notebook_enums::NotebookMainEnum;
 
     // Helper to create a minimal SubView for Duplicate notebook along with its ListStore
     fn get_test_sv_duplicate() -> (crate::gui_structs::common_tree_view::SubView, gtk4::ListStore) {
@@ -1002,32 +994,6 @@ mod test {
         let name = "file.txt";
         let expected = format!("{}{}{}", path, std::path::MAIN_SEPARATOR, name);
         assert_eq!(get_full_name_from_path_name(path, name), expected);
-    }
-
-    #[gtk4::test]
-    fn test_get_notebook_enum_from_tree_view() {
-        let tv = gtk4::TreeView::new();
-        tv.set_widget_name("tree_view_duplicate_finder");
-        assert_eq!(get_notebook_enum_from_tree_view(&tv), NotebookMainEnum::Duplicate);
-    }
-
-    #[gtk4::test]
-    fn test_get_notebook_upper_enum_from_tree_view() {
-        let tv = gtk4::TreeView::new();
-        tv.set_widget_name("tree_view_upper_included_directories");
-        assert_eq!(get_notebook_upper_enum_from_tree_view(&tv), NotebookUpperEnum::IncludedDirectories);
-    }
-
-    #[test]
-    fn test_get_tree_view_name_from_notebook_upper_enum() {
-        assert_eq!(
-            get_tree_view_name_from_notebook_upper_enum(NotebookUpperEnum::IncludedDirectories),
-            "tree_view_upper_included_directories"
-        );
-        assert_eq!(
-            get_tree_view_name_from_notebook_upper_enum(NotebookUpperEnum::ExcludedDirectories),
-            "tree_view_upper_excluded_directories"
-        );
     }
 
     #[gtk4::test]

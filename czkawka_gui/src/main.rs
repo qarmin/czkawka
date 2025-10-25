@@ -51,7 +51,6 @@ use crate::saving_loading::{DEFAULT_MAXIMAL_FILE_SIZE, DEFAULT_MINIMAL_CACHE_SIZ
 mod cli;
 mod compute_results;
 mod connect_things;
-mod create_tree_view;
 mod dicom_traits;
 mod gui_structs;
 mod help_combo_box;

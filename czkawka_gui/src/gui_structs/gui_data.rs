@@ -182,6 +182,7 @@ impl GuiData {
 
     pub(crate) fn setup(&self) {
         self.main_notebook.setup(self);
+        self.upper_notebook.setup();
     }
 
     pub(crate) fn update_language(&self) {

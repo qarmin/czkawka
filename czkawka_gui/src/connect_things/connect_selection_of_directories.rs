@@ -9,14 +9,18 @@ use gtk4::{DropTarget, FileChooserNative, Notebook, Orientation, ResponseType, T
 
 use crate::connect_things::file_chooser_helpers::extract_paths_from_file_chooser;
 use crate::flg;
+use crate::gui_structs::common_upper_tree_view::UpperTreeViewEnum;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::{ColumnsExcludedDirectory, ColumnsIncludedDirectory, append_row_to_list_store, check_if_value_is_in_list_store, get_list_store};
 use crate::notebook_enums::{NotebookUpperEnum, to_notebook_upper_enum};
 
 pub(crate) fn connect_selection_of_directories(gui_data: &GuiData) {
+    let tree_view_included_directories = gui_data.upper_notebook.common_upper_tree_views.get_tree_view(UpperTreeViewEnum::IncludedDirectories);
+    let tree_view_excluded_directories = gui_data.upper_notebook.common_upper_tree_views.get_tree_view(UpperTreeViewEnum::ExcludedDirectories);
+
     // Add manually directory
     {
-        let tree_view_included_directories = gui_data.upper_notebook.tree_view_included_directories.clone();
+        let tree_view_included_directories = tree_view_included_directories.clone();
         let window_main = gui_data.window_main.clone();
         let buttons_manual_add_included_directory = gui_data.upper_notebook.buttons_manual_add_included_directory.clone();
         buttons_manual_add_included_directory.connect_clicked(move |_| {
@@ -25,7 +29,7 @@ pub(crate) fn connect_selection_of_directories(gui_data: &GuiData) {
     }
     // Add manually excluded directory
     {
-        let tree_view_excluded_directories = gui_data.upper_notebook.tree_view_excluded_directories.clone();
+        let tree_view_excluded_directories = tree_view_excluded_directories.clone();
         let window_main = gui_data.window_main.clone();
         let buttons_manual_add_excluded_directory = gui_data.upper_notebook.buttons_manual_add_excluded_directory.clone();
         buttons_manual_add_excluded_directory.connect_clicked(move |_| {
@@ -53,8 +57,8 @@ pub(crate) fn connect_selection_of_directories(gui_data: &GuiData) {
     // Connect
     {
         let notebook_upper = gui_data.upper_notebook.notebook_upper.clone();
-        let tree_view_included_directories = gui_data.upper_notebook.tree_view_included_directories.clone();
-        let tree_view_excluded_directories = gui_data.upper_notebook.tree_view_excluded_directories.clone();
+        let tree_view_included_directories = tree_view_included_directories.clone();
+        let tree_view_excluded_directories = tree_view_excluded_directories.clone();
         let file_dialog_include_exclude_folder_selection = gui_data.file_dialog_include_exclude_folder_selection.clone();
         connect_file_dialog(
             &file_dialog_include_exclude_folder_selection,
@@ -65,38 +69,35 @@ pub(crate) fn connect_selection_of_directories(gui_data: &GuiData) {
     }
     // Drag and drop
     {
-        configure_directory_drop(&gui_data.upper_notebook.tree_view_included_directories, false);
-        configure_directory_drop(&gui_data.upper_notebook.tree_view_excluded_directories, true);
+        configure_directory_drop(tree_view_included_directories, false);
+        configure_directory_drop(tree_view_excluded_directories, true);
     }
     // Remove Excluded Folder
     {
         let buttons_remove_excluded_directory = gui_data.upper_notebook.buttons_remove_excluded_directory.clone();
-        let tree_view_excluded_directories = gui_data.upper_notebook.tree_view_excluded_directories.clone();
+        let tree_view_excluded_directories = tree_view_excluded_directories.clone();
         buttons_remove_excluded_directory.connect_clicked(move |_| {
-            let list_store = get_list_store(&tree_view_excluded_directories);
-            let selection = tree_view_excluded_directories.selection();
-
-            let (vec_tree_path, _tree_model) = selection.selected_rows();
-
-            for tree_path in vec_tree_path.iter().rev() {
-                list_store.remove(&list_store.iter(tree_path).expect("Using invalid tree_path"));
-            }
+            remove_item_directory(&tree_view_excluded_directories);
         });
     }
     // Remove Included Folder
     {
         let buttons_remove_included_directory = gui_data.upper_notebook.buttons_remove_included_directory.clone();
-        let tree_view_included_directories = gui_data.upper_notebook.tree_view_included_directories.clone();
+        let tree_view_included_directories = tree_view_included_directories.clone();
         buttons_remove_included_directory.connect_clicked(move |_| {
-            let list_store = get_list_store(&tree_view_included_directories);
-            let selection = tree_view_included_directories.selection();
-
-            let (vec_tree_path, _tree_model) = selection.selected_rows();
-
-            for tree_path in vec_tree_path.iter().rev() {
-                list_store.remove(&list_store.iter(tree_path).expect("Using invalid tree_path"));
-            }
+            remove_item_directory(&tree_view_included_directories);
         });
+    }
+}
+
+fn remove_item_directory(tree_view: &TreeView) {
+    let list_store = get_list_store(tree_view);
+    let selection = tree_view.selection();
+
+    let (vec_tree_path, _tree_model) = selection.selected_rows();
+
+    for tree_path in vec_tree_path.iter().rev() {
+        list_store.remove(&list_store.iter(tree_path).expect("Using invalid tree_path"));
     }
 }
 
