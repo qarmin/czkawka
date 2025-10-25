@@ -155,17 +155,17 @@ impl GuiMainNotebook {
 
         #[rustfmt::skip]
         let subviews: Vec<_> = [
-            SubView::new(builder, "scrolled_window_duplicate_finder", NotebookMainEnum::Duplicate, Some("image_preview_duplicates"), "tree_view_duplicate_finder", Some(settings.check_button_settings_show_preview_duplicates.clone()), SharedModelEnum::Duplicates(Rc::default())),
-            SubView::new(builder, "scrolled_window_empty_folder_finder", NotebookMainEnum::EmptyDirectories, None, "tree_view_empty_folder_finder", None, SharedModelEnum::EmptyFolder(Rc::default())),
-            SubView::new(builder, "scrolled_window_empty_files_finder", NotebookMainEnum::EmptyFiles, None, "tree_view_empty_files_finder", None, SharedModelEnum::EmptyFiles(Rc::default())),
-            SubView::new(builder, "scrolled_window_temporary_files_finder", NotebookMainEnum::Temporary, None, "tree_view_temporary_files_finder", None, SharedModelEnum::Temporary(Rc::default())),
-            SubView::new(builder, "scrolled_window_big_files_finder", NotebookMainEnum::BigFiles, None, "tree_view_big_files_finder", None, SharedModelEnum::BigFile(Rc::default())),
-            SubView::new(builder, "scrolled_window_similar_images_finder", NotebookMainEnum::SimilarImages, Some("image_preview_similar_images"), "tree_view_similar_images_finder", Some(settings.check_button_settings_show_preview_similar_images.clone()), SharedModelEnum::SimilarImages(Rc::default())),
-            SubView::new(builder, "scrolled_window_similar_videos_finder", NotebookMainEnum::SimilarVideos, None, "tree_view_similar_videos_finder", None, SharedModelEnum::SimilarVideos(Rc::default())),
-            SubView::new(builder, "scrolled_window_same_music_finder", NotebookMainEnum::SameMusic, None, "tree_view_same_music_finder", None, SharedModelEnum::SameMusic(Rc::default())),
-            SubView::new(builder, "scrolled_window_invalid_symlinks", NotebookMainEnum::Symlinks, None, "tree_view_invalid_symlinks", None, SharedModelEnum::Symlinks(Rc::default())),
-            SubView::new(builder, "scrolled_window_broken_files", NotebookMainEnum::BrokenFiles, None, "tree_view_broken_files", None, SharedModelEnum::BrokenFiles(Rc::default())),
-            SubView::new(builder, "scrolled_window_bad_extensions", NotebookMainEnum::BadExtensions, None, "tree_view_bad_extensions", None, SharedModelEnum::BadExtensions(Rc::default())),
+            SubView::new(builder, "scrolled_window_duplicate_finder", NotebookMainEnum::Duplicate, Some("image_preview_duplicates"), Some(settings.check_button_settings_show_preview_duplicates.clone()), SharedModelEnum::Duplicates(Rc::default())),
+            SubView::new(builder, "scrolled_window_empty_folder_finder", NotebookMainEnum::EmptyDirectories, None, None, SharedModelEnum::EmptyFolder(Rc::default())),
+            SubView::new(builder, "scrolled_window_empty_files_finder", NotebookMainEnum::EmptyFiles, None, None, SharedModelEnum::EmptyFiles(Rc::default())),
+            SubView::new(builder, "scrolled_window_temporary_files_finder", NotebookMainEnum::Temporary, None, None, SharedModelEnum::Temporary(Rc::default())),
+            SubView::new(builder, "scrolled_window_big_files_finder", NotebookMainEnum::BigFiles, None, None, SharedModelEnum::BigFile(Rc::default())),
+            SubView::new(builder, "scrolled_window_similar_images_finder", NotebookMainEnum::SimilarImages, Some("image_preview_similar_images"), Some(settings.check_button_settings_show_preview_similar_images.clone()), SharedModelEnum::SimilarImages(Rc::default())),
+            SubView::new(builder, "scrolled_window_similar_videos_finder", NotebookMainEnum::SimilarVideos, None, None, SharedModelEnum::SimilarVideos(Rc::default())),
+            SubView::new(builder, "scrolled_window_same_music_finder", NotebookMainEnum::SameMusic, None, None, SharedModelEnum::SameMusic(Rc::default())),
+            SubView::new(builder, "scrolled_window_invalid_symlinks", NotebookMainEnum::Symlinks, None, None, SharedModelEnum::Symlinks(Rc::default())),
+            SubView::new(builder, "scrolled_window_broken_files", NotebookMainEnum::BrokenFiles, None, None, SharedModelEnum::BrokenFiles(Rc::default())),
+            SubView::new(builder, "scrolled_window_bad_extensions", NotebookMainEnum::BadExtensions, None, None, SharedModelEnum::BadExtensions(Rc::default())),
         ]
         .into_iter()
         .collect();

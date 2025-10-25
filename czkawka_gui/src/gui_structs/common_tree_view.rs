@@ -117,7 +117,6 @@ pub struct SubView {
     pub event_controller_key: EventControllerKey,
     pub nb_object: NotebookObject,
     pub enum_value: NotebookMainEnum,
-    pub tree_view_name: String,
     pub preview_struct: Option<PreviewStruct>,
     pub shared_model_enum: SharedModelEnum,
 }
@@ -143,7 +142,6 @@ impl SubView {
         scrolled_name: &str,
         enum_value: NotebookMainEnum,
         preview_str: Option<&str>,
-        tree_view_name: &str,
         settings_show_preview: Option<CheckButton>,
         shared_model_enum: SharedModelEnum,
     ) -> Self {
@@ -175,7 +173,6 @@ impl SubView {
             nb_object,
             enum_value,
             preview_struct,
-            tree_view_name: tree_view_name.to_string(),
             shared_model_enum,
         }
     }
@@ -192,7 +189,7 @@ impl SubView {
 
         self._setup_tree_view_config();
 
-        self.tree_view.set_widget_name(&self.tree_view_name);
+        self.tree_view.set_widget_name(self.nb_object.tree_view_name);
         self.scrolled_window.set_child(Some(&self.tree_view));
         self.scrolled_window.show();
     }

@@ -382,22 +382,12 @@ pub(crate) fn change_dimension_to_krotka(dimensions: &str) -> (u64, u64) {
 }
 
 pub(crate) fn get_notebook_enum_from_tree_view(tree_view: &TreeView) -> NotebookMainEnum {
-    match (*tree_view).widget_name().to_string().as_str() {
-        "tree_view_duplicate_finder" => NotebookMainEnum::Duplicate,
-        "tree_view_empty_folder_finder" => NotebookMainEnum::EmptyDirectories,
-        "tree_view_empty_files_finder" => NotebookMainEnum::EmptyFiles,
-        "tree_view_temporary_files_finder" => NotebookMainEnum::Temporary,
-        "tree_view_big_files_finder" => NotebookMainEnum::BigFiles,
-        "tree_view_similar_images_finder" => NotebookMainEnum::SimilarImages,
-        "tree_view_similar_videos_finder" => NotebookMainEnum::SimilarVideos,
-        "tree_view_same_music_finder" => NotebookMainEnum::SameMusic,
-        "tree_view_invalid_symlinks" => NotebookMainEnum::Symlinks,
-        "tree_view_broken_files" => NotebookMainEnum::BrokenFiles,
-        "tree_view_bad_extensions" => NotebookMainEnum::BadExtensions,
-        e => {
-            panic!("{}", e)
-        }
-    }
+    let tree_view_name = (*tree_view).widget_name().to_string();
+
+    NOTEBOOKS_INFO.iter().find(|nb_object| nb_object.tree_view_name == tree_view_name).map_or_else(
+        || panic!("Tree view name '{tree_view_name}' not found in NOTEBOOKS_INFO"),
+        |nb_object| nb_object.notebook_type,
+    )
 }
 
 pub(crate) fn get_notebook_upper_enum_from_tree_view(tree_view: &TreeView) -> NotebookUpperEnum {
@@ -849,7 +839,6 @@ mod test {
             event_controller_key,
             nb_object,
             enum_value: NotebookMainEnum::Duplicate,
-            tree_view_name: "tree_view_duplicate_finder".to_string(),
             preview_struct: None,
             shared_model_enum: SharedModelEnum::Duplicates(Rc::new(RefCell::new(None::<DuplicateFinder>))),
         };
