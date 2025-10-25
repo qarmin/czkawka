@@ -381,15 +381,6 @@ pub(crate) fn change_dimension_to_krotka(dimensions: &str) -> (u64, u64) {
     (number1, number2)
 }
 
-pub(crate) fn get_notebook_enum_from_tree_view(tree_view: &TreeView) -> NotebookMainEnum {
-    let tree_view_name = (*tree_view).widget_name().to_string();
-
-    NOTEBOOKS_INFO.iter().find(|nb_object| nb_object.tree_view_name == tree_view_name).map_or_else(
-        || panic!("Tree view name '{tree_view_name}' not found in NOTEBOOKS_INFO"),
-        |nb_object| nb_object.notebook_type,
-    )
-}
-
 pub(crate) fn get_notebook_upper_enum_from_tree_view(tree_view: &TreeView) -> NotebookUpperEnum {
     match (*tree_view).widget_name().to_string().as_str() {
         "tree_view_upper_included_directories" => NotebookUpperEnum::IncludedDirectories,
@@ -407,8 +398,12 @@ pub(crate) fn get_tree_view_name_from_notebook_upper_enum(notebook_upper_enum: N
 }
 
 pub(crate) fn get_notebook_object_from_tree_view(tree_view: &TreeView) -> &NotebookObject {
-    let nb_enum = get_notebook_enum_from_tree_view(tree_view);
-    &NOTEBOOKS_INFO[nb_enum as usize]
+    let tree_view_name = (*tree_view).widget_name().to_string();
+
+    NOTEBOOKS_INFO.iter().find(|nb_object| nb_object.tree_view_name == tree_view_name).map_or_else(
+        || panic!("Tree view name '{tree_view_name}' not found in NOTEBOOKS_INFO"),
+        |nb_object| nb_object,
+    )
 }
 
 pub(crate) fn get_full_name_from_path_name(path: &str, name: &str) -> String {
