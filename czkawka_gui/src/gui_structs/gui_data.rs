@@ -91,7 +91,7 @@ impl GuiData {
         //// Windows
         let window_main: gtk4::Window = builder.object("window_main").expect("Cambalache");
         window_main.set_title(Some(&flg!("window_main_title")));
-        window_main.show();
+        window_main.set_visible(true);
 
         let pixbuf = Pixbuf::from_read(BufReader::new(ICON_ABOUT))
             .unwrap_or(Pixbuf::new(gdk4::gdk_pixbuf::Colorspace::Rgb, false, 8, 1, 1).expect("Crash is a lot of less likely than loading png file"));
@@ -152,7 +152,7 @@ impl GuiData {
         //// Bottom
         let text_view_errors: gtk4::TextView = builder.object("text_view_errors").expect("Cambalache");
         let scrolled_window_errors: gtk4::ScrolledWindow = builder.object("scrolled_window_errors").expect("Cambalache");
-        scrolled_window_errors.show(); // Not sure why needed, but without it text view errors sometimes hide itself
+        scrolled_window_errors.set_visible(true); // Not sure why needed, but without it text view errors sometimes hide itself
 
         // Used for sending stop signal to thread
         let stop_flag = Arc::default();

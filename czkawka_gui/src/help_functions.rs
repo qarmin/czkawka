@@ -351,16 +351,16 @@ pub(crate) fn add_text_to_text_view(text_view: &TextView, string_to_append: &str
 pub(crate) fn set_buttons(hashmap: &mut HashMap<BottomButtonsEnum, bool>, buttons_array: &[Widget], button_names: &[BottomButtonsEnum]) {
     for (index, button) in buttons_array.iter().enumerate() {
         if *hashmap.get_mut(&button_names[index]).expect("Invalid button name") {
-            button.show();
+            button.set_visible(true);
         } else {
-            button.hide();
+            button.set_visible(false);
         }
     }
 }
 
 pub(crate) fn hide_all_buttons(buttons_array: &[Widget]) {
     for button in buttons_array {
-        button.hide();
+        button.set_visible(false);
     }
 }
 

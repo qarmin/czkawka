@@ -76,10 +76,10 @@ pub async fn check_if_can_delete_files(
             if !check_button.is_active() {
                 check_button_settings_confirm_deletion.set_active(false);
             }
-            confirmation_dialog_delete.hide();
+            confirmation_dialog_delete.set_visible(false);
             confirmation_dialog_delete.close();
         } else {
-            confirmation_dialog_delete.hide();
+            confirmation_dialog_delete.set_visible(false);
             confirmation_dialog_delete.close();
             return false;
         }
@@ -119,7 +119,7 @@ fn create_dialog_ask_for_deletion(window_main: &gtk4::Window, number_of_selected
     parent.insert_child_after(&label2, Some(&label));
     parent.insert_child_after(&check_button, Some(&label2));
 
-    dialog.show();
+    dialog.set_visible(true);
     (dialog, check_button)
 }
 
@@ -144,7 +144,7 @@ fn create_dialog_group_deletion(window_main: &gtk4::Window) -> (Dialog, CheckBut
     parent.insert_child_after(&label2, Some(&label));
     parent.insert_child_after(&check_button, Some(&label2));
 
-    dialog.show();
+    dialog.set_visible(true);
     (dialog, check_button)
 }
 
@@ -192,11 +192,11 @@ pub async fn check_if_deleting_all_files_in_group(sv: &SubView, window_main: &gt
             check_button_settings_confirm_group_deletion.set_active(false);
         }
     } else {
-        confirmation_dialog_group_delete.hide();
+        confirmation_dialog_group_delete.set_visible(false);
         confirmation_dialog_group_delete.close();
         return true;
     }
-    confirmation_dialog_group_delete.hide();
+    confirmation_dialog_group_delete.set_visible(false);
     confirmation_dialog_group_delete.close();
 
     false

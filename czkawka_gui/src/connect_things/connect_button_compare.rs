@@ -82,7 +82,7 @@ pub(crate) fn connect_button_compare(gui_data: &GuiData) {
             &check_button_settings_use_rust_preview,
         );
 
-        window_compare.show();
+        window_compare.set_visible(true);
     });
 
     let shared_image_cache = gui_data.compare_images.shared_image_cache.clone();
@@ -94,7 +94,7 @@ pub(crate) fn connect_button_compare(gui_data: &GuiData) {
     let image_compare_left = gui_data.compare_images.image_compare_left.clone();
     let image_compare_right = gui_data.compare_images.image_compare_right.clone();
     window_compare.connect_close_request(move |window_compare| {
-        window_compare.hide();
+        window_compare.set_visible(false);
         *shared_image_cache.borrow_mut() = Vec::new();
         *shared_current_path.borrow_mut() = None;
         *shared_current_of_groups.borrow_mut() = 0;
@@ -588,7 +588,7 @@ fn populate_similar_scrolled_view(
         all_gtk_box.append(&small_box);
     }
 
-    all_gtk_box.show();
+    all_gtk_box.set_visible(true);
     scrolled_window.set_child(Some(&all_gtk_box));
 }
 

@@ -214,7 +214,7 @@ fn create_dialog_non_group(window_main: &gtk4::Window) -> Dialog {
     parent.insert_child_after(&label2, Some(&label));
     parent.insert_child_after(&label3, Some(&label2));
 
-    dialog.show();
+    dialog.set_visible(true);
     dialog
 }
 
@@ -250,11 +250,11 @@ pub async fn check_if_changing_one_item_in_group_and_continue(sv: &SubView, wind
 
         let response_type = confirmation_dialog.run_future().await;
         if response_type != ResponseType::Ok {
-            confirmation_dialog.hide();
+            confirmation_dialog.set_visible(false);
             confirmation_dialog.close();
             return false;
         }
-        confirmation_dialog.hide();
+        confirmation_dialog.set_visible(false);
         confirmation_dialog.close();
     }
 
@@ -294,10 +294,10 @@ pub async fn check_if_can_link_files(check_button_settings_confirm_link: &CheckB
             if !check_button.is_active() {
                 check_button_settings_confirm_link.set_active(false);
             }
-            confirmation_dialog_link.hide();
+            confirmation_dialog_link.set_visible(false);
             confirmation_dialog_link.close();
         } else {
-            confirmation_dialog_link.hide();
+            confirmation_dialog_link.set_visible(false);
             confirmation_dialog_link.close();
             return false;
         }
@@ -320,6 +320,6 @@ fn create_dialog_ask_for_linking(window_main: &gtk4::Window) -> (Dialog, CheckBu
     parent.insert_child_after(&label, None::<&gtk4::Widget>);
     parent.insert_child_after(&check_button, Some(&label));
 
-    dialog.show();
+    dialog.set_visible(true);
     (dialog, check_button)
 }

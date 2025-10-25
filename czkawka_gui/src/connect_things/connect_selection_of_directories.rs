@@ -37,7 +37,7 @@ pub(crate) fn connect_selection_of_directories(gui_data: &GuiData) {
         let buttons_add_included_directory = gui_data.upper_notebook.buttons_add_included_directory.clone();
         let file_dialog_include_exclude_folder_selection = gui_data.file_dialog_include_exclude_folder_selection.clone();
         buttons_add_included_directory.connect_clicked(move |_| {
-            file_dialog_include_exclude_folder_selection.show();
+            file_dialog_include_exclude_folder_selection.set_visible(true);
             file_dialog_include_exclude_folder_selection.set_title(&flg!("include_folders_dialog_title"));
         });
     }
@@ -46,7 +46,7 @@ pub(crate) fn connect_selection_of_directories(gui_data: &GuiData) {
         let buttons_add_excluded_directory = gui_data.upper_notebook.buttons_add_excluded_directory.clone();
         let file_dialog_include_exclude_folder_selection = gui_data.file_dialog_include_exclude_folder_selection.clone();
         buttons_add_excluded_directory.connect_clicked(move |_| {
-            file_dialog_include_exclude_folder_selection.show();
+            file_dialog_include_exclude_folder_selection.set_visible(true);
             file_dialog_include_exclude_folder_selection.set_title(&flg!("exclude_folders_dialog_title"));
         });
     }
@@ -186,7 +186,7 @@ fn add_manually_directories(window_main: &Window, tree_view: &TreeView, excluded
     parent.set_orientation(Orientation::Vertical);
     parent.insert_child_after(&entry, None::<&gtk4::Widget>);
 
-    dialog.show();
+    dialog.set_visible(true);
 
     let tree_view = tree_view.clone();
     dialog.connect_response(move |dialog, response_type| {

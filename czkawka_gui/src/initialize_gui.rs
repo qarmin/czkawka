@@ -20,9 +20,9 @@ pub(crate) fn initialize_gui(gui_data: &GuiData) {
     {
         let buttons = &gui_data.bottom_buttons.buttons_array;
         for button in buttons {
-            button.hide();
+            button.set_visible(false);
         }
-        gui_data.bottom_buttons.buttons_search.show();
+        gui_data.bottom_buttons.buttons_search.set_visible(true);
     }
     //// Initialize language combo box
     gui_data
@@ -85,7 +85,7 @@ pub(crate) fn initialize_gui(gui_data: &GuiData) {
 
             tree_view.set_widget_name(get_tree_view_name_from_notebook_upper_enum(NotebookUpperEnum::IncludedDirectories));
             scrolled_window.set_child(Some(&tree_view));
-            scrolled_window.show();
+            scrolled_window.set_visible(true);
 
             gc.connect_pressed(opening_double_click_function_directories);
             evk.connect_key_pressed(opening_enter_function_ported_upper_directories);
@@ -119,7 +119,7 @@ pub(crate) fn initialize_gui(gui_data: &GuiData) {
 
             tree_view.set_widget_name(get_tree_view_name_from_notebook_upper_enum(NotebookUpperEnum::ExcludedDirectories));
             scrolled_window.set_child(Some(&tree_view));
-            scrolled_window.show();
+            scrolled_window.set_visible(true);
 
             gc.connect_pressed(opening_double_click_function_directories);
             evk.connect_key_pressed(opening_enter_function_ported_upper_directories);

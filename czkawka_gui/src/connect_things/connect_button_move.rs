@@ -51,7 +51,7 @@ pub(crate) fn connect_button_move(gui_data: &GuiData) {
     });
 
     buttons_move.connect_clicked(move |_| {
-        file_dialog_move_to_folder.show();
+        file_dialog_move_to_folder.set_visible(true);
     });
 }
 

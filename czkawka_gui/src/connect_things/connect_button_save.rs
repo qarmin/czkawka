@@ -44,7 +44,7 @@ fn post_save_things(
     entry_info.set_text(&flg!("save_results_to_file", name = current_path));
     // Set state
     {
-        buttons_save.hide();
+        buttons_save.set_visible(false);
         *shared_buttons
             .borrow_mut()
             .get_mut(&type_of_tab)

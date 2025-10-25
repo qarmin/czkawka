@@ -693,9 +693,9 @@ pub fn load_configuration(
 
     // Show/hide bottom text panel
     if !loaded_settings.show_bottom_text_panel {
-        scrolled_window_errors.hide();
+        scrolled_window_errors.set_visible(false);
     } else {
-        scrolled_window_errors.show();
+        scrolled_window_errors.set_visible(true);
     }
 
     reset_text_view(text_view_errors);
