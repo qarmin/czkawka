@@ -544,7 +544,7 @@ delete_folder_failed = Failed to delete folder {$dir} because folder doesn't exi
 delete_items_label = { $items } files will be deleted.
 delete_items_groups_label = { $items } files from { $groups } groups will be deleted.
 
-hardlink_failed = Failed to hardlink
+hardlink_failed = Failed to hardlink { $name } to { $target }, reason { $reason }
 hard_sym_invalid_selection_title_dialog = Invalid selection with some groups
 hard_sym_invalid_selection_label_1 = In some groups there is only one record selected and it will be ignored.
 hard_sym_invalid_selection_label_2 = To be able to hard/sym link these files, at least two results in the group need to be selected.

@@ -310,7 +310,7 @@ mod test {
     use tempfile::tempdir;
 
     use crate::common::items::new_excluded_item;
-    use crate::common::{make_hard_link, make_file_soft_link, normalize_windows_path, regex_check, remove_folder_if_contains_only_empty_folders};
+    use crate::common::{make_file_soft_link, make_hard_link, normalize_windows_path, regex_check, remove_folder_if_contains_only_empty_folders};
 
     #[cfg(target_family = "unix")]
     fn assert_inode(before: &Metadata, after: &Metadata) {
@@ -367,7 +367,7 @@ mod test {
         let content = "hello softlink";
         {
             let mut f = File::create(&src)?;
-            writeln!(f, "{}", content)?;
+            writeln!(f, "{content}")?;
         }
         File::create(&dst)?;
 
@@ -405,7 +405,7 @@ mod test {
             Ok(()) => {
                 let symlink_meta = fs::symlink_metadata(&dst)?;
                 assert!(symlink_meta.file_type().is_symlink());
-                assert!(fs::read_to_string(&dst).is_err());
+                fs::read_to_string(&dst).unwrap_err();
             }
         }
         Ok(())

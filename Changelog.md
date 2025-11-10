@@ -6,11 +6,12 @@
 ### Core
 - Extensions in similar images mode and in previews, drops validating if extension is correct(most of the time) - [#]() 
 - Build and runtime Musl and Glibc versions are printed to logs - [#]()
-- 
+- Delayed removing destination file while symlinking, to avoid data loss in case of failure - [#]()
 
 ### GTK GUI
 - Sort button is restored and crashes when sorting are fixed(probably) - [#]()
 - Config now uses json format instead custom one, which fixes some problems - [#]()
+- Multithreaded hard/symlinking of files - [#]()
 
 ### Prebuilt binaries
 - Krokiet Windows binaries with skia backend are available (this is msvc build and requires vc redist installed)

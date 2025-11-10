@@ -1,14 +1,14 @@
 use std::path::PathBuf;
 
-use czkawka_core::common::{make_file_soft_link, make_hard_link};
-use gtk4::prelude::*;
-use gtk4::{Align, CheckButton, Dialog, Orientation, ResponseType, TextView, TreeIter, TreePath};
-
 use crate::flg;
 use crate::gui_structs::common_tree_view::SubView;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::{add_text_to_text_view, clean_invalid_headers, get_full_name_from_path_name, reset_text_view};
 use crate::model_iter::{iter_list, iter_list_break_with_init};
+use czkawka_core::common::{make_file_soft_link, make_hard_link};
+use gtk4::prelude::*;
+use gtk4::{Align, CheckButton, Dialog, Orientation, ResponseType, TextView, TreeIter, TreePath};
+use rayon::prelude::*;
 
 #[derive(PartialEq, Eq, Copy, Clone)]
 enum TypeOfTool {
@@ -154,32 +154,40 @@ fn hardlink_symlink(sv: &SubView, hardlinking: TypeOfTool, text_view_errors: &Te
             break;
         }
     }
-    if hardlinking == TypeOfTool::Hardlinking {
-        for symhardlink_data in vec_symhardlink_data {
-            for file_to_hardlink in symhardlink_data.files_to_symhardlink {
-                if let Err(e) = make_hard_link(&PathBuf::from(&symhardlink_data.original_data), &PathBuf::from(&file_to_hardlink)) {
-                    add_text_to_text_view(text_view_errors, format!("{} {}, reason {}", flg!("hardlink_failed"), file_to_hardlink, e).as_str());
-                }
-            }
-        }
-    } else {
-        for symhardlink_data in vec_symhardlink_data {
-            for file_to_symlink in symhardlink_data.files_to_symhardlink {
-                if let Err(e) = make_file_soft_link(&symhardlink_data.original_data, &file_to_symlink) {
-                    add_text_to_text_view(
-                        text_view_errors,
-                        flg!(
+
+    let errors = vec_symhardlink_data
+        .into_par_iter()
+        .flat_map(|symhardlink_data| {
+            let mut err = vec![];
+            for file_to_be_replaced in symhardlink_data.files_to_symhardlink {
+                if hardlinking == TypeOfTool::Symlinking {
+                    if let Err(e) = make_file_soft_link(&symhardlink_data.original_data, &file_to_be_replaced) {
+                        err.push(flg!(
                             "symlink_failed",
                             name = symhardlink_data.original_data.clone(),
-                            target = file_to_symlink,
+                            target = file_to_be_replaced,
                             reason = e.to_string()
-                        )
-                        .as_str(),
-                    );
+                        ));
+                    }
+                } else {
+                    if let Err(e) = make_hard_link(&symhardlink_data.original_data, &file_to_be_replaced) {
+                        err.push(flg!(
+                            "hardlink_failed",
+                            name = symhardlink_data.original_data.clone(),
+                            target = file_to_be_replaced,
+                            reason = e.to_string()
+                        ));
+                    }
                 }
             }
-        }
+            err
+        })
+        .collect::<Vec<_>>();
+
+    for error in errors {
+        add_text_to_text_view(text_view_errors, &error);
     }
+
     for tree_path in vec_tree_path_to_remove.iter().rev() {
         model.remove(&model.iter(tree_path).expect("Using invalid tree_path"));
     }
