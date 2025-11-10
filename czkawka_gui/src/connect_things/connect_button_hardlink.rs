@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use czkawka_core::common::{make_hard_link, make_soft_link};
+use czkawka_core::common::{make_file_soft_link, make_hard_link};
 use gtk4::prelude::*;
 use gtk4::{Align, CheckButton, Dialog, Orientation, ResponseType, TextView, TreeIter, TreePath};
 
@@ -165,7 +165,7 @@ fn hardlink_symlink(sv: &SubView, hardlinking: TypeOfTool, text_view_errors: &Te
     } else {
         for symhardlink_data in vec_symhardlink_data {
             for file_to_symlink in symhardlink_data.files_to_symhardlink {
-                if let Err(e) = make_soft_link(&symhardlink_data.original_data, &file_to_symlink) {
+                if let Err(e) = make_file_soft_link(&symhardlink_data.original_data, &file_to_symlink) {
                     add_text_to_text_view(
                         text_view_errors,
                         flg!(
