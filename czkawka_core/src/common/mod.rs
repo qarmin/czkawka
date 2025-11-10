@@ -310,7 +310,7 @@ mod test {
     use tempfile::tempdir;
 
     use crate::common::items::new_excluded_item;
-    use crate::common::{make_hard_link, normalize_windows_path, regex_check, remove_folder_if_contains_only_empty_folders};
+    use crate::common::{make_hard_link, make_file_soft_link, normalize_windows_path, regex_check, remove_folder_if_contains_only_empty_folders};
 
     #[cfg(target_family = "unix")]
     fn assert_inode(before: &Metadata, after: &Metadata) {
@@ -356,6 +356,58 @@ mod test {
         assert_eq!(metadata.modified()?, fs::metadata(&dst)?.modified()?);
 
         assert_eq!(vec![dst], read_dir(&dir)?.flatten().map(|e| e.path()).collect::<Vec<PathBuf>>());
+        Ok(())
+    }
+
+    #[cfg(any(target_family = "unix", target_family = "windows"))]
+    #[test]
+    fn test_make_file_soft_link() -> io::Result<()> {
+        let dir = tempfile::Builder::new().tempdir()?;
+        let (src, dst) = (dir.path().join("a"), dir.path().join("b"));
+        let content = "hello softlink";
+        {
+            let mut f = File::create(&src)?;
+            writeln!(f, "{}", content)?;
+        }
+        File::create(&dst)?;
+
+        make_file_soft_link(&src, &dst)?;
+
+        let symlink_meta = fs::symlink_metadata(&dst)?;
+        assert!(symlink_meta.file_type().is_symlink());
+
+        let src_content = fs::read_to_string(&src)?;
+        let dst_content = fs::read_to_string(&dst)?;
+        assert_eq!(src_content, dst_content);
+
+        let mut actual = read_dir(&dir)?.flatten().map(|e| e.path()).collect::<Vec<PathBuf>>();
+        actual.sort_unstable();
+        assert_eq!(vec![src, dst], actual);
+        Ok(())
+    }
+
+    #[cfg(any(target_family = "unix", target_family = "windows"))]
+    #[test]
+    fn test_make_file_soft_link_fails() -> io::Result<()> {
+        let dir = tempfile::Builder::new().tempdir()?;
+        let (src, dst) = (dir.path().join("a"), dir.path().join("b"));
+        {
+            let mut f = File::create(&dst)?;
+            writeln!(f, "original")?;
+        }
+        let metadata = fs::metadata(&dst)?;
+
+        match make_file_soft_link(&src, &dst) {
+            Err(_) => {
+                assert_eq!(fs::read_to_string(&dst)?, "original\n");
+                assert_eq!(metadata.permissions(), fs::metadata(&dst)?.permissions());
+            }
+            Ok(()) => {
+                let symlink_meta = fs::symlink_metadata(&dst)?;
+                assert!(symlink_meta.file_type().is_symlink());
+                assert!(fs::read_to_string(&dst).is_err());
+            }
+        }
         Ok(())
     }
 
