@@ -242,12 +242,16 @@ pub fn make_hard_link<P: AsRef<Path>, Q: AsRef<Path>>(src: P, dst: Q) -> io::Res
         }
     }
     fs::rename(dst, temp.as_path())?;
-    let result = fs::hard_link(src, dst);
-    if result.is_err() {
-        fs::rename(temp.as_path(), dst)?;
+    match fs::hard_link(src, dst) {
+        Ok(()) => {
+            fs::remove_file(&temp)?;
+            Ok(())
+        }
+        Err(e) => {
+            let _ = fs::rename(&temp, dst);
+            Err(e)
+        }
     }
-    fs::remove_file(temp)?;
-    result
 }
 
 #[cfg(any(target_family = "unix", target_family = "windows"))]
@@ -277,11 +281,16 @@ pub fn make_file_soft_link<P: AsRef<Path>, Q: AsRef<Path>>(src: P, dst: Q) -> io
     {
         result = std::os::windows::fs::symlink_file(src, dst);
     }
-    if result.is_err() {
-        fs::rename(temp.as_path(), dst)?;
+    match result {
+        Ok(()) => {
+            fs::remove_file(&temp)?;
+            Ok(())
+        }
+        Err(e) => {
+            let _ = fs::rename(&temp, dst);
+            Err(e)
+        }
     }
-    fs::remove_file(temp)?;
-    result
 }
 
 #[cfg(not(any(target_family = "unix", target_family = "windows")))]
