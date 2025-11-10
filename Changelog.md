@@ -6,6 +6,7 @@
 ### Core
 - Extensions in similar images mode and in previews, drops validating if extension is correct(most of the time) - [#]() 
 - Build and runtime Musl and Glibc versions are printed to logs - [#]()
+- 
 
 ### GTK GUI
 - Sort button is restored and crashes when sorting are fixed(probably) - [#]()
@@ -14,6 +15,7 @@
 ### Prebuilt binaries
 - Krokiet Windows binaries with skia backend are available (this is msvc build and requires vc redist installed)
 - Intel Mac binaries, are now built with the latest available MacOS(15 at the moment)
+- Windows prebuild binaries, bundles now libEGL and libGLES, which fixes gtk 4.12 binaries, so gtk 4.6 binaries are no longer provided
 
 ## Version 10.0.0 - 18.08.2025r
 ### Breaking changes

@@ -24,6 +24,7 @@ pub struct UpperSubView {
     pub tree_view: TreeView,
     pub gesture_click: GestureClick,
     pub event_controller_key: EventControllerKey,
+    #[expect(dead_code)]
     pub enum_value: NotebookUpperEnum,
     pub upper_tree_view_enum: UpperTreeViewEnum,
     pub tree_view_name: &'static str,

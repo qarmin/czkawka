@@ -1,7 +1,6 @@
-use std::fs;
 use std::path::PathBuf;
 
-use czkawka_core::common::make_hard_link;
+use czkawka_core::common::{make_hard_link, make_soft_link};
 use gtk4::prelude::*;
 use gtk4::{Align, CheckButton, Dialog, Orientation, ResponseType, TextView, TreeIter, TreePath};
 
@@ -166,22 +165,17 @@ fn hardlink_symlink(sv: &SubView, hardlinking: TypeOfTool, text_view_errors: &Te
     } else {
         for symhardlink_data in vec_symhardlink_data {
             for file_to_symlink in symhardlink_data.files_to_symhardlink {
-                if let Err(e) = fs::remove_file(&file_to_symlink) {
-                    add_text_to_text_view(text_view_errors, flg!("delete_file_failed", name = file_to_symlink, reason = e.to_string()).as_str());
-                    continue;
-                }
-
-                #[cfg(target_family = "unix")]
-                {
-                    if let Err(e) = std::os::unix::fs::symlink(&symhardlink_data.original_data, &file_to_symlink) {
-                        add_text_to_text_view(text_view_errors, flg!("delete_file_failed", name = file_to_symlink, reason = e.to_string()).as_str());
-                    }
-                }
-                #[cfg(target_family = "windows")]
-                {
-                    if let Err(e) = std::os::windows::fs::symlink_file(&symhardlink_data.original_data, &file_to_symlink) {
-                        add_text_to_text_view(text_view_errors, flg!("delete_file_failed", name = file_to_symlink, reason = e.to_string()).as_str());
-                    };
+                if let Err(e) = make_soft_link(&symhardlink_data.original_data, &file_to_symlink) {
+                    add_text_to_text_view(
+                        text_view_errors,
+                        flg!(
+                            "symlink_failed",
+                            name = symhardlink_data.original_data.clone(),
+                            target = file_to_symlink,
+                            reason = e.to_string()
+                        )
+                        .as_str(),
+                    );
                 }
             }
         }

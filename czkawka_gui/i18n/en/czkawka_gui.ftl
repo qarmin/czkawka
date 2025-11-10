@@ -532,6 +532,7 @@ about_window_motto = This program is free to use and will always be.
 dialogs_ask_next_time = Ask next time
 
 delete_file_failed = Failed to delete file {$name}, reason {$reason}
+symlink_failed = Failed to symlink {$name} to {$target}, reason {$reason}
 
 delete_title_dialog = Delete confirmation
 delete_question_label = Are you sure that you want to delete files?

@@ -19,11 +19,11 @@ use std::io::Error;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use std::{fs, io, thread};
-
+use crossbeam_channel::at;
 use items::SingleExcludedItem;
 use log::debug;
 
-use crate::common::consts::{DEFAULT_WORKER_THREAD_SIZE, TEMP_HARDLINK_FILE};
+use crate::common::consts::{DEFAULT_WORKER_THREAD_SIZE};
 
 static NUMBER_OF_THREADS: std::sync::LazyLock<Mutex<Option<usize>>> = std::sync::LazyLock::new(|| Mutex::new(None));
 static ALL_AVAILABLE_THREADS: std::sync::LazyLock<Mutex<Option<usize>>> = std::sync::LazyLock::new(|| Mutex::new(None));
@@ -225,7 +225,17 @@ pub fn normalize_windows_path(path_to_change: impl AsRef<Path>) -> PathBuf {
 
 pub fn make_hard_link(src: &Path, dst: &Path) -> io::Result<()> {
     let dst_dir = dst.parent().ok_or_else(|| Error::other("No parent"))?;
-    let temp = dst_dir.join(TEMP_HARDLINK_FILE);
+    let temp;
+    let attempts = 5;
+    loop {
+        temp = dst_dir.join(format!("{}.czkawka_tmp", rand::random::<u128>()));
+        if !temp.exists() {
+            break;
+        }
+        if attempts == 0 {
+            return Err(Error::other("Cannot create temporary file for hardlink creation"));
+        }
+    }
     fs::rename(dst, temp.as_path())?;
     let result = fs::hard_link(src, dst);
     if result.is_err() {
@@ -233,6 +243,115 @@ pub fn make_hard_link(src: &Path, dst: &Path) -> io::Result<()> {
     }
     fs::remove_file(temp)?;
     result
+}
+
+pub fn make_file_soft_link<P: AsRef<Path>, Q: AsRef<Path>>(src: P, dst: Q) -> io::Result<()> {
+
+    // Convert to owned PathBufs so we can inspect and reuse paths
+    let src_pb = src.as_ref().to_path_buf();
+    let mut dst_pb = dst.as_ref().to_path_buf();
+
+    // If destination exists, move it to a temporary unique name in the same dir
+    let mut backup_path: Option<PathBuf> = None;
+    if dst_pb.exists() {
+        let dst_dir = dst_pb.parent().ok_or_else(|| io::Error::new(io::ErrorKind::Other, "Destination has no parent"))?;
+        // Generate a (very likely) unique suffix using pid + timestamp
+        let ts = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_nanos();
+        let pid = std::process::id();
+
+        // original filename
+        let file_name = dst_pb.file_name().map(|s| s.to_string_lossy().to_string()).unwrap_or_else(|| "czkawka_tmp".to_string());
+        let mut candidate = dst_dir.join(format!("{}.czkawka_tmp_{}_{}", file_name, pid, ts));
+        // If collision happens (extremely unlikely), try appending an increasing counter
+        let mut counter = 0u32;
+        while candidate.exists() {
+            counter = counter.wrapping_add(1);
+            candidate = dst_dir.join(format!("{}.czkawka_tmp_{}_{}_{}", file_name, pid, ts, counter));
+        }
+
+        // Attempt rename; if it fails, return the error (as requested)
+        fs::rename(&dst_pb, &candidate)?;
+        backup_path = Some(candidate);
+    }
+
+    // Try to create symlink. On success, remove backup (if any). On failure, restore backup and return error.
+    // Use platform-specific functions.
+    let symlink_result = {
+        #[cfg(target_family = "unix")]
+        {
+            std::os::unix::fs::symlink(&src_pb, &dst_pb)
+        }
+        #[cfg(target_family = "windows")]
+        {
+            if src_pb.is_dir() {
+                std::os::windows::fs::symlink_dir(&src_pb, &dst_pb)
+            } else {
+                std::os::windows::fs::symlink_file(&src_pb, &dst_pb)
+            }
+        }
+        #[allow(unreachable_code)]
+        {
+            Err(io::Error::new(io::ErrorKind::Other, "make_soft_link is not supported on this platform"))
+        }
+    };
+
+    match symlink_result {
+        Ok(()) => {
+            // Symlink created. If we had a backup, remove it (it was the original dst moved aside).
+            if let Some(backup) = backup_path {
+                // Backup could be a file or directory; remove accordingly
+                if let Ok(meta) = fs::metadata(&backup) {
+                    if meta.is_dir() {
+                        // Remove directory tree
+                        if let Err(e) = fs::remove_dir_all(&backup) {
+                            // If unable to remove backup, try to ignore (best-effort). Return Ok since symlink succeeded.
+                            log::warn!("Failed to remove backup path '{}': {}", backup.to_string_lossy(), e);
+                        }
+                    } else {
+                        if let Err(e) = fs::remove_file(&backup) {
+                            log::warn!("Failed to remove backup file '{}': {}", backup.to_string_lossy(), e);
+                        }
+                    }
+                } else {
+                    // If metadata check fails, try best-effort remove file
+                    let _ = fs::remove_file(&backup);
+                }
+            }
+            Ok(())
+        }
+        Err(e) => {
+            // Symlink creation failed. If we moved the original dst to backup, try to restore it.
+            if let Some(backup) = backup_path {
+                // If dst currently exists (partial or previous), remove it before restoring
+                if dst_pb.exists() {
+                    // Attempt to remove whatever is at dst before restore
+                    if let Ok(meta) = fs::metadata(&dst_pb) {
+                        if meta.is_dir() {
+                            let _ = fs::remove_dir_all(&dst_pb);
+                        } else {
+                            let _ = fs::remove_file(&dst_pb);
+                        }
+                    } else {
+                        let _ = fs::remove_file(&dst_pb);
+                    }
+                }
+
+                // Try to rename backup back to original location. If this fails, return the original symlink error but try to include context.
+                if let Err(rename_err) = fs::rename(&backup, &dst_pb) {
+                    // Combine errors into a single io::Error with context
+                    let combined = io::Error::new(
+                        io::ErrorKind::Other,
+                        format!("Failed to create symlink: {}. Additionally, failed to restore original destination from backup: {}", e, rename_err),
+                    );
+                    return Err(combined);
+                }
+            }
+            Err(e)
+        }
+    }
 }
 
 #[cfg(test)]
