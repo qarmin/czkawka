@@ -30,7 +30,7 @@ pub const CLAP_STYLING: Styles = Styles::styled()
     help_template = HELP_TEMPLATE,
     version = CZKAWKA_VERSION,
 )]
-#[cfg_attr(not(feature = "no_colors")), clap(styles = CLAP_STYLING)]
+#[cfg_attr(not(feature = "no_colors"), clap(styles = CLAP_STYLING))]
 pub struct Args {
     #[command(subcommand)]
     pub command: Commands,
