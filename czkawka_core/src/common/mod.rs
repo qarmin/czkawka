@@ -223,15 +223,20 @@ pub fn normalize_windows_path(path_to_change: impl AsRef<Path>) -> PathBuf {
     }
 }
 
-pub fn make_hard_link(src: &Path, dst: &Path) -> io::Result<()> {
+// Function to create hardlink, when destination exists
+// This is always true in this app, because creating hardling, to newly created file is pointless
+pub fn make_hard_link<P: AsRef<Path>, Q: AsRef<Path>>(src: P, dst: Q) -> io::Result<()> {
+    let src = src.as_ref();
+    let dst = dst.as_ref();
     let dst_dir = dst.parent().ok_or_else(|| Error::other("No parent"))?;
     let mut temp;
-    let attempts = 5;
+    let mut attempts = 5;
     loop {
         temp = dst_dir.join(format!("{}.czkawka_tmp", rand::random::<u128>()));
         if !temp.exists() {
             break;
         }
+        attempts -= 1;
         if attempts == 0 {
             return Err(Error::other("Cannot choose temporary file for hardlink creation"));
         }
@@ -247,29 +252,33 @@ pub fn make_hard_link(src: &Path, dst: &Path) -> io::Result<()> {
 
 #[cfg(any(target_family = "unix", target_family = "windows"))]
 pub fn make_file_soft_link<P: AsRef<Path>, Q: AsRef<Path>>(src: P, dst: Q) -> io::Result<()> {
-    let dst_dir = dst.as_ref().parent().ok_or_else(|| Error::other("No parent"))?;
+    let src = src.as_ref();
+    let dst = dst.as_ref();
+    let dst_dir = dst.parent().ok_or_else(|| Error::other("No parent"))?;
     let mut temp;
-    let attempts = 5;
+    let mut attempts = 5;
     loop {
         temp = dst_dir.join(format!("{}.czkawka_tmp", rand::random::<u128>()));
         if !temp.exists() {
             break;
         }
+        attempts -= 1;
         if attempts == 0 {
             return Err(Error::other("Cannot choose temporary file for hardlink creation"));
         }
     }
-    fs::rename(&dst, temp.as_path())?;
-    let result = fs::hard_link(&src, &dst);
+    fs::rename(dst, temp.as_path())?;
+    let result: Result<_, _>;
+    #[cfg(target_family = "unix")]
+    {
+        result = std::os::unix::fs::symlink(src, dst);
+    }
+    #[cfg(target_family = "windows")]
+    {
+        result = std::os::windows::fs::symlink_file(src, dst);
+    }
     if result.is_err() {
-        #[cfg(target_family = "unix")]
-        {
-            std::os::unix::fs::symlink(src, &dst)?;
-        }
-        #[cfg(target_family = "windows")]
-        {
-            std::os::windows::fs::symlink_file(src, &dst)?;
-        }
+        fs::rename(temp.as_path(), dst)?;
     }
     fs::remove_file(temp)?;
     result
