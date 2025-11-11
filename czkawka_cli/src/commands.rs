@@ -1,5 +1,9 @@
 use std::path::PathBuf;
 
+#[cfg(not(feature = "no_colors"))]
+use clap::builder::Styles;
+#[cfg(not(feature = "no_colors"))]
+use clap::builder::styling::AnsiColor;
 use czkawka_core::CZKAWKA_VERSION;
 use czkawka_core::common::model::{CheckingMethod, HashType};
 use czkawka_core::common::tool_data::DeleteMethod;
@@ -10,12 +14,23 @@ use czkawka_core::tools::similar_videos::{ALLOWED_SKIP_FORWARD_AMOUNT, ALLOWED_V
 use image_hasher::{FilterType, HashAlg};
 use vid_dup_finder_lib::Cropdetect;
 
+#[cfg(not(feature = "no_colors"))]
+pub const CLAP_STYLING: Styles = Styles::styled()
+    .header(AnsiColor::Green.on_default().bold())
+    .usage(AnsiColor::Green.on_default().bold())
+    .literal(AnsiColor::Cyan.on_default().bold())
+    .placeholder(AnsiColor::Cyan.on_default().bold())
+    .error(AnsiColor::Red.on_default().bold())
+    .valid(AnsiColor::Green.on_default().bold())
+    .invalid(AnsiColor::Yellow.on_default().bold());
+
 #[derive(clap::Parser)]
 #[clap(
     name = "czkawka",
     help_template = HELP_TEMPLATE,
-    version = CZKAWKA_VERSION
+    version = CZKAWKA_VERSION,
 )]
+#[cfg_attr(not(feature = "no_colors"), clap(styles = CLAP_STYLING))]
 pub struct Args {
     #[command(subcommand)]
     pub command: Commands,
@@ -824,15 +839,15 @@ const HELP_TEMPLATE: &str = r#"
 {bin} {version}
 
 USAGE:
-    {usage} [SCFLAGS] [SCOPTIONS]
+    {usage} [FLAGS] [OPTIONS]
 
 OPTIONS:
 {options}
 
-SUBCOMMANDS:
+COMMANDS:
 {subcommands}
 
-    try "{usage} <COMMAND> -h" to get more info about a specific tool
+    try "{usage} -h" to get more info about a specific tool
 
 EXAMPLES:
     {bin} dup -d /home/rafal -e /home/rafal/Obrazy  -m 25 -x 7z rar IMAGE -s hash -f results.txt -D aeo

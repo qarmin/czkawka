@@ -351,16 +351,16 @@ pub(crate) fn add_text_to_text_view(text_view: &TextView, string_to_append: &str
 pub(crate) fn set_buttons(hashmap: &mut HashMap<BottomButtonsEnum, bool>, buttons_array: &[Widget], button_names: &[BottomButtonsEnum]) {
     for (index, button) in buttons_array.iter().enumerate() {
         if *hashmap.get_mut(&button_names[index]).expect("Invalid button name") {
-            button.show();
+            button.set_visible(true);
         } else {
-            button.hide();
+            button.set_visible(false);
         }
     }
 }
 
 pub(crate) fn hide_all_buttons(buttons_array: &[Widget]) {
     for button in buttons_array {
-        button.hide();
+        button.set_visible(false);
     }
 }
 
@@ -381,25 +381,6 @@ pub(crate) fn change_dimension_to_krotka(dimensions: &str) -> (u64, u64) {
     (number1, number2)
 }
 
-pub(crate) fn get_notebook_enum_from_tree_view(tree_view: &TreeView) -> NotebookMainEnum {
-    match (*tree_view).widget_name().to_string().as_str() {
-        "tree_view_duplicate_finder" => NotebookMainEnum::Duplicate,
-        "tree_view_empty_folder_finder" => NotebookMainEnum::EmptyDirectories,
-        "tree_view_empty_files_finder" => NotebookMainEnum::EmptyFiles,
-        "tree_view_temporary_files_finder" => NotebookMainEnum::Temporary,
-        "tree_view_big_files_finder" => NotebookMainEnum::BigFiles,
-        "tree_view_similar_images_finder" => NotebookMainEnum::SimilarImages,
-        "tree_view_similar_videos_finder" => NotebookMainEnum::SimilarVideos,
-        "tree_view_same_music_finder" => NotebookMainEnum::SameMusic,
-        "tree_view_invalid_symlinks" => NotebookMainEnum::Symlinks,
-        "tree_view_broken_files" => NotebookMainEnum::BrokenFiles,
-        "tree_view_bad_extensions" => NotebookMainEnum::BadExtensions,
-        e => {
-            panic!("{}", e)
-        }
-    }
-}
-
 pub(crate) fn get_notebook_upper_enum_from_tree_view(tree_view: &TreeView) -> NotebookUpperEnum {
     match (*tree_view).widget_name().to_string().as_str() {
         "tree_view_upper_included_directories" => NotebookUpperEnum::IncludedDirectories,
@@ -408,17 +389,13 @@ pub(crate) fn get_notebook_upper_enum_from_tree_view(tree_view: &TreeView) -> No
     }
 }
 
-pub(crate) fn get_tree_view_name_from_notebook_upper_enum(notebook_upper_enum: NotebookUpperEnum) -> &'static str {
-    match notebook_upper_enum {
-        NotebookUpperEnum::IncludedDirectories => "tree_view_upper_included_directories",
-        NotebookUpperEnum::ExcludedDirectories => "tree_view_upper_excluded_directories",
-        NotebookUpperEnum::ItemsConfiguration => panic!(),
-    }
-}
-
 pub(crate) fn get_notebook_object_from_tree_view(tree_view: &TreeView) -> &NotebookObject {
-    let nb_enum = get_notebook_enum_from_tree_view(tree_view);
-    &NOTEBOOKS_INFO[nb_enum as usize]
+    let tree_view_name = (*tree_view).widget_name().to_string();
+
+    NOTEBOOKS_INFO
+        .iter()
+        .find(|nb_object| nb_object.tree_view_name == tree_view_name)
+        .map_or_else(|| panic!("Tree view name '{tree_view_name}' not found in NOTEBOOKS_INFO"), |nb_object| nb_object)
 }
 
 pub(crate) fn get_full_name_from_path_name(path: &str, name: &str) -> String {
@@ -819,7 +796,7 @@ mod test {
     use image::DynamicImage;
 
     use super::*;
-    use crate::notebook_enums::{NotebookMainEnum, NotebookUpperEnum};
+    use crate::notebook_enums::NotebookMainEnum;
 
     // Helper to create a minimal SubView for Duplicate notebook along with its ListStore
     fn get_test_sv_duplicate() -> (crate::gui_structs::common_tree_view::SubView, gtk4::ListStore) {
@@ -849,7 +826,6 @@ mod test {
             event_controller_key,
             nb_object,
             enum_value: NotebookMainEnum::Duplicate,
-            tree_view_name: "tree_view_duplicate_finder".to_string(),
             preview_struct: None,
             shared_model_enum: SharedModelEnum::Duplicates(Rc::new(RefCell::new(None::<DuplicateFinder>))),
         };
@@ -1018,32 +994,6 @@ mod test {
         let name = "file.txt";
         let expected = format!("{}{}{}", path, std::path::MAIN_SEPARATOR, name);
         assert_eq!(get_full_name_from_path_name(path, name), expected);
-    }
-
-    #[gtk4::test]
-    fn test_get_notebook_enum_from_tree_view() {
-        let tv = gtk4::TreeView::new();
-        tv.set_widget_name("tree_view_duplicate_finder");
-        assert_eq!(get_notebook_enum_from_tree_view(&tv), NotebookMainEnum::Duplicate);
-    }
-
-    #[gtk4::test]
-    fn test_get_notebook_upper_enum_from_tree_view() {
-        let tv = gtk4::TreeView::new();
-        tv.set_widget_name("tree_view_upper_included_directories");
-        assert_eq!(get_notebook_upper_enum_from_tree_view(&tv), NotebookUpperEnum::IncludedDirectories);
-    }
-
-    #[test]
-    fn test_get_tree_view_name_from_notebook_upper_enum() {
-        assert_eq!(
-            get_tree_view_name_from_notebook_upper_enum(NotebookUpperEnum::IncludedDirectories),
-            "tree_view_upper_included_directories"
-        );
-        assert_eq!(
-            get_tree_view_name_from_notebook_upper_enum(NotebookUpperEnum::ExcludedDirectories),
-            "tree_view_upper_excluded_directories"
-        );
     }
 
     #[gtk4::test]

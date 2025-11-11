@@ -23,23 +23,23 @@ fn show_required_popovers(popovers_sort: &GuiSortPopovers, sv: &SubView) {
 
     let arr = sv.nb_object.available_modes;
 
-    buttons_popover_sort_full_name.hide();
+    buttons_popover_sort_full_name.set_visible(false);
 
     if arr.contains(&PopoverTypes::All) {
-        buttons_popover_sort_selection.show();
-        buttons_popover_sort_file_name.show();
-        buttons_popover_sort_folder_name.show();
-        // buttons_popover_sort_full_name.show(); // TODO, this needs to be handled a little different
+        buttons_popover_sort_selection.set_visible(true);
+        buttons_popover_sort_file_name.set_visible(true);
+        buttons_popover_sort_folder_name.set_visible(true);
+        // buttons_popover_sort_full_name.set_visible(true); // TODO, this needs to be handled a little different
     } else {
-        buttons_popover_sort_selection.hide();
-        buttons_popover_sort_file_name.hide();
-        buttons_popover_sort_folder_name.hide();
-        // buttons_popover_sort_full_name.hide();
+        buttons_popover_sort_selection.set_visible(false);
+        buttons_popover_sort_file_name.set_visible(false);
+        buttons_popover_sort_folder_name.set_visible(false);
+        // buttons_popover_sort_full_name.set_visible(false);
     }
 
     if arr.contains(&PopoverTypes::Size) {
-        buttons_popover_sort_size.show();
+        buttons_popover_sort_size.set_visible(true);
     } else {
-        buttons_popover_sort_size.hide();
+        buttons_popover_sort_size.set_visible(false);
     }
 }

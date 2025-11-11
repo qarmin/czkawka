@@ -10,7 +10,7 @@ homepage = "https://github.com/qarmin/czkawka"
 repository = "https://github.com/qarmin/czkawka"
 
 [dependencies]
-clap = { version = "4.5", features = ["derive"] }
+clap = { version = "4.5", features = ["derive", "color"] }
 
 # For enum types
 image_hasher = "3.0"
@@ -28,6 +28,8 @@ default = []
 heif = ["czkawka_core/heif"]
 libraw = ["czkawka_core/libraw"]
 libavif = ["czkawka_core/libavif"]
+
+no_colors = []
 
 [lints]
 workspace = true

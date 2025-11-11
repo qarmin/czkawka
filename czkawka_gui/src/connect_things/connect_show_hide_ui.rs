@@ -9,10 +9,10 @@ pub(crate) fn connect_show_hide_ui(gui_data: &GuiData) {
 
     buttons_show_errors.connect_clicked(move |_| {
         if scrolled_window_errors.is_visible() {
-            scrolled_window_errors.hide();
+            scrolled_window_errors.set_visible(false);
             check_button_settings_show_text_view.set_active(false);
         } else {
-            scrolled_window_errors.show();
+            scrolled_window_errors.set_visible(true);
             check_button_settings_show_text_view.set_active(true);
         }
     });
@@ -22,9 +22,9 @@ pub(crate) fn connect_show_hide_ui(gui_data: &GuiData) {
 
     buttons_show_upper_notebook.connect_clicked(move |_| {
         if notebook_upper.is_visible() {
-            notebook_upper.hide();
+            notebook_upper.set_visible(false);
         } else {
-            notebook_upper.show();
+            notebook_upper.set_visible(true);
         }
     });
 }

@@ -24,6 +24,7 @@ pub struct NotebookObject {
     pub column_modification_as_secs: Option<i32>,
     pub columns_types: &'static [Type],
     pub bottom_buttons: &'static [BottomButtonsEnum],
+    pub tree_view_name: &'static str,
 }
 
 pub static NOTEBOOKS_INFO: [NotebookObject; TOOLS_NUMBER] = [
@@ -68,6 +69,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; TOOLS_NUMBER] = [
             BottomButtonsEnum::Hardlink,
             BottomButtonsEnum::Move,
         ],
+        tree_view_name: "tree_view_duplicate_finder",
     },
     NotebookObject {
         notebook_type: NotebookMainEnum::EmptyDirectories,
@@ -89,6 +91,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; TOOLS_NUMBER] = [
             Type::U64,    // ModificationAsSecs
         ],
         bottom_buttons: &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
+        tree_view_name: "tree_view_empty_folder_finder",
     },
     NotebookObject {
         notebook_type: NotebookMainEnum::BigFiles,
@@ -112,6 +115,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; TOOLS_NUMBER] = [
             Type::U64,    // ModificationAsSecs
         ],
         bottom_buttons: &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
+        tree_view_name: "tree_view_big_files_finder",
     },
     NotebookObject {
         notebook_type: NotebookMainEnum::EmptyFiles,
@@ -133,6 +137,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; TOOLS_NUMBER] = [
             Type::U64,    // ModificationAsSecs
         ],
         bottom_buttons: &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
+        tree_view_name: "tree_view_empty_files_finder",
     },
     NotebookObject {
         notebook_type: NotebookMainEnum::Temporary,
@@ -154,6 +159,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; TOOLS_NUMBER] = [
             Type::U64,    // ModificationAsSecs
         ],
         bottom_buttons: &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
+        tree_view_name: "tree_view_temporary_files_finder",
     },
     NotebookObject {
         notebook_type: NotebookMainEnum::SimilarImages,
@@ -192,6 +198,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; TOOLS_NUMBER] = [
             BottomButtonsEnum::Move,
             BottomButtonsEnum::Compare,
         ],
+        tree_view_name: "tree_view_similar_images_finder",
     },
     NotebookObject {
         notebook_type: NotebookMainEnum::SimilarVideos,
@@ -227,6 +234,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; TOOLS_NUMBER] = [
             BottomButtonsEnum::Hardlink,
             BottomButtonsEnum::Move,
         ],
+        tree_view_name: "tree_view_similar_videos_finder",
     },
     NotebookObject {
         notebook_type: NotebookMainEnum::SameMusic,
@@ -269,6 +277,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; TOOLS_NUMBER] = [
             BottomButtonsEnum::Hardlink,
             BottomButtonsEnum::Move,
         ],
+        tree_view_name: "tree_view_same_music_finder",
     },
     NotebookObject {
         notebook_type: NotebookMainEnum::Symlinks,
@@ -292,6 +301,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; TOOLS_NUMBER] = [
             Type::U64,    // ModificationAsSecs
         ],
         bottom_buttons: &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
+        tree_view_name: "tree_view_invalid_symlinks",
     },
     NotebookObject {
         notebook_type: NotebookMainEnum::BrokenFiles,
@@ -314,6 +324,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; TOOLS_NUMBER] = [
             Type::U64,    // ModificationAsSecs
         ],
         bottom_buttons: &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
+        tree_view_name: "tree_view_broken_files",
     },
     NotebookObject {
         notebook_type: NotebookMainEnum::BadExtensions,
@@ -337,5 +348,6 @@ pub static NOTEBOOKS_INFO: [NotebookObject; TOOLS_NUMBER] = [
             Type::U64,    // ModificationAsSecs
         ],
         bottom_buttons: &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
+        tree_view_name: "tree_view_bad_extensions",
     },
 ];

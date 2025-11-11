@@ -56,7 +56,7 @@ impl CommonTreeViews {
     pub fn hide_preview(&self) {
         let current_subview = self.get_current_subview();
         if let Some(preview_struct) = &current_subview.preview_struct {
-            preview_struct.image_preview.hide();
+            preview_struct.image_preview.set_visible(false);
         }
         *self.preview_path.borrow_mut() = String::new();
     }
@@ -117,7 +117,6 @@ pub struct SubView {
     pub event_controller_key: EventControllerKey,
     pub nb_object: NotebookObject,
     pub enum_value: NotebookMainEnum,
-    pub tree_view_name: String,
     pub preview_struct: Option<PreviewStruct>,
     pub shared_model_enum: SharedModelEnum,
 }
@@ -143,7 +142,6 @@ impl SubView {
         scrolled_name: &str,
         enum_value: NotebookMainEnum,
         preview_str: Option<&str>,
-        tree_view_name: &str,
         settings_show_preview: Option<CheckButton>,
         shared_model_enum: SharedModelEnum,
     ) -> Self {
@@ -175,7 +173,6 @@ impl SubView {
             nb_object,
             enum_value,
             preview_struct,
-            tree_view_name: tree_view_name.to_string(),
             shared_model_enum,
         }
     }
@@ -192,9 +189,9 @@ impl SubView {
 
         self._setup_tree_view_config();
 
-        self.tree_view.set_widget_name(&self.tree_view_name);
+        self.tree_view.set_widget_name(self.nb_object.tree_view_name);
         self.scrolled_window.set_child(Some(&self.tree_view));
-        self.scrolled_window.show();
+        self.scrolled_window.set_visible(true);
     }
     fn _setup_gesture_click(&self) {
         self.gesture_click.set_button(0);
@@ -270,7 +267,7 @@ impl SubView {
 
     fn setup(&self, preview_path: &Rc<RefCell<String>>, gui_data: &GuiData) {
         if let Some(preview_struct) = &self.preview_struct {
-            preview_struct.image_preview.hide();
+            preview_struct.image_preview.set_visible(false);
         }
         self._setup_tree_view();
         self._setup_gesture_click();
@@ -600,9 +597,9 @@ pub(crate) fn show_preview(
         }
     }
     if created_image {
-        image_preview.show();
+        image_preview.set_visible(true);
     } else {
-        image_preview.hide();
+        image_preview.set_visible(false);
         {
             let mut preview_path = preview_path.borrow_mut();
             *preview_path = String::new();

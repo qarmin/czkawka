@@ -1,7 +1,5 @@
 # In Rust translations
 rust_loaded_preset = Loaded preset { $preset_idx }
-rust_error_moving_to_trash = Error while moving to trash: { $error }
-rust_error_removing_file = Error while removing file: { $error }
 rust_file_already_exists = File \"{ $file }\" already exists, and will not be overridden
 rust_error_removing_file_after_copy = Error while removing file \"{ $file }\" (after copying into different partition), reason: { $reason }
 rust_error_copying_file = Error while copying \"{ $input }\" to \"{ $output }\", reason: { $reason }

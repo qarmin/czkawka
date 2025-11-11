@@ -36,13 +36,13 @@ pub(crate) fn connect_settings(gui_data: &GuiData) {
         let button_settings = gui_data.header.button_settings.clone();
         let window_settings = gui_data.settings.window_settings.clone();
         button_settings.connect_clicked(move |_| {
-            window_settings.show();
+            window_settings.set_visible(true);
         });
 
         let window_settings = gui_data.settings.window_settings.clone();
 
         window_settings.connect_close_request(move |window| {
-            window.hide();
+            window.set_visible(false);
             glib::Propagation::Stop
         });
     }
@@ -117,7 +117,7 @@ pub(crate) fn connect_settings(gui_data: &GuiData) {
 
             button_settings_duplicates_clear_cache.connect_clicked(move |_| {
                 let dialog = create_clear_cache_dialog(&flg!("cache_clear_duplicates_title"), &settings_window);
-                dialog.show();
+                dialog.set_visible(true);
 
                 let text_view_errors = text_view_errors.clone();
                 let entry_settings_cache_file_minimal_size = entry_settings_cache_file_minimal_size.clone();
@@ -160,7 +160,7 @@ pub(crate) fn connect_settings(gui_data: &GuiData) {
 
             button_settings_similar_images_clear_cache.connect_clicked(move |_| {
                 let dialog = create_clear_cache_dialog(&flg!("cache_clear_similar_images_title"), &settings_window);
-                dialog.show();
+                dialog.set_visible(true);
 
                 let text_view_errors = text_view_errors.clone();
 
@@ -209,7 +209,7 @@ pub(crate) fn connect_settings(gui_data: &GuiData) {
 
             button_settings_similar_videos_clear_cache.connect_clicked(move |_| {
                 let dialog = create_clear_cache_dialog(&flg!("cache_clear_similar_videos_title"), &settings_window);
-                dialog.show();
+                dialog.set_visible(true);
 
                 let text_view_errors = text_view_errors.clone();
 

@@ -352,7 +352,7 @@ fn popover_custom_select_unselect(
             let box_widget = get_dialog_box_child(&dialog);
             box_widget.append(&grid);
 
-            dialog.show();
+            dialog.set_visible(true);
         }
 
         let sv = sv.clone();

@@ -1,4 +1,5 @@
 pub mod common_tree_view;
+pub mod common_upper_tree_view;
 mod gui_about;
 mod gui_bottom_buttons;
 mod gui_compare_images;

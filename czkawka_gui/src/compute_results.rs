@@ -111,14 +111,14 @@ pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Recei
     glib::spawn_future_local(async move {
         loop {
             while let Ok(msg) = result_receiver.try_recv() {
-                buttons_search.show();
+                buttons_search.set_visible(true);
 
                 notebook_main.set_sensitive(true);
                 notebook_upper.set_sensitive(true);
                 button_settings.set_sensitive(true);
                 button_app_info.set_sensitive(true);
 
-                window_progress.hide();
+                window_progress.set_visible(false);
 
                 taskbar_state.borrow().hide();
 

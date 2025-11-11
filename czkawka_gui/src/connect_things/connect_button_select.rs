@@ -36,52 +36,52 @@ fn show_required_popovers(popovers_select: &GuiSelectPopovers, sv: &SubView) {
     let arr = sv.nb_object.available_modes;
 
     if arr.contains(&PopoverTypes::All) {
-        buttons_popover_select_all.show();
-        buttons_popover_unselect_all.show();
+        buttons_popover_select_all.set_visible(true);
+        buttons_popover_unselect_all.set_visible(true);
     } else {
-        buttons_popover_select_all.hide();
-        buttons_popover_unselect_all.hide();
+        buttons_popover_select_all.set_visible(false);
+        buttons_popover_unselect_all.set_visible(false);
     }
 
     if arr.contains(&PopoverTypes::Size) {
-        buttons_popover_select_all_images_except_biggest.show();
-        buttons_popover_select_all_images_except_smallest.show();
-        separator_select_image_size.show();
+        buttons_popover_select_all_images_except_biggest.set_visible(true);
+        buttons_popover_select_all_images_except_smallest.set_visible(true);
+        separator_select_image_size.set_visible(true);
     } else {
-        buttons_popover_select_all_images_except_biggest.hide();
-        buttons_popover_select_all_images_except_smallest.hide();
-        separator_select_image_size.hide();
+        buttons_popover_select_all_images_except_biggest.set_visible(false);
+        buttons_popover_select_all_images_except_smallest.set_visible(false);
+        separator_select_image_size.set_visible(false);
     }
 
     if arr.contains(&PopoverTypes::Reverse) {
-        buttons_popover_reverse.show();
-        separator_select_reverse.show();
+        buttons_popover_reverse.set_visible(true);
+        separator_select_reverse.set_visible(true);
     } else {
-        buttons_popover_reverse.hide();
-        separator_select_reverse.hide();
+        buttons_popover_reverse.set_visible(false);
+        separator_select_reverse.set_visible(false);
     }
 
     if arr.contains(&PopoverTypes::Custom) {
-        buttons_popover_select_custom.show();
-        buttons_popover_unselect_custom.show();
-        separator_select_custom.show();
+        buttons_popover_select_custom.set_visible(true);
+        buttons_popover_unselect_custom.set_visible(true);
+        separator_select_custom.set_visible(true);
     } else {
-        buttons_popover_select_custom.hide();
-        buttons_popover_unselect_custom.hide();
-        separator_select_custom.hide();
+        buttons_popover_select_custom.set_visible(false);
+        buttons_popover_unselect_custom.set_visible(false);
+        separator_select_custom.set_visible(false);
     }
 
     if arr.contains(&PopoverTypes::Date) {
-        buttons_popover_select_all_except_oldest.show();
-        buttons_popover_select_all_except_newest.show();
-        buttons_popover_select_one_oldest.show();
-        buttons_popover_select_one_newest.show();
-        separator_select_date.show();
+        buttons_popover_select_all_except_oldest.set_visible(true);
+        buttons_popover_select_all_except_newest.set_visible(true);
+        buttons_popover_select_one_oldest.set_visible(true);
+        buttons_popover_select_one_newest.set_visible(true);
+        separator_select_date.set_visible(true);
     } else {
-        buttons_popover_select_all_except_oldest.hide();
-        buttons_popover_select_all_except_newest.hide();
-        buttons_popover_select_one_oldest.hide();
-        buttons_popover_select_one_newest.hide();
-        separator_select_date.hide();
+        buttons_popover_select_all_except_oldest.set_visible(false);
+        buttons_popover_select_all_except_newest.set_visible(false);
+        buttons_popover_select_one_oldest.set_visible(false);
+        buttons_popover_select_one_newest.set_visible(false);
+        separator_select_date.set_visible(false);
     }
 }

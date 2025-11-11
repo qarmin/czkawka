@@ -24,6 +24,7 @@ use fun_time::fun_time;
 use gtk4::Grid;
 use gtk4::prelude::*;
 
+use crate::gui_structs::common_upper_tree_view::UpperTreeViewEnum;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_combo_box::{
     AUDIO_TYPE_CHECK_METHOD_COMBO_BOX, BIG_FILES_CHECK_METHOD_COMBO_BOX, DUPLICATES_CHECK_METHOD_COMBO_BOX, DUPLICATES_HASH_TYPE_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX,
@@ -50,7 +51,11 @@ pub(crate) fn connect_button_search(gui_data: &GuiData, result_sender: Sender<Me
     let stop_flag = gui_data.stop_flag.clone();
     let taskbar_state = gui_data.taskbar_state.clone();
     let text_view_errors = gui_data.text_view_errors.clone();
-    let tree_view_included_directories = gui_data.upper_notebook.tree_view_included_directories.clone();
+    let tree_view_included_directories = gui_data
+        .upper_notebook
+        .common_upper_tree_views
+        .get_tree_view(UpperTreeViewEnum::IncludedDirectories)
+        .clone();
     let window_progress = gui_data.progress_window.window_progress.clone();
     let entry_info = gui_data.entry_info.clone();
     let button_settings = gui_data.header.button_settings.clone();
@@ -91,7 +96,7 @@ pub(crate) fn connect_button_search(gui_data: &GuiData, result_sender: Sender<Me
         // Clear stop flag
         stop_flag.store(false, Ordering::Relaxed);
 
-        label_stage.show();
+        label_stage.set_visible(true);
 
         let progress_sender = progress_sender.clone();
 
@@ -150,8 +155,16 @@ impl LoadedCommonItems {
         let entry_general_maximal_size = gui_data.upper_notebook.entry_general_maximal_size.clone();
         let entry_general_minimal_size = gui_data.upper_notebook.entry_general_minimal_size.clone();
         let entry_settings_cache_file_minimal_size = gui_data.settings.entry_settings_cache_file_minimal_size.clone();
-        let tree_view_excluded_directories = gui_data.upper_notebook.tree_view_excluded_directories.clone();
-        let tree_view_included_directories = gui_data.upper_notebook.tree_view_included_directories.clone();
+        let tree_view_excluded_directories = gui_data
+            .upper_notebook
+            .common_upper_tree_views
+            .get_tree_view(UpperTreeViewEnum::ExcludedDirectories)
+            .clone();
+        let tree_view_included_directories = gui_data
+            .upper_notebook
+            .common_upper_tree_views
+            .get_tree_view(UpperTreeViewEnum::IncludedDirectories)
+            .clone();
         let check_button_settings_save_also_json = gui_data.settings.check_button_settings_save_also_json.clone();
 
         let included_directories = get_path_buf_from_vector_of_strings(&get_string_from_list_store(&tree_view_included_directories, ColumnsIncludedDirectory::Path as i32, None));
@@ -213,7 +226,7 @@ fn duplicate_search(
     grid_progress: &Grid,
     progress_data_sender: Sender<ProgressData>,
 ) {
-    grid_progress.show();
+    grid_progress.set_visible(true);
 
     let combo_box_duplicate_check_method = gui_data.main_notebook.combo_box_duplicate_check_method.clone();
     let combo_box_duplicate_hash_type = gui_data.main_notebook.combo_box_duplicate_hash_type.clone();
@@ -223,7 +236,7 @@ fn duplicate_search(
     let entry_settings_prehash_cache_file_minimal_size = gui_data.settings.entry_settings_prehash_cache_file_minimal_size.clone();
     let image_preview_duplicates = gui_data.main_notebook.image_preview_duplicates.clone();
 
-    image_preview_duplicates.hide();
+    image_preview_duplicates.set_visible(false);
     clean_tree_view(&gui_data.main_notebook.common_tree_views.get_current_subview().tree_view);
 
     let check_method_index = combo_box_duplicate_check_method.active().expect("Failed to get active search") as usize;
@@ -270,7 +283,7 @@ fn empty_files_search(
     grid_progress: &Grid,
     progress_data_sender: Sender<ProgressData>,
 ) {
-    grid_progress.hide();
+    grid_progress.set_visible(false);
 
     clean_tree_view(&gui_data.main_notebook.common_tree_views.get_current_subview().tree_view);
     // Find empty files
@@ -294,7 +307,7 @@ fn empty_dirs_search(
     grid_progress: &Grid,
     progress_data_sender: Sender<ProgressData>,
 ) {
-    grid_progress.hide();
+    grid_progress.set_visible(false);
 
     clean_tree_view(&gui_data.main_notebook.common_tree_views.get_current_subview().tree_view);
 
@@ -318,7 +331,7 @@ fn big_files_search(
     grid_progress: &Grid,
     progress_data_sender: Sender<ProgressData>,
 ) {
-    grid_progress.hide();
+    grid_progress.set_visible(false);
 
     let combo_box_big_files_mode = gui_data.main_notebook.combo_box_big_files_mode.clone();
     let entry_big_files_number = gui_data.main_notebook.entry_big_files_number.clone();
@@ -350,7 +363,7 @@ fn temporary_files_search(
     grid_progress: &Grid,
     progress_data_sender: Sender<ProgressData>,
 ) {
-    grid_progress.hide();
+    grid_progress.set_visible(false);
 
     clean_tree_view(&gui_data.main_notebook.common_tree_views.get_current_subview().tree_view);
 
@@ -375,7 +388,7 @@ fn same_music_search(
     progress_data_sender: Sender<ProgressData>,
     show_dialog: &Arc<AtomicBool>,
 ) {
-    grid_progress.show();
+    grid_progress.set_visible(true);
 
     let check_button_music_artist: gtk4::CheckButton = gui_data.main_notebook.check_button_music_artist.clone();
     let check_button_music_title: gtk4::CheckButton = gui_data.main_notebook.check_button_music_title.clone();
@@ -474,7 +487,7 @@ fn broken_files_search(
     progress_data_sender: Sender<ProgressData>,
     show_dialog: &Arc<AtomicBool>,
 ) {
-    grid_progress.show();
+    grid_progress.set_visible(true);
 
     let check_button_broken_files_archive: gtk4::CheckButton = gui_data.main_notebook.check_button_broken_files_archive.clone();
     let check_button_broken_files_pdf: gtk4::CheckButton = gui_data.main_notebook.check_button_broken_files_pdf.clone();
@@ -546,7 +559,7 @@ fn similar_image_search(
     grid_progress: &Grid,
     progress_data_sender: Sender<ProgressData>,
 ) {
-    grid_progress.show();
+    grid_progress.set_visible(true);
 
     let combo_box_image_hash_size = gui_data.main_notebook.combo_box_image_hash_size.clone();
     let combo_box_image_hash_algorithm = gui_data.main_notebook.combo_box_image_hash_algorithm.clone();
@@ -557,7 +570,7 @@ fn similar_image_search(
     let scale_similarity_similar_images = gui_data.main_notebook.scale_similarity_similar_images.clone();
 
     clean_tree_view(&gui_data.main_notebook.common_tree_views.get_current_subview().tree_view);
-    image_preview_similar_images.hide();
+    image_preview_similar_images.set_visible(false);
 
     let hash_size_index = combo_box_image_hash_size.active().expect("Failed to get active search") as usize;
     let hash_size = IMAGES_HASH_SIZE_COMBO_BOX[hash_size_index] as u8;
@@ -596,7 +609,7 @@ fn similar_video_search(
     grid_progress: &Grid,
     progress_data_sender: Sender<ProgressData>,
 ) {
-    grid_progress.show();
+    grid_progress.set_visible(true);
 
     let check_button_video_ignore_same_size = gui_data.main_notebook.check_button_video_ignore_same_size.clone();
     let check_button_settings_similar_videos_delete_outdated_cache = gui_data.settings.check_button_settings_similar_videos_delete_outdated_cache.clone();
@@ -638,7 +651,7 @@ fn bad_symlinks_search(
     grid_progress: &Grid,
     progress_data_sender: Sender<ProgressData>,
 ) {
-    grid_progress.hide();
+    grid_progress.set_visible(false);
 
     clean_tree_view(&gui_data.main_notebook.common_tree_views.get_current_subview().tree_view);
 
@@ -662,7 +675,7 @@ fn bad_extensions_search(
     grid_progress: &Grid,
     progress_data_sender: Sender<ProgressData>,
 ) {
-    grid_progress.show();
+    grid_progress.set_visible(true);
 
     clean_tree_view(&gui_data.main_notebook.common_tree_views.get_current_subview().tree_view);
 
