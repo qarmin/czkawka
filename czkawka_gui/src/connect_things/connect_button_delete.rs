@@ -1,10 +1,10 @@
 use std::collections::BTreeMap;
-use std::fs;
 
-use czkawka_core::common::{check_if_folder_contains_only_empty_folders, remove_single_file};
+use czkawka_core::common::{check_if_folder_contains_only_empty_folders, remove_single_file, remove_single_folder};
 use gtk4::prelude::*;
 use gtk4::{Align, CheckButton, Dialog, Orientation, ResponseType, TextView};
 use log::debug;
+use rayon::prelude::*;
 
 use crate::flg;
 use crate::gui_structs::common_tree_view::SubView;
@@ -237,12 +237,7 @@ pub(crate) fn empty_folder_remover(sv: &SubView, check_button_settings_use_trash
         let mut error_happened = check_if_folder_contains_only_empty_folders(&full_path).is_err();
 
         if !error_happened {
-            let res = if use_trash {
-                trash::delete(&full_path).map_err(|e|e.to_string())
-            } else {
-                fs::remove_dir_all(&full_path).map_err(|e|e.to_string())
-            };
-            match res {
+            match remove_single_folder(&full_path, use_trash) {
                 Ok(()) => {
                     model.remove(&iter);
                     deleted_folders += 1;
@@ -284,25 +279,44 @@ pub(crate) fn basic_remove(sv: &SubView, check_button_settings_use_trash: &Check
 
     debug!("Starting to delete {} files", selected_rows.len());
     let start_time = std::time::Instant::now();
-    let mut deleted_files: u32 = 0;
-
     // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
-    for tree_path in selected_rows.iter().rev() {
-        let iter = model.iter(tree_path).expect("Using invalid tree_path");
 
-        let name = model.get::<String>(&iter, sv.nb_object.column_name);
-        let path = model.get::<String>(&iter, sv.nb_object.column_path);
+    let to_remove = selected_rows
+        .iter()
+        .enumerate()
+        .map(|(idx, tree_path)| {
+            let iter = model.iter(tree_path).expect("Using invalid tree_path");
 
-        match remove_single_file(&get_full_name_from_path_name(&path, &name), use_trash) {
-            Ok(()) => {
-                model.remove(&iter);
-                deleted_files += 1;
-            }
-            Err(e) => {
-                messages += &e;
-                messages += "\n";
-            }
-        }
+            let name = model.get::<String>(&iter, sv.nb_object.column_name);
+            let path = model.get::<String>(&iter, sv.nb_object.column_path);
+
+            (idx, get_full_name_from_path_name(&path, &name))
+        })
+        .collect::<Vec<_>>();
+
+    let (mut removed, failed_to_remove): (Vec<usize>, Vec<String>) = to_remove
+        .into_par_iter()
+        .map(|(idx, path)| match remove_single_file(&path, use_trash) {
+            Ok(()) => Ok(idx),
+            Err(e) => Err(flg!("delete_file_failed", name = path, reason = e)),
+        })
+        .partition_map(|res| match res {
+            Ok(entry) => itertools::Either::Left(entry),
+            Err(err) => itertools::Either::Right(err),
+        });
+
+    for failed in &failed_to_remove {
+        messages += failed;
+        messages += "\n";
+    }
+
+    removed.sort_unstable();
+    removed.reverse();
+    let deleted_files = removed.len();
+
+    for idx in removed {
+        let iter = model.iter(&selected_rows[idx]).expect("Using invalid tree_path");
+        model.remove(&iter);
     }
 
     debug!("Deleted {deleted_files} files in {:?}", start_time.elapsed());
@@ -356,15 +370,10 @@ pub(crate) fn tree_remove(sv: &SubView, column_header: i32, check_button_setting
         vec_file_name.sort_unstable();
         vec_file_name.dedup();
         for file_name in vec_file_name {
-            if !use_trash {
-                if let Err(e) = fs::remove_file(get_full_name_from_path_name(&path, &file_name)) {
-                    messages += flg!("delete_file_failed", name = get_full_name_from_path_name(&path, &file_name), reason = e.to_string()).as_str();
-                    messages += "\n";
-                }
-            } else if let Err(e) = trash::delete(get_full_name_from_path_name(&path, &file_name)) {
-                messages += flg!("delete_file_failed", name = get_full_name_from_path_name(&path, &file_name), reason = e.to_string()).as_str();
+            remove_single_file(get_full_name_from_path_name(&path, &file_name).as_str(), use_trash).unwrap_or_else(|e| {
+                messages += e.as_str();
                 messages += "\n";
-            }
+            });
 
             vec_path_to_delete.push((path.clone(), file_name.clone()));
         }

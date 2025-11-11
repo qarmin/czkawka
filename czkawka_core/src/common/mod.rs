@@ -140,12 +140,24 @@ pub fn remove_single_file(full_path: &str, remove_to_trash: bool) -> Result<(), 
         }
     } else {
         if let Err(e) = fs::remove_file(full_path) {
-            return Err(flc!("rust_error_removing_file", file = full_path, error = e.to_string()));
+            return Err(flc!("rust_error_removing", file = full_path, error = e.to_string()));
         }
     }
     Ok(())
 }
 
+pub fn remove_single_folder(full_path: &str, remove_to_trash: bool) -> Result<(), String> {
+    if remove_to_trash {
+        if let Err(e) = trash::delete(full_path) {
+            return Err(flc!("rust_error_moving_to_trash", file = full_path, error = e.to_string()));
+        }
+    } else {
+        if let Err(e) = fs::remove_dir_all(full_path) {
+            return Err(flc!("rust_error_removing", file = full_path, error = e.to_string()));
+        }
+    }
+    Ok(())
+}
 
 pub fn split_path(path: &Path) -> (String, String) {
     match (path.parent(), path.file_name()) {
