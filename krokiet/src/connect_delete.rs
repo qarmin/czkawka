@@ -6,7 +6,7 @@ use std::thread;
 use crossbeam_channel::Sender;
 use czkawka_core::common::progress_data::ProgressData;
 use slint::{ComponentHandle, Weak};
-
+use czkawka_core::common::remove_single_file;
 use crate::model_operations::get_checked_info_from_app;
 use crate::model_operations::model_processor::{MessageType, ModelProcessor};
 use crate::simpler_model::{SimplerMainListModel, ToSimplerVec};
@@ -91,16 +91,7 @@ fn remove_single_item(full_path: &str, is_folder_tab: bool, remove_to_trash: boo
     if is_folder_tab {
         return czkawka_core::common::remove_folder_if_contains_only_empty_folders(full_path, remove_to_trash);
     }
-    if remove_to_trash {
-        if let Err(e) = trash::delete(full_path) {
-            return Err(crate::flk!("rust_error_moving_to_trash", error = e.to_string()));
-        }
-    } else {
-        if let Err(e) = std::fs::remove_file(full_path) {
-            return Err(crate::flk!("rust_error_removing_file", error = e.to_string()));
-        }
-    }
-    Ok(())
+    remove_single_file(full_path, remove_to_trash)
 }
 
 #[cfg(test)]

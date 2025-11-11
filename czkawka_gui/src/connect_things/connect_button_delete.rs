@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use std::fs;
 
-use czkawka_core::common::check_if_folder_contains_only_empty_folders;
+use czkawka_core::common::{check_if_folder_contains_only_empty_folders, remove_single_file};
 use gtk4::prelude::*;
 use gtk4::{Align, CheckButton, Dialog, Orientation, ResponseType, TextView};
 use log::debug;
@@ -237,22 +237,17 @@ pub(crate) fn empty_folder_remover(sv: &SubView, check_button_settings_use_trash
         let mut error_happened = check_if_folder_contains_only_empty_folders(&full_path).is_err();
 
         if !error_happened {
-            if !use_trash {
-                match fs::remove_dir_all(&full_path) {
-                    Ok(()) => {
-                        model.remove(&iter);
-                        deleted_folders += 1;
-                    }
-                    Err(_inspected) => error_happened = true,
-                }
+            let res = if use_trash {
+                trash::delete(&full_path).map_err(|e|e.to_string())
             } else {
-                match trash::delete(&full_path) {
-                    Ok(()) => {
-                        model.remove(&iter);
-                        deleted_folders += 1;
-                    }
-                    Err(_inspected) => error_happened = true,
+                fs::remove_dir_all(&full_path).map_err(|e|e.to_string())
+            };
+            match res {
+                Ok(()) => {
+                    model.remove(&iter);
+                    deleted_folders += 1;
                 }
+                Err(_) => error_happened = true,
             }
         }
 
@@ -298,28 +293,14 @@ pub(crate) fn basic_remove(sv: &SubView, check_button_settings_use_trash: &Check
         let name = model.get::<String>(&iter, sv.nb_object.column_name);
         let path = model.get::<String>(&iter, sv.nb_object.column_path);
 
-        if !use_trash {
-            match fs::remove_file(get_full_name_from_path_name(&path, &name)) {
-                Ok(()) => {
-                    model.remove(&iter);
-                    deleted_files += 1;
-                }
-
-                Err(e) => {
-                    messages += flg!("delete_file_failed", name = get_full_name_from_path_name(&path, &name), reason = e.to_string()).as_str();
-                    messages += "\n";
-                }
+        match remove_single_file(&get_full_name_from_path_name(&path, &name), use_trash) {
+            Ok(()) => {
+                model.remove(&iter);
+                deleted_files += 1;
             }
-        } else {
-            match trash::delete(get_full_name_from_path_name(&path, &name)) {
-                Ok(()) => {
-                    model.remove(&iter);
-                    deleted_files += 1;
-                }
-                Err(e) => {
-                    messages += flg!("delete_file_failed", name = get_full_name_from_path_name(&path, &name), reason = e.to_string()).as_str();
-                    messages += "\n";
-                }
+            Err(e) => {
+                messages += &e;
+                messages += "\n";
             }
         }
     }
