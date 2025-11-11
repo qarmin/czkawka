@@ -19,7 +19,7 @@ pub const CLAP_STYLING: Styles = Styles::styled()
     .header(AnsiColor::Green.on_default().bold())
     .usage(AnsiColor::Green.on_default().bold())
     .literal(AnsiColor::Cyan.on_default().bold())
-    .placeholder(AnsiColor::Cyan.on_default())
+    .placeholder(AnsiColor::Cyan.on_default().bold())
     .error(AnsiColor::Red.on_default().bold())
     .valid(AnsiColor::Green.on_default().bold())
     .invalid(AnsiColor::Yellow.on_default().bold());
@@ -839,15 +839,15 @@ const HELP_TEMPLATE: &str = r#"
 {bin} {version}
 
 USAGE:
-    {usage} [SCFLAGS] [SCOPTIONS]
+    {usage} [FLAGS] [OPTIONS]
 
 OPTIONS:
 {options}
 
-SUBCOMMANDS:
+COMMANDS:
 {subcommands}
 
-    try "{usage} <COMMAND> -h" to get more info about a specific tool
+    try "{usage} -h" to get more info about a specific tool
 
 EXAMPLES:
     {bin} dup -d /home/rafal -e /home/rafal/Obrazy  -m 25 -x 7z rar IMAGE -s hash -f results.txt -D aeo
