@@ -80,7 +80,7 @@ mod tests {
     fn test_iter_list_collects_items() {
         let types: &[Type] = &[Type::STRING];
         let list_store = ListStore::new(types);
-        // append three rows
+
         list_store.set(&list_store.append(), &[(0u32, &Into::<Value>::into("a"))]);
         list_store.set(&list_store.append(), &[(0u32, &Into::<Value>::into("b"))]);
         list_store.set(&list_store.append(), &[(0u32, &Into::<Value>::into("c"))]);
@@ -104,7 +104,6 @@ mod tests {
         let mut collected = Vec::new();
         iter_list_with_break(&list_store, |m, i| {
             collected.push(m.get::<String>(i, 0));
-            // stop after first
             false
         });
 
@@ -122,7 +121,6 @@ mod tests {
         iter_list_with_break_init(
             &list_store,
             |m, i| {
-                // init: advance to next element; return true to continue
                 m.iter_next(i)
             },
             |m, i| {
@@ -130,7 +128,6 @@ mod tests {
             },
         );
 
-        // should have collected only second row ("b")
         assert_eq!(collected, vec!["b".to_string()]);
     }
 
@@ -145,11 +142,9 @@ mod tests {
         iter_list_break_with_init(
             &list_store,
             |_m, _i| {
-                // init: do nothing
             },
             |m, i| {
                 collected.push(m.get::<String>(i, 0));
-                // break after first
                 false
             },
         );

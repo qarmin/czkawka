@@ -4,17 +4,23 @@
 - Czkawka gui config file converted from custom format to json, so all settings needs to be set again(old txt file is not removed, so it may be used as reference for changes) 
 
 ### Core
-- Extensions in similar images mode and in previews, drops validating if extension is correct(most of the time) - [#]() 
-- Build and runtime Musl and Glibc versions are printed to logs - [#]()
+- Extensions in similar images mode and in previews, drops validating if extension is correct(most of the time) - [#1623](https://github.com/qarmin/czkawka/pull/1623)
+- Build and runtime Musl and Glibc versions are printed to logs - [#1604](https://github.com/qarmin/czkawka/pull/1604/files)
 - Delayed removing destination file while symlinking, to avoid data loss in case of failure - [#]()
+- Fix invalid canonicalization of paths on windows - [#1604](https://github.com/qarmin/czkawka/pull/1604/files)
+- Comparison results are now deterministic - [#1654](https://github.com/qarmin/czkawka/pull/1654)
+- Reading built-in jpeg inside raw images, if available - [#1655](https://github.com/qarmin/czkawka/pull/1655)
+- Fixed silent panics, when logger cannot log to terminal - [1658](https://github.com/qarmin/czkawka/pull/1658)
 
 ### CLI
 - Using colors by default in terminal output(can be disabled by feature flag) - [#]()
 
 ### GTK GUI
-- Sort button is restored and crashes when sorting are fixed(probably) - [#]()
-- Config now uses json format instead custom one, which fixes some problems - [#]()
+- Sort button is restored and crashes when sorting are fixed(probably) - [#1623](https://github.com/qarmin/czkawka/pull/1623)
+- Config now uses json format instead custom one - [#1623](https://github.com/qarmin/czkawka/pull/1623)
 - Multithreaded hard/symlinking of files - [#]()
+- Fixed the “expected” GTK regression that made image previews ridiculously small - [#1658](https://github.com/qarmin/czkawka/pull/1658)
+- Refactorings to assess whether migrating to GTK 5 will be possible (currently, it doesn’t seem very feasible) - [#1658](https://github.com/qarmin/czkawka/pull/1658)
 
 ### Prebuilt binaries
 - Krokiet Windows binaries with skia backend are available (this is msvc build and requires vc redist installed)
