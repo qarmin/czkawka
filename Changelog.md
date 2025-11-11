@@ -8,6 +8,9 @@
 - Build and runtime Musl and Glibc versions are printed to logs - [#]()
 - Delayed removing destination file while symlinking, to avoid data loss in case of failure - [#]()
 
+### CLI
+- Using colors by default in terminal output(can be disabled by feature flag) - [#]()
+
 ### GTK GUI
 - Sort button is restored and crashes when sorting are fixed(probably) - [#]()
 - Config now uses json format instead custom one, which fixes some problems - [#]()
