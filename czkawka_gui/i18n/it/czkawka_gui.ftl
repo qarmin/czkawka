@@ -402,8 +402,8 @@ settings_folder_cache_open = Apri la cartella della cache
 settings_folder_settings_open = Apri la cartella delle impostazioni
 # Compute results
 compute_stopped_by_user = Ricerca interrotta dall'utente
-compute_found_duplicates_hash_size = Trovati { $number_files } duplicati in { $number_groups } gruppi che occupano { $size }
-compute_found_duplicates_name = Trovati { $number_files } duplicati in { $number_groups } gruppi
+compute_found_duplicates_hash_size = Trovati { $number_files } duplicati in { $number_groups } gruppi che occupano { $size }, **la ricerca ha impiegato { $time }**
+compute_found_duplicates_name = Trovati { $number_files } duplicati in { $number_groups } gruppi, **la ricerca ha impiegato { $time }**
 compute_found_empty_folders = Trovate { $number_files } cartelle vuote
 compute_found_empty_files = Trovati { $number_files } file vuoti
 compute_found_big_files = Trovati { $number_files } grandi file

@@ -400,8 +400,8 @@ settings_folder_cache_open = Abrir diretório do cache
 settings_folder_settings_open = Abrir diretório de configurações
 # Compute results
 compute_stopped_by_user = A busca foi parada pelo usuário
-compute_found_duplicates_hash_size = Achadas { $number_files } duplicatas em { $number_groups } grupos que levaram { $size }
-compute_found_duplicates_name = Achadas { $number_files } duplicatas em { $number_groups } grupos
+compute_found_duplicates_hash_size = Achadas { $number_files }} duplicatas em { $number_groups }} grupos que levaram {{ $size }}, **a varredura levou { $time }}**
+compute_found_duplicates_name = Achadas { $number_files }} duplicatas em {{ $number_groups }} grupos, **a varredura levou { $time }}**
 compute_found_empty_folders = Achados { $number_files } diretórios vazios
 compute_found_empty_files = Achados { $number_files } arquivos vazios
 compute_found_big_files = Achados { $number_files } arquivos grandes

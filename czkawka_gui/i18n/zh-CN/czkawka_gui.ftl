@@ -405,8 +405,8 @@ settings_folder_cache_open = 打开缓存文件夹
 settings_folder_settings_open = 打开设置文件夹
 # Compute results
 compute_stopped_by_user = 搜索已被用户停止
-compute_found_duplicates_hash_size = 在 { $number_groups } 个组中发现 { $number_files } 个重复项，占用了 { $size } 的空间
-compute_found_duplicates_name = 在 { $number_groups } 个组中发现 { $number_files } 个重复项
+compute_found_duplicates_hash_size = 在 { $number_groups } 个组中发现 { $number_files } 个重徤项，占用了 { $size }} 的空间，**搜索耳 { $time }}**
+compute_found_duplicates_name = 在 {{ $number_groups }} 个组中发现 {{ $number_files }} 个重徤项，**搜索肗 {{ $time }}**
 compute_found_empty_folders = 找到 { $number_files } 个空文件夹
 compute_found_empty_files = 找到 { $number_files } 个空文件
 compute_found_big_files = 找到 { $number_files } 个大文件

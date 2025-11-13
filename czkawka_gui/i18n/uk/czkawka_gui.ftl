@@ -403,8 +403,8 @@ settings_folder_cache_open = Відкрити теку кешу
 settings_folder_settings_open = Відкрити папку налаштувань
 # Compute results
 compute_stopped_by_user = Пошук був зупинений користувачем
-compute_found_duplicates_hash_size = Знайдено дублікатів: { $number_files } (груп: { $number_groups }), розмір: { $size }
-compute_found_duplicates_name = Знайдено: { $number_files } дубликат(и/ів) (груп: { $number_groups })
+compute_found_duplicates_hash_size = Знайдено дублікатів: {{ $number_files }} (груп: {{ $number_groups }}), розмір: {{ $size }}, **пошук тривав {{ $time }}**
+ compute_found_duplicates_name = Знайдено: {{ $number_files }} дублікат(и/ів) (груп: {{ $number_groups }}), **пошук тривав {{ $time }}**
 compute_found_empty_folders = Знайдено порожніх папок: { $number_files }
 compute_found_empty_files = Знайдено порожніх файлів: { $number_files }
 compute_found_big_files = Знайдено великих файлів: { $number_files }

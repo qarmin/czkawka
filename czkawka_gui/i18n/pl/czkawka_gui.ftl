@@ -403,8 +403,8 @@ settings_folder_cache_open = Otwórz folder pamięci podręcznej
 settings_folder_settings_open = Otwórz folder ustawień
 # Compute results
 compute_stopped_by_user = Przeszukiwanie zostało zatrzymane przez użytkownika
-compute_found_duplicates_hash_size = Znaleziono { $number_files } duplikatów w { $number_groups } grupach, które zajmują { $size }
-compute_found_duplicates_name = Znaleziono { $number_files } duplikatów w { $number_groups } grupach
+compute_found_duplicates_hash_size = Znaleziono { $number_files } duplikatów w { $number_groups } grupach zajmujących { $size }, **skan zajął { $time }**
+compute_found_duplicates_name = Znaleziono { $number_files } duplikatów w { $number_groups } grupach, **skan zajął { $time }**
 compute_found_empty_folders = Znaleziono { $number_files } pustych folderów
 compute_found_empty_files = Znaleziono { $number_files } pustych plików
 compute_found_big_files = Znaleziono { $number_files } największych plików

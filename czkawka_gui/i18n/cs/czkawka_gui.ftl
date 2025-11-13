@@ -403,8 +403,8 @@ settings_folder_cache_open = Otevřít složku mezipaměti
 settings_folder_settings_open = Otevřít složku s nastavením
 # Compute results
 compute_stopped_by_user = Vyhledávání bylo zastaveno uživatelem
-compute_found_duplicates_hash_size = Nalezeno { $number_files } duplikátů v { $number_groups } skupinách, které trvaly { $size }
-compute_found_duplicates_name = Nalezeno { $number_files } duplicit v { $number_groups } skupinách
+compute_found_duplicates_hash_size = Nalezeno { $number_files }} duplikátů v {{ $number_groups }} skupinách zabírajících {{ $size }}, **vyhledávání trvalo {{ $time }}**
+compute_found_duplicates_name = Nalezeno {{ $number_files }} duplikátů v {{ $number_groups }} skupinách, **vyhledávání trvalo {{ $time }}**
 compute_found_empty_folders = Nalezen { $number_files } prázdných složek
 compute_found_empty_files = Nalezeno { $number_files } prázdných souborů
 compute_found_big_files = Nalezeno { $number_files } velkých souborů

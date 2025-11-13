@@ -462,8 +462,8 @@ settings_folder_settings_open = Open settings folder
 # Compute results
 compute_stopped_by_user = Searching was stopped by user
 
-compute_found_duplicates_hash_size = Found { $number_files } duplicates in { $number_groups } groups which took { $size }
-compute_found_duplicates_name = Found { $number_files } duplicates in { $number_groups } groups
+compute_found_duplicates_hash_size = Found { $number_files } duplicates in { $number_groups } groups which took { $size }, **searching took { $time }**
+compute_found_duplicates_name = Found { $number_files } duplicates in { $number_groups } groups, **searching took { $time }**
 compute_found_empty_folders = Found { $number_files } empty folders
 compute_found_empty_files = Found { $number_files } empty files
 compute_found_big_files = Found { $number_files } big files

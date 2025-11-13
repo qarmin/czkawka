@@ -74,6 +74,7 @@ pub struct Info {
     pub number_of_duplicated_files_by_size_name: usize,
     pub lost_space_by_size: u64,
     pub lost_space_by_hash: u64,
+    pub scanning_time: u128,
 }
 
 #[derive(Clone)]

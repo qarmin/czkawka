@@ -403,8 +403,8 @@ settings_folder_cache_open = Öppna cachemapp
 settings_folder_settings_open = Öppna inställningsmapp
 # Compute results
 compute_stopped_by_user = Sökandet stoppades av användaren
-compute_found_duplicates_hash_size = Hittade { $number_files } dubbletter i { $number_groups } grupper som tog { $size }
-compute_found_duplicates_name = Hittade { $number_files } dubbletter i { $number_groups } grupper
+compute_found_duplicates_hash_size = Hittade { $number_files } dubbletter i { $number_groups } grupper som tog { $size }, **sökning tog { $time }**
+compute_found_duplicates_name = Hittade { $number_files } dubbletter i { $number_groups } grupper, **sökning tog { $time }**
 compute_found_empty_folders = Hittade { $number_files } tomma mappar
 compute_found_empty_files = Hittades { $number_files } tomma filer
 compute_found_big_files = Hittade { $number_files } stora filer

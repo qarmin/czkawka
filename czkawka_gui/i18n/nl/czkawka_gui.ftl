@@ -403,8 +403,8 @@ settings_folder_cache_open = Open cachemap
 settings_folder_settings_open = Instellingenmap openen
 # Compute results
 compute_stopped_by_user = Zoeken is gestopt door gebruiker
-compute_found_duplicates_hash_size = Gevonden { $number_files } duplicaten in { $number_groups } groepen die { $size } namen
-compute_found_duplicates_name = Gevonden { $number_files } duplicaten in { $number_groups } groepen
+compute_found_duplicates_hash_size = Gevonden { $number_files } duplicaten in { $number_groups } groepen die { $size } innamen, **zoeken nam { $time }} in beslag**
+compute_found_duplicates_name = Gevonden {{ $number_files }} duplicaten in {{ $number_groups }} groepen, **zoeken nam {{ $time }} in beslag**
 compute_found_empty_folders = Gevonden { $number_files } lege mappen
 compute_found_empty_files = Gevonden { $number_files } lege bestanden
 compute_found_big_files = Gevonden { $number_files } grote bestanden
