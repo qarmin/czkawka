@@ -403,8 +403,8 @@ settings_folder_cache_open = 開啟快取資料夾
 settings_folder_settings_open = 開啟設定資料夾
 # Compute results
 compute_stopped_by_user = 搜尋已被使用者停止
-compute_found_duplicates_hash_size = 在 { $number_groups } 群組中找到 { $number_files } 重複，被帶去了 { $size }
-compute_found_duplicates_name = 找到 { $number_files } 重複的 { $number_groups } 群組
+compute_found_duplicates_hash_size = 在 { $number_groups } 個組中發現了 { $number_files }} 個重複的檔案，佔用了 { $size }}，**措揷該 { $time }}**
+compute_found_duplicates_name = 在 {{ $number_groups }} 個組中發現了 {{ $number_files }} 個重複的檔案，**措揷該 {{ $time }}**
 compute_found_empty_folders = 找到 { $number_files } 空資料夾
 compute_found_empty_files = 找到 { $number_files } 空檔案
 compute_found_big_files = 找到 { $number_files } 大檔案

@@ -402,8 +402,8 @@ settings_folder_cache_open = Cache-Ordner öffnen
 settings_folder_settings_open = Einstellungsordner öffnen
 # Compute results
 compute_stopped_by_user = Suche wurde vom Benutzer gestoppt
-compute_found_duplicates_hash_size = { $number_files } Duplikate in { $number_groups } Gruppen gefunden, die { $size } benötigt haben
-compute_found_duplicates_name = { $number_files } Duplikate in { $number_groups } Gruppen gefunden
+compute_found_duplicates_hash_size = { $number_files } Duplikate in { $number_groups } Gruppen gefunden, die { $size } benötigt haben, **Suche dauerte { $time }**
+compute_found_duplicates_name = { $number_files } Duplikate in { $number_groups } Gruppen gefunden, **Suche dauerte { $time }**
 compute_found_empty_folders = { $number_files } leere Ordner gefunden
 compute_found_empty_files = { $number_files } leere Dateien gefunden
 compute_found_big_files = { $number_files } große Dateien gefunden

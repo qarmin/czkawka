@@ -403,8 +403,8 @@ settings_folder_cache_open = Åpne mappe for hurtigbuffer
 settings_folder_settings_open = Åpne innstillingsmappen
 # Compute results
 compute_stopped_by_user = Søket ble stoppet av bruker
-compute_found_duplicates_hash_size = Fant { $number_files } duplikater i { $number_groups } grupper som tok { $size }
-compute_found_duplicates_name = Fant { $number_files } duplikater i { $number_groups } grupper
+compute_found_duplicates_hash_size = Fant { $number_files } duplikater i { $number_groups } grupper som tok { $size }., **søk tok { $time }}**
+compute_found_duplicates_name = Fant { $number_files } duplikater i { $number_groups } grupper, **søk tok { $time }}**
 compute_found_empty_folders = Fant { $number_files } tomme mapper
 compute_found_empty_files = Fant { $number_files } tomme filer
 compute_found_big_files = Fant { $number_files } store filer
