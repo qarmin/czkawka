@@ -38,7 +38,7 @@ impl Search for DuplicateFinder {
     #[fun_time(message = "find_duplicates", level = "info")]
     fn search(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
         let start_time = Instant::now();
-        
+
         self.prepare_items();
         self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
 

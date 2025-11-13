@@ -714,7 +714,15 @@ fn compute_duplicate_finder(df: DuplicateFinder, entry_info: &Entry, text_view_e
     }
     let scanning_time_str = format_scanning_time(information.scanning_time);
     if duplicates_size == 0 {
-        entry_info.set_text(flg!("compute_found_duplicates_name", number_files = duplicates_number, number_groups = duplicates_group, time = scanning_time_str).as_str());
+        entry_info.set_text(
+            flg!(
+                "compute_found_duplicates_name",
+                number_files = duplicates_number,
+                number_groups = duplicates_group,
+                time = scanning_time_str
+            )
+            .as_str(),
+        );
     } else {
         entry_info.set_text(
             flg!(
