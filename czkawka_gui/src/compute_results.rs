@@ -87,7 +87,7 @@ fn format_size_and_date(size: u64, modified_date: u64, is_header: bool, is_refer
 /// Helper to format scanning time from milliseconds to human readable format
 fn format_scanning_time(scanning_time_ms: u128) -> String {
     if scanning_time_ms < 1000 {
-        format!("{} ms", scanning_time_ms)
+        format!("{scanning_time_ms} ms")
     } else {
         format!("{:.2} s", scanning_time_ms as f64 / 1000.0)
     }
