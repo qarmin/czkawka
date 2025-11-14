@@ -126,7 +126,7 @@ pub(crate) const WORKAROUNDS: &[(&str, &str)] = &[
     ("xml", "xba"),       // Libreoffice
     ("xml", "xcd"),       // Libreoffice files
     ("zip", "apk"),       // Android apk
-    ("zip", "cbr"),       // Comics
+    ("zip", "cbz"),       // Comics
     ("zip", "dat"),       // Multiple - python, brave
     ("zip", "doc"),       // Word
     ("zip", "docx"),      // Word
