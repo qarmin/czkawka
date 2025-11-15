@@ -244,7 +244,6 @@ pub(crate) fn common_file_remove(sv: &SubView, check_button_settings_use_trash: 
 
     debug!("Starting to delete {} files", selected_rows.len());
     let start_time = std::time::Instant::now();
-    // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
 
     let to_remove = selected_rows
         .iter()
@@ -289,7 +288,7 @@ pub(crate) fn common_file_remove(sv: &SubView, check_button_settings_use_trash: 
     }
 
     removed.sort_unstable();
-    removed.reverse();
+    removed.reverse(); // Must be deleted from end to start
     let deleted_files = removed.len();
 
     for idx in removed {
@@ -297,7 +296,12 @@ pub(crate) fn common_file_remove(sv: &SubView, check_button_settings_use_trash: 
         model.remove(&iter);
     }
 
-    debug!("Deleted {deleted_files} items({:?} tab) in {:?}", sv.nb_object.name , start_time.elapsed());
+    debug!(
+        "Deleted {deleted_files}/{} items({:?} tab) in {:?}",
+        sv.nb_object.name,
+        selected_rows.len(),
+        start_time.elapsed()
+    );
 
     text_view_errors.buffer().set_text(messages.as_str());
 }
