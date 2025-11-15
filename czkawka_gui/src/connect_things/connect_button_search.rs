@@ -187,11 +187,14 @@ impl LoadedCommonItems {
             .parse::<u64>()
             .unwrap_or_else(|_| DEFAULT_MINIMAL_CACHE_SIZE.parse::<u64>().expect("Failed to parse minimal_cache_file_size"));
 
-        let minimal_file_size = entry_general_minimal_size
-            .text()
-            .as_str()
-            .parse::<u64>()
-            .unwrap_or_else(|_| DEFAULT_MINIMAL_FILE_SIZE.parse::<u64>().expect("Failed to parse minimal_file_size"));
+        let minimal_file_size_txt = entry_general_minimal_size.text().trim().to_string();
+        let minimal_file_size = if minimal_file_size_txt.is_empty() {
+            0u64
+        } else {
+            minimal_file_size_txt
+                .parse::<u64>()
+                .unwrap_or_else(|_| DEFAULT_MINIMAL_FILE_SIZE.parse::<u64>().expect("Failed to parse minimal_file_size"))
+        };
         let maximal_file_size = entry_general_maximal_size
             .text()
             .as_str()

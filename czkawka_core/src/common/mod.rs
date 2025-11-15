@@ -29,6 +29,8 @@ use crate::flc;
 static NUMBER_OF_THREADS: std::sync::LazyLock<Mutex<Option<usize>>> = std::sync::LazyLock::new(|| Mutex::new(None));
 static ALL_AVAILABLE_THREADS: std::sync::LazyLock<Mutex<Option<usize>>> = std::sync::LazyLock::new(|| Mutex::new(None));
 
+const MAX_SYMLINK_HARDLINK_ATTEMPTS: u8 = 5;
+
 pub fn get_number_of_threads() -> usize {
     let data = NUMBER_OF_THREADS.lock().expect("Cannot fail").expect("Should be set before get");
     if data >= 1 { data } else { get_all_available_threads() }
@@ -257,7 +259,7 @@ pub fn make_hard_link<P: AsRef<Path>, Q: AsRef<Path>>(src: P, dst: Q) -> io::Res
     let dst = dst.as_ref();
     let dst_dir = dst.parent().ok_or_else(|| Error::other("No parent"))?;
     let mut temp;
-    let mut attempts = 5;
+    let mut attempts = MAX_SYMLINK_HARDLINK_ATTEMPTS;
     loop {
         temp = dst_dir.join(format!("{}.czkawka_tmp", rand::random::<u128>()));
         if !temp.exists() {
@@ -282,12 +284,12 @@ pub fn make_hard_link<P: AsRef<Path>, Q: AsRef<Path>>(src: P, dst: Q) -> io::Res
 }
 
 #[cfg(any(target_family = "unix", target_family = "windows"))]
-pub fn make_file_soft_link<P: AsRef<Path>, Q: AsRef<Path>>(src: P, dst: Q) -> io::Result<()> {
+pub fn make_file_symlink<P: AsRef<Path>, Q: AsRef<Path>>(src: P, dst: Q) -> io::Result<()> {
     let src = src.as_ref();
     let dst = dst.as_ref();
     let dst_dir = dst.parent().ok_or_else(|| Error::other("No parent"))?;
     let mut temp;
-    let mut attempts = 5;
+    let mut attempts = MAX_SYMLINK_HARDLINK_ATTEMPTS;
     loop {
         temp = dst_dir.join(format!("{}.czkawka_tmp", rand::random::<u128>()));
         if !temp.exists() {
@@ -295,7 +297,7 @@ pub fn make_file_soft_link<P: AsRef<Path>, Q: AsRef<Path>>(src: P, dst: Q) -> io
         }
         attempts -= 1;
         if attempts == 0 {
-            return Err(Error::other("Cannot choose temporary file for hardlink creation"));
+            return Err(Error::other("Cannot choose temporary file for symlink creation"));
         }
     }
     fs::rename(dst, temp.as_path())?;
@@ -321,7 +323,7 @@ pub fn make_file_soft_link<P: AsRef<Path>, Q: AsRef<Path>>(src: P, dst: Q) -> io
 }
 
 #[cfg(not(any(target_family = "unix", target_family = "windows")))]
-pub fn make_file_soft_link<P: AsRef<Path>, Q: AsRef<Path>>(src: P, dst: Q) -> io::Result<()> {
+pub fn make_file_symlink<P: AsRef<Path>, Q: AsRef<Path>>(src: P, dst: Q) -> io::Result<()> {
     Err(Error::new(io::ErrorKind::Other, "Soft links are not supported on this platform"))
 }
 
@@ -337,7 +339,7 @@ mod test {
     use tempfile::tempdir;
 
     use crate::common::items::new_excluded_item;
-    use crate::common::{make_file_soft_link, make_hard_link, normalize_windows_path, regex_check, remove_folder_if_contains_only_empty_folders};
+    use crate::common::{make_file_symlink, make_hard_link, normalize_windows_path, regex_check, remove_folder_if_contains_only_empty_folders};
 
     #[cfg(target_family = "unix")]
     fn assert_inode(before: &Metadata, after: &Metadata) {
@@ -388,7 +390,7 @@ mod test {
 
     #[cfg(any(target_family = "unix", target_family = "windows"))]
     #[test]
-    fn test_make_file_soft_link() -> io::Result<()> {
+    fn test_make_file_symlink() -> io::Result<()> {
         let dir = tempfile::Builder::new().tempdir()?;
         let (src, dst) = (dir.path().join("a"), dir.path().join("b"));
         let content = "hello softlink";
@@ -398,7 +400,7 @@ mod test {
         }
         File::create(&dst)?;
 
-        make_file_soft_link(&src, &dst)?;
+        make_file_symlink(&src, &dst)?;
 
         let symlink_meta = fs::symlink_metadata(&dst)?;
         assert!(symlink_meta.file_type().is_symlink());
@@ -415,7 +417,7 @@ mod test {
 
     #[cfg(any(target_family = "unix", target_family = "windows"))]
     #[test]
-    fn test_make_file_soft_link_fails() -> io::Result<()> {
+    fn test_make_file_symlink_fails() -> io::Result<()> {
         let dir = tempfile::Builder::new().tempdir()?;
         let (src, dst) = (dir.path().join("a"), dir.path().join("b"));
         {
@@ -424,7 +426,7 @@ mod test {
         }
         let metadata = fs::metadata(&dst)?;
 
-        match make_file_soft_link(&src, &dst) {
+        match make_file_symlink(&src, &dst) {
             Err(_) => {
                 assert_eq!(fs::read_to_string(&dst)?, "original\n");
                 assert_eq!(metadata.permissions(), fs::metadata(&dst)?.permissions());

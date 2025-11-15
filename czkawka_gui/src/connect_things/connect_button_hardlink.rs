@@ -1,4 +1,4 @@
-use czkawka_core::common::{make_file_soft_link, make_hard_link};
+use czkawka_core::common::{make_file_symlink, make_hard_link};
 use gtk4::prelude::*;
 use gtk4::{Align, CheckButton, Dialog, Orientation, ResponseType, TextView, TreeIter, TreePath};
 use rayon::prelude::*;
@@ -160,7 +160,7 @@ fn hardlink_symlink(sv: &SubView, hardlinking: TypeOfTool, text_view_errors: &Te
             let mut err = vec![];
             for file_to_be_replaced in symhardlink_data.files_to_symhardlink {
                 if hardlinking == TypeOfTool::Symlinking {
-                    if let Err(e) = make_file_soft_link(&symhardlink_data.original_data, &file_to_be_replaced) {
+                    if let Err(e) = make_file_symlink(&symhardlink_data.original_data, &file_to_be_replaced) {
                         err.push(flg!(
                             "symlink_failed",
                             name = symhardlink_data.original_data.clone(),

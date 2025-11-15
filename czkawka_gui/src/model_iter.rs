@@ -120,9 +120,7 @@ mod tests {
         let mut collected = Vec::new();
         iter_list_with_break_init(
             &list_store,
-            |m, i| {
-                m.iter_next(i)
-            },
+            |m, i| m.iter_next(i),
             |m, i| {
                 collected.push(m.get::<String>(i, 0));
             },
@@ -141,8 +139,7 @@ mod tests {
         let mut collected = Vec::new();
         iter_list_break_with_init(
             &list_store,
-            |_m, _i| {
-            },
+            |_m, _i| {},
             |m, i| {
                 collected.push(m.get::<String>(i, 0));
                 false
