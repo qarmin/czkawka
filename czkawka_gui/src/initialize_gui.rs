@@ -2,7 +2,7 @@ use czkawka_core::tools::similar_images::SIMILAR_VALUES;
 use czkawka_core::tools::similar_videos::MAX_TOLERANCE;
 use gtk4::prelude::*;
 
-use crate::dicom_traits::ComboBoxTraits;
+use crate::gtk_traits::ComboBoxTraits;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_combo_box::{
     DUPLICATES_CHECK_METHOD_COMBO_BOX, DUPLICATES_HASH_TYPE_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX, IMAGES_HASH_TYPE_COMBO_BOX, IMAGES_RESIZE_ALGORITHM_COMBO_BOX,

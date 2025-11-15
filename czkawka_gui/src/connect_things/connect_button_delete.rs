@@ -292,9 +292,9 @@ pub(crate) fn common_file_remove(sv: &SubView, check_button_settings_use_trash: 
     }
 
     debug!(
-        "Deleted {deleted_files}/{} items({:?} tab) in {:?}",
-        sv.nb_object.name,
+        "Deleted {deleted_files}/{} items({} tab) in {:?}",
         selected_rows.len(),
+        sv.nb_object.name,
         start_time.elapsed()
     );
 

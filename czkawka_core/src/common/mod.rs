@@ -12,6 +12,7 @@ pub mod progress_data;
 pub mod progress_stop_handler;
 pub mod tool_data;
 pub mod traits;
+pub mod basic_gui_cli;
 
 use std::cmp::Ordering;
 use std::ffi::OsString;
