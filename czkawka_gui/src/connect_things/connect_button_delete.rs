@@ -1,4 +1,4 @@
-use czkawka_core::common::{check_if_folder_contains_only_empty_folders, remove_single_file, remove_single_folder};
+use czkawka_core::common::{remove_folder_if_contains_only_empty_folders, remove_single_file};
 use gtk4::prelude::*;
 use gtk4::{Align, CheckButton, Dialog, Orientation, ResponseType, TextView};
 use log::debug;
@@ -208,7 +208,6 @@ pub(crate) fn basic_remove(sv: &SubView, check_button_settings_use_trash: &Check
     common_file_remove(sv, check_button_settings_use_trash, text_view_errors, None, true);
 }
 
-// Remove all occurrences - remove every element which have same path and name as even non selected ones
 pub(crate) fn tree_remove(sv: &SubView, column_header: i32, check_button_settings_use_trash: &CheckButton, text_view_errors: &TextView) {
     common_file_remove(sv, check_button_settings_use_trash, text_view_errors, Some(column_header), true);
 
@@ -267,11 +266,7 @@ pub(crate) fn common_file_remove(sv: &SubView, check_button_settings_use_trash: 
                     Err(e) => Err(flg!("delete_file_failed", name = path, reason = e)),
                 }
             } else {
-                if let Err(e) = check_if_folder_contains_only_empty_folders(&path) {
-                    return Err(flg!("delete_folder_failed", dir = path, reason = e));
-                }
-
-                match remove_single_folder(&path, use_trash) {
+                match remove_folder_if_contains_only_empty_folders(&path, use_trash) {
                     Ok(()) => Ok(idx),
                     Err(e) => Err(flg!("delete_folder_failed", dir = path, reason = e)),
                 }
