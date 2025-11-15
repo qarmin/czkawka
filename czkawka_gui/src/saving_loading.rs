@@ -1,6 +1,7 @@
 use std::env;
 use std::path::{Path, PathBuf};
 
+use czkawka_core::common::basic_gui_cli::CliResult;
 use czkawka_core::common::config_cache_path::get_config_cache_path;
 use czkawka_core::common::get_all_available_threads;
 use czkawka_core::common::items::DEFAULT_EXCLUDED_ITEMS;
@@ -10,7 +11,6 @@ use gtk4::prelude::*;
 use gtk4::{ListStore, ScrolledWindow, TextView, TreeView};
 use serde::{Deserialize, Serialize};
 
-use crate::cli::CliResult;
 use crate::flg;
 use crate::gui_structs::common_tree_view::TreeViewListStoreTrait;
 use crate::gui_structs::common_upper_tree_view::UpperTreeViewEnum;
