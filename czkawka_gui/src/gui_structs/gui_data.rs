@@ -20,7 +20,7 @@ use crate::gui_structs::gui_popovers_sort::GuiSortPopovers;
 use crate::gui_structs::gui_progress_dialog::GuiProgressDialog;
 use crate::gui_structs::gui_settings::GuiSettings;
 use crate::gui_structs::gui_upper_notebook::GuiUpperNotebook;
-use crate::help_functions::BottomButtonsEnum;
+use crate::helpers::enums::BottomButtonsEnum;
 use crate::notebook_enums::{NotebookMainEnum, get_all_main_tabs};
 use crate::taskbar_progress::TaskbarProgress;
 

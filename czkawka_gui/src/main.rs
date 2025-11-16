@@ -54,6 +54,7 @@ mod gtk_traits;
 mod gui_structs;
 mod help_combo_box;
 mod help_functions;
+mod helpers;
 mod initialize_gui;
 mod language_functions;
 mod localizer_gui;

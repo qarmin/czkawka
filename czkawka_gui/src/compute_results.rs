@@ -31,10 +31,10 @@ use crate::flg;
 use crate::gui_structs::common_tree_view::{SharedModelEnum, SubView};
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_combo_box::IMAGES_HASH_SIZE_COMBO_BOX;
-use crate::help_functions::{
+use crate::help_functions::{HEADER_ROW_COLOR, MAIN_ROW_COLOR, TEXT_COLOR, append_row_to_list_store, get_list_store, print_text_messages_to_text_view, set_buttons};
+use crate::helpers::enums::{
     BottomButtonsEnum, ColumnsBadExtensions, ColumnsBigFiles, ColumnsBrokenFiles, ColumnsDuplicates, ColumnsEmptyFiles, ColumnsEmptyFolders, ColumnsInvalidSymlinks,
-    ColumnsSameMusic, ColumnsSimilarImages, ColumnsSimilarVideos, ColumnsTemporaryFiles, HEADER_ROW_COLOR, MAIN_ROW_COLOR, Message, TEXT_COLOR, append_row_to_list_store,
-    get_list_store, print_text_messages_to_text_view, set_buttons,
+    ColumnsSameMusic, ColumnsSimilarImages, ColumnsSimilarVideos, ColumnsTemporaryFiles, Message,
 };
 use crate::notebook_enums::NotebookMainEnum;
 use crate::notebook_info::NOTEBOOKS_INFO;

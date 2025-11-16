@@ -1,7 +1,7 @@
 use czkawka_core::TOOLS_NUMBER;
 use glib::types::Type;
 
-use crate::help_functions::{
+use crate::helpers::enums::{
     BottomButtonsEnum, ColumnsBadExtensions, ColumnsBigFiles, ColumnsBrokenFiles, ColumnsDuplicates, ColumnsEmptyFiles, ColumnsEmptyFolders, ColumnsInvalidSymlinks,
     ColumnsSameMusic, ColumnsSimilarImages, ColumnsSimilarVideos, ColumnsTemporaryFiles, PopoverTypes,
 };

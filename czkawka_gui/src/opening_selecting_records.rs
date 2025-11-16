@@ -4,10 +4,8 @@ use gtk4::{GestureClick, TreeModel, TreePath, TreeSelection};
 use log::{debug, error};
 
 use crate::gui_structs::common_tree_view::GetTreeViewTrait;
-use crate::help_functions::{
-    ColumnsDuplicates, ColumnsExcludedDirectory, ColumnsIncludedDirectory, ColumnsSameMusic, ColumnsSimilarImages, ColumnsSimilarVideos, KEY_ENTER, KEY_SPACE,
-    get_full_name_from_path_name, get_list_store, get_notebook_object_from_tree_view, get_notebook_upper_enum_from_tree_view,
-};
+use crate::help_functions::{KEY_ENTER, KEY_SPACE, get_full_name_from_path_name, get_list_store, get_notebook_object_from_tree_view, get_notebook_upper_enum_from_tree_view};
+use crate::helpers::enums::{ColumnsDuplicates, ColumnsExcludedDirectory, ColumnsIncludedDirectory, ColumnsSameMusic, ColumnsSimilarImages, ColumnsSimilarVideos};
 use crate::notebook_enums::NotebookUpperEnum;
 
 // TODO add option to open files and folders from context menu activated by pressing ONCE with right mouse button

@@ -31,9 +31,10 @@ use crate::help_combo_box::{
     IMAGES_HASH_TYPE_COMBO_BOX, IMAGES_RESIZE_ALGORITHM_COMBO_BOX,
 };
 use crate::help_functions::{
-    ColumnsExcludedDirectory, ColumnsIncludedDirectory, Message, check_if_list_store_column_have_all_same_values, get_list_store, get_path_buf_from_vector_of_strings,
-    get_string_from_list_store, hide_all_buttons, reset_text_view, set_buttons,
+    check_if_list_store_column_have_all_same_values, get_list_store, get_path_buf_from_vector_of_strings, get_string_from_list_store, hide_all_buttons, reset_text_view,
+    set_buttons,
 };
+use crate::helpers::enums::{ColumnsExcludedDirectory, ColumnsIncludedDirectory, Message};
 use crate::model_iter::iter_list;
 use crate::notebook_enums::NotebookMainEnum;
 use crate::taskbar_progress::tbp_flags::TBPF_NOPROGRESS;

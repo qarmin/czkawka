@@ -3,7 +3,8 @@ use gtk4::prelude::*;
 use gtk4::{Builder, EventControllerKey, GestureClick, ScrolledWindow, SelectionMode, TreeView};
 
 use crate::gui_structs::common_tree_view::{ColumnSort, TreeViewListStoreTrait, create_default_columns, create_default_selection_button_column};
-use crate::help_functions::{ColumnsExcludedDirectory, ColumnsIncludedDirectory, KEY_DELETE};
+use crate::help_functions::KEY_DELETE;
+use crate::helpers::enums::{ColumnsExcludedDirectory, ColumnsIncludedDirectory};
 use crate::notebook_enums::NotebookUpperEnum;
 use crate::opening_selecting_records::{opening_double_click_function_directories, opening_enter_function_ported_upper_directories};
 

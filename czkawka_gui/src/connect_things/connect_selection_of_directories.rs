@@ -11,7 +11,8 @@ use crate::connect_things::file_chooser_helpers::extract_paths_from_file_chooser
 use crate::flg;
 use crate::gui_structs::common_upper_tree_view::UpperTreeViewEnum;
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::{ColumnsExcludedDirectory, ColumnsIncludedDirectory, append_row_to_list_store, check_if_value_is_in_list_store, get_list_store};
+use crate::help_functions::{append_row_to_list_store, check_if_value_is_in_list_store, get_list_store};
+use crate::helpers::enums::{ColumnsExcludedDirectory, ColumnsIncludedDirectory};
 use crate::notebook_enums::{NotebookUpperEnum, to_notebook_upper_enum};
 
 pub(crate) fn connect_selection_of_directories(gui_data: &GuiData) {

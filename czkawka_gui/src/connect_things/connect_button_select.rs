@@ -3,7 +3,7 @@ use gtk4::prelude::*;
 use crate::gui_structs::common_tree_view::SubView;
 use crate::gui_structs::gui_data::GuiData;
 use crate::gui_structs::gui_popovers_select::GuiSelectPopovers;
-use crate::help_functions::PopoverTypes;
+use crate::helpers::enums::PopoverTypes;
 
 pub(crate) fn connect_button_select(gui_data: &GuiData) {
     let popovers_select = gui_data.popovers_select.clone();
