@@ -12,7 +12,8 @@ use crate::flg;
 use crate::gtk_traits::WidgetTraits;
 use crate::gui_structs::common_tree_view::SubView;
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::{count_number_of_groups, get_full_name_from_path_name, get_max_file_name, get_pixbuf_from_dynamic_image, resize_pixbuf_dimension};
+use crate::help_functions::{get_full_name_from_path_name, get_max_file_name, get_pixbuf_from_dynamic_image, resize_pixbuf_dimension};
+use crate::helpers::list_store_operations::count_number_of_groups;
 use crate::notebook_info::NotebookObject;
 
 const BIG_PREVIEW_SIZE: i32 = 600;

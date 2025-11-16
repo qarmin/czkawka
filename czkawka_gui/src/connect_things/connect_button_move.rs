@@ -9,7 +9,8 @@ use crate::connect_things::file_chooser_helpers::extract_paths_from_file_chooser
 use crate::flg;
 use crate::gui_structs::common_tree_view::SubView;
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::{add_text_to_text_view, check_how_much_elements_is_selected, clean_invalid_headers, get_full_name_from_path_name, reset_text_view};
+use crate::help_functions::{add_text_to_text_view, get_full_name_from_path_name, reset_text_view};
+use crate::helpers::list_store_operations::{check_how_much_elements_is_selected, clean_invalid_headers};
 use crate::helpers::model_iter::iter_list;
 
 pub(crate) fn connect_button_move(gui_data: &GuiData) {

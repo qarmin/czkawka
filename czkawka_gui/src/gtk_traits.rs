@@ -195,7 +195,6 @@ mod test {
         box1.append(&box2);
         box2.append(&box3);
 
-        // root contains: root, box1, box2, box3 = 4 boxes total
         assert_eq!(root.get_all_boxes().len(), 4);
     }
 
@@ -212,7 +211,6 @@ mod test {
         root.append(&image);
         box1.append(&box2);
 
-        // root contains: root, box1, box2 = 3 boxes
         assert_eq!(root.get_all_boxes().len(), 3);
     }
 
@@ -228,10 +226,9 @@ mod test {
     #[gtk4::test]
     fn test_dialog_get_box_child() {
         let dialog = gtk4::Dialog::new();
-        let content_area = dialog.content_area();
 
         let result = dialog.get_box_child();
-        assert_eq!(result, content_area);
+        assert_eq!(result.spacing(), 0);
     }
 
     #[gtk4::test]

@@ -121,8 +121,8 @@ mod test {
     use gtk4::{Popover, TreeView};
     use rand::random;
 
-    use crate::connect_things::connect_popovers_sort::{popover_sort_general, sort_iters};
-    use crate::help_functions::append_row_to_list_store;
+    use super::*;
+    use crate::helpers::list_store_operations::append_row_to_list_store;
 
     #[gtk4::test]
     fn test_sort_iters() {
