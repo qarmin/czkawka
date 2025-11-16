@@ -352,7 +352,6 @@ mod test {
         assert!(list_store.iter_first().is_none());
     }
 
-
     #[gtk4::test]
     #[ignore] // No idea why this freezes - when I print iters inside the loop, then it works fine
     fn cleans_invalid_headers_properly() {

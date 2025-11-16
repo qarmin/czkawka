@@ -93,6 +93,11 @@ fn main() {
 
     let cli_output = calculate_thread.join().expect("Failed to join calculation thread");
 
+    if !cli_output.output.is_empty() {
+        #[expect(clippy::print_stdout)]
+        println!("{}", cli_output.output);
+    }
+
     if cli_output.found_any_files && !cli_output.ignored_error_code_on_found {
         std::process::exit(11);
     } else {

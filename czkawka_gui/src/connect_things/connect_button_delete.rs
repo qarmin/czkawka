@@ -262,16 +262,11 @@ pub(crate) fn common_file_remove(sv: &SubView, check_button_settings_use_trash: 
         .into_par_iter()
         .map(|(idx, path)| {
             if file_remove {
-                match remove_single_file(&path, use_trash) {
-                    Ok(()) => Ok(idx),
-                    Err(e) => Err(flg!("delete_file_failed", name = path, reason = e)),
-                }
+                remove_single_file(&path, use_trash)?;
             } else {
-                match remove_folder_if_contains_only_empty_folders(&path, use_trash) {
-                    Ok(()) => Ok(idx),
-                    Err(e) => Err(flg!("delete_folder_failed", dir = path, reason = e)),
-                }
+                remove_folder_if_contains_only_empty_folders(&path, use_trash)?;
             }
+            Ok(idx)
         })
         .partition_map(|res| match res {
             Ok(entry) => itertools::Either::Left(entry),

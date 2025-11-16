@@ -14,11 +14,12 @@
 
 ### CLI
 - Using colors by default in terminal output(can be disabled by feature flag) - [#]()
+- Fixed regression, where results were not printed by default to terminal - [#]()
 
 ### GTK GUI
 - Sort button is restored and crashes when sorting are fixed(probably) - [#1623](https://github.com/qarmin/czkawka/pull/1623)
 - Config now uses json format instead custom one - [#1623](https://github.com/qarmin/czkawka/pull/1623)
-- Multithreaded hard/symlinking of files - [#]()
+- Multithreaded creation of hard links, symbolic links, and file removal - [#]()
 - Fixed the “expected” GTK regression that made image previews ridiculously small - [#1658](https://github.com/qarmin/czkawka/pull/1658)
 - Refactorings to assess whether migrating to GTK 5 will be possible (currently, it doesn’t seem very feasible) - [#1658](https://github.com/qarmin/czkawka/pull/1658)
 
