@@ -36,12 +36,13 @@ impl DialogTraits for Dialog {
 
 pub trait WidgetTraits {
     fn get_all_direct_children(&self) -> Vec<Widget>;
+    fn get_all_widgets_of_type<T: IsA<Widget>>(&self) -> Vec<T>;
+    fn get_widget_of_type<T: IsA<Widget>>(&self) -> T;
     fn get_custom_label(&self) -> Label;
     fn get_custom_image(&self) -> Image;
     fn get_all_boxes(&self) -> Vec<GtkBox>;
     #[expect(dead_code)]
     fn debug_print_widget(&self, print_only_direct_children: bool);
-    fn get_all_widgets_of_type<T: IsA<Widget>>(&self) -> Vec<T>;
 }
 
 impl<P: IsA<Widget>> WidgetTraits for P {
@@ -71,7 +72,20 @@ impl<P: IsA<Widget>> WidgetTraits for P {
                 found_widgets.push(specific_widget);
             }
         }
+        assert_eq!(found_widgets.len(), 0);
         found_widgets
+    }
+
+    fn get_widget_of_type<T: IsA<Widget>>(&self) -> T {
+        let mut widgets_to_check = vec![self.clone().upcast::<Widget>()];
+
+        while let Some(widget) = widgets_to_check.pop() {
+            if let Ok(specific_widget) = widget.clone().downcast::<T>() {
+                return Some(specific_widget);
+            }
+            widgets_to_check.extend(widget.get_all_direct_children());
+        }
+        panic!("Widget doesn't have proper child of specified type");
     }
 
     fn get_custom_label(&self) -> Label {
