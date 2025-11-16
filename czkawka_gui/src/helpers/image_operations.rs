@@ -3,9 +3,9 @@ use std::io::{BufReader, Cursor};
 
 use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
 use glib::Bytes;
-use gtk4::Widget;
 use gtk4::gdk_pixbuf::Colorspace;
 use gtk4::prelude::*;
+use gtk4::{Image, Widget};
 use image::codecs::png::PngEncoder;
 use image::{DynamicImage, GenericImageView, ImageEncoder, RgbaImage};
 use resvg::tiny_skia;
@@ -58,7 +58,7 @@ fn dynamic_image_to_pixbuf(img: DynamicImage) -> Pixbuf {
 }
 
 pub(crate) fn set_icon_of_button<P: IsA<Widget>>(button: &P, data: &'static [u8]) {
-    let image = button.get_custom_image();
+    let image = button.get_widget_of_type::<Image>(true);
     let dynamic_image = svg_to_dynamic_image(data).expect("Failed to convert SVG data to DynamicImage");
     let pixbuf = dynamic_image_to_pixbuf(dynamic_image);
     image.set_from_pixbuf(Some(&pixbuf));

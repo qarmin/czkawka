@@ -1,3 +1,4 @@
+use gtk4::Label;
 use gtk4::prelude::*;
 
 use crate::gtk_traits::WidgetTraits;
@@ -122,15 +123,23 @@ impl GuiUpperNotebook {
         self.check_button_recursive.set_tooltip_text(Some(&flg!("upper_recursive_button_tooltip")));
 
         self.buttons_manual_add_included_directory
-            .get_custom_label()
+            .get_widget_of_type::<Label>(true)
             .set_text(&flg!("upper_manual_add_included_button"));
-        self.buttons_add_included_directory.get_custom_label().set_text(&flg!("upper_add_included_button"));
-        self.buttons_remove_included_directory.get_custom_label().set_text(&flg!("upper_remove_included_button"));
+        self.buttons_add_included_directory
+            .get_widget_of_type::<Label>(true)
+            .set_text(&flg!("upper_add_included_button"));
+        self.buttons_remove_included_directory
+            .get_widget_of_type::<Label>(true)
+            .set_text(&flg!("upper_remove_included_button"));
         self.buttons_manual_add_excluded_directory
-            .get_custom_label()
+            .get_widget_of_type::<Label>(true)
             .set_text(&flg!("upper_manual_add_excluded_button"));
-        self.buttons_add_excluded_directory.get_custom_label().set_text(&flg!("upper_add_excluded_button"));
-        self.buttons_remove_excluded_directory.get_custom_label().set_text(&flg!("upper_remove_excluded_button"));
+        self.buttons_add_excluded_directory
+            .get_widget_of_type::<Label>(true)
+            .set_text(&flg!("upper_add_excluded_button"));
+        self.buttons_remove_excluded_directory
+            .get_widget_of_type::<Label>(true)
+            .set_text(&flg!("upper_remove_excluded_button"));
 
         self.buttons_manual_add_included_directory
             .set_tooltip_text(Some(&flg!("upper_manual_add_included_button_tooltip")));

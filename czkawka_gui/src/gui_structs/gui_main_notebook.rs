@@ -2,13 +2,6 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use crate::flg;
-use crate::gtk_traits::WidgetTraits;
-use crate::gui_structs::common_tree_view::{CommonTreeViews, SharedModelEnum, SubView};
-use crate::gui_structs::gui_data::GuiData;
-use crate::gui_structs::gui_settings::GuiSettings;
-use crate::help_combo_box::{AUDIO_TYPE_CHECK_METHOD_COMBO_BOX, BIG_FILES_CHECK_METHOD_COMBO_BOX, DUPLICATES_CHECK_METHOD_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX};
-use crate::notebook_enums::NotebookMainEnum;
 use czkawka_core::common::model::CheckingMethod;
 use czkawka_core::localizer_core::{fnc_get_similarity_minimal, fnc_get_similarity_very_high};
 use czkawka_core::tools::big_file::SearchMode;
@@ -17,6 +10,14 @@ use czkawka_core::tools::similar_images::core::get_string_from_similarity;
 use gtk4::prelude::*;
 use gtk4::{Builder, CheckButton, ComboBoxText, Entry, Label, Notebook, Picture, Scale, Widget};
 use log::error;
+
+use crate::flg;
+use crate::gtk_traits::WidgetTraits;
+use crate::gui_structs::common_tree_view::{CommonTreeViews, SharedModelEnum, SubView};
+use crate::gui_structs::gui_data::GuiData;
+use crate::gui_structs::gui_settings::GuiSettings;
+use crate::help_combo_box::{AUDIO_TYPE_CHECK_METHOD_COMBO_BOX, BIG_FILES_CHECK_METHOD_COMBO_BOX, DUPLICATES_CHECK_METHOD_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX};
+use crate::notebook_enums::NotebookMainEnum;
 
 #[derive(Clone)]
 pub struct GuiMainNotebook {
@@ -344,7 +345,7 @@ impl GuiMainNotebook {
             if let Some(tabel) = tabel {
                 tabel.downcast::<Label>().expect("Tab label must be a label").set_text(&fl_thing);
             } else {
-                error!("Tab label for main notebook not found for enum {:?), message {:?}", main_enum, fl_thing);
+                error!("Tab label for main notebook not found for enum {main_enum:?}, message {fl_thing:?}");
             }
         }
 
