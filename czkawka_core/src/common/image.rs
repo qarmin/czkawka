@@ -1,33 +1,23 @@
-#![allow(unused_imports)]
+// #![allow(unused_imports)]
 // I don't want to fight with unused(heif) imports in this file, so simply ignore it to avoid too much complexity
 
 use std::fs::File;
 use std::path::Path;
-use std::sync::{Arc, atomic};
-use std::thread::{JoinHandle, sleep};
-use std::time::{Duration, Instant, SystemTime};
-use std::{fs, panic, thread};
+use std::{fs, panic};
 
-use anyhow::anyhow;
-use fun_time::fun_time;
 use image::{DynamicImage, ImageBuffer, ImageReader, Rgb, Rgba};
-use jxl_oxide::image::BitDepth;
 use jxl_oxide::integration::JxlDecoder;
-use jxl_oxide::{JxlImage, PixelFormat};
 #[cfg(feature = "heif")]
 use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
 #[cfg(feature = "libraw")]
 use libraw::Processor;
-use log::{LevelFilter, Record, debug, error, info, trace, warn};
+use log::{error, trace};
 use nom_exif::{ExifIter, ExifTag, MediaParser, MediaSource};
-use rawler::RawLoader;
 use rawler::decoders::RawDecodeParams;
 use rawler::imgop::develop::RawDevelop;
 use rawler::rawsource::RawSource;
-use symphonia::core::conv::IntoSample;
 
-use crate::common;
-use crate::common::consts::{HEIC_EXTENSIONS, IMAGE_RS_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, JXL_IMAGE_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
+use crate::common::consts::{HEIC_EXTENSIONS, IMAGE_RS_EXTENSIONS, JXL_IMAGE_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
 use crate::common::create_crash_message;
 use crate::helpers::debug_timer::Timer;
 // #[cfg(feature = "heif")]
