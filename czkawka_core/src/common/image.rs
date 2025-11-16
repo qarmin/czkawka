@@ -77,6 +77,10 @@ pub fn get_dynamic_image_from_path(path: &str) -> Result<DynamicImage, String> {
     if let Ok(res) = res {
         match res {
             Ok(t) => {
+                if t.width() == 0 || t.height() == 0 {
+                    return Err(format!("Image has zero width or height \"{path}\""));
+                }
+
                 let rotation = get_rotation_from_exif(path).unwrap_or(None);
                 match rotation {
                     Some(ExifOrientation::Normal) | None => Ok(t),
