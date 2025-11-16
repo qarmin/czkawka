@@ -3,8 +3,8 @@ use gtk4::{GestureClick, Widget};
 
 use crate::gtk_traits::WidgetTraits;
 use crate::gui_structs::gui_data::CZK_ICON_SORT;
-use crate::helpers::image_operations::set_icon_of_button;
 use crate::helpers::enums::BottomButtonsEnum;
+use crate::helpers::image_operations::set_icon_of_button;
 use crate::{
     CZK_ICON_COMPARE, CZK_ICON_HARDLINK, CZK_ICON_HIDE_DOWN, CZK_ICON_HIDE_UP, CZK_ICON_MOVE, CZK_ICON_SAVE, CZK_ICON_SEARCH, CZK_ICON_SELECT, CZK_ICON_SYMLINK, CZK_ICON_TRASH,
     flg,

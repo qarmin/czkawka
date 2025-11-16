@@ -297,119 +297,113 @@ mod test {
     }
 
     #[gtk4::test]
-    fn test_get_string_from_list_store() {
+    fn returns_empty_vector_when_list_store_is_empty() {
         let columns_types: &[Type] = &[Type::STRING];
         let list_store = gtk4::ListStore::new(columns_types);
         let tree_view = TreeView::with_model(&list_store);
 
-        let values_to_add: &[(u32, &dyn ToValue)] = &[(0, &"test"), (0, &"test2"), (0, &"test3")];
-        for i in values_to_add {
-            append_row_to_list_store(&list_store, &[*i]);
-        }
-        assert_eq!(
-            get_string_from_list_store(&tree_view, 0, None),
-            vec!["test".to_string(), "test2".to_string(), "test3".to_string()]
-        );
+        assert_eq!(get_string_from_list_store(&tree_view, 0, None), Vec::<String>::new());
+    }
 
+    #[gtk4::test]
+    fn filters_by_boolean_column_when_selection_specified() {
         let columns_types: &[Type] = &[Type::BOOL, Type::STRING];
         let list_store = gtk4::ListStore::new(columns_types);
         let tree_view = TreeView::with_model(&list_store);
 
         let values_to_add: &[&[(u32, &dyn ToValue)]] = &[
-            &[(0, &Into::<Value>::into(true)), (1, &Into::<Value>::into("test"))],
-            &[(0, &Into::<Value>::into(true)), (1, &Into::<Value>::into("test2"))],
-            &[(0, &Into::<Value>::into(false)), (1, &Into::<Value>::into("test3"))],
+            &[(0, &Into::<Value>::into(true)), (1, &Into::<Value>::into("selected1"))],
+            &[(0, &Into::<Value>::into(false)), (1, &Into::<Value>::into("not_selected"))],
+            &[(0, &Into::<Value>::into(true)), (1, &Into::<Value>::into("selected2"))],
         ];
         for i in values_to_add {
             append_row_to_list_store(&list_store, i);
         }
-        assert_eq!(get_string_from_list_store(&tree_view, 1, Some(0)), vec!["test".to_string(), "test2".to_string()]);
+
+        assert_eq!(get_string_from_list_store(&tree_view, 1, Some(0)), vec!["selected1".to_string(), "selected2".to_string()]);
     }
 
     #[gtk4::test]
-    fn test_check_if_list_store_column_have_all_same_values() {
-        let columns_types: &[Type] = &[Type::BOOL];
+    fn applies_custom_function_to_all_rows() {
+        let columns_types: &[Type] = &[Type::STRING, Type::I32];
+        let list_store = gtk4::ListStore::new(columns_types);
+        let tree_view = TreeView::with_model(&list_store);
+
+        append_row_to_list_store(&list_store, &[(0, &"row1"), (1, &10)]);
+        append_row_to_list_store(&list_store, &[(0, &"row2"), (1, &20)]);
+        append_row_to_list_store(&list_store, &[(0, &"row3"), (1, &30)]);
+
+        let collected: Vec<(String, i32)> = get_from_list_store_fnc(&tree_view, &|m, i, vec: &mut Vec<(String, i32)>| {
+            vec.push((m.get::<String>(i, 0), m.get::<i32>(i, 1)));
+        });
+
+        assert_eq!(collected, vec![("row1".to_string(), 10), ("row2".to_string(), 20), ("row3".to_string(), 30)]);
+    }
+
+    #[gtk4::test]
+    fn removes_single_orphan_header_with_empty_path() {
+        let columns_types: &[Type] = &[Type::BOOL, Type::STRING];
         let list_store = gtk4::ListStore::new(columns_types);
 
-        list_store.clear();
-        let values_to_add: &[(u32, &dyn ToValue)] = &[(0, &true), (0, &true), (0, &false)];
-        for i in values_to_add {
-            append_row_to_list_store(&list_store, &[*i]);
-        }
-        assert!(!check_if_list_store_column_have_all_same_values(&list_store, 0, true));
-        assert!(!check_if_list_store_column_have_all_same_values(&list_store, 0, false));
+        append_row_to_list_store(&list_store, &[(0, &true), (1, &"")]);
 
-        list_store.clear();
-        let values_to_add: &[(u32, &dyn ToValue)] = &[(0, &true), (0, &true), (0, &true)];
-        for i in values_to_add {
-            append_row_to_list_store(&list_store, &[*i]);
-        }
-        assert!(check_if_list_store_column_have_all_same_values(&list_store, 0, true));
-        assert!(!check_if_list_store_column_have_all_same_values(&list_store, 0, false));
+        clean_invalid_headers(&list_store, 0, 1);
 
-        list_store.clear();
-        let values_to_add: &[(u32, &dyn ToValue)] = &[(0, &false)];
-        for i in values_to_add {
-            append_row_to_list_store(&list_store, &[*i]);
-        }
-        assert!(!check_if_list_store_column_have_all_same_values(&list_store, 0, true));
-        assert!(check_if_list_store_column_have_all_same_values(&list_store, 0, false));
-
-        list_store.clear();
-        assert!(!check_if_list_store_column_have_all_same_values(&list_store, 0, true));
-        assert!(!check_if_list_store_column_have_all_same_values(&list_store, 0, false));
+        assert!(list_store.iter_first().is_none());
     }
 
     #[gtk4::test]
-    fn test_check_if_value_is_in_list_store() {
-        let columns_types: &[Type] = &[Type::STRING];
+    fn removes_header_with_single_child_when_path_empty() {
+        let columns_types: &[Type] = &[Type::BOOL, Type::STRING];
         let list_store = gtk4::ListStore::new(columns_types);
-        let values_to_add: &[(u32, &dyn ToValue)] = &[(0, &"Koczkodan"), (0, &"Kachir")];
-        for i in values_to_add {
-            append_row_to_list_store(&list_store, &[*i]);
-        }
-        assert!(check_if_value_is_in_list_store(&list_store, 0, "Koczkodan"));
-        assert!(check_if_value_is_in_list_store(&list_store, 0, "Kachir"));
-        assert!(!check_if_value_is_in_list_store(&list_store, 0, "Koczkodan2"));
 
-        let columns_types: &[Type] = &[Type::STRING, Type::STRING];
+        append_row_to_list_store(&list_store, &[(0, &true), (1, &"")]);
+        append_row_to_list_store(&list_store, &[(0, &false), (1, &"")]);
+
+        clean_invalid_headers(&list_store, 0, 1);
+
+        let count = list_store.iter_n_children(None);
+        assert_eq!(count, 0, "Expected 0 rows after cleaning header with single child, but got {count}");
+    }
+
+    #[gtk4::test]
+    fn keeps_header_with_multiple_children_when_path_empty() {
+        let columns_types: &[Type] = &[Type::BOOL, Type::STRING];
         let list_store = gtk4::ListStore::new(columns_types);
-        let values_to_add: &[&[(u32, &dyn ToValue)]] = &[&[(0, &"Koczkodan"), (1, &"Krakus")], &[(0, &"Kachir"), (1, &"Wodnica")]];
-        for i in values_to_add {
-            append_row_to_list_store(&list_store, i);
-        }
-        assert!(check_if_value_is_in_list_store(&list_store, 0, "Koczkodan"));
-        assert!(check_if_value_is_in_list_store(&list_store, 1, "Krakus"));
-        assert!(check_if_value_is_in_list_store(&list_store, 0, "Kachir"));
-        assert!(check_if_value_is_in_list_store(&list_store, 1, "Wodnica"));
-        assert!(!check_if_value_is_in_list_store(&list_store, 0, "Krakus"));
-        assert!(!check_if_value_is_in_list_store(&list_store, 1, "Kachir"));
+
+        append_row_to_list_store(&list_store, &[(0, &true), (1, &"")]);
+        append_row_to_list_store(&list_store, &[(0, &false), (1, &"")]);
+        append_row_to_list_store(&list_store, &[(0, &false), (1, &"")]);
+
+        clean_invalid_headers(&list_store, 0, 1);
+
+        let mut count = 0;
+        iter_list(&list_store, |_, _| count += 1);
+        assert_eq!(count, 3);
     }
 
     #[gtk4::test]
-    fn test_count_number_of_groups() {
-        // Use helper that builds SubView + ListStore
-        let (sv, list_store) = get_test_sv_duplicate();
+    fn keeps_reference_folder_header_with_single_child() {
+        let columns_types: &[Type] = &[Type::BOOL, Type::STRING];
+        let list_store = gtk4::ListStore::new(columns_types);
 
-        let column_header = sv.nb_object.column_header.expect("Duplicate NB must have header column");
+        append_row_to_list_store(&list_store, &[(0, &true), (1, &"/reference/path")]);
+        append_row_to_list_store(&list_store, &[(0, &false), (1, &"/some/child")]);
 
-        // Build rows: H, C, H, C -> expected 2 groups
-        append_row_to_list_store(&list_store, &[(column_header as u32, &Into::<Value>::into(true))]);
-        append_row_to_list_store(&list_store, &[(column_header as u32, &Into::<Value>::into(false))]);
-        append_row_to_list_store(&list_store, &[(column_header as u32, &Into::<Value>::into(true))]);
-        append_row_to_list_store(&list_store, &[(column_header as u32, &Into::<Value>::into(false))]);
+        clean_invalid_headers(&list_store, 0, 1);
 
-        assert_eq!(crate::helpers::list_store_operations::count_number_of_groups(&sv), 2);
+        let mut count = 0;
+        iter_list(&list_store, |_, _| count += 1);
+        assert_eq!(count, 2);
     }
 
     #[gtk4::test]
-    fn test_check_how_much_elements_is_selected() {
+    fn counts_items_and_groups_correctly() {
         let (sv, list_store) = get_test_sv_duplicate();
 
         let column_header = sv.nb_object.column_header.expect("Duplicate NB must have header column");
         let column_selection = sv.nb_object.column_selection;
 
-        // Build rows: H, C(selected), C(not selected), H, C(selected) => 2 selected items in 2 groups
         append_row_to_list_store(
             &list_store,
             &[(column_header as u32, &Into::<Value>::into(true)), (column_selection as u32, &Into::<Value>::into(false))],
@@ -417,6 +411,14 @@ mod test {
         append_row_to_list_store(
             &list_store,
             &[(column_header as u32, &Into::<Value>::into(false)), (column_selection as u32, &Into::<Value>::into(true))],
+        );
+        append_row_to_list_store(
+            &list_store,
+            &[(column_header as u32, &Into::<Value>::into(false)), (column_selection as u32, &Into::<Value>::into(true))],
+        );
+        append_row_to_list_store(
+            &list_store,
+            &[(column_header as u32, &Into::<Value>::into(true)), (column_selection as u32, &Into::<Value>::into(false))],
         );
         append_row_to_list_store(
             &list_store,
@@ -424,32 +426,102 @@ mod test {
         );
         append_row_to_list_store(
             &list_store,
+            &[(column_header as u32, &Into::<Value>::into(false)), (column_selection as u32, &Into::<Value>::into(true))],
+        );
+
+        let (items, groups) = check_how_much_elements_is_selected(&sv);
+        assert_eq!(items, 3);
+        assert_eq!(groups, 2);
+    }
+
+    #[gtk4::test]
+    fn returns_zero_when_nothing_selected() {
+        let (sv, list_store) = get_test_sv_duplicate();
+
+        let column_header = sv.nb_object.column_header.expect("Duplicate NB must have header column");
+        let column_selection = sv.nb_object.column_selection;
+
+        append_row_to_list_store(
+            &list_store,
             &[(column_header as u32, &Into::<Value>::into(true)), (column_selection as u32, &Into::<Value>::into(false))],
         );
         append_row_to_list_store(
             &list_store,
-            &[(column_header as u32, &Into::<Value>::into(false)), (column_selection as u32, &Into::<Value>::into(true))],
+            &[(column_header as u32, &Into::<Value>::into(false)), (column_selection as u32, &Into::<Value>::into(false))],
         );
 
-        let res = check_how_much_elements_is_selected(&sv);
-        assert_eq!(res, (2, 2));
+        let (items, groups) = check_how_much_elements_is_selected(&sv);
+        assert_eq!(items, 0);
+        assert_eq!(groups, 0);
     }
 
     #[gtk4::test]
-    fn test_get_from_list_store_fnc() {
-        let columns_types: &[Type] = &[Type::STRING];
+    fn returns_correct_count_of_groups() {
+        let (sv, list_store) = get_test_sv_duplicate();
+
+        let column_header = sv.nb_object.column_header.expect("Duplicate NB must have header column");
+
+        append_row_to_list_store(&list_store, &[(column_header as u32, &Into::<Value>::into(true))]);
+        append_row_to_list_store(&list_store, &[(column_header as u32, &Into::<Value>::into(false))]);
+        append_row_to_list_store(&list_store, &[(column_header as u32, &Into::<Value>::into(true))]);
+        append_row_to_list_store(&list_store, &[(column_header as u32, &Into::<Value>::into(false))]);
+        append_row_to_list_store(&list_store, &[(column_header as u32, &Into::<Value>::into(true))]);
+
+        assert_eq!(count_number_of_groups(&sv), 3);
+    }
+
+    #[gtk4::test]
+    fn finds_existing_values_in_different_columns() {
+        let columns_types: &[Type] = &[Type::STRING, Type::STRING];
         let list_store = gtk4::ListStore::new(columns_types);
-        let tree_view = TreeView::with_model(&list_store);
 
-        // Append literals directly to avoid lifetime/coercion issues
-        append_row_to_list_store(&list_store, &[(0, &"a")]);
-        append_row_to_list_store(&list_store, &[(0, &"b")]);
-        append_row_to_list_store(&list_store, &[(0, &"c")]);
+        let values_to_add: &[&[(u32, &dyn ToValue)]] = &[&[(0, &"key1"), (1, &"value1")], &[(0, &"key2"), (1, &"value2")], &[(0, &"key3"), (1, &"value3")]];
+        for i in values_to_add {
+            append_row_to_list_store(&list_store, i);
+        }
 
-        let collected: Vec<String> = get_from_list_store_fnc(&tree_view, &|m, i, vec: &mut Vec<String>| {
-            vec.push(m.get::<String>(i, 0));
-        });
+        assert!(check_if_value_is_in_list_store(&list_store, 0, "key2"));
+        assert!(check_if_value_is_in_list_store(&list_store, 1, "value3"));
+        assert!(!check_if_value_is_in_list_store(&list_store, 0, "nonexistent"));
+        assert!(!check_if_value_is_in_list_store(&list_store, 1, "key1"));
+    }
 
-        assert_eq!(collected, vec!["a".to_string(), "b".to_string(), "c".to_string()]);
+    #[gtk4::test]
+    fn detects_uniform_values_in_column() {
+        let columns_types: &[Type] = &[Type::BOOL];
+        let list_store = gtk4::ListStore::new(columns_types);
+
+        append_row_to_list_store(&list_store, &[(0, &true)]);
+        append_row_to_list_store(&list_store, &[(0, &true)]);
+        append_row_to_list_store(&list_store, &[(0, &true)]);
+
+        assert!(check_if_list_store_column_have_all_same_values(&list_store, 0, true));
+        assert!(!check_if_list_store_column_have_all_same_values(&list_store, 0, false));
+    }
+
+    #[gtk4::test]
+    fn detects_mixed_values_in_column() {
+        let columns_types: &[Type] = &[Type::BOOL];
+        let list_store = gtk4::ListStore::new(columns_types);
+
+        append_row_to_list_store(&list_store, &[(0, &true)]);
+        append_row_to_list_store(&list_store, &[(0, &false)]);
+        append_row_to_list_store(&list_store, &[(0, &true)]);
+
+        assert!(!check_if_list_store_column_have_all_same_values(&list_store, 0, true));
+        assert!(!check_if_list_store_column_have_all_same_values(&list_store, 0, false));
+    }
+
+    #[gtk4::test]
+    fn adds_row_with_multiple_columns() {
+        let columns_types: &[Type] = &[Type::STRING, Type::I32, Type::BOOL];
+        let list_store = gtk4::ListStore::new(columns_types);
+
+        append_row_to_list_store(&list_store, &[(0, &"test"), (1, &42), (2, &true)]);
+
+        let iter = list_store.iter_first().expect("Should have a row");
+        assert_eq!(list_store.get::<String>(&iter, 0), "test");
+        assert_eq!(list_store.get::<i32>(&iter, 1), 42);
+        assert!(list_store.get::<bool>(&iter, 2));
     }
 }

@@ -383,18 +383,13 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>,
         let small_img = Image::new();
         let big_img = Image::new();
 
-        let mut pixbuf = get_pixbuf_from_dynamic_image(&DynamicImage::new_rgb8(1, 1)).expect("Failed to create pixbuf");
+        let mut pixbuf = get_pixbuf_from_dynamic_image(DynamicImage::new_rgb8(1, 1)).expect("Failed to create pixbuf");
 
         if use_rust_loader {
-            match get_dynamic_image_from_path(&full_path) {
-                Ok(t) => match get_pixbuf_from_dynamic_image(&t) {
-                    Ok(t) => {
-                        pixbuf = t;
-                    }
-                    Err(e) => {
-                        error!("Failed to open image {full_path}, reason {e}");
-                    }
-                },
+            match get_dynamic_image_from_path(&full_path).and_then(get_pixbuf_from_dynamic_image) {
+                Ok(t) => {
+                    pixbuf = t;
+                }
                 Err(e) => {
                     error!("Failed to open image {full_path}, reason {e}");
                 }

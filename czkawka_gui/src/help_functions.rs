@@ -126,7 +126,6 @@ pub(crate) fn get_full_name_from_path_name(path: &str, name: &str) -> String {
     string
 }
 
-
 pub(crate) fn get_max_file_name(file_name: &str, max_length: usize) -> String {
     assert!(max_length > 10); // Maybe in future will be supported lower values
     let characters_in_filename = file_name.chars().count();
@@ -150,7 +149,6 @@ pub(crate) fn get_max_file_name(file_name: &str, max_length: usize) -> String {
         file_name.to_string()
     }
 }
-
 
 pub(crate) fn scale_set_min_max_values(scale: &Scale, minimum: f64, maximum: f64, current_value: f64, step: Option<f64>) {
     scale.set_range(minimum, maximum);
