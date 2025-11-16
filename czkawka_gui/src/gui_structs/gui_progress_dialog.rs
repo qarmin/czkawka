@@ -2,7 +2,7 @@ use gtk4::prelude::*;
 use gtk4::{Builder, EventControllerKey, Window};
 
 use crate::gtk_traits::WidgetTraits;
-use crate::help_functions::set_icon_of_button;
+use crate::helpers::image_operations::set_icon_of_button;
 use crate::{CZK_ICON_STOP, flg};
 
 #[derive(Clone)]

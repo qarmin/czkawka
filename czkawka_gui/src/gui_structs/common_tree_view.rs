@@ -25,11 +25,12 @@ use gtk4::{
 use crate::connect_things::connect_button_delete::delete_things;
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::{KEY_DELETE, SharedState, add_text_to_text_view, get_full_name_from_path_name, get_pixbuf_from_dynamic_image, resize_pixbuf_dimension};
+use crate::help_functions::{KEY_DELETE, SharedState, add_text_to_text_view, get_full_name_from_path_name};
 use crate::helpers::enums::{
     ColumnsBadExtensions, ColumnsBigFiles, ColumnsBrokenFiles, ColumnsDuplicates, ColumnsEmptyFiles, ColumnsEmptyFolders, ColumnsInvalidSymlinks, ColumnsSameMusic,
     ColumnsSimilarImages, ColumnsSimilarVideos, ColumnsTemporaryFiles,
 };
+use crate::helpers::image_operations::{get_pixbuf_from_dynamic_image, resize_pixbuf_dimension};
 use crate::notebook_enums::NotebookMainEnum;
 use crate::notebook_info::{NOTEBOOKS_INFO, NotebookObject};
 use crate::opening_selecting_records::{opening_double_click_function, opening_enter_function_ported, opening_middle_mouse_function, select_function_header};
