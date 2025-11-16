@@ -24,6 +24,7 @@ use fun_time::fun_time;
 use gtk4::Grid;
 use gtk4::prelude::*;
 
+use crate::gui_structs::common_tree_view::TreeViewListStoreTrait;
 use crate::gui_structs::common_upper_tree_view::UpperTreeViewEnum;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_combo_box::{
@@ -31,8 +32,7 @@ use crate::help_combo_box::{
     IMAGES_HASH_TYPE_COMBO_BOX, IMAGES_RESIZE_ALGORITHM_COMBO_BOX,
 };
 use crate::help_functions::{
-    check_if_list_store_column_have_all_same_values, get_list_store, get_path_buf_from_vector_of_strings, get_string_from_list_store, hide_all_buttons, reset_text_view,
-    set_buttons,
+    check_if_list_store_column_have_all_same_values, get_path_buf_from_vector_of_strings, get_string_from_list_store, hide_all_buttons, reset_text_view, set_buttons,
 };
 use crate::helpers::enums::{ColumnsExcludedDirectory, ColumnsIncludedDirectory, Message};
 use crate::model_iter::iter_list;
@@ -67,7 +67,7 @@ pub(crate) fn connect_button_search(gui_data: &GuiData, result_sender: Sender<Me
         let loaded_commons = LoadedCommonItems::load_items(&gui_data);
 
         // Check if user selected all referenced folders
-        let list_store_included_directories = get_list_store(&tree_view_included_directories);
+        let list_store_included_directories = tree_view_included_directories.get_model();
         if check_if_list_store_column_have_all_same_values(&list_store_included_directories, ColumnsIncludedDirectory::ReferenceButton as i32, true) {
             entry_info.set_text(&flg!("selected_all_reference_folders"));
             return;
@@ -716,7 +716,7 @@ where
 
 #[fun_time(message = "clean_tree_view", level = "debug")]
 fn clean_tree_view(tree_view: &gtk4::TreeView) {
-    let list_store = get_list_store(tree_view);
+    let list_store = tree_view.get_model();
     let mut all_iters: Vec<gtk4::TreeIter> = Vec::new();
     iter_list(&list_store, |_m, i| {
         all_iters.push(*i);

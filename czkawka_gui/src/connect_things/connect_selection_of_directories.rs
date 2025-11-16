@@ -9,9 +9,10 @@ use gtk4::{DropTarget, FileChooserNative, Notebook, Orientation, ResponseType, T
 
 use crate::connect_things::file_chooser_helpers::extract_paths_from_file_chooser;
 use crate::flg;
+use crate::gui_structs::common_tree_view::TreeViewListStoreTrait;
 use crate::gui_structs::common_upper_tree_view::UpperTreeViewEnum;
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::{append_row_to_list_store, check_if_value_is_in_list_store, get_list_store};
+use crate::help_functions::{append_row_to_list_store, check_if_value_is_in_list_store};
 use crate::helpers::enums::{ColumnsExcludedDirectory, ColumnsIncludedDirectory};
 use crate::notebook_enums::{NotebookUpperEnum, to_notebook_upper_enum};
 
@@ -92,7 +93,7 @@ pub(crate) fn connect_selection_of_directories(gui_data: &GuiData) {
 }
 
 fn remove_item_directory(tree_view: &TreeView) {
-    let list_store = get_list_store(tree_view);
+    let list_store = tree_view.get_model();
     let selection = tree_view.selection();
 
     let (vec_tree_path, _tree_model) = selection.selected_rows();
@@ -152,7 +153,7 @@ fn connect_file_dialog(file_dialog_include_exclude_folder_selection: &FileChoose
 }
 
 fn add_directories(tree_view: &TreeView, folders: &Vec<PathBuf>, excluded_items: bool) {
-    let list_store = get_list_store(tree_view);
+    let list_store = tree_view.get_model();
 
     if excluded_items {
         for file_entry in folders {
@@ -202,7 +203,7 @@ fn add_manually_directories(window_main: &Window, tree_view: &TreeView, excluded
                 remove_ending_slashes(&mut text);
 
                 if !text.is_empty() {
-                    let list_store = get_list_store(&tree_view);
+                    let list_store = tree_view.get_model();
 
                     if excluded_items {
                         if !check_if_value_is_in_list_store(&list_store, ColumnsExcludedDirectory::Path as i32, &text) {

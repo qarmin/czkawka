@@ -3,8 +3,8 @@ use gtk4::prelude::*;
 use gtk4::{GestureClick, TreeModel, TreePath, TreeSelection};
 use log::{debug, error};
 
-use crate::gui_structs::common_tree_view::GetTreeViewTrait;
-use crate::help_functions::{KEY_ENTER, KEY_SPACE, get_full_name_from_path_name, get_list_store, get_notebook_object_from_tree_view, get_notebook_upper_enum_from_tree_view};
+use crate::gui_structs::common_tree_view::{GetTreeViewTrait, TreeViewListStoreTrait};
+use crate::help_functions::{KEY_ENTER, KEY_SPACE, get_full_name_from_path_name, get_notebook_object_from_tree_view, get_notebook_upper_enum_from_tree_view};
 use crate::helpers::enums::{ColumnsDuplicates, ColumnsExcludedDirectory, ColumnsIncludedDirectory, ColumnsSameMusic, ColumnsSimilarImages, ColumnsSimilarVideos};
 use crate::notebook_enums::NotebookUpperEnum;
 
@@ -111,7 +111,7 @@ fn common_mark_function(tree_view: &gtk4::TreeView, column_selection: i32, colum
     let selection = tree_view.selection();
     let (selected_rows, tree_model) = selection.selected_rows();
 
-    let model = get_list_store(tree_view);
+    let model = tree_view.get_model();
 
     for tree_path in selected_rows.iter().rev() {
         if let Some(column_header) = column_header

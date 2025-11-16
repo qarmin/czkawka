@@ -18,7 +18,7 @@ use resvg::tiny_skia;
 use resvg::usvg::{Options, Tree};
 
 use crate::flg;
-use crate::gui_structs::common_tree_view::SubView;
+use crate::gui_structs::common_tree_view::{SubView, TreeViewListStoreTrait};
 use crate::helpers::enums::BottomButtonsEnum;
 use crate::model_iter::{iter_list, iter_list_with_break, iter_list_with_break_init};
 use crate::notebook_enums::NotebookUpperEnum;
@@ -35,7 +35,7 @@ pub const HEADER_ROW_COLOR: &str = "#111111";
 pub const TEXT_COLOR: &str = "#ffffff";
 
 pub(crate) fn get_string_from_list_store(tree_view: &TreeView, column_full_path: i32, column_selection: Option<i32>) -> Vec<String> {
-    let list_store: ListStore = get_list_store(tree_view);
+    let list_store: ListStore = tree_view.get_model();
 
     let mut string_vector: Vec<String> = Vec::new();
 
@@ -58,7 +58,7 @@ pub(crate) fn get_string_from_list_store(tree_view: &TreeView, column_full_path:
 }
 
 pub(crate) fn get_from_list_store_fnc<T>(tree_view: &TreeView, fnc: &dyn Fn(&ListStore, &gtk4::TreeIter, &mut Vec<T>)) -> Vec<T> {
-    let list_store: ListStore = get_list_store(tree_view);
+    let list_store: ListStore = tree_view.get_model();
 
     let mut result_vector: Vec<T> = Vec::new();
 
@@ -137,10 +137,6 @@ pub(crate) fn hide_all_buttons(buttons_array: &[Widget]) {
     for button in buttons_array {
         button.set_visible(false);
     }
-}
-
-pub(crate) fn get_list_store(tree_view: &TreeView) -> ListStore {
-    tree_view.model().expect("Tree view have no model").downcast::<ListStore>().expect("Model is not ListStore")
 }
 
 pub(crate) fn get_dialog_box_child(dialog: &gtk4::Dialog) -> gtk4::Box {

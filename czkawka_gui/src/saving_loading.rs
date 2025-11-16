@@ -18,9 +18,7 @@ use crate::gui_structs::gui_main_notebook::GuiMainNotebook;
 use crate::gui_structs::gui_settings::GuiSettings;
 use crate::gui_structs::gui_upper_notebook::GuiUpperNotebook;
 use crate::help_combo_box::DUPLICATES_CHECK_METHOD_COMBO_BOX;
-use crate::help_functions::{
-    add_text_to_text_view, append_row_to_list_store, get_from_list_store_fnc, get_list_store, get_string_from_list_store, reset_text_view, scale_step_function,
-};
+use crate::help_functions::{add_text_to_text_view, append_row_to_list_store, get_from_list_store_fnc, get_string_from_list_store, reset_text_view, scale_step_function};
 use crate::helpers::enums::{ColumnsExcludedDirectory, ColumnsIncludedDirectory};
 use crate::language_functions::{LANGUAGES_ALL, get_language_from_combo_box_text};
 
@@ -453,7 +451,7 @@ fn default_use_rust_libraries_to_preview() -> bool {
 }
 
 fn set_included_reference_folders(tree_view_included_directories: &TreeView, included_directories: &[String], referenced_directories: &[String]) {
-    let list_store = get_list_store(tree_view_included_directories);
+    let list_store = tree_view_included_directories.get_model();
     list_store.clear();
 
     // Referenced directories must be also in included directories
@@ -760,7 +758,7 @@ fn set_directories(
     set_included_reference_folders(tree_view_included_directories, included_directories, referenced_directories);
 
     //// Exclude Directories
-    let list_store = get_list_store(tree_view_excluded_directories);
+    let list_store = tree_view_excluded_directories.get_model();
     list_store.clear();
 
     for directory in excluded_directories {
