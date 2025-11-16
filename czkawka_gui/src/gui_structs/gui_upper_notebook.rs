@@ -1,6 +1,6 @@
 use gtk4::prelude::*;
 
-use crate::gtk_traits::{get_all_direct_children, get_custom_label_from_widget};
+use crate::gtk_traits::WidgetTraits;
 use crate::gui_structs::common_upper_tree_view::{CommonUpperTreeViews, UpperSubView, UpperTreeViewEnum};
 use crate::help_functions::set_icon_of_button;
 use crate::notebook_enums::NotebookUpperEnum;
@@ -121,12 +121,16 @@ impl GuiUpperNotebook {
         self.check_button_recursive.set_label(Some(&flg!("upper_recursive_button")));
         self.check_button_recursive.set_tooltip_text(Some(&flg!("upper_recursive_button_tooltip")));
 
-        get_custom_label_from_widget(&self.buttons_manual_add_included_directory.clone()).set_text(&flg!("upper_manual_add_included_button"));
-        get_custom_label_from_widget(&self.buttons_add_included_directory.clone()).set_text(&flg!("upper_add_included_button"));
-        get_custom_label_from_widget(&self.buttons_remove_included_directory.clone()).set_text(&flg!("upper_remove_included_button"));
-        get_custom_label_from_widget(&self.buttons_manual_add_excluded_directory.clone()).set_text(&flg!("upper_manual_add_excluded_button"));
-        get_custom_label_from_widget(&self.buttons_add_excluded_directory.clone()).set_text(&flg!("upper_add_excluded_button"));
-        get_custom_label_from_widget(&self.buttons_remove_excluded_directory.clone()).set_text(&flg!("upper_remove_excluded_button"));
+        self.buttons_manual_add_included_directory
+            .get_custom_label()
+            .set_text(&flg!("upper_manual_add_included_button"));
+        self.buttons_add_included_directory.get_custom_label().set_text(&flg!("upper_add_included_button"));
+        self.buttons_remove_included_directory.get_custom_label().set_text(&flg!("upper_remove_included_button"));
+        self.buttons_manual_add_excluded_directory
+            .get_custom_label()
+            .set_text(&flg!("upper_manual_add_excluded_button"));
+        self.buttons_add_excluded_directory.get_custom_label().set_text(&flg!("upper_add_excluded_button"));
+        self.buttons_remove_excluded_directory.get_custom_label().set_text(&flg!("upper_remove_excluded_button"));
 
         self.buttons_manual_add_included_directory
             .set_tooltip_text(Some(&flg!("upper_manual_add_included_button_tooltip")));
@@ -158,8 +162,8 @@ impl GuiUpperNotebook {
         self.entry_general_minimal_size.set_tooltip_text(Some(&flg!("main_label_size_bytes_tooltip")));
         self.entry_general_maximal_size.set_tooltip_text(Some(&flg!("main_label_size_bytes_tooltip")));
 
-        let vec_children: Vec<gtk4::Widget> = get_all_direct_children(&self.notebook_upper);
-        let vec_children: Vec<gtk4::Widget> = get_all_direct_children(&vec_children[1]); // This is quite safe in GTK 4, because tab label is always second child
+        let vec_children: Vec<gtk4::Widget> = self.notebook_upper.get_all_direct_children();
+        let vec_children: Vec<gtk4::Widget> = vec_children[1].get_all_direct_children(); // This is quite safe in GTK 4, because tab label is always second child
 
         // Change name of upper notebook tabs
         for (upper_enum, fl_thing) in [

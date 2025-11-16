@@ -6,7 +6,7 @@ use log::error;
 use regex::Regex;
 
 use crate::flg;
-use crate::gtk_traits::get_dialog_box_child;
+use crate::gtk_traits::DialogTraits;
 use crate::gui_structs::common_tree_view::{SubView, TreeViewListStoreTrait};
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::{change_dimension_to_krotka, get_full_name_from_path_name};
@@ -350,7 +350,7 @@ fn popover_custom_select_unselect(
                 grid.attach(&check_button_select_not_all_results, 0, 6, 2, 1);
             }
 
-            let box_widget = get_dialog_box_child(&dialog);
+            let box_widget = dialog.get_box_child();
             box_widget.append(&grid);
 
             dialog.set_visible(true);

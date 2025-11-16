@@ -17,7 +17,7 @@ use image_hasher::HashAlg;
 use log::error;
 
 use crate::flg;
-use crate::gtk_traits::get_dialog_box_child;
+use crate::gtk_traits::DialogTraits;
 use crate::gui_structs::gui_data::GuiData;
 use crate::saving_loading::{load_configuration, reset_configuration, save_configuration};
 
@@ -244,7 +244,7 @@ fn create_clear_cache_dialog(title_str: &str, window_settings: &Window) -> gtk4:
     let label3 = Label::builder().label(flg!("cache_clear_message_label_3")).build();
     let label4 = Label::builder().label(flg!("cache_clear_message_label_4")).build();
 
-    let internal_box = get_dialog_box_child(&dialog);
+    let internal_box = dialog.get_box_child();
     internal_box.append(&label);
     internal_box.append(&label2);
     internal_box.append(&label3);

@@ -17,7 +17,7 @@ use resvg::tiny_skia;
 use resvg::usvg::{Options, Tree};
 
 use crate::flg;
-use crate::gtk_traits::get_custom_image_from_widget;
+use crate::gtk_traits::WidgetTraits;
 use crate::gui_structs::common_tree_view::{SubView, TreeViewListStoreTrait};
 use crate::helpers::enums::BottomButtonsEnum;
 use crate::model_iter::{iter_list, iter_list_with_break, iter_list_with_break_init};
@@ -421,7 +421,7 @@ fn dynamic_image_to_pixbuf(img: DynamicImage) -> Pixbuf {
 }
 
 pub(crate) fn set_icon_of_button<P: IsA<Widget>>(button: &P, data: &'static [u8]) {
-    let image = get_custom_image_from_widget(button);
+    let image = button.get_custom_image();
     let dynamic_image = svg_to_dynamic_image(data).expect("Failed to convert SVG data to DynamicImage");
     let pixbuf = dynamic_image_to_pixbuf(dynamic_image);
     image.set_from_pixbuf(Some(&pixbuf));

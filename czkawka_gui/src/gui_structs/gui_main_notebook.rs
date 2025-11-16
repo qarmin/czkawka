@@ -11,7 +11,7 @@ use gtk4::prelude::*;
 use gtk4::{Builder, CheckButton, ComboBoxText, Entry, Label, Notebook, Picture, Scale, Widget};
 
 use crate::flg;
-use crate::gtk_traits::get_all_direct_children;
+use crate::gtk_traits::WidgetTraits;
 use crate::gui_structs::common_tree_view::{CommonTreeViews, SharedModelEnum, SubView};
 use crate::gui_structs::gui_data::GuiData;
 use crate::gui_structs::gui_settings::GuiSettings;
@@ -322,8 +322,8 @@ impl GuiMainNotebook {
             }
         }
 
-        let vec_children: Vec<Widget> = get_all_direct_children(&self.notebook_main);
-        let vec_children: Vec<Widget> = get_all_direct_children(&vec_children[1]);
+        let vec_children: Vec<Widget> = self.notebook_main.get_all_direct_children();
+        let vec_children: Vec<Widget> = vec_children[1].get_all_direct_children();
 
         // Change name of main notebook tabs
         for (main_enum, fl_thing) in [

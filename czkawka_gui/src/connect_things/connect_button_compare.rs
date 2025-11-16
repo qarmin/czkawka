@@ -9,7 +9,7 @@ use image::DynamicImage;
 use log::error;
 
 use crate::flg;
-use crate::gtk_traits::get_all_direct_children;
+use crate::gtk_traits::WidgetTraits;
 use crate::gui_structs::common_tree_view::SubView;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::{count_number_of_groups, get_full_name_from_path_name, get_max_file_name, get_pixbuf_from_dynamic_image, resize_pixbuf_dimension};
@@ -351,13 +351,13 @@ fn populate_groups_at_start(
     *shared_image_cache.borrow_mut() = cache_all_images.clone();
 
     let mut found = false;
-    for i in get_all_direct_children(
-        &scrolled_window_compare_choose_images
-            .child()
-            .expect("Failed to get child of scrolled_window_compare_choose_images")
-            .downcast::<gtk4::Viewport>()
-            .expect("Failed to downcast to Viewport"),
-    ) {
+    for i in scrolled_window_compare_choose_images
+        .child()
+        .expect("Failed to get child of scrolled_window_compare_choose_images")
+        .downcast::<gtk4::Viewport>()
+        .expect("Failed to downcast to Viewport")
+        .get_all_direct_children()
+    {
         if i.widget_name() == "all_box" {
             let gtk_box = i.downcast::<gtk4::Box>().expect("Failed to downcast to Box");
             update_bottom_buttons(&gtk_box, shared_using_for_preview, shared_image_cache);
@@ -599,13 +599,13 @@ fn update_bottom_buttons(
     let left_tree_view = shared_using_for_preview.borrow().0.clone().expect("Left tree_view not set");
     let right_tree_view = shared_using_for_preview.borrow().1.clone().expect("Right tree_view not set");
 
-    for (number, i) in get_all_direct_children(all_gtk_box).into_iter().enumerate() {
+    for (number, i) in all_gtk_box.get_all_direct_children().into_iter().enumerate() {
         let cache_tree_path = (*image_cache.borrow())[number].4.clone();
         let is_chosen = cache_tree_path != right_tree_view && cache_tree_path != left_tree_view;
 
         let bx = i.downcast::<gtk4::Box>().expect("Not Box");
         let smaller_bx = bx.first_child().expect("No first child").downcast::<gtk4::Box>().expect("First child is not Box");
-        for items in get_all_direct_children(&smaller_bx) {
+        for items in smaller_bx.get_all_direct_children() {
             if let Ok(btn) = items.downcast::<gtk4::Button>() {
                 btn.set_sensitive(is_chosen);
             }

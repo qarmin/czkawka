@@ -1,7 +1,7 @@
 use gtk4::prelude::*;
 use gtk4::{GestureClick, Widget};
 
-use crate::gtk_traits::get_custom_label_from_widget;
+use crate::gtk_traits::WidgetTraits;
 use crate::gui_structs::gui_data::CZK_ICON_SORT;
 use crate::help_functions::set_icon_of_button;
 use crate::helpers::enums::BottomButtonsEnum;
@@ -120,14 +120,14 @@ impl GuiBottomButtons {
         }
     }
     pub(crate) fn update_language(&self) {
-        get_custom_label_from_widget(&self.buttons_search.clone()).set_text(&flg!("bottom_search_button"));
+        self.buttons_search.get_custom_label().set_text(&flg!("bottom_search_button"));
         self.label_buttons_select.set_text(&flg!("bottom_select_button"));
-        get_custom_label_from_widget(&self.buttons_delete.clone()).set_text(&flg!("bottom_delete_button"));
-        get_custom_label_from_widget(&self.buttons_save.clone()).set_text(&flg!("bottom_save_button"));
-        get_custom_label_from_widget(&self.buttons_symlink.clone()).set_text(&flg!("bottom_symlink_button"));
-        get_custom_label_from_widget(&self.buttons_move.clone()).set_text(&flg!("bottom_move_button"));
-        get_custom_label_from_widget(&self.buttons_hardlink.clone()).set_text(&flg!("bottom_hardlink_button"));
-        get_custom_label_from_widget(&self.buttons_compare.clone()).set_text(&flg!("bottom_compare_button"));
+        self.buttons_delete.get_custom_label().set_text(&flg!("bottom_delete_button"));
+        self.buttons_save.get_custom_label().set_text(&flg!("bottom_save_button"));
+        self.buttons_symlink.get_custom_label().set_text(&flg!("bottom_symlink_button"));
+        self.buttons_move.get_custom_label().set_text(&flg!("bottom_move_button"));
+        self.buttons_hardlink.get_custom_label().set_text(&flg!("bottom_hardlink_button"));
+        self.buttons_compare.get_custom_label().set_text(&flg!("bottom_compare_button"));
         self.label_buttons_sort.set_text(&flg!("bottom_sort_button"));
 
         self.buttons_search.set_tooltip_text(Some(&flg!("bottom_search_button_tooltip")));
