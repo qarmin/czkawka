@@ -1,7 +1,8 @@
 use gtk4::prelude::*;
 
+use crate::gtk_traits::{get_all_direct_children, get_custom_label_from_widget};
 use crate::gui_structs::common_upper_tree_view::{CommonUpperTreeViews, UpperSubView, UpperTreeViewEnum};
-use crate::help_functions::{get_all_direct_children, get_custom_label_from_widget, set_icon_of_button};
+use crate::help_functions::set_icon_of_button;
 use crate::notebook_enums::NotebookUpperEnum;
 use crate::{CZK_ICON_ADD, CZK_ICON_DELETE, CZK_ICON_MANUAL_ADD, flg};
 

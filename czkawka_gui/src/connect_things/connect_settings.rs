@@ -17,8 +17,8 @@ use image_hasher::HashAlg;
 use log::error;
 
 use crate::flg;
+use crate::gtk_traits::get_dialog_box_child;
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::get_dialog_box_child;
 use crate::saving_loading::{load_configuration, reset_configuration, save_configuration};
 
 pub(crate) fn connect_settings(gui_data: &GuiData) {

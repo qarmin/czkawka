@@ -13,11 +13,11 @@ use gtk4::prelude::*;
 use gtk4::{ListStore, Scale, ScrollType, TextView, TreeView, Widget};
 use image::codecs::jpeg::JpegEncoder;
 use image::{DynamicImage, GenericImageView, RgbaImage};
-use log::debug;
 use resvg::tiny_skia;
 use resvg::usvg::{Options, Tree};
 
 use crate::flg;
+use crate::gtk_traits::get_custom_image_from_widget;
 use crate::gui_structs::common_tree_view::{SubView, TreeViewListStoreTrait};
 use crate::helpers::enums::BottomButtonsEnum;
 use crate::model_iter::{iter_list, iter_list_with_break, iter_list_with_break_init};
@@ -137,10 +137,6 @@ pub(crate) fn hide_all_buttons(buttons_array: &[Widget]) {
     for button in buttons_array {
         button.set_visible(false);
     }
-}
-
-pub(crate) fn get_dialog_box_child(dialog: &gtk4::Dialog) -> gtk4::Box {
-    dialog.child().expect("Dialog has no child").downcast::<gtk4::Box>().expect("Dialog child is not Box")
 }
 
 pub(crate) fn change_dimension_to_krotka(dimensions: &str) -> (u64, u64) {
@@ -400,75 +396,6 @@ pub(crate) fn get_max_file_name(file_name: &str, max_length: usize) -> String {
     }
 }
 
-pub(crate) fn get_custom_label_from_widget<P: IsA<Widget>>(item: &P) -> gtk4::Label {
-    let mut widgets_to_check = vec![item.clone().upcast::<Widget>()];
-
-    while let Some(widget) = widgets_to_check.pop() {
-        if let Ok(label) = widget.clone().downcast::<gtk4::Label>() {
-            return label;
-        }
-        widgets_to_check.extend(get_all_direct_children(&widget));
-    }
-    panic!("Button doesn't have proper custom label child");
-}
-
-pub(crate) fn get_custom_image_from_widget<P: IsA<Widget>>(item: &P) -> gtk4::Image {
-    let mut widgets_to_check = vec![item.clone().upcast::<Widget>()];
-
-    while let Some(widget) = widgets_to_check.pop() {
-        if let Ok(image) = widget.clone().downcast::<gtk4::Image>() {
-            return image;
-        }
-        widgets_to_check.extend(get_all_direct_children(&widget));
-    }
-    panic!("Button doesn't have proper custom label child");
-}
-
-#[expect(dead_code)]
-pub(crate) fn debug_print_widget<P: IsA<Widget>>(item: &P) {
-    let mut widgets_to_check = vec![(0, 0, item.clone().upcast::<Widget>())];
-
-    let mut next_free_number = 1;
-    debug!("{}, {}, {:?} ", widgets_to_check[0].0, widgets_to_check[0].1, widgets_to_check[0].2);
-
-    while let Some((current_number, parent_number, widget)) = widgets_to_check.pop() {
-        for widget in get_all_direct_children(&widget) {
-            widgets_to_check.push((next_free_number, current_number, widget));
-            next_free_number += 1;
-        }
-        debug!("{current_number}, {parent_number}, {widget:?} ");
-    }
-}
-
-pub(crate) fn get_all_boxes_from_widget<P: IsA<Widget>>(item: &P) -> Vec<gtk4::Box> {
-    let mut widgets_to_check = vec![item.clone().upcast::<Widget>()];
-    let mut boxes = Vec::new();
-
-    while let Some(widget) = widgets_to_check.pop() {
-        widgets_to_check.extend(get_all_direct_children(&widget));
-        if let Ok(bbox) = widget.clone().downcast::<gtk4::Box>() {
-            boxes.push(bbox);
-        }
-    }
-    boxes
-}
-
-pub(crate) fn get_all_direct_children<P: IsA<Widget>>(wid: &P) -> Vec<Widget> {
-    let mut vector = vec![];
-    if let Some(mut child) = wid.first_child() {
-        vector.push(child.clone());
-        loop {
-            child = match child.next_sibling() {
-                Some(t) => t,
-                None => break,
-            };
-            vector.push(child.clone());
-        }
-    }
-
-    vector
-}
-
 const SIZE_OF_ICON: i32 = 18;
 const TYPE_OF_INTERPOLATION: InterpType = InterpType::Tiles;
 
@@ -562,8 +489,8 @@ mod test {
 
     use glib::Value;
     use glib::types::Type;
+    use gtk4::TreeView;
     use gtk4::prelude::*;
-    use gtk4::{Orientation, TreeView};
     use image::DynamicImage;
 
     use super::*;
@@ -723,35 +650,6 @@ mod test {
         get_pixbuf_from_dynamic_image(&dynamic_image).expect("Failed to get pixbuf from dynamic image");
         get_pixbuf_from_dynamic_image(&dynamic_image).expect("Failed to get pixbuf from dynamic image");
     }
-
-    #[gtk4::test]
-    fn test_get_all_direct_children() {
-        let obj = gtk4::Box::new(Orientation::Horizontal, 0);
-        let obj2 = gtk4::Box::new(Orientation::Horizontal, 0);
-        let obj3 = gtk4::Image::new();
-        let obj4 = gtk4::Image::new();
-        let obj5 = gtk4::Image::new();
-        obj.append(&obj2);
-        obj.append(&obj3);
-        obj2.append(&obj4);
-        obj2.append(&obj5);
-        assert_eq!(get_all_direct_children(&obj).len(), 2);
-    }
-
-    #[gtk4::test]
-    fn test_get_all_boxes_from_widget() {
-        let obj = gtk4::Box::new(Orientation::Horizontal, 0);
-        let obj2 = gtk4::Box::new(Orientation::Horizontal, 0);
-        let obj3 = gtk4::Image::new();
-        let obj4 = gtk4::Image::new();
-        let obj5 = gtk4::Image::new();
-        obj.append(&obj2);
-        obj.append(&obj3);
-        obj2.append(&obj4);
-        obj2.append(&obj5);
-        assert_eq!(get_all_boxes_from_widget(&obj).len(), 2);
-    }
-
     #[test]
     fn test_get_path_buf_from_vector_of_strings() {
         let input = vec!["/tmp/test1".to_string(), "relative/path".to_string()];

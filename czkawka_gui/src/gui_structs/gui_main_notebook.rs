@@ -11,11 +11,11 @@ use gtk4::prelude::*;
 use gtk4::{Builder, CheckButton, ComboBoxText, Entry, Label, Notebook, Picture, Scale, Widget};
 
 use crate::flg;
+use crate::gtk_traits::get_all_direct_children;
 use crate::gui_structs::common_tree_view::{CommonTreeViews, SharedModelEnum, SubView};
 use crate::gui_structs::gui_data::GuiData;
 use crate::gui_structs::gui_settings::GuiSettings;
 use crate::help_combo_box::{AUDIO_TYPE_CHECK_METHOD_COMBO_BOX, BIG_FILES_CHECK_METHOD_COMBO_BOX, DUPLICATES_CHECK_METHOD_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX};
-use crate::help_functions::get_all_direct_children;
 use crate::notebook_enums::NotebookMainEnum;
 
 #[derive(Clone)]
