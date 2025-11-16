@@ -7,7 +7,7 @@ use crate::flg;
 use crate::gui_structs::common_tree_view::SubView;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::{add_text_to_text_view, clean_invalid_headers, get_full_name_from_path_name, reset_text_view};
-use crate::model_iter::{iter_list, iter_list_break_with_init};
+use crate::helpers::model_iter::{iter_list, iter_list_break_with_init};
 
 #[derive(PartialEq, Eq, Copy, Clone)]
 enum TypeOfTool {

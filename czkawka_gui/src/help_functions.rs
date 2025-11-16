@@ -20,7 +20,7 @@ use crate::flg;
 use crate::gtk_traits::WidgetTraits;
 use crate::gui_structs::common_tree_view::{SubView, TreeViewListStoreTrait};
 use crate::helpers::enums::BottomButtonsEnum;
-use crate::model_iter::{iter_list, iter_list_with_break, iter_list_with_break_init};
+use crate::helpers::model_iter::{iter_list, iter_list_with_break, iter_list_with_break_init};
 use crate::notebook_enums::NotebookUpperEnum;
 use crate::notebook_info::{NOTEBOOKS_INFO, NotebookObject};
 

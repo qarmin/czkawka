@@ -10,7 +10,7 @@ use crate::gtk_traits::DialogTraits;
 use crate::gui_structs::common_tree_view::{SubView, TreeViewListStoreTrait};
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_functions::{change_dimension_to_krotka, get_full_name_from_path_name};
-use crate::model_iter::iter_list;
+use crate::helpers::model_iter::iter_list;
 
 // File length variable allows users to choose duplicates which have shorter file name
 // e.g. 'tar.gz' will be selected instead 'tar.gz (copy)' etc.

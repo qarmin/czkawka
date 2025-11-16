@@ -22,8 +22,8 @@ use connect_things::connect_selection_of_directories::connect_selection_of_direc
 use connect_things::connect_settings::connect_settings;
 use connect_things::connect_show_hide_ui::connect_show_hide_ui;
 use connect_things::connect_similar_image_size_change::connect_similar_image_size_change;
-use crossbeam_channel::{Receiver, Sender, unbounded};
-use czkawka_core::common::basic_gui_cli::{CliResult, process_cli_args};
+use crossbeam_channel::{unbounded, Receiver, Sender};
+use czkawka_core::common::basic_gui_cli::{process_cli_args, CliResult};
 use czkawka_core::common::config_cache_path::{print_infos_and_warnings, set_config_cache_path};
 use czkawka_core::common::logger::{filtering_messages, print_version_mode, setup_logger};
 use czkawka_core::common::progress_data::ProgressData;
@@ -34,8 +34,8 @@ use gtk4::Application;
 use gtk4::gio::ApplicationFlags;
 use gtk4::prelude::*;
 use gui_structs::gui_data::{
-    CZK_ICON_ADD, CZK_ICON_COMPARE, CZK_ICON_DELETE, CZK_ICON_HARDLINK, CZK_ICON_HIDE_DOWN, CZK_ICON_HIDE_UP, CZK_ICON_INFO, CZK_ICON_LEFT, CZK_ICON_MANUAL_ADD, CZK_ICON_MOVE,
-    CZK_ICON_RIGHT, CZK_ICON_SAVE, CZK_ICON_SEARCH, CZK_ICON_SELECT, CZK_ICON_SETTINGS, CZK_ICON_STOP, CZK_ICON_SYMLINK, CZK_ICON_TRASH, GuiData,
+    GuiData, CZK_ICON_ADD, CZK_ICON_COMPARE, CZK_ICON_DELETE, CZK_ICON_HARDLINK, CZK_ICON_HIDE_DOWN, CZK_ICON_HIDE_UP, CZK_ICON_INFO, CZK_ICON_LEFT, CZK_ICON_MANUAL_ADD,
+    CZK_ICON_MOVE, CZK_ICON_RIGHT, CZK_ICON_SAVE, CZK_ICON_SEARCH, CZK_ICON_SELECT, CZK_ICON_SETTINGS, CZK_ICON_STOP, CZK_ICON_SYMLINK, CZK_ICON_TRASH,
 };
 use log::info;
 
@@ -46,7 +46,7 @@ use crate::connect_things::connect_popovers_sort::connect_popover_sort;
 use crate::connect_things::connect_same_music_mode_changed::connect_same_music_change_mode;
 use crate::initialize_gui::initialize_gui;
 use crate::language_functions::LANGUAGES_ALL;
-use crate::saving_loading::{DEFAULT_MAXIMAL_FILE_SIZE, DEFAULT_MINIMAL_CACHE_SIZE, DEFAULT_MINIMAL_FILE_SIZE, load_configuration, reset_configuration, save_configuration};
+use crate::saving_loading::{load_configuration, reset_configuration, save_configuration, DEFAULT_MAXIMAL_FILE_SIZE, DEFAULT_MINIMAL_CACHE_SIZE, DEFAULT_MINIMAL_FILE_SIZE};
 
 mod compute_results;
 mod connect_things;
@@ -58,7 +58,6 @@ mod helpers;
 mod initialize_gui;
 mod language_functions;
 mod localizer_gui;
-mod model_iter;
 mod notebook_enums;
 mod notebook_info;
 mod opening_selecting_records;
