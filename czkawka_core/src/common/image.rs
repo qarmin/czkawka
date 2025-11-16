@@ -1,4 +1,4 @@
-// #![allow(unused_imports)]
+#![allow(unused_imports)]
 // I don't want to fight with unused(heif) imports in this file, so simply ignore it to avoid too much complexity
 
 use std::fs::File;

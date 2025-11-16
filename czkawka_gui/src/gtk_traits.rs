@@ -2,7 +2,7 @@ use std::vec::Vec;
 
 use gtk4::prelude::{ComboBoxExtManual, *};
 use gtk4::{Box as GtkBox, ComboBoxText, Dialog, Image, Label, Widget};
-use log::debug;
+use log::{debug, info};
 
 pub trait ComboBoxTraits {
     fn set_model_and_first<I, S>(&self, models: I)
@@ -40,7 +40,8 @@ pub trait WidgetTraits {
     fn get_custom_image(&self) -> Image;
     fn get_all_boxes(&self) -> Vec<GtkBox>;
     #[expect(dead_code)]
-    fn debug_print_widget(&self);
+    fn debug_print_widget(&self, print_only_direct_children: bool);
+    fn get_all_widgets_of_type<T: IsA<Widget>>(&self) -> Vec<T>;
 }
 
 impl<P: IsA<Widget>> WidgetTraits for P {
@@ -58,6 +59,19 @@ impl<P: IsA<Widget>> WidgetTraits for P {
         }
 
         vector
+    }
+
+    fn get_all_widgets_of_type<T: IsA<Widget>>(&self) -> Vec<T> {
+        let mut widgets_to_check = vec![self.clone().upcast::<Widget>()];
+        let mut found_widgets = Vec::new();
+
+        while let Some(widget) = widgets_to_check.pop() {
+            widgets_to_check.extend(widget.get_all_direct_children());
+            if let Ok(specific_widget) = widget.clone().downcast::<T>() {
+                found_widgets.push(specific_widget);
+            }
+        }
+        found_widgets
     }
 
     fn get_custom_label(&self) -> Label {
@@ -97,18 +111,37 @@ impl<P: IsA<Widget>> WidgetTraits for P {
         boxes
     }
 
-    fn debug_print_widget(&self) {
-        let mut widgets_to_check = vec![(0, 0, self.clone().upcast::<Widget>())];
+    #[expect(clippy::print_stdout)]
+    fn debug_print_widget(&self, print_only_direct_children: bool) {
+        struct WidgetInfo {
+            depth: usize,
+            widget: Widget,
+        }
 
-        let mut next_free_number = 1;
-        debug!("{}, {}, {:?} ", widgets_to_check[0].0, widgets_to_check[0].1, widgets_to_check[0].2);
+        fn collect_widgets(widget: &Widget, depth: usize, print_only_direct_children: bool) -> Vec<WidgetInfo> {
+            let mut result = vec![WidgetInfo {
+                depth,
+                widget: widget.clone(),
+            }];
 
-        while let Some((current_number, parent_number, widget)) = widgets_to_check.pop() {
-            for widget in widget.get_all_direct_children() {
-                widgets_to_check.push((next_free_number, current_number, widget));
-                next_free_number += 1;
+            // If print_only_direct_children is true, only process children at depth 0
+            // Otherwise, recurse through all descendants
+            if !print_only_direct_children || depth == 0 {
+                for child in widget.get_all_direct_children() {
+                    result.extend(collect_widgets(&child, depth + 1, print_only_direct_children));
+                }
             }
-            debug!("{current_number}, {parent_number}, {widget:?} ");
+
+            result
+        }
+
+        let widget_infos = collect_widgets(&self.clone().upcast::<Widget>(), 0, print_only_direct_children);
+
+        println!("Widget hierarchy:");
+
+        for widget_info in widget_infos {
+            let indent = "  ".repeat(widget_info.depth);
+            println!("{}{:?}", indent, widget_info.widget);
         }
     }
 }

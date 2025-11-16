@@ -2,14 +2,6 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use czkawka_core::common::model::CheckingMethod;
-use czkawka_core::localizer_core::{fnc_get_similarity_minimal, fnc_get_similarity_very_high};
-use czkawka_core::tools::big_file::SearchMode;
-use czkawka_core::tools::similar_images::SIMILAR_VALUES;
-use czkawka_core::tools::similar_images::core::get_string_from_similarity;
-use gtk4::prelude::*;
-use gtk4::{Builder, CheckButton, ComboBoxText, Entry, Label, Notebook, Picture, Scale, Widget};
-
 use crate::flg;
 use crate::gtk_traits::WidgetTraits;
 use crate::gui_structs::common_tree_view::{CommonTreeViews, SharedModelEnum, SubView};
@@ -17,6 +9,14 @@ use crate::gui_structs::gui_data::GuiData;
 use crate::gui_structs::gui_settings::GuiSettings;
 use crate::help_combo_box::{AUDIO_TYPE_CHECK_METHOD_COMBO_BOX, BIG_FILES_CHECK_METHOD_COMBO_BOX, DUPLICATES_CHECK_METHOD_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX};
 use crate::notebook_enums::NotebookMainEnum;
+use czkawka_core::common::model::CheckingMethod;
+use czkawka_core::localizer_core::{fnc_get_similarity_minimal, fnc_get_similarity_very_high};
+use czkawka_core::tools::big_file::SearchMode;
+use czkawka_core::tools::similar_images::SIMILAR_VALUES;
+use czkawka_core::tools::similar_images::core::get_string_from_similarity;
+use gtk4::prelude::*;
+use gtk4::{Builder, CheckButton, ComboBoxText, Entry, Label, Notebook, Picture, Scale, Widget};
+use log::error;
 
 #[derive(Clone)]
 pub struct GuiMainNotebook {
@@ -339,12 +339,13 @@ impl GuiMainNotebook {
             (NotebookMainEnum::BrokenFiles as usize, flg!("main_notebook_broken_files")),
             (NotebookMainEnum::BadExtensions as usize, flg!("main_notebook_bad_extensions")),
         ] {
-            self.notebook_main
-                .tab_label(&vec_children[main_enum])
-                .expect("Tab label must be set")
-                .downcast::<Label>()
-                .expect("Tab label must be a label")
-                .set_text(&fl_thing);
+            let tabel = self.notebook_main.tab_label(&vec_children[main_enum]);
+
+            if let Some(tabel) = tabel {
+                tabel.downcast::<Label>().expect("Tab label must be a label").set_text(&fl_thing);
+            } else {
+                error!("Tab label for main notebook not found for enum {:?), message {:?}", main_enum, fl_thing);
+            }
         }
 
         // Change names of columns
