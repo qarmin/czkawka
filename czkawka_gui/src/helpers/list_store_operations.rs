@@ -352,18 +352,24 @@ mod test {
         assert!(list_store.iter_first().is_none());
     }
 
+
     #[gtk4::test]
-    fn removes_header_with_single_child_when_path_empty() {
+    fn cleans_invalid_headers_properly() {
         let columns_types: &[Type] = &[Type::BOOL, Type::STRING];
         let list_store = gtk4::ListStore::new(columns_types);
 
+        // Scenario: H1 -> C1 -> H2 -> C2 -> C3
+        // After cleaning: H2 -> C2 -> C3 (H1 and C1 removed as H1 has only one child)
         append_row_to_list_store(&list_store, &[(0, &true), (1, &"")]);
-        append_row_to_list_store(&list_store, &[(0, &false), (1, &"")]);
+        append_row_to_list_store(&list_store, &[(0, &false), (1, &"/path/file1.txt")]);
+        append_row_to_list_store(&list_store, &[(0, &true), (1, &"")]);
+        append_row_to_list_store(&list_store, &[(0, &false), (1, &"/path/file2.txt")]);
+        append_row_to_list_store(&list_store, &[(0, &false), (1, &"/path/file3.txt")]);
 
         clean_invalid_headers(&list_store, 0, 1);
 
         let count = list_store.iter_n_children(None);
-        assert_eq!(count, 0, "Expected 0 rows after cleaning header with single child, but got {count}");
+        assert_eq!(count, 3, "Should keep header with 2 children");
     }
 
     #[gtk4::test]
@@ -372,8 +378,8 @@ mod test {
         let list_store = gtk4::ListStore::new(columns_types);
 
         append_row_to_list_store(&list_store, &[(0, &true), (1, &"")]);
-        append_row_to_list_store(&list_store, &[(0, &false), (1, &"")]);
-        append_row_to_list_store(&list_store, &[(0, &false), (1, &"")]);
+        append_row_to_list_store(&list_store, &[(0, &false), (1, &"/path/file1.txt")]);
+        append_row_to_list_store(&list_store, &[(0, &false), (1, &"/path/file2.txt")]);
 
         clean_invalid_headers(&list_store, 0, 1);
 
