@@ -2,6 +2,7 @@ use std::io::prelude::*;
 use std::io::{self};
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
+use std::time::Instant;
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
@@ -36,6 +37,8 @@ impl DeletingItems for DuplicateFinder {
 impl Search for DuplicateFinder {
     #[fun_time(message = "find_duplicates", level = "info")]
     fn search(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
+        let start_time = Instant::now();
+
         self.prepare_items();
         self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
 
@@ -43,28 +46,33 @@ impl Search for DuplicateFinder {
             CheckingMethod::Name => {
                 self.common_data.stopped_search = self.check_files_name(stop_flag, progress_sender) == WorkContinueStatus::Stop;
                 if self.common_data.stopped_search {
+                    self.information.scanning_time = start_time.elapsed().as_millis();
                     return;
                 }
             }
             CheckingMethod::SizeName => {
                 self.common_data.stopped_search = self.check_files_size_name(stop_flag, progress_sender) == WorkContinueStatus::Stop;
                 if self.common_data.stopped_search {
+                    self.information.scanning_time = start_time.elapsed().as_millis();
                     return;
                 }
             }
             CheckingMethod::Size => {
                 self.common_data.stopped_search = self.check_files_size(stop_flag, progress_sender) == WorkContinueStatus::Stop;
                 if self.common_data.stopped_search {
+                    self.information.scanning_time = start_time.elapsed().as_millis();
                     return;
                 }
             }
             CheckingMethod::Hash => {
                 self.common_data.stopped_search = self.check_files_size(stop_flag, progress_sender) == WorkContinueStatus::Stop;
                 if self.common_data.stopped_search {
+                    self.information.scanning_time = start_time.elapsed().as_millis();
                     return;
                 }
                 self.common_data.stopped_search = self.check_files_hash(stop_flag, progress_sender) == WorkContinueStatus::Stop;
                 if self.common_data.stopped_search {
+                    self.information.scanning_time = start_time.elapsed().as_millis();
                     return;
                 }
             }
@@ -72,8 +80,10 @@ impl Search for DuplicateFinder {
         }
         if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
             self.common_data.stopped_search = true;
+            self.information.scanning_time = start_time.elapsed().as_millis();
             return;
         }
+        self.information.scanning_time = start_time.elapsed().as_millis();
         self.debug_print();
     }
 }

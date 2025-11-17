@@ -403,8 +403,8 @@ settings_folder_cache_open = Отворете папката с кеш
 settings_folder_settings_open = Отваряне на папката с настройки
 # Compute results
 compute_stopped_by_user = Търсенето е спряно от потребител
-compute_found_duplicates_hash_size = Намерени са { $number_files } дубликати в { $number_groups } групи, които са отнели { $size }
-compute_found_duplicates_name = Намерени са { $number_files } дубликати в { $number_groups } групи
+compute_found_duplicates_hash_size = Намерени са { $number_files }} дубликати в { $number_groups }} групи, които са отнели { $size }}, **търсенето отнеме { $time }}**
+compute_found_duplicates_name = Намерени са { $number_files }} дубликати в { $number_groups }} групи, **търсенето отнеме { $time }}**
 compute_found_empty_folders = Намерени { $number_files } празни папки
 compute_found_empty_files = Намерени { $number_files } празни файлове
 compute_found_big_files = Намерени { $number_files } големи файлове

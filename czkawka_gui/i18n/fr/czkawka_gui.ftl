@@ -403,8 +403,8 @@ settings_folder_cache_open = Ouvrir le dossier de cache
 settings_folder_settings_open = Ouvrir le dossier des paramètres
 # Compute results
 compute_stopped_by_user = La recherche a été interrompue par l'utilisateur
-compute_found_duplicates_hash_size = { $number_files } doublons trouvés dans { $number_groups } groupes qui ont pris { $size }
-compute_found_duplicates_name = { $number_files } doublons trouvés dans { $number_groups } groupes
+compute_found_duplicates_hash_size = { $number_files } doublons trouvés dans { $number_groups } groupes qui ont pris { $size }, **recherche a pris { $time }**
+compute_found_duplicates_name = { $number_files } doublons trouvés dans { $number_groups } groupes, **recherche a pris { $time }**
 compute_found_empty_folders = { $number_files } dossiers vides trouvés
 compute_found_empty_files = { $number_files } fichiers vides trouvés
 compute_found_big_files = { $number_files } gros fichiers trouvés

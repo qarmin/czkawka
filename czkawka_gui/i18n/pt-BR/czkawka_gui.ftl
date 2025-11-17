@@ -406,8 +406,8 @@ settings_folder_cache_open = Abrir a pasta do ‘cache’
 settings_folder_settings_open = Abrir a pasta das configurações
 # Compute results
 compute_stopped_by_user = A pesquisa foi interrompida pelo usuário
-compute_found_duplicates_hash_size = Foram encontrados { $number_files } arquivos duplicados nos { $number_groups } grupos que adotaram o { $size } de tamanho
-compute_found_duplicates_name = Foram encontrados { $number_files } arquivos duplicados nos { $number_groups } grupos
+compute_found_duplicates_hash_size = Foram encontrados { $number_files } arquivos duplicados nos { $number_groups } grupos que adotaram o { $size }} de tamanho, **a varredura levou { $time }}**
+compute_found_duplicates_name = Foram encontrados { $number_files } arquivos duplicados nos { $number_groups } grupos, **a varredura levou { $time }}**
 compute_found_empty_folders = Foram encontradas { $number_files } pastas vazias
 compute_found_empty_files = Foram encontrados { $number_files } arquivos vazios
 compute_found_big_files = Foram encontrados { $number_files } arquivos grandes
