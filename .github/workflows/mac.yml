@@ -7,6 +7,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  CZKAWKA_OFFICIAL_BUILD: 1
 
 jobs:
   macos:

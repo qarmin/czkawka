@@ -18,22 +18,15 @@ fn main() {
         .args(["rev-parse", "HEAD"])
         .output()
         .ok()
-        .and_then(|output| {
-            if output.status.success() {
-                String::from_utf8(output.stdout).ok()
-            } else {
-                None
-            }
-        })
-        .map(|s| s.trim().to_string())
-        .unwrap_or_else(|| "<unknown>".to_string());
+        .and_then(|output| if output.status.success() { String::from_utf8(output.stdout).ok() } else { None })
+        .map_or_else(|| "<unknown>".to_string(), |s| s.trim().to_string());
     println!("cargo:rustc-env=CZKAWKA_GIT_COMMIT={git_commit}");
 
     // Get short Git commit hash
     let git_commit_short = if git_commit != "<unknown>" && git_commit.len() >= 10 {
-        git_commit[..10].to_string()
+        git_commit.chars().take(10).collect::<String>()
     } else {
-        git_commit.clone()
+        git_commit
     };
     println!("cargo:rustc-env=CZKAWKA_GIT_COMMIT_SHORT={git_commit_short}");
 
