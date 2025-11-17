@@ -4107,7 +4107,6 @@ dependencies = [
  "image",
  "image_hasher",
  "log",
- "once_cell",
  "open",
  "rayon",
  "rfd",
