@@ -1,6 +1,8 @@
 pub mod core;
 pub mod traits;
 mod workarounds;
+#[cfg(test)]
+mod tests;
 
 use std::path::{Path, PathBuf};
 
@@ -68,3 +70,4 @@ impl BadExtensions {
         &self.bad_extensions_files
     }
 }
+

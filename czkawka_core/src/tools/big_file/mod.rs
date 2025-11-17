@@ -1,5 +1,7 @@
 pub mod core;
 pub mod traits;
+#[cfg(test)]
+mod tests;
 
 use crate::common::model::FileEntry;
 use crate::common::tool_data::CommonToolData;
