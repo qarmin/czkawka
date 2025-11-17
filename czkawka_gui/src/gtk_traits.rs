@@ -125,8 +125,6 @@ impl<P: IsA<Widget>> WidgetTraits for P {
         fn collect_widgets(widget: &Widget, depth: usize, print_only_direct_children: bool) -> Vec<WidgetInfo> {
             let mut result = vec![WidgetInfo { depth, widget: widget.clone() }];
 
-            // If print_only_direct_children is true, only process children at depth 0
-            // Otherwise, recurse through all descendants
             if !print_only_direct_children || depth == 0 {
                 for child in widget.get_all_direct_children() {
                     result.extend(collect_widgets(&child, depth + 1, print_only_direct_children));
@@ -236,24 +234,22 @@ mod test {
     }
 
     #[gtk4::test]
-    #[should_panic(expected = "Widget doesn't have proper custom label child")]
+    #[should_panic(expected = "Widget doesn't have proper child of specified type")]
     fn test_get_custom_label_panic() {
         let container = gtk4::Box::new(Orientation::Horizontal, 0);
         let image = gtk4::Image::new();
         container.append(&image);
 
-        // This should panic because there's no label
         container.get_widget_of_type::<Label>(true);
     }
 
     #[gtk4::test]
-    #[should_panic(expected = "Widget doesn't have proper custom image child")]
+    #[should_panic(expected = "Widget doesn't have proper child of specified type")]
     fn test_get_custom_image_panic() {
         let container = gtk4::Box::new(Orientation::Horizontal, 0);
         let label = gtk4::Label::new(Some("Test"));
         container.append(&label);
 
-        // This should panic because there's no image
         container.get_widget_of_type::<Image>(true);
     }
 
@@ -362,7 +358,6 @@ mod test {
         let image = gtk4::Image::new();
         root.append(&image);
 
-        // This should panic because there's no label
         root.get_widget_of_type::<Label>(true);
     }
 
@@ -376,7 +371,6 @@ mod test {
         root.append(&box1);
         box1.append(&label);
 
-        // This should panic because label is not a direct child (non-recursive)
         root.get_widget_of_type::<Label>(false);
     }
 }
