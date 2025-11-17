@@ -1,6 +1,7 @@
 use std::env;
 use std::path::{Path, PathBuf};
 
+use czkawka_core::common::basic_gui_cli::CliResult;
 use czkawka_core::common::config_cache_path::get_config_cache_path;
 use czkawka_core::common::get_all_available_threads;
 use czkawka_core::common::items::DEFAULT_EXCLUDED_ITEMS;
@@ -10,16 +11,16 @@ use gtk4::prelude::*;
 use gtk4::{ListStore, ScrolledWindow, TextView, TreeView};
 use serde::{Deserialize, Serialize};
 
-use crate::cli::CliResult;
 use crate::flg;
+use crate::gui_structs::common_tree_view::TreeViewListStoreTrait;
+use crate::gui_structs::common_upper_tree_view::UpperTreeViewEnum;
 use crate::gui_structs::gui_main_notebook::GuiMainNotebook;
 use crate::gui_structs::gui_settings::GuiSettings;
 use crate::gui_structs::gui_upper_notebook::GuiUpperNotebook;
 use crate::help_combo_box::DUPLICATES_CHECK_METHOD_COMBO_BOX;
-use crate::help_functions::{
-    ColumnsExcludedDirectory, ColumnsIncludedDirectory, add_text_to_text_view, append_row_to_list_store, get_from_list_store_fnc, get_list_store, get_string_from_list_store,
-    reset_text_view, scale_step_function,
-};
+use crate::help_functions::{add_text_to_text_view, reset_text_view, scale_step_function};
+use crate::helpers::enums::{ColumnsExcludedDirectory, ColumnsIncludedDirectory};
+use crate::helpers::list_store_operations::{append_row_to_list_store, get_from_list_store_fnc, get_string_from_list_store};
 use crate::language_functions::{LANGUAGES_ALL, get_language_from_combo_box_text};
 
 const SAVE_FILE_NAME_JSON: &str = "czkawka_gui_config.json";
@@ -451,7 +452,7 @@ fn default_use_rust_libraries_to_preview() -> bool {
 }
 
 fn set_included_reference_folders(tree_view_included_directories: &TreeView, included_directories: &[String], referenced_directories: &[String]) {
-    let list_store = get_list_store(tree_view_included_directories);
+    let list_store = tree_view_included_directories.get_model();
     list_store.clear();
 
     // Referenced directories must be also in included directories
@@ -471,18 +472,16 @@ fn set_included_reference_folders(tree_view_included_directories: &TreeView, inc
 }
 
 fn set_configuration_to_gui_internal(upper_notebook: &GuiUpperNotebook, main_notebook: &GuiMainNotebook, settings: &GuiSettings, default_config: &SettingsJson) {
+    let tree_view_included_directories = upper_notebook.common_upper_tree_views.get_tree_view(UpperTreeViewEnum::IncludedDirectories);
+    let tree_view_excluded_directories = upper_notebook.common_upper_tree_views.get_tree_view(UpperTreeViewEnum::ExcludedDirectories);
+
     // Resetting included directories
     {
-        set_included_reference_folders(
-            &upper_notebook.tree_view_included_directories,
-            &default_config.included_directories,
-            &default_config.reference_directories,
-        );
+        set_included_reference_folders(tree_view_included_directories, &default_config.included_directories, &default_config.reference_directories);
     }
     // Resetting excluded directories
     {
-        let tree_view_excluded_directories = upper_notebook.tree_view_excluded_directories.clone();
-        let list_store = get_list_store(&tree_view_excluded_directories);
+        let list_store = tree_view_excluded_directories.get_model();
         list_store.clear();
         for i in default_config.excluded_directories.clone() {
             let values: [(u32, &dyn ToValue); 1] = [(ColumnsExcludedDirectory::Path as u32, &i)];
@@ -602,9 +601,12 @@ fn get_current_directory() -> String {
 }
 
 fn gui_to_settings(upper_notebook: &GuiUpperNotebook, main_notebook: &GuiMainNotebook, settings: &GuiSettings) -> SettingsJson {
+    let tree_view_included_directories = &upper_notebook.common_upper_tree_views.get_tree_view(UpperTreeViewEnum::IncludedDirectories);
+    let tree_view_excluded_directories = &upper_notebook.common_upper_tree_views.get_tree_view(UpperTreeViewEnum::ExcludedDirectories);
+
     // Gather directories
-    let included_directories = get_string_from_list_store(&upper_notebook.tree_view_included_directories, ColumnsIncludedDirectory::Path as i32, None);
-    let excluded_directories = get_string_from_list_store(&upper_notebook.tree_view_excluded_directories, ColumnsExcludedDirectory::Path as i32, None);
+    let included_directories = get_string_from_list_store(tree_view_included_directories, ColumnsIncludedDirectory::Path as i32, None);
+    let excluded_directories = get_string_from_list_store(tree_view_excluded_directories, ColumnsExcludedDirectory::Path as i32, None);
 
     let ref_fnc: &dyn Fn(&ListStore, &gtk4::TreeIter, &mut Vec<String>) = &|list_store, tree_iter, vec| {
         if list_store.get::<bool>(tree_iter, ColumnsIncludedDirectory::ReferenceButton as i32) {
@@ -612,7 +614,7 @@ fn gui_to_settings(upper_notebook: &GuiUpperNotebook, main_notebook: &GuiMainNot
         }
     };
 
-    let reference_directories = get_from_list_store_fnc(&upper_notebook.tree_view_included_directories, ref_fnc);
+    let reference_directories = get_from_list_store_fnc(tree_view_included_directories, ref_fnc);
 
     // Language short text
     let language_text = match settings.combo_box_settings_language.active_text() {
@@ -693,9 +695,9 @@ pub fn load_configuration(
 
     // Show/hide bottom text panel
     if !loaded_settings.show_bottom_text_panel {
-        scrolled_window_errors.hide();
+        scrolled_window_errors.set_visible(false);
     } else {
-        scrolled_window_errors.show();
+        scrolled_window_errors.set_visible(true);
     }
 
     reset_text_view(text_view_errors);
@@ -735,8 +737,8 @@ pub fn load_configuration(
     // When starting app wtih arguments, we want to set folders
     if set_start_folders {
         set_directories(
-            &upper_notebook.tree_view_included_directories,
-            &upper_notebook.tree_view_excluded_directories,
+            upper_notebook.common_upper_tree_views.get_tree_view(UpperTreeViewEnum::IncludedDirectories),
+            upper_notebook.common_upper_tree_views.get_tree_view(UpperTreeViewEnum::ExcludedDirectories),
             &included_directories,
             &referenced_directories,
             &excluded_directories,
@@ -757,7 +759,7 @@ fn set_directories(
     set_included_reference_folders(tree_view_included_directories, included_directories, referenced_directories);
 
     //// Exclude Directories
-    let list_store = get_list_store(tree_view_excluded_directories);
+    let list_store = tree_view_excluded_directories.get_model();
     list_store.clear();
 
     for directory in excluded_directories {

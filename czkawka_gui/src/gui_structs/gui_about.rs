@@ -3,7 +3,7 @@ use gtk4::prelude::*;
 use gtk4::{Builder, Button, Orientation, Picture, Window};
 
 use crate::flg;
-use crate::help_functions::get_all_boxes_from_widget;
+use crate::gtk_traits::WidgetTraits;
 
 #[derive(Clone)]
 pub struct GuiAbout {
@@ -105,7 +105,7 @@ impl GuiAbout {
             "undefined-landmark",
         ]);
 
-        let custom_box = get_all_boxes_from_widget(&about_dialog)[2].clone(); // TODO may not be stable enough between GTK versions
+        let custom_box = about_dialog.get_all_boxes()[2].clone(); // TODO may not be stable enough between GTK versions
         let new_box = gtk4::Box::new(Orientation::Horizontal, 5);
 
         let button_repository = Button::builder().label("Repository").build();

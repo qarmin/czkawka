@@ -531,19 +531,18 @@ about_window_motto = This program is free to use and will always be.
 # Various dialog
 dialogs_ask_next_time = Ask next time
 
-delete_file_failed = Failed to delete file {$name}, reason {$reason}
+symlink_failed = Failed to symlink {$name} to {$target}, reason {$reason}
 
 delete_title_dialog = Delete confirmation
 delete_question_label = Are you sure that you want to delete files?
 delete_all_files_in_group_title = Confirmation of deleting all files in group
 delete_all_files_in_group_label1 = In some groups all records are selected.
 delete_all_files_in_group_label2 = Are you sure that you want to delete them?
-delete_folder_failed = Failed to delete folder {$dir} because folder doesn't exist, you don't have permission or the folder isn't empty.
 
 delete_items_label = { $items } files will be deleted.
 delete_items_groups_label = { $items } files from { $groups } groups will be deleted.
 
-hardlink_failed = Failed to hardlink
+hardlink_failed = Failed to hardlink { $name } to { $target }, reason { $reason }
 hard_sym_invalid_selection_title_dialog = Invalid selection with some groups
 hard_sym_invalid_selection_label_1 = In some groups there is only one record selected and it will be ignored.
 hard_sym_invalid_selection_label_2 = To be able to hard/sym link these files, at least two results in the group need to be selected.

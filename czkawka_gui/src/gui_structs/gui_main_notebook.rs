@@ -9,13 +9,14 @@ use czkawka_core::tools::similar_images::SIMILAR_VALUES;
 use czkawka_core::tools::similar_images::core::get_string_from_similarity;
 use gtk4::prelude::*;
 use gtk4::{Builder, CheckButton, ComboBoxText, Entry, Label, Notebook, Picture, Scale, Widget};
+use log::error;
 
 use crate::flg;
+use crate::gtk_traits::WidgetTraits;
 use crate::gui_structs::common_tree_view::{CommonTreeViews, SharedModelEnum, SubView};
 use crate::gui_structs::gui_data::GuiData;
 use crate::gui_structs::gui_settings::GuiSettings;
 use crate::help_combo_box::{AUDIO_TYPE_CHECK_METHOD_COMBO_BOX, BIG_FILES_CHECK_METHOD_COMBO_BOX, DUPLICATES_CHECK_METHOD_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX};
-use crate::help_functions::get_all_direct_children;
 use crate::notebook_enums::NotebookMainEnum;
 
 #[derive(Clone)]
@@ -155,17 +156,17 @@ impl GuiMainNotebook {
 
         #[rustfmt::skip]
         let subviews: Vec<_> = [
-            SubView::new(builder, "scrolled_window_duplicate_finder", NotebookMainEnum::Duplicate, Some("image_preview_duplicates"), "tree_view_duplicate_finder", Some(settings.check_button_settings_show_preview_duplicates.clone()), SharedModelEnum::Duplicates(Rc::default())),
-            SubView::new(builder, "scrolled_window_empty_folder_finder", NotebookMainEnum::EmptyDirectories, None, "tree_view_empty_folder_finder", None, SharedModelEnum::EmptyFolder(Rc::default())),
-            SubView::new(builder, "scrolled_window_empty_files_finder", NotebookMainEnum::EmptyFiles, None, "tree_view_empty_files_finder", None, SharedModelEnum::EmptyFiles(Rc::default())),
-            SubView::new(builder, "scrolled_window_temporary_files_finder", NotebookMainEnum::Temporary, None, "tree_view_temporary_files_finder", None, SharedModelEnum::Temporary(Rc::default())),
-            SubView::new(builder, "scrolled_window_big_files_finder", NotebookMainEnum::BigFiles, None, "tree_view_big_files_finder", None, SharedModelEnum::BigFile(Rc::default())),
-            SubView::new(builder, "scrolled_window_similar_images_finder", NotebookMainEnum::SimilarImages, Some("image_preview_similar_images"), "tree_view_similar_images_finder", Some(settings.check_button_settings_show_preview_similar_images.clone()), SharedModelEnum::SimilarImages(Rc::default())),
-            SubView::new(builder, "scrolled_window_similar_videos_finder", NotebookMainEnum::SimilarVideos, None, "tree_view_similar_videos_finder", None, SharedModelEnum::SimilarVideos(Rc::default())),
-            SubView::new(builder, "scrolled_window_same_music_finder", NotebookMainEnum::SameMusic, None, "tree_view_same_music_finder", None, SharedModelEnum::SameMusic(Rc::default())),
-            SubView::new(builder, "scrolled_window_invalid_symlinks", NotebookMainEnum::Symlinks, None, "tree_view_invalid_symlinks", None, SharedModelEnum::Symlinks(Rc::default())),
-            SubView::new(builder, "scrolled_window_broken_files", NotebookMainEnum::BrokenFiles, None, "tree_view_broken_files", None, SharedModelEnum::BrokenFiles(Rc::default())),
-            SubView::new(builder, "scrolled_window_bad_extensions", NotebookMainEnum::BadExtensions, None, "tree_view_bad_extensions", None, SharedModelEnum::BadExtensions(Rc::default())),
+            SubView::new(builder, "scrolled_window_duplicate_finder", NotebookMainEnum::Duplicate, Some("image_preview_duplicates"), Some(settings.check_button_settings_show_preview_duplicates.clone()), SharedModelEnum::Duplicates(Rc::default())),
+            SubView::new(builder, "scrolled_window_empty_folder_finder", NotebookMainEnum::EmptyDirectories, None, None, SharedModelEnum::EmptyFolder(Rc::default())),
+            SubView::new(builder, "scrolled_window_empty_files_finder", NotebookMainEnum::EmptyFiles, None, None, SharedModelEnum::EmptyFiles(Rc::default())),
+            SubView::new(builder, "scrolled_window_temporary_files_finder", NotebookMainEnum::Temporary, None, None, SharedModelEnum::Temporary(Rc::default())),
+            SubView::new(builder, "scrolled_window_big_files_finder", NotebookMainEnum::BigFiles, None, None, SharedModelEnum::BigFile(Rc::default())),
+            SubView::new(builder, "scrolled_window_similar_images_finder", NotebookMainEnum::SimilarImages, Some("image_preview_similar_images"), Some(settings.check_button_settings_show_preview_similar_images.clone()), SharedModelEnum::SimilarImages(Rc::default())),
+            SubView::new(builder, "scrolled_window_similar_videos_finder", NotebookMainEnum::SimilarVideos, None, None, SharedModelEnum::SimilarVideos(Rc::default())),
+            SubView::new(builder, "scrolled_window_same_music_finder", NotebookMainEnum::SameMusic, None, None, SharedModelEnum::SameMusic(Rc::default())),
+            SubView::new(builder, "scrolled_window_invalid_symlinks", NotebookMainEnum::Symlinks, None, None, SharedModelEnum::Symlinks(Rc::default())),
+            SubView::new(builder, "scrolled_window_broken_files", NotebookMainEnum::BrokenFiles, None, None, SharedModelEnum::BrokenFiles(Rc::default())),
+            SubView::new(builder, "scrolled_window_bad_extensions", NotebookMainEnum::BadExtensions, None, None, SharedModelEnum::BadExtensions(Rc::default())),
         ]
         .into_iter()
         .collect();
@@ -322,8 +323,8 @@ impl GuiMainNotebook {
             }
         }
 
-        let vec_children: Vec<Widget> = get_all_direct_children(&self.notebook_main);
-        let vec_children: Vec<Widget> = get_all_direct_children(&vec_children[1]);
+        let vec_children: Vec<Widget> = self.notebook_main.get_all_direct_children();
+        let vec_children: Vec<Widget> = vec_children[1].get_all_direct_children();
 
         // Change name of main notebook tabs
         for (main_enum, fl_thing) in [
@@ -339,12 +340,13 @@ impl GuiMainNotebook {
             (NotebookMainEnum::BrokenFiles as usize, flg!("main_notebook_broken_files")),
             (NotebookMainEnum::BadExtensions as usize, flg!("main_notebook_bad_extensions")),
         ] {
-            self.notebook_main
-                .tab_label(&vec_children[main_enum])
-                .expect("Tab label must be set")
-                .downcast::<Label>()
-                .expect("Tab label must be a label")
-                .set_text(&fl_thing);
+            let tabel = self.notebook_main.tab_label(&vec_children[main_enum]);
+
+            if let Some(tabel) = tabel {
+                tabel.downcast::<Label>().expect("Tab label must be a label").set_text(&fl_thing);
+            } else {
+                error!("Tab label for main notebook not found for enum {main_enum:?}, message {fl_thing:?}");
+            }
         }
 
         // Change names of columns

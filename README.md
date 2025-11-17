@@ -14,6 +14,7 @@ files from your computer.
 - Cache support - second and further scans should be much faster than the first one
 - CLI frontend - for easy automation
 - GUI frontend - uses GTK 4 or Slint frameworks
+- Core library - allows to reuse functionality in other apps
 - No spying - Czkawka does not have access to the Internet, nor does it collect any user information or statistics
 - Multilingual - support multiple languages like Polish, English or Italian
 - Multiple tools to use:
@@ -104,6 +105,25 @@ console apps, then take a look at these:
   Rust
 - [Rmlint](https://github.com/sahib/rmlint) - Nice console interface and also is feature packed
 - [RdFind](https://github.com/pauldreik/rdfind) - Fast, but written in C++ ¯\\\_(ツ)\_/¯
+
+
+## Projects using Czkawka
+
+Czkawka exposes its common functionality through a crate called **`czkawka_core`**, which can be reused by other projects.
+
+It is written in Rust and is used by all Czkawka frontends (`czkawka_gui`, `czkawka_cli`, `krokiet`).
+
+It is also used by external projects, such as:
+
+- **page-dewarp** – https://github.com/lmmx/page-dewarp - A library for dewarping document images using a cubic sheet model.
+
+Bindings are also available for:
+
+- **Python** – https://pypi.org/project/czkawka/
+
+Some projects work as wrappers around `czkawka_cli`. Without directly depending on `czkawka_core`, they allow simple scanning and retrieving results in JSON format:
+
+- **Schluckauf** – https://github.com/fadykuzman/schluckauf
 
 ## Thanks
 

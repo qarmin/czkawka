@@ -5,7 +5,7 @@ use gtk4::prelude::*;
 use gtk4::{Builder, TreePath};
 
 use crate::gui_structs::gui_data::CZK_ICON_REPLACE;
-use crate::help_functions::set_icon_of_button;
+use crate::helpers::image_operations::set_icon_of_button;
 use crate::{CZK_ICON_LEFT, CZK_ICON_RIGHT, flg};
 
 #[derive(Clone)]

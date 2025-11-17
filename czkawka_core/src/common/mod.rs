@@ -1,3 +1,4 @@
+pub mod basic_gui_cli;
 pub mod cache;
 pub mod config_cache_path;
 pub mod consts;
@@ -23,10 +24,13 @@ use std::{fs, io, thread};
 use items::SingleExcludedItem;
 use log::debug;
 
-use crate::common::consts::{DEFAULT_WORKER_THREAD_SIZE, TEMP_HARDLINK_FILE};
+use crate::common::consts::DEFAULT_WORKER_THREAD_SIZE;
+use crate::flc;
 
 static NUMBER_OF_THREADS: std::sync::LazyLock<Mutex<Option<usize>>> = std::sync::LazyLock::new(|| Mutex::new(None));
 static ALL_AVAILABLE_THREADS: std::sync::LazyLock<Mutex<Option<usize>>> = std::sync::LazyLock::new(|| Mutex::new(None));
+
+const MAX_SYMLINK_HARDLINK_ATTEMPTS: u8 = 5;
 
 pub fn get_number_of_threads() -> usize {
     let data = NUMBER_OF_THREADS.lock().expect("Cannot fail").expect("Should be set before get");
@@ -132,6 +136,32 @@ pub fn remove_folder_if_contains_only_empty_folders(path: impl AsRef<Path>, remo
     }
 }
 
+pub fn remove_single_file(full_path: &str, remove_to_trash: bool) -> Result<(), String> {
+    if remove_to_trash {
+        if let Err(e) = trash::delete(full_path) {
+            return Err(flc!("rust_error_moving_to_trash", file = full_path, error = e.to_string()));
+        }
+    } else {
+        if let Err(e) = fs::remove_file(full_path) {
+            return Err(flc!("rust_error_removing", file = full_path, error = e.to_string()));
+        }
+    }
+    Ok(())
+}
+
+pub fn remove_single_folder(full_path: &str, remove_to_trash: bool) -> Result<(), String> {
+    if remove_to_trash {
+        if let Err(e) = trash::delete(full_path) {
+            return Err(flc!("rust_error_moving_to_trash", file = full_path, error = e.to_string()));
+        }
+    } else {
+        if let Err(e) = fs::remove_dir_all(full_path) {
+            return Err(flc!("rust_error_removing", file = full_path, error = e.to_string()));
+        }
+    }
+    Ok(())
+}
+
 pub fn split_path(path: &Path) -> (String, String) {
     match (path.parent(), path.file_name()) {
         (Some(dir), Some(file)) => (dir.to_string_lossy().to_string(), file.to_string_lossy().into_owned()),
@@ -223,16 +253,79 @@ pub fn normalize_windows_path(path_to_change: impl AsRef<Path>) -> PathBuf {
     }
 }
 
-pub fn make_hard_link(src: &Path, dst: &Path) -> io::Result<()> {
+// Function to create hardlink, when destination exists
+// This is always true in this app, because creating hardling, to newly created file is pointless
+pub fn make_hard_link<P: AsRef<Path>, Q: AsRef<Path>>(src: P, dst: Q) -> io::Result<()> {
+    let src = src.as_ref();
+    let dst = dst.as_ref();
     let dst_dir = dst.parent().ok_or_else(|| Error::other("No parent"))?;
-    let temp = dst_dir.join(TEMP_HARDLINK_FILE);
-    fs::rename(dst, temp.as_path())?;
-    let result = fs::hard_link(src, dst);
-    if result.is_err() {
-        fs::rename(temp.as_path(), dst)?;
+    let mut temp;
+    let mut attempts = MAX_SYMLINK_HARDLINK_ATTEMPTS;
+    loop {
+        temp = dst_dir.join(format!("{}.czkawka_tmp", rand::random::<u128>()));
+        if !temp.exists() {
+            break;
+        }
+        attempts -= 1;
+        if attempts == 0 {
+            return Err(Error::other("Cannot choose temporary file for hardlink creation"));
+        }
     }
-    fs::remove_file(temp)?;
-    result
+    fs::rename(dst, temp.as_path())?;
+    match fs::hard_link(src, dst) {
+        Ok(()) => {
+            fs::remove_file(&temp)?;
+            Ok(())
+        }
+        Err(e) => {
+            let _ = fs::rename(&temp, dst);
+            Err(e)
+        }
+    }
+}
+
+#[cfg(any(target_family = "unix", target_family = "windows"))]
+pub fn make_file_symlink<P: AsRef<Path>, Q: AsRef<Path>>(src: P, dst: Q) -> io::Result<()> {
+    let src = src.as_ref();
+    let dst = dst.as_ref();
+    let dst_dir = dst.parent().ok_or_else(|| Error::other("No parent"))?;
+    let mut temp;
+    let mut attempts = MAX_SYMLINK_HARDLINK_ATTEMPTS;
+    loop {
+        temp = dst_dir.join(format!("{}.czkawka_tmp", rand::random::<u128>()));
+        if !temp.exists() {
+            break;
+        }
+        attempts -= 1;
+        if attempts == 0 {
+            return Err(Error::other("Cannot choose temporary file for symlink creation"));
+        }
+    }
+    fs::rename(dst, temp.as_path())?;
+    let result: Result<_, _>;
+    #[cfg(target_family = "unix")]
+    {
+        result = std::os::unix::fs::symlink(src, dst);
+    }
+    #[cfg(target_family = "windows")]
+    {
+        result = std::os::windows::fs::symlink_file(src, dst);
+    }
+    match result {
+        Ok(()) => {
+            fs::remove_file(&temp)?;
+            Ok(())
+        }
+        Err(e) => {
+            let _ = fs::rename(&temp, dst);
+            Err(e)
+        }
+    }
+}
+
+#[cfg(not(any(target_family = "unix", target_family = "windows")))]
+pub fn make_file_symlink<P: AsRef<Path>, Q: AsRef<Path>>(src: P, dst: Q) -> io::Result<()> {
+    Err(Error::new(io::ErrorKind::Other, "Soft links are not supported on this platform"))
 }
 
 #[cfg(test)]
@@ -247,7 +340,7 @@ mod test {
     use tempfile::tempdir;
 
     use crate::common::items::new_excluded_item;
-    use crate::common::{make_hard_link, normalize_windows_path, regex_check, remove_folder_if_contains_only_empty_folders};
+    use crate::common::{make_file_symlink, make_hard_link, normalize_windows_path, regex_check, remove_folder_if_contains_only_empty_folders};
 
     #[cfg(target_family = "unix")]
     fn assert_inode(before: &Metadata, after: &Metadata) {
@@ -293,6 +386,58 @@ mod test {
         assert_eq!(metadata.modified()?, fs::metadata(&dst)?.modified()?);
 
         assert_eq!(vec![dst], read_dir(&dir)?.flatten().map(|e| e.path()).collect::<Vec<PathBuf>>());
+        Ok(())
+    }
+
+    #[cfg(any(target_family = "unix", target_family = "windows"))]
+    #[test]
+    fn test_make_file_symlink() -> io::Result<()> {
+        let dir = tempfile::Builder::new().tempdir()?;
+        let (src, dst) = (dir.path().join("a"), dir.path().join("b"));
+        let content = "hello softlink";
+        {
+            let mut f = File::create(&src)?;
+            writeln!(f, "{content}")?;
+        }
+        File::create(&dst)?;
+
+        make_file_symlink(&src, &dst)?;
+
+        let symlink_meta = fs::symlink_metadata(&dst)?;
+        assert!(symlink_meta.file_type().is_symlink());
+
+        let src_content = fs::read_to_string(&src)?;
+        let dst_content = fs::read_to_string(&dst)?;
+        assert_eq!(src_content, dst_content);
+
+        let mut actual = read_dir(&dir)?.flatten().map(|e| e.path()).collect::<Vec<PathBuf>>();
+        actual.sort_unstable();
+        assert_eq!(vec![src, dst], actual);
+        Ok(())
+    }
+
+    #[cfg(any(target_family = "unix", target_family = "windows"))]
+    #[test]
+    fn test_make_file_symlink_fails() -> io::Result<()> {
+        let dir = tempfile::Builder::new().tempdir()?;
+        let (src, dst) = (dir.path().join("a"), dir.path().join("b"));
+        {
+            let mut f = File::create(&dst)?;
+            writeln!(f, "original")?;
+        }
+        let metadata = fs::metadata(&dst)?;
+
+        match make_file_symlink(&src, &dst) {
+            Err(_) => {
+                assert_eq!(fs::read_to_string(&dst)?, "original\n");
+                assert_eq!(metadata.permissions(), fs::metadata(&dst)?.permissions());
+            }
+            Ok(()) => {
+                let symlink_meta = fs::symlink_metadata(&dst)?;
+                assert!(symlink_meta.file_type().is_symlink());
+                fs::read_to_string(&dst).unwrap_err();
+            }
+        }
         Ok(())
     }
 

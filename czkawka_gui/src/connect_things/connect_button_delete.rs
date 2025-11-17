@@ -1,16 +1,15 @@
-use std::collections::BTreeMap;
-use std::fs;
-
-use czkawka_core::common::check_if_folder_contains_only_empty_folders;
+use czkawka_core::common::{remove_folder_if_contains_only_empty_folders, remove_single_file};
 use gtk4::prelude::*;
 use gtk4::{Align, CheckButton, Dialog, Orientation, ResponseType, TextView};
 use log::debug;
+use rayon::prelude::*;
 
 use crate::flg;
 use crate::gui_structs::common_tree_view::SubView;
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::{check_how_much_elements_is_selected, clean_invalid_headers, get_full_name_from_path_name};
-use crate::model_iter::iter_list;
+use crate::help_functions::get_full_name_from_path_name;
+use crate::helpers::list_store_operations::{check_how_much_elements_is_selected, clean_invalid_headers};
+use crate::helpers::model_iter::iter_list;
 use crate::notebook_enums::NotebookMainEnum;
 
 // TODO add support for checking if really symlink doesn't point to correct directory/file
@@ -76,10 +75,10 @@ pub async fn check_if_can_delete_files(
             if !check_button.is_active() {
                 check_button_settings_confirm_deletion.set_active(false);
             }
-            confirmation_dialog_delete.hide();
+            confirmation_dialog_delete.set_visible(false);
             confirmation_dialog_delete.close();
         } else {
-            confirmation_dialog_delete.hide();
+            confirmation_dialog_delete.set_visible(false);
             confirmation_dialog_delete.close();
             return false;
         }
@@ -119,7 +118,7 @@ fn create_dialog_ask_for_deletion(window_main: &gtk4::Window, number_of_selected
     parent.insert_child_after(&label2, Some(&label));
     parent.insert_child_after(&check_button, Some(&label2));
 
-    dialog.show();
+    dialog.set_visible(true);
     (dialog, check_button)
 }
 
@@ -144,7 +143,7 @@ fn create_dialog_group_deletion(window_main: &gtk4::Window) -> (Dialog, CheckBut
     parent.insert_child_after(&label2, Some(&label));
     parent.insert_child_after(&check_button, Some(&label2));
 
-    dialog.show();
+    dialog.set_visible(true);
     (dialog, check_button)
 }
 
@@ -192,83 +191,31 @@ pub async fn check_if_deleting_all_files_in_group(sv: &SubView, window_main: &gt
             check_button_settings_confirm_group_deletion.set_active(false);
         }
     } else {
-        confirmation_dialog_group_delete.hide();
+        confirmation_dialog_group_delete.set_visible(false);
         confirmation_dialog_group_delete.close();
         return true;
     }
-    confirmation_dialog_group_delete.hide();
+    confirmation_dialog_group_delete.set_visible(false);
     confirmation_dialog_group_delete.close();
 
     false
 }
 
 pub(crate) fn empty_folder_remover(sv: &SubView, check_button_settings_use_trash: &CheckButton, text_view_errors: &TextView) {
-    let use_trash = check_button_settings_use_trash.is_active();
-
-    let model = sv.get_model();
-
-    let mut selected_rows = Vec::new();
-
-    iter_list(&model, |m, i| {
-        if m.get::<bool>(i, sv.nb_object.column_selection) {
-            selected_rows.push(m.path(i));
-        }
-    });
-
-    if selected_rows.is_empty() {
-        return; // No selected rows
-    }
-
-    debug!("Starting to delete {} folders", selected_rows.len());
-    let start_time = std::time::Instant::now();
-    let mut deleted_folders: u32 = 0;
-
-    let mut messages: String = String::new();
-
-    // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
-    for tree_path in selected_rows.iter().rev() {
-        let iter = model.iter(tree_path).expect("Using invalid tree_path");
-
-        let name = model.get::<String>(&iter, sv.nb_object.column_name);
-        let path = model.get::<String>(&iter, sv.nb_object.column_path);
-        let full_path = get_full_name_from_path_name(&path, &name);
-
-        // We must check if folder is really empty or contains only other empty folders
-        let mut error_happened = check_if_folder_contains_only_empty_folders(&full_path).is_err();
-
-        if !error_happened {
-            if !use_trash {
-                match fs::remove_dir_all(&full_path) {
-                    Ok(()) => {
-                        model.remove(&iter);
-                        deleted_folders += 1;
-                    }
-                    Err(_inspected) => error_happened = true,
-                }
-            } else {
-                match trash::delete(&full_path) {
-                    Ok(()) => {
-                        model.remove(&iter);
-                        deleted_folders += 1;
-                    }
-                    Err(_inspected) => error_happened = true,
-                }
-            }
-        }
-
-        // This could be changed to add more specific error message, what exactly happened
-        if error_happened {
-            messages += &flg!("delete_folder_failed", dir = full_path);
-            messages += "\n";
-        }
-    }
-
-    debug!("Deleted {deleted_folders} folders in {:?}", start_time.elapsed());
-
-    text_view_errors.buffer().set_text(messages.as_str());
+    common_file_remove(sv, check_button_settings_use_trash, text_view_errors, None, false);
 }
 
 pub(crate) fn basic_remove(sv: &SubView, check_button_settings_use_trash: &CheckButton, text_view_errors: &TextView) {
+    common_file_remove(sv, check_button_settings_use_trash, text_view_errors, None, true);
+}
+
+pub(crate) fn tree_remove(sv: &SubView, column_header: i32, check_button_settings_use_trash: &CheckButton, text_view_errors: &TextView) {
+    common_file_remove(sv, check_button_settings_use_trash, text_view_errors, Some(column_header), true);
+
+    clean_invalid_headers(&sv.get_model(), column_header, sv.nb_object.column_path);
+}
+
+pub(crate) fn common_file_remove(sv: &SubView, check_button_settings_use_trash: &CheckButton, text_view_errors: &TextView, column_header: Option<i32>, file_remove: bool) {
     let use_trash = check_button_settings_use_trash.is_active();
 
     let model = sv.get_model();
@@ -279,7 +226,15 @@ pub(crate) fn basic_remove(sv: &SubView, check_button_settings_use_trash: &Check
 
     iter_list(&model, |m, i| {
         if m.get::<bool>(i, sv.nb_object.column_selection) {
-            selected_rows.push(m.path(i));
+            if let Some(column_header) = column_header {
+                if !m.get::<bool>(i, column_header) {
+                    selected_rows.push(m.path(i));
+                } else {
+                    panic!("Header row shouldn't be selected, please report bug.");
+                }
+            } else {
+                selected_rows.push(m.path(i));
+            }
         }
     });
 
@@ -289,109 +244,55 @@ pub(crate) fn basic_remove(sv: &SubView, check_button_settings_use_trash: &Check
 
     debug!("Starting to delete {} files", selected_rows.len());
     let start_time = std::time::Instant::now();
-    let mut deleted_files: u32 = 0;
 
-    // Must be deleted from end to start, because when deleting entries, TreePath(and also TreeIter) will points to invalid data
-    for tree_path in selected_rows.iter().rev() {
-        let iter = model.iter(tree_path).expect("Using invalid tree_path");
+    let to_remove = selected_rows
+        .iter()
+        .enumerate()
+        .map(|(idx, tree_path)| {
+            let iter = model.iter(tree_path).expect("Using invalid tree_path");
 
-        let name = model.get::<String>(&iter, sv.nb_object.column_name);
-        let path = model.get::<String>(&iter, sv.nb_object.column_path);
+            let name = model.get::<String>(&iter, sv.nb_object.column_name);
+            let path = model.get::<String>(&iter, sv.nb_object.column_path);
 
-        if !use_trash {
-            match fs::remove_file(get_full_name_from_path_name(&path, &name)) {
-                Ok(()) => {
-                    model.remove(&iter);
-                    deleted_files += 1;
-                }
+            (idx, get_full_name_from_path_name(&path, &name))
+        })
+        .collect::<Vec<_>>();
 
-                Err(e) => {
-                    messages += flg!("delete_file_failed", name = get_full_name_from_path_name(&path, &name), reason = e.to_string()).as_str();
-                    messages += "\n";
-                }
-            }
-        } else {
-            match trash::delete(get_full_name_from_path_name(&path, &name)) {
-                Ok(()) => {
-                    model.remove(&iter);
-                    deleted_files += 1;
-                }
-                Err(e) => {
-                    messages += flg!("delete_file_failed", name = get_full_name_from_path_name(&path, &name), reason = e.to_string()).as_str();
-                    messages += "\n";
-                }
-            }
-        }
-    }
-
-    debug!("Deleted {deleted_files} files in {:?}", start_time.elapsed());
-
-    text_view_errors.buffer().set_text(messages.as_str());
-}
-
-// Remove all occurrences - remove every element which have same path and name as even non selected ones
-pub(crate) fn tree_remove(sv: &SubView, column_header: i32, check_button_settings_use_trash: &CheckButton, text_view_errors: &TextView) {
-    let use_trash = check_button_settings_use_trash.is_active();
-
-    let model = sv.get_model();
-
-    let mut messages: String = String::new();
-
-    // TODO - looks like a but - this var is not deleted
-    #[expect(clippy::collection_is_never_read)]
-    let mut vec_path_to_delete: Vec<(String, String)> = Vec::new();
-    let mut map_with_path_to_delete: BTreeMap<String, Vec<String>> = Default::default(); // BTreeMap<Path,Vec<FileName>>
-
-    let mut selected_rows = Vec::new();
-
-    iter_list(&model, |m, i| {
-        if m.get::<bool>(i, sv.nb_object.column_selection) {
-            if !m.get::<bool>(i, column_header) {
-                selected_rows.push(m.path(i));
+    let (mut removed, failed_to_remove): (Vec<usize>, Vec<String>) = to_remove
+        .into_par_iter()
+        .map(|(idx, path)| {
+            if file_remove {
+                remove_single_file(&path, use_trash)?;
             } else {
-                panic!("Header row shouldn't be selected, please report bug.");
+                remove_folder_if_contains_only_empty_folders(&path, use_trash)?;
             }
-        }
-    });
+            Ok(idx)
+        })
+        .partition_map(|res| match res {
+            Ok(entry) => itertools::Either::Left(entry),
+            Err(err) => itertools::Either::Right(err),
+        });
 
-    if selected_rows.is_empty() {
-        return;
+    for failed in &failed_to_remove {
+        messages += failed;
+        messages += "\n";
     }
 
-    // Save to variable paths of files, and remove it when not removing all occurrences.
-    for tree_path in selected_rows.iter().rev() {
-        let iter = model.iter(tree_path).expect("Using invalid tree_path");
+    removed.sort_unstable();
+    removed.reverse(); // Must be deleted from end to start
+    let deleted_files = removed.len();
 
-        let file_name = model.get::<String>(&iter, sv.nb_object.column_name);
-        let path = model.get::<String>(&iter, sv.nb_object.column_path);
-
+    for idx in removed {
+        let iter = model.iter(&selected_rows[idx]).expect("Using invalid tree_path");
         model.remove(&iter);
-
-        map_with_path_to_delete.entry(path.clone()).or_default().push(file_name);
     }
 
-    // Delete duplicated entries, and remove real files
-    for (path, mut vec_file_name) in map_with_path_to_delete {
-        vec_file_name.sort_unstable();
-        vec_file_name.dedup();
-        for file_name in vec_file_name {
-            if !use_trash {
-                if let Err(e) = fs::remove_file(get_full_name_from_path_name(&path, &file_name)) {
-                    messages += flg!("delete_file_failed", name = get_full_name_from_path_name(&path, &file_name), reason = e.to_string()).as_str();
-                    messages += "\n";
-                }
-            } else if let Err(e) = trash::delete(get_full_name_from_path_name(&path, &file_name)) {
-                messages += flg!("delete_file_failed", name = get_full_name_from_path_name(&path, &file_name), reason = e.to_string()).as_str();
-                messages += "\n";
-            }
-
-            vec_path_to_delete.push((path.clone(), file_name.clone()));
-        }
-    }
-
-    // TODO use vec_path_to_delete
-
-    clean_invalid_headers(&model, column_header, sv.nb_object.column_path);
+    debug!(
+        "Deleted {deleted_files}/{} items({} tab) in {:?}",
+        selected_rows.len(),
+        sv.nb_object.name,
+        start_time.elapsed()
+    );
 
     text_view_errors.buffer().set_text(messages.as_str());
 }

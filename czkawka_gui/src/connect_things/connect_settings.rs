@@ -17,8 +17,8 @@ use image_hasher::HashAlg;
 use log::error;
 
 use crate::flg;
+use crate::gtk_traits::DialogTraits;
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::get_dialog_box_child;
 use crate::saving_loading::{load_configuration, reset_configuration, save_configuration};
 
 pub(crate) fn connect_settings(gui_data: &GuiData) {
@@ -36,13 +36,13 @@ pub(crate) fn connect_settings(gui_data: &GuiData) {
         let button_settings = gui_data.header.button_settings.clone();
         let window_settings = gui_data.settings.window_settings.clone();
         button_settings.connect_clicked(move |_| {
-            window_settings.show();
+            window_settings.set_visible(true);
         });
 
         let window_settings = gui_data.settings.window_settings.clone();
 
         window_settings.connect_close_request(move |window| {
-            window.hide();
+            window.set_visible(false);
             glib::Propagation::Stop
         });
     }
@@ -117,7 +117,7 @@ pub(crate) fn connect_settings(gui_data: &GuiData) {
 
             button_settings_duplicates_clear_cache.connect_clicked(move |_| {
                 let dialog = create_clear_cache_dialog(&flg!("cache_clear_duplicates_title"), &settings_window);
-                dialog.show();
+                dialog.set_visible(true);
 
                 let text_view_errors = text_view_errors.clone();
                 let entry_settings_cache_file_minimal_size = entry_settings_cache_file_minimal_size.clone();
@@ -160,7 +160,7 @@ pub(crate) fn connect_settings(gui_data: &GuiData) {
 
             button_settings_similar_images_clear_cache.connect_clicked(move |_| {
                 let dialog = create_clear_cache_dialog(&flg!("cache_clear_similar_images_title"), &settings_window);
-                dialog.show();
+                dialog.set_visible(true);
 
                 let text_view_errors = text_view_errors.clone();
 
@@ -209,7 +209,7 @@ pub(crate) fn connect_settings(gui_data: &GuiData) {
 
             button_settings_similar_videos_clear_cache.connect_clicked(move |_| {
                 let dialog = create_clear_cache_dialog(&flg!("cache_clear_similar_videos_title"), &settings_window);
-                dialog.show();
+                dialog.set_visible(true);
 
                 let text_view_errors = text_view_errors.clone();
 
@@ -244,7 +244,7 @@ fn create_clear_cache_dialog(title_str: &str, window_settings: &Window) -> gtk4:
     let label3 = Label::builder().label(flg!("cache_clear_message_label_3")).build();
     let label4 = Label::builder().label(flg!("cache_clear_message_label_4")).build();
 
-    let internal_box = get_dialog_box_child(&dialog);
+    let internal_box = dialog.get_box_child();
     internal_box.append(&label);
     internal_box.append(&label2);
     internal_box.append(&label3);

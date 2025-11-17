@@ -3,9 +3,8 @@ use std::fmt::Debug;
 use gtk4::prelude::*;
 use gtk4::{ListStore, TreeIter};
 
-use crate::gui_structs::common_tree_view::SubView;
+use crate::gui_structs::common_tree_view::{SubView, TreeViewListStoreTrait};
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::get_list_store;
 
 fn popover_sort_general_abs<T>(popover: &gtk4::Popover, sv: &SubView)
 where
@@ -23,7 +22,7 @@ fn popover_sort_general<T>(popover: &gtk4::Popover, tree_view: &gtk4::TreeView, 
 where
     T: Ord + for<'b> glib::value::FromValue<'b> + 'static + Debug,
 {
-    let model = get_list_store(tree_view);
+    let model = tree_view.get_model();
 
     if let Some(mut curr_iter) = model.iter_first() {
         assert!(model.get::<bool>(&curr_iter, column_header));
@@ -122,8 +121,8 @@ mod test {
     use gtk4::{Popover, TreeView};
     use rand::random;
 
-    use crate::connect_things::connect_popovers_sort::{popover_sort_general, sort_iters};
-    use crate::help_functions::append_row_to_list_store;
+    use super::*;
+    use crate::helpers::list_store_operations::append_row_to_list_store;
 
     #[gtk4::test]
     fn test_sort_iters() {

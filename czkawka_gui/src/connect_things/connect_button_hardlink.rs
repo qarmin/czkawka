@@ -1,15 +1,14 @@
-use std::fs;
-use std::path::PathBuf;
-
-use czkawka_core::common::make_hard_link;
+use czkawka_core::common::{make_file_symlink, make_hard_link};
 use gtk4::prelude::*;
 use gtk4::{Align, CheckButton, Dialog, Orientation, ResponseType, TextView, TreeIter, TreePath};
+use rayon::prelude::*;
 
 use crate::flg;
 use crate::gui_structs::common_tree_view::SubView;
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::{add_text_to_text_view, clean_invalid_headers, get_full_name_from_path_name, reset_text_view};
-use crate::model_iter::{iter_list, iter_list_break_with_init};
+use crate::help_functions::{add_text_to_text_view, get_full_name_from_path_name, reset_text_view};
+use crate::helpers::list_store_operations::clean_invalid_headers;
+use crate::helpers::model_iter::{iter_list, iter_list_break_with_init};
 
 #[derive(PartialEq, Eq, Copy, Clone)]
 enum TypeOfTool {
@@ -155,37 +154,40 @@ fn hardlink_symlink(sv: &SubView, hardlinking: TypeOfTool, text_view_errors: &Te
             break;
         }
     }
-    if hardlinking == TypeOfTool::Hardlinking {
-        for symhardlink_data in vec_symhardlink_data {
-            for file_to_hardlink in symhardlink_data.files_to_symhardlink {
-                if let Err(e) = make_hard_link(&PathBuf::from(&symhardlink_data.original_data), &PathBuf::from(&file_to_hardlink)) {
-                    add_text_to_text_view(text_view_errors, format!("{} {}, reason {}", flg!("hardlink_failed"), file_to_hardlink, e).as_str());
-                }
-            }
-        }
-    } else {
-        for symhardlink_data in vec_symhardlink_data {
-            for file_to_symlink in symhardlink_data.files_to_symhardlink {
-                if let Err(e) = fs::remove_file(&file_to_symlink) {
-                    add_text_to_text_view(text_view_errors, flg!("delete_file_failed", name = file_to_symlink, reason = e.to_string()).as_str());
-                    continue;
-                }
 
-                #[cfg(target_family = "unix")]
-                {
-                    if let Err(e) = std::os::unix::fs::symlink(&symhardlink_data.original_data, &file_to_symlink) {
-                        add_text_to_text_view(text_view_errors, flg!("delete_file_failed", name = file_to_symlink, reason = e.to_string()).as_str());
+    let errors = vec_symhardlink_data
+        .into_par_iter()
+        .flat_map(|symhardlink_data| {
+            let mut err = vec![];
+            for file_to_be_replaced in symhardlink_data.files_to_symhardlink {
+                if hardlinking == TypeOfTool::Symlinking {
+                    if let Err(e) = make_file_symlink(&symhardlink_data.original_data, &file_to_be_replaced) {
+                        err.push(flg!(
+                            "symlink_failed",
+                            name = symhardlink_data.original_data.clone(),
+                            target = file_to_be_replaced,
+                            reason = e.to_string()
+                        ));
+                    }
+                } else {
+                    if let Err(e) = make_hard_link(&symhardlink_data.original_data, &file_to_be_replaced) {
+                        err.push(flg!(
+                            "hardlink_failed",
+                            name = symhardlink_data.original_data.clone(),
+                            target = file_to_be_replaced,
+                            reason = e.to_string()
+                        ));
                     }
                 }
-                #[cfg(target_family = "windows")]
-                {
-                    if let Err(e) = std::os::windows::fs::symlink_file(&symhardlink_data.original_data, &file_to_symlink) {
-                        add_text_to_text_view(text_view_errors, flg!("delete_file_failed", name = file_to_symlink, reason = e.to_string()).as_str());
-                    };
-                }
             }
-        }
+            err
+        })
+        .collect::<Vec<_>>();
+
+    for error in errors {
+        add_text_to_text_view(text_view_errors, &error);
     }
+
     for tree_path in vec_tree_path_to_remove.iter().rev() {
         model.remove(&model.iter(tree_path).expect("Using invalid tree_path"));
     }
@@ -214,7 +216,7 @@ fn create_dialog_non_group(window_main: &gtk4::Window) -> Dialog {
     parent.insert_child_after(&label2, Some(&label));
     parent.insert_child_after(&label3, Some(&label2));
 
-    dialog.show();
+    dialog.set_visible(true);
     dialog
 }
 
@@ -250,11 +252,11 @@ pub async fn check_if_changing_one_item_in_group_and_continue(sv: &SubView, wind
 
         let response_type = confirmation_dialog.run_future().await;
         if response_type != ResponseType::Ok {
-            confirmation_dialog.hide();
+            confirmation_dialog.set_visible(false);
             confirmation_dialog.close();
             return false;
         }
-        confirmation_dialog.hide();
+        confirmation_dialog.set_visible(false);
         confirmation_dialog.close();
     }
 
@@ -294,10 +296,10 @@ pub async fn check_if_can_link_files(check_button_settings_confirm_link: &CheckB
             if !check_button.is_active() {
                 check_button_settings_confirm_link.set_active(false);
             }
-            confirmation_dialog_link.hide();
+            confirmation_dialog_link.set_visible(false);
             confirmation_dialog_link.close();
         } else {
-            confirmation_dialog_link.hide();
+            confirmation_dialog_link.set_visible(false);
             confirmation_dialog_link.close();
             return false;
         }
@@ -320,6 +322,6 @@ fn create_dialog_ask_for_linking(window_main: &gtk4::Window) -> (Dialog, CheckBu
     parent.insert_child_after(&label, None::<&gtk4::Widget>);
     parent.insert_child_after(&check_button, Some(&label));
 
-    dialog.show();
+    dialog.set_visible(true);
     (dialog, check_button)
 }

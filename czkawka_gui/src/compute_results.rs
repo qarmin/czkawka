@@ -28,14 +28,15 @@ use humansize::{BINARY, format_size};
 use rayon::prelude::*;
 
 use crate::flg;
-use crate::gui_structs::common_tree_view::{SharedModelEnum, SubView};
+use crate::gui_structs::common_tree_view::{SharedModelEnum, SubView, TreeViewListStoreTrait};
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_combo_box::IMAGES_HASH_SIZE_COMBO_BOX;
-use crate::help_functions::{
+use crate::help_functions::{HEADER_ROW_COLOR, MAIN_ROW_COLOR, TEXT_COLOR, print_text_messages_to_text_view, set_buttons};
+use crate::helpers::enums::{
     BottomButtonsEnum, ColumnsBadExtensions, ColumnsBigFiles, ColumnsBrokenFiles, ColumnsDuplicates, ColumnsEmptyFiles, ColumnsEmptyFolders, ColumnsInvalidSymlinks,
-    ColumnsSameMusic, ColumnsSimilarImages, ColumnsSimilarVideos, ColumnsTemporaryFiles, HEADER_ROW_COLOR, MAIN_ROW_COLOR, Message, TEXT_COLOR, append_row_to_list_store,
-    get_list_store, print_text_messages_to_text_view, set_buttons,
+    ColumnsSameMusic, ColumnsSimilarImages, ColumnsSimilarVideos, ColumnsTemporaryFiles, Message,
 };
+use crate::helpers::list_store_operations::append_row_to_list_store;
 use crate::notebook_enums::NotebookMainEnum;
 use crate::notebook_info::NOTEBOOKS_INFO;
 use crate::opening_selecting_records::{
@@ -111,14 +112,14 @@ pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Recei
     glib::spawn_future_local(async move {
         loop {
             while let Ok(msg) = result_receiver.try_recv() {
-                buttons_search.show();
+                buttons_search.set_visible(true);
 
                 notebook_main.set_sensitive(true);
                 notebook_upper.set_sensitive(true);
                 button_settings.set_sensitive(true);
                 button_app_info.set_sensitive(true);
 
-                window_progress.hide();
+                window_progress.set_visible(false);
 
                 taskbar_state.borrow().hide();
 
@@ -168,7 +169,7 @@ fn compute_bad_extensions(be: BadExtensions, entry_info: &Entry, text_view_error
 
     entry_info.set_text(flg!("compute_found_bad_extensions", number_files = bad_extensions_number).as_str());
 
-    let list_store = get_list_store(&subview.tree_view);
+    let list_store = subview.tree_view.get_model();
     let mut vector = be.get_bad_extensions_files().clone();
     vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
@@ -200,7 +201,7 @@ fn compute_broken_files(br: BrokenFiles, entry_info: &Entry, text_view_errors: &
 
     entry_info.set_text(flg!("compute_found_broken_files", number_files = broken_files_number).as_str());
 
-    let list_store = get_list_store(&subview.tree_view);
+    let list_store = subview.tree_view.get_model();
     let mut vector = br.get_broken_files().clone();
     vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
@@ -231,7 +232,7 @@ fn compute_invalid_symlinks(ifs: InvalidSymlinks, entry_info: &Entry, text_view_
 
     entry_info.set_text(flg!("compute_found_invalid_symlinks", number_files = invalid_symlinks).as_str());
 
-    let list_store = get_list_store(&subview.tree_view);
+    let list_store = subview.tree_view.get_model();
     let vector = conditional_sort_vector(ifs.get_invalid_symlinks());
 
     for file_entry in vector {
@@ -280,7 +281,7 @@ fn compute_same_music(mf: SameMusic, entry_info: &Entry, text_view_errors: &Text
 
     // Create GUI
     {
-        let list_store = get_list_store(&subview.tree_view);
+        let list_store = subview.tree_view.get_model();
 
         let music_similarity = mf.get_params().music_similarity;
 
@@ -411,7 +412,7 @@ fn compute_similar_videos(ff: SimilarVideos, entry_info: &Entry, text_view_error
 
     // Create GUI
     {
-        let list_store = get_list_store(&subview.tree_view);
+        let list_store = subview.tree_view.get_model();
 
         if ff.get_use_reference() {
             let vec_struct_similar = ff.get_similar_videos_referenced();
@@ -473,7 +474,7 @@ fn compute_similar_images(sf: SimilarImages, entry_info: &Entry, text_view_error
 
     // Create GUI
     {
-        let list_store = get_list_store(&subview.tree_view);
+        let list_store = subview.tree_view.get_model();
 
         if sf.get_use_reference() {
             let vec_struct_similar: Vec<(ImagesEntry, Vec<ImagesEntry>)> = sf.get_similar_images_referenced().clone();
@@ -551,7 +552,7 @@ fn compute_temporary_files(tf: Temporary, entry_info: &Entry, text_view_errors: 
 
     entry_info.set_text(flg!("compute_found_temporary_files", number_files = temporary_files_number).as_str());
 
-    let list_store = get_list_store(&subview.tree_view);
+    let list_store = subview.tree_view.get_model();
     let mut vector = tf.get_temporary_files().clone();
     vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
@@ -581,7 +582,7 @@ fn compute_big_files(bf: BigFile, entry_info: &Entry, text_view_errors: &TextVie
 
     entry_info.set_text(flg!("compute_found_big_files", number_files = biggest_files_number).as_str());
 
-    let list_store = get_list_store(&subview.tree_view);
+    let list_store = subview.tree_view.get_model();
     let vector = bf.get_big_files();
 
     for file_entry in vector {
@@ -612,7 +613,7 @@ fn compute_empty_files(vf: EmptyFiles, entry_info: &Entry, text_view_errors: &Te
 
     entry_info.set_text(flg!("compute_found_empty_files", number_files = empty_files_number).as_str());
 
-    let list_store = get_list_store(&subview.tree_view);
+    let list_store = subview.tree_view.get_model();
     let vector = conditional_sort_vector(vf.get_empty_files());
 
     for file_entry in vector {
@@ -641,7 +642,7 @@ fn compute_empty_folders(ef: EmptyFolder, entry_info: &Entry, text_view_errors: 
 
     entry_info.set_text(flg!("compute_found_empty_folders", number_files = empty_folder_number).as_str());
 
-    let list_store = get_list_store(&subview.tree_view);
+    let list_store = subview.tree_view.get_model();
     let hashmap = ef.get_empty_folder_list();
     let mut vector = hashmap.values().collect::<Vec<_>>();
     vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
@@ -719,7 +720,7 @@ fn compute_duplicate_finder(df: DuplicateFinder, entry_info: &Entry, text_view_e
 
     // Create GUI
     {
-        let list_store = get_list_store(&subview.tree_view);
+        let list_store = subview.tree_view.get_model();
 
         if df.get_use_reference() {
             match df.get_params().check_method {

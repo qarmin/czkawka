@@ -6,16 +6,17 @@ use log::error;
 use regex::Regex;
 
 use crate::flg;
-use crate::gui_structs::common_tree_view::SubView;
+use crate::gtk_traits::DialogTraits;
+use crate::gui_structs::common_tree_view::{SubView, TreeViewListStoreTrait};
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::{change_dimension_to_krotka, get_dialog_box_child, get_full_name_from_path_name, get_list_store};
-use crate::model_iter::iter_list;
+use crate::help_functions::{change_dimension_to_krotka, get_full_name_from_path_name};
+use crate::helpers::model_iter::iter_list;
 
 // File length variable allows users to choose duplicates which have shorter file name
 // e.g. 'tar.gz' will be selected instead 'tar.gz (copy)' etc.
 
 fn popover_select_all(popover: &gtk4::Popover, tree_view: &gtk4::TreeView, column_button_selection: u32, column_header: Option<i32>) {
-    let model = get_list_store(tree_view);
+    let model = tree_view.get_model();
 
     if let Some(iter) = model.iter_first() {
         if let Some(column_header) = column_header {
@@ -41,7 +42,7 @@ fn popover_select_all(popover: &gtk4::Popover, tree_view: &gtk4::TreeView, colum
 }
 
 fn popover_unselect_all(popover: &gtk4::Popover, tree_view: &gtk4::TreeView, column_button_selection: u32) {
-    let model = get_list_store(tree_view);
+    let model = tree_view.get_model();
 
     iter_list(&model, |m, i| {
         m.set_value(i, column_button_selection, &false.to_value());
@@ -50,7 +51,7 @@ fn popover_unselect_all(popover: &gtk4::Popover, tree_view: &gtk4::TreeView, col
 }
 
 fn popover_reverse(popover: &gtk4::Popover, tree_view: &gtk4::TreeView, column_button_selection: u32, column_header: Option<i32>) {
-    let model = get_list_store(tree_view);
+    let model = tree_view.get_model();
 
     if let Some(iter) = model.iter_first() {
         if let Some(column_header) = column_header {
@@ -86,7 +87,7 @@ fn popover_all_except_oldest_newest(
     column_button_selection: u32,
     except_oldest: bool,
 ) {
-    let model = get_list_store(tree_view);
+    let model = tree_view.get_model();
 
     if let Some(iter) = model.iter_first() {
         let mut end: bool = false;
@@ -349,10 +350,10 @@ fn popover_custom_select_unselect(
                 grid.attach(&check_button_select_not_all_results, 0, 6, 2, 1);
             }
 
-            let box_widget = get_dialog_box_child(&dialog);
+            let box_widget = dialog.get_box_child();
             box_widget.append(&grid);
 
-            dialog.show();
+            dialog.set_visible(true);
         }
 
         let sv = sv.clone();

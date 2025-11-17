@@ -23,6 +23,7 @@ use connect_things::connect_settings::connect_settings;
 use connect_things::connect_show_hide_ui::connect_show_hide_ui;
 use connect_things::connect_similar_image_size_change::connect_similar_image_size_change;
 use crossbeam_channel::{Receiver, Sender, unbounded};
+use czkawka_core::common::basic_gui_cli::{CliResult, process_cli_args};
 use czkawka_core::common::config_cache_path::{print_infos_and_warnings, set_config_cache_path};
 use czkawka_core::common::logger::{filtering_messages, print_version_mode, setup_logger};
 use czkawka_core::common::progress_data::ProgressData;
@@ -38,7 +39,6 @@ use gui_structs::gui_data::{
 };
 use log::info;
 
-use crate::cli::{CliResult, process_cli_args};
 use crate::compute_results::connect_compute_results;
 use crate::connect_things::connect_button_sort::connect_button_sort;
 use crate::connect_things::connect_popovers_select::connect_popover_select;
@@ -48,18 +48,16 @@ use crate::initialize_gui::initialize_gui;
 use crate::language_functions::LANGUAGES_ALL;
 use crate::saving_loading::{DEFAULT_MAXIMAL_FILE_SIZE, DEFAULT_MINIMAL_CACHE_SIZE, DEFAULT_MINIMAL_FILE_SIZE, load_configuration, reset_configuration, save_configuration};
 
-mod cli;
 mod compute_results;
 mod connect_things;
-mod create_tree_view;
-mod dicom_traits;
+mod gtk_traits;
 mod gui_structs;
 mod help_combo_box;
 mod help_functions;
+mod helpers;
 mod initialize_gui;
 mod language_functions;
 mod localizer_gui;
-mod model_iter;
 mod notebook_enums;
 mod notebook_info;
 mod opening_selecting_records;
@@ -82,7 +80,11 @@ fn main() {
     glib::set_prgname(Some("com.github.qarmin.czkawka"));
 
     application.connect_command_line(move |app, cmdline| {
-        let cli_args = process_cli_args(cmdline.arguments().into_iter().skip(1).map(|x| x.to_string_lossy().to_string()).collect());
+        let cli_args = process_cli_args(
+            "Czkawka Gui",
+            "czkawka_gui",
+            cmdline.arguments().into_iter().skip(1).map(|x| x.to_string_lossy().to_string()).collect(),
+        );
         build_ui(app, cli_args.as_ref());
         ExitCode::new(0)
     });

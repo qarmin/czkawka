@@ -1,8 +1,10 @@
 use gtk4::prelude::*;
-use gtk4::{GestureClick, Widget};
+use gtk4::{GestureClick, Label, Widget};
 
+use crate::gtk_traits::WidgetTraits;
 use crate::gui_structs::gui_data::CZK_ICON_SORT;
-use crate::help_functions::{BottomButtonsEnum, get_custom_label_from_widget, set_icon_of_button};
+use crate::helpers::enums::BottomButtonsEnum;
+use crate::helpers::image_operations::set_icon_of_button;
 use crate::{
     CZK_ICON_COMPARE, CZK_ICON_HARDLINK, CZK_ICON_HIDE_DOWN, CZK_ICON_HIDE_UP, CZK_ICON_MOVE, CZK_ICON_SAVE, CZK_ICON_SEARCH, CZK_ICON_SELECT, CZK_ICON_SYMLINK, CZK_ICON_TRASH,
     flg,
@@ -118,14 +120,14 @@ impl GuiBottomButtons {
         }
     }
     pub(crate) fn update_language(&self) {
-        get_custom_label_from_widget(&self.buttons_search.clone()).set_text(&flg!("bottom_search_button"));
+        self.buttons_search.get_widget_of_type::<Label>(true).set_text(&flg!("bottom_search_button"));
         self.label_buttons_select.set_text(&flg!("bottom_select_button"));
-        get_custom_label_from_widget(&self.buttons_delete.clone()).set_text(&flg!("bottom_delete_button"));
-        get_custom_label_from_widget(&self.buttons_save.clone()).set_text(&flg!("bottom_save_button"));
-        get_custom_label_from_widget(&self.buttons_symlink.clone()).set_text(&flg!("bottom_symlink_button"));
-        get_custom_label_from_widget(&self.buttons_move.clone()).set_text(&flg!("bottom_move_button"));
-        get_custom_label_from_widget(&self.buttons_hardlink.clone()).set_text(&flg!("bottom_hardlink_button"));
-        get_custom_label_from_widget(&self.buttons_compare.clone()).set_text(&flg!("bottom_compare_button"));
+        self.buttons_delete.get_widget_of_type::<Label>(true).set_text(&flg!("bottom_delete_button"));
+        self.buttons_save.get_widget_of_type::<Label>(true).set_text(&flg!("bottom_save_button"));
+        self.buttons_symlink.get_widget_of_type::<Label>(true).set_text(&flg!("bottom_symlink_button"));
+        self.buttons_move.get_widget_of_type::<Label>(true).set_text(&flg!("bottom_move_button"));
+        self.buttons_hardlink.get_widget_of_type::<Label>(true).set_text(&flg!("bottom_hardlink_button"));
+        self.buttons_compare.get_widget_of_type::<Label>(true).set_text(&flg!("bottom_compare_button"));
         self.label_buttons_sort.set_text(&flg!("bottom_sort_button"));
 
         self.buttons_search.set_tooltip_text(Some(&flg!("bottom_search_button_tooltip")));

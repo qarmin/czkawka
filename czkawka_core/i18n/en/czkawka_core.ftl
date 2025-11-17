@@ -28,3 +28,6 @@ core_ffmpeg_not_found_windows = Be sure that ffmpeg.exe and ffprobe.exe are avai
 
 core_invalid_symlink_infinite_recursion = Infinite recursion
 core_invalid_symlink_non_existent_destination = Non-existent destination file
+
+rust_error_moving_to_trash = Error while moving \"{ $file }\" to trash: { $error }
+rust_error_removing = Error while removing \"{ $file }\" : { $error }

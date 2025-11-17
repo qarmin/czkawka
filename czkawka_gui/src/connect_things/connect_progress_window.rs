@@ -51,7 +51,7 @@ fn progress_save_load_cache(gui_data: &GuiData, item: &ProgressData) {
     let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
     let taskbar_state = gui_data.taskbar_state.clone();
 
-    progress_bar_current_stage.hide();
+    progress_bar_current_stage.set_visible(false);
     taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
 
     let text = match item.sstage {
@@ -84,7 +84,7 @@ fn progress_collect_items(gui_data: &GuiData, item: &ProgressData, files: bool) 
     let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
     let taskbar_state = gui_data.taskbar_state.clone();
 
-    progress_bar_current_stage.hide();
+    progress_bar_current_stage.set_visible(false);
     taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
 
     match item.sstage {
@@ -113,7 +113,7 @@ fn progress_default(gui_data: &GuiData, item: &ProgressData) {
     let progress_bar_all_stages = gui_data.progress_window.progress_bar_all_stages.clone();
     let taskbar_state = gui_data.taskbar_state.clone();
 
-    progress_bar_current_stage.show();
+    progress_bar_current_stage.set_visible(true);
     common_set_data(item, &progress_bar_all_stages, &progress_bar_current_stage, &taskbar_state);
     taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
 

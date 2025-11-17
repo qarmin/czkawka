@@ -1,6 +1,6 @@
 use gtk4::prelude::*;
 
-use crate::help_functions::set_icon_of_button;
+use crate::helpers::image_operations::set_icon_of_button;
 use crate::{CZK_ICON_INFO, CZK_ICON_SETTINGS, flg};
 
 #[derive(Clone)]

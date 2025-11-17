@@ -8,7 +8,7 @@ use gtk4::{Button, Entry};
 
 use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::BottomButtonsEnum;
+use crate::helpers::enums::BottomButtonsEnum;
 use crate::notebook_enums::NotebookMainEnum;
 
 pub(crate) fn connect_button_save(gui_data: &GuiData) {
@@ -44,7 +44,7 @@ fn post_save_things(
     entry_info.set_text(&flg!("save_results_to_file", name = current_path));
     // Set state
     {
-        buttons_save.hide();
+        buttons_save.set_visible(false);
         *shared_buttons
             .borrow_mut()
             .get_mut(&type_of_tab)

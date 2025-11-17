@@ -1,7 +1,8 @@
 use gtk4::prelude::*;
-use gtk4::{Builder, EventControllerKey, Window};
+use gtk4::{Builder, EventControllerKey, Label, Window};
 
-use crate::help_functions::{get_custom_label_from_widget, set_icon_of_button};
+use crate::gtk_traits::WidgetTraits;
+use crate::helpers::image_operations::set_icon_of_button;
 use crate::{CZK_ICON_STOP, flg};
 
 #[derive(Clone)]
@@ -61,7 +62,7 @@ impl GuiProgressDialog {
     pub(crate) fn update_language(&self) {
         self.window_progress.set_title(Some(&flg!("window_progress_title")));
 
-        get_custom_label_from_widget(&self.button_stop_in_dialog.clone()).set_text(&flg!("progress_stop_button"));
+        self.button_stop_in_dialog.get_widget_of_type::<Label>(true).set_text(&flg!("progress_stop_button"));
 
         self.label_progress_current_stage.set_label(&flg!("progress_current_stage"));
         self.label_progress_all_stages.set_label(&flg!("progress_all_stages"));

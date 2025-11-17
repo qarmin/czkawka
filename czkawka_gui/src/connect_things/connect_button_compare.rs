@@ -9,11 +9,12 @@ use image::DynamicImage;
 use log::error;
 
 use crate::flg;
+use crate::gtk_traits::WidgetTraits;
 use crate::gui_structs::common_tree_view::SubView;
 use crate::gui_structs::gui_data::GuiData;
-use crate::help_functions::{
-    count_number_of_groups, get_all_direct_children, get_full_name_from_path_name, get_max_file_name, get_pixbuf_from_dynamic_image, resize_pixbuf_dimension,
-};
+use crate::help_functions::{get_full_name_from_path_name, get_max_file_name};
+use crate::helpers::image_operations::{get_pixbuf_from_dynamic_image, resize_pixbuf_dimension};
+use crate::helpers::list_store_operations::count_number_of_groups;
 use crate::notebook_info::NotebookObject;
 
 const BIG_PREVIEW_SIZE: i32 = 600;
@@ -82,7 +83,7 @@ pub(crate) fn connect_button_compare(gui_data: &GuiData) {
             &check_button_settings_use_rust_preview,
         );
 
-        window_compare.show();
+        window_compare.set_visible(true);
     });
 
     let shared_image_cache = gui_data.compare_images.shared_image_cache.clone();
@@ -94,7 +95,7 @@ pub(crate) fn connect_button_compare(gui_data: &GuiData) {
     let image_compare_left = gui_data.compare_images.image_compare_left.clone();
     let image_compare_right = gui_data.compare_images.image_compare_right.clone();
     window_compare.connect_close_request(move |window_compare| {
-        window_compare.hide();
+        window_compare.set_visible(false);
         *shared_image_cache.borrow_mut() = Vec::new();
         *shared_current_path.borrow_mut() = None;
         *shared_current_of_groups.borrow_mut() = 0;
@@ -352,13 +353,13 @@ fn populate_groups_at_start(
     *shared_image_cache.borrow_mut() = cache_all_images.clone();
 
     let mut found = false;
-    for i in get_all_direct_children(
-        &scrolled_window_compare_choose_images
-            .child()
-            .expect("Failed to get child of scrolled_window_compare_choose_images")
-            .downcast::<gtk4::Viewport>()
-            .expect("Failed to downcast to Viewport"),
-    ) {
+    for i in scrolled_window_compare_choose_images
+        .child()
+        .expect("Failed to get child of scrolled_window_compare_choose_images")
+        .downcast::<gtk4::Viewport>()
+        .expect("Failed to downcast to Viewport")
+        .get_all_direct_children()
+    {
         if i.widget_name() == "all_box" {
             let gtk_box = i.downcast::<gtk4::Box>().expect("Failed to downcast to Box");
             update_bottom_buttons(&gtk_box, shared_using_for_preview, shared_image_cache);
@@ -382,18 +383,13 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>,
         let small_img = Image::new();
         let big_img = Image::new();
 
-        let mut pixbuf = get_pixbuf_from_dynamic_image(&DynamicImage::new_rgb8(1, 1)).expect("Failed to create pixbuf");
+        let mut pixbuf = get_pixbuf_from_dynamic_image(DynamicImage::new_rgb8(1, 1)).expect("Failed to create pixbuf");
 
         if use_rust_loader {
-            match get_dynamic_image_from_path(&full_path) {
-                Ok(t) => match get_pixbuf_from_dynamic_image(&t) {
-                    Ok(t) => {
-                        pixbuf = t;
-                    }
-                    Err(e) => {
-                        error!("Failed to open image {full_path}, reason {e}");
-                    }
-                },
+            match get_dynamic_image_from_path(&full_path).and_then(get_pixbuf_from_dynamic_image) {
+                Ok(t) => {
+                    pixbuf = t;
+                }
                 Err(e) => {
                     error!("Failed to open image {full_path}, reason {e}");
                 }
@@ -588,7 +584,7 @@ fn populate_similar_scrolled_view(
         all_gtk_box.append(&small_box);
     }
 
-    all_gtk_box.show();
+    all_gtk_box.set_visible(true);
     scrolled_window.set_child(Some(&all_gtk_box));
 }
 
@@ -600,13 +596,13 @@ fn update_bottom_buttons(
     let left_tree_view = shared_using_for_preview.borrow().0.clone().expect("Left tree_view not set");
     let right_tree_view = shared_using_for_preview.borrow().1.clone().expect("Right tree_view not set");
 
-    for (number, i) in get_all_direct_children(all_gtk_box).into_iter().enumerate() {
+    for (number, i) in all_gtk_box.get_all_direct_children().into_iter().enumerate() {
         let cache_tree_path = (*image_cache.borrow())[number].4.clone();
         let is_chosen = cache_tree_path != right_tree_view && cache_tree_path != left_tree_view;
 
         let bx = i.downcast::<gtk4::Box>().expect("Not Box");
         let smaller_bx = bx.first_child().expect("No first child").downcast::<gtk4::Box>().expect("First child is not Box");
-        for items in get_all_direct_children(&smaller_bx) {
+        for items in smaller_bx.get_all_direct_children() {
             if let Ok(btn) = items.downcast::<gtk4::Button>() {
                 btn.set_sensitive(is_chosen);
             }

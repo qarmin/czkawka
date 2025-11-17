@@ -165,8 +165,15 @@ pub fn print_version_mode(app: &str) {
         "".to_string()
     };
 
+    let git_commit = env!("CZKAWKA_GIT_COMMIT_SHORT");
+    let official_build = if env!("CZKAWKA_OFFICIAL_BUILD") == "1" {
+        "O" // Official build
+    } else {
+        "U" // Unofficial build
+    };
+
     info!(
-        "{app} version: {CZKAWKA_VERSION}, {debug_release} mode, rust {rust_version}, os {} {} ({} {}), {processors} cpu/threads, features({}): [{}], app cpu version: {app_cpu_version}, os cpu version: {os_cpu_version}{musl_or_glibc}",
+        "{app} version: {CZKAWKA_VERSION}({git_commit} {official_build}) , {debug_release} mode, rust {rust_version}, os {} {} ({} {}), {processors} cpu/threads, features({}): [{}], app cpu version: {app_cpu_version}, os cpu version: {os_cpu_version}{musl_or_glibc}",
         info.os_type(),
         info.version(),
         env::consts::ARCH,

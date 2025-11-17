@@ -1,7 +1,7 @@
 use czkawka_core::TOOLS_NUMBER;
 use glib::types::Type;
 
-use crate::help_functions::{
+use crate::helpers::enums::{
     BottomButtonsEnum, ColumnsBadExtensions, ColumnsBigFiles, ColumnsBrokenFiles, ColumnsDuplicates, ColumnsEmptyFiles, ColumnsEmptyFolders, ColumnsInvalidSymlinks,
     ColumnsSameMusic, ColumnsSimilarImages, ColumnsSimilarVideos, ColumnsTemporaryFiles, PopoverTypes,
 };
@@ -9,6 +9,7 @@ use crate::notebook_enums::NotebookMainEnum;
 
 #[derive(Debug, Clone)]
 pub struct NotebookObject {
+    pub name: &'static str,
     pub notebook_type: NotebookMainEnum,
     pub available_modes: &'static [PopoverTypes],
     #[expect(unused)]
@@ -24,10 +25,12 @@ pub struct NotebookObject {
     pub column_modification_as_secs: Option<i32>,
     pub columns_types: &'static [Type],
     pub bottom_buttons: &'static [BottomButtonsEnum],
+    pub tree_view_name: &'static str,
 }
 
 pub static NOTEBOOKS_INFO: [NotebookObject; TOOLS_NUMBER] = [
     NotebookObject {
+        name: "Duplicates",
         notebook_type: NotebookMainEnum::Duplicate,
         available_modes: &[
             PopoverTypes::All,
@@ -68,8 +71,10 @@ pub static NOTEBOOKS_INFO: [NotebookObject; TOOLS_NUMBER] = [
             BottomButtonsEnum::Hardlink,
             BottomButtonsEnum::Move,
         ],
+        tree_view_name: "tree_view_duplicate_finder",
     },
     NotebookObject {
+        name: "Empty Folders",
         notebook_type: NotebookMainEnum::EmptyDirectories,
         available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom],
         column_activatable_button: None,
@@ -89,8 +94,10 @@ pub static NOTEBOOKS_INFO: [NotebookObject; TOOLS_NUMBER] = [
             Type::U64,    // ModificationAsSecs
         ],
         bottom_buttons: &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
+        tree_view_name: "tree_view_empty_folder_finder",
     },
     NotebookObject {
+        name: "Big Files",
         notebook_type: NotebookMainEnum::BigFiles,
         available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom],
         column_activatable_button: None,
@@ -112,8 +119,10 @@ pub static NOTEBOOKS_INFO: [NotebookObject; TOOLS_NUMBER] = [
             Type::U64,    // ModificationAsSecs
         ],
         bottom_buttons: &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
+        tree_view_name: "tree_view_big_files_finder",
     },
     NotebookObject {
+        name: "Big Files",
         notebook_type: NotebookMainEnum::EmptyFiles,
         available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom],
         column_activatable_button: None,
@@ -133,8 +142,10 @@ pub static NOTEBOOKS_INFO: [NotebookObject; TOOLS_NUMBER] = [
             Type::U64,    // ModificationAsSecs
         ],
         bottom_buttons: &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
+        tree_view_name: "tree_view_empty_files_finder",
     },
     NotebookObject {
+        name: "Temporary Files",
         notebook_type: NotebookMainEnum::Temporary,
         available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom],
         column_activatable_button: None,
@@ -154,8 +165,10 @@ pub static NOTEBOOKS_INFO: [NotebookObject; TOOLS_NUMBER] = [
             Type::U64,    // ModificationAsSecs
         ],
         bottom_buttons: &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
+        tree_view_name: "tree_view_temporary_files_finder",
     },
     NotebookObject {
+        name: "Similar Images",
         notebook_type: NotebookMainEnum::SimilarImages,
         available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date, PopoverTypes::Size],
         column_activatable_button: Some(ColumnsSimilarImages::ActivatableSelectButton as i32),
@@ -192,8 +205,10 @@ pub static NOTEBOOKS_INFO: [NotebookObject; TOOLS_NUMBER] = [
             BottomButtonsEnum::Move,
             BottomButtonsEnum::Compare,
         ],
+        tree_view_name: "tree_view_similar_images_finder",
     },
     NotebookObject {
+        name: "Similar Images",
         notebook_type: NotebookMainEnum::SimilarVideos,
         available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date, PopoverTypes::Size],
         column_activatable_button: Some(ColumnsSimilarVideos::ActivatableSelectButton as i32),
@@ -227,8 +242,10 @@ pub static NOTEBOOKS_INFO: [NotebookObject; TOOLS_NUMBER] = [
             BottomButtonsEnum::Hardlink,
             BottomButtonsEnum::Move,
         ],
+        tree_view_name: "tree_view_similar_videos_finder",
     },
     NotebookObject {
+        name: "Same Music",
         notebook_type: NotebookMainEnum::SameMusic,
         available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date, PopoverTypes::Size],
         column_activatable_button: Some(ColumnsSameMusic::ActivatableSelectButton as i32),
@@ -269,8 +286,10 @@ pub static NOTEBOOKS_INFO: [NotebookObject; TOOLS_NUMBER] = [
             BottomButtonsEnum::Hardlink,
             BottomButtonsEnum::Move,
         ],
+        tree_view_name: "tree_view_same_music_finder",
     },
     NotebookObject {
+        name: "Invalid Symlinks",
         notebook_type: NotebookMainEnum::Symlinks,
         available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom],
         column_activatable_button: None,
@@ -292,8 +311,10 @@ pub static NOTEBOOKS_INFO: [NotebookObject; TOOLS_NUMBER] = [
             Type::U64,    // ModificationAsSecs
         ],
         bottom_buttons: &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
+        tree_view_name: "tree_view_invalid_symlinks",
     },
     NotebookObject {
+        name: "Broken Files",
         notebook_type: NotebookMainEnum::BrokenFiles,
         available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom],
         column_activatable_button: None,
@@ -314,8 +335,10 @@ pub static NOTEBOOKS_INFO: [NotebookObject; TOOLS_NUMBER] = [
             Type::U64,    // ModificationAsSecs
         ],
         bottom_buttons: &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
+        tree_view_name: "tree_view_broken_files",
     },
     NotebookObject {
+        name: "Bad Extensions",
         notebook_type: NotebookMainEnum::BadExtensions,
         available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom],
         column_activatable_button: None,
@@ -337,5 +360,6 @@ pub static NOTEBOOKS_INFO: [NotebookObject; TOOLS_NUMBER] = [
             Type::U64,    // ModificationAsSecs
         ],
         bottom_buttons: &[BottomButtonsEnum::Save, BottomButtonsEnum::Delete, BottomButtonsEnum::Select, BottomButtonsEnum::Move],
+        tree_view_name: "tree_view_bad_extensions",
     },
 ];

@@ -2,7 +2,7 @@ use gtk4::prelude::*;
 use gtk4::{Builder, Window};
 
 use crate::flg;
-use crate::help_functions::get_all_direct_children;
+use crate::gtk_traits::WidgetTraits;
 
 #[derive(Clone)]
 pub struct GuiSettings {
@@ -270,8 +270,8 @@ impl GuiSettings {
         self.button_settings_open_settings_folder
             .set_tooltip_text(Some(&flg!("settings_folder_settings_open_tooltip")));
 
-        let vec_children: Vec<gtk4::Widget> = get_all_direct_children(&self.notebook_settings);
-        let vec_children: Vec<gtk4::Widget> = get_all_direct_children(&vec_children[1]);
+        let vec_children: Vec<gtk4::Widget> = self.notebook_settings.get_all_direct_children();
+        let vec_children: Vec<gtk4::Widget> = vec_children[1].get_all_direct_children();
 
         // Change name of main notebook tabs
         let names: [String; 4] = [

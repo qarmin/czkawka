@@ -7,6 +7,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  CZKAWKA_OFFICIAL_BUILD: 1
 
 jobs:
   macos:
@@ -24,7 +25,7 @@ jobs:
           echo "ARCHNAME=$ARCHNAME" >> $GITHUB_ENV
 
       - name: Setup rust version
-        run: rustup default 1.88.0
+        run: rustup default 1.90.0
 
       - name: Install Homebrew
         run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
