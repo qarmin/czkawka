@@ -235,3 +235,71 @@ where
     debug!("Failed to load cache from file {cache_file_name} because not exists");
     (text_messages, None)
 }
+
+#[cfg(test)]
+mod tests {
+    use std::collections::BTreeMap;
+
+    use super::*;
+
+    #[derive(Clone, Debug, PartialEq)]
+    struct TestEntry {
+        name: String,
+        value: u32,
+    }
+
+    #[test]
+    fn test_extract_loaded_cache() {
+        let mut loaded_cache = BTreeMap::new();
+        loaded_cache.insert(
+            "file1".to_string(),
+            TestEntry {
+                name: "file1".to_string(),
+                value: 100,
+            },
+        );
+        loaded_cache.insert(
+            "file2".to_string(),
+            TestEntry {
+                name: "file2".to_string(),
+                value: 200,
+            },
+        );
+
+        let mut files_to_check = BTreeMap::new();
+        files_to_check.insert(
+            "file1".to_string(),
+            TestEntry {
+                name: "file1".to_string(),
+                value: 100,
+            },
+        );
+        files_to_check.insert(
+            "file3".to_string(),
+            TestEntry {
+                name: "file3".to_string(),
+                value: 300,
+            },
+        );
+        files_to_check.insert(
+            "file2".to_string(),
+            TestEntry {
+                name: "file2".to_string(),
+                value: 200,
+            },
+        );
+
+        let mut records_already_cached = BTreeMap::new();
+        let mut non_cached_files_to_check = BTreeMap::new();
+
+        extract_loaded_cache(&loaded_cache, files_to_check, &mut records_already_cached, &mut non_cached_files_to_check);
+
+        assert_eq!(records_already_cached.len(), 2);
+        assert_eq!(non_cached_files_to_check.len(), 1);
+        assert!(records_already_cached.contains_key("file1"));
+        assert!(records_already_cached.contains_key("file2"));
+        assert!(non_cached_files_to_check.contains_key("file3"));
+        assert_eq!(records_already_cached.get("file1").unwrap().value, 100);
+        assert_eq!(non_cached_files_to_check.get("file3").unwrap().value, 300);
+    }
+}

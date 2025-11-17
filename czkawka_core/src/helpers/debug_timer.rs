@@ -97,8 +97,9 @@ impl Timer {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use std::thread::sleep;
+
+    use super::*;
 
     #[test]
     fn test_timer_basic_functionality() {
@@ -171,4 +172,3 @@ mod tests {
         assert!(timer.times[1].1.as_millis() >= 15);
     }
 }
-

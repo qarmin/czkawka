@@ -126,3 +126,110 @@ impl Extensions {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::fs;
+
+    use super::*;
+
+    #[test]
+    fn test_filter_extensions_basic_and_replacements() {
+        // Empty string
+        let (exts, msgs) = Extensions::filter_extensions("".to_string());
+        assert!(exts.is_empty());
+        assert!(msgs.messages.is_empty() && msgs.warnings.is_empty() && msgs.errors.is_empty());
+
+        // Basic extensions
+        let (exts, msgs) = Extensions::filter_extensions("jpg,png,gif".to_string());
+        assert_eq!(exts.len(), 3);
+        assert!(exts.contains("jpg") && exts.contains("png") && exts.contains("gif"));
+        assert!(msgs.warnings.is_empty());
+
+        // With dots
+        let (exts, _) = Extensions::filter_extensions(".jpg,.png".to_string());
+        assert_eq!(exts.len(), 2);
+        assert!(exts.contains("jpg") && exts.contains("png"));
+
+        // IMAGE replacement
+        let (exts, _) = Extensions::filter_extensions("IMAGE".to_string());
+        assert!(exts.contains("jpg") && exts.contains("png") && exts.contains("bmp"));
+
+        // VIDEO replacement
+        let (exts, _) = Extensions::filter_extensions("VIDEO".to_string());
+        assert!(exts.contains("mp4") && exts.contains("mkv") && exts.contains("avi"));
+
+        // Invalid extensions with dot inside
+        let (exts, msgs) = Extensions::filter_extensions("jpg,test.bad,png".to_string());
+        assert_eq!(exts.len(), 2);
+        assert!(!exts.contains("test.bad"));
+        assert!(msgs.warnings.iter().any(|w| w.contains("test.bad")));
+
+        // Invalid extensions with space
+        let (exts, msgs) = Extensions::filter_extensions("jpg,bad ext,png".to_string());
+        assert!(!exts.contains("bad ext"));
+        assert!(msgs.warnings.iter().any(|w| w.contains("bad ext")));
+    }
+
+    #[test]
+    fn test_set_allowed_and_excluded_extensions() {
+        let mut ext = Extensions::new();
+
+        let msgs = ext.set_allowed_extensions("jpg,png".to_string());
+        assert!(msgs.warnings.is_empty());
+        assert!(ext.set_any_extensions());
+
+        let mut ext2 = Extensions::new();
+        ext2.set_excluded_extensions("gif,bmp".to_string());
+        assert!(!ext2.set_any_extensions());
+    }
+
+    #[test]
+    fn test_check_if_entry_have_valid_extension() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let file_jpg = temp_dir.path().join("test.jpg");
+        let file_png = temp_dir.path().join("test.PNG");
+        let file_gif = temp_dir.path().join("test.gif");
+        let file_txt = temp_dir.path().join("test.txt");
+        let file_no_ext = temp_dir.path().join("noext");
+
+        fs::write(&file_jpg, "test").unwrap();
+        fs::write(&file_png, "test").unwrap();
+        fs::write(&file_gif, "test").unwrap();
+        fs::write(&file_txt, "test").unwrap();
+        fs::write(&file_no_ext, "test").unwrap();
+
+        // No extensions set - all should pass
+        let ext = Extensions::new();
+        assert!(ext.check_if_entry_have_valid_extension(&fs::read_dir(&temp_dir).unwrap().find(|e| e.as_ref().unwrap().file_name() == "test.jpg").unwrap().unwrap()));
+
+        // Allowed extensions
+        let mut ext = Extensions::new();
+        ext.set_allowed_extensions("jpg,png".to_string());
+        let entries: Vec<_> = fs::read_dir(&temp_dir).unwrap().map(|e| e.unwrap()).collect();
+        assert!(ext.check_if_entry_have_valid_extension(entries.iter().find(|e| e.file_name() == "test.jpg").unwrap()));
+        assert!(ext.check_if_entry_have_valid_extension(entries.iter().find(|e| e.file_name() == "test.PNG").unwrap())); // case insensitive
+        assert!(!ext.check_if_entry_have_valid_extension(entries.iter().find(|e| e.file_name() == "test.gif").unwrap()));
+        assert!(!ext.check_if_entry_have_valid_extension(entries.iter().find(|e| e.file_name() == "noext").unwrap()));
+
+        // Excluded extensions
+        let mut ext = Extensions::new();
+        ext.set_excluded_extensions("txt".to_string());
+        assert!(ext.check_if_entry_have_valid_extension(entries.iter().find(|e| e.file_name() == "test.jpg").unwrap()));
+        assert!(!ext.check_if_entry_have_valid_extension(entries.iter().find(|e| e.file_name() == "test.txt").unwrap()));
+    }
+
+    #[test]
+    fn test_set_and_validate_allowed_extensions() {
+        let mut ext = Extensions::new();
+        ext.set_and_validate_allowed_extensions(&["mp4", "mkv"]);
+        assert_eq!(ext.allowed_extensions_hashset.len(), 2);
+        assert!(ext.allowed_extensions_hashset.contains("mp4"));
+
+        let mut ext = Extensions::new();
+        ext.set_allowed_extensions("jpg,png,mp4".to_string());
+        ext.set_and_validate_allowed_extensions(&["mp4", "mkv"]);
+        assert!(ext.allowed_extensions_hashset.contains("mkv"));
+        assert!(!ext.allowed_extensions_hashset.contains("jpg"));
+    }
+}

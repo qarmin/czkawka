@@ -154,7 +154,7 @@ mod tests {
         // Test print_messages_to_writer()
         let mut buffer = Vec::new();
         let result = msg1.print_messages_to_writer(&mut buffer);
-        assert!(result.is_ok());
+        result.unwrap();
 
         let output = String::from_utf8(buffer).unwrap();
         assert!(output.contains("Msg1"));
@@ -162,5 +162,3 @@ mod tests {
         assert!(output.contains("Err1"));
     }
 }
-
-

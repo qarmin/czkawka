@@ -39,7 +39,7 @@ impl Search for DuplicateFinder {
     fn search(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
         let start_time = Instant::now();
 
-        let _ = (|| {
+        let () = (|| {
             self.prepare_items();
             self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
 
@@ -76,9 +76,7 @@ impl Search for DuplicateFinder {
             }
             if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
                 self.common_data.stopped_search = true;
-                return;
             }
-
         })();
 
         self.information.scanning_time = start_time.elapsed();

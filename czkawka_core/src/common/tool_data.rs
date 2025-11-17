@@ -496,3 +496,80 @@ pub trait CommonData {
         println!("Messages size - {}", self.get_cd().text_messages.messages.len());
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::common::model::FileEntry;
+
+    #[test]
+    fn test_delete_result_add_to_messages() {
+        let delete_result = DeleteResult {
+            deleted_files: 5,
+            gained_bytes: 1024,
+            failed_to_delete_files: 2,
+            errors: vec!["Error 1".to_string(), "Error 2".to_string()],
+            infos: vec!["Info 1".to_string()],
+        };
+
+        let mut messages = Messages::new();
+        delete_result.add_to_messages(&mut messages);
+
+        assert_eq!(messages.errors.len(), 2);
+        assert_eq!(messages.messages.len(), 1);
+        assert!(messages.errors.contains(&"Error 1".to_string()));
+        assert!(messages.messages.contains(&"Info 1".to_string()));
+    }
+
+    #[test]
+    fn test_delete_item_type_calculate_size_and_entries() {
+        let files = vec![
+            FileEntry {
+                path: PathBuf::from("/a"),
+                size: 100,
+                modified_date: 1,
+            },
+            FileEntry {
+                path: PathBuf::from("/b"),
+                size: 200,
+                modified_date: 2,
+            },
+            FileEntry {
+                path: PathBuf::from("/c"),
+                size: 300,
+                modified_date: 3,
+            },
+        ];
+
+        let delete_files = DeleteItemType::DeletingFiles(files.clone());
+        assert_eq!(delete_files.calculate_size_to_delete(), 600);
+        assert_eq!(delete_files.calculate_entries_to_delete(), 3);
+
+        let delete_folders = DeleteItemType::DeletingFolders(files.clone());
+        assert_eq!(delete_folders.calculate_size_to_delete(), 600);
+        assert_eq!(delete_folders.calculate_entries_to_delete(), 3);
+
+        let hardlink_files = DeleteItemType::HardlinkingFiles(vec![
+            (files[0].clone(), vec![files[1].clone()]),
+            (files[2].clone(), vec![files[0].clone(), files[1].clone()]),
+        ]);
+        assert_eq!(hardlink_files.calculate_size_to_delete(), 400);
+        assert_eq!(hardlink_files.calculate_entries_to_delete(), 3);
+    }
+
+    #[test]
+    fn test_common_tool_data_new() {
+        let tool_data = CommonToolData::new(ToolType::Duplicate);
+        assert_eq!(tool_data.tool_type, ToolType::Duplicate);
+        assert_eq!(tool_data.delete_method, DeleteMethod::None);
+        assert_eq!(tool_data.maximal_file_size, u64::MAX);
+        assert_eq!(tool_data.minimal_file_size, 8192);
+        assert!(tool_data.recursive_search);
+        assert!(!tool_data.stopped_search);
+        assert!(tool_data.use_cache);
+        assert!(tool_data.delete_outdated_cache);
+        assert!(!tool_data.save_also_as_json);
+        assert!(!tool_data.use_reference_folders);
+        assert!(!tool_data.dry_run);
+    }
+}

@@ -87,7 +87,7 @@ mod tests {
         thread::sleep(Duration::from_millis(100));
 
         let result = receiver.try_recv();
-        assert!(result.is_ok());
+        result.unwrap();
         assert_eq!(result.unwrap(), 42);
     }
 
@@ -102,7 +102,7 @@ mod tests {
 
         // Wait for first send to complete
         let first = receiver.try_recv();
-        assert!(first.is_ok());
+        first.unwrap();
         assert_eq!(first.unwrap(), 1);
 
         // Now send multiple values quickly - only the last one should be sent
@@ -115,11 +115,11 @@ mod tests {
         thread::sleep(Duration::from_millis(150));
 
         let result = receiver.try_recv();
-        assert!(result.is_ok());
+        result.unwrap();
         assert_eq!(result.unwrap(), 4);
 
         let result2 = receiver.try_recv();
-        assert!(result2.is_err());
+        result2.unwrap_err();
     }
 
     #[test]
@@ -134,11 +134,11 @@ mod tests {
         thread::sleep(Duration::from_millis(100));
 
         let first = receiver.try_recv();
-        assert!(first.is_ok());
+        first.unwrap();
         assert_eq!(first.unwrap(), 10);
 
         let second = receiver.try_recv();
-        assert!(second.is_ok());
+        second.unwrap();
         assert_eq!(second.unwrap(), 20);
     }
 
@@ -168,7 +168,7 @@ mod tests {
         thread::sleep(Duration::from_millis(50));
 
         let first = receiver.try_recv();
-        assert!(first.is_ok());
+        first.unwrap();
         assert_eq!(first.unwrap(), 5);
 
         // Second send - should not be sent within 50ms (wait_time is 100ms)
@@ -176,14 +176,12 @@ mod tests {
         thread::sleep(Duration::from_millis(50));
 
         let result = receiver.try_recv();
-        assert!(result.is_err());
+        result.unwrap_err();
 
         // But should be sent after full wait_time
         thread::sleep(Duration::from_millis(100));
         let result = receiver.try_recv();
-        assert!(result.is_ok());
+        result.unwrap();
         assert_eq!(result.unwrap(), 10);
     }
 }
-
-
