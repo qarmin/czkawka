@@ -96,17 +96,27 @@ mod tests {
         let (sender, receiver) = crossbeam_channel::unbounded();
         let delayed_sender = DelayedSender::new(sender, Duration::from_millis(100));
 
+        // First send will be sent immediately (last_send_time is None)
         delayed_sender.send(1);
-        thread::sleep(Duration::from_millis(10));
+        thread::sleep(Duration::from_millis(50));
+
+        // Wait for first send to complete
+        let first = receiver.try_recv();
+        assert!(first.is_ok());
+        assert_eq!(first.unwrap(), 1);
+
+        // Now send multiple values quickly - only the last one should be sent
         delayed_sender.send(2);
         thread::sleep(Duration::from_millis(10));
         delayed_sender.send(3);
+        thread::sleep(Duration::from_millis(10));
+        delayed_sender.send(4);
 
         thread::sleep(Duration::from_millis(150));
 
         let result = receiver.try_recv();
         assert!(result.is_ok());
-        assert_eq!(result.unwrap(), 3);
+        assert_eq!(result.unwrap(), 4);
 
         let result2 = receiver.try_recv();
         assert!(result2.is_err());
@@ -153,11 +163,26 @@ mod tests {
         let (sender, receiver) = crossbeam_channel::unbounded();
         let delayed_sender = DelayedSender::new(sender, Duration::from_millis(100));
 
+        // First send - will be sent immediately
         delayed_sender.send(5);
-        thread::sleep(Duration::from_millis(20));
+        thread::sleep(Duration::from_millis(50));
+
+        let first = receiver.try_recv();
+        assert!(first.is_ok());
+        assert_eq!(first.unwrap(), 5);
+
+        // Second send - should not be sent within 50ms (wait_time is 100ms)
+        delayed_sender.send(10);
+        thread::sleep(Duration::from_millis(50));
 
         let result = receiver.try_recv();
         assert!(result.is_err());
+
+        // But should be sent after full wait_time
+        thread::sleep(Duration::from_millis(100));
+        let result = receiver.try_recv();
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), 10);
     }
 }
 
