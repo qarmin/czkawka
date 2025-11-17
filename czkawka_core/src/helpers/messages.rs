@@ -80,3 +80,87 @@ impl Messages {
         self.errors.extend(errors);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_messages_constructors_and_text_formatting() {
+        // Test new()
+        let msg = Messages::new();
+        assert!(msg.messages.is_empty());
+        assert!(msg.warnings.is_empty());
+        assert!(msg.errors.is_empty());
+        assert_eq!(msg.create_messages_text(), "");
+
+        // Test new_from_errors()
+        let errors = vec!["Error 1".to_string(), "Error 2".to_string()];
+        let msg = Messages::new_from_errors(errors.clone());
+        assert_eq!(msg.errors, errors);
+        let text = msg.create_messages_text();
+        assert!(text.contains("ERRORS"));
+        assert!(text.contains("Error 1"));
+
+        // Test new_from_warnings()
+        let warnings = vec!["Warning 1".to_string()];
+        let msg = Messages::new_from_warnings(warnings.clone());
+        assert_eq!(msg.warnings, warnings);
+        let text = msg.create_messages_text();
+        assert!(text.contains("WARNINGS"));
+
+        // Test new_from_messages()
+        let messages = vec!["Message 1".to_string()];
+        let msg = Messages::new_from_messages(messages.clone());
+        assert_eq!(msg.messages, messages);
+        let text = msg.create_messages_text();
+        assert!(text.contains("MESSAGES"));
+
+        // Test all types together
+        let mut msg = Messages::new();
+        msg.messages.push("Info".to_string());
+        msg.warnings.push("Warn".to_string());
+        msg.errors.push("Err".to_string());
+        let text = msg.create_messages_text();
+        assert!(text.contains("MESSAGES"));
+        assert!(text.contains("Info"));
+        assert!(text.contains("WARNINGS"));
+        assert!(text.contains("Warn"));
+        assert!(text.contains("ERRORS"));
+        assert!(text.contains("Err"));
+    }
+
+    #[test]
+    fn test_extend_and_writer() {
+        // Test extend_with_another_messages()
+        let mut msg1 = Messages::new();
+        msg1.messages.push("Msg1".to_string());
+        msg1.warnings.push("Warn1".to_string());
+        msg1.errors.push("Err1".to_string());
+
+        let mut msg2 = Messages::new();
+        msg2.messages.push("Msg2".to_string());
+        msg2.warnings.push("Warn2".to_string());
+        msg2.errors.push("Err2".to_string());
+
+        msg1.extend_with_another_messages(msg2);
+
+        assert_eq!(msg1.messages.len(), 2);
+        assert_eq!(msg1.warnings.len(), 2);
+        assert_eq!(msg1.errors.len(), 2);
+        assert!(msg1.messages.contains(&"Msg1".to_string()));
+        assert!(msg1.messages.contains(&"Msg2".to_string()));
+
+        // Test print_messages_to_writer()
+        let mut buffer = Vec::new();
+        let result = msg1.print_messages_to_writer(&mut buffer);
+        assert!(result.is_ok());
+
+        let output = String::from_utf8(buffer).unwrap();
+        assert!(output.contains("Msg1"));
+        assert!(output.contains("Warn2"));
+        assert!(output.contains("Err1"));
+    }
+}
+
+

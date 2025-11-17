@@ -39,51 +39,50 @@ impl Search for DuplicateFinder {
     fn search(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
         let start_time = Instant::now();
 
-        self.prepare_items();
-        self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
+        let _ = (|| {
+            self.prepare_items();
+            self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
 
-        match self.get_params().check_method {
-            CheckingMethod::Name => {
-                self.common_data.stopped_search = self.check_files_name(stop_flag, progress_sender) == WorkContinueStatus::Stop;
-                if self.common_data.stopped_search {
-                    self.information.scanning_time = start_time.elapsed().as_millis();
-                    return;
+            match self.get_params().check_method {
+                CheckingMethod::Name => {
+                    self.common_data.stopped_search = self.check_files_name(stop_flag, progress_sender) == WorkContinueStatus::Stop;
+                    if self.common_data.stopped_search {
+                        return;
+                    }
                 }
+                CheckingMethod::SizeName => {
+                    self.common_data.stopped_search = self.check_files_size_name(stop_flag, progress_sender) == WorkContinueStatus::Stop;
+                    if self.common_data.stopped_search {
+                        return;
+                    }
+                }
+                CheckingMethod::Size => {
+                    self.common_data.stopped_search = self.check_files_size(stop_flag, progress_sender) == WorkContinueStatus::Stop;
+                    if self.common_data.stopped_search {
+                        return;
+                    }
+                }
+                CheckingMethod::Hash => {
+                    self.common_data.stopped_search = self.check_files_size(stop_flag, progress_sender) == WorkContinueStatus::Stop;
+                    if self.common_data.stopped_search {
+                        return;
+                    }
+                    self.common_data.stopped_search = self.check_files_hash(stop_flag, progress_sender) == WorkContinueStatus::Stop;
+                    if self.common_data.stopped_search {
+                        return;
+                    }
+                }
+                _ => panic!(),
             }
-            CheckingMethod::SizeName => {
-                self.common_data.stopped_search = self.check_files_size_name(stop_flag, progress_sender) == WorkContinueStatus::Stop;
-                if self.common_data.stopped_search {
-                    self.information.scanning_time = start_time.elapsed().as_millis();
-                    return;
-                }
+            if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+                self.common_data.stopped_search = true;
+                return;
             }
-            CheckingMethod::Size => {
-                self.common_data.stopped_search = self.check_files_size(stop_flag, progress_sender) == WorkContinueStatus::Stop;
-                if self.common_data.stopped_search {
-                    self.information.scanning_time = start_time.elapsed().as_millis();
-                    return;
-                }
-            }
-            CheckingMethod::Hash => {
-                self.common_data.stopped_search = self.check_files_size(stop_flag, progress_sender) == WorkContinueStatus::Stop;
-                if self.common_data.stopped_search {
-                    self.information.scanning_time = start_time.elapsed().as_millis();
-                    return;
-                }
-                self.common_data.stopped_search = self.check_files_hash(stop_flag, progress_sender) == WorkContinueStatus::Stop;
-                if self.common_data.stopped_search {
-                    self.information.scanning_time = start_time.elapsed().as_millis();
-                    return;
-                }
-            }
-            _ => panic!(),
-        }
-        if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-            self.common_data.stopped_search = true;
-            self.information.scanning_time = start_time.elapsed().as_millis();
-            return;
-        }
-        self.information.scanning_time = start_time.elapsed().as_millis();
+
+        })();
+
+        self.information.scanning_time = start_time.elapsed();
+
         self.debug_print();
     }
 }

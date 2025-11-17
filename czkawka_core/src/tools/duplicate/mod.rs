@@ -14,7 +14,7 @@ use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
-
+use std::time::Duration;
 use indexmap::IndexSet;
 use serde::{Deserialize, Serialize};
 use static_assertions::const_assert;
@@ -74,7 +74,7 @@ pub struct Info {
     pub number_of_duplicated_files_by_size_name: usize,
     pub lost_space_by_size: u64,
     pub lost_space_by_hash: u64,
-    pub scanning_time: u128,
+    pub scanning_time: Duration,
 }
 
 #[derive(Clone)]

@@ -73,3 +73,92 @@ impl<T: Send + 'static> Drop for DelayedSender<T> {
         self.stop_flag.store(true, std::sync::atomic::Ordering::Relaxed);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_delayed_sender_basic_send() {
+        let (sender, receiver) = crossbeam_channel::unbounded();
+        let delayed_sender = DelayedSender::new(sender, Duration::from_millis(50));
+
+        delayed_sender.send(42);
+        thread::sleep(Duration::from_millis(100));
+
+        let result = receiver.try_recv();
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), 42);
+    }
+
+    #[test]
+    fn test_delayed_sender_batching() {
+        let (sender, receiver) = crossbeam_channel::unbounded();
+        let delayed_sender = DelayedSender::new(sender, Duration::from_millis(100));
+
+        delayed_sender.send(1);
+        thread::sleep(Duration::from_millis(10));
+        delayed_sender.send(2);
+        thread::sleep(Duration::from_millis(10));
+        delayed_sender.send(3);
+
+        thread::sleep(Duration::from_millis(150));
+
+        let result = receiver.try_recv();
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), 3);
+
+        let result2 = receiver.try_recv();
+        assert!(result2.is_err());
+    }
+
+    #[test]
+    fn test_delayed_sender_multiple_sends() {
+        let (sender, receiver) = crossbeam_channel::unbounded();
+        let delayed_sender = DelayedSender::new(sender, Duration::from_millis(50));
+
+        delayed_sender.send(10);
+        thread::sleep(Duration::from_millis(100));
+
+        delayed_sender.send(20);
+        thread::sleep(Duration::from_millis(100));
+
+        let first = receiver.try_recv();
+        assert!(first.is_ok());
+        assert_eq!(first.unwrap(), 10);
+
+        let second = receiver.try_recv();
+        assert!(second.is_ok());
+        assert_eq!(second.unwrap(), 20);
+    }
+
+    #[test]
+    fn test_delayed_sender_drop_stops_thread() {
+        let (sender, receiver) = crossbeam_channel::unbounded();
+        {
+            let delayed_sender = DelayedSender::new(sender, Duration::from_millis(50));
+            delayed_sender.send(100);
+        } // delayed_sender is dropped here
+
+        thread::sleep(Duration::from_millis(150));
+
+        // The thread should have stopped, so no value should be sent
+        // or at most one value might have been sent before stop
+        let count = receiver.try_iter().count();
+        assert!(count <= 1);
+    }
+
+    #[test]
+    fn test_delayed_sender_no_send_without_wait() {
+        let (sender, receiver) = crossbeam_channel::unbounded();
+        let delayed_sender = DelayedSender::new(sender, Duration::from_millis(100));
+
+        delayed_sender.send(5);
+        thread::sleep(Duration::from_millis(20));
+
+        let result = receiver.try_recv();
+        assert!(result.is_err());
+    }
+}
+
+

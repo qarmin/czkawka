@@ -85,15 +85,6 @@ fn format_size_and_date(size: u64, modified_date: u64, is_header: bool, is_refer
     }
 }
 
-/// Helper to format scanning time from milliseconds to human readable format
-fn format_scanning_time(scanning_time_ms: u128) -> String {
-    if scanning_time_ms < 1000 {
-        format!("{scanning_time_ms} ms")
-    } else {
-        format!("{:.2} s", scanning_time_ms as f64 / 1000.0)
-    }
-}
-
 /// Helper to get row color based on header status
 fn get_row_color(is_header: bool) -> &'static str {
     if is_header { HEADER_ROW_COLOR } else { MAIN_ROW_COLOR }
@@ -713,7 +704,7 @@ fn compute_duplicate_finder(df: DuplicateFinder, entry_info: &Entry, text_view_e
         }
         _ => panic!(),
     }
-    let scanning_time_str = format_scanning_time(information.scanning_time);
+    let scanning_time_str = format!("{:?}", information.scanning_time);
     if duplicates_size == 0 {
         entry_info.set_text(
             flg!(

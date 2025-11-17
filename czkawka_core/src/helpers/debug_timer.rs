@@ -94,3 +94,81 @@ impl Timer {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::thread::sleep;
+
+    #[test]
+    fn test_timer_basic_functionality() {
+        let mut timer = Timer::new("TestTimer");
+        assert_eq!(timer.base, "TestTimer");
+        assert_eq!(timer.times.len(), 0);
+
+        sleep(Duration::from_millis(10));
+        timer.checkpoint("step1");
+        assert_eq!(timer.times.len(), 1);
+        assert_eq!(timer.times[0].0, "step1");
+
+        sleep(Duration::from_millis(10));
+        timer.checkpoint("step2");
+        assert_eq!(timer.times.len(), 2);
+        assert_eq!(timer.times[1].0, "step2");
+    }
+
+    #[test]
+    fn test_timer_report_multiline() {
+        let mut timer = Timer::new("MultilineTimer");
+        sleep(Duration::from_millis(5));
+        timer.checkpoint("checkpoint1");
+        sleep(Duration::from_millis(5));
+        timer.checkpoint("checkpoint2");
+
+        let report = timer.report("total", false);
+        assert!(report.contains("MultilineTimer - checkpoint1:"));
+        assert!(report.contains("MultilineTimer - checkpoint2:"));
+        assert!(report.contains("MultilineTimer - total:"));
+        assert!(report.contains(", \n"));
+    }
+
+    #[test]
+    fn test_timer_report_oneline() {
+        let mut timer = Timer::new("OnelineTimer");
+        sleep(Duration::from_millis(5));
+        timer.checkpoint("a");
+        sleep(Duration::from_millis(5));
+        timer.checkpoint("b");
+
+        let report = timer.report("final", true);
+        assert!(report.starts_with("OnelineTimer - "));
+        assert!(report.contains("a:"));
+        assert!(report.contains("b:"));
+        assert!(report.contains("final:"));
+        assert!(report.contains(", "));
+        assert!(!report.contains("\n"));
+    }
+
+    #[test]
+    fn test_timer_no_checkpoints() {
+        let mut timer = Timer::new("EmptyTimer");
+        let report = timer.report("done", false);
+        assert!(report.contains("EmptyTimer - done:"));
+        assert_eq!(report.matches('\n').count(), 0);
+    }
+
+    #[test]
+    fn test_timer_elapsed_time_accumulates() {
+        let mut timer = Timer::new("AccumulateTimer");
+        sleep(Duration::from_millis(20));
+        timer.checkpoint("step1");
+
+        assert!(timer.times[0].1.as_millis() >= 15);
+
+        sleep(Duration::from_millis(20));
+        timer.checkpoint("step2");
+
+        assert!(timer.times[1].1.as_millis() >= 15);
+    }
+}
+
