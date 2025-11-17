@@ -231,3 +231,59 @@ pub(crate) fn get_rotation_from_exif(path: &str) -> Result<Option<ExifOrientatio
         Err(nom_exif::Error::IOError(std::io::Error::other("Panic in get_rotation_from_exif")))
     })
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const TEST_NORMAL_IMAGE: &str = "test_resources/normal.jpg";
+    const TEST_ROTATED_IMAGE: &str = "test_resources/rotated.jpg";
+
+    #[test]
+    fn test_image_loading_and_exif_rotation() {
+        let normal_img = get_dynamic_image_from_path(TEST_NORMAL_IMAGE).unwrap();
+        let rotated_img = get_dynamic_image_from_path(TEST_ROTATED_IMAGE).unwrap();
+
+        assert!(normal_img.width() > 0 && normal_img.height() > 0);
+        assert!(rotated_img.width() > 0 && rotated_img.height() > 0);
+
+        let normal_exif = get_rotation_from_exif(TEST_NORMAL_IMAGE).ok();
+        let rotated_exif = get_rotation_from_exif(TEST_ROTATED_IMAGE).ok();
+
+        if let Some(normal_orientation) = normal_exif {
+            assert!(normal_orientation == Some(ExifOrientation::Normal) || normal_orientation.is_none());
+        }
+
+        if let Some(rotated_orientation) = rotated_exif {
+            if rotated_orientation.is_some() {
+                let raw_rotated = decode_normal_image(TEST_ROTATED_IMAGE).unwrap();
+                if rotated_orientation == Some(ExifOrientation::Rotate90CW) || rotated_orientation == Some(ExifOrientation::Rotate270CW) {
+                    assert_eq!(rotated_img.width(), raw_rotated.height());
+                    assert_eq!(rotated_img.height(), raw_rotated.width());
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn test_check_if_can_display_image() {
+        assert!(check_if_can_display_image("test.jpg"));
+        assert!(check_if_can_display_image("test.png"));
+        assert!(check_if_can_display_image("test.webp"));
+        assert!(check_if_can_display_image("test.jxl"));
+        assert!(check_if_can_display_image("test.cr2"));
+        assert!(check_if_can_display_image("test.JPG"));
+
+        assert!(!check_if_can_display_image("test.txt"));
+        assert!(!check_if_can_display_image("test.mp4"));
+        assert!(!check_if_can_display_image("test"));
+    }
+
+    #[test]
+    fn test_error_handling() {
+        assert!(get_dynamic_image_from_path("nonexistent.jpg").is_err());
+        assert!(decode_normal_image("nonexistent.jpg").is_err());
+        assert!(get_rotation_from_exif("nonexistent.jpg").is_err());
+    }
+}
+
