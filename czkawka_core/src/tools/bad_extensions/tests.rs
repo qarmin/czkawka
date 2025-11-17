@@ -8,6 +8,8 @@ mod tests {
     use tempfile::TempDir;
 
     use crate::common::tool_data::CommonData;
+    use crate::common::traits::Search;
+    use crate::tools::bad_extensions::{BadExtensions, BadExtensionsParameters};
 
     #[test]
     fn test_find_bad_extension_png_as_jpg() {
@@ -25,7 +27,6 @@ mod tests {
         let params = BadExtensionsParameters::new();
         let mut finder = BadExtensions::new(params);
         finder.set_included_directory(vec![path.to_path_buf()]);
-        finder.set_included_directory(path.to_path_buf());
 
         let stop_flag = Arc::new(AtomicBool::new(false));
         finder.search(&stop_flag, None);
@@ -50,9 +51,8 @@ mod tests {
         file.write_all(&png_data).unwrap();
 
         let params = BadExtensionsParameters::new();
-        finder.set_included_directory(vec![path.to_path_buf()]);
         let mut finder = BadExtensions::new(params);
-        finder.set_included_directory(path.to_path_buf());
+        finder.set_included_directory(vec![path.to_path_buf()]);
 
         let stop_flag = Arc::new(AtomicBool::new(false));
         finder.search(&stop_flag, None);
@@ -76,9 +76,9 @@ mod tests {
 
         let mut params = BadExtensionsParameters::new();
         params.include_files_without_extension = false;
+        let mut finder = BadExtensions::new(params);
 
         finder.set_included_directory(vec![path.to_path_buf()]);
-        finder.set_included_directory(path.to_path_buf());
         finder.set_recursive_search(true);
 
         let stop_flag = Arc::new(AtomicBool::new(false));
@@ -106,7 +106,6 @@ mod tests {
 
         let mut finder = BadExtensions::new(params);
         finder.set_included_directory(vec![path.to_path_buf()]);
-        finder.set_included_directory(vec![path.to_path_buf()]);
 
         let stop_flag = Arc::new(AtomicBool::new(false));
         finder.search(&stop_flag, None);
@@ -114,6 +113,7 @@ mod tests {
         let bad_files = finder.get_bad_extensions_files();
         assert_eq!(bad_files.len(), 1, "Should include files without extension when enabled");
         assert_eq!(bad_files[0].current_extension, "", "Current extension should be empty");
+        assert_eq!(bad_files[0].proper_extension, "png");
     }
 }
 

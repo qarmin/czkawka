@@ -7,6 +7,9 @@ mod tests {
     use tempfile::TempDir;
 
     use crate::common::tool_data::CommonData;
+    use crate::common::traits::Search;
+    use crate::tools::big_file::{BigFile, BigFileParameters, SearchMode};
+
     #[test]
     fn test_find_biggest_files() {
         let temp_dir = TempDir::new().unwrap();
@@ -18,9 +21,8 @@ mod tests {
         fs::write(path.join("large.txt"), vec![b'A'; 100]).unwrap(); // 100 bytes
 
         let params = BigFileParameters::new(2, SearchMode::BiggestFiles);
-        finder.set_included_directory(vec![path.to_path_buf()]);
-        finder.set_included_directory(path.to_path_buf());
         let mut finder = BigFile::new(params);
+        finder.set_included_directory(vec![path.to_path_buf()]);
 
         let stop_flag = Arc::new(AtomicBool::new(false));
         finder.search(&stop_flag, None);
@@ -67,7 +69,6 @@ mod tests {
 
         let params = BigFileParameters::new(3, SearchMode::BiggestFiles);
         let mut finder = BigFile::new(params);
-        finder.set_included_directory(path.to_path_buf());
         finder.set_included_directory(vec![path.to_path_buf()]);
 
         let stop_flag = Arc::new(AtomicBool::new(false));
@@ -84,9 +85,8 @@ mod tests {
 
         let params = BigFileParameters::new(5, SearchMode::BiggestFiles);
         let mut finder = BigFile::new(params);
-        finder.set_included_directory(path.to_path_buf());
-        finder.set_recursive_search(true);
         finder.set_included_directory(vec![path.to_path_buf()]);
+        finder.set_recursive_search(true);
         let stop_flag = Arc::new(AtomicBool::new(false));
         finder.search(&stop_flag, None);
 

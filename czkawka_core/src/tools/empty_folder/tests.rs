@@ -25,7 +25,7 @@ mod tests {
         fs::write(non_empty.join("file.txt"), b"content").unwrap();
 
         let mut finder = EmptyFolder::new();
-        finder.set_included_directory(path.to_path_buf());
+        finder.set_included_directory(vec![path.to_path_buf()]);
         finder.set_recursive_search(true);
 
         let stop_flag = Arc::new(AtomicBool::new(false));

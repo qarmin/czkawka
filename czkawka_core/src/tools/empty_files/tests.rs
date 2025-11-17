@@ -7,6 +7,8 @@ mod tests {
     use tempfile::TempDir;
 
     use crate::common::tool_data::CommonData;
+    use crate::common::traits::Search;
+    use crate::tools::empty_files::EmptyFiles;
 
     #[test]
     fn test_find_empty_files() {
@@ -18,8 +20,8 @@ mod tests {
         fs::write(path.join("empty2.txt"), b"").unwrap();
         fs::write(path.join("not_empty.txt"), b"content").unwrap();
 
-        finder.set_included_directory(vec![path.to_path_buf()]);
         let mut finder = EmptyFiles::new();
+        finder.set_included_directory(vec![path.to_path_buf()]);
         finder.set_recursive_search(true);
 
         let stop_flag = Arc::new(AtomicBool::new(false));
@@ -64,7 +66,6 @@ mod tests {
         fs::write(subdir.join("empty2.txt"), b"").unwrap();
 
         let mut finder = EmptyFiles::new();
-        finder.set_included_directory(path.to_path_buf());
         finder.set_included_directory(vec![path.to_path_buf()]);
 
         let stop_flag = Arc::new(AtomicBool::new(false));
@@ -74,4 +75,3 @@ mod tests {
         assert_eq!(info.number_of_empty_files, 2, "Should find empty files in subdirectories");
     }
 }
-

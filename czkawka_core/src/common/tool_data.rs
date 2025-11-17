@@ -104,7 +104,7 @@ impl CommonToolData {
             recursive_search: true,
             delete_method: DeleteMethod::None,
             maximal_file_size: u64::MAX,
-            minimal_file_size: 8192,
+            minimal_file_size: 0,
             stopped_search: false,
             use_cache: true,
             delete_outdated_cache: true,
@@ -563,7 +563,7 @@ mod tests {
         assert_eq!(tool_data.tool_type, ToolType::Duplicate);
         assert_eq!(tool_data.delete_method, DeleteMethod::None);
         assert_eq!(tool_data.maximal_file_size, u64::MAX);
-        assert_eq!(tool_data.minimal_file_size, 8192);
+        assert_eq!(tool_data.minimal_file_size, 0);
         assert!(tool_data.recursive_search);
         assert!(!tool_data.stopped_search);
         assert!(tool_data.use_cache);

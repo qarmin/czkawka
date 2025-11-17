@@ -97,7 +97,6 @@ mod tests {
         );
 
         let mut finder = DuplicateFinder::new(params);
-        finder.set_included_directory(path.to_path_buf());
         finder.set_recursive_search(true);
         finder.set_included_directory(vec![path.to_path_buf()]);
         let stop_flag = Arc::new(AtomicBool::new(false));
@@ -128,12 +127,10 @@ mod tests {
         );
 
         let mut finder = DuplicateFinder::new(params);
-        finder.set_included_directory(path.to_path_buf());
         finder.set_recursive_search(true);
+        finder.set_included_directory(vec![path.to_path_buf()]);
 
         let stop_flag = Arc::new(AtomicBool::new(false));
-        finder.set_included_directory(vec![path.to_path_buf()]);
-        finder.set_included_directory(vec![path.to_path_buf()]);
         let info = finder.get_information();
         assert_eq!(info.number_of_groups_by_name, 1, "Should find duplicates with case insensitive search");
     }
@@ -191,7 +188,6 @@ mod tests {
         );
 
         let mut finder = DuplicateFinder::new(params);
-        finder.set_included_directory(path.to_path_buf());
         finder.set_included_directory(vec![path.to_path_buf()]);
 
         let stop_flag = Arc::new(AtomicBool::new(false));
