@@ -115,7 +115,7 @@ pub(crate) fn get_notebook_object_from_tree_view(tree_view: &TreeView) -> &Noteb
     NOTEBOOKS_INFO
         .iter()
         .find(|nb_object| nb_object.tree_view_name == tree_view_name)
-        .map_or_else(|| panic!("Tree view name '{tree_view_name}' not found in NOTEBOOKS_INFO"), |nb_object| nb_object)
+        .unwrap_or_else(|| panic!("Tree view name '{tree_view_name}' not found in NOTEBOOKS_INFO"))
 }
 
 pub(crate) fn get_full_name_from_path_name(path: &str, name: &str) -> String {
