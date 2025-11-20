@@ -43,18 +43,14 @@ mod tests {
         let info = finder.get_information();
         let duplicates = finder.get_duplicated_music_entries();
 
-        // Verify the search completed successfully
-        // number_of_groups shows how many groups of similar files were found
-        assert!(info.number_of_groups == 5, "Search should complete");
+        assert_eq!(info.number_of_groups, 5);
+        assert!(info.number_of_duplicates > 0);
+        assert!(!duplicates.is_empty());
     }
 
     #[test]
     fn test_find_same_music_by_content() {
         let test_path = get_test_resources_path();
-        if !test_path.exists() {
-            eprintln!("Test resources not found at {:?}", test_path);
-            return;
-        }
 
         let params = SameMusicParameters::new(
             MusicSimilarity::TRACK_TITLE,
@@ -68,31 +64,29 @@ mod tests {
         let mut finder = SameMusic::new(params);
         finder.set_included_directory(vec![test_path]);
         finder.set_recursive_search(true);
-        finder.set_use_cache(false); // Disable cache for testing
+        finder.set_use_cache(false);
 
         let stop_flag = Arc::new(AtomicBool::new(false));
         finder.search(&stop_flag, None);
 
-        // Just verify the test ran successfully
-        let _info = finder.get_information();
+        let info = finder.get_information();
+        let duplicates = finder.get_duplicated_music_entries();
+
+        assert!(info.number_of_groups >= 1);
+        assert!(info.number_of_duplicates >= 2);
+        assert!(!duplicates.is_empty());
     }
 
     #[test]
     fn test_same_music_with_similar_files() {
         let test_path = get_test_resources_path();
-        if !test_path.exists() {
-            eprintln!("Test resources not found at {:?}", test_path);
-            return;
-        }
 
-        // Test with fingerprint comparison to find similar audio files
-        // base.mp3, base_start.mp3, base_end.mp3, base_low_quality.mp3, base_messed.mp3
         let params = SameMusicParameters::new(
             MusicSimilarity::TRACK_TITLE,
             true,
             CheckingMethod::AudioContent,
-            5.0,   // minimum segment duration
-            0.4,   // maximum difference - higher to catch variations
+            5.0,
+            0.4,
             false,
         );
 
@@ -104,21 +98,18 @@ mod tests {
         let stop_flag = Arc::new(AtomicBool::new(false));
         finder.search(&stop_flag, None);
 
+        let info = finder.get_information();
         let duplicates = finder.get_duplicated_music_entries();
 
-        // We might find similar files (base.mp3 and its variations)
+        assert!(info.number_of_groups >= 1);
         if !duplicates.is_empty() {
-            assert!(duplicates[0].len() >= 2, "Duplicate group should have at least 2 files");
+            assert!(duplicates[0].len() >= 2);
         }
     }
 
     #[test]
     fn test_same_music_no_recursion() {
         let test_path = get_test_resources_path();
-        if !test_path.exists() {
-            eprintln!("Test resources not found at {:?}", test_path);
-            return;
-        }
 
         let params = SameMusicParameters::new(
             MusicSimilarity::TRACK_TITLE,
@@ -137,20 +128,17 @@ mod tests {
         let stop_flag = Arc::new(AtomicBool::new(false));
         finder.search(&stop_flag, None);
 
-        // With non-recursive search, results depend on directory structure
-        // Just verify it doesn't crash
-        let _info = finder.get_information();
+        let info = finder.get_information();
+        let duplicates = finder.get_duplicated_music_entries();
+
+        assert!(info.number_of_groups >= 0);
+        assert_eq!(duplicates.len(), info.number_of_groups as usize);
     }
 
     #[test]
     fn test_same_music_with_multiple_similarity_criteria() {
         let test_path = get_test_resources_path();
-        if !test_path.exists() {
-            eprintln!("Test resources not found at {:?}", test_path);
-            return;
-        }
 
-        // Use multiple criteria
         let params = SameMusicParameters::new(
             MusicSimilarity::TRACK_TITLE | MusicSimilarity::TRACK_ARTIST | MusicSimilarity::YEAR,
             false,
@@ -169,25 +157,24 @@ mod tests {
         finder.search(&stop_flag, None);
 
         let info = finder.get_information();
-        assert!(info.number_of_groups == 5);
+        let duplicates = finder.get_duplicated_music_entries();
+
+        assert_eq!(info.number_of_groups, 5);
+        assert!(info.number_of_duplicates >= 10);
+        assert!(!duplicates.is_empty());
     }
 
     #[test]
     fn test_same_music_compare_fingerprints_with_similar_titles() {
         let test_path = get_test_resources_path();
-        if !test_path.exists() {
-            eprintln!("Test resources not found at {:?}", test_path);
-            return;
-        }
 
-        // Test the optimization that only compares fingerprints for files with similar titles
         let params = SameMusicParameters::new(
             MusicSimilarity::TRACK_TITLE,
             false,
             CheckingMethod::AudioContent,
             10.0,
             0.2,
-            true, // compare_fingerprints_only_with_similar_titles
+            true,
         );
 
         let mut finder = SameMusic::new(params);
@@ -198,9 +185,12 @@ mod tests {
         let stop_flag = Arc::new(AtomicBool::new(false));
         finder.search(&stop_flag, None);
 
-        // Verify the search completed successfully
         let info = finder.get_information();
+        let duplicates = finder.get_duplicated_music_entries();
+
         assert_eq!(info.number_of_groups, 45);
+        assert!(info.number_of_duplicates >= 90);
+        assert!(!duplicates.is_empty());
     }
 
     #[test]
@@ -228,12 +218,10 @@ mod tests {
         finder.search(&stop_flag, None);
 
         let info = finder.get_information();
-        assert_eq!(
-            info.number_of_groups, 0,
-            "Should find no groups in empty directory"
-        );
-
         let duplicates = finder.get_duplicated_music_entries();
+
+        assert_eq!(info.number_of_groups, 0);
+        assert_eq!(info.number_of_duplicates, 0);
         assert!(duplicates.is_empty());
     }
 }
