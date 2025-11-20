@@ -236,8 +236,8 @@ pub(crate) fn get_rotation_from_exif(path: &str) -> Result<Option<ExifOrientatio
 mod tests {
     use super::*;
 
-    const TEST_NORMAL_IMAGE: &str = "test_resources/normal.jpg";
-    const TEST_ROTATED_IMAGE: &str = "test_resources/rotated.jpg";
+    const TEST_NORMAL_IMAGE: &str = "test_resources/images/normal.jpg";
+    const TEST_ROTATED_IMAGE: &str = "test_resources/images/rotated.jpg";
 
     #[test]
     fn test_image_loading_and_exif_rotation() {

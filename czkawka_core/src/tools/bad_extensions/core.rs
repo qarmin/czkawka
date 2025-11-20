@@ -167,20 +167,16 @@ impl BadExtensions {
 
     fn check_for_all_extensions_that_file_can_use(hashmap_workarounds: &IndexMap<&str, Vec<&str>>, current_extension: &str, proper_extension: &str) -> (BTreeSet<String>, String) {
         let mut all_available_extensions: BTreeSet<String> = Default::default();
-        // TODO Isn't this a bug?
-        // Why to file without extensions we set this as empty
-        let valid_extensions = if current_extension.is_empty() {
-            String::new()
-        } else {
-            for mim in mime_guess::from_ext(proper_extension) {
-                if let Some(all_ext) = get_mime_extensions(&mim) {
-                    for ext in all_ext {
-                        all_available_extensions.insert((*ext).to_string());
-                    }
+        for mim in mime_guess::from_ext(proper_extension) {
+            if let Some(all_ext) = get_mime_extensions(&mim) {
+                for ext in all_ext {
+                    all_available_extensions.insert((*ext).to_string());
                 }
             }
+        }
 
-            // Workarounds
+        // Workarounds:
+        if !current_extension.is_empty() {
             if let Some(vec_pre) = hashmap_workarounds.get(current_extension) {
                 for pre in vec_pre {
                     if all_available_extensions.contains(*pre) {
@@ -189,16 +185,20 @@ impl BadExtensions {
                     }
                 }
             }
+        }
 
+        let valid_extensions = if all_available_extensions.is_empty() {
+            String::new()
+        } else {
             let mut guessed_multiple_extensions = format!("({proper_extension}) - ");
             for ext in &all_available_extensions {
                 guessed_multiple_extensions.push_str(ext);
                 guessed_multiple_extensions.push(',');
             }
             guessed_multiple_extensions.pop();
-
             guessed_multiple_extensions
         };
+
         (all_available_extensions, valid_extensions)
     }
 }

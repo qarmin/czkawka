@@ -99,7 +99,7 @@ mod tests {
 
         let info = finder.get_information();
         // Parent and children are all empty
-        assert!(info.number_of_empty_folders >= 2, "Should find multiple empty folders");
+        assert!(info.number_of_empty_folders == 1, "Should find 1 empty folder (the parent) - which contains only empty subfolders");
     }
 }
 
