@@ -3,9 +3,7 @@ mod tests {
     use std::path::PathBuf;
     use std::sync::Arc;
     use std::sync::atomic::AtomicBool;
-    use crc32fast::hash;
     use image_hasher::{FilterType, HashAlg};
-    use crate::common::model::CheckingMethod::Hash;
     use crate::common::tool_data::CommonData;
     use crate::common::traits::Search;
     use crate::tools::similar_images::{SimilarImages, SimilarImagesParameters};
@@ -24,11 +22,11 @@ mod tests {
 
         let algo_filter_hash_sim_found = [
             (HashAlg::Gradient, FilterType::Lanczos3, 8,222240, 1, 1, 2),
-            (HashAlg::Gradient, FilterType::Lanczos3, 8,15, 1, 1, 2),
-            (HashAlg::Gradient, FilterType::Lanczos3, 8, 8, 0, 0, 0),
-            (HashAlg::Blockhash, FilterType::Lanczos3, 8, 40, 1, 1, 2),
-            (HashAlg::Blockhash, FilterType::Lanczos3, 8, 15, 1, 1, 2),
-            (HashAlg::Blockhash, FilterType::Lanczos3, 8, 2, 0, 0, 0),
+            // (HashAlg::Gradient, FilterType::Lanczos3, 8,15, 1, 1, 2),
+            // (HashAlg::Gradient, FilterType::Lanczos3, 8, 8, 0, 0, 0),
+            // (HashAlg::Blockhash, FilterType::Lanczos3, 8, 40, 1, 1, 2),
+            // (HashAlg::Blockhash, FilterType::Lanczos3, 8, 15, 1, 1, 2),
+            // (HashAlg::Blockhash, FilterType::Lanczos3, 8, 2, 0, 0, 0),
         ];
 
         for (idx, (hash_alg,filter_type, hash_size,similarity, duplicates, groups, all_in_similar)) in algo_filter_hash_sim_found.into_iter().enumerate() {

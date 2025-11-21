@@ -168,8 +168,6 @@ impl SimilarImages {
                 Err(err) => itertools::Either::Right(err),
             });
 
-        dbg!(&vec_file_entry);
-
         self.common_data.text_messages.errors.extend(errors);
         debug!("hash_images - end hashing {} images", vec_file_entry.len());
 
@@ -327,7 +325,6 @@ impl SimilarImages {
         let mut hashes_similarity: IndexMap<ImHash, (ImHash, u32)> = Default::default(); // Hashes used as child, (parent_hash, similarity)
 
         // Check them in chunks, to decrease number of used memory
-        // println!();
         let base_hashes_chunks = base_hashes.chunks(1000);
         for chunk in base_hashes_chunks {
             let partial_results = chunk
@@ -364,6 +361,7 @@ impl SimilarImages {
                 .filter(|(original_hash, vec_similar_hashes)| !vec_similar_hashes.is_empty() || hashes_with_multiple_images.contains(*original_hash))
                 .collect::<Vec<_>>();
 
+
             // for (hash, vec) in &partial_results {
             //     println!("{hash:?} --- {:?}", vec.iter().map(|e| e.1).collect::<Vec<_>>());
             // }
@@ -373,7 +371,14 @@ impl SimilarImages {
                 return WorkContinueStatus::Stop;
             }
 
+            dbg!(&partial_results);
+            dbg!(&hashes_parents);
+            dbg!(&hashes_similarity);
+            dbg!(&hashes_with_multiple_images);
+
             self.connect_results(partial_results, &mut hashes_parents, &mut hashes_similarity, &hashes_with_multiple_images);
+            dbg!(&hashes_parents);
+            dbg!(&hashes_similarity);
         }
 
         progress_handler.join_thread();
@@ -815,6 +820,26 @@ mod tests {
             let fe1 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "abc.txt");
             let fe2 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "bcd.txt");
             let fe3 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 2], "rrd.txt");
+
+            add_hashes(&mut similar_images.image_hashes, vec![fe1, fe2, fe3]);
+
+            similar_images.find_similar_hashes(&Arc::default(), None);
+            assert_eq!(similar_images.get_similar_images().len(), 1);
+            assert_eq!(similar_images.get_similar_images()[0].len(), 3);
+        }
+    }
+
+    #[test]
+    fn test_simple_normal_one_group_extended2() {
+        for _ in 0..100 {
+            let mut parameters = get_default_parameters();
+            parameters.similarity = 222222;
+            let mut similar_images = SimilarImages::new(parameters);
+            similar_images.set_use_reference_folders(false);
+
+            let fe1 = create_random_file_entry(vec![59, 41, 53, 27, 19, 143, 228, 228], "abc.txt");
+            let fe2 = create_random_file_entry(vec![57, 41, 60, 155, 51, 173, 204, 228], "bcd.txt");
+            let fe3 = create_random_file_entry(vec![28, 222, 206, 192, 203, 157, 25, 24], "rrd.txt");
 
             add_hashes(&mut similar_images.image_hashes, vec![fe1, fe2, fe3]);
 
