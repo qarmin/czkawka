@@ -361,24 +361,12 @@ impl SimilarImages {
                 .filter(|(original_hash, vec_similar_hashes)| !vec_similar_hashes.is_empty() || hashes_with_multiple_images.contains(*original_hash))
                 .collect::<Vec<_>>();
 
-
-            // for (hash, vec) in &partial_results {
-            //     println!("{hash:?} --- {:?}", vec.iter().map(|e| e.1).collect::<Vec<_>>());
-            // }
-
             if check_if_stop_received(stop_flag) {
                 progress_handler.join_thread();
                 return WorkContinueStatus::Stop;
             }
 
-            // dbg!(&partial_results);
-            // dbg!(&hashes_parents);
-            // dbg!(&hashes_similarity);
-            // dbg!(&hashes_with_multiple_images);
-
             self.connect_results(partial_results, &mut hashes_parents, &mut hashes_similarity, &hashes_with_multiple_images);
-            // dbg!(&hashes_parents);
-            // dbg!(&hashes_similarity);
         }
 
         progress_handler.join_thread();
