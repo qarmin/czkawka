@@ -128,8 +128,9 @@ pub struct SimilarImages {
 
 #[derive(Default, Clone)]
 pub struct Info {
+    pub initial_found_files: usize,
     pub number_of_duplicates: usize,
-    pub number_of_groups: u64,
+    pub number_of_groups: usize,
 }
 
 impl SimilarImages {

@@ -35,7 +35,7 @@ impl Search for BrokenFiles {
 
 impl DebugPrint for BrokenFiles {
     fn debug_print(&self) {
-        if !cfg!(debug_assertions) {
+        if !cfg!(debug_assertions) || cfg!(test) {
             return;
         }
         self.debug_print_common();

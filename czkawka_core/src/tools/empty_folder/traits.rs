@@ -36,7 +36,7 @@ impl Search for EmptyFolder {
 impl DebugPrint for EmptyFolder {
     #[expect(clippy::print_stdout)]
     fn debug_print(&self) {
-        if !cfg!(debug_assertions) {
+        if !cfg!(debug_assertions) || cfg!(test) {
             return;
         }
 

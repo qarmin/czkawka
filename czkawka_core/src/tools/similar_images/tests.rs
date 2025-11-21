@@ -3,17 +3,15 @@ mod tests {
     use std::path::PathBuf;
     use std::sync::Arc;
     use std::sync::atomic::AtomicBool;
-
+    use crc32fast::hash;
     use image_hasher::{FilterType, HashAlg};
-
+    use crate::common::model::CheckingMethod::Hash;
     use crate::common::tool_data::CommonData;
     use crate::common::traits::Search;
     use crate::tools::similar_images::{SimilarImages, SimilarImagesParameters};
 
     fn get_test_resources_path() -> PathBuf {
-        let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-            .join("test_resources")
-            .join("images");
+        let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test_resources").join("images");
 
         assert!(path.exists(), "Test resources not found at {:?}", path);
 
@@ -21,115 +19,20 @@ mod tests {
     }
 
     #[test]
-    fn test_find_similar_images() {
+    fn test_similar_images() {
         let test_path = get_test_resources_path();
 
-        let params = SimilarImagesParameters::new(
-            10,
-            8,
-            HashAlg::Gradient,
-            FilterType::Lanczos3,
-            false,
-            true,
-        );
-
-        let mut finder = SimilarImages::new(params);
-        finder.set_included_directory(vec![test_path]);
-        finder.set_recursive_search(true);
-        finder.set_use_cache(false);
-
-        let stop_flag = Arc::new(AtomicBool::new(false));
-        finder.search(&stop_flag, None);
-
-        let info = finder.get_information();
-        let similar_images = finder.get_similar_images();
-
-        assert_eq!(info.number_of_duplicates, 20);
-        assert_eq!(info.number_of_groups, 20);
-        assert_eq!(similar_images.len(), 40);
-    }
-
-    #[test]
-    fn test_similar_images_with_rotated() {
-        let test_path = get_test_resources_path();
-
-        let params = SimilarImagesParameters::new(
-            20,
-            16,
-            HashAlg::Gradient,
-            FilterType::Lanczos3,
-            false,
-            true,
-        );
-
-        let mut finder = SimilarImages::new(params);
-        finder.set_included_directory(vec![test_path]);
-        finder.set_recursive_search(true);
-        finder.set_use_cache(false);
-
-        let stop_flag = Arc::new(AtomicBool::new(false));
-        finder.search(&stop_flag, None);
-
-        let similar_images = finder.get_similar_images();
-        let info = finder.get_information();
-
-        assert_eq!(info.number_of_duplicates, 20);
-        assert_eq!(info.number_of_groups, 20);
-        assert_eq!(similar_images.len(), 40);
-    }
-
-    #[test]
-    fn test_similar_images_different_hash_sizes() {
-        let test_path = get_test_resources_path();
-
-        for hash_size in [8, 16, 32, 64] {
-            let params = SimilarImagesParameters::new(
-                10,
-                hash_size,
-                HashAlg::Gradient,
-                FilterType::Lanczos3,
-                false,
-                true,
-            );
-
-            let mut finder = SimilarImages::new(params);
-            finder.set_included_directory(vec![test_path.clone()]);
-            finder.set_recursive_search(true);
-            finder.set_use_cache(false);
-
-            let stop_flag = Arc::new(AtomicBool::new(false));
-            finder.search(&stop_flag, None);
-
-            let info = finder.get_information();
-            let similar_images = finder.get_similar_images();
-
-            assert_eq!(info.number_of_duplicates, 20);
-            assert_eq!(info.number_of_groups, 20);
-            assert_eq!(similar_images.len(), 40);
-        }
-    }
-
-    #[test]
-    fn test_similar_images_different_algorithms() {
-        let test_path = get_test_resources_path();
-
-        let algorithms = vec![
-            HashAlg::Blockhash,
-            HashAlg::Gradient,
-            HashAlg::Mean,
-            HashAlg::DoubleGradient,
-            HashAlg::VertGradient,
+        let algo_filter_hash_sim_found = [
+            (HashAlg::Gradient, FilterType::Lanczos3, 8,222240, 1, 1, 2),
+            (HashAlg::Gradient, FilterType::Lanczos3, 8,15, 1, 1, 2),
+            (HashAlg::Gradient, FilterType::Lanczos3, 8, 8, 0, 0, 0),
+            (HashAlg::Blockhash, FilterType::Lanczos3, 8, 40, 1, 1, 2),
+            (HashAlg::Blockhash, FilterType::Lanczos3, 8, 15, 1, 1, 2),
+            (HashAlg::Blockhash, FilterType::Lanczos3, 8, 2, 0, 0, 0),
         ];
 
-        for hash_alg in algorithms {
-            let params = SimilarImagesParameters::new(
-                10,
-                8,
-                hash_alg,
-                FilterType::Lanczos3,
-                false,
-                true,
-            );
+        for (idx, (hash_alg,filter_type, hash_size,similarity, duplicates, groups, all_in_similar)) in algo_filter_hash_sim_found.into_iter().enumerate() {
+            let params = SimilarImagesParameters::new(similarity, hash_size, hash_alg, filter_type, false, true);
 
             let mut finder = SimilarImages::new(params);
             finder.set_included_directory(vec![test_path.clone()]);
@@ -142,9 +45,15 @@ mod tests {
             let info = finder.get_information();
             let similar_images = finder.get_similar_images();
 
-            assert_eq!(info.number_of_duplicates, 20);
-            assert_eq!(info.number_of_groups, 20);
-            assert_eq!(similar_images.len(), 40);
+            finder.common_data.debug_print_common();
+
+            let msg = format!("Failed for algo/filter/hash/similarity set {idx}: {:?}/{:?}/{}/{}", hash_alg, filter_type, hash_size, similarity);
+
+            assert_eq!(info.initial_found_files, 3, "{msg}");
+            assert_eq!(info.number_of_duplicates, duplicates, "{msg}");
+            assert_eq!(info.number_of_groups, groups, "{msg}");
+            assert_eq!(similar_images.len(), groups, "{msg}");
+            assert_eq!(similar_images.iter().map(|e|e.len()).sum::<usize>(), all_in_similar, "{msg}");
         }
     }
 
@@ -152,14 +61,7 @@ mod tests {
     fn test_similar_images_exclude_same_size() {
         let test_path = get_test_resources_path();
 
-        let params = SimilarImagesParameters::new(
-            10,
-            8,
-            HashAlg::Gradient,
-            FilterType::Lanczos3,
-            true,
-            true,
-        );
+        let params = SimilarImagesParameters::new(10, 8, HashAlg::Gradient, FilterType::Lanczos3, true, true);
 
         let mut finder = SimilarImages::new(params);
         finder.set_included_directory(vec![test_path]);
@@ -183,49 +85,13 @@ mod tests {
     }
 
     #[test]
-    fn test_similar_images_no_recursion() {
-        let test_path = get_test_resources_path();
-
-        let params = SimilarImagesParameters::new(
-            10,
-            8,
-            HashAlg::Gradient,
-            FilterType::Lanczos3,
-            false,
-            true,
-        );
-
-        let mut finder = SimilarImages::new(params);
-        finder.set_included_directory(vec![test_path]);
-        finder.set_recursive_search(false);
-        finder.set_use_cache(false);
-
-        let stop_flag = Arc::new(AtomicBool::new(false));
-        finder.search(&stop_flag, None);
-
-        let info = finder.get_information();
-        let similar_images = finder.get_similar_images();
-
-        assert_eq!(info.number_of_duplicates, 20);
-        assert_eq!(info.number_of_groups, 20);
-        assert_eq!(similar_images.len(), 40);
-    }
-
-    #[test]
     fn test_similar_images_empty_directory() {
         use tempfile::TempDir;
 
         let temp_dir = TempDir::new().unwrap();
         let path = temp_dir.path();
 
-        let params = SimilarImagesParameters::new(
-            10,
-            8,
-            HashAlg::Gradient,
-            FilterType::Lanczos3,
-            false,
-            true,
-        );
+        let params = SimilarImagesParameters::new(10, 8, HashAlg::Gradient, FilterType::Lanczos3, false, true);
 
         let mut finder = SimilarImages::new(params);
         finder.set_included_directory(vec![path.to_path_buf()]);
@@ -238,75 +104,8 @@ mod tests {
         let info = finder.get_information();
         let similar_images = finder.get_similar_images();
 
-        assert_eq!(info.number_of_duplicates, 20);
-        assert_eq!(info.number_of_groups, 20);
-        assert_eq!(similar_images.len(), 40);
-    }
-
-    #[test]
-    fn test_similar_images_high_similarity_threshold() {
-        let test_path = get_test_resources_path();
-
-        let params = SimilarImagesParameters::new(
-            1,
-            8,
-            HashAlg::Gradient,
-            FilterType::Lanczos3,
-            false,
-            true,
-        );
-
-        let mut finder = SimilarImages::new(params);
-        finder.set_included_directory(vec![test_path]);
-        finder.set_recursive_search(true);
-        finder.set_use_cache(false);
-
-        let stop_flag = Arc::new(AtomicBool::new(false));
-        finder.search(&stop_flag, None);
-
-        let info = finder.get_information();
-        let similar_images = finder.get_similar_images();
-
-        assert_eq!(info.number_of_duplicates, 20);
-        assert_eq!(info.number_of_groups, 20);
-        assert_eq!(similar_images.len(), 40);
-    }
-
-    #[test]
-    fn test_similar_images_different_filters() {
-        let test_path = get_test_resources_path();
-
-        let filters = vec![
-            FilterType::Nearest,
-            FilterType::Triangle,
-            FilterType::Lanczos3,
-        ];
-
-        for filter in filters {
-            let params = SimilarImagesParameters::new(
-                10,
-                8,
-                HashAlg::Gradient,
-                filter,
-                false,
-                true,
-            );
-
-            let mut finder = SimilarImages::new(params);
-            finder.set_included_directory(vec![test_path.clone()]);
-            finder.set_recursive_search(true);
-            finder.set_use_cache(false);
-
-            let stop_flag = Arc::new(AtomicBool::new(false));
-            finder.search(&stop_flag, None);
-
-            let info = finder.get_information();
-            let similar_images = finder.get_similar_images();
-
-            assert_eq!(info.number_of_duplicates, 20);
-            assert_eq!(info.number_of_groups, 20);
-            assert_eq!(similar_images.len(), 40);
-        }
+        assert_eq!(info.number_of_duplicates, 0);
+        assert_eq!(info.number_of_groups, 0);
+        assert_eq!(similar_images.len(), 0);
     }
 }
-

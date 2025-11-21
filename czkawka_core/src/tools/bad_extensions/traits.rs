@@ -42,7 +42,7 @@ impl DeletingItems for BadExtensions {
 impl DebugPrint for BadExtensions {
     #[expect(clippy::print_stdout)]
     fn debug_print(&self) {
-        if !cfg!(debug_assertions) {
+        if !cfg!(debug_assertions) || cfg!(test) {
             return;
         }
         println!("---------------DEBUG PRINT---------------");

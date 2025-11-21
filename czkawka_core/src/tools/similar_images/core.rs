@@ -77,6 +77,8 @@ impl SimilarImages {
                     })
                     .collect();
 
+                self.information.initial_found_files = self.images_to_check.len();
+
                 self.common_data.text_messages.warnings.extend(warnings);
                 debug!("check_files - Found {} image files.", self.images_to_check.len());
                 WorkContinueStatus::Continue
@@ -165,6 +167,8 @@ impl SimilarImages {
                 Ok(entry) => itertools::Either::Left(entry),
                 Err(err) => itertools::Either::Right(err),
             });
+
+        dbg!(&vec_file_entry);
 
         self.common_data.text_messages.errors.extend(errors);
         debug!("hash_images - end hashing {} images", vec_file_entry.len());
