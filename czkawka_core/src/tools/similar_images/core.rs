@@ -1137,3 +1137,43 @@ mod tests {
         }
     }
 }
+
+#[cfg(test)]
+mod connect_results_tests {
+    use super::*;
+    use indexmap::{IndexMap, IndexSet};
+    use image_hasher::{FilterType, HashAlg};
+
+    #[test]
+    fn test_connect_results_real_case() {
+        let params = SimilarImagesParameters::new(10, 8, HashAlg::Gradient, FilterType::Lanczos3, false, true);
+        let finder = SimilarImages::new(params);
+
+        let hash1: ImHash = vec![59, 41, 53, 27, 19, 143, 228, 228];
+        let hash2: ImHash = vec![57, 41, 60, 155, 51, 173, 204, 228];
+        let hash3: ImHash = vec![28, 222, 206, 192, 203, 157, 25, 24];
+
+        let partial_results = vec![
+            (&hash1, vec![(9, &hash2), (43, &hash3)]),
+            (&hash2, vec![(9, &hash1), (38, &hash3)]),
+            (&hash3, vec![(38, &hash2), (43, &hash1)]),
+        ];
+
+        let mut hashes_parents: IndexMap<ImHash, u32> = IndexMap::new();
+        let mut hashes_similarity: IndexMap<ImHash, (ImHash, u32)> = IndexMap::new();
+        let hashes_with_multiple_images: IndexSet<ImHash> = IndexSet::new();
+
+        assert_eq!(hashes_parents.len(), 0);
+        assert_eq!(hashes_similarity.len(), 0);
+
+        finder.connect_results(partial_results, &mut hashes_parents, &mut hashes_similarity, &hashes_with_multiple_images);
+
+        assert_eq!(hashes_parents.len(), 1);
+        assert_eq!(hashes_similarity.len(), 1);
+
+        assert_eq!(hashes_parents.get(&hash1), Some(&1));
+        assert_eq!(hashes_similarity.get(&hash2), Some(&(hash1.clone(), 9)));
+        assert!(hashes_similarity.get(&hash3).is_none());
+    }
+}
+
