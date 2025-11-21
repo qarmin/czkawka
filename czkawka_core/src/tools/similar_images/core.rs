@@ -371,14 +371,14 @@ impl SimilarImages {
                 return WorkContinueStatus::Stop;
             }
 
-            dbg!(&partial_results);
-            dbg!(&hashes_parents);
-            dbg!(&hashes_similarity);
-            dbg!(&hashes_with_multiple_images);
+            // dbg!(&partial_results);
+            // dbg!(&hashes_parents);
+            // dbg!(&hashes_similarity);
+            // dbg!(&hashes_with_multiple_images);
 
             self.connect_results(partial_results, &mut hashes_parents, &mut hashes_similarity, &hashes_with_multiple_images);
-            dbg!(&hashes_parents);
-            dbg!(&hashes_similarity);
+            // dbg!(&hashes_parents);
+            // dbg!(&hashes_similarity);
         }
 
         progress_handler.join_thread();
@@ -753,6 +753,33 @@ mod tests {
     }
 
     #[test]
+    fn test_fuzzer() {
+        for _ in 0..100 {
+            let mut parameters = get_default_parameters();
+            parameters.similarity = rand::random::<u32>() % 40;
+            let mut similar_images = SimilarImages::new(parameters);
+
+            for i in 0..(rand::random::<u32>() % 2000) {
+                let mut entry = vec![1u8; 8];
+                entry[1] = rand::random::<u8>();
+                if rand::random::<bool>() {
+                    entry[2] = rand::random::<u8>();
+                }
+                if rand::random::<bool>() {
+                    entry[3] = rand::random::<u8>();
+                }
+                if rand::random::<bool>() {
+                    entry[4] = rand::random::<u8>();
+                }
+                let fe = create_random_file_entry(entry, &format!("file_{i}.txt"));
+                add_hashes(&mut similar_images.image_hashes, vec![fe]);
+            }
+
+            similar_images.find_similar_hashes(&Arc::default(), None);
+        }
+    }
+
+    #[test]
     fn test_compare_no_images() {
         use crate::common::traits::Search;
         for _ in 0..100 {
@@ -807,6 +834,25 @@ mod tests {
             similar_images.find_similar_hashes(&Arc::default(), None);
             assert_eq!(similar_images.get_similar_images().len(), 1);
         }
+    }
+
+    #[test]
+    fn test_2000_hashes() {
+        let mut parameters = get_default_parameters();
+        parameters.similarity = 10;
+        let mut similar_images = SimilarImages::new(parameters);
+
+        for i in 0..2000 {
+            let mut entry = vec![1u8; 8];
+            entry[7] = (i as u32 % 256) as u8;
+            entry[6] = (i as u32 / 256 % 256) as u8;
+            entry[5] = (i as u32 / 256 / 256 % 256) as u8;
+            let fe = create_random_file_entry(entry, &format!("file_{i}.txt"));
+            add_hashes(&mut similar_images.image_hashes, vec![fe]);
+        }
+
+        similar_images.find_similar_hashes(&Arc::default(), None);
+        assert!(similar_images.get_similar_images().len() > 0);
     }
 
     #[test]

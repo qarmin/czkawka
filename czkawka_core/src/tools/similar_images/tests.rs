@@ -21,12 +21,24 @@ mod tests {
         let test_path = get_test_resources_path();
 
         let algo_filter_hash_sim_found = [
-            (HashAlg::Gradient, FilterType::Lanczos3, 8,222240, 1, 1, 2),
-            // (HashAlg::Gradient, FilterType::Lanczos3, 8,15, 1, 1, 2),
-            // (HashAlg::Gradient, FilterType::Lanczos3, 8, 8, 0, 0, 0),
-            // (HashAlg::Blockhash, FilterType::Lanczos3, 8, 40, 1, 1, 2),
-            // (HashAlg::Blockhash, FilterType::Lanczos3, 8, 15, 1, 1, 2),
-            // (HashAlg::Blockhash, FilterType::Lanczos3, 8, 2, 0, 0, 0),
+            (HashAlg::Gradient, FilterType::Lanczos3, 8,222240, 2, 1, 3),
+            (HashAlg::Gradient, FilterType::Lanczos3, 8,15, 1, 1, 2),
+            (HashAlg::Gradient, FilterType::Lanczos3, 8, 8, 0, 0, 0),
+            (HashAlg::Blockhash, FilterType::Lanczos3, 8, 40, 2, 1, 3),
+            (HashAlg::Blockhash, FilterType::Lanczos3, 8, 15, 1, 1, 2),
+            (HashAlg::Blockhash, FilterType::Lanczos3, 8, 2, 0, 0, 0),
+            (HashAlg::Mean, FilterType::Lanczos3, 8, 40, 2, 1, 3),
+            (HashAlg::Mean, FilterType::Lanczos3, 8, 15, 1, 1, 2),
+            (HashAlg::Mean, FilterType::Lanczos3, 8, 2, 0, 0, 0),
+            (HashAlg::DoubleGradient, FilterType::Lanczos3, 8, 40, 2, 1, 3),
+            (HashAlg::DoubleGradient, FilterType::Lanczos3, 8, 15, 1, 1, 2),
+            (HashAlg::DoubleGradient, FilterType::Lanczos3, 8, 2, 0, 0, 0),
+            (HashAlg::VertGradient, FilterType::Lanczos3, 8, 40, 2, 1, 3),
+            (HashAlg::VertGradient, FilterType::Lanczos3, 8, 15, 1, 1, 2),
+            (HashAlg::VertGradient, FilterType::Lanczos3, 8, 2, 0, 0, 0),
+
+            (HashAlg::Gradient, FilterType::Gaussian, 15,15, 1, 1, 2),
+
         ];
 
         for (idx, (hash_alg,filter_type, hash_size,similarity, duplicates, groups, all_in_similar)) in algo_filter_hash_sim_found.into_iter().enumerate() {
@@ -42,8 +54,6 @@ mod tests {
 
             let info = finder.get_information();
             let similar_images = finder.get_similar_images();
-
-            finder.common_data.debug_print_common();
 
             let msg = format!("Failed for algo/filter/hash/similarity set {idx}: {:?}/{:?}/{}/{}", hash_alg, filter_type, hash_size, similarity);
 
@@ -72,7 +82,7 @@ mod tests {
         let similar_images = finder.get_similar_images();
         let info = finder.get_information();
 
-        assert!(info.number_of_groups >= 0);
+        assert!(info.number_of_groups > 0);
         for group in similar_images {
             if group.len() > 1 {
                 let first_size = group[0].size;
