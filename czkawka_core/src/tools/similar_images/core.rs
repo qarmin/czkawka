@@ -461,7 +461,7 @@ impl SimilarImages {
                 let parent = hashes_parents.insert((*original_hash).clone(), 1);
                 assert!(parent.is_none(), "Parent hash should not exist here");
             } else {
-                hashes_parents.entry(original_hash.clone()).or_insert(1);
+                *hashes_parents.entry(original_hash.clone()).or_insert(0) += 1;
             }
 
             // This overwrites parent hash if there was any
@@ -470,70 +470,6 @@ impl SimilarImages {
 
             if let Some(compared_hash_parent) = compared_hash_parent {
                 *hashes_parents.get_mut(&compared_hash_parent).expect("Cannot find parent hash") -= 1;
-            }
-        }
-    }
-
-    #[fun_time(message = "connect_results", level = "debug")]
-    fn connect_results(
-        &self,
-        partial_results: Vec<(&ImHash, Vec<(u32, &ImHash)>)>,
-        hashes_parents: &mut IndexMap<ImHash, u32>,
-        hashes_similarity: &mut IndexMap<ImHash, (ImHash, u32)>,
-        hashes_with_multiple_images: &IndexSet<ImHash>,
-    ) {
-        for (original_hash, vec_compared_hashes) in partial_results {
-            let mut number_of_added_child_items = 0;
-            for (similarity, compared_hash) in vec_compared_hashes {
-                // If hash is already in results skip it
-                // This check duplicates check from bktree.find, but it is needed to because when iterating over elements, this structure can change
-                if hashes_parents.contains_key(compared_hash) {
-                    continue;
-                }
-
-                // If there is already record, with smaller sensitivity, then replace it
-                let mut need_to_add = false;
-                let mut need_to_check = false;
-
-                // TODO consider to replace variables from above with closures
-                // If current checked hash, have parent, first we must check if similarity between them is lower than checked item
-                if let Some((current_parent_hash, current_similarity_with_parent)) = hashes_similarity.get(original_hash) {
-                    if *current_similarity_with_parent > similarity {
-                        need_to_check = true;
-
-                        *hashes_parents.get_mut(current_parent_hash).expect("Cannot find parent hash") -= 1;
-                        if hashes_parents.get(current_parent_hash) == Some(&0) && !hashes_with_multiple_images.contains(current_parent_hash) {
-                            hashes_parents.swap_remove(current_parent_hash);
-                        }
-                        hashes_similarity
-                            .swap_remove(original_hash)
-                            .expect("This should never fail, because we are iterating over this hash");
-                    }
-                } else {
-                    need_to_check = true;
-                }
-
-                if need_to_check {
-                    if let Some((other_parent_hash, other_similarity)) = hashes_similarity.get(compared_hash) {
-                        if *other_similarity > similarity {
-                            need_to_add = true;
-                            *hashes_parents.get_mut(other_parent_hash).expect("Cannot find parent hash") -= 1;
-                        }
-                    }
-                    // But when there is no record, just add it
-                    else {
-                        need_to_add = true;
-                    }
-                }
-
-                if need_to_add {
-                    hashes_similarity.insert(compared_hash.clone(), (original_hash.clone(), similarity));
-                    number_of_added_child_items += 1;
-                }
-            }
-
-            if number_of_added_child_items > 0 || hashes_with_multiple_images.contains(original_hash) {
-                hashes_parents.insert((*original_hash).clone(), number_of_added_child_items);
             }
         }
     }
