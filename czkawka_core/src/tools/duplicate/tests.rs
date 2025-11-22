@@ -9,7 +9,6 @@ use crate::common::tool_data::CommonData;
 use crate::common::traits::Search;
 use crate::tools::duplicate::{DuplicateFinder, DuplicateFinderParameters};
 
-
 #[test]
 fn test_find_duplicates_by_hash() {
     let temp_dir = TempDir::new().unwrap();

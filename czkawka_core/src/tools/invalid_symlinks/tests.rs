@@ -1,6 +1,3 @@
-#![allow(clippy::allow_attributes)]
-#![allow(dead_code)]
-
 use std::fs;
 use std::os::unix;
 use std::sync::Arc;
