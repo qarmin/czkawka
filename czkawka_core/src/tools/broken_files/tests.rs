@@ -1,5 +1,4 @@
 use std::fs;
-use std::io::Write;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
@@ -18,9 +17,8 @@ fn get_test_resources_path() -> PathBuf {
 
 fn corrupt_file(source: &PathBuf, dest: &PathBuf, bytes_to_corrupt: usize) {
     let mut content = fs::read(source).unwrap();
-    // Corrupt first N bytes by setting them to 0
     for byte in content.iter_mut().take(bytes_to_corrupt) {
-        *byte = 0x00;
+        *byte = 0x11;
     }
     fs::write(dest, content).unwrap();
 }
@@ -30,7 +28,6 @@ fn test_find_broken_image() {
     let temp_dir = TempDir::new().unwrap();
     let test_resources = get_test_resources_path();
 
-    // Corrupt an image from test_resources
     let source_image = test_resources.join("images").join("normal.jpg");
     let broken_image = temp_dir.path().join("broken.jpg");
     corrupt_file(&source_image, &broken_image, 10);
@@ -54,7 +51,6 @@ fn test_valid_image() {
     let temp_dir = TempDir::new().unwrap();
     let test_resources = get_test_resources_path();
 
-    // Copy valid image
     let source_image = test_resources.join("images").join("normal.jpg");
     let valid_image = temp_dir.path().join("valid.jpg");
     fs::copy(&source_image, &valid_image).unwrap();
@@ -77,10 +73,13 @@ fn test_broken_audio() {
     let temp_dir = TempDir::new().unwrap();
     let test_resources = get_test_resources_path();
 
-    // Corrupt an audio file from test_resources
     let source_audio = test_resources.join("audio").join("base.mp3");
     let broken_audio = temp_dir.path().join("broken.mp3");
-    corrupt_file(&source_audio, &broken_audio, 10);
+    let file_len = fs::metadata(&source_audio).unwrap().len();
+    corrupt_file(&source_audio, &broken_audio, file_len as usize);
+
+    let good_audio = temp_dir.path().join("good.mp3");
+    fs::copy(&source_audio, &good_audio).unwrap();
 
     let params = BrokenFilesParameters::new(CheckedTypes::AUDIO);
     let mut finder = BrokenFiles::new(params);
@@ -101,11 +100,9 @@ fn test_mixed_valid_and_broken_images() {
     let temp_dir = TempDir::new().unwrap();
     let test_resources = get_test_resources_path();
 
-    // Copy valid image
     let source_image1 = test_resources.join("images").join("normal.jpg");
     fs::copy(&source_image1, temp_dir.path().join("valid.jpg")).unwrap();
 
-    // Create broken image
     let source_image2 = test_resources.join("images").join("normal2.jpg");
     corrupt_file(&source_image2, &temp_dir.path().join("broken.jpg"), 10);
 
@@ -130,13 +127,12 @@ fn test_multiple_file_types() {
     let temp_dir = TempDir::new().unwrap();
     let test_resources = get_test_resources_path();
 
-    // Create broken image
     let source_image = test_resources.join("images").join("normal.jpg");
     corrupt_file(&source_image, &temp_dir.path().join("broken.jpg"), 10);
 
-    // Create broken audio
     let source_audio = test_resources.join("audio").join("base.mp3");
-    corrupt_file(&source_audio, &temp_dir.path().join("broken.mp3"), 10);
+    let file_len = fs::metadata(&source_audio).unwrap().len();
+    corrupt_file(&source_audio, &temp_dir.path().join("broken.mp3"), file_len as usize);
 
     let params = BrokenFilesParameters::new(CheckedTypes::IMAGE | CheckedTypes::AUDIO);
     let mut finder = BrokenFiles::new(params);
@@ -173,7 +169,6 @@ fn test_no_file_types_selected() {
     let temp_dir = TempDir::new().unwrap();
     let test_resources = get_test_resources_path();
 
-    // Create broken image
     let source_image = test_resources.join("images").join("normal.jpg");
     corrupt_file(&source_image, &temp_dir.path().join("broken.jpg"), 10);
 
@@ -189,4 +184,3 @@ fn test_no_file_types_selected() {
     let broken_files = finder.get_broken_files();
     assert_eq!(broken_files.len(), 0, "Should find no files when no types are selected");
 }
-

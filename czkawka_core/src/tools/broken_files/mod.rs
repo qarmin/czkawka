@@ -1,9 +1,10 @@
 use bitflags::bitflags;
 
+mod audio_checker;
 pub mod core;
-pub mod traits;
 #[cfg(test)]
 mod tests;
+pub mod traits;
 
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};

@@ -462,15 +462,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1505bd5d3d116872e7271a6d4e16d81d0c8570876c8de68093a09ac269d8aac0"
 
 [[package]]
-name = "audio_checker"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "20234f0225492ef6ee5b9258277720993b343c694873da45b3c46221816d8831"
-dependencies = [
- "symphonia",
-]
-
-[[package]]
 name = "auto_enums"
 version = "0.8.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1462,7 +1453,6 @@ name = "czkawka_core"
 version = "10.0.0"
 dependencies = [
  "anyhow",
- "audio_checker",
  "bincode 1.3.3",
  "bitflags 2.10.0",
  "bk-tree",
