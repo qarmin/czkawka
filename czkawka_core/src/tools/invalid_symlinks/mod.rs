@@ -1,6 +1,6 @@
 pub mod core;
-pub mod traits;
 mod tests;
+pub mod traits;
 
 use std::fmt::Display;
 use std::path::{Path, PathBuf};

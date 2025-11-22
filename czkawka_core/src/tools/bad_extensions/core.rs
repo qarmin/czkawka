@@ -176,13 +176,13 @@ impl BadExtensions {
         }
 
         // Workarounds:
-        if !current_extension.is_empty() {
-            if let Some(vec_pre) = hashmap_workarounds.get(current_extension) {
-                for pre in vec_pre {
-                    if all_available_extensions.contains(*pre) {
-                        all_available_extensions.insert(current_extension.to_string());
-                        break;
-                    }
+        if !current_extension.is_empty()
+            && let Some(vec_pre) = hashmap_workarounds.get(current_extension)
+        {
+            for pre in vec_pre {
+                if all_available_extensions.contains(*pre) {
+                    all_available_extensions.insert(current_extension.to_string());
+                    break;
                 }
             }
         }

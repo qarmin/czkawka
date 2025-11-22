@@ -1,6 +1,6 @@
 pub mod core;
-pub mod traits;
 mod tests;
+pub mod traits;
 
 use std::cell::RefCell;
 use std::collections::BTreeMap;
@@ -310,9 +310,10 @@ impl MyHasher for Xxh3 {
 mod tests2 {
     use std::fs::File;
     use std::io;
+
+    use super::*;
     use crate::common::model::FileEntry;
     use crate::tools::duplicate::filter_hard_links;
-    use super::*;
 
     #[test]
     fn test_filter_hard_links_empty() {

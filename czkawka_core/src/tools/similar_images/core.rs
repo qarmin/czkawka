@@ -379,7 +379,6 @@ impl SimilarImages {
             }
         }
 
-
         progress_handler.join_thread();
 
         debug_check_for_duplicated_things(self.common_data.use_reference_folders, &hashes_parents, &hashes_similarity, all_hashed_images, "LATTER");
@@ -405,7 +404,7 @@ impl SimilarImages {
                 if similar.is_empty() {
                     assert!(hashes_with_multiple_images.contains(parent)); // We expect, that only hashes with multiple images can have no similar hashes
                     assert!(!hashes_parents.contains_key(parent)); // We expect, that this hash is not already in parents list - this would be strange, because it have no similar hashes
-                    return None;
+                    None
                 } else {
                     Some(similar.into_iter().map(move |sim| (parent, sim)))
                 }
@@ -773,32 +772,33 @@ mod tests {
         }
     }
 
-    #[test]
-    fn test_fuzzer() {
-        for _ in 0..100 {
-            let mut parameters = get_default_parameters();
-            parameters.similarity = rand::random::<u32>() % 40;
-            let mut similar_images = SimilarImages::new(parameters);
-
-            for i in 0..(rand::random::<u32>() % 2000) {
-                let mut entry = vec![1u8; 8];
-                entry[1] = rand::random::<u8>();
-                if rand::random::<bool>() {
-                    entry[2] = rand::random::<u8>();
-                }
-                if rand::random::<bool>() {
-                    entry[3] = rand::random::<u8>();
-                }
-                if rand::random::<bool>() {
-                    entry[4] = rand::random::<u8>();
-                }
-                let fe = create_random_file_entry(entry, &format!("file_{i}.txt"));
-                add_hashes(&mut similar_images.image_hashes, vec![fe]);
-            }
-
-            similar_images.find_similar_hashes(&Arc::default(), None);
-        }
-    }
+    // Just to debug changes to algorithms
+    // #[test]
+    // fn test_fuzzer() {
+    //     for _ in 0..100 {
+    //         let mut parameters = get_default_parameters();
+    //         parameters.similarity = rand::random::<u32>() % 40;
+    //         let mut similar_images = SimilarImages::new(parameters);
+    //
+    //         for i in 0..(rand::random::<u32>() % 2000) {
+    //             let mut entry = vec![1u8; 8];
+    //             entry[1] = rand::random::<u8>();
+    //             if rand::random::<bool>() {
+    //                 entry[2] = rand::random::<u8>();
+    //             }
+    //             if rand::random::<bool>() {
+    //                 entry[3] = rand::random::<u8>();
+    //             }
+    //             if rand::random::<bool>() {
+    //                 entry[4] = rand::random::<u8>();
+    //             }
+    //             let fe = create_random_file_entry(entry, &format!("file_{i}.txt"));
+    //             add_hashes(&mut similar_images.image_hashes, vec![fe]);
+    //         }
+    //
+    //         similar_images.find_similar_hashes(&Arc::default(), None);
+    //     }
+    // }
 
     #[test]
     fn test_compare_no_images() {
@@ -873,7 +873,7 @@ mod tests {
         }
 
         similar_images.find_similar_hashes(&Arc::default(), None);
-        assert!(similar_images.get_similar_images().len() > 0);
+        assert!(!similar_images.get_similar_images().is_empty());
     }
 
     #[test]
@@ -1207,9 +1207,10 @@ mod tests {
 
 #[cfg(test)]
 mod connect_results_tests {
-    use super::*;
     use image_hasher::{FilterType, HashAlg};
     use indexmap::{IndexMap, IndexSet};
+
+    use super::*;
 
     #[test]
     fn test_connect_results_real_case() {

@@ -145,13 +145,7 @@ mod tests {
     #[test]
     fn test_progress_thread_handler_with_sender() {
         let (sender, _receiver) = crossbeam_channel::unbounded();
-        let handler = prepare_thread_handler_common(
-            Some(&sender),
-            CurrentStage::DuplicateFullHashing,
-            100,
-            (ToolType::Duplicate, CheckingMethod::Hash),
-            10000,
-        );
+        let handler = prepare_thread_handler_common(Some(&sender), CurrentStage::DuplicateFullHashing, 100, (ToolType::Duplicate, CheckingMethod::Hash), 10000);
 
         assert_eq!(handler.items_counter().load(atomic::Ordering::Relaxed), 0);
         assert_eq!(handler.size_counter().load(atomic::Ordering::Relaxed), 0);
@@ -186,4 +180,3 @@ mod tests {
         prepare_thread_handler_common(None, CurrentStage::CollectingFiles, 50, (ToolType::None, CheckingMethod::None), 5000);
     }
 }
-

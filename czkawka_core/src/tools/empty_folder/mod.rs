@@ -1,7 +1,7 @@
 pub mod core;
-pub mod traits;
 #[cfg(test)]
 mod tests;
+pub mod traits;
 
 use std::path::{Path, PathBuf};
 
