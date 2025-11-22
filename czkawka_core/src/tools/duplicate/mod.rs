@@ -1,5 +1,6 @@
 pub mod core;
 pub mod traits;
+mod tests;
 
 use std::cell::RefCell;
 use std::collections::BTreeMap;
