@@ -307,10 +307,11 @@ impl MyHasher for Xxh3 {
 }
 
 #[cfg(test)]
-mod tests {
+mod tests2 {
     use std::fs::File;
     use std::io;
-
+    use crate::common::model::FileEntry;
+    use crate::tools::duplicate::filter_hard_links;
     use super::*;
 
     #[test]

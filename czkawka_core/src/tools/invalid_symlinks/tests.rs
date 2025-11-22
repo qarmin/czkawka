@@ -8,6 +8,7 @@ mod tests {
     use tempfile::TempDir;
 
     use crate::common::tool_data::CommonData;
+    use crate::common::traits::Search;
     use crate::tools::invalid_symlinks::InvalidSymlinks;
 
     #[test]
@@ -29,7 +30,7 @@ mod tests {
         unix::fs::symlink(path.join("non_existent.txt"), &invalid_link).unwrap();
 
         let mut finder = InvalidSymlinks::new();
-        finder.set_included_directory(path.to_path_buf());
+        finder.set_included_directory(vec![path.to_path_buf()]);
         finder.set_recursive_search(true);
 
         let stop_flag = Arc::new(AtomicBool::new(false));
@@ -53,7 +54,7 @@ mod tests {
         unix::fs::symlink(&target, &link).unwrap();
 
         let mut finder = InvalidSymlinks::new();
-        finder.set_included_directory(path.to_path_buf());
+        finder.set_included_directory(vec![path.to_path_buf()]);
         finder.set_recursive_search(true);
 
         let stop_flag = Arc::new(AtomicBool::new(false));
@@ -80,7 +81,7 @@ mod tests {
         fs::remove_file(&target).unwrap();
 
         let mut finder = InvalidSymlinks::new();
-        finder.set_included_directory(path.to_path_buf());
+        finder.set_included_directory(vec![path.to_path_buf()]);
         finder.set_recursive_search(true);
 
         let stop_flag = Arc::new(AtomicBool::new(false));

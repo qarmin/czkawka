@@ -1,15 +1,17 @@
 #[cfg(test)]
 mod tests {
+    use std::fs;
     use std::sync::Arc;
+    use std::sync::atomic::AtomicBool;
     use tempfile::TempDir;
+    use crate::common::model::{CheckingMethod, HashType};
+    use crate::common::tool_data::CommonData;
     use crate::tools::duplicate::{DuplicateFinder, DuplicateFinderParameters};
 
     use crate::common::traits::Search;
     #[test]
     fn test_find_duplicates_by_hash() {
-    use crate::common::traits::Search;
         let temp_dir = TempDir::new().unwrap();
-    use crate::common::traits::Search;
         let path = temp_dir.path();
 
         // Create duplicate files with same content
@@ -29,6 +31,7 @@ mod tests {
 
         let mut finder = DuplicateFinder::new(params);
         finder.set_included_directory(vec![path.to_path_buf()]);
+        finder.set_minimal_file_size(0);
         finder.set_recursive_search(true);
 
         let stop_flag = Arc::new(AtomicBool::new(false));
@@ -62,6 +65,7 @@ mod tests {
         let mut finder = DuplicateFinder::new(params);
         finder.set_included_directory(vec![path.to_path_buf()]);
         finder.set_recursive_search(true);
+        finder.set_minimal_file_size(0);
 
         let stop_flag = Arc::new(AtomicBool::new(false));
         finder.search(&stop_flag, None);
@@ -99,6 +103,7 @@ mod tests {
         let mut finder = DuplicateFinder::new(params);
         finder.set_recursive_search(true);
         finder.set_included_directory(vec![path.to_path_buf()]);
+        finder.set_minimal_file_size(0);
         let stop_flag = Arc::new(AtomicBool::new(false));
         finder.search(&stop_flag, None);
 
@@ -128,9 +133,11 @@ mod tests {
 
         let mut finder = DuplicateFinder::new(params);
         finder.set_recursive_search(true);
+        finder.set_minimal_file_size(0);
         finder.set_included_directory(vec![path.to_path_buf()]);
 
         let stop_flag = Arc::new(AtomicBool::new(false));
+        finder.search(&stop_flag, None);
         let info = finder.get_information();
         assert_eq!(info.number_of_groups_by_name, 1, "Should find duplicates with case insensitive search");
     }
@@ -157,6 +164,7 @@ mod tests {
         let mut finder = DuplicateFinder::new(params);
         finder.set_included_directory(vec![path.to_path_buf()]);
         finder.set_recursive_search(true);
+        finder.set_minimal_file_size(0);
 
         let stop_flag = Arc::new(AtomicBool::new(false));
         finder.search(&stop_flag, None);
@@ -188,6 +196,7 @@ mod tests {
         );
 
         let mut finder = DuplicateFinder::new(params);
+        finder.set_minimal_file_size(0);
         finder.set_included_directory(vec![path.to_path_buf()]);
 
         let stop_flag = Arc::new(AtomicBool::new(false));
