@@ -499,8 +499,42 @@ pub trait CommonData {
 
 #[cfg(test)]
 mod tests {
+    use std::fs;
+
+    use tempfile::TempDir;
+
     use super::*;
     use crate::common::model::FileEntry;
+
+    // Mock implementation for testing
+    struct MockTool {
+        common_data: CommonToolData,
+    }
+
+    impl CommonData for MockTool {
+        type Info = ();
+        type Parameters = ();
+
+        fn get_information(&self) -> Self::Info {}
+        fn get_params(&self) -> Self::Parameters {}
+        fn get_cd(&self) -> &CommonToolData {
+            &self.common_data
+        }
+        fn get_cd_mut(&mut self) -> &mut CommonToolData {
+            &mut self.common_data
+        }
+        fn found_any_broken_files(&self) -> bool {
+            false
+        }
+    }
+
+    impl MockTool {
+        fn new() -> Self {
+            Self {
+                common_data: CommonToolData::new(ToolType::Duplicate),
+            }
+        }
+    }
 
     #[test]
     fn test_delete_result_add_to_messages() {
@@ -571,5 +605,517 @@ mod tests {
         assert!(!tool_data.save_also_as_json);
         assert!(!tool_data.use_reference_folders);
         assert!(!tool_data.dry_run);
+    }
+
+    #[test]
+    fn test_delete_elements_dry_run() {
+        let temp_dir = TempDir::new().unwrap();
+        let file1 = temp_dir.path().join("file1.txt");
+        let file2 = temp_dir.path().join("file2.txt");
+        fs::write(&file1, "test content 1").unwrap();
+        fs::write(&file2, "test content 2").unwrap();
+
+        let files = vec![
+            FileEntry {
+                path: file1.clone(),
+                size: 14,
+                modified_date: 1,
+            },
+            FileEntry {
+                path: file2.clone(),
+                size: 14,
+                modified_date: 2,
+            },
+        ];
+
+        let mut tool = MockTool::new();
+        tool.common_data.dry_run = true;
+
+        let stop_flag = Arc::new(AtomicBool::new(false));
+        let delete_result = tool.delete_elements(&stop_flag, None, DeleteItemType::DeletingFiles(files));
+
+        assert_eq!(delete_result.deleted_files, 2, "Should mark 2 files as deleted");
+        assert_eq!(delete_result.failed_to_delete_files, 0, "Should have no failed deletions");
+        assert_eq!(delete_result.gained_bytes, 28, "Should calculate gained bytes");
+        assert_eq!(delete_result.infos.len(), 2, "Should have 2 info messages in dry run");
+        assert!(file1.exists(), "File should still exist in dry run");
+        assert!(file2.exists(), "File should still exist in dry run");
+    }
+
+    #[test]
+    fn test_delete_elements_actual_deletion() {
+        let temp_dir = TempDir::new().unwrap();
+        let file1 = temp_dir.path().join("file1.txt");
+        let file2 = temp_dir.path().join("file2.txt");
+        fs::write(&file1, "test content 1").unwrap();
+        fs::write(&file2, "test content 2").unwrap();
+
+        let files = vec![
+            FileEntry {
+                path: file1.clone(),
+                size: 14,
+                modified_date: 1,
+            },
+            FileEntry {
+                path: file2.clone(),
+                size: 14,
+                modified_date: 2,
+            },
+        ];
+
+        let tool = MockTool::new();
+        let stop_flag = Arc::new(AtomicBool::new(false));
+        let delete_result = tool.delete_elements(&stop_flag, None, DeleteItemType::DeletingFiles(files));
+
+        assert_eq!(delete_result.deleted_files, 2, "Should delete 2 files");
+        assert_eq!(delete_result.failed_to_delete_files, 0, "Should have no failed deletions");
+        assert_eq!(delete_result.gained_bytes, 28, "Should gain 28 bytes");
+        assert!(!file1.exists(), "File 1 should be deleted");
+        assert!(!file2.exists(), "File 2 should be deleted");
+    }
+
+    #[test]
+    fn test_delete_elements_with_stop_flag() {
+        let temp_dir = TempDir::new().unwrap();
+        let file1 = temp_dir.path().join("file1.txt");
+        fs::write(&file1, "test content").unwrap();
+
+        let files = vec![FileEntry {
+            path: file1.clone(),
+            size: 12,
+            modified_date: 1,
+        }];
+
+        let tool = MockTool::new();
+        let stop_flag = Arc::new(AtomicBool::new(true)); // Stop flag set to true
+        let delete_result = tool.delete_elements(&stop_flag, None, DeleteItemType::DeletingFiles(files));
+
+        assert_eq!(delete_result.deleted_files, 0, "Should not delete any files when stopped");
+        assert!(file1.exists(), "File should still exist");
+    }
+
+    #[test]
+    fn test_delete_elements_nonexistent_file() {
+        let temp_dir = TempDir::new().unwrap();
+        let nonexistent_file = temp_dir.path().join("nonexistent.txt");
+
+        let files = vec![FileEntry {
+            path: nonexistent_file.clone(),
+            size: 100,
+            modified_date: 1,
+        }];
+
+        let tool = MockTool::new();
+        let stop_flag = Arc::new(AtomicBool::new(false));
+        let delete_result = tool.delete_elements(&stop_flag, None, DeleteItemType::DeletingFiles(files));
+
+        assert_eq!(delete_result.deleted_files, 0, "Should not delete nonexistent file");
+        assert_eq!(delete_result.failed_to_delete_files, 1, "Should report 1 failed deletion");
+        assert_eq!(delete_result.errors.len(), 1, "Should have 1 error message");
+    }
+
+    #[test]
+    fn test_delete_simple_elements_and_add_to_messages() {
+        let temp_dir = TempDir::new().unwrap();
+        let file1 = temp_dir.path().join("file1.txt");
+        let file2 = temp_dir.path().join("file2.txt");
+        fs::write(&file1, "content1").unwrap();
+        fs::write(&file2, "content2").unwrap();
+
+        let files = vec![
+            FileEntry {
+                path: file1.clone(),
+                size: 8,
+                modified_date: 1,
+            },
+            FileEntry {
+                path: file2.clone(),
+                size: 8,
+                modified_date: 2,
+            },
+        ];
+
+        let mut tool = MockTool::new();
+        let stop_flag = Arc::new(AtomicBool::new(false));
+        let status = tool.delete_simple_elements_and_add_to_messages(&stop_flag, None, DeleteItemType::DeletingFiles(files));
+
+        assert_eq!(status, WorkContinueStatus::Continue, "Should continue");
+        assert!(!file1.exists(), "File 1 should be deleted");
+        assert!(!file2.exists(), "File 2 should be deleted");
+        assert_eq!(tool.common_data.text_messages.errors.len(), 0, "Should have no errors");
+    }
+
+    #[test]
+    fn test_delete_simple_elements_with_stop_flag() {
+        let temp_dir = TempDir::new().unwrap();
+        let file1 = temp_dir.path().join("file1.txt");
+        fs::write(&file1, "content").unwrap();
+
+        let files = vec![FileEntry {
+            path: file1.clone(),
+            size: 7,
+            modified_date: 1,
+        }];
+
+        let mut tool = MockTool::new();
+        let stop_flag = Arc::new(AtomicBool::new(true));
+        let status = tool.delete_simple_elements_and_add_to_messages(&stop_flag, None, DeleteItemType::DeletingFiles(files));
+
+        assert_eq!(status, WorkContinueStatus::Stop, "Should stop");
+        assert!(file1.exists(), "File should still exist");
+    }
+
+    #[test]
+    fn test_delete_advanced_elements_all_except_newest() {
+        let temp_dir = TempDir::new().unwrap();
+        let file1 = temp_dir.path().join("file1.txt");
+        let file2 = temp_dir.path().join("file2.txt");
+        let file3 = temp_dir.path().join("file3.txt");
+        fs::write(&file1, "a").unwrap();
+        fs::write(&file2, "b").unwrap();
+        fs::write(&file3, "c").unwrap();
+
+        let files_group = vec![vec![
+            FileEntry {
+                path: file1.clone(),
+                size: 1,
+                modified_date: 1,
+            },
+            FileEntry {
+                path: file2.clone(),
+                size: 1,
+                modified_date: 2,
+            },
+            FileEntry {
+                path: file3.clone(),
+                size: 1,
+                modified_date: 3,
+            },
+        ]];
+
+        let mut tool = MockTool::new();
+        tool.common_data.delete_method = DeleteMethod::AllExceptNewest;
+
+        let stop_flag = Arc::new(AtomicBool::new(false));
+        let status = tool.delete_advanced_elements_and_add_to_messages(&stop_flag, None, files_group);
+
+        assert_eq!(status, WorkContinueStatus::Continue, "Should continue");
+        assert!(!file1.exists(), "Oldest file should be deleted");
+        assert!(!file2.exists(), "Middle file should be deleted");
+        assert!(file3.exists(), "Newest file should be kept");
+    }
+
+    #[test]
+    fn test_delete_advanced_elements_all_except_oldest() {
+        let temp_dir = TempDir::new().unwrap();
+        let file1 = temp_dir.path().join("file1.txt");
+        let file2 = temp_dir.path().join("file2.txt");
+        let file3 = temp_dir.path().join("file3.txt");
+        fs::write(&file1, "a").unwrap();
+        fs::write(&file2, "b").unwrap();
+        fs::write(&file3, "c").unwrap();
+
+        let files_group = vec![vec![
+            FileEntry {
+                path: file1.clone(),
+                size: 1,
+                modified_date: 1,
+            },
+            FileEntry {
+                path: file2.clone(),
+                size: 1,
+                modified_date: 2,
+            },
+            FileEntry {
+                path: file3.clone(),
+                size: 1,
+                modified_date: 3,
+            },
+        ]];
+
+        let mut tool = MockTool::new();
+        tool.common_data.delete_method = DeleteMethod::AllExceptOldest;
+
+        let stop_flag = Arc::new(AtomicBool::new(false));
+        let status = tool.delete_advanced_elements_and_add_to_messages(&stop_flag, None, files_group);
+
+        assert_eq!(status, WorkContinueStatus::Continue, "Should continue");
+        assert!(file1.exists(), "Oldest file should be kept");
+        assert!(!file2.exists(), "Middle file should be deleted");
+        assert!(!file3.exists(), "Newest file should be deleted");
+    }
+
+    #[test]
+    fn test_delete_advanced_elements_one_oldest() {
+        let temp_dir = TempDir::new().unwrap();
+        let file1 = temp_dir.path().join("file1.txt");
+        let file2 = temp_dir.path().join("file2.txt");
+        let file3 = temp_dir.path().join("file3.txt");
+        fs::write(&file1, "a").unwrap();
+        fs::write(&file2, "b").unwrap();
+        fs::write(&file3, "c").unwrap();
+
+        let files_group = vec![vec![
+            FileEntry {
+                path: file1.clone(),
+                size: 1,
+                modified_date: 1,
+            },
+            FileEntry {
+                path: file2.clone(),
+                size: 1,
+                modified_date: 2,
+            },
+            FileEntry {
+                path: file3.clone(),
+                size: 1,
+                modified_date: 3,
+            },
+        ]];
+
+        let mut tool = MockTool::new();
+        tool.common_data.delete_method = DeleteMethod::OneOldest;
+
+        let stop_flag = Arc::new(AtomicBool::new(false));
+        let status = tool.delete_advanced_elements_and_add_to_messages(&stop_flag, None, files_group);
+
+        assert_eq!(status, WorkContinueStatus::Continue, "Should continue");
+        assert!(!file1.exists(), "Oldest file should be deleted");
+        assert!(file2.exists(), "Middle file should be kept");
+        assert!(file3.exists(), "Newest file should be kept");
+    }
+
+    #[test]
+    fn test_delete_advanced_elements_one_newest() {
+        let temp_dir = TempDir::new().unwrap();
+        let file1 = temp_dir.path().join("file1.txt");
+        let file2 = temp_dir.path().join("file2.txt");
+        let file3 = temp_dir.path().join("file3.txt");
+        fs::write(&file1, "a").unwrap();
+        fs::write(&file2, "b").unwrap();
+        fs::write(&file3, "c").unwrap();
+
+        let files_group = vec![vec![
+            FileEntry {
+                path: file1.clone(),
+                size: 1,
+                modified_date: 1,
+            },
+            FileEntry {
+                path: file2.clone(),
+                size: 1,
+                modified_date: 2,
+            },
+            FileEntry {
+                path: file3.clone(),
+                size: 1,
+                modified_date: 3,
+            },
+        ]];
+
+        let mut tool = MockTool::new();
+        tool.common_data.delete_method = DeleteMethod::OneNewest;
+
+        let stop_flag = Arc::new(AtomicBool::new(false));
+        let status = tool.delete_advanced_elements_and_add_to_messages(&stop_flag, None, files_group);
+
+        assert_eq!(status, WorkContinueStatus::Continue, "Should continue");
+        assert!(file1.exists(), "Oldest file should be kept");
+        assert!(file2.exists(), "Middle file should be kept");
+        assert!(!file3.exists(), "Newest file should be deleted");
+    }
+
+    #[test]
+    fn test_delete_advanced_elements_all_except_biggest() {
+        let temp_dir = TempDir::new().unwrap();
+        let file1 = temp_dir.path().join("file1.txt");
+        let file2 = temp_dir.path().join("file2.txt");
+        let file3 = temp_dir.path().join("file3.txt");
+        fs::write(&file1, "a").unwrap();
+        fs::write(&file2, "bb").unwrap();
+        fs::write(&file3, "ccc").unwrap();
+
+        let files_group = vec![vec![
+            FileEntry {
+                path: file1.clone(),
+                size: 1,
+                modified_date: 1,
+            },
+            FileEntry {
+                path: file2.clone(),
+                size: 2,
+                modified_date: 1,
+            },
+            FileEntry {
+                path: file3.clone(),
+                size: 3,
+                modified_date: 1,
+            },
+        ]];
+
+        let mut tool = MockTool::new();
+        tool.common_data.delete_method = DeleteMethod::AllExceptBiggest;
+
+        let stop_flag = Arc::new(AtomicBool::new(false));
+        let status = tool.delete_advanced_elements_and_add_to_messages(&stop_flag, None, files_group);
+
+        assert_eq!(status, WorkContinueStatus::Continue, "Should continue");
+        assert!(!file1.exists(), "Smallest file should be deleted");
+        assert!(!file2.exists(), "Middle file should be deleted");
+        assert!(file3.exists(), "Biggest file should be kept");
+    }
+
+    #[test]
+    fn test_delete_advanced_elements_all_except_smallest() {
+        let temp_dir = TempDir::new().unwrap();
+        let file1 = temp_dir.path().join("file1.txt");
+        let file2 = temp_dir.path().join("file2.txt");
+        let file3 = temp_dir.path().join("file3.txt");
+        fs::write(&file1, "a").unwrap();
+        fs::write(&file2, "bb").unwrap();
+        fs::write(&file3, "ccc").unwrap();
+
+        let files_group = vec![vec![
+            FileEntry {
+                path: file1.clone(),
+                size: 1,
+                modified_date: 1,
+            },
+            FileEntry {
+                path: file2.clone(),
+                size: 2,
+                modified_date: 1,
+            },
+            FileEntry {
+                path: file3.clone(),
+                size: 3,
+                modified_date: 1,
+            },
+        ]];
+
+        let mut tool = MockTool::new();
+        tool.common_data.delete_method = DeleteMethod::AllExceptSmallest;
+
+        let stop_flag = Arc::new(AtomicBool::new(false));
+        let status = tool.delete_advanced_elements_and_add_to_messages(&stop_flag, None, files_group);
+
+        assert_eq!(status, WorkContinueStatus::Continue, "Should continue");
+        assert!(file1.exists(), "Smallest file should be kept");
+        assert!(!file2.exists(), "Middle file should be deleted");
+        assert!(!file3.exists(), "Biggest file should be deleted");
+    }
+
+    #[test]
+    fn test_delete_advanced_elements_delete_all() {
+        let temp_dir = TempDir::new().unwrap();
+        let file1 = temp_dir.path().join("file1.txt");
+        let file2 = temp_dir.path().join("file2.txt");
+        fs::write(&file1, "a").unwrap();
+        fs::write(&file2, "b").unwrap();
+
+        let files_group = vec![vec![
+            FileEntry {
+                path: file1.clone(),
+                size: 1,
+                modified_date: 1,
+            },
+            FileEntry {
+                path: file2.clone(),
+                size: 1,
+                modified_date: 2,
+            },
+        ]];
+
+        let mut tool = MockTool::new();
+        tool.common_data.delete_method = DeleteMethod::Delete;
+
+        let stop_flag = Arc::new(AtomicBool::new(false));
+        let status = tool.delete_advanced_elements_and_add_to_messages(&stop_flag, None, files_group);
+
+        assert_eq!(status, WorkContinueStatus::Continue, "Should continue");
+        assert!(!file1.exists(), "All files should be deleted");
+        assert!(!file2.exists(), "All files should be deleted");
+    }
+
+    #[test]
+    fn test_delete_advanced_elements_multiple_groups() {
+        let temp_dir = TempDir::new().unwrap();
+        let file1 = temp_dir.path().join("file1.txt");
+        let file2 = temp_dir.path().join("file2.txt");
+        let file3 = temp_dir.path().join("file3.txt");
+        let file4 = temp_dir.path().join("file4.txt");
+        fs::write(&file1, "a").unwrap();
+        fs::write(&file2, "b").unwrap();
+        fs::write(&file3, "c").unwrap();
+        fs::write(&file4, "d").unwrap();
+
+        let files_group = vec![
+            vec![
+                FileEntry {
+                    path: file1.clone(),
+                    size: 1,
+                    modified_date: 1,
+                },
+                FileEntry {
+                    path: file2.clone(),
+                    size: 1,
+                    modified_date: 2,
+                },
+            ],
+            vec![
+                FileEntry {
+                    path: file3.clone(),
+                    size: 1,
+                    modified_date: 1,
+                },
+                FileEntry {
+                    path: file4.clone(),
+                    size: 1,
+                    modified_date: 2,
+                },
+            ],
+        ];
+
+        let mut tool = MockTool::new();
+        tool.common_data.delete_method = DeleteMethod::AllExceptNewest;
+
+        let stop_flag = Arc::new(AtomicBool::new(false));
+        let status = tool.delete_advanced_elements_and_add_to_messages(&stop_flag, None, files_group);
+
+        assert_eq!(status, WorkContinueStatus::Continue, "Should continue");
+        assert!(!file1.exists(), "Oldest from group 1 should be deleted");
+        assert!(file2.exists(), "Newest from group 1 should be kept");
+        assert!(!file3.exists(), "Oldest from group 2 should be deleted");
+        assert!(file4.exists(), "Newest from group 2 should be kept");
+    }
+
+    #[test]
+    fn test_delete_advanced_elements_with_stop_flag() {
+        let temp_dir = TempDir::new().unwrap();
+        let file1 = temp_dir.path().join("file1.txt");
+        let file2 = temp_dir.path().join("file2.txt");
+        fs::write(&file1, "a").unwrap();
+        fs::write(&file2, "b").unwrap();
+
+        let files_group = vec![vec![
+            FileEntry {
+                path: file1.clone(),
+                size: 1,
+                modified_date: 1,
+            },
+            FileEntry {
+                path: file2.clone(),
+                size: 1,
+                modified_date: 2,
+            },
+        ]];
+
+        let mut tool = MockTool::new();
+        tool.common_data.delete_method = DeleteMethod::AllExceptNewest;
+
+        let stop_flag = Arc::new(AtomicBool::new(true));
+        let status = tool.delete_advanced_elements_and_add_to_messages(&stop_flag, None, files_group);
+
+        assert_eq!(status, WorkContinueStatus::Stop, "Should stop");
     }
 }
