@@ -37,7 +37,9 @@ mod tests {
             (HashAlg::VertGradient, FilterType::Lanczos3, 8, 15, 1, 1, 2),
             (HashAlg::VertGradient, FilterType::Lanczos3, 8, 2, 0, 0, 0),
 
-            (HashAlg::Gradient, FilterType::Gaussian, 16,15, 1, 1, 2),
+            (HashAlg::Gradient, FilterType::Gaussian, 16,15, 0, 0, 0),
+            (HashAlg::Gradient, FilterType::Gaussian, 16,32, 1, 1, 2),
+            (HashAlg::VertGradient, FilterType::Nearest, 16,32, 1, 1, 2),
 
         ];
 
