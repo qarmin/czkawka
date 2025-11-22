@@ -2,6 +2,8 @@ use bitflags::bitflags;
 
 pub mod core;
 pub mod traits;
+#[cfg(test)]
+mod tests;
 
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
