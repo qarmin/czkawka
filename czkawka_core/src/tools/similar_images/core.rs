@@ -325,6 +325,9 @@ impl SimilarImages {
         let mut hashes_similarity: IndexMap<ImHash, (ImHash, u32)> = Default::default(); // Hashes used as child, (parent_hash, similarity)
 
         // Check them in chunks, to decrease number of used memory
+        // Without chunks, every single hash would be compared to every other hash and generate really big amount of results
+        // With chunks we can save results to variables and later use such variables, to skip ones with too big difference
+        // Not really helpful, when not finding almost any duplicates, but with bigger amount of them, this should help a lot
         let base_hashes_chunks = base_hashes.chunks(1000);
         for chunk in base_hashes_chunks {
             let partial_results = chunk
@@ -358,6 +361,7 @@ impl SimilarImages {
                     Some((hash_to_check, found_items))
                 })
                 .while_some()
+                // TODO - this filter move to into_par_iter above
                 .filter(|(original_hash, vec_similar_hashes)| !vec_similar_hashes.is_empty() || hashes_with_multiple_images.contains(*original_hash))
                 .collect::<Vec<_>>();
 
@@ -366,8 +370,15 @@ impl SimilarImages {
                 return WorkContinueStatus::Stop;
             }
 
-            self.connect_results(partial_results, &mut hashes_parents, &mut hashes_similarity, &hashes_with_multiple_images);
+            self.connect_results_simplified(partial_results, &mut hashes_parents, &mut hashes_similarity, &hashes_with_multiple_images);
         }
+        // To avoid situations in simplified connector we don't add such hashes to results
+        for multiple_image_hash in &hashes_with_multiple_images {
+            if !hashes_parents.contains_key(multiple_image_hash) {
+                hashes_parents.insert(multiple_image_hash.clone(), 0);
+            }
+        }
+
 
         progress_handler.join_thread();
 
@@ -375,6 +386,92 @@ impl SimilarImages {
         self.collect_hash_compare_result(hashes_parents, &hashes_with_multiple_images, all_hashed_images, collected_similar_images, hashes_similarity);
 
         WorkContinueStatus::Continue
+    }
+
+    #[fun_time(message = "connect_results2", level = "debug")]
+    fn connect_results_simplified<'a>(
+        &self,
+        partial_results: Vec<(&'a ImHash, Vec<(u32, &'a ImHash)>)>,
+        hashes_parents: &mut IndexMap<ImHash, u32>,
+        hashes_similarity: &mut IndexMap<ImHash, (ImHash, u32)>,
+        hashes_with_multiple_images: &IndexSet<ImHash>,
+    ) {
+        // To simplify later logic, we sort all results by similarity
+        // To be able to do this, we need to flatten structure, which will increase memory usage a bit, but should improve a little logic(algorithm is a little broken and works better with sorted data)
+        // There can be hashes with multiple similar images, without any similar hashes, so we need to keep them too and add to final results without even checking for parents etc.
+        let mut flattened_partial_results: Vec<(&'a ImHash, (u32, &'a ImHash))> = partial_results
+            .into_iter()
+            .filter_map(|(parent, similar)| {
+                if similar.is_empty() {
+                    assert!(hashes_with_multiple_images.contains(parent)); // We expect, that only hashes with multiple images can have no similar hashes
+                    assert!(!hashes_parents.contains_key(parent)); // We expect, that this hash is not already in parents list - this would be strange, because it have no similar hashes
+                    return None;
+                } else {
+                    Some(similar.into_iter().map(move |sim| (parent, sim)))
+                }
+            })
+            .flatten()
+            .collect::<Vec<_>>();
+
+        flattened_partial_results.sort_by_key(|(_parent, (similarity, _compared_hash))| *similarity);
+
+        // Original hash means, that we check this hash and we can easily find this hash a new parent
+        // Compared hash cannot be changed if it is already parent to different hash, because it would be too complex to handle this properly
+        for (original_hash, (similarity, compared_hash)) in flattened_partial_results {
+            // If compared hash already is parent to different hash, skip it
+            // This may be not optimal, because we may miss better parent for such hash, but I have no idea how to properly reparent it
+            // This would be hard, because we would need to track all similar hashes for reparented childrens, to find them better parents
+            if hashes_parents.contains_key(compared_hash) {
+                continue;
+            }
+
+            // dbg!(original_hash, compared_hash, similarity);
+
+            let compared_hash_parent = if let Some((other_parent_hash, other_similarity)) = hashes_similarity.get(compared_hash) {
+                if *other_similarity > similarity {
+                    Some(other_parent_hash.clone())
+                } else {
+                    // Have parent, but with lower similarity, so skipping this one
+                    continue;
+                }
+            } else {
+                None
+            };
+
+            // If current checked hash, have parent, first we must check if similarity between them is lower than checked item
+            if let Some((current_parent_hash, current_similarity_with_parent)) = hashes_similarity.get(original_hash) {
+                if *current_similarity_with_parent <= similarity {
+                    // Have more similar parent, so skip this one
+                    continue;
+                }
+
+                let children_count = hashes_parents.get_mut(current_parent_hash).expect("Cannot find parent hash");
+                *children_count -= 1;
+                let left_any_children = *children_count != 0;
+
+                // We can remove entirely previous parent from hashes_parents if it will not have any other children
+                // Of course, only if hash applies to single image, because hashes with multiple images must stay in parents list
+                if !left_any_children && !hashes_with_multiple_images.contains(current_parent_hash) {
+                    hashes_parents.swap_remove(current_parent_hash);
+                }
+                hashes_similarity
+                    .swap_remove(original_hash)
+                    .expect("This should never fail, because we are iterating over this hash");
+
+                let parent = hashes_parents.insert((*original_hash).clone(), 1);
+                assert!(parent.is_none(), "Parent hash should not exist here");
+            } else {
+                hashes_parents.entry(original_hash.clone()).or_insert(1);
+            }
+
+            // This overwrites parent hash if there was any
+            // or just adds new record if there was no parent
+            hashes_similarity.insert(compared_hash.clone(), (original_hash.clone(), similarity));
+
+            if let Some(compared_hash_parent) = compared_hash_parent {
+                *hashes_parents.get_mut(&compared_hash_parent).expect("Cannot find parent hash") -= 1;
+            }
+        }
     }
 
     #[fun_time(message = "connect_results", level = "debug")]
@@ -1175,8 +1272,8 @@ mod tests {
 #[cfg(test)]
 mod connect_results_tests {
     use super::*;
-    use indexmap::{IndexMap, IndexSet};
     use image_hasher::{FilterType, HashAlg};
+    use indexmap::{IndexMap, IndexSet};
 
     #[test]
     fn test_connect_results_real_case() {
@@ -1200,10 +1297,9 @@ mod connect_results_tests {
         assert_eq!(hashes_parents.len(), 0);
         assert_eq!(hashes_similarity.len(), 0);
 
-        finder.connect_results(partial_results, &mut hashes_parents, &mut hashes_similarity, &hashes_with_multiple_images);
+        finder.connect_results_simplified(partial_results, &mut hashes_parents, &mut hashes_similarity, &hashes_with_multiple_images);
 
         assert_eq!(hashes_parents.len(), 1);
         assert_eq!(hashes_similarity.len(), 2);
     }
 }
-
