@@ -73,9 +73,10 @@ mod tests {
         let info = finder.get_information();
         let duplicates = finder.get_duplicated_music_entries();
 
-        assert!(info.number_of_duplicates >= 1);
-        assert!(info.number_of_groups >= 1);
-        assert!(duplicates.len() >= 1);
+        assert_eq!(info.number_of_duplicates, 1);
+        assert_eq!(info.number_of_groups, 1);
+        assert_eq!(duplicates.len(), 1);
+        assert_eq!(duplicates.iter().map(|e| e.len()).sum::<usize>(), 2);
     }
 
     #[test]
@@ -102,9 +103,10 @@ mod tests {
         let info = finder.get_information();
         let duplicates = finder.get_duplicated_music_entries();
 
-        assert!(info.number_of_duplicates >= 1);
-        assert!(info.number_of_groups >= 1);
-        assert!(duplicates.len() >= 1);
+        assert_eq!(info.number_of_duplicates, 3);
+        assert_eq!(info.number_of_groups, 1);
+        assert_eq!(duplicates.len(), 1);
+        assert_eq!(duplicates.iter().map(|e| e.len()).sum::<usize>(), 4);
     }
 
     #[test]
@@ -161,9 +163,9 @@ mod tests {
         let info = finder.get_information();
         let duplicates = finder.get_duplicated_music_entries();
 
-        assert!(info.number_of_duplicates <= 4);
-        assert!(info.number_of_groups <= 1);
-        assert!(duplicates.len() <= 1);
+        assert_eq!(info.number_of_duplicates, 0);
+        assert_eq!(info.number_of_groups, 0);
+        assert_eq!(duplicates.len(), 0);
     }
 
     #[test]
@@ -220,10 +222,10 @@ mod tests {
         let info = finder.get_information();
         let duplicates = finder.get_duplicated_music_entries();
 
-        assert_eq!(info.number_of_duplicates, 1);
+        assert_eq!(info.number_of_duplicates, 2);
         assert_eq!(info.number_of_groups, 1);
         assert_eq!(duplicates.len(), 1);
-        assert_eq!(duplicates[0].len(), 2);
+        assert_eq!(duplicates.iter().map(|e| e.len()).sum::<usize>(), 3);
     }
 
     #[test]
@@ -250,10 +252,9 @@ mod tests {
         let info = finder.get_information();
         let duplicates = finder.get_duplicated_music_entries();
 
-        assert_eq!(info.number_of_duplicates, 4);
-        assert_eq!(info.number_of_groups, 1);
-        assert_eq!(duplicates.len(), 1);
-        assert_eq!(duplicates[0].len(), 5);
+        assert_eq!(info.number_of_duplicates, 0);
+        assert_eq!(info.number_of_groups, 0);
+        assert_eq!(duplicates.len(), 0);
     }
 
     #[test]
