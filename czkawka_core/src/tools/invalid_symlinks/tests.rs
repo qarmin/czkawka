@@ -1,3 +1,21 @@
+
+#[cfg(target_family = "unix")]
+use std::fs;
+#[cfg(target_family = "unix")]
+use std::os::unix;
+#[cfg(target_family = "unix")]
+use std::sync::Arc;
+#[cfg(target_family = "unix")]
+use std::sync::atomic::AtomicBool;
+#[cfg(target_family = "unix")]
+use tempfile::TempDir;
+#[cfg(target_family = "unix")]
+use crate::common::tool_data::CommonData;
+#[cfg(target_family = "unix")]
+use crate::common::traits::Search;
+#[cfg(target_family = "unix")]
+use crate::tools::invalid_symlinks::InvalidSymlinks;
+
 #[test]
 #[cfg(target_family = "unix")]
 fn test_find_invalid_symlinks() {

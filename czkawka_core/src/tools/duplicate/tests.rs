@@ -1,3 +1,12 @@
+use std::fs;
+use std::sync::Arc;
+use std::sync::atomic::AtomicBool;
+use tempfile::TempDir;
+use crate::common::model::{CheckingMethod, HashType};
+use crate::common::tool_data::CommonData;
+use crate::common::traits::Search;
+use crate::tools::duplicate::{DuplicateFinder, DuplicateFinderParameters};
+
 #[test]
 fn test_find_duplicates_by_hash() {
     let temp_dir = TempDir::new().unwrap();
