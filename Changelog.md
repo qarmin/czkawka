@@ -12,6 +12,7 @@
 - Reading built-in jpeg inside raw images, if available - [#1655](https://github.com/qarmin/czkawka/pull/1655)
 - Fixed silent panics, when logger cannot log to terminal - [1658](https://github.com/qarmin/czkawka/pull/1658)
 - Commit hash is added to logs - [#1672](https://github.com/qarmin/czkawka/pull/1672)
+- Improved and fixed a little, logic which groups similar images by its similarity - [#]()
 
 ### CLI
 - Using colors by default in terminal output(can be disabled by feature flag) - [#1672](https://github.com/qarmin/czkawka/pull/1672)
