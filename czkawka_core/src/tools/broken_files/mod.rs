@@ -1,6 +1,5 @@
 use bitflags::bitflags;
 
-mod audio_checker;
 pub mod core;
 #[cfg(test)]
 mod tests;
