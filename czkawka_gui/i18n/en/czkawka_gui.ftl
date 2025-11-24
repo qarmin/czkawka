@@ -462,18 +462,18 @@ settings_folder_settings_open = Open settings folder
 # Compute results
 compute_stopped_by_user = Searching was stopped by user
 
-compute_found_duplicates_hash_size = Found { $number_files } duplicates in { $number_groups } groups which took { $size }, **searching took { $time }**
-compute_found_duplicates_name = Found { $number_files } duplicates in { $number_groups } groups, **searching took { $time }**
-compute_found_empty_folders = Found { $number_files } empty folders
-compute_found_empty_files = Found { $number_files } empty files
-compute_found_big_files = Found { $number_files } big files
-compute_found_temporary_files = Found { $number_files } temporary files
-compute_found_images = Found { $number_files } similar images in { $number_groups } groups
-compute_found_videos = Found { $number_files } similar videos in { $number_groups } groups
-compute_found_music = Found { $number_files } similar music files in { $number_groups } groups
-compute_found_invalid_symlinks = Found { $number_files } invalid symlinks
-compute_found_broken_files = Found { $number_files } broken files
-compute_found_bad_extensions = Found { $number_files } files with invalid extensions
+compute_found_duplicates_hash_size = Found { $number_files } duplicates in { $number_groups } groups which took { $size } in { $time }
+compute_found_duplicates_name = Found { $number_files } duplicates in { $number_groups } groups in { $time }
+compute_found_empty_folders = Found { $number_files } empty folders in { $time }
+compute_found_empty_files = Found { $number_files } empty files in { $time }
+compute_found_big_files = Found { $number_files } big files in { $time }
+compute_found_temporary_files = Found { $number_files } temporary files in { $time }
+compute_found_images = Found { $number_files } similar images in { $number_groups } groups in { $time }
+compute_found_videos = Found { $number_files } similar videos in { $number_groups } groups in { $time }
+compute_found_music = Found { $number_files } similar music files in { $number_groups } groups in { $time }
+compute_found_invalid_symlinks = Found { $number_files } invalid symlinks in { $time }
+compute_found_broken_files = Found { $number_files } broken files in { $time }
+compute_found_bad_extensions = Found { $number_files } files with invalid extensions in { $time }
 
 # Progress window
 progress_scanning_general_file = {$file_number -> 
