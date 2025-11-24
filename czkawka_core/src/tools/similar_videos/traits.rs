@@ -1,6 +1,7 @@
 use std::io::Write;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
+use std::time::Instant;
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
@@ -18,26 +19,33 @@ impl AllTraits for SimilarVideos {}
 impl Search for SimilarVideos {
     #[fun_time(message = "find_similar_videos", level = "info")]
     fn search(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
-        if !ffmpeg_cmdline_utils::ffmpeg_and_ffprobe_are_callable() {
-            self.common_data.text_messages.errors.push(flc!("core_ffmpeg_not_found"));
-            #[cfg(target_os = "windows")]
-            self.common_data.text_messages.errors.push(flc!("core_ffmpeg_not_found_windows"));
-        } else {
-            self.prepare_items();
-            self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
-            if self.check_for_similar_videos(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+        let start_time = Instant::now();
+
+        let () = (|| {
+            if !ffmpeg_cmdline_utils::ffmpeg_and_ffprobe_are_callable() {
+                self.common_data.text_messages.errors.push(flc!("core_ffmpeg_not_found"));
+                #[cfg(target_os = "windows")]
+                self.common_data.text_messages.errors.push(flc!("core_ffmpeg_not_found_windows"));
+            } else {
+                self.prepare_items();
+                self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
+                if self.check_for_similar_videos(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+                    self.common_data.stopped_search = true;
+                    return;
+                }
+                if self.sort_videos(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+                    self.common_data.stopped_search = true;
+                    return;
+                }
+            }
+            if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
                 self.common_data.stopped_search = true;
                 return;
             }
-            if self.sort_videos(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-                self.common_data.stopped_search = true;
-                return;
-            }
-        }
-        if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-            self.common_data.stopped_search = true;
-            return;
-        }
+        })();
+
+        self.information.scanning_time = start_time.elapsed();
+
         self.debug_print();
     }
 }

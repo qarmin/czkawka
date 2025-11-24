@@ -1,6 +1,7 @@
 use std::io::Write;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
+use std::time::Instant;
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
@@ -17,17 +18,23 @@ impl AllTraits for EmptyFolder {}
 impl Search for EmptyFolder {
     #[fun_time(message = "find_empty_folders", level = "info")]
     fn search(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
-        self.prepare_items();
-        if self.check_for_empty_folders(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-            self.common_data.stopped_search = true;
-            return;
-        }
-        self.optimize_folders();
+        let start_time = Instant::now();
 
-        if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-            self.common_data.stopped_search = true;
-            return;
-        }
+        let () = (|| {
+            self.prepare_items();
+            if self.check_for_empty_folders(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+                self.common_data.stopped_search = true;
+                return;
+            }
+            self.optimize_folders();
+
+            if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+                self.common_data.stopped_search = true;
+                return;
+            }
+        })();
+
+        self.information.scanning_time = start_time.elapsed();
 
         self.debug_print();
     }

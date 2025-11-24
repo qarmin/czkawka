@@ -2,6 +2,7 @@ pub mod core;
 pub mod traits;
 
 use std::path::{Path, PathBuf};
+use std::time::Duration;
 
 use serde::Serialize;
 
@@ -46,6 +47,7 @@ impl ResultEntry for TemporaryFileEntry {
 #[derive(Default, Clone)]
 pub struct Info {
     pub number_of_temporary_files: usize,
+    pub scanning_time: Duration,
 }
 
 pub struct Temporary {

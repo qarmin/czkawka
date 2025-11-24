@@ -1,6 +1,7 @@
 use std::io::Write;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
+use std::time::Instant;
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
@@ -16,15 +17,22 @@ impl AllTraits for BadExtensions {}
 impl Search for BadExtensions {
     #[fun_time(message = "find_bad_extensions_files", level = "info")]
     fn search(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
-        self.prepare_items();
-        if self.check_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-            self.common_data.stopped_search = true;
-            return;
-        }
-        if self.look_for_bad_extensions_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-            self.common_data.stopped_search = true;
-            return;
-        }
+        let start_time = Instant::now();
+
+        let () = (|| {
+            self.prepare_items();
+            if self.check_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+                self.common_data.stopped_search = true;
+                return;
+            }
+            if self.look_for_bad_extensions_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+                self.common_data.stopped_search = true;
+                return;
+            }
+        })();
+
+        self.information.scanning_time = start_time.elapsed();
+
         self.debug_print();
     }
 }

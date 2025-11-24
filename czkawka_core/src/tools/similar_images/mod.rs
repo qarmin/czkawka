@@ -6,6 +6,7 @@ mod tests;
 
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
+use std::time::Duration;
 
 use bk_tree::BKTree;
 use hamming_bitwise_fast::hamming_bitwise_fast;
@@ -131,6 +132,7 @@ pub struct Info {
     pub initial_found_files: usize,
     pub number_of_duplicates: usize,
     pub number_of_groups: usize,
+    pub scanning_time: Duration,
 }
 
 impl SimilarImages {

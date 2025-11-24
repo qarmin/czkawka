@@ -7,6 +7,7 @@ mod tests;
 
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
+use std::time::Duration;
 
 use rusty_chromaprint::Configuration;
 use serde::{Deserialize, Serialize};
@@ -84,6 +85,7 @@ struct GroupedFilesToCheck {
 pub struct Info {
     pub number_of_duplicates: usize,
     pub number_of_groups: u64,
+    pub scanning_time: Duration,
 }
 
 #[derive(Clone)]

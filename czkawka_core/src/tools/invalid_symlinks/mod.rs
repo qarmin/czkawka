@@ -5,6 +5,7 @@ pub mod traits;
 
 use std::fmt::Display;
 use std::path::{Path, PathBuf};
+use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
 
@@ -16,6 +17,7 @@ use crate::flc;
 #[derive(Default, Clone)]
 pub struct Info {
     pub number_of_invalid_symlinks: usize,
+    pub scanning_time: Duration,
 }
 
 const MAX_NUMBER_OF_SYMLINK_JUMPS: i32 = 20;
