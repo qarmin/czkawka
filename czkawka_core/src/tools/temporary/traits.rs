@@ -27,13 +27,14 @@ impl Search for Temporary {
             }
             if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
                 self.common_data.stopped_search = true;
-                return;
             }
         })();
 
         self.information.scanning_time = start_time.elapsed();
 
-        self.debug_print();
+        if !self.common_data.stopped_search {
+            self.debug_print();
+        }
     }
 }
 

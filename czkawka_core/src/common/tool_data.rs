@@ -700,7 +700,7 @@ mod tests {
         let nonexistent_file = temp_dir.path().join("nonexistent.txt");
 
         let files = vec![FileEntry {
-            path: nonexistent_file.clone(),
+            path: nonexistent_file,
             size: 100,
             modified_date: 1,
         }];
@@ -1099,12 +1099,12 @@ mod tests {
 
         let files_group = vec![vec![
             FileEntry {
-                path: file1.clone(),
+                path: file1,
                 size: 1,
                 modified_date: 1,
             },
             FileEntry {
-                path: file2.clone(),
+                path: file2,
                 size: 1,
                 modified_date: 2,
             },

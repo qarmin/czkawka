@@ -214,8 +214,7 @@ fn compute_broken_files(br: BrokenFiles, entry_info: &Entry, text_view_errors: &
     let broken_files_number = information.number_of_broken_files;
     let scanning_time_str = format_time(information.scanning_time);
 
-    entry_info.set_text(flg!("compute_found_broken_files", number_files = broken_files_number, time = scanning_time_str
-    ).as_str());
+    entry_info.set_text(flg!("compute_found_broken_files", number_files = broken_files_number, time = scanning_time_str).as_str());
 
     let list_store = subview.tree_view.get_model();
     let mut vector = br.get_broken_files().clone();
@@ -574,8 +573,7 @@ fn compute_temporary_files(tf: Temporary, entry_info: &Entry, text_view_errors: 
     let temporary_files_number = information.number_of_temporary_files;
     let scanning_time_str = format_time(information.scanning_time);
 
-    entry_info.set_text(flg!("compute_found_temporary_files", number_files = temporary_files_number, time = scanning_time_str
-    ).as_str());
+    entry_info.set_text(flg!("compute_found_temporary_files", number_files = temporary_files_number, time = scanning_time_str).as_str());
 
     let list_store = subview.tree_view.get_model();
     let mut vector = tf.get_temporary_files().clone();
@@ -606,8 +604,7 @@ fn compute_big_files(bf: BigFile, entry_info: &Entry, text_view_errors: &TextVie
     let biggest_files_number = information.number_of_real_files;
     let scanning_time_str = format_time(information.scanning_time);
 
-    entry_info.set_text(flg!("compute_found_big_files", number_files = biggest_files_number, time = scanning_time_str
-    ).as_str());
+    entry_info.set_text(flg!("compute_found_big_files", number_files = biggest_files_number, time = scanning_time_str).as_str());
 
     let list_store = subview.tree_view.get_model();
     let vector = bf.get_big_files();

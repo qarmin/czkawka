@@ -266,15 +266,16 @@ fn scan_empty_folders(
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
+            let scanning_time_str = format_time(tool.get_information().scanning_time);
             shared_models.lock().unwrap().shared_empty_folders_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_empty_folders_results(&app, vector, messages);
+                write_empty_folders_results(&app, vector, messages, &scanning_time_str);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_empty_folders_results(app: &MainWindow, vector: Vec<FolderEntry>, messages: String) {
+fn write_empty_folders_results(app: &MainWindow, vector: Vec<FolderEntry>, messages: String, scanning_time_str: &str) {
     let items_found = vector.len();
     let items = Rc::new(VecModel::default());
     for fe in vector {
@@ -282,7 +283,7 @@ fn write_empty_folders_results(app: &MainWindow, vector: Vec<FolderEntry>, messa
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_empty_folder_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_empty_folders", items_found = items_found).into());
+    app.invoke_scan_ended(flk!("rust_found_empty_folders", items_found = items_found, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 
@@ -330,15 +331,16 @@ fn scan_big_files(
                 vector.par_sort_unstable_by_key(|fe| fe.size);
             }
 
+            let scanning_time_str = format_time(tool.get_information().scanning_time);
             shared_models.lock().unwrap().shared_big_files_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_big_files_results(&app, vector, messages);
+                write_big_files_results(&app, vector, messages, &scanning_time_str);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_big_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages: String) {
+fn write_big_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages: String, scanning_time_str: &str) {
     let items_found = vector.len();
     let items = Rc::new(VecModel::default());
     for fe in vector {
@@ -346,7 +348,7 @@ fn write_big_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages: S
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_big_files_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_big_files", items_found = items_found).into());
+    app.invoke_scan_ended(flk!("rust_found_big_files", items_found = items_found, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 
@@ -387,15 +389,16 @@ fn scan_empty_files(
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
+            let scanning_time_str = format_time(tool.get_information().scanning_time);
             shared_models.lock().unwrap().shared_empty_files_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_empty_files_results(&app, vector, messages);
+                write_empty_files_results(&app, vector, messages, &scanning_time_str);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_empty_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages: String) {
+fn write_empty_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages: String, scanning_time_str: &str) {
     let items_found = vector.len();
     let items = Rc::new(VecModel::default());
     for fe in vector {
@@ -403,7 +406,7 @@ fn write_empty_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages:
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_empty_files_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_empty_files", items_found = items_found).into());
+    app.invoke_scan_ended(flk!("rust_found_empty_files", items_found = items_found, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 
@@ -475,15 +478,16 @@ fn scan_similar_images(
             }
             vector.sort_by_key(|(_header, vc)| u64::MAX - vc.iter().map(|e| e.size).sum::<u64>()); // Also sorts by size, to show the biggest groups first
 
+            let scanning_time_str = format_time(tool.get_information().scanning_time);
             shared_models.lock().unwrap().shared_similar_images_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_similar_images_results(&app, vector, messages, hash_size);
+                write_similar_images_results(&app, vector, messages, hash_size, &scanning_time_str);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_similar_images_results(app: &MainWindow, vector: Vec<(Option<ImagesEntry>, Vec<ImagesEntry>)>, messages: String, hash_size: u8) {
+fn write_similar_images_results(app: &MainWindow, vector: Vec<(Option<ImagesEntry>, Vec<ImagesEntry>)>, messages: String, hash_size: u8, scanning_time_str: &str) {
     let items_found = vector.len();
     let items = Rc::new(VecModel::default());
     for (ref_fe, vec_fe) in vector {
@@ -500,7 +504,7 @@ fn write_similar_images_results(app: &MainWindow, vector: Vec<(Option<ImagesEntr
         }
     }
     app.set_similar_images_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_similar_images", items_found = items_found).into());
+    app.invoke_scan_ended(flk!("rust_found_similar_images", items_found = items_found, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 fn prepare_data_model_similar_images(fe: &ImagesEntry, hash_size: u8) -> (ModelRc<SharedString>, ModelRc<i32>) {
@@ -569,15 +573,16 @@ fn scan_similar_videos(
             }
             vector.sort_by_key(|(_header, vc)| u64::MAX - vc.iter().map(|e| e.size).sum::<u64>()); // Also sorts by size, to show the biggest groups first
 
+            let scanning_time_str = format_time(tool.get_information().scanning_time);
             shared_models.lock().unwrap().shared_similar_videos_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_similar_videos_results(&app, vector, messages);
+                write_similar_videos_results(&app, vector, messages, &scanning_time_str);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_similar_videos_results(app: &MainWindow, vector: Vec<(Option<VideosEntry>, Vec<VideosEntry>)>, messages: String) {
+fn write_similar_videos_results(app: &MainWindow, vector: Vec<(Option<VideosEntry>, Vec<VideosEntry>)>, messages: String, scanning_time_str: &str) {
     let items_found = vector.len();
     let items = Rc::new(VecModel::default());
     for (ref_fe, vec_fe) in vector {
@@ -594,7 +599,7 @@ fn write_similar_videos_results(app: &MainWindow, vector: Vec<(Option<VideosEntr
         }
     }
     app.set_similar_videos_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_similar_videos", items_found = items_found).into());
+    app.invoke_scan_ended(flk!("rust_found_similar_videos", items_found = items_found, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 fn prepare_data_model_similar_videos(fe: &VideosEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
@@ -685,15 +690,16 @@ fn scan_similar_music(
                 vec_fe.sort_unstable_by_key(|a| u64::MAX - a.size);
             }
 
+            let scanning_time_str = format_time(tool.get_information().scanning_time);
             shared_models.lock().unwrap().shared_same_music_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_similar_music_results(&app, vector, messages);
+                write_similar_music_results(&app, vector, messages, &scanning_time_str);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_similar_music_results(app: &MainWindow, vector: Vec<(Option<MusicEntry>, Vec<MusicEntry>)>, messages: String) {
+fn write_similar_music_results(app: &MainWindow, vector: Vec<(Option<MusicEntry>, Vec<MusicEntry>)>, messages: String, scanning_time_str: &str) {
     let items_found = vector.len();
     let items = Rc::new(VecModel::default());
     for (ref_fe, vec_fe) in vector {
@@ -710,7 +716,7 @@ fn write_similar_music_results(app: &MainWindow, vector: Vec<(Option<MusicEntry>
         }
     }
     app.set_similar_music_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_similar_music_files", items_found = items_found).into());
+    app.invoke_scan_ended(flk!("rust_found_similar_music_files", items_found = items_found, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 fn prepare_data_model_similar_music(fe: &MusicEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
@@ -756,15 +762,16 @@ fn scan_invalid_symlinks(
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
+            let scanning_time_str = format_time(tool.get_information().scanning_time);
             shared_models.lock().unwrap().shared_same_invalid_symlinks = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_invalid_symlinks_results(&app, vector, messages);
+                write_invalid_symlinks_results(&app, vector, messages, &scanning_time_str);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_invalid_symlinks_results(app: &MainWindow, vector: Vec<SymlinksFileEntry>, messages: String) {
+fn write_invalid_symlinks_results(app: &MainWindow, vector: Vec<SymlinksFileEntry>, messages: String, scanning_time_str: &str) {
     let items_found = vector.len();
     let items = Rc::new(VecModel::default());
     for fe in vector {
@@ -772,7 +779,7 @@ fn write_invalid_symlinks_results(app: &MainWindow, vector: Vec<SymlinksFileEntr
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_invalid_symlinks_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_invalid_symlinks", items_found = items_found).into());
+    app.invoke_scan_ended(flk!("rust_found_invalid_symlinks", items_found = items_found, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 
@@ -812,15 +819,16 @@ fn scan_temporary_files(
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
+            let scanning_time_str = format_time(tool.get_information().scanning_time);
             shared_models.lock().unwrap().shared_temporary_files_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_temporary_files_results(&app, vector, messages);
+                write_temporary_files_results(&app, vector, messages, &scanning_time_str);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_temporary_files_results(app: &MainWindow, vector: Vec<TemporaryFileEntry>, messages: String) {
+fn write_temporary_files_results(app: &MainWindow, vector: Vec<TemporaryFileEntry>, messages: String, scanning_time_str: &str) {
     let items_found = vector.len();
     let items = Rc::new(VecModel::default());
     for fe in vector {
@@ -828,7 +836,7 @@ fn write_temporary_files_results(app: &MainWindow, vector: Vec<TemporaryFileEntr
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_temporary_files_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_temporary_files", items_found = items_found).into());
+    app.invoke_scan_ended(flk!("rust_found_temporary_files", items_found = items_found, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 
@@ -891,15 +899,16 @@ fn scan_broken_files(
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
+            let scanning_time_str = format_time(tool.get_information().scanning_time);
             shared_models.lock().unwrap().shared_broken_files_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_broken_files_results(&app, vector, messages);
+                write_broken_files_results(&app, vector, messages, &scanning_time_str);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_broken_files_results(app: &MainWindow, vector: Vec<BrokenEntry>, messages: String) {
+fn write_broken_files_results(app: &MainWindow, vector: Vec<BrokenEntry>, messages: String, scanning_time_str: &str) {
     let items_found = vector.len();
     let items = Rc::new(VecModel::default());
     for fe in vector {
@@ -907,7 +916,7 @@ fn write_broken_files_results(app: &MainWindow, vector: Vec<BrokenEntry>, messag
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_broken_files_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_broken_files", items_found = items_found).into());
+    app.invoke_scan_ended(flk!("rust_found_broken_files", items_found = items_found, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 
@@ -949,15 +958,16 @@ fn scan_bad_extensions(
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
+            let scanning_time_str = format_time(tool.get_information().scanning_time);
             shared_models.lock().unwrap().shared_bad_extensions_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_bad_extensions_results(&app, vector, messages);
+                write_bad_extensions_results(&app, vector, messages, &scanning_time_str);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_bad_extensions_results(app: &MainWindow, vector: Vec<BadFileEntry>, messages: String) {
+fn write_bad_extensions_results(app: &MainWindow, vector: Vec<BadFileEntry>, messages: String, scanning_time_str: &str) {
     let items_found = vector.len();
     let items = Rc::new(VecModel::default());
     for fe in vector {
@@ -965,7 +975,7 @@ fn write_bad_extensions_results(app: &MainWindow, vector: Vec<BadFileEntry>, mes
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_bad_extensions_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_bad_extensions", items_found = items_found).into());
+    app.invoke_scan_ended(flk!("rust_found_bad_extensions", items_found = items_found, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 

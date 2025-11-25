@@ -406,7 +406,7 @@ mod tests {
 
         // Convert to flat map for saving
         let mut flat_cache = BTreeMap::new();
-        for (_, entries) in &cache_to_save {
+        for entries in cache_to_save.values() {
             for entry in entries {
                 flat_cache.insert(entry.path.to_string_lossy().to_string(), entry.clone());
             }
@@ -481,7 +481,12 @@ mod tests {
         let mut files_to_check = BTreeMap::new();
         files_to_check.insert(
             temp_file.to_string_lossy().to_string(),
-            TestEntry::new(temp_file.to_str().unwrap(), new_metadata.len(), new_metadata.modified().unwrap().elapsed().unwrap().as_secs(), 42),
+            TestEntry::new(
+                temp_file.to_str().unwrap(),
+                new_metadata.len(),
+                new_metadata.modified().unwrap().elapsed().unwrap().as_secs(),
+                42,
+            ),
         );
 
         // Load cache - should filter out the outdated entry
