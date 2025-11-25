@@ -2,6 +2,7 @@ use std::rc::Rc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
+use std::time::Duration;
 
 use chrono::DateTime;
 use crossbeam_channel::Sender;
@@ -108,6 +109,19 @@ pub(crate) fn connect_scan_button(app: &MainWindow, progress_sender: Sender<Prog
     });
 }
 
+fn format_time(duration: Duration) -> String {
+    let minutes = duration.as_secs() / 60;
+    let secs = duration.as_secs() % 60;
+    let millis = duration.subsec_millis();
+    if minutes == 0 && secs == 0 {
+        format!("{millis}ms")
+    } else if minutes == 0 {
+        format!("{secs}.{:02}s", millis / 10)
+    } else {
+        format!("{minutes}m {secs}.{:02}s", millis / 10)
+    }
+}
+
 // Scan Duplicates
 
 fn scan_duplicates(
@@ -186,15 +200,16 @@ fn scan_duplicates(
                 vec.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
             }
 
+            let scanning_time_str = format_time(tool.get_information().scanning_time);
             shared_models.lock().unwrap().shared_duplication_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_duplicate_results(&app, vector, messages);
+                write_duplicate_results(&app, vector, messages, &scanning_time_str);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_duplicate_results(app: &MainWindow, vector: Vec<(Option<DuplicateEntry>, Vec<DuplicateEntry>)>, messages: String) {
+fn write_duplicate_results(app: &MainWindow, vector: Vec<(Option<DuplicateEntry>, Vec<DuplicateEntry>)>, messages: String, scanning_time_str: &str) {
     let items_found = vector.len();
     let items = Rc::new(VecModel::default());
     for (ref_fe, vec_fe) in vector.into_iter().rev() {
@@ -211,7 +226,7 @@ fn write_duplicate_results(app: &MainWindow, vector: Vec<(Option<DuplicateEntry>
         }
     }
     app.set_duplicate_files_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_duplicate_files", items_found = items_found).into());
+    app.invoke_scan_ended(flk!("rust_found_duplicate_files", items_found = items_found, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 fn prepare_data_model_duplicates(fe: &DuplicateEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
