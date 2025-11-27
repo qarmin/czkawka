@@ -14,8 +14,8 @@ use crate::common::extensions::Extensions;
 use crate::common::items::ExcludedItems;
 use crate::common::model::{CheckingMethod, ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
-use crate::common::{make_hard_link, remove_folder_if_contains_only_empty_folders};
 use crate::common::traits::ResultEntry;
+use crate::common::{make_hard_link, remove_folder_if_contains_only_empty_folders};
 use crate::helpers::delayed_sender::DelayedSender;
 use crate::helpers::messages::Messages;
 
@@ -418,7 +418,7 @@ pub trait CommonData {
                     let res = files
                         .iter()
                         .map(|file| {
-                            let err = match make_hard_link(original, file) {
+                            let err = match make_hard_link(original.get_path(), file.get_path()) {
                                 Ok(()) => None,
                                 Err(err) => Some(format!(
                                     "Failed to hardlink \"{}\" to \"{}\": {err}",
