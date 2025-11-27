@@ -170,16 +170,14 @@ pub struct DuplicatesArgs {
     pub case_sensitive_name_comparison: CaseSensitiveNameComparison,
     #[clap(flatten)]
     pub allow_hard_links: AllowHardLinks,
-    #[clap(flatten)]
-    pub dry_run: DryRun,
 }
 
 #[derive(Debug, clap::Args)]
 pub struct EmptyFoldersArgs {
     #[clap(flatten)]
     pub common_cli_items: CommonCliItems,
-    #[clap(short = 'D', long, help = "Delete found folders")]
-    pub delete_folders: bool,
+    #[clap(flatten)]
+    pub delete_method: SDMethod,
 }
 
 #[derive(Debug, clap::Args)]
@@ -188,8 +186,8 @@ pub struct BiggestFilesArgs {
     pub common_cli_items: CommonCliItems,
     #[clap(short, long, default_value = "50", help = "Number of files to be shown")]
     pub number_of_files: usize,
-    #[clap(short = 'D', long, help = "Delete found files")]
-    pub delete_files: bool,
+    #[clap(flatten)]
+    pub delete_method: SDMethod,
     #[clap(short = 'J', long, help = "Finds the smallest files instead the biggest")]
     pub smallest_mode: bool,
 }
@@ -198,16 +196,16 @@ pub struct BiggestFilesArgs {
 pub struct EmptyFilesArgs {
     #[clap(flatten)]
     pub common_cli_items: CommonCliItems,
-    #[clap(short = 'D', long, help = "Delete found files")]
-    pub delete_files: bool,
+    #[clap(flatten)]
+    pub delete_method: SDMethod,
 }
 
 #[derive(Debug, clap::Args)]
 pub struct TemporaryArgs {
     #[clap(flatten)]
     pub common_cli_items: CommonCliItems,
-    #[clap(short = 'D', long, help = "Delete found files")]
-    pub delete_files: bool,
+    #[clap(flatten)]
+    pub delete_method: SDMethod,
 }
 
 #[derive(Debug, clap::Args)]
@@ -248,8 +246,6 @@ pub struct SimilarImagesArgs {
     #[clap(flatten)]
     pub allow_hard_links: AllowHardLinks,
     #[clap(flatten)]
-    pub dry_run: DryRun,
-    #[clap(flatten)]
     pub ignore_same_size: IgnoreSameSize,
     #[clap(
         short = 'g',
@@ -285,8 +281,6 @@ pub struct SameMusicArgs {
     pub reference_directories: ReferenceDirectories,
     #[clap(flatten)]
     pub delete_method: DMethod,
-    #[clap(flatten)]
-    pub dry_run: DryRun,
     #[clap(short, long, help = "Approximate comparison of music tags.")]
     pub approximate_comparison: bool,
     #[clap(short, long, help = "Compare fingerprints only with similar titles.")]
@@ -380,16 +374,16 @@ fn parse_minimum_segment_duration(src: &str) -> Result<f32, String> {
 pub struct InvalidSymlinksArgs {
     #[clap(flatten)]
     pub common_cli_items: CommonCliItems,
-    #[clap(short = 'D', long, help = "Delete found files")]
-    pub delete_files: bool,
+    #[clap(flatten)]
+    pub delete_method: SDMethod,
 }
 
 #[derive(Debug, clap::Args)]
 pub struct BrokenFilesArgs {
     #[clap(flatten)]
     pub common_cli_items: CommonCliItems,
-    #[clap(short = 'D', long, help = "Delete found files")]
-    pub delete_files: bool,
+    #[clap(flatten)]
+    pub delete_method: SDMethod,
     #[clap(
         short,
         long,
@@ -411,8 +405,6 @@ pub struct SimilarVideosArgs {
     pub delete_method: DMethod,
     #[clap(flatten)]
     pub allow_hard_links: AllowHardLinks,
-    #[clap(flatten)]
-    pub dry_run: DryRun,
     #[clap(flatten)]
     pub ignore_same_size: IgnoreSameSize,
     #[clap(
@@ -550,6 +542,22 @@ pub struct DMethod {
         long_help = "Methods to delete the files.\nAEN - All files except the newest,\nAEO - All files except the oldest,\nON - Only 1 file, the newest,\nOO - Only 1 file, the oldest\nAEB - All files except the biggest,\nAES - All files except the smallest,\nOB - Only 1 file, the biggest,\nOS - Only 1 file, the smallest\nHARD - create hard link\nNONE - not delete files"
     )]
     pub delete_method: DeleteMethod,
+    #[clap(short = 'n', long, help = "Do nothing and print the operation that would happen.")]
+    pub dry_run: bool,
+    #[clap(short = 'c', long, help = "Remove folders to trash")]
+    pub move_to_trash: bool,
+}
+
+
+// Simple delete method - delete files or not
+#[derive(Debug, clap::Args)]
+pub struct SDMethod {
+    #[clap(short = 'D', long, help = "Delete found items")]
+    pub delete_files: bool,
+    #[clap(short = 'n', long, help = "Do nothing and print the operation that would happen.")]
+    pub dry_run: bool,
+    #[clap(short = 'c', long, help = "Remove files to trash")]
+    pub move_to_trash: bool,
 }
 
 #[derive(Debug, clap::Args)]
@@ -591,12 +599,6 @@ pub struct AllowHardLinks {
 pub struct CaseSensitiveNameComparison {
     #[clap(short = 'l', long, help = "Use case sensitive name comparison")]
     pub case_sensitive_name_comparison: bool,
-}
-
-#[derive(Debug, clap::Args)]
-pub struct DryRun {
-    #[clap(long, help = "Do nothing and print the operation that would happen.")]
-    pub dry_run: bool,
 }
 
 #[derive(Debug, clap::Args)]
