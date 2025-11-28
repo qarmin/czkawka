@@ -109,7 +109,7 @@ pub(crate) fn get_dynamic_image_from_heic(path: &str) -> anyhow::Result<DynamicI
 }
 
 #[cfg(feature = "libraw")]
-pub(crate) fn get_raw_image(path: impl AsRef<Path>) -> anyhow::Result<DynamicImage> {
+pub(crate) fn get_raw_image<P: AsRef<Path>>(path: P) -> anyhow::Result<DynamicImage> {
     let buf = fs::read(path.as_ref())?;
 
     let processor = Processor::new();
@@ -129,7 +129,7 @@ pub(crate) fn get_raw_image(path: impl AsRef<Path>) -> anyhow::Result<DynamicIma
 }
 
 #[cfg(not(feature = "libraw"))]
-pub(crate) fn get_raw_image(path: impl AsRef<Path> + std::fmt::Debug) -> Result<DynamicImage, String> {
+pub(crate) fn get_raw_image<P: AsRef<Path> + std::fmt::Debug>(path: P) -> Result<DynamicImage, String> {
     let mut timer = Timer::new("Rawler");
 
     let raw_source = RawSource::new(path.as_ref()).map_err(|err| format!("Failed to create RawSource from path {path:?}: {err}"))?;

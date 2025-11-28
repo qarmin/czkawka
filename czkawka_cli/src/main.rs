@@ -408,7 +408,7 @@ where
         component.set_delete_method(DeleteMethod::Delete);
     }
     component.set_dry_run(s_delete.dry_run);
-    // component.set_move_to_trash(s_delete.move_to_trash); // TODO
+    component.set_move_to_trash(s_delete.move_to_trash);
 }
 
 fn set_advanced_delete<T>(component: &mut T, a_delete: DMethod)
@@ -417,7 +417,7 @@ where
 {
     component.set_delete_method(a_delete.delete_method);
     component.set_dry_run(a_delete.dry_run);
-    // component.set_move_to_trash(a_delete.move_to_trash); // TODO
+    component.set_move_to_trash(a_delete.move_to_trash);
 }
 
 fn set_common_settings<T>(component: &mut T, common_cli_items: &CommonCliItems, reference_directories: Option<&Vec<PathBuf>>)

@@ -523,7 +523,7 @@ pub struct CommonCliItems {
     pub disable_cache: bool,
 }
 
-#[derive(Debug, clap::Args)]
+#[derive(Debug, clap::Args, Clone, Copy)]
 pub struct DoNotPrint {
     #[clap(short = 'N', long, help = "Do not print the results to the console")]
     pub do_not_print_results: bool,
@@ -531,7 +531,7 @@ pub struct DoNotPrint {
     pub do_not_print_messages: bool,
 }
 
-#[derive(Debug, clap::Args)]
+#[derive(Debug, clap::Args, Clone, Copy)]
 pub struct DMethod {
     #[clap(
         short = 'D',
@@ -542,21 +542,20 @@ pub struct DMethod {
         long_help = "Methods to delete the files.\nAEN - All files except the newest,\nAEO - All files except the oldest,\nON - Only 1 file, the newest,\nOO - Only 1 file, the oldest\nAEB - All files except the biggest,\nAES - All files except the smallest,\nOB - Only 1 file, the biggest,\nOS - Only 1 file, the smallest\nHARD - create hard link\nNONE - not delete files"
     )]
     pub delete_method: DeleteMethod,
-    #[clap(short = 'n', long, help = "Do nothing and print the operation that would happen.")]
+    #[clap(short = 'Q', long, help = "Do nothing and print the operation that would happen.")]
     pub dry_run: bool,
-    #[clap(short = 'c', long, help = "Remove folders to trash")]
+    #[clap(short = 'y', long, help = "Remove items to trash")]
     pub move_to_trash: bool,
 }
 
-
 // Simple delete method - delete files or not
-#[derive(Debug, clap::Args)]
+#[derive(Debug, clap::Args, Clone, Copy)]
 pub struct SDMethod {
     #[clap(short = 'D', long, help = "Delete found items")]
     pub delete_files: bool,
-    #[clap(short = 'n', long, help = "Do nothing and print the operation that would happen.")]
+    #[clap(short = 'Q', long, help = "Do nothing and print the operation that would happen.")]
     pub dry_run: bool,
-    #[clap(short = 'c', long, help = "Remove files to trash")]
+    #[clap(short = 'y', long, help = "Remove items to trash")]
     pub move_to_trash: bool,
 }
 

@@ -20,7 +20,7 @@ use std::io::Error;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use std::{fs, io, thread};
-
+use std::time::Duration;
 use items::SingleExcludedItem;
 use log::debug;
 
@@ -69,7 +69,7 @@ pub fn set_number_of_threads(thread_number: usize) {
         .expect("Cannot set number of threads");
 }
 
-pub fn check_if_folder_contains_only_empty_folders(path: impl AsRef<Path>) -> Result<(), String> {
+pub fn check_if_folder_contains_only_empty_folders<P: AsRef<Path>>(path: P) -> Result<(), String> {
     let path = path.as_ref();
     if !path.is_dir() {
         return Err(format!("Trying to remove folder \"{}\" which is not a directory", path.to_string_lossy()));
@@ -124,7 +124,7 @@ pub fn check_if_folder_contains_only_empty_folders(path: impl AsRef<Path>) -> Re
     Ok(())
 }
 
-pub fn remove_folder_if_contains_only_empty_folders(path: impl AsRef<Path>, remove_to_trash: bool) -> Result<(), String> {
+pub fn remove_folder_if_contains_only_empty_folders<P: AsRef<Path>>(path: P, remove_to_trash: bool) -> Result<(), String> {
     check_if_folder_contains_only_empty_folders(&path)?;
 
     let path = path.as_ref();
@@ -136,14 +136,18 @@ pub fn remove_folder_if_contains_only_empty_folders(path: impl AsRef<Path>, remo
     }
 }
 
-pub fn remove_single_file(full_path: &str, remove_to_trash: bool) -> Result<(), String> {
+pub fn remove_single_file<P: AsRef<Path>>(full_path: P, remove_to_trash: bool) -> Result<(), String> {
     if remove_to_trash {
-        if let Err(e) = trash::delete(full_path) {
-            return Err(flc!("rust_error_moving_to_trash", file = full_path, error = e.to_string()));
+        if let Err(e) = trash::delete(&full_path) {
+            return Err(flc!(
+                "rust_error_moving_to_trash",
+                file = full_path.as_ref().to_string_lossy().to_string(),
+                error = e.to_string()
+            ));
         }
     } else {
-        if let Err(e) = fs::remove_file(full_path) {
-            return Err(flc!("rust_error_removing", file = full_path, error = e.to_string()));
+        if let Err(e) = fs::remove_file(&full_path) {
+            return Err(flc!("rust_error_removing", file = full_path.as_ref().to_string_lossy().to_string(), error = e.to_string()));
         }
     }
     Ok(())
@@ -174,6 +178,22 @@ pub fn split_path_compare(path_a: &Path, path_b: &Path) -> Ordering {
     match path_a.parent().cmp(&path_b.parent()) {
         Ordering::Equal => path_a.file_name().cmp(&path_b.file_name()),
         other => other,
+    }
+}
+
+pub fn format_time(duration: Duration) -> String {
+    let hours = duration.as_secs() / 3600;
+    let minutes = duration.as_secs() % 3600 / 60;
+    let secs = duration.as_secs() % 60;
+    let millis = duration.subsec_millis();
+    if minutes == 0 && secs == 0 {
+        format!("{millis}ms")
+    } else if minutes == 0 {
+        format!("{secs}.{:02}s", millis / 10)
+    } else if hours == 0 {
+        format!("{minutes}m {secs}.{:02}s", millis / 10)
+    } else {
+        format!("{hours}h {minutes}m {secs}s")
     }
 }
 
@@ -229,7 +249,7 @@ pub fn regex_check(expression_item: &SingleExcludedItem, directory_name: &str) -
 }
 
 #[expect(clippy::string_slice)] // Is in char boundary
-pub fn normalize_windows_path(path_to_change: impl AsRef<Path>) -> PathBuf {
+pub fn normalize_windows_path<P: AsRef<Path>>(path_to_change: P) -> PathBuf {
     let path = path_to_change.as_ref();
 
     // Don't do anything, because network path may be case intensive

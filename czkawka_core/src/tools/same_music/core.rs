@@ -575,7 +575,7 @@ impl SameMusic {
 }
 
 // TODO this should be taken from rusty-chromaprint repo, not reimplemented here
-fn calc_fingerprint_helper(path: impl AsRef<Path>, config: &Configuration) -> anyhow::Result<Vec<u32>> {
+fn calc_fingerprint_helper<P: AsRef<Path>>(path: P, config: &Configuration) -> anyhow::Result<Vec<u32>> {
     let path = path.as_ref().to_path_buf();
     panic::catch_unwind(|| {
         let path = &path;

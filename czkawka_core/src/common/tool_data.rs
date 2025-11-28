@@ -1,4 +1,3 @@
-use std::fs;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
@@ -15,7 +14,7 @@ use crate::common::items::ExcludedItems;
 use crate::common::model::{CheckingMethod, ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::traits::ResultEntry;
-use crate::common::{make_hard_link, remove_folder_if_contains_only_empty_folders};
+use crate::common::{make_hard_link, remove_folder_if_contains_only_empty_folders, remove_single_file};
 use crate::helpers::delayed_sender::DelayedSender;
 use crate::helpers::messages::Messages;
 
@@ -36,6 +35,7 @@ pub struct CommonToolData {
     pub(crate) save_also_as_json: bool,
     pub(crate) use_reference_folders: bool,
     pub(crate) dry_run: bool,
+    pub(crate) move_to_trash: bool,
 }
 
 #[derive(Debug, Clone, Default)]
@@ -111,6 +111,7 @@ impl CommonToolData {
             save_also_as_json: false,
             use_reference_folders: false,
             dry_run: false,
+            move_to_trash: false,
         }
     }
 }
@@ -231,6 +232,14 @@ pub trait CommonData {
         self.get_cd().delete_method
     }
 
+    // Only used for internal deleting - probably only useful in CLI, but not in GUI which probably uses its own delete method selection
+    fn set_move_to_trash(&mut self, move_to_trash: bool) {
+        self.get_cd_mut().move_to_trash = move_to_trash;
+    }
+    fn get_move_to_trash(&self) -> bool {
+        self.get_cd().move_to_trash
+    }
+
     fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) {
         let messages = self.get_cd_mut().directories.set_included_directory(included_directory);
         self.get_cd_mut().text_messages.extend_with_another_messages(messages);
@@ -340,6 +349,7 @@ pub trait CommonData {
         delete_item_type: DeleteItemType<T>,
     ) -> DeleteResult {
         let dry_run = self.get_cd().dry_run;
+        let move_to_trash = self.get_cd().move_to_trash;
         let mut progress = ProgressData::get_empty_state(CurrentStage::DeletingFiles);
         progress.bytes_to_check = delete_item_type.calculate_size_to_delete();
         progress.entries_to_check = delete_item_type.calculate_entries_to_delete();
@@ -379,14 +389,13 @@ pub trait CommonData {
                     }
 
                     if dry_run {
-                        // return Some(vec![(e, Some(format!("TTTTTTTTTT - {}", e.get_path().to_string_lossy())))]); // TODO
                         return Some(vec![(e, None)]);
                     }
 
                     let delete_res = if matches!(delete_item_type, DeleteItemType::DeletingFiles(_)) {
-                        fs::remove_file(e.get_path()).map_err(|err| format!("Failed to delete \"{}\": {err}", e.get_path().to_string_lossy()))
+                        remove_single_file(e.get_path(), move_to_trash)
                     } else {
-                        remove_folder_if_contains_only_empty_folders(e.get_path(), false) // TODO remove to trash should be an option
+                        remove_folder_if_contains_only_empty_folders(e.get_path(), move_to_trash)
                     };
 
                     match delete_res {
