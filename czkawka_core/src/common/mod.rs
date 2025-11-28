@@ -189,9 +189,17 @@ pub fn format_time(duration: Duration) -> String {
     if minutes == 0 && secs == 0 {
         format!("{millis}ms")
     } else if minutes == 0 {
-        format!("{secs}.{:02}s", millis / 10)
+        if millis / 10 == 0 {
+            return format!("{secs}s");
+        } else {
+            format!("{secs}.{:02}s", millis / 10)
+        }
     } else if hours == 0 {
-        format!("{minutes}m {secs}.{:02}s", millis / 10)
+        if secs == 0 {
+            return format!("{minutes}m");
+        } else {
+            format!("{minutes}m {secs}s")
+        }
     } else {
         format!("{hours}h {minutes}m {secs}s")
     }
@@ -350,17 +358,12 @@ pub fn make_file_symlink<P: AsRef<Path>, Q: AsRef<Path>>(src: P, dst: Q) -> io::
 
 #[cfg(test)]
 mod test {
-    use std::fs::{File, Metadata, read_dir};
-    use std::io::Write;
+    use std::fs::{read_dir, File, Metadata};
     #[cfg(target_family = "unix")]
     use std::os::unix::fs::MetadataExt;
-    use std::path::{Path, PathBuf};
-    use std::{fs, io};
-
     use tempfile::tempdir;
-
     use crate::common::items::new_excluded_item;
-    use crate::common::{make_file_symlink, make_hard_link, normalize_windows_path, regex_check, remove_folder_if_contains_only_empty_folders};
+    use super::*;use std::io::Write;
 
     #[cfg(target_family = "unix")]
     fn assert_inode(before: &Metadata, after: &Metadata) {
@@ -525,5 +528,38 @@ mod test {
         assert_eq!(PathBuf::from("\\\\aBBa"), normalize_windows_path("\\\\aBBa"));
         assert_eq!(PathBuf::from("a"), normalize_windows_path("a"));
         assert_eq!(PathBuf::from(""), normalize_windows_path(""));
+    }
+
+    #[test]
+    fn test_format_time() {
+        // Test milliseconds only
+        assert_eq!(format_time(Duration::from_millis(0)), "0ms");
+        assert_eq!(format_time(Duration::from_millis(1)), "1ms");
+        assert_eq!(format_time(Duration::from_millis(999)), "999ms");
+
+        // Test seconds only
+        assert_eq!(format_time(Duration::from_millis(1000)), "1.00s");
+        assert_eq!(format_time(Duration::from_millis(1234)), "1.23s");
+        assert_eq!(format_time(Duration::from_millis(5678)), "5.67s");
+        assert_eq!(format_time(Duration::from_secs(59)), "59.00s");
+
+        // Test minutes and seconds
+        assert_eq!(format_time(Duration::from_secs(60)), "1m 0.00s");
+        assert_eq!(format_time(Duration::from_secs(61)), "1m 1.00s");
+        assert_eq!(format_time(Duration::from_millis(61234)), "1m 1.23s");
+        assert_eq!(format_time(Duration::from_secs(125)), "2m 5.00s");
+        assert_eq!(format_time(Duration::from_secs(3599)), "59m 59.00s");
+
+        // Test hours, minutes and seconds
+        assert_eq!(format_time(Duration::from_secs(3600)), "1h 0m 0s");
+        assert_eq!(format_time(Duration::from_secs(3661)), "1h 1m 1s");
+        assert_eq!(format_time(Duration::from_secs(7384)), "2h 3m 4s");
+        assert_eq!(format_time(Duration::from_secs(86400)), "24h 0m 0s");
+
+        // Test edge cases
+        assert_eq!(format_time(Duration::from_millis(999)), "999ms");
+        assert_eq!(format_time(Duration::from_millis(1001)), "1.00s");
+        assert_eq!(format_time(Duration::from_millis(59999)), "59.99s");
+        assert_eq!(format_time(Duration::from_millis(60000)), "1m 0.00s");
     }
 }
