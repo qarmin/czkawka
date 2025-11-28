@@ -142,29 +142,27 @@ pub(crate) fn get_raw_image<P: AsRef<Path> + std::fmt::Debug>(path: P) -> Result
 
     let params = RawDecodeParams::default();
 
-    let dynamic_image = match decoder.full_image(&raw_source, &params).map_err(|e| e.to_string())? {
-        Some(img) => {
-            timer.checkpoint("Decoded full image");
+    // TODO - currently disabled, due really bad quality of some extracted images https://github.com/dnglab/dnglab/issues/638
+    // if let Some(extracted_dynamic_image) = decoder.full_image(&raw_source, &params).ok().flatten() {
+    //     timer.checkpoint("Decoded full image");
+    //
+    //     trace!("{}", timer.report("Everything", false));
+    //
+    //     return Ok(extracted_dynamic_image);
+    // }
 
-            img
-        }
-        None => {
-            let raw_image = decoder.raw_image(&raw_source, &params, false).map_err(|e| e.to_string())?;
+    let raw_image = decoder.raw_image(&raw_source, &params, false).map_err(|e| e.to_string())?;
 
-            timer.checkpoint("Decoded raw image");
+    timer.checkpoint("Decoded raw image");
 
-            let developer = RawDevelop::default();
-            let developed_image = developer.develop_intermediate(&raw_image).map_err(|e| e.to_string())?;
+    let developer = RawDevelop::default();
+    let developed_image = developer.develop_intermediate(&raw_image).map_err(|e| e.to_string())?;
 
-            timer.checkpoint("Developed raw image");
+    timer.checkpoint("Developed raw image");
 
-            let dynamic_image = developed_image.to_dynamic_image().ok_or("Failed to convert image to DynamicImage")?;
+    let dynamic_image = developed_image.to_dynamic_image().ok_or("Failed to convert image to DynamicImage")?;
 
-            timer.checkpoint("Converted to DynamicImage");
-
-            dynamic_image
-        }
-    };
+    timer.checkpoint("Converted to DynamicImage");
 
     trace!("{}", timer.report("Everything", false));
 

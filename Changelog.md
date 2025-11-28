@@ -9,14 +9,16 @@
 - Delayed removing destination file while symlinking, to avoid data loss in case of failure - [#1672](https://github.com/qarmin/czkawka/pull/1672)
 - Fix invalid canonicalization of paths on windows - [#1604](https://github.com/qarmin/czkawka/pull/1604/files)
 - Comparison results are now deterministic - [#1654](https://github.com/qarmin/czkawka/pull/1654)
-- Reading built-in jpeg inside raw images, if available - [#1655](https://github.com/qarmin/czkawka/pull/1655)
+- Reading built-in jpeg inside raw images, if available(currently disabled due - https://github.com/dnglab/dnglab/issues/638) - [#1655](https://github.com/qarmin/czkawka/pull/1655)
 - Fixed silent panics, when logger cannot log to terminal - [1658](https://github.com/qarmin/czkawka/pull/1658)
 - Commit hash is added to logs - [#1672](https://github.com/qarmin/czkawka/pull/1672)
-- Improved and fixed a little, logic which groups similar images by its similarity - [#]()
+- Improved and fixed logic which groups similar images by its similarity - [#1685](https://github.com/qarmin/czkawka/pull/1685)
+- Added counting scan time  - [#1674](https://github.com/qarmin/czkawka/pull/1674), [#1685](https://github.com/qarmin/czkawka/pull/1685)
 
 ### CLI
 - Using colors by default in terminal output(can be disabled by feature flag) - [#1672](https://github.com/qarmin/czkawka/pull/1672)
 - Fixed regression, where results were not printed by default to terminal - [#1672](https://github.com/qarmin/czkawka/pull/1672)
+- Added dry_run and move_to_trash options to all tools - [#1685](https://github.com/qarmin/czkawka/pull/1685)
 
 ### GTK GUI
 - Sort button is restored and crashes when sorting are fixed(probably) - [#1623](https://github.com/qarmin/czkawka/pull/1623)
