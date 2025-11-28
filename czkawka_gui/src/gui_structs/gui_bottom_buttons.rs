@@ -154,6 +154,8 @@ fn test_hardlinks() -> bool {
     use std::io::Write;
     use std::{env, fs};
 
+    use rand::Rng;
+
     fn try_create_hardlink(dir: &std::path::Path) -> bool {
         let random_suffix: u32 = rand::rng().random();
         let cache_file = dir.join(format!("czkawka_test_{}.czkawka_tmp", random_suffix));
