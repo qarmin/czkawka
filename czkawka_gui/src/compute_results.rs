@@ -8,7 +8,7 @@ use crossbeam_channel::Receiver;
 use czkawka_core::common::model::CheckingMethod;
 use czkawka_core::common::tool_data::CommonData;
 use czkawka_core::common::traits::ResultEntry;
-use czkawka_core::common::{split_path, split_path_compare};
+use czkawka_core::common::{format_time, split_path, split_path_compare};
 use czkawka_core::tools::bad_extensions::BadExtensions;
 use czkawka_core::tools::big_file::BigFile;
 use czkawka_core::tools::broken_files::BrokenFiles;
@@ -88,19 +88,6 @@ fn format_size_and_date(size: u64, modified_date: u64, is_header: bool, is_refer
 /// Helper to get row color based on header status
 fn get_row_color(is_header: bool) -> &'static str {
     if is_header { HEADER_ROW_COLOR } else { MAIN_ROW_COLOR }
-}
-
-fn format_time(duration: Duration) -> String {
-    let minutes = duration.as_secs() / 60;
-    let secs = duration.as_secs() % 60;
-    let millis = duration.subsec_millis();
-    if minutes == 0 && secs == 0 {
-        format!("{millis}ms")
-    } else if minutes == 0 {
-        format!("{secs}.{:02}s", millis / 10)
-    } else {
-        format!("{minutes}m {secs}.{:02}s", millis / 10)
-    }
 }
 
 pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Receiver<Message>) {

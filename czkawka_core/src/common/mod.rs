@@ -14,8 +14,6 @@ pub mod progress_stop_handler;
 pub mod tool_data;
 pub mod traits;
 
-use items::SingleExcludedItem;
-use log::debug;
 use std::cmp::Ordering;
 use std::ffi::OsString;
 use std::io::Error;
@@ -23,6 +21,9 @@ use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use std::time::Duration;
 use std::{fs, io, thread};
+
+use items::SingleExcludedItem;
+use log::debug;
 
 use crate::common::consts::DEFAULT_WORKER_THREAD_SIZE;
 use crate::flc;
@@ -188,23 +189,15 @@ pub fn format_time(duration: Duration) -> String {
     let millis = duration.subsec_millis();
     if hours == 0 && minutes == 0 && secs == 0 {
         format!("{millis}ms")
+    } else if hours == 0 && minutes == 0 {
+        if millis / 10 == 0 { format!("{secs}s") } else { format!("{secs}.{:02}s", millis / 10) }
     } else if hours == 0 {
-        if secs == 0 {
-            return format!("{minutes}m");
-        } else {
-            format!("{minutes}m {secs}s")
-        }
-    } else if minutes == 0 {
-        if millis / 10 == 0 {
-            return format!("{secs}s");
-        } else {
-            format!("{secs}.{:02}s", millis / 10)
-        }
+        if secs == 0 { format!("{minutes}m") } else { format!("{minutes}m {secs}s") }
     } else {
         if secs == 0 && minutes == 0 {
-            return format!("{hours}h {minutes}m");
+            format!("{hours}h")
         } else if secs == 0 {
-            return format!("{hours}h");
+            format!("{hours}h {minutes}m")
         } else {
             format!("{hours}h {minutes}m {secs}s")
         }
@@ -364,13 +357,15 @@ pub fn make_file_symlink<P: AsRef<Path>, Q: AsRef<Path>>(src: P, dst: Q) -> io::
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    use crate::common::items::new_excluded_item;
     use std::fs::{File, Metadata, read_dir};
     use std::io::Write;
     #[cfg(target_family = "unix")]
     use std::os::unix::fs::MetadataExt;
+
     use tempfile::tempdir;
+
+    use super::*;
+    use crate::common::items::new_excluded_item;
 
     #[cfg(target_family = "unix")]
     fn assert_inode(before: &Metadata, after: &Metadata) {
@@ -539,36 +534,31 @@ mod test {
 
     #[test]
     fn test_format_time() {
-        // Test milliseconds only (minutes == 0 && secs == 0)
         assert_eq!(format_time(Duration::from_millis(0)), "0ms");
         assert_eq!(format_time(Duration::from_millis(1)), "1ms");
         assert_eq!(format_time(Duration::from_millis(999)), "999ms");
 
-        // Test seconds only (minutes == 0, secs > 0)
-        assert_eq!(format_time(Duration::from_millis(1000)), "1s"); // 0 millis / 10 == 0
-        assert_eq!(format_time(Duration::from_millis(1234)), "1.23s"); // 234 / 10 == 23
-        assert_eq!(format_time(Duration::from_millis(5678)), "5.67s"); // 678 / 10 == 67
+        assert_eq!(format_time(Duration::from_millis(1000)), "1s");
+        assert_eq!(format_time(Duration::from_millis(1234)), "1.23s");
+        assert_eq!(format_time(Duration::from_millis(5678)), "5.67s");
         assert_eq!(format_time(Duration::from_secs(59)), "59s");
 
-        // Test minutes and seconds (hours == 0, minutes > 0)
-        assert_eq!(format_time(Duration::from_secs(60)), "1m"); // secs == 0
+        assert_eq!(format_time(Duration::from_secs(60)), "1m");
         assert_eq!(format_time(Duration::from_secs(61)), "1m 1s");
-        assert_eq!(format_time(Duration::from_millis(61234)), "1m 1s"); // millis ignorowane dla minut
+        assert_eq!(format_time(Duration::from_millis(61234)), "1m 1s");
         assert_eq!(format_time(Duration::from_secs(125)), "2m 5s");
         assert_eq!(format_time(Duration::from_secs(3599)), "59m 59s");
 
-        // Test hours, minutes and seconds (hours > 0)
-        assert_eq!(format_time(Duration::from_secs(3600)), "1h 0m 0s");
+        assert_eq!(format_time(Duration::from_secs(3600)), "1h");
         assert_eq!(format_time(Duration::from_secs(3661)), "1h 1m 1s");
         assert_eq!(format_time(Duration::from_secs(7384)), "2h 3m 4s");
-        assert_eq!(format_time(Duration::from_secs(86400)), "24h 0m 0s");
+        assert_eq!(format_time(Duration::from_secs(86400)), "24h");
 
-        // Test edge cases
         assert_eq!(format_time(Duration::from_millis(999)), "999ms");
-        assert_eq!(format_time(Duration::from_millis(1001)), "1.00s");
+        assert_eq!(format_time(Duration::from_millis(1001)), "1s");
         assert_eq!(format_time(Duration::from_millis(59999)), "59.99s");
         assert_eq!(format_time(Duration::from_millis(60000)), "1m");
-        assert_eq!(format_time(Duration::from_millis(60100)), "1m 0s");
+        assert_eq!(format_time(Duration::from_millis(60100)), "1m");
         assert_eq!(format_time(Duration::from_millis(120000)), "2m");
     }
 }

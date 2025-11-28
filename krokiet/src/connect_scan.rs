@@ -2,7 +2,6 @@ use std::rc::Rc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
-use std::time::Duration;
 
 use chrono::DateTime;
 use crossbeam_channel::Sender;
@@ -11,7 +10,7 @@ use czkawka_core::common::model::{CheckingMethod, FileEntry};
 use czkawka_core::common::progress_data::ProgressData;
 use czkawka_core::common::tool_data::CommonData;
 use czkawka_core::common::traits::{ResultEntry, Search};
-use czkawka_core::common::{split_path, split_path_compare};
+use czkawka_core::common::{format_time, split_path, split_path_compare};
 use czkawka_core::tools::bad_extensions::{BadExtensions, BadExtensionsParameters, BadFileEntry};
 use czkawka_core::tools::big_file::{BigFile, BigFileParameters, SearchMode};
 use czkawka_core::tools::broken_files::{BrokenEntry, BrokenFiles, BrokenFilesParameters, CheckedTypes};
@@ -107,19 +106,6 @@ pub(crate) fn connect_scan_button(app: &MainWindow, progress_sender: Sender<Prog
             ActiveTab::Settings | ActiveTab::About => panic!("Button should be disabled"),
         }
     });
-}
-
-fn format_time(duration: Duration) -> String {
-    let minutes = duration.as_secs() / 60;
-    let secs = duration.as_secs() % 60;
-    let millis = duration.subsec_millis();
-    if minutes == 0 && secs == 0 {
-        format!("{millis}ms")
-    } else if minutes == 0 {
-        format!("{secs}.{:02}s", millis / 10)
-    } else {
-        format!("{minutes}m {secs}.{:02}s", millis / 10)
-    }
 }
 
 // Scan Duplicates
