@@ -1,5 +1,9 @@
 pub mod core;
+#[cfg(test)]
+mod tests;
 pub mod traits;
+
+use std::time::Duration;
 
 use crate::common::model::FileEntry;
 use crate::common::tool_data::CommonToolData;
@@ -13,6 +17,7 @@ pub enum SearchMode {
 #[derive(Debug, Default, Clone)]
 pub struct Info {
     pub number_of_real_files: usize,
+    pub scanning_time: Duration,
 }
 
 #[derive(Clone)]

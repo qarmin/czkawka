@@ -1,6 +1,7 @@
 use std::io::prelude::*;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
+use std::time::Instant;
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
@@ -16,23 +17,31 @@ impl AllTraits for EmptyFiles {}
 impl Search for EmptyFiles {
     #[fun_time(message = "find_empty_files", level = "info")]
     fn search(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
-        self.prepare_items();
-        if self.check_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-            self.common_data.stopped_search = true;
-            return;
+        let start_time = Instant::now();
+
+        let () = (|| {
+            self.prepare_items();
+            if self.check_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+                self.common_data.stopped_search = true;
+                return;
+            }
+            if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+                self.common_data.stopped_search = true;
+            }
+        })();
+
+        self.information.scanning_time = start_time.elapsed();
+
+        if !self.common_data.stopped_search {
+            self.debug_print();
         }
-        if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-            self.common_data.stopped_search = true;
-            return;
-        }
-        self.debug_print();
     }
 }
 
 impl DebugPrint for EmptyFiles {
     #[expect(clippy::print_stdout)]
     fn debug_print(&self) {
-        if !cfg!(debug_assertions) {
+        if !cfg!(debug_assertions) || cfg!(test) {
             return;
         }
         println!("---------------DEBUG PRINT---------------");

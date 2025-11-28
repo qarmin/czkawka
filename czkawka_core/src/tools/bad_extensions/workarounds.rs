@@ -49,6 +49,7 @@ pub(crate) const WORKAROUNDS: &[(&str, &str)] = &[
     ("xml", "msc"),
     ("xml", "mum"),
     ("xml", "resx"),
+    ("zip", "msix"),
     ("zip", "wmz"),
     // Games specific extensions - cannot be used here common extensions like zip
     ("gz", "h3m"),     // Heroes 3

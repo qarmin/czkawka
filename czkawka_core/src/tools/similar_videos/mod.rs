@@ -1,9 +1,13 @@
 pub mod core;
 pub mod traits;
 
+#[cfg(test)]
+mod tests;
+
 use std::collections::BTreeMap;
 use std::ops::RangeInclusive;
 use std::path::{Path, PathBuf};
+use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
 use vid_dup_finder_lib::{Cropdetect, VideoHash};
@@ -116,6 +120,7 @@ pub struct SimilarVideos {
 pub struct Info {
     pub number_of_duplicates: usize,
     pub number_of_groups: u64,
+    pub scanning_time: Duration,
 }
 
 impl SimilarVideos {

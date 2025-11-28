@@ -1,8 +1,11 @@
 pub mod core;
+#[cfg(test)]
+mod tests;
 pub mod traits;
 mod workarounds;
 
 use std::path::{Path, PathBuf};
+use std::time::Duration;
 
 use serde::Serialize;
 
@@ -35,6 +38,7 @@ impl ResultEntry for BadFileEntry {
 #[derive(Default, Clone)]
 pub struct Info {
     pub number_of_files_with_bad_extension: usize,
+    pub scanning_time: Duration,
 }
 
 #[derive(Clone)]

@@ -109,7 +109,7 @@ pub(crate) fn get_dynamic_image_from_heic(path: &str) -> anyhow::Result<DynamicI
 }
 
 #[cfg(feature = "libraw")]
-pub(crate) fn get_raw_image(path: impl AsRef<Path>) -> anyhow::Result<DynamicImage> {
+pub(crate) fn get_raw_image<P: AsRef<Path>>(path: P) -> anyhow::Result<DynamicImage> {
     let buf = fs::read(path.as_ref())?;
 
     let processor = Processor::new();
@@ -129,7 +129,7 @@ pub(crate) fn get_raw_image(path: impl AsRef<Path>) -> anyhow::Result<DynamicIma
 }
 
 #[cfg(not(feature = "libraw"))]
-pub(crate) fn get_raw_image(path: impl AsRef<Path> + std::fmt::Debug) -> Result<DynamicImage, String> {
+pub(crate) fn get_raw_image<P: AsRef<Path> + std::fmt::Debug>(path: P) -> Result<DynamicImage, String> {
     let mut timer = Timer::new("Rawler");
 
     let raw_source = RawSource::new(path.as_ref()).map_err(|err| format!("Failed to create RawSource from path {path:?}: {err}"))?;
@@ -142,29 +142,27 @@ pub(crate) fn get_raw_image(path: impl AsRef<Path> + std::fmt::Debug) -> Result<
 
     let params = RawDecodeParams::default();
 
-    let dynamic_image = match decoder.full_image(&raw_source, &params).map_err(|e| e.to_string())? {
-        Some(img) => {
-            timer.checkpoint("Decoded full image");
+    // TODO - currently disabled, due really bad quality of some extracted images https://github.com/dnglab/dnglab/issues/638
+    // if let Some(extracted_dynamic_image) = decoder.full_image(&raw_source, &params).ok().flatten() {
+    //     timer.checkpoint("Decoded full image");
+    //
+    //     trace!("{}", timer.report("Everything", false));
+    //
+    //     return Ok(extracted_dynamic_image);
+    // }
 
-            img
-        }
-        None => {
-            let raw_image = decoder.raw_image(&raw_source, &params, false).map_err(|e| e.to_string())?;
+    let raw_image = decoder.raw_image(&raw_source, &params, false).map_err(|e| e.to_string())?;
 
-            timer.checkpoint("Decoded raw image");
+    timer.checkpoint("Decoded raw image");
 
-            let developer = RawDevelop::default();
-            let developed_image = developer.develop_intermediate(&raw_image).map_err(|e| e.to_string())?;
+    let developer = RawDevelop::default();
+    let developed_image = developer.develop_intermediate(&raw_image).map_err(|e| e.to_string())?;
 
-            timer.checkpoint("Developed raw image");
+    timer.checkpoint("Developed raw image");
 
-            let dynamic_image = developed_image.to_dynamic_image().ok_or("Failed to convert image to DynamicImage")?;
+    let dynamic_image = developed_image.to_dynamic_image().ok_or("Failed to convert image to DynamicImage")?;
 
-            timer.checkpoint("Converted to DynamicImage");
-
-            dynamic_image
-        }
-    };
+    timer.checkpoint("Converted to DynamicImage");
 
     trace!("{}", timer.report("Everything", false));
 
@@ -230,4 +228,59 @@ pub(crate) fn get_rotation_from_exif(path: &str) -> Result<Option<ExifOrientatio
         error!("{message}");
         Err(nom_exif::Error::IOError(std::io::Error::other("Panic in get_rotation_from_exif")))
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const TEST_NORMAL_IMAGE: &str = "test_resources/images/normal.jpg";
+    const TEST_ROTATED_IMAGE: &str = "test_resources/images/rotated.jpg";
+
+    #[test]
+    fn test_image_loading_and_exif_rotation() {
+        let normal_img = get_dynamic_image_from_path(TEST_NORMAL_IMAGE).unwrap();
+        let rotated_img = get_dynamic_image_from_path(TEST_ROTATED_IMAGE).unwrap();
+
+        assert!(normal_img.width() > 0 && normal_img.height() > 0);
+        assert!(rotated_img.width() > 0 && rotated_img.height() > 0);
+
+        let normal_exif = get_rotation_from_exif(TEST_NORMAL_IMAGE).ok();
+        let rotated_exif = get_rotation_from_exif(TEST_ROTATED_IMAGE).ok();
+
+        if let Some(normal_orientation) = normal_exif {
+            assert!(normal_orientation == Some(ExifOrientation::Normal) || normal_orientation.is_none());
+        }
+
+        if let Some(rotated_orientation) = rotated_exif
+            && rotated_orientation.is_some()
+        {
+            let raw_rotated = decode_normal_image(TEST_ROTATED_IMAGE).unwrap();
+            if rotated_orientation == Some(ExifOrientation::Rotate90CW) || rotated_orientation == Some(ExifOrientation::Rotate270CW) {
+                assert_eq!(rotated_img.width(), raw_rotated.height());
+                assert_eq!(rotated_img.height(), raw_rotated.width());
+            }
+        }
+    }
+
+    #[test]
+    fn test_check_if_can_display_image() {
+        assert!(check_if_can_display_image("test.jpg"));
+        assert!(check_if_can_display_image("test.png"));
+        assert!(check_if_can_display_image("test.webp"));
+        assert!(check_if_can_display_image("test.jxl"));
+        assert!(check_if_can_display_image("test.cr2"));
+        assert!(check_if_can_display_image("test.JPG"));
+
+        assert!(!check_if_can_display_image("test.txt"));
+        assert!(!check_if_can_display_image("test.mp4"));
+        assert!(!check_if_can_display_image("test"));
+    }
+
+    #[test]
+    fn test_error_handling() {
+        get_dynamic_image_from_path("nonexistent.jpg").unwrap_err();
+        decode_normal_image("nonexistent.jpg").unwrap_err();
+        get_rotation_from_exif("nonexistent.jpg").unwrap_err();
+    }
 }

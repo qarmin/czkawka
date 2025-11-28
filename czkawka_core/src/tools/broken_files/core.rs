@@ -21,6 +21,7 @@ use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::common::traits::ResultEntry;
+use crate::helpers::audio_checker;
 use crate::tools::broken_files::{BrokenEntry, BrokenFiles, BrokenFilesParameters, CheckedTypes, Info, TypeOfFile};
 
 impl BrokenFiles {

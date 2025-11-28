@@ -151,40 +151,50 @@ impl GuiBottomButtons {
 
 #[cfg(target_family = "windows")]
 fn test_hardlinks() -> bool {
-    use std::fs;
     use std::io::Write;
-    use std::path::Path;
+    use std::{env, fs};
 
-    use directories_next::ProjectDirs;
+    use rand::Rng;
 
-    let mut hardlinked = false;
+    fn try_create_hardlink(dir: &std::path::Path) -> bool {
+        let random_suffix: u32 = rand::rng().random();
+        let cache_file = dir.join(format!("czkawka_test_{}.czkawka_tmp", random_suffix));
+        let cache_file_second = dir.join(format!("czkawka_test_{}_link.czkawka_tmp", random_suffix));
 
-    // TODO - use temporary files instead of project dirs
-
-    if let Some(proj_dirs) = ProjectDirs::from("pl", "Qarmin", "Czkawka") {
-        let cache_dir = proj_dirs.cache_dir();
-        let cache_file = cache_dir.join(Path::new("GILLES_FROM_NOSE.temp"));
-        let cache_file_second = cache_dir.join(Path::new("ROBERCIG_LOWANDOWSKI.temp"));
-
-        if cache_file.exists() {
-            let _ = fs::remove_file(&cache_file);
-        }
-        if cache_file_second.exists() {
-            let _ = fs::remove_file(&cache_file_second);
-        }
-        if !cache_file.exists() && !cache_file_second.exists() {
-            if let Ok(mut file_handler) = fs::OpenOptions::new().write(true).create(true).open(&cache_file) {
-                let _ = writeln!(file_handler, "GURKA");
-            }
-            let _ = fs::hard_link(&cache_file, &cache_file_second);
-
-            if cache_file.exists() && cache_file_second.exists() {
-                hardlinked = true;
-            }
-        }
         let _ = fs::remove_file(&cache_file);
         let _ = fs::remove_file(&cache_file_second);
+
+        let result = (|| {
+            let mut file_handler = fs::File::create(&cache_file).ok()?;
+            writeln!(file_handler, "test").ok()?;
+            drop(file_handler);
+
+            czkawka_core::common::make_hard_link(&cache_file, &cache_file_second).ok()?;
+
+            if cache_file_second.exists() { Some(true) } else { None }
+        })();
+
+        let _ = fs::remove_file(&cache_file);
+        let _ = fs::remove_file(&cache_file_second);
+
+        result.unwrap_or(false)
     }
 
-    hardlinked
+    // Try home directory first
+    if let Ok(home_dir) = env::var("USERPROFILE").or_else(|_| env::var("HOME")) {
+        if let Ok(home_path) = std::path::PathBuf::from(home_dir).canonicalize() {
+            if try_create_hardlink(&home_path) {
+                return true;
+            }
+        }
+    }
+
+    // Fallback to current directory
+    if let Ok(current_dir) = env::current_dir() {
+        if try_create_hardlink(&current_dir) {
+            return true;
+        }
+    }
+
+    false
 }

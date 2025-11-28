@@ -8,7 +8,7 @@ use crossbeam_channel::Receiver;
 use czkawka_core::common::model::CheckingMethod;
 use czkawka_core::common::tool_data::CommonData;
 use czkawka_core::common::traits::ResultEntry;
-use czkawka_core::common::{split_path, split_path_compare};
+use czkawka_core::common::{format_time, split_path, split_path_compare};
 use czkawka_core::tools::bad_extensions::BadExtensions;
 use czkawka_core::tools::big_file::BigFile;
 use czkawka_core::tools::broken_files::BrokenFiles;
@@ -82,15 +82,6 @@ fn format_size_and_date(size: u64, modified_date: u64, is_header: bool, is_refer
         (String::new(), String::new())
     } else {
         (format_size(size, BINARY), get_dt_timestamp_string(modified_date))
-    }
-}
-
-/// Helper to format scanning time from milliseconds to human readable format
-fn format_scanning_time(scanning_time_ms: u128) -> String {
-    if scanning_time_ms < 1000 {
-        format!("{scanning_time_ms} ms")
-    } else {
-        format!("{:.2} s", scanning_time_ms as f64 / 1000.0)
     }
 }
 
@@ -175,8 +166,9 @@ fn compute_bad_extensions(be: BadExtensions, entry_info: &Entry, text_view_error
     let information = be.get_information();
     let text_messages = be.get_text_messages();
     let bad_extensions_number = information.number_of_files_with_bad_extension;
+    let scanning_time_str = format_time(information.scanning_time);
 
-    entry_info.set_text(flg!("compute_found_bad_extensions", number_files = bad_extensions_number).as_str());
+    entry_info.set_text(flg!("compute_found_bad_extensions", number_files = bad_extensions_number, time = scanning_time_str).as_str());
 
     let list_store = subview.tree_view.get_model();
     let mut vector = be.get_bad_extensions_files().clone();
@@ -207,8 +199,9 @@ fn compute_broken_files(br: BrokenFiles, entry_info: &Entry, text_view_errors: &
     let information = br.get_information();
     let text_messages = br.get_text_messages();
     let broken_files_number = information.number_of_broken_files;
+    let scanning_time_str = format_time(information.scanning_time);
 
-    entry_info.set_text(flg!("compute_found_broken_files", number_files = broken_files_number).as_str());
+    entry_info.set_text(flg!("compute_found_broken_files", number_files = broken_files_number, time = scanning_time_str).as_str());
 
     let list_store = subview.tree_view.get_model();
     let mut vector = br.get_broken_files().clone();
@@ -238,8 +231,9 @@ fn compute_invalid_symlinks(ifs: InvalidSymlinks, entry_info: &Entry, text_view_
     let information = ifs.get_information();
     let text_messages = ifs.get_text_messages();
     let invalid_symlinks = information.number_of_invalid_symlinks;
+    let scanning_time_str = format_time(information.scanning_time);
 
-    entry_info.set_text(flg!("compute_found_invalid_symlinks", number_files = invalid_symlinks).as_str());
+    entry_info.set_text(flg!("compute_found_invalid_symlinks", number_files = invalid_symlinks, time = scanning_time_str).as_str());
 
     let list_store = subview.tree_view.get_model();
     let vector = conditional_sort_vector(ifs.get_invalid_symlinks());
@@ -278,12 +272,14 @@ fn compute_same_music(mf: SameMusic, entry_info: &Entry, text_view_errors: &Text
     let text_messages = mf.get_text_messages();
 
     let same_music_number: usize = information.number_of_duplicates;
+    let scanning_time_str = format_time(information.scanning_time);
 
     entry_info.set_text(
         flg!(
             "compute_found_music",
             number_files = information.number_of_duplicates,
-            number_groups = information.number_of_groups
+            number_groups = information.number_of_groups,
+            time = scanning_time_str
         )
         .as_str(),
     );
@@ -409,12 +405,14 @@ fn compute_similar_videos(ff: SimilarVideos, entry_info: &Entry, text_view_error
     let information = ff.get_information();
     let text_messages = ff.get_text_messages();
     let found_any_duplicates = information.number_of_duplicates > 0;
+    let scanning_time_str = format_time(information.scanning_time);
 
     entry_info.set_text(
         flg!(
             "compute_found_videos",
             number_files = information.number_of_duplicates,
-            number_groups = information.number_of_groups
+            number_groups = information.number_of_groups,
+            time = scanning_time_str
         )
         .as_str(),
     );
@@ -471,12 +469,14 @@ fn compute_similar_images(sf: SimilarImages, entry_info: &Entry, text_view_error
     let text_messages = sf.get_text_messages();
 
     let found_any_duplicates = information.number_of_duplicates > 0;
+    let scanning_time_str = format_time(information.scanning_time);
 
     entry_info.set_text(
         flg!(
             "compute_found_images",
             number_files = information.number_of_duplicates,
-            number_groups = information.number_of_groups
+            number_groups = information.number_of_groups,
+            time = scanning_time_str
         )
         .as_str(),
     );
@@ -558,8 +558,9 @@ fn compute_temporary_files(tf: Temporary, entry_info: &Entry, text_view_errors: 
     let information = tf.get_information();
     let text_messages = tf.get_text_messages();
     let temporary_files_number = information.number_of_temporary_files;
+    let scanning_time_str = format_time(information.scanning_time);
 
-    entry_info.set_text(flg!("compute_found_temporary_files", number_files = temporary_files_number).as_str());
+    entry_info.set_text(flg!("compute_found_temporary_files", number_files = temporary_files_number, time = scanning_time_str).as_str());
 
     let list_store = subview.tree_view.get_model();
     let mut vector = tf.get_temporary_files().clone();
@@ -588,8 +589,9 @@ fn compute_big_files(bf: BigFile, entry_info: &Entry, text_view_errors: &TextVie
     let information = bf.get_information();
     let text_messages = bf.get_text_messages();
     let biggest_files_number = information.number_of_real_files;
+    let scanning_time_str = format_time(information.scanning_time);
 
-    entry_info.set_text(flg!("compute_found_big_files", number_files = biggest_files_number).as_str());
+    entry_info.set_text(flg!("compute_found_big_files", number_files = biggest_files_number, time = scanning_time_str).as_str());
 
     let list_store = subview.tree_view.get_model();
     let vector = bf.get_big_files();
@@ -619,8 +621,9 @@ fn compute_empty_files(vf: EmptyFiles, entry_info: &Entry, text_view_errors: &Te
     let information = vf.get_information();
     let text_messages = vf.get_text_messages();
     let empty_files_number = information.number_of_empty_files;
+    let scanning_time_str = format_time(information.scanning_time);
 
-    entry_info.set_text(flg!("compute_found_empty_files", number_files = empty_files_number).as_str());
+    entry_info.set_text(flg!("compute_found_empty_files", number_files = empty_files_number, time = scanning_time_str).as_str());
 
     let list_store = subview.tree_view.get_model();
     let vector = conditional_sort_vector(vf.get_empty_files());
@@ -648,8 +651,9 @@ fn compute_empty_folders(ef: EmptyFolder, entry_info: &Entry, text_view_errors: 
     let information = ef.get_information();
     let text_messages = ef.get_text_messages();
     let empty_folder_number = information.number_of_empty_folders;
+    let scanning_time_str = format_time(information.scanning_time);
 
-    entry_info.set_text(flg!("compute_found_empty_folders", number_files = empty_folder_number).as_str());
+    entry_info.set_text(flg!("compute_found_empty_folders", number_files = empty_folder_number, time = scanning_time_str).as_str());
 
     let list_store = subview.tree_view.get_model();
     let hashmap = ef.get_empty_folder_list();
@@ -713,7 +717,7 @@ fn compute_duplicate_finder(df: DuplicateFinder, entry_info: &Entry, text_view_e
         }
         _ => panic!(),
     }
-    let scanning_time_str = format_scanning_time(information.scanning_time);
+    let scanning_time_str = format_time(information.scanning_time);
     if duplicates_size == 0 {
         entry_info.set_text(
             flg!(

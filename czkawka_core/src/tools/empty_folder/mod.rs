@@ -1,7 +1,10 @@
 pub mod core;
+#[cfg(test)]
+mod tests;
 pub mod traits;
 
 use std::path::{Path, PathBuf};
+use std::time::Duration;
 
 use indexmap::IndexMap;
 
@@ -48,6 +51,7 @@ pub(crate) enum FolderEmptiness {
 #[derive(Default, Clone)]
 pub struct Info {
     pub number_of_empty_folders: usize,
+    pub scanning_time: Duration,
 }
 
 impl Default for EmptyFolder {

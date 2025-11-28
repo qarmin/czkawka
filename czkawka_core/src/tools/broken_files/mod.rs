@@ -1,10 +1,13 @@
 use bitflags::bitflags;
 
 pub mod core;
+#[cfg(test)]
+mod tests;
 pub mod traits;
 
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
+use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
 
@@ -69,6 +72,7 @@ bitflags! {
 #[derive(Default, Clone)]
 pub struct Info {
     pub number_of_broken_files: usize,
+    pub scanning_time: Duration,
 }
 
 #[derive(Clone)]

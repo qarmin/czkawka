@@ -1,6 +1,7 @@
 use std::io::Write;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
+use std::time::Instant;
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
@@ -18,32 +19,40 @@ impl AllTraits for SimilarImages {}
 impl Search for SimilarImages {
     #[fun_time(message = "find_similar_images", level = "info")]
     fn search(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
-        self.prepare_items();
-        self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
-        if self.check_for_similar_images(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-            self.common_data.stopped_search = true;
-            return;
+        let start_time = Instant::now();
+
+        let () = (|| {
+            self.prepare_items();
+            self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
+            if self.check_for_similar_images(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+                self.common_data.stopped_search = true;
+                return;
+            }
+            if self.hash_images(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+                self.common_data.stopped_search = true;
+                return;
+            }
+            if self.find_similar_hashes(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+                self.common_data.stopped_search = true;
+                return;
+            }
+            if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+                self.common_data.stopped_search = true;
+            }
+        })();
+
+        self.information.scanning_time = start_time.elapsed();
+
+        if !self.common_data.stopped_search {
+            self.debug_print();
         }
-        if self.hash_images(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-            self.common_data.stopped_search = true;
-            return;
-        }
-        if self.find_similar_hashes(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-            self.common_data.stopped_search = true;
-            return;
-        }
-        if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-            self.common_data.stopped_search = true;
-            return;
-        }
-        self.debug_print();
     }
 }
 
 impl DebugPrint for SimilarImages {
     #[expect(clippy::print_stdout)]
     fn debug_print(&self) {
-        if !cfg!(debug_assertions) {
+        if !cfg!(debug_assertions) || cfg!(test) {
             return;
         }
 

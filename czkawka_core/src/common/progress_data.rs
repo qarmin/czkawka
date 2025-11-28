@@ -262,3 +262,84 @@ impl CurrentStage {
         )
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_tool_type_and_current_stage_integration() {
+        assert_eq!(ToolType::Duplicate.get_max_stage(CheckingMethod::Hash), 6);
+        assert_eq!(ToolType::SameMusic.get_max_stage(CheckingMethod::AudioTags), 4);
+        assert_eq!(ToolType::SameMusic.get_max_stage(CheckingMethod::AudioContent), 7);
+        assert_eq!(ToolType::SimilarImages.get_max_stage(CheckingMethod::None), 2);
+        assert_eq!(ToolType::BrokenFiles.get_max_stage(CheckingMethod::None), 1);
+
+        assert_eq!(CurrentStage::DuplicateFullHashing.get_current_stage(), 5);
+        assert_eq!(CurrentStage::SameMusicComparingFingerprints.get_current_stage(), 7);
+        assert!(CurrentStage::DeletingFiles.is_special_non_tool_stage());
+        assert!(!CurrentStage::CollectingFiles.is_special_non_tool_stage());
+    }
+
+    #[test]
+    fn test_cache_operations_detection() {
+        assert!(CurrentStage::DuplicateCacheLoading.check_if_loading_cache());
+        assert!(CurrentStage::DuplicateCacheSaving.check_if_saving_cache());
+        assert!(CurrentStage::SameMusicCacheLoadingTags.check_if_loading_saving_cache());
+        assert!(!CurrentStage::DuplicateFullHashing.check_if_loading_saving_cache());
+    }
+
+    #[test]
+    fn test_progress_data_validation_and_empty_state() {
+        let empty = ProgressData::get_empty_state(CurrentStage::CollectingFiles);
+        assert_eq!(empty.entries_checked, 0);
+        assert_eq!(empty.tool_type, ToolType::None);
+
+        let valid = ProgressData {
+            sstage: CurrentStage::DuplicateFullHashing,
+            checking_method: CheckingMethod::Hash,
+            current_stage_idx: 5,
+            max_stage_idx: 6,
+            entries_checked: 50,
+            entries_to_check: 100,
+            bytes_checked: 1000,
+            bytes_to_check: 2000,
+            tool_type: ToolType::Duplicate,
+        };
+        valid.validate();
+    }
+
+    #[test]
+    #[should_panic(expected = "Current stage index")]
+    fn test_validation_invalid_stage_idx() {
+        ProgressData {
+            sstage: CurrentStage::DuplicateFullHashing,
+            checking_method: CheckingMethod::Hash,
+            current_stage_idx: 7,
+            max_stage_idx: 6,
+            entries_checked: 0,
+            entries_to_check: 100,
+            bytes_checked: 0,
+            bytes_to_check: 1000,
+            tool_type: ToolType::Duplicate,
+        }
+        .validate();
+    }
+
+    #[test]
+    #[should_panic(expected = "Entries checked")]
+    fn test_validation_too_many_entries() {
+        ProgressData {
+            sstage: CurrentStage::DuplicateFullHashing,
+            checking_method: CheckingMethod::Hash,
+            current_stage_idx: 5,
+            max_stage_idx: 6,
+            entries_checked: 150,
+            entries_to_check: 100,
+            bytes_checked: 0,
+            bytes_to_check: 1000,
+            tool_type: ToolType::Duplicate,
+        }
+        .validate();
+    }
+}

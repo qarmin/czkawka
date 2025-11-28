@@ -119,3 +119,64 @@ pub(crate) fn send_info_and_wait_for_ending_all_threads(progress_thread_run: &Ar
     progress_thread_run.store(false, atomic::Ordering::Relaxed);
     progress_thread_handle.join().expect("Cannot join progress thread - quite fatal error, but happens rarely");
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_progress_status_and_stop_flag() {
+        let status = ProgressStatus::new();
+        assert_eq!(status.items_counter.load(atomic::Ordering::Relaxed), 0);
+        assert_eq!(status.size_counter.load(atomic::Ordering::Relaxed), 0);
+
+        status.items_counter.fetch_add(10, atomic::Ordering::Relaxed);
+        status.size_counter.fetch_add(1024, atomic::Ordering::Relaxed);
+
+        assert_eq!(status.items_counter.load(atomic::Ordering::Relaxed), 10);
+        assert_eq!(status.size_counter.load(atomic::Ordering::Relaxed), 1024);
+
+        let stop_flag = Arc::new(AtomicBool::new(false));
+        assert!(!check_if_stop_received(&stop_flag));
+        stop_flag.store(true, atomic::Ordering::Relaxed);
+        assert!(check_if_stop_received(&stop_flag));
+    }
+
+    #[test]
+    fn test_progress_thread_handler_with_sender() {
+        let (sender, _receiver) = crossbeam_channel::unbounded();
+        let handler = prepare_thread_handler_common(Some(&sender), CurrentStage::DuplicateFullHashing, 100, (ToolType::Duplicate, CheckingMethod::Hash), 10000);
+
+        assert_eq!(handler.items_counter().load(atomic::Ordering::Relaxed), 0);
+        assert_eq!(handler.size_counter().load(atomic::Ordering::Relaxed), 0);
+
+        handler.increase_items(5);
+        handler.increase_size(512);
+        handler.increase_items(3);
+        handler.increase_size(256);
+
+        assert_eq!(handler.items_counter().load(atomic::Ordering::Relaxed), 8);
+        assert_eq!(handler.size_counter().load(atomic::Ordering::Relaxed), 768);
+
+        handler.join_thread();
+    }
+
+    #[test]
+    fn test_progress_thread_handler_without_sender() {
+        let handler = prepare_thread_handler_common(None, CurrentStage::CollectingFiles, 50, (ToolType::EmptyFiles, CheckingMethod::None), 5000);
+
+        handler.increase_items(10);
+        handler.increase_size(1000);
+
+        assert_eq!(handler.items_counter().load(atomic::Ordering::Relaxed), 10);
+        assert_eq!(handler.size_counter().load(atomic::Ordering::Relaxed), 1000);
+
+        handler.join_thread();
+    }
+
+    #[test]
+    #[should_panic(expected = "Cannot send progress data for ToolType::None")]
+    fn test_panics_on_none_tool_type() {
+        prepare_thread_handler_common(None, CurrentStage::CollectingFiles, 50, (ToolType::None, CheckingMethod::None), 5000);
+    }
+}

@@ -94,6 +94,7 @@ impl Temporary {
 
         WorkContinueStatus::Continue
     }
+
     pub(crate) fn get_file_entry(&self, items_counter: &Arc<AtomicUsize>, entry_data: &DirEntry, warnings: &mut Vec<String>) -> Option<TemporaryFileEntry> {
         items_counter.fetch_add(1, Ordering::Relaxed);
 

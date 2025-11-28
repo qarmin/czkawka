@@ -1,5 +1,9 @@
 pub mod core;
+#[cfg(test)]
+mod tests;
 pub mod traits;
+
+use std::time::Duration;
 
 use crate::common::model::FileEntry;
 use crate::common::tool_data::CommonToolData;
@@ -7,6 +11,7 @@ use crate::common::tool_data::CommonToolData;
 #[derive(Default, Clone)]
 pub struct Info {
     pub number_of_empty_files: usize,
+    pub scanning_time: Duration,
 }
 
 pub struct EmptyFiles {

@@ -1,4 +1,6 @@
 pub mod core;
+#[cfg(test)]
+mod tests;
 pub mod traits;
 
 use std::cell::RefCell;
@@ -14,6 +16,7 @@ use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+use std::time::Duration;
 
 use indexmap::IndexSet;
 use serde::{Deserialize, Serialize};
@@ -74,7 +77,7 @@ pub struct Info {
     pub number_of_duplicated_files_by_size_name: usize,
     pub lost_space_by_size: u64,
     pub lost_space_by_hash: u64,
-    pub scanning_time: u128,
+    pub scanning_time: Duration,
 }
 
 #[derive(Clone)]
@@ -305,11 +308,13 @@ impl MyHasher for Xxh3 {
 }
 
 #[cfg(test)]
-mod tests {
+mod tests2 {
     use std::fs::File;
     use std::io;
 
     use super::*;
+    use crate::common::model::FileEntry;
+    use crate::tools::duplicate::filter_hard_links;
 
     #[test]
     fn test_filter_hard_links_empty() {

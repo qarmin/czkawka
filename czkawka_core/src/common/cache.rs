@@ -235,3 +235,301 @@ where
     debug!("Failed to load cache from file {cache_file_name} because not exists");
     (text_messages, None)
 }
+
+#[cfg(test)]
+mod tests {
+    use std::collections::BTreeMap;
+    use std::fs;
+    use std::path::PathBuf;
+    use std::sync::Once;
+
+    use tempfile::TempDir;
+
+    use super::*;
+    use crate::common::config_cache_path::set_config_cache_path;
+
+    static INIT: Once = Once::new();
+
+    fn setup_cache_path() {
+        INIT.call_once(|| {
+            let _ = set_config_cache_path("czkawka_test", "czkawka_test");
+        });
+    }
+
+    #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+    struct TestEntry {
+        path: PathBuf,
+        size: u64,
+        modified_date: u64,
+        value: u32,
+    }
+
+    impl ResultEntry for TestEntry {
+        fn get_path(&self) -> &Path {
+            &self.path
+        }
+        fn get_modified_date(&self) -> u64 {
+            self.modified_date
+        }
+        fn get_size(&self) -> u64 {
+            self.size
+        }
+    }
+
+    impl TestEntry {
+        fn new(path: &str, size: u64, modified_date: u64, value: u32) -> Self {
+            Self {
+                path: PathBuf::from(path),
+                size,
+                modified_date,
+                value,
+            }
+        }
+    }
+
+    #[test]
+    fn test_extract_loaded_cache() {
+        let mut loaded_cache = BTreeMap::new();
+        loaded_cache.insert("file1".to_string(), TestEntry::new("/tmp/file1", 100, 1000, 10));
+        loaded_cache.insert("file2".to_string(), TestEntry::new("/tmp/file2", 200, 2000, 20));
+
+        let mut files_to_check = BTreeMap::new();
+        files_to_check.insert("file1".to_string(), TestEntry::new("/tmp/file1", 100, 1000, 10));
+        files_to_check.insert("file3".to_string(), TestEntry::new("/tmp/file3", 300, 3000, 30));
+        files_to_check.insert("file2".to_string(), TestEntry::new("/tmp/file2", 200, 2000, 20));
+
+        let mut records_already_cached = BTreeMap::new();
+        let mut non_cached_files_to_check = BTreeMap::new();
+
+        extract_loaded_cache(&loaded_cache, files_to_check, &mut records_already_cached, &mut non_cached_files_to_check);
+
+        assert_eq!(records_already_cached.len(), 2);
+        assert_eq!(non_cached_files_to_check.len(), 1);
+        assert!(records_already_cached.contains_key("file1"));
+        assert!(records_already_cached.contains_key("file2"));
+        assert!(non_cached_files_to_check.contains_key("file3"));
+        assert_eq!(records_already_cached.get("file1").unwrap().value, 10);
+        assert_eq!(non_cached_files_to_check.get("file3").unwrap().value, 30);
+    }
+
+    #[test]
+    fn test_extract_loaded_cache_empty() {
+        let loaded_cache: BTreeMap<String, TestEntry> = BTreeMap::new();
+        let mut files_to_check = BTreeMap::new();
+        files_to_check.insert("file1".to_string(), TestEntry::new("/tmp/file1", 100, 1000, 10));
+        files_to_check.insert("file2".to_string(), TestEntry::new("/tmp/file2", 200, 2000, 20));
+
+        let mut records_already_cached = BTreeMap::new();
+        let mut non_cached_files_to_check = BTreeMap::new();
+
+        extract_loaded_cache(&loaded_cache, files_to_check, &mut records_already_cached, &mut non_cached_files_to_check);
+
+        assert_eq!(records_already_cached.len(), 0, "No entries should be cached");
+        assert_eq!(non_cached_files_to_check.len(), 2, "All entries should be non-cached");
+    }
+
+    #[test]
+    fn test_extract_loaded_cache_all_cached() {
+        let mut loaded_cache = BTreeMap::new();
+        loaded_cache.insert("file1".to_string(), TestEntry::new("/tmp/file1", 100, 1000, 10));
+        loaded_cache.insert("file2".to_string(), TestEntry::new("/tmp/file2", 200, 2000, 20));
+
+        let mut files_to_check = BTreeMap::new();
+        files_to_check.insert("file1".to_string(), TestEntry::new("/tmp/file1", 100, 1000, 10));
+        files_to_check.insert("file2".to_string(), TestEntry::new("/tmp/file2", 200, 2000, 20));
+
+        let mut records_already_cached = BTreeMap::new();
+        let mut non_cached_files_to_check = BTreeMap::new();
+
+        extract_loaded_cache(&loaded_cache, files_to_check, &mut records_already_cached, &mut non_cached_files_to_check);
+
+        assert_eq!(records_already_cached.len(), 2, "All entries should be cached");
+        assert_eq!(non_cached_files_to_check.len(), 0, "No entries should be non-cached");
+    }
+
+    #[test]
+    fn test_save_and_load_cache_by_path() {
+        setup_cache_path();
+        let temp_dir = TempDir::new().unwrap();
+        let temp_file = temp_dir.path().join("test_file.txt");
+        fs::write(&temp_file, "test content").unwrap();
+        let metadata = fs::metadata(&temp_file).unwrap();
+
+        let mut cache_to_save = BTreeMap::new();
+        cache_to_save.insert(
+            temp_file.to_string_lossy().to_string(),
+            TestEntry::new(temp_file.to_str().unwrap(), metadata.len(), metadata.modified().unwrap().elapsed().unwrap().as_secs(), 42),
+        );
+
+        // Save cache
+        let cache_name = format!("test_cache_by_path_{}", std::process::id());
+        let messages = save_cache_to_file_generalized(&cache_name, &cache_to_save, false, 0);
+        assert!(messages.warnings.is_empty(), "Should not have warnings when saving");
+        assert!(!messages.messages.is_empty(), "Should have success messages when saving");
+
+        // Load cache
+        let (load_messages, loaded_cache) = load_cache_from_file_generalized_by_path::<TestEntry>(&cache_name, false, &cache_to_save);
+        assert!(load_messages.warnings.is_empty(), "Should not have warnings when loading");
+        assert!(!load_messages.messages.is_empty(), "Should have success messages when loading");
+        assert!(loaded_cache.is_some(), "Should load cache successfully");
+
+        let loaded = loaded_cache.unwrap();
+        assert_eq!(loaded.len(), 1, "Should load 1 entry");
+        assert!(loaded.contains_key(temp_file.to_str().unwrap()), "Should contain the test file");
+    }
+
+    #[test]
+    fn test_save_and_load_cache_by_size() {
+        setup_cache_path();
+        let temp_dir = TempDir::new().unwrap();
+        let temp_file1 = temp_dir.path().join("test_file1.txt");
+        let temp_file2 = temp_dir.path().join("test_file2.txt");
+        fs::write(&temp_file1, "test content 1").unwrap();
+        fs::write(&temp_file2, "test content 2").unwrap();
+
+        let metadata1 = fs::metadata(&temp_file1).unwrap();
+        let metadata2 = fs::metadata(&temp_file2).unwrap();
+
+        let mut cache_to_save: BTreeMap<u64, Vec<TestEntry>> = BTreeMap::new();
+        cache_to_save.entry(metadata1.len()).or_default().push(TestEntry::new(
+            temp_file1.to_str().unwrap(),
+            metadata1.len(),
+            metadata1.modified().unwrap().elapsed().unwrap().as_secs(),
+            10,
+        ));
+        cache_to_save.entry(metadata2.len()).or_default().push(TestEntry::new(
+            temp_file2.to_str().unwrap(),
+            metadata2.len(),
+            metadata2.modified().unwrap().elapsed().unwrap().as_secs(),
+            20,
+        ));
+
+        // Convert to flat map for saving
+        let mut flat_cache = BTreeMap::new();
+        for entries in cache_to_save.values() {
+            for entry in entries {
+                flat_cache.insert(entry.path.to_string_lossy().to_string(), entry.clone());
+            }
+        }
+
+        // Save cache
+        let cache_name = format!("test_cache_by_size_{}", std::process::id());
+        let messages = save_cache_to_file_generalized(&cache_name, &flat_cache, false, 0);
+        assert!(messages.warnings.is_empty(), "Should not have warnings when saving");
+
+        // Load cache
+        let (load_messages, loaded_cache) = load_cache_from_file_generalized_by_size::<TestEntry>(&cache_name, false, &cache_to_save);
+        assert!(load_messages.warnings.is_empty(), "Should not have warnings when loading");
+        assert!(loaded_cache.is_some(), "Should load cache successfully");
+
+        let loaded = loaded_cache.unwrap();
+        assert!(!loaded.is_empty(), "Should load entries");
+    }
+
+    #[test]
+    fn test_save_cache_with_minimum_file_size() {
+        setup_cache_path();
+        let temp_dir = TempDir::new().unwrap();
+        let temp_file = temp_dir.path().join("test_file.txt");
+        fs::write(&temp_file, "test").unwrap();
+
+        let mut cache_to_save = BTreeMap::new();
+        cache_to_save.insert("small_file".to_string(), TestEntry::new("/tmp/small", 10, 1000, 1));
+        cache_to_save.insert("large_file".to_string(), TestEntry::new("/tmp/large", 1000, 2000, 2));
+
+        // Save cache with minimum file size of 100 bytes
+        let cache_name = format!("test_cache_min_size_{}", std::process::id());
+        let messages = save_cache_to_file_generalized(&cache_name, &cache_to_save, false, 100);
+        assert!(messages.warnings.is_empty(), "Should not have warnings");
+
+        // Load cache - should only contain large file
+        let files_to_check = cache_to_save.clone();
+        let (_, loaded_cache) = load_cache_from_file_generalized_by_path::<TestEntry>(&cache_name, false, &files_to_check);
+
+        if let Some(loaded) = loaded_cache {
+            // Only the large file should be saved (size >= 100)
+            for (_, entry) in loaded {
+                assert!(entry.size >= 100, "All loaded entries should be >= minimum size");
+            }
+        }
+    }
+
+    #[test]
+    fn test_load_cache_with_outdated_entries() {
+        setup_cache_path();
+        let temp_dir = TempDir::new().unwrap();
+        let temp_file = temp_dir.path().join("test_file.txt");
+        fs::write(&temp_file, "test content").unwrap();
+        let metadata = fs::metadata(&temp_file).unwrap();
+
+        let mut cache_to_save = BTreeMap::new();
+        cache_to_save.insert(
+            temp_file.to_string_lossy().to_string(),
+            TestEntry::new(temp_file.to_str().unwrap(), metadata.len(), metadata.modified().unwrap().elapsed().unwrap().as_secs(), 42),
+        );
+
+        // Save cache
+        let cache_name = format!("test_cache_outdated_{}", std::process::id());
+        save_cache_to_file_generalized(&cache_name, &cache_to_save, false, 0);
+
+        // Modify the file
+        std::thread::sleep(std::time::Duration::from_millis(100));
+        fs::write(&temp_file, "modified content").unwrap();
+
+        // Create new files_to_check with updated metadata
+        let new_metadata = fs::metadata(&temp_file).unwrap();
+        let mut files_to_check = BTreeMap::new();
+        files_to_check.insert(
+            temp_file.to_string_lossy().to_string(),
+            TestEntry::new(
+                temp_file.to_str().unwrap(),
+                new_metadata.len(),
+                new_metadata.modified().unwrap().elapsed().unwrap().as_secs(),
+                42,
+            ),
+        );
+
+        // Load cache - should filter out the outdated entry
+        let (_, loaded_cache) = load_cache_from_file_generalized_by_path::<TestEntry>(&cache_name, false, &files_to_check);
+
+        if let Some(loaded) = loaded_cache {
+            // Should be empty because size/modified date changed
+            assert!(loaded.is_empty() || loaded.len() < cache_to_save.len(), "Outdated entries should be filtered");
+        }
+    }
+
+    #[test]
+    fn test_load_nonexistent_cache() {
+        setup_cache_path();
+        let cache_name = format!("nonexistent_cache_{}", std::process::id());
+        let files_to_check: BTreeMap<String, TestEntry> = BTreeMap::new();
+
+        let (messages, loaded_cache) = load_cache_from_file_generalized_by_path::<TestEntry>(&cache_name, false, &files_to_check);
+
+        assert!(loaded_cache.is_none(), "Should return None for nonexistent cache");
+        assert!(messages.warnings.is_empty(), "Should not have warnings for nonexistent cache");
+    }
+
+    #[test]
+    fn test_save_cache_with_json() {
+        setup_cache_path();
+        let temp_dir = TempDir::new().unwrap();
+        let temp_file = temp_dir.path().join("test_file.txt");
+        fs::write(&temp_file, "test content").unwrap();
+
+        let mut cache_to_save = BTreeMap::new();
+        cache_to_save.insert("test_key".to_string(), TestEntry::new("/tmp/test", 100, 1000, 42));
+
+        // Save cache with JSON enabled
+        let cache_name = format!("test_cache_json_{}", std::process::id());
+        let messages = save_cache_to_file_generalized(&cache_name, &cache_to_save, true, 0);
+        assert!(messages.warnings.is_empty(), "Should not have warnings when saving with JSON");
+    }
+
+    #[test]
+    fn test_get_cache_size_nonexistent() {
+        let nonexistent_path = Path::new("/nonexistent/path/to/cache.bin");
+        let size_str = get_cache_size(nonexistent_path);
+        assert_eq!(size_str, "<unknown size>", "Should return unknown size for nonexistent file");
+    }
+}

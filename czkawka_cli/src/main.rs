@@ -28,8 +28,8 @@ use czkawka_core::tools::temporary::Temporary;
 use log::{debug, error, info};
 
 use crate::commands::{
-    Args, BadExtensionsArgs, BiggestFilesArgs, BrokenFilesArgs, CommonCliItems, DuplicatesArgs, EmptyFilesArgs, EmptyFoldersArgs, InvalidSymlinksArgs, SameMusicArgs,
-    SimilarImagesArgs, SimilarVideosArgs, TemporaryArgs,
+    Args, BadExtensionsArgs, BiggestFilesArgs, BrokenFilesArgs, CommonCliItems, DMethod, DuplicatesArgs, EmptyFilesArgs, EmptyFoldersArgs, InvalidSymlinksArgs, SDMethod,
+    SameMusicArgs, SimilarImagesArgs, SimilarVideosArgs, TemporaryArgs,
 };
 use crate::progress::connect_progress;
 
@@ -116,7 +116,6 @@ fn duplicates(duplicates: DuplicatesArgs, stop_flag: &Arc<AtomicBool>, progress_
         delete_method,
         hash_type,
         allow_hard_links,
-        dry_run,
         case_sensitive_name_comparison,
         minimal_prehash_cache_file_size,
         use_prehash_cache,
@@ -136,8 +135,7 @@ fn duplicates(duplicates: DuplicatesArgs, stop_flag: &Arc<AtomicBool>, progress_
     set_common_settings(&mut tool, &common_cli_items, Some(reference_directories.reference_directories.as_ref()));
     tool.set_minimal_file_size(minimal_file_size);
     tool.set_maximal_file_size(maximal_file_size);
-    tool.set_delete_method(delete_method.delete_method);
-    tool.set_dry_run(dry_run.dry_run);
+    set_advanced_delete(&mut tool, delete_method);
 
     tool.search(stop_flag, Some(progress_sender));
 
@@ -145,14 +143,12 @@ fn duplicates(duplicates: DuplicatesArgs, stop_flag: &Arc<AtomicBool>, progress_
 }
 
 fn empty_folders(empty_folders: EmptyFoldersArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
-    let EmptyFoldersArgs { common_cli_items, delete_folders } = empty_folders;
+    let EmptyFoldersArgs { common_cli_items, delete_method } = empty_folders;
 
     let mut tool = EmptyFolder::new();
 
     set_common_settings(&mut tool, &common_cli_items, None);
-    if delete_folders {
-        tool.set_delete_method(DeleteMethod::Delete);
-    }
+    set_simple_delete(&mut tool, delete_method);
 
     tool.search(stop_flag, Some(progress_sender));
 
@@ -163,7 +159,7 @@ fn biggest_files(biggest_files: BiggestFilesArgs, stop_flag: &Arc<AtomicBool>, p
     let BiggestFilesArgs {
         common_cli_items,
         number_of_files,
-        delete_files,
+        delete_method,
         smallest_mode,
     } = biggest_files;
 
@@ -172,9 +168,7 @@ fn biggest_files(biggest_files: BiggestFilesArgs, stop_flag: &Arc<AtomicBool>, p
     let mut tool = BigFile::new(params);
 
     set_common_settings(&mut tool, &common_cli_items, None);
-    if delete_files {
-        tool.set_delete_method(DeleteMethod::Delete);
-    }
+    set_simple_delete(&mut tool, delete_method);
 
     tool.search(stop_flag, Some(progress_sender));
 
@@ -182,14 +176,12 @@ fn biggest_files(biggest_files: BiggestFilesArgs, stop_flag: &Arc<AtomicBool>, p
 }
 
 fn empty_files(empty_files: EmptyFilesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
-    let EmptyFilesArgs { common_cli_items, delete_files } = empty_files;
+    let EmptyFilesArgs { common_cli_items, delete_method } = empty_files;
 
     let mut tool = EmptyFiles::new();
 
     set_common_settings(&mut tool, &common_cli_items, None);
-    if delete_files {
-        tool.set_delete_method(DeleteMethod::Delete);
-    }
+    set_simple_delete(&mut tool, delete_method);
 
     tool.search(stop_flag, Some(progress_sender));
 
@@ -197,14 +189,12 @@ fn empty_files(empty_files: EmptyFilesArgs, stop_flag: &Arc<AtomicBool>, progres
 }
 
 fn temporary(temporary: TemporaryArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
-    let TemporaryArgs { common_cli_items, delete_files } = temporary;
+    let TemporaryArgs { common_cli_items, delete_method } = temporary;
 
     let mut tool = Temporary::new();
 
     set_common_settings(&mut tool, &common_cli_items, None);
-    if delete_files {
-        tool.set_delete_method(DeleteMethod::Delete);
-    }
+    set_simple_delete(&mut tool, delete_method);
 
     tool.search(stop_flag, Some(progress_sender));
 
@@ -222,7 +212,6 @@ fn similar_images(similar_images: SimilarImagesArgs, stop_flag: &Arc<AtomicBool>
         image_filter,
         hash_size,
         delete_method,
-        dry_run,
         allow_hard_links,
         ignore_same_size,
     } = similar_images;
@@ -241,8 +230,7 @@ fn similar_images(similar_images: SimilarImagesArgs, stop_flag: &Arc<AtomicBool>
     set_common_settings(&mut tool, &common_cli_items, Some(reference_directories.reference_directories.as_ref()));
     tool.set_minimal_file_size(minimal_file_size);
     tool.set_maximal_file_size(maximal_file_size);
-    tool.set_delete_method(delete_method.delete_method);
-    tool.set_dry_run(dry_run.dry_run);
+    set_advanced_delete(&mut tool, delete_method);
 
     tool.search(stop_flag, Some(progress_sender));
 
@@ -257,7 +245,6 @@ fn same_music(same_music: SameMusicArgs, stop_flag: &Arc<AtomicBool>, progress_s
         minimal_file_size,
         maximal_file_size,
         music_similarity,
-        dry_run,
         minimum_segment_duration,
         maximum_difference,
         search_method,
@@ -278,8 +265,7 @@ fn same_music(same_music: SameMusicArgs, stop_flag: &Arc<AtomicBool>, progress_s
     set_common_settings(&mut tool, &common_cli_items, Some(reference_directories.reference_directories.as_ref()));
     tool.set_minimal_file_size(minimal_file_size);
     tool.set_maximal_file_size(maximal_file_size);
-    tool.set_delete_method(delete_method.delete_method);
-    tool.set_dry_run(dry_run.dry_run);
+    set_advanced_delete(&mut tool, delete_method);
 
     tool.search(stop_flag, Some(progress_sender));
 
@@ -287,14 +273,12 @@ fn same_music(same_music: SameMusicArgs, stop_flag: &Arc<AtomicBool>, progress_s
 }
 
 fn invalid_symlinks(invalid_symlinks: InvalidSymlinksArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
-    let InvalidSymlinksArgs { common_cli_items, delete_files } = invalid_symlinks;
+    let InvalidSymlinksArgs { common_cli_items, delete_method } = invalid_symlinks;
 
     let mut tool = InvalidSymlinks::new();
 
     set_common_settings(&mut tool, &common_cli_items, None);
-    if delete_files {
-        tool.set_delete_method(DeleteMethod::Delete);
-    }
+    set_simple_delete(&mut tool, delete_method);
 
     tool.search(stop_flag, Some(progress_sender));
 
@@ -304,7 +288,7 @@ fn invalid_symlinks(invalid_symlinks: InvalidSymlinksArgs, stop_flag: &Arc<Atomi
 fn broken_files(broken_files: BrokenFilesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
     let BrokenFilesArgs {
         common_cli_items,
-        delete_files,
+        delete_method,
         checked_types,
     } = broken_files;
 
@@ -316,9 +300,7 @@ fn broken_files(broken_files: BrokenFilesArgs, stop_flag: &Arc<AtomicBool>, prog
     let mut tool = BrokenFiles::new(params);
 
     set_common_settings(&mut tool, &common_cli_items, None);
-    if delete_files {
-        tool.set_delete_method(DeleteMethod::Delete);
-    }
+    set_simple_delete(&mut tool, delete_method);
 
     tool.search(stop_flag, Some(progress_sender));
 
@@ -333,7 +315,6 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>
         minimal_file_size,
         maximal_file_size,
         delete_method,
-        dry_run,
         allow_hard_links,
         ignore_same_size,
         skip_forward_amount,
@@ -354,8 +335,7 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>
     set_common_settings(&mut tool, &common_cli_items, Some(reference_directories.reference_directories.as_ref()));
     tool.set_minimal_file_size(minimal_file_size);
     tool.set_maximal_file_size(maximal_file_size);
-    tool.set_delete_method(delete_method.delete_method);
-    tool.set_dry_run(dry_run.dry_run);
+    set_advanced_delete(&mut tool, delete_method);
 
     tool.search(stop_flag, Some(progress_sender));
 
@@ -418,6 +398,26 @@ fn save_and_write_results_to_writer<T: CommonData + PrintResults>(component: &T,
     }
 
     cli_output
+}
+
+fn set_simple_delete<T>(component: &mut T, s_delete: SDMethod)
+where
+    T: AllTraits,
+{
+    if s_delete.delete_files {
+        component.set_delete_method(DeleteMethod::Delete);
+    }
+    component.set_dry_run(s_delete.dry_run);
+    component.set_move_to_trash(s_delete.move_to_trash);
+}
+
+fn set_advanced_delete<T>(component: &mut T, a_delete: DMethod)
+where
+    T: AllTraits,
+{
+    component.set_delete_method(a_delete.delete_method);
+    component.set_dry_run(a_delete.dry_run);
+    component.set_move_to_trash(a_delete.move_to_trash);
 }
 
 fn set_common_settings<T>(component: &mut T, common_cli_items: &CommonCliItems, reference_directories: Option<&Vec<PathBuf>>)

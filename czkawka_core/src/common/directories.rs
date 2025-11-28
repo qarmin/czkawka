@@ -310,7 +310,7 @@ impl Directories {
     }
 
     #[cfg(target_family = "unix")]
-    pub(crate) fn is_on_other_filesystems(&self, path: impl AsRef<Path>) -> Result<bool, String> {
+    pub(crate) fn is_on_other_filesystems<P: AsRef<Path>>(&self, path: P) -> Result<bool, String> {
         let path = path.as_ref();
         match fs::metadata(path) {
             Ok(m) => Ok(!self.included_dev_ids.iter().any(|&id| id == m.dev())),

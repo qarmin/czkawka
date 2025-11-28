@@ -116,3 +116,64 @@ pub fn new_excluded_item(expression: &str) -> SingleExcludedItem {
         unique_extensions_splits,
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_excluded_items_new_and_basic_operations() {
+        let items = ExcludedItems::new();
+        assert!(items.expressions.is_empty());
+        assert!(items.connected_expressions.is_empty());
+
+        let items = ExcludedItems::new_from(vec!["*/.git/*".to_string(), "*/node_modules/*".to_string()]);
+        assert_eq!(items.expressions.len(), 2);
+        assert_eq!(items.get_excluded_items().len(), 2);
+    }
+
+    #[test]
+    fn test_set_excluded_items_with_default() {
+        let mut items = ExcludedItems::new();
+        let msgs = items.set_excluded_items(vec!["DEFAULT".to_string()]);
+        assert!(msgs.warnings.is_empty());
+        assert_eq!(items.expressions.len(), 1);
+        assert!(items.expressions[0].contains(".git") || items.expressions[0].contains("node_modules"));
+    }
+
+    #[test]
+    fn test_set_excluded_items_warnings() {
+        let mut items = ExcludedItems::new();
+        let msgs = items.set_excluded_items(vec!["no_wildcard".to_string(), "  ".to_string()]);
+        assert_eq!(msgs.warnings.len(), 1);
+        assert!(msgs.warnings[0].contains("Wildcard * is required"));
+        assert!(items.expressions.is_empty());
+    }
+
+    #[test]
+    fn test_is_excluded() {
+        let mut items = ExcludedItems::new();
+        items.set_excluded_items(vec!["*/.git/*".to_string(), "*/node_modules/*".to_string()]);
+
+        assert!(items.is_excluded(Path::new("/home/user/.git/config")));
+        assert!(items.is_excluded(Path::new("/project/node_modules/package.json")));
+        assert!(!items.is_excluded(Path::new("/home/user/file.txt")));
+
+        // Empty items - nothing excluded
+        let items_empty = ExcludedItems::new();
+        assert!(!items_empty.is_excluded(Path::new("/any/path")));
+    }
+
+    #[test]
+    fn test_new_excluded_item() {
+        let item = new_excluded_item("  */test/*.txt  ");
+        assert_eq!(item.expression, "*/test/*.txt");
+        assert_eq!(item.expression_splits, vec!["/test/", ".txt"]);
+        assert_eq!(item.unique_extensions_splits.len(), 2);
+
+        let item2 = new_excluded_item("*abc*def*abc*");
+        assert_eq!(item2.expression_splits, vec!["abc", "def", "abc"]);
+        // unique_extensions_splits should be deduplicated and sorted by length
+        assert_eq!(item2.unique_extensions_splits, vec!["abc", "def"]);
+    }
+}
