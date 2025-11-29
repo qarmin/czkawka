@@ -132,7 +132,7 @@ pub(crate) fn get_raw_image<P: AsRef<Path>>(path: P) -> anyhow::Result<DynamicIm
 pub(crate) fn get_raw_image<P: AsRef<Path> + std::fmt::Debug>(path: P) -> Result<DynamicImage, String> {
     let mut timer = Timer::new("Rawler");
 
-    let raw_source = RawSource::new(path.as_ref()).map_err(|err| format!("Failed to create RawSource from path {path:?}: {err}"))?;
+    let raw_source = RawSource::new(path.as_ref()).map_err(|err| format!("Failed to create RawSource from path {}: {err}", path.as_ref().to_string_lossy()))?;
 
     timer.checkpoint("Created RawSource");
 

@@ -173,7 +173,7 @@ impl PrintResults for DuplicateFinder {
                     )?;
                     for (name, (file_entry, vector)) in self.files_with_identical_names_referenced.iter().rev() {
                         writeln!(writer, "Name - {} - {} files ", name, vector.len())?;
-                        writeln!(writer, "Reference file - {:?}", file_entry.path)?;
+                        writeln!(writer, "Reference file - \"{}\"", file_entry.path.to_string_lossy())?;
                         for j in vector {
                             writeln!(writer, "\"{}\"", j.path.to_string_lossy())?;
                         }
@@ -213,7 +213,7 @@ impl PrintResults for DuplicateFinder {
                     )?;
                     for ((size, name), (file_entry, vector)) in self.files_with_identical_size_names_referenced.iter().rev() {
                         writeln!(writer, "Name - {}, {} - {} files ", name, format_size(*size, BINARY), vector.len())?;
-                        writeln!(writer, "Reference file - {:?}", file_entry.path)?;
+                        writeln!(writer, "Reference file - \"{}\"", file_entry.path.to_string_lossy())?;
                         for j in vector {
                             writeln!(writer, "\"{}\"", j.path.to_string_lossy())?;
                         }
@@ -256,7 +256,7 @@ impl PrintResults for DuplicateFinder {
                     )?;
                     for (size, (file_entry, vector)) in self.files_with_identical_size_referenced.iter().rev() {
                         writeln!(writer, "\n---- Size {} ({}) - {} files", format_size(*size, BINARY), size, vector.len())?;
-                        writeln!(writer, "Reference file - {:?}", file_entry.path)?;
+                        writeln!(writer, "Reference file - \"{}\"", file_entry.path.to_string_lossy())?;
                         for file_entry in vector {
                             writeln!(writer, "\"{}\"", file_entry.path.to_string_lossy())?;
                         }

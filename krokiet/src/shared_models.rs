@@ -74,7 +74,7 @@ impl SharedModels {
 
         match result.expect("Tried to save results, without running scan(bug which needs to be fixed)") {
             Ok(()) => Ok(()),
-            Err(e) => Err(format!("Failed to save results to folder {current_path}, reason {e}")),
+            Err(e) => Err(format!("Failed to save results to folder \"{current_path}\", reason {e}")),
         }
     }
 }

@@ -100,8 +100,8 @@ impl PrintResults for SimilarImages {
                 for file_entry in vec_file_entry {
                     writeln!(
                         writer,
-                        "{:?} - {}x{} - {} - {}",
-                        file_entry.path,
+                        "\"{}\" - {}x{} - {} - {}",
+                        file_entry.path.to_string_lossy(),
                         file_entry.width,
                         file_entry.height,
                         format_size(file_entry.size, BINARY),
