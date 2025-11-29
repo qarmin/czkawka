@@ -372,45 +372,237 @@ mod test {
         assert_eq!(before.ino(), after.ino());
     }
 
+
     #[cfg(target_family = "windows")]
     fn assert_inode(_: &Metadata, _: &Metadata) {}
 
+    #[cfg(target_family = "unix")]
+    fn assert_different_inode(before: &Metadata, after: &Metadata) {
+        assert_ne!(before.ino(), after.ino());
+    }
+
+    #[cfg(target_family = "windows")]
+    fn assert_different_inode(_: &Metadata, _: &Metadata) {}
+
+    #[cfg(target_family = "windows")]
+    fn assert_different_inode(_before: &Metadata, _after: &Metadata) {
+    }
+
     #[test]
     fn test_make_hard_link() -> io::Result<()> {
-        let dir = tempfile::Builder::new().tempdir()?;
-        let (src, dst) = (dir.path().join("a"), dir.path().join("b"));
-        File::create(&src)?;
-        let metadata = fs::metadata(&src)?;
-        File::create(&dst)?;
+        // Test 1: Basic hardlink creation
+        {
+            let dir = tempfile::Builder::new().tempdir()?;
+            let (src, dst) = (dir.path().join("a"), dir.path().join("b"));
+            File::create(&src)?;
+            let metadata = fs::metadata(&src)?;
+            File::create(&dst)?;
+            let dst_metadata_before = fs::metadata(&dst)?;
 
-        make_hard_link(&src, &dst)?;
+            assert_different_inode(&metadata, &dst_metadata_before);
 
-        assert_inode(&metadata, &fs::metadata(&dst)?);
-        assert_eq!(metadata.permissions(), fs::metadata(&dst)?.permissions());
-        assert_eq!(metadata.modified()?, fs::metadata(&dst)?.modified()?);
-        assert_inode(&metadata, &fs::metadata(&src)?);
-        assert_eq!(metadata.permissions(), fs::metadata(&src)?.permissions());
-        assert_eq!(metadata.modified()?, fs::metadata(&src)?.modified()?);
+            make_hard_link(&src, &dst)?;
 
-        let mut actual = read_dir(&dir)?.flatten().map(|e| e.path()).collect::<Vec<PathBuf>>();
-        actual.sort_unstable();
-        assert_eq!(vec![src, dst], actual);
-        Ok(())
-    }
-    #[test]
-    fn test_make_hard_link_fails() -> io::Result<()> {
-        let dir = tempfile::Builder::new().tempdir()?;
-        let (src, dst) = (dir.path().join("a"), dir.path().join("b"));
-        File::create(&dst)?;
-        let metadata = fs::metadata(&dst)?;
+            make_hard_link(&src, &dst)?;
 
-        assert!(make_hard_link(&src, &dst).is_err());
+            assert_inode(&metadata, &fs::metadata(&dst)?);
+            assert_eq!(metadata.permissions(), fs::metadata(&dst)?.permissions());
+            assert_eq!(metadata.modified()?, fs::metadata(&dst)?.modified()?);
+            assert_inode(&metadata, &fs::metadata(&src)?);
+            assert_eq!(metadata.permissions(), fs::metadata(&src)?.permissions());
+            assert_eq!(metadata.modified()?, fs::metadata(&src)?.modified()?);
 
-        assert_inode(&metadata, &fs::metadata(&dst)?);
-        assert_eq!(metadata.permissions(), fs::metadata(&dst)?.permissions());
-        assert_eq!(metadata.modified()?, fs::metadata(&dst)?.modified()?);
+            let mut actual = read_dir(&dir)?.flatten().map(|e| e.path()).collect::<Vec<PathBuf>>();
+            actual.sort_unstable();
+            assert_eq!(vec![src, dst], actual);
+        }
 
-        assert_eq!(vec![dst], read_dir(&dir)?.flatten().map(|e| e.path()).collect::<Vec<PathBuf>>());
+        // Test 2: Hardlink creation fails when source doesn't exist
+        {
+            let dir = tempfile::Builder::new().tempdir()?;
+            let (src, dst) = (dir.path().join("a"), dir.path().join("b"));
+            File::create(&dst)?;
+            let metadata = fs::metadata(&dst)?;
+
+            assert!(make_hard_link(&src, &dst).is_err());
+
+            assert_inode(&metadata, &fs::metadata(&dst)?);
+            assert_eq!(metadata.permissions(), fs::metadata(&dst)?.permissions());
+            assert_eq!(metadata.modified()?, fs::metadata(&dst)?.modified()?);
+
+            assert_eq!(vec![dst], read_dir(&dir)?.flatten().map(|e| e.path()).collect::<Vec<PathBuf>>());
+        }
+
+        // Test 3: Hardlink with content preservation
+        {
+            let dir = tempfile::Builder::new().tempdir()?;
+            let (src, dst) = (dir.path().join("src_file"), dir.path().join("dst_file"));
+            let content = "test content for hardlink";
+            {
+                let mut f = File::create(&src)?;
+                writeln!(f, "{content}")?;
+            }
+            {
+                let mut f = File::create(&dst)?;
+                writeln!(f, "old content")?;
+            }
+
+            let src_metadata = fs::metadata(&src)?;
+            let dst_metadata_before = fs::metadata(&dst)?;
+
+            assert_different_inode(&src_metadata, &dst_metadata_before);
+
+            make_hard_link(&src, &dst)?;
+
+            let src_content = fs::read_to_string(&src)?;
+            let dst_content = fs::read_to_string(&dst)?;
+            assert_eq!(src_content, dst_content);
+            assert_eq!(src_content, format!("{content}\n"));
+            assert_inode(&src_metadata, &fs::metadata(&dst)?);
+        }
+
+        // Test 4: Hardlink on readonly file - CRITICAL TEST
+        #[cfg(target_family = "unix")]
+        {
+            let dir = tempfile::Builder::new().tempdir()?;
+            let (src, dst) = (dir.path().join("readonly_src"), dir.path().join("readonly_dst"));
+
+            {
+                let mut f = File::create(&src)?;
+                writeln!(f, "readonly content")?;
+            }
+
+            let mut perms = fs::metadata(&src)?.permissions();
+            perms.set_readonly(true);
+            fs::set_permissions(&src, perms)?;
+
+            assert!(fs::metadata(&src)?.permissions().readonly());
+
+            {
+                let mut f = File::create(&dst)?;
+                writeln!(f, "dst content")?;
+            }
+
+            let src_metadata_before = fs::metadata(&src)?;
+            let dst_metadata_before = fs::metadata(&dst)?;
+
+            assert_different_inode(&src_metadata_before, &dst_metadata_before);
+
+            let result = make_hard_link(&src, &dst);
+
+            if result.is_ok() {
+                assert_inode(&src_metadata_before, &fs::metadata(&dst)?);
+                assert_eq!(fs::read_to_string(&src)?, fs::read_to_string(&dst)?);
+
+                assert!(fs::metadata(&src)?.permissions().readonly());
+                assert!(fs::metadata(&dst)?.permissions().readonly());
+            } else {
+                panic!("Hardlink creation on readonly file failed: {:?}", result.unwrap_err());
+            }
+        }
+
+        // Test 5: Hardlink on readonly destination file
+        #[cfg(target_family = "unix")]
+        {
+            let dir = tempfile::Builder::new().tempdir()?;
+            let (src, dst) = (dir.path().join("src_normal"), dir.path().join("dst_readonly"));
+
+            // Create source file
+            {
+                let mut f = File::create(&src)?;
+                writeln!(f, "source content")?;
+            }
+
+            // Create destination file and make it readonly
+            {
+                let mut f = File::create(&dst)?;
+                writeln!(f, "destination content")?;
+            }
+            let mut perms = fs::metadata(&dst)?.permissions();
+            perms.set_readonly(true);
+            fs::set_permissions(&dst, perms)?;
+
+            assert!(fs::metadata(&dst)?.permissions().readonly());
+
+            let src_metadata = fs::metadata(&src)?;
+            let dst_metadata_before = fs::metadata(&dst)?;
+
+            assert_different_inode(&src_metadata, &dst_metadata_before);
+
+            let result = make_hard_link(&src, &dst);
+
+            if result.is_ok() {
+                assert_inode(&src_metadata, &fs::metadata(&dst)?);
+                assert_eq!(fs::read_to_string(&src)?, fs::read_to_string(&dst)?);
+            } else {
+                panic!("Hardlink creation with readonly destination failed: {:?}", result.unwrap_err());
+            }
+        }
+
+        // Test 6: Hardlink when destination doesn't exist - should fail
+        {
+            let dir = tempfile::Builder::new().tempdir()?;
+            let (src, dst) = (dir.path().join("src"), dir.path().join("nonexistent"));
+            File::create(&src)?;
+
+            let result = make_hard_link(&src, &dst);
+            assert!(result.is_err(), "Should fail when destination doesn't exist");
+        }
+
+        // Test 7: Hardlink preserves file size
+        {
+            let dir = tempfile::Builder::new().tempdir()?;
+            let (src, dst) = (dir.path().join("large_src"), dir.path().join("large_dst"));
+
+            let large_content = "x".repeat(10000);
+            {
+                let mut f = File::create(&src)?;
+                write!(f, "{large_content}")?;
+            }
+            File::create(&dst)?;
+
+            let src_size = fs::metadata(&src)?.len();
+            let src_metadata = fs::metadata(&src)?;
+            let dst_metadata_before = fs::metadata(&dst)?;
+
+            assert_different_inode(&src_metadata, &dst_metadata_before);
+
+            make_hard_link(&src, &dst)?;
+
+            assert_eq!(src_size, fs::metadata(&dst)?.len());
+            assert_eq!(large_content, fs::read_to_string(&dst)?);
+        }
+
+        // Test 8: Multiple hardlinks to same file
+        {
+            let dir = tempfile::Builder::new().tempdir()?;
+            let src = dir.path().join("original");
+            let dst1 = dir.path().join("link1");
+            let dst2 = dir.path().join("link2");
+
+            {
+                let mut f = File::create(&src)?;
+                writeln!(f, "original")?;
+            }
+            File::create(&dst1)?;
+            File::create(&dst2)?;
+
+            let src_metadata = fs::metadata(&src)?;
+            let dst1_metadata_before = fs::metadata(&dst1)?;
+            let dst2_metadata_before = fs::metadata(&dst2)?;
+
+            // Before hardlinks - all files should have different inodes
+            assert_different_inode(&src_metadata, &dst1_metadata_before);
+            assert_different_inode(&src_metadata, &dst2_metadata_before);
+            assert_different_inode(&dst1_metadata_before, &dst2_metadata_before);
+
+            make_hard_link(&src, &dst1)?;
+            make_hard_link(&src, &dst2)?;
+
+            assert_inode(&src_metadata, &fs::metadata(&dst1)?);
+            assert_inode(&src_metadata, &fs::metadata(&dst2)?);
+        }
+
         Ok(())
     }
 
