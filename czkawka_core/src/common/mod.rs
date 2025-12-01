@@ -372,7 +372,6 @@ mod test {
         assert_eq!(before.ino(), after.ino());
     }
 
-
     #[cfg(target_family = "windows")]
     fn assert_inode(_: &Metadata, _: &Metadata) {}
 
@@ -382,11 +381,7 @@ mod test {
     }
 
     #[cfg(target_family = "windows")]
-    fn assert_different_inode(_: &Metadata, _: &Metadata) {}
-
-    #[cfg(target_family = "windows")]
-    fn assert_different_inode(_before: &Metadata, _after: &Metadata) {
-    }
+    fn assert_different_inode(_before: &Metadata, _after: &Metadata) {}
 
     #[test]
     fn test_make_hard_link() -> io::Result<()> {

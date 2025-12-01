@@ -1463,7 +1463,6 @@ dependencies = [
  "deunicode",
  "directories-next",
  "dunce",
- "fast_image_resize",
  "ffmpeg_cmdline_utils",
  "file-id",
  "file-rotate",
