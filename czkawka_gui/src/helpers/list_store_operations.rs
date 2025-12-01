@@ -1,3 +1,4 @@
+use fun_time::fun_time;
 use gtk4::prelude::*;
 use gtk4::{ListStore, TreeView};
 
@@ -40,6 +41,7 @@ pub(crate) fn get_from_list_store_fnc<T>(tree_view: &TreeView, fnc: &dyn Fn(&Lis
 }
 
 // After e.g. deleting files, header may become orphan or have one child, so should be deleted in this case
+#[fun_time(message = "clean_invalid_headers", level = "debug")]
 pub(crate) fn clean_invalid_headers(model: &ListStore, column_header: i32, column_path: i32) {
     // Remove only child from header
     if let Some(first_iter) = model.iter_first() {

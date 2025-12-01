@@ -102,7 +102,7 @@ impl SimilarVideos {
             Ok(t) => t,
             Err(e) => {
                 let path = file_entry.path.to_string_lossy();
-                file_entry.error = format!("Failed to hash file {path}: reason {e}");
+                file_entry.error = format!("Failed to hash file \"{path}\": reason {e}");
                 return file_entry;
             }
         };

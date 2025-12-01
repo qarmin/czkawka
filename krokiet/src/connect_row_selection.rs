@@ -133,7 +133,7 @@ mod opener {
         });
         app.global::<Callabler>().on_open_parent(move |path| {
             let Some(parent_path) = std::path::Path::new(&path).parent() else {
-                return error!("Failed to get parent path for {path}");
+                return error!("Failed to get parent path for \"{path}\"");
             };
             open_item_simple(&parent_path.to_string_lossy());
         });
