@@ -461,7 +461,7 @@ mod test {
             assert_inode(&src_metadata, &fs::metadata(&dst)?);
         }
 
-        // Test 4: Hardlink on readonly file - CRITICAL TEST
+        // Test 4: Hardlink on readonly file
         #[cfg(target_family = "unix")]
         {
             let dir = tempfile::Builder::new().tempdir()?;
@@ -507,13 +507,11 @@ mod test {
             let dir = tempfile::Builder::new().tempdir()?;
             let (src, dst) = (dir.path().join("src_normal"), dir.path().join("dst_readonly"));
 
-            // Create source file
             {
                 let mut f = File::create(&src)?;
                 writeln!(f, "source content")?;
             }
 
-            // Create destination file and make it readonly
             {
                 let mut f = File::create(&dst)?;
                 writeln!(f, "destination content")?;

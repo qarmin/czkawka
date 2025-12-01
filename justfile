@@ -127,3 +127,8 @@ check_compilations:
 
 tags:
     tags=($(git tag --sort=version:refname | grep -v Nightly)); for ((i=0; i<${#tags[@]}-1; i++)); do from=${tags[$i]}; to=${tags[$i+1]}; echo "$from -> $to : $(git diff --shortstat "$from" "$to")"; done; last=${tags[-1]}; echo "$last -> master : $(git diff --shortstat "$last" master)"
+
+install:
+    cargo install --path czkawka_cli --locked
+    cargo install --path krokiet --locked
+    cargo install --path czkawka_gui --locked

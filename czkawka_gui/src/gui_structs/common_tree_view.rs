@@ -319,7 +319,7 @@ impl SubView {
                 create_default_columns(
                     tree_view,
                     &[
-                        (ColumnsBigFiles::Size as i32, ColumnSort::Default),
+                        (ColumnsBigFiles::Size as i32, ColumnSort::Custom(ColumnsBigFiles::SizeAsBytes as i32)),
                         (ColumnsBigFiles::Name as i32, ColumnSort::Default),
                         (ColumnsBigFiles::Path as i32, ColumnSort::Default),
                         (ColumnsBigFiles::Modification as i32, ColumnSort::Custom(ColumnsBigFiles::ModificationAsSecs as i32)),
