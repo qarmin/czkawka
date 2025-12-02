@@ -1,15 +1,21 @@
 [Desktop Entry]
-Type=Application
-Terminal=false
+Categories=System;FileTools
 Exec=czkawka_gui
+Icon=com.github.qarmin.czkawka
+StartupWMClass=czkawka_gui
+Terminal=false
+TryExec=czkawka_gui
+Type=Application
+
 Name=Czkawka
 Name[it]=Singhiozzo
+Name[pt_BR]=Localizador de Arquivos Duplicados Czkawka
+
 Comment=Multi functional app to clean OS which allow to find duplicates, empty folders, similar files etc.
 Comment[it]=Programma multifunzionale per pulire il sistema, che permette di trovare file duplicati, cartelle vuote, file simili, ecc...
+Comment[pt_BR]=O ‘Czkawka’, que em idioma português significa ‘soluço’, é um programa que permite encontrar (buscar ou localizar ou pesquisar) arquivos duplicados, pastas ou diretórios vazios, arquivos equivalentes (semelhantes ou similares), criar arquivos de verificação da integridade (hash) de vários tipos de arquivos diferentes (por exemplo, arquivos de imagens, músicas, vídeos, etc.), mover para a lixeira os arquivos duplicados, excluir permanentemente os arquivos duplicados, etc., possibilita realizar a limpeza do sistema operacional
 Comment[zh_CN]=可用于清理文件副本、空文件夹、相似文件等的系统清理工具
 Comment[zh_TW]=可用於清理重複檔案、空資料夾、相似檔案等的系統清理工具
-Icon=com.github.qarmin.czkawka
-Categories=System;FileTools
+
 Keywords=Hiccup;duplicate;same;similar;cleaner;copy;copies;compare;files;
-StartupWMClass=czkawka_gui
-TryExec=czkawka_gui
+Keywords[pt_BR]=czkawka;hiccup;soluço;arquivos;ficheiros;duplicado;igual;iguais;equivalentes;similares;semelhantes;limpar;limpeza;mais limpo;cópia;cópias;comparar;pastas;
