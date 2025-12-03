@@ -93,6 +93,10 @@ pub const LANGUAGES_ALL: &[Language] = &[
         combo_box_text: "Română (Romanian)",
         short_text: "ro",
     },
+    Language {
+        combo_box_text: "Türkçe (Turkish)",
+        short_text: "tr",
+    },
 ];
 
 pub(crate) fn get_language_from_combo_box_text(combo_box_text: &str) -> Language {

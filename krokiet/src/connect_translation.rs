@@ -12,6 +12,7 @@ pub struct Language {
     pub left_panel_size: f32, // Currently don't know how to automatically calculate this, so each language has its own size
 }
 
+// When changing, do not forget to update languages_list inside slint file
 pub const LANGUAGE_LIST: &[Language] = &[
     Language {
         long_name: "English",
@@ -122,6 +123,11 @@ pub const LANGUAGE_LIST: &[Language] = &[
         long_name: "Română (Romanian)",
         short_name: "ro",
         left_panel_size: 140.0,
+    },
+    Language {
+        long_name: "Türkçe (Turkish)",
+        short_name: "tr",
+        left_panel_size: 150.0,
     },
 ];
 

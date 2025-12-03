@@ -18,10 +18,15 @@ pub(crate) fn connect_button_save(gui_data: &GuiData) {
     let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
 
     buttons_save.connect_clicked(move |buttons_save| {
-        let current_path = match env::current_dir() {
+        let mut current_path = match env::current_dir() {
             Ok(t) => t.to_string_lossy().to_string(),
             Err(_) => "__unknown__".to_string(),
         };
+        if ["Windows"].iter().any(|item| current_path.contains(item)) {
+            current_path = directories_next::UserDirs::new()
+                .and_then(|d| d.desktop_dir().map(|d| d.to_string_lossy().to_string()))
+                .unwrap_or_else(|| current_path.clone());
+        }
 
         let subview = common_tree_views.get_current_subview();
 

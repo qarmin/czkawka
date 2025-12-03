@@ -34,7 +34,7 @@
 - Krokiet Windows binaries with skia backend are available (this is msvc build and requires vc redist installed)
 - Intel Mac binaries, are now built with the latest available MacOS(15 at the moment)
 - Windows prebuild binaries, bundles now libEGL and libGLES, which fixes gtk 4.12 binaries, so gtk 4.6 binaries are no longer provided
-- Mac opengl binaries are deprecated(due deprecating opengl by Apple) and skia vulkan binaries are now provided and recommended to use
+- Krokiet Mac OpenGL binaries are deprecated (due to Apple’s broken and outdated OpenGL driver), and Skia Vulkan binaries are now provided and recommended for use.
 
 ## Version 10.0.0 - 18.08.2025r
 ### Breaking changes
