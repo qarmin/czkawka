@@ -54,6 +54,7 @@ jobs:
           cargo build --release --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software"
           mv target/release/krokiet mac_krokiet_skia_vulkan_${{ env.ARCHNAME }}
           
+          cargo build --release --features "heif,libavif"
           mv target/release/czkawka_cli mac_czkawka_cli_heif_avif_${{ env.ARCHNAME }}
           mv target/release/czkawka_gui mac_czkawka_gui_heif_avif_${{ env.ARCHNAME }}
           mv target/release/krokiet mac_krokiet_heif_avif_${{ env.ARCHNAME }}
