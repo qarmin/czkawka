@@ -94,7 +94,6 @@ log-panics = { version = "2.1.0", features = ["with-backtrace"] }
 deunicode = "1.6.2"
 glibc_musl_version = "0.1.0"
 
-fast_image_resize = "5.1.4"
 rand = "0.9.2"
 
 [target.'cfg(windows)'.dependencies]
@@ -105,7 +104,7 @@ rustc_version = "0.4"
 glibc_musl_version = "0.1.0"
 
 [dev-dependencies]
-criterion =  { version = "0.7", default-features = false, features = [] }
+criterion =  { version = "0.8", default-features = false, features = [] }
 
 [[bench]]
 name = "hash_calculation_benchmark"

@@ -27,11 +27,14 @@
 - Fixed the “expected” GTK regression that made image previews ridiculously small - [#1658](https://github.com/qarmin/czkawka/pull/1658)
 - Added button, that easily allows to swap between compared images - [#1658](https://github.com/qarmin/czkawka/pull/1658)
 - Refactorings to assess whether migrating to GTK 5 will be possible (currently, it doesn’t seem very feasible) - [#1658](https://github.com/qarmin/czkawka/pull/1658)
+- Fixed sorting by size in big files mode - [#1691](https://github.com/qarmin/czkawka/pull/1691)
+- Ugly workarounds for ugly freezes, caused probably by inconsistencies between GTK4 and the Rust compiler’s optimizations   - [#1691](https://github.com/qarmin/czkawka/pull/1691)
 
 ### Prebuilt binaries
 - Krokiet Windows binaries with skia backend are available (this is msvc build and requires vc redist installed)
 - Intel Mac binaries, are now built with the latest available MacOS(15 at the moment)
 - Windows prebuild binaries, bundles now libEGL and libGLES, which fixes gtk 4.12 binaries, so gtk 4.6 binaries are no longer provided
+- Krokiet Mac OpenGL binaries are deprecated (due to Apple’s broken and outdated OpenGL driver), and Skia Vulkan binaries are now provided and recommended for use.
 
 ## Version 10.0.0 - 18.08.2025r
 ### Breaking changes

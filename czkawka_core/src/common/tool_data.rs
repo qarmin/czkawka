@@ -472,8 +472,9 @@ pub trait CommonData {
 
         if !dry_run {
             let action = if is_hardlinking { "hardlink" } else { "delete" };
+            let action2 = if is_hardlinking { "hardlinked" } else { "deleted" };
             info!(
-                "{} items deleted, {} bytes gained, {} failed to {action}",
+                "{} items {action2}, {} gained, {} failed to {action}",
                 delete_result.deleted_files,
                 format_size(delete_result.gained_bytes, BINARY),
                 delete_result.failed_to_delete_files

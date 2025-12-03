@@ -11,7 +11,7 @@ use crate::tools::broken_files::{BrokenFiles, BrokenFilesParameters, CheckedType
 
 fn get_test_resources_path() -> PathBuf {
     let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test_resources");
-    assert!(path.exists(), "Test resources not found at {path:?}");
+    assert!(path.exists(), "Test resources not found at \"{}\"", path.to_string_lossy());
     path
 }
 

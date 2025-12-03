@@ -44,7 +44,7 @@ pub(crate) fn decode_normal_image(path: &str) -> anyhow::Result<DynamicImage> {
 pub fn get_dynamic_image_from_path(path: &str) -> Result<DynamicImage, String> {
     let path_lower = Path::new(path).extension().unwrap_or_default().to_string_lossy().to_lowercase();
 
-    trace!("decoding file {path}");
+    trace!("decoding file \"{path}\"");
     let res = panic::catch_unwind(|| {
         if HEIC_EXTENSIONS.iter().any(|ext| path_lower.ends_with(ext)) {
             #[cfg(feature = "heif")]
@@ -132,7 +132,7 @@ pub(crate) fn get_raw_image<P: AsRef<Path>>(path: P) -> anyhow::Result<DynamicIm
 pub(crate) fn get_raw_image<P: AsRef<Path> + std::fmt::Debug>(path: P) -> Result<DynamicImage, String> {
     let mut timer = Timer::new("Rawler");
 
-    let raw_source = RawSource::new(path.as_ref()).map_err(|err| format!("Failed to create RawSource from path {path:?}: {err}"))?;
+    let raw_source = RawSource::new(path.as_ref()).map_err(|err| format!("Failed to create RawSource from path {}: {err}", path.as_ref().to_string_lossy()))?;
 
     timer.checkpoint("Created RawSource");
 

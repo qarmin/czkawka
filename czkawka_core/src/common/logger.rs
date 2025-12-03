@@ -173,7 +173,7 @@ pub fn print_version_mode(app: &str) {
     };
 
     info!(
-        "{app} version: {CZKAWKA_VERSION}({git_commit} {official_build}) , {debug_release} mode, rust {rust_version}, os {} {} ({} {}), {processors} cpu/threads, features({}): [{}], app cpu version: {app_cpu_version}, os cpu version: {os_cpu_version}{musl_or_glibc}",
+        "{app} version: {CZKAWKA_VERSION}({git_commit} {official_build}), {debug_release} mode, rust {rust_version}, os {} {} ({} {}), {processors} cpu/threads, features({}): [{}], app cpu version: {app_cpu_version}, os cpu version: {os_cpu_version}{musl_or_glibc}",
         info.os_type(),
         info.version(),
         env::consts::ARCH,

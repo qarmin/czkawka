@@ -68,6 +68,7 @@ clippy.enum_variant_names = "allow" # Not always is possible to use different na
 clippy.too_many_arguments = "allow" # Sometimes such functions are needed
 clippy.type_complexity = "allow" # Sometimes such types are needed
 clippy.collapsible_else_if = "allow" # Sometimes it is more readable
+clippy.iter_on_single_items = "allow" # Allows to extend items
 
 clippy.doc_broken_link = "warn"
 clippy.ip_constant = "warn"
@@ -102,7 +103,6 @@ clippy.invalid_upcast_comparisons = "warn"
 clippy.iter_filter_is_ok = "warn"
 clippy.iter_filter_is_some = "warn"
 clippy.iter_on_empty_collections = "warn"
-clippy.iter_on_single_items = "warn"
 clippy.iter_with_drain = "warn"
 clippy.large_stack_arrays = "warn"
 clippy.large_types_passed_by_value = "warn"

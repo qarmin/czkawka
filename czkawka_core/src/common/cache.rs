@@ -41,20 +41,28 @@ where
             let writer = BufWriter::new(file_handler.expect("Cannot fail, because for saving, this always exists"));
             let options = bincode::DefaultOptions::new().with_limit(MEMORY_LIMIT);
             if let Err(e) = options.serialize_into(writer, &hashmap_to_save) {
-                text_messages.warnings.push(format!("Cannot write data to cache file {cache_file:?}, reason {e}"));
-                debug!("Failed to save cache to file {cache_file:?} - {e}");
+                text_messages
+                    .warnings
+                    .push(format!("Cannot write data to cache file \"{}\", reason {e}", cache_file.to_string_lossy()));
+                debug!("Failed to save cache to file \"{}\" - {e}", cache_file.to_string_lossy());
                 return text_messages;
             }
-            debug!("Saved cache to binary file {cache_file:?} with size {}", get_cache_size(&cache_file));
+            debug!("Saved cache to binary file \"{}\" with size {}", cache_file.to_string_lossy(), get_cache_size(&cache_file));
         }
         if save_also_as_json && let Some(file_handler_json) = file_handler_json {
             let writer = BufWriter::new(file_handler_json);
             if let Err(e) = serde_json::to_writer(writer, &hashmap_to_save) {
-                text_messages.warnings.push(format!("Cannot write data to cache file {cache_file_json:?}, reason {e}"));
-                debug!("Failed to save cache to file {cache_file_json:?} - {e}");
+                text_messages
+                    .warnings
+                    .push(format!("Cannot write data to cache file \"{}\", reason {e}", cache_file_json.to_string_lossy()));
+                debug!("Failed to save cache to file \"{}\" - {e}", cache_file_json.to_string_lossy());
                 return text_messages;
             }
-            debug!("Saved cache to json file {cache_file_json:?} with size {}", get_cache_size(&cache_file_json));
+            debug!(
+                "Saved cache to json file \"{}\" with size {}",
+                cache_file_json.to_string_lossy(),
+                get_cache_size(&cache_file_json)
+            );
         }
 
         text_messages.messages.push(format!("Properly saved to file {} cache entries.", hashmap.len()));
@@ -181,8 +189,10 @@ where
             vec_loaded_entries = match options.deserialize_from(reader) {
                 Ok(t) => t,
                 Err(e) => {
-                    text_messages.warnings.push(format!("Failed to load data from cache file {cache_file:?}, reason {e}"));
-                    error!("Failed to load cache from file {cache_file:?} - {e}");
+                    text_messages
+                        .warnings
+                        .push(format!("Failed to load data from cache file {}, reason {e}", cache_file.to_string_lossy()));
+                    error!("Failed to load cache from file {} - {e}", cache_file.to_string_lossy());
                     return (text_messages, None);
                 }
             };
@@ -194,8 +204,8 @@ where
                 Err(e) => {
                     text_messages
                         .warnings
-                        .push(format!("Failed to load data from json cache file {cache_file_json:?}, reason {e}"));
-                    debug!("Failed to load cache from file {cache_file:?} - {e}");
+                        .push(format!("Failed to load data from json cache file {}, reason {e}", cache_file_json.to_string_lossy()));
+                    debug!("Failed to load cache from file {} - {e}", cache_file_json.to_string_lossy());
                     return (text_messages, None);
                 }
             };
