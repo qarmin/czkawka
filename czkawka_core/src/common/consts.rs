@@ -23,7 +23,7 @@ pub const IMAGE_RS_BROKEN_FILES_EXTENSIONS: &[&str] = &[
 pub const IMAGE_RS_BROKEN_FILES_EXTENSIONS: &[&str] = &[
     "jpg", "jpeg", "png", "tiff", "tif", "tga", "ff", "jif", "jfi", "gif", "bmp", "ico", "jfif", "jpe", "pnz", "dib", "webp", "exr",
 ];
-pub const HEIC_EXTENSIONS: &[&str] = &["heif", "heifs", "heic", "heics", "avci", "avcs"];
+pub const HEIC_EXTENSIONS: &[&str] = &["heif", "heifs", "heic", "heics", "avci", "avcs", "hif"];
 pub const ZIP_FILES_EXTENSIONS: &[&str] = &["zip", "jar"];
 pub const PDF_FILES_EXTENSIONS: &[&str] = &["pdf"];
 pub const AUDIO_FILES_EXTENSIONS: &[&str] = &[
