@@ -483,17 +483,13 @@ mod test {
 
             assert_different_inode(&src_metadata_before, &dst_metadata_before);
 
-            let result = make_hard_link(&src, &dst);
+            make_hard_link(&src, &dst).unwrap();
 
-            if result.is_ok() {
-                assert_inode(&src_metadata_before, &fs::metadata(&dst)?);
-                assert_eq!(fs::read_to_string(&src)?, fs::read_to_string(&dst)?);
+            assert_inode(&src_metadata_before, &fs::metadata(&dst)?);
+            assert_eq!(fs::read_to_string(&src)?, fs::read_to_string(&dst)?);
 
-                assert!(fs::metadata(&src)?.permissions().readonly());
-                assert!(fs::metadata(&dst)?.permissions().readonly());
-            } else {
-                panic!("Hardlink creation on readonly file failed: {:?}", result.unwrap_err());
-            }
+            assert!(fs::metadata(&src)?.permissions().readonly());
+            assert!(fs::metadata(&dst)?.permissions().readonly());
         }
 
         // Test 5: Hardlink on readonly destination file
@@ -522,14 +518,10 @@ mod test {
 
             assert_different_inode(&src_metadata, &dst_metadata_before);
 
-            let result = make_hard_link(&src, &dst);
+            make_hard_link(&src, &dst).unwrap();
 
-            if result.is_ok() {
-                assert_inode(&src_metadata, &fs::metadata(&dst)?);
-                assert_eq!(fs::read_to_string(&src)?, fs::read_to_string(&dst)?);
-            } else {
-                panic!("Hardlink creation with readonly destination failed: {:?}", result.unwrap_err());
-            }
+            assert_inode(&src_metadata, &fs::metadata(&dst)?);
+            assert_eq!(fs::read_to_string(&src)?, fs::read_to_string(&dst)?);
         }
 
         // Test 6: Hardlink when destination doesn't exist - should fail
