@@ -149,10 +149,9 @@ dependencies_graph:
     cd krokiet;cargo deps --all-deps | dot -Tpng > deps.png;cd ..
 
 # Shows llvm compilation data summary
-profiling profile=debug:
-    # profile: "debug" (default) or "release"
-    if [ "{{profile}}" = "release" ]; then release_flag="--release"; else release_flag=""; fi
-    cargo clean
+profiling profile='debug' mode='build':
+    if [ "{{profile}}" = "release" ]; then release_flag="--release"; else release_flag=""; fi; \
+    cargo clean; \
     for crate in czkawka_core czkawka_gui czkawka_cli krokiet; do \
         cd "$crate"; \
         rm ../*.mm_profdata || true; \
@@ -162,8 +161,28 @@ profiling profile=debug:
         cd ..; \
     done
 
+# Timings of crates compilation
+timings profile='debug' mode='build':
+    if [ "{{profile}}" = "release" ]; then release_flag="--release"; else release_flag=""; fi; \
+    cargo clean; \
+    for crate in czkawka_core czkawka_gui czkawka_cli krokiet; do \
+        cd "$crate"; \
+        rm ../target/cargo-timings/*.html || true; \
+        cargo "{{mode}}" $release_flag --timings; \
+        cp "$(find ../target/cargo-timings -maxdepth 1 -name '*.html' -print -quit)" ../czkawka_core.html \
+        cd ..; \
+    done
+    #cargo clean
+#    cd czkawka_core; RUSTFLAGS="-Ztime" cargo +nightly rustc; cd ..;
+#    cargo clean
+#    cd czkawka_gui; RUSTFLAGS="-Ztime" cargo +nightly rustc; cd ..;
+#    cargo clean
+#    cd czkawka_cli; RUSTFLAGS="-Ztime" cargo +nightly rustc; cd ..;
+#    cargo clean
+#    cd krokiet; RUSTFLAGS="-Ztime" cargo +nightly rustc; cd ..;
+
 # Per crate compilarion times and ram usage
-# This is very verbose, so probably not really helpful
+# This is very verbose, so probably not really useful
 time_passes:
     cargo clean
     cd czkawka_core; RUSTFLAGS="-Ztime-passes" cargo +nightly rustc; cd ..;
@@ -173,4 +192,3 @@ time_passes:
     cd czkawka_cli; RUSTFLAGS="-Ztime-passes" cargo +nightly rustc; cd ..;
     cargo clean
     cd krokiet; RUSTFLAGS="-Ztime-passes" cargo +nightly rustc; cd ..;
-
