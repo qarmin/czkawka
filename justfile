@@ -169,7 +169,7 @@ timings profile='debug' mode='build':
         cd "$crate"; \
         rm ../target/cargo-timings/*.html || true; \
         cargo "{{mode}}" $release_flag --timings; \
-        cp "$(find ../target/cargo-timings -maxdepth 1 -name '*.html' -print -quit)" "../$crate.html" \
+        cp "$(find ../target/cargo-timings -maxdepth 1 -name '*.html' -print -quit)" "../$crate.html" || true; \
         cd ..; \
     done
     #cargo clean
