@@ -81,9 +81,9 @@ options to choose than other).
 |     Overwriting files     |             |             |   ✔    |                   |      ✔      |
 |    Multiple languages     |      ✔      |      ✔      |   ✔    |         ✔         |      ✔      |
 |       Cache support       |      ✔      |      ✔      |        |         ✔         |             |
-|   In active development   |     Yes     |     Yes     |   No   |        No*        |     Yes     |
+|   In active development   |     Yes     |     Yes     |   No   |        No<sup>*</sup>        |     Yes     |
 
-* Last commit in 2024 and last version released in 2023
+<p><sup>*</sup> Last commit in 2024 and last version released in 2023</p> 
 
 ## Other apps
 
