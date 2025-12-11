@@ -149,25 +149,18 @@ dependencies_graph:
     cd krokiet;cargo deps --all-deps | dot -Tpng > deps.png;cd ..
 
 # Shows llvm compilation data summary
-profiling_debug:
+profiling profile=debug:
+    # profile: "debug" (default) or "release"
+    if [ "{{profile}}" = "release" ]; then release_flag="--release"; else release_flag=""; fi
     cargo clean
-    cd czkawka_core; rm ../*.mm_profdata; rm *.mm_profdata; RUSTFLAGS="-Zself-profile" cargo +nightly rustc; summarize summarize ../*.mm_profdata; cd ..;
-    cargo clean
-    cd czkawka_gui; rm ../*.mm_profdata; rm *.mm_profdata; RUSTFLAGS="-Zself-profile" cargo +nightly rustc; summarize summarize ../*.mm_profdata; cd ..;
-    cargo clean
-    cd czkawka_cli; rm ../*.mm_profdata; rm *.mm_profdata; RUSTFLAGS="-Zself-profile" cargo +nightly rustc; summarize summarize ../*.mm_profdata; cd ..;
-    cargo clean
-    cd krokiet; rm ../*.mm_profdata; rm *.mm_profdata; RUSTFLAGS="-Zself-profile" cargo +nightly rustc; summarize summarize ../*.mm_profdata; cd ..;
-
-profiling_release:
-    cargo clean
-    cd czkawka_core; rm ../*.mm_profdata; rm *.mm_profdata; RUSTFLAGS="-Zself-profile" cargo +nightly rustc; summarize summarize ../*.mm_profdata; cd ..;
-    cargo clean
-    cd czkawka_gui; rm ../*.mm_profdata; rm *.mm_profdata; RUSTFLAGS="-Zself-profile" cargo +nightly rustc; summarize summarize ../*.mm_profdata; cd ..;
-    cargo clean
-    cd czkawka_cli; rm ../*.mm_profdata; rm *.mm_profdata; RUSTFLAGS="-Zself-profile" cargo +nightly rustc; summarize summarize ../*.mm_profdata; cd ..;
-    cargo clean
-    cd krokiet; rm ../*.mm_profdata; rm *.mm_profdata; RUSTFLAGS="-Zself-profile" cargo +nightly rustc summarize summarize ../*.mm_profdata; cd ..;
+    for crate in czkawka_core czkawka_gui czkawka_cli krokiet; do \
+        cd "$crate"; \
+        rm ../*.mm_profdata || true; \
+        rm *.mm_profdata || true; \
+        RUSTFLAGS="-Zself-profile" cargo +nightly rustc $release_flag; \
+        summarize summarize ../*.mm_profdata || true; \
+        cd ..; \
+    done
 
 # Per crate compilarion times and ram usage
 # This is very verbose, so probably not really helpful
@@ -180,3 +173,4 @@ time_passes:
     cd czkawka_cli; RUSTFLAGS="-Ztime-passes" cargo +nightly rustc; cd ..;
     cargo clean
     cd krokiet; RUSTFLAGS="-Ztime-passes" cargo +nightly rustc; cd ..;
+
