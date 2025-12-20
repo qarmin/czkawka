@@ -137,8 +137,6 @@ main_tree_view_column_current_extension = Current Extension
 main_tree_view_column_proper_extensions = Proper Extension
 main_tree_view_column_fps = FPS
 main_tree_view_column_codec = Codec
-main_tree_view_column_bitrate = Bitrate
-main_tree_view_column_dimensions = Dimensions
 
 main_label_check_method = Check method
 main_label_hash_type = Hash type

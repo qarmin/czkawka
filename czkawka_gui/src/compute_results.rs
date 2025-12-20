@@ -90,6 +90,21 @@ fn get_row_color(is_header: bool) -> &'static str {
     if is_header { HEADER_ROW_COLOR } else { MAIN_ROW_COLOR }
 }
 
+fn format_bitrate_opt(bitrate: Option<u64>) -> String {
+    match bitrate {
+        Some(b) => {
+            if b >= 1_000_000 {
+                format!("{:.1} Mbps", b as f64 / 1_000_000.0)
+            } else if b >= 1000 {
+                format!("{:.0} kbps", b as f64 / 1000.0)
+            } else {
+                format!("{b} bps")
+            }
+        }
+        None => String::from(""),
+    }
+}
+
 pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Receiver<Message>) {
     let combo_box_image_hash_size = gui_data.main_notebook.combo_box_image_hash_size.clone();
     let buttons_search = gui_data.bottom_buttons.buttons_search.clone();
@@ -428,10 +443,36 @@ fn compute_similar_videos(ff: SimilarVideos, entry_info: &Entry, text_view_error
                 let vec_file_entry = vector_sort_unstable_entry_by_path(vec_file_entry);
 
                 let (directory, file) = split_path(&base_file_entry.path);
-                similar_videos_add_to_list_store(&list_store, &file, &directory, base_file_entry.size, base_file_entry.modified_date, true, true, base_file_entry.fps, base_file_entry.codec.as_deref(), base_file_entry.bitrate, base_file_entry.width, base_file_entry.height);
+                similar_videos_add_to_list_store(
+                    &list_store,
+                    &file,
+                    &directory,
+                    base_file_entry.size,
+                    base_file_entry.modified_date,
+                    true,
+                    true,
+                    base_file_entry.fps,
+                    base_file_entry.codec.as_deref(),
+                    base_file_entry.bitrate,
+                    base_file_entry.width,
+                    base_file_entry.height,
+                );
                 for file_entry in &vec_file_entry {
                     let (directory, file) = split_path(&file_entry.path);
-                    similar_videos_add_to_list_store(&list_store, &file, &directory, file_entry.size, file_entry.modified_date, false, true, file_entry.fps, file_entry.codec.as_deref(), file_entry.bitrate, file_entry.width, file_entry.height);
+                    similar_videos_add_to_list_store(
+                        &list_store,
+                        &file,
+                        &directory,
+                        file_entry.size,
+                        file_entry.modified_date,
+                        false,
+                        true,
+                        file_entry.fps,
+                        file_entry.codec.as_deref(),
+                        file_entry.bitrate,
+                        file_entry.width,
+                        file_entry.height,
+                    );
                 }
             }
         } else {
@@ -443,7 +484,20 @@ fn compute_similar_videos(ff: SimilarVideos, entry_info: &Entry, text_view_error
                 similar_videos_add_to_list_store(&list_store, "", "", 0, 0, true, false, None, None, None, None, None);
                 for file_entry in &vec_file_entry {
                     let (directory, file) = split_path(&file_entry.path);
-                    similar_videos_add_to_list_store(&list_store, &file, &directory, file_entry.size, file_entry.modified_date, false, false, file_entry.fps, file_entry.codec.as_deref(), file_entry.bitrate, file_entry.width, file_entry.height);
+                    similar_videos_add_to_list_store(
+                        &list_store,
+                        &file,
+                        &directory,
+                        file_entry.size,
+                        file_entry.modified_date,
+                        false,
+                        false,
+                        file_entry.fps,
+                        file_entry.codec.as_deref(),
+                        file_entry.bitrate,
+                        file_entry.width,
+                        file_entry.height,
+                    );
                 }
             }
         }
@@ -937,16 +991,29 @@ fn similar_images_add_to_list_store(
     append_row_to_list_store(list_store, &values);
 }
 
-fn similar_videos_add_to_list_store(list_store: &ListStore, file: &str, directory: &str, size: u64, modified_date: u64, is_header: bool, is_reference_folder: bool, fps: Option<f64>, codec: Option<&str>, bitrate: Option<u64>, width: Option<u32>, height: Option<u32>) {
+fn similar_videos_add_to_list_store(
+    list_store: &ListStore,
+    file: &str,
+    directory: &str,
+    size: u64,
+    modified_date: u64,
+    is_header: bool,
+    is_reference_folder: bool,
+    fps: Option<f64>,
+    codec: Option<&str>,
+    bitrate: Option<u64>,
+    width: Option<u32>,
+    height: Option<u32>,
+) {
     const COLUMNS_NUMBER: usize = 15;
     let (size_str, string_date) = format_size_and_date(size, modified_date, is_header, is_reference_folder);
     let color = get_row_color(is_header);
 
-    let fps_str = fps.map(|f| format!("{:.2}", f)).unwrap_or_default();
-    let bitrate_str = bitrate.map(|b| b.to_string()).unwrap_or_default();
-    let codec_str = codec.unwrap_or_default().to_string();
+    let fps_str = fps.map(|f| format!("{f:.2}")).unwrap_or_default();
+    let bitrate_str = format_bitrate_opt(bitrate);
+    let codec_str = codec.unwrap_or_default();
     let dimensions = match (width, height) {
-        (Some(w), Some(h)) => format!("{}x{}", w, h),
+        (Some(w), Some(h)) => format!("{w}x{h}"),
         _ => "".to_string(),
     };
 
