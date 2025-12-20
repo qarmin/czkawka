@@ -160,6 +160,7 @@ pub enum ColumnsSimilarVideos {
     Codec,
     Bitrate,
     Dimensions,
+    Duration,
     Name,
     Path,
     Modification,

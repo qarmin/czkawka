@@ -89,6 +89,7 @@ column_current_extension = Current Extension
 column_proper_extension = Proper Extension
 column_fps = FPS
 column_codec = Codec
+column_duration = Duration
 
 # Slint translations
 ok_button = Ok

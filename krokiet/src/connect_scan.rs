@@ -21,6 +21,7 @@ use czkawka_core::tools::invalid_symlinks::{InvalidSymlinks, SymlinksFileEntry};
 use czkawka_core::tools::same_music::{MusicEntry, MusicSimilarity, SameMusic, SameMusicParameters};
 use czkawka_core::tools::similar_images::core::get_string_from_similarity;
 use czkawka_core::tools::similar_images::{ImagesEntry, SimilarImages, SimilarImagesParameters};
+use czkawka_core::tools::similar_videos::core::{format_bitrate_opt, format_duration_opt};
 use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters, VideosEntry, crop_detect_from_str};
 use czkawka_core::tools::temporary::{Temporary, TemporaryFileEntry};
 use humansize::{BINARY, format_size};
@@ -599,14 +600,16 @@ fn prepare_data_model_similar_videos(fe: &VideosEntry) -> (ModelRc<SharedString>
     } else {
         "".to_string()
     };
+    let duration = format_duration_opt(fe.duration);
     let data_model_str = VecModel::from_slice(&[
         format_size(fe.size, BINARY).into(),
         file.into(),
         directory.into(),
+        dimensions.into(),
+        duration.into(),
         bitrate.into(),
         fps.into(),
         codec.into(),
-        dimensions.into(),
         DateTime::from_timestamp(fe.get_modified_date() as i64, 0)
             .expect("Cannot create DateTime")
             .to_string()

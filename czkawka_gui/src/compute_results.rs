@@ -20,6 +20,7 @@ use czkawka_core::tools::same_music::{MusicSimilarity, SameMusic};
 use czkawka_core::tools::similar_images::core::get_string_from_similarity;
 use czkawka_core::tools::similar_images::{ImagesEntry, SimilarImages};
 use czkawka_core::tools::similar_videos::SimilarVideos;
+use czkawka_core::tools::similar_videos::core::{format_bitrate_opt, format_duration_opt};
 use czkawka_core::tools::temporary::Temporary;
 use fun_time::fun_time;
 use gtk4::prelude::*;
@@ -89,8 +90,6 @@ fn format_size_and_date(size: u64, modified_date: u64, is_header: bool, is_refer
 fn get_row_color(is_header: bool) -> &'static str {
     if is_header { HEADER_ROW_COLOR } else { MAIN_ROW_COLOR }
 }
-
-
 
 pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Receiver<Message>) {
     let combo_box_image_hash_size = gui_data.main_notebook.combo_box_image_hash_size.clone();
@@ -443,6 +442,7 @@ fn compute_similar_videos(ff: SimilarVideos, entry_info: &Entry, text_view_error
                     base_file_entry.bitrate,
                     base_file_entry.width,
                     base_file_entry.height,
+                    base_file_entry.duration,
                 );
                 for file_entry in &vec_file_entry {
                     let (directory, file) = split_path(&file_entry.path);
@@ -459,6 +459,7 @@ fn compute_similar_videos(ff: SimilarVideos, entry_info: &Entry, text_view_error
                         file_entry.bitrate,
                         file_entry.width,
                         file_entry.height,
+                        file_entry.duration,
                     );
                 }
             }
@@ -468,7 +469,7 @@ fn compute_similar_videos(ff: SimilarVideos, entry_info: &Entry, text_view_error
             for vec_file_entry in vec_struct_similar {
                 let vec_file_entry = vector_sort_unstable_entry_by_path(vec_file_entry);
 
-                similar_videos_add_to_list_store(&list_store, "", "", 0, 0, true, false, None, None, None, None, None);
+                similar_videos_add_to_list_store(&list_store, "", "", 0, 0, true, false, None, None, None, None, None, None);
                 for file_entry in &vec_file_entry {
                     let (directory, file) = split_path(&file_entry.path);
                     similar_videos_add_to_list_store(
@@ -484,6 +485,7 @@ fn compute_similar_videos(ff: SimilarVideos, entry_info: &Entry, text_view_error
                         file_entry.bitrate,
                         file_entry.width,
                         file_entry.height,
+                        file_entry.duration,
                     );
                 }
             }
@@ -991,8 +993,9 @@ fn similar_videos_add_to_list_store(
     bitrate: Option<u64>,
     width: Option<u32>,
     height: Option<u32>,
+    duration: Option<f64>,
 ) {
-    const COLUMNS_NUMBER: usize = 15;
+    const COLUMNS_NUMBER: usize = 16;
     let (size_str, string_date) = format_size_and_date(size, modified_date, is_header, is_reference_folder);
     let color = get_row_color(is_header);
 
@@ -1003,6 +1006,7 @@ fn similar_videos_add_to_list_store(
         (Some(w), Some(h)) => format!("{w}x{h}"),
         _ => "".to_string(),
     };
+    let duration_str = format_duration_opt(duration);
 
     let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
         (ColumnsSimilarVideos::ActivatableSelectButton as u32, &(!is_header)),
@@ -1013,6 +1017,7 @@ fn similar_videos_add_to_list_store(
         (ColumnsSimilarVideos::Codec as u32, &codec_str),
         (ColumnsSimilarVideos::Bitrate as u32, &bitrate_str),
         (ColumnsSimilarVideos::Dimensions as u32, &dimensions),
+        (ColumnsSimilarVideos::Duration as u32, &duration_str),
         (ColumnsSimilarVideos::Name as u32, &file),
         (ColumnsSimilarVideos::Path as u32, &directory),
         (ColumnsSimilarVideos::Modification as u32, &string_date),

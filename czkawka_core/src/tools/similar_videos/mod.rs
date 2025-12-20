@@ -40,6 +40,7 @@ pub struct VideosEntry {
     pub bitrate: Option<u64>,
     pub width: Option<u32>,
     pub height: Option<u32>,
+    pub duration: Option<f64>,
 }
 
 impl ResultEntry for VideosEntry {
@@ -68,6 +69,7 @@ impl FileEntry {
             bitrate: None,
             width: None,
             height: None,
+            duration: None,
         }
     }
 }

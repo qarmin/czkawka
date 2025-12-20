@@ -12,8 +12,8 @@ use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
 use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, PrintResults, Search};
 use crate::flc;
+use crate::tools::similar_videos::core::{format_bitrate_opt, format_duration_opt};
 use crate::tools::similar_videos::{Info, SimilarVideos, SimilarVideosParameters};
-use crate::tools::similar_videos::core::format_bitrate_opt;
 
 impl AllTraits for SimilarVideos {}
 
@@ -88,23 +88,41 @@ impl PrintResults for SimilarVideos {
             } else {
                 "".to_string()
             };
+            let duration = format_duration_opt(file_entry.duration);
 
-            writeln!(writer, "\"{}\" - {} - {} - {} - {} - {}", file_entry.path.to_string_lossy(), format_size(file_entry.size, BINARY), bitrate, fps, codec, dimensions)
+            writeln!(
+                writer,
+                "\"{}\" - {} - {} - {} - {} - {} - {}",
+                file_entry.path.to_string_lossy(),
+                format_size(file_entry.size, BINARY),
+                bitrate,
+                fps,
+                codec,
+                dimensions,
+                duration
+            )
         }
-
 
         if !self.similar_vectors.is_empty() {
             write!(writer, "{} videos which have similar friends\n\n", self.similar_vectors.len())?;
 
             for struct_similar in &self.similar_vectors {
-                writeln!(writer, "Found {} videos which have similar friends (path, size, bitrate, fps, codec, dimensions)", struct_similar.len())?;
+                writeln!(
+                    writer,
+                    "Found {} videos which have similar friends (path, size, bitrate, fps, codec, dimensions, duration)",
+                    struct_similar.len()
+                )?;
                 for file_entry in struct_similar {
                     write_video_entry(writer, file_entry)?;
                 }
                 writeln!(writer)?;
             }
         } else if !self.similar_referenced_vectors.is_empty() {
-            write!(writer, "{} videos which have similar friends (path, size, bitrate, fps, codec, dimensions)\n\n", self.similar_referenced_vectors.len())?;
+            write!(
+                writer,
+                "{} videos which have similar friends (path, size, bitrate, fps, codec, dimensions, duration)\n\n",
+                self.similar_referenced_vectors.len()
+            )?;
 
             for (fe, struct_similar) in &self.similar_referenced_vectors {
                 writeln!(writer, "Found {} videos which have similar friends", struct_similar.len())?;

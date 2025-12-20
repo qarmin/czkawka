@@ -442,7 +442,7 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
         settings.set_temporary_files_column_size(fnm(&[sel_px, name_px, path_px, mod_px], "temporary_files"));
         settings.set_big_files_column_size(fnm(&[sel_px, size_px, name_px, path_px, mod_px], "big_files"));
         settings.set_similar_images_column_size(fnm(&[sel_px, 80.0, 80.0, 80.0, name_px, path_px, mod_px], "similar_images"));
-        settings.set_similar_videos_column_size(fnm(&[sel_px, size_px, name_px, path_px, 80.0, 80.0, 80.0, 80.0, mod_px], "similar_videos"));
+        settings.set_similar_videos_column_size(fnm(&[sel_px, size_px, name_px, path_px, 80.0, 80.0, 80.0, 80.0, 80.0, mod_px], "similar_videos"));
         settings.set_similar_music_column_size(fnm(&[sel_px, size_px, name_px, 80.0, 80.0, 80.0, 80.0, 80.0, 80.0, path_px, mod_px], "similar_music"));
         settings.set_invalid_symlink_column_size(fnm(&[sel_px, name_px, path_px, path_px, mod_px], "invalid_symlink"));
         settings.set_broken_files_column_size(fnm(&[sel_px, name_px, path_px, 200.0, size_px, mod_px], "broken_files"));

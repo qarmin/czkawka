@@ -116,6 +116,12 @@ impl SimilarVideos {
     fn read_video_properties(mut file_entry: VideosEntry) -> VideosEntry {
         match ffprobe(file_entry.path.clone()) {
             Ok(info) => {
+                if let Some(duration_str) = &info.format.duration
+                    && let Ok(d) = duration_str.parse::<f64>()
+                {
+                    file_entry.duration = Some(d);
+                }
+
                 if let Some(stream) = info.streams.into_iter().find(|s| s.codec_type.as_deref() == Some("video")) {
                     if let Some(codec_name) = stream.codec_name {
                         file_entry.codec = Some(codec_name);
@@ -349,4 +355,19 @@ pub fn format_bitrate_opt(bitrate: Option<u64>) -> String {
         }
         None => String::from(""),
     }
+}
+
+pub fn format_duration_opt(duration: Option<f64>) -> String {
+    duration
+        .map(|d| {
+            let hours = (d / 3600.0) as u32;
+            let minutes = ((d % 3600.0) / 60.0) as u32;
+            let seconds = (d % 60.0) as u32;
+            if hours > 0 {
+                format!("{hours:02}:{minutes:02}:{seconds:02}")
+            } else {
+                format!("{minutes:02}:{seconds:02}")
+            }
+        })
+        .unwrap_or_default()
 }
