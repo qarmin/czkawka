@@ -20,7 +20,7 @@ use crate::helpers::messages::Messages;
 pub(crate) const CACHE_VERSION: &str = "100";
 pub(crate) const CACHE_DUPLICATE_VERSION: &str = "100";
 pub(crate) const CACHE_IMAGE_VERSION: &str = "100";
-pub(crate) const CACHE_VIDEO_VERSION: &str = "100";
+pub(crate) const CACHE_VIDEO_VERSION: &str = "110";
 
 const MEMORY_LIMIT: u64 = 8 * 1024 * 1024 * 1024;
 

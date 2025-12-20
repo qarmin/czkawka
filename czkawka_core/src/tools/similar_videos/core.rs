@@ -4,6 +4,7 @@ use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
 use crossbeam_channel::Sender;
+use ffprobe::ffprobe;
 use fun_time::fun_time;
 use indexmap::IndexMap;
 use log::debug;
@@ -112,6 +113,70 @@ impl SimilarVideos {
         file_entry
     }
 
+    fn read_video_properties(mut file_entry: VideosEntry) -> VideosEntry {
+        match ffprobe(file_entry.path.clone()) {
+            Ok(info) => {
+                if let Some(stream) = info.streams.into_iter().find(|s| s.codec_type.as_deref() == Some("video")) {
+                    if let Some(codec_name) = stream.codec_name {
+                        file_entry.codec = Some(codec_name);
+                    }
+
+                    if let Some(bit_rate_str) = stream.bit_rate.or(info.format.bit_rate)
+                        && let Ok(b) = bit_rate_str.parse::<u64>()
+                    {
+                        file_entry.bitrate = Some(b);
+                    }
+
+                    if let Some(w) = stream.width
+                        && w >= 0
+                    {
+                        file_entry.width = Some(w as u32);
+                    }
+                    if let Some(h) = stream.height
+                        && h >= 0
+                    {
+                        file_entry.height = Some(h as u32);
+                    }
+
+                    let fps_opt = if !stream.avg_frame_rate.is_empty() && stream.avg_frame_rate != "0/0" {
+                        Some(stream.avg_frame_rate)
+                    } else if !stream.r_frame_rate.is_empty() && stream.r_frame_rate != "0/0" {
+                        Some(stream.r_frame_rate)
+                    } else {
+                        None
+                    };
+
+                    if let Some(fps_str) = fps_opt {
+                        let fps_val = if fps_str.contains('/') {
+                            let mut parts = fps_str.splitn(2, '/');
+                            if let (Some(n), Some(d)) = (parts.next(), parts.next()) {
+                                if let (Ok(nv), Ok(dv)) = (n.parse::<f64>(), d.parse::<f64>()) {
+                                    if dv != 0.0 { Some(nv / dv) } else { None }
+                                } else {
+                                    None
+                                }
+                            } else {
+                                None
+                            }
+                        } else {
+                            fps_str.parse::<f64>().ok()
+                        };
+
+                        if let Some(fps_v) = fps_val {
+                            file_entry.fps = Some(fps_v);
+                        }
+                    }
+                }
+            }
+            Err(e) => {
+                let path = file_entry.path.to_string_lossy();
+                file_entry.error = format!("Failed to read properties for file \"{path}\": reason {e}");
+            }
+        }
+
+        file_entry
+    }
+
     #[fun_time(message = "sort_videos", level = "debug")]
     pub(crate) fn sort_videos(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.videos_to_check.is_empty() {
@@ -138,6 +203,7 @@ impl SimilarVideos {
                 // Currently size is not too much relevant
                 // let size = file_entry.size;
                 let res = self.check_video_file_entry(file_entry);
+                let res = Self::read_video_properties(res);
 
                 progress_handler.increase_items(1);
                 // progress_handler.increase_size(size);

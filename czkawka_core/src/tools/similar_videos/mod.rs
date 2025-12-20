@@ -33,6 +33,13 @@ pub struct VideosEntry {
     pub modified_date: u64,
     pub vhash: VideoHash,
     pub error: String,
+
+    // Properties extracted from video
+    pub fps: Option<f64>,
+    pub codec: Option<String>,
+    pub bitrate: Option<u64>,
+    pub width: Option<u32>,
+    pub height: Option<u32>,
 }
 
 impl ResultEntry for VideosEntry {
@@ -56,6 +63,11 @@ impl FileEntry {
 
             vhash: Default::default(),
             error: String::new(),
+            fps: None,
+            codec: None,
+            bitrate: None,
+            width: None,
+            height: None,
         }
     }
 }
