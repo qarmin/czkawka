@@ -428,10 +428,10 @@ fn compute_similar_videos(ff: SimilarVideos, entry_info: &Entry, text_view_error
                 let vec_file_entry = vector_sort_unstable_entry_by_path(vec_file_entry);
 
                 let (directory, file) = split_path(&base_file_entry.path);
-                similar_videos_add_to_list_store(&list_store, &file, &directory, base_file_entry.size, base_file_entry.modified_date, true, true);
+                similar_videos_add_to_list_store(&list_store, &file, &directory, base_file_entry.size, base_file_entry.modified_date, true, true, base_file_entry.fps, base_file_entry.codec.as_deref(), base_file_entry.bitrate, base_file_entry.width, base_file_entry.height);
                 for file_entry in &vec_file_entry {
                     let (directory, file) = split_path(&file_entry.path);
-                    similar_videos_add_to_list_store(&list_store, &file, &directory, file_entry.size, file_entry.modified_date, false, true);
+                    similar_videos_add_to_list_store(&list_store, &file, &directory, file_entry.size, file_entry.modified_date, false, true, file_entry.fps, file_entry.codec.as_deref(), file_entry.bitrate, file_entry.width, file_entry.height);
                 }
             }
         } else {
@@ -440,10 +440,10 @@ fn compute_similar_videos(ff: SimilarVideos, entry_info: &Entry, text_view_error
             for vec_file_entry in vec_struct_similar {
                 let vec_file_entry = vector_sort_unstable_entry_by_path(vec_file_entry);
 
-                similar_videos_add_to_list_store(&list_store, "", "", 0, 0, true, false);
+                similar_videos_add_to_list_store(&list_store, "", "", 0, 0, true, false, None, None, None, None, None);
                 for file_entry in &vec_file_entry {
                     let (directory, file) = split_path(&file_entry.path);
-                    similar_videos_add_to_list_store(&list_store, &file, &directory, file_entry.size, file_entry.modified_date, false, false);
+                    similar_videos_add_to_list_store(&list_store, &file, &directory, file_entry.size, file_entry.modified_date, false, false, file_entry.fps, file_entry.codec.as_deref(), file_entry.bitrate, file_entry.width, file_entry.height);
                 }
             }
         }
@@ -937,16 +937,28 @@ fn similar_images_add_to_list_store(
     append_row_to_list_store(list_store, &values);
 }
 
-fn similar_videos_add_to_list_store(list_store: &ListStore, file: &str, directory: &str, size: u64, modified_date: u64, is_header: bool, is_reference_folder: bool) {
-    const COLUMNS_NUMBER: usize = 11;
+fn similar_videos_add_to_list_store(list_store: &ListStore, file: &str, directory: &str, size: u64, modified_date: u64, is_header: bool, is_reference_folder: bool, fps: Option<f64>, codec: Option<&str>, bitrate: Option<u64>, width: Option<u32>, height: Option<u32>) {
+    const COLUMNS_NUMBER: usize = 15;
     let (size_str, string_date) = format_size_and_date(size, modified_date, is_header, is_reference_folder);
     let color = get_row_color(is_header);
+
+    let fps_str = fps.map(|f| format!("{:.2}", f)).unwrap_or_default();
+    let bitrate_str = bitrate.map(|b| b.to_string()).unwrap_or_default();
+    let codec_str = codec.unwrap_or_default().to_string();
+    let dimensions = match (width, height) {
+        (Some(w), Some(h)) => format!("{}x{}", w, h),
+        _ => "".to_string(),
+    };
 
     let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
         (ColumnsSimilarVideos::ActivatableSelectButton as u32, &(!is_header)),
         (ColumnsSimilarVideos::SelectionButton as u32, &false),
         (ColumnsSimilarVideos::Size as u32, &size_str),
         (ColumnsSimilarVideos::SizeAsBytes as u32, &size),
+        (ColumnsSimilarVideos::Fps as u32, &fps_str),
+        (ColumnsSimilarVideos::Codec as u32, &codec_str),
+        (ColumnsSimilarVideos::Bitrate as u32, &bitrate_str),
+        (ColumnsSimilarVideos::Dimensions as u32, &dimensions),
         (ColumnsSimilarVideos::Name as u32, &file),
         (ColumnsSimilarVideos::Path as u32, &directory),
         (ColumnsSimilarVideos::Modification as u32, &string_date),

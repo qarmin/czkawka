@@ -386,10 +386,14 @@ impl SubView {
                         (ColumnsSimilarVideos::Name as i32, ColumnSort::None),
                         (ColumnsSimilarVideos::Path as i32, ColumnSort::None),
                         (ColumnsSimilarVideos::Modification as i32, ColumnSort::None),
+                        (ColumnsSimilarVideos::Fps as i32, ColumnSort::None),
+                        (ColumnsSimilarVideos::Codec as i32, ColumnSort::None),
+                        (ColumnsSimilarVideos::Bitrate as i32, ColumnSort::None),
+                        (ColumnsSimilarVideos::Dimensions as i32, ColumnSort::None),
                     ],
                     Some(columns_colors),
                 );
-                assert_eq!(tree_view.columns().len(), 5);
+                assert_eq!(tree_view.columns().len(), 9);
             }
             NotebookMainEnum::SameMusic => {
                 let columns_colors = (ColumnsSameMusic::Color as i32, ColumnsSameMusic::TextColor as i32);

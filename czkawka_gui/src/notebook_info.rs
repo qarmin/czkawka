@@ -216,7 +216,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; TOOLS_NUMBER] = [
         column_name: ColumnsSimilarVideos::Name as i32,
         column_selection: ColumnsSimilarVideos::SelectionButton as i32,
         column_header: Some(ColumnsSimilarVideos::IsHeader as i32),
-        column_dimensions: None,
+        column_dimensions: Some(ColumnsSimilarVideos::Dimensions as i32),
         column_size: Some(ColumnsSimilarVideos::Size as i32),
         column_size_as_bytes: Some(ColumnsSimilarVideos::SizeAsBytes as i32),
         column_modification_as_secs: Some(ColumnsSimilarVideos::ModificationAsSecs as i32),
@@ -225,6 +225,10 @@ pub static NOTEBOOKS_INFO: [NotebookObject; TOOLS_NUMBER] = [
             Type::BOOL,   // SelectionButton
             Type::STRING, // Size
             Type::U64,    // SizeAsBytes
+            Type::STRING, // Fps
+            Type::STRING, // Codec
+            Type::STRING, // Bitrate
+            Type::STRING, // Dimensions
             Type::STRING, // Name
             Type::STRING, // Path
             Type::STRING, // Modification
