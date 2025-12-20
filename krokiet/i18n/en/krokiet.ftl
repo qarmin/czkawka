@@ -87,6 +87,8 @@ column_symlink_folder = Symlink Folder
 column_destination_path = Destination Path
 column_current_extension = Current Extension
 column_proper_extension = Proper Extension
+column_fps = FPS
+column_codec = Codec
 
 # Slint translations
 ok_button = Ok

@@ -336,3 +336,17 @@ pub fn get_similar_videos_cache_file(skip_forward_amount: u32, duration: u32, cr
     };
     format!("cache_similar_videos_{CACHE_VIDEO_VERSION}__skip_{skip_forward_amount}__dur_{duration}__cd_{crop_detect_str}.bin")
 }
+pub fn format_bitrate_opt(bitrate: Option<u64>) -> String {
+    match bitrate {
+        Some(b) => {
+            if b >= 1_000_000 {
+                format!("{:.1} Mbps", b as f64 / 1_000_000.0)
+            } else if b >= 1000 {
+                format!("{:.0} kbps", b as f64 / 1000.0)
+            } else {
+                format!("{b} bps")
+            }
+        }
+        None => String::from(""),
+    }
+}

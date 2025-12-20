@@ -90,20 +90,7 @@ fn get_row_color(is_header: bool) -> &'static str {
     if is_header { HEADER_ROW_COLOR } else { MAIN_ROW_COLOR }
 }
 
-fn format_bitrate_opt(bitrate: Option<u64>) -> String {
-    match bitrate {
-        Some(b) => {
-            if b >= 1_000_000 {
-                format!("{:.1} Mbps", b as f64 / 1_000_000.0)
-            } else if b >= 1000 {
-                format!("{:.0} kbps", b as f64 / 1000.0)
-            } else {
-                format!("{b} bps")
-            }
-        }
-        None => String::from(""),
-    }
-}
+
 
 pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Receiver<Message>) {
     let combo_box_image_hash_size = gui_data.main_notebook.combo_box_image_hash_size.clone();

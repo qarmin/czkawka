@@ -588,12 +588,25 @@ fn write_similar_videos_results(app: &MainWindow, vector: Vec<(Option<VideosEntr
     app.invoke_scan_ended(flk!("rust_found_similar_videos", items_found = items_found, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
+
 fn prepare_data_model_similar_videos(fe: &VideosEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(fe.get_path());
+    let bitrate = format_bitrate_opt(fe.bitrate);
+    let fps = fe.fps.map(|e| format!("{e:.2}")).unwrap_or_default();
+    let codec = fe.codec.clone().unwrap_or_default();
+    let dimensions = if let (Some(w), Some(h)) = (fe.width, fe.height) {
+        format!("{w}x{h}")
+    } else {
+        "".to_string()
+    };
     let data_model_str = VecModel::from_slice(&[
         format_size(fe.size, BINARY).into(),
         file.into(),
         directory.into(),
+        bitrate.into(),
+        fps.into(),
+        codec.into(),
+        dimensions.into(),
         DateTime::from_timestamp(fe.get_modified_date() as i64, 0)
             .expect("Cannot create DateTime")
             .to_string()
