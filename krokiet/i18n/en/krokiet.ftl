@@ -199,6 +199,7 @@ settings_similar_images_show_image_preview = Image preview
 settings_similar_images_hide_hard_links = Hide hard links
 settings_delete_outdated_entries = Delete automatically outdated entries
 settings_similar_videos_hide_hard_links = Hide hard links
+settings_similar_videos_image_preview = Image preview
 settings_open_config_folder = Open config folder
 settings_open_cache_folder = Open cache folder
 settings_language = Language

@@ -21,7 +21,8 @@ pub(crate) fn connect_show_preview(app: &MainWindow) {
         let active_tab = gui_state.get_active_tab();
 
         if !((active_tab == ActiveTab::SimilarImages && settings.get_similar_images_show_image_preview())
-            || (active_tab == ActiveTab::DuplicateFiles && settings.get_duplicate_image_preview()))
+            || (active_tab == ActiveTab::DuplicateFiles && settings.get_duplicate_image_preview())
+            || (active_tab == ActiveTab::SimilarVideos && settings.get_similar_videos_image_preview()))
         {
             set_preview_visible(&gui_state, None);
             return;

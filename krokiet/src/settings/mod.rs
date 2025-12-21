@@ -402,6 +402,7 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     );
     settings.set_similar_videos_vid_hash_duration_min(*ALLOWED_VID_HASH_DURATION.start() as f32);
     settings.set_similar_videos_vid_hash_duration_max(*ALLOWED_VID_HASH_DURATION.end() as f32);
+    settings.set_similar_videos_image_preview(custom_settings.similar_videos_image_preview);
 
     settings.set_similar_music_sub_approximate_comparison(custom_settings.similar_music_sub_approximate_comparison);
     settings.set_similar_music_sub_title(custom_settings.similar_music_sub_title);
@@ -499,6 +500,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
 
     let similar_videos_hide_hard_links = settings.get_similar_videos_hide_hard_links();
     let similar_videos_delete_outdated_entries = settings.get_similar_videos_delete_outdated_entries();
+    let similar_videos_image_preview = settings.get_similar_videos_image_preview();
 
     let similar_music_compare_fingerprints_only_with_similar_titles = settings.get_similar_music_compare_fingerprints_only_with_similar_titles();
     let similar_music_delete_outdated_entries = settings.get_similar_music_delete_outdated_entries();
@@ -617,6 +619,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         similar_videos_vid_hash_duration,
         similar_videos_crop_detect,
         similar_videos_skip_forward_amount,
+        similar_videos_image_preview,
     }
 }
 

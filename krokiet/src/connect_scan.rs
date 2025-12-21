@@ -532,7 +532,9 @@ fn scan_similar_videos(
                 custom_settings.similar_videos_skip_forward_amount,
                 custom_settings.similar_videos_vid_hash_duration,
                 crop_detect_from_str(&custom_settings.similar_videos_crop_detect),
+                custom_settings.similar_videos_image_preview,
             );
+            dbg!(&params);
             let mut tool = SimilarVideos::new(params);
             set_common_settings(&mut tool, &custom_settings, &stop_flag);
 
@@ -600,6 +602,7 @@ fn prepare_data_model_similar_videos(fe: &VideosEntry) -> (ModelRc<SharedString>
     } else {
         "".to_string()
     };
+    let preview_path = fe.thumbnail_path.as_ref().map(|e|e.to_string_lossy().to_string()).unwrap_or_default();
     let duration = format_duration_opt(fe.duration);
     let data_model_str = VecModel::from_slice(&[
         format_size(fe.size, BINARY).into(),
@@ -610,6 +613,7 @@ fn prepare_data_model_similar_videos(fe: &VideosEntry) -> (ModelRc<SharedString>
         bitrate.into(),
         fps.into(),
         codec.into(),
+        preview_path.into(),
         DateTime::from_timestamp(fe.get_modified_date() as i64, 0)
             .expect("Cannot create DateTime")
             .to_string()

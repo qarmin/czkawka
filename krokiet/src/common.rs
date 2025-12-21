@@ -120,12 +120,13 @@ pub enum StrDataSimilarVideos {
     Size,
     Name,
     Path,
-    ModificationDate,
     Dimensions,
     Duration,
     Bitrate,
     Fps,
     Codec,
+    PreviewPath,
+    ModificationDate,
 }
 
 // Similar Music

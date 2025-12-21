@@ -635,6 +635,7 @@ fn similar_video_search(
                 DEFAULT_SKIP_FORWARD_AMOUNT,
                 DEFAULT_VID_HASH_DURATION,
                 DEFAULT_CROP_DETECT,
+                false, // Not implemented in gtk gui
             );
             let mut tool = SimilarVideos::new(params);
 

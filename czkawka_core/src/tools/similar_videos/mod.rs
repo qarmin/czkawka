@@ -78,7 +78,7 @@ impl FileEntry {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SimilarVideosParameters {
     pub tolerance: i32,
     pub exclude_videos_with_same_size: bool,
@@ -110,7 +110,15 @@ pub fn crop_detect_to_str(crop_detect: Cropdetect) -> String {
 }
 
 impl SimilarVideosParameters {
-    pub fn new(tolerance: i32, exclude_videos_with_same_size: bool, ignore_hard_links: bool, skip_forward_amount: u32, duration: u32, crop_detect: Cropdetect) -> Self {
+    pub fn new(
+        tolerance: i32,
+        exclude_videos_with_same_size: bool,
+        ignore_hard_links: bool,
+        skip_forward_amount: u32,
+        duration: u32,
+        crop_detect: Cropdetect,
+        generate_thumbnails: bool,
+    ) -> Self {
         assert!((0..=MAX_TOLERANCE).contains(&tolerance));
         assert!(ALLOWED_SKIP_FORWARD_AMOUNT.contains(&skip_forward_amount));
         assert!(ALLOWED_VID_HASH_DURATION.contains(&duration));
@@ -121,6 +129,7 @@ impl SimilarVideosParameters {
             skip_forward_amount,
             duration,
             crop_detect,
+            generate_thumbnails,
         }
     }
 }

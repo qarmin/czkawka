@@ -1,5 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::mem;
+use std::process::Command;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
@@ -12,6 +13,7 @@ use rayon::prelude::*;
 use vid_dup_finder_lib::{CreationOptions, Cropdetect, VideoHash, VideoHashBuilder};
 
 use crate::common::cache::{CACHE_VIDEO_VERSION, extract_loaded_cache, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
+use crate::common::config_cache_path::get_config_cache_path;
 use crate::common::consts::VIDEO_FILES_EXTENSIONS;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult, inode, take_1_per_inode};
 use crate::common::model::{ToolType, WorkContinueStatus};
@@ -177,6 +179,68 @@ impl SimilarVideos {
             Err(e) => {
                 let path = file_entry.path.to_string_lossy();
                 file_entry.error = format!("Failed to read properties for file \"{path}\": reason {e}");
+            }
+        }
+
+        file_entry
+    }
+
+    fn generate_thumbnail(mut file_entry: VideosEntry, generate_thumbnail: bool) -> VideosEntry {
+        if !generate_thumbnail {
+            return file_entry;
+        }
+
+        let Some(config_cache_path) = get_config_cache_path() else {
+            return file_entry;
+        };
+
+        let thumbnails_dir = config_cache_path.cache_folder.join("thumbnails");
+        if let Err(e) = std::fs::create_dir_all(&thumbnails_dir) {
+            debug!("Failed to create thumbnails directory: {e}");
+            return file_entry;
+        }
+
+        use blake3::Hasher;
+        let mut hasher = Hasher::new();
+        hasher.update(file_entry.path.to_string_lossy().as_bytes());
+        let hash = hasher.finalize();
+        let thumbnail_filename = format!("{}.jpg", hash.to_hex());
+        let thumbnail_path = thumbnails_dir.join(thumbnail_filename);
+
+        if thumbnail_path.exists() {
+            file_entry.thumbnail_path = Some(thumbnail_path);
+            return file_entry;
+        }
+
+        let seek_time = file_entry.duration.map_or(5.0, |d| d * 0.1);
+
+        let output = Command::new("ffmpeg")
+            .arg("-ss")
+            .arg(seek_time.to_string())
+            .arg("-i")
+            .arg(&file_entry.path)
+            .arg("-vframes")
+            .arg("1")
+            .arg("-q:v")
+            .arg("2")
+            .arg("-y")
+            .arg(&thumbnail_path)
+            .output();
+
+        match output {
+            Ok(result) => {
+                if result.status.success() && thumbnail_path.exists() {
+                    file_entry.thumbnail_path = Some(thumbnail_path);
+                } else {
+                    debug!(
+                        "Failed to generate thumbnail for {}: {}",
+                        file_entry.path.display(),
+                        String::from_utf8_lossy(&result.stderr)
+                    );
+                }
+            }
+            Err(e) => {
+                debug!("Failed to run ffmpeg for thumbnail generation: {e}");
             }
         }
 

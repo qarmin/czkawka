@@ -363,6 +363,10 @@ export component SettingsList inherits VerticalLayout {
             }
 
             CheckBoxComponent {
+                name <=> Translations.settings_similar_videos_preview_text;
+                model <=> Settings.similar_videos_image_preview;
+            }
+            CheckBoxComponent {
                 name <=> Translations.settings_similar_videos_hide_hard_links_text;
                 model <=> Settings.similar_videos_hide_hard_links;
             }

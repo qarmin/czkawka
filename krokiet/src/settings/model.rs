@@ -78,6 +78,8 @@ pub struct SettingsCustom {
     #[serde(default = "ttrue")]
     pub similar_videos_delete_outdated_entries: bool,
     #[serde(default = "ttrue")]
+    pub similar_videos_image_preview: bool,
+    #[serde(default = "ttrue")]
     pub similar_music_delete_outdated_entries: bool,
     #[serde(default = "default_sub_hash_size")]
     pub similar_images_sub_hash_size: String,
