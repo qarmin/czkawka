@@ -117,6 +117,7 @@ pub enum CurrentStage {
     SimilarImagesCalculatingHashes,
     SimilarImagesComparingHashes,
     SimilarVideosCalculatingHashes,
+    SimilarVideosCreatingThumbnails,
     BrokenFilesChecking,
     BadExtensionsChecking,
 }
@@ -183,7 +184,7 @@ impl ProgressData {
             | CurrentStage::SameMusicComparingFingerprints
             | CurrentStage::SameMusicCalculatingFingerprints => Some(ToolType::SameMusic),
             CurrentStage::SimilarImagesCalculatingHashes | CurrentStage::SimilarImagesComparingHashes => Some(ToolType::SimilarImages),
-            CurrentStage::SimilarVideosCalculatingHashes => Some(ToolType::SimilarVideos),
+            CurrentStage::SimilarVideosCalculatingHashes | CurrentStage::SimilarVideosCreatingThumbnails => Some(ToolType::SimilarVideos),
             CurrentStage::BrokenFilesChecking => Some(ToolType::BrokenFiles),
             CurrentStage::BadExtensionsChecking => Some(ToolType::BadExtensions),
         };
@@ -198,8 +199,8 @@ impl ToolType {
         match self {
             Self::Duplicate => 6,
             Self::EmptyFolders | Self::EmptyFiles | Self::InvalidSymlinks | Self::BigFile | Self::TemporaryFiles => 0,
-            Self::BrokenFiles | Self::BadExtensions | Self::SimilarVideos => 1,
-            Self::SimilarImages => 2,
+            Self::BrokenFiles | Self::BadExtensions => 1,
+            Self::SimilarImages | Self::SimilarVideos => 2,
             Self::None => unreachable!("ToolType::None is not allowed"),
             Self::SameMusic => match checking_method {
                 CheckingMethod::AudioTags => 4,
@@ -234,6 +235,7 @@ impl CurrentStage {
             Self::SimilarImagesCalculatingHashes => 1,
             Self::SimilarImagesComparingHashes => 2,
             Self::SimilarVideosCalculatingHashes => 1,
+            Self::SimilarVideosCreatingThumbnails => 2,
             Self::BrokenFilesChecking => 1,
             Self::BadExtensionsChecking => 1,
             Self::SameMusicCacheLoadingTags => 1,

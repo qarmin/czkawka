@@ -23,6 +23,7 @@ rust_compared_content = Compared content of { $items_stats }
 rust_hashed_images = Hashed { $items_stats } images ({ $size_stats })
 rust_compared_image_hashes = Compared { $items_stats } image hashes
 rust_hashed_videos = Hashed { $items_stats } videos
+rust_created_thumbnails = Created thumbnails for { $items_stats } videos
 rust_checked_files = Checked { $items_stats } file ({ $size_stats })
 rust_checked_files_bad_extensions = Checked { $items_stats } file
 rust_analyzed_partial_hash = Analyzed partial hash of { $items_stats } files ({ $size_stats })

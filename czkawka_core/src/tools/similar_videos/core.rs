@@ -1,5 +1,5 @@
 use std::collections::{BTreeMap, BTreeSet};
-use std::mem;
+use std::{mem, thread};
 use std::process::Command;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
@@ -275,7 +275,6 @@ impl SimilarVideos {
                 // let size = file_entry.size;
                 let res = self.check_video_file_entry(file_entry);
                 let res = Self::read_video_properties(res);
-                let res = Self::generate_thumbnail(res, generate_thumbnail);
 
                 progress_handler.increase_items(1);
                 // progress_handler.increase_size(size);
@@ -310,6 +309,38 @@ impl SimilarVideos {
         }
 
         self.match_groups_of_videos(vector_of_hashes, &hashmap_with_file_entries);
+
+        // Generate thumbnails for similar videos
+        let progress_handler = prepare_thread_handler_common(
+            progress_sender,
+            CurrentStage::SimilarVideosCreatingThumbnails,
+            self.similar_vectors.iter().map(|e|e.len()).sum::<usize>(),
+            self.get_test_type(),
+            0,
+        );
+
+        self.similar_vectors = self.similar_vectors.into_par_iter().map(|vec_file_entry| {
+            let mut collected_items = vec![];
+            for file_entry in vec_file_entry {
+                if check_if_stop_received(stop_flag) {
+                    return;
+                }
+
+                collected_items.push(Self::generate_thumbnail(file_entry, generate_thumbnail));
+
+                progress_handler.increase_items(1);
+            }
+
+            std::thread::sleep(std::time::Duration::from_secs(1));
+
+            vec_file_entry
+        }).collect();
+
+        progress_handler.join_thread();
+        if check_if_stop_received(stop_flag) {
+            return WorkContinueStatus::Stop;
+        }
+
         self.remove_from_reference_folders();
 
         if self.common_data.use_reference_folders {
