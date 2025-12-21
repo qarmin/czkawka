@@ -31,7 +31,7 @@
 - Ugly workarounds for ugly freezes, caused probably by inconsistencies between GTK4 and the Rust compiler’s optimizations   - [#1691](https://github.com/qarmin/czkawka/pull/1691)
 
 ### Krokiet
-- Improve gui performance when a lot of messages are visible in bottom text view(fixed by updated Slint dependencies)
+- Added video thumbnails - [#]()
 
 ### Prebuilt binaries
 - Krokiet Windows binaries with skia backend are available (this is msvc build and requires vc redist installed)

@@ -1,5 +1,5 @@
 use std::collections::{BTreeMap, BTreeSet};
-use std::{mem, thread};
+use std::mem;
 use std::process::Command;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
@@ -187,17 +187,17 @@ impl SimilarVideos {
 
     fn generate_thumbnail(file_entry: &mut VideosEntry, generate_thumbnail: bool) {
         if !generate_thumbnail {
-            return ;
+            return;
         }
 
         let Some(config_cache_path) = get_config_cache_path() else {
-            return ;
+            return;
         };
 
         let thumbnails_dir = config_cache_path.cache_folder.join("video_thumbnails");
         if let Err(e) = std::fs::create_dir_all(&thumbnails_dir) {
             debug!("Failed to create thumbnails directory: {e}");
-            return ;
+            return;
         }
 
         use blake3::Hasher;
@@ -209,7 +209,7 @@ impl SimilarVideos {
 
         if thumbnail_path.exists() {
             file_entry.thumbnail_path = Some(thumbnail_path);
-            return ;
+            return;
         }
 
         let seek_time = file_entry.duration.map_or(5.0, |d| d * 0.1);
@@ -312,7 +312,7 @@ impl SimilarVideos {
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
             CurrentStage::SimilarVideosCreatingThumbnails,
-            self.similar_vectors.iter().map(|e|e.len()).sum::<usize>(),
+            self.similar_vectors.iter().map(|e| e.len()).sum::<usize>(),
             self.get_test_type(),
             0,
         );
