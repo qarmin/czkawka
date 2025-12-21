@@ -181,7 +181,7 @@ timings profile='debug' mode='build':
 #    cargo clean
 #    cd krokiet; RUSTFLAGS="-Ztime" cargo +nightly rustc; cd ..;
 
-# Per crate compilarion times and ram usage
+# Per crate compilation times and ram usage
 # This is very verbose, so probably not really useful
 time_passes:
     cargo clean
