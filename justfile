@@ -192,8 +192,3 @@ time_passes:
     cd czkawka_cli; RUSTFLAGS="-Ztime-passes" cargo +nightly rustc; cd ..;
     cargo clean
     cd krokiet; RUSTFLAGS="-Ztime-passes" cargo +nightly rustc; cd ..;
-
-install:
-    cargo install --path czkawka_cli --locked
-    cargo install --path krokiet --locked
-    cargo install --path czkawka_gui --locked
