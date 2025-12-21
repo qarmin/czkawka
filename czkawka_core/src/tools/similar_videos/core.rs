@@ -199,6 +199,7 @@ impl SimilarVideos {
             0, // non_cached_files_to_check.values().map(|e| e.size).sum(), // Looks, that at least for now, there is no big difference between checking big and small files, so at least for now, only tracking number of files is enough
         );
 
+        let generate_thumbnail = self.params.generate_thumbnails;
         let mut vec_file_entry: Vec<VideosEntry> = non_cached_files_to_check
             .into_par_iter()
             .map(|(_, file_entry)| {
@@ -210,6 +211,7 @@ impl SimilarVideos {
                 // let size = file_entry.size;
                 let res = self.check_video_file_entry(file_entry);
                 let res = Self::read_video_properties(res);
+                let res = Self::generate_thumbnail(res, generate_thumbnail);
 
                 progress_handler.increase_items(1);
                 // progress_handler.increase_size(size);

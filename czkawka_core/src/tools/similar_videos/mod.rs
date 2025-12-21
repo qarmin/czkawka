@@ -41,6 +41,9 @@ pub struct VideosEntry {
     pub width: Option<u32>,
     pub height: Option<u32>,
     pub duration: Option<f64>,
+
+    #[serde(skip)] // Saving it to cache is bad idea, because cache can be moved to another locations
+    pub thumbnail_path: Option<PathBuf>,
 }
 
 impl ResultEntry for VideosEntry {
@@ -70,6 +73,7 @@ impl FileEntry {
             width: None,
             height: None,
             duration: None,
+            thumbnail_path: None,
         }
     }
 }
@@ -82,6 +86,7 @@ pub struct SimilarVideosParameters {
     pub skip_forward_amount: u32,
     pub duration: u32,
     pub crop_detect: Cropdetect,
+    pub generate_thumbnails: bool,
 }
 
 pub fn crop_detect_from_str_opt(s: &str) -> Option<Cropdetect> {
