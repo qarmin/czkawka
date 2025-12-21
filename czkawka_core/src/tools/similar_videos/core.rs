@@ -185,19 +185,19 @@ impl SimilarVideos {
         file_entry
     }
 
-    fn generate_thumbnail(mut file_entry: VideosEntry, generate_thumbnail: bool) -> VideosEntry {
+    fn generate_thumbnail(file_entry: &mut VideosEntry, generate_thumbnail: bool) {
         if !generate_thumbnail {
-            return file_entry;
+            return ;
         }
 
         let Some(config_cache_path) = get_config_cache_path() else {
-            return file_entry;
+            return ;
         };
 
-        let thumbnails_dir = config_cache_path.cache_folder.join("thumbnails");
+        let thumbnails_dir = config_cache_path.cache_folder.join("video_thumbnails");
         if let Err(e) = std::fs::create_dir_all(&thumbnails_dir) {
             debug!("Failed to create thumbnails directory: {e}");
-            return file_entry;
+            return ;
         }
 
         use blake3::Hasher;
@@ -209,7 +209,7 @@ impl SimilarVideos {
 
         if thumbnail_path.exists() {
             file_entry.thumbnail_path = Some(thumbnail_path);
-            return file_entry;
+            return ;
         }
 
         let seek_time = file_entry.duration.map_or(5.0, |d| d * 0.1);
@@ -243,8 +243,6 @@ impl SimilarVideos {
                 debug!("Failed to run ffmpeg for thumbnail generation: {e}");
             }
         }
-
-        file_entry
     }
 
     #[fun_time(message = "sort_videos", level = "debug")]
@@ -319,22 +317,17 @@ impl SimilarVideos {
             0,
         );
 
-        self.similar_vectors = self.similar_vectors.into_par_iter().map(|vec_file_entry| {
-            let mut collected_items = vec![];
+        self.similar_vectors.par_iter_mut().for_each(|vec_file_entry| {
             for file_entry in vec_file_entry {
                 if check_if_stop_received(stop_flag) {
                     return;
                 }
 
-                collected_items.push(Self::generate_thumbnail(file_entry, generate_thumbnail));
+                Self::generate_thumbnail(file_entry, generate_thumbnail);
 
                 progress_handler.increase_items(1);
             }
-
-            std::thread::sleep(std::time::Duration::from_secs(1));
-
-            vec_file_entry
-        }).collect();
+        });
 
         progress_handler.join_thread();
         if check_if_stop_received(stop_flag) {
