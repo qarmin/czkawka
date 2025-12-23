@@ -26,6 +26,8 @@ pub const DEFAULT_SKIP_FORWARD_AMOUNT: u32 = 15;
 pub const ALLOWED_VID_HASH_DURATION: RangeInclusive<u32> = 2..=60;
 pub const DEFAULT_VID_HASH_DURATION: u32 = 10;
 
+pub const DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL: u8 = 10;
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct VideosEntry {
     pub path: PathBuf,

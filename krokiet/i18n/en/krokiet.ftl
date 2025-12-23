@@ -232,3 +232,4 @@ searching = Searching...
 subsettings_videos_crop_detect = Crop detect method
 subsettings_videos_skip_forward_amount = Skip duration [s]
 subsettings_videos_vid_hash_duration = Video hash duration
+subsettings_videos_thumbnail_percentage = Thumbnail position in video (%)
