@@ -27,6 +27,7 @@ use crate::connect_save::connect_save;
 use crate::connect_scan::connect_scan_button;
 use crate::connect_select::{connect_select, connect_showing_proper_select_buttons};
 use crate::connect_show_preview::connect_show_preview;
+use crate::connect_size_of_config_cache::connect_size_of_config_cache;
 use crate::connect_sort::{connect_showing_proper_sort_buttons, connect_sort};
 use crate::connect_stop::connect_stop_button;
 use crate::connect_translation::connect_translations;
@@ -48,6 +49,7 @@ mod connect_save;
 mod connect_scan;
 mod connect_select;
 mod connect_show_preview;
+mod connect_size_of_config_cache;
 mod connect_sort;
 mod connect_stop;
 mod connect_translation;
@@ -102,6 +104,7 @@ fn main() {
     connect_row_selections(&app);
     connect_sort(&app);
     connect_showing_proper_sort_buttons(&app);
+    connect_size_of_config_cache(&app);
 
     // Popups gather their size, after starting/closing popup at least once
     // This is simpler solution, than setting sizes of popups manually for each language

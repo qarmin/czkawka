@@ -385,6 +385,17 @@ export component SettingsList inherits VerticalLayout {
                 model <=> Settings.similar_music_delete_outdated_entries;
             }
 
+
+            if Translations.settings_cache_number_size_text != "": HeaderText {
+                text <=> Translations.settings_cache_number_size_text;
+            }
+            if Translations.settings_video_thumbnails_number_size_text != "": HeaderText {
+                text <=> Translations.settings_video_thumbnails_number_size_text;
+            }
+            if Translations.settings_log_number_size_text != "": HeaderText {
+                text <=> Translations.settings_log_number_size_text;
+            }
+
             ConfigCacheButtons { }
         }
     }

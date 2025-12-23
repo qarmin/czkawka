@@ -1,4 +1,9 @@
 ## Version ?.?.? - ??
+### New version blockers
+- workaround for very slow performance with thousands of lines in Krokiet in bottom panel - maybe max width option in gui?
+- new release of gtk4-rs, with iter_next fix
+- sym/hardlinks in Krokiet
+
 ### Breaking changes
 #### Users
 - Czkawka gui config file converted from custom format to json, so all settings needs to be set again(old txt file is not removed, so it may be used as reference for changes) 
@@ -32,6 +37,7 @@
 
 ### Krokiet
 - Added video thumbnails - [#]()
+- Printing in settings, size of cache/thumbnails/logs files - [#]()
 
 ### Prebuilt binaries
 - Krokiet Windows binaries with skia backend are available (this is msvc build and requires vc redist installed)

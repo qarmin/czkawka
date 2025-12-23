@@ -25,6 +25,8 @@ use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::common::traits::ResultEntry;
 use crate::tools::similar_videos::{SimilarVideos, SimilarVideosParameters, VideosEntry};
 
+pub const VIDEO_THUMBNAILS_SUBFOLDER: &str = "video_thumbnails";
+
 impl SimilarVideos {
     pub fn new(params: SimilarVideosParameters) -> Self {
         Self {
@@ -338,7 +340,7 @@ impl SimilarVideos {
             return WorkContinueStatus::Continue;
         };
 
-        let thumbnails_dir = config_cache_path.cache_folder.join("video_thumbnails");
+        let thumbnails_dir = config_cache_path.cache_folder.join(VIDEO_THUMBNAILS_SUBFOLDER);
         if let Err(e) = std::fs::create_dir_all(&thumbnails_dir) {
             debug!("Failed to create thumbnails directory: {e}");
             return WorkContinueStatus::Continue;
