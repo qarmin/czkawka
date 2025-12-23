@@ -330,7 +330,7 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>
         scan_duration,
         crop_detect,
         false, // creating thumbnails in CLI, makes almost no sense
-        10, // creating thumbnails in CLI, makes almost no sense
+        10,    // creating thumbnails in CLI, makes almost no sense
     );
     let mut tool = SimilarVideos::new(params);
 

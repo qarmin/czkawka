@@ -35,13 +35,7 @@ fn main() {
         .args(["log", "-1", "--format=%cd", "--date=format:%Y-%m-%d"])
         .output()
         .ok()
-        .and_then(|output| {
-            if output.status.success() {
-                String::from_utf8(output.stdout).ok()
-            } else {
-                None
-            }
-        })
+        .and_then(|output| if output.status.success() { String::from_utf8(output.stdout).ok() } else { None })
         .map_or_else(|| "<unknown>".to_string(), |s| s.trim().to_string());
     println!("cargo:rustc-env=CZKAWKA_GIT_COMMIT_DATE={git_commit_date}");
 

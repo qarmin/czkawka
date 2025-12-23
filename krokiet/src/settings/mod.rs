@@ -16,7 +16,11 @@ use slint::{ComponentHandle, Model, ModelRc, PhysicalSize, VecModel, WindowSize}
 use crate::common::{create_excluded_directories_model_from_pathbuf, create_included_directories_model_from_pathbuf, create_vec_model_from_vec_string};
 use crate::connect_translation::change_language;
 use crate::settings::combo_box::StringComboBoxItems;
-use crate::settings::model::{BasicSettings, DEFAULT_BIGGEST_FILES, DEFAULT_MAXIMUM_SIZE_KB, DEFAULT_MINIMUM_CACHE_SIZE, DEFAULT_MINIMUM_PREHASH_CACHE_SIZE, DEFAULT_MINIMUM_SIZE_KB, MAX_HASH_SIZE, PRESET_NAME_RESERVED, PRESET_NUMBER, RESERVER_PRESET_IDX, SettingsCustom, DEFAULT_MAX_VIDEO_THUMBNAIL_POSITION_PERCENT, DEFAULT_MIN_VIDEO_THUMBNAIL_POSITION_PERCENT};
+use crate::settings::model::{
+    BasicSettings, DEFAULT_BIGGEST_FILES, DEFAULT_MAX_VIDEO_THUMBNAIL_POSITION_PERCENT, DEFAULT_MAXIMUM_SIZE_KB, DEFAULT_MIN_VIDEO_THUMBNAIL_POSITION_PERCENT,
+    DEFAULT_MINIMUM_CACHE_SIZE, DEFAULT_MINIMUM_PREHASH_CACHE_SIZE, DEFAULT_MINIMUM_SIZE_KB, MAX_HASH_SIZE, PRESET_NAME_RESERVED, PRESET_NUMBER, RESERVER_PRESET_IDX,
+    SettingsCustom,
+};
 use crate::{Callabler, GuiState, MainWindow, Settings, flk};
 
 pub(crate) fn connect_changing_settings_preset(app: &MainWindow) {
@@ -400,9 +404,13 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_similar_videos_vid_hash_duration_min(*ALLOWED_VID_HASH_DURATION.start() as f32);
     settings.set_similar_videos_vid_hash_duration_max(*ALLOWED_VID_HASH_DURATION.end() as f32);
     settings.set_similar_videos_image_preview(custom_settings.similar_videos_image_preview);
-    settings.set_similar_videos_thumbnail_percentage(custom_settings.similar_videos_thumbnail_percentage.clamp(DEFAULT_MIN_VIDEO_THUMBNAIL_POSITION_PERCENT, DEFAULT_MAX_VIDEO_THUMBNAIL_POSITION_PERCENT) as f32);
+    settings.set_similar_videos_thumbnail_percentage(
+        custom_settings
+            .similar_videos_thumbnail_percentage
+            .clamp(DEFAULT_MIN_VIDEO_THUMBNAIL_POSITION_PERCENT, DEFAULT_MAX_VIDEO_THUMBNAIL_POSITION_PERCENT) as f32,
+    );
     settings.set_similar_videos_thumbnail_percentage_min(DEFAULT_MIN_VIDEO_THUMBNAIL_POSITION_PERCENT as f32);
-        settings.set_similar_videos_thumbnail_percentage_max(DEFAULT_MAX_VIDEO_THUMBNAIL_POSITION_PERCENT as f32);
+    settings.set_similar_videos_thumbnail_percentage_max(DEFAULT_MAX_VIDEO_THUMBNAIL_POSITION_PERCENT as f32);
 
     settings.set_similar_music_sub_approximate_comparison(custom_settings.similar_music_sub_approximate_comparison);
     settings.set_similar_music_sub_title(custom_settings.similar_music_sub_title);

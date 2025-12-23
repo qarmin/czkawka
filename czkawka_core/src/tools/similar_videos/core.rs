@@ -1,9 +1,10 @@
 use std::collections::{BTreeMap, BTreeSet};
-use std::{fs, mem};
 use std::path::Path;
 use std::process::Command;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
+use std::{fs, mem};
+
 use blake3::Hasher;
 use crossbeam_channel::Sender;
 use ffprobe::ffprobe;
@@ -225,11 +226,10 @@ impl SimilarVideos {
                         "Failed to generate thumbnail(disabled for it thumbnail) for {}: {}",
                         file_entry.path.display(),
                         String::from_utf8_lossy(&result.stderr)
-                    ))                }
+                    ))
+                }
             }
-            Err(e) => {
-                Err(format!("Failed to run ffmpeg for thumbnail generation: {e}"))
-            }
+            Err(e) => Err(format!("Failed to run ffmpeg for thumbnail generation: {e}")),
         }
     }
 
@@ -295,7 +295,7 @@ impl SimilarVideos {
 
         self.match_groups_of_videos(vector_of_hashes, &hashmap_with_file_entries);
 
-        if let WorkContinueStatus::Stop = self.create_thumbnails(progress_sender, stop_flag) {
+        if self.create_thumbnails(progress_sender, stop_flag) == WorkContinueStatus::Stop {
             return WorkContinueStatus::Stop;
         }
 
@@ -344,22 +344,27 @@ impl SimilarVideos {
             return WorkContinueStatus::Continue;
         }
         let thumbnail_video_percentage_from_start = self.params.thumbnail_video_percentage_from_start;
-        let errors = self.similar_vectors.par_iter_mut().map(|vec_file_entry| {
-            let mut errs = vec![];
-            for file_entry in vec_file_entry {
-                if check_if_stop_received(stop_flag) {
-                    return errs;
+        let errors = self
+            .similar_vectors
+            .par_iter_mut()
+            .map(|vec_file_entry| {
+                let mut errs = vec![];
+                for file_entry in vec_file_entry {
+                    if check_if_stop_received(stop_flag) {
+                        return errs;
+                    }
+
+                    if let Err(e) = Self::generate_thumbnail(file_entry, &thumbnails_dir, thumbnail_video_percentage_from_start) {
+                        errs.push(e);
+                    }
+
+                    progress_handler.increase_items(1);
                 }
 
-                if let Err(e) = Self::generate_thumbnail(file_entry, &thumbnails_dir, thumbnail_video_percentage_from_start) {
-                    errs.push(e);
-                }
-
-                progress_handler.increase_items(1);
-            }
-
-            errs
-        }).flatten().collect::<Vec<String>>();
+                errs
+            })
+            .flatten()
+            .collect::<Vec<String>>();
 
         self.common_data.text_messages.warnings.extend(errors);
 

@@ -89,7 +89,7 @@ pub struct SimilarVideosParameters {
     pub duration: u32,
     pub crop_detect: Cropdetect,
     pub generate_thumbnails: bool,
-    pub thumbnail_video_percentage_from_start: u8
+    pub thumbnail_video_percentage_from_start: u8,
 }
 
 pub fn crop_detect_from_str_opt(s: &str) -> Option<Cropdetect> {
@@ -121,7 +121,7 @@ impl SimilarVideosParameters {
         duration: u32,
         crop_detect: Cropdetect,
         generate_thumbnails: bool,
-        thumbnail_video_percentage_from_start: u8
+        thumbnail_video_percentage_from_start: u8,
     ) -> Self {
         assert!((0..=MAX_TOLERANCE).contains(&tolerance));
         assert!(ALLOWED_SKIP_FORWARD_AMOUNT.contains(&skip_forward_amount));
@@ -134,7 +134,7 @@ impl SimilarVideosParameters {
             duration,
             crop_detect,
             generate_thumbnails,
-            thumbnail_video_percentage_from_start
+            thumbnail_video_percentage_from_start,
         }
     }
 }
