@@ -1,5 +1,5 @@
 use std::collections::{BTreeMap, BTreeSet};
-use std::mem;
+use std::{fs, mem};
 use std::path::Path;
 use std::process::Command;
 use std::sync::Arc;
@@ -186,7 +186,7 @@ impl SimilarVideos {
         file_entry
     }
 
-    fn generate_thumbnail(file_entry: &mut VideosEntry, thumbnails_dir: &Path, thumbnail_video_percentage_from_start: u8) {
+    fn generate_thumbnail(file_entry: &mut VideosEntry, thumbnails_dir: &Path, thumbnail_video_percentage_from_start: u8) -> Result<(), String> {
         let mut hasher = Hasher::new();
         hasher.update(format!("{thumbnail_video_percentage_from_start}___").as_bytes());
         hasher.update(file_entry.path.to_string_lossy().as_bytes());
@@ -196,7 +196,7 @@ impl SimilarVideos {
 
         if thumbnail_path.exists() {
             file_entry.thumbnail_path = Some(thumbnail_path);
-            return;
+            return Ok(());
         }
 
         let seek_time = file_entry.duration.map_or(5.0, |d| d * (thumbnail_video_percentage_from_start as f64) / 100.0);
@@ -218,16 +218,17 @@ impl SimilarVideos {
             Ok(result) => {
                 if result.status.success() && thumbnail_path.exists() {
                     file_entry.thumbnail_path = Some(thumbnail_path);
+                    Ok(())
                 } else {
-                    debug!(
-                        "Failed to generate thumbnail for {}: {}",
+                    let _ = fs::write(&thumbnail_path, b""); // Create empty file to avoid retrying generation again and again
+                    Err(format!(
+                        "Failed to generate thumbnail(disabled for it thumbnail) for {}: {}",
                         file_entry.path.display(),
                         String::from_utf8_lossy(&result.stderr)
-                    );
-                }
+                    ))                }
             }
             Err(e) => {
-                debug!("Failed to run ffmpeg for thumbnail generation: {e}");
+                Err(format!("Failed to run ffmpeg for thumbnail generation: {e}"))
             }
         }
     }
@@ -343,17 +344,24 @@ impl SimilarVideos {
             return WorkContinueStatus::Continue;
         }
         let thumbnail_video_percentage_from_start = self.params.thumbnail_video_percentage_from_start;
-        self.similar_vectors.par_iter_mut().for_each(|vec_file_entry| {
+        let errors = self.similar_vectors.par_iter_mut().map(|vec_file_entry| {
+            let mut errs = vec![];
             for file_entry in vec_file_entry {
                 if check_if_stop_received(stop_flag) {
-                    return;
+                    return errs;
                 }
 
-                Self::generate_thumbnail(file_entry, &thumbnails_dir, thumbnail_video_percentage_from_start);
+                if let Err(e) = Self::generate_thumbnail(file_entry, &thumbnails_dir, thumbnail_video_percentage_from_start) {
+                    errs.push(e);
+                }
 
                 progress_handler.increase_items(1);
             }
-        });
+
+            errs
+        }).flatten().collect::<Vec<String>>();
+
+        self.common_data.text_messages.warnings.extend(errors);
 
         progress_handler.join_thread();
         if check_if_stop_received(stop_flag) {
