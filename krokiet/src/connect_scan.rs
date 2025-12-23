@@ -533,6 +533,7 @@ fn scan_similar_videos(
                 custom_settings.similar_videos_vid_hash_duration,
                 crop_detect_from_str(&custom_settings.similar_videos_crop_detect),
                 custom_settings.similar_videos_image_preview,
+                // TODO thumbnail percentage from start // u8 - 0-100 - but realistically should be 1-99, default 10
             );
             let mut tool = SimilarVideos::new(params);
             set_common_settings(&mut tool, &custom_settings, &stop_flag);

@@ -199,7 +199,7 @@ impl SimilarVideos {
             return;
         }
 
-        let seek_time = file_entry.duration.map_or(5.0, |d| d * thumbnail_video_percentage_from_start as f32 / 100.0);
+        let seek_time = file_entry.duration.map_or(5.0, |d| d * (thumbnail_video_percentage_from_start as f64) / 100.0);
 
         let output = Command::new("ffmpeg")
             .arg("-ss")
@@ -334,22 +334,22 @@ impl SimilarVideos {
         );
 
         let Some(config_cache_path) = get_config_cache_path() else {
-            return;
+            return WorkContinueStatus::Continue;
         };
 
         let thumbnails_dir = config_cache_path.cache_folder.join("video_thumbnails");
         if let Err(e) = std::fs::create_dir_all(&thumbnails_dir) {
             debug!("Failed to create thumbnails directory: {e}");
-            return;
+            return WorkContinueStatus::Continue;
         }
-
+        let thumbnail_video_percentage_from_start = self.params.thumbnail_video_percentage_from_start;
         self.similar_vectors.par_iter_mut().for_each(|vec_file_entry| {
             for file_entry in vec_file_entry {
                 if check_if_stop_received(stop_flag) {
                     return;
                 }
 
-                Self::generate_thumbnail(file_entry);
+                Self::generate_thumbnail(file_entry, &thumbnails_dir, thumbnail_video_percentage_from_start);
 
                 progress_handler.increase_items(1);
             }

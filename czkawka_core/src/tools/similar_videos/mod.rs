@@ -119,6 +119,7 @@ impl SimilarVideosParameters {
         duration: u32,
         crop_detect: Cropdetect,
         generate_thumbnails: bool,
+        thumbnail_video_percentage_from_start: u8
     ) -> Self {
         assert!((0..=MAX_TOLERANCE).contains(&tolerance));
         assert!(ALLOWED_SKIP_FORWARD_AMOUNT.contains(&skip_forward_amount));
@@ -131,6 +132,7 @@ impl SimilarVideosParameters {
             duration,
             crop_detect,
             generate_thumbnails,
+            thumbnail_video_percentage_from_start
         }
     }
 }
