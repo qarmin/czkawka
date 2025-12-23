@@ -1,9 +1,10 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::mem;
+use std::path::Path;
 use std::process::Command;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
-
+use blake3::Hasher;
 use crossbeam_channel::Sender;
 use ffprobe::ffprobe;
 use fun_time::fun_time;
@@ -185,23 +186,9 @@ impl SimilarVideos {
         file_entry
     }
 
-    fn generate_thumbnail(file_entry: &mut VideosEntry, generate_thumbnail: bool) {
-        if !generate_thumbnail {
-            return;
-        }
-
-        let Some(config_cache_path) = get_config_cache_path() else {
-            return;
-        };
-
-        let thumbnails_dir = config_cache_path.cache_folder.join("video_thumbnails");
-        if let Err(e) = std::fs::create_dir_all(&thumbnails_dir) {
-            debug!("Failed to create thumbnails directory: {e}");
-            return;
-        }
-
-        use blake3::Hasher;
+    fn generate_thumbnail(file_entry: &mut VideosEntry, thumbnails_dir: &Path, thumbnail_video_percentage_from_start: u8) {
         let mut hasher = Hasher::new();
+        hasher.update(format!("{thumbnail_video_percentage_from_start}___").as_bytes());
         hasher.update(file_entry.path.to_string_lossy().as_bytes());
         let hash = hasher.finalize();
         let thumbnail_filename = format!("{}.jpg", hash.to_hex());
@@ -212,7 +199,7 @@ impl SimilarVideos {
             return;
         }
 
-        let seek_time = file_entry.duration.map_or(5.0, |d| d * 0.1);
+        let seek_time = file_entry.duration.map_or(5.0, |d| d * thumbnail_video_percentage_from_start as f32 / 100.0);
 
         let output = Command::new("ffmpeg")
             .arg("-ss")
@@ -261,7 +248,6 @@ impl SimilarVideos {
             0, // non_cached_files_to_check.values().map(|e| e.size).sum(), // Looks, that at least for now, there is no big difference between checking big and small files, so at least for now, only tracking number of files is enough
         );
 
-        let generate_thumbnail = self.params.generate_thumbnails;
         let mut vec_file_entry: Vec<VideosEntry> = non_cached_files_to_check
             .into_par_iter()
             .map(|(_, file_entry)| {
@@ -308,29 +294,7 @@ impl SimilarVideos {
 
         self.match_groups_of_videos(vector_of_hashes, &hashmap_with_file_entries);
 
-        // Generate thumbnails for similar videos
-        let progress_handler = prepare_thread_handler_common(
-            progress_sender,
-            CurrentStage::SimilarVideosCreatingThumbnails,
-            self.similar_vectors.iter().map(|e| e.len()).sum::<usize>(),
-            self.get_test_type(),
-            0,
-        );
-
-        self.similar_vectors.par_iter_mut().for_each(|vec_file_entry| {
-            for file_entry in vec_file_entry {
-                if check_if_stop_received(stop_flag) {
-                    return;
-                }
-
-                Self::generate_thumbnail(file_entry, generate_thumbnail);
-
-                progress_handler.increase_items(1);
-            }
-        });
-
-        progress_handler.join_thread();
-        if check_if_stop_received(stop_flag) {
+        if let WorkContinueStatus::Stop = self.create_thumbnails(progress_sender, stop_flag) {
             return WorkContinueStatus::Stop;
         }
 
@@ -351,6 +315,50 @@ impl SimilarVideos {
         // Clean unused data
         self.videos_hashes = Default::default();
         self.videos_to_check = Default::default();
+
+        WorkContinueStatus::Continue
+    }
+
+    #[fun_time(message = "create_thumbnails", level = "debug")]
+    fn create_thumbnails(&mut self, progress_sender: Option<&Sender<ProgressData>>, stop_flag: &Arc<AtomicBool>) -> WorkContinueStatus {
+        if !self.params.generate_thumbnails {
+            return WorkContinueStatus::Continue;
+        }
+
+        let progress_handler = prepare_thread_handler_common(
+            progress_sender,
+            CurrentStage::SimilarVideosCreatingThumbnails,
+            self.similar_vectors.iter().map(|e| e.len()).sum::<usize>(),
+            self.get_test_type(),
+            0,
+        );
+
+        let Some(config_cache_path) = get_config_cache_path() else {
+            return;
+        };
+
+        let thumbnails_dir = config_cache_path.cache_folder.join("video_thumbnails");
+        if let Err(e) = std::fs::create_dir_all(&thumbnails_dir) {
+            debug!("Failed to create thumbnails directory: {e}");
+            return;
+        }
+
+        self.similar_vectors.par_iter_mut().for_each(|vec_file_entry| {
+            for file_entry in vec_file_entry {
+                if check_if_stop_received(stop_flag) {
+                    return;
+                }
+
+                Self::generate_thumbnail(file_entry);
+
+                progress_handler.increase_items(1);
+            }
+        });
+
+        progress_handler.join_thread();
+        if check_if_stop_received(stop_flag) {
+            return WorkContinueStatus::Stop;
+        }
 
         WorkContinueStatus::Continue
     }

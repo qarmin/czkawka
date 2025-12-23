@@ -87,6 +87,7 @@ pub struct SimilarVideosParameters {
     pub duration: u32,
     pub crop_detect: Cropdetect,
     pub generate_thumbnails: bool,
+    pub thumbnail_video_percentage_from_start: u8
 }
 
 pub fn crop_detect_from_str_opt(s: &str) -> Option<Cropdetect> {
