@@ -95,7 +95,7 @@ column_duration = Duration
 # Slint translations
 ok_button = Ok
 cancel_button = Cancel
-are_you_want_to_continue = Are you want to continue?
+are_you_want_to_continue = Do you want to continue?
 main_window_title = Krokiet - Data Cleaner
 scan_button = Scan
 stop_button = Stop
