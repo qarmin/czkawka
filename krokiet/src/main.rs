@@ -52,6 +52,7 @@ mod connect_select;
 mod connect_show_preview;
 mod connect_size_of_config_cache;
 mod connect_sort;
+mod connect_sort_column;
 mod connect_stop;
 mod connect_translation;
 mod localizer_krokiet;
@@ -62,7 +63,6 @@ mod shared_models;
 mod simpler_model;
 #[cfg(test)]
 mod test_common;
-mod connect_sort_column;
 
 slint::include_modules!();
 

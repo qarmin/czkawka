@@ -28,7 +28,12 @@ use humansize::{BINARY, format_size};
 use rayon::prelude::*;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
 
-use crate::common::{check_if_all_included_dirs_are_referenced, check_if_there_are_any_included_folders, split_u64_into_i32s, MAX_INT_DATA_DUPLICATE_FILES, MAX_STR_DATA_DUPLICATE_FILES};
+use crate::common::{
+    MAX_INT_DATA_BIG_FILES, MAX_INT_DATA_BROKEN_FILES, MAX_INT_DATA_DUPLICATE_FILES, MAX_INT_DATA_EMPTY_FILES, MAX_INT_DATA_EMPTY_FOLDERS, MAX_INT_DATA_INVALID_SYMLINKS,
+    MAX_INT_DATA_SIMILAR_IMAGES, MAX_INT_DATA_SIMILAR_MUSIC, MAX_INT_DATA_SIMILAR_VIDEOS, MAX_INT_DATA_TEMPORARY_FILES, MAX_STR_DATA_BIG_FILES, MAX_STR_DATA_BROKEN_FILES,
+    MAX_STR_DATA_DUPLICATE_FILES, MAX_STR_DATA_EMPTY_FILES, MAX_STR_DATA_EMPTY_FOLDERS, MAX_STR_DATA_INVALID_SYMLINKS, MAX_STR_DATA_SIMILAR_IMAGES, MAX_STR_DATA_SIMILAR_MUSIC,
+    MAX_STR_DATA_SIMILAR_VIDEOS, MAX_STR_DATA_TEMPORARY_FILES, check_if_all_included_dirs_are_referenced, check_if_there_are_any_included_folders, split_u64_into_i32s,
+};
 use crate::connect_row_selection::checker::set_number_of_enabled_items;
 use crate::connect_row_selection::reset_selection;
 use crate::settings::collect_settings;
@@ -278,16 +283,18 @@ fn write_empty_folders_results(app: &MainWindow, vector: Vec<FolderEntry>, messa
 
 fn prepare_data_model_empty_folders(fe: &FolderEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(&fe.path);
-    let data_model_str = VecModel::from_slice(&[
+    let data_model_str_arr: [SharedString; MAX_STR_DATA_EMPTY_FOLDERS] = [
         file.into(),
         directory.into(),
         DateTime::from_timestamp(fe.modified_date as i64, 0)
             .expect("Modified date always should be in valid range")
             .to_string()
             .into(),
-    ]);
+    ];
+    let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
-    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1]);
+    let data_model_int_arr: [i32; MAX_INT_DATA_EMPTY_FOLDERS] = [modification_split.0, modification_split.1];
+    let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 }
 
@@ -343,7 +350,7 @@ fn write_big_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages: S
 
 fn prepare_data_model_big_files(fe: &FileEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(&fe.path);
-    let data_model_str = VecModel::from_slice(&[
+    let data_model_str_arr: [SharedString; MAX_STR_DATA_BIG_FILES] = [
         format_size(fe.size, BINARY).into(),
         file.into(),
         directory.into(),
@@ -351,10 +358,12 @@ fn prepare_data_model_big_files(fe: &FileEntry) -> (ModelRc<SharedString>, Model
             .expect("Modified date always should be in valid range")
             .to_string()
             .into(),
-    ]);
+    ];
+    let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
-    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1, size_split.0, size_split.1]);
+    let data_model_int_arr: [i32; MAX_INT_DATA_BIG_FILES] = [modification_split.0, modification_split.1, size_split.0, size_split.1];
+    let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 }
 
@@ -401,17 +410,19 @@ fn write_empty_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages:
 
 fn prepare_data_model_empty_files(fe: &FileEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(fe.get_path());
-    let data_model_str = VecModel::from_slice(&[
+    let data_model_str_arr: [SharedString; MAX_STR_DATA_EMPTY_FILES] = [
         file.into(),
         directory.into(),
         DateTime::from_timestamp(fe.get_modified_date() as i64, 0)
             .expect("Cannot create DateTime")
             .to_string()
             .into(),
-    ]);
+    ];
+    let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
-    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1, size_split.0, size_split.1]);
+    let data_model_int_arr: [i32; MAX_INT_DATA_EMPTY_FILES] = [modification_split.0, modification_split.1, size_split.0, size_split.1];
+    let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 }
 // Scan Similar Images
@@ -498,7 +509,7 @@ fn write_similar_images_results(app: &MainWindow, vector: Vec<(Option<ImagesEntr
 }
 fn prepare_data_model_similar_images(fe: &ImagesEntry, hash_size: u8) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(fe.get_path());
-    let data_model_str = VecModel::from_slice(&[
+    let data_model_str_arr: [SharedString; MAX_STR_DATA_SIMILAR_IMAGES] = [
         get_string_from_similarity(&fe.similarity, hash_size).into(),
         format_size(fe.size, BINARY).into(),
         format!("{}x{}", fe.width, fe.height).into(),
@@ -508,10 +519,12 @@ fn prepare_data_model_similar_images(fe: &ImagesEntry, hash_size: u8) -> (ModelR
             .expect("Cannot create DateTime")
             .to_string()
             .into(),
-    ]);
+    ];
+    let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
-    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1, size_split.0, size_split.1, fe.width as i32, fe.height as i32]);
+    let data_model_int_arr: [i32; MAX_INT_DATA_SIMILAR_IMAGES] = [modification_split.0, modification_split.1, size_split.0, size_split.1, fe.width as i32, fe.height as i32];
+    let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 }
 
@@ -606,7 +619,7 @@ fn prepare_data_model_similar_videos(fe: &VideosEntry) -> (ModelRc<SharedString>
     };
     let preview_path = fe.thumbnail_path.as_ref().map(|e| e.to_string_lossy().to_string()).unwrap_or_default();
     let duration = format_duration_opt(fe.duration);
-    let data_model_str = VecModel::from_slice(&[
+    let data_model_str_arr: [SharedString; MAX_STR_DATA_SIMILAR_VIDEOS] = [
         format_size(fe.size, BINARY).into(),
         file.into(),
         directory.into(),
@@ -620,10 +633,12 @@ fn prepare_data_model_similar_videos(fe: &VideosEntry) -> (ModelRc<SharedString>
             .to_string()
             .into(),
         preview_path.into(),
-    ]);
+    ];
+    let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
-    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1, size_split.0, size_split.1]);
+    let data_model_int_arr: [i32; MAX_INT_DATA_SIMILAR_VIDEOS] = [modification_split.0, modification_split.1, size_split.0, size_split.1];
+    let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 }
 // Scan Similar Music
@@ -729,7 +744,7 @@ fn write_similar_music_results(app: &MainWindow, vector: Vec<(Option<MusicEntry>
 }
 fn prepare_data_model_similar_music(fe: &MusicEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(fe.get_path());
-    let data_model_str = VecModel::from_slice(&[
+    let data_model_str_arr: [SharedString; MAX_STR_DATA_SIMILAR_MUSIC] = [
         format_size(fe.size, BINARY).into(),
         file.into(),
         fe.track_title.clone().into(),
@@ -743,10 +758,12 @@ fn prepare_data_model_similar_music(fe: &MusicEntry) -> (ModelRc<SharedString>, 
             .expect("Cannot create DateTime")
             .to_string()
             .into(),
-    ]);
+    ];
+    let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
-    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1, size_split.0, size_split.1]);
+    let data_model_int_arr: [i32; MAX_INT_DATA_SIMILAR_MUSIC] = [modification_split.0, modification_split.1, size_split.0, size_split.1];
+    let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 }
 // Invalid Symlinks
@@ -793,7 +810,7 @@ fn write_invalid_symlinks_results(app: &MainWindow, vector: Vec<SymlinksFileEntr
 
 fn prepare_data_model_invalid_symlinks(fe: &SymlinksFileEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(fe.get_path());
-    let data_model_str = VecModel::from_slice(&[
+    let data_model_str_arr: [SharedString; MAX_STR_DATA_INVALID_SYMLINKS] = [
         file.into(),
         directory.into(),
         fe.symlink_info.destination_path.to_string_lossy().to_string().into(),
@@ -802,9 +819,11 @@ fn prepare_data_model_invalid_symlinks(fe: &SymlinksFileEntry) -> (ModelRc<Share
             .expect("Cannot create DateTime")
             .to_string()
             .into(),
-    ]);
+    ];
+    let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
-    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1]);
+    let data_model_int_arr: [i32; MAX_INT_DATA_INVALID_SYMLINKS] = [modification_split.0, modification_split.1];
+    let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 } ////////////////////////////////////////// Temporary Files
 fn scan_temporary_files(
@@ -850,17 +869,19 @@ fn write_temporary_files_results(app: &MainWindow, vector: Vec<TemporaryFileEntr
 
 fn prepare_data_model_temporary_files(fe: &TemporaryFileEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(&fe.path);
-    let data_model_str = VecModel::from_slice(&[
+    let data_model_str_arr: [SharedString; MAX_STR_DATA_TEMPORARY_FILES] = [
         file.into(),
         directory.into(),
         DateTime::from_timestamp(fe.modified_date as i64, 0)
             .expect("Modified date always should be in valid range")
             .to_string()
             .into(),
-    ]);
+    ];
+    let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
-    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1, size_split.0, size_split.1]);
+    let data_model_int_arr: [i32; MAX_INT_DATA_TEMPORARY_FILES] = [modification_split.0, modification_split.1, size_split.0, size_split.1];
+    let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 }
 ////////////////////////////////////////// Broken Files
@@ -930,7 +951,7 @@ fn write_broken_files_results(app: &MainWindow, vector: Vec<BrokenEntry>, messag
 
 fn prepare_data_model_broken_files(fe: &BrokenEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(&fe.path);
-    let data_model_str = VecModel::from_slice(&[
+    let data_model_str_arr: [SharedString; MAX_STR_DATA_BROKEN_FILES] = [
         file.into(),
         directory.into(),
         fe.error_string.clone().into(),
@@ -939,10 +960,12 @@ fn prepare_data_model_broken_files(fe: &BrokenEntry) -> (ModelRc<SharedString>, 
             .expect("Modified date always should be in valid range")
             .to_string()
             .into(),
-    ]);
+    ];
+    let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
-    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1, size_split.0, size_split.1]);
+    let data_model_int_arr: [i32; MAX_INT_DATA_BROKEN_FILES] = [modification_split.0, modification_split.1, size_split.0, size_split.1];
+    let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 }
 ////////////////////////////////////////// Bad Extensions
