@@ -253,6 +253,7 @@ pub const MAX_STR_DATA_BAD_EXTENSIONS: usize = StrDataBadExtensions::ProperExten
 pub(crate) enum SortIdx {
     StrIdx(i32),
     IntIdxPair(i32, i32),
+    Selection,
 }
 
 impl ActiveTab {
@@ -263,6 +264,12 @@ impl ActiveTab {
         // Video duration
         // Video fps
         // Images resolution
+
+        // This not exists in enums, because selection is stored in other field
+        if str_idx == 0 {
+            return SortIdx::Selection;
+        }
+        let str_idx = str_idx - 1; // Adjust for selection
 
         match self {
             Self::EmptyFolders => match StrDataEmptyFolders::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for EmptyFolders")) {

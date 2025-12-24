@@ -38,6 +38,7 @@
 ### Krokiet
 - Added video thumbnails - [#1714](https://github.com/qarmin/czkawka/pull/1714)
 - Printing in settings, size of cache/thumbnails/logs files - [#1714](https://github.com/qarmin/czkawka/pull/1714)
+- Added sorting, by clicking at column headers - [#]()
 
 ### Prebuilt binaries
 - Krokiet Windows binaries with skia backend are available (this is msvc build and requires vc redist installed)

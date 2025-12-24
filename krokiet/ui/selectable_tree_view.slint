@@ -57,8 +57,6 @@ export component SelectableTableView inherits Rectangle {
 
                                 sort_column_idx = idx;
 
-                                debug("Clicked header column: " + title + " idx: " + idx);
-                                debug("New sort mode: " + (sort_column_mode == SortColumnMode.Ascending ? "Ascending" : (sort_column_mode == SortColumnMode.Descending ? "Descending" : "None")));
                                 Callabler.change_sort_column_mode(sort_column_mode, idx);
                             }
                         }
