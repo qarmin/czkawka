@@ -6,6 +6,42 @@ use crate::common::connect_i32_into_u64;
 use crate::connect_row_selection::recalculate_small_selection_if_needed;
 use crate::connect_translation::translate_sort_mode;
 use crate::{ActiveTab, Callabler, GuiState, MainListModel, MainWindow, SortMode, SortModel};
+use crate::common::SortIdx;
+
+pub(crate) fn connect_sort_column(app: &MainWindow) {
+    let a = app.as_weak();
+    app.global::<Callabler>().on_change_sort_column_mode(move |sort_column_mode, column_idx| {
+        let app = a.upgrade().expect("Failed to upgrade app :(");
+        let active_tab = app.global::<GuiState>().get_active_tab();
+        let current_model = active_tab.get_tool_model(&app);
+
+        let idx = active_tab.get_str_int_sort_idx(column_idx);
+        match idx {
+            SortIdx::StrIdx(str_idx) => {
+                // TODO
+                let sort_function = |e: &MainListModel| {
+                    let name_idx = active_tab.get_str_name_idx();
+                    let path_idx = active_tab.get_str_path_idx();
+                    let items = e.val_str.iter().collect::<Vec<_>>();
+                    format!("{}/{}", items[path_idx], items[name_idx])
+                };
+
+                common_sort_function(model, active_tab, sort_function)
+            }
+            SortIdx::IntIdxPair(int_idx1, int_idx2) => {
+                // TODO
+            }
+        }
+
+        // TODO sorting
+
+        // (&sort_column_mode, &column_idx);
+
+        recalculate_small_selection_if_needed(&current_model, active_tab);
+        active_tab.set_tool_model(&app, current_model);
+    });
+}
+
 
 pub(crate) fn connect_sort(app: &MainWindow) {
     let a = app.as_weak();
