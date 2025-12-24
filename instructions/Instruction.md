@@ -78,12 +78,14 @@ It is possible to modify files with JSON extension(may be helpful when moving fi
 Config files are located in this path:
 
 Linux - `/home/username/.config/czkawka`  
+Linux Flatpak - `/home/username/.var/app/com.github.qarmin.czkawka/config/czkawka`  
 Mac - `/Users/username/Library/Application Support/pl.Qarmin.Czkawka`  
 Windows - `C:\Users\Username\AppData\Roaming\Qarmin\Czkawka\config`
 
 Cache should be here:
 
 Linux - `/home/username/.cache/czkawka`  
+Linux Flatpak - `/home/username/.var/app/com.github.qarmin.czkawka/cache/czkawka`  
 Mac - `/Users/Username/Library/Caches/pl.Qarmin.Czkawka`  
 Windows - `C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache`
 

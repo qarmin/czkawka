@@ -36,8 +36,8 @@
 - Ugly workarounds for ugly freezes, caused probably by inconsistencies between GTK4 and the Rust compiler’s optimizations   - [#1691](https://github.com/qarmin/czkawka/pull/1691)
 
 ### Krokiet
-- Added video thumbnails - [#]()
-- Printing in settings, size of cache/thumbnails/logs files - [#]()
+- Added video thumbnails - [#1714](https://github.com/qarmin/czkawka/pull/1714)
+- Printing in settings, size of cache/thumbnails/logs files - [#1714](https://github.com/qarmin/czkawka/pull/1714)
 
 ### Prebuilt binaries
 - Krokiet Windows binaries with skia backend are available (this is msvc build and requires vc redist installed)

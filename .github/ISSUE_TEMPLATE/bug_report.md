@@ -31,7 +31,11 @@ Very helpful in this situation will be logs from czkawka run with RUST_LOG envir
 
 **System**
 
-<!-- OS and Czkawka/Krokiet version and other os info, you can just copy from logs, if you run app from terminal or find it in logs file (usually Linux - `/home/username/.cache/czkawka`, Mac - `/Users/Username/Library/Caches/pl.Qarmin.Czkawka`, Windows - `C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache`). -->
+<!-- OS and Czkawka/Krokiet version and other OS info — you can copy it from the logs if you run the app from a terminal or locate the log files manually
+(Linux: `/home/username/.cache/czkawka`,
+macOS: `/Users/Username/Library/Caches/pl.Qarmin.Czkawka`,
+Windows: `C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache`).
+Note: the exact path depends on the installation method(you can open config/cache path from gui). -->
 <!-- Example of logs: -->
 <!-- Czkawka gtk version: 10.0.0, debug mode, rust 1.90.0 (2025-06-23), os Ubuntu 25.4.0 (x86_64 64-bit), 24 cpu/threads, features(1): [fast_image_resize], app cpu version: x86-64-v3 (AVX2) or x86-64-v4 (AVX-512), os cpu version: x86-64-v4 (AVX-512) -->
 <!-- Config folder set to "/home/rafal/.config/czkawka" and cache folder set to "/home/rafal/.cache/czkawka" -->
