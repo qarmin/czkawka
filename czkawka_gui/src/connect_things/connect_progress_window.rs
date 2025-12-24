@@ -139,6 +139,9 @@ fn progress_default(gui_data: &GuiData, item: &ProgressData) {
         CurrentStage::SimilarVideosCalculatingHashes => {
             label_stage.set_text(&flg!("progress_scanning_video", progress_ratio_tm(item)));
         }
+        CurrentStage::SimilarVideosCreatingThumbnails => {
+            label_stage.set_text(&flg!("progress_creating_video_thumbnails", progress_ratio_tm(item)));
+        }
         CurrentStage::BrokenFilesChecking => {
             label_stage.set_text(&flg!("progress_scanning_broken_files", progress_ratio_tm(item)));
         }

@@ -363,6 +363,10 @@ export component SettingsList inherits VerticalLayout {
             }
 
             CheckBoxComponent {
+                name <=> Translations.settings_similar_videos_preview_text;
+                model <=> Settings.similar_videos_image_preview;
+            }
+            CheckBoxComponent {
                 name <=> Translations.settings_similar_videos_hide_hard_links_text;
                 model <=> Settings.similar_videos_hide_hard_links;
             }
@@ -379,6 +383,17 @@ export component SettingsList inherits VerticalLayout {
             CheckBoxComponent {
                 name <=> Translations.settings_delete_outdated_entries_text;
                 model <=> Settings.similar_music_delete_outdated_entries;
+            }
+
+
+            if Translations.settings_cache_number_size_text != "": HeaderText {
+                text <=> Translations.settings_cache_number_size_text;
+            }
+            if Translations.settings_video_thumbnails_number_size_text != "": HeaderText {
+                text <=> Translations.settings_video_thumbnails_number_size_text;
+            }
+            if Translations.settings_log_number_size_text != "": HeaderText {
+                text <=> Translations.settings_log_number_size_text;
             }
 
             ConfigCacheButtons { }

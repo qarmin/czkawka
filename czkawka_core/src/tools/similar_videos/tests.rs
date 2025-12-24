@@ -16,7 +16,7 @@ fn test_similar_videos_empty_directory() {
     let temp_dir = TempDir::new().unwrap();
     let path = temp_dir.path();
 
-    let params = SimilarVideosParameters::new(10, false, false, 15, 10, Cropdetect::Letterbox);
+    let params = SimilarVideosParameters::new(10, false, false, 15, 10, Cropdetect::Letterbox, false, 0);
 
     let mut finder = SimilarVideos::new(params);
     finder.set_included_directory(vec![path.to_path_buf()]);

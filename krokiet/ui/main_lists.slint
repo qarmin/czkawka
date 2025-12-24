@@ -41,6 +41,7 @@ export component MainList {
         values <=> duplicate_files_model;
         parentPathIdx: 3;
         fileNameIdx: 2;
+        previewImageIdx: -1;
     }
 
     empty_folders := SelectableTableView {
@@ -52,6 +53,7 @@ export component MainList {
         values <=> empty_folder_model;
         parentPathIdx: 2;
         fileNameIdx: 1;
+        previewImageIdx: -1;
     }
 
     big_files := SelectableTableView {
@@ -63,6 +65,7 @@ export component MainList {
         values <=> big_files_model;
         parentPathIdx: 3;
         fileNameIdx: 2;
+        previewImageIdx: -1;
     }
 
     empty_files := SelectableTableView {
@@ -74,6 +77,7 @@ export component MainList {
         values <=> empty_files_model;
         parentPathIdx: 2;
         fileNameIdx: 1;
+        previewImageIdx: -1;
     }
 
     temporary_files := SelectableTableView {
@@ -85,6 +89,7 @@ export component MainList {
         values <=> temporary_files_model;
         parentPathIdx: 2;
         fileNameIdx: 1;
+        previewImageIdx: -1;
     }
 
     similar_images := SelectableTableView {
@@ -96,6 +101,7 @@ export component MainList {
         values <=> similar_images_model;
         parentPathIdx: 5;
         fileNameIdx: 4;
+        previewImageIdx: -1;
     }
 
     similar_videos := SelectableTableView {
@@ -107,6 +113,7 @@ export component MainList {
         values <=> similar_videos_model;
         parentPathIdx: 3;
         fileNameIdx: 2;
+        previewImageIdx: 10;
     }
 
     similar_music := SelectableTableView {
@@ -118,6 +125,7 @@ export component MainList {
         values <=> similar_music_model;
         parentPathIdx: 9;
         fileNameIdx: 2;
+        previewImageIdx: -1;
     }
 
     invalid_symlink := SelectableTableView {
@@ -129,6 +137,7 @@ export component MainList {
         values <=> invalid_symlinks_model;
         parentPathIdx: 2;
         fileNameIdx: 1;
+        previewImageIdx: -1;
     }
 
     broken_files := SelectableTableView {
@@ -140,6 +149,7 @@ export component MainList {
         values <=> broken_files_model;
         parentPathIdx: 2;
         fileNameIdx: 1;
+        previewImageIdx: -1;
     }
 
     bad_extensions := SelectableTableView {
@@ -151,6 +161,7 @@ export component MainList {
         values <=> bad_extensions_model;
         parentPathIdx: 2;
         fileNameIdx: 1;
+        previewImageIdx: -1;
     }
 
     settings_list := SettingsList {

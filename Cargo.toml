@@ -52,6 +52,11 @@ strip = "symbols"
 debug = false
 lto = "off"
 
+[profile.rdebug]
+inherits = "release"
+debug = "full"
+strip = "none"
+
 # Unsafe profile, just to check, how fast and small app could be 
 [profile.fastest]
 inherits = "release"

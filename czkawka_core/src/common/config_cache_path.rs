@@ -62,6 +62,7 @@ fn resolve_folder(env_var: &str, default_folder: Option<PathBuf>, name: &'static
 pub fn set_config_cache_path(cache_name: &'static str, config_name: &'static str) -> (Vec<String>, Vec<String>) {
     // By default, such folders are used:
     // Lin: /home/username/.config/czkawka
+    // LinFlatpak: /home/username/.var/app/com.github.qarmin.czkawka/config/czkawka
     // Win: C:\Users\Username\AppData\Roaming\Qarmin\Czkawka\config
     // Mac: /Users/Username/Library/Application Support/pl.Qarmin.Czkawka
 

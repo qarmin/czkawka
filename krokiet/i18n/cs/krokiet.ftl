@@ -90,7 +90,7 @@ column_proper_extension = Řádné rozšíření
 # Slint translations
 ok_button = Ok
 cancel_button = Zrušit
-are_you_want_to_continue = Opravdu chcete pokračovat?
+do_you_want_to_continue = Opravdu chcete pokračovat?
 main_window_title = Krokiet - Čistič dat
 scan_button = Skenovat
 stop_button = Zastavit

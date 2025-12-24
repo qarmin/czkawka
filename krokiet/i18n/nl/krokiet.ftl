@@ -90,7 +90,7 @@ column_proper_extension = Proper Extensie
 # Slint translations
 ok_button = OK
 cancel_button = annuleren
-are_you_want_to_continue = Wilt u doorgaan?
+do_you_want_to_continue = Wilt u doorgaan?
 main_window_title = Krokiet - Opschoner gegevens
 scan_button = Scannen
 stop_button = Stoppen

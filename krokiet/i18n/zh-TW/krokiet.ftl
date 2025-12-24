@@ -90,7 +90,7 @@ column_proper_extension = 正確副檔名
 # Slint translations
 ok_button = 確定
 cancel_button = 取消
-are_you_want_to_continue = 您確定要繼續嗎？
+do_you_want_to_continue = 您確定要繼續嗎？
 main_window_title = Krokiet - Data Cleaner
 scan_button = Scan
 stop_button = 停止

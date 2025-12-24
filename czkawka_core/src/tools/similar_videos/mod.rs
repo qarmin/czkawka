@@ -26,6 +26,8 @@ pub const DEFAULT_SKIP_FORWARD_AMOUNT: u32 = 15;
 pub const ALLOWED_VID_HASH_DURATION: RangeInclusive<u32> = 2..=60;
 pub const DEFAULT_VID_HASH_DURATION: u32 = 10;
 
+pub const DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL: u8 = 10;
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct VideosEntry {
     pub path: PathBuf,
@@ -33,6 +35,17 @@ pub struct VideosEntry {
     pub modified_date: u64,
     pub vhash: VideoHash,
     pub error: String,
+
+    // Properties extracted from video
+    pub fps: Option<f64>,
+    pub codec: Option<String>,
+    pub bitrate: Option<u64>,
+    pub width: Option<u32>,
+    pub height: Option<u32>,
+    pub duration: Option<f64>,
+
+    #[serde(skip)] // Saving it to cache is bad idea, because cache can be moved to another locations
+    pub thumbnail_path: Option<PathBuf>,
 }
 
 impl ResultEntry for VideosEntry {
@@ -56,11 +69,18 @@ impl FileEntry {
 
             vhash: Default::default(),
             error: String::new(),
+            fps: None,
+            codec: None,
+            bitrate: None,
+            width: None,
+            height: None,
+            duration: None,
+            thumbnail_path: None,
         }
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SimilarVideosParameters {
     pub tolerance: i32,
     pub exclude_videos_with_same_size: bool,
@@ -68,6 +88,8 @@ pub struct SimilarVideosParameters {
     pub skip_forward_amount: u32,
     pub duration: u32,
     pub crop_detect: Cropdetect,
+    pub generate_thumbnails: bool,
+    pub thumbnail_video_percentage_from_start: u8,
 }
 
 pub fn crop_detect_from_str_opt(s: &str) -> Option<Cropdetect> {
@@ -91,7 +113,16 @@ pub fn crop_detect_to_str(crop_detect: Cropdetect) -> String {
 }
 
 impl SimilarVideosParameters {
-    pub fn new(tolerance: i32, exclude_videos_with_same_size: bool, ignore_hard_links: bool, skip_forward_amount: u32, duration: u32, crop_detect: Cropdetect) -> Self {
+    pub fn new(
+        tolerance: i32,
+        exclude_videos_with_same_size: bool,
+        ignore_hard_links: bool,
+        skip_forward_amount: u32,
+        duration: u32,
+        crop_detect: Cropdetect,
+        generate_thumbnails: bool,
+        thumbnail_video_percentage_from_start: u8,
+    ) -> Self {
         assert!((0..=MAX_TOLERANCE).contains(&tolerance));
         assert!(ALLOWED_SKIP_FORWARD_AMOUNT.contains(&skip_forward_amount));
         assert!(ALLOWED_VID_HASH_DURATION.contains(&duration));
@@ -102,6 +133,8 @@ impl SimilarVideosParameters {
             skip_forward_amount,
             duration,
             crop_detect,
+            generate_thumbnails,
+            thumbnail_video_percentage_from_start,
         }
     }
 }

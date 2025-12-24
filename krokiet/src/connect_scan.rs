@@ -21,6 +21,7 @@ use czkawka_core::tools::invalid_symlinks::{InvalidSymlinks, SymlinksFileEntry};
 use czkawka_core::tools::same_music::{MusicEntry, MusicSimilarity, SameMusic, SameMusicParameters};
 use czkawka_core::tools::similar_images::core::get_string_from_similarity;
 use czkawka_core::tools::similar_images::{ImagesEntry, SimilarImages, SimilarImagesParameters};
+use czkawka_core::tools::similar_videos::core::{format_bitrate_opt, format_duration_opt};
 use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters, VideosEntry, crop_detect_from_str};
 use czkawka_core::tools::temporary::{Temporary, TemporaryFileEntry};
 use humansize::{BINARY, format_size};
@@ -531,6 +532,8 @@ fn scan_similar_videos(
                 custom_settings.similar_videos_skip_forward_amount,
                 custom_settings.similar_videos_vid_hash_duration,
                 crop_detect_from_str(&custom_settings.similar_videos_crop_detect),
+                custom_settings.similar_videos_image_preview,
+                custom_settings.similar_videos_thumbnail_percentage,
             );
             let mut tool = SimilarVideos::new(params);
             set_common_settings(&mut tool, &custom_settings, &stop_flag);
@@ -588,16 +591,33 @@ fn write_similar_videos_results(app: &MainWindow, vector: Vec<(Option<VideosEntr
     app.invoke_scan_ended(flk!("rust_found_similar_videos", items_found = items_found, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
+
 fn prepare_data_model_similar_videos(fe: &VideosEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(fe.get_path());
+    let bitrate = format_bitrate_opt(fe.bitrate);
+    let fps = fe.fps.map(|e| format!("{e:.2}")).unwrap_or_default();
+    let codec = fe.codec.clone().unwrap_or_default();
+    let dimensions = if let (Some(w), Some(h)) = (fe.width, fe.height) {
+        format!("{w}x{h}")
+    } else {
+        "".to_string()
+    };
+    let preview_path = fe.thumbnail_path.as_ref().map(|e| e.to_string_lossy().to_string()).unwrap_or_default();
+    let duration = format_duration_opt(fe.duration);
     let data_model_str = VecModel::from_slice(&[
         format_size(fe.size, BINARY).into(),
         file.into(),
         directory.into(),
+        dimensions.into(),
+        duration.into(),
+        bitrate.into(),
+        fps.into(),
+        codec.into(),
         DateTime::from_timestamp(fe.get_modified_date() as i64, 0)
             .expect("Cannot create DateTime")
             .to_string()
             .into(),
+        preview_path.into(),
     ]);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);

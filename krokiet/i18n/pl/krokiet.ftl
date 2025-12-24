@@ -90,7 +90,7 @@ column_proper_extension = Właściwe rozszerzenie
 # Slint translations
 ok_button = Ok
 cancel_button = Anuluj
-are_you_want_to_continue = Czy chcesz kontynuować?
+do_you_want_to_continue = Czy chcesz kontynuować?
 main_window_title = Krokiet - Czyścioch Danych
 scan_button = Skanuj
 stop_button = Zatrzymaj

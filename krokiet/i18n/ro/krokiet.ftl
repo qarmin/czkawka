@@ -90,7 +90,7 @@ column_proper_extension = Extensie corectă
 # Slint translations
 ok_button = Ok
 cancel_button = Anulează
-are_you_want_to_continue = Vrei să continui?
+do_you_want_to_continue = Vrei să continui?
 main_window_title = Krokiet - Curățător de date
 scan_button = Scanare
 stop_button = Oprește

@@ -90,7 +90,7 @@ column_proper_extension = Propre extension
 # Slint translations
 ok_button = Ok
 cancel_button = Abandonner
-are_you_want_to_continue = Voulez-vous continuer ?
+do_you_want_to_continue = Voulez-vous continuer ?
 main_window_title = Krokiet - Nettoyeur de données
 scan_button = Analyser
 stop_button = Arrêter

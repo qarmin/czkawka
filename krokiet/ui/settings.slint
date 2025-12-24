@@ -40,7 +40,7 @@ export global Settings {
     in-out property <bool> similar_images_delete_outdated_entries;
     in-out property <bool> similar_images_hide_hard_links;
 
-    // in-out property <int> similar_videos_show_video_preview; // TODO - maybe someday
+    in-out property <bool> similar_videos_image_preview;
     in-out property <bool> similar_videos_delete_outdated_entries;
     in-out property <bool> similar_videos_hide_hard_links;
 
@@ -93,6 +93,10 @@ export global Settings {
     in-out property <string> similar_videos_crop_detect_value: "letterbox";
     in-out property <int> similar_videos_crop_detect_index: 0;
 
+    in-out property <float> similar_videos_thumbnail_percentage: 10;
+    in-out property <float> similar_videos_thumbnail_percentage_max: 99;
+    in-out property <float> similar_videos_thumbnail_percentage_min: 1;
+
     // Same Music
     in-out property <[string]> similar_music_sub_audio_check_type: ["Tags", "Fingerprint"];
     in-out property <int> similar_music_sub_audio_check_type_index: 0;
@@ -133,8 +137,8 @@ export global Settings {
     in-out property <[length]> temporary_files_column_size: [35px, name_px, path_px, mod_px];
     in-out property <[string]> similar_images_column_name: ["Selection", "Similarity", "Size", "Dimensions", "File Name", "Path", "Modification Date"];
     in-out property <[length]> similar_images_column_size: [35px, 80px, 80px, 80px, name_px, path_px, mod_px];
-    in-out property <[string]> similar_videos_column_name: ["Selection", "Size", "File Name", "Path", "Modification Date"];
-    in-out property <[length]> similar_videos_column_size: [35px, size_px, name_px, path_px, mod_px];
+    in-out property <[string]> similar_videos_column_name: ["Selection", "Size", "File Name", "Path", "Dimensions", "Duration", "Bitrate", "Fps", "Codec", "Modification Date"];
+    in-out property <[length]> similar_videos_column_size: [35px, size_px, name_px, path_px, 80px, 30px, 30px, 80px, 80px, mod_px];
     in-out property <[string]> similar_music_column_name: ["Selection", "Size", "File Name", "Title", "Artist", "Year", "Bitrate", "Length", "Genre", "Path", "Modification Date"];
     in-out property <[length]> similar_music_column_size: [35px, size_px, name_px, 80px, 80px, 80px, 80px, 80px, 80px, path_px, mod_px];
     in-out property <[string]> invalid_symlink_column_name: ["Selection", "Symlink Name", "Symlink Folder", "Destination Path", "Modification Date"];

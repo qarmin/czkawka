@@ -135,6 +135,8 @@ main_tree_view_column_destination_path = Destination Path
 main_tree_view_column_type_of_error = Type Of Error
 main_tree_view_column_current_extension = Current Extension
 main_tree_view_column_proper_extensions = Proper Extension
+main_tree_view_column_fps = FPS
+main_tree_view_column_codec = Codec
 
 main_label_check_method = Check method
 main_label_hash_type = Hash type
@@ -484,6 +486,7 @@ progress_scanning_general_file = {$file_number ->
 progress_scanning_extension_of_files = Checked extension of {$file_checked}/{$all_files} file
 progress_scanning_broken_files = Checked {$file_checked}/{$all_files} file ({$data_checked}/{$all_data})
 progress_scanning_video = Hashed of {$file_checked}/{$all_files} video
+progress_creating_video_thumbnails = Created thumbnails of {$file_checked}/{$all_files} video
 progress_scanning_image = Hashed of {$file_checked}/{$all_files} image ({$data_checked}/{$all_data})
 progress_comparing_image_hashes = Compared {$file_checked}/{$all_files} image hash
 progress_scanning_music_tags_end = Compared tags of {$file_checked}/{$all_files} music file

@@ -3,7 +3,9 @@ use std::env;
 use std::path::PathBuf;
 
 use czkawka_core::common::items::{DEFAULT_EXCLUDED_DIRECTORIES, DEFAULT_EXCLUDED_ITEMS};
-use czkawka_core::tools::similar_videos::{DEFAULT_CROP_DETECT, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION, crop_detect_to_str};
+use czkawka_core::tools::similar_videos::{
+    DEFAULT_CROP_DETECT, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION, DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL, crop_detect_to_str,
+};
 use home::home_dir;
 use serde::{Deserialize, Serialize};
 
@@ -22,6 +24,8 @@ pub const DEFAULT_MINIMAL_FRAGMENT_DURATION_VALUE: f32 = 5.0;
 pub const MAX_HASH_SIZE: f32 = 40.0;
 pub const DEFAULT_WINDOW_WIDTH: u32 = 800;
 pub const DEFAULT_WINDOW_HEIGHT: u32 = 600;
+pub const DEFAULT_MIN_VIDEO_THUMBNAIL_POSITION_PERCENT: u8 = 1;
+pub const DEFAULT_MAX_VIDEO_THUMBNAIL_POSITION_PERCENT: u8 = 99;
 
 pub const PRESET_NUMBER: usize = 11; // 10 normal presets + 1 reserved preset for custom settings
 pub const RESERVER_PRESET_IDX: i32 = PRESET_NUMBER as i32 - 1; // 10 normal presets + 1 reserved preset for custom settings
@@ -77,6 +81,8 @@ pub struct SettingsCustom {
     pub similar_images_delete_outdated_entries: bool,
     #[serde(default = "ttrue")]
     pub similar_videos_delete_outdated_entries: bool,
+    #[serde(default = "ttrue")]
+    pub similar_videos_image_preview: bool,
     #[serde(default = "ttrue")]
     pub similar_music_delete_outdated_entries: bool,
     #[serde(default = "default_sub_hash_size")]
@@ -141,6 +147,8 @@ pub struct SettingsCustom {
     pub similar_videos_vid_hash_duration: u32,
     #[serde(default = "default_similar_videos_crop_detect")]
     pub similar_videos_crop_detect: String,
+    #[serde(default = "default_similar_videos_thumbnail_percentage")]
+    pub similar_videos_thumbnail_percentage: u8,
     #[serde(default)]
     pub column_sizes: BTreeMap<String, Vec<f32>>,
 }
@@ -213,6 +221,9 @@ fn default_similar_videos_vid_hash_duration() -> u32 {
 }
 fn default_similar_videos_crop_detect() -> String {
     crop_detect_to_str(DEFAULT_CROP_DETECT)
+}
+fn default_similar_videos_thumbnail_percentage() -> u8 {
+    DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL
 }
 
 fn default_duplicates_check_method() -> String {

@@ -101,23 +101,6 @@ benchmark media:
     #hyperfine --prepare "sudo sh -c 'sync; echo 3 > /proc/sys/vm/drop_caches'; rm cache_duplicates_Blake3_70.bin || true" 'benchmarks/czkawka_cli_fastest dup -d "{{ media }}" -W -N -M -H' 'benchmarks/czkawka_cli_v4 dup -d "{{ media }}" -W -N -M -H' 'benchmarks/czkawka_cli_normal dup -d "{{ media }}" -W -N -M -H' 'benchmarks/czkawka_cli_old image -d "{{ media }}" > /dev/null'
     hyperfine --prepare "sudo sh -c 'sync; echo 3 > /proc/sys/vm/drop_caches'; rm /home/rafal/.cache/czkawka/cache_similar_images_16_Gradient_Nearest_80.bin || true" 'benchmarks/czkawka_cli_fastest image -d "{{ media }}" -W -N -M -H' 'benchmarks/czkawka_cli_v4 image -d "{{ media }}" -W -N -M -H' 'benchmarks/czkawka_cli_normal image -d "{{ media }}" -W -N -M -H' 'benchmarks/czkawka_cli_old image -d "{{ media }}" > /dev/null'
 
-setup_verify:
-    cargo install cargo-llvm-lines
-    cargo install cargo-bloat
-
-debug_verify:
-    cargo llvm-lines -p krokiet --bin krokiet | head -40
-    cargo llvm-lines -p czkawka_gui --bin czkawka_gui | head -40
-    cargo llvm-lines -p czkawka_cli --bin czkawka_cli | head -40
-
-    cargo bloat --release --bin czkawka_cli -n 30
-    cargo bloat --release --bin czkawka_gui -n 30
-    cargo bloat --release --bin krokiet -n 30
-
-bloat:
-    cargo bloat --release --crates --bin czkawka_cli
-    cargo bloat --release --crates --bin czkawka_gui
-    cargo bloat --release --crates --bin krokiet
 
 check_compilations:
     git checkout Cargo.toml
@@ -132,3 +115,80 @@ install:
     cargo install --path czkawka_cli --locked
     cargo install --path krokiet --locked
     cargo install --path czkawka_gui --locked
+
+
+##################### DEBUG SIZE, PERFORMANCE AND OTHERS #####################
+setup_verify_tools:
+    rustup component add llvm-tools-preview
+    cargo install cargo-llvm-lines cargo-bloat cargo-deps flamegraph measureme
+    cargo install --git https://github.com/rust-lang/measureme crox flamegraph summarize
+
+# Prints lines of certain functions in binary
+llvm_lines:
+    cargo llvm-lines -p krokiet --bin krokiet | head -40
+    cargo llvm-lines -p czkawka_gui --bin czkawka_gui | head -40
+    cargo llvm-lines -p czkawka_cli --bin czkawka_cli | head -40
+
+# Prints size of functions in binary
+bloat_by_function:
+    cargo bloat --release --bin czkawka_cli -n 30
+    cargo bloat --release --bin czkawka_gui -n 30
+    cargo bloat --release --bin krokiet -n 30
+
+# Prints size of crates in binary
+bloat_by_crate:
+    cargo bloat --release --crates --bin czkawka_cli
+    cargo bloat --release --crates --bin czkawka_gui
+    cargo bloat --release --crates --bin krokiet
+
+# Draws dependency graphs of certain binaries(like regex, image, etc)
+dependencies_graph:
+    cd czkawka_core;cargo deps --all-deps | dot -Tpng > deps.png;cd ..
+    cd czkawka_cli;cargo deps --all-deps | dot -Tpng > deps.png;cd ..
+    cd czkawka_gui;cargo deps --all-deps | dot -Tpng > deps.png;cd ..
+    cd krokiet;cargo deps --all-deps | dot -Tpng > deps.png;cd ..
+
+# Shows llvm compilation data summary
+profiling profile='debug' mode='build':
+    if [ "{{profile}}" = "release" ]; then release_flag="--release"; else release_flag=""; fi; \
+    cargo clean; \
+    for crate in czkawka_core czkawka_gui czkawka_cli krokiet; do \
+        cd "$crate"; \
+        rm ../*.mm_profdata || true; \
+        rm *.mm_profdata || true; \
+        RUSTFLAGS="-Zself-profile" cargo +nightly rustc $release_flag; \
+        summarize summarize ../*.mm_profdata || true; \
+        cd ..; \
+    done
+
+# Timings of crates compilation
+timings profile='debug' mode='build':
+    if [ "{{profile}}" = "release" ]; then release_flag="--release"; else release_flag=""; fi; \
+    cargo clean; \
+    for crate in czkawka_core czkawka_gui czkawka_cli krokiet; do \
+        cd "$crate"; \
+        rm ../target/cargo-timings/*.html || true; \
+        cargo "{{mode}}" $release_flag --timings; \
+        cp "$(find ../target/cargo-timings -maxdepth 1 -name '*.html' -print -quit)" "../$crate.html" || true; \
+        cd ..; \
+    done
+    #cargo clean
+#    cd czkawka_core; RUSTFLAGS="-Ztime" cargo +nightly rustc; cd ..;
+#    cargo clean
+#    cd czkawka_gui; RUSTFLAGS="-Ztime" cargo +nightly rustc; cd ..;
+#    cargo clean
+#    cd czkawka_cli; RUSTFLAGS="-Ztime" cargo +nightly rustc; cd ..;
+#    cargo clean
+#    cd krokiet; RUSTFLAGS="-Ztime" cargo +nightly rustc; cd ..;
+
+# Per crate compilation times and ram usage
+# This is very verbose, so probably not really useful
+time_passes:
+    cargo clean
+    cd czkawka_core; RUSTFLAGS="-Ztime-passes" cargo +nightly rustc; cd ..;
+    cargo clean
+    cd czkawka_gui; RUSTFLAGS="-Ztime-passes" cargo +nightly rustc; cd ..;
+    cargo clean
+    cd czkawka_cli; RUSTFLAGS="-Ztime-passes" cargo +nightly rustc; cd ..;
+    cargo clean
+    cd krokiet; RUSTFLAGS="-Ztime-passes" cargo +nightly rustc; cd ..;

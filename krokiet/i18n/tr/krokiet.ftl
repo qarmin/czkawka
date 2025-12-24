@@ -90,7 +90,7 @@ column_proper_extension = Doğru Uzantı
 # Slint translations
 ok_button = Tamam
 cancel_button = İptal
-are_you_want_to_continue = Devam etmek istiyor musunuz?
+do_you_want_to_continue = Devam etmek istiyor musunuz?
 main_window_title = Krokiet - Data Cleaner
 scan_button = Scan
 stop_button = Durdur

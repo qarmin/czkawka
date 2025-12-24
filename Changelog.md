@@ -1,4 +1,9 @@
 ## Version ?.?.? - ??
+### New version blockers
+- workaround for very slow performance with thousands of lines in Krokiet in bottom panel - maybe max width option in gui?
+- new release of gtk4-rs, with iter_next fix
+- sym/hardlinks in Krokiet
+
 ### Breaking changes
 #### Users
 - Czkawka gui config file converted from custom format to json, so all settings needs to be set again(old txt file is not removed, so it may be used as reference for changes) 
@@ -30,6 +35,10 @@
 - Fixed sorting by size in big files mode - [#1691](https://github.com/qarmin/czkawka/pull/1691)
 - Ugly workarounds for ugly freezes, caused probably by inconsistencies between GTK4 and the Rust compiler’s optimizations   - [#1691](https://github.com/qarmin/czkawka/pull/1691)
 
+### Krokiet
+- Added video thumbnails - [#1714](https://github.com/qarmin/czkawka/pull/1714)
+- Printing in settings, size of cache/thumbnails/logs files - [#1714](https://github.com/qarmin/czkawka/pull/1714)
+
 ### Prebuilt binaries
 - Krokiet Windows binaries with skia backend are available (this is msvc build and requires vc redist installed)
 - Intel Mac binaries, are now built with the latest available MacOS(15 at the moment)
@@ -42,6 +51,7 @@
 - Some languages now have unified names in Crowdin (e.g. `es` → `es-ES`). The GUI may not find them and will fall back to the default language.
 - Cache files now use memory limits and are incompatible with previous versions.
 - Cli image filter argument changed from `faussian` to `gaussian`
+
 #### Devs
 - `stop_flag` is now required argument in most of the core functions
 - Visibility of some core functions has been reduced to `pub(crate)`
@@ -58,6 +68,7 @@
 - Replaced `imagepipe` + `rawloader` with `rawler` which is still supported and faster to decode raw files - [#1572](https://github.com/qarmin/czkawka/pull/1572)
 - Added more configuration options in video finder - [#1578](https://github.com/qarmin/czkawka/pull/1578)
 - `fast_image_resize` feature is removed and `image_hasher/fast_resize_unstable` is enabled unconditionally - [#1586](https://github.com/qarmin/czkawka/pull/1586)
+- Added to all projects, info about video properties(bitrate, codec, fps, dimensions, duration) - [#]()
 
 ### CLI
 - Improved logic for deleting files and added progress bar for this operation - [#1571](https://github.com/qarmin/czkawka/pull/1571)

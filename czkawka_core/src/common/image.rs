@@ -180,7 +180,7 @@ pub fn check_if_can_display_image(path: &str) -> bool {
     #[cfg(not(feature = "heif"))]
     let allowed_extensions = &[IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS, JXL_IMAGE_EXTENSIONS].concat();
 
-    allowed_extensions.iter().any(|ext| extension_str.ends_with(ext))
+    allowed_extensions.iter().any(|ext| &extension_str == ext)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

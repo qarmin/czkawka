@@ -32,7 +32,7 @@ bitflags = "2.6"
 lofty = "0.22"
 
 # Needed by broken files
-zip = { version = "6.0", features = ["aes-crypto", "bzip2", "deflate", "time"], default-features = false }
+zip = { version = "7.0", features = ["aes-crypto", "bzip2", "deflate", "time"], default-features = false }
 lopdf = "0.38.0"
 
 # Needed by audio similarity feature
@@ -49,6 +49,9 @@ tempfile = "3.13"
 # Video Duplicates
 vid_dup_finder_lib = "0.4"
 ffmpeg_cmdline_utils = "0.4"
+
+# For extracting video properties using ffprobe CLI
+ffprobe = "0.4.0"
 
 # Saving/Loading Cache
 serde = "1.0"

@@ -17,8 +17,9 @@ use crate::common::{create_excluded_directories_model_from_pathbuf, create_inclu
 use crate::connect_translation::change_language;
 use crate::settings::combo_box::StringComboBoxItems;
 use crate::settings::model::{
-    BasicSettings, DEFAULT_BIGGEST_FILES, DEFAULT_MAXIMUM_SIZE_KB, DEFAULT_MINIMUM_CACHE_SIZE, DEFAULT_MINIMUM_PREHASH_CACHE_SIZE, DEFAULT_MINIMUM_SIZE_KB, MAX_HASH_SIZE,
-    PRESET_NAME_RESERVED, PRESET_NUMBER, RESERVER_PRESET_IDX, SettingsCustom,
+    BasicSettings, DEFAULT_BIGGEST_FILES, DEFAULT_MAX_VIDEO_THUMBNAIL_POSITION_PERCENT, DEFAULT_MAXIMUM_SIZE_KB, DEFAULT_MIN_VIDEO_THUMBNAIL_POSITION_PERCENT,
+    DEFAULT_MINIMUM_CACHE_SIZE, DEFAULT_MINIMUM_PREHASH_CACHE_SIZE, DEFAULT_MINIMUM_SIZE_KB, MAX_HASH_SIZE, PRESET_NAME_RESERVED, PRESET_NUMBER, RESERVER_PRESET_IDX,
+    SettingsCustom,
 };
 use crate::{Callabler, GuiState, MainWindow, Settings, flk};
 
@@ -402,6 +403,14 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     );
     settings.set_similar_videos_vid_hash_duration_min(*ALLOWED_VID_HASH_DURATION.start() as f32);
     settings.set_similar_videos_vid_hash_duration_max(*ALLOWED_VID_HASH_DURATION.end() as f32);
+    settings.set_similar_videos_image_preview(custom_settings.similar_videos_image_preview);
+    settings.set_similar_videos_thumbnail_percentage(
+        custom_settings
+            .similar_videos_thumbnail_percentage
+            .clamp(DEFAULT_MIN_VIDEO_THUMBNAIL_POSITION_PERCENT, DEFAULT_MAX_VIDEO_THUMBNAIL_POSITION_PERCENT) as f32,
+    );
+    settings.set_similar_videos_thumbnail_percentage_min(DEFAULT_MIN_VIDEO_THUMBNAIL_POSITION_PERCENT as f32);
+    settings.set_similar_videos_thumbnail_percentage_max(DEFAULT_MAX_VIDEO_THUMBNAIL_POSITION_PERCENT as f32);
 
     settings.set_similar_music_sub_approximate_comparison(custom_settings.similar_music_sub_approximate_comparison);
     settings.set_similar_music_sub_title(custom_settings.similar_music_sub_title);
@@ -442,7 +451,7 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
         settings.set_temporary_files_column_size(fnm(&[sel_px, name_px, path_px, mod_px], "temporary_files"));
         settings.set_big_files_column_size(fnm(&[sel_px, size_px, name_px, path_px, mod_px], "big_files"));
         settings.set_similar_images_column_size(fnm(&[sel_px, 80.0, 80.0, 80.0, name_px, path_px, mod_px], "similar_images"));
-        settings.set_similar_videos_column_size(fnm(&[sel_px, size_px, name_px, path_px, mod_px], "similar_videos"));
+        settings.set_similar_videos_column_size(fnm(&[sel_px, size_px, name_px, path_px, 80.0, 80.0, 80.0, 80.0, 80.0, mod_px], "similar_videos"));
         settings.set_similar_music_column_size(fnm(&[sel_px, size_px, name_px, 80.0, 80.0, 80.0, 80.0, 80.0, 80.0, path_px, mod_px], "similar_music"));
         settings.set_invalid_symlink_column_size(fnm(&[sel_px, name_px, path_px, path_px, mod_px], "invalid_symlink"));
         settings.set_broken_files_column_size(fnm(&[sel_px, name_px, path_px, 200.0, size_px, mod_px], "broken_files"));
@@ -499,6 +508,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
 
     let similar_videos_hide_hard_links = settings.get_similar_videos_hide_hard_links();
     let similar_videos_delete_outdated_entries = settings.get_similar_videos_delete_outdated_entries();
+    let similar_videos_image_preview = settings.get_similar_videos_image_preview();
 
     let similar_music_compare_fingerprints_only_with_similar_titles = settings.get_similar_music_compare_fingerprints_only_with_similar_titles();
     let similar_music_delete_outdated_entries = settings.get_similar_music_delete_outdated_entries();
@@ -527,6 +537,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let similar_videos_crop_detect = StringComboBoxItems::get_config_name_from_idx(similar_videos_crop_detect_idx as usize, &collected_items.videos_crop_detect);
     let similar_videos_skip_forward_amount = settings.get_similar_videos_skip_forward_amount() as u32;
     let similar_videos_vid_hash_duration = settings.get_similar_videos_vid_hash_duration() as u32;
+    let similar_videos_thumbnail_percentage = settings.get_similar_videos_thumbnail_percentage().round() as u8;
 
     let similar_music_sub_audio_check_type_idx = settings.get_similar_music_sub_audio_check_type_index();
     let similar_music_sub_audio_check_type = StringComboBoxItems::get_config_name_from_idx(similar_music_sub_audio_check_type_idx as usize, &collected_items.audio_check_type);
@@ -617,6 +628,8 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         similar_videos_vid_hash_duration,
         similar_videos_crop_detect,
         similar_videos_skip_forward_amount,
+        similar_videos_image_preview,
+        similar_videos_thumbnail_percentage,
     }
 }
 

@@ -171,9 +171,10 @@ pub fn print_version_mode(app: &str) {
     } else {
         "U" // Unofficial build
     };
+    let git_date = env!("CZKAWKA_GIT_COMMIT_DATE");
 
     info!(
-        "{app} version: {CZKAWKA_VERSION}({git_commit} {official_build}), {debug_release} mode, rust {rust_version}, os {} {} ({} {}), {processors} cpu/threads, features({}): [{}], app cpu version: {app_cpu_version}, os cpu version: {os_cpu_version}{musl_or_glibc}",
+        "{app} version: {CZKAWKA_VERSION}({git_commit} {official_build} {git_date}), {debug_release} mode, rust {rust_version}, os {} {} ({} {}), {processors} cpu/threads, features({}): [{}], app cpu version: {app_cpu_version}, os cpu version: {os_cpu_version}{musl_or_glibc}",
         info.os_type(),
         info.version(),
         env::consts::ARCH,

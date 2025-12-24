@@ -1,9 +1,13 @@
 use std::collections::{BTreeMap, BTreeSet};
-use std::mem;
+use std::path::Path;
+use std::process::Command;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
+use std::{fs, mem};
 
+use blake3::Hasher;
 use crossbeam_channel::Sender;
+use ffprobe::ffprobe;
 use fun_time::fun_time;
 use indexmap::IndexMap;
 use log::debug;
@@ -11,6 +15,7 @@ use rayon::prelude::*;
 use vid_dup_finder_lib::{CreationOptions, Cropdetect, VideoHash, VideoHashBuilder};
 
 use crate::common::cache::{CACHE_VIDEO_VERSION, extract_loaded_cache, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
+use crate::common::config_cache_path::get_config_cache_path;
 use crate::common::consts::VIDEO_FILES_EXTENSIONS;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult, inode, take_1_per_inode};
 use crate::common::model::{ToolType, WorkContinueStatus};
@@ -19,6 +24,8 @@ use crate::common::progress_stop_handler::{check_if_stop_received, prepare_threa
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::common::traits::ResultEntry;
 use crate::tools::similar_videos::{SimilarVideos, SimilarVideosParameters, VideosEntry};
+
+pub const VIDEO_THUMBNAILS_SUBFOLDER: &str = "video_thumbnails";
 
 impl SimilarVideos {
     pub fn new(params: SimilarVideosParameters) -> Self {
@@ -112,6 +119,122 @@ impl SimilarVideos {
         file_entry
     }
 
+    fn read_video_properties(mut file_entry: VideosEntry) -> VideosEntry {
+        match ffprobe(file_entry.path.clone()) {
+            Ok(info) => {
+                if let Some(duration_str) = &info.format.duration
+                    && let Ok(d) = duration_str.parse::<f64>()
+                {
+                    file_entry.duration = Some(d);
+                }
+
+                if let Some(stream) = info.streams.into_iter().find(|s| s.codec_type.as_deref() == Some("video")) {
+                    if let Some(codec_name) = stream.codec_name {
+                        file_entry.codec = Some(codec_name);
+                    }
+
+                    if let Some(bit_rate_str) = stream.bit_rate.or(info.format.bit_rate)
+                        && let Ok(b) = bit_rate_str.parse::<u64>()
+                    {
+                        file_entry.bitrate = Some(b);
+                    }
+
+                    if let Some(w) = stream.width
+                        && w >= 0
+                    {
+                        file_entry.width = Some(w as u32);
+                    }
+                    if let Some(h) = stream.height
+                        && h >= 0
+                    {
+                        file_entry.height = Some(h as u32);
+                    }
+
+                    let fps_opt = if !stream.avg_frame_rate.is_empty() && stream.avg_frame_rate != "0/0" {
+                        Some(stream.avg_frame_rate)
+                    } else if !stream.r_frame_rate.is_empty() && stream.r_frame_rate != "0/0" {
+                        Some(stream.r_frame_rate)
+                    } else {
+                        None
+                    };
+
+                    if let Some(fps_str) = fps_opt {
+                        let fps_val = if fps_str.contains('/') {
+                            let mut parts = fps_str.splitn(2, '/');
+                            if let (Some(n), Some(d)) = (parts.next(), parts.next()) {
+                                if let (Ok(nv), Ok(dv)) = (n.parse::<f64>(), d.parse::<f64>()) {
+                                    if dv != 0.0 { Some(nv / dv) } else { None }
+                                } else {
+                                    None
+                                }
+                            } else {
+                                None
+                            }
+                        } else {
+                            fps_str.parse::<f64>().ok()
+                        };
+
+                        if let Some(fps_v) = fps_val {
+                            file_entry.fps = Some(fps_v);
+                        }
+                    }
+                }
+            }
+            Err(e) => {
+                let path = file_entry.path.to_string_lossy();
+                file_entry.error = format!("Failed to read properties for file \"{path}\": reason {e}");
+            }
+        }
+
+        file_entry
+    }
+
+    fn generate_thumbnail(file_entry: &mut VideosEntry, thumbnails_dir: &Path, thumbnail_video_percentage_from_start: u8) -> Result<(), String> {
+        let mut hasher = Hasher::new();
+        hasher.update(format!("{thumbnail_video_percentage_from_start}___").as_bytes());
+        hasher.update(file_entry.path.to_string_lossy().as_bytes());
+        let hash = hasher.finalize();
+        let thumbnail_filename = format!("{}.jpg", hash.to_hex());
+        let thumbnail_path = thumbnails_dir.join(thumbnail_filename);
+
+        if thumbnail_path.exists() {
+            file_entry.thumbnail_path = Some(thumbnail_path);
+            return Ok(());
+        }
+
+        let seek_time = file_entry.duration.map_or(5.0, |d| d * (thumbnail_video_percentage_from_start as f64) / 100.0);
+
+        let output = Command::new("ffmpeg")
+            .arg("-ss")
+            .arg(seek_time.to_string())
+            .arg("-i")
+            .arg(&file_entry.path)
+            .arg("-vframes")
+            .arg("1")
+            .arg("-q:v")
+            .arg("2")
+            .arg("-y")
+            .arg(&thumbnail_path)
+            .output();
+
+        match output {
+            Ok(result) => {
+                if result.status.success() && thumbnail_path.exists() {
+                    file_entry.thumbnail_path = Some(thumbnail_path);
+                    Ok(())
+                } else {
+                    let _ = fs::write(&thumbnail_path, b""); // Create empty file to avoid retrying generation again and again
+                    Err(format!(
+                        "Failed to generate thumbnail(disabled for it thumbnail) for {}: {}",
+                        file_entry.path.display(),
+                        String::from_utf8_lossy(&result.stderr)
+                    ))
+                }
+            }
+            Err(e) => Err(format!("Failed to run ffmpeg for thumbnail generation: {e}")),
+        }
+    }
+
     #[fun_time(message = "sort_videos", level = "debug")]
     pub(crate) fn sort_videos(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.videos_to_check.is_empty() {
@@ -138,6 +261,7 @@ impl SimilarVideos {
                 // Currently size is not too much relevant
                 // let size = file_entry.size;
                 let res = self.check_video_file_entry(file_entry);
+                let res = Self::read_video_properties(res);
 
                 progress_handler.increase_items(1);
                 // progress_handler.increase_size(size);
@@ -172,6 +296,11 @@ impl SimilarVideos {
         }
 
         self.match_groups_of_videos(vector_of_hashes, &hashmap_with_file_entries);
+
+        if self.create_thumbnails(progress_sender, stop_flag) == WorkContinueStatus::Stop {
+            return WorkContinueStatus::Stop;
+        }
+
         self.remove_from_reference_folders();
 
         if self.common_data.use_reference_folders {
@@ -189,6 +318,62 @@ impl SimilarVideos {
         // Clean unused data
         self.videos_hashes = Default::default();
         self.videos_to_check = Default::default();
+
+        WorkContinueStatus::Continue
+    }
+
+    #[fun_time(message = "create_thumbnails", level = "debug")]
+    fn create_thumbnails(&mut self, progress_sender: Option<&Sender<ProgressData>>, stop_flag: &Arc<AtomicBool>) -> WorkContinueStatus {
+        if !self.params.generate_thumbnails {
+            return WorkContinueStatus::Continue;
+        }
+
+        let progress_handler = prepare_thread_handler_common(
+            progress_sender,
+            CurrentStage::SimilarVideosCreatingThumbnails,
+            self.similar_vectors.iter().map(|e| e.len()).sum::<usize>(),
+            self.get_test_type(),
+            0,
+        );
+
+        let Some(config_cache_path) = get_config_cache_path() else {
+            return WorkContinueStatus::Continue;
+        };
+
+        let thumbnails_dir = config_cache_path.cache_folder.join(VIDEO_THUMBNAILS_SUBFOLDER);
+        if let Err(e) = std::fs::create_dir_all(&thumbnails_dir) {
+            debug!("Failed to create thumbnails directory: {e}");
+            return WorkContinueStatus::Continue;
+        }
+        let thumbnail_video_percentage_from_start = self.params.thumbnail_video_percentage_from_start;
+        let errors = self
+            .similar_vectors
+            .par_iter_mut()
+            .map(|vec_file_entry| {
+                let mut errs = vec![];
+                for file_entry in vec_file_entry {
+                    if check_if_stop_received(stop_flag) {
+                        return errs;
+                    }
+
+                    if let Err(e) = Self::generate_thumbnail(file_entry, &thumbnails_dir, thumbnail_video_percentage_from_start) {
+                        errs.push(e);
+                    }
+
+                    progress_handler.increase_items(1);
+                }
+
+                errs
+            })
+            .flatten()
+            .collect::<Vec<String>>();
+
+        self.common_data.text_messages.warnings.extend(errors);
+
+        progress_handler.join_thread();
+        if check_if_stop_received(stop_flag) {
+            return WorkContinueStatus::Stop;
+        }
 
         WorkContinueStatus::Continue
     }
@@ -269,4 +454,33 @@ pub fn get_similar_videos_cache_file(skip_forward_amount: u32, duration: u32, cr
         Cropdetect::Motion => "motion",
     };
     format!("cache_similar_videos_{CACHE_VIDEO_VERSION}__skip_{skip_forward_amount}__dur_{duration}__cd_{crop_detect_str}.bin")
+}
+pub fn format_bitrate_opt(bitrate: Option<u64>) -> String {
+    match bitrate {
+        Some(b) => {
+            if b >= 1_000_000 {
+                format!("{:.1} Mbps", b as f64 / 1_000_000.0)
+            } else if b >= 1000 {
+                format!("{:.0} kbps", b as f64 / 1000.0)
+            } else {
+                format!("{b} bps")
+            }
+        }
+        None => String::from(""),
+    }
+}
+
+pub fn format_duration_opt(duration: Option<f64>) -> String {
+    duration
+        .map(|d| {
+            let hours = (d / 3600.0) as u32;
+            let minutes = ((d % 3600.0) / 60.0) as u32;
+            let seconds = (d % 60.0) as u32;
+            if hours > 0 {
+                format!("{hours:02}:{minutes:02}:{seconds:02}")
+            } else {
+                format!("{minutes:02}:{seconds:02}")
+            }
+        })
+        .unwrap_or_default()
 }

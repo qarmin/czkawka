@@ -188,7 +188,7 @@ fn translate_items(app: &MainWindow) {
 
     translation.set_ok_button_text(flk!("ok_button").into());
     translation.set_cancel_button_text(flk!("cancel_button").into());
-    translation.set_are_you_want_to_continue_text(flk!("are_you_want_to_continue").into());
+    translation.set_do_you_want_to_continue_text(flk!("do_you_want_to_continue").into());
     translation.set_main_window_title_text(flk!("main_window_title").into());
     translation.set_scan_button_text(flk!("scan_button").into());
     translation.set_stop_button_text(flk!("stop_button").into());
@@ -277,6 +277,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_settings_thread_number_text(flk!("settings_thread_number").into());
     translation.set_settings_restart_required_text(flk!("settings_restart_required").into());
     translation.set_settings_duplicate_image_preview_text(flk!("settings_duplicate_image_preview").into());
+    translation.set_settings_similar_videos_preview_text(flk!("settings_similar_videos_image_preview").into());
     translation.set_settings_duplicate_hide_hard_links_text(flk!("settings_duplicate_hide_hard_links").into());
     translation.set_settings_duplicate_minimal_hash_cache_size_text(flk!("settings_duplicate_minimal_hash_cache_size").into());
     translation.set_settings_duplicate_use_prehash_text(flk!("settings_duplicate_use_prehash").into());
@@ -316,8 +317,12 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_videos_crop_detect_text(flk!("subsettings_videos_crop_detect").into());
     translation.set_subsettings_videos_skip_forward_amount_text(flk!("subsettings_videos_skip_forward_amount").into());
     translation.set_subsettings_videos_vid_hash_duration_text(flk!("subsettings_videos_vid_hash_duration").into());
+    translation.set_subsettings_videos_thumbnail_percentage_text(flk!("subsettings_videos_thumbnail_percentage").into());
     translation.set_settings_load_tabs_sizes_at_startup_text(flk!("settings_load_tabs_sizes_at_startup").into());
     translation.set_settings_load_windows_size_at_startup_text(flk!("settings_load_windows_size_at_startup").into());
+    translation.set_settings_cache_number_size_text("".into());
+    translation.set_settings_video_thumbnails_number_size_text("".into());
+    translation.set_settings_log_number_size_text("".into());
 
     let tools_model: [(SharedString, ActiveTab); TOOLS_NUMBER] = [
         (flk!("tool_duplicate_files").into(), ActiveTab::DuplicateFiles),
@@ -385,6 +390,9 @@ fn translate_items(app: &MainWindow) {
     let bitrate = flk!("column_bitrate");
     let length = flk!("column_length");
     let genre = flk!("column_genre");
+    let fps = flk!("column_fps");
+    let codec = flk!("column_codec");
+    let duration = flk!("column_duration");
     let type_of_error = flk!("column_type_of_error");
     let symlink_name = flk!("column_symlink_name");
     let symlink_folder = flk!("column_symlink_folder");
@@ -403,7 +411,7 @@ fn translate_items(app: &MainWindow) {
     settings.set_temporary_files_column_name(fnm(&[&selection, &file_name, &path, &mod_date]));
     settings.set_big_files_column_name(fnm(&[&selection, &size, &file_name, &path, &mod_date]));
     settings.set_similar_images_column_name(fnm(&[&selection, &similarity, &size, &dimensions, &file_name, &path, &mod_date]));
-    settings.set_similar_videos_column_name(fnm(&[&selection, &size, &file_name, &path, &mod_date]));
+    settings.set_similar_videos_column_name(fnm(&[&selection, &size, &file_name, &path, &dimensions, &duration, &bitrate, &fps, &codec, &mod_date]));
     settings.set_similar_music_column_name(fnm(&[&selection, &size, &file_name, &title, &artist, &year, &bitrate, &length, &genre, &path, &mod_date]));
     settings.set_invalid_symlink_column_name(fnm(&[&selection, &symlink_name, &symlink_folder, &destination_path, &mod_date]));
     settings.set_broken_files_column_name(fnm(&[&selection, &file_name, &path, &type_of_error, &size, &mod_date]));

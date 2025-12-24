@@ -412,6 +412,10 @@ impl GuiMainNotebook {
                 flg!("main_tree_view_column_file_name"),
                 flg!("main_tree_view_column_path"),
                 flg!("main_tree_view_column_modification"),
+                flg!("main_tree_view_column_fps"),
+                flg!("main_tree_view_column_codec"),
+                flg!("main_tree_view_column_bitrate"),
+                flg!("main_tree_view_column_dimensions"),
             ],
         );
         names_of_columns.insert(

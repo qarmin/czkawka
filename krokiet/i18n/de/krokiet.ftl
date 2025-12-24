@@ -90,7 +90,7 @@ column_proper_extension = Richtige Erweiterung
 # Slint translations
 ok_button = Ok
 cancel_button = Abbrechen
-are_you_want_to_continue = Möchten Sie fortfahren?
+do_you_want_to_continue = Möchten Sie fortfahren?
 main_window_title = Krokiet - Datenreiniger
 scan_button = Scannen
 stop_button = Stoppen
