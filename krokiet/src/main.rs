@@ -29,6 +29,7 @@ use crate::connect_select::{connect_select, connect_showing_proper_select_button
 use crate::connect_show_preview::connect_show_preview;
 use crate::connect_size_of_config_cache::connect_size_of_config_cache;
 use crate::connect_sort::{connect_showing_proper_sort_buttons, connect_sort};
+use crate::connect_sort_column::connect_sort_column;
 use crate::connect_stop::connect_stop_button;
 use crate::connect_translation::connect_translations;
 // TODO - at start this should be used, to be sure that rust models are in sync with slint models
@@ -61,6 +62,7 @@ mod shared_models;
 mod simpler_model;
 #[cfg(test)]
 mod test_common;
+mod connect_sort_column;
 
 slint::include_modules!();
 
@@ -103,6 +105,7 @@ fn main() {
     connect_save(&app, Arc::clone(&shared_models));
     connect_row_selections(&app);
     connect_sort(&app);
+    connect_sort_column(&app);
     connect_showing_proper_sort_buttons(&app);
     connect_size_of_config_cache(&app);
 

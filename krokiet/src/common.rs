@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use std::path::PathBuf;
-
+use num_enum::TryFromPrimitive;
 use slint::{ComponentHandle, Model, ModelRc, SharedString, VecModel};
 
 use crate::{ActiveTab, ExcludedDirectoriesModel, IncludedDirectoriesModel, MainListModel, MainWindow, Settings};
@@ -11,6 +11,7 @@ use crate::{ActiveTab, ExcludedDirectoriesModel, IncludedDirectoriesModel, MainL
 
 // Duplicates
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum IntDataDuplicateFiles {
     ModificationDatePart1,
     ModificationDatePart2,
@@ -18,6 +19,7 @@ pub enum IntDataDuplicateFiles {
     SizePart2,
 }
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum StrDataDuplicateFiles {
     Size,
     Name,
@@ -27,12 +29,14 @@ pub enum StrDataDuplicateFiles {
 
 // Empty Folders
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum IntDataEmptyFolders {
     ModificationDatePart1,
     ModificationDatePart2,
 }
 
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum StrDataEmptyFolders {
     Name,
     Path,
@@ -40,6 +44,7 @@ pub enum StrDataEmptyFolders {
 }
 // Big Files
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum IntDataBigFiles {
     ModificationDatePart1,
     ModificationDatePart2,
@@ -48,6 +53,7 @@ pub enum IntDataBigFiles {
 }
 
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum StrDataBigFiles {
     Size,
     Name,
@@ -57,6 +63,7 @@ pub enum StrDataBigFiles {
 
 // Empty files
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum IntDataEmptyFiles {
     ModificationDatePart1,
     ModificationDatePart2,
@@ -65,6 +72,7 @@ pub enum IntDataEmptyFiles {
 }
 
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum StrDataEmptyFiles {
     Name,
     Path,
@@ -72,6 +80,7 @@ pub enum StrDataEmptyFiles {
 }
 // Temporary Files
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum IntDataTemporaryFiles {
     ModificationDatePart1,
     ModificationDatePart2,
@@ -79,6 +88,7 @@ pub enum IntDataTemporaryFiles {
     SizePart2,
 }
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum StrDataTemporaryFiles {
     Name,
     Path,
@@ -87,6 +97,7 @@ pub enum StrDataTemporaryFiles {
 
 // Similar Images
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum IntDataSimilarImages {
     ModificationDatePart1,
     ModificationDatePart2,
@@ -97,6 +108,7 @@ pub enum IntDataSimilarImages {
 }
 
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum StrDataSimilarImages {
     Similarity,
     Size,
@@ -108,6 +120,7 @@ pub enum StrDataSimilarImages {
 
 // Similar Videos
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum IntDataSimilarVideos {
     ModificationDatePart1,
     ModificationDatePart2,
@@ -116,6 +129,7 @@ pub enum IntDataSimilarVideos {
 }
 
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum StrDataSimilarVideos {
     Size,
     Name,
@@ -131,6 +145,7 @@ pub enum StrDataSimilarVideos {
 
 // Similar Music
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum IntDataSimilarMusic {
     ModificationDatePart1,
     ModificationDatePart2,
@@ -139,6 +154,7 @@ pub enum IntDataSimilarMusic {
 }
 
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum StrDataSimilarMusic {
     Size,
     Name,
@@ -154,12 +170,14 @@ pub enum StrDataSimilarMusic {
 
 // Invalid Symlinks
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum IntDataInvalidSymlinks {
     ModificationDatePart1,
     ModificationDatePart2,
 }
 
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum StrDataInvalidSymlinks {
     SymlinkName,
     SymlinkFolder,
@@ -170,6 +188,7 @@ pub enum StrDataInvalidSymlinks {
 
 // Broken Files
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum IntDataBrokenFiles {
     ModificationDatePart1,
     ModificationDatePart2,
@@ -178,6 +197,7 @@ pub enum IntDataBrokenFiles {
 }
 
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum StrDataBrokenFiles {
     Name,
     Path,
@@ -187,6 +207,7 @@ pub enum StrDataBrokenFiles {
 }
 // Bad Extensions
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum IntDataBadExtensions {
     ModificationDatePart1,
     ModificationDatePart2,
@@ -195,6 +216,7 @@ pub enum IntDataBadExtensions {
 }
 
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum StrDataBadExtensions {
     Name,
     Path,
@@ -203,7 +225,50 @@ pub enum StrDataBadExtensions {
     ProperExtension,
 }
 
+enum SortIdx {
+    StrIdx(i32),
+    IntIdx(i32),
+    IntIdxPair(i32, i32),
+}
+
 impl ActiveTab {
+    pub(crate) fn get_str_int_sort_idx(self, str_idx: i32) -> SortIdx {
+        match self {
+            Self::EmptyFolders => {
+                match StrDataEmptyFolders::try_from(str_idx).expect(&format!("Invalid str idx {str_idx} for EmptyFolders")) {
+                    StrDataEmptyFolders::Name | StrDataEmptyFolders::Path => SortIdx::StrIdx(str_idx),
+                    StrDataEmptyFolders::ModificationDate => SortIdx::IntIdxPair(
+                        IntDataEmptyFolders::ModificationDatePart1 as i32,
+                        IntDataEmptyFolders::ModificationDatePart2 as i32,
+                    ),
+                }
+            }
+            Self::EmptyFiles => {
+                match StrDataEmptyFiles::try_from(str_idx).expect(&format!("Invalid str idx {str_idx} for EmptyFiles")) {
+                    StrDataEmptyFiles::Name | StrDataEmptyFiles::Path => SortIdx::StrIdx(str_idx),
+                    StrDataEmptyFiles::ModificationDate => SortIdx::IntIdxPair(
+                        IntDataEmptyFiles::ModificationDatePart1 as i32,
+                        IntDataEmptyFiles::ModificationDatePart2 as i32,
+                    ),
+                }
+            }
+            Self::SimilarImages => {
+                match StrDataSimilarImages::try_from(str_idx).expect(&format!("Invalid str idx {str_idx} for SimilarImages")) {
+                    // TODO RESOLUTION IS BROKEN! - NEEDS CUSTOM SORTING FUNCTION
+                    StrDataSimilarImages::Similarity | StrDataSimilarImages::Resolution | StrDataSimilarImages::Name | StrDataSimilarImages::Path => SortIdx::StrIdx(str_idx),
+                    StrDataSimilarImages::ModificationDate => SortIdx::IntIdxPair(
+                        IntDataSimilarImages::ModificationDatePart1 as i32,
+                        IntDataSimilarImages::ModificationDatePart2 as i32,
+                    ),
+                    StrDataSimilarImages::Size => SortIdx::IntIdxPair(
+                        IntDataSimilarImages::SizePart1 as i32,
+                        IntDataSimilarImages::SizePart2 as i32,
+                    )
+                }
+            }
+        }
+    }
+
     // Remember to match updated this according to ui/main_lists.slint and connect_scan.rs files
     pub(crate) fn get_str_path_idx(self) -> usize {
         match self {

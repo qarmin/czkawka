@@ -6,6 +6,8 @@ import { About } from "about.slint";
 import { Settings } from "settings.slint";
 
 export component MainList {
+    in-out property <bool> working: false;
+
     in-out property <[MainListModel]> duplicate_files_model: [];
     in-out property <[MainListModel]> empty_folder_model: [
         {checked: false, selected_row: false, header_row: false, filled_header_row: false, val_str: ["kropkarz", "/Xd1", "24.10.2023"], val_int: []} ,
@@ -42,6 +44,7 @@ export component MainList {
         parentPathIdx: 3;
         fileNameIdx: 2;
         previewImageIdx: -1;
+        sort_available: !working;
     }
 
     empty_folders := SelectableTableView {
@@ -54,6 +57,7 @@ export component MainList {
         parentPathIdx: 2;
         fileNameIdx: 1;
         previewImageIdx: -1;
+        sort_available: !working;
     }
 
     big_files := SelectableTableView {
@@ -66,6 +70,7 @@ export component MainList {
         parentPathIdx: 3;
         fileNameIdx: 2;
         previewImageIdx: -1;
+        sort_available: !working;
     }
 
     empty_files := SelectableTableView {
@@ -78,6 +83,7 @@ export component MainList {
         parentPathIdx: 2;
         fileNameIdx: 1;
         previewImageIdx: -1;
+        sort_available: !working;
     }
 
     temporary_files := SelectableTableView {
@@ -90,6 +96,7 @@ export component MainList {
         parentPathIdx: 2;
         fileNameIdx: 1;
         previewImageIdx: -1;
+        sort_available: !working;
     }
 
     similar_images := SelectableTableView {
@@ -102,6 +109,7 @@ export component MainList {
         parentPathIdx: 5;
         fileNameIdx: 4;
         previewImageIdx: -1;
+        sort_available: !working;
     }
 
     similar_videos := SelectableTableView {
@@ -114,6 +122,7 @@ export component MainList {
         parentPathIdx: 3;
         fileNameIdx: 2;
         previewImageIdx: 10;
+        sort_available: !working;
     }
 
     similar_music := SelectableTableView {
@@ -126,6 +135,7 @@ export component MainList {
         parentPathIdx: 9;
         fileNameIdx: 2;
         previewImageIdx: -1;
+        sort_available: !working;
     }
 
     invalid_symlink := SelectableTableView {
@@ -138,6 +148,7 @@ export component MainList {
         parentPathIdx: 2;
         fileNameIdx: 1;
         previewImageIdx: -1;
+        sort_available: !working;
     }
 
     broken_files := SelectableTableView {
@@ -150,6 +161,7 @@ export component MainList {
         parentPathIdx: 2;
         fileNameIdx: 1;
         previewImageIdx: -1;
+        sort_available: !working;
     }
 
     bad_extensions := SelectableTableView {
@@ -162,6 +174,7 @@ export component MainList {
         parentPathIdx: 2;
         fileNameIdx: 1;
         previewImageIdx: -1;
+        sort_available: !working;
     }
 
     settings_list := SettingsList {
@@ -195,6 +208,34 @@ export component MainList {
             invalid_symlink.reset_selection();
         } else if (GuiState.active_tab == ActiveTab.BrokenFiles) {
             broken_files.reset_selection();
+        } else {
+            // debug("Non handled reset selection in main_lists.slint", GuiState.active_tab);
+        }
+    }
+
+    public function scan_started() {
+        if (GuiState.active_tab == ActiveTab.EmptyFiles) {
+            empty_files.scan_started();
+        } else if (GuiState.active_tab == ActiveTab.EmptyFolders) {
+            empty_folders.scan_started();
+        } else if (GuiState.active_tab == ActiveTab.SimilarImages) {
+            similar_images.scan_started();
+        } else if (GuiState.active_tab == ActiveTab.BadExtensions) {
+            bad_extensions.scan_started();
+        } else if (GuiState.active_tab == ActiveTab.BigFiles) {
+            big_files.scan_started();
+        } else if (GuiState.active_tab == ActiveTab.DuplicateFiles) {
+            duplicates.scan_started();
+        } else if (GuiState.active_tab == ActiveTab.TemporaryFiles) {
+            temporary_files.scan_started();
+        } else if (GuiState.active_tab == ActiveTab.SimilarVideos) {
+            similar_videos.scan_started();
+        } else if (GuiState.active_tab == ActiveTab.SimilarMusic) {
+            similar_music.scan_started();
+        } else if (GuiState.active_tab == ActiveTab.InvalidSymlinks) {
+            invalid_symlink.scan_started();
+        } else if (GuiState.active_tab == ActiveTab.BrokenFiles) {
+            broken_files.scan_started();
         } else {
             // debug("Non handled reset selection in main_lists.slint", GuiState.active_tab);
         }

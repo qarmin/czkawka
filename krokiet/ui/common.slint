@@ -14,6 +14,12 @@ export enum ActiveTab {
     About
 }
 
+export enum SortColumnMode {
+    None, // None is default mode, is set when starting scan and cannot be restored by user
+    Descending,
+    Ascending,
+}
+
 export enum TypeOfOpenedItem {
     CurrentItem,
     ParentItem,
