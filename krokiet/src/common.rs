@@ -28,6 +28,7 @@ pub enum StrDataDuplicateFiles {
     Path,
     ModificationDate,
 }
+pub const MAX_STR_DATA_DUPLICATE_FILES: usize = StrDataDuplicateFiles::ModificationDate as usize + 1;
 
 // Empty Folders
 #[repr(u8)]
@@ -36,6 +37,7 @@ pub enum IntDataEmptyFolders {
     ModificationDatePart1,
     ModificationDatePart2,
 }
+pub const MAX_INT_DATA_EMPTY_FOLDERS: usize = IntDataEmptyFolders::ModificationDatePart2 as usize + 1;
 
 #[repr(u8)]
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
@@ -44,6 +46,7 @@ pub enum StrDataEmptyFolders {
     Path,
     ModificationDate,
 }
+pub const MAX_STR_DATA_EMPTY_FOLDERS: usize = StrDataEmptyFolders::ModificationDate as usize + 1;
 // Big Files
 #[repr(u8)]
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
@@ -53,6 +56,7 @@ pub enum IntDataBigFiles {
     SizePart1,
     SizePart2,
 }
+pub const MAX_INT_DATA_BIG_FILES: usize = IntDataBigFiles::SizePart2 as usize + 1;
 
 #[repr(u8)]
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
@@ -62,6 +66,7 @@ pub enum StrDataBigFiles {
     Path,
     ModificationDate,
 }
+pub const MAX_STR_DATA_BIG_FILES: usize = StrDataBigFiles::ModificationDate as usize + 1;
 
 // Empty files
 #[repr(u8)]
@@ -72,6 +77,7 @@ pub enum IntDataEmptyFiles {
     SizePart1,
     SizePart2,
 }
+pub const MAX_INT_DATA_EMPTY_FILES: usize = IntDataEmptyFiles::SizePart2 as usize + 1;
 
 #[repr(u8)]
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
@@ -80,6 +86,7 @@ pub enum StrDataEmptyFiles {
     Path,
     ModificationDate,
 }
+pub const MAX_STR_DATA_EMPTY_FILES: usize = StrDataEmptyFiles::ModificationDate as usize + 1;
 // Temporary Files
 #[repr(u8)]
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
@@ -89,6 +96,8 @@ pub enum IntDataTemporaryFiles {
     SizePart1,
     SizePart2,
 }
+pub const MAX_INT_DATA_TEMPORARY_FILES: usize = IntDataTemporaryFiles::SizePart2 as usize + 1;
+
 #[repr(u8)]
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum StrDataTemporaryFiles {
@@ -96,6 +105,7 @@ pub enum StrDataTemporaryFiles {
     Path,
     ModificationDate,
 }
+pub const MAX_STR_DATA_TEMPORARY_FILES: usize = StrDataTemporaryFiles::ModificationDate as usize + 1;
 
 // Similar Images
 #[repr(u8)]
@@ -108,6 +118,7 @@ pub enum IntDataSimilarImages {
     Width,
     Height,
 }
+pub const MAX_INT_DATA_SIMILAR_IMAGES: usize = IntDataSimilarImages::Height as usize + 1;
 
 #[repr(u8)]
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
@@ -119,6 +130,7 @@ pub enum StrDataSimilarImages {
     Path,
     ModificationDate,
 }
+pub const MAX_STR_DATA_SIMILAR_IMAGES: usize = StrDataSimilarImages::ModificationDate as usize + 1;
 
 // Similar Videos
 #[repr(u8)]
@@ -129,6 +141,7 @@ pub enum IntDataSimilarVideos {
     SizePart1,
     SizePart2,
 }
+pub const MAX_INT_DATA_SIMILAR_VIDEOS: usize = IntDataSimilarVideos::SizePart2 as usize + 1;
 
 #[repr(u8)]
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
@@ -144,6 +157,7 @@ pub enum StrDataSimilarVideos {
     ModificationDate,
     PreviewPath,
 }
+pub const MAX_STR_DATA_SIMILAR_VIDEOS: usize = StrDataSimilarVideos::PreviewPath as usize + 1;
 
 // Similar Music
 #[repr(u8)]
@@ -154,6 +168,7 @@ pub enum IntDataSimilarMusic {
     SizePart1,
     SizePart2,
 }
+pub const MAX_INT_DATA_SIMILAR_MUSIC: usize = IntDataSimilarMusic::SizePart2 as usize + 1;
 
 #[repr(u8)]
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
@@ -169,6 +184,7 @@ pub enum StrDataSimilarMusic {
     Path,
     ModificationDate,
 }
+pub const MAX_STR_DATA_SIMILAR_MUSIC: usize = StrDataSimilarMusic::ModificationDate as usize + 1;
 
 // Invalid Symlinks
 #[repr(u8)]
@@ -177,6 +193,7 @@ pub enum IntDataInvalidSymlinks {
     ModificationDatePart1,
     ModificationDatePart2,
 }
+pub const MAX_INT_DATA_INVALID_SYMLINKS: usize = IntDataInvalidSymlinks::ModificationDatePart2 as usize + 1;
 
 #[repr(u8)]
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
@@ -187,6 +204,7 @@ pub enum StrDataInvalidSymlinks {
     TypeOfError,
     ModificationDate,
 }
+pub const MAX_STR_DATA_INVALID_SYMLINKS: usize = StrDataInvalidSymlinks::ModificationDate as usize + 1;
 
 // Broken Files
 #[repr(u8)]
@@ -197,6 +215,7 @@ pub enum IntDataBrokenFiles {
     SizePart1,
     SizePart2,
 }
+pub const MAX_INT_DATA_BROKEN_FILES: usize = IntDataBrokenFiles::SizePart2 as usize + 1;
 
 #[repr(u8)]
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
@@ -207,6 +226,7 @@ pub enum StrDataBrokenFiles {
     Size,
     ModificationDate,
 }
+pub const MAX_STR_DATA_BROKEN_FILES: usize = StrDataBrokenFiles::ModificationDate as usize + 1;
 // Bad Extensions
 #[repr(u8)]
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
@@ -216,6 +236,7 @@ pub enum IntDataBadExtensions {
     SizePart1,
     SizePart2,
 }
+pub const MAX_INT_DATA_BAD_EXTENSIONS: usize = IntDataBadExtensions::SizePart2 as usize + 1;
 
 #[repr(u8)]
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
@@ -226,6 +247,7 @@ pub enum StrDataBadExtensions {
     ProperExtensionsGroup,
     ProperExtension,
 }
+pub const MAX_STR_DATA_BAD_EXTENSIONS: usize = StrDataBadExtensions::ProperExtension as usize + 1;
 
 pub(crate) enum SortIdx {
     StrIdx(i32),

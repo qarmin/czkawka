@@ -28,7 +28,7 @@ use humansize::{BINARY, format_size};
 use rayon::prelude::*;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
 
-use crate::common::{check_if_all_included_dirs_are_referenced, check_if_there_are_any_included_folders, split_u64_into_i32s};
+use crate::common::{check_if_all_included_dirs_are_referenced, check_if_there_are_any_included_folders, split_u64_into_i32s, MAX_INT_DATA_DUPLICATE_FILES, MAX_STR_DATA_DUPLICATE_FILES};
 use crate::connect_row_selection::checker::set_number_of_enabled_items;
 use crate::connect_row_selection::reset_selection;
 use crate::settings::collect_settings;
@@ -218,7 +218,7 @@ fn write_duplicate_results(app: &MainWindow, vector: Vec<(Option<DuplicateEntry>
 }
 fn prepare_data_model_duplicates(fe: &DuplicateEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(fe.get_path());
-    let data_model_str = VecModel::from_slice(&[
+    let data_model_str_arr: [SharedString; MAX_STR_DATA_DUPLICATE_FILES] = [
         format_size(fe.size, BINARY).into(),
         file.into(),
         directory.into(),
@@ -226,10 +226,12 @@ fn prepare_data_model_duplicates(fe: &DuplicateEntry) -> (ModelRc<SharedString>,
             .expect("Cannot create DateTime")
             .to_string()
             .into(),
-    ]);
+    ];
+    let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
-    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1, size_split.0, size_split.1]);
+    let data_model_int_arr: [i32; MAX_INT_DATA_DUPLICATE_FILES] = [modification_split.0, modification_split.1, size_split.0, size_split.1];
+    let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 }
 
