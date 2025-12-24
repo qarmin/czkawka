@@ -90,7 +90,7 @@ column_proper_extension = Належне розширення
 # Slint translations
 ok_button = Гаразд
 cancel_button = Скасувати
-are_you_want_to_continue = Ви хочете продовжити?
+do_you_want_to_continue = Ви хочете продовжити?
 main_window_title = Крокет - Очищувач даних
 scan_button = Сканування товару
 stop_button = Зупинити

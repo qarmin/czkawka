@@ -90,7 +90,7 @@ column_proper_extension = 올바른 확장자
 # Slint translations
 ok_button = 확인
 cancel_button = 취소
-are_you_want_to_continue = 계속하시겠습니까?
+do_you_want_to_continue = 계속하시겠습니까?
 main_window_title = Krokiet - Data Cleaner
 scan_button = Scan
 stop_button = 정지

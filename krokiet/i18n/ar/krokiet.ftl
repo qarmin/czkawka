@@ -90,7 +90,7 @@ column_proper_extension = التمديد الصحيح
 # Slint translations
 ok_button = حسناً
 cancel_button = إلغاء
-are_you_want_to_continue = هل تريد الاستمرار؟
+do_you_want_to_continue = هل تريد الاستمرار؟
 main_window_title = كروكييت - منظف البيانات
 scan_button = فحص
 stop_button = توقف

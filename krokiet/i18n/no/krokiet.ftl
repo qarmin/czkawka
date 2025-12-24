@@ -90,7 +90,7 @@ column_proper_extension = Riktig utvidelse
 # Slint translations
 ok_button = OK
 cancel_button = Avbryt
-are_you_want_to_continue = Er du sikker på at du vil fortsette?
+do_you_want_to_continue = Er du sikker på at du vil fortsette?
 main_window_title = Krokiet - Data Cleaner
 scan_button = Skann
 stop_button = Stopp

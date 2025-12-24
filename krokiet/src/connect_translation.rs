@@ -188,7 +188,7 @@ fn translate_items(app: &MainWindow) {
 
     translation.set_ok_button_text(flk!("ok_button").into());
     translation.set_cancel_button_text(flk!("cancel_button").into());
-    translation.set_do_you_want_to_continue_text(flk!("are_you_want_to_continue").into());
+    translation.set_do_you_want_to_continue_text(flk!("do_you_want_to_continue").into());
     translation.set_main_window_title_text(flk!("main_window_title").into());
     translation.set_scan_button_text(flk!("scan_button").into());
     translation.set_stop_button_text(flk!("stop_button").into());

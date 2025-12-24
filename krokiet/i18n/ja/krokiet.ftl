@@ -90,7 +90,7 @@ column_proper_extension = 適切な拡張
 # Slint translations
 ok_button = OK
 cancel_button = キャンセル
-are_you_want_to_continue = 続行しますか？
+do_you_want_to_continue = 続行しますか？
 main_window_title = Krokiet - データクリーナー
 scan_button = スキャン
 stop_button = 停止
