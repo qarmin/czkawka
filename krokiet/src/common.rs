@@ -18,6 +18,8 @@ pub enum IntDataDuplicateFiles {
     SizePart1,
     SizePart2,
 }
+pub const MAX_INT_DATA_DUPLICATE_FILES: usize = IntDataDuplicateFiles::SizePart2 as usize + 1;
+
 #[repr(u8)]
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum StrDataDuplicateFiles {
@@ -225,17 +227,23 @@ pub enum StrDataBadExtensions {
     ProperExtension,
 }
 
-enum SortIdx {
+pub(crate) enum SortIdx {
     StrIdx(i32),
-    IntIdx(i32),
     IntIdxPair(i32, i32),
 }
 
 impl ActiveTab {
     pub(crate) fn get_str_int_sort_idx(self, str_idx: i32) -> SortIdx {
+        // TODO
+        // Missing sorting(needs additional int data enums):
+        // Video bitrate
+        // Video duration
+        // Video fps
+        // Images resolution
+
         match self {
             Self::EmptyFolders => {
-                match StrDataEmptyFolders::try_from(str_idx).expect(&format!("Invalid str idx {str_idx} for EmptyFolders")) {
+                match StrDataEmptyFolders::try_from(str_idx as u8).expect(&format!("Invalid str idx {str_idx} for EmptyFolders")) {
                     StrDataEmptyFolders::Name | StrDataEmptyFolders::Path => SortIdx::StrIdx(str_idx),
                     StrDataEmptyFolders::ModificationDate => SortIdx::IntIdxPair(
                         IntDataEmptyFolders::ModificationDatePart1 as i32,
@@ -244,7 +252,7 @@ impl ActiveTab {
                 }
             }
             Self::EmptyFiles => {
-                match StrDataEmptyFiles::try_from(str_idx).expect(&format!("Invalid str idx {str_idx} for EmptyFiles")) {
+                match StrDataEmptyFiles::try_from(str_idx as u8).expect(&format!("Invalid str idx {str_idx} for EmptyFiles")) {
                     StrDataEmptyFiles::Name | StrDataEmptyFiles::Path => SortIdx::StrIdx(str_idx),
                     StrDataEmptyFiles::ModificationDate => SortIdx::IntIdxPair(
                         IntDataEmptyFiles::ModificationDatePart1 as i32,
@@ -253,8 +261,7 @@ impl ActiveTab {
                 }
             }
             Self::SimilarImages => {
-                match StrDataSimilarImages::try_from(str_idx).expect(&format!("Invalid str idx {str_idx} for SimilarImages")) {
-                    // TODO RESOLUTION IS BROKEN! - NEEDS CUSTOM SORTING FUNCTION
+                match StrDataSimilarImages::try_from(str_idx as u8).expect(&format!("Invalid str idx {str_idx} for SimilarImages")) {
                     StrDataSimilarImages::Similarity | StrDataSimilarImages::Resolution | StrDataSimilarImages::Name | StrDataSimilarImages::Path => SortIdx::StrIdx(str_idx),
                     StrDataSimilarImages::ModificationDate => SortIdx::IntIdxPair(
                         IntDataSimilarImages::ModificationDatePart1 as i32,
@@ -266,6 +273,101 @@ impl ActiveTab {
                     )
                 }
             }
+            Self::DuplicateFiles => {
+                match StrDataDuplicateFiles::try_from(str_idx as u8).expect(&format!("Invalid str idx {str_idx} for DuplicateFiles")) {
+                    StrDataDuplicateFiles::Name | StrDataDuplicateFiles::Path => SortIdx::StrIdx(str_idx),
+                    StrDataDuplicateFiles::ModificationDate => SortIdx::IntIdxPair(
+                        IntDataDuplicateFiles::ModificationDatePart1 as i32,
+                        IntDataDuplicateFiles::ModificationDatePart2 as i32,
+                    ),
+                    StrDataDuplicateFiles::Size => SortIdx::IntIdxPair(
+                        IntDataDuplicateFiles::SizePart1 as i32,
+                        IntDataDuplicateFiles::SizePart2 as i32,
+                    )
+                }
+            }
+            Self::BigFiles => {
+                match StrDataBigFiles::try_from(str_idx as u8).expect(&format!("Invalid str idx {str_idx} for BigFiles")) {
+                    StrDataBigFiles::Name | StrDataBigFiles::Path => SortIdx::StrIdx(str_idx),
+                    StrDataBigFiles::ModificationDate => SortIdx::IntIdxPair(
+                        IntDataBigFiles::ModificationDatePart1 as i32,
+                        IntDataBigFiles::ModificationDatePart2 as i32,
+                    ),
+                    StrDataBigFiles::Size => SortIdx::IntIdxPair(
+                        IntDataBigFiles::SizePart1 as i32,
+                        IntDataBigFiles::SizePart2 as i32,
+                    )
+                }
+            }
+            Self::TemporaryFiles => {
+                match StrDataTemporaryFiles::try_from(str_idx as u8).expect(&format!("Invalid str idx {str_idx} for TemporaryFiles")) {
+                    StrDataTemporaryFiles::Name | StrDataTemporaryFiles::Path => SortIdx::StrIdx(str_idx),
+                    StrDataTemporaryFiles::ModificationDate => SortIdx::IntIdxPair(
+                        IntDataTemporaryFiles::ModificationDatePart1 as i32,
+                        IntDataTemporaryFiles::ModificationDatePart2 as i32,
+                    ),
+                }
+            }
+            Self::SimilarVideos => {
+                match StrDataSimilarVideos::try_from(str_idx as u8).expect(&format!("Invalid str idx {str_idx} for SimilarVideos")) {
+                    StrDataSimilarVideos::Name | StrDataSimilarVideos::Path | StrDataSimilarVideos::Dimensions
+                    | StrDataSimilarVideos::Duration | StrDataSimilarVideos::Bitrate | StrDataSimilarVideos::Fps
+                    | StrDataSimilarVideos::Codec | StrDataSimilarVideos::PreviewPath => SortIdx::StrIdx(str_idx),
+                    StrDataSimilarVideos::ModificationDate => SortIdx::IntIdxPair(
+                        IntDataSimilarVideos::ModificationDatePart1 as i32,
+                        IntDataSimilarVideos::ModificationDatePart2 as i32,
+                    ),
+                    StrDataSimilarVideos::Size => SortIdx::IntIdxPair(
+                        IntDataSimilarVideos::SizePart1 as i32,
+                        IntDataSimilarVideos::SizePart2 as i32,
+                    )
+                }
+            }
+            Self::SimilarMusic => {
+                match StrDataSimilarMusic::try_from(str_idx as u8).expect(&format!("Invalid str idx {str_idx} for SimilarMusic")) {
+                    StrDataSimilarMusic::Name | StrDataSimilarMusic::Path | StrDataSimilarMusic::Title
+                    | StrDataSimilarMusic::Artist | StrDataSimilarMusic::Year | StrDataSimilarMusic::Bitrate
+                    | StrDataSimilarMusic::Length | StrDataSimilarMusic::Genre => SortIdx::StrIdx(str_idx),
+                    StrDataSimilarMusic::ModificationDate => SortIdx::IntIdxPair(
+                        IntDataSimilarMusic::ModificationDatePart1 as i32,
+                        IntDataSimilarMusic::ModificationDatePart2 as i32,
+                    ),
+                    StrDataSimilarMusic::Size => SortIdx::IntIdxPair(
+                        IntDataSimilarMusic::SizePart1 as i32,
+                        IntDataSimilarMusic::SizePart2 as i32,
+                    )
+                }
+            }
+            Self::InvalidSymlinks => {
+                match StrDataInvalidSymlinks::try_from(str_idx as u8).expect(&format!("Invalid str idx {str_idx} for InvalidSymlinks")) {
+                    StrDataInvalidSymlinks::SymlinkName | StrDataInvalidSymlinks::SymlinkFolder
+                    | StrDataInvalidSymlinks::DestinationPath | StrDataInvalidSymlinks::TypeOfError => SortIdx::StrIdx(str_idx),
+                    StrDataInvalidSymlinks::ModificationDate => SortIdx::IntIdxPair(
+                        IntDataInvalidSymlinks::ModificationDatePart1 as i32,
+                        IntDataInvalidSymlinks::ModificationDatePart2 as i32,
+                    ),
+                }
+            }
+            Self::BrokenFiles => {
+                match StrDataBrokenFiles::try_from(str_idx as u8).expect(&format!("Invalid str idx {str_idx} for BrokenFiles")) {
+                    StrDataBrokenFiles::Name | StrDataBrokenFiles::Path | StrDataBrokenFiles::TypeOfError => SortIdx::StrIdx(str_idx),
+                    StrDataBrokenFiles::ModificationDate => SortIdx::IntIdxPair(
+                        IntDataBrokenFiles::ModificationDatePart1 as i32,
+                        IntDataBrokenFiles::ModificationDatePart2 as i32,
+                    ),
+                    StrDataBrokenFiles::Size => SortIdx::IntIdxPair(
+                        IntDataBrokenFiles::SizePart1 as i32,
+                        IntDataBrokenFiles::SizePart2 as i32,
+                    )
+                }
+            }
+            Self::BadExtensions => {
+                match StrDataBadExtensions::try_from(str_idx as u8).expect(&format!("Invalid str idx {str_idx} for BadExtensions")) {
+                    StrDataBadExtensions::Name | StrDataBadExtensions::Path | StrDataBadExtensions::CurrentExtension
+                    | StrDataBadExtensions::ProperExtensionsGroup | StrDataBadExtensions::ProperExtension => SortIdx::StrIdx(str_idx),
+                }
+            }
+            Self::Settings | Self::About => panic!("Button should be disabled"),
         }
     }
 
