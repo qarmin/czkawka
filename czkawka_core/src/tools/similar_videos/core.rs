@@ -191,8 +191,7 @@ impl SimilarVideos {
 
     fn generate_thumbnail(file_entry: &mut VideosEntry, thumbnails_dir: &Path, thumbnail_video_percentage_from_start: u8) -> Result<(), String> {
         let mut hasher = Hasher::new();
-        hasher.update(format!("{thumbnail_video_percentage_from_start}___").as_bytes());
-        hasher.update(file_entry.path.to_string_lossy().as_bytes());
+        hasher.update(format!("{thumbnail_video_percentage_from_start}___{}___{}___{}", file_entry.size, file_entry.modified_date, file_entry.path.to_string_lossy()).as_bytes());
         let hash = hasher.finalize();
         let thumbnail_filename = format!("{}.jpg", hash.to_hex());
         let thumbnail_path = thumbnails_dir.join(thumbnail_filename);
