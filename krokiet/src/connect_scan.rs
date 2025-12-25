@@ -194,17 +194,17 @@ fn scan_duplicates(
 
             let info = tool.get_information();
             let scanning_time_str = format_time(info.scanning_time);
-            let (duplicates_number, groups_number) = match tool.get_check_method() {
-                CheckingMethod::Hash => (info.number_of_duplicated_files_by_hash, info.number_of_groups_by_hash),
-                CheckingMethod::Name => (info.number_of_duplicated_files_by_name, info.number_of_groups_by_name),
-                CheckingMethod::Size => (info.number_of_duplicated_files_by_size, info.number_of_groups_by_size),
-                CheckingMethod::SizeName => (info.number_of_duplicated_files_by_size_name, info.number_of_groups_by_size_name),
+            let (duplicates_number, groups_number, lost_space) = match tool.get_check_method() {
+                CheckingMethod::Hash => (info.number_of_duplicated_files_by_hash, info.number_of_groups_by_hash, info.lost_space_by_hash),
+                CheckingMethod::Name => (info.number_of_duplicated_files_by_name, info.number_of_groups_by_name, 0),
+                CheckingMethod::Size => (info.number_of_duplicated_files_by_size, info.number_of_groups_by_size, info.lost_space_by_size),
+                CheckingMethod::SizeName => (info.number_of_duplicated_files_by_size_name, info.number_of_groups_by_size_name, info.lost_space_by_size),
                 _ => unreachable!("invalid check method {:?}", tool.get_check_method()),
             };
             shared_models.lock().unwrap().shared_duplication_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_duplicate_results(&app, vector, messages, &scanning_time_str, duplicates_number, groups_number);
+                write_duplicate_results(&app, vector, messages, &scanning_time_str, duplicates_number, groups_number, lost_space);
             })
         })
         .expect("Cannot start thread - not much we can do here");
@@ -216,6 +216,7 @@ fn write_duplicate_results(
     scanning_time_str: &str,
     items_found: usize,
     groups: usize,
+    lost_space: u64,
 ) {
     let items = Rc::new(VecModel::default());
     for (ref_fe, vec_fe) in vector.into_iter().rev() {
@@ -232,7 +233,11 @@ fn write_duplicate_results(
         }
     }
     app.set_duplicate_files_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_duplicate_files", items_found = items_found, groups = groups, time = scanning_time_str).into());
+    if lost_space > 0 {
+        app.invoke_scan_ended(flk!("rust_found_duplicate_files", items_found = items_found, groups = groups, size = format_size(lost_space, BINARY), time = scanning_time_str).into());
+    } else {
+        app.invoke_scan_ended(flk!("rust_found_duplicate_files_no_lost_space", items_found = items_found, groups = groups, time = scanning_time_str).into());
+    }
     app.global::<GuiState>().set_info_text(messages.into());
 }
 fn prepare_data_model_duplicates(fe: &DuplicateEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
@@ -345,22 +350,23 @@ fn scan_big_files(
             let info = tool.get_information();
             let scanning_time_str = format_time(info.scanning_time);
             let items_found = info.number_of_real_files;
+            let files_size = tool.get_big_files().iter().map(|f| f.size).sum::<u64>();
             shared_models.lock().unwrap().shared_big_files_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_big_files_results(&app, vector, messages, &scanning_time_str, items_found);
+                write_big_files_results(&app, vector, messages, &scanning_time_str, items_found, files_size);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_big_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages: String, scanning_time_str: &str, items_found: usize) {
+fn write_big_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages: String, scanning_time_str: &str, items_found: usize, files_size: u64) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_big_files(&fe);
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_big_files_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_big_files", items_found = items_found, time = scanning_time_str).into());
+    app.invoke_scan_ended(flk!("rust_found_big_files", items_found = items_found, time = scanning_time_str, size = format_size(files_size, BINARY)).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 
@@ -972,22 +978,23 @@ fn scan_broken_files(
             let info = tool.get_information();
             let scanning_time_str = format_time(info.scanning_time);
             let items_found = info.number_of_broken_files;
+            let size = tool.get_broken_files().iter().map(|e| e.size).sum::<u64>();
             shared_models.lock().unwrap().shared_broken_files_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_broken_files_results(&app, vector, messages, &scanning_time_str, items_found);
+                write_broken_files_results(&app, vector, messages, &scanning_time_str, items_found, size);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_broken_files_results(app: &MainWindow, vector: Vec<BrokenEntry>, messages: String, scanning_time_str: &str, items_found: usize) {
+fn write_broken_files_results(app: &MainWindow, vector: Vec<BrokenEntry>, messages: String, scanning_time_str: &str, items_found: usize, size: u64) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_broken_files(&fe);
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_broken_files_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_broken_files", items_found = items_found, time = scanning_time_str).into());
+    app.invoke_scan_ended(flk!("rust_found_broken_files", items_found = items_found, time = scanning_time_str, size = format_size(size, BINARY)).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 
