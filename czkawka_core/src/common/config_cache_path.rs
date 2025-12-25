@@ -57,6 +57,13 @@ fn resolve_folder(env_var: &str, default_folder: Option<PathBuf>, name: &'static
         }
     }
 }
+#[cfg(test)]
+pub fn set_config_cache_path_test(cache_path: &'static str, config_path: &'static str) {
+    CONFIG_CACHE_PATH.set(Some(ConfigCachePath {
+        cache_folder: PathBuf::from(cache_path),
+        config_folder: PathBuf::from(config_path),
+    })).expect("Cannot set config cache path");
+}
 
 // This function must be executed, to not crash, when gathering config/cache path
 pub fn set_config_cache_path(cache_name: &'static str, config_name: &'static str) -> (Vec<String>, Vec<String>) {

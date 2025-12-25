@@ -190,7 +190,7 @@ where
 
     let result = match std::fs::read_to_string(&config_file) {
         Ok(serialized) => {
-            debug!("Loading data from file {:?} took {:?}", config_file, current_time.elapsed());
+            debug!("Loading data from file \"{:?}\" took {:?}", config_file.to_string_lossy(), current_time.elapsed());
 
             match serde_json::from_str(&serialized) {
                 Ok(custom_settings) => Ok(custom_settings),
@@ -200,7 +200,11 @@ where
         Err(e) => Err(format!("Cannot read config file: {e}")),
     };
 
-    debug!("Loading and converting data from file {:?} took {:?}", config_file, current_time.elapsed());
+    debug!(
+        "Loading and converting data from file \"{:?}\" took {:?}",
+        config_file.to_string_lossy(),
+        current_time.elapsed()
+    );
 
     result
 }
