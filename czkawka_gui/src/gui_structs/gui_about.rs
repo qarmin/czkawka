@@ -11,6 +11,7 @@ pub struct GuiAbout {
 
     pub button_repository: Button,
     pub button_donation: Button,
+    pub button_krokiet: Button,
     pub button_instruction: Button,
     pub button_translation: Button,
 }
@@ -110,11 +111,13 @@ impl GuiAbout {
 
         let button_repository = Button::builder().label("Repository").build();
         let button_donation = Button::builder().label("Donation").build();
+        let button_krokiet = Button::builder().label("Krokiet").build();
         let button_instruction = Button::builder().label("Instruction").build();
         let button_translation = Button::builder().label("Translation").build();
 
         new_box.append(&button_repository);
         new_box.append(&button_donation);
+        new_box.append(&button_krokiet);
         new_box.append(&button_instruction);
         new_box.append(&button_translation);
 
@@ -124,6 +127,7 @@ impl GuiAbout {
             about_dialog,
             button_repository,
             button_donation,
+            button_krokiet,
             button_instruction,
             button_translation,
         }
@@ -132,6 +136,8 @@ impl GuiAbout {
     pub(crate) fn update_language(&self) {
         let mut comment_text: String = "2020 - 2025  Rafał Mikrut(qarmin)\n\n".to_string();
         comment_text += &flg!("about_window_motto");
+        comment_text += "\n\n";
+        comment_text += &flg!("krokiet_new_app");
         self.about_dialog.set_comments(Some(&comment_text));
 
         self.button_repository.set_tooltip_text(Some(&flg!("about_repository_button_tooltip")));
@@ -141,6 +147,7 @@ impl GuiAbout {
 
         self.button_repository.set_label(&flg!("about_repository_button"));
         self.button_donation.set_label(&flg!("about_donation_button"));
+        self.button_krokiet.set_label("Krokiet");
         self.button_instruction.set_label(&flg!("about_instruction_button"));
         self.button_translation.set_label(&flg!("about_translation_button"));
     }
