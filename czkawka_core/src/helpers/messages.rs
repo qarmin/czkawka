@@ -11,6 +11,12 @@ pub struct Messages {
     pub errors: Vec<String>,
 }
 
+pub enum MessageLimit {
+    NoLimit,
+    Characters(usize),
+    Lines(usize),
+}
+
 impl Messages {
     /// Creates a new, empty `Messages` struct.
     pub fn new() -> Self {
@@ -42,6 +48,15 @@ impl Messages {
     pub fn create_messages_text(&self) -> String {
         let mut text_to_return: String = String::new();
 
+        if !self.errors.is_empty() {
+            text_to_return += "--------------------------------ERRORS---------------------------------\n";
+            for i in &self.errors {
+                text_to_return += i;
+                text_to_return += "\n";
+            }
+            text_to_return += "----------------------------END OF ERRORS------------------------------\n";
+        }
+
         if !self.messages.is_empty() {
             text_to_return += "-------------------------------MESSAGES--------------------------------\n";
             for i in &self.messages {
@@ -58,15 +73,6 @@ impl Messages {
                 text_to_return += "\n";
             }
             text_to_return += "---------------------------END OF WARNINGS-----------------------------\n";
-        }
-
-        if !self.errors.is_empty() {
-            text_to_return += "--------------------------------ERRORS---------------------------------\n";
-            for i in &self.errors {
-                text_to_return += i;
-                text_to_return += "\n";
-            }
-            text_to_return += "----------------------------END OF ERRORS------------------------------\n";
         }
 
         text_to_return
