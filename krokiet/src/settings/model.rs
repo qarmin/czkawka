@@ -180,7 +180,7 @@ pub struct BasicSettings {
     #[serde(default = "ttrue")]
     pub settings_load_tabs_sizes_at_startup: bool,
     #[serde(default = "ttrue")]
-    pub settings_limit_messages_to_500_lines: bool,
+    pub settings_limit_lines_of_messages: bool,
 }
 
 impl Default for BasicSettings {

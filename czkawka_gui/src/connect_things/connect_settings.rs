@@ -4,7 +4,7 @@ use std::default::Default;
 use czkawka_core::common::cache::{load_cache_from_file_generalized_by_path, load_cache_from_file_generalized_by_size, save_cache_to_file_generalized};
 use czkawka_core::common::config_cache_path::get_config_cache_path;
 use czkawka_core::common::model::HashType;
-use czkawka_core::helpers::messages::Messages;
+use czkawka_core::helpers::messages::{MessageLimit, Messages};
 use czkawka_core::tools::duplicate::DuplicateEntry;
 use czkawka_core::tools::duplicate::core::get_duplicate_cache_file;
 use czkawka_core::tools::similar_images::core::get_similar_images_cache_file;
@@ -146,7 +146,7 @@ pub(crate) fn connect_settings(gui_data: &GuiData) {
                             }
 
                             messages.messages.push(flg!("cache_properly_cleared"));
-                            text_view_errors.buffer().set_text(messages.create_messages_text().as_str());
+                            text_view_errors.buffer().set_text(messages.create_messages_text(MessageLimit::NoLimit).as_str());
                         }
                     }
                     dialog.close();
@@ -196,7 +196,7 @@ pub(crate) fn connect_settings(gui_data: &GuiData) {
                         }
 
                         messages.messages.push(flg!("cache_properly_cleared"));
-                        text_view_errors.buffer().set_text(messages.create_messages_text().as_str());
+                        text_view_errors.buffer().set_text(messages.create_messages_text(MessageLimit::NoLimit).as_str());
                     }
                     dialog.close();
                 });
@@ -225,7 +225,7 @@ pub(crate) fn connect_settings(gui_data: &GuiData) {
                         }
 
                         messages.messages.push(flg!("cache_properly_cleared"));
-                        text_view_errors.buffer().set_text(messages.create_messages_text().as_str());
+                        text_view_errors.buffer().set_text(messages.create_messages_text(MessageLimit::NoLimit).as_str());
                     }
                     dialog.close();
                 });

@@ -315,7 +315,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_videos_thumbnail_percentage_text(flk!("subsettings_videos_thumbnail_percentage").into());
     translation.set_settings_load_tabs_sizes_at_startup_text(flk!("settings_load_tabs_sizes_at_startup").into());
     translation.set_settings_load_windows_size_at_startup_text(flk!("settings_load_windows_size_at_startup").into());
-    translation.set_settings_limit_messages_to_500_lines_text(flk!("settings_limit_messages_to_500_lines").into());
+    translation.set_settings_limit_lines_of_messages_text(flk!("settings_limit_lines_of_messages").into());
     translation.set_settings_cache_number_size_text("".into());
     translation.set_settings_video_thumbnails_number_size_text("".into());
     translation.set_settings_log_number_size_text("".into());

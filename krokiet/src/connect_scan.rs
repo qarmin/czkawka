@@ -27,7 +27,7 @@ use czkawka_core::tools::temporary::{Temporary, TemporaryFileEntry};
 use humansize::{BINARY, format_size};
 use rayon::prelude::*;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
-
+use czkawka_core::helpers::messages::MessageLimit;
 use crate::common::{
     MAX_INT_DATA_BIG_FILES, MAX_INT_DATA_BROKEN_FILES, MAX_INT_DATA_DUPLICATE_FILES, MAX_INT_DATA_EMPTY_FILES, MAX_INT_DATA_EMPTY_FOLDERS, MAX_INT_DATA_INVALID_SYMLINKS,
     MAX_INT_DATA_SIMILAR_IMAGES, MAX_INT_DATA_SIMILAR_MUSIC, MAX_INT_DATA_SIMILAR_VIDEOS, MAX_INT_DATA_TEMPORARY_FILES, MAX_STR_DATA_BIG_FILES, MAX_STR_DATA_BROKEN_FILES,
@@ -36,9 +36,9 @@ use crate::common::{
 };
 use crate::connect_row_selection::checker::set_number_of_enabled_items;
 use crate::connect_row_selection::reset_selection;
-use crate::settings::collect_settings;
+use crate::settings::{collect_base_settings, collect_settings};
 use crate::settings::combo_box::StringComboBoxItems;
-use crate::settings::model::SettingsCustom;
+use crate::settings::model::{BasicSettings, SettingsCustom};
 use crate::shared_models::SharedModels;
 use crate::{ActiveTab, GuiState, MainListModel, MainWindow, ProgressToSend, flk};
 
@@ -68,6 +68,7 @@ pub(crate) fn connect_scan_button(app: &MainWindow, progress_sender: Sender<Prog
         });
 
         let custom_settings = collect_settings(&app);
+        let basic_settings = collect_base_settings(&app);
 
         let cloned_model = Arc::clone(&shared_models);
 
@@ -77,37 +78,37 @@ pub(crate) fn connect_scan_button(app: &MainWindow, progress_sender: Sender<Prog
         let a = app.as_weak();
         match active_tab {
             ActiveTab::DuplicateFiles => {
-                scan_duplicates(a, progress_sender, stop_flag, custom_settings, cloned_model);
+                scan_duplicates(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
             }
             ActiveTab::EmptyFolders => {
-                scan_empty_folders(a, progress_sender, stop_flag, custom_settings, cloned_model);
+                scan_empty_folders(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
             }
             ActiveTab::BigFiles => {
-                scan_big_files(a, progress_sender, stop_flag, custom_settings, cloned_model);
+                scan_big_files(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
             }
             ActiveTab::EmptyFiles => {
-                scan_empty_files(a, progress_sender, stop_flag, custom_settings, cloned_model);
+                scan_empty_files(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
             }
             ActiveTab::SimilarImages => {
-                scan_similar_images(a, progress_sender, stop_flag, custom_settings, cloned_model);
+                scan_similar_images(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
             }
             ActiveTab::SimilarVideos => {
-                scan_similar_videos(a, progress_sender, stop_flag, custom_settings, cloned_model);
+                scan_similar_videos(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
             }
             ActiveTab::SimilarMusic => {
-                scan_similar_music(a, progress_sender, stop_flag, custom_settings, cloned_model);
+                scan_similar_music(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
             }
             ActiveTab::InvalidSymlinks => {
-                scan_invalid_symlinks(a, progress_sender, stop_flag, custom_settings, cloned_model);
+                scan_invalid_symlinks(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
             }
             ActiveTab::BadExtensions => {
-                scan_bad_extensions(a, progress_sender, stop_flag, custom_settings, cloned_model);
+                scan_bad_extensions(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
             }
             ActiveTab::BrokenFiles => {
-                scan_broken_files(a, progress_sender, stop_flag, custom_settings, cloned_model);
+                scan_broken_files(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
             }
             ActiveTab::TemporaryFiles => {
-                scan_temporary_files(a, progress_sender, stop_flag, custom_settings, cloned_model);
+                scan_temporary_files(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
             }
             ActiveTab::Settings | ActiveTab::About => panic!("Button should be disabled"),
         }
@@ -121,6 +122,7 @@ fn scan_duplicates(
     progress_sender: Sender<ProgressData>,
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
+    basic_settings: BasicSettings,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
@@ -145,7 +147,7 @@ fn scan_duplicates(
             set_common_settings(&mut tool, &custom_settings, &stop_flag);
             tool.set_delete_outdated_cache(custom_settings.duplicate_delete_outdated_entries);
             tool.search(&stop_flag, Some(&progress_sender));
-            let messages = tool.get_text_messages().create_messages_text();
+            let messages = get_text_messages(&tool, &basic_settings);
 
             let mut vector;
             if tool.get_use_reference() {
@@ -265,6 +267,7 @@ fn scan_empty_folders(
     progress_sender: Sender<ProgressData>,
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
+    basic_settings: BasicSettings,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
@@ -275,7 +278,7 @@ fn scan_empty_folders(
             tool.search(&stop_flag, Some(&progress_sender));
 
             let mut vector = tool.get_empty_folder_list().values().cloned().collect::<Vec<_>>();
-            let messages = tool.get_text_messages().create_messages_text();
+            let messages = get_text_messages(&tool, &basic_settings);
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
@@ -324,6 +327,7 @@ fn scan_big_files(
     progress_sender: Sender<ProgressData>,
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
+    basic_settings: BasicSettings,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
@@ -339,7 +343,7 @@ fn scan_big_files(
             tool.search(&stop_flag, Some(&progress_sender));
 
             let mut vector = tool.get_big_files().clone();
-            let messages = tool.get_text_messages().create_messages_text();
+            let messages = get_text_messages(&tool, &basic_settings);
 
             if big_files_mode == SearchMode::BiggestFiles {
                 vector.par_sort_unstable_by_key(|fe| u64::MAX - fe.size);
@@ -395,6 +399,7 @@ fn scan_empty_files(
     progress_sender: Sender<ProgressData>,
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
+    basic_settings: BasicSettings,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
@@ -405,7 +410,7 @@ fn scan_empty_files(
             tool.search(&stop_flag, Some(&progress_sender));
 
             let mut vector = tool.get_empty_files().clone();
-            let messages = tool.get_text_messages().create_messages_text();
+            let messages = get_text_messages(&tool, &basic_settings);
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
@@ -455,6 +460,7 @@ fn scan_similar_images(
     progress_sender: Sender<ProgressData>,
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
+    basic_settings: BasicSettings,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
@@ -484,7 +490,7 @@ fn scan_similar_images(
 
             tool.search(&stop_flag, Some(&progress_sender));
 
-            let messages = tool.get_text_messages().create_messages_text();
+            let messages = get_text_messages(&tool, &basic_settings);
 
             let mut vector: Vec<_> = if tool.get_use_reference() {
                 tool.get_similar_images_referenced()
@@ -568,6 +574,7 @@ fn scan_similar_videos(
     progress_sender: Sender<ProgressData>,
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
+    basic_settings: BasicSettings,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
@@ -590,7 +597,7 @@ fn scan_similar_videos(
 
             tool.search(&stop_flag, Some(&progress_sender));
 
-            let messages = tool.get_text_messages().create_messages_text();
+            let messages = get_text_messages(&tool, &basic_settings);
 
             let mut vector: Vec<_> = if tool.get_use_reference() {
                 tool.get_similar_videos_referenced()
@@ -689,6 +696,7 @@ fn scan_similar_music(
     progress_sender: Sender<ProgressData>,
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
+    basic_settings: BasicSettings,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
@@ -738,7 +746,7 @@ fn scan_similar_music(
 
             tool.search(&stop_flag, Some(&progress_sender));
 
-            let messages = tool.get_text_messages().create_messages_text();
+            let messages = get_text_messages(&tool, &basic_settings);
 
             let mut vector: Vec<_> = if tool.get_use_reference() {
                 tool.get_similar_music_referenced()
@@ -816,6 +824,7 @@ fn scan_invalid_symlinks(
     progress_sender: Sender<ProgressData>,
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
+    basic_settings: BasicSettings,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
@@ -827,7 +836,7 @@ fn scan_invalid_symlinks(
             tool.search(&stop_flag, Some(&progress_sender));
 
             let mut vector = tool.get_invalid_symlinks().clone();
-            let messages = tool.get_text_messages().create_messages_text();
+            let messages = get_text_messages(&tool, &basic_settings);
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
@@ -877,6 +886,7 @@ fn scan_temporary_files(
     progress_sender: Sender<ProgressData>,
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
+    basic_settings: BasicSettings,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
@@ -888,7 +898,7 @@ fn scan_temporary_files(
             tool.search(&stop_flag, Some(&progress_sender));
 
             let mut vector = tool.get_temporary_files().clone();
-            let messages = tool.get_text_messages().create_messages_text();
+            let messages = get_text_messages(&tool, &basic_settings);
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
@@ -937,6 +947,7 @@ fn scan_broken_files(
     progress_sender: Sender<ProgressData>,
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
+    basic_settings: BasicSettings,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
@@ -971,7 +982,7 @@ fn scan_broken_files(
             tool.search(&stop_flag, Some(&progress_sender));
 
             let mut vector = tool.get_broken_files().clone();
-            let messages = tool.get_text_messages().create_messages_text();
+            let messages = get_text_messages(&tool, &basic_settings);
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
@@ -1023,6 +1034,7 @@ fn scan_bad_extensions(
     progress_sender: Sender<ProgressData>,
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
+    basic_settings: BasicSettings,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
@@ -1034,7 +1046,7 @@ fn scan_bad_extensions(
             tool.search(&stop_flag, Some(&progress_sender));
 
             let mut vector = tool.get_bad_extensions_files().clone();
-            let messages = tool.get_text_messages().create_messages_text();
+            let messages = get_text_messages(&tool, &basic_settings);
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
@@ -1085,6 +1097,18 @@ fn insert_data_to_model(items: &Rc<VecModel<MainListModel>>, data_model_str: Mod
         val_int: ModelRc::new(data_model_int),
     };
     items.push(main);
+}
+
+fn get_text_messages<T>(component: &T, basic_settings: &BasicSettings) -> String
+where
+    T: CommonData
+{
+    let limit = if basic_settings.settings_limit_lines_of_messages {
+        MessageLimit::Lines(500)
+    } else {
+        MessageLimit::NoLimit
+    };
+    component.get_text_messages().create_messages_text(limit)
 }
 
 fn set_common_settings<T>(component: &mut T, custom_settings: &SettingsCustom, stop_flag: &Arc<AtomicBool>)

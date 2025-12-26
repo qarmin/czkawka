@@ -29,5 +29,8 @@ core_ffmpeg_not_found_windows = Be sure that ffmpeg.exe and ffprobe.exe are avai
 core_invalid_symlink_infinite_recursion = Infinite recursion
 core_invalid_symlink_non_existent_destination = Non-existent destination file
 
-rust_error_moving_to_trash = Error while moving \"{ $file }\" to trash: { $error }
-rust_error_removing = Error while removing \"{ $file }\" : { $error }
+core_messages_limit_reached_characters = Number of messages exceeded the set limit ({$current}/{$limit} characters), so the output was truncated. To read the full output, disable the limiting option in settings.
+core_messages_limit_reached_lines = Number of messages exceeded the set limit ({$current}/{$limit} lines), so the output was truncated. To read the full output, disable the limiting option in settings.
+
+rust_error_moving_to_trash = Error while moving "{ $file }" to trash: { $error }
+rust_error_removing = Error while removing "{ $file }" : { $error }
