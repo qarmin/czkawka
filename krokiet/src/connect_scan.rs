@@ -11,6 +11,7 @@ use czkawka_core::common::progress_data::ProgressData;
 use czkawka_core::common::tool_data::CommonData;
 use czkawka_core::common::traits::{ResultEntry, Search};
 use czkawka_core::common::{format_time, split_path, split_path_compare};
+use czkawka_core::helpers::messages::MessageLimit;
 use czkawka_core::tools::bad_extensions::{BadExtensions, BadExtensionsParameters, BadFileEntry};
 use czkawka_core::tools::big_file::{BigFile, BigFileParameters, SearchMode};
 use czkawka_core::tools::broken_files::{BrokenEntry, BrokenFiles, BrokenFilesParameters, CheckedTypes};
@@ -27,7 +28,7 @@ use czkawka_core::tools::temporary::{Temporary, TemporaryFileEntry};
 use humansize::{BINARY, format_size};
 use rayon::prelude::*;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
-use czkawka_core::helpers::messages::MessageLimit;
+
 use crate::common::{
     MAX_INT_DATA_BIG_FILES, MAX_INT_DATA_BROKEN_FILES, MAX_INT_DATA_DUPLICATE_FILES, MAX_INT_DATA_EMPTY_FILES, MAX_INT_DATA_EMPTY_FOLDERS, MAX_INT_DATA_INVALID_SYMLINKS,
     MAX_INT_DATA_SIMILAR_IMAGES, MAX_INT_DATA_SIMILAR_MUSIC, MAX_INT_DATA_SIMILAR_VIDEOS, MAX_INT_DATA_TEMPORARY_FILES, MAX_STR_DATA_BIG_FILES, MAX_STR_DATA_BROKEN_FILES,
@@ -36,9 +37,9 @@ use crate::common::{
 };
 use crate::connect_row_selection::checker::set_number_of_enabled_items;
 use crate::connect_row_selection::reset_selection;
-use crate::settings::{collect_base_settings, collect_settings};
 use crate::settings::combo_box::StringComboBoxItems;
 use crate::settings::model::{BasicSettings, SettingsCustom};
+use crate::settings::{collect_base_settings, collect_settings};
 use crate::shared_models::SharedModels;
 use crate::{ActiveTab, GuiState, MainListModel, MainWindow, ProgressToSend, flk};
 
@@ -236,9 +237,26 @@ fn write_duplicate_results(
     }
     app.set_duplicate_files_model(items.into());
     if lost_space > 0 {
-        app.invoke_scan_ended(flk!("rust_found_duplicate_files", items_found = items_found, groups = groups, size = format_size(lost_space, BINARY), time = scanning_time_str).into());
+        app.invoke_scan_ended(
+            flk!(
+                "rust_found_duplicate_files",
+                items_found = items_found,
+                groups = groups,
+                size = format_size(lost_space, BINARY),
+                time = scanning_time_str
+            )
+            .into(),
+        );
     } else {
-        app.invoke_scan_ended(flk!("rust_found_duplicate_files_no_lost_space", items_found = items_found, groups = groups, time = scanning_time_str).into());
+        app.invoke_scan_ended(
+            flk!(
+                "rust_found_duplicate_files_no_lost_space",
+                items_found = items_found,
+                groups = groups,
+                time = scanning_time_str
+            )
+            .into(),
+        );
     }
     app.global::<GuiState>().set_info_text(messages.into());
 }
@@ -370,7 +388,15 @@ fn write_big_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages: S
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_big_files_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_big_files", items_found = items_found, time = scanning_time_str, size = format_size(files_size, BINARY)).into());
+    app.invoke_scan_ended(
+        flk!(
+            "rust_found_big_files",
+            items_found = items_found,
+            time = scanning_time_str,
+            size = format_size(files_size, BINARY)
+        )
+        .into(),
+    );
     app.global::<GuiState>().set_info_text(messages.into());
 }
 
@@ -1005,7 +1031,15 @@ fn write_broken_files_results(app: &MainWindow, vector: Vec<BrokenEntry>, messag
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_broken_files_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_broken_files", items_found = items_found, time = scanning_time_str, size = format_size(size, BINARY)).into());
+    app.invoke_scan_ended(
+        flk!(
+            "rust_found_broken_files",
+            items_found = items_found,
+            time = scanning_time_str,
+            size = format_size(size, BINARY)
+        )
+        .into(),
+    );
     app.global::<GuiState>().set_info_text(messages.into());
 }
 
@@ -1101,7 +1135,7 @@ fn insert_data_to_model(items: &Rc<VecModel<MainListModel>>, data_model_str: Mod
 
 fn get_text_messages<T>(component: &T, basic_settings: &BasicSettings) -> String
 where
-    T: CommonData
+    T: CommonData,
 {
     let limit = if basic_settings.settings_limit_lines_of_messages {
         MessageLimit::Lines(500)

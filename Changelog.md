@@ -40,6 +40,9 @@
 - Printing in settings, size of cache/thumbnails/logs files - [#1714](https://github.com/qarmin/czkawka/pull/1714)
 - Added sorting, by clicking at column headers - [#]()
 
+### External
+- Wine 10.20 contains bugfix that fixes crashes when running dialogs in Czkawka Gui - [Wine 49987 issue](https://bugs.winehq.org/show_bug.cgi?id=49987)
+
 ### Prebuilt binaries
 - Krokiet Windows binaries with skia backend are available (this is msvc build and requires vc redist installed)
 - Intel Mac binaries, are now built with the latest available MacOS(15 at the moment)
