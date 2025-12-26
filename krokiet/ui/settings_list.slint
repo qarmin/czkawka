@@ -247,6 +247,11 @@ export component SettingsList inherits VerticalLayout {
                 model <=> Settings.load_tabs_sizes_at_startup;
             }
 
+            CheckBoxComponent {
+                name <=> Translations.settings_limit_messages_to_500_lines_text;
+                model <=> Settings.limit_messages_to_500_lines;
+            }
+
             HeaderText {
                 text <=> Translations.settings_general_settings_text;
             }

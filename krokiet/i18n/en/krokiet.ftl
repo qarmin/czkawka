@@ -213,6 +213,7 @@ settings_general_settings = General Settings
 settings_settings = Settings
 settings_load_tabs_sizes_at_startup = Load tabs sizes at startup
 settings_load_windows_size_at_startup = Load windows size at startup
+settings_limit_messages_to_500_lines = Limit messages to 500 lines
 popup_save_title = Saving results
 popup_save_message = This will save results to 3 different files
 popup_rename_title = Renaming files

@@ -268,6 +268,7 @@ pub(crate) fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicS
     app.global::<Callabler>().invoke_theme_changed();
     settings.set_load_tabs_sizes_at_startup(basic_settings.settings_load_tabs_sizes_at_startup);
     settings.set_load_windows_size_at_startup(basic_settings.settings_load_windows_size_at_startup);
+    settings.set_limit_messages_to_500_lines(basic_settings.settings_limit_messages_to_500_lines);
 
     set_combobox_basic_settings_items(&settings, basic_settings);
 }
@@ -655,6 +656,7 @@ pub(crate) fn collect_base_settings(app: &MainWindow) -> BasicSettings {
 
     let settings_load_tabs_sizes_at_startup = settings.get_load_tabs_sizes_at_startup();
     let settings_load_windows_size_at_startup = settings.get_load_windows_size_at_startup();
+    let settings_limit_messages_to_500_lines = settings.get_limit_messages_to_500_lines();
     BasicSettings {
         language,
         default_preset,
@@ -665,5 +667,6 @@ pub(crate) fn collect_base_settings(app: &MainWindow) -> BasicSettings {
         show_only_icons,
         settings_load_tabs_sizes_at_startup,
         settings_load_windows_size_at_startup,
+        settings_limit_messages_to_500_lines,
     }
 }
