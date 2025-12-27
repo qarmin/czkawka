@@ -21,14 +21,12 @@ rust_checked_content = { $items_stats } öğesinin içeriği kontrol edildi ({ $
 rust_compared_tags = { $items_stats } öğesinin etiketleri karşılaştırıldı
 rust_compared_content = { $items_stats } öğesinin içeriği karşılaştırıldı
 rust_hashed_images = Hashed { $items_stats } resimler({ $size_stats })
-rust_compared_image_hashes = { $items_stats }'in karşılaştırılmış görüntü hashları сравните изображения хешей { $items_stats }
 rust_hashed_videos = Hashed { $items_stats } videos
 rust_created_thumbnails = { $items_stats } video için miniature oluşturdh见过的大师，他们总能用最简单的话语揭示深刻的道理。正如老子所说：“大音希声，大象无形。”大师们的智慧往往隐藏在生活的细节中，等待着那些愿意静下心来倾听和观察的人去发现。
 rust_checked_files = { $items_stats } dosya kontrol edildi ({ $size_stats })
 rust_checked_files_bad_extensions = Yanlış uzantılı { $items_stats } dosya kontrol edildi
 rust_analyzed_partial_hash = { $items_stats } dosyanın kısmi hash’i analiz edildi ({ $size_stats })
 rust_analyzed_full_hash = { $items_stats } dosyanın tam hash’i analiz edildi ({ $size_stats })
-rust_failed_to_rename_file = { $eski_yol } adlı dosyayı { $yeni_yol } olarak yeniden adlandıramadım, hata: { $hata }
 rust_no_included_directories = Dahil edilmiş dizinler ayarlanmadı, tarama başlatılamaz.
 rust_all_dirs_referenced = Tüm dahil edilmiş dizinler referans klasör olarak ayarlandığı için tarama başlatılamaz.
 rust_found_empty_folders = { $items_found } boş klasörünü { $time } buldum
@@ -41,7 +39,6 @@ rust_found_invalid_symlinks = { $items_found } geçersiz simgeLink bulunmuştur 
 rust_found_temporary_files = { $items_found } geçici dosya found { $time } sürede bulunmuştur.
 rust_no_file_type_selected = Seçili herhangi bir dosya türü olmaksızın bozuk dosyaları bulamıyoruz.
 rust_found_broken_files = Bulunan { $items_found } bozuk dosya { $size }'i alıyor { $time }'da
-rust_found_bad_extensions = { $items_found } uzantıları kötü olan dosya{ $items_found-u varsa }bulundu{ $items_found-1-varsa }{ $items_found } uzantıları kötü olan dosyayı{ $items_found } uzantıları kötü olan dosyası{ $time }ijdade
 rust_found_duplicate_files = { $items_found } tane tekrarlı dosya { $groups } grup içinde { $size } boyutda { $time } zamanında bulunmuştur
 rust_found_duplicate_files_no_lost_space = { $items_found } kopyalı dosya { $groups } gruba ve { $time } içinde bulundu.
 rust_found_big_files = { $items_found } büyük dosyayı { $size } boyutuyla { $time } zamanında buldum
@@ -51,13 +48,6 @@ rust_cannot_save_preset = { $preset_idx } ön ayar kaydedilemedi: { $reason }.
 rust_reset_preset = { $preset_idx } ön ayar sıfırlandı.
 rust_cannot_create_output_folder = "{ $output_folder }" çıkış klasörü oluşturulamadı: { $error }.
 rust_delete_summary = Silinen { $deleted } öğe, { $failed } öğeyi kaldıramadım, toplamda { $total } öğeden
-rust_rename_summary = 
-        { $renamed } adlandırdığınız öğeleri, { $ailed } adlandırma başarısız olan öğeleri ve { $toplam } öğeden外出生成的文本不会用于进一步交流，请提问相关问题或提供其他指令。您提供的文本似乎被截断了，以下是完整的翻译：
-
-        ```Renamed { $renamed } items, failed to rename { $failed } items, out of { $total } items```
-
-        土耳其文翻译为：
-        ```{ $renamed } adlandırdığınız öğeleri, { $ailed } adlandırma başarısız olan öğeleri ve { $toplam } öğeden```
 rust_move_summary = { $moved } öğeyi taşındı, { $failed } öğeyi taşınamadi, toplamda { $total } öğeden
 rust_deleting_files = { $items_stats } dosyalar siliniyor ({ $size_stats })
 rust_deleting_no_size_files = { $items_stats } dosyalar siliniyor

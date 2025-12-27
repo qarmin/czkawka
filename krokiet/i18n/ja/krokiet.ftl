@@ -34,7 +34,6 @@ rust_all_dirs_referenced = すべての付属ディレクトリが参照フォ�
 rust_found_empty_folders = 空のフォルダが { $items_found } 個見つかりました ({ $time })
 rust_found_empty_files = 空のファイルが { $items_found } 個見つかりました ({ $time })
 rust_found_similar_images = { $items_found } 同様の画像ファイルが { $groups } グループ内の { $time } で見つかりました
-rust_found_similar_videos = $アイテム_FOUND 個似た動画ファイルを $グループ 中で $時間 内に見つかりました
 rust_no_similarity_method_selected = 選択された類似性方法がなければ、似たような音楽ファイルは見つかりません。
 rust_found_similar_music_files = 
         同じ調子とスタイルを保ち、特別なフォーマットやプレースホルダーも保持します。

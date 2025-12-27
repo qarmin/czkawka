@@ -64,7 +64,6 @@ rust_no_files_moved = Não há arquivos ou pastas selecionados para mover
 rust_delete_confirmation = Você tem certeza que deseja excluir os itens selecionados?
 rust_delete_confirmation_number_simple = { $items } itens selecionados.
 rust_delete_confirmation_number_groups = { $items } itens selecionados em grupos { $groups }.
-rust_delete_confirmation_selected_all_in_group = Todos os itens selecionados em { $grupos } grupos.
 
 # Slint translations, but in arrays
 

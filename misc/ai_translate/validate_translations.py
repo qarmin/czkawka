@@ -25,6 +25,18 @@ def extract_placeholders(text: str) -> Set[str]:
     return normalized
 
 
+def count_placeholders(text: str) -> Dict[str, int]:
+    pattern = re.compile(r'\{\s*\$[\w-]+\s*\}')
+    matches = pattern.findall(text)
+    normalized_matches = [re.sub(r'\s+', '', match) for match in matches]
+
+    counts = {}
+    for placeholder in normalized_matches:
+        counts[placeholder] = counts.get(placeholder, 0) + 1
+
+    return counts
+
+
 def validate_translation(base_value: str, translated_value: str, key: str) -> List[str]:
     errors = []
 
@@ -38,6 +50,17 @@ def validate_translation(base_value: str, translated_value: str, key: str) -> Li
         errors.append(f"  {Colors.RED}Missing placeholders:{Colors.RESET} {', '.join(sorted(missing))}")
     if extra:
         errors.append(f"  {Colors.RED}Extra placeholders:{Colors.RESET} {', '.join(sorted(extra))}")
+
+    base_counts = count_placeholders(base_value)
+    translated_counts = count_placeholders(translated_value)
+
+    for placeholder in base_placeholders:
+        if placeholder in translated_placeholders:
+            base_count = base_counts.get(placeholder, 0)
+            translated_count = translated_counts.get(placeholder, 0)
+
+            if base_count != translated_count:
+                errors.append(f"  {Colors.RED}Wrong occurrence count for {placeholder}:{Colors.RESET} expected {base_count}, found {translated_count}")
 
     return errors
 
@@ -65,7 +88,44 @@ def validate_language_file(
     return errors_by_key
 
 
-def validate_i18n_folder(i18n_path: pathlib.Path, target_languages: List[str] | None = None) -> int:
+def fix_language_file(lang_file: pathlib.Path, keys_to_remove: Set[str]) -> int:
+    content = lang_file.read_text(encoding="utf-8")
+    lines = content.split('\n')
+    result_lines = []
+    i = 0
+    removed_count = 0
+
+    while i < len(lines):
+        line = lines[i]
+
+        key_match = re.match(r'^([\w][\w-]*)\s*=', line)
+
+        if key_match:
+            key = key_match.group(1)
+
+            if key in keys_to_remove:
+                removed_count += 1
+                i += 1
+                while i < len(lines):
+                    if lines[i] and lines[i][0] == ' ':
+                        i += 1
+                    elif not lines[i].strip():
+                        if i + 1 < len(lines) and lines[i + 1] and lines[i + 1][0] == ' ':
+                            i += 1
+                        else:
+                            break
+                    else:
+                        break
+                continue
+
+        result_lines.append(line)
+        i += 1
+
+    lang_file.write_text('\n'.join(result_lines), encoding="utf-8")
+    return removed_count
+
+
+def validate_i18n_folder(i18n_path: pathlib.Path, target_languages: List[str] | None = None, fix_mode: bool = False) -> int:
     print(f"Validating i18n folder: {i18n_path}")
 
     en_folder = i18n_path / "en"
@@ -117,6 +177,22 @@ def validate_i18n_folder(i18n_path: pathlib.Path, target_languages: List[str] | 
 
     if not errors_by_language:
         print("All translations are valid!")
+        return 0
+
+    if fix_mode:
+        print(f"\n{Colors.YELLOW}FIX MODE: Removing entries with placeholder errors{Colors.RESET}\n")
+
+        total_fixed = 0
+        for lang_code in sorted(errors_by_language.keys()):
+            data = errors_by_language[lang_code]
+            keys_to_remove = set(data['errors'].keys())
+
+            removed = fix_language_file(data['file'], keys_to_remove)
+            total_fixed += removed
+
+            print(f"{lang_code:8} ({data['name']:25}) - removed {removed:3} entry(ies)")
+
+        print(f"\n{Colors.GREEN}Fixed! Removed {total_fixed} entry(ies) with errors{Colors.RESET}")
         return 0
 
     print(f"\nFound errors in {len(errors_by_language)} language(s):\n")
@@ -171,6 +247,12 @@ Examples:
         help="Only validate specific languages (e.g., --languages pl de fr)"
     )
 
+    parser.add_argument(
+        "--fix",
+        action="store_true",
+        help="Automatically remove entries with placeholder errors"
+    )
+
     args = parser.parse_args()
 
     i18n_path = pathlib.Path(args.i18n_folder)
@@ -186,7 +268,7 @@ Examples:
         sys.exit(1)
 
     try:
-        exit_code = validate_i18n_folder(i18n_path, args.languages)
+        exit_code = validate_i18n_folder(i18n_path, args.languages, args.fix)
         sys.exit(exit_code)
     except KeyboardInterrupt:
         print("\n\nInterrupted by user")

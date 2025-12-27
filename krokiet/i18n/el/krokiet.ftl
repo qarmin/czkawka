@@ -20,7 +20,6 @@ rust_checked_tags = Επιλεγμένες ετικέτες του { $items_stat
 rust_checked_content = Ελέγξτε το περιεχόμενο των { $items_stats } (των { $size_stats })
 rust_compared_tags = Συγκρίθηκαν ετικέτες του { $items_stats }
 rust_compared_content = Συγκριτικό περιεχόμενο του { $items_stats }
-rust_hashed_images = HASHED { $items_stats } εικόνες (Τα στατιστικά του μεγέθους)
 rust_compared_image_hashes = Σύγκριση κατακερμάτων εικόνων του { $items_stats }
 rust_hashed_videos = Διακεκομμένα βίντεο { $items_stats }
 rust_created_thumbnails = Δημιουργήθηκε μικρογραφίες για { $items_stats } βίντεο

@@ -442,13 +442,10 @@ compute_found_duplicates_hash_size = { $number_files } tane ekleme { $number_gro
 compute_found_duplicates_name = { $number_files } kopya, { $number_groups } grubunda { $time } süresi içinde bulunmuştur.
 compute_found_empty_folders = { $number_files } boş klasörünü { $time } buldum
 compute_found_empty_files = { $number_files } adet dosya { $time } içinde boş bulundu.
-compute_found_big_files = { $number_files } büyük dosya{k $number_files == 1} bulundu,{ $number_files > 1} bulunmuştur{ $number_files != 1}. { $time } sürede{ $time == "1" k} { $number_files } büyük dosya,birleşik olarak { $time } sürede{ $time != "1" k} { $number_files } büyük dosya bulundu,{ $time != "1" k}
 compute_found_temporary_files = { $number_files } geçici dosya{ $number_files > 1: 's' } { $time } içinde bulunmuştur
 compute_found_images = { $number_files } benzer görüntüyü { $number_groups } grupta { $time } süre içinde buldum
-compute_found_videos = { $number_files } benzer video found { $number_groups } grupta { $time } sürede { $number_files } benzer视频找到在{ $number_groups }组中用时{ $time }
 compute_found_music = { $number_files } benzer müzik dosyası { $number_groups } grup içinde { $time } bulunmuştur.
 compute_found_invalid_symlinks = { $number_files } geçerli olmayan simge bağlantısı { $time } içinde bulunuldu
-compute_found_broken_files = { $number_files } bozuk dosya{ $number_files>1}ler{ $number_files} bulundu { $time }
 compute_found_bad_extensions = Geçersiz uzantılarla { $number_files } dosya { $time } içinde bulundu
 # Progress window
 progress_scanning_general_file =
