@@ -415,10 +415,9 @@ settings_folder_cache_open = 캐시 폴더 열기
 settings_folder_settings_open = 설정 폴더 열기
 # Compute results
 compute_stopped_by_user = 사용자에 의해 검색이 중단됨.
-compute_found_duplicates_hash_size = { $number_files }개의 중복 파일을 { $number_groups } 그룹에서找到了 {$number_files} 개의 중복 파일이 { $number_groups } 그룹에서 찾았습니다whichtook { $size } 크기로 { $time } 시간에
 compute_found_duplicates_name = {$number_files} 개의 중복 파일을 {$number_groups} 그룹에서 {$time}에 발견했습니다.
 compute_found_empty_folders = {$number_files}개의 비어있는 폴더를 {$time} 안에 발견했습니다.
-compute_found_empty_files = {$number_files}에 {$number_files}개의 빈 파일을 찾았습니다.
+compute_found_empty_files = {$number_files}에 {$number_of_groups}개의 빈 파일을 찾았습니다.
 compute_found_big_files = {$number_files}개의 큰 파일을 {$time}에 찾았습니다.
 compute_found_temporary_files = {$number_files}개의 임시 파일을 {$time} 안에 찾았습니다.
 compute_found_images = {$number_files} 개의 유사한 이미지를 {$number_groups} 그룹에서 {$time} 내에 발견했습니다.

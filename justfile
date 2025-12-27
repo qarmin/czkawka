@@ -129,6 +129,11 @@ translate:
     cd misc/ai_translate; uv run translate.py ../../krokiet/i18n
     just pack_translations
 
+validate_translations:
+    cd misc/ai_translate; uv run validate_translations.py ../../czkawka_gui/i18n
+    cd misc/ai_translate; uv run validate_translations.py ../../czkawka_core/i18n
+    cd misc/ai_translate; uv run validate_translations.py ../../krokiet/i18n
+
 pack_translations:
     rm -f i18n_translations.zip
     mkdir -p /tmp/czkawka_i18n
