@@ -31,3 +31,4 @@ TestFiles
 *.txt
 .venv
 charts*
+*__pycache__*/
