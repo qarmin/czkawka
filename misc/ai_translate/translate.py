@@ -1,21 +1,12 @@
 #!/usr/bin/env python3
-"""
-Translation script for FTL (Fluent) files using offline AI translation.
-
-Usage:
-    python3 misc/ai_translate/translate.py czkawka_gui/i18n
-    python3 misc/ai_translate/translate.py krokiet/i18n
-"""
 
 import argparse
-import os
 import pathlib
 import re
 import sys
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Set
 
 
-# Language code mapping for translation
 LANGUAGE_NAMES = {
     "ar": "Arabic",
     "bg": "Bulgarian",
@@ -43,28 +34,16 @@ LANGUAGE_NAMES = {
     "zh-TW": "Traditional Chinese",
 }
 
-# Default model to use (can be changed via config or CLI)
 DEFAULT_MODEL = "qwen2.5:7b"
 
 
 def parse_ftl_file(file_path: pathlib.Path) -> Dict[str, str]:
-    """
-    Parse an FTL file and extract key-value pairs.
-    Handles multiline values.
-
-    Returns a dict where keys are the translation keys and values are the translated text.
-    """
     if not file_path.exists():
         return {}
 
     content = file_path.read_text(encoding="utf-8")
     entries = {}
 
-    # Regular expression to match FTL entries
-    # Matches: key = value (potentially multiline)
-    # Pattern explanation:
-    # ^(\w[\w-]*)\s*=\s* - matches key at start of line
-    # (.*?)(?=^\w[\w-]*\s*=|^#|$) - matches value until next key, comment, or end
     pattern = re.compile(
         r'^([\w][\w-]*)\s*=\s*(.*?)(?=^[\w][\w-]*\s*=\s*|^#[^\n]*\n[\w]|^\s*$|\Z)',
         re.MULTILINE | re.DOTALL
@@ -79,12 +58,8 @@ def parse_ftl_file(file_path: pathlib.Path) -> Dict[str, str]:
 
 
 def serialize_ftl_entries(entries: Dict[str, str]) -> str:
-    """
-    Convert a dictionary of entries back to FTL format.
-    """
     lines = []
     for key, value in entries.items():
-        # Check if value is multiline
         if '\n' in value:
             lines.append(f"{key} =")
             for line in value.split('\n'):
@@ -99,10 +74,6 @@ def serialize_ftl_entries(entries: Dict[str, str]) -> str:
 
 
 def read_ftl_with_structure(file_path: pathlib.Path) -> Tuple[str, Dict[str, str]]:
-    """
-    Read FTL file preserving comments and structure.
-    Returns the full content and parsed entries.
-    """
     if not file_path.exists():
         return "", {}
 
@@ -113,13 +84,10 @@ def read_ftl_with_structure(file_path: pathlib.Path) -> Tuple[str, Dict[str, str
 
 
 def translate_text(text: str, target_language: str, model: str = DEFAULT_MODEL) -> str:
-    """
-    Translate text using Ollama offline AI model.
-    """
     try:
         import ollama
     except ImportError:
-        print("❌ Error: 'ollama' package not installed.")
+        print("Error: 'ollama' package not installed.")
         print("   Install it with: pip install ollama")
         print("   Or run: just prepare_translations_deps")
         sys.exit(1)
@@ -142,7 +110,6 @@ Text to translate:
 
         translated = response["message"]["content"].strip()
 
-        # Remove quotes if the model added them
         if translated.startswith('"') and translated.endswith('"'):
             translated = translated[1:-1]
         if translated.startswith("'") and translated.endswith("'"):
@@ -151,14 +118,11 @@ Text to translate:
         return translated
 
     except Exception as e:
-        print(f"  ⚠ Translation error: {e}")
-        return text  # Return original text on error
+        print(f"  Translation error: {e}")
+        return text
 
 
 def find_ftl_file_in_folder(folder: pathlib.Path) -> pathlib.Path | None:
-    """
-    Find the FTL file in a folder. Should be only one.
-    """
     if not folder.exists() or not folder.is_dir():
         return None
 
@@ -166,69 +130,44 @@ def find_ftl_file_in_folder(folder: pathlib.Path) -> pathlib.Path | None:
     if len(ftl_files) == 1:
         return ftl_files[0]
     elif len(ftl_files) > 1:
-        print(f"  ⚠ Warning: Multiple FTL files found in {folder}, using first one: {ftl_files[0].name}")
+        print(f"  Warning: Multiple FTL files found in {folder}, using first one: {ftl_files[0].name}")
         return ftl_files[0]
 
     return None
 
 
-def update_language_file(
+def analyze_language_file(
     base_entries: Dict[str, str],
     lang_file: pathlib.Path,
-    target_lang: str,
-    model: str,
-    dry_run: bool = False
-) -> int:
-    """
-    Update a language file with missing or untranslated entries.
-    Returns the number of translations added/updated.
-    """
-    # Read existing translations
+    target_lang: str
+) -> Tuple[Dict[str, str], int]:
     lang_content, lang_entries = read_ftl_with_structure(lang_file)
 
-    translations_count = 0
+    missing_keys = {}
 
-    # Find missing or untranslated keys
     for key, base_value in base_entries.items():
         needs_translation = False
 
         if key not in lang_entries:
-            print(f"    ➕ Missing key: {key}")
             needs_translation = True
         elif lang_entries[key] == base_value:
-            print(f"    🔄 Untranslated key (same as English): {key}")
             needs_translation = True
 
         if needs_translation:
-            if not dry_run:
-                print(f"       Translating: {base_value[:60]}...")
-                translated_value = translate_text(base_value, target_lang, model)
-                lang_entries[key] = translated_value
-                translations_count += 1
-            else:
-                print(f"       [DRY RUN] Would translate: {base_value[:60]}...")
-                translations_count += 1
+            missing_keys[key] = base_value
 
-    # Write back if changes were made
-    if translations_count > 0 and not dry_run:
-        # Preserve comments and structure by parsing the original file
-        # and inserting new translations in the right places
-        new_content = preserve_structure_and_update(lang_content, lang_entries, base_entries)
-        lang_file.write_text(new_content, encoding="utf-8")
-        print(f"    ✅ Updated {lang_file.name} with {translations_count} translations")
-
-    return translations_count
+    return missing_keys, len(missing_keys)
 
 
-def preserve_structure_and_update(
-    original_content: str,
-    updated_entries: Dict[str, str],
-    base_entries: Dict[str, str]
-) -> str:
-    """
-    Update the file content while preserving comments and structure.
-    """
-    lines = original_content.split('\n')
+def update_language_file_content(
+    lang_file: pathlib.Path,
+    translations: Dict[str, str]
+) -> None:
+    if not translations:
+        return
+
+    content = lang_file.read_text(encoding="utf-8")
+    lines = content.split('\n')
     result_lines = []
     i = 0
     processed_keys = set()
@@ -236,16 +175,14 @@ def preserve_structure_and_update(
     while i < len(lines):
         line = lines[i]
 
-        # Check if line starts with a key
         key_match = re.match(r'^([\w][\w-]*)\s*=', line)
 
         if key_match:
             key = key_match.group(1)
             processed_keys.add(key)
 
-            if key in updated_entries:
-                # Replace with updated value
-                value = updated_entries[key]
+            if key in translations:
+                value = translations[key]
                 if '\n' in value:
                     result_lines.append(f"{key} =")
                     for v_line in value.split('\n'):
@@ -256,7 +193,6 @@ def preserve_structure_and_update(
                 else:
                     result_lines.append(f"{key} = {value}")
 
-                # Skip original multiline value if any
                 i += 1
                 while i < len(lines) and lines[i].startswith('    '):
                     i += 1
@@ -265,13 +201,12 @@ def preserve_structure_and_update(
         result_lines.append(line)
         i += 1
 
-    # Add new keys at the end
-    new_keys = [k for k in base_entries.keys() if k in updated_entries and k not in processed_keys]
+    new_keys = [k for k in translations.keys() if k not in processed_keys]
     if new_keys:
-        result_lines.append("")
-        result_lines.append("# Newly added translations")
+        if result_lines and result_lines[-1].strip():
+            result_lines.append("")
         for key in new_keys:
-            value = updated_entries[key]
+            value = translations[key]
             if '\n' in value:
                 result_lines.append(f"{key} =")
                 for v_line in value.split('\n'):
@@ -282,7 +217,7 @@ def preserve_structure_and_update(
             else:
                 result_lines.append(f"{key} = {value}")
 
-    return '\n'.join(result_lines)
+    lang_file.write_text('\n'.join(result_lines), encoding="utf-8")
 
 
 def process_i18n_folder(
@@ -291,58 +226,90 @@ def process_i18n_folder(
     dry_run: bool = False,
     target_languages: List[str] | None = None
 ):
-    """
-    Process an i18n folder and translate missing entries.
-    """
-    print(f"🌍 Processing i18n folder: {i18n_path}")
+    print(f"Processing i18n folder: {i18n_path}")
 
-    # Find the English FTL file
     en_folder = i18n_path / "en"
     if not en_folder.exists():
-        print(f"❌ Error: English folder not found at {en_folder}")
+        print(f"Error: English folder not found at {en_folder}")
         return
 
     en_file = find_ftl_file_in_folder(en_folder)
     if not en_file:
-        print(f"❌ Error: No FTL file found in {en_folder}")
+        print(f"Error: No FTL file found in {en_folder}")
         return
 
-    print(f"📄 Base file: {en_file.name}")
+    print(f"Base file: {en_file.name}")
 
-    # Parse English file
     base_entries = parse_ftl_file(en_file)
-    print(f"📊 Found {len(base_entries)} entries in base file\n")
+    print(f"Found {len(base_entries)} entries in base file\n")
 
-    # Get all language folders
     lang_folders = [f for f in i18n_path.iterdir() if f.is_dir() and f.name != "en"]
     lang_folders.sort()
 
-    # Filter languages if specified
     if target_languages:
         lang_folders = [f for f in lang_folders if f.name in target_languages]
 
-    total_translations = 0
+    print("=" * 70)
+    print("ANALYSIS PHASE - Reading all files")
+    print("=" * 70)
+
+    analysis_results = {}
 
     for lang_folder in lang_folders:
         lang_code = lang_folder.name
-        print(f"🔤 Processing language: {lang_code} ({LANGUAGE_NAMES.get(lang_code, 'Unknown')})")
+        lang_name = LANGUAGE_NAMES.get(lang_code, 'Unknown')
 
-        # Find or create the FTL file
         lang_file = find_ftl_file_in_folder(lang_folder)
 
         if not lang_file:
-            # Create new file with same name as base
             lang_file = lang_folder / en_file.name
-            print(f"  📝 Creating new file: {lang_file.name}")
-            lang_file.touch()
+            if not lang_file.exists():
+                lang_file.touch()
 
-        # Update the file
-        count = update_language_file(base_entries, lang_file, lang_code, model, dry_run)
-        total_translations += count
+        missing_keys, count = analyze_language_file(base_entries, lang_file, lang_code)
+        analysis_results[lang_code] = {
+            'name': lang_name,
+            'file': lang_file,
+            'missing_keys': missing_keys,
+            'count': count
+        }
 
-        print()
+        print(f"{lang_code:8} ({lang_name:25}) - {count:3} phrases to translate")
 
-    print(f"✨ Complete! Total translations: {total_translations}")
+    total_to_translate = sum(r['count'] for r in analysis_results.values())
+    print(f"\nTotal phrases to translate: {total_to_translate}")
+
+    if total_to_translate == 0:
+        print("\nNo translations needed.")
+        return
+
+    if dry_run:
+        print("\n[DRY RUN] Would translate the above phrases")
+        return
+
+    print("\n" + "=" * 70)
+    print("TRANSLATION PHASE")
+    print("=" * 70 + "\n")
+
+    total_translated = 0
+
+    for lang_code, data in analysis_results.items():
+        if data['count'] == 0:
+            continue
+
+        print(f"Translating {lang_code} ({data['name']}) - {data['count']} phrases")
+
+        translations = {}
+        for idx, (key, base_value) in enumerate(data['missing_keys'].items(), 1):
+            print(f"  [{idx}/{data['count']}] {key}: {base_value[:50]}...")
+            translated_value = translate_text(base_value, lang_code, model)
+            translations[key] = translated_value
+
+        update_language_file_content(data['file'], translations)
+        total_translated += data['count']
+        print(f"  Updated {data['file'].name}\n")
+
+    print(f"Complete! Translated {total_translated} phrases across {len([r for r in analysis_results.values() if r['count'] > 0])} languages")
 
 
 def main():
@@ -385,26 +352,25 @@ Examples:
 
     args = parser.parse_args()
 
-    # Convert to absolute path
     i18n_path = pathlib.Path(args.i18n_folder)
     if not i18n_path.is_absolute():
         i18n_path = pathlib.Path.cwd() / i18n_path
 
     if not i18n_path.exists():
-        print(f"❌ Error: Path does not exist: {i18n_path}")
+        print(f"Error: Path does not exist: {i18n_path}")
         sys.exit(1)
 
     if not i18n_path.is_dir():
-        print(f"❌ Error: Path is not a directory: {i18n_path}")
+        print(f"Error: Path is not a directory: {i18n_path}")
         sys.exit(1)
 
     try:
         process_i18n_folder(i18n_path, args.model, args.dry_run, args.languages)
     except KeyboardInterrupt:
-        print("\n\n⚠ Interrupted by user")
+        print("\n\nInterrupted by user")
         sys.exit(1)
     except Exception as e:
-        print(f"\n❌ Error: {e}")
+        print(f"\nError: {e}")
         import traceback
         traceback.print_exc()
         sys.exit(1)
