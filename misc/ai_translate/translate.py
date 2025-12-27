@@ -4,7 +4,7 @@ import argparse
 import pathlib
 import re
 import sys
-from typing import Dict, List, Tuple, Set
+from typing import Dict, List, Tuple
 
 
 LANGUAGE_NAMES = {
@@ -36,6 +36,19 @@ LANGUAGE_NAMES = {
 
 DEFAULT_MODEL = "qwen2.5:7b"
 
+IGNORED_KEYS = [
+    "bottom_symlink_button",
+    "bottom_hardlink_button",
+    "main_tree_view_column_fps",
+    "main_check_box_broken_files_pdf",
+    "general_ok_button",
+    "duplicate_mode_hash_combo_box",
+    "compare_move_left_button",
+    "compare_move_right_button",
+    "",
+    "",
+]
+
 
 def parse_ftl_file(file_path: pathlib.Path) -> Dict[str, str]:
     if not file_path.exists():
@@ -43,16 +56,57 @@ def parse_ftl_file(file_path: pathlib.Path) -> Dict[str, str]:
 
     content = file_path.read_text(encoding="utf-8")
     entries = {}
+    lines = content.split('\n')
+    i = 0
 
-    pattern = re.compile(
-        r'^([\w][\w-]*)\s*=\s*(.*?)(?=^[\w][\w-]*\s*=\s*|^#[^\n]*\n[\w]|^\s*$|\Z)',
-        re.MULTILINE | re.DOTALL
-    )
+    while i < len(lines):
+        line = lines[i]
 
-    for match in pattern.finditer(content):
-        key = match.group(1).strip()
-        value = match.group(2).strip()
-        entries[key] = value
+        key_match = re.match(r'^([\w][\w-]*)\s*=\s*(.*)', line)
+
+        if key_match:
+            key = key_match.group(1).strip()
+            first_line_value = key_match.group(2).strip()
+
+            value_lines = []
+            if first_line_value:
+                value_lines.append(first_line_value)
+
+            i += 1
+            while i < len(lines):
+                next_line = lines[i]
+
+                if re.match(r'^[\w][\w-]*\s*=', next_line):
+                    break
+                if next_line.startswith('#'):
+                    break
+
+                if next_line and next_line[0] == ' ':
+                    value_lines.append(next_line.strip())
+                    i += 1
+                elif not next_line.strip():
+                    j = i + 1
+                    has_more_content = False
+                    while j < len(lines):
+                        if lines[j] and lines[j][0] == ' ':
+                            has_more_content = True
+                            break
+                        elif lines[j].strip() and not lines[j].startswith('#'):
+                            break
+                        j += 1
+
+                    if has_more_content:
+                        value_lines.append('')
+                        i += 1
+                    else:
+                        break
+                else:
+                    break
+
+            value = '\n'.join(value_lines) if value_lines else ''
+            entries[key] = value
+        else:
+            i += 1
 
     return entries
 
@@ -140,12 +194,18 @@ def analyze_language_file(
     base_entries: Dict[str, str],
     lang_file: pathlib.Path,
     target_lang: str
-) -> Tuple[Dict[str, str], int]:
+) -> Tuple[Dict[str, str], int, int]:
     lang_content, lang_entries = read_ftl_with_structure(lang_file)
 
     missing_keys = {}
+    ignored_count = 0
 
     for key, base_value in base_entries.items():
+        if key in IGNORED_KEYS:
+            if key not in lang_entries or lang_entries[key] == base_value:
+                ignored_count += 1
+            continue
+
         needs_translation = False
 
         if key not in lang_entries:
@@ -156,7 +216,7 @@ def analyze_language_file(
         if needs_translation:
             missing_keys[key] = base_value
 
-    return missing_keys, len(missing_keys)
+    return missing_keys, len(missing_keys), ignored_count
 
 
 def update_language_file_content(
@@ -184,18 +244,26 @@ def update_language_file_content(
             if key in translations:
                 value = translations[key]
                 if '\n' in value:
-                    result_lines.append(f"{key} =")
+                    result_lines.append(f"{key} = ")
                     for v_line in value.split('\n'):
                         if v_line.strip():
-                            result_lines.append(f"    {v_line}")
+                            result_lines.append(f"        {v_line}")
                         else:
                             result_lines.append("")
                 else:
                     result_lines.append(f"{key} = {value}")
 
                 i += 1
-                while i < len(lines) and lines[i].startswith('    '):
-                    i += 1
+                while i < len(lines):
+                    if lines[i] and lines[i][0] == ' ':
+                        i += 1
+                    elif not lines[i].strip():
+                        if i + 1 < len(lines) and lines[i + 1] and lines[i + 1][0] == ' ':
+                            i += 1
+                        else:
+                            break
+                    else:
+                        break
                 continue
 
         result_lines.append(line)
@@ -208,10 +276,10 @@ def update_language_file_content(
         for key in new_keys:
             value = translations[key]
             if '\n' in value:
-                result_lines.append(f"{key} =")
+                result_lines.append(f"{key} = ")
                 for v_line in value.split('\n'):
                     if v_line.strip():
-                        result_lines.append(f"    {v_line}")
+                        result_lines.append(f"        {v_line}")
                     else:
                         result_lines.append("")
             else:
@@ -266,18 +334,25 @@ def process_i18n_folder(
             if not lang_file.exists():
                 lang_file.touch()
 
-        missing_keys, count = analyze_language_file(base_entries, lang_file, lang_code)
+        missing_keys, count, ignored_count = analyze_language_file(base_entries, lang_file, lang_code)
         analysis_results[lang_code] = {
             'name': lang_name,
             'file': lang_file,
             'missing_keys': missing_keys,
-            'count': count
+            'count': count,
+            'ignored_count': ignored_count
         }
 
-        print(f"{lang_code:8} ({lang_name:25}) - {count:3} phrases to translate")
+        status = f"{count:3} phrases to translate"
+        if ignored_count > 0:
+            status += f", {ignored_count:3} ignored"
+        print(f"{lang_code:8} ({lang_name:25}) - {status}")
 
     total_to_translate = sum(r['count'] for r in analysis_results.values())
+    total_ignored = sum(r['ignored_count'] for r in analysis_results.values())
     print(f"\nTotal phrases to translate: {total_to_translate}")
+    if total_ignored > 0:
+        print(f"Total phrases ignored: {total_ignored}")
 
     if total_to_translate == 0:
         print("\nNo translations needed.")
