@@ -127,11 +127,11 @@ main_label_hash_type = Typ hashu
 main_label_hash_size = Rozmiar hashu
 main_label_size_bytes = Rozmiar (bajty)
 main_label_min_size = Min
-main_label_max_size = Max
+main_label_max_size = Maks
 main_label_shown_files = Liczba wyświetlanych plików
 main_label_resize_algorithm = Algorytm zmiany rozmiaru
 main_label_similarity = Podobieństwo{ "   " }
-main_check_box_broken_files_audio = Audio
+main_check_box_broken_files_audio = Dźwięk
 main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = Archiwa
 main_check_box_broken_files_image = Obraz
@@ -275,7 +275,7 @@ bottom_compare_button_tooltip = Porównaj obrazy w grupie.
 bottom_show_errors_tooltip = Pokaż/Ukryj dolny panel tekstowy.
 bottom_show_upper_notebook_tooltip = Pokazuje/ukrywa górny panel.
 # Progress Window
-progress_stop_button = Stop
+progress_stop_button = Przerwij
 progress_stop_additional_message = Przerywanie skanowania
 # About Window
 about_repository_button_tooltip = Link do repozytorium z kodem źródłowym

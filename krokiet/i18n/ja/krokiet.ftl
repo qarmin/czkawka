@@ -34,24 +34,28 @@ rust_all_dirs_referenced = すべての付属ディレクトリが参照フォ�
 rust_found_empty_folders = 空のフォルダが { $items_found } 個見つかりました ({ $time })
 rust_found_empty_files = 空のファイルが { $items_found } 個見つかりました ({ $time })
 rust_found_similar_images = { $items_found } 同様の画像ファイルが { $groups } グループ内の { $time } で見つかりました
-rust_found_similar_videos = Found { $items_found } similar video files in { $groups } groups in { $time }
+rust_found_similar_videos = $アイテム_FOUND 個似た動画ファイルを $グループ 中で $時間 内に見つかりました
 rust_no_similarity_method_selected = 選択された類似性方法がなければ、似たような音楽ファイルは見つかりません。
-rust_found_similar_music_files = Found { $items_found } similar music files in { $groups } groups in { $time }
+rust_found_similar_music_files = 
+        同じ調子とスタイルを保ち、特別なフォーマットやプレースホルダーも保持します。
+        翻訳後のテキスト：
+        同じ調子とスタイルを保ち、特別なフォーマットやプレースホルダーも保持します。
+        見つかった { $items_found } 類似音楽ファイルは { $groups } レコードにまたがり、時間は { $time } です。
 rust_found_invalid_symlinks = 無効なシンボリックリンクが { $items_found } 個見つかりました ({ $time })
 rust_found_temporary_files = 一時ファイルが { $items_found } 個見つかりました ({ $time })
 rust_no_file_type_selected = 選択したファイルタイプがない壊れたファイルを見つけることができません。
-rust_found_broken_files = Found { $items_found } broken files taking { $size } in { $time }
+rust_found_broken_files = 見つかった壊れたファイル数は{ $items_found }で、サイズは{ $size}で、時間は{ $time}took
 rust_found_bad_extensions = 無効な拡張子を持つファイルが { $items_found } 個見つかりました ({ $time })
 rust_found_duplicate_files = { $items_found } 重複したファイルを { $groups } グループで { $size } を { $time } で見つけました
 rust_found_duplicate_files_no_lost_space = { $items_found } 重複したファイルが { $groups } グループの { $time } で見つかりました
-rust_found_big_files = Found { $items_found } big files with size { $size } in { $time }
+rust_found_big_files = 見つけた/bigファイル{ $items_found }個はサイズ{ $size }で{ $time }にあります
 rust_cannot_load_preset = プリセット { $preset_idx } - 理由 { $reason }を変更して読み込むことができません。代わりにデフォルト設定を使用してください。
 rust_saved_preset = プリセット { $preset_idx }を保存しました
 rust_cannot_save_preset = プリセット { $preset_idx } を保存できません - 理由 { $reason }
-rust_reset_preset = Reset preset { $preset_idx }
+rust_reset_preset = 予め設定{ $preset_idx }をリセット
 rust_cannot_create_output_folder = 出力フォルダ { $output_folder }を作成できません、理由： { $error }
 rust_delete_summary = { $deleted } アイテムを削除しました。 { $failed } アイテムの削除に失敗しました。 { $total } アイテムのうち
-rust_rename_summary = Renamed { $renamed } items, failed to rename { $failed } items, out of { $total } items
+rust_rename_summary = 再命名{ $renamed }項目、再命名失敗{ $failed }項目、総数{ $total }項目
 rust_move_summary = { $moved } アイテムを移動しました、 { $failed } アイテムの移動に失敗しました、 { $total } アイテムのうち
 rust_deleting_files = { $items_stats } ファイル ({ $size_stats }) を削除しています
 rust_deleting_no_size_files = { $items_stats } ファイルを削除中
@@ -173,7 +177,7 @@ settings_show_only_icons = アイコンのみ表示
 settings_excluded_items = 除外されたアイテム:
 settings_allowed_extensions = 許可される拡張子:
 settings_excluded_extensions = 除外する拡張子:
-settings_file_size = File Size(Kilobytes)
+settings_file_size = ファイルサイズ(キロバイト)
 settings_minimum_file_size = 最小:
 settings_maximum_file_size = 最大：
 settings_recursive_search = 再帰的な検索

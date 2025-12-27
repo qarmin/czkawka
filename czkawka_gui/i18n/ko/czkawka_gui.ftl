@@ -129,7 +129,7 @@ main_tree_view_column_type_of_error = 손상 유형
 main_tree_view_column_current_extension = 현재 확장자
 main_tree_view_column_proper_extensions = 올바른 확장자
 main_tree_view_column_fps = FPS
-main_tree_view_column_codec = Codec
+main_tree_view_column_codec = 코덱
 main_label_check_method = 확인 방법
 main_label_hash_type = 해시 유형
 main_label_hash_size = 해시 크기
@@ -415,18 +415,19 @@ settings_folder_cache_open = 캐시 폴더 열기
 settings_folder_settings_open = 설정 폴더 열기
 # Compute results
 compute_stopped_by_user = 사용자에 의해 검색이 중단됨.
-compute_found_duplicates_hash_size = Found { $number_files } duplicates in { $number_groups } groups which took { $size } in { $time }
-compute_found_duplicates_name = Found { $number_files } duplicates in { $number_groups } groups in { $time }
-compute_found_empty_folders = Found { $number_files } empty folders in { $time }
-compute_found_empty_files = Found { $number_files } empty files in { $time }
-compute_found_big_files = Found { $number_files } big files in { $time }
-compute_found_temporary_files = Found { $number_files } temporary files in { $time }
-compute_found_images = Found { $number_files } similar images in { $number_groups } groups in { $time }
-compute_found_videos = Found { $number_files } similar videos in { $number_groups } groups in { $time }
-compute_found_music = Found { $number_files } similar music files in { $number_groups } groups in { $time }
-compute_found_invalid_symlinks = Found { $number_files } invalid symlinks in { $time }
-compute_found_broken_files = Found { $number_files } broken files in { $time }
-compute_found_bad_extensions = Found { $number_files } files with invalid extensions in { $time }
+compute_found_duplicates_hash_size = { $number_files }개의 중복 파일을 { $number_groups } 그룹에서找到了 {$number_files} 개의 중복 파일이 { $number_groups } 그룹에서 찾았습니다whichtook { $size } 크기로 { $time } 시간에
+compute_found_duplicates_name = {$number_files} 개의 중복 파일을 {$number_groups} 그룹에서 {$time}에 발견했습니다.
+compute_found_empty_folders = {$number_files}개의 비어있는 폴더를 {$time} 안에 발견했습니다.
+compute_found_empty_files = {$number_files}에 {$number_files}개의 빈 파일을 찾았습니다.
+compute_found_big_files = {$number_files}개의 큰 파일을 {$time}에 찾았습니다.
+compute_found_temporary_files = {$number_files}개의 임시 파일을 {$time} 안에 찾았습니다.
+compute_found_images = {$number_files} 개의 유사한 이미지를 {$number_groups} 그룹에서 {$time} 내에 발견했습니다.
+compute_found_videos = {$number_files} 개의 비슷한 동영상을 {$number_groups} 그룹에서 {$time} 내에 찾았습니다.
+compute_found_music = {$number_files}개의 비슷한 음악 파일을 {$number_groups} 그룹에서 {$time} 내에 찾았습니다.
+compute_found_invalid_symlinks = {$number_files}개의 유효하지 않은 심볼릭 링크를 {$time}에서 찾았습니다.
+compute_found_broken_files = {$number_files}개의 봉인된 파일을 {$time}에 발견했습니다.
+compute_found_bad_extensions = {$number_files} 확장자에 문제가 있는 파일을 {$time} 내로找到了
+
 # Progress window
 progress_scanning_general_file =
     { $file_number ->
@@ -463,7 +464,7 @@ progress_current_stage = 현재 단계:{ "  " }
 progress_all_stages = 전체 단계:{ "  " }
 # Saving loading 
 saving_loading_saving_success = 파일 { $name }에 설정 저장함.
-saving_loading_saving_failure = Failed to save configuration data to file { $name }, reason { $reason }.
+saving_loading_saving_failure = кон피그레이션 데이터를 파일 { $name }에 저장하지 못했습니다, 이유는 { $reason }입니다.
 saving_loading_reset_configuration = 현재 설정이 초기화됨.
 saving_loading_loading_success = 앱 설정 불러오기 성공.
 saving_loading_failed_to_create_config_file = "{ $path }" 파일에 설정을 저장할 수 없습니다. 이유: "{ $reason }".
@@ -476,7 +477,7 @@ text_view_messages = 알림
 text_view_warnings = 경고
 text_view_errors = 오류
 about_window_motto = 이 프로그램은 무료이며, 앞으로도 항상 그럴 것이다.
-krokiet_new_app = Czkawka is in maintenance mode, which means that only critical bugs will be fixed and no new features will be added. For new features, please check out new Krokiet app, which is more stable and performant and is still under active development.
+krokiet_new_app = 'Czkawka'는 유지보수 모드에 있습니다,这意味着仅会修复关键错误且不会添加新功能。对于新功能，请查看新的Krokiet应用，该应用更加稳定性能更强并且仍在积极开发中。
 # Various dialog
 dialogs_ask_next_time = 다음에도 묻기
 symlink_failed = Failed to symlink { $name } to { $target }, reason { $reason }
@@ -487,7 +488,7 @@ delete_all_files_in_group_label1 = 일부 그룹 내에 있는 모든 파일이 
 delete_all_files_in_group_label2 = 정말로 해당 파일을 모두 삭제합니까?
 delete_items_label = { $items }개의 파일이 삭제됩니다.
 delete_items_groups_label = { $groups }개 그룹에서 { $items }개의 파일이 삭제됩니다.
-hardlink_failed = Failed to hardlink { $name } to { $target }, reason { $reason }
+hardlink_failed = 하드 링크를 생성하지 못했습니다 { $name }을 { $target }으로, 이유는 { $reason }입니다
 hard_sym_invalid_selection_title_dialog = 일부 그룹의 선택이 유효하지 않습니다.
 hard_sym_invalid_selection_label_1 = 일부 그룹에서 1개의 항목만이 선택되었으며, 해당 항목은 무시됩니다.
 hard_sym_invalid_selection_label_2 = 하드 링크/심볼릭 링크를 생성하려면, 그룹 내에서 최소 2개의 파일이 선택되어야 합니다.

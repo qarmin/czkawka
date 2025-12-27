@@ -18,7 +18,7 @@ music_checking_by_tags = Etiketler
 music_checking_by_content = İçerik
 same_music_seconds_label = Minimal parça saniyesel süresi
 same_music_similarity_label = Maksimum fark
-music_compare_only_in_title_group = Compare within groups of similar titles
+music_compare_only_in_title_group = Benzer başlıklı gruplar içinde karşılaştırın
 music_compare_only_in_title_group_tooltip =
     Etkinleştirildiğinde dosyalar başlığa göre gruplandırılır ve ardından birbirleriyle karşılaştırılır.
     
@@ -134,7 +134,7 @@ main_tree_view_column_type_of_error = Hata türü
 main_tree_view_column_current_extension = Geçerli Uzantı
 main_tree_view_column_proper_extensions = Uygun Uzantı
 main_tree_view_column_fps = FPS
-main_tree_view_column_codec = Codec
+main_tree_view_column_codec = KodçTürkçe: Kodç
 main_label_check_method = Denetim yöntemi:
 main_label_hash_type = SUÇ türü:
 main_label_hash_size = SURÇ boyutu:
@@ -403,7 +403,7 @@ settings_duplicates_prehash_checkbutton_tooltip =
     Aramayı birden çok kez hızlandırabileceğinden, yüz binlerce veya milyonlarca dosyayı 
     tararken kullanılması şiddetle tavsiye edilir.
 settings_duplicates_prehash_minimal_entry_tooltip = Önbelleğe alınacak girişlerin minimum boyutu.
-settings_duplicates_hide_hard_link_button = Hide hard links
+settings_duplicates_hide_hard_link_button = Zor bağlantıları gizle
 settings_duplicates_prehash_checkbutton = kısmi-SUÇ önbelleği kullan
 settings_duplicates_minimal_size_cache_label = Önbelleğe kaydedilen minimum dosya boyutu (bayt cinsinden):
 settings_duplicates_minimal_size_cache_prehash_label = kısmi-SUÇ önbelleğine kaydedilen minimum dosya boyutu (bayt cinsinden):
@@ -438,18 +438,18 @@ settings_folder_cache_open = Önbellek klasörünü aç
 settings_folder_settings_open = Ayarlar klasörünü aç
 # Compute results
 compute_stopped_by_user = Arama, kullanıcı tarafından durduruldu.
-compute_found_duplicates_hash_size = Found { $number_files } duplicates in { $number_groups } groups which took { $size } in { $time }
-compute_found_duplicates_name = Found { $number_files } duplicates in { $number_groups } groups in { $time }
-compute_found_empty_folders = Found { $number_files } empty folders in { $time }
-compute_found_empty_files = Found { $number_files } empty files in { $time }
-compute_found_big_files = Found { $number_files } big files in { $time }
-compute_found_temporary_files = Found { $number_files } temporary files in { $time }
-compute_found_images = Found { $number_files } similar images in { $number_groups } groups in { $time }
-compute_found_videos = Found { $number_files } similar videos in { $number_groups } groups in { $time }
-compute_found_music = Found { $number_files } similar music files in { $number_groups } groups in { $time }
-compute_found_invalid_symlinks = Found { $number_files } invalid symlinks in { $time }
-compute_found_broken_files = Found { $number_files } broken files in { $time }
-compute_found_bad_extensions = Found { $number_files } files with invalid extensions in { $time }
+compute_found_duplicates_hash_size = { $number_files } tane ekleme { $number_groups } grupta bulunmuştur ve bu,{ $size }'ye { $time } sürede kadardır.
+compute_found_duplicates_name = { $number_files } kopya, { $number_groups } grubunda { $time } süresi içinde bulunmuştur.
+compute_found_empty_folders = { $number_files } boş klasörünü { $time } buldum
+compute_found_empty_files = { $number_files } adet dosya { $time } içinde boş bulundu.
+compute_found_big_files = { $number_files } büyük dosya{k $number_files == 1} bulundu,{ $number_files > 1} bulunmuştur{ $number_files != 1}. { $time } sürede{ $time == "1" k} { $number_files } büyük dosya,birleşik olarak { $time } sürede{ $time != "1" k} { $number_files } büyük dosya bulundu,{ $time != "1" k}
+compute_found_temporary_files = { $number_files } geçici dosya{ $number_files > 1: 's' } { $time } içinde bulunmuştur
+compute_found_images = { $number_files } benzer görüntüyü { $number_groups } grupta { $time } süre içinde buldum
+compute_found_videos = { $number_files } benzer video found { $number_groups } grupta { $time } sürede { $number_files } benzer视频找到在{ $number_groups }组中用时{ $time }
+compute_found_music = { $number_files } benzer müzik dosyası { $number_groups } grup içinde { $time } bulunmuştur.
+compute_found_invalid_symlinks = { $number_files } geçerli olmayan simge bağlantısı { $time } içinde bulunuldu
+compute_found_broken_files = { $number_files } bozuk dosya{ $number_files>1}ler{ $number_files} bulundu { $time }
+compute_found_bad_extensions = Geçersiz uzantılarla { $number_files } dosya { $time } içinde bulundu
 # Progress window
 progress_scanning_general_file =
     { $file_number ->
@@ -486,7 +486,7 @@ progress_current_stage = Geçerli Aşama: { " " }
 progress_all_stages = Tüm Aşamalar: { " " }
 # Saving loading 
 saving_loading_saving_success = Yapılandırma { $name } dosyasına kaydedildi.
-saving_loading_saving_failure = Failed to save configuration data to file { $name }, reason { $reason }.
+saving_loading_saving_failure = Konfigürasyon verilerini dosya { $name }'a kaydetme başarısız oldu, sebep { $reason }.
 saving_loading_reset_configuration = Geçerli yapılandırma temizlendi.
 saving_loading_loading_success = Uygulama yapılandırması düzgünce yüklendi.
 saving_loading_failed_to_create_config_file = "{ $path }" dizininde yapılandırma dosyası oluşturulamadı, nedeni:  "{ $reason }".
@@ -499,7 +499,7 @@ text_view_messages = MESAJLAR
 text_view_warnings = UYARILAR
 text_view_errors = HATALAR
 about_window_motto = Bu programın kullanımı ücretsizdir ve her zaman öyle kalacaktır.
-krokiet_new_app = Czkawka is in maintenance mode, which means that only critical bugs will be fixed and no new features will be added. For new features, please check out new Krokiet app, which is more stable and performant and is still under active development.
+krokiet_new_app = Czkawka bakım modunda, bu da sadece kritik hatalarının düzeltilmesini ve yeni özelliklerin eklenmemesi anlamına geliyor. Yeni özellikler için lütfen daha stabil ve performanslı olup hala aktif olarak geliştirilen yeni Krokiet uygulamasını kontrol ediniz.
 # Various dialog
 dialogs_ask_next_time = Bir dahaki sefere sor
 symlink_failed = Failed to symlink { $name } to { $target }, reason { $reason }
@@ -510,7 +510,7 @@ delete_all_files_in_group_label1 = Kimi gruplarda tüm kayıtlar seçilir.
 delete_all_files_in_group_label2 = Bunları silmek istediğinizden emin misiniz?
 delete_items_label = { $items } dosya silinecek.
 delete_items_groups_label = { $groups } gruptan { $items } dosya silinecek.
-hardlink_failed = Failed to hardlink { $name } to { $target }, reason { $reason }
+hardlink_failed = { $name }'yi { $target }'a hafıza.linklemek başarısız oldu, sebep { $reason }
 hard_sym_invalid_selection_title_dialog = Kimi gruplarda geçersiz seçim
 hard_sym_invalid_selection_label_1 = Bazı gruplarda sadece bir kayıt seçilmiştir ve bu kayıt yok sayılacaktır.
 hard_sym_invalid_selection_label_2 = Bu dosyaları sabit/sembolik bağlayabilmek için gruptaki en az iki sonucun seçilmesi gerekir.

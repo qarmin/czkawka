@@ -19,10 +19,10 @@ music_checking_by_content = محتوى
 same_music_seconds_label = الحد الأدنى من مدة التجزئة الثانية
 same_music_similarity_label = الفرق الأقصى
 music_compare_only_in_title_group = مقارنة داخل مجموعات من العناوين المتشابهة
-music_compare_only_in_title_group_tooltip =
-    When enabled, files are grouped by title and then compared to each other.
-    
-    With 10000 files, instead almost 100 million comparisons usually there will be around 20000 comparisons.
+music_compare_only_in_title_group_tooltip = 
+        عند تمكينه، يتم تجميع الملفات حسب العنوان ومن ثم مقارنتها ببعضها البعض.
+
+        بمليون ملف من أصل عشرة آلاف ملف، بدلاً من حوالي مليارية مقارنات عادةً ستكون حول 20000 مقارنة.
 same_music_tooltip =
     يمكن تكوين البحث عن ملفات موسيقية مشابهة بواسطة محتواها عن طريق الإعداد:
     
@@ -40,10 +40,10 @@ music_comparison_checkbox_tooltip =
     
     S<unk> wie<unk> dziz<unk> L.o<unk> b --- S<unk> wie<unk> dziz<unk> L.o<unk> b (Remix Lato 2021)
 duplicate_case_sensitive_name = حالة حساسة
-duplicate_case_sensitive_name_tooltip =
-    When enabled, group only records when they have exactly same name e.g. Żołd <-> Żołd
-    
-    Disabling such option will group names without checking if each letter is same size e.g. żoŁD <-> Żołd
+duplicate_case_sensitive_name_tooltip = 
+        عند تفعيل هذه الخيار،群组仅当记录具有完全相同名称时才进行分组，例如 Żołd <-> Żołd
+
+        إيقاف 활ط هذا الخيار سيقوم ب群组名称而不检查每个字母是否大小写一致，例如 żoŁD <-> Żołd
 duplicate_mode_size_name_combo_box = الحجم والاسم
 duplicate_mode_name_combo_box = الاسم
 duplicate_mode_size_combo_box = الحجم
@@ -72,14 +72,14 @@ image_hash_size_tooltip =
     16 هو حجم التجزئة الافتراضي الذي يمثل حلاً وسطاً جيداً بين العثور على صور مشابهة قليلاً فقط وبين حدوث عدد صغير من تصادم التجزئة.
     
     32 و64 تجزئة لا تجد سوى صور مشابهة جداً، ولكن ينبغي ألا يكون لها تقريباً إيجابيات كاذبة (ربما باستثناء بعض الصور مع قناة ألفا).
-image_resize_filter_tooltip =
-    To compute hash of image, the library must first resize it.
-    
-    Depend on chosen algorithm, the resulting image used to calculate hash will looks a little different.
-    
-    The fastest algorithm to use, but also the one which gives the worst results, is Nearest. It is enabled by default, because with 16x16 hash size lower quality it is not really visible.
-    
-    With 8x8 hash size it is recommended to use a different algorithm than Nearest, to have better groups of images.
+image_resize_filter_tooltip = 
+        لحساب مفتاح هاش للصورة، يجب أولاً إعادة تشكيلها من قبل المكتبة.
+
+        وفقًا للأ lugoritيم chosen的选择算法，用于计算哈希值的图像将会稍微有所不同。
+
+        الحد fastest最快的算法速最高的算法但也是结果最差的一个是最近邻算法。它默认启用，因为使用16x16大小的哈希时，较低的质量并不明显可见。
+
+        当哈希尺寸为8x8时，建议使用不同于最近邻算法的方法，以便更好地分组图像。
 image_hash_alg_tooltip =
     يمكن للمستخدمين الاختيار من واحدة من خوارزميات عديدة لحساب التجزئة.
     
@@ -178,9 +178,9 @@ upper_excluded_extensions_tooltip =
     قائمة الملفات المعطلة التي سيتم تجاهلها في المسح.
     
     عند استخدام الملحقات المسموح بها والمعطلة على حد سواء، هذه واحدة لها أولوية أعلى، لذلك لن يتم تحديد الملف.
-upper_excluded_items_tooltip =
-    Excluded items must contain * wildcard and should be separated by commas.
-    This is slower than Excluded Directories, so use it carefully.
+upper_excluded_items_tooltip = 
+        العناصر المخزنة يجب أن تحتوي على نجمة (*) ك Placeholder وdevide بينها بالنقاط وال逗号。
+        هذا أslower than Directories محظورة مباشرة، لذا استخدمه بعناية.
 upper_excluded_items = البنود المستثناة:
 upper_allowed_extensions = الإضافات المسموح بها:
 upper_excluded_extensions = الملحقات المعطّلة:
@@ -196,11 +196,11 @@ popover_select_custom = تحديد مخصص
 popover_unselect_custom = إلغاء تحديد مخصص
 popover_select_all_images_except_biggest = حدد الكل باستثناء أكبر
 popover_select_all_images_except_smallest = حدد الكل باستثناء الأصغر
-popover_custom_path_check_button_entry_tooltip =
-    Select records by path.
-    
-    Example usage:
-    /home/pimpek/rzecz.txt can be found with /home/pim*
+popover_custom_path_check_button_entry_tooltip = 
+        اختر السجلات بواسطة المسار.
+
+        예시 استخدام:
+        /home/pimpek/rzecz.txt يمكن العثور عليه باستخدام /home/pim*
 popover_custom_name_check_button_entry_tooltip =
     حدد السجلات حسب أسماء الملفات.
     
@@ -219,12 +219,12 @@ popover_custom_case_sensitive_check_button_tooltip =
     تمكين الكشف الحساس لحالة الأحرف.
     
     عند تعطيل / المنزل/* يجد كلا من /HoMe/roman و /home/roman.
-popover_custom_not_all_check_button_tooltip =
-    Prevents selecting all records in group.
-    
-    This is enabled by default, because in most situations, you don't want to delete both original and duplicates files, but want to leave at least one file.
-    
-    WARNING: This setting doesn't work if you have already manually selected all results in a group.
+popover_custom_not_all_check_button_tooltip = 
+        تمنع اختيار جميع السجلات في المجموعة.
+
+        هذا مفعل بالطبيعة، لأن في معظم الحالات لا تريد حذف كلاً من الملفات الأصلية والمكررة، ولكنك ترغب في ترك على الأقل ملف واحد.
+
+        تحذير: هذه الإعداد لا يعمل إذا كنت قد اخترت يدويًا جميع النتائج في مجموعة محددة بالفعل.
 popover_custom_regex_path_label = المسار
 popover_custom_regex_name_label = الاسم
 popover_custom_regex_regex_label = مسار Regex + اسم
@@ -261,11 +261,11 @@ bottom_hardlink_button_tooltip =
     إنشاء روابط صلبة.
     يعمل فقط عندما يتم تحديد نتيجتين على الأقل في المجموعة.
     أولا لم يتغير و الثاني و اللاحق متصلين بالأول.
-bottom_hardlink_button_not_available_tooltip =
-    Create hardlinks.
-    Button is disabled, because hardlinks cannot be created.
-    Hardlinks only works with administrator privileges on Windows, so be sure to run app as administrator.
-    If app already works with such privileges check for similar issues on Github.
+bottom_hardlink_button_not_available_tooltip = 
+        قم بخلق روابط صعبة.
+        الزر معدم، لأن روابط صعبة لا يمكن إنشاؤها.
+        تworks فقط مع صلاحيات مدير في ويندوز، لذا تأكد من تشغيل التطبيق كمدير.
+        إذا كان التطبيق يعمل بالفعل بصلاحية مثل هذه، فقم بفحص مشاكل مماثلة على جيت هاب.
 bottom_move_button_tooltip =
     ينقل الملفات إلى الدليل المختار.
     ينسخ جميع الملفات إلى الدليل دون الحفاظ على شجرة الدليل.
@@ -334,14 +334,14 @@ settings_save_also_as_json_button = حفظ ذاكرة التخزين المؤق�
 settings_use_trash_button = نقل الملفات المحذوفة إلى سلة المهملات
 settings_language_label = اللغة
 settings_multiple_delete_outdated_cache_checkbutton = حذف إدخالات ذاكرة التخزين المؤقت القديمة تلقائياً
-settings_multiple_delete_outdated_cache_checkbutton_tooltip =
-    Delete outdated cache results which point to non-existent files.
-    
-    When enabled, app makes sure when loading records, that all records point to valid files (broken ones are ignored).
-    
-    Disabling this will help when scanning files on external drives, so cache entries about them will not be purged in the next scan.
-    
-    In the case of having hundred of thousands records in cache, it is suggested to enable this, which will speedup cache loading/saving at start/end of the scan.
+settings_multiple_delete_outdated_cache_checkbutton_tooltip = 
+        حذف النتائج القديمة من 缓存，这些结果指向不存在的文件。
+
+        عندما يتم تفعيل هذا، يتأكد التطبيق أثناء تحميل السجلات أن جميع السجلات تشير إلى ملفات صالحة (الأجزاء المكسورةignored).
+
+        إيقاف تشغيل هذا سوف يكون مفيدًا عند مرور ملفات الأقراص الخارجية، فلن يتم حذف دخول 缓存关于它们的条目在下次扫描时不会被清除。
+
+        في حالة وجود مئات الآلاف من السجلات في 缓存，建议启用此功能，这将加快扫描开始/结束时缓存的加载/保存速度。
 settings_notebook_general = عمومي
 settings_notebook_duplicates = مكرر
 settings_notebook_images = صور مشابهة
@@ -351,21 +351,19 @@ settings_notebook_videos = فيديو مشابه
 
 settings_multiple_image_preview_checkbutton_tooltip = عرض المعاينة على الجانب الأيمن (عند تحديد ملف صورة).
 settings_multiple_image_preview_checkbutton = عرض معاينة الصورة
-settings_multiple_clear_cache_button_tooltip =
-    Manually clear the cache of outdated entries.
-    This should only be used if automatic clearing has been disabled.
+settings_multiple_clear_cache_button_tooltip = 清除过时条目的缓存请手动操作。这仅应在自动清除被禁用的情况下使用。
 settings_multiple_clear_cache_button = إزالة النتائج القديمة من ذاكرة التخزين المؤقت.
 
 ## Duplicates
 
-settings_duplicates_hide_hard_link_button_tooltip =
-    Hides all files except one, if all point to the same data (are hardlinked).
-    
-    Example: In the case where there are (on disk) seven files which are hardlinked to specific data and one different file with same data but a different inode, then in duplicate finder, only one unique file and one file from hardlinked ones will be shown.
-settings_duplicates_minimal_size_entry_tooltip =
-    Set the minimal file size which will be cached.
-    
-    Choosing a smaller value will generate more records. This will speedup search, but slowdown cache loading/saving.
+settings_duplicates_hide_hard_link_button_tooltip = 
+        يختبئ جميع الملفات باستثناء واحد، إذا أشار كل منها إلى نفس البيانات (وهو متصل بشكل صلب).  
+
+        مثال: في حالة وجود سبع ملفات على дисك مترابطة ببيانات معينة وملف مختلف يحتوي على نفس البيانات ولكن inode مختلف，则继续翻译剩下的部分：
+        ملف inode، ثم في مستكشف الملفات المكرر، سيتم عرض只有一个唯一文件和一个来自硬链接的文件。
+settings_duplicates_minimal_size_entry_tooltip = 
+        설정할 최소 파일 크기를 캐시에 저장할 것입니다.
+        작은 값을 선택하면 더 많은 기록이 생성됩니다. 이는 검색 속도가 빨라질 것이지만 캐시 로드/저장은 느려질 수 있습니다.
 settings_duplicates_prehash_checkbutton_tooltip =
     تمكين التخزين المؤقت للتجزئة (تجزئة محسوبة من جزء صغير من الملف) مما يسمح برفض النتائج غير المكررة في وقت سابق.
     
@@ -389,18 +387,18 @@ settings_reset_button = إعادة ضبط الإعدادات
 
 ## Opening cache/config folders
 
-settings_folder_cache_open_tooltip =
-    Opens the folder where the cache txt files are stored.
-    
-    Modifying the cache files may cause invalid results to be shown. However, modifying path may save time when moving a big amount of files to a different location.
-    
-    You can copy these files between computers to save time on scanning again for files (of course if they have similar directory structure).
-    
-    In the case of problems with the cache, these files can be removed. The app will automatically regenerate them.
-settings_folder_settings_open_tooltip =
-    Opens the folder where the Czkawka config is stored.
-    
-    WARNING: Manually modifying the config may break your workflow.
+settings_folder_cache_open_tooltip = 
+        يفتح المجلد الذي يتم فيه تخزين ملفات txt 缓存。
+
+        تعديل ملفات 缓存 可能会导致显示无效的结果。然而，修改路径可能会在将大量文件移到不同位置时节省时间。
+
+        يمكن نقل هذه الملفات بين الحواسيب لحفظ الوقت عند سcan 文件（当然如果它们具有类似的目录结构的话）。
+
+        في حالة مشاكل مع 缓存，可以删除这些文件。تطبيق将会自动重新生成它们。
+settings_folder_settings_open_tooltip = 
+        يفتح المجلد الذي يحتوي على إعدادات Czkawka.
+
+        تحذير: تعديل الإعدادات يدويًا قد يتعكر دفق العمل الخاص بك.
 settings_folder_cache_open = فتح مجلد التخزين المؤقت
 settings_folder_settings_open = فتح مجلد الإعدادات
 # Compute results

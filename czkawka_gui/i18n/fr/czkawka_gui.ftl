@@ -14,7 +14,7 @@ music_bitrate_checkbox = Débit binaire
 music_genre_checkbox = Genre
 music_length_checkbox = Longueur
 music_comparison_checkbox = Comparaison approximative
-music_checking_by_tags = Tags
+music_checking_by_tags = étiquettes
 music_checking_by_content = Contenu
 same_music_seconds_label = Durée minimale de seconde de fragment
 same_music_similarity_label = Différence maximale
@@ -462,7 +462,7 @@ saving_loading_failed_to_read_data_from_file = Impossible de lire les données d
 # Other
 selected_all_reference_folders = Impossible de lancer la recherche quand tous les répertoires sont définis comme des répertoires de référence
 searching_for_data = Recherche de données. Cela peut prendre un certain temps, veuillez patienter…
-text_view_messages = MESSAGES
+text_view_messages = MESSAGESS
 text_view_warnings = AVERTISSEMENTS
 text_view_errors = ERREURS
 about_window_motto = Ce programme peut être utilisée gratuitement et le sera toujours.

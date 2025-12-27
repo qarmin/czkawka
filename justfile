@@ -127,6 +127,22 @@ translate:
     cd misc/ai_translate; uv run translate.py ../../czkawka_gui/i18n
     cd misc/ai_translate; uv run translate.py ../../czkawka_core/i18n
     cd misc/ai_translate; uv run translate.py ../../krokiet/i18n
+    just pack_translations
+
+pack_translations:
+    rm -f i18n_translations.zip
+    mkdir -p /tmp/czkawka_i18n
+    for lang in czkawka_gui/i18n/*/; do \
+        lang_code=$(basename "$lang"); \
+        [ "$lang_code" = "en" ] && continue; \
+        mkdir -p "/tmp/czkawka_i18n/i18n/$lang_code"; \
+        [ -f "czkawka_gui/i18n/$lang_code/czkawka_gui.ftl" ] && cp "czkawka_gui/i18n/$lang_code/czkawka_gui.ftl" "/tmp/czkawka_i18n/i18n/$lang_code/" || true; \
+        [ -f "czkawka_core/i18n/$lang_code/czkawka_core.ftl" ] && cp "czkawka_core/i18n/$lang_code/czkawka_core.ftl" "/tmp/czkawka_i18n/i18n/$lang_code/" || true; \
+        [ -f "krokiet/i18n/$lang_code/krokiet.ftl" ] && cp "krokiet/i18n/$lang_code/krokiet.ftl" "/tmp/czkawka_i18n/i18n/$lang_code/" || true; \
+    done
+    cd /tmp/czkawka_i18n && zip -r - i18n > "{{justfile_directory()}}/i18n_translations.zip"
+    rm -rf /tmp/czkawka_i18n
+    @echo "Created i18n_translations.zip with all translations (excluding English)"
 
 
 ##################### DEBUG SIZE, PERFORMANCE AND OTHERS #####################

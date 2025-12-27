@@ -27,4 +27,4 @@ core_invalid_symlink_non_existent_destination = File di destinazione inesistente
 core_messages_limit_reached_characters = Il numero di messaggi ha superato il limite impostato ( caratteri{ $current }/{ $limit } ), quindi l'output è stato troncato. Per leggere l'output completo, disabilitare l'opzione di limitazione nelle impostazioni.
 core_messages_limit_reached_lines = Il numero di messaggi ha superato il limite impostato ( linee{ $current }/{ $limit } ), quindi l'output è stato troncato. Per leggere l'output completo, disabilitare l'opzione di limitazione nelle impostazioni.
 rust_error_moving_to_trash = Errore durante lo spostamento "{ $file }" nel cestino: { $error }
-rust_error_removing = Error while removing "{ $file }": { $error }
+rust_error_removing = Errore durante la rimozione "{ $file }": { $error }

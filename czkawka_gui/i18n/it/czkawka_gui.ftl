@@ -39,7 +39,7 @@ music_comparison_checkbox_tooltip =
     Cerca file musicali simili usando l'IA, che utilizza l'apprendimento automatico per rimuovere parentesi da una frase. Ad esempio, con questa opzione abilitata, i file in questione saranno considerati duplicati:
     
     Świędziżłób     ---     Świędziżłób (Remix Lato 2021)
-duplicate_case_sensitive_name = Case Sensitive
+duplicate_case_sensitive_name = Caso Sensibile
 duplicate_case_sensitive_name_tooltip =
     Se abilitato, raggruppa solo i record quando hanno esattamente lo stesso nome, ad es. Żołd <-> Żołd
     La disattivazione di tale opzione raggrupperà i nomi senza controllare se ogni lettera ha le stesse dimensioni, ad esempio żoŁD <-> Żołd
@@ -120,13 +120,13 @@ main_tree_view_column_type_of_error = Tipo di Errore
 main_tree_view_column_current_extension = Estensione Corrente
 main_tree_view_column_proper_extensions = Estensione Corretta
 main_tree_view_column_fps = FPS
-main_tree_view_column_codec = Codec
+main_tree_view_column_codec = Codicecá
 main_label_check_method = Metodo di verifica
 main_label_hash_type = Tipo hash
 main_label_hash_size = Dimensione hash
 main_label_size_bytes = Dimensione (byte)
 main_label_min_size = Min
-main_label_max_size = Max
+main_label_max_size = Massimo
 main_label_shown_files = Numero di file visualizzati
 main_label_resize_algorithm = Metodo di ridimensionamento
 main_label_similarity = Similitudine{ "   " }
@@ -406,16 +406,16 @@ settings_folder_settings_open = Apri la cartella delle impostazioni
 compute_stopped_by_user = Ricerca interrotta dall'utente
 compute_found_duplicates_hash_size = Trovato { $number_files } duplicati in { $number_groups } gruppi che hanno preso { $size } in { $time }
 compute_found_duplicates_name = Trovato { $number_files } duplicati in { $number_groups } gruppi in { $time }
-compute_found_empty_folders = Found { $number_files } empty folders in { $time }
-compute_found_empty_files = Found { $number_files } empty files in { $time }
-compute_found_big_files = Found { $number_files } big files in { $time }
-compute_found_temporary_files = Found { $number_files } temporary files in { $time }
-compute_found_images = Found { $number_files } similar images in { $number_groups } groups in { $time }
-compute_found_videos = Found { $number_files } similar videos in { $number_groups } groups in { $time }
-compute_found_music = Found { $number_files } similar music files in { $number_groups } groups in { $time }
-compute_found_invalid_symlinks = Found { $number_files } invalid symlinks in { $time }
-compute_found_broken_files = Found { $number_files } broken files in { $time }
-compute_found_bad_extensions = Found { $number_files } files with invalid extensions in { $time }
+compute_found_empty_folders = Trovo { $number_files } folder vuote in { $time }
+compute_found_empty_files = Trovati { $number_files } file vuoti in { $time }
+compute_found_big_files = Trovati { $number_files } file grandi in { $time }
+compute_found_temporary_files = Trovati { $number_files } file temporanei in { $time }
+compute_found_images = Trova { $number_files } immagini simili in { $number_groups } gruppi in { $time }
+compute_found_videos = Trovati { $number_files } video simili in { $number_groups } gruppi in { $time }
+compute_found_music = Trovo { $number_files } file musicali simili in { $number_groups } gruppi in { $time }
+compute_found_invalid_symlinks = Trovati { $number_files } simboliche invalidi in { $time }
+compute_found_broken_files = Trovate { $number_files } file danneggiati in { $time }
+compute_found_bad_extensions = Trovati { $number_files } file con estensioni non valide in { $time }
 # Progress window
 progress_scanning_general_file =
     { $file_number ->

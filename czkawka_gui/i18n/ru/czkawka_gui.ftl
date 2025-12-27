@@ -405,16 +405,16 @@ settings_folder_cache_open = Открыть папку кэша
 settings_folder_settings_open = Открыть папку настроек
 # Compute results
 compute_stopped_by_user = Поиск был остановлен пользователем
-compute_found_duplicates_hash_size = Found { $number_files } duplicates in { $number_groups } groups which took { $size } in { $time }
-compute_found_duplicates_name = Found { $number_files } duplicates in { $number_groups } groups in { $time }
-compute_found_empty_folders = Found { $number_files } empty folders in { $time }
-compute_found_empty_files = Found { $number_files } empty files in { $time }
-compute_found_big_files = Found { $number_files } big files in { $time }
-compute_found_temporary_files = Found { $number_files } temporary files in { $time }
-compute_found_images = Found { $number_files } similar images in { $number_groups } groups in { $time }
-compute_found_videos = Found { $number_files } similar videos in { $number_groups } groups in { $time }
-compute_found_music = Found { $number_files } similar music files in { $number_groups } groups in { $time }
-compute_found_invalid_symlinks = Found { $number_files } invalid symlinks in { $time }
+compute_found_duplicates_hash_size = Найдено { $number_files } дубликатов в { $number_groups } группах, которые заняли { $size } за { $time }
+compute_found_duplicates_name = Найдено { $number_files } дубликатов в { $number_groups } группах за { $time }
+compute_found_empty_folders = Найдено { $number_files } пустых папки в { $time }
+compute_found_empty_files = Найдено { $number_files } пустых файла в { $time }
+compute_found_big_files = Найдено { $number_files } больших файлов в { $time }
+compute_found_temporary_files = Найдено { $number_files } временных файла в { $time }
+compute_found_images = Найдено { $number_files } подобных изображения в { $number_groups } группах за { $time }
+compute_found_videos = Найдено { $number_files } похожих видео в { $number_groups } группах за { $time }
+compute_found_music = Найдено { $number_files } схожих музыкальных файлов в { $number_groups } группах за { $time }
+compute_found_invalid_symlinks = Найдено { $number_files } невалидных symbolic ссылок за { $time }
 compute_found_broken_files = Найдено { $number_files } сломанных файлов в { $time }
 compute_found_bad_extensions = Найдено { $number_files } файлов с недопустимыми расширениями в { $time }
 # Progress window

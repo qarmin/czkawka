@@ -64,7 +64,7 @@ rust_no_files_moved = Não há arquivos ou pastas selecionados para mover
 rust_delete_confirmation = Você tem certeza que deseja excluir os itens selecionados?
 rust_delete_confirmation_number_simple = { $items } itens selecionados.
 rust_delete_confirmation_number_groups = { $items } itens selecionados em grupos { $groups }.
-rust_delete_confirmation_selected_all_in_group = All items selected in { $groups } groups.
+rust_delete_confirmation_selected_all_in_group = Todos os itens selecionados em { $groups } grupos.
 
 # Slint translations, but in arrays
 
@@ -88,10 +88,10 @@ column_destination_path = Caminho do destino
 column_current_extension = Extensão atual
 column_proper_extension = Extensão corrompida
 column_fps = FPS
-column_codec = Codec
+column_codec = Códigocx
 column_duration = Duração
 # Slint translations
-ok_button = Ok
+ok_button = Tudo bem
 cancel_button = Cancelar
 do_you_want_to_continue = Você quer continuar?
 main_window_title = Limpador de Dados - Krokiet

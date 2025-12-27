@@ -119,7 +119,7 @@ main_tree_view_column_type_of_error = Tipo de Erro
 main_tree_view_column_current_extension = Extensão Atual
 main_tree_view_column_proper_extensions = Extensão Adequada
 main_tree_view_column_fps = FPS
-main_tree_view_column_codec = Codec
+main_tree_view_column_codec = Codificador
 main_label_check_method = Método de verificação
 main_label_hash_type = Tipo de hash
 main_label_hash_size = Tamanho do hash
@@ -402,7 +402,7 @@ settings_folder_cache_open = Abrir diretório do cache
 settings_folder_settings_open = Abrir diretório de configurações
 # Compute results
 compute_stopped_by_user = A busca foi parada pelo usuário
-compute_found_duplicates_hash_size = Found { $number_files } duplicates in { $number_groups } groups which took { $size } in { $time }
+compute_found_duplicates_hash_size = Encontradas { $number_files } duplicatas em { $number_groups } grupos que ocuparam { $size } em { $time }
 compute_found_duplicates_name = Encontradas { $number_files } duplicações em { $number_groups } grupos em { $time }
 compute_found_empty_folders = Encontradas pastas { $number_files } vazias em { $time }
 compute_found_empty_files = Encontrados { $number_files } arquivos vazios em { $time }
@@ -450,7 +450,7 @@ progress_current_stage = Estágio atual:{ " " }
 progress_all_stages = Todo estágio:{ " " }
 # Saving loading 
 saving_loading_saving_success = Configuração guardada no arquivo { $name }.
-saving_loading_saving_failure = Failed to save configuration data to file { $name }, reason { $reason }.
+saving_loading_saving_failure = Falhou na salvaguarda dos dados de configuração no arquivo { $name }, motivo { $reason }.
 saving_loading_reset_configuration = A configuração atual foi limpa.
 saving_loading_loading_success = Configuração de aplicativo devidamente carregada.
 saving_loading_failed_to_create_config_file = Falha ao criar o arquivo de configuração "{ $path }", razão "{ $reason }".

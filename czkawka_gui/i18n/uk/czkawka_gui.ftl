@@ -19,10 +19,10 @@ music_checking_by_content = Зміст
 same_music_seconds_label = Мінімальна тривалість фрагменту
 same_music_similarity_label = Максимальна різниця
 music_compare_only_in_title_group = Порівняйте у групах подібних назвах
-music_compare_only_in_title_group_tooltip =
-    When enabled, files are grouped by title and then compared to each other.
-    
-    With 10000 files, instead almost 100 million comparisons usually there will be around 20000 comparisons.
+music_compare_only_in_title_group_tooltip = 
+        При активованому стані файли групуються за назвою і потім порівнюються між собою.
+
+        З 10 000 файлів, замість близько 100 зіріх порівнянь, вище є ймовірністю побути близько 20 000 порівнянь.
 same_music_tooltip =
     Пошук подібних музичних файлів за його вмістом може бути налаштований за налаштуванням:
     
@@ -405,17 +405,17 @@ settings_folder_cache_open = Відкрити теку кешу
 settings_folder_settings_open = Відкрити папку налаштувань
 # Compute results
 compute_stopped_by_user = Пошук був зупинений користувачем
-compute_found_duplicates_hash_size = Found { $number_files } duplicates in { $number_groups } groups which took { $size } in { $time }
-compute_found_duplicates_name = Found { $number_files } duplicates in { $number_groups } groups in { $time }
+compute_found_duplicates_hash_size = Знайдено { $number_files } дублікати в { $number_groups } групах, які зайняли { $size } за { $time }
+compute_found_duplicates_name = Знайдено { $number_files } дублікати в { $number_groups } групах за { $time }
 compute_found_empty_folders = Знайдено { $number_files } порожніх папок в { $time }
-compute_found_empty_files = Found { $number_files } empty files in { $time }
-compute_found_big_files = Found { $number_files } big files in { $time }
+compute_found_empty_files = Знайдено { $number_files } порожніх файлів за { $time }
+compute_found_big_files = Знайдено { $number_files } великих файлів за { $time }
 compute_found_temporary_files = Знайдено { $number_files } тимчасових файлів в { $time }
 compute_found_images = Знайдено { $number_files } схожих зображень в { $number_groups } групах на { $time }
-compute_found_videos = Found { $number_files } similar videos in { $number_groups } groups in { $time }
-compute_found_music = Found { $number_files } similar music files in { $number_groups } groups in { $time }
+compute_found_videos = Знайдено { $number_files } подібних відео у { $number_groups } групах за { $time }
+compute_found_music = Знайдено { $number_files } подібних музичних файлів в { $number_groups } групах за { $time }
 compute_found_invalid_symlinks = Знайдено { $number_files } неприпустимі символьні посилання в { $time }
-compute_found_broken_files = Found { $number_files } broken files in { $time }
+compute_found_broken_files = Знарядно { $number_files } пошкоджених файлів за час { $time }
 compute_found_bad_extensions = Знайдено { $number_files } файли з недійсними розширеннями в { $time }
 # Progress window
 progress_scanning_general_file =

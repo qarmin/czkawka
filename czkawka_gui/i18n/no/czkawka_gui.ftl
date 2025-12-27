@@ -1,6 +1,6 @@
 # Window titles
 window_settings_title = Innstillinger
-window_main_title = Czkawka (Hiccup)
+window_main_title = Czkawka (Hikkup)
 window_progress_title = Skanner
 window_compare_images = Sammenlign bilder
 # General
@@ -8,9 +8,9 @@ general_ok_button = Ok
 general_close_button = Lukk
 # Main window
 music_title_checkbox = Tittel
-music_artist_checkbox = Artist
+music_artist_checkbox = Kunstner
 music_year_checkbox = År
-music_bitrate_checkbox = Bitrate
+music_bitrate_checkbox = Bitratespeed
 music_genre_checkbox = Sjanger
 music_length_checkbox = Lengde
 music_comparison_checkbox = Omtrentlig sammenligning
@@ -72,14 +72,14 @@ image_hash_size_tooltip =
     16 er standard hash-størrelse som er et godt kompromiss mellom å finne selv små lignende bilder og å ha bare en liten mengde hash-kollisjoner.
     
     32 og 64 hashes finner bare lignende bilder, men bør ha nesten ingen falske positiver (kanskje unntatt bilder med alfa-kanal).
-image_resize_filter_tooltip =
-    To compute hash of image, the library must first resize it.
-    
-    Depend on chosen algorithm, the resulting image used to calculate hash will looks a little different.
-    
-    The fastest algorithm to use, but also the one which gives the worst results, is Nearest. It is enabled by default, because with 16x16 hash size lower quality it is not really visible.
-    
-    With 8x8 hash size it is recommended to use a different algorithm than Nearest, to have better groups of images.
+image_resize_filter_tooltip = 
+        For å beregne hesh av bilde, må biblioteket først tilpass bilden.
+
+        Avhengig av valgt algoritme vil det bilde som brukes for beregning av hesh se litt forskjellig ut.
+
+        Forkortest algoritme å bruke, men også den som gir de vres resultatene, er Nearest. Den aktiveres standard, fordi med en 16x16 heshstørrelse nederste kvalitet ikke er virkelig synlig.
+
+        Med en 8x8 heshstørrelse anbefales det å bruke en annen algoritme enn Nearest for å ha bedre grupper av bilder.
 image_hash_alg_tooltip =
     Brukere kan velge mellom en av mange algoritmer i beregningen av hashen.
     
@@ -109,9 +109,9 @@ main_tree_view_column_size = Størrelse
 main_tree_view_column_similarity = Likhet
 main_tree_view_column_dimensions = Dimensjoner
 main_tree_view_column_title = Tittel
-main_tree_view_column_artist = Artist
+main_tree_view_column_artist = Kjennestein
 main_tree_view_column_year = År
-main_tree_view_column_bitrate = Bitrate
+main_tree_view_column_bitrate = Bitratespeed
 main_tree_view_column_length = Lengde
 main_tree_view_column_genre = Sjanger
 main_tree_view_column_symlink_file_name = Symlink filnavn
@@ -243,7 +243,7 @@ popover_valid_regex = Regex er gyldig
 bottom_search_button = Søk
 bottom_select_button = Velg
 bottom_delete_button = Slett
-bottom_save_button = Save
+bottom_save_button = Lagre
 bottom_symlink_button = Symlink
 bottom_hardlink_button = Hardlink
 bottom_move_button = Flytt
@@ -332,7 +332,7 @@ settings_show_text_view_button = Vis nederste tekstpanel
 settings_use_cache_button = Bruk buffer
 settings_save_also_as_json_button = Lagre også mellomlager som JSON-fil
 settings_use_trash_button = Flytt slettede filer til papirkurv
-settings_language_label = Language
+settings_language_label = Språk
 settings_multiple_delete_outdated_cache_checkbutton = Slett utdaterte cache-oppføringer automatisk
 settings_multiple_delete_outdated_cache_checkbutton_tooltip =
     Slett utdaterte cache-resultater som peker til ikke-eksisterende filer.

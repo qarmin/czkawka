@@ -120,7 +120,7 @@ main_tree_view_column_type_of_error = Tipo de error
 main_tree_view_column_current_extension = Extensión actual
 main_tree_view_column_proper_extensions = Extensión adecuada
 main_tree_view_column_fps = FPS
-main_tree_view_column_codec = Codec
+main_tree_view_column_codec = Codificador
 main_label_check_method = Método de comprobación
 main_label_hash_type = Tipo de Hash
 main_label_hash_size = Tamaño hash
@@ -297,12 +297,12 @@ header_about_button_tooltip = Abre el diálogo con información sobre la aplicac
 settings_number_of_threads = Número de hilos usados
 settings_number_of_threads_tooltip = Número de hilos usados, 0 significa que se utilizarán todos los hilos disponibles.
 settings_use_rust_preview = Usar librerías externas en su lugar gtk para cargar vistas previas
-settings_use_rust_preview_tooltip =
-    Using gtk previews will sometimes be faster and support more formats, but sometimes this could be exactly the opposite.
-    
-    If you have problems with loading previews, you may can to try to change this setting.
-    
-    On non-linux systems, it is recommended to use this option, because gtk-pixbuf are not always available there so disabling this option will not load previews of some images.
+settings_use_rust_preview_tooltip = 
+        Usar vistas previas de gtk a veces será más rápido y soportará más formatos, pero a veces esto podría ser exactamente lo contrario.
+
+        Si tienes problemas con la carga de las vistas previas, puedes intentar cambiar esta configuración.
+
+        En los sistemas no-linux, se recomienda usar esta opción, porque gtk-pixbuf no están siempre disponibles allí por lo que desactivar esta opción no cargará vistas previas de algunas imágenes.
 settings_label_restart = ¡Necesitas reiniciar la aplicación para aplicar la configuración!
 settings_ignore_other_filesystems = Ignorar otros sistemas de ficheros (sólo Linux)
 settings_ignore_other_filesystems_tooltip =
@@ -404,17 +404,17 @@ settings_folder_cache_open = Abrir carpeta de caché
 settings_folder_settings_open = Abrir carpeta de ajustes
 # Compute results
 compute_stopped_by_user = El usuario ha detenido la búsqueda
-compute_found_duplicates_hash_size = Found { $number_files } duplicates in { $number_groups } groups which took { $size } in { $time }
-compute_found_duplicates_name = Found { $number_files } duplicates in { $number_groups } groups in { $time }
+compute_found_duplicates_hash_size = Se encontraron { $number_files } duplicados en { $number_groups } grupos que tomaron { $size } en { $time }
+compute_found_duplicates_name = Se encontraron { $number_files } duplicados en { $number_groups } grupos en { $time }
 compute_found_empty_folders = Se encontraron carpetas vacías { $number_files } en { $time }
-compute_found_empty_files = Found { $number_files } empty files in { $time }
-compute_found_big_files = Found { $number_files } big files in { $time }
+compute_found_empty_files = Se encontraron { $number_files } archivos vacíos en { $time }
+compute_found_big_files = Se encontraron { $number_files } archivos grandes en { $time }
 compute_found_temporary_files = Encontrados archivos temporales { $number_files } en { $time }
-compute_found_images = Found { $number_files } similar images in { $number_groups } groups in { $time }
-compute_found_videos = Found { $number_files } similar videos in { $number_groups } groups in { $time }
+compute_found_images = Se encontraron { $number_files } imágenes similares en { $number_groups } grupos en { $time }
+compute_found_videos = Se encontraron { $number_files } vídeos similares en { $number_groups } grupos en { $time }
 compute_found_music = Se encontraron archivos de música similares { $number_files } en grupos { $number_groups } en { $time }
 compute_found_invalid_symlinks = Encontrados { $number_files } enlaces simbólicos no válidos en { $time }
-compute_found_broken_files = Found { $number_files } broken files in { $time }
+compute_found_broken_files = Se encontraron { $number_files } archivos dañados en { $time }
 compute_found_bad_extensions = Se encontraron archivos { $number_files } con extensiones no válidas en { $time }
 # Progress window
 progress_scanning_general_file =
