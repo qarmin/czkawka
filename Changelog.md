@@ -34,11 +34,13 @@
 - Refactorings to assess whether migrating to GTK 5 will be possible (currently, it doesn’t seem very feasible) - [#1658](https://github.com/qarmin/czkawka/pull/1658)
 - Fixed sorting by size in big files mode - [#1691](https://github.com/qarmin/czkawka/pull/1691)
 - Ugly workarounds for ugly freezes, caused probably by inconsistencies between GTK4 and the Rust compiler’s optimizations   - [#1691](https://github.com/qarmin/czkawka/pull/1691)
+- About screen, now contains info, that Krokiet is successor app - [#1718](https://github.com/qarmin/czkawka/pull/1718)
 
 ### Krokiet
 - Added video thumbnails - [#1714](https://github.com/qarmin/czkawka/pull/1714)
 - Printing in settings, size of cache/thumbnails/logs files - [#1714](https://github.com/qarmin/czkawka/pull/1714)
-- Added sorting, by clicking at column headers - [#]()
+- Added sorting, by clicking at column headers - [#1718](https://github.com/qarmin/czkawka/pull/1718)
+- Added, enabled by default, limit 500 lines of messages in Krokiet, to avoid slow TextEdit performance - [#1718](https://github.com/qarmin/czkawka/pull/1718)
 
 ### External
 - Wine 10.20 contains bugfix that fixes crashes when running dialogs in Czkawka Gui - [Wine 49987 issue](https://bugs.winehq.org/show_bug.cgi?id=49987)
