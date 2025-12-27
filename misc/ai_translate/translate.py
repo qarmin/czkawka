@@ -1,11 +1,10 @@
-#!/usr/bin/env python3
-
 import argparse
 import pathlib
 import re
 import sys
 from typing import Dict, List, Tuple
 
+# TODO - add validation if something goes wrong with translation - e.g. { $variable } was not change(only space could be added/removed inside - but no more)
 
 LANGUAGE_NAMES = {
     "ar": "Arabic",
