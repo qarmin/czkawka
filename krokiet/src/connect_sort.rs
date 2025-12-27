@@ -26,6 +26,16 @@ pub(crate) fn connect_sort_column(app: &MainWindow) {
 
                 common_sort_function(&model, active_tab, sort_function, sort_column_mode == SortColumnMode::Descending)
             }
+            SortIdx::IntIdx(int_idx) => {
+                let sort_function = |e: &MainListModel| {
+                    e.val_int
+                        .iter()
+                        .nth(int_idx as usize)
+                        .unwrap_or_else(|| panic!("Failed to get int index - {int_idx} on {} items", e.val_int.iter().count()))
+                };
+
+                common_sort_function(&model, active_tab, sort_function, sort_column_mode == SortColumnMode::Descending)
+            }
             SortIdx::IntIdxPair(int_idx1, int_idx2) => {
                 let sort_function = |e: &MainListModel| {
                     let items = e.val_int.iter().collect::<Vec<_>>();

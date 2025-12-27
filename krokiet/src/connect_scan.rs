@@ -588,7 +588,17 @@ fn prepare_data_model_similar_images(fe: &ImagesEntry, hash_size: u8) -> (ModelR
     let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
-    let data_model_int_arr: [i32; MAX_INT_DATA_SIMILAR_IMAGES] = [modification_split.0, modification_split.1, size_split.0, size_split.1, fe.width as i32, fe.height as i32];
+    let pixels = split_u64_into_i32s((fe.width as u64) * (fe.height as u64));
+    let data_model_int_arr: [i32; MAX_INT_DATA_SIMILAR_IMAGES] = [
+        modification_split.0,
+        modification_split.1,
+        size_split.0,
+        size_split.1,
+        fe.width as i32,
+        fe.height as i32,
+        pixels.0,
+        pixels.1,
+    ];
     let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 }
@@ -712,7 +722,23 @@ fn prepare_data_model_similar_videos(fe: &VideosEntry) -> (ModelRc<SharedString>
     let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
-    let data_model_int_arr: [i32; MAX_INT_DATA_SIMILAR_VIDEOS] = [modification_split.0, modification_split.1, size_split.0, size_split.1];
+    let bitrate_split = split_u64_into_i32s(fe.bitrate.unwrap_or(0));
+    let duration_i32 = fe.duration.map_or(0, |d| (d * 100.0) as i32);
+    let fps_i32 = fe.fps.map_or(0, |f| (f * 100.0) as i32);
+    let pixels_int = fe.width.and_then(|w| fe.height.map(|h| w as u64 * h as u64)).unwrap_or_default();
+    let pixels_split = split_u64_into_i32s(pixels_int);
+    let data_model_int_arr: [i32; MAX_INT_DATA_SIMILAR_VIDEOS] = [
+        modification_split.0,
+        modification_split.1,
+        size_split.0,
+        size_split.1,
+        bitrate_split.0,
+        bitrate_split.1,
+        duration_i32,
+        fps_i32,
+        pixels_split.0,
+        pixels_split.1,
+    ];
     let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 }

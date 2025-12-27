@@ -118,8 +118,10 @@ pub enum IntDataSimilarImages {
     SizePart2,
     Width,
     Height,
+    PixelsPart1,
+    PixelsPart2,
 }
-pub const MAX_INT_DATA_SIMILAR_IMAGES: usize = IntDataSimilarImages::Height as usize + 1;
+pub const MAX_INT_DATA_SIMILAR_IMAGES: usize = IntDataSimilarImages::PixelsPart2 as usize + 1;
 
 #[repr(u8)]
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
@@ -141,8 +143,14 @@ pub enum IntDataSimilarVideos {
     ModificationDatePart2,
     SizePart1,
     SizePart2,
+    BitratePart1,
+    BitratePart2,
+    Duration,
+    Fps,
+    PixelsPart1,
+    PixelsPart2,
 }
-pub const MAX_INT_DATA_SIMILAR_VIDEOS: usize = IntDataSimilarVideos::SizePart2 as usize + 1;
+pub const MAX_INT_DATA_SIMILAR_VIDEOS: usize = IntDataSimilarVideos::PixelsPart2 as usize + 1;
 
 #[repr(u8)]
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
@@ -252,19 +260,13 @@ pub const MAX_STR_DATA_BAD_EXTENSIONS: usize = StrDataBadExtensions::ProperExten
 
 pub(crate) enum SortIdx {
     StrIdx(i32),
+    IntIdx(i32),
     IntIdxPair(i32, i32),
     Selection,
 }
 
 impl ActiveTab {
     pub(crate) fn get_str_int_sort_idx(self, str_idx: i32) -> SortIdx {
-        // TODO
-        // Missing sorting(needs additional int data enums):
-        // Video bitrate
-        // Video duration
-        // Video fps
-        // Images resolution
-
         // This not exists in enums, because selection is stored in other field
         if str_idx == 0 {
             return SortIdx::Selection;
@@ -281,11 +283,12 @@ impl ActiveTab {
                 StrDataEmptyFiles::ModificationDate => SortIdx::IntIdxPair(IntDataEmptyFiles::ModificationDatePart1 as i32, IntDataEmptyFiles::ModificationDatePart2 as i32),
             },
             Self::SimilarImages => match StrDataSimilarImages::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for SimilarImages")) {
-                StrDataSimilarImages::Similarity | StrDataSimilarImages::Resolution | StrDataSimilarImages::Name | StrDataSimilarImages::Path => SortIdx::StrIdx(str_idx),
+                StrDataSimilarImages::Similarity | StrDataSimilarImages::Name | StrDataSimilarImages::Path => SortIdx::StrIdx(str_idx),
                 StrDataSimilarImages::ModificationDate => {
                     SortIdx::IntIdxPair(IntDataSimilarImages::ModificationDatePart1 as i32, IntDataSimilarImages::ModificationDatePart2 as i32)
                 }
                 StrDataSimilarImages::Size => SortIdx::IntIdxPair(IntDataSimilarImages::SizePart1 as i32, IntDataSimilarImages::SizePart2 as i32),
+                StrDataSimilarImages::Resolution => SortIdx::IntIdxPair(IntDataSimilarImages::PixelsPart1 as i32, IntDataSimilarImages::PixelsPart2 as i32),
             },
             Self::DuplicateFiles => match StrDataDuplicateFiles::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for DuplicateFiles")) {
                 StrDataDuplicateFiles::Name | StrDataDuplicateFiles::Path => SortIdx::StrIdx(str_idx),
@@ -306,18 +309,15 @@ impl ActiveTab {
                 }
             },
             Self::SimilarVideos => match StrDataSimilarVideos::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for SimilarVideos")) {
-                StrDataSimilarVideos::Name
-                | StrDataSimilarVideos::Path
-                | StrDataSimilarVideos::Dimensions
-                | StrDataSimilarVideos::Duration
-                | StrDataSimilarVideos::Bitrate
-                | StrDataSimilarVideos::Fps
-                | StrDataSimilarVideos::Codec
-                | StrDataSimilarVideos::PreviewPath => SortIdx::StrIdx(str_idx),
+                StrDataSimilarVideos::Name | StrDataSimilarVideos::Path | StrDataSimilarVideos::Codec | StrDataSimilarVideos::PreviewPath => SortIdx::StrIdx(str_idx),
                 StrDataSimilarVideos::ModificationDate => {
                     SortIdx::IntIdxPair(IntDataSimilarVideos::ModificationDatePart1 as i32, IntDataSimilarVideos::ModificationDatePart2 as i32)
                 }
                 StrDataSimilarVideos::Size => SortIdx::IntIdxPair(IntDataSimilarVideos::SizePart1 as i32, IntDataSimilarVideos::SizePart2 as i32),
+                StrDataSimilarVideos::Bitrate => SortIdx::IntIdxPair(IntDataSimilarVideos::BitratePart1 as i32, IntDataSimilarVideos::BitratePart2 as i32),
+                StrDataSimilarVideos::Duration => SortIdx::IntIdx(IntDataSimilarVideos::Duration as i32),
+                StrDataSimilarVideos::Fps => SortIdx::IntIdx(IntDataSimilarVideos::Fps as i32),
+                StrDataSimilarVideos::Dimensions => SortIdx::IntIdxPair(IntDataSimilarVideos::PixelsPart1 as i32, IntDataSimilarVideos::PixelsPart2 as i32),
             },
             Self::SimilarMusic => match StrDataSimilarMusic::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for SimilarMusic")) {
                 StrDataSimilarMusic::Name
