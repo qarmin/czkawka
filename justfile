@@ -117,6 +117,18 @@ install:
     cargo install --path czkawka_gui --locked
 
 
+prepare_translations_deps:
+    @command -v uv >/dev/null 2>&1 || curl -LsSf https://astral.sh/uv/install.sh | sh
+    @command -v ollama >/dev/null 2>&1 || curl -fsSL https://ollama.com/install.sh | sh
+    cd misc/ai_translate; uv sync
+    ollama pull qwen2.5:7b
+
+translate:
+    cd misc/ai_translate; uv run translate.py ../../czkawka_gui/i18n
+    cd misc/ai_translate; uv run translate.py ../../czkawka_core/i18n
+    cd misc/ai_translate; uv run translate.py ../../krokiet/i18n
+
+
 ##################### DEBUG SIZE, PERFORMANCE AND OTHERS #####################
 setup_verify_tools:
     rustup component add llvm-tools-preview

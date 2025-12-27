@@ -1,0 +1,7 @@
+[project]
+name = "i18n-ai-translate"
+version = "0.1.0"
+dependencies = [
+    "fluent.syntax",
+    "ollama"
+]
