@@ -18,7 +18,7 @@ music_checking_by_tags = Etiketler
 music_checking_by_content = İçerik
 same_music_seconds_label = Minimal parça saniyesel süresi
 same_music_similarity_label = Maksimum fark
-music_compare_only_in_title_group = Compare within groups of similar titles
+music_compare_only_in_title_group = Benzer başlıklı gruplar içinde karşılaştırın
 music_compare_only_in_title_group_tooltip =
     Etkinleştirildiğinde dosyalar başlığa göre gruplandırılır ve ardından birbirleriyle karşılaştırılır.
     
@@ -133,6 +133,8 @@ main_tree_view_column_destination_path = Hedef Yol
 main_tree_view_column_type_of_error = Hata türü
 main_tree_view_column_current_extension = Geçerli Uzantı
 main_tree_view_column_proper_extensions = Uygun Uzantı
+main_tree_view_column_fps = FPS
+main_tree_view_column_codec = KodçTürkçe: Kodç
 main_label_check_method = Denetim yöntemi:
 main_label_hash_type = SUÇ türü:
 main_label_hash_size = SURÇ boyutu:
@@ -401,7 +403,7 @@ settings_duplicates_prehash_checkbutton_tooltip =
     Aramayı birden çok kez hızlandırabileceğinden, yüz binlerce veya milyonlarca dosyayı 
     tararken kullanılması şiddetle tavsiye edilir.
 settings_duplicates_prehash_minimal_entry_tooltip = Önbelleğe alınacak girişlerin minimum boyutu.
-settings_duplicates_hide_hard_link_button = Sabit bağlantıları gizle (yalnızca Linux ve macOS)
+settings_duplicates_hide_hard_link_button = Zor bağlantıları gizle
 settings_duplicates_prehash_checkbutton = kısmi-SUÇ önbelleği kullan
 settings_duplicates_minimal_size_cache_label = Önbelleğe kaydedilen minimum dosya boyutu (bayt cinsinden):
 settings_duplicates_minimal_size_cache_prehash_label = kısmi-SUÇ önbelleğine kaydedilen minimum dosya boyutu (bayt cinsinden):
@@ -436,18 +438,15 @@ settings_folder_cache_open = Önbellek klasörünü aç
 settings_folder_settings_open = Ayarlar klasörünü aç
 # Compute results
 compute_stopped_by_user = Arama, kullanıcı tarafından durduruldu.
-compute_found_duplicates_hash_size = { $number_groups } grupta, { $size } yer kaplayan, toplam { $number_files } adet kopya bulundu.
-compute_found_duplicates_name = { $number_groups } grupta, { $number_files } adet kopya bulundu.
-compute_found_empty_folders = { $number_files } adet boş klasör bulundu.
-compute_found_empty_files = { $number_files } adet boş dosya bulundu.
-compute_found_big_files = { $number_files } adet büyük/küçük dosya bulundu.
-compute_found_temporary_files = { $number_files } adet geçici dosya bulundu.
-compute_found_images = { $number_groups } grupta, { $number_files } adet benzer resim bulundu.
-compute_found_videos = { $number_groups } grupta, { $number_files } adet benzer video bulundu.
-compute_found_music = { $number_groups } grupta, { $number_files } adet benzer müzik dosyası bulundu.
-compute_found_invalid_symlinks = { $number_files } adet geçersiz sembolik bağlantı bulundu.
-compute_found_broken_files = { $number_files } adet bozuk dosya bulundu.
-compute_found_bad_extensions = { $number_files } adet geçersiz uzantıya sahip dosya bulundu.
+compute_found_duplicates_hash_size = { $number_files } tane ekleme { $number_groups } grupta bulunmuştur ve bu,{ $size }'ye { $time } sürede kadardır.
+compute_found_duplicates_name = { $number_files } kopya, { $number_groups } grubunda { $time } süresi içinde bulunmuştur.
+compute_found_empty_folders = { $number_files } boş klasörünü { $time } buldum
+compute_found_empty_files = { $number_files } adet dosya { $time } içinde boş bulundu.
+compute_found_temporary_files = { $number_files } geçici dosya{ $number_files > 1: 's' } { $time } içinde bulunmuştur
+compute_found_images = { $number_files } benzer görüntüyü { $number_groups } grupta { $time } süre içinde buldum
+compute_found_music = { $number_files } benzer müzik dosyası { $number_groups } grup içinde { $time } bulunmuştur.
+compute_found_invalid_symlinks = { $number_files } geçerli olmayan simge bağlantısı { $time } içinde bulunuldu
+compute_found_bad_extensions = Geçersiz uzantılarla { $number_files } dosya { $time } içinde bulundu
 # Progress window
 progress_scanning_general_file =
     { $file_number ->
@@ -457,6 +456,7 @@ progress_scanning_general_file =
 progress_scanning_extension_of_files = { $file_checked }/{ $all_files } dosyasını kontrol edildi
 progress_scanning_broken_files = Kontrol edilen { $file_checked }/{ $all_files } dosya ({ $data_checked }/{ $all_data })
 progress_scanning_video = Hash işlemi uygulanmış { $file_checked }/{ $all_files } video
+progress_creating_video_thumbnails = Created thumbnails of { $file_checked }/{ $all_files } video
 progress_scanning_image = Hash işlemi uygulanmış { $file_checked }/{ $all_files } görsel ({ $data_checked }/{ $all_data })
 progress_comparing_image_hashes = { $file_checked }/{ $all_files } görsel hash kaydı karşılaştırıldı.
 progress_scanning_music_tags_end = Compared tags of { $file_checked }/{ $all_files } music file
@@ -483,19 +483,12 @@ progress_current_stage = Geçerli Aşama: { " " }
 progress_all_stages = Tüm Aşamalar: { " " }
 # Saving loading 
 saving_loading_saving_success = Yapılandırma { $name } dosyasına kaydedildi.
-saving_loading_saving_failure = Yapılandırma verileri { $name } dosyasına kaydedilemedi.
+saving_loading_saving_failure = Konfigürasyon verilerini dosya { $name }'a kaydetme başarısız oldu, sebep { $reason }.
 saving_loading_reset_configuration = Geçerli yapılandırma temizlendi.
 saving_loading_loading_success = Uygulama yapılandırması düzgünce yüklendi.
-saving_loading_invalid_string = "{ $key }" anahtarı için geçersiz sonuç bulundu. "{ $result }" bir dize(tümce) değil.
-saving_loading_invalid_int = "{ $key }" anahtarı için geçersiz sonuç bulundu. "{ $result }" tam sayı değil.
-saving_loading_invalid_bool = "{ $key }" anahtarı için geçersiz sonuç bulundu. "{ $result }" D/Y türünde değil.
-saving_loading_decode_problem_bool = "{ $key }" anahtarından D/Y kodu çözülemedi, "{ $result }" bulundu ancak izin verilen değerler 0, 1, doğru veya yanlış.
-saving_loading_saving_same_keys = Ayar, yinelenen "{ $key }" anahtarıyla kaydedilmeye çalışılıyor.
 saving_loading_failed_to_create_config_file = "{ $path }" dizininde yapılandırma dosyası oluşturulamadı, nedeni:  "{ $reason }".
 saving_loading_failed_to_read_config_file = "{ $path }" dizininden yapılandırma dosyası yüklenemiyor, böyle dosya yok ya da bir dosya değil.
 saving_loading_failed_to_read_data_from_file = "{ $path }" dosyasından veri okunamıyor, nedeni: "{ $reason }".
-saving_loading_orphan_data = "{ $line }" satırda "{ $data }" ilişiksiz veri bulundu.
-saving_loading_not_valid = "{ $data }" ayarı geçerli uygulama sürümünde bulunmuyor.
 # Other
 selected_all_reference_folders = Tüm dizinler, "Başvuru Klasörü" olarak ayarlandığında arama başlatılamaz.
 searching_for_data = İşleminiz yürütülüyor, bu biraz zaman alabilir, lütfen bekleyin...
@@ -503,18 +496,18 @@ text_view_messages = MESAJLAR
 text_view_warnings = UYARILAR
 text_view_errors = HATALAR
 about_window_motto = Bu programın kullanımı ücretsizdir ve her zaman öyle kalacaktır.
+krokiet_new_app = Czkawka bakım modunda, bu da sadece kritik hatalarının düzeltilmesini ve yeni özelliklerin eklenmemesi anlamına geliyor. Yeni özellikler için lütfen daha stabil ve performanslı olup hala aktif olarak geliştirilen yeni Krokiet uygulamasını kontrol ediniz.
 # Various dialog
 dialogs_ask_next_time = Bir dahaki sefere sor
-delete_file_failed = { $name } dosyası silinemedi, nedeni: { $reason }
+symlink_failed = Failed to symlink { $name } to { $target }, reason { $reason }
 delete_title_dialog = Silmeyi onaylayın.
 delete_question_label = Dosyaları silmek istediğinizden emin misiniz?
 delete_all_files_in_group_title = Gruptaki tüm dosyaları silmeyi onaylayın.
 delete_all_files_in_group_label1 = Kimi gruplarda tüm kayıtlar seçilir.
 delete_all_files_in_group_label2 = Bunları silmek istediğinizden emin misiniz?
-delete_folder_failed = { $dir } klasörü; bulunmadığı, izniniz olmadığı veya klasör boş olmadığı için silinemedi.
 delete_items_label = { $items } dosya silinecek.
 delete_items_groups_label = { $groups } gruptan { $items } dosya silinecek.
-hardlink_failed = Sabit bağlantı kurulamadı.
+hardlink_failed = { $name }'yi { $target }'a hafıza.linklemek başarısız oldu, sebep { $reason }
 hard_sym_invalid_selection_title_dialog = Kimi gruplarda geçersiz seçim
 hard_sym_invalid_selection_label_1 = Bazı gruplarda sadece bir kayıt seçilmiştir ve bu kayıt yok sayılacaktır.
 hard_sym_invalid_selection_label_2 = Bu dosyaları sabit/sembolik bağlayabilmek için gruptaki en az iki sonucun seçilmesi gerekir.

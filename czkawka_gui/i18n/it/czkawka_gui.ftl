@@ -39,7 +39,7 @@ music_comparison_checkbox_tooltip =
     Cerca file musicali simili usando l'IA, che utilizza l'apprendimento automatico per rimuovere parentesi da una frase. Ad esempio, con questa opzione abilitata, i file in questione saranno considerati duplicati:
     
     Świędziżłób     ---     Świędziżłób (Remix Lato 2021)
-duplicate_case_sensitive_name = Case Sensitive
+duplicate_case_sensitive_name = Caso Sensibile
 duplicate_case_sensitive_name_tooltip =
     Se abilitato, raggruppa solo i record quando hanno esattamente lo stesso nome, ad es. Żołd <-> Żołd
     La disattivazione di tale opzione raggrupperà i nomi senza controllare se ogni lettera ha le stesse dimensioni, ad esempio żoŁD <-> Żołd
@@ -119,12 +119,14 @@ main_tree_view_column_destination_path = Percorso di destinazione
 main_tree_view_column_type_of_error = Tipo di Errore
 main_tree_view_column_current_extension = Estensione Corrente
 main_tree_view_column_proper_extensions = Estensione Corretta
+main_tree_view_column_fps = FPS
+main_tree_view_column_codec = Codicecá
 main_label_check_method = Metodo di verifica
 main_label_hash_type = Tipo hash
 main_label_hash_size = Dimensione hash
 main_label_size_bytes = Dimensione (byte)
 main_label_min_size = Min
-main_label_max_size = Max
+main_label_max_size = Massimo
 main_label_shown_files = Numero di file visualizzati
 main_label_resize_algorithm = Metodo di ridimensionamento
 main_label_similarity = Similitudine{ "   " }
@@ -370,7 +372,7 @@ settings_duplicates_prehash_checkbutton_tooltip =
     
     Si consiglia vivamente di usarlo durante la scansione di centinaia di migliaia o milioni di file, perché può accelerare la ricerca di più volte.
 settings_duplicates_prehash_minimal_entry_tooltip = Dimensione minima delle voci della cache
-settings_duplicates_hide_hard_link_button = Nascondi collegamenti rigidi (solo Linux e macOS)
+settings_duplicates_hide_hard_link_button = Nascondi collegamenti rigidi
 settings_duplicates_prehash_checkbutton = Utilizza la cash prehash
 settings_duplicates_minimal_size_cache_label = Dimensione minima dei file (in byte) salvati nella cache
 settings_duplicates_minimal_size_cache_prehash_label = Dimensione minima dei file (in byte) salvati nella cache prehash
@@ -402,18 +404,18 @@ settings_folder_cache_open = Apri la cartella della cache
 settings_folder_settings_open = Apri la cartella delle impostazioni
 # Compute results
 compute_stopped_by_user = Ricerca interrotta dall'utente
-compute_found_duplicates_hash_size = Trovati { $number_files } duplicati in { $number_groups } gruppi che occupano { $size }, **la ricerca ha impiegato { $time }**
-compute_found_duplicates_name = Trovati { $number_files } duplicati in { $number_groups } gruppi, **la ricerca ha impiegato { $time }**
-compute_found_empty_folders = Trovate { $number_files } cartelle vuote
-compute_found_empty_files = Trovati { $number_files } file vuoti
-compute_found_big_files = Trovati { $number_files } grandi file
-compute_found_temporary_files = Trovati { $number_files } file temporanei
-compute_found_images = Trovate { $number_files } immagini simili in { $number_groups } gruppi
-compute_found_videos = Trovati { $number_files } video simili in { $number_groups } gruppi
-compute_found_music = Trovati { $number_files } file musicali simili in { $number_groups } gruppi
-compute_found_invalid_symlinks = Trovati { $number_files } colegamenti simbolici invalidi
-compute_found_broken_files = Trovati { $number_files } file corrotti
-compute_found_bad_extensions = Trovati { $number_files } file con estensioni non valide
+compute_found_duplicates_hash_size = Trovato { $number_files } duplicati in { $number_groups } gruppi che hanno preso { $size } in { $time }
+compute_found_duplicates_name = Trovato { $number_files } duplicati in { $number_groups } gruppi in { $time }
+compute_found_empty_folders = Trovo { $number_files } folder vuote in { $time }
+compute_found_empty_files = Trovati { $number_files } file vuoti in { $time }
+compute_found_big_files = Trovati { $number_files } file grandi in { $time }
+compute_found_temporary_files = Trovati { $number_files } file temporanei in { $time }
+compute_found_images = Trova { $number_files } immagini simili in { $number_groups } gruppi in { $time }
+compute_found_videos = Trovati { $number_files } video simili in { $number_groups } gruppi in { $time }
+compute_found_music = Trovo { $number_files } file musicali simili in { $number_groups } gruppi in { $time }
+compute_found_invalid_symlinks = Trovati { $number_files } simboliche invalidi in { $time }
+compute_found_broken_files = Trovate { $number_files } file danneggiati in { $time }
+compute_found_bad_extensions = Trovati { $number_files } file con estensioni non valide in { $time }
 # Progress window
 progress_scanning_general_file =
     { $file_number ->
@@ -423,6 +425,7 @@ progress_scanning_general_file =
 progress_scanning_extension_of_files = Estensione controllata del file { $file_checked }/{ $all_files }
 progress_scanning_broken_files = Checked { $file_checked }/{ $all_files } file ({ $data_checked }/{ $all_data })
 progress_scanning_video = Hashed of { $file_checked }/{ $all_files } video
+progress_creating_video_thumbnails = Miniature create di { $file_checked }/{ $all_files } video
 progress_scanning_image = Hashed of { $file_checked }/{ $all_files } image ({ $data_checked }/{ $all_data })
 progress_comparing_image_hashes = Confrontato { $file_checked }/{ $all_files } immagine hash
 progress_scanning_music_tags_end = Etichette confrontate di { $file_checked }/{ $all_files } file musicale
@@ -447,21 +450,13 @@ progress_cache_loading = Caricamento cache
 progress_cache_saving = Salvataggio cache
 progress_current_stage = Fase attuale:{ "  " }
 progress_all_stages = Tutte le fasi:{ "  " }
-# Saving loading 
-saving_loading_saving_success = Configurazione salvata su file
-saving_loading_saving_failure = Salvataggio della configurazione nel file { $name } fallito.
+# Saving loading
+saving_loading_saving_failure = Impossibile salvare i dati di configurazione nel file { $name }, motivo { $reason }.
 saving_loading_reset_configuration = La configurazione corrente è stata cancellata.
 saving_loading_loading_success = Caricamento configurazione da file avvenuto con successo
-saving_loading_invalid_string = Trovato risultato non valido nella chiave "{ $key }" - "{ $result }" non è una stringa.
-saving_loading_invalid_int = Trovato risultato non valido nella chiave "{ $key }" - "{ $result }" non è un numero intero.
-saving_loading_invalid_bool = Trovato risultato non valido nella chiave "{ $key }" - "{ $result }" non è un valore booleano.
-saving_loading_decode_problem_bool = Decodifica booleana fallita per la chiave "{ $key }"; trovato "{ $result }", ma i valori possibili sono 0, 1, 'true' o 'false'.
-saving_loading_saving_same_keys = Tentativo di salvataggio dell'impostazione con chiave duplicata "{ $key }".
 saving_loading_failed_to_create_config_file = Impossibile creare il file di configurazione "{ $path }", motivo "{ $reason }".
 saving_loading_failed_to_read_config_file = Impossibile caricare la configurazione da "{ $path }" perché non esiste o non è un file.
 saving_loading_failed_to_read_data_from_file = Impossibile leggere il file "{ $path }", motivo "{ $reason }".
-saving_loading_orphan_data = Trovati dati orfani "{ $data }" nella riga "{ $line }".
-saving_loading_not_valid = L'impostazione "{ $data }" non esiste nella versione corrente dell'app.
 # Other
 selected_all_reference_folders = Impossibile avviare la ricerca, quando tutte le directory sono impostate come cartelle di riferimento
 searching_for_data = Ricerca dei dati, può durare a lungo, attendere prego...
@@ -469,18 +464,18 @@ text_view_messages = MESSAGGI
 text_view_warnings = ATTENZIONE
 text_view_errors = ERRORI
 about_window_motto = Questo programma può essere usato liberamente e lo sarà sempre.
+krokiet_new_app = Czkawka è in modalità manutenzione, il che significa che saranno risolti solo bug critici e non verranno aggiunte nuove funzionalità. Per nuove funzionalità, si prega di controllare la nuova applicazione Krokiet, che è più stabile e performante ed è ancora in fase di sviluppo attivo.
 # Various dialog
 dialogs_ask_next_time = Chiedi la prossima volta
-delete_file_failed = Impossibile eliminare il file { $name }, motivo { $reason }
+symlink_failed = Collegamento simbolico { $name } a { $target }non riuscito, motivo { $reason }
 delete_title_dialog = Conferma di cancellazione
 delete_question_label = Sei sicuro di cancellare i file?
 delete_all_files_in_group_title = Conferma di cancellazione di tutti i file nel gruppo
 delete_all_files_in_group_label1 = In alcuni gruppi tutti i record sono selezionati.
 delete_all_files_in_group_label2 = Sei sicuro di cancellarli tutti?
-delete_folder_failed = Impossibile eliminare la cartella { $dir } perché la cartella non esiste, non hai i permessi o la cartella non è vuota.
 delete_items_label = { $items } i file verranno eliminati.
 delete_items_groups_label = { $items } i file da { $groups } gruppi verranno eliminati.
-hardlink_failed = Collegamento fisico fallito
+hardlink_failed = Collegamento non riuscito a { $name } a { $target }, motivo { $reason }
 hard_sym_invalid_selection_title_dialog = Selezione invalida in alcuni gruppi
 hard_sym_invalid_selection_label_1 = In alcuni gruppi c'è solo un record selezionato e verrà ignorato.
 hard_sym_invalid_selection_label_2 = Per essere in grado di collegare hard/sym questi file, è necessario selezionare almeno due risultati nel gruppo.

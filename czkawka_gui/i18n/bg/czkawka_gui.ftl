@@ -18,11 +18,11 @@ music_checking_by_tags = Етикети
 music_checking_by_content = Съдържание
 same_music_seconds_label = Минимална продължителност на фрагмента в секунди
 same_music_similarity_label = Максимална разлика
-music_compare_only_in_title_group = Compare within groups of similar titles
+music_compare_only_in_title_group = Сравни в групи от подобни заглавия
 music_compare_only_in_title_group_tooltip =
-    When enabled, files are grouped by title and then compared to each other.
+    Когато е включено, файловете са групирани по заглавие и след това се сравняват едно с друго.
     
-    With 10000 files, instead almost 100 million comparisons usually there will be around 20000 comparisons.
+    С 10000 файла, вместо почти 100 милиона сравнения, обикновено ще има около 20000 сравнения.
 same_music_tooltip =
     Търсенето на подобни музикални файлове по съдържание може да се конфигурира чрез настройка:
     
@@ -65,21 +65,21 @@ duplicate_check_method_tooltip =
     
     Hash - Намира файлове с еднакво съдържание. Този режим хешира файла и по-късно сравнява този хеш, за да намери дубликати. Този режим е най-сигурният начин за намиране на дубликати. Приложението използва силно кеша, така че второто и следващите сканирания на едни и същи данни би трябвало да са много по-бързи от първото.
 image_hash_size_tooltip =
-    Each checked image produces a special hash which can be compared with each other, and a small difference between them means that these images are similar.
+    Всяко сравнено изображение дава специален хеш, който може да бъде сравнен с другите и малка разлика между тях означава че изображенията са близки.
     
-    8 hash size is quite good to find images that are only a little similar to original. With a bigger set of images (>1000), this will produce a big amount of false positives, so I recommend to use  a bigger hash size in this case.
+    Размер 8 хеш е сравнително добър за намиране на изображения, които са близки до оригинала. С по-голям набор изображения (>1000), това ще доведе до голяма бройка фалшиви позитивни, така че препоръчвам да се ползва по-голям размер на хеша в този случай.
     
-    16 is the default hash size which is quite a good compromise between finding even a little similar images and having only a small amount of hash collisions.
+    16 е размер по подразбиране, който е сравнително добър компромис между намиране на малки разлики в изображенията и имайки малко хеш колизии.
     
-    32 and 64 hashes find only very similar images, but should have almost no false positives (maybe except some images with alpha channel).
+    32 и 64 хешове намират само много сходни изображения, но ще имат почти никакви фалшиви позитивни (с изключение на някой изображения с алфа канал).
 image_resize_filter_tooltip =
-    To compute hash of image, the library must first resize it.
+    За да изчисли хеша на изображението, библиотеката трябва първо да го оразмери.
     
-    Depend on chosen algorithm, the resulting image used to calculate hash will looks a little different.
+    В зависимост от избрания алгоритъм, крайното изображение използвано за изчисляване на хеша може да изглежда леко различно.
     
-    The fastest algorithm to use, but also the one which gives the worst results, is Nearest. It is enabled by default, because with 16x16 hash size lower quality it is not really visible.
+    Най-бързият алгоритъм, но и даващ най-лоши резултати е Най-Близък. Използва се по-подразбиране, защото хеш с размер 16х16 с ниско качество не е толкова видимо.
     
-    With 8x8 hash size it is recommended to use a different algorithm than Nearest, to have better groups of images.
+    С 8х8 хеш, се препоръчва да се използва различен алгоритъм от Най-Близък за да има по-добри групи изображения.
 image_hash_alg_tooltip =
     Потребителите могат да изберат един от многото алгоритми за изчисляване на хеша.
     
@@ -120,6 +120,8 @@ main_tree_view_column_destination_path = Път за местоположени�
 main_tree_view_column_type_of_error = Тип на грешка
 main_tree_view_column_current_extension = Избрано разширение
 main_tree_view_column_proper_extensions = Правилно разширение
+main_tree_view_column_fps = FPS
+main_tree_view_column_codec = Кодек
 main_label_check_method = Провери метод
 main_label_hash_type = Хеш тип
 main_label_hash_size = Хеш размер
@@ -134,7 +136,7 @@ main_check_box_broken_files_pdf = PDF
 main_check_box_broken_files_archive = Архив
 main_check_box_broken_files_image = Изображение
 check_button_general_same_size = Игнорирай еднакъв размер
-check_button_general_same_size_tooltip = Ignore files with identical size in results - usually these are 1:1 duplicates
+check_button_general_same_size_tooltip = Игнорирай файлове с идентичен размер в резултата - обикновено това са 1:1 дубликати
 main_label_size_bytes_tooltip = Размер на файловете, които ще се използват при сканиране
 # Upper window
 upper_tree_view_included_folder_column_title = Папки за търсене
@@ -173,15 +175,15 @@ upper_allowed_extensions_tooltip =
     
     Пример за използване ".exe, IMAGE, VIDEO, .rar, 7z" - това означава, че ще бъдат сканирани изображения (напр. jpg, png), видеоклипове (напр. avi, mp4), файлове exe, rar и 7z.
 upper_excluded_extensions_tooltip =
-    List of disabled files which will be ignored in scan.
+    Списък с изключени от търсенето файлове.
     
-    When using both allowed and disabled extensions, this one has higher priority, so file will not be checked.
+    Когато се ползват едновременно включени и изключени разширения, този тук има по-голям приоритет и файла няма да бъде проверен.
 upper_excluded_items_tooltip =
     Изключените елементи трябва да съдържат заместител * и да са разделени със запетаи.
     Тази функция е по-бавна от функцията Изключени директории, затова я използвайте внимателно.
 upper_excluded_items = Изключени елементи:
 upper_allowed_extensions = Разрешени разширения:
-upper_excluded_extensions = Disabled Extensions:
+upper_excluded_extensions = Изключени разширения:
 # Popovers
 popover_select_all = Избери всички
 popover_unselect_all = Размаркирайте всички
@@ -246,7 +248,7 @@ bottom_symlink_button = Симлинк
 bottom_hardlink_button = Хардлинк
 bottom_move_button = Премести
 bottom_sort_button = Сортирай
-bottom_compare_button = Compare
+bottom_compare_button = Сравни
 bottom_search_button_tooltip = Започни търсене
 bottom_select_button_tooltip = Изберете записи. Само избраните файлове/папки могат да бъдат обработени по-късно.
 bottom_delete_button_tooltip = Изтрий избрани файлове/папки.
@@ -269,7 +271,7 @@ bottom_move_button_tooltip =
     Той копира всички файлове в директорията, без да запазва дървото на директориите.
     При опит за преместване на два файла с еднакво име в папка, вторият ще се провали и ще покаже грешка.
 bottom_sort_button_tooltip = Сортира файловете/папките според избрания метод.
-bottom_compare_button_tooltip = Compare images in the group.
+bottom_compare_button_tooltip = Сравни изображенията в групата.
 bottom_show_errors_tooltip = Показване/скриване на долния текстов панел.
 bottom_show_upper_notebook_tooltip = Показване/скриване на горния панел на бележника.
 # Progress Window
@@ -295,13 +297,13 @@ header_about_button_tooltip = Отваря диалогов прозорец с 
 
 settings_number_of_threads = Брой използвани нишки
 settings_number_of_threads_tooltip = Брой използвани нишки, 0 означава, че ще бъдат използвани всички налични нишки.
-settings_use_rust_preview = Use external libraries instead gtk to load previews
+settings_use_rust_preview = Използвай външна библиотека вместо GTK да зареди визуализацията.
 settings_use_rust_preview_tooltip =
-    Using gtk previews will sometimes be faster and support more formats, but sometimes this could be exactly the opposite.
+    Използвайки GTK визуализации, понякога ще е по-бързо и ще поддържа повече формати, но понякога това може да е точно обратното.
     
-    If you have problems with loading previews, you may can to try to change this setting.
+    Ако имате проблеми със зареждането на визуализации, можете да пробвате да промените тази настройка.
     
-    On non-linux systems, it is recommended to use this option, because gtk-pixbuf are not always available there so disabling this option will not load previews of some images.
+    На не Linux-ови системи е препоръчително да ползвате тази опция, защото gtk-pixbuf не винаги е налично, затова изключването на тази опция може да спре зареждането на визуализациите на някои изображения.
 settings_label_restart = Трябва да рестартирате приложението, за да приложите настройките!
 settings_ignore_other_filesystems = Игнориране на други файлови системи (само за Linux)
 settings_ignore_other_filesystems_tooltip =
@@ -352,7 +354,7 @@ settings_multiple_image_preview_checkbutton = Показване на предв
 settings_multiple_clear_cache_button_tooltip =
     Изчистете ръчно кеша от остарели записи.
     Това трябва да се използва само ако автоматичното изчистване е деактивирано.
-settings_multiple_clear_cache_button = Remove outdated results from cache.
+settings_multiple_clear_cache_button = Премахни остарели резултати от кеша.
 
 ## Duplicates
 
@@ -371,7 +373,7 @@ settings_duplicates_prehash_checkbutton_tooltip =
     
     Силно се препоръчва да се използва при сканиране на стотици хиляди или милиони файлове, защото може да ускори търсенето многократно.
 settings_duplicates_prehash_minimal_entry_tooltip = Минимален размер на записа в кеша.
-settings_duplicates_hide_hard_link_button = Скриване на твърди връзки (само за Linux и macOS)
+settings_duplicates_hide_hard_link_button = Скрий твърди връзки
 settings_duplicates_prehash_checkbutton = Използване на предварителен кеш
 settings_duplicates_minimal_size_cache_label = Минимален размер на файловете (в байтове), записани в кеша
 settings_duplicates_minimal_size_cache_prehash_label = Минимален размер на файловете (в байтове), които се записват в предварителния кеш
@@ -403,66 +405,59 @@ settings_folder_cache_open = Отворете папката с кеш
 settings_folder_settings_open = Отваряне на папката с настройки
 # Compute results
 compute_stopped_by_user = Търсенето е спряно от потребител
-compute_found_duplicates_hash_size = Намерени са { $number_files }} дубликати в { $number_groups }} групи, които са отнели { $size }}, **търсенето отнеме { $time }}**
-compute_found_duplicates_name = Намерени са { $number_files }} дубликати в { $number_groups }} групи, **търсенето отнеме { $time }}**
-compute_found_empty_folders = Намерени { $number_files } празни папки
-compute_found_empty_files = Намерени { $number_files } празни файлове
-compute_found_big_files = Намерени { $number_files } големи файлове
-compute_found_temporary_files = Намерени { $number_files } временни файлове
-compute_found_images = Намерени { $number_files } подобни изображения в { $number_groups } групи
-compute_found_videos = Намерени { $number_files } подобни видеоклипове в { $number_groups } групи
-compute_found_music = Намерени са { $number_files } подобни музикални файлове в { $number_groups } групи
-compute_found_invalid_symlinks = Намерени { $number_files } невалидни симлинкове
-compute_found_broken_files = Намерени { $number_files } счупени файлове
-compute_found_bad_extensions = Намерени { $number_files } файлове с невалидни разширения
+compute_found_duplicates_hash_size = Намерени са { $number_files } дубликати в { $number_groups } групи, които заемат { $size } за { $time }
+compute_found_duplicates_name = Намерих { $number_files } дублики в { $number_groups } групи за { $time }
+compute_found_empty_folders = Найдени са { $number_files } празни папки във { $time }
+compute_found_empty_files = Найдени са { $number_files } празни файлова обекта в { $time }
+compute_found_big_files = Намерих { $number_files } големи файла в { $time }
+compute_found_temporary_files = Найдени са { $number_files } временни файлъв в { $time }
+compute_found_images = Найшли се { $number_files } подобни изображения в { $number_groups } групи за { $time }
+compute_found_videos = Намерил { $number_files } подобни видео файла в { $number_groups } групи за { $time }
+compute_found_music = Найдено { $number_files } подобни музикални файлове в { $number_groups } групи за { $time }
+compute_found_invalid_symlinks = Намерени { $number_files } невалидни символни връзки в { $time }
+compute_found_broken_files = Намерих { $number_files } повредени файла в { $time }
 # Progress window
 progress_scanning_general_file =
     { $file_number ->
-        [one] Scanned { $file_number } file
-       *[other] Scanned { $file_number } files
+        [one] Сканиран { $file_number } файл
+       *[other] Сканирани { $file_number } файлове
     }
-progress_scanning_extension_of_files = Checked extension of { $file_checked }/{ $all_files } file
-progress_scanning_broken_files = Checked { $file_checked }/{ $all_files } file ({ $data_checked }/{ $all_data })
-progress_scanning_video = Hashed of { $file_checked }/{ $all_files } video
-progress_scanning_image = Hashed of { $file_checked }/{ $all_files } image ({ $data_checked }/{ $all_data })
-progress_comparing_image_hashes = Compared { $file_checked }/{ $all_files } image hash
-progress_scanning_music_tags_end = Compared tags of { $file_checked }/{ $all_files } music file
-progress_scanning_music_tags = Read tags of { $file_checked }/{ $all_files } music file
-progress_scanning_music_content_end = Compared fingerprint of { $file_checked }/{ $all_files } music file
-progress_scanning_music_content = Calculated fingerprint of { $file_checked }/{ $all_files } music file ({ $data_checked }/{ $all_data })
+progress_scanning_extension_of_files = Проверено разширение на { $file_checked }/{ $all_files } файла
+progress_scanning_broken_files = Проверени { $file_checked }/{ $all_files } файла от ({ $data_checked }/{ $all_data })
+progress_scanning_video = Хеширани { $file_checked }/{ $all_files } видеа
+progress_creating_video_thumbnails = Created thumbnails of { $file_checked }/{ $all_files } video
+progress_scanning_image = Хеширани { $file_checked }/{ $all_files } изображения ({ $data_checked }/{ $all_data })
+progress_comparing_image_hashes = Сравнени { $file_checked }/{ $all_files } хешове на изображения
+progress_scanning_music_tags_end = Сравнени тагове на { $file_checked }/{ $all_files } музикални файла
+progress_scanning_music_tags = Прочетени { $file_checked }/{ $all_files } тага на музикални файла
+progress_scanning_music_content_end = Сравнени { $file_checked }/{ $all_files } отпечатъка на музикални файла
+progress_scanning_music_content = Изчислени { $file_checked }/{ $all_files } отпечатъка на музикални файла ({ $data_checked }/{ $all_data })
 progress_scanning_empty_folders =
     { $folder_number ->
-        [one] Scanned { $folder_number } folder
-       *[other] Scanned { $folder_number } folders
+        [one] Сканирана { $folder_number } папка
+       *[other] Сканирани { $folder_number } папки
     }
-progress_scanning_size = Scanned size of { $file_number } file
-progress_scanning_size_name = Scanned name and size of { $file_number } file
-progress_scanning_name = Scanned name of { $file_number } file
-progress_analyzed_partial_hash = Analyzed partial hash of { $file_checked }/{ $all_files } files ({ $data_checked }/{ $all_data })
-progress_analyzed_full_hash = Analyzed full hash of { $file_checked }/{ $all_files } files ({ $data_checked }/{ $all_data })
+progress_scanning_size = Сканиран размер на { $file_number } файла
+progress_scanning_size_name = Сканиран име и размер на { $file_number } файла
+progress_scanning_name = Сканиран име на { $file_number } файла
+progress_analyzed_partial_hash = Анализиран частичен хеш на { $file_checked }/{ $all_files } файла ({ $data_checked }/{ $all_data })
+progress_analyzed_full_hash = Анализиран пълен хеш на { $file_checked }/{ $all_files } файла ({ $data_checked }/{ $all_data })
 progress_prehash_cache_loading = Зареждане на prehash кеш
 progress_prehash_cache_saving = Запис на prehash кеш
 progress_hash_cache_loading = Зареждане на hash кеш
 progress_hash_cache_saving = Запис на hash кеш
-progress_cache_loading = Loading cache
-progress_cache_saving = Saving cache
+progress_cache_loading = Зарежда кеш
+progress_cache_saving = Запазва кеш
 progress_current_stage = Текущ етап:{ " " }
 progress_all_stages = Всички етапи:{ " " }
 # Saving loading 
 saving_loading_saving_success = Запазване на конфигурацията във файл { $name }.
-saving_loading_saving_failure = Неуспешно записване на данните за конфигурацията във файла { $name }.
+saving_loading_saving_failure = Неуспешно спъжаване на конфигурационните данни в файл { $name }, причина { $reason }.
 saving_loading_reset_configuration = Текущата конфигурация е изтрита.
 saving_loading_loading_success = Правилно заредена конфигурация на приложението.
-saving_loading_invalid_string = За ключа "{ $key }" е намерен невалиден резултат - "{ $result }", който не е низ.
-saving_loading_invalid_int = За ключа "{ $key }" е намерен невалиден резултат - "{ $result }", който не е цяло число.
-saving_loading_invalid_bool = За ключа "{ $key }" е намерен невалиден резултат - "{ $result }", който не е bool.
-saving_loading_decode_problem_bool = Неуспешно декодиране на bool от ключа "{ $key }" намерено "{ $result }", но разрешените стойности са 0, 1, true или false.
-saving_loading_saving_same_keys = Опит за запазване на настройка с дублиран ключ "{ $key }".
 saving_loading_failed_to_create_config_file = Неуспешно създаване на конфигурационен файл "{ $path }", причина "{ $reason }".
 saving_loading_failed_to_read_config_file = Не може да се зареди конфигурация от "{ $path }", защото тя не съществува или не е файл.
 saving_loading_failed_to_read_data_from_file = Не може да се прочетат данни от файл "{ $path }", причина "{ $reason }".
-saving_loading_orphan_data = Открити са данни за сираци "{ $data }" в ред "{ $line }".
-saving_loading_not_valid = Настройката "{ $data }" не съществува в текущата версия на приложението.
 # Other
 selected_all_reference_folders = Не може да се стартира търсене, когато всички директории са зададени като референтни папки
 searching_for_data = Търсене на данни, може да отнеме известно време, моля, изчакайте...
@@ -470,18 +465,18 @@ text_view_messages = СЪОБЩЕНИЯ
 text_view_warnings = ПРЕДУПРЕЖДЕНИЯ
 text_view_errors = ГРЕШКИ
 about_window_motto = Тази програма е безплатна за използване и винаги ще бъде такава.
+krokiet_new_app = Цквака е в режим на поддръжка, че се приемат само критични грешки и нито еднаnova функционалност ще бъде добавена. За nova функционалност моля проверете новата апликация Крочиец, която е по-стабилна и изтеглянечна и се развива все още активно.
 # Various dialog
 dialogs_ask_next_time = Попитайте следващия път
-delete_file_failed = Неуспешно изтриване на файл { $name }, причина { $reason }
+symlink_failed = Failed to symlink { $name } to { $target }, reason { $reason }
 delete_title_dialog = Изтрий потвърждението
 delete_question_label = Сигурни ли сте, че искате да изтриете файловете?
 delete_all_files_in_group_title = Потвърждаване на изтриването на всички файлове в групата
 delete_all_files_in_group_label1 = В някои групи се избират всички записи.
 delete_all_files_in_group_label2 = Сигурни ли сте, че искате да ги изтриете?
-delete_folder_failed = Не успяхте да изтриете папка { $dir }, защото папката не съществува, нямате разрешение или папката не е празна.
 delete_items_label = { $items } файловете ще бъдат изтрити.
 delete_items_groups_label = { $items } Файловете от { $groups } групите ще бъдат изтрити.
-hardlink_failed = Неуспешно свързване с твърда връзка
+hardlink_failed = Неуспех при създаване на твърд линк за { $name } в { $target }, причина { $reason }
 hard_sym_invalid_selection_title_dialog = Невалидна селекция при някои групи
 hard_sym_invalid_selection_label_1 = В някои групи е избран само един запис и той ще бъде пренебрегнат.
 hard_sym_invalid_selection_label_2 = За да можете да свържете тези файлове с твърда/симетрична връзка, трябва да изберете поне два резултата в групата.
@@ -493,7 +488,7 @@ move_file_failed = Неуспешно преместване на файл { $na
 move_files_title_dialog = Изберете папката, в която искате да преместите дублираните файлове
 move_files_choose_more_than_1_path = Може да се избере само един път, за да може да се копират дублираните им файлове, selected { $path_number }.
 move_stats = Правилно преместени { $num_files }/{ $all_files } елементи
-save_results_to_file = Saved results both to txt and json files into "{ $name }" folder.
+save_results_to_file = Запазени резултати едновременно към txt и json файлове в папка "{ $name }".
 search_not_choosing_any_music = ГРЕШКА: Трябва да изберете поне едно квадратче за отметка с типове търсене на музика.
 search_not_choosing_any_broken_files = ГРЕШКА: Трябва да изберете поне едно квадратче за отметка с тип на проверените счупени файлове.
 include_folders_dialog_title = Папки, които да се включват

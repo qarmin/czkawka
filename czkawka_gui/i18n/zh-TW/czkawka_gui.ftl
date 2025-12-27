@@ -18,11 +18,11 @@ music_checking_by_tags = 標籤
 music_checking_by_content = 內容
 same_music_seconds_label = 最小片段秒數
 same_music_similarity_label = 最大差異
-music_compare_only_in_title_group = Compare within groups of similar titles
-music_compare_only_in_title_group_tooltip =
-    When enabled, files are grouped by title and then compared to each other.
-    
-    With 10000 files, instead almost 100 million comparisons usually there will be around 20000 comparisons.
+music_compare_only_in_title_group = 比較相同標題類群之間
+music_compare_only_in_title_group_tooltip = 
+        當啟用時，檔案會按照標題分組然後相互比較。
+
+        有萬個檔案，通常會有的近乎十億次比較，反之只會約有二萬次比較。
 same_music_tooltip =
     透過以下設定，可以根據內容搜尋相似的音樂檔案：
     
@@ -120,6 +120,8 @@ main_tree_view_column_destination_path = 目標路徑
 main_tree_view_column_type_of_error = 錯誤類型
 main_tree_view_column_current_extension = 現有副檔名
 main_tree_view_column_proper_extensions = 適當的副檔名
+main_tree_view_column_fps = FPS
+main_tree_view_column_codec = 編碼解碼器
 main_label_check_method = 檢查方法
 main_label_hash_type = 雜湊類型
 main_label_hash_size = 雜湊大小
@@ -246,7 +248,7 @@ bottom_symlink_button = 符號連結
 bottom_hardlink_button = 永久連結
 bottom_move_button = 移動
 bottom_sort_button = 排序
-bottom_compare_button = Compare
+bottom_compare_button = 比較
 bottom_search_button_tooltip = 開始搜尋
 bottom_select_button_tooltip = 選擇記錄。只能稍後處理選定的檔案/資料夾。
 bottom_delete_button_tooltip = 刪除選取的檔案/資料夾。
@@ -269,7 +271,7 @@ bottom_move_button_tooltip =
     會將所有檔案複製到目錄中，但不會保留原始的目錄結構。
     如果試圖將兩個同名檔案移動到同一資料夾，第二個檔案將無法移動並會顯示錯誤。
 bottom_sort_button_tooltip = 根據選定的方法排序檔案/資料夾。
-bottom_compare_button_tooltip = Compare images in the group.
+bottom_compare_button_tooltip = 比較群組中的圖像。
 bottom_show_errors_tooltip = 顯示/隱藏底部文字面板。
 bottom_show_upper_notebook_tooltip = 顯示/隱藏主筆記本面板。
 # Progress Window
@@ -295,13 +297,13 @@ header_about_button_tooltip = 開啟包含應用程式資訊的對話方塊。
 
 settings_number_of_threads = 使用的執行緒數
 settings_number_of_threads_tooltip = 使用的執行緒數，0 表示所有可用執行緒都將被使用。
-settings_use_rust_preview = Use external libraries instead gtk to load previews
-settings_use_rust_preview_tooltip =
-    Using gtk previews will sometimes be faster and support more formats, but sometimes this could be exactly the opposite.
-    
-    If you have problems with loading previews, you may can to try to change this setting.
-    
-    On non-linux systems, it is recommended to use this option, because gtk-pixbuf are not always available there so disabling this option will not load previews of some images.
+settings_use_rust_preview = 使用外部庫 Instead gtk 來加載預覽
+settings_use_rust_preview_tooltip = 
+        使用 gtk 預覽通常會較快且支援更多格式，但有時這可能會正好相反。
+
+        如果您在載入預覽時遇到問題，您可以嘗試更變這個設定。
+
+        於非 Linux 系統中，建議使用此選項，因為 gtk-pixbuf 不總是在這些系統中可用，因而禁用此選項將無法載入某些圖像的預覽。
 settings_label_restart = 您需要重新啟動應用程式才能套用設定！
 settings_ignore_other_filesystems = 忽略其它檔案系統（僅限 Linux）
 settings_ignore_other_filesystems_tooltip =
@@ -371,7 +373,7 @@ settings_duplicates_prehash_checkbutton_tooltip =
     
     當掃描數十萬或百萬個檔案時，強烈建議使用此選項，因為它可以多倍加速搜尋。
 settings_duplicates_prehash_minimal_entry_tooltip = 快取項目的最小大小。
-settings_duplicates_hide_hard_link_button = 隱藏永久連結（僅限 Linux 和 macOS）
+settings_duplicates_hide_hard_link_button = 隱藏硬連結
 settings_duplicates_prehash_checkbutton = 使用捕捉快取
 settings_duplicates_minimal_size_cache_label = 儲存到快取的檔案最小大小（位元組）
 settings_duplicates_minimal_size_cache_prehash_label = 檔案最小大小（位元組）儲存到逮捕快取
@@ -403,18 +405,18 @@ settings_folder_cache_open = 開啟快取資料夾
 settings_folder_settings_open = 開啟設定資料夾
 # Compute results
 compute_stopped_by_user = 搜尋已被使用者停止
-compute_found_duplicates_hash_size = 在 { $number_groups } 個組中發現了 { $number_files }} 個重複的檔案，佔用了 { $size }}，**措揷該 { $time }}**
-compute_found_duplicates_name = 在 {{ $number_groups }} 個組中發現了 {{ $number_files }} 個重複的檔案，**措揷該 {{ $time }}**
-compute_found_empty_folders = 找到 { $number_files } 空資料夾
-compute_found_empty_files = 找到 { $number_files } 空檔案
-compute_found_big_files = 找到 { $number_files } 大檔案
-compute_found_temporary_files = 找到 { $number_files } 臨時檔案
-compute_found_images = 在 { $number_groups } 群組中找到 { $number_files } 相似影像
-compute_found_videos = 在 { $number_groups } 群組中找到 { $number_files } 相似影片
-compute_found_music = 在 { $number_groups } 群組中找到 { $number_files } 相似的音樂檔案
-compute_found_invalid_symlinks = 找到 { $number_files } 無效的符號連結
-compute_found_broken_files = 找到 { $number_files } 損壞的檔案
-compute_found_bad_extensions = 找到 { $number_files } 檔案，其副檔名無效
+compute_found_duplicates_hash_size = 找到{$number_files}個重複檔案在{$number_groups}組中，佔用了{$size}，在{$time}內
+compute_found_duplicates_name = 發現{$number_files}個重複檔在{$number_groups}組中於{$time}
+compute_found_empty_folders = 找到{$number_files}個空資料夾在{$time}
+compute_found_empty_files = 找到{$number_files}個空文件在{$time}
+compute_found_big_files = 找到{$number_files}個大檔案在{$time}
+compute_found_temporary_files = 找到 {$number_files} 個臨時文件在{$time}
+compute_found_images = 找到{$number_files}張相似圖像在{$number_groups}組中，在{$time}內
+compute_found_videos = 找到{$number_files}個相似影片，在{$number_groups}組中，耗時{$time}
+compute_found_music = 找到{$number_files}首相似音樂檔案在{$number_groups}組中，在{$time}內
+compute_found_invalid_symlinks = 發現 {$number_files} 個無效的符徵鏈接在 {$time}
+compute_found_broken_files = 找到 {$number_files} 個損壞檔案在 {$time}
+compute_found_bad_extensions = 找到{$number_files}個擴展名無效的檔案在{$time}
 # Progress window
 progress_scanning_general_file =
     { $file_number ->
@@ -424,6 +426,7 @@ progress_scanning_general_file =
 progress_scanning_extension_of_files = Checked extension of { $file_checked }/{ $all_files } file
 progress_scanning_broken_files = Checked { $file_checked }/{ $all_files } file ({ $data_checked }/{ $all_data })
 progress_scanning_video = Hashed of { $file_checked }/{ $all_files } video
+progress_creating_video_thumbnails = Created thumbnails of { $file_checked }/{ $all_files } video
 progress_scanning_image = Hashed of { $file_checked }/{ $all_files } image ({ $data_checked }/{ $all_data })
 progress_comparing_image_hashes = Compared { $file_checked }/{ $all_files } image hash
 progress_scanning_music_tags_end = Compared tags of { $file_checked }/{ $all_files } music file
@@ -450,19 +453,12 @@ progress_current_stage = 目前階段：{ "  " }
 progress_all_stages = 所有階段：{ " " }
 # Saving loading 
 saving_loading_saving_success = 設定儲存到檔案 { $name }。
-saving_loading_saving_failure = 無法將設定資料儲存到檔案 { $name }
+saving_loading_saving_failure = 失敗將配置資料存儲至檔案 { $name }，原因 { $reason }。
 saving_loading_reset_configuration = 目前設定已被清除。
 saving_loading_loading_success = 正確載入應用程式設定。
-saving_loading_invalid_string = 對於金鑰"{ $key }" 發現無效的結果 - "{ $result }"不是字串。
-saving_loading_invalid_int = 對於金鑰"{ $key }" 發現無效的結果 - "{ $result } 不是整數。
-saving_loading_invalid_bool = 對於金鑰"{ $key }" 發現無效的結果 - "{ $result } 不是布林值。
-saving_loading_decode_problem_bool = 無法從金鑰 "{ $key }" 解碼布林值，找到的是 "{ $result }" ，允許的值為 0, 1, true 或 false。
-saving_loading_saving_same_keys = 嘗試用重複的金鑰儲存設定 "{ $key }".
 saving_loading_failed_to_create_config_file = 無法建立設定檔案 "{ $path }", 原因"{ $reason }".
 saving_loading_failed_to_read_config_file = 無法從 "{ $path }" 載入設定，因為它不存在或不是檔案。
 saving_loading_failed_to_read_data_from_file = 無法從檔案讀取資料"{ $path }", 原因"{ $reason }".
-saving_loading_orphan_data = 在 "{ $line }" 行中發現了孤兒資料 "{ $data }"。
-saving_loading_not_valid = 設定 "{ $data }" 在目前應用程式的版本中不存在。
 # Other
 selected_all_reference_folders = 當所有目錄被設定為參考資料夾時，無法開始搜尋
 searching_for_data = 正在搜尋資料，可能需要一段時間，請稍候...
@@ -470,18 +466,18 @@ text_view_messages = 訊息
 text_view_warnings = 警告
 text_view_errors = 錯誤
 about_window_motto = 這個程式可以永遠自由使用。
+krokiet_new_app = Czkawka處於維護模式，這意味著 hanya 會修復關鍵錯誤而不會添加新功能。對於新功能，請檢視新的Krokietapp，該應用更為穩定且效能更好，並且仍然處於積極開發中。
 # Various dialog
 dialogs_ask_next_time = 下次詢問
-delete_file_failed = 刪除檔案 { $name } 失敗，原因 { $reason }
+symlink_failed = Failed to symlink { $name } to { $target }, reason { $reason }
 delete_title_dialog = 刪除確認
 delete_question_label = 您確定要刪除檔案嗎？
 delete_all_files_in_group_title = 確認刪除群組中的所有檔案
 delete_all_files_in_group_label1 = 在某些群組中，所有記錄都被選取。
 delete_all_files_in_group_label2 = 您確定要刪除它們嗎？
-delete_folder_failed = 無法刪除資料夾 { $dir } ，因為資料夾不存在，您沒有權限，或者資料夾不是空的。
 delete_items_label = { $items } 檔案將被刪除。
 delete_items_groups_label = { $items } 檔案來自 { $groups } 群組將被刪除。
-hardlink_failed = 永久連結失敗
+hardlink_failed = 無法硬連結 { $name } 至 { $target }，理由 { $reason }
 hard_sym_invalid_selection_title_dialog = 對某些群組的選擇無效
 hard_sym_invalid_selection_label_1 = 在某些群組中，只選擇了一個記錄，它將被忽略。
 hard_sym_invalid_selection_label_2 = 要能夠連結到這些檔案，至少需要選擇兩個群組的結果。

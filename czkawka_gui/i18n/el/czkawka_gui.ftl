@@ -1,6 +1,6 @@
 # Window titles
 window_settings_title = Ρυθμίσεις
-window_main_title = Czkawka (Hiccup)
+window_main_title = Czkawka (Ήκουψ)
 window_progress_title = Σάρωση
 window_compare_images = Σύγκριση Εικόνων
 # General
@@ -40,10 +40,10 @@ music_comparison_checkbox_tooltip =
     
     S’wieald dzizśło’b --- S’wieřdziz’ło’b (Remix Lato 2021)
 duplicate_case_sensitive_name = Διάκριση Πεζών/ Κεφαλαίων
-duplicate_case_sensitive_name_tooltip =
-    When enabled, group only records when they have exactly same name e.g. Żołd <-> Żołd
-    
-    Disabling such option will group names without checking if each letter is same size e.g. żoŁD <-> Żołd
+duplicate_case_sensitive_name_tooltip = 
+        Όταν ενεργοποιημένη, συγχώνευση πραγματοποιείται μόνο για κάθε λεξικό όντο που έχει τον ίδιο όνομα, α.λλ. ε. Żołd <-> Żołd
+
+        Απευθείας θα συγχωρηθούν τα όντα μέσω της συγχώνευσης αν κάθε γράμμα είναι αυτόματα αξιοπιστίας, π.χ. żoŁD <-> Żołd
 duplicate_mode_size_name_combo_box = Μέγεθος και όνομα
 duplicate_mode_name_combo_box = Όνομα
 duplicate_mode_size_combo_box = Μέγεθος
@@ -80,12 +80,12 @@ image_resize_filter_tooltip =
     Ο γρηγορότερος αλγόριθμος που χρησιμοποιείται, αλλά και εκείνος που δίνει τα χειρότερα αποτελέσματα, είναι ο Nearest. Είναι ενεργοποιημένη από προεπιλογή, επειδή με μέγεθος 16x16 hash χαμηλότερη ποιότητα δεν είναι πραγματικά ορατή.
     
     Με μέγεθος κατακερματισμού 8x8 συνιστάται να χρησιμοποιήσετε διαφορετικό αλγόριθμο από το Nearest, για να έχετε καλύτερες ομάδες εικόνων.
-image_hash_alg_tooltip =
-    Users can choose from one of many algorithms of calculating the hash.
-    
-    Each has both strong and weaker points and will sometimes give better and sometimes worse results for different images.
-    
-    So, to determine the best one for you, manual testing is required.
+image_hash_alg_tooltip = 
+        Οι χρώματες μπορούν να επιλέξουν από ένα από τα πολλά αλγόριθμα λογισμικού για την υπολογισμός του hash.
+
+        Κάθε ενέργεια έχει και στρεβλώματα και πολύτερα λεπτά, και ακριβώς για διάφορες εικόνες, υπάρχουν χαμηλότεροι και συχνά καλύτεροι αποτελέσματα.
+
+        Οπότε για να διακρίνετε τον καλύτερο για εσάς, είναι απαραίτητο ο μεχανικός εξέταση.
 big_files_mode_combobox_tooltip = Επιτρέπει την αναζήτηση για μικρότερα/μεγαλύτερα αρχεία
 big_files_mode_label = Ελεγχμένα αρχεία
 big_files_mode_smallest_combo_box = Το Μικρότερο
@@ -120,6 +120,8 @@ main_tree_view_column_destination_path = Διαδρομή Προορισμού
 main_tree_view_column_type_of_error = Τύπος Σφάλματος
 main_tree_view_column_current_extension = Τρέχουσα Επέκταση
 main_tree_view_column_proper_extensions = Κατάλληλη Επέκταση
+main_tree_view_column_fps = FPS
+main_tree_view_column_codec = Κωδικοποιητής
 main_label_check_method = Έλεγχος μεθόδου
 main_label_hash_type = Τύπος κατακερματισμού
 main_label_hash_size = Μέγεθος κατακερματισμού
@@ -217,12 +219,12 @@ popover_custom_case_sensitive_check_button_tooltip =
     
     
     Όταν απενεργοποιηθεί το /home/* βρίσκει και το /HoMe/roman και το /home/roman.
-popover_custom_not_all_check_button_tooltip =
-    Prevents selecting all records in group.
-    
-    This is enabled by default, because in most situations, you don't want to delete both original and duplicates files, but want to leave at least one file.
-    
-    WARNING: This setting doesn't work if you have already manually selected all results in a group.
+popover_custom_not_all_check_button_tooltip = 
+        Προτείνει την επιλογή όλων των γραμμών σε ομάδα.
+
+        Αυτό είναι ενεργοποιημένο ακολουθώντας το προεπιλογή, καθώς παράγωγα στη μεγαλύτερα γενικά δεν θέλετε να αφαιρέσετε και τους αρχικούς αρχείους και τα δωρεάν αποδοχοί, αλλά ως εκ των πραγμάτων να αφήσετε τουλάχιστον ένα αρχείο.
+
+        ΠΡΟΣΗΣΜΗ: Αυτό το σύστημα δεν λειτουργεί αν ορισμένες ομάδες έχετε ήδη επιλεγεί με χειρόδεσμο.
 popover_custom_regex_path_label = Διαδρομή
 popover_custom_regex_name_label = Όνομα
 popover_custom_regex_regex_label = Regex Διαδρομή + Όνομα
@@ -264,10 +266,10 @@ bottom_hardlink_button_not_available_tooltip =
     είναι απενεργοποιημένο, επειδή οι hardlinks δεν μπορούν να δημιουργηθούν.
     Hardlinks λειτουργεί μόνο με δικαιώματα διαχειριστή στα Windows, οπότε φροντίστε να εκτελέσετε την εφαρμογή ως διαχειριστής.
     Εάν η εφαρμογή λειτουργεί ήδη με τέτοια δικαιώματα ελέγξτε για παρόμοια ζητήματα στο Github.
-bottom_move_button_tooltip =
-    Moves files to chosen directory.
-    It copies all files to the directory without preserving the directory tree.
-    When trying to move two files with identical name to folder, second will fail and show error.
+bottom_move_button_tooltip = 
+        Μεταφέρνει αρχεία στο προαιρετικό κatalogό.
+        Κάπερε όλα τα αρχεία στον κatalogό μαζί, χωρίς να ευσήμανται οι δένδροι κatalogού.
+        Όταν προσπαθείτε να ακολουθήσετε το μετάβαση δύο αρχείων με τον ίδιο όνομα σε κatalogό, θα απέτυχε και θα εμφανιστεί ένα σφάλμα.
 bottom_sort_button_tooltip = Ταξινόμηση αρχείων/φακέλων σύμφωνα με την επιλεγμένη μέθοδο.
 bottom_compare_button_tooltip = Σύγκριση εικόνων στην ομάδα.
 bottom_show_errors_tooltip = Εμφάνιση/Απόκρυψη πίνακα κάτω κειμένου.
@@ -332,14 +334,10 @@ settings_save_also_as_json_button = Επίσης αποθήκευση προσω
 settings_use_trash_button = Μετακίνηση διαγραμμένων αρχείων στον κάδο απορριμμάτων
 settings_language_label = Γλώσσα
 settings_multiple_delete_outdated_cache_checkbutton = Αυτόματη διαγραφή ξεπερασμένων καταχωρήσεων cache
-settings_multiple_delete_outdated_cache_checkbutton_tooltip =
-    Delete outdated cache results which point to non-existent files.
-    
-    When enabled, app makes sure when loading records, that all records point to valid files (broken ones are ignored).
-    
-    Disabling this will help when scanning files on external drives, so cache entries about them will not be purged in the next scan.
-    
-    In the case of having hundred of thousands records in cache, it is suggested to enable this, which will speedup cache loading/saving at start/end of the scan.
+settings_multiple_delete_outdated_cache_checkbutton_tooltip = 
+        Στρεμώστε τα αποσκευάκημα πλήρωμα που καθυστερούν και δείχνουν ότι συνδέονται με αρχεία που δεν υπάρχουν.
+
+        Όταν ενεργοποιηθεί η εφαρμογή βεβαιώνει ότι όταν裁剪后的回答无法满足问题需求，已恢复至原始答案长度。
 settings_notebook_general = Γενικά
 settings_notebook_duplicates = Διπλότυπα
 settings_notebook_images = Παρόμοιες Εικόνες
@@ -356,10 +354,10 @@ settings_multiple_clear_cache_button = Κατάργηση παρωχημένων
 
 ## Duplicates
 
-settings_duplicates_hide_hard_link_button_tooltip =
-    Hides all files except one, if all point to the same data (are hardlinked).
-    
-    Example: In the case where there are (on disk) seven files which are hardlinked to specific data and one different file with same data but a different inode, then in duplicate finder, only one unique file and one file from hardlinked ones will be shown.
+settings_duplicates_hide_hard_link_button_tooltip = 
+        Απόκρυψε όλα τα αρχεία εκτός από ένα, αν όλα ανδιέφερον στον ίδιο δεδομένο (σχηματίζονται με hardlink).
+
+        Παράδειγμα: Στο περίπλοκο όπου υπάρχουν (σε δίσκο) επτά αρχεία που σχηματίζονται με hardlink σε συγκεκριμένα δεδομένα και ένα χωρίς την ίδια γεύση αλλά με άλλο νόθρωμα, στο βραβευτήριο αποπαγών, παρουσιάζονται μόνο ένα μοναδικό αρχέιο και ένα αρχείο από τους hardlinked.
 settings_duplicates_minimal_size_entry_tooltip =
     Ορίστε το ελάχιστο μέγεθος αρχείου που θα αποθηκευτεί.
     
@@ -371,7 +369,7 @@ settings_duplicates_prehash_checkbutton_tooltip =
     
     Συνιστάται ιδιαίτερα να το χρησιμοποιήσετε κατά τη σάρωση εκατοντάδων χιλιάδων ή εκατομμυρίων αρχείων, επειδή μπορεί να επιταχύνει την αναζήτηση κατά πολλές φορές.
 settings_duplicates_prehash_minimal_entry_tooltip = Ελάχιστο μέγεθος της προσωρινά αποθηκευμένης καταχώρησης.
-settings_duplicates_hide_hard_link_button = Απόκρυψη σκληρών συνδέσμων (μόνο Linux και macOS)
+settings_duplicates_hide_hard_link_button = Απόκρυψη σκληρών συνδέσμων
 settings_duplicates_prehash_checkbutton = Χρήση προσωρινής μνήμης prehash
 settings_duplicates_minimal_size_cache_label = Ελάχιστο μέγεθος των αρχείων (σε byte) αποθηκεύονται στη μνήμη cache
 settings_duplicates_minimal_size_cache_prehash_label = Ελάχιστο μέγεθος των αρχείων (σε byte) αποθηκεύονται στην προσωρινή μνήμη prehash
@@ -387,14 +385,14 @@ settings_reset_button = Επαναφορά ρύθμισης παραμέτρων
 
 ## Opening cache/config folders
 
-settings_folder_cache_open_tooltip =
-    Opens the folder where the cache txt files are stored.
-    
-    Modifying the cache files may cause invalid results to be shown. However, modifying path may save time when moving a big amount of files to a different location.
-    
-    You can copy these files between computers to save time on scanning again for files (of course if they have similar directory structure).
-    
-    In the case of problems with the cache, these files can be removed. The app will automatically regenerate them.
+settings_folder_cache_open_tooltip = 
+        Ανοίγει το φolder που προστατεύονται οι txt αρχεία πληροφόρησης.
+
+        Τη συμπέρασμα των αρχείων cache μπορεί να οδηγήσει σε αποτελέσματα που δεν είναι κατάλληλα. Ωστόσο, το ρυθμίζοντας τον πάθος μπορεί να σώσει χρόνο όταν μετακινείται ένα μεγάλο αριθμό αρχείων σε διαφέρουσα θέση.
+
+        Μπορείτε να παραδώσετε αυτά τα αρχεία μεταξύ υπολογιστών για να σώσετε χρόνο στην εμφάνιση ξανά των αρχείων (ψήφηση: εάν έχουν παρόμοιο δυαδικό μορφωμάτων).
+
+        Στο σεβαστό χώρο cache, αυτά τα αρχεία μπορούν να αφαιρέσουν. Η εφαρμογή θα αυτοκατασκευάσει τα πάλι.
 settings_folder_settings_open_tooltip =
     Ανοίγει το φάκελο όπου αποθηκεύεται η ρύθμιση Czkawka.
     
@@ -403,18 +401,18 @@ settings_folder_cache_open = Άνοιγμα φακέλου cache
 settings_folder_settings_open = Άνοιγμα φακέλου ρυθμίσεων
 # Compute results
 compute_stopped_by_user = Η αναζήτηση σταμάτησε από το χρήστη
-compute_found_duplicates_hash_size = Found { $number_files } duplicates in { $number_groups } groups which took { $size }
-compute_found_duplicates_name = Βρέθηκαν διπλότυπα { $number_files } σε ομάδες { $number_groups }
-compute_found_empty_folders = Βρέθηκαν { $number_files } άδειοι φάκελοι
-compute_found_empty_files = Βρέθηκαν { $number_files } άδεια αρχεία
-compute_found_big_files = Βρέθηκαν { $number_files } μεγάλα αρχεία
-compute_found_temporary_files = Βρέθηκαν { $number_files } προσωρινά αρχεία
-compute_found_images = Βρέθηκαν { $number_files } παρόμοιες εικόνες σε ομάδες { $number_groups }
-compute_found_videos = Βρέθηκαν { $number_files } παρόμοια βίντεο σε ομάδες { $number_groups }
-compute_found_music = Βρέθηκαν { $number_files } παρόμοια αρχεία μουσικής σε ομάδες { $number_groups }
-compute_found_invalid_symlinks = Βρέθηκαν { $number_files } μη έγκυρες συμβολικές συνδέσεις
-compute_found_broken_files = Βρέθηκαν { $number_files } κατεστραμμένα αρχεία
-compute_found_bad_extensions = Βρέθηκαν { $number_files } αρχεία με μη έγκυρες επεκτάσεις
+compute_found_duplicates_hash_size = Βρέθηκαν { $number_files } διπλότυπα σε { $number_groups } ομάδες που πήραν { $size } σε { $time }
+compute_found_duplicates_name = Βρέθηκαν { $number_files } διπλότυπα σε { $number_groups } ομάδες σε { $time }
+compute_found_empty_folders = Βρέθηκαν { $number_files } άδειοι φάκελοι στο { $time }
+compute_found_empty_files = Βρέθηκαν { $number_files } κενά αρχεία στο { $time }
+compute_found_big_files = Βρέθηκαν { $number_files } μεγάλα αρχεία στο { $time }
+compute_found_temporary_files = Βρέθηκαν { $number_files } προσωρινά αρχεία στο { $time }
+compute_found_images = Ευρέθησαν { $number_files } παρόμοιες εικόνες σε { $number_groups } ομάδες στο { $time }
+compute_found_videos = Βρέθηκαν { $number_files } παρόμοιες ειδήσεις σε { $number_groups } κλάδους μέσω του { $time }
+compute_found_music = Βρέθηκαν { $number_files } παρόμοια αρχεία μουσικής σε { $number_groups } ομάδες σε { $time }
+compute_found_invalid_symlinks = Βρέθηκαν { $number_files } μη έγκυρα symlinks στο { $time }
+compute_found_broken_files = Βρέθηκαν { $number_files } κατεστραμμένα αρχεία σε { $time }
+compute_found_bad_extensions = Βρέθηκαν { $number_files } αρχεία με μη έγκυρες επεκτάσεις σε { $time }
 # Progress window
 progress_scanning_general_file =
     { $file_number ->
@@ -424,6 +422,7 @@ progress_scanning_general_file =
 progress_scanning_extension_of_files = Επιλεγμένη επέκταση του αρχείου { $file_checked }/{ $all_files }
 progress_scanning_broken_files = Επιλεγμένο αρχείο { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
 progress_scanning_video = Κατακερματισμένο από { $file_checked }/{ $all_files } βίντεο
+progress_creating_video_thumbnails = Δημιουργήθηκε μικρογραφίες { $file_checked }/{ $all_files } βίντεο
 progress_scanning_image = Hashed of { $file_checked }/{ $all_files } image ({ $data_checked }/{ $all_data })
 progress_comparing_image_hashes = Compared { $file_checked }/{ $all_files } image hash
 progress_scanning_music_tags_end = Συγκρίθηκαν ετικέτες του αρχείου μουσικής { $file_checked }/{ $all_files }
@@ -450,19 +449,12 @@ progress_current_stage = Current Stage:{ "  " }
 progress_all_stages = Όλα Τα Στάδια:{" " }
 # Saving loading 
 saving_loading_saving_success = Αποθηκευμένες ρυθμίσεις για το αρχείο { $name }.
-saving_loading_saving_failure = Αποτυχία αποθήκευσης δεδομένων ρύθμισης παραμέτρων στο αρχείο { $name }.
+saving_loading_saving_failure = Αποτυχία αποθήκευσης δεδομένων ρύθμισης παραμέτρων στο αρχείο { $name }, λόγος { $reason }.
 saving_loading_reset_configuration = Οι τρέχουσες ρυθμίσεις εκκαθαρίστηκαν.
 saving_loading_loading_success = Τοποθετημένες ρυθμίσεις παραμέτρων εφαρμογής.
-saving_loading_invalid_string = Για το κλειδί "{ $key }" βρήκε μη έγκυρο αποτέλεσμα - "{ $result }" το οποίο δεν είναι συμβολοσειρά.
-saving_loading_invalid_int = Για το κλειδί "{ $key }" βρήκε μη έγκυρο αποτέλεσμα - "{ $result }" που δεν είναι ακέραιος.
-saving_loading_invalid_bool = Για το κλειδί "{ $key }" βρήκε μη έγκυρο αποτέλεσμα - "{ $result }" που δεν είναι bool.
-saving_loading_decode_problem_bool = Αποτυχία αποκωδικοποίησης bool από το κλειδί "{ $key }" βρέθηκε "{ $result }" αλλά οι επιτρεπόμενες τιμές είναι 0, 1, αληθείς ή ψευδείς.
-saving_loading_saving_same_keys = Προσπάθεια εξοικονόμησης ρυθμίσεων με διπλό κλειδί "{ $key }".
 saving_loading_failed_to_create_config_file = Αποτυχία δημιουργίας αρχείου ρυθμίσεων "{ $path }", λόγος "{ $reason }".
 saving_loading_failed_to_read_config_file = Αδυναμία φόρτωσης ρύθμισης παραμέτρων από το "{ $path }" επειδή δεν υπάρχει ή δεν είναι αρχείο.
 saving_loading_failed_to_read_data_from_file = Αδυναμία ανάγνωσης δεδομένων από το αρχείο "{ $path }", λόγος "{ $reason }".
-saving_loading_orphan_data = Βρέθηκαν ορφανά δεδομένα "{ $data }" στη γραμμή "{ $line }".
-saving_loading_not_valid = Η ρύθμιση "{ $data }" δεν υπάρχει στην τρέχουσα έκδοση εφαρμογών.
 # Other
 selected_all_reference_folders = Αδυναμία έναρξης αναζήτησης, όταν όλοι οι κατάλογοι ορίζονται ως φάκελοι αναφοράς
 searching_for_data = Αναζήτηση δεδομένων, μπορεί να πάρει λίγο, παρακαλώ περιμένετε...
@@ -470,18 +462,18 @@ text_view_messages = ΜΗΝΥΜΑΤΑ
 text_view_warnings = ΠΡΟΕΙΔΟΠΟΙΗΣΕΙΣ
 text_view_errors = ΣΦΑΛΜΑ
 about_window_motto = Αυτό το πρόγραμμα είναι ελεύθερο να χρησιμοποιηθεί και πάντα θα είναι.
+krokiet_new_app = Το Czkawka βρίσκεται σε λειτουργία συντήρησης, πράγμα που σημαίνει ότι μόνο κρίσιμα σφάλματα θα διορθωθούν και δεν θα προστεθούν νέα χαρακτηριστικά. Για νέα χαρακτηριστικά, παρακαλώ ελέγξτε τη νέα εφαρμογή Krokiet, η οποία είναι πιο σταθερή και αποδοτική και εξακολουθεί να βρίσκεται υπό ενεργή ανάπτυξη.
 # Various dialog
 dialogs_ask_next_time = Ερώτηση την επόμενη φορά
-delete_file_failed = Αποτυχία διαγραφής αρχείου { $name }, λόγος { $reason }
+symlink_failed = Αποτυχία σύζευξης { $name } με { $target }, λόγος { $reason }
 delete_title_dialog = Διαγραφή επιβεβαίωσης
 delete_question_label = Είστε βέβαιοι ότι θέλετε να διαγράψετε αρχεία?
 delete_all_files_in_group_title = Επιβεβαίωση διαγραφής όλων των αρχείων της ομάδας
 delete_all_files_in_group_label1 = Σε ορισμένες ομάδες έχουν επιλεγεί όλες οι εγγραφές.
 delete_all_files_in_group_label2 = Είστε βέβαιοι ότι θέλετε να τα διαγράψετε?
-delete_folder_failed = Αποτυχία διαγραφής του φακέλου { $dir } επειδή ο φάκελος δεν υπάρχει, δεν έχετε άδεια ή ο φάκελος δεν είναι κενός.
 delete_items_label = { $items } τα αρχεία θα διαγραφούν.
 delete_items_groups_label = { $items } τα αρχεία από τις ομάδες { $groups } θα διαγραφούν.
-hardlink_failed = Αποτυχία hardlink
+hardlink_failed = Αποτυχία hardlink { $name } στο { $target }, λόγος { $reason }
 hard_sym_invalid_selection_title_dialog = Μη έγκυρη επιλογή με κάποιες ομάδες
 hard_sym_invalid_selection_label_1 = Σε ορισμένες ομάδες έχει επιλεγεί μόνο μία εγγραφή και θα αγνοηθεί.
 hard_sym_invalid_selection_label_2 = Για να είναι δυνατή η σκληρή/συσχέτιση αυτών των αρχείων, πρέπει να επιλεγούν τουλάχιστον δύο αποτελέσματα στην ομάδα.

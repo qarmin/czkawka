@@ -19,10 +19,10 @@ music_checking_by_content = Зміст
 same_music_seconds_label = Мінімальна тривалість фрагменту
 same_music_similarity_label = Максимальна різниця
 music_compare_only_in_title_group = Порівняйте у групах подібних назвах
-music_compare_only_in_title_group_tooltip =
-    When enabled, files are grouped by title and then compared to each other.
-    
-    With 10000 files, instead almost 100 million comparisons usually there will be around 20000 comparisons.
+music_compare_only_in_title_group_tooltip = 
+        При активованому стані файли групуються за назвою і потім порівнюються між собою.
+
+        З 10 000 файлів, замість близько 100 зіріх порівнянь, вище є ймовірністю побути близько 20 000 порівнянь.
 same_music_tooltip =
     Пошук подібних музичних файлів за його вмістом може бути налаштований за налаштуванням:
     
@@ -120,6 +120,8 @@ main_tree_view_column_destination_path = Шлях призначення
 main_tree_view_column_type_of_error = Тип помилки
 main_tree_view_column_current_extension = Поточне розширення
 main_tree_view_column_proper_extensions = Належне розширення
+main_tree_view_column_fps = Кадрів в секунду
+main_tree_view_column_codec = Кодек
 main_label_check_method = Метод перевірки
 main_label_hash_type = Тип хешу
 main_label_hash_size = Розмір хешу
@@ -371,7 +373,7 @@ settings_duplicates_prehash_checkbutton_tooltip =
     
     Рекомендується використовувати його при скануванні сотень тисяч або мільйонів файлів, оскільки це може прискорити пошук в рази.
 settings_duplicates_prehash_minimal_entry_tooltip = Мінімальний розмір кешованого запису.
-settings_duplicates_hide_hard_link_button = Приховати жорсткі посилання (лише Linux та macOS)
+settings_duplicates_hide_hard_link_button = Приховати жорсткі посилання
 settings_duplicates_prehash_checkbutton = Кешувати попередній хеш
 settings_duplicates_minimal_size_cache_label = Мінімальний розмір (байт) файлів, що кешуються
 settings_duplicates_minimal_size_cache_prehash_label = Мінімальний розмір (байт) файлів для кешування попереднього хешу
@@ -403,18 +405,18 @@ settings_folder_cache_open = Відкрити теку кешу
 settings_folder_settings_open = Відкрити папку налаштувань
 # Compute results
 compute_stopped_by_user = Пошук був зупинений користувачем
-compute_found_duplicates_hash_size = Знайдено дублікатів: {{ $number_files }} (груп: {{ $number_groups }}), розмір: {{ $size }}, **пошук тривав {{ $time }}**
- compute_found_duplicates_name = Знайдено: {{ $number_files }} дублікат(и/ів) (груп: {{ $number_groups }}), **пошук тривав {{ $time }}**
-compute_found_empty_folders = Знайдено порожніх папок: { $number_files }
-compute_found_empty_files = Знайдено порожніх файлів: { $number_files }
-compute_found_big_files = Знайдено великих файлів: { $number_files }
-compute_found_temporary_files = Знайдено тимчасових файлів: { $number_files }
-compute_found_images = Знайдено аналогічних зображень: { $number_files } (груп: { $number_groups })
-compute_found_videos = Знайдено схожих відео: { $number_files } (груп: { $number_groups })
-compute_found_music = Знайдено аналогічних музичних файлів: { $number_files } (груп: { $number_groups })
-compute_found_invalid_symlinks = Знайдено { $number_files } неприпустимі символічні посилання
-compute_found_broken_files = Знайдено зламаних файлів: { $number_files }
-compute_found_bad_extensions = Знайдено { $number_files } файлів з недійсними розширеннями
+compute_found_duplicates_hash_size = Знайдено { $number_files } дублікати в { $number_groups } групах, які зайняли { $size } за { $time }
+compute_found_duplicates_name = Знайдено { $number_files } дублікати в { $number_groups } групах за { $time }
+compute_found_empty_folders = Знайдено { $number_files } порожніх папок в { $time }
+compute_found_empty_files = Знайдено { $number_files } порожніх файлів за { $time }
+compute_found_big_files = Знайдено { $number_files } великих файлів за { $time }
+compute_found_temporary_files = Знайдено { $number_files } тимчасових файлів в { $time }
+compute_found_images = Знайдено { $number_files } схожих зображень в { $number_groups } групах на { $time }
+compute_found_videos = Знайдено { $number_files } подібних відео у { $number_groups } групах за { $time }
+compute_found_music = Знайдено { $number_files } подібних музичних файлів в { $number_groups } групах за { $time }
+compute_found_invalid_symlinks = Знайдено { $number_files } неприпустимі символьні посилання в { $time }
+compute_found_broken_files = Знарядно { $number_files } пошкоджених файлів за час { $time }
+compute_found_bad_extensions = Знайдено { $number_files } файли з недійсними розширеннями в { $time }
 # Progress window
 progress_scanning_general_file =
     { $file_number ->
@@ -424,6 +426,7 @@ progress_scanning_general_file =
 progress_scanning_extension_of_files = Перевірено розширення { $file_checked }/{ $all_files } файлу
 progress_scanning_broken_files = Перевірено { $file_checked }/{ $all_files } файл ({ $data_checked }/{ $all_data })
 progress_scanning_video = Створено відео з { $file_checked }/{ $all_files }
+progress_creating_video_thumbnails = Створені мініатюри { $file_checked }/{ $all_files } відео
 progress_scanning_image = Створено зображення { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
 progress_comparing_image_hashes = Порівняо { $file_checked }/{ $all_files } хеш зображення
 progress_scanning_music_tags_end = Порівняті теґи { $file_checked }/{ $all_files } музичний файл
@@ -450,19 +453,12 @@ progress_current_stage = Поточний етап: { "  " }
 progress_all_stages = Усі етапи: { "  " }
 # Saving loading 
 saving_loading_saving_success = Збережено конфігурацію в файл { $name }.
-saving_loading_saving_failure = Не вдалося зберегти дані конфігурації до файлу { $name }.
+saving_loading_saving_failure = Не вдалося зберегти дані конфігурації у файл { $name }, причина { $reason }.
 saving_loading_reset_configuration = Поточна конфігурація була очищена.
 saving_loading_loading_success = Установки програми коректно завантажені.
-saving_loading_invalid_string = Для ключа «{ $key }» знайдено неприпустимий результат: «{ $result }» не є рядком.
-saving_loading_invalid_int = Для ключа «{ $key }» знайдено неприпустимий результат: «{ $result }» не є цілим числом.
-saving_loading_invalid_bool = Для ключа «{ $key }» знайдено неприпустимий результат: «{ $result }» не є булевим.
-saving_loading_decode_problem_bool = Не вдалося декодувати булеве значення з ключа «{$key}»: знайдено «{$result}», але дозволені значення 0, 1, true або false.
-saving_loading_saving_same_keys = Спроба зберегти налаштування за допомогою дубльованого ключа "{ $key }".
 saving_loading_failed_to_create_config_file = Не вдалося створити файл налаштувань "{ $path }", причина "{ $reason }".
 saving_loading_failed_to_read_config_file = Неможливо завантажити конфігурацію з «{$path}», тому що або такого файлу не існує, або це не файл.
 saving_loading_failed_to_read_data_from_file = Не вдалося прочитати дані з файлу "{ $path }", причина "{ $reason }".
-saving_loading_orphan_data = Знайдені дані «{ $data }», що нічого не належать, у рядку «{ $line }».
-saving_loading_not_valid = Параметр «{ $data }» не існує в поточній версії додатку.
 # Other
 selected_all_reference_folders = Неможливо почати пошук, коли всі каталоги встановлені як папки з орієнтирами
 searching_for_data = Пошук даних може зайняти деякий час — будь ласка, зачекайте...
@@ -470,18 +466,18 @@ text_view_messages = ПОВІДОМЛЕННЯ
 text_view_warnings = ПОПЕРЕДЖЕННЯ
 text_view_errors = ПОМИЛКИ
 about_window_motto = Ця програма безкоштовна для використання і завжди буде такою.
+krokiet_new_app = Чкавка перебуває у режимі технічного обслуговування, а це означає, що фіксуються лише важливі помилки, і жодна нова функція не буде додана. Для нових функцій, будь ласка, ознайомтеся з новим додатком Krokiet (більш стабільним та ефективним та активним додатком).
 # Various dialog
 dialogs_ask_next_time = Завжди запитувати
-delete_file_failed = Не вдалося видалити файл { $name }. Причина: { $reason }
+symlink_failed = Не вдалося прив'язати { $name } до { $target }, причина { $reason }
 delete_title_dialog = Підтвердження видалення
 delete_question_label = Ви впевнені, що бажаєте видалити файли?
 delete_all_files_in_group_title = Підтвердження видалення всіх файлів у групі
 delete_all_files_in_group_label1 = У деяких групах обрані всі записи.
 delete_all_files_in_group_label2 = Ви впевнені, що хочете видалити їх?
-delete_folder_failed = Не вдалося видалити папку { $dir }, оскільки папки не існує, або у вас немає дозволу на зміну, або папка не порожня.
 delete_items_label = Буде видалено файлів: { $items }
 delete_items_groups_label = Буде видалено файлів: { $items } (груп: { $groups })
-hardlink_failed = Не вдалося створити жорстке посилання
+hardlink_failed = Не вдалося жорстке посилання { $name } на { $target }, причина { $reason }
 hard_sym_invalid_selection_title_dialog = Невірний вибір у деяких групах
 hard_sym_invalid_selection_label_1 = У деяких групах вибрано лише один запис — вони будуть проігноровані.
 hard_sym_invalid_selection_label_2 = Щоб жорстко або символьно зв'язати ці файли, необхідно вибрати щонайменше два результати групи.

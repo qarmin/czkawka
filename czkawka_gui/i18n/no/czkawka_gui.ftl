@@ -1,6 +1,6 @@
 # Window titles
 window_settings_title = Innstillinger
-window_main_title = Czkawka (Hiccup)
+window_main_title = Czkawka (Hikkup)
 window_progress_title = Skanner
 window_compare_images = Sammenlign bilder
 # General
@@ -8,9 +8,9 @@ general_ok_button = Ok
 general_close_button = Lukk
 # Main window
 music_title_checkbox = Tittel
-music_artist_checkbox = Artist
+music_artist_checkbox = Kunstner
 music_year_checkbox = År
-music_bitrate_checkbox = Bitrate
+music_bitrate_checkbox = Bitratespeed
 music_genre_checkbox = Sjanger
 music_length_checkbox = Lengde
 music_comparison_checkbox = Omtrentlig sammenligning
@@ -72,14 +72,14 @@ image_hash_size_tooltip =
     16 er standard hash-størrelse som er et godt kompromiss mellom å finne selv små lignende bilder og å ha bare en liten mengde hash-kollisjoner.
     
     32 og 64 hashes finner bare lignende bilder, men bør ha nesten ingen falske positiver (kanskje unntatt bilder med alfa-kanal).
-image_resize_filter_tooltip =
-    To compute hash of image, the library must first resize it.
-    
-    Depend on chosen algorithm, the resulting image used to calculate hash will looks a little different.
-    
-    The fastest algorithm to use, but also the one which gives the worst results, is Nearest. It is enabled by default, because with 16x16 hash size lower quality it is not really visible.
-    
-    With 8x8 hash size it is recommended to use a different algorithm than Nearest, to have better groups of images.
+image_resize_filter_tooltip = 
+        For å beregne hesh av bilde, må biblioteket først tilpass bilden.
+
+        Avhengig av valgt algoritme vil det bilde som brukes for beregning av hesh se litt forskjellig ut.
+
+        Forkortest algoritme å bruke, men også den som gir de vres resultatene, er Nearest. Den aktiveres standard, fordi med en 16x16 heshstørrelse nederste kvalitet ikke er virkelig synlig.
+
+        Med en 8x8 heshstørrelse anbefales det å bruke en annen algoritme enn Nearest for å ha bedre grupper av bilder.
 image_hash_alg_tooltip =
     Brukere kan velge mellom en av mange algoritmer i beregningen av hashen.
     
@@ -109,9 +109,9 @@ main_tree_view_column_size = Størrelse
 main_tree_view_column_similarity = Likhet
 main_tree_view_column_dimensions = Dimensjoner
 main_tree_view_column_title = Tittel
-main_tree_view_column_artist = Artist
+main_tree_view_column_artist = Kjennestein
 main_tree_view_column_year = År
-main_tree_view_column_bitrate = Bitrate
+main_tree_view_column_bitrate = Bitratespeed
 main_tree_view_column_length = Lengde
 main_tree_view_column_genre = Sjanger
 main_tree_view_column_symlink_file_name = Symlink filnavn
@@ -120,6 +120,8 @@ main_tree_view_column_destination_path = Destinasjonssti
 main_tree_view_column_type_of_error = Type feil
 main_tree_view_column_current_extension = Gjeldende utvidelse
 main_tree_view_column_proper_extensions = Riktig utvidelse
+main_tree_view_column_fps = BPS
+main_tree_view_column_codec = Kodek
 main_label_check_method = Sjekkmetode
 main_label_hash_type = Type hash
 main_label_hash_size = Størrelse på hash
@@ -241,7 +243,7 @@ popover_valid_regex = Regex er gyldig
 bottom_search_button = Søk
 bottom_select_button = Velg
 bottom_delete_button = Slett
-bottom_save_button = Save
+bottom_save_button = Lagre
 bottom_symlink_button = Symlink
 bottom_hardlink_button = Hardlink
 bottom_move_button = Flytt
@@ -330,7 +332,7 @@ settings_show_text_view_button = Vis nederste tekstpanel
 settings_use_cache_button = Bruk buffer
 settings_save_also_as_json_button = Lagre også mellomlager som JSON-fil
 settings_use_trash_button = Flytt slettede filer til papirkurv
-settings_language_label = Language
+settings_language_label = Språk
 settings_multiple_delete_outdated_cache_checkbutton = Slett utdaterte cache-oppføringer automatisk
 settings_multiple_delete_outdated_cache_checkbutton_tooltip =
     Slett utdaterte cache-resultater som peker til ikke-eksisterende filer.
@@ -371,7 +373,7 @@ settings_duplicates_prehash_checkbutton_tooltip =
     
     Det anbefales å bruke det når det skannes hundre eller millioner filer, fordi det kan fremskynde søk med flere ganger.
 settings_duplicates_prehash_minimal_entry_tooltip = Minimal størrelse på mellomlagret oppføring.
-settings_duplicates_hide_hard_link_button = Skjul hardlinker (kun Linux og macOS)
+settings_duplicates_hide_hard_link_button = Skjul harde linker
 settings_duplicates_prehash_checkbutton = Bruk prehash cache
 settings_duplicates_minimal_size_cache_label = Minimal størrelse på filer (i byte) lagret i mellomlager
 settings_duplicates_minimal_size_cache_prehash_label = Minimal størrelse på filer (i byte) lagret i hurtigbuffer for prehash
@@ -403,18 +405,18 @@ settings_folder_cache_open = Åpne mappe for hurtigbuffer
 settings_folder_settings_open = Åpne innstillingsmappen
 # Compute results
 compute_stopped_by_user = Søket ble stoppet av bruker
-compute_found_duplicates_hash_size = Fant { $number_files } duplikater i { $number_groups } grupper som tok { $size }., **søk tok { $time }}**
-compute_found_duplicates_name = Fant { $number_files } duplikater i { $number_groups } grupper, **søk tok { $time }}**
-compute_found_empty_folders = Fant { $number_files } tomme mapper
-compute_found_empty_files = Fant { $number_files } tomme filer
-compute_found_big_files = Fant { $number_files } store filer
-compute_found_temporary_files = Fant { $number_files } midlertidige filer
-compute_found_images = Fant { $number_files } lignende bilder i { $number_groups } grupper
-compute_found_videos = Fant { $number_files } lignende videoer i { $number_groups } grupper
-compute_found_music = Fant { $number_files } lignende musikkfiler i { $number_groups } grupper
-compute_found_invalid_symlinks = Fant { $number_files } ugyldige symlinker
-compute_found_broken_files = Fant { $number_files } ødelagte filer
-compute_found_bad_extensions = Fant { $number_files } filer med ugyldige utvidelser
+compute_found_duplicates_hash_size = Fant { $number_files } duplikater i { $number_groups } grupper som tok { $size } i { $time }
+compute_found_duplicates_name = Fant { $number_files } duplikater i { $number_groups } grupper i { $time }
+compute_found_empty_folders = Fant { $number_files } tomme mapper i { $time }
+compute_found_empty_files = Fant { $number_files } tomme filer i { $time }
+compute_found_big_files = Fant { $number_files } store filer i { $time }
+compute_found_temporary_files = Fant { $number_files } midlertidige filer i { $time }
+compute_found_images = Fant { $number_files } lignende bilder i { $number_groups } grupper i { $time }
+compute_found_videos = Fant { $number_files } lignende videoer i { $number_groups } grupper i { $time }
+compute_found_music = Fant { $number_files } lignende musikkfiler i { $number_groups } grupper i { $time }
+compute_found_invalid_symlinks = Fant { $number_files } ugyldige symlinker i { $time }
+compute_found_broken_files = Fant { $number_files } ødelagte filer i { $time }
+compute_found_bad_extensions = Fant { $number_files } filer med ugyldige utvidelser i { $time }
 # Progress window
 progress_scanning_general_file =
     { $file_number ->
@@ -424,6 +426,7 @@ progress_scanning_general_file =
 progress_scanning_extension_of_files = Merket utvidelse av { $file_checked }/{ $all_files } -filen
 progress_scanning_broken_files = Merket { $file_checked }/{ $all_files } fil ({ $data_checked }/{ $all_data })
 progress_scanning_video = Kastet av { $file_checked }/{ $all_files } video
+progress_creating_video_thumbnails = Lagede miniatyrbilder av { $file_checked }/{ $all_files } video
 progress_scanning_image = Kastet av { $file_checked }/{ $all_files } bilde ({ $data_checked }/{ $all_data })
 progress_comparing_image_hashes = Sammenlignet { $file_checked }/{ $all_files } bilde-hash
 progress_scanning_music_tags_end = Sammenligne tagger med { $file_checked }/{ $all_files } musikkfil
@@ -450,19 +453,12 @@ progress_current_stage = Gjeldende trinn: { " " }
 progress_all_stages = Alle stadier:{ " " }
 # Saving loading 
 saving_loading_saving_success = Lagret konfigurasjon til filen { $name }.
-saving_loading_saving_failure = Klarte ikke å lagre konfigurasjonsdataene til filen { $name }.
+saving_loading_saving_failure = Kunne ikke lagre konfigurasjonsdata som filen { $name }, grunn { $reason }.
 saving_loading_reset_configuration = Gjeldende konfigurasjon ble fjernet.
 saving_loading_loading_success = Godt lastet applikasjonskonfigurasjon.
-saving_loading_invalid_string = For nøkkelen "{ $key }" fant du ugyldig resultat - "{ $result }" som ikke er en streng.
-saving_loading_invalid_int = I nøkkelen "{ $key }" fant du ugyldig resultat - "{ $result }" som ikke er et heltall.
-saving_loading_invalid_bool = For nøkkelen "{ $key }" fant ugyldig resultat - "{ $result }" som ikke er en bool.
-saving_loading_decode_problem_bool = Kan ikke dekode bool fra nøkkelen "{ $key }" funnet "{ $result }", men tillatte verdier er 0, 1, sanne eller usann.
-saving_loading_saving_same_keys = Prøver å lagre innstillinger med duplisert nøkkel "{ $key }".
 saving_loading_failed_to_create_config_file = Kunne ikke opprette konfigurasjonsfilen{ $path }", grunn "{ $reason }".
 saving_loading_failed_to_read_config_file = Kan ikke laste konfigurasjonen fra "{ $path }" fordi den ikke eksisterer eller ikke er en fil.
 saving_loading_failed_to_read_data_from_file = Kan ikke lese data fra filen{ $path }", grunn "{ $reason }".
-saving_loading_orphan_data = Funnet orphan data "{ $data }" i linje "{ $line }".
-saving_loading_not_valid = Setter "{ $data }" finnes ikke i gjeldende appversjon.
 # Other
 selected_all_reference_folders = Kan ikke starte søk, når alle kataloger er angitt som referanselapper
 searching_for_data = Søker data, det kan ta en stund, vennligst vent...
@@ -470,18 +466,18 @@ text_view_messages = MELDINGER
 text_view_warnings = ADVARSELSER
 text_view_errors = FEILSER
 about_window_motto = Dette programmet er gratis å bruke og vil alltid være.
+krokiet_new_app = Tjekkawka er i vedlikeholdsmodus, noe som betyr at bare kritiske feil utbedres, og ingen nye funksjoner legges til. For nye funksjoner, vennligst sjekk ut ny Krokiet-app, som er mer stabil og fremstår som under aktiv utvikling.
 # Various dialog
 dialogs_ask_next_time = Spør neste gang
-delete_file_failed = Kunne ikke slette filen { $name }, årsak { $reason }
+symlink_failed = Kan ikke symlink { $name } til { $target }, årsak { $reason }
 delete_title_dialog = Bekreft sletting
 delete_question_label = Er du sikker på at du vil slette filer?
 delete_all_files_in_group_title = Bekreftelse på sletting av alle filer i gruppen
 delete_all_files_in_group_label1 = For noen grupper er alle poster valgt.
 delete_all_files_in_group_label2 = Er du sikker på at du vil slette dem?
-delete_folder_failed = Kunne ikke slette mappen { $dir } fordi mappen ikke eksisterer, du har ikke tillatelse eller mappen er ikke tom.
 delete_items_label = { $items } filer vil bli slettet.
 delete_items_groups_label = { $items } filer fra { $groups } grupper vil bli slettet.
-hardlink_failed = Mislyktes i å koble sammen
+hardlink_failed = Kunne ikke koble { $name } til { $target }, grunn { $reason }
 hard_sym_invalid_selection_title_dialog = Ugyldig valg med noen grupper
 hard_sym_invalid_selection_label_1 = I noen grupper er det bare én post valgt og det vil bli ignorert.
 hard_sym_invalid_selection_label_2 = For å kunne feste koblingen til disse filene, må minst to resultater i gruppen velges.

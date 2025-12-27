@@ -18,7 +18,7 @@ music_checking_by_tags = 태그 기준 검사
 music_checking_by_content = 내용 기준 검사
 same_music_seconds_label = 최소 조각 재생 시간
 same_music_similarity_label = 최대 허용 차이
-music_compare_only_in_title_group = Compare within groups of similar titles
+music_compare_only_in_title_group = 유사한 제목들의 그룹 내에서 비교
 music_compare_only_in_title_group_tooltip =
     활성화 시, 파일이 제목별로 그룹화된 후에만 서로 비교됩니다.
     
@@ -128,6 +128,8 @@ main_tree_view_column_destination_path = 심볼릭 링크 대상 경로
 main_tree_view_column_type_of_error = 손상 유형
 main_tree_view_column_current_extension = 현재 확장자
 main_tree_view_column_proper_extensions = 올바른 확장자
+main_tree_view_column_fps = FPS
+main_tree_view_column_codec = 코덱
 main_label_check_method = 확인 방법
 main_label_hash_type = 해시 유형
 main_label_hash_size = 해시 크기
@@ -181,9 +183,9 @@ upper_allowed_extensions_tooltip =
     
     예시: ".exe, IMAGE, VIDEO, .rar, 7z" - 이와 같이 입력하면, 이미지 파일(예. jpg, png), 영상 파일(예. avi, mp4), exe, rar, 그리고 7z 파일을 검색합니다.
 upper_excluded_extensions_tooltip =
-    List of disabled files which will be ignored in scan.
+    검사에서 무시될 비활성화된 파일 목록입니다.
     
-    When using both allowed and disabled extensions, this one has higher priority, so file will not be checked.
+    허용된 확장자와 비활성화된 확장자를 둘 다 사용할 경우, 비활성화된 확장자가 더 높은 우선순위를 가지므로 해당 파일은 검사되지 않습니다.
 upper_excluded_items_tooltip =
     제외할 항목은 반드시 '*' 와일드카드 문자를 사용해서 추가해야 하며, 콤마(',')로 구분되어야 합니다.
     디렉터리를 직접 제외하는 것보다 느립니다. 주의해서 사용하세요.
@@ -254,7 +256,7 @@ bottom_symlink_button = 심볼릭 링크
 bottom_hardlink_button = 하드 링크
 bottom_move_button = 이동
 bottom_sort_button = 종류
-bottom_compare_button = Compare
+bottom_compare_button = 비교
 bottom_search_button_tooltip = 검색을 시작합니다.
 bottom_select_button_tooltip = 항목을 선택합니다. 오직 선택된 것만이 처리됩니다.
 bottom_delete_button_tooltip = 선택된 파일 또는 폴더를 삭제합니다.
@@ -277,7 +279,7 @@ bottom_move_button_tooltip =
     이 동작은 원본이 위치한 경로를 전부 무시하고, 선택한 경로로 파일을 전부 복사합니다.
     만일 2개 이상의 파일이 같은 이름을 가지고 있다면, 첫 번째 이후의 파일은 복사에 실패하고 오류 메시지를 보여줄 것입니다.
 bottom_sort_button_tooltip = 파일/폴더를 선택한 방법으로 정렬합니다.
-bottom_compare_button_tooltip = Compare images in the group.
+bottom_compare_button_tooltip = 그룹 내의 이미지를 비교합니다.
 bottom_show_errors_tooltip = 하단 텍스트 패널을 보이거나 숨깁니다.
 bottom_show_upper_notebook_tooltip = 상단 패널을 보이거나 숨깁니다.
 # Progress Window
@@ -381,7 +383,7 @@ settings_duplicates_prehash_checkbutton_tooltip =
     
     만일 수백~수천 개 이상의 파일처럼 매우 많은 파일을 여러 번 검색하는 경우, 이 기능을 반드시 켜는 것을 추천합니다.
 settings_duplicates_prehash_minimal_entry_tooltip = 캐싱을 위한 최소 파일크기입니다.
-settings_duplicates_hide_hard_link_button = 하드 링크 숨기기 (Linux 및 macOS)
+settings_duplicates_hide_hard_link_button = 하드 링크 숨기기
 settings_duplicates_prehash_checkbutton = 사전 해시 캐싱하기
 settings_duplicates_minimal_size_cache_label = 캐싱하기 위한 최소 파일 크기 (바이트)
 settings_duplicates_minimal_size_cache_prehash_label = 사전 해시를 캐싱하기 위한 최소 파일 크기 (바이트)
@@ -413,18 +415,17 @@ settings_folder_cache_open = 캐시 폴더 열기
 settings_folder_settings_open = 설정 폴더 열기
 # Compute results
 compute_stopped_by_user = 사용자에 의해 검색이 중단됨.
-compute_found_duplicates_hash_size = 총 { $number_groups }개의 그룹, { $number_files }개의 중복 파일을 찾음. 총 크기 { $size }
-compute_found_duplicates_name = 총 { $number_groups }개의 그룹, { $number_files }개의 중복 파일을 찾음.
-compute_found_empty_folders = 총 { $number_files }개의 빈 폴더를 찾음.
-compute_found_empty_files = 총 { $number_files }개의 빈 파일을 찾음.
-compute_found_big_files = 총 { $number_files }개의 큰 파일을 찾음.
-compute_found_temporary_files = 총 { $number_files }개의 임시 파일을 찾음.
-compute_found_images = 총 { $number_groups }개의 그룹, { $number_files }개의 유사한 이미지를 찾음.
-compute_found_videos = 총 { $number_groups }개의 그룹, { $number_files }개의 유사한 영상을 찾음.
-compute_found_music = 총 { $number_groups }개의 그룹, { $number_files }개의 유사한 음악 파일을 찾음.
-compute_found_invalid_symlinks = 총 { $number_files } 개의 유효하지 않은 심볼릭 링크를 찾음.
-compute_found_broken_files = { $number_files }개의 손상된 파일을 찾음.
-compute_found_bad_extensions = 총 { $number_files }개의 잘못된 확장자를 가진 파일을 찾음.
+compute_found_duplicates_name = {$number_files} 개의 중복 파일을 {$number_groups} 그룹에서 {$time}에 발견했습니다.
+compute_found_empty_folders = {$number_files}개의 비어있는 폴더를 {$time} 안에 발견했습니다.
+compute_found_big_files = {$number_files}개의 큰 파일을 {$time}에 찾았습니다.
+compute_found_temporary_files = {$number_files}개의 임시 파일을 {$time} 안에 찾았습니다.
+compute_found_images = {$number_files} 개의 유사한 이미지를 {$number_groups} 그룹에서 {$time} 내에 발견했습니다.
+compute_found_videos = {$number_files} 개의 비슷한 동영상을 {$number_groups} 그룹에서 {$time} 내에 찾았습니다.
+compute_found_music = {$number_files}개의 비슷한 음악 파일을 {$number_groups} 그룹에서 {$time} 내에 찾았습니다.
+compute_found_invalid_symlinks = {$number_files}개의 유효하지 않은 심볼릭 링크를 {$time}에서 찾았습니다.
+compute_found_broken_files = {$number_files}개의 봉인된 파일을 {$time}에 발견했습니다.
+compute_found_bad_extensions = {$number_files} 확장자에 문제가 있는 파일을 {$time} 내로找到了
+
 # Progress window
 progress_scanning_general_file =
     { $file_number ->
@@ -434,6 +435,7 @@ progress_scanning_general_file =
 progress_scanning_extension_of_files = { $file_checked }/{ $all_files }개의 파일 확장자 확인
 progress_scanning_broken_files = { $file_checked }/{ $all_files }개 파일 확인 (데이터: { $data_checked } / { $all_data })
 progress_scanning_video = { $file_checked }/{ $all_files }개의 비디오 해시 생성
+progress_creating_video_thumbnails = Created thumbnails of { $file_checked }/{ $all_files } video
 progress_scanning_image = { $file_checked }/{ $all_files }개의 이미지 해시 생성 (데이터: { $data_checked } / { $all_data })
 progress_comparing_image_hashes = { $file_checked }/{ $all_files }개의 이미지 해시 비교
 progress_scanning_music_tags_end = { $file_checked }/{ $all_files }개의 음악 파일 태그 비교 완료
@@ -460,19 +462,12 @@ progress_current_stage = 현재 단계:{ "  " }
 progress_all_stages = 전체 단계:{ "  " }
 # Saving loading 
 saving_loading_saving_success = 파일 { $name }에 설정 저장함.
-saving_loading_saving_failure = 파일 { $name }에 설정 저장 실패.
+saving_loading_saving_failure = кон피그레이션 데이터를 파일 { $name }에 저장하지 못했습니다, 이유는 { $reason }입니다.
 saving_loading_reset_configuration = 현재 설정이 초기화됨.
 saving_loading_loading_success = 앱 설정 불러오기 성공.
-saving_loading_invalid_string = 키 "{ $key }"의 값이 올바르지 않습니다. "{ $result }"는 string이 아닙니다.
-saving_loading_invalid_int = 키 "{ $key }"의 값이 올바르지 않습니다. "{ $result }"는 integer가 아닙니다.
-saving_loading_invalid_bool = 키 "{ $key }"의 값이 올바르지 않습니다. "{ $result }"은 bool이 아닙니다.
-saving_loading_decode_problem_bool = 키 "{ $key }"의 값을 bool로 해석할 수 없습니다. 허용된 값은 0, 1, true, false 중 하나이지만 실제 값이 "{ $result }"입니다.
-saving_loading_saving_same_keys = 키 "{ $key }"가 중복되어 있습니다.
 saving_loading_failed_to_create_config_file = "{ $path }" 파일에 설정을 저장할 수 없습니다. 이유: "{ $reason }".
 saving_loading_failed_to_read_config_file = "{ $path }" 파일에서 설정을 불러올 수 없습니다. 파일이 없거나, 파일이 아닙니다.
 saving_loading_failed_to_read_data_from_file = "{ $path }" 파일을 읽을 수 없습니다. 이유: "{ $reason }".
-saving_loading_orphan_data = { $line }번 행에 고아 데이터 "{ $data }"가 있습니다.
-saving_loading_not_valid = 설정 "{ $data }"은 현재 프로그램 버전에 존재하지 않습니다.
 # Other
 selected_all_reference_folders = 모든 디렉터리가 기준 폴더이므로, 검색을 시작할 수 없습니다.
 searching_for_data = 검색 중. 잠시만 기다려주세요...
@@ -480,18 +475,18 @@ text_view_messages = 알림
 text_view_warnings = 경고
 text_view_errors = 오류
 about_window_motto = 이 프로그램은 무료이며, 앞으로도 항상 그럴 것이다.
+krokiet_new_app = 'Czkawka'는 유지보수 모드에 있습니다,这意味着仅会修复关键错误且不会添加新功能。对于新功能，请查看新的Krokiet应用，该应用更加稳定性能更强并且仍在积极开发中。
 # Various dialog
 dialogs_ask_next_time = 다음에도 묻기
-delete_file_failed = { $name } 파일 삭제 실패. 이유: { $reason }
+symlink_failed = Failed to symlink { $name } to { $target }, reason { $reason }
 delete_title_dialog = 삭제 확인
 delete_question_label = 정말로 파일들을 삭제합니까?
 delete_all_files_in_group_title = 그룹의 모든 파일 삭제 확인
 delete_all_files_in_group_label1 = 일부 그룹 내에 있는 모든 파일이 선택되어 있습니다.
 delete_all_files_in_group_label2 = 정말로 해당 파일을 모두 삭제합니까?
-delete_folder_failed = { $dir } 폴더가 존재하지 않거나, 권한이 없거나, 폴더가 비어있지 않아 삭제할 수 없습니다.
 delete_items_label = { $items }개의 파일이 삭제됩니다.
 delete_items_groups_label = { $groups }개 그룹에서 { $items }개의 파일이 삭제됩니다.
-hardlink_failed = 하드 링크 생성 실패
+hardlink_failed = 하드 링크를 생성하지 못했습니다 { $name }을 { $target }으로, 이유는 { $reason }입니다
 hard_sym_invalid_selection_title_dialog = 일부 그룹의 선택이 유효하지 않습니다.
 hard_sym_invalid_selection_label_1 = 일부 그룹에서 1개의 항목만이 선택되었으며, 해당 항목은 무시됩니다.
 hard_sym_invalid_selection_label_2 = 하드 링크/심볼릭 링크를 생성하려면, 그룹 내에서 최소 2개의 파일이 선택되어야 합니다.
@@ -503,7 +498,7 @@ move_file_failed = { $name } 파일 이동 실패. 이유: { $reason }
 move_files_title_dialog = 중복 파일을 이동할 폴더를 선택하세요.
 move_files_choose_more_than_1_path = 중복 파일을 복사할 1개의 폴더만 지정해야 하지만, { $path_number }개의 경로를 선택했습니다.
 move_stats = { $num_files }/{ $all_files }개의 항목을 이동함
-save_results_to_file = Saved results both to txt and json files into "{ $name }" folder.
+save_results_to_file = 결과를 txt 및 json 파일로 ‘{ $name }’ 폴더에 저장했습니다.
 search_not_choosing_any_music = 경고: 최소한 하나의 검색 방법을 선택해야 합니다.
 search_not_choosing_any_broken_files = 경고: 최소한 하나 이상의 검색할 파일 분류를 선택해야 합니다.
 include_folders_dialog_title = 검색할 폴더 추가

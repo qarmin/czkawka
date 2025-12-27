@@ -4,7 +4,7 @@ window_main_title = Czkawka (Soluço)
 window_progress_title = Verificando
 window_compare_images = Comparar as imagens
 # General
-general_ok_button = OK
+general_ok_button = Ok
 general_close_button = Fechar
 # Main window
 music_title_checkbox = Título
@@ -20,7 +20,7 @@ same_music_seconds_label = Duração mínima em segundos do fragmento
 same_music_similarity_label = Diferença máxima
 music_compare_only_in_title_group = Comparar dentro de grupos de títulos similares
 music_compare_only_in_title_group_tooltip =
-    Quando esta opção está ativada, os arquivos são agrupados por título e são comparados entre si.
+    Quando esta opção está ativada, os arquivos são agrupados por título, em seguida, são comparados entre si.
     
     Com 10.000 arquivos, em vez de se obter quase 100 milhões de comparações, normalmente, resultará em cerca de 20.000 comparações.
 same_music_tooltip =
@@ -38,8 +38,8 @@ same_music_tooltip =
 music_comparison_checkbox_tooltip =
     Pesquisar arquivos de música equivalentes utilizando a inteligência artificial (IA) que utiliza o aprendizado da máquina para remover os parênteses de uma frase. Por exemplo, com esta opção ativada, os arquivos em questão que serão tratados como duplicados:
     
-    Świędziżłób     ---     Świędziżłób (Remix Lato 2021) (Santuário --- Santuário (Remixado no verão de 2021))
-duplicate_case_sensitive_name = Diferenciar maiúsculas de minúsculas
+    Świędziżłób     ---     Świędziżłób (Remix Lato 2021) (Santuário --- O santuário foi remixado no verão de 2021)
+duplicate_case_sensitive_name = Diferenciar as maiúsculas das minúsculas
 duplicate_case_sensitive_name_tooltip =
     Quando esta opção está ativada, agrupa apenas os registros se eles tiverem exatamente o mesmo nome. Por exemplo, pagar <-> pagar.
     
@@ -49,13 +49,13 @@ duplicate_mode_name_combo_box = Nome
 duplicate_mode_size_combo_box = Tamanho
 duplicate_mode_hash_combo_box = Integridade do arquivo
 duplicate_hash_type_tooltip =
-     O Czkawka oferece três tipos de identificação pela integridade do arquivo por meio do código ‘hash’:
+    O Czkawka oferece três tipos de identificação pela integridade do arquivo por meio do código ‘hash’:
     
-     Blake3 - esta opção possui o recurso de criptografia e é o padrão porque é muito rápida.
+    Blake3 - esta opção possui o recurso de criptografia e é o padrão porque é muito rápida.
     
-     CRC32 - esta opção é a mais simples e deveria ser mais rápida do que o Blake3, mas muito raramente pode ocorrer algumas colisões.
+    CRC32 - esta opção é a mais simples e deveria ser mais rápida do que o Blake3, mas muito raramente pode ocorrer algumas colisões.
     
-     XXH3 - esta opção não possui o recurso de criptografia e é muito similar em desempenho e qualidade do Blake3.
+    XXH3 - esta opção não possui o recurso de criptografia e é muito similar em desempenho e qualidade do Blake3.
     
     Estes modos podem ser facilmente alternados.
 duplicate_check_method_tooltip =
@@ -69,11 +69,11 @@ duplicate_check_method_tooltip =
 image_hash_size_tooltip =
     A cada imagem que é verificada, um arquivo de assinatura digital ou ‘hash’ é criado e que pode ser comparado entre si, e se uma pequena diferença entre as imagens for encontrada, então significa que as imagens são equivalentes.
     
-    O tamanho de 8 do ‘hash’ é muito bom para localizar as imagens que são apenas um pouco equivalentes às originais. Com uma quantidade maior de imagens, maior do que 1000 imagens, irá produzir uma grande quantidade de falsos positivos, então é recomendado utilizar um tamanho maior do ‘hash’ nestes casos.
+    O tamanho 8 para o ‘hash’ é muito bom para localizar as imagens que são apenas um pouco equivalentes às originais. Com uma quantidade maior de imagens, maior do que 1000 imagens, irá produzir uma grande quantidade de falsos positivos, então é recomendado utilizar um tamanho maior do ‘hash’ nestes casos.
     
-    O tamanho de 16 do ‘hash’ é o tamanho padrão por ser uma boa referência entre localizar as imagens que são um pouco equivalentes e ter uma pequena quantidade de colisões do código ‘hash’.
+    O tamanho 16 para o ‘hash’ é o tamanho padrão por ser uma boa referência entre localizar as imagens que são um pouco equivalentes e ter uma pequena quantidade de colisões do código ‘hash’.
     
-    O tamanho de 32 e 64 do ‘hash’ localizam imagens muito equivalentes, mas quase não deve ter falsos positivos, talvez, exceto algumas imagens que possuem o canal alfa.
+    O tamanho 32 e 64 para o ‘hash’ localizam imagens muito equivalentes, mas quase não deve ter falsos positivos, talvez, exceto algumas imagens que possuem o canal alfa.
 image_resize_filter_tooltip =
     Para calcular o ‘hash’ de uma imagem, a biblioteca deve ser primeiro dimensionada.
     
@@ -101,7 +101,7 @@ main_notebook_similar_images = Imagens equivalentes
 main_notebook_similar_videos = Vídeos equivalentes
 main_notebook_same_music = Músicas duplicadas
 main_notebook_symlinks = Ligações simbólicas não válidas
-main_notebook_broken_files = Arquivos quebrados
+main_notebook_broken_files = Arquivos corrompidos
 main_notebook_bad_extensions = Extensões inválidas
 main_tree_view_column_file_name = Nome do arquivo
 main_tree_view_column_folder_name = Nome da pasta
@@ -119,12 +119,14 @@ main_tree_view_column_genre = Gênero
 main_tree_view_column_symlink_file_name = Nome do arquivo da ligação simbólica
 main_tree_view_column_symlink_folder = Pasta da ligação simbólica
 main_tree_view_column_destination_path = Caminho do destino
-main_tree_view_column_type_of_error = Tipo de erro
+main_tree_view_column_type_of_error = Tipo do erro
 main_tree_view_column_current_extension = Extensão atual
 main_tree_view_column_proper_extensions = Extensões válidas
+main_tree_view_column_fps = FPS
+main_tree_view_column_codec = Codec
 main_label_check_method = Método de verificação
-main_label_hash_type = Tipo do hash
-main_label_hash_size = Tamanho do hash
+main_label_hash_type = Tipo do hash (verificação da integridade)
+main_label_hash_size = Tamanho do hash (verificação da integridade)
 main_label_size_bytes = Tamanho (em bytes)
 main_label_min_size = Mínimo
 main_label_max_size = Máximo
@@ -152,7 +154,7 @@ upper_remove_excluded_button = Remover
 upper_manual_add_included_button_tooltip =
     Adicionar manualmente os nomes dos diretórios ou das pastas para serem pesquisadas.
     
-    Para adicionar vários caminhos de uma vez, separe-os com o ponto e vírgula ‘;’.
+    Para adicionar vários caminhos de uma vez, separe-os com o ponto e vírgula ‘ ; ’.
     
     /home/roman;/home/rozkaz adicionará dois diretórios /home/roman e /home/rozkaz
 upper_add_included_button_tooltip = Adicionar um novo diretório para ser pesquisado.
@@ -160,7 +162,7 @@ upper_remove_included_button_tooltip = Remover o diretório da pesquisa.
 upper_manual_add_excluded_button_tooltip =
     Adicionar manualmente um diretório à lista das exceções.
     
-    Para adicionar vários caminhos de uma vez, separe-os com o ponto e vírgula ‘;’.
+    Para adicionar vários caminhos de uma vez, separe-os com o ponto e vírgula ‘ ; ’.
     
     Por exemplo, ‘/home/roman;/home/krokiet’ irá adicionar os dois diretórios ‘/home/roman’ e ‘/home/keokiet’
 upper_add_excluded_button_tooltip = Selecionar o diretório que não será incluído na pesquisa.
@@ -169,19 +171,19 @@ upper_notebook_items_configuration = Configurações dos itens
 upper_notebook_excluded_directories = Diretórios não incluídos
 upper_notebook_included_directories = Diretórios incluídos
 upper_allowed_extensions_tooltip =
-    Allowed extensions must be separated by commas (by default all are available).
+    As extensões que são permitidas devem ser separadas por vírgulas, por padrão, todas as extensões estão disponíveis.
     
-    The following Macros, which add multiple extensions at once, are also available: IMAGE, VIDEO, MUSIC, TEXT.
+    Os macros que adicionam várias extensões de uma só vez também estão disponíveis para os arquivos de IMAGEM, VÍDEO, MÚSICA, TEXTO.
     
-    Usage example  ".exe, IMAGE, VIDEO, .rar, 7z" - this means that images (e.g. jpg, png), videos (e.g. avi, mp4), exe, rar, and 7z files will be scanned.
+    Por exemplo: Ao utilizar ".exe, IMAGE, VIDEO, .rar, 7z", esta opção significa que as imagens (por exemplo, .jpg, .png), os vídeos (por exemplo, .avi, .mp4), os arquivos .exe, .rar e .7z serão verificados.
 upper_excluded_extensions_tooltip =
     Lista de arquivos que serão ignorados na verificação.
     
     Quando você utiliza as extensões permitidas, estas tem maior prioridade em relação as outras, então o arquivo não será verificado.
 upper_excluded_items_tooltip =
-    Os itens que serão ignorados devem conter o asterisco ‘*’, que corresponde a qualquer cadeia de caracteres e devem ser separados por vírgulas.
+    Os itens que serão ignorados devem conter o asterisco ‘ * ’, que corresponde a qualquer cadeia de caracteres e devem ser separados por vírgulas.
     
-    Esta opção é mais lenta do que a opção do diretórios não incluídos, portanto, deve ser utilizada com cuidado.
+    Esta opção é mais lenta do que a opção dos diretórios não incluídos, portanto, deve ser utilizada com cuidado.
 upper_excluded_items = Itens ignorados:
 upper_allowed_extensions = Extensões permitidas:
 upper_excluded_extensions = Extensões ignoradas:
@@ -203,9 +205,9 @@ popover_custom_path_check_button_entry_tooltip =
     Exemplo de uso:
     O caminho ‘/home/pimpek/rzecz.txt’ pode ser encontrado com ‘/home/pim*’
 popover_custom_name_check_button_entry_tooltip =
-      Selecionar os registros por nome de arquivo.
+    Selecionar os registros por nome de arquivo.
     
-    Exemplo de uso:
+    Exemplo de utilização:
     O caminho ‘/usr/ping/pong.txt’ pode ser encontrado com ‘*ong*’
 popover_custom_regex_check_button_entry_tooltip =
     Selecionar os registros por meio das expressões regulares.
@@ -231,7 +233,7 @@ popover_custom_regex_name_label = Nome
 popover_custom_regex_regex_label = Expressão regular junto com o nome
 popover_custom_case_sensitive_check_button = Diferenciar entre maiúsculas e minúsculas
 popover_custom_all_in_group_label = Não selecionar todos os registros em um grupo
-popover_custom_mode_unselect = Desselecionar o personalizado
+popover_custom_mode_unselect = Desselecionar personalizado
 popover_custom_mode_select = Selecionar o personalizado
 popover_sort_file_name = Nome do arquivo
 popover_sort_folder_name = Nome do diretório
@@ -282,7 +284,7 @@ progress_stop_additional_message = Parar a pesquisa
 about_repository_button_tooltip = Endereço da página eletrônica do repositório com o código-fonte do programa Czkawka.
 about_donation_button_tooltip = Endereço da página eletrônica para fazer doação ao programador do Czkawka.
 about_instruction_button_tooltip = Endereço da página eletrônica para obter ajuda.
-about_translation_button_tooltip = Endereço da página eletrônica da plataforma de tradução ‘Crowdin’ com as traduções do programa Czkawka. Os idiomas polonês e inglês são fornecidos oficialmente pelo Rafał Mikrut, que também é conhecido por ‘qarmin’ (https://github.com/qarmin) e o idioma português do Brasil foi gentilmente traduzido por marcelocripe (marcelocripe@gmail.com) em novembro de 2024.
+about_translation_button_tooltip = Endereço da página eletrônica da plataforma de tradução ‘Crowdin’ com as traduções do programa Czkawka. Os idiomas polonês e inglês são fornecidos oficialmente pelo Rafał Mikrut, que também é conhecido por ‘qarmin’ (https://github.com/qarmin) e o idioma português do Brasil foi gentilmente traduzido por marcelocripe (https://github.com/marcelocripe e https://gitlab.com/marcelocripe) em 2024 e 2025.
 about_repository_button = Repositório
 about_donation_button = Doar
 about_instruction_button = Ajuda
@@ -374,7 +376,7 @@ settings_duplicates_prehash_checkbutton_tooltip =
     
     Recomenda-se utilizar esta opção ao fazer a pesquisa de centenas de milhares ou de milhões de arquivos, porque esta opção pode acelerar os resultados da pesquisa e pode desativar esta opção ao fazer a pesquisa de uma pequena quantidade de dados.
 settings_duplicates_prehash_minimal_entry_tooltip = Tamanho mínimo do código ‘hash’ parcial que será gravado no arquivo de ‘cache’.
-settings_duplicates_hide_hard_link_button = Ocultar as ligações rígidas (somente no GNU/Linux e no macOS)
+settings_duplicates_hide_hard_link_button = Ocultar as ligações físicas
 settings_duplicates_prehash_checkbutton = Utilizar os ‘hash’ parciais no arquivo de ‘cache’
 settings_duplicates_minimal_size_cache_label = Tamanho mínimo dos arquivos (em bytes) salvos no arquivo de ‘cache’
 settings_duplicates_minimal_size_cache_prehash_label = Tamanho mínimo dos arquivos (em bytes) ao salvar o ‘hash’ parcial no arquivo de ‘cache’
@@ -401,40 +403,39 @@ settings_folder_cache_open_tooltip =
 settings_folder_settings_open_tooltip =
     Abrir a pasta onde está armazenada as configurações do Czkawka.
     
-    Aviso: a modificação manual das configurações pode interromper no seu fluxo de trabalho.
+    Aviso. A modificação manual das configurações pode interromper no seu fluxo de trabalho.
 settings_folder_cache_open = Abrir a pasta do ‘cache’
 settings_folder_settings_open = Abrir a pasta das configurações
 # Compute results
 compute_stopped_by_user = A pesquisa foi interrompida pelo usuário
-compute_found_duplicates_hash_size = Foram encontrados { $number_files } arquivos duplicados nos { $number_groups } grupos que adotaram o { $size }} de tamanho, **a varredura levou { $time }}**
-compute_found_duplicates_name = Foram encontrados { $number_files } arquivos duplicados nos { $number_groups } grupos, **a varredura levou { $time }}**
-compute_found_empty_folders = Foram encontradas { $number_files } pastas vazias
-compute_found_empty_files = Foram encontrados { $number_files } arquivos vazios
-compute_found_big_files = Foram encontrados { $number_files } arquivos grandes
-compute_found_temporary_files = Foram encontrados { $number_files } arquivos temporários
-compute_found_images = Foram encontrados { $number_files } arquivos de imagem equivalentes nos { $number_groups } grupos
-compute_found_videos = Foram encontrados { $number_files } arquivos de vídeo equivalentes nos { $number_groups } grupos
-compute_found_music = Foram encontrados { $number_files } arquivos de música equivalentes nos { $number_groups } grupos
-compute_found_invalid_symlinks = As { $number_files } ligações simbólicas não são válidas
-compute_found_broken_files = Foram encontrados { $number_files } arquivos corrompidos
-compute_found_bad_extensions = Foram encontrados { $number_files } arquivos com extensões que não são válidas
+compute_found_duplicates_hash_size = Foram encontrados { $number_files } arquivos duplicados nos { $number_groups } grupos que ocupou o tamanho { $size }. A verificação durou { $time }
+compute_found_duplicates_name = Foram encontrados { $number_files } arquivos duplicados nos { $number_groups } grupos. A verificação durou { $time }
+compute_found_empty_folders = Foram encontradas { $number_files } pastas vazias. A verificação durou { $time }
+compute_found_empty_files = Foram encontrados { $number_files } arquivos vazios. A verificação durou { $time }
+compute_found_big_files = Foram encontrados { $number_files } arquivos grandes. A verificação durou { $time }
+compute_found_temporary_files = Foram encontrados { $number_files } arquivos temporários. A verificação durou { $time }
+compute_found_images = Foram encontradas { $number_files } imagens equivalentes nos { $number_groups } grupos. A verificação durou { $time }
+compute_found_videos = Foram encontrados { $number_files } vídeos equivalentes nos { $number_groups } grupos. A verificação durou { $time }
+compute_found_music = Foram encontrados { $number_files } arquivos de músicas equivalentes nos { $number_groups } grupos. A verificação durou { $time }
+compute_found_invalid_symlinks = Foram encontradas { $number_files } ligações simbólicas que não são válidas. A verificação durou { $time }
+compute_found_broken_files = Foram encontrados { $number_files } arquivos corrompidos. A verificação durou { $time }
+compute_found_bad_extensions = Foram encontrados { $number_files } arquivos com extensões que não são válidas. A verificação durou { $time }
 # Progress window
-progress_scanning_general_file = Pesquisando em { $file_number } arquivos
 progress_scanning_extension_of_files = Pesquisando por tipo da extensão dos arquivos { $file_checked } de { $all_files }
-progress_scanning_broken_files = Verificado { $file_checked }/{ $all_files } arquivo ({ $data_checked }/{ $all_data })
-progress_scanning_video = Criando o código ‘hash’ dos arquivos de vídeo { $file_checked } de { $all_files }
-progress_scanning_image = Hash de { $file_checked }/{ $all_files } imagem ({ $data_checked }/{ $all_data })
-progress_comparing_image_hashes = Comparando o código ‘hash’ dos arquivos de imagem { $file_checked } de { $all_files }
-progress_scanning_music_tags_end = Comparando as informações dos arquivos de música { $file_checked } de { $all_files }
+progress_scanning_broken_files = Pesquisando { $file_checked }/{ $all_files } no arquivo ({ $data_checked }/{ $all_data })
+progress_scanning_video = Criando o código do ‘hash’ dos arquivos de vídeo { $file_checked } de { $all_files }
+progress_creating_video_thumbnails = Miniaturas criadas de { $file_checked }/{ $all_files } de vídeo
+progress_scanning_image = O ‘hash’ de { $file_checked }/{ $all_files } da imagem ({ $data_checked }/{ $all_data })
+progress_comparing_image_hashes = Comparando o código ‘hash’ dos arquivos da imagem { $file_checked } de { $all_files }
+progress_scanning_music_tags_end = Comparando as informações do arquivo de música { $file_checked } de { $all_files }
 progress_scanning_music_tags = Lendo as informações dos arquivos de música { $file_checked } de { $all_files }
-progress_scanning_music_content_end = Comparando a impressão digital dos arquivos de música { $file_checked } de { $all_files }
-progress_scanning_music_content = Calculada impressão digital de { $file_checked }/ arquivo de música{ $all_files } ({ $data_checked }/{ $all_data })
-progress_scanning_empty_folders = Pesquisando nas { $folder_number } pastas
+progress_scanning_music_content_end = Comparando a impressão digital do arquivo de música { $file_checked } de { $all_files }
+progress_scanning_music_content = Foi calculado a impressão digital de { $file_checked }/ arquivo de música { $all_files } ({ $data_checked }/{ $all_data })
 progress_scanning_size = Pesquisando por nome nos { $file_number } arquivos
-progress_scanning_size_name = Pesquisando por nome e tamanho do arquivo { $file_number }
+progress_scanning_size_name = Pesquisando por nome e por tamanho do arquivo { $file_number }
 progress_scanning_name = Pesquisando por nome do arquivo { $file_number }
-progress_analyzed_partial_hash = Hash parcial analisado de arquivos { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
-progress_analyzed_full_hash = Hash completo analisado de arquivos { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
+progress_analyzed_partial_hash = O ‘hash’ parcial foi analisado dos arquivos { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
+progress_analyzed_full_hash = O ‘hash’ completo foi analisado dos arquivos { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
 progress_prehash_cache_loading = Carregando o ‘hash’ parcial dos arquivos do ‘cache’
 progress_prehash_cache_saving = Salvando o ‘hash’ parcial dos arquivos no ‘cache’
 progress_hash_cache_loading = Carregando o ‘hash’ dos arquivos do ‘cache’
@@ -445,22 +446,15 @@ progress_current_stage = Estágio atual: { "  " }
 progress_all_stages = Todos os estágios: { "  " }
 # Saving loading 
 saving_loading_saving_success = As configurações foram salvas no arquivo { $name }.
-saving_loading_saving_failure = Ocorreu uma falha ao tentar salvar as configurações no arquivo { $name }.
+saving_loading_saving_failure = Ocorreu uma falha ao salvar os dados no arquivo configurações { $name }, por causa de { $reason }.
 saving_loading_reset_configuration = As configurações padrão foram restauradas.
 saving_loading_loading_success = As configurações do programa foram carregadas com sucesso.
-saving_loading_invalid_string = Para o conteúdo "{ $key }" foi encontrado o resultado "{ $result }" que não é um texto válido.
-saving_loading_invalid_int = Para o conteúdo "{ $key }" foi encontrado o resultado "{ $result }" que não é um número inteiro.
-saving_loading_invalid_bool = Para o conteúdo "{ $key }" foi encontrado o resultado "{ $result }" que não é do tipo ‘booleano’, ou seja, ‘true’ = verdadeiro = 1 (um) ou ‘false’ = falso = 0 (zero).
-saving_loading_decode_problem_bool = Ocorreu uma falha ao tentar decodificar o dado ‘booleano’ o conteúdo "{ $key }", foi encontrado o resultado "{ $result }", mas os valores permitidos podem ser 0, 1, ‘true’ (verdadeiro) ou ‘false’ (falso).
-saving_loading_saving_same_keys = Tentando salvar as configurações com o conteúdo duplicado "{ $key }".
-saving_loading_failed_to_create_config_file = Ocorreu uma falha ao criar o arquivo de configurações no caminho "{ $path }", por causa de "{ $reason }".
-saving_loading_failed_to_read_config_file = Não foi possível carregar o arquivo de configurações do caminho "{ $path }", porque o arquivo não existe ou porque não é um arquivo de configurações.
-saving_loading_failed_to_read_data_from_file = Não foi possível ler os dados do arquivo do caminho "{ $path }", por causa de "{ $reason }".
-saving_loading_orphan_data = Foram encontrados dados órfãos "{ $data }" na linha "{ $line }".
-saving_loading_not_valid = A configuração "{ $data }" não existe na versão atual do programa.
+saving_loading_failed_to_create_config_file = Ocorreu uma falha ao criar o arquivo de configurações no caminho ‘{ $path }’, por causa de ‘{ $reason }’.
+saving_loading_failed_to_read_config_file = Não foi possível carregar o arquivo de configurações do caminho ‘{ $path }’, porque o arquivo não existe ou porque não é um arquivo de configurações.
+saving_loading_failed_to_read_data_from_file = Não foi possível ler os dados do arquivo do caminho ‘{ $path }’, por causa de ‘{ $reason }’.
 # Other
 selected_all_reference_folders = Não foi possível iniciar a pesquisa se todas as pastas estiverem definidas como pastas de origem (ou pastas de referência)
-searching_for_data = Pesquisando os dados. Esta ação pode demorar. Por favor, aguarde...
+searching_for_data = Pesquisando os dados. Esta ação pode demorar bastante tempo. Por favor, aguarde...
 text_view_messages = Exibir as mensagens
 text_view_warnings = Exibir os avisos
 text_view_errors = Exibir os erros
@@ -468,18 +462,18 @@ about_window_motto =
     Este programa é e sempre será de uso gratuito.
     
     Talvez a interface do programa não seja tão ergonômica, mas pelo menos, o programa é de código aberto.
+krokiet_new_app = Czkawka está em modo de manutenção, o que significa que apenas erros críticos serão corrigidos e nenhum novo recurso será adicionado. Para novos recursos, por favor, veja o novo aplicativo Krokiet, que é mais estável e com desempenho e ainda está em desenvolvimento ativo.
 # Various dialog
 dialogs_ask_next_time = Perguntar na próxima vez que for exibida a janela
-delete_file_failed = Ocorreu uma falha ao excluir o arquivo { $name }, por causa de { $reason }
-delete_title_dialog = Confirmação de exclusão
+symlink_failed = Ocorreu uma falha na ligação simbólica { $name } para { $target }, por causa de { $reason }
+delete_title_dialog = Confirmação da exclusão
 delete_question_label = Você tem certeza de que quer excluir os arquivos?
-delete_all_files_in_group_title = Confirmação de exclusão de todos os arquivos do grupo
+delete_all_files_in_group_title = Confirmação da exclusão de todos os arquivos do grupo
 delete_all_files_in_group_label1 = Em alguns grupos, todos os registros estão selecionados.
 delete_all_files_in_group_label2 = Você tem certeza de que quer excluí-los?
-delete_folder_failed = Ocorreu uma falha ao excluir a pasta { $dir }, porque a pasta não existe ou porque você não tem permissões para apagá-la ou porque a pasta não está vazia.
-delete_items_label = Os arquivos { $items } serão excluídos.
-delete_items_groups_label = Os arquivos { $items } dos grupos { $groups } serão excluídos.
-hardlink_failed = Ocorreu uma falha ao criar a ligação simbólica rígida
+delete_items_label = Os { $items } arquivos serão excluídos.
+delete_items_groups_label = Os { $items } arquivos dos { $groups } grupos serão excluídos.
+hardlink_failed = Ocorreu uma falha na ligação rígida { $name } para { $target }, por causa de { $reason }
 hard_sym_invalid_selection_title_dialog = Alguns grupos não são válidos para serem selecionados
 hard_sym_invalid_selection_label_1 = Em alguns grupos, existe apenas um registro selecionado e será ignorado.
 hard_sym_invalid_selection_label_2 = Para criar a ligação simbólica rígida dos arquivos, pelo menos dois registros de um grupo devem ser selecionados.
@@ -491,9 +485,9 @@ move_file_failed = Ocorreu uma falha ao mover o arquivo { $name }, por causa de 
 move_files_title_dialog = Escolha a pasta para a qual você quer mover os arquivos duplicados
 move_files_choose_more_than_1_path = Apenas um caminho pode ser selecionado para copiar os arquivos duplicados. A pasta { $path_number } foi selecionada.
 move_stats = Os itens { $num_files } de { $all_files } foram movidos corretamente.
-save_results_to_file = Resultados salvos tanto nos arquivos txt quanto json na pasta "{ $name }".
-search_not_choosing_any_music = Ocorreu um erro: Você deve selecionar pelo menos uma caixa de seleção com o tipo dos arquivos de música que serão pesquisadas.
-search_not_choosing_any_broken_files = Ocorreu um erro: Você deve selecionar pelo menos uma caixa de seleção com o tipo dos arquivos quebrados que serão pesquisados.
+save_results_to_file = Os resultados foram salvos tanto nos arquivos ‘.txt’ quanto no ‘.json’ na pasta ‘{ $name }’.
+search_not_choosing_any_music = Ocorreu um erro. Você deve selecionar pelo menos uma caixa de seleção com o tipo dos arquivos de música que serão pesquisadas.
+search_not_choosing_any_broken_files = Ocorreu um erro. Você deve selecionar pelo menos uma caixa de seleção com o tipo dos arquivos corrompidos que serão pesquisados.
 include_folders_dialog_title = Pastas a serem pesquisadas
 exclude_folders_dialog_title = Pastas a serem ignoradas
 include_manually_directories_dialog_title = Adicionar as pastas manualmente
@@ -504,7 +498,7 @@ cache_clear_similar_videos_title = Limpando os vídeos equivalentes do ‘cache�
 cache_clear_message_label_1 = Você quer limpar as entradas que estão desatualizadas no ‘cache’?
 cache_clear_message_label_2 = Esta ação irá excluir todos os registros do ‘cache’ que apontam para os arquivos que não são válidos ou que não existentes.
 cache_clear_message_label_3 = Esta opção pode acelerar um pouco o carregamento ou o salvamento do ‘cache’.
-cache_clear_message_label_4 = Aviso: Esta ação irá excluir todos os dados que estão armazenados no ‘cache’ das unidades externas que não estão conectadas. Portanto, todos os ‘hash’ terão que de ser gerados novamente.
+cache_clear_message_label_4 = Aviso. Esta ação irá excluir todos os dados que estão armazenados no ‘cache’ das unidades externas que não estão conectadas. Portanto, todos os ‘hash’ terão que de ser gerados novamente.
 # Show preview
 preview_image_resize_failure = Ocorreu uma falha ao redimensionar a imagem { $name }.
 preview_image_opening_failure = Ocorreu uma falha ao abrir a imagem { $name }, por causa de { $reason }
