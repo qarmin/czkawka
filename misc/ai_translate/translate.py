@@ -45,8 +45,6 @@ IGNORED_KEYS = [
     "duplicate_mode_hash_combo_box",
     "compare_move_left_button",
     "compare_move_right_button",
-    "",
-    "",
 ]
 
 
