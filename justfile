@@ -129,7 +129,7 @@ translate:
     cd misc/ai_translate; uv run translate.py ../../krokiet/i18n
     just pack_translations
 
-validate_translations +args: # Available --fix argument, which removes invalid translations
+validate_translations *args: # Available --fix argument, which removes invalid translations
     cd misc/ai_translate; uv run validate_translations.py ../../czkawka_gui/i18n {{args}}
     cd misc/ai_translate; uv run validate_translations.py ../../czkawka_core/i18n {{args}}
     cd misc/ai_translate; uv run validate_translations.py ../../krokiet/i18n {{args}}
