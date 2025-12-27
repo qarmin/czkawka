@@ -120,6 +120,8 @@ main_tree_view_column_destination_path = Docelowa Ścieżka
 main_tree_view_column_type_of_error = Typ Błędu
 main_tree_view_column_current_extension = Aktualne rozszerzenie
 main_tree_view_column_proper_extensions = Poprawne rozszerzenia
+main_tree_view_column_fps = FPS
+main_tree_view_column_codec = Kodek
 main_label_check_method = Metoda sprawdzania
 main_label_hash_type = Typ hashu
 main_label_hash_size = Rozmiar hashu
@@ -371,7 +373,7 @@ settings_duplicates_prehash_checkbutton_tooltip =
     
     Zaleca się używanie tej opcji podczas skanowania setek tysięcy lub milionów plików, ponieważ może przyspieszyć wielokrotnie przeszukiwanie i wyłaczać gdy skanuje się niewielką ilość danych.
 settings_duplicates_prehash_minimal_entry_tooltip = Minimalny rozmiar pliku, którego cząstkowy hash będzie zapisywany do pamięci podręcznej.
-settings_duplicates_hide_hard_link_button = Ukryj twarde dowiązania (tylko Linux i macOS)
+settings_duplicates_hide_hard_link_button = Ukryj twarde dowiązania
 settings_duplicates_prehash_checkbutton = Używaj pamięci podręcznej dla hashy cząstkowych
 settings_duplicates_minimal_size_cache_label = Minimalny rozmiar plików (w bajtach) zapisywanych do pamięci podręcznej
 settings_duplicates_minimal_size_cache_prehash_label = Minimalny rozmiar plików (w bajtach) przy zapisywaniu ich częściowego haszu do pamięci podręcznej
@@ -403,18 +405,18 @@ settings_folder_cache_open = Otwórz folder pamięci podręcznej
 settings_folder_settings_open = Otwórz folder ustawień
 # Compute results
 compute_stopped_by_user = Przeszukiwanie zostało zatrzymane przez użytkownika
-compute_found_duplicates_hash_size = Znaleziono { $number_files } duplikatów w { $number_groups } grupach zajmujących { $size }, **skan zajął { $time }**
-compute_found_duplicates_name = Znaleziono { $number_files } duplikatów w { $number_groups } grupach, **skan zajął { $time }**
-compute_found_empty_folders = Znaleziono { $number_files } pustych folderów
-compute_found_empty_files = Znaleziono { $number_files } pustych plików
-compute_found_big_files = Znaleziono { $number_files } największych plików
-compute_found_temporary_files = Znaleziono { $number_files } tymczasowych plików
-compute_found_images = Znaleziono { $number_files } podobnych obrazów w { $number_groups } grupach
-compute_found_videos = Znaleziono { $number_files } podobnych plików wideo w { $number_groups } grupach
-compute_found_music = Znaleziono { $number_files } podobnych plików muzycznych w { $number_groups } grupach
-compute_found_invalid_symlinks = Znaleziono { $number_files } niepoprawnych dowiązań symbolicznych
-compute_found_broken_files = Znaleziono { $number_files } uszkodzonych plików
-compute_found_bad_extensions = Znaleziono { $number_files } plików z nieprawidłowymi rozszerzeniami
+compute_found_duplicates_hash_size = Znaleziono duplikaty { $number_files } w grupach { $number_groups } , które zajęły { $size } w { $time }
+compute_found_duplicates_name = Znaleziono duplikaty { $number_files } w grupach { $number_groups } w { $time }
+compute_found_empty_folders = Znaleziono puste foldery { $number_files } w { $time }
+compute_found_empty_files = Znaleziono { $number_files } puste pliki w { $time }
+compute_found_big_files = Znaleziono { $number_files } dużych plików w { $time }
+compute_found_temporary_files = Znaleziono pliki tymczasowe { $number_files } w { $time }
+compute_found_images = Znaleziono { $number_files } podobnych obrazów w grupach { $number_groups } w { $time }
+compute_found_videos = Znaleziono podobne filmy { $number_files } w grupach { $number_groups } w { $time }
+compute_found_music = Znaleziono { $number_files } podobne pliki muzyczne w grupach { $number_groups } w { $time }
+compute_found_invalid_symlinks = Znaleziono { $number_files } niepoprawnych symlinków w { $time }
+compute_found_broken_files = Znaleziono { $number_files } uszkodzonych plików w { $time }
+compute_found_bad_extensions = Znaleziono pliki { $number_files } z nieprawidłowymi rozszerzeniami w { $time }
 # Progress window
 progress_scanning_general_file =
     { $file_number ->
@@ -424,6 +426,7 @@ progress_scanning_general_file =
 progress_scanning_extension_of_files = Sprawdzono rozszerzenie { $file_checked }/{ $all_files } plików
 progress_scanning_broken_files = Sprawdzono plik { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
 progress_scanning_video = Obliczono hashe dla { $file_checked }/{ $all_files } plików video
+progress_creating_video_thumbnails = Utworzone miniatury filmu { $file_checked }/{ $all_files }
 progress_scanning_image = Obliczono hashe dla { $file_checked }/{ $all_files } obrazów ({ $data_checked }/{ $all_data })
 progress_comparing_image_hashes = Porównano { $file_checked }/{ $all_files } hashy obrazów
 progress_scanning_music_tags_end = Porównano { $file_checked }/{ $all_files } tagów plików audio
@@ -450,19 +453,12 @@ progress_current_stage = Aktualny Etap:{ "  " }
 progress_all_stages = Wszystkie Etapy:{ "  " }
 # Saving loading 
 saving_loading_saving_success = Zapisano konfigurację do pliku { $name }.
-saving_loading_saving_failure = Nie udało zapisać się konfiguracji do pliku { $name }.
+saving_loading_saving_failure = Nie udało się zapisać danych konfiguracyjnych do pliku { $name }, powód { $reason }.
 saving_loading_reset_configuration = Przywrócono domyślą konfigurację.
 saving_loading_loading_success = Poprawnie załadowano ustawienia aplikacji.
-saving_loading_invalid_string = Dla klucza "{ $key }" znaleziono niepoprawną wartość - "{ $result }" która nie jest jedno-liniowym ciągiem znaków.
-saving_loading_invalid_int = Dla klucza "{ $key }" znaleziono niepoprawną wartość - "{ $result }" która nie jest liczbą całkowitą.
-saving_loading_invalid_bool = Dla klucza "{ $key }" znaleziono niepoprawną wartość - "{ $result }" która nie jest typem logicznym.
-saving_loading_decode_problem_bool = Nie udało się zdekodować wartości z klucza "{ $key }", znaleziono "{ $result }" ale dozwolone wartości to 0, 1, true lub false.
-saving_loading_saving_same_keys = Próba zapisania ustawień z zduplikowanym kluczem "{ $key }".
 saving_loading_failed_to_create_config_file = Nie udało się utworzyć pliku konfiguracyjnego "{ $path }", powód "{ $reason }".
 saving_loading_failed_to_read_config_file = Nie można załadować konfiguracji z "{ $path }" ponieważ nie istnieje lub nie jest plikiem.
 saving_loading_failed_to_read_data_from_file = Nie można odczytać danych z pliku "{ $path }", powód "{ $reason }".
-saving_loading_orphan_data = Znaleziono osierocone dane "{ $data }" w wierszu "{ $line }".
-saving_loading_not_valid = Ustawienie "{ $data }" nie istnieje w bieżącej wersji aplikacji.
 # Other
 selected_all_reference_folders = Nie można rozpocząć wyszukiwania, gdy wszystkie katalogi są ustawione jako foldery źródłowe (referencyjne)
 searching_for_data = Przeszukiwanie dysku, może to potrwać chwilę, proszę czekać...
@@ -474,18 +470,18 @@ about_window_motto =
     
     Może interfejs programu nie jest ergonomiczny,
     ale za to przynajmniej kod jest nieczytelny.
+krokiet_new_app = Czkawka jest w trybie konserwacji, co oznacza, że naprawione zostaną tylko krytyczne błędy i nie zostaną dodane żadne nowe funkcje. Aby uzyskać nowe funkcje, sprawdź nową aplikację Krokiet, która jest bardziej stabilna i wydajna i nadal jest w fazie rozwoju.
 # Various dialog
 dialogs_ask_next_time = Pytaj następnym razem
-delete_file_failed = Nie udało się usunąć pliku { $name }, powód { $reason }
+symlink_failed = Nie udało się połączyć symbolem { $name } do { $target }, powód { $reason }
 delete_title_dialog = Potwierdzenie usunięcia
 delete_question_label = Czy na pewno usunąć te pliki?
 delete_all_files_in_group_title = Potwierdzenie usunięcia wszystkich plików w grupie
 delete_all_files_in_group_label1 = W niektórych grupach wszystkie rekordy są zaznaczone.
 delete_all_files_in_group_label2 = Czy na pewno je usunąć?
-delete_folder_failed = Nie udało się usunąć folderu { $dir } ponieważ nie istnieje, uprawnienia nie są wystarczające lub nie jest pusty.
 delete_items_label = { $items } plików będzie usuniętych.
 delete_items_groups_label = { $items } plików z { $groups } grup zostanie usuniętych.
-hardlink_failed = Nie udało się utworzyć twardego dowiązania
+hardlink_failed = Nie udało się połączyć z { $name } do { $target }, powód { $reason }
 hard_sym_invalid_selection_title_dialog = Niepoprawne zaznaczenie w niektórych grupach
 hard_sym_invalid_selection_label_1 = W niektórych grupach jest zaznaczony tylko jeden rekord i zostanie zignorowany.
 hard_sym_invalid_selection_label_2 = Aby móc mocno połączyć te pliki, należy wybrać co najmniej dwa rekordy w grupie.
