@@ -219,14 +219,9 @@ fn translate_items(app: &MainWindow) {
     translation.set_tool_invalid_symlinks_text(flk!("tool_invalid_symlinks").into());
     translation.set_tool_broken_files_text(flk!("tool_broken_files").into());
     translation.set_tool_bad_extensions_text(flk!("tool_bad_extensions").into());
-    translation.set_sort_by_item_name_text(flk!("sort_by_item_name").into());
-    translation.set_sort_by_parent_name_text(flk!("sort_by_parent_name").into());
     translation.set_sort_by_full_name_text(flk!("sort_by_full_name").into());
-    translation.set_sort_by_size_text(flk!("sort_by_size").into());
-    translation.set_sort_by_modification_date_text(flk!("sort_by_modification_date").into());
     translation.set_sort_by_selection_text(flk!("sort_by_selection").into());
     translation.set_sort_reverse_text(flk!("sort_reverse").into());
-    translation.set_sort_by_checked_text(flk!("sort_by_checked").into());
     translation.set_settings_dark_theme_text(flk!("settings_dark_theme").into());
     translation.set_settings_show_only_icons_text(flk!("settings_show_only_icons").into());
     translation.set_settings_global_settings_text(flk!("settings_global_settings").into());
@@ -320,6 +315,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_videos_thumbnail_percentage_text(flk!("subsettings_videos_thumbnail_percentage").into());
     translation.set_settings_load_tabs_sizes_at_startup_text(flk!("settings_load_tabs_sizes_at_startup").into());
     translation.set_settings_load_windows_size_at_startup_text(flk!("settings_load_windows_size_at_startup").into());
+    translation.set_settings_limit_lines_of_messages_text(flk!("settings_limit_lines_of_messages").into());
     translation.set_settings_cache_number_size_text("".into());
     translation.set_settings_video_thumbnails_number_size_text("".into());
     translation.set_settings_log_number_size_text("".into());
@@ -340,34 +336,14 @@ fn translate_items(app: &MainWindow) {
     let gui_state = app.global::<GuiState>();
     gui_state.set_tools_model(ModelRc::new(VecModel::from(tools_model.to_vec())));
 
-    let sort_model: [SortModel; 8] = [
-        SortModel {
-            data: SortMode::ItemName,
-            name: flk!("sort_by_item_name").into(),
-        },
-        SortModel {
-            data: SortMode::ParentName,
-            name: flk!("sort_by_parent_name").into(),
-        },
+    let sort_model: [SortModel; 3] = [
         SortModel {
             data: SortMode::FullName,
             name: flk!("sort_by_full_name").into(),
         },
         SortModel {
-            data: SortMode::Size,
-            name: flk!("sort_by_size").into(),
-        },
-        SortModel {
-            data: SortMode::ModificationDate,
-            name: flk!("sort_by_modification_date").into(),
-        },
-        SortModel {
             data: SortMode::Selection,
             name: flk!("sort_by_selection").into(),
-        },
-        SortModel {
-            data: SortMode::Checked,
-            name: flk!("sort_by_checked").into(),
         },
         SortModel {
             data: SortMode::Reverse,
@@ -434,13 +410,8 @@ pub(crate) fn translate_select_mode(select_mode: SelectMode) -> SharedString {
 
 pub(crate) fn translate_sort_mode(sort_mode: SortMode) -> SharedString {
     match sort_mode {
-        SortMode::ItemName => flk!("sort_by_item_name").into(),
-        SortMode::ParentName => flk!("sort_by_parent_name").into(),
         SortMode::FullName => flk!("sort_by_full_name").into(),
-        SortMode::Size => flk!("sort_by_size").into(),
-        SortMode::ModificationDate => flk!("sort_by_modification_date").into(),
         SortMode::Selection => flk!("sort_by_selection").into(),
-        SortMode::Checked => flk!("sort_by_checked").into(),
         SortMode::Reverse => flk!("sort_reverse").into(),
     }
 }

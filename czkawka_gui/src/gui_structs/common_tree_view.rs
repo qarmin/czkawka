@@ -1,9 +1,8 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use czkawka_core::common::image::get_dynamic_image_from_path;
+use czkawka_core::common::image::{check_if_can_display_image, get_dynamic_image_from_path};
 use czkawka_core::common::traits::PrintResults;
-use czkawka_core::localizer_core::generate_translation_hashmap;
 use czkawka_core::tools::bad_extensions::BadExtensions;
 use czkawka_core::tools::big_file::BigFile;
 use czkawka_core::tools::broken_files::BrokenFiles;
@@ -546,6 +545,10 @@ pub(crate) fn show_preview(
 
             let file_name = get_full_name_from_path_name(&path, &name);
 
+            if !check_if_can_display_image(&file_name) {
+                break 'dir;
+            }
+
             if file_name == preview_path.borrow().as_str() {
                 return; // Preview is already created, no need to recreate it
             }
@@ -554,7 +557,7 @@ pub(crate) fn show_preview(
                 let image = match get_dynamic_image_from_path(&file_name) {
                     Ok(t) => t,
                     Err(e) => {
-                        add_text_to_text_view(text_view_errors, flg!("preview_image_opening_failure", name = file_name, reason = e).as_str());
+                        add_text_to_text_view(text_view_errors, &flg!("preview_image_opening_failure", name = file_name, reason = e));
                         break 'dir;
                     }
                 };
@@ -562,7 +565,7 @@ pub(crate) fn show_preview(
                 match get_pixbuf_from_dynamic_image(image) {
                     Ok(t) => t,
                     Err(e) => {
-                        add_text_to_text_view(text_view_errors, flg!("preview_image_opening_failure", name = file_name, reason = e).as_str());
+                        add_text_to_text_view(text_view_errors, &flg!("preview_image_opening_failure", name = file_name, reason = e));
                         break 'dir;
                     }
                 }
@@ -570,21 +573,14 @@ pub(crate) fn show_preview(
                 match Pixbuf::from_file(&file_name) {
                     Ok(pixbuf) => pixbuf,
                     Err(e) => {
-                        add_text_to_text_view(
-                            text_view_errors,
-                            flg!(
-                                "preview_image_opening_failure",
-                                generate_translation_hashmap(vec![("name", file_name), ("reason", e.to_string())])
-                            )
-                            .as_str(),
-                        );
+                        add_text_to_text_view(text_view_errors, &flg!("preview_image_opening_failure", name = file_name, reason = e.to_string()));
                         break 'dir;
                     }
                 }
             };
             pixbuf = match resize_pixbuf_dimension(&pixbuf, (800, 800), InterpType::Bilinear) {
                 None => {
-                    add_text_to_text_view(text_view_errors, flg!("preview_image_resize_failure", name = file_name).as_str());
+                    add_text_to_text_view(text_view_errors, &flg!("preview_image_resize_failure", name = file_name));
                     break 'dir;
                 }
                 Some(pixbuf) => pixbuf,

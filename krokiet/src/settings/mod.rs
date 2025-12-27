@@ -190,7 +190,7 @@ where
 
     let result = match std::fs::read_to_string(&config_file) {
         Ok(serialized) => {
-            debug!("Loading data from file {:?} took {:?}", config_file, current_time.elapsed());
+            debug!("Loading data from file \"{:?}\" took {:?}", config_file.to_string_lossy(), current_time.elapsed());
 
             match serde_json::from_str(&serialized) {
                 Ok(custom_settings) => Ok(custom_settings),
@@ -200,7 +200,11 @@ where
         Err(e) => Err(format!("Cannot read config file: {e}")),
     };
 
-    debug!("Loading and converting data from file {:?} took {:?}", config_file, current_time.elapsed());
+    debug!(
+        "Loading and converting data from file \"{:?}\" took {:?}",
+        config_file.to_string_lossy(),
+        current_time.elapsed()
+    );
 
     result
 }
@@ -264,6 +268,7 @@ pub(crate) fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicS
     app.global::<Callabler>().invoke_theme_changed();
     settings.set_load_tabs_sizes_at_startup(basic_settings.settings_load_tabs_sizes_at_startup);
     settings.set_load_windows_size_at_startup(basic_settings.settings_load_windows_size_at_startup);
+    settings.set_limit_messages_lines(basic_settings.settings_limit_lines_of_messages);
 
     set_combobox_basic_settings_items(&settings, basic_settings);
 }
@@ -651,6 +656,7 @@ pub(crate) fn collect_base_settings(app: &MainWindow) -> BasicSettings {
 
     let settings_load_tabs_sizes_at_startup = settings.get_load_tabs_sizes_at_startup();
     let settings_load_windows_size_at_startup = settings.get_load_windows_size_at_startup();
+    let settings_limit_lines_of_messages = settings.get_limit_messages_lines();
     BasicSettings {
         language,
         default_preset,
@@ -661,5 +667,6 @@ pub(crate) fn collect_base_settings(app: &MainWindow) -> BasicSettings {
         show_only_icons,
         settings_load_tabs_sizes_at_startup,
         settings_load_windows_size_at_startup,
+        settings_limit_lines_of_messages,
     }
 }

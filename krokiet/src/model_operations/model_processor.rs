@@ -5,7 +5,7 @@ use std::time::Duration;
 use crossbeam_channel::Sender;
 use czkawka_core::common::progress_data::{CurrentStage, ProgressData};
 use czkawka_core::helpers::delayed_sender::DelayedSender;
-use czkawka_core::helpers::messages::Messages;
+use czkawka_core::helpers::messages::{MessageLimit, Messages};
 use log::{debug, error};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use slint::{ComponentHandle, ModelRc, VecModel, Weak};
@@ -205,7 +205,7 @@ impl ModelProcessor {
                 self.active_tab.set_tool_model(&app, ModelRc::new(VecModel::from(new_model_after_removing_useless_items)));
 
                 app.global::<GuiState>()
-                    .set_info_text(Messages::new_from_errors(errors.clone()).create_messages_text().into());
+                    .set_info_text(Messages::new_from_errors(errors.clone()).create_messages_text(MessageLimit::NoLimit).into());
 
                 app.global::<GuiState>().set_preview_visible(false);
 

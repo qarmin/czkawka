@@ -118,7 +118,7 @@ impl DebugPrint for DuplicateFinder {
         println!("### Other");
 
         println!("Files list size - {}", self.files_with_identical_size.len());
-        println!("Hashed Files list size - {}", self.files_with_identical_hashes.len());
+        println!("Hashed files list size - {}", self.files_with_identical_hashes.len());
         println!("Files with identical names - {}", self.files_with_identical_names.len());
         println!("Files with identical size names - {}", self.files_with_identical_size_names.len());
         println!("Files with identical names referenced - {}", self.files_with_identical_names_referenced.len());

@@ -152,7 +152,7 @@ pub struct SimilarVideos {
 #[derive(Default, Clone)]
 pub struct Info {
     pub number_of_duplicates: usize,
-    pub number_of_groups: u64,
+    pub number_of_groups: usize,
     pub scanning_time: Duration,
 }
 

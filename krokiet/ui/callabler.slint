@@ -1,4 +1,4 @@
-import { ActiveTab, SelectMode, SortMode } from "common.slint";
+import { ActiveTab, SelectMode, SortColumnMode, SortMode } from "common.slint";
 import { Palette } from "std-widgets.slint";
 import { Settings } from "settings.slint";
 
@@ -60,4 +60,6 @@ export global Callabler {
     theme_changed => {
         Palette.color-scheme = Settings.dark_theme ? ColorScheme.dark : ColorScheme.light;
     }
+
+    callback change_sort_column_mode(SortColumnMode, int);
 }

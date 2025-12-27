@@ -179,6 +179,8 @@ pub struct BasicSettings {
     pub settings_load_windows_size_at_startup: bool,
     #[serde(default = "ttrue")]
     pub settings_load_tabs_sizes_at_startup: bool,
+    #[serde(default = "ttrue")]
+    pub settings_limit_lines_of_messages: bool,
 }
 
 impl Default for BasicSettings {

@@ -84,6 +84,7 @@ export component MainWindow inherits Window {
                         width: preview_or_tool_settings.visible ? parent.width / 2 : parent.width;
                         height: parent.height;
                         horizontal-stretch: 0.5;
+                        working: root.scanning || root.processing;
                         duplicate_files_model <=> root.duplicate_files_model;
                         empty_folder_model <=> root.empty_folder_model;
                         big_files_model <=> root.big_files_model;
@@ -149,6 +150,7 @@ export component MainWindow inherits Window {
             scan_starting(item) => {
                 text_summary_text = Translations.searching_text;
                 root.scan_starting(item);
+                main_list.scan_started(); // Need to clear sorting state
             }
             show_select_popup(x_offset, y_offset) => {
                 select_popup_window.x_offset = x_offset;

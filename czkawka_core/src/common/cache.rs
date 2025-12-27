@@ -256,13 +256,23 @@ mod tests {
     use tempfile::TempDir;
 
     use super::*;
-    use crate::common::config_cache_path::set_config_cache_path;
+    use crate::common::config_cache_path::set_config_cache_path_test;
 
     static INIT: Once = Once::new();
 
     fn setup_cache_path() {
         INIT.call_once(|| {
-            let _ = set_config_cache_path("czkawka_test", "czkawka_test");
+            let temp_cache_dir = TempDir::new().expect("Failed to create temp cache dir");
+            let temp_config_dir = TempDir::new().expect("Failed to create temp config dir");
+
+            let cache_path = temp_cache_dir.path().to_path_buf();
+            let config_path = temp_config_dir.path().to_path_buf();
+
+            set_config_cache_path_test(cache_path, config_path);
+
+            // Leak the TempDir to keep directories alive for the duration of tests
+            std::mem::forget(temp_cache_dir);
+            std::mem::forget(temp_config_dir);
         });
     }
 

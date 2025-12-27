@@ -1,6 +1,6 @@
 import { CheckBox, ListView, ScrollView, VerticalBox } from "std-widgets.slint";
 import { ColorPalette } from "color_palette.slint";
-import { MainListModel } from "common.slint";
+import { MainListModel, SortColumnMode } from "common.slint";
 import { Callabler } from "callabler.slint";
 
 export component SelectableTableView inherits Rectangle {
@@ -20,6 +20,9 @@ export component SelectableTableView inherits Rectangle {
     in-out property <int> start_shift_idx: -1;
     in-out property <int> last_selected_idx: -1;
     out property <length> item_height: 20px;
+    in-out property <SortColumnMode> sort_column_mode: SortColumnMode.None;
+    in-out property <int> sort_column_idx: -1;
+    in-out property <bool> sort_available: true;
 
     out property <length> list_view_width: max(self.width - 20px, column_sizes[0] + column_sizes[1] + column_sizes[2] + column_sizes[3] + column_sizes[4] + column_sizes[5] + column_sizes[6] + column_sizes[7] + column_sizes[8] + column_sizes[9] + column_sizes[10] + column_sizes[11]);
 
@@ -34,9 +37,36 @@ export component SelectableTableView inherits Rectangle {
                 spacing: 5px;
                 for title[idx] in root.columns: HorizontalLayout {
                     width: root.column_sizes[idx];
-                    Text {
-                        overflow: elide;
-                        text: title;
+                    
+                    TouchArea {
+                        pointer-event(event) => {
+                            if (!sort_available) {
+                                return; // TODO - this probably should be relaxed - it should be available to sort, lists that are not processing e.g. during duplicate scan, sorting empty folders should be possible
+                            }
+                            if (event.button == PointerEventButton.left && event.kind == PointerEventKind.up) {
+                                // Clicked at header column, and already there was sorting in this column
+                                if (sort_column_idx == idx) {
+                                    if (sort_column_mode == SortColumnMode.Ascending || sort_column_mode == SortColumnMode.None) {
+                                        sort_column_mode = SortColumnMode.Descending;
+                                    } else {
+                                        sort_column_mode = SortColumnMode.Ascending;
+                                    }
+                                } else {
+                                    sort_column_mode = SortColumnMode.Descending;
+                                }
+
+                                sort_column_idx = idx;
+
+                                Callabler.change_sort_column_mode(sort_column_mode, idx);
+                            }
+                        }
+                        Text {
+                            width: parent.width;
+                            height: parent.height;
+
+                            overflow: elide;
+                            text: title;
+                        }
                     }
 
                     Rectangle {
@@ -145,6 +175,12 @@ export component SelectableTableView inherits Rectangle {
         start_shift_idx = -1;
         last_selected_idx = -1;
         hidePreview();
+    }
+
+    public function scan_started() {
+        sort_column_idx = -1;
+        sort_column_mode = SortColumnMode.None;
+        // We could here reset selections, but this is done in rust side already
     }
 
     function contains_data(idx: int) -> bool {

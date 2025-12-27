@@ -7,7 +7,7 @@ Czkawka GUI is a graphical user interface for Czkawka Core, built with GTK 4.
 ## Maintenance Mode
 
 Czkawka GTK is currently in maintenance mode.  
-No new features will be added (at least by me), but bug fixes and compatibility updates with the Czkawka core package will continue.  
+This means that new features will be kept to an absolute minimum, and only critical bugs will be fixed.  Compatibility updates with the Czkawka core package will still be provided to ensure that the application continues to compile correctly.  
 Active development is now focused on the Krokiet GUI.
 
 ## Requirements

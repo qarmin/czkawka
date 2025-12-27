@@ -2,6 +2,7 @@
 
 use std::path::PathBuf;
 
+use num_enum::TryFromPrimitive;
 use slint::{ComponentHandle, Model, ModelRc, SharedString, VecModel};
 
 use crate::{ActiveTab, ExcludedDirectoriesModel, IncludedDirectoriesModel, MainListModel, MainWindow, Settings};
@@ -11,82 +12,105 @@ use crate::{ActiveTab, ExcludedDirectoriesModel, IncludedDirectoriesModel, MainL
 
 // Duplicates
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum IntDataDuplicateFiles {
     ModificationDatePart1,
     ModificationDatePart2,
     SizePart1,
     SizePart2,
 }
+pub const MAX_INT_DATA_DUPLICATE_FILES: usize = IntDataDuplicateFiles::SizePart2 as usize + 1;
+
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum StrDataDuplicateFiles {
     Size,
     Name,
     Path,
     ModificationDate,
 }
+pub const MAX_STR_DATA_DUPLICATE_FILES: usize = StrDataDuplicateFiles::ModificationDate as usize + 1;
 
 // Empty Folders
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum IntDataEmptyFolders {
     ModificationDatePart1,
     ModificationDatePart2,
 }
+pub const MAX_INT_DATA_EMPTY_FOLDERS: usize = IntDataEmptyFolders::ModificationDatePart2 as usize + 1;
 
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum StrDataEmptyFolders {
     Name,
     Path,
     ModificationDate,
 }
+pub const MAX_STR_DATA_EMPTY_FOLDERS: usize = StrDataEmptyFolders::ModificationDate as usize + 1;
 // Big Files
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum IntDataBigFiles {
     ModificationDatePart1,
     ModificationDatePart2,
     SizePart1,
     SizePart2,
 }
+pub const MAX_INT_DATA_BIG_FILES: usize = IntDataBigFiles::SizePart2 as usize + 1;
 
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum StrDataBigFiles {
     Size,
     Name,
     Path,
     ModificationDate,
 }
+pub const MAX_STR_DATA_BIG_FILES: usize = StrDataBigFiles::ModificationDate as usize + 1;
 
 // Empty files
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum IntDataEmptyFiles {
     ModificationDatePart1,
     ModificationDatePart2,
     SizePart1,
     SizePart2,
 }
+pub const MAX_INT_DATA_EMPTY_FILES: usize = IntDataEmptyFiles::SizePart2 as usize + 1;
 
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum StrDataEmptyFiles {
     Name,
     Path,
     ModificationDate,
 }
+pub const MAX_STR_DATA_EMPTY_FILES: usize = StrDataEmptyFiles::ModificationDate as usize + 1;
 // Temporary Files
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum IntDataTemporaryFiles {
     ModificationDatePart1,
     ModificationDatePart2,
     SizePart1,
     SizePart2,
 }
+pub const MAX_INT_DATA_TEMPORARY_FILES: usize = IntDataTemporaryFiles::SizePart2 as usize + 1;
+
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum StrDataTemporaryFiles {
     Name,
     Path,
     ModificationDate,
 }
+pub const MAX_STR_DATA_TEMPORARY_FILES: usize = StrDataTemporaryFiles::ModificationDate as usize + 1;
 
 // Similar Images
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum IntDataSimilarImages {
     ModificationDatePart1,
     ModificationDatePart2,
@@ -94,9 +118,13 @@ pub enum IntDataSimilarImages {
     SizePart2,
     Width,
     Height,
+    PixelsPart1,
+    PixelsPart2,
 }
+pub const MAX_INT_DATA_SIMILAR_IMAGES: usize = IntDataSimilarImages::PixelsPart2 as usize + 1;
 
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum StrDataSimilarImages {
     Similarity,
     Size,
@@ -105,17 +133,27 @@ pub enum StrDataSimilarImages {
     Path,
     ModificationDate,
 }
+pub const MAX_STR_DATA_SIMILAR_IMAGES: usize = StrDataSimilarImages::ModificationDate as usize + 1;
 
 // Similar Videos
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum IntDataSimilarVideos {
     ModificationDatePart1,
     ModificationDatePart2,
     SizePart1,
     SizePart2,
+    BitratePart1,
+    BitratePart2,
+    Duration,
+    Fps,
+    PixelsPart1,
+    PixelsPart2,
 }
+pub const MAX_INT_DATA_SIMILAR_VIDEOS: usize = IntDataSimilarVideos::PixelsPart2 as usize + 1;
 
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum StrDataSimilarVideos {
     Size,
     Name,
@@ -128,17 +166,21 @@ pub enum StrDataSimilarVideos {
     ModificationDate,
     PreviewPath,
 }
+pub const MAX_STR_DATA_SIMILAR_VIDEOS: usize = StrDataSimilarVideos::PreviewPath as usize + 1;
 
 // Similar Music
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum IntDataSimilarMusic {
     ModificationDatePart1,
     ModificationDatePart2,
     SizePart1,
     SizePart2,
 }
+pub const MAX_INT_DATA_SIMILAR_MUSIC: usize = IntDataSimilarMusic::SizePart2 as usize + 1;
 
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum StrDataSimilarMusic {
     Size,
     Name,
@@ -151,15 +193,19 @@ pub enum StrDataSimilarMusic {
     Path,
     ModificationDate,
 }
+pub const MAX_STR_DATA_SIMILAR_MUSIC: usize = StrDataSimilarMusic::ModificationDate as usize + 1;
 
 // Invalid Symlinks
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum IntDataInvalidSymlinks {
     ModificationDatePart1,
     ModificationDatePart2,
 }
+pub const MAX_INT_DATA_INVALID_SYMLINKS: usize = IntDataInvalidSymlinks::ModificationDatePart2 as usize + 1;
 
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum StrDataInvalidSymlinks {
     SymlinkName,
     SymlinkFolder,
@@ -167,17 +213,21 @@ pub enum StrDataInvalidSymlinks {
     TypeOfError,
     ModificationDate,
 }
+pub const MAX_STR_DATA_INVALID_SYMLINKS: usize = StrDataInvalidSymlinks::ModificationDate as usize + 1;
 
 // Broken Files
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum IntDataBrokenFiles {
     ModificationDatePart1,
     ModificationDatePart2,
     SizePart1,
     SizePart2,
 }
+pub const MAX_INT_DATA_BROKEN_FILES: usize = IntDataBrokenFiles::SizePart2 as usize + 1;
 
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum StrDataBrokenFiles {
     Name,
     Path,
@@ -185,16 +235,20 @@ pub enum StrDataBrokenFiles {
     Size,
     ModificationDate,
 }
+pub const MAX_STR_DATA_BROKEN_FILES: usize = StrDataBrokenFiles::ModificationDate as usize + 1;
 // Bad Extensions
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum IntDataBadExtensions {
     ModificationDatePart1,
     ModificationDatePart2,
     SizePart1,
     SizePart2,
 }
+pub const MAX_INT_DATA_BAD_EXTENSIONS: usize = IntDataBadExtensions::SizePart2 as usize + 1;
 
 #[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum StrDataBadExtensions {
     Name,
     Path,
@@ -202,8 +256,105 @@ pub enum StrDataBadExtensions {
     ProperExtensionsGroup,
     ProperExtension,
 }
+pub const MAX_STR_DATA_BAD_EXTENSIONS: usize = StrDataBadExtensions::ProperExtension as usize + 1;
+
+pub(crate) enum SortIdx {
+    StrIdx(i32),
+    IntIdx(i32),
+    IntIdxPair(i32, i32),
+    Selection,
+}
 
 impl ActiveTab {
+    pub(crate) fn get_str_int_sort_idx(self, str_idx: i32) -> SortIdx {
+        // This not exists in enums, because selection is stored in other field
+        if str_idx == 0 {
+            return SortIdx::Selection;
+        }
+        let str_idx = str_idx - 1; // Adjust for selection
+
+        match self {
+            Self::EmptyFolders => match StrDataEmptyFolders::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for EmptyFolders")) {
+                StrDataEmptyFolders::Name | StrDataEmptyFolders::Path => SortIdx::StrIdx(str_idx),
+                StrDataEmptyFolders::ModificationDate => SortIdx::IntIdxPair(IntDataEmptyFolders::ModificationDatePart1 as i32, IntDataEmptyFolders::ModificationDatePart2 as i32),
+            },
+            Self::EmptyFiles => match StrDataEmptyFiles::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for EmptyFiles")) {
+                StrDataEmptyFiles::Name | StrDataEmptyFiles::Path => SortIdx::StrIdx(str_idx),
+                StrDataEmptyFiles::ModificationDate => SortIdx::IntIdxPair(IntDataEmptyFiles::ModificationDatePart1 as i32, IntDataEmptyFiles::ModificationDatePart2 as i32),
+            },
+            Self::SimilarImages => match StrDataSimilarImages::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for SimilarImages")) {
+                StrDataSimilarImages::Similarity | StrDataSimilarImages::Name | StrDataSimilarImages::Path => SortIdx::StrIdx(str_idx),
+                StrDataSimilarImages::ModificationDate => {
+                    SortIdx::IntIdxPair(IntDataSimilarImages::ModificationDatePart1 as i32, IntDataSimilarImages::ModificationDatePart2 as i32)
+                }
+                StrDataSimilarImages::Size => SortIdx::IntIdxPair(IntDataSimilarImages::SizePart1 as i32, IntDataSimilarImages::SizePart2 as i32),
+                StrDataSimilarImages::Resolution => SortIdx::IntIdxPair(IntDataSimilarImages::PixelsPart1 as i32, IntDataSimilarImages::PixelsPart2 as i32),
+            },
+            Self::DuplicateFiles => match StrDataDuplicateFiles::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for DuplicateFiles")) {
+                StrDataDuplicateFiles::Name | StrDataDuplicateFiles::Path => SortIdx::StrIdx(str_idx),
+                StrDataDuplicateFiles::ModificationDate => {
+                    SortIdx::IntIdxPair(IntDataDuplicateFiles::ModificationDatePart1 as i32, IntDataDuplicateFiles::ModificationDatePart2 as i32)
+                }
+                StrDataDuplicateFiles::Size => SortIdx::IntIdxPair(IntDataDuplicateFiles::SizePart1 as i32, IntDataDuplicateFiles::SizePart2 as i32),
+            },
+            Self::BigFiles => match StrDataBigFiles::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for BigFiles")) {
+                StrDataBigFiles::Name | StrDataBigFiles::Path => SortIdx::StrIdx(str_idx),
+                StrDataBigFiles::ModificationDate => SortIdx::IntIdxPair(IntDataBigFiles::ModificationDatePart1 as i32, IntDataBigFiles::ModificationDatePart2 as i32),
+                StrDataBigFiles::Size => SortIdx::IntIdxPair(IntDataBigFiles::SizePart1 as i32, IntDataBigFiles::SizePart2 as i32),
+            },
+            Self::TemporaryFiles => match StrDataTemporaryFiles::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for TemporaryFiles")) {
+                StrDataTemporaryFiles::Name | StrDataTemporaryFiles::Path => SortIdx::StrIdx(str_idx),
+                StrDataTemporaryFiles::ModificationDate => {
+                    SortIdx::IntIdxPair(IntDataTemporaryFiles::ModificationDatePart1 as i32, IntDataTemporaryFiles::ModificationDatePart2 as i32)
+                }
+            },
+            Self::SimilarVideos => match StrDataSimilarVideos::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for SimilarVideos")) {
+                StrDataSimilarVideos::Name | StrDataSimilarVideos::Path | StrDataSimilarVideos::Codec | StrDataSimilarVideos::PreviewPath => SortIdx::StrIdx(str_idx),
+                StrDataSimilarVideos::ModificationDate => {
+                    SortIdx::IntIdxPair(IntDataSimilarVideos::ModificationDatePart1 as i32, IntDataSimilarVideos::ModificationDatePart2 as i32)
+                }
+                StrDataSimilarVideos::Size => SortIdx::IntIdxPair(IntDataSimilarVideos::SizePart1 as i32, IntDataSimilarVideos::SizePart2 as i32),
+                StrDataSimilarVideos::Bitrate => SortIdx::IntIdxPair(IntDataSimilarVideos::BitratePart1 as i32, IntDataSimilarVideos::BitratePart2 as i32),
+                StrDataSimilarVideos::Duration => SortIdx::IntIdx(IntDataSimilarVideos::Duration as i32),
+                StrDataSimilarVideos::Fps => SortIdx::IntIdx(IntDataSimilarVideos::Fps as i32),
+                StrDataSimilarVideos::Dimensions => SortIdx::IntIdxPair(IntDataSimilarVideos::PixelsPart1 as i32, IntDataSimilarVideos::PixelsPart2 as i32),
+            },
+            Self::SimilarMusic => match StrDataSimilarMusic::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for SimilarMusic")) {
+                StrDataSimilarMusic::Name
+                | StrDataSimilarMusic::Path
+                | StrDataSimilarMusic::Title
+                | StrDataSimilarMusic::Artist
+                | StrDataSimilarMusic::Year
+                | StrDataSimilarMusic::Bitrate
+                | StrDataSimilarMusic::Length
+                | StrDataSimilarMusic::Genre => SortIdx::StrIdx(str_idx),
+                StrDataSimilarMusic::ModificationDate => SortIdx::IntIdxPair(IntDataSimilarMusic::ModificationDatePart1 as i32, IntDataSimilarMusic::ModificationDatePart2 as i32),
+                StrDataSimilarMusic::Size => SortIdx::IntIdxPair(IntDataSimilarMusic::SizePart1 as i32, IntDataSimilarMusic::SizePart2 as i32),
+            },
+            Self::InvalidSymlinks => match StrDataInvalidSymlinks::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for InvalidSymlinks")) {
+                StrDataInvalidSymlinks::SymlinkName | StrDataInvalidSymlinks::SymlinkFolder | StrDataInvalidSymlinks::DestinationPath | StrDataInvalidSymlinks::TypeOfError => {
+                    SortIdx::StrIdx(str_idx)
+                }
+                StrDataInvalidSymlinks::ModificationDate => {
+                    SortIdx::IntIdxPair(IntDataInvalidSymlinks::ModificationDatePart1 as i32, IntDataInvalidSymlinks::ModificationDatePart2 as i32)
+                }
+            },
+            Self::BrokenFiles => match StrDataBrokenFiles::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for BrokenFiles")) {
+                StrDataBrokenFiles::Name | StrDataBrokenFiles::Path | StrDataBrokenFiles::TypeOfError => SortIdx::StrIdx(str_idx),
+                StrDataBrokenFiles::ModificationDate => SortIdx::IntIdxPair(IntDataBrokenFiles::ModificationDatePart1 as i32, IntDataBrokenFiles::ModificationDatePart2 as i32),
+                StrDataBrokenFiles::Size => SortIdx::IntIdxPair(IntDataBrokenFiles::SizePart1 as i32, IntDataBrokenFiles::SizePart2 as i32),
+            },
+            Self::BadExtensions => match StrDataBadExtensions::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for BadExtensions")) {
+                StrDataBadExtensions::Name
+                | StrDataBadExtensions::Path
+                | StrDataBadExtensions::CurrentExtension
+                | StrDataBadExtensions::ProperExtensionsGroup
+                | StrDataBadExtensions::ProperExtension => SortIdx::StrIdx(str_idx),
+            },
+            Self::Settings | Self::About => panic!("Button should be disabled"),
+        }
+    }
+
     // Remember to match updated this according to ui/main_lists.slint and connect_scan.rs files
     pub(crate) fn get_str_path_idx(self) -> usize {
         match self {

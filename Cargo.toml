@@ -39,6 +39,8 @@ opt-level = 3 # OPT PACKAGES
 inherits = "release"
 incremental = true
 overflow-checks = true
+debug = false
+strip = true
 
 [profile.test]
 debug-assertions = true # Forces to crash when there is duplicated item in cli

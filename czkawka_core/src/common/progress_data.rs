@@ -29,6 +29,7 @@ use crate::common::model::{CheckingMethod, ToolType};
 // Similar videos
 // 0 - Collecting files
 // 1 - Scanning videos
+// 2 - Creating thumbnails
 
 // Temporary files
 // 0 - Collecting files

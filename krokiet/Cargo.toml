@@ -27,6 +27,7 @@ rayon = "1.10"
 fs_extra = "1.3" # TODO replace with less buggy library
 dunce = "1.0.5"
 fast_image_resize = { version = "5.1.4", features = ["image"] }
+num_enum = "0.7.5"
 
 # Just for enums
 vid_dup_finder_lib = "0.4"

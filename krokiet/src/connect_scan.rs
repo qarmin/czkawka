@@ -11,6 +11,7 @@ use czkawka_core::common::progress_data::ProgressData;
 use czkawka_core::common::tool_data::CommonData;
 use czkawka_core::common::traits::{ResultEntry, Search};
 use czkawka_core::common::{format_time, split_path, split_path_compare};
+use czkawka_core::helpers::messages::MessageLimit;
 use czkawka_core::tools::bad_extensions::{BadExtensions, BadExtensionsParameters, BadFileEntry};
 use czkawka_core::tools::big_file::{BigFile, BigFileParameters, SearchMode};
 use czkawka_core::tools::broken_files::{BrokenEntry, BrokenFiles, BrokenFilesParameters, CheckedTypes};
@@ -28,12 +29,17 @@ use humansize::{BINARY, format_size};
 use rayon::prelude::*;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
 
-use crate::common::{check_if_all_included_dirs_are_referenced, check_if_there_are_any_included_folders, split_u64_into_i32s};
+use crate::common::{
+    MAX_INT_DATA_BIG_FILES, MAX_INT_DATA_BROKEN_FILES, MAX_INT_DATA_DUPLICATE_FILES, MAX_INT_DATA_EMPTY_FILES, MAX_INT_DATA_EMPTY_FOLDERS, MAX_INT_DATA_INVALID_SYMLINKS,
+    MAX_INT_DATA_SIMILAR_IMAGES, MAX_INT_DATA_SIMILAR_MUSIC, MAX_INT_DATA_SIMILAR_VIDEOS, MAX_INT_DATA_TEMPORARY_FILES, MAX_STR_DATA_BIG_FILES, MAX_STR_DATA_BROKEN_FILES,
+    MAX_STR_DATA_DUPLICATE_FILES, MAX_STR_DATA_EMPTY_FILES, MAX_STR_DATA_EMPTY_FOLDERS, MAX_STR_DATA_INVALID_SYMLINKS, MAX_STR_DATA_SIMILAR_IMAGES, MAX_STR_DATA_SIMILAR_MUSIC,
+    MAX_STR_DATA_SIMILAR_VIDEOS, MAX_STR_DATA_TEMPORARY_FILES, check_if_all_included_dirs_are_referenced, check_if_there_are_any_included_folders, split_u64_into_i32s,
+};
 use crate::connect_row_selection::checker::set_number_of_enabled_items;
 use crate::connect_row_selection::reset_selection;
-use crate::settings::collect_settings;
 use crate::settings::combo_box::StringComboBoxItems;
-use crate::settings::model::SettingsCustom;
+use crate::settings::model::{BasicSettings, SettingsCustom};
+use crate::settings::{collect_base_settings, collect_settings};
 use crate::shared_models::SharedModels;
 use crate::{ActiveTab, GuiState, MainListModel, MainWindow, ProgressToSend, flk};
 
@@ -63,6 +69,7 @@ pub(crate) fn connect_scan_button(app: &MainWindow, progress_sender: Sender<Prog
         });
 
         let custom_settings = collect_settings(&app);
+        let basic_settings = collect_base_settings(&app);
 
         let cloned_model = Arc::clone(&shared_models);
 
@@ -72,37 +79,37 @@ pub(crate) fn connect_scan_button(app: &MainWindow, progress_sender: Sender<Prog
         let a = app.as_weak();
         match active_tab {
             ActiveTab::DuplicateFiles => {
-                scan_duplicates(a, progress_sender, stop_flag, custom_settings, cloned_model);
+                scan_duplicates(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
             }
             ActiveTab::EmptyFolders => {
-                scan_empty_folders(a, progress_sender, stop_flag, custom_settings, cloned_model);
+                scan_empty_folders(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
             }
             ActiveTab::BigFiles => {
-                scan_big_files(a, progress_sender, stop_flag, custom_settings, cloned_model);
+                scan_big_files(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
             }
             ActiveTab::EmptyFiles => {
-                scan_empty_files(a, progress_sender, stop_flag, custom_settings, cloned_model);
+                scan_empty_files(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
             }
             ActiveTab::SimilarImages => {
-                scan_similar_images(a, progress_sender, stop_flag, custom_settings, cloned_model);
+                scan_similar_images(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
             }
             ActiveTab::SimilarVideos => {
-                scan_similar_videos(a, progress_sender, stop_flag, custom_settings, cloned_model);
+                scan_similar_videos(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
             }
             ActiveTab::SimilarMusic => {
-                scan_similar_music(a, progress_sender, stop_flag, custom_settings, cloned_model);
+                scan_similar_music(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
             }
             ActiveTab::InvalidSymlinks => {
-                scan_invalid_symlinks(a, progress_sender, stop_flag, custom_settings, cloned_model);
+                scan_invalid_symlinks(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
             }
             ActiveTab::BadExtensions => {
-                scan_bad_extensions(a, progress_sender, stop_flag, custom_settings, cloned_model);
+                scan_bad_extensions(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
             }
             ActiveTab::BrokenFiles => {
-                scan_broken_files(a, progress_sender, stop_flag, custom_settings, cloned_model);
+                scan_broken_files(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
             }
             ActiveTab::TemporaryFiles => {
-                scan_temporary_files(a, progress_sender, stop_flag, custom_settings, cloned_model);
+                scan_temporary_files(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
             }
             ActiveTab::Settings | ActiveTab::About => panic!("Button should be disabled"),
         }
@@ -116,6 +123,7 @@ fn scan_duplicates(
     progress_sender: Sender<ProgressData>,
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
+    basic_settings: BasicSettings,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
@@ -140,7 +148,7 @@ fn scan_duplicates(
             set_common_settings(&mut tool, &custom_settings, &stop_flag);
             tool.set_delete_outdated_cache(custom_settings.duplicate_delete_outdated_entries);
             tool.search(&stop_flag, Some(&progress_sender));
-            let messages = tool.get_text_messages().create_messages_text();
+            let messages = get_text_messages(&tool, &basic_settings);
 
             let mut vector;
             if tool.get_use_reference() {
@@ -187,17 +195,32 @@ fn scan_duplicates(
                 vec.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
             }
 
-            let scanning_time_str = format_time(tool.get_information().scanning_time);
+            let info = tool.get_information();
+            let scanning_time_str = format_time(info.scanning_time);
+            let (duplicates_number, groups_number, lost_space) = match tool.get_check_method() {
+                CheckingMethod::Hash => (info.number_of_duplicated_files_by_hash, info.number_of_groups_by_hash, info.lost_space_by_hash),
+                CheckingMethod::Name => (info.number_of_duplicated_files_by_name, info.number_of_groups_by_name, 0),
+                CheckingMethod::Size => (info.number_of_duplicated_files_by_size, info.number_of_groups_by_size, info.lost_space_by_size),
+                CheckingMethod::SizeName => (info.number_of_duplicated_files_by_size_name, info.number_of_groups_by_size_name, info.lost_space_by_size),
+                _ => unreachable!("invalid check method {:?}", tool.get_check_method()),
+            };
             shared_models.lock().unwrap().shared_duplication_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_duplicate_results(&app, vector, messages, &scanning_time_str);
+                write_duplicate_results(&app, vector, messages, &scanning_time_str, duplicates_number, groups_number, lost_space);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_duplicate_results(app: &MainWindow, vector: Vec<(Option<DuplicateEntry>, Vec<DuplicateEntry>)>, messages: String, scanning_time_str: &str) {
-    let items_found = vector.len();
+fn write_duplicate_results(
+    app: &MainWindow,
+    vector: Vec<(Option<DuplicateEntry>, Vec<DuplicateEntry>)>,
+    messages: String,
+    scanning_time_str: &str,
+    items_found: usize,
+    groups: usize,
+    lost_space: u64,
+) {
     let items = Rc::new(VecModel::default());
     for (ref_fe, vec_fe) in vector.into_iter().rev() {
         if let Some(ref_fe) = ref_fe {
@@ -213,12 +236,33 @@ fn write_duplicate_results(app: &MainWindow, vector: Vec<(Option<DuplicateEntry>
         }
     }
     app.set_duplicate_files_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_duplicate_files", items_found = items_found, time = scanning_time_str).into());
+    if lost_space > 0 {
+        app.invoke_scan_ended(
+            flk!(
+                "rust_found_duplicate_files",
+                items_found = items_found,
+                groups = groups,
+                size = format_size(lost_space, BINARY),
+                time = scanning_time_str
+            )
+            .into(),
+        );
+    } else {
+        app.invoke_scan_ended(
+            flk!(
+                "rust_found_duplicate_files_no_lost_space",
+                items_found = items_found,
+                groups = groups,
+                time = scanning_time_str
+            )
+            .into(),
+        );
+    }
     app.global::<GuiState>().set_info_text(messages.into());
 }
 fn prepare_data_model_duplicates(fe: &DuplicateEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(fe.get_path());
-    let data_model_str = VecModel::from_slice(&[
+    let data_model_str_arr: [SharedString; MAX_STR_DATA_DUPLICATE_FILES] = [
         format_size(fe.size, BINARY).into(),
         file.into(),
         directory.into(),
@@ -226,10 +270,12 @@ fn prepare_data_model_duplicates(fe: &DuplicateEntry) -> (ModelRc<SharedString>,
             .expect("Cannot create DateTime")
             .to_string()
             .into(),
-    ]);
+    ];
+    let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
-    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1, size_split.0, size_split.1]);
+    let data_model_int_arr: [i32; MAX_INT_DATA_DUPLICATE_FILES] = [modification_split.0, modification_split.1, size_split.0, size_split.1];
+    let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 }
 
@@ -239,6 +285,7 @@ fn scan_empty_folders(
     progress_sender: Sender<ProgressData>,
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
+    basic_settings: BasicSettings,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
@@ -249,21 +296,22 @@ fn scan_empty_folders(
             tool.search(&stop_flag, Some(&progress_sender));
 
             let mut vector = tool.get_empty_folder_list().values().cloned().collect::<Vec<_>>();
-            let messages = tool.get_text_messages().create_messages_text();
+            let messages = get_text_messages(&tool, &basic_settings);
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
-            let scanning_time_str = format_time(tool.get_information().scanning_time);
+            let info = tool.get_information();
+            let scanning_time_str = format_time(info.scanning_time);
+            let items_found = info.number_of_empty_folders;
             shared_models.lock().unwrap().shared_empty_folders_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_empty_folders_results(&app, vector, messages, &scanning_time_str);
+                write_empty_folders_results(&app, vector, messages, &scanning_time_str, items_found);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_empty_folders_results(app: &MainWindow, vector: Vec<FolderEntry>, messages: String, scanning_time_str: &str) {
-    let items_found = vector.len();
+fn write_empty_folders_results(app: &MainWindow, vector: Vec<FolderEntry>, messages: String, scanning_time_str: &str, items_found: usize) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_empty_folders(&fe);
@@ -276,16 +324,18 @@ fn write_empty_folders_results(app: &MainWindow, vector: Vec<FolderEntry>, messa
 
 fn prepare_data_model_empty_folders(fe: &FolderEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(&fe.path);
-    let data_model_str = VecModel::from_slice(&[
+    let data_model_str_arr: [SharedString; MAX_STR_DATA_EMPTY_FOLDERS] = [
         file.into(),
         directory.into(),
         DateTime::from_timestamp(fe.modified_date as i64, 0)
             .expect("Modified date always should be in valid range")
             .to_string()
             .into(),
-    ]);
+    ];
+    let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
-    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1]);
+    let data_model_int_arr: [i32; MAX_INT_DATA_EMPTY_FOLDERS] = [modification_split.0, modification_split.1];
+    let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 }
 
@@ -295,6 +345,7 @@ fn scan_big_files(
     progress_sender: Sender<ProgressData>,
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
+    basic_settings: BasicSettings,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
@@ -310,7 +361,7 @@ fn scan_big_files(
             tool.search(&stop_flag, Some(&progress_sender));
 
             let mut vector = tool.get_big_files().clone();
-            let messages = tool.get_text_messages().create_messages_text();
+            let messages = get_text_messages(&tool, &basic_settings);
 
             if big_files_mode == SearchMode::BiggestFiles {
                 vector.par_sort_unstable_by_key(|fe| u64::MAX - fe.size);
@@ -318,30 +369,40 @@ fn scan_big_files(
                 vector.par_sort_unstable_by_key(|fe| fe.size);
             }
 
-            let scanning_time_str = format_time(tool.get_information().scanning_time);
+            let info = tool.get_information();
+            let scanning_time_str = format_time(info.scanning_time);
+            let items_found = info.number_of_real_files;
+            let files_size = tool.get_big_files().iter().map(|f| f.size).sum::<u64>();
             shared_models.lock().unwrap().shared_big_files_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_big_files_results(&app, vector, messages, &scanning_time_str);
+                write_big_files_results(&app, vector, messages, &scanning_time_str, items_found, files_size);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_big_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages: String, scanning_time_str: &str) {
-    let items_found = vector.len();
+fn write_big_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages: String, scanning_time_str: &str, items_found: usize, files_size: u64) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_big_files(&fe);
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_big_files_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_big_files", items_found = items_found, time = scanning_time_str).into());
+    app.invoke_scan_ended(
+        flk!(
+            "rust_found_big_files",
+            items_found = items_found,
+            time = scanning_time_str,
+            size = format_size(files_size, BINARY)
+        )
+        .into(),
+    );
     app.global::<GuiState>().set_info_text(messages.into());
 }
 
 fn prepare_data_model_big_files(fe: &FileEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(&fe.path);
-    let data_model_str = VecModel::from_slice(&[
+    let data_model_str_arr: [SharedString; MAX_STR_DATA_BIG_FILES] = [
         format_size(fe.size, BINARY).into(),
         file.into(),
         directory.into(),
@@ -349,10 +410,12 @@ fn prepare_data_model_big_files(fe: &FileEntry) -> (ModelRc<SharedString>, Model
             .expect("Modified date always should be in valid range")
             .to_string()
             .into(),
-    ]);
+    ];
+    let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
-    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1, size_split.0, size_split.1]);
+    let data_model_int_arr: [i32; MAX_INT_DATA_BIG_FILES] = [modification_split.0, modification_split.1, size_split.0, size_split.1];
+    let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 }
 
@@ -362,6 +425,7 @@ fn scan_empty_files(
     progress_sender: Sender<ProgressData>,
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
+    basic_settings: BasicSettings,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
@@ -372,21 +436,22 @@ fn scan_empty_files(
             tool.search(&stop_flag, Some(&progress_sender));
 
             let mut vector = tool.get_empty_files().clone();
-            let messages = tool.get_text_messages().create_messages_text();
+            let messages = get_text_messages(&tool, &basic_settings);
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
-            let scanning_time_str = format_time(tool.get_information().scanning_time);
+            let info = tool.get_information();
+            let scanning_time_str = format_time(info.scanning_time);
+            let items_found = info.number_of_empty_files;
             shared_models.lock().unwrap().shared_empty_files_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_empty_files_results(&app, vector, messages, &scanning_time_str);
+                write_empty_files_results(&app, vector, messages, &scanning_time_str, items_found);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_empty_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages: String, scanning_time_str: &str) {
-    let items_found = vector.len();
+fn write_empty_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages: String, scanning_time_str: &str, items_found: usize) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_empty_files(&fe);
@@ -399,17 +464,19 @@ fn write_empty_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages:
 
 fn prepare_data_model_empty_files(fe: &FileEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(fe.get_path());
-    let data_model_str = VecModel::from_slice(&[
+    let data_model_str_arr: [SharedString; MAX_STR_DATA_EMPTY_FILES] = [
         file.into(),
         directory.into(),
         DateTime::from_timestamp(fe.get_modified_date() as i64, 0)
             .expect("Cannot create DateTime")
             .to_string()
             .into(),
-    ]);
+    ];
+    let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
-    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1, size_split.0, size_split.1]);
+    let data_model_int_arr: [i32; MAX_INT_DATA_EMPTY_FILES] = [modification_split.0, modification_split.1, size_split.0, size_split.1];
+    let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 }
 // Scan Similar Images
@@ -419,6 +486,7 @@ fn scan_similar_images(
     progress_sender: Sender<ProgressData>,
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
+    basic_settings: BasicSettings,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
@@ -448,7 +516,7 @@ fn scan_similar_images(
 
             tool.search(&stop_flag, Some(&progress_sender));
 
-            let messages = tool.get_text_messages().create_messages_text();
+            let messages = get_text_messages(&tool, &basic_settings);
 
             let mut vector: Vec<_> = if tool.get_use_reference() {
                 tool.get_similar_images_referenced()
@@ -465,17 +533,27 @@ fn scan_similar_images(
             }
             vector.sort_by_key(|(_header, vc)| u64::MAX - vc.iter().map(|e| e.size).sum::<u64>()); // Also sorts by size, to show the biggest groups first
 
-            let scanning_time_str = format_time(tool.get_information().scanning_time);
+            let info = tool.get_information();
+            let scanning_time_str = format_time(info.scanning_time);
+            let items_found = info.number_of_duplicates;
+            let groups = info.number_of_groups;
             shared_models.lock().unwrap().shared_similar_images_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_similar_images_results(&app, vector, messages, hash_size, &scanning_time_str);
+                write_similar_images_results(&app, vector, messages, hash_size, &scanning_time_str, items_found, groups);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_similar_images_results(app: &MainWindow, vector: Vec<(Option<ImagesEntry>, Vec<ImagesEntry>)>, messages: String, hash_size: u8, scanning_time_str: &str) {
-    let items_found = vector.len();
+fn write_similar_images_results(
+    app: &MainWindow,
+    vector: Vec<(Option<ImagesEntry>, Vec<ImagesEntry>)>,
+    messages: String,
+    hash_size: u8,
+    scanning_time_str: &str,
+    items_found: usize,
+    groups: usize,
+) {
     let items = Rc::new(VecModel::default());
     for (ref_fe, vec_fe) in vector {
         if let Some(ref_fe) = ref_fe {
@@ -491,12 +569,12 @@ fn write_similar_images_results(app: &MainWindow, vector: Vec<(Option<ImagesEntr
         }
     }
     app.set_similar_images_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_similar_images", items_found = items_found, time = scanning_time_str).into());
+    app.invoke_scan_ended(flk!("rust_found_similar_images", items_found = items_found, groups = groups, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 fn prepare_data_model_similar_images(fe: &ImagesEntry, hash_size: u8) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(fe.get_path());
-    let data_model_str = VecModel::from_slice(&[
+    let data_model_str_arr: [SharedString; MAX_STR_DATA_SIMILAR_IMAGES] = [
         get_string_from_similarity(&fe.similarity, hash_size).into(),
         format_size(fe.size, BINARY).into(),
         format!("{}x{}", fe.width, fe.height).into(),
@@ -506,10 +584,22 @@ fn prepare_data_model_similar_images(fe: &ImagesEntry, hash_size: u8) -> (ModelR
             .expect("Cannot create DateTime")
             .to_string()
             .into(),
-    ]);
+    ];
+    let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
-    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1, size_split.0, size_split.1, fe.width as i32, fe.height as i32]);
+    let pixels = split_u64_into_i32s((fe.width as u64) * (fe.height as u64));
+    let data_model_int_arr: [i32; MAX_INT_DATA_SIMILAR_IMAGES] = [
+        modification_split.0,
+        modification_split.1,
+        size_split.0,
+        size_split.1,
+        fe.width as i32,
+        fe.height as i32,
+        pixels.0,
+        pixels.1,
+    ];
+    let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 }
 
@@ -520,6 +610,7 @@ fn scan_similar_videos(
     progress_sender: Sender<ProgressData>,
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
+    basic_settings: BasicSettings,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
@@ -542,7 +633,7 @@ fn scan_similar_videos(
 
             tool.search(&stop_flag, Some(&progress_sender));
 
-            let messages = tool.get_text_messages().create_messages_text();
+            let messages = get_text_messages(&tool, &basic_settings);
 
             let mut vector: Vec<_> = if tool.get_use_reference() {
                 tool.get_similar_videos_referenced()
@@ -562,17 +653,26 @@ fn scan_similar_videos(
             }
             vector.sort_by_key(|(_header, vc)| u64::MAX - vc.iter().map(|e| e.size).sum::<u64>()); // Also sorts by size, to show the biggest groups first
 
-            let scanning_time_str = format_time(tool.get_information().scanning_time);
+            let info = tool.get_information();
+            let scanning_time_str = format_time(info.scanning_time);
+            let items_found = info.number_of_duplicates;
+            let groups = info.number_of_groups;
             shared_models.lock().unwrap().shared_similar_videos_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_similar_videos_results(&app, vector, messages, &scanning_time_str);
+                write_similar_videos_results(&app, vector, messages, &scanning_time_str, items_found, groups);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_similar_videos_results(app: &MainWindow, vector: Vec<(Option<VideosEntry>, Vec<VideosEntry>)>, messages: String, scanning_time_str: &str) {
-    let items_found = vector.len();
+fn write_similar_videos_results(
+    app: &MainWindow,
+    vector: Vec<(Option<VideosEntry>, Vec<VideosEntry>)>,
+    messages: String,
+    scanning_time_str: &str,
+    items_found: usize,
+    groups: usize,
+) {
     let items = Rc::new(VecModel::default());
     for (ref_fe, vec_fe) in vector {
         if let Some(ref_fe) = ref_fe {
@@ -588,7 +688,7 @@ fn write_similar_videos_results(app: &MainWindow, vector: Vec<(Option<VideosEntr
         }
     }
     app.set_similar_videos_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_similar_videos", items_found = items_found, time = scanning_time_str).into());
+    app.invoke_scan_ended(flk!("rust_found_similar_videos", items_found = items_found, groups = groups, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 
@@ -604,7 +704,7 @@ fn prepare_data_model_similar_videos(fe: &VideosEntry) -> (ModelRc<SharedString>
     };
     let preview_path = fe.thumbnail_path.as_ref().map(|e| e.to_string_lossy().to_string()).unwrap_or_default();
     let duration = format_duration_opt(fe.duration);
-    let data_model_str = VecModel::from_slice(&[
+    let data_model_str_arr: [SharedString; MAX_STR_DATA_SIMILAR_VIDEOS] = [
         format_size(fe.size, BINARY).into(),
         file.into(),
         directory.into(),
@@ -618,10 +718,28 @@ fn prepare_data_model_similar_videos(fe: &VideosEntry) -> (ModelRc<SharedString>
             .to_string()
             .into(),
         preview_path.into(),
-    ]);
+    ];
+    let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
-    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1, size_split.0, size_split.1]);
+    let bitrate_split = split_u64_into_i32s(fe.bitrate.unwrap_or(0));
+    let duration_i32 = fe.duration.map_or(0, |d| (d * 100.0) as i32);
+    let fps_i32 = fe.fps.map_or(0, |f| (f * 100.0) as i32);
+    let pixels_int = fe.width.and_then(|w| fe.height.map(|h| w as u64 * h as u64)).unwrap_or_default();
+    let pixels_split = split_u64_into_i32s(pixels_int);
+    let data_model_int_arr: [i32; MAX_INT_DATA_SIMILAR_VIDEOS] = [
+        modification_split.0,
+        modification_split.1,
+        size_split.0,
+        size_split.1,
+        bitrate_split.0,
+        bitrate_split.1,
+        duration_i32,
+        fps_i32,
+        pixels_split.0,
+        pixels_split.1,
+    ];
+    let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 }
 // Scan Similar Music
@@ -630,6 +748,7 @@ fn scan_similar_music(
     progress_sender: Sender<ProgressData>,
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
+    basic_settings: BasicSettings,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
@@ -679,7 +798,7 @@ fn scan_similar_music(
 
             tool.search(&stop_flag, Some(&progress_sender));
 
-            let messages = tool.get_text_messages().create_messages_text();
+            let messages = get_text_messages(&tool, &basic_settings);
 
             let mut vector: Vec<_> = if tool.get_use_reference() {
                 tool.get_similar_music_referenced()
@@ -696,17 +815,19 @@ fn scan_similar_music(
                 vec_fe.sort_unstable_by_key(|a| u64::MAX - a.size);
             }
 
-            let scanning_time_str = format_time(tool.get_information().scanning_time);
+            let info = tool.get_information();
+            let scanning_time_str = format_time(info.scanning_time);
+            let items_found = info.number_of_duplicates;
+            let groups = info.number_of_groups;
             shared_models.lock().unwrap().shared_same_music_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_similar_music_results(&app, vector, messages, &scanning_time_str);
+                write_similar_music_results(&app, vector, messages, &scanning_time_str, items_found, groups);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_similar_music_results(app: &MainWindow, vector: Vec<(Option<MusicEntry>, Vec<MusicEntry>)>, messages: String, scanning_time_str: &str) {
-    let items_found = vector.len();
+fn write_similar_music_results(app: &MainWindow, vector: Vec<(Option<MusicEntry>, Vec<MusicEntry>)>, messages: String, scanning_time_str: &str, items_found: usize, groups: usize) {
     let items = Rc::new(VecModel::default());
     for (ref_fe, vec_fe) in vector {
         if let Some(ref_fe) = ref_fe {
@@ -722,12 +843,12 @@ fn write_similar_music_results(app: &MainWindow, vector: Vec<(Option<MusicEntry>
         }
     }
     app.set_similar_music_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_similar_music_files", items_found = items_found, time = scanning_time_str).into());
+    app.invoke_scan_ended(flk!("rust_found_similar_music_files", items_found = items_found, groups = groups, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
 }
 fn prepare_data_model_similar_music(fe: &MusicEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(fe.get_path());
-    let data_model_str = VecModel::from_slice(&[
+    let data_model_str_arr: [SharedString; MAX_STR_DATA_SIMILAR_MUSIC] = [
         format_size(fe.size, BINARY).into(),
         file.into(),
         fe.track_title.clone().into(),
@@ -741,10 +862,12 @@ fn prepare_data_model_similar_music(fe: &MusicEntry) -> (ModelRc<SharedString>, 
             .expect("Cannot create DateTime")
             .to_string()
             .into(),
-    ]);
+    ];
+    let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
-    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1, size_split.0, size_split.1]);
+    let data_model_int_arr: [i32; MAX_INT_DATA_SIMILAR_MUSIC] = [modification_split.0, modification_split.1, size_split.0, size_split.1];
+    let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 }
 // Invalid Symlinks
@@ -753,6 +876,7 @@ fn scan_invalid_symlinks(
     progress_sender: Sender<ProgressData>,
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
+    basic_settings: BasicSettings,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
@@ -764,21 +888,22 @@ fn scan_invalid_symlinks(
             tool.search(&stop_flag, Some(&progress_sender));
 
             let mut vector = tool.get_invalid_symlinks().clone();
-            let messages = tool.get_text_messages().create_messages_text();
+            let messages = get_text_messages(&tool, &basic_settings);
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
-            let scanning_time_str = format_time(tool.get_information().scanning_time);
+            let info = tool.get_information();
+            let scanning_time_str = format_time(info.scanning_time);
+            let items_found = info.number_of_invalid_symlinks;
             shared_models.lock().unwrap().shared_same_invalid_symlinks = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_invalid_symlinks_results(&app, vector, messages, &scanning_time_str);
+                write_invalid_symlinks_results(&app, vector, messages, &scanning_time_str, items_found);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_invalid_symlinks_results(app: &MainWindow, vector: Vec<SymlinksFileEntry>, messages: String, scanning_time_str: &str) {
-    let items_found = vector.len();
+fn write_invalid_symlinks_results(app: &MainWindow, vector: Vec<SymlinksFileEntry>, messages: String, scanning_time_str: &str, items_found: usize) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_invalid_symlinks(&fe);
@@ -791,7 +916,7 @@ fn write_invalid_symlinks_results(app: &MainWindow, vector: Vec<SymlinksFileEntr
 
 fn prepare_data_model_invalid_symlinks(fe: &SymlinksFileEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(fe.get_path());
-    let data_model_str = VecModel::from_slice(&[
+    let data_model_str_arr: [SharedString; MAX_STR_DATA_INVALID_SYMLINKS] = [
         file.into(),
         directory.into(),
         fe.symlink_info.destination_path.to_string_lossy().to_string().into(),
@@ -800,16 +925,20 @@ fn prepare_data_model_invalid_symlinks(fe: &SymlinksFileEntry) -> (ModelRc<Share
             .expect("Cannot create DateTime")
             .to_string()
             .into(),
-    ]);
+    ];
+    let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
-    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1]);
+    let data_model_int_arr: [i32; MAX_INT_DATA_INVALID_SYMLINKS] = [modification_split.0, modification_split.1];
+    let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
-} ////////////////////////////////////////// Temporary Files
+}
+////////////////////////////////////////// Temporary Files
 fn scan_temporary_files(
     a: Weak<MainWindow>,
     progress_sender: Sender<ProgressData>,
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
+    basic_settings: BasicSettings,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
@@ -821,21 +950,22 @@ fn scan_temporary_files(
             tool.search(&stop_flag, Some(&progress_sender));
 
             let mut vector = tool.get_temporary_files().clone();
-            let messages = tool.get_text_messages().create_messages_text();
+            let messages = get_text_messages(&tool, &basic_settings);
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
-            let scanning_time_str = format_time(tool.get_information().scanning_time);
+            let info = tool.get_information();
+            let scanning_time_str = format_time(info.scanning_time);
+            let items_found = info.number_of_temporary_files;
             shared_models.lock().unwrap().shared_temporary_files_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_temporary_files_results(&app, vector, messages, &scanning_time_str);
+                write_temporary_files_results(&app, vector, messages, &scanning_time_str, items_found);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_temporary_files_results(app: &MainWindow, vector: Vec<TemporaryFileEntry>, messages: String, scanning_time_str: &str) {
-    let items_found = vector.len();
+fn write_temporary_files_results(app: &MainWindow, vector: Vec<TemporaryFileEntry>, messages: String, scanning_time_str: &str, items_found: usize) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_temporary_files(&fe);
@@ -848,17 +978,19 @@ fn write_temporary_files_results(app: &MainWindow, vector: Vec<TemporaryFileEntr
 
 fn prepare_data_model_temporary_files(fe: &TemporaryFileEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(&fe.path);
-    let data_model_str = VecModel::from_slice(&[
+    let data_model_str_arr: [SharedString; MAX_STR_DATA_TEMPORARY_FILES] = [
         file.into(),
         directory.into(),
         DateTime::from_timestamp(fe.modified_date as i64, 0)
             .expect("Modified date always should be in valid range")
             .to_string()
             .into(),
-    ]);
+    ];
+    let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
-    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1, size_split.0, size_split.1]);
+    let data_model_int_arr: [i32; MAX_INT_DATA_TEMPORARY_FILES] = [modification_split.0, modification_split.1, size_split.0, size_split.1];
+    let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 }
 ////////////////////////////////////////// Broken Files
@@ -867,6 +999,7 @@ fn scan_broken_files(
     progress_sender: Sender<ProgressData>,
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
+    basic_settings: BasicSettings,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
@@ -901,34 +1034,44 @@ fn scan_broken_files(
             tool.search(&stop_flag, Some(&progress_sender));
 
             let mut vector = tool.get_broken_files().clone();
-            let messages = tool.get_text_messages().create_messages_text();
+            let messages = get_text_messages(&tool, &basic_settings);
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
-            let scanning_time_str = format_time(tool.get_information().scanning_time);
+            let info = tool.get_information();
+            let scanning_time_str = format_time(info.scanning_time);
+            let items_found = info.number_of_broken_files;
+            let size = tool.get_broken_files().iter().map(|e| e.size).sum::<u64>();
             shared_models.lock().unwrap().shared_broken_files_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_broken_files_results(&app, vector, messages, &scanning_time_str);
+                write_broken_files_results(&app, vector, messages, &scanning_time_str, items_found, size);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_broken_files_results(app: &MainWindow, vector: Vec<BrokenEntry>, messages: String, scanning_time_str: &str) {
-    let items_found = vector.len();
+fn write_broken_files_results(app: &MainWindow, vector: Vec<BrokenEntry>, messages: String, scanning_time_str: &str, items_found: usize, size: u64) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_broken_files(&fe);
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_broken_files_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_broken_files", items_found = items_found, time = scanning_time_str).into());
+    app.invoke_scan_ended(
+        flk!(
+            "rust_found_broken_files",
+            items_found = items_found,
+            time = scanning_time_str,
+            size = format_size(size, BINARY)
+        )
+        .into(),
+    );
     app.global::<GuiState>().set_info_text(messages.into());
 }
 
 fn prepare_data_model_broken_files(fe: &BrokenEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(&fe.path);
-    let data_model_str = VecModel::from_slice(&[
+    let data_model_str_arr: [SharedString; MAX_STR_DATA_BROKEN_FILES] = [
         file.into(),
         directory.into(),
         fe.error_string.clone().into(),
@@ -937,10 +1080,12 @@ fn prepare_data_model_broken_files(fe: &BrokenEntry) -> (ModelRc<SharedString>, 
             .expect("Modified date always should be in valid range")
             .to_string()
             .into(),
-    ]);
+    ];
+    let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
-    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1, size_split.0, size_split.1]);
+    let data_model_int_arr: [i32; MAX_INT_DATA_BROKEN_FILES] = [modification_split.0, modification_split.1, size_split.0, size_split.1];
+    let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 }
 ////////////////////////////////////////// Bad Extensions
@@ -949,6 +1094,7 @@ fn scan_bad_extensions(
     progress_sender: Sender<ProgressData>,
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
+    basic_settings: BasicSettings,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
@@ -960,21 +1106,22 @@ fn scan_bad_extensions(
             tool.search(&stop_flag, Some(&progress_sender));
 
             let mut vector = tool.get_bad_extensions_files().clone();
-            let messages = tool.get_text_messages().create_messages_text();
+            let messages = get_text_messages(&tool, &basic_settings);
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
-            let scanning_time_str = format_time(tool.get_information().scanning_time);
+            let info = tool.get_information();
+            let scanning_time_str = format_time(info.scanning_time);
+            let items_found = info.number_of_files_with_bad_extension;
             shared_models.lock().unwrap().shared_bad_extensions_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_bad_extensions_results(&app, vector, messages, &scanning_time_str);
+                write_bad_extensions_results(&app, vector, messages, &scanning_time_str, items_found);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_bad_extensions_results(app: &MainWindow, vector: Vec<BadFileEntry>, messages: String, scanning_time_str: &str) {
-    let items_found = vector.len();
+fn write_bad_extensions_results(app: &MainWindow, vector: Vec<BadFileEntry>, messages: String, scanning_time_str: &str, items_found: usize) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_bad_extensions(&fe);
@@ -1010,6 +1157,18 @@ fn insert_data_to_model(items: &Rc<VecModel<MainListModel>>, data_model_str: Mod
         val_int: ModelRc::new(data_model_int),
     };
     items.push(main);
+}
+
+fn get_text_messages<T>(component: &T, basic_settings: &BasicSettings) -> String
+where
+    T: CommonData,
+{
+    let limit = if basic_settings.settings_limit_lines_of_messages {
+        MessageLimit::Lines(500)
+    } else {
+        MessageLimit::NoLimit
+    };
+    component.get_text_messages().create_messages_text(limit)
 }
 
 fn set_common_settings<T>(component: &mut T, custom_settings: &SettingsCustom, stop_flag: &Arc<AtomicBool>)

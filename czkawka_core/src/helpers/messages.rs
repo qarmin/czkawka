@@ -1,5 +1,7 @@
 //! Messages: Utility for collecting and printing messages, warnings, and errors.
 
+use crate::flc;
+
 /// Stores messages, warnings, and errors for reporting.
 #[derive(Debug, Default, Clone)]
 pub struct Messages {
@@ -9,6 +11,13 @@ pub struct Messages {
     pub warnings: Vec<String>,
     /// Error messages.
     pub errors: Vec<String>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum MessageLimit {
+    NoLimit,
+    Characters(usize),
+    Lines(usize),
 }
 
 impl Messages {
@@ -34,13 +43,22 @@ impl Messages {
 
     /// Prints all messages, warnings, and errors to the provided writer.
     pub fn print_messages_to_writer<T: std::io::Write>(&self, writer: &mut T) -> std::io::Result<()> {
-        let text = self.create_messages_text();
+        let text = self.create_messages_text(MessageLimit::NoLimit);
         writer.write_all(text.as_bytes())
     }
 
     /// Creates a formatted string containing all messages, warnings, and errors.
-    pub fn create_messages_text(&self) -> String {
+    pub fn create_messages_text(&self, limit: MessageLimit) -> String {
         let mut text_to_return: String = String::new();
+
+        if !self.errors.is_empty() {
+            text_to_return += "--------------------------------ERRORS---------------------------------\n";
+            for i in &self.errors {
+                text_to_return += i;
+                text_to_return += "\n";
+            }
+            text_to_return += "----------------------------END OF ERRORS------------------------------\n";
+        }
 
         if !self.messages.is_empty() {
             text_to_return += "-------------------------------MESSAGES--------------------------------\n";
@@ -60,13 +78,29 @@ impl Messages {
             text_to_return += "---------------------------END OF WARNINGS-----------------------------\n";
         }
 
-        if !self.errors.is_empty() {
-            text_to_return += "--------------------------------ERRORS---------------------------------\n";
-            for i in &self.errors {
-                text_to_return += i;
-                text_to_return += "\n";
+        let mut text_to_return = text_to_return.trim().to_string();
+        match limit {
+            MessageLimit::NoLimit => {}
+            MessageLimit::Characters(max_chars) => {
+                let char_count = text_to_return.chars().count();
+                if char_count > max_chars {
+                    let truncated: String = text_to_return.chars().take(max_chars).collect();
+                    text_to_return = truncated;
+                    text_to_return += "\n\n";
+                    text_to_return += &flc!("core_messages_limit_reached_characters", current = char_count, limit = max_chars);
+                    text_to_return += "\n";
+                }
             }
-            text_to_return += "----------------------------END OF ERRORS------------------------------\n";
+            MessageLimit::Lines(max_lines) => {
+                let line_count = text_to_return.lines().count();
+                if line_count > max_lines {
+                    let lines: Vec<&str> = text_to_return.lines().take(max_lines).collect();
+                    text_to_return = lines.join("\n");
+                    text_to_return += "\n\n";
+                    text_to_return += &flc!("core_messages_limit_reached_lines", current = line_count, limit = max_lines);
+                    text_to_return += "\n";
+                }
+            }
         }
 
         text_to_return
@@ -92,13 +126,13 @@ mod tests {
         assert!(msg.messages.is_empty());
         assert!(msg.warnings.is_empty());
         assert!(msg.errors.is_empty());
-        assert_eq!(msg.create_messages_text(), "");
+        assert_eq!(msg.create_messages_text(MessageLimit::NoLimit), "");
 
         // Test new_from_errors()
         let errors = vec!["Error 1".to_string(), "Error 2".to_string()];
         let msg = Messages::new_from_errors(errors.clone());
         assert_eq!(msg.errors, errors);
-        let text = msg.create_messages_text();
+        let text = msg.create_messages_text(MessageLimit::NoLimit);
         assert!(text.contains("ERRORS"));
         assert!(text.contains("Error 1"));
 
@@ -106,14 +140,14 @@ mod tests {
         let warnings = vec!["Warning 1".to_string()];
         let msg = Messages::new_from_warnings(warnings.clone());
         assert_eq!(msg.warnings, warnings);
-        let text = msg.create_messages_text();
+        let text = msg.create_messages_text(MessageLimit::NoLimit);
         assert!(text.contains("WARNINGS"));
 
         // Test new_from_messages()
         let messages = vec!["Message 1".to_string()];
         let msg = Messages::new_from_messages(messages.clone());
         assert_eq!(msg.messages, messages);
-        let text = msg.create_messages_text();
+        let text = msg.create_messages_text(MessageLimit::NoLimit);
         assert!(text.contains("MESSAGES"));
 
         // Test all types together
@@ -121,7 +155,7 @@ mod tests {
         msg.messages.push("Info".to_string());
         msg.warnings.push("Warn".to_string());
         msg.errors.push("Err".to_string());
-        let text = msg.create_messages_text();
+        let text = msg.create_messages_text(MessageLimit::NoLimit);
         assert!(text.contains("MESSAGES"));
         assert!(text.contains("Info"));
         assert!(text.contains("WARNINGS"));

@@ -7,6 +7,7 @@ const SPONSOR_SITE: &str = "https://github.com/sponsors/qarmin";
 const REPOSITORY_SITE: &str = "https://github.com/qarmin/czkawka";
 const INSTRUCTION_SITE: &str = "https://github.com/qarmin/czkawka/blob/master/instructions/Instruction.md";
 const TRANSLATION_SITE: &str = "https://crwd.in/czkawka";
+const KROKIET_SITE: &str = "https://github.com/qarmin/czkawka/tree/master/krokiet";
 
 pub(crate) fn connect_about_buttons(gui_data: &GuiData) {
     let button_donation = gui_data.about.button_donation.clone();
@@ -20,6 +21,13 @@ pub(crate) fn connect_about_buttons(gui_data: &GuiData) {
     button_instruction.connect_clicked(move |_| {
         if let Err(e) = open::that(INSTRUCTION_SITE) {
             error!("Failed to open instruction site: {INSTRUCTION_SITE}, reason {e}");
+        }
+    });
+
+    let button_krokiet = gui_data.about.button_krokiet.clone();
+    button_krokiet.connect_clicked(move |_| {
+        if let Err(e) = open::that(KROKIET_SITE) {
+            error!("Failed to open Krokiet site: {KROKIET_SITE}, reason {e}");
         }
     });
 
