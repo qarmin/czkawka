@@ -32,3 +32,4 @@ TestFiles
 .venv
 charts*
 *__pycache__*/
+result
