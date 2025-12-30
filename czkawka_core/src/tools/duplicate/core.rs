@@ -2,6 +2,7 @@ use std::collections::BTreeMap;
 use std::path::Path;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
+use std::time::Instant;
 use std::{mem, thread};
 
 use crossbeam_channel::Sender;
@@ -247,7 +248,21 @@ impl DuplicateFinder {
                             return None;
                         }
 
-                        let vector = if self.get_params().ignore_hard_links { filter_hard_links(&vec) } else { vec };
+                        let vector = if self.get_params().ignore_hard_links {
+                            let start_time = Instant::now();
+                            let initial_len = vec.len();
+                            let res = filter_hard_links(vec);
+                            let diff = initial_len - res.len();
+                            debug!(
+                                "check_file_size - filtered {} hard link(s) from group of {} files (this took {:?})",
+                                diff,
+                                initial_len,
+                                start_time.elapsed()
+                            );
+                            res
+                        } else {
+                            vec
+                        };
 
                         if vector.len() > 1 {
                             Some((size, vector.into_iter().map(FileEntry::into_duplicate_entry).collect()))

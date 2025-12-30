@@ -4,33 +4,33 @@ import argparse
 import pathlib
 import re
 import sys
-from typing import Dict, List, Set
+from typing import Any, Dict, List, Set
 
 from ftl_utils import parse_ftl_file, find_ftl_file_in_folder, LANGUAGE_NAMES
 
 
 class Colors:
-    GREEN = '\033[92m'
-    RED = '\033[91m'
-    YELLOW = '\033[93m'
-    BLUE = '\033[94m'
-    RESET = '\033[0m'
-    BOLD = '\033[1m'
+    GREEN = "\033[92m"
+    RED = "\033[91m"
+    YELLOW = "\033[93m"
+    BLUE = "\033[94m"
+    RESET = "\033[0m"
+    BOLD = "\033[1m"
 
 
 def extract_placeholders(text: str) -> Set[str]:
-    pattern = re.compile(r'\{\s*\$[\w-]+\s*\}')
+    pattern = re.compile(r"\{\s*\$[\w-]+\s*\}")
     matches = pattern.findall(text)
-    normalized = {re.sub(r'\s+', '', match) for match in matches}
+    normalized = {re.sub(r"\s+", "", match) for match in matches}
     return normalized
 
 
 def count_placeholders(text: str) -> Dict[str, int]:
-    pattern = re.compile(r'\{\s*\$[\w-]+\s*\}')
+    pattern = re.compile(r"\{\s*\$[\w-]+\s*\}")
     matches = pattern.findall(text)
-    normalized_matches = [re.sub(r'\s+', '', match) for match in matches]
+    normalized_matches = [re.sub(r"\s+", "", match) for match in matches]
 
-    counts = {}
+    counts: Dict[str, int] = {}
     for placeholder in normalized_matches:
         counts[placeholder] = counts.get(placeholder, 0) + 1
 
@@ -60,15 +60,15 @@ def validate_translation(base_value: str, translated_value: str, key: str) -> Li
             translated_count = translated_counts.get(placeholder, 0)
 
             if base_count != translated_count:
-                errors.append(f"  {Colors.RED}Wrong occurrence count for {placeholder}:{Colors.RESET} expected {base_count}, found {translated_count}")
+                errors.append(
+                    f"  {Colors.RED}Wrong occurrence count for {placeholder}:{Colors.RESET} expected {base_count}, found {translated_count}"
+                )
 
     return errors
 
 
 def validate_language_file(
-    base_entries: Dict[str, str],
-    lang_file: pathlib.Path,
-    lang_code: str
+    base_entries: Dict[str, str], lang_file: pathlib.Path, lang_code: str
 ) -> Dict[str, List[str]]:
     lang_entries = parse_ftl_file(lang_file)
 
@@ -90,7 +90,7 @@ def validate_language_file(
 
 def fix_language_file(lang_file: pathlib.Path, keys_to_remove: Set[str]) -> int:
     content = lang_file.read_text(encoding="utf-8")
-    lines = content.split('\n')
+    lines = content.split("\n")
     result_lines = []
     i = 0
     removed_count = 0
@@ -98,7 +98,7 @@ def fix_language_file(lang_file: pathlib.Path, keys_to_remove: Set[str]) -> int:
     while i < len(lines):
         line = lines[i]
 
-        key_match = re.match(r'^([\w][\w-]*)\s*=', line)
+        key_match = re.match(r"^([\w][\w-]*)\s*=", line)
 
         if key_match:
             key = key_match.group(1)
@@ -107,10 +107,10 @@ def fix_language_file(lang_file: pathlib.Path, keys_to_remove: Set[str]) -> int:
                 removed_count += 1
                 i += 1
                 while i < len(lines):
-                    if lines[i] and lines[i][0] == ' ':
+                    if lines[i] and lines[i][0] == " ":
                         i += 1
                     elif not lines[i].strip():
-                        if i + 1 < len(lines) and lines[i + 1] and lines[i + 1][0] == ' ':
+                        if i + 1 < len(lines) and lines[i + 1] and lines[i + 1][0] == " ":
                             i += 1
                         else:
                             break
@@ -121,11 +121,13 @@ def fix_language_file(lang_file: pathlib.Path, keys_to_remove: Set[str]) -> int:
         result_lines.append(line)
         i += 1
 
-    lang_file.write_text('\n'.join(result_lines), encoding="utf-8")
+    lang_file.write_text("\n".join(result_lines), encoding="utf-8")
     return removed_count
 
 
-def validate_i18n_folder(i18n_path: pathlib.Path, target_languages: List[str] | None = None, fix_mode: bool = False) -> int:
+def validate_i18n_folder(
+    i18n_path: pathlib.Path, target_languages: List[str] | None = None, fix_mode: bool = False
+) -> int:
     print(f"Validating i18n folder: {i18n_path}")
 
     en_folder = i18n_path / "en"
@@ -154,11 +156,11 @@ def validate_i18n_folder(i18n_path: pathlib.Path, target_languages: List[str] | 
     print("=" * 70)
 
     total_errors = 0
-    errors_by_language = {}
+    errors_by_language: Dict[str, Dict[str, Any]] = {}
 
     for lang_folder in lang_folders:
         lang_code = lang_folder.name
-        lang_name = LANGUAGE_NAMES.get(lang_code, 'Unknown')
+        lang_name = LANGUAGE_NAMES.get(lang_code, "Unknown")
 
         lang_file = find_ftl_file_in_folder(lang_folder)
 
@@ -168,11 +170,7 @@ def validate_i18n_folder(i18n_path: pathlib.Path, target_languages: List[str] | 
         errors = validate_language_file(base_entries, lang_file, lang_code)
 
         if errors:
-            errors_by_language[lang_code] = {
-                'name': lang_name,
-                'file': lang_file,
-                'errors': errors
-            }
+            errors_by_language[lang_code] = {"name": lang_name, "file": lang_file, "errors": errors}
             total_errors += len(errors)
 
     if not errors_by_language:
@@ -185,9 +183,9 @@ def validate_i18n_folder(i18n_path: pathlib.Path, target_languages: List[str] | 
         total_fixed = 0
         for lang_code in sorted(errors_by_language.keys()):
             data = errors_by_language[lang_code]
-            keys_to_remove = set(data['errors'].keys())
+            keys_to_remove = set(data["errors"].keys())
 
-            removed = fix_language_file(data['file'], keys_to_remove)
+            removed = fix_language_file(data["file"], keys_to_remove)
             total_fixed += removed
 
             print(f"{lang_code:8} ({data['name']:25}) - removed {removed:3} entry(ies)")
@@ -199,7 +197,7 @@ def validate_i18n_folder(i18n_path: pathlib.Path, target_languages: List[str] | 
 
     for lang_code in sorted(errors_by_language.keys()):
         data = errors_by_language[lang_code]
-        error_count = len(data['errors'])
+        error_count = len(data["errors"])
         print(f"{lang_code:8} ({data['name']:25}) - {error_count:3} error(s)")
 
     print(f"\nTotal errors: {total_errors}\n")
@@ -212,7 +210,7 @@ def validate_i18n_folder(i18n_path: pathlib.Path, target_languages: List[str] | 
         print(f"\n{Colors.BOLD}{lang_code} ({data['name']}) - {data['file'].name}{Colors.RESET}")
         print("-" * 70)
 
-        for key, error_messages in sorted(data['errors'].items()):
+        for key, error_messages in sorted(data["errors"].items()):
             print(f"\n{Colors.GREEN}Key: {key}{Colors.RESET}")
             for error_msg in error_messages:
                 print(error_msg)
@@ -223,7 +221,7 @@ def validate_i18n_folder(i18n_path: pathlib.Path, target_languages: List[str] | 
     return 1 if total_errors > 0 else 0
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Validate FTL translation files for placeholder consistency",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -232,26 +230,14 @@ Examples:
   python3 misc/ai_translate/validate_translations.py czkawka_gui/i18n
   python3 misc/ai_translate/validate_translations.py krokiet/i18n
   python3 misc/ai_translate/validate_translations.py czkawka_gui/i18n --languages pl de fr
-        """
+        """,
     )
 
-    parser.add_argument(
-        "i18n_folder",
-        type=str,
-        help="Path to the i18n folder containing language subdirectories"
-    )
+    parser.add_argument("i18n_folder", type=str, help="Path to the i18n folder containing language subdirectories")
 
-    parser.add_argument(
-        "--languages",
-        nargs="+",
-        help="Only validate specific languages (e.g., --languages pl de fr)"
-    )
+    parser.add_argument("--languages", nargs="+", help="Only validate specific languages (e.g., --languages pl de fr)")
 
-    parser.add_argument(
-        "--fix",
-        action="store_true",
-        help="Automatically remove entries with placeholder errors"
-    )
+    parser.add_argument("--fix", action="store_true", help="Automatically remove entries with placeholder errors")
 
     args = parser.parse_args()
 
@@ -276,10 +262,10 @@ Examples:
     except Exception as e:
         print(f"\nError: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 
 
 if __name__ == "__main__":
     main()
-

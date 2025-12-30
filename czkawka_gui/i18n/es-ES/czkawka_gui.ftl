@@ -297,12 +297,12 @@ header_about_button_tooltip = Abre el diálogo con información sobre la aplicac
 settings_number_of_threads = Número de hilos usados
 settings_number_of_threads_tooltip = Número de hilos usados, 0 significa que se utilizarán todos los hilos disponibles.
 settings_use_rust_preview = Usar librerías externas en su lugar gtk para cargar vistas previas
-settings_use_rust_preview_tooltip = 
-        Usar vistas previas de gtk a veces será más rápido y soportará más formatos, pero a veces esto podría ser exactamente lo contrario.
-
-        Si tienes problemas con la carga de las vistas previas, puedes intentar cambiar esta configuración.
-
-        En los sistemas no-linux, se recomienda usar esta opción, porque gtk-pixbuf no están siempre disponibles allí por lo que desactivar esta opción no cargará vistas previas de algunas imágenes.
+settings_use_rust_preview_tooltip =
+    Usar vistas previas de gtk a veces será más rápido y soportará más formatos, pero a veces esto podría ser exactamente lo contrario.
+    
+    Si tienes problemas con la carga de las vistas previas, puedes intentar cambiar esta configuración.
+    
+    En los sistemas no-linux, se recomienda usar esta opción, porque gtk-pixbuf no están siempre disponibles allí por lo que desactivar esta opción no cargará vistas previas de algunas imágenes.
 settings_label_restart = ¡Necesitas reiniciar la aplicación para aplicar la configuración!
 settings_ignore_other_filesystems = Ignorar otros sistemas de ficheros (sólo Linux)
 settings_ignore_other_filesystems_tooltip =

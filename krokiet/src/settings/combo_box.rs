@@ -31,6 +31,8 @@ pub struct StringComboBoxItems {
     pub audio_check_type: Vec<StringComboBoxItem<CheckingMethod>>,
     pub duplicates_check_method: Vec<StringComboBoxItem<CheckingMethod>>,
     pub videos_crop_detect: Vec<StringComboBoxItem<Cropdetect>>,
+    pub iv_optimizer_mode: Vec<StringComboBoxItem<String>>,
+    pub iv_optimizer_video_codec: Vec<StringComboBoxItem<String>>,
 }
 
 pub static STRING_COMBO_BOX_ITEMS: std::sync::LazyLock<Arc<Mutex<StringComboBoxItems>>> = std::sync::LazyLock::new(|| {
@@ -127,6 +129,15 @@ impl StringComboBoxItems {
             ("none", "None", Cropdetect::None),
         ]);
 
+        let iv_optimizer_mode = Self::convert_to_combobox_items(&[("image", "Image", "image".to_string()), ("video", "Video", "video".to_string())]);
+
+        let iv_optimizer_video_codec = Self::convert_to_combobox_items(&[
+            ("h265", "HEVC/H265", "h265".to_string()),
+            ("h264", "H264", "h264".to_string()),
+            ("vp9", "VP9", "vp9".to_string()),
+            ("av1", "AV1", "av1".to_string()),
+        ]);
+
         Self {
             languages,
             hash_size,
@@ -137,6 +148,8 @@ impl StringComboBoxItems {
             audio_check_type,
             duplicates_check_method,
             videos_crop_detect,
+            iv_optimizer_mode,
+            iv_optimizer_video_codec,
         }
     }
 

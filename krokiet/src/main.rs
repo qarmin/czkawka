@@ -65,11 +65,11 @@ mod test_common;
 slint::include_modules!();
 
 fn main() {
-    let (infos, warnings) = set_config_cache_path("Czkawka", "Krokiet");
+    let config_cache_path_set_result = set_config_cache_path("Czkawka", "Krokiet");
     setup_logger(false, "krokiet", filtering_messages);
     let cli_args = process_cli_args("Krokiet", "krokiet_gui", std::env::args().skip(1).collect());
     print_version_mode("Krokiet");
-    print_infos_and_warnings(infos, warnings);
+    print_infos_and_warnings(config_cache_path_set_result.infos, config_cache_path_set_result.warnings);
     print_krokiet_features();
 
     let app = MainWindow::new().expect("Failed to create main window");
@@ -128,6 +128,7 @@ pub(crate) fn zeroing_all_models(app: &MainWindow) {
     app.set_similar_videos_model(Rc::new(VecModel::default()).into());
     app.set_invalid_symlinks_model(Rc::new(VecModel::default()).into());
     app.set_temporary_files_model(Rc::new(VecModel::default()).into());
+    app.set_iv_optimizer_model(Rc::new(VecModel::default()).into());
 }
 
 #[allow(clippy::allow_attributes)]

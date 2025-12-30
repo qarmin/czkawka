@@ -219,6 +219,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_tool_invalid_symlinks_text(flk!("tool_invalid_symlinks").into());
     translation.set_tool_broken_files_text(flk!("tool_broken_files").into());
     translation.set_tool_bad_extensions_text(flk!("tool_bad_extensions").into());
+    translation.set_tool_iv_optimizer_text(flk!("tool_iv_optimizer").into());
     translation.set_sort_by_full_name_text(flk!("sort_by_full_name").into());
     translation.set_sort_by_selection_text(flk!("sort_by_selection").into());
     translation.set_sort_reverse_text(flk!("sort_reverse").into());
@@ -258,6 +259,12 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_broken_files_pdf_text(flk!("subsettings_broken_files_pdf").into());
     translation.set_subsettings_broken_files_archive_text(flk!("subsettings_broken_files_archive").into());
     translation.set_subsettings_broken_files_image_text(flk!("subsettings_broken_files_image").into());
+    translation.set_subsettings_iv_optimizer_mode_text(flk!("subsettings_iv_optimizer_mode").into());
+    translation.set_subsettings_iv_optimizer_video_codec_text(flk!("subsettings_iv_optimizer_video_codec").into());
+    translation.set_subsettings_iv_optimizer_excluded_codecs_text(flk!("subsettings_iv_optimizer_excluded_codecs").into());
+    translation.set_subsettings_iv_optimizer_video_quality_text(flk!("subsettings_iv_optimizer_video_quality").into());
+    translation.set_subsettings_iv_optimizer_image_threshold_text(flk!("subsettings_iv_optimizer_image_threshold").into());
+    translation.set_subsettings_reset_text(flk!("subsettings_reset").into());
     translation.set_settings_excluded_items_text(flk!("settings_excluded_items").into());
     translation.set_settings_allowed_extensions_text(flk!("settings_allowed_extensions").into());
     translation.set_settings_excluded_extensions_text(flk!("settings_excluded_extensions").into());
@@ -332,6 +339,7 @@ fn translate_items(app: &MainWindow) {
         (flk!("tool_invalid_symlinks").into(), ActiveTab::InvalidSymlinks),
         (flk!("tool_broken_files").into(), ActiveTab::BrokenFiles),
         (flk!("tool_bad_extensions").into(), ActiveTab::BadExtensions),
+        (flk!("tool_iv_optimizer").into(), ActiveTab::IVOptimizer),
     ];
     let gui_state = app.global::<GuiState>();
     gui_state.set_tools_model(ModelRc::new(VecModel::from(tools_model.to_vec())));

@@ -121,6 +121,21 @@ export global Settings {
     in-out property <bool> broken_files_sub_archive: false;
     in-out property <bool> broken_files_sub_image: false;
 
+    // IV Optimizer
+    in-out property <[string]> iv_optimizer_sub_mode: ["Image", "Video"];
+    in-out property <int> iv_optimizer_sub_mode_index: 1;
+    in-out property <string> iv_optimizer_sub_mode_value: "Video";
+    in-out property <[string]> iv_optimizer_sub_video_codec: ["HEVC/H265", "H264", "VP9", "AV1"];
+    in-out property <int> iv_optimizer_sub_video_codec_index: 0;
+    in-out property <string> iv_optimizer_sub_video_codec_value: "HEVC/H265";
+    in-out property <string> iv_optimizer_sub_excluded_codecs: "hevc,av1";
+    in-out property <float> iv_optimizer_sub_video_quality: 23;
+    in-out property <float> iv_optimizer_sub_video_quality_max: 51;
+    in-out property <float> iv_optimizer_sub_video_quality_min: 0;
+    in-out property <float> iv_optimizer_sub_image_threshold: 1;
+    in-out property <float> iv_optimizer_sub_image_threshold_max: 255;
+    in-out property <float> iv_optimizer_sub_image_threshold_min: 1;
+
     out property <length> path_px: 350px;
     out property <length> name_px: 100px;
     out property <length> mod_px: 150px;
@@ -148,4 +163,6 @@ export global Settings {
     in-out property <[length]> broken_files_column_size: [35px, name_px, path_px, 200px, size_px, mod_px];
     in-out property <[string]> bad_extensions_column_name: ["Selection", "File Name", "Path", "Current Extension", "Proper Extension"];
     in-out property <[length]> bad_extensions_column_size: [35px, name_px, path_px, 40px, 200px];
+    in-out property <[string]> iv_optimizer_column_name: ["Selection", "Size", "File Name", "Path", "Codec", "Dimensions", "Modification Date"];
+    in-out property <[length]> iv_optimizer_column_size: [35px, size_px, name_px, path_px, 100px, 120px, mod_px];
 }

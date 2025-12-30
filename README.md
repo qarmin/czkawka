@@ -1,9 +1,8 @@
 ![com github qarmin czkawka](https://user-images.githubusercontent.com/41945903/102616149-66490400-4137-11eb-9cd6-813b2b070834.png)
 
-**Czkawka** (_tch•kav•ka_ (IPA: [ˈʧ̑kafka]), "hiccup" in Polish) is a simple, fast and free app to remove unnecessary
-files from your computer.
+**Krokiet** ((IPA: [ˈkrɔcɛt]), "croquet" in Polish) new generation GUI frontend, simple, multiplatform, fast and free app to remove unnecessary files from your computer.
 
-**Krokiet** ((IPA: [ˈkrɔcɛt]), "croquet" in Polish) same as above, but uses Slint frontend.
+**Czkawka** (_tch•kav•ka_ (IPA: [ˈʧ̑kafka]), "hiccup" in Polish) older gtk4 GUI frontend, superseded by Krokiet, but still maintained.
 
 ## Features
 
@@ -13,7 +12,7 @@ files from your computer.
 - Multiplatform - works on Linux, Windows, macOS, FreeBSD and many more
 - Cache support - second and further scans should be much faster than the first one
 - CLI frontend - for easy automation
-- GUI frontend - uses GTK 4 or Slint frameworks
+- GUI frontend - uses Slint or GTK 4 frameworks
 - Core library - allows to reuse functionality in other apps
 - No spying - Czkawka does not have access to the Internet, nor does it collect any user information or statistics
 - Multilingual - support multiple languages like Polish, English or Italian

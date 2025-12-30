@@ -34,16 +34,17 @@ rust_all_dirs_referenced = すべての付属ディレクトリが参照フォ�
 rust_found_empty_folders = 空のフォルダが { $items_found } 個見つかりました ({ $time })
 rust_found_empty_files = 空のファイルが { $items_found } 個見つかりました ({ $time })
 rust_found_similar_images = { $items_found } 同様の画像ファイルが { $groups } グループ内の { $time } で見つかりました
+rust_found_similar_videos = { $items_found }件の類似動画ファイルを{ $groups }グループで{ $time }に見つけました
 rust_no_similarity_method_selected = 選択された類似性方法がなければ、似たような音楽ファイルは見つかりません。
-rust_found_similar_music_files = 
-        同じ調子とスタイルを保ち、特別なフォーマットやプレースホルダーも保持します。
-        翻訳後のテキスト：
-        同じ調子とスタイルを保ち、特別なフォーマットやプレースホルダーも保持します。
-        見つかった { $items_found } 類似音楽ファイルは { $groups } レコードにまたがり、時間は { $time } です。
+rust_found_similar_music_files =
+    同じ調子とスタイルを保ち、特別なフォーマットやプレースホルダーも保持します。
+    翻訳後のテキスト：
+    同じ調子とスタイルを保ち、特別なフォーマットやプレースホルダーも保持します。
+    見つかった { $items_found } 類似音楽ファイルは { $groups } レコードにまたがり、時間は { $time } です。
 rust_found_invalid_symlinks = 無効なシンボリックリンクが { $items_found } 個見つかりました ({ $time })
 rust_found_temporary_files = 一時ファイルが { $items_found } 個見つかりました ({ $time })
 rust_no_file_type_selected = 選択したファイルタイプがない壊れたファイルを見つけることができません。
-rust_found_broken_files = 見つかった壊れたファイル数は{ $items_found }で、サイズは{ $size}で、時間は{ $time}took
+rust_found_broken_files = 見つかった壊れたファイル数は{ $items_found }で、サイズは{ $size }で、時間は{ $time }took
 rust_found_bad_extensions = 無効な拡張子を持つファイルが { $items_found } 個見つかりました ({ $time })
 rust_found_duplicate_files = { $items_found } 重複したファイルを { $groups } グループで { $size } を { $time } で見つけました
 rust_found_duplicate_files_no_lost_space = { $items_found } 重複したファイルが { $groups } グループの { $time } で見つかりました

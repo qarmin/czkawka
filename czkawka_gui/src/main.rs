@@ -16,6 +16,7 @@ use connect_things::connect_button_stop::connect_button_stop;
 use connect_things::connect_change_language::{connect_change_language, load_system_language};
 use connect_things::connect_duplicate_buttons::connect_duplicate_combo_box;
 use connect_things::connect_header_buttons::connect_button_about;
+use connect_things::connect_krokiet_info_dialog::show_krokiet_info_dialog;
 use connect_things::connect_notebook_tabs::connect_notebook_tabs;
 use connect_things::connect_progress_window::connect_progress_window;
 use connect_things::connect_selection_of_directories::connect_selection_of_directories;
@@ -69,10 +70,15 @@ mod taskbar_progress_dummy;
 mod taskbar_progress_win;
 
 fn main() {
-    let (infos, warnings) = set_config_cache_path("Czkawka", "Czkawka");
+    let config_cache_path_set_result = set_config_cache_path("Czkawka", "Czkawka");
+    let needs_to_open_dialog_about_krokiet = !(config_cache_path_set_result.config_env_set
+        || config_cache_path_set_result.cache_env_set
+        || config_cache_path_set_result.default_cache_path_exists
+        || config_cache_path_set_result.default_config_path_exists
+        || option_env!("CZKAWKA_DONT_ANNOY_ME").as_ref().is_some_and(|x| !x.is_empty()));
     setup_logger(false, "czkawka_gui", filtering_messages);
     print_version_mode("Czkawka gtk");
-    print_infos_and_warnings(infos, warnings);
+    print_infos_and_warnings(config_cache_path_set_result.infos, config_cache_path_set_result.warnings);
 
     let application = Application::new(None::<String>, ApplicationFlags::HANDLES_OPEN | ApplicationFlags::HANDLES_COMMAND_LINE);
 
@@ -85,13 +91,13 @@ fn main() {
             "czkawka_gui",
             cmdline.arguments().into_iter().skip(1).map(|x| x.to_string_lossy().to_string()).collect(),
         );
-        build_ui(app, cli_args.as_ref());
+        build_ui(app, cli_args.as_ref(), needs_to_open_dialog_about_krokiet);
         ExitCode::new(0)
     });
     application.run_with_args(&env::args().collect::<Vec<_>>());
 }
 
-fn build_ui(application: &Application, cli_args: Option<&CliResult>) {
+fn build_ui(application: &Application, cli_args: Option<&CliResult>, needs_to_open_dialog_about_krokiet: bool) {
     let gui_data: GuiData = GuiData::new_with_application(application);
     gui_data.setup();
 
@@ -146,6 +152,12 @@ fn build_ui(application: &Application, cli_args: Option<&CliResult>) {
     let window_main = gui_data.window_main.clone();
     let taskbar_state = gui_data.taskbar_state.clone();
     let used_additional_arguments = cli_args.is_some();
+
+    // Show Krokiet info dialog if needed
+    if needs_to_open_dialog_about_krokiet {
+        show_krokiet_info_dialog(&window_main);
+    }
+
     window_main.connect_close_request(move |_| {
         // Not save configuration when using non default arguments
         if !used_additional_arguments {

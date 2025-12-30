@@ -416,6 +416,7 @@ compute_found_videos = Намерил { $number_files } подобни виде�
 compute_found_music = Найдено { $number_files } подобни музикални файлове в { $number_groups } групи за { $time }
 compute_found_invalid_symlinks = Намерени { $number_files } невалидни символни връзки в { $time }
 compute_found_broken_files = Намерих { $number_files } повредени файла в { $time }
+compute_found_bad_extensions = Намерени са { $number_files } файла с невалидни разширения за { $time }
 # Progress window
 progress_scanning_general_file =
     { $file_number ->

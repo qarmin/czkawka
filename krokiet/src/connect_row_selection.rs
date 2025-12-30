@@ -73,6 +73,7 @@ pub(crate) fn initialize_selection_struct() {
         ActiveTab::InvalidSymlinks,
         ActiveTab::BrokenFiles,
         ActiveTab::BadExtensions,
+        ActiveTab::IVOptimizer,
     ];
 
     let map: HashMap<_, _> = tools.into_iter().map(|tool| (tool, SelectionData::default())).collect();
@@ -368,6 +369,10 @@ pub(crate) mod checker {
                 app.global::<GuiState>().set_selected_results_bad_extensions(it1);
                 app.global::<GuiState>().set_selected_results_bad_extensions2(it2);
             }
+            ActiveTab::IVOptimizer => {
+                app.global::<GuiState>().set_selected_results_iv_optimizer(it1);
+                app.global::<GuiState>().set_selected_results_iv_optimizer2(it2);
+            }
             _ => unreachable!("Current tab is not a tool that has enabled items"),
         }
     }
@@ -425,6 +430,10 @@ pub(crate) mod checker {
             ActiveTab::BadExtensions => (
                 app.global::<GuiState>().get_selected_results_bad_extensions(),
                 app.global::<GuiState>().get_selected_results_bad_extensions2(),
+            ),
+            ActiveTab::IVOptimizer => (
+                app.global::<GuiState>().get_selected_results_iv_optimizer(),
+                app.global::<GuiState>().get_selected_results_iv_optimizer2(),
             ),
             _ => unreachable!("Current tab is not a tool that has enabled items"),
         };

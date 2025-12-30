@@ -149,6 +149,16 @@ pub struct SettingsCustom {
     pub similar_videos_crop_detect: String,
     #[serde(default = "default_similar_videos_thumbnail_percentage")]
     pub similar_videos_thumbnail_percentage: u8,
+    #[serde(default = "default_iv_optimizer_mode")]
+    pub iv_optimizer_mode: String,
+    #[serde(default = "default_iv_optimizer_video_codec")]
+    pub iv_optimizer_video_codec: String,
+    #[serde(default = "default_iv_optimizer_excluded_codecs")]
+    pub iv_optimizer_excluded_codecs: String,
+    #[serde(default = "default_iv_optimizer_video_quality")]
+    pub iv_optimizer_video_quality: u32,
+    #[serde(default = "default_iv_optimizer_image_threshold")]
+    pub iv_optimizer_image_threshold: u8,
     #[serde(default)]
     pub column_sizes: BTreeMap<String, Vec<f32>>,
 }
@@ -296,4 +306,19 @@ fn default_window_width() -> u32 {
 }
 fn default_window_height() -> u32 {
     DEFAULT_WINDOW_HEIGHT
+}
+fn default_iv_optimizer_mode() -> String {
+    "video".to_string()
+}
+fn default_iv_optimizer_video_codec() -> String {
+    "h265".to_string()
+}
+fn default_iv_optimizer_excluded_codecs() -> String {
+    "hevc,av1".to_string()
+}
+fn default_iv_optimizer_video_quality() -> u32 {
+    23
+}
+fn default_iv_optimizer_image_threshold() -> u8 {
+    1
 }

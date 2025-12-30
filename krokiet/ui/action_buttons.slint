@@ -40,6 +40,7 @@ export component ActionButtons inherits HorizontalLayout {
     in-out property <[MainListModel]> invalid_symlinks_model: [];
     in-out property <[MainListModel]> broken_files_model: [];
     in-out property <[MainListModel]> bad_extensions_model: [];
+    in-out property <[MainListModel]> iv_optimizer_model: [];
 
     property <ActiveTab> active_tab: GuiState.active_tab;
 
@@ -62,7 +63,8 @@ export component ActionButtons inherits HorizontalLayout {
         (active_tab == ActiveTab.EmptyFolders && (GuiState.selected_results_empty_folders > 0 || GuiState.selected_results_empty_folders2 > 0)) ||
         (active_tab == ActiveTab.EmptyFiles && (GuiState.selected_results_empty_files > 0 || GuiState.selected_results_empty_files2 > 0)) ||
         (active_tab == ActiveTab.TemporaryFiles && (GuiState.selected_results_temporary_files > 0 || GuiState.selected_results_temporary_files2 > 0)) ||
-        (active_tab == ActiveTab.BadExtensions && (GuiState.selected_results_bad_extensions > 0 || GuiState.selected_results_bad_extensions2 > 0))
+        (active_tab == ActiveTab.BadExtensions && (GuiState.selected_results_bad_extensions > 0 || GuiState.selected_results_bad_extensions2 > 0)) ||
+        (active_tab == ActiveTab.IVOptimizer && (GuiState.selected_results_iv_optimizer > 0 || GuiState.selected_results_iv_optimizer2 > 0))
     );
     in-out property <bool> results_available: (
         (active_tab == ActiveTab.DuplicateFiles && duplicate_files_model.length > 0) ||
@@ -75,7 +77,8 @@ export component ActionButtons inherits HorizontalLayout {
         (active_tab == ActiveTab.SimilarMusic && similar_music_model.length > 0) ||
         (active_tab == ActiveTab.InvalidSymlinks && invalid_symlinks_model.length > 0) ||
         (active_tab == ActiveTab.BrokenFiles && broken_files_model.length > 0) ||
-        (active_tab == ActiveTab.BadExtensions && bad_extensions_model.length > 0)
+        (active_tab == ActiveTab.BadExtensions && bad_extensions_model.length > 0) ||
+        (active_tab == ActiveTab.IVOptimizer && iv_optimizer_model.length > 0)
     );
 
     height: 30px;

@@ -1,6 +1,6 @@
 # Window titles
 window_settings_title = Setări
-window_main_title = Czkawka (Hiccup)
+window_main_title = Czkawka (Sufletăciune)
 window_progress_title = Scanare
 window_compare_images = Compară imaginile
 # General
@@ -10,7 +10,7 @@ general_close_button = Inchide
 music_title_checkbox = Titlu
 music_artist_checkbox = Artist
 music_year_checkbox = An
-music_bitrate_checkbox = Bitrate
+music_bitrate_checkbox = Rată de bitrate
 music_genre_checkbox = Gen
 music_length_checkbox = Lungime
 music_comparison_checkbox = Comparație aproximativă
@@ -111,7 +111,7 @@ main_tree_view_column_dimensions = Dimensiuni
 main_tree_view_column_title = Titlu
 main_tree_view_column_artist = Artist
 main_tree_view_column_year = An
-main_tree_view_column_bitrate = Bitrate
+main_tree_view_column_bitrate = Rată de bitrate
 main_tree_view_column_length = Lungime
 main_tree_view_column_genre = Gen
 main_tree_view_column_symlink_file_name = Numele fișierului Symlink

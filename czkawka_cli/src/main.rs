@@ -50,10 +50,10 @@ fn main() {
     }
     let command = Args::parse().command;
 
-    let (infos, warnings) = set_config_cache_path("Czkawka", "Czkawka");
+    let config_cache_path_set_result = set_config_cache_path("Czkawka", "Czkawka");
     setup_logger(true, "czkawka_cli", filtering_messages);
     print_version_mode("Czkawka cli");
-    print_infos_and_warnings(infos, warnings);
+    print_infos_and_warnings(config_cache_path_set_result.infos, config_cache_path_set_result.warnings);
 
     if cfg!(debug_assertions) {
         debug!("Running command - {command:?}");

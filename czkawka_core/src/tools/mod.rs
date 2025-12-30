@@ -5,6 +5,7 @@ pub mod duplicate;
 pub mod empty_files;
 pub mod empty_folder;
 pub mod invalid_symlinks;
+pub mod iv_optimizer;
 pub mod same_music;
 pub mod similar_images;
 pub mod similar_videos;

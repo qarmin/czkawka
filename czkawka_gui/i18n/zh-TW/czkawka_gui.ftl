@@ -19,10 +19,10 @@ music_checking_by_content = 內容
 same_music_seconds_label = 最小片段秒數
 same_music_similarity_label = 最大差異
 music_compare_only_in_title_group = 比較相同標題類群之間
-music_compare_only_in_title_group_tooltip = 
-        當啟用時，檔案會按照標題分組然後相互比較。
-
-        有萬個檔案，通常會有的近乎十億次比較，反之只會約有二萬次比較。
+music_compare_only_in_title_group_tooltip =
+    當啟用時，檔案會按照標題分組然後相互比較。
+    
+    有萬個檔案，通常會有的近乎十億次比較，反之只會約有二萬次比較。
 same_music_tooltip =
     透過以下設定，可以根據內容搜尋相似的音樂檔案：
     
@@ -298,12 +298,12 @@ header_about_button_tooltip = 開啟包含應用程式資訊的對話方塊。
 settings_number_of_threads = 使用的執行緒數
 settings_number_of_threads_tooltip = 使用的執行緒數，0 表示所有可用執行緒都將被使用。
 settings_use_rust_preview = 使用外部庫 Instead gtk 來加載預覽
-settings_use_rust_preview_tooltip = 
-        使用 gtk 預覽通常會較快且支援更多格式，但有時這可能會正好相反。
-
-        如果您在載入預覽時遇到問題，您可以嘗試更變這個設定。
-
-        於非 Linux 系統中，建議使用此選項，因為 gtk-pixbuf 不總是在這些系統中可用，因而禁用此選項將無法載入某些圖像的預覽。
+settings_use_rust_preview_tooltip =
+    使用 gtk 預覽通常會較快且支援更多格式，但有時這可能會正好相反。
+    
+    如果您在載入預覽時遇到問題，您可以嘗試更變這個設定。
+    
+    於非 Linux 系統中，建議使用此選項，因為 gtk-pixbuf 不總是在這些系統中可用，因而禁用此選項將無法載入某些圖像的預覽。
 settings_label_restart = 您需要重新啟動應用程式才能套用設定！
 settings_ignore_other_filesystems = 忽略其它檔案系統（僅限 Linux）
 settings_ignore_other_filesystems_tooltip =
@@ -405,18 +405,18 @@ settings_folder_cache_open = 開啟快取資料夾
 settings_folder_settings_open = 開啟設定資料夾
 # Compute results
 compute_stopped_by_user = 搜尋已被使用者停止
-compute_found_duplicates_hash_size = 找到{$number_files}個重複檔案在{$number_groups}組中，佔用了{$size}，在{$time}內
-compute_found_duplicates_name = 發現{$number_files}個重複檔在{$number_groups}組中於{$time}
-compute_found_empty_folders = 找到{$number_files}個空資料夾在{$time}
-compute_found_empty_files = 找到{$number_files}個空文件在{$time}
-compute_found_big_files = 找到{$number_files}個大檔案在{$time}
-compute_found_temporary_files = 找到 {$number_files} 個臨時文件在{$time}
-compute_found_images = 找到{$number_files}張相似圖像在{$number_groups}組中，在{$time}內
-compute_found_videos = 找到{$number_files}個相似影片，在{$number_groups}組中，耗時{$time}
-compute_found_music = 找到{$number_files}首相似音樂檔案在{$number_groups}組中，在{$time}內
-compute_found_invalid_symlinks = 發現 {$number_files} 個無效的符徵鏈接在 {$time}
-compute_found_broken_files = 找到 {$number_files} 個損壞檔案在 {$time}
-compute_found_bad_extensions = 找到{$number_files}個擴展名無效的檔案在{$time}
+compute_found_duplicates_hash_size = 找到{ $number_files }個重複檔案在{ $number_groups }組中，佔用了{ $size }，在{ $time }內
+compute_found_duplicates_name = 發現{ $number_files }個重複檔在{ $number_groups }組中於{ $time }
+compute_found_empty_folders = 找到{ $number_files }個空資料夾在{ $time }
+compute_found_empty_files = 找到{ $number_files }個空文件在{ $time }
+compute_found_big_files = 找到{ $number_files }個大檔案在{ $time }
+compute_found_temporary_files = 找到 { $number_files } 個臨時文件在{ $time }
+compute_found_images = 找到{ $number_files }張相似圖像在{ $number_groups }組中，在{ $time }內
+compute_found_videos = 找到{ $number_files }個相似影片，在{ $number_groups }組中，耗時{ $time }
+compute_found_music = 找到{ $number_files }首相似音樂檔案在{ $number_groups }組中，在{ $time }內
+compute_found_invalid_symlinks = 發現 { $number_files } 個無效的符徵鏈接在 { $time }
+compute_found_broken_files = 找到 { $number_files } 個損壞檔案在 { $time }
+compute_found_bad_extensions = 找到{ $number_files }個擴展名無效的檔案在{ $time }
 # Progress window
 progress_scanning_general_file =
     { $file_number ->

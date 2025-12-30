@@ -31,6 +31,7 @@ export component MainList {
     in-out property <[MainListModel]> invalid_symlinks_model: [];
     in-out property <[MainListModel]> broken_files_model: [];
     in-out property <[MainListModel]> bad_extensions_model: [];
+    in-out property <[MainListModel]> iv_optimizer_model: [];
 
     callback changed_active_tab();
 
@@ -177,6 +178,19 @@ export component MainList {
         sort_available: !working;
     }
 
+    iv_optimizer := SelectableTableView {
+        visible: GuiState.active_tab == ActiveTab.IVOptimizer;
+        min-width: 200px;
+        height: parent.height;
+        columns <=> Settings.iv_optimizer_column_name;
+        column_sizes <=> Settings.iv_optimizer_column_size;
+        values <=> iv_optimizer_model;
+        parentPathIdx: 2;
+        fileNameIdx: 1;
+        previewImageIdx: -1;
+        sort_available: !working;
+    }
+
     settings_list := SettingsList {
         visible: GuiState.active_tab == ActiveTab.Settings;
     }
@@ -208,6 +222,8 @@ export component MainList {
             invalid_symlink.reset_selection();
         } else if (GuiState.active_tab == ActiveTab.BrokenFiles) {
             broken_files.reset_selection();
+        } else if (GuiState.active_tab == ActiveTab.IVOptimizer) {
+            iv_optimizer.reset_selection();
         } else {
             // debug("Non handled reset selection in main_lists.slint", GuiState.active_tab);
         }
@@ -236,6 +252,8 @@ export component MainList {
             invalid_symlink.scan_started();
         } else if (GuiState.active_tab == ActiveTab.BrokenFiles) {
             broken_files.scan_started();
+        } else if (GuiState.active_tab == ActiveTab.IVOptimizer) {
+            iv_optimizer.scan_started();
         } else {
             // debug("Non handled reset selection in main_lists.slint", GuiState.active_tab);
         }

@@ -422,7 +422,7 @@ progress_scanning_general_file =
     { $file_number ->
         [one] Fichier { $file_number }
        *[other] Fichiers { $file_number }
-     } Scannés
+    } Scannés
 progress_scanning_extension_of_files = Extension du fichier { $file_checked }/{ $all_files } vérifiée
 progress_scanning_broken_files = Fichier { $file_checked }/{ $all_files } vérifié ({ $data_checked }/{ $all_data })
 progress_scanning_video = Haché de la vidéo { $file_checked }/{ $all_files }
@@ -437,7 +437,7 @@ progress_scanning_empty_folders =
     { $folder_number ->
         [one] Répertoire { $folder_number }
        *[other] Dossiers { $folder_number }
-     } numérisés
+    } numérisés
 progress_scanning_size = Taille numérisée du fichier { $file_number }
 progress_scanning_size_name = Nom numérisé et taille du fichier { $file_number }
 progress_scanning_name = Nom numérisé du fichier { $file_number }

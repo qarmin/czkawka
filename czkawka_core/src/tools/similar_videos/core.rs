@@ -7,7 +7,6 @@ use std::{fs, mem};
 
 use blake3::Hasher;
 use crossbeam_channel::Sender;
-use ffprobe::ffprobe;
 use fun_time::fun_time;
 use indexmap::IndexMap;
 use log::debug;
@@ -23,6 +22,7 @@ use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::common::traits::ResultEntry;
+use crate::common::video_metadata::VideoMetadata;
 use crate::tools::similar_videos::{SimilarVideos, SimilarVideosParameters, VideosEntry};
 
 pub const VIDEO_THUMBNAILS_SUBFOLDER: &str = "video_thumbnails";
@@ -120,65 +120,14 @@ impl SimilarVideos {
     }
 
     fn read_video_properties(mut file_entry: VideosEntry) -> VideosEntry {
-        match ffprobe(file_entry.path.clone()) {
-            Ok(info) => {
-                if let Some(duration_str) = &info.format.duration
-                    && let Ok(d) = duration_str.parse::<f64>()
-                {
-                    file_entry.duration = Some(d);
-                }
-
-                if let Some(stream) = info.streams.into_iter().find(|s| s.codec_type.as_deref() == Some("video")) {
-                    if let Some(codec_name) = stream.codec_name {
-                        file_entry.codec = Some(codec_name);
-                    }
-
-                    if let Some(bit_rate_str) = stream.bit_rate.or(info.format.bit_rate)
-                        && let Ok(b) = bit_rate_str.parse::<u64>()
-                    {
-                        file_entry.bitrate = Some(b);
-                    }
-
-                    if let Some(w) = stream.width
-                        && w >= 0
-                    {
-                        file_entry.width = Some(w as u32);
-                    }
-                    if let Some(h) = stream.height
-                        && h >= 0
-                    {
-                        file_entry.height = Some(h as u32);
-                    }
-
-                    let fps_opt = if !stream.avg_frame_rate.is_empty() && stream.avg_frame_rate != "0/0" {
-                        Some(stream.avg_frame_rate)
-                    } else if !stream.r_frame_rate.is_empty() && stream.r_frame_rate != "0/0" {
-                        Some(stream.r_frame_rate)
-                    } else {
-                        None
-                    };
-
-                    if let Some(fps_str) = fps_opt {
-                        let fps_val = if fps_str.contains('/') {
-                            let mut parts = fps_str.splitn(2, '/');
-                            if let (Some(n), Some(d)) = (parts.next(), parts.next()) {
-                                if let (Ok(nv), Ok(dv)) = (n.parse::<f64>(), d.parse::<f64>()) {
-                                    if dv != 0.0 { Some(nv / dv) } else { None }
-                                } else {
-                                    None
-                                }
-                            } else {
-                                None
-                            }
-                        } else {
-                            fps_str.parse::<f64>().ok()
-                        };
-
-                        if let Some(fps_v) = fps_val {
-                            file_entry.fps = Some(fps_v);
-                        }
-                    }
-                }
+        match VideoMetadata::from_path(&file_entry.path) {
+            Ok(metadata) => {
+                file_entry.fps = metadata.fps;
+                file_entry.codec = metadata.codec;
+                file_entry.bitrate = metadata.bitrate;
+                file_entry.width = metadata.width;
+                file_entry.height = metadata.height;
+                file_entry.duration = metadata.duration;
             }
             Err(e) => {
                 let path = file_entry.path.to_string_lossy();

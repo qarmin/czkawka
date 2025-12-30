@@ -1,6 +1,6 @@
 # Window titles
 window_settings_title = Inställningar
-window_main_title = Czkawka (Hiccup)
+window_main_title = Czkawka (Pipade)
 window_progress_title = Scannar
 window_compare_images = Jämför bilder
 # General
@@ -450,7 +450,7 @@ progress_hash_cache_saving = Sparar hash-cache
 progress_cache_loading = Laddar cache
 progress_cache_saving = Sparar cache
 progress_current_stage = Nuvarande steg:{ " " }
-progress_all_stages = Alla etapper:{ " "  }
+progress_all_stages = Alla etapper:{ " " }
 # Saving loading 
 saving_loading_saving_success = Sparad konfiguration till filen { $name }.
 saving_loading_saving_failure = Det gick inte att spara konfigurationsdata till filen { $name }, anledningen { $reason }.

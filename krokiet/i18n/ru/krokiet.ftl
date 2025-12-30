@@ -87,7 +87,7 @@ column_symlink_folder = Папка Symlink
 column_destination_path = Путь назначения
 column_current_extension = Текущее расширение
 column_proper_extension = Правильное расширение
-column_fps = FPS
+column_fps = КПД
 column_codec = Кодек
 column_duration = Продолжительность
 # Slint translations

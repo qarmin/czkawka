@@ -72,14 +72,14 @@ image_hash_size_tooltip =
     16 er standard hash-størrelse som er et godt kompromiss mellom å finne selv små lignende bilder og å ha bare en liten mengde hash-kollisjoner.
     
     32 og 64 hashes finner bare lignende bilder, men bør ha nesten ingen falske positiver (kanskje unntatt bilder med alfa-kanal).
-image_resize_filter_tooltip = 
-        For å beregne hesh av bilde, må biblioteket først tilpass bilden.
-
-        Avhengig av valgt algoritme vil det bilde som brukes for beregning av hesh se litt forskjellig ut.
-
-        Forkortest algoritme å bruke, men også den som gir de vres resultatene, er Nearest. Den aktiveres standard, fordi med en 16x16 heshstørrelse nederste kvalitet ikke er virkelig synlig.
-
-        Med en 8x8 heshstørrelse anbefales det å bruke en annen algoritme enn Nearest for å ha bedre grupper av bilder.
+image_resize_filter_tooltip =
+    For å beregne hesh av bilde, må biblioteket først tilpass bilden.
+    
+    Avhengig av valgt algoritme vil det bilde som brukes for beregning av hesh se litt forskjellig ut.
+    
+    Forkortest algoritme å bruke, men også den som gir de vres resultatene, er Nearest. Den aktiveres standard, fordi med en 16x16 heshstørrelse nederste kvalitet ikke er virkelig synlig.
+    
+    Med en 8x8 heshstørrelse anbefales det å bruke en annen algoritme enn Nearest for å ha bedre grupper av bilder.
 image_hash_alg_tooltip =
     Brukere kan velge mellom en av mange algoritmer i beregningen av hashen.
     

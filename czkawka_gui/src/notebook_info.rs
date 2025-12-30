@@ -28,7 +28,7 @@ pub struct NotebookObject {
     pub tree_view_name: &'static str,
 }
 
-pub static NOTEBOOKS_INFO: [NotebookObject; TOOLS_NUMBER] = [
+pub static NOTEBOOKS_INFO: [NotebookObject; TOOLS_NUMBER - 1] = [
     NotebookObject {
         name: "Duplicates",
         notebook_type: NotebookMainEnum::Duplicate,

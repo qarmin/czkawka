@@ -258,6 +258,29 @@ pub enum StrDataBadExtensions {
 }
 pub const MAX_STR_DATA_BAD_EXTENSIONS: usize = StrDataBadExtensions::ProperExtension as usize + 1;
 
+// IV Optimizer
+#[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
+pub enum IntDataIVOptimizer {
+    ModificationDatePart1,
+    ModificationDatePart2,
+    SizePart1,
+    SizePart2,
+}
+pub const MAX_INT_DATA_IV_OPTIMIZER: usize = IntDataIVOptimizer::SizePart2 as usize + 1;
+
+#[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
+pub enum StrDataIVOptimizer {
+    Size,
+    Name,
+    Path,
+    Codec,
+    Dimensions,
+    ModificationDate,
+}
+pub const MAX_STR_DATA_IV_OPTIMIZER: usize = StrDataIVOptimizer::ModificationDate as usize + 1;
+
 pub(crate) enum SortIdx {
     StrIdx(i32),
     IntIdx(i32),
@@ -351,6 +374,11 @@ impl ActiveTab {
                 | StrDataBadExtensions::ProperExtensionsGroup
                 | StrDataBadExtensions::ProperExtension => SortIdx::StrIdx(str_idx),
             },
+            Self::IVOptimizer => match StrDataIVOptimizer::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for IVOptimizer")) {
+                StrDataIVOptimizer::Name | StrDataIVOptimizer::Path | StrDataIVOptimizer::Codec | StrDataIVOptimizer::Dimensions => SortIdx::StrIdx(str_idx),
+                StrDataIVOptimizer::ModificationDate => SortIdx::IntIdxPair(IntDataIVOptimizer::ModificationDatePart1 as i32, IntDataIVOptimizer::ModificationDatePart2 as i32),
+                StrDataIVOptimizer::Size => SortIdx::IntIdxPair(IntDataIVOptimizer::SizePart1 as i32, IntDataIVOptimizer::SizePart2 as i32),
+            },
             Self::Settings | Self::About => panic!("Button should be disabled"),
         }
     }
@@ -369,6 +397,7 @@ impl ActiveTab {
             Self::InvalidSymlinks => StrDataInvalidSymlinks::SymlinkFolder as usize,
             Self::BrokenFiles => StrDataBrokenFiles::Path as usize,
             Self::BadExtensions => StrDataBadExtensions::Path as usize,
+            Self::IVOptimizer => StrDataIVOptimizer::Path as usize,
             Self::Settings | Self::About => panic!("Button should be disabled"),
         }
     }
@@ -386,6 +415,7 @@ impl ActiveTab {
             Self::InvalidSymlinks => StrDataInvalidSymlinks::SymlinkName as usize,
             Self::BrokenFiles => StrDataBrokenFiles::Name as usize,
             Self::BadExtensions => StrDataBadExtensions::Name as usize,
+            Self::IVOptimizer => StrDataIVOptimizer::Name as usize,
             Self::Settings | Self::About => panic!("Button should be disabled"),
         }
     }
@@ -410,6 +440,7 @@ impl ActiveTab {
             Self::InvalidSymlinks => IntDataInvalidSymlinks::ModificationDatePart1 as usize,
             Self::BrokenFiles => IntDataBrokenFiles::ModificationDatePart1 as usize,
             Self::BadExtensions => IntDataBadExtensions::ModificationDatePart1 as usize,
+            Self::IVOptimizer => IntDataIVOptimizer::ModificationDatePart1 as usize,
             Self::Settings | Self::About => panic!("Button should be disabled"),
         }
     }
@@ -424,6 +455,7 @@ impl ActiveTab {
             Self::BrokenFiles => IntDataBrokenFiles::SizePart1 as usize,
             Self::BadExtensions => IntDataBadExtensions::SizePart1 as usize,
             Self::TemporaryFiles => IntDataTemporaryFiles::SizePart1 as usize,
+            Self::IVOptimizer => IntDataIVOptimizer::SizePart1 as usize,
             Self::Settings | Self::About | Self::EmptyFolders | Self::InvalidSymlinks => return None,
         };
         Some(res)
@@ -449,7 +481,9 @@ impl ActiveTab {
 
     pub(crate) fn get_is_header_mode(self) -> bool {
         match self {
-            Self::EmptyFolders | Self::EmptyFiles | Self::BrokenFiles | Self::BigFiles | Self::TemporaryFiles | Self::InvalidSymlinks | Self::BadExtensions => false,
+            Self::EmptyFolders | Self::EmptyFiles | Self::BrokenFiles | Self::BigFiles | Self::TemporaryFiles | Self::InvalidSymlinks | Self::BadExtensions | Self::IVOptimizer => {
+                false
+            }
             Self::SimilarImages | Self::DuplicateFiles | Self::SimilarVideos | Self::SimilarMusic => true,
             Self::Settings | Self::About => panic!("Button should be disabled"),
         }
@@ -467,6 +501,7 @@ impl ActiveTab {
             Self::InvalidSymlinks => app.get_invalid_symlinks_model(),
             Self::BrokenFiles => app.get_broken_files_model(),
             Self::BadExtensions => app.get_bad_extensions_model(),
+            Self::IVOptimizer => app.get_iv_optimizer_model(),
             Self::Settings | Self::About => panic!("Button should be disabled"),
         }
     }
@@ -484,6 +519,7 @@ impl ActiveTab {
             Self::InvalidSymlinks => app.set_invalid_symlinks_model(model),
             Self::BrokenFiles => app.set_broken_files_model(model),
             Self::BadExtensions => app.set_bad_extensions_model(model),
+            Self::IVOptimizer => app.set_iv_optimizer_model(model),
             Self::Settings | Self::About => panic!("Button should be disabled"),
         }
     }

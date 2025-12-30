@@ -1,4 +1,4 @@
-import { CheckBox, ComboBox, ScrollView, Slider } from "std-widgets.slint";
+import { Button, CheckBox, ComboBox, LineEdit, ScrollView, Slider } from "std-widgets.slint";
 import { ActiveTab } from "common.slint";
 import { Settings } from "settings.slint";
 import { GuiState } from "gui_state.slint";
@@ -338,6 +338,74 @@ export component ToolSettings {
             CheckBoxWrapper {
                 text: Translations.subsettings_broken_files_image_text;
                 checked <=> Settings.broken_files_sub_image;
+            }
+
+            Rectangle { }
+        }
+
+        VerticalLayout {
+            visible: GuiState.active_tab == ActiveTab.IVOptimizer;
+            spacing: 5px;
+            padding: 10px;
+            SubsettingsHeader { }
+
+            ComboBoxWrapper {
+                text: Translations.subsettings_iv_optimizer_mode_text;
+                model: Settings.iv_optimizer_sub_mode;
+                current_index <=> Settings.iv_optimizer_sub_mode_index;
+                current_value <=> Settings.iv_optimizer_sub_mode_value;
+            }
+
+            if Settings.iv_optimizer_sub_mode_index == 1: VerticalLayout {
+                spacing: 5px;
+
+                ComboBoxWrapper {
+                    text: Translations.subsettings_iv_optimizer_video_codec_text;
+                    model: Settings.iv_optimizer_sub_video_codec;
+                    current_index <=> Settings.iv_optimizer_sub_video_codec_index;
+                    current_value <=> Settings.iv_optimizer_sub_video_codec_value;
+                }
+
+                HorizontalLayout {
+                    spacing: 5px;
+                    Text {
+                        text: Translations.subsettings_iv_optimizer_excluded_codecs_text;
+                        vertical_alignment: TextVerticalAlignment.center;
+                    }
+
+                    LineEdit {
+                        text <=> Settings.iv_optimizer_sub_excluded_codecs;
+                    }
+
+                    Button {
+                        text: Translations.subsettings_reset_text;
+                        clicked => {
+                            Settings.iv_optimizer_sub_excluded_codecs = "hevc,av1";
+                        }
+                    }
+                }
+
+                SliderWrapper {
+                    text: Translations.subsettings_iv_optimizer_video_quality_text;
+                    end_text: "(" + round(Settings.iv_optimizer_sub_video_quality) + "/" + round(Settings.iv_optimizer_sub_video_quality_max) + ")";
+                    end_text_size: 60px;
+                    maximum <=> Settings.iv_optimizer_sub_video_quality_max;
+                    minimum <=> Settings.iv_optimizer_sub_video_quality_min;
+                    value <=> Settings.iv_optimizer_sub_video_quality;
+                }
+            }
+
+            if Settings.iv_optimizer_sub_mode_index == 0: VerticalLayout {
+                spacing: 5px;
+
+                SliderWrapper {
+                    text: Translations.subsettings_iv_optimizer_image_threshold_text;
+                    end_text: "(" + round(Settings.iv_optimizer_sub_image_threshold) + "/" + round(Settings.iv_optimizer_sub_image_threshold_max) + ")";
+                    end_text_size: 60px;
+                    maximum <=> Settings.iv_optimizer_sub_image_threshold_max;
+                    minimum <=> Settings.iv_optimizer_sub_image_threshold_min;
+                    value <=> Settings.iv_optimizer_sub_image_threshold;
+                }
             }
 
             Rectangle { }

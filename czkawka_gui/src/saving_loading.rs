@@ -78,7 +78,10 @@ struct LoadSaveStruct {
 impl LoadSaveStruct {
     pub(crate) fn with_text_view() -> Self {
         Self {
-            settings: SettingsJson::default(),
+            settings: SettingsJson {
+                included_directories: vec![get_current_directory()],
+                ..Default::default()
+            },
         }
     }
 

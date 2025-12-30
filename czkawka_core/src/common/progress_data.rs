@@ -121,6 +121,8 @@ pub enum CurrentStage {
     SimilarVideosCreatingThumbnails,
     BrokenFilesChecking,
     BadExtensionsChecking,
+    IVOptimizerProcessingImages,
+    IVOptimizerProcessingVideos,
 }
 
 impl ProgressData {
@@ -188,6 +190,7 @@ impl ProgressData {
             CurrentStage::SimilarVideosCalculatingHashes | CurrentStage::SimilarVideosCreatingThumbnails => Some(ToolType::SimilarVideos),
             CurrentStage::BrokenFilesChecking => Some(ToolType::BrokenFiles),
             CurrentStage::BadExtensionsChecking => Some(ToolType::BadExtensions),
+            CurrentStage::IVOptimizerProcessingImages | CurrentStage::IVOptimizerProcessingVideos => Some(ToolType::IVOptimizer),
         };
         if let Some(tool_type) = tool_type_current_stage {
             assert_eq!(self.tool_type, tool_type, "Tool type: {:?}, stage {:?}", self.tool_type, self.sstage);
@@ -200,7 +203,7 @@ impl ToolType {
         match self {
             Self::Duplicate => 6,
             Self::EmptyFolders | Self::EmptyFiles | Self::InvalidSymlinks | Self::BigFile | Self::TemporaryFiles => 0,
-            Self::BrokenFiles | Self::BadExtensions => 1,
+            Self::BrokenFiles | Self::BadExtensions | Self::IVOptimizer => 1,
             Self::SimilarImages | Self::SimilarVideos => 2,
             Self::None => unreachable!("ToolType::None is not allowed"),
             Self::SameMusic => match checking_method {
@@ -239,6 +242,8 @@ impl CurrentStage {
             Self::SimilarVideosCreatingThumbnails => 2,
             Self::BrokenFilesChecking => 1,
             Self::BadExtensionsChecking => 1,
+            Self::IVOptimizerProcessingImages => 1,
+            Self::IVOptimizerProcessingVideos => 1,
             Self::SameMusicCacheLoadingTags => 1,
             Self::SameMusicReadingTags => 2,
             Self::SameMusicCacheSavingTags => 3,

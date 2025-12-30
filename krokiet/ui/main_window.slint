@@ -61,6 +61,7 @@ export component MainWindow inherits Window {
     in-out property <[MainListModel]> invalid_symlinks_model: [];
     in-out property <[MainListModel]> broken_files_model: [];
     in-out property <[MainListModel]> bad_extensions_model: [];
+    in-out property <[MainListModel]> iv_optimizer_model: [];
 
     VerticalBox {
         HorizontalBox {
@@ -96,6 +97,7 @@ export component MainWindow inherits Window {
                         invalid_symlinks_model <=> root.invalid_symlinks_model;
                         broken_files_model <=> root.broken_files_model;
                         bad_extensions_model <=> root.bad_extensions_model;
+                        iv_optimizer_model <=> root.iv_optimizer_model;
                     }
 
                     preview_or_tool_settings := Rectangle {
@@ -138,6 +140,7 @@ export component MainWindow inherits Window {
             invalid_symlinks_model <=> root.invalid_symlinks_model;
             broken_files_model <=> root.broken_files_model;
             bad_extensions_model <=> root.bad_extensions_model;
+            iv_optimizer_model <=> root.iv_optimizer_model;
 
             vertical-stretch: 0.0;
             scanning <=> root.scanning;

@@ -19,6 +19,7 @@ use czkawka_core::tools::duplicate::{DuplicateEntry, DuplicateFinder, DuplicateF
 use czkawka_core::tools::empty_files::EmptyFiles;
 use czkawka_core::tools::empty_folder::{EmptyFolder, FolderEntry};
 use czkawka_core::tools::invalid_symlinks::{InvalidSymlinks, SymlinksFileEntry};
+use czkawka_core::tools::iv_optimizer::{IVOptimizer, IVOptimizerParameters, ImageTrimEntry, OptimizerMode, VideoCodec, VideoTranscodeEntry};
 use czkawka_core::tools::same_music::{MusicEntry, MusicSimilarity, SameMusic, SameMusicParameters};
 use czkawka_core::tools::similar_images::core::get_string_from_similarity;
 use czkawka_core::tools::similar_images::{ImagesEntry, SimilarImages, SimilarImagesParameters};
@@ -31,9 +32,10 @@ use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
 
 use crate::common::{
     MAX_INT_DATA_BIG_FILES, MAX_INT_DATA_BROKEN_FILES, MAX_INT_DATA_DUPLICATE_FILES, MAX_INT_DATA_EMPTY_FILES, MAX_INT_DATA_EMPTY_FOLDERS, MAX_INT_DATA_INVALID_SYMLINKS,
-    MAX_INT_DATA_SIMILAR_IMAGES, MAX_INT_DATA_SIMILAR_MUSIC, MAX_INT_DATA_SIMILAR_VIDEOS, MAX_INT_DATA_TEMPORARY_FILES, MAX_STR_DATA_BIG_FILES, MAX_STR_DATA_BROKEN_FILES,
-    MAX_STR_DATA_DUPLICATE_FILES, MAX_STR_DATA_EMPTY_FILES, MAX_STR_DATA_EMPTY_FOLDERS, MAX_STR_DATA_INVALID_SYMLINKS, MAX_STR_DATA_SIMILAR_IMAGES, MAX_STR_DATA_SIMILAR_MUSIC,
-    MAX_STR_DATA_SIMILAR_VIDEOS, MAX_STR_DATA_TEMPORARY_FILES, check_if_all_included_dirs_are_referenced, check_if_there_are_any_included_folders, split_u64_into_i32s,
+    MAX_INT_DATA_IV_OPTIMIZER, MAX_INT_DATA_SIMILAR_IMAGES, MAX_INT_DATA_SIMILAR_MUSIC, MAX_INT_DATA_SIMILAR_VIDEOS, MAX_INT_DATA_TEMPORARY_FILES, MAX_STR_DATA_BIG_FILES,
+    MAX_STR_DATA_BROKEN_FILES, MAX_STR_DATA_DUPLICATE_FILES, MAX_STR_DATA_EMPTY_FILES, MAX_STR_DATA_EMPTY_FOLDERS, MAX_STR_DATA_INVALID_SYMLINKS, MAX_STR_DATA_IV_OPTIMIZER,
+    MAX_STR_DATA_SIMILAR_IMAGES, MAX_STR_DATA_SIMILAR_MUSIC, MAX_STR_DATA_SIMILAR_VIDEOS, MAX_STR_DATA_TEMPORARY_FILES, check_if_all_included_dirs_are_referenced,
+    check_if_there_are_any_included_folders, split_u64_into_i32s,
 };
 use crate::connect_row_selection::checker::set_number_of_enabled_items;
 use crate::connect_row_selection::reset_selection;
@@ -110,6 +112,9 @@ pub(crate) fn connect_scan_button(app: &MainWindow, progress_sender: Sender<Prog
             }
             ActiveTab::TemporaryFiles => {
                 scan_temporary_files(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
+            }
+            ActiveTab::IVOptimizer => {
+                scan_iv_optimizer(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
             }
             ActiveTab::Settings | ActiveTab::About => panic!("Button should be disabled"),
         }
@@ -1189,4 +1194,147 @@ where
     component.set_exclude_other_filesystems(custom_settings.ignore_other_file_systems);
     component.set_use_cache(custom_settings.use_cache);
     component.set_save_also_as_json(custom_settings.save_also_as_json);
+}
+
+////////////////////////////////////////// IV Optimizer
+fn scan_iv_optimizer(
+    a: Weak<MainWindow>,
+    progress_sender: Sender<ProgressData>,
+    stop_flag: Arc<AtomicBool>,
+    custom_settings: SettingsCustom,
+    basic_settings: BasicSettings,
+    shared_models: Arc<Mutex<SharedModels>>,
+) {
+    thread::Builder::new()
+        .stack_size(DEFAULT_THREAD_SIZE)
+        .spawn(move || {
+            // Parse excluded codecs from settings
+            let excluded_codecs: Vec<String> = custom_settings
+                .iv_optimizer_excluded_codecs
+                .split(',')
+                .map(|s| s.trim().to_lowercase())
+                .filter(|s| !s.is_empty())
+                .collect();
+
+            // Determine mode from settings
+            let mode_str = custom_settings.iv_optimizer_mode.to_lowercase();
+
+            // Parse video codec from settings
+            let video_codec = match custom_settings.iv_optimizer_video_codec.to_lowercase().as_str() {
+                "h264" => VideoCodec::H264,
+                "vp9" => VideoCodec::Vp9,
+                "av1" => VideoCodec::Av1,
+                "h265" | _ => VideoCodec::H265,
+            };
+
+            let params = if mode_str == "video" {
+                IVOptimizerParameters {
+                    mode: OptimizerMode::VideoTranscode {
+                        codec: video_codec,
+                        quality: custom_settings.iv_optimizer_video_quality,
+                    },
+                    excluded_codecs,
+                }
+            } else {
+                // image mode
+                IVOptimizerParameters {
+                    mode: OptimizerMode::ImageTrim {
+                        threshold: custom_settings.iv_optimizer_image_threshold,
+                    },
+                    excluded_codecs,
+                }
+            };
+
+            let mut tool = IVOptimizer::new(params);
+            set_common_settings(&mut tool, &custom_settings, &stop_flag);
+
+            tool.search(&stop_flag, Some(&progress_sender));
+
+            let video_transcode_entries = tool.get_video_transcode_entries().clone();
+            let image_trim_entries = tool.get_image_trim_entries().clone();
+            let messages = get_text_messages(&tool, &basic_settings);
+
+            let info = tool.get_information();
+            let scanning_time_str = format_time(info.scanning_time);
+            let items_found = info.number_of_processed_files;
+
+            shared_models.lock().unwrap().shared_iv_optimizer_state = Some(tool);
+
+            a.upgrade_in_event_loop(move |app| {
+                write_iv_optimizer_results(&app, video_transcode_entries, image_trim_entries, messages, &scanning_time_str, items_found);
+            })
+        })
+        .expect("Cannot start thread - not much we can do here");
+}
+
+fn write_iv_optimizer_results(
+    app: &MainWindow,
+    video_transcode_entries: Vec<VideoTranscodeEntry>,
+    image_trim_entries: Vec<ImageTrimEntry>,
+    messages: String,
+    scanning_time_str: &str,
+    items_found: usize,
+) {
+    let items = Rc::new(VecModel::default());
+
+    for fe in video_transcode_entries {
+        let (data_model_str, data_model_int) = prepare_data_model_iv_optimizer_video(&fe);
+        insert_data_to_model(&items, data_model_str, data_model_int, None);
+    }
+
+    for fe in image_trim_entries {
+        let (data_model_str, data_model_int) = prepare_data_model_iv_optimizer_image(&fe);
+        insert_data_to_model(&items, data_model_str, data_model_int, None);
+    }
+
+    app.set_iv_optimizer_model(items.into());
+    app.invoke_scan_ended(flk!("rust_found_iv_optimizer", items_found = items_found, time = scanning_time_str).into());
+    app.global::<GuiState>().set_info_text(messages.into());
+}
+
+fn prepare_data_model_iv_optimizer_video(fe: &VideoTranscodeEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
+    let (directory, file) = split_path(&fe.path);
+    let data_model_str_arr: [SharedString; MAX_STR_DATA_IV_OPTIMIZER] = [
+        format_size(fe.size, BINARY).into(),
+        file.into(),
+        directory.into(),
+        fe.codec.clone().into(),
+        fe.dimensions.clone().unwrap_or_default().into(),
+        DateTime::from_timestamp(fe.modified_date as i64, 0)
+            .expect("Modified date always should be in valid range")
+            .to_string()
+            .into(),
+    ];
+    let data_model_str = VecModel::from_slice(&data_model_str_arr);
+    let modification_split = split_u64_into_i32s(fe.modified_date);
+    let size_split = split_u64_into_i32s(fe.size);
+    let data_model_int_arr: [i32; MAX_INT_DATA_IV_OPTIMIZER] = [modification_split.0, modification_split.1, size_split.0, size_split.1];
+    let data_model_int = VecModel::from_slice(&data_model_int_arr);
+    (data_model_str, data_model_int)
+}
+
+fn prepare_data_model_iv_optimizer_image(fe: &ImageTrimEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
+    let (directory, file) = split_path(&fe.path);
+    let dimensions = if let Some(bbox) = &fe.bounding_box {
+        format!("{}x{}", bbox.right - bbox.left, bbox.bottom - bbox.top)
+    } else {
+        String::new()
+    };
+    let data_model_str_arr: [SharedString; MAX_STR_DATA_IV_OPTIMIZER] = [
+        format_size(fe.size, BINARY).into(),
+        file.into(),
+        directory.into(),
+        "".into(), // Codec is empty for images
+        dimensions.into(),
+        DateTime::from_timestamp(fe.modified_date as i64, 0)
+            .expect("Modified date always should be in valid range")
+            .to_string()
+            .into(),
+    ];
+    let data_model_str = VecModel::from_slice(&data_model_str_arr);
+    let modification_split = split_u64_into_i32s(fe.modified_date);
+    let size_split = split_u64_into_i32s(fe.size);
+    let data_model_int_arr: [i32; MAX_INT_DATA_IV_OPTIMIZER] = [modification_split.0, modification_split.1, size_split.0, size_split.1];
+    let data_model_int = VecModel::from_slice(&data_model_int_arr);
+    (data_model_str, data_model_int)
 }

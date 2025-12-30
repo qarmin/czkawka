@@ -1,4 +1,4 @@
-
+# In Rust translations
 rust_loaded_preset = پیش‌-installed سفارش { $preset_idx }
 rust_file_already_exists = فایل "{ $file }" مدرک وجود دارد و نخواهد می‌شد آن را جایگزین کرد
 rust_error_removing_file_after_copy = خطا در حذف فایل \"{ $file }\"(بعد از کپی آن به پارتیشن متفاوت)، دلیل:{ $reason }
@@ -12,7 +12,7 @@ rust_saving_prehash_cache = ذخیره کش存在的错误导致无法直接翻�
 rust_loading_hash_cache = بارگذاری کاش هشینگ
 rust_saving_hash_cache = گذรده کاش هش را ذخیره کنید
 rust_scanning_name = پیمایش نام { $entries_checked } فایل
-rust_scanning_size_name = اندازه‌ی و نام فایل‌های {$entries_checked} را پردازش کنید
+rust_scanning_size_name = اندازه‌ی و نام فایل‌های { $entries_checked } را پردازش کنید
 rust_scanning_size = اندازه‌ی بررسی شده { $entries_checked } فایل
 rust_scanning_file = سkenری‌شدن { $entries_checked } فایل
 rust_scanning_folder = پیمایش { $entries_checked } مappe
@@ -20,13 +20,14 @@ rust_checked_tags = برچسب‌های معتبر شده { $items_stats }
 rust_checked_content = محتوای { $items_stats } ({ $size_stats }) بررسی کردید
 rust_compared_tags = برای شناسایی تگ‌های { $items_stats }
 rust_compared_content = محتوای مقایسه‌ای از { $items_stats }
-rust_hashed_images = پوشیده شده {$items_stats} تصویر ({$size_stats})
+rust_hashed_images = پوشیده شده { $items_stats } تصویر ({ $size_stats })
+rust_compared_image_hashes = اشباع هش‌های تصاویر مقایسه شده از { $items_stats }
 rust_hashed_videos = پس انداز شده { $items_stats } ویدئو
 rust_created_thumbnails = تصاویر کمکی برای { $items_stats } ویدیو ساختم
 rust_checked_files = چک شده فایل { $items_stats } (اندازه { $size_stats })
-rust_checked_files_bad_extensions = چک شده فایل {$items_stats}
-rust_analyzed_partial_hash = جزییات هاش تحلیل شده از {$items_stats} فایل ({$size_stats})
-rust_analyzed_full_hash = انالیز هش کامل { $items_stats } فایل ({$size_stats})
+rust_checked_files_bad_extensions = چک شده فایل { $items_stats }
+rust_analyzed_partial_hash = جزییات هاش تحلیل شده از { $items_stats } فایل ({ $size_stats })
+rust_analyzed_full_hash = انالیز هش کامل { $items_stats } فایل ({ $size_stats })
 rust_failed_to_rename_file = خطا در تغییر نام فایل { $old_path } به { $new_path }, помک: { $error }
 rust_no_included_directories = وقتی دایرکتوری درج نشده است، فحص شروع نمی‌شود.
 rust_all_dirs_referenced = وقتی تمام مسیرهای درج شده به صورت پوشه‌های اشاره‌گر تنظیم شده‌اند، نمی‌توان ارزشیابی را شروع کرد.
@@ -50,6 +51,7 @@ rust_cannot_save_preset = نمی‌توان پیش فرض { $preset_idx } را �
 rust_reset_preset = تنظیم پیش‌فرض { $preset_idx } را بازنشانی کنید
 rust_cannot_create_output_folder = نمی‌توانم مسیر خروجی { $output_folder } را ایجاد کنم، دلیل: { $error }
 rust_delete_summary = حذف شده‌ی { $deleted } مورد، نجات نشده‌ی { $failed } مورد، از کل { $total } مورد
+rust_rename_summary = نام { $renamed } آیتم تغییر کرد، نام { $failed } آیتم موفق به تغییر نشد، از مجموع { $total } آیتم
 rust_move_summary = انتقال { $moved } قطعه، موفقیت آمیز نبود { $failed } قطعه، از کل { $total } قطعه
 rust_deleting_files = حذف فایل { $items_stats } (سایز { $size_stats })
 rust_deleting_no_size_files = حذف فایل { $items_stats }
@@ -60,8 +62,12 @@ rust_no_files_deleted = لیست نرم‌افزار یا پوشه مورد حذ
 rust_no_files_renamed = هیچ فایل یا پوشه‌ی انتخابی برای نامبردهش وجود ندارد
 rust_no_files_moved = هیچ فایل یا mapه نم chosen برای منتقل کردن است
 rust_delete_confirmation = هستید وظیفه‌ای را برای حذف قطعات انتخاب شده را اطمینان دارید؟
+rust_delete_confirmation_number_simple = { $items } آیتم انتخاب شد.
 rust_delete_confirmation_number_groups = { $items } مورد در { $groups } گروه انتخاب شده است.
 rust_delete_confirmation_selected_all_in_group = همه آیتم‌ها در { $groups } گروه انتخاب شده است.
+
+# Slint translations, but in arrays
+
 column_selection = انتخاب
 column_size = سایز
 column_file_name = نام فایل
@@ -84,6 +90,7 @@ column_proper_extension = توسعه مناسب
 column_fps = فپس
 column_codec = کدکوډ ( Codec )
 column_duration = مدت زمان
+# Slint translations
 ok_button = اوکی
 cancel_button = لغو
 do_you_want_to_continue = شما عازم به دنباله هستید؟
@@ -97,9 +104,9 @@ save_button = پای 若要继续，请输入完整的问题或命令。保存�
 sort_button = مرتب کردن
 rename_button = تغییر نام
 motto = این برنامه را می‌توانید به طور آزاد استفاده کنید و همیشه اینطور خواهد بود.\nبرای جزئیات، به پروتکلライセンス MIT/GPL نگاه کنید.
-unicorn = 
-        شما ممکن است یک گوسفند سرخ نگاه نکنید، اما گوسفند سرخ همいつante始发时间总是过去时，你总是在它之后。永远不要认为你了解了什么，因为每一次的遇见都是一次新的开始。
-        你可能不会去看一只独角兽，但独角兽总是看着你。
+unicorn =
+    شما ممکن است یک گوسفند سرخ نگاه نکنید، اما گوسفند سرخ همいつante始发时间总是过去时，你总是在它之后。永远不要认为你了解了什么，因为每一次的遇见都是一次新的开始。
+    你可能不会去看一只独角兽，但独角兽总是看着你。
 repository = گارایو
 instruction = دکمه دستورالعمل
 donation = پیمانکار
@@ -222,3 +229,6 @@ subsettings_videos_crop_detect = روش شناساندن کره
 subsettings_videos_skip_forward_amount = مدت زمان hop [س]
 subsettings_videos_vid_hash_duration = مدت زمان ویدیو هاش
 subsettings_videos_thumbnail_percentage = pozیション تصویر کمپین در ویدئو (%)
+settings_cache_number_size_text = حجم فایل‌های پوше: { $size }, تعداد فایل‌ها: { $number }
+settings_video_thumbnails_number_size_text = rozمغزهای ویدیو: {$size}، تعداد فایل‌ها: {$number}
+settings_log_number_size_text = اندازه فایل‌های لگ: { $size }, تعداد فایل‌ها: { $number }

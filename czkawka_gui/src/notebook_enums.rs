@@ -33,7 +33,7 @@ pub(crate) fn to_notebook_main_enum(notebook_number: u32) -> NotebookMainEnum {
     }
 }
 
-pub(crate) fn get_all_main_tabs() -> [NotebookMainEnum; TOOLS_NUMBER] {
+pub(crate) fn get_all_main_tabs() -> [NotebookMainEnum; TOOLS_NUMBER - 1] {
     [
         to_notebook_main_enum(0),
         to_notebook_main_enum(1),
