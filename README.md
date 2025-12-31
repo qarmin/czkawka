@@ -28,6 +28,7 @@
     - Invalid Symbolic Links - Shows symbolic links which point to non-existent files/directories
     - Broken Files - Finds files that are invalid or corrupted
     - Bad Extensions - Lists files whose content not match with their extension
+    - IV Optimizer - Finds images that 
 
 ![Czkawka](https://github.com/user-attachments/assets/b0409515-1bec-4e13-8fac-7bdfa15f5848)
 

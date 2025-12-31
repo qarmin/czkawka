@@ -3,7 +3,6 @@ use std::path::Path;
 use ffprobe::ffprobe;
 use serde::{Deserialize, Serialize};
 
-/// Raw video metadata extracted from ffprobe
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct VideoMetadata {
     pub fps: Option<f64>,
@@ -15,7 +14,6 @@ pub struct VideoMetadata {
 }
 
 impl VideoMetadata {
-    /// Extract video metadata from a file using ffprobe
     pub fn from_path(path: &Path) -> Result<Self, String> {
         let info = ffprobe(path).map_err(|e| format!("Failed to read video properties: {e}"))?;
 
@@ -80,7 +78,6 @@ impl VideoMetadata {
         Ok(metadata)
     }
 
-    /// Get dimensions as a formatted string (e.g., "1920x1080")
     pub fn dimensions_string(&self) -> Option<String> {
         match (self.width, self.height) {
             (Some(w), Some(h)) => Some(format!("{w}x{h}")),

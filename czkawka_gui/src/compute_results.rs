@@ -46,7 +46,6 @@ use crate::opening_selecting_records::{
 
 // Helper functions for deduplication
 
-/// Check if search was stopped and update UI accordingly
 fn handle_stopped_search<T: CommonData>(tool: &T, entry_info: &Entry) -> bool {
     if tool.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
@@ -56,14 +55,12 @@ fn handle_stopped_search<T: CommonData>(tool: &T, entry_info: &Entry) -> bool {
     }
 }
 
-/// Update shared state and return whether items were found
 #[expect(clippy::unnecessary_wraps)]
 fn finalize_compute<T: Into<SharedModelEnum>>(subview: &SubView, tool: T, items_found: usize) -> Option<bool> {
     subview.shared_model_enum.replace(tool.into());
     Some(items_found > 0)
 }
 
-/// Sort entries that implement ResultEntry trait - conditional version (only if >= 2 elements)
 fn conditional_sort_vector<T>(vector: &[T]) -> Vec<T>
 where
     T: ResultEntry + Clone + Send,
@@ -77,7 +74,6 @@ where
     }
 }
 
-/// Helper to format file size and date for list store entries
 fn format_size_and_date(size: u64, modified_date: u64, is_header: bool, is_reference_folder: bool) -> (String, String) {
     if is_header && !is_reference_folder {
         (String::new(), String::new())
@@ -86,7 +82,6 @@ fn format_size_and_date(size: u64, modified_date: u64, is_header: bool, is_refer
     }
 }
 
-/// Helper to get row color based on header status
 fn get_row_color(is_header: bool) -> &'static str {
     if is_header { HEADER_ROW_COLOR } else { MAIN_ROW_COLOR }
 }
