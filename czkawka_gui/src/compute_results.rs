@@ -27,7 +27,7 @@ use gtk4::prelude::*;
 use gtk4::{Entry, ListStore, TextView};
 use humansize::{BINARY, format_size};
 use rayon::prelude::*;
-
+use czkawka_core::tools::same_music::core::format_audio_duration;
 use crate::flg;
 use crate::gui_structs::common_tree_view::{SharedModelEnum, SubView, TreeViewListStoreTrait};
 use crate::gui_structs::gui_data::GuiData;
@@ -312,7 +312,7 @@ fn compute_same_music(mf: SameMusic, entry_info: &Entry, text_view_errors: &Text
                     base_file_entry.bitrate,
                     &format!("{} kbps", base_file_entry.bitrate),
                     &base_file_entry.genre,
-                    &base_file_entry.length,
+                    &format_audio_duration(base_file_entry.length),
                     true,
                     true,
                 );
@@ -330,7 +330,7 @@ fn compute_same_music(mf: SameMusic, entry_info: &Entry, text_view_errors: &Text
                         file_entry.bitrate,
                         &format!("{} kbps", file_entry.bitrate),
                         &file_entry.genre,
-                        &file_entry.length,
+                        &format_audio_duration(file_entry.length),
                         false,
                         true,
                     );
@@ -374,7 +374,7 @@ fn compute_same_music(mf: SameMusic, entry_info: &Entry, text_view_errors: &Text
                         file_entry.bitrate,
                         &format!("{} kbps", file_entry.bitrate),
                         &file_entry.genre,
-                        &file_entry.length,
+                        &format_audio_duration(file_entry.length),
                         false,
                         false,
                     );

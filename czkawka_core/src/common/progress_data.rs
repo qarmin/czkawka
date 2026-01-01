@@ -121,9 +121,9 @@ pub enum CurrentStage {
     SimilarVideosCreatingThumbnails,
     BrokenFilesChecking,
     BadExtensionsChecking,
-    ExifFinderExtractingTags,
-    IVOptimizerProcessingImages,
-    IVOptimizerProcessingVideos,
+    ExifRemoverExtractingTags,
+    VideoOptimizerProcessingImages,
+    VideoOptimizerProcessingVideos,
 }
 
 impl ProgressData {
@@ -191,8 +191,8 @@ impl ProgressData {
             CurrentStage::SimilarVideosCalculatingHashes | CurrentStage::SimilarVideosCreatingThumbnails => Some(ToolType::SimilarVideos),
             CurrentStage::BrokenFilesChecking => Some(ToolType::BrokenFiles),
             CurrentStage::BadExtensionsChecking => Some(ToolType::BadExtensions),
-            CurrentStage::ExifFinderExtractingTags => Some(ToolType::ExifRemover),
-            CurrentStage::IVOptimizerProcessingImages | CurrentStage::IVOptimizerProcessingVideos => Some(ToolType::IVOptimizer),
+            CurrentStage::ExifRemoverExtractingTags => Some(ToolType::ExifRemover),
+            CurrentStage::VideoOptimizerProcessingImages | CurrentStage::VideoOptimizerProcessingVideos => Some(ToolType::VideoOptimizer),
         };
         if let Some(tool_type) = tool_type_current_stage {
             assert_eq!(self.tool_type, tool_type, "Tool type: {:?}, stage {:?}", self.tool_type, self.sstage);
@@ -205,7 +205,7 @@ impl ToolType {
         match self {
             Self::Duplicate => 6,
             Self::EmptyFolders | Self::EmptyFiles | Self::InvalidSymlinks | Self::BigFile | Self::TemporaryFiles => 0,
-            Self::BrokenFiles | Self::BadExtensions | Self::IVOptimizer | Self::ExifRemover => 1,
+            Self::BrokenFiles | Self::BadExtensions | Self::VideoOptimizer | Self::ExifRemover => 1,
             Self::SimilarImages | Self::SimilarVideos => 2,
             Self::None => unreachable!("ToolType::None is not allowed"),
             Self::SameMusic => match checking_method {
@@ -244,8 +244,8 @@ impl CurrentStage {
             Self::SimilarVideosCreatingThumbnails => 2,
             Self::BrokenFilesChecking => 1,
             Self::BadExtensionsChecking => 1,
-            Self::IVOptimizerProcessingImages => 1,
-            Self::IVOptimizerProcessingVideos => 1,
+            Self::VideoOptimizerProcessingImages => 1,
+            Self::VideoOptimizerProcessingVideos => 1,
             Self::SameMusicCacheLoadingTags => 1,
             Self::SameMusicReadingTags => 2,
             Self::SameMusicCacheSavingTags => 3,
@@ -254,7 +254,7 @@ impl CurrentStage {
             Self::SameMusicCalculatingFingerprints => 5,
             Self::SameMusicCacheSavingFingerprints => 6,
             Self::SameMusicComparingFingerprints => 7,
-            Self::ExifFinderExtractingTags => 1,
+            Self::ExifRemoverExtractingTags => 1,
         }
     }
     pub fn check_if_loading_saving_cache(&self) -> bool {

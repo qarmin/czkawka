@@ -19,7 +19,7 @@ pub enum ToolType {
     SimilarImages,
     SimilarVideos,
     TemporaryFiles,
-    IVOptimizer,
+    VideoOptimizer,
     ExifRemover,
     #[default]
     None,

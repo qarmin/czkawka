@@ -176,8 +176,10 @@ pub enum IntDataSimilarMusic {
     ModificationDatePart2,
     SizePart1,
     SizePart2,
+    Bitrate,
+    Length,
 }
-pub const MAX_INT_DATA_SIMILAR_MUSIC: usize = IntDataSimilarMusic::SizePart2 as usize + 1;
+pub const MAX_INT_DATA_SIMILAR_MUSIC: usize = IntDataSimilarMusic::Length as usize + 1;
 
 #[repr(u8)]
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
@@ -260,40 +262,43 @@ pub const MAX_STR_DATA_BAD_EXTENSIONS: usize = StrDataBadExtensions::ProperExten
 
 #[repr(u8)]
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
-pub enum IntDataExifFinder {
+// Exif Remover
+pub enum IntDataExifRemover {
     ModificationDatePart1,
     ModificationDatePart2,
     SizePart1,
     SizePart2,
     ExifTagsCount,
 }
-pub const MAX_INT_DATA_EXIF_FINDER: usize = IntDataExifFinder::ExifTagsCount as usize + 1;
+pub const MAX_INT_DATA_EXIF_REMOVER: usize = IntDataExifRemover::ExifTagsCount as usize + 1;
 
 #[repr(u8)]
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
-pub enum StrDataExifFinder {
+pub enum StrDataExifRemover {
     Size,
     Name,
     Path,
-    ModificationDate,
     ExifTags,
+    ModificationDate,
 }
-pub const MAX_STR_DATA_EXIF_FINDER: usize = StrDataExifFinder::ExifTags as usize + 1;
+pub const MAX_STR_DATA_EXIF_REMOVER: usize = StrDataExifRemover::ModificationDate as usize + 1;
 
-// IV Optimizer
+// Video Optimizer
 #[repr(u8)]
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
-pub enum IntDataIVOptimizer {
+pub enum IntDataVideoOptimizer {
     ModificationDatePart1,
     ModificationDatePart2,
     SizePart1,
     SizePart2,
+    DimensionsPart1,
+    DimensionsPart2,
 }
-pub const MAX_INT_DATA_IV_OPTIMIZER: usize = IntDataIVOptimizer::SizePart2 as usize + 1;
+pub const MAX_INT_DATA_VIDEO_OPTIMIZER: usize = IntDataVideoOptimizer::DimensionsPart2 as usize + 1;
 
 #[repr(u8)]
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
-pub enum StrDataIVOptimizer {
+pub enum StrDataVideoOptimizer {
     Size,
     Name,
     Path,
@@ -301,7 +306,7 @@ pub enum StrDataIVOptimizer {
     Dimensions,
     ModificationDate,
 }
-pub const MAX_STR_DATA_IV_OPTIMIZER: usize = StrDataIVOptimizer::ModificationDate as usize + 1;
+pub const MAX_STR_DATA_VIDEO_OPTIMIZER: usize = StrDataVideoOptimizer::ModificationDate as usize + 1;
 
 pub(crate) enum SortIdx {
     StrIdx(i32),
@@ -396,15 +401,19 @@ impl ActiveTab {
                 | StrDataBadExtensions::ProperExtensionsGroup
                 | StrDataBadExtensions::ProperExtension => SortIdx::StrIdx(str_idx),
             },
-            Self::ExifRemover => match StrDataExifFinder::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for ExifRemover")) {
-                StrDataExifFinder::Size | StrDataExifFinder::Name | StrDataExifFinder::Path => SortIdx::StrIdx(str_idx),
-                StrDataExifFinder::ModificationDate => SortIdx::IntIdxPair(IntDataExifFinder::ModificationDatePart1 as i32, IntDataExifFinder::ModificationDatePart2 as i32),
-                StrDataExifFinder::ExifTags => SortIdx::IntIdx(IntDataExifFinder::ExifTagsCount as i32),
+            Self::ExifRemover => match StrDataExifRemover::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for ExifRemover")) {
+                StrDataExifRemover::Name | StrDataExifRemover::Path => SortIdx::StrIdx(str_idx),
+                StrDataExifRemover::ModificationDate => SortIdx::IntIdxPair(IntDataExifRemover::ModificationDatePart1 as i32, IntDataExifRemover::ModificationDatePart2 as i32),
+                StrDataExifRemover::ExifTags => SortIdx::IntIdx(IntDataExifRemover::ExifTagsCount as i32),
+                StrDataExifRemover::Size => SortIdx::IntIdxPair(IntDataExifRemover::SizePart1 as i32, IntDataExifRemover::SizePart2 as i32),
             },
-            Self::IVOptimizer => match StrDataIVOptimizer::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for IVOptimizer")) {
-                StrDataIVOptimizer::Name | StrDataIVOptimizer::Path | StrDataIVOptimizer::Codec | StrDataIVOptimizer::Dimensions => SortIdx::StrIdx(str_idx),
-                StrDataIVOptimizer::ModificationDate => SortIdx::IntIdxPair(IntDataIVOptimizer::ModificationDatePart1 as i32, IntDataIVOptimizer::ModificationDatePart2 as i32),
-                StrDataIVOptimizer::Size => SortIdx::IntIdxPair(IntDataIVOptimizer::SizePart1 as i32, IntDataIVOptimizer::SizePart2 as i32),
+            Self::VideoOptimizer => match StrDataVideoOptimizer::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for VideoOptimizer")) {
+                StrDataVideoOptimizer::Name | StrDataVideoOptimizer::Path | StrDataVideoOptimizer::Codec => SortIdx::StrIdx(str_idx),
+                StrDataVideoOptimizer::ModificationDate => {
+                    SortIdx::IntIdxPair(IntDataVideoOptimizer::ModificationDatePart1 as i32, IntDataVideoOptimizer::ModificationDatePart2 as i32)
+                }
+                StrDataVideoOptimizer::Size => SortIdx::IntIdxPair(IntDataVideoOptimizer::SizePart1 as i32, IntDataVideoOptimizer::SizePart2 as i32),
+                StrDataVideoOptimizer::Dimensions => SortIdx::IntIdxPair(IntDataVideoOptimizer::DimensionsPart1 as i32, IntDataVideoOptimizer::DimensionsPart2 as i32),
             },
             Self::Settings | Self::About => panic!("Button should be disabled"),
         }
@@ -424,8 +433,8 @@ impl ActiveTab {
             Self::InvalidSymlinks => StrDataInvalidSymlinks::SymlinkFolder as usize,
             Self::BrokenFiles => StrDataBrokenFiles::Path as usize,
             Self::BadExtensions => StrDataBadExtensions::Path as usize,
-            Self::ExifRemover => StrDataExifFinder::Path as usize,
-            Self::IVOptimizer => StrDataIVOptimizer::Path as usize,
+            Self::ExifRemover => StrDataExifRemover::Path as usize,
+            Self::VideoOptimizer => StrDataVideoOptimizer::Path as usize,
             Self::Settings | Self::About => panic!("Button should be disabled"),
         }
     }
@@ -443,8 +452,8 @@ impl ActiveTab {
             Self::InvalidSymlinks => StrDataInvalidSymlinks::SymlinkName as usize,
             Self::BrokenFiles => StrDataBrokenFiles::Name as usize,
             Self::BadExtensions => StrDataBadExtensions::Name as usize,
-            Self::ExifRemover => StrDataExifFinder::Name as usize,
-            Self::IVOptimizer => StrDataIVOptimizer::Name as usize,
+            Self::ExifRemover => StrDataExifRemover::Name as usize,
+            Self::VideoOptimizer => StrDataVideoOptimizer::Name as usize,
             Self::Settings | Self::About => panic!("Button should be disabled"),
         }
     }
@@ -469,8 +478,8 @@ impl ActiveTab {
             Self::InvalidSymlinks => IntDataInvalidSymlinks::ModificationDatePart1 as usize,
             Self::BrokenFiles => IntDataBrokenFiles::ModificationDatePart1 as usize,
             Self::BadExtensions => IntDataBadExtensions::ModificationDatePart1 as usize,
-            Self::ExifRemover => IntDataExifFinder::ModificationDatePart1 as usize,
-            Self::IVOptimizer => IntDataIVOptimizer::ModificationDatePart1 as usize,
+            Self::ExifRemover => IntDataExifRemover::ModificationDatePart1 as usize,
+            Self::VideoOptimizer => IntDataVideoOptimizer::ModificationDatePart1 as usize,
             Self::Settings | Self::About => panic!("Button should be disabled"),
         }
     }
@@ -484,9 +493,9 @@ impl ActiveTab {
             Self::SimilarMusic => IntDataSimilarMusic::SizePart1 as usize,
             Self::BrokenFiles => IntDataBrokenFiles::SizePart1 as usize,
             Self::BadExtensions => IntDataBadExtensions::SizePart1 as usize,
-            Self::ExifRemover => IntDataExifFinder::SizePart1 as usize,
+            Self::ExifRemover => IntDataExifRemover::SizePart1 as usize,
             Self::TemporaryFiles => IntDataTemporaryFiles::SizePart1 as usize,
-            Self::IVOptimizer => IntDataIVOptimizer::SizePart1 as usize,
+            Self::VideoOptimizer => IntDataVideoOptimizer::SizePart1 as usize,
             Self::Settings | Self::About | Self::EmptyFolders | Self::InvalidSymlinks => return None,
         };
         Some(res)
@@ -520,7 +529,7 @@ impl ActiveTab {
             | Self::InvalidSymlinks
             | Self::BadExtensions
             | Self::ExifRemover
-            | Self::IVOptimizer => false,
+            | Self::VideoOptimizer => false,
             Self::SimilarImages | Self::DuplicateFiles | Self::SimilarVideos | Self::SimilarMusic => true,
             Self::Settings | Self::About => panic!("Button should be disabled"),
         }
@@ -538,8 +547,8 @@ impl ActiveTab {
             Self::InvalidSymlinks => app.get_invalid_symlinks_model(),
             Self::BrokenFiles => app.get_broken_files_model(),
             Self::BadExtensions => app.get_bad_extensions_model(),
-            Self::ExifRemover => app.get_exif_finder_model(),
-            Self::IVOptimizer => app.get_iv_optimizer_model(),
+            Self::ExifRemover => app.get_exif_remover_model(),
+            Self::VideoOptimizer => app.get_video_optimizer_model(),
             Self::Settings | Self::About => panic!("Button should be disabled"),
         }
     }
@@ -557,8 +566,8 @@ impl ActiveTab {
             Self::InvalidSymlinks => app.set_invalid_symlinks_model(model),
             Self::BrokenFiles => app.set_broken_files_model(model),
             Self::BadExtensions => app.set_bad_extensions_model(model),
-            Self::ExifRemover => app.set_exif_finder_model(model),
-            Self::IVOptimizer => app.set_iv_optimizer_model(model),
+            Self::ExifRemover => app.set_exif_remover_model(model),
+            Self::VideoOptimizer => app.set_video_optimizer_model(model),
             Self::Settings | Self::About => panic!("Button should be disabled"),
         }
     }

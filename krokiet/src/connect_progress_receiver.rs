@@ -92,8 +92,8 @@ fn progress_default(item: &ProgressData) -> ProgressToSend {
         CurrentStage::SimilarVideosCreatingThumbnails => flk!("rust_created_thumbnails", items_stats = items_stats),
         CurrentStage::BrokenFilesChecking => flk!("rust_checked_files", items_stats = items_stats, size_stats = size_stats),
         CurrentStage::BadExtensionsChecking => flk!("rust_checked_files_bad_extensions", items_stats = items_stats),
-        CurrentStage::IVOptimizerProcessingImages => flk!("rust_checked_images", items_stats = items_stats, size_stats = size_stats),
-        CurrentStage::IVOptimizerProcessingVideos => flk!("rust_checked_videos", items_stats = items_stats, size_stats = size_stats),
+        CurrentStage::VideoOptimizerProcessingImages => flk!("rust_checked_images", items_stats = items_stats, size_stats = size_stats),
+        CurrentStage::VideoOptimizerProcessingVideos => flk!("rust_checked_videos", items_stats = items_stats, size_stats = size_stats),
         CurrentStage::DuplicatePreHashing => flk!("rust_analyzed_partial_hash", items_stats = items_stats, size_stats = size_stats),
         CurrentStage::DuplicateFullHashing => flk!("rust_analyzed_full_hash", items_stats = items_stats, size_stats = size_stats),
 
@@ -103,7 +103,7 @@ fn progress_default(item: &ProgressData) -> ProgressToSend {
         CurrentStage::MovingFiles if item.bytes_to_check != 0 => flk!("rust_moving_files", items_stats = items_stats, size_stats = size_stats),
         CurrentStage::MovingFiles => flk!("rust_moving_no_size_files", items_stats = items_stats),
 
-        CurrentStage::ExifFinderExtractingTags => flk!("rust_extracted_exif_tags", items_stats = items_stats, size_stats = size_stats),
+        CurrentStage::ExifRemoverExtractingTags => flk!("rust_extracted_exif_tags", items_stats = items_stats, size_stats = size_stats),
 
         CurrentStage::CollectingFiles
         | CurrentStage::DuplicateCacheSaving

@@ -19,11 +19,11 @@ pub struct Info {
 }
 
 #[derive(Clone, Default)]
-pub struct ExifFinderParameters {
+pub struct ExifRemoverParameters {
     pub ignored_tags: Vec<String>,
 }
 
-impl ExifFinderParameters {
+impl ExifRemoverParameters {
     pub fn new(ignored_tags: Vec<String>) -> Self {
         Self { ignored_tags }
     }
@@ -55,7 +55,7 @@ pub struct ExifRemover {
     information: Info,
     exif_files: Vec<ExifEntry>,
     files_to_check: BTreeMap<String, ExifEntry>,
-    params: ExifFinderParameters,
+    params: ExifRemoverParameters,
 }
 
 impl ExifRemover {

@@ -7,7 +7,7 @@ use tempfile::TempDir;
 
 use crate::common::tool_data::CommonData;
 use crate::common::traits::Search;
-use crate::tools::exif_remover::{ExifFinderParameters, ExifRemover};
+use crate::tools::exif_remover::{ExifRemover, ExifRemoverParameters};
 
 fn get_test_resources_path() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test_resources").join("images")
@@ -22,7 +22,7 @@ fn test_find_exif_files() {
     let dest_image = path.join("test.jpg");
     fs::copy(&source_image, &dest_image).unwrap();
 
-    let mut finder = ExifRemover::new(ExifFinderParameters::default());
+    let mut finder = ExifRemover::new(ExifRemoverParameters::default());
     finder.set_included_directory(vec![path.to_path_buf()]);
 
     let stop_flag = Arc::new(AtomicBool::new(false));
@@ -41,7 +41,7 @@ fn test_empty_directory() {
     let temp_dir = TempDir::new().unwrap();
     let path = temp_dir.path();
 
-    let mut finder = ExifRemover::new(ExifFinderParameters::default());
+    let mut finder = ExifRemover::new(ExifRemoverParameters::default());
     finder.set_included_directory(vec![path.to_path_buf()]);
 
     let stop_flag = Arc::new(AtomicBool::new(false));
@@ -58,7 +58,7 @@ fn test_non_image_files() {
 
     fs::write(path.join("test.txt"), b"This is not an image").unwrap();
 
-    let mut finder = ExifRemover::new(ExifFinderParameters::default());
+    let mut finder = ExifRemover::new(ExifRemoverParameters::default());
     finder.set_included_directory(vec![path.to_path_buf()]);
 
     let stop_flag = Arc::new(AtomicBool::new(false));

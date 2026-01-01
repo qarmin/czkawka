@@ -31,8 +31,8 @@ export component MainList {
     in-out property <[MainListModel]> invalid_symlinks_model: [];
     in-out property <[MainListModel]> broken_files_model: [];
     in-out property <[MainListModel]> bad_extensions_model: [];
-    in-out property <[MainListModel]> exif_finder_model: [];
-    in-out property <[MainListModel]> iv_optimizer_model: [];
+    in-out property <[MainListModel]> exif_remover_model: [];
+    in-out property <[MainListModel]> video_optimizer_model: [];
 
     callback changed_active_tab();
 
@@ -183,22 +183,22 @@ export component MainList {
         visible: GuiState.active_tab == ActiveTab.ExifRemover;
         min-width: 200px;
         height: parent.height;
-        columns <=> Settings.exif_finder_column_name;
-        column_sizes <=> Settings.exif_finder_column_size;
-        values <=> exif_finder_model;
+        columns <=> Settings.exif_remover_column_name;
+        column_sizes <=> Settings.exif_remover_column_size;
+        values <=> exif_remover_model;
         parentPathIdx: 2;
         fileNameIdx: 1;
         previewImageIdx: -1;
         sort_available: !working;
     }
 
-    iv_optimizer := SelectableTableView {
-        visible: GuiState.active_tab == ActiveTab.IVOptimizer;
+    video_optimizer := SelectableTableView {
+        visible: GuiState.active_tab == ActiveTab.VideoOptimizer;
         min-width: 200px;
         height: parent.height;
-        columns <=> Settings.iv_optimizer_column_name;
-        column_sizes <=> Settings.iv_optimizer_column_size;
-        values <=> iv_optimizer_model;
+        columns <=> Settings.video_optimizer_column_name;
+        column_sizes <=> Settings.video_optimizer_column_size;
+        values <=> video_optimizer_model;
         parentPathIdx: 2;
         fileNameIdx: 1;
         previewImageIdx: -1;
@@ -238,8 +238,8 @@ export component MainList {
             broken_files.reset_selection();
         } else if (GuiState.active_tab == ActiveTab.ExifRemover) {
             exif_remover.reset_selection();
-        } else if (GuiState.active_tab == ActiveTab.IVOptimizer) {
-            iv_optimizer.reset_selection();
+        } else if (GuiState.active_tab == ActiveTab.VideoOptimizer) {
+            video_optimizer.reset_selection();
         } else {
             // debug("Non handled reset selection in main_lists.slint", GuiState.active_tab);
         }
@@ -270,8 +270,8 @@ export component MainList {
             broken_files.scan_started();
         } else if (GuiState.active_tab == ActiveTab.ExifRemover) {
             exif_remover.scan_started();
-        } else if (GuiState.active_tab == ActiveTab.IVOptimizer) {
-            iv_optimizer.scan_started();
+        } else if (GuiState.active_tab == ActiveTab.VideoOptimizer) {
+            video_optimizer.scan_started();
         } else {
             // debug("Non handled reset selection in main_lists.slint", GuiState.active_tab);
         }

@@ -74,7 +74,7 @@ pub(crate) fn initialize_selection_struct() {
         ActiveTab::BrokenFiles,
         ActiveTab::BadExtensions,
         ActiveTab::ExifRemover,
-        ActiveTab::IVOptimizer,
+        ActiveTab::VideoOptimizer,
     ];
 
     let map: HashMap<_, _> = tools.into_iter().map(|tool| (tool, SelectionData::default())).collect();
@@ -370,13 +370,13 @@ pub(crate) mod checker {
                 app.global::<GuiState>().set_selected_results_bad_extensions(it1);
                 app.global::<GuiState>().set_selected_results_bad_extensions2(it2);
             }
-            ActiveTab::IVOptimizer => {
-                app.global::<GuiState>().set_selected_results_iv_optimizer(it1);
-                app.global::<GuiState>().set_selected_results_iv_optimizer2(it2);
+            ActiveTab::VideoOptimizer => {
+                app.global::<GuiState>().set_selected_results_video_optimizer(it1);
+                app.global::<GuiState>().set_selected_results_video_optimizer2(it2);
             }
             ActiveTab::ExifRemover => {
-                app.global::<GuiState>().set_selected_results_exif_finder(it1);
-                app.global::<GuiState>().set_selected_results_exif_finder2(it2);
+                app.global::<GuiState>().set_selected_results_exif_remover(it1);
+                app.global::<GuiState>().set_selected_results_exif_remover2(it2);
             }
             _ => unreachable!("Current tab is not a tool that has enabled items"),
         }
@@ -436,13 +436,13 @@ pub(crate) mod checker {
                 app.global::<GuiState>().get_selected_results_bad_extensions(),
                 app.global::<GuiState>().get_selected_results_bad_extensions2(),
             ),
-            ActiveTab::IVOptimizer => (
-                app.global::<GuiState>().get_selected_results_iv_optimizer(),
-                app.global::<GuiState>().get_selected_results_iv_optimizer2(),
+            ActiveTab::VideoOptimizer => (
+                app.global::<GuiState>().get_selected_results_video_optimizer(),
+                app.global::<GuiState>().get_selected_results_video_optimizer2(),
             ),
             ActiveTab::ExifRemover => (
-                app.global::<GuiState>().get_selected_results_exif_finder(),
-                app.global::<GuiState>().get_selected_results_exif_finder2(),
+                app.global::<GuiState>().get_selected_results_exif_remover(),
+                app.global::<GuiState>().get_selected_results_exif_remover2(),
             ),
             _ => unreachable!("Current tab is not a tool that has enabled items"),
         };

@@ -15,6 +15,7 @@ use crate::common::model::{CheckingMethod, ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::traits::ResultEntry;
 use crate::common::{make_hard_link, remove_folder_if_contains_only_empty_folders, remove_single_file};
+use crate::common::progress_stop_handler::check_if_stop_received;
 use crate::helpers::delayed_sender::DelayedSender;
 use crate::helpers::messages::Messages;
 
@@ -278,7 +279,7 @@ pub trait CommonData {
     ) -> WorkContinueStatus {
         let delete_results = self.delete_elements(stop_flag, progress_sender, delete_item_type);
 
-        if stop_flag.load(std::sync::atomic::Ordering::Relaxed) {
+        if check_if_stop_received(stop_flag) {
             WorkContinueStatus::Stop
         } else {
             delete_results.add_to_messages(self.get_text_messages_mut());
@@ -334,7 +335,7 @@ pub trait CommonData {
             self.delete_elements(stop_flag, progress_sender, DeleteItemType::DeletingFiles(res))
         };
 
-        if stop_flag.load(std::sync::atomic::Ordering::Relaxed) {
+        if check_if_stop_received(stop_flag) {
             WorkContinueStatus::Stop
         } else {
             delete_results.add_to_messages(self.get_text_messages_mut());
@@ -376,7 +377,7 @@ pub trait CommonData {
             DeleteItemType::DeletingFiles(ref items) | DeleteItemType::DeletingFolders(ref items) => items
                 .into_par_iter()
                 .map(|e| {
-                    if stop_flag.load(std::sync::atomic::Ordering::Relaxed) {
+                    if check_if_stop_received(stop_flag) {
                         return None;
                     }
 
@@ -409,7 +410,7 @@ pub trait CommonData {
             DeleteItemType::HardlinkingFiles(ref items) => items
                 .into_par_iter()
                 .map(|(original, files)| {
-                    if stop_flag.load(std::sync::atomic::Ordering::Relaxed) {
+                    if check_if_stop_received(stop_flag) {
                         return None;
                     }
 

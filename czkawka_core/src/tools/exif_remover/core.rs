@@ -17,10 +17,10 @@ use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
-use crate::tools::exif_remover::{ExifEntry, ExifFinderParameters, ExifRemover, Info};
+use crate::tools::exif_remover::{ExifEntry, ExifRemover, ExifRemoverParameters, Info};
 
 impl ExifRemover {
-    pub fn new(params: ExifFinderParameters) -> Self {
+    pub fn new(params: ExifRemoverParameters) -> Self {
         Self {
             common_data: CommonToolData::new(ToolType::ExifRemover),
             information: Info::default(),
@@ -80,7 +80,7 @@ impl ExifRemover {
         let files_to_check = mem::take(&mut self.files_to_check);
 
         if self.common_data.use_cache {
-            let (messages, loaded_items) = load_cache_from_file_generalized_by_path::<ExifEntry>(&get_exif_finder_cache_file(), self.get_delete_outdated_cache(), &files_to_check);
+            let (messages, loaded_items) = load_cache_from_file_generalized_by_path::<ExifEntry>(&get_exif_remover_cache_file(), self.get_delete_outdated_cache(), &files_to_check);
             self.get_text_messages_mut().extend_with_another_messages(messages);
             loaded_hash_map = loaded_items.unwrap_or_default();
 
@@ -105,7 +105,7 @@ impl ExifRemover {
                 all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
             }
 
-            let messages = save_cache_to_file_generalized(&get_exif_finder_cache_file(), &all_results, self.common_data.save_also_as_json, 0);
+            let messages = save_cache_to_file_generalized(&get_exif_remover_cache_file(), &all_results, self.common_data.save_also_as_json, 0);
             self.get_text_messages_mut().extend_with_another_messages(messages);
         }
     }
@@ -120,7 +120,7 @@ impl ExifRemover {
 
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
-            CurrentStage::ExifFinderExtractingTags,
+            CurrentStage::ExifRemoverExtractingTags,
             non_cached_files_to_check.len(),
             self.get_test_type(),
             non_cached_files_to_check.values().map(|item| item.size).sum::<u64>(),
@@ -226,6 +226,6 @@ fn extract_exif_tags(path: &Path) -> Result<Vec<String>, String> {
 //     })
 // }
 
-pub fn get_exif_finder_cache_file() -> String {
-    format!("cache_exif_finder_{CACHE_VERSION}.bin")
+pub fn get_exif_remover_cache_file() -> String {
+    format!("cache_exif_remover_{CACHE_VERSION}.bin")
 }

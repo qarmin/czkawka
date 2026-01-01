@@ -1,11 +1,11 @@
 #[cfg(test)]
 mod tests2 {
-    use crate::tools::iv_optimizer::{IVOptimizer, IVOptimizerParameters, OptimizerMode, VideoCodec};
+    use crate::tools::video_optimizer::{OptimizerMode, VideoCodec, VideoOptimizer, VideoOptimizerParameters};
 
     #[test]
-    fn test_iv_optimizer_creation() {
-        let params = IVOptimizerParameters::default();
-        let optimizer = IVOptimizer::new(params);
+    fn test_video_optimizer_creation() {
+        let params = VideoOptimizerParameters::default();
+        let optimizer = VideoOptimizer::new(params);
 
         assert_eq!(optimizer.get_information().number_of_processed_files, 0);
         assert_eq!(optimizer.get_information().number_of_failed_files, 0);
@@ -13,7 +13,7 @@ mod tests2 {
 
     #[test]
     fn test_parameters_builder() {
-        let params = IVOptimizerParameters::new(OptimizerMode::VideoTranscode {
+        let params = VideoOptimizerParameters::new(OptimizerMode::VideoTranscode {
             codec: VideoCodec::H265,
             quality: 25,
         });
@@ -36,7 +36,7 @@ mod tests2 {
 
     #[test]
     fn test_default_parameters() {
-        let params = IVOptimizerParameters::default();
+        let params = VideoOptimizerParameters::default();
 
         assert_eq!(
             params.mode,

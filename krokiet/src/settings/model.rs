@@ -149,16 +149,16 @@ pub struct SettingsCustom {
     pub similar_videos_crop_detect: String,
     #[serde(default = "default_similar_videos_thumbnail_percentage")]
     pub similar_videos_thumbnail_percentage: u8,
-    #[serde(default = "default_iv_optimizer_mode")]
-    pub iv_optimizer_mode: String,
-    #[serde(default = "default_iv_optimizer_video_codec")]
-    pub iv_optimizer_video_codec: String,
-    #[serde(default = "default_iv_optimizer_excluded_codecs")]
-    pub iv_optimizer_excluded_codecs: String,
-    #[serde(default = "default_iv_optimizer_video_quality")]
-    pub iv_optimizer_video_quality: u32,
-    #[serde(default = "default_iv_optimizer_image_threshold")]
-    pub iv_optimizer_image_threshold: u8,
+    #[serde(default = "default_video_optimizer_mode")]
+    pub video_optimizer_mode: String,
+    #[serde(default = "default_video_optimizer_video_codec")]
+    pub video_optimizer_video_codec: String,
+    #[serde(default = "default_video_optimizer_excluded_codecs")]
+    pub video_optimizer_excluded_codecs: String,
+    #[serde(default = "default_video_optimizer_video_quality")]
+    pub video_optimizer_video_quality: u32,
+    #[serde(default = "default_video_optimizer_image_threshold")]
+    pub video_optimizer_image_threshold: u8,
     #[serde(default)]
     pub ignored_exif_tags: String,
     #[serde(default)]
@@ -309,18 +309,18 @@ fn default_window_width() -> u32 {
 fn default_window_height() -> u32 {
     DEFAULT_WINDOW_HEIGHT
 }
-fn default_iv_optimizer_mode() -> String {
+fn default_video_optimizer_mode() -> String {
     "video".to_string()
 }
-fn default_iv_optimizer_video_codec() -> String {
+fn default_video_optimizer_video_codec() -> String {
     "h265".to_string()
 }
-fn default_iv_optimizer_excluded_codecs() -> String {
+fn default_video_optimizer_excluded_codecs() -> String {
     "hevc,av1".to_string()
 }
-fn default_iv_optimizer_video_quality() -> u32 {
+fn default_video_optimizer_video_quality() -> u32 {
     23
 }
-fn default_iv_optimizer_image_threshold() -> u8 {
+fn default_video_optimizer_image_threshold() -> u8 {
     1
 }

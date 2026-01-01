@@ -10,7 +10,7 @@ use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
 use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, PrintResults, Search};
-use crate::tools::exif_remover::{ExifEntry, ExifFinderParameters, ExifRemover, Info};
+use crate::tools::exif_remover::{ExifEntry, ExifRemover, ExifRemoverParameters, Info};
 
 impl AllTraits for ExifRemover {}
 
@@ -104,7 +104,7 @@ impl Search for ExifRemover {
 
 impl CommonData for ExifRemover {
     type Info = Info;
-    type Parameters = ExifFinderParameters;
+    type Parameters = ExifRemoverParameters;
 
     fn get_information(&self) -> Self::Info {
         self.information.clone()

@@ -11,25 +11,25 @@ use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, FixingItems, PrintResults, Search};
-use crate::tools::iv_optimizer::{IVOptimizer, IVOptimizerParameters, Info, OptimizerMode};
+use crate::tools::video_optimizer::{Info, OptimizerMode, VideoOptimizer, VideoOptimizerParameters};
 
-impl AllTraits for IVOptimizer {}
+impl AllTraits for VideoOptimizer {}
 
-impl DeletingItems for IVOptimizer {
+impl DeletingItems for VideoOptimizer {
     #[fun_time(message = "delete_files", level = "debug")]
     fn delete_files(&mut self, _stop_flag: &Arc<AtomicBool>, _progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
-        unreachable!("IVOptimizer does not support deleting files");
+        unreachable!("VideoOptimizer does not support deleting files");
     }
 }
 
-impl FixingItems for IVOptimizer {
+impl FixingItems for VideoOptimizer {
     #[fun_time(message = "fix_items", level = "debug")]
     fn fix_items(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         self.fix_files(stop_flag, progress_sender)
     }
 }
 
-impl DebugPrint for IVOptimizer {
+impl DebugPrint for VideoOptimizer {
     #[expect(clippy::print_stdout)]
     fn debug_print(&self) {
         if !cfg!(debug_assertions) || cfg!(test) {
@@ -40,15 +40,14 @@ impl DebugPrint for IVOptimizer {
         println!("Info: {:?}", self.information);
         println!("Mode: {:?}", self.params.mode);
         println!("Video transcode entries: {}", self.video_transcode_entries.len());
-        println!("Image trim entries: {}", self.image_trim_entries.len());
         self.debug_print_common();
         println!("-----------------------------------------");
     }
 }
 
-impl PrintResults for IVOptimizer {
+impl PrintResults for VideoOptimizer {
     fn write_results<T: Write>(&self, writer: &mut T) -> std::io::Result<()> {
-        writeln!(writer, "Results of IV Optimizer with mode {:?}", self.params.mode)?;
+        writeln!(writer, "Results of Video Optimizer with mode {:?}", self.params.mode)?;
         writeln!(writer, "Searched in directories: {:?}", self.common_data.directories.included_directories)?;
         writeln!(writer, "Excluded directories: {:?}", self.common_data.directories.excluded_directories)?;
 
@@ -71,56 +70,17 @@ impl PrintResults for IVOptimizer {
                     if !entry.codec.is_empty() {
                         if let Some(err) = &entry.error {
                             writeln!(writer, "[FAILED] {} - Codec: {} - Error: {}", entry.path.display(), entry.codec, err)?;
-                        } else if let Some(dimensions) = &entry.dimensions {
-                            writeln!(
-                                writer,
-                                "[CANDIDATE] {} - Codec: {} - Dimensions: {} - Size: {}",
-                                entry.path.display(),
-                                entry.codec,
-                                dimensions,
-                                format_size(entry.size, BINARY)
-                            )?;
                         } else {
                             writeln!(
                                 writer,
-                                "[CANDIDATE] {} - Codec: {} - Size: {}",
+                                "[CANDIDATE] {} - Codec: {} - Dimensions: {}x{} - Size: {}",
                                 entry.path.display(),
                                 entry.codec,
+                                entry.width,
+                                entry.height,
                                 format_size(entry.size, BINARY)
                             )?;
                         }
-                    }
-                }
-            }
-            OptimizerMode::ImageTrim { threshold } => {
-                writeln!(writer, "Trim threshold: {threshold}")?;
-                writeln!(writer)?;
-
-                let total_entries = self.image_trim_entries.len();
-                let entries_needing_optimization = self.image_trim_entries.iter().filter(|e| e.bounding_box.is_some() && e.error.is_none()).count();
-                let failed_entries = self.image_trim_entries.iter().filter(|e| e.error.is_some()).count();
-
-                writeln!(writer, "Total files found: {total_entries}")?;
-                writeln!(writer, "Files needing optimization: {entries_needing_optimization}")?;
-                writeln!(writer, "Failed to analyze: {failed_entries}")?;
-                writeln!(writer)?;
-
-                for entry in &self.image_trim_entries {
-                    if let Some(bb) = &entry.bounding_box {
-                        if let Some(err) = &entry.error {
-                            writeln!(writer, "[FAILED] {} - Error: {}", entry.path.display(), err)?;
-                        } else {
-                            writeln!(
-                                writer,
-                                "[CANDIDATE] {} - Will trim to {}x{} - Size: {}",
-                                entry.path.display(),
-                                bb.right - bb.left,
-                                bb.bottom - bb.top,
-                                format_size(entry.size, BINARY)
-                            )?;
-                        }
-                    } else if let Some(err) = &entry.error {
-                        writeln!(writer, "[FAILED] {} - Error: {}", entry.path.display(), err)?;
                     }
                 }
             }
@@ -132,12 +92,11 @@ impl PrintResults for IVOptimizer {
     fn save_results_to_file_as_json(&self, file_name: &str, pretty_print: bool) -> std::io::Result<()> {
         match self.params.mode {
             OptimizerMode::VideoTranscode { .. } => self.save_results_to_file_as_json_internal(file_name, &self.video_transcode_entries, pretty_print),
-            OptimizerMode::ImageTrim { .. } => self.save_results_to_file_as_json_internal(file_name, &self.image_trim_entries, pretty_print),
         }
     }
 }
 
-impl Search for IVOptimizer {
+impl Search for VideoOptimizer {
     #[fun_time(message = "scan_media_files", level = "info")]
     fn search(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
         let start_time = Instant::now();
@@ -157,9 +116,9 @@ impl Search for IVOptimizer {
     }
 }
 
-impl CommonData for IVOptimizer {
+impl CommonData for VideoOptimizer {
     type Info = Info;
-    type Parameters = IVOptimizerParameters;
+    type Parameters = VideoOptimizerParameters;
 
     fn get_information(&self) -> Self::Info {
         self.information.clone()

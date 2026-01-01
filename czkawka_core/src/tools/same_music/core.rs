@@ -293,7 +293,7 @@ impl SameMusic {
                 return WorkContinueStatus::Stop;
             }
 
-            old_duplicates = self.check_music_item(old_duplicates, progress_handler.items_counter(), |fe| &fe.track_title, self.params.approximate_comparison);
+            old_duplicates = self.check_music_item(old_duplicates, progress_handler.items_counter(), |fe| fe.track_title.clone(), self.params.approximate_comparison);
         }
         if (self.params.music_similarity & MusicSimilarity::TRACK_ARTIST) == MusicSimilarity::TRACK_ARTIST {
             if check_if_stop_received(stop_flag) {
@@ -301,7 +301,7 @@ impl SameMusic {
                 return WorkContinueStatus::Stop;
             }
 
-            old_duplicates = self.check_music_item(old_duplicates, progress_handler.items_counter(), |fe| &fe.track_artist, self.params.approximate_comparison);
+            old_duplicates = self.check_music_item(old_duplicates, progress_handler.items_counter(), |fe| fe.track_artist.clone(), self.params.approximate_comparison);
         }
         if (self.params.music_similarity & MusicSimilarity::YEAR) == MusicSimilarity::YEAR {
             if check_if_stop_received(stop_flag) {
@@ -309,7 +309,7 @@ impl SameMusic {
                 return WorkContinueStatus::Stop;
             }
 
-            old_duplicates = self.check_music_item(old_duplicates, progress_handler.items_counter(), |fe| &fe.year, false);
+            old_duplicates = self.check_music_item(old_duplicates, progress_handler.items_counter(), |fe| fe.year.clone(), false);
         }
         if (self.params.music_similarity & MusicSimilarity::LENGTH) == MusicSimilarity::LENGTH {
             if check_if_stop_received(stop_flag) {
@@ -317,7 +317,7 @@ impl SameMusic {
                 return WorkContinueStatus::Stop;
             }
 
-            old_duplicates = self.check_music_item(old_duplicates, progress_handler.items_counter(), |fe| &fe.length, false);
+            old_duplicates = self.check_music_item(old_duplicates, progress_handler.items_counter(), |fe| format_audio_duration(fe.length).clone(), false);
         }
         if (self.params.music_similarity & MusicSimilarity::GENRE) == MusicSimilarity::GENRE {
             if check_if_stop_received(stop_flag) {
@@ -325,7 +325,7 @@ impl SameMusic {
                 return WorkContinueStatus::Stop;
             }
 
-            old_duplicates = self.check_music_item(old_duplicates, progress_handler.items_counter(), |fe| &fe.genre, false);
+            old_duplicates = self.check_music_item(old_duplicates, progress_handler.items_counter(), |fe| fe.genre.clone(), false);
         }
         if (self.params.music_similarity & MusicSimilarity::BITRATE) == MusicSimilarity::BITRATE {
             if check_if_stop_received(stop_flag) {
@@ -546,7 +546,7 @@ impl SameMusic {
         &self,
         old_duplicates: Vec<Vec<MusicEntry>>,
         items_counter: &Arc<AtomicUsize>,
-        get_item: fn(&MusicEntry) -> &str,
+        get_item: fn(&MusicEntry) -> String,
         approximate_comparison: bool,
     ) -> Vec<Vec<MusicEntry>> {
         let mut new_duplicates: Vec<_> = Default::default();
@@ -672,7 +672,6 @@ fn read_single_file_tags(path: &str, mut music_entry: MusicEntry) -> Option<Musi
     let mut genre = String::new();
 
     let bitrate = properties.audio_bitrate().unwrap_or(0);
-    let mut length = properties.duration().as_millis().to_string();
 
     if let Some(tag) = tagged_file.primary_tag() {
         track_title = tag.get_string(&ItemKey::TrackTitle).unwrap_or_default().to_string();
@@ -704,30 +703,37 @@ fn read_single_file_tags(path: &str, mut music_entry: MusicEntry) -> Option<Musi
         }
     }
 
-    if let Ok(old_length_number) = length.parse::<u32>() {
-        let length_number = old_length_number / 60;
-        let minutes = length_number / 1000;
-        let seconds = (length_number % 1000) * 6 / 100;
-        if minutes != 0 || seconds != 0 {
-            length = format!("{minutes}:{seconds:02}");
-        } else if old_length_number > 0 {
-            // That means, that audio have length smaller that second but not zero
-            length = "0:01".to_string();
-        } else {
-            length = String::new();
-        }
+    let length_milliseconds = properties.duration().as_millis();
+    let length_in_seconds= if length_milliseconds == 0 {
+        0
     } else {
-        length = String::new();
-    }
+        let secs = properties.duration().as_secs() as u32;
+        if secs == 0 {
+            1
+        } else {
+            secs
+        }
+    };
 
     music_entry.track_title = track_title;
     music_entry.track_artist = track_artist;
     music_entry.year = year;
-    music_entry.length = length;
+    music_entry.length = length_in_seconds;
     music_entry.genre = genre;
     music_entry.bitrate = bitrate;
 
     Some(music_entry)
+}
+
+pub fn format_audio_duration(duration: u32) -> String {
+    let hours = duration / 3600;
+    let minutes = (duration % 3600) / 60;
+    let seconds = duration % 60;
+    if hours > 0 {
+        format!("{hours}:{minutes:02}:{seconds:02}")
+    } else {
+        format!("{minutes}:{seconds:02}")
+    }
 }
 
 fn get_simplified_name_internal(what: &str, ignore_numbers: bool) -> String {

@@ -43,7 +43,6 @@ impl VideoCodec {
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum OptimizerMode {
     VideoTranscode { codec: VideoCodec, quality: u32 },
-    ImageTrim { threshold: u8 },
 }
 
 #[derive(Debug, Default, Clone)]
@@ -54,12 +53,12 @@ pub struct Info {
 }
 
 #[derive(Clone)]
-pub struct IVOptimizerParameters {
+pub struct VideoOptimizerParameters {
     pub mode: OptimizerMode,
     pub excluded_codecs: Vec<String>,
 }
 
-impl Default for IVOptimizerParameters {
+impl Default for VideoOptimizerParameters {
     fn default() -> Self {
         Self {
             mode: OptimizerMode::VideoTranscode {
@@ -71,7 +70,7 @@ impl Default for IVOptimizerParameters {
     }
 }
 
-impl IVOptimizerParameters {
+impl VideoOptimizerParameters {
     pub fn new(mode: OptimizerMode) -> Self {
         Self {
             mode,
@@ -88,7 +87,8 @@ pub struct VideoTranscodeEntry {
     pub error: Option<String>,
 
     pub codec: String,
-    pub dimensions: Option<String>,
+    pub width: u32,
+    pub height: u32,
 }
 
 impl ResultEntry for VideoTranscodeEntry {
@@ -111,78 +111,29 @@ impl FileEntry {
             modified_date: self.modified_date,
             error: None,
             codec: String::new(),
-            dimensions: None,
+            width: 0,
+            height: 0,
         }
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct ImageTrimEntry {
-    pub path: PathBuf,
-    pub size: u64,
-    pub modified_date: u64,
-    pub error: Option<String>,
-
-    pub bounding_box: Option<BoundingBox>,
-    pub new_size: Option<u64>,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct BoundingBox {
-    pub top: u32,
-    pub bottom: u32,
-    pub left: u32,
-    pub right: u32,
-}
-
-impl ResultEntry for ImageTrimEntry {
-    fn get_path(&self) -> &Path {
-        &self.path
-    }
-    fn get_modified_date(&self) -> u64 {
-        self.modified_date
-    }
-    fn get_size(&self) -> u64 {
-        self.size
-    }
-}
-
-impl FileEntry {
-    fn into_image_trim_entry(self) -> ImageTrimEntry {
-        ImageTrimEntry {
-            size: self.size,
-            path: self.path,
-            modified_date: self.modified_date,
-            error: None,
-            bounding_box: None,
-            new_size: None,
-        }
-    }
-}
-
-pub enum IVOptimizerEntry {
+pub enum VideoOptimizerEntry {
     VideoTranscode(VideoTranscodeEntry),
-    ImageTrim(ImageTrimEntry),
 }
 
-pub struct IVOptimizer {
+pub struct VideoOptimizer {
     common_data: CommonToolData,
     information: Info,
     video_transcode_entries: Vec<VideoTranscodeEntry>,
-    image_trim_entries: Vec<ImageTrimEntry>,
-    params: IVOptimizerParameters,
+    params: VideoOptimizerParameters,
 }
 
-impl IVOptimizer {
+impl VideoOptimizer {
     pub const fn get_video_transcode_entries(&self) -> &Vec<VideoTranscodeEntry> {
         &self.video_transcode_entries
     }
 
-    pub const fn get_image_trim_entries(&self) -> &Vec<ImageTrimEntry> {
-        &self.image_trim_entries
-    }
-
-    pub const fn get_params(&self) -> &IVOptimizerParameters {
+    pub const fn get_params(&self) -> &VideoOptimizerParameters {
         &self.params
     }
 

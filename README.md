@@ -28,11 +28,12 @@
     - Invalid Symbolic Links - Shows symbolic links which point to non-existent files/directories
     - Broken Files - Finds files that are invalid or corrupted
     - Bad Extensions - Lists files whose content not match with their extension
-    - IV Optimizer - Finds images that 
-
-![Czkawka](https://github.com/user-attachments/assets/b0409515-1bec-4e13-8fac-7bdfa15f5848)
+    - Exif Remover - Tool to remove Exif metadata from various file types
+    - Video Optimizer - Converts videos to more efficient formats
 
 ![Krokiet](https://github.com/user-attachments/assets/720e98c3-598a-41aa-a04b-0c0c1d8a28e6)
+
+![Czkawka](https://github.com/user-attachments/assets/b0409515-1bec-4e13-8fac-7bdfa15f5848)
 
 Changelog about each version can be found in [CHANGELOG.md](Changelog.md).
 

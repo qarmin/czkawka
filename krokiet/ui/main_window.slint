@@ -1,7 +1,7 @@
 import { HorizontalBox, LineEdit, Palette, VerticalBox } from "std-widgets.slint";
 import { LeftSidePanel } from "left_side_panel.slint";
 import { MainList } from "main_lists.slint";
-import { ActiveTab, MainListModel, ProgressToSend } from "common.slint";
+import { ActiveTab, MainListModel, PopupRequest, ProgressToSend } from "common.slint";
 import { ActionButtons } from "action_buttons.slint";
 import { Progress } from "progress.slint";
 import { Settings } from "settings.slint";
@@ -27,13 +27,21 @@ export component MainWindow inherits Window {
     callback scan_starting(ActiveTab);
     callback folder_choose_requested(bool);
     callback scan_ended(string);
-    callback show_move_folders_dialog(string);
-    callback folders_move_choose_requested();
     callback reset_selection();
     callback initialize_popup_sizes();
     callback processing_ended(string);
 
-    callback delete_popup_dialog_show_requested();
+    // Logic:
+    // Opening popup is done via Rust call
+    callback request_setup_action_popup(PopupRequest); // When opening popup we need to setup data in it, Slint -> Rust
+    callback show_action_popup(PopupRequest, string); // After setup, we can show popup - Rust -> Slint - string is choosed folder - to avoid having multiple callbacks, string will be empty for things that do not need it
+
+    // Moving is special - first we need to open folder chooser dialog, then normal move popup
+    callback folders_move_choose_requested(); // When moving, first need to
+    callback show_move_folders_dialog(string); // Comes from Rust side
+
+    callback delete_selected_items(); // TODO - inside can be set params
+    callback request_popup_accepted(PopupRequest); // When user accepted action in popup, we can proceed
     callback delete_popup_dialog_configured();
 
     title <=> Translations.main_window_title_text;
@@ -62,8 +70,8 @@ export component MainWindow inherits Window {
     in-out property <[MainListModel]> invalid_symlinks_model: [];
     in-out property <[MainListModel]> broken_files_model: [];
     in-out property <[MainListModel]> bad_extensions_model: [];
-    in-out property <[MainListModel]> exif_finder_model: [];
-    in-out property <[MainListModel]> iv_optimizer_model: [];
+    in-out property <[MainListModel]> exif_remover_model: [];
+    in-out property <[MainListModel]> video_optimizer_model: [];
 
     VerticalBox {
         HorizontalBox {
@@ -99,8 +107,8 @@ export component MainWindow inherits Window {
                         invalid_symlinks_model <=> root.invalid_symlinks_model;
                         broken_files_model <=> root.broken_files_model;
                         bad_extensions_model <=> root.bad_extensions_model;
-                        exif_finder_model <=> root.exif_finder_model;
-                        iv_optimizer_model <=> root.iv_optimizer_model;
+                        exif_remover_model <=> root.exif_remover_model;
+                        video_optimizer_model <=> root.video_optimizer_model;
                     }
 
                     preview_or_tool_settings := Rectangle {
@@ -143,8 +151,8 @@ export component MainWindow inherits Window {
             invalid_symlinks_model <=> root.invalid_symlinks_model;
             broken_files_model <=> root.broken_files_model;
             bad_extensions_model <=> root.bad_extensions_model;
-            exif_finder_model <=> root.exif_finder_model;
-            iv_optimizer_model <=> root.iv_optimizer_model;
+            exif_remover_model <=> root.exif_remover_model;
+            video_optimizer_model <=> root.video_optimizer_model;
 
             vertical-stretch: 0.0;
             scanning <=> root.scanning;
@@ -164,29 +172,8 @@ export component MainWindow inherits Window {
                 select_popup_window.y_offset = y_offset;
                 select_popup_window.show_popup();
             }
-            request_folder_to_move => {
-                folders_move_choose_requested();
-            }
-            show_remove_popup => {
-                delete_popup_dialog_show_requested();
-            }
-            show_rename_popup => {
-                rename_popup_window.show_popup();
-            }
-            show_clean_popup => {
-                clean_popup_window.show_popup();
-            }
-            show_optimize_popup => {
-                optimize_popup_window.show_popup();
-            }
-            show_hardlink_popup => {
-                hardlink_popup_window.show_popup();
-            }
-            show_softlink_popup => {
-                softlink_popup_window.show_popup();
-            }
-            show_save_popup => {
-                save_popup_window.show_popup();
+            show_action_popup(popup_request) => {
+                request_setup_action_popup(popup_request);
             }
             show_sort_popup(x_offset, y_offset) => {
                 sort_popup_window.x_offset = x_offset;
@@ -362,6 +349,29 @@ export component MainWindow inherits Window {
         sort_popup_window.close_popup();
         select_popup_window.show_popup();
         select_popup_window.close_popup();
+    }
+
+    show_action_popup(request, folder_name) => {
+        if (request == PopupRequest.Move) {
+            move_popup_window.folder_name = folder_name;
+            move_popup_window.show_popup();
+        } else if (request == PopupRequest.Delete) {
+            delete_popup_window.show_popup();
+        } else if (request == PopupRequest.CleanExif) {
+            clean_popup_window.show_popup();
+        } else if (request == PopupRequest.OptimizeVideo) {
+            optimize_popup_window.show_popup();
+        } else if (request == PopupRequest.Symlink) {
+            softlink_popup_window.show_popup();
+        } else if (request == PopupRequest.Rename) {
+            rename_popup_window.show_popup();
+        } else if (request == PopupRequest.Hardlink) {
+            hardlink_popup_window.show_popup();
+        } else if (request == PopupRequest.Save) {
+            save_popup_window.show_popup();
+        } else {
+            debug("Unsupported popup request");
+        }
     }
 
     delete_popup_dialog_configured => {

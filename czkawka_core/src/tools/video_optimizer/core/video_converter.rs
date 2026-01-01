@@ -5,7 +5,7 @@ use std::process::Command;
 use log::{debug, info, warn};
 
 use crate::common::video_metadata::VideoMetadata;
-use crate::tools::iv_optimizer::{VideoCodec, VideoTranscodeEntry};
+use crate::tools::video_optimizer::{VideoCodec, VideoTranscodeEntry};
 
 pub fn check_video(mut entry: VideoTranscodeEntry) -> VideoTranscodeEntry {
     debug!("Checking video: {}", entry.path.display());
@@ -24,7 +24,17 @@ pub fn check_video(mut entry: VideoTranscodeEntry) -> VideoTranscodeEntry {
     };
 
     entry.codec = current_codec;
-    entry.dimensions = metadata.dimensions_string();
+    match (metadata.width, metadata.height) {
+        (Some(width), Some(height)) => {
+            entry.width = width;
+            entry.height = height;
+        }
+        _ => {
+            entry.error = Some("Failed to get video dimensions".to_string());
+            return entry;
+        }
+    }
+
     entry
 }
 
@@ -77,13 +87,3 @@ pub fn process_video(video_path: &Path, original_size: u64, video_codec: VideoCo
     }
 }
 
-pub fn process_video_legacy(entry: &mut VideoTranscodeEntry, video_codec: VideoCodec, target_quality: u32) {
-    match process_video(&entry.path, entry.size, video_codec, target_quality) {
-        Ok(_new_size) => {
-            // Success - no error to set
-        }
-        Err(e) => {
-            entry.error = Some(e);
-        }
-    }
-}

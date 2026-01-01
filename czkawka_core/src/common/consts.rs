@@ -30,6 +30,13 @@ pub const AUDIO_FILES_EXTENSIONS: &[&str] = &[
     "mp3", "flac", "wav", "ogg", "m4a", "aac", "aiff", "pcm", "aif", "aiff", "aifc", "m3a", "mp2", "mp4a", "mp2a", "mpga", "wave", "weba", "wma", "oga",
 ];
 pub const VIDEO_FILES_EXTENSIONS: &[&str] = &[
-    "mp4", "mpv", "flv", "mp4a", "webm", "mpg", "mp2", "mpeg", "m4p", "m4v", "avi", "wmv", "qt", "mov", "swf", "mkv", "mts", "m2ts",
+    "mp4", "m4v", "mkv", "avi", "mov", "webm", "flv", "wmv", // Popular
+    "mpeg", "mpg", "mp2", "mpe", "m2ts", "mts", "vob", "evo", // MPEG / broadcast, "ts"
+    "3gp", "3g2", "f4v", "f4p", "f4a", "f4b", // Mobile / legacy
+    "qt", "m4p", "mpv", // Apple / ISO BMFF
+    "ogv", "rm", "rmvb", "asf", // Streaming / recording
+    "dv", "mxf", "roq", "nsv", "yuv", // Professional
+    "y4m", "h264", "h265", "hevc", "av1", "vp8", "vp9", // Raw / uncompressed
+    "amv", "drc", "gifv", "smk", "bik", // Older / games
 ];
-pub const EXIF_FILES_EXTENSIONS: &[&str] = &["jpg", "jpeg", "png", "tiff", "tif", "webp", "heic", "heif", "avif", "jxl"];
+pub const EXIF_FILES_EXTENSIONS: &[&str] = &["jpg", "jpeg", "png", "tiff", "tif", "heic", "heif", "avif", "jxl"]; // "webp" is buggy as hell - https://github.com/TechnikTobi/little_exif/issues/77

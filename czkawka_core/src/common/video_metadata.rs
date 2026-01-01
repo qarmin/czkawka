@@ -77,11 +77,4 @@ impl VideoMetadata {
 
         Ok(metadata)
     }
-
-    pub fn dimensions_string(&self) -> Option<String> {
-        match (self.width, self.height) {
-            (Some(w), Some(h)) => Some(format!("{w}x{h}")),
-            _ => None,
-        }
-    }
 }

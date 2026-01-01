@@ -334,15 +334,15 @@ pub(crate) fn set_combobox_custom_settings_items(settings: &Settings, custom_set
     settings.set_similar_videos_crop_detect_index(idx as i32);
     settings.set_similar_videos_crop_detect_value(display_names[idx].clone());
 
-    // IV Optimizer mode
-    let (idx, display_names) = StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.iv_optimizer_mode, &collected_items.iv_optimizer_mode);
-    settings.set_iv_optimizer_sub_mode_index(idx as i32);
-    settings.set_iv_optimizer_sub_mode_value(display_names[idx].clone());
+    // Video Optimizer mode
+    let (idx, display_names) = StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.video_optimizer_mode, &collected_items.video_optimizer_mode);
+    settings.set_video_optimizer_sub_mode_index(idx as i32);
+    settings.set_video_optimizer_sub_mode_value(display_names[idx].clone());
 
-    // IV Optimizer video codec
-    let (idx, display_names) = StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.iv_optimizer_video_codec, &collected_items.iv_optimizer_video_codec);
-    settings.set_iv_optimizer_sub_video_codec_index(idx as i32);
-    settings.set_iv_optimizer_sub_video_codec_value(display_names[idx].clone());
+    // Video Optimizer video codec
+    let (idx, display_names) = StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.video_optimizer_video_codec, &collected_items.video_optimizer_video_codec);
+    settings.set_video_optimizer_sub_video_codec_index(idx as i32);
+    settings.set_video_optimizer_sub_video_codec_value(display_names[idx].clone());
 }
 
 pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom, base_settings: &BasicSettings, cli_args: Option<CliResult>) {
@@ -442,9 +442,9 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_broken_files_sub_archive(custom_settings.broken_files_sub_archive);
     settings.set_broken_files_sub_image(custom_settings.broken_files_sub_image);
 
-    settings.set_iv_optimizer_sub_excluded_codecs(custom_settings.iv_optimizer_excluded_codecs.clone().into());
-    settings.set_iv_optimizer_sub_video_quality(custom_settings.iv_optimizer_video_quality as f32);
-    settings.set_iv_optimizer_sub_image_threshold(custom_settings.iv_optimizer_image_threshold as f32);
+    settings.set_video_optimizer_sub_excluded_codecs(custom_settings.video_optimizer_excluded_codecs.clone().into());
+    settings.set_video_optimizer_sub_video_quality(custom_settings.video_optimizer_video_quality as f32);
+    settings.set_video_optimizer_sub_image_threshold(custom_settings.video_optimizer_image_threshold as f32);
 
     settings.set_ignored_exif_tags(custom_settings.ignored_exif_tags.clone().into());
 
@@ -477,7 +477,8 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
         settings.set_invalid_symlink_column_size(fnm(&[sel_px, name_px, path_px, path_px, mod_px], "invalid_symlink"));
         settings.set_broken_files_column_size(fnm(&[sel_px, name_px, path_px, 200.0, size_px, mod_px], "broken_files"));
         settings.set_bad_extensions_column_size(fnm(&[sel_px, name_px, path_px, 40.0, 200.0], "bad_extensions"));
-        settings.set_iv_optimizer_column_size(fnm(&[sel_px, size_px, name_px, path_px, 100.0, 120.0, mod_px], "iv_optimizer"));
+        settings.set_exif_remover_column_size(fnm(&[sel_px, size_px, name_px, path_px, 300.0, mod_px], "exif_remover"));
+        settings.set_video_optimizer_column_size(fnm(&[sel_px, size_px, name_px, path_px, 100.0, 120.0, mod_px], "video_optimizer"));
     }
 
     // Clear text
@@ -578,13 +579,13 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let broken_files_sub_archive = settings.get_broken_files_sub_archive();
     let broken_files_sub_image = settings.get_broken_files_sub_image();
 
-    let iv_optimizer_sub_mode_idx = settings.get_iv_optimizer_sub_mode_index();
-    let iv_optimizer_mode = StringComboBoxItems::get_config_name_from_idx(iv_optimizer_sub_mode_idx as usize, &collected_items.iv_optimizer_mode);
-    let iv_optimizer_sub_video_codec_idx = settings.get_iv_optimizer_sub_video_codec_index();
-    let iv_optimizer_video_codec = StringComboBoxItems::get_config_name_from_idx(iv_optimizer_sub_video_codec_idx as usize, &collected_items.iv_optimizer_video_codec);
-    let iv_optimizer_excluded_codecs = settings.get_iv_optimizer_sub_excluded_codecs().to_string();
-    let iv_optimizer_video_quality = settings.get_iv_optimizer_sub_video_quality().round() as u32;
-    let iv_optimizer_image_threshold = settings.get_iv_optimizer_sub_image_threshold().round() as u8;
+    let video_optimizer_sub_mode_idx = settings.get_video_optimizer_sub_mode_index();
+    let video_optimizer_mode = StringComboBoxItems::get_config_name_from_idx(video_optimizer_sub_mode_idx as usize, &collected_items.video_optimizer_mode);
+    let video_optimizer_sub_video_codec_idx = settings.get_video_optimizer_sub_video_codec_index();
+    let video_optimizer_video_codec = StringComboBoxItems::get_config_name_from_idx(video_optimizer_sub_video_codec_idx as usize, &collected_items.video_optimizer_video_codec);
+    let video_optimizer_excluded_codecs = settings.get_video_optimizer_sub_excluded_codecs().to_string();
+    let video_optimizer_video_quality = settings.get_video_optimizer_sub_video_quality().round() as u32;
+    let video_optimizer_image_threshold = settings.get_video_optimizer_sub_image_threshold().round() as u8;
 
     let ignored_exif_tags = settings.get_ignored_exif_tags().to_string();
 
@@ -600,7 +601,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         ("invalid_symlink".to_string(), settings.get_invalid_symlink_column_size().iter().collect::<Vec<_>>()),
         ("broken_files".to_string(), settings.get_broken_files_column_size().iter().collect::<Vec<_>>()),
         ("bad_extensions".to_string(), settings.get_bad_extensions_column_size().iter().collect::<Vec<_>>()),
-        ("iv_optimizer".to_string(), settings.get_iv_optimizer_column_size().iter().collect::<Vec<_>>()),
+        ("video_optimizer".to_string(), settings.get_video_optimizer_column_size().iter().collect::<Vec<_>>()),
     ]);
 
     SettingsCustom {
@@ -657,11 +658,11 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         broken_files_sub_pdf,
         broken_files_sub_archive,
         broken_files_sub_image,
-        iv_optimizer_mode,
-        iv_optimizer_video_codec,
-        iv_optimizer_excluded_codecs,
-        iv_optimizer_video_quality,
-        iv_optimizer_image_threshold,
+        video_optimizer_mode,
+        video_optimizer_video_codec,
+        video_optimizer_excluded_codecs,
+        video_optimizer_video_quality,
+        video_optimizer_image_threshold,
         ignored_exif_tags,
         column_sizes,
         similar_videos_vid_hash_duration,

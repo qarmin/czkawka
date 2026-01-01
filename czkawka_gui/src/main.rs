@@ -69,7 +69,7 @@ mod taskbar_progress_dummy;
 #[cfg(target_os = "windows")]
 mod taskbar_progress_win;
 
-pub const CZKAWKA_GTK_TOOL_NUMBER: usize = TOOLS_NUMBER - 2; // Missing exif and iv optimizer tools
+pub const CZKAWKA_GTK_TOOL_NUMBER: usize = TOOLS_NUMBER - 2; // Missing exif and video optimizer tools
 
 fn main() {
     let config_cache_path_set_result = set_config_cache_path("Czkawka", "Czkawka");
