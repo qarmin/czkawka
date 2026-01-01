@@ -240,6 +240,10 @@ impl DuplicateFinder {
 
                 let grouped_file_entries: Vec<(u64, Vec<FileEntry>)> = grouped_file_entries.into_iter().collect();
                 let rayon_max_len = if self.get_params().ignore_hard_links { 3 } else { 100 };
+
+                let start_time = Instant::now();
+                // We only gather files with more than 1 entry, because only this will be later used
+                let initial_size = grouped_file_entries.iter().map(|(_size, vec)| if vec.len() > 1 {vec.len() as u64} else {0}).sum::<u64>();
                 self.files_with_identical_size = grouped_file_entries
                     .into_par_iter()
                     .with_max_len(rayon_max_len)
@@ -249,16 +253,7 @@ impl DuplicateFinder {
                         }
 
                         let vector = if self.get_params().ignore_hard_links {
-                            let start_time = Instant::now();
-                            let initial_len = vec.len();
                             let res = filter_hard_links(vec);
-                            let diff = initial_len - res.len();
-                            debug!(
-                                "check_file_size - filtered {} hard link(s) from group of {} files (this took {:?})",
-                                diff,
-                                initial_len,
-                                start_time.elapsed()
-                            );
                             res
                         } else {
                             vec
@@ -271,6 +266,13 @@ impl DuplicateFinder {
                         }
                     })
                     .collect();
+                let filtered_size = self.files_with_identical_size.values().map(|v| v.len() as u64).sum::<u64>();
+                debug!(                                "check_file_size - filtered hard links in {:?}, removed {} hardlinks ({} -> {})",
+                    start_time.elapsed(),
+                    initial_size - filtered_size,
+                    initial_size,
+                    filtered_size
+                );
 
                 self.filter_reference_folders_by_size();
                 self.calculate_size_stats();

@@ -8,7 +8,7 @@ use slint::ComponentHandle;
 
 use crate::{Callabler, GuiState, MainWindow};
 
-pub(crate) fn connect_softlink(app: &MainWindow, _progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
+pub(crate) fn connect_symlink(app: &MainWindow, _progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
     let a = app.as_weak();
     app.global::<Callabler>().on_softlink_items(move || {
         let weak_app = a.clone();

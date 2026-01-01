@@ -10,7 +10,7 @@ use crate::{Callabler, GuiState, MainWindow};
 
 pub(crate) fn connect_clean(app: &MainWindow, _progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
     let a = app.as_weak();
-    app.global::<Callabler>().on_clean_items(move || {
+    app.global::<Callabler>().on_clean_exif_items(move || {
         let weak_app = a.clone();
         let stop_flag = stop_flag.clone();
         stop_flag.store(false, Ordering::Relaxed);
