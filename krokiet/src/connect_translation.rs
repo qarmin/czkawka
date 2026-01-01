@@ -280,6 +280,8 @@ fn translate_items(app: &MainWindow) {
     translation.set_softlink_button_text(flk!("softlink_button_text").into());
     translation.set_softlink_text(flk!("softlink_text").into());
     translation.set_softlink_confirmation_text(flk!("softlink_confirmation_text").into());
+    translation.set_move_confirmation_text(flk!("move_confirmation_text").into());
+    translation.set_rename_confirmation_text(flk!("rename_confirmation_text").into());
     translation.set_settings_excluded_items_text(flk!("settings_excluded_items").into());
     translation.set_settings_allowed_extensions_text(flk!("settings_allowed_extensions").into());
     translation.set_settings_excluded_extensions_text(flk!("settings_excluded_extensions").into());
@@ -321,10 +323,8 @@ fn translate_items(app: &MainWindow) {
     translation.set_popup_save_title_text(flk!("popup_save_title").into());
     translation.set_popup_save_message_text(flk!("popup_save_message").into());
     translation.set_popup_rename_title_text(flk!("popup_rename_title").into());
-    translation.set_popup_rename_message_text(flk!("popup_rename_message").into());
     translation.set_popup_new_directories_title_text(flk!("popup_new_directories_title").into());
     translation.set_popup_move_title_text(flk!("popup_move_title").into());
-    translation.set_popup_move_message_text(flk!("popup_move_message").into());
     translation.set_popup_move_copy_checkbox_text(flk!("popup_move_copy_checkbox").into());
     translation.set_popup_move_preserve_folder_checkbox_text(flk!("popup_move_preserve_folder_checkbox").into());
     translation.set_delete_text(flk!("delete").into());

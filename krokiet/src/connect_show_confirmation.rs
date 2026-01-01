@@ -4,7 +4,6 @@ use slint::ComponentHandle;
 use crate::model_operations::get_checked_info_from_app;
 use crate::{MainWindow, PopupRequest, Translations, flk};
 
-#[expect(clippy::match_same_arms)]
 pub(crate) fn connect_show_confirmation(app: &MainWindow) {
     let a = app.as_weak();
     app.on_request_setup_action_popup(move |popup_request: PopupRequest| {
@@ -48,25 +47,38 @@ pub(crate) fn connect_show_confirmation(app: &MainWindow) {
                     return;
                 };
                 folder_path = folder.to_string_lossy().to_string();
-                // TODO missing info about moving items
+
+                let mut base = flk!("rust_move_confirmation");
+                base.push_str(format!("\n{}", flk!("rust_move_confirmation_number_simple", items = res.checked_items_number)).as_str());
+                translation.set_move_confirmation_text(base.into());
             }
             PopupRequest::OptimizeVideo => {
-                // TODO missing info about optimizing items
+                let mut base = flk!("rust_optimize_video_confirmation");
+                base.push_str(format!("\n{}", flk!("rust_optimize_video_confirmation_number_simple", items = res.checked_items_number)).as_str());
+                translation.set_optimize_confirmation_text(base.into());
             }
             PopupRequest::CleanExif => {
-                // TODO missing info about cleaning EXIF items
+                let mut base = flk!("rust_clean_exif_confirmation");
+                base.push_str(format!("\n{}", flk!("rust_clean_exif_confirmation_number_simple", items = res.checked_items_number)).as_str());
+                translation.set_clean_confirmation_text(base.into());
             }
             PopupRequest::Symlink => {
-                // TODO missing info about symlinking items
+                let mut base = flk!("rust_symlink_confirmation");
+                base.push_str(format!("\n{}", flk!("rust_symlink_confirmation_number_simple", items = res.checked_items_number)).as_str());
+                translation.set_softlink_confirmation_text(base.into());
             }
             PopupRequest::Hardlink => {
-                // TODO missing info about hardlinking items
+                let mut base = flk!("rust_hardlink_confirmation");
+                base.push_str(format!("\n{}", flk!("rust_hardlink_confirmation_number_simple", items = res.checked_items_number)).as_str());
+                translation.set_hardlink_confirmation_text(base.into());
             }
             PopupRequest::Rename => {
-                // TODO missing info about renaming items
+                let mut base = flk!("rust_rename_confirmation");
+                base.push_str(format!("\n{}", flk!("rust_rename_confirmation_number_simple", items = res.checked_items_number)).as_str());
+                translation.set_rename_confirmation_text(base.into());
             }
             PopupRequest::Save => {
-                // TODO missing info about saving items
+                // There is no confirmation saving
             }
         }
 

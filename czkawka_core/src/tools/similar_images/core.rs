@@ -387,7 +387,6 @@ impl SimilarImages {
         WorkContinueStatus::Continue
     }
 
-    #[fun_time(message = "connect_results2", level = "debug")]
     fn connect_results_simplified<'a>(
         &self,
         partial_results: Vec<(&'a ImHash, Vec<(u32, &'a ImHash)>)>,

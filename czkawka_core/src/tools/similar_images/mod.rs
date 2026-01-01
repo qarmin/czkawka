@@ -20,9 +20,7 @@ use crate::common::traits::ResultEntry;
 
 type ImHash = Vec<u8>;
 
-// 40 is, similar like previous 20 in 8 hash size is useless
-// But since Krowka have problems with proper changing max value in fly
-// hardcode 40 as max value
+// 40 is a little useless in 8 similarity - but this value is kept to simplify harder Krokiet max value calculations
 pub const SIMILAR_VALUES: [[u32; 6]; 4] = [
     [1, 2, 5, 7, 14, 40],    // 8
     [2, 5, 15, 30, 40, 40],  // 16

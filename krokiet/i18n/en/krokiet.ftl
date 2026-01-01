@@ -89,6 +89,24 @@ rust_delete_confirmation_number_simple = { $items } items selected.
 rust_delete_confirmation_number_groups = { $items } items selected in { $groups } groups.
 rust_delete_confirmation_selected_all_in_group = All items selected in { $groups } groups.
 
+rust_move_confirmation = Are you sure you want to move the selected items?
+rust_move_confirmation_number_simple = { $items } items selected.
+
+rust_clean_exif_confirmation = Are you sure you want to remove EXIF data from the selected items?
+rust_clean_exif_confirmation_number_simple = { $items } items selected.
+
+rust_optimize_video_confirmation = Are you sure you want to optimize the selected videos?
+rust_optimize_video_confirmation_number_simple = { $items } items selected.
+
+rust_hardlink_confirmation = Are you sure you want to create hardlinks for the selected items?
+rust_hardlink_confirmation_number_simple = { $items } items selected.
+
+rust_symlink_confirmation = Are you sure you want to create symlinks for the selected items?
+rust_symlink_confirmation_number_simple = { $items } items selected.
+
+rust_rename_confirmation = Are you sure you want to rename the selected items?
+rust_rename_confirmation_number_simple = { $items } items selected.
+
 # Slint translations, but in arrays
 
 column_selection = Selection
@@ -241,12 +259,12 @@ settings_limit_lines_of_messages = Limit messages to 500 lines(workaround for sl
 popup_save_title = Saving results
 popup_save_message = This will save results to 3 different files
 popup_rename_title = Renaming files
-popup_rename_message = This will rename extensions of selected files to more proper ones
 popup_new_directories_title = Please add directories one per line
 popup_move_title = Moving files
-popup_move_message = Moving entries to folder
 popup_move_copy_checkbox = Copy files instead of moving
 popup_move_preserve_folder_checkbox = Preserve folder structure
+move_confirmation_text = Are you sure you want to move the selected items?
+rename_confirmation_text = Are you sure you want to rename the selected items?
 delete = Delete items
 stopping_scan = Stopping scan, please wait...
 searching = Searching...
