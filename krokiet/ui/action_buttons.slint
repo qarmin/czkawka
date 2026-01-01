@@ -27,6 +27,10 @@ export component ActionButtons inherits HorizontalLayout {
     callback show_rename_popup();
     callback show_save_popup();
     callback show_sort_popup(length, length);
+    callback show_clean_popup();
+    callback show_optimize_popup();
+    callback show_hardlink_popup();
+    callback show_softlink_popup();
     callback request_folder_to_move();
 
     in-out property <[MainListModel]> duplicate_files_model: [];
@@ -40,6 +44,7 @@ export component ActionButtons inherits HorizontalLayout {
     in-out property <[MainListModel]> invalid_symlinks_model: [];
     in-out property <[MainListModel]> broken_files_model: [];
     in-out property <[MainListModel]> bad_extensions_model: [];
+    in-out property <[MainListModel]> exif_finder_model: [];
     in-out property <[MainListModel]> iv_optimizer_model: [];
 
     property <ActiveTab> active_tab: GuiState.active_tab;
@@ -64,6 +69,7 @@ export component ActionButtons inherits HorizontalLayout {
         (active_tab == ActiveTab.EmptyFiles && (GuiState.selected_results_empty_files > 0 || GuiState.selected_results_empty_files2 > 0)) ||
         (active_tab == ActiveTab.TemporaryFiles && (GuiState.selected_results_temporary_files > 0 || GuiState.selected_results_temporary_files2 > 0)) ||
         (active_tab == ActiveTab.BadExtensions && (GuiState.selected_results_bad_extensions > 0 || GuiState.selected_results_bad_extensions2 > 0)) ||
+        (active_tab == ActiveTab.ExifRemover && (GuiState.selected_results_exif_finder > 0 || GuiState.selected_results_exif_finder2 > 0)) ||
         (active_tab == ActiveTab.IVOptimizer && (GuiState.selected_results_iv_optimizer > 0 || GuiState.selected_results_iv_optimizer2 > 0))
     );
     in-out property <bool> results_available: (
@@ -78,6 +84,7 @@ export component ActionButtons inherits HorizontalLayout {
         (active_tab == ActiveTab.InvalidSymlinks && invalid_symlinks_model.length > 0) ||
         (active_tab == ActiveTab.BrokenFiles && broken_files_model.length > 0) ||
         (active_tab == ActiveTab.BadExtensions && bad_extensions_model.length > 0) ||
+        (active_tab == ActiveTab.ExifRemover && exif_finder_model.length > 0) ||
         (active_tab == ActiveTab.IVOptimizer && iv_optimizer_model.length > 0)
     );
 
@@ -180,6 +187,50 @@ export component ActionButtons inherits HorizontalLayout {
         colorize-icon: true;
         clicked => {
             show_rename_popup();
+        }
+    }
+
+    if lists_enabled && GuiState.active_tab == ActiveTab.IVOptimizer: optimize_button := Button {
+        height: parent.height;
+        enabled: base_buttons_may_be_available && self.visible && checked_anything;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.optimize_button_text;
+        icon: @image-url("../icons/krokiet_optimize.svg");
+        colorize-icon: true;
+        clicked => {
+            show_optimize_popup();
+        }
+    }
+
+    if lists_enabled && GuiState.active_tab == ActiveTab.ExifRemover: clean_button := Button {
+        height: parent.height;
+        enabled: base_buttons_may_be_available && self.visible && checked_anything;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.clean_button_text;
+        icon: @image-url("../icons/krokiet_clean.svg");
+        colorize-icon: true;
+        clicked => {
+            show_clean_popup();
+        }
+    }
+
+    if lists_enabled && (GuiState.active_tab == ActiveTab.DuplicateFiles || GuiState.active_tab == ActiveTab.SimilarImages || GuiState.active_tab == ActiveTab.SimilarVideos || GuiState.active_tab == ActiveTab.SimilarMusic): hardlink_button := Button {
+        height: parent.height;
+        enabled: base_buttons_may_be_available && self.visible && checked_anything;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.hardlink_button_text;
+        icon: @image-url("../icons/krokiet_hardlink.svg");
+        colorize-icon: true;
+        clicked => {
+            show_hardlink_popup();
+        }
+    }
+
+    if lists_enabled && (GuiState.active_tab == ActiveTab.DuplicateFiles || GuiState.active_tab == ActiveTab.SimilarImages || GuiState.active_tab == ActiveTab.SimilarVideos || GuiState.active_tab == ActiveTab.SimilarMusic): softlink_button := Button {
+        height: parent.height;
+        enabled: base_buttons_may_be_available && self.visible && checked_anything;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.softlink_button_text;
+        icon: @image-url("../icons/krokiet_symlink.svg");
+        colorize-icon: true;
+        clicked => {
+            show_softlink_popup();
         }
     }
 

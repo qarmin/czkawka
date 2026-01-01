@@ -29,7 +29,7 @@ use czkawka_core::common::config_cache_path::{print_infos_and_warnings, set_conf
 use czkawka_core::common::logger::{filtering_messages, print_version_mode, setup_logger};
 use czkawka_core::common::progress_data::ProgressData;
 use czkawka_core::common::{get_number_of_threads, set_number_of_threads};
-use czkawka_core::localizer_core;
+use czkawka_core::{TOOLS_NUMBER, localizer_core};
 use glib::ExitCode;
 use gtk4::Application;
 use gtk4::gio::ApplicationFlags;
@@ -68,6 +68,8 @@ mod taskbar_progress;
 mod taskbar_progress_dummy;
 #[cfg(target_os = "windows")]
 mod taskbar_progress_win;
+
+pub const CZKAWKA_GTK_TOOL_NUMBER: usize = TOOLS_NUMBER - 2; // Missing exif and iv optimizer tools
 
 fn main() {
     let config_cache_path_set_result = set_config_cache_path("Czkawka", "Czkawka");

@@ -103,7 +103,20 @@ fn progress_default(item: &ProgressData) -> ProgressToSend {
         CurrentStage::MovingFiles if item.bytes_to_check != 0 => flk!("rust_moving_files", items_stats = items_stats, size_stats = size_stats),
         CurrentStage::MovingFiles => flk!("rust_moving_no_size_files", items_stats = items_stats),
 
-        _ => unreachable!(),
+        CurrentStage::ExifFinderExtractingTags => flk!("rust_extracted_exif_tags", items_stats = items_stats, size_stats = size_stats),
+
+        CurrentStage::CollectingFiles
+        | CurrentStage::DuplicateCacheSaving
+        | CurrentStage::DuplicateCacheLoading
+        | CurrentStage::DuplicatePreHashCacheSaving
+        | CurrentStage::DuplicatePreHashCacheLoading
+        | CurrentStage::DuplicateScanningName
+        | CurrentStage::DuplicateScanningSizeName
+        | CurrentStage::DuplicateScanningSize
+        | CurrentStage::SameMusicCacheSavingTags
+        | CurrentStage::SameMusicCacheLoadingTags
+        | CurrentStage::SameMusicCacheSavingFingerprints
+        | CurrentStage::SameMusicCacheLoadingFingerprints => unreachable!("This stages(caches, initial files scanning) should be handled somewhere else"),
     };
     let (all_progress, current_progress, current_progress_size) = common_get_data(item);
 

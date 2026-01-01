@@ -410,5 +410,33 @@ export component ToolSettings {
 
             Rectangle { }
         }
+
+        VerticalLayout {
+            visible: GuiState.active_tab == ActiveTab.ExifRemover;
+            spacing: 5px;
+            padding: 10px;
+            SubsettingsHeader { }
+
+            HorizontalLayout {
+                spacing: 5px;
+                Text {
+                    text: Translations.subsettings_exif_ignored_tags_text;
+                    vertical_alignment: TextVerticalAlignment.center;
+                }
+
+                LineEdit {
+                    text <=> Settings.ignored_exif_tags;
+                    placeholder-text: "GPS, Thumbnail, MakerNote";
+                }
+            }
+
+            Text {
+                text: Translations.subsettings_exif_ignored_tags_hint_text;
+                font-size: 10px;
+                color: #888;
+            }
+
+            Rectangle { }
+        }
     }
 }

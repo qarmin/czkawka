@@ -160,6 +160,8 @@ pub struct SettingsCustom {
     #[serde(default = "default_iv_optimizer_image_threshold")]
     pub iv_optimizer_image_threshold: u8,
     #[serde(default)]
+    pub ignored_exif_tags: String,
+    #[serde(default)]
     pub column_sizes: BTreeMap<String, Vec<f32>>,
 }
 

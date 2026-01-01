@@ -446,6 +446,8 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_iv_optimizer_sub_video_quality(custom_settings.iv_optimizer_video_quality as f32);
     settings.set_iv_optimizer_sub_image_threshold(custom_settings.iv_optimizer_image_threshold as f32);
 
+    settings.set_ignored_exif_tags(custom_settings.ignored_exif_tags.clone().into());
+
     let sel_px = 35.0;
     let path_px = 350.0;
     let name_px = 100.0;
@@ -584,6 +586,8 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let iv_optimizer_video_quality = settings.get_iv_optimizer_sub_video_quality().round() as u32;
     let iv_optimizer_image_threshold = settings.get_iv_optimizer_sub_image_threshold().round() as u8;
 
+    let ignored_exif_tags = settings.get_ignored_exif_tags().to_string();
+
     let column_sizes = BTreeMap::from([
         ("duplicates".to_string(), settings.get_duplicates_column_size().iter().collect::<Vec<_>>()),
         ("empty_folders".to_string(), settings.get_empty_folders_column_size().iter().collect::<Vec<_>>()),
@@ -658,6 +662,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         iv_optimizer_excluded_codecs,
         iv_optimizer_video_quality,
         iv_optimizer_image_threshold,
+        ignored_exif_tags,
         column_sizes,
         similar_videos_vid_hash_duration,
         similar_videos_crop_detect,

@@ -16,6 +16,7 @@ import { PopupSelectResults } from "popup_select_results.slint";
 import { PopupRenameFiles } from "popup_rename_files.slint";
 import { PopupSave } from "popup_save.slint";
 import { PopupSortResults } from "popup_sort.slint";
+import { PopupActionConfirm } from "popup_action_confirm.slint";
 import { ToolSettings } from "tool_settings.slint";
 import { Translations } from "translations.slint";
 
@@ -61,6 +62,7 @@ export component MainWindow inherits Window {
     in-out property <[MainListModel]> invalid_symlinks_model: [];
     in-out property <[MainListModel]> broken_files_model: [];
     in-out property <[MainListModel]> bad_extensions_model: [];
+    in-out property <[MainListModel]> exif_finder_model: [];
     in-out property <[MainListModel]> iv_optimizer_model: [];
 
     VerticalBox {
@@ -97,6 +99,7 @@ export component MainWindow inherits Window {
                         invalid_symlinks_model <=> root.invalid_symlinks_model;
                         broken_files_model <=> root.broken_files_model;
                         bad_extensions_model <=> root.bad_extensions_model;
+                        exif_finder_model <=> root.exif_finder_model;
                         iv_optimizer_model <=> root.iv_optimizer_model;
                     }
 
@@ -140,6 +143,7 @@ export component MainWindow inherits Window {
             invalid_symlinks_model <=> root.invalid_symlinks_model;
             broken_files_model <=> root.broken_files_model;
             bad_extensions_model <=> root.bad_extensions_model;
+            exif_finder_model <=> root.exif_finder_model;
             iv_optimizer_model <=> root.iv_optimizer_model;
 
             vertical-stretch: 0.0;
@@ -168,6 +172,18 @@ export component MainWindow inherits Window {
             }
             show_rename_popup => {
                 rename_popup_window.show_popup();
+            }
+            show_clean_popup => {
+                clean_popup_window.show_popup();
+            }
+            show_optimize_popup => {
+                optimize_popup_window.show_popup();
+            }
+            show_hardlink_popup => {
+                hardlink_popup_window.show_popup();
+            }
+            show_softlink_popup => {
+                softlink_popup_window.show_popup();
             }
             show_save_popup => {
                 save_popup_window.show_popup();
@@ -262,6 +278,62 @@ export component MainWindow inherits Window {
         y: parent.y + y_offset - self.all_items_height - 5px;
         height: root.height;
         width: root.width;
+    }
+
+    clean_popup_window := PopupActionConfirm {
+        height: root.height;
+        width: root.width;
+        title_text: Translations.clean_text;
+        confirmation_text: Translations.clean_confirmation_text;
+
+        x: parent.x + (root.width - self.popup_width) / 2.0;
+        y: parent.y + (parent.height - self.popup_height) / 2.0;
+
+        action_confirmed => {
+            Callabler.clean_items();
+        }
+    }
+
+    optimize_popup_window := PopupActionConfirm {
+        height: root.height;
+        width: root.width;
+        title_text: Translations.optimize_text;
+        confirmation_text: Translations.optimize_confirmation_text;
+
+        x: parent.x + (root.width - self.popup_width) / 2.0;
+        y: parent.y + (parent.height - self.popup_height) / 2.0;
+
+        action_confirmed => {
+            Callabler.optimize_items();
+        }
+    }
+
+    hardlink_popup_window := PopupActionConfirm {
+        height: root.height;
+        width: root.width;
+        title_text: Translations.hardlink_text;
+        confirmation_text: Translations.hardlink_confirmation_text;
+
+        x: parent.x + (root.width - self.popup_width) / 2.0;
+        y: parent.y + (parent.height - self.popup_height) / 2.0;
+
+        action_confirmed => {
+            Callabler.hardlink_items();
+        }
+    }
+
+    softlink_popup_window := PopupActionConfirm {
+        height: root.height;
+        width: root.width;
+        title_text: Translations.softlink_text;
+        confirmation_text: Translations.softlink_confirmation_text;
+
+        x: parent.x + (root.width - self.popup_width) / 2.0;
+        y: parent.y + (parent.height - self.popup_height) / 2.0;
+
+        action_confirmed => {
+            Callabler.softlink_items();
+        }
     }
 
     show_move_folders_dialog(folder_name) => {

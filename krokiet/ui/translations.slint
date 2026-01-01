@@ -15,6 +15,10 @@ export global Translations {
     in-out property <string> save_button_text: "Save";
     in-out property <string> sort_button_text: "Sort";
     in-out property <string> rename_button_text: "Rename";
+    in-out property <string> optimize_button_text: "Optimize";
+    in-out property <string> clean_button_text: "Clean";
+    in-out property <string> hardlink_button_text: "Hardlink";
+    in-out property <string> softlink_button_text: "Softlink";
 
     // About
     in-out property <string> motto_text: "This program is free to use and will always be.\nSee the The MIT/GPL License for details.";
@@ -42,6 +46,7 @@ export global Translations {
     in-out property <string> tool_invalid_symlinks_text: "Invalid Symlinks";
     in-out property <string> tool_broken_files_text: "Broken Files";
     in-out property <string> tool_bad_extensions_text: "Bad Extensions";
+    in-out property <string> tool_exif_finder_text: "EXIF Finder";
     in-out property <string> tool_iv_optimizer_text: "IV Optimizer";
 
     // Sorting
@@ -104,6 +109,9 @@ export global Translations {
     in-out property <string> subsettings_iv_optimizer_video_quality_text: "Video quality (CRF)";
     in-out property <string> subsettings_iv_optimizer_image_threshold_text: "Image threshold";
     in-out property <string> subsettings_reset_text: "Reset";
+
+    in-out property <string> subsettings_exif_ignored_tags_text: "Ignored tags (comma-separated):";
+    in-out property <string> subsettings_exif_ignored_tags_hint_text: "Tags to exclude from scanning (e.g. GPS, Thumbnail, MakerNote)";
 
     // Settings
     in-out property <string> settings_dark_theme_text: "Dark theme";
@@ -177,6 +185,22 @@ export global Translations {
     // Popup delete
     in-out property <string> delete_text: "Delete items";
     in-out property <string> delete_confirmation_text: "Are you sure you want to delete the selected items?";
+
+    // Popup clean
+    in-out property <string> clean_text: "Clean EXIF data";
+    in-out property <string> clean_confirmation_text: "Are you sure you want to remove EXIF data from the selected items?";
+
+    // Popup optimize
+    in-out property <string> optimize_text: "Optimize images";
+    in-out property <string> optimize_confirmation_text: "Are you sure you want to optimize the selected items?";
+
+    // Popup hardlink
+    in-out property <string> hardlink_text: "Create hardlinks";
+    in-out property <string> hardlink_confirmation_text: "Are you sure you want to create hardlinks for the selected items?";
+
+    // Popup softlink
+    in-out property <string> softlink_text: "Create softlinks";
+    in-out property <string> softlink_confirmation_text: "Are you sure you want to create softlinks (symlinks) for the selected items?";
 
     // Main window
     in-out property <string> stopping_scan_text: "Stopping scan, please wait...";

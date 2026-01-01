@@ -32,3 +32,4 @@ pub const AUDIO_FILES_EXTENSIONS: &[&str] = &[
 pub const VIDEO_FILES_EXTENSIONS: &[&str] = &[
     "mp4", "mpv", "flv", "mp4a", "webm", "mpg", "mp2", "mpeg", "m4p", "m4v", "avi", "wmv", "qt", "mov", "swf", "mkv", "mts", "m2ts",
 ];
+pub const EXIF_FILES_EXTENSIONS: &[&str] = &["jpg", "jpeg", "png", "tiff", "tif", "webp", "heic", "heif", "avif", "jxl"];

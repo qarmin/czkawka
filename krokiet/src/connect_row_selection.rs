@@ -73,6 +73,7 @@ pub(crate) fn initialize_selection_struct() {
         ActiveTab::InvalidSymlinks,
         ActiveTab::BrokenFiles,
         ActiveTab::BadExtensions,
+        ActiveTab::ExifRemover,
         ActiveTab::IVOptimizer,
     ];
 
@@ -373,6 +374,10 @@ pub(crate) mod checker {
                 app.global::<GuiState>().set_selected_results_iv_optimizer(it1);
                 app.global::<GuiState>().set_selected_results_iv_optimizer2(it2);
             }
+            ActiveTab::ExifRemover => {
+                app.global::<GuiState>().set_selected_results_exif_finder(it1);
+                app.global::<GuiState>().set_selected_results_exif_finder2(it2);
+            }
             _ => unreachable!("Current tab is not a tool that has enabled items"),
         }
     }
@@ -434,6 +439,10 @@ pub(crate) mod checker {
             ActiveTab::IVOptimizer => (
                 app.global::<GuiState>().get_selected_results_iv_optimizer(),
                 app.global::<GuiState>().get_selected_results_iv_optimizer2(),
+            ),
+            ActiveTab::ExifRemover => (
+                app.global::<GuiState>().get_selected_results_exif_finder(),
+                app.global::<GuiState>().get_selected_results_exif_finder2(),
             ),
             _ => unreachable!("Current tab is not a tool that has enabled items"),
         };

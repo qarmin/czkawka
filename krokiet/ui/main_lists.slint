@@ -31,6 +31,7 @@ export component MainList {
     in-out property <[MainListModel]> invalid_symlinks_model: [];
     in-out property <[MainListModel]> broken_files_model: [];
     in-out property <[MainListModel]> bad_extensions_model: [];
+    in-out property <[MainListModel]> exif_finder_model: [];
     in-out property <[MainListModel]> iv_optimizer_model: [];
 
     callback changed_active_tab();
@@ -178,6 +179,19 @@ export component MainList {
         sort_available: !working;
     }
 
+    exif_remover := SelectableTableView {
+        visible: GuiState.active_tab == ActiveTab.ExifRemover;
+        min-width: 200px;
+        height: parent.height;
+        columns <=> Settings.exif_finder_column_name;
+        column_sizes <=> Settings.exif_finder_column_size;
+        values <=> exif_finder_model;
+        parentPathIdx: 2;
+        fileNameIdx: 1;
+        previewImageIdx: -1;
+        sort_available: !working;
+    }
+
     iv_optimizer := SelectableTableView {
         visible: GuiState.active_tab == ActiveTab.IVOptimizer;
         min-width: 200px;
@@ -222,6 +236,8 @@ export component MainList {
             invalid_symlink.reset_selection();
         } else if (GuiState.active_tab == ActiveTab.BrokenFiles) {
             broken_files.reset_selection();
+        } else if (GuiState.active_tab == ActiveTab.ExifRemover) {
+            exif_remover.reset_selection();
         } else if (GuiState.active_tab == ActiveTab.IVOptimizer) {
             iv_optimizer.reset_selection();
         } else {
@@ -252,6 +268,8 @@ export component MainList {
             invalid_symlink.scan_started();
         } else if (GuiState.active_tab == ActiveTab.BrokenFiles) {
             broken_files.scan_started();
+        } else if (GuiState.active_tab == ActiveTab.ExifRemover) {
+            exif_remover.scan_started();
         } else if (GuiState.active_tab == ActiveTab.IVOptimizer) {
             iv_optimizer.scan_started();
         } else {

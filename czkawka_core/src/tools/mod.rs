@@ -4,6 +4,7 @@ pub mod broken_files;
 pub mod duplicate;
 pub mod empty_files;
 pub mod empty_folder;
+pub mod exif_remover;
 pub mod invalid_symlinks;
 pub mod iv_optimizer;
 pub mod same_music;

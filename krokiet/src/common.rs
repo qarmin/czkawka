@@ -258,6 +258,28 @@ pub enum StrDataBadExtensions {
 }
 pub const MAX_STR_DATA_BAD_EXTENSIONS: usize = StrDataBadExtensions::ProperExtension as usize + 1;
 
+#[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
+pub enum IntDataExifFinder {
+    ModificationDatePart1,
+    ModificationDatePart2,
+    SizePart1,
+    SizePart2,
+    ExifTagsCount,
+}
+pub const MAX_INT_DATA_EXIF_FINDER: usize = IntDataExifFinder::ExifTagsCount as usize + 1;
+
+#[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
+pub enum StrDataExifFinder {
+    Size,
+    Name,
+    Path,
+    ModificationDate,
+    ExifTags,
+}
+pub const MAX_STR_DATA_EXIF_FINDER: usize = StrDataExifFinder::ExifTags as usize + 1;
+
 // IV Optimizer
 #[repr(u8)]
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
@@ -374,6 +396,11 @@ impl ActiveTab {
                 | StrDataBadExtensions::ProperExtensionsGroup
                 | StrDataBadExtensions::ProperExtension => SortIdx::StrIdx(str_idx),
             },
+            Self::ExifRemover => match StrDataExifFinder::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for ExifRemover")) {
+                StrDataExifFinder::Size | StrDataExifFinder::Name | StrDataExifFinder::Path => SortIdx::StrIdx(str_idx),
+                StrDataExifFinder::ModificationDate => SortIdx::IntIdxPair(IntDataExifFinder::ModificationDatePart1 as i32, IntDataExifFinder::ModificationDatePart2 as i32),
+                StrDataExifFinder::ExifTags => SortIdx::IntIdx(IntDataExifFinder::ExifTagsCount as i32),
+            },
             Self::IVOptimizer => match StrDataIVOptimizer::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for IVOptimizer")) {
                 StrDataIVOptimizer::Name | StrDataIVOptimizer::Path | StrDataIVOptimizer::Codec | StrDataIVOptimizer::Dimensions => SortIdx::StrIdx(str_idx),
                 StrDataIVOptimizer::ModificationDate => SortIdx::IntIdxPair(IntDataIVOptimizer::ModificationDatePart1 as i32, IntDataIVOptimizer::ModificationDatePart2 as i32),
@@ -397,6 +424,7 @@ impl ActiveTab {
             Self::InvalidSymlinks => StrDataInvalidSymlinks::SymlinkFolder as usize,
             Self::BrokenFiles => StrDataBrokenFiles::Path as usize,
             Self::BadExtensions => StrDataBadExtensions::Path as usize,
+            Self::ExifRemover => StrDataExifFinder::Path as usize,
             Self::IVOptimizer => StrDataIVOptimizer::Path as usize,
             Self::Settings | Self::About => panic!("Button should be disabled"),
         }
@@ -415,6 +443,7 @@ impl ActiveTab {
             Self::InvalidSymlinks => StrDataInvalidSymlinks::SymlinkName as usize,
             Self::BrokenFiles => StrDataBrokenFiles::Name as usize,
             Self::BadExtensions => StrDataBadExtensions::Name as usize,
+            Self::ExifRemover => StrDataExifFinder::Name as usize,
             Self::IVOptimizer => StrDataIVOptimizer::Name as usize,
             Self::Settings | Self::About => panic!("Button should be disabled"),
         }
@@ -440,6 +469,7 @@ impl ActiveTab {
             Self::InvalidSymlinks => IntDataInvalidSymlinks::ModificationDatePart1 as usize,
             Self::BrokenFiles => IntDataBrokenFiles::ModificationDatePart1 as usize,
             Self::BadExtensions => IntDataBadExtensions::ModificationDatePart1 as usize,
+            Self::ExifRemover => IntDataExifFinder::ModificationDatePart1 as usize,
             Self::IVOptimizer => IntDataIVOptimizer::ModificationDatePart1 as usize,
             Self::Settings | Self::About => panic!("Button should be disabled"),
         }
@@ -454,6 +484,7 @@ impl ActiveTab {
             Self::SimilarMusic => IntDataSimilarMusic::SizePart1 as usize,
             Self::BrokenFiles => IntDataBrokenFiles::SizePart1 as usize,
             Self::BadExtensions => IntDataBadExtensions::SizePart1 as usize,
+            Self::ExifRemover => IntDataExifFinder::SizePart1 as usize,
             Self::TemporaryFiles => IntDataTemporaryFiles::SizePart1 as usize,
             Self::IVOptimizer => IntDataIVOptimizer::SizePart1 as usize,
             Self::Settings | Self::About | Self::EmptyFolders | Self::InvalidSymlinks => return None,
@@ -481,9 +512,15 @@ impl ActiveTab {
 
     pub(crate) fn get_is_header_mode(self) -> bool {
         match self {
-            Self::EmptyFolders | Self::EmptyFiles | Self::BrokenFiles | Self::BigFiles | Self::TemporaryFiles | Self::InvalidSymlinks | Self::BadExtensions | Self::IVOptimizer => {
-                false
-            }
+            Self::EmptyFolders
+            | Self::EmptyFiles
+            | Self::BrokenFiles
+            | Self::BigFiles
+            | Self::TemporaryFiles
+            | Self::InvalidSymlinks
+            | Self::BadExtensions
+            | Self::ExifRemover
+            | Self::IVOptimizer => false,
             Self::SimilarImages | Self::DuplicateFiles | Self::SimilarVideos | Self::SimilarMusic => true,
             Self::Settings | Self::About => panic!("Button should be disabled"),
         }
@@ -501,6 +538,7 @@ impl ActiveTab {
             Self::InvalidSymlinks => app.get_invalid_symlinks_model(),
             Self::BrokenFiles => app.get_broken_files_model(),
             Self::BadExtensions => app.get_bad_extensions_model(),
+            Self::ExifRemover => app.get_exif_finder_model(),
             Self::IVOptimizer => app.get_iv_optimizer_model(),
             Self::Settings | Self::About => panic!("Button should be disabled"),
         }
@@ -519,6 +557,7 @@ impl ActiveTab {
             Self::InvalidSymlinks => app.set_invalid_symlinks_model(model),
             Self::BrokenFiles => app.set_broken_files_model(model),
             Self::BadExtensions => app.set_bad_extensions_model(model),
+            Self::ExifRemover => app.set_exif_finder_model(model),
             Self::IVOptimizer => app.set_iv_optimizer_model(model),
             Self::Settings | Self::About => panic!("Button should be disabled"),
         }

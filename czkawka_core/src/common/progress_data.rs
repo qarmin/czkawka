@@ -121,6 +121,7 @@ pub enum CurrentStage {
     SimilarVideosCreatingThumbnails,
     BrokenFilesChecking,
     BadExtensionsChecking,
+    ExifFinderExtractingTags,
     IVOptimizerProcessingImages,
     IVOptimizerProcessingVideos,
 }
@@ -190,6 +191,7 @@ impl ProgressData {
             CurrentStage::SimilarVideosCalculatingHashes | CurrentStage::SimilarVideosCreatingThumbnails => Some(ToolType::SimilarVideos),
             CurrentStage::BrokenFilesChecking => Some(ToolType::BrokenFiles),
             CurrentStage::BadExtensionsChecking => Some(ToolType::BadExtensions),
+            CurrentStage::ExifFinderExtractingTags => Some(ToolType::ExifRemover),
             CurrentStage::IVOptimizerProcessingImages | CurrentStage::IVOptimizerProcessingVideos => Some(ToolType::IVOptimizer),
         };
         if let Some(tool_type) = tool_type_current_stage {
@@ -203,7 +205,7 @@ impl ToolType {
         match self {
             Self::Duplicate => 6,
             Self::EmptyFolders | Self::EmptyFiles | Self::InvalidSymlinks | Self::BigFile | Self::TemporaryFiles => 0,
-            Self::BrokenFiles | Self::BadExtensions | Self::IVOptimizer => 1,
+            Self::BrokenFiles | Self::BadExtensions | Self::IVOptimizer | Self::ExifRemover => 1,
             Self::SimilarImages | Self::SimilarVideos => 2,
             Self::None => unreachable!("ToolType::None is not allowed"),
             Self::SameMusic => match checking_method {
@@ -252,6 +254,7 @@ impl CurrentStage {
             Self::SameMusicCalculatingFingerprints => 5,
             Self::SameMusicCacheSavingFingerprints => 6,
             Self::SameMusicComparingFingerprints => 7,
+            Self::ExifFinderExtractingTags => 1,
         }
     }
     pub fn check_if_loading_saving_cache(&self) -> bool {
