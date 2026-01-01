@@ -8,23 +8,24 @@ use std::rc::Rc;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
-use crossbeam_channel::{unbounded, Receiver, Sender};
+use crossbeam_channel::{Receiver, Sender, unbounded};
 use czkawka_core::common::basic_gui_cli::process_cli_args;
 use czkawka_core::common::config_cache_path::{print_infos_and_warnings, set_config_cache_path};
 use czkawka_core::common::logger::{filtering_messages, print_version_mode, setup_logger};
 use czkawka_core::common::progress_data::ProgressData;
+use file_actions::connect_clean_exif::connect_clean;
+use file_actions::connect_delete::connect_delete_button;
+use file_actions::connect_hardlink::connect_hardlink;
+use file_actions::connect_move::connect_move;
+use file_actions::connect_optimize_video::connect_optimize_video;
+use file_actions::connect_rename::connect_rename;
+use file_actions::connect_symlink::connect_symlink;
 use log::info;
 use slint::VecModel;
 
-use file_actions::connect_clean_exif::connect_clean;
-use file_actions::connect_delete::connect_delete_button;
 use crate::connect_directories_changes::connect_add_remove_directories;
-use file_actions::connect_hardlink::connect_hardlink;
-use file_actions::connect_move::connect_move;
 use crate::connect_open::connect_open_items;
-use crate::connect_optimize_video::connect_optimize_video;
 use crate::connect_progress_receiver::connect_progress_gathering;
-use file_actions::connect_rename::connect_rename;
 use crate::connect_row_selection::connect_row_selections;
 use crate::connect_save::connect_save;
 use crate::connect_scan::connect_scan_button;
@@ -32,7 +33,6 @@ use crate::connect_select::{connect_select, connect_showing_proper_select_button
 use crate::connect_show_confirmation::connect_show_confirmation;
 use crate::connect_show_preview::connect_show_preview;
 use crate::connect_size_of_config_cache::connect_size_of_config_cache;
-use file_actions::connect_symlink::connect_symlink;
 use crate::connect_sort::{connect_showing_proper_sort_buttons, connect_sort, connect_sort_column};
 use crate::connect_stop::connect_stop_button;
 use crate::connect_translation::connect_translations;
@@ -45,7 +45,6 @@ use crate::shared_models::SharedModels;
 mod common;
 mod connect_directories_changes;
 mod connect_open;
-mod connect_optimize_video;
 mod connect_progress_receiver;
 mod connect_row_selection;
 mod connect_save;
@@ -57,6 +56,7 @@ mod connect_size_of_config_cache;
 mod connect_sort;
 mod connect_stop;
 mod connect_translation;
+mod file_actions;
 mod localizer_krokiet;
 mod model_operations;
 mod set_initial_gui_info;
@@ -65,7 +65,6 @@ mod shared_models;
 mod simpler_model;
 #[cfg(test)]
 mod test_common;
-mod file_actions;
 
 slint::include_modules!();
 

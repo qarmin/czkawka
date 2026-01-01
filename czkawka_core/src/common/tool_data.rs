@@ -13,9 +13,9 @@ use crate::common::extensions::Extensions;
 use crate::common::items::ExcludedItems;
 use crate::common::model::{CheckingMethod, ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
+use crate::common::progress_stop_handler::check_if_stop_received;
 use crate::common::traits::ResultEntry;
 use crate::common::{make_hard_link, remove_folder_if_contains_only_empty_folders, remove_single_file};
-use crate::common::progress_stop_handler::check_if_stop_received;
 use crate::helpers::delayed_sender::DelayedSender;
 use crate::helpers::messages::Messages;
 

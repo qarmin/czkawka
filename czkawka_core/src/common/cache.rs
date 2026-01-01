@@ -169,7 +169,10 @@ where
     for file_entry in vec_loaded_entries {
         map_loaded_entries.entry(file_entry.get_size()).or_default().push(file_entry);
     }
-    debug!("Converted cache Vec<T>({number_of_entries} results) into BTreeMap<u64, Vec<T>> in {:?}", start_time.elapsed());
+    debug!(
+        "Converted cache Vec<T>({number_of_entries} results) into BTreeMap<u64, Vec<T>> in {:?}",
+        start_time.elapsed()
+    );
 
     (text_messages, Some(map_loaded_entries))
 }

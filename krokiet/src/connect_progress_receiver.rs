@@ -102,6 +102,14 @@ fn progress_default(item: &ProgressData) -> ProgressToSend {
         CurrentStage::RenamingFiles => flk!("rust_renaming_files", items_stats = items_stats),
         CurrentStage::MovingFiles if item.bytes_to_check != 0 => flk!("rust_moving_files", items_stats = items_stats, size_stats = size_stats),
         CurrentStage::MovingFiles => flk!("rust_moving_no_size_files", items_stats = items_stats),
+        CurrentStage::HardlinkingFiles if item.bytes_to_check != 0 => flk!("rust_hardlinking_files", items_stats = items_stats, size_stats = size_stats),
+        CurrentStage::HardlinkingFiles => flk!("rust_hardlinking_no_size_files", items_stats = items_stats),
+        CurrentStage::SymlinkingFiles if item.bytes_to_check != 0 => flk!("rust_symlinking_files", items_stats = items_stats, size_stats = size_stats),
+        CurrentStage::SymlinkingFiles => flk!("rust_symlinking_no_size_files", items_stats = items_stats),
+        CurrentStage::OptimizingVideos if item.bytes_to_check != 0 => flk!("rust_optimizing_videos", items_stats = items_stats, size_stats = size_stats),
+        CurrentStage::OptimizingVideos => flk!("rust_optimizing_no_size_videos", items_stats = items_stats),
+        CurrentStage::CleaningExif if item.bytes_to_check != 0 => flk!("rust_cleaning_exif", items_stats = items_stats, size_stats = size_stats),
+        CurrentStage::CleaningExif => flk!("rust_cleaning_no_size_exif", items_stats = items_stats),
 
         CurrentStage::ExifRemoverExtractingTags => flk!("rust_extracted_exif_tags", items_stats = items_stats, size_stats = size_stats),
 

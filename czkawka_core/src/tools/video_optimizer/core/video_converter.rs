@@ -86,4 +86,3 @@ pub fn process_video(video_path: &Path, original_size: u64, video_codec: VideoCo
         Err(format!("Optimized file ({new_size} bytes) is larger than original ({original_size} bytes)"))
     }
 }
-

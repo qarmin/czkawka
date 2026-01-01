@@ -16,9 +16,7 @@ Prebuilt binaries are available for Windows 10/11, Mac and Ubuntu 22.04 (and sim
 
 On Ubuntu, you need to install these dependencies - `libfontconfig-dev libfreetype-dev`
 
-Compi
-
-The default compilation is done with `cargo build --release` and should work on most systems.
+Compilation with `cargo build --release` should produce a working binary, that without any additional dependencies should run on user os.
 
 If you have installed new `cargo`, you can easily compile and install it via `cargo install krokiet`
 

@@ -293,7 +293,12 @@ impl SameMusic {
                 return WorkContinueStatus::Stop;
             }
 
-            old_duplicates = self.check_music_item(old_duplicates, progress_handler.items_counter(), |fe| fe.track_title.clone(), self.params.approximate_comparison);
+            old_duplicates = self.check_music_item(
+                old_duplicates,
+                progress_handler.items_counter(),
+                |fe| fe.track_title.clone(),
+                self.params.approximate_comparison,
+            );
         }
         if (self.params.music_similarity & MusicSimilarity::TRACK_ARTIST) == MusicSimilarity::TRACK_ARTIST {
             if check_if_stop_received(stop_flag) {
@@ -301,7 +306,12 @@ impl SameMusic {
                 return WorkContinueStatus::Stop;
             }
 
-            old_duplicates = self.check_music_item(old_duplicates, progress_handler.items_counter(), |fe| fe.track_artist.clone(), self.params.approximate_comparison);
+            old_duplicates = self.check_music_item(
+                old_duplicates,
+                progress_handler.items_counter(),
+                |fe| fe.track_artist.clone(),
+                self.params.approximate_comparison,
+            );
         }
         if (self.params.music_similarity & MusicSimilarity::YEAR) == MusicSimilarity::YEAR {
             if check_if_stop_received(stop_flag) {
@@ -317,7 +327,7 @@ impl SameMusic {
                 return WorkContinueStatus::Stop;
             }
 
-            old_duplicates = self.check_music_item(old_duplicates, progress_handler.items_counter(), |fe| format_audio_duration(fe.length).clone(), false);
+            old_duplicates = self.check_music_item(old_duplicates, progress_handler.items_counter(), |fe| format_audio_duration(fe.length), false);
         }
         if (self.params.music_similarity & MusicSimilarity::GENRE) == MusicSimilarity::GENRE {
             if check_if_stop_received(stop_flag) {
@@ -704,15 +714,11 @@ fn read_single_file_tags(path: &str, mut music_entry: MusicEntry) -> Option<Musi
     }
 
     let length_milliseconds = properties.duration().as_millis();
-    let length_in_seconds= if length_milliseconds == 0 {
+    let length_in_seconds = if length_milliseconds == 0 {
         0
     } else {
         let secs = properties.duration().as_secs() as u32;
-        if secs == 0 {
-            1
-        } else {
-            secs
-        }
+        if secs == 0 { 1 } else { secs }
     };
 
     music_entry.track_title = track_title;

@@ -4,6 +4,7 @@ use slint::ComponentHandle;
 use crate::model_operations::get_checked_info_from_app;
 use crate::{MainWindow, PopupRequest, Translations, flk};
 
+#[expect(clippy::match_same_arms)]
 pub(crate) fn connect_show_confirmation(app: &MainWindow) {
     let a = app.as_weak();
     app.on_request_setup_action_popup(move |popup_request: PopupRequest| {

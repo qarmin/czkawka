@@ -94,6 +94,10 @@ pub enum CurrentStage {
     DeletingFiles,
     RenamingFiles,
     MovingFiles,
+    HardlinkingFiles,
+    SymlinkingFiles,
+    OptimizingVideos,
+    CleaningExif,
 
     CollectingFiles,
     DuplicateCacheSaving,
@@ -170,7 +174,14 @@ impl ProgressData {
             assert_eq!(self.tool_type, tool_type, "Tool type: {:?}, checking method: {:?}", self.tool_type, self.checking_method);
         }
         let tool_type_current_stage: Option<ToolType> = match self.sstage {
-            CurrentStage::CollectingFiles | CurrentStage::DeletingFiles | CurrentStage::RenamingFiles | CurrentStage::MovingFiles => None,
+            CurrentStage::CollectingFiles
+            | CurrentStage::DeletingFiles
+            | CurrentStage::RenamingFiles
+            | CurrentStage::MovingFiles
+            | CurrentStage::HardlinkingFiles
+            | CurrentStage::SymlinkingFiles
+            | CurrentStage::OptimizingVideos
+            | CurrentStage::CleaningExif => None,
             CurrentStage::DuplicateCacheSaving | CurrentStage::DuplicateCacheLoading | CurrentStage::DuplicatePreHashCacheSaving | CurrentStage::DuplicatePreHashCacheLoading => {
                 Some(ToolType::Duplicate)
             }
@@ -228,6 +239,10 @@ impl CurrentStage {
             Self::DeletingFiles => 0,
             Self::RenamingFiles => 0,
             Self::MovingFiles => 0,
+            Self::HardlinkingFiles => 0,
+            Self::SymlinkingFiles => 0,
+            Self::OptimizingVideos => 0,
+            Self::CleaningExif => 0,
             Self::CollectingFiles => 0,
             Self::DuplicateScanningName => 0,
             Self::DuplicateScanningSizeName => 0,

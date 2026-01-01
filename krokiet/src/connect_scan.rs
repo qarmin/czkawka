@@ -20,23 +20,24 @@ use czkawka_core::tools::empty_files::EmptyFiles;
 use czkawka_core::tools::empty_folder::{EmptyFolder, FolderEntry};
 use czkawka_core::tools::exif_remover::{ExifEntry, ExifRemover, ExifRemoverParameters};
 use czkawka_core::tools::invalid_symlinks::{InvalidSymlinks, SymlinksFileEntry};
-use czkawka_core::tools::video_optimizer::{OptimizerMode, VideoCodec, VideoOptimizer, VideoOptimizerParameters, VideoTranscodeEntry};
+use czkawka_core::tools::same_music::core::format_audio_duration;
 use czkawka_core::tools::same_music::{MusicEntry, MusicSimilarity, SameMusic, SameMusicParameters};
 use czkawka_core::tools::similar_images::core::get_string_from_similarity;
 use czkawka_core::tools::similar_images::{ImagesEntry, SimilarImages, SimilarImagesParameters};
 use czkawka_core::tools::similar_videos::core::{format_bitrate_opt, format_duration_opt};
 use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters, VideosEntry, crop_detect_from_str};
 use czkawka_core::tools::temporary::{Temporary, TemporaryFileEntry};
+use czkawka_core::tools::video_optimizer::{OptimizerMode, VideoCodec, VideoOptimizer, VideoOptimizerParameters, VideoTranscodeEntry};
 use humansize::{BINARY, format_size};
 use rayon::prelude::*;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
-use czkawka_core::tools::same_music::core::format_audio_duration;
+
 use crate::common::{
     MAX_INT_DATA_BAD_EXTENSIONS, MAX_INT_DATA_BIG_FILES, MAX_INT_DATA_BROKEN_FILES, MAX_INT_DATA_DUPLICATE_FILES, MAX_INT_DATA_EMPTY_FILES, MAX_INT_DATA_EMPTY_FOLDERS,
-    MAX_INT_DATA_EXIF_REMOVER, MAX_INT_DATA_INVALID_SYMLINKS, MAX_INT_DATA_VIDEO_OPTIMIZER, MAX_INT_DATA_SIMILAR_IMAGES, MAX_INT_DATA_SIMILAR_MUSIC, MAX_INT_DATA_SIMILAR_VIDEOS,
-    MAX_INT_DATA_TEMPORARY_FILES, MAX_STR_DATA_BAD_EXTENSIONS, MAX_STR_DATA_BIG_FILES, MAX_STR_DATA_BROKEN_FILES, MAX_STR_DATA_DUPLICATE_FILES, MAX_STR_DATA_EMPTY_FILES,
-    MAX_STR_DATA_EMPTY_FOLDERS, MAX_STR_DATA_EXIF_REMOVER, MAX_STR_DATA_INVALID_SYMLINKS, MAX_STR_DATA_VIDEO_OPTIMIZER, MAX_STR_DATA_SIMILAR_IMAGES, MAX_STR_DATA_SIMILAR_MUSIC,
-    MAX_STR_DATA_SIMILAR_VIDEOS, MAX_STR_DATA_TEMPORARY_FILES, check_if_all_included_dirs_are_referenced, check_if_there_are_any_included_folders, split_u64_into_i32s,
+    MAX_INT_DATA_EXIF_REMOVER, MAX_INT_DATA_INVALID_SYMLINKS, MAX_INT_DATA_SIMILAR_IMAGES, MAX_INT_DATA_SIMILAR_MUSIC, MAX_INT_DATA_SIMILAR_VIDEOS, MAX_INT_DATA_TEMPORARY_FILES,
+    MAX_INT_DATA_VIDEO_OPTIMIZER, MAX_STR_DATA_BAD_EXTENSIONS, MAX_STR_DATA_BIG_FILES, MAX_STR_DATA_BROKEN_FILES, MAX_STR_DATA_DUPLICATE_FILES, MAX_STR_DATA_EMPTY_FILES,
+    MAX_STR_DATA_EMPTY_FOLDERS, MAX_STR_DATA_EXIF_REMOVER, MAX_STR_DATA_INVALID_SYMLINKS, MAX_STR_DATA_SIMILAR_IMAGES, MAX_STR_DATA_SIMILAR_MUSIC, MAX_STR_DATA_SIMILAR_VIDEOS,
+    MAX_STR_DATA_TEMPORARY_FILES, MAX_STR_DATA_VIDEO_OPTIMIZER, check_if_all_included_dirs_are_referenced, check_if_there_are_any_included_folders, split_u64_into_i32s,
 };
 use crate::connect_row_selection::checker::set_number_of_enabled_items;
 use crate::connect_row_selection::reset_selection;

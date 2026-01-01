@@ -30,6 +30,10 @@ pub enum MessageType {
     Delete,
     Rename,
     Move,
+    Hardlink,
+    Symlink,
+    OptimizeVideo,
+    CleanExif,
 }
 
 impl MessageType {
@@ -38,6 +42,10 @@ impl MessageType {
             Self::Delete => flk!("rust_no_files_deleted"),
             Self::Rename => flk!("rust_no_files_renamed"),
             Self::Move => flk!("rust_no_files_moved"),
+            Self::Hardlink => flk!("rust_no_files_hardlinked"),
+            Self::Symlink => flk!("rust_no_files_symlinked"),
+            Self::OptimizeVideo => flk!("rust_no_videos_optimized"),
+            Self::CleanExif => flk!("rust_no_exif_cleaned"),
         }
     }
     fn get_summary_message(self, deleted: usize, failed: usize, total: usize) -> String {
@@ -45,6 +53,10 @@ impl MessageType {
             Self::Delete => flk!("rust_delete_summary", deleted = deleted, failed = failed, total = total),
             Self::Rename => flk!("rust_rename_summary", renamed = deleted, failed = failed, total = total),
             Self::Move => flk!("rust_move_summary", moved = deleted, failed = failed, total = total),
+            Self::Hardlink => flk!("rust_hardlink_summary", hardlinked = deleted, failed = failed, total = total),
+            Self::Symlink => flk!("rust_symlink_summary", symlinked = deleted, failed = failed, total = total),
+            Self::OptimizeVideo => flk!("rust_optimize_video_summary", optimized = deleted, failed = failed, total = total),
+            Self::CleanExif => flk!("rust_clean_exif_summary", cleaned = deleted, failed = failed, total = total),
         }
     }
     fn get_base_progress(self) -> ProgressData {
@@ -52,6 +64,10 @@ impl MessageType {
             Self::Delete => ProgressData::get_empty_state(CurrentStage::DeletingFiles),
             Self::Rename => ProgressData::get_empty_state(CurrentStage::RenamingFiles),
             Self::Move => ProgressData::get_empty_state(CurrentStage::MovingFiles),
+            Self::Hardlink => ProgressData::get_empty_state(CurrentStage::HardlinkingFiles),
+            Self::Symlink => ProgressData::get_empty_state(CurrentStage::SymlinkingFiles),
+            Self::OptimizeVideo => ProgressData::get_empty_state(CurrentStage::OptimizingVideos),
+            Self::CleanExif => ProgressData::get_empty_state(CurrentStage::CleaningExif),
         }
     }
     fn msg_type(self) -> &'static str {
@@ -59,6 +75,10 @@ impl MessageType {
             Self::Delete => "delete",
             Self::Rename => "rename",
             Self::Move => "move",
+            Self::Hardlink => "hardlink",
+            Self::Symlink => "symlink",
+            Self::OptimizeVideo => "optimize_video",
+            Self::CleanExif => "clean_exif",
         }
     }
 }

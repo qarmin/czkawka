@@ -16,6 +16,7 @@ use czkawka_core::tools::duplicate::DuplicateFinder;
 use czkawka_core::tools::empty_files::EmptyFiles;
 use czkawka_core::tools::empty_folder::EmptyFolder;
 use czkawka_core::tools::invalid_symlinks::InvalidSymlinks;
+use czkawka_core::tools::same_music::core::format_audio_duration;
 use czkawka_core::tools::same_music::{MusicSimilarity, SameMusic};
 use czkawka_core::tools::similar_images::core::get_string_from_similarity;
 use czkawka_core::tools::similar_images::{ImagesEntry, SimilarImages};
@@ -27,7 +28,7 @@ use gtk4::prelude::*;
 use gtk4::{Entry, ListStore, TextView};
 use humansize::{BINARY, format_size};
 use rayon::prelude::*;
-use czkawka_core::tools::same_music::core::format_audio_duration;
+
 use crate::flg;
 use crate::gui_structs::common_tree_view::{SharedModelEnum, SubView, TreeViewListStoreTrait};
 use crate::gui_structs::gui_data::GuiData;

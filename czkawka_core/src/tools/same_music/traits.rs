@@ -10,8 +10,8 @@ use crate::common::model::{CheckingMethod, WorkContinueStatus};
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
 use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, PrintResults, Search};
-use crate::tools::same_music::{Info, MusicEntry, SameMusic, SameMusicParameters};
 use crate::tools::same_music::core::format_audio_duration;
+use crate::tools::same_music::{Info, MusicEntry, SameMusic, SameMusicParameters};
 
 impl AllTraits for SameMusic {}
 
