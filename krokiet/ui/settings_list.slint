@@ -381,6 +381,11 @@ export component SettingsList inherits VerticalLayout {
                 model <=> Settings.similar_videos_delete_outdated_entries;
             }
 
+            CheckBoxComponent {
+                name <=> Translations.settings_similar_videos_clear_unused_thumbnails_text;
+                model <=> Settings.similar_videos_clear_unused_thumbnails;
+            }
+
             HeaderText {
                 text <=> Translations.settings_similar_music_tool_text;
             }

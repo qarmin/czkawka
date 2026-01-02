@@ -256,6 +256,7 @@ settings_settings = Settings
 settings_load_tabs_sizes_at_startup = Load tabs sizes at startup
 settings_load_windows_size_at_startup = Load windows size at startup
 settings_limit_lines_of_messages = Limit messages to 500 lines(workaround for slow TextEdit widget)
+settings_similar_videos_clear_unused_thumbnails = Delete unused video thumbnails older than 7 days at app startup
 popup_save_title = Saving results
 popup_save_message = This will save results to 3 different files
 popup_rename_title = Renaming files

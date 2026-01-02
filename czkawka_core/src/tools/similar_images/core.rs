@@ -370,7 +370,7 @@ impl SimilarImages {
                 return WorkContinueStatus::Stop;
             }
 
-            self.connect_results_simplified(partial_results, &mut hashes_parents, &mut hashes_similarity, &hashes_with_multiple_images);
+            SimilarImages::connect_results_simplified(partial_results, &mut hashes_parents, &mut hashes_similarity, &hashes_with_multiple_images);
         }
         // To avoid situations in simplified connector we don't add such hashes to results
         for multiple_image_hash in &hashes_with_multiple_images {
@@ -388,7 +388,6 @@ impl SimilarImages {
     }
 
     fn connect_results_simplified<'a>(
-        &self,
         partial_results: Vec<(&'a ImHash, Vec<(u32, &'a ImHash)>)>,
         hashes_parents: &mut IndexMap<ImHash, u32>,
         hashes_similarity: &mut IndexMap<ImHash, (ImHash, u32)>,
@@ -1214,7 +1213,7 @@ mod connect_results_tests {
     #[test]
     fn test_connect_results_real_case() {
         let params = SimilarImagesParameters::new(10, 8, HashAlg::Gradient, FilterType::Lanczos3, false, true);
-        let finder = SimilarImages::new(params);
+        let _finder = SimilarImages::new(params);
 
         let hash1: ImHash = vec![59, 41, 53, 27, 19, 143, 228, 228];
         let hash2: ImHash = vec![57, 41, 60, 155, 51, 173, 204, 228];
@@ -1233,7 +1232,7 @@ mod connect_results_tests {
         assert_eq!(hashes_parents.len(), 0);
         assert_eq!(hashes_similarity.len(), 0);
 
-        finder.connect_results_simplified(partial_results, &mut hashes_parents, &mut hashes_similarity, &hashes_with_multiple_images);
+        SimilarImages::connect_results_simplified(partial_results, &mut hashes_parents, &mut hashes_similarity, &hashes_with_multiple_images);
 
         assert_eq!(hashes_parents.len(), 1);
         assert_eq!(hashes_similarity.len(), 2);

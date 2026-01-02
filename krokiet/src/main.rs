@@ -23,6 +23,7 @@ use file_actions::connect_symlink::connect_symlink;
 use log::info;
 use slint::VecModel;
 
+use crate::clear_outdated_video_thumbnails::clear_outdated_video_thumbnails;
 use crate::connect_directories_changes::connect_add_remove_directories;
 use crate::connect_open::connect_open_items;
 use crate::connect_progress_receiver::connect_progress_gathering;
@@ -42,6 +43,7 @@ use crate::connect_translation::connect_translations;
 use crate::settings::{connect_changing_settings_preset, create_default_settings_files, load_settings_from_file, save_all_settings_to_file};
 use crate::shared_models::SharedModels;
 
+mod clear_outdated_video_thumbnails;
 mod common;
 mod connect_directories_changes;
 mod connect_open;
@@ -115,6 +117,8 @@ fn main() {
     connect_showing_proper_sort_buttons(&app);
     connect_size_of_config_cache(&app);
     connect_show_confirmation(&app);
+
+    clear_outdated_video_thumbnails(&app);
 
     // Popups gather their size, after starting/closing popup at least once
     // This is simpler solution, than setting sizes of popups manually for each language

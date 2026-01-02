@@ -390,6 +390,8 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_similar_images_delete_outdated_entries(custom_settings.similar_images_delete_outdated_entries);
     settings.set_similar_videos_hide_hard_links(custom_settings.similar_videos_hide_hard_links);
     settings.set_similar_videos_delete_outdated_entries(custom_settings.similar_videos_delete_outdated_entries);
+    settings.set_similar_videos_image_preview(custom_settings.similar_videos_image_preview);
+    settings.set_similar_videos_clear_unused_thumbnails(custom_settings.similar_videos_clear_unused_thumbnails);
     settings.set_similar_music_compare_fingerprints_only_with_similar_titles(custom_settings.similar_music_compare_fingerprints_only_with_similar_titles);
     settings.set_similar_music_delete_outdated_entries(custom_settings.similar_music_delete_outdated_entries);
 
@@ -418,7 +420,6 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     );
     settings.set_similar_videos_vid_hash_duration_min(*ALLOWED_VID_HASH_DURATION.start() as f32);
     settings.set_similar_videos_vid_hash_duration_max(*ALLOWED_VID_HASH_DURATION.end() as f32);
-    settings.set_similar_videos_image_preview(custom_settings.similar_videos_image_preview);
     settings.set_similar_videos_thumbnail_percentage(
         custom_settings
             .similar_videos_thumbnail_percentage
@@ -532,6 +533,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let similar_videos_hide_hard_links = settings.get_similar_videos_hide_hard_links();
     let similar_videos_delete_outdated_entries = settings.get_similar_videos_delete_outdated_entries();
     let similar_videos_image_preview = settings.get_similar_videos_image_preview();
+    let similar_videos_clear_unused_thumbnails = settings.get_similar_videos_clear_unused_thumbnails();
 
     let similar_music_compare_fingerprints_only_with_similar_titles = settings.get_similar_music_compare_fingerprints_only_with_similar_titles();
     let similar_music_delete_outdated_entries = settings.get_similar_music_delete_outdated_entries();
@@ -629,6 +631,8 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         similar_images_show_image_preview,
         similar_images_delete_outdated_entries,
         similar_videos_delete_outdated_entries,
+        similar_videos_image_preview,
+        similar_videos_clear_unused_thumbnails,
         similar_music_delete_outdated_entries,
         similar_images_sub_hash_size,
         similar_images_sub_hash_alg,
@@ -658,6 +662,10 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         broken_files_sub_pdf,
         broken_files_sub_archive,
         broken_files_sub_image,
+        similar_videos_skip_forward_amount,
+        similar_videos_vid_hash_duration,
+        similar_videos_crop_detect,
+        similar_videos_thumbnail_percentage,
         video_optimizer_mode,
         video_optimizer_video_codec,
         video_optimizer_excluded_codecs,
@@ -665,11 +673,6 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         video_optimizer_image_threshold,
         ignored_exif_tags,
         column_sizes,
-        similar_videos_vid_hash_duration,
-        similar_videos_crop_detect,
-        similar_videos_skip_forward_amount,
-        similar_videos_image_preview,
-        similar_videos_thumbnail_percentage,
     }
 }
 
