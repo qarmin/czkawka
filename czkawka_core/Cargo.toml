@@ -49,6 +49,7 @@ tempfile = "3.13"
 # Video Duplicates
 vid_dup_finder_lib = "0.4"
 ffmpeg_cmdline_utils = "0.4"
+filetime = "0.2.26"
 
 # For extracting video properties using ffprobe CLI
 ffprobe = "0.4.0"

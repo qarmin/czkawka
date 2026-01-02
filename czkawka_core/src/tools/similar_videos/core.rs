@@ -154,7 +154,8 @@ impl SimilarVideos {
         let thumbnail_path = thumbnails_dir.join(thumbnail_filename);
 
         if thumbnail_path.exists() {
-            file_entry.thumbnail_path = Some(thumbnail_path);
+            file_entry.thumbnail_path = Some(thumbnail_path.clone());
+            let _ = filetime::set_file_mtime(&thumbnail_path, filetime::FileTime::now());
             return Ok(());
         }
 
@@ -178,7 +179,8 @@ impl SimilarVideos {
         match output {
             Ok(result) => {
                 if result.status.success() && thumbnail_path.exists() {
-                    file_entry.thumbnail_path = Some(thumbnail_path);
+                    file_entry.thumbnail_path = Some(thumbnail_path.clone());
+                    let _ = filetime::set_file_mtime(&thumbnail_path, filetime::FileTime::now());
                     Ok(())
                 } else {
                     let _ = fs::write(&thumbnail_path, b""); // Create empty file to avoid retrying generation again and again
