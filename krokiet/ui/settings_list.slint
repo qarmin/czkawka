@@ -72,6 +72,29 @@ component ThreadSliderComponent inherits HorizontalLayout {
     }
 }
 
+component ApplicationScaleComponent inherits HorizontalLayout {
+    spacing: 5px;
+    in-out property <string> name;
+    callback changed <=> slider.changed;
+    Text {
+        text <=> name;
+        vertical-alignment: TextVerticalAlignment.center;
+        height: SettingsSize.item_height;
+    }
+    slider := Slider {
+        minimum: 0.5;
+        maximum: 3.0;
+        step: 0.01;
+        value <=> Settings.application_scale;
+        height: SettingsSize.item_height;
+    }
+    Text {
+        height: SettingsSize.item_height;
+        vertical-alignment: TextVerticalAlignment.center;
+        text: (round(slider.value * 100.0) / 100.0);
+    }
+}
+
 component MinMaxSizeComponent inherits HorizontalLayout {
     spacing: 20px;
     Text {
@@ -304,6 +327,12 @@ export component SettingsList inherits VerticalLayout {
                 changed => {
                     restart_required = true;
                 }
+            }
+
+            ApplicationScaleComponent {
+                name <=> Translations.settings_application_scale_text;
+                // Changing scale requires restart to take full effect
+                changed => { restart_required = true; }
             }
 
             if restart_required: Text {

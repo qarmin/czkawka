@@ -81,6 +81,13 @@ fn main() {
     create_default_settings_files();
     let (base_settings, custom_settings, preset_to_load) = load_initial_settings_from_file(cli_args.as_ref());
 
+    // Apply saved application scale to Slint (requires restart to fully apply in some backends)
+    // Clamp to allowed range to be safe
+    let scale = base_settings.manual_application_scale.clamp(0.5, 3.0);
+    unsafe {
+        std::env::set_var("SLINT_SCALE_FACTOR", format!("{:.2}", scale));
+    }
+
     // TODO Set custom scale
 
     let app = MainWindow::new().expect("Failed to create main window");

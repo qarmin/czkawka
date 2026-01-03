@@ -197,6 +197,8 @@ pub struct BasicSettings {
     pub settings_load_tabs_sizes_at_startup: bool,
     #[serde(default = "ttrue")]
     pub settings_limit_lines_of_messages: bool,
+    #[serde(default = "default_manual_application_scale")]
+    pub manual_application_scale: f32,
 }
 
 impl Default for BasicSettings {
@@ -328,3 +330,7 @@ fn default_video_optimizer_video_quality() -> u32 {
 fn default_video_optimizer_image_threshold() -> u8 {
     1
 }
+fn default_manual_application_scale() -> f32 {
+    1.0
+}
+
