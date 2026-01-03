@@ -612,6 +612,7 @@ fn scan_similar_videos(
                 crop_detect_from_str(&custom_settings.similar_videos_crop_detect),
                 custom_settings.similar_videos_image_preview,
                 custom_settings.similar_videos_thumbnail_percentage,
+                custom_settings.similar_videos_generate_thumbnail_grid_instead_of_single_image
             );
             let mut tool = SimilarVideos::new(params);
             set_common_settings(&mut tool, &custom_settings, &stop_flag);
