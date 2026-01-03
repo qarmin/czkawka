@@ -138,7 +138,12 @@ impl SimilarVideos {
         file_entry
     }
 
-    fn generate_thumbnail(file_entry: &mut VideosEntry, thumbnails_dir: &Path, thumbnail_video_percentage_from_start: u8, generate_grid_instead_of_single: bool) -> Result<(), String> {
+    fn generate_thumbnail(
+        file_entry: &mut VideosEntry,
+        thumbnails_dir: &Path,
+        thumbnail_video_percentage_from_start: u8,
+        generate_grid_instead_of_single: bool,
+    ) -> Result<(), String> {
         let mut hasher = Hasher::new();
         hasher.update(
             format!(
@@ -162,41 +167,37 @@ impl SimilarVideos {
         let seek_time = file_entry.duration.map_or(5.0, |d| d * (thumbnail_video_percentage_from_start as f64) / 100.0);
         let duration_per_10_items = file_entry.duration.map_or(0.5, |d| d / 10.0);
 
-        let output =
-            if generate_grid_instead_of_single {
-                let vf_filter = format!(
-                    "fps=1/{:.6},scale='min(1920,iw)':'min(1080,ih)':force_original_aspect_ratio=decrease,tile=3x3",
-                    duration_per_10_items
-                );
+        let output = if generate_grid_instead_of_single {
+            let vf_filter = format!("fps=1/{duration_per_10_items:.6},scale='min(1920,iw)':'min(1080,ih)':force_original_aspect_ratio=decrease,tile=3x3");
 
-                Command::new("ffmpeg")
-                    .arg("-i")
-                    .arg(&file_entry.path)
-                    .arg("-vf")
-                    .arg(&vf_filter)
-                    .arg("-frames:v")
-                    .arg("1")
-                    .arg("-q:v")
-                    .arg("2")
-                    .arg("-y")
-                    .arg(&thumbnail_path)
-                    .output()
-            } else {
-                Command::new("ffmpeg")
-                    .arg("-ss")
-                    .arg(seek_time.to_string())
-                    .arg("-i")
-                    .arg(&file_entry.path)
-                    .arg("-vf")
-                    .arg("scale='min(1920,iw)':'min(1080,ih)':force_original_aspect_ratio=decrease")
-                    .arg("-vframes")
-                    .arg("1")
-                    .arg("-q:v")
-                    .arg("2")
-                    .arg("-y")
-                    .arg(&thumbnail_path)
-                    .output()
-            };
+            Command::new("ffmpeg")
+                .arg("-i")
+                .arg(&file_entry.path)
+                .arg("-vf")
+                .arg(&vf_filter)
+                .arg("-frames:v")
+                .arg("1")
+                .arg("-q:v")
+                .arg("2")
+                .arg("-y")
+                .arg(&thumbnail_path)
+                .output()
+        } else {
+            Command::new("ffmpeg")
+                .arg("-ss")
+                .arg(seek_time.to_string())
+                .arg("-i")
+                .arg(&file_entry.path)
+                .arg("-vf")
+                .arg("scale='min(1920,iw)':'min(1080,ih)':force_original_aspect_ratio=decrease")
+                .arg("-vframes")
+                .arg("1")
+                .arg("-q:v")
+                .arg("2")
+                .arg("-y")
+                .arg(&thumbnail_path)
+                .output()
+        };
 
         match output {
             Ok(result) => {

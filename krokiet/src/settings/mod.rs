@@ -391,6 +391,7 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_similar_videos_hide_hard_links(custom_settings.similar_videos_hide_hard_links);
     settings.set_similar_videos_delete_outdated_entries(custom_settings.similar_videos_delete_outdated_entries);
     settings.set_similar_videos_image_preview(custom_settings.similar_videos_image_preview);
+    settings.set_similar_videos_generate_thumbnail_grid_instead_of_single_image(custom_settings.similar_videos_generate_thumbnail_grid_instead_of_single_image);
     settings.set_similar_videos_clear_unused_thumbnails(custom_settings.similar_videos_clear_unused_thumbnails);
     settings.set_similar_music_compare_fingerprints_only_with_similar_titles(custom_settings.similar_music_compare_fingerprints_only_with_similar_titles);
     settings.set_similar_music_delete_outdated_entries(custom_settings.similar_music_delete_outdated_entries);
@@ -533,6 +534,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let similar_videos_hide_hard_links = settings.get_similar_videos_hide_hard_links();
     let similar_videos_delete_outdated_entries = settings.get_similar_videos_delete_outdated_entries();
     let similar_videos_image_preview = settings.get_similar_videos_image_preview();
+    let similar_videos_generate_thumbnail_grid_instead_of_single_image = settings.get_similar_videos_generate_thumbnail_grid_instead_of_single_image();
     let similar_videos_clear_unused_thumbnails = settings.get_similar_videos_clear_unused_thumbnails();
 
     let similar_music_compare_fingerprints_only_with_similar_titles = settings.get_similar_music_compare_fingerprints_only_with_similar_titles();
@@ -632,6 +634,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         similar_images_delete_outdated_entries,
         similar_videos_delete_outdated_entries,
         similar_videos_image_preview,
+        similar_videos_generate_thumbnail_grid_instead_of_single_image,
         similar_videos_clear_unused_thumbnails,
         similar_music_delete_outdated_entries,
         similar_images_sub_hash_size,

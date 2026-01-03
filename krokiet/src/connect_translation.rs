@@ -297,6 +297,8 @@ fn translate_items(app: &MainWindow) {
     translation.set_settings_restart_required_text(flk!("settings_restart_required").into());
     translation.set_settings_duplicate_image_preview_text(flk!("settings_duplicate_image_preview").into());
     translation.set_settings_similar_videos_preview_text(flk!("settings_similar_videos_image_preview").into());
+    translation
+        .set_settings_similar_videos_generate_thumbnail_grid_instead_of_single_image_text(flk!("settings_similar_videos_generate_thumbnail_grid_instead_of_single_image").into());
     translation.set_settings_duplicate_hide_hard_links_text(flk!("settings_duplicate_hide_hard_links").into());
     translation.set_settings_duplicate_minimal_hash_cache_size_text(flk!("settings_duplicate_minimal_hash_cache_size").into());
     translation.set_settings_duplicate_use_prehash_text(flk!("settings_duplicate_use_prehash").into());

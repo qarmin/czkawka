@@ -83,6 +83,8 @@ pub struct SettingsCustom {
     pub similar_videos_delete_outdated_entries: bool,
     #[serde(default = "ttrue")]
     pub similar_videos_image_preview: bool,
+    #[serde(default)]
+    pub similar_videos_generate_thumbnail_grid_instead_of_single_image: bool,
     #[serde(default = "ttrue")]
     pub similar_videos_clear_unused_thumbnails: bool,
     #[serde(default = "ttrue")]

@@ -239,6 +239,7 @@ settings_similar_images_hide_hard_links = Hide hard links
 settings_delete_outdated_entries = Delete automatically outdated entries
 settings_similar_videos_hide_hard_links = Hide hard links
 settings_similar_videos_image_preview = Image preview
+settings_similar_videos_generate_thumbnail_grid_instead_of_single_image = Generate thumbnail grid instead of single image
 settings_open_config_folder = Open config folder
 settings_open_cache_folder = Open cache folder
 settings_language = Language
@@ -296,4 +297,3 @@ hardlink_confirmation_text = Are you sure you want to create hardlinks for the s
 softlink_button_text = Softlink
 softlink_text = Create softlinks
 softlink_confirmation_text = Are you sure you want to create softlinks (symlinks) for the selected items?
-
