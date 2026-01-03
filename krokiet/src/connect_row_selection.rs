@@ -783,7 +783,7 @@ mod tests {
 
         let mut selection = SelectionData {
             number_of_selected_rows: 0,
-            selected_rows: vec![],
+            selected_rows: Vec::new(),
             exceeded_limit: false,
         };
 
@@ -831,7 +831,7 @@ mod tests {
 
         let mut selection = SelectionData {
             number_of_selected_rows: 0,
-            selected_rows: vec![],
+            selected_rows: Vec::new(),
             exceeded_limit: false,
         };
 
@@ -856,7 +856,7 @@ mod tests {
 
         let mut selection = SelectionData {
             number_of_selected_rows: 0,
-            selected_rows: vec![],
+            selected_rows: Vec::new(),
             exceeded_limit: true,
         };
 
@@ -884,7 +884,7 @@ mod tests {
 
         let mut selection = SelectionData {
             number_of_selected_rows: 0,
-            selected_rows: vec![],
+            selected_rows: Vec::new(),
             exceeded_limit: false,
         };
 
@@ -922,7 +922,7 @@ mod tests {
 
         let mut selection = SelectionData {
             number_of_selected_rows: 0,
-            selected_rows: vec![],
+            selected_rows: Vec::new(),
             exceeded_limit: false,
         };
 
@@ -947,7 +947,7 @@ mod tests {
 
         let mut selection = SelectionData {
             number_of_selected_rows: 0,
-            selected_rows: vec![],
+            selected_rows: Vec::new(),
             exceeded_limit: false,
         };
 
@@ -997,7 +997,7 @@ mod tests {
 
         let selection = SelectionData {
             number_of_selected_rows: 2,
-            selected_rows: vec![],
+            selected_rows: Vec::new(),
             exceeded_limit: true,
         };
 

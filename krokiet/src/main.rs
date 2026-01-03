@@ -163,7 +163,7 @@ pub(crate) fn zeroing_all_models(app: &MainWindow) {
 #[expect(clippy::vec_init_then_push)]
 #[expect(unused_mut)]
 pub(crate) fn print_krokiet_features() {
-    let mut features: Vec<&str> = vec![];
+    let mut features: Vec<&str> = Vec::new();
 
     #[cfg(feature = "skia_opengl")]
     features.push("skia_opengl");

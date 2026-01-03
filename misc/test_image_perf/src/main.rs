@@ -24,7 +24,7 @@ fn print_items() {
     let info = os_info::get();
 
     #[allow(unused_mut)]
-    let mut features: Vec<&str> = vec![];
+    let mut features: Vec<&str> = Vec::new();
 
     #[allow(unused_mut)]
     let mut app_cpu_version = "Baseline";
@@ -115,7 +115,7 @@ fn main() {
         collected_image_files.len()
     );
 
-    let mut times = vec![];
+    let mut times = Vec::new();
 
     for i in 0..ITERATIONS {
         println!("Iteration {}", i + 1);

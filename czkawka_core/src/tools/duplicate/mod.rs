@@ -319,7 +319,7 @@ mod tests2 {
     #[test]
     fn test_filter_hard_links_empty() {
         let expected: Vec<FileEntry> = Default::default();
-        assert_eq!(expected, filter_hard_links(vec![]));
+        assert_eq!(expected, filter_hard_links(Vec::new()));
     }
 
     #[cfg(target_family = "unix")]

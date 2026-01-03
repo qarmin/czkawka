@@ -16,7 +16,7 @@ impl EmptyFiles {
         Self {
             common_data: CommonToolData::new(ToolType::EmptyFiles),
             information: Info::default(),
-            empty_files: vec![],
+            empty_files: Vec::new(),
         }
     }
 

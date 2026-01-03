@@ -84,8 +84,8 @@ pub fn set_config_cache_path(cache_name: &'static str, config_name: &'static str
     // Win: C:\Users\Username\AppData\Roaming\Qarmin\Czkawka\config
     // Mac: /Users/Username/Library/Application Support/pl.Qarmin.Czkawka
 
-    let mut infos = vec![];
-    let mut warnings = vec![];
+    let mut infos = Vec::new();
+    let mut warnings = Vec::new();
 
     let config_folder_env = env::var("CZKAWKA_CONFIG_PATH").unwrap_or_default().trim().to_string();
     let cache_folder_env = env::var("CZKAWKA_CACHE_PATH").unwrap_or_default().trim().to_string();

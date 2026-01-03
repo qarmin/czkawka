@@ -24,7 +24,7 @@ impl ExifRemover {
         Self {
             common_data: CommonToolData::new(ToolType::ExifRemover),
             information: Info::default(),
-            exif_files: vec![],
+            exif_files: Vec::new(),
             files_to_check: Default::default(),
             params,
         }
@@ -54,7 +54,7 @@ impl ExifRemover {
                             path: fe.path.clone(),
                             size: fe.size,
                             modified_date: fe.modified_date,
-                            exif_tags: vec![],
+                            exif_tags: Vec::new(),
                             error: None,
                         };
                         (fe.path.to_string_lossy().to_string(), exif_entry)
@@ -208,7 +208,7 @@ fn extract_exif_tags(path: &Path) -> Result<Vec<String>, String> {
 //     let res = panic::catch_unwind(|| {
 //         let mut parser = MediaParser::new();
 //         let ms = MediaSource::file_path(path).map_err(|e| format!("Failed to open file: {e}"))?;
-//         let mut results = vec![];
+//         let mut results = Vec::new();
 //         if !ms.has_exif() {
 //             return Ok(results);
 //         }

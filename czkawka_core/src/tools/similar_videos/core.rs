@@ -32,10 +32,10 @@ impl SimilarVideos {
         Self {
             common_data: CommonToolData::new(ToolType::SimilarVideos),
             information: Default::default(),
-            similar_vectors: vec![],
+            similar_vectors: Vec::new(),
             videos_hashes: Default::default(),
             videos_to_check: Default::default(),
-            similar_referenced_vectors: vec![],
+            similar_referenced_vectors: Vec::new(),
             params,
         }
     }
@@ -334,7 +334,7 @@ impl SimilarVideos {
             .similar_vectors
             .par_iter_mut()
             .map(|vec_file_entry| {
-                let mut errs = vec![];
+                let mut errs = Vec::new();
                 for file_entry in vec_file_entry {
                     if check_if_stop_received(stop_flag) {
                         return errs;

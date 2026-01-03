@@ -65,7 +65,7 @@ impl FileEntry {
             path: self.path,
             modified_date: self.modified_date,
 
-            fingerprint: vec![],
+            fingerprint: Vec::new(),
             track_title: String::new(),
             track_artist: String::new(),
             year: String::new(),

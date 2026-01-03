@@ -94,7 +94,7 @@ impl ModelProcessor {
     }
 
     pub(crate) fn remove_deleted_items_from_model(results: ProcessingResult) -> (Vec<SimplerMainListModel>, Vec<String>, usize) {
-        let mut errors = vec![];
+        let mut errors = Vec::new();
         let mut items_deleted = 0;
 
         let new_model: Vec<SimplerMainListModel> = results

@@ -21,7 +21,7 @@ impl Temporary {
         Self {
             common_data: CommonToolData::new(ToolType::TemporaryFiles),
             information: Info::default(),
-            temporary_files: vec![],
+            temporary_files: Vec::new(),
         }
     }
 
@@ -40,9 +40,9 @@ impl Temporary {
             let segments: Vec<_> = folders_to_check
                 .into_par_iter()
                 .map(|current_folder| {
-                    let mut dir_result = vec![];
-                    let mut warnings = vec![];
-                    let mut fe_result = vec![];
+                    let mut dir_result = Vec::new();
+                    let mut warnings = Vec::new();
+                    let mut fe_result = Vec::new();
 
                     let Some(read_dir) = common_read_dir(&current_folder, &mut warnings) else {
                         return (dir_result, warnings, fe_result);

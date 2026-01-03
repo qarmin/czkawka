@@ -215,7 +215,7 @@ fn detect_language() -> String {
 }
 
 fn default_included_directories() -> Vec<PathBuf> {
-    let mut included_directories = vec![];
+    let mut included_directories = Vec::new();
     if let Ok(current_dir) = env::current_dir() {
         included_directories.push(current_dir.to_string_lossy().to_string());
     } else if let Some(home_dir) = home_dir() {

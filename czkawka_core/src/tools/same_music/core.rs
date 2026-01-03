@@ -40,9 +40,9 @@ impl SameMusic {
             common_data: CommonToolData::new(ToolType::SameMusic),
             information: Info::default(),
             music_entries: Vec::with_capacity(2048),
-            duplicated_music_entries: vec![],
+            duplicated_music_entries: Vec::new(),
             music_to_check: Default::default(),
-            duplicated_music_entries_referenced: vec![],
+            duplicated_music_entries_referenced: Vec::new(),
             hash_preset_config: Configuration::preset_test1(), // TODO allow to change this and move to parameters
             params,
         }
