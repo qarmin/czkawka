@@ -219,6 +219,11 @@ export component ToolSettings {
                 value <=> Settings.similar_videos_thumbnail_percentage;
             }
 
+            CheckBoxWrapper {
+                text: Translations.settings_similar_videos_generate_thumbnail_grid_instead_of_single_image_text;
+                checked <=> Settings.similar_videos_sub_generate_thumbnail_grid_instead_of_single_image;
+            }
+
 
             Rectangle { }
         }
