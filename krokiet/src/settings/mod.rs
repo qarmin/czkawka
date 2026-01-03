@@ -271,6 +271,7 @@ pub(crate) fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicS
     settings.set_load_windows_size_at_startup(basic_settings.settings_load_windows_size_at_startup);
     settings.set_limit_messages_lines(basic_settings.settings_limit_lines_of_messages);
     settings.set_manual_application_scale(basic_settings.manual_application_scale);
+    settings.set_use_manual_application_scale(basic_settings.use_manual_application_scale);
 
     set_combobox_basic_settings_items(&settings, basic_settings);
 }
@@ -701,6 +702,7 @@ pub(crate) fn collect_base_settings(app: &MainWindow) -> BasicSettings {
     let settings_load_windows_size_at_startup = settings.get_load_windows_size_at_startup();
     let settings_limit_lines_of_messages = settings.get_limit_messages_lines();
     let manual_application_scale = settings.get_manual_application_scale();
+    let use_manual_application_scale = settings.get_use_manual_application_scale();
     BasicSettings {
         language,
         default_preset,
@@ -713,5 +715,6 @@ pub(crate) fn collect_base_settings(app: &MainWindow) -> BasicSettings {
         settings_load_windows_size_at_startup,
         settings_limit_lines_of_messages,
         manual_application_scale,
+        use_manual_application_scale,
     }
 }

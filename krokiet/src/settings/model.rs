@@ -199,6 +199,8 @@ pub struct BasicSettings {
     pub settings_limit_lines_of_messages: bool,
     #[serde(default = "default_manual_application_scale")]
     pub manual_application_scale: f32,
+    #[serde(default = "default_use_manual_application_scale")]
+    pub use_manual_application_scale: bool,
 }
 
 impl Default for BasicSettings {
@@ -333,4 +335,6 @@ fn default_video_optimizer_image_threshold() -> u8 {
 fn default_manual_application_scale() -> f32 {
     1.0
 }
-
+fn default_use_manual_application_scale() -> bool {
+    false
+}

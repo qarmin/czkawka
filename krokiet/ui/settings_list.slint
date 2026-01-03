@@ -85,7 +85,7 @@ component ApplicationScaleComponent inherits HorizontalLayout {
         minimum: 0.5;
         maximum: 3.0;
         step: 0.01;
-        value <=> Settings.application_scale;
+        value <=> Settings.manual_application_scale;
         height: SettingsSize.item_height;
     }
     Text {
@@ -275,6 +275,16 @@ export component SettingsList inherits VerticalLayout {
                 model <=> Settings.limit_messages_lines;
             }
 
+            CheckBoxComponent {
+                name <=> Translations.settings_use_manual_application_scale_text;
+                model <=> Settings.use_manual_application_scale;
+                toggled => { restart_required = true; }
+            }
+            ApplicationScaleComponent {
+                name <=> Translations.settings_application_scale_text;
+                changed => { restart_required = true; }
+            }
+
             HeaderText {
                 text <=> Translations.settings_general_settings_text;
             }
@@ -327,12 +337,6 @@ export component SettingsList inherits VerticalLayout {
                 changed => {
                     restart_required = true;
                 }
-            }
-
-            ApplicationScaleComponent {
-                name <=> Translations.settings_application_scale_text;
-                // Changing scale requires restart to take full effect
-                changed => { restart_required = true; }
             }
 
             if restart_required: Text {

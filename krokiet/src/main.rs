@@ -83,9 +83,11 @@ fn main() {
 
     // Apply saved application scale to Slint (requires restart to fully apply in some backends)
     // Clamp to allowed range to be safe
-    let scale = base_settings.manual_application_scale.clamp(0.5, 3.0);
-    unsafe {
-        std::env::set_var("SLINT_SCALE_FACTOR", format!("{:.2}", scale));
+    if base_settings.use_manual_application_scale {
+        let scale = base_settings.manual_application_scale.clamp(0.5, 3.0);
+        unsafe {
+            std::env::set_var("SLINT_SCALE_FACTOR", format!("{:.2}", scale));
+        }
     }
 
     // TODO Set custom scale
