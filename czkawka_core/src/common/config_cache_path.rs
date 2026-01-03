@@ -67,22 +67,34 @@ pub fn set_config_cache_path_test(cache_path: PathBuf, config_path: PathBuf) {
         .expect("Cannot set config cache path");
 }
 
+pub struct ConfigCachePathSetResult {
+    pub infos: Vec<String>,
+    pub warnings: Vec<String>,
+    pub config_env_set: bool,
+    pub cache_env_set: bool,
+    pub default_cache_path_exists: bool,
+    pub default_config_path_exists: bool,
+}
+
 // This function must be executed, to not crash, when gathering config/cache path
-pub fn set_config_cache_path(cache_name: &'static str, config_name: &'static str) -> (Vec<String>, Vec<String>) {
+pub fn set_config_cache_path(cache_name: &'static str, config_name: &'static str) -> ConfigCachePathSetResult {
     // By default, such folders are used:
     // Lin: /home/username/.config/czkawka
     // LinFlatpak: /home/username/.var/app/com.github.qarmin.czkawka/config/czkawka
     // Win: C:\Users\Username\AppData\Roaming\Qarmin\Czkawka\config
     // Mac: /Users/Username/Library/Application Support/pl.Qarmin.Czkawka
 
-    let mut infos = vec![];
-    let mut warnings = vec![];
+    let mut infos = Vec::new();
+    let mut warnings = Vec::new();
 
     let config_folder_env = env::var("CZKAWKA_CONFIG_PATH").unwrap_or_default().trim().to_string();
     let cache_folder_env = env::var("CZKAWKA_CACHE_PATH").unwrap_or_default().trim().to_string();
 
     let default_cache_folder = ProjectDirs::from("pl", "Qarmin", cache_name).map(|proj_dirs| proj_dirs.cache_dir().to_path_buf());
     let default_config_folder = ProjectDirs::from("pl", "Qarmin", config_name).map(|proj_dirs| proj_dirs.config_dir().to_path_buf());
+
+    let default_config_path_exists = default_config_folder.as_ref().is_some_and(|t| t.exists());
+    let default_cache_path_exists = default_cache_folder.as_ref().is_some_and(|t| t.exists());
 
     let config_folder = resolve_folder(&config_folder_env, default_config_folder, "Config", &mut warnings);
     let cache_folder = resolve_folder(&cache_folder_env, default_cache_folder, "Cache", &mut warnings);
@@ -111,7 +123,14 @@ pub fn set_config_cache_path(cache_name: &'static str, config_name: &'static str
 
     CONFIG_CACHE_PATH.set(config_cache_path).expect("Cannot set config/cache path twice");
 
-    (infos, warnings)
+    ConfigCachePathSetResult {
+        infos,
+        warnings,
+        config_env_set: !config_folder_env.is_empty(),
+        cache_env_set: !cache_folder_env.is_empty(),
+        default_cache_path_exists,
+        default_config_path_exists,
+    }
 }
 
 pub(crate) fn open_cache_folder(

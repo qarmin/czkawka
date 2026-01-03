@@ -128,7 +128,7 @@ fn hardlink_symlink(sv: &SubView, hardlinking: TypeOfTool, text_view_errors: &Te
             } else {
                 current_symhardlink_data = Some(SymHardlinkData {
                     original_data: full_file_path,
-                    files_to_symhardlink: vec![],
+                    files_to_symhardlink: Vec::new(),
                 });
             }
 
@@ -158,7 +158,7 @@ fn hardlink_symlink(sv: &SubView, hardlinking: TypeOfTool, text_view_errors: &Te
     let errors = vec_symhardlink_data
         .into_par_iter()
         .flat_map(|symhardlink_data| {
-            let mut err = vec![];
+            let mut err = Vec::new();
             for file_to_be_replaced in symhardlink_data.files_to_symhardlink {
                 if hardlinking == TypeOfTool::Symlinking {
                     if let Err(e) = make_file_symlink(&symhardlink_data.original_data, &file_to_be_replaced) {

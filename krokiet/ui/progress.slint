@@ -1,6 +1,7 @@
 import { ProgressToSend } from "common.slint";
 import { ProgressIndicator } from "std-widgets.slint";
 import { Translations } from "translations.slint";
+import { FontSizes } from "fonts.slint";
 
 export component Progress {
     in-out property <ProgressToSend> progress_datas;
@@ -9,6 +10,7 @@ export component Progress {
     VerticalLayout {
         padding-top: 5px;
         Text {
+            font-size: FontSizes.normal;
             text: progress-datas.step_name;
             horizontal-alignment: TextHorizontalAlignment.center;
         }
@@ -18,11 +20,13 @@ export component Progress {
             VerticalLayout {
                 spacing: 5px;
                 Text {
+                    font-size: FontSizes.normal;
                     vertical-alignment: TextVerticalAlignment.center;
                     text: Translations.stage_current_text;
                 }
 
                 Text {
+                    font-size: FontSizes.normal;
                     vertical-alignment: TextVerticalAlignment.center;
                     text: Translations.stage_all_text;
                 }
@@ -52,12 +56,14 @@ export component Progress {
                 visible: progress_datas.all_progress > -0.001;
                 spacing: 5px;
                 Text {
+                    font-size: FontSizes.normal;
                     visible: progress_datas.current_progress >= -0.001;
                     vertical-alignment: TextVerticalAlignment.center;
                     text: (progress_datas.current_progress_size == -1 ? progress_datas.current_progress : progress_datas.current_progress_size) + "%";
                 }
 
                 Text {
+                    font-size: FontSizes.normal;
                     vertical-alignment: TextVerticalAlignment.center;
                     text: progress_datas.all_progress + "%";
                 }

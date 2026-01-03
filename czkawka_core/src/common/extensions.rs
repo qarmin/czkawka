@@ -52,8 +52,6 @@ impl Extensions {
         (extensions_hashset, messages)
     }
 
-    /// List of allowed extensions, only files with this extensions will be checking if are duplicates
-    /// After, extensions cannot contain any dot, commas etc.
     pub(crate) fn set_allowed_extensions(&mut self, allowed_extensions: String) -> Messages {
         let (extensions, messages) = Self::filter_extensions(allowed_extensions);
 

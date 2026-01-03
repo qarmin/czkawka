@@ -92,6 +92,8 @@ fn progress_default(item: &ProgressData) -> ProgressToSend {
         CurrentStage::SimilarVideosCreatingThumbnails => flk!("rust_created_thumbnails", items_stats = items_stats),
         CurrentStage::BrokenFilesChecking => flk!("rust_checked_files", items_stats = items_stats, size_stats = size_stats),
         CurrentStage::BadExtensionsChecking => flk!("rust_checked_files_bad_extensions", items_stats = items_stats),
+        CurrentStage::VideoOptimizerProcessingImages => flk!("rust_checked_images", items_stats = items_stats, size_stats = size_stats),
+        CurrentStage::VideoOptimizerProcessingVideos => flk!("rust_checked_videos", items_stats = items_stats, size_stats = size_stats),
         CurrentStage::DuplicatePreHashing => flk!("rust_analyzed_partial_hash", items_stats = items_stats, size_stats = size_stats),
         CurrentStage::DuplicateFullHashing => flk!("rust_analyzed_full_hash", items_stats = items_stats, size_stats = size_stats),
 
@@ -100,8 +102,29 @@ fn progress_default(item: &ProgressData) -> ProgressToSend {
         CurrentStage::RenamingFiles => flk!("rust_renaming_files", items_stats = items_stats),
         CurrentStage::MovingFiles if item.bytes_to_check != 0 => flk!("rust_moving_files", items_stats = items_stats, size_stats = size_stats),
         CurrentStage::MovingFiles => flk!("rust_moving_no_size_files", items_stats = items_stats),
+        CurrentStage::HardlinkingFiles if item.bytes_to_check != 0 => flk!("rust_hardlinking_files", items_stats = items_stats, size_stats = size_stats),
+        CurrentStage::HardlinkingFiles => flk!("rust_hardlinking_no_size_files", items_stats = items_stats),
+        CurrentStage::SymlinkingFiles if item.bytes_to_check != 0 => flk!("rust_symlinking_files", items_stats = items_stats, size_stats = size_stats),
+        CurrentStage::SymlinkingFiles => flk!("rust_symlinking_no_size_files", items_stats = items_stats),
+        CurrentStage::OptimizingVideos if item.bytes_to_check != 0 => flk!("rust_optimizing_videos", items_stats = items_stats, size_stats = size_stats),
+        CurrentStage::OptimizingVideos => flk!("rust_optimizing_no_size_videos", items_stats = items_stats),
+        CurrentStage::CleaningExif if item.bytes_to_check != 0 => flk!("rust_cleaning_exif", items_stats = items_stats, size_stats = size_stats),
+        CurrentStage::CleaningExif => flk!("rust_cleaning_no_size_exif", items_stats = items_stats),
 
-        _ => unreachable!(),
+        CurrentStage::ExifRemoverExtractingTags => flk!("rust_extracted_exif_tags", items_stats = items_stats, size_stats = size_stats),
+
+        CurrentStage::CollectingFiles
+        | CurrentStage::DuplicateCacheSaving
+        | CurrentStage::DuplicateCacheLoading
+        | CurrentStage::DuplicatePreHashCacheSaving
+        | CurrentStage::DuplicatePreHashCacheLoading
+        | CurrentStage::DuplicateScanningName
+        | CurrentStage::DuplicateScanningSizeName
+        | CurrentStage::DuplicateScanningSize
+        | CurrentStage::SameMusicCacheSavingTags
+        | CurrentStage::SameMusicCacheLoadingTags
+        | CurrentStage::SameMusicCacheSavingFingerprints
+        | CurrentStage::SameMusicCacheLoadingFingerprints => unreachable!("This stages(caches, initial files scanning) should be handled somewhere else"),
     };
     let (all_progress, current_progress, current_progress_size) = common_get_data(item);
 

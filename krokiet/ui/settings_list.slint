@@ -3,6 +3,8 @@ import { Settings } from "settings.slint";
 import { Callabler } from "callabler.slint";
 import { GuiState } from "gui_state.slint";
 import { Translations } from "translations.slint";
+import { ColorPalette } from "color_palette.slint";
+import { FontSizes } from "fonts.slint";
 
 // TODO use Spinbox instead LineEdit {} to be able to set only numbers
 
@@ -15,6 +17,7 @@ export component TextComponent inherits HorizontalLayout {
     in property <string> name;
     spacing: 5px;
     Text {
+        font-size: FontSizes.normal;
         horizontal-stretch: 0.0;
         vertical-alignment: TextVerticalAlignment.center;
         text: name;
@@ -24,6 +27,7 @@ export component TextComponent inherits HorizontalLayout {
         horizontal-stretch: 1.0;
         height: SettingsSize.item_height;
         text <=> model;
+        font-size: FontSizes.normal;
     }
 }
 
@@ -50,11 +54,12 @@ component ThreadSliderComponent inherits HorizontalLayout {
     in-out property <string> name;
     spacing: 5px;
 
-    callback changed <=> slider.changed;
+    callback changed();
     Text {
         text <=> name;
         vertical-alignment: TextVerticalAlignment.center;
         height: SettingsSize.item_height;
+        font-size: FontSizes.normal;
     }
 
     slider := Slider {
@@ -63,12 +68,40 @@ component ThreadSliderComponent inherits HorizontalLayout {
         minimum: minimum_number;
         maximum <=> maximum_number;
         value <=> Settings.thread_number;
+        changed => root.changed();
     }
 
     Text {
         height: SettingsSize.item_height;
         vertical-alignment: TextVerticalAlignment.center;
         text: round(slider.value) == 0 ? ("All (" + GuiState.maximum_threads + "/" + GuiState.maximum_threads + ")") : (round(slider.value) + "/" + GuiState.maximum_threads);
+        font-size: FontSizes.normal;
+    }
+}
+
+component ApplicationScaleComponent inherits HorizontalLayout {
+    spacing: 5px;
+    in-out property <string> name;
+    callback changed();
+    Text {
+        text <=> name;
+        vertical-alignment: TextVerticalAlignment.center;
+        height: SettingsSize.item_height;
+        font-size: FontSizes.normal;
+    }
+    slider := Slider {
+        minimum: 0.5;
+        maximum: 3.0;
+        step: 0.01;
+        value <=> Settings.manual_application_scale;
+        height: SettingsSize.item_height;
+        changed => root.changed();
+    }
+    Text {
+        height: SettingsSize.item_height;
+        vertical-alignment: TextVerticalAlignment.center;
+        text: (round(slider.value * 100.0) / 100.0);
+        font-size: FontSizes.normal;
     }
 }
 
@@ -78,6 +111,7 @@ component MinMaxSizeComponent inherits HorizontalLayout {
         horizontal-stretch: 0.0;
         text <=> Translations.settings_file_size_text;
         vertical-alignment: TextVerticalAlignment.center;
+        font-size: FontSizes.normal;
     }
 
     HorizontalLayout {
@@ -86,21 +120,25 @@ component MinMaxSizeComponent inherits HorizontalLayout {
         Text {
             text <=> Translations.settings_minimum_file_size_text;
             vertical-alignment: TextVerticalAlignment.center;
+            font-size: FontSizes.normal;
         }
 
         LineEdit {
             height: SettingsSize.item_height;
             text <=> Settings.minimum_file_size;
+            font-size: FontSizes.normal;
         }
 
         Text {
             text <=> Translations.settings_maximum_file_size_text;
             vertical-alignment: TextVerticalAlignment.center;
+            font-size: FontSizes.normal;
         }
 
         LineEdit {
             height: SettingsSize.item_height;
             text <=> Settings.maximum_file_size;
+            font-size: FontSizes.normal;
         }
     }
 }
@@ -113,6 +151,7 @@ component Presets inherits Rectangle {
         Text {
             text <=> Translations.settings_current_preset_text;
             vertical-alignment: TextVerticalAlignment.center;
+            font-size: FontSizes.normal;
         }
 
         combo_box := ComboBox {
@@ -136,10 +175,12 @@ component Presets inherits Rectangle {
         Text {
             text: Translations.settings_choose_name_for_prefix_text + (Settings.settings_preset_idx + 1);
             vertical-alignment: TextVerticalAlignment.center;
+            font-size: FontSizes.normal;
         }
 
         current_name := LineEdit {
             text: Settings.settings_presets[Settings.settings_preset_idx];
+            font-size: FontSizes.normal;
         }
 
         Button {
@@ -152,8 +193,15 @@ component Presets inherits Rectangle {
     }
 }
 
+component HintText inherits Text {
+    in-out property <string> hint_text;
+    font-size: FontSizes.small;
+    color: ColorPalette.hint_color;
+    text: root.hint_text;
+}
+
 component HeaderText inherits Text {
-    font-size: 15px;
+    font-size: FontSizes.header;
     height: SettingsSize.item_height;
     horizontal-alignment: TextHorizontalAlignment.center;
     vertical-alignment: TextVerticalAlignment.center;
@@ -181,6 +229,7 @@ component Languages inherits HorizontalLayout {
     Text {
         text <=> Translations.settings_language_text;
         vertical-alignment: TextVerticalAlignment.center;
+        font-size: FontSizes.normal;
     }
 
     combo_box := ComboBox {
@@ -198,13 +247,14 @@ export component SettingsList inherits VerticalLayout {
     preferred-height: 300px;
     preferred-width: 400px;
 
+    in-out property <bool> restart_required_global;
     in-out property <bool> restart_required;
 
     Text {
         text <=> Translations.settings_settings_text;
         height: SettingsSize.item_height;
         horizontal-alignment: TextHorizontalAlignment.center;
-        font-size: 20px;
+        font-size: FontSizes.title;
     }
 
     ScrollView {
@@ -250,6 +300,27 @@ export component SettingsList inherits VerticalLayout {
             CheckBoxComponent {
                 name <=> Translations.settings_limit_lines_of_messages_text;
                 model <=> Settings.limit_messages_lines;
+            }
+
+            CheckBoxComponent {
+                name <=> Translations.settings_use_manual_application_scale_text;
+                model <=> Settings.use_manual_application_scale;
+                toggled => { restart_required_global = true; }
+            }
+
+            HintText {
+                hint_text <=> Translations.settings_application_scale_hint_text;
+            }
+
+            ApplicationScaleComponent {
+                name <=> Translations.settings_application_scale_text;
+                changed => { restart_required_global = true; }
+            }
+
+            if restart_required_global: Text {
+                text <=> Translations.settings_restart_required_scale_text;
+                horizontal-alignment: TextHorizontalAlignment.center;
+                font-size: FontSizes.normal;
             }
 
             HeaderText {
@@ -309,6 +380,7 @@ export component SettingsList inherits VerticalLayout {
             if restart_required: Text {
                 text <=> Translations.settings_restart_required_text;
                 horizontal-alignment: TextHorizontalAlignment.center;
+                font-size: FontSizes.normal;
             }
             HeaderText {
                 text <=> Translations.tool_duplicate_files_text;
@@ -371,6 +443,7 @@ export component SettingsList inherits VerticalLayout {
                 name <=> Translations.settings_similar_videos_preview_text;
                 model <=> Settings.similar_videos_image_preview;
             }
+
             CheckBoxComponent {
                 name <=> Translations.settings_similar_videos_hide_hard_links_text;
                 model <=> Settings.similar_videos_hide_hard_links;
@@ -379,6 +452,11 @@ export component SettingsList inherits VerticalLayout {
             CheckBoxComponent {
                 name <=> Translations.settings_delete_outdated_entries_text;
                 model <=> Settings.similar_videos_delete_outdated_entries;
+            }
+
+            CheckBoxComponent {
+                name <=> Translations.settings_similar_videos_clear_unused_thumbnails_text;
+                model <=> Settings.similar_videos_clear_unused_thumbnails;
             }
 
             HeaderText {

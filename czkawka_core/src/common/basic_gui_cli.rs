@@ -193,7 +193,7 @@ mod tests {
 
     #[test]
     fn handles_no_arguments() {
-        let args = vec![];
+        let args = Vec::new();
         let result = process_cli_args("A", "B", args);
         assert!(result.is_none());
     }

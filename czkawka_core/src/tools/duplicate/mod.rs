@@ -136,7 +136,7 @@ pub struct DuplicateFinder {
 }
 
 #[cfg(target_family = "windows")]
-fn filter_hard_links(vec_file_entry: &[FileEntry]) -> Vec<FileEntry> {
+fn filter_hard_links(vec_file_entry: Vec<FileEntry>) -> Vec<FileEntry> {
     let mut inodes: IndexSet<u128> = IndexSet::with_capacity(vec_file_entry.len());
     let mut identical: Vec<FileEntry> = Vec::with_capacity(vec_file_entry.len());
     for f in vec_file_entry {
@@ -147,13 +147,13 @@ fn filter_hard_links(vec_file_entry: &[FileEntry]) -> Vec<FileEntry> {
                 }
             }
         }
-        identical.push(f.clone());
+        identical.push(f);
     }
     identical
 }
 
 #[cfg(target_family = "unix")]
-fn filter_hard_links(vec_file_entry: &[FileEntry]) -> Vec<FileEntry> {
+fn filter_hard_links(vec_file_entry: Vec<FileEntry>) -> Vec<FileEntry> {
     let mut inodes: IndexSet<u64> = IndexSet::with_capacity(vec_file_entry.len());
     let mut identical: Vec<FileEntry> = Vec::with_capacity(vec_file_entry.len());
     for f in vec_file_entry {
@@ -162,7 +162,7 @@ fn filter_hard_links(vec_file_entry: &[FileEntry]) -> Vec<FileEntry> {
         {
             continue;
         }
-        identical.push(f.clone());
+        identical.push(f);
     }
     identical
 }
@@ -319,7 +319,7 @@ mod tests2 {
     #[test]
     fn test_filter_hard_links_empty() {
         let expected: Vec<FileEntry> = Default::default();
-        assert_eq!(expected, filter_hard_links(&[]));
+        assert_eq!(expected, filter_hard_links(Vec::new()));
     }
 
     #[cfg(target_family = "unix")]
@@ -331,7 +331,7 @@ mod tests2 {
         fs::hard_link(src.clone(), dst.clone())?;
         let e1 = FileEntry { path: src, ..Default::default() };
         let e2 = FileEntry { path: dst, ..Default::default() };
-        let actual = filter_hard_links(&[e1.clone(), e2]);
+        let actual = filter_hard_links(vec![e1.clone(), e2]);
         assert_eq!(vec![e1], actual);
         Ok(())
     }
@@ -344,7 +344,7 @@ mod tests2 {
         File::create(&dst)?;
         let e1 = FileEntry { path: src, ..Default::default() };
         let e2 = FileEntry { path: dst, ..Default::default() };
-        let actual = filter_hard_links(&[e1.clone(), e2.clone()]);
+        let actual = filter_hard_links(vec![e1.clone(), e2.clone()]);
         assert_eq!(vec![e1, e2], actual);
         Ok(())
     }

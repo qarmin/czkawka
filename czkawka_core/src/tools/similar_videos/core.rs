@@ -7,7 +7,6 @@ use std::{fs, mem};
 
 use blake3::Hasher;
 use crossbeam_channel::Sender;
-use ffprobe::ffprobe;
 use fun_time::fun_time;
 use indexmap::IndexMap;
 use log::debug;
@@ -23,6 +22,7 @@ use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::common::traits::ResultEntry;
+use crate::common::video_metadata::VideoMetadata;
 use crate::tools::similar_videos::{SimilarVideos, SimilarVideosParameters, VideosEntry};
 
 pub const VIDEO_THUMBNAILS_SUBFOLDER: &str = "video_thumbnails";
@@ -32,10 +32,10 @@ impl SimilarVideos {
         Self {
             common_data: CommonToolData::new(ToolType::SimilarVideos),
             information: Default::default(),
-            similar_vectors: vec![],
+            similar_vectors: Vec::new(),
             videos_hashes: Default::default(),
             videos_to_check: Default::default(),
-            similar_referenced_vectors: vec![],
+            similar_referenced_vectors: Vec::new(),
             params,
         }
     }
@@ -120,65 +120,14 @@ impl SimilarVideos {
     }
 
     fn read_video_properties(mut file_entry: VideosEntry) -> VideosEntry {
-        match ffprobe(file_entry.path.clone()) {
-            Ok(info) => {
-                if let Some(duration_str) = &info.format.duration
-                    && let Ok(d) = duration_str.parse::<f64>()
-                {
-                    file_entry.duration = Some(d);
-                }
-
-                if let Some(stream) = info.streams.into_iter().find(|s| s.codec_type.as_deref() == Some("video")) {
-                    if let Some(codec_name) = stream.codec_name {
-                        file_entry.codec = Some(codec_name);
-                    }
-
-                    if let Some(bit_rate_str) = stream.bit_rate.or(info.format.bit_rate)
-                        && let Ok(b) = bit_rate_str.parse::<u64>()
-                    {
-                        file_entry.bitrate = Some(b);
-                    }
-
-                    if let Some(w) = stream.width
-                        && w >= 0
-                    {
-                        file_entry.width = Some(w as u32);
-                    }
-                    if let Some(h) = stream.height
-                        && h >= 0
-                    {
-                        file_entry.height = Some(h as u32);
-                    }
-
-                    let fps_opt = if !stream.avg_frame_rate.is_empty() && stream.avg_frame_rate != "0/0" {
-                        Some(stream.avg_frame_rate)
-                    } else if !stream.r_frame_rate.is_empty() && stream.r_frame_rate != "0/0" {
-                        Some(stream.r_frame_rate)
-                    } else {
-                        None
-                    };
-
-                    if let Some(fps_str) = fps_opt {
-                        let fps_val = if fps_str.contains('/') {
-                            let mut parts = fps_str.splitn(2, '/');
-                            if let (Some(n), Some(d)) = (parts.next(), parts.next()) {
-                                if let (Ok(nv), Ok(dv)) = (n.parse::<f64>(), d.parse::<f64>()) {
-                                    if dv != 0.0 { Some(nv / dv) } else { None }
-                                } else {
-                                    None
-                                }
-                            } else {
-                                None
-                            }
-                        } else {
-                            fps_str.parse::<f64>().ok()
-                        };
-
-                        if let Some(fps_v) = fps_val {
-                            file_entry.fps = Some(fps_v);
-                        }
-                    }
-                }
+        match VideoMetadata::from_path(&file_entry.path) {
+            Ok(metadata) => {
+                file_entry.fps = metadata.fps;
+                file_entry.codec = metadata.codec;
+                file_entry.bitrate = metadata.bitrate;
+                file_entry.width = metadata.width;
+                file_entry.height = metadata.height;
+                file_entry.duration = metadata.duration;
             }
             Err(e) => {
                 let path = file_entry.path.to_string_lossy();
@@ -189,11 +138,16 @@ impl SimilarVideos {
         file_entry
     }
 
-    fn generate_thumbnail(file_entry: &mut VideosEntry, thumbnails_dir: &Path, thumbnail_video_percentage_from_start: u8) -> Result<(), String> {
+    fn generate_thumbnail(
+        file_entry: &mut VideosEntry,
+        thumbnails_dir: &Path,
+        thumbnail_video_percentage_from_start: u8,
+        generate_grid_instead_of_single: bool,
+    ) -> Result<(), String> {
         let mut hasher = Hasher::new();
         hasher.update(
             format!(
-                "{thumbnail_video_percentage_from_start}___{}___{}___{}",
+                "{thumbnail_video_percentage_from_start}___{}___{}___{}___{generate_grid_instead_of_single}",
                 file_entry.size,
                 file_entry.modified_date,
                 file_entry.path.to_string_lossy()
@@ -205,31 +159,51 @@ impl SimilarVideos {
         let thumbnail_path = thumbnails_dir.join(thumbnail_filename);
 
         if thumbnail_path.exists() {
-            file_entry.thumbnail_path = Some(thumbnail_path);
+            file_entry.thumbnail_path = Some(thumbnail_path.clone());
+            let _ = filetime::set_file_mtime(&thumbnail_path, filetime::FileTime::now());
             return Ok(());
         }
 
         let seek_time = file_entry.duration.map_or(5.0, |d| d * (thumbnail_video_percentage_from_start as f64) / 100.0);
+        let duration_per_10_items = file_entry.duration.map_or(0.5, |d| d / 10.0);
 
-        let output = Command::new("ffmpeg")
-            .arg("-ss")
-            .arg(seek_time.to_string())
-            .arg("-i")
-            .arg(&file_entry.path)
-            .arg("-vf")
-            .arg("scale='min(1920,iw)':'min(1080,ih)':force_original_aspect_ratio=decrease")
-            .arg("-vframes")
-            .arg("1")
-            .arg("-q:v")
-            .arg("2")
-            .arg("-y")
-            .arg(&thumbnail_path)
-            .output();
+        let output = if generate_grid_instead_of_single {
+            let vf_filter = format!("fps=1/{duration_per_10_items:.6},scale='min(1920,iw)':'min(1080,ih)':force_original_aspect_ratio=decrease,tile=3x3");
+
+            Command::new("ffmpeg")
+                .arg("-i")
+                .arg(&file_entry.path)
+                .arg("-vf")
+                .arg(&vf_filter)
+                .arg("-frames:v")
+                .arg("1")
+                .arg("-q:v")
+                .arg("2")
+                .arg("-y")
+                .arg(&thumbnail_path)
+                .output()
+        } else {
+            Command::new("ffmpeg")
+                .arg("-ss")
+                .arg(seek_time.to_string())
+                .arg("-i")
+                .arg(&file_entry.path)
+                .arg("-vf")
+                .arg("scale='min(1920,iw)':'min(1080,ih)':force_original_aspect_ratio=decrease")
+                .arg("-vframes")
+                .arg("1")
+                .arg("-q:v")
+                .arg("2")
+                .arg("-y")
+                .arg(&thumbnail_path)
+                .output()
+        };
 
         match output {
             Ok(result) => {
                 if result.status.success() && thumbnail_path.exists() {
-                    file_entry.thumbnail_path = Some(thumbnail_path);
+                    file_entry.thumbnail_path = Some(thumbnail_path.clone());
+                    let _ = filetime::set_file_mtime(&thumbnail_path, filetime::FileTime::now());
                     Ok(())
                 } else {
                     let _ = fs::write(&thumbnail_path, b""); // Create empty file to avoid retrying generation again and again
@@ -355,17 +329,18 @@ impl SimilarVideos {
             return WorkContinueStatus::Continue;
         }
         let thumbnail_video_percentage_from_start = self.params.thumbnail_video_percentage_from_start;
+        let generate_grid_instead_of_single = self.params.generate_thumbnail_grid_instead_of_single;
         let errors = self
             .similar_vectors
             .par_iter_mut()
             .map(|vec_file_entry| {
-                let mut errs = vec![];
+                let mut errs = Vec::new();
                 for file_entry in vec_file_entry {
                     if check_if_stop_received(stop_flag) {
                         return errs;
                     }
 
-                    if let Err(e) = Self::generate_thumbnail(file_entry, &thumbnails_dir, thumbnail_video_percentage_from_start) {
+                    if let Err(e) = Self::generate_thumbnail(file_entry, &thumbnails_dir, thumbnail_video_percentage_from_start, generate_grid_instead_of_single) {
                         errs.push(e);
                     }
 

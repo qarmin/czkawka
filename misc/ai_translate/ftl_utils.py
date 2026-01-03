@@ -39,13 +39,13 @@ def parse_ftl_file(file_path: pathlib.Path) -> Dict[str, str]:
 
     content = file_path.read_text(encoding="utf-8")
     entries = {}
-    lines = content.split('\n')
+    lines = content.split("\n")
     i = 0
 
     while i < len(lines):
         line = lines[i]
 
-        key_match = re.match(r'^([\w][\w-]*)\s*=\s*(.*)', line)
+        key_match = re.match(r"^([\w][\w-]*)\s*=\s*(.*)", line)
 
         if key_match:
             key = key_match.group(1).strip()
@@ -59,34 +59,34 @@ def parse_ftl_file(file_path: pathlib.Path) -> Dict[str, str]:
             while i < len(lines):
                 next_line = lines[i]
 
-                if re.match(r'^[\w][\w-]*\s*=', next_line):
+                if re.match(r"^[\w][\w-]*\s*=", next_line):
                     break
-                if next_line.startswith('#'):
+                if next_line.startswith("#"):
                     break
 
-                if next_line and next_line[0] == ' ':
+                if next_line and next_line[0] == " ":
                     value_lines.append(next_line.strip())
                     i += 1
                 elif not next_line.strip():
                     j = i + 1
                     has_more_content = False
                     while j < len(lines):
-                        if lines[j] and lines[j][0] == ' ':
+                        if lines[j] and lines[j][0] == " ":
                             has_more_content = True
                             break
-                        elif lines[j].strip() and not lines[j].startswith('#'):
+                        elif lines[j].strip() and not lines[j].startswith("#"):
                             break
                         j += 1
 
                     if has_more_content:
-                        value_lines.append('')
+                        value_lines.append("")
                         i += 1
                     else:
                         break
                 else:
                     break
 
-            value = '\n'.join(value_lines) if value_lines else ''
+            value = "\n".join(value_lines) if value_lines else ""
             entries[key] = value
         else:
             i += 1
@@ -106,4 +106,3 @@ def find_ftl_file_in_folder(folder: pathlib.Path) -> pathlib.Path | None:
         return ftl_files[0]
 
     return None
-

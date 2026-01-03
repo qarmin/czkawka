@@ -67,8 +67,10 @@ fn set_select_buttons(app: &MainWindow) {
         | ActiveTab::InvalidSymlinks
         | ActiveTab::BrokenFiles
         | ActiveTab::BadExtensions
+        | ActiveTab::VideoOptimizer
+        | ActiveTab::ExifRemover
         | ActiveTab::Settings
-        | ActiveTab::About => vec![], // Not available in settings and about, so may be set any value here
+        | ActiveTab::About => Vec::new(), // Not available in settings and about, so may be set any value here
     };
 
     base_buttons.extend(additional_buttons);

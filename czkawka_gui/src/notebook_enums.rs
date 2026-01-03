@@ -1,4 +1,4 @@
-use czkawka_core::TOOLS_NUMBER;
+use crate::CZKAWKA_GTK_TOOL_NUMBER;
 
 // Needs to be updated when changed order of notebook tabs
 #[derive(Eq, PartialEq, Hash, Clone, Debug, Copy)]
@@ -33,7 +33,7 @@ pub(crate) fn to_notebook_main_enum(notebook_number: u32) -> NotebookMainEnum {
     }
 }
 
-pub(crate) fn get_all_main_tabs() -> [NotebookMainEnum; TOOLS_NUMBER] {
+pub(crate) fn get_all_main_tabs() -> [NotebookMainEnum; CZKAWKA_GTK_TOOL_NUMBER] {
     [
         to_notebook_main_enum(0),
         to_notebook_main_enum(1),

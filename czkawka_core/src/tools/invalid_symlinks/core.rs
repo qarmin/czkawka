@@ -17,7 +17,7 @@ impl InvalidSymlinks {
         Self {
             common_data: CommonToolData::new(ToolType::InvalidSymlinks),
             information: Info::default(),
-            invalid_symlinks: vec![],
+            invalid_symlinks: Vec::new(),
         }
     }
 

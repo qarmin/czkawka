@@ -21,9 +21,9 @@ rust_checked_content = { $items_stats } 항목의 내용 확인 완료 ({ $size_
 rust_compared_tags = { $items_stats } 항목의 태그 비교 완료
 rust_compared_content = { $items_stats } 항목의 내용 비교 완료
 rust_hashed_images = 해싱된 { $items_stats } 이미지들 ({ $size_stats })
-rust_compared_image_hashes = {$items_stats}의 비교 이미지 해시를 보존하세요.
+rust_compared_image_hashes = { $items_stats }의 비교 이미지 해시를 보존하세요.
 rust_hashed_videos = 해싱된 { $items_stats } 비디오들
-rust_created_thumbnails = {$items_stats} 비디오를 미리보기로 만들었습니다.
+rust_created_thumbnails = { $items_stats } 비디오를 미리보기로 만들었습니다.
 rust_checked_files = { $items_stats }개의 파일 확인 완료 ({ $size_stats })
 rust_checked_files_bad_extensions = 부적절한 확장자를 가진 { $items_stats }개의 파일 확인 완료
 rust_analyzed_partial_hash = { $items_stats }개의 파일 부분 해시 분석 완료 ({ $size_stats })
@@ -31,16 +31,18 @@ rust_analyzed_full_hash = { $items_stats }개의 파일 전체 해시 분석 완
 rust_failed_to_rename_file = 파일 { $old_path }를 { $new_path }로 이름변경에 실패하였습니다. 오류: { $error }
 rust_no_included_directories = 포함된 디렉터리가 설정되지 않아 스캔을 시작할 수 없습니다.
 rust_all_dirs_referenced = 모든 포함 디렉터리가 참조 폴더로 설정되어 있어 스캔을 시작할 수 없습니다.
-rust_found_empty_folders = {$items_found}개의 폴더가 비어 있어 { $time }에 발견되었습니다.
-rust_found_empty_files = {$items_found}개의 파일이 {$time}에 비어 있습니다.
-rust_found_similar_images = {$items_found}개의 유사한 이미지 파일을 {$groups} 그룹에서 {$time}에 찾았습니다.
+rust_found_empty_folders = { $items_found }개의 폴더가 비어 있어 { $time }에 발견되었습니다.
+rust_found_empty_files = { $items_found }개의 파일이 { $time }에 비어 있습니다.
+rust_found_similar_images = { $items_found }개의 유사한 이미지 파일을 { $groups } 그룹에서 { $time }에 찾았습니다.
+rust_found_similar_videos = { $groups }개의 그룹에서 비디오 파일 { $items_found }개를 { $time }에 찾았습니다.
 rust_no_similarity_method_selected = 유형을 선택하지 않았기 때문에 유사한 음악 파일을 찾을 수 없습니다.
-rust_found_similar_music_files = {$items_found}개의 유사 음악 파일을 {$groups} 그룹에서 {$time}에 찾았습니다.
-rust_found_invalid_symlinks = {$items_found}개의 잘못된 심볼릭 링크를 찾았습니다.{ $time }
-rust_found_temporary_files = {$items_found}분의 일시 파일을 {$time}에서 찾았습니다.
+rust_found_similar_music_files = { $items_found }개의 유사 음악 파일을 { $groups } 그룹에서 { $time }에 찾았습니다.
+rust_found_invalid_symlinks = { $items_found }개의 잘못된 심볼릭 링크를 찾았습니다.{ $time }
+rust_found_temporary_files = { $items_found }분의 일시 파일을 { $time }에서 찾았습니다.
 rust_no_file_type_selected = 선택된 파일 유형 없이 손상된 파일을 찾을 수 없습니다.
 rust_found_broken_files = 발견된 { $items_found } 개의 깨진 파일이 { $size }에 차지하고 있습니다 { $time }동안
-rust_found_duplicate_files_no_lost_space = {$items_found}개의 중복 파일을 {$groups} 그룹에서 {$time}에 찾았습니다.
+rust_found_duplicate_files = { $groups } 그룹에서 중복 파일 { $items_found }개를 발견하여 { $size }의 용량을 { $time }에 차지하고 있습니다.
+rust_found_duplicate_files_no_lost_space = { $items_found }개의 중복 파일을 { $groups } 그룹에서 { $time }에 찾았습니다.
 rust_found_big_files = 找到 크기 { $size }의 { $items_found }대 큰 파일 { $time } 내에
 rust_cannot_load_preset = 프리셋 { $preset_idx }을(를) 변경하거나 로드할 수 없습니다: { $reason }. 기본 설정을 사용합니다.
 rust_saved_preset = 프리셋 { $preset_idx }이(가) 저장되었습니다.
@@ -59,9 +61,9 @@ rust_no_files_deleted = 삭제할 파일이나 폴더가 선택되지 않았습�
 rust_no_files_renamed = 변경할 파일이나 폴더가 선택되지 않았습니다.
 rust_no_files_moved = 이동할 파일이나 폴더가 선택되지 않았습니다.
 rust_delete_confirmation = 선택한 항목을 정말 삭제하시겠습니까?
-rust_delete_confirmation_number_simple = {$items} 아이템 선택되었습니다.
-rust_delete_confirmation_number_groups = {$items} 개가 선택되어 있는 {$groups} 그룹입니다.
-rust_delete_confirmation_selected_all_in_group = {$groups} 그룹에서 선택된 모든 항목.
+rust_delete_confirmation_number_simple = { $items } 아이템 선택되었습니다.
+rust_delete_confirmation_number_groups = { $items } 개가 선택되어 있는 { $groups } 그룹입니다.
+rust_delete_confirmation_selected_all_in_group = { $groups } 그룹에서 선택된 모든 항목.
 
 # Slint translations, but in arrays
 
@@ -100,10 +102,10 @@ delete_button = 삭제
 save_button = 저장
 sort_button = 종류
 rename_button = 이름 바꾸기
-motto = 
-        이 프로그램은 무료로 사용할 수 있으며 항상如此翻译结果：
-        这个程序是免费使用的，而且将会一直如此。
-        请参见MIT/MPL许可证以获取详细信息。
+motto =
+    이 프로그램은 무료로 사용할 수 있으며 항상如此翻译结果：
+    这个程序是免费使用的，而且将会一直如此。
+    请参见MIT/MPL许可证以获取详细信息。
 unicorn = 🦄을 보지 못하더라도 Unicorn은 항상 당신을 바라봅니다.
 repository = 리포지토리
 instruction = 사용방법
@@ -210,7 +212,6 @@ settings_general_settings = 일반 설정
 settings_settings = 설정
 settings_load_tabs_sizes_at_startup = 시작시 탭 크기 불러오기
 settings_load_windows_size_at_startup = 시작시 윈도우 크기 불러오기
-settings_limit_lines_of_messages = 메시지를 500 줄로 제한하십시오(텍스트 편집 위젯이 느리기 때문에의-workaround)
 popup_save_title = 결과 저장
 popup_save_message = 결과를 3개의 파일로 저장합니다
 popup_rename_title = 파일 이름 변경중
@@ -230,3 +231,8 @@ subsettings_videos_thumbnail_percentage = 비디오 내 썸네일 위치 (%)
 settings_cache_number_size_text = 캐시 파일 크기: { $size }, 파일 수: { $number }
 settings_video_thumbnails_number_size_text = 비디오 탭형 이미지 크기: { $size }, 파일 개수: { $number }
 settings_log_number_size_text = 로그 파일 크기: { $size }, 파일 수: { $number }
+
+settings_limit_lines_of_messages = 
+        메시지를 500줄以内我无法继续使用韩语翻译这个句子，因为提供的文本片段突然包含了中文。不过，前部分内容的正确韩语翻译是：
+
+        메시지를 500줄로 제한하세요(TextEdit 위젯이 느릴 때의 대안)

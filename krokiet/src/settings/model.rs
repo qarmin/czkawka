@@ -83,6 +83,10 @@ pub struct SettingsCustom {
     pub similar_videos_delete_outdated_entries: bool,
     #[serde(default = "ttrue")]
     pub similar_videos_image_preview: bool,
+    #[serde(default)]
+    pub similar_videos_generate_thumbnail_grid_instead_of_single_image: bool,
+    #[serde(default = "ttrue")]
+    pub similar_videos_clear_unused_thumbnails: bool,
     #[serde(default = "ttrue")]
     pub similar_music_delete_outdated_entries: bool,
     #[serde(default = "default_sub_hash_size")]
@@ -149,6 +153,18 @@ pub struct SettingsCustom {
     pub similar_videos_crop_detect: String,
     #[serde(default = "default_similar_videos_thumbnail_percentage")]
     pub similar_videos_thumbnail_percentage: u8,
+    #[serde(default = "default_video_optimizer_mode")]
+    pub video_optimizer_mode: String,
+    #[serde(default = "default_video_optimizer_video_codec")]
+    pub video_optimizer_video_codec: String,
+    #[serde(default = "default_video_optimizer_excluded_codecs")]
+    pub video_optimizer_excluded_codecs: String,
+    #[serde(default = "default_video_optimizer_video_quality")]
+    pub video_optimizer_video_quality: u32,
+    #[serde(default = "default_video_optimizer_image_threshold")]
+    pub video_optimizer_image_threshold: u8,
+    #[serde(default)]
+    pub ignored_exif_tags: String,
     #[serde(default)]
     pub column_sizes: BTreeMap<String, Vec<f32>>,
 }
@@ -181,6 +197,10 @@ pub struct BasicSettings {
     pub settings_load_tabs_sizes_at_startup: bool,
     #[serde(default = "ttrue")]
     pub settings_limit_lines_of_messages: bool,
+    #[serde(default = "default_manual_application_scale")]
+    pub manual_application_scale: f32,
+    #[serde(default = "default_use_manual_application_scale")]
+    pub use_manual_application_scale: bool,
 }
 
 impl Default for BasicSettings {
@@ -195,7 +215,7 @@ fn detect_language() -> String {
 }
 
 fn default_included_directories() -> Vec<PathBuf> {
-    let mut included_directories = vec![];
+    let mut included_directories = Vec::new();
     if let Ok(current_dir) = env::current_dir() {
         included_directories.push(current_dir.to_string_lossy().to_string());
     } else if let Some(home_dir) = home_dir() {
@@ -296,4 +316,25 @@ fn default_window_width() -> u32 {
 }
 fn default_window_height() -> u32 {
     DEFAULT_WINDOW_HEIGHT
+}
+fn default_video_optimizer_mode() -> String {
+    "video".to_string()
+}
+fn default_video_optimizer_video_codec() -> String {
+    "h265".to_string()
+}
+fn default_video_optimizer_excluded_codecs() -> String {
+    "hevc,av1".to_string()
+}
+fn default_video_optimizer_video_quality() -> u32 {
+    23
+}
+fn default_video_optimizer_image_threshold() -> u8 {
+    1
+}
+fn default_manual_application_scale() -> f32 {
+    1.0
+}
+fn default_use_manual_application_scale() -> bool {
+    false
 }

@@ -78,7 +78,7 @@ impl DirTraversalBuilder<'_, ()> {
     pub fn new() -> Self {
         DirTraversalBuilder {
             group_by: None,
-            root_dirs: vec![],
+            root_dirs: Vec::new(),
             stop_flag: None,
             progress_sender: None,
             checking_method: CheckingMethod::None,
@@ -206,7 +206,7 @@ where
     pub(crate) fn run(self) -> DirTraversalResult<T> {
         assert_ne!(self.tool_type, ToolType::None, "Tool type cannot be None");
 
-        let mut all_warnings = vec![];
+        let mut all_warnings = Vec::new();
         let mut grouped_file_entries: BTreeMap<T, Vec<FileEntry>> = BTreeMap::new();
 
         // Add root folders for finding
@@ -235,9 +235,9 @@ where
                 .into_par_iter()
                 .with_max_len(2) // Avoiding checking too many folders in batch
                 .map(|current_folder| {
-                    let mut dir_result = vec![];
-                    let mut warnings = vec![];
-                    let mut fe_result = vec![];
+                    let mut dir_result = Vec::new();
+                    let mut warnings = Vec::new();
+                    let mut fe_result = Vec::new();
 
                     let Some(read_dir) = common_read_dir(&current_folder, &mut warnings) else {
                         return Some((dir_result, warnings, fe_result));

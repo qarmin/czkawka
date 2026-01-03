@@ -7,10 +7,9 @@ use crossbeam_channel::Sender;
 use czkawka_core::common::progress_data::ProgressData;
 use slint::{ComponentHandle, Weak};
 
-use crate::model_operations::get_checked_info_from_app;
 use crate::model_operations::model_processor::{MessageType, ModelProcessor};
 use crate::simpler_model::{SimplerMainListModel, ToSimplerVec};
-use crate::{ActiveTab, Callabler, GuiState, MainWindow, Settings, Translations, flk};
+use crate::{ActiveTab, Callabler, GuiState, MainWindow, Settings};
 
 pub(crate) fn connect_delete_button(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
     let a = app.as_weak();
@@ -25,42 +24,6 @@ pub(crate) fn connect_delete_button(app: &MainWindow, progress_sender: Sender<Pr
 
         let processor = ModelProcessor::new(active_tab);
         processor.delete_selected_items(settings.get_move_to_trash(), progress_sender, weak_app, stop_flag);
-    });
-
-    let a = app.as_weak();
-    app.on_delete_popup_dialog_show_requested(move || {
-        let app = a.upgrade().expect("Failed to upgrade app :(");
-        let translation = app.global::<Translations>();
-        let res = get_checked_info_from_app(&app);
-        // TODO - items formatting should be done in GUI, not here, but slint not supports fluent strings with arguments
-        let mut base = flk!("rust_delete_confirmation");
-        if let Some(group_res) = res.groups_with_checked_items {
-            base.push_str(
-                format!(
-                    "\n{}",
-                    flk!(
-                        "rust_delete_confirmation_number_groups",
-                        items = res.checked_items_number,
-                        groups = group_res.groups_with_checked_items
-                    )
-                )
-                .as_str(),
-            );
-            if group_res.number_of_groups_with_all_items_checked > 0 {
-                base.push_str(
-                    format!(
-                        "\n{}",
-                        flk!("rust_delete_confirmation_selected_all_in_group", groups = group_res.number_of_groups_with_all_items_checked)
-                    )
-                    .as_str(),
-                );
-            }
-        } else {
-            base.push_str(format!("\n{}", flk!("rust_delete_confirmation_number_simple", items = res.checked_items_number)).as_str());
-        }
-        translation.set_delete_confirmation_text(base.into());
-
-        app.invoke_delete_popup_dialog_configured();
     });
 }
 

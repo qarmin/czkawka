@@ -1,8 +1,8 @@
 ## Version ?.?.? - ??
 ### New version blockers
-- workaround for very slow performance with thousands of lines in Krokiet in bottom panel - maybe max width option in gui?
 - new release of gtk4-rs, with iter_next fix
 - sym/hardlinks in Krokiet
+- new optimizer mode for images?
 
 ### Breaking changes
 #### Users
@@ -18,7 +18,7 @@
 - Fixed silent panics, when logger cannot log to terminal - [1658](https://github.com/qarmin/czkawka/pull/1658)
 - Commit hash is added to logs - [#1672](https://github.com/qarmin/czkawka/pull/1672)
 - Improved and fixed logic which groups similar images by its similarity - [#1685](https://github.com/qarmin/czkawka/pull/1685)
-- Added counting scan time  - [#1674](https://github.com/qarmin/czkawka/pull/1674), [#1685](https://github.com/qarmin/czkawka/pull/1685)
+- Added counting scan time - [#1674](https://github.com/qarmin/czkawka/pull/1674), [#1685](https://github.com/qarmin/czkawka/pull/1685)
 
 ### CLI
 - Using colors by default in terminal output(can be disabled by feature flag) - [#1672](https://github.com/qarmin/czkawka/pull/1672)
@@ -33,7 +33,7 @@
 - Added button, that easily allows to swap between compared images - [#1658](https://github.com/qarmin/czkawka/pull/1658)
 - Refactorings to assess whether migrating to GTK 5 will be possible (currently, it doesn’t seem very feasible) - [#1658](https://github.com/qarmin/czkawka/pull/1658)
 - Fixed sorting by size in big files mode - [#1691](https://github.com/qarmin/czkawka/pull/1691)
-- Ugly workarounds for ugly freezes, caused probably by inconsistencies between GTK4 and the Rust compiler’s optimizations   - [#1691](https://github.com/qarmin/czkawka/pull/1691)
+- Ugly workarounds for ugly freezes, caused probably by inconsistencies between GTK4 and the Rust compiler’s optimizations - [#1691](https://github.com/qarmin/czkawka/pull/1691)
 - About screen, now contains info, that Krokiet is successor app - [#1718](https://github.com/qarmin/czkawka/pull/1718)
 
 ### Krokiet
@@ -61,7 +61,7 @@
 #### Devs
 - `stop_flag` is now required argument in most of the core functions
 - Visibility of some core functions has been reduced to `pub(crate)`
-- The modules in czkawka_core have been split and reorganized a bit — imports need to be adjusted, although the actual behavior and item names should not be changed too much
+- The modules in czkawka_core have been split and reorganized a bit - imports need to be adjusted, although the actual behavior and item names should not be changed too much
 
 ### Core
 - Replaced `println`/`eprintln` with logging functions - [#1478](https://github.com/qarmin/czkawka/pull/1478)
@@ -80,7 +80,7 @@
 - Improved logic for deleting files and added progress bar for this operation - [#1571](https://github.com/qarmin/czkawka/pull/1571)
 
 ### GTK GUI
-- New icons — less visually appealing, but created by me and released under a truly free CC BY license - [#1478](https://github.com/qarmin/czkawka/pull/1478)
+- New icons - less visually appealing, but created by me and released under a truly free CC BY license - [#1478](https://github.com/qarmin/czkawka/pull/1478)
 - Fixed crash when removing outdated cache - [#1508](https://github.com/qarmin/czkawka/pull/1508)
 - Fixed missing file and folder names for similar videos in reference folders - [#1520](https://github.com/qarmin/czkawka/pull/1520)
 - Fixed crashes when the SVG pixbuf loader is not available - [#1565](https://github.com/qarmin/czkawka/pull/1565)
@@ -117,7 +117,7 @@
 - HEIF Mac binaries are now provided
 - CI now builds Linux binaries on Ubuntu 22.04 instead of 20.04(github removed 20.04 images)
 - `musl` builds of `czkawka_cli` are now provided instead of `eyra` builds (slightly easier to maintain). GUI builds are not included due to limitations of `musl` and `eyra` :(
-- Prebuilt Windows console binaries are no longer provided — logs are now saved to a file, which is easier to read than terminal output
+- Prebuilt Windows console binaries are no longer provided - logs are now saved to a file, which is easier to read than terminal output
 - Skia opengl and vulkan backends are provided for Krokiet on Linux(no binaries on Windows, because don't know how to replace `sed`)
 - Prebuilt binaries are now build with `lto fat` instead `lto thin` and `codegen-units=1` to greatly reduce binary size(~25% smaller binaries)
 

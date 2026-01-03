@@ -17,7 +17,6 @@ core_missing_no_chosen_included_directory = Трябва да се предос�
 core_directory_must_exists = Директории: Експониран път на файлова директория трябва да съществува, пропускайки { $path }
 core_directory_must_be_directory = DIRECTORIES: Потъваме към директория, като пренебрегваме { $path }
 core_included_directory_zero_valid_directories = Включена директория Gрешка: Нямало дори и едно валидno вklucheno пътище, което е задължително
-core_excluded_directory_pointless_slash = Директории: Изключение на /\ е бесс益处的，因为这意味着不会扫描任何文件
 core_directory_overlap = Папки: Всички папки за търсене съвпадат с изключени папки
 core_directory_unable_to_get_device_id = Директории: Невъзможно е да се получи идентификатор на устройството от папка { $path }
 core_ffmpeg_not_found = Невъзможно да се открие правилна инсталирана версия на FFmpeg. Това е външно програмно обеспечение, което трябва да бъде инсталирано ръчно.
@@ -28,3 +27,5 @@ core_messages_limit_reached_characters = Number of messages exceeded the set lim
 core_messages_limit_reached_lines = Number of messages exceeded the set limit ({ $current }/{ $limit } lines), so the output was truncated. To read the full output, disable the limiting option in settings.
 rust_error_moving_to_trash = Грешка при преместване на "{ $file }" в кош: { $error }
 rust_error_removing = Огледална грешка при изтриване на "{ $file }": { $error }
+
+core_excluded_directory_pointless_slash = Директории: Изваждането на / е бессмислено, защото това означава, че няма файлове да бъдат сканирани

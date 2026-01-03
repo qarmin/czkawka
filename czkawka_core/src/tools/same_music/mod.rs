@@ -41,7 +41,7 @@ pub struct MusicEntry {
     pub track_title: String,
     pub track_artist: String,
     pub year: String,
-    pub length: String,
+    pub length: u32,
     pub genre: String,
     pub bitrate: u32,
 }
@@ -65,11 +65,11 @@ impl FileEntry {
             path: self.path,
             modified_date: self.modified_date,
 
-            fingerprint: vec![],
+            fingerprint: Vec::new(),
             track_title: String::new(),
             track_artist: String::new(),
             year: String::new(),
-            length: String::new(),
+            length: 0,
             genre: String::new(),
             bitrate: 0,
         }

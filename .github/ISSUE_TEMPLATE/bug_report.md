@@ -31,7 +31,7 @@ Very helpful in this situation will be logs from czkawka run with RUST_LOG envir
 
 **System**
 
-<!-- OS and Czkawka/Krokiet version and other OS info — you can copy it from the logs if you run the app from a terminal or locate the log files manually
+<!-- OS and Czkawka/Krokiet version and other OS info - you can copy it from the logs if you run the app from a terminal or locate the log files manually
 (Linux: `/home/username/.cache/czkawka`,
 macOS: `/Users/Username/Library/Caches/pl.Qarmin.Czkawka`,
 Windows: `C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache`).

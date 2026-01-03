@@ -10,7 +10,7 @@ general_close_button = Chiudi
 music_title_checkbox = Titolo
 music_artist_checkbox = Artista
 music_year_checkbox = Anno
-music_bitrate_checkbox = Bitrate
+music_bitrate_checkbox = Tasso di bit
 music_genre_checkbox = Genere
 music_length_checkbox = Durata
 music_comparison_checkbox = Confronto approssimativo
@@ -110,7 +110,7 @@ main_tree_view_column_dimensions = Dimensioni
 main_tree_view_column_title = Titolo
 main_tree_view_column_artist = Artista
 main_tree_view_column_year = Anno
-main_tree_view_column_bitrate = Bitrate
+main_tree_view_column_bitrate = Tasso di bit
 main_tree_view_column_length = Durata
 main_tree_view_column_genre = Genere
 main_tree_view_column_symlink_file_name = Nome collegamento
@@ -450,7 +450,7 @@ progress_cache_loading = Caricamento cache
 progress_cache_saving = Salvataggio cache
 progress_current_stage = Fase attuale:{ "  " }
 progress_all_stages = Tutte le fasi:{ "  " }
-# Saving loading
+# Saving loading 
 saving_loading_saving_failure = Impossibile salvare i dati di configurazione nel file { $name }, motivo { $reason }.
 saving_loading_reset_configuration = La configurazione corrente è stata cancellata.
 saving_loading_loading_success = Caricamento configurazione da file avvenuto con successo

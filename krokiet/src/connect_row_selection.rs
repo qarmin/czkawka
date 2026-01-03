@@ -73,6 +73,8 @@ pub(crate) fn initialize_selection_struct() {
         ActiveTab::InvalidSymlinks,
         ActiveTab::BrokenFiles,
         ActiveTab::BadExtensions,
+        ActiveTab::ExifRemover,
+        ActiveTab::VideoOptimizer,
     ];
 
     let map: HashMap<_, _> = tools.into_iter().map(|tool| (tool, SelectionData::default())).collect();
@@ -368,6 +370,14 @@ pub(crate) mod checker {
                 app.global::<GuiState>().set_selected_results_bad_extensions(it1);
                 app.global::<GuiState>().set_selected_results_bad_extensions2(it2);
             }
+            ActiveTab::VideoOptimizer => {
+                app.global::<GuiState>().set_selected_results_video_optimizer(it1);
+                app.global::<GuiState>().set_selected_results_video_optimizer2(it2);
+            }
+            ActiveTab::ExifRemover => {
+                app.global::<GuiState>().set_selected_results_exif_remover(it1);
+                app.global::<GuiState>().set_selected_results_exif_remover2(it2);
+            }
             _ => unreachable!("Current tab is not a tool that has enabled items"),
         }
     }
@@ -425,6 +435,14 @@ pub(crate) mod checker {
             ActiveTab::BadExtensions => (
                 app.global::<GuiState>().get_selected_results_bad_extensions(),
                 app.global::<GuiState>().get_selected_results_bad_extensions2(),
+            ),
+            ActiveTab::VideoOptimizer => (
+                app.global::<GuiState>().get_selected_results_video_optimizer(),
+                app.global::<GuiState>().get_selected_results_video_optimizer2(),
+            ),
+            ActiveTab::ExifRemover => (
+                app.global::<GuiState>().get_selected_results_exif_remover(),
+                app.global::<GuiState>().get_selected_results_exif_remover2(),
             ),
             _ => unreachable!("Current tab is not a tool that has enabled items"),
         };
@@ -765,7 +783,7 @@ mod tests {
 
         let mut selection = SelectionData {
             number_of_selected_rows: 0,
-            selected_rows: vec![],
+            selected_rows: Vec::new(),
             exceeded_limit: false,
         };
 
@@ -813,7 +831,7 @@ mod tests {
 
         let mut selection = SelectionData {
             number_of_selected_rows: 0,
-            selected_rows: vec![],
+            selected_rows: Vec::new(),
             exceeded_limit: false,
         };
 
@@ -838,7 +856,7 @@ mod tests {
 
         let mut selection = SelectionData {
             number_of_selected_rows: 0,
-            selected_rows: vec![],
+            selected_rows: Vec::new(),
             exceeded_limit: true,
         };
 
@@ -866,7 +884,7 @@ mod tests {
 
         let mut selection = SelectionData {
             number_of_selected_rows: 0,
-            selected_rows: vec![],
+            selected_rows: Vec::new(),
             exceeded_limit: false,
         };
 
@@ -904,7 +922,7 @@ mod tests {
 
         let mut selection = SelectionData {
             number_of_selected_rows: 0,
-            selected_rows: vec![],
+            selected_rows: Vec::new(),
             exceeded_limit: false,
         };
 
@@ -929,7 +947,7 @@ mod tests {
 
         let mut selection = SelectionData {
             number_of_selected_rows: 0,
-            selected_rows: vec![],
+            selected_rows: Vec::new(),
             exceeded_limit: false,
         };
 
@@ -979,7 +997,7 @@ mod tests {
 
         let selection = SelectionData {
             number_of_selected_rows: 2,
-            selected_rows: vec![],
+            selected_rows: Vec::new(),
             exceeded_limit: true,
         };
 

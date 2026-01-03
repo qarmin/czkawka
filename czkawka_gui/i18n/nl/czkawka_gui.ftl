@@ -1,6 +1,6 @@
 # Window titles
 window_settings_title = Instellingen
-window_main_title = Czkawka (Hiccup)
+window_main_title = Czkawka (Giechel)
 window_progress_title = Scannen
 window_compare_images = Vergelijk afbeeldingen
 # General

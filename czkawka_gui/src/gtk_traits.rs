@@ -46,7 +46,7 @@ pub trait WidgetTraits {
 
 impl<P: IsA<Widget>> WidgetTraits for P {
     fn get_all_direct_children(&self) -> Vec<Widget> {
-        let mut vector = vec![];
+        let mut vector = Vec::new();
         if let Some(mut child) = self.first_child() {
             vector.push(child.clone());
             loop {

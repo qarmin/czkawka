@@ -58,14 +58,14 @@ fn main() {
     Results::write_header_to_file(&mut results_file).unwrap();
 
     config.build_config_converted = config.build_config.clone().into_iter().map(|e| e.into()).collect();
-    let mut all_configs = vec![];
+    let mut all_configs = Vec::new();
     for build_config in &config.build_config_converted {
         all_configs.push(build_config.clone());
     }
 
     println!("Found {} configurations to test", all_configs.len());
 
-    // let mut results = vec![];
+    // let mut results = Vec::new();
     for build_config in all_configs {
         let new_cargo_toml_content = format!("{cargo_toml_content}\n\n[profile.{PROFILE_NAME}]\n{}\n", build_config.to_str());
         fs::write(&cargo_toml_path, new_cargo_toml_content).expect("Could not write Cargo.toml file");

@@ -1,6 +1,6 @@
-use czkawka_core::TOOLS_NUMBER;
 use glib::types::Type;
 
+use crate::CZKAWKA_GTK_TOOL_NUMBER;
 use crate::helpers::enums::{
     BottomButtonsEnum, ColumnsBadExtensions, ColumnsBigFiles, ColumnsBrokenFiles, ColumnsDuplicates, ColumnsEmptyFiles, ColumnsEmptyFolders, ColumnsInvalidSymlinks,
     ColumnsSameMusic, ColumnsSimilarImages, ColumnsSimilarVideos, ColumnsTemporaryFiles, PopoverTypes,
@@ -28,7 +28,7 @@ pub struct NotebookObject {
     pub tree_view_name: &'static str,
 }
 
-pub static NOTEBOOKS_INFO: [NotebookObject; TOOLS_NUMBER] = [
+pub static NOTEBOOKS_INFO: [NotebookObject; CZKAWKA_GTK_TOOL_NUMBER] = [
     NotebookObject {
         name: "Duplicates",
         notebook_type: NotebookMainEnum::Duplicate,
