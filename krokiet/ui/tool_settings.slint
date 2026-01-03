@@ -391,10 +391,12 @@ export component ToolSettings {
                     Text {
                         text: Translations.subsettings_video_optimizer_excluded_codecs_text;
                         vertical_alignment: TextVerticalAlignment.center;
+                        font-size: FontSizes.normal;
                     }
 
                     LineEdit {
                         text <=> Settings.video_optimizer_sub_excluded_codecs;
+        font-size: FontSizes.normal;
                     }
 
                     Button {
@@ -442,11 +444,13 @@ export component ToolSettings {
                 Text {
                     text: Translations.subsettings_exif_ignored_tags_text;
                     vertical_alignment: TextVerticalAlignment.center;
+                    font-size: FontSizes.normal;
                 }
 
                 LineEdit {
                     text <=> Settings.ignored_exif_tags;
                     placeholder-text: "GPS, Thumbnail, MakerNote";
+                    font-size: FontSizes.normal;
                 }
             }
 

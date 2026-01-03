@@ -27,6 +27,7 @@ export component TextComponent inherits HorizontalLayout {
         horizontal-stretch: 1.0;
         height: SettingsSize.item_height;
         text <=> model;
+        font-size: FontSizes.normal;
     }
 }
 
@@ -125,6 +126,7 @@ component MinMaxSizeComponent inherits HorizontalLayout {
         LineEdit {
             height: SettingsSize.item_height;
             text <=> Settings.minimum_file_size;
+            font-size: FontSizes.normal;
         }
 
         Text {
@@ -136,6 +138,7 @@ component MinMaxSizeComponent inherits HorizontalLayout {
         LineEdit {
             height: SettingsSize.item_height;
             text <=> Settings.maximum_file_size;
+            font-size: FontSizes.normal;
         }
     }
 }
@@ -177,6 +180,7 @@ component Presets inherits Rectangle {
 
         current_name := LineEdit {
             text: Settings.settings_presets[Settings.settings_preset_idx];
+            font-size: FontSizes.normal;
         }
 
         Button {

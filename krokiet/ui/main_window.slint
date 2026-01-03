@@ -24,6 +24,8 @@ import { Translations } from "translations.slint";
 export {Settings, Callabler, GuiState, Translations, Palette}
 
 export component MainWindow inherits Window {
+    default-font-size: 14px;
+
     callback scan_stopping;
     callback scan_starting(ActiveTab);
     callback folder_choose_requested(bool);
@@ -188,6 +190,7 @@ export component MainWindow inherits Window {
             text_summary := LineEdit {
                 text: text_summary_text;
                 read-only: true;
+                font-size: FontSizes.normal;
             }
 
             Text {

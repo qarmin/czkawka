@@ -20,7 +20,7 @@ export component SelectableTableView inherits Rectangle {
     in-out property <int> previewImageIdx;
     in-out property <int> start_shift_idx: -1;
     in-out property <int> last_selected_idx: -1;
-    out property <length> item_height: 20px;
+    out property <length> item_height: 23px;
     in-out property <SortColumnMode> sort_column_mode: SortColumnMode.None;
     in-out property <int> sort_column_idx: -1;
     in-out property <bool> sort_available: true;
@@ -67,6 +67,7 @@ export component SelectableTableView inherits Rectangle {
 
                             overflow: elide;
                             text: title;
+                            font-size: FontSizes.normal;
                         }
                     }
 

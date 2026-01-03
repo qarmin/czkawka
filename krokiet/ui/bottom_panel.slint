@@ -4,6 +4,7 @@ import { GuiState } from "gui_state.slint";
 import { ExcludedDirectories, IncludedDirectories } from "included_directories.slint";
 import { Translations } from "translations.slint";
 import { ColorPalette } from "color_palette.slint";
+import { FontSizes } from "fonts.slint";
 
 component DirectoriesPanel inherits HorizontalLayout {
     callback folder_choose_requested(bool);
@@ -40,6 +41,7 @@ component DirectoriesPanel inherits HorizontalLayout {
                 horizontal-stretch: 1.0;
                 Text {
                     text <=> Translations.included_directories_text;
+                    font-size: FontSizes.normal;
                 }
             }
             
@@ -91,6 +93,7 @@ component DirectoriesPanel inherits HorizontalLayout {
                 horizontal-stretch: 1.0;
                 Text {
                     text <=> Translations.excluded_directories_text;
+                    font-size: FontSizes.normal;
                 }
             }
 
@@ -120,6 +123,7 @@ component TextErrorsPanel inherits TextEdit {
     read-only: true;
     wrap: TextWrap.no-wrap;
     text <=> GuiState.info_text;
+    font-size: FontSizes.normal;
 }
 
 export component BottomPanel {
