@@ -3,6 +3,7 @@ import { Settings } from "settings.slint";
 import { Callabler } from "callabler.slint";
 import { GuiState } from "gui_state.slint";
 import { Translations } from "translations.slint";
+import { ColorPalette } from "color_palette.slint";
 
 // TODO use Spinbox instead LineEdit {} to be able to set only numbers
 
@@ -175,8 +176,15 @@ component Presets inherits Rectangle {
     }
 }
 
+component HintText inherits Text {
+    in-out property <string> hint_text;
+    font-size: 12px;
+    color: ColorPalette.hint_color;
+    text: root.hint_text;
+}
+
 component HeaderText inherits Text {
-    font-size: 15px;
+    font-size: 17px;
     height: SettingsSize.item_height;
     horizontal-alignment: TextHorizontalAlignment.center;
     vertical-alignment: TextVerticalAlignment.center;
@@ -227,7 +235,7 @@ export component SettingsList inherits VerticalLayout {
         text <=> Translations.settings_settings_text;
         height: SettingsSize.item_height;
         horizontal-alignment: TextHorizontalAlignment.center;
-        font-size: 20px;
+        font-size: 22px;
     }
 
     ScrollView {
