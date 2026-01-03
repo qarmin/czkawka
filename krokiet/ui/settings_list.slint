@@ -4,6 +4,7 @@ import { Callabler } from "callabler.slint";
 import { GuiState } from "gui_state.slint";
 import { Translations } from "translations.slint";
 import { ColorPalette } from "color_palette.slint";
+import { FontSizes } from "fonts.slint";
 
 // TODO use Spinbox instead LineEdit {} to be able to set only numbers
 
@@ -16,7 +17,7 @@ export component TextComponent inherits HorizontalLayout {
     in property <string> name;
     spacing: 5px;
     Text {
-        font-size: 16px;
+        font-size: FontSizes.normal;
         horizontal-stretch: 0.0;
         vertical-alignment: TextVerticalAlignment.center;
         text: name;
@@ -52,11 +53,12 @@ component ThreadSliderComponent inherits HorizontalLayout {
     in-out property <string> name;
     spacing: 5px;
 
-    callback changed <=> slider.changed;
+    callback changed();
     Text {
         text <=> name;
         vertical-alignment: TextVerticalAlignment.center;
         height: SettingsSize.item_height;
+        font-size: FontSizes.normal;
     }
 
     slider := Slider {
@@ -65,23 +67,26 @@ component ThreadSliderComponent inherits HorizontalLayout {
         minimum: minimum_number;
         maximum <=> maximum_number;
         value <=> Settings.thread_number;
+        changed => root.changed();
     }
 
     Text {
         height: SettingsSize.item_height;
         vertical-alignment: TextVerticalAlignment.center;
         text: round(slider.value) == 0 ? ("All (" + GuiState.maximum_threads + "/" + GuiState.maximum_threads + ")") : (round(slider.value) + "/" + GuiState.maximum_threads);
+        font-size: FontSizes.normal;
     }
 }
 
 component ApplicationScaleComponent inherits HorizontalLayout {
     spacing: 5px;
     in-out property <string> name;
-    callback changed <=> slider.changed;
+    callback changed();
     Text {
         text <=> name;
         vertical-alignment: TextVerticalAlignment.center;
         height: SettingsSize.item_height;
+        font-size: FontSizes.normal;
     }
     slider := Slider {
         minimum: 0.5;
@@ -89,11 +94,13 @@ component ApplicationScaleComponent inherits HorizontalLayout {
         step: 0.01;
         value <=> Settings.manual_application_scale;
         height: SettingsSize.item_height;
+        changed => root.changed();
     }
     Text {
         height: SettingsSize.item_height;
         vertical-alignment: TextVerticalAlignment.center;
         text: (round(slider.value * 100.0) / 100.0);
+        font-size: FontSizes.normal;
     }
 }
 
@@ -103,6 +110,7 @@ component MinMaxSizeComponent inherits HorizontalLayout {
         horizontal-stretch: 0.0;
         text <=> Translations.settings_file_size_text;
         vertical-alignment: TextVerticalAlignment.center;
+        font-size: FontSizes.normal;
     }
 
     HorizontalLayout {
@@ -111,6 +119,7 @@ component MinMaxSizeComponent inherits HorizontalLayout {
         Text {
             text <=> Translations.settings_minimum_file_size_text;
             vertical-alignment: TextVerticalAlignment.center;
+            font-size: FontSizes.normal;
         }
 
         LineEdit {
@@ -121,6 +130,7 @@ component MinMaxSizeComponent inherits HorizontalLayout {
         Text {
             text <=> Translations.settings_maximum_file_size_text;
             vertical-alignment: TextVerticalAlignment.center;
+            font-size: FontSizes.normal;
         }
 
         LineEdit {
@@ -138,6 +148,7 @@ component Presets inherits Rectangle {
         Text {
             text <=> Translations.settings_current_preset_text;
             vertical-alignment: TextVerticalAlignment.center;
+            font-size: FontSizes.normal;
         }
 
         combo_box := ComboBox {
@@ -161,6 +172,7 @@ component Presets inherits Rectangle {
         Text {
             text: Translations.settings_choose_name_for_prefix_text + (Settings.settings_preset_idx + 1);
             vertical-alignment: TextVerticalAlignment.center;
+            font-size: FontSizes.normal;
         }
 
         current_name := LineEdit {
@@ -179,13 +191,13 @@ component Presets inherits Rectangle {
 
 component HintText inherits Text {
     in-out property <string> hint_text;
-    font-size: 12px;
+    font-size: FontSizes.small;
     color: ColorPalette.hint_color;
     text: root.hint_text;
 }
 
 component HeaderText inherits Text {
-    font-size: 17px;
+    font-size: FontSizes.header;
     height: SettingsSize.item_height;
     horizontal-alignment: TextHorizontalAlignment.center;
     vertical-alignment: TextVerticalAlignment.center;
@@ -213,6 +225,7 @@ component Languages inherits HorizontalLayout {
     Text {
         text <=> Translations.settings_language_text;
         vertical-alignment: TextVerticalAlignment.center;
+        font-size: FontSizes.normal;
     }
 
     combo_box := ComboBox {
@@ -237,7 +250,7 @@ export component SettingsList inherits VerticalLayout {
         text <=> Translations.settings_settings_text;
         height: SettingsSize.item_height;
         horizontal-alignment: TextHorizontalAlignment.center;
-        font-size: 22px;
+        font-size: FontSizes.title;
     }
 
     ScrollView {
@@ -303,6 +316,7 @@ export component SettingsList inherits VerticalLayout {
             if restart_required_global: Text {
                 text <=> Translations.settings_restart_required_scale_text;
                 horizontal-alignment: TextHorizontalAlignment.center;
+                font-size: FontSizes.normal;
             }
 
             HeaderText {
@@ -362,6 +376,7 @@ export component SettingsList inherits VerticalLayout {
             if restart_required: Text {
                 text <=> Translations.settings_restart_required_text;
                 horizontal-alignment: TextHorizontalAlignment.center;
+                font-size: FontSizes.normal;
             }
             HeaderText {
                 text <=> Translations.tool_duplicate_files_text;

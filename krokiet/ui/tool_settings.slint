@@ -5,6 +5,7 @@ import { GuiState } from "gui_state.slint";
 import { TextComponent } from "settings_list.slint";
 import { Translations } from "translations.slint";
 import { ColorPalette } from "color_palette.slint";
+import { FontSizes } from "fonts.slint";
 
 component ComboBoxWrapper inherits HorizontalLayout {
     in-out property <string> text;
@@ -15,6 +16,7 @@ component ComboBoxWrapper inherits HorizontalLayout {
     Text {
         text <=> root.text;
         vertical_alignment: TextVerticalAlignment.center;
+        font-size: FontSizes.normal;
     }
 
     ComboBox {
@@ -28,14 +30,14 @@ component CheckBoxWrapper inherits CheckBox { }
 
 component SubsettingsHeader inherits Text {
     text: Translations.subsettings_text;
-    font-size: 15px;
+    font-size: FontSizes.normal;
     height: 30px;
 }
 
 // Reusable text wrapper to centralize font-size and height
 component LabelText inherits Text {
     in-out property <string> label_text;
-    in-out property <length> label_font_size: 14px;
+    in-out property <length> label_font_size: FontSizes.normal;
     in-out property <length> label_height: 25px;
     text: root.label_text;
     font-size: root.label_font_size;
@@ -53,6 +55,7 @@ component SliderWrapper inherits HorizontalLayout {
     spacing: 5px;
     Text {
         text: root.text;
+        font-size: FontSizes.normal;
     }
 
     Slider {
@@ -65,12 +68,13 @@ component SliderWrapper inherits HorizontalLayout {
     Text {
         text: root.end_text;
         width: root.end_text_size;
+        font-size: FontSizes.normal;
     }
 }
 
 component HintText inherits Text {
     in-out property <string> hint_text;
-    font-size: 12px;
+    font-size: FontSizes.small;
     color: ColorPalette.hint_color;
     text: root.hint_text;
 }

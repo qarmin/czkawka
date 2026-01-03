@@ -1,6 +1,7 @@
 import { Button } from "std-widgets.slint";
 import { Callabler } from "callabler.slint";
 import { Translations } from "translations.slint";
+import { FontSizes } from "fonts.slint";
 
 export component About inherits VerticalLayout {
     preferred-height: 300px;
@@ -14,7 +15,7 @@ export component About inherits VerticalLayout {
     Text {
         text: "10.0.0";
         horizontal-alignment: center;
-        font-size: max(min(img.width / 20, 19px), 12px);
+        font-size: max(min(img.width / 20, FontSizes.header), FontSizes.small);
     }
 
     VerticalLayout {
@@ -23,19 +24,19 @@ export component About inherits VerticalLayout {
         Text {
             text: "2020 - 2025  Rafał Mikrut(qarmin)";
             horizontal-alignment: center;
-            font-size: 17px;
+            font-size: FontSizes.header;
         }
 
         Text {
             text <=> Translations.motto_text;
             horizontal-alignment: center;
-            font-size: 15px;
+            font-size: FontSizes.normal;
         }
 
         Text {
             text <=> Translations.unicorn_text;
             horizontal-alignment: center;
-            font-size: 16px;
+            font-size: FontSizes.normal;
         }
     }
 
