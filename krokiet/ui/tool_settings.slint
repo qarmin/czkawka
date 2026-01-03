@@ -4,6 +4,7 @@ import { Settings } from "settings.slint";
 import { GuiState } from "gui_state.slint";
 import { TextComponent } from "settings_list.slint";
 import { Translations } from "translations.slint";
+import { ColorPalette } from "color_palette.slint";
 
 component ComboBoxWrapper inherits HorizontalLayout {
     in-out property <string> text;
@@ -54,6 +55,13 @@ component SliderWrapper inherits HorizontalLayout {
         text: root.end_text;
         width: root.end_text_size;
     }
+}
+
+component HintText inherits Text {
+    in-out property <string> hint_text;
+    font-size: 10px;
+    color: ColorPalette.hint_color;
+    text: root.hint_text;
 }
 
 export component ToolSettings {
@@ -435,10 +443,8 @@ export component ToolSettings {
                 }
             }
 
-            Text {
-                text: Translations.subsettings_exif_ignored_tags_hint_text;
-                font-size: 10px;
-                color: #888;
+            HintText {
+                hint_text: Translations.subsettings_exif_ignored_tags_hint_text;
             }
 
             Rectangle { }
