@@ -40,7 +40,7 @@ use crate::connect_translation::connect_translations;
 // TODO - at start this should be used, to be sure that rust models are in sync with slint models
 // currently I need to do this manually - https://github.com/slint-ui/slint/issues/7632
 // use crate::set_initial_gui_info::set_initial_gui_infos;
-use crate::settings::{connect_changing_settings_preset, create_default_settings_files, load_settings_from_file, save_all_settings_to_file};
+use crate::settings::{connect_changing_settings_preset, create_default_settings_files, load_initial_settings_from_file, save_all_settings_to_file, set_initial_settings_to_gui};
 use crate::shared_models::SharedModels;
 
 mod clear_outdated_video_thumbnails;
@@ -78,6 +78,11 @@ fn main() {
     print_infos_and_warnings(config_cache_path_set_result.infos, config_cache_path_set_result.warnings);
     print_krokiet_features();
 
+    create_default_settings_files();
+    let (base_settings, custom_settings, preset_to_load) = load_initial_settings_from_file(cli_args.as_ref());
+
+    // TODO Set custom scale
+
     let app = MainWindow::new().expect("Failed to create main window");
 
     let (progress_sender, progress_receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
@@ -90,8 +95,8 @@ fn main() {
     // Disabled for now, due invalid settings model at start
     // set_initial_gui_infos(&app);
 
-    create_default_settings_files();
-    let original_preset_idx = load_settings_from_file(&app, cli_args);
+    let original_preset_idx = base_settings.default_preset;
+    set_initial_settings_to_gui(&app, &base_settings, &custom_settings, cli_args, preset_to_load);
 
     connect_delete_button(&app, progress_sender.clone(), stop_flag.clone());
     connect_scan_button(&app, progress_sender.clone(), stop_flag.clone(), Arc::clone(&shared_models));

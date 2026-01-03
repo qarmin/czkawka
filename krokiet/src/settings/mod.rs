@@ -107,7 +107,7 @@ pub(crate) fn create_default_settings_files() {
     }
 }
 
-pub(crate) fn load_settings_from_file(app: &MainWindow, cli_result: Option<CliResult>) -> i32 {
+pub(crate) fn load_initial_settings_from_file(cli_result: Option<&CliResult>) -> (BasicSettings, SettingsCustom, i32) {
     StringComboBoxItems::regenerate_and_set();
 
     let result_base_settings = load_data_from_file::<BasicSettings>(get_base_config_file());
@@ -137,12 +137,13 @@ pub(crate) fn load_settings_from_file(app: &MainWindow, cli_result: Option<CliRe
     base_settings.default_preset = base_settings.default_preset.clamp(0, PRESET_NUMBER as i32 - 2);
     custom_settings.thread_number = max(min(custom_settings.thread_number, get_all_available_threads() as i32), 0);
 
-    // Ended validating, starting saving settings to GUI
-    set_settings_to_gui(app, &custom_settings, &base_settings, cli_result);
-    set_base_settings_to_gui(app, &base_settings, preset_to_load);
-    set_number_of_threads(custom_settings.thread_number as usize);
+    (base_settings, custom_settings, preset_to_load)
+}
 
-    base_settings.default_preset
+pub(crate) fn set_initial_settings_to_gui(app: &MainWindow, base_settings: &BasicSettings, custom_settings: &SettingsCustom, cli_result: Option<CliResult>, preset_to_load: i32) {
+    set_settings_to_gui(app, custom_settings, base_settings, cli_result);
+    set_base_settings_to_gui(app, base_settings, preset_to_load);
+    set_number_of_threads(custom_settings.thread_number as usize);
 }
 
 pub(crate) fn save_all_settings_to_file(app: &MainWindow, original_preset_idx: i32) {
