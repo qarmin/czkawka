@@ -16,6 +16,7 @@ export component TextComponent inherits HorizontalLayout {
     in property <string> name;
     spacing: 5px;
     Text {
+        font-size: 16px;
         horizontal-stretch: 0.0;
         vertical-alignment: TextVerticalAlignment.center;
         text: name;
@@ -229,6 +230,7 @@ export component SettingsList inherits VerticalLayout {
     preferred-height: 300px;
     preferred-width: 400px;
 
+    in-out property <bool> restart_required_global;
     in-out property <bool> restart_required;
 
     Text {
@@ -286,11 +288,21 @@ export component SettingsList inherits VerticalLayout {
             CheckBoxComponent {
                 name <=> Translations.settings_use_manual_application_scale_text;
                 model <=> Settings.use_manual_application_scale;
-                toggled => { restart_required = true; }
+                toggled => { restart_required_global = true; }
             }
+
+            HintText {
+                hint_text <=> Translations.settings_application_scale_hint_text;
+            }
+
             ApplicationScaleComponent {
                 name <=> Translations.settings_application_scale_text;
-                changed => { restart_required = true; }
+                changed => { restart_required_global = true; }
+            }
+
+            if restart_required_global: Text {
+                text <=> Translations.settings_restart_required_scale_text;
+                horizontal-alignment: TextHorizontalAlignment.center;
             }
 
             HeaderText {

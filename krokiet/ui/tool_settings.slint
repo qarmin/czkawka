@@ -32,6 +32,17 @@ component SubsettingsHeader inherits Text {
     height: 30px;
 }
 
+// Reusable text wrapper to centralize font-size and height
+component LabelText inherits Text {
+    in-out property <string> label_text;
+    in-out property <length> label_font_size: 14px;
+    in-out property <length> label_height: 25px;
+    text: root.label_text;
+    font-size: root.label_font_size;
+    height: root.label_height;
+    vertical-alignment: TextVerticalAlignment.center;
+}
+
 component SliderWrapper inherits HorizontalLayout {
     in-out property <float> maximum;
     in-out property <float> minimum: 0;
@@ -59,7 +70,7 @@ component SliderWrapper inherits HorizontalLayout {
 
 component HintText inherits Text {
     in-out property <string> hint_text;
-    font-size: 10px;
+    font-size: 12px;
     color: ColorPalette.hint_color;
     text: root.hint_text;
 }
@@ -256,11 +267,7 @@ export component ToolSettings {
                     height: 40px;
                 }
 
-                Text {
-                    text: Translations.subsettings_music_compared_tags_text + ":";
-                    font-size: 14px;
-                    height: 20px;
-                }
+                LabelText { label_text: Translations.subsettings_music_compared_tags_text + ":"; label_height: 20px; }
 
                 CheckBoxWrapper {
                     text: Translations.subsettings_music_title_text;
@@ -327,11 +334,7 @@ export component ToolSettings {
             padding: 10px;
             SubsettingsHeader { }
 
-            Text {
-                text: Translations.subsettings_broken_files_type_text;
-                font-size: 14px;
-                height: 25px;
-            }
+            LabelText { label_text: Translations.subsettings_broken_files_type_text; }
 
             CheckBoxWrapper {
                 text: Translations.subsettings_broken_files_audio_text;
