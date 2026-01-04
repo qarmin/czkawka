@@ -1183,13 +1183,17 @@ fn write_exif_remover_results(app: &MainWindow, vector: Vec<ExifEntry>, messages
 fn prepare_data_model_exif_remover(fe: &ExifEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(&fe.path);
     let size_str = format_size(fe.size, BINARY);
-    let exif_tags = format!("{} ({})", fe.exif_tags.len(), fe.exif_tags.join(", "));
+    let exif_tags = format!("{} ({})", fe.exif_tags.len(), fe.exif_tags.iter().map(|(q,w,e)|q.clone()).collect::<Vec<String>>().join(", "));
+    let exif_groups_name = fe.exif_tags.iter().map(|(q,w,e)|e.clone()).collect::<Vec<String>>().join(",");
+    let exif_tag_u16 = fe.exif_tags.iter().map(|(q,w,e)|w.to_string()).collect::<Vec<String>>().join(",");
     let data_model_str_arr: [SharedString; MAX_STR_DATA_EXIF_REMOVER] = [
         size_str.into(),
         file.into(),
         directory.into(),
         exif_tags.into(),
         get_dt_timestamp_string(fe.get_modified_date()).into(),
+        exif_groups_name.into(),
+        exif_tag_u16.into()
     ];
     let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());

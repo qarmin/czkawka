@@ -2,12 +2,15 @@ use std::collections::BTreeMap;
 use std::path::Path;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
-use std::{mem, panic};
+use std::{fs, mem, panic};
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
+use itertools::Itertools;
+use little_exif::exif_tag::ExifTag;
+use little_exif::ifd::ExifTagGroup;
 use little_exif::metadata::Metadata;
-use log::debug;
+use log::{debug, info};
 use rayon::prelude::*;
 
 use crate::common::cache::{CACHE_VERSION, extract_loaded_cache, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
@@ -18,6 +21,8 @@ use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::tools::exif_remover::{ExifEntry, ExifRemover, ExifRemoverParameters, Info};
+use crate::tools::video_optimizer::OptimizerMode;
+use crate::tools::video_optimizer::core::process_video;
 
 impl ExifRemover {
     pub fn new(params: ExifRemoverParameters) -> Self {
@@ -95,7 +100,6 @@ impl ExifRemover {
     #[fun_time(message = "save_to_cache", level = "debug")]
     fn save_to_cache(&mut self, vec_file_entry: &[ExifEntry], loaded_hash_map: BTreeMap<String, ExifEntry>) {
         if self.common_data.use_cache {
-            // Must save all results to file, old loaded from file with all currently counted results
             let mut all_results: BTreeMap<String, ExifEntry> = Default::default();
 
             for file_entry in vec_file_entry.iter().cloned() {
@@ -164,7 +168,7 @@ impl ExifRemover {
 
         if !self.params.ignored_tags.is_empty() {
             for entry in &mut vec_file_entry {
-                entry.exif_tags.retain(|tag| !self.params.ignored_tags.contains(tag));
+                entry.exif_tags.retain(|(tag_str, _tag_u16, _tag_group)| !self.params.ignored_tags.contains(tag_str));
             }
         }
 
@@ -177,9 +181,64 @@ impl ExifRemover {
 
         WorkContinueStatus::Continue
     }
+
+    #[fun_time(message = "fix_files", level = "debug")]
+    pub(crate) fn fix_files(&mut self, stop_flag: &Arc<AtomicBool>, _progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+        info!("Starting optimization of {} video files", self.exif_files.len());
+
+        self.exif_files.par_iter_mut().for_each(|entry| {
+            if check_if_stop_received(stop_flag) {
+                return;
+            }
+
+            // TODO - override file needs to be parameter in CLI
+            match clean_exif_tags(&entry.path.to_string_lossy(), &entry.exif_tags, false) {
+                Ok(_number_removed_tags) => {}
+                Err(e) => {
+                    entry.error = Some(e);
+                }
+            }
+        });
+
+        WorkContinueStatus::Continue
+    }
 }
 
-fn extract_exif_tags(path: &Path) -> Result<Vec<String>, String> {
+pub fn clean_exif_tags(file_path: &str, tags_to_remove: &[(String, u16, String)], override_file: bool) -> Result<u32, String> {
+    panic::catch_unwind(|| {
+        let file_path = Path::new(file_path);
+        let metadata = Metadata::new_from_path(file_path).map_err(|e| format!("Failed to read EXIF: {e}"))?;
+
+        let mut new_metadata = metadata.clone();
+        let mut tags_removed:u32 = 0;
+        for (_tag_str, tag_u16, tag_group) in tags_to_remove {
+            let Ok(tag_group) = string_to_exif_tag_group(&tag_group) else {
+                continue;
+            };
+
+            let Ok(tag) = ExifTag::from_u16(*tag_u16, &tag_group) else {
+                continue;
+            };
+            new_metadata.remove_tag(tag);
+            tags_removed += 1;
+        }
+
+        if override_file {
+            new_metadata.write_to_file(file_path).map_err(|e| format!("Failed to write EXIF file: {e}"))?;
+        } else {
+            let extension = file_path.extension().and_then(|ext| ext.to_str()).unwrap_or("");
+            let new_file_path = file_path.with_extension(format!("czkawka_cleaned_exif.{extension}"));
+            let _ = fs::copy(&file_path, &new_file_path);
+            new_metadata.write_to_file(&new_file_path).map_err(|e| format!("Failed to write EXIF file: {e}"))?;
+        }
+
+        Ok(tags_removed)
+    })
+    .map_err(|e| format!("Panic occurred while reading EXIF: {e:?}"))?
+    .map_err(|e: String| format!("Failed to remove EXIF from file {} - {e}", file_path.to_string()))
+}
+
+fn extract_exif_tags(path: &Path) -> Result<Vec<(String, u16, String)>, String> {
     let metadata = panic::catch_unwind(|| Metadata::new_from_path(path))
         .map_err(|e| format!("Panic occurred while reading EXIF: {e:?}"))?
         .map_err(|e| format!("Failed to read EXIF: {e}"))?;
@@ -188,11 +247,13 @@ fn extract_exif_tags(path: &Path) -> Result<Vec<String>, String> {
 
     for tag in &metadata {
         let tag_name = format!("{tag:?}");
+        let tag_u16 = tag.as_u16();
+        let tag_group = exif_tag_group_to_string(tag.get_group());
         if let Some(pos) = tag_name.find('(') {
             #[expect(clippy::string_slice)] // Safe, because pos is from find
-            tags.push(tag_name[..pos].to_string());
+            tags.push((tag_name[..pos].to_string(), tag_u16, tag_group));
         } else {
-            tags.push(tag_name);
+            tags.push((tag_name, tag_u16, tag_group));
         }
     }
 
@@ -225,6 +286,25 @@ fn extract_exif_tags(path: &Path) -> Result<Vec<String>, String> {
 //         Err("Panic in get_rotation_from_exif".to_string())
 //     })
 // }
+
+pub fn string_to_exif_tag_group(tag: &str) -> Result<ExifTagGroup, String> {
+    match tag {
+        "EXIF" => Ok(ExifTagGroup::EXIF),
+        "INTEROP" => Ok(ExifTagGroup::INTEROP),
+        "GPS" => Ok(ExifTagGroup::GPS),
+        "GENERIC" => Ok(ExifTagGroup::GENERIC),
+        _ => Err(format!("Unknown EXIF tag group: {tag}")),
+    }
+}
+
+pub fn exif_tag_group_to_string(tag_group: ExifTagGroup) -> String {
+    match tag_group {
+        ExifTagGroup::EXIF => "EXIF".to_string(),
+        ExifTagGroup::INTEROP => "INTEROP".to_string(),
+        ExifTagGroup::GPS => "GPS".to_string(),
+        ExifTagGroup::GENERIC => "GENERIC".to_string(),
+    }
+}
 
 pub fn get_exif_remover_cache_file() -> String {
     format!("cache_exif_remover_{CACHE_VERSION}.bin")

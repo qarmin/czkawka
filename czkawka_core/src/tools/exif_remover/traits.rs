@@ -3,14 +3,15 @@ use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 use std::time::Instant;
 
-use crossbeam_channel::Sender;
-use fun_time::fun_time;
-
 use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
-use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, PrintResults, Search};
+use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, FixingItems, PrintResults, Search};
 use crate::tools::exif_remover::{ExifEntry, ExifRemover, ExifRemoverParameters, Info};
+use crate::tools::video_optimizer::VideoOptimizer;
+use crossbeam_channel::Sender;
+use fun_time::fun_time;
+use humansize::BINARY;
 
 impl AllTraits for ExifRemover {}
 
@@ -25,6 +26,13 @@ impl DeletingItems for ExifRemover {
             DeleteMethod::None => WorkContinueStatus::Continue,
             _ => unreachable!(),
         }
+    }
+}
+
+impl FixingItems for ExifRemover {
+    #[fun_time(message = "fix_items", level = "debug")]
+    fn fix_items(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+        self.fix_files(stop_flag, progress_sender)
     }
 }
 
@@ -55,10 +63,14 @@ impl PrintResults for ExifRemover {
             writeln!(writer, "Found {} files with EXIF data.\n", self.information.number_of_files_with_exif)?;
 
             for exif_entry in &self.exif_files {
-                writeln!(writer, "\nFile: \"{}\"", exif_entry.path.to_string_lossy())?;
-                writeln!(writer, "  Size: {} bytes", exif_entry.size)?;
-                writeln!(writer, "  Modified: {}", exif_entry.modified_date)?;
-                writeln!(writer, "  EXIF Tags: {}", exif_entry.exif_tags.join(", "))?;
+                writeln!(
+                    writer,
+                    "\nFile: \"{}\" - {} - {} - {:?}",
+                    exif_entry.path.to_string_lossy(),
+                    humansize::format_size(exif_entry.size, BINARY),
+                    exif_entry.modified_date,
+                    exif_entry.exif_tags.iter().map(|(e, _, _)| e.to_string()).collect::<Vec<_>>()
+                )?;
             }
         } else {
             writeln!(writer, "Not found any files with EXIF data.")?;

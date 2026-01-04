@@ -280,8 +280,10 @@ pub enum StrDataExifRemover {
     Path,
     ExifTags,
     ModificationDate,
+    ExifGroupsNames,
+    ExifTagsU16
 }
-pub const MAX_STR_DATA_EXIF_REMOVER: usize = StrDataExifRemover::ModificationDate as usize + 1;
+pub const MAX_STR_DATA_EXIF_REMOVER: usize = StrDataExifRemover::ExifTagsU16 as usize + 1;
 
 // Video Optimizer
 #[repr(u8)]
@@ -402,6 +404,7 @@ impl ActiveTab {
                 | StrDataBadExtensions::ProperExtension => SortIdx::StrIdx(str_idx),
             },
             Self::ExifRemover => match StrDataExifRemover::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for ExifRemover")) {
+                StrDataExifRemover::ExifTagsU16 | StrDataExifRemover::ExifGroupsNames => SortIdx::StrIdx(str_idx),
                 StrDataExifRemover::Name | StrDataExifRemover::Path => SortIdx::StrIdx(str_idx),
                 StrDataExifRemover::ModificationDate => SortIdx::IntIdxPair(IntDataExifRemover::ModificationDatePart1 as i32, IntDataExifRemover::ModificationDatePart2 as i32),
                 StrDataExifRemover::ExifTags => SortIdx::IntIdx(IntDataExifRemover::ExifTagsCount as i32),

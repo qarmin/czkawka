@@ -34,7 +34,7 @@ pub struct ExifEntry {
     pub path: PathBuf,
     pub size: u64,
     pub modified_date: u64,
-    pub exif_tags: Vec<String>,
+    pub exif_tags: Vec<(String, u16, String)>, // (Tag name, Tag code, Tag group)
     pub error: Option<String>,
 }
 

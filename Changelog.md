@@ -41,10 +41,11 @@
 - Printing in settings, size of cache/thumbnails/logs files - [#1714](https://github.com/qarmin/czkawka/pull/1714)
 - Added sorting, by clicking at column headers - [#1718](https://github.com/qarmin/czkawka/pull/1718)
 - Added, enabled by default, limit 500 lines of messages in Krokiet, to freezes caused by slow TextEdit widget performance - [#1718](https://github.com/qarmin/czkawka/pull/1718)
-- Increased a little, size of all fonts, to improve readability - []()
-- Ability to choose app scale in runtime(but with several limitations) - []()
-- Cleaning messages in bottom panel, when scan starts - []()
-- Fix crash, when user clicked at previous results while new scan was in progress - []()
+- Increased a little, size of all fonts, to improve readability - [#1726](https://github.com/qarmin/czkawka/pull/1726)
+- Ability to choose app scale in runtime(but with several limitations) - [#1726](https://github.com/qarmin/czkawka/pull/1726)
+- Cleaning messages in bottom panel, when scan starts - [#1726](https://github.com/qarmin/czkawka/pull/1726)
+- Fix crash, when user clicked at previous results while new scan was in progress - [#1726](https://github.com/qarmin/czkawka/pull/1726)
+- Defaulting to remove files to trash instead permanent deletion - [#1726](https://github.com/qarmin/czkawka/pull/1726)
 
 ### External
 - Wine 10.20 contains bugfix that fixes crashes when running dialogs in Czkawka Gui - [Wine 49987 issue](https://bugs.winehq.org/show_bug.cgi?id=49987)
