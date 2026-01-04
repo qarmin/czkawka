@@ -3,15 +3,15 @@ use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 use std::time::Instant;
 
+use crossbeam_channel::Sender;
+use fun_time::fun_time;
+use humansize::BINARY;
+
 use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
 use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, FixingItems, PrintResults, Search};
 use crate::tools::exif_remover::{ExifEntry, ExifRemover, ExifRemoverParameters, Info};
-use crate::tools::video_optimizer::VideoOptimizer;
-use crossbeam_channel::Sender;
-use fun_time::fun_time;
-use humansize::BINARY;
 
 impl AllTraits for ExifRemover {}
 
@@ -69,7 +69,7 @@ impl PrintResults for ExifRemover {
                     exif_entry.path.to_string_lossy(),
                     humansize::format_size(exif_entry.size, BINARY),
                     exif_entry.modified_date,
-                    exif_entry.exif_tags.iter().map(|(e, _, _)| e.to_string()).collect::<Vec<_>>()
+                    exif_entry.exif_tags.iter().map(|(e, _, _)| e.clone()).collect::<Vec<_>>()
                 )?;
             }
         } else {

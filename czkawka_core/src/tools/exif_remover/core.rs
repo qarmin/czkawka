@@ -6,7 +6,6 @@ use std::{fs, mem, panic};
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
-use itertools::Itertools;
 use little_exif::exif_tag::ExifTag;
 use little_exif::ifd::ExifTagGroup;
 use little_exif::metadata::Metadata;
@@ -21,8 +20,6 @@ use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::tools::exif_remover::{ExifEntry, ExifRemover, ExifRemoverParameters, Info};
-use crate::tools::video_optimizer::OptimizerMode;
-use crate::tools::video_optimizer::core::process_video;
 
 impl ExifRemover {
     pub fn new(params: ExifRemoverParameters) -> Self {
@@ -209,10 +206,10 @@ pub fn clean_exif_tags(file_path: &str, tags_to_remove: &[(String, u16, String)]
         let file_path = Path::new(file_path);
         let metadata = Metadata::new_from_path(file_path).map_err(|e| format!("Failed to read EXIF: {e}"))?;
 
-        let mut new_metadata = metadata.clone();
-        let mut tags_removed:u32 = 0;
+        let mut new_metadata = metadata;
+        let mut tags_removed: u32 = 0;
         for (_tag_str, tag_u16, tag_group) in tags_to_remove {
-            let Ok(tag_group) = string_to_exif_tag_group(&tag_group) else {
+            let Ok(tag_group) = string_to_exif_tag_group(tag_group) else {
                 continue;
             };
 
@@ -228,14 +225,14 @@ pub fn clean_exif_tags(file_path: &str, tags_to_remove: &[(String, u16, String)]
         } else {
             let extension = file_path.extension().and_then(|ext| ext.to_str()).unwrap_or("");
             let new_file_path = file_path.with_extension(format!("czkawka_cleaned_exif.{extension}"));
-            let _ = fs::copy(&file_path, &new_file_path);
+            let _ = fs::copy(file_path, &new_file_path);
             new_metadata.write_to_file(&new_file_path).map_err(|e| format!("Failed to write EXIF file: {e}"))?;
         }
 
         Ok(tags_removed)
     })
     .map_err(|e| format!("Panic occurred while reading EXIF: {e:?}"))?
-    .map_err(|e: String| format!("Failed to remove EXIF from file {} - {e}", file_path.to_string()))
+    .map_err(|e: String| format!("Failed to remove EXIF from file {file_path} - {e}"))
 }
 
 fn extract_exif_tags(path: &Path) -> Result<Vec<(String, u16, String)>, String> {

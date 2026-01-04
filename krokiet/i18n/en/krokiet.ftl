@@ -95,6 +95,8 @@ rust_move_confirmation_number_simple = { $items } items selected.
 rust_clean_exif_confirmation = Are you sure you want to remove EXIF data from the selected items?
 rust_clean_exif_confirmation_number_simple = { $items } items selected.
 
+clean_exif_overwrite_files_text = Overwrite files
+
 rust_optimize_video_confirmation = Are you sure you want to optimize the selected videos?
 rust_optimize_video_confirmation_number_simple = { $items } items selected.
 
@@ -294,7 +296,6 @@ subsettings_exif_ignored_tags_hint_text = Tags to exclude from scanning (e.g. GP
 clean_button_text = Clean
 clean_text = Clean EXIF data
 clean_confirmation_text = Are you sure you want to remove EXIF data from the selected items?
-clean_exif_overwrite_files_text = Overwrite files
 optimize_button_text = Optimize
 optimize_text = Optimize images
 optimize_confirmation_text = Are you sure you want to optimize the selected items?
