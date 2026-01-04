@@ -36,7 +36,7 @@ impl ModelProcessor {
 
             let rm_fnc = move |data: &SimplerMainListModel| rename_single_item(data, path_idx, name_idx, ext_idx);
 
-            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, rm_fnc, MessageType::Rename);
+            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, rm_fnc, MessageType::Rename, false);
         });
     }
 }
@@ -105,6 +105,7 @@ mod tests {
                 rm_fnc,
                 MessageType::Rename,
                 self.active_tab.get_int_size_opt_idx(),
+                false,
             );
 
             let (new_simple_model, errors, items_deleted) = Self::remove_deleted_items_from_model(output);

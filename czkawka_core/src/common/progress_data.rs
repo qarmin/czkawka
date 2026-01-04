@@ -230,7 +230,10 @@ impl ToolType {
 
 impl CurrentStage {
     pub fn is_special_non_tool_stage(&self) -> bool {
-        matches!(self, Self::DeletingFiles | Self::RenamingFiles | Self::MovingFiles)
+        matches!(
+            self,
+            Self::DeletingFiles | Self::RenamingFiles | Self::MovingFiles | Self::HardlinkingFiles | Self::SymlinkingFiles | Self::OptimizingVideos | Self::CleaningExif
+        )
     }
 
     pub fn get_current_stage(&self) -> u8 {

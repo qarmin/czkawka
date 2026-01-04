@@ -15,7 +15,7 @@
 - Fix invalid canonicalization of paths on windows - [#1604](https://github.com/qarmin/czkawka/pull/1604/files)
 - Comparison results are now deterministic - [#1654](https://github.com/qarmin/czkawka/pull/1654)
 - Reading built-in jpeg inside raw images, if available(currently disabled due - https://github.com/dnglab/dnglab/issues/638) - [#1655](https://github.com/qarmin/czkawka/pull/1655)
-- Fixed silent panics, when logger cannot log to terminal - [1658](https://github.com/qarmin/czkawka/pull/1658)
+- Fixed silent panics, when logger cannot log to terminal - [#1658](https://github.com/qarmin/czkawka/pull/1658)
 - Commit hash is added to logs - [#1672](https://github.com/qarmin/czkawka/pull/1672)
 - Improved and fixed logic which groups similar images by its similarity - [#1685](https://github.com/qarmin/czkawka/pull/1685)
 - Added counting scan time - [#1674](https://github.com/qarmin/czkawka/pull/1674), [#1685](https://github.com/qarmin/czkawka/pull/1685)
@@ -37,10 +37,14 @@
 - About screen, now contains info, that Krokiet is successor app - [#1718](https://github.com/qarmin/czkawka/pull/1718)
 
 ### Krokiet
-- Added video thumbnails - [#1714](https://github.com/qarmin/czkawka/pull/1714)
+- Added video thumbnails(single/grid) - [#1714](https://github.com/qarmin/czkawka/pull/1714)
 - Printing in settings, size of cache/thumbnails/logs files - [#1714](https://github.com/qarmin/czkawka/pull/1714)
 - Added sorting, by clicking at column headers - [#1718](https://github.com/qarmin/czkawka/pull/1718)
-- Added, enabled by default, limit 500 lines of messages in Krokiet, to avoid slow TextEdit performance - [#1718](https://github.com/qarmin/czkawka/pull/1718)
+- Added, enabled by default, limit 500 lines of messages in Krokiet, to freezes caused by slow TextEdit widget performance - [#1718](https://github.com/qarmin/czkawka/pull/1718)
+- Increased a little, size of all fonts, to improve readability - []()
+- Ability to choose app scale in runtime(but with several limitations) - []()
+- Cleaning messages in bottom panel, when scan starts - []()
+- Fix crash, when user clicked at previous results while new scan was in progress - []()
 
 ### External
 - Wine 10.20 contains bugfix that fixes crashes when running dialogs in Czkawka Gui - [Wine 49987 issue](https://bugs.winehq.org/show_bug.cgi?id=49987)

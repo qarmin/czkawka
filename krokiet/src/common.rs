@@ -492,9 +492,9 @@ impl ActiveTab {
             Self::SimilarVideos => IntDataSimilarVideos::SizePart1 as usize,
             Self::SimilarMusic => IntDataSimilarMusic::SizePart1 as usize,
             Self::BrokenFiles => IntDataBrokenFiles::SizePart1 as usize,
+            Self::TemporaryFiles => IntDataTemporaryFiles::SizePart1 as usize,
             Self::BadExtensions => IntDataBadExtensions::SizePart1 as usize,
             Self::ExifRemover => IntDataExifRemover::SizePart1 as usize,
-            Self::TemporaryFiles => IntDataTemporaryFiles::SizePart1 as usize,
             Self::VideoOptimizer => IntDataVideoOptimizer::SizePart1 as usize,
             Self::Settings | Self::About | Self::EmptyFolders | Self::InvalidSymlinks => return None,
         };
@@ -516,6 +516,15 @@ impl ActiveTab {
             Self::SimilarImages => IntDataSimilarImages::Height as usize,
             Self::Settings | Self::About => panic!("Button should be disabled"),
             _ => panic!("Unable to get height from this tab"),
+        }
+    }
+
+    pub(crate) fn get_str_video_codec_idx(self) -> usize {
+        match self {
+            Self::SimilarVideos => StrDataSimilarVideos::Codec as usize,
+            Self::VideoOptimizer => StrDataVideoOptimizer::Codec as usize,
+            Self::Settings | Self::About => panic!("Button should be disabled"),
+            _ => panic!("Unable to get video codec from this tab"),
         }
     }
 

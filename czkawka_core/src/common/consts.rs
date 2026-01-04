@@ -31,7 +31,7 @@ pub const AUDIO_FILES_EXTENSIONS: &[&str] = &[
 ];
 pub const VIDEO_FILES_EXTENSIONS: &[&str] = &[
     "mp4", "m4v", "mkv", "avi", "mov", "webm", "flv", "wmv", // Popular
-    "mpeg", "mpg", "mp2", "mpe", "m2ts", "mts", "vob", "evo", // MPEG / broadcast, "ts"
+    "mpeg", "mpg", "mp2", "mpe", "m2ts", "vob", "evo", // MPEG / broadcast, "ts"
     "3gp", "3g2", "f4v", "f4p", "f4a", "f4b", // Mobile / legacy
     "qt", "m4p", "mpv", // Apple / ISO BMFF
     "ogv", "rm", "rmvb", "asf", // Streaming / recording

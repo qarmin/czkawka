@@ -77,8 +77,7 @@ pub(crate) fn connect_scan_button(app: &MainWindow, progress_sender: Sender<Prog
 
         let cloned_model = Arc::clone(&shared_models);
 
-        reset_selection(&app, true);
-        set_number_of_enabled_items(&app, active_tab, 0);
+        app.global::<GuiState>().set_info_text("".into());
 
         let a = app.as_weak();
         match active_tab {
@@ -269,6 +268,7 @@ fn write_duplicate_results(
         );
     }
     app.global::<GuiState>().set_info_text(messages.into());
+    reset_selection_at_end(app, ActiveTab::DuplicateFiles);
 }
 fn prepare_data_model_duplicates(fe: &DuplicateEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(fe.get_path());
@@ -327,6 +327,7 @@ fn write_empty_folders_results(app: &MainWindow, vector: Vec<FolderEntry>, messa
     app.set_empty_folder_model(items.into());
     app.invoke_scan_ended(flk!("rust_found_empty_folders", items_found = items_found, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
+    reset_selection_at_end(app, ActiveTab::EmptyFolders);
 }
 
 fn prepare_data_model_empty_folders(fe: &FolderEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
@@ -398,6 +399,7 @@ fn write_big_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages: S
         .into(),
     );
     app.global::<GuiState>().set_info_text(messages.into());
+    reset_selection_at_end(app, ActiveTab::BigFiles);
 }
 
 fn prepare_data_model_big_files(fe: &FileEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
@@ -457,6 +459,7 @@ fn write_empty_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages:
     app.set_empty_files_model(items.into());
     app.invoke_scan_ended(flk!("rust_found_empty_files", items_found = items_found, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
+    reset_selection_at_end(app, ActiveTab::EmptyFiles);
 }
 
 fn prepare_data_model_empty_files(fe: &FileEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
@@ -561,6 +564,7 @@ fn write_similar_images_results(
     app.set_similar_images_model(items.into());
     app.invoke_scan_ended(flk!("rust_found_similar_images", items_found = items_found, groups = groups, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
+    reset_selection_at_end(app, ActiveTab::SimilarImages);
 }
 fn prepare_data_model_similar_images(fe: &ImagesEntry, hash_size: u8) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(fe.get_path());
@@ -678,6 +682,7 @@ fn write_similar_videos_results(
     app.set_similar_videos_model(items.into());
     app.invoke_scan_ended(flk!("rust_found_similar_videos", items_found = items_found, groups = groups, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
+    reset_selection_at_end(app, ActiveTab::SimilarVideos);
 }
 
 fn prepare_data_model_similar_videos(fe: &VideosEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
@@ -830,6 +835,7 @@ fn write_similar_music_results(app: &MainWindow, vector: Vec<(Option<MusicEntry>
     app.set_similar_music_model(items.into());
     app.invoke_scan_ended(flk!("rust_found_similar_music_files", items_found = items_found, groups = groups, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
+    reset_selection_at_end(app, ActiveTab::SimilarMusic);
 }
 fn prepare_data_model_similar_music(fe: &MusicEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(fe.get_path());
@@ -894,6 +900,7 @@ fn write_invalid_symlinks_results(app: &MainWindow, vector: Vec<SymlinksFileEntr
     app.set_invalid_symlinks_model(items.into());
     app.invoke_scan_ended(flk!("rust_found_invalid_symlinks", items_found = items_found, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
+    reset_selection_at_end(app, ActiveTab::InvalidSymlinks);
 }
 
 fn prepare_data_model_invalid_symlinks(fe: &SymlinksFileEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
@@ -953,6 +960,7 @@ fn write_temporary_files_results(app: &MainWindow, vector: Vec<TemporaryFileEntr
     app.set_temporary_files_model(items.into());
     app.invoke_scan_ended(flk!("rust_found_temporary_files", items_found = items_found, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
+    reset_selection_at_end(app, ActiveTab::TemporaryFiles);
 }
 
 fn prepare_data_model_temporary_files(fe: &TemporaryFileEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
@@ -1039,6 +1047,7 @@ fn write_broken_files_results(app: &MainWindow, vector: Vec<BrokenEntry>, messag
         .into(),
     );
     app.global::<GuiState>().set_info_text(messages.into());
+    reset_selection_at_end(app, ActiveTab::BrokenFiles);
 }
 
 fn prepare_data_model_broken_files(fe: &BrokenEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
@@ -1099,6 +1108,7 @@ fn write_bad_extensions_results(app: &MainWindow, vector: Vec<BadFileEntry>, mes
     app.set_bad_extensions_model(items.into());
     app.invoke_scan_ended(flk!("rust_found_bad_extensions", items_found = items_found, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
+    reset_selection_at_end(app, ActiveTab::BadExtensions);
 }
 
 fn prepare_data_model_bad_extensions(fe: &BadFileEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
@@ -1167,6 +1177,7 @@ fn write_exif_remover_results(app: &MainWindow, vector: Vec<ExifEntry>, messages
     app.set_exif_remover_model(items.into());
     app.invoke_scan_ended(flk!("rust_found_exif_files", items_found = items_found, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
+    reset_selection_at_end(app, ActiveTab::ExifRemover);
 }
 
 fn prepare_data_model_exif_remover(fe: &ExifEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
@@ -1254,6 +1265,7 @@ fn write_video_optimizer_results(app: &MainWindow, video_transcode_entries: Vec<
     app.set_video_optimizer_model(items.into());
     app.invoke_scan_ended(flk!("rust_found_video_optimizer", items_found = items_found, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
+    reset_selection_at_end(app, ActiveTab::VideoOptimizer);
 }
 
 fn prepare_data_model_video_optimizer_video(fe: &VideoTranscodeEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
@@ -1282,6 +1294,12 @@ fn get_dt_timestamp_string(timestamp: u64) -> String {
 }
 
 ////////////////////////////////////////// Common
+
+fn reset_selection_at_end(app: &MainWindow, active_tab: ActiveTab) {
+    reset_selection(app, true);
+    set_number_of_enabled_items(app, active_tab, 0);
+}
+
 fn insert_data_to_model(items: &Rc<VecModel<MainListModel>>, data_model_str: ModelRc<SharedString>, data_model_int: ModelRc<i32>, filled_header_row: Option<bool>) {
     let main = MainListModel {
         checked: false,

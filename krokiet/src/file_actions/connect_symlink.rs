@@ -36,7 +36,7 @@ impl ModelProcessor {
 
             let symlink_fnc = move |data: &SimplerMainListModel| symlink_single_item(&format!("{}{MAIN_SEPARATOR}{}", data.val_str[path_idx], data.val_str[name_idx]));
 
-            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, symlink_fnc, MessageType::Symlink);
+            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, symlink_fnc, MessageType::Symlink, false);
         });
     }
 }

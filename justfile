@@ -121,9 +121,10 @@ prepare_translations_deps:
     @command -v uv >/dev/null 2>&1 || curl -LsSf https://astral.sh/uv/install.sh | sh
     @command -v ollama >/dev/null 2>&1 || curl -fsSL https://ollama.com/install.sh | sh
     cd misc/ai_translate; uv sync
-    # ollama pull qwen2.5:7b # takes few GB, 32b takes 20GB
-    # 7b is few times faster, so should be used where number of words to translate are big
-    ollama pull qwen2.5:32b
+    # qwen2.5:7b - fast, but quite bad quality
+    # qwen2.5:32b - very slow, still not good quality
+    #
+    ollama pull zongwei/gemma3-translator:4b
 
 translate:
     cd misc/ai_translate; uv run translate.py ../../czkawka_gui/i18n

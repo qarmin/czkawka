@@ -40,6 +40,20 @@ impl VideoCodec {
     }
 }
 
+impl std::str::FromStr for VideoCodec {
+    type Err = String;
+
+    fn from_str(codec: &str) -> Result<Self, Self::Err> {
+        match codec.to_lowercase().as_str() {
+            "h264" | "libx264" => Ok(Self::H264),
+            "h265" | "hevc" | "libx265" => Ok(Self::H265),
+            "av1" | "libaom-av1" => Ok(Self::Av1),
+            "vp9" | "libvpx-vp9" => Ok(Self::Vp9),
+            _ => Err(format!("Unknown codec: {codec}")),
+        }
+    }
+}
+
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum OptimizerMode {
     VideoTranscode { codec: VideoCodec, quality: u32 },

@@ -167,37 +167,27 @@ impl SimilarVideos {
         let seek_time = file_entry.duration.map_or(5.0, |d| d * (thumbnail_video_percentage_from_start as f64) / 100.0);
         let duration_per_10_items = file_entry.duration.map_or(0.5, |d| d / 10.0);
 
-        let output = if generate_grid_instead_of_single {
-            let vf_filter = format!("fps=1/{duration_per_10_items:.6},scale='min(1920,iw)':'min(1080,ih)':force_original_aspect_ratio=decrease,tile=3x3");
+        let max_height = 1080;
+        let max_width = 1920;
+        let tiles_size = 3;
 
-            Command::new("ffmpeg")
-                .arg("-i")
-                .arg(&file_entry.path)
-                .arg("-vf")
-                .arg(&vf_filter)
-                .arg("-frames:v")
-                .arg("1")
-                .arg("-q:v")
-                .arg("2")
-                .arg("-y")
-                .arg(&thumbnail_path)
-                .output()
+        let mut command = Command::new("ffmpeg");
+        let mut command = command.arg("-threads").arg("1").arg("-i").arg(&file_entry.path);
+
+        if generate_grid_instead_of_single {
+            let vf_filter = format!(
+                "fps=1/{duration_per_10_items:.6},scale='min({},iw)':'min({},ih)':force_original_aspect_ratio=decrease,tile={tiles_size}x{tiles_size}",
+                max_width / tiles_size,
+                max_height / tiles_size
+            );
+
+            command = command.arg("-vf").arg(&vf_filter);
         } else {
-            Command::new("ffmpeg")
-                .arg("-ss")
-                .arg(seek_time.to_string())
-                .arg("-i")
-                .arg(&file_entry.path)
-                .arg("-vf")
-                .arg("scale='min(1920,iw)':'min(1080,ih)':force_original_aspect_ratio=decrease")
-                .arg("-vframes")
-                .arg("1")
-                .arg("-q:v")
-                .arg("2")
-                .arg("-y")
-                .arg(&thumbnail_path)
-                .output()
-        };
+            let vf_filter = format!("scale='min({max_width},iw)':'min({max_height},ih)':force_original_aspect_ratio=decrease");
+            command = command.arg("-vf").arg(&vf_filter).arg("-ss").arg(seek_time.to_string());
+        }
+
+        let output = command.arg("-frames:v").arg("1").arg("-q:v").arg("2").arg("-y").arg(&thumbnail_path).output();
 
         match output {
             Ok(result) => {
@@ -234,9 +224,11 @@ impl SimilarVideos {
             0, // non_cached_files_to_check.values().map(|e| e.size).sum(), // Looks, that at least for now, there is no big difference between checking big and small files, so at least for now, only tracking number of files is enough
         );
 
+        let non_cached_files_to_check: Vec<_> = non_cached_files_to_check.into_iter().map(|f| f.1).collect();
         let mut vec_file_entry: Vec<VideosEntry> = non_cached_files_to_check
             .into_par_iter()
-            .map(|(_, file_entry)| {
+            .with_max_len(2)
+            .map(|file_entry| {
                 if check_if_stop_received(stop_flag) {
                     return None;
                 }
@@ -333,6 +325,7 @@ impl SimilarVideos {
         let errors = self
             .similar_vectors
             .par_iter_mut()
+            .with_max_len(2)
             .map(|vec_file_entry| {
                 let mut errs = Vec::new();
                 for file_entry in vec_file_entry {

@@ -274,6 +274,11 @@ fn translate_items(app: &MainWindow) {
     translation.set_optimize_button_text(flk!("optimize_button_text").into());
     translation.set_optimize_text(flk!("optimize_text").into());
     translation.set_optimize_confirmation_text(flk!("optimize_confirmation_text").into());
+    translation.set_optimize_fail_if_bigger_text(flk!("optimize_fail_if_bigger_text").into());
+    translation.set_optimize_overwrite_files_text(flk!("optimize_overwrite_files_text").into());
+    translation.set_optimize_limit_video_size_text(flk!("optimize_limit_video_size_text").into());
+    translation.set_optimize_max_width_text(flk!("optimize_max_width_text").into());
+    translation.set_optimize_max_height_text(flk!("optimize_max_height_text").into());
     translation.set_hardlink_button_text(flk!("hardlink_button_text").into());
     translation.set_hardlink_text(flk!("hardlink_text").into());
     translation.set_hardlink_confirmation_text(flk!("hardlink_confirmation_text").into());
@@ -299,6 +304,13 @@ fn translate_items(app: &MainWindow) {
     translation.set_settings_similar_videos_preview_text(flk!("settings_similar_videos_image_preview").into());
     translation
         .set_settings_similar_videos_generate_thumbnail_grid_instead_of_single_image_text(flk!("settings_similar_videos_generate_thumbnail_grid_instead_of_single_image").into());
+    translation.set_settings_similar_videos_generate_thumbnail_grid_instead_of_single_image_hint_text(
+        flk!("settings_similar_videos_generate_thumbnail_grid_instead_of_single_image_hint_text").into(),
+    );
+    translation.set_settings_application_scale_text(flk!("settings_application_scale_text").into());
+    translation.set_settings_application_scale_hint_text(flk!("settings_application_scale_hint_text").into());
+    translation.set_settings_restart_required_scale_text(flk!("settings_restart_required_scale_text").into());
+    translation.set_settings_use_manual_application_scale_text(flk!("settings_use_manual_application_scale_text").into());
     translation.set_settings_duplicate_hide_hard_links_text(flk!("settings_duplicate_hide_hard_links").into());
     translation.set_settings_duplicate_minimal_hash_cache_size_text(flk!("settings_duplicate_minimal_hash_cache_size").into());
     translation.set_settings_duplicate_use_prehash_text(flk!("settings_duplicate_use_prehash").into());

@@ -174,7 +174,8 @@ impl VideoOptimizer {
                     if check_if_stop_received(stop_flag) {
                         return;
                     }
-                    match process_video(&entry.path, entry.size, codec, quality) {
+                    // TODO not supported arguments
+                    match process_video(stop_flag, &entry.path.to_string_lossy(), entry.size, codec, quality, true, true, false, 0, 0) {
                         Ok(_new_size) => {}
                         Err(e) => {
                             entry.error = Some(e);

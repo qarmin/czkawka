@@ -1,8 +1,10 @@
-use std::fs;
 use std::path::Path;
-use std::process::Command;
+use std::process::{Command, Stdio};
+use std::sync::Arc;
+use std::sync::atomic::AtomicBool;
+use std::{fs, thread};
 
-use log::{debug, info, warn};
+use log::debug;
 
 use crate::common::video_metadata::VideoMetadata;
 use crate::tools::video_optimizer::{VideoCodec, VideoTranscodeEntry};
@@ -38,51 +40,95 @@ pub fn check_video(mut entry: VideoTranscodeEntry) -> VideoTranscodeEntry {
     entry
 }
 
-pub fn process_video(video_path: &Path, original_size: u64, video_codec: VideoCodec, target_quality: u32) -> Result<u64, String> {
-    debug!("Processing video: {}", video_path.display());
+pub fn process_video(
+    stop_flag: &Arc<AtomicBool>,
+    video_path: &str,
+    original_size: u64,
+    video_codec: VideoCodec,
+    target_quality: u32,
+    fail_if_not_smaller: bool,
+    overwrite_original: bool,
+    limit_video_size: bool,
+    max_width: u32,
+    max_height: u32,
+) -> Result<(), String> {
+    let stop_flag = stop_flag.clone();
+    let temp_output = Path::new(video_path).with_extension("czkawka_optimized.mp4");
 
-    let temp_output = video_path.with_extension(format!("optimized.{}", video_path.extension().and_then(|e| e.to_str()).unwrap_or("mp4")));
-
-    let codec_str = video_codec.as_str();
-    let quality = target_quality.to_string();
-
-    let output = Command::new("ffmpeg")
+    let mut command = Command::new("ffmpeg");
+    command
         .arg("-i")
         .arg(video_path)
+        .arg("-nostdin")
         .arg("-c:v")
-        .arg(codec_str)
+        .arg(video_codec.as_str())
         .arg("-crf")
-        .arg(&quality)
+        .arg(target_quality.to_string());
+
+    if limit_video_size {
+        let scale_filter = format!("scale='min({max_width},iw):min({max_height},ih):force_original_aspect_ratio=decrease'");
+        command.arg("-vf").arg(scale_filter);
+    }
+
+    command
         .arg("-c:a")
         .arg("copy")
         .arg("-y")
         .arg(&temp_output)
-        .output()
-        .map_err(|e| format!("Failed to execute ffmpeg: {e}"))?;
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null());
 
-    if !output.status.success() {
+    let mut child = command.spawn().map_err(|e| format!("Failed to execute ffmpeg: {e}"))?;
+
+    let result = thread::spawn(move || {
+        loop {
+            if stop_flag.load(std::sync::atomic::Ordering::Relaxed) {
+                let _ = child.kill();
+                return Err(String::from("Ffmpeg process was forced to stop"));
+            }
+
+            if let Some(status) = child.try_wait().expect("Failed to wait on ffmpeg process") {
+                if status.success() {
+                    break Ok(());
+                }
+                break Err(format!("ffmpeg exited with non-zero status: {status}"));
+            }
+
+            thread::sleep(std::time::Duration::from_millis(100));
+        }
+    })
+    .join()
+    .map_err(|e| format!("Failed to join handler, when processing file {video_path}: {e:?}"))?;
+
+    if let Err(e) = result {
         let _ = fs::remove_file(&temp_output);
-        return Err(String::from_utf8_lossy(&output.stderr).to_string());
+        return Err(format!("Failed to process video file {video_path}: {e}"));
     }
 
     let metadata = fs::metadata(&temp_output).map_err(|e| {
         let _ = fs::remove_file(&temp_output);
-        format!("Failed to get metadata: {e}")
+        format!("Failed to get metadata of optimized file \"{}\": {}", temp_output.to_string_lossy(), e)
     })?;
 
     let new_size = metadata.len();
 
-    if new_size < original_size {
+    if fail_if_not_smaller && new_size >= original_size {
+        let _ = fs::remove_file(&temp_output);
+        return Err(format!(
+            "Optimized file({}) ({new_size} bytes) is larger than original({}) ({original_size} bytes)",
+            temp_output.to_string_lossy(),
+            video_path
+        ));
+    }
+
+    if overwrite_original {
         fs::rename(&temp_output, video_path).map_err(|e| {
             let _ = fs::remove_file(&temp_output);
-            format!("Failed to replace file: {e}")
+            format!("Failed to replace file \"{video_path}\" with optimized version: {e}")
         })?;
-
-        info!("Successfully optimized video: {} ({} -> {} bytes)", video_path.display(), original_size, new_size);
-        Ok(new_size)
-    } else {
-        warn!("Optimized video is larger than original, keeping original: {}", video_path.display());
-        let _ = fs::remove_file(&temp_output);
-        Err(format!("Optimized file ({new_size} bytes) is larger than original ({original_size} bytes)"))
+        return Ok(());
     }
+
+    Ok(())
 }

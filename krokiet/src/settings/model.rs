@@ -161,6 +161,16 @@ pub struct SettingsCustom {
     pub video_optimizer_excluded_codecs: String,
     #[serde(default = "default_video_optimizer_video_quality")]
     pub video_optimizer_video_quality: u32,
+    #[serde(default)]
+    pub video_optimizer_fail_if_bigger: bool,
+    #[serde(default)]
+    pub video_optimizer_overwrite_files: bool,
+    #[serde(default)]
+    pub video_optimizer_limit_video_size: bool,
+    #[serde(default = "default_video_optimizer_max_width")]
+    pub video_optimizer_max_width: u32,
+    #[serde(default = "default_video_optimizer_max_height")]
+    pub video_optimizer_max_height: u32,
     #[serde(default = "default_video_optimizer_image_threshold")]
     pub video_optimizer_image_threshold: u8,
     #[serde(default)]
@@ -324,10 +334,16 @@ fn default_video_optimizer_video_codec() -> String {
     "h265".to_string()
 }
 fn default_video_optimizer_excluded_codecs() -> String {
-    "hevc,av1".to_string()
+    "hevc,av1,h265".to_string()
 }
 fn default_video_optimizer_video_quality() -> u32 {
     23
+}
+fn default_video_optimizer_max_width() -> u32 {
+    1920
+}
+fn default_video_optimizer_max_height() -> u32 {
+    1080
 }
 fn default_video_optimizer_image_threshold() -> u8 {
     1

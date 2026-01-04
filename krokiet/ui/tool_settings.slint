@@ -247,6 +247,9 @@ export component ToolSettings {
                 checked <=> Settings.similar_videos_sub_generate_thumbnail_grid_instead_of_single_image;
             }
 
+            HintText {
+                hint_text: Translations.settings_similar_videos_generate_thumbnail_grid_instead_of_single_image_hint_text;
+            }
 
             Rectangle { }
         }
@@ -379,13 +382,6 @@ export component ToolSettings {
             if Settings.video_optimizer_sub_mode_index == 1: VerticalLayout {
                 spacing: 5px;
 
-                ComboBoxWrapper {
-                    text: Translations.subsettings_video_optimizer_video_codec_text;
-                    model: Settings.video_optimizer_sub_video_codec;
-                    current_index <=> Settings.video_optimizer_sub_video_codec_index;
-                    current_value <=> Settings.video_optimizer_sub_video_codec_value;
-                }
-
                 HorizontalLayout {
                     spacing: 5px;
                     Text {
@@ -396,24 +392,15 @@ export component ToolSettings {
 
                     LineEdit {
                         text <=> Settings.video_optimizer_sub_excluded_codecs;
-        font-size: FontSizes.normal;
+                        font-size: FontSizes.normal;
                     }
 
                     Button {
                         text: Translations.subsettings_reset_text;
                         clicked => {
-                            Settings.video_optimizer_sub_excluded_codecs = "hevc,av1";
+                            Settings.video_optimizer_sub_excluded_codecs = "hevc,av1,h265";
                         }
                     }
-                }
-
-                SliderWrapper {
-                    text: Translations.subsettings_video_optimizer_video_quality_text;
-                    end_text: "(" + round(Settings.video_optimizer_sub_video_quality) + "/" + round(Settings.video_optimizer_sub_video_quality_max) + ")";
-                    end_text_size: 60px;
-                    maximum <=> Settings.video_optimizer_sub_video_quality_max;
-                    minimum <=> Settings.video_optimizer_sub_video_quality_min;
-                    value <=> Settings.video_optimizer_sub_video_quality;
                 }
             }
 

@@ -191,7 +191,7 @@ where
 
     let result = match std::fs::read_to_string(&config_file) {
         Ok(serialized) => {
-            debug!("Loading data from file \"{:?}\" took {:?}", config_file.to_string_lossy(), current_time.elapsed());
+            debug!("Loading data from file \"{}\" took {:?}", config_file.to_string_lossy(), current_time.elapsed());
 
             match serde_json::from_str(&serialized) {
                 Ok(custom_settings) => Ok(custom_settings),
@@ -202,7 +202,7 @@ where
     };
 
     debug!(
-        "Loading and converting data from file \"{:?}\" took {:?}",
+        "Loading and converting data from file \"{}\" took {:?}",
         config_file.to_string_lossy(),
         current_time.elapsed()
     );
@@ -346,6 +346,15 @@ pub(crate) fn set_combobox_custom_settings_items(settings: &Settings, custom_set
     let (idx, display_names) = StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.video_optimizer_video_codec, &collected_items.video_optimizer_video_codec);
     settings.set_video_optimizer_sub_video_codec_index(idx as i32);
     settings.set_video_optimizer_sub_video_codec_value(display_names[idx].clone());
+
+    let codec_display_names = collected_items
+        .video_optimizer_video_codec
+        .iter()
+        .map(|e| e.display_name.clone().into())
+        .collect::<Vec<_>>();
+    let codec_config_value = collected_items.video_optimizer_video_codec[idx].config_name.clone();
+    settings.set_video_optimizer_sub_video_codec_config(ModelRc::new(VecModel::from(codec_display_names)));
+    settings.set_video_optimizer_sub_video_codec_config_value(codec_config_value.into());
 }
 
 pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom, base_settings: &BasicSettings, cli_args: Option<CliResult>) {
@@ -449,6 +458,11 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
 
     settings.set_video_optimizer_sub_excluded_codecs(custom_settings.video_optimizer_excluded_codecs.clone().into());
     settings.set_video_optimizer_sub_video_quality(custom_settings.video_optimizer_video_quality as f32);
+    settings.set_video_optimizer_sub_fail_if_bigger(custom_settings.video_optimizer_fail_if_bigger);
+    settings.set_video_optimizer_sub_overwrite_files(custom_settings.video_optimizer_overwrite_files);
+    settings.set_video_optimizer_sub_limit_video_size(custom_settings.video_optimizer_limit_video_size);
+    settings.set_video_optimizer_sub_max_width(custom_settings.video_optimizer_max_width.to_string().into());
+    settings.set_video_optimizer_sub_max_height(custom_settings.video_optimizer_max_height.to_string().into());
     settings.set_video_optimizer_sub_image_threshold(custom_settings.video_optimizer_image_threshold as f32);
 
     settings.set_ignored_exif_tags(custom_settings.ignored_exif_tags.clone().into());
@@ -592,6 +606,11 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let video_optimizer_video_codec = StringComboBoxItems::get_config_name_from_idx(video_optimizer_sub_video_codec_idx as usize, &collected_items.video_optimizer_video_codec);
     let video_optimizer_excluded_codecs = settings.get_video_optimizer_sub_excluded_codecs().to_string();
     let video_optimizer_video_quality = settings.get_video_optimizer_sub_video_quality().round() as u32;
+    let video_optimizer_fail_if_bigger = settings.get_video_optimizer_sub_fail_if_bigger();
+    let video_optimizer_overwrite_files = settings.get_video_optimizer_sub_overwrite_files();
+    let video_optimizer_limit_video_size = settings.get_video_optimizer_sub_limit_video_size();
+    let video_optimizer_max_width = settings.get_video_optimizer_sub_max_width().parse::<u32>().unwrap_or(1920);
+    let video_optimizer_max_height = settings.get_video_optimizer_sub_max_height().parse::<u32>().unwrap_or(1080);
     let video_optimizer_image_threshold = settings.get_video_optimizer_sub_image_threshold().round() as u8;
 
     let ignored_exif_tags = settings.get_ignored_exif_tags().to_string();
@@ -676,6 +695,11 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         video_optimizer_video_codec,
         video_optimizer_excluded_codecs,
         video_optimizer_video_quality,
+        video_optimizer_fail_if_bigger,
+        video_optimizer_overwrite_files,
+        video_optimizer_limit_video_size,
+        video_optimizer_max_width,
+        video_optimizer_max_height,
         video_optimizer_image_threshold,
         ignored_exif_tags,
         column_sizes,

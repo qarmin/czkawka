@@ -36,7 +36,7 @@ impl ModelProcessor {
 
             let clean_fnc = move |data: &SimplerMainListModel| clean_exif_single_file(&format!("{}{MAIN_SEPARATOR}{}", data.val_str[path_idx], data.val_str[name_idx]));
 
-            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, clean_fnc, MessageType::CleanExif);
+            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, clean_fnc, MessageType::CleanExif, false);
         });
     }
 }

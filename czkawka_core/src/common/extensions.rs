@@ -23,7 +23,7 @@ impl Extensions {
             return (Default::default(), messages);
         }
         file_extensions = file_extensions.replace("IMAGE", "jpg,kra,gif,png,bmp,tiff,hdr,svg");
-        file_extensions = file_extensions.replace("VIDEO", "mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,mts,m2ts");
+        file_extensions = file_extensions.replace("VIDEO", "mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts");
         file_extensions = file_extensions.replace("MUSIC", "mp3,flac,ogg,tta,wma,webm");
         file_extensions = file_extensions.replace("TEXT", "txt,doc,docx,odt,rtf");
 

@@ -123,35 +123,39 @@ impl ModelProcessor {
         process_function: impl Fn(&SimplerMainListModel) -> Result<(), String> + Send + Sync + 'static,
         message_type: MessageType,
         size_idx: Option<usize>,
+        force_single_threaded: bool,
     ) -> ProcessingResult {
         let rm_idx = Arc::new(AtomicUsize::new(0));
         let size = Arc::new(AtomicU64::new(0));
         let delayed_sender = DelayedSender::new(sender, Duration::from_millis(200));
 
-        let mut output: Vec<_> = items_simplified
-            .into_par_iter()
-            .map(|(idx, data)| {
-                if !data.checked {
-                    return (idx, data, None);
-                }
+        let fnc = |(idx, data): (usize, SimplerMainListModel)| {
+            if !data.checked {
+                return (idx, data, None);
+            }
 
-                // Stop requested, so just return items
-                if stop_flag.load(Ordering::Relaxed) {
-                    return (idx, data, None);
-                }
+            // Stop requested, so just return items
+            if stop_flag.load(Ordering::Relaxed) {
+                return (idx, data, None);
+            }
 
-                let rm_idx = rm_idx.fetch_add(1, Ordering::Relaxed);
-                let size = size.fetch_add(size_idx.map(|size_idx| data.get_size(size_idx)).unwrap_or_default(), Ordering::Relaxed);
-                let mut progress = message_type.get_base_progress();
-                progress.entries_to_check = items_queued_to_delete;
-                progress.entries_checked = rm_idx;
-                progress.bytes_checked = size;
-                delayed_sender.send(progress);
+            let rm_idx = rm_idx.fetch_add(1, Ordering::Relaxed);
+            let size = size.fetch_add(size_idx.map(|size_idx| data.get_size(size_idx)).unwrap_or_default(), Ordering::Relaxed);
+            let mut progress = message_type.get_base_progress();
+            progress.entries_to_check = items_queued_to_delete;
+            progress.entries_checked = rm_idx;
+            progress.bytes_checked = size;
+            delayed_sender.send(progress);
 
-                let res = process_function(&data);
-                (idx, data, Some(res))
-            })
-            .collect();
+            let res = process_function(&data);
+            (idx, data, Some(res))
+        };
+
+        let mut output: Vec<_> = if force_single_threaded {
+            items_simplified.into_iter().map(fnc).collect()
+        } else {
+            items_simplified.into_par_iter().map(fnc).collect()
+        };
         output.sort_by_key(|(idx, _, _)| *idx);
 
         output
@@ -165,6 +169,7 @@ impl ModelProcessor {
         simpler_model: Vec<(usize, SimplerMainListModel)>,
         dlt_fnc: impl Fn(&SimplerMainListModel) -> Result<(), String> + Send + Sync + 'static,
         message_type: MessageType,
+        force_single_threaded: bool,
     ) {
         weak_app
             .upgrade_in_event_loop(move |app| {
@@ -197,7 +202,16 @@ impl ModelProcessor {
         let _ = progress_sender.send(base_progress).map_err(|e| error!("Failed to send progress data: {e}"));
 
         let start_time = std::time::Instant::now();
-        let results = Self::process_items(simpler_model, items_queued_to_delete, progress_sender.clone(), &stop_flag, dlt_fnc, message_type, size_idx);
+        let results = Self::process_items(
+            simpler_model,
+            items_queued_to_delete,
+            progress_sender.clone(),
+            &stop_flag,
+            dlt_fnc,
+            message_type,
+            size_idx,
+            force_single_threaded,
+        );
         let processing_time = start_time.elapsed();
         let removing_items_from_model = std::time::Instant::now();
         let (new_simple_model, errors, items_deleted) = Self::remove_deleted_items_from_model(results);

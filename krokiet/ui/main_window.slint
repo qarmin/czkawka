@@ -18,13 +18,14 @@ import { PopupRenameFiles } from "popup_rename_files.slint";
 import { PopupSave } from "popup_save.slint";
 import { PopupSortResults } from "popup_sort.slint";
 import { PopupActionConfirm } from "popup_action_confirm.slint";
+import { PopupOptimize } from "popup_optimize.slint";
 import { ToolSettings } from "tool_settings.slint";
 import { Translations } from "translations.slint";
 
 export {Settings, Callabler, GuiState, Translations, Palette}
 
 export component MainWindow inherits Window {
-    default-font-size: 14px;
+    default-font-size: FontSizes.normal;
 
     callback scan_stopping;
     callback scan_starting(ActiveTab);
@@ -38,14 +39,6 @@ export component MainWindow inherits Window {
     // Opening popup is done via Rust call
     callback request_setup_action_popup(PopupRequest); // When opening popup we need to setup data in it, Slint -> Rust
     callback show_action_popup(PopupRequest, string); // After setup, we can show popup - Rust -> Slint - string is choosed folder - to avoid having multiple callbacks, string will be empty for things that do not need it
-
-    // Moving is special - first we need to open folder chooser dialog, then normal move popup
-    callback folders_move_choose_requested(); // When moving, first need to
-    callback show_move_folders_dialog(string); // Comes from Rust side
-
-    callback delete_selected_items(); // TODO - inside can be set params
-    callback request_popup_accepted(PopupRequest); // When user accepted action in popup, we can proceed
-    callback delete_popup_dialog_configured();
 
     title <=> Translations.main_window_title_text;
 
@@ -286,17 +279,16 @@ export component MainWindow inherits Window {
         }
     }
 
-    optimize_popup_window := PopupActionConfirm {
+    optimize_popup_window := PopupOptimize {
         height: root.height;
         width: root.width;
         title_text: Translations.optimize_text;
-        confirmation_text: Translations.optimize_confirmation_text;
 
         x: parent.x + (root.width - self.popup_width) / 2.0;
         y: parent.y + (parent.height - self.popup_height) / 2.0;
 
-        action_confirmed => {
-            Callabler.optimize_items();
+        action_confirmed(codec, fail_if_bigger, overwrite_files, quality, limit_size, max_width, max_height) => {
+            Callabler.optimize_items(codec, fail_if_bigger, overwrite_files, quality, limit_size, max_width, max_height);
         }
     }
 
@@ -326,11 +318,6 @@ export component MainWindow inherits Window {
         action_confirmed => {
             Callabler.softlink_items();
         }
-    }
-
-    show_move_folders_dialog(folder_name) => {
-        move_popup_window.folder_name = folder_name;
-        move_popup_window.show_popup();
     }
 
     scan_ended(scan_text) => {
@@ -377,9 +364,5 @@ export component MainWindow inherits Window {
         } else {
             debug("Unsupported popup request");
         }
-    }
-
-    delete_popup_dialog_configured => {
-        delete_popup_window.show_popup();
     }
 }

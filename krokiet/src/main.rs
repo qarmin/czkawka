@@ -86,7 +86,7 @@ fn main() {
     if base_settings.use_manual_application_scale {
         let scale = base_settings.manual_application_scale.clamp(0.5, 3.0);
         unsafe {
-            std::env::set_var("SLINT_SCALE_FACTOR", format!("{:.2}", scale));
+            std::env::set_var("SLINT_SCALE_FACTOR", format!("{scale:.2}"));
         }
     }
 
@@ -120,7 +120,7 @@ fn main() {
     connect_showing_proper_select_buttons(&app);
     connect_move(&app, progress_sender.clone(), stop_flag.clone());
     connect_rename(&app, progress_sender.clone(), stop_flag.clone());
-    connect_optimize_video(&app, progress_sender.clone(), stop_flag.clone());
+    connect_optimize_video(&app, progress_sender.clone(), stop_flag.clone(), Arc::clone(&shared_models));
     connect_clean(&app, progress_sender.clone(), stop_flag.clone());
     connect_hardlink(&app, progress_sender.clone(), stop_flag.clone());
     connect_symlink(&app, progress_sender, stop_flag);

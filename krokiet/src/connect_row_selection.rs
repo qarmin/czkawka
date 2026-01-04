@@ -40,7 +40,10 @@ pub(crate) fn reset_selection(app: &MainWindow, reset_all_selection: bool) {
 // So we need to recalculate them
 pub(crate) fn recalculate_small_selection_if_needed(model: &ModelRc<MainListModel>, active_tab: ActiveTab) {
     let mut lock = get_write_selection_lock();
-    let selection = lock.get_mut(&active_tab).expect("Failed to get selection data");
+    let keys = lock.keys().cloned().collect::<Vec<_>>();
+    let selection = lock
+        .get_mut(&active_tab)
+        .unwrap_or_else(|| panic!("Failed to get selection data for tab {active_tab:?} - {keys:?}"));
 
     if selection.exceeded_limit || selection.selected_rows.is_empty() {
         return;
@@ -370,13 +373,13 @@ pub(crate) mod checker {
                 app.global::<GuiState>().set_selected_results_bad_extensions(it1);
                 app.global::<GuiState>().set_selected_results_bad_extensions2(it2);
             }
-            ActiveTab::VideoOptimizer => {
-                app.global::<GuiState>().set_selected_results_video_optimizer(it1);
-                app.global::<GuiState>().set_selected_results_video_optimizer2(it2);
-            }
             ActiveTab::ExifRemover => {
                 app.global::<GuiState>().set_selected_results_exif_remover(it1);
                 app.global::<GuiState>().set_selected_results_exif_remover2(it2);
+            }
+            ActiveTab::VideoOptimizer => {
+                app.global::<GuiState>().set_selected_results_video_optimizer(it1);
+                app.global::<GuiState>().set_selected_results_video_optimizer2(it2);
             }
             _ => unreachable!("Current tab is not a tool that has enabled items"),
         }
@@ -436,13 +439,13 @@ pub(crate) mod checker {
                 app.global::<GuiState>().get_selected_results_bad_extensions(),
                 app.global::<GuiState>().get_selected_results_bad_extensions2(),
             ),
-            ActiveTab::VideoOptimizer => (
-                app.global::<GuiState>().get_selected_results_video_optimizer(),
-                app.global::<GuiState>().get_selected_results_video_optimizer2(),
-            ),
             ActiveTab::ExifRemover => (
                 app.global::<GuiState>().get_selected_results_exif_remover(),
                 app.global::<GuiState>().get_selected_results_exif_remover2(),
+            ),
+            ActiveTab::VideoOptimizer => (
+                app.global::<GuiState>().get_selected_results_video_optimizer(),
+                app.global::<GuiState>().get_selected_results_video_optimizer2(),
             ),
             _ => unreachable!("Current tab is not a tool that has enabled items"),
         };
