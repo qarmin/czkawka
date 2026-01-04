@@ -241,6 +241,7 @@ subsettings_exif_ignored_tags_hint_text = Tagi do wykluczenia ze skanowania (np.
 clean_button_text = Wyczyść
 clean_text = Wyczyść dane EXIF
 clean_confirmation_text = Czy na pewno chcesz usunąć dane EXIF z wybranych elementów?
+clean_exif_overwrite_files_text = Nadpisz pliki
 optimize_button_text = Optymalizuj
 optimize_text = Optymalizuj obrazy
 optimize_confirmation_text = Czy na pewno chcesz zoptymalizować wybrane elementy?

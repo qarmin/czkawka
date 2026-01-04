@@ -19,6 +19,7 @@ import { PopupSave } from "popup_save.slint";
 import { PopupSortResults } from "popup_sort.slint";
 import { PopupActionConfirm } from "popup_action_confirm.slint";
 import { PopupOptimize } from "popup_optimize.slint";
+import { PopupCleanExif } from "popup_clean_exif.slint";
 import { ToolSettings } from "tool_settings.slint";
 import { Translations } from "translations.slint";
 
@@ -265,17 +266,16 @@ export component MainWindow inherits Window {
         width: root.width;
     }
 
-    clean_popup_window := PopupActionConfirm {
+    clean_popup_window := PopupCleanExif {
         height: root.height;
         width: root.width;
         title_text: Translations.clean_text;
-        confirmation_text: Translations.clean_confirmation_text;
 
         x: parent.x + (root.width - self.popup_width) / 2.0;
         y: parent.y + (parent.height - self.popup_height) / 2.0;
 
-        action_confirmed => {
-            Callabler.clean_exif_items();
+        action_confirmed(override_file) => {
+            Callabler.clean_exif_items(override_file);
         }
     }
 

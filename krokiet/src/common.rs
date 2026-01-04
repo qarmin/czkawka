@@ -531,6 +531,30 @@ impl ActiveTab {
         }
     }
 
+    pub(crate) fn get_exif_tag_names_idx(self) -> usize {
+        match self {
+            Self::ExifRemover => StrDataExifRemover::ExifTags as usize,
+            Self::Settings | Self::About => panic!("Button should be disabled"),
+            _ => panic!("Unable to get exif tag names from this tab"),
+        }
+    }
+
+    pub(crate) fn get_exif_tag_groups_idx(self) -> usize {
+        match self {
+            Self::ExifRemover => StrDataExifRemover::ExifGroupsNames as usize,
+            Self::Settings | Self::About => panic!("Button should be disabled"),
+            _ => panic!("Unable to get exif tag groups from this tab"),
+        }
+    }
+
+    pub(crate) fn get_exif_tag_u16_idx(self) -> usize {
+        match self {
+            Self::ExifRemover => StrDataExifRemover::ExifTagsU16 as usize,
+            Self::Settings | Self::About => panic!("Button should be disabled"),
+            _ => panic!("Unable to get exif tag u16 from this tab"),
+        }
+    }
+
     pub(crate) fn get_is_header_mode(self) -> bool {
         match self {
             Self::EmptyFolders

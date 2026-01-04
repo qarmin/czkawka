@@ -1,4 +1,4 @@
-use std::path::{Path, MAIN_SEPARATOR};
+use std::path::MAIN_SEPARATOR;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread;
@@ -13,7 +13,7 @@ use crate::{Callabler, GuiState, MainWindow};
 
 pub(crate) fn connect_clean(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
     let a = app.as_weak();
-    app.global::<Callabler>().on_clean_exif_items(move || {
+    app.global::<Callabler>().on_clean_exif_items(move |override_file: bool| {
         let weak_app = a.clone();
         let progress_sender = progress_sender.clone();
         let stop_flag = stop_flag.clone();
@@ -22,12 +22,12 @@ pub(crate) fn connect_clean(app: &MainWindow, progress_sender: Sender<ProgressDa
         let active_tab = app.global::<GuiState>().get_active_tab();
 
         let processor = ModelProcessor::new(active_tab);
-        processor.clean_exif_selected_files(progress_sender, weak_app, stop_flag);
+        processor.clean_exif_selected_files(progress_sender, weak_app, stop_flag, override_file);
     });
 }
 
 impl ModelProcessor {
-    fn clean_exif_selected_files(self, progress_sender: Sender<ProgressData>, weak_app: Weak<MainWindow>, stop_flag: Arc<AtomicBool>) {
+    fn clean_exif_selected_files(self, progress_sender: Sender<ProgressData>, weak_app: Weak<MainWindow>, stop_flag: Arc<AtomicBool>, override_file: bool) {
         let model = self.active_tab.get_tool_model(&weak_app.upgrade().expect("Failed to upgrade app :("));
         let simpler_model = model.to_simpler_enumerated_vec();
         thread::spawn(move || {
@@ -43,7 +43,7 @@ impl ModelProcessor {
                     data.val_str[tag_names_idx].split(',').map(|s| s.to_string()).collect(),
                     data.val_str[tag_groups_idx].split(',').map(|s| s.to_string()).collect(),
                     data.val_str[tag_u16_idx].split(',').map(|s| s.to_string()).collect(),
-                    true,
+                    override_file,
                 )
             };
 
@@ -59,7 +59,7 @@ fn clean_exif_single_file(file_path: &str, tag_names: Vec<String>, tag_groups: V
     assert_eq!(tag_names.len(), tag_groups.len());
     assert_eq!(tag_names.len(), tags_u16.len());
     let connected_tags = tag_names.iter().zip(tag_groups.iter()).zip(tags_u16.iter())
-        .map(|((name, group), code)| (name.clone(), *code.parse::<u16>().unwrap_or(0), group.clone()))
+        .map(|((name, group), code)| (name.clone(), code.parse::<u16>().unwrap_or(0), group.clone()))
         .collect::<Vec<(String, u16, String)>>();
     let _ = clean_exif_tags(file_path, &connected_tags, override_file).map_err(|e| format!("Failed to clean EXIF for file {:?}, reason: {}", file_path, e))?;
     Ok(())

@@ -1,0 +1,55 @@
+import { PopupBase } from "popup_base.slint";
+import { Translations } from "translations.slint";
+import { CheckBox } from "std-widgets.slint";
+import { Settings } from "settings.slint";
+
+export component PopupCleanExif inherits Rectangle {
+    in-out property <string> title_text;
+
+    callback action_confirmed(bool);
+
+    out property <length> popup_width: 420px;
+    out property <length> popup_height: 200px;
+    callback show_popup();
+
+    popup_window := PopupBase {
+        width: popup_width;
+        height: popup_height;
+        title_text <=> root.title_text;
+
+        VerticalLayout {
+            spacing: 8px;
+
+            Rectangle { height: 8px; }
+
+            HorizontalLayout {
+                spacing: 0px;
+
+                Rectangle { width: 8px; }
+
+                VerticalLayout {
+                    spacing: 8px;
+
+                    Text { text: Translations.clean_confirmation_text; wrap: TextWrap.word-wrap; }
+
+                    CheckBox { text: Translations.clean_exif_overwrite_files_text; checked <=> Settings.clean_exif_sub_overwrite_files; }
+
+                    Rectangle { height: 10px; }
+                }
+
+                Rectangle { width: 8px; }
+            }
+        }
+
+        ok_clicked => {
+            root.action_confirmed(
+                Settings.clean_exif_sub_overwrite_files,
+            );
+        }
+
+        cancel_clicked => {
+        }
+    }
+
+    show_popup() => { popup_window.show(); }
+}
