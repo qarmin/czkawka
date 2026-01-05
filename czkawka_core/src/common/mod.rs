@@ -128,13 +128,29 @@ pub fn check_if_folder_contains_only_empty_folders<P: AsRef<Path>>(path: P) -> R
     Ok(())
 }
 
+/// A wrapper around `trash::delete`, falling back to `fs::remove_dir_all` for platforms that do not support
+/// the library (e.g. Android, iOS).
+fn trash_delete<P: AsRef<Path>>(path: P) -> Result<(), String> {
+    let path = path.as_ref();
+
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    {
+        trash::delete(path).map_err(|err| err.to_string())
+    }
+
+    #[cfg(any(target_os = "android", target_os = "ios"))]
+    {
+        fs::remove_dir_all(path).map_err(|err| err.to_string())
+    }
+}
+
 pub fn remove_folder_if_contains_only_empty_folders<P: AsRef<Path>>(path: P, remove_to_trash: bool) -> Result<(), String> {
     check_if_folder_contains_only_empty_folders(&path)?;
 
     let path = path.as_ref();
 
     if remove_to_trash {
-        trash::delete(path).map_err(|e| format!("Cannot move folder \"{}\" to trash, reason {e}", path.to_string_lossy()))
+        trash_delete(path).map_err(|e| format!("Cannot move folder \"{}\" to trash, reason {e}", path.to_string_lossy()))
     } else {
         fs::remove_dir_all(path).map_err(|e| format!("Cannot remove directory \"{}\", reason {e}", path.to_string_lossy()))
     }
@@ -142,7 +158,7 @@ pub fn remove_folder_if_contains_only_empty_folders<P: AsRef<Path>>(path: P, rem
 
 pub fn remove_single_file<P: AsRef<Path>>(full_path: P, remove_to_trash: bool) -> Result<(), String> {
     if remove_to_trash {
-        if let Err(e) = trash::delete(&full_path) {
+        if let Err(e) = trash_delete(&full_path) {
             return Err(flc!(
                 "core_error_moving_to_trash",
                 file = full_path.as_ref().to_string_lossy().to_string(),
@@ -159,7 +175,7 @@ pub fn remove_single_file<P: AsRef<Path>>(full_path: P, remove_to_trash: bool) -
 
 pub fn remove_single_folder(full_path: &str, remove_to_trash: bool) -> Result<(), String> {
     if remove_to_trash {
-        if let Err(e) = trash::delete(full_path) {
+        if let Err(e) = trash_delete(full_path) {
             return Err(flc!("core_error_moving_to_trash", file = full_path, error = e.to_string()));
         }
     } else {
