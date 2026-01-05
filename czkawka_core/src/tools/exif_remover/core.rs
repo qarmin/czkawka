@@ -1,4 +1,5 @@
 use std::collections::BTreeMap;
+use std::io::{Read, Seek};
 use std::path::Path;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
@@ -7,13 +8,13 @@ use std::{fs, mem, panic};
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use little_exif::exif_tag::ExifTag;
+use little_exif::filetype::FileExtension;
 use little_exif::ifd::ExifTagGroup;
 use little_exif::metadata::Metadata;
 use log::{debug, info};
 use rayon::prelude::*;
 
 use crate::common::cache::{CACHE_VERSION, extract_loaded_cache, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
-use crate::common::consts::EXIF_FILES_EXTENSIONS;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
@@ -34,10 +35,11 @@ impl ExifRemover {
 
     #[fun_time(message = "find_exif_files", level = "debug")]
     pub(crate) fn find_exif_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
-        self.common_data.extensions.set_and_validate_allowed_extensions(EXIF_FILES_EXTENSIONS);
-        if !self.common_data.extensions.set_any_extensions() {
-            return WorkContinueStatus::Continue;
-        }
+        // TODO test only - restore after tests
+        // self.common_data.extensions.set_and_validate_allowed_extensions(EXIF_FILES_EXTENSIONS);
+        // if !self.common_data.extensions.set_any_extensions() {
+        //     return WorkContinueStatus::Continue;
+        // }
         let result = DirTraversalBuilder::new()
             .common_data(&self.common_data)
             .group_by(|_fe| ())
@@ -102,8 +104,8 @@ impl ExifRemover {
             for file_entry in vec_file_entry.iter().cloned() {
                 all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
             }
-            for (_name, file_entry) in loaded_hash_map {
-                all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
+            for (name, file_entry) in loaded_hash_map {
+                all_results.insert(name, file_entry);
             }
 
             let messages = save_cache_to_file_generalized(&get_exif_remover_cache_file(), &all_results, self.common_data.save_also_as_json, 0);
@@ -134,7 +136,7 @@ impl ExifRemover {
             .into_par_iter()
             .map(|(_, mut file_entry)| {
                 if check_if_stop_received(stop_flag) {
-                    return Some(file_entry);
+                    return None;
                 }
 
                 let size = file_entry.size;
@@ -154,15 +156,22 @@ impl ExifRemover {
                 }
 
                 Some(file_entry)
-            }).while_some()
+            })
+            .while_some()
             .collect();
         debug!("check_exif_in_files - finished extracting EXIF data");
+
+        progress_handler.join_thread();
 
         vec_file_entry.extend(records_already_cached.into_values());
 
         self.save_to_cache(&vec_file_entry, loaded_hash_map);
-        progress_handler.join_thread();
 
+        if check_if_stop_received(stop_flag) {
+            return WorkContinueStatus::Stop;
+        }
+
+        // After saving to cache, remove ignored tags - because in cache we need to store full info about tags
         if !self.params.ignored_tags.is_empty() {
             for entry in &mut vec_file_entry {
                 entry.exif_tags.retain(|(tag_str, _tag_u16, _tag_group)| !self.params.ignored_tags.contains(tag_str));
@@ -204,7 +213,10 @@ impl ExifRemover {
 pub fn clean_exif_tags(file_path: &str, tags_to_remove: &[(String, u16, String)], override_file: bool) -> Result<u32, String> {
     panic::catch_unwind(|| {
         let file_path = Path::new(file_path);
-        let metadata = Metadata::new_from_path(file_path).map_err(|e| format!("Failed to read EXIF: {e}"))?;
+        let data = fs::read(file_path).map_err(|e| e.to_string())?;
+        let mut cursor = std::io::Cursor::new(&data);
+        let ext = auto_detect_file_extension(&mut cursor).ok_or_else(|| "Failed to detect file type".to_string())?;
+        let metadata = Metadata::new_from_vec(&data, ext).map_err(|e| format!("Failed to read EXIF: {e}"))?;
 
         let mut new_metadata = metadata;
         let mut tags_removed: u32 = 0;
@@ -236,28 +248,94 @@ pub fn clean_exif_tags(file_path: &str, tags_to_remove: &[(String, u16, String)]
 }
 
 fn extract_exif_tags(path: &Path) -> Result<Vec<(String, u16, String)>, String> {
-    let metadata = panic::catch_unwind(|| Metadata::new_from_path(path))
-        .map_err(|e| format!("Panic occurred while reading EXIF: {e:?}"))?
-        .map_err(|e| format!("Failed to read EXIF: {e}"))?;
+    panic::catch_unwind(|| {
+        let file_path = Path::new(path);
+        let data = fs::read(file_path).map_err(|e| e.to_string())?;
+        let mut cursor = std::io::Cursor::new(&data);
+        let ext = auto_detect_file_extension(&mut cursor).ok_or_else(|| "Failed to detect file type".to_string())?;
+        let metadata = Metadata::new_from_vec(&data, ext).map_err(|e| format!("Failed to read EXIF: {e}"))?;
 
-    let mut tags = Vec::new();
+        let mut tags = Vec::new();
 
-    for tag in &metadata {
-        let tag_name = format!("{tag:?}");
-        let tag_u16 = tag.as_u16();
-        let tag_group = exif_tag_group_to_string(tag.get_group());
-        if let Some(pos) = tag_name.find('(') {
-            #[expect(clippy::string_slice)] // Safe, because pos is from find
-            tags.push((tag_name[..pos].to_string(), tag_u16, tag_group));
-        } else {
-            tags.push((tag_name, tag_u16, tag_group));
+        for tag in &metadata {
+            let tag_name = format!("{tag:?}");
+            let tag_u16 = tag.as_u16();
+            let tag_group = exif_tag_group_to_string(tag.get_group());
+            if let Some(pos) = tag_name.find('(') {
+                #[expect(clippy::string_slice)] // Safe, because pos is from find
+                tags.push((tag_name[..pos].to_string(), tag_u16, tag_group));
+            } else {
+                tags.push((tag_name, tag_u16, tag_group));
+            }
         }
+
+        tags.sort();
+        tags.dedup();
+
+        Ok(tags)
+    })
+    .map_err(|e| format!("Panic occurred while reading \"{}\" - EXIF: {e:?}", path.to_string_lossy()))?
+}
+
+pub(crate) fn auto_detect_file_extension<T: Seek + Read>(cursor: &mut T) -> Option<FileExtension> {
+    let mut buffer = [0; 32];
+    let Ok(n) = cursor.read(&mut buffer) else {
+        return None;
+    };
+    if n < 4 {
+        return None;
     }
 
-    tags.sort();
-    tags.dedup();
+    match buffer {
+            // PNG
+            [0x89, 0x50, 0x4E, 0x47, ..] => {
+                Some(FileExtension::PNG { as_zTXt_chunk: true })
+            }
 
-    Ok(tags)
+            // JP(E)G
+            [0xFF, 0xD8, ..] => {
+                Some(FileExtension::JPEG)
+            }
+
+            // TIFF, little endian
+            [0x49, 0x49, 0x2A, 0x00, ..] |
+            [0x4D, 0x4D, 0x00, 0x2A, ..] => {
+                Some(FileExtension::TIFF)
+            }
+
+            // WebP
+            [0x52, 0x49, 0x46, 0x46, _, _, _, _, 0x57, 0x45, 0x42, 0x50, ..] =>
+                {
+                    Some(FileExtension::WEBP)
+                }
+
+            // A "naked" JXL codestream that can't hold metadata
+            // See: https://www.loc.gov/preservation/digital/formats/fdd/fdd000538.shtml
+            [0xFF, 0x0A, ..] => {
+                Some(FileExtension::NAKED_JXL)
+            }
+
+            // JXL (in ISO_BMFF container)
+            // In this case, the JXL file starts with the JXL signature box
+            // 4 bytes for length       J     X     L  space more stuff
+            [0x00, 0x00, 0x00, 0x0C, 0x4A, 0x58, 0x4C, 0x20, 0x0D, 0x0A, 0x87, 0x0A, ..] =>
+                {
+                    Some(FileExtension::JXL)
+                }
+
+            // HEIC/HEIF/AVIF
+            // length       f     t     y     p
+            [_, _, _, _, 0x66, 0x74, 0x79, 0x70, 0x68, 0x65, 0x69, 0x63 | 0x66, ..] |
+[_, _, _, _, 0x66, 0x74, 0x79, 0x70, 0x61, 0x76, 0x69, 0x66, ..]  // avif
+            =>
+                {
+                    Some(FileExtension::HEIF)
+                }
+
+            _ => {
+                None
+            }
+        }
 }
 
 // Nom-exif implementation
