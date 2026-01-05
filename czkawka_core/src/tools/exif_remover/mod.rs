@@ -36,8 +36,15 @@ pub struct ExifEntry {
     pub path: PathBuf,
     pub size: u64,
     pub modified_date: u64,
-    pub exif_tags: Vec<(String, u16, String)>, // (Tag name, Tag code, Tag group)
+    pub exif_tags: Vec<ExifTagInfo>,
     pub error: Option<String>,
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct ExifTagInfo {
+    pub name: String,
+    pub code: u16,
+    pub group: String,
 }
 
 impl ResultEntry for ExifEntry {
@@ -58,6 +65,7 @@ pub struct ExifRemover {
     exif_files: Vec<ExifEntry>,
     files_to_check: BTreeMap<String, ExifEntry>,
     params: ExifRemoverParameters,
+    additional_excluded_tags: BTreeMap<&'static str, Vec<&'static str>>,
 }
 
 impl ExifRemover {

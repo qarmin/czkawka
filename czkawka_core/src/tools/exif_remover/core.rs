@@ -11,35 +11,53 @@ use little_exif::exif_tag::ExifTag;
 use little_exif::filetype::FileExtension;
 use little_exif::ifd::ExifTagGroup;
 use little_exif::metadata::Metadata;
-use log::{debug, info};
+use log::{debug, error, info};
 use rayon::prelude::*;
 
 use crate::common::cache::{CACHE_VERSION, extract_loaded_cache, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
+use crate::common::consts::EXIF_FILES_EXTENSIONS;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
-use crate::tools::exif_remover::{ExifEntry, ExifRemover, ExifRemoverParameters, Info};
+use crate::tools::exif_remover::{ExifEntry, ExifRemover, ExifRemoverParameters, ExifTagInfo, Info};
 
 impl ExifRemover {
     pub fn new(params: ExifRemoverParameters) -> Self {
+        let mut additional_excluded_tags = BTreeMap::new();
+
+        let tiff_disabled_tags = vec![
+            "ImageWidth",
+            "ImageHeight",
+            "BitsPerSample",
+            "Compression",
+            "PhotometricInterpretation",
+            "StripOffsets",
+            "SamplesPerPixel",
+            "RowsPerStrip",
+            "StripByteCounts",
+            "PlanarConfiguration",
+        ];
+        for i in ["tif", "tiff", "dng"] {
+            additional_excluded_tags.insert(i, tiff_disabled_tags.clone());
+        }
         Self {
             common_data: CommonToolData::new(ToolType::ExifRemover),
             information: Info::default(),
             exif_files: Vec::new(),
             files_to_check: Default::default(),
             params,
+            additional_excluded_tags,
         }
     }
 
     #[fun_time(message = "find_exif_files", level = "debug")]
     pub(crate) fn find_exif_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
-        // TODO test only - restore after tests
-        // self.common_data.extensions.set_and_validate_allowed_extensions(EXIF_FILES_EXTENSIONS);
-        // if !self.common_data.extensions.set_any_extensions() {
-        //     return WorkContinueStatus::Continue;
-        // }
+        self.common_data.extensions.set_and_validate_allowed_extensions(EXIF_FILES_EXTENSIONS);
+        if !self.common_data.extensions.set_any_extensions() {
+            return WorkContinueStatus::Continue;
+        }
         let result = DirTraversalBuilder::new()
             .common_data(&self.common_data)
             .group_by(|_fe| ())
@@ -147,7 +165,7 @@ impl ExifRemover {
 
                 match res {
                     Ok(tags) if !tags.is_empty() => {
-                        file_entry.exif_tags = tags;
+                        file_entry.exif_tags = tags.into_iter().map(|(name, code, group)| ExifTagInfo { name, code, group }).collect();
                     }
                     Ok(_) => {}
                     Err(e) => {
@@ -174,7 +192,11 @@ impl ExifRemover {
         // After saving to cache, remove ignored tags - because in cache we need to store full info about tags
         if !self.params.ignored_tags.is_empty() {
             for entry in &mut vec_file_entry {
-                entry.exif_tags.retain(|(tag_str, _tag_u16, _tag_group)| !self.params.ignored_tags.contains(tag_str));
+                let extension = entry.path.extension().and_then(|ext| ext.to_str()).unwrap_or("").to_lowercase();
+                if let Some(additional_ignored_tags) = self.additional_excluded_tags.get(&extension.as_str()) {
+                    entry.exif_tags.retain(|tag_item| !additional_ignored_tags.contains(&tag_item.name.as_str()));
+                }
+                entry.exif_tags.retain(|tag_item| !self.params.ignored_tags.contains(&tag_item.name));
             }
         }
 
@@ -197,8 +219,8 @@ impl ExifRemover {
                 return;
             }
 
-            // TODO - override file needs to be parameter in CLI
-            match clean_exif_tags(&entry.path.to_string_lossy(), &entry.exif_tags, false) {
+            let exif_data_to_remove: Vec<(u16, String)> = entry.exif_tags.iter().map(|item_tag| (item_tag.code, item_tag.group.clone())).collect();
+            match clean_exif_tags(&entry.path.to_string_lossy(), &exif_data_to_remove, false) {
                 Ok(_number_removed_tags) => {}
                 Err(e) => {
                     entry.error = Some(e);
@@ -210,7 +232,7 @@ impl ExifRemover {
     }
 }
 
-pub fn clean_exif_tags(file_path: &str, tags_to_remove: &[(String, u16, String)], override_file: bool) -> Result<u32, String> {
+pub fn clean_exif_tags(file_path: &str, tags_to_remove: &[(u16, String)], override_file: bool) -> Result<u32, String> {
     panic::catch_unwind(|| {
         let file_path = Path::new(file_path);
         let data = fs::read(file_path).map_err(|e| e.to_string())?;
@@ -220,7 +242,7 @@ pub fn clean_exif_tags(file_path: &str, tags_to_remove: &[(String, u16, String)]
 
         let mut new_metadata = metadata;
         let mut tags_removed: u32 = 0;
-        for (_tag_str, tag_u16, tag_group) in tags_to_remove {
+        for (tag_u16, tag_group) in tags_to_remove {
             let Ok(tag_group) = string_to_exif_tag_group(tag_group) else {
                 continue;
             };
@@ -268,9 +290,6 @@ fn extract_exif_tags(path: &Path) -> Result<Vec<(String, u16, String)>, String> 
                 tags.push((tag_name, tag_u16, tag_group));
             }
         }
-
-        tags.sort();
-        tags.dedup();
 
         Ok(tags)
     })
@@ -336,6 +355,33 @@ pub(crate) fn auto_detect_file_extension<T: Seek + Read>(cursor: &mut T) -> Opti
                 None
             }
         }
+}
+
+pub fn file_extension_to_string(extension: &FileExtension) -> &'static str {
+    match extension {
+        FileExtension::PNG { .. } => "PNG",
+        FileExtension::JPEG => "JPEG",
+        FileExtension::TIFF => "TIFF",
+        FileExtension::WEBP => "WEBP",
+        FileExtension::NAKED_JXL => "NAKED_JXL",
+        FileExtension::JXL => "JXL",
+        FileExtension::HEIF => "HEIF",
+    }
+}
+pub fn string_to_file_extension(s: &str) -> FileExtension {
+    match s {
+        "PNG" => FileExtension::PNG { as_zTXt_chunk: true },
+        "JPEG" => FileExtension::JPEG,
+        "TIFF" => FileExtension::TIFF,
+        "WEBP" => FileExtension::WEBP,
+        "NAKED_JXL" => FileExtension::NAKED_JXL,
+        "JXL" => FileExtension::JXL,
+        "HEIF" => FileExtension::HEIF,
+        _ => {
+            error!("Unknown file extension string: {s}, defaulting to JPEG");
+            FileExtension::JPEG
+        } // Default to JPEG
+    }
 }
 
 // Nom-exif implementation

@@ -1186,10 +1186,10 @@ fn prepare_data_model_exif_remover(fe: &ExifEntry) -> (ModelRc<SharedString>, Mo
     let exif_tags = format!(
         "{} ({})",
         fe.exif_tags.len(),
-        fe.exif_tags.iter().map(|(q, _w, _e)| q.clone()).collect::<Vec<String>>().join(", ")
+        fe.exif_tags.iter().map(|item_tag| item_tag.name.clone()).collect::<Vec<String>>().join(", ")
     );
-    let exif_groups_name = fe.exif_tags.iter().map(|(_q, _w, e)| e.clone()).collect::<Vec<String>>().join(",");
-    let exif_tag_u16 = fe.exif_tags.iter().map(|(_q, w, _e)| w.to_string()).collect::<Vec<String>>().join(",");
+    let exif_groups_name = fe.exif_tags.iter().map(|item_tag| item_tag.group.clone()).collect::<Vec<String>>().join(",");
+    let exif_tag_u16 = fe.exif_tags.iter().map(|item_tag| item_tag.code.to_string()).collect::<Vec<String>>().join(",");
     let data_model_str_arr: [SharedString; MAX_STR_DATA_EXIF_REMOVER] = [
         size_str.into(),
         file.into(),
@@ -1304,7 +1304,7 @@ fn get_dt_timestamp_string(timestamp: u64) -> String {
 ////////////////////////////////////////// Common
 
 fn reset_selection_at_end(app: &MainWindow, active_tab: ActiveTab) {
-    reset_selection(app, true);
+    reset_selection(app, active_tab, true);
     set_number_of_enabled_items(app, active_tab, 0);
 }
 

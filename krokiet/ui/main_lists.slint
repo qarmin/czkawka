@@ -213,35 +213,35 @@ export component MainList {
         visible: GuiState.active_tab == ActiveTab.About;
     }
 
-    public function reset_selection() {
-        if (GuiState.active_tab == ActiveTab.EmptyFiles) {
+    public function reset_selection(active_tab: ActiveTab) {
+        if (active_tab == ActiveTab.EmptyFiles) {
             empty_files.reset_selection();
-        } else if (GuiState.active_tab == ActiveTab.EmptyFolders) {
+        } else if (active_tab == ActiveTab.EmptyFolders) {
             empty_folders.reset_selection();
-        } else if (GuiState.active_tab == ActiveTab.SimilarImages) {
+        } else if (active_tab == ActiveTab.SimilarImages) {
             similar_images.reset_selection();
-        } else if (GuiState.active_tab == ActiveTab.BadExtensions) {
+        } else if (active_tab == ActiveTab.BadExtensions) {
             bad_extensions.reset_selection();
-        } else if (GuiState.active_tab == ActiveTab.BigFiles) {
+        } else if (active_tab == ActiveTab.BigFiles) {
             big_files.reset_selection();
-        } else if (GuiState.active_tab == ActiveTab.DuplicateFiles) {
+        } else if (active_tab == ActiveTab.DuplicateFiles) {
             duplicates.reset_selection();
-        } else if (GuiState.active_tab == ActiveTab.TemporaryFiles) {
+        } else if (active_tab == ActiveTab.TemporaryFiles) {
             temporary_files.reset_selection();
-        } else if (GuiState.active_tab == ActiveTab.SimilarVideos) {
+        } else if (active_tab == ActiveTab.SimilarVideos) {
             similar_videos.reset_selection();
-        } else if (GuiState.active_tab == ActiveTab.SimilarMusic) {
+        } else if (active_tab == ActiveTab.SimilarMusic) {
             similar_music.reset_selection();
-        } else if (GuiState.active_tab == ActiveTab.InvalidSymlinks) {
+        } else if (active_tab == ActiveTab.InvalidSymlinks) {
             invalid_symlink.reset_selection();
-        } else if (GuiState.active_tab == ActiveTab.BrokenFiles) {
+        } else if (active_tab == ActiveTab.BrokenFiles) {
             broken_files.reset_selection();
-        } else if (GuiState.active_tab == ActiveTab.ExifRemover) {
+        } else if (active_tab == ActiveTab.ExifRemover) {
             exif_remover.reset_selection();
-        } else if (GuiState.active_tab == ActiveTab.VideoOptimizer) {
+        } else if (active_tab == ActiveTab.VideoOptimizer) {
             video_optimizer.reset_selection();
         } else {
-            // debug("Non handled reset selection in main_lists.slint", GuiState.active_tab);
+            // debug("Non handled reset selection in main_lists.slint", active_tab);
         }
     }
 

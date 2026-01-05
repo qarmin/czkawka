@@ -33,15 +33,12 @@ impl ModelProcessor {
         thread::spawn(move || {
             let path_idx = self.active_tab.get_str_path_idx();
             let name_idx = self.active_tab.get_str_name_idx();
-            let tag_names_idx = self.active_tab.get_exif_tag_names_idx();
             let tag_groups_idx = self.active_tab.get_exif_tag_groups_idx();
             let tag_u16_idx = self.active_tab.get_exif_tag_u16_idx();
 
             let clean_fnc = move |data: &SimplerMainListModel| {
                 clean_exif_single_file(
                     &format!("{}{MAIN_SEPARATOR}{}", data.val_str[path_idx], data.val_str[name_idx]),
-                    // TODO - this contains wrong first item, because contains number of elements - fix it when argument will be used
-                    &data.val_str[tag_names_idx].split(',').map(|s| s.to_string()).collect::<Vec<_>>(),
                     &data.val_str[tag_groups_idx].split(',').map(|s| s.to_string()).collect::<Vec<_>>(),
                     &data.val_str[tag_u16_idx].split(',').map(|s| s.to_string()).collect::<Vec<_>>(),
                     override_file,
@@ -54,23 +51,21 @@ impl ModelProcessor {
 }
 
 #[cfg(not(test))]
-fn clean_exif_single_file(file_path: &str, tag_names: &[String], tag_groups: &[String], tags_u16: &[String], override_file: bool) -> Result<(), String> {
+fn clean_exif_single_file(file_path: &str, tag_groups: &[String], tags_u16: &[String], override_file: bool) -> Result<(), String> {
     // Such data are split into multiple vectors, but in Krokiet they are not changed
-    assert_eq!(tag_names.len(), tag_groups.len());
-    assert_eq!(tag_names.len(), tags_u16.len());
-    let connected_tags = tag_names
+    assert_eq!(tags_u16.len(), tag_groups.len());
+    let connected_tags = tag_groups
         .iter()
-        .zip(tag_groups.iter())
         .zip(tags_u16.iter())
-        .map(|((name, group), code)| (name.clone(), code.parse::<u16>().unwrap_or(0), group.clone()))
-        .collect::<Vec<(String, u16, String)>>();
+        .map(|(group, code)| (code.parse::<u16>().unwrap_or(0), group.clone()))
+        .collect::<Vec<(u16, String)>>();
     let _ = czkawka_core::tools::exif_remover::core::clean_exif_tags(file_path, &connected_tags, override_file)
         .map_err(|e| format!("Failed to clean EXIF for file {file_path:?}, reason: {e}"))?;
     Ok(())
 }
 
 #[cfg(test)]
-fn clean_exif_single_file(full_path: &str, _tag_names: &[String], _tag_groups: &[String], _tags_u16: &[String], _override_file: bool) -> Result<(), String> {
+fn clean_exif_single_file(full_path: &str, _tag_groups: &[String], _tags_u16: &[String], _override_file: bool) -> Result<(), String> {
     if full_path.contains("test_error") {
         return Err(format!("Test error for item: {full_path}"));
     }

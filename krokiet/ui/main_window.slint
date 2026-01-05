@@ -32,7 +32,7 @@ export component MainWindow inherits Window {
     callback scan_starting(ActiveTab);
     callback folder_choose_requested(bool);
     callback scan_ended(string);
-    callback reset_selection();
+    callback reset_selection(ActiveTab);
     callback initialize_popup_sizes();
     callback processing_ended(string);
 
@@ -332,8 +332,8 @@ export component MainWindow inherits Window {
         root.stop_requested = false;
     }
 
-    reset_selection => {
-        main_list.reset_selection();
+    reset_selection(active_tab) => {
+        main_list.reset_selection(active_tab);
     }
 
     initialize_popup_sizes => {

@@ -69,7 +69,7 @@ impl PrintResults for ExifRemover {
                     exif_entry.path.to_string_lossy(),
                     humansize::format_size(exif_entry.size, BINARY),
                     exif_entry.modified_date,
-                    exif_entry.exif_tags.iter().map(|(e, _, _)| e.clone()).collect::<Vec<_>>()
+                    exif_entry.exif_tags.iter().map(|item_tag| item_tag.name.clone()).collect::<Vec<_>>()
                 )?;
             }
         } else {

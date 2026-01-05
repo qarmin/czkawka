@@ -24,16 +24,18 @@ pub(crate) struct SelectionData {
 
 pub(crate) static TOOLS_SELECTION: LazyLock<RwLock<HashMap<ActiveTab, SelectionData>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
 
-pub(crate) fn reset_selection(app: &MainWindow, reset_all_selection: bool) {
+pub(crate) fn reset_selection(app: &MainWindow, active_tab: ActiveTab, reset_all_selection: bool) {
     if reset_all_selection {
-        let active_tab = app.global::<GuiState>().get_active_tab();
         let mut lock = get_write_selection_lock();
-        let selection = lock.get_mut(&active_tab).expect("Failed to get selection data");
+        let keys = lock.keys().cloned().collect::<Vec<_>>();
+        let selection = lock
+            .get_mut(&active_tab)
+            .unwrap_or_else(|| panic!("Failed to get selection data for tab {active_tab:?} - {keys:?}"));
         selection.selected_rows.clear();
         selection.exceeded_limit = false;
     }
 
-    app.invoke_reset_selection();
+    app.invoke_reset_selection(active_tab);
 }
 
 // E.g. when sorting things, selected rows in vector, may be invalid
@@ -95,7 +97,7 @@ pub(crate) fn initialize_selection_struct() {
 //     selection.read().expect("Failed to lock selection data")
 // }
 fn get_write_selection_lock() -> RwLockWriteGuard<'static, HashMap<ActiveTab, SelectionData>> {
-    TOOLS_SELECTION.write().expect("Selection data is not initialized")
+    TOOLS_SELECTION.write().expect("Selection data is not initialized or is poisoned")
 }
 
 impl Hash for ActiveTab {
