@@ -1155,7 +1155,7 @@ fn scan_exif_remover(
             let mut vector = tool.get_exif_files().clone();
             let messages = get_text_messages(&tool, &basic_settings);
 
-            vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
+            vector.par_sort_unstable_by(|a, b| b.exif_tags.len().cmp(&a.exif_tags.len()));
 
             let info = tool.get_information();
             let scanning_time_str = format_time(info.scanning_time);

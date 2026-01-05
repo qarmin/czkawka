@@ -171,6 +171,7 @@ impl VideoOptimizer {
                 info!("Starting optimization of {} video files", self.video_transcode_entries.len());
 
                 self.video_transcode_entries.par_iter_mut().for_each(|entry| {
+                    // TODO - here is missing while_some to skip processing if stop received
                     if check_if_stop_received(stop_flag) {
                         return;
                     }

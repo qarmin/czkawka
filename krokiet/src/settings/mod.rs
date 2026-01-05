@@ -610,7 +610,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let video_optimizer_overwrite_files = settings.get_video_optimizer_sub_overwrite_files();
     let video_optimizer_limit_video_size = settings.get_video_optimizer_sub_limit_video_size();
     let video_optimizer_max_width = settings.get_video_optimizer_sub_max_width().parse::<u32>().unwrap_or(1920);
-    let video_optimizer_max_height = settings.get_video_optimizer_sub_max_height().parse::<u32>().unwrap_or(1080);
+    let video_optimizer_max_height = settings.get_video_optimizer_sub_max_height().parse::<u32>().unwrap_or(1920);
     let video_optimizer_image_threshold = settings.get_video_optimizer_sub_image_threshold().round() as u8;
 
     let ignored_exif_tags = settings.get_ignored_exif_tags().to_string();

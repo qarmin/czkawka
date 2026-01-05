@@ -343,7 +343,7 @@ fn default_video_optimizer_max_width() -> u32 {
     1920
 }
 fn default_video_optimizer_max_height() -> u32 {
-    1080
+    1920
 }
 fn default_video_optimizer_image_threshold() -> u8 {
     1

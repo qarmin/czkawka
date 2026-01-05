@@ -134,7 +134,7 @@ impl ExifRemover {
             .into_par_iter()
             .map(|(_, mut file_entry)| {
                 if check_if_stop_received(stop_flag) {
-                    return file_entry;
+                    return Some(file_entry);
                 }
 
                 let size = file_entry.size;
@@ -153,8 +153,8 @@ impl ExifRemover {
                     }
                 }
 
-                file_entry
-            })
+                Some(file_entry)
+            }).while_some()
             .collect();
         debug!("check_exif_in_files - finished extracting EXIF data");
 

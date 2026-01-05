@@ -77,6 +77,7 @@ component HintText inherits Text {
     font-size: FontSizes.small;
     color: ColorPalette.hint_color;
     text: root.hint_text;
+    wrap: TextWrap.word-wrap;
 }
 
 export component ToolSettings {
@@ -436,7 +437,7 @@ export component ToolSettings {
 
                 LineEdit {
                     text <=> Settings.ignored_exif_tags;
-                    placeholder-text: "GPS, Thumbnail, MakerNote";
+                    placeholder-text: "Thumbnail, MakerNote";
                     font-size: FontSizes.normal;
                 }
             }
