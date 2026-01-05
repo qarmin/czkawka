@@ -45,7 +45,34 @@ fn progress_save_load_cache(item: &ProgressData) -> ProgressToSend {
         CurrentStage::DuplicatePreHashCacheSaving => flk!("rust_saving_prehash_cache"),
         CurrentStage::DuplicateCacheLoading => flk!("rust_loading_hash_cache"),
         CurrentStage::DuplicateCacheSaving => flk!("rust_saving_hash_cache"),
-        _ => unreachable!(),
+        CurrentStage::ExifRemoverCacheLoading => flk!("rust_loading_exif_cache"),
+        CurrentStage::ExifRemoverCacheSaving => flk!("rust_saving_exif_cache"),
+        CurrentStage::DeletingFiles
+        | CurrentStage::RenamingFiles
+        | CurrentStage::MovingFiles
+        | CurrentStage::HardlinkingFiles
+        | CurrentStage::SymlinkingFiles
+        | CurrentStage::OptimizingVideos
+        | CurrentStage::CleaningExif
+        | CurrentStage::CollectingFiles
+        | CurrentStage::DuplicateScanningName
+        | CurrentStage::DuplicateScanningSizeName
+        | CurrentStage::DuplicateScanningSize
+        | CurrentStage::DuplicatePreHashing
+        | CurrentStage::DuplicateFullHashing
+        | CurrentStage::SameMusicReadingTags
+        | CurrentStage::SameMusicCalculatingFingerprints
+        | CurrentStage::SameMusicComparingTags
+        | CurrentStage::SameMusicComparingFingerprints
+        | CurrentStage::SimilarImagesCalculatingHashes
+        | CurrentStage::SimilarImagesComparingHashes
+        | CurrentStage::SimilarVideosCalculatingHashes
+        | CurrentStage::SimilarVideosCreatingThumbnails
+        | CurrentStage::BrokenFilesChecking
+        | CurrentStage::BadExtensionsChecking
+        | CurrentStage::ExifRemoverExtractingTags
+        | CurrentStage::VideoOptimizerProcessingImages
+        | CurrentStage::VideoOptimizerProcessingVideos => unreachable!(),
     };
     let (all_progress, current_progress, current_progress_size) = common_get_data(item);
     ProgressToSend {
@@ -124,7 +151,9 @@ fn progress_default(item: &ProgressData) -> ProgressToSend {
         | CurrentStage::SameMusicCacheSavingTags
         | CurrentStage::SameMusicCacheLoadingTags
         | CurrentStage::SameMusicCacheSavingFingerprints
-        | CurrentStage::SameMusicCacheLoadingFingerprints => unreachable!("This stages(caches, initial files scanning) should be handled somewhere else"),
+        | CurrentStage::SameMusicCacheLoadingFingerprints
+        | CurrentStage::ExifRemoverCacheLoading
+        | CurrentStage::ExifRemoverCacheSaving => unreachable!("This stages(caches, initial files scanning) should be handled somewhere else"),
     };
     let (all_progress, current_progress, current_progress_size) = common_get_data(item);
 

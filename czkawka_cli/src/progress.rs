@@ -69,7 +69,30 @@ pub(crate) fn get_progress_message(progress_data: &ProgressData) -> String {
         CurrentStage::BrokenFilesChecking => "Checking broken files",
         CurrentStage::BadExtensionsChecking => "Checking extensions of files",
         CurrentStage::DeletingFiles => "Deleting files/folders",
-        _ => unreachable!("Unsupported stage {:?}", progress_data.sstage),
+        CurrentStage::RenamingFiles => "Renaming files",
+        CurrentStage::MovingFiles => "Moving files",
+        CurrentStage::HardlinkingFiles => "Creating hardlinks",
+        CurrentStage::SymlinkingFiles => "Creating symlinks",
+        CurrentStage::OptimizingVideos => "Optimizing videos",
+        CurrentStage::CleaningExif => "Cleaning EXIF data",
+        CurrentStage::ExifRemoverExtractingTags => "Extracting EXIF tags",
+        CurrentStage::VideoOptimizerProcessingImages => "Processing images",
+        CurrentStage::VideoOptimizerProcessingVideos => "Processing videos",
+
+        CurrentStage::CollectingFiles
+        | CurrentStage::DuplicateCacheSaving
+        | CurrentStage::DuplicateCacheLoading
+        | CurrentStage::DuplicatePreHashCacheSaving
+        | CurrentStage::DuplicatePreHashCacheLoading
+        | CurrentStage::DuplicateScanningName
+        | CurrentStage::DuplicateScanningSizeName
+        | CurrentStage::DuplicateScanningSize
+        | CurrentStage::SameMusicCacheSavingTags
+        | CurrentStage::SameMusicCacheLoadingTags
+        | CurrentStage::SameMusicCacheSavingFingerprints
+        | CurrentStage::SameMusicCacheLoadingFingerprints
+        | CurrentStage::ExifRemoverCacheLoading
+        | CurrentStage::ExifRemoverCacheSaving => unreachable!("This stages(caches, initial files scanning) should be handled somewhere else"),
     }
     .to_string()
 }
