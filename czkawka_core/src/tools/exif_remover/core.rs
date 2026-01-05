@@ -201,6 +201,7 @@ impl ExifRemover {
         }
 
         self.exif_files = vec_file_entry.into_iter().filter(|f| f.error.is_none() && !f.exif_tags.is_empty()).collect();
+        self.exif_files.iter_mut().for_each(|file| file.exif_tags.sort_unstable_by_key(|tag| tag.name.clone()));
 
         self.information.number_of_files_with_exif = self.exif_files.len();
         debug!("Found {} files with EXIF data.", self.information.number_of_files_with_exif);
@@ -388,21 +389,22 @@ pub fn string_to_file_extension(s: &str) -> FileExtension {
 // Probably will use this version in future
 // fn extract_exif_tags2(path: &Path) -> Result<Vec<String>, String> {
 //     let res = panic::catch_unwind(|| {
-//         let mut parser = MediaParser::new();
-//         let ms = MediaSource::file_path(path).map_err(|e| format!("Failed to open file: {e}"))?;
+//         let mut parser = nom_exif::MediaParser::new();
+//         let ms = nom_exif::MediaSource::file_path(path).map_err(|e| format!("Failed to open file: {e}"))?;
 //         let mut results = Vec::new();
 //         if !ms.has_exif() {
 //             return Ok(results);
 //         }
-//         let exif_iter: ExifIter = parser.parse(ms).map_err(|e| format!("Failed to parse EXIF data: {e}"))?;
+//         let exif_iter: nom_exif::ExifIter = parser.parse(ms).map_err(|e| format!("Failed to parse EXIF data: {e}"))?;
 //         for exif_entry in exif_iter {
 //             results.push(exif_entry.tag().map_or_else(|| "Unknown".to_string(), |t| format!("{t:?}")));
 //         }
+//
 //         Ok(results)
 //     });
 //
 //     res.unwrap_or_else(|_| {
-//         let message = create_crash_message("nom-exif", path.to_string_lossy().as_ref(), "https://github.com/mindeng/nom-exif");
+//         let message = crate::common::create_crash_message("nom-exif", path.to_string_lossy().as_ref(), "https://github.com/mindeng/nom-exif");
 //         error!("{message}");
 //         Err("Panic in get_rotation_from_exif".to_string())
 //     })

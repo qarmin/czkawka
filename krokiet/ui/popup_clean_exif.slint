@@ -2,6 +2,7 @@ import { PopupBase } from "popup_base.slint";
 import { Translations } from "translations.slint";
 import { CheckBox } from "std-widgets.slint";
 import { Settings } from "settings.slint";
+import { PopupCenteredText } from "popup_centered_text.slint";
 
 export component PopupCleanExif inherits Rectangle {
     in-out property <string> title_text;
@@ -30,7 +31,7 @@ export component PopupCleanExif inherits Rectangle {
                 VerticalLayout {
                     spacing: 8px;
 
-                    Text { text: Translations.clean_confirmation_text; wrap: TextWrap.word-wrap; }
+                    PopupCenteredText { text: Translations.clean_confirmation_text; }
 
                     CheckBox { text: Translations.clean_exif_overwrite_files_text; checked <=> Settings.clean_exif_sub_overwrite_files; }
 

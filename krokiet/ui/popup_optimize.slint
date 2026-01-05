@@ -2,6 +2,7 @@ import { PopupBase } from "popup_base.slint";
 import { Translations } from "translations.slint";
 import { CheckBox, ComboBox, LineEdit, Slider } from "std-widgets.slint";
 import { Settings } from "settings.slint";
+import { PopupCenteredText } from "popup_centered_text.slint";
 
 export component PopupOptimize inherits Rectangle {
     in-out property <string> title_text;
@@ -30,7 +31,7 @@ export component PopupOptimize inherits Rectangle {
                 VerticalLayout {
                     spacing: 8px;
 
-                    Text { text: Translations.optimize_confirmation_text; wrap: TextWrap.word-wrap; }
+                    PopupCenteredText { text: Translations.optimize_confirmation_text; }
 
                     HorizontalLayout {
                         spacing: 5px;
