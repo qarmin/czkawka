@@ -510,3 +510,17 @@ preview_image_opening_failure = Nu s-a reușit deschiderea imaginii { $name }, m
 compare_groups_number = Grup { $current_group }/{ $all_groups } ({ $images_in_group } imagini)
 compare_move_left_button = l
 compare_move_right_button = R
+
+krokiet_info_title = Introducerea lui Krokiet - Noua Versiune a Czkawka
+krokiet_info_message = 
+        Pașii este noua, îmbunătățită, mai rapidă și mai puțin buggy versiune a Czkawka GTK!
+
+        Fiind auto-conținută, este mult mai ușor de rulat și mai rezistentă la modificările sistemului și la actualizările de versiune a pachetelor.
+
+        Include multe funcții indisponibile în Czkawka, cum ar fi miniaturi în modul de comparare video, progresul mișcării fișierelor/copierea/ștergerea și opțiuni extinse de sortare.
+
+        Încearcă-o și vezi diferența!
+
+        Czkawka va continua să primească corecții de bug-uri și actualizări minore, dar toate noile funcții vor fi implementate doar în Krokiet.
+
+        PS. Acest mesaj ar trebui să fie vizibil doar o singură dată, dar dacă apare din nou, setați variabila de mediu CZKAWKA_DONT_ANNOY_ME la orice valoare non-goalomptă.

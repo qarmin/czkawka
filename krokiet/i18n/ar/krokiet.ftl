@@ -230,3 +230,77 @@ subsettings_videos_thumbnail_percentage = موضع الصورة المصغرة �
 settings_cache_number_size_text = حجم ملفات التخزين المؤقت: { $size }، عدد الملفات: { $number }
 settings_video_thumbnails_number_size_text = حجم الصور المصغرة للفيديو: { $size }، عدد الملفات: { $number }
 settings_log_number_size_text = حجم ملفات السجل: { $size }، عدد الملفات: { $number }
+
+rust_loading_exif_cache = تحميل ذاكرة التخزين المؤقت EXIF
+rust_saving_exif_cache = حفظ ذاكرة التخزين المؤقت EXIF
+rust_checked_images = تم التحقق من { $items_stats } صور ({ $size_stats })
+rust_checked_videos = تم التحقق من { $items_stats } مقاطع فيديو ({ $size_stats })
+rust_found_video_optimizer = تم العثور على { $items_found } ملفات لتحسينها في { $time}
+rust_found_exif_files = تم العثور على { $items_found } ملفات مع بيانات EXIF في { $time }
+rust_hardlink_summary = مرتبط بالرابط { $hardlinked } عناصر، فشل ربط الرابط { $failed } عناصر، من أصل { $total } عناصر
+rust_symlink_summary = ربط رمزي { $symlinked } عناصر، فشل ربط رمزي { $failed } عناصر، من أصل { $total } عناصر
+rust_optimize_video_summary = مقاطع فيديو مُحسّنة { $optimized }، وفشلت في تحسين { $failed }، وخرجت من { $total } مقاطع فيديو.
+rust_clean_exif_summary = تمت إزالة EXIF المُنظَّفة من { $cleaned } ملفات، وفشلت في تنظيف { $failed } ملفات، من أصل { $total } ملفات.
+rust_hardlinking_files = الرابط الصلب { $items_stats } الملف ({ $size_stats })
+rust_hardlinking_no_size_files = الرابط الصلب { $items_stats } ملف
+rust_symlinking_files = الرابط الرمزية { $items_stats } الملف ({ $size_stats })
+rust_symlinking_no_size_files = الرابط الرمزية { $items_stats } ملف
+rust_optimizing_videos = مُحسَّن { $items_stats } فيديو ({ $size_stats })
+rust_optimizing_no_size_videos = مُحسَّن { $items_stats } فيديو
+rust_cleaning_exif = تنظيف EXIF من ملف { $items_stats } ({ $size_stats })
+rust_cleaning_no_size_exif = تنظيف EXIF من ملف { $items_stats }
+rust_no_files_hardlinked = لا توجد ملفات أو مجلدات محددة لإنشاء الروابط الصلبة.
+rust_no_files_symlinked = لا توجد ملفات أو مجلدات محددة لإنشاء الروابط الرمزية
+rust_no_videos_optimized = لا توجد فيديوهات مُحدَّدة للتحسين
+rust_no_exif_cleaned = لا توجد ملفات مُحدَّدة لتنظيف EXIF
+rust_extracted_exif_tags = تم استخراج علامات EXIF من ملفات { $items_stats } ({ $size_stats })
+rust_move_confirmation = هل أنت متأكد من أنك تريد نقل العناصر المحددة؟
+rust_move_confirmation_number_simple = { $items } عناصر محددة.
+rust_clean_exif_confirmation = هل أنت متأكد من أنك تريد إزالة بيانات EXIF من العناصر المحددة؟
+rust_clean_exif_confirmation_number_simple = { $items } عناصر محددة.
+clean_exif_overwrite_files_text = استبدل الملفات
+rust_optimize_video_confirmation = هل أنت متأكد من أنك تريد تحسين مقاطع الفيديو المحددة؟
+rust_optimize_video_confirmation_number_simple = { $items } عناصر محددة.
+rust_hardlink_confirmation = هل أنت متأكد من أنك تريد إنشاء روابط صلبة للعناصر المحددة؟
+rust_hardlink_confirmation_number_simple = { $items } عناصر محددة.
+rust_symlink_confirmation = هل أنت متأكد من أنك تريد إنشاء روابط رمزية للعناصر المحددة؟
+rust_symlink_confirmation_number_simple = { $items } عناصر محددة.
+rust_rename_confirmation = هل أنت متأكد من أنك تريد إعادة تسمية العناصر المحددة؟
+rust_rename_confirmation_number_simple = { $items } عناصر محددة.
+column_exif_tags = وسوم EXIF
+tool_video_optimizer = مُحسِّن الفيديو
+tool_exif_remover = مزيل إكسيف
+settings_application_scale_text = تطبيق النطاق
+settings_application_scale_hint_text = تطبيق مقياس يدوي (مثل: 1.0 = 100%)
+settings_restart_required_scale_text = ---يجب إعادة تشغيل التطبيق لتطبيق التغييرات في المقياس---
+settings_use_manual_application_scale_text = استخدم مقياس تطبيق يدوي
+settings_similar_videos_generate_thumbnail_grid_instead_of_single_image_hint_text = إنشاء شبكة من الصور المصغرة بدلاً من صورة واحدة (قد يستغرق وقتًا أطول)
+settings_similar_videos_generate_thumbnail_grid_instead_of_single_image = إنشاء شبكة صور مصغرة بدلاً من صورة واحدة
+settings_similar_videos_clear_unused_thumbnails = حذف صورthumbnails للفيديو غير المستخدمة التي يزيد عمرها عن 7 أيام عند بدء تشغيل التطبيق
+move_confirmation_text = هل أنت متأكد من أنك تريد نقل العناصر المحددة؟
+rename_confirmation_text = هل أنت متأكد من أنك تريد إعادة تسمية العناصر المحددة؟
+subsettings_video_optimizer_mode = وضع
+subsettings_video_optimizer_video_codec = فيديو كودك
+subsettings_video_optimizer_excluded_codecs = محذوفات الترميز
+subsettings_video_optimizer_video_quality = جودة الفيديو (CRF)
+subsettings_video_optimizer_image_threshold = حدٌّ للصور
+subsettings_reset = إعادة تعيين
+subsettings_exif_ignored_tags_text = تجاهل العلامات:
+subsettings_exif_ignored_tags_hint_text = قائمة مفرغة بفواصل من العلامات المستبعدة من الفحص (مثل GPS، Thumbnail). بعض العلامات، مثل ImageWidth في ملفات TIFF، مخفية لمنع كسر الصورة.
+clean_button_text = نظيف
+clean_text = بيانات EXIF ​​النظيفة
+clean_confirmation_text = هل أنت متأكد من أنك تريد إزالة بيانات EXIF من العناصر المحددة؟
+optimize_button_text = التحسين
+optimize_text = التحسين صور
+optimize_confirmation_text = هل أنت متأكد من أنك تريد تحسين العناصر المحددة؟
+optimize_fail_if_bigger_text = فشل إذا كان الملف المحسن أكبر
+optimize_overwrite_files_text = استبدل الملفات
+optimize_limit_video_size_text = حدّ حجم الفيديو
+optimize_max_width_text = الحد الأقصى للعرض:
+optimize_max_height_text = الحد الأقصى للارتفاع:
+hardlink_button_text = رابط صلب
+hardlink_text = إنشاء روابط صلبة
+hardlink_confirmation_text = هل أنت متأكد من أنك تريد إنشاء روابط صلبة للعناصر المحددة؟
+softlink_button_text = سولت لينك
+softlink_text = إنشاء روابط رمزية
+softlink_confirmation_text = هل أنت متأكد من أنك تريد إنشاء روابط رمزية (symlinks) للعناصر المحددة؟

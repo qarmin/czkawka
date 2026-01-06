@@ -520,3 +520,17 @@ preview_image_opening_failure = { $name } 이미지 열기 실패. 이유: { $re
 compare_groups_number = 그룹 { $current_group } / { $all_groups } ({ $images_in_group } 이미지)
 compare_move_left_button = 이전
 compare_move_right_button = 다음
+
+krokiet_info_title = Introducing Krokiet - 새로운 버전의 Czkawka
+krokiet_info_message = 
+        크로키에트는 Czkawka GTK GUI의 새로운, 개선된, 더 빠르고 버그가 적은 버전입니다!
+
+        자체 포함되어 있어 실행이 훨씬 쉽고 시스템 변경 및 패키지 버전 업데이트에 더 강합니다.
+
+        비디오 비교 모드에서 썸네일, 파일 이동/복사/삭제 진행률 및 확장된 정렬 옵션과 같이 Czkawka에는 없는 많은 기능이 포함되어 있습니다.
+
+        사용해 보고 차이점을 확인해 보세요!
+
+        Czkawka는 여전히 버그 수정 및 미세 업데이트를 받겠지만 모든 새로운 기능은 크로키에트에서만 구현됩니다.
+
+        PS. 이 메시지는 한 번만 표시되어야 하지만 다시 나타나면 CZKAWKA_DONT_ANNOY_ME 환경 변수를 비어 있는 값이 아닌 값으로 설정하세요.

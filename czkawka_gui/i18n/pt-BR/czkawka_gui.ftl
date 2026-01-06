@@ -421,7 +421,6 @@ compute_found_invalid_symlinks = Foram encontradas { $number_files } ligações 
 compute_found_broken_files = Foram encontrados { $number_files } arquivos corrompidos. A verificação durou { $time }
 compute_found_bad_extensions = Foram encontrados { $number_files } arquivos com extensões que não são válidas. A verificação durou { $time }
 # Progress window
-progress_scanning_general_file = Pesquisando em { $file_number } arquivos
 progress_scanning_extension_of_files = Pesquisando por tipo da extensão dos arquivos { $file_checked } de { $all_files }
 progress_scanning_broken_files = Pesquisando { $file_checked }/{ $all_files } no arquivo ({ $data_checked }/{ $all_data })
 progress_scanning_video = Criando o código do ‘hash’ dos arquivos de vídeo { $file_checked } de { $all_files }
@@ -432,7 +431,6 @@ progress_scanning_music_tags_end = Comparando as informações do arquivo de mú
 progress_scanning_music_tags = Lendo as informações dos arquivos de música { $file_checked } de { $all_files }
 progress_scanning_music_content_end = Comparando a impressão digital do arquivo de música { $file_checked } de { $all_files }
 progress_scanning_music_content = Foi calculado a impressão digital de { $file_checked }/ arquivo de música { $all_files } ({ $data_checked }/{ $all_data })
-progress_scanning_empty_folders = Pesquisando nas { $folder_number } pastas
 progress_scanning_size = Pesquisando por nome nos { $file_number } arquivos
 progress_scanning_size_name = Pesquisando por nome e por tamanho do arquivo { $file_number }
 progress_scanning_name = Pesquisando por nome do arquivo { $file_number }
@@ -508,3 +506,17 @@ preview_image_opening_failure = Ocorreu uma falha ao abrir a imagem { $name }, p
 compare_groups_number = O grupo { $current_group } de { $all_groups } grupos possui { $images_in_group } imagens
 compare_move_left_button = E
 compare_move_right_button = D
+
+krokiet_info_title = Apresentando Krokiet - Nova Versão de Czkawka
+krokiet_info_message = 
+        Krokiet é a nova, melhorada, mais rápida e menos problemática versão da interface gráfica GTK Czkawka!
+
+        Sendo auto-contida, é muito mais fácil de executar e mais resistente a alterações do sistema e atualizações de versão de pacote.
+
+        Inclui muitos recursos que não estão disponíveis no Czkawka, como miniaturas no modo de comparação de vídeo, progresso de mover/copiar/excluir arquivos e opções de classificação estendidas.
+
+        Experimente e veja a diferença!
+
+        O Czkawka ainda receberá correções de bugs e atualizações menores, mas todos os novos recursos serão implementados apenas no Krokiet.
+
+        PS. Esta mensagem deve ser visível apenas uma vez, mas se ela aparecer novamente, defina a variável de ambiente CZKAWKA_DONT_ANNOY_ME para qualquer valor não vazio.

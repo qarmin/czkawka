@@ -205,7 +205,8 @@ export component ActionButtons inherits HorizontalLayout {
         }
     }
 
-    if lists_enabled && GuiState.tool_with_groups: hardlink_button := Button {
+    // TODO - implement softlink action
+    if false && lists_enabled && GuiState.tool_with_groups: hardlink_button := Button {
         height: parent.height;
         enabled: base_buttons_may_be_available && self.visible && checked_anything;
         text: self.visible && Settings.show_only_icons ? "" : Translations.hardlink_button_text;
@@ -216,7 +217,8 @@ export component ActionButtons inherits HorizontalLayout {
         }
     }
 
-    if lists_enabled && GuiState.tool_with_groups: softlink_button := Button {
+    // TODO - implement softlink action
+    if false && lists_enabled && GuiState.tool_with_groups: softlink_button := Button {
         height: parent.height;
         enabled: base_buttons_may_be_available && self.visible && checked_anything;
         text: self.visible && Settings.show_only_icons ? "" : Translations.softlink_button_text;

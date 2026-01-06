@@ -21,8 +21,6 @@ pub struct Info {
 #[derive(Clone, Default)]
 pub struct ExifRemoverParameters {
     pub ignored_tags: Vec<String>,
-    // TODO ignored_tags_for_tiff - which breaks files
-    // ImageWidth, ImageHeight,
 }
 
 impl ExifRemoverParameters {

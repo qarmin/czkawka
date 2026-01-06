@@ -543,3 +543,17 @@ preview_image_opening_failure = { $name } adlı resim dosyası açılamadı, ned
 compare_groups_number = Grup: { $current_group }/{ $all_groups } ({ $images_in_group } resim)
 compare_move_left_button = <-
 compare_move_right_button = ->
+
+krokiet_info_title = Krokiet - Yeni Versiyon Czkawka
+krokiet_info_message = 
+        Krokiet, yeni, geliştirilmiş, daha hızlı ve daha az hatalı Czkawka GTK GUI sürümüdür!
+
+        Bağımsız yapısı sayesinde, çalıştırması çok daha kolaydır ve sistem değişikliklerine ve paket sürümü güncellemelerine karşı daha dirençlidir.
+
+        Video karşılaştırma modunda ön izlemeler, dosya taşıma/kopyalama/silme ilerlemesi ve gelişmiş sıralama seçenekleri gibi Czkawka'da bulunmayan birçok özelliği içerir.
+
+        Deneyin ve farkı görün!
+
+        Czkawka hala hata düzeltmeleri ve küçük güncellemeler alacak, ancak tüm yeni özellikler yalnızca Krokiet'te uygulanacaktır.
+
+        PS. Bu mesaj yalnızca bir kez görünmeli, ancak tekrar görünürse CZKAWKA_DONT_ANNOY_ME ortam değişkenini herhangi bir boş olmayan değere ayarlayın.

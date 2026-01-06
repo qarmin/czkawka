@@ -1,11 +1,11 @@
 # Translations
 
-From all ~20 languages available in Czkawka/Krokiet, the main/default one language is English, but also Polish is officially supported.
+Czkawka/Krokiet is available in around 20 languages. The main (default) language is English, and Polish is also officially supported.
 
-App use Fluent localization system - https://projectfluent.org/
+The application uses simple Fluent localization system: https://projectfluent.org/
 
-Translating is mostly done by site - https://crowdin.com/project/czkawka
+Most translations are managed on Crowdin: https://crowdin.com/project/czkawka
 
-If you want to translate Czkawka to your language, you can do it in this site.
+If you want to translate Czkawka into your language, you can do so on that platform.
 
-With every new release, a lot of strings are added/changed, so due lack of dedicated translators for some languages, some strings are translated with crowdin machine translation system and some, with local llm models, so it may not be perfect and still needs human review - but this greatly reduces the amount of work needed from human translators.
+With each new release, many strings are added or modified. Because most of languages lack dedicated translators, parts of the translations are generated using Crowdin’s machine translation system or local LLM models. These translations may not be perfect and still require human review, but they significantly reduce the amount of work needed from human translators.

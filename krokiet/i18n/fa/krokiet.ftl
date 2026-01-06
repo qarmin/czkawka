@@ -232,3 +232,77 @@ subsettings_videos_thumbnail_percentage = pozیション تصویر کمپین �
 settings_cache_number_size_text = حجم فایل‌های پوше: { $size }, تعداد فایل‌ها: { $number }
 settings_video_thumbnails_number_size_text = rozمغزهای ویدیو: { $size }، تعداد فایل‌ها: { $number }
 settings_log_number_size_text = اندازه فایل‌های لگ: { $size }, تعداد فایل‌ها: { $number }
+
+rust_loading_exif_cache = بارگذاری کش EXIF
+rust_saving_exif_cache = ذخیره کش EXIF
+rust_checked_images = بررسی شد { $items_stats } تصاویر ({ $size_stats })
+rust_checked_videos = بررسی شد { $items_stats } ویدیو ({ $size_stats })
+rust_found_video_optimizer = یافته { $items_found } فایل برای بهینه‌سازی در { $time}
+rust_found_exif_files = یافته { $items_found } فایل با داده‌های exif در { $time }
+rust_hardlink_summary = پیوند داده شده { $hardlinked } آیتم‌ها، نتوانستند { $failed } آیتم را پیوند دهند، از { $total } آیتم
+rust_symlink_summary = پیوند داده شد { $symlinked } آیتم، ناموفق بود در پیوند دادن { $failed } آیتم، از { $total } آیتم
+rust_optimize_video_summary = ویدیوهای بهینه‌شده { $optimized }، ویدیوهای ناموفق در بهینه‌سازی { $failed }، از مجموع { $total } ویدیو
+rust_clean_exif_summary = تمیز کردن EXIF از فایل‌های { $cleaned }، ناموفق در پاکسازی فایل‌های { $failed }، از مجموع { $total } فایل
+rust_hardlinking_files = پیوند سخت { $items_stats } فایل ({ $size_stats })
+rust_hardlinking_no_size_files = پیوند سخت { $items_stats } فایل
+rust_symlinking_files = ارتباط پیوند نمادین { $items_stats } فایل ({ $size_stats })
+rust_symlinking_no_size_files = ارتباط پیوند نمادین { $items_stats } فایل
+rust_optimizing_videos = بهینه‌سازی شده { $items_stats } ویدیوی ({ $size_stats })
+rust_optimizing_no_size_videos = ویدیو بهینه‌سازی شده { $items_stats }
+rust_cleaning_exif = پاک‌سازی EXIF از فایل { $items_stats } ({ $size_stats })
+rust_cleaning_no_size_exif = پاک کردن EXIF از فایل { $items_stats }
+rust_no_files_hardlinked = فایل یا پوشه‌ای برای پیوند سخت انتخاب نشده است.
+rust_no_files_symlinked = هیچ فایل یا پوشه‌ای برای پیوند نمایی انتخاب نشده است.
+rust_no_videos_optimized = بهینه‌سازی نشده / ویدیو انتخاب نشده برای بهینه‌سازی
+rust_no_exif_cleaned = فایل‌های انتخابی برای پاکسازی EXIF وجود ندارد
+rust_extracted_exif_tags = استخراج برچسب‌های EXIF از فایل‌های { $items_stats } ({ $size_stats })
+rust_move_confirmation = آیا مطمئن هستید که می‌خواهید آیتم‌های انتخاب شده را جابجا کنید؟
+rust_move_confirmation_number_simple = { $items } آیتم‌های انتخاب شده.
+rust_clean_exif_confirmation = آیا مطمئن هستید که می‌خواهید داده‌های EXIF را از آیتم‌های انتخاب شده حذف کنید؟
+rust_clean_exif_confirmation_number_simple = { $items } آیتم‌های انتخاب شده.
+clean_exif_overwrite_files_text = بازنویسی فایل‌ها
+rust_optimize_video_confirmation = آیا مطمئن هستید که می‌خواهید ویدیوهای انتخاب شده را بهینه‌سازی کنید؟
+rust_optimize_video_confirmation_number_simple = { $items } آیتم‌های انتخاب شده.
+rust_hardlink_confirmation = آیا مطمئن هستید که می‌خواهید لینک‌های سخت برای آیتم‌های انتخاب شده ایجاد کنید؟
+rust_hardlink_confirmation_number_simple = { $items } آیتم‌های انتخاب شده.
+rust_symlink_confirmation = آیا مطمئن هستید که می‌خواهید برای آیتم‌های انتخاب شده پیوند نمایی ایجاد کنید؟
+rust_symlink_confirmation_number_simple = { $items } آیتم‌های انتخاب شده.
+rust_rename_confirmation = آیا مطمئن هستید که می‌خواهید آیتم‌های انتخاب شده را تغییر نام دهید؟
+rust_rename_confirmation_number_simple = { $items } آیتم‌های انتخاب شده.
+column_exif_tags = تگ‌های EXIF
+tool_video_optimizer = بهینه‌ساز ویدیو
+tool_exif_remover = حذف EXIF
+settings_application_scale_text = مقیاس درخواست
+settings_application_scale_hint_text = اعمال مقیاس دستی (به عنوان مثال، 1.0 = 100٪)
+settings_restart_required_scale_text = ---شما باید برنامه را برای اعمال تغییرات مقیاس راه‌اندازی مجدد کنید---
+settings_use_manual_application_scale_text = استفاده از مقیاس دستی
+settings_similar_videos_generate_thumbnail_grid_instead_of_single_image_hint_text = یک شبکه از پیش‌نمایه‌ها به جای یک تصویر واحد تولید کنید (ممکن است زمان بیشتری طول بکشد)
+settings_similar_videos_generate_thumbnail_grid_instead_of_single_image = ایجاد شبکه پیش‌نمایه‌ها به جای یک تصویر واحد
+settings_similar_videos_clear_unused_thumbnails = حذف تصاویر پس‌زمینه ویدیویی غیرفعال قدیمی‌تر از 7 روز در هنگام راه‌اندازی برنامه
+move_confirmation_text = آیا مطمئن هستید که می‌خواهید آیتم‌های انتخاب شده را جابجا کنید؟
+rename_confirmation_text = آیا مطمئن هستید که می‌خواهید آیتم‌های انتخاب شده را تغییر نام دهید؟
+subsettings_video_optimizer_mode = حالت
+subsettings_video_optimizer_video_codec = ویدئو کُدک
+subsettings_video_optimizer_excluded_codecs = استثنی شده کدک‌ها
+subsettings_video_optimizer_video_quality = کیفیت ویدیو (CRF)
+subsettings_video_optimizer_image_threshold = آستانه تصویر
+subsettings_reset = بازنشانی
+subsettings_exif_ignored_tags_text = تگ‌های نادیده گرفته شده:
+subsettings_exif_ignored_tags_hint_text = لیست جدا شده با کاما از برچسب‌هایی که باید از اسکن حذف شوند (به عنوان مثال، GPS، Thumbnail). برخی از برچسب‌ها، مانند ImageWidth در فایل‌های TIFF، پنهان شده‌اند تا از شکستن تصویر جلوگیری شود.
+clean_button_text = تمیز
+clean_text = داده‌های EXIF تمیز
+clean_confirmation_text = آیا مطمئن هستید که می‌خواهید داده‌های EXIF را از آیتم‌های انتخاب شده حذف کنید؟
+optimize_button_text = بهینه‌سازی
+optimize_text = بهینه‌سازی تصاویر
+optimize_confirmation_text = آیا مطمئن هستید که می‌خواهید آیتم‌های انتخاب شده را بهینه‌سازی کنید؟
+optimize_fail_if_bigger_text = اگر فایل بهینه شده بزرگتر شد، شکست بخشد
+optimize_overwrite_files_text = بازنویسی فایل‌ها
+optimize_limit_video_size_text = حداکثر اندازه ویدیو
+optimize_max_width_text = حداکثر عرض:
+optimize_max_height_text = حداکثر ارتفاع:
+hardlink_button_text = هاردلینک
+hardlink_text = ایجاد پیوند سخت
+hardlink_confirmation_text = آیا مطمئن هستید که می‌خواهید لینک‌های سخت برای آیتم‌های انتخاب شده ایجاد کنید؟
+softlink_button_text = سافت‌لینک
+softlink_text = ایجاد پیوند نرم
+softlink_confirmation_text = آیا مطمئن هستید که می‌خواهید پیوند نرم‌افزاری (symlinks) را برای آیتم‌های انتخاب شده ایجاد کنید؟

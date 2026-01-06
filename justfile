@@ -123,7 +123,7 @@ prepare_translations_deps:
     cd misc/ai_translate; uv sync
     # qwen2.5:7b - fast, but quite bad quality
     # qwen2.5:32b - very slow, still not good quality
-    #
+    # zongwei/gemma3-translator:4b - not so fast, but looks quite good
     ollama pull zongwei/gemma3-translator:4b
 
 translate:

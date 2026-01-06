@@ -510,3 +510,17 @@ preview_image_opening_failure = イメージ { $name } を開けませんでし�
 compare_groups_number = グループ { $current_group }/{ $all_groups } ({ $images_in_group } 画像)
 compare_move_left_button = L
 compare_move_right_button = R
+
+krokiet_info_title = Krokiet – 新バージョン Czkawka
+krokiet_info_message = 
+        クローキエッとは、新しい、改良され、高速で、バグが少ないCzkawka GTK GUIのバージョンです！
+
+        自己完結型なので、実行が簡単で、システム変更やパッケージバージョン更新に強いです。
+
+        ビデオ比較モードでのサムネイル、ファイルの移動/コピー/削除の進捗状況、拡張されたソートオプションなど、Czkawkaでは利用できない多くの機能が含まれています。
+
+        試して違いを見てください！
+
+        Czkawkaは引き続きバグ修正や軽微なアップデートを受け取りますが、すべての新機能はクローキエッでのみ実装されます。
+
+        追伸。このメッセージは一度だけ表示されるように設計されていますが、表示された場合は、CZKAWKA_DONT_ANNOY_ME環境変数を任意の空でない値に設定してください。

@@ -409,7 +409,7 @@ settings_folder_cache_open = پوشه کاشی را باز کنید
 settings_folder_settings_open = پوشه تنظیمات را باز کنید
 # Compute results
 compute_stopped_by_user = جستجو توسط کاربر متوقف شد
-compute_found_duplicates_hash_size = Found { $number_files } duplicates in { $number_groups } groups which took { $size } in { $time }
+compute_found_duplicates_hash_size = یافته { $number_files } کپی برابر را در { $number_groups } گروه که { $size } را در { $time } صرف کرد.
 compute_found_duplicates_name = Duplication { $number_files } فایل در { $number_groups } گروه در { $time } پیدا شد پیدا شد
 compute_found_empty_folders = فولدرهای خالی پیدا شد { $number_files } در زمان { $time }
 compute_found_empty_files = فایل‌های خالی پیدا شد: { $number_files } در زمان: { $time }
@@ -514,3 +514,17 @@ preview_image_opening_failure = تصویر { $name } را باز کردن شکس
 compare_groups_number = گروه { $current_group }/{ $all_groups } ({ $images_in_group } تصویر)
 compare_move_left_button = L
 compare_move_right_button = R
+
+krokiet_info_title = معرفی کرکیه - نسخه جدید Czkawka
+krokiet_info_message = 
+        کروکیت نسخه جدید، بهبود یافته، سریعتر و بدون باگ Czkawka GTK GUI است!
+
+        به دلیل خودکفایی، اجرای آن آسان‌تر است و در برابر تغییرات سیستم و به‌روزرسانی‌های نسخه بسته‌ها مقاوم‌تر است.
+
+        شامل بسیاری از ویژگی‌هایی است که در Czkawka در دسترس نیستند، مانند تصاویر کوچک در حالت مقایسه ویدیو، پیشرفت انتقال/کپی/حذف فایل و گزینه‌های مرتب‌سازی گسترده.
+
+        آن را امتحان کنید و تفاوت را ببینید!
+
+        Czkawka همچنان شامل رفع اشکال و به‌روزرسانی‌های جزئی خواهد بود، اما تمام ویژگی‌های جدید فقط درکروکیت پیاده‌سازی خواهند شد.
+
+        PS. این پیام باید فقط یک بار قابل مشاهده باشد، اما اگر دوباره ظاهر شد، متغیر محیطی CZKAWKA_DONT_ANNOY_ME را به هر مقدار غیر خالی تنظیم کنید.

@@ -510,3 +510,17 @@ preview_image_opening_failure = Klarte ikke å åpne bilde { $name }, årsak { $
 compare_groups_number = Gruppe { $current_group }/{ $all_groups } ({ $images_in_group } bilder)
 compare_move_left_button = L
 compare_move_right_button = R
+
+krokiet_info_title = Introduserer Krokiet - Ny versjon av Czkawka
+krokiet_info_message = 
+        Krokiet er den nye, forbedrede, raskere og mindre buggy versjonen av Czkawka GTK!
+
+        Siden den er selvstendig, er den mye lettere å kjøre og mer motstandsdyktig mot systemendringer og pakkeversjonsoppdateringer.
+
+        Den inkluderer mange funksjoner som ikke er tilgjengelige i Czkawka, som for eksempel forhåndsvisninger i videokomparismodus, filflyttings-/kopierings-/slettingsprogresjon og utvidede sorteringsalternativer.
+
+        Prøv det ut og se forskjellen!
+
+        Czkawka vil fortsatt motta feilrettinger og mindre oppdateringer, men alle nye funksjoner vil kun implementeres i Krokiet.
+
+        PS. Denne meldingen skal kun være synlig én gang, men hvis den dukker opp igjen, sett CZKAWKA_DONT_ANNOY_ME miljøvariabelen til en hvilken som helst ikke tom verdi.

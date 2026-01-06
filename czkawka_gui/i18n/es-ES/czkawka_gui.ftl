@@ -509,3 +509,17 @@ preview_image_opening_failure = Error al abrir la imagen { $name }, razón { $re
 compare_groups_number = Grupo { $current_group }/{ $all_groups } ({ $images_in_group } imágenes)
 compare_move_left_button = L
 compare_move_right_button = R
+
+krokiet_info_title = Presentando Krokiet - Nueva Versión de Czkawka
+krokiet_info_message = 
+        Krokiet es la nueva, mejorada, más rápida y menos problemática versión de la interfaz gráfica GTK de Czkawka.
+
+        Al ser autosuficiente, es mucho más fácil de ejecutar y más resistente a los cambios del sistema y las actualizaciones de versiones de paquetes.
+
+        Incluye muchas funciones que no están disponibles en Czkawka, como miniaturas en el modo de comparación de vídeo, el progreso de la copia/movimiento/borrado de archivos y opciones de ordenación ampliadas.
+
+        Pruébalo y comprueba la diferencia.
+
+        Czkawka seguirá recibiendo correcciones de errores y actualizaciones menores, pero todas las nuevas funciones se implementarán solo en Krokiet.
+
+        PS. Este mensaje debería ser visible solo una vez, pero si aparece de nuevo, establece la variable de entorno CZKAWKA_DONT_ANNOY_ME con cualquier valor no vacío.
