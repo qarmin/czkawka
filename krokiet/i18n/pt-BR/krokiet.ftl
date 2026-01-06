@@ -298,3 +298,10 @@ hardlink_confirmation_text = Tem certeza de que deseja criar hardlinks para os i
 softlink_button_text = Softlink
 softlink_text = Criar links simbólicos
 softlink_confirmation_text = Tem certeza que deseja criar links simbólicos (softlinks) para os itens selecionados?
+
+rust_move_confirmation_number_simple = { $items } itens selecionados.
+rust_clean_exif_confirmation_number_simple = { $items } itens selecionados.
+rust_optimize_video_confirmation_number_simple = { $items } itens selecionados.
+rust_hardlink_confirmation_number_simple = { $items } itens selecionados.
+rust_symlink_confirmation_number_simple = { $items } itens selecionados.
+rust_rename_confirmation_number_simple = { $items } itens selecionados.

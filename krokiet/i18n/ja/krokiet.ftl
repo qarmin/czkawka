@@ -307,3 +307,5 @@ hardlink_confirmation_text = 選択した項目に対してハードリンクを
 softlink_button_text = ソフトリンク
 softlink_text = 作成してリンク
 softlink_confirmation_text = 選択した項目に対して、シンボリックリンク（symlinks）を作成しますか？
+
+rust_found_exif_files = ファイルを { $time } に { $items_found } 件見つけました。

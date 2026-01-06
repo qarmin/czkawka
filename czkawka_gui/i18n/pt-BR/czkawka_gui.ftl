@@ -520,3 +520,12 @@ krokiet_info_message =
         O Czkawka ainda receberá correções de bugs e atualizações menores, mas todos os novos recursos serão implementados apenas no Krokiet.
 
         PS. Esta mensagem deve ser visível apenas uma vez, mas se ela aparecer novamente, defina a variável de ambiente CZKAWKA_DONT_ANNOY_ME para qualquer valor não vazio.
+
+progress_scanning_general_file =
+    { $file_number ->
+    [one] Arquivo { $file_number } escaneado
+    *[other] Arquivos { $file_number } escaneados}
+progress_scanning_empty_folders = 
+        {$folder_number ->
+        [one] Pasta {$folder_number} escaneada
+        *[other] Pastas {$folder_number} escaneadas}

@@ -309,3 +309,5 @@ hardlink_confirmation_text = 선택한 항목에 대해 하드 링크를 생성�
 softlink_button_text = 소프트링크
 softlink_text = 생성 softlinks
 softlink_confirmation_text = 선택한 항목에 대한 심볼릭 링크(symlink)를 생성하시겠습니까?
+
+rust_found_bad_extensions = 발견된 { $items_found }개의 파일 중 { $time }에 잘못된 확장자를 가진 파일이 있습니다.

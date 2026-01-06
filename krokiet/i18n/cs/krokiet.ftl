@@ -303,3 +303,5 @@ hardlink_confirmation_text = Jste si jisti, že chcete vytvořit tvrdé odkazy p
 softlink_button_text = Softlink
 softlink_text = Vytvořit softlinky
 softlink_confirmation_text = Jste si jisti, že chcete vytvořit softlinky (symlinky) pro vybrané položky?
+
+rust_optimize_video_summary = Optimalizované { $optimized } videa, neoptimalizované { $failed } videa, z celkem { $total } videí

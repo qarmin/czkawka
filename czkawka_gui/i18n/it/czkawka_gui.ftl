@@ -522,3 +522,5 @@ krokiet_info_message =
         Czkawka riceverà comunque correzioni di bug e aggiornamenti minori, ma tutte le nuove funzionalità saranno implementate solo in Krokiet.
 
         PS. Questo messaggio dovrebbe essere visibile solo una volta, ma se appare di nuovo, imposta la variabile d'ambiente CZKAWKA_DONT_ANNOY_ME a qualsiasi valore non vuoto.
+
+saving_loading_saving_success = Salvataggio configurazione su file { $name }.

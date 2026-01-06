@@ -298,3 +298,10 @@ hardlink_confirmation_text = Är du säker på att du vill skapa hårda länkar 
 softlink_button_text = Softlink
 softlink_text = Skapa symboliska länkar
 softlink_confirmation_text = Är du säker på att du vill skapa symboliska länkar (symlinks) för de valda objekten?
+
+rust_move_confirmation_number_simple = { $items } föremål valda.
+rust_clean_exif_confirmation_number_simple = { $items } föremål valda.
+rust_optimize_video_confirmation_number_simple = { $items } föremål valda.
+rust_hardlink_confirmation_number_simple = { $items } föremål valda.
+rust_symlink_confirmation_number_simple = { $items } föremål valda.
+rust_rename_confirmation_number_simple = { $items } föremål valda.

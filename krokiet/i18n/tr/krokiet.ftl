@@ -303,3 +303,5 @@ hardlink_confirmation_text = Seçilen öğeler için sert bağlantılar oluştur
 softlink_button_text = Yumuşak bağlantı
 softlink_text = Yumuşak bağlantılar oluştur
 softlink_confirmation_text = Seçilen öğeler için yumuşak bağlantılar (sembolik bağlantılar) oluşturmaya emin misiniz?
+
+rust_optimize_video_summary = Optimize edilmiş { $optimized } videolar, optimize edilemeyen { $failed } videolar, toplamda { $total } video

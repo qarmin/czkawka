@@ -303,3 +303,5 @@ hardlink_confirmation_text = Er du sikker på at du vil opprette hardkoblinger f
 softlink_button_text = Softlink
 softlink_text = Opprett mylkoblinger
 softlink_confirmation_text = Er du sikker på at du vil opprette softlenker (symlinks) for de valgte elementene?
+
+rust_optimize_video_summary = Optimaliserte { $optimized } videoer, mislykkede optimaliseringer av { $failed } videoer, ut av { $total } videoer
