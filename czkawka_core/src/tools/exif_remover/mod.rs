@@ -47,6 +47,11 @@ pub struct ExifTagInfo {
     pub group: String,
 }
 
+#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct ExifTagsFixerParams {
+    pub override_file: bool,
+}
+
 impl ResultEntry for ExifEntry {
     fn get_path(&self) -> &std::path::Path {
         &self.path

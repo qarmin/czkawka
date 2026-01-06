@@ -21,7 +21,7 @@ use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
-use crate::tools::exif_remover::{ExifEntry, ExifRemover, ExifRemoverParameters, ExifTagInfo, Info};
+use crate::tools::exif_remover::{ExifEntry, ExifRemover, ExifRemoverParameters, ExifTagInfo, ExifTagsFixerParams, Info};
 
 impl ExifRemover {
     pub fn new(params: ExifRemoverParameters) -> Self {
@@ -39,7 +39,7 @@ impl ExifRemover {
             "StripByteCounts",
             "PlanarConfiguration",
         ];
-        for i in ["tif", "tiff", "dng"] {
+        for i in ["tif", "tiff"] {
             additional_excluded_tags.insert(i, tiff_disabled_tags.clone());
         }
         Self {
@@ -208,14 +208,16 @@ impl ExifRemover {
         }
 
         // After saving to cache, remove ignored tags - because in cache we need to store full info about tags
-        if !self.params.ignored_tags.is_empty() {
-            for entry in &mut vec_file_entry {
-                let extension = entry.path.extension().and_then(|ext| ext.to_str()).unwrap_or("").to_lowercase();
-                if let Some(additional_ignored_tags) = self.additional_excluded_tags.get(&extension.as_str()) {
-                    entry.exif_tags.retain(|tag_item| !additional_ignored_tags.contains(&tag_item.name.as_str()));
-                }
-                entry.exif_tags.retain(|tag_item| !self.params.ignored_tags.contains(&tag_item.name));
+        for entry in &mut vec_file_entry {
+            let extension = entry.path.extension().and_then(|ext| ext.to_str()).unwrap_or("").to_lowercase();
+            if let Some(additional_ignored_tags) = self.additional_excluded_tags.get(&extension.as_str()) {
+                entry.exif_tags.retain(|tag_item| !additional_ignored_tags.contains(&tag_item.name.as_str()));
             }
+            if self.params.ignored_tags.is_empty() {
+                continue;
+            }
+
+            entry.exif_tags.retain(|tag_item| !self.params.ignored_tags.contains(&tag_item.name));
         }
 
         self.exif_files = vec_file_entry.into_iter().filter(|f| f.error.is_none() && !f.exif_tags.is_empty()).collect();
@@ -230,7 +232,7 @@ impl ExifRemover {
     }
 
     #[fun_time(message = "fix_files", level = "debug")]
-    pub(crate) fn fix_files(&mut self, stop_flag: &Arc<AtomicBool>, _progress_sender: Option<&Sender<ProgressData>>, _fix_params: ()) -> WorkContinueStatus {
+    pub(crate) fn fix_files(&mut self, stop_flag: &Arc<AtomicBool>, _progress_sender: Option<&Sender<ProgressData>>, fix_params: ExifTagsFixerParams) -> WorkContinueStatus {
         info!("Starting optimization of {} video files", self.exif_files.len());
 
         self.exif_files.par_iter_mut().for_each(|entry| {
@@ -239,7 +241,7 @@ impl ExifRemover {
             }
 
             let exif_data_to_remove: Vec<(u16, String)> = entry.exif_tags.iter().map(|item_tag| (item_tag.code, item_tag.group.clone())).collect();
-            match clean_exif_tags(&entry.path.to_string_lossy(), &exif_data_to_remove, false) {
+            match clean_exif_tags(&entry.path.to_string_lossy(), &exif_data_to_remove, fix_params.override_file) {
                 Ok(_number_removed_tags) => {}
                 Err(e) => {
                     entry.error = Some(e);
@@ -254,10 +256,10 @@ impl ExifRemover {
 pub fn clean_exif_tags(file_path: &str, tags_to_remove: &[(u16, String)], override_file: bool) -> Result<u32, String> {
     panic::catch_unwind(|| {
         let file_path = Path::new(file_path);
-        let data = fs::read(file_path).map_err(|e| e.to_string())?;
-        let mut cursor = std::io::Cursor::new(&data);
+        let mut file_data = fs::read(file_path).map_err(|e| e.to_string())?;
+        let mut cursor = std::io::Cursor::new(&file_data);
         let ext = auto_detect_file_extension(&mut cursor).ok_or_else(|| "Failed to detect file type".to_string())?;
-        let metadata = Metadata::new_from_vec(&data, ext).map_err(|e| format!("Failed to read EXIF: {e}"))?;
+        let metadata = Metadata::new_from_vec(&file_data, ext).map_err(|e| format!("Failed to read EXIF: {e}"))?;
 
         let mut new_metadata = metadata;
         let mut tags_removed: u32 = 0;
@@ -273,13 +275,13 @@ pub fn clean_exif_tags(file_path: &str, tags_to_remove: &[(u16, String)], overri
             tags_removed += 1;
         }
 
+        new_metadata.write_to_vec(&mut file_data, ext).map_err(|e| e.to_string())?;
         if override_file {
-            new_metadata.write_to_file(file_path).map_err(|e| format!("Failed to write EXIF file: {e}"))?;
+            fs::write(file_path, file_data).map_err(|e| e.to_string())?;
         } else {
             let extension = file_path.extension().and_then(|ext| ext.to_str()).unwrap_or("");
             let new_file_path = file_path.with_extension(format!("czkawka_cleaned_exif.{extension}"));
-            let _ = fs::copy(file_path, &new_file_path);
-            new_metadata.write_to_file(&new_file_path).map_err(|e| format!("Failed to write EXIF file: {e}"))?;
+            fs::write(new_file_path, file_data).map_err(|e| e.to_string())?;
         }
 
         Ok(tags_removed)

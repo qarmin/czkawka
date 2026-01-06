@@ -11,7 +11,7 @@ use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
 use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, FixingItems, PrintResults, Search};
-use crate::tools::exif_remover::{ExifEntry, ExifRemover, ExifRemoverParameters, Info};
+use crate::tools::exif_remover::{ExifEntry, ExifRemover, ExifRemoverParameters, ExifTagsFixerParams, Info};
 
 impl AllTraits for ExifRemover {}
 
@@ -30,7 +30,7 @@ impl DeletingItems for ExifRemover {
 }
 
 impl FixingItems for ExifRemover {
-    type FixParams = ();
+    type FixParams = ExifTagsFixerParams;
     #[fun_time(message = "fix_items", level = "debug")]
     fn fix_items(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>, fix_params: Self::FixParams) -> WorkContinueStatus {
         self.fix_files(stop_flag, progress_sender, fix_params)

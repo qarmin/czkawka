@@ -39,4 +39,7 @@ pub const VIDEO_FILES_EXTENSIONS: &[&str] = &[
     "y4m", "h264", "h265", "hevc", "av1", "vp8", "vp9", // Raw / uncompressed
     "amv", "drc", "gifv", "smk", "bik", // Older / games
 ];
-pub const EXIF_FILES_EXTENSIONS: &[&str] = &["jpg", "jpeg", "jfif", "png", "tiff", "tif", "avif", "jxl", "dng"]; // "webp","heic", "heif" are all buggy as hell - https://github.com/TechnikTobi/little_exif/issues/77
+
+// "webp","heic", "heif" are all buggy as hell - https://github.com/TechnikTobi/little_exif/issues/77
+// "dng" - is theoretically a tiff file, but little_exif have problem with saving metadata to it
+pub const EXIF_FILES_EXTENSIONS: &[&str] = &["jpg", "jpeg", "jfif", "png", "tiff", "tif", "avif", "jxl"];
