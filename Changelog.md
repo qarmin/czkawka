@@ -2,7 +2,9 @@
 ### New version blockers
 - new release of gtk4-rs, with iter_next fix
 - sym/hardlinks in Krokiet
-- new optimizer mode for images?
+- cropping videos
+- delay when checking for outdated cache
+- fix elements after changing font size in Krokiet
 
 ### Breaking changes
 #### Users
