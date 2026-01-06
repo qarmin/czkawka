@@ -230,7 +230,7 @@ impl ExifRemover {
     }
 
     #[fun_time(message = "fix_files", level = "debug")]
-    pub(crate) fn fix_files(&mut self, stop_flag: &Arc<AtomicBool>, _progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    pub(crate) fn fix_files(&mut self, stop_flag: &Arc<AtomicBool>, _progress_sender: Option<&Sender<ProgressData>>, _fix_params: ()) -> WorkContinueStatus {
         info!("Starting optimization of {} video files", self.exif_files.len());
 
         self.exif_files.par_iter_mut().for_each(|entry| {

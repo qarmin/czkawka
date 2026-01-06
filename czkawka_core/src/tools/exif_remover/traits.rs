@@ -30,9 +30,10 @@ impl DeletingItems for ExifRemover {
 }
 
 impl FixingItems for ExifRemover {
+    type FixParams = ();
     #[fun_time(message = "fix_items", level = "debug")]
-    fn fix_items(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
-        self.fix_files(stop_flag, progress_sender)
+    fn fix_items(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>, fix_params: Self::FixParams) -> WorkContinueStatus {
+        self.fix_files(stop_flag, progress_sender, fix_params)
     }
 }
 

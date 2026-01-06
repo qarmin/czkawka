@@ -27,7 +27,7 @@ use czkawka_core::tools::similar_images::{ImagesEntry, SimilarImages, SimilarIma
 use czkawka_core::tools::similar_videos::core::{format_bitrate_opt, format_duration_opt};
 use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters, VideosEntry, crop_detect_from_str};
 use czkawka_core::tools::temporary::{Temporary, TemporaryFileEntry};
-use czkawka_core::tools::video_optimizer::{OptimizerMode, VideoCodec, VideoOptimizer, VideoOptimizerParameters, VideoOptimizerFixParams, VideoTranscodeEntry};
+use czkawka_core::tools::video_optimizer::{OptimizerMode, VideoOptimizer, VideoOptimizerParameters, VideoTranscodeEntry};
 use humansize::{BINARY, format_size};
 use rayon::prelude::*;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
@@ -1226,24 +1226,12 @@ fn scan_video_optimizer(
                 .filter(|s| !s.is_empty())
                 .collect();
 
-            let video_codec = match custom_settings.video_optimizer_video_codec.to_lowercase().as_str() {
-                "h264" => VideoCodec::H264,
-                "vp9" => VideoCodec::Vp9,
-                "av1" => VideoCodec::Av1,
-                _ => VideoCodec::H265,
-            };
-
             let params = VideoOptimizerParameters {
                 mode: OptimizerMode::VideoTranscode,
                 excluded_codecs,
             };
 
-            let fix_params = VideoOptimizerFixParams::VideoTranscode {
-                codec: video_codec,
-                quality: custom_settings.video_optimizer_video_quality,
-            };
-
-            let mut tool = VideoOptimizer::new(params, fix_params);
+            let mut tool = VideoOptimizer::new(params);
             set_common_settings(&mut tool, &custom_settings, &stop_flag);
 
             tool.search(&stop_flag, Some(&progress_sender));

@@ -36,4 +36,3 @@ pub fn check_video_crop(mut entry: VideoCropEntry) -> VideoCropEntry {
 
     entry
 }
-

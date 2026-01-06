@@ -90,8 +90,9 @@ pub trait DeletingItems {
 }
 
 pub trait FixingItems {
+    type FixParams;
     #[must_use]
-    fn fix_items(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus;
+    fn fix_items(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>, fix_params: Self::FixParams) -> WorkContinueStatus;
 }
 
 pub trait ResultEntry {

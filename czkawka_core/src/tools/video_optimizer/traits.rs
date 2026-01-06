@@ -11,7 +11,7 @@ use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, FixingItems, PrintResults, Search};
-use crate::tools::video_optimizer::{Info, OptimizerMode, VideoOptimizer, VideoOptimizerParameters, VideoOptimizerFixParams};
+use crate::tools::video_optimizer::{Info, OptimizerMode, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters};
 
 impl AllTraits for VideoOptimizer {}
 
@@ -23,9 +23,10 @@ impl DeletingItems for VideoOptimizer {
 }
 
 impl FixingItems for VideoOptimizer {
+    type FixParams = VideoOptimizerFixParams;
     #[fun_time(message = "fix_items", level = "debug")]
-    fn fix_items(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
-        self.fix_files(stop_flag, progress_sender)
+    fn fix_items(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>, fix_params: Self::FixParams) -> WorkContinueStatus {
+        self.fix_files(stop_flag, progress_sender, fix_params)
     }
 }
 
@@ -54,11 +55,6 @@ impl PrintResults for VideoOptimizer {
 
         match self.params.mode {
             OptimizerMode::VideoTranscode => {
-                let VideoOptimizerFixParams::VideoTranscode { codec, quality } = self.fix_params else {
-                    unreachable!("VideoTranscode mode should have VideoTranscode fix_params");
-                };
-                writeln!(writer, "Target codec: {codec:?}")?;
-                writeln!(writer, "Target quality (CRF): {quality}")?;
                 writeln!(writer)?;
 
                 let total_entries = self.video_transcode_entries.len();
@@ -89,12 +85,6 @@ impl PrintResults for VideoOptimizer {
                 }
             }
             OptimizerMode::VideoCrop => {
-                let VideoOptimizerFixParams::VideoCrop { crop_start_end_static_frames, crop_black_bars, crop_static_parts } = self.fix_params else {
-                    unreachable!("VideoCrop mode should have VideoCrop fix_params");
-                };
-                writeln!(writer, "Crop start/end static frames: {crop_start_end_static_frames}")?;
-                writeln!(writer, "Crop black bars: {crop_black_bars}")?;
-                writeln!(writer, "Crop static parts: {crop_static_parts}")?;
                 writeln!(writer)?;
 
                 let total_entries = self.video_crop_entries.len();

@@ -62,7 +62,10 @@ pub enum OptimizerMode {
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum VideoOptimizerFixParams {
-    VideoTranscode { codec: VideoCodec, quality: u32 },
+    VideoTranscode {
+        codec: VideoCodec,
+        quality: u32,
+    },
     VideoCrop {
         crop_start_end_static_frames: bool,
         crop_black_bars: bool,
@@ -96,7 +99,7 @@ impl VideoOptimizerParameters {
     pub fn new(mode: OptimizerMode) -> Self {
         Self {
             mode,
-            excluded_codecs: vec!["hevc".to_string(), "av1".to_string(),"vp9".to_string()],
+            excluded_codecs: vec!["hevc".to_string(), "av1".to_string(), "vp9".to_string()],
         }
     }
 }
@@ -192,7 +195,6 @@ pub struct VideoOptimizer {
     video_transcode_entries: Vec<VideoTranscodeEntry>,
     video_crop_entries: Vec<VideoCropEntry>,
     params: VideoOptimizerParameters,
-    fix_params: VideoOptimizerFixParams,
 }
 
 impl VideoOptimizer {
@@ -206,10 +208,6 @@ impl VideoOptimizer {
 
     pub const fn get_params(&self) -> &VideoOptimizerParameters {
         &self.params
-    }
-
-    pub const fn get_fix_params(&self) -> &VideoOptimizerFixParams {
-        &self.fix_params
     }
 
     pub const fn get_information(&self) -> &Info {
