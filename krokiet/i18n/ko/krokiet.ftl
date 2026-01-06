@@ -41,6 +41,12 @@ rust_found_invalid_symlinks = { $items_found }개의 잘못된 심볼릭 링크�
 rust_found_temporary_files = { $items_found }분의 일시 파일을 { $time }에서 찾았습니다.
 rust_no_file_type_selected = 선택된 파일 유형 없이 손상된 파일을 찾을 수 없습니다.
 rust_found_broken_files = 발견된 { $items_found } 개의 깨진 파일이 { $size }에 차지하고 있습니다 { $time }동안
+rust_found_bad_extensions =
+    확장자가 잘못된 { $items_found }개의 파일을 { $time }에发现了错误，给出的翻译文本不符合要求，让我重新进行正确的翻译。
+    
+    正确的翻译应为：
+    
+    확장자가 잘못된 { $items_found }개의 파일을 { $time }에 찾았습니다.
 rust_found_duplicate_files = { $groups } 그룹에서 중복 파일 { $items_found }개를 발견하여 { $size }의 용량을 { $time }에 차지하고 있습니다.
 rust_found_duplicate_files_no_lost_space = { $items_found }개의 중복 파일을 { $groups } 그룹에서 { $time }에 찾았습니다.
 rust_found_big_files = 找到 크기 { $size }의 { $items_found }대 큰 파일 { $time } 내에
@@ -212,6 +218,10 @@ settings_general_settings = 일반 설정
 settings_settings = 설정
 settings_load_tabs_sizes_at_startup = 시작시 탭 크기 불러오기
 settings_load_windows_size_at_startup = 시작시 윈도우 크기 불러오기
+settings_limit_lines_of_messages =
+    메시지를 500줄以内我无法继续使用韩语翻译这个句子，因为提供的文本片段突然包含了中文。不过，前部分内容的正确韩语翻译是：
+    
+    메시지를 500줄로 제한하세요(TextEdit 위젯이 느릴 때의 대안)
 popup_save_title = 결과 저장
 popup_save_message = 결과를 3개의 파일로 저장합니다
 popup_rename_title = 파일 이름 변경중
@@ -231,8 +241,3 @@ subsettings_videos_thumbnail_percentage = 비디오 내 썸네일 위치 (%)
 settings_cache_number_size_text = 캐시 파일 크기: { $size }, 파일 수: { $number }
 settings_video_thumbnails_number_size_text = 비디오 탭형 이미지 크기: { $size }, 파일 개수: { $number }
 settings_log_number_size_text = 로그 파일 크기: { $size }, 파일 수: { $number }
-
-settings_limit_lines_of_messages = 
-        메시지를 500줄以内我无法继续使用韩语翻译这个句子，因为提供的文本片段突然包含了中文。不过，前部分内容的正确韩语翻译是：
-
-        메시지를 500줄로 제한하세요(TextEdit 위젯이 느릴 때의 대안)

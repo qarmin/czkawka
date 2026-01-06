@@ -202,6 +202,7 @@ settings_edit_name = تحرير الاسم
 settings_choose_name_for_prefix = اختر اسم البادئة
 settings_save = حفظ
 settings_load = تحميل
+settings_reset = إعادة تعيين
 settings_similar_videos_tool = أداة فيديو مشابهة
 settings_similar_images_tool = أداة مشابهة للصور
 settings_similar_music_tool = أداة موسيقية مشابهة
@@ -229,5 +230,3 @@ subsettings_videos_thumbnail_percentage = موضع الصورة المصغرة �
 settings_cache_number_size_text = حجم ملفات التخزين المؤقت: { $size }، عدد الملفات: { $number }
 settings_video_thumbnails_number_size_text = حجم الصور المصغرة للفيديو: { $size }، عدد الملفات: { $number }
 settings_log_number_size_text = حجم ملفات السجل: { $size }، عدد الملفات: { $number }
-
-settings_reset = إعادة تعيين

@@ -230,5 +230,5 @@ subsettings_videos_skip_forward_amount = مدت زمان hop [س]
 subsettings_videos_vid_hash_duration = مدت زمان ویدیو هاش
 subsettings_videos_thumbnail_percentage = pozیション تصویر کمپین در ویدئو (%)
 settings_cache_number_size_text = حجم فایل‌های پوше: { $size }, تعداد فایل‌ها: { $number }
-settings_video_thumbnails_number_size_text = rozمغزهای ویدیو: {$size}، تعداد فایل‌ها: {$number}
+settings_video_thumbnails_number_size_text = rozمغزهای ویدیو: { $size }، تعداد فایل‌ها: { $number }
 settings_log_number_size_text = اندازه فایل‌های لگ: { $size }, تعداد فایل‌ها: { $number }

@@ -50,7 +50,6 @@ rust_saved_preset = 已儲存預設設定 { $preset_idx }
 rust_cannot_save_preset = 無法儲存預設設定 { $preset_idx }，原因：{ $reason }
 rust_reset_preset = 已重設預設設定 { $preset_idx }
 rust_cannot_create_output_folder = 無法建立輸出資料夾 { $output_folder }，原因：{ $error }
-
 rust_delete_summary = 已刪除 { $deleted } 個項目，刪除失敗 { $failed } 個項目，共 { $total } 個項目
 rust_rename_summary = 已重新命名 { $renamed } 個項目，重新命名失敗 { $failed } 個項目，共 { $total } 個項目
 rust_move_summary = 已移動 { $moved } 個項目，移動失敗 { $failed } 個項目，共 { $total } 個項目

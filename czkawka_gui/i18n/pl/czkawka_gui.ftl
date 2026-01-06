@@ -6,22 +6,6 @@ window_compare_images = Porównywanie Obrazów
 # General
 general_ok_button = Ok
 general_close_button = Zamknij
-
-# Krokiet info dialog
-krokiet_info_title = Przedstawiamy Krokiet - Nową Wersję Czkawki
-krokiet_info_message =
-        Krokiet to nowa, ulepszona, szybsza i mniej wadliwa wersja interfejsu GTK Czkawki!
-
-        Będąc samodzielną aplikacją, jest znacznie łatwiejszy w uruchomieniu i bardziej odporny na zmiany systemu oraz aktualizacje wersji pakietów.
-
-        Zawiera wiele funkcji niedostępnych w Czkawce, takich jak miniatury w trybie porównywania wideo, postęp przenoszenia/kopiowania/usuwania plików oraz rozszerzone opcje sortowania.
-
-        Wypróbuj i zobacz różnicę!
-
-        Czkawka nadal będzie otrzymywać poprawki błędów i drobne aktualizacje, ale wszystkie nowe funkcje będą implementowane tylko w Krokiecie.
-
-        PS. Ta wiadomość powinna być widoczna tylko raz, ale jeśli pojawi się ponownie, ustaw zmienną środowiskową CZKAWKA_DONT_ANNOY_ME na dowolną niepustą wartość.
-krokiet_info_checkbox = Nie pokazuj więcej tej wiadomości
 # Main window
 music_title_checkbox = Tytuł
 music_artist_checkbox = Wykonawca
@@ -143,7 +127,7 @@ main_label_hash_type = Typ hashu
 main_label_hash_size = Rozmiar hashu
 main_label_size_bytes = Rozmiar (bajty)
 main_label_min_size = Min
-main_label_max_size = Maks
+main_label_max_size = Max
 main_label_shown_files = Liczba wyświetlanych plików
 main_label_resize_algorithm = Algorytm zmiany rozmiaru
 main_label_similarity = Podobieństwo{ "   " }

@@ -15,6 +15,7 @@ core_file_no_modification_date = { $name } dosyasının değişiklik tarihine er
 core_folder_no_modification_date = { $name } klasörünün değişiklik tarihine erişilemiyor, nedeni: { $reason }
 core_missing_no_chosen_included_directory = "Aranacak Dizinler" listesinde en az bir dizin yer almalıdır.
 core_directory_must_exists = Kataloglar: Sağlanan klasör yolu mevcut olmalıdır, { $path }'i ihraç edilmiştir
+core_directory_must_be_directory = Dizinler: Sağlanan yol bir dizin göstermelidir, { $path } yok sayılmıştır
 core_included_directory_zero_valid_directories = Kümeledilen Klasör HATA: Geçerli bir kümeledilen yolu bulamadık, bu gereklidir
 core_excluded_directory_pointless_slash = Klasörler: "/yi hariç tutmak faydalı değildir, çünkü bu herhangi bir dosya taramasını önleme anlamına gelir"
 core_directory_overlap = Klasörler: Aranan tüm klasörlerEXKLUDEDIRECTORIES ilelapsız olmalıdır
@@ -27,6 +28,3 @@ core_messages_limit_reached_characters = Number of messages exceeded the set lim
 core_messages_limit_reached_lines = Number of messages exceeded the set limit ({ $current }/{ $limit } lines), so the output was truncated. To read the full output, disable the limiting option in settings.
 rust_error_moving_to_trash = { $file }'yi atlaşına taşıma sırasında hata: { $error }
 rust_error_removing = "{ $file }" kaldırılırken hata: { $error }
-
-core_directory_must_be_directory =
-        Dizinler: Sağlanan yol bir dizin göstermelidir, { $path } yok sayılmıştır

@@ -210,6 +210,7 @@ settings_general_settings = Γενικές Ρυθμίσεις
 settings_settings = Ρυθμίσεις
 settings_load_tabs_sizes_at_startup = Φόρτωση μεγεθών καρτελών κατά την εκκίνηση
 settings_load_windows_size_at_startup = Φόρτωση μεγέθους παραθύρων κατά την εκκίνηση
+settings_limit_lines_of_messages = Όριο μηνυμάτων σε 500 γραμμές (workaround για αργό TextEdit πλήκτρο εισαγωγής)
 popup_save_title = Εξοικονόμηση αποτελεσμάτων
 popup_save_message = Αυτό θα αποθηκεύσει αποτελέσματα σε 3 διαφορετικά αρχεία
 popup_rename_title = Μετονομασία αρχείων
@@ -229,5 +230,3 @@ subsettings_videos_thumbnail_percentage = Θέση μικρογραφίας στ
 settings_cache_number_size_text = Μέγεθος αρχείων λανθάνουσας μνήμης: { $size }, αριθμός αρχείων: { $number }
 settings_video_thumbnails_number_size_text = Μέγεθος μικρογραφιών βίντεο: { $size }, αριθμός αρχείων: { $number }
 settings_log_number_size_text = Μέγεθος αρχείων: { $size }, αριθμός αρχείων: { $number }
-
-settings_limit_lines_of_messages = Όριο μηνυμάτων σε 500 γραμμές (workaround για αργό TextEdit πλήκτρο εισαγωγής)
