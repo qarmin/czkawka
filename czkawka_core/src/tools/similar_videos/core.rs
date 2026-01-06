@@ -1,9 +1,9 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
-use std::process::Command;
+use std::process::{Command, Stdio};
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
-use std::{fs, mem};
+use std::{fs, mem, thread};
 
 use blake3::Hasher;
 use crossbeam_channel::Sender;
@@ -139,6 +139,7 @@ impl SimilarVideos {
     }
 
     fn generate_thumbnail(
+        stop_flag: &Arc<AtomicBool>,
         file_entry: &mut VideosEntry,
         thumbnails_dir: &Path,
         thumbnail_video_percentage_from_start: u8,
@@ -187,24 +188,62 @@ impl SimilarVideos {
             command = command.arg("-vf").arg(&vf_filter).arg("-ss").arg(seek_time.to_string());
         }
 
-        let output = command.arg("-frames:v").arg("1").arg("-q:v").arg("2").arg("-y").arg(&thumbnail_path).output();
+        let output = command
+            .arg("-frames:v")
+            .arg("1")
+            .arg("-q:v")
+            .arg("2")
+            .arg("-y")
+            .arg(&thumbnail_path)
+            .stdin(Stdio::null())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null());
 
-        match output {
-            Ok(result) => {
-                if result.status.success() && thumbnail_path.exists() {
+        let stop_flag = stop_flag.clone();
+        let mut child = output.spawn().map_err(|e| format!("Failed to execute ffmpeg: {e}"))?;
+
+        let result = thread::spawn(move || {
+            loop {
+                if stop_flag.load(std::sync::atomic::Ordering::Relaxed) {
+                    let _ = child.kill();
+                    return Err(String::from("Ffmpeg process was forced to stop"));
+                }
+
+                match child.try_wait() {
+                    Ok(Some(status)) => {
+                        if status.success() {
+                            break Ok(());
+                        }
+                        break Err(format!("ffmpeg exited with non-zero status: {status}"));
+                    }
+                    Ok(None) => {}
+                    Err(e) => break Err(format!("Failed to wait on ffmpeg process: {e}")),
+                }
+
+                thread::sleep(std::time::Duration::from_millis(100));
+            }
+        })
+        .join()
+        .map_err(|e| format!("Failed to join handler, when generating thumbnail: {e:?}"))?;
+
+        match result {
+            Ok(()) => {
+                if thumbnail_path.exists() {
                     file_entry.thumbnail_path = Some(thumbnail_path.clone());
                     let _ = filetime::set_file_mtime(&thumbnail_path, filetime::FileTime::now());
                     Ok(())
                 } else {
                     let _ = fs::write(&thumbnail_path, b""); // Create empty file to avoid retrying generation again and again
                     Err(format!(
-                        "Failed to generate thumbnail(disabled for it thumbnail) for {}: {}",
-                        file_entry.path.display(),
-                        String::from_utf8_lossy(&result.stderr)
+                        "Failed to generate thumbnail(disabled for it thumbnail) for {}: thumbnail file was not created",
+                        file_entry.path.display()
                     ))
                 }
             }
-            Err(e) => Err(format!("Failed to run ffmpeg for thumbnail generation: {e}")),
+            Err(e) => {
+                let _ = fs::remove_file(&thumbnail_path);
+                Err(format!("Failed to generate thumbnail for {}: {e}", file_entry.path.display()))
+            }
         }
     }
 
@@ -333,7 +372,7 @@ impl SimilarVideos {
                         return errs;
                     }
 
-                    if let Err(e) = Self::generate_thumbnail(file_entry, &thumbnails_dir, thumbnail_video_percentage_from_start, generate_grid_instead_of_single) {
+                    if let Err(e) = Self::generate_thumbnail(stop_flag, file_entry, &thumbnails_dir, thumbnail_video_percentage_from_start, generate_grid_instead_of_single) {
                         errs.push(e);
                     }
 
