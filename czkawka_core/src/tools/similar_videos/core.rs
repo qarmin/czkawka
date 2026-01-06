@@ -372,7 +372,13 @@ impl SimilarVideos {
                         return errs;
                     }
 
-                    if let Err(e) = Self::generate_thumbnail(stop_flag, file_entry, &thumbnails_dir, thumbnail_video_percentage_from_start, generate_grid_instead_of_single) {
+                    if let Err(e) = Self::generate_thumbnail(
+                        stop_flag,
+                        file_entry,
+                        &thumbnails_dir,
+                        thumbnail_video_percentage_from_start,
+                        generate_grid_instead_of_single,
+                    ) {
                         errs.push(e);
                     }
 

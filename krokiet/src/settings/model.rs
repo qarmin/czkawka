@@ -331,10 +331,10 @@ fn default_video_optimizer_mode() -> String {
     "video".to_string()
 }
 fn default_video_optimizer_video_codec() -> String {
-    "h265".to_string()
+    "hevc".to_string()
 }
 fn default_video_optimizer_excluded_codecs() -> String {
-    "hevc,av1,h265".to_string()
+    "hevc,av1,vp9".to_string()
 }
 fn default_video_optimizer_video_quality() -> u32 {
     23

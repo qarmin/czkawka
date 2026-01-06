@@ -101,12 +101,16 @@ impl Search for VideoOptimizer {
     fn search(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) {
         let start_time = Instant::now();
 
-        let () = {
+        let () = (|| {
             self.prepare_items();
             if self.scan_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
                 self.common_data.stopped_search = true;
+                return;
             }
-        };
+            if self.check_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+                self.common_data.stopped_search = true;
+            }
+        })();
 
         self.information.scanning_time = start_time.elapsed();
 

@@ -79,7 +79,7 @@ impl Default for VideoOptimizerParameters {
                 codec: VideoCodec::H265,
                 quality: 23,
             },
-            excluded_codecs: vec!["hevc".to_string(), "av1".to_string()],
+            excluded_codecs: vec!["hevc".to_string(), "av1".to_string(), "vp9".to_string()],
         }
     }
 }
@@ -88,7 +88,7 @@ impl VideoOptimizerParameters {
     pub fn new(mode: OptimizerMode) -> Self {
         Self {
             mode,
-            excluded_codecs: vec!["hevc".to_string(), "av1".to_string()],
+            excluded_codecs: vec!["hevc".to_string(), "av1".to_string(),"vp9".to_string()],
         }
     }
 }

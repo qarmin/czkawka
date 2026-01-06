@@ -399,7 +399,7 @@ export component ToolSettings {
                     Button {
                         text: Translations.subsettings_reset_text;
                         clicked => {
-                            Settings.video_optimizer_sub_excluded_codecs = "hevc,av1,h265";
+                            Settings.video_optimizer_sub_excluded_codecs = "hevc,av1,vp9";
                         }
                     }
                 }
@@ -437,7 +437,6 @@ export component ToolSettings {
 
                 LineEdit {
                     text <=> Settings.ignored_exif_tags;
-                    placeholder-text: "Thumbnail, MakerNote";
                     font-size: FontSizes.normal;
                 }
             }
