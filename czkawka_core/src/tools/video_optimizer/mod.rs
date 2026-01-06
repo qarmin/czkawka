@@ -57,6 +57,11 @@ impl std::str::FromStr for VideoCodec {
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum OptimizerMode {
     VideoTranscode { codec: VideoCodec, quality: u32 },
+    VideoCrop {
+        crop_start_end_static_frames: bool,
+        crop_black_bars: bool,
+        crop_static_parts: bool,
+    },
 }
 
 #[derive(Debug, Default, Clone)]
@@ -105,7 +110,34 @@ pub struct VideoTranscodeEntry {
     pub height: u32,
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct VideoCropEntry {
+    pub path: PathBuf,
+    pub size: u64,
+    pub modified_date: u64,
+    pub error: Option<String>,
+
+    pub codec: String,
+    pub width: u32,
+    pub height: u32,
+    pub start_crop_frame: Option<u32>,
+    pub end_crop_frame: Option<u32>,
+    pub new_image_dimensions: Option<(u32, u32, u32, u32)>, // (left top, right top, right bottom, left bottom)
+}
+
 impl ResultEntry for VideoTranscodeEntry {
+    fn get_path(&self) -> &Path {
+        &self.path
+    }
+    fn get_modified_date(&self) -> u64 {
+        self.modified_date
+    }
+    fn get_size(&self) -> u64 {
+        self.size
+    }
+}
+
+impl ResultEntry for VideoCropEntry {
     fn get_path(&self) -> &Path {
         &self.path
     }
@@ -129,22 +161,43 @@ impl FileEntry {
             height: 0,
         }
     }
+
+    fn into_video_crop_entry(self) -> VideoCropEntry {
+        VideoCropEntry {
+            size: self.size,
+            path: self.path,
+            modified_date: self.modified_date,
+            error: None,
+            codec: String::new(),
+            width: 0,
+            height: 0,
+            start_crop_frame: None,
+            end_crop_frame: None,
+            new_image_dimensions: None,
+        }
+    }
 }
 
 pub enum VideoOptimizerEntry {
     VideoTranscode(VideoTranscodeEntry),
+    VideoCrop(VideoCropEntry),
 }
 
 pub struct VideoOptimizer {
     common_data: CommonToolData,
     information: Info,
     video_transcode_entries: Vec<VideoTranscodeEntry>,
+    video_crop_entries: Vec<VideoCropEntry>,
     params: VideoOptimizerParameters,
 }
 
 impl VideoOptimizer {
     pub const fn get_video_transcode_entries(&self) -> &Vec<VideoTranscodeEntry> {
         &self.video_transcode_entries
+    }
+
+    pub const fn get_video_crop_entries(&self) -> &Vec<VideoCropEntry> {
+        &self.video_crop_entries
     }
 
     pub const fn get_params(&self) -> &VideoOptimizerParameters {

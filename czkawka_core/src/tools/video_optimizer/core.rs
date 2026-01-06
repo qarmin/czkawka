@@ -14,17 +14,19 @@ use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
-use crate::tools::video_optimizer::{Info, OptimizerMode, VideoCodec, VideoOptimizer, VideoOptimizerParameters, VideoTranscodeEntry};
+use crate::tools::video_optimizer::{Info, OptimizerMode, VideoCodec, VideoOptimizer, VideoOptimizerParameters, VideoTranscodeEntry, VideoCropEntry};
 
 mod video_converter;
+mod video_cropper;
 
 // Re-export public functions for GUI usage
 pub use video_converter::process_video;
 
 use crate::common::consts::VIDEO_FILES_EXTENSIONS;
 
-pub const CACHE_VIDEO_TRANSCODE_VERSION: u8 = 1;
-pub const CACHE_IMAGE_TRIM_VERSION: u8 = 1;
+pub const CACHE_VIDEO_TRANSCODE_VERSION: u8 = 11;
+pub const CACHE_VIDEO_CROP_VERSION: u8 = 11;
+pub const CACHE_IMAGE_TRIM_VERSION: u8 = 11;
 
 impl VideoOptimizer {
     pub fn new(params: VideoOptimizerParameters) -> Self {
@@ -32,6 +34,7 @@ impl VideoOptimizer {
             common_data: CommonToolData::new(ToolType::VideoOptimizer),
             information: Info::default(),
             video_transcode_entries: Default::default(),
+            video_crop_entries: Default::default(),
             params,
         }
     }
@@ -39,7 +42,7 @@ impl VideoOptimizer {
     #[fun_time(message = "scan_files", level = "debug")]
     pub(crate) fn scan_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let extensions_string = match self.params.mode {
-            OptimizerMode::VideoTranscode { .. } => VIDEO_FILES_EXTENSIONS.join(","),
+            OptimizerMode::VideoTranscode { .. } | OptimizerMode::VideoCrop { .. } => VIDEO_FILES_EXTENSIONS.join(","),
         };
         self.common_data.extensions.set_allowed_extensions(extensions_string);
 
@@ -53,9 +56,16 @@ impl VideoOptimizer {
 
         match result {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
-                self.video_transcode_entries = grouped_file_entries.into_values().flatten().map(|fe| fe.into_video_transcode_entry()).collect();
-
-                info!("Found {} files to check", self.video_transcode_entries.len());
+                match self.params.mode {
+                    OptimizerMode::VideoTranscode { .. } => {
+                        self.video_transcode_entries = grouped_file_entries.into_values().flatten().map(|fe| fe.into_video_transcode_entry()).collect();
+                        info!("Found {} files to check", self.video_transcode_entries.len());
+                    }
+                    OptimizerMode::VideoCrop { .. } => {
+                        self.video_crop_entries = grouped_file_entries.into_values().flatten().map(|fe| fe.into_video_crop_entry()).collect();
+                        info!("Found {} files to check", self.video_crop_entries.len());
+                    }
+                }
 
                 self.common_data.text_messages.warnings.extend(warnings);
 
@@ -67,56 +77,114 @@ impl VideoOptimizer {
 
     #[fun_time(message = "check_files", level = "debug")]
     pub(crate) fn check_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+        match self.params.mode {
+            OptimizerMode::VideoTranscode { codec, quality } => {
+                self.process_video_transcode(stop_flag, progress_sender, codec, quality)
+            }
+            OptimizerMode::VideoCrop { crop_start_end_static_frames, crop_black_bars, crop_static_parts } => {
+                self.process_video_crop(stop_flag, progress_sender, crop_start_end_static_frames, crop_black_bars, crop_static_parts)
+            }
+        }
+    }
+
+    #[fun_time(message = "process_video_transcode", level = "debug")]
+    fn process_video_transcode(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>, codec: VideoCodec, quality: u32) -> WorkContinueStatus {
         if self.video_transcode_entries.is_empty() {
             return WorkContinueStatus::Continue;
         }
 
-        match self.params.mode {
-            OptimizerMode::VideoTranscode { codec, quality } => {
-                let all_files: Vec<VideoTranscodeEntry> = std::mem::take(&mut self.video_transcode_entries);
+        let all_files: Vec<VideoTranscodeEntry> = std::mem::take(&mut self.video_transcode_entries);
 
-                let (records_already_cached, non_cached_files_to_check) = self.load_video_transcode_cache(all_files);
+        let (records_already_cached, non_cached_files_to_check) = self.load_video_transcode_cache(all_files);
 
-                let progress_handler = prepare_thread_handler_common(
-                    progress_sender,
-                    CurrentStage::VideoOptimizerProcessingVideos,
-                    non_cached_files_to_check.len(),
-                    self.get_test_type(),
-                    non_cached_files_to_check.values().map(|entry| entry.size).sum(),
-                );
+        let progress_handler = prepare_thread_handler_common(
+            progress_sender,
+            CurrentStage::VideoOptimizerProcessingVideos,
+            non_cached_files_to_check.len(),
+            self.get_test_type(),
+            non_cached_files_to_check.values().map(|entry| entry.size).sum(),
+        );
 
-                let mut entries: Vec<VideoTranscodeEntry> = non_cached_files_to_check
-                    .into_par_iter()
-                    .map(|(_path, entry)| {
-                        if check_if_stop_received(stop_flag) {
-                            return None;
-                        }
-                        let size = entry.size;
-                        let res = video_converter::check_video(entry);
-                        progress_handler.increase_items(1);
-                        progress_handler.increase_size(size);
-                        Some(res)
-                    })
-                    .while_some()
-                    .collect();
-
-                entries.extend(records_already_cached.into_values());
-
-                progress_handler.join_thread();
-
+        let mut entries: Vec<VideoTranscodeEntry> = non_cached_files_to_check
+            .into_par_iter()
+            .map(|(_path, entry)| {
                 if check_if_stop_received(stop_flag) {
-                    return WorkContinueStatus::Stop;
+                    return None;
                 }
+                let size = entry.size;
+                let res = video_converter::check_video(entry);
+                progress_handler.increase_items(1);
+                progress_handler.increase_size(size);
+                Some(res)
+            })
+            .while_some()
+            .collect();
 
-                self.save_video_transcode_cache(&entries, codec, quality);
+        entries.extend(records_already_cached.into_values());
 
-                let mut disallowed_codecs = self.params.excluded_codecs.clone();
-                disallowed_codecs.push(codec.as_ffprobe_codec_name().to_string());
-                entries.retain(|e| e.error.is_none() && !disallowed_codecs.contains(&e.codec));
+        progress_handler.join_thread();
 
-                self.video_transcode_entries = entries;
-            }
+        if check_if_stop_received(stop_flag) {
+            return WorkContinueStatus::Stop;
         }
+
+        self.save_video_transcode_cache(&entries, codec, quality);
+
+        let mut disallowed_codecs = self.params.excluded_codecs.clone();
+        disallowed_codecs.push(codec.as_ffprobe_codec_name().to_string());
+        entries.retain(|e| e.error.is_none() && !disallowed_codecs.contains(&e.codec));
+
+        self.video_transcode_entries = entries;
+
+        WorkContinueStatus::Continue
+    }
+
+    #[fun_time(message = "process_video_crop", level = "debug")]
+    fn process_video_crop(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>, _crop_start_end_static_frames: bool, _crop_black_bars: bool, _crop_static_parts: bool) -> WorkContinueStatus {
+        if self.video_crop_entries.is_empty() {
+            return WorkContinueStatus::Continue;
+        }
+
+        let all_files: Vec<VideoCropEntry> = std::mem::take(&mut self.video_crop_entries);
+
+        let (records_already_cached, non_cached_files_to_check) = self.load_video_crop_cache(all_files);
+
+        let progress_handler = prepare_thread_handler_common(
+            progress_sender,
+            CurrentStage::VideoOptimizerProcessingVideos,
+            non_cached_files_to_check.len(),
+            self.get_test_type(),
+            non_cached_files_to_check.values().map(|entry| entry.size).sum(),
+        );
+
+        let mut entries: Vec<VideoCropEntry> = non_cached_files_to_check
+            .into_par_iter()
+            .map(|(_path, entry)| {
+                if check_if_stop_received(stop_flag) {
+                    return None;
+                }
+                let size = entry.size;
+                let res = video_cropper::check_video_crop(entry);
+                progress_handler.increase_items(1);
+                progress_handler.increase_size(size);
+                Some(res)
+            })
+            .while_some()
+            .collect();
+
+        entries.extend(records_already_cached.into_values());
+
+        progress_handler.join_thread();
+
+        if check_if_stop_received(stop_flag) {
+            return WorkContinueStatus::Stop;
+        }
+
+        self.save_video_crop_cache(&entries);
+
+        entries.retain(|e| e.error.is_none());
+
+        self.video_crop_entries = entries;
 
         WorkContinueStatus::Continue
     }
@@ -135,7 +203,9 @@ impl VideoOptimizer {
             .collect();
 
         if self.common_data.use_cache {
-            let OptimizerMode::VideoTranscode { codec, quality } = self.params.mode;
+            let OptimizerMode::VideoTranscode { codec, quality } = self.params.mode else {
+                unreachable!("load_video_transcode_cache should only be called in VideoTranscode mode");
+            };
             let (messages, loaded_items) = load_cache_from_file_generalized_by_path::<VideoTranscodeEntry>(
                 &get_video_transcode_cache_file(&codec, quality),
                 self.get_delete_outdated_cache(),
@@ -164,12 +234,66 @@ impl VideoOptimizer {
         (records_already_cached, non_cached_files_to_check)
     }
 
+    #[fun_time(message = "load_video_crop_cache", level = "debug")]
+    fn load_video_crop_cache(&mut self, all_files: Vec<VideoCropEntry>) -> (BTreeMap<String, VideoCropEntry>, BTreeMap<String, VideoCropEntry>) {
+        let mut records_already_cached: BTreeMap<String, VideoCropEntry> = Default::default();
+        let mut non_cached_files_to_check: BTreeMap<String, VideoCropEntry> = Default::default();
+
+        let preliminary_files: BTreeMap<String, VideoCropEntry> = all_files
+            .into_iter()
+            .map(|entry| {
+                let path = entry.path.to_string_lossy().to_string();
+                (path, entry)
+            })
+            .collect();
+
+        if self.common_data.use_cache {
+            let (messages, loaded_items) = load_cache_from_file_generalized_by_path::<VideoCropEntry>(
+                &get_video_crop_cache_file(),
+                self.get_delete_outdated_cache(),
+                &preliminary_files,
+            );
+            self.get_cd_mut().text_messages.messages.extend(messages.messages);
+            self.get_cd_mut().text_messages.warnings.extend(messages.warnings);
+
+            if let Some(loaded_items) = loaded_items {
+                extract_loaded_cache(&loaded_items, preliminary_files, &mut records_already_cached, &mut non_cached_files_to_check);
+
+                info!(
+                    "load_video_crop_cache - {}({}) non cached, {}({}) already cached",
+                    non_cached_files_to_check.len(),
+                    format_size(non_cached_files_to_check.values().map(|e| e.size).sum::<u64>(), BINARY),
+                    records_already_cached.len(),
+                    format_size(records_already_cached.values().map(|e| e.size).sum::<u64>(), BINARY),
+                );
+            } else {
+                non_cached_files_to_check = preliminary_files;
+            }
+        } else {
+            non_cached_files_to_check = preliminary_files;
+        }
+
+        (records_already_cached, non_cached_files_to_check)
+    }
+
     #[fun_time(message = "save_video_transcode_cache", level = "debug")]
     fn save_video_transcode_cache(&mut self, entries: &[VideoTranscodeEntry], _codec: VideoCodec, quality: u32) {
         if self.common_data.use_cache {
-            let OptimizerMode::VideoTranscode { codec, .. } = self.params.mode;
+            let OptimizerMode::VideoTranscode { codec, .. } = self.params.mode else {
+                unreachable!("save_video_transcode_cache should only be called in VideoTranscode mode");
+            };
             let entries_map: BTreeMap<String, VideoTranscodeEntry> = entries.iter().map(|entry| (entry.path.to_string_lossy().to_string(), entry.clone())).collect();
             let messages = save_cache_to_file_generalized(&get_video_transcode_cache_file(&codec, quality), &entries_map, self.get_save_also_as_json(), 0);
+            self.get_cd_mut().text_messages.messages.extend(messages.messages);
+            self.get_cd_mut().text_messages.warnings.extend(messages.warnings);
+        }
+    }
+
+    #[fun_time(message = "save_video_crop_cache", level = "debug")]
+    fn save_video_crop_cache(&mut self, entries: &[VideoCropEntry]) {
+        if self.common_data.use_cache {
+            let entries_map: BTreeMap<String, VideoCropEntry> = entries.iter().map(|entry| (entry.path.to_string_lossy().to_string(), entry.clone())).collect();
+            let messages = save_cache_to_file_generalized(&get_video_crop_cache_file(), &entries_map, self.get_save_also_as_json(), 0);
             self.get_cd_mut().text_messages.messages.extend(messages.messages);
             self.get_cd_mut().text_messages.warnings.extend(messages.warnings);
         }
@@ -203,6 +327,10 @@ impl VideoOptimizer {
 
                 debug!("Optimization complete - Processed: {successful_files}, Failed: {failed_files}");
             }
+            OptimizerMode::VideoCrop { .. } => {
+                // TODO: Implement video cropping logic
+                info!("Video crop mode - logic not yet implemented for {} files", self.video_crop_entries.len());
+            }
         }
 
         WorkContinueStatus::Continue
@@ -212,3 +340,8 @@ impl VideoOptimizer {
 pub fn get_video_transcode_cache_file(codec: &VideoCodec, quality: u32) -> String {
     format!("cache_video_transcode_{codec:?}_{quality}_{CACHE_VIDEO_TRANSCODE_VERSION}.bin")
 }
+
+pub fn get_video_crop_cache_file() -> String {
+    format!("cache_video_crop_{CACHE_VIDEO_CROP_VERSION}.bin")
+}
+

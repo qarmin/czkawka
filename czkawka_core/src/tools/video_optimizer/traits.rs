@@ -40,6 +40,7 @@ impl DebugPrint for VideoOptimizer {
         println!("Info: {:?}", self.information);
         println!("Mode: {:?}", self.params.mode);
         println!("Video transcode entries: {}", self.video_transcode_entries.len());
+        println!("Video crop entries: {}", self.video_crop_entries.len());
         self.debug_print_common();
         println!("-----------------------------------------");
     }
@@ -84,6 +85,48 @@ impl PrintResults for VideoOptimizer {
                     }
                 }
             }
+            OptimizerMode::VideoCrop { crop_start_end_static_frames, crop_black_bars, crop_static_parts } => {
+                writeln!(writer, "Crop start/end static frames: {crop_start_end_static_frames}")?;
+                writeln!(writer, "Crop black bars: {crop_black_bars}")?;
+                writeln!(writer, "Crop static parts: {crop_static_parts}")?;
+                writeln!(writer)?;
+
+                let total_entries = self.video_crop_entries.len();
+                let entries_with_crop_info = self.video_crop_entries.iter().filter(|e| !e.codec.is_empty() && e.error.is_none()).count();
+                let failed_entries = self.video_crop_entries.iter().filter(|e| e.error.is_some()).count();
+
+                writeln!(writer, "Total files found: {total_entries}")?;
+                writeln!(writer, "Files with crop information: {entries_with_crop_info}")?;
+                writeln!(writer, "Failed to analyze: {failed_entries}")?;
+                writeln!(writer)?;
+
+                for entry in &self.video_crop_entries {
+                    if !entry.codec.is_empty() {
+                        if let Some(err) = &entry.error {
+                            writeln!(writer, "[FAILED] {} - Codec: {} - Error: {}", entry.path.display(), entry.codec, err)?;
+                        } else {
+                            writeln!(
+                                writer,
+                                "[INFO] {} - Codec: {} - Dimensions: {}x{} - Size: {}",
+                                entry.path.display(),
+                                entry.codec,
+                                entry.width,
+                                entry.height,
+                                format_size(entry.size, BINARY)
+                            )?;
+                            if let Some(start) = entry.start_crop_frame {
+                                writeln!(writer, "  Start crop frame: {start}")?;
+                            }
+                            if let Some(end) = entry.end_crop_frame {
+                                writeln!(writer, "  End crop frame: {end}")?;
+                            }
+                            if let Some((lt, rt, rb, lb)) = entry.new_image_dimensions {
+                                writeln!(writer, "  New dimensions: LT:{lt}, RT:{rt}, RB:{rb}, LB:{lb}")?;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         Ok(())
@@ -92,6 +135,7 @@ impl PrintResults for VideoOptimizer {
     fn save_results_to_file_as_json(&self, file_name: &str, pretty_print: bool) -> std::io::Result<()> {
         match self.params.mode {
             OptimizerMode::VideoTranscode { .. } => self.save_results_to_file_as_json_internal(file_name, &self.video_transcode_entries, pretty_print),
+            OptimizerMode::VideoCrop { .. } => self.save_results_to_file_as_json_internal(file_name, &self.video_crop_entries, pretty_print),
         }
     }
 }
