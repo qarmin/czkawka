@@ -56,6 +56,12 @@ impl std::str::FromStr for VideoCodec {
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum OptimizerMode {
+    VideoTranscode,
+    VideoCrop,
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+pub enum VideoOptimizerFixParams {
     VideoTranscode { codec: VideoCodec, quality: u32 },
     VideoCrop {
         crop_start_end_static_frames: bool,
@@ -80,10 +86,7 @@ pub struct VideoOptimizerParameters {
 impl Default for VideoOptimizerParameters {
     fn default() -> Self {
         Self {
-            mode: OptimizerMode::VideoTranscode {
-                codec: VideoCodec::H265,
-                quality: 23,
-            },
+            mode: OptimizerMode::VideoTranscode,
             excluded_codecs: vec!["hevc".to_string(), "av1".to_string(), "vp9".to_string()],
         }
     }
@@ -189,6 +192,7 @@ pub struct VideoOptimizer {
     video_transcode_entries: Vec<VideoTranscodeEntry>,
     video_crop_entries: Vec<VideoCropEntry>,
     params: VideoOptimizerParameters,
+    fix_params: VideoOptimizerFixParams,
 }
 
 impl VideoOptimizer {
@@ -202,6 +206,10 @@ impl VideoOptimizer {
 
     pub const fn get_params(&self) -> &VideoOptimizerParameters {
         &self.params
+    }
+
+    pub const fn get_fix_params(&self) -> &VideoOptimizerFixParams {
+        &self.fix_params
     }
 
     pub const fn get_information(&self) -> &Info {

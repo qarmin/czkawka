@@ -11,7 +11,7 @@ use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, FixingItems, PrintResults, Search};
-use crate::tools::video_optimizer::{Info, OptimizerMode, VideoOptimizer, VideoOptimizerParameters};
+use crate::tools::video_optimizer::{Info, OptimizerMode, VideoOptimizer, VideoOptimizerParameters, VideoOptimizerFixParams};
 
 impl AllTraits for VideoOptimizer {}
 
@@ -53,7 +53,10 @@ impl PrintResults for VideoOptimizer {
         writeln!(writer, "Excluded directories: {:?}", self.common_data.directories.excluded_directories)?;
 
         match self.params.mode {
-            OptimizerMode::VideoTranscode { codec, quality } => {
+            OptimizerMode::VideoTranscode => {
+                let VideoOptimizerFixParams::VideoTranscode { codec, quality } = self.fix_params else {
+                    unreachable!("VideoTranscode mode should have VideoTranscode fix_params");
+                };
                 writeln!(writer, "Target codec: {codec:?}")?;
                 writeln!(writer, "Target quality (CRF): {quality}")?;
                 writeln!(writer)?;
@@ -85,7 +88,10 @@ impl PrintResults for VideoOptimizer {
                     }
                 }
             }
-            OptimizerMode::VideoCrop { crop_start_end_static_frames, crop_black_bars, crop_static_parts } => {
+            OptimizerMode::VideoCrop => {
+                let VideoOptimizerFixParams::VideoCrop { crop_start_end_static_frames, crop_black_bars, crop_static_parts } = self.fix_params else {
+                    unreachable!("VideoCrop mode should have VideoCrop fix_params");
+                };
                 writeln!(writer, "Crop start/end static frames: {crop_start_end_static_frames}")?;
                 writeln!(writer, "Crop black bars: {crop_black_bars}")?;
                 writeln!(writer, "Crop static parts: {crop_static_parts}")?;
@@ -134,8 +140,8 @@ impl PrintResults for VideoOptimizer {
 
     fn save_results_to_file_as_json(&self, file_name: &str, pretty_print: bool) -> std::io::Result<()> {
         match self.params.mode {
-            OptimizerMode::VideoTranscode { .. } => self.save_results_to_file_as_json_internal(file_name, &self.video_transcode_entries, pretty_print),
-            OptimizerMode::VideoCrop { .. } => self.save_results_to_file_as_json_internal(file_name, &self.video_crop_entries, pretty_print),
+            OptimizerMode::VideoTranscode => self.save_results_to_file_as_json_internal(file_name, &self.video_transcode_entries, pretty_print),
+            OptimizerMode::VideoCrop => self.save_results_to_file_as_json_internal(file_name, &self.video_crop_entries, pretty_print),
         }
     }
 }
