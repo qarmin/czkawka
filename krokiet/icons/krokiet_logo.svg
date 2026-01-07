@@ -5,8 +5,11 @@
    viewBox="0 0 1024 1024"
    version="1.1"
    id="svg1"
-   sodipodi:docname="b462d7eb-d2e5-47a8-9ea4-6d3956d9c5e2(1).svg"
+   sodipodi:docname="krokiet_logo.svg"
    inkscape:version="1.4.3 (0d15f75042, 2025-12-25)"
+   inkscape:export-filename="krokiet_logo.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -64,9 +67,9 @@
      inkscape:pageopacity="0"
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#505050"
-     inkscape:zoom="0.81542969"
-     inkscape:cx="172.3018"
-     inkscape:cy="315.78443"
+     inkscape:zoom="9.2255338"
+     inkscape:cx="415.8567"
+     inkscape:cy="599.91109"
      inkscape:window-width="2880"
      inkscape:window-height="1551"
      inkscape:window-x="0"
@@ -119,4 +122,11 @@
      style="fill:#fedf94;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:7.7916;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke markers fill"
      d="m 531.03294,196.49102 c -9.61815,-0.0973 -19.47192,3.67543 -26.01198,10.83353 -5.93228,6.56848 -6.30988,16.26831 -4.48503,24.51617 1.72846,8.02773 6.23158,15.77939 13.57126,19.8479 6.73593,4.17567 14.50865,6.23168 22.32587,7.1011 4.5436,0.47411 9.1786,1.54624 13.74239,0.81268 1.42552,-0.60236 4.04854,-1.81823 3.11976,-3.75988 -2.14703,-2.40663 -5.75774,-2.46071 -8.63306,-3.47174 -8.44312,-2.51667 -16.932,-5.07681 -25.07719,-8.46915 -4.42512,-2.26201 -8.59169,-5.45347 -11.36879,-9.58067 -1.26491,-3.30531 -0.67337,-7.01184 -0.58623,-10.4485 0.89715,-8.10946 7.35692,-15.08821 15.31317,-16.90779 5.12283,-1.33942 10.57572,-0.65643 15.69521,0.43293 10.23843,2.78181 19.55599,8.62862 26.51799,16.63726 5.01136,5.68937 9.39317,12.91341 8.84609,20.76035 0.13545,3.68164 -2.70147,6.26906 -5.07605,8.66766 -0.78017,0.54972 -1.15539,2.09703 0.20479,2.07306 6.69384,0.17724 13.5719,-2.10281 18.70299,-6.43533 3.60891,-3.02662 4.5813,-8.22025 3.12455,-12.57485 -3.26351,-10.39172 -11.39813,-18.3262 -19.65629,-24.9994 -9.81376,-7.71461 -21.52302,-13.53115 -34.04191,-14.87186 -2.0718,-0.15187 -4.15073,-0.18917 -6.22754,-0.16347 z"
      id="path40" />
+  <rect
+     style="fill:#000000;stroke-width:30"
+     id="rect2"
+     width="17.34317"
+     height="15.066879"
+     x="405.07141"
+     y="607.33612" />
 </svg>

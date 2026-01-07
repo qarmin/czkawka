@@ -1,4 +1,5 @@
-# Krokiet
+
+![krokiet_logo](https://github.com/user-attachments/assets/567a7a38-d754-4a79-86b5-3cc898dbbade)
 
 Krokiet is a new Czkawka frontend written in Slint.
 
@@ -10,7 +11,7 @@ It aims to provide a more consistent experience across all platforms (Linux, Win
 
 Krokiet should not have any special runtime requirements, it should work on almost any modern device.
 
-Prebuilt binaries are available for Windows 10/11, Mac and Ubuntu 22.04 (and similar distros with the same or newer glibc version): https://github.com/qarmin/czkawka/releases/
+Prebuilt binaries are available for Windows 10/11, Mac and Ubuntu 22.04 (and similar distros with the same or newer glibc version): https://github.com/qarmin/czkawka/releases/ with recommendations about which variant to use depending on your needs.
 
 ## Compilation
 

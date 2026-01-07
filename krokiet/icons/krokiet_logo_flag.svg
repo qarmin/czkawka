@@ -5,8 +5,11 @@
    viewBox="0 0 1024 1024"
    version="1.1"
    id="svg1"
-   sodipodi:docname="krokiet_logo_new_with_flag.svg"
+   sodipodi:docname="krokiet_logo_flag.svg"
    inkscape:version="1.4.3 (0d15f75042, 2025-12-25)"
+   inkscape:export-filename="krokiet_logo_flag.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -64,9 +67,9 @@
      inkscape:pageopacity="0"
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#505050"
-     inkscape:zoom="1"
-     inkscape:cx="379.5"
-     inkscape:cy="645.5"
+     inkscape:zoom="22.627417"
+     inkscape:cx="421.36935"
+     inkscape:cy="617.4589"
      inkscape:window-width="2880"
      inkscape:window-height="1551"
      inkscape:window-x="0"
@@ -161,4 +164,11 @@
      height="29.409706"
      x="564.78528"
      y="968.47015" />
+  <rect
+     style="fill:#000000;stroke-width:30"
+     id="rect2"
+     width="12.330174"
+     height="11.22532"
+     x="408.9729"
+     y="610.0564" />
 </svg>

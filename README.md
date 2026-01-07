@@ -1,6 +1,8 @@
-![com github qarmin czkawka](https://user-images.githubusercontent.com/41945903/102616149-66490400-4137-11eb-9cd6-813b2b070834.png)
+![krokiet_logo](https://github.com/user-attachments/assets/567a7a38-d754-4a79-86b5-3cc898dbbade)
 
 **Krokiet** ((IPA: [ˈkrɔcɛt]), "croquet" in Polish) new generation GUI frontend, simple, multiplatform, fast and free app to remove unnecessary files from your computer.
+
+![czkawka_logo](https://user-images.githubusercontent.com/41945903/102616149-66490400-4137-11eb-9cd6-813b2b070834.png)
 
 **Czkawka** (_tch•kav•ka_ (IPA: [ˈʧ̑kafka]), "hiccup" in Polish) older gtk4 GUI frontend, superseded by Krokiet, but still receiving bugfix updates.
 

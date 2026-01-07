@@ -39,6 +39,7 @@
 - About screen, now contains info, that Krokiet is successor app - [#1718](https://github.com/qarmin/czkawka/pull/1718)
 
 ### Krokiet
+- New Logo - [#1726](https://github.com/qarmin/czkawka/pull/1726)
 - Added video thumbnails(single/grid) - [#1714](https://github.com/qarmin/czkawka/pull/1714)
 - Printing in settings, size of cache/thumbnails/logs files - [#1714](https://github.com/qarmin/czkawka/pull/1714)
 - Added sorting, by clicking at column headers - [#1718](https://github.com/qarmin/czkawka/pull/1718)
