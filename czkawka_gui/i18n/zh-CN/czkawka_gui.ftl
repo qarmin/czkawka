@@ -6,6 +6,20 @@ window_compare_images = 比较图像
 # General
 general_ok_button = 确定
 general_close_button = 关闭
+# Krokiet info dialog
+krokiet_info_title = Introducing Krokiet - 新版本 Czkawka
+krokiet_info_message =
+    克罗基特是 Czkawka GTK GUI 的新、改进、更快且更少错误的版！
+    
+    由于它具有自包含性，因此运行起来更容易，并且对系统更改和软件包版本更新更具抵抗力。
+    
+    它包含 Czkawka 中不可用的许多功能，例如视频比较模式下的缩略图、文件移动/复制/删除进度以及扩展的排序选项。
+    
+    尝试一下并看看区别！
+    
+    Czkawka 将继续获得错误修复和小更新，但所有新功能都只会在克罗基特中实现。
+    
+    PS. 此消息应仅显示一次，但如果它再次出现，请将 CZKAWKA_DONT_ANNOY_ME 环境变量设置为任何非空值。
 # Main window
 music_title_checkbox = 标题
 music_artist_checkbox = 艺人
@@ -130,7 +144,7 @@ main_label_min_size = 最小值
 main_label_max_size = 最大值
 main_label_shown_files = 显示的文件数
 main_label_resize_algorithm = 调整算法
-main_label_similarity = 相似性:{" "}
+main_label_similarity = 相似性:{ " " }
 main_check_box_broken_files_audio = 音频
 main_check_box_broken_files_pdf = PDF
 main_check_box_broken_files_archive = 归档
@@ -409,15 +423,15 @@ settings_folder_settings_open = 打开设置文件夹
 compute_stopped_by_user = 搜索已被用户停止
 compute_found_duplicates_hash_size = 找到 { $number_files } 重复的 { $number_groups } 个小组，这些小组在 { $size } 中占用了 { $time }
 compute_found_duplicates_name = 在 { $number_groups } 组中找到 { $number_files } 重复的 { $time }
-compute_found_empty_folders = 找到了 {$number_files} 个空文件夹在 {$time}
-compute_found_empty_files = 在{$time}找到了{$number_files}个空文件
+compute_found_empty_folders = 找到了 { $number_files } 个空文件夹在 { $time }
+compute_found_empty_files = 在{ $time }找到了{ $number_files }个空文件
 compute_found_big_files = 在 { $number_files } 中找到 { $time } 大文件
-compute_found_temporary_files = 找到了 {$number_files} 个临时文件在 {$time}
+compute_found_temporary_files = 找到了 { $number_files } 个临时文件在 { $time }
 compute_found_images = 在 { $number_groups } 组中找到 { $number_files } 相似的图像，于 { $time }
-compute_found_videos = 找到了{$number_files}个相似视频，在{$number_groups}组中，耗时{$time}
+compute_found_videos = 找到了{ $number_files }个相似视频，在{ $number_groups }组中，耗时{ $time }
 compute_found_music = 在 { $number_groups } 组中找到 { $number_files } 类似的音乐文件在 { $time }
-compute_found_invalid_symlinks = 找到了{$number_files}个无效的符号链接在{$time}
-compute_found_broken_files = 在 {$time} 中找到了 {$number_files} 个损坏文件
+compute_found_invalid_symlinks = 找到了{ $number_files }个无效的符号链接在{ $time }
+compute_found_broken_files = 在 { $time } 中找到了 { $number_files } 个损坏文件
 compute_found_bad_extensions = 在 { $number_files } 中发现无效扩展名的 { $time }
 # Progress window
 progress_scanning_general_file =

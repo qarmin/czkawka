@@ -15,9 +15,7 @@ core_file_no_modification_date = { $name } dosyasının değişiklik tarihine er
 core_folder_no_modification_date = { $name } klasörünün değişiklik tarihine erişilemiyor, nedeni: { $reason }
 core_missing_no_chosen_included_directory = "Aranacak Dizinler" listesinde en az bir dizin yer almalıdır.
 core_directory_must_exists = Kataloglar: Sağlanan klasör yolu mevcut olmalıdır, { $path }'i ihraç edilmiştir
-core_directory_must_be_directory = 
-        Klasörler: Verilen yol bir klasöre指向中文翻译结果：
-        目录：提供的路径必须指向一个目录，忽略{ $path }
+core_directory_must_be_directory = Dizinler: Sağlanan yol bir dizin göstermelidir, { $path } yok sayılmıştır
 core_included_directory_zero_valid_directories = Kümeledilen Klasör HATA: Geçerli bir kümeledilen yolu bulamadık, bu gereklidir
 core_excluded_directory_pointless_slash = Klasörler: "/yi hariç tutmak faydalı değildir, çünkü bu herhangi bir dosya taramasını önleme anlamına gelir"
 core_directory_overlap = Klasörler: Aranan tüm klasörlerEXKLUDEDIRECTORIES ilelapsız olmalıdır

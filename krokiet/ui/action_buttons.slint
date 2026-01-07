@@ -1,5 +1,5 @@
 import { Button } from "std-widgets.slint";
-import { ActiveTab, BottomPanelVisibility, MainListModel } from "common.slint";
+import { ActiveTab, BottomPanelVisibility, MainListModel, PopupRequest } from "common.slint";
 import { GuiState } from "gui_state.slint";
 import { Translations } from "translations.slint";
 import { Settings } from "settings.slint";
@@ -23,11 +23,8 @@ export component ActionButtons inherits HorizontalLayout {
     callback scan_stopping;
     callback scan_starting(ActiveTab);
     callback show_select_popup(length, length);
-    callback show_remove_popup();
-    callback show_rename_popup();
-    callback show_save_popup();
     callback show_sort_popup(length, length);
-    callback request_folder_to_move();
+    callback show_action_popup(PopupRequest);
 
     in-out property <[MainListModel]> duplicate_files_model: [];
     in-out property <[MainListModel]> empty_folder_model: [];
@@ -40,6 +37,8 @@ export component ActionButtons inherits HorizontalLayout {
     in-out property <[MainListModel]> invalid_symlinks_model: [];
     in-out property <[MainListModel]> broken_files_model: [];
     in-out property <[MainListModel]> bad_extensions_model: [];
+    in-out property <[MainListModel]> exif_remover_model: [];
+    in-out property <[MainListModel]> video_optimizer_model: [];
 
     property <ActiveTab> active_tab: GuiState.active_tab;
 
@@ -62,7 +61,9 @@ export component ActionButtons inherits HorizontalLayout {
         (active_tab == ActiveTab.EmptyFolders && (GuiState.selected_results_empty_folders > 0 || GuiState.selected_results_empty_folders2 > 0)) ||
         (active_tab == ActiveTab.EmptyFiles && (GuiState.selected_results_empty_files > 0 || GuiState.selected_results_empty_files2 > 0)) ||
         (active_tab == ActiveTab.TemporaryFiles && (GuiState.selected_results_temporary_files > 0 || GuiState.selected_results_temporary_files2 > 0)) ||
-        (active_tab == ActiveTab.BadExtensions && (GuiState.selected_results_bad_extensions > 0 || GuiState.selected_results_bad_extensions2 > 0))
+        (active_tab == ActiveTab.BadExtensions && (GuiState.selected_results_bad_extensions > 0 || GuiState.selected_results_bad_extensions2 > 0)) ||
+        (active_tab == ActiveTab.ExifRemover && (GuiState.selected_results_exif_remover > 0 || GuiState.selected_results_exif_remover2 > 0)) ||
+        (active_tab == ActiveTab.VideoOptimizer && (GuiState.selected_results_video_optimizer > 0 || GuiState.selected_results_video_optimizer2 > 0))
     );
     in-out property <bool> results_available: (
         (active_tab == ActiveTab.DuplicateFiles && duplicate_files_model.length > 0) ||
@@ -75,7 +76,9 @@ export component ActionButtons inherits HorizontalLayout {
         (active_tab == ActiveTab.SimilarMusic && similar_music_model.length > 0) ||
         (active_tab == ActiveTab.InvalidSymlinks && invalid_symlinks_model.length > 0) ||
         (active_tab == ActiveTab.BrokenFiles && broken_files_model.length > 0) ||
-        (active_tab == ActiveTab.BadExtensions && bad_extensions_model.length > 0)
+        (active_tab == ActiveTab.BadExtensions && bad_extensions_model.length > 0) ||
+        (active_tab == ActiveTab.ExifRemover && exif_remover_model.length > 0) ||
+        (active_tab == ActiveTab.VideoOptimizer && video_optimizer_model.length > 0)
     );
 
     height: 30px;
@@ -129,7 +132,7 @@ export component ActionButtons inherits HorizontalLayout {
         icon: @image-url("../icons/krokiet_move.svg");
         colorize-icon: true;
         clicked => {
-            request_folder_to_move();
+            show_action_popup(PopupRequest.Move);
         }
     }
 
@@ -141,7 +144,7 @@ export component ActionButtons inherits HorizontalLayout {
         icon: @image-url("../icons/krokiet_delete.svg");
         colorize-icon: true;
         clicked => {
-            show_remove_popup();
+            show_action_popup(PopupRequest.Delete);
         }
     }
 
@@ -153,7 +156,7 @@ export component ActionButtons inherits HorizontalLayout {
         icon: @image-url("../icons/krokiet_save.svg");
         colorize-icon: true;
         clicked => {
-            show_save_popup();
+            show_action_popup(PopupRequest.Save);
         }
     }
 
@@ -176,7 +179,53 @@ export component ActionButtons inherits HorizontalLayout {
         icon: @image-url("../icons/krokiet_rename.svg");
         colorize-icon: true;
         clicked => {
-            show_rename_popup();
+            show_action_popup(PopupRequest.Rename);
+        }
+    }
+
+    if lists_enabled && GuiState.active_tab == ActiveTab.VideoOptimizer: optimize_button := Button {
+        height: parent.height;
+        enabled: base_buttons_may_be_available && self.visible && checked_anything;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.optimize_button_text;
+        icon: @image-url("../icons/krokiet_optimize.svg");
+        colorize-icon: true;
+        clicked => {
+            show_action_popup(PopupRequest.OptimizeVideo);
+        }
+    }
+
+    if lists_enabled && GuiState.active_tab == ActiveTab.ExifRemover: clean_button := Button {
+        height: parent.height;
+        enabled: base_buttons_may_be_available && self.visible && checked_anything;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.clean_button_text;
+        icon: @image-url("../icons/krokiet_clean.svg");
+        colorize-icon: true;
+        clicked => {
+            show_action_popup(PopupRequest.CleanExif);
+        }
+    }
+
+    // TODO - implement softlink action
+    if false && lists_enabled && GuiState.tool_with_groups: hardlink_button := Button {
+        height: parent.height;
+        enabled: base_buttons_may_be_available && self.visible && checked_anything;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.hardlink_button_text;
+        icon: @image-url("../icons/krokiet_hardlink.svg");
+        colorize-icon: true;
+        clicked => {
+            show_action_popup(PopupRequest.Hardlink);
+        }
+    }
+
+    // TODO - implement softlink action
+    if false && lists_enabled && GuiState.tool_with_groups: softlink_button := Button {
+        height: parent.height;
+        enabled: base_buttons_may_be_available && self.visible && checked_anything;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.softlink_button_text;
+        icon: @image-url("../icons/krokiet_symlink.svg");
+        colorize-icon: true;
+        clicked => {
+            show_action_popup(PopupRequest.Symlink);
         }
     }
 

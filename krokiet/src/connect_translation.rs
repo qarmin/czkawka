@@ -219,6 +219,8 @@ fn translate_items(app: &MainWindow) {
     translation.set_tool_invalid_symlinks_text(flk!("tool_invalid_symlinks").into());
     translation.set_tool_broken_files_text(flk!("tool_broken_files").into());
     translation.set_tool_bad_extensions_text(flk!("tool_bad_extensions").into());
+    translation.set_tool_exif_remover_text(flk!("tool_exif_remover").into());
+    translation.set_tool_video_optimizer_text(flk!("tool_video_optimizer").into());
     translation.set_sort_by_full_name_text(flk!("sort_by_full_name").into());
     translation.set_sort_by_selection_text(flk!("sort_by_selection").into());
     translation.set_sort_reverse_text(flk!("sort_reverse").into());
@@ -258,6 +260,33 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_broken_files_pdf_text(flk!("subsettings_broken_files_pdf").into());
     translation.set_subsettings_broken_files_archive_text(flk!("subsettings_broken_files_archive").into());
     translation.set_subsettings_broken_files_image_text(flk!("subsettings_broken_files_image").into());
+    translation.set_subsettings_video_optimizer_mode_text(flk!("subsettings_video_optimizer_mode").into());
+    translation.set_subsettings_video_optimizer_video_codec_text(flk!("subsettings_video_optimizer_video_codec").into());
+    translation.set_subsettings_video_optimizer_excluded_codecs_text(flk!("subsettings_video_optimizer_excluded_codecs").into());
+    translation.set_subsettings_video_optimizer_video_quality_text(flk!("subsettings_video_optimizer_video_quality").into());
+    translation.set_subsettings_video_optimizer_image_threshold_text(flk!("subsettings_video_optimizer_image_threshold").into());
+    translation.set_subsettings_reset_text(flk!("subsettings_reset").into());
+    translation.set_subsettings_exif_ignored_tags_text(flk!("subsettings_exif_ignored_tags_text").into());
+    translation.set_subsettings_exif_ignored_tags_hint_text(flk!("subsettings_exif_ignored_tags_hint_text").into());
+    translation.set_clean_button_text(flk!("clean_button_text").into());
+    translation.set_clean_text(flk!("clean_text").into());
+    translation.set_clean_confirmation_text(flk!("clean_confirmation_text").into());
+    translation.set_optimize_button_text(flk!("optimize_button_text").into());
+    translation.set_optimize_text(flk!("optimize_text").into());
+    translation.set_optimize_confirmation_text(flk!("optimize_confirmation_text").into());
+    translation.set_optimize_fail_if_bigger_text(flk!("optimize_fail_if_bigger_text").into());
+    translation.set_optimize_overwrite_files_text(flk!("optimize_overwrite_files_text").into());
+    translation.set_optimize_limit_video_size_text(flk!("optimize_limit_video_size_text").into());
+    translation.set_optimize_max_width_text(flk!("optimize_max_width_text").into());
+    translation.set_optimize_max_height_text(flk!("optimize_max_height_text").into());
+    translation.set_hardlink_button_text(flk!("hardlink_button_text").into());
+    translation.set_hardlink_text(flk!("hardlink_text").into());
+    translation.set_hardlink_confirmation_text(flk!("hardlink_confirmation_text").into());
+    translation.set_softlink_button_text(flk!("softlink_button_text").into());
+    translation.set_softlink_text(flk!("softlink_text").into());
+    translation.set_softlink_confirmation_text(flk!("softlink_confirmation_text").into());
+    translation.set_move_confirmation_text(flk!("move_confirmation_text").into());
+    translation.set_rename_confirmation_text(flk!("rename_confirmation_text").into());
     translation.set_settings_excluded_items_text(flk!("settings_excluded_items").into());
     translation.set_settings_allowed_extensions_text(flk!("settings_allowed_extensions").into());
     translation.set_settings_excluded_extensions_text(flk!("settings_excluded_extensions").into());
@@ -273,6 +302,15 @@ fn translate_items(app: &MainWindow) {
     translation.set_settings_restart_required_text(flk!("settings_restart_required").into());
     translation.set_settings_duplicate_image_preview_text(flk!("settings_duplicate_image_preview").into());
     translation.set_settings_similar_videos_preview_text(flk!("settings_similar_videos_image_preview").into());
+    translation
+        .set_settings_similar_videos_generate_thumbnail_grid_instead_of_single_image_text(flk!("settings_similar_videos_generate_thumbnail_grid_instead_of_single_image").into());
+    translation.set_settings_similar_videos_generate_thumbnail_grid_instead_of_single_image_hint_text(
+        flk!("settings_similar_videos_generate_thumbnail_grid_instead_of_single_image_hint_text").into(),
+    );
+    translation.set_settings_application_scale_text(flk!("settings_application_scale_text").into());
+    translation.set_settings_application_scale_hint_text(flk!("settings_application_scale_hint_text").into());
+    translation.set_settings_restart_required_scale_text(flk!("settings_restart_required_scale_text").into());
+    translation.set_settings_use_manual_application_scale_text(flk!("settings_use_manual_application_scale_text").into());
     translation.set_settings_duplicate_hide_hard_links_text(flk!("settings_duplicate_hide_hard_links").into());
     translation.set_settings_duplicate_minimal_hash_cache_size_text(flk!("settings_duplicate_minimal_hash_cache_size").into());
     translation.set_settings_duplicate_use_prehash_text(flk!("settings_duplicate_use_prehash").into());
@@ -299,10 +337,8 @@ fn translate_items(app: &MainWindow) {
     translation.set_popup_save_title_text(flk!("popup_save_title").into());
     translation.set_popup_save_message_text(flk!("popup_save_message").into());
     translation.set_popup_rename_title_text(flk!("popup_rename_title").into());
-    translation.set_popup_rename_message_text(flk!("popup_rename_message").into());
     translation.set_popup_new_directories_title_text(flk!("popup_new_directories_title").into());
     translation.set_popup_move_title_text(flk!("popup_move_title").into());
-    translation.set_popup_move_message_text(flk!("popup_move_message").into());
     translation.set_popup_move_copy_checkbox_text(flk!("popup_move_copy_checkbox").into());
     translation.set_popup_move_preserve_folder_checkbox_text(flk!("popup_move_preserve_folder_checkbox").into());
     translation.set_delete_text(flk!("delete").into());
@@ -319,6 +355,8 @@ fn translate_items(app: &MainWindow) {
     translation.set_settings_cache_number_size_text("".into());
     translation.set_settings_video_thumbnails_number_size_text("".into());
     translation.set_settings_log_number_size_text("".into());
+    translation.set_settings_similar_videos_clear_unused_thumbnails_text(flk!("settings_similar_videos_clear_unused_thumbnails").into());
+    translation.set_clean_exif_overwrite_files_text(flk!("clean_exif_overwrite_files_text").into());
 
     let tools_model: [(SharedString, ActiveTab); TOOLS_NUMBER] = [
         (flk!("tool_duplicate_files").into(), ActiveTab::DuplicateFiles),
@@ -332,6 +370,8 @@ fn translate_items(app: &MainWindow) {
         (flk!("tool_invalid_symlinks").into(), ActiveTab::InvalidSymlinks),
         (flk!("tool_broken_files").into(), ActiveTab::BrokenFiles),
         (flk!("tool_bad_extensions").into(), ActiveTab::BadExtensions),
+        (flk!("tool_exif_remover").into(), ActiveTab::ExifRemover),
+        (flk!("tool_video_optimizer").into(), ActiveTab::VideoOptimizer),
     ];
     let gui_state = app.global::<GuiState>();
     gui_state.set_tools_model(ModelRc::new(VecModel::from(tools_model.to_vec())));
@@ -375,6 +415,7 @@ fn translate_items(app: &MainWindow) {
     let destination_path = flk!("column_destination_path");
     let current_extension = flk!("column_current_extension");
     let proper_extension = flk!("column_proper_extension");
+    let exif_tags = flk!("column_exif_tags");
 
     let fnm = |model: &[&str]| {
         let shared_string = model.iter().map(|s| (*s).into()).collect::<Vec<SharedString>>();
@@ -392,6 +433,7 @@ fn translate_items(app: &MainWindow) {
     settings.set_invalid_symlink_column_name(fnm(&[&selection, &symlink_name, &symlink_folder, &destination_path, &mod_date]));
     settings.set_broken_files_column_name(fnm(&[&selection, &file_name, &path, &type_of_error, &size, &mod_date]));
     settings.set_bad_extensions_column_name(fnm(&[&selection, &file_name, &path, &current_extension, &proper_extension]));
+    settings.set_exif_remover_column_name(fnm(&[&selection, &size, &file_name, &path, &exif_tags, &mod_date]));
 }
 
 pub(crate) fn translate_select_mode(select_mode: SelectMode) -> SharedString {

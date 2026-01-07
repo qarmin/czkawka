@@ -44,6 +44,12 @@ def main() -> None:
 
     svg_folder = Path(sys.argv[1])
     svg_files = list(svg_folder.glob("**/*.svg"))
+
+    disabled_contains_names = ["krokiet_logo"]
+    svg_files = [
+        svg_file for svg_file in svg_files if not any(name in svg_file.name for name in disabled_contains_names)
+    ]
+
     if not svg_files:
         print(f"No SVG files found in the specified directory: {svg_folder}")
         return

@@ -177,10 +177,10 @@ fn convert_group_header_into_rc_model(grouped: Vec<(MainListModel, Vec<MainListM
 }
 
 fn group_by_header(model: &ModelRc<MainListModel>) -> Vec<(MainListModel, Vec<MainListModel>)> {
-    let mut grouped_items: Vec<(MainListModel, Vec<MainListModel>)> = vec![];
+    let mut grouped_items: Vec<(MainListModel, Vec<MainListModel>)> = Vec::new();
 
     let mut current_header: Option<MainListModel> = None;
-    let mut current_group: Vec<MainListModel> = vec![];
+    let mut current_group: Vec<MainListModel> = Vec::new();
     for item in model.iter() {
         if item.header_row {
             if let Some(header) = current_header.take() {
@@ -307,7 +307,7 @@ mod tests {
     #[test]
     fn convert_group_header_into_rc_model_handles_empty_groups() {
         initialize_selection_struct();
-        let grouped: Vec<(MainListModel, Vec<MainListModel>)> = vec![];
+        let grouped: Vec<(MainListModel, Vec<MainListModel>)> = Vec::new();
 
         let combined_model = convert_group_header_into_rc_model(grouped, 0);
 

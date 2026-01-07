@@ -10,19 +10,32 @@ export enum ActiveTab {
     InvalidSymlinks,
     BrokenFiles,
     BadExtensions,
+    ExifRemover,
+    VideoOptimizer,
     Settings,
     About
+}
+
+export enum PopupRequest {
+    Delete,
+    Move,
+    CleanExif,
+    OptimizeVideo,
+    Rename,
+    Symlink,
+    Hardlink,
+    Save
 }
 
 export enum SortColumnMode {
     None, // None is default mode, is set when starting scan and cannot be restored by user
     Descending,
-    Ascending,
+    Ascending
 }
 
 export enum TypeOfOpenedItem {
     CurrentItem,
-    ParentItem,
+    ParentItem
 }
 
 export struct ProgressToSend {
@@ -78,7 +91,7 @@ export struct SelectModel {
 export enum SortMode {
     FullName,
     Selection,
-    Reverse,
+    Reverse
 }
 
 export struct SortModel {

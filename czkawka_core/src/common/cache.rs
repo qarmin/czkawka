@@ -114,11 +114,13 @@ where
     };
 
     debug!("Converting cache Vec<T> into BTreeMap<String, T>");
+    let number_of_entries = vec_loaded_entries.len();
+    let start_time = std::time::Instant::now();
     let map_loaded_entries: BTreeMap<String, T> = vec_loaded_entries
         .into_iter()
         .map(|file_entry| (file_entry.get_path().to_string_lossy().into_owned(), file_entry))
         .collect();
-    debug!("Converted cache Vec<T> into BTreeMap<String, T>");
+    debug!("Converted cache Vec<T>({number_of_entries} results) into BTreeMap<String, T> in {:?}", start_time.elapsed());
 
     (text_messages, Some(map_loaded_entries))
 }
@@ -161,11 +163,16 @@ where
     };
 
     debug!("Converting cache Vec<T> into BTreeMap<u64, Vec<T>>");
+    let number_of_entries = vec_loaded_entries.len();
+    let start_time = std::time::Instant::now();
     let mut map_loaded_entries: BTreeMap<u64, Vec<T>> = Default::default();
     for file_entry in vec_loaded_entries {
         map_loaded_entries.entry(file_entry.get_size()).or_default().push(file_entry);
     }
-    debug!("Converted cache Vec<T> into BTreeMap<u64, Vec<T>>");
+    debug!(
+        "Converted cache Vec<T>({number_of_entries} results) into BTreeMap<u64, Vec<T>> in {:?}",
+        start_time.elapsed()
+    );
 
     (text_messages, Some(map_loaded_entries))
 }
@@ -213,6 +220,7 @@ where
 
         debug!("Starting removing outdated cache entries (removing non existent files from cache - {delete_outdated_cache})");
         let initial_number_of_entries = vec_loaded_entries.len();
+        let deleting_start_time = std::time::Instant::now();
         vec_loaded_entries = vec_loaded_entries
             .into_par_iter()
             .filter(|file_entry| {
@@ -228,9 +236,10 @@ where
             })
             .collect();
         debug!(
-            "Completed removing outdated cache entries, removed {} out of all {} entries",
+            "Completed removing outdated cache entries, removed {} out of all {} entries in {:?}",
             initial_number_of_entries - vec_loaded_entries.len(),
-            initial_number_of_entries
+            initial_number_of_entries,
+            deleting_start_time.elapsed()
         );
 
         text_messages.messages.push(format!("Properly loaded {} cache entries.", vec_loaded_entries.len()));

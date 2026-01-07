@@ -89,6 +89,12 @@ pub trait DeletingItems {
     fn delete_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus;
 }
 
+pub trait FixingItems {
+    type FixParams;
+    #[must_use]
+    fn fix_items(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>, fix_params: Self::FixParams) -> WorkContinueStatus;
+}
+
 pub trait ResultEntry {
     fn get_path(&self) -> &Path;
     fn get_modified_date(&self) -> u64;

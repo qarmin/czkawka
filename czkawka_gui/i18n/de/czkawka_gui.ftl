@@ -6,15 +6,29 @@ window_compare_images = Bilder vergleichen
 # General
 general_ok_button = Ok
 general_close_button = Schließen
+# Krokiet info dialog
+krokiet_info_title = Krokiet – Neue Version von Czkawka
+krokiet_info_message =
+    Krokiet ist die neue, verbesserte, schnellere und weniger fehlerhafte Version von Czkawka GTK!
+    
+    Da es sich um eine eigenständige Version handelt, ist es viel einfacher zu starten und widerstandsfähiger gegen Systemänderungen und Paketversionsupdates.
+    
+    Es enthält viele Funktionen, die in Czkawka nicht verfügbar sind, wie z. B. Vorschaubilder im Video-Vergleichsmodus, Fortschritt bei Datei-Move/Kopieren/Löschen und erweiterte Sortieroptionen.
+    
+    Probiere es aus und sieh den Unterschied!
+    
+    Czkawka wird weiterhin Fehlerbehebungen und kleinere Updates erhalten, aber alle neuen Funktionen werden nur in Krokiet implementiert.
+    
+    PS. Diese Nachricht sollte nur einmal sichtbar sein, aber wenn sie erneut erscheint, setze die Umgebungsvariable CZKAWKA_DONT_ANNOY_ME auf einen nicht leeren Wert.
 # Main window
 music_title_checkbox = Titel
 music_artist_checkbox = Künstler
 music_year_checkbox = Jahr
-music_bitrate_checkbox = Bitrate
+music_bitrate_checkbox = Bitraten
 music_genre_checkbox = Genretype
 music_length_checkbox = Dauer
 music_comparison_checkbox = Ungefährer Vergleich
-music_checking_by_tags = Tags
+music_checking_by_tags = Schlagworte
 music_checking_by_content = Inhalt
 same_music_seconds_label = Minimale Dauer des Fragments, in Sekunden
 same_music_similarity_label = Maximaler Unterschied

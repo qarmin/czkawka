@@ -107,7 +107,7 @@ pub(crate) fn create_default_settings_files() {
     }
 }
 
-pub(crate) fn load_settings_from_file(app: &MainWindow, cli_result: Option<CliResult>) -> i32 {
+pub(crate) fn load_initial_settings_from_file(cli_result: Option<&CliResult>) -> (BasicSettings, SettingsCustom, i32) {
     StringComboBoxItems::regenerate_and_set();
 
     let result_base_settings = load_data_from_file::<BasicSettings>(get_base_config_file());
@@ -137,12 +137,13 @@ pub(crate) fn load_settings_from_file(app: &MainWindow, cli_result: Option<CliRe
     base_settings.default_preset = base_settings.default_preset.clamp(0, PRESET_NUMBER as i32 - 2);
     custom_settings.thread_number = max(min(custom_settings.thread_number, get_all_available_threads() as i32), 0);
 
-    // Ended validating, starting saving settings to GUI
-    set_settings_to_gui(app, &custom_settings, &base_settings, cli_result);
-    set_base_settings_to_gui(app, &base_settings, preset_to_load);
-    set_number_of_threads(custom_settings.thread_number as usize);
+    (base_settings, custom_settings, preset_to_load)
+}
 
-    base_settings.default_preset
+pub(crate) fn set_initial_settings_to_gui(app: &MainWindow, base_settings: &BasicSettings, custom_settings: &SettingsCustom, cli_result: Option<CliResult>, preset_to_load: i32) {
+    set_settings_to_gui(app, custom_settings, base_settings, cli_result);
+    set_base_settings_to_gui(app, base_settings, preset_to_load);
+    set_number_of_threads(custom_settings.thread_number as usize);
 }
 
 pub(crate) fn save_all_settings_to_file(app: &MainWindow, original_preset_idx: i32) {
@@ -190,7 +191,7 @@ where
 
     let result = match std::fs::read_to_string(&config_file) {
         Ok(serialized) => {
-            debug!("Loading data from file \"{:?}\" took {:?}", config_file.to_string_lossy(), current_time.elapsed());
+            debug!("Loading data from file \"{}\" took {:?}", config_file.to_string_lossy(), current_time.elapsed());
 
             match serde_json::from_str(&serialized) {
                 Ok(custom_settings) => Ok(custom_settings),
@@ -201,7 +202,7 @@ where
     };
 
     debug!(
-        "Loading and converting data from file \"{:?}\" took {:?}",
+        "Loading and converting data from file \"{}\" took {:?}",
         config_file.to_string_lossy(),
         current_time.elapsed()
     );
@@ -269,6 +270,8 @@ pub(crate) fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicS
     settings.set_load_tabs_sizes_at_startup(basic_settings.settings_load_tabs_sizes_at_startup);
     settings.set_load_windows_size_at_startup(basic_settings.settings_load_windows_size_at_startup);
     settings.set_limit_messages_lines(basic_settings.settings_limit_lines_of_messages);
+    settings.set_manual_application_scale(basic_settings.manual_application_scale);
+    settings.set_use_manual_application_scale(basic_settings.use_manual_application_scale);
 
     set_combobox_basic_settings_items(&settings, basic_settings);
 }
@@ -333,6 +336,25 @@ pub(crate) fn set_combobox_custom_settings_items(settings: &Settings, custom_set
     // settings.set_similar_videos_crop_detect_model(display_names);
     settings.set_similar_videos_crop_detect_index(idx as i32);
     settings.set_similar_videos_crop_detect_value(display_names[idx].clone());
+
+    // Video Optimizer mode
+    let (idx, display_names) = StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.video_optimizer_mode, &collected_items.video_optimizer_mode);
+    settings.set_video_optimizer_sub_mode_index(idx as i32);
+    settings.set_video_optimizer_sub_mode_value(display_names[idx].clone());
+
+    // Video Optimizer video codec
+    let (idx, display_names) = StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.video_optimizer_video_codec, &collected_items.video_optimizer_video_codec);
+    settings.set_video_optimizer_sub_video_codec_index(idx as i32);
+    settings.set_video_optimizer_sub_video_codec_value(display_names[idx].clone());
+
+    let codec_display_names = collected_items
+        .video_optimizer_video_codec
+        .iter()
+        .map(|e| e.display_name.clone().into())
+        .collect::<Vec<_>>();
+    let codec_config_value = collected_items.video_optimizer_video_codec[idx].config_name.clone();
+    settings.set_video_optimizer_sub_video_codec_config(ModelRc::new(VecModel::from(codec_display_names)));
+    settings.set_video_optimizer_sub_video_codec_config_value(codec_config_value.into());
 }
 
 pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom, base_settings: &BasicSettings, cli_args: Option<CliResult>) {
@@ -380,6 +402,9 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_similar_images_delete_outdated_entries(custom_settings.similar_images_delete_outdated_entries);
     settings.set_similar_videos_hide_hard_links(custom_settings.similar_videos_hide_hard_links);
     settings.set_similar_videos_delete_outdated_entries(custom_settings.similar_videos_delete_outdated_entries);
+    settings.set_similar_videos_image_preview(custom_settings.similar_videos_image_preview);
+    settings.set_similar_videos_sub_generate_thumbnail_grid_instead_of_single_image(custom_settings.similar_videos_generate_thumbnail_grid_instead_of_single_image);
+    settings.set_similar_videos_clear_unused_thumbnails(custom_settings.similar_videos_clear_unused_thumbnails);
     settings.set_similar_music_compare_fingerprints_only_with_similar_titles(custom_settings.similar_music_compare_fingerprints_only_with_similar_titles);
     settings.set_similar_music_delete_outdated_entries(custom_settings.similar_music_delete_outdated_entries);
 
@@ -408,7 +433,6 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     );
     settings.set_similar_videos_vid_hash_duration_min(*ALLOWED_VID_HASH_DURATION.start() as f32);
     settings.set_similar_videos_vid_hash_duration_max(*ALLOWED_VID_HASH_DURATION.end() as f32);
-    settings.set_similar_videos_image_preview(custom_settings.similar_videos_image_preview);
     settings.set_similar_videos_thumbnail_percentage(
         custom_settings
             .similar_videos_thumbnail_percentage
@@ -431,6 +455,17 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_broken_files_sub_pdf(custom_settings.broken_files_sub_pdf);
     settings.set_broken_files_sub_archive(custom_settings.broken_files_sub_archive);
     settings.set_broken_files_sub_image(custom_settings.broken_files_sub_image);
+
+    settings.set_video_optimizer_sub_excluded_codecs(custom_settings.video_optimizer_excluded_codecs.clone().into());
+    settings.set_video_optimizer_sub_video_quality(custom_settings.video_optimizer_video_quality as f32);
+    settings.set_video_optimizer_sub_fail_if_bigger(custom_settings.video_optimizer_fail_if_bigger);
+    settings.set_video_optimizer_sub_overwrite_files(custom_settings.video_optimizer_overwrite_files);
+    settings.set_video_optimizer_sub_limit_video_size(custom_settings.video_optimizer_limit_video_size);
+    settings.set_video_optimizer_sub_max_width(custom_settings.video_optimizer_max_width.to_string().into());
+    settings.set_video_optimizer_sub_max_height(custom_settings.video_optimizer_max_height.to_string().into());
+    settings.set_video_optimizer_sub_image_threshold(custom_settings.video_optimizer_image_threshold as f32);
+
+    settings.set_ignored_exif_tags(custom_settings.ignored_exif_tags.clone().into());
 
     let sel_px = 35.0;
     let path_px = 350.0;
@@ -461,6 +496,8 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
         settings.set_invalid_symlink_column_size(fnm(&[sel_px, name_px, path_px, path_px, mod_px], "invalid_symlink"));
         settings.set_broken_files_column_size(fnm(&[sel_px, name_px, path_px, 200.0, size_px, mod_px], "broken_files"));
         settings.set_bad_extensions_column_size(fnm(&[sel_px, name_px, path_px, 40.0, 200.0], "bad_extensions"));
+        settings.set_exif_remover_column_size(fnm(&[sel_px, size_px, name_px, path_px, 300.0, mod_px], "exif_remover"));
+        settings.set_video_optimizer_column_size(fnm(&[sel_px, size_px, name_px, path_px, 100.0, 120.0, mod_px], "video_optimizer"));
     }
 
     // Clear text
@@ -514,6 +551,8 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let similar_videos_hide_hard_links = settings.get_similar_videos_hide_hard_links();
     let similar_videos_delete_outdated_entries = settings.get_similar_videos_delete_outdated_entries();
     let similar_videos_image_preview = settings.get_similar_videos_image_preview();
+    let similar_videos_generate_thumbnail_grid_instead_of_single_image = settings.get_similar_videos_sub_generate_thumbnail_grid_instead_of_single_image();
+    let similar_videos_clear_unused_thumbnails = settings.get_similar_videos_clear_unused_thumbnails();
 
     let similar_music_compare_fingerprints_only_with_similar_titles = settings.get_similar_music_compare_fingerprints_only_with_similar_titles();
     let similar_music_delete_outdated_entries = settings.get_similar_music_delete_outdated_entries();
@@ -561,6 +600,21 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let broken_files_sub_archive = settings.get_broken_files_sub_archive();
     let broken_files_sub_image = settings.get_broken_files_sub_image();
 
+    let video_optimizer_sub_mode_idx = settings.get_video_optimizer_sub_mode_index();
+    let video_optimizer_mode = StringComboBoxItems::get_config_name_from_idx(video_optimizer_sub_mode_idx as usize, &collected_items.video_optimizer_mode);
+    let video_optimizer_sub_video_codec_idx = settings.get_video_optimizer_sub_video_codec_index();
+    let video_optimizer_video_codec = StringComboBoxItems::get_config_name_from_idx(video_optimizer_sub_video_codec_idx as usize, &collected_items.video_optimizer_video_codec);
+    let video_optimizer_excluded_codecs = settings.get_video_optimizer_sub_excluded_codecs().to_string();
+    let video_optimizer_video_quality = settings.get_video_optimizer_sub_video_quality().round() as u32;
+    let video_optimizer_fail_if_bigger = settings.get_video_optimizer_sub_fail_if_bigger();
+    let video_optimizer_overwrite_files = settings.get_video_optimizer_sub_overwrite_files();
+    let video_optimizer_limit_video_size = settings.get_video_optimizer_sub_limit_video_size();
+    let video_optimizer_max_width = settings.get_video_optimizer_sub_max_width().parse::<u32>().unwrap_or(1920);
+    let video_optimizer_max_height = settings.get_video_optimizer_sub_max_height().parse::<u32>().unwrap_or(1920);
+    let video_optimizer_image_threshold = settings.get_video_optimizer_sub_image_threshold().round() as u8;
+
+    let ignored_exif_tags = settings.get_ignored_exif_tags().to_string();
+
     let column_sizes = BTreeMap::from([
         ("duplicates".to_string(), settings.get_duplicates_column_size().iter().collect::<Vec<_>>()),
         ("empty_folders".to_string(), settings.get_empty_folders_column_size().iter().collect::<Vec<_>>()),
@@ -573,6 +627,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         ("invalid_symlink".to_string(), settings.get_invalid_symlink_column_size().iter().collect::<Vec<_>>()),
         ("broken_files".to_string(), settings.get_broken_files_column_size().iter().collect::<Vec<_>>()),
         ("bad_extensions".to_string(), settings.get_bad_extensions_column_size().iter().collect::<Vec<_>>()),
+        ("video_optimizer".to_string(), settings.get_video_optimizer_column_size().iter().collect::<Vec<_>>()),
     ]);
 
     SettingsCustom {
@@ -600,6 +655,9 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         similar_images_show_image_preview,
         similar_images_delete_outdated_entries,
         similar_videos_delete_outdated_entries,
+        similar_videos_image_preview,
+        similar_videos_generate_thumbnail_grid_instead_of_single_image,
+        similar_videos_clear_unused_thumbnails,
         similar_music_delete_outdated_entries,
         similar_images_sub_hash_size,
         similar_images_sub_hash_alg,
@@ -629,12 +687,22 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         broken_files_sub_pdf,
         broken_files_sub_archive,
         broken_files_sub_image,
-        column_sizes,
+        similar_videos_skip_forward_amount,
         similar_videos_vid_hash_duration,
         similar_videos_crop_detect,
-        similar_videos_skip_forward_amount,
-        similar_videos_image_preview,
         similar_videos_thumbnail_percentage,
+        video_optimizer_mode,
+        video_optimizer_video_codec,
+        video_optimizer_excluded_codecs,
+        video_optimizer_video_quality,
+        video_optimizer_fail_if_bigger,
+        video_optimizer_overwrite_files,
+        video_optimizer_limit_video_size,
+        video_optimizer_max_width,
+        video_optimizer_max_height,
+        video_optimizer_image_threshold,
+        ignored_exif_tags,
+        column_sizes,
     }
 }
 
@@ -657,6 +725,8 @@ pub(crate) fn collect_base_settings(app: &MainWindow) -> BasicSettings {
     let settings_load_tabs_sizes_at_startup = settings.get_load_tabs_sizes_at_startup();
     let settings_load_windows_size_at_startup = settings.get_load_windows_size_at_startup();
     let settings_limit_lines_of_messages = settings.get_limit_messages_lines();
+    let manual_application_scale = settings.get_manual_application_scale();
+    let use_manual_application_scale = settings.get_use_manual_application_scale();
     BasicSettings {
         language,
         default_preset,
@@ -668,5 +738,7 @@ pub(crate) fn collect_base_settings(app: &MainWindow) -> BasicSettings {
         settings_load_tabs_sizes_at_startup,
         settings_load_windows_size_at_startup,
         settings_limit_lines_of_messages,
+        manual_application_scale,
+        use_manual_application_scale,
     }
 }

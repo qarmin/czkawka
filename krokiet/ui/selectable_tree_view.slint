@@ -2,6 +2,7 @@ import { CheckBox, ListView, ScrollView, VerticalBox } from "std-widgets.slint";
 import { ColorPalette } from "color_palette.slint";
 import { MainListModel, SortColumnMode } from "common.slint";
 import { Callabler } from "callabler.slint";
+import { FontSizes } from "fonts.slint";
 
 export component SelectableTableView inherits Rectangle {
     in property <[string]> columns;
@@ -19,7 +20,7 @@ export component SelectableTableView inherits Rectangle {
     in-out property <int> previewImageIdx;
     in-out property <int> start_shift_idx: -1;
     in-out property <int> last_selected_idx: -1;
-    out property <length> item_height: 20px;
+    out property <length> item_height: 23px;
     in-out property <SortColumnMode> sort_column_mode: SortColumnMode.None;
     in-out property <int> sort_column_idx: -1;
     in-out property <bool> sort_available: true;
@@ -66,6 +67,7 @@ export component SelectableTableView inherits Rectangle {
 
                             overflow: elide;
                             text: title;
+                            font-size: FontSizes.normal;
                         }
                     }
 
@@ -160,7 +162,7 @@ export component SelectableTableView inherits Rectangle {
                         for f[idx] in r.val_str: Text {
                             width: root.column_sizes[idx + 1];
                             text: f;
-                            font-size: 12px;
+                            font-size: FontSizes.normal;
                             vertical-alignment: center;
                             overflow: elide;
                         }

@@ -121,7 +121,10 @@ prepare_translations_deps:
     @command -v uv >/dev/null 2>&1 || curl -LsSf https://astral.sh/uv/install.sh | sh
     @command -v ollama >/dev/null 2>&1 || curl -fsSL https://ollama.com/install.sh | sh
     cd misc/ai_translate; uv sync
-    ollama pull qwen2.5:7b
+    # qwen2.5:7b - fast, but quite bad quality
+    # qwen2.5:32b - very slow, still not good quality
+    # zongwei/gemma3-translator:4b - not so fast, but looks quite good
+    ollama pull zongwei/gemma3-translator:4b
 
 translate:
     cd misc/ai_translate; uv run translate.py ../../czkawka_gui/i18n
@@ -134,6 +137,7 @@ validate_translations *args: # Available --fix argument, which removes invalid t
     cd misc/ai_translate; uv run validate_translations.py ../../czkawka_core/i18n {{args}}
     cd misc/ai_translate; uv run validate_translations.py ../../krokiet/i18n {{args}}
 
+# Crowdin allows to import zip file with structured translations
 pack_translations:
     rm -f i18n_translations.zip
     mkdir -p /tmp/czkawka_i18n
@@ -148,6 +152,19 @@ pack_translations:
     cd /tmp/czkawka_i18n && zip -r - i18n > "{{justfile_directory()}}/i18n_translations.zip"
     rm -rf /tmp/czkawka_i18n
     @echo "Created i18n_translations.zip with all translations (excluding English)"
+
+unpack_translations path_to_file:
+    @echo "Unpacking translations from {{path_to_file}}..."
+    mkdir -p /tmp/czkawka_unpack
+    unzip -q "{{path_to_file}}" -d /tmp/czkawka_unpack
+    for lang_dir in /tmp/czkawka_unpack/*/; do \
+        lang_code=$(basename "$lang_dir"); \
+        [ -f "$lang_dir/czkawka_gui.ftl" ] && mkdir -p "czkawka_gui/i18n/$lang_code" && cp "$lang_dir/czkawka_gui.ftl" "czkawka_gui/i18n/$lang_code/" && echo "Copied czkawka_gui.ftl to czkawka_gui/i18n/$lang_code/" || true; \
+        [ -f "$lang_dir/czkawka_core.ftl" ] && mkdir -p "czkawka_core/i18n/$lang_code" && cp "$lang_dir/czkawka_core.ftl" "czkawka_core/i18n/$lang_code/" && echo "Copied czkawka_core.ftl to czkawka_core/i18n/$lang_code/" || true; \
+        [ -f "$lang_dir/krokiet.ftl" ] && mkdir -p "krokiet/i18n/$lang_code" && cp "$lang_dir/krokiet.ftl" "krokiet/i18n/$lang_code/" && echo "Copied krokiet.ftl to krokiet/i18n/$lang_code/" || true; \
+    done
+    rm -rf /tmp/czkawka_unpack
+    @echo "Translations unpacked successfully"
 
 
 ##################### DEBUG SIZE, PERFORMANCE AND OTHERS #####################

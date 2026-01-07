@@ -47,6 +47,10 @@ export global Callabler {
     callback save_results();
     callback move_items(bool, bool, string);
     callback rename_files();
+    callback optimize_items(string, bool, bool, float, bool, int, int);
+    callback clean_exif_items(bool);
+    callback hardlink_items();
+    callback softlink_items();
 
     // Only Slint
     callback open_select_popup();

@@ -6,6 +6,20 @@ window_compare_images = Sammenlign bilder
 # General
 general_ok_button = Ok
 general_close_button = Lukk
+# Krokiet info dialog
+krokiet_info_title = Introduserer Krokiet - Ny versjon av Czkawka
+krokiet_info_message =
+    Krokiet er den nye, forbedrede, raskere og mindre buggy versjonen av Czkawka GTK!
+    
+    Siden den er selvstendig, er den mye lettere å kjøre og mer motstandsdyktig mot systemendringer og pakkeversjonsoppdateringer.
+    
+    Den inkluderer mange funksjoner som ikke er tilgjengelige i Czkawka, som for eksempel forhåndsvisninger i videokomparismodus, filflyttings-/kopierings-/slettingsprogresjon og utvidede sorteringsalternativer.
+    
+    Prøv det ut og se forskjellen!
+    
+    Czkawka vil fortsatt motta feilrettinger og mindre oppdateringer, men alle nye funksjoner vil kun implementeres i Krokiet.
+    
+    PS. Denne meldingen skal kun være synlig én gang, men hvis den dukker opp igjen, sett CZKAWKA_DONT_ANNOY_ME miljøvariabelen til en hvilken som helst ikke tom verdi.
 # Main window
 music_title_checkbox = Tittel
 music_artist_checkbox = Kunstner
@@ -72,14 +86,14 @@ image_hash_size_tooltip =
     16 er standard hash-størrelse som er et godt kompromiss mellom å finne selv små lignende bilder og å ha bare en liten mengde hash-kollisjoner.
     
     32 og 64 hashes finner bare lignende bilder, men bør ha nesten ingen falske positiver (kanskje unntatt bilder med alfa-kanal).
-image_resize_filter_tooltip = 
-        For å beregne hesh av bilde, må biblioteket først tilpass bilden.
-
-        Avhengig av valgt algoritme vil det bilde som brukes for beregning av hesh se litt forskjellig ut.
-
-        Forkortest algoritme å bruke, men også den som gir de vres resultatene, er Nearest. Den aktiveres standard, fordi med en 16x16 heshstørrelse nederste kvalitet ikke er virkelig synlig.
-
-        Med en 8x8 heshstørrelse anbefales det å bruke en annen algoritme enn Nearest for å ha bedre grupper av bilder.
+image_resize_filter_tooltip =
+    For å beregne hesh av bilde, må biblioteket først tilpass bilden.
+    
+    Avhengig av valgt algoritme vil det bilde som brukes for beregning av hesh se litt forskjellig ut.
+    
+    Forkortest algoritme å bruke, men også den som gir de vres resultatene, er Nearest. Den aktiveres standard, fordi med en 16x16 heshstørrelse nederste kvalitet ikke er virkelig synlig.
+    
+    Med en 8x8 heshstørrelse anbefales det å bruke en annen algoritme enn Nearest for å ha bedre grupper av bilder.
 image_hash_alg_tooltip =
     Brukere kan velge mellom en av mange algoritmer i beregningen av hashen.
     

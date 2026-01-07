@@ -6,6 +6,20 @@ window_compare_images = 画像を比較
 # General
 general_ok_button = Ok
 general_close_button = 閉じる
+# Krokiet info dialog
+krokiet_info_title = Krokiet – 新バージョン Czkawka
+krokiet_info_message =
+    クローキエッとは、新しい、改良され、高速で、バグが少ないCzkawka GTK GUIのバージョンです！
+    
+    自己完結型なので、実行が簡単で、システム変更やパッケージバージョン更新に強いです。
+    
+    ビデオ比較モードでのサムネイル、ファイルの移動/コピー/削除の進捗状況、拡張されたソートオプションなど、Czkawkaでは利用できない多くの機能が含まれています。
+    
+    試して違いを見てください！
+    
+    Czkawkaは引き続きバグ修正や軽微なアップデートを受け取りますが、すべての新機能はクローキエッでのみ実装されます。
+    
+    追伸。このメッセージは一度だけ表示されるように設計されていますが、表示された場合は、CZKAWKA_DONT_ANNOY_ME環境変数を任意の空でない値に設定してください。
 # Main window
 music_title_checkbox = タイトル
 music_artist_checkbox = アーティスト
@@ -130,7 +144,7 @@ main_label_min_size = 最小値
 main_label_max_size = 最大値
 main_label_shown_files = 表示するファイルの数
 main_label_resize_algorithm = アルゴリズムのサイズを変更
-main_label_similarity = 類似度{"   "}
+main_label_similarity = 類似度{ "   " }
 main_check_box_broken_files_audio = 音声
 main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = アーカイブする

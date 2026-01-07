@@ -1,16 +1,30 @@
 # Window titles
 window_settings_title = Setări
-window_main_title = Czkawka (Hiccup)
+window_main_title = Czkawka (Sufletăciune)
 window_progress_title = Scanare
 window_compare_images = Compară imaginile
 # General
 general_ok_button = Ok
 general_close_button = Inchide
+# Krokiet info dialog
+krokiet_info_title = Introducerea lui Krokiet - Noua Versiune a Czkawka
+krokiet_info_message =
+    Pașii este noua, îmbunătățită, mai rapidă și mai puțin buggy versiune a Czkawka GTK!
+    
+    Fiind auto-conținută, este mult mai ușor de rulat și mai rezistentă la modificările sistemului și la actualizările de versiune a pachetelor.
+    
+    Include multe funcții indisponibile în Czkawka, cum ar fi miniaturi în modul de comparare video, progresul mișcării fișierelor/copierea/ștergerea și opțiuni extinse de sortare.
+    
+    Încearcă-o și vezi diferența!
+    
+    Czkawka va continua să primească corecții de bug-uri și actualizări minore, dar toate noile funcții vor fi implementate doar în Krokiet.
+    
+    PS. Acest mesaj ar trebui să fie vizibil doar o singură dată, dar dacă apare din nou, setați variabila de mediu CZKAWKA_DONT_ANNOY_ME la orice valoare non-goalomptă.
 # Main window
 music_title_checkbox = Titlu
 music_artist_checkbox = Artist
 music_year_checkbox = An
-music_bitrate_checkbox = Bitrate
+music_bitrate_checkbox = Rată de bitrate
 music_genre_checkbox = Gen
 music_length_checkbox = Lungime
 music_comparison_checkbox = Comparație aproximativă
@@ -111,7 +125,7 @@ main_tree_view_column_dimensions = Dimensiuni
 main_tree_view_column_title = Titlu
 main_tree_view_column_artist = Artist
 main_tree_view_column_year = An
-main_tree_view_column_bitrate = Bitrate
+main_tree_view_column_bitrate = Rată de bitrate
 main_tree_view_column_length = Lungime
 main_tree_view_column_genre = Gen
 main_tree_view_column_symlink_file_name = Numele fișierului Symlink

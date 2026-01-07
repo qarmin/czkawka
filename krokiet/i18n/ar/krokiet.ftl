@@ -11,6 +11,8 @@ rust_loading_prehash_cache = تحميل ذاكرة التخزين المؤقت
 rust_saving_prehash_cache = حفظ ذاكرة التخزين المؤقت
 rust_loading_hash_cache = تحميل ذاكرة التخزين المؤقت للتجزئة
 rust_saving_hash_cache = حفظ ذاكرة التخزين المؤقت
+rust_loading_exif_cache = تحميل ذاكرة التخزين المؤقت EXIF
+rust_saving_exif_cache = حفظ ذاكرة التخزين المؤقت EXIF
 rust_scanning_name = فحص اسم الملف { $entries_checked }
 rust_scanning_size_name = حجم واسم ملف { $entries_checked }
 rust_scanning_size = حجم مسح الملف { $entries_checked }
@@ -26,6 +28,8 @@ rust_hashed_videos = مجزأة { $items_stats } مقاطع فيديو
 rust_created_thumbnails = أنشئ مصغرات لـ { $items_stats } مقاطع فيديو
 rust_checked_files = تم تحديد الملف { $items_stats } ({ $size_stats })
 rust_checked_files_bad_extensions = تم التحقق من الملف { $items_stats }
+rust_checked_images = تم التحقق من { $items_stats } صور ({ $size_stats })
+rust_checked_videos = تم التحقق من { $items_stats } مقاطع فيديو ({ $size_stats })
 rust_analyzed_partial_hash = تم تحليل التجزئة الجزئية للملفات { $items_stats } ({ $size_stats })
 rust_analyzed_full_hash = تم تحليل التجزئة الكاملة من ملفات { $items_stats } ({ $size_stats })
 rust_failed_to_rename_file = فشل في إعادة تسمية الملف { $old_path } إلى { $new_path }، الخطأ: { $error }
@@ -42,9 +46,11 @@ rust_found_temporary_files = تم العثور على { $items_found } ملفا�
 rust_no_file_type_selected = لا يمكن العثور على الملفات المكسورة بدون أي نوع من الملفات المحددة.
 rust_found_broken_files = تم العثور على { $items_found } ملفات مكسورة أخذت { $size } في { $time }
 rust_found_bad_extensions = تم العثور على { $items_found } ملفات ذات ملحقات سيئة في { $time }
+rust_found_video_optimizer = تم العثور على { $items_found } ملفات لتحسينها في { $time }
 rust_found_duplicate_files = تم العثور على { $items_found } ملفات مكررة في { $groups } مجموعات أخذت { $size } في { $time }
 rust_found_duplicate_files_no_lost_space = تم العثور على { $items_found } ملفات مكررة في { $groups } مجموعات في { $time }
 rust_found_big_files = تم العثور على { $items_found } ملفات كبيرة بحجم { $size } في { $time }
+rust_found_exif_files = تم العثور على { $items_found } ملفات مع بيانات EXIF في { $time }
 rust_cannot_load_preset = لا يمكن تغيير وتحميل الإعداد المسبق { $preset_idx } - السبب { $reason }، باستخدام الإعدادات الافتراضية بدلاً من ذلك
 rust_saved_preset = تم الحفظ مسبقا { $preset_idx }
 rust_cannot_save_preset = لا يمكن حفظ الإعداد المسبق { $preset_idx } - السبب { $reason }
@@ -53,18 +59,48 @@ rust_cannot_create_output_folder = لا يمكن إنشاء مجلد الإخر�
 rust_delete_summary = حذف { $deleted } عناصر ، فشل في إزالة { $failed } عناصر ، من أصل { $total } عناصر
 rust_rename_summary = إعادة تسمية العناصر { $renamed } ، فشل في إعادة تسمية العناصر { $failed } ، من أصل { $total } عناصر
 rust_move_summary = نقل { $moved } عناصر, فشل في نقل { $failed } عناصر, من { $total } عناصر
+rust_hardlink_summary = مرتبط بالرابط { $hardlinked } عناصر، فشل ربط الرابط { $failed } عناصر، من أصل { $total } عناصر
+rust_symlink_summary = ربط رمزي { $symlinked } عناصر، فشل ربط رمزي { $failed } عناصر، من أصل { $total } عناصر
+rust_optimize_video_summary = مقاطع فيديو مُحسّنة { $optimized }، وفشلت في تحسين { $failed }، وخرجت من { $total } مقاطع فيديو.
+rust_clean_exif_summary = تمت إزالة EXIF المُنظَّفة من { $cleaned } ملفات، وفشلت في تنظيف { $failed } ملفات، من أصل { $total } ملفات.
 rust_deleting_files = حذف ملف { $items_stats } ({ $size_stats })
 rust_deleting_no_size_files = حذف ملف { $items_stats }
 rust_renaming_files = إعادة تسمية الملف { $items_stats }
 rust_moving_files = نقل الملف { $items_stats } ({ $size_stats })
 rust_moving_no_size_files = نقل ملف { $items_stats }
+rust_hardlinking_files = الرابط الصلب { $items_stats } الملف ({ $size_stats })
+rust_hardlinking_no_size_files = الرابط الصلب { $items_stats } ملف
+rust_symlinking_files = الرابط الرمزية { $items_stats } الملف ({ $size_stats })
+rust_symlinking_no_size_files = الرابط الرمزية { $items_stats } ملف
+rust_optimizing_videos = مُحسَّن { $items_stats } فيديو ({ $size_stats })
+rust_optimizing_no_size_videos = مُحسَّن { $items_stats } فيديو
+rust_cleaning_exif = تنظيف EXIF من ملف { $items_stats } ({ $size_stats })
+rust_cleaning_no_size_exif = تنظيف EXIF من ملف { $items_stats }
 rust_no_files_deleted = لا توجد ملفات أو مجلدات محددة للحذف
 rust_no_files_renamed = لا توجد ملفات أو مجلدات محددة لإعادة التسمية
 rust_no_files_moved = لا توجد ملفات أو مجلدات محددة للانتقال
+rust_no_files_hardlinked = لا توجد ملفات أو مجلدات محددة لإنشاء الروابط الصلبة.
+rust_no_files_symlinked = لا توجد ملفات أو مجلدات محددة لإنشاء الروابط الرمزية
+rust_no_videos_optimized = لا توجد فيديوهات مُحدَّدة للتحسين
+rust_no_exif_cleaned = لا توجد ملفات مُحدَّدة لتنظيف EXIF
+rust_extracted_exif_tags = تم استخراج علامات EXIF من ملفات { $items_stats } ({ $size_stats })
 rust_delete_confirmation = هل أنت متأكد من أنك تريد حذف العناصر المحددة؟
 rust_delete_confirmation_number_simple = { $items } العناصر المحددة.
 rust_delete_confirmation_number_groups = { $items } العناصر المحددة في { $groups } مجموعات.
 rust_delete_confirmation_selected_all_in_group = جميع العناصر المحددة في مجموعات { $groups }.
+rust_move_confirmation = هل أنت متأكد من أنك تريد نقل العناصر المحددة؟
+rust_move_confirmation_number_simple = { $items } عناصر محددة.
+rust_clean_exif_confirmation = هل أنت متأكد من أنك تريد إزالة بيانات EXIF من العناصر المحددة؟
+rust_clean_exif_confirmation_number_simple = { $items } عناصر محددة.
+clean_exif_overwrite_files_text = استبدل الملفات
+rust_optimize_video_confirmation = هل أنت متأكد من أنك تريد تحسين مقاطع الفيديو المحددة؟
+rust_optimize_video_confirmation_number_simple = { $items } عناصر محددة.
+rust_hardlink_confirmation = هل أنت متأكد من أنك تريد إنشاء روابط صلبة للعناصر المحددة؟
+rust_hardlink_confirmation_number_simple = { $items } عناصر محددة.
+rust_symlink_confirmation = هل أنت متأكد من أنك تريد إنشاء روابط رمزية للعناصر المحددة؟
+rust_symlink_confirmation_number_simple = { $items } عناصر محددة.
+rust_rename_confirmation = هل أنت متأكد من أنك تريد إعادة تسمية العناصر المحددة؟
+rust_rename_confirmation_number_simple = { $items } عناصر محددة.
 
 # Slint translations, but in arrays
 
@@ -90,6 +126,7 @@ column_proper_extension = التمديد الصحيح
 column_fps = fps
 column_codec = ترميز
 column_duration = المدة
+column_exif_tags = وسوم EXIF
 # Slint translations
 ok_button = حسناً
 cancel_button = إلغاء
@@ -124,6 +161,8 @@ tool_music_duplicates = مكرر الموسيقى
 tool_invalid_symlinks = الروابط الرمزية غير صالحة
 tool_broken_files = الملفات المكسورة
 tool_bad_extensions = ملحقات سيئة
+tool_video_optimizer = مُحسِّن الفيديو
+tool_exif_remover = مزيل إكسيف
 sort_by_full_name = الترتيب حسب الاسم الكامل
 sort_by_selection = الترتيب حسب التحديد
 sort_reverse = عكس الترتيب
@@ -164,7 +203,7 @@ subsettings_music_minimal_fragment_duration = الحد الأدنى من مدة 
 subsettings_music_compare_fingerprints_only_with_similar_titles = مقارنة داخل مجموعات من العناوين المتشابهة
 subsettings_broken_files_type = نوع الملفات المراد التحقق منها
 subsettings_broken_files_audio = الصوت
-subsettings_broken_files_pdf = Pdf
+subsettings_broken_files_pdf = بي دي إف
 subsettings_broken_files_archive = أرشيف
 subsettings_broken_files_image = صورة
 settings_global_settings = الإعدادات العامة
@@ -190,10 +229,16 @@ settings_duplicate_use_prehash = استخدام ما قبل التجزئة
 settings_duplicate_minimal_prehash_cache_size = الحجم الأدنى للملفات المخزنة مؤقتاً - بريهاش (KB)
 settings_duplicate_delete_outdated_entries = حذف إدخالات قديمة تلقائياً
 settings_similar_images_show_image_preview = معاينة الصورة
+settings_application_scale_text = تطبيق النطاق
+settings_application_scale_hint_text = تطبيق مقياس يدوي (مثل: 1.0 = 100%)
+settings_restart_required_scale_text = ---يجب إعادة تشغيل التطبيق لتطبيق التغييرات في المقياس---
+settings_use_manual_application_scale_text = استخدم مقياس تطبيق يدوي
+settings_similar_videos_generate_thumbnail_grid_instead_of_single_image_hint_text = إنشاء شبكة من الصور المصغرة بدلاً من صورة واحدة (قد يستغرق وقتًا أطول)
 settings_similar_images_hide_hard_links = إخفاء الروابط الصلبة
 settings_delete_outdated_entries = حذف إدخالات قديمة تلقائياً
 settings_similar_videos_hide_hard_links = إخفاء الروابط الصلبة
 settings_similar_videos_image_preview = معاينة الصورة
+settings_similar_videos_generate_thumbnail_grid_instead_of_single_image = إنشاء شبكة صور مصغرة بدلاً من صورة واحدة
 settings_open_config_folder = فتح مجلد التكوين
 settings_open_cache_folder = فتح مجلد ذاكرة التخزين المؤقت
 settings_language = اللغة
@@ -202,7 +247,7 @@ settings_edit_name = تحرير الاسم
 settings_choose_name_for_prefix = اختر اسم البادئة
 settings_save = حفظ
 settings_load = تحميل
-settings_reset = إعادة設置
+settings_reset = إعادة تعيين
 settings_similar_videos_tool = أداة فيديو مشابهة
 settings_similar_images_tool = أداة مشابهة للصور
 settings_similar_music_tool = أداة موسيقية مشابهة
@@ -211,15 +256,16 @@ settings_settings = الإعدادات
 settings_load_tabs_sizes_at_startup = تحميل أحجام علامات التبويب عند بدء التشغيل
 settings_load_windows_size_at_startup = تحميل حجم النوافذ عند بدء التشغيل
 settings_limit_lines_of_messages = قصر الرسائل على 500 سطر (العمل على أداة تحرير نص بطيئ)
+settings_similar_videos_clear_unused_thumbnails = حذف صورthumbnails للفيديو غير المستخدمة التي يزيد عمرها عن 7 أيام عند بدء تشغيل التطبيق
 popup_save_title = حفظ النتائج
 popup_save_message = سيؤدي هذا إلى حفظ النتائج إلى 3 ملفات مختلفة
 popup_rename_title = إعادة تسمية الملفات
-popup_rename_message = سيؤدي هذا إلى إعادة تسمية ملحقات الملفات المحددة إلى ملفات أكثر ملاءمة
 popup_new_directories_title = الرجاء إضافة دليل واحد لكل سطر
 popup_move_title = نقل الملفات
-popup_move_message = نقل الإدخالات إلى المجلد
 popup_move_copy_checkbox = نسخ الملفات بدلاً من النقل
 popup_move_preserve_folder_checkbox = الحفاظ على هيكل المجلد
+move_confirmation_text = هل أنت متأكد من أنك تريد نقل العناصر المحددة؟
+rename_confirmation_text = هل أنت متأكد من أنك تريد إعادة تسمية العناصر المحددة؟
 delete = حذف العناصر
 stopping_scan = إيقاف المسح، الرجاء الانتظار...
 searching = يبحث...
@@ -230,3 +276,28 @@ subsettings_videos_thumbnail_percentage = موضع الصورة المصغرة �
 settings_cache_number_size_text = حجم ملفات التخزين المؤقت: { $size }، عدد الملفات: { $number }
 settings_video_thumbnails_number_size_text = حجم الصور المصغرة للفيديو: { $size }، عدد الملفات: { $number }
 settings_log_number_size_text = حجم ملفات السجل: { $size }، عدد الملفات: { $number }
+subsettings_video_optimizer_mode = وضع
+subsettings_video_optimizer_video_codec = فيديو كودك
+subsettings_video_optimizer_excluded_codecs = محذوفات الترميز
+subsettings_video_optimizer_video_quality = جودة الفيديو (CRF)
+subsettings_video_optimizer_image_threshold = حدٌّ للصور
+subsettings_reset = إعادة تعيين
+subsettings_exif_ignored_tags_text = تجاهل العلامات:
+subsettings_exif_ignored_tags_hint_text = قائمة مفرغة بفواصل من العلامات المستبعدة من الفحص (مثل GPS، Thumbnail). بعض العلامات، مثل ImageWidth في ملفات TIFF، مخفية لمنع كسر الصورة.
+clean_button_text = نظيف
+clean_text = بيانات EXIF ​​النظيفة
+clean_confirmation_text = هل أنت متأكد من أنك تريد إزالة بيانات EXIF من العناصر المحددة؟
+optimize_button_text = التحسين
+optimize_text = التحسين صور
+optimize_confirmation_text = هل أنت متأكد من أنك تريد تحسين العناصر المحددة؟
+optimize_fail_if_bigger_text = فشل إذا كان الملف المحسن أكبر
+optimize_overwrite_files_text = استبدل الملفات
+optimize_limit_video_size_text = حدّ حجم الفيديو
+optimize_max_width_text = الحد الأقصى للعرض:
+optimize_max_height_text = الحد الأقصى للارتفاع:
+hardlink_button_text = رابط صلب
+hardlink_text = إنشاء روابط صلبة
+hardlink_confirmation_text = هل أنت متأكد من أنك تريد إنشاء روابط صلبة للعناصر المحددة؟
+softlink_button_text = سولت لينك
+softlink_text = إنشاء روابط رمزية
+softlink_confirmation_text = هل أنت متأكد من أنك تريد إنشاء روابط رمزية (symlinks) للعناصر المحددة؟

@@ -10,6 +10,7 @@ use crate::common::model::{CheckingMethod, WorkContinueStatus};
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
 use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, PrintResults, Search};
+use crate::tools::same_music::core::format_audio_duration;
 use crate::tools::same_music::{Info, MusicEntry, SameMusic, SameMusicParameters};
 
 impl AllTraits for SameMusic {}
@@ -126,7 +127,7 @@ fn write_music_entry<T: Write>(writer: &mut T, file_entry: &MusicEntry) -> std::
         file_entry.track_title,
         file_entry.track_artist,
         file_entry.year,
-        file_entry.length,
+        format_audio_duration(file_entry.length),
         file_entry.genre,
         file_entry.bitrate,
         file_entry.path.to_string_lossy()

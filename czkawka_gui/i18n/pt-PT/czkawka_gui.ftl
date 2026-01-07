@@ -6,6 +6,20 @@ window_compare_images = Comparar Imagens
 # General
 general_ok_button = Ok
 general_close_button = Fechar
+# Krokiet info dialog
+krokiet_info_title = Apresentando Krokiet - Nova Versão de Czkawka
+krokiet_info_message =
+    Krokiet é a nova, melhorada, mais rápida e menos problemática versão da interface gráfica GTK Czkawka!
+    
+    Sendo auto-contida, é muito mais fácil de executar e mais resistente a alterações do sistema e atualizações de versão de pacote.
+    
+    Inclui muitos recursos que não estão disponíveis no Czkawka, como miniaturas no modo de comparação de vídeo, progresso de mover/copiar/excluir arquivos e opções de classificação estendidas.
+    
+    Experimente e veja a diferença!
+    
+    O Czkawka ainda receberá correções de bugs e atualizações menores, mas todos os novos recursos serão implementados apenas no Krokiet.
+    
+    PS. Esta mensagem deve ser visível apenas uma vez, mas se ela aparecer novamente, defina a variável de ambiente CZKAWKA_DONT_ANNOY_ME para qualquer valor não vazio.
 # Main window
 music_title_checkbox = Título
 music_artist_checkbox = Artista
@@ -22,7 +36,7 @@ music_compare_only_in_title_group = Comparar dentro de grupos de títulos simila
 music_compare_only_in_title_group_tooltip =
     Quando ativado, os ficheiros são agrupados por título e então comparados entre si.
     
-    Com 10 000 ficheiros, em vez de quase 100 milhões de comparações, haverá geralmente cerca de 20 000.
+    Com 10000 ficheiros, em vez de quase 100 milhões de comparações, haverá geralmente cerca de 20 000.
 same_music_tooltip =
     Buscar por arquivos de música semelhantes por seu conteúdo pode ser configurado definindo:
     

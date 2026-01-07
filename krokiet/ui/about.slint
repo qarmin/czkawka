@@ -1,41 +1,42 @@
 import { Button } from "std-widgets.slint";
 import { Callabler } from "callabler.slint";
 import { Translations } from "translations.slint";
+import { FontSizes } from "fonts.slint";
 
 export component About inherits VerticalLayout {
     preferred-height: 300px;
     preferred-width: 400px;
 
     img := Image {
-        source: @image-url("../icons/krokiet_logo.png");
+        source: @image-url("../icons/krokiet_logo_flag_name_vertical.png"); // TODO simplify svg, to be able to use here svg version with text
         image-fit: ImageFit.contain;
     }
 
     Text {
         text: "10.0.0";
         horizontal-alignment: center;
-        font-size: max(min(img.width / 20, 17px), 10px);
+        font-size: max(min(img.width / 20, FontSizes.header), FontSizes.small);
     }
 
     VerticalLayout {
         spacing: 10px;
         padding-bottom: 10px;
         Text {
-            text: "2020 - 2025  Rafał Mikrut(qarmin)";
+            text: "2020 - 2026  Rafał Mikrut(qarmin)";
             horizontal-alignment: center;
-            font-size: 15px;
+            font-size: FontSizes.header;
         }
 
         Text {
             text <=> Translations.motto_text;
             horizontal-alignment: center;
-            font-size: 13px;
+            font-size: FontSizes.normal;
         }
 
         Text {
             text <=> Translations.unicorn_text;
             horizontal-alignment: center;
-            font-size: 13px;
+            font-size: FontSizes.normal;
         }
     }
 

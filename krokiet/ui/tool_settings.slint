@@ -1,9 +1,11 @@
-import { CheckBox, ComboBox, ScrollView, Slider } from "std-widgets.slint";
+import { Button, CheckBox, ComboBox, LineEdit, ScrollView, Slider } from "std-widgets.slint";
 import { ActiveTab } from "common.slint";
 import { Settings } from "settings.slint";
 import { GuiState } from "gui_state.slint";
 import { TextComponent } from "settings_list.slint";
 import { Translations } from "translations.slint";
+import { ColorPalette } from "color_palette.slint";
+import { FontSizes } from "fonts.slint";
 
 component ComboBoxWrapper inherits HorizontalLayout {
     in-out property <string> text;
@@ -14,6 +16,7 @@ component ComboBoxWrapper inherits HorizontalLayout {
     Text {
         text <=> root.text;
         vertical_alignment: TextVerticalAlignment.center;
+        font-size: FontSizes.normal;
     }
 
     ComboBox {
@@ -27,8 +30,19 @@ component CheckBoxWrapper inherits CheckBox { }
 
 component SubsettingsHeader inherits Text {
     text: Translations.subsettings_text;
-    font-size: 15px;
+    font-size: FontSizes.normal;
     height: 30px;
+}
+
+// Reusable text wrapper to centralize font-size and height
+component LabelText inherits Text {
+    in-out property <string> label_text;
+    in-out property <length> label_font_size: FontSizes.normal;
+    in-out property <length> label_height: 25px;
+    text: root.label_text;
+    font-size: root.label_font_size;
+    height: root.label_height;
+    vertical-alignment: TextVerticalAlignment.center;
 }
 
 component SliderWrapper inherits HorizontalLayout {
@@ -41,6 +55,7 @@ component SliderWrapper inherits HorizontalLayout {
     spacing: 5px;
     Text {
         text: root.text;
+        font-size: FontSizes.normal;
     }
 
     Slider {
@@ -53,7 +68,16 @@ component SliderWrapper inherits HorizontalLayout {
     Text {
         text: root.end_text;
         width: root.end_text_size;
+        font-size: FontSizes.normal;
     }
+}
+
+component HintText inherits Text {
+    in-out property <string> hint_text;
+    font-size: FontSizes.small;
+    color: ColorPalette.hint_color;
+    text: root.hint_text;
+    wrap: TextWrap.word-wrap;
 }
 
 export component ToolSettings {
@@ -219,6 +243,14 @@ export component ToolSettings {
                 value <=> Settings.similar_videos_thumbnail_percentage;
             }
 
+            CheckBoxWrapper {
+                text: Translations.settings_similar_videos_generate_thumbnail_grid_instead_of_single_image_text;
+                checked <=> Settings.similar_videos_sub_generate_thumbnail_grid_instead_of_single_image;
+            }
+
+            HintText {
+                hint_text: Translations.settings_similar_videos_generate_thumbnail_grid_instead_of_single_image_hint_text;
+            }
 
             Rectangle { }
         }
@@ -243,11 +275,7 @@ export component ToolSettings {
                     height: 40px;
                 }
 
-                Text {
-                    text: Translations.subsettings_music_compared_tags_text + ":";
-                    font-size: 12px;
-                    height: 20px;
-                }
+                LabelText { label_text: Translations.subsettings_music_compared_tags_text + ":"; label_height: 20px; }
 
                 CheckBoxWrapper {
                     text: Translations.subsettings_music_title_text;
@@ -314,11 +342,7 @@ export component ToolSettings {
             padding: 10px;
             SubsettingsHeader { }
 
-            Text {
-                text: Translations.subsettings_broken_files_type_text;
-                font-size: 12px;
-                height: 25px;
-            }
+            LabelText { label_text: Translations.subsettings_broken_files_type_text; }
 
             CheckBoxWrapper {
                 text: Translations.subsettings_broken_files_audio_text;
@@ -338,6 +362,87 @@ export component ToolSettings {
             CheckBoxWrapper {
                 text: Translations.subsettings_broken_files_image_text;
                 checked <=> Settings.broken_files_sub_image;
+            }
+
+            Rectangle { }
+        }
+
+        VerticalLayout {
+            visible: GuiState.active_tab == ActiveTab.VideoOptimizer;
+            spacing: 5px;
+            padding: 10px;
+            SubsettingsHeader { }
+
+            ComboBoxWrapper {
+                text: Translations.subsettings_video_optimizer_mode_text;
+                model: Settings.video_optimizer_sub_mode;
+                current_index <=> Settings.video_optimizer_sub_mode_index;
+                current_value <=> Settings.video_optimizer_sub_mode_value;
+            }
+
+            if Settings.video_optimizer_sub_mode_index == 1: VerticalLayout {
+                spacing: 5px;
+
+                HorizontalLayout {
+                    spacing: 5px;
+                    Text {
+                        text: Translations.subsettings_video_optimizer_excluded_codecs_text;
+                        vertical_alignment: TextVerticalAlignment.center;
+                        font-size: FontSizes.normal;
+                    }
+
+                    LineEdit {
+                        text <=> Settings.video_optimizer_sub_excluded_codecs;
+                        font-size: FontSizes.normal;
+                    }
+
+                    Button {
+                        text: Translations.subsettings_reset_text;
+                        clicked => {
+                            Settings.video_optimizer_sub_excluded_codecs = "hevc,av1,vp9";
+                        }
+                    }
+                }
+            }
+
+            if Settings.video_optimizer_sub_mode_index == 0: VerticalLayout {
+                spacing: 5px;
+
+                SliderWrapper {
+                    text: Translations.subsettings_video_optimizer_image_threshold_text;
+                    end_text: "(" + round(Settings.video_optimizer_sub_image_threshold) + "/" + round(Settings.video_optimizer_sub_image_threshold_max) + ")";
+                    end_text_size: 60px;
+                    maximum <=> Settings.video_optimizer_sub_image_threshold_max;
+                    minimum <=> Settings.video_optimizer_sub_image_threshold_min;
+                    value <=> Settings.video_optimizer_sub_image_threshold;
+                }
+            }
+
+            Rectangle { }
+        }
+
+        VerticalLayout {
+            visible: GuiState.active_tab == ActiveTab.ExifRemover;
+            spacing: 5px;
+            padding: 10px;
+            SubsettingsHeader { }
+
+            HorizontalLayout {
+                spacing: 5px;
+                Text {
+                    text: Translations.subsettings_exif_ignored_tags_text;
+                    vertical_alignment: TextVerticalAlignment.center;
+                    font-size: FontSizes.normal;
+                }
+
+                LineEdit {
+                    text <=> Settings.ignored_exif_tags;
+                    font-size: FontSizes.normal;
+                }
+            }
+
+            HintText {
+                hint_text: Translations.subsettings_exif_ignored_tags_hint_text;
             }
 
             Rectangle { }

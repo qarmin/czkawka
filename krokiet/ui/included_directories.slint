@@ -4,6 +4,7 @@ import { ExcludedDirectoriesModel, IncludedDirectoriesModel } from "common.slint
 import { ColorPalette } from "color_palette.slint";
 import { Settings } from "settings.slint";
 import { Translations } from "translations.slint";
+import { FontSizes } from "fonts.slint";
 
 export component IncludedDirectories {
     in-out property <[IncludedDirectoriesModel]> model <=> Settings.included_directories_model;
@@ -17,10 +18,12 @@ export component IncludedDirectories {
             Text {
                 text <=> Translations.ref_text;
                 width: size_referenced_folder;
+                font-size: FontSizes.normal;
                 horizontal-alignment: center;
             }
 
             Text {
+                font-size: FontSizes.normal;
                 horizontal-stretch: 1.0;
                 text <=> Translations.path_text;
             }
@@ -76,6 +79,7 @@ export component IncludedDirectories {
                     }
 
                     Text {
+                        font-size: FontSizes.normal;
                         horizontal-stretch: 1.0;
                         height: parent.height;
                         text: r.path;
@@ -119,6 +123,7 @@ export component ExcludedDirectories {
             padding-left: 5px;
             Text {
                 text <=> Translations.path_text;
+                font-size: FontSizes.normal;
             }
         }
 
@@ -160,6 +165,7 @@ export component ExcludedDirectories {
                 }
 
                 Text {
+                    font-size: FontSizes.normal;
                     width: parent.width;
                     horizontal-stretch: 1.0;
                     height: parent.height;

@@ -499,7 +499,7 @@ pub struct CommonCliItems {
         short = 'x',
         long,
         help = "Allowed file extension(s)",
-        long_help = "List of checked files with provided extension(s). There are also helpful macros which allow to easy use a typical extensions like:\nIMAGE(\"jpg,kra,gif,png,bmp,tiff,hdr,svg\"),\nTEXT(\"txt,doc,docx,odt,rtf\"),\nVIDEO(\"mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,mts,m2ts\") or\nMUSIC(\"mp3,flac,ogg,tta,wma,webm\")\n "
+        long_help = "List of checked files with provided extension(s). There are also helpful macros which allow to easy use a typical extensions like:\nIMAGE(\"jpg,kra,gif,png,bmp,tiff,hdr,svg\"),\nTEXT(\"txt,doc,docx,odt,rtf\"),\nVIDEO(\"mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts\") or\nMUSIC(\"mp3,flac,ogg,tta,wma,webm\")\n "
     )]
     pub allowed_extensions: Vec<String>,
     #[clap(short = 'P', long, help = "Excluded file extension(s)", long_help = "List of extensions, that will be removed from search.\n ")]

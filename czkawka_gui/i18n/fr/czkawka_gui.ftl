@@ -6,6 +6,18 @@ window_compare_images = Comparer les images
 # General
 general_ok_button = Ok
 general_close_button = Fermer
+# Krokiet info dialog
+krokiet_info_title = Introduction à Krokiet - Nouvelle version de Czkawka
+krokiet_info_message =
+    Krokiet est une nouvelle version, améliorée, plus rapide et moins buggée de l'interface graphique GTK de Czkawka !
+    
+    Étant autonome, il est beaucoup plus facile de Czkawka, tels que les miniatures dans le mode de comparaison des vidéos, la progression du déplacement, de la copie et de la suppression des fichiers et des options de tri étendu.
+    
+    Essayez et constatez la différence !
+    
+    Czkawka continuera de recevoir des corrections de bugs et des mises à jour mineures, mais toutes les nouvelles fonctionnalités sera implémentée uniquement dans Krokiet.
+    
+    PS : ce message ne devrait s'afficher qu'une seule fois, mais, si elle apparaissait à nouveau, paramétrer la variable d'environnement CZKAWKA_DONT_ANNOY_ME à n'importe quelle valeur non vide.
 # Main window
 music_title_checkbox = Titre de la page
 music_artist_checkbox = Artiste
@@ -422,7 +434,7 @@ progress_scanning_general_file =
     { $file_number ->
         [one] Fichier { $file_number }
        *[other] Fichiers { $file_number }
-     } Scannés
+    } Scannés
 progress_scanning_extension_of_files = Extension du fichier { $file_checked }/{ $all_files } vérifiée
 progress_scanning_broken_files = Fichier { $file_checked }/{ $all_files } vérifié ({ $data_checked }/{ $all_data })
 progress_scanning_video = Haché de la vidéo { $file_checked }/{ $all_files }
@@ -437,7 +449,7 @@ progress_scanning_empty_folders =
     { $folder_number ->
         [one] Répertoire { $folder_number }
        *[other] Dossiers { $folder_number }
-     } numérisés
+    } numérisés
 progress_scanning_size = Taille numérisée du fichier { $file_number }
 progress_scanning_size_name = Nom numérisé et taille du fichier { $file_number }
 progress_scanning_name = Nom numérisé du fichier { $file_number }

@@ -1,6 +1,7 @@
 import { Button } from "std-widgets.slint";
 import { ColorPalette } from "color_palette.slint";
 import { Translations } from "translations.slint";
+import { FontSizes } from "fonts.slint";
 
 export component PopupBase inherits PopupWindow {
     in-out property <string> title_text: "TODO - needs to be changed";
@@ -30,7 +31,7 @@ export component PopupBase inherits PopupWindow {
                     text <=> title_text;
                     vertical-alignment: center;
                     horizontal-alignment: center;
-                    font-size: 13px;
+                    font-size: FontSizes.normal;
                 }
             }
 

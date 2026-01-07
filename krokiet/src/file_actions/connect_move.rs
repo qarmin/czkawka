@@ -5,7 +5,6 @@ use std::{fs, path, thread};
 
 use crossbeam_channel::Sender;
 use czkawka_core::common::progress_data::ProgressData;
-use rfd::FileDialog;
 use slint::{ComponentHandle, Weak};
 
 use crate::model_operations::model_processor::{MessageType, ModelProcessor};
@@ -13,19 +12,6 @@ use crate::simpler_model::{SimplerMainListModel, ToSimplerVec};
 use crate::{Callabler, GuiState, MainWindow, flk};
 
 pub(crate) fn connect_move(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
-    let a = app.as_weak();
-    app.on_folders_move_choose_requested(move || {
-        let app = a.upgrade().expect("Failed to upgrade app :(");
-
-        let file_dialog = FileDialog::new();
-        let Some(folder) = file_dialog.pick_folder() else {
-            return;
-        };
-        let folder_str = folder.to_string_lossy().to_string();
-
-        app.invoke_show_move_folders_dialog(folder_str.into());
-    });
-
     let a = app.as_weak();
     app.global::<Callabler>().on_move_items(move |preserve_structure, copy_mode, output_folder| {
         let weak_app = a.clone();
@@ -66,7 +52,7 @@ impl ModelProcessor {
 
             let mlt_fnc = move |data: &SimplerMainListModel| move_single_item(data, path_idx, name_idx, &output_folder, preserve_structure, copy_mode);
 
-            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, mlt_fnc, MessageType::Move);
+            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, mlt_fnc, MessageType::Move, false);
         });
     }
 }

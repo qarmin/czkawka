@@ -746,6 +746,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "brotli"
+version = "8.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4bd8b9603c7aa97359dbd97ecf258968c95f3adddd6db2f7e7a5bef101c84560"
+dependencies = [
+ "alloc-no-stdlib",
+ "alloc-stdlib",
+ "brotli-decompressor",
+]
+
+[[package]]
 name = "brotli-decompressor"
 version = "5.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1290,6 +1301,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "crc"
+version = "3.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5eb8a2a1cd12ab0d987a5d5e825195d372001a4094a0376319d5a0ad71c1ba0d"
+dependencies = [
+ "crc-catalog",
+]
+
+[[package]]
+name = "crc-catalog"
+version = "2.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "19d374276b40fb8bbdee95aef7c7fa6b5316ec764510eb64b8dd0e2ed0d7e7f5"
+
+[[package]]
 name = "crc32fast"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1453,6 +1479,7 @@ dependencies = [
  "ffprobe",
  "file-id",
  "file-rotate",
+ "filetime",
  "fun_time",
  "glibc_musl_version",
  "hamming-bitwise-fast",
@@ -1469,6 +1496,7 @@ dependencies = [
  "libheif-rs",
  "libheif-sys",
  "libraw-rs",
+ "little_exif",
  "lofty",
  "log",
  "log-panics",
@@ -4052,7 +4080,6 @@ dependencies = [
  "chrono",
  "crossbeam-channel",
  "czkawka_core",
- "dunce",
  "fast_image_resize",
  "fs_extra",
  "home",
@@ -4298,6 +4325,20 @@ name = "litrs"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "11d3d7f243d5c5a8b9bb5d6dd2b1602c0cb0b9db1621bafc7ed66e35ff9fe092"
+
+[[package]]
+name = "little_exif"
+version = "0.6.20"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e932a2a26300dd745c269fb3a1e1af89cdaf6b2a5f66b8fcfd2917254633b1b1"
+dependencies = [
+ "brotli",
+ "crc",
+ "log",
+ "miniz_oxide",
+ "paste",
+ "quick-xml",
+]
 
 [[package]]
 name = "lock_api"

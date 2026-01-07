@@ -259,8 +259,8 @@ impl BrokenFiles {
             for file_entry in vec_file_entry.iter().cloned() {
                 all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
             }
-            for (_name, file_entry) in loaded_hash_map {
-                all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
+            for (name, file_entry) in loaded_hash_map {
+                all_results.insert(name, file_entry);
             }
 
             let messages = save_cache_to_file_generalized(&get_broken_files_cache_file(), &all_results, self.common_data.save_also_as_json, 0);

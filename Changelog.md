@@ -1,8 +1,10 @@
 ## Version ?.?.? - ??
 ### New version blockers
-- workaround for very slow performance with thousands of lines in Krokiet in bottom panel - maybe max width option in gui?
 - new release of gtk4-rs, with iter_next fix
 - sym/hardlinks in Krokiet
+- cropping videos
+- delay when checking for outdated cache
+- fix elements after changing font size in Krokiet
 
 ### Breaking changes
 #### Users
@@ -15,10 +17,10 @@
 - Fix invalid canonicalization of paths on windows - [#1604](https://github.com/qarmin/czkawka/pull/1604/files)
 - Comparison results are now deterministic - [#1654](https://github.com/qarmin/czkawka/pull/1654)
 - Reading built-in jpeg inside raw images, if available(currently disabled due - https://github.com/dnglab/dnglab/issues/638) - [#1655](https://github.com/qarmin/czkawka/pull/1655)
-- Fixed silent panics, when logger cannot log to terminal - [1658](https://github.com/qarmin/czkawka/pull/1658)
+- Fixed silent panics, when logger cannot log to terminal - [#1658](https://github.com/qarmin/czkawka/pull/1658)
 - Commit hash is added to logs - [#1672](https://github.com/qarmin/czkawka/pull/1672)
 - Improved and fixed logic which groups similar images by its similarity - [#1685](https://github.com/qarmin/czkawka/pull/1685)
-- Added counting scan time  - [#1674](https://github.com/qarmin/czkawka/pull/1674), [#1685](https://github.com/qarmin/czkawka/pull/1685)
+- Added counting scan time - [#1674](https://github.com/qarmin/czkawka/pull/1674), [#1685](https://github.com/qarmin/czkawka/pull/1685)
 
 ### CLI
 - Using colors by default in terminal output(can be disabled by feature flag) - [#1672](https://github.com/qarmin/czkawka/pull/1672)
@@ -33,14 +35,20 @@
 - Added button, that easily allows to swap between compared images - [#1658](https://github.com/qarmin/czkawka/pull/1658)
 - Refactorings to assess whether migrating to GTK 5 will be possible (currently, it doesn’t seem very feasible) - [#1658](https://github.com/qarmin/czkawka/pull/1658)
 - Fixed sorting by size in big files mode - [#1691](https://github.com/qarmin/czkawka/pull/1691)
-- Ugly workarounds for ugly freezes, caused probably by inconsistencies between GTK4 and the Rust compiler’s optimizations   - [#1691](https://github.com/qarmin/czkawka/pull/1691)
+- Ugly workarounds for ugly freezes, caused probably by inconsistencies between GTK4 and the Rust compiler’s optimizations - [#1691](https://github.com/qarmin/czkawka/pull/1691)
 - About screen, now contains info, that Krokiet is successor app - [#1718](https://github.com/qarmin/czkawka/pull/1718)
 
 ### Krokiet
-- Added video thumbnails - [#1714](https://github.com/qarmin/czkawka/pull/1714)
+- New Logo - [#1726](https://github.com/qarmin/czkawka/pull/1726)
+- Added video thumbnails(single/grid) - [#1714](https://github.com/qarmin/czkawka/pull/1714)
 - Printing in settings, size of cache/thumbnails/logs files - [#1714](https://github.com/qarmin/czkawka/pull/1714)
 - Added sorting, by clicking at column headers - [#1718](https://github.com/qarmin/czkawka/pull/1718)
-- Added, enabled by default, limit 500 lines of messages in Krokiet, to avoid slow TextEdit performance - [#1718](https://github.com/qarmin/czkawka/pull/1718)
+- Added, enabled by default, limit 500 lines of messages in Krokiet, to freezes caused by slow TextEdit widget performance - [#1718](https://github.com/qarmin/czkawka/pull/1718)
+- Increased a little, size of all fonts, to improve readability - [#1726](https://github.com/qarmin/czkawka/pull/1726)
+- Ability to choose app scale in runtime(but with several limitations) - [#1726](https://github.com/qarmin/czkawka/pull/1726)
+- Cleaning messages in bottom panel, when scan starts - [#1726](https://github.com/qarmin/czkawka/pull/1726)
+- Fix crash, when user clicked at previous results while new scan was in progress - [#1726](https://github.com/qarmin/czkawka/pull/1726)
+- Defaulting to remove files to trash instead permanent deletion - [#1726](https://github.com/qarmin/czkawka/pull/1726)
 
 ### External
 - Wine 10.20 contains bugfix that fixes crashes when running dialogs in Czkawka Gui - [Wine 49987 issue](https://bugs.winehq.org/show_bug.cgi?id=49987)
@@ -61,7 +69,7 @@
 #### Devs
 - `stop_flag` is now required argument in most of the core functions
 - Visibility of some core functions has been reduced to `pub(crate)`
-- The modules in czkawka_core have been split and reorganized a bit — imports need to be adjusted, although the actual behavior and item names should not be changed too much
+- The modules in czkawka_core have been split and reorganized a bit - imports need to be adjusted, although the actual behavior and item names should not be changed too much
 
 ### Core
 - Replaced `println`/`eprintln` with logging functions - [#1478](https://github.com/qarmin/czkawka/pull/1478)
@@ -80,7 +88,7 @@
 - Improved logic for deleting files and added progress bar for this operation - [#1571](https://github.com/qarmin/czkawka/pull/1571)
 
 ### GTK GUI
-- New icons — less visually appealing, but created by me and released under a truly free CC BY license - [#1478](https://github.com/qarmin/czkawka/pull/1478)
+- New icons - less visually appealing, but created by me and released under a truly free CC BY license - [#1478](https://github.com/qarmin/czkawka/pull/1478)
 - Fixed crash when removing outdated cache - [#1508](https://github.com/qarmin/czkawka/pull/1508)
 - Fixed missing file and folder names for similar videos in reference folders - [#1520](https://github.com/qarmin/czkawka/pull/1520)
 - Fixed crashes when the SVG pixbuf loader is not available - [#1565](https://github.com/qarmin/czkawka/pull/1565)
@@ -117,7 +125,7 @@
 - HEIF Mac binaries are now provided
 - CI now builds Linux binaries on Ubuntu 22.04 instead of 20.04(github removed 20.04 images)
 - `musl` builds of `czkawka_cli` are now provided instead of `eyra` builds (slightly easier to maintain). GUI builds are not included due to limitations of `musl` and `eyra` :(
-- Prebuilt Windows console binaries are no longer provided — logs are now saved to a file, which is easier to read than terminal output
+- Prebuilt Windows console binaries are no longer provided - logs are now saved to a file, which is easier to read than terminal output
 - Skia opengl and vulkan backends are provided for Krokiet on Linux(no binaries on Windows, because don't know how to replace `sed`)
 - Prebuilt binaries are now build with `lto fat` instead `lto thin` and `codegen-units=1` to greatly reduce binary size(~25% smaller binaries)
 

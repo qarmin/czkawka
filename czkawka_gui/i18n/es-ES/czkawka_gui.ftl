@@ -6,6 +6,20 @@ window_compare_images = Comparar imágenes
 # General
 general_ok_button = Aceptar
 general_close_button = Cerrar
+# Krokiet info dialog
+krokiet_info_title = Presentando Krokiet - Nueva Versión de Czkawka
+krokiet_info_message =
+    Krokiet es la nueva, mejorada, más rápida y menos problemática versión de la interfaz gráfica GTK de Czkawka.
+    
+    Al ser autosuficiente, es mucho más fácil de ejecutar y más resistente a los cambios del sistema y las actualizaciones de versiones de paquetes.
+    
+    Incluye muchas funciones que no están disponibles en Czkawka, como miniaturas en el modo de comparación de vídeo, el progreso de la copia/movimiento/borrado de archivos y opciones de ordenación ampliadas.
+    
+    Pruébalo y comprueba la diferencia.
+    
+    Czkawka seguirá recibiendo correcciones de errores y actualizaciones menores, pero todas las nuevas funciones se implementarán solo en Krokiet.
+    
+    PS. Este mensaje debería ser visible solo una vez, pero si aparece de nuevo, establece la variable de entorno CZKAWKA_DONT_ANNOY_ME con cualquier valor no vacío.
 # Main window
 music_title_checkbox = Título
 music_artist_checkbox = Artista
@@ -297,12 +311,12 @@ header_about_button_tooltip = Abre el diálogo con información sobre la aplicac
 settings_number_of_threads = Número de hilos usados
 settings_number_of_threads_tooltip = Número de hilos usados, 0 significa que se utilizarán todos los hilos disponibles.
 settings_use_rust_preview = Usar librerías externas en su lugar gtk para cargar vistas previas
-settings_use_rust_preview_tooltip = 
-        Usar vistas previas de gtk a veces será más rápido y soportará más formatos, pero a veces esto podría ser exactamente lo contrario.
-
-        Si tienes problemas con la carga de las vistas previas, puedes intentar cambiar esta configuración.
-
-        En los sistemas no-linux, se recomienda usar esta opción, porque gtk-pixbuf no están siempre disponibles allí por lo que desactivar esta opción no cargará vistas previas de algunas imágenes.
+settings_use_rust_preview_tooltip =
+    Usar vistas previas de gtk a veces será más rápido y soportará más formatos, pero a veces esto podría ser exactamente lo contrario.
+    
+    Si tienes problemas con la carga de las vistas previas, puedes intentar cambiar esta configuración.
+    
+    En los sistemas no-linux, se recomienda usar esta opción, porque gtk-pixbuf no están siempre disponibles allí por lo que desactivar esta opción no cargará vistas previas de algunas imágenes.
 settings_label_restart = ¡Necesitas reiniciar la aplicación para aplicar la configuración!
 settings_ignore_other_filesystems = Ignorar otros sistemas de ficheros (sólo Linux)
 settings_ignore_other_filesystems_tooltip =

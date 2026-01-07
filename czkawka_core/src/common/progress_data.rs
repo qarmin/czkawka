@@ -45,6 +45,12 @@ use crate::common::model::{CheckingMethod, ToolType};
 // 0 - Collecting files
 // 1 - Scanning files
 
+// Exif Remover
+// 0 - Collecting files
+// 1 - Loading cache
+// 2 - Extracting tags
+// 3 - Saving cache
+
 // Duplicates - Hash
 // 0 - Collecting files
 // 1 - Loading cache
@@ -94,6 +100,10 @@ pub enum CurrentStage {
     DeletingFiles,
     RenamingFiles,
     MovingFiles,
+    HardlinkingFiles,
+    SymlinkingFiles,
+    OptimizingVideos,
+    CleaningExif,
 
     CollectingFiles,
     DuplicateCacheSaving,
@@ -121,6 +131,11 @@ pub enum CurrentStage {
     SimilarVideosCreatingThumbnails,
     BrokenFilesChecking,
     BadExtensionsChecking,
+    ExifRemoverCacheLoading,
+    ExifRemoverExtractingTags,
+    ExifRemoverCacheSaving,
+    VideoOptimizerProcessingImages,
+    VideoOptimizerProcessingVideos,
 }
 
 impl ProgressData {
@@ -167,7 +182,14 @@ impl ProgressData {
             assert_eq!(self.tool_type, tool_type, "Tool type: {:?}, checking method: {:?}", self.tool_type, self.checking_method);
         }
         let tool_type_current_stage: Option<ToolType> = match self.sstage {
-            CurrentStage::CollectingFiles | CurrentStage::DeletingFiles | CurrentStage::RenamingFiles | CurrentStage::MovingFiles => None,
+            CurrentStage::CollectingFiles
+            | CurrentStage::DeletingFiles
+            | CurrentStage::RenamingFiles
+            | CurrentStage::MovingFiles
+            | CurrentStage::HardlinkingFiles
+            | CurrentStage::SymlinkingFiles
+            | CurrentStage::OptimizingVideos
+            | CurrentStage::CleaningExif => None,
             CurrentStage::DuplicateCacheSaving | CurrentStage::DuplicateCacheLoading | CurrentStage::DuplicatePreHashCacheSaving | CurrentStage::DuplicatePreHashCacheLoading => {
                 Some(ToolType::Duplicate)
             }
@@ -188,6 +210,8 @@ impl ProgressData {
             CurrentStage::SimilarVideosCalculatingHashes | CurrentStage::SimilarVideosCreatingThumbnails => Some(ToolType::SimilarVideos),
             CurrentStage::BrokenFilesChecking => Some(ToolType::BrokenFiles),
             CurrentStage::BadExtensionsChecking => Some(ToolType::BadExtensions),
+            CurrentStage::ExifRemoverCacheLoading | CurrentStage::ExifRemoverExtractingTags | CurrentStage::ExifRemoverCacheSaving => Some(ToolType::ExifRemover),
+            CurrentStage::VideoOptimizerProcessingImages | CurrentStage::VideoOptimizerProcessingVideos => Some(ToolType::VideoOptimizer),
         };
         if let Some(tool_type) = tool_type_current_stage {
             assert_eq!(self.tool_type, tool_type, "Tool type: {:?}, stage {:?}", self.tool_type, self.sstage);
@@ -200,7 +224,8 @@ impl ToolType {
         match self {
             Self::Duplicate => 6,
             Self::EmptyFolders | Self::EmptyFiles | Self::InvalidSymlinks | Self::BigFile | Self::TemporaryFiles => 0,
-            Self::BrokenFiles | Self::BadExtensions => 1,
+            Self::BrokenFiles | Self::BadExtensions | Self::VideoOptimizer => 1,
+            Self::ExifRemover => 3,
             Self::SimilarImages | Self::SimilarVideos => 2,
             Self::None => unreachable!("ToolType::None is not allowed"),
             Self::SameMusic => match checking_method {
@@ -214,7 +239,10 @@ impl ToolType {
 
 impl CurrentStage {
     pub fn is_special_non_tool_stage(&self) -> bool {
-        matches!(self, Self::DeletingFiles | Self::RenamingFiles | Self::MovingFiles)
+        matches!(
+            self,
+            Self::DeletingFiles | Self::RenamingFiles | Self::MovingFiles | Self::HardlinkingFiles | Self::SymlinkingFiles | Self::OptimizingVideos | Self::CleaningExif
+        )
     }
 
     pub fn get_current_stage(&self) -> u8 {
@@ -223,6 +251,10 @@ impl CurrentStage {
             Self::DeletingFiles => 0,
             Self::RenamingFiles => 0,
             Self::MovingFiles => 0,
+            Self::HardlinkingFiles => 0,
+            Self::SymlinkingFiles => 0,
+            Self::OptimizingVideos => 0,
+            Self::CleaningExif => 0,
             Self::CollectingFiles => 0,
             Self::DuplicateScanningName => 0,
             Self::DuplicateScanningSizeName => 0,
@@ -239,6 +271,8 @@ impl CurrentStage {
             Self::SimilarVideosCreatingThumbnails => 2,
             Self::BrokenFilesChecking => 1,
             Self::BadExtensionsChecking => 1,
+            Self::VideoOptimizerProcessingImages => 1,
+            Self::VideoOptimizerProcessingVideos => 1,
             Self::SameMusicCacheLoadingTags => 1,
             Self::SameMusicReadingTags => 2,
             Self::SameMusicCacheSavingTags => 3,
@@ -247,6 +281,9 @@ impl CurrentStage {
             Self::SameMusicCalculatingFingerprints => 5,
             Self::SameMusicCacheSavingFingerprints => 6,
             Self::SameMusicComparingFingerprints => 7,
+            Self::ExifRemoverCacheLoading => 1,
+            Self::ExifRemoverExtractingTags => 2,
+            Self::ExifRemoverCacheSaving => 3,
         }
     }
     pub fn check_if_loading_saving_cache(&self) -> bool {
@@ -255,13 +292,17 @@ impl CurrentStage {
     pub fn check_if_loading_cache(&self) -> bool {
         matches!(
             self,
-            Self::SameMusicCacheLoadingFingerprints | Self::SameMusicCacheLoadingTags | Self::DuplicateCacheLoading | Self::DuplicatePreHashCacheLoading
+            Self::SameMusicCacheLoadingFingerprints
+                | Self::SameMusicCacheLoadingTags
+                | Self::DuplicateCacheLoading
+                | Self::DuplicatePreHashCacheLoading
+                | Self::ExifRemoverCacheLoading
         )
     }
     pub fn check_if_saving_cache(&self) -> bool {
         matches!(
             self,
-            Self::SameMusicCacheSavingFingerprints | Self::SameMusicCacheSavingTags | Self::DuplicateCacheSaving | Self::DuplicatePreHashCacheSaving
+            Self::SameMusicCacheSavingFingerprints | Self::SameMusicCacheSavingTags | Self::DuplicateCacheSaving | Self::DuplicatePreHashCacheSaving | Self::ExifRemoverCacheSaving
         )
     }
 }

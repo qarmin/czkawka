@@ -6,6 +6,20 @@ window_compare_images = Resimleri Karşılaştır
 # General
 general_ok_button = Tamam
 general_close_button = Kapat
+# Krokiet info dialog
+krokiet_info_title = Krokiet - Yeni Versiyon Czkawka
+krokiet_info_message =
+    Krokiet, yeni, geliştirilmiş, daha hızlı ve daha az hatalı Czkawka GTK GUI sürümüdür!
+    
+    Bağımsız yapısı sayesinde, çalıştırması çok daha kolaydır ve sistem değişikliklerine ve paket sürümü güncellemelerine karşı daha dirençlidir.
+    
+    Video karşılaştırma modunda ön izlemeler, dosya taşıma/kopyalama/silme ilerlemesi ve gelişmiş sıralama seçenekleri gibi Czkawka'da bulunmayan birçok özelliği içerir.
+    
+    Deneyin ve farkı görün!
+    
+    Czkawka hala hata düzeltmeleri ve küçük güncellemeler alacak, ancak tüm yeni özellikler yalnızca Krokiet'te uygulanacaktır.
+    
+    PS. Bu mesaj yalnızca bir kez görünmeli, ancak tekrar görünürse CZKAWKA_DONT_ANNOY_ME ortam değişkenini herhangi bir boş olmayan değere ayarlayın.
 # Main window
 music_title_checkbox = Başlık
 music_artist_checkbox = Sanatçı
@@ -140,7 +154,7 @@ main_label_hash_type = SUÇ türü:
 main_label_hash_size = SURÇ boyutu:
 main_label_size_bytes = Boyut (bayt):
 main_label_min_size = Min
-main_label_max_size = Max
+main_label_max_size = Maks
 main_label_shown_files = Gösterilecek Dosya Sayısı:
 main_label_resize_algorithm = Yeniden boyutlandırma algoritması:
 main_label_similarity = Benzerlik: { "   " }
@@ -442,10 +456,13 @@ compute_found_duplicates_hash_size = { $number_files } tane ekleme { $number_gro
 compute_found_duplicates_name = { $number_files } kopya, { $number_groups } grubunda { $time } süresi içinde bulunmuştur.
 compute_found_empty_folders = { $number_files } boş klasörünü { $time } buldum
 compute_found_empty_files = { $number_files } adet dosya { $time } içinde boş bulundu.
-compute_found_temporary_files = { $number_files } geçici dosya{ $number_files > 1: 's' } { $time } içinde bulunmuştur
+compute_found_big_files = { $number_files } büyük dosya { $time } içinde bulundu
+compute_found_temporary_files = { $number_files } geçici dosya { $time } içinde bulundu
 compute_found_images = { $number_files } benzer görüntüyü { $number_groups } grupta { $time } süre içinde buldum
+compute_found_videos = { $number_files } benzer videoyu { $number_groups } grupta { $time } içinde buldum
 compute_found_music = { $number_files } benzer müzik dosyası { $number_groups } grup içinde { $time } bulunmuştur.
 compute_found_invalid_symlinks = { $number_files } geçerli olmayan simge bağlantısı { $time } içinde bulunuldu
+compute_found_broken_files = { $number_files } bozuk dosya bulundu { $time } içinde
 compute_found_bad_extensions = Geçersiz uzantılarla { $number_files } dosya { $time } içinde bulundu
 # Progress window
 progress_scanning_general_file =

@@ -1,11 +1,25 @@
 # Window titles
 window_settings_title = Instellingen
-window_main_title = Czkawka (Hiccup)
+window_main_title = Czkawka (Giechel)
 window_progress_title = Scannen
 window_compare_images = Vergelijk afbeeldingen
 # General
 general_ok_button = OK
 general_close_button = Afsluiten
+# Krokiet info dialog
+krokiet_info_title = Introductie van Krokiet - Nieuwe Versie van Czkawka
+krokiet_info_message =
+    Krokiet is de nieuwe, verbeterde, snellere en minder buggy versie van Czkawka GTK!
+    
+    Omdat het zelfstandig is, is het veel gemakkelijker te draaien en meer bestand tegen systeemwijzigingen en pakketversie-updates.
+    
+    Het bevat veel functies die niet beschikbaar zijn in Czkawka, zoals thumbnails in video vergelijkingsmodus, bestand verplaatsen/kopieëren/verwijderen voortgang en uitgebreide sorteeropties.
+    
+    Probeer het uit en zie het verschil!
+    
+    Czkawka zal nog steeds bugfixes en kleine updates ontvangen, maar alle nieuwe functies zullen alleen in Krokiet worden geïmplementeerd.
+    
+    PS. Dit bericht zou alleen één keer zichtbaar moeten zijn, maar als het weer verschijnt, stel dan de CZKAWKA_DONT_ANNOY_ME omgeving variabele in op een niet-lege waarde.
 # Main window
 music_title_checkbox = Aanspreektitel
 music_artist_checkbox = Kunstenaar

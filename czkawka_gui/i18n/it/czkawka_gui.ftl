@@ -6,11 +6,25 @@ window_compare_images = Confronta le immagini
 # General
 general_ok_button = Ok
 general_close_button = Chiudi
+# Krokiet info dialog
+krokiet_info_title = Introdurre Krokiet - Nuova Versione di Czkawka
+krokiet_info_message =
+    Krokiet è la nuova, migliorata, più veloce e meno buggata versione di Czkawka GTK!
+    
+    Essendo autosufficiente, è molto più facile da eseguire e più resistente alle modifiche del sistema e agli aggiornamenti delle versioni dei pacchetti.
+    
+    Include molte funzionalità non disponibili in Czkawka, come le miniature in modalità di confronto video, il progresso del trasferimento/copia/eliminazione dei file e opzioni di ordinamento estese.
+    
+    Provalo e vedi la differenza!
+    
+    Czkawka riceverà comunque correzioni di bug e aggiornamenti minori, ma tutte le nuove funzionalità saranno implementate solo in Krokiet.
+    
+    PS. Questo messaggio dovrebbe essere visibile solo una volta, ma se appare di nuovo, imposta la variabile d'ambiente CZKAWKA_DONT_ANNOY_ME a qualsiasi valore non vuoto.
 # Main window
 music_title_checkbox = Titolo
 music_artist_checkbox = Artista
 music_year_checkbox = Anno
-music_bitrate_checkbox = Bitrate
+music_bitrate_checkbox = Tasso di bit
 music_genre_checkbox = Genere
 music_length_checkbox = Durata
 music_comparison_checkbox = Confronto approssimativo
@@ -110,7 +124,7 @@ main_tree_view_column_dimensions = Dimensioni
 main_tree_view_column_title = Titolo
 main_tree_view_column_artist = Artista
 main_tree_view_column_year = Anno
-main_tree_view_column_bitrate = Bitrate
+main_tree_view_column_bitrate = Tasso di bit
 main_tree_view_column_length = Durata
 main_tree_view_column_genre = Genere
 main_tree_view_column_symlink_file_name = Nome collegamento
@@ -450,7 +464,8 @@ progress_cache_loading = Caricamento cache
 progress_cache_saving = Salvataggio cache
 progress_current_stage = Fase attuale:{ "  " }
 progress_all_stages = Tutte le fasi:{ "  " }
-# Saving loading
+# Saving loading 
+saving_loading_saving_success = Salvataggio configurazione su file { $name }.
 saving_loading_saving_failure = Impossibile salvare i dati di configurazione nel file { $name }, motivo { $reason }.
 saving_loading_reset_configuration = La configurazione corrente è stata cancellata.
 saving_loading_loading_success = Caricamento configurazione da file avvenuto con successo

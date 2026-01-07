@@ -15,6 +15,10 @@ export global Translations {
     in-out property <string> save_button_text: "Save";
     in-out property <string> sort_button_text: "Sort";
     in-out property <string> rename_button_text: "Rename";
+    in-out property <string> optimize_button_text: "Optimize";
+    in-out property <string> clean_button_text: "Clean";
+    in-out property <string> hardlink_button_text: "Hardlink";
+    in-out property <string> softlink_button_text: "Softlink";
 
     // About
     in-out property <string> motto_text: "This program is free to use and will always be.\nSee the The MIT/GPL License for details.";
@@ -42,6 +46,8 @@ export global Translations {
     in-out property <string> tool_invalid_symlinks_text: "Invalid Symlinks";
     in-out property <string> tool_broken_files_text: "Broken Files";
     in-out property <string> tool_bad_extensions_text: "Bad Extensions";
+    in-out property <string> tool_exif_remover_text: "EXIF Finder";
+    in-out property <string> tool_video_optimizer_text: "Video Optimizer";
 
     // Sorting
     in-out property <string> sort_by_full_name_text: "Sort by full name";
@@ -97,6 +103,16 @@ export global Translations {
     in-out property <string> subsettings_broken_files_archive_text: "Archive";
     in-out property <string> subsettings_broken_files_image_text: "Image";
 
+    in-out property <string> subsettings_video_optimizer_mode_text: "Mode";
+    in-out property <string> subsettings_video_optimizer_video_codec_text: "Video codec";
+    in-out property <string> subsettings_video_optimizer_excluded_codecs_text: "Excluded codecs";
+    in-out property <string> subsettings_video_optimizer_video_quality_text: "Video quality (CRF)";
+    in-out property <string> subsettings_video_optimizer_image_threshold_text: "Image threshold";
+    in-out property <string> subsettings_reset_text: "Reset";
+
+    in-out property <string> subsettings_exif_ignored_tags_text: "Ignored tags:";
+    in-out property <string> subsettings_exif_ignored_tags_hint_text: "Comma-separated list of tags to exclude from scanning (e.g. GPS, Thumbnail). Some tags, such as ImageWidth in TIFF files, are hidden to prevent breaking the image.";
+
     // Settings
     in-out property <string> settings_dark_theme_text: "Dark theme";
     in-out property <string> settings_show_only_icons_text: "Show only icons";
@@ -113,6 +129,10 @@ export global Translations {
     in-out property <string> settings_ignore_other_filesystems_text: "Ignore other filesystems (only Linux)";
     in-out property <string> settings_thread_number_text: "Thread number";
     in-out property <string> settings_restart_required_text: "---You need to restart app to apply changes in thread number---";
+    in-out property <string> settings_restart_required_scale_text: "---You need to restart app to apply changes in app scale---";
+    in-out property <string> settings_application_scale_text: "Application scale";
+    in-out property <string> settings_use_manual_application_scale_text: "Apply manual application scale";
+    in-out property <string> settings_application_scale_hint_text: "This may break HiDPI automatic detection and cause multi monitor related problems, so use it wisely";
     in-out property <string> settings_duplicate_image_preview_text: "Image preview";
     in-out property <string> settings_duplicate_hide_hard_links_text: "Hide hard links";
     in-out property <string> settings_duplicate_minimal_hash_cache_size_text: "Minimal size of cached files - Hash (KB)";
@@ -124,6 +144,8 @@ export global Translations {
     in-out property <string> settings_delete_outdated_entries_text: "Delete automatically outdated entries";
     in-out property <string> settings_similar_videos_hide_hard_links_text: "Hide hard links";
     in-out property <string> settings_similar_videos_preview_text: "Image preview";
+    in-out property <string> settings_similar_videos_generate_thumbnail_grid_instead_of_single_image_text: "Generate thumbnail grid instead of single image";
+    in-out property <string> settings_similar_videos_generate_thumbnail_grid_instead_of_single_image_hint_text: "Generating multiple images in grid is a lot of slower than generating single thumbnail";
     in-out property <string> settings_open_config_folder_text: "Open config folder";
     in-out property <string> settings_open_cache_folder_text: "Open cache folder";
     in-out property <string> settings_language_text: "Language";
@@ -134,6 +156,7 @@ export global Translations {
     in-out property <string> settings_load_text: "Load";
     in-out property <string> settings_reset_text: "Reset";
     in-out property <string> settings_similar_videos_tool_text: "Similar Videos tool";
+    in-out property <string> settings_similar_videos_clear_unused_thumbnails_text: "Delete unused video thumbnails older than 7 days at app startup";
     in-out property <string> settings_similar_images_tool_text: "Similar Images tool";
     in-out property <string> settings_similar_music_tool_text: "Similar Music tool";
     in-out property <string> settings_general_settings_text: "General Settings";
@@ -155,20 +178,43 @@ export global Translations {
 
     // Popup rename
     in-out property <string> popup_rename_title_text: "Renaming files";
-    in-out property <string> popup_rename_message_text: "This will rename extensions of selected files to more proper";
+    in-out property <string> rename_confirmation_text: "Are you sure you want to rename the selected items?";
 
     // Popup new directories
     in-out property <string> popup_new_directories_title_text: "Manually adding directories(one per line)";
 
     // Popup move folders
     in-out property <string> popup_move_title_text: "Moving files";
-    in-out property <string> popup_move_message_text: "Moving entries to folder"; // TODO remove
+    in-out property <string> move_confirmation_text: "Are you sure you want to move the selected items?";
     in-out property <string> popup_move_copy_checkbox_text: "Copy files instead of moving";
     in-out property <string> popup_move_preserve_folder_checkbox_text: "Preserve folder structure";
+
 
     // Popup delete
     in-out property <string> delete_text: "Delete items";
     in-out property <string> delete_confirmation_text: "Are you sure you want to delete the selected items?";
+
+    // Popup clean
+    in-out property <string> clean_text: "Clean EXIF data";
+    in-out property <string> clean_confirmation_text: "Are you sure you want to remove EXIF data from the selected items?";
+    in-out property <string> clean_exif_overwrite_files_text: "Overwrite files";
+
+    // Popup optimize
+    in-out property <string> optimize_text: "Optimize images";
+    in-out property <string> optimize_confirmation_text: "Are you sure you want to optimize the selected items?";
+    in-out property <string> optimize_fail_if_bigger_text: "Fail if optimized file is bigger";
+    in-out property <string> optimize_overwrite_files_text: "Overwrite files";
+    in-out property <string> optimize_limit_video_size_text: "Limit video size";
+    in-out property <string> optimize_max_width_text: "Max width:";
+    in-out property <string> optimize_max_height_text: "Max height:";
+
+    // Popup hardlink
+    in-out property <string> hardlink_text: "Create hardlinks";
+    in-out property <string> hardlink_confirmation_text: "Are you sure you want to create hardlinks for the selected items?";
+
+    // Popup softlink
+    in-out property <string> softlink_text: "Create softlinks";
+    in-out property <string> softlink_confirmation_text: "Are you sure you want to create softlinks (symlinks) for the selected items?";
 
     // Main window
     in-out property <string> stopping_scan_text: "Stopping scan, please wait...";

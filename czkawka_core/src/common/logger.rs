@@ -96,7 +96,7 @@ pub fn print_version_mode(app: &str) {
 
     let info = os_info::get();
 
-    let mut features: Vec<&str> = vec![];
+    let mut features: Vec<&str> = Vec::new();
     #[cfg(feature = "heif")]
     features.push("heif");
     #[cfg(feature = "libavif")]

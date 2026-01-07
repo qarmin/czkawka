@@ -49,6 +49,7 @@ tempfile = "3.13"
 # Video Duplicates
 vid_dup_finder_lib = "0.4"
 ffmpeg_cmdline_utils = "0.4"
+filetime = "0.2.26"
 
 # For extracting video properties using ffprobe CLI
 ffprobe = "0.4.0"
@@ -81,6 +82,9 @@ libheif-sys = { version = "=1.14.2", optional = true } # 1.14.3 brake compilatio
 anyhow = { version = "1.0.89" }
 
 nom-exif = "2.1.0"
+
+# EXIF data cleaning
+little_exif = "0.6.20"
 
 trash = "5.1"
 dunce = "1.0.5"

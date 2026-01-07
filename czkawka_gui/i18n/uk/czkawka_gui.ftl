@@ -6,6 +6,20 @@ window_compare_images = Порівняння зображень
 # General
 general_ok_button = Гаразд
 general_close_button = Закрити
+# Krokiet info dialog
+krokiet_info_title = Представляємо Krokiet – Нова версія Czkawka
+krokiet_info_message =
+    Крокієт – це нова, покращена, швидша та менш багована версія Czkawka GTK!
+    
+    Будучи самодостатнім, його набагато легше запускати та він більш стійкий до змін системи та оновлень версій пакетів.
+    
+    Він включає багато функцій, недоступних у Czkawka, таких як мініатюри в режимі порівняння відео, прогрес переміщення/копіювання/видалення файлів та розширені опції сортування.
+    
+    Спробуйте його та подивіться на різницю!
+    
+    Czkawka все ще отримуватиме виправлення помилок та невеликі оновлення, але всі нові функції будуть реалізовані лише в Krokiet.
+    
+    ЗПС. Це повідомлення має бути видимим лише один раз, але якщо воно з'являється знову, встановіть змінну середовища CZKAWKA_DONT_ANNOY_ME на будь-яке не порожнє значення.
 # Main window
 music_title_checkbox = Найменування
 music_artist_checkbox = Виконавець
@@ -19,10 +33,10 @@ music_checking_by_content = Зміст
 same_music_seconds_label = Мінімальна тривалість фрагменту
 same_music_similarity_label = Максимальна різниця
 music_compare_only_in_title_group = Порівняйте у групах подібних назвах
-music_compare_only_in_title_group_tooltip = 
-        При активованому стані файли групуються за назвою і потім порівнюються між собою.
-
-        З 10 000 файлів, замість близько 100 зіріх порівнянь, вище є ймовірністю побути близько 20 000 порівнянь.
+music_compare_only_in_title_group_tooltip =
+    При активованому стані файли групуються за назвою і потім порівнюються між собою.
+    
+    З 10 000 файлів, замість близько 100 зіріх порівнянь, вище є ймовірністю побути близько 20 000 порівнянь.
 same_music_tooltip =
     Пошук подібних музичних файлів за його вмістом може бути налаштований за налаштуванням:
     
@@ -50,11 +64,11 @@ duplicate_mode_size_combo_box = Розмір
 duplicate_mode_hash_combo_box = Хеш
 duplicate_hash_type_tooltip =
     У програмі Czkawka можна використовувати один із трьох алгоритмів хешування:
-     
+    
     Blake3 — криптографічна хеш-функція. Використовується за замовчуванням, оскільки дуже швидка.
-     
+    
     CRC32 — проста хеш-функція. Ще швидше, ніж Blake3, але можливі рідкісні колізії хешів різних файлів.
-     
+    
     XXH3 — функція, схожа за продуктивністю і надійністю хеша на Blake3 (але вона не криптографічна), тому її можна використовувати замість Blake3.
 duplicate_check_method_tooltip =
     На цей час Czkawka пропонує три методи пошуку дублікатів:
@@ -170,9 +184,9 @@ upper_notebook_excluded_directories = Виключені каталоги
 upper_notebook_included_directories = Включені каталоги
 upper_allowed_extensions_tooltip =
     Розширення, що включаються, повинні бути розділені комами (за замовчуванням шукаються файли з будь-якими розширеннями).
-        
+    
     Макроси IMAGE, VIDEO, MUSIC, TEXT додають одразу кілька розширень.
-        
+    
     Приклад використання: «.exe, IMAGE, VIDEO, .rar, 7z» — це означає, що будуть скануватися файли зображень (напр. jpg, png), відео (напр. avi, mp4), exe, rar і 7z.
 upper_excluded_extensions_tooltip =
     Список вимкнених файлів, які будуть ігноруватися при скануванні.
@@ -210,10 +224,10 @@ popover_custom_regex_check_button_entry_tooltip =
     Вибір записів за допомогою регулярних виразів.
     
     У цьому режимі шуканий текст є шлях з ім'ям.
-     
+    
     Приклад:
     /usr/bin/ziemniak.txt можна знайти за допомогою виразу /ziem[a-z]+
-     
+    
     За замовчуванням використається синтаксис регулярних виразів Rust. Докладніше про це можна прочитати тут: https://docs.rs/regex.
 popover_custom_case_sensitive_check_button_tooltip =
     Вмикає пошук з урахуванням регістру.
@@ -457,7 +471,7 @@ saving_loading_saving_failure = Не вдалося зберегти дані к
 saving_loading_reset_configuration = Поточна конфігурація була очищена.
 saving_loading_loading_success = Установки програми коректно завантажені.
 saving_loading_failed_to_create_config_file = Не вдалося створити файл налаштувань "{ $path }", причина "{ $reason }".
-saving_loading_failed_to_read_config_file = Неможливо завантажити конфігурацію з «{$path}», тому що або такого файлу не існує, або це не файл.
+saving_loading_failed_to_read_config_file = Неможливо завантажити конфігурацію з «{ $path }», тому що або такого файлу не існує, або це не файл.
 saving_loading_failed_to_read_data_from_file = Не вдалося прочитати дані з файлу "{ $path }", причина "{ $reason }".
 # Other
 selected_all_reference_folders = Неможливо почати пошук, коли всі каталоги встановлені як папки з орієнтирами
@@ -505,7 +519,7 @@ cache_clear_message_label_3 = Це може трохи прискорити за
 cache_clear_message_label_4 = УВАГА. Ця дія видаляє всі кешовані дані від вимкнених зовнішніх дисків. Хеші для файлів на цих носіях потрібно буде згенерувати заново.
 # Show preview
 preview_image_resize_failure = Не вдалося змінити розмір зображення { $name }.
-preview_image_opening_failure = Не вдалося відкрити зображення {$name}. Причина: {$reason}
+preview_image_opening_failure = Не вдалося відкрити зображення { $name }. Причина: { $reason }
 # Compare images (L is short Left, R is short Right - they can't take too much space)
 compare_groups_number = Група { $current_group }/{ $all_groups } (зображень: { $images_in_group })
 compare_move_left_button = L

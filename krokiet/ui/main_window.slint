@@ -1,7 +1,8 @@
 import { HorizontalBox, LineEdit, Palette, VerticalBox } from "std-widgets.slint";
+import { FontSizes } from "fonts.slint";
 import { LeftSidePanel } from "left_side_panel.slint";
 import { MainList } from "main_lists.slint";
-import { ActiveTab, MainListModel, ProgressToSend } from "common.slint";
+import { ActiveTab, MainListModel, PopupRequest, ProgressToSend } from "common.slint";
 import { ActionButtons } from "action_buttons.slint";
 import { Progress } from "progress.slint";
 import { Settings } from "settings.slint";
@@ -16,24 +17,29 @@ import { PopupSelectResults } from "popup_select_results.slint";
 import { PopupRenameFiles } from "popup_rename_files.slint";
 import { PopupSave } from "popup_save.slint";
 import { PopupSortResults } from "popup_sort.slint";
+import { PopupActionConfirm } from "popup_action_confirm.slint";
+import { PopupOptimize } from "popup_optimize.slint";
+import { PopupCleanExif } from "popup_clean_exif.slint";
 import { ToolSettings } from "tool_settings.slint";
 import { Translations } from "translations.slint";
 
 export {Settings, Callabler, GuiState, Translations, Palette}
 
 export component MainWindow inherits Window {
+    default-font-size: FontSizes.normal;
+
     callback scan_stopping;
     callback scan_starting(ActiveTab);
     callback folder_choose_requested(bool);
     callback scan_ended(string);
-    callback show_move_folders_dialog(string);
-    callback folders_move_choose_requested();
-    callback reset_selection();
+    callback reset_selection(ActiveTab);
     callback initialize_popup_sizes();
     callback processing_ended(string);
 
-    callback delete_popup_dialog_show_requested();
-    callback delete_popup_dialog_configured();
+    // Logic:
+    // Opening popup is done via Rust call
+    callback request_setup_action_popup(PopupRequest); // When opening popup we need to setup data in it, Slint -> Rust
+    callback show_action_popup(PopupRequest, string); // After setup, we can show popup - Rust -> Slint - string is choosed folder - to avoid having multiple callbacks, string will be empty for things that do not need it
 
     title <=> Translations.main_window_title_text;
 
@@ -61,6 +67,8 @@ export component MainWindow inherits Window {
     in-out property <[MainListModel]> invalid_symlinks_model: [];
     in-out property <[MainListModel]> broken_files_model: [];
     in-out property <[MainListModel]> bad_extensions_model: [];
+    in-out property <[MainListModel]> exif_remover_model: [];
+    in-out property <[MainListModel]> video_optimizer_model: [];
 
     VerticalBox {
         HorizontalBox {
@@ -96,6 +104,8 @@ export component MainWindow inherits Window {
                         invalid_symlinks_model <=> root.invalid_symlinks_model;
                         broken_files_model <=> root.broken_files_model;
                         bad_extensions_model <=> root.bad_extensions_model;
+                        exif_remover_model <=> root.exif_remover_model;
+                        video_optimizer_model <=> root.video_optimizer_model;
                     }
 
                     preview_or_tool_settings := Rectangle {
@@ -138,6 +148,8 @@ export component MainWindow inherits Window {
             invalid_symlinks_model <=> root.invalid_symlinks_model;
             broken_files_model <=> root.broken_files_model;
             bad_extensions_model <=> root.bad_extensions_model;
+            exif_remover_model <=> root.exif_remover_model;
+            video_optimizer_model <=> root.video_optimizer_model;
 
             vertical-stretch: 0.0;
             scanning <=> root.scanning;
@@ -157,17 +169,8 @@ export component MainWindow inherits Window {
                 select_popup_window.y_offset = y_offset;
                 select_popup_window.show_popup();
             }
-            request_folder_to_move => {
-                folders_move_choose_requested();
-            }
-            show_remove_popup => {
-                delete_popup_dialog_show_requested();
-            }
-            show_rename_popup => {
-                rename_popup_window.show_popup();
-            }
-            show_save_popup => {
-                save_popup_window.show_popup();
+            show_action_popup(popup_request) => {
+                request_setup_action_popup(popup_request);
             }
             show_sort_popup(x_offset, y_offset) => {
                 sort_popup_window.x_offset = x_offset;
@@ -181,9 +184,11 @@ export component MainWindow inherits Window {
             text_summary := LineEdit {
                 text: text_summary_text;
                 read-only: true;
+                font-size: FontSizes.normal;
             }
 
             Text {
+                font-size: FontSizes.normal;
                 text: "Krokiet\n10.0.0";
                 vertical-alignment: center;
                 horizontal-alignment: center;
@@ -261,9 +266,58 @@ export component MainWindow inherits Window {
         width: root.width;
     }
 
-    show_move_folders_dialog(folder_name) => {
-        move_popup_window.folder_name = folder_name;
-        move_popup_window.show_popup();
+    clean_popup_window := PopupCleanExif {
+        height: root.height;
+        width: root.width;
+        title_text: Translations.clean_text;
+
+        x: parent.x + (root.width - self.popup_width) / 2.0;
+        y: parent.y + (parent.height - self.popup_height) / 2.0;
+
+        action_confirmed(override_file) => {
+            Callabler.clean_exif_items(override_file);
+        }
+    }
+
+    optimize_popup_window := PopupOptimize {
+        height: root.height;
+        width: root.width;
+        title_text: Translations.optimize_text;
+
+        x: parent.x + (root.width - self.popup_width) / 2.0;
+        y: parent.y + (parent.height - self.popup_height) / 2.0;
+
+        action_confirmed(codec, fail_if_bigger, overwrite_files, quality, limit_size, max_width, max_height) => {
+            Callabler.optimize_items(codec, fail_if_bigger, overwrite_files, quality, limit_size, max_width, max_height);
+        }
+    }
+
+    hardlink_popup_window := PopupActionConfirm {
+        height: root.height;
+        width: root.width;
+        title_text: Translations.hardlink_text;
+        confirmation_text: Translations.hardlink_confirmation_text;
+
+        x: parent.x + (root.width - self.popup_width) / 2.0;
+        y: parent.y + (parent.height - self.popup_height) / 2.0;
+
+        action_confirmed => {
+            Callabler.hardlink_items();
+        }
+    }
+
+    softlink_popup_window := PopupActionConfirm {
+        height: root.height;
+        width: root.width;
+        title_text: Translations.softlink_text;
+        confirmation_text: Translations.softlink_confirmation_text;
+
+        x: parent.x + (root.width - self.popup_width) / 2.0;
+        y: parent.y + (parent.height - self.popup_height) / 2.0;
+
+        action_confirmed => {
+            Callabler.softlink_items();
+        }
     }
 
     scan_ended(scan_text) => {
@@ -278,8 +332,8 @@ export component MainWindow inherits Window {
         root.stop_requested = false;
     }
 
-    reset_selection => {
-        main_list.reset_selection();
+    reset_selection(active_tab) => {
+        main_list.reset_selection(active_tab);
     }
 
     initialize_popup_sizes => {
@@ -289,7 +343,26 @@ export component MainWindow inherits Window {
         select_popup_window.close_popup();
     }
 
-    delete_popup_dialog_configured => {
-        delete_popup_window.show_popup();
+    show_action_popup(request, folder_name) => {
+        if (request == PopupRequest.Move) {
+            move_popup_window.folder_name = folder_name;
+            move_popup_window.show_popup();
+        } else if (request == PopupRequest.Delete) {
+            delete_popup_window.show_popup();
+        } else if (request == PopupRequest.CleanExif) {
+            clean_popup_window.show_popup();
+        } else if (request == PopupRequest.OptimizeVideo) {
+            optimize_popup_window.show_popup();
+        } else if (request == PopupRequest.Symlink) {
+            softlink_popup_window.show_popup();
+        } else if (request == PopupRequest.Rename) {
+            rename_popup_window.show_popup();
+        } else if (request == PopupRequest.Hardlink) {
+            hardlink_popup_window.show_popup();
+        } else if (request == PopupRequest.Save) {
+            save_popup_window.show_popup();
+        } else {
+            debug("Unsupported popup request");
+        }
     }
 }

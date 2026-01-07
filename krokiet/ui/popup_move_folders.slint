@@ -17,7 +17,7 @@ export component PopupMoveFolders inherits Rectangle {
 
         VerticalLayout {
             PopupCenteredText {
-                text: Translations.popup_move_message_text + "\n" + folder_name;
+                text: Translations.move_confirmation_text + "\n" + folder_name;
             }
 
             Rectangle {height: 5px;}
@@ -37,11 +37,6 @@ export component PopupMoveFolders inherits Rectangle {
                         text <=> Translations.popup_move_preserve_folder_checkbox_text;
                     }
                 }
-            }
-            Rectangle {height: 20px;}
-
-            PopupCenteredText {
-                text: Translations.do_you_want_to_continue_text;
             }
         }
 

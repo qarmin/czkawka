@@ -1,11 +1,25 @@
 # Window titles
 window_settings_title = Inställningar
-window_main_title = Czkawka (Hiccup)
+window_main_title = Czkawka (Pipade)
 window_progress_title = Scannar
 window_compare_images = Jämför bilder
 # General
 general_ok_button = Ok
 general_close_button = Stäng
+# Krokiet info dialog
+krokiet_info_title = Införande av Krokiet – Ny version av Czkawka
+krokiet_info_message =
+    Stegen är den nya, förbättrade, snabbare och mindre buggiga versionen av Czkawka GTK!
+    
+    Eftersom den är självständigt innesluten är den mycket lättare att köra och mer motståndskraftig mot systemändringar och paketversionsuppdateringar.
+    
+    Den inkluderar många funktioner som inte finns i Czkawka, såsom förhandsbilder i videojämförelsetillståndet, filöverförings-/kopierings-/raderingsframsteg och utökade sorteringsalternativ.
+    
+    Testa den och se skillnaden!
+    
+    Czkawka kommer fortfarande att få buggfixar och mindre uppdateringar, men alla nya funktioner kommer endast att implementeras i Stegen.
+    
+    PS. Detta meddelande bör bara vara synligt en gång, men om det dyker upp igen, ställ miljön CZKAWKA_DONT_ANNOY_ME till ett värde som inte är tomt.
 # Main window
 music_title_checkbox = Titel
 music_artist_checkbox = Kunstnär
@@ -450,7 +464,7 @@ progress_hash_cache_saving = Sparar hash-cache
 progress_cache_loading = Laddar cache
 progress_cache_saving = Sparar cache
 progress_current_stage = Nuvarande steg:{ " " }
-progress_all_stages = Alla etapper:{ " "  }
+progress_all_stages = Alla etapper:{ " " }
 # Saving loading 
 saving_loading_saving_success = Sparad konfiguration till filen { $name }.
 saving_loading_saving_failure = Det gick inte att spara konfigurationsdata till filen { $name }, anledningen { $reason }.

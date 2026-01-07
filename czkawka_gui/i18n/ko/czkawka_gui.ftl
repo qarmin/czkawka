@@ -1,11 +1,25 @@
 # Window titles
 window_settings_title = 설정
-window_main_title = Czkawka (Hiccup)
+window_main_title = Czkawka (구글ить)
 window_progress_title = 스캔중
 window_compare_images = 이미지 비교
 # General
 general_ok_button = 확인
 general_close_button = 닫기
+# Krokiet info dialog
+krokiet_info_title = Introducing Krokiet - 새로운 버전의 Czkawka
+krokiet_info_message =
+    크로키에트는 Czkawka GTK GUI의 새로운, 개선된, 더 빠르고 버그가 적은 버전입니다!
+    
+    자체 포함되어 있어 실행이 훨씬 쉽고 시스템 변경 및 패키지 버전 업데이트에 더 강합니다.
+    
+    비디오 비교 모드에서 썸네일, 파일 이동/복사/삭제 진행률 및 확장된 정렬 옵션과 같이 Czkawka에는 없는 많은 기능이 포함되어 있습니다.
+    
+    사용해 보고 차이점을 확인해 보세요!
+    
+    Czkawka는 여전히 버그 수정 및 미세 업데이트를 받겠지만 모든 새로운 기능은 크로키에트에서만 구현됩니다.
+    
+    PS. 이 메시지는 한 번만 표시되어야 하지만 다시 나타나면 CZKAWKA_DONT_ANNOY_ME 환경 변수를 비어 있는 값이 아닌 값으로 설정하세요.
 # Main window
 music_title_checkbox = 제목
 music_artist_checkbox = 아티스트
@@ -415,17 +429,18 @@ settings_folder_cache_open = 캐시 폴더 열기
 settings_folder_settings_open = 설정 폴더 열기
 # Compute results
 compute_stopped_by_user = 사용자에 의해 검색이 중단됨.
-compute_found_duplicates_name = {$number_files} 개의 중복 파일을 {$number_groups} 그룹에서 {$time}에 발견했습니다.
-compute_found_empty_folders = {$number_files}개의 비어있는 폴더를 {$time} 안에 발견했습니다.
-compute_found_big_files = {$number_files}개의 큰 파일을 {$time}에 찾았습니다.
-compute_found_temporary_files = {$number_files}개의 임시 파일을 {$time} 안에 찾았습니다.
-compute_found_images = {$number_files} 개의 유사한 이미지를 {$number_groups} 그룹에서 {$time} 내에 발견했습니다.
-compute_found_videos = {$number_files} 개의 비슷한 동영상을 {$number_groups} 그룹에서 {$time} 내에 찾았습니다.
-compute_found_music = {$number_files}개의 비슷한 음악 파일을 {$number_groups} 그룹에서 {$time} 내에 찾았습니다.
-compute_found_invalid_symlinks = {$number_files}개의 유효하지 않은 심볼릭 링크를 {$time}에서 찾았습니다.
-compute_found_broken_files = {$number_files}개의 봉인된 파일을 {$time}에 발견했습니다.
-compute_found_bad_extensions = {$number_files} 확장자에 문제가 있는 파일을 {$time} 내로找到了
-
+compute_found_duplicates_hash_size = { $number_files }개의 중복 파일을 { $number_groups }개 그룹에서 발견했으며 이는 { $size }를 차지하고 { $time }에 걸쳐 수행되었습니다.
+compute_found_duplicates_name = { $number_files } 개의 중복 파일을 { $number_groups } 그룹에서 { $time }에 발견했습니다.
+compute_found_empty_folders = { $number_files }개의 비어있는 폴더를 { $time } 안에 발견했습니다.
+compute_found_empty_files = { $number_files }개의 빈 파일을 { $time }에 발견했습니다.
+compute_found_big_files = { $number_files }개의 큰 파일을 { $time }에 찾았습니다.
+compute_found_temporary_files = { $number_files }개의 임시 파일을 { $time } 안에 찾았습니다.
+compute_found_images = { $number_files } 개의 유사한 이미지를 { $number_groups } 그룹에서 { $time } 내에 발견했습니다.
+compute_found_videos = { $number_files } 개의 비슷한 동영상을 { $number_groups } 그룹에서 { $time } 내에 찾았습니다.
+compute_found_music = { $number_files }개의 비슷한 음악 파일을 { $number_groups } 그룹에서 { $time } 내에 찾았습니다.
+compute_found_invalid_symlinks = { $number_files }개의 유효하지 않은 심볼릭 링크를 { $time }에서 찾았습니다.
+compute_found_broken_files = { $number_files }개의 봉인된 파일을 { $time }에 발견했습니다.
+compute_found_bad_extensions = { $number_files } 확장자에 문제가 있는 파일을 { $time } 내로找到了
 # Progress window
 progress_scanning_general_file =
     { $file_number ->

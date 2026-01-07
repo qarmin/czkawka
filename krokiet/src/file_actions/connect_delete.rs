@@ -1,3 +1,4 @@
+use std::path::MAIN_SEPARATOR;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread;
@@ -8,65 +9,56 @@ use slint::{ComponentHandle, Weak};
 
 use crate::model_operations::model_processor::{MessageType, ModelProcessor};
 use crate::simpler_model::{SimplerMainListModel, ToSimplerVec};
-use crate::{Callabler, GuiState, MainWindow};
+use crate::{ActiveTab, Callabler, GuiState, MainWindow, Settings};
 
-pub(crate) fn connect_rename(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
+pub(crate) fn connect_delete_button(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
     let a = app.as_weak();
-    app.global::<Callabler>().on_rename_files(move || {
+    app.global::<Callabler>().on_delete_selected_items(move || {
         let weak_app = a.clone();
         let progress_sender = progress_sender.clone();
         let stop_flag = stop_flag.clone();
         stop_flag.store(false, Ordering::Relaxed);
         let app = a.upgrade().expect("Failed to upgrade app :(");
         let active_tab = app.global::<GuiState>().get_active_tab();
+        let settings = app.global::<Settings>();
 
         let processor = ModelProcessor::new(active_tab);
-        processor.rename_selected_items(progress_sender, weak_app, stop_flag);
+        processor.delete_selected_items(settings.get_move_to_trash(), progress_sender, weak_app, stop_flag);
     });
 }
 
 impl ModelProcessor {
-    fn rename_selected_items(self, progress_sender: Sender<ProgressData>, weak_app: Weak<MainWindow>, stop_flag: Arc<AtomicBool>) {
+    fn delete_selected_items(self, remove_to_trash: bool, progress_sender: Sender<ProgressData>, weak_app: Weak<MainWindow>, stop_flag: Arc<AtomicBool>) {
+        let is_empty_folder_tab = self.active_tab == ActiveTab::EmptyFolders;
         let model = self.active_tab.get_tool_model(&weak_app.upgrade().expect("Failed to upgrade app :("));
         let simpler_model = model.to_simpler_enumerated_vec();
         thread::spawn(move || {
             let path_idx = self.active_tab.get_str_path_idx();
             let name_idx = self.active_tab.get_str_name_idx();
-            let ext_idx = self.active_tab.get_str_proper_extension();
 
-            let rm_fnc = move |data: &SimplerMainListModel| rename_single_item(data, path_idx, name_idx, ext_idx);
+            let dlt_fnc = move |data: &SimplerMainListModel| {
+                remove_single_item(
+                    &format!("{}{MAIN_SEPARATOR}{}", data.val_str[path_idx], data.val_str[name_idx]),
+                    is_empty_folder_tab,
+                    remove_to_trash,
+                )
+            };
 
-            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, rm_fnc, MessageType::Rename);
+            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, dlt_fnc, MessageType::Delete, false);
         });
     }
 }
 
 #[cfg(not(test))]
-fn rename_single_item(data: &SimplerMainListModel, path_idx: usize, name_idx: usize, ext_idx: usize) -> Result<(), String> {
-    use std::path::MAIN_SEPARATOR;
-    let folder = &data.val_str[path_idx];
-    let file_name = &data.val_str[name_idx];
-    let new_extension = &data.val_str[ext_idx];
-
-    let file_stem = std::path::Path::new(&file_name).file_stem().map(|e| e.to_string_lossy().to_string()).unwrap_or_default();
-    let new_full_path = format!("{folder}{MAIN_SEPARATOR}{file_stem}.{new_extension}");
-    let old_full_path = format!("{folder}{MAIN_SEPARATOR}{file_name}");
-
-    if let Err(e) = std::fs::rename(&old_full_path, &new_full_path) {
-        Err(crate::flk!(
-            "rust_failed_to_rename_file",
-            old_path = old_full_path,
-            new_path = new_full_path,
-            error = e.to_string()
-        ))
-    } else {
-        Ok(())
+fn remove_single_item(full_path: &str, is_folder_tab: bool, remove_to_trash: bool) -> Result<(), String> {
+    if is_folder_tab {
+        return czkawka_core::common::remove_folder_if_contains_only_empty_folders(full_path, remove_to_trash);
     }
+    czkawka_core::common::remove_single_file(full_path, remove_to_trash)
 }
 
 #[cfg(test)]
-fn rename_single_item(data: &SimplerMainListModel, path_idx: usize, _name_idx: usize, _ext_idx: usize) -> Result<(), String> {
-    let full_path = &data.val_str[path_idx];
+fn remove_single_item(full_path: &str, _is_folder_tab: bool, _remove_to_trash: bool) -> Result<(), String> {
     if full_path.contains("test_error") {
         return Err(format!("Test error for item: {full_path}"));
     }
@@ -79,12 +71,19 @@ mod tests {
     use slint::{Model, ModelRc, VecModel};
 
     use super::*;
+    use crate::MainListModel;
     use crate::simpler_model::ToSlintModel;
     use crate::test_common::{create_model_from_model_vec, get_model_vec};
-    use crate::{ActiveTab, MainListModel};
 
     impl ModelProcessor {
-        pub(crate) fn process_rename_test(&self, progress_sender: Sender<ProgressData>, model: ModelRc<MainListModel>) -> Option<(Vec<MainListModel>, Vec<String>, usize, usize)> {
+        pub(crate) fn process_deletion_test(
+            &self,
+            remove_to_trash: bool,
+            progress_sender: Sender<ProgressData>,
+            model: ModelRc<MainListModel>,
+        ) -> Option<(Vec<MainListModel>, Vec<String>, usize, usize)> {
+            let is_empty_folder_tab = self.active_tab == ActiveTab::EmptyFolders;
+
             let items_queued_to_delete = model.iter().filter(|e| e.checked).count();
             if items_queued_to_delete == 0 {
                 return None; // No items to delete
@@ -93,18 +92,23 @@ mod tests {
 
             let path_idx = 0;
             let name_idx = 0;
-            let ext_idx = 0;
-
-            let rm_fnc = move |data: &SimplerMainListModel| rename_single_item(data, path_idx, name_idx, ext_idx);
+            let dlt_fnc = move |data: &SimplerMainListModel| {
+                remove_single_item(
+                    &format!("{}{MAIN_SEPARATOR}{}", data.val_str[path_idx], data.val_str[name_idx]),
+                    is_empty_folder_tab,
+                    remove_to_trash,
+                )
+            };
 
             let output = Self::process_items(
                 simplified_model,
                 items_queued_to_delete,
                 progress_sender,
                 &Arc::default(),
-                rm_fnc,
-                MessageType::Rename,
+                dlt_fnc,
+                MessageType::Delete,
                 self.active_tab.get_int_size_opt_idx(),
+                false,
             );
 
             let (new_simple_model, errors, items_deleted) = Self::remove_deleted_items_from_model(output);
@@ -114,16 +118,16 @@ mod tests {
     }
 
     #[test]
-    fn test_no_rename_items() {
+    fn test_no_delete_items() {
         let (progress, _receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
         let model = get_model_vec(10);
         let model = create_model_from_model_vec(&model);
         let processor = ModelProcessor::new(ActiveTab::EmptyFolders);
-        assert!(processor.process_rename_test(progress, model).is_none());
+        assert!(processor.process_deletion_test(false, progress, model).is_none());
     }
 
     #[test]
-    fn test_rename_selected_items() {
+    fn test_delete_selected_items() {
         let (progress, _receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
         let mut model = get_model_vec(10);
         model[0].checked = true;
@@ -134,7 +138,7 @@ mod tests {
         model[3].val_str = ModelRc::new(VecModel::from(vec!["test_error".to_string().into(); 10]));
         let model = create_model_from_model_vec(&model);
         let processor = ModelProcessor::new(ActiveTab::EmptyFolders);
-        let (new_model, errors, items_queued_to_delete, items_deleted) = processor.process_rename_test(progress, model).unwrap();
+        let (new_model, errors, items_queued_to_delete, items_deleted) = processor.process_deletion_test(false, progress, model).unwrap();
 
         assert_eq!(new_model.len(), 8);
         assert_eq!(errors.len(), 1);

@@ -23,6 +23,8 @@ export global ColorPalette {
 
     in-out property <color> remove_item_color_button: Settings.dark_theme ? #222222 : #dddddd;
 
+    in-out property <color> hint_color: Settings.dark_theme ? #888888 : #888888;
+
     public pure function get_listview_color(selected: bool, hovered: bool) -> color {
         if (selected) {
             return hovered ? self.list_view_item_selected_hovered_color : self.list_view_item_selected_color;

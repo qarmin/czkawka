@@ -30,7 +30,7 @@ fn main() {
     };
     println!("cargo:rustc-env=CZKAWKA_GIT_COMMIT_SHORT={git_commit_short}");
 
-    // Official date
+    // Commit date
     let git_commit_date = std::process::Command::new("git")
         .args(["log", "-1", "--format=%cd", "--date=format:%Y-%m-%d"])
         .output()

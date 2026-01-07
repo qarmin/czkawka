@@ -134,7 +134,7 @@ impl GuiAbout {
     }
 
     pub(crate) fn update_language(&self) {
-        let mut comment_text: String = "2020 - 2025  Rafał Mikrut(qarmin)\n\n".to_string();
+        let mut comment_text: String = "2020 - 2026  Rafał Mikrut(qarmin)\n\n".to_string();
         comment_text += &flg!("about_window_motto");
         comment_text += "\n\n";
         comment_text += &flg!("krokiet_new_app");

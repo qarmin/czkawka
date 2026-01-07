@@ -23,7 +23,7 @@ impl Extensions {
             return (Default::default(), messages);
         }
         file_extensions = file_extensions.replace("IMAGE", "jpg,kra,gif,png,bmp,tiff,hdr,svg");
-        file_extensions = file_extensions.replace("VIDEO", "mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,mts,m2ts");
+        file_extensions = file_extensions.replace("VIDEO", "mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts");
         file_extensions = file_extensions.replace("MUSIC", "mp3,flac,ogg,tta,wma,webm");
         file_extensions = file_extensions.replace("TEXT", "txt,doc,docx,odt,rtf");
 
@@ -52,8 +52,6 @@ impl Extensions {
         (extensions_hashset, messages)
     }
 
-    /// List of allowed extensions, only files with this extensions will be checking if are duplicates
-    /// After, extensions cannot contain any dot, commas etc.
     pub(crate) fn set_allowed_extensions(&mut self, allowed_extensions: String) -> Messages {
         let (extensions, messages) = Self::filter_extensions(allowed_extensions);
 

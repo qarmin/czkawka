@@ -1,9 +1,10 @@
-![com github qarmin czkawka](https://user-images.githubusercontent.com/41945903/102616149-66490400-4137-11eb-9cd6-813b2b070834.png)
+![krokiet_logo](https://github.com/user-attachments/assets/567a7a38-d754-4a79-86b5-3cc898dbbade)
 
-**Czkawka** (_tch•kav•ka_ (IPA: [ˈʧ̑kafka]), "hiccup" in Polish) is a simple, fast and free app to remove unnecessary
-files from your computer.
+**Krokiet** ((IPA: [ˈkrɔcɛt]), "croquet" in Polish) new generation GUI frontend, simple, multiplatform, fast and free app to remove unnecessary files from your computer.
 
-**Krokiet** ((IPA: [ˈkrɔcɛt]), "croquet" in Polish) same as above, but uses Slint frontend.
+![czkawka_logo](https://user-images.githubusercontent.com/41945903/102616149-66490400-4137-11eb-9cd6-813b2b070834.png)
+
+**Czkawka** (_tch•kav•ka_ (IPA: [ˈʧ̑kafka]), "hiccup" in Polish) older gtk4 GUI frontend, superseded by Krokiet, but still receiving bugfix updates.
 
 ## Features
 
@@ -13,7 +14,7 @@ files from your computer.
 - Multiplatform - works on Linux, Windows, macOS, FreeBSD and many more
 - Cache support - second and further scans should be much faster than the first one
 - CLI frontend - for easy automation
-- GUI frontend - uses GTK 4 or Slint frameworks
+- GUI frontend - uses Slint or GTK 4 frameworks
 - Core library - allows to reuse functionality in other apps
 - No spying - Czkawka does not have access to the Internet, nor does it collect any user information or statistics
 - Multilingual - support multiple languages like Polish, English or Italian
@@ -29,10 +30,12 @@ files from your computer.
     - Invalid Symbolic Links - Shows symbolic links which point to non-existent files/directories
     - Broken Files - Finds files that are invalid or corrupted
     - Bad Extensions - Lists files whose content not match with their extension
-
-![Czkawka](https://github.com/user-attachments/assets/b0409515-1bec-4e13-8fac-7bdfa15f5848)
+    - Exif Remover(Experimental) - Tool to remove Exif metadata from various file types
+    - Video Optimizer(Experimental) - Converts videos to more efficient formats
 
 ![Krokiet](https://github.com/user-attachments/assets/720e98c3-598a-41aa-a04b-0c0c1d8a28e6)
+
+![Czkawka](https://github.com/user-attachments/assets/b0409515-1bec-4e13-8fac-7bdfa15f5848)
 
 Changelog about each version can be found in [CHANGELOG.md](Changelog.md).
 

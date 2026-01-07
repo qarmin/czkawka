@@ -31,6 +31,8 @@ export component MainList {
     in-out property <[MainListModel]> invalid_symlinks_model: [];
     in-out property <[MainListModel]> broken_files_model: [];
     in-out property <[MainListModel]> bad_extensions_model: [];
+    in-out property <[MainListModel]> exif_remover_model: [];
+    in-out property <[MainListModel]> video_optimizer_model: [];
 
     callback changed_active_tab();
 
@@ -177,6 +179,32 @@ export component MainList {
         sort_available: !working;
     }
 
+    exif_remover := SelectableTableView {
+        visible: GuiState.active_tab == ActiveTab.ExifRemover;
+        min-width: 200px;
+        height: parent.height;
+        columns <=> Settings.exif_remover_column_name;
+        column_sizes <=> Settings.exif_remover_column_size;
+        values <=> exif_remover_model;
+        parentPathIdx: 2;
+        fileNameIdx: 1;
+        previewImageIdx: -1;
+        sort_available: !working;
+    }
+
+    video_optimizer := SelectableTableView {
+        visible: GuiState.active_tab == ActiveTab.VideoOptimizer;
+        min-width: 200px;
+        height: parent.height;
+        columns <=> Settings.video_optimizer_column_name;
+        column_sizes <=> Settings.video_optimizer_column_size;
+        values <=> video_optimizer_model;
+        parentPathIdx: 2;
+        fileNameIdx: 1;
+        previewImageIdx: -1;
+        sort_available: !working;
+    }
+
     settings_list := SettingsList {
         visible: GuiState.active_tab == ActiveTab.Settings;
     }
@@ -185,31 +213,35 @@ export component MainList {
         visible: GuiState.active_tab == ActiveTab.About;
     }
 
-    public function reset_selection() {
-        if (GuiState.active_tab == ActiveTab.EmptyFiles) {
+    public function reset_selection(active_tab: ActiveTab) {
+        if (active_tab == ActiveTab.EmptyFiles) {
             empty_files.reset_selection();
-        } else if (GuiState.active_tab == ActiveTab.EmptyFolders) {
+        } else if (active_tab == ActiveTab.EmptyFolders) {
             empty_folders.reset_selection();
-        } else if (GuiState.active_tab == ActiveTab.SimilarImages) {
+        } else if (active_tab == ActiveTab.SimilarImages) {
             similar_images.reset_selection();
-        } else if (GuiState.active_tab == ActiveTab.BadExtensions) {
+        } else if (active_tab == ActiveTab.BadExtensions) {
             bad_extensions.reset_selection();
-        } else if (GuiState.active_tab == ActiveTab.BigFiles) {
+        } else if (active_tab == ActiveTab.BigFiles) {
             big_files.reset_selection();
-        } else if (GuiState.active_tab == ActiveTab.DuplicateFiles) {
+        } else if (active_tab == ActiveTab.DuplicateFiles) {
             duplicates.reset_selection();
-        } else if (GuiState.active_tab == ActiveTab.TemporaryFiles) {
+        } else if (active_tab == ActiveTab.TemporaryFiles) {
             temporary_files.reset_selection();
-        } else if (GuiState.active_tab == ActiveTab.SimilarVideos) {
+        } else if (active_tab == ActiveTab.SimilarVideos) {
             similar_videos.reset_selection();
-        } else if (GuiState.active_tab == ActiveTab.SimilarMusic) {
+        } else if (active_tab == ActiveTab.SimilarMusic) {
             similar_music.reset_selection();
-        } else if (GuiState.active_tab == ActiveTab.InvalidSymlinks) {
+        } else if (active_tab == ActiveTab.InvalidSymlinks) {
             invalid_symlink.reset_selection();
-        } else if (GuiState.active_tab == ActiveTab.BrokenFiles) {
+        } else if (active_tab == ActiveTab.BrokenFiles) {
             broken_files.reset_selection();
+        } else if (active_tab == ActiveTab.ExifRemover) {
+            exif_remover.reset_selection();
+        } else if (active_tab == ActiveTab.VideoOptimizer) {
+            video_optimizer.reset_selection();
         } else {
-            // debug("Non handled reset selection in main_lists.slint", GuiState.active_tab);
+            // debug("Non handled reset selection in main_lists.slint", active_tab);
         }
     }
 
@@ -236,6 +268,10 @@ export component MainList {
             invalid_symlink.scan_started();
         } else if (GuiState.active_tab == ActiveTab.BrokenFiles) {
             broken_files.scan_started();
+        } else if (GuiState.active_tab == ActiveTab.ExifRemover) {
+            exif_remover.scan_started();
+        } else if (GuiState.active_tab == ActiveTab.VideoOptimizer) {
+            video_optimizer.scan_started();
         } else {
             // debug("Non handled reset selection in main_lists.slint", GuiState.active_tab);
         }

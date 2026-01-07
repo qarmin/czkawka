@@ -73,6 +73,9 @@ fn progress_save_load_cache(gui_data: &GuiData, item: &ProgressData) {
         CurrentStage::DuplicatePreHashCacheSaving => {
             flg!("progress_prehash_cache_saving")
         }
+        CurrentStage::ExifRemoverCacheLoading | CurrentStage::ExifRemoverCacheSaving | CurrentStage::ExifRemoverExtractingTags | CurrentStage::CleaningExif => {
+            panic!("Exif remover not implemented in gtk version")
+        }
         _ => panic!("Invalid stage {:?}", item.sstage),
     };
 

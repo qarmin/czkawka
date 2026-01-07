@@ -63,7 +63,7 @@ impl EmptyFolder {
         let excluded_items = self.common_data.excluded_items.clone();
         let directories = self.common_data.directories.clone();
 
-        let mut non_empty_folders: Vec<String> = vec![];
+        let mut non_empty_folders: Vec<String> = Vec::new();
 
         let mut start_folder_entries = Vec::with_capacity(folders_to_check.len());
         let mut new_folder_entries_list = Vec::new();
@@ -85,10 +85,10 @@ impl EmptyFolder {
             let segments: Vec<_> = folders_to_check
                 .into_par_iter()
                 .map(|current_folder| {
-                    let mut dir_result = vec![];
-                    let mut warnings = vec![];
+                    let mut dir_result = Vec::new();
+                    let mut warnings = Vec::new();
                     let mut non_empty_folder = None;
-                    let mut folder_entries_list = vec![];
+                    let mut folder_entries_list = Vec::new();
 
                     let current_folder_as_string = current_folder.to_string_lossy().to_string();
 

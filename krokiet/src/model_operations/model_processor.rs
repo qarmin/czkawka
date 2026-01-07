@@ -30,6 +30,10 @@ pub enum MessageType {
     Delete,
     Rename,
     Move,
+    Hardlink,
+    Symlink,
+    OptimizeVideo,
+    CleanExif,
 }
 
 impl MessageType {
@@ -38,6 +42,10 @@ impl MessageType {
             Self::Delete => flk!("rust_no_files_deleted"),
             Self::Rename => flk!("rust_no_files_renamed"),
             Self::Move => flk!("rust_no_files_moved"),
+            Self::Hardlink => flk!("rust_no_files_hardlinked"),
+            Self::Symlink => flk!("rust_no_files_symlinked"),
+            Self::OptimizeVideo => flk!("rust_no_videos_optimized"),
+            Self::CleanExif => flk!("rust_no_exif_cleaned"),
         }
     }
     fn get_summary_message(self, deleted: usize, failed: usize, total: usize) -> String {
@@ -45,6 +53,10 @@ impl MessageType {
             Self::Delete => flk!("rust_delete_summary", deleted = deleted, failed = failed, total = total),
             Self::Rename => flk!("rust_rename_summary", renamed = deleted, failed = failed, total = total),
             Self::Move => flk!("rust_move_summary", moved = deleted, failed = failed, total = total),
+            Self::Hardlink => flk!("rust_hardlink_summary", hardlinked = deleted, failed = failed, total = total),
+            Self::Symlink => flk!("rust_symlink_summary", symlinked = deleted, failed = failed, total = total),
+            Self::OptimizeVideo => flk!("rust_optimize_video_summary", optimized = deleted, failed = failed, total = total),
+            Self::CleanExif => flk!("rust_clean_exif_summary", cleaned = deleted, failed = failed, total = total),
         }
     }
     fn get_base_progress(self) -> ProgressData {
@@ -52,6 +64,10 @@ impl MessageType {
             Self::Delete => ProgressData::get_empty_state(CurrentStage::DeletingFiles),
             Self::Rename => ProgressData::get_empty_state(CurrentStage::RenamingFiles),
             Self::Move => ProgressData::get_empty_state(CurrentStage::MovingFiles),
+            Self::Hardlink => ProgressData::get_empty_state(CurrentStage::HardlinkingFiles),
+            Self::Symlink => ProgressData::get_empty_state(CurrentStage::SymlinkingFiles),
+            Self::OptimizeVideo => ProgressData::get_empty_state(CurrentStage::OptimizingVideos),
+            Self::CleanExif => ProgressData::get_empty_state(CurrentStage::CleaningExif),
         }
     }
     fn msg_type(self) -> &'static str {
@@ -59,6 +75,10 @@ impl MessageType {
             Self::Delete => "delete",
             Self::Rename => "rename",
             Self::Move => "move",
+            Self::Hardlink => "hardlink",
+            Self::Symlink => "symlink",
+            Self::OptimizeVideo => "optimize_video",
+            Self::CleanExif => "clean_exif",
         }
     }
 }
@@ -74,7 +94,7 @@ impl ModelProcessor {
     }
 
     pub(crate) fn remove_deleted_items_from_model(results: ProcessingResult) -> (Vec<SimplerMainListModel>, Vec<String>, usize) {
-        let mut errors = vec![];
+        let mut errors = Vec::new();
         let mut items_deleted = 0;
 
         let new_model: Vec<SimplerMainListModel> = results
@@ -103,35 +123,39 @@ impl ModelProcessor {
         process_function: impl Fn(&SimplerMainListModel) -> Result<(), String> + Send + Sync + 'static,
         message_type: MessageType,
         size_idx: Option<usize>,
+        force_single_threaded: bool,
     ) -> ProcessingResult {
         let rm_idx = Arc::new(AtomicUsize::new(0));
         let size = Arc::new(AtomicU64::new(0));
         let delayed_sender = DelayedSender::new(sender, Duration::from_millis(200));
 
-        let mut output: Vec<_> = items_simplified
-            .into_par_iter()
-            .map(|(idx, data)| {
-                if !data.checked {
-                    return (idx, data, None);
-                }
+        let fnc = |(idx, data): (usize, SimplerMainListModel)| {
+            if !data.checked {
+                return (idx, data, None);
+            }
 
-                // Stop requested, so just return items
-                if stop_flag.load(Ordering::Relaxed) {
-                    return (idx, data, None);
-                }
+            // Stop requested, so just return items
+            if stop_flag.load(Ordering::Relaxed) {
+                return (idx, data, None);
+            }
 
-                let rm_idx = rm_idx.fetch_add(1, Ordering::Relaxed);
-                let size = size.fetch_add(size_idx.map(|size_idx| data.get_size(size_idx)).unwrap_or_default(), Ordering::Relaxed);
-                let mut progress = message_type.get_base_progress();
-                progress.entries_to_check = items_queued_to_delete;
-                progress.entries_checked = rm_idx;
-                progress.bytes_checked = size;
-                delayed_sender.send(progress);
+            let rm_idx = rm_idx.fetch_add(1, Ordering::Relaxed);
+            let size = size.fetch_add(size_idx.map(|size_idx| data.get_size(size_idx)).unwrap_or_default(), Ordering::Relaxed);
+            let mut progress = message_type.get_base_progress();
+            progress.entries_to_check = items_queued_to_delete;
+            progress.entries_checked = rm_idx;
+            progress.bytes_checked = size;
+            delayed_sender.send(progress);
 
-                let res = process_function(&data);
-                (idx, data, Some(res))
-            })
-            .collect();
+            let res = process_function(&data);
+            (idx, data, Some(res))
+        };
+
+        let mut output: Vec<_> = if force_single_threaded {
+            items_simplified.into_iter().map(fnc).collect()
+        } else {
+            items_simplified.into_par_iter().map(fnc).collect()
+        };
         output.sort_by_key(|(idx, _, _)| *idx);
 
         output
@@ -145,6 +169,7 @@ impl ModelProcessor {
         simpler_model: Vec<(usize, SimplerMainListModel)>,
         dlt_fnc: impl Fn(&SimplerMainListModel) -> Result<(), String> + Send + Sync + 'static,
         message_type: MessageType,
+        force_single_threaded: bool,
     ) {
         weak_app
             .upgrade_in_event_loop(move |app| {
@@ -177,7 +202,16 @@ impl ModelProcessor {
         let _ = progress_sender.send(base_progress).map_err(|e| error!("Failed to send progress data: {e}"));
 
         let start_time = std::time::Instant::now();
-        let results = Self::process_items(simpler_model, items_queued_to_delete, progress_sender.clone(), &stop_flag, dlt_fnc, message_type, size_idx);
+        let results = Self::process_items(
+            simpler_model,
+            items_queued_to_delete,
+            progress_sender.clone(),
+            &stop_flag,
+            dlt_fnc,
+            message_type,
+            size_idx,
+            force_single_threaded,
+        );
         let processing_time = start_time.elapsed();
         let removing_items_from_model = std::time::Instant::now();
         let (new_simple_model, errors, items_deleted) = Self::remove_deleted_items_from_model(results);
@@ -209,7 +243,7 @@ impl ModelProcessor {
 
                 app.global::<GuiState>().set_preview_visible(false);
 
-                reset_selection(&app, true);
+                reset_selection(&app, self.active_tab, true);
                 set_number_of_enabled_items(&app, self.active_tab, errors_len as u64);
                 stop_flag.store(false, Ordering::Relaxed);
                 app.invoke_processing_ended(message_type.get_summary_message(items_deleted, errors_len, items_queued_to_delete).into());

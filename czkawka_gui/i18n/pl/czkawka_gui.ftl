@@ -6,6 +6,20 @@ window_compare_images = Porównywanie Obrazów
 # General
 general_ok_button = Ok
 general_close_button = Zamknij
+# Krokiet info dialog
+krokiet_info_title = Wprowadzenie do Krokieta - Nowa Wersja Czkawki
+krokiet_info_message =
+    Krokiet to nowa, ulepszona, szybsza i mniej błędogenna wersja Czkawki GTK!
+    
+    Dzięki wbudowanym zależnościom jest znacznie łatwiejszy w konfiruacji i bardziej odporny na zmiany systemu oraz aktualizacje pakietów systemowych.
+    
+    Zawiera wiele funkcji niedostępnych w Czkawce, takich jak miniaturki w trybie porównywania wideo, wyświetlanie postępu przesyłania/kopiowania/usuwania plików oraz rozszerzone opcje sortowania.
+    
+    Wypróbuj go i zobacz różnicę!
+    
+    Czkawka nadal będzie otrzymywać poprawki błędów i drobne aktualizacje, ale wszystkie nowe funkcje będą implementowane tylko w Krokietcie.
+    
+    PS. Ten komunikat powinien być widoczny tylko raz, ale jeśli pojawi się ponownie, ustaw zmienną środowiskową CZKAWKA_DONT_ANNOY_ME na dowolną wartość niepustą.
 # Main window
 music_title_checkbox = Tytuł
 music_artist_checkbox = Wykonawca
@@ -16,13 +30,13 @@ music_length_checkbox = Długość
 music_comparison_checkbox = Przybliżone Porównywanie
 music_checking_by_tags = Tagi
 music_checking_by_content = Zawartość
-same_music_seconds_label = Minimalny fragment drugi czas trwania
+same_music_seconds_label = Minimalny czas trwania podobnego fragmentu
 same_music_similarity_label = Maksymalna różnica
 music_compare_only_in_title_group = Porównaj w grupach o podobnych tytułach
 music_compare_only_in_title_group_tooltip =
     Gdy włączone, pliki są pogrupowane według tytułu, a następnie porównywane do siebie.
     
-    z 10000 plików, zamiast tego prawie 100 milionów porównań będzie około 20000 porównań.
+    z 10000 plików, zamiast prawie 100 milionów porównań, zwykle będzie sprawdzone ~20000 porównań.
 same_music_tooltip =
     Wyszukiwanie podobnych plików muzycznych przez jego zawartość można skonfigurować przez ustawienie:
     
@@ -127,7 +141,7 @@ main_label_hash_type = Typ hashu
 main_label_hash_size = Rozmiar hashu
 main_label_size_bytes = Rozmiar (bajty)
 main_label_min_size = Min
-main_label_max_size = Maks
+main_label_max_size = Max
 main_label_shown_files = Liczba wyświetlanych plików
 main_label_resize_algorithm = Algorytm zmiany rozmiaru
 main_label_similarity = Podobieństwo{ "   " }
@@ -275,7 +289,7 @@ bottom_compare_button_tooltip = Porównaj obrazy w grupie.
 bottom_show_errors_tooltip = Pokaż/Ukryj dolny panel tekstowy.
 bottom_show_upper_notebook_tooltip = Pokazuje/ukrywa górny panel.
 # Progress Window
-progress_stop_button = Przerwij
+progress_stop_button = Stop
 progress_stop_additional_message = Przerywanie skanowania
 # About Window
 about_repository_button_tooltip = Link do repozytorium z kodem źródłowym
@@ -405,18 +419,18 @@ settings_folder_cache_open = Otwórz folder pamięci podręcznej
 settings_folder_settings_open = Otwórz folder ustawień
 # Compute results
 compute_stopped_by_user = Przeszukiwanie zostało zatrzymane przez użytkownika
-compute_found_duplicates_hash_size = Znaleziono duplikaty { $number_files } w grupach { $number_groups } , które zajęły { $size } w { $time }
-compute_found_duplicates_name = Znaleziono duplikaty { $number_files } w grupach { $number_groups } w { $time }
-compute_found_empty_folders = Znaleziono puste foldery { $number_files } w { $time }
-compute_found_empty_files = Znaleziono { $number_files } puste pliki w { $time }
+compute_found_duplicates_hash_size = Znaleziono { $number_files } duplikatów w { $number_groups } grupach w { $time }, które zajęły { $size }
+compute_found_duplicates_name = Znaleziono { $number_files } duplikatów w { $number_groups } grupach w { $time }
+compute_found_empty_folders = Znaleziono { $number_files } pustych folderów w { $time }
+compute_found_empty_files = Znaleziono { $number_files } pustych plików w { $time }
 compute_found_big_files = Znaleziono { $number_files } dużych plików w { $time }
-compute_found_temporary_files = Znaleziono pliki tymczasowe { $number_files } w { $time }
+compute_found_temporary_files = Znaleziono { $number_files } plików tymczasowych w { $time }
 compute_found_images = Znaleziono { $number_files } podobnych obrazów w grupach { $number_groups } w { $time }
-compute_found_videos = Znaleziono podobne filmy { $number_files } w grupach { $number_groups } w { $time }
-compute_found_music = Znaleziono { $number_files } podobne pliki muzyczne w grupach { $number_groups } w { $time }
+compute_found_videos = Znaleziono { $number_files } podobnych plików wideo w { $number_groups } grupach w { $time }
+compute_found_music = Znaleziono { $number_files } podobnych plików muzycznych w { $number_groups } grupach w { $time }
 compute_found_invalid_symlinks = Znaleziono { $number_files } niepoprawnych symlinków w { $time }
 compute_found_broken_files = Znaleziono { $number_files } uszkodzonych plików w { $time }
-compute_found_bad_extensions = Znaleziono pliki { $number_files } z nieprawidłowymi rozszerzeniami w { $time }
+compute_found_bad_extensions = Znaleziono { $number_files } plików z nieprawidłowymi rozszerzeniami w { $time }
 # Progress window
 progress_scanning_general_file =
     { $file_number ->
@@ -473,7 +487,7 @@ about_window_motto =
 krokiet_new_app = Czkawka jest w trybie konserwacji, co oznacza, że naprawione zostaną tylko krytyczne błędy i nie zostaną dodane żadne nowe funkcje. Aby uzyskać nowe funkcje, sprawdź nową aplikację Krokiet, która jest bardziej stabilna i wydajna i nadal jest w fazie rozwoju.
 # Various dialog
 dialogs_ask_next_time = Pytaj następnym razem
-symlink_failed = Nie udało się połączyć symbolem { $name } do { $target }, powód { $reason }
+symlink_failed = Nie udało się stworzyć symlinka { $name } do { $target }, powód { $reason }
 delete_title_dialog = Potwierdzenie usunięcia
 delete_question_label = Czy na pewno usunąć te pliki?
 delete_all_files_in_group_title = Potwierdzenie usunięcia wszystkich plików w grupie

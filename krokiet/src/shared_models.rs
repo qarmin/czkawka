@@ -7,11 +7,13 @@ use czkawka_core::tools::broken_files::BrokenFiles;
 use czkawka_core::tools::duplicate::DuplicateFinder;
 use czkawka_core::tools::empty_files::EmptyFiles;
 use czkawka_core::tools::empty_folder::EmptyFolder;
+use czkawka_core::tools::exif_remover::ExifRemover;
 use czkawka_core::tools::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::tools::same_music::SameMusic;
 use czkawka_core::tools::similar_images::SimilarImages;
 use czkawka_core::tools::similar_videos::SimilarVideos;
 use czkawka_core::tools::temporary::Temporary;
+use czkawka_core::tools::video_optimizer::VideoOptimizer;
 
 use crate::ActiveTab;
 
@@ -27,6 +29,8 @@ pub struct SharedModels {
     pub shared_same_invalid_symlinks: Option<InvalidSymlinks>,
     pub shared_broken_files_state: Option<BrokenFiles>,
     pub shared_bad_extensions_state: Option<BadExtensions>,
+    pub shared_exif_remover_state: Option<ExifRemover>,
+    pub shared_video_optimizer_state: Option<VideoOptimizer>,
 }
 
 impl SharedModels {
@@ -43,6 +47,8 @@ impl SharedModels {
             shared_same_invalid_symlinks: None,
             shared_broken_files_state: None,
             shared_bad_extensions_state: None,
+            shared_exif_remover_state: None,
+            shared_video_optimizer_state: None,
         }
     }
 
@@ -64,6 +70,8 @@ impl SharedModels {
             ActiveTab::InvalidSymlinks => self.shared_same_invalid_symlinks.as_ref().map(|x| x.save_all_in_one(cd, "results_invalid_symlinks")),
             ActiveTab::BrokenFiles => self.shared_broken_files_state.as_ref().map(|x| x.save_all_in_one(cd, "results_broken_files")),
             ActiveTab::BadExtensions => self.shared_bad_extensions_state.as_ref().map(|x| x.save_all_in_one(cd, "results_bad_extensions")),
+            ActiveTab::ExifRemover => self.shared_exif_remover_state.as_ref().map(|x| x.save_all_in_one(cd, "results_exif_remover")),
+            ActiveTab::VideoOptimizer => self.shared_video_optimizer_state.as_ref().map(|x| x.save_all_in_one(cd, "results_video_optimizer")),
             ActiveTab::Settings | ActiveTab::About => panic!("Cannot save results for settings or about tab"),
         };
 

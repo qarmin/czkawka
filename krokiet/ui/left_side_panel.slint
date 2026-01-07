@@ -3,6 +3,7 @@ import { ActiveTab, BottomPanelVisibility } from "common.slint";
 import { ColorPalette } from "color_palette.slint";
 import { GuiState } from "gui_state.slint";
 import { Callabler } from "callabler.slint";
+import { FontSizes } from "fonts.slint";
 
 component TabItem {
     in property <string> text;
@@ -51,6 +52,7 @@ component TabItem {
         text: root.text;
         width: parent.width;
         horizontal-alignment: center;
+        font-size: FontSizes.normal;
     }
 
     states [
@@ -73,7 +75,7 @@ export component LeftSidePanel {
             height: 80px;
             Image {
                 width: parent.height;
-                source: @image-url("../icons/krokiet_logo_small.png");
+                source: @image-url("../icons/krokiet_logo_flag.svg");
                 image-fit: ImageFit.contain;
             }
 

@@ -18,22 +18,26 @@ use czkawka_core::tools::broken_files::{BrokenEntry, BrokenFiles, BrokenFilesPar
 use czkawka_core::tools::duplicate::{DuplicateEntry, DuplicateFinder, DuplicateFinderParameters};
 use czkawka_core::tools::empty_files::EmptyFiles;
 use czkawka_core::tools::empty_folder::{EmptyFolder, FolderEntry};
+use czkawka_core::tools::exif_remover::{ExifEntry, ExifRemover, ExifRemoverParameters};
 use czkawka_core::tools::invalid_symlinks::{InvalidSymlinks, SymlinksFileEntry};
+use czkawka_core::tools::same_music::core::format_audio_duration;
 use czkawka_core::tools::same_music::{MusicEntry, MusicSimilarity, SameMusic, SameMusicParameters};
 use czkawka_core::tools::similar_images::core::get_string_from_similarity;
 use czkawka_core::tools::similar_images::{ImagesEntry, SimilarImages, SimilarImagesParameters};
 use czkawka_core::tools::similar_videos::core::{format_bitrate_opt, format_duration_opt};
 use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters, VideosEntry, crop_detect_from_str};
 use czkawka_core::tools::temporary::{Temporary, TemporaryFileEntry};
+use czkawka_core::tools::video_optimizer::{OptimizerMode, VideoOptimizer, VideoOptimizerParameters, VideoTranscodeEntry};
 use humansize::{BINARY, format_size};
 use rayon::prelude::*;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
 
 use crate::common::{
-    MAX_INT_DATA_BIG_FILES, MAX_INT_DATA_BROKEN_FILES, MAX_INT_DATA_DUPLICATE_FILES, MAX_INT_DATA_EMPTY_FILES, MAX_INT_DATA_EMPTY_FOLDERS, MAX_INT_DATA_INVALID_SYMLINKS,
-    MAX_INT_DATA_SIMILAR_IMAGES, MAX_INT_DATA_SIMILAR_MUSIC, MAX_INT_DATA_SIMILAR_VIDEOS, MAX_INT_DATA_TEMPORARY_FILES, MAX_STR_DATA_BIG_FILES, MAX_STR_DATA_BROKEN_FILES,
-    MAX_STR_DATA_DUPLICATE_FILES, MAX_STR_DATA_EMPTY_FILES, MAX_STR_DATA_EMPTY_FOLDERS, MAX_STR_DATA_INVALID_SYMLINKS, MAX_STR_DATA_SIMILAR_IMAGES, MAX_STR_DATA_SIMILAR_MUSIC,
-    MAX_STR_DATA_SIMILAR_VIDEOS, MAX_STR_DATA_TEMPORARY_FILES, check_if_all_included_dirs_are_referenced, check_if_there_are_any_included_folders, split_u64_into_i32s,
+    MAX_INT_DATA_BAD_EXTENSIONS, MAX_INT_DATA_BIG_FILES, MAX_INT_DATA_BROKEN_FILES, MAX_INT_DATA_DUPLICATE_FILES, MAX_INT_DATA_EMPTY_FILES, MAX_INT_DATA_EMPTY_FOLDERS,
+    MAX_INT_DATA_EXIF_REMOVER, MAX_INT_DATA_INVALID_SYMLINKS, MAX_INT_DATA_SIMILAR_IMAGES, MAX_INT_DATA_SIMILAR_MUSIC, MAX_INT_DATA_SIMILAR_VIDEOS, MAX_INT_DATA_TEMPORARY_FILES,
+    MAX_INT_DATA_VIDEO_OPTIMIZER, MAX_STR_DATA_BAD_EXTENSIONS, MAX_STR_DATA_BIG_FILES, MAX_STR_DATA_BROKEN_FILES, MAX_STR_DATA_DUPLICATE_FILES, MAX_STR_DATA_EMPTY_FILES,
+    MAX_STR_DATA_EMPTY_FOLDERS, MAX_STR_DATA_EXIF_REMOVER, MAX_STR_DATA_INVALID_SYMLINKS, MAX_STR_DATA_SIMILAR_IMAGES, MAX_STR_DATA_SIMILAR_MUSIC, MAX_STR_DATA_SIMILAR_VIDEOS,
+    MAX_STR_DATA_TEMPORARY_FILES, MAX_STR_DATA_VIDEO_OPTIMIZER, check_if_all_included_dirs_are_referenced, check_if_there_are_any_included_folders, split_u64_into_i32s,
 };
 use crate::connect_row_selection::checker::set_number_of_enabled_items;
 use crate::connect_row_selection::reset_selection;
@@ -73,8 +77,7 @@ pub(crate) fn connect_scan_button(app: &MainWindow, progress_sender: Sender<Prog
 
         let cloned_model = Arc::clone(&shared_models);
 
-        reset_selection(&app, true);
-        set_number_of_enabled_items(&app, active_tab, 0);
+        app.global::<GuiState>().set_info_text("".into());
 
         let a = app.as_weak();
         match active_tab {
@@ -110,6 +113,12 @@ pub(crate) fn connect_scan_button(app: &MainWindow, progress_sender: Sender<Prog
             }
             ActiveTab::TemporaryFiles => {
                 scan_temporary_files(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
+            }
+            ActiveTab::ExifRemover => {
+                scan_exif_remover(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
+            }
+            ActiveTab::VideoOptimizer => {
+                scan_video_optimizer(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
             }
             ActiveTab::Settings | ActiveTab::About => panic!("Button should be disabled"),
         }
@@ -259,6 +268,7 @@ fn write_duplicate_results(
         );
     }
     app.global::<GuiState>().set_info_text(messages.into());
+    reset_selection_at_end(app, ActiveTab::DuplicateFiles);
 }
 fn prepare_data_model_duplicates(fe: &DuplicateEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(fe.get_path());
@@ -266,10 +276,7 @@ fn prepare_data_model_duplicates(fe: &DuplicateEntry) -> (ModelRc<SharedString>,
         format_size(fe.size, BINARY).into(),
         file.into(),
         directory.into(),
-        DateTime::from_timestamp(fe.get_modified_date() as i64, 0)
-            .expect("Cannot create DateTime")
-            .to_string()
-            .into(),
+        get_dt_timestamp_string(fe.get_modified_date()).into(),
     ];
     let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
@@ -320,18 +327,12 @@ fn write_empty_folders_results(app: &MainWindow, vector: Vec<FolderEntry>, messa
     app.set_empty_folder_model(items.into());
     app.invoke_scan_ended(flk!("rust_found_empty_folders", items_found = items_found, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
+    reset_selection_at_end(app, ActiveTab::EmptyFolders);
 }
 
 fn prepare_data_model_empty_folders(fe: &FolderEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(&fe.path);
-    let data_model_str_arr: [SharedString; MAX_STR_DATA_EMPTY_FOLDERS] = [
-        file.into(),
-        directory.into(),
-        DateTime::from_timestamp(fe.modified_date as i64, 0)
-            .expect("Modified date always should be in valid range")
-            .to_string()
-            .into(),
-    ];
+    let data_model_str_arr: [SharedString; MAX_STR_DATA_EMPTY_FOLDERS] = [file.into(), directory.into(), get_dt_timestamp_string(fe.modified_date).into()];
     let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let data_model_int_arr: [i32; MAX_INT_DATA_EMPTY_FOLDERS] = [modification_split.0, modification_split.1];
@@ -398,6 +399,7 @@ fn write_big_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages: S
         .into(),
     );
     app.global::<GuiState>().set_info_text(messages.into());
+    reset_selection_at_end(app, ActiveTab::BigFiles);
 }
 
 fn prepare_data_model_big_files(fe: &FileEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
@@ -406,10 +408,7 @@ fn prepare_data_model_big_files(fe: &FileEntry) -> (ModelRc<SharedString>, Model
         format_size(fe.size, BINARY).into(),
         file.into(),
         directory.into(),
-        DateTime::from_timestamp(fe.modified_date as i64, 0)
-            .expect("Modified date always should be in valid range")
-            .to_string()
-            .into(),
+        get_dt_timestamp_string(fe.modified_date).into(),
     ];
     let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
@@ -460,18 +459,12 @@ fn write_empty_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages:
     app.set_empty_files_model(items.into());
     app.invoke_scan_ended(flk!("rust_found_empty_files", items_found = items_found, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
+    reset_selection_at_end(app, ActiveTab::EmptyFiles);
 }
 
 fn prepare_data_model_empty_files(fe: &FileEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(fe.get_path());
-    let data_model_str_arr: [SharedString; MAX_STR_DATA_EMPTY_FILES] = [
-        file.into(),
-        directory.into(),
-        DateTime::from_timestamp(fe.get_modified_date() as i64, 0)
-            .expect("Cannot create DateTime")
-            .to_string()
-            .into(),
-    ];
+    let data_model_str_arr: [SharedString; MAX_STR_DATA_EMPTY_FILES] = [file.into(), directory.into(), get_dt_timestamp_string(fe.get_modified_date()).into()];
     let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
@@ -571,6 +564,7 @@ fn write_similar_images_results(
     app.set_similar_images_model(items.into());
     app.invoke_scan_ended(flk!("rust_found_similar_images", items_found = items_found, groups = groups, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
+    reset_selection_at_end(app, ActiveTab::SimilarImages);
 }
 fn prepare_data_model_similar_images(fe: &ImagesEntry, hash_size: u8) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(fe.get_path());
@@ -580,10 +574,7 @@ fn prepare_data_model_similar_images(fe: &ImagesEntry, hash_size: u8) -> (ModelR
         format!("{}x{}", fe.width, fe.height).into(),
         file.into(),
         directory.into(),
-        DateTime::from_timestamp(fe.get_modified_date() as i64, 0)
-            .expect("Cannot create DateTime")
-            .to_string()
-            .into(),
+        get_dt_timestamp_string(fe.get_modified_date()).into(),
     ];
     let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
@@ -625,6 +616,7 @@ fn scan_similar_videos(
                 crop_detect_from_str(&custom_settings.similar_videos_crop_detect),
                 custom_settings.similar_videos_image_preview,
                 custom_settings.similar_videos_thumbnail_percentage,
+                custom_settings.similar_videos_generate_thumbnail_grid_instead_of_single_image,
             );
             let mut tool = SimilarVideos::new(params);
             set_common_settings(&mut tool, &custom_settings, &stop_flag);
@@ -690,6 +682,7 @@ fn write_similar_videos_results(
     app.set_similar_videos_model(items.into());
     app.invoke_scan_ended(flk!("rust_found_similar_videos", items_found = items_found, groups = groups, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
+    reset_selection_at_end(app, ActiveTab::SimilarVideos);
 }
 
 fn prepare_data_model_similar_videos(fe: &VideosEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
@@ -713,10 +706,7 @@ fn prepare_data_model_similar_videos(fe: &VideosEntry) -> (ModelRc<SharedString>
         bitrate.into(),
         fps.into(),
         codec.into(),
-        DateTime::from_timestamp(fe.get_modified_date() as i64, 0)
-            .expect("Cannot create DateTime")
-            .to_string()
-            .into(),
+        get_dt_timestamp_string(fe.get_modified_date()).into(),
         preview_path.into(),
     ];
     let data_model_str = VecModel::from_slice(&data_model_str_arr);
@@ -845,6 +835,7 @@ fn write_similar_music_results(app: &MainWindow, vector: Vec<(Option<MusicEntry>
     app.set_similar_music_model(items.into());
     app.invoke_scan_ended(flk!("rust_found_similar_music_files", items_found = items_found, groups = groups, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
+    reset_selection_at_end(app, ActiveTab::SimilarMusic);
 }
 fn prepare_data_model_similar_music(fe: &MusicEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(fe.get_path());
@@ -855,18 +846,15 @@ fn prepare_data_model_similar_music(fe: &MusicEntry) -> (ModelRc<SharedString>, 
         fe.track_artist.clone().into(),
         fe.year.clone().into(),
         fe.bitrate.to_string().into(),
-        fe.length.clone().into(),
+        format_audio_duration(fe.length).into(),
         fe.genre.clone().into(),
         directory.into(),
-        DateTime::from_timestamp(fe.get_modified_date() as i64, 0)
-            .expect("Cannot create DateTime")
-            .to_string()
-            .into(),
+        get_dt_timestamp_string(fe.get_modified_date()).into(),
     ];
     let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
-    let data_model_int_arr: [i32; MAX_INT_DATA_SIMILAR_MUSIC] = [modification_split.0, modification_split.1, size_split.0, size_split.1];
+    let data_model_int_arr: [i32; MAX_INT_DATA_SIMILAR_MUSIC] = [modification_split.0, modification_split.1, size_split.0, size_split.1, fe.bitrate as i32, fe.length as i32];
     let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 }
@@ -912,6 +900,7 @@ fn write_invalid_symlinks_results(app: &MainWindow, vector: Vec<SymlinksFileEntr
     app.set_invalid_symlinks_model(items.into());
     app.invoke_scan_ended(flk!("rust_found_invalid_symlinks", items_found = items_found, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
+    reset_selection_at_end(app, ActiveTab::InvalidSymlinks);
 }
 
 fn prepare_data_model_invalid_symlinks(fe: &SymlinksFileEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
@@ -921,10 +910,7 @@ fn prepare_data_model_invalid_symlinks(fe: &SymlinksFileEntry) -> (ModelRc<Share
         directory.into(),
         fe.symlink_info.destination_path.to_string_lossy().to_string().into(),
         fe.symlink_info.type_of_error.to_string().into(),
-        DateTime::from_timestamp(fe.get_modified_date() as i64, 0)
-            .expect("Cannot create DateTime")
-            .to_string()
-            .into(),
+        get_dt_timestamp_string(fe.get_modified_date()).into(),
     ];
     let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
@@ -974,18 +960,12 @@ fn write_temporary_files_results(app: &MainWindow, vector: Vec<TemporaryFileEntr
     app.set_temporary_files_model(items.into());
     app.invoke_scan_ended(flk!("rust_found_temporary_files", items_found = items_found, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
+    reset_selection_at_end(app, ActiveTab::TemporaryFiles);
 }
 
 fn prepare_data_model_temporary_files(fe: &TemporaryFileEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(&fe.path);
-    let data_model_str_arr: [SharedString; MAX_STR_DATA_TEMPORARY_FILES] = [
-        file.into(),
-        directory.into(),
-        DateTime::from_timestamp(fe.modified_date as i64, 0)
-            .expect("Modified date always should be in valid range")
-            .to_string()
-            .into(),
-    ];
+    let data_model_str_arr: [SharedString; MAX_STR_DATA_TEMPORARY_FILES] = [file.into(), directory.into(), get_dt_timestamp_string(fe.modified_date).into()];
     let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
@@ -1067,6 +1047,7 @@ fn write_broken_files_results(app: &MainWindow, vector: Vec<BrokenEntry>, messag
         .into(),
     );
     app.global::<GuiState>().set_info_text(messages.into());
+    reset_selection_at_end(app, ActiveTab::BrokenFiles);
 }
 
 fn prepare_data_model_broken_files(fe: &BrokenEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
@@ -1076,10 +1057,7 @@ fn prepare_data_model_broken_files(fe: &BrokenEntry) -> (ModelRc<SharedString>, 
         directory.into(),
         fe.error_string.clone().into(),
         format_size(fe.size, BINARY).into(),
-        DateTime::from_timestamp(fe.modified_date as i64, 0)
-            .expect("Modified date always should be in valid range")
-            .to_string()
-            .into(),
+        get_dt_timestamp_string(fe.modified_date).into(),
     ];
     let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
@@ -1130,23 +1108,196 @@ fn write_bad_extensions_results(app: &MainWindow, vector: Vec<BadFileEntry>, mes
     app.set_bad_extensions_model(items.into());
     app.invoke_scan_ended(flk!("rust_found_bad_extensions", items_found = items_found, time = scanning_time_str).into());
     app.global::<GuiState>().set_info_text(messages.into());
+    reset_selection_at_end(app, ActiveTab::BadExtensions);
 }
 
 fn prepare_data_model_bad_extensions(fe: &BadFileEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(&fe.path);
-    let data_model_str = VecModel::from_slice(&[
+    let data_model_str_arr: [SharedString; MAX_STR_DATA_BAD_EXTENSIONS] = [
         file.into(),
         directory.into(),
         fe.current_extension.clone().into(),
         fe.proper_extensions_group.clone().into(),
         fe.proper_extension.clone().into(),
-    ]);
+    ];
+    let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
-    let data_model_int = VecModel::from_slice(&[modification_split.0, modification_split.1, size_split.0, size_split.1]);
+    let data_model_int_arr: [i32; MAX_INT_DATA_BAD_EXTENSIONS] = [modification_split.0, modification_split.1, size_split.0, size_split.1];
+    let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 }
+////////////////////////////////////////// Exif Remover
+fn scan_exif_remover(
+    a: Weak<MainWindow>,
+    progress_sender: Sender<ProgressData>,
+    stop_flag: Arc<AtomicBool>,
+    custom_settings: SettingsCustom,
+    basic_settings: BasicSettings,
+    shared_models: Arc<Mutex<SharedModels>>,
+) {
+    thread::Builder::new()
+        .stack_size(DEFAULT_THREAD_SIZE)
+        .spawn(move || {
+            // Parse ignored tags from comma-separated string, trimming whitespace
+            let ignored_tags: Vec<String> = custom_settings
+                .ignored_exif_tags
+                .split(',')
+                .map(|s| s.trim().to_string())
+                .filter(|s| !s.is_empty())
+                .collect();
+
+            let params = ExifRemoverParameters::new(ignored_tags);
+            let mut tool = ExifRemover::new(params);
+            set_common_settings(&mut tool, &custom_settings, &stop_flag);
+            tool.search(&stop_flag, Some(&progress_sender));
+
+            let mut vector = tool.get_exif_files().clone();
+            let messages = get_text_messages(&tool, &basic_settings);
+
+            vector.par_sort_unstable_by(|a, b| b.exif_tags.len().cmp(&a.exif_tags.len()));
+
+            let info = tool.get_information();
+            let scanning_time_str = format_time(info.scanning_time);
+            let items_found = info.number_of_files_with_exif;
+            shared_models.lock().unwrap().shared_exif_remover_state = Some(tool);
+
+            a.upgrade_in_event_loop(move |app| {
+                write_exif_remover_results(&app, vector, messages, &scanning_time_str, items_found);
+            })
+        })
+        .expect("Cannot start thread - not much we can do here");
+}
+fn write_exif_remover_results(app: &MainWindow, vector: Vec<ExifEntry>, messages: String, scanning_time_str: &str, items_found: usize) {
+    let items = Rc::new(VecModel::default());
+    for fe in vector {
+        let (data_model_str, data_model_int) = prepare_data_model_exif_remover(&fe);
+        insert_data_to_model(&items, data_model_str, data_model_int, None);
+    }
+    app.set_exif_remover_model(items.into());
+    app.invoke_scan_ended(flk!("rust_found_exif_files", items_found = items_found, time = scanning_time_str).into());
+    app.global::<GuiState>().set_info_text(messages.into());
+    reset_selection_at_end(app, ActiveTab::ExifRemover);
+}
+
+fn prepare_data_model_exif_remover(fe: &ExifEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
+    let (directory, file) = split_path(&fe.path);
+    let size_str = format_size(fe.size, BINARY);
+    let exif_tags = format!(
+        "{} ({})",
+        fe.exif_tags.len(),
+        fe.exif_tags.iter().map(|item_tag| item_tag.name.clone()).collect::<Vec<String>>().join(", ")
+    );
+    let exif_groups_name = fe.exif_tags.iter().map(|item_tag| item_tag.group.clone()).collect::<Vec<String>>().join(",");
+    let exif_tag_u16 = fe.exif_tags.iter().map(|item_tag| item_tag.code.to_string()).collect::<Vec<String>>().join(",");
+    let data_model_str_arr: [SharedString; MAX_STR_DATA_EXIF_REMOVER] = [
+        size_str.into(),
+        file.into(),
+        directory.into(),
+        exif_tags.into(),
+        get_dt_timestamp_string(fe.get_modified_date()).into(),
+        exif_groups_name.into(),
+        exif_tag_u16.into(),
+    ];
+    let data_model_str = VecModel::from_slice(&data_model_str_arr);
+    let modification_split = split_u64_into_i32s(fe.get_modified_date());
+    let size_split = split_u64_into_i32s(fe.size);
+    let data_model_int_arr: [i32; MAX_INT_DATA_EXIF_REMOVER] = [modification_split.0, modification_split.1, size_split.0, size_split.1, fe.exif_tags.len() as i32];
+    let data_model_int = VecModel::from_slice(&data_model_int_arr);
+    (data_model_str, data_model_int)
+}
+
+////////////////////////////////////////// Video Optimizer
+fn scan_video_optimizer(
+    a: Weak<MainWindow>,
+    progress_sender: Sender<ProgressData>,
+    stop_flag: Arc<AtomicBool>,
+    custom_settings: SettingsCustom,
+    basic_settings: BasicSettings,
+    shared_models: Arc<Mutex<SharedModels>>,
+) {
+    thread::Builder::new()
+        .stack_size(DEFAULT_THREAD_SIZE)
+        .spawn(move || {
+            let excluded_codecs: Vec<String> = custom_settings
+                .video_optimizer_excluded_codecs
+                .split(',')
+                .map(|s| s.trim().to_lowercase())
+                .filter(|s| !s.is_empty())
+                .collect();
+
+            let params = VideoOptimizerParameters {
+                mode: OptimizerMode::VideoTranscode,
+                excluded_codecs,
+            };
+
+            let mut tool = VideoOptimizer::new(params);
+            set_common_settings(&mut tool, &custom_settings, &stop_flag);
+
+            tool.search(&stop_flag, Some(&progress_sender));
+
+            let video_transcode_entries = tool.get_video_transcode_entries().clone();
+            let messages = get_text_messages(&tool, &basic_settings);
+
+            let info = tool.get_information();
+            let scanning_time_str = format_time(info.scanning_time);
+            let items_found = info.number_of_processed_files;
+
+            shared_models.lock().unwrap().shared_video_optimizer_state = Some(tool);
+
+            a.upgrade_in_event_loop(move |app| {
+                write_video_optimizer_results(&app, video_transcode_entries, messages, &scanning_time_str, items_found);
+            })
+        })
+        .expect("Cannot start thread - not much we can do here");
+}
+
+fn write_video_optimizer_results(app: &MainWindow, video_transcode_entries: Vec<VideoTranscodeEntry>, messages: String, scanning_time_str: &str, items_found: usize) {
+    let items = Rc::new(VecModel::default());
+
+    for fe in video_transcode_entries {
+        let (data_model_str, data_model_int) = prepare_data_model_video_optimizer_video(&fe);
+        insert_data_to_model(&items, data_model_str, data_model_int, None);
+    }
+
+    app.set_video_optimizer_model(items.into());
+    app.invoke_scan_ended(flk!("rust_found_video_optimizer", items_found = items_found, time = scanning_time_str).into());
+    app.global::<GuiState>().set_info_text(messages.into());
+    reset_selection_at_end(app, ActiveTab::VideoOptimizer);
+}
+
+fn prepare_data_model_video_optimizer_video(fe: &VideoTranscodeEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
+    let (directory, file) = split_path(&fe.path);
+    let data_model_str_arr: [SharedString; MAX_STR_DATA_VIDEO_OPTIMIZER] = [
+        format_size(fe.size, BINARY).into(),
+        file.into(),
+        directory.into(),
+        fe.codec.clone().into(),
+        format!("{}x{}", fe.width, fe.height).into(),
+        get_dt_timestamp_string(fe.modified_date).into(),
+    ];
+    let data_model_str = VecModel::from_slice(&data_model_str_arr);
+    let modification_split = split_u64_into_i32s(fe.modified_date);
+    let size_split = split_u64_into_i32s(fe.size);
+    let dimension_split = split_u64_into_i32s(fe.width as u64 * fe.height as u64);
+    let data_model_int_arr: [i32; MAX_INT_DATA_VIDEO_OPTIMIZER] = [modification_split.0, modification_split.1, size_split.0, size_split.1, dimension_split.0, dimension_split.1];
+    let data_model_int = VecModel::from_slice(&data_model_int_arr);
+    (data_model_str, data_model_int)
+}
+
+fn get_dt_timestamp_string(timestamp: u64) -> String {
+    DateTime::from_timestamp(timestamp as i64, 0)
+        .expect("Modified date always should be in valid range")
+        .to_string()
+}
+
 ////////////////////////////////////////// Common
+
+fn reset_selection_at_end(app: &MainWindow, active_tab: ActiveTab) {
+    reset_selection(app, active_tab, true);
+    set_number_of_enabled_items(app, active_tab, 0);
+}
+
 fn insert_data_to_model(items: &Rc<VecModel<MainListModel>>, data_model_str: ModelRc<SharedString>, data_model_int: ModelRc<i32>, filled_header_row: Option<bool>) {
     let main = MainListModel {
         checked: false,

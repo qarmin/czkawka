@@ -16,6 +16,7 @@ use czkawka_core::tools::duplicate::DuplicateFinder;
 use czkawka_core::tools::empty_files::EmptyFiles;
 use czkawka_core::tools::empty_folder::EmptyFolder;
 use czkawka_core::tools::invalid_symlinks::InvalidSymlinks;
+use czkawka_core::tools::same_music::core::format_audio_duration;
 use czkawka_core::tools::same_music::{MusicSimilarity, SameMusic};
 use czkawka_core::tools::similar_images::core::get_string_from_similarity;
 use czkawka_core::tools::similar_images::{ImagesEntry, SimilarImages};
@@ -46,7 +47,6 @@ use crate::opening_selecting_records::{
 
 // Helper functions for deduplication
 
-/// Check if search was stopped and update UI accordingly
 fn handle_stopped_search<T: CommonData>(tool: &T, entry_info: &Entry) -> bool {
     if tool.get_stopped_search() {
         entry_info.set_text(&flg!("compute_stopped_by_user"));
@@ -56,14 +56,12 @@ fn handle_stopped_search<T: CommonData>(tool: &T, entry_info: &Entry) -> bool {
     }
 }
 
-/// Update shared state and return whether items were found
 #[expect(clippy::unnecessary_wraps)]
 fn finalize_compute<T: Into<SharedModelEnum>>(subview: &SubView, tool: T, items_found: usize) -> Option<bool> {
     subview.shared_model_enum.replace(tool.into());
     Some(items_found > 0)
 }
 
-/// Sort entries that implement ResultEntry trait - conditional version (only if >= 2 elements)
 fn conditional_sort_vector<T>(vector: &[T]) -> Vec<T>
 where
     T: ResultEntry + Clone + Send,
@@ -77,7 +75,6 @@ where
     }
 }
 
-/// Helper to format file size and date for list store entries
 fn format_size_and_date(size: u64, modified_date: u64, is_header: bool, is_reference_folder: bool) -> (String, String) {
     if is_header && !is_reference_folder {
         (String::new(), String::new())
@@ -86,7 +83,6 @@ fn format_size_and_date(size: u64, modified_date: u64, is_header: bool, is_refer
     }
 }
 
-/// Helper to get row color based on header status
 fn get_row_color(is_header: bool) -> &'static str {
     if is_header { HEADER_ROW_COLOR } else { MAIN_ROW_COLOR }
 }
@@ -317,7 +313,7 @@ fn compute_same_music(mf: SameMusic, entry_info: &Entry, text_view_errors: &Text
                     base_file_entry.bitrate,
                     &format!("{} kbps", base_file_entry.bitrate),
                     &base_file_entry.genre,
-                    &base_file_entry.length,
+                    &format_audio_duration(base_file_entry.length),
                     true,
                     true,
                 );
@@ -335,7 +331,7 @@ fn compute_same_music(mf: SameMusic, entry_info: &Entry, text_view_errors: &Text
                         file_entry.bitrate,
                         &format!("{} kbps", file_entry.bitrate),
                         &file_entry.genre,
-                        &file_entry.length,
+                        &format_audio_duration(file_entry.length),
                         false,
                         true,
                     );
@@ -379,7 +375,7 @@ fn compute_same_music(mf: SameMusic, entry_info: &Entry, text_view_errors: &Text
                         file_entry.bitrate,
                         &format!("{} kbps", file_entry.bitrate),
                         &file_entry.genre,
-                        &file_entry.length,
+                        &format_audio_duration(file_entry.length),
                         false,
                         false,
                     );

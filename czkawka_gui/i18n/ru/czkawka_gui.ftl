@@ -6,6 +6,20 @@ window_compare_images = Сравнить изображения
 # General
 general_ok_button = ОК
 general_close_button = Закрыть
+# Krokiet info dialog
+krokiet_info_title = Представляем Krokiet - Новая версия Czkawka
+krokiet_info_message =
+    Крокиет – это новая, улучшенная, более быстрая и менее подверженная ошибкам версия Czkawka GTK!
+    
+    Будучи самодостаточной, она гораздо проще в установке и более устойчива к изменениям системы и обновлениям версии пакетов.
+    
+    В ней включено множество функций, недоступных в Czkawka, таких как миниатюры в режиме сравнения видео, прогресс перемещения/копирования/удаления файлов и расширенные возможности сортировки.
+    
+    Попробуйте и убедитесь в разнице!
+    
+    Czkawka продолжит получать исправления ошибок и небольшие обновления, но все новые функции будут реализованы только в Krokiet.
+    
+    ПС. Это сообщение должно быть видно только один раз, но если оно снова появится, установите переменную среды CZKAWKA_DONT_ANNOY_ME на любое не пустое значение.
 # Main window
 music_title_checkbox = Заголовок
 music_artist_checkbox = Исполнитель
@@ -50,11 +64,11 @@ duplicate_mode_size_combo_box = Размер
 duplicate_mode_hash_combo_box = Хэш
 duplicate_hash_type_tooltip =
     В программе Czkawka можно использовать один из трёх алгоритмов хэширования:
-     
+    
     Blake3 — криптографическая хэш-функция. Используется по умолчанию, поскольку очень быстрый.
-     
+    
     CRC32 — простая хэш-функция. Ещё быстрее, чем Blake3, но возможны очень редкие совпадения хэшей неидентичных файлов.
-     
+    
     XXH3 — функция, похожая по производительности и надёжности хэша на Blake3, но не являющаяся криптографической, поэтому её можно использовать вместо Blake3.
 duplicate_check_method_tooltip =
     На данный момент Czkawka предлагает три метода поиска дубликатов:
@@ -130,7 +144,7 @@ main_label_min_size = Мин
 main_label_max_size = Макс
 main_label_shown_files = Количество отображаемых файлов
 main_label_resize_algorithm = Алгоритм масштабирования
-main_label_similarity = Сходство{"   "}
+main_label_similarity = Сходство{ "   " }
 main_check_box_broken_files_audio = Звук
 main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = Архивировать
@@ -170,9 +184,9 @@ upper_notebook_excluded_directories = Исключённые каталоги
 upper_notebook_included_directories = Включённые каталоги
 upper_allowed_extensions_tooltip =
     Включаемые расширения должны быть разделены запятыми (по умолчанию ищутся файлы с любыми расширениями).
-        
+    
     Макросы IMAGE, VIDEO, MUSIC, TEXT добавляют сразу несколько расширений.
-        
+    
     Пример использования: «.exe, IMAGE, VIDEO, .rar, 7z» — это означает, что будут сканироваться файлы изображений (напр. jpg, png), видео (напр. avi, mp4), exe, rar и 7z.
 upper_excluded_extensions_tooltip =
     Список отключенных файлов, которые будут игнорироваться в сканировании.
@@ -210,10 +224,10 @@ popover_custom_regex_check_button_entry_tooltip =
     Выбор записей с помощью регулярного выражения.
     
     В этом режиме искомый текст представляет собой путь с именем.
-     
+    
     Пример:
     /usr/bin/ziemniak.txt можно найти с помощью выражения /ziem[a-z]+
-     
+    
     По умолчанию используется синтаксис регулярных выражений Rust. Подробнее об этом можно прочитать здесь: https://docs.rs/regex.
 popover_custom_case_sensitive_check_button_tooltip =
     Включает регистрозависимый поиск.
