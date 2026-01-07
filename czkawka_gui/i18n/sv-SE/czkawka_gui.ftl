@@ -6,6 +6,20 @@ window_compare_images = Jämför bilder
 # General
 general_ok_button = Ok
 general_close_button = Stäng
+# Krokiet info dialog
+krokiet_info_title = Införande av Krokiet – Ny version av Czkawka
+krokiet_info_message =
+    Stegen är den nya, förbättrade, snabbare och mindre buggiga versionen av Czkawka GTK!
+    
+    Eftersom den är självständigt innesluten är den mycket lättare att köra och mer motståndskraftig mot systemändringar och paketversionsuppdateringar.
+    
+    Den inkluderar många funktioner som inte finns i Czkawka, såsom förhandsbilder i videojämförelsetillståndet, filöverförings-/kopierings-/raderingsframsteg och utökade sorteringsalternativ.
+    
+    Testa den och se skillnaden!
+    
+    Czkawka kommer fortfarande att få buggfixar och mindre uppdateringar, men alla nya funktioner kommer endast att implementeras i Stegen.
+    
+    PS. Detta meddelande bör bara vara synligt en gång, men om det dyker upp igen, ställ miljön CZKAWKA_DONT_ANNOY_ME till ett värde som inte är tomt.
 # Main window
 music_title_checkbox = Titel
 music_artist_checkbox = Kunstnär
@@ -510,17 +524,3 @@ preview_image_opening_failure = Det gick inte att öppna bilden { $name } skäl 
 compare_groups_number = Grupp { $current_group }/{ $all_groups } ({ $images_in_group } bilder)
 compare_move_left_button = L
 compare_move_right_button = R
-
-krokiet_info_title = Införande av Krokiet – Ny version av Czkawka
-krokiet_info_message = 
-        Stegen är den nya, förbättrade, snabbare och mindre buggiga versionen av Czkawka GTK!
-
-        Eftersom den är självständigt innesluten är den mycket lättare att köra och mer motståndskraftig mot systemändringar och paketversionsuppdateringar.
-
-        Den inkluderar många funktioner som inte finns i Czkawka, såsom förhandsbilder i videojämförelsetillståndet, filöverförings-/kopierings-/raderingsframsteg och utökade sorteringsalternativ.
-
-        Testa den och se skillnaden!
-
-        Czkawka kommer fortfarande att få buggfixar och mindre uppdateringar, men alla nya funktioner kommer endast att implementeras i Stegen.
-
-        PS. Detta meddelande bör bara vara synligt en gång, men om det dyker upp igen, ställ miljön CZKAWKA_DONT_ANNOY_ME till ett värde som inte är tomt.

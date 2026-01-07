@@ -6,6 +6,20 @@ window_compare_images = Confronta le immagini
 # General
 general_ok_button = Ok
 general_close_button = Chiudi
+# Krokiet info dialog
+krokiet_info_title = Introdurre Krokiet - Nuova Versione di Czkawka
+krokiet_info_message =
+    Krokiet è la nuova, migliorata, più veloce e meno buggata versione di Czkawka GTK!
+    
+    Essendo autosufficiente, è molto più facile da eseguire e più resistente alle modifiche del sistema e agli aggiornamenti delle versioni dei pacchetti.
+    
+    Include molte funzionalità non disponibili in Czkawka, come le miniature in modalità di confronto video, il progresso del trasferimento/copia/eliminazione dei file e opzioni di ordinamento estese.
+    
+    Provalo e vedi la differenza!
+    
+    Czkawka riceverà comunque correzioni di bug e aggiornamenti minori, ma tutte le nuove funzionalità saranno implementate solo in Krokiet.
+    
+    PS. Questo messaggio dovrebbe essere visibile solo una volta, ma se appare di nuovo, imposta la variabile d'ambiente CZKAWKA_DONT_ANNOY_ME a qualsiasi valore non vuoto.
 # Main window
 music_title_checkbox = Titolo
 music_artist_checkbox = Artista
@@ -451,6 +465,7 @@ progress_cache_saving = Salvataggio cache
 progress_current_stage = Fase attuale:{ "  " }
 progress_all_stages = Tutte le fasi:{ "  " }
 # Saving loading 
+saving_loading_saving_success = Salvataggio configurazione su file { $name }.
 saving_loading_saving_failure = Impossibile salvare i dati di configurazione nel file { $name }, motivo { $reason }.
 saving_loading_reset_configuration = La configurazione corrente è stata cancellata.
 saving_loading_loading_success = Caricamento configurazione da file avvenuto con successo
@@ -508,19 +523,3 @@ preview_image_opening_failure = Impossibile aprire l'immagine { $name }, motivo 
 compare_groups_number = Gruppo { $current_group }/{ $all_groups } ({ $images_in_group } immagini)
 compare_move_left_button = L
 compare_move_right_button = R
-
-krokiet_info_title = Introdurre Krokiet - Nuova Versione di Czkawka
-krokiet_info_message = 
-        Krokiet è la nuova, migliorata, più veloce e meno buggata versione di Czkawka GTK!
-
-        Essendo autosufficiente, è molto più facile da eseguire e più resistente alle modifiche del sistema e agli aggiornamenti delle versioni dei pacchetti.
-
-        Include molte funzionalità non disponibili in Czkawka, come le miniature in modalità di confronto video, il progresso del trasferimento/copia/eliminazione dei file e opzioni di ordinamento estese.
-
-        Provalo e vedi la differenza!
-
-        Czkawka riceverà comunque correzioni di bug e aggiornamenti minori, ma tutte le nuove funzionalità saranno implementate solo in Krokiet.
-
-        PS. Questo messaggio dovrebbe essere visibile solo una volta, ma se appare di nuovo, imposta la variabile d'ambiente CZKAWKA_DONT_ANNOY_ME a qualsiasi valore non vuoto.
-
-saving_loading_saving_success = Salvataggio configurazione su file { $name }.

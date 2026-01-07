@@ -6,6 +6,20 @@ window_compare_images = Porovnat obrázky
 # General
 general_ok_button = Ok
 general_close_button = Zavřít
+# Krokiet info dialog
+krokiet_info_title = Představujeme Krokiet - Nová verze Czkawky
+krokiet_info_message =
+    Krokiet je nový, vylepšený, rychlejší a méně chybný verze Czkawka GTK!
+    
+    Díky tomu, že je samoobsahový, je mnohem snazší spouštět a odolnější vůči systémovým změnám a aktualizacím verzí balíčků.
+    
+    Obsahuje mnoho funkcí, které nejsou dostupné v Czkawce, jako jsou miniatury v režimu porovnání videa, průběh přesunu/kopírování/smazání souborů a rozšířené možnosti třídění.
+    
+    Vyzkoušejte to a uvidíte rozdíl!
+    
+    Czkawka bude stále dostávat opravy chyb a menší aktualizace, ale všechny nové funkce budou implementovány pouze v Krokiet.
+    
+    PS. Tato zpráva by měla být viditelná pouze jednou, ale pokud se objeví znovu, nastavte proměnnou CZKAWKA_DONT_ANNOY_ME na libovolnou neprázdnou hodnotu.
 # Main window
 music_title_checkbox = Hlava 1 – Celkem
 music_artist_checkbox = Umělec
@@ -510,17 +524,3 @@ preview_image_opening_failure = Nepodařilo se otevřít obrázek { $name }, dů
 compare_groups_number = Skupina { $current_group }/{ $all_groups } ({ $images_in_group } obrázků)
 compare_move_left_button = L
 compare_move_right_button = R
-
-krokiet_info_title = Představujeme Krokiet - Nová verze Czkawky
-krokiet_info_message = 
-        Krokiet je nový, vylepšený, rychlejší a méně chybný verze Czkawka GTK!
-
-        Díky tomu, že je samoobsahový, je mnohem snazší spouštět a odolnější vůči systémovým změnám a aktualizacím verzí balíčků.
-
-        Obsahuje mnoho funkcí, které nejsou dostupné v Czkawce, jako jsou miniatury v režimu porovnání videa, průběh přesunu/kopírování/smazání souborů a rozšířené možnosti třídění.
-
-        Vyzkoušejte to a uvidíte rozdíl!
-
-        Czkawka bude stále dostávat opravy chyb a menší aktualizace, ale všechny nové funkce budou implementovány pouze v Krokiet.
-
-        PS. Tato zpráva by měla být viditelná pouze jednou, ale pokud se objeví znovu, nastavte proměnnou CZKAWKA_DONT_ANNOY_ME na libovolnou neprázdnou hodnotu.

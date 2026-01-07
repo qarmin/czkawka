@@ -6,6 +6,20 @@ window_compare_images = Comparar as imagens
 # General
 general_ok_button = Ok
 general_close_button = Fechar
+# Krokiet info dialog
+krokiet_info_title = Apresentando o Krokiet, a nova versão do Czkawka
+krokiet_info_message =
+    Krokiet é a nova, melhorada, mais rápida e menos bugada versão da interface gráfica GTK do Czkawka!
+    
+    Por ser autocontido, é muito mais fácil de executar e mais resistente a mudanças no sistema e a atualizações de versões de pacotes.
+    
+    Ele inclui muitos recursos indisponíveis no Czkawka, como miniaturas no modo de comparação de vídeos, progresso ao mover/copiar/excluir arquivos e opções de ordenação estendidas.
+    
+    Experimente e veja a diferença!
+    
+    O Czkawka continuará recebendo correções de bugs e pequenas atualizações, mas todos os novos recursos serão implementados apenas no Krokiet.
+    
+    PS. Esta mensagem deveria aparecer apenas uma vez, mas se ela aparecer novamente, defina a variável de ambiente CZKAWKA_DONT_ANNOY_ME com qualquer valor não vazio.
 # Main window
 music_title_checkbox = Título
 music_artist_checkbox = Artista
@@ -34,7 +48,7 @@ same_music_tooltip =
     Definir o tempo mínimo para 5s e a diferença máxima para 1.0, irá pesquisar fragmentos quase idênticos nos arquivos.
     Um tempo de 20s e uma diferença máxima de 6.0, por outro lado, funciona bem para encontrar versões ao vivo, versões modificadas (remixadas), etc.
     
-    Por padrão, cada arquivo de música é comparado entre si, o que pode levar muito tempo para testar vários arquivos, portanto, é melhor utilizar pastas de referência e especificar quais são os arquivos devem ser comparados entre si. Com a mesma quantidade de arquivos, a comparação de impressões digitais será pelo menos quatro vezes mais rápida do que sem as pastas de referência.
+    Por padrão, cada arquivo de música é comparado entre si, o que pode levar muito tempo para testar vários arquivos. Portanto, é melhor utilizar pastas de referência e especificar quais são os arquivos devem ser comparados entre si. Com a mesma quantidade de arquivos, a comparação de impressões digitais será pelo menos quatro vezes mais rápida do que sem as pastas de referência.
 music_comparison_checkbox_tooltip =
     Pesquisar arquivos de música equivalentes utilizando a inteligência artificial (IA) que utiliza o aprendizado da máquina para remover os parênteses de uma frase. Por exemplo, com esta opção ativada, os arquivos em questão que serão tratados como duplicados:
     
@@ -51,29 +65,29 @@ duplicate_mode_hash_combo_box = Integridade do arquivo
 duplicate_hash_type_tooltip =
     O Czkawka oferece três tipos de identificação pela integridade do arquivo por meio do código ‘hash’:
     
-    Blake3 - esta opção possui o recurso de criptografia e é o padrão porque é muito rápida.
+    Blake3 - Esta opção possui o recurso de criptografia e é o padrão porque é muito rápida.
     
-    CRC32 - esta opção é a mais simples e deveria ser mais rápida do que o Blake3, mas muito raramente pode ocorrer algumas colisões.
+    CRC32 - Esta opção é a mais simples e deve ser mais rápida do que o Blake3, mas muito raramente pode ocorrer algumas colisões.
     
-    XXH3 - esta opção não possui o recurso de criptografia e é muito similar em desempenho e qualidade do Blake3.
+    XXH3 - Esta opção não possui o recurso de criptografia e é muito similar em desempenho e qualidade do Blake3.
     
     Estes modos podem ser facilmente alternados.
 duplicate_check_method_tooltip =
     Por enquanto, o Czkawka oferece três tipos de métodos para localizar os arquivos duplicados:
     
-    Por nome - Localiza os arquivos que têm o mesmo nome.
+    Por nome - Esta opção permite localizar os arquivos que têm o mesmo nome.
     
-    Por tamanho - Localiza os arquivos que têm o mesmo tamanho.
+    Por tamanho - Esta opção permite localizar os arquivos que têm o mesmo tamanho.
     
-    Por integridade do arquivo - Localiza os arquivos que têm o mesmo conteúdo, ou seja, que possui o mesmo código ‘hash’ (o ‘hash’ de arquivo ou o valor do ‘hash’ de um arquivo é uma sequência de caracteres alfanuméricos distinta, trata-se de um valor único que corresponde ao conteúdo exato de um arquivo, permite verificar a integridade de um arquivo e é como se fosse a assinatura digital do arquivo). Este método cria a assinatura digital ou ‘hash’ do arquivo e, em seguida, compara o código da assinatura digital que foi criada para localizar os arquivos duplicados. Este método é a maneira mais segura e precisa de localizar os arquivos duplicados. O Czkawka utiliza a memória ‘cache’ (é um espaço de armazenamento das configurações, dos resultados das pesquisas, etc. que guarda os dados para que possam ser acessados mais rapidamente), portanto, a segunda verificação e as subsequentes dos mesmos dados deverão ser muito mais rápidas do que na primeira vez.
+    Por integridade do arquivo - Esta opção permite localizar os arquivos que têm o mesmo conteúdo, ou seja, que possui o mesmo código ‘hash’ (o ‘hash’ de arquivo ou o valor do ‘hash’ de um arquivo é uma sequência de caracteres alfanuméricos distinta, trata-se de um valor único que corresponde ao conteúdo exato de um arquivo, permite verificar a integridade de um arquivo e é como se fosse a assinatura digital do arquivo). Este método cria a assinatura digital ou ‘hash’ do arquivo e, em seguida, compara o código da assinatura digital que foi criada para localizar os arquivos duplicados. Este método é a maneira mais segura e precisa para localizar os arquivos duplicados. O Czkawka utiliza a memória ‘cache’ (é um espaço de armazenamento das configurações, dos resultados das pesquisas, etc. que guarda os dados para que possam ser acessados mais rapidamente), portanto, a segunda verificação e as subsequentes dos mesmos dados deverão ser muito mais rápidas do que na primeira vez.
 image_hash_size_tooltip =
-    A cada imagem que é verificada, um arquivo de assinatura digital ou ‘hash’ é criado e que pode ser comparado entre si, e se uma pequena diferença entre as imagens for encontrada, então significa que as imagens são equivalentes.
+    A cada imagem que é verificada, um arquivo de assinatura digital ou ‘hash’ é criado e pode ser comparado entre si, e se uma pequena diferença entre as imagens for encontrada, então significa que as imagens são equivalentes.
     
     O tamanho 8 para o ‘hash’ é muito bom para localizar as imagens que são apenas um pouco equivalentes às originais. Com uma quantidade maior de imagens, maior do que 1000 imagens, irá produzir uma grande quantidade de falsos positivos, então é recomendado utilizar um tamanho maior do ‘hash’ nestes casos.
     
     O tamanho 16 para o ‘hash’ é o tamanho padrão por ser uma boa referência entre localizar as imagens que são um pouco equivalentes e ter uma pequena quantidade de colisões do código ‘hash’.
     
-    O tamanho 32 e 64 para o ‘hash’ localizam imagens muito equivalentes, mas quase não deve ter falsos positivos, talvez, exceto algumas imagens que possuem o canal alfa.
+    O tamanho 32 e 64 para o ‘hash’ localizam as imagens muito equivalentes, mas quase não deverá ocorrer os falsos positivos, talvez, exceto algumas imagens que possuem o canal alfa.
 image_resize_filter_tooltip =
     Para calcular o ‘hash’ de uma imagem, a biblioteca deve ser primeiro dimensionada.
     
@@ -421,6 +435,7 @@ compute_found_invalid_symlinks = Foram encontradas { $number_files } ligações 
 compute_found_broken_files = Foram encontrados { $number_files } arquivos corrompidos. A verificação durou { $time }
 compute_found_bad_extensions = Foram encontrados { $number_files } arquivos com extensões que não são válidas. A verificação durou { $time }
 # Progress window
+progress_scanning_general_file = Pesquisando em { $file_number } arquivos
 progress_scanning_extension_of_files = Pesquisando por tipo da extensão dos arquivos { $file_checked } de { $all_files }
 progress_scanning_broken_files = Pesquisando { $file_checked }/{ $all_files } no arquivo ({ $data_checked }/{ $all_data })
 progress_scanning_video = Criando o código do ‘hash’ dos arquivos de vídeo { $file_checked } de { $all_files }
@@ -431,6 +446,7 @@ progress_scanning_music_tags_end = Comparando as informações do arquivo de mú
 progress_scanning_music_tags = Lendo as informações dos arquivos de música { $file_checked } de { $all_files }
 progress_scanning_music_content_end = Comparando a impressão digital do arquivo de música { $file_checked } de { $all_files }
 progress_scanning_music_content = Foi calculado a impressão digital de { $file_checked }/ arquivo de música { $all_files } ({ $data_checked }/{ $all_data })
+progress_scanning_empty_folders = Pesquisando nas { $folder_number } pastas
 progress_scanning_size = Pesquisando por nome nos { $file_number } arquivos
 progress_scanning_size_name = Pesquisando por nome e por tamanho do arquivo { $file_number }
 progress_scanning_name = Pesquisando por nome do arquivo { $file_number }
@@ -506,26 +522,3 @@ preview_image_opening_failure = Ocorreu uma falha ao abrir a imagem { $name }, p
 compare_groups_number = O grupo { $current_group } de { $all_groups } grupos possui { $images_in_group } imagens
 compare_move_left_button = E
 compare_move_right_button = D
-
-krokiet_info_title = Apresentando Krokiet - Nova Versão de Czkawka
-krokiet_info_message = 
-        Krokiet é a nova, melhorada, mais rápida e menos problemática versão da interface gráfica GTK Czkawka!
-
-        Sendo auto-contida, é muito mais fácil de executar e mais resistente a alterações do sistema e atualizações de versão de pacote.
-
-        Inclui muitos recursos que não estão disponíveis no Czkawka, como miniaturas no modo de comparação de vídeo, progresso de mover/copiar/excluir arquivos e opções de classificação estendidas.
-
-        Experimente e veja a diferença!
-
-        O Czkawka ainda receberá correções de bugs e atualizações menores, mas todos os novos recursos serão implementados apenas no Krokiet.
-
-        PS. Esta mensagem deve ser visível apenas uma vez, mas se ela aparecer novamente, defina a variável de ambiente CZKAWKA_DONT_ANNOY_ME para qualquer valor não vazio.
-
-progress_scanning_general_file =
-    { $file_number ->
-    [one] Arquivo { $file_number } escaneado
-    *[other] Arquivos { $file_number } escaneados}
-progress_scanning_empty_folders = 
-        {$folder_number ->
-        [one] Pasta {$folder_number} escaneada
-        *[other] Pastas {$folder_number} escaneadas}

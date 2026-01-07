@@ -4,8 +4,22 @@ window_main_title = چکاواک (همیپ)
 window_progress_title = سkenنگ
 window_compare_images = مقایسه تصاویر
 # General
-general_ok_button = Ok
+general_ok_button = اوکی
 general_close_button = بسته شود
+# Krokiet info dialog
+krokiet_info_title = معرفی کرکیه - نسخه جدید Czkawka
+krokiet_info_message =
+    کروکیت نسخه جدید، بهبود یافته، سریعتر و بدون باگ Czkawka GTK GUI است!
+    
+    به دلیل خودکفایی، اجرای آن آسان‌تر است و در برابر تغییرات سیستم و به‌روزرسانی‌های نسخه بسته‌ها مقاوم‌تر است.
+    
+    شامل بسیاری از ویژگی‌هایی است که در Czkawka در دسترس نیستند، مانند تصاویر کوچک در حالت مقایسه ویدیو، پیشرفت انتقال/کپی/حذف فایل و گزینه‌های مرتب‌سازی گسترده.
+    
+    آن را امتحان کنید و تفاوت را ببینید!
+    
+    Czkawka همچنان شامل رفع اشکال و به‌روزرسانی‌های جزئی خواهد بود، اما تمام ویژگی‌های جدید فقط درکروکیت پیاده‌سازی خواهند شد.
+    
+    PS. این پیام باید فقط یک بار قابل مشاهده باشد، اما اگر دوباره ظاهر شد، متغیر محیطی CZKAWKA_DONT_ANNOY_ME را به هر مقدار غیر خالی تنظیم کنید.
 # Main window
 music_title_checkbox = عنوان
 music_artist_checkbox = هنرپرداز
@@ -120,7 +134,7 @@ main_tree_view_column_destination_path = پیشانته مسیر
 main_tree_view_column_type_of_error = نوع خطا
 main_tree_view_column_current_extension = بازگشت بسته شده
 main_tree_view_column_proper_extensions = توضیح معتبر
-main_tree_view_column_fps = FPS
+main_tree_view_column_fps = فپس
 main_tree_view_column_codec = کدک
 main_label_check_method = روش چک کردن
 main_label_hash_type = نوع هاش
@@ -132,7 +146,7 @@ main_label_shown_files = تعداد فایل‌های نمایش‌یافته
 main_label_resize_algorithm = الگوریتم سایز بندی
 main_label_similarity = سхожگی{ "   " }
 main_check_box_broken_files_audio = آوتویډ
-main_check_box_broken_files_pdf = Pdf
+main_check_box_broken_files_pdf = پdf
 main_check_box_broken_files_archive = اریکرج
 main_check_box_broken_files_image = عکس
 check_button_general_same_size = تنها سایز‌های مختلف را تغییر ندهید
@@ -250,7 +264,7 @@ bottom_select_button = انتخاب
 bottom_delete_button = حذف
 bottom_save_button = ذخیره
 bottom_symlink_button = Symlink
-bottom_hardlink_button = Hardlink
+bottom_hardlink_button = هاردلینک
 bottom_move_button = برو
 bottom_sort_button = مرتب کردن
 bottom_compare_button = مقایسه
@@ -514,17 +528,3 @@ preview_image_opening_failure = تصویر { $name } را باز کردن شکس
 compare_groups_number = گروه { $current_group }/{ $all_groups } ({ $images_in_group } تصویر)
 compare_move_left_button = L
 compare_move_right_button = R
-
-krokiet_info_title = معرفی کرکیه - نسخه جدید Czkawka
-krokiet_info_message = 
-        کروکیت نسخه جدید، بهبود یافته، سریعتر و بدون باگ Czkawka GTK GUI است!
-
-        به دلیل خودکفایی، اجرای آن آسان‌تر است و در برابر تغییرات سیستم و به‌روزرسانی‌های نسخه بسته‌ها مقاوم‌تر است.
-
-        شامل بسیاری از ویژگی‌هایی است که در Czkawka در دسترس نیستند، مانند تصاویر کوچک در حالت مقایسه ویدیو، پیشرفت انتقال/کپی/حذف فایل و گزینه‌های مرتب‌سازی گسترده.
-
-        آن را امتحان کنید و تفاوت را ببینید!
-
-        Czkawka همچنان شامل رفع اشکال و به‌روزرسانی‌های جزئی خواهد بود، اما تمام ویژگی‌های جدید فقط درکروکیت پیاده‌سازی خواهند شد.
-
-        PS. این پیام باید فقط یک بار قابل مشاهده باشد، اما اگر دوباره ظاهر شد، متغیر محیطی CZKAWKA_DONT_ANNOY_ME را به هر مقدار غیر خالی تنظیم کنید.

@@ -6,6 +6,20 @@ window_compare_images = 比较图像
 # General
 general_ok_button = 确定
 general_close_button = 关闭
+# Krokiet info dialog
+krokiet_info_title = Introducing Krokiet - 新版本 Czkawka
+krokiet_info_message =
+    克罗基特是 Czkawka GTK GUI 的新、改进、更快且更少错误的版！
+    
+    由于它具有自包含性，因此运行起来更容易，并且对系统更改和软件包版本更新更具抵抗力。
+    
+    它包含 Czkawka 中不可用的许多功能，例如视频比较模式下的缩略图、文件移动/复制/删除进度以及扩展的排序选项。
+    
+    尝试一下并看看区别！
+    
+    Czkawka 将继续获得错误修复和小更新，但所有新功能都只会在克罗基特中实现。
+    
+    PS. 此消息应仅显示一次，但如果它再次出现，请将 CZKAWKA_DONT_ANNOY_ME 环境变量设置为任何非空值。
 # Main window
 music_title_checkbox = 标题
 music_artist_checkbox = 艺人
@@ -512,17 +526,3 @@ preview_image_opening_failure = 打开镜像 { $name } 失败，原因 { $reason
 compare_groups_number = 组 { $current_group }/{ $all_groups } ({ $images_in_group } 图像)
 compare_move_left_button = L
 compare_move_right_button = R
-
-krokiet_info_title = Introducing Krokiet - 新版本 Czkawka
-krokiet_info_message = 
-        克罗基特是 Czkawka GTK GUI 的新、改进、更快且更少错误的版！
-
-        由于它具有自包含性，因此运行起来更容易，并且对系统更改和软件包版本更新更具抵抗力。
-
-        它包含 Czkawka 中不可用的许多功能，例如视频比较模式下的缩略图、文件移动/复制/删除进度以及扩展的排序选项。
-
-        尝试一下并看看区别！
-
-        Czkawka 将继续获得错误修复和小更新，但所有新功能都只会在克罗基特中实现。
-
-        PS. 此消息应仅显示一次，但如果它再次出现，请将 CZKAWKA_DONT_ANNOY_ME 环境变量设置为任何非空值。

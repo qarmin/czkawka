@@ -6,6 +6,20 @@ window_compare_images = Porównywanie Obrazów
 # General
 general_ok_button = Ok
 general_close_button = Zamknij
+# Krokiet info dialog
+krokiet_info_title = Wprowadzenie do Krokieta - Nowa Wersja Czkawki
+krokiet_info_message =
+    Krokiet to nowa, ulepszona, szybsza i mniej błędogenna wersja Czkawki GTK!
+    
+    Dzięki wbudowanym zależnościom jest znacznie łatwiejszy w konfiruacji i bardziej odporny na zmiany systemu oraz aktualizacje pakietów systemowych.
+    
+    Zawiera wiele funkcji niedostępnych w Czkawce, takich jak miniaturki w trybie porównywania wideo, wyświetlanie postępu przesyłania/kopiowania/usuwania plików oraz rozszerzone opcje sortowania.
+    
+    Wypróbuj go i zobacz różnicę!
+    
+    Czkawka nadal będzie otrzymywać poprawki błędów i drobne aktualizacje, ale wszystkie nowe funkcje będą implementowane tylko w Krokietcie.
+    
+    PS. Ten komunikat powinien być widoczny tylko raz, ale jeśli pojawi się ponownie, ustaw zmienną środowiskową CZKAWKA_DONT_ANNOY_ME na dowolną wartość niepustą.
 # Main window
 music_title_checkbox = Tytuł
 music_artist_checkbox = Wykonawca
@@ -275,7 +289,7 @@ bottom_compare_button_tooltip = Porównaj obrazy w grupie.
 bottom_show_errors_tooltip = Pokaż/Ukryj dolny panel tekstowy.
 bottom_show_upper_notebook_tooltip = Pokazuje/ukrywa górny panel.
 # Progress Window
-progress_stop_button = Zatrzymaj
+progress_stop_button = Stop
 progress_stop_additional_message = Przerywanie skanowania
 # About Window
 about_repository_button_tooltip = Link do repozytorium z kodem źródłowym
@@ -514,17 +528,3 @@ preview_image_opening_failure = Nie udało się otworzyć obrazu { $name }, pow�
 compare_groups_number = Grupa { $current_group }/{ $all_groups } ({ $images_in_group } obrazów)
 compare_move_left_button = L
 compare_move_right_button = P
-
-krokiet_info_title = Wprowadzenie do Krokieta - Nowa Wersja Czkawki
-krokiet_info_message = 
-        Krokiet to nowa, ulepszona, szybsza i mniej błędogenna wersja Czkawki GTK!
-
-        Dzięki wbudowanym zależnościom jest znacznie łatwiejszy w konfiruacji i bardziej odporny na zmiany systemu oraz aktualizacje pakietów systemowych.
-
-        Zawiera wiele funkcji niedostępnych w Czkawce, takich jak miniaturki w trybie porównywania wideo, wyświetlanie postępu przesyłania/kopiowania/usuwania plików oraz rozszerzone opcje sortowania.
-
-        Wypróbuj go i zobacz różnicę!
-
-        Czkawka nadal będzie otrzymywać poprawki błędów i drobne aktualizacje, ale wszystkie nowe funkcje będą implementowane tylko w Krokietcie.
-
-        PS. Ten komunikat powinien być widoczny tylko raz, ale jeśli pojawi się ponownie, ustaw zmienną środowiskową CZKAWKA_DONT_ANNOY_ME na dowolną wartość niepustą.

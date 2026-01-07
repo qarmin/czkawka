@@ -6,6 +6,20 @@ window_compare_images = 比較影像
 # General
 general_ok_button = 確定
 general_close_button = 關閉
+# Krokiet info dialog
+krokiet_info_title = Introducing Krokiet - 新版本 Czkawka
+krokiet_info_message =
+    考其特是新的、改良的、更快速且更少錯誤的版本，Czkawka GTK GUI！
+    
+    由於它具有自包含的特性，因此運作起來更容易且對系統變更和套件版本更新更具抵抗力。
+    
+    它包含許多在 Czkawka 中不可用的功能，例如影片比較模式中的縮圖、檔案移動/複製/刪除進度以及擴展的排序選項。
+    
+    試試看並看看區別！
+    
+    考其特將繼續收到錯誤修復和輕微更新，但所有新功能都只會在考其特中實施。
+    
+    PS. 此訊息只應該一次顯示，但如果它再次出現，請將 CZKAWKA_DONT_ANNOY_ME 環境變數設定為任何非空值。
 # Main window
 music_title_checkbox = 標題
 music_artist_checkbox = 藝人
@@ -120,7 +134,7 @@ main_tree_view_column_destination_path = 目標路徑
 main_tree_view_column_type_of_error = 錯誤類型
 main_tree_view_column_current_extension = 現有副檔名
 main_tree_view_column_proper_extensions = 適當的副檔名
-main_tree_view_column_fps = FPS
+main_tree_view_column_fps = 每秒幀數
 main_tree_view_column_codec = 編碼解碼器
 main_label_check_method = 檢查方法
 main_label_hash_type = 雜湊類型
@@ -510,17 +524,3 @@ preview_image_opening_failure = 開啟影像 { $name } 失敗，原因 { $reason
 compare_groups_number = 組 { $current_group }/{ $all_groups } ({ $images_in_group } 影像）
 compare_move_left_button = L
 compare_move_right_button = R
-
-krokiet_info_title = Introducing Krokiet - 新版本 Czkawka
-krokiet_info_message = 
-        考其特是新的、改良的、更快速且更少錯誤的版本，Czkawka GTK GUI！
-
-        由於它具有自包含的特性，因此運作起來更容易且對系統變更和套件版本更新更具抵抗力。
-
-        它包含許多在 Czkawka 中不可用的功能，例如影片比較模式中的縮圖、檔案移動/複製/刪除進度以及擴展的排序選項。
-
-        試試看並看看區別！
-
-        考其特將繼續收到錯誤修復和輕微更新，但所有新功能都只會在考其特中實施。
-
-        PS. 此訊息只應該一次顯示，但如果它再次出現，請將 CZKAWKA_DONT_ANNOY_ME 環境變數設定為任何非空值。

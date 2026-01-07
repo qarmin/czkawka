@@ -6,6 +6,20 @@ window_compare_images = Bilder vergleichen
 # General
 general_ok_button = Ok
 general_close_button = Schließen
+# Krokiet info dialog
+krokiet_info_title = Krokiet – Neue Version von Czkawka
+krokiet_info_message =
+    Krokiet ist die neue, verbesserte, schnellere und weniger fehlerhafte Version von Czkawka GTK!
+    
+    Da es sich um eine eigenständige Version handelt, ist es viel einfacher zu starten und widerstandsfähiger gegen Systemänderungen und Paketversionsupdates.
+    
+    Es enthält viele Funktionen, die in Czkawka nicht verfügbar sind, wie z. B. Vorschaubilder im Video-Vergleichsmodus, Fortschritt bei Datei-Move/Kopieren/Löschen und erweiterte Sortieroptionen.
+    
+    Probiere es aus und sieh den Unterschied!
+    
+    Czkawka wird weiterhin Fehlerbehebungen und kleinere Updates erhalten, aber alle neuen Funktionen werden nur in Krokiet implementiert.
+    
+    PS. Diese Nachricht sollte nur einmal sichtbar sein, aber wenn sie erneut erscheint, setze die Umgebungsvariable CZKAWKA_DONT_ANNOY_ME auf einen nicht leeren Wert.
 # Main window
 music_title_checkbox = Titel
 music_artist_checkbox = Künstler
@@ -509,17 +523,3 @@ preview_image_opening_failure = Konnte Bild { $name } nicht öffnen, Grund { $re
 compare_groups_number = Gruppe { $current_group }/{ $all_groups } ({ $images_in_group } Bilder)
 compare_move_left_button = L
 compare_move_right_button = R
-
-krokiet_info_title = Krokiet – Neue Version von Czkawka
-krokiet_info_message = 
-        Krokiet ist die neue, verbesserte, schnellere und weniger fehlerhafte Version von Czkawka GTK!
-
-        Da es sich um eine eigenständige Version handelt, ist es viel einfacher zu starten und widerstandsfähiger gegen Systemänderungen und Paketversionsupdates.
-
-        Es enthält viele Funktionen, die in Czkawka nicht verfügbar sind, wie z. B. Vorschaubilder im Video-Vergleichsmodus, Fortschritt bei Datei-Move/Kopieren/Löschen und erweiterte Sortieroptionen.
-
-        Probiere es aus und sieh den Unterschied!
-
-        Czkawka wird weiterhin Fehlerbehebungen und kleinere Updates erhalten, aber alle neuen Funktionen werden nur in Krokiet implementiert.
-
-        PS. Diese Nachricht sollte nur einmal sichtbar sein, aber wenn sie erneut erscheint, setze die Umgebungsvariable CZKAWKA_DONT_ANNOY_ME auf einen nicht leeren Wert.
