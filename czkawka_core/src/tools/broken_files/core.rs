@@ -162,7 +162,8 @@ impl BrokenFiles {
         })
     }
 
-    fn check_broken_video(mut file_entry: BrokenEntry) -> BrokenEntry {
+    // None if stopped, otherwise Some
+    fn check_broken_video(mut file_entry: BrokenEntry) -> Option<BrokenEntry> {
         let ffprobe_errors = [("moov atom not found", Some("broken file structure"))];
 
         match Command::new("ffprobe").arg(&file_entry.path).output() {
@@ -187,7 +188,7 @@ impl BrokenFiles {
         }
 
         if !file_entry.error_string.is_empty() {
-            return file_entry;
+            return Some(file_entry);
         }
 
         let ffmpeg_message = [("Input buffer exhausted before END element found", Some("possible valid file, but cropped too early"))];
@@ -228,7 +229,7 @@ impl BrokenFiles {
         }
 
 
-        file_entry
+        Some(file_entry)
     }
 
 
@@ -254,16 +255,16 @@ impl BrokenFiles {
         (loaded_hash_map, records_already_cached, non_cached_files_to_check)
     }
 
-    fn check_file(file_entry: BrokenEntry) -> Option<BrokenEntry> {
+    fn check_file(file_entry: BrokenEntry) -> Option<Option<BrokenEntry>> {
         match check_extension_availability(&file_entry.path) {
-            TypeOfFile::Image => Some(Self::check_broken_image(file_entry)),
-            TypeOfFile::ArchiveZip => Self::check_broken_zip(file_entry),
-            TypeOfFile::Audio => Self::check_broken_audio(file_entry),
-            TypeOfFile::Pdf => Some(Self::check_broken_pdf(file_entry)),
-            TypeOfFile::Video => Some(Self::check_broken_video(file_entry)),
+            TypeOfFile::Image => Some(Some(Self::check_broken_image(file_entry))),
+            TypeOfFile::ArchiveZip => Some(Self::check_broken_zip(file_entry)),
+            TypeOfFile::Audio => Some(Self::check_broken_audio(file_entry)),
+            TypeOfFile::Pdf => Some(Some(Self::check_broken_pdf(file_entry))),
+            TypeOfFile::Video => Self::check_broken_video(file_entry).map(|e|Some(e)),
             TypeOfFile::Unknown => {
                 error!("Unknown file type of: {:?}", file_entry);
-                None
+                Some(None)
             }
         }
     }
