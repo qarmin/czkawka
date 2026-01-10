@@ -1,9 +1,9 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
-use std::process::{Command, Stdio};
+use std::process::Command;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
-use std::{fs, mem, thread};
+use std::{fs, mem};
 
 use blake3::Hasher;
 use crossbeam_channel::Sender;
@@ -18,6 +18,7 @@ use crate::common::config_cache_path::get_config_cache_path;
 use crate::common::consts::VIDEO_FILES_EXTENSIONS;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult, inode, take_1_per_inode};
 use crate::common::model::{ToolType, WorkContinueStatus};
+use crate::common::process_utils::run_command_interruptible;
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
@@ -173,7 +174,7 @@ impl SimilarVideos {
         let tiles_size = 3;
 
         let mut command = Command::new("ffmpeg");
-        let mut command = command.arg("-threads").arg("1").arg("-i").arg(&file_entry.path);
+        let mut command_mut = command.arg("-threads").arg("1").arg("-i").arg(&file_entry.path);
 
         if generate_grid_instead_of_single {
             let vf_filter = format!(
@@ -182,52 +183,27 @@ impl SimilarVideos {
                 max_height / tiles_size
             );
 
-            command = command.arg("-vf").arg(&vf_filter);
+            command_mut = command_mut.arg("-vf").arg(&vf_filter);
         } else {
             let vf_filter = format!("scale='min({max_width},iw)':'min({max_height},ih)':force_original_aspect_ratio=decrease");
-            command = command.arg("-vf").arg(&vf_filter).arg("-ss").arg(seek_time.to_string());
+            command_mut = command_mut.arg("-vf").arg(&vf_filter).arg("-ss").arg(seek_time.to_string());
         }
 
-        let output = command
+        command_mut
             .arg("-frames:v")
             .arg("1")
             .arg("-q:v")
             .arg("2")
             .arg("-y")
-            .arg(&thumbnail_path)
-            .stdin(Stdio::null())
-            .stdout(Stdio::null())
-            .stderr(Stdio::null());
+            .arg(&thumbnail_path);
 
-        let stop_flag = stop_flag.clone();
-        let mut child = output.spawn().map_err(|e| format!("Failed to execute ffmpeg: {e}"))?;
-
-        let result = thread::spawn(move || {
-            loop {
-                if stop_flag.load(std::sync::atomic::Ordering::Relaxed) {
-                    let _ = child.kill();
-                    return Err(String::from("Ffmpeg process was forced to stop"));
-                }
-
-                match child.try_wait() {
-                    Ok(Some(status)) => {
-                        if status.success() {
-                            break Ok(());
-                        }
-                        break Err(format!("ffmpeg exited with non-zero status: {status}"));
-                    }
-                    Ok(None) => {}
-                    Err(e) => break Err(format!("Failed to wait on ffmpeg process: {e}")),
-                }
-
-                thread::sleep(std::time::Duration::from_millis(100));
+        match run_command_interruptible(command, stop_flag) {
+            None => Err(String::from("Thumbnail generation was stopped by user")),
+            Some(Err(e)) => {
+                let _ = fs::remove_file(&thumbnail_path);
+                Err(format!("Failed to generate thumbnail for {}: {e}", file_entry.path.display()))
             }
-        })
-        .join()
-        .map_err(|e| format!("Failed to join handler, when generating thumbnail: {e:?}"))?;
-
-        match result {
-            Ok(()) => {
+            Some(Ok(_)) => {
                 if thumbnail_path.exists() {
                     file_entry.thumbnail_path = Some(thumbnail_path.clone());
                     let _ = filetime::set_file_mtime(&thumbnail_path, filetime::FileTime::now());
@@ -239,10 +215,6 @@ impl SimilarVideos {
                         file_entry.path.display()
                     ))
                 }
-            }
-            Err(e) => {
-                let _ = fs::remove_file(&thumbnail_path);
-                Err(format!("Failed to generate thumbnail for {}: {e}", file_entry.path.display()))
             }
         }
     }

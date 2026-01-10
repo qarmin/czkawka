@@ -17,6 +17,7 @@ use crate::common::consts::{AUDIO_FILES_EXTENSIONS, IMAGE_RS_BROKEN_FILES_EXTENS
 use crate::common::create_crash_message;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{ToolType, WorkContinueStatus};
+use crate::common::process_utils::run_command_interruptible;
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
@@ -163,11 +164,20 @@ impl BrokenFiles {
     }
 
     // None if stopped, otherwise Some
-    fn check_broken_video(mut file_entry: BrokenEntry) -> Option<BrokenEntry> {
+    fn check_broken_video(mut file_entry: BrokenEntry, stop_flag: &Arc<AtomicBool>) -> Option<BrokenEntry> {
         let ffprobe_errors = [("moov atom not found", Some("broken file structure"))];
 
-        match Command::new("ffprobe").arg(&file_entry.path).output() {
-            Ok(output) => {
+        let mut command = Command::new("ffprobe");
+        command.arg(&file_entry.path);
+
+        match run_command_interruptible(command, stop_flag) {
+            None => return None, // Stopped
+            Some(Err(e)) => {
+                debug!("Failed to run ffprobe on {:?}: {}", file_entry.path, e);
+                file_entry.error_string = format!("Failed to run ffprobe: {}", e);
+                return Some(file_entry);
+            }
+            Some(Ok(output)) => {
                 let combined = format!("{}{}", String::from_utf8_lossy(&output.stdout), String::from_utf8_lossy(&output.stderr));
 
                 use std::io::Write;
@@ -175,32 +185,34 @@ impl BrokenFiles {
                     let _ = writeln!(f, "{}", combined);
                 }
 
-                if let Some((error_message, additional_message)) = ffprobe_errors.iter().find(|(err, extra_msg)| combined.contains(err)) {
-                    file_entry.error_string = format!("{error_message}{}", additional_message.map(|e|format!("({e})")).unwrap_or_default());
+                if let Some((error_message, additional_message)) = ffprobe_errors.iter().find(|(err, _)| combined.contains(err)) {
+                    file_entry.error_string = format!("{error_message}{}", additional_message.map(|e| format!(" ({e})")).unwrap_or_default());
+                    return Some(file_entry);
                 } else if !output.status.success() {
                     file_entry.error_string = format!("ffprobe exited with non-zero status: {}", output.status);
+                    return Some(file_entry);
                 }
             }
-            Err(e) => {
-                debug!("Failed to run ffprobe on {:?}: {}", file_entry.path, e);
-                file_entry.error_string = format!("Failed to run ffprobe: {}", e);
-            }
         }
 
-        if !file_entry.error_string.is_empty() {
-            return Some(file_entry);
-        }
-
+        // If ffprobe passed, run ffmpeg validation
         let ffmpeg_message = [("Input buffer exhausted before END element found", Some("possible valid file, but cropped too early"))];
-        match Command::new("ffmpeg")
+
+        let mut command = Command::new("ffmpeg");
+        command
             .arg("-v").arg("error")
             .arg("-xerror")
             .arg("-i").arg(&file_entry.path)
             .arg("-f").arg("null")
-            .arg("-")
-            .output()
-        {
-            Ok(output) => {
+            .arg("-");
+
+        match run_command_interruptible(command, stop_flag) {
+            None => return None, // Stopped
+            Some(Err(e)) => {
+                debug!("Failed to run ffmpeg on {:?}: {}", file_entry.path, e);
+                file_entry.error_string = format!("Failed to run ffmpeg: {}", e);
+            }
+            Some(Ok(output)) => {
                 let combined = format!(
                     "{}{}",
                     String::from_utf8_lossy(&output.stdout),
@@ -216,18 +228,13 @@ impl BrokenFiles {
                     let _ = writeln!(f, "{}", combined);
                 }
 
-                if let Some((error_message, additional_message)) = ffmpeg_message.iter().find(|(err, extra_msg)| combined.contains(err)) {
-                    file_entry.error_string = format!("{error_message}{}", additional_message.map(|e|format!("({e})")).unwrap_or_default());
+                if let Some((error_message, additional_message)) = ffmpeg_message.iter().find(|(err, _)| combined.contains(err)) {
+                    file_entry.error_string = format!("{error_message}{}", additional_message.map(|e| format!(" ({e})")).unwrap_or_default());
                 } else if !output.status.success() {
                     file_entry.error_string = format!("ffmpeg exited with non-zero status: {}", output.status);
                 }
             }
-            Err(e) => {
-                debug!("Failed to run ffmpeg on {:?}: {}", file_entry.path, e);
-                file_entry.error_string = format!("Failed to run ffmpeg: {}", e);
-            }
         }
-
 
         Some(file_entry)
     }
@@ -255,13 +262,13 @@ impl BrokenFiles {
         (loaded_hash_map, records_already_cached, non_cached_files_to_check)
     }
 
-    fn check_file(file_entry: BrokenEntry) -> Option<Option<BrokenEntry>> {
+    fn check_file(file_entry: BrokenEntry, stop_flag: &Arc<AtomicBool>) -> Option<Option<BrokenEntry>> {
         match check_extension_availability(&file_entry.path) {
             TypeOfFile::Image => Some(Some(Self::check_broken_image(file_entry))),
             TypeOfFile::ArchiveZip => Some(Self::check_broken_zip(file_entry)),
             TypeOfFile::Audio => Some(Self::check_broken_audio(file_entry)),
             TypeOfFile::Pdf => Some(Some(Self::check_broken_pdf(file_entry))),
-            TypeOfFile::Video => Self::check_broken_video(file_entry).map(|e|Some(e)),
+            TypeOfFile::Video => Self::check_broken_video(file_entry, stop_flag).map(Some),
             TypeOfFile::Unknown => {
                 error!("Unknown file type of: {:?}", file_entry);
                 Some(None)
@@ -297,15 +304,15 @@ impl BrokenFiles {
                 }
 
                 let size = file_entry.size;
-                let res = Self::check_file(file_entry);
+                let res = Self::check_file(file_entry, stop_flag);
 
                 progress_handler.increase_items(1);
                 progress_handler.increase_size(size);
 
-                Some(res)
+                res // Return Option<Option<BrokenEntry>>
             })
-            .while_some()
-            .flatten()
+            .while_some() // Stop on None (stopped), convert to Iterator<Option<BrokenEntry>>
+            .flatten() // Flatten Option<BrokenEntry> to BrokenEntry
             .collect::<Vec<BrokenEntry>>();
         debug!("look_for_broken_files - ended finding for broken files");
 

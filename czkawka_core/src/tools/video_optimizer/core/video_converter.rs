@@ -1,11 +1,12 @@
 use std::path::Path;
-use std::process::{Command, Stdio};
+use std::process::Command;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
-use std::{fs, thread};
+use std::fs;
 
 use log::debug;
 
+use crate::common::process_utils::run_command_interruptible;
 use crate::common::video_metadata::VideoMetadata;
 use crate::tools::video_optimizer::{VideoCodec, VideoTranscodeEntry};
 
@@ -52,7 +53,6 @@ pub fn process_video(
     max_width: u32,
     max_height: u32,
 ) -> Result<(), String> {
-    let stop_flag = stop_flag.clone();
     let temp_output = Path::new(video_path).with_extension("czkawka_optimized.mp4");
 
     let mut command = Command::new("ffmpeg");
@@ -74,36 +74,20 @@ pub fn process_video(
         .arg("-c:a")
         .arg("copy")
         .arg("-y")
-        .arg(&temp_output)
-        .stdin(Stdio::null())
-        .stdout(Stdio::null())
-        .stderr(Stdio::null());
+        .arg(&temp_output);
 
-    let mut child = command.spawn().map_err(|e| format!("Failed to execute ffmpeg: {e}"))?;
-
-    let result = thread::spawn(move || {
-        loop {
-            if stop_flag.load(std::sync::atomic::Ordering::Relaxed) {
-                let _ = child.kill();
-                return Err(String::from("Ffmpeg process was forced to stop"));
-            }
-
-            if let Some(status) = child.try_wait().expect("Failed to wait on ffmpeg process") {
-                if status.success() {
-                    break Ok(());
-                }
-                break Err(format!("ffmpeg exited with non-zero status: {status}"));
-            }
-
-            thread::sleep(std::time::Duration::from_millis(100));
+    match run_command_interruptible(command, stop_flag) {
+        None => {
+            let _ = fs::remove_file(&temp_output);
+            return Err(String::from("Video processing was stopped by user"));
         }
-    })
-    .join()
-    .map_err(|e| format!("Failed to join handler, when processing file {video_path}: {e:?}"))?;
-
-    if let Err(e) = result {
-        let _ = fs::remove_file(&temp_output);
-        return Err(format!("Failed to process video file {video_path}: {e}"));
+        Some(Err(e)) => {
+            let _ = fs::remove_file(&temp_output);
+            return Err(format!("Failed to process video file {video_path}: {e}"));
+        }
+        Some(Ok(_)) => {
+            // Command succeeded, continue with validation
+        }
     }
 
     let metadata = fs::metadata(&temp_output).map_err(|e| {

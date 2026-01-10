@@ -10,6 +10,7 @@ pub mod image;
 pub mod items;
 pub mod logger;
 pub mod model;
+pub mod process_utils;
 pub mod progress_data;
 pub mod progress_stop_handler;
 pub mod tool_data;
