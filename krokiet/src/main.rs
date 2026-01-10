@@ -90,12 +90,10 @@ fn main() {
         }
     }
 
-    let app =     match MainWindow::new() {
-        Ok(app) => {
-            app
-        }
+     let app = match MainWindow::new() {
+        Ok(app) => app,
         Err(e) => {
-            error!("Error during creating main window: {e}" );
+            error!("Error during creating main window: {e}");
             show_critical_error(e.to_string());
             return;
         }
@@ -146,11 +144,11 @@ fn main() {
     app.invoke_initialize_popup_sizes();
 
     match app.run() {
-        Ok(_) => {
+        Ok(()) => {
             save_all_settings_to_file(&app, original_preset_idx);
         }
         Err(e) => {
-            error!("Error during running the application: {}", e);
+            error!("Error during running the application: {e}");
             show_critical_error(e.to_string());
         }
     }

@@ -37,6 +37,7 @@
 - Fixed sorting by size in big files mode - [#1691](https://github.com/qarmin/czkawka/pull/1691)
 - Ugly workarounds for ugly freezes, caused probably by inconsistencies between GTK4 and the Rust compiler’s optimizations - [#1691](https://github.com/qarmin/czkawka/pull/1691)
 - About screen, now contains info, that Krokiet is successor app - [#1718](https://github.com/qarmin/czkawka/pull/1718)
+- Added `--cache`, `--config` CLI options, to open cache/config paths  - []()
 
 ### Krokiet
 - New Logo - [#1726](https://github.com/qarmin/czkawka/pull/1726)
@@ -50,6 +51,7 @@
 - Fix crash, when user clicked at previous results while new scan was in progress - [#1726](https://github.com/qarmin/czkawka/pull/1726)
 - Defaulting to remove files to trash instead permanent deletion - [#1726](https://github.com/qarmin/czkawka/pull/1726)
 - Added notification dialog, when app cannot be opened - []()
+- Added `--cache`, `--config` CLI options, to open cache/config paths  - []()
 
 ### External
 - Wine 10.20 contains bugfix that fixes crashes when running dialogs in Czkawka Gui - [Wine 49987 issue](https://bugs.winehq.org/show_bug.cgi?id=49987)

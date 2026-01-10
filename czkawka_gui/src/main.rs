@@ -92,7 +92,7 @@ fn main() {
         );
         setup_logger(false, "czkawka_gui", filtering_messages);
         print_version_mode("Czkawka gtk");
-        print_infos_and_warnings(config_cache_path_set_result.infos, config_cache_path_set_result.warnings);
+        print_infos_and_warnings(config_cache_path_set_result.infos.clone(), config_cache_path_set_result.warnings.clone());
         build_ui(app, cli_args.as_ref(), needs_to_open_dialog_about_krokiet);
         ExitCode::new(0)
     });

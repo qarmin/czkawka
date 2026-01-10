@@ -98,6 +98,8 @@ itertools = "0.14"
 static_assertions = "1.1.0"
 file-rotate = "0.8.0"
 
+open = "5.3"
+
 log-panics = { version = "2.1.0", features = ["with-backtrace"] }
 deunicode = "1.6.2"
 glibc_musl_version = "0.1.0"

@@ -1,8 +1,9 @@
 use std::process;
 
-use log::warn;
+use log::{error, warn};
 
 use crate::CZKAWKA_VERSION;
+use crate::common::config_cache_path::get_config_cache_path;
 
 #[derive(Clone, Debug)]
 pub struct CliResult {
@@ -67,6 +68,32 @@ pub fn process_cli_args(app_display: &str, app_exec: &str, args: Vec<String>) ->
             match arg.as_str() {
                 "-e" | "--exclude" => expected_arg = ExpectedArgs::Exclude,
                 "-r" | "--referenced" => expected_arg = ExpectedArgs::Referenced,
+                "-c" | "--cache" => {
+                    // Open cache folder and exit
+                    if let Some(cfg) = get_config_cache_path() {
+                        if let Err(e) = open::that(&cfg.cache_folder) {
+                            error!("Failed to open cache folder \"{}\": {e}", cfg.cache_folder.to_string_lossy());
+                            process::exit(1);
+                        }
+                        process::exit(0);
+                    } else {
+                        error!("Failed to get cache folder path");
+                        process::exit(1);
+                    }
+                }
+                "-C" | "--config" => {
+                    // Open config folder and exit
+                    if let Some(cfg) = get_config_cache_path() {
+                        if let Err(e) = open::that(&cfg.config_folder) {
+                            error!("Failed to open config folder \"{}\": {e}", cfg.config_folder.to_string_lossy());
+                            process::exit(1);
+                        }
+                        process::exit(0);
+                    } else {
+                        error!("Failed to get config folder path");
+                        process::exit(1);
+                    }
+                }
                 _ => {
                     eprintln!("Unknown option: {arg}");
                     process::exit(1);
