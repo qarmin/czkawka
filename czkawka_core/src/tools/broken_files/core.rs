@@ -195,9 +195,10 @@ impl BrokenFiles {
             TypeOfFile::Image => Some(Self::check_broken_image(file_entry)),
             TypeOfFile::ArchiveZip => Self::check_broken_zip(file_entry),
             TypeOfFile::Audio => Self::check_broken_audio(file_entry),
-            TypeOfFile::PDF => Some(Self::check_broken_pdf(file_entry)),
+            TypeOfFile::Pdf => Some(Self::check_broken_pdf(file_entry)),
             // This means that cache read invalid value because maybe cache comes from different czkawka version
             TypeOfFile::Unknown => None,
+            TypeOfFile::Video => unimplemented!(),
         }
     }
 
@@ -302,7 +303,7 @@ fn check_extension_availability(
     } else if audio_extensions.contains(&extension_lowercase.as_str()) {
         TypeOfFile::Audio
     } else if pdf_extensions.contains(&extension_lowercase.as_str()) {
-        TypeOfFile::PDF
+        TypeOfFile::Pdf
     } else {
         error!("File with unknown extension: \"{}\" - {extension_lowercase}", full_name.to_string_lossy());
         debug_assert!(false, "File with unknown extension - \"{}\" - {extension_lowercase}", full_name.to_string_lossy());
@@ -374,7 +375,7 @@ mod tests {
         let path = Path::new("test.pdf");
         assert_eq!(
             check_extension_availability(path, &images_extensions, &zip_extensions, &audio_extensions, &pdf_extensions),
-            TypeOfFile::PDF
+            TypeOfFile::Pdf
         );
     }
 

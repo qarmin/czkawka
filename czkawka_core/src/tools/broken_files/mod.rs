@@ -54,7 +54,8 @@ pub enum TypeOfFile {
     Image = 0,
     ArchiveZip,
     Audio,
-    PDF,
+    Pdf,
+    Video,
 }
 
 bitflags! {
@@ -66,6 +67,7 @@ bitflags! {
         const AUDIO = 0b10;
         const IMAGE = 0b100;
         const ARCHIVE = 0b1000;
+        const VIDEO = 0b10000;
     }
 }
 

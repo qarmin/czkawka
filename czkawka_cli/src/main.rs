@@ -216,7 +216,7 @@ fn similar_images(similar_images: SimilarImagesArgs, stop_flag: &Arc<AtomicBool>
         ignore_same_size,
     } = similar_images;
 
-    let similarity = return_similarity_from_similarity_preset(&similarity_preset, hash_size);
+    let similarity = return_similarity_from_similarity_preset(similarity_preset, hash_size);
     let params = SimilarImagesParameters::new(
         similarity,
         hash_size,

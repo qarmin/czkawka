@@ -126,7 +126,7 @@ pub(crate) fn connect_settings(gui_data: &GuiData) {
                     if response_type == ResponseType::Ok {
                         let mut messages: Messages = Messages::new();
                         for use_prehash in [true, false] {
-                            for type_of_hash in &[HashType::Xxh3, HashType::Blake3, HashType::Crc32] {
+                            for type_of_hash in [HashType::Xxh3, HashType::Blake3, HashType::Crc32] {
                                 let file_name = get_duplicate_cache_file(type_of_hash, use_prehash);
                                 let (mut messages, loaded_items) = load_cache_from_file_generalized_by_size::<DuplicateEntry>(&file_name, true, &Default::default());
 
@@ -167,15 +167,15 @@ pub(crate) fn connect_settings(gui_data: &GuiData) {
                 dialog.connect_response(move |dialog, response_type| {
                     if response_type == ResponseType::Ok {
                         let mut messages: Messages = Messages::new();
-                        for hash_size in &[8, 16, 32, 64] {
-                            for image_filter in &[
+                        for hash_size in [8, 16, 32, 64] {
+                            for image_filter in [
                                 FilterType::Lanczos3,
                                 FilterType::CatmullRom,
                                 FilterType::Gaussian,
                                 FilterType::Nearest,
                                 FilterType::Triangle,
                             ] {
-                                for hash_alg in &[
+                                for hash_alg in [
                                     HashAlg::Blockhash,
                                     HashAlg::Gradient,
                                     HashAlg::DoubleGradient,

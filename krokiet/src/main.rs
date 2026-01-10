@@ -90,7 +90,7 @@ fn main() {
         }
     }
 
-     let app = match MainWindow::new() {
+    let app = match MainWindow::new() {
         Ok(app) => app,
         Err(e) => {
             error!("Error during creating main window: {e}");

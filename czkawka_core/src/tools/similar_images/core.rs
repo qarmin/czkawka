@@ -97,7 +97,7 @@ impl SimilarImages {
 
         if self.common_data.use_cache {
             let (messages, loaded_items) = load_cache_from_file_generalized_by_path::<ImagesEntry>(
-                &get_similar_images_cache_file(&self.get_params().hash_size, &self.get_params().hash_alg, &self.get_params().image_filter),
+                &get_similar_images_cache_file(self.get_params().hash_size, self.get_params().hash_alg, self.get_params().image_filter),
                 self.get_delete_outdated_cache(),
                 &self.images_to_check,
             );
@@ -206,7 +206,7 @@ impl SimilarImages {
             }
 
             let messages = save_cache_to_file_generalized(
-                &get_similar_images_cache_file(&self.get_params().hash_size, &self.get_params().hash_alg, &self.get_params().image_filter),
+                &get_similar_images_cache_file(self.get_params().hash_size, self.get_params().hash_alg, self.get_params().image_filter),
                 &all_results,
                 self.common_data.save_also_as_json,
                 0,
@@ -602,7 +602,7 @@ fn is_in_reference_folder(reference_directories: &[PathBuf], path: &Path) -> boo
 }
 
 #[expect(clippy::indexing_slicing)] // Because hash size is validated before
-pub fn get_string_from_similarity(similarity: &u32, hash_size: u8) -> String {
+pub fn get_string_from_similarity(similarity: u32, hash_size: u8) -> String {
     let index_preset = match hash_size {
         8 => 0,
         16 => 1,
@@ -611,19 +611,19 @@ pub fn get_string_from_similarity(similarity: &u32, hash_size: u8) -> String {
         _ => panic!("Invalid hash size {hash_size}"),
     };
 
-    if *similarity == 0 {
+    if similarity == 0 {
         flc!("core_similarity_original")
-    } else if *similarity <= SIMILAR_VALUES[index_preset][0] {
+    } else if similarity <= SIMILAR_VALUES[index_preset][0] {
         flc!("core_similarity_very_high")
-    } else if *similarity <= SIMILAR_VALUES[index_preset][1] {
+    } else if similarity <= SIMILAR_VALUES[index_preset][1] {
         flc!("core_similarity_high")
-    } else if *similarity <= SIMILAR_VALUES[index_preset][2] {
+    } else if similarity <= SIMILAR_VALUES[index_preset][2] {
         flc!("core_similarity_medium")
-    } else if *similarity <= SIMILAR_VALUES[index_preset][3] {
+    } else if similarity <= SIMILAR_VALUES[index_preset][3] {
         flc!("core_similarity_small")
-    } else if *similarity <= SIMILAR_VALUES[index_preset][4] {
+    } else if similarity <= SIMILAR_VALUES[index_preset][4] {
         flc!("core_similarity_very_small")
-    } else if *similarity <= SIMILAR_VALUES[index_preset][5] {
+    } else if similarity <= SIMILAR_VALUES[index_preset][5] {
         flc!("core_similarity_minimal")
     } else {
         panic!("Invalid similarity value {similarity} for hash size {hash_size} (index {index_preset})");
@@ -631,7 +631,7 @@ pub fn get_string_from_similarity(similarity: &u32, hash_size: u8) -> String {
 }
 
 #[expect(clippy::indexing_slicing)] // Because hash size is validated before
-pub fn return_similarity_from_similarity_preset(similarity_preset: &SimilarityPreset, hash_size: u8) -> u32 {
+pub fn return_similarity_from_similarity_preset(similarity_preset: SimilarityPreset, hash_size: u8) -> u32 {
     let index_preset = match hash_size {
         8 => 0,
         16 => 1,
@@ -738,11 +738,11 @@ fn debug_check_for_duplicated_things(
     assert!(!found_broken_thing);
 }
 
-pub fn get_similar_images_cache_file(hash_size: &u8, hash_alg: &HashAlg, image_filter: &FilterType) -> String {
+pub fn get_similar_images_cache_file(hash_size: u8, hash_alg: HashAlg, image_filter: FilterType) -> String {
     format!(
         "cache_similar_images_{hash_size}_{}_{}_{CACHE_IMAGE_VERSION}.bin",
-        convert_algorithm_to_string(*hash_alg),
-        convert_filters_to_string(*image_filter),
+        convert_algorithm_to_string(hash_alg),
+        convert_filters_to_string(image_filter),
     )
 }
 

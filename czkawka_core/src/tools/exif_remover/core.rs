@@ -380,7 +380,7 @@ pub(crate) fn auto_detect_file_extension<T: Seek + Read>(cursor: &mut T) -> Opti
         }
 }
 
-pub fn file_extension_to_string(extension: &FileExtension) -> &'static str {
+pub fn file_extension_to_string(extension: FileExtension) -> &'static str {
     match extension {
         FileExtension::PNG { .. } => "PNG",
         FileExtension::JPEG => "JPEG",

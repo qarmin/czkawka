@@ -305,19 +305,16 @@ impl GuiMainNotebook {
             let hash_size = IMAGES_HASH_SIZE_COMBO_BOX[hash_size_index];
             match hash_size {
                 8 => {
-                    self.label_similar_images_minimal_similarity.set_text(&get_string_from_similarity(&SIMILAR_VALUES[0][5], 8));
+                    self.label_similar_images_minimal_similarity.set_text(&get_string_from_similarity(SIMILAR_VALUES[0][5], 8));
                 }
                 16 => {
-                    self.label_similar_images_minimal_similarity
-                        .set_text(&get_string_from_similarity(&SIMILAR_VALUES[1][5], 16));
+                    self.label_similar_images_minimal_similarity.set_text(&get_string_from_similarity(SIMILAR_VALUES[1][5], 16));
                 }
                 32 => {
-                    self.label_similar_images_minimal_similarity
-                        .set_text(&get_string_from_similarity(&SIMILAR_VALUES[2][5], 32));
+                    self.label_similar_images_minimal_similarity.set_text(&get_string_from_similarity(SIMILAR_VALUES[2][5], 32));
                 }
                 64 => {
-                    self.label_similar_images_minimal_similarity
-                        .set_text(&get_string_from_similarity(&SIMILAR_VALUES[3][5], 64));
+                    self.label_similar_images_minimal_similarity.set_text(&get_string_from_similarity(SIMILAR_VALUES[3][5], 64));
                 }
                 _ => panic!(),
             }
