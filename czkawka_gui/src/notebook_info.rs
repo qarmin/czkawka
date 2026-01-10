@@ -171,7 +171,14 @@ pub static NOTEBOOKS_INFO: [NotebookObject; CZKAWKA_GTK_TOOL_NUMBER] = [
     NotebookObject {
         name: "Similar Images",
         notebook_type: NotebookMainEnum::SimilarImages,
-        available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date, PopoverTypes::Size, PopoverTypes::PathLength],
+        available_modes: &[
+            PopoverTypes::All,
+            PopoverTypes::Reverse,
+            PopoverTypes::Custom,
+            PopoverTypes::Date,
+            PopoverTypes::Size,
+            PopoverTypes::PathLength,
+        ],
         column_activatable_button: Some(ColumnsSimilarImages::ActivatableSelectButton as i32),
         column_path: ColumnsSimilarImages::Path as i32,
         column_name: ColumnsSimilarImages::Name as i32,
@@ -211,7 +218,14 @@ pub static NOTEBOOKS_INFO: [NotebookObject; CZKAWKA_GTK_TOOL_NUMBER] = [
     NotebookObject {
         name: "Similar Images",
         notebook_type: NotebookMainEnum::SimilarVideos,
-        available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date, PopoverTypes::Size, PopoverTypes::PathLength],
+        available_modes: &[
+            PopoverTypes::All,
+            PopoverTypes::Reverse,
+            PopoverTypes::Custom,
+            PopoverTypes::Date,
+            PopoverTypes::Size,
+            PopoverTypes::PathLength,
+        ],
         column_activatable_button: Some(ColumnsSimilarVideos::ActivatableSelectButton as i32),
         column_path: ColumnsSimilarVideos::Path as i32,
         column_name: ColumnsSimilarVideos::Name as i32,
@@ -252,7 +266,14 @@ pub static NOTEBOOKS_INFO: [NotebookObject; CZKAWKA_GTK_TOOL_NUMBER] = [
     NotebookObject {
         name: "Same Music",
         notebook_type: NotebookMainEnum::SameMusic,
-        available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date, PopoverTypes::Size, PopoverTypes::PathLength],
+        available_modes: &[
+            PopoverTypes::All,
+            PopoverTypes::Reverse,
+            PopoverTypes::Custom,
+            PopoverTypes::Date,
+            PopoverTypes::Size,
+            PopoverTypes::PathLength,
+        ],
         column_activatable_button: Some(ColumnsSameMusic::ActivatableSelectButton as i32),
         column_path: ColumnsSameMusic::Path as i32,
         column_name: ColumnsSameMusic::Name as i32,

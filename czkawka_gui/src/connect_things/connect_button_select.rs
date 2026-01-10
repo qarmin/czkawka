@@ -87,7 +87,7 @@ fn show_required_popovers(popovers_select: &GuiSelectPopovers, sv: &SubView) {
         buttons_popover_select_one_newest.set_visible(false);
         separator_select_date.set_visible(false);
     }
-    
+
     if arr.contains(&PopoverTypes::PathLength) {
         buttons_popover_select_all_except_shortest_path.set_visible(true);
         buttons_popover_select_all_except_longest_path.set_visible(true);
