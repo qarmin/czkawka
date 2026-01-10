@@ -1441,7 +1441,6 @@ dependencies = [
  "deunicode",
  "directories-next",
  "dunce",
- "ffmpeg_cmdline_utils",
  "ffprobe",
  "file-id",
  "file-rotate",

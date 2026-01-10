@@ -7,10 +7,12 @@ use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use humansize::{BINARY, format_size};
 
+use crate::common::ffmpeg_utils::check_if_ffprobe_ffmpeg_exists;
 use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, FixingItems, PrintResults, Search};
+use crate::flc;
 use crate::tools::video_optimizer::{Info, OptimizerMode, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters};
 
 impl AllTraits for VideoOptimizer {}
@@ -142,6 +144,13 @@ impl Search for VideoOptimizer {
         let start_time = Instant::now();
 
         let () = (|| {
+            if !check_if_ffprobe_ffmpeg_exists() {
+                self.common_data.text_messages.errors.push(flc!("core_ffmpeg_not_found"));
+                #[cfg(target_os = "windows")]
+                self.common_data.text_messages.errors.push(flc!("core_ffmpeg_not_found_windows"));
+                return;
+            }
+
             self.prepare_items();
             if self.scan_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
                 self.common_data.stopped_search = true;
