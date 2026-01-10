@@ -20,7 +20,6 @@ pub struct BrokenEntry {
     pub path: PathBuf,
     pub modified_date: u64,
     pub size: u64,
-    pub type_of_file: TypeOfFile,
     pub error_string: String,
 }
 impl ResultEntry for BrokenEntry {
@@ -41,8 +40,6 @@ impl FileEntry {
             size: self.size,
             path: self.path,
             modified_date: self.modified_date,
-
-            type_of_file: TypeOfFile::Unknown,
             error_string: String::new(),
         }
     }

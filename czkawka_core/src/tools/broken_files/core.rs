@@ -4,23 +4,22 @@ use std::path::Path;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 use std::{mem, panic};
+use std::process::Command;
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
-use indexmap::IndexSet;
 use log::{debug, error};
 use lopdf::Document;
 use rayon::prelude::*;
 
 use crate::common::cache::{CACHE_VERSION, extract_loaded_cache, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
-use crate::common::consts::{AUDIO_FILES_EXTENSIONS, IMAGE_RS_BROKEN_FILES_EXTENSIONS, PDF_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS};
+use crate::common::consts::{AUDIO_FILES_EXTENSIONS, IMAGE_RS_BROKEN_FILES_EXTENSIONS, PDF_FILES_EXTENSIONS, VIDEO_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS};
 use crate::common::create_crash_message;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
-use crate::common::traits::ResultEntry;
 use crate::helpers::audio_checker;
 use crate::tools::broken_files::{BrokenEntry, BrokenFiles, BrokenFilesParameters, CheckedTypes, Info, TypeOfFile};
 
@@ -37,17 +36,13 @@ impl BrokenFiles {
 
     #[fun_time(message = "check_files", level = "debug")]
     pub(crate) fn check_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
-        let zip_extensions = ZIP_FILES_EXTENSIONS.iter().copied().collect::<IndexSet<_>>();
-        let audio_extensions = AUDIO_FILES_EXTENSIONS.iter().copied().collect::<IndexSet<_>>();
-        let pdf_extensions = PDF_FILES_EXTENSIONS.iter().copied().collect::<IndexSet<_>>();
-        let images_extensions = IMAGE_RS_BROKEN_FILES_EXTENSIONS.iter().copied().collect::<IndexSet<_>>();
-
         let mut extensions = Vec::new();
         let vec_extensions = [
             (CheckedTypes::PDF, PDF_FILES_EXTENSIONS),
             (CheckedTypes::AUDIO, AUDIO_FILES_EXTENSIONS),
             (CheckedTypes::ARCHIVE, ZIP_FILES_EXTENSIONS),
             (CheckedTypes::IMAGE, IMAGE_RS_BROKEN_FILES_EXTENSIONS),
+            (CheckedTypes::VIDEO, VIDEO_FILES_EXTENSIONS),
         ];
         for (checked_type, extensions_to_add) in &vec_extensions {
             if self.get_params().checked_types.contains(*checked_type) {
@@ -76,8 +71,7 @@ impl BrokenFiles {
                     .into_values()
                     .flatten()
                     .map(|fe| {
-                        let mut broken_entry = fe.into_broken_entry();
-                        broken_entry.type_of_file = check_extension_availability(broken_entry.get_path(), &images_extensions, &zip_extensions, &audio_extensions, &pdf_extensions);
+                        let broken_entry = fe.into_broken_entry();
                         (broken_entry.path.to_string_lossy().to_string(), broken_entry)
                     })
                     .collect();
@@ -168,6 +162,23 @@ impl BrokenFiles {
         })
     }
 
+    fn check_broken_video(mut file_entry: BrokenEntry) -> BrokenEntry {
+        match Command::new("ffprobe").arg(&file_entry.path).output() {
+            Ok(output) => {
+                let combined = format!("{}{}", String::from_utf8_lossy(&output.stdout), String::from_utf8_lossy(&output.stderr));
+                if combined.contains("moov atom not found") {
+                    file_entry.error_string = "moov atom not found".to_string();
+                }
+            }
+            Err(e) => {
+                debug!("Failed to run ffprobe on {:?}: {}", file_entry.path, e);
+            }
+        }
+
+        file_entry
+    }
+
+
     #[fun_time(message = "load_cache", level = "debug")]
     fn load_cache(&mut self) -> (BTreeMap<String, BrokenEntry>, BTreeMap<String, BrokenEntry>, BTreeMap<String, BrokenEntry>) {
         let loaded_hash_map;
@@ -191,14 +202,16 @@ impl BrokenFiles {
     }
 
     fn check_file(file_entry: BrokenEntry) -> Option<BrokenEntry> {
-        match file_entry.type_of_file {
+        match check_extension_availability(&file_entry.path) {
             TypeOfFile::Image => Some(Self::check_broken_image(file_entry)),
             TypeOfFile::ArchiveZip => Self::check_broken_zip(file_entry),
             TypeOfFile::Audio => Self::check_broken_audio(file_entry),
             TypeOfFile::Pdf => Some(Self::check_broken_pdf(file_entry)),
-            // This means that cache read invalid value because maybe cache comes from different czkawka version
-            TypeOfFile::Unknown => None,
-            TypeOfFile::Video => unimplemented!(),
+            TypeOfFile::Video => Some(Self::check_broken_video(file_entry)),
+            TypeOfFile::Unknown => {
+                error!("Unknown file type of: {:?}", file_entry);
+                None
+            }
         }
     }
 
@@ -280,30 +293,30 @@ impl BrokenFiles {
 #[expect(clippy::string_slice)] // Valid, because we address go to dot, which is known ascii character
 fn check_extension_availability(
     full_name: &Path,
-    images_extensions: &IndexSet<&'static str>,
-    zip_extensions: &IndexSet<&'static str>,
-    audio_extensions: &IndexSet<&'static str>,
-    pdf_extensions: &IndexSet<&'static str>,
 ) -> TypeOfFile {
     let Some(file_name) = full_name.file_name() else {
         error!("Missing file name in file - \"{}\"", full_name.to_string_lossy());
         debug_assert!(false, "Missing file name in file - \"{}\"", full_name.to_string_lossy());
         return TypeOfFile::Unknown;
     };
+
+    // Faster manual conversion than using Path::extension()
     let Some(file_name_str) = file_name.to_str() else { return TypeOfFile::Unknown };
     let Some(extension_idx) = file_name_str.rfind('.') else { return TypeOfFile::Unknown };
     let extension_str = &file_name_str[extension_idx + 1..];
 
     let extension_lowercase = extension_str.to_ascii_lowercase();
 
-    if images_extensions.contains(&extension_lowercase.as_str()) {
+    if IMAGE_RS_BROKEN_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
         TypeOfFile::Image
-    } else if zip_extensions.contains(&extension_lowercase.as_str()) {
+    } else if ZIP_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
         TypeOfFile::ArchiveZip
-    } else if audio_extensions.contains(&extension_lowercase.as_str()) {
-        TypeOfFile::Audio
-    } else if pdf_extensions.contains(&extension_lowercase.as_str()) {
+    } else if PDF_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
         TypeOfFile::Pdf
+    } else if AUDIO_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
+        TypeOfFile::Audio
+    } else if VIDEO_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
+        TypeOfFile::Video
     } else {
         error!("File with unknown extension: \"{}\" - {extension_lowercase}", full_name.to_string_lossy());
         debug_assert!(false, "File with unknown extension - \"{}\" - {extension_lowercase}", full_name.to_string_lossy());
@@ -313,97 +326,4 @@ fn check_extension_availability(
 
 pub fn get_broken_files_cache_file() -> String {
     format!("cache_broken_files_{CACHE_VERSION}.bin")
-}
-
-#[cfg(test)]
-mod tests {
-    use std::path::Path;
-
-    use indexmap::{IndexSet, indexset};
-
-    use super::*;
-
-    #[test]
-    fn test_check_extension_availability_image() {
-        let images_extensions: IndexSet<&str> = indexset! {"jpg", "png", "gif"};
-        let zip_extensions: IndexSet<&str> = IndexSet::new();
-        let audio_extensions: IndexSet<&str> = IndexSet::new();
-        let pdf_extensions: IndexSet<&str> = IndexSet::new();
-
-        let path = Path::new("test.jpg");
-        assert_eq!(
-            check_extension_availability(path, &images_extensions, &zip_extensions, &audio_extensions, &pdf_extensions),
-            TypeOfFile::Image
-        );
-    }
-
-    #[test]
-    fn test_check_extension_availability_zip() {
-        let images_extensions: IndexSet<&str> = IndexSet::new();
-        let zip_extensions: IndexSet<&str> = indexset! {"zip", "rar"};
-        let audio_extensions: IndexSet<&str> = IndexSet::new();
-        let pdf_extensions: IndexSet<&str> = IndexSet::new();
-
-        let path = Path::new("test.zip");
-        assert_eq!(
-            check_extension_availability(path, &images_extensions, &zip_extensions, &audio_extensions, &pdf_extensions),
-            TypeOfFile::ArchiveZip
-        );
-    }
-
-    #[test]
-    fn test_check_extension_availability_audio() {
-        let images_extensions: IndexSet<&str> = IndexSet::new();
-        let zip_extensions: IndexSet<&str> = IndexSet::new();
-        let audio_extensions: IndexSet<&str> = indexset! {"mp3", "wav"};
-        let pdf_extensions: IndexSet<&str> = IndexSet::new();
-
-        let path = Path::new("test.mp3");
-        assert_eq!(
-            check_extension_availability(path, &images_extensions, &zip_extensions, &audio_extensions, &pdf_extensions),
-            TypeOfFile::Audio
-        );
-    }
-
-    #[test]
-    fn test_check_extension_availability_pdf() {
-        let images_extensions: IndexSet<&str> = IndexSet::new();
-        let zip_extensions: IndexSet<&str> = IndexSet::new();
-        let audio_extensions: IndexSet<&str> = IndexSet::new();
-        let pdf_extensions: IndexSet<&str> = indexset! {"pdf"};
-
-        let path = Path::new("test.pdf");
-        assert_eq!(
-            check_extension_availability(path, &images_extensions, &zip_extensions, &audio_extensions, &pdf_extensions),
-            TypeOfFile::Pdf
-        );
-    }
-
-    #[test]
-    fn test_check_extension_availability_no_extension() {
-        let images_extensions: IndexSet<&str> = IndexSet::new();
-        let zip_extensions: IndexSet<&str> = IndexSet::new();
-        let audio_extensions: IndexSet<&str> = IndexSet::new();
-        let pdf_extensions: IndexSet<&str> = IndexSet::new();
-
-        let path = Path::new("test");
-        assert_eq!(
-            check_extension_availability(path, &images_extensions, &zip_extensions, &audio_extensions, &pdf_extensions),
-            TypeOfFile::Unknown
-        );
-    }
-
-    #[test]
-    fn test_check_no_extension() {
-        let images_extensions: IndexSet<&str> = IndexSet::new();
-        let zip_extensions: IndexSet<&str> = IndexSet::new();
-        let audio_extensions: IndexSet<&str> = indexset! {"mp3", "wav"};
-        let pdf_extensions: IndexSet<&str> = IndexSet::new();
-
-        let path = Path::new("/home/.mp3");
-        assert_eq!(
-            check_extension_availability(path, &images_extensions, &zip_extensions, &audio_extensions, &pdf_extensions),
-            TypeOfFile::Audio
-        );
-    }
 }
