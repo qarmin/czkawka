@@ -389,8 +389,8 @@ pub struct BrokenFilesArgs {
         long,
         default_value = "PDF",
         value_parser = parse_broken_files,
-        help = "Checking file types (PDF, AUDIO, IMAGE, ARCHIVE)",
-        long_help = "Methods to search files - default PDF.\nPDF - finds broken PDF files,\nAUDIO - finds broken audio files,\nIMAGE - finds broken image files,\nARCHIVE - finds broken archive files"
+        help = "Checking file types (PDF, AUDIO, IMAGE, ARCHIVE, VIDEO)",
+        long_help = "Methods to search files - default PDF.\nPDF - finds broken PDF files,\nAUDIO - finds broken audio files,\nIMAGE - finds broken image files,\nARCHIVE - finds broken archive files,\nVIDEO - finds broken video files"
     )]
     pub checked_types: Vec<CheckedTypes>,
 }
@@ -704,7 +704,8 @@ fn parse_broken_files(src: &str) -> Result<CheckedTypes, &'static str> {
         "audio" => Ok(CheckedTypes::AUDIO),
         "image" => Ok(CheckedTypes::IMAGE),
         "archive" => Ok(CheckedTypes::ARCHIVE),
-        _ => Err("Couldn't parse the broken files type (allowed: PDF, AUDIO, IMAGE, ARCHIVE)"),
+        "video" => Ok(CheckedTypes::VIDEO),
+        _ => Err("Couldn't parse the broken files type (allowed: PDF, AUDIO, IMAGE, ARCHIVE, VIDEO)"),
     }
 }
 

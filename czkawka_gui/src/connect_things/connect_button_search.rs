@@ -496,6 +496,7 @@ fn broken_files_search(
     let check_button_broken_files_pdf: gtk4::CheckButton = gui_data.main_notebook.check_button_broken_files_pdf.clone();
     let check_button_broken_files_audio: gtk4::CheckButton = gui_data.main_notebook.check_button_broken_files_audio.clone();
     let check_button_broken_files_image: gtk4::CheckButton = gui_data.main_notebook.check_button_broken_files_image.clone();
+    let check_button_broken_files_video: gtk4::CheckButton = gui_data.main_notebook.check_button_broken_files_video.clone();
 
     clean_tree_view(&gui_data.main_notebook.common_tree_views.get_current_subview().tree_view);
 
@@ -512,6 +513,9 @@ fn broken_files_search(
     }
     if check_button_broken_files_archive.is_active() {
         checked_types |= CheckedTypes::ARCHIVE;
+    }
+    if check_button_broken_files_video.is_active() {
+        checked_types |= CheckedTypes::VIDEO;
     }
 
     if checked_types != CheckedTypes::NONE {

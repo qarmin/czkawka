@@ -250,7 +250,7 @@ settings_duplicate_minimal_prehash_cache_size = Minimal size of cached files - P
 settings_duplicate_delete_outdated_entries = Delete automatically outdated entries
 settings_similar_images_show_image_preview = Image preview
 settings_application_scale_text = Application scale
-settings_application_scale_hint_text = Manual application scale (e.g., 1.0 = 100%)
+settings_application_scale_hint_text = When manual scale is enabled, this allows you to choose a custom scale factor, but completely disables automatic scaling based on the monitor’s DPI.
 settings_restart_required_scale_text = ---You need to restart app to apply changes in scale---
 settings_use_manual_application_scale_text = Use manual application scale
 

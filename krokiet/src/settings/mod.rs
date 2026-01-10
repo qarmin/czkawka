@@ -455,6 +455,7 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_broken_files_sub_pdf(custom_settings.broken_files_sub_pdf);
     settings.set_broken_files_sub_archive(custom_settings.broken_files_sub_archive);
     settings.set_broken_files_sub_image(custom_settings.broken_files_sub_image);
+    settings.set_broken_files_sub_video(custom_settings.broken_files_sub_video);
 
     settings.set_video_optimizer_sub_excluded_codecs(custom_settings.video_optimizer_excluded_codecs.clone().into());
     settings.set_video_optimizer_sub_video_quality(custom_settings.video_optimizer_video_quality as f32);
@@ -599,6 +600,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let broken_files_sub_pdf = settings.get_broken_files_sub_pdf();
     let broken_files_sub_archive = settings.get_broken_files_sub_archive();
     let broken_files_sub_image = settings.get_broken_files_sub_image();
+    let broken_files_sub_video = settings.get_broken_files_sub_video();
 
     let video_optimizer_sub_mode_idx = settings.get_video_optimizer_sub_mode_index();
     let video_optimizer_mode = StringComboBoxItems::get_config_name_from_idx(video_optimizer_sub_mode_idx as usize, &collected_items.video_optimizer_mode);
@@ -687,6 +689,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         broken_files_sub_pdf,
         broken_files_sub_archive,
         broken_files_sub_image,
+        broken_files_sub_video,
         similar_videos_skip_forward_amount,
         similar_videos_vid_hash_duration,
         similar_videos_crop_detect,

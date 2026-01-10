@@ -145,6 +145,8 @@ pub struct SettingsCustom {
     pub broken_files_sub_archive: bool,
     #[serde(default = "ttrue")]
     pub broken_files_sub_image: bool,
+    #[serde(default)]
+    pub broken_files_sub_video: bool,
     #[serde(default = "default_similar_videos_skip_forward_amount")]
     pub similar_videos_skip_forward_amount: u32,
     #[serde(default = "default_similar_videos_vid_hash_duration")]

@@ -862,6 +862,12 @@
                                 <property name="label">Image</property>
                               </object>
                             </child>
+                            <child>
+                              <object class="GtkCheckButton" id="check_button_broken_files_video">
+                                <property name="active">True</property>
+                                <property name="label">Video</property>
+                              </object>
+                            </child>
                           </object>
                         </child>
                         <child>

@@ -998,6 +998,9 @@ fn scan_broken_files(
             if custom_settings.broken_files_sub_archive {
                 checked_types |= CheckedTypes::ARCHIVE;
             }
+            if custom_settings.broken_files_sub_video {
+                checked_types |= CheckedTypes::VIDEO;
+            }
 
             if checked_types == CheckedTypes::NONE {
                 a.upgrade_in_event_loop(move |app| {
