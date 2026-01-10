@@ -90,9 +90,16 @@ fn main() {
         }
     }
 
-    // TODO Set custom scale
-
-    let app = MainWindow::new().expect("Failed to create main window");
+    let app =     match MainWindow::new() {
+        Ok(app) => {
+            app
+        }
+        Err(e) => {
+            error!("Error during creating main window: {e}" );
+            show_critical_error(e.to_string());
+            return;
+        }
+    };
 
     let (progress_sender, progress_receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
     let stop_flag: Arc<AtomicBool> = Arc::default();
@@ -144,12 +151,16 @@ fn main() {
         }
         Err(e) => {
             error!("Error during running the application: {}", e);
-            rfd::MessageDialog::new()
-                .set_title(flk!("rust_init_error_title"))
-                .set_description(&flk!("rust_init_error_message", error_message = e.to_string()))
-                .show();
+            show_critical_error(e.to_string());
         }
     }
+}
+
+pub fn show_critical_error(error: String) {
+    rfd::MessageDialog::new()
+        .set_title(flk!("rust_init_error_title"))
+        .set_description(&flk!("rust_init_error_message", error_message = error))
+        .show();
 }
 
 pub(crate) fn zeroing_all_models(app: &MainWindow) {
