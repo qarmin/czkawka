@@ -78,6 +78,70 @@ fn popover_reverse(popover: &gtk4::Popover, tree_view: &gtk4::TreeView, column_b
     popover.popdown();
 }
 
+fn popover_all_except_longest_shortest_path(
+    popover: &gtk4::Popover,
+    tree_view: &gtk4::TreeView,
+    column_header: i32,
+    column_path: i32,
+    column_button_selection: u32,
+    except_longest: bool,
+) {
+    let model = tree_view.get_model();
+
+    if let Some(iter) = model.iter_first() {
+        let mut end: bool = false;
+        loop {
+            let mut tree_iter_array: Vec<TreeIter> = Vec::new();
+            let mut used_index: Option<usize> = None;
+            let mut current_index: usize = 0;
+
+            let mut path_extreme: usize = if except_longest { usize::MAX } else { 0 };
+
+            loop {
+                if model.get::<bool>(&iter, column_header) {
+                    if !model.iter_next(&iter) {
+                        end = true;
+                    }
+                    break;
+                }
+                tree_iter_array.push(iter);
+                let path_length = model.get::<String>(&iter, column_path).len();
+                if except_longest {
+                    if path_length < path_extreme {
+                        path_extreme = path_length;
+                        used_index = Some(current_index);
+                    }
+                } else if path_length > path_extreme {
+                    path_extreme = path_length;
+                    used_index = Some(current_index);
+                }
+                current_index += 1;
+
+                if !model.iter_next(&iter) {
+                    end = true;
+                    break;
+                }
+            }
+            let Some(used_index) = used_index else {
+                continue;
+            };
+            for (index, tree_iter) in tree_iter_array.iter().enumerate() {
+                if index != used_index {
+                    model.set_value(tree_iter, column_button_selection, &true.to_value());
+                } else {
+                    model.set_value(tree_iter, column_button_selection, &false.to_value());
+                }
+            }
+
+            if end {
+                break;
+            }
+        }
+    }
+
+    popover.popdown();
+}
+
 fn popover_all_except_oldest_newest(
     popover: &gtk4::Popover,
     tree_view: &gtk4::TreeView,
@@ -651,6 +715,40 @@ pub(crate) fn connect_popover_select(gui_data: &GuiData) {
             sv.nb_object.column_header.expect("AEN can't be used without headers"),
             sv.nb_object.column_modification_as_secs.expect("AEN needs modification as secs column"),
             sv.nb_object.column_name,
+            sv.nb_object.column_selection as u32,
+            false,
+        );
+    });
+
+    let popover_select = gui_data.popovers_select.popover_select.clone();
+    let buttons_popover_select_all_except_shortest = gui_data.popovers_select.buttons_popover_select_all_except_shortest_path.clone();
+
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
+    buttons_popover_select_all_except_shortest.connect_clicked(move |_| {
+        let sv = common_tree_views.get_current_subview();
+
+        popover_all_except_longest_shortest_path(
+            &popover_select,
+            &sv.tree_view,
+            sv.nb_object.column_header.expect("AES can't be used without headers"),
+            sv.nb_object.column_path,
+            sv.nb_object.column_selection as u32,
+            true,
+        );
+    });
+
+    let popover_select = gui_data.popovers_select.popover_select.clone();
+    let buttons_popover_select_all_except_longest = gui_data.popovers_select.buttons_popover_select_all_except_longest_path.clone();
+
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
+    buttons_popover_select_all_except_longest.connect_clicked(move |_| {
+        let sv = common_tree_views.get_current_subview();
+
+        popover_all_except_longest_shortest_path(
+            &popover_select,
+            &sv.tree_view,
+            sv.nb_object.column_header.expect("AES can't be used without headers"),
+            sv.nb_object.column_path,
             sv.nb_object.column_selection as u32,
             false,
         );

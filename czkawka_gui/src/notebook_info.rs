@@ -39,6 +39,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; CZKAWKA_GTK_TOOL_NUMBER] = [
             PopoverTypes::Date,
             PopoverTypes::Size,
             PopoverTypes::All,
+            PopoverTypes::PathLength,
         ],
         column_activatable_button: Some(ColumnsDuplicates::ActivatableSelectButton as i32),
         column_path: ColumnsDuplicates::Path as i32,
@@ -76,7 +77,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; CZKAWKA_GTK_TOOL_NUMBER] = [
     NotebookObject {
         name: "Empty Folders",
         notebook_type: NotebookMainEnum::EmptyDirectories,
-        available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom],
+        available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::PathLength],
         column_activatable_button: None,
         column_path: ColumnsEmptyFolders::Path as i32,
         column_name: ColumnsEmptyFolders::Name as i32,
@@ -99,7 +100,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; CZKAWKA_GTK_TOOL_NUMBER] = [
     NotebookObject {
         name: "Big Files",
         notebook_type: NotebookMainEnum::BigFiles,
-        available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom],
+        available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::PathLength],
         column_activatable_button: None,
         column_path: ColumnsBigFiles::Path as i32,
         column_name: ColumnsBigFiles::Name as i32,
@@ -124,7 +125,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; CZKAWKA_GTK_TOOL_NUMBER] = [
     NotebookObject {
         name: "Big Files",
         notebook_type: NotebookMainEnum::EmptyFiles,
-        available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom],
+        available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::PathLength],
         column_activatable_button: None,
         column_path: ColumnsEmptyFiles::Path as i32,
         column_name: ColumnsEmptyFiles::Name as i32,
@@ -147,7 +148,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; CZKAWKA_GTK_TOOL_NUMBER] = [
     NotebookObject {
         name: "Temporary Files",
         notebook_type: NotebookMainEnum::Temporary,
-        available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom],
+        available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::PathLength],
         column_activatable_button: None,
         column_path: ColumnsTemporaryFiles::Path as i32,
         column_name: ColumnsTemporaryFiles::Name as i32,
@@ -170,7 +171,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; CZKAWKA_GTK_TOOL_NUMBER] = [
     NotebookObject {
         name: "Similar Images",
         notebook_type: NotebookMainEnum::SimilarImages,
-        available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date, PopoverTypes::Size],
+        available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date, PopoverTypes::Size, PopoverTypes::PathLength],
         column_activatable_button: Some(ColumnsSimilarImages::ActivatableSelectButton as i32),
         column_path: ColumnsSimilarImages::Path as i32,
         column_name: ColumnsSimilarImages::Name as i32,
@@ -210,7 +211,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; CZKAWKA_GTK_TOOL_NUMBER] = [
     NotebookObject {
         name: "Similar Images",
         notebook_type: NotebookMainEnum::SimilarVideos,
-        available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date, PopoverTypes::Size],
+        available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date, PopoverTypes::Size, PopoverTypes::PathLength],
         column_activatable_button: Some(ColumnsSimilarVideos::ActivatableSelectButton as i32),
         column_path: ColumnsSimilarVideos::Path as i32,
         column_name: ColumnsSimilarVideos::Name as i32,
@@ -251,7 +252,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; CZKAWKA_GTK_TOOL_NUMBER] = [
     NotebookObject {
         name: "Same Music",
         notebook_type: NotebookMainEnum::SameMusic,
-        available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date, PopoverTypes::Size],
+        available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::Date, PopoverTypes::Size, PopoverTypes::PathLength],
         column_activatable_button: Some(ColumnsSameMusic::ActivatableSelectButton as i32),
         column_path: ColumnsSameMusic::Path as i32,
         column_name: ColumnsSameMusic::Name as i32,
@@ -295,7 +296,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; CZKAWKA_GTK_TOOL_NUMBER] = [
     NotebookObject {
         name: "Invalid Symlinks",
         notebook_type: NotebookMainEnum::Symlinks,
-        available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom],
+        available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::PathLength],
         column_activatable_button: None,
         column_path: ColumnsInvalidSymlinks::Path as i32,
         column_name: ColumnsInvalidSymlinks::Name as i32,
@@ -320,7 +321,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; CZKAWKA_GTK_TOOL_NUMBER] = [
     NotebookObject {
         name: "Broken Files",
         notebook_type: NotebookMainEnum::BrokenFiles,
-        available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom],
+        available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::PathLength],
         column_activatable_button: None,
         column_path: ColumnsBrokenFiles::Path as i32,
         column_name: ColumnsBrokenFiles::Name as i32,
@@ -344,7 +345,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; CZKAWKA_GTK_TOOL_NUMBER] = [
     NotebookObject {
         name: "Bad Extensions",
         notebook_type: NotebookMainEnum::BadExtensions,
-        available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom],
+        available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::PathLength],
         column_activatable_button: None,
         column_path: ColumnsBadExtensions::Path as i32,
         column_name: ColumnsBadExtensions::Name as i32,
