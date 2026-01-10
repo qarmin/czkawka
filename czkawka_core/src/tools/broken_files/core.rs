@@ -180,10 +180,10 @@ impl BrokenFiles {
             Some(Ok(output)) => {
                 let combined = format!("{}{}", String::from_utf8_lossy(&output.stdout), String::from_utf8_lossy(&output.stderr));
 
-                use std::io::Write;
-                if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open("a.txt") {
-                    let _ = writeln!(f, "{}", combined);
-                }
+                // use std::io::Write;
+                // if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open("a.txt") {
+                //     let _ = writeln!(f, "{}", combined);
+                // }
 
                 if let Some((error_message, additional_message)) = ffprobe_errors.iter().find(|(err, _)| combined.contains(err)) {
                     file_entry.error_string = format!("{error_message}{}", additional_message.map(|e| format!(" ({e})")).unwrap_or_default());
@@ -217,10 +217,10 @@ impl BrokenFiles {
             Some(Ok(output)) => {
                 let combined = format!("{}{}", String::from_utf8_lossy(&output.stdout), String::from_utf8_lossy(&output.stderr));
 
-                use std::io::Write;
-                if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open("b.txt") {
-                    let _ = writeln!(f, "{} --- \n{}", file_entry.path.to_string_lossy(), combined);
-                }
+                // use std::io::Write;
+                // if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open("b.txt") {
+                //     let _ = writeln!(f, "{} --- \n{}", file_entry.path.to_string_lossy(), combined);
+                // }
 
                 if ffmpeg_allowed_messages.iter().any(|msg| combined.contains(msg)) {
                     // Allowed message, do nothing
