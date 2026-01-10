@@ -94,8 +94,15 @@ impl BrokenFiles {
         let mut file_entry_clone = file_entry.clone();
 
         panic::catch_unwind(|| {
-            if let Err(e) = image::open(&file_entry.path) {
-                file_entry.error_string = e.to_string();
+            match image::open(&file_entry.path) {
+                Ok(img) => {
+                    if img.width() == 0 || img.height() == 0 {
+                        file_entry.error_string = "Image has zero width or height".to_string();
+                    }
+                }
+                Err(e) => {
+                    file_entry.error_string = e.to_string();
+                }
             }
             file_entry
         })

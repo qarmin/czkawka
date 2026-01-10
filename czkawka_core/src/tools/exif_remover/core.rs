@@ -265,9 +265,11 @@ pub fn clean_exif_tags(file_path: &str, tags_to_remove: &[(u16, String)], overri
         let mut tags_removed: u32 = 0;
         for (tag_u16, tag_group) in tags_to_remove {
             let Ok(tag_group) = string_to_exif_tag_group(tag_group) else {
+                error!("Unknown EXIF tag group string: {tag_group}, skipping tag removal.");
                 continue;
             };
 
+            // TODO https://github.com/TechnikTobi/little_exif/pull/92
             let Ok(tag) = ExifTag::from_u16(*tag_u16, &tag_group) else {
                 continue;
             };

@@ -76,6 +76,8 @@ options to choose than other).
 |     Invalid symlinks      |      ✔      |      ✔      |   ✔    |                   |             |
 |       Broken files        |      ✔      |      ✔      |        |                   |             |
 | Invalid names/extensions  |      ✔      |      ✔      |   ✔    |                   |             |
+|       Exif cleaner        |             |      ✔      |        |                   |             |
+|      Video optimizer      |             |      ✔      |        |                   |             |
 |      Names conflict       |             |             |   ✔    |                   |             |
 |    Installed packages     |             |             |   ✔    |                   |             |
 |          Bad ID           |             |             |   ✔    |                   |             |
@@ -84,9 +86,9 @@ options to choose than other).
 |     Overwriting files     |             |             |   ✔    |                   |      ✔      |
 |    Multiple languages     |      ✔      |      ✔      |   ✔    |         ✔         |      ✔      |
 |       Cache support       |      ✔      |      ✔      |        |         ✔         |             |
-|   In active development   |     Yes     |     Yes     |   No   |        No<sup>*</sup>        |     Yes     |
+|   In active development   |     Yes     |     Yes     |   No   |  No<sup>*</sup>   |     Yes     |
 
-<p><sup>*</sup> Last commit in 2024 and last version released in 2023</p> 
+<p><sup>*</sup> Few small commits added recently and last version released in 2023</p> 
 
 ## Other apps
 
