@@ -49,6 +49,7 @@
 - Cleaning messages in bottom panel, when scan starts - [#1726](https://github.com/qarmin/czkawka/pull/1726)
 - Fix crash, when user clicked at previous results while new scan was in progress - [#1726](https://github.com/qarmin/czkawka/pull/1726)
 - Defaulting to remove files to trash instead permanent deletion - [#1726](https://github.com/qarmin/czkawka/pull/1726)
+- Added notification dialog, when app cannot be opened - []()
 
 ### External
 - Wine 10.20 contains bugfix that fixes crashes when running dialogs in Czkawka Gui - [Wine 49987 issue](https://bugs.winehq.org/show_bug.cgi?id=49987)

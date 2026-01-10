@@ -9,19 +9,19 @@ general_ok_button = Ok
 general_close_button = Close
 
 # Krokiet info dialog
-krokiet_info_title = Introducing Krokiet - New Version of Czkawka
+krokiet_info_title = Introducing Krokiet - New version of Czkawka
 krokiet_info_message =
-        Krokiet is the new, improved, faster and less buggy version of Czkawka GTK GUI!
+        Krokiet is the new, improved, faster, and more reliable version of the Czkawka GTK GUI!
 
-        Being self-contained, it is much easier to run and more resistant to system changes and package version updates.
+        It’s easier to run and more resilient to system changes, as it depends only on core libraries available on most systems by default.
 
-        It includes many features unavailable in Czkawka, such as thumbnails in video comparison mode, file move/copy/delete progress and extended sorting options.
+        Krokiet also brings features that Czkawka lacks, including thumbnails in video comparison mode, an EXIF cleaner, file move/copy/delete progress or extended sorting options.
 
-        Try it out and see the difference!
+        Give it a try and see the difference!
 
-        Czkawka will still receive bug fixes and minor updates, but all new features will be implemented in Krokiet only.
+        Czkawka will continue to receive bug fixes and minor updates, but all new features will be developed exclusively for Krokiet.
 
-        PS. This message should be visible only once, but if it appears again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non empty value.
+        PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
 
 # Main window
 music_title_checkbox = Title

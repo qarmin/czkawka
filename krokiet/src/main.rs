@@ -20,7 +20,7 @@ use file_actions::connect_move::connect_move;
 use file_actions::connect_optimize_video::connect_optimize_video;
 use file_actions::connect_rename::connect_rename;
 use file_actions::connect_symlink::connect_symlink;
-use log::info;
+use log::{error, info};
 use slint::VecModel;
 
 use crate::clear_outdated_video_thumbnails::clear_outdated_video_thumbnails;
@@ -138,9 +138,18 @@ fn main() {
     // This is simpler solution, than setting sizes of popups manually for each language
     app.invoke_initialize_popup_sizes();
 
-    app.run().expect("Failed to run app :(");
-
-    save_all_settings_to_file(&app, original_preset_idx);
+    match app.run() {
+        Ok(_) => {
+            save_all_settings_to_file(&app, original_preset_idx);
+        }
+        Err(e) => {
+            error!("Error during running the application: {}", e);
+            rfd::MessageDialog::new()
+                .set_title(flk!("rust_init_error_title"))
+                .set_description(&flk!("rust_init_error_message", error_message = e.to_string()))
+                .show();
+        }
+    }
 }
 
 pub(crate) fn zeroing_all_models(app: &MainWindow) {

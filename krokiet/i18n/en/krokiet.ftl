@@ -1,4 +1,14 @@
 # In Rust translations
+rust_init_error_title = Critical Error During App Startup
+rust_init_error_message =
+    A critical error occurred while starting the application:
+
+    { $error_message }
+
+    This may be caused by missing or malfunctioning OpenGL/Vulkan drivers, running the application in a virtual machine or a bug in Krokiet or one of its libraries.
+
+    You can try running different builds (skia_opengl, skia_vulkan, femtovg_opengl - the default) or with software renderer to see if that resolves the issue.
+
 rust_loaded_preset = Loaded preset { $preset_idx }
 rust_file_already_exists = File \"{ $file }\" already exists, and will not be overridden
 rust_error_removing_file_after_copy = Error while removing file \"{ $file }\" (after copying into different partition), reason: { $reason }
