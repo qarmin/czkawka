@@ -78,9 +78,6 @@ fn main() {
         || config_cache_path_set_result.default_cache_path_exists
         || config_cache_path_set_result.default_config_path_exists
         || option_env!("CZKAWKA_DONT_ANNOY_ME").as_ref().is_some_and(|x| !x.is_empty()));
-    setup_logger(false, "czkawka_gui", filtering_messages);
-    print_version_mode("Czkawka gtk");
-    print_infos_and_warnings(config_cache_path_set_result.infos, config_cache_path_set_result.warnings);
 
     let application = Application::new(None::<String>, ApplicationFlags::HANDLES_OPEN | ApplicationFlags::HANDLES_COMMAND_LINE);
 
@@ -93,6 +90,9 @@ fn main() {
             "czkawka_gui",
             cmdline.arguments().into_iter().skip(1).map(|x| x.to_string_lossy().to_string()).collect(),
         );
+        setup_logger(false, "czkawka_gui", filtering_messages);
+        print_version_mode("Czkawka gtk");
+        print_infos_and_warnings(config_cache_path_set_result.infos, config_cache_path_set_result.warnings);
         build_ui(app, cli_args.as_ref(), needs_to_open_dialog_about_krokiet);
         ExitCode::new(0)
     });

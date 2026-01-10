@@ -32,6 +32,8 @@ pub fn process_cli_args(app_display: &str, app_exec: &str, args: Vec<String>) ->
         println!("  FOLDER                Include a folder in the search");
         println!("  -e FOLDER, --exclude FOLDER      Exclude a folder from the search");
         println!("  -r FOLDER, --referenced FOLDER   Include a folder and set it as referenced");
+        println!("  --cache, -c           Opens the cache folder");
+        println!("  --config, -C          Opens the config folder");
         println!("  --help, -h            Show this help message");
         println!("  --version, -v         Show version information");
         println!("Examples:");
@@ -41,7 +43,14 @@ pub fn process_cli_args(app_display: &str, app_exec: &str, args: Vec<String>) ->
         process::exit(0);
     }
     if ["--version", "-v"].iter().any(|&arg| args.contains(&arg.to_string())) {
-        println!("{app_display} version {CZKAWKA_VERSION}");
+        let git_commit = env!("CZKAWKA_GIT_COMMIT_SHORT");
+        let official_build = if env!("CZKAWKA_OFFICIAL_BUILD") == "1" {
+            "O" // Official build
+        } else {
+            "U" // Unofficial build
+        };
+        let git_date = env!("CZKAWKA_GIT_COMMIT_DATE");
+        println!("{app_display} version {CZKAWKA_VERSION}({git_commit} {official_build} {git_date})");
         process::exit(0);
     }
 
