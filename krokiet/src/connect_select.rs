@@ -26,6 +26,8 @@ pub(crate) fn connect_select(app: &MainWindow) {
             SelectMode::SelectTheSmallestResolution => select_by_resolution(&current_model, active_tab, false),
             SelectMode::SelectNewest => select_by_size_date(&current_model, active_tab, true, false),
             SelectMode::SelectOldest => select_by_size_date(&current_model, active_tab, false, false),
+            SelectMode::SelectShortestPath => select_by_path_length(&current_model, active_tab, false),
+            SelectMode::SelectLongestPath => select_by_path_length(&current_model, active_tab, true),
         };
         active_tab.set_tool_model(&app, new_model);
         change_number_of_enabled_items(&app, active_tab, checked_items as i64 - unchecked_items as i64);
@@ -51,6 +53,8 @@ fn set_select_buttons(app: &MainWindow) {
             SelectMode::SelectNewest,
             SelectMode::SelectTheSmallestSize,
             SelectMode::SelectTheBiggestSize,
+            SelectMode::SelectShortestPath,
+            SelectMode::SelectLongestPath,
         ],
         ActiveTab::SimilarImages => vec![
             SelectMode::SelectOldest,
@@ -59,6 +63,8 @@ fn set_select_buttons(app: &MainWindow) {
             SelectMode::SelectTheBiggestSize,
             SelectMode::SelectTheSmallestResolution,
             SelectMode::SelectTheBiggestResolution,
+            SelectMode::SelectShortestPath,
+            SelectMode::SelectLongestPath,
         ],
         ActiveTab::EmptyFolders
         | ActiveTab::BigFiles
@@ -125,6 +131,58 @@ fn select_by_resolution(model: &ModelRc<MainListModel>, active_tab: ActiveTab, b
             for j in (headers_idx[i] + 1)..headers_idx[i + 1] {
                 let int_data = old_data[j].val_int.iter().collect::<Vec<_>>();
                 let item = (int_data[width_idx] * int_data[height_idx]) as u64;
+                if item < min_item {
+                    min_item = item;
+                    min_item_idx = j;
+                }
+            }
+            if !old_data[min_item_idx].checked {
+                checked_items += 1;
+            }
+            old_data[min_item_idx].checked = true;
+        }
+    }
+
+    (checked_items, 0, ModelRc::new(VecModel::from(old_data)))
+}
+
+// TODO, refactor with size_date (and possibly resolution) to reduce duplication.
+fn select_by_path_length(model: &ModelRc<MainListModel>, active_tab: ActiveTab, longest_path: bool) -> SelectionResult {
+    let mut checked_items = 0;
+
+    let is_header_mode = active_tab.get_is_header_mode();
+    assert!(is_header_mode); // non header modes not really have reason to use this function
+
+    let mut old_data = model.iter().collect::<Vec<_>>();
+    let headers_idx = find_header_idx_and_deselect_all(&mut old_data);
+    let item_idx = active_tab.get_str_path_idx();
+
+    if longest_path {
+        for i in 0..(headers_idx.len() - 1) {
+            let mut max_item = 0;
+            let mut max_item_idx = 1;
+            #[expect(clippy::needless_range_loop)]
+            for j in (headers_idx[i] + 1)..headers_idx[i + 1] {
+                let str_data = old_data[j].val_str.iter().collect::<Vec<_>>();
+                let item = str_data[item_idx].len();
+                if item > max_item {
+                    max_item = item;
+                    max_item_idx = j;
+                }
+            }
+            if !old_data[max_item_idx].checked {
+                checked_items += 1;
+            }
+            old_data[max_item_idx].checked = true;
+        }
+    } else {
+        for i in 0..(headers_idx.len() - 1) {
+            let mut min_item = usize::MAX;
+            let mut min_item_idx = 1;
+            #[expect(clippy::needless_range_loop)]
+            for j in (headers_idx[i] + 1)..headers_idx[i + 1] {
+                let str_data = old_data[j].val_str.iter().collect::<Vec<_>>();
+                let item = str_data[item_idx].len();
                 if item < min_item {
                     min_item = item;
                     min_item_idx = j;
