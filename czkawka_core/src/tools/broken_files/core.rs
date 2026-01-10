@@ -3,7 +3,7 @@ use std::fs::File;
 use std::path::Path;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
-use std::{mem, panic};
+use std::{fs, mem, panic};
 use std::process::Command;
 
 use crossbeam_channel::Sender;
@@ -163,17 +163,70 @@ impl BrokenFiles {
     }
 
     fn check_broken_video(mut file_entry: BrokenEntry) -> BrokenEntry {
+        let ffprobe_errors = [("moov atom not found", Some("broken file structure"))];
+
         match Command::new("ffprobe").arg(&file_entry.path).output() {
             Ok(output) => {
                 let combined = format!("{}{}", String::from_utf8_lossy(&output.stdout), String::from_utf8_lossy(&output.stderr));
-                if combined.contains("moov atom not found") {
-                    file_entry.error_string = "moov atom not found".to_string();
+
+                use std::io::Write;
+                if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open("a.txt") {
+                    let _ = writeln!(f, "{}", combined);
+                }
+
+                if let Some((error_message, additional_message)) = ffprobe_errors.iter().find(|(err, extra_msg)| combined.contains(err)) {
+                    file_entry.error_string = format!("{error_message}{}", additional_message.map(|e|format!("({e})")).unwrap_or_default());
+                } else if !output.status.success() {
+                    file_entry.error_string = format!("ffprobe exited with non-zero status: {}", output.status);
                 }
             }
             Err(e) => {
                 debug!("Failed to run ffprobe on {:?}: {}", file_entry.path, e);
+                file_entry.error_string = format!("Failed to run ffprobe: {}", e);
             }
         }
+
+        if !file_entry.error_string.is_empty() {
+            return file_entry;
+        }
+
+        let ffmpeg_message = [("Input buffer exhausted before END element found", Some("possible valid file, but cropped too early"))];
+        match Command::new("ffmpeg")
+            .arg("-v").arg("error")
+            .arg("-xerror")
+            .arg("-i").arg(&file_entry.path)
+            .arg("-f").arg("null")
+            .arg("-")
+            .output()
+        {
+            Ok(output) => {
+                let combined = format!(
+                    "{}{}",
+                    String::from_utf8_lossy(&output.stdout),
+                    String::from_utf8_lossy(&output.stderr)
+                );
+
+                use std::io::Write;
+                if let Ok(mut f) = std::fs::OpenOptions::new()
+                    .create(true)
+                    .append(true)
+                    .open("b.txt")
+                {
+                    let _ = writeln!(f, "{}", combined);
+                }
+
+                if let Some((error_message, additional_message)) = ffmpeg_message.iter().find(|(err, extra_msg)| combined.contains(err)) {
+                    file_entry.error_string = format!("{error_message}{}", additional_message.map(|e|format!("({e})")).unwrap_or_default());
+                } else if !output.status.success() {
+                    file_entry.error_string = format!("ffmpeg exited with non-zero status: {}", output.status);
+                }
+            }
+            Err(e) => {
+                debug!("Failed to run ffmpeg on {:?}: {}", file_entry.path, e);
+                file_entry.error_string = format!("Failed to run ffmpeg: {}", e);
+            }
+        }
+
 
         file_entry
     }
