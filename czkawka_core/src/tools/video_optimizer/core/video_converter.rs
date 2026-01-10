@@ -1,8 +1,8 @@
+use std::fs;
 use std::path::Path;
 use std::process::Command;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
-use std::fs;
 
 use log::debug;
 
@@ -70,11 +70,7 @@ pub fn process_video(
         command.arg("-vf").arg(scale_filter);
     }
 
-    command
-        .arg("-c:a")
-        .arg("copy")
-        .arg("-y")
-        .arg(&temp_output);
+    command.arg("-c:a").arg("copy").arg("-y").arg(&temp_output);
 
     match run_command_interruptible(command, stop_flag) {
         None => {

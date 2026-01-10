@@ -4,16 +4,13 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread;
 use std::time::Duration;
 
-
 // Returns None if stopped, Some(Err) if command failed, Some(Ok(output)) if successful.
-pub fn run_command_interruptible(
-    mut command: Command,
-    stop_flag: &Arc<AtomicBool>,
-) -> Option<Result<std::process::Output, String>> {
-    // First quick check before spawning
+pub fn run_command_interruptible(mut command: Command, stop_flag: &Arc<AtomicBool>) -> Option<Result<std::process::Output, String>> {
     if stop_flag.load(Ordering::Relaxed) {
         return None;
     }
+
+    command.stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped());
 
     let mut child = match command.spawn() {
         Ok(c) => c,
@@ -29,10 +26,10 @@ pub fn run_command_interruptible(
 
         match child.try_wait() {
             Ok(Some(_status)) => {
-                match child.wait_with_output() {
-                    Ok(output) => return Some(Ok(output)),
-                    Err(e) => return Some(Err(format!("Failed to get output: {e}"))),
-                }
+                return match child.wait_with_output() {
+                    Ok(output) => Some(Ok(output)),
+                    Err(e) => Some(Err(format!("Failed to get output: {e}"))),
+                };
             }
             Ok(None) => {
                 thread::sleep(Duration::from_millis(100));
@@ -43,4 +40,3 @@ pub fn run_command_interruptible(
         }
     }
 }
-

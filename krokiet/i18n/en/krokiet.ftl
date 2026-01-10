@@ -226,6 +226,8 @@ subsettings_broken_files_audio = Audio
 subsettings_broken_files_pdf = Pdf
 subsettings_broken_files_archive = Archive
 subsettings_broken_files_image = Image
+subsettings_broken_files_video = Video
+subsettings_broken_files_video_info = Uses ffmpeg/ffprobe. Quite slow and may detect pedantic errors even if file plays fine.
 settings_global_settings = Global Settings
 settings_dark_theme = Dark theme
 settings_show_only_icons = Show only icons
@@ -254,7 +256,7 @@ settings_application_scale_hint_text = When manual scale is enabled, this allows
 settings_restart_required_scale_text = ---You need to restart app to apply changes in scale---
 settings_use_manual_application_scale_text = Use manual application scale
 
-settings_similar_videos_generate_thumbnail_grid_instead_of_single_image_hint_text = Generate a grid of thumbnails instead of a single image (may take longer)
+settings_similar_videos_generate_thumbnail_grid_instead_of_single_image_hint_text = Generate thumbnail composed from multiple frames from video, instead of a single frame
 settings_similar_images_hide_hard_links = Hide hard links
 settings_delete_outdated_entries = Delete automatically outdated entries
 settings_similar_videos_hide_hard_links = Hide hard links

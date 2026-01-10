@@ -257,6 +257,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_music_compare_fingerprints_only_with_similar_titles_text(flk!("subsettings_music_compare_fingerprints_only_with_similar_titles").into());
     translation.set_subsettings_broken_files_type_text(flk!("subsettings_broken_files_type").into());
     translation.set_subsettings_broken_files_audio_text(flk!("subsettings_broken_files_audio").into());
+    translation.set_subsettings_broken_files_video_text(flk!("subsettings_broken_files_video").into());
     translation.set_subsettings_broken_files_pdf_text(flk!("subsettings_broken_files_pdf").into());
     translation.set_subsettings_broken_files_archive_text(flk!("subsettings_broken_files_archive").into());
     translation.set_subsettings_broken_files_image_text(flk!("subsettings_broken_files_image").into());

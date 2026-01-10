@@ -296,6 +296,7 @@ impl GuiMainNotebook {
         self.check_button_broken_files_image.set_label(Some(&flg!("main_check_box_broken_files_image")));
         self.check_button_broken_files_pdf.set_label(Some(&flg!("main_check_box_broken_files_pdf")));
         self.check_button_broken_files_video.set_label(Some(&flg!("main_check_box_broken_files_video")));
+        self.check_button_broken_files_video.set_tooltip_text(Some(&flg!("main_check_box_broken_files_video_tooltip")));
 
         self.label_same_music_seconds.set_label(&flg!("same_music_seconds_label"));
         self.label_same_music_similarity.set_label(&flg!("same_music_similarity_label"));

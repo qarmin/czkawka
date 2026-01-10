@@ -5,6 +5,7 @@ use std::time::Instant;
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
+
 use crate::common::ffmpeg_utils::check_if_ffprobe_ffmpeg_exists;
 use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;

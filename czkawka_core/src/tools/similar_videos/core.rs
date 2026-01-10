@@ -189,16 +189,13 @@ impl SimilarVideos {
             command_mut = command_mut.arg("-vf").arg(&vf_filter).arg("-ss").arg(seek_time.to_string());
         }
 
-        command_mut
-            .arg("-frames:v")
-            .arg("1")
-            .arg("-q:v")
-            .arg("2")
-            .arg("-y")
-            .arg(&thumbnail_path);
+        command_mut.arg("-frames:v").arg("1").arg("-q:v").arg("2").arg("-y").arg(&thumbnail_path);
 
         match run_command_interruptible(command, stop_flag) {
-            None => Err(String::from("Thumbnail generation was stopped by user")),
+            None => {
+                let _ = fs::remove_file(&thumbnail_path);
+                Err(String::from("Thumbnail generation was stopped by user"))
+            }
             Some(Err(e)) => {
                 let _ = fs::remove_file(&thumbnail_path);
                 Err(format!("Failed to generate thumbnail for {}: {e}", file_entry.path.display()))

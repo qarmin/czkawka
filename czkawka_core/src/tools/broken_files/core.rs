@@ -1,10 +1,10 @@
 use std::collections::BTreeMap;
 use std::fs::File;
 use std::path::Path;
+use std::process::Command;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
-use std::{fs, mem, panic};
-use std::process::Command;
+use std::{mem, panic};
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
@@ -12,7 +12,7 @@ use log::{debug, error};
 use lopdf::Document;
 use rayon::prelude::*;
 
-use crate::common::cache::{CACHE_VERSION, extract_loaded_cache, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
+use crate::common::cache::{CACHE_BROKEN_FILES_VERSION, extract_loaded_cache, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common::consts::{AUDIO_FILES_EXTENSIONS, IMAGE_RS_BROKEN_FILES_EXTENSIONS, PDF_FILES_EXTENSIONS, VIDEO_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS};
 use crate::common::create_crash_message;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
@@ -171,7 +171,7 @@ impl BrokenFiles {
         command.arg(&file_entry.path);
 
         match run_command_interruptible(command, stop_flag) {
-            None => return None, // Stopped
+            None => return None,
             Some(Err(e)) => {
                 debug!("Failed to run ffprobe on {:?}: {}", file_entry.path, e);
                 file_entry.error_string = format!("Failed to run ffprobe: {}", e);
@@ -195,40 +195,36 @@ impl BrokenFiles {
             }
         }
 
-        // If ffprobe passed, run ffmpeg validation
-        let ffmpeg_message = [("Input buffer exhausted before END element found", Some("possible valid file, but cropped too early"))];
+        let ffmpeg_message = [
+            ("Output file does not contain any stream", Some("cannot find video stream - possible not even video file")),
+            ("corrupt decoded frame", Some("may be still playable")),
+            ("Invalid data found when processing input", Some("generic error"))
+        ];
+        let ffmpeg_allowed_messages = [
+            "Input buffer exhausted before END element found", // Looks like quite popular message, so ignoring it
+            "Invalid color space", // https://fftrac-bg.ffmpeg.org/ticket/11020 - seems to be non-fatal
+        ];
 
         let mut command = Command::new("ffmpeg");
-        command
-            .arg("-v").arg("error")
-            .arg("-xerror")
-            .arg("-i").arg(&file_entry.path)
-            .arg("-f").arg("null")
-            .arg("-");
+        command.arg("-v").arg("error").arg("-xerror").arg("-threads").arg("1").arg("-i").arg(&file_entry.path).arg("-f").arg("null").arg("-");
 
         match run_command_interruptible(command, stop_flag) {
-            None => return None, // Stopped
+            None => return None,
             Some(Err(e)) => {
                 debug!("Failed to run ffmpeg on {:?}: {}", file_entry.path, e);
                 file_entry.error_string = format!("Failed to run ffmpeg: {}", e);
             }
             Some(Ok(output)) => {
-                let combined = format!(
-                    "{}{}",
-                    String::from_utf8_lossy(&output.stdout),
-                    String::from_utf8_lossy(&output.stderr)
-                );
+                let combined = format!("{}{}", String::from_utf8_lossy(&output.stdout), String::from_utf8_lossy(&output.stderr));
 
                 use std::io::Write;
-                if let Ok(mut f) = std::fs::OpenOptions::new()
-                    .create(true)
-                    .append(true)
-                    .open("b.txt")
-                {
-                    let _ = writeln!(f, "{}", combined);
+                if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open("b.txt") {
+                    let _ = writeln!(f, "{} --- \n{}", file_entry.path.to_string_lossy(), combined);
                 }
 
-                if let Some((error_message, additional_message)) = ffmpeg_message.iter().find(|(err, _)| combined.contains(err)) {
+                if ffmpeg_allowed_messages.iter().any(|msg| combined.contains(msg)) {
+                    // Allowed message, do nothing
+                } else if let Some((error_message, additional_message)) = ffmpeg_message.iter().find(|(err, _)| combined.contains(err)) {
                     file_entry.error_string = format!("{error_message}{}", additional_message.map(|e| format!(" ({e})")).unwrap_or_default());
                 } else if !output.status.success() {
                     file_entry.error_string = format!("ffmpeg exited with non-zero status: {}", output.status);
@@ -238,7 +234,6 @@ impl BrokenFiles {
 
         Some(file_entry)
     }
-
 
     #[fun_time(message = "load_cache", level = "debug")]
     fn load_cache(&mut self) -> (BTreeMap<String, BrokenEntry>, BTreeMap<String, BrokenEntry>, BTreeMap<String, BrokenEntry>) {
@@ -309,10 +304,10 @@ impl BrokenFiles {
                 progress_handler.increase_items(1);
                 progress_handler.increase_size(size);
 
-                res // Return Option<Option<BrokenEntry>>
+                res
             })
-            .while_some() // Stop on None (stopped), convert to Iterator<Option<BrokenEntry>>
-            .flatten() // Flatten Option<BrokenEntry> to BrokenEntry
+            .while_some()
+            .flatten()
             .collect::<Vec<BrokenEntry>>();
         debug!("look_for_broken_files - ended finding for broken files");
 
@@ -352,9 +347,7 @@ impl BrokenFiles {
 }
 
 #[expect(clippy::string_slice)] // Valid, because we address go to dot, which is known ascii character
-fn check_extension_availability(
-    full_name: &Path,
-) -> TypeOfFile {
+fn check_extension_availability(full_name: &Path) -> TypeOfFile {
     let Some(file_name) = full_name.file_name() else {
         error!("Missing file name in file - \"{}\"", full_name.to_string_lossy());
         debug_assert!(false, "Missing file name in file - \"{}\"", full_name.to_string_lossy());
@@ -386,5 +379,5 @@ fn check_extension_availability(
 }
 
 pub fn get_broken_files_cache_file() -> String {
-    format!("cache_broken_files_{CACHE_VERSION}.bin")
+    format!("cache_broken_files_{CACHE_BROKEN_FILES_VERSION}.bin")
 }
