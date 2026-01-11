@@ -7,7 +7,7 @@ use image::{DynamicImage, GenericImageView};
 use log::debug;
 
 use crate::common::video_metadata::VideoMetadata;
-use crate::tools::video_optimizer::{VideoCropEntry, VideoCropParams};
+use crate::tools::video_optimizer::{VideoCropEntry, VideoCropFixParams, VideoCropParams};
 
 const BLACK_PIXEL_THRESHOLD: u8 = 20;
 const BLACK_BAR_MIN_PERCENTAGE: f32 = 0.95;
@@ -254,6 +254,89 @@ pub fn check_video_crop(mut entry: VideoCropEntry, _params: &VideoCropParams, st
     }
 
     entry
+}
+
+pub fn fix_video_crop(entry: &VideoCropEntry, params: &VideoCropFixParams, stop_flag: &Arc<AtomicBool>) -> Result<(), String> {
+    if stop_flag.load(Ordering::Relaxed) {
+        return Err("Operation cancelled".to_string());
+    }
+
+    let (left, top, right, bottom) = params.crop_rectangle;
+
+    // Validate rectangle
+    if left >= right || top >= bottom {
+        return Err(format!("Invalid crop rectangle: left={}, top={}, right={}, bottom={}", left, top, right, bottom));
+    }
+
+    let crop_width = right - left;
+    let crop_height = bottom - top;
+
+    if crop_width == 0 || crop_height == 0 {
+        return Err("Crop dimensions cannot be zero".to_string());
+    }
+
+    let output_path = if params.overwrite_original {
+        let temp_path = entry.path.with_extension("tmp.mp4");
+        temp_path
+    } else {
+        let stem = entry.path.file_stem().ok_or("Cannot get file stem")?;
+        let parent = entry.path.parent().ok_or("Cannot get parent directory")?;
+        let extension = entry.path.extension().and_then(|e| e.to_str()).unwrap_or("mp4");
+        parent.join(format!("{}_cropped.{}", stem.to_string_lossy(), extension))
+    };
+
+    debug!(
+        "Cropping video: {} -> {}, crop: {}x{}+{}+{}",
+        entry.path.display(),
+        output_path.display(),
+        crop_width, crop_height, left, top
+    );
+
+    let mut ffmpeg_cmd = Command::new("ffmpeg");
+    ffmpeg_cmd
+        .arg("-i")
+        .arg(&entry.path)
+        .arg("-vf")
+        .arg(format!("crop={}:{}:{}:{}", crop_width, crop_height, left, top));
+
+    // Add codec parameters if target codec is specified
+    if let Some(target_codec) = params.target_codec {
+        ffmpeg_cmd.arg("-c:v").arg(target_codec.as_str());
+
+        // Add quality parameter if specified
+        if let Some(quality) = params.quality {
+            ffmpeg_cmd.arg("-crf").arg(quality.to_string());
+        }
+
+        // Copy audio stream
+        ffmpeg_cmd.arg("-c:a").arg("copy");
+    } else {
+        // Copy both video and audio streams
+        ffmpeg_cmd.arg("-c").arg("copy");
+    }
+
+    ffmpeg_cmd
+        .arg("-y") // Overwrite output file
+        .arg(&output_path)
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null());
+
+    let output = ffmpeg_cmd.output().map_err(|e| format!("Failed to execute ffmpeg: {}", e))?;
+
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Err(format!("FFmpeg failed: {}", stderr));
+    }
+
+    // If overwriting, move temp file to original
+    if params.overwrite_original {
+        std::fs::rename(&output_path, &entry.path)
+            .map_err(|e| format!("Failed to replace original file: {}", e))?;
+    }
+
+    debug!("Successfully cropped video: {}", entry.path.display());
+    Ok(())
 }
 
 #[cfg(test)]

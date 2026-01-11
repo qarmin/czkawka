@@ -73,9 +73,10 @@ pub struct VideoTranscodeFixParams {
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct VideoCropFixParams {
-    pub crop_start_end_static_frames: bool,
-    pub crop_black_bars: bool,
-    pub crop_static_parts: bool,
+    pub overwrite_original: bool,
+    pub target_codec: Option<VideoCodec>,
+    pub quality: Option<u32>,
+    pub crop_rectangle: (u32, u32, u32, u32), // (left, top, right, bottom)
 }
 
 #[derive(Debug, Default, Clone)]

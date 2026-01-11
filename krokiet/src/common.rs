@@ -297,8 +297,12 @@ pub enum IntDataVideoOptimizer {
     DimensionsPart2,
     NewDimensionsPart1,
     NewDimensionsPart2,
+    RectLeft,
+    RectTop,
+    RectRight,
+    RectBottom,
 }
-pub const MAX_INT_DATA_VIDEO_OPTIMIZER: usize = IntDataVideoOptimizer::NewDimensionsPart2 as usize + 1;
+pub const MAX_INT_DATA_VIDEO_OPTIMIZER: usize = IntDataVideoOptimizer::RectBottom as usize + 1;
 
 #[repr(u8)]
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]

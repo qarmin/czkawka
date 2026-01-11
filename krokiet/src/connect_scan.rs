@@ -1309,7 +1309,7 @@ fn prepare_data_model_video_optimizer_transcode(fe: &VideoTranscodeEntry) -> (Mo
     let modification_split = split_u64_into_i32s(fe.modified_date);
     let size_split = split_u64_into_i32s(fe.size);
     let dimension_split = split_u64_into_i32s(fe.width as u64 * fe.height as u64);
-    let data_model_int_arr: [i32; MAX_INT_DATA_VIDEO_OPTIMIZER] = [modification_split.0, modification_split.1, size_split.0, size_split.1, dimension_split.0, dimension_split.1, 0, 0];
+    let data_model_int_arr: [i32; MAX_INT_DATA_VIDEO_OPTIMIZER] = [modification_split.0, modification_split.1, size_split.0, size_split.1, dimension_split.0, dimension_split.1, 0, 0, 0, 0, 0, 0];
     let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 }
@@ -1318,18 +1318,21 @@ fn prepare_data_model_video_optimizer_crop(fe: &VideoCropEntry) -> (ModelRc<Shar
     let (directory, file) = split_path(&fe.path);
     let (left, top, right, bottom) = fe.new_image_dimensions.expect("new_image_dimensions should be Some in crop mode");
 
-
-    let (width, height, dim_string) =      if left > right || top > bottom {
-            eprintln!(
-                "ERROR: Invalid rectangle coordinates in cache for file '{}': left={}, top={}, right={}, bottom={}. Skipping dimensions display.",
-                fe.path.display(), left, top, right, bottom
-            );
+    let (width, height, dim_string) = if left > right || top > bottom {
+        eprintln!(
+            "ERROR: Invalid rectangle coordinates in cache for file '{}': left={}, top={}, right={}, bottom={}. Skipping dimensions display.",
+            fe.path.display(), left, top, right, bottom
+        );
         (-1, -1, "-".to_string())
-        } else {
-            let new_width = (right - left) as i32;
-            let new_height = (bottom - top) as i32;
-        (new_width, new_height, format!("{}x{} ({}x{})", new_width, new_height,  fe.width as i32 - new_width,  fe.height as i32 - new_height))
-        };
+    } else {
+        let new_width = (right - left) as i32;
+        let new_height = (bottom - top) as i32;
+        (
+            new_width,
+            new_height,
+            format!("{}x{} ({}x{})", new_width, new_height, fe.width as i32 - new_width, fe.height as i32 - new_height),
+        )
+    };
 
     let data_model_str_arr: [SharedString; MAX_STR_DATA_VIDEO_OPTIMIZER] = [
         format_size(fe.size, BINARY).into(),
@@ -1345,7 +1348,20 @@ fn prepare_data_model_video_optimizer_crop(fe: &VideoCropEntry) -> (ModelRc<Shar
     let size_split = split_u64_into_i32s(fe.size);
     let dimension_split = split_u64_into_i32s(fe.width as u64 * fe.height as u64);
     let new_dimension_split = split_u64_into_i32s(width as u64 * height as u64);
-    let data_model_int_arr: [i32; MAX_INT_DATA_VIDEO_OPTIMIZER] = [modification_split.0, modification_split.1, size_split.0, size_split.1, dimension_split.0, dimension_split.1,  new_dimension_split.0, new_dimension_split.1];
+    let data_model_int_arr: [i32; MAX_INT_DATA_VIDEO_OPTIMIZER] = [
+        modification_split.0,
+        modification_split.1,
+        size_split.0,
+        size_split.1,
+        dimension_split.0,
+        dimension_split.1,
+        new_dimension_split.0,
+        new_dimension_split.1,
+        left as i32,
+        top as i32,
+        right as i32,
+        bottom as i32,
+    ];
     let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 }

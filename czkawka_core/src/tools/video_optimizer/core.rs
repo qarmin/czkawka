@@ -20,6 +20,7 @@ mod video_converter;
 mod video_cropper;
 
 pub use video_converter::process_video;
+pub use video_cropper::fix_video_crop;
 
 use crate::common::consts::VIDEO_FILES_EXTENSIONS;
 
