@@ -1328,7 +1328,7 @@ fn prepare_data_model_video_optimizer_crop(fe: &VideoCropEntry) -> (ModelRc<Shar
         } else {
             let new_width = (right - left) as i32;
             let new_height = (bottom - top) as i32;
-        (new_width, new_height, format!("{}x{} ({}x{})", new_width, new_height, new_width - fe.width as i32, new_height - fe.height as i32))
+        (new_width, new_height, format!("{}x{} ({}x{})", new_width, new_height,  fe.width as i32 - new_width,  fe.height as i32 - new_height))
         };
 
     let data_model_str_arr: [SharedString; MAX_STR_DATA_VIDEO_OPTIMIZER] = [

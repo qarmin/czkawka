@@ -86,7 +86,7 @@ fn extract_frame_ffmpeg(video_path: &Path, timestamp: f32) -> Option<DynamicImag
 
 fn is_pixel_black(img: &image::RgbImage, x: u32, y: u32) -> bool {
     let pixel = img.get_pixel(x, y);
-    pixel[0] < BLACK_PIXEL_THRESHOLD && pixel[1] < BLACK_PIXEL_THRESHOLD && pixel[2] < BLACK_PIXEL_THRESHOLD
+    pixel.0.iter().all(|&channel| channel < BLACK_PIXEL_THRESHOLD)
 }
 
 fn detect_black_bars(img: &DynamicImage) -> Option<Rectangle> {
@@ -103,12 +103,16 @@ fn detect_black_bars(img: &DynamicImage) -> Option<Rectangle> {
     }
 
     let mut right_pos = width;
-    for x in (left_crop..width).rev() {
+    for x in (0..width).rev() {
         let black_pixels = (0..height).filter(|&y| is_pixel_black(&rgb_img, x, y)).count();
         if (black_pixels as f32 / height as f32) < BLACK_BAR_MIN_PERCENTAGE {
+            right_pos = x + 1;
             break;
         }
-        right_pos = x;
+    }
+
+    if left_crop >= right_pos {
+        return None;
     }
 
     let mut top_crop = 0u32;
@@ -121,19 +125,17 @@ fn detect_black_bars(img: &DynamicImage) -> Option<Rectangle> {
     }
 
     let mut bottom_pos = height;
-    for y in (top_crop..height).rev() {
+    for y in (0..height).rev() {
         let black_pixels = (0..width).filter(|&x| is_pixel_black(&rgb_img, x, y)).count();
         if (black_pixels as f32 / width as f32) < BLACK_BAR_MIN_PERCENTAGE {
+            bottom_pos = y + 1;
             break;
         }
-        bottom_pos = y;
     }
 
-    // // Validate that we have a valid rectangle (not entire video is black)
-    // if left_crop >= right_pos || top_crop >= bottom_pos {
-    //     // Invalid rectangle - either entire video is black or margins overlap
-    //     return None;
-    // }
+    if top_crop >= bottom_pos {
+        return None;
+    }
 
     let rect = Rectangle::new(top_crop, bottom_pos, left_crop, right_pos);
     if rect.is_cropping_needed(width, height) {

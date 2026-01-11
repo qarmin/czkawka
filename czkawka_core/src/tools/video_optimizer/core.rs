@@ -119,11 +119,12 @@ impl VideoOptimizer {
 
         progress_handler.join_thread();
 
+        self.save_video_transcode_cache(&entries);
+
         if check_if_stop_received(stop_flag) {
             return WorkContinueStatus::Stop;
         }
 
-        self.save_video_transcode_cache(&entries);
 
         entries.retain(|e| e.error.is_none() && !params.excluded_codecs.contains(&e.codec));
 
@@ -173,11 +174,12 @@ impl VideoOptimizer {
 
         progress_handler.join_thread();
 
+        self.save_video_crop_cache(&entries);
+
         if check_if_stop_received(stop_flag) {
             return WorkContinueStatus::Stop;
         }
 
-        self.save_video_crop_cache(&entries);
 
         entries.retain(|e| e.error.is_none() && e.new_image_dimensions.is_some());
 
