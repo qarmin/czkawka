@@ -103,7 +103,7 @@ fn detect_black_bars(img: &DynamicImage) -> Option<Rectangle> {
     }
 
     let mut right_pos = width;
-    for x in (0..width).rev() {
+    for x in (left_crop..width).rev() {
         let black_pixels = (0..height).filter(|&y| is_pixel_black(&rgb_img, x, y)).count();
         if (black_pixels as f32 / height as f32) < BLACK_BAR_MIN_PERCENTAGE {
             break;
@@ -121,7 +121,7 @@ fn detect_black_bars(img: &DynamicImage) -> Option<Rectangle> {
     }
 
     let mut bottom_pos = height;
-    for y in (0..height).rev() {
+    for y in (top_crop..height).rev() {
         let black_pixels = (0..width).filter(|&x| is_pixel_black(&rgb_img, x, y)).count();
         if (black_pixels as f32 / width as f32) < BLACK_BAR_MIN_PERCENTAGE {
             break;
@@ -429,9 +429,7 @@ mod tests {
 
     #[test]
     fn test_detect_black_bars_fuzzer() {
-        // Test with various edge cases and random patterns
         let test_cases = vec![
-            // (width, height, description)
             (1, 1, "1x1 image"),
             (1, 100, "1 pixel wide"),
             (100, 1, "1 pixel tall"),
@@ -451,7 +449,6 @@ mod tests {
                 *pixel = image::Rgb([0, 0, 0]);
             }
             let result = detect_black_bars(&DynamicImage::ImageRgb8(all_black));
-            // All black should return None (no valid content area)
             assert!(result.is_none(), "All black image should return None for {}", desc);
 
             // Test 2: All white image
@@ -460,7 +457,6 @@ mod tests {
                 *pixel = image::Rgb([255, 255, 255]);
             }
             let result = detect_black_bars(&DynamicImage::ImageRgb8(all_white));
-            // All white should return None (no cropping needed)
             assert!(result.is_none(), "All white image should return None for {}", desc);
 
             // Test 3: Single white pixel in center
@@ -472,7 +468,6 @@ mod tests {
                 single_pixel.put_pixel(width / 2, height / 2, image::Rgb([255, 255, 255]));
                 let result = detect_black_bars(&DynamicImage::ImageRgb8(single_pixel));
                 if let Some(rect) = result {
-                    // Rectangle should be valid
                     assert!(rect.left < rect.right, "Invalid rectangle for single pixel in {}: left >= right", desc);
                     assert!(rect.top < rect.bottom, "Invalid rectangle for single pixel in {}: top >= bottom", desc);
                     assert!(rect.right <= width, "Right exceeds width in {}", desc);
@@ -488,7 +483,6 @@ mod tests {
                     *pixel = image::Rgb([color, color, color]);
                 }
                 let result = detect_black_bars(&DynamicImage::ImageRgb8(checkerboard));
-                // Checkerboard should return None (no uniform black bars)
                 assert!(result.is_none(), "Checkerboard should return None for {}", desc);
             }
 
@@ -505,12 +499,10 @@ mod tests {
                 }
                 let result = detect_black_bars(&DynamicImage::ImageRgb8(with_bars));
                 if let Some(rect) = result {
-                    // Should detect black bars
                     assert!(rect.left > 0, "Should detect left black bar in {}", desc);
                     assert!(rect.top > 0, "Should detect top black bar in {}", desc);
                     assert!(rect.right < width, "Should detect right black bar in {}", desc);
                     assert!(rect.bottom < height, "Should detect bottom black bar in {}", desc);
-                    // Validate rectangle invariants
                     assert!(rect.left < rect.right, "Invalid rectangle in {}: left >= right", desc);
                     assert!(rect.top < rect.bottom, "Invalid rectangle in {}: top >= bottom", desc);
                 }
@@ -520,7 +512,7 @@ mod tests {
             if width > 40 && height > 20 {
                 let bar_size = 10;
                 let mut letterbox = RgbImage::new(width, height);
-                for (x, y, pixel) in letterbox.enumerate_pixels_mut() {
+                for (x, _y, pixel) in letterbox.enumerate_pixels_mut() {
                     if x < bar_size || x >= width - bar_size {
                         *pixel = image::Rgb([0, 0, 0]);
                     } else {
@@ -538,7 +530,7 @@ mod tests {
             if width > 20 && height > 40 {
                 let bar_size = 10;
                 let mut pillarbox = RgbImage::new(width, height);
-                for (x, y, pixel) in pillarbox.enumerate_pixels_mut() {
+                for (_x, y, pixel) in pillarbox.enumerate_pixels_mut() {
                     if y < bar_size || y >= height - bar_size {
                         *pixel = image::Rgb([0, 0, 0]);
                     } else {
