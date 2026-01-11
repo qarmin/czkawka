@@ -2,7 +2,9 @@ use std::process::{Command, Stdio};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread;
-use std::time::Duration;
+use std::time::{Duration, Instant};
+
+use log::warn;
 
 // Returns None if stopped, Some(Err) if command failed, Some(Ok(output)) if successful.
 pub fn run_command_interruptible(mut command: Command, stop_flag: &Arc<AtomicBool>) -> Option<Result<std::process::Output, String>> {
@@ -11,6 +13,7 @@ pub fn run_command_interruptible(mut command: Command, stop_flag: &Arc<AtomicBoo
     }
 
     command.stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped());
+    // command.stdin(Stdio::null());
 
     let mut child = match command.spawn() {
         Ok(c) => c,
@@ -18,10 +21,20 @@ pub fn run_command_interruptible(mut command: Command, stop_flag: &Arc<AtomicBoo
     };
 
     let stop_flag = stop_flag.clone();
+    let start_time = Instant::now();
+    let warning_steps = [10, 50, 250, 1250, 6000];
+    let mut next_warning_idx = 0;
+
     loop {
         if stop_flag.load(Ordering::Relaxed) {
             let _ = child.kill();
             return None;
+        }
+
+        let elapsed_secs = start_time.elapsed().as_secs();
+        if let Some(warning_time) = warning_steps.get(next_warning_idx) && elapsed_secs >= *warning_time {
+            warn!("Command is still running after {warning_time} seconds, for command: {:?}", command);
+            next_warning_idx += 1;
         }
 
         match child.try_wait() {

@@ -358,6 +358,14 @@ pub fn make_file_symlink<P: AsRef<Path>, Q: AsRef<Path>>(src: P, dst: Q) -> io::
     Err(Error::new(io::ErrorKind::Other, "Soft links are not supported on this platform"))
 }
 
+pub fn debug_save_file(path: &str, data: &str)
+{
+    use std::io::Write;
+    if let Ok(mut f) = fs::OpenOptions::new().create(true).append(true).open(path) {
+        let _ = writeln!(f, "{data}");
+    }
+}
+
 #[cfg(test)]
 mod test {
     use std::fs::{File, Metadata, read_dir};

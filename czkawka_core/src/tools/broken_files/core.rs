@@ -14,7 +14,7 @@ use rayon::prelude::*;
 
 use crate::common::cache::{CACHE_BROKEN_FILES_VERSION, extract_loaded_cache, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common::consts::{AUDIO_FILES_EXTENSIONS, IMAGE_RS_BROKEN_FILES_EXTENSIONS, PDF_FILES_EXTENSIONS, VIDEO_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS};
-use crate::common::create_crash_message;
+use crate::common::{create_crash_message, debug_save_file};
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::process_utils::run_command_interruptible;
@@ -165,7 +165,7 @@ impl BrokenFiles {
 
     // None if stopped, otherwise Some
     fn check_broken_video(mut file_entry: BrokenEntry, stop_flag: &Arc<AtomicBool>) -> Option<BrokenEntry> {
-        let ffprobe_errors = [("moov atom not found", Some("broken file structure"))];
+        let ffprobe_errors = [("moov atom not found", Some("broken file structure")), ("error reading header", Some("broken file structure"))];
 
         let mut command = Command::new("ffprobe");
         command.arg(&file_entry.path);
@@ -180,15 +180,11 @@ impl BrokenFiles {
             Some(Ok(output)) => {
                 let combined = format!("{}{}", String::from_utf8_lossy(&output.stdout), String::from_utf8_lossy(&output.stderr));
 
-                // use std::io::Write;
-                // if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open("a.txt") {
-                //     let _ = writeln!(f, "{}", combined);
-                // }
-
                 if let Some((error_message, additional_message)) = ffprobe_errors.iter().find(|(err, _)| combined.contains(err)) {
                     file_entry.error_string = format!("{error_message}{}", additional_message.map(|e| format!(" ({e})")).unwrap_or_default());
                     return Some(file_entry);
                 } else if !output.status.success() {
+                    debug_save_file("ffprobe_failed_output.txt",&format!("{} --- \n{}", file_entry.path.to_string_lossy(), combined));
                     file_entry.error_string = format!("ffprobe exited with non-zero status: {}", output.status);
                     return Some(file_entry);
                 }
@@ -197,8 +193,14 @@ impl BrokenFiles {
 
         let ffmpeg_message = [
             ("Output file does not contain any stream", Some("cannot find video stream - possible not even video file")),
+            ("missing mandatory atoms, broken header", Some("broken file structure")),
+
+            // Last resort for all other errors
+            // ("Invalid data found when processing input", Some("generic error")) // Must be last to not override more precise errors - disabled currently to find less generic errors
+
+            // Warnings
             ("corrupt decoded frame", Some("may be still playable")),
-            ("Invalid data found when processing input", Some("generic error"))
+
         ];
         let ffmpeg_allowed_messages = [
             "Input buffer exhausted before END element found", // Looks like quite popular message, so ignoring it
@@ -217,16 +219,12 @@ impl BrokenFiles {
             Some(Ok(output)) => {
                 let combined = format!("{}{}", String::from_utf8_lossy(&output.stdout), String::from_utf8_lossy(&output.stderr));
 
-                // use std::io::Write;
-                // if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open("b.txt") {
-                //     let _ = writeln!(f, "{} --- \n{}", file_entry.path.to_string_lossy(), combined);
-                // }
-
                 if ffmpeg_allowed_messages.iter().any(|msg| combined.contains(msg)) {
                     // Allowed message, do nothing
                 } else if let Some((error_message, additional_message)) = ffmpeg_message.iter().find(|(err, _)| combined.contains(err)) {
                     file_entry.error_string = format!("{error_message}{}", additional_message.map(|e| format!(" ({e})")).unwrap_or_default());
                 } else if !output.status.success() {
+                    debug_save_file("ffmpeg_failed_output.txt",&format!("{} --- \n{}", file_entry.path.to_string_lossy(), combined));
                     file_entry.error_string = format!("ffmpeg exited with non-zero status: {}", output.status);
                 }
             }
