@@ -31,7 +31,7 @@ pub fn check_video_crop(mut entry: VideoCropEntry) -> VideoCropEntry {
         }
     }
 
-    // TODO: Implement crop detection logic
+    // TODO: Implement crop detection logic - split extracting metadata from real crop detection
     // For now, just return the entry with basic metadata
 
     entry
