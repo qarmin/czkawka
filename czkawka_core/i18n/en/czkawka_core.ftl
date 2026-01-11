@@ -23,7 +23,7 @@ core_excluded_directory_pointless_slash = Directories: Excluding / is pointless,
 core_directory_overlap = Directories: All directories to search overlap with excluded directories
 core_directory_unable_to_get_device_id = Directories: Unable to get device id from folder { $path }
 
-core_ffmpeg_not_found = Cannot find a proper installation of FFmpeg. This is an external program that you need to install manually.
+core_ffmpeg_not_found = Cannot find a proper installation of FFmpeg or FFprobe. These are external programs that must be installed manually.
 core_ffmpeg_not_found_windows = Be sure that ffmpeg.exe and ffprobe.exe are available in PATH or are placed directly in the same folder as the app executable
 
 core_invalid_symlink_infinite_recursion = Infinite recursion

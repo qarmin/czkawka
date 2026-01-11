@@ -22,7 +22,7 @@ pub fn run_command_interruptible(mut command: Command, stop_flag: &Arc<AtomicBoo
 
     let stop_flag = stop_flag.clone();
     let start_time = Instant::now();
-    let warning_steps = [10, 50, 250, 1250, 6000];
+    let warning_steps = [50, 250, 1250, 6000];
     let mut next_warning_idx = 0;
 
     loop {
