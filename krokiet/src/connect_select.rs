@@ -34,6 +34,7 @@ pub(crate) fn connect_select(app: &MainWindow) {
     });
 }
 
+#[derive(Clone, Copy)]
 enum Property {
     Size,
     Date,
@@ -100,7 +101,7 @@ fn set_select_buttons(app: &MainWindow) {
     app.global::<GuiState>().set_select_results_list(ModelRc::new(VecModel::from(new_select_model)));
 }
 
-fn extract_comparable_field(model: &MainListModel, property: &Property, active_tab: &ActiveTab) -> u64 {
+fn extract_comparable_field(model: &MainListModel, property: Property, active_tab: ActiveTab) -> u64 {
     let val_ints = model.val_int.iter().collect::<Vec<_>>();
     let val_strs = model.val_str.iter().collect::<Vec<_>>();
     match property {
@@ -128,7 +129,7 @@ fn select_by_property(model: &ModelRc<MainListModel>, active_tab: ActiveTab, pro
             let mut max_item_idx = 1;
             #[expect(clippy::needless_range_loop)]
             for j in (headers_idx[i] + 1)..headers_idx[i + 1] {
-                let item = extract_comparable_field(&old_data[j], &property, &active_tab);
+                let item = extract_comparable_field(&old_data[j], property, active_tab);
                 if item > max_item {
                     max_item = item;
                     max_item_idx = j;
@@ -145,7 +146,7 @@ fn select_by_property(model: &ModelRc<MainListModel>, active_tab: ActiveTab, pro
             let mut min_item_idx = 1;
             #[expect(clippy::needless_range_loop)]
             for j in (headers_idx[i] + 1)..headers_idx[i + 1] {
-                let item = extract_comparable_field(&old_data[j], &property, &active_tab);
+                let item = extract_comparable_field(&old_data[j], property, active_tab);
                 if item < min_item {
                     min_item = item;
                     min_item_idx = j;
