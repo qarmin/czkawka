@@ -28,21 +28,21 @@ jobs:
       - name: AAAAAAAAAAAAAAAA
         run: |
           echo "AAAAAAAAAAAAAAAAAAAAAAAAA"
-          echo "${{ env.HAVE_PAT_REPOSITORY_TOKEN }}"
+          echo "${{ vars.HAVE_PAT_REPOSITORY_TOKEN }}"
           echo "BBBBBBBBBBBBBBBBBBBBBBBBB"
 
       # THIS SHOULD RUN
       - name: HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
-        if: ${{ env.HAVE_PAT_REPOSITORY_TOKEN == '1' }}
+        if: ${{ vars.HAVE_PAT_REPOSITORY_TOKEN == '1' }}
         run: |
           echo "HHHHHHHHHHHHHHHHHHHHHHHHHHHH"
-          echo "${{ env.HAVE_PAT_REPOSITORY_TOKEN }}"
+          echo "${{ vars.HAVE_PAT_REPOSITORY_TOKEN }}"
           echo "FFFFFFFFFFFFFFFFFff"
 
       - name: BBBBBBBBBBBb
         run: |
           echo "CCCCCCCCCCCCCCCCCC"
-          echo "${{ env.HAVE_PAT_REPOSITORY_TOKEN }}"
+          echo "${{ vars.HAVE_PAT_REPOSITORY_TOKEN }}"
           if [ "$HAVE_PAT_REPOSITORY_TOKEN" = "1" ]; then
             echo "true"
           else
@@ -132,7 +132,7 @@ jobs:
 
       - name: Release
         uses: softprops/action-gh-release@v2
-        if: ${{ github.ref == 'refs/heads/master' && env.HAVE_PAT_REPOSITORY_TOKEN == '1' }}
+        if: ${{ github.ref == 'refs/heads/master' && vars.HAVE_PAT_REPOSITORY_TOKEN == '1' }}
         with:
           tag_name: "Nightly"
           files: |
