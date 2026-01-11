@@ -240,7 +240,6 @@ pub fn check_video_crop(mut entry: VideoCropEntry, _params: &VideoCropParams, st
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
     use std::sync::Arc;
     use std::sync::atomic::AtomicBool;
 
@@ -355,16 +354,11 @@ mod tests {
 
     #[test]
     fn test_analyze_black_bars_inconsistent_bars() {
-        use std::cell::Cell;
-
         let stop_flag = Arc::new(AtomicBool::new(false));
         let duration = 10.0;
-        let call_count = Cell::new(0);
 
-        let get_frame = |_timestamp: f32| -> Option<DynamicImage> {
-            let count = call_count.get();
-            call_count.set(count + 1);
-            if count == 0 {
+        let get_frame = |timestamp: f32| -> Option<DynamicImage> {
+            if timestamp < 5.0 {
                 Some(create_frame_with_black_bars(200, 200, 20))
             } else {
                 Some(create_colored_frame(200, 200, 100, 150, 200))
@@ -389,25 +383,25 @@ mod tests {
     #[test]
     fn test_analyze_black_bars_variable_rectangles() {
         let stop_flag = Arc::new(AtomicBool::new(false));
-        let duration = 1.0;
-
-        let frames: HashMap<String, DynamicImage> = [
-            ("0.00".to_string(), create_frame_with_black_bars(200, 200, 20)),
-            ("0.10".to_string(), create_frame_with_black_bars(200, 200, 18)),
-            ("0.50".to_string(), create_frame_with_black_bars(200, 200, 22)),
-        ]
-        .iter()
-        .cloned()
-        .collect();
+        let duration = 10.0;
 
         let get_frame = |timestamp: f32| -> Option<DynamicImage> {
-            let key = format!("{timestamp:.2}");
-            frames.get(&key).or_else(|| frames.values().next()).cloned()
+            if timestamp < 3.0 {
+                Some(create_frame_with_black_bars(200, 200, 20))
+            } else if timestamp < 7.0 {
+                Some(create_frame_with_black_bars(200, 200, 18))
+            } else {
+                Some(create_frame_with_black_bars(200, 200, 22))
+            }
         };
 
         let result = analyze_black_bars(duration, &get_frame, &stop_flag);
         let rectangle = result.unwrap();
         let rect = rectangle.unwrap();
-        assert!(rect.left >= 15 && rect.left <= 20);
+        dbg!(&rect);
+        assert_eq!(rect.left, 18);
+        assert_eq!(rect.top, 18);
+        assert_eq!(rect.right, 200 - 18);
+        assert_eq!(rect.bottom, 200 - 18);
     }
 }
