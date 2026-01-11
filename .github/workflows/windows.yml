@@ -7,7 +7,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  CZKAWKA_OFFICIAL_BUILD: 1
+  CZKAWKA_OFFICIAL_BUILD: ${{ vars.CZKAWKA_OFFICIAL_BUILD }}
 
 jobs:
   krokiet-compiled-on-linux:
@@ -23,32 +23,6 @@ jobs:
         run: |
           rustup default 1.90.0
           rustup target add x86_64-pc-windows-gnu
-
-
-      - name: AAAAAAAAAAAAAAAA
-        run: |
-          echo "AAAAAAAAAAAAAAAAAAAAAAAAA"
-          echo "${{ vars.HAVE_PAT_REPOSITORY_TOKEN }}"
-          echo "BBBBBBBBBBBBBBBBBBBBBBBBB"
-
-      # THIS SHOULD RUN
-      - name: HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
-        if: ${{ vars.HAVE_PAT_REPOSITORY_TOKEN == '1' }}
-        run: |
-          echo "HHHHHHHHHHHHHHHHHHHHHHHHHHHH"
-          echo "${{ vars.HAVE_PAT_REPOSITORY_TOKEN }}"
-          echo "FFFFFFFFFFFFFFFFFff"
-
-      - name: BBBBBBBBBBBb
-        run: |
-          echo "CCCCCCCCCCCCCCCCCC"
-          echo "${{ vars.HAVE_PAT_REPOSITORY_TOKEN }}"
-          if [ "$HAVE_PAT_REPOSITORY_TOKEN" = "1" ]; then
-            echo "true"
-          else
-            echo "false"
-          fi
-          echo "DDDDDDDDDDDDDDDDDDd"
 
       - name: Compile Krokiet Release
         if: ${{ github.ref == 'refs/heads/master' }}
