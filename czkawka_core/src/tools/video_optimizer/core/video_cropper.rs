@@ -37,8 +37,10 @@ impl Rectangle {
         }
     }
 
-    fn is_cropping_needed(&self) -> bool {
-        self.left > MIN_CROP_SIZE || self.right > MIN_CROP_SIZE || self.top > MIN_CROP_SIZE || self.bottom > MIN_CROP_SIZE
+    fn is_cropping_needed(&self, width: u32, height: u32) -> bool {
+        let right_margin = width - self.right;
+        let bottom_margin = height - self.bottom;
+        self.left > MIN_CROP_SIZE || right_margin > MIN_CROP_SIZE || self.top > MIN_CROP_SIZE || bottom_margin > MIN_CROP_SIZE
     }
 }
 
@@ -88,13 +90,13 @@ fn detect_black_bars(img: &DynamicImage) -> Option<Rectangle> {
         left_crop = x + 1;
     }
 
-    let mut right_crop = 0u32;
+    let mut right_margin = 0u32;
     for x in (0..width).rev() {
         let black_pixels = (0..height).filter(|&y| is_pixel_black(&rgb_img, x, y)).count();
         if (black_pixels as f32 / height as f32) < BLACK_BAR_MIN_PERCENTAGE {
             break;
         }
-        right_crop = width - x;
+        right_margin = width - x;
     }
 
     let mut top_crop = 0u32;
@@ -106,17 +108,17 @@ fn detect_black_bars(img: &DynamicImage) -> Option<Rectangle> {
         top_crop = y + 1;
     }
 
-    let mut bottom_crop = 0u32;
+    let mut bottom_margin = 0u32;
     for y in (0..height).rev() {
         let black_pixels = (0..width).filter(|&x| is_pixel_black(&rgb_img, x, y)).count();
         if (black_pixels as f32 / width as f32) < BLACK_BAR_MIN_PERCENTAGE {
             break;
         }
-        bottom_crop = height - y;
+        bottom_margin = height - y;
     }
 
-    let rect = Rectangle::new(top_crop, bottom_crop, left_crop, right_crop);
-    if rect.is_cropping_needed() {
+    let rect = Rectangle::new(top_crop, height - bottom_margin, left_crop, width - right_margin);
+    if rect.is_cropping_needed(width, height) {
         Some(rect)
     } else {
         None
@@ -298,8 +300,8 @@ mod tests {
         let rect = result.unwrap();
         assert!(rect.left >= 15 && rect.left <= 25, "Left crop: {}", rect.left);
         assert!(rect.top >= 15 && rect.top <= 25, "Top crop: {}", rect.top);
-        assert!(rect.right >= 15 && rect.right <= 25, "Right crop: {}", rect.right);
-        assert!(rect.bottom >= 15 && rect.bottom <= 25, "Bottom crop: {}", rect.bottom);
+        assert!(rect.right >= 175 && rect.right <= 185, "Right position: {}", rect.right);
+        assert!(rect.bottom >= 175 && rect.bottom <= 185, "Bottom position: {}", rect.bottom);
     }
 
     #[test]
@@ -323,11 +325,17 @@ mod tests {
 
     #[test]
     fn test_rectangle_is_cropping_needed() {
-        let cropping_needed = Rectangle::new(10, 10, 10, 10);
-        assert!(cropping_needed.is_cropping_needed());
+        // Image 100x100, cropped to (10, 10) -> (90, 90), so 10px margin on each side
+        let cropping_needed = Rectangle::new(10, 90, 10, 90);
+        assert!(cropping_needed.is_cropping_needed(100, 100));
 
-        let no_cropping_needed = Rectangle::new(0, 0, 0, 0);
-        assert!(!no_cropping_needed.is_cropping_needed());
+        // Image 100x100, no cropping: (0, 0) -> (100, 100)
+        let no_cropping_needed = Rectangle::new(0, 100, 0, 100);
+        assert!(!no_cropping_needed.is_cropping_needed(100, 100));
+
+        // Image 100x100, small crop (3px on each side) - below threshold
+        let small_crop = Rectangle::new(3, 97, 3, 97);
+        assert!(!small_crop.is_cropping_needed(100, 100));
     }
 
     #[test]

@@ -330,7 +330,7 @@ fn default_window_height() -> u32 {
     DEFAULT_WINDOW_HEIGHT
 }
 fn default_video_optimizer_mode() -> String {
-    "video".to_string()
+    "transcode".to_string()
 }
 fn default_video_optimizer_video_codec() -> String {
     "hevc".to_string()

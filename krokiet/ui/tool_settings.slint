@@ -416,15 +416,6 @@ export component ToolSettings {
 
             if Settings.video_optimizer_sub_mode_index == 0: VerticalLayout {
                 spacing: 5px;
-
-                SliderWrapper {
-                    text: Translations.subsettings_video_optimizer_image_threshold_text;
-                    end_text: "(" + round(Settings.video_optimizer_sub_image_threshold) + "/" + round(Settings.video_optimizer_sub_image_threshold_max) + ")";
-                    end_text_size: 60px;
-                    maximum <=> Settings.video_optimizer_sub_image_threshold_max;
-                    minimum <=> Settings.video_optimizer_sub_image_threshold_min;
-                    value <=> Settings.video_optimizer_sub_image_threshold;
-                }
             }
 
             Rectangle { }

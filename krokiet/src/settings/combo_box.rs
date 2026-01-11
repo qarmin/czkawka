@@ -128,7 +128,7 @@ impl StringComboBoxItems {
             ("none", "None", Cropdetect::None),
         ]);
 
-        let video_optimizer_mode = Self::convert_to_combobox_items(&[("image", "Image", "image".to_string()), ("video", "Video", "video".to_string())]);
+        let video_optimizer_mode = Self::convert_to_combobox_items(&[("crop", "Crop", "crop".to_string()), ("transcode", "Transcode", "transcode".to_string())]);
 
         let video_optimizer_video_codec = Self::convert_to_combobox_items(&[
             ("hevc", "HEVC/H265", "hevc".to_string()),
