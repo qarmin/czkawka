@@ -102,13 +102,13 @@ fn detect_black_bars(img: &DynamicImage) -> Option<Rectangle> {
         left_crop = x + 1;
     }
 
-    let mut right_margin = 0u32;
+    let mut right_pos = width;
     for x in (0..width).rev() {
         let black_pixels = (0..height).filter(|&y| is_pixel_black(&rgb_img, x, y)).count();
         if (black_pixels as f32 / height as f32) < BLACK_BAR_MIN_PERCENTAGE {
             break;
         }
-        right_margin = width - x;
+        right_pos = x;
     }
 
     let mut top_crop = 0u32;
@@ -120,16 +120,22 @@ fn detect_black_bars(img: &DynamicImage) -> Option<Rectangle> {
         top_crop = y + 1;
     }
 
-    let mut bottom_margin = 0u32;
+    let mut bottom_pos = height;
     for y in (0..height).rev() {
         let black_pixels = (0..width).filter(|&x| is_pixel_black(&rgb_img, x, y)).count();
         if (black_pixels as f32 / width as f32) < BLACK_BAR_MIN_PERCENTAGE {
             break;
         }
-        bottom_margin = height - y;
+        bottom_pos = y;
     }
 
-    let rect = Rectangle::new(top_crop, height - bottom_margin, left_crop, width - right_margin);
+    // // Validate that we have a valid rectangle (not entire video is black)
+    // if left_crop >= right_pos || top_crop >= bottom_pos {
+    //     // Invalid rectangle - either entire video is black or margins overlap
+    //     return None;
+    // }
+
+    let rect = Rectangle::new(top_crop, bottom_pos, left_crop, right_pos);
     if rect.is_cropping_needed(width, height) {
         Some(rect)
     } else {
