@@ -135,7 +135,7 @@ pub struct VideoCropEntry {
     pub height: u32,
     pub start_crop_frame: Option<u32>,
     pub end_crop_frame: Option<u32>,
-    pub new_image_dimensions: Option<(u32, u32, u32, u32)>, // (left top, right top, right bottom, left bottom)
+    pub new_image_dimensions: Option<(u32, u32, u32, u32)>,
 }
 
 impl ResultEntry for VideoTranscodeEntry {

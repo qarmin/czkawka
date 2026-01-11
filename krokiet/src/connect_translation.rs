@@ -418,6 +418,7 @@ fn translate_items(app: &MainWindow) {
     let current_extension = flk!("column_current_extension");
     let proper_extension = flk!("column_proper_extension");
     let exif_tags = flk!("column_exif_tags");
+    let new_dimensions = flk!("column_new_dimensions");
 
     let fnm = |model: &[&str]| {
         let shared_string = model.iter().map(|s| (*s).into()).collect::<Vec<SharedString>>();
@@ -436,6 +437,7 @@ fn translate_items(app: &MainWindow) {
     settings.set_broken_files_column_name(fnm(&[&selection, &file_name, &path, &type_of_error, &size, &mod_date]));
     settings.set_bad_extensions_column_name(fnm(&[&selection, &file_name, &path, &current_extension, &proper_extension]));
     settings.set_exif_remover_column_name(fnm(&[&selection, &size, &file_name, &path, &exif_tags, &mod_date]));
+    settings.set_video_optimizer_column_name(fnm(&[&selection, &size, &file_name, &path, &codec, &dimensions, &new_dimensions, &mod_date]));
 }
 
 pub(crate) fn translate_select_mode(select_mode: SelectMode) -> SharedString {

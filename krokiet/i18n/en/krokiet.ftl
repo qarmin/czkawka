@@ -130,6 +130,7 @@ column_path = Path
 column_modification_date = Modification Date
 column_similarity = Similarity
 column_dimensions = Dimensions
+column_new_dimensions = New Dimensions
 column_title = Title
 column_artist = Artist
 column_year = Year

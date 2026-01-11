@@ -1302,57 +1302,50 @@ fn prepare_data_model_video_optimizer_transcode(fe: &VideoTranscodeEntry) -> (Mo
         directory.into(),
         fe.codec.clone().into(),
         format!("{}x{}", fe.width, fe.height).into(),
+        "-".into(),
         get_dt_timestamp_string(fe.modified_date).into(),
     ];
     let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.modified_date);
     let size_split = split_u64_into_i32s(fe.size);
     let dimension_split = split_u64_into_i32s(fe.width as u64 * fe.height as u64);
-    let data_model_int_arr: [i32; MAX_INT_DATA_VIDEO_OPTIMIZER] = [modification_split.0, modification_split.1, size_split.0, size_split.1, dimension_split.0, dimension_split.1];
+    let data_model_int_arr: [i32; MAX_INT_DATA_VIDEO_OPTIMIZER] = [modification_split.0, modification_split.1, size_split.0, size_split.1, dimension_split.0, dimension_split.1, 0, 0];
     let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 }
 
 fn prepare_data_model_video_optimizer_crop(fe: &VideoCropEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(&fe.path);
+    let (left, top, right, bottom) = fe.new_image_dimensions.expect("new_image_dimensions should be Some in crop mode");
 
-    // Calculate new dimensions if black bars were detected
-    let new_size_str = if let Some((left, top, right, bottom)) = fe.new_image_dimensions {
-        // Validate rectangle coordinates to prevent crashes from corrupted cache data
-        if left > right || top > bottom {
+
+    let (width, height, dim_string) =      if left > right || top > bottom {
             eprintln!(
                 "ERROR: Invalid rectangle coordinates in cache for file '{}': left={}, top={}, right={}, bottom={}. Skipping dimensions display.",
                 fe.path.display(), left, top, right, bottom
             );
-            "-".to_string()
-        } else if right > fe.width || bottom > fe.height {
-            eprintln!(
-                "ERROR: Rectangle coordinates exceed video dimensions for file '{}': video={}x{}, rect: left={}, top={}, right={}, bottom={}. Skipping dimensions display.",
-                fe.path.display(), fe.width, fe.height, left, top, right, bottom
-            );
-            "-".to_string()
+        (-1, -1, "-".to_string())
         } else {
-            let new_width = right - left;
-            let new_height = bottom - top;
-            format!("{}x{} ({}x{})", new_width, new_height, fe.width, fe.height)
-        }
-    } else {
-        "-".to_string()
-    };
+            let new_width = (right - left) as i32;
+            let new_height = (bottom - top) as i32;
+        (new_width, new_height, format!("{}x{} ({}x{})", new_width, new_height, new_width - fe.width as i32, new_height - fe.height as i32))
+        };
 
     let data_model_str_arr: [SharedString; MAX_STR_DATA_VIDEO_OPTIMIZER] = [
         format_size(fe.size, BINARY).into(),
         file.into(),
         directory.into(),
         fe.codec.clone().into(),
-        new_size_str.into(),
+        format!("{}x{}", fe.width, fe.height).into(),
+        dim_string.into(),
         get_dt_timestamp_string(fe.modified_date).into(),
     ];
     let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.modified_date);
     let size_split = split_u64_into_i32s(fe.size);
     let dimension_split = split_u64_into_i32s(fe.width as u64 * fe.height as u64);
-    let data_model_int_arr: [i32; MAX_INT_DATA_VIDEO_OPTIMIZER] = [modification_split.0, modification_split.1, size_split.0, size_split.1, dimension_split.0, dimension_split.1];
+    let new_dimension_split = split_u64_into_i32s(width as u64 * height as u64);
+    let data_model_int_arr: [i32; MAX_INT_DATA_VIDEO_OPTIMIZER] = [modification_split.0, modification_split.1, size_split.0, size_split.1, dimension_split.0, dimension_split.1,  new_dimension_split.0, new_dimension_split.1];
     let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 }
