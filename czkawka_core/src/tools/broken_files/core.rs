@@ -185,7 +185,7 @@ impl BrokenFiles {
                 return Some(file_entry);
             }
             Some(Ok(output)) => {
-                let combined = format!("{}{}", String::from_utf8_lossy(&output.stdout), String::from_utf8_lossy(&output.stderr));
+                let combined = format!("{}{}", &output.stdout, &output.stderr);
 
                 if let Some((error_message, additional_message)) = ffprobe_errors.iter().find(|(err, _)| combined.contains(err)) {
                     file_entry.error_string = format!("{error_message}{}", additional_message.map(|e| format!(" ({e})")).unwrap_or_default());
@@ -244,7 +244,7 @@ impl BrokenFiles {
                 file_entry.error_string = format!("Failed to run ffmpeg: {e}");
             }
             Some(Ok(output)) => {
-                let combined = format!("{}{}", String::from_utf8_lossy(&output.stdout), String::from_utf8_lossy(&output.stderr));
+                let combined = format!("{}{}", &output.stdout, &output.stderr);
 
                 if ffmpeg_allowed_messages.iter().any(|msg| combined.contains(msg)) {
                     // Allowed message, do nothing

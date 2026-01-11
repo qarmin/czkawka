@@ -86,5 +86,9 @@ pub fn run_command_interruptible(mut command: Command, stop_flag: &Arc<AtomicBoo
     let stdout = Arc::try_unwrap(stdout_buf).unwrap().into_inner().unwrap();
     let stderr = Arc::try_unwrap(stderr_buf).unwrap().into_inner().unwrap();
 
-    Some(Ok(CommandOutput { status, stdout: String::from_utf8_lossy(&stdout).to_string(), stderr: String::from_utf8_lossy(&stderr).to_string() }))
+    Some(Ok(CommandOutput {
+        status,
+        stdout: String::from_utf8_lossy(&stdout).to_string(),
+        stderr: String::from_utf8_lossy(&stderr).to_string(),
+    }))
 }
