@@ -166,6 +166,15 @@ unpack_translations path_to_file:
     rm -rf /tmp/czkawka_unpack
     @echo "Translations unpacked successfully"
 
+cache:
+    xdg-open ~/.cache/czkawka
+
+configc:
+    xdg-open ~/.config/czkawka
+
+configk:
+    xdg-open ~/.config/krokiet
+
 
 ##################### DEBUG SIZE, PERFORMANCE AND OTHERS #####################
 setup_verify_tools:
