@@ -138,6 +138,10 @@ impl VideoOptimizer {
             return WorkContinueStatus::Continue;
         }
 
+        let VideoOptimizerParameters::VideoCrop(params) = self.params.clone() else {
+            unreachable!("process_video_crop called with non VideoCrop parameters, caller is responsible for that");
+        };
+
         let all_files: Vec<VideoCropEntry> = std::mem::take(&mut self.video_crop_entries);
 
         let (records_already_cached, non_cached_files_to_check) = self.load_video_crop_cache(all_files);
@@ -157,7 +161,7 @@ impl VideoOptimizer {
                     return None;
                 }
                 let size = entry.size;
-                let res = video_cropper::check_video_crop(entry);
+                let res = video_cropper::check_video_crop(entry, &params);
                 progress_handler.increase_items(1);
                 progress_handler.increase_size(size);
                 Some(res)
