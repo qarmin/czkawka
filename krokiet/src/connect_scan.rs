@@ -1318,9 +1318,24 @@ fn prepare_data_model_video_optimizer_crop(fe: &VideoCropEntry) -> (ModelRc<Shar
 
     // Calculate new dimensions if black bars were detected
     let new_size_str = if let Some((left, top, right, bottom)) = fe.new_image_dimensions {
-        let new_width = right - left;
-        let new_height = bottom - top;
-        format!("{}x{} ({}x{})", new_width, new_height, fe.width, fe.height)
+        // Validate rectangle coordinates to prevent crashes from corrupted cache data
+        if left > right || top > bottom {
+            eprintln!(
+                "ERROR: Invalid rectangle coordinates in cache for file '{}': left={}, top={}, right={}, bottom={}. Skipping dimensions display.",
+                fe.path.display(), left, top, right, bottom
+            );
+            "-".to_string()
+        } else if right > fe.width || bottom > fe.height {
+            eprintln!(
+                "ERROR: Rectangle coordinates exceed video dimensions for file '{}': video={}x{}, rect: left={}, top={}, right={}, bottom={}. Skipping dimensions display.",
+                fe.path.display(), fe.width, fe.height, left, top, right, bottom
+            );
+            "-".to_string()
+        } else {
+            let new_width = right - left;
+            let new_height = bottom - top;
+            format!("{}x{} ({}x{})", new_width, new_height, fe.width, fe.height)
+        }
     } else {
         "-".to_string()
     };

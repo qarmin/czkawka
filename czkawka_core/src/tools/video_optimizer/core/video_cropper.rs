@@ -25,16 +25,28 @@ struct Rectangle {
 
 impl Rectangle {
     fn new(top: u32, bottom: u32, left: u32, right: u32) -> Self {
-        Self { top, bottom, left, right }
+        let s = Self { top, bottom, left, right };
+        s.validate();
+        s
     }
 
     fn union(&self, other: &Self) -> Self {
-        Self {
+        let s = Self {
             top: self.top.min(other.top),
             bottom: self.bottom.max(other.bottom),
             left: self.left.min(other.left),
             right: self.right.max(other.right),
-        }
+        };
+        s.validate();
+        s
+    }
+
+    fn validate(&self) {
+        assert!(
+            self.left <= self.right && self.top <= self.bottom,
+            "Invalid rectangle coordinates: top={}, bottom={}, left={}, right={}. Expected: left <= right && top <= bottom",
+            self.top, self.bottom, self.left, self.right
+        );
     }
 
     fn is_cropping_needed(&self, width: u32, height: u32) -> bool {
@@ -222,6 +234,24 @@ pub fn check_video_crop(mut entry: VideoCropEntry, _params: &VideoCropParams, st
 
     match analyze_black_bars(duration as f32, &get_frame, stop_flag) {
         Ok(Some(rectangle)) => {
+            // Validate rectangle coordinates before saving
+            if rectangle.left >= rectangle.right || rectangle.top >= rectangle.bottom {
+                let error_msg = format!(
+                    "Invalid rectangle coordinates detected: left={}, top={}, right={}, bottom={}. Expected: left < right && top < bottom",
+                    rectangle.left, rectangle.top, rectangle.right, rectangle.bottom
+                );
+                entry.error = Some(error_msg);
+                return entry;
+            }
+            if rectangle.right > width || rectangle.bottom > height {
+                let error_msg = format!(
+                    "Rectangle coordinates exceed video dimensions: video={}x{}, rectangle: left={}, top={}, right={}, bottom={}",
+                    width, height, rectangle.left, rectangle.top, rectangle.right, rectangle.bottom
+                );
+                entry.error = Some(error_msg);
+                return entry;
+            }
+
             debug!(
                 "Detected black bars - Left: {}, Top: {}, Right: {}, Bottom: {}",
                 rectangle.left, rectangle.top, rectangle.right, rectangle.bottom
