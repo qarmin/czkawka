@@ -4,7 +4,7 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
 
-use log::warn;
+use log::{error, warn};
 
 pub struct CommandOutput {
     pub status: std::process::ExitStatus,
@@ -24,8 +24,14 @@ pub fn run_command_interruptible(mut command: Command, stop_flag: &Arc<AtomicBoo
         Err(e) => return Some(Err(format!("Failed to spawn command: {e}"))),
     };
 
-    let mut stdout = child.stdout.take().unwrap();
-    let mut stderr = child.stderr.take().unwrap();
+    let Some(mut stdout) = child.stdout.take() else {
+        error!("Failed to take stdout from child process");
+        return Some(Err("Failed to take stdout from child process".to_string()));
+    };
+    let Some(mut stderr) = child.stderr.take() else {
+        error!("Failed to take stderr from child process");
+        return Some(Err("Failed to take stderr from child process".to_string()));
+    };
 
     let stdout_buf = Arc::new(Mutex::new(Vec::new()));
     let stderr_buf = Arc::new(Mutex::new(Vec::new()));
@@ -36,13 +42,19 @@ pub fn run_command_interruptible(mut command: Command, stop_flag: &Arc<AtomicBoo
     let out_handle = thread::spawn(move || {
         let mut buf = Vec::new();
         let _ = std::io::copy(&mut stdout, &mut buf);
-        *out_buf.lock().unwrap() = buf;
+        match out_buf.lock() {
+            Ok(mut lock) => *lock = buf,
+            Err(e) => error!("Failed to lock stdout buffer: {e}"),
+        }
     });
 
     let err_handle = thread::spawn(move || {
         let mut buf = Vec::new();
         let _ = std::io::copy(&mut stderr, &mut buf);
-        *err_buf.lock().unwrap() = buf;
+        match err_buf.lock() {
+            Ok(mut lock) => *lock = buf,
+            Err(e) => error!("Failed to lock stderr buffer: {e}"),
+        }
     });
 
     let start_time = Instant::now();
@@ -83,8 +95,33 @@ pub fn run_command_interruptible(mut command: Command, stop_flag: &Arc<AtomicBoo
         return None;
     }
 
-    let stdout = Arc::try_unwrap(stdout_buf).unwrap().into_inner().unwrap();
-    let stderr = Arc::try_unwrap(stderr_buf).unwrap().into_inner().unwrap();
+    let stdout = match Arc::try_unwrap(stdout_buf) {
+        Ok(mutex) => match mutex.into_inner() {
+            Ok(buf) => buf,
+            Err(e) => {
+                error!("Failed to get stdout inner buffer: {e}");
+                return Some(Err("Failed to get stdout inner buffer".to_string()));
+            }
+        },
+        Err(_) => {
+            error!("Failed to unwrap stdout Arc - multiple references still exist");
+            return Some(Err("Failed to unwrap stdout Arc".to_string()));
+        }
+    };
+
+    let stderr = match Arc::try_unwrap(stderr_buf) {
+        Ok(mutex) => match mutex.into_inner() {
+            Ok(buf) => buf,
+            Err(e) => {
+                error!("Failed to get stderr inner buffer: {e}");
+                return Some(Err("Failed to get stderr inner buffer".to_string()));
+            }
+        },
+        Err(_) => {
+            error!("Failed to unwrap stderr Arc - multiple references still exist");
+            return Some(Err("Failed to unwrap stderr Arc".to_string()));
+        }
+    };
 
     Some(Ok(CommandOutput {
         status,
