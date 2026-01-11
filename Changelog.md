@@ -9,6 +9,11 @@
 ### Breaking changes
 #### Users
 - Czkawka gui config file converted from custom format to json, so all settings needs to be set again(old txt file is not removed, so it may be used as reference for changes) 
+- In broken files mode, type of file is no longer saved to cache, so old cache files are incompatible with new version and should be regenerated from scratch
+
+#### Devs
+- Public api functions, now do not take references to copyable types
+
 
 ### Core
 - Extensions in similar images mode and in previews, drops validating if extension is correct(most of the time) - [#1623](https://github.com/qarmin/czkawka/pull/1623)

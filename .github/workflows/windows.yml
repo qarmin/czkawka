@@ -24,11 +24,19 @@ jobs:
           rustup default 1.90.0
           rustup target add x86_64-pc-windows-gnu
 
+
       - name: AAAAAAAAAAAAAAAA
         run: |
           echo "AAAAAAAAAAAAAAAAAAAAAAAAA"
           echo "${{ env.HAVE_PAT_REPOSITORY_TOKEN }}"
           echo "BBBBBBBBBBBBBBBBBBBBBBBBB"
+
+      - name: BBBBBBBBBBBb
+        run: |
+          echo "CCCCCCCCCCCCCCCCCC"
+          echo "${{ env.HAVE_PAT_REPOSITORY_TOKEN }}"
+          echo ${{ env.HAVE_PAT_REPOSITORY_TOKEN == '1' }}
+          echo "DDDDDDDDDDDDDDDDDDd"
 
       - name: Compile Krokiet Release
         if: ${{ github.ref == 'refs/heads/master' }}
