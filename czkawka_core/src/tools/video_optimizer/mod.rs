@@ -55,12 +55,6 @@ impl std::str::FromStr for VideoCodec {
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
-pub enum OptimizerMode {
-    VideoTranscode,
-    VideoCrop,
-}
-
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum VideoOptimizerFixParams {
     VideoTranscode(VideoTranscodeFixParams),
     VideoCrop(VideoCropFixParams),
@@ -91,27 +85,29 @@ pub struct Info {
     pub scanning_time: Duration,
 }
 
-#[derive(Clone)]
-pub struct VideoOptimizerParameters {
-    pub mode: OptimizerMode,
-    pub excluded_codecs: Vec<String>,
+#[derive(Clone, Eq, PartialEq, Debug)]
+pub enum VideoOptimizerParameters {
+    VideoTranscode(VideoTranscodeParams),
+    VideoCrop(VideoCropParams),
 }
 
-impl Default for VideoOptimizerParameters {
-    fn default() -> Self {
+#[derive(Clone, Eq, PartialEq, Debug)]
+pub struct VideoTranscodeParams {
+    pub excluded_codecs: Vec<String>,
+}
+#[derive(Clone, Eq, PartialEq, Debug)]
+pub struct VideoCropParams {}
+
+impl VideoTranscodeParams {
+    pub fn new() -> Self {
         Self {
-            mode: OptimizerMode::VideoTranscode,
             excluded_codecs: vec!["hevc".to_string(), "av1".to_string(), "vp9".to_string()],
         }
     }
 }
-
-impl VideoOptimizerParameters {
-    pub fn new(mode: OptimizerMode) -> Self {
-        Self {
-            mode,
-            excluded_codecs: vec!["hevc".to_string(), "av1".to_string(), "vp9".to_string()],
-        }
+impl Default for VideoTranscodeParams {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

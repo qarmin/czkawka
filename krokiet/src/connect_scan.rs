@@ -27,7 +27,7 @@ use czkawka_core::tools::similar_images::{ImagesEntry, SimilarImages, SimilarIma
 use czkawka_core::tools::similar_videos::core::{format_bitrate_opt, format_duration_opt};
 use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters, VideosEntry, crop_detect_from_str};
 use czkawka_core::tools::temporary::{Temporary, TemporaryFileEntry};
-use czkawka_core::tools::video_optimizer::{OptimizerMode, VideoOptimizer, VideoOptimizerParameters, VideoTranscodeEntry};
+use czkawka_core::tools::video_optimizer::{VideoOptimizer, VideoOptimizerParameters, VideoTranscodeEntry, VideoTranscodeParams};
 use humansize::{BINARY, format_size};
 use rayon::prelude::*;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
@@ -1229,10 +1229,7 @@ fn scan_video_optimizer(
                 .filter(|s| !s.is_empty())
                 .collect();
 
-            let params = VideoOptimizerParameters {
-                mode: OptimizerMode::VideoTranscode,
-                excluded_codecs,
-            };
+            let params = VideoOptimizerParameters::VideoTranscode(VideoTranscodeParams { excluded_codecs });
 
             let mut tool = VideoOptimizer::new(params);
             set_common_settings(&mut tool, &custom_settings, &stop_flag);

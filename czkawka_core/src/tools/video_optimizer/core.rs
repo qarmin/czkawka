@@ -14,7 +14,7 @@ use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
-use crate::tools::video_optimizer::{Info, OptimizerMode, VideoCropEntry, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters, VideoTranscodeEntry};
+use crate::tools::video_optimizer::{Info, VideoCropEntry, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters, VideoTranscodeEntry, VideoTranscodeParams};
 
 mod video_converter;
 mod video_cropper;
@@ -40,8 +40,8 @@ impl VideoOptimizer {
 
     #[fun_time(message = "scan_files", level = "debug")]
     pub(crate) fn scan_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
-        let extensions_string = match self.params.mode {
-            OptimizerMode::VideoTranscode | OptimizerMode::VideoCrop => VIDEO_FILES_EXTENSIONS.join(","),
+        let extensions_string = match &self.params {
+            VideoOptimizerParameters::VideoTranscode(_) | VideoOptimizerParameters::VideoCrop(_) => VIDEO_FILES_EXTENSIONS.join(","),
         };
         self.common_data.extensions.set_allowed_extensions(extensions_string);
 
@@ -55,12 +55,12 @@ impl VideoOptimizer {
 
         match result {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
-                match self.params.mode {
-                    OptimizerMode::VideoTranscode => {
+                match &self.params {
+                    VideoOptimizerParameters::VideoTranscode(_) => {
                         self.video_transcode_entries = grouped_file_entries.into_values().flatten().map(|fe| fe.into_video_transcode_entry()).collect();
                         info!("Found {} files to check", self.video_transcode_entries.len());
                     }
-                    OptimizerMode::VideoCrop => {
+                    VideoOptimizerParameters::VideoCrop(_) => {
                         self.video_crop_entries = grouped_file_entries.into_values().flatten().map(|fe| fe.into_video_crop_entry()).collect();
                         info!("Found {} files to check", self.video_crop_entries.len());
                     }
@@ -76,14 +76,14 @@ impl VideoOptimizer {
 
     #[fun_time(message = "check_files", level = "debug")]
     pub(crate) fn check_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
-        match self.params.mode {
-            OptimizerMode::VideoTranscode => self.process_video_transcode(stop_flag, progress_sender),
-            OptimizerMode::VideoCrop => self.process_video_crop(stop_flag, progress_sender),
+        match self.params.clone() {
+            VideoOptimizerParameters::VideoTranscode(params) => self.process_video_transcode(stop_flag, progress_sender, params),
+            VideoOptimizerParameters::VideoCrop(_) => self.process_video_crop(stop_flag, progress_sender),
         }
     }
 
     #[fun_time(message = "process_video_transcode", level = "debug")]
-    fn process_video_transcode(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    fn process_video_transcode(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>, params: VideoTranscodeParams) -> WorkContinueStatus {
         if self.video_transcode_entries.is_empty() {
             return WorkContinueStatus::Continue;
         }
@@ -125,7 +125,7 @@ impl VideoOptimizer {
 
         self.save_video_transcode_cache(&entries);
 
-        entries.retain(|e| e.error.is_none() && !self.params.excluded_codecs.contains(&e.codec));
+        entries.retain(|e| e.error.is_none() && !params.excluded_codecs.contains(&e.codec));
 
         self.video_transcode_entries = entries;
 
@@ -282,8 +282,8 @@ impl VideoOptimizer {
 
     #[fun_time(message = "fix_files", level = "debug")]
     pub(crate) fn fix_files(&mut self, stop_flag: &Arc<AtomicBool>, _progress_sender: Option<&Sender<ProgressData>>, fix_params: VideoOptimizerFixParams) -> WorkContinueStatus {
-        match self.params.mode {
-            OptimizerMode::VideoTranscode => {
+        match self.params.clone() {
+            VideoOptimizerParameters::VideoTranscode(_) => {
                 info!("Starting optimization of {} video files", self.video_transcode_entries.len());
 
                 let VideoOptimizerFixParams::VideoTranscode(video_transcode_params) = fix_params else {
@@ -312,7 +312,7 @@ impl VideoOptimizer {
 
                 debug!("Optimization complete - Processed: {successful_files}, Failed: {failed_files}");
             }
-            OptimizerMode::VideoCrop => {
+            VideoOptimizerParameters::VideoCrop(_) => {
                 // TODO: Implement video cropping logic
                 info!("Video crop mode - logic not yet implemented for {} files", self.video_crop_entries.len());
             }

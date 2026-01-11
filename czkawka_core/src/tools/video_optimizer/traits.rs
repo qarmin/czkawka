@@ -13,7 +13,7 @@ use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, FixingItems, PrintResults, Search};
 use crate::flc;
-use crate::tools::video_optimizer::{Info, OptimizerMode, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters};
+use crate::tools::video_optimizer::{Info, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters};
 
 impl AllTraits for VideoOptimizer {}
 
@@ -41,7 +41,7 @@ impl DebugPrint for VideoOptimizer {
 
         println!("### INDIVIDUAL DEBUG PRINT ###");
         println!("Info: {:?}", self.information);
-        println!("Mode: {:?}", self.params.mode);
+        println!("Mode: {:?}", self.params);
         println!("Video transcode entries: {}", self.video_transcode_entries.len());
         println!("Video crop entries: {}", self.video_crop_entries.len());
         self.debug_print_common();
@@ -51,12 +51,12 @@ impl DebugPrint for VideoOptimizer {
 
 impl PrintResults for VideoOptimizer {
     fn write_results<T: Write>(&self, writer: &mut T) -> std::io::Result<()> {
-        writeln!(writer, "Results of Video Optimizer with mode {:?}", self.params.mode)?;
+        writeln!(writer, "Results of Video Optimizer with mode {:?}", self.params)?;
         writeln!(writer, "Searched in directories: {:?}", self.common_data.directories.included_directories)?;
         writeln!(writer, "Excluded directories: {:?}", self.common_data.directories.excluded_directories)?;
 
-        match self.params.mode {
-            OptimizerMode::VideoTranscode => {
+        match self.params.clone() {
+            VideoOptimizerParameters::VideoTranscode(_) => {
                 writeln!(writer)?;
 
                 let total_entries = self.video_transcode_entries.len();
@@ -86,7 +86,7 @@ impl PrintResults for VideoOptimizer {
                     }
                 }
             }
-            OptimizerMode::VideoCrop => {
+            VideoOptimizerParameters::VideoCrop(_) => {
                 writeln!(writer)?;
 
                 let total_entries = self.video_crop_entries.len();
@@ -131,9 +131,9 @@ impl PrintResults for VideoOptimizer {
     }
 
     fn save_results_to_file_as_json(&self, file_name: &str, pretty_print: bool) -> std::io::Result<()> {
-        match self.params.mode {
-            OptimizerMode::VideoTranscode => self.save_results_to_file_as_json_internal(file_name, &self.video_transcode_entries, pretty_print),
-            OptimizerMode::VideoCrop => self.save_results_to_file_as_json_internal(file_name, &self.video_crop_entries, pretty_print),
+        match &self.params {
+            VideoOptimizerParameters::VideoTranscode(_) => self.save_results_to_file_as_json_internal(file_name, &self.video_transcode_entries, pretty_print),
+            VideoOptimizerParameters::VideoCrop(_) => self.save_results_to_file_as_json_internal(file_name, &self.video_crop_entries, pretty_print),
         }
     }
 }
