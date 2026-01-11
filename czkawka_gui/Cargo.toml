@@ -21,7 +21,6 @@ directories-next = "2.0"
 open = "5.3"
 image = "0.25"
 regex = "1.11"
-image_hasher = "3.0"
 fs_extra = "1.3"
 dunce = "1.0.5"
 

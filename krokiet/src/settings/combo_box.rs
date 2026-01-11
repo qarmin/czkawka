@@ -2,12 +2,11 @@ use std::fmt::Debug;
 use std::sync::{Arc, Mutex, MutexGuard};
 
 use czkawka_core::common::model::{CheckingMethod, HashType};
+use czkawka_core::re_exported::{Cropdetect, HashAlg};
 use czkawka_core::tools::big_file::SearchMode;
 use image::imageops::FilterType;
-use image_hasher::HashAlg;
 use log::warn;
 use slint::SharedString;
-use vid_dup_finder_lib::Cropdetect;
 
 use crate::connect_translation::LANGUAGE_LIST;
 

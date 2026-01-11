@@ -1420,10 +1420,8 @@ dependencies = [
  "ctrlc",
  "czkawka_core",
  "humansize",
- "image_hasher",
  "indicatif",
  "log",
- "vid_dup_finder_lib",
 ]
 
 [[package]]
@@ -1506,7 +1504,6 @@ dependencies = [
  "i18n-embed",
  "i18n-embed-fl",
  "image",
- "image_hasher",
  "itertools 0.14.0",
  "log",
  "once_cell",
@@ -4053,7 +4050,6 @@ dependencies = [
  "i18n-embed",
  "i18n-embed-fl",
  "image",
- "image_hasher",
  "log",
  "num_enum",
  "open",
@@ -4064,7 +4060,6 @@ dependencies = [
  "serde_json",
  "slint",
  "slint-build",
- "vid_dup_finder_lib",
 ]
 
 [[package]]

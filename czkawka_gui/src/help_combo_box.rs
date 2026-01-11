@@ -1,6 +1,6 @@
 use czkawka_core::common::model::{CheckingMethod, HashType};
+use czkawka_core::re_exported::{FilterType, HashAlg};
 use czkawka_core::tools::big_file::SearchMode;
-use image_hasher::{FilterType, HashAlg};
 
 pub struct HashTypeStruct {
     pub eng_name: &'static str,
