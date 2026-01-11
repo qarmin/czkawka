@@ -14,13 +14,13 @@ use rayon::prelude::*;
 
 use crate::common::cache::{CACHE_BROKEN_FILES_VERSION, extract_loaded_cache, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
 use crate::common::consts::{AUDIO_FILES_EXTENSIONS, IMAGE_RS_BROKEN_FILES_EXTENSIONS, PDF_FILES_EXTENSIONS, VIDEO_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS};
-use crate::common::{create_crash_message, debug_save_file};
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::process_utils::run_command_interruptible;
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
+use crate::common::{create_crash_message, debug_save_file};
 use crate::helpers::audio_checker;
 use crate::tools::broken_files::{BrokenEntry, BrokenFiles, BrokenFilesParameters, CheckedTypes, Info, TypeOfFile};
 
@@ -165,10 +165,17 @@ impl BrokenFiles {
 
     // None if stopped, otherwise Some
     fn check_broken_video(mut file_entry: BrokenEntry, stop_flag: &Arc<AtomicBool>) -> Option<BrokenEntry> {
-        let ffprobe_errors = [("moov atom not found", Some("broken file structure")), ("error reading header", Some("broken file structure"))];
+        let ffprobe_errors = [
+            ("moov atom not found", Some("broken file structure")),
+            ("error reading header", Some("broken file structure")),
+            ("EBML header parsing failed", None),
+            ("exceeds containing master element", Some("broken file structure")),
+            ("invalid frame index table", Some("broken file structure")),
+            ("Invalid argument", Some("ffprobe seems to not recognize file format")),
+        ];
 
         let mut command = Command::new("ffprobe");
-        command.arg(&file_entry.path);
+        command.arg("-v").arg("error").arg(&file_entry.path);
 
         match run_command_interruptible(command, stop_flag) {
             None => return None,
@@ -184,7 +191,7 @@ impl BrokenFiles {
                     file_entry.error_string = format!("{error_message}{}", additional_message.map(|e| format!(" ({e})")).unwrap_or_default());
                     return Some(file_entry);
                 } else if !output.status.success() {
-                    debug_save_file("ffprobe_failed_output.txt",&format!("{} --- \n{}", file_entry.path.to_string_lossy(), combined));
+                    debug_save_file("ffprobe_failed_output.txt", &format!("{} --- \n{}", file_entry.path.to_string_lossy(), combined));
                     file_entry.error_string = format!("ffprobe exited with non-zero status: {}", output.status);
                     return Some(file_entry);
                 }
@@ -194,21 +201,36 @@ impl BrokenFiles {
         let ffmpeg_message = [
             ("Output file does not contain any stream", Some("cannot find video stream - possible not even video file")),
             ("missing mandatory atoms, broken header", Some("broken file structure")),
-
+            ("Cannot determine format of input", None),
+            ("decode_slice_header error", Some("corrupted video data, may be still fully/partially playable")),
+            ("Truncating packet", Some("corrupted video data, may be still fully/partially playable")),
+            ("Invalid NAL unit size", Some("corrupted video data, may be still fully/partially playable")),
+            ("exceeds containing master element ending", Some("corrupted video data, may be still fully/partially playable")),
+            ("corrupt input packet in stream", Some("Possible corruption in audio/video stream, may be still playable")),
+            ("invalid as first byte of an EBML number", Some("corrupted video data, may be still fully/partially playable")),
             // Last resort for all other errors
-            // ("Invalid data found when processing input", Some("generic error")) // Must be last to not override more precise errors - disabled currently to find less generic errors
+            ("Invalid data found when processing input", Some("generic error")), // Must be last to not override more precise errors
 
             // Warnings
             ("corrupt decoded frame", Some("may be still playable")),
-
         ];
         let ffmpeg_allowed_messages = [
             "Input buffer exhausted before END element found", // Looks like quite popular message, so ignoring it
-            "Invalid color space", // https://fftrac-bg.ffmpeg.org/ticket/11020 - seems to be non-fatal
+            "Invalid color space",                             // https://fftrac-bg.ffmpeg.org/ticket/11020 - seems to be non-fatal
         ];
 
         let mut command = Command::new("ffmpeg");
-        command.arg("-v").arg("error").arg("-xerror").arg("-threads").arg("1").arg("-i").arg(&file_entry.path).arg("-f").arg("null").arg("-");
+        command
+            .arg("-v")
+            .arg("error")
+            .arg("-xerror")
+            .arg("-threads")
+            .arg("1")
+            .arg("-i")
+            .arg(&file_entry.path)
+            .arg("-f")
+            .arg("null")
+            .arg("-");
 
         match run_command_interruptible(command, stop_flag) {
             None => return None,
@@ -224,7 +246,7 @@ impl BrokenFiles {
                 } else if let Some((error_message, additional_message)) = ffmpeg_message.iter().find(|(err, _)| combined.contains(err)) {
                     file_entry.error_string = format!("{error_message}{}", additional_message.map(|e| format!(" ({e})")).unwrap_or_default());
                 } else if !output.status.success() {
-                    debug_save_file("ffmpeg_failed_output.txt",&format!("{} --- \n{}", file_entry.path.to_string_lossy(), combined));
+                    debug_save_file("ffmpeg_failed_output.txt", &format!("{} --- \n{}", file_entry.path.to_string_lossy(), combined));
                     file_entry.error_string = format!("ffmpeg exited with non-zero status: {}", output.status);
                 }
             }
