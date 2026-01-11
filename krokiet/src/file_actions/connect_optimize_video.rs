@@ -6,7 +6,7 @@ use std::thread;
 
 use crossbeam_channel::Sender;
 use czkawka_core::common::progress_data::ProgressData;
-use czkawka_core::tools::video_optimizer::VideoCodec;
+use czkawka_core::tools::video_optimizer::{VideoCodec, VideoTranscodeFixParams};
 use slint::{ComponentHandle, SharedString, Weak};
 
 use crate::model_operations::model_processor::{MessageType, ModelProcessor};
@@ -82,13 +82,15 @@ impl ModelProcessor {
                     &stop_flag_clone,
                     &full_path,
                     original_size,
-                    requested_video_codec,
-                    target_quality,
-                    fail_if_bigger,
-                    overwrite_files,
-                    limit_video_size,
-                    max_width,
-                    max_height,
+                    VideoTranscodeFixParams {
+                        codec: requested_video_codec,
+                        quality: target_quality,
+                        fail_if_not_smaller: fail_if_bigger,
+                        overwrite_original: overwrite_files,
+                        limit_video_size,
+                        max_width,
+                        max_height,
+                    },
                 )
             };
 
@@ -98,45 +100,12 @@ impl ModelProcessor {
 }
 
 #[cfg(not(test))]
-fn optimize_single_video(
-    stop_flag: &Arc<AtomicBool>,
-    video_path: &str,
-    original_size: u64,
-    requested_video_codec: VideoCodec,
-    target_quality: u32,
-    fail_if_not_smaller: bool,
-    overwrite_original: bool,
-    limit_video_size: bool,
-    max_width: u32,
-    max_height: u32,
-) -> Result<(), String> {
-    czkawka_core::tools::video_optimizer::core::process_video(
-        stop_flag,
-        video_path,
-        original_size,
-        requested_video_codec,
-        target_quality,
-        fail_if_not_smaller,
-        overwrite_original,
-        limit_video_size,
-        max_width,
-        max_height,
-    )
+fn optimize_single_video(stop_flag: &Arc<AtomicBool>, video_path: &str, original_size: u64, transcode_params: VideoTranscodeFixParams) -> Result<(), String> {
+    czkawka_core::tools::video_optimizer::core::process_video(stop_flag, video_path, original_size, transcode_params)
 }
 
 #[cfg(test)]
-fn optimize_single_video(
-    _stop_flag: &Arc<AtomicBool>,
-    video_path: &str,
-    _original_size: u64,
-    _requested_video_codec: VideoCodec,
-    _target_quality: u32,
-    _fail_if_not_smaller: bool,
-    _overwrite_original: bool,
-    _limit_video_size: bool,
-    _max_width: u32,
-    _max_height: u32,
-) -> Result<(), String> {
+fn optimize_single_video(_stop_flag: &Arc<AtomicBool>, video_path: &str, _original_size: u64, _transcode_params: VideoTranscodeFixParams) -> Result<(), String> {
     if video_path.contains("test_error") {
         return Err(format!("Test error for item: {video_path}"));
     }

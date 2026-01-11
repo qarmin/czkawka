@@ -19,7 +19,7 @@ krokiet_info_message =
 
         Give it a try and see the difference!
 
-        Czkawka will continue to receive bug fixes and minor updates, but all new features will be developed exclusively for Krokiet.
+        Czkawka will continue to receive bug fixes and minor updates from me, but all new features will be developed exclusively for Krokiet, and anyone is free to contribute new features add missing modes or extend Czkawka further.
 
         PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
 

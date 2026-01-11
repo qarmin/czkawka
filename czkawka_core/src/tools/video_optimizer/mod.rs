@@ -62,15 +62,26 @@ pub enum OptimizerMode {
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum VideoOptimizerFixParams {
-    VideoTranscode {
-        codec: VideoCodec,
-        quality: u32,
-    },
-    VideoCrop {
-        crop_start_end_static_frames: bool,
-        crop_black_bars: bool,
-        crop_static_parts: bool,
-    },
+    VideoTranscode(VideoTranscodeFixParams),
+    VideoCrop(VideoCropFixParams),
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+pub struct VideoTranscodeFixParams {
+    pub codec: VideoCodec,
+    pub quality: u32,
+    pub fail_if_not_smaller: bool,
+    pub overwrite_original: bool,
+    pub limit_video_size: bool,
+    pub max_width: u32,
+    pub max_height: u32,
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+pub struct VideoCropFixParams {
+    pub crop_start_end_static_frames: bool,
+    pub crop_black_bars: bool,
+    pub crop_static_parts: bool,
 }
 
 #[derive(Debug, Default, Clone)]

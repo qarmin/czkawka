@@ -286,8 +286,8 @@ impl VideoOptimizer {
             OptimizerMode::VideoTranscode => {
                 info!("Starting optimization of {} video files", self.video_transcode_entries.len());
 
-                let VideoOptimizerFixParams::VideoTranscode { codec, quality } = fix_params else {
-                    unreachable!("VideoTranscode mode should have VideoTranscode fix_params");
+                let VideoOptimizerFixParams::VideoTranscode(video_transcode_params) = fix_params else {
+                    unreachable!("VideoTranscode mode should have VideoTranscode fix_params(caller is responsible for that)");
                 };
 
                 self.video_transcode_entries.par_iter_mut().for_each(|entry| {
@@ -296,7 +296,7 @@ impl VideoOptimizer {
                         return;
                     }
                     // TODO not supported arguments
-                    match process_video(stop_flag, &entry.path.to_string_lossy(), entry.size, codec, quality, true, true, false, 0, 0) {
+                    match process_video(stop_flag, &entry.path.to_string_lossy(), entry.size, video_transcode_params) {
                         Ok(_new_size) => {}
                         Err(e) => {
                             entry.error = Some(e);

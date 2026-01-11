@@ -75,7 +75,7 @@ clippy.enum_variant_names = "allow" # Not always is possible to use different na
 clippy.too_many_arguments = "allow" # Sometimes such functions are needed
 clippy.type_complexity = "allow" # Sometimes such types are needed
 clippy.collapsible_else_if = "allow" # Sometimes it is more readable
-clippy.iter_on_single_items = "allow" # Allows to extend items
+clippy.iter_on_single_items = "allow" # Allows to extend slice items, without needing to converting it when number of items change
 
 clippy.doc_broken_link = "warn"
 clippy.ip_constant = "warn"

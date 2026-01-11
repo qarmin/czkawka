@@ -8,7 +8,7 @@ use log::debug;
 
 use crate::common::process_utils::run_command_interruptible;
 use crate::common::video_metadata::VideoMetadata;
-use crate::tools::video_optimizer::{VideoCodec, VideoTranscodeEntry};
+use crate::tools::video_optimizer::{VideoTranscodeEntry, VideoTranscodeFixParams};
 
 pub fn check_video(mut entry: VideoTranscodeEntry) -> VideoTranscodeEntry {
     debug!("Checking video: {}", entry.path.display());
@@ -41,18 +41,7 @@ pub fn check_video(mut entry: VideoTranscodeEntry) -> VideoTranscodeEntry {
     entry
 }
 
-pub fn process_video(
-    stop_flag: &Arc<AtomicBool>,
-    video_path: &str,
-    original_size: u64,
-    video_codec: VideoCodec,
-    target_quality: u32,
-    fail_if_not_smaller: bool,
-    overwrite_original: bool,
-    limit_video_size: bool,
-    max_width: u32,
-    max_height: u32,
-) -> Result<(), String> {
+pub fn process_video(stop_flag: &Arc<AtomicBool>, video_path: &str, original_size: u64, video_transcode_params: VideoTranscodeFixParams) -> Result<(), String> {
     let temp_output = Path::new(video_path).with_extension("czkawka_optimized.mp4");
 
     let mut command = Command::new("ffmpeg");
@@ -61,12 +50,15 @@ pub fn process_video(
         .arg(video_path)
         .arg("-nostdin")
         .arg("-c:v")
-        .arg(video_codec.as_str())
+        .arg(video_transcode_params.codec.as_str())
         .arg("-crf")
-        .arg(target_quality.to_string());
+        .arg(video_transcode_params.quality.to_string());
 
-    if limit_video_size {
-        let scale_filter = format!("scale='min({max_width},iw):min({max_height},ih):force_original_aspect_ratio=decrease'");
+    if video_transcode_params.limit_video_size {
+        let scale_filter = format!(
+            "scale='min({},iw):min({},ih):force_original_aspect_ratio=decrease'",
+            video_transcode_params.max_width, video_transcode_params.max_height
+        );
         command.arg("-vf").arg(scale_filter);
     }
 
@@ -93,7 +85,7 @@ pub fn process_video(
 
     let new_size = metadata.len();
 
-    if fail_if_not_smaller && new_size >= original_size {
+    if video_transcode_params.fail_if_not_smaller && new_size >= original_size {
         let _ = fs::remove_file(&temp_output);
         return Err(format!(
             "Optimized file({}) ({new_size} bytes) is larger than original({}) ({original_size} bytes)",
@@ -102,7 +94,7 @@ pub fn process_video(
         ));
     }
 
-    if overwrite_original {
+    if video_transcode_params.overwrite_original {
         fs::rename(&temp_output, video_path).map_err(|e| {
             let _ = fs::remove_file(&temp_output);
             format!("Failed to replace file \"{video_path}\" with optimized version: {e}")
