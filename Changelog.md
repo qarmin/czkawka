@@ -12,7 +12,7 @@
 - In broken files mode, type of file is no longer saved to cache, so old cache files are incompatible with new version and should be regenerated from scratch
 
 #### Devs
-- Public api functions, now do not take references to copyable types
+- Public api functions, now do not take references to small copyable types
 
 
 ### Core

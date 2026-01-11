@@ -69,7 +69,6 @@ pub fn process_cli_args(app_display: &str, app_exec: &str, args: Vec<String>) ->
                 "-e" | "--exclude" => expected_arg = ExpectedArgs::Exclude,
                 "-r" | "--referenced" => expected_arg = ExpectedArgs::Referenced,
                 "-c" | "--cache" => {
-                    // Open cache folder and exit
                     if let Some(cfg) = get_config_cache_path() {
                         if let Err(e) = open::that(&cfg.cache_folder) {
                             error!("Failed to open cache folder \"{}\": {e}", cfg.cache_folder.to_string_lossy());
@@ -82,7 +81,6 @@ pub fn process_cli_args(app_display: &str, app_exec: &str, args: Vec<String>) ->
                     }
                 }
                 "-C" | "--config" => {
-                    // Open config folder and exit
                     if let Some(cfg) = get_config_cache_path() {
                         if let Err(e) = open::that(&cfg.config_folder) {
                             error!("Failed to open config folder \"{}\": {e}", cfg.config_folder.to_string_lossy());

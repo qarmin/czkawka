@@ -181,7 +181,7 @@ impl BrokenFiles {
             None => return None,
             Some(Err(e)) => {
                 debug!("Failed to run ffprobe on {:?}: {}", file_entry.path, e);
-                file_entry.error_string = format!("Failed to run ffprobe: {}", e);
+                file_entry.error_string = format!("Failed to run ffprobe: {e}");
                 return Some(file_entry);
             }
             Some(Ok(output)) => {
@@ -205,12 +205,17 @@ impl BrokenFiles {
             ("decode_slice_header error", Some("corrupted video data, may be still fully/partially playable")),
             ("Truncating packet", Some("corrupted video data, may be still fully/partially playable")),
             ("Invalid NAL unit size", Some("corrupted video data, may be still fully/partially playable")),
-            ("exceeds containing master element ending", Some("corrupted video data, may be still fully/partially playable")),
+            (
+                "exceeds containing master element ending",
+                Some("corrupted video data, may be still fully/partially playable"),
+            ),
             ("corrupt input packet in stream", Some("Possible corruption in audio/video stream, may be still playable")),
-            ("invalid as first byte of an EBML number", Some("corrupted video data, may be still fully/partially playable")),
+            (
+                "invalid as first byte of an EBML number",
+                Some("corrupted video data, may be still fully/partially playable"),
+            ),
             // Last resort for all other errors
             ("Invalid data found when processing input", Some("generic error")), // Must be last to not override more precise errors
-
             // Warnings
             ("corrupt decoded frame", Some("may be still playable")),
         ];
@@ -236,7 +241,7 @@ impl BrokenFiles {
             None => return None,
             Some(Err(e)) => {
                 debug!("Failed to run ffmpeg on {:?}: {}", file_entry.path, e);
-                file_entry.error_string = format!("Failed to run ffmpeg: {}", e);
+                file_entry.error_string = format!("Failed to run ffmpeg: {e}");
             }
             Some(Ok(output)) => {
                 let combined = format!("{}{}", String::from_utf8_lossy(&output.stdout), String::from_utf8_lossy(&output.stderr));
@@ -285,7 +290,7 @@ impl BrokenFiles {
             TypeOfFile::Pdf => Some(Some(Self::check_broken_pdf(file_entry))),
             TypeOfFile::Video => Self::check_broken_video(file_entry, stop_flag).map(Some),
             TypeOfFile::Unknown => {
-                error!("Unknown file type of: {:?}", file_entry);
+                error!("Unknown file type of: {file_entry:?}");
                 Some(None)
             }
         }

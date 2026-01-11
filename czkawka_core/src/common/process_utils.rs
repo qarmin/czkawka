@@ -32,8 +32,10 @@ pub fn run_command_interruptible(mut command: Command, stop_flag: &Arc<AtomicBoo
         }
 
         let elapsed_secs = start_time.elapsed().as_secs();
-        if let Some(warning_time) = warning_steps.get(next_warning_idx) && elapsed_secs >= *warning_time {
-            warn!("Command is still running after {warning_time} seconds, for command: {:?}", command);
+        if let Some(warning_time) = warning_steps.get(next_warning_idx)
+            && elapsed_secs >= *warning_time
+        {
+            warn!("Command is still running after {warning_time} seconds, for command: {command:?}");
             next_warning_idx += 1;
         }
 

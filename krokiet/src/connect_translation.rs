@@ -358,6 +358,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_settings_log_number_size_text("".into());
     translation.set_settings_similar_videos_clear_unused_thumbnails_text(flk!("settings_similar_videos_clear_unused_thumbnails").into());
     translation.set_clean_exif_overwrite_files_text(flk!("clean_exif_overwrite_files_text").into());
+    translation.set_subsettings_broken_files_video_info_text(flk!("subsettings_broken_files_video_info").into());
 
     let tools_model: [(SharedString, ActiveTab); TOOLS_NUMBER] = [
         (flk!("tool_duplicate_files").into(), ActiveTab::DuplicateFiles),
