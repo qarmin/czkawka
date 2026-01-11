@@ -179,7 +179,6 @@ impl VideoOptimizer {
 
         self.save_video_crop_cache(&entries);
 
-        // Keep only entries without errors and with detected black bars
         entries.retain(|e| e.error.is_none() && e.new_image_dimensions.is_some());
 
         self.video_crop_entries = entries;

@@ -240,28 +240,6 @@ pub fn check_video_crop(mut entry: VideoCropEntry, _params: &VideoCropParams, st
 
     match analyze_black_bars(duration as f32, &get_frame, stop_flag) {
         Ok(Some(rectangle)) => {
-            // Validate rectangle coordinates before saving
-            if rectangle.left >= rectangle.right || rectangle.top >= rectangle.bottom {
-                let error_msg = format!(
-                    "Invalid rectangle coordinates detected: left={}, top={}, right={}, bottom={}. Expected: left < right && top < bottom",
-                    rectangle.left, rectangle.top, rectangle.right, rectangle.bottom
-                );
-                entry.error = Some(error_msg);
-                return entry;
-            }
-            if rectangle.right > width || rectangle.bottom > height {
-                let error_msg = format!(
-                    "Rectangle coordinates exceed video dimensions: video={}x{}, rectangle: left={}, top={}, right={}, bottom={}",
-                    width, height, rectangle.left, rectangle.top, rectangle.right, rectangle.bottom
-                );
-                entry.error = Some(error_msg);
-                return entry;
-            }
-
-            debug!(
-                "Detected black bars - Left: {}, Top: {}, Right: {}, Bottom: {}",
-                rectangle.left, rectangle.top, rectangle.right, rectangle.bottom
-            );
             entry.new_image_dimensions = Some((rectangle.left, rectangle.top, rectangle.right, rectangle.bottom));
         }
         Ok(None) => {
@@ -447,5 +425,157 @@ mod tests {
         assert_eq!(rect.top, 18);
         assert_eq!(rect.right, 200 - 18);
         assert_eq!(rect.bottom, 200 - 18);
+    }
+
+    #[test]
+    fn test_detect_black_bars_fuzzer() {
+        // Test with various edge cases and random patterns
+        let test_cases = vec![
+            // (width, height, description)
+            (1, 1, "1x1 image"),
+            (1, 100, "1 pixel wide"),
+            (100, 1, "1 pixel tall"),
+            (2, 2, "2x2 minimum"),
+            (10, 10, "10x10 small"),
+            (100, 100, "100x100 medium"),
+            (1920, 1080, "1920x1080 Full HD"),
+            (3840, 2160, "3840x2160 4K"),
+        ];
+
+        for (width, height, desc) in test_cases {
+            println!("Testing: {}", desc);
+
+            // Test 1: All black image
+            let mut all_black = RgbImage::new(width, height);
+            for pixel in all_black.pixels_mut() {
+                *pixel = image::Rgb([0, 0, 0]);
+            }
+            let result = detect_black_bars(&DynamicImage::ImageRgb8(all_black));
+            // All black should return None (no valid content area)
+            assert!(result.is_none(), "All black image should return None for {}", desc);
+
+            // Test 2: All white image
+            let mut all_white = RgbImage::new(width, height);
+            for pixel in all_white.pixels_mut() {
+                *pixel = image::Rgb([255, 255, 255]);
+            }
+            let result = detect_black_bars(&DynamicImage::ImageRgb8(all_white));
+            // All white should return None (no cropping needed)
+            assert!(result.is_none(), "All white image should return None for {}", desc);
+
+            // Test 3: Single white pixel in center
+            if width > 2 && height > 2 {
+                let mut single_pixel = RgbImage::new(width, height);
+                for pixel in single_pixel.pixels_mut() {
+                    *pixel = image::Rgb([0, 0, 0]);
+                }
+                single_pixel.put_pixel(width / 2, height / 2, image::Rgb([255, 255, 255]));
+                let result = detect_black_bars(&DynamicImage::ImageRgb8(single_pixel));
+                if let Some(rect) = result {
+                    // Rectangle should be valid
+                    assert!(rect.left < rect.right, "Invalid rectangle for single pixel in {}: left >= right", desc);
+                    assert!(rect.top < rect.bottom, "Invalid rectangle for single pixel in {}: top >= bottom", desc);
+                    assert!(rect.right <= width, "Right exceeds width in {}", desc);
+                    assert!(rect.bottom <= height, "Bottom exceeds height in {}", desc);
+                }
+            }
+
+            // Test 4: Checkerboard pattern (no black bars)
+            if width > 4 && height > 4 {
+                let mut checkerboard = RgbImage::new(width, height);
+                for (x, y, pixel) in checkerboard.enumerate_pixels_mut() {
+                    let color = if (x + y) % 2 == 0 { 255 } else { 0 };
+                    *pixel = image::Rgb([color, color, color]);
+                }
+                let result = detect_black_bars(&DynamicImage::ImageRgb8(checkerboard));
+                // Checkerboard should return None (no uniform black bars)
+                assert!(result.is_none(), "Checkerboard should return None for {}", desc);
+            }
+
+            // Test 5: Black bars on all sides
+            if width > 40 && height > 40 {
+                let bar_size = 10;
+                let mut with_bars = RgbImage::new(width, height);
+                for (x, y, pixel) in with_bars.enumerate_pixels_mut() {
+                    if x < bar_size || x >= width - bar_size || y < bar_size || y >= height - bar_size {
+                        *pixel = image::Rgb([0, 0, 0]);
+                    } else {
+                        *pixel = image::Rgb([128, 128, 128]);
+                    }
+                }
+                let result = detect_black_bars(&DynamicImage::ImageRgb8(with_bars));
+                if let Some(rect) = result {
+                    // Should detect black bars
+                    assert!(rect.left > 0, "Should detect left black bar in {}", desc);
+                    assert!(rect.top > 0, "Should detect top black bar in {}", desc);
+                    assert!(rect.right < width, "Should detect right black bar in {}", desc);
+                    assert!(rect.bottom < height, "Should detect bottom black bar in {}", desc);
+                    // Validate rectangle invariants
+                    assert!(rect.left < rect.right, "Invalid rectangle in {}: left >= right", desc);
+                    assert!(rect.top < rect.bottom, "Invalid rectangle in {}: top >= bottom", desc);
+                }
+            }
+
+            // Test 6: Only left and right black bars (letterbox)
+            if width > 40 && height > 20 {
+                let bar_size = 10;
+                let mut letterbox = RgbImage::new(width, height);
+                for (x, y, pixel) in letterbox.enumerate_pixels_mut() {
+                    if x < bar_size || x >= width - bar_size {
+                        *pixel = image::Rgb([0, 0, 0]);
+                    } else {
+                        *pixel = image::Rgb([128, 128, 128]);
+                    }
+                }
+                let result = detect_black_bars(&DynamicImage::ImageRgb8(letterbox));
+                if let Some(rect) = result {
+                    assert!(rect.left < rect.right, "Invalid letterbox rectangle in {}", desc);
+                    assert!(rect.top < rect.bottom, "Invalid letterbox rectangle in {}", desc);
+                }
+            }
+
+            // Test 7: Only top and bottom black bars (pillarbox)
+            if width > 20 && height > 40 {
+                let bar_size = 10;
+                let mut pillarbox = RgbImage::new(width, height);
+                for (x, y, pixel) in pillarbox.enumerate_pixels_mut() {
+                    if y < bar_size || y >= height - bar_size {
+                        *pixel = image::Rgb([0, 0, 0]);
+                    } else {
+                        *pixel = image::Rgb([128, 128, 128]);
+                    }
+                }
+                let result = detect_black_bars(&DynamicImage::ImageRgb8(pillarbox));
+                if let Some(rect) = result {
+                    assert!(rect.left < rect.right, "Invalid pillarbox rectangle in {}", desc);
+                    assert!(rect.top < rect.bottom, "Invalid pillarbox rectangle in {}", desc);
+                }
+            }
+
+            // Test 8: Asymmetric black bars
+            if width > 50 && height > 50 {
+                let mut asymmetric = RgbImage::new(width, height);
+                let left_bar = 5;
+                let right_bar = 15;
+                let top_bar = 10;
+                let bottom_bar = 20;
+                for (x, y, pixel) in asymmetric.enumerate_pixels_mut() {
+                    if x < left_bar || x >= width - right_bar || y < top_bar || y >= height - bottom_bar {
+                        *pixel = image::Rgb([0, 0, 0]);
+                    } else {
+                        *pixel = image::Rgb([200, 200, 200]);
+                    }
+                }
+                let result = detect_black_bars(&DynamicImage::ImageRgb8(asymmetric));
+                if let Some(rect) = result {
+                    assert!(rect.left < rect.right, "Invalid asymmetric rectangle in {}", desc);
+                    assert!(rect.top < rect.bottom, "Invalid asymmetric rectangle in {}", desc);
+                    assert!(rect.left >= left_bar, "Left bar not detected properly in {}", desc);
+                    assert!(rect.right <= width - right_bar, "Right bar not detected properly in {}", desc);
+                }
+            }
+        }
+
+        println!("Fuzzer test completed successfully!");
     }
 }
