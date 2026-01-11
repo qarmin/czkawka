@@ -96,7 +96,7 @@ pub struct VideoTranscodeParams {
     pub excluded_codecs: Vec<String>,
 }
 #[derive(Clone, Eq, PartialEq, Debug)]
-pub struct VideoCropParams { }
+pub struct VideoCropParams {}
 
 impl VideoTranscodeParams {
     pub fn new() -> Self {

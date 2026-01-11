@@ -1,5 +1,7 @@
 use std::path::Path;
 use std::process::{Command, Stdio};
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use image::{DynamicImage, GenericImageView};
 use log::debug;
@@ -7,38 +9,43 @@ use log::debug;
 use crate::common::video_metadata::VideoMetadata;
 use crate::tools::video_optimizer::{VideoCropEntry, VideoCropParams};
 
-// Zaimplementuj cropopwanie, jako przyjemny do czytania i testów funkcjonalność - NIE USUWAJ TEGO OPISU
-//
-// To ma:
-// - znajdywać w przybliżeniu początek i koniec sensowny wideo(jeśli np. przez 5 sekund jest ten sam obraz, to znaczy że to intro/outro i można usunąć)
-// - ma znajdywać czarne pasy na górze/dole/lewej prawje strony(w przyszłości tobędą statyczne części video, ale obecnie tylko czarne pasy)
-//
-// Algorythm ma działać tak
-// - masz duration i działasz na nim
-// Pobierasz z grubsza pierwszą klatkę, ostatnią klatkę - w sensie z grubsza, bo nie chcesz dekodować całego wideo klatka po klatce
-// Jeśli tutaj nie ma ani czarnych pasów to odpuszczas krok sprawdzania czarnych pasów
-// Ale dalej musisz sprawdzic czy pocztek i koniec mogą być przycięte
-// Przycięcie początku i końca, powinno być przycięte do około 0.5 sekundy dokładności - czyli 0s - obraz A, 0.5s - obraz A, 1s - obraz B, to znaczy że można przyciąć do 0.5s
-// Analogicznie na końcu wideo
-// W obu przypadkach, najlepiej skorzystać z wyszukiwania binarnego - ale tylko po początkowych krokach
-// A początkowe kroki to(dla dużych video, bo dla małych to będzie przetwarzane szybkeij):
-// Sprawdź pierwszą i ostantią klatkę, sprawdź potem w krokach 5s, 30s, 100s, 300s - jeśli znajdziemy rożnicę, to suzkamy binarnie pomiedzy np. 30 - 100, czyli 65 etc.
-// Komentarze (inne niż ten opis co robić) pousuwaj
-// Dodaj testy - test ma sobie określać jakie wideo ma być tworzone (np. 10s czarnego, 20s kolorowego, 10s czarnego), i dla określonego timestampu, ma generować określone obrazy z czarnym etc. a potem weryfikować czy jest ok rezultaa
-// To jest operacja długotrwała, więc ma być dodany stop_flag do przerwania, po każdej wyciągniętej klatce sprawdzamy czy stop_flag jest ustawiony i jeśli tak to przerywamy działanie
-// Limituj ffmpeg do max 1 wątku
-// Zmniejsz liczbę wyciągnięć klatek - pierwsza, ostatnia i 1 bliska początku i końca są wspólne, potem przy pomocy jakiś flag pomocniczych, sprawdzaj czy black bars potrzebuje gdzieś klatki czy i czy ten drugi tryb potrzebuje, by nie robić tego podwójnie
+const BLACK_PIXEL_THRESHOLD: u8 = 20;
+const BLACK_BAR_MIN_PERCENTAGE: f32 = 0.9;
+const MIN_SAMPLE_INTERVAL: f32 = 0.25;
+const MAX_SAMPLES: usize = 60;
+const MIN_CROP_SIZE: u32 = 5;
 
-// Constants for detection
-const BLACK_PIXEL_THRESHOLD: u8 = 20; // Pixels below this value are considered black
-const BLACK_BAR_MIN_PERCENTAGE: f32 = 0.9; // 90% of row/column must be black
-const STATIC_FRAME_SIMILARITY_THRESHOLD: f32 = 0.98; // 98% similarity means static frame
-const BINARY_SEARCH_PRECISION: f32 = 0.5; // Search precision in seconds
-const INITIAL_CHECK_INTERVALS: &[f32] = &[0.0, 5.0, 30.0, 100.0, 300.0]; // Initial sampling points in seconds
+#[derive(Debug, Clone, Copy, PartialEq)]
+struct Rectangle {
+    top: u32,
+    bottom: u32,
+    left: u32,
+    right: u32,
+}
 
-/// Extract a single frame from video at given timestamp
-fn extract_frame_at_timestamp(video_path: &Path, timestamp: f32) -> Result<DynamicImage, String> {
+impl Rectangle {
+    fn new(top: u32, bottom: u32, left: u32, right: u32) -> Self {
+        Self { top, bottom, left, right }
+    }
+
+    fn union(&self, other: &Self) -> Self {
+        Self {
+            top: self.top.min(other.top),
+            bottom: self.bottom.max(other.bottom),
+            left: self.left.min(other.left),
+            right: self.right.max(other.right),
+        }
+    }
+
+    fn is_cropping_needed(&self) -> bool {
+        self.left > MIN_CROP_SIZE || self.right > MIN_CROP_SIZE || self.top > MIN_CROP_SIZE || self.bottom > MIN_CROP_SIZE
+    }
+}
+
+fn extract_frame_ffmpeg(video_path: &Path, timestamp: f32) -> Option<DynamicImage> {
     let output = Command::new("ffmpeg")
+        .arg("-threads")
+        .arg("1")
         .arg("-ss")
         .arg(timestamp.to_string())
         .arg("-i")
@@ -54,61 +61,25 @@ fn extract_frame_at_timestamp(video_path: &Path, timestamp: f32) -> Result<Dynam
         .stdout(Stdio::piped())
         .stderr(Stdio::null())
         .output()
-        .map_err(|e| format!("Failed to execute ffmpeg: {e}"))?;
+        .ok()?;
 
     if !output.status.success() {
-        return Err("ffmpeg failed to extract frame".to_string());
+        return None;
     }
 
-    let img = image::load_from_memory(&output.stdout).map_err(|e| format!("Failed to decode frame: {e}"))?;
-    Ok(img)
+    image::load_from_memory(&output.stdout).ok()
 }
 
-/// Calculate similarity between two images (0.0 = completely different, 1.0 = identical)
-fn calculate_frame_similarity(img1: &DynamicImage, img2: &DynamicImage) -> f32 {
-    let (w1, h1) = img1.dimensions();
-    let (w2, h2) = img2.dimensions();
-
-    if w1 != w2 || h1 != h2 {
-        return 0.0;
-    }
-
-    let img1_rgb = img1.to_rgb8();
-    let img2_rgb = img2.to_rgb8();
-
-    let total_pixels = (w1 * h1) as usize;
-    let mut similar_pixels = 0usize;
-
-    for y in 0..h1 {
-        for x in 0..w1 {
-            let p1 = img1_rgb.get_pixel(x, y);
-            let p2 = img2_rgb.get_pixel(x, y);
-
-            let diff_r = (p1[0] as i32 - p2[0] as i32).abs();
-            let diff_g = (p1[1] as i32 - p2[1] as i32).abs();
-            let diff_b = (p1[2] as i32 - p2[2] as i32).abs();
-
-            // Allow small differences (up to 10 per channel)
-            if diff_r <= 10 && diff_g <= 10 && diff_b <= 10 {
-                similar_pixels += 1;
-            }
-        }
-    }
-
-    similar_pixels as f32 / total_pixels as f32
+fn is_pixel_black(img: &image::RgbImage, x: u32, y: u32) -> bool {
+    let pixel = img.get_pixel(x, y);
+    pixel[0] < BLACK_PIXEL_THRESHOLD && pixel[1] < BLACK_PIXEL_THRESHOLD && pixel[2] < BLACK_PIXEL_THRESHOLD
 }
 
-/// Detect black bars in an image (returns: left, top, right, bottom crop amounts)
-fn detect_black_bars(img: &DynamicImage) -> Option<(u32, u32, u32, u32)> {
+fn detect_black_bars(img: &DynamicImage) -> Option<Rectangle> {
     let (width, height) = img.dimensions();
     let rgb_img = img.to_rgb8();
 
     let mut left_crop = 0u32;
-    let mut right_crop = 0u32;
-    let mut top_crop = 0u32;
-    let mut bottom_crop = 0u32;
-
-    // Check left edge
     for x in 0..width {
         let black_pixels = (0..height).filter(|&y| is_pixel_black(&rgb_img, x, y)).count();
         if (black_pixels as f32 / height as f32) < BLACK_BAR_MIN_PERCENTAGE {
@@ -117,7 +88,7 @@ fn detect_black_bars(img: &DynamicImage) -> Option<(u32, u32, u32, u32)> {
         left_crop = x + 1;
     }
 
-    // Check right edge
+    let mut right_crop = 0u32;
     for x in (0..width).rev() {
         let black_pixels = (0..height).filter(|&y| is_pixel_black(&rgb_img, x, y)).count();
         if (black_pixels as f32 / height as f32) < BLACK_BAR_MIN_PERCENTAGE {
@@ -126,7 +97,7 @@ fn detect_black_bars(img: &DynamicImage) -> Option<(u32, u32, u32, u32)> {
         right_crop = width - x;
     }
 
-    // Check top edge
+    let mut top_crop = 0u32;
     for y in 0..height {
         let black_pixels = (0..width).filter(|&x| is_pixel_black(&rgb_img, x, y)).count();
         if (black_pixels as f32 / width as f32) < BLACK_BAR_MIN_PERCENTAGE {
@@ -135,7 +106,7 @@ fn detect_black_bars(img: &DynamicImage) -> Option<(u32, u32, u32, u32)> {
         top_crop = y + 1;
     }
 
-    // Check bottom edge
+    let mut bottom_crop = 0u32;
     for y in (0..height).rev() {
         let black_pixels = (0..width).filter(|&x| is_pixel_black(&rgb_img, x, y)).count();
         if (black_pixels as f32 / width as f32) < BLACK_BAR_MIN_PERCENTAGE {
@@ -144,152 +115,73 @@ fn detect_black_bars(img: &DynamicImage) -> Option<(u32, u32, u32, u32)> {
         bottom_crop = height - y;
     }
 
-    // Only return if we found significant black bars (at least 5 pixels)
-    if left_crop > 5 || right_crop > 5 || top_crop > 5 || bottom_crop > 5 {
-        Some((left_crop, top_crop, right_crop, bottom_crop))
+    let rect = Rectangle::new(top_crop, bottom_crop, left_crop, right_crop);
+    if rect.is_cropping_needed() {
+        Some(rect)
     } else {
         None
     }
 }
 
-/// Check if a pixel is considered black
-fn is_pixel_black(img: &image::RgbImage, x: u32, y: u32) -> bool {
-    let pixel = img.get_pixel(x, y);
-    pixel[0] < BLACK_PIXEL_THRESHOLD && pixel[1] < BLACK_PIXEL_THRESHOLD && pixel[2] < BLACK_PIXEL_THRESHOLD
-}
+fn analyze_black_bars<F>(duration: f32, get_frame: &F, stop_flag: &Arc<AtomicBool>) -> Result<Option<Rectangle>, String>
+where
+    F: Fn(f32) -> Option<DynamicImage>,
+{
+    if stop_flag.load(Ordering::Relaxed) {
+        return Err("Operation cancelled".to_string());
+    }
 
-/// Find the point where video content actually starts (after static intro frames)
-fn find_content_start(video_path: &Path, duration: f32) -> Result<Option<f32>, String> {
-    // Don't bother with very short videos
-    if duration < 10.0 {
+    let first_frame = get_frame(0.0).ok_or("Failed to extract first frame")?;
+
+    let Some(mut rectangle) = detect_black_bars(&first_frame) else {
         return Ok(None);
-    }
+    };
 
-    let first_frame = extract_frame_at_timestamp(video_path, 0.0)?;
+    let mut array_with_rectangles_and_timestamps = vec![(0.0, rectangle)];
 
-    // Initial coarse search
-    let mut last_static_time = 0.0;
-    let mut search_intervals = INITIAL_CHECK_INTERVALS
-        .iter()
-        .copied()
-        .filter(|&t| t < duration)
-        .collect::<Vec<_>>();
+    let num_samples = (duration / MIN_SAMPLE_INTERVAL).min(MAX_SAMPLES as f32).floor() as usize;
+    let num_samples = num_samples.max(1);
 
-    // Add last frame check
-    search_intervals.push(duration - 1.0);
-
-    for &check_time in &search_intervals {
-        if check_time <= last_static_time {
-            continue;
+    for i in 1..num_samples {
+        if stop_flag.load(Ordering::Relaxed) {
+            return Err("Operation cancelled".to_string());
         }
 
-        let frame = extract_frame_at_timestamp(video_path, check_time)?;
-        let similarity = calculate_frame_similarity(&first_frame, &frame);
+        let timestamp = (i as f32 / num_samples as f32) * duration;
 
-        if similarity >= STATIC_FRAME_SIMILARITY_THRESHOLD {
-            last_static_time = check_time;
+        let Some(tmp_frame) = get_frame(timestamp) else {
+            return Ok(None);
+        };
+
+        if let Some(tmp_rect) = detect_black_bars(&tmp_frame) {
+            rectangle = rectangle.union(&tmp_rect);
+            array_with_rectangles_and_timestamps.push((timestamp, tmp_rect));
         } else {
-            // Found difference, now binary search between last_static_time and check_time
-            if check_time - last_static_time > BINARY_SEARCH_PRECISION * 2.0 {
-                return binary_search_content_boundary(video_path, &first_frame, last_static_time, check_time, true);
-            }
-            return Ok(if last_static_time > 0.5 {
-                Some(last_static_time)
-            } else {
-                None
-            });
+            return Ok(None);
         }
     }
 
-    // If we got here, the entire video might be static (shouldn't happen in practice)
-    Ok(None)
+    debug!(
+        "Black bar analysis complete: {} samples, final rectangle: {:?}",
+        array_with_rectangles_and_timestamps.len(),
+        rectangle
+    );
+
+    Ok(Some(rectangle))
 }
 
-/// Find the point where video content actually ends (before static outro frames)
-fn find_content_end(video_path: &Path, duration: f32) -> Result<Option<f32>, String> {
-    // Don't bother with very short videos
-    if duration < 10.0 {
-        return Ok(None);
-    }
-
-    let last_frame = extract_frame_at_timestamp(video_path, duration - 1.0)?;
-
-    // Initial coarse search (going backwards)
-    let mut first_static_time = duration;
-    let mut search_intervals = INITIAL_CHECK_INTERVALS
-        .iter()
-        .copied()
-        .filter(|&t| t < duration)
-        .map(|t| duration - t)
-        .collect::<Vec<_>>();
-
-    search_intervals.sort_by(|a, b| b.partial_cmp(a).unwrap());
-
-    for &check_time in &search_intervals {
-        if check_time >= first_static_time {
-            continue;
-        }
-
-        let frame = extract_frame_at_timestamp(video_path, check_time)?;
-        let similarity = calculate_frame_similarity(&last_frame, &frame);
-
-        if similarity >= STATIC_FRAME_SIMILARITY_THRESHOLD {
-            first_static_time = check_time;
-        } else {
-            // Found difference, now binary search between check_time and first_static_time
-            if first_static_time - check_time > BINARY_SEARCH_PRECISION * 2.0 {
-                return binary_search_content_boundary(video_path, &last_frame, check_time, first_static_time, false);
-            }
-            return Ok(if duration - first_static_time > 0.5 {
-                Some(first_static_time)
-            } else {
-                None
-            });
-        }
-    }
-
-    // If we got here, the entire video might be static (shouldn't happen in practice)
-    Ok(None)
-}
-
-/// Binary search to find exact boundary between static and dynamic content
-fn binary_search_content_boundary(
-    video_path: &Path,
-    reference_frame: &DynamicImage,
-    mut left: f32,
-    mut right: f32,
-    _is_start: bool,
-) -> Result<Option<f32>, String> {
-    while right - left > BINARY_SEARCH_PRECISION {
-        let mid = (left + right) / 2.0;
-        let frame = extract_frame_at_timestamp(video_path, mid)?;
-        let similarity = calculate_frame_similarity(reference_frame, &frame);
-
-        if similarity >= STATIC_FRAME_SIMILARITY_THRESHOLD {
-            left = mid;
-        } else {
-            right = mid;
-        }
-    }
-
-    Ok(if left > 0.5 { Some(left) } else { None })
-}
-
-pub fn check_video_crop(mut entry: VideoCropEntry, _params: &VideoCropParams) -> VideoCropEntry {
-    debug!("Checking video for crop: {}", entry.path.display());
-
-    // Extract basic metadata
+fn extract_video_metadata_for_crop(entry: &mut VideoCropEntry) -> Result<(u32, u32, f64, f64), ()> {
     let metadata = match VideoMetadata::from_path(&entry.path) {
         Ok(metadata) => metadata,
         Err(e) => {
             entry.error = Some(e);
-            return entry;
+            return Err(());
         }
     };
 
     let Some(current_codec) = metadata.codec.clone() else {
         entry.error = Some("Failed to get video codec".to_string());
-        return entry;
+        return Err(());
     };
 
     entry.codec = current_codec;
@@ -302,95 +194,220 @@ pub fn check_video_crop(mut entry: VideoCropEntry, _params: &VideoCropParams) ->
         }
         _ => {
             entry.error = Some("Failed to get video dimensions".to_string());
-            return entry;
+            return Err(());
         }
     };
 
     let Some(duration) = metadata.duration else {
         entry.error = Some("Failed to get video duration".to_string());
-        return entry;
+        return Err(());
     };
 
-    let fps = metadata.fps.unwrap_or(25.0); // Default to 25 fps if not available
+    let fps = metadata.fps.unwrap_or(25.0);
 
-    debug!(
-        "Video metadata: {}x{}, duration: {:.2}s, fps: {:.2}, codec: {}",
-        width, height, duration, fps, entry.codec
-    );
+    Ok((width, height, duration, fps))
+}
 
-    // Step 1: Check for black bars by examining first and last frames
-    let black_bars = match extract_frame_at_timestamp(&entry.path, 1.0) {
-        Ok(first_frame) => {
-            if let Some(bars) = detect_black_bars(&first_frame) {
-                // Verify with last frame
-                if let Ok(last_frame) = extract_frame_at_timestamp(&entry.path, (duration - 1.0) as f32) {
-                    if let Some(bars_last) = detect_black_bars(&last_frame) {
-                        // Use the average of both detections for better accuracy
-                        Some((
-                            (bars.0 + bars_last.0) / 2,
-                            (bars.1 + bars_last.1) / 2,
-                            (bars.2 + bars_last.2) / 2,
-                            (bars.3 + bars_last.3) / 2,
-                        ))
-                    } else {
-                        Some(bars)
-                    }
-                } else {
-                    Some(bars)
-                }
-            } else {
-                None
-            }
+pub fn check_video_crop(mut entry: VideoCropEntry, _params: &VideoCropParams, stop_flag: &Arc<AtomicBool>) -> VideoCropEntry {
+    debug!("Checking video for crop: {}", entry.path.display());
+
+    let Ok((width, height, duration, fps)) = extract_video_metadata_for_crop(&mut entry) else { return entry };
+
+    debug!("Video metadata: {}x{}, duration: {:.2}s, fps: {:.2}, codec: {}", width, height, duration, fps, entry.codec);
+
+    let video_path = entry.path.clone();
+    let get_frame = |timestamp: f32| -> Option<DynamicImage> { extract_frame_ffmpeg(&video_path, timestamp) };
+
+    match analyze_black_bars(duration as f32, &get_frame, stop_flag) {
+        Ok(Some(rectangle)) => {
+            debug!(
+                "Detected black bars - Left: {}, Top: {}, Right: {}, Bottom: {}",
+                rectangle.left, rectangle.top, rectangle.right, rectangle.bottom
+            );
+            entry.new_image_dimensions = Some((rectangle.left, rectangle.top, rectangle.right, rectangle.bottom));
+        }
+        Ok(None) => {
+            debug!("No black bars detected");
         }
         Err(e) => {
-            debug!("Failed to extract frame for black bar detection: {}", e);
-            None
+            entry.error = Some(e);
+            return entry;
         }
-    };
-
-    if let Some((left, top, right, bottom)) = black_bars {
-        debug!(
-            "Detected black bars - Left: {}, Top: {}, Right: {}, Bottom: {}",
-            left, top, right, bottom
-        );
-        entry.new_image_dimensions = Some((left, top, right, bottom));
-    }
-
-    // Step 2: Check for static frames at start and end
-    let start_crop_time = match find_content_start(&entry.path, duration as f32) {
-        Ok(Some(time)) => {
-            debug!("Detected static intro ending at {:.2}s", time);
-            // Convert time to frame number
-            Some((time * fps as f32) as u32)
-        }
-        Ok(None) => None,
-        Err(e) => {
-            debug!("Failed to detect content start: {}", e);
-            None
-        }
-    };
-
-    let end_crop_time = match find_content_end(&entry.path, duration as f32) {
-        Ok(Some(time)) => {
-            debug!("Detected static outro starting at {:.2}s", time);
-            // Convert time to frame number
-            Some((time * fps as f32) as u32)
-        }
-        Ok(None) => None,
-        Err(e) => {
-            debug!("Failed to detect content end: {}", e);
-            None
-        }
-    };
-
-    entry.start_crop_frame = start_crop_time;
-    entry.end_crop_frame = end_crop_time;
-
-    if entry.new_image_dimensions.is_some() || entry.start_crop_frame.is_some() || entry.end_crop_frame.is_some() {
-        debug!("Video can be cropped - found optimization opportunities");
-    } else {
-        debug!("No cropping opportunities found for this video");
     }
 
     entry
+}
+
+#[cfg(test)]
+mod tests {
+    use std::collections::HashMap;
+    use std::sync::Arc;
+    use std::sync::atomic::AtomicBool;
+
+    use image::{DynamicImage, RgbImage};
+
+    use super::*;
+
+    fn create_colored_frame(width: u32, height: u32, r: u8, g: u8, b: u8) -> DynamicImage {
+        let mut img = RgbImage::new(width, height);
+        for pixel in img.pixels_mut() {
+            *pixel = image::Rgb([r, g, b]);
+        }
+        DynamicImage::ImageRgb8(img)
+    }
+
+    fn create_frame_with_black_bars(width: u32, height: u32, bar_size: u32) -> DynamicImage {
+        let mut img = RgbImage::new(width, height);
+        for (x, y, pixel) in img.enumerate_pixels_mut() {
+            if x < bar_size || x >= width - bar_size || y < bar_size || y >= height - bar_size {
+                *pixel = image::Rgb([0, 0, 0]);
+            } else {
+                *pixel = image::Rgb([100, 150, 200]);
+            }
+        }
+        DynamicImage::ImageRgb8(img)
+    }
+
+    #[test]
+    fn test_is_pixel_black() {
+        let black_img = RgbImage::from_pixel(10, 10, image::Rgb([0, 0, 0]));
+        assert!(is_pixel_black(&black_img, 5, 5));
+
+        let dark_gray_img = RgbImage::from_pixel(10, 10, image::Rgb([19, 19, 19]));
+        assert!(is_pixel_black(&dark_gray_img, 5, 5));
+
+        let light_gray_img = RgbImage::from_pixel(10, 10, image::Rgb([20, 20, 20]));
+        assert!(!is_pixel_black(&light_gray_img, 5, 5));
+
+        let white_img = RgbImage::from_pixel(10, 10, image::Rgb([255, 255, 255]));
+        assert!(!is_pixel_black(&white_img, 5, 5));
+    }
+
+    #[test]
+    fn test_detect_black_bars_no_bars() {
+        let img = create_colored_frame(100, 100, 100, 150, 200);
+        let result = detect_black_bars(&img);
+        assert!(result.is_none());
+    }
+
+    #[test]
+    fn test_detect_black_bars_with_bars() {
+        let img = create_frame_with_black_bars(200, 200, 20);
+        let result = detect_black_bars(&img);
+        assert!(result.is_some());
+
+        let rect = result.unwrap();
+        assert!(rect.left >= 15 && rect.left <= 25, "Left crop: {}", rect.left);
+        assert!(rect.top >= 15 && rect.top <= 25, "Top crop: {}", rect.top);
+        assert!(rect.right >= 15 && rect.right <= 25, "Right crop: {}", rect.right);
+        assert!(rect.bottom >= 15 && rect.bottom <= 25, "Bottom crop: {}", rect.bottom);
+    }
+
+    #[test]
+    fn test_detect_black_bars_small_bars() {
+        let img = create_frame_with_black_bars(200, 200, 3);
+        let result = detect_black_bars(&img);
+        assert!(result.is_none());
+    }
+
+    #[test]
+    fn test_rectangle_union() {
+        let rect1 = Rectangle::new(10, 10, 10, 10);
+        let rect2 = Rectangle::new(5, 15, 8, 12);
+        let union = rect1.union(&rect2);
+
+        assert_eq!(union.top, 5);
+        assert_eq!(union.bottom, 15);
+        assert_eq!(union.left, 8);
+        assert_eq!(union.right, 12);
+    }
+
+    #[test]
+    fn test_rectangle_is_cropping_needed() {
+        let cropping_needed = Rectangle::new(10, 10, 10, 10);
+        assert!(cropping_needed.is_cropping_needed());
+
+        let no_cropping_needed = Rectangle::new(0, 0, 0, 0);
+        assert!(!no_cropping_needed.is_cropping_needed());
+    }
+
+    #[test]
+    fn test_analyze_black_bars_consistent_bars() {
+        let stop_flag = Arc::new(AtomicBool::new(false));
+        let duration = 10.0;
+
+        let get_frame = |_timestamp: f32| -> Option<DynamicImage> { Some(create_frame_with_black_bars(200, 200, 20)) };
+
+        let result = analyze_black_bars(duration, &get_frame, &stop_flag);
+        assert!(result.unwrap().is_some());
+    }
+
+    #[test]
+    fn test_analyze_black_bars_no_bars() {
+        let stop_flag = Arc::new(AtomicBool::new(false));
+        let duration = 10.0;
+
+        let get_frame = |_timestamp: f32| -> Option<DynamicImage> { Some(create_colored_frame(200, 200, 100, 150, 200)) };
+
+        let result = analyze_black_bars(duration, &get_frame, &stop_flag);
+        assert!(result.unwrap().is_none());
+    }
+
+    #[test]
+    fn test_analyze_black_bars_inconsistent_bars() {
+        use std::cell::Cell;
+
+        let stop_flag = Arc::new(AtomicBool::new(false));
+        let duration = 10.0;
+        let call_count = Cell::new(0);
+
+        let get_frame = |_timestamp: f32| -> Option<DynamicImage> {
+            let count = call_count.get();
+            call_count.set(count + 1);
+            if count == 0 {
+                Some(create_frame_with_black_bars(200, 200, 20))
+            } else {
+                Some(create_colored_frame(200, 200, 100, 150, 200))
+            }
+        };
+
+        let result = analyze_black_bars(duration, &get_frame, &stop_flag);
+        assert!(result.unwrap().is_none());
+    }
+
+    #[test]
+    fn test_analyze_black_bars_with_stop_flag() {
+        let stop_flag = Arc::new(AtomicBool::new(true));
+        let duration = 10.0;
+
+        let get_frame = |_timestamp: f32| -> Option<DynamicImage> { Some(create_frame_with_black_bars(200, 200, 20)) };
+
+        let result = analyze_black_bars(duration, &get_frame, &stop_flag);
+        assert!(result.unwrap_err().contains("cancelled"));
+    }
+
+    #[test]
+    fn test_analyze_black_bars_variable_rectangles() {
+        let stop_flag = Arc::new(AtomicBool::new(false));
+        let duration = 1.0;
+
+        let frames: HashMap<String, DynamicImage> = [
+            ("0.00".to_string(), create_frame_with_black_bars(200, 200, 20)),
+            ("0.10".to_string(), create_frame_with_black_bars(200, 200, 18)),
+            ("0.50".to_string(), create_frame_with_black_bars(200, 200, 22)),
+        ]
+        .iter()
+        .cloned()
+        .collect();
+
+        let get_frame = |timestamp: f32| -> Option<DynamicImage> {
+            let key = format!("{timestamp:.2}");
+            frames.get(&key).or_else(|| frames.values().next()).cloned()
+        };
+
+        let result = analyze_black_bars(duration, &get_frame, &stop_flag);
+        let rectangle = result.unwrap();
+        let rect = rectangle.unwrap();
+        assert!(rect.left >= 15 && rect.left <= 20);
+    }
 }
