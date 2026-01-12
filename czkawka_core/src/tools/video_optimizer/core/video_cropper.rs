@@ -150,13 +150,17 @@ fn analyze_black_bars<F>(duration: f32, get_frame: &F, stop_flag: &Arc<AtomicBoo
 where
     F: Fn(f32) -> Option<RgbImage>,
 {
+
+    debug!("WWWWWWWWWWWWWWWWWWWWWWWW");
     if stop_flag.load(Ordering::Relaxed) {
         return None;
     }
 
+    debug!("AAAAAAAAAAA");
     let Some(first_frame) = get_frame(0.0) else {
         return Some(Err("Failed to extract first frame".to_string()));
     };
+    debug!("BBBBBBBBBB");
     if first_frame.dimensions() != (width, height) {
         return Some(Err(format!(
             "Frame dimensions do not match video metadata: frame is {}x{}, metadata says {}x{}",
@@ -166,10 +170,12 @@ where
             height
         )));
     }
+    debug!("CCCCCCCCc");
 
     let Some(mut rectangle) = detect_black_bars(&first_frame) else {
         return Some(Ok(None));
     };
+    debug!("DDDDDDDDDd");
 
     let num_samples = (duration / MIN_SAMPLE_INTERVAL).min(MAX_SAMPLES as f32).floor() as usize;
     let num_samples = num_samples.max(1);
@@ -180,6 +186,8 @@ where
         }
 
         let timestamp = (i as f32 / num_samples as f32) * duration;
+
+        debug!("Analyzing frame at {:.2}s for black bars", timestamp);
 
         let Some(tmp_frame) = get_frame(timestamp) else {
             return Some(Ok(None));
@@ -324,7 +332,7 @@ pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, sto
                 entry.new_image_dimensions = Some((rectangle.left, rectangle.top, rectangle.right, rectangle.bottom));
             }
             Some(Ok(None)) => {
-                debug!("No static content detected");
+
             }
             Some(Err(e)) => {
                 entry.error = Some(e);
@@ -523,7 +531,7 @@ mod tests {
         let get_frame = |_timestamp: f32| -> Option<RgbImage> { Some(create_frame_with_black_bars(200, 200, 20)) };
 
         let result = analyze_black_bars(duration, &get_frame, &stop_flag, 200, 200);
-        assert!(result.unwrap().is_some());
+        assert!(result.expect("Expected Result").unwrap().is_some());
     }
 
     #[test]
@@ -534,7 +542,7 @@ mod tests {
         let get_frame = |_timestamp: f32| -> Option<RgbImage> { Some(create_colored_frame(200, 200, 100, 150, 200)) };
 
         let result = analyze_black_bars(duration, &get_frame, &stop_flag, 200, 200);
-        assert!(result.unwrap().is_none());
+        assert!(result.expect("Expected Result").unwrap().is_none());
     }
 
     #[test]
@@ -551,7 +559,7 @@ mod tests {
         };
 
         let result = analyze_black_bars(duration, &get_frame, &stop_flag, 200, 200);
-        assert!(result.unwrap().is_none());
+        assert!(result.expect("Expected Result").unwrap().is_none());
     }
 
     #[test]
@@ -562,7 +570,7 @@ mod tests {
         let get_frame = |_timestamp: f32| -> Option<RgbImage> { Some(create_frame_with_black_bars(200, 200, 20)) };
 
         let result = analyze_black_bars(duration, &get_frame, &stop_flag, 200, 200);
-        assert!(result.unwrap_err().contains("cancelled"));
+        assert!(result.unwrap().unwrap_err().contains("cancelled"));
     }
 
     #[test]
@@ -581,8 +589,7 @@ mod tests {
         };
 
         let result = analyze_black_bars(duration, &get_frame, &stop_flag, 200, 200);
-        let rectangle = result.unwrap();
-        let rect = rectangle.unwrap();
+        let rect = result.expect("Expected Result").unwrap().unwrap();
         assert_eq!(rect.left, 18);
         assert_eq!(rect.top, 18);
         assert_eq!(rect.right, 200 - 18);
