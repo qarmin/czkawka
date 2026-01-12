@@ -240,10 +240,7 @@ where
         }
         let dynamic_image_diff: RgbImage = diff_between_dynamic_images(first_frame, tmp_frame);
 
-        debug!("_______{rectangle:?}");
-
         if let Some(tmp_rect) = detect_black_bars(&dynamic_image_diff) {
-            debug!("_______{tmp_rect:?}");
             rectangle = rectangle.union(&tmp_rect);
         } else {
             return Some(Ok(None));
@@ -353,6 +350,8 @@ pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, sto
 }
 
 pub fn fix_video_crop(video_path: &Path, params: &VideoCropFixParams, stop_flag: &Arc<AtomicBool>) -> Result<(), String> {
+    debug!("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa");
+    debug!("Video path: {:?}", video_path);
     if stop_flag.load(Ordering::Relaxed) {
         return Err("Video processing was stopped by user".to_string());
     }
@@ -375,10 +374,10 @@ pub fn fix_video_crop(video_path: &Path, params: &VideoCropFixParams, stop_flag:
         VideoCroppingMechanism::StaticContent => "staticcontent",
     };
 
-    let stem = video_path.file_stem().ok_or("Cannot get file stem")?;
-    let parent = video_path.parent().ok_or("Cannot get parent directory")?;
-    let extension = video_path.extension().and_then(|e| e.to_str()).unwrap_or("mp4");
-    let temp_output = parent.join(format!("{}_czkawka_cropped_{}.{}", stem.to_string_lossy(), crop_type_suffix, extension));
+    let extension = video_path.extension().and_then(|ext| ext.to_str()).unwrap_or("");
+    let temp_output = video_path.with_extension(format!("czkawka_cropped_{crop_type_suffix}.{extension}"));
+
+    debug!("temp_new_path: {:?}", temp_output);
 
     // log::debug!(
     //     "Cropping video: {} -> {}, crop: {}x{}+{}+{}",
@@ -392,7 +391,6 @@ pub fn fix_video_crop(video_path: &Path, params: &VideoCropFixParams, stop_flag:
 
     let mut command = Command::new("ffmpeg");
     command
-        .arg("-nostdin")
         .arg("-i")
         .arg(video_path)
         .arg("-vf")
@@ -415,13 +413,17 @@ pub fn fix_video_crop(video_path: &Path, params: &VideoCropFixParams, stop_flag:
     match run_command_interruptible(command, stop_flag) {
         None => {
             let _ = std::fs::remove_file(&temp_output);
+            debug!("Video cropping was stopped by user for video: {:?}", video_path);
             return Err(String::from("Video cropping was stopped by user"));
         }
         Some(Err(e)) => {
             let _ = std::fs::remove_file(&temp_output);
+            debug!("Failed to crop video file {}: {}", video_path.display(), e);
             return Err(format!("Failed to crop video file {}: {e}", video_path.display()));
         }
-        Some(Ok(_)) => {}
+        Some(Ok(_)) => {
+            assert!(temp_output.exists(), "Expected cropped video file to exist: {:?}", temp_output);
+        }
     }
 
     if params.overwrite_original {
