@@ -262,6 +262,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_broken_files_archive_text(flk!("subsettings_broken_files_archive").into());
     translation.set_subsettings_broken_files_image_text(flk!("subsettings_broken_files_image").into());
     translation.set_subsettings_video_optimizer_mode_text(flk!("subsettings_video_optimizer_mode").into());
+    translation.set_subsettings_video_optimizer_crop_type_text(flk!("subsettings_video_optimizer_crop_type").into());
     translation.set_subsettings_video_optimizer_video_codec_text(flk!("subsettings_video_optimizer_video_codec").into());
     translation.set_subsettings_video_optimizer_excluded_codecs_text(flk!("subsettings_video_optimizer_excluded_codecs").into());
     translation.set_subsettings_video_optimizer_video_quality_text(flk!("subsettings_video_optimizer_video_quality").into());

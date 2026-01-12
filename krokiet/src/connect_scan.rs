@@ -685,7 +685,6 @@ fn write_similar_videos_results(
     app.global::<GuiState>().set_info_text(messages.into());
     reset_selection_at_end(app, ActiveTab::SimilarVideos);
 }
-
 fn prepare_data_model_similar_videos(fe: &VideosEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(fe.get_path());
     let bitrate = format_bitrate_opt(fe.bitrate);
@@ -1223,8 +1222,10 @@ fn scan_video_optimizer(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
+            let collected_items = StringComboBoxItems::get_items();
             let params = if custom_settings.video_optimizer_mode == "crop" {
-                VideoOptimizerParameters::VideoCrop(VideoCropParams {})
+                let crop_detect = StringComboBoxItems::get_value_from_config_name(&custom_settings.video_optimizer_crop_type, &collected_items.video_optimizer_crop_type);
+                VideoOptimizerParameters::VideoCrop(VideoCropParams { crop_detect })
             } else {
                 let excluded_codecs: Vec<String> = custom_settings
                     .video_optimizer_excluded_codecs

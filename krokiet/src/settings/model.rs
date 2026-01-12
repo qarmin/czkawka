@@ -157,6 +157,8 @@ pub struct SettingsCustom {
     pub similar_videos_thumbnail_percentage: u8,
     #[serde(default = "default_video_optimizer_mode")]
     pub video_optimizer_mode: String,
+    #[serde(default = "default_video_optimizer_crop_type")]
+    pub video_optimizer_crop_type: String,
     #[serde(default = "default_video_optimizer_video_codec")]
     pub video_optimizer_video_codec: String,
     #[serde(default = "default_video_optimizer_excluded_codecs")]
@@ -331,6 +333,10 @@ fn default_window_height() -> u32 {
 }
 fn default_video_optimizer_mode() -> String {
     "transcode".to_string()
+}
+fn default_video_optimizer_crop_type() -> String {
+    // Allowed values: blackbars, staticcontent (case-insensitive parsing later)
+    "blackbars".to_string()
 }
 fn default_video_optimizer_video_codec() -> String {
     "hevc".to_string()

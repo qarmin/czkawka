@@ -6,7 +6,6 @@ use std::thread;
 
 use crossbeam_channel::Sender;
 use czkawka_core::common::progress_data::ProgressData;
-use czkawka_core::common::tool_data::CommonData;
 use czkawka_core::tools::video_optimizer::{VideoCodec, VideoCropFixParams, VideoOptimizerParameters, VideoTranscodeFixParams};
 use slint::{ComponentHandle, SharedString, Weak};
 

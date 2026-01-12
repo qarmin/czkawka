@@ -343,6 +343,11 @@ pub(crate) fn set_combobox_custom_settings_items(settings: &Settings, custom_set
     settings.set_video_optimizer_sub_mode_index(idx as i32);
     settings.set_video_optimizer_sub_mode_value(display_names[idx].clone());
 
+    // Video Optimizer crop type
+    let (idx, display_names) = StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.video_optimizer_crop_type, &collected_items.video_optimizer_crop_type);
+    settings.set_video_optimizer_sub_crop_type_index(idx as i32);
+    settings.set_video_optimizer_sub_crop_type_value(display_names[idx].clone());
+
     // Video Optimizer video codec
     let (idx, display_names) = StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.video_optimizer_video_codec, &collected_items.video_optimizer_video_codec);
     settings.set_video_optimizer_sub_video_codec_index(idx as i32);
@@ -605,6 +610,8 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
 
     let video_optimizer_sub_mode_idx = settings.get_video_optimizer_sub_mode_index();
     let video_optimizer_mode = StringComboBoxItems::get_config_name_from_idx(video_optimizer_sub_mode_idx as usize, &collected_items.video_optimizer_mode);
+    let video_optimizer_sub_crop_type_idx = settings.get_video_optimizer_sub_crop_type_index();
+    let video_optimizer_crop_type = StringComboBoxItems::get_config_name_from_idx(video_optimizer_sub_crop_type_idx as usize, &collected_items.video_optimizer_crop_type);
     let video_optimizer_sub_video_codec_idx = settings.get_video_optimizer_sub_video_codec_index();
     let video_optimizer_video_codec = StringComboBoxItems::get_config_name_from_idx(video_optimizer_sub_video_codec_idx as usize, &collected_items.video_optimizer_video_codec);
     let video_optimizer_excluded_codecs = settings.get_video_optimizer_sub_excluded_codecs().to_string();
@@ -698,6 +705,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         similar_videos_crop_detect,
         similar_videos_thumbnail_percentage,
         video_optimizer_mode,
+        video_optimizer_crop_type,
         video_optimizer_video_codec,
         video_optimizer_excluded_codecs,
         video_optimizer_video_quality,

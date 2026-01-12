@@ -301,6 +301,7 @@ settings_cache_number_size_text = Cache files size: { $size }, number of files: 
 settings_video_thumbnails_number_size_text = Video thumbnails size: { $size }, number of files: { $number }
 settings_log_number_size_text = Log files size: { $size }, number of files: { $number }
 subsettings_video_optimizer_mode = Mode
+subsettings_video_optimizer_crop_type = Crop Type
 subsettings_video_optimizer_video_codec = Video codec
 subsettings_video_optimizer_excluded_codecs = Excluded codecs
 subsettings_video_optimizer_video_quality = Video quality (CRF)

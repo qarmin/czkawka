@@ -27,6 +27,8 @@
 - Improved and fixed logic which groups similar images by its similarity - [#1685](https://github.com/qarmin/czkawka/pull/1685)
 - Added counting scan time - [#1674](https://github.com/qarmin/czkawka/pull/1674), [#1685](https://github.com/qarmin/czkawka/pull/1685)
 - Added ability to search for broken video files in broken files tool(via external ffmpeg/ffprobe) - []()
+- New mode, video optimizer, to reencode videos to more efficient codecs and cropping black/bars from videos - [#1726](https://github.com/qarmin/czkawka/pull/1726), []()
+- New mode, exif remover, to remove certain exif tags from files - []()
 
 ### CLI
 - Using colors by default in terminal output(can be disabled by feature flag) - [#1672](https://github.com/qarmin/czkawka/pull/1672)
@@ -58,6 +60,7 @@
 - Defaulting to remove files to trash instead permanent deletion - [#1726](https://github.com/qarmin/czkawka/pull/1726)
 - Added notification dialog, when app cannot be opened - []()
 - Added `--cache`, `--config` CLI options, to open cache/config paths  - []()
+- Added new video optimizer and exif remover modes - [#1726](https://github.com/qarmin/czkawka/pull/1726), []()
 
 ### External
 - Wine 10.20 contains bugfix that fixes crashes when running dialogs in Czkawka Gui - [Wine 49987 issue](https://bugs.winehq.org/show_bug.cgi?id=49987)

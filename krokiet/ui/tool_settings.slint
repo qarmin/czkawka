@@ -416,6 +416,13 @@ export component ToolSettings {
 
             if Settings.video_optimizer_sub_mode_index == 0: VerticalLayout {
                 spacing: 5px;
+
+                ComboBoxWrapper {
+                    text: Translations.subsettings_video_optimizer_crop_type_text;
+                    model: Settings.video_optimizer_sub_crop_type;
+                    current_index <=> Settings.video_optimizer_sub_crop_type_index;
+                    current_value <=> Settings.video_optimizer_sub_crop_type_value;
+                }
             }
 
             Rectangle { }

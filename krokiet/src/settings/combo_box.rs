@@ -4,6 +4,7 @@ use std::sync::{Arc, Mutex, MutexGuard};
 use czkawka_core::common::model::{CheckingMethod, HashType};
 use czkawka_core::re_exported::{Cropdetect, HashAlg};
 use czkawka_core::tools::big_file::SearchMode;
+use czkawka_core::tools::video_optimizer::VideoCroppingMechanism;
 use image::imageops::FilterType;
 use log::warn;
 use slint::SharedString;
@@ -30,6 +31,7 @@ pub struct StringComboBoxItems {
     pub audio_check_type: Vec<StringComboBoxItem<CheckingMethod>>,
     pub duplicates_check_method: Vec<StringComboBoxItem<CheckingMethod>>,
     pub videos_crop_detect: Vec<StringComboBoxItem<Cropdetect>>,
+    pub video_optimizer_crop_type: Vec<StringComboBoxItem<VideoCroppingMechanism>>,
     pub video_optimizer_mode: Vec<StringComboBoxItem<String>>,
     pub video_optimizer_video_codec: Vec<StringComboBoxItem<String>>,
 }
@@ -128,6 +130,11 @@ impl StringComboBoxItems {
             ("none", "None", Cropdetect::None),
         ]);
 
+        let video_optimizer_crop_type = Self::convert_to_combobox_items(&[
+            ("blackbars", "Black Bars", VideoCroppingMechanism::BlackBars),
+            ("staticcontent", "Static Content", VideoCroppingMechanism::StaticContent),
+        ]);
+
         let video_optimizer_mode = Self::convert_to_combobox_items(&[("crop", "Crop", "crop".to_string()), ("transcode", "Transcode", "transcode".to_string())]);
 
         let video_optimizer_video_codec = Self::convert_to_combobox_items(&[
@@ -147,6 +154,7 @@ impl StringComboBoxItems {
             audio_check_type,
             duplicates_check_method,
             videos_crop_detect,
+            video_optimizer_crop_type,
             video_optimizer_mode,
             video_optimizer_video_codec,
         }

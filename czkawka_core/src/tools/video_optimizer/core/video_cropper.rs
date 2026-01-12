@@ -3,11 +3,11 @@ use std::process::{Command, Stdio};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 
-use image::{DynamicImage, GenericImageView, RgbImage};
+use image::RgbImage;
 use log::debug;
 
 use crate::common::video_metadata::VideoMetadata;
-use crate::tools::video_optimizer::{VideoCropEntry, VideoCropFixParams, VideoCropParams};
+use crate::tools::video_optimizer::{VideoCropEntry, VideoCropFixParams, VideoCropParams, VideoCroppingMechanism};
 
 const BLACK_PIXEL_THRESHOLD: u8 = 20;
 const BLACK_BAR_MIN_PERCENTAGE: f32 = 0.95;
@@ -86,7 +86,7 @@ fn extract_frame_ffmpeg(video_path: &Path, timestamp: f32) -> Option<RgbImage> {
         return None;
     }
 
-    image::load_from_memory(&output.stdout).ok().map(|img|img.into_rgb8())
+    image::load_from_memory(&output.stdout).ok().map(|img| img.into_rgb8())
 }
 
 fn is_pixel_black(img: &image::RgbImage, x: u32, y: u32) -> bool {
@@ -99,7 +99,7 @@ fn detect_black_bars(rgb_img: &RgbImage) -> Option<Rectangle> {
 
     let mut left_crop = 0u32;
     for x in 0..width {
-        let black_pixels = (0..height).filter(|&y| is_pixel_black(&rgb_img, x, y)).count();
+        let black_pixels = (0..height).filter(|&y| is_pixel_black(rgb_img, x, y)).count();
         if (black_pixels as f32 / height as f32) < BLACK_BAR_MIN_PERCENTAGE {
             break;
         }
@@ -108,7 +108,7 @@ fn detect_black_bars(rgb_img: &RgbImage) -> Option<Rectangle> {
 
     let mut right_pos = width;
     for x in (0..width).rev() {
-        let black_pixels = (0..height).filter(|&y| is_pixel_black(&rgb_img, x, y)).count();
+        let black_pixels = (0..height).filter(|&y| is_pixel_black(rgb_img, x, y)).count();
         if (black_pixels as f32 / height as f32) < BLACK_BAR_MIN_PERCENTAGE {
             right_pos = x + 1;
             break;
@@ -121,7 +121,7 @@ fn detect_black_bars(rgb_img: &RgbImage) -> Option<Rectangle> {
 
     let mut top_crop = 0u32;
     for y in 0..height {
-        let black_pixels = (0..width).filter(|&x| is_pixel_black(&rgb_img, x, y)).count();
+        let black_pixels = (0..width).filter(|&x| is_pixel_black(rgb_img, x, y)).count();
         if (black_pixels as f32 / width as f32) < BLACK_BAR_MIN_PERCENTAGE {
             break;
         }
@@ -130,7 +130,7 @@ fn detect_black_bars(rgb_img: &RgbImage) -> Option<Rectangle> {
 
     let mut bottom_pos = height;
     for y in (0..height).rev() {
-        let black_pixels = (0..width).filter(|&x| is_pixel_black(&rgb_img, x, y)).count();
+        let black_pixels = (0..width).filter(|&x| is_pixel_black(rgb_img, x, y)).count();
         if (black_pixels as f32 / width as f32) < BLACK_BAR_MIN_PERCENTAGE {
             bottom_pos = y + 1;
             break;
@@ -186,14 +186,18 @@ where
 fn diff_between_dynamic_images(img_original: &RgbImage, mut consumed_temp_img: RgbImage) -> RgbImage {
     assert_eq!(img_original.dimensions(), consumed_temp_img.dimensions(), "Image dimensions do not match for diffing");
     img_original.pixels().zip(consumed_temp_img.pixels_mut()).for_each(|(img_original_pixel, consumed_pixel)| {
-        consumed_pixel.0.iter_mut().zip(img_original_pixel.0.iter()).for_each(|(consumed_channel, &original_channel)| {
-            *consumed_channel = original_channel.abs_diff(*consumed_channel);
-        });
+        consumed_pixel
+            .0
+            .iter_mut()
+            .zip(img_original_pixel.0.iter())
+            .for_each(|(consumed_channel, &original_channel)| {
+                *consumed_channel = original_channel.abs_diff(*consumed_channel);
+            });
     });
     consumed_temp_img
 }
 
-fn analyze_static_image_parts<F>(duration: f32, get_frame: &F, stop_flag: &Arc<AtomicBool>,) -> Result<Option<Rectangle>, String>
+fn analyze_static_image_parts<F>(duration: f32, get_frame: &F, stop_flag: &Arc<AtomicBool>) -> Result<Option<Rectangle>, String>
 where
     F: Fn(f32) -> Option<RgbImage>,
 {
@@ -267,7 +271,7 @@ fn extract_video_metadata_for_crop(entry: &mut VideoCropEntry) -> Result<(u32, u
     Ok((width, height, duration, fps))
 }
 
-pub fn check_video_crop(mut entry: VideoCropEntry, _params: &VideoCropParams, stop_flag: &Arc<AtomicBool>) -> VideoCropEntry {
+pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, stop_flag: &Arc<AtomicBool>) -> VideoCropEntry {
     debug!("Checking video for crop: {}", entry.path.display());
 
     let Ok((width, height, duration, fps)) = extract_video_metadata_for_crop(&mut entry) else {
@@ -279,17 +283,31 @@ pub fn check_video_crop(mut entry: VideoCropEntry, _params: &VideoCropParams, st
     let video_path = entry.path.clone();
     let get_frame = |timestamp: f32| -> Option<RgbImage> { extract_frame_ffmpeg(&video_path, timestamp) };
 
-    match analyze_black_bars(duration as f32, &get_frame, stop_flag) {
-        Ok(Some(rectangle)) => {
-            entry.new_image_dimensions = Some((rectangle.left, rectangle.top, rectangle.right, rectangle.bottom));
-        }
-        Ok(None) => {
-            debug!("No black bars detected");
-        }
-        Err(e) => {
-            entry.error = Some(e);
-            return entry;
-        }
+    match params.crop_detect {
+        VideoCroppingMechanism::BlackBars => match analyze_black_bars(duration as f32, &get_frame, stop_flag) {
+            Ok(Some(rectangle)) => {
+                entry.new_image_dimensions = Some((rectangle.left, rectangle.top, rectangle.right, rectangle.bottom));
+            }
+            Ok(None) => {
+                debug!("No black bars detected");
+            }
+            Err(e) => {
+                entry.error = Some(e);
+                return entry;
+            }
+        },
+        VideoCroppingMechanism::StaticContent => match analyze_static_image_parts(duration as f32, &get_frame, stop_flag) {
+            Ok(Some(rectangle)) => {
+                entry.new_image_dimensions = Some((rectangle.left, rectangle.top, rectangle.right, rectangle.bottom));
+            }
+            Ok(None) => {
+                debug!("No static content detected");
+            }
+            Err(e) => {
+                entry.error = Some(e);
+                return entry;
+            }
+        },
     }
 
     entry
@@ -302,7 +320,6 @@ pub fn fix_video_crop(entry: &VideoCropEntry, params: &VideoCropFixParams, stop_
 
     let (left, top, right, bottom) = params.crop_rectangle;
 
-    // Validate rectangle
     if left >= right || top >= bottom {
         return Err(format!("Invalid crop rectangle: left={left}, top={top}, right={right}, bottom={bottom}"));
     }
@@ -384,7 +401,7 @@ mod tests {
     use std::sync::Arc;
     use std::sync::atomic::AtomicBool;
 
-    use image::{DynamicImage, RgbImage};
+    use image::RgbImage;
 
     use super::*;
 

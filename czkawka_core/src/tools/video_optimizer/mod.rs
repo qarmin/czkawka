@@ -55,6 +55,12 @@ impl std::str::FromStr for VideoCodec {
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
+pub enum VideoCroppingMechanism {
+    BlackBars,
+    StaticContent,
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum VideoOptimizerFixParams {
     VideoTranscode(VideoTranscodeFixParams),
     VideoCrop(VideoCropFixParams),
@@ -97,7 +103,9 @@ pub struct VideoTranscodeParams {
     pub excluded_codecs: Vec<String>,
 }
 #[derive(Clone, Eq, PartialEq, Debug)]
-pub struct VideoCropParams {}
+pub struct VideoCropParams {
+    pub crop_detect: VideoCroppingMechanism,
+}
 
 impl VideoTranscodeParams {
     pub fn new() -> Self {
