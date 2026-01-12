@@ -3,7 +3,7 @@ use std::process::{Command, Stdio};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 
-use image::{DynamicImage, GenericImageView};
+use image::{DynamicImage, GenericImageView, RgbImage};
 use log::debug;
 
 use crate::common::video_metadata::VideoMetadata;
@@ -59,7 +59,7 @@ impl Rectangle {
     }
 }
 
-fn extract_frame_ffmpeg(video_path: &Path, timestamp: f32) -> Option<DynamicImage> {
+fn extract_frame_ffmpeg(video_path: &Path, timestamp: f32) -> Option<RgbImage> {
     let output = Command::new("ffmpeg")
         .arg("-threads")
         .arg("1")
@@ -71,6 +71,8 @@ fn extract_frame_ffmpeg(video_path: &Path, timestamp: f32) -> Option<DynamicImag
         .arg("1")
         .arg("-f")
         .arg("image2pipe")
+        .arg("-pix_fmt") // TODO - newly added - may be broken
+        .arg("rgb24") // TODO
         .arg("-vcodec")
         .arg("png")
         .arg("pipe:1")
@@ -84,7 +86,7 @@ fn extract_frame_ffmpeg(video_path: &Path, timestamp: f32) -> Option<DynamicImag
         return None;
     }
 
-    image::load_from_memory(&output.stdout).ok()
+    image::load_from_memory(&output.stdout).ok().map(|img|img.into_rgb8())
 }
 
 fn is_pixel_black(img: &image::RgbImage, x: u32, y: u32) -> bool {
@@ -92,9 +94,8 @@ fn is_pixel_black(img: &image::RgbImage, x: u32, y: u32) -> bool {
     pixel.0.iter().all(|&channel| channel < BLACK_PIXEL_THRESHOLD)
 }
 
-fn detect_black_bars(img: &DynamicImage) -> Option<Rectangle> {
-    let (width, height) = img.dimensions();
-    let rgb_img = img.to_rgb8();
+fn detect_black_bars(rgb_img: &RgbImage) -> Option<Rectangle> {
+    let (width, height) = rgb_img.dimensions();
 
     let mut left_crop = 0u32;
     for x in 0..width {
@@ -146,7 +147,7 @@ fn detect_black_bars(img: &DynamicImage) -> Option<Rectangle> {
 
 fn analyze_black_bars<F>(duration: f32, get_frame: &F, stop_flag: &Arc<AtomicBool>) -> Result<Option<Rectangle>, String>
 where
-    F: Fn(f32) -> Option<DynamicImage>,
+    F: Fn(f32) -> Option<RgbImage>,
 {
     if stop_flag.load(Ordering::Relaxed) {
         return Err("Operation cancelled".to_string());
@@ -157,8 +158,6 @@ where
     let Some(mut rectangle) = detect_black_bars(&first_frame) else {
         return Ok(None);
     };
-
-    let mut array_with_rectangles_and_timestamps = vec![(0.0, rectangle)];
 
     let num_samples = (duration / MIN_SAMPLE_INTERVAL).min(MAX_SAMPLES as f32).floor() as usize;
     let num_samples = num_samples.max(1);
@@ -176,17 +175,56 @@ where
 
         if let Some(tmp_rect) = detect_black_bars(&tmp_frame) {
             rectangle = rectangle.union(&tmp_rect);
-            array_with_rectangles_and_timestamps.push((timestamp, tmp_rect));
         } else {
             return Ok(None);
         }
     }
 
-    debug!(
-        "Black bar analysis complete: {} samples, final rectangle: {:?}",
-        array_with_rectangles_and_timestamps.len(),
-        rectangle
-    );
+    Ok(Some(rectangle))
+}
+
+fn diff_between_dynamic_images(img_original: &RgbImage, mut consumed_temp_img: RgbImage) -> RgbImage {
+    assert_eq!(img_original.dimensions(), consumed_temp_img.dimensions(), "Image dimensions do not match for diffing");
+    img_original.pixels().zip(consumed_temp_img.pixels_mut()).for_each(|(img_original_pixel, consumed_pixel)| {
+        consumed_pixel.0.iter_mut().zip(img_original_pixel.0.iter()).for_each(|(consumed_channel, &original_channel)| {
+            *consumed_channel = original_channel.abs_diff(*consumed_channel);
+        });
+    });
+    consumed_temp_img
+}
+
+fn analyze_static_image_parts<F>(duration: f32, get_frame: &F, stop_flag: &Arc<AtomicBool>,) -> Result<Option<Rectangle>, String>
+where
+    F: Fn(f32) -> Option<RgbImage>,
+{
+    if stop_flag.load(Ordering::Relaxed) {
+        return Err("Operation cancelled".to_string());
+    }
+
+    let first_frame = get_frame(0.0).ok_or("Failed to extract first frame")?;
+    let mut rectangle = Rectangle::new(0, first_frame.height(), 0, first_frame.width());
+
+    let num_samples = (duration / MIN_SAMPLE_INTERVAL).min(MAX_SAMPLES as f32).floor() as usize;
+    let num_samples = num_samples.max(1);
+
+    for i in 1..num_samples {
+        if stop_flag.load(Ordering::Relaxed) {
+            return Err("Operation cancelled".to_string());
+        }
+
+        let timestamp = (i as f32 / num_samples as f32) * duration;
+
+        let Some(tmp_frame) = get_frame(timestamp) else {
+            return Ok(None);
+        };
+        let dynamic_image_diff: RgbImage = diff_between_dynamic_images(&first_frame, tmp_frame);
+
+        if let Some(tmp_rect) = detect_black_bars(&dynamic_image_diff) {
+            rectangle = rectangle.union(&tmp_rect);
+        } else {
+            return Ok(None);
+        }
+    }
 
     Ok(Some(rectangle))
 }
@@ -239,7 +277,7 @@ pub fn check_video_crop(mut entry: VideoCropEntry, _params: &VideoCropParams, st
     debug!("Video metadata: {}x{}, duration: {:.2}s, fps: {:.2}, codec: {}", width, height, duration, fps, entry.codec);
 
     let video_path = entry.path.clone();
-    let get_frame = |timestamp: f32| -> Option<DynamicImage> { extract_frame_ffmpeg(&video_path, timestamp) };
+    let get_frame = |timestamp: f32| -> Option<RgbImage> { extract_frame_ffmpeg(&video_path, timestamp) };
 
     match analyze_black_bars(duration as f32, &get_frame, stop_flag) {
         Ok(Some(rectangle)) => {
@@ -350,15 +388,15 @@ mod tests {
 
     use super::*;
 
-    fn create_colored_frame(width: u32, height: u32, r: u8, g: u8, b: u8) -> DynamicImage {
+    fn create_colored_frame(width: u32, height: u32, r: u8, g: u8, b: u8) -> RgbImage {
         let mut img = RgbImage::new(width, height);
         for pixel in img.pixels_mut() {
             *pixel = image::Rgb([r, g, b]);
         }
-        DynamicImage::ImageRgb8(img)
+        img
     }
 
-    fn create_frame_with_black_bars(width: u32, height: u32, bar_size: u32) -> DynamicImage {
+    fn create_frame_with_black_bars(width: u32, height: u32, bar_size: u32) -> RgbImage {
         let mut img = RgbImage::new(width, height);
         for (x, y, pixel) in img.enumerate_pixels_mut() {
             if x < bar_size || x >= width - bar_size || y < bar_size || y >= height - bar_size {
@@ -367,7 +405,7 @@ mod tests {
                 *pixel = image::Rgb([100, 150, 200]);
             }
         }
-        DynamicImage::ImageRgb8(img)
+        img
     }
 
     #[test]
@@ -444,7 +482,7 @@ mod tests {
         let stop_flag = Arc::new(AtomicBool::new(false));
         let duration = 10.0;
 
-        let get_frame = |_timestamp: f32| -> Option<DynamicImage> { Some(create_frame_with_black_bars(200, 200, 20)) };
+        let get_frame = |_timestamp: f32| -> Option<RgbImage> { Some(create_frame_with_black_bars(200, 200, 20)) };
 
         let result = analyze_black_bars(duration, &get_frame, &stop_flag);
         assert!(result.unwrap().is_some());
@@ -455,7 +493,7 @@ mod tests {
         let stop_flag = Arc::new(AtomicBool::new(false));
         let duration = 10.0;
 
-        let get_frame = |_timestamp: f32| -> Option<DynamicImage> { Some(create_colored_frame(200, 200, 100, 150, 200)) };
+        let get_frame = |_timestamp: f32| -> Option<RgbImage> { Some(create_colored_frame(200, 200, 100, 150, 200)) };
 
         let result = analyze_black_bars(duration, &get_frame, &stop_flag);
         assert!(result.unwrap().is_none());
@@ -466,7 +504,7 @@ mod tests {
         let stop_flag = Arc::new(AtomicBool::new(false));
         let duration = 10.0;
 
-        let get_frame = |timestamp: f32| -> Option<DynamicImage> {
+        let get_frame = |timestamp: f32| -> Option<RgbImage> {
             if timestamp < 5.0 {
                 Some(create_frame_with_black_bars(200, 200, 20))
             } else {
@@ -483,7 +521,7 @@ mod tests {
         let stop_flag = Arc::new(AtomicBool::new(true));
         let duration = 10.0;
 
-        let get_frame = |_timestamp: f32| -> Option<DynamicImage> { Some(create_frame_with_black_bars(200, 200, 20)) };
+        let get_frame = |_timestamp: f32| -> Option<RgbImage> { Some(create_frame_with_black_bars(200, 200, 20)) };
 
         let result = analyze_black_bars(duration, &get_frame, &stop_flag);
         assert!(result.unwrap_err().contains("cancelled"));
@@ -494,7 +532,7 @@ mod tests {
         let stop_flag = Arc::new(AtomicBool::new(false));
         let duration = 10.0;
 
-        let get_frame = |timestamp: f32| -> Option<DynamicImage> {
+        let get_frame = |timestamp: f32| -> Option<RgbImage> {
             if timestamp < 3.0 {
                 Some(create_frame_with_black_bars(200, 200, 20))
             } else if timestamp < 7.0 {
@@ -532,7 +570,7 @@ mod tests {
             for pixel in all_black.pixels_mut() {
                 *pixel = image::Rgb([0, 0, 0]);
             }
-            let result = detect_black_bars(&DynamicImage::ImageRgb8(all_black));
+            let result = detect_black_bars(&all_black);
             assert!(result.is_none(), "All black image should return None for {desc}");
 
             // Test 2: All white image
@@ -540,7 +578,7 @@ mod tests {
             for pixel in all_white.pixels_mut() {
                 *pixel = image::Rgb([255, 255, 255]);
             }
-            let result = detect_black_bars(&DynamicImage::ImageRgb8(all_white));
+            let result = detect_black_bars(&all_white);
             assert!(result.is_none(), "All white image should return None for {desc}");
 
             // Test 3: Single white pixel in center
@@ -550,7 +588,7 @@ mod tests {
                     *pixel = image::Rgb([0, 0, 0]);
                 }
                 single_pixel.put_pixel(width / 2, height / 2, image::Rgb([255, 255, 255]));
-                let result = detect_black_bars(&DynamicImage::ImageRgb8(single_pixel));
+                let result = detect_black_bars(&single_pixel);
                 if let Some(rect) = result {
                     assert!(rect.left < rect.right, "Invalid rectangle for single pixel in {desc}: left >= right");
                     assert!(rect.top < rect.bottom, "Invalid rectangle for single pixel in {desc}: top >= bottom");
@@ -566,7 +604,7 @@ mod tests {
                     let color = if (x + y) % 2 == 0 { 255 } else { 0 };
                     *pixel = image::Rgb([color, color, color]);
                 }
-                let result = detect_black_bars(&DynamicImage::ImageRgb8(checkerboard));
+                let result = detect_black_bars(&checkerboard);
                 assert!(result.is_none(), "Checkerboard should return None for {desc}");
             }
 
@@ -581,7 +619,7 @@ mod tests {
                         *pixel = image::Rgb([128, 128, 128]);
                     }
                 }
-                let result = detect_black_bars(&DynamicImage::ImageRgb8(with_bars));
+                let result = detect_black_bars(&with_bars);
                 if let Some(rect) = result {
                     assert!(rect.left > 0, "Should detect left black bar in {desc}");
                     assert!(rect.top > 0, "Should detect top black bar in {desc}");
@@ -603,7 +641,7 @@ mod tests {
                         *pixel = image::Rgb([128, 128, 128]);
                     }
                 }
-                let result = detect_black_bars(&DynamicImage::ImageRgb8(letterbox));
+                let result = detect_black_bars(&letterbox);
                 if let Some(rect) = result {
                     assert!(rect.left < rect.right, "Invalid letterbox rectangle in {desc}");
                     assert!(rect.top < rect.bottom, "Invalid letterbox rectangle in {desc}");
@@ -621,7 +659,7 @@ mod tests {
                         *pixel = image::Rgb([128, 128, 128]);
                     }
                 }
-                let result = detect_black_bars(&DynamicImage::ImageRgb8(pillarbox));
+                let result = detect_black_bars(&pillarbox);
                 if let Some(rect) = result {
                     assert!(rect.left < rect.right, "Invalid pillarbox rectangle in {desc}");
                     assert!(rect.top < rect.bottom, "Invalid pillarbox rectangle in {desc}");
@@ -642,7 +680,7 @@ mod tests {
                         *pixel = image::Rgb([200, 200, 200]);
                     }
                 }
-                let result = detect_black_bars(&DynamicImage::ImageRgb8(asymmetric));
+                let result = detect_black_bars(&asymmetric);
                 if let Some(rect) = result {
                     assert!(rect.left < rect.right, "Invalid asymmetric rectangle in {desc}");
                     assert!(rect.top < rect.bottom, "Invalid asymmetric rectangle in {desc}");
