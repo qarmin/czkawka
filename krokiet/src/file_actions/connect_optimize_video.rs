@@ -6,15 +6,15 @@ use std::thread;
 
 use crossbeam_channel::Sender;
 use czkawka_core::common::progress_data::ProgressData;
+use czkawka_core::common::tool_data::CommonData;
 use czkawka_core::tools::video_optimizer::{VideoCodec, VideoCropFixParams, VideoOptimizerParameters, VideoTranscodeFixParams};
 use slint::{ComponentHandle, SharedString, Weak};
-use czkawka_core::common::tool_data::CommonData;
+
 use crate::common::IntDataVideoOptimizer;
 use crate::model_operations::model_processor::{MessageType, ModelProcessor};
-use crate::settings::combo_box::StringComboBoxItems;
 use crate::shared_models::SharedModels;
 use crate::simpler_model::{SimplerMainListModel, ToSimplerVec};
-use crate::{Callabler, GuiState, MainWindow, Settings};
+use crate::{Callabler, GuiState, MainWindow};
 
 pub(crate) fn connect_optimize_video(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>, shared_models: Arc<Mutex<SharedModels>>) {
     let a = app.as_weak();
@@ -27,19 +27,22 @@ pub(crate) fn connect_optimize_video(app: &MainWindow, progress_sender: Sender<P
             let app = a.upgrade().expect("Failed to upgrade app :(");
             let active_tab = app.global::<GuiState>().get_active_tab();
 
-            let crop_mode = matches!(shared_models.lock().as_ref().expect("Failed to lock shared models").shared_video_optimizer_state.expect("Item should be present for video optimizer").get_params(), VideoOptimizerParameters::VideoCrop(_));
+            let crop_mode = matches!(
+                shared_models
+                    .lock()
+                    .as_ref()
+                    .expect("Failed to lock shared models")
+                    .shared_video_optimizer_state
+                    .as_ref()
+                    .expect("Item should be present for video optimizer")
+                    .get_params(),
+                VideoOptimizerParameters::VideoCrop(_)
+            );
 
             let processor = ModelProcessor::new(active_tab);
 
-            if  crop_mode {
-                processor.crop_selected_videos(
-                    progress_sender,
-                    weak_app,
-                    stop_flag,
-                    codec.to_string(),
-                    overwrite_files,
-                    video_quality,
-                );
+            if crop_mode {
+                processor.crop_selected_videos(progress_sender, weak_app, stop_flag, codec.to_string(), overwrite_files, video_quality);
             } else {
                 processor.optimize_selected_videos(
                     progress_sender,
@@ -139,15 +142,13 @@ impl ModelProcessor {
             let requested_codec = if requested_video_codec_str.is_empty() {
                 None
             } else {
-                Some(VideoCodec::from_str(&requested_video_codec_str)
-                    .unwrap_or_else(|_err| panic!("Unsupported codec: {}(This should be validated before)", &requested_video_codec_str)))
+                Some(
+                    VideoCodec::from_str(&requested_video_codec_str)
+                        .unwrap_or_else(|_err| panic!("Unsupported codec: {}(This should be validated before)", &requested_video_codec_str)),
+                )
             };
 
-            let quality = if video_quality > 0.0 {
-                Some(video_quality as u32)
-            } else {
-                None
-            };
+            let quality = if video_quality > 0.0 { Some(video_quality as u32) } else { None };
 
             let stop_flag_clone = stop_flag.clone();
             let crop_fnc = move |data: &SimplerMainListModel| {
@@ -193,20 +194,25 @@ fn optimize_single_video(_stop_flag: &Arc<AtomicBool>, video_path: &str, _origin
 
 fn crop_single_video(stop_flag: &Arc<AtomicBool>, full_path: &str, _original_size: u64, params: VideoCropFixParams) -> Result<(), String> {
     use std::path::PathBuf;
-    use czkawka_core::tools::video_optimizer::core::fix_video_crop;
+
     use czkawka_core::tools::video_optimizer::VideoCropEntry;
+    use czkawka_core::tools::video_optimizer::core::fix_video_crop;
 
     if stop_flag.load(Ordering::Relaxed) {
         return Err("Operation cancelled".to_string());
     }
 
     let path = PathBuf::from(full_path);
-    let metadata = std::fs::metadata(&path).map_err(|e| format!("Failed to read file metadata: {}", e))?;
+    let metadata = std::fs::metadata(&path).map_err(|e| format!("Failed to read file metadata: {e}"))?;
 
     let entry = VideoCropEntry {
-        path: path.clone(),
+        path,
         size: metadata.len(),
-        modified_date: metadata.modified().ok().and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok()).map(|d| d.as_secs()).unwrap_or(0),
+        modified_date: metadata
+            .modified()
+            .ok()
+            .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
+            .map_or(0, |d| d.as_secs()),
         error: None,
         codec: String::new(),
         width: 0,

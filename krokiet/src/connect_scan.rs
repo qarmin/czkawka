@@ -29,6 +29,7 @@ use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters
 use czkawka_core::tools::temporary::{Temporary, TemporaryFileEntry};
 use czkawka_core::tools::video_optimizer::{VideoCropEntry, VideoCropParams, VideoOptimizer, VideoOptimizerParameters, VideoTranscodeEntry, VideoTranscodeParams};
 use humansize::{BINARY, format_size};
+use log::error;
 use rayon::prelude::*;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
 
@@ -1309,7 +1310,20 @@ fn prepare_data_model_video_optimizer_transcode(fe: &VideoTranscodeEntry) -> (Mo
     let modification_split = split_u64_into_i32s(fe.modified_date);
     let size_split = split_u64_into_i32s(fe.size);
     let dimension_split = split_u64_into_i32s(fe.width as u64 * fe.height as u64);
-    let data_model_int_arr: [i32; MAX_INT_DATA_VIDEO_OPTIMIZER] = [modification_split.0, modification_split.1, size_split.0, size_split.1, dimension_split.0, dimension_split.1, 0, 0, 0, 0, 0, 0];
+    let data_model_int_arr: [i32; MAX_INT_DATA_VIDEO_OPTIMIZER] = [
+        modification_split.0,
+        modification_split.1,
+        size_split.0,
+        size_split.1,
+        dimension_split.0,
+        dimension_split.1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+    ];
     let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 }
@@ -1319,9 +1333,13 @@ fn prepare_data_model_video_optimizer_crop(fe: &VideoCropEntry) -> (ModelRc<Shar
     let (left, top, right, bottom) = fe.new_image_dimensions.expect("new_image_dimensions should be Some in crop mode");
 
     let (width, height, dim_string) = if left > right || top > bottom {
-        eprintln!(
+        error!(
             "ERROR: Invalid rectangle coordinates in cache for file '{}': left={}, top={}, right={}, bottom={}. Skipping dimensions display.",
-            fe.path.display(), left, top, right, bottom
+            fe.path.display(),
+            left,
+            top,
+            right,
+            bottom
         );
         (-1, -1, "-".to_string())
     } else {

@@ -304,7 +304,6 @@ subsettings_video_optimizer_mode = Mode
 subsettings_video_optimizer_video_codec = Video codec
 subsettings_video_optimizer_excluded_codecs = Excluded codecs
 subsettings_video_optimizer_video_quality = Video quality (CRF)
-subsettings_video_optimizer_image_threshold = Image threshold
 subsettings_reset = Reset
 subsettings_exif_ignored_tags_text = Ignored tags:
 subsettings_exif_ignored_tags_hint_text = Comma-separated list of tags to exclude from scanning (e.g. GPS, Thumbnail). Some tags, such as ImageWidth in TIFF files, are hidden to prevent breaking the image.

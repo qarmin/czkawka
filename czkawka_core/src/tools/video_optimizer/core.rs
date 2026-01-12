@@ -126,7 +126,6 @@ impl VideoOptimizer {
             return WorkContinueStatus::Stop;
         }
 
-
         entries.retain(|e| e.error.is_none() && !params.excluded_codecs.contains(&e.codec));
 
         self.video_transcode_entries = entries;
@@ -180,7 +179,6 @@ impl VideoOptimizer {
         if check_if_stop_received(stop_flag) {
             return WorkContinueStatus::Stop;
         }
-
 
         entries.retain(|e| e.error.is_none() && e.new_image_dimensions.is_some());
 

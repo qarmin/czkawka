@@ -45,7 +45,10 @@ impl Rectangle {
         assert!(
             self.left <= self.right && self.top <= self.bottom,
             "Invalid rectangle coordinates: top={}, bottom={}, left={}, right={}. Expected: left <= right && top <= bottom",
-            self.top, self.bottom, self.left, self.right
+            self.top,
+            self.bottom,
+            self.left,
+            self.right
         );
     }
 
@@ -138,11 +141,7 @@ fn detect_black_bars(img: &DynamicImage) -> Option<Rectangle> {
     }
 
     let rect = Rectangle::new(top_crop, bottom_pos, left_crop, right_pos);
-    if rect.is_cropping_needed(width, height) {
-        Some(rect)
-    } else {
-        None
-    }
+    if rect.is_cropping_needed(width, height) { Some(rect) } else { None }
 }
 
 fn analyze_black_bars<F>(duration: f32, get_frame: &F, stop_flag: &Arc<AtomicBool>) -> Result<Option<Rectangle>, String>
@@ -233,7 +232,9 @@ fn extract_video_metadata_for_crop(entry: &mut VideoCropEntry) -> Result<(u32, u
 pub fn check_video_crop(mut entry: VideoCropEntry, _params: &VideoCropParams, stop_flag: &Arc<AtomicBool>) -> VideoCropEntry {
     debug!("Checking video for crop: {}", entry.path.display());
 
-    let Ok((width, height, duration, fps)) = extract_video_metadata_for_crop(&mut entry) else { return entry };
+    let Ok((width, height, duration, fps)) = extract_video_metadata_for_crop(&mut entry) else {
+        return entry;
+    };
 
     debug!("Video metadata: {}x{}, duration: {:.2}s, fps: {:.2}, codec: {}", width, height, duration, fps, entry.codec);
 
@@ -265,7 +266,7 @@ pub fn fix_video_crop(entry: &VideoCropEntry, params: &VideoCropFixParams, stop_
 
     // Validate rectangle
     if left >= right || top >= bottom {
-        return Err(format!("Invalid crop rectangle: left={}, top={}, right={}, bottom={}", left, top, right, bottom));
+        return Err(format!("Invalid crop rectangle: left={left}, top={top}, right={right}, bottom={bottom}"));
     }
 
     let crop_width = right - left;
@@ -276,8 +277,7 @@ pub fn fix_video_crop(entry: &VideoCropEntry, params: &VideoCropFixParams, stop_
     }
 
     let output_path = if params.overwrite_original {
-        let temp_path = entry.path.with_extension("tmp.mp4");
-        temp_path
+        entry.path.with_extension("tmp.mp4")
     } else {
         let stem = entry.path.file_stem().ok_or("Cannot get file stem")?;
         let parent = entry.path.parent().ok_or("Cannot get parent directory")?;
@@ -289,7 +289,10 @@ pub fn fix_video_crop(entry: &VideoCropEntry, params: &VideoCropFixParams, stop_
         "Cropping video: {} -> {}, crop: {}x{}+{}+{}",
         entry.path.display(),
         output_path.display(),
-        crop_width, crop_height, left, top
+        crop_width,
+        crop_height,
+        left,
+        top
     );
 
     let mut ffmpeg_cmd = Command::new("ffmpeg");
@@ -297,7 +300,7 @@ pub fn fix_video_crop(entry: &VideoCropEntry, params: &VideoCropFixParams, stop_
         .arg("-i")
         .arg(&entry.path)
         .arg("-vf")
-        .arg(format!("crop={}:{}:{}:{}", crop_width, crop_height, left, top));
+        .arg(format!("crop={crop_width}:{crop_height}:{left}:{top}"));
 
     // Add codec parameters if target codec is specified
     if let Some(target_codec) = params.target_codec {
@@ -322,17 +325,16 @@ pub fn fix_video_crop(entry: &VideoCropEntry, params: &VideoCropFixParams, stop_
         .stdout(Stdio::null())
         .stderr(Stdio::null());
 
-    let output = ffmpeg_cmd.output().map_err(|e| format!("Failed to execute ffmpeg: {}", e))?;
+    let output = ffmpeg_cmd.output().map_err(|e| format!("Failed to execute ffmpeg: {e}"))?;
 
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
-        return Err(format!("FFmpeg failed: {}", stderr));
+        return Err(format!("FFmpeg failed: {stderr}"));
     }
 
     // If overwriting, move temp file to original
     if params.overwrite_original {
-        std::fs::rename(&output_path, &entry.path)
-            .map_err(|e| format!("Failed to replace original file: {}", e))?;
+        std::fs::rename(&output_path, &entry.path).map_err(|e| format!("Failed to replace original file: {e}"))?;
     }
 
     debug!("Successfully cropped video: {}", entry.path.display());
@@ -505,7 +507,6 @@ mod tests {
         let result = analyze_black_bars(duration, &get_frame, &stop_flag);
         let rectangle = result.unwrap();
         let rect = rectangle.unwrap();
-        dbg!(&rect);
         assert_eq!(rect.left, 18);
         assert_eq!(rect.top, 18);
         assert_eq!(rect.right, 200 - 18);
@@ -526,15 +527,13 @@ mod tests {
         ];
 
         for (width, height, desc) in test_cases {
-            println!("Testing: {}", desc);
-
             // Test 1: All black image
             let mut all_black = RgbImage::new(width, height);
             for pixel in all_black.pixels_mut() {
                 *pixel = image::Rgb([0, 0, 0]);
             }
             let result = detect_black_bars(&DynamicImage::ImageRgb8(all_black));
-            assert!(result.is_none(), "All black image should return None for {}", desc);
+            assert!(result.is_none(), "All black image should return None for {desc}");
 
             // Test 2: All white image
             let mut all_white = RgbImage::new(width, height);
@@ -542,7 +541,7 @@ mod tests {
                 *pixel = image::Rgb([255, 255, 255]);
             }
             let result = detect_black_bars(&DynamicImage::ImageRgb8(all_white));
-            assert!(result.is_none(), "All white image should return None for {}", desc);
+            assert!(result.is_none(), "All white image should return None for {desc}");
 
             // Test 3: Single white pixel in center
             if width > 2 && height > 2 {
@@ -553,10 +552,10 @@ mod tests {
                 single_pixel.put_pixel(width / 2, height / 2, image::Rgb([255, 255, 255]));
                 let result = detect_black_bars(&DynamicImage::ImageRgb8(single_pixel));
                 if let Some(rect) = result {
-                    assert!(rect.left < rect.right, "Invalid rectangle for single pixel in {}: left >= right", desc);
-                    assert!(rect.top < rect.bottom, "Invalid rectangle for single pixel in {}: top >= bottom", desc);
-                    assert!(rect.right <= width, "Right exceeds width in {}", desc);
-                    assert!(rect.bottom <= height, "Bottom exceeds height in {}", desc);
+                    assert!(rect.left < rect.right, "Invalid rectangle for single pixel in {desc}: left >= right");
+                    assert!(rect.top < rect.bottom, "Invalid rectangle for single pixel in {desc}: top >= bottom");
+                    assert!(rect.right <= width, "Right exceeds width in {desc}");
+                    assert!(rect.bottom <= height, "Bottom exceeds height in {desc}");
                 }
             }
 
@@ -568,7 +567,7 @@ mod tests {
                     *pixel = image::Rgb([color, color, color]);
                 }
                 let result = detect_black_bars(&DynamicImage::ImageRgb8(checkerboard));
-                assert!(result.is_none(), "Checkerboard should return None for {}", desc);
+                assert!(result.is_none(), "Checkerboard should return None for {desc}");
             }
 
             // Test 5: Black bars on all sides
@@ -584,12 +583,12 @@ mod tests {
                 }
                 let result = detect_black_bars(&DynamicImage::ImageRgb8(with_bars));
                 if let Some(rect) = result {
-                    assert!(rect.left > 0, "Should detect left black bar in {}", desc);
-                    assert!(rect.top > 0, "Should detect top black bar in {}", desc);
-                    assert!(rect.right < width, "Should detect right black bar in {}", desc);
-                    assert!(rect.bottom < height, "Should detect bottom black bar in {}", desc);
-                    assert!(rect.left < rect.right, "Invalid rectangle in {}: left >= right", desc);
-                    assert!(rect.top < rect.bottom, "Invalid rectangle in {}: top >= bottom", desc);
+                    assert!(rect.left > 0, "Should detect left black bar in {desc}");
+                    assert!(rect.top > 0, "Should detect top black bar in {desc}");
+                    assert!(rect.right < width, "Should detect right black bar in {desc}");
+                    assert!(rect.bottom < height, "Should detect bottom black bar in {desc}");
+                    assert!(rect.left < rect.right, "Invalid rectangle in {desc}: left >= right");
+                    assert!(rect.top < rect.bottom, "Invalid rectangle in {desc}: top >= bottom");
                 }
             }
 
@@ -606,8 +605,8 @@ mod tests {
                 }
                 let result = detect_black_bars(&DynamicImage::ImageRgb8(letterbox));
                 if let Some(rect) = result {
-                    assert!(rect.left < rect.right, "Invalid letterbox rectangle in {}", desc);
-                    assert!(rect.top < rect.bottom, "Invalid letterbox rectangle in {}", desc);
+                    assert!(rect.left < rect.right, "Invalid letterbox rectangle in {desc}");
+                    assert!(rect.top < rect.bottom, "Invalid letterbox rectangle in {desc}");
                 }
             }
 
@@ -624,8 +623,8 @@ mod tests {
                 }
                 let result = detect_black_bars(&DynamicImage::ImageRgb8(pillarbox));
                 if let Some(rect) = result {
-                    assert!(rect.left < rect.right, "Invalid pillarbox rectangle in {}", desc);
-                    assert!(rect.top < rect.bottom, "Invalid pillarbox rectangle in {}", desc);
+                    assert!(rect.left < rect.right, "Invalid pillarbox rectangle in {desc}");
+                    assert!(rect.top < rect.bottom, "Invalid pillarbox rectangle in {desc}");
                 }
             }
 
@@ -645,14 +644,12 @@ mod tests {
                 }
                 let result = detect_black_bars(&DynamicImage::ImageRgb8(asymmetric));
                 if let Some(rect) = result {
-                    assert!(rect.left < rect.right, "Invalid asymmetric rectangle in {}", desc);
-                    assert!(rect.top < rect.bottom, "Invalid asymmetric rectangle in {}", desc);
-                    assert!(rect.left >= left_bar, "Left bar not detected properly in {}", desc);
-                    assert!(rect.right <= width - right_bar, "Right bar not detected properly in {}", desc);
+                    assert!(rect.left < rect.right, "Invalid asymmetric rectangle in {desc}");
+                    assert!(rect.top < rect.bottom, "Invalid asymmetric rectangle in {desc}");
+                    assert!(rect.left >= left_bar, "Left bar not detected properly in {desc}");
+                    assert!(rect.right <= width - right_bar, "Right bar not detected properly in {desc}");
                 }
             }
         }
-
-        println!("Fuzzer test completed successfully!");
     }
 }

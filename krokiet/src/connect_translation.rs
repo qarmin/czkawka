@@ -265,7 +265,6 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_video_optimizer_video_codec_text(flk!("subsettings_video_optimizer_video_codec").into());
     translation.set_subsettings_video_optimizer_excluded_codecs_text(flk!("subsettings_video_optimizer_excluded_codecs").into());
     translation.set_subsettings_video_optimizer_video_quality_text(flk!("subsettings_video_optimizer_video_quality").into());
-    translation.set_subsettings_video_optimizer_image_threshold_text(flk!("subsettings_video_optimizer_image_threshold").into());
     translation.set_subsettings_reset_text(flk!("subsettings_reset").into());
     translation.set_subsettings_exif_ignored_tags_text(flk!("subsettings_exif_ignored_tags_text").into());
     translation.set_subsettings_exif_ignored_tags_hint_text(flk!("subsettings_exif_ignored_tags_hint_text").into());

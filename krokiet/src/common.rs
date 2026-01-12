@@ -423,9 +423,7 @@ impl ActiveTab {
                 }
                 StrDataVideoOptimizer::Size => SortIdx::IntIdxPair(IntDataVideoOptimizer::SizePart1 as i32, IntDataVideoOptimizer::SizePart2 as i32),
                 StrDataVideoOptimizer::Dimensions => SortIdx::IntIdxPair(IntDataVideoOptimizer::DimensionsPart1 as i32, IntDataVideoOptimizer::DimensionsPart2 as i32),
-                StrDataVideoOptimizer::NewDimensions => {
-                    SortIdx::IntIdxPair(IntDataVideoOptimizer::NewDimensionsPart1 as i32, IntDataVideoOptimizer::NewDimensionsPart2 as i32)
-                }
+                StrDataVideoOptimizer::NewDimensions => SortIdx::IntIdxPair(IntDataVideoOptimizer::NewDimensionsPart1 as i32, IntDataVideoOptimizer::NewDimensionsPart2 as i32),
             },
             Self::Settings | Self::About => panic!("Button should be disabled"),
         }
