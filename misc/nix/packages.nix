@@ -1,13 +1,13 @@
 { self, pkgs, crane, msrvRust, buildInputs, nativeBuildInputs }:
 let
   craneLib = (crane.mkLib pkgs).overrideToolchain (p: msrvRust);
-  src = self;
+  src = ../..;
   doCheck = false;
 in
 rec {
   default = czkawka-gui-wayland;
   czkawka-gui = let
-    cargoToml = "${self}/czkawka_gui/Cargo.toml";
+    cargoToml = "${self}/../../czkawka_gui/Cargo.toml";
     cargoTomlConfig = builtins.fromTOML (builtins.readFile cargoToml);
     version = cargoTomlConfig.package.version;
   in
@@ -26,7 +26,7 @@ rec {
     exec ${czkawka-gui}/bin/czkawka_gui "$@"
   '';
   czkawka-gui-wayland = let
-    cargoToml = "${self}/czkawka_gui/Cargo.toml";
+    cargoToml = "${self}/../../czkawka_gui/Cargo.toml";
     cargoTomlConfig = builtins.fromTOML (builtins.readFile cargoToml);
     version = cargoTomlConfig.package.version;
     waylandBuildInputs = buildInputs ++ [ pkgs.wayland ];
@@ -43,7 +43,7 @@ rec {
     };
   };
   czkawka-cli = let
-    cargoToml = "${self}/czkawka_cli/Cargo.toml";
+    cargoToml = "${self}/../../czkawka_cli/Cargo.toml";
     cargoTomlConfig = builtins.fromTOML (builtins.readFile cargoToml);
     version = cargoTomlConfig.package.version;
   in
