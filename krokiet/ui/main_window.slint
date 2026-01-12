@@ -343,9 +343,9 @@ export component MainWindow inherits Window {
         select_popup_window.close_popup();
     }
 
-    show_action_popup(request, folder_name) => {
+    show_action_popup(request, data) => {
         if (request == PopupRequest.Move) {
-            move_popup_window.folder_name = folder_name;
+            move_popup_window.folder_name = data;
             move_popup_window.show_popup();
         } else if (request == PopupRequest.Delete) {
             delete_popup_window.show_popup();
