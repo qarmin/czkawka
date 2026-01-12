@@ -165,7 +165,7 @@ impl VideoOptimizer {
                 let res = video_cropper::check_video_crop(entry, &params, stop_flag);
                 progress_handler.increase_items(1);
                 progress_handler.increase_size(size);
-                Some(res)
+                res
             })
             .while_some()
             .collect();

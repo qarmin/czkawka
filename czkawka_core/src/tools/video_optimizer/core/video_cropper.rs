@@ -146,18 +146,20 @@ fn detect_black_bars(rgb_img: &RgbImage) -> Option<Rectangle> {
     if rect.is_cropping_needed(width, height) { Some(rect) } else { None }
 }
 
-fn analyze_black_bars<F>(duration: f32, get_frame: &F, stop_flag: &Arc<AtomicBool>) -> Result<Option<Rectangle>, String>
+fn analyze_black_bars<F>(duration: f32, get_frame: &F, stop_flag: &Arc<AtomicBool>) -> Option<Result<Option<Rectangle>, String>>
 where
     F: Fn(f32) -> Option<RgbImage>,
 {
     if stop_flag.load(Ordering::Relaxed) {
-        return Err("Operation cancelled".to_string());
+        return None;
     }
 
-    let first_frame = get_frame(0.0).ok_or("Failed to extract first frame")?;
+    let Some(first_frame) = get_frame(0.0) else {
+        return Some(Err("Failed to extract first frame".to_string()));
+    };
 
     let Some(mut rectangle) = detect_black_bars(&first_frame) else {
-        return Ok(None);
+        return Some(Ok(None));
     };
 
     let num_samples = (duration / MIN_SAMPLE_INTERVAL).min(MAX_SAMPLES as f32).floor() as usize;
@@ -165,23 +167,23 @@ where
 
     for i in 1..num_samples {
         if stop_flag.load(Ordering::Relaxed) {
-            return Err("Operation cancelled".to_string());
+            return None;
         }
 
         let timestamp = (i as f32 / num_samples as f32) * duration;
 
         let Some(tmp_frame) = get_frame(timestamp) else {
-            return Ok(None);
+            return Some(Ok(None));
         };
 
         if let Some(tmp_rect) = detect_black_bars(&tmp_frame) {
             rectangle = rectangle.union(&tmp_rect);
         } else {
-            return Ok(None);
+            return Some(Ok(None));
         }
     }
 
-    Ok(Some(rectangle))
+    Some(Ok(Some(rectangle)))
 }
 
 fn diff_between_dynamic_images(img_original: &RgbImage, mut consumed_temp_img: RgbImage) -> RgbImage {
@@ -198,15 +200,17 @@ fn diff_between_dynamic_images(img_original: &RgbImage, mut consumed_temp_img: R
     consumed_temp_img
 }
 
-fn analyze_static_image_parts<F>(duration: f32, get_frame: &F, stop_flag: &Arc<AtomicBool>) -> Result<Option<Rectangle>, String>
+fn analyze_static_image_parts<F>(duration: f32, get_frame: &F, stop_flag: &Arc<AtomicBool>) -> Option<Result<Option<Rectangle>, String>>
 where
     F: Fn(f32) -> Option<RgbImage>,
 {
     if stop_flag.load(Ordering::Relaxed) {
-        return Err("Operation cancelled".to_string());
+        return None;
     }
 
-    let first_frame = get_frame(0.0).ok_or("Failed to extract first frame")?;
+    let Some(first_frame) = get_frame(0.0) else {
+        return Some(Err("Failed to extract first frame".to_string()));
+    };
     let mut rectangle = Rectangle::new(0, first_frame.height(), 0, first_frame.width());
 
     let num_samples = (duration / MIN_SAMPLE_INTERVAL).min(MAX_SAMPLES as f32).floor() as usize;
@@ -214,24 +218,24 @@ where
 
     for i in 1..num_samples {
         if stop_flag.load(Ordering::Relaxed) {
-            return Err("Operation cancelled".to_string());
+            return None;
         }
 
         let timestamp = (i as f32 / num_samples as f32) * duration;
 
         let Some(tmp_frame) = get_frame(timestamp) else {
-            return Ok(None);
+            return Some(Ok(None));
         };
         let dynamic_image_diff: RgbImage = diff_between_dynamic_images(&first_frame, tmp_frame);
 
         if let Some(tmp_rect) = detect_black_bars(&dynamic_image_diff) {
             rectangle = rectangle.union(&tmp_rect);
         } else {
-            return Ok(None);
+            return Some(Ok(None));
         }
     }
 
-    Ok(Some(rectangle))
+    Some(Ok(Some(rectangle)))
 }
 
 fn extract_video_metadata_for_crop(entry: &mut VideoCropEntry) -> Result<(u32, u32, f64, f64), ()> {
@@ -272,11 +276,11 @@ fn extract_video_metadata_for_crop(entry: &mut VideoCropEntry) -> Result<(u32, u
     Ok((width, height, duration, fps))
 }
 
-pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, stop_flag: &Arc<AtomicBool>) -> VideoCropEntry {
+pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, stop_flag: &Arc<AtomicBool>) -> Option<VideoCropEntry> {
     debug!("Checking video for crop: {}", entry.path.display());
 
     let Ok((width, height, duration, fps)) = extract_video_metadata_for_crop(&mut entry) else {
-        return entry;
+        return Some(entry);
     };
 
     debug!("Video metadata: {}x{}, duration: {:.2}s, fps: {:.2}, codec: {}", width, height, duration, fps, entry.codec);
@@ -286,32 +290,33 @@ pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, sto
 
     match params.crop_detect {
         VideoCroppingMechanism::BlackBars => match analyze_black_bars(duration as f32, &get_frame, stop_flag) {
-            Ok(Some(rectangle)) => {
+            Some(Ok(Some(rectangle))) => {
                 entry.new_image_dimensions = Some((rectangle.left, rectangle.top, rectangle.right, rectangle.bottom));
             }
-            Ok(None) => {
-                debug!("No black bars detected");
+            Some(Ok(None)) => {// No black bars
             }
-            Err(e) => {
+            Some(Err(e)) => {
                 entry.error = Some(e);
-                return entry;
+                return Some(entry);
             }
+            None => return None
         },
         VideoCroppingMechanism::StaticContent => match analyze_static_image_parts(duration as f32, &get_frame, stop_flag) {
-            Ok(Some(rectangle)) => {
+            Some(Ok(Some(rectangle))) => {
                 entry.new_image_dimensions = Some((rectangle.left, rectangle.top, rectangle.right, rectangle.bottom));
             }
-            Ok(None) => {
+            Some(Ok(None)) => {
                 debug!("No static content detected");
             }
-            Err(e) => {
+            Some(Err(e)) => {
                 entry.error = Some(e);
-                return entry;
+                return Some(entry);
             }
+            None => return None,
         },
     }
 
-    entry
+    Some(entry)
 }
 
 pub fn fix_video_crop(video_path: &Path, params: &VideoCropFixParams, stop_flag: &Arc<AtomicBool>) -> Result<(), String> {
