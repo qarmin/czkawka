@@ -396,18 +396,19 @@ pub fn fix_video_crop(video_path: &Path, params: &VideoCropFixParams, stop_flag:
         .arg("-vf")
         .arg(format!("crop={crop_width}:{crop_height}:{left}:{top}"));
 
-    if let Some(target_codec) = params.target_codec {
-        command.arg("-c:v").arg(target_codec.as_str());
-
-        if let Some(quality) = params.quality {
-            command.arg("-crf").arg(quality.to_string());
+    match (params.target_codec, params.quality) {
+        (None, None) => {
+            // Do nothing, do not convert video to different codec
         }
-
-        command.arg("-c:a").arg("copy");
-    } else {
-        command.arg("-c").arg("copy");
+        (Some(target_codec), Some(quality)) => {
+            command.arg("-c:v").arg(target_codec.as_str()).arg("-crf").arg(quality.to_string());
+        }
+        _ => {
+            return Err("Both target_codec and quality must be specified together".to_string());
+        }
     }
 
+    command.arg("-c:a").arg("copy");
     command.arg("-y").arg(&temp_output);
 
     println!("Running command: {:?}", command);
