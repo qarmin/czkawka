@@ -116,6 +116,7 @@ impl VideoOptimizer {
             .while_some()
             .collect();
 
+        self.common_data.text_messages.warnings.extend(entries.iter().filter_map(|e| e.error.as_ref()).cloned());
         entries.extend(records_already_cached.into_values());
 
         progress_handler.join_thread();
@@ -170,6 +171,7 @@ impl VideoOptimizer {
             .while_some()
             .collect();
 
+        self.common_data.text_messages.warnings.extend(entries.iter().filter_map(|e| e.error.as_ref()).cloned());
         entries.extend(records_already_cached.into_values());
 
         progress_handler.join_thread();

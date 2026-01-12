@@ -5,7 +5,6 @@ use std::sync::atomic::{AtomicBool, Ordering};
 
 use image::RgbImage;
 use log::debug;
-
 use crate::common::process_utils::run_command_interruptible;
 use crate::common::video_metadata::VideoMetadata;
 use crate::tools::video_optimizer::{VideoCropEntry, VideoCropFixParams, VideoCropParams, VideoCroppingMechanism};
@@ -151,16 +150,13 @@ where
     F: Fn(f32) -> Option<RgbImage>,
 {
 
-    debug!("WWWWWWWWWWWWWWWWWWWWWWWW");
     if stop_flag.load(Ordering::Relaxed) {
         return None;
     }
 
-    debug!("AAAAAAAAAAA");
     let Some(first_frame) = get_frame(0.0) else {
         return Some(Err("Failed to extract first frame".to_string()));
     };
-    debug!("BBBBBBBBBB");
     if first_frame.dimensions() != (width, height) {
         return Some(Err(format!(
             "Frame dimensions do not match video metadata: frame is {}x{}, metadata says {}x{}",
@@ -170,12 +166,10 @@ where
             height
         )));
     }
-    debug!("CCCCCCCCc");
 
     let Some(mut rectangle) = detect_black_bars(&first_frame) else {
         return Some(Ok(None));
     };
-    debug!("DDDDDDDDDd");
 
     let num_samples = (duration / MIN_SAMPLE_INTERVAL).min(MAX_SAMPLES as f32).floor() as usize;
     let num_samples = num_samples.max(1);
@@ -186,8 +180,6 @@ where
         }
 
         let timestamp = (i as f32 / num_samples as f32) * duration;
-
-        debug!("Analyzing frame at {:.2}s for black bars", timestamp);
 
         let Some(tmp_frame) = get_frame(timestamp) else {
             return Some(Ok(None));
@@ -303,13 +295,9 @@ fn extract_video_metadata_for_crop(entry: &mut VideoCropEntry) -> Result<(u32, u
 }
 
 pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, stop_flag: &Arc<AtomicBool>) -> Option<VideoCropEntry> {
-    debug!("Checking video for crop: {}", entry.path.display());
-
     let Ok((width, height, duration, fps)) = extract_video_metadata_for_crop(&mut entry) else {
         return Some(entry);
     };
-
-    debug!("Video metadata: {}x{}, duration: {:.2}s, fps: {:.2}, codec: {}", width, height, duration, fps, entry.codec);
 
     let video_path = entry.path.clone();
     let get_frame = |timestamp: f32| -> Option<RgbImage> { extract_frame_ffmpeg(&video_path, timestamp) };
@@ -317,11 +305,14 @@ pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, sto
     match params.crop_detect {
         VideoCroppingMechanism::BlackBars => match analyze_black_bars(duration as f32, &get_frame, stop_flag, width, height) {
             Some(Ok(Some(rectangle))) => {
+                debug!("________________________Detected black bars for video {}: left={}, top={}, right={}, bottom={}", entry.path.display(), rectangle.left, rectangle.top, rectangle.right, rectangle.bottom);
                 entry.new_image_dimensions = Some((rectangle.left, rectangle.top, rectangle.right, rectangle.bottom));
             }
             Some(Ok(None)) => { // No black bars
+                debug!("________________________No black bars detected for video {}", entry.path.display());
             }
             Some(Err(e)) => {
+                debug!("________________________Error analyzing black bars for video {}: {}", entry.path.display(), e);
                 entry.error = Some(e);
                 return Some(entry);
             }
@@ -373,15 +364,15 @@ pub fn fix_video_crop(video_path: &Path, params: &VideoCropFixParams, stop_flag:
     let extension = video_path.extension().and_then(|e| e.to_str()).unwrap_or("mp4");
     let temp_output = parent.join(format!("{}_czkawka_cropped_{}.{}", stem.to_string_lossy(), crop_type_suffix, extension));
 
-    debug!(
-        "Cropping video: {} -> {}, crop: {}x{}+{}+{}",
-        video_path.display(),
-        temp_output.display(),
-        crop_width,
-        crop_height,
-        left,
-        top
-    );
+    // log::debug!(
+    //     "Cropping video: {} -> {}, crop: {}x{}+{}+{}",
+    //     video_path.display(),
+    //     temp_output.display(),
+    //     crop_width,
+    //     crop_height,
+    //     left,
+    //     top
+    // );
 
     let mut command = Command::new("ffmpeg");
     command
@@ -421,7 +412,6 @@ pub fn fix_video_crop(video_path: &Path, params: &VideoCropFixParams, stop_flag:
         std::fs::rename(&temp_output, video_path).map_err(|e| format!("Failed to replace original file: {e}"))?;
     }
 
-    debug!("Successfully cropped video: {}", video_path.display());
     Ok(())
 }
 
