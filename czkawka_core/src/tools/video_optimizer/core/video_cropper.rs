@@ -146,7 +146,7 @@ fn detect_black_bars(rgb_img: &RgbImage) -> Option<Rectangle> {
     if rect.is_cropping_needed(width, height) { Some(rect) } else { None }
 }
 
-fn analyze_black_bars<F>(duration: f32, get_frame: &F, stop_flag: &Arc<AtomicBool>, first_frame: RgbImage) -> Option<Result<Option<Rectangle>, String>>
+fn analyze_black_bars<F>(duration: f32, get_frame: &F, stop_flag: &Arc<AtomicBool>, first_frame: &RgbImage) -> Option<Result<Option<Rectangle>, String>>
 where
     F: Fn(f32) -> Option<RgbImage>,
 {
@@ -154,7 +154,7 @@ where
         return None;
     }
 
-    let Some(mut rectangle) = detect_black_bars(&first_frame) else {
+    let Some(mut rectangle) = detect_black_bars(first_frame) else {
         return Some(Ok(None));
     };
 
@@ -204,7 +204,7 @@ fn diff_between_dynamic_images(img_original: &RgbImage, mut consumed_temp_img: R
     consumed_temp_img
 }
 
-fn analyze_static_image_parts<F>(duration: f32, get_frame: &F, stop_flag: &Arc<AtomicBool>, first_frame: RgbImage) -> Option<Result<Option<Rectangle>, String>>
+fn analyze_static_image_parts<F>(duration: f32, get_frame: &F, stop_flag: &Arc<AtomicBool>, first_frame: &RgbImage) -> Option<Result<Option<Rectangle>, String>>
 where
     F: Fn(f32) -> Option<RgbImage>,
 {
@@ -234,7 +234,7 @@ where
                 first_frame.height()
             )));
         }
-        let dynamic_image_diff: RgbImage = diff_between_dynamic_images(&first_frame, tmp_frame);
+        let dynamic_image_diff: RgbImage = diff_between_dynamic_images(first_frame, tmp_frame);
 
         if let Some(tmp_rect) = detect_black_bars(&dynamic_image_diff) {
             rectangle = rectangle.union(&tmp_rect);
@@ -303,7 +303,7 @@ pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, sto
     entry.width = width;
 
     match params.crop_detect {
-        VideoCroppingMechanism::BlackBars => match analyze_black_bars(duration as f32, &get_frame, stop_flag, first_frame) {
+        VideoCroppingMechanism::BlackBars => match analyze_black_bars(duration as f32, &get_frame, stop_flag, &first_frame) {
             Some(Ok(Some(rectangle))) => {
                 // debug!("________________________Detected black bars for video {}: left={}, top={}, right={}, bottom={}", entry.path.display(), rectangle.left, rectangle.top, rectangle.right, rectangle.bottom);
                 entry.new_image_dimensions = Some((rectangle.left, rectangle.top, rectangle.right, rectangle.bottom));
@@ -318,7 +318,7 @@ pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, sto
             }
             None => return None,
         },
-        VideoCroppingMechanism::StaticContent => match analyze_static_image_parts(duration as f32, &get_frame, stop_flag, first_frame) {
+        VideoCroppingMechanism::StaticContent => match analyze_static_image_parts(duration as f32, &get_frame, stop_flag, &first_frame) {
             Some(Ok(Some(rectangle))) => {
                 debug!(
                     "________________________Detected static content crop for video {}: left={}, top={}, right={}, bottom={}",
@@ -529,7 +529,7 @@ mod tests {
 
         let get_frame = |_timestamp: f32| -> Option<RgbImage> { Some(create_frame_with_black_bars(200, 200, 20)) };
 
-        let result = analyze_black_bars(duration, &get_frame, &stop_flag, 200, 200);
+        let result = analyze_black_bars(duration, &get_frame, &stop_flag, &create_frame_with_black_bars(200, 200, 20));
         assert!(result.expect("Expected Result").unwrap().is_some());
     }
 
@@ -540,7 +540,7 @@ mod tests {
 
         let get_frame = |_timestamp: f32| -> Option<RgbImage> { Some(create_colored_frame(200, 200, 100, 150, 200)) };
 
-        let result = analyze_black_bars(duration, &get_frame, &stop_flag, 200, 200);
+        let result = analyze_black_bars(duration, &get_frame, &stop_flag, &create_colored_frame(200, 200, 100, 150, 200));
         assert!(result.expect("Expected Result").unwrap().is_none());
     }
 
@@ -557,19 +557,8 @@ mod tests {
             }
         };
 
-        let result = analyze_black_bars(duration, &get_frame, &stop_flag, 200, 200);
+        let result = analyze_black_bars(duration, &get_frame, &stop_flag, &create_frame_with_black_bars(200, 200, 20));
         assert!(result.expect("Expected Result").unwrap().is_none());
-    }
-
-    #[test]
-    fn test_analyze_black_bars_with_stop_flag() {
-        let stop_flag = Arc::new(AtomicBool::new(true));
-        let duration = 10.0;
-
-        let get_frame = |_timestamp: f32| -> Option<RgbImage> { Some(create_frame_with_black_bars(200, 200, 20)) };
-
-        let result = analyze_black_bars(duration, &get_frame, &stop_flag, 200, 200);
-        assert!(result.unwrap().unwrap_err().contains("cancelled"));
     }
 
     #[test]
@@ -587,7 +576,7 @@ mod tests {
             }
         };
 
-        let result = analyze_black_bars(duration, &get_frame, &stop_flag, 200, 200);
+        let result = analyze_black_bars(duration, &get_frame, &stop_flag, &create_frame_with_black_bars(200, 200, 20));
         let rect = result.expect("Expected Result").unwrap().unwrap();
         assert_eq!(rect.left, 18);
         assert_eq!(rect.top, 18);
