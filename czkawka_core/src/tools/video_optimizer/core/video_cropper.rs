@@ -146,7 +146,7 @@ fn detect_black_bars(rgb_img: &RgbImage) -> Option<Rectangle> {
     if rect.is_cropping_needed(width, height) { Some(rect) } else { None }
 }
 
-fn analyze_black_bars<F>(duration: f32, get_frame: &F, stop_flag: &Arc<AtomicBool>) -> Option<Result<Option<Rectangle>, String>>
+fn analyze_black_bars<F>(duration: f32, get_frame: &F, stop_flag: &Arc<AtomicBool>, width: u32, height: u32) -> Option<Result<Option<Rectangle>, String>>
 where
     F: Fn(f32) -> Option<RgbImage>,
 {
@@ -157,6 +157,15 @@ where
     let Some(first_frame) = get_frame(0.0) else {
         return Some(Err("Failed to extract first frame".to_string()));
     };
+    if first_frame.dimensions() != (width, height) {
+        return Some(Err(format!(
+            "Frame dimensions do not match video metadata: frame is {}x{}, metadata says {}x{}",
+            first_frame.width(),
+            first_frame.height(),
+            width,
+            height
+        )));
+    }
 
     let Some(mut rectangle) = detect_black_bars(&first_frame) else {
         return Some(Ok(None));
@@ -200,7 +209,8 @@ fn diff_between_dynamic_images(img_original: &RgbImage, mut consumed_temp_img: R
     consumed_temp_img
 }
 
-fn analyze_static_image_parts<F>(duration: f32, get_frame: &F, stop_flag: &Arc<AtomicBool>) -> Option<Result<Option<Rectangle>, String>>
+fn analyze_static_image_parts<F>(duration: f32, get_frame: &F, stop_flag: &Arc<AtomicBool>, width: u32, height: u32
+) -> Option<Result<Option<Rectangle>, String>>
 where
     F: Fn(f32) -> Option<RgbImage>,
 {
@@ -211,6 +221,15 @@ where
     let Some(first_frame) = get_frame(0.0) else {
         return Some(Err("Failed to extract first frame".to_string()));
     };
+    if first_frame.dimensions() != (width, height) {
+        return Some(Err(format!(
+            "Frame dimensions do not match video metadata: frame is {}x{}, metadata says {}x{}",
+            first_frame.width(),
+            first_frame.height(),
+            width,
+            height
+        )));
+    }
     let mut rectangle = Rectangle::new(0, first_frame.height(), 0, first_frame.width());
 
     let num_samples = (duration / MIN_SAMPLE_INTERVAL).min(MAX_SAMPLES as f32).floor() as usize;
@@ -289,7 +308,7 @@ pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, sto
     let get_frame = |timestamp: f32| -> Option<RgbImage> { extract_frame_ffmpeg(&video_path, timestamp) };
 
     match params.crop_detect {
-        VideoCroppingMechanism::BlackBars => match analyze_black_bars(duration as f32, &get_frame, stop_flag) {
+        VideoCroppingMechanism::BlackBars => match analyze_black_bars(duration as f32, &get_frame, stop_flag, width, height) {
             Some(Ok(Some(rectangle))) => {
                 entry.new_image_dimensions = Some((rectangle.left, rectangle.top, rectangle.right, rectangle.bottom));
             }
@@ -301,7 +320,7 @@ pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, sto
             }
             None => return None
         },
-        VideoCroppingMechanism::StaticContent => match analyze_static_image_parts(duration as f32, &get_frame, stop_flag) {
+        VideoCroppingMechanism::StaticContent => match analyze_static_image_parts(duration as f32, &get_frame, stop_flag, width, height) {
             Some(Ok(Some(rectangle))) => {
                 entry.new_image_dimensions = Some((rectangle.left, rectangle.top, rectangle.right, rectangle.bottom));
             }
@@ -321,7 +340,7 @@ pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, sto
 
 pub fn fix_video_crop(video_path: &Path, params: &VideoCropFixParams, stop_flag: &Arc<AtomicBool>) -> Result<(), String> {
     if stop_flag.load(Ordering::Relaxed) {
-        return Err("Operation cancelled".to_string());
+        return Err("Video processing was stopped by user".to_string());
     }
 
     let (left, top, right, bottom) = params.crop_rectangle;
@@ -504,7 +523,7 @@ mod tests {
 
         let get_frame = |_timestamp: f32| -> Option<RgbImage> { Some(create_frame_with_black_bars(200, 200, 20)) };
 
-        let result = analyze_black_bars(duration, &get_frame, &stop_flag);
+        let result = analyze_black_bars(duration, &get_frame, &stop_flag,200 ,200 );
         assert!(result.unwrap().is_some());
     }
 
@@ -515,7 +534,7 @@ mod tests {
 
         let get_frame = |_timestamp: f32| -> Option<RgbImage> { Some(create_colored_frame(200, 200, 100, 150, 200)) };
 
-        let result = analyze_black_bars(duration, &get_frame, &stop_flag);
+        let result = analyze_black_bars(duration, &get_frame, &stop_flag,200 ,200 );
         assert!(result.unwrap().is_none());
     }
 
@@ -532,7 +551,7 @@ mod tests {
             }
         };
 
-        let result = analyze_black_bars(duration, &get_frame, &stop_flag);
+        let result = analyze_black_bars(duration, &get_frame, &stop_flag,200 ,200 );
         assert!(result.unwrap().is_none());
     }
 
@@ -543,7 +562,7 @@ mod tests {
 
         let get_frame = |_timestamp: f32| -> Option<RgbImage> { Some(create_frame_with_black_bars(200, 200, 20)) };
 
-        let result = analyze_black_bars(duration, &get_frame, &stop_flag);
+        let result = analyze_black_bars(duration, &get_frame, &stop_flag,200 ,200 );
         assert!(result.unwrap_err().contains("cancelled"));
     }
 
@@ -562,7 +581,7 @@ mod tests {
             }
         };
 
-        let result = analyze_black_bars(duration, &get_frame, &stop_flag);
+        let result = analyze_black_bars(duration, &get_frame, &stop_flag,200 ,200 );
         let rectangle = result.unwrap();
         let rect = rectangle.unwrap();
         assert_eq!(rect.left, 18);
