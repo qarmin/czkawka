@@ -14,7 +14,9 @@ use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
-use crate::tools::video_optimizer::{Info, VideoCropEntry, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters, VideoTranscodeEntry, VideoTranscodeParams};
+use crate::tools::video_optimizer::{
+    Info, VideoCropEntry, VideoCroppingMechanism, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters, VideoTranscodeEntry, VideoTranscodeParams,
+};
 
 mod video_converter;
 mod video_cropper;
@@ -123,10 +125,6 @@ impl VideoOptimizer {
 
         self.save_video_transcode_cache(&entries);
 
-        if check_if_stop_received(stop_flag) {
-            return WorkContinueStatus::Stop;
-        }
-
         entries.retain(|e| e.error.is_none() && !params.excluded_codecs.contains(&e.codec));
 
         self.video_transcode_entries = entries;
@@ -146,7 +144,7 @@ impl VideoOptimizer {
 
         let all_files: Vec<VideoCropEntry> = std::mem::take(&mut self.video_crop_entries);
 
-        let (records_already_cached, non_cached_files_to_check) = self.load_video_crop_cache(all_files);
+        let (records_already_cached, non_cached_files_to_check) = self.load_video_crop_cache(all_files, params.crop_detect);
 
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
@@ -176,11 +174,7 @@ impl VideoOptimizer {
 
         progress_handler.join_thread();
 
-        self.save_video_crop_cache(&entries);
-
-        if check_if_stop_received(stop_flag) {
-            return WorkContinueStatus::Stop;
-        }
+        self.save_video_crop_cache(&entries, params.crop_detect);
 
         entries.retain(|e| e.error.is_none() && e.new_image_dimensions.is_some());
 
@@ -229,7 +223,7 @@ impl VideoOptimizer {
     }
 
     #[fun_time(message = "load_video_crop_cache", level = "debug")]
-    fn load_video_crop_cache(&mut self, all_files: Vec<VideoCropEntry>) -> (BTreeMap<String, VideoCropEntry>, BTreeMap<String, VideoCropEntry>) {
+    fn load_video_crop_cache(&mut self, all_files: Vec<VideoCropEntry>, params: VideoCroppingMechanism) -> (BTreeMap<String, VideoCropEntry>, BTreeMap<String, VideoCropEntry>) {
         let mut records_already_cached: BTreeMap<String, VideoCropEntry> = Default::default();
         let mut non_cached_files_to_check: BTreeMap<String, VideoCropEntry> = Default::default();
 
@@ -243,7 +237,7 @@ impl VideoOptimizer {
 
         if self.common_data.use_cache {
             let (messages, loaded_items) =
-                load_cache_from_file_generalized_by_path::<VideoCropEntry>(&get_video_crop_cache_file(), self.get_delete_outdated_cache(), &preliminary_files);
+                load_cache_from_file_generalized_by_path::<VideoCropEntry>(&get_video_crop_cache_file(params), self.get_delete_outdated_cache(), &preliminary_files);
             self.get_cd_mut().text_messages.messages.extend(messages.messages);
             self.get_cd_mut().text_messages.warnings.extend(messages.warnings);
 
@@ -278,10 +272,10 @@ impl VideoOptimizer {
     }
 
     #[fun_time(message = "save_video_crop_cache", level = "debug")]
-    fn save_video_crop_cache(&mut self, entries: &[VideoCropEntry]) {
+    fn save_video_crop_cache(&mut self, entries: &[VideoCropEntry], video_cropping_mechanism: VideoCroppingMechanism) {
         if self.common_data.use_cache {
             let entries_map: BTreeMap<String, VideoCropEntry> = entries.iter().map(|entry| (entry.path.to_string_lossy().to_string(), entry.clone())).collect();
-            let messages = save_cache_to_file_generalized(&get_video_crop_cache_file(), &entries_map, self.get_save_also_as_json(), 0);
+            let messages = save_cache_to_file_generalized(&get_video_crop_cache_file(video_cropping_mechanism), &entries_map, self.get_save_also_as_json(), 0);
             self.get_cd_mut().text_messages.messages.extend(messages.messages);
             self.get_cd_mut().text_messages.warnings.extend(messages.warnings);
         }
@@ -333,6 +327,6 @@ pub fn get_video_transcode_cache_file() -> String {
     format!("cache_video_transcode_{CACHE_VIDEO_TRANSCODE_VERSION}.bin")
 }
 
-pub fn get_video_crop_cache_file() -> String {
-    format!("cache_video_crop_{CACHE_VIDEO_CROP_VERSION}.bin")
+pub fn get_video_crop_cache_file(vide_cropping_mechanism: VideoCroppingMechanism) -> String {
+    format!("cache_video_crop_{CACHE_VIDEO_CROP_VERSION}_{vide_cropping_mechanism:?}.bin")
 }

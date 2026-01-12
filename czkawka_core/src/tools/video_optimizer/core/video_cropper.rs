@@ -5,6 +5,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 
 use image::RgbImage;
 use log::debug;
+
 use crate::common::process_utils::run_command_interruptible;
 use crate::common::video_metadata::VideoMetadata;
 use crate::tools::video_optimizer::{VideoCropEntry, VideoCropFixParams, VideoCropParams, VideoCroppingMechanism};
@@ -149,7 +150,6 @@ fn analyze_black_bars<F>(duration: f32, get_frame: &F, stop_flag: &Arc<AtomicBoo
 where
     F: Fn(f32) -> Option<RgbImage>,
 {
-
     if stop_flag.load(Ordering::Relaxed) {
         return None;
     }
@@ -295,24 +295,34 @@ fn extract_video_metadata_for_crop(entry: &mut VideoCropEntry) -> Result<(u32, u
 }
 
 pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, stop_flag: &Arc<AtomicBool>) -> Option<VideoCropEntry> {
-    let Ok((width, height, duration, fps)) = extract_video_metadata_for_crop(&mut entry) else {
+    let Ok((_width, _height, duration, _fps)) = extract_video_metadata_for_crop(&mut entry) else {
         return Some(entry);
     };
 
     let video_path = entry.path.clone();
     let get_frame = |timestamp: f32| -> Option<RgbImage> { extract_frame_ffmpeg(&video_path, timestamp) };
 
+    // TODO - metadata are broken? Not proper?
+    // Metadata shows different dimensions than actual frames extracted - quite strange, probably rotated data -
+    let Some(first_frame) = get_frame(0.0) else {
+        entry.error = Some("Failed to extract first frame".to_string());
+        return Some(entry);
+    };
+    let (width, height) = first_frame.dimensions();
+    entry.height = height;
+    entry.width = width;
+
     match params.crop_detect {
         VideoCroppingMechanism::BlackBars => match analyze_black_bars(duration as f32, &get_frame, stop_flag, width, height) {
             Some(Ok(Some(rectangle))) => {
-                debug!("________________________Detected black bars for video {}: left={}, top={}, right={}, bottom={}", entry.path.display(), rectangle.left, rectangle.top, rectangle.right, rectangle.bottom);
+                // debug!("________________________Detected black bars for video {}: left={}, top={}, right={}, bottom={}", entry.path.display(), rectangle.left, rectangle.top, rectangle.right, rectangle.bottom);
                 entry.new_image_dimensions = Some((rectangle.left, rectangle.top, rectangle.right, rectangle.bottom));
             }
             Some(Ok(None)) => { // No black bars
-                debug!("________________________No black bars detected for video {}", entry.path.display());
+                // debug!("________________________No black bars detected for video {}", entry.path.display());
             }
             Some(Err(e)) => {
-                debug!("________________________Error analyzing black bars for video {}: {}", entry.path.display(), e);
+                // debug!("________________________Error analyzing black bars for video {}: {}", entry.path.display(), e);
                 entry.error = Some(e);
                 return Some(entry);
             }
@@ -320,12 +330,21 @@ pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, sto
         },
         VideoCroppingMechanism::StaticContent => match analyze_static_image_parts(duration as f32, &get_frame, stop_flag, width, height) {
             Some(Ok(Some(rectangle))) => {
+                debug!(
+                    "________________________Detected static content crop for video {}: left={}, top={}, right={}, bottom={}",
+                    entry.path.display(),
+                    rectangle.left,
+                    rectangle.top,
+                    rectangle.right,
+                    rectangle.bottom
+                );
                 entry.new_image_dimensions = Some((rectangle.left, rectangle.top, rectangle.right, rectangle.bottom));
             }
             Some(Ok(None)) => {
-
+                debug!("________________________No static content crop detected for video {}", entry.path.display());
             }
             Some(Err(e)) => {
+                debug!("________________________Error analyzing static content for video {}: {}", entry.path.display(), e);
                 entry.error = Some(e);
                 return Some(entry);
             }
