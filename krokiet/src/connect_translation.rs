@@ -272,8 +272,11 @@ fn translate_items(app: &MainWindow) {
     translation.set_clean_button_text(flk!("clean_button_text").into());
     translation.set_clean_text(flk!("clean_text").into());
     translation.set_clean_confirmation_text(flk!("clean_confirmation_text").into());
+    translation.set_crop_videos_text(flk!("crop_videos_text").into());
+    translation.set_crop_video_confirmation_text(flk!("crop_video_confirmation_text").into());
+    translation.set_crop_reencode_video_text(flk!("crop_reencode_video_text").into());
+    translation.set_reencode_videos_text(flk!("reencode_videos_text").into());
     translation.set_optimize_button_text(flk!("optimize_button_text").into());
-    translation.set_optimize_videos_text(flk!("optimize_videos_text").into());
     translation.set_optimize_confirmation_text(flk!("optimize_confirmation_text").into());
     translation.set_optimize_fail_if_bigger_text(flk!("optimize_fail_if_bigger_text").into());
     translation.set_optimize_overwrite_files_text(flk!("optimize_overwrite_files_text").into());

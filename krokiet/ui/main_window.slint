@@ -18,7 +18,8 @@ import { PopupRenameFiles } from "popup_rename_files.slint";
 import { PopupSave } from "popup_save.slint";
 import { PopupSortResults } from "popup_sort.slint";
 import { PopupActionConfirm } from "popup_action_confirm.slint";
-import { PopupOptimize } from "popup_optimize.slint";
+import { PopupCropVideo } from "popup_crop_video.slint";
+import { PopupReencodeVideo } from "popup_optimize.slint";
 import { PopupCleanExif } from "popup_clean_exif.slint";
 import { ToolSettings } from "tool_settings.slint";
 import { Translations } from "translations.slint";
@@ -279,16 +280,29 @@ export component MainWindow inherits Window {
         }
     }
 
-    optimize_popup_window := PopupOptimize {
+    crop_video_popup_window := PopupCropVideo {
         height: root.height;
         width: root.width;
-        title_text: Translations.optimize_videos_text;
+        title_text: Translations.crop_videos_text;
+
+        x: parent.x + (root.width - self.popup_width) / 2.0;
+        y: parent.y + (parent.height - self.popup_height) / 2.0;
+
+        action_confirmed(reencode, codec, quality, overwrite_files) => {
+            Callabler.crop_video_items(reencode, codec, quality, overwrite_files);
+        }
+    }
+
+    reencode_video_popup_window := PopupReencodeVideo {
+        height: root.height;
+        width: root.width;
+        title_text: Translations.reencode_videos_text;
 
         x: parent.x + (root.width - self.popup_width) / 2.0;
         y: parent.y + (parent.height - self.popup_height) / 2.0;
 
         action_confirmed(codec, fail_if_bigger, overwrite_files, quality, limit_size, max_width, max_height) => {
-            Callabler.optimize_items(codec, fail_if_bigger, overwrite_files, quality, limit_size, max_width, max_height);
+            Callabler.reencode_video_items(codec, fail_if_bigger, overwrite_files, quality, limit_size, max_width, max_height);
         }
     }
 
@@ -352,7 +366,11 @@ export component MainWindow inherits Window {
         } else if (request == PopupRequest.CleanExif) {
             clean_popup_window.show_popup();
         } else if (request == PopupRequest.OptimizeVideo) {
-            optimize_popup_window.show_popup();
+            if (data == "crop") {
+                crop_video_popup_window.show_popup();
+            } else {
+                reencode_video_popup_window.show_popup();
+            }
         } else if (request == PopupRequest.Symlink) {
             softlink_popup_window.show_popup();
         } else if (request == PopupRequest.Rename) {

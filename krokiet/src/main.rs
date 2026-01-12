@@ -125,7 +125,7 @@ fn main() {
     connect_showing_proper_select_buttons(&app);
     connect_move(&app, progress_sender.clone(), stop_flag.clone());
     connect_rename(&app, progress_sender.clone(), stop_flag.clone());
-    connect_optimize_video(&app, progress_sender.clone(), stop_flag.clone(), Arc::clone(&shared_models));
+    connect_optimize_video(&app, progress_sender.clone(), stop_flag.clone());
     connect_clean(&app, progress_sender.clone(), stop_flag.clone());
     connect_hardlink(&app, progress_sender.clone(), stop_flag.clone());
     connect_symlink(&app, progress_sender, stop_flag);
@@ -135,7 +135,7 @@ fn main() {
     connect_sort_column(&app);
     connect_showing_proper_sort_buttons(&app);
     connect_size_of_config_cache(&app);
-    connect_show_confirmation(&app);
+    connect_show_confirmation(&app, Arc::clone(&shared_models));
 
     clear_outdated_video_thumbnails(&app);
 

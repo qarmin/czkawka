@@ -1,13 +1,14 @@
 use std::sync::{Arc, Mutex};
+
+use czkawka_core::tools::video_optimizer::VideoOptimizerParameters;
 use rfd::FileDialog;
 use slint::ComponentHandle;
 
 use crate::model_operations::get_checked_info_from_app;
-use crate::{MainWindow, PopupRequest, Translations, flk};
 use crate::shared_models::SharedModels;
+use crate::{MainWindow, PopupRequest, Translations, flk};
 
-pub(crate) fn connect_show_confirmation(app: &MainWindow,
-                                        shared_models: Arc<Mutex<SharedModels>>,) {
+pub(crate) fn connect_show_confirmation(app: &MainWindow, shared_models: Arc<Mutex<SharedModels>>) {
     let a = app.as_weak();
     app.on_request_setup_action_popup(move |popup_request: PopupRequest| {
         let app = a.upgrade().expect("Failed to upgrade app :(");

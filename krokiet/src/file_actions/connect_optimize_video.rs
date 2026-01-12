@@ -1,28 +1,30 @@
-use std::path::{Path, MAIN_SEPARATOR};
+use std::path::MAIN_SEPARATOR;
+use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{Arc, Mutex};
 use std::thread;
 
 use crossbeam_channel::Sender;
 use czkawka_core::common::progress_data::ProgressData;
-use czkawka_core::tools::video_optimizer::{VideoCodec, VideoCropFixParams, VideoCroppingMechanism, VideoOptimizerParameters, VideoTranscodeFixParams};
+use czkawka_core::tools::video_optimizer::{VideoCodec, VideoCropFixParams, VideoCroppingMechanism, VideoTranscodeFixParams};
 use slint::{ComponentHandle, SharedString, Weak};
 
 use crate::common::IntDataVideoOptimizer;
 use crate::model_operations::model_processor::{MessageType, ModelProcessor};
 use crate::settings::collect_settings;
 use crate::settings::combo_box::StringComboBoxItems;
-use crate::shared_models::SharedModels;
 use crate::simpler_model::{SimplerMainListModel, ToSimplerVec};
 use crate::{Callabler, GuiState, MainWindow};
 
-pub(crate) fn connect_optimize_video(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>, shared_models: Arc<Mutex<SharedModels>>) {
+pub(crate) fn connect_optimize_video(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
     let a = app.as_weak();
-    app.global::<Callabler>().on_optimize_items(
-        move |codec: SharedString, fail_if_bigger: bool, overwrite_files: bool, video_quality: f32, limit_video_size: bool, max_width: i32, max_height: i32| {
+
+    let progress_sender_crop = progress_sender.clone();
+    let stop_flag_crop = stop_flag.clone();
+    app.global::<Callabler>()
+        .on_crop_video_items(move |reencode: bool, codec: SharedString, video_quality: f32, overwrite_files: bool| {
             let weak_app = a.clone();
-            let progress_sender = progress_sender.clone();
-            let stop_flag = stop_flag.clone();
+            let progress_sender = progress_sender_crop.clone();
+            let stop_flag = stop_flag_crop.clone();
             stop_flag.store(false, Ordering::Relaxed);
             let app = a.upgrade().expect("Failed to upgrade app :(");
             let active_tab = app.global::<GuiState>().get_active_tab();
@@ -32,35 +34,44 @@ pub(crate) fn connect_optimize_video(app: &MainWindow, progress_sender: Sender<P
             let collected_items = StringComboBoxItems::get_items();
             let crop_mechanism = StringComboBoxItems::get_value_from_config_name(&settings.video_optimizer_crop_type, &collected_items.video_optimizer_crop_type);
 
-            let shared_model = shared_models.lock();
-            let shared_model = shared_model.as_ref().expect("Failed to lock shared models");
-            let shared_model = shared_model.shared_video_optimizer_state.as_ref().expect("Item should be present for video optimizer");
-            let crop_mode = matches!(shared_model.get_params(), VideoOptimizerParameters::VideoCrop(_));
+            let processor = ModelProcessor::new(active_tab);
+
+            let requested_codec = if reencode {
+                Some(StringComboBoxItems::get_value_from_config_name(&codec, &collected_items.video_optimizer_video_codec))
+            } else {
+                None
+            };
+
+            processor.crop_selected_videos(progress_sender, weak_app, stop_flag, requested_codec, overwrite_files, video_quality, crop_mechanism);
+        });
+
+    let a2 = app.as_weak();
+    app.global::<Callabler>().on_reencode_video_items(
+        move |codec: SharedString, fail_if_bigger: bool, overwrite_files: bool, video_quality: f32, limit_video_size: bool, max_width: i32, max_height: i32| {
+            let weak_app = a2.clone();
+            let progress_sender = progress_sender.clone();
+            let stop_flag = stop_flag.clone();
+            stop_flag.store(false, Ordering::Relaxed);
+            let app = a2.upgrade().expect("Failed to upgrade app :(");
+            let active_tab = app.global::<GuiState>().get_active_tab();
+
+            let collected_items = StringComboBoxItems::get_items();
+            let video_codec = StringComboBoxItems::get_value_from_config_name(&codec, &collected_items.video_optimizer_video_codec);
 
             let processor = ModelProcessor::new(active_tab);
 
-            if crop_mode {
-                let video_codec = if codec.is_empty() {
-                    None
-                } else {
-                    Some(StringComboBoxItems::get_value_from_config_name(&codec, &collected_items.video_optimizer_video_codec))
-                };
-                processor.crop_selected_videos(progress_sender, weak_app, stop_flag, video_codec, overwrite_files, video_quality, crop_mechanism);
-            } else {
-                let video_codec = StringComboBoxItems::get_value_from_config_name(&codec, &collected_items.video_optimizer_video_codec);
-                processor.optimize_selected_videos(
-                    progress_sender,
-                    weak_app,
-                    stop_flag,
-                    video_codec,
-                    fail_if_bigger,
-                    overwrite_files,
-                    video_quality,
-                    limit_video_size,
-                    max_width.max(0) as u32,
-                    max_height.max(0) as u32,
-                );
-            }
+            processor.optimize_selected_videos(
+                progress_sender,
+                weak_app,
+                stop_flag,
+                video_codec,
+                fail_if_bigger,
+                overwrite_files,
+                video_quality,
+                limit_video_size,
+                max_width.max(0) as u32,
+                max_height.max(0) as u32,
+            );
         },
     );
 }
