@@ -154,7 +154,7 @@ impl ModelProcessor {
             let rect_right_idx = IntDataVideoOptimizer::RectRight as usize;
             let rect_bottom_idx = IntDataVideoOptimizer::RectBottom as usize;
 
-            let quality = if video_quality > 0.0 { Some(video_quality as u32) } else { None };
+            let quality = if requested_codec.is_some() { Some(video_quality as u32) } else { None };
 
             let stop_flag_clone = stop_flag.clone();
             let crop_fnc = move |data: &SimplerMainListModel| {

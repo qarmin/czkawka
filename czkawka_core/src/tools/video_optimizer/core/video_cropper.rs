@@ -4,14 +4,14 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use image::RgbImage;
-use log::debug;
+use log::error;
 
 use crate::common::process_utils::run_command_interruptible;
 use crate::common::video_metadata::VideoMetadata;
 use crate::tools::video_optimizer::{VideoCropEntry, VideoCropFixParams, VideoCropParams, VideoCroppingMechanism};
 
 const BLACK_PIXEL_THRESHOLD: u8 = 20;
-const BLACK_BAR_MIN_PERCENTAGE: f32 = 0.95;
+const BLACK_BAR_MIN_PERCENTAGE: f32 = 0.9;
 const MIN_SAMPLE_INTERVAL: f32 = 0.25;
 const MAX_SAMPLES: usize = 60;
 const MIN_CROP_SIZE: u32 = 5;
@@ -215,7 +215,7 @@ where
         return None;
     }
     // Invalid rectangle, but is later changed and properly validated
-    let mut rectangle = Rectangle::new_without_validation(first_frame.height(), 0,first_frame.width(), 0, );
+    let mut rectangle = Rectangle::new_without_validation(first_frame.height(), 0, first_frame.width(), 0);
 
     let num_samples = (duration / MIN_SAMPLE_INTERVAL).min(MAX_SAMPLES as f32).floor() as usize;
     let num_samples = num_samples.max(1);
@@ -324,21 +324,21 @@ pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, sto
         },
         VideoCroppingMechanism::StaticContent => match analyze_static_image_parts(duration as f32, &get_frame, stop_flag, &first_frame) {
             Some(Ok(Some(rectangle))) => {
-                debug!(
-                    "________________________Detected static content crop for video {}: left={}, top={}, right={}, bottom={}",
-                    entry.path.display(),
-                    rectangle.left,
-                    rectangle.top,
-                    rectangle.right,
-                    rectangle.bottom
-                );
+                // debug!(
+                //     "________________________Detected static content crop for video {}: left={}, top={}, right={}, bottom={}",
+                //     entry.path.display(),
+                //     rectangle.left,
+                //     rectangle.top,
+                //     rectangle.right,
+                //     rectangle.bottom
+                // );
                 entry.new_image_dimensions = Some((rectangle.left, rectangle.top, rectangle.right, rectangle.bottom));
             }
             Some(Ok(None)) => {
-                debug!("________________________No static content crop detected for video {}", entry.path.display());
+                // debug!("________________________No static content crop detected for video {}", entry.path.display());
             }
             Some(Err(e)) => {
-                debug!("________________________Error analyzing static content for video {}: {}", entry.path.display(), e);
+                // debug!("________________________Error analyzing static content for video {}: {}", entry.path.display(), e);
                 entry.error = Some(e);
                 return Some(entry);
             }
@@ -350,8 +350,6 @@ pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, sto
 }
 
 pub fn fix_video_crop(video_path: &Path, params: &VideoCropFixParams, stop_flag: &Arc<AtomicBool>) -> Result<(), String> {
-    debug!("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa");
-    debug!("Video path: {:?}", video_path);
     if stop_flag.load(Ordering::Relaxed) {
         return Err("Video processing was stopped by user".to_string());
     }
@@ -377,8 +375,6 @@ pub fn fix_video_crop(video_path: &Path, params: &VideoCropFixParams, stop_flag:
     let extension = video_path.extension().and_then(|ext| ext.to_str()).unwrap_or("");
     let temp_output = video_path.with_extension(format!("czkawka_cropped_{crop_type_suffix}.{extension}"));
 
-    debug!("temp_new_path: {:?}", temp_output);
-
     // log::debug!(
     //     "Cropping video: {} -> {}, crop: {}x{}+{}+{}",
     //     video_path.display(),
@@ -390,11 +386,7 @@ pub fn fix_video_crop(video_path: &Path, params: &VideoCropFixParams, stop_flag:
     // );
 
     let mut command = Command::new("ffmpeg");
-    command
-        .arg("-i")
-        .arg(video_path)
-        .arg("-vf")
-        .arg(format!("crop={crop_width}:{crop_height}:{left}:{top}"));
+    command.arg("-i").arg(video_path).arg("-vf").arg(format!("crop={crop_width}:{crop_height}:{left}:{top}"));
 
     match (params.target_codec, params.quality) {
         (None, None) => {
@@ -411,21 +403,20 @@ pub fn fix_video_crop(video_path: &Path, params: &VideoCropFixParams, stop_flag:
     command.arg("-c:a").arg("copy");
     command.arg("-y").arg(&temp_output);
 
-    println!("Running command: {:?}", command);
-
     match run_command_interruptible(command, stop_flag) {
         None => {
             let _ = std::fs::remove_file(&temp_output);
-            debug!("Video cropping was stopped by user for video: {:?}", video_path);
             return Err(String::from("Video cropping was stopped by user"));
         }
         Some(Err(e)) => {
             let _ = std::fs::remove_file(&temp_output);
-            debug!("Failed to crop video file {}: {}", video_path.display(), e);
             return Err(format!("Failed to crop video file {}: {e}", video_path.display()));
         }
         Some(Ok(_)) => {
-            assert!(temp_output.exists(), "Expected cropped video file to exist: {:?}", temp_output);
+            if !temp_output.exists() {
+                error!("Cropped video file was not created: {temp_output:?}");
+                return Err(format!("Cropped video file was not created: {temp_output:?}"));
+            }
         }
     }
 
