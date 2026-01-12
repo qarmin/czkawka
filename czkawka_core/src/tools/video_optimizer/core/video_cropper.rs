@@ -25,6 +25,9 @@ struct Rectangle {
 }
 
 impl Rectangle {
+    fn new_without_validation(top: u32, bottom: u32, left: u32, right: u32) -> Self {
+        Self { top, bottom, left, right }
+    }
     fn new(top: u32, bottom: u32, left: u32, right: u32) -> Self {
         let s = Self { top, bottom, left, right };
         s.validate();
@@ -211,7 +214,8 @@ where
     if stop_flag.load(Ordering::Relaxed) {
         return None;
     }
-    let mut rectangle = Rectangle::new(0, first_frame.height(), 0, first_frame.width());
+    // Invalid rectangle, but is later changed and properly validated
+    let mut rectangle = Rectangle::new_without_validation(first_frame.height(), 0,first_frame.width(), 0, );
 
     let num_samples = (duration / MIN_SAMPLE_INTERVAL).min(MAX_SAMPLES as f32).floor() as usize;
     let num_samples = num_samples.max(1);
@@ -236,7 +240,10 @@ where
         }
         let dynamic_image_diff: RgbImage = diff_between_dynamic_images(first_frame, tmp_frame);
 
+        debug!("_______{rectangle:?}");
+
         if let Some(tmp_rect) = detect_black_bars(&dynamic_image_diff) {
+            debug!("_______{tmp_rect:?}");
             rectangle = rectangle.union(&tmp_rect);
         } else {
             return Some(Ok(None));
