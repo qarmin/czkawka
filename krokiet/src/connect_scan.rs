@@ -1366,6 +1366,7 @@ fn prepare_data_model_video_optimizer_crop(fe: &VideoCropEntry) -> (ModelRc<Shar
     let modification_split = split_u64_into_i32s(fe.modified_date);
     let size_split = split_u64_into_i32s(fe.size);
     let dimension_split = split_u64_into_i32s(fe.width as u64 * fe.height as u64);
+    dbg!(&width, &height);
     let new_dimension_split = split_u64_into_i32s(width as u64 * height as u64);
     let data_model_int_arr: [i32; MAX_INT_DATA_VIDEO_OPTIMIZER] = [
         modification_split.0,
