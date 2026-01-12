@@ -4,7 +4,7 @@ use std::sync::{Arc, Mutex, MutexGuard};
 use czkawka_core::common::model::{CheckingMethod, HashType};
 use czkawka_core::re_exported::{Cropdetect, HashAlg};
 use czkawka_core::tools::big_file::SearchMode;
-use czkawka_core::tools::video_optimizer::VideoCroppingMechanism;
+use czkawka_core::tools::video_optimizer::{VideoCodec, VideoCroppingMechanism, VideoOptimizerMode};
 use image::imageops::FilterType;
 use log::warn;
 use slint::SharedString;
@@ -32,8 +32,8 @@ pub struct StringComboBoxItems {
     pub duplicates_check_method: Vec<StringComboBoxItem<CheckingMethod>>,
     pub videos_crop_detect: Vec<StringComboBoxItem<Cropdetect>>,
     pub video_optimizer_crop_type: Vec<StringComboBoxItem<VideoCroppingMechanism>>,
-    pub video_optimizer_mode: Vec<StringComboBoxItem<String>>,
-    pub video_optimizer_video_codec: Vec<StringComboBoxItem<String>>,
+    pub video_optimizer_mode: Vec<StringComboBoxItem<VideoOptimizerMode>>,
+    pub video_optimizer_video_codec: Vec<StringComboBoxItem<VideoCodec>>,
 }
 
 pub static STRING_COMBO_BOX_ITEMS: std::sync::LazyLock<Arc<Mutex<StringComboBoxItems>>> = std::sync::LazyLock::new(|| {
@@ -135,13 +135,16 @@ impl StringComboBoxItems {
             ("staticcontent", "Static Content", VideoCroppingMechanism::StaticContent),
         ]);
 
-        let video_optimizer_mode = Self::convert_to_combobox_items(&[("crop", "Crop", "crop".to_string()), ("transcode", "Transcode", "transcode".to_string())]);
+        let video_optimizer_mode = Self::convert_to_combobox_items(&[
+            ("crop", "Crop", VideoOptimizerMode::VideoCrop),
+            ("transcode", "Transcode", VideoOptimizerMode::VideoTranscode),
+        ]);
 
         let video_optimizer_video_codec = Self::convert_to_combobox_items(&[
-            ("hevc", "HEVC/H265", "hevc".to_string()),
-            ("h264", "H264", "h264".to_string()),
-            ("vp9", "VP9", "vp9".to_string()),
-            ("av1", "AV1", "av1".to_string()),
+            ("hevc", "HEVC/H265", VideoCodec::H265),
+            ("h264", "H264", VideoCodec::H264),
+            ("vp9", "VP9", VideoCodec::Vp9),
+            ("av1", "AV1", VideoCodec::Av1),
         ]);
 
         Self {
@@ -159,6 +162,12 @@ impl StringComboBoxItems {
             video_optimizer_video_codec,
         }
     }
+    // pub enum VideoCodec {
+    //     H264,
+    //     H265,
+    //     Av1,
+    //     Vp9,
+    // }
 
     fn convert_to_combobox_items<T>(input: &[(&str, &str, T)]) -> Vec<StringComboBoxItem<T>>
     where

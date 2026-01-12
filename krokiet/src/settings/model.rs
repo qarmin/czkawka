@@ -335,14 +335,13 @@ fn default_video_optimizer_mode() -> String {
     "transcode".to_string()
 }
 fn default_video_optimizer_crop_type() -> String {
-    // Allowed values: blackbars, staticcontent (case-insensitive parsing later)
     "blackbars".to_string()
 }
 fn default_video_optimizer_video_codec() -> String {
-    "hevc".to_string()
+    "h265".to_string()
 }
 fn default_video_optimizer_excluded_codecs() -> String {
-    "hevc,av1,vp9".to_string()
+    "h265,av1,vp9".to_string()
 }
 fn default_video_optimizer_video_quality() -> u32 {
     23

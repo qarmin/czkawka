@@ -112,12 +112,6 @@ impl PrintResults for VideoOptimizer {
                                 entry.height,
                                 format_size(entry.size, BINARY)
                             )?;
-                            if let Some(start) = entry.start_crop_frame {
-                                writeln!(writer, "  Start crop frame: {start}")?;
-                            }
-                            if let Some(end) = entry.end_crop_frame {
-                                writeln!(writer, "  End crop frame: {end}")?;
-                            }
                             if let Some((lt, rt, rb, lb)) = entry.new_image_dimensions {
                                 writeln!(writer, "  New dimensions: LT:{lt}, RT:{rt}, RB:{rb}, LB:{lb}")?;
                             }

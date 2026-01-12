@@ -6,6 +6,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use image::RgbImage;
 use log::debug;
 
+use crate::common::process_utils::run_command_interruptible;
 use crate::common::video_metadata::VideoMetadata;
 use crate::tools::video_optimizer::{VideoCropEntry, VideoCropFixParams, VideoCropParams, VideoCroppingMechanism};
 
@@ -313,7 +314,7 @@ pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, sto
     entry
 }
 
-pub fn fix_video_crop(entry: &VideoCropEntry, params: &VideoCropFixParams, stop_flag: &Arc<AtomicBool>) -> Result<(), String> {
+pub fn fix_video_crop(video_path: &Path, params: &VideoCropFixParams, stop_flag: &Arc<AtomicBool>) -> Result<(), String> {
     if stop_flag.load(Ordering::Relaxed) {
         return Err("Operation cancelled".to_string());
     }
@@ -331,68 +332,65 @@ pub fn fix_video_crop(entry: &VideoCropEntry, params: &VideoCropFixParams, stop_
         return Err("Crop dimensions cannot be zero".to_string());
     }
 
-    let output_path = if params.overwrite_original {
-        entry.path.with_extension("tmp.mp4")
-    } else {
-        let stem = entry.path.file_stem().ok_or("Cannot get file stem")?;
-        let parent = entry.path.parent().ok_or("Cannot get parent directory")?;
-        let extension = entry.path.extension().and_then(|e| e.to_str()).unwrap_or("mp4");
-        parent.join(format!("{}_cropped.{}", stem.to_string_lossy(), extension))
+    let crop_type_suffix = match params.crop_mechanism {
+        VideoCroppingMechanism::BlackBars => "blackbars",
+        VideoCroppingMechanism::StaticContent => "staticcontent",
     };
+
+    let stem = video_path.file_stem().ok_or("Cannot get file stem")?;
+    let parent = video_path.parent().ok_or("Cannot get parent directory")?;
+    let extension = video_path.extension().and_then(|e| e.to_str()).unwrap_or("mp4");
+    let temp_output = parent.join(format!("{}_czkawka_cropped_{}.{}", stem.to_string_lossy(), crop_type_suffix, extension));
 
     debug!(
         "Cropping video: {} -> {}, crop: {}x{}+{}+{}",
-        entry.path.display(),
-        output_path.display(),
+        video_path.display(),
+        temp_output.display(),
         crop_width,
         crop_height,
         left,
         top
     );
 
-    let mut ffmpeg_cmd = Command::new("ffmpeg");
-    ffmpeg_cmd
+    let mut command = Command::new("ffmpeg");
+    command
+        .arg("-nostdin")
         .arg("-i")
-        .arg(&entry.path)
+        .arg(video_path)
         .arg("-vf")
         .arg(format!("crop={crop_width}:{crop_height}:{left}:{top}"));
 
-    // Add codec parameters if target codec is specified
     if let Some(target_codec) = params.target_codec {
-        ffmpeg_cmd.arg("-c:v").arg(target_codec.as_str());
+        command.arg("-c:v").arg(target_codec.as_str());
 
-        // Add quality parameter if specified
         if let Some(quality) = params.quality {
-            ffmpeg_cmd.arg("-crf").arg(quality.to_string());
+            command.arg("-crf").arg(quality.to_string());
         }
 
-        // Copy audio stream
-        ffmpeg_cmd.arg("-c:a").arg("copy");
+        command.arg("-c:a").arg("copy");
     } else {
-        // Copy both video and audio streams
-        ffmpeg_cmd.arg("-c").arg("copy");
+        command.arg("-c").arg("copy");
     }
 
-    ffmpeg_cmd
-        .arg("-y") // Overwrite output file
-        .arg(&output_path)
-        .stdin(Stdio::null())
-        .stdout(Stdio::null())
-        .stderr(Stdio::null());
+    command.arg("-y").arg(&temp_output);
 
-    let output = ffmpeg_cmd.output().map_err(|e| format!("Failed to execute ffmpeg: {e}"))?;
-
-    if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        return Err(format!("FFmpeg failed: {stderr}"));
+    match run_command_interruptible(command, stop_flag) {
+        None => {
+            let _ = std::fs::remove_file(&temp_output);
+            return Err(String::from("Video cropping was stopped by user"));
+        }
+        Some(Err(e)) => {
+            let _ = std::fs::remove_file(&temp_output);
+            return Err(format!("Failed to crop video file {}: {e}", video_path.display()));
+        }
+        Some(Ok(_)) => {}
     }
 
-    // If overwriting, move temp file to original
     if params.overwrite_original {
-        std::fs::rename(&output_path, &entry.path).map_err(|e| format!("Failed to replace original file: {e}"))?;
+        std::fs::rename(&temp_output, video_path).map_err(|e| format!("Failed to replace original file: {e}"))?;
     }
 
-    debug!("Successfully cropped video: {}", entry.path.display());
+    debug!("Successfully cropped video: {}", video_path.display());
     Ok(())
 }
 

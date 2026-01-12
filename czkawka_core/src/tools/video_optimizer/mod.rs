@@ -33,7 +33,7 @@ impl VideoCodec {
     pub const fn as_ffprobe_codec_name(&self) -> &str {
         match self {
             Self::H264 => "h264",
-            Self::H265 => "hevc",
+            Self::H265 => "h265",
             Self::Av1 => "av1",
             Self::Vp9 => "vp9",
         }
@@ -46,7 +46,7 @@ impl std::str::FromStr for VideoCodec {
     fn from_str(codec: &str) -> Result<Self, Self::Err> {
         match codec.to_lowercase().as_str() {
             "h264" | "libx264" => Ok(Self::H264),
-            "h265" | "hevc" | "libx265" => Ok(Self::H265),
+            "h265" | "libx265" => Ok(Self::H265),
             "av1" | "libaom-av1" => Ok(Self::Av1),
             "vp9" | "libvpx-vp9" => Ok(Self::Vp9),
             _ => Err(format!("Unknown codec: {codec}")),
@@ -58,6 +58,11 @@ impl std::str::FromStr for VideoCodec {
 pub enum VideoCroppingMechanism {
     BlackBars,
     StaticContent,
+}
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+pub enum VideoOptimizerMode {
+    VideoTranscode,
+    VideoCrop,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
@@ -82,7 +87,8 @@ pub struct VideoCropFixParams {
     pub overwrite_original: bool,
     pub target_codec: Option<VideoCodec>,
     pub quality: Option<u32>,
-    pub crop_rectangle: (u32, u32, u32, u32), // (left, top, right, bottom)
+    pub crop_rectangle: (u32, u32, u32, u32),
+    pub crop_mechanism: VideoCroppingMechanism,
 }
 
 #[derive(Debug, Default, Clone)]
@@ -110,7 +116,7 @@ pub struct VideoCropParams {
 impl VideoTranscodeParams {
     pub fn new() -> Self {
         Self {
-            excluded_codecs: vec!["hevc".to_string(), "av1".to_string(), "vp9".to_string()],
+            excluded_codecs: vec!["h265".to_string(), "av1".to_string(), "vp9".to_string()],
         }
     }
 }
@@ -142,8 +148,6 @@ pub struct VideoCropEntry {
     pub codec: String,
     pub width: u32,
     pub height: u32,
-    pub start_crop_frame: Option<u32>,
-    pub end_crop_frame: Option<u32>,
     pub new_image_dimensions: Option<(u32, u32, u32, u32)>,
 }
 
@@ -193,8 +197,6 @@ impl FileEntry {
             codec: String::new(),
             width: 0,
             height: 0,
-            start_crop_frame: None,
-            end_crop_frame: None,
             new_image_dimensions: None,
         }
     }
