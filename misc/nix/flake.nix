@@ -18,10 +18,10 @@
         pkgs = import nixpkgs {
           inherit system overlays;
         };
-        cargoToml = (builtins.fromTOML (builtins.readFile ./czkawka_core/Cargo.toml));
+        cargoToml = (builtins.fromTOML (builtins.readFile ../../czkawka_core/Cargo.toml));
       in
       {
-        packages = (import ./misc/nix/packages.nix { 
+        packages = (import ./packages.nix { 
           inherit self pkgs crane;
           msrvRust = pkgs.rust-bin.stable.${cargoToml.package.rust-version}.minimal;
           buildInputs = with pkgs; [
