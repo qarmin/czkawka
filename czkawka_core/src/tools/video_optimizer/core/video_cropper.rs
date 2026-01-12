@@ -410,6 +410,8 @@ pub fn fix_video_crop(video_path: &Path, params: &VideoCropFixParams, stop_flag:
 
     command.arg("-y").arg(&temp_output);
 
+    println!("Running command: {:?}", command);
+
     match run_command_interruptible(command, stop_flag) {
         None => {
             let _ = std::fs::remove_file(&temp_output);
