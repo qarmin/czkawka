@@ -3,6 +3,8 @@ use std::path::Path;
 use ffprobe::ffprobe;
 use serde::{Deserialize, Serialize};
 
+use crate::common::consts::VIDEO_RESOLUTION_LIMIT;
+
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct VideoMetadata {
     pub fps: Option<f64>,
@@ -37,11 +39,17 @@ impl VideoMetadata {
             if let Some(w) = stream.width
                 && w >= 0
             {
+                if w > VIDEO_RESOLUTION_LIMIT as i64 {
+                    return Err(format!("Video width {} exceeds the limit of {}", w, VIDEO_RESOLUTION_LIMIT));
+                }
                 metadata.width = Some(w as u32);
             }
             if let Some(h) = stream.height
                 && h >= 0
             {
+                if h > VIDEO_RESOLUTION_LIMIT as i64 {
+                    return Err(format!("Video height {} exceeds the limit of {}", h, VIDEO_RESOLUTION_LIMIT));
+                }
                 metadata.height = Some(h as u32);
             }
 

@@ -147,10 +147,9 @@ pub enum IntDataSimilarVideos {
     BitratePart2,
     Duration,
     Fps,
-    PixelsPart1,
-    PixelsPart2,
+    Dimensions,
 }
-pub const MAX_INT_DATA_SIMILAR_VIDEOS: usize = IntDataSimilarVideos::PixelsPart2 as usize + 1;
+pub const MAX_INT_DATA_SIMILAR_VIDEOS: usize = IntDataSimilarVideos::Dimensions as usize + 1;
 
 #[repr(u8)]
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
@@ -293,10 +292,8 @@ pub enum IntDataVideoOptimizer {
     ModificationDatePart2,
     SizePart1,
     SizePart2,
-    DimensionsPart1,
-    DimensionsPart2,
-    NewDimensionsPart1,
-    NewDimensionsPart2,
+    Dimensions,
+    NewDimensions,
     RectLeft,
     RectTop,
     RectRight,
@@ -376,7 +373,7 @@ impl ActiveTab {
                 StrDataSimilarVideos::Bitrate => SortIdx::IntIdxPair(IntDataSimilarVideos::BitratePart1 as i32, IntDataSimilarVideos::BitratePart2 as i32),
                 StrDataSimilarVideos::Duration => SortIdx::IntIdx(IntDataSimilarVideos::Duration as i32),
                 StrDataSimilarVideos::Fps => SortIdx::IntIdx(IntDataSimilarVideos::Fps as i32),
-                StrDataSimilarVideos::Dimensions => SortIdx::IntIdxPair(IntDataSimilarVideos::PixelsPart1 as i32, IntDataSimilarVideos::PixelsPart2 as i32),
+                StrDataSimilarVideos::Dimensions => SortIdx::IntIdx(IntDataSimilarVideos::Dimensions as i32),
             },
             Self::SimilarMusic => match StrDataSimilarMusic::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for SimilarMusic")) {
                 StrDataSimilarMusic::Name
@@ -422,8 +419,8 @@ impl ActiveTab {
                     SortIdx::IntIdxPair(IntDataVideoOptimizer::ModificationDatePart1 as i32, IntDataVideoOptimizer::ModificationDatePart2 as i32)
                 }
                 StrDataVideoOptimizer::Size => SortIdx::IntIdxPair(IntDataVideoOptimizer::SizePart1 as i32, IntDataVideoOptimizer::SizePart2 as i32),
-                StrDataVideoOptimizer::Dimensions => SortIdx::IntIdxPair(IntDataVideoOptimizer::DimensionsPart1 as i32, IntDataVideoOptimizer::DimensionsPart2 as i32),
-                StrDataVideoOptimizer::NewDimensions => SortIdx::IntIdxPair(IntDataVideoOptimizer::NewDimensionsPart1 as i32, IntDataVideoOptimizer::NewDimensionsPart2 as i32),
+                StrDataVideoOptimizer::Dimensions => SortIdx::IntIdx(IntDataVideoOptimizer::Dimensions as i32),
+                StrDataVideoOptimizer::NewDimensions => SortIdx::IntIdx(IntDataVideoOptimizer::NewDimensions as i32),
             },
             Self::Settings | Self::About => panic!("Button should be disabled"),
         }

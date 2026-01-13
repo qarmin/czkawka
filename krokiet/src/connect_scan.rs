@@ -715,8 +715,7 @@ fn prepare_data_model_similar_videos(fe: &VideosEntry) -> (ModelRc<SharedString>
     let bitrate_split = split_u64_into_i32s(fe.bitrate.unwrap_or(0));
     let duration_i32 = fe.duration.map_or(0, |d| (d * 100.0) as i32);
     let fps_i32 = fe.fps.map_or(0, |f| (f * 100.0) as i32);
-    let pixels_int = fe.width.and_then(|w| fe.height.map(|h| w as u64 * h as u64)).unwrap_or_default();
-    let pixels_split = split_u64_into_i32s(pixels_int);
+    let dimension = fe.width.and_then(|w| fe.height.map(|h| w as i32 * h as i32)).unwrap_or_default();
     let data_model_int_arr: [i32; MAX_INT_DATA_SIMILAR_VIDEOS] = [
         modification_split.0,
         modification_split.1,
@@ -726,8 +725,7 @@ fn prepare_data_model_similar_videos(fe: &VideosEntry) -> (ModelRc<SharedString>
         bitrate_split.1,
         duration_i32,
         fps_i32,
-        pixels_split.0,
-        pixels_split.1,
+        dimension,
     ];
     let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
@@ -1310,21 +1308,8 @@ fn prepare_data_model_video_optimizer_transcode(fe: &VideoTranscodeEntry) -> (Mo
     let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.modified_date);
     let size_split = split_u64_into_i32s(fe.size);
-    let dimension_split = split_u64_into_i32s(fe.width as u64 * fe.height as u64);
-    let data_model_int_arr: [i32; MAX_INT_DATA_VIDEO_OPTIMIZER] = [
-        modification_split.0,
-        modification_split.1,
-        size_split.0,
-        size_split.1,
-        dimension_split.0,
-        dimension_split.1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-    ];
+    let dimension = fe.width as i32 * fe.height as i32; // Video dimension, limited to 16K vs 16K, so no overflow
+    let data_model_int_arr: [i32; MAX_INT_DATA_VIDEO_OPTIMIZER] = [modification_split.0, modification_split.1, size_split.0, size_split.1, dimension, 0, 0, 0, 0, 0];
     let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 }
@@ -1365,18 +1350,16 @@ fn prepare_data_model_video_optimizer_crop(fe: &VideoCropEntry) -> (ModelRc<Shar
     let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.modified_date);
     let size_split = split_u64_into_i32s(fe.size);
-    let dimension_split = split_u64_into_i32s(fe.width as u64 * fe.height as u64);
-    dbg!(&width, &height);
-    let new_dimension_split = split_u64_into_i32s(width as u64 * height as u64);
+    let dimension = fe.width as i32 * fe.height as i32;
+    (&width, &height);
+    let new_dimension = width * height;
     let data_model_int_arr: [i32; MAX_INT_DATA_VIDEO_OPTIMIZER] = [
         modification_split.0,
         modification_split.1,
         size_split.0,
         size_split.1,
-        dimension_split.0,
-        dimension_split.1,
-        new_dimension_split.0,
-        new_dimension_split.1,
+        dimension,
+        new_dimension,
         left as i32,
         top as i32,
         right as i32,

@@ -6,6 +6,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use image::RgbImage;
 use log::error;
 
+use crate::common::consts::VIDEO_RESOLUTION_LIMIT;
 use crate::common::process_utils::run_command_interruptible;
 use crate::common::video_metadata::VideoMetadata;
 use crate::tools::video_optimizer::{VideoCropEntry, VideoCropFixParams, VideoCropParams, VideoCroppingMechanism};
@@ -53,6 +54,16 @@ impl Rectangle {
             self.bottom,
             self.left,
             self.right
+        );
+    }
+    fn validate_image_size(&self, width: u32, height: u32) {
+        assert!(
+            self.right <= width && self.bottom <= height,
+            "Rectangle exceeds image dimensions: image_width={}, image_height={}, rectangle_right={}, rectangle_bottom={}. Expected: right <= image_width && bottom <= image_height",
+            width,
+            height,
+            self.right,
+            self.bottom
         );
     }
 
@@ -302,14 +313,24 @@ pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, sto
         entry.error = Some("Failed to extract first frame".to_string());
         return Some(entry);
     };
+
     let (width, height) = first_frame.dimensions();
     entry.height = height;
     entry.width = width;
+
+    if entry.width > VIDEO_RESOLUTION_LIMIT || entry.height > VIDEO_RESOLUTION_LIMIT {
+        entry.error = Some(format!(
+            "Image dimensions are too large for processing: {}x{}. Limit is {}x{}",
+            entry.width, entry.height, VIDEO_RESOLUTION_LIMIT, VIDEO_RESOLUTION_LIMIT
+        ));
+        return Some(entry);
+    }
 
     match params.crop_detect {
         VideoCroppingMechanism::BlackBars => match analyze_black_bars(duration as f32, &get_frame, stop_flag, &first_frame) {
             Some(Ok(Some(rectangle))) => {
                 // debug!("________________________Detected black bars for video {}: left={}, top={}, right={}, bottom={}", entry.path.display(), rectangle.left, rectangle.top, rectangle.right, rectangle.bottom);
+                rectangle.validate_image_size(width, height);
                 entry.new_image_dimensions = Some((rectangle.left, rectangle.top, rectangle.right, rectangle.bottom));
             }
             Some(Ok(None)) => { // No black bars
@@ -332,6 +353,7 @@ pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, sto
                 //     rectangle.right,
                 //     rectangle.bottom
                 // );
+                rectangle.validate_image_size(width, height);
                 entry.new_image_dimensions = Some((rectangle.left, rectangle.top, rectangle.right, rectangle.bottom));
             }
             Some(Ok(None)) => {

@@ -1,5 +1,4 @@
 use std::collections::BTreeMap;
-use std::io::{Read, Seek};
 use std::path::Path;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
@@ -7,7 +6,6 @@ use std::{fs, mem, panic};
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
-use little_exif::exif_tag::ExifTag;
 use little_exif::filetype::FileExtension;
 use little_exif::ifd::ExifTagGroup;
 use little_exif::metadata::Metadata;
@@ -258,7 +256,7 @@ pub fn clean_exif_tags(file_path: &str, tags_to_remove: &[(u16, String)], overri
         let file_path = Path::new(file_path);
         let mut file_data = fs::read(file_path).map_err(|e| e.to_string())?;
         let mut cursor = std::io::Cursor::new(&file_data);
-        let ext = auto_detect_file_extension(&mut cursor).ok_or_else(|| "Failed to detect file type".to_string())?;
+        let ext = FileExtension::auto_detect(&mut cursor).ok_or_else(|| "Failed to detect file type".to_string())?;
         let metadata = Metadata::new_from_vec(&file_data, ext).map_err(|e| format!("Failed to read EXIF: {e}"))?;
 
         let mut new_metadata = metadata;
@@ -269,11 +267,7 @@ pub fn clean_exif_tags(file_path: &str, tags_to_remove: &[(u16, String)], overri
                 continue;
             };
 
-            // TODO https://github.com/TechnikTobi/little_exif/pull/92
-            let Ok(tag) = ExifTag::from_u16(*tag_u16, &tag_group) else {
-                continue;
-            };
-            new_metadata.remove_tag(tag);
+            new_metadata.remove_tag_by_hex_group(*tag_u16, tag_group);
             tags_removed += 1;
         }
 
@@ -297,7 +291,7 @@ fn extract_exif_tags(path: &Path) -> Result<Vec<(String, u16, String)>, String> 
         let file_path = Path::new(path);
         let data = fs::read(file_path).map_err(|e| e.to_string())?;
         let mut cursor = std::io::Cursor::new(&data);
-        let ext = auto_detect_file_extension(&mut cursor).ok_or_else(|| "Failed to detect file type".to_string())?;
+        let ext = FileExtension::auto_detect(&mut cursor).ok_or_else(|| "Failed to detect file type".to_string())?;
         let metadata = Metadata::new_from_vec(&data, ext).map_err(|e| format!("Failed to read EXIF: {e}"))?;
 
         let mut tags = Vec::new();
@@ -317,67 +311,6 @@ fn extract_exif_tags(path: &Path) -> Result<Vec<(String, u16, String)>, String> 
         Ok(tags)
     })
     .map_err(|e| format!("Panic occurred while reading \"{}\" - EXIF: {e:?}", path.to_string_lossy()))?
-}
-
-pub(crate) fn auto_detect_file_extension<T: Seek + Read>(cursor: &mut T) -> Option<FileExtension> {
-    let mut buffer = [0; 32];
-    let Ok(n) = cursor.read(&mut buffer) else {
-        return None;
-    };
-    if n < 4 {
-        return None;
-    }
-
-    match buffer {
-            // PNG
-            [0x89, 0x50, 0x4E, 0x47, ..] => {
-                Some(FileExtension::PNG { as_zTXt_chunk: true })
-            }
-
-            // JP(E)G
-            [0xFF, 0xD8, ..] => {
-                Some(FileExtension::JPEG)
-            }
-
-            // TIFF, little endian
-            [0x49, 0x49, 0x2A, 0x00, ..] |
-            [0x4D, 0x4D, 0x00, 0x2A, ..] => {
-                Some(FileExtension::TIFF)
-            }
-
-            // WebP
-            [0x52, 0x49, 0x46, 0x46, _, _, _, _, 0x57, 0x45, 0x42, 0x50, ..] =>
-                {
-                    Some(FileExtension::WEBP)
-                }
-
-            // A "naked" JXL codestream that can't hold metadata
-            // See: https://www.loc.gov/preservation/digital/formats/fdd/fdd000538.shtml
-            [0xFF, 0x0A, ..] => {
-                Some(FileExtension::NAKED_JXL)
-            }
-
-            // JXL (in ISO_BMFF container)
-            // In this case, the JXL file starts with the JXL signature box
-            // 4 bytes for length       J     X     L  space more stuff
-            [0x00, 0x00, 0x00, 0x0C, 0x4A, 0x58, 0x4C, 0x20, 0x0D, 0x0A, 0x87, 0x0A, ..] =>
-                {
-                    Some(FileExtension::JXL)
-                }
-
-            // HEIC/HEIF/AVIF
-            // length       f     t     y     p
-            [_, _, _, _, 0x66, 0x74, 0x79, 0x70, 0x68, 0x65, 0x69, 0x63 | 0x66, ..] |
-[_, _, _, _, 0x66, 0x74, 0x79, 0x70, 0x61, 0x76, 0x69, 0x66, ..]  // avif
-            =>
-                {
-                    Some(FileExtension::HEIF)
-                }
-
-            _ => {
-                None
-            }
-        }
 }
 
 pub fn file_extension_to_string(extension: FileExtension) -> &'static str {

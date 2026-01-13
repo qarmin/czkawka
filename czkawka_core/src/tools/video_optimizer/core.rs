@@ -1,4 +1,5 @@
 use std::collections::BTreeMap;
+use std::mem;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
@@ -291,19 +292,28 @@ impl VideoOptimizer {
                     unreachable!("VideoTranscode mode should have VideoTranscode fix_params(caller is responsible for that)");
                 };
 
-                self.video_transcode_entries.par_iter_mut().for_each(|entry| {
-                    // TODO - here is missing while_some to skip processing if stop received
-                    if check_if_stop_received(stop_flag) {
-                        return;
-                    }
-                    // TODO not supported arguments
-                    match process_video(stop_flag, &entry.path.to_string_lossy(), entry.size, video_transcode_params) {
-                        Ok(_new_size) => {}
-                        Err(e) => {
-                            entry.error = Some(e);
+                // TODO this should use same mechanism as deleting files - this currently do not save progress to CLI
+                self.video_transcode_entries = mem::take(&mut self
+                    .video_transcode_entries)
+                    .into_par_iter()
+                    .map(|mut entry| {
+                        if check_if_stop_received(stop_flag) {
+                            return None;
                         }
-                    }
-                });
+
+                        match process_video(stop_flag, &entry.path.to_string_lossy(), entry.size, video_transcode_params) {
+                            Ok(_new_size) => {}
+                            Err(e) => {
+                                entry.error = Some(e); // TODO
+                            }
+                        }
+
+                        Some(entry)
+                    })
+                    .while_some()
+                    .collect();
+
+                // TODO save errors/warnings to text messages
 
                 let successful_files = self.video_transcode_entries.iter().filter(|e| e.error.is_none() && !e.codec.is_empty()).count();
                 let failed_files = self.video_transcode_entries.iter().filter(|e| e.error.is_some()).count();

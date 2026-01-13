@@ -1,5 +1,6 @@
 pub const DEFAULT_THREAD_SIZE: usize = 8 * 1024 * 1024; // 8 MB
 pub const DEFAULT_WORKER_THREAD_SIZE: usize = 4 * 1024 * 1024; // 4 MB
+pub const VIDEO_RESOLUTION_LIMIT: u32 = 16 * 1024; // Not processing is a problem, but overflows, when width * height overflows u64 in gui, so with such limit can i32 can be used safely
 
 pub const RAW_IMAGE_EXTENSIONS: &[&str] = &[
     "ari", "cr3", "cr2", "crw", "erf", "raf", "3fr", "kdc", "dcs", "dcr", "iiq", "mos", "mef", "mrw", "nef", "nrw", "orf", "rw2", "pef", "srw", "arw", "srf", "sr2",
@@ -40,6 +41,5 @@ pub const VIDEO_FILES_EXTENSIONS: &[&str] = &[
     "amv", "drc", "gifv", "smk", "bik", // Older / games
 ];
 
-// "webp","heic", "heif" are all buggy as hell - https://github.com/TechnikTobi/little_exif/issues/77
 // "dng" - is theoretically a tiff file, but little_exif have problem with saving metadata to it
-pub const EXIF_FILES_EXTENSIONS: &[&str] = &["jpg", "jpeg", "jfif", "png", "tiff", "tif", "avif", "jxl"];
+pub const EXIF_FILES_EXTENSIONS: &[&str] = &["jpg", "jpeg", "jfif", "png", "tiff", "tif", "avif", "jxl", "webp", "heic", "heif"];
