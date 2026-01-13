@@ -1318,7 +1318,7 @@ fn prepare_data_model_video_optimizer_crop(fe: &VideoCropEntry) -> (ModelRc<Shar
     let (directory, file) = split_path(&fe.path);
     let (left, top, right, bottom) = fe.new_image_dimensions.expect("new_image_dimensions should be Some in crop mode");
 
-    let (width, height, dim_string) = if left > right || top > bottom {
+    let (_width, _height, pixels_diff, dim_string) = if left > right || top > bottom {
         error!(
             "ERROR: Invalid rectangle coordinates in cache for file '{}': left={}, top={}, right={}, bottom={}. Skipping dimensions display.",
             fe.path.display(),
@@ -1327,13 +1327,16 @@ fn prepare_data_model_video_optimizer_crop(fe: &VideoCropEntry) -> (ModelRc<Shar
             right,
             bottom
         );
-        (-1, -1, "-".to_string())
+        // TODO - this should never happens
+        (-1, -1, 0, "-".to_string())
     } else {
         let new_width = (right - left) as i32;
         let new_height = (bottom - top) as i32;
+        let pixels_diff = fe.width * fe.height - new_width as u32 * new_height as u32;
         (
             new_width,
             new_height,
+            pixels_diff,
             format!("{}x{} ({}x{})", new_width, new_height, fe.width as i32 - new_width, fe.height as i32 - new_height),
         )
     };
@@ -1351,15 +1354,13 @@ fn prepare_data_model_video_optimizer_crop(fe: &VideoCropEntry) -> (ModelRc<Shar
     let modification_split = split_u64_into_i32s(fe.modified_date);
     let size_split = split_u64_into_i32s(fe.size);
     let dimension = fe.width as i32 * fe.height as i32;
-    (&width, &height);
-    let new_dimension = width * height;
     let data_model_int_arr: [i32; MAX_INT_DATA_VIDEO_OPTIMIZER] = [
         modification_split.0,
         modification_split.1,
         size_split.0,
         size_split.1,
         dimension,
-        new_dimension,
+        pixels_diff as i32,
         left as i32,
         top as i32,
         right as i32,

@@ -185,7 +185,7 @@ impl ExifRemover {
                     }
                     Ok(_) => {}
                     Err(e) => {
-                        file_entry.error = Some(e);
+                        file_entry.error = Some(format!("Failed to extract Exif data for file \"{}\": {}", file_entry.path.to_string_lossy(), e));
                     }
                 }
 
@@ -242,7 +242,7 @@ impl ExifRemover {
             match clean_exif_tags(&entry.path.to_string_lossy(), &exif_data_to_remove, fix_params.override_file) {
                 Ok(_number_removed_tags) => {}
                 Err(e) => {
-                    entry.error = Some(e);
+                    entry.error = Some(format!("Failed to clean EXIF tags for file \"{}\": {}", entry.path.to_string_lossy(), e));
                 }
             }
         });

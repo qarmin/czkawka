@@ -15,6 +15,7 @@ const BLACK_PIXEL_THRESHOLD: u8 = 20;
 const BLACK_BAR_MIN_PERCENTAGE: f32 = 0.9;
 const MIN_SAMPLE_INTERVAL: f32 = 0.25;
 const MAX_SAMPLES: usize = 60;
+const MIN_SAMPLES: usize = 3;
 const MIN_CROP_SIZE: u32 = 5;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -172,8 +173,7 @@ where
         return Some(Ok(None));
     };
 
-    let num_samples = (duration / MIN_SAMPLE_INTERVAL).min(MAX_SAMPLES as f32).floor() as usize;
-    let num_samples = num_samples.max(1);
+    let num_samples = ((duration / MIN_SAMPLE_INTERVAL).floor() as usize).clamp(MIN_SAMPLES, MAX_SAMPLES);
 
     for i in 1..num_samples {
         if stop_flag.load(Ordering::Relaxed) {
@@ -228,8 +228,7 @@ where
     // Invalid rectangle, but is later changed and properly validated
     let mut rectangle = Rectangle::new_without_validation(first_frame.height(), 0, first_frame.width(), 0);
 
-    let num_samples = (duration / MIN_SAMPLE_INTERVAL).min(MAX_SAMPLES as f32).floor() as usize;
-    let num_samples = num_samples.max(1);
+    let num_samples = ((duration / MIN_SAMPLE_INTERVAL).floor() as usize).clamp(MIN_SAMPLES, MAX_SAMPLES);
 
     for i in 1..num_samples {
         if stop_flag.load(Ordering::Relaxed) {
@@ -265,13 +264,13 @@ fn extract_video_metadata_for_crop(entry: &mut VideoCropEntry) -> Result<(u32, u
     let metadata = match VideoMetadata::from_path(&entry.path) {
         Ok(metadata) => metadata,
         Err(e) => {
-            entry.error = Some(e);
+            entry.error = Some(format!("Failed to get video metadata for file \"{}\": {}", entry.path.to_string_lossy(), e));
             return Err(());
         }
     };
 
     let Some(current_codec) = metadata.codec.clone() else {
-        entry.error = Some("Failed to get video codec".to_string());
+        entry.error = Some(format!("Failed to get video codec from metadata for file \"{}\"", entry.path.to_string_lossy()));
         return Err(());
     };
 
@@ -284,13 +283,13 @@ fn extract_video_metadata_for_crop(entry: &mut VideoCropEntry) -> Result<(u32, u
             (width, height)
         }
         _ => {
-            entry.error = Some("Failed to get video dimensions".to_string());
+            entry.error = Some(format!("Failed to get video dimensions from metadata for file \"{}\"", entry.path.to_string_lossy()));
             return Err(());
         }
     };
 
     let Some(duration) = metadata.duration else {
-        entry.error = Some("Failed to get video duration".to_string());
+        entry.error = Some(format!("Failed to get video duration from metadata, for file \"{}\"", entry.path.to_string_lossy()));
         return Err(());
     };
 
@@ -310,7 +309,7 @@ pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, sto
     // TODO - metadata are broken? Not proper?
     // Metadata shows different dimensions than actual frames extracted - quite strange, probably rotated data -
     let Some(first_frame) = get_frame(0.0) else {
-        entry.error = Some("Failed to extract first frame".to_string());
+        entry.error = Some(format!("Failed to extract first frame for video \"{}\"", entry.path.to_string_lossy()));
         return Some(entry);
     };
 
@@ -320,8 +319,12 @@ pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, sto
 
     if entry.width > VIDEO_RESOLUTION_LIMIT || entry.height > VIDEO_RESOLUTION_LIMIT {
         entry.error = Some(format!(
-            "Image dimensions are too large for processing: {}x{}. Limit is {}x{}",
-            entry.width, entry.height, VIDEO_RESOLUTION_LIMIT, VIDEO_RESOLUTION_LIMIT
+            "Image dimensions for video \"{}\" exceed the limit: {}x{} > {}x{}",
+            entry.path.to_string_lossy(),
+            entry.width,
+            entry.height,
+            VIDEO_RESOLUTION_LIMIT,
+            VIDEO_RESOLUTION_LIMIT
         ));
         return Some(entry);
     }

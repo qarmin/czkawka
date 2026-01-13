@@ -293,8 +293,7 @@ impl VideoOptimizer {
                 };
 
                 // TODO this should use same mechanism as deleting files - this currently do not save progress to CLI
-                self.video_transcode_entries = mem::take(&mut self
-                    .video_transcode_entries)
+                self.video_transcode_entries = mem::take(&mut self.video_transcode_entries)
                     .into_par_iter()
                     .map(|mut entry| {
                         if check_if_stop_received(stop_flag) {
@@ -304,7 +303,7 @@ impl VideoOptimizer {
                         match process_video(stop_flag, &entry.path.to_string_lossy(), entry.size, video_transcode_params) {
                             Ok(_new_size) => {}
                             Err(e) => {
-                                entry.error = Some(e); // TODO
+                                entry.error = Some(format!("Failed to optimize video \"{}\": {}", entry.path.to_string_lossy(), e)); // TODO
                             }
                         }
 

@@ -293,7 +293,7 @@ pub enum IntDataVideoOptimizer {
     SizePart1,
     SizePart2,
     Dimensions,
-    NewDimensions,
+    DiffInPixels,
     RectLeft,
     RectTop,
     RectRight,
@@ -420,7 +420,7 @@ impl ActiveTab {
                 }
                 StrDataVideoOptimizer::Size => SortIdx::IntIdxPair(IntDataVideoOptimizer::SizePart1 as i32, IntDataVideoOptimizer::SizePart2 as i32),
                 StrDataVideoOptimizer::Dimensions => SortIdx::IntIdx(IntDataVideoOptimizer::Dimensions as i32),
-                StrDataVideoOptimizer::NewDimensions => SortIdx::IntIdx(IntDataVideoOptimizer::NewDimensions as i32),
+                StrDataVideoOptimizer::NewDimensions => SortIdx::IntIdx(IntDataVideoOptimizer::DiffInPixels as i32),
             },
             Self::Settings | Self::About => panic!("Button should be disabled"),
         }

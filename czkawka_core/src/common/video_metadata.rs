@@ -40,7 +40,7 @@ impl VideoMetadata {
                 && w >= 0
             {
                 if w > VIDEO_RESOLUTION_LIMIT as i64 {
-                    return Err(format!("Video width {} exceeds the limit of {}", w, VIDEO_RESOLUTION_LIMIT));
+                    return Err(format!("Video width {w} exceeds the limit of {VIDEO_RESOLUTION_LIMIT}"));
                 }
                 metadata.width = Some(w as u32);
             }
@@ -48,7 +48,7 @@ impl VideoMetadata {
                 && h >= 0
             {
                 if h > VIDEO_RESOLUTION_LIMIT as i64 {
-                    return Err(format!("Video height {} exceeds the limit of {}", h, VIDEO_RESOLUTION_LIMIT));
+                    return Err(format!("Video height {h} exceeds the limit of {VIDEO_RESOLUTION_LIMIT}"));
                 }
                 metadata.height = Some(h as u32);
             }

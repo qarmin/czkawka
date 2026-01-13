@@ -4,25 +4,21 @@ use std::process::Command;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
-use log::debug;
-
 use crate::common::process_utils::run_command_interruptible;
 use crate::common::video_metadata::VideoMetadata;
 use crate::tools::video_optimizer::{VideoTranscodeEntry, VideoTranscodeFixParams};
 
 pub fn check_video(mut entry: VideoTranscodeEntry) -> VideoTranscodeEntry {
-    debug!("Checking video: {}", entry.path.display());
-
     let metadata = match VideoMetadata::from_path(&entry.path) {
         Ok(metadata) => metadata,
         Err(e) => {
-            entry.error = Some(e);
+            entry.error = Some(format!("Failed to get video metadata for file \"{}\": {}", entry.path.to_string_lossy(), e));
             return entry;
         }
     };
 
     let Some(current_codec) = metadata.codec.clone() else {
-        entry.error = Some("Failed to get video codec".to_string());
+        entry.error = Some(format!("Failed to get video codec for file \"{}\"", entry.path.to_string_lossy()));
         return entry;
     };
 
@@ -33,7 +29,7 @@ pub fn check_video(mut entry: VideoTranscodeEntry) -> VideoTranscodeEntry {
             entry.height = height;
         }
         _ => {
-            entry.error = Some("Failed to get video dimensions".to_string());
+            entry.error = Some(format!("Failed to get video dimensions for file \"{}\"", entry.path.to_string_lossy()));
             return entry;
         }
     }
