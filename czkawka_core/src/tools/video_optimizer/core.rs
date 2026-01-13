@@ -94,7 +94,7 @@ impl VideoOptimizer {
 
         let all_files: Vec<VideoTranscodeEntry> = std::mem::take(&mut self.video_transcode_entries);
 
-        let (records_already_cached, non_cached_files_to_check) = self.load_video_transcode_cache(all_files);
+        let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_video_transcode_cache(all_files);
 
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
@@ -124,7 +124,7 @@ impl VideoOptimizer {
 
         progress_handler.join_thread();
 
-        self.save_video_transcode_cache(&entries);
+        self.save_video_transcode_cache(&entries, loaded_hash_map);
 
         entries.retain(|e| e.error.is_none() && !params.excluded_codecs.contains(&e.codec));
 
@@ -145,7 +145,7 @@ impl VideoOptimizer {
 
         let all_files: Vec<VideoCropEntry> = std::mem::take(&mut self.video_crop_entries);
 
-        let (records_already_cached, non_cached_files_to_check) = self.load_video_crop_cache(all_files, params.crop_detect);
+        let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_video_crop_cache(all_files, params.crop_detect);
 
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
@@ -175,7 +175,7 @@ impl VideoOptimizer {
 
         progress_handler.join_thread();
 
-        self.save_video_crop_cache(&entries, params.crop_detect);
+        self.save_video_crop_cache(&entries, params.crop_detect, loaded_hash_map);
 
         entries.retain(|e| e.error.is_none() && e.new_image_dimensions.is_some());
 
@@ -185,7 +185,8 @@ impl VideoOptimizer {
     }
 
     #[fun_time(message = "load_video_transcode_cache", level = "debug")]
-    fn load_video_transcode_cache(&mut self, all_files: Vec<VideoTranscodeEntry>) -> (BTreeMap<String, VideoTranscodeEntry>, BTreeMap<String, VideoTranscodeEntry>) {
+    fn load_video_transcode_cache(&mut self, all_files: Vec<VideoTranscodeEntry>) -> (BTreeMap<String, VideoTranscodeEntry>, BTreeMap<String, VideoTranscodeEntry>, BTreeMap<String, VideoTranscodeEntry>) {
+        let loaded_hash_map;
         let mut records_already_cached: BTreeMap<String, VideoTranscodeEntry> = Default::default();
         let mut non_cached_files_to_check: BTreeMap<String, VideoTranscodeEntry> = Default::default();
 
@@ -204,7 +205,8 @@ impl VideoOptimizer {
             self.get_cd_mut().text_messages.warnings.extend(messages.warnings);
 
             if let Some(loaded_items) = loaded_items {
-                extract_loaded_cache(&loaded_items, preliminary_files, &mut records_already_cached, &mut non_cached_files_to_check);
+                loaded_hash_map = loaded_items;
+                extract_loaded_cache(&loaded_hash_map, preliminary_files, &mut records_already_cached, &mut non_cached_files_to_check);
 
                 info!(
                     "load_video_transcode_cache - {}({}) non cached, {}({}) already cached",
@@ -214,17 +216,20 @@ impl VideoOptimizer {
                     format_size(records_already_cached.values().map(|e| e.size).sum::<u64>(), BINARY),
                 );
             } else {
+                loaded_hash_map = Default::default();
                 non_cached_files_to_check = preliminary_files;
             }
         } else {
+            loaded_hash_map = Default::default();
             non_cached_files_to_check = preliminary_files;
         }
 
-        (records_already_cached, non_cached_files_to_check)
+        (loaded_hash_map, records_already_cached, non_cached_files_to_check)
     }
 
     #[fun_time(message = "load_video_crop_cache", level = "debug")]
-    fn load_video_crop_cache(&mut self, all_files: Vec<VideoCropEntry>, params: VideoCroppingMechanism) -> (BTreeMap<String, VideoCropEntry>, BTreeMap<String, VideoCropEntry>) {
+    fn load_video_crop_cache(&mut self, all_files: Vec<VideoCropEntry>, params: VideoCroppingMechanism) -> (BTreeMap<String, VideoCropEntry>, BTreeMap<String, VideoCropEntry>, BTreeMap<String, VideoCropEntry>) {
+        let loaded_hash_map;
         let mut records_already_cached: BTreeMap<String, VideoCropEntry> = Default::default();
         let mut non_cached_files_to_check: BTreeMap<String, VideoCropEntry> = Default::default();
 
@@ -243,7 +248,8 @@ impl VideoOptimizer {
             self.get_cd_mut().text_messages.warnings.extend(messages.warnings);
 
             if let Some(loaded_items) = loaded_items {
-                extract_loaded_cache(&loaded_items, preliminary_files, &mut records_already_cached, &mut non_cached_files_to_check);
+                loaded_hash_map = loaded_items;
+                extract_loaded_cache(&loaded_hash_map, preliminary_files, &mut records_already_cached, &mut non_cached_files_to_check);
 
                 info!(
                     "load_video_crop_cache - {}({}) non cached, {}({}) already cached",
@@ -253,30 +259,42 @@ impl VideoOptimizer {
                     format_size(records_already_cached.values().map(|e| e.size).sum::<u64>(), BINARY),
                 );
             } else {
+                loaded_hash_map = Default::default();
                 non_cached_files_to_check = preliminary_files;
             }
         } else {
+            loaded_hash_map = Default::default();
             non_cached_files_to_check = preliminary_files;
         }
 
-        (records_already_cached, non_cached_files_to_check)
+        (loaded_hash_map, records_already_cached, non_cached_files_to_check)
     }
 
     #[fun_time(message = "save_video_transcode_cache", level = "debug")]
-    fn save_video_transcode_cache(&mut self, entries: &[VideoTranscodeEntry]) {
+    fn save_video_transcode_cache(&mut self, entries: &[VideoTranscodeEntry], loaded_hash_map: BTreeMap<String, VideoTranscodeEntry>) {
         if self.common_data.use_cache {
-            let entries_map: BTreeMap<String, VideoTranscodeEntry> = entries.iter().map(|entry| (entry.path.to_string_lossy().to_string(), entry.clone())).collect();
-            let messages = save_cache_to_file_generalized(&get_video_transcode_cache_file(), &entries_map, self.get_save_also_as_json(), 0);
+            // Must save all results to file, old loaded from file with all currently counted results
+            let mut all_results: BTreeMap<String, VideoTranscodeEntry> = loaded_hash_map;
+            for entry in entries {
+                all_results.insert(entry.path.to_string_lossy().to_string(), entry.clone());
+            }
+
+            let messages = save_cache_to_file_generalized(&get_video_transcode_cache_file(), &all_results, self.get_save_also_as_json(), 0);
             self.get_cd_mut().text_messages.messages.extend(messages.messages);
             self.get_cd_mut().text_messages.warnings.extend(messages.warnings);
         }
     }
 
     #[fun_time(message = "save_video_crop_cache", level = "debug")]
-    fn save_video_crop_cache(&mut self, entries: &[VideoCropEntry], video_cropping_mechanism: VideoCroppingMechanism) {
+    fn save_video_crop_cache(&mut self, entries: &[VideoCropEntry], video_cropping_mechanism: VideoCroppingMechanism, loaded_hash_map: BTreeMap<String, VideoCropEntry>) {
         if self.common_data.use_cache {
-            let entries_map: BTreeMap<String, VideoCropEntry> = entries.iter().map(|entry| (entry.path.to_string_lossy().to_string(), entry.clone())).collect();
-            let messages = save_cache_to_file_generalized(&get_video_crop_cache_file(video_cropping_mechanism), &entries_map, self.get_save_also_as_json(), 0);
+            // Must save all results to file, old loaded from file with all currently counted results
+            let mut all_results: BTreeMap<String, VideoCropEntry> = loaded_hash_map;
+            for entry in entries {
+                all_results.insert(entry.path.to_string_lossy().to_string(), entry.clone());
+            }
+
+            let messages = save_cache_to_file_generalized(&get_video_crop_cache_file(video_cropping_mechanism), &all_results, self.get_save_also_as_json(), 0);
             self.get_cd_mut().text_messages.messages.extend(messages.messages);
             self.get_cd_mut().text_messages.warnings.extend(messages.warnings);
         }
