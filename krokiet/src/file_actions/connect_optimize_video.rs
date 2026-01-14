@@ -27,10 +27,10 @@ pub(crate) fn connect_optimize_video(app: &MainWindow, progress_sender: Sender<P
         let app = a.upgrade().expect("Failed to upgrade app :(");
         let active_tab = app.global::<GuiState>().get_active_tab();
 
-        // Read settings from Settings global
-        let reencode = app.global::<Settings>().get_video_optimizer_crop_reencode_video();
-        let video_quality = app.global::<Settings>().get_video_optimizer_sub_video_quality();
-        let overwrite_files = app.global::<Settings>().get_popup_crop_video_overwrite_files();
+        let settings = app.global::<Settings>();
+        let reencode = settings.get_popup_crop_video_reencode();
+        let video_quality = settings.get_video_optimizer_sub_video_quality();
+        let overwrite_files = settings.get_popup_crop_video_overwrite_files();
 
         let crop_mechanism = collect_combo_box_settings(&app).video_optimizer_crop_type.value;
 
@@ -54,16 +54,15 @@ pub(crate) fn connect_optimize_video(app: &MainWindow, progress_sender: Sender<P
         let app = a2.upgrade().expect("Failed to upgrade app :(");
         let active_tab = app.global::<GuiState>().get_active_tab();
 
-        // Read settings from Settings global
         let settings = app.global::<Settings>();
         let codec = collect_combo_box_settings(&app).video_optimizer_video_codec.value;
-        let fail_if_bigger = settings.get_video_optimizer_sub_fail_if_bigger();
+        let fail_if_bigger = settings.get_popup_reencode_video_fail_if_bigger();
         let overwrite_files = settings.get_popup_reencode_video_overwrite_files();
-        let video_quality = settings.get_video_optimizer_sub_video_quality();
-        let limit_video_size = settings.get_video_optimizer_sub_limit_video_size();
+        let video_quality = settings.get_popup_reencode_video_quality();
+        let limit_video_size = settings.get_popup_reencode_video_limit_video_size();
 
-        let max_width_str = settings.get_video_optimizer_sub_max_width();
-        let max_height_str = settings.get_video_optimizer_sub_max_height();
+        let max_width_str = settings.get_popup_reencode_video_max_width();
+        let max_height_str = settings.get_popup_reencode_video_max_height();
 
         let max_width = max_width_str.parse::<i32>().unwrap_or(0).max(0) as u32;
         let max_height = max_height_str.parse::<i32>().unwrap_or(0).max(0) as u32;

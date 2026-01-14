@@ -275,8 +275,8 @@ export component MainWindow inherits Window {
         x: parent.x + (root.width - self.popup_width) / 2.0;
         y: parent.y + (parent.height - self.popup_height) / 2.0;
 
-        action_confirmed(override_file) => {
-            Callabler.clean_exif_items(override_file);
+        action_confirmed() => {
+            Callabler.clean_exif_items();
         }
     }
 

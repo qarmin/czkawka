@@ -33,7 +33,7 @@ export component PopupCropVideo inherits Rectangle {
 
                     PopupCenteredText { text: Translations.crop_video_confirmation_text; }
 
-                    CheckBox { text: Translations.crop_reencode_video_text; checked <=> Settings.video_optimizer_crop_reencode_video; }
+                    CheckBox { text: Translations.crop_reencode_video_text; checked <=> Settings.popup_crop_video_reencode; }
 
                     HorizontalLayout {
                         spacing: 5px;
@@ -41,7 +41,7 @@ export component PopupCropVideo inherits Rectangle {
                         ComboBox {
                             model <=> Settings.video_optimizer_sub_video_codec_config;
                             current_value <=> Settings.video_optimizer_sub_video_codec_config_value;
-                            enabled: Settings.video_optimizer_crop_reencode_video;
+                            enabled: Settings.popup_crop_video_reencode;
                         }
                     }
 
@@ -51,17 +51,17 @@ export component PopupCropVideo inherits Rectangle {
                         Slider {
                             minimum: 0.0;
                             maximum: 51.0;
-                            value <=> Settings.video_optimizer_sub_video_quality;
-                            enabled: Settings.video_optimizer_crop_reencode_video;
+                            value <=> Settings.popup_crop_video_quality;
+                            enabled: Settings.popup_crop_video_reencode;
                         }
                         Text {
-                            text: Math.round(Settings.video_optimizer_sub_video_quality) + " / 51";
+                            text: Math.round(Settings.popup_crop_video_quality) + " / 51";
                             vertical_alignment: TextVerticalAlignment.center;
                             min-width: 50px;
                         }
                     }
 
-                    CheckBox { text: Translations.optimize_overwrite_files_text; checked <=> Settings.video_optimizer_sub_overwrite_files; }
+                    CheckBox { text: Translations.optimize_overwrite_files_text; checked <=> Settings.popup_crop_video_overwrite_files; }
 
                     Rectangle { height: 10px; }
                 }

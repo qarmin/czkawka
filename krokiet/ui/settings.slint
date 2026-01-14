@@ -169,9 +169,21 @@ export global Settings {
     in-out property <bool> popup_move_preserve_folder_structure: false;
     in-out property <bool> popup_move_copy_mode: false;
 
-    in-out property <bool> popup_reencode_video_overwrite_files: false;
+    // Clean EXIF popup settings
+    in-out property <bool> popup_clean_exif_overwrite_files: false;
 
+    // Reencode video popup settings
+    in-out property <bool> popup_reencode_video_overwrite_files: false;
+    in-out property <float> popup_reencode_video_quality: 23;
+    in-out property <bool> popup_reencode_video_fail_if_bigger: false;
+    in-out property <bool> popup_reencode_video_limit_video_size: false;
+    in-out property <string> popup_reencode_video_max_width: "1920";
+    in-out property <string> popup_reencode_video_max_height: "1920";
+
+    // Crop video popup settings
     in-out property <bool> popup_crop_video_overwrite_files: false;
+    in-out property <bool> popup_crop_video_reencode: false;
+    in-out property <float> popup_crop_video_quality: 23;
 
     out property <length> path_px: 350px;
     out property <length> name_px: 100px;

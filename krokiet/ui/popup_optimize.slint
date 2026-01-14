@@ -42,25 +42,25 @@ export component PopupReencodeVideo inherits Rectangle {
                     HorizontalLayout {
                         spacing: 5px;
                         Text { text: Translations.subsettings_video_optimizer_video_quality_text; vertical_alignment: TextVerticalAlignment.center; }
-                        Slider { minimum: 0.0; maximum: 51.0; value <=> Settings.video_optimizer_sub_video_quality; }
+                        Slider { minimum: 0.0; maximum: 51.0; value <=> Settings.popup_reencode_video_quality; }
                         Text {
-                            text: Math.round(Settings.video_optimizer_sub_video_quality) + " / 51";
+                            text: Math.round(Settings.popup_reencode_video_quality) + " / 51";
                             vertical_alignment: TextVerticalAlignment.center;
                             min-width: 50px;
                         }
                     }
 
-                    CheckBox { text: Translations.optimize_fail_if_bigger_text; checked <=> Settings.video_optimizer_sub_fail_if_bigger; }
-                    CheckBox { text: Translations.optimize_overwrite_files_text; checked <=> Settings.video_optimizer_sub_overwrite_files; }
+                    CheckBox { text: Translations.optimize_fail_if_bigger_text; checked <=> Settings.popup_reencode_video_fail_if_bigger; }
+                    CheckBox { text: Translations.optimize_overwrite_files_text; checked <=> Settings.popup_reencode_video_overwrite_files; }
 
-                    CheckBox { text: Translations.optimize_limit_video_size_text; checked <=> Settings.video_optimizer_sub_limit_video_size; }
+                    CheckBox { text: Translations.optimize_limit_video_size_text; checked <=> Settings.popup_reencode_video_limit_video_size; }
 
                     HorizontalLayout {
                         spacing: 5px;
                         Text { text: Translations.optimize_max_width_text; vertical_alignment: TextVerticalAlignment.center; }
-                        LineEdit { text <=> Settings.video_optimizer_sub_max_width; enabled: Settings.video_optimizer_sub_limit_video_size; }
+                        LineEdit { text <=> Settings.popup_reencode_video_max_width; enabled: Settings.popup_reencode_video_limit_video_size; }
                         Text { text: Translations.optimize_max_height_text; vertical_alignment: TextVerticalAlignment.center; }
-                        LineEdit { text <=> Settings.video_optimizer_sub_max_height; enabled: Settings.video_optimizer_sub_limit_video_size; }
+                        LineEdit { text <=> Settings.popup_reencode_video_max_height; enabled: Settings.popup_reencode_video_limit_video_size; }
                     }
 
                     Rectangle { height: 10px; }
