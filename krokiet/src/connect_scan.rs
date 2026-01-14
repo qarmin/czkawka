@@ -27,7 +27,7 @@ use czkawka_core::tools::same_music::{MusicEntry, MusicSimilarity, SameMusic, Sa
 use czkawka_core::tools::similar_images::core::get_string_from_similarity;
 use czkawka_core::tools::similar_images::{ImagesEntry, SimilarImages, SimilarImagesParameters};
 use czkawka_core::tools::similar_videos::core::{format_bitrate_opt, format_duration_opt};
-use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters, VideosEntry, crop_detect_from_str};
+use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters, VideosEntry};
 use czkawka_core::tools::temporary::{Temporary, TemporaryFileEntry};
 use czkawka_core::tools::video_optimizer::{
     VideoCropEntry, VideoCropParams, VideoOptimizer, VideoOptimizerMode, VideoOptimizerParameters, VideoTranscodeEntry, VideoTranscodeParams,
@@ -625,7 +625,7 @@ fn scan_similar_videos(
                 custom_settings.similar_videos_hide_hard_links,
                 custom_settings.similar_videos_skip_forward_amount,
                 custom_settings.similar_videos_vid_hash_duration,
-                crop_detect_from_str(&custom_settings.similar_videos_crop_detect),
+                combo_box_items.videos_crop_detect.value,
                 custom_settings.similar_videos_image_preview,
                 custom_settings.similar_videos_thumbnail_percentage,
                 custom_settings.similar_videos_generate_thumbnail_grid_instead_of_single_image,

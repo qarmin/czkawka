@@ -474,6 +474,20 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
 
     settings.set_ignored_exif_tags(custom_settings.ignored_exif_tags.clone().into());
 
+    // Popup-specific settings
+    settings.set_popup_move_preserve_folder_structure(custom_settings.popup_move_preserve_folder_structure);
+    settings.set_popup_move_copy_mode(custom_settings.popup_move_copy_mode);
+    settings.set_popup_clean_exif_overwrite_files(custom_settings.popup_clean_exif_overwrite_files);
+    settings.set_popup_reencode_video_overwrite_files(custom_settings.popup_reencode_video_overwrite_files);
+    settings.set_popup_reencode_video_quality(custom_settings.popup_reencode_video_quality as f32);
+    settings.set_popup_reencode_video_fail_if_bigger(custom_settings.popup_reencode_video_fail_if_bigger);
+    settings.set_popup_reencode_video_limit_video_size(custom_settings.popup_reencode_video_limit_video_size);
+    settings.set_popup_reencode_video_max_width(custom_settings.popup_reencode_video_max_width.to_string().into());
+    settings.set_popup_reencode_video_max_height(custom_settings.popup_reencode_video_max_height.to_string().into());
+    settings.set_popup_crop_video_overwrite_files(custom_settings.popup_crop_video_overwrite_files);
+    settings.set_popup_crop_video_reencode(custom_settings.popup_crop_video_reencode);
+    settings.set_popup_crop_video_quality(custom_settings.popup_crop_video_quality as f32);
+
     let sel_px = 35.0;
     let path_px = 350.0;
     let name_px = 100.0;
@@ -705,6 +719,18 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         video_optimizer_image_threshold,
         ignored_exif_tags,
         column_sizes,
+        popup_move_preserve_folder_structure: settings.get_popup_move_preserve_folder_structure(),
+        popup_move_copy_mode: settings.get_popup_move_copy_mode(),
+        popup_clean_exif_overwrite_files: settings.get_popup_clean_exif_overwrite_files(),
+        popup_reencode_video_overwrite_files: settings.get_popup_reencode_video_overwrite_files(),
+        popup_reencode_video_quality: settings.get_popup_reencode_video_quality().round() as u32,
+        popup_reencode_video_fail_if_bigger: settings.get_popup_reencode_video_fail_if_bigger(),
+        popup_reencode_video_limit_video_size: settings.get_popup_reencode_video_limit_video_size(),
+        popup_reencode_video_max_width: settings.get_popup_reencode_video_max_width().parse::<u32>().unwrap_or(1920),
+        popup_reencode_video_max_height: settings.get_popup_reencode_video_max_height().parse::<u32>().unwrap_or(1920),
+        popup_crop_video_overwrite_files: settings.get_popup_crop_video_overwrite_files(),
+        popup_crop_video_reencode: settings.get_popup_crop_video_reencode(),
+        popup_crop_video_quality: settings.get_popup_crop_video_quality().round() as u32,
     }
 }
 

@@ -134,8 +134,6 @@ export global Settings {
     in-out property <[string]> video_optimizer_sub_crop_type: ["Black Bars", "Static Content"];
     in-out property <int> video_optimizer_sub_crop_type_index: 0;
     in-out property <string> video_optimizer_sub_crop_type_value: "Black Bars";
-    in-out property <bool> video_optimizer_crop_reencode_video: false;
-    in-out property <[string]> video_optimizer_sub_video_codec: ["HEVC/H265", "H264", "VP9", "AV1"];
     in-out property <int> video_optimizer_sub_video_codec_index: 0;
     in-out property <string> video_optimizer_sub_video_codec_value: "HEVC/H265";
     in-out property <string> video_optimizer_sub_excluded_codecs: "h265,av1,vp9";
@@ -161,9 +159,6 @@ export global Settings {
 
     // Exif Finder
     in-out property <string> ignored_exif_tags: "";
-
-    // Clean EXIF settings
-    in-out property <bool> clean_exif_sub_overwrite_files: false;
 
     // Move/Copy popup settings
     in-out property <bool> popup_move_preserve_folder_structure: false;

@@ -6,9 +6,7 @@ use czkawka_core::common::items::{DEFAULT_EXCLUDED_DIRECTORIES, DEFAULT_EXCLUDED
 use czkawka_core::common::model::{CheckingMethod, HashType};
 use czkawka_core::re_exported::{Cropdetect, HashAlg};
 use czkawka_core::tools::big_file::SearchMode;
-use czkawka_core::tools::similar_videos::{
-    DEFAULT_CROP_DETECT, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION, DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL, crop_detect_to_str,
-};
+use czkawka_core::tools::similar_videos::{DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION, DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL};
 use czkawka_core::tools::video_optimizer::{VideoCodec, VideoCroppingMechanism, VideoOptimizerMode};
 use home::home_dir;
 use image::imageops::FilterType;
@@ -187,6 +185,31 @@ pub struct SettingsCustom {
     pub ignored_exif_tags: String,
     #[serde(default)]
     pub column_sizes: BTreeMap<String, Vec<f32>>,
+
+    #[serde(default)]
+    pub popup_move_preserve_folder_structure: bool,
+    #[serde(default)]
+    pub popup_move_copy_mode: bool,
+    #[serde(default)]
+    pub popup_clean_exif_overwrite_files: bool,
+    #[serde(default)]
+    pub popup_reencode_video_overwrite_files: bool,
+    #[serde(default = "default_video_optimizer_video_quality")]
+    pub popup_reencode_video_quality: u32,
+    #[serde(default)]
+    pub popup_reencode_video_fail_if_bigger: bool,
+    #[serde(default)]
+    pub popup_reencode_video_limit_video_size: bool,
+    #[serde(default = "default_video_optimizer_max_width")]
+    pub popup_reencode_video_max_width: u32,
+    #[serde(default = "default_video_optimizer_max_height")]
+    pub popup_reencode_video_max_height: u32,
+    #[serde(default)]
+    pub popup_crop_video_overwrite_files: bool,
+    #[serde(default)]
+    pub popup_crop_video_reencode: bool,
+    #[serde(default = "default_video_optimizer_video_quality")]
+    pub popup_crop_video_quality: u32,
 }
 
 impl Default for SettingsCustom {
@@ -277,7 +300,7 @@ fn default_similar_videos_vid_hash_duration() -> u32 {
     DEFAULT_VID_HASH_DURATION
 }
 fn default_similar_videos_crop_detect() -> String {
-    crop_detect_to_str(DEFAULT_CROP_DETECT)
+    "letterbox".to_string()
 }
 fn default_similar_videos_thumbnail_percentage() -> u8 {
     DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL
