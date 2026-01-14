@@ -45,10 +45,10 @@ export global Callabler {
 
     // Dialogs
     callback save_results();
-    callback move_items(bool, bool, string);
+    callback move_items(string);
     callback rename_files();
-    callback crop_video_items(bool, string, float, bool);
-    callback reencode_video_items(string, bool, bool, float, bool, int, int);
+    callback crop_video_items();
+    callback reencode_video_items();
     callback clean_exif_items(bool);
     callback hardlink_items();
     callback softlink_items();

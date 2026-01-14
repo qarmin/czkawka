@@ -7,7 +7,7 @@ import { PopupCenteredText } from "popup_centered_text.slint";
 export component PopupReencodeVideo inherits Rectangle {
     in-out property <string> title_text;
 
-    callback action_confirmed(string, bool, bool, float, bool, int, int);
+    callback action_confirmed();
 
     out property <length> popup_width: 420px;
     out property <length> popup_height: 300px;
@@ -71,15 +71,7 @@ export component PopupReencodeVideo inherits Rectangle {
         }
 
         ok_clicked => {
-            root.action_confirmed(
-                Settings.video_optimizer_sub_video_codec_config_value,
-                Settings.video_optimizer_sub_fail_if_bigger,
-                Settings.video_optimizer_sub_overwrite_files,
-                Settings.video_optimizer_sub_video_quality,
-                Settings.video_optimizer_sub_limit_video_size,
-                Settings.video_optimizer_sub_max_width.to-float() > 0 ? Settings.video_optimizer_sub_max_width.to-float() : 1920,
-                Settings.video_optimizer_sub_max_height.to-float() > 0 ? Settings.video_optimizer_sub_max_height.to-float() : 1920
-            );
+            root.action_confirmed();
         }
 
         cancel_clicked => {

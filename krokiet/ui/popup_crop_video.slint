@@ -7,7 +7,7 @@ import { PopupCenteredText } from "popup_centered_text.slint";
 export component PopupCropVideo inherits Rectangle {
     in-out property <string> title_text;
 
-    callback action_confirmed(bool, string, float, bool);
+    callback action_confirmed();
 
     out property <length> popup_width: 420px;
     out property <length> popup_height: 280px;
@@ -71,12 +71,7 @@ export component PopupCropVideo inherits Rectangle {
         }
 
         ok_clicked => {
-            root.action_confirmed(
-                Settings.video_optimizer_crop_reencode_video,
-                Settings.video_optimizer_sub_video_codec_config_value,
-                Settings.video_optimizer_sub_video_quality,
-                Settings.video_optimizer_sub_overwrite_files
-            );
+            root.action_confirmed();
         }
 
         cancel_clicked => {

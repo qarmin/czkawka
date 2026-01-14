@@ -288,8 +288,8 @@ export component MainWindow inherits Window {
         x: parent.x + (root.width - self.popup_width) / 2.0;
         y: parent.y + (parent.height - self.popup_height) / 2.0;
 
-        action_confirmed(reencode, codec, quality, overwrite_files) => {
-            Callabler.crop_video_items(reencode, codec, quality, overwrite_files);
+        action_confirmed() => {
+            Callabler.crop_video_items();
         }
     }
 
@@ -301,8 +301,8 @@ export component MainWindow inherits Window {
         x: parent.x + (root.width - self.popup_width) / 2.0;
         y: parent.y + (parent.height - self.popup_height) / 2.0;
 
-        action_confirmed(codec, fail_if_bigger, overwrite_files, quality, limit_size, max_width, max_height) => {
-            Callabler.reencode_video_items(codec, fail_if_bigger, overwrite_files, quality, limit_size, max_width, max_height);
+        action_confirmed() => {
+            Callabler.reencode_video_items();
         }
     }
 

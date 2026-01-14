@@ -27,7 +27,9 @@ use czkawka_core::tools::similar_images::{ImagesEntry, SimilarImages, SimilarIma
 use czkawka_core::tools::similar_videos::core::{format_bitrate_opt, format_duration_opt};
 use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters, VideosEntry, crop_detect_from_str};
 use czkawka_core::tools::temporary::{Temporary, TemporaryFileEntry};
-use czkawka_core::tools::video_optimizer::{VideoCropEntry, VideoCropParams, VideoOptimizer, VideoOptimizerMode, VideoOptimizerParameters, VideoTranscodeEntry, VideoTranscodeParams};
+use czkawka_core::tools::video_optimizer::{
+    VideoCropEntry, VideoCropParams, VideoOptimizer, VideoOptimizerMode, VideoOptimizerParameters, VideoTranscodeEntry, VideoTranscodeParams,
+};
 use humansize::{BINARY, format_size};
 use log::error;
 use rayon::prelude::*;
@@ -74,7 +76,7 @@ pub(crate) fn connect_scan_button(app: &MainWindow, progress_sender: Sender<Prog
 
         let custom_settings = collect_settings(&app);
         let basic_settings = collect_base_settings(&app);
-        let combo_box_items = collect_combo_box_settings(&app);  
+        let combo_box_items = collect_combo_box_settings(&app);
 
         let cloned_model = Arc::clone(&shared_models);
 
@@ -140,6 +142,7 @@ fn scan_duplicates(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
+            let _ = combo_box_items;
             let hash_type = combo_box_items.duplicates_hash_type.value;
             let check_method = combo_box_items.duplicates_check_method.value;
 
@@ -299,6 +302,7 @@ fn scan_empty_folders(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
+            let _ = combo_box_items;
             let mut tool = EmptyFolder::new();
             set_common_settings(&mut tool, &custom_settings, &stop_flag);
             tool.search(&stop_flag, Some(&progress_sender));
@@ -354,6 +358,7 @@ fn scan_big_files(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
+            let _ = combo_box_items;
             let big_files_mode = combo_box_items.biggest_files_method.value;
             let params = BigFileParameters::new(custom_settings.biggest_files_sub_number_of_files as usize, big_files_mode);
             let mut tool = BigFile::new(params);
@@ -431,6 +436,7 @@ fn scan_empty_files(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
+            let _ = combo_box_items;
             let mut tool = EmptyFiles::new();
             set_common_settings(&mut tool, &custom_settings, &stop_flag);
             tool.search(&stop_flag, Some(&progress_sender));
@@ -487,6 +493,7 @@ fn scan_similar_images(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
+            let _ = combo_box_items;
             let hash_alg = combo_box_items.image_hash_alg.value;
             let resize_algorithm = combo_box_items.resize_algorithm.value;
             let hash_size = custom_settings
@@ -609,6 +616,7 @@ fn scan_similar_videos(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
+            let _ = combo_box_items;
             let params = SimilarVideosParameters::new(
                 custom_settings.similar_videos_sub_similarity,
                 custom_settings.similar_videos_sub_ignore_same_size,
@@ -744,6 +752,7 @@ fn scan_similar_music(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
+            let _ = combo_box_items;
             let mut music_similarity: MusicSimilarity = MusicSimilarity::NONE;
             if custom_settings.similar_music_sub_title {
                 music_similarity |= MusicSimilarity::TRACK_TITLE;
@@ -869,6 +878,7 @@ fn scan_invalid_symlinks(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
+            let _ = combo_box_items;
             let mut tool = InvalidSymlinks::new();
             set_common_settings(&mut tool, &custom_settings, &stop_flag);
 
@@ -930,6 +940,7 @@ fn scan_temporary_files(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
+            let _ = combo_box_items;
             let mut tool = Temporary::new();
             set_common_settings(&mut tool, &custom_settings, &stop_flag);
 
@@ -986,6 +997,7 @@ fn scan_broken_files(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
+            let _ = combo_box_items;
             let mut checked_types: CheckedTypes = CheckedTypes::NONE;
             if custom_settings.broken_files_sub_audio {
                 checked_types |= CheckedTypes::AUDIO;
@@ -1083,6 +1095,7 @@ fn scan_bad_extensions(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
+            let _ = combo_box_items;
             let params = BadExtensionsParameters::new();
             let mut tool = BadExtensions::new(params);
             set_common_settings(&mut tool, &custom_settings, &stop_flag);
@@ -1145,6 +1158,7 @@ fn scan_exif_remover(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
+            let _ = combo_box_items;
             // Parse ignored tags from comma-separated string, trimming whitespace
             let ignored_tags: Vec<String> = custom_settings
                 .ignored_exif_tags
@@ -1226,6 +1240,7 @@ fn scan_video_optimizer(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
+            let _ = combo_box_items;
             let video_optimizer_mode = combo_box_items.video_optimizer_mode.value;
             let params = if video_optimizer_mode == VideoOptimizerMode::VideoCrop {
                 let crop_detect = combo_box_items.video_optimizer_crop_type.value;

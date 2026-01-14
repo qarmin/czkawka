@@ -6,68 +6,86 @@ use std::thread;
 use crossbeam_channel::Sender;
 use czkawka_core::common::progress_data::ProgressData;
 use czkawka_core::tools::video_optimizer::{VideoCodec, VideoCropFixParams, VideoCroppingMechanism, VideoTranscodeFixParams};
-use slint::{ComponentHandle, SharedString, Weak};
+use slint::{ComponentHandle, Weak};
 
 use crate::common::IntDataVideoOptimizer;
 use crate::model_operations::model_processor::{MessageType, ModelProcessor};
 use crate::settings::collect_combo_box_settings;
 use crate::simpler_model::{SimplerMainListModel, ToSimplerVec};
-use crate::{Callabler, GuiState, MainWindow};
+use crate::{Callabler, GuiState, MainWindow, Settings};
 
 pub(crate) fn connect_optimize_video(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
     let a = app.as_weak();
 
     let progress_sender_crop = progress_sender.clone();
     let stop_flag_crop = stop_flag.clone();
-    app.global::<Callabler>()
-        .on_crop_video_items(move |reencode: bool, _codec: SharedString, video_quality: f32, overwrite_files: bool| {
-            let weak_app = a.clone();
-            let progress_sender = progress_sender_crop.clone();
-            let stop_flag = stop_flag_crop.clone();
-            stop_flag.store(false, Ordering::Relaxed);
-            let app = a.upgrade().expect("Failed to upgrade app :(");
-            let active_tab = app.global::<GuiState>().get_active_tab();
+    app.global::<Callabler>().on_crop_video_items(move || {
+        let weak_app = a.clone();
+        let progress_sender = progress_sender_crop.clone();
+        let stop_flag = stop_flag_crop.clone();
+        stop_flag.store(false, Ordering::Relaxed);
+        let app = a.upgrade().expect("Failed to upgrade app :(");
+        let active_tab = app.global::<GuiState>().get_active_tab();
 
-            let crop_mechanism = collect_combo_box_settings(&app).video_optimizer_crop_type.value;
+        // Read settings from Settings global
+        let reencode = app.global::<Settings>().get_video_optimizer_crop_reencode_video();
+        let video_quality = app.global::<Settings>().get_video_optimizer_sub_video_quality();
+        let overwrite_files = app.global::<Settings>().get_popup_crop_video_overwrite_files();
 
-            let processor = ModelProcessor::new(active_tab);
+        let crop_mechanism = collect_combo_box_settings(&app).video_optimizer_crop_type.value;
 
-            let requested_codec = if reencode {
-                Some(collect_combo_box_settings(&app).video_optimizer_video_codec.value)
-            } else {
-                None
-            };
+        let processor = ModelProcessor::new(active_tab);
 
-            processor.crop_selected_videos(progress_sender, weak_app, stop_flag, requested_codec, overwrite_files, video_quality, crop_mechanism);
-        });
+        let requested_codec = if reencode {
+            Some(collect_combo_box_settings(&app).video_optimizer_video_codec.value)
+        } else {
+            None
+        };
+
+        processor.crop_selected_videos(progress_sender, weak_app, stop_flag, requested_codec, overwrite_files, video_quality, crop_mechanism);
+    });
 
     let a2 = app.as_weak();
-    app.global::<Callabler>().on_reencode_video_items(
-        move |_codec: SharedString, fail_if_bigger: bool, overwrite_files: bool, video_quality: f32, limit_video_size: bool, max_width: i32, max_height: i32| {
-            let weak_app = a2.clone();
-            let progress_sender = progress_sender.clone();
-            let stop_flag = stop_flag.clone();
-            stop_flag.store(false, Ordering::Relaxed);
-            let app = a2.upgrade().expect("Failed to upgrade app :(");
-            let active_tab = app.global::<GuiState>().get_active_tab();
+    app.global::<Callabler>().on_reencode_video_items(move || {
+        let weak_app = a2.clone();
+        let progress_sender = progress_sender.clone();
+        let stop_flag = stop_flag.clone();
+        stop_flag.store(false, Ordering::Relaxed);
+        let app = a2.upgrade().expect("Failed to upgrade app :(");
+        let active_tab = app.global::<GuiState>().get_active_tab();
 
-            let codec = collect_combo_box_settings(&app).video_optimizer_video_codec.value;
-            let processor = ModelProcessor::new(active_tab);
+        // Read settings from Settings global
+        let settings = app.global::<Settings>();
+        let codec = collect_combo_box_settings(&app).video_optimizer_video_codec.value;
+        let fail_if_bigger = settings.get_video_optimizer_sub_fail_if_bigger();
+        let overwrite_files = settings.get_popup_reencode_video_overwrite_files();
+        let video_quality = settings.get_video_optimizer_sub_video_quality();
+        let limit_video_size = settings.get_video_optimizer_sub_limit_video_size();
 
-            processor.optimize_selected_videos(
-                progress_sender,
-                weak_app,
-                stop_flag,
-                codec,
-                fail_if_bigger,
-                overwrite_files,
-                video_quality,
-                limit_video_size,
-                max_width.max(0) as u32,
-                max_height.max(0) as u32,
-            );
-        },
-    );
+        let max_width_str = settings.get_video_optimizer_sub_max_width();
+        let max_height_str = settings.get_video_optimizer_sub_max_height();
+
+        let max_width = max_width_str.parse::<i32>().unwrap_or(0).max(0) as u32;
+        let max_height = max_height_str.parse::<i32>().unwrap_or(0).max(0) as u32;
+
+        let max_width = if max_width > 0 { max_width } else { 1920 };
+        let max_height = if max_height > 0 { max_height } else { 1920 };
+
+        let processor = ModelProcessor::new(active_tab);
+
+        processor.optimize_selected_videos(
+            progress_sender,
+            weak_app,
+            stop_flag,
+            codec,
+            fail_if_bigger,
+            overwrite_files,
+            video_quality,
+            limit_video_size,
+            max_width,
+            max_height,
+        );
+    });
 }
 
 impl ModelProcessor {

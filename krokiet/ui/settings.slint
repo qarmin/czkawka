@@ -165,6 +165,14 @@ export global Settings {
     // Clean EXIF settings
     in-out property <bool> clean_exif_sub_overwrite_files: false;
 
+    // Move/Copy popup settings
+    in-out property <bool> popup_move_preserve_folder_structure: false;
+    in-out property <bool> popup_move_copy_mode: false;
+
+    in-out property <bool> popup_reencode_video_overwrite_files: false;
+
+    in-out property <bool> popup_crop_video_overwrite_files: false;
+
     out property <length> path_px: 350px;
     out property <length> name_px: 100px;
     out property <length> mod_px: 155px;
