@@ -7,9 +7,14 @@ use czkawka_core::tools::similar_videos::{
     DEFAULT_CROP_DETECT, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION, DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL, crop_detect_to_str,
 };
 use home::home_dir;
+use image::imageops::FilterType;
 use serde::{Deserialize, Serialize};
-
+use czkawka_core::common::model::{CheckingMethod, HashType};
+use czkawka_core::re_exported::{Cropdetect, HashAlg};
+use czkawka_core::tools::big_file::SearchMode;
+use czkawka_core::tools::video_optimizer::{VideoCodec, VideoCroppingMechanism, VideoOptimizerMode};
 use crate::connect_translation::{LANGUAGE_LIST, find_the_closest_language_idx_to_system};
+use crate::settings::combo_box::StringComboBoxItem;
 
 pub const DEFAULT_MINIMUM_SIZE_KB: i32 = 16;
 pub const DEFAULT_MAXIMUM_SIZE_KB: i32 = i32::MAX / 1024;
@@ -189,9 +194,20 @@ impl Default for SettingsCustom {
     }
 }
 
-// pub struct ComboBoxItems {
-//     pub d
-// }
+pub struct ComboBoxItems {
+    pub language: StringComboBoxItem<String>,
+    pub hash_size: StringComboBoxItem<u8>,
+    pub resize_algorithm: StringComboBoxItem<FilterType>,
+    pub image_hash_alg: StringComboBoxItem<HashAlg>,
+    pub duplicates_hash_type: StringComboBoxItem<HashType>,
+    pub biggest_files_method: StringComboBoxItem<SearchMode>,
+    pub audio_check_type: StringComboBoxItem<CheckingMethod>,
+    pub duplicates_check_method: StringComboBoxItem<CheckingMethod>,
+    pub videos_crop_detect: StringComboBoxItem<Cropdetect>,
+    pub video_optimizer_crop_type: StringComboBoxItem<VideoCroppingMechanism>,
+    pub video_optimizer_mode: StringComboBoxItem<VideoOptimizerMode>,
+    pub video_optimizer_video_codec: StringComboBoxItem<VideoCodec>,
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BasicSettings {

@@ -17,11 +17,7 @@ use slint::{ComponentHandle, Model, ModelRc, PhysicalSize, VecModel, WindowSize}
 use crate::common::{create_excluded_directories_model_from_pathbuf, create_included_directories_model_from_pathbuf, create_vec_model_from_vec_string};
 use crate::connect_translation::change_language;
 use crate::settings::combo_box::StringComboBoxItems;
-use crate::settings::model::{
-    BasicSettings, DEFAULT_BIGGEST_FILES, DEFAULT_MAX_VIDEO_THUMBNAIL_POSITION_PERCENT, DEFAULT_MAXIMUM_SIZE_KB, DEFAULT_MIN_VIDEO_THUMBNAIL_POSITION_PERCENT,
-    DEFAULT_MINIMUM_CACHE_SIZE, DEFAULT_MINIMUM_PREHASH_CACHE_SIZE, DEFAULT_MINIMUM_SIZE_KB, MAX_HASH_SIZE, PRESET_NAME_RESERVED, PRESET_NUMBER, RESERVER_PRESET_IDX,
-    SettingsCustom,
-};
+use crate::settings::model::{BasicSettings, DEFAULT_BIGGEST_FILES, DEFAULT_MAX_VIDEO_THUMBNAIL_POSITION_PERCENT, DEFAULT_MAXIMUM_SIZE_KB, DEFAULT_MIN_VIDEO_THUMBNAIL_POSITION_PERCENT, DEFAULT_MINIMUM_CACHE_SIZE, DEFAULT_MINIMUM_PREHASH_CACHE_SIZE, DEFAULT_MINIMUM_SIZE_KB, MAX_HASH_SIZE, PRESET_NAME_RESERVED, PRESET_NUMBER, RESERVER_PRESET_IDX, SettingsCustom, ComboBoxItems};
 use crate::{Callabler, GuiState, MainWindow, Settings, flk};
 
 pub(crate) fn connect_changing_settings_preset(app: &MainWindow) {
@@ -717,6 +713,27 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         video_optimizer_image_threshold,
         ignored_exif_tags,
         column_sizes,
+    }
+}
+
+pub(crate) fn collect_combo_box_settings(app: &MainWindow) -> ComboBoxItems {
+    let collected_combo_boxes = StringComboBoxItems::regenerate_items();
+    let settings = app.global::<Settings>();
+
+    let video_optimizer_sub_video_codec_idx = settings.get_video_optimizer_sub_video_codec_index();
+    ComboBoxItems {
+        language: StringComboBoxItem {},
+        hash_size: StringComboBoxItem {},
+        resize_algorithm: StringComboBoxItem {},
+        image_hash_alg: StringComboBoxItem {},
+        duplicates_hash_type: StringComboBoxItem {},
+        biggest_files_method: StringComboBoxItem {},
+        audio_check_type: StringComboBoxItem {},
+        duplicates_check_method: StringComboBoxItem {},
+        videos_crop_detect: StringComboBoxItem {},
+        video_optimizer_crop_type: StringComboBoxItem {},
+        video_optimizer_mode: StringComboBoxItem {},
+        video_optimizer_video_codec: collected_combo_boxes.video_optimizer_video_codec[video_optimizer_sub_video_codec_idx].clone(),
     }
 }
 
