@@ -87,8 +87,8 @@ fn extract_frame_ffmpeg(video_path: &Path, timestamp: f32) -> Option<RgbImage> {
         .arg("1")
         .arg("-f")
         .arg("image2pipe")
-        .arg("-pix_fmt") // TODO - newly added - may be broken
-        .arg("rgb24") // TODO
+        .arg("-pix_fmt")
+        .arg("rgb24")
         .arg("-vcodec")
         .arg("png")
         .arg("pipe:1")
@@ -110,7 +110,13 @@ fn is_pixel_black(img: &image::RgbImage, x: u32, y: u32) -> bool {
     pixel.0.iter().all(|&channel| channel < BLACK_PIXEL_THRESHOLD)
 }
 
-fn detect_black_bars(rgb_img: &RgbImage) -> Option<Rectangle> {
+enum BlackBarResult {
+    NoBlackBars,
+    BlackBarsDetected(Rectangle),
+    FullBlackImage,
+}
+
+fn detect_black_bars(rgb_img: &RgbImage) -> BlackBarResult {
     let (width, height) = rgb_img.dimensions();
 
     let mut left_crop = 0u32;
@@ -132,7 +138,7 @@ fn detect_black_bars(rgb_img: &RgbImage) -> Option<Rectangle> {
     }
 
     if left_crop >= right_pos {
-        return None;
+        return BlackBarResult::FullBlackImage;
     }
 
     let mut top_crop = 0u32;
@@ -154,11 +160,15 @@ fn detect_black_bars(rgb_img: &RgbImage) -> Option<Rectangle> {
     }
 
     if top_crop >= bottom_pos {
-        return None;
+        return BlackBarResult::FullBlackImage;
     }
 
     let rect = Rectangle::new(top_crop, bottom_pos, left_crop, right_pos);
-    if rect.is_cropping_needed(width, height) { Some(rect) } else { None }
+    if rect.is_cropping_needed(width, height) {
+        BlackBarResult::BlackBarsDetected(rect)
+    } else {
+        BlackBarResult::NoBlackBars
+    }
 }
 
 fn analyze_black_bars<F>(duration: f32, get_frame: &F, stop_flag: &Arc<AtomicBool>, first_frame: &RgbImage) -> Option<Result<Option<Rectangle>, String>>
@@ -169,8 +179,12 @@ where
         return None;
     }
 
-    let Some(mut rectangle) = detect_black_bars(first_frame) else {
-        return Some(Ok(None));
+    let mut rectangle = match detect_black_bars(first_frame) {
+        BlackBarResult::BlackBarsDetected(rect) => Some(rect),
+        BlackBarResult::NoBlackBars => {
+            return Some(Ok(None));
+        }
+        BlackBarResult::FullBlackImage => None,
     };
 
     let num_samples = ((duration / MIN_SAMPLE_INTERVAL).floor() as usize).clamp(MIN_SAMPLES, MAX_SAMPLES);
@@ -194,14 +208,28 @@ where
             )));
         }
 
-        if let Some(tmp_rect) = detect_black_bars(&tmp_frame) {
-            rectangle = rectangle.union(&tmp_rect);
-        } else {
-            return Some(Ok(None));
+        match detect_black_bars(&tmp_frame) {
+            BlackBarResult::BlackBarsDetected(tmp_rect) => {
+                rectangle = match rectangle {
+                    Some(current_rect) => Some(current_rect.union(&tmp_rect)),
+                    None => Some(tmp_rect),
+                };
+            }
+            BlackBarResult::NoBlackBars => {
+                return Some(Ok(None));
+            }
+            BlackBarResult::FullBlackImage => {
+                // Do nothing - leave the current rectangle as is
+            }
         }
     }
 
-    Some(Ok(Some(rectangle)))
+    if let Some((rectangle)) = rectangle {
+        rectangle.validate();
+        Some(Ok(Some(rectangle)))
+    } else {
+        Some(Ok(None)) // All frames were fully black
+    }
 }
 
 fn diff_between_dynamic_images(img_original: &RgbImage, mut consumed_temp_img: RgbImage) -> RgbImage {
@@ -225,8 +253,8 @@ where
     if stop_flag.load(Ordering::Relaxed) {
         return None;
     }
-    // Invalid rectangle, but is later changed and properly validated
-    let mut rectangle = Rectangle::new_without_validation(first_frame.height(), 0, first_frame.width(), 0);
+    // Initial rectangle is empty, because with only one frame we cannot determine static parts
+    let mut rectangle: Option<Rectangle> = None;
 
     let num_samples = ((duration / MIN_SAMPLE_INTERVAL).floor() as usize).clamp(MIN_SAMPLES, MAX_SAMPLES);
 
@@ -238,7 +266,7 @@ where
         let timestamp = (i as f32 / num_samples as f32) * duration;
 
         let Some(tmp_frame) = get_frame(timestamp) else {
-            return Some(Ok(None));
+            return Some(Err(format!("Failed to get frame at timestamp {}", timestamp)));
         };
         if tmp_frame.dimensions() != first_frame.dimensions() {
             return Some(Err(format!(
@@ -250,14 +278,28 @@ where
         }
         let dynamic_image_diff: RgbImage = diff_between_dynamic_images(first_frame, tmp_frame);
 
-        if let Some(tmp_rect) = detect_black_bars(&dynamic_image_diff) {
-            rectangle = rectangle.union(&tmp_rect);
-        } else {
-            return Some(Ok(None));
+        match detect_black_bars(&dynamic_image_diff) {
+            BlackBarResult::FullBlackImage => {
+                // Do nothing - leave the current rectangle as is
+            }
+            BlackBarResult::NoBlackBars => {
+                return Some(Ok(None));
+            }
+            BlackBarResult::BlackBarsDetected(tmp_rect) => {
+                rectangle = match rectangle {
+                    Some(current_rect) => Some(current_rect.union(&tmp_rect)),
+                    None => Some(tmp_rect),
+                };
+            }
         }
     }
 
-    Some(Ok(Some(rectangle)))
+    if let Some((rectangle)) = rectangle {
+        rectangle.validate();
+        Some(Ok(Some(rectangle)))
+    } else {
+        Some(Ok(None)) // All frames were fully black
+    }
 }
 
 fn extract_video_metadata_for_crop(entry: &mut VideoCropEntry) -> Result<(u32, u32, f64, f64), ()> {
