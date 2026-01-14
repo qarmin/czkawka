@@ -54,28 +54,6 @@ impl StringComboBoxItems {
         (position, display_names)
     }
 
-    pub(crate) fn get_config_name_from_idx<T>(idx: usize, items: &Vec<StringComboBoxItem<T>>) -> String
-    where
-        T: Clone + Debug,
-    {
-        if idx < items.len() {
-            items[idx].config_name.clone()
-        } else {
-            warn!("Trying to get non existent item - \"{idx}\" from {items:?}");
-            items[0].config_name.clone()
-        }
-    }
-
-    pub(crate) fn get_value_from_config_name<T>(config_name: &str, items: &Vec<StringComboBoxItem<T>>) -> T
-    where
-        T: Clone + Debug,
-    {
-        let position = items.iter().position(|e| e.config_name == config_name).unwrap_or_else(|| {
-            panic!("Trying to get non existent item - \"{config_name}\" from {items:?}");
-        });
-        items[position].value.clone()
-    }
-
     pub(crate) fn regenerate_items() -> Self {
         let languages = LANGUAGE_LIST
             .iter()

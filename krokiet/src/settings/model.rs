@@ -3,16 +3,17 @@ use std::env;
 use std::path::PathBuf;
 
 use czkawka_core::common::items::{DEFAULT_EXCLUDED_DIRECTORIES, DEFAULT_EXCLUDED_ITEMS};
-use czkawka_core::tools::similar_videos::{
-    DEFAULT_CROP_DETECT, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION, DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL, crop_detect_to_str,
-};
-use home::home_dir;
-use image::imageops::FilterType;
-use serde::{Deserialize, Serialize};
 use czkawka_core::common::model::{CheckingMethod, HashType};
 use czkawka_core::re_exported::{Cropdetect, HashAlg};
 use czkawka_core::tools::big_file::SearchMode;
+use czkawka_core::tools::similar_videos::{
+    DEFAULT_CROP_DETECT, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION, DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL, crop_detect_to_str,
+};
 use czkawka_core::tools::video_optimizer::{VideoCodec, VideoCroppingMechanism, VideoOptimizerMode};
+use home::home_dir;
+use image::imageops::FilterType;
+use serde::{Deserialize, Serialize};
+
 use crate::connect_translation::{LANGUAGE_LIST, find_the_closest_language_idx_to_system};
 use crate::settings::combo_box::StringComboBoxItem;
 

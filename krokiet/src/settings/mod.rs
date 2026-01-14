@@ -17,7 +17,11 @@ use slint::{ComponentHandle, Model, ModelRc, PhysicalSize, VecModel, WindowSize}
 use crate::common::{create_excluded_directories_model_from_pathbuf, create_included_directories_model_from_pathbuf, create_vec_model_from_vec_string};
 use crate::connect_translation::change_language;
 use crate::settings::combo_box::StringComboBoxItems;
-use crate::settings::model::{BasicSettings, DEFAULT_BIGGEST_FILES, DEFAULT_MAX_VIDEO_THUMBNAIL_POSITION_PERCENT, DEFAULT_MAXIMUM_SIZE_KB, DEFAULT_MIN_VIDEO_THUMBNAIL_POSITION_PERCENT, DEFAULT_MINIMUM_CACHE_SIZE, DEFAULT_MINIMUM_PREHASH_CACHE_SIZE, DEFAULT_MINIMUM_SIZE_KB, MAX_HASH_SIZE, PRESET_NAME_RESERVED, PRESET_NUMBER, RESERVER_PRESET_IDX, SettingsCustom, ComboBoxItems};
+use crate::settings::model::{
+    BasicSettings, ComboBoxItems, DEFAULT_BIGGEST_FILES, DEFAULT_MAX_VIDEO_THUMBNAIL_POSITION_PERCENT, DEFAULT_MAXIMUM_SIZE_KB, DEFAULT_MIN_VIDEO_THUMBNAIL_POSITION_PERCENT,
+    DEFAULT_MINIMUM_CACHE_SIZE, DEFAULT_MINIMUM_PREHASH_CACHE_SIZE, DEFAULT_MINIMUM_SIZE_KB, MAX_HASH_SIZE, PRESET_NAME_RESERVED, PRESET_NUMBER, RESERVER_PRESET_IDX,
+    SettingsCustom,
+};
 use crate::{Callabler, GuiState, MainWindow, Settings, flk};
 
 pub(crate) fn connect_changing_settings_preset(app: &MainWindow) {
@@ -510,7 +514,7 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
 pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let settings = app.global::<Settings>();
 
-    let collected_items = StringComboBoxItems::regenerate_items();
+    let combo_box_items = collect_combo_box_settings(app);
 
     let included_directories_model = settings.get_included_directories_model();
     let included_directories = included_directories_model.iter().map(|model| PathBuf::from(model.path.as_str())).collect::<Vec<_>>();
@@ -560,34 +564,25 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let similar_music_compare_fingerprints_only_with_similar_titles = settings.get_similar_music_compare_fingerprints_only_with_similar_titles();
     let similar_music_delete_outdated_entries = settings.get_similar_music_delete_outdated_entries();
 
-    let similar_images_sub_hash_size_idx = settings.get_similar_images_sub_hash_size_index();
-    let similar_images_sub_hash_size = StringComboBoxItems::get_config_name_from_idx(similar_images_sub_hash_size_idx as usize, &collected_items.hash_size);
-    let similar_images_sub_hash_alg_idx = settings.get_similar_images_sub_hash_alg_index();
-    let similar_images_sub_hash_alg = StringComboBoxItems::get_config_name_from_idx(similar_images_sub_hash_alg_idx as usize, &collected_items.image_hash_alg);
-    let similar_images_sub_resize_algorithm_idx = settings.get_similar_images_sub_resize_algorithm_index();
-    let similar_images_sub_resize_algorithm = StringComboBoxItems::get_config_name_from_idx(similar_images_sub_resize_algorithm_idx as usize, &collected_items.resize_algorithm);
+    let similar_images_sub_hash_size = combo_box_items.hash_size.config_name.clone();
+    let similar_images_sub_hash_alg = combo_box_items.image_hash_alg.config_name.clone();
+    let similar_images_sub_resize_algorithm = combo_box_items.resize_algorithm.config_name.clone();
     let similar_images_sub_ignore_same_size = settings.get_similar_images_sub_ignore_same_size();
     let similar_images_sub_similarity = settings.get_similar_images_sub_current_similarity().round() as i32;
 
-    let duplicates_sub_check_method_idx = settings.get_duplicates_sub_check_method_index();
-    let duplicates_sub_check_method = StringComboBoxItems::get_config_name_from_idx(duplicates_sub_check_method_idx as usize, &collected_items.duplicates_check_method);
-    let duplicates_sub_available_hash_type_idx = settings.get_duplicates_sub_available_hash_type_index();
-    let duplicates_sub_available_hash_type = StringComboBoxItems::get_config_name_from_idx(duplicates_sub_available_hash_type_idx as usize, &collected_items.duplicates_hash_type);
-
-    let biggest_files_sub_method_idx = settings.get_biggest_files_sub_method_index();
-    let biggest_files_sub_method = StringComboBoxItems::get_config_name_from_idx(biggest_files_sub_method_idx as usize, &collected_items.biggest_files_method);
+    let duplicates_sub_check_method = combo_box_items.duplicates_check_method.config_name.clone();
+    let duplicates_sub_available_hash_type = combo_box_items.duplicates_hash_type.config_name.clone();
+    let biggest_files_sub_method = combo_box_items.biggest_files_method.config_name.clone();
     let biggest_files_sub_number_of_files = settings.get_biggest_files_sub_number_of_files().parse().unwrap_or(DEFAULT_BIGGEST_FILES);
 
     let similar_videos_sub_ignore_same_size = settings.get_similar_videos_sub_ignore_same_size();
     let similar_videos_sub_similarity = settings.get_similar_videos_sub_current_similarity().round() as i32;
-    let similar_videos_crop_detect_idx = settings.get_similar_videos_crop_detect_index();
-    let similar_videos_crop_detect = StringComboBoxItems::get_config_name_from_idx(similar_videos_crop_detect_idx as usize, &collected_items.videos_crop_detect);
+    let similar_videos_crop_detect = combo_box_items.videos_crop_detect.config_name.clone();
     let similar_videos_skip_forward_amount = settings.get_similar_videos_skip_forward_amount() as u32;
     let similar_videos_vid_hash_duration = settings.get_similar_videos_vid_hash_duration() as u32;
     let similar_videos_thumbnail_percentage = settings.get_similar_videos_thumbnail_percentage().round() as u8;
 
-    let similar_music_sub_audio_check_type_idx = settings.get_similar_music_sub_audio_check_type_index();
-    let similar_music_sub_audio_check_type = StringComboBoxItems::get_config_name_from_idx(similar_music_sub_audio_check_type_idx as usize, &collected_items.audio_check_type);
+    let similar_music_sub_audio_check_type = combo_box_items.audio_check_type.config_name.clone();
     let similar_music_sub_approximate_comparison = settings.get_similar_music_sub_approximate_comparison();
     let similar_music_sub_title = settings.get_similar_music_sub_title();
     let similar_music_sub_artist = settings.get_similar_music_sub_artist();
@@ -604,12 +599,9 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let broken_files_sub_image = settings.get_broken_files_sub_image();
     let broken_files_sub_video = settings.get_broken_files_sub_video();
 
-    let video_optimizer_sub_mode_idx = settings.get_video_optimizer_sub_mode_index();
-    let video_optimizer_mode = StringComboBoxItems::get_config_name_from_idx(video_optimizer_sub_mode_idx as usize, &collected_items.video_optimizer_mode);
-    let video_optimizer_sub_crop_type_idx = settings.get_video_optimizer_sub_crop_type_index();
-    let video_optimizer_crop_type = StringComboBoxItems::get_config_name_from_idx(video_optimizer_sub_crop_type_idx as usize, &collected_items.video_optimizer_crop_type);
-    let video_optimizer_sub_video_codec_idx = settings.get_video_optimizer_sub_video_codec_index();
-    let video_optimizer_video_codec = StringComboBoxItems::get_config_name_from_idx(video_optimizer_sub_video_codec_idx as usize, &collected_items.video_optimizer_video_codec);
+    let video_optimizer_mode = combo_box_items.video_optimizer_mode.config_name.clone();
+    let video_optimizer_crop_type = combo_box_items.video_optimizer_crop_type.config_name.clone();
+    let video_optimizer_video_codec = combo_box_items.video_optimizer_video_codec.config_name;
     let video_optimizer_excluded_codecs = settings.get_video_optimizer_sub_excluded_codecs().to_string();
     let video_optimizer_video_quality = settings.get_video_optimizer_sub_video_quality().round() as u32;
     let video_optimizer_fail_if_bigger = settings.get_video_optimizer_sub_fail_if_bigger();
@@ -720,26 +712,38 @@ pub(crate) fn collect_combo_box_settings(app: &MainWindow) -> ComboBoxItems {
     let collected_combo_boxes = StringComboBoxItems::regenerate_items();
     let settings = app.global::<Settings>();
 
-    let video_optimizer_sub_video_codec_idx = settings.get_video_optimizer_sub_video_codec_index();
+    let language_idx = settings.get_language_index() as usize;
+    let hash_size_idx = settings.get_similar_images_sub_hash_size_index() as usize;
+    let resize_algorithm_idx = settings.get_similar_images_sub_resize_algorithm_index() as usize;
+    let image_hash_alg_idx = settings.get_similar_images_sub_hash_alg_index() as usize;
+    let duplicates_hash_type_idx = settings.get_duplicates_sub_available_hash_type_index() as usize;
+    let biggest_files_method_idx = settings.get_biggest_files_sub_method_index() as usize;
+    let audio_check_type_idx = settings.get_similar_music_sub_audio_check_type_index() as usize;
+    let duplicates_check_method_idx = settings.get_duplicates_sub_check_method_index() as usize;
+    let videos_crop_detect_idx = settings.get_similar_videos_crop_detect_index() as usize;
+    let video_optimizer_crop_type_idx = settings.get_video_optimizer_sub_crop_type_index() as usize;
+    let video_optimizer_mode_idx = settings.get_video_optimizer_sub_mode_index() as usize;
+    let video_optimizer_video_codec_idx = settings.get_video_optimizer_sub_video_codec_index() as usize;
+
     ComboBoxItems {
-        language: StringComboBoxItem {},
-        hash_size: StringComboBoxItem {},
-        resize_algorithm: StringComboBoxItem {},
-        image_hash_alg: StringComboBoxItem {},
-        duplicates_hash_type: StringComboBoxItem {},
-        biggest_files_method: StringComboBoxItem {},
-        audio_check_type: StringComboBoxItem {},
-        duplicates_check_method: StringComboBoxItem {},
-        videos_crop_detect: StringComboBoxItem {},
-        video_optimizer_crop_type: StringComboBoxItem {},
-        video_optimizer_mode: StringComboBoxItem {},
-        video_optimizer_video_codec: collected_combo_boxes.video_optimizer_video_codec[video_optimizer_sub_video_codec_idx].clone(),
+        language: collected_combo_boxes.languages[language_idx].clone(),
+        hash_size: collected_combo_boxes.hash_size[hash_size_idx].clone(),
+        resize_algorithm: collected_combo_boxes.resize_algorithm[resize_algorithm_idx].clone(),
+        image_hash_alg: collected_combo_boxes.image_hash_alg[image_hash_alg_idx].clone(),
+        duplicates_hash_type: collected_combo_boxes.duplicates_hash_type[duplicates_hash_type_idx].clone(),
+        biggest_files_method: collected_combo_boxes.biggest_files_method[biggest_files_method_idx].clone(),
+        audio_check_type: collected_combo_boxes.audio_check_type[audio_check_type_idx].clone(),
+        duplicates_check_method: collected_combo_boxes.duplicates_check_method[duplicates_check_method_idx].clone(),
+        videos_crop_detect: collected_combo_boxes.videos_crop_detect[videos_crop_detect_idx].clone(),
+        video_optimizer_crop_type: collected_combo_boxes.video_optimizer_crop_type[video_optimizer_crop_type_idx].clone(),
+        video_optimizer_mode: collected_combo_boxes.video_optimizer_mode[video_optimizer_mode_idx].clone(),
+        video_optimizer_video_codec: collected_combo_boxes.video_optimizer_video_codec[video_optimizer_video_codec_idx].clone(),
     }
 }
 
 pub(crate) fn collect_base_settings(app: &MainWindow) -> BasicSettings {
     let settings = app.global::<Settings>();
-    let collected_items = StringComboBoxItems::regenerate_items();
+    let combo_box_items = collect_combo_box_settings(app);
 
     let default_preset = settings.get_settings_preset_idx();
     let preset_names = settings.get_settings_presets().iter().map(|x| x.to_string()).collect::<Vec<_>>();
@@ -747,8 +751,7 @@ pub(crate) fn collect_base_settings(app: &MainWindow) -> BasicSettings {
     let window_height = (app.window().size().height as f32 / app.window().scale_factor()) as u32;
 
     assert_eq!(preset_names.len(), PRESET_NUMBER);
-    let lang_idx = settings.get_language_index();
-    let language = StringComboBoxItems::get_config_name_from_idx(lang_idx as usize, &collected_items.languages);
+    let language = combo_box_items.language.config_name;
     // let language = LANGUAGE_LIST[lang_idx as usize].short_name.to_string();
     let dark_theme = settings.get_dark_theme();
     let show_only_icons = settings.get_show_only_icons();

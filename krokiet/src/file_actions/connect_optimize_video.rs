@@ -10,7 +10,7 @@ use slint::{ComponentHandle, SharedString, Weak};
 
 use crate::common::IntDataVideoOptimizer;
 use crate::model_operations::model_processor::{MessageType, ModelProcessor};
-use crate::settings::collect_settings;
+use crate::settings::{collect_combo_box_settings, collect_settings};
 use crate::settings::combo_box::StringComboBoxItems;
 use crate::simpler_model::{SimplerMainListModel, ToSimplerVec};
 use crate::{Callabler, GuiState, MainWindow};
@@ -31,13 +31,12 @@ pub(crate) fn connect_optimize_video(app: &MainWindow, progress_sender: Sender<P
 
             let settings = collect_settings(&app);
 
-            let collected_items = StringComboBoxItems::get_items();
-            let crop_mechanism = StringComboBoxItems::get_value_from_config_name(&settings.video_optimizer_crop_type, &collected_items.video_optimizer_crop_type);
+            let crop_mechanism = collect_combo_box_settings(&app).video_optimizer_crop_type.value;
 
             let processor = ModelProcessor::new(active_tab);
 
             let requested_codec = if reencode {
-                Some(StringComboBoxItems::get_value_from_config_name(&codec, &collected_items.video_optimizer_video_codec))
+                Some(collect_combo_box_settings(&app).video_optimizer_video_codec.value.clone())
             } else {
                 None
             };
@@ -55,16 +54,14 @@ pub(crate) fn connect_optimize_video(app: &MainWindow, progress_sender: Sender<P
             let app = a2.upgrade().expect("Failed to upgrade app :(");
             let active_tab = app.global::<GuiState>().get_active_tab();
 
-            let collected_items = StringComboBoxItems::get_items();
-            let video_codec = StringComboBoxItems::get_value_from_config_name(&codec, &collected_items.video_optimizer_video_codec);
-
+            let codec =  collect_combo_box_settings(&app).video_optimizer_video_codec.value.clone();
             let processor = ModelProcessor::new(active_tab);
 
             processor.optimize_selected_videos(
                 progress_sender,
                 weak_app,
                 stop_flag,
-                video_codec,
+                codec,
                 fail_if_bigger,
                 overwrite_files,
                 video_quality,

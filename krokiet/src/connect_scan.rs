@@ -27,7 +27,7 @@ use czkawka_core::tools::similar_images::{ImagesEntry, SimilarImages, SimilarIma
 use czkawka_core::tools::similar_videos::core::{format_bitrate_opt, format_duration_opt};
 use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters, VideosEntry, crop_detect_from_str};
 use czkawka_core::tools::temporary::{Temporary, TemporaryFileEntry};
-use czkawka_core::tools::video_optimizer::{VideoCropEntry, VideoCropParams, VideoOptimizer, VideoOptimizerParameters, VideoTranscodeEntry, VideoTranscodeParams};
+use czkawka_core::tools::video_optimizer::{VideoCropEntry, VideoCropParams, VideoOptimizer, VideoOptimizerMode, VideoOptimizerParameters, VideoTranscodeEntry, VideoTranscodeParams};
 use humansize::{BINARY, format_size};
 use log::error;
 use rayon::prelude::*;
@@ -42,9 +42,8 @@ use crate::common::{
 };
 use crate::connect_row_selection::checker::set_number_of_enabled_items;
 use crate::connect_row_selection::reset_selection;
-use crate::settings::combo_box::StringComboBoxItems;
-use crate::settings::model::{BasicSettings, SettingsCustom};
-use crate::settings::{collect_base_settings, collect_settings};
+use crate::settings::model::{BasicSettings, ComboBoxItems, SettingsCustom};
+use crate::settings::{collect_base_settings, collect_combo_box_settings, collect_settings};
 use crate::shared_models::SharedModels;
 use crate::{ActiveTab, GuiState, MainListModel, MainWindow, ProgressToSend, flk};
 
@@ -75,6 +74,7 @@ pub(crate) fn connect_scan_button(app: &MainWindow, progress_sender: Sender<Prog
 
         let custom_settings = collect_settings(&app);
         let basic_settings = collect_base_settings(&app);
+        let combo_box_items = collect_combo_box_settings(&app);  
 
         let cloned_model = Arc::clone(&shared_models);
 
@@ -83,43 +83,43 @@ pub(crate) fn connect_scan_button(app: &MainWindow, progress_sender: Sender<Prog
         let a = app.as_weak();
         match active_tab {
             ActiveTab::DuplicateFiles => {
-                scan_duplicates(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
+                scan_duplicates(a, progress_sender, stop_flag, custom_settings, basic_settings, combo_box_items, cloned_model);
             }
             ActiveTab::EmptyFolders => {
-                scan_empty_folders(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
+                scan_empty_folders(a, progress_sender, stop_flag, custom_settings, basic_settings, combo_box_items, cloned_model);
             }
             ActiveTab::BigFiles => {
-                scan_big_files(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
+                scan_big_files(a, progress_sender, stop_flag, custom_settings, basic_settings, combo_box_items, cloned_model);
             }
             ActiveTab::EmptyFiles => {
-                scan_empty_files(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
+                scan_empty_files(a, progress_sender, stop_flag, custom_settings, basic_settings, combo_box_items, cloned_model);
             }
             ActiveTab::SimilarImages => {
-                scan_similar_images(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
+                scan_similar_images(a, progress_sender, stop_flag, custom_settings, basic_settings, combo_box_items, cloned_model);
             }
             ActiveTab::SimilarVideos => {
-                scan_similar_videos(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
+                scan_similar_videos(a, progress_sender, stop_flag, custom_settings, basic_settings, combo_box_items, cloned_model);
             }
             ActiveTab::SimilarMusic => {
-                scan_similar_music(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
+                scan_similar_music(a, progress_sender, stop_flag, custom_settings, basic_settings, combo_box_items, cloned_model);
             }
             ActiveTab::InvalidSymlinks => {
-                scan_invalid_symlinks(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
+                scan_invalid_symlinks(a, progress_sender, stop_flag, custom_settings, basic_settings, combo_box_items, cloned_model);
             }
             ActiveTab::BadExtensions => {
-                scan_bad_extensions(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
+                scan_bad_extensions(a, progress_sender, stop_flag, custom_settings, basic_settings, combo_box_items, cloned_model);
             }
             ActiveTab::BrokenFiles => {
-                scan_broken_files(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
+                scan_broken_files(a, progress_sender, stop_flag, custom_settings, basic_settings, combo_box_items, cloned_model);
             }
             ActiveTab::TemporaryFiles => {
-                scan_temporary_files(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
+                scan_temporary_files(a, progress_sender, stop_flag, custom_settings, basic_settings, combo_box_items, cloned_model);
             }
             ActiveTab::ExifRemover => {
-                scan_exif_remover(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
+                scan_exif_remover(a, progress_sender, stop_flag, custom_settings, basic_settings, combo_box_items, cloned_model);
             }
             ActiveTab::VideoOptimizer => {
-                scan_video_optimizer(a, progress_sender, stop_flag, custom_settings, basic_settings, cloned_model);
+                scan_video_optimizer(a, progress_sender, stop_flag, custom_settings, basic_settings, combo_box_items, cloned_model);
             }
             ActiveTab::Settings | ActiveTab::About => panic!("Button should be disabled"),
         }
@@ -134,15 +134,14 @@ fn scan_duplicates(
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
     basic_settings: BasicSettings,
+    combo_box_items: ComboBoxItems,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let collected_items = StringComboBoxItems::get_items();
-
-            let hash_type = StringComboBoxItems::get_value_from_config_name(&custom_settings.duplicates_sub_available_hash_type, &collected_items.duplicates_hash_type);
-            let check_method = StringComboBoxItems::get_value_from_config_name(&custom_settings.duplicates_sub_check_method, &collected_items.duplicates_check_method);
+            let hash_type = combo_box_items.duplicates_hash_type.value;
+            let check_method = combo_box_items.duplicates_check_method.value;
 
             let params = DuplicateFinderParameters::new(
                 check_method,
@@ -294,6 +293,7 @@ fn scan_empty_folders(
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
     basic_settings: BasicSettings,
+    combo_box_items: ComboBoxItems,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
@@ -348,14 +348,13 @@ fn scan_big_files(
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
     basic_settings: BasicSettings,
+    combo_box_items: ComboBoxItems,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let collected_items = StringComboBoxItems::get_items();
-            let big_files_mode = StringComboBoxItems::get_value_from_config_name(&custom_settings.biggest_files_sub_method, &collected_items.biggest_files_method);
-
+            let big_files_mode = combo_box_items.biggest_files_method.value;
             let params = BigFileParameters::new(custom_settings.biggest_files_sub_number_of_files as usize, big_files_mode);
             let mut tool = BigFile::new(params);
 
@@ -426,6 +425,7 @@ fn scan_empty_files(
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
     basic_settings: BasicSettings,
+    combo_box_items: ComboBoxItems,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
@@ -481,14 +481,14 @@ fn scan_similar_images(
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
     basic_settings: BasicSettings,
+    combo_box_items: ComboBoxItems,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let collected_items = StringComboBoxItems::get_items();
-            let hash_alg = StringComboBoxItems::get_value_from_config_name(&custom_settings.similar_images_sub_hash_alg, &collected_items.image_hash_alg);
-            let resize_algorithm = StringComboBoxItems::get_value_from_config_name(&custom_settings.similar_images_sub_resize_algorithm, &collected_items.resize_algorithm);
+            let hash_alg = combo_box_items.image_hash_alg.value;
+            let resize_algorithm = combo_box_items.resize_algorithm.value;
             let hash_size = custom_settings
                 .similar_images_sub_hash_size
                 .parse()
@@ -603,6 +603,7 @@ fn scan_similar_videos(
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
     basic_settings: BasicSettings,
+    combo_box_items: ComboBoxItems,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
@@ -737,6 +738,7 @@ fn scan_similar_music(
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
     basic_settings: BasicSettings,
+    combo_box_items: ComboBoxItems,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
@@ -770,9 +772,7 @@ fn scan_similar_music(
                 return Ok(());
             }
 
-            let collected_items = StringComboBoxItems::get_items();
-            let audio_check_type = StringComboBoxItems::get_value_from_config_name(&custom_settings.similar_music_sub_audio_check_type, &collected_items.audio_check_type);
-
+            let audio_check_type = combo_box_items.audio_check_type.value;
             let params = SameMusicParameters::new(
                 music_similarity,
                 custom_settings.similar_music_sub_approximate_comparison,
@@ -863,6 +863,7 @@ fn scan_invalid_symlinks(
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
     basic_settings: BasicSettings,
+    combo_box_items: ComboBoxItems,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
@@ -923,6 +924,7 @@ fn scan_temporary_files(
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
     basic_settings: BasicSettings,
+    combo_box_items: ComboBoxItems,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
@@ -978,6 +980,7 @@ fn scan_broken_files(
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
     basic_settings: BasicSettings,
+    combo_box_items: ComboBoxItems,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
@@ -1074,6 +1077,7 @@ fn scan_bad_extensions(
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
     basic_settings: BasicSettings,
+    combo_box_items: ComboBoxItems,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
@@ -1135,6 +1139,7 @@ fn scan_exif_remover(
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
     basic_settings: BasicSettings,
+    combo_box_items: ComboBoxItems,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
@@ -1215,14 +1220,15 @@ fn scan_video_optimizer(
     stop_flag: Arc<AtomicBool>,
     custom_settings: SettingsCustom,
     basic_settings: BasicSettings,
+    combo_box_items: ComboBoxItems,
     shared_models: Arc<Mutex<SharedModels>>,
 ) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let collected_items = StringComboBoxItems::get_items();
-            let params = if custom_settings.video_optimizer_mode == "crop" {
-                let crop_detect = StringComboBoxItems::get_value_from_config_name(&custom_settings.video_optimizer_crop_type, &collected_items.video_optimizer_crop_type);
+            let video_optimizer_mode = combo_box_items.video_optimizer_mode.value;
+            let params = if video_optimizer_mode == VideoOptimizerMode::VideoCrop {
+                let crop_detect = combo_box_items.video_optimizer_crop_type.value;
                 VideoOptimizerParameters::VideoCrop(VideoCropParams { crop_detect })
             } else {
                 let excluded_codecs: Vec<String> = custom_settings
