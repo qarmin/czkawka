@@ -10,9 +10,9 @@ homepage = "https://github.com/qarmin/czkawka"
 repository = "https://github.com/qarmin/czkawka"
 
 [dependencies]
-gdk4 = { version = "0.10", default-features = false, features = ["v4_6"] }
-glib = "=0.21"
-gtk4 = { version = "0.10", default-features = false, features = ["v4_6"] }
+gdk4 = { version = "0.11.0-alpha.2", default-features = false, features = ["v4_6"] }
+glib = "=0.22.0-alpha.2"
+gtk4 = { version = "0.11.0-alpha.2", default-features = false, features = ["v4_6"] }
 
 humansize = "2.1"
 chrono = "0.4.38"

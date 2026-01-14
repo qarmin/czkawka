@@ -162,12 +162,6 @@ impl StringComboBoxItems {
             video_optimizer_video_codec,
         }
     }
-    // pub enum VideoCodec {
-    //     H264,
-    //     H265,
-    //     Av1,
-    //     Vp9,
-    // }
 
     fn convert_to_combobox_items<T>(input: &[(&str, &str, T)]) -> Vec<StringComboBoxItem<T>>
     where

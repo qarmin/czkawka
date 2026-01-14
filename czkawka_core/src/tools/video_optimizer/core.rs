@@ -185,7 +185,14 @@ impl VideoOptimizer {
     }
 
     #[fun_time(message = "load_video_transcode_cache", level = "debug")]
-    fn load_video_transcode_cache(&mut self, all_files: Vec<VideoTranscodeEntry>) -> (BTreeMap<String, VideoTranscodeEntry>, BTreeMap<String, VideoTranscodeEntry>, BTreeMap<String, VideoTranscodeEntry>) {
+    fn load_video_transcode_cache(
+        &mut self,
+        all_files: Vec<VideoTranscodeEntry>,
+    ) -> (
+        BTreeMap<String, VideoTranscodeEntry>,
+        BTreeMap<String, VideoTranscodeEntry>,
+        BTreeMap<String, VideoTranscodeEntry>,
+    ) {
         let loaded_hash_map;
         let mut records_already_cached: BTreeMap<String, VideoTranscodeEntry> = Default::default();
         let mut non_cached_files_to_check: BTreeMap<String, VideoTranscodeEntry> = Default::default();
@@ -228,7 +235,11 @@ impl VideoOptimizer {
     }
 
     #[fun_time(message = "load_video_crop_cache", level = "debug")]
-    fn load_video_crop_cache(&mut self, all_files: Vec<VideoCropEntry>, params: VideoCroppingMechanism) -> (BTreeMap<String, VideoCropEntry>, BTreeMap<String, VideoCropEntry>, BTreeMap<String, VideoCropEntry>) {
+    fn load_video_crop_cache(
+        &mut self,
+        all_files: Vec<VideoCropEntry>,
+        params: VideoCroppingMechanism,
+    ) -> (BTreeMap<String, VideoCropEntry>, BTreeMap<String, VideoCropEntry>, BTreeMap<String, VideoCropEntry>) {
         let loaded_hash_map;
         let mut records_already_cached: BTreeMap<String, VideoCropEntry> = Default::default();
         let mut non_cached_files_to_check: BTreeMap<String, VideoCropEntry> = Default::default();

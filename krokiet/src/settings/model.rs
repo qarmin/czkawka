@@ -189,6 +189,10 @@ impl Default for SettingsCustom {
     }
 }
 
+// pub struct ComboBoxItems {
+//     pub d
+// }
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BasicSettings {
     #[serde(default)]

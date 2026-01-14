@@ -81,7 +81,7 @@ fn hardlink_symlink(sv: &SubView, hardlinking: TypeOfTool, text_view_errors: &Te
     let mut vec_tree_path_to_remove: Vec<TreePath> = Vec::new(); // List of hardlinked files without its root
     let mut vec_symhardlink_data: Vec<SymHardlinkData> = Vec::new();
 
-    let current_iter: TreeIter = match model.iter_first() {
+    let mut current_iter: TreeIter = match model.iter_first() {
         Some(t) => t,
         None => return, // No records
     };
@@ -112,7 +112,7 @@ fn hardlink_symlink(sv: &SubView, hardlinking: TypeOfTool, text_view_errors: &Te
             }
 
             current_symhardlink_data = None;
-            assert!(model.iter_next(&current_iter), "HEADER, shouldn't be a last item.");
+            assert!(model.iter_next(&mut current_iter), "HEADER, shouldn't be a last item.");
             continue;
         }
 
@@ -144,7 +144,7 @@ fn hardlink_symlink(sv: &SubView, hardlinking: TypeOfTool, text_view_errors: &Te
             }
         }
 
-        if !model.iter_next(&current_iter) {
+        if !model.iter_next(&mut current_iter) {
             if let Some(current_symhardlink_data) = current_symhardlink_data
                 && !current_symhardlink_data.files_to_symhardlink.is_empty()
             {
@@ -226,11 +226,11 @@ pub async fn check_if_changing_one_item_in_group_and_continue(sv: &SubView, wind
 
     let mut selected_values_in_group = 0;
 
-    if let Some(iter) = model.iter_first() {
+    if let Some(mut iter) = model.iter_first() {
         assert!(model.get::<bool>(&iter, column_header)); // First element should be header
 
         loop {
-            if !model.iter_next(&iter) {
+            if !model.iter_next(&mut iter) {
                 break;
             }
 
