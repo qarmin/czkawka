@@ -10,8 +10,7 @@ use slint::{ComponentHandle, SharedString, Weak};
 
 use crate::common::IntDataVideoOptimizer;
 use crate::model_operations::model_processor::{MessageType, ModelProcessor};
-use crate::settings::{collect_combo_box_settings, collect_settings};
-use crate::settings::combo_box::StringComboBoxItems;
+use crate::settings::collect_combo_box_settings;
 use crate::simpler_model::{SimplerMainListModel, ToSimplerVec};
 use crate::{Callabler, GuiState, MainWindow};
 
@@ -21,7 +20,7 @@ pub(crate) fn connect_optimize_video(app: &MainWindow, progress_sender: Sender<P
     let progress_sender_crop = progress_sender.clone();
     let stop_flag_crop = stop_flag.clone();
     app.global::<Callabler>()
-        .on_crop_video_items(move |reencode: bool, codec: SharedString, video_quality: f32, overwrite_files: bool| {
+        .on_crop_video_items(move |reencode: bool, _codec: SharedString, video_quality: f32, overwrite_files: bool| {
             let weak_app = a.clone();
             let progress_sender = progress_sender_crop.clone();
             let stop_flag = stop_flag_crop.clone();
@@ -29,14 +28,12 @@ pub(crate) fn connect_optimize_video(app: &MainWindow, progress_sender: Sender<P
             let app = a.upgrade().expect("Failed to upgrade app :(");
             let active_tab = app.global::<GuiState>().get_active_tab();
 
-            let settings = collect_settings(&app);
-
             let crop_mechanism = collect_combo_box_settings(&app).video_optimizer_crop_type.value;
 
             let processor = ModelProcessor::new(active_tab);
 
             let requested_codec = if reencode {
-                Some(collect_combo_box_settings(&app).video_optimizer_video_codec.value.clone())
+                Some(collect_combo_box_settings(&app).video_optimizer_video_codec.value)
             } else {
                 None
             };
@@ -46,7 +43,7 @@ pub(crate) fn connect_optimize_video(app: &MainWindow, progress_sender: Sender<P
 
     let a2 = app.as_weak();
     app.global::<Callabler>().on_reencode_video_items(
-        move |codec: SharedString, fail_if_bigger: bool, overwrite_files: bool, video_quality: f32, limit_video_size: bool, max_width: i32, max_height: i32| {
+        move |_codec: SharedString, fail_if_bigger: bool, overwrite_files: bool, video_quality: f32, limit_video_size: bool, max_width: i32, max_height: i32| {
             let weak_app = a2.clone();
             let progress_sender = progress_sender.clone();
             let stop_flag = stop_flag.clone();
@@ -54,7 +51,7 @@ pub(crate) fn connect_optimize_video(app: &MainWindow, progress_sender: Sender<P
             let app = a2.upgrade().expect("Failed to upgrade app :(");
             let active_tab = app.global::<GuiState>().get_active_tab();
 
-            let codec =  collect_combo_box_settings(&app).video_optimizer_video_codec.value.clone();
+            let codec = collect_combo_box_settings(&app).video_optimizer_video_codec.value;
             let processor = ModelProcessor::new(active_tab);
 
             processor.optimize_selected_videos(
