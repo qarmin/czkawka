@@ -72,7 +72,7 @@ pub const LANGUAGE_LIST: &[Language] = &[
     Language {
         long_name: "Português Brasileiro (Brazilian Portuguese)",
         short_name: "pt-BR",
-        left_panel_size: 175.0,
+        left_panel_size: 205.0,
     },
     Language {
         long_name: "简体中文 (Simplified Chinese)",
@@ -107,7 +107,7 @@ pub const LANGUAGE_LIST: &[Language] = &[
     Language {
         long_name: "Български (Bulgarian)",
         short_name: "bg",
-        left_panel_size: 175.0,
+        left_panel_size: 205.0,
     },
     Language {
         long_name: "Ελληνικά (Greek)",
