@@ -621,10 +621,10 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let video_optimizer_crop_type = combo_box_items.video_optimizer_crop_type.config_name.clone();
     let video_optimizer_video_codec = combo_box_items.video_optimizer_video_codec.config_name;
     let video_optimizer_excluded_codecs = settings.get_video_optimizer_sub_excluded_codecs().to_string();
-    let video_optimizer_black_pixel_threshold = settings.get_video_optimizer_sub_black_pixel_threshold().parse::<u8>().unwrap_or(20);
-    let video_optimizer_black_bar_min_percentage = settings.get_video_optimizer_sub_black_bar_min_percentage().parse::<u8>().unwrap_or(90);
-    let video_optimizer_max_samples = settings.get_video_optimizer_sub_max_samples().parse::<usize>().unwrap_or(60);
-    let video_optimizer_min_crop_size = settings.get_video_optimizer_sub_min_crop_size().parse::<u32>().unwrap_or(5);
+    let video_optimizer_black_pixel_threshold = settings.get_video_optimizer_sub_black_pixel_threshold().parse::<u8>().unwrap_or(20).min(128);
+    let video_optimizer_black_bar_min_percentage = settings.get_video_optimizer_sub_black_bar_min_percentage().parse::<u8>().unwrap_or(90).clamp(50, 100);
+    let video_optimizer_max_samples = settings.get_video_optimizer_sub_max_samples().parse::<usize>().unwrap_or(60).clamp(5, 1000);
+    let video_optimizer_min_crop_size = settings.get_video_optimizer_sub_min_crop_size().parse::<u32>().unwrap_or(5).clamp(1, 1000);
     let video_optimizer_video_quality = settings.get_video_optimizer_sub_video_quality().round() as u32;
     let video_optimizer_fail_if_bigger = settings.get_video_optimizer_sub_fail_if_bigger();
     let video_optimizer_overwrite_files = settings.get_video_optimizer_sub_overwrite_files();
