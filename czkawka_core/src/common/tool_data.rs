@@ -186,11 +186,6 @@ pub trait CommonData {
         self.get_cd().minimal_file_size
     }
 
-    fn set_reference_directory(&mut self, reference_directory: Vec<PathBuf>) {
-        let messages = self.get_cd_mut().directories.set_reference_directory(&reference_directory);
-        self.get_cd_mut().text_messages.extend_with_another_messages(messages);
-    }
-
     #[cfg(target_family = "unix")]
     fn set_exclude_other_filesystems(&mut self, exclude_other_filesystems: bool) {
         self.get_cd_mut().directories.set_exclude_other_filesystems(exclude_other_filesystems);
@@ -241,19 +236,26 @@ pub trait CommonData {
         self.get_cd().move_to_trash
     }
 
-    fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) {
-        let messages = self.get_cd_mut().directories.set_included_directory(included_directory);
+    fn set_included_paths(&mut self, included_paths: Vec<PathBuf>) {
+        let messages = self.get_cd_mut().directories.set_included_paths(included_paths);
         self.get_cd_mut().text_messages.extend_with_another_messages(messages);
     }
 
-    fn set_excluded_directory(&mut self, excluded_directory: Vec<PathBuf>) {
-        let messages = self.get_cd_mut().directories.set_excluded_directory(excluded_directory);
+    fn set_excluded_paths(&mut self, excluded_paths: Vec<PathBuf>) {
+        let messages = self.get_cd_mut().directories.set_excluded_paths(excluded_paths);
         self.get_cd_mut().text_messages.extend_with_another_messages(messages);
     }
+
+    fn set_reference_paths(&mut self, reference_paths: Vec<PathBuf>) {
+        let messages = self.get_cd_mut().directories.set_reference_paths(reference_paths);
+        self.get_cd_mut().text_messages.extend_with_another_messages(messages);
+    }
+
     fn set_allowed_extensions(&mut self, allowed_extensions: String) {
         let messages = self.get_cd_mut().extensions.set_allowed_extensions(allowed_extensions);
         self.get_cd_mut().text_messages.extend_with_another_messages(messages);
     }
+
     fn set_excluded_extensions(&mut self, excluded_extensions: String) {
         let messages = self.get_cd_mut().extensions.set_excluded_extensions(excluded_extensions);
         self.get_cd_mut().text_messages.extend_with_another_messages(messages);

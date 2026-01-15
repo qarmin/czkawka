@@ -587,7 +587,7 @@ mod tests {
         let secs = NOW.duration_since(SystemTime::UNIX_EPOCH).expect("Cannot fail calculating duration since epoch").as_secs();
 
         let mut common_data = CommonToolData::new(ToolType::SimilarImages);
-        common_data.directories.set_included_directory([dir.path().to_owned()].to_vec());
+        common_data.directories.set_included_paths([dir.path().to_owned()].to_vec());
         common_data.set_minimal_file_size(0);
 
         match DirTraversalBuilder::new()
@@ -638,7 +638,7 @@ mod tests {
         let secs = NOW.duration_since(SystemTime::UNIX_EPOCH).expect("Cannot fail calculating duration since epoch").as_secs();
 
         let mut common_data = CommonToolData::new(ToolType::SimilarImages);
-        common_data.directories.set_included_directory([dir.path().to_owned()].to_vec());
+        common_data.directories.set_included_paths([dir.path().to_owned()].to_vec());
         common_data.set_minimal_file_size(0);
 
         match DirTraversalBuilder::new()
@@ -684,7 +684,7 @@ mod tests {
         let secs = NOW.duration_since(SystemTime::UNIX_EPOCH).expect("Cannot fail duration from epoch").as_secs();
 
         let mut common_data = CommonToolData::new(ToolType::SimilarImages);
-        common_data.directories.set_included_directory([dir.path().to_owned()].to_vec());
+        common_data.directories.set_included_paths([dir.path().to_owned()].to_vec());
         common_data.set_minimal_file_size(0);
 
         match DirTraversalBuilder::new()

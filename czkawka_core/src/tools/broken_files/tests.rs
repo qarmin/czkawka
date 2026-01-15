@@ -34,7 +34,7 @@ fn test_find_broken_image() {
 
     let params = BrokenFilesParameters::new(CheckedTypes::IMAGE);
     let mut finder = BrokenFiles::new(params);
-    finder.set_included_directory(vec![temp_dir.path().to_path_buf()]);
+    finder.set_included_paths(vec![temp_dir.path().to_path_buf()]);
     finder.set_recursive_search(true);
     finder.set_use_cache(false);
 
@@ -57,7 +57,7 @@ fn test_valid_image() {
 
     let params = BrokenFilesParameters::new(CheckedTypes::IMAGE);
     let mut finder = BrokenFiles::new(params);
-    finder.set_included_directory(vec![temp_dir.path().to_path_buf()]);
+    finder.set_included_paths(vec![temp_dir.path().to_path_buf()]);
     finder.set_recursive_search(true);
     finder.set_use_cache(false);
 
@@ -83,7 +83,7 @@ fn test_broken_audio() {
 
     let params = BrokenFilesParameters::new(CheckedTypes::AUDIO);
     let mut finder = BrokenFiles::new(params);
-    finder.set_included_directory(vec![temp_dir.path().to_path_buf()]);
+    finder.set_included_paths(vec![temp_dir.path().to_path_buf()]);
     finder.set_recursive_search(true);
     finder.set_use_cache(false);
 
@@ -108,7 +108,7 @@ fn test_mixed_valid_and_broken_images() {
 
     let params = BrokenFilesParameters::new(CheckedTypes::IMAGE);
     let mut finder = BrokenFiles::new(params);
-    finder.set_included_directory(vec![temp_dir.path().to_path_buf()]);
+    finder.set_included_paths(vec![temp_dir.path().to_path_buf()]);
     finder.set_recursive_search(true);
     finder.set_use_cache(false);
 
@@ -136,7 +136,7 @@ fn test_multiple_file_types() {
 
     let params = BrokenFilesParameters::new(CheckedTypes::IMAGE | CheckedTypes::AUDIO);
     let mut finder = BrokenFiles::new(params);
-    finder.set_included_directory(vec![temp_dir.path().to_path_buf()]);
+    finder.set_included_paths(vec![temp_dir.path().to_path_buf()]);
     finder.set_recursive_search(true);
     finder.set_use_cache(false);
 
@@ -153,7 +153,7 @@ fn test_empty_directory() {
 
     let params = BrokenFilesParameters::new(CheckedTypes::IMAGE);
     let mut finder = BrokenFiles::new(params);
-    finder.set_included_directory(vec![temp_dir.path().to_path_buf()]);
+    finder.set_included_paths(vec![temp_dir.path().to_path_buf()]);
     finder.set_recursive_search(true);
     finder.set_use_cache(false);
 
@@ -174,7 +174,7 @@ fn test_no_file_types_selected() {
 
     let params = BrokenFilesParameters::new(CheckedTypes::NONE);
     let mut finder = BrokenFiles::new(params);
-    finder.set_included_directory(vec![temp_dir.path().to_path_buf()]);
+    finder.set_included_paths(vec![temp_dir.path().to_path_buf()]);
     finder.set_recursive_search(true);
     finder.set_use_cache(false);
 

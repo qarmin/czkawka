@@ -19,7 +19,7 @@ fn test_similar_videos_empty_directory() {
     let params = SimilarVideosParameters::new(10, false, false, 15, 10, Cropdetect::Letterbox, false, 0, false);
 
     let mut finder = SimilarVideos::new(params);
-    finder.set_included_directory(vec![path.to_path_buf()]);
+    finder.set_included_paths(vec![path.to_path_buf()]);
     finder.set_recursive_search(true);
     finder.set_use_cache(false);
 

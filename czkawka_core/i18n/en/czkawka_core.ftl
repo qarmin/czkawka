@@ -15,13 +15,13 @@ core_folder_modified_before_epoch = Folder {$name} seems to have been modified b
 core_file_no_modification_date = Unable to get modification date from file {$name}, reason {$reason}
 core_folder_no_modification_date = Unable to get modification date from folder {$name}, reason {$reason}
 
-core_missing_no_chosen_included_directory = At least one directory must be provided
-core_directory_must_exists = Directories: Provided folder path must exist, ignoring { $path }
-core_directory_must_be_directory = Directories: Provided path must point to a directory, ignoring { $path }
-core_included_directory_zero_valid_directories = Included Directory ERROR: Not even one valid included path was found, which is required
-core_excluded_directory_pointless_slash = Directories: Excluding / is pointless, because it means no files will be scanned
-core_directory_overlap = Directories: All directories to search overlap with excluded directories
-core_directory_unable_to_get_device_id = Directories: Unable to get device id from folder { $path }
+core_missing_no_chosen_included_path = At least one path to scan must be provided
+core_path_must_exists = Provided path must exist, ignoring { $path }
+core_must_be_directory_or_file = Provided path must point to a vaild directory or file, ignoring { $path }
+core_included_path_zero_valid_paths = Not even one valid included path was found, which is required
+core_excluded_paths_pointless_slash = Excluding / is pointless, because it means no files will be scanned
+core_path_overlap = All searched paths overlap with excluded paths
+core_paths_unable_to_get_device_id = Unable to get device id from folder { $path }
 
 core_ffmpeg_not_found = Cannot find a proper installation of FFmpeg or FFprobe. These are external programs that must be installed manually.
 core_ffmpeg_not_found_windows = Be sure that ffmpeg.exe and ffprobe.exe are available in PATH or are placed directly in the same folder as the app executable

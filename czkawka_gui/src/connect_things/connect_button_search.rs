@@ -706,9 +706,9 @@ fn set_common_settings<T>(component: &mut T, loaded_commons: &LoadedCommonItems)
 where
     T: CommonData,
 {
-    component.set_included_directory(loaded_commons.included_directories.clone());
-    component.set_excluded_directory(loaded_commons.excluded_directories.clone());
-    component.set_reference_directory(loaded_commons.reference_directories.clone());
+    component.set_included_paths(loaded_commons.included_directories.clone());
+    component.set_excluded_paths(loaded_commons.excluded_directories.clone());
+    component.set_reference_paths(loaded_commons.reference_directories.clone());
     component.set_recursive_search(loaded_commons.recursive_search);
     component.set_allowed_extensions(loaded_commons.allowed_extensions.clone());
     component.set_excluded_extensions(loaded_commons.excluded_extensions.clone());

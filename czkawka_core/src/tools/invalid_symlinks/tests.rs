@@ -25,7 +25,7 @@ fn test_find_invalid_symlinks() {
     unix::fs::symlink(path.join("non_existent.txt"), &invalid_link).unwrap();
 
     let mut finder = InvalidSymlinks::new();
-    finder.set_included_directory(vec![path.to_path_buf()]);
+    finder.set_included_paths(vec![path.to_path_buf()]);
     finder.set_recursive_search(true);
 
     let stop_flag = Arc::new(AtomicBool::new(false));
@@ -48,7 +48,7 @@ fn test_no_invalid_symlinks() {
     unix::fs::symlink(&target, &link).unwrap();
 
     let mut finder = InvalidSymlinks::new();
-    finder.set_included_directory(vec![path.to_path_buf()]);
+    finder.set_included_paths(vec![path.to_path_buf()]);
     finder.set_recursive_search(true);
 
     let stop_flag = Arc::new(AtomicBool::new(false));
@@ -73,7 +73,7 @@ fn test_deleted_target_creates_invalid_symlink() {
     fs::remove_file(&target).unwrap();
 
     let mut finder = InvalidSymlinks::new();
-    finder.set_included_directory(vec![path.to_path_buf()]);
+    finder.set_included_paths(vec![path.to_path_buf()]);
     finder.set_recursive_search(true);
 
     let stop_flag = Arc::new(AtomicBool::new(false));

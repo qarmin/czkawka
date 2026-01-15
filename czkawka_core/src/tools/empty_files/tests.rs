@@ -19,7 +19,7 @@ fn test_find_empty_files() {
     fs::write(path.join("not_empty.txt"), b"content").unwrap();
 
     let mut finder = EmptyFiles::new();
-    finder.set_included_directory(vec![path.to_path_buf()]);
+    finder.set_included_paths(vec![path.to_path_buf()]);
     finder.set_recursive_search(true);
 
     let stop_flag = Arc::new(AtomicBool::new(false));
@@ -40,7 +40,7 @@ fn test_no_empty_files() {
     fs::write(path.join("file2.txt"), b"content2").unwrap();
 
     let mut finder = EmptyFiles::new();
-    finder.set_included_directory(vec![path.to_path_buf()]);
+    finder.set_included_paths(vec![path.to_path_buf()]);
     finder.set_recursive_search(true);
 
     let stop_flag = Arc::new(AtomicBool::new(false));
@@ -64,7 +64,7 @@ fn test_recursive_search_empty_files() {
     fs::write(subdir.join("empty2.txt"), b"").unwrap();
 
     let mut finder = EmptyFiles::new();
-    finder.set_included_directory(vec![path.to_path_buf()]);
+    finder.set_included_paths(vec![path.to_path_buf()]);
 
     let stop_flag = Arc::new(AtomicBool::new(false));
     finder.search(&stop_flag, None);

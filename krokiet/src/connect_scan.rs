@@ -1442,9 +1442,9 @@ where
 {
     stop_flag.store(false, Ordering::Relaxed);
 
-    component.set_included_directory(custom_settings.included_directories.clone());
-    component.set_reference_directory(custom_settings.included_directories_referenced.clone());
-    component.set_excluded_directory(custom_settings.excluded_directories.clone());
+    component.set_included_paths(custom_settings.included_directories.clone());
+    component.set_reference_paths(custom_settings.included_directories_referenced.clone());
+    component.set_excluded_paths(custom_settings.excluded_directories.clone());
     component.set_recursive_search(custom_settings.recursive_search);
     component.set_minimal_file_size(custom_settings.minimum_file_size as u64 * 1024);
     component.set_maximal_file_size(custom_settings.maximum_file_size as u64 * 1024);

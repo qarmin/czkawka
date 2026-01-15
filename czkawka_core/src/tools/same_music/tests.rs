@@ -22,7 +22,7 @@ fn test_same_music_by_content_high_similarity() {
     let params = SameMusicParameters::new(MusicSimilarity::TRACK_TITLE, false, CheckingMethod::AudioContent, 10.0, 0.2, false);
 
     let mut finder = SameMusic::new(params);
-    finder.set_included_directory(vec![test_path]);
+    finder.set_included_paths(vec![test_path]);
     finder.set_recursive_search(true);
     finder.set_use_cache(false);
 
@@ -45,7 +45,7 @@ fn test_same_music_by_content_medium_similarity() {
     let params = SameMusicParameters::new(MusicSimilarity::TRACK_TITLE, false, CheckingMethod::AudioContent, 10.0, 0.5, false);
 
     let mut finder = SameMusic::new(params);
-    finder.set_included_directory(vec![test_path]);
+    finder.set_included_paths(vec![test_path]);
     finder.set_recursive_search(true);
     finder.set_use_cache(false);
 
@@ -68,7 +68,7 @@ fn test_same_music_by_content_low_similarity() {
     let params = SameMusicParameters::new(MusicSimilarity::TRACK_TITLE, false, CheckingMethod::AudioContent, 10.0, 0.8, false);
 
     let mut finder = SameMusic::new(params);
-    finder.set_included_directory(vec![test_path]);
+    finder.set_included_paths(vec![test_path]);
     finder.set_recursive_search(true);
     finder.set_use_cache(false);
 
@@ -98,7 +98,7 @@ fn test_same_music_by_tags_title_artist() {
     );
 
     let mut finder = SameMusic::new(params);
-    finder.set_included_directory(vec![test_path]);
+    finder.set_included_paths(vec![test_path]);
     finder.set_recursive_search(true);
     finder.set_use_cache(false);
 
@@ -121,7 +121,7 @@ fn test_same_music_by_tags_year() {
     let params = SameMusicParameters::new(MusicSimilarity::YEAR, false, CheckingMethod::AudioTags, 10.0, 0.2, false);
 
     let mut finder = SameMusic::new(params);
-    finder.set_included_directory(vec![test_path]);
+    finder.set_included_paths(vec![test_path]);
     finder.set_recursive_search(true);
     finder.set_use_cache(false);
 
@@ -143,7 +143,7 @@ fn test_same_music_by_tags_genre() {
     let params = SameMusicParameters::new(MusicSimilarity::GENRE, false, CheckingMethod::AudioTags, 10.0, 0.2, false);
 
     let mut finder = SameMusic::new(params);
-    finder.set_included_directory(vec![test_path]);
+    finder.set_included_paths(vec![test_path]);
     finder.set_recursive_search(true);
     finder.set_use_cache(false);
 
@@ -166,7 +166,7 @@ fn test_same_music_by_tags_bitrate() {
     let params = SameMusicParameters::new(MusicSimilarity::BITRATE, false, CheckingMethod::AudioTags, 10.0, 0.2, false);
 
     let mut finder = SameMusic::new(params);
-    finder.set_included_directory(vec![test_path]);
+    finder.set_included_paths(vec![test_path]);
     finder.set_recursive_search(true);
     finder.set_use_cache(false);
 
@@ -196,7 +196,7 @@ fn test_same_music_by_tags_all_criteria() {
     );
 
     let mut finder = SameMusic::new(params);
-    finder.set_included_directory(vec![test_path]);
+    finder.set_included_paths(vec![test_path]);
     finder.set_recursive_search(true);
     finder.set_use_cache(false);
 
@@ -225,7 +225,7 @@ fn test_same_music_approximate_comparison() {
     );
 
     let mut finder = SameMusic::new(params);
-    finder.set_included_directory(vec![test_path]);
+    finder.set_included_paths(vec![test_path]);
     finder.set_recursive_search(true);
     finder.set_use_cache(false);
 
@@ -251,7 +251,7 @@ fn test_same_music_empty_directory() {
     let params = SameMusicParameters::new(MusicSimilarity::TRACK_TITLE, false, CheckingMethod::AudioTags, 10.0, 0.2, false);
 
     let mut finder = SameMusic::new(params);
-    finder.set_included_directory(vec![path.to_path_buf()]);
+    finder.set_included_paths(vec![path.to_path_buf()]);
     finder.set_recursive_search(true);
     finder.set_use_cache(false);
 
