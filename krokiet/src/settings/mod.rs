@@ -14,7 +14,7 @@ use log::{debug, error, info};
 use serde::{Deserialize, Serialize};
 use slint::{ComponentHandle, Model, ModelRc, PhysicalSize, VecModel, WindowSize};
 
-use crate::common::{create_excluded_directories_model_from_pathbuf, create_included_directories_model_from_pathbuf, create_vec_model_from_vec_string};
+use crate::common::{create_excluded_paths_model_from_pathbuf, create_included_paths_model_from_pathbuf, create_vec_model_from_vec_string};
 use crate::connect_translation::change_language;
 use crate::settings::combo_box::StringComboBoxItems;
 use crate::settings::model::{
@@ -371,18 +371,18 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
         (vs_to_vp(cli_args.included_items), vs_to_vp(cli_args.referenced_items), vs_to_vp(cli_args.excluded_items))
     } else {
         (
-            custom_settings.included_directories.clone(),
-            custom_settings.included_directories_referenced.clone(),
-            custom_settings.excluded_directories.clone(),
+            custom_settings.included_paths.clone(),
+            custom_settings.included_paths_referenced.clone(),
+            custom_settings.excluded_paths.clone(),
         )
     };
     // Included directories
-    let included_directories = create_included_directories_model_from_pathbuf(&included, &referenced);
-    settings.set_included_directories_model(included_directories);
+    let included_paths = create_included_paths_model_from_pathbuf(&included, &referenced);
+    settings.set_included_paths_model(included_paths);
 
     // Excluded directories
-    let excluded_directories = create_excluded_directories_model_from_pathbuf(&excluded);
-    settings.set_excluded_directories_model(excluded_directories);
+    let excluded_paths = create_excluded_paths_model_from_pathbuf(&excluded);
+    settings.set_excluded_paths_model(excluded_paths);
 
     settings.set_excluded_items(custom_settings.excluded_items.clone().into());
     settings.set_allowed_extensions(custom_settings.allowed_extensions.clone().into());
@@ -534,16 +534,16 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
 
     let combo_box_items = collect_combo_box_settings(app);
 
-    let included_directories_model = settings.get_included_directories_model();
-    let included_directories = included_directories_model.iter().map(|model| PathBuf::from(model.path.as_str())).collect::<Vec<_>>();
-    let included_directories_referenced = included_directories_model
+    let included_paths_model = settings.get_included_paths_model();
+    let included_paths = included_paths_model.iter().map(|model| PathBuf::from(model.path.as_str())).collect::<Vec<_>>();
+    let included_paths_referenced = included_paths_model
         .iter()
-        .filter(|model| model.referenced_folder)
+        .filter(|model| model.referenced_path)
         .map(|model| PathBuf::from(model.path.as_str()))
         .collect::<Vec<_>>();
 
-    let excluded_directories_model = settings.get_excluded_directories_model();
-    let excluded_directories = excluded_directories_model.iter().map(|model| PathBuf::from(model.path.as_str())).collect::<Vec<_>>();
+    let excluded_paths_model = settings.get_excluded_paths_model();
+    let excluded_paths = excluded_paths_model.iter().map(|model| PathBuf::from(model.path.as_str())).collect::<Vec<_>>();
 
     let excluded_items = settings.get_excluded_items().to_string();
     let allowed_extensions = settings.get_allowed_extensions().to_string();
@@ -653,9 +653,9 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     assert_eq!(column_sizes.len(), TOOLS_NUMBER);
 
     SettingsCustom {
-        included_directories,
-        included_directories_referenced,
-        excluded_directories,
+        included_paths,
+        included_paths_referenced,
+        excluded_paths,
         excluded_items,
         allowed_extensions,
         excluded_extensions,

@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use num_enum::TryFromPrimitive;
 use slint::{ComponentHandle, Model, ModelRc, SharedString, VecModel};
 
-use crate::{ActiveTab, ExcludedDirectoriesModel, IncludedDirectoriesModel, MainListModel, MainWindow, Settings};
+use crate::{ActiveTab, ExcludedPathsModel, IncludedPathsModel, MainListModel, MainWindow, Settings};
 
 // Int model is used to store data in unchanged(* except that we need to split u64 into two i32) form and is used to sort/select data
 // Str model is used to display data in gui
@@ -613,15 +613,15 @@ impl ActiveTab {
     }
 }
 
-pub(crate) fn create_included_directories_model_from_pathbuf(items: &[PathBuf], referenced: &[PathBuf]) -> ModelRc<IncludedDirectoriesModel> {
+pub(crate) fn create_included_paths_model_from_pathbuf(items: &[PathBuf], referenced: &[PathBuf]) -> ModelRc<IncludedPathsModel> {
     let referenced_as_string = referenced.iter().map(|x| x.to_string_lossy().to_string()).collect::<Vec<_>>();
     let converted = items
         .iter()
         .map(|x| {
             let path_as_string = x.to_string_lossy().to_string();
-            IncludedDirectoriesModel {
+            IncludedPathsModel {
                 path: x.to_string_lossy().to_string().into(),
-                referenced_folder: referenced_as_string.contains(&path_as_string),
+                referenced_path: referenced_as_string.contains(&path_as_string),
                 selected_row: false,
             }
         })
@@ -629,10 +629,10 @@ pub(crate) fn create_included_directories_model_from_pathbuf(items: &[PathBuf], 
     ModelRc::new(VecModel::from(converted))
 }
 
-pub(crate) fn create_excluded_directories_model_from_pathbuf(items: &[PathBuf]) -> ModelRc<ExcludedDirectoriesModel> {
+pub(crate) fn create_excluded_paths_model_from_pathbuf(items: &[PathBuf]) -> ModelRc<ExcludedPathsModel> {
     let converted = items
         .iter()
-        .map(|x| ExcludedDirectoriesModel {
+        .map(|x| ExcludedPathsModel {
             path: x.to_string_lossy().to_string().into(),
             selected_row: false,
         })
@@ -641,13 +641,13 @@ pub(crate) fn create_excluded_directories_model_from_pathbuf(items: &[PathBuf]) 
 }
 
 pub(crate) fn check_if_there_are_any_included_folders(app: &MainWindow) -> bool {
-    let included = app.global::<Settings>().get_included_directories_model();
+    let included = app.global::<Settings>().get_included_paths_model();
     included.iter().count() > 0
 }
 
 pub(crate) fn check_if_all_included_dirs_are_referenced(app: &MainWindow) -> bool {
-    let included = app.global::<Settings>().get_included_directories_model();
-    included.iter().all(|x| x.referenced_folder)
+    let included = app.global::<Settings>().get_included_paths_model();
+    included.iter().all(|x| x.referenced_path)
 }
 
 pub(crate) fn create_vec_model_from_vec_string(items: Vec<String>) -> VecModel<SharedString> {

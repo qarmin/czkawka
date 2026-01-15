@@ -204,8 +204,8 @@ fn translate_items(app: &MainWindow) {
     translation.set_instruction_text(flk!("instruction").into());
     translation.set_donation_text(flk!("donation").into());
     translation.set_translation_text(flk!("translation").into());
-    translation.set_included_directories_text(flk!("included_directories").into());
-    translation.set_excluded_directories_text(flk!("excluded_directories").into());
+    translation.set_included_paths_text(flk!("included_paths").into());
+    translation.set_excluded_paths_text(flk!("excluded_paths").into());
     translation.set_ref_text(flk!("ref").into());
     translation.set_path_text(flk!("path").into());
     translation.set_tool_duplicate_files_text(flk!("tool_duplicate_files").into());
@@ -349,7 +349,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_popup_save_title_text(flk!("popup_save_title").into());
     translation.set_popup_save_message_text(flk!("popup_save_message").into());
     translation.set_popup_rename_title_text(flk!("popup_rename_title").into());
-    translation.set_popup_new_directories_title_text(flk!("popup_new_directories_title").into());
+    translation.set_popup_new_directories_title_text(flk!("popup_new_paths_title").into());
     translation.set_popup_move_title_text(flk!("popup_move_title").into());
     translation.set_popup_move_copy_checkbox_text(flk!("popup_move_copy_checkbox").into());
     translation.set_popup_move_preserve_folder_checkbox_text(flk!("popup_move_preserve_folder_checkbox").into());

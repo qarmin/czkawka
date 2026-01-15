@@ -199,11 +199,11 @@ export component MainWindow inherits Window {
         bottom_panel := BottomPanel {
             bottom_panel_visibility <=> action_buttons.bottom_panel_visibility;
             vertical-stretch: 0.0;
-            folder_choose_requested(included_directories) => {
-                root.folder_choose_requested(included_directories)
+            folder_choose_requested(included_paths) => {
+                root.folder_choose_requested(included_paths)
             }
-            show_manual_add_dialog(included_directories) => {
-                GuiState.choosing_include_directories = included_directories;
+            show_manual_add_dialog(included_paths) => {
+                GuiState.choosing_include_directories = included_paths;
                 new_directory_popup_window.show_popup()
             }
         }

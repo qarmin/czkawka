@@ -1,7 +1,7 @@
 import { Button, TextEdit } from "std-widgets.slint";
 import { BottomPanelVisibility } from "common.slint";
 import { GuiState } from "gui_state.slint";
-import { ExcludedDirectories, IncludedDirectories } from "included_directories.slint";
+import { ExcludedPaths, IncludedPaths } from "included_paths.slint";
 import { Translations } from "translations.slint";
 import { ColorPalette } from "color_palette.slint";
 import { FontSizes } from "fonts.slint";
@@ -40,7 +40,7 @@ component DirectoriesPanel inherits HorizontalLayout {
             Rectangle {
                 horizontal-stretch: 1.0;
                 Text {
-                    text <=> Translations.included_directories_text;
+                    text <=> Translations.included_paths_text;
                     font-size: FontSizes.normal;
                 }
             }
@@ -62,7 +62,7 @@ component DirectoriesPanel inherits HorizontalLayout {
             height: 5px;
         }
 
-        included_list := IncludedDirectories { }
+        included_list := IncludedPaths { }
     }
 
     Rectangle {
@@ -92,7 +92,7 @@ component DirectoriesPanel inherits HorizontalLayout {
             Rectangle {
                 horizontal-stretch: 1.0;
                 Text {
-                    text <=> Translations.excluded_directories_text;
+                    text <=> Translations.excluded_paths_text;
                     font-size: FontSizes.normal;
                 }
             }
@@ -114,7 +114,7 @@ component DirectoriesPanel inherits HorizontalLayout {
             height: 5px;
         }
 
-        excluded_list := ExcludedDirectories { }
+        excluded_list := ExcludedPaths { }
     }
 }
 
@@ -135,11 +135,11 @@ export component BottomPanel {
     if bottom_panel_visibility == BottomPanelVisibility.Directories: DirectoriesPanel {
         width: parent.width;
         height: parent.height;
-        folder_choose_requested(included_directories) => {
-            root.folder_choose_requested(included_directories)
+        folder_choose_requested(included_paths) => {
+            root.folder_choose_requested(included_paths)
         }
-        show_manual_add_dialog(included_directories) => {
-            root.show_manual_add_dialog(included_directories)
+        show_manual_add_dialog(included_paths) => {
+            root.show_manual_add_dialog(included_paths)
         }
     }
 

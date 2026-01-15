@@ -57,12 +57,12 @@ pub(crate) fn connect_scan_button(app: &MainWindow, progress_sender: Sender<Prog
         let app = a.upgrade().expect("Failed to upgrade app :(");
 
         if !check_if_there_are_any_included_folders(&app) {
-            app.invoke_scan_ended(flk!("rust_no_included_directories").into());
+            app.invoke_scan_ended(flk!("rust_no_included_paths").into());
             return;
         }
 
         if check_if_all_included_dirs_are_referenced(&app) {
-            app.invoke_scan_ended(flk!("rust_all_dirs_referenced").into());
+            app.invoke_scan_ended(flk!("rust_all_paths_referenced").into());
             return;
         }
 
@@ -1442,9 +1442,9 @@ where
 {
     stop_flag.store(false, Ordering::Relaxed);
 
-    component.set_included_paths(custom_settings.included_directories.clone());
-    component.set_reference_paths(custom_settings.included_directories_referenced.clone());
-    component.set_excluded_paths(custom_settings.excluded_directories.clone());
+    component.set_included_paths(custom_settings.included_paths.clone());
+    component.set_reference_paths(custom_settings.included_paths_referenced.clone());
+    component.set_excluded_paths(custom_settings.excluded_paths.clone());
     component.set_recursive_search(custom_settings.recursive_search);
     component.set_minimal_file_size(custom_settings.minimum_file_size as u64 * 1024);
     component.set_maximal_file_size(custom_settings.maximum_file_size as u64 * 1024);

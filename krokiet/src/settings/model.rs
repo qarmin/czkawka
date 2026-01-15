@@ -37,12 +37,12 @@ pub const PRESET_NAME_RESERVED: &str = "CLI Folders";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SettingsCustom {
-    #[serde(default = "default_included_directories")]
-    pub included_directories: Vec<PathBuf>,
+    #[serde(default = "default_included_paths")]
+    pub included_paths: Vec<PathBuf>,
     #[serde(default)]
-    pub included_directories_referenced: Vec<PathBuf>,
-    #[serde(default = "default_excluded_directories")]
-    pub excluded_directories: Vec<PathBuf>,
+    pub included_paths_referenced: Vec<PathBuf>,
+    #[serde(default = "default_excluded_paths")]
+    pub excluded_paths: Vec<PathBuf>,
     #[serde(default = "default_excluded_items")]
     pub excluded_items: String,
     #[serde(default)]
@@ -280,26 +280,26 @@ fn detect_language() -> String {
     LANGUAGE_LIST[lang_idx].short_name.to_string()
 }
 
-fn default_included_directories() -> Vec<PathBuf> {
-    let mut included_directories = Vec::new();
+fn default_included_paths() -> Vec<PathBuf> {
+    let mut included_paths = Vec::new();
     if let Ok(current_dir) = env::current_dir() {
-        included_directories.push(current_dir.to_string_lossy().to_string());
+        included_paths.push(current_dir.to_string_lossy().to_string());
     } else if let Some(home_dir) = home_dir() {
-        included_directories.push(home_dir.to_string_lossy().to_string());
+        included_paths.push(home_dir.to_string_lossy().to_string());
     } else if cfg!(target_family = "unix") {
-        included_directories.push("/".to_string());
+        included_paths.push("/".to_string());
     } else {
         // This could be set to default
-        included_directories.push("C:\\".to_string());
+        included_paths.push("C:\\".to_string());
     }
-    included_directories.sort();
-    included_directories.iter().map(PathBuf::from).collect::<Vec<_>>()
+    included_paths.sort();
+    included_paths.iter().map(PathBuf::from).collect::<Vec<_>>()
 }
 
-fn default_excluded_directories() -> Vec<PathBuf> {
-    let mut excluded_directories = DEFAULT_EXCLUDED_DIRECTORIES.iter().map(PathBuf::from).collect::<Vec<_>>();
-    excluded_directories.sort();
-    excluded_directories
+fn default_excluded_paths() -> Vec<PathBuf> {
+    let mut excluded_paths = DEFAULT_EXCLUDED_DIRECTORIES.iter().map(PathBuf::from).collect::<Vec<_>>();
+    excluded_paths.sort();
+    excluded_paths
 }
 fn default_similar_videos_skip_forward_amount() -> u32 {
     DEFAULT_SKIP_FORWARD_AMOUNT

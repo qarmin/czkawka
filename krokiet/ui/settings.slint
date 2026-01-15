@@ -1,4 +1,4 @@
-import { ExcludedDirectoriesModel, IncludedDirectoriesModel } from "common.slint";
+import { ExcludedPathsModel, IncludedPathsModel } from "common.slint";
 
 export global Settings {
     in-out property <int> settings_preset_idx: 0;
@@ -8,10 +8,10 @@ export global Settings {
     in-out property <int> language_index: 0;
     in-out property <string> language_value: "English";
 
-    in-out property <[IncludedDirectoriesModel]> included_directories_model: [{ path: "/home/pathssssssssssssssssssssss", referenced_folder: false, selected_row: false },{ path: "/home/path", referenced_folder: false, selected_row: false },{ path: "/home/path", referenced_folder: false, selected_row: false },{ path: "/home/path", referenced_folder: false, selected_row: false }];
-    in-out property <int> included_directories_model_selected_idx: -1;
-    in-out property <[ExcludedDirectoriesModel]> excluded_directories_model: [{ path:"/home/pathssssssssssssssssssssssss", selected_row: false },{ path:"/home/path", selected_row: false },{ path:"/home/path", selected_row: false },{ path:"/home/path", selected_row: false }, { path:"/home/a", selected_row: false }];
-    in-out property <int> excluded_directories_model_selected_idx: -1;
+    in-out property <[IncludedPathsModel]> included_paths_model: [{ path: "/home/pathssssssssssssssssssssss", referenced_path: false, selected_row: false },{ path: "/home/path", referenced_path: false, selected_row: false },{ path: "/home/path", referenced_path: false, selected_row: false },{ path: "/home/path", referenced_path: false, selected_row: false }];
+    in-out property <int> included_paths_model_selected_idx: -1;
+    in-out property <[ExcludedPathsModel]> excluded_paths_model: [{ path:"/home/pathssssssssssssssssssssssss", selected_row: false },{ path:"/home/path", selected_row: false },{ path:"/home/path", selected_row: false },{ path:"/home/path", selected_row: false }, { path:"/home/a", selected_row: false }];
+    in-out property <int> excluded_paths_model_selected_idx: -1;
 
     // Settings
     in-out property <bool> dark_theme: true;
