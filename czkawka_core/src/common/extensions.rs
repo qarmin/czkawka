@@ -1,3 +1,4 @@
+use std::ffi::OsString;
 use std::fs::DirEntry;
 
 use indexmap::IndexSet;
@@ -67,13 +68,12 @@ impl Extensions {
     }
 
     #[expect(clippy::string_slice)] // Valid, because we address go to dot, which is known ascii character
-    pub(crate) fn check_if_entry_have_valid_extension(&self, entry_data: &DirEntry) -> bool {
+    pub(crate) fn check_if_entry_have_valid_extension(&self, file_name: OsString) -> bool {
         if self.allowed_extensions_hashset.is_empty() && self.excluded_extensions_hashset.is_empty() {
             return true;
         }
 
         // Using entry_data.path().extension() is a lot of slower, even 5 times
-        let file_name = entry_data.file_name();
         let Some(file_name_str) = file_name.to_str() else { return false };
         let Some(extension_idx) = file_name_str.rfind('.') else { return false };
         let extension = &file_name_str[extension_idx + 1..];

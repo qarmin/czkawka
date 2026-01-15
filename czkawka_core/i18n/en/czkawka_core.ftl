@@ -10,6 +10,7 @@ core_similarity_minimal = Minimal
 core_cannot_open_dir = Cannot open dir {$dir}, reason {$reason}
 core_cannot_read_entry_dir = Cannot read entry in dir {$dir}, reason {$reason}
 core_cannot_read_metadata_dir = Cannot read metadata in dir {$dir}, reason {$reason}
+core_cannot_read_metadata_file = Cannot read metadata of file {$file}, reason {$reason}
 core_file_modified_before_epoch = File {$name} seems to have been modified before the Unix Epoch
 core_folder_modified_before_epoch = Folder {$name} seems to have been modified before the Unix Epoch
 core_file_no_modification_date = Unable to get modification date from file {$name}, reason {$reason}

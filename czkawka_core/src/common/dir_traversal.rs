@@ -12,7 +12,7 @@ use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use log::debug;
 use rayon::prelude::*;
-
+use trash::os_limited::metadata;
 use crate::common::directories::Directories;
 use crate::common::extensions::Extensions;
 use crate::common::items::ExcludedItems;
@@ -22,7 +22,7 @@ use crate::common::progress_stop_handler::{check_if_stop_received, prepare_threa
 use crate::common::tool_data::CommonToolData;
 use crate::flc;
 
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum Collect {
     InvalidSymlinks,
     Files,
@@ -38,7 +38,7 @@ enum EntryType {
 
 pub struct DirTraversalBuilder<'b, F> {
     group_by: Option<F>,
-    root_dirs: Vec<PathBuf>,
+    root_paths: Vec<PathBuf>,
     stop_flag: Option<Arc<AtomicBool>>,
     progress_sender: Option<&'b Sender<ProgressData>>,
     minimal_file_size: Option<u64>,
@@ -52,9 +52,10 @@ pub struct DirTraversalBuilder<'b, F> {
     tool_type: ToolType,
 }
 
+#[derive(Debug)]
 pub struct DirTraversal<'b, F> {
     group_by: F,
-    root_dirs: Vec<PathBuf>,
+    root_paths: Vec<PathBuf>,
     stop_flag: Arc<AtomicBool>,
     progress_sender: Option<&'b Sender<ProgressData>>,
     recursive_search: bool,
@@ -78,7 +79,7 @@ impl DirTraversalBuilder<'_, ()> {
     pub fn new() -> Self {
         DirTraversalBuilder {
             group_by: None,
-            root_dirs: Vec::new(),
+            root_paths: Vec::new(),
             stop_flag: None,
             progress_sender: None,
             checking_method: CheckingMethod::None,
@@ -96,7 +97,7 @@ impl DirTraversalBuilder<'_, ()> {
 
 impl<'b, F> DirTraversalBuilder<'b, F> {
     pub(crate) fn common_data(mut self, common_tool_data: &CommonToolData) -> Self {
-        self.root_dirs = common_tool_data.directories.included_directories.clone();
+        self.root_paths = common_tool_data.directories.included_directories.clone();
         self.extensions = Some(common_tool_data.extensions.clone());
         self.excluded_items = Some(common_tool_data.excluded_items.clone());
         self.recursive_search = common_tool_data.recursive_search;
@@ -143,7 +144,7 @@ impl<'b, F> DirTraversalBuilder<'b, F> {
     {
         DirTraversalBuilder {
             group_by: Some(group_by),
-            root_dirs: self.root_dirs,
+            root_paths: self.root_paths,
             stop_flag: self.stop_flag,
             progress_sender: self.progress_sender,
             directories: self.directories,
@@ -161,7 +162,7 @@ impl<'b, F> DirTraversalBuilder<'b, F> {
     pub(crate) fn build(self) -> DirTraversal<'b, F> {
         DirTraversal {
             group_by: self.group_by.expect("could not build"),
-            root_dirs: self.root_dirs,
+            root_paths: self.root_paths,
             stop_flag: self.stop_flag.expect("Stop flag must be always initialized"),
             progress_sender: self.progress_sender,
             checking_method: self.checking_method,
@@ -197,6 +198,7 @@ fn entry_type(file_type: FileType) -> EntryType {
     }
 }
 
+
 impl<F, T> DirTraversal<'_, F>
 where
     F: Fn(&FileEntry) -> T,
@@ -210,7 +212,8 @@ where
         let mut grouped_file_entries: BTreeMap<T, Vec<FileEntry>> = BTreeMap::new();
 
         // Add root folders for finding
-        let mut folders_to_check: Vec<PathBuf> = self.root_dirs.clone();
+        let mut folders_to_check: Vec<PathBuf> = self.root_paths.clone().into_iter().filter(|e|e.is_dir()).collect();
+        let mut files_to_check: Vec<PathBuf> = self.root_paths.clone().into_iter().filter(|e|!e.is_dir()).collect();
 
         let progress_handler = prepare_thread_handler_common(self.progress_sender, CurrentStage::CollectingFiles, 0, (self.tool_type, self.checking_method), 0);
 
@@ -225,6 +228,54 @@ where
             stop_flag,
             ..
         } = self;
+
+        dbg!(&folders_to_check, &files_to_check);
+
+        let mut file_results = Vec::new();
+        // File traversal
+        while let Some(current_file) = files_to_check.pop() {
+            let Some(metadata) = common_get_metadata_from_path(&current_file, &mut all_warnings) else { continue };
+            let file_type = metadata.file_type();
+            match (entry_type(file_type), collect) {
+                (EntryType::File, Collect::Files) => {
+                    progress_handler.increase_items(1);
+                    process_file_in_file_mode_path_check(
+                        &current_file,
+                        &metadata,
+                        &mut all_warnings,
+                        &mut file_results,
+                        &extensions,
+                        &excluded_items,
+                        minimal_file_size,
+                        maximal_file_size,
+                    );
+                }
+                (EntryType::File, Collect::InvalidSymlinks) => {
+                    progress_handler.increase_items(1);
+                }
+                (EntryType::Symlink, Collect::InvalidSymlinks) => {
+                    progress_handler.increase_items(1);
+                    process_symlink_in_symlink_mode_path_check(
+                        &current_file,
+                        &metadata,
+                        &mut all_warnings,
+                        &mut file_results,
+                        &extensions,
+                        &excluded_items,
+                    );
+                }
+                (EntryType::Symlink, _) | (EntryType::Dir, _) | (EntryType::Other, _) => {
+                    // nothing to do
+                }
+            }
+        }
+        file_results.sort_by_cached_key(|fe| fe.path.to_string_lossy().to_string());
+        for fe in file_results {
+            let key = (self.group_by)(&fe);
+            grouped_file_entries.entry(key).or_default().push(fe);
+        }
+
+        // Folder traversal
         while !folders_to_check.is_empty() {
             if check_if_stop_received(&stop_flag) {
                 progress_handler.join_thread();
@@ -331,7 +382,7 @@ fn process_file_in_file_mode(
     minimal_file_size: u64,
     maximal_file_size: u64,
 ) {
-    if !extensions.check_if_entry_have_valid_extension(entry_data) {
+    if !extensions.check_if_entry_have_valid_extension(entry_data.file_name()) {
         return;
     }
 
@@ -362,6 +413,40 @@ fn process_file_in_file_mode(
             size: metadata.len(),
             modified_date: get_modified_time(&metadata, warnings, &current_file_name, false),
             path: current_file_name,
+        };
+
+        fe_result.push(fe);
+    }
+}
+// Same as above, but working with Path instead of DirEntry
+// Sadly this cannot be merged, due to a little crazy optimizations done in this functions
+fn process_file_in_file_mode_path_check(
+    path: &Path,
+    metadata: &Metadata,
+    warnings: &mut Vec<String>,
+    fe_result: &mut Vec<FileEntry>,
+    extensions: &Extensions,
+    excluded_items: &ExcludedItems,
+    minimal_file_size: u64,
+    maximal_file_size: u64,
+) {
+    let Some(file_name) = path.file_name() else {
+        return;
+    };
+    if !extensions.check_if_entry_have_valid_extension(file_name.to_os_string()) {
+        return;
+    }
+
+    if excluded_items.is_excluded(&path) {
+        return;
+    }
+
+    if (minimal_file_size..=maximal_file_size).contains(&metadata.len()) {
+        // Creating new file entry
+        let fe: FileEntry = FileEntry {
+            size: metadata.len(),
+            modified_date: get_modified_time(metadata, warnings, &path, false),
+            path: path.to_path_buf(),
         };
 
         fe_result.push(fe);
@@ -412,7 +497,7 @@ fn process_symlink_in_symlink_mode(
     directories: &Directories,
     excluded_items: &ExcludedItems,
 ) {
-    if !extensions.check_if_entry_have_valid_extension(entry_data) {
+    if !extensions.check_if_entry_have_valid_extension(entry_data.file_name()) {
         return;
     }
 
@@ -442,6 +527,34 @@ fn process_symlink_in_symlink_mode(
         size: metadata.len(),
         modified_date: get_modified_time(&metadata, warnings, &current_file_name, false),
         path: current_file_name,
+    };
+
+    fe_result.push(fe);
+}
+fn process_symlink_in_symlink_mode_path_check(
+    path: &Path,
+    metadata: &Metadata,
+    warnings: &mut Vec<String>,
+    fe_result: &mut Vec<FileEntry>,
+    extensions: &Extensions,
+    excluded_items: &ExcludedItems,
+) {
+    let Some(file_name) = path.file_name() else {
+        return;
+    };
+    if !extensions.check_if_entry_have_valid_extension(file_name.to_os_string()) {
+        return;
+    }
+
+    if excluded_items.is_excluded(&path) {
+        return;
+    }
+
+    // Creating new file entry
+    let fe: FileEntry = FileEntry {
+        size: metadata.len(),
+        modified_date: get_modified_time(&metadata, warnings, &path, false),
+        path: path.to_path_buf(),
     };
 
     fe_result.push(fe);
@@ -477,6 +590,21 @@ pub(crate) fn common_get_metadata_dir(entry_data: &DirEntry, warnings: &mut Vec<
             warnings.push(flc!(
                 "core_cannot_read_metadata_dir",
                 dir = current_folder.to_string_lossy().to_string(),
+                reason = e.to_string()
+            ));
+            return None;
+        }
+    };
+    Some(metadata)
+}
+
+pub(crate) fn common_get_metadata_from_path(path: &Path, warnings: &mut Vec<String>) -> Option<Metadata> {
+    let metadata: Metadata = match fs::metadata(path) {
+        Ok(t) => t,
+        Err(e) => {
+            warnings.push(flc!(
+                "core_cannot_read_metadata_file",
+                file = path.to_string_lossy().to_string(),
                 reason = e.to_string()
             ));
             return None;
