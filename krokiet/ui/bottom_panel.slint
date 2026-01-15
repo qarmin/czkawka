@@ -8,6 +8,7 @@ import { FontSizes } from "fonts.slint";
 
 component DirectoriesPanel inherits HorizontalLayout {
     callback folder_choose_requested(bool);
+    callback file_choose_requested(bool);
     callback show_manual_add_dialog(bool);
 
     spacing: 5px;
@@ -26,10 +27,17 @@ component DirectoriesPanel inherits HorizontalLayout {
         padding-top: 5px;
         HorizontalLayout {
             Button {
-                icon: @image-url("../icons/krokiet_add.svg");
+                icon: @image-url("../icons/krokiet_folder_add.svg");
                 colorize-icon: true;
                 clicked => {
                     folder_choose_requested(true);
+                }
+            }
+            Button {
+                icon: @image-url("../icons/krokiet_file_add.svg");
+                colorize-icon: true;
+                clicked => {
+                    file_choose_requested(true);
                 }
             }
 
@@ -78,10 +86,17 @@ component DirectoriesPanel inherits HorizontalLayout {
         padding-right: 5px;
         HorizontalLayout {
             Button {
-                icon: @image-url("../icons/krokiet_add.svg");
+                icon: @image-url("../icons/krokiet_folder_add.svg");
                 colorize-icon: true;
                 clicked => {
                     folder_choose_requested(false);
+                }
+            }
+            Button {
+                icon: @image-url("../icons/krokiet_file_add.svg");
+                colorize-icon: true;
+                clicked => {
+                    file_choose_requested(false);
                 }
             }
 
@@ -129,6 +144,7 @@ component TextErrorsPanel inherits TextEdit {
 export component BottomPanel {
     in-out property <BottomPanelVisibility> bottom_panel_visibility: BottomPanelVisibility.Directories;
     callback folder_choose_requested(bool);
+    callback file_choose_requested(bool);
     callback show_manual_add_dialog(bool);
     min-height: bottom_panel_visibility == BottomPanelVisibility.NotVisible ? 0px : 150px;
     min-width: bottom_panel_visibility == BottomPanelVisibility.NotVisible ? 0px : 400px;
@@ -137,6 +153,9 @@ export component BottomPanel {
         height: parent.height;
         folder_choose_requested(included_paths) => {
             root.folder_choose_requested(included_paths)
+        }
+        file_choose_requested(included_paths) => {
+            root.file_choose_requested(included_paths)
         }
         show_manual_add_dialog(included_paths) => {
             root.show_manual_add_dialog(included_paths)

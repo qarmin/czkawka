@@ -5,6 +5,7 @@ use crate::{Callabler, ExcludedPathsModel, IncludedPathsModel, MainWindow, Setti
 
 pub(crate) fn connect_add_remove_directories(app: &MainWindow) {
     connect_add_directories(app);
+    connect_add_files(app);
     connect_remove_directories(app);
     connect_add_manual_directories(app);
 }
@@ -56,6 +57,7 @@ fn connect_remove_directories(app: &MainWindow) {
 fn connect_add_directories(app: &MainWindow) {
     let a = app.as_weak();
     app.on_folder_choose_requested(move |included_paths| {
+        println!("Folder choose requested");
         let app = a.upgrade().expect("Failed to upgrade app :(");
 
         let directory = std::env::current_dir().unwrap_or(std::path::PathBuf::from("/"));
@@ -72,6 +74,30 @@ fn connect_add_directories(app: &MainWindow) {
             add_included_paths(&settings, &folders);
         } else {
             add_excluded_paths(&settings, &folders);
+        }
+    });
+}
+
+fn connect_add_files(app: &MainWindow) {
+    let a = app.as_weak();
+    app.on_file_choose_requested(move |included_paths| {
+        println!("File choose requested");
+        let app = a.upgrade().expect("Failed to upgrade app :(");
+
+        let directory = std::env::current_dir().unwrap_or(std::path::PathBuf::from("/"));
+
+        let file_dialog = FileDialog::new().set_directory(directory);
+
+        let Some(files) = file_dialog.pick_files() else {
+            return;
+        };
+        let files = files.iter().map(|x| x.to_string_lossy().to_string()).collect::<Vec<_>>();
+
+        let settings = app.global::<Settings>();
+        if included_paths {
+            add_included_paths(&settings, &files);
+        } else {
+            add_excluded_paths(&settings, &files);
         }
     });
 }
