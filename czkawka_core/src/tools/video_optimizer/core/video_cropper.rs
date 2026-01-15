@@ -13,10 +13,10 @@ use crate::tools::video_optimizer::{VideoCropEntry, VideoCropFixParams, VideoCro
 
 const BLACK_PIXEL_THRESHOLD: u8 = 20;
 const BLACK_BAR_MIN_PERCENTAGE: f32 = 0.9;
-const MIN_SAMPLE_INTERVAL: f32 = 0.25;
 const MAX_SAMPLES: usize = 60;
-const MIN_SAMPLES: usize = 3;
 const MIN_CROP_SIZE: u32 = 5;
+const MIN_SAMPLES: usize = 3;
+const MIN_SAMPLE_INTERVAL: f32 = 0.1;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 struct Rectangle {
