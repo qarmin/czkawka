@@ -275,7 +275,7 @@ pub fn get_video_crop_cache_file(params: &VideoCropParams) -> String {
         "cache_video_crop_{CACHE_VIDEO_OPTIMIZE_VERSION}_{:?}_t{}_p{}_s{}_c{}.bin",
         params.crop_detect,
         params.black_pixel_threshold,
-        (params.black_bar_min_percentage * 100.0) as u32, // Convert to percentage for filename
+        params.black_bar_min_percentage,
         params.max_samples,
         params.min_crop_size
     )

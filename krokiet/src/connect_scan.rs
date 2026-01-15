@@ -1246,13 +1246,13 @@ fn scan_video_optimizer(
             let video_optimizer_mode = combo_box_items.video_optimizer_mode.value;
             let params = if video_optimizer_mode == VideoOptimizerMode::VideoCrop {
                 let crop_detect = combo_box_items.video_optimizer_crop_type.value;
-                VideoOptimizerParameters::VideoCrop(VideoCropParams {
+                VideoOptimizerParameters::VideoCrop(VideoCropParams::with_custom_params(
                     crop_detect,
-                    black_pixel_threshold: custom_settings.video_optimizer_black_pixel_threshold,
-                    black_bar_min_percentage: custom_settings.video_optimizer_black_bar_min_percentage,
-                    max_samples: custom_settings.video_optimizer_max_samples,
-                    min_crop_size: custom_settings.video_optimizer_min_crop_size,
-                })
+                    custom_settings.video_optimizer_black_pixel_threshold,
+                    custom_settings.video_optimizer_black_bar_min_percentage,
+                    custom_settings.video_optimizer_max_samples,
+                    custom_settings.video_optimizer_min_crop_size,
+                ))
             } else {
                 let excluded_codecs: Vec<String> = custom_settings
                     .video_optimizer_excluded_codecs

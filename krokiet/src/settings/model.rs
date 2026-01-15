@@ -166,7 +166,7 @@ pub struct SettingsCustom {
     #[serde(default = "default_video_optimizer_black_pixel_threshold")]
     pub video_optimizer_black_pixel_threshold: u8,
     #[serde(default = "default_video_optimizer_black_bar_min_percentage")]
-    pub video_optimizer_black_bar_min_percentage: f32,
+    pub video_optimizer_black_bar_min_percentage: u8,
     #[serde(default = "default_video_optimizer_max_samples")]
     pub video_optimizer_max_samples: usize,
     #[serde(default = "default_video_optimizer_min_crop_size")]
@@ -392,8 +392,8 @@ fn default_video_optimizer_crop_type() -> String {
 fn default_video_optimizer_black_pixel_threshold() -> u8 {
     20
 }
-fn default_video_optimizer_black_bar_min_percentage() -> f32 {
-    0.9
+fn default_video_optimizer_black_bar_min_percentage() -> u8 {
+    90
 }
 fn default_video_optimizer_max_samples() -> usize {
     60

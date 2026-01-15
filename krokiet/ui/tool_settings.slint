@@ -462,12 +462,12 @@ export component ToolSettings {
                         font-size: FontSizes.normal;
                     }
 
-                    Button {
-                        text: Translations.subsettings_reset_text;
-                        clicked => {
-                            Settings.video_optimizer_sub_black_bar_min_percentage = "0.9";
-                        }
+                Button {
+                    text: Translations.subsettings_reset_text;
+                    clicked => {
+                        Settings.video_optimizer_sub_black_bar_min_percentage = "90";
                     }
+                }
                 }
 
                 HintText {

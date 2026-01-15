@@ -112,11 +112,12 @@ enum BlackBarResult {
 
 fn detect_black_bars(rgb_img: &RgbImage, params: &VideoCropParams) -> BlackBarResult {
     let (width, height) = rgb_img.dimensions();
+    let min_percentage = params.black_bar_min_percentage as f32 / 100.0;
 
     let mut left_crop = 0u32;
     for x in 0..width {
         let black_pixels = (0..height).filter(|&y| is_pixel_black(rgb_img, x, y, params.black_pixel_threshold)).count();
-        if (black_pixels as f32 / height as f32) < params.black_bar_min_percentage {
+        if (black_pixels as f32 / height as f32) < min_percentage {
             break;
         }
         left_crop = x + 1;
@@ -125,7 +126,7 @@ fn detect_black_bars(rgb_img: &RgbImage, params: &VideoCropParams) -> BlackBarRe
     let mut right_pos = width;
     for x in (0..width).rev() {
         let black_pixels = (0..height).filter(|&y| is_pixel_black(rgb_img, x, y, params.black_pixel_threshold)).count();
-        if (black_pixels as f32 / height as f32) < params.black_bar_min_percentage {
+        if (black_pixels as f32 / height as f32) < min_percentage {
             right_pos = x + 1;
             break;
         }
@@ -138,7 +139,7 @@ fn detect_black_bars(rgb_img: &RgbImage, params: &VideoCropParams) -> BlackBarRe
     let mut top_crop = 0u32;
     for y in 0..height {
         let black_pixels = (0..width).filter(|&x| is_pixel_black(rgb_img, x, y, params.black_pixel_threshold)).count();
-        if (black_pixels as f32 / width as f32) < params.black_bar_min_percentage {
+        if (black_pixels as f32 / width as f32) < min_percentage {
             break;
         }
         top_crop = y + 1;
@@ -147,7 +148,7 @@ fn detect_black_bars(rgb_img: &RgbImage, params: &VideoCropParams) -> BlackBarRe
     let mut bottom_pos = height;
     for y in (0..height).rev() {
         let black_pixels = (0..width).filter(|&x| is_pixel_black(rgb_img, x, y, params.black_pixel_threshold)).count();
-        if (black_pixels as f32 / width as f32) < params.black_bar_min_percentage {
+        if (black_pixels as f32 / width as f32) < min_percentage {
             bottom_pos = y + 1;
             break;
         }
@@ -500,7 +501,7 @@ mod tests {
         VideoCropParams {
             crop_detect: VideoCroppingMechanism::BlackBars,
             black_pixel_threshold: 20,
-            black_bar_min_percentage: 0.9,
+            black_bar_min_percentage: 90,
             max_samples: 60,
             min_crop_size: 5,
         }
