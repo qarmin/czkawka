@@ -132,17 +132,14 @@ impl Default for VideoTranscodeParams {
 }
 
 impl VideoCropParams {
-    pub fn with_custom_params(
-        crop_detect: VideoCroppingMechanism,
-        black_pixel_threshold: u8,
-        black_bar_min_percentage: u8,
-        max_samples: usize,
-        min_crop_size: u32,
-    ) -> Self {
-        assert!(black_pixel_threshold <= 128, "black_pixel_threshold must be 0-128, got {}", black_pixel_threshold);
-        assert!((50..=100).contains(&black_bar_min_percentage), "black_bar_min_percentage must be 50-100, got {}", black_bar_min_percentage);
-        assert!((5..=1000).contains(&max_samples), "max_samples must be 5-1000, got {}", max_samples);
-        assert!((1..=1000).contains(&min_crop_size), "min_crop_size must be 1-1000, got {}", min_crop_size);
+    pub fn with_custom_params(crop_detect: VideoCroppingMechanism, black_pixel_threshold: u8, black_bar_min_percentage: u8, max_samples: usize, min_crop_size: u32) -> Self {
+        assert!(black_pixel_threshold <= 128, "black_pixel_threshold must be 0-128, got {black_pixel_threshold}");
+        assert!(
+            (50..=100).contains(&black_bar_min_percentage),
+            "black_bar_min_percentage must be 50-100, got {black_bar_min_percentage}"
+        );
+        assert!((5..=1000).contains(&max_samples), "max_samples must be 5-1000, got {max_samples}");
+        assert!((1..=1000).contains(&min_crop_size), "min_crop_size must be 1-1000, got {min_crop_size}");
 
         Self {
             crop_detect,
