@@ -221,9 +221,11 @@ where
             }
         }
     }
-
     if let Some(rectangle) = rectangle {
         rectangle.validate();
+        if !rectangle.is_cropping_needed(first_frame.width(), first_frame.height()) {
+            return Some(Ok(None));
+        }
         Some(Ok(Some(rectangle)))
     } else {
         Some(Ok(None)) // All frames were fully black
@@ -294,6 +296,9 @@ where
 
     if let Some(rectangle) = rectangle {
         rectangle.validate();
+        if !rectangle.is_cropping_needed(first_frame.width(), first_frame.height()) {
+            return Some(Ok(None));
+        }
         Some(Ok(Some(rectangle)))
     } else {
         Some(Ok(None)) // All frames were fully black
