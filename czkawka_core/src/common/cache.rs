@@ -1,9 +1,9 @@
 #![allow(clippy::useless_let_if_seq)]
 
 use std::collections::BTreeMap;
-use std::fs;
 use std::io::{BufReader, BufWriter};
 use std::path::Path;
+use std::{fs, mem};
 
 use bincode::Options;
 use fun_time::fun_time;
@@ -14,14 +14,16 @@ use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use serde::{Deserialize, Serialize};
 
 use crate::common::config_cache_path::open_cache_folder;
+use crate::common::tool_data::CommonData;
 use crate::common::traits::ResultEntry;
 use crate::helpers::messages::Messages;
 
-pub(crate) const CACHE_VERSION: &str = "100";
-pub(crate) const CACHE_DUPLICATE_VERSION: &str = "100";
-pub(crate) const CACHE_IMAGE_VERSION: &str = "100";
-pub(crate) const CACHE_VIDEO_VERSION: &str = "110";
-pub(crate) const CACHE_BROKEN_FILES_VERSION: &str = "110";
+pub(crate) const CACHE_VERSION: u8 = 100;
+pub(crate) const CACHE_DUPLICATE_VERSION: u8 = 100;
+pub(crate) const CACHE_IMAGE_VERSION: u8 = 100;
+pub(crate) const CACHE_VIDEO_VERSION: u8 = 110;
+pub(crate) const CACHE_BROKEN_FILES_VERSION: u8 = 110;
+pub(crate) const CACHE_VIDEO_OPTIMIZE_VERSION: u8 = 110;
 
 const MEMORY_LIMIT: u64 = 8 * 1024 * 1024 * 1024;
 
@@ -254,6 +256,64 @@ where
     }
     debug!("Failed to load cache from file {cache_file_name} because not exists");
     (text_messages, None)
+}
+
+pub(crate) fn load_and_split_cache_generalized_by_path<C: CommonData, K>(
+    cache_file_name: &str,
+    mut items_to_check: BTreeMap<String, K>,
+    common_data: &mut C,
+) -> (BTreeMap<String, K>, BTreeMap<String, K>, BTreeMap<String, K>)
+where
+    for<'a> K: Deserialize<'a> + ResultEntry + Sized + Send + Sync + Clone,
+{
+    if !common_data.get_use_cache() {
+        return (Default::default(), Default::default(), items_to_check);
+    }
+
+    let loaded_hash_map;
+
+    let mut records_already_cached: BTreeMap<String, K> = Default::default();
+    let mut non_cached_files_to_check: BTreeMap<String, K> = Default::default();
+
+    let (messages, loaded_items) = load_cache_from_file_generalized_by_path::<K>(cache_file_name, common_data.get_delete_outdated_cache(), &items_to_check);
+    common_data.get_text_messages_mut().extend_with_another_messages(messages);
+    loaded_hash_map = loaded_items.unwrap_or_default();
+
+    debug!("load_cache - Starting to check for differences");
+    extract_loaded_cache(
+        &loaded_hash_map,
+        mem::take(&mut items_to_check),
+        &mut records_already_cached,
+        &mut non_cached_files_to_check,
+    );
+    debug!(
+        "load_cache - completed diff between loaded and prechecked files, {}({}) - non cached, {}({}) - already cached",
+        non_cached_files_to_check.len(),
+        format_size(non_cached_files_to_check.values().map(|e| e.get_size()).sum::<u64>(), BINARY),
+        records_already_cached.len(),
+        format_size(records_already_cached.values().map(|e| e.get_size()).sum::<u64>(), BINARY),
+    );
+    (loaded_hash_map, records_already_cached, non_cached_files_to_check)
+}
+
+pub(crate) fn save_and_connect_cache_generalized_by_path<C: CommonData, K>(cache_file_name: &str, vec_file_entry: &[K], loaded_hash_map: BTreeMap<String, K>, common_data: &mut C)
+where
+    K: Serialize + ResultEntry + Sized + Send + Sync + Clone,
+{
+    if !common_data.get_use_cache() {
+        return;
+    }
+    let mut all_results: BTreeMap<String, K> = Default::default();
+
+    for file_entry in vec_file_entry.iter().cloned() {
+        all_results.insert(file_entry.get_path().to_string_lossy().to_string(), file_entry);
+    }
+    for (name, file_entry) in loaded_hash_map {
+        all_results.insert(name, file_entry);
+    }
+
+    let messages = save_cache_to_file_generalized(cache_file_name, &all_results, common_data.get_save_also_as_json(), 0);
+    common_data.get_text_messages_mut().extend_with_another_messages(messages);
 }
 
 #[cfg(test)]

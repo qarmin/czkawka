@@ -12,7 +12,7 @@ use little_exif::metadata::Metadata;
 use log::{debug, error, info};
 use rayon::prelude::*;
 
-use crate::common::cache::{CACHE_VERSION, extract_loaded_cache, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
+use crate::common::cache::{CACHE_VERSION, load_and_split_cache_generalized_by_path, save_and_connect_cache_generalized_by_path};
 use crate::common::consts::EXIF_FILES_EXTENSIONS;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{ToolType, WorkContinueStatus};
@@ -97,27 +97,11 @@ impl ExifRemover {
         _stop_flag: &Arc<AtomicBool>,
         progress_sender: Option<&Sender<ProgressData>>,
     ) -> (BTreeMap<String, ExifEntry>, BTreeMap<String, ExifEntry>, BTreeMap<String, ExifEntry>) {
-        let loaded_hash_map;
+        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::ExifRemoverCacheLoading, 0, self.get_test_type(), 0);
+        let res = load_and_split_cache_generalized_by_path(&get_exif_remover_cache_file(), mem::take(&mut self.files_to_check), self);
 
-        let mut records_already_cached: BTreeMap<String, ExifEntry> = Default::default();
-        let mut non_cached_files_to_check: BTreeMap<String, ExifEntry> = Default::default();
-        let files_to_check = mem::take(&mut self.files_to_check);
-
-        if self.common_data.use_cache {
-            let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::ExifRemoverCacheLoading, 0, self.get_test_type(), 0);
-
-            let (messages, loaded_items) = load_cache_from_file_generalized_by_path::<ExifEntry>(&get_exif_remover_cache_file(), self.get_delete_outdated_cache(), &files_to_check);
-            self.get_text_messages_mut().extend_with_another_messages(messages);
-            loaded_hash_map = loaded_items.unwrap_or_default();
-
-            extract_loaded_cache(&loaded_hash_map, files_to_check, &mut records_already_cached, &mut non_cached_files_to_check);
-
-            progress_handler.join_thread();
-        } else {
-            loaded_hash_map = Default::default();
-            non_cached_files_to_check = files_to_check;
-        }
-        (loaded_hash_map, records_already_cached, non_cached_files_to_check)
+        progress_handler.join_thread();
+        res
     }
 
     #[fun_time(message = "save_to_cache", level = "debug")]
@@ -128,23 +112,11 @@ impl ExifRemover {
         _stop_flag: &Arc<AtomicBool>,
         progress_sender: Option<&Sender<ProgressData>>,
     ) {
-        if self.common_data.use_cache {
-            let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::ExifRemoverCacheSaving, 0, self.get_test_type(), 0);
+        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::ExifRemoverCacheSaving, 0, self.get_test_type(), 0);
 
-            let mut all_results: BTreeMap<String, ExifEntry> = Default::default();
+        save_and_connect_cache_generalized_by_path(&get_exif_remover_cache_file(), vec_file_entry, loaded_hash_map, self);
 
-            for file_entry in vec_file_entry.iter().cloned() {
-                all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
-            }
-            for (name, file_entry) in loaded_hash_map {
-                all_results.insert(name, file_entry);
-            }
-
-            let messages = save_cache_to_file_generalized(&get_exif_remover_cache_file(), &all_results, self.common_data.save_also_as_json, 0);
-            self.get_text_messages_mut().extend_with_another_messages(messages);
-
-            progress_handler.join_thread();
-        }
+        progress_handler.join_thread();
     }
 
     #[fun_time(message = "check_exif_in_files", level = "debug")]

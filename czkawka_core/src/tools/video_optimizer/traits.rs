@@ -42,8 +42,8 @@ impl DebugPrint for VideoOptimizer {
         println!("### INDIVIDUAL DEBUG PRINT ###");
         println!("Info: {:?}", self.information);
         println!("Mode: {:?}", self.params);
-        println!("Video transcode entries: {}", self.video_transcode_entries.len());
-        println!("Video crop entries: {}", self.video_crop_entries.len());
+        println!("Video transcode entries: {}", self.video_transcode_result_entries.len());
+        println!("Video crop entries: {}", self.video_crop_result_entries.len());
         self.debug_print_common();
         println!("-----------------------------------------");
     }
@@ -59,16 +59,16 @@ impl PrintResults for VideoOptimizer {
             VideoOptimizerParameters::VideoTranscode(_) => {
                 writeln!(writer)?;
 
-                let total_entries = self.video_transcode_entries.len();
-                let entries_needing_optimization = self.video_transcode_entries.iter().filter(|e| !e.codec.is_empty() && e.error.is_none()).count();
-                let failed_entries = self.video_transcode_entries.iter().filter(|e| e.error.is_some()).count();
+                let total_entries = self.video_transcode_result_entries.len();
+                let entries_needing_optimization = self.video_transcode_result_entries.iter().filter(|e| !e.codec.is_empty() && e.error.is_none()).count();
+                let failed_entries = self.video_transcode_result_entries.iter().filter(|e| e.error.is_some()).count();
 
                 writeln!(writer, "Total files found: {total_entries}")?;
                 writeln!(writer, "Files needing optimization: {entries_needing_optimization}")?;
                 writeln!(writer, "Failed to analyze: {failed_entries}")?;
                 writeln!(writer)?;
 
-                for entry in &self.video_transcode_entries {
+                for entry in &self.video_transcode_result_entries {
                     if !entry.codec.is_empty() {
                         if let Some(err) = &entry.error {
                             writeln!(writer, "[FAILED] {} - Codec: {} - Error: {}", entry.path.display(), entry.codec, err)?;
@@ -89,16 +89,16 @@ impl PrintResults for VideoOptimizer {
             VideoOptimizerParameters::VideoCrop(_) => {
                 writeln!(writer)?;
 
-                let total_entries = self.video_crop_entries.len();
-                let entries_with_crop_info = self.video_crop_entries.iter().filter(|e| !e.codec.is_empty() && e.error.is_none()).count();
-                let failed_entries = self.video_crop_entries.iter().filter(|e| e.error.is_some()).count();
+                let total_entries = self.video_crop_result_entries.len();
+                let entries_with_crop_info = self.video_crop_result_entries.iter().filter(|e| !e.codec.is_empty() && e.error.is_none()).count();
+                let failed_entries = self.video_crop_result_entries.iter().filter(|e| e.error.is_some()).count();
 
                 writeln!(writer, "Total files found: {total_entries}")?;
                 writeln!(writer, "Files with crop information: {entries_with_crop_info}")?;
                 writeln!(writer, "Failed to analyze: {failed_entries}")?;
                 writeln!(writer)?;
 
-                for entry in &self.video_crop_entries {
+                for entry in &self.video_crop_result_entries {
                     if !entry.codec.is_empty() {
                         if let Some(err) = &entry.error {
                             writeln!(writer, "[FAILED] {} - Codec: {} - Error: {}", entry.path.display(), entry.codec, err)?;
@@ -126,8 +126,8 @@ impl PrintResults for VideoOptimizer {
 
     fn save_results_to_file_as_json(&self, file_name: &str, pretty_print: bool) -> std::io::Result<()> {
         match &self.params {
-            VideoOptimizerParameters::VideoTranscode(_) => self.save_results_to_file_as_json_internal(file_name, &self.video_transcode_entries, pretty_print),
-            VideoOptimizerParameters::VideoCrop(_) => self.save_results_to_file_as_json_internal(file_name, &self.video_crop_entries, pretty_print),
+            VideoOptimizerParameters::VideoTranscode(_) => self.save_results_to_file_as_json_internal(file_name, &self.video_transcode_result_entries, pretty_print),
+            VideoOptimizerParameters::VideoCrop(_) => self.save_results_to_file_as_json_internal(file_name, &self.video_crop_result_entries, pretty_print),
         }
     }
 }

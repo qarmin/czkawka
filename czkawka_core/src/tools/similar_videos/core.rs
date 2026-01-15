@@ -13,7 +13,7 @@ use log::debug;
 use rayon::prelude::*;
 use vid_dup_finder_lib::{CreationOptions, Cropdetect, VideoHash, VideoHashBuilder};
 
-use crate::common::cache::{CACHE_VIDEO_VERSION, extract_loaded_cache, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
+use crate::common::cache::{CACHE_VIDEO_VERSION, load_and_split_cache_generalized_by_path, save_and_connect_cache_generalized_by_path};
 use crate::common::config_cache_path::get_config_cache_path;
 use crate::common::consts::VIDEO_FILES_EXTENSIONS;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult, inode, take_1_per_inode};
@@ -70,34 +70,6 @@ impl SimilarVideos {
 
             DirTraversalResult::Stopped => WorkContinueStatus::Stop,
         }
-    }
-
-    #[fun_time(message = "load_cache_at_start", level = "debug")]
-    fn load_cache_at_start(&mut self) -> (BTreeMap<String, VideosEntry>, BTreeMap<String, VideosEntry>, BTreeMap<String, VideosEntry>) {
-        let loaded_hash_map;
-        let mut records_already_cached: BTreeMap<String, VideosEntry> = Default::default();
-        let mut non_cached_files_to_check: BTreeMap<String, VideosEntry> = Default::default();
-
-        if self.common_data.use_cache {
-            let (messages, loaded_items) = load_cache_from_file_generalized_by_path::<VideosEntry>(
-                &get_similar_videos_cache_file(self.params.skip_forward_amount, self.params.duration, self.params.crop_detect),
-                self.get_delete_outdated_cache(),
-                &self.videos_to_check,
-            );
-            self.get_text_messages_mut().extend_with_another_messages(messages);
-            loaded_hash_map = loaded_items.unwrap_or_default();
-
-            extract_loaded_cache(
-                &loaded_hash_map,
-                mem::take(&mut self.videos_to_check),
-                &mut records_already_cached,
-                &mut non_cached_files_to_check,
-            );
-        } else {
-            loaded_hash_map = Default::default();
-            mem::swap(&mut self.videos_to_check, &mut non_cached_files_to_check);
-        }
-        (loaded_hash_map, records_already_cached, non_cached_files_to_check)
     }
 
     fn check_video_file_entry(&self, mut file_entry: VideosEntry) -> VideosEntry {
@@ -259,19 +231,19 @@ impl SimilarVideos {
         // Just connect loaded results with already calculated hashes
         vec_file_entry.extend(records_already_cached.into_values());
 
+        self.save_cache(&vec_file_entry, loaded_hash_map);
+
         let mut hashmap_with_file_entries: IndexMap<String, VideosEntry> = Default::default();
         let mut vector_of_hashes: Vec<VideoHash> = Vec::new();
-        for file_entry in &vec_file_entry {
+        for file_entry in vec_file_entry {
             // 0 means that images was not hashed correctly, e.g. could be improperly
             if file_entry.error.is_empty() {
-                hashmap_with_file_entries.insert(file_entry.vhash.src_path().to_string_lossy().to_string(), file_entry.clone());
                 vector_of_hashes.push(file_entry.vhash.clone());
+                hashmap_with_file_entries.insert(file_entry.vhash.src_path().to_string_lossy().to_string(), file_entry);
             } else {
-                self.common_data.text_messages.warnings.push(file_entry.error.clone());
+                self.common_data.text_messages.warnings.push(file_entry.error);
             }
         }
-
-        self.save_cache(vec_file_entry, loaded_hash_map);
 
         // Break if stop was clicked after saving to cache
         if check_if_stop_received(stop_flag) {
@@ -370,22 +342,22 @@ impl SimilarVideos {
     }
 
     #[fun_time(message = "save_cache", level = "debug")]
-    fn save_cache(&mut self, vec_file_entry: Vec<VideosEntry>, loaded_hash_map: BTreeMap<String, VideosEntry>) {
-        if self.common_data.use_cache {
-            // Must save all results to file, old loaded from file with all currently counted results
-            let mut all_results: BTreeMap<String, VideosEntry> = loaded_hash_map;
-            for file_entry in vec_file_entry {
-                all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
-            }
+    fn save_cache(&mut self, vec_file_entry: &[VideosEntry], loaded_hash_map: BTreeMap<String, VideosEntry>) {
+        save_and_connect_cache_generalized_by_path(
+            &get_similar_videos_cache_file(self.params.skip_forward_amount, self.params.duration, self.params.crop_detect),
+            vec_file_entry,
+            loaded_hash_map,
+            self,
+        );
+    }
 
-            let messages = save_cache_to_file_generalized(
-                &get_similar_videos_cache_file(self.params.skip_forward_amount, self.params.duration, self.params.crop_detect),
-                &all_results,
-                self.common_data.save_also_as_json,
-                0,
-            );
-            self.get_text_messages_mut().extend_with_another_messages(messages);
-        }
+    #[fun_time(message = "load_cache_at_start", level = "debug")]
+    fn load_cache_at_start(&mut self) -> (BTreeMap<String, VideosEntry>, BTreeMap<String, VideosEntry>, BTreeMap<String, VideosEntry>) {
+        load_and_split_cache_generalized_by_path(
+            &get_similar_videos_cache_file(self.params.skip_forward_amount, self.params.duration, self.params.crop_detect),
+            mem::take(&mut self.videos_to_check),
+            self,
+        )
     }
 
     #[fun_time(message = "match_groups_of_videos", level = "debug")]

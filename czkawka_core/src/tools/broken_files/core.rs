@@ -12,7 +12,7 @@ use log::{debug, error};
 use lopdf::Document;
 use rayon::prelude::*;
 
-use crate::common::cache::{CACHE_BROKEN_FILES_VERSION, extract_loaded_cache, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
+use crate::common::cache::{CACHE_BROKEN_FILES_VERSION, load_and_split_cache_generalized_by_path, save_and_connect_cache_generalized_by_path};
 use crate::common::consts::{AUDIO_FILES_EXTENSIONS, IMAGE_RS_BROKEN_FILES_EXTENSIONS, PDF_FILES_EXTENSIONS, VIDEO_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS};
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{ToolType, WorkContinueStatus};
@@ -262,24 +262,12 @@ impl BrokenFiles {
 
     #[fun_time(message = "load_cache", level = "debug")]
     fn load_cache(&mut self) -> (BTreeMap<String, BrokenEntry>, BTreeMap<String, BrokenEntry>, BTreeMap<String, BrokenEntry>) {
-        let loaded_hash_map;
+        load_and_split_cache_generalized_by_path(&get_broken_files_cache_file(), mem::take(&mut self.files_to_check), self)
+    }
 
-        let mut records_already_cached: BTreeMap<String, BrokenEntry> = Default::default();
-        let mut non_cached_files_to_check: BTreeMap<String, BrokenEntry> = Default::default();
-        let files_to_check = mem::take(&mut self.files_to_check);
-
-        if self.common_data.use_cache {
-            let (messages, loaded_items) =
-                load_cache_from_file_generalized_by_path::<BrokenEntry>(&get_broken_files_cache_file(), self.get_delete_outdated_cache(), &files_to_check);
-            self.get_text_messages_mut().extend_with_another_messages(messages);
-            loaded_hash_map = loaded_items.unwrap_or_default();
-
-            extract_loaded_cache(&loaded_hash_map, files_to_check, &mut records_already_cached, &mut non_cached_files_to_check);
-        } else {
-            loaded_hash_map = Default::default();
-            non_cached_files_to_check = files_to_check;
-        }
-        (loaded_hash_map, records_already_cached, non_cached_files_to_check)
+    #[fun_time(message = "save_to_cache", level = "debug")]
+    fn save_to_cache(&mut self, vec_file_entry: &[BrokenEntry], loaded_hash_map: BTreeMap<String, BrokenEntry>) {
+        save_and_connect_cache_generalized_by_path(&get_broken_files_cache_file(), vec_file_entry, loaded_hash_map, self);
     }
 
     fn check_file(file_entry: BrokenEntry, stop_flag: &Arc<AtomicBool>) -> Option<Option<BrokenEntry>> {
@@ -351,23 +339,6 @@ impl BrokenFiles {
         self.files_to_check = Default::default();
 
         WorkContinueStatus::Continue
-    }
-    #[fun_time(message = "save_to_cache", level = "debug")]
-    fn save_to_cache(&mut self, vec_file_entry: &[BrokenEntry], loaded_hash_map: BTreeMap<String, BrokenEntry>) {
-        if self.common_data.use_cache {
-            // Must save all results to file, old loaded from file with all currently counted results
-            let mut all_results: BTreeMap<String, BrokenEntry> = Default::default();
-
-            for file_entry in vec_file_entry.iter().cloned() {
-                all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
-            }
-            for (name, file_entry) in loaded_hash_map {
-                all_results.insert(name, file_entry);
-            }
-
-            let messages = save_cache_to_file_generalized(&get_broken_files_cache_file(), &all_results, self.common_data.save_also_as_json, 0);
-            self.get_text_messages_mut().extend_with_another_messages(messages);
-        }
     }
 }
 

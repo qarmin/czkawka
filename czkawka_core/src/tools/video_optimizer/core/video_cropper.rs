@@ -223,6 +223,7 @@ where
     }
     if let Some(rectangle) = rectangle {
         rectangle.validate();
+        // Rectangle may extend step by step to full image size, so that is why previous checks are not enough
         if !rectangle.is_cropping_needed(first_frame.width(), first_frame.height()) {
             return Some(Ok(None));
         }
@@ -296,12 +297,13 @@ where
 
     if let Some(rectangle) = rectangle {
         rectangle.validate();
+        // Rectangle may extend step by step to full image size, so that is why previous checks are not enough
         if !rectangle.is_cropping_needed(first_frame.width(), first_frame.height()) {
             return Some(Ok(None));
         }
         Some(Ok(Some(rectangle)))
     } else {
-        Some(Ok(None)) // All frames were fully black
+        Some(Ok(None)) // All frames were fully static
     }
 }
 
@@ -377,15 +379,12 @@ pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, sto
     match params.crop_detect {
         VideoCroppingMechanism::BlackBars => match analyze_black_bars(duration as f32, &get_frame, stop_flag, &first_frame) {
             Some(Ok(Some(rectangle))) => {
-                // debug!("________________________Detected black bars for video {}: left={}, top={}, right={}, bottom={}", entry.path.display(), rectangle.left, rectangle.top, rectangle.right, rectangle.bottom);
                 rectangle.validate_image_size(width, height);
                 entry.new_image_dimensions = Some((rectangle.left, rectangle.top, rectangle.right, rectangle.bottom));
             }
             Some(Ok(None)) => { // No black bars
-                // debug!("________________________No black bars detected for video {}", entry.path.display());
             }
             Some(Err(e)) => {
-                // debug!("________________________Error analyzing black bars for video {}: {}", entry.path.display(), e);
                 entry.error = Some(e);
                 return Some(entry);
             }
@@ -393,22 +392,11 @@ pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, sto
         },
         VideoCroppingMechanism::StaticContent => match analyze_static_image_parts(duration as f32, &get_frame, stop_flag, &first_frame) {
             Some(Ok(Some(rectangle))) => {
-                // debug!(
-                //     "________________________Detected static content crop for video {}: left={}, top={}, right={}, bottom={}",
-                //     entry.path.display(),
-                //     rectangle.left,
-                //     rectangle.top,
-                //     rectangle.right,
-                //     rectangle.bottom
-                // );
                 rectangle.validate_image_size(width, height);
                 entry.new_image_dimensions = Some((rectangle.left, rectangle.top, rectangle.right, rectangle.bottom));
             }
-            Some(Ok(None)) => {
-                // debug!("________________________No static content crop detected for video {}", entry.path.display());
-            }
+            Some(Ok(None)) => {}
             Some(Err(e)) => {
-                // debug!("________________________Error analyzing static content for video {}: {}", entry.path.display(), e);
                 entry.error = Some(e);
                 return Some(entry);
             }
