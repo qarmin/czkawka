@@ -83,6 +83,7 @@ clippy.unnecessary_semicolon = "warn"
 clippy.trivially_copy_pass_by_ref = "warn"
 clippy.indexing_slicing = "warn"
 clippy.non_std_lazy_statics = "warn"
+clippy.undocumented_unsafe_blocks = "warn"
 
 clippy.allow_attributes = "warn"
 clippy.assertions_on_result_states = "warn"
@@ -177,4 +178,5 @@ clippy.useless_let_if_seq = "warn"
 clippy.use_self = "warn"
 clippy.verbose_file_reads = "warn"
 clippy.wildcard_imports = "warn"
+
 

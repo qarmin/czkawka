@@ -85,6 +85,8 @@ fn main() {
     // Clamp to allowed range to be safe
     if base_settings.use_manual_application_scale {
         let scale = base_settings.manual_application_scale.clamp(0.5, 3.0);
+        // SAFETY:
+        // set_var is safe when using on single threaded context
         unsafe {
             std::env::set_var("SLINT_SCALE_FACTOR", format!("{scale:.2}"));
         }
