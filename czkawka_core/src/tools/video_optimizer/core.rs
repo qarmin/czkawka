@@ -15,7 +15,7 @@ use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::tools::video_optimizer::{
-    Info, VideoCropEntry, VideoCroppingMechanism, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters, VideoTranscodeEntry, VideoTranscodeParams,
+    Info, VideoCropEntry, VideoCropParams, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters, VideoTranscodeEntry, VideoTranscodeParams,
 };
 
 mod video_converter;
@@ -148,7 +148,7 @@ impl VideoOptimizer {
             unreachable!("process_video_crop called with non VideoCrop parameters, caller is responsible for that");
         };
 
-        let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_video_crop_cache(params.crop_detect);
+        let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_video_crop_cache(&params);
 
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
@@ -181,7 +181,7 @@ impl VideoOptimizer {
 
         progress_handler.join_thread();
 
-        self.save_video_crop_cache(&vec_file_entry, params.crop_detect, loaded_hash_map);
+        self.save_video_crop_cache(&vec_file_entry, &params, loaded_hash_map);
 
         vec_file_entry.retain(|e| e.error.is_none() && e.new_image_dimensions.is_some());
 
@@ -202,7 +202,7 @@ impl VideoOptimizer {
     }
 
     #[fun_time(message = "load_video_crop_cache", level = "debug")]
-    fn load_video_crop_cache(&mut self, params: VideoCroppingMechanism) -> (BTreeMap<String, VideoCropEntry>, BTreeMap<String, VideoCropEntry>, BTreeMap<String, VideoCropEntry>) {
+    fn load_video_crop_cache(&mut self, params: &VideoCropParams) -> (BTreeMap<String, VideoCropEntry>, BTreeMap<String, VideoCropEntry>, BTreeMap<String, VideoCropEntry>) {
         load_and_split_cache_generalized_by_path(&get_video_crop_cache_file(params), mem::take(&mut self.video_crop_test_entries), self)
     }
 
@@ -212,8 +212,8 @@ impl VideoOptimizer {
     }
 
     #[fun_time(message = "save_video_crop_cache", level = "debug")]
-    fn save_video_crop_cache(&mut self, vec_file_entry: &[VideoCropEntry], video_cropping_mechanism: VideoCroppingMechanism, loaded_hash_map: BTreeMap<String, VideoCropEntry>) {
-        save_and_connect_cache_generalized_by_path(&get_video_crop_cache_file(video_cropping_mechanism), vec_file_entry, loaded_hash_map, self);
+    fn save_video_crop_cache(&mut self, vec_file_entry: &[VideoCropEntry], params: &VideoCropParams, loaded_hash_map: BTreeMap<String, VideoCropEntry>) {
+        save_and_connect_cache_generalized_by_path(&get_video_crop_cache_file(params), vec_file_entry, loaded_hash_map, self);
     }
 
     #[fun_time(message = "fix_files", level = "debug")]
@@ -270,6 +270,13 @@ pub fn get_video_transcode_cache_file() -> String {
     format!("cache_video_transcode_{CACHE_VIDEO_OPTIMIZE_VERSION}.bin")
 }
 
-pub fn get_video_crop_cache_file(vide_cropping_mechanism: VideoCroppingMechanism) -> String {
-    format!("cache_video_crop_{CACHE_VIDEO_OPTIMIZE_VERSION}_{vide_cropping_mechanism:?}.bin")
+pub fn get_video_crop_cache_file(params: &VideoCropParams) -> String {
+    format!(
+        "cache_video_crop_{CACHE_VIDEO_OPTIMIZE_VERSION}_{:?}_t{}_p{}_s{}_c{}.bin",
+        params.crop_detect,
+        params.black_pixel_threshold,
+        (params.black_bar_min_percentage * 100.0) as u32, // Convert to percentage for filename
+        params.max_samples,
+        params.min_crop_size
+    )
 }

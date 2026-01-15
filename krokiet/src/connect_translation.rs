@@ -263,6 +263,14 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_broken_files_image_text(flk!("subsettings_broken_files_image").into());
     translation.set_subsettings_video_optimizer_mode_text(flk!("subsettings_video_optimizer_mode").into());
     translation.set_subsettings_video_optimizer_crop_type_text(flk!("subsettings_video_optimizer_crop_type").into());
+    translation.set_subsettings_video_optimizer_black_pixel_threshold_text(flk!("subsettings_video_optimizer_black_pixel_threshold").into());
+    translation.set_subsettings_video_optimizer_black_pixel_threshold_hint_text(flk!("subsettings_video_optimizer_black_pixel_threshold_hint").into());
+    translation.set_subsettings_video_optimizer_black_bar_min_percentage_text(flk!("subsettings_video_optimizer_black_bar_min_percentage").into());
+    translation.set_subsettings_video_optimizer_black_bar_min_percentage_hint_text(flk!("subsettings_video_optimizer_black_bar_min_percentage_hint").into());
+    translation.set_subsettings_video_optimizer_max_samples_text(flk!("subsettings_video_optimizer_max_samples").into());
+    translation.set_subsettings_video_optimizer_max_samples_hint_text(flk!("subsettings_video_optimizer_max_samples_hint").into());
+    translation.set_subsettings_video_optimizer_min_crop_size_text(flk!("subsettings_video_optimizer_min_crop_size").into());
+    translation.set_subsettings_video_optimizer_min_crop_size_hint_text(flk!("subsettings_video_optimizer_min_crop_size_hint").into());
     translation.set_subsettings_video_optimizer_video_codec_text(flk!("subsettings_video_optimizer_video_codec").into());
     translation.set_subsettings_video_optimizer_excluded_codecs_text(flk!("subsettings_video_optimizer_excluded_codecs").into());
     translation.set_subsettings_video_optimizer_video_quality_text(flk!("subsettings_video_optimizer_video_quality").into());

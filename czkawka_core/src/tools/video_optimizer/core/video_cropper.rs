@@ -11,10 +11,6 @@ use crate::common::process_utils::run_command_interruptible;
 use crate::common::video_metadata::VideoMetadata;
 use crate::tools::video_optimizer::{VideoCropEntry, VideoCropFixParams, VideoCropParams, VideoCroppingMechanism};
 
-const BLACK_PIXEL_THRESHOLD: u8 = 20;
-const BLACK_BAR_MIN_PERCENTAGE: f32 = 0.9;
-const MAX_SAMPLES: usize = 60;
-const MIN_CROP_SIZE: u32 = 5;
 const MIN_SAMPLES: usize = 3;
 const MIN_SAMPLE_INTERVAL: f32 = 0.1;
 
@@ -65,10 +61,10 @@ impl Rectangle {
         );
     }
 
-    fn is_cropping_needed(&self, width: u32, height: u32) -> bool {
+    fn is_cropping_needed(&self, width: u32, height: u32, min_crop_size: u32) -> bool {
         let right_margin = width - self.right;
         let bottom_margin = height - self.bottom;
-        self.left > MIN_CROP_SIZE || right_margin > MIN_CROP_SIZE || self.top > MIN_CROP_SIZE || bottom_margin > MIN_CROP_SIZE
+        self.left > min_crop_size || right_margin > min_crop_size || self.top > min_crop_size || bottom_margin > min_crop_size
     }
 }
 
@@ -102,9 +98,9 @@ fn extract_frame_ffmpeg(video_path: &Path, timestamp: f32) -> Option<RgbImage> {
     image::load_from_memory(&output.stdout).ok().map(|img| img.into_rgb8())
 }
 
-fn is_pixel_black(img: &image::RgbImage, x: u32, y: u32) -> bool {
+fn is_pixel_black(img: &image::RgbImage, x: u32, y: u32, black_pixel_threshold: u8) -> bool {
     let pixel = img.get_pixel(x, y);
-    pixel.0.iter().all(|&channel| channel < BLACK_PIXEL_THRESHOLD)
+    pixel.0.iter().all(|&channel| channel < black_pixel_threshold)
 }
 
 #[derive(Debug)]
@@ -114,13 +110,13 @@ enum BlackBarResult {
     FullBlackImage,
 }
 
-fn detect_black_bars(rgb_img: &RgbImage) -> BlackBarResult {
+fn detect_black_bars(rgb_img: &RgbImage, params: &VideoCropParams) -> BlackBarResult {
     let (width, height) = rgb_img.dimensions();
 
     let mut left_crop = 0u32;
     for x in 0..width {
-        let black_pixels = (0..height).filter(|&y| is_pixel_black(rgb_img, x, y)).count();
-        if (black_pixels as f32 / height as f32) < BLACK_BAR_MIN_PERCENTAGE {
+        let black_pixels = (0..height).filter(|&y| is_pixel_black(rgb_img, x, y, params.black_pixel_threshold)).count();
+        if (black_pixels as f32 / height as f32) < params.black_bar_min_percentage {
             break;
         }
         left_crop = x + 1;
@@ -128,8 +124,8 @@ fn detect_black_bars(rgb_img: &RgbImage) -> BlackBarResult {
 
     let mut right_pos = width;
     for x in (0..width).rev() {
-        let black_pixels = (0..height).filter(|&y| is_pixel_black(rgb_img, x, y)).count();
-        if (black_pixels as f32 / height as f32) < BLACK_BAR_MIN_PERCENTAGE {
+        let black_pixels = (0..height).filter(|&y| is_pixel_black(rgb_img, x, y, params.black_pixel_threshold)).count();
+        if (black_pixels as f32 / height as f32) < params.black_bar_min_percentage {
             right_pos = x + 1;
             break;
         }
@@ -141,8 +137,8 @@ fn detect_black_bars(rgb_img: &RgbImage) -> BlackBarResult {
 
     let mut top_crop = 0u32;
     for y in 0..height {
-        let black_pixels = (0..width).filter(|&x| is_pixel_black(rgb_img, x, y)).count();
-        if (black_pixels as f32 / width as f32) < BLACK_BAR_MIN_PERCENTAGE {
+        let black_pixels = (0..width).filter(|&x| is_pixel_black(rgb_img, x, y, params.black_pixel_threshold)).count();
+        if (black_pixels as f32 / width as f32) < params.black_bar_min_percentage {
             break;
         }
         top_crop = y + 1;
@@ -150,8 +146,8 @@ fn detect_black_bars(rgb_img: &RgbImage) -> BlackBarResult {
 
     let mut bottom_pos = height;
     for y in (0..height).rev() {
-        let black_pixels = (0..width).filter(|&x| is_pixel_black(rgb_img, x, y)).count();
-        if (black_pixels as f32 / width as f32) < BLACK_BAR_MIN_PERCENTAGE {
+        let black_pixels = (0..width).filter(|&x| is_pixel_black(rgb_img, x, y, params.black_pixel_threshold)).count();
+        if (black_pixels as f32 / width as f32) < params.black_bar_min_percentage {
             bottom_pos = y + 1;
             break;
         }
@@ -162,14 +158,14 @@ fn detect_black_bars(rgb_img: &RgbImage) -> BlackBarResult {
     }
 
     let rect = Rectangle::new(top_crop, bottom_pos, left_crop, right_pos);
-    if rect.is_cropping_needed(width, height) {
+    if rect.is_cropping_needed(width, height, params.min_crop_size) {
         BlackBarResult::BlackBarsDetected(rect)
     } else {
         BlackBarResult::NoBlackBars
     }
 }
 
-fn analyze_black_bars<F>(duration: f32, get_frame: &F, stop_flag: &Arc<AtomicBool>, first_frame: &RgbImage) -> Option<Result<Option<Rectangle>, String>>
+fn analyze_black_bars<F>(duration: f32, get_frame: &F, stop_flag: &Arc<AtomicBool>, first_frame: &RgbImage, params: &VideoCropParams) -> Option<Result<Option<Rectangle>, String>>
 where
     F: Fn(f32) -> Option<RgbImage>,
 {
@@ -177,7 +173,7 @@ where
         return None;
     }
 
-    let mut rectangle = match detect_black_bars(first_frame) {
+    let mut rectangle = match detect_black_bars(first_frame, params) {
         BlackBarResult::BlackBarsDetected(rect) => Some(rect),
         BlackBarResult::NoBlackBars => {
             return Some(Ok(None));
@@ -185,7 +181,7 @@ where
         BlackBarResult::FullBlackImage => None,
     };
 
-    let num_samples = ((duration / MIN_SAMPLE_INTERVAL).floor() as usize).clamp(MIN_SAMPLES, MAX_SAMPLES);
+    let num_samples = ((duration / MIN_SAMPLE_INTERVAL).floor() as usize).clamp(MIN_SAMPLES, params.max_samples);
 
     for i in 1..num_samples {
         if stop_flag.load(Ordering::Relaxed) {
@@ -206,7 +202,7 @@ where
             )));
         }
 
-        match detect_black_bars(&tmp_frame) {
+        match detect_black_bars(&tmp_frame, params) {
             BlackBarResult::BlackBarsDetected(tmp_rect) => {
                 rectangle = match rectangle {
                     Some(current_rect) => Some(current_rect.union(&tmp_rect)),
@@ -224,7 +220,7 @@ where
     if let Some(rectangle) = rectangle {
         rectangle.validate();
         // Rectangle may extend step by step to full image size, so that is why previous checks are not enough
-        if !rectangle.is_cropping_needed(first_frame.width(), first_frame.height()) {
+        if !rectangle.is_cropping_needed(first_frame.width(), first_frame.height(), params.min_crop_size) {
             return Some(Ok(None));
         }
         Some(Ok(Some(rectangle)))
@@ -247,7 +243,13 @@ fn diff_between_dynamic_images(img_original: &RgbImage, mut consumed_temp_img: R
     consumed_temp_img
 }
 
-fn analyze_static_image_parts<F>(duration: f32, get_frame: &F, stop_flag: &Arc<AtomicBool>, first_frame: &RgbImage) -> Option<Result<Option<Rectangle>, String>>
+fn analyze_static_image_parts<F>(
+    duration: f32,
+    get_frame: &F,
+    stop_flag: &Arc<AtomicBool>,
+    first_frame: &RgbImage,
+    params: &VideoCropParams,
+) -> Option<Result<Option<Rectangle>, String>>
 where
     F: Fn(f32) -> Option<RgbImage>,
 {
@@ -257,7 +259,7 @@ where
     // Initial rectangle is empty, because with only one frame we cannot determine static parts
     let mut rectangle: Option<Rectangle> = None;
 
-    let num_samples = ((duration / MIN_SAMPLE_INTERVAL).floor() as usize).clamp(MIN_SAMPLES, MAX_SAMPLES);
+    let num_samples = ((duration / MIN_SAMPLE_INTERVAL).floor() as usize).clamp(MIN_SAMPLES, params.max_samples);
 
     for i in 1..num_samples {
         if stop_flag.load(Ordering::Relaxed) {
@@ -279,7 +281,7 @@ where
         }
         let dynamic_image_diff: RgbImage = diff_between_dynamic_images(first_frame, tmp_frame);
 
-        match detect_black_bars(&dynamic_image_diff) {
+        match detect_black_bars(&dynamic_image_diff, params) {
             BlackBarResult::FullBlackImage => {
                 // Do nothing - leave the current rectangle as is
             }
@@ -298,7 +300,7 @@ where
     if let Some(rectangle) = rectangle {
         rectangle.validate();
         // Rectangle may extend step by step to full image size, so that is why previous checks are not enough
-        if !rectangle.is_cropping_needed(first_frame.width(), first_frame.height()) {
+        if !rectangle.is_cropping_needed(first_frame.width(), first_frame.height(), params.min_crop_size) {
             return Some(Ok(None));
         }
         Some(Ok(Some(rectangle)))
@@ -377,7 +379,7 @@ pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, sto
     }
 
     match params.crop_detect {
-        VideoCroppingMechanism::BlackBars => match analyze_black_bars(duration as f32, &get_frame, stop_flag, &first_frame) {
+        VideoCroppingMechanism::BlackBars => match analyze_black_bars(duration as f32, &get_frame, stop_flag, &first_frame, params) {
             Some(Ok(Some(rectangle))) => {
                 rectangle.validate_image_size(width, height);
                 entry.new_image_dimensions = Some((rectangle.left, rectangle.top, rectangle.right, rectangle.bottom));
@@ -390,7 +392,7 @@ pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, sto
             }
             None => return None,
         },
-        VideoCroppingMechanism::StaticContent => match analyze_static_image_parts(duration as f32, &get_frame, stop_flag, &first_frame) {
+        VideoCroppingMechanism::StaticContent => match analyze_static_image_parts(duration as f32, &get_frame, stop_flag, &first_frame, params) {
             Some(Ok(Some(rectangle))) => {
                 rectangle.validate_image_size(width, height);
                 entry.new_image_dimensions = Some((rectangle.left, rectangle.top, rectangle.right, rectangle.bottom));
@@ -494,6 +496,16 @@ mod tests {
 
     use super::*;
 
+    fn default_test_params() -> VideoCropParams {
+        VideoCropParams {
+            crop_detect: VideoCroppingMechanism::BlackBars,
+            black_pixel_threshold: 20,
+            black_bar_min_percentage: 0.9,
+            max_samples: 60,
+            min_crop_size: 5,
+        }
+    }
+
     fn create_colored_frame(width: u32, height: u32, r: u8, g: u8, b: u8) -> RgbImage {
         let mut img = RgbImage::new(width, height);
         for pixel in img.pixels_mut() {
@@ -516,30 +528,34 @@ mod tests {
 
     #[test]
     fn test_is_pixel_black() {
+        let params = default_test_params();
+
         let black_img = RgbImage::from_pixel(10, 10, image::Rgb([0, 0, 0]));
-        assert!(is_pixel_black(&black_img, 5, 5));
+        assert!(is_pixel_black(&black_img, 5, 5, params.black_pixel_threshold));
 
         let dark_gray_img = RgbImage::from_pixel(10, 10, image::Rgb([19, 19, 19]));
-        assert!(is_pixel_black(&dark_gray_img, 5, 5));
+        assert!(is_pixel_black(&dark_gray_img, 5, 5, params.black_pixel_threshold));
 
         let light_gray_img = RgbImage::from_pixel(10, 10, image::Rgb([20, 20, 20]));
-        assert!(!is_pixel_black(&light_gray_img, 5, 5));
+        assert!(!is_pixel_black(&light_gray_img, 5, 5, params.black_pixel_threshold));
 
         let white_img = RgbImage::from_pixel(10, 10, image::Rgb([255, 255, 255]));
-        assert!(!is_pixel_black(&white_img, 5, 5));
+        assert!(!is_pixel_black(&white_img, 5, 5, params.black_pixel_threshold));
     }
 
     #[test]
     fn test_detect_black_bars_no_bars() {
+        let params = default_test_params();
         let img = create_colored_frame(100, 100, 100, 150, 200);
-        let result = detect_black_bars(&img);
+        let result = detect_black_bars(&img, &params);
         assert!(matches!(result, BlackBarResult::NoBlackBars));
     }
 
     #[test]
     fn test_detect_black_bars_with_bars() {
+        let params = default_test_params();
         let img = create_frame_with_black_bars(200, 200, 20);
-        let result = detect_black_bars(&img);
+        let result = detect_black_bars(&img, &params);
         if let BlackBarResult::BlackBarsDetected(rect) = result {
             assert!(rect.left >= 15 && rect.left <= 25, "Left crop: {}", rect.left);
             assert!(rect.top >= 15 && rect.top <= 25, "Top crop: {}", rect.top);
@@ -552,8 +568,9 @@ mod tests {
 
     #[test]
     fn test_detect_black_bars_small_bars() {
+        let params = default_test_params();
         let img = create_frame_with_black_bars(200, 200, 3);
-        let result = detect_black_bars(&img);
+        let result = detect_black_bars(&img, &params);
         assert!(matches!(result, BlackBarResult::NoBlackBars));
     }
 
@@ -571,43 +588,48 @@ mod tests {
 
     #[test]
     fn test_rectangle_is_cropping_needed() {
+        let params = default_test_params();
+
         // Image 100x100, cropped to (10, 10) -> (90, 90), so 10px margin on each side
         let cropping_needed = Rectangle::new(10, 90, 10, 90);
-        assert!(cropping_needed.is_cropping_needed(100, 100));
+        assert!(cropping_needed.is_cropping_needed(100, 100, params.min_crop_size));
 
         // Image 100x100, no cropping: (0, 0) -> (100, 100)
         let no_cropping_needed = Rectangle::new(0, 100, 0, 100);
-        assert!(!no_cropping_needed.is_cropping_needed(100, 100));
+        assert!(!no_cropping_needed.is_cropping_needed(100, 100, params.min_crop_size));
 
         // Image 100x100, small crop (3px on each side) - below threshold
         let small_crop = Rectangle::new(3, 97, 3, 97);
-        assert!(!small_crop.is_cropping_needed(100, 100));
+        assert!(!small_crop.is_cropping_needed(100, 100, params.min_crop_size));
     }
 
     #[test]
     fn test_analyze_black_bars_consistent_bars() {
+        let params = default_test_params();
         let stop_flag = Arc::new(AtomicBool::new(false));
         let duration = 10.0;
 
         let get_frame = |_timestamp: f32| -> Option<RgbImage> { Some(create_frame_with_black_bars(200, 200, 20)) };
 
-        let result = analyze_black_bars(duration, &get_frame, &stop_flag, &create_frame_with_black_bars(200, 200, 20));
+        let result = analyze_black_bars(duration, &get_frame, &stop_flag, &create_frame_with_black_bars(200, 200, 20), &params);
         assert!(result.expect("Expected Result").unwrap().is_some());
     }
 
     #[test]
     fn test_analyze_black_bars_no_bars() {
+        let params = default_test_params();
         let stop_flag = Arc::new(AtomicBool::new(false));
         let duration = 10.0;
 
         let get_frame = |_timestamp: f32| -> Option<RgbImage> { Some(create_colored_frame(200, 200, 100, 150, 200)) };
 
-        let result = analyze_black_bars(duration, &get_frame, &stop_flag, &create_colored_frame(200, 200, 100, 150, 200));
+        let result = analyze_black_bars(duration, &get_frame, &stop_flag, &create_colored_frame(200, 200, 100, 150, 200), &params);
         assert!(result.expect("Expected Result").unwrap().is_none());
     }
 
     #[test]
     fn test_analyze_black_bars_inconsistent_bars() {
+        let params = default_test_params();
         let stop_flag = Arc::new(AtomicBool::new(false));
         let duration = 10.0;
 
@@ -619,12 +641,13 @@ mod tests {
             }
         };
 
-        let result = analyze_black_bars(duration, &get_frame, &stop_flag, &create_frame_with_black_bars(200, 200, 20));
+        let result = analyze_black_bars(duration, &get_frame, &stop_flag, &create_frame_with_black_bars(200, 200, 20), &params);
         assert!(result.expect("Expected Result").unwrap().is_none());
     }
 
     #[test]
     fn test_analyze_black_bars_variable_rectangles() {
+        let params = default_test_params();
         let stop_flag = Arc::new(AtomicBool::new(false));
         let duration = 10.0;
 
@@ -638,7 +661,7 @@ mod tests {
             }
         };
 
-        let result = analyze_black_bars(duration, &get_frame, &stop_flag, &create_frame_with_black_bars(200, 200, 20));
+        let result = analyze_black_bars(duration, &get_frame, &stop_flag, &create_frame_with_black_bars(200, 200, 20), &params);
         let rect = result.expect("Expected Result").unwrap().unwrap();
         assert_eq!(rect.left, 18);
         assert_eq!(rect.top, 18);
@@ -648,6 +671,7 @@ mod tests {
 
     #[test]
     fn test_detect_black_bars_fuzzer() {
+        let params = default_test_params();
         let test_cases = vec![
             (1, 1, "1x1 image"),
             (1, 100, "1 pixel wide"),
@@ -665,7 +689,7 @@ mod tests {
             for pixel in all_black.pixels_mut() {
                 *pixel = image::Rgb([0, 0, 0]);
             }
-            let result = detect_black_bars(&all_black);
+            let result = detect_black_bars(&all_black, &params);
             assert!(matches!(result, BlackBarResult::FullBlackImage), "All black image should return FullBlackImage for {desc}");
 
             // Test 2: All white image
@@ -673,7 +697,7 @@ mod tests {
             for pixel in all_white.pixels_mut() {
                 *pixel = image::Rgb([255, 255, 255]);
             }
-            let result = detect_black_bars(&all_white);
+            let result = detect_black_bars(&all_white, &params);
             assert!(matches!(result, BlackBarResult::NoBlackBars), "All white image should return NoBlackBars for {desc}");
 
             // Test 4: Checkerboard pattern (no black bars)
@@ -683,7 +707,7 @@ mod tests {
                     let color = if (x + y) % 2 == 0 { 255 } else { 0 };
                     *pixel = image::Rgb([color, color, color]);
                 }
-                let result = detect_black_bars(&checkerboard);
+                let result = detect_black_bars(&checkerboard, &params);
                 assert!(matches!(result, BlackBarResult::NoBlackBars), "Checkerboard should return NoBlackBars for {desc}");
             }
         }

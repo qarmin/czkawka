@@ -423,6 +423,106 @@ export component ToolSettings {
                     current_index <=> Settings.video_optimizer_sub_crop_type_index;
                     current_value <=> Settings.video_optimizer_sub_crop_type_value;
                 }
+
+                HorizontalLayout {
+                    spacing: 5px;
+                    Text {
+                        text: Translations.subsettings_video_optimizer_black_pixel_threshold_text;
+                        vertical_alignment: TextVerticalAlignment.center;
+                        font-size: FontSizes.normal;
+                    }
+
+                    LineEdit {
+                        text <=> Settings.video_optimizer_sub_black_pixel_threshold;
+                        font-size: FontSizes.normal;
+                    }
+
+                    Button {
+                        text: Translations.subsettings_reset_text;
+                        clicked => {
+                            Settings.video_optimizer_sub_black_pixel_threshold = "20";
+                        }
+                    }
+                }
+
+                HintText {
+                    hint_text: Translations.subsettings_video_optimizer_black_pixel_threshold_hint_text;
+                }
+
+                HorizontalLayout {
+                    spacing: 5px;
+                    Text {
+                        text: Translations.subsettings_video_optimizer_black_bar_min_percentage_text;
+                        vertical_alignment: TextVerticalAlignment.center;
+                        font-size: FontSizes.normal;
+                    }
+
+                    LineEdit {
+                        text <=> Settings.video_optimizer_sub_black_bar_min_percentage;
+                        font-size: FontSizes.normal;
+                    }
+
+                    Button {
+                        text: Translations.subsettings_reset_text;
+                        clicked => {
+                            Settings.video_optimizer_sub_black_bar_min_percentage = "0.9";
+                        }
+                    }
+                }
+
+                HintText {
+                    hint_text: Translations.subsettings_video_optimizer_black_bar_min_percentage_hint_text;
+                }
+
+                HorizontalLayout {
+                    spacing: 5px;
+                    Text {
+                        text: Translations.subsettings_video_optimizer_max_samples_text;
+                        vertical_alignment: TextVerticalAlignment.center;
+                        font-size: FontSizes.normal;
+                    }
+
+                    LineEdit {
+                        text <=> Settings.video_optimizer_sub_max_samples;
+                        font-size: FontSizes.normal;
+                    }
+
+                    Button {
+                        text: Translations.subsettings_reset_text;
+                        clicked => {
+                            Settings.video_optimizer_sub_max_samples = "60";
+                        }
+                    }
+                }
+
+                HintText {
+                    hint_text: Translations.subsettings_video_optimizer_max_samples_hint_text;
+                }
+
+                HorizontalLayout {
+                    spacing: 5px;
+                    Text {
+                        text: Translations.subsettings_video_optimizer_min_crop_size_text;
+                        vertical_alignment: TextVerticalAlignment.center;
+                        font-size: FontSizes.normal;
+                    }
+
+                    LineEdit {
+                        text <=> Settings.video_optimizer_sub_min_crop_size;
+                        font-size: FontSizes.normal;
+                    }
+
+                    Button {
+                        text: Translations.subsettings_reset_text;
+                        clicked => {
+                            Settings.video_optimizer_sub_min_crop_size = "5";
+                        }
+                    }
+                }
+
+                HintText {
+                    hint_text: Translations.subsettings_video_optimizer_min_crop_size_hint_text;
+                }
             }
 
             Rectangle { }

@@ -163,6 +163,14 @@ pub struct SettingsCustom {
     pub video_optimizer_mode: String,
     #[serde(default = "default_video_optimizer_crop_type")]
     pub video_optimizer_crop_type: String,
+    #[serde(default = "default_video_optimizer_black_pixel_threshold")]
+    pub video_optimizer_black_pixel_threshold: u8,
+    #[serde(default = "default_video_optimizer_black_bar_min_percentage")]
+    pub video_optimizer_black_bar_min_percentage: f32,
+    #[serde(default = "default_video_optimizer_max_samples")]
+    pub video_optimizer_max_samples: usize,
+    #[serde(default = "default_video_optimizer_min_crop_size")]
+    pub video_optimizer_min_crop_size: u32,
     #[serde(default = "default_video_optimizer_video_codec")]
     pub video_optimizer_video_codec: String,
     #[serde(default = "default_video_optimizer_excluded_codecs")]
@@ -380,6 +388,18 @@ fn default_video_optimizer_mode() -> String {
 }
 fn default_video_optimizer_crop_type() -> String {
     "blackbars".to_string()
+}
+fn default_video_optimizer_black_pixel_threshold() -> u8 {
+    20
+}
+fn default_video_optimizer_black_bar_min_percentage() -> f32 {
+    0.9
+}
+fn default_video_optimizer_max_samples() -> usize {
+    60
+}
+fn default_video_optimizer_min_crop_size() -> u32 {
+    5
 }
 fn default_video_optimizer_video_codec() -> String {
     "h265".to_string()

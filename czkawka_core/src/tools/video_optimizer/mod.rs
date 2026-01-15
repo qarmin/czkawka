@@ -99,7 +99,7 @@ pub struct Info {
     pub scanning_time: Duration,
 }
 
-#[derive(Clone, Eq, PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub enum VideoOptimizerParameters {
     VideoTranscode(VideoTranscodeParams),
     VideoCrop(VideoCropParams),
@@ -109,9 +109,13 @@ pub enum VideoOptimizerParameters {
 pub struct VideoTranscodeParams {
     pub excluded_codecs: Vec<String>,
 }
-#[derive(Clone, Eq, PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct VideoCropParams {
     pub crop_detect: VideoCroppingMechanism,
+    pub black_pixel_threshold: u8,
+    pub black_bar_min_percentage: f32,
+    pub max_samples: usize,
+    pub min_crop_size: u32,
 }
 
 impl VideoTranscodeParams {
@@ -124,6 +128,18 @@ impl VideoTranscodeParams {
 impl Default for VideoTranscodeParams {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+impl VideoCropParams {
+    pub fn new(crop_detect: VideoCroppingMechanism) -> Self {
+        Self {
+            crop_detect,
+            black_pixel_threshold: 20,
+            black_bar_min_percentage: 0.9,
+            max_samples: 60,
+            min_crop_size: 5,
+        }
     }
 }
 

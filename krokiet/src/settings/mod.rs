@@ -464,6 +464,10 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_broken_files_sub_video(custom_settings.broken_files_sub_video);
 
     settings.set_video_optimizer_sub_excluded_codecs(custom_settings.video_optimizer_excluded_codecs.clone().into());
+    settings.set_video_optimizer_sub_black_pixel_threshold(custom_settings.video_optimizer_black_pixel_threshold.to_string().into());
+    settings.set_video_optimizer_sub_black_bar_min_percentage(custom_settings.video_optimizer_black_bar_min_percentage.to_string().into());
+    settings.set_video_optimizer_sub_max_samples(custom_settings.video_optimizer_max_samples.to_string().into());
+    settings.set_video_optimizer_sub_min_crop_size(custom_settings.video_optimizer_min_crop_size.to_string().into());
     settings.set_video_optimizer_sub_video_quality(custom_settings.video_optimizer_video_quality as f32);
     settings.set_video_optimizer_sub_fail_if_bigger(custom_settings.video_optimizer_fail_if_bigger);
     settings.set_video_optimizer_sub_overwrite_files(custom_settings.video_optimizer_overwrite_files);
@@ -617,6 +621,10 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let video_optimizer_crop_type = combo_box_items.video_optimizer_crop_type.config_name.clone();
     let video_optimizer_video_codec = combo_box_items.video_optimizer_video_codec.config_name;
     let video_optimizer_excluded_codecs = settings.get_video_optimizer_sub_excluded_codecs().to_string();
+    let video_optimizer_black_pixel_threshold = settings.get_video_optimizer_sub_black_pixel_threshold().parse::<u8>().unwrap_or(20);
+    let video_optimizer_black_bar_min_percentage = settings.get_video_optimizer_sub_black_bar_min_percentage().parse::<f32>().unwrap_or(0.9);
+    let video_optimizer_max_samples = settings.get_video_optimizer_sub_max_samples().parse::<usize>().unwrap_or(60);
+    let video_optimizer_min_crop_size = settings.get_video_optimizer_sub_min_crop_size().parse::<u32>().unwrap_or(5);
     let video_optimizer_video_quality = settings.get_video_optimizer_sub_video_quality().round() as u32;
     let video_optimizer_fail_if_bigger = settings.get_video_optimizer_sub_fail_if_bigger();
     let video_optimizer_overwrite_files = settings.get_video_optimizer_sub_overwrite_files();
@@ -708,6 +716,10 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         similar_videos_thumbnail_percentage,
         video_optimizer_mode,
         video_optimizer_crop_type,
+        video_optimizer_black_pixel_threshold,
+        video_optimizer_black_bar_min_percentage,
+        video_optimizer_max_samples,
+        video_optimizer_min_crop_size,
         video_optimizer_video_codec,
         video_optimizer_excluded_codecs,
         video_optimizer_video_quality,

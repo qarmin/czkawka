@@ -134,6 +134,13 @@ export global Settings {
     in-out property <[string]> video_optimizer_sub_crop_type: ["Black Bars", "Static Content"];
     in-out property <int> video_optimizer_sub_crop_type_index: 0;
     in-out property <string> video_optimizer_sub_crop_type_value: "Black Bars";
+
+    // Video Crop scanning parameters
+    in-out property <string> video_optimizer_sub_black_pixel_threshold: "20";
+    in-out property <string> video_optimizer_sub_black_bar_min_percentage: "0.9";
+    in-out property <string> video_optimizer_sub_max_samples: "60";
+    in-out property <string> video_optimizer_sub_min_crop_size: "5";
+
     in-out property <int> video_optimizer_sub_video_codec_index: 0;
     in-out property <string> video_optimizer_sub_video_codec_value: "HEVC/H265";
     in-out property <string> video_optimizer_sub_excluded_codecs: "h265,av1,vp9";
