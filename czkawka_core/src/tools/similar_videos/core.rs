@@ -146,7 +146,7 @@ impl SimilarVideos {
         let tiles_size = 3;
 
         let mut command = Command::new("ffmpeg");
-        let mut command_mut = command.arg("-threads").arg("1").arg("-i").arg(&file_entry.path);
+        let mut command_mut = &mut command;
 
         if generate_grid_instead_of_single {
             let vf_filter = format!(
@@ -161,7 +161,7 @@ impl SimilarVideos {
             command_mut = command_mut.arg("-vf").arg(&vf_filter).arg("-ss").arg(seek_time.to_string());
         }
 
-        command_mut.arg("-frames:v").arg("1").arg("-q:v").arg("2").arg("-y").arg(&thumbnail_path);
+        command_mut.arg("-threads").arg("1").arg("-i").arg(&file_entry.path).arg("-frames:v").arg("1").arg("-q:v").arg("2").arg("-y").arg(&thumbnail_path);
 
         match run_command_interruptible(command, stop_flag) {
             None => {

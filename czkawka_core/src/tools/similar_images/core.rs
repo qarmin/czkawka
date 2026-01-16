@@ -374,7 +374,6 @@ impl SimilarImages {
                 continue;
             }
 
-            // dbg!(original_hash, compared_hash, similarity);
 
             let compared_hash_parent = if let Some((other_parent_hash, other_similarity)) = hashes_similarity.get(compared_hash) {
                 if *other_similarity > similarity {

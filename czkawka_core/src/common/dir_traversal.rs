@@ -38,7 +38,8 @@ enum EntryType {
 
 pub struct DirTraversalBuilder<'b, F> {
     group_by: Option<F>,
-    root_paths: Vec<PathBuf>,
+    root_dirs: Vec<PathBuf>,
+    root_files: Vec<PathBuf>,
     stop_flag: Option<Arc<AtomicBool>>,
     progress_sender: Option<&'b Sender<ProgressData>>,
     minimal_file_size: Option<u64>,
@@ -55,7 +56,8 @@ pub struct DirTraversalBuilder<'b, F> {
 #[derive(Debug)]
 pub struct DirTraversal<'b, F> {
     group_by: F,
-    root_paths: Vec<PathBuf>,
+    root_dirs: Vec<PathBuf>,
+    root_files: Vec<PathBuf>,
     stop_flag: Arc<AtomicBool>,
     progress_sender: Option<&'b Sender<ProgressData>>,
     recursive_search: bool,
@@ -79,7 +81,8 @@ impl DirTraversalBuilder<'_, ()> {
     pub fn new() -> Self {
         DirTraversalBuilder {
             group_by: None,
-            root_paths: Vec::new(),
+            root_dirs: Vec::new(),
+            root_files: Vec::new(),
             stop_flag: None,
             progress_sender: None,
             checking_method: CheckingMethod::None,
@@ -97,7 +100,8 @@ impl DirTraversalBuilder<'_, ()> {
 
 impl<'b, F> DirTraversalBuilder<'b, F> {
     pub(crate) fn common_data(mut self, common_tool_data: &CommonToolData) -> Self {
-        self.root_paths = common_tool_data.directories.included_directories.clone();
+        self.root_dirs = common_tool_data.directories.included_directories.clone();
+        self.root_files = common_tool_data.directories.included_files.clone();
         self.extensions = Some(common_tool_data.extensions.clone());
         self.excluded_items = Some(common_tool_data.excluded_items.clone());
         self.recursive_search = common_tool_data.recursive_search;
@@ -144,7 +148,8 @@ impl<'b, F> DirTraversalBuilder<'b, F> {
     {
         DirTraversalBuilder {
             group_by: Some(group_by),
-            root_paths: self.root_paths,
+            root_dirs: self.root_dirs,
+            root_files: self.root_files,
             stop_flag: self.stop_flag,
             progress_sender: self.progress_sender,
             directories: self.directories,
@@ -162,7 +167,8 @@ impl<'b, F> DirTraversalBuilder<'b, F> {
     pub(crate) fn build(self) -> DirTraversal<'b, F> {
         DirTraversal {
             group_by: self.group_by.expect("could not build"),
-            root_paths: self.root_paths,
+            root_dirs: self.root_dirs,
+            root_files: self.root_files,
             stop_flag: self.stop_flag.expect("Stop flag must be always initialized"),
             progress_sender: self.progress_sender,
             checking_method: self.checking_method,
@@ -211,9 +217,9 @@ where
         let mut all_warnings = Vec::new();
         let mut grouped_file_entries: BTreeMap<T, Vec<FileEntry>> = BTreeMap::new();
 
-        // Add root folders for finding
-        let mut folders_to_check: Vec<PathBuf> = self.root_paths.clone().into_iter().filter(|e|e.is_dir()).collect();
-        let mut files_to_check: Vec<PathBuf> = self.root_paths.clone().into_iter().filter(|e|!e.is_dir()).collect();
+        // Add root folders and files for finding
+        let mut folders_to_check: Vec<PathBuf> = self.root_dirs.clone();
+        let mut files_to_check: Vec<PathBuf> = self.root_files.clone();
 
         let progress_handler = prepare_thread_handler_common(self.progress_sender, CurrentStage::CollectingFiles, 0, (self.tool_type, self.checking_method), 0);
 
@@ -229,7 +235,6 @@ where
             ..
         } = self;
 
-        dbg!(&folders_to_check, &files_to_check);
 
         let mut file_results = Vec::new();
         // File traversal
