@@ -29,7 +29,9 @@ impl Search for BrokenFiles {
                 return;
             }
 
-            self.prepare_items();
+            if self.prepare_items().is_err() {
+                return;
+            }
             if self.check_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
                 self.common_data.stopped_search = true;
                 return;

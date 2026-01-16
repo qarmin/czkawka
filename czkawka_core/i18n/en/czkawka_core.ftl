@@ -16,12 +16,11 @@ core_folder_modified_before_epoch = Folder {$name} seems to have been modified b
 core_file_no_modification_date = Unable to get modification date from file {$name}, reason {$reason}
 core_folder_no_modification_date = Unable to get modification date from folder {$name}, reason {$reason}
 
-core_missing_no_chosen_included_path = At least one path to scan must be provided
+core_missing_no_chosen_included_path = No valid included path was chosen(excluded paths could have excluded all included paths)
+core_reference_included_paths_same = Cannot start scan where all valid included paths are also referenced paths, try to validate or disable referenced paths
 core_path_must_exists = Provided path must exist, ignoring { $path }
 core_must_be_directory_or_file = Provided path must point to a vaild directory or file, ignoring { $path }
-core_included_path_zero_valid_paths = Not even one valid included path was found, which is required
 core_excluded_paths_pointless_slash = Excluding / is pointless, because it means no files will be scanned
-core_path_overlap = All searched paths overlap with excluded paths
 core_paths_unable_to_get_device_id = Unable to get device id from folder { $path }
 
 core_ffmpeg_not_found = Cannot find a proper installation of FFmpeg or FFprobe. These are external programs that must be installed manually.

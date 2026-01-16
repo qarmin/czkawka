@@ -70,19 +70,15 @@ impl PrintResults for VideoOptimizer {
 
                 for entry in &self.video_transcode_result_entries {
                     if !entry.codec.is_empty() {
-                        if let Some(err) = &entry.error {
-                            writeln!(writer, "[FAILED] {} - Codec: {} - Error: {}", entry.path.display(), entry.codec, err)?;
-                        } else {
-                            writeln!(
-                                writer,
-                                "[CANDIDATE] {} - Codec: {} - Dimensions: {}x{} - Size: {}",
-                                entry.path.display(),
-                                entry.codec,
-                                entry.width,
-                                entry.height,
-                                format_size(entry.size, BINARY)
-                            )?;
-                        }
+                        writeln!(
+                            writer,
+                            "\"{}\" - Codec: {} - Dimensions: {}x{} - Size: {}",
+                            entry.path.to_string_lossy(),
+                            entry.codec,
+                            entry.width,
+                            entry.height,
+                            format_size(entry.size, BINARY)
+                        )?;
                     }
                 }
             }
@@ -100,22 +96,20 @@ impl PrintResults for VideoOptimizer {
 
                 for entry in &self.video_crop_result_entries {
                     if !entry.codec.is_empty() {
-                        if let Some(err) = &entry.error {
-                            writeln!(writer, "[FAILED] {} - Codec: {} - Error: {}", entry.path.display(), entry.codec, err)?;
+                        let new_image_dimensions: String = if let Some((lt, rt, rb, lb)) = entry.new_image_dimensions {
+                            format!("  New dimensions: LT:{lt}, RT:{rt}, RB:{rb}, LB:{lb}")
                         } else {
-                            writeln!(
-                                writer,
-                                "[INFO] {} - Codec: {} - Dimensions: {}x{} - Size: {}",
-                                entry.path.display(),
-                                entry.codec,
-                                entry.width,
-                                entry.height,
-                                format_size(entry.size, BINARY)
-                            )?;
-                            if let Some((lt, rt, rb, lb)) = entry.new_image_dimensions {
-                                writeln!(writer, "  New dimensions: LT:{lt}, RT:{rt}, RB:{rb}, LB:{lb}")?;
-                            }
-                        }
+                            String::new()
+                        };
+                        writeln!(
+                            writer,
+                            "{} - Codec: {} - Dimensions: {}x{} - Size: {}{new_image_dimensions}",
+                            entry.path.display(),
+                            entry.codec,
+                            entry.width,
+                            entry.height,
+                            format_size(entry.size, BINARY)
+                        )?;
                     }
                 }
             }
@@ -145,7 +139,9 @@ impl Search for VideoOptimizer {
                 return;
             }
 
-            self.prepare_items();
+            if self.prepare_items().is_err() {
+                return;
+            }
             if self.scan_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
                 self.common_data.stopped_search = true;
                 return;

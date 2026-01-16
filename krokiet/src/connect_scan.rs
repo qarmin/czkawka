@@ -162,7 +162,7 @@ fn scan_duplicates(
             set_common_settings(&mut tool, &custom_settings, &stop_flag);
             tool.set_delete_outdated_cache(custom_settings.duplicate_delete_outdated_entries);
             tool.search(&stop_flag, Some(&progress_sender));
-            let messages = get_text_messages(&tool, &basic_settings);
+            let (critical, messages) = get_text_messages(&tool, &basic_settings);
 
             let mut vector;
             if tool.get_use_reference() {
@@ -221,7 +221,7 @@ fn scan_duplicates(
             shared_models.lock().unwrap().shared_duplication_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_duplicate_results(&app, vector, messages, &scanning_time_str, duplicates_number, groups_number, lost_space);
+                write_duplicate_results(&app, vector, critical, messages, &scanning_time_str, duplicates_number, groups_number, lost_space);
             })
         })
         .expect("Cannot start thread - not much we can do here");
@@ -229,6 +229,7 @@ fn scan_duplicates(
 fn write_duplicate_results(
     app: &MainWindow,
     vector: Vec<(Option<DuplicateEntry>, Vec<DuplicateEntry>)>,
+    critical: Option<String>,
     messages: String,
     scanning_time_str: &str,
     items_found: usize,
@@ -250,27 +251,31 @@ fn write_duplicate_results(
         }
     }
     app.set_duplicate_files_model(items.into());
-    if lost_space > 0 {
-        app.invoke_scan_ended(
-            flk!(
-                "rust_found_duplicate_files",
-                items_found = items_found,
-                groups = groups,
-                size = format_size(lost_space, BINARY),
-                time = scanning_time_str
-            )
-            .into(),
-        );
+    if let Some(critical) = critical {
+        app.invoke_scan_ended(critical.into());
     } else {
-        app.invoke_scan_ended(
-            flk!(
-                "rust_found_duplicate_files_no_lost_space",
-                items_found = items_found,
-                groups = groups,
-                time = scanning_time_str
-            )
-            .into(),
-        );
+        if lost_space > 0 {
+            app.invoke_scan_ended(
+                flk!(
+                    "rust_found_duplicate_files",
+                    items_found = items_found,
+                    groups = groups,
+                    size = format_size(lost_space, BINARY),
+                    time = scanning_time_str
+                )
+                .into(),
+            );
+        } else {
+            app.invoke_scan_ended(
+                flk!(
+                    "rust_found_duplicate_files_no_lost_space",
+                    items_found = items_found,
+                    groups = groups,
+                    time = scanning_time_str
+                )
+                .into(),
+            );
+        }
     }
     app.global::<GuiState>().set_info_text(messages.into());
     reset_selection_at_end(app, ActiveTab::DuplicateFiles);
@@ -310,7 +315,7 @@ fn scan_empty_folders(
             tool.search(&stop_flag, Some(&progress_sender));
 
             let mut vector = tool.get_empty_folder_list().values().cloned().collect::<Vec<_>>();
-            let messages = get_text_messages(&tool, &basic_settings);
+            let (critical, messages) = get_text_messages(&tool, &basic_settings);
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
@@ -320,19 +325,23 @@ fn scan_empty_folders(
             shared_models.lock().unwrap().shared_empty_folders_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_empty_folders_results(&app, vector, messages, &scanning_time_str, items_found);
+                write_empty_folders_results(&app, vector, critical, messages, &scanning_time_str, items_found);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_empty_folders_results(app: &MainWindow, vector: Vec<FolderEntry>, messages: String, scanning_time_str: &str, items_found: usize) {
+fn write_empty_folders_results(app: &MainWindow, vector: Vec<FolderEntry>, critical: Option<String>, messages: String, scanning_time_str: &str, items_found: usize) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_empty_folders(&fe);
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_empty_folder_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_empty_folders", items_found = items_found, time = scanning_time_str).into());
+    if let Some(critical) = critical {
+        app.invoke_scan_ended(critical.into());
+    } else {
+        app.invoke_scan_ended(flk!("rust_found_empty_folders", items_found = items_found, time = scanning_time_str).into());
+    }
     app.global::<GuiState>().set_info_text(messages.into());
     reset_selection_at_end(app, ActiveTab::EmptyFolders);
 }
@@ -369,7 +378,7 @@ fn scan_big_files(
             tool.search(&stop_flag, Some(&progress_sender));
 
             let mut vector = tool.get_big_files().clone();
-            let messages = get_text_messages(&tool, &basic_settings);
+            let (critical, messages) = get_text_messages(&tool, &basic_settings);
 
             if big_files_mode == SearchMode::BiggestFiles {
                 vector.par_sort_unstable_by_key(|fe| u64::MAX - fe.size);
@@ -384,27 +393,31 @@ fn scan_big_files(
             shared_models.lock().unwrap().shared_big_files_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_big_files_results(&app, vector, messages, &scanning_time_str, items_found, files_size);
+                write_big_files_results(&app, vector, critical, messages, &scanning_time_str, items_found, files_size);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_big_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages: String, scanning_time_str: &str, items_found: usize, files_size: u64) {
+fn write_big_files_results(app: &MainWindow, vector: Vec<FileEntry>, critical: Option<String>, messages: String, scanning_time_str: &str, items_found: usize, files_size: u64) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_big_files(&fe);
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_big_files_model(items.into());
-    app.invoke_scan_ended(
-        flk!(
-            "rust_found_big_files",
-            items_found = items_found,
-            time = scanning_time_str,
-            size = format_size(files_size, BINARY)
-        )
-        .into(),
-    );
+    if let Some(critical) = critical {
+        app.invoke_scan_ended(critical.into());
+    } else {
+        app.invoke_scan_ended(
+            flk!(
+                "rust_found_big_files",
+                items_found = items_found,
+                time = scanning_time_str,
+                size = format_size(files_size, BINARY)
+            )
+            .into(),
+        );
+    }
     app.global::<GuiState>().set_info_text(messages.into());
     reset_selection_at_end(app, ActiveTab::BigFiles);
 }
@@ -444,7 +457,7 @@ fn scan_empty_files(
             tool.search(&stop_flag, Some(&progress_sender));
 
             let mut vector = tool.get_empty_files().clone();
-            let messages = get_text_messages(&tool, &basic_settings);
+            let (critical, messages) = get_text_messages(&tool, &basic_settings);
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
@@ -454,19 +467,23 @@ fn scan_empty_files(
             shared_models.lock().unwrap().shared_empty_files_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_empty_files_results(&app, vector, messages, &scanning_time_str, items_found);
+                write_empty_files_results(&app, vector, critical, messages, &scanning_time_str, items_found);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_empty_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages: String, scanning_time_str: &str, items_found: usize) {
+fn write_empty_files_results(app: &MainWindow, vector: Vec<FileEntry>, critical: Option<String>, messages: String, scanning_time_str: &str, items_found: usize) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_empty_files(&fe);
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_empty_files_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_empty_files", items_found = items_found, time = scanning_time_str).into());
+    if let Some(critical) = critical {
+        app.invoke_scan_ended(critical.into());
+    } else {
+        app.invoke_scan_ended(flk!("rust_found_empty_files", items_found = items_found, time = scanning_time_str).into());
+    }
     app.global::<GuiState>().set_info_text(messages.into());
     reset_selection_at_end(app, ActiveTab::EmptyFiles);
 }
@@ -519,7 +536,7 @@ fn scan_similar_images(
 
             tool.search(&stop_flag, Some(&progress_sender));
 
-            let messages = get_text_messages(&tool, &basic_settings);
+            let (critical, messages) = get_text_messages(&tool, &basic_settings);
 
             let mut vector: Vec<_> = if tool.get_use_reference() {
                 tool.get_similar_images_referenced()
@@ -543,7 +560,7 @@ fn scan_similar_images(
             shared_models.lock().unwrap().shared_similar_images_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_similar_images_results(&app, vector, messages, hash_size, &scanning_time_str, items_found, groups);
+                write_similar_images_results(&app, vector, critical, messages, hash_size, &scanning_time_str, items_found, groups);
             })
         })
         .expect("Cannot start thread - not much we can do here");
@@ -551,6 +568,7 @@ fn scan_similar_images(
 fn write_similar_images_results(
     app: &MainWindow,
     vector: Vec<(Option<ImagesEntry>, Vec<ImagesEntry>)>,
+    critical: Option<String>,
     messages: String,
     hash_size: u8,
     scanning_time_str: &str,
@@ -572,7 +590,11 @@ fn write_similar_images_results(
         }
     }
     app.set_similar_images_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_similar_images", items_found = items_found, groups = groups, time = scanning_time_str).into());
+    if let Some(critical) = critical {
+        app.invoke_scan_ended(critical.into());
+    } else {
+        app.invoke_scan_ended(flk!("rust_found_similar_images", items_found = items_found, groups = groups, time = scanning_time_str).into());
+    }
     app.global::<GuiState>().set_info_text(messages.into());
     reset_selection_at_end(app, ActiveTab::SimilarImages);
 }
@@ -637,7 +659,7 @@ fn scan_similar_videos(
 
             tool.search(&stop_flag, Some(&progress_sender));
 
-            let messages = get_text_messages(&tool, &basic_settings);
+            let (critical, messages) = get_text_messages(&tool, &basic_settings);
 
             let mut vector: Vec<_> = if tool.get_use_reference() {
                 tool.get_similar_videos_referenced()
@@ -664,7 +686,7 @@ fn scan_similar_videos(
             shared_models.lock().unwrap().shared_similar_videos_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_similar_videos_results(&app, vector, messages, &scanning_time_str, items_found, groups);
+                write_similar_videos_results(&app, vector, critical, messages, &scanning_time_str, items_found, groups);
             })
         })
         .expect("Cannot start thread - not much we can do here");
@@ -672,6 +694,7 @@ fn scan_similar_videos(
 fn write_similar_videos_results(
     app: &MainWindow,
     vector: Vec<(Option<VideosEntry>, Vec<VideosEntry>)>,
+    critical: Option<String>,
     messages: String,
     scanning_time_str: &str,
     items_found: usize,
@@ -692,7 +715,11 @@ fn write_similar_videos_results(
         }
     }
     app.set_similar_videos_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_similar_videos", items_found = items_found, groups = groups, time = scanning_time_str).into());
+    if let Some(critical) = critical {
+        app.invoke_scan_ended(critical.into());
+    } else {
+        app.invoke_scan_ended(flk!("rust_found_similar_videos", items_found = items_found, groups = groups, time = scanning_time_str).into());
+    }
     app.global::<GuiState>().set_info_text(messages.into());
     reset_selection_at_end(app, ActiveTab::SimilarVideos);
 }
@@ -797,7 +824,7 @@ fn scan_similar_music(
 
             tool.search(&stop_flag, Some(&progress_sender));
 
-            let messages = get_text_messages(&tool, &basic_settings);
+            let (critical, messages) = get_text_messages(&tool, &basic_settings);
 
             let mut vector: Vec<_> = if tool.get_use_reference() {
                 tool.get_similar_music_referenced()
@@ -821,12 +848,20 @@ fn scan_similar_music(
             shared_models.lock().unwrap().shared_same_music_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_similar_music_results(&app, vector, messages, &scanning_time_str, items_found, groups);
+                write_similar_music_results(&app, vector, critical, messages, &scanning_time_str, items_found, groups);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_similar_music_results(app: &MainWindow, vector: Vec<(Option<MusicEntry>, Vec<MusicEntry>)>, messages: String, scanning_time_str: &str, items_found: usize, groups: usize) {
+fn write_similar_music_results(
+    app: &MainWindow,
+    vector: Vec<(Option<MusicEntry>, Vec<MusicEntry>)>,
+    critical: Option<String>,
+    messages: String,
+    scanning_time_str: &str,
+    items_found: usize,
+    groups: usize,
+) {
     let items = Rc::new(VecModel::default());
     for (ref_fe, vec_fe) in vector {
         if let Some(ref_fe) = ref_fe {
@@ -842,7 +877,11 @@ fn write_similar_music_results(app: &MainWindow, vector: Vec<(Option<MusicEntry>
         }
     }
     app.set_similar_music_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_similar_music_files", items_found = items_found, groups = groups, time = scanning_time_str).into());
+    if let Some(critical) = critical {
+        app.invoke_scan_ended(critical.into());
+    } else {
+        app.invoke_scan_ended(flk!("rust_found_similar_music_files", items_found = items_found, groups = groups, time = scanning_time_str).into());
+    }
     app.global::<GuiState>().set_info_text(messages.into());
     reset_selection_at_end(app, ActiveTab::SimilarMusic);
 }
@@ -887,7 +926,7 @@ fn scan_invalid_symlinks(
             tool.search(&stop_flag, Some(&progress_sender));
 
             let mut vector = tool.get_invalid_symlinks().clone();
-            let messages = get_text_messages(&tool, &basic_settings);
+            let (critical, messages) = get_text_messages(&tool, &basic_settings);
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
@@ -897,19 +936,23 @@ fn scan_invalid_symlinks(
             shared_models.lock().unwrap().shared_same_invalid_symlinks = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_invalid_symlinks_results(&app, vector, messages, &scanning_time_str, items_found);
+                write_invalid_symlinks_results(&app, vector, critical, messages, &scanning_time_str, items_found);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_invalid_symlinks_results(app: &MainWindow, vector: Vec<SymlinksFileEntry>, messages: String, scanning_time_str: &str, items_found: usize) {
+fn write_invalid_symlinks_results(app: &MainWindow, vector: Vec<SymlinksFileEntry>, critical: Option<String>, messages: String, scanning_time_str: &str, items_found: usize) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_invalid_symlinks(&fe);
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_invalid_symlinks_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_invalid_symlinks", items_found = items_found, time = scanning_time_str).into());
+    if let Some(critical) = critical {
+        app.invoke_scan_ended(critical.into());
+    } else {
+        app.invoke_scan_ended(flk!("rust_found_invalid_symlinks", items_found = items_found, time = scanning_time_str).into());
+    }
     app.global::<GuiState>().set_info_text(messages.into());
     reset_selection_at_end(app, ActiveTab::InvalidSymlinks);
 }
@@ -949,7 +992,7 @@ fn scan_temporary_files(
             tool.search(&stop_flag, Some(&progress_sender));
 
             let mut vector = tool.get_temporary_files().clone();
-            let messages = get_text_messages(&tool, &basic_settings);
+            let (critical, messages) = get_text_messages(&tool, &basic_settings);
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
@@ -959,19 +1002,23 @@ fn scan_temporary_files(
             shared_models.lock().unwrap().shared_temporary_files_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_temporary_files_results(&app, vector, messages, &scanning_time_str, items_found);
+                write_temporary_files_results(&app, vector, critical, messages, &scanning_time_str, items_found);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_temporary_files_results(app: &MainWindow, vector: Vec<TemporaryFileEntry>, messages: String, scanning_time_str: &str, items_found: usize) {
+fn write_temporary_files_results(app: &MainWindow, vector: Vec<TemporaryFileEntry>, critical: Option<String>, messages: String, scanning_time_str: &str, items_found: usize) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_temporary_files(&fe);
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_temporary_files_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_temporary_files", items_found = items_found, time = scanning_time_str).into());
+    if let Some(critical) = critical {
+        app.invoke_scan_ended(critical.into());
+    } else {
+        app.invoke_scan_ended(flk!("rust_found_temporary_files", items_found = items_found, time = scanning_time_str).into());
+    }
     app.global::<GuiState>().set_info_text(messages.into());
     reset_selection_at_end(app, ActiveTab::TemporaryFiles);
 }
@@ -1032,7 +1079,7 @@ fn scan_broken_files(
             tool.search(&stop_flag, Some(&progress_sender));
 
             let mut vector = tool.get_broken_files().clone();
-            let messages = get_text_messages(&tool, &basic_settings);
+            let (critical, messages) = get_text_messages(&tool, &basic_settings);
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
@@ -1043,27 +1090,31 @@ fn scan_broken_files(
             shared_models.lock().unwrap().shared_broken_files_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_broken_files_results(&app, vector, messages, &scanning_time_str, items_found, size);
+                write_broken_files_results(&app, vector, critical, messages, &scanning_time_str, items_found, size);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_broken_files_results(app: &MainWindow, vector: Vec<BrokenEntry>, messages: String, scanning_time_str: &str, items_found: usize, size: u64) {
+fn write_broken_files_results(app: &MainWindow, vector: Vec<BrokenEntry>, critical: Option<String>, messages: String, scanning_time_str: &str, items_found: usize, size: u64) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_broken_files(&fe);
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_broken_files_model(items.into());
-    app.invoke_scan_ended(
-        flk!(
-            "rust_found_broken_files",
-            items_found = items_found,
-            time = scanning_time_str,
-            size = format_size(size, BINARY)
-        )
-        .into(),
-    );
+    if let Some(critical) = critical {
+        app.invoke_scan_ended(critical.into());
+    } else {
+        app.invoke_scan_ended(
+            flk!(
+                "rust_found_broken_files",
+                items_found = items_found,
+                time = scanning_time_str,
+                size = format_size(size, BINARY)
+            )
+            .into(),
+        );
+    }
     app.global::<GuiState>().set_info_text(messages.into());
     reset_selection_at_end(app, ActiveTab::BrokenFiles);
 }
@@ -1104,7 +1155,7 @@ fn scan_bad_extensions(
             tool.search(&stop_flag, Some(&progress_sender));
 
             let mut vector = tool.get_bad_extensions_files().clone();
-            let messages = get_text_messages(&tool, &basic_settings);
+            let (critical, messages) = get_text_messages(&tool, &basic_settings);
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
@@ -1114,19 +1165,23 @@ fn scan_bad_extensions(
             shared_models.lock().unwrap().shared_bad_extensions_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_bad_extensions_results(&app, vector, messages, &scanning_time_str, items_found);
+                write_bad_extensions_results(&app, vector, critical, messages, &scanning_time_str, items_found);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_bad_extensions_results(app: &MainWindow, vector: Vec<BadFileEntry>, messages: String, scanning_time_str: &str, items_found: usize) {
+fn write_bad_extensions_results(app: &MainWindow, vector: Vec<BadFileEntry>, critical: Option<String>, messages: String, scanning_time_str: &str, items_found: usize) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_bad_extensions(&fe);
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_bad_extensions_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_bad_extensions", items_found = items_found, time = scanning_time_str).into());
+    if let Some(critical) = critical {
+        app.invoke_scan_ended(critical.into());
+    } else {
+        app.invoke_scan_ended(flk!("rust_found_bad_extensions", items_found = items_found, time = scanning_time_str).into());
+    }
     app.global::<GuiState>().set_info_text(messages.into());
     reset_selection_at_end(app, ActiveTab::BadExtensions);
 }
@@ -1175,7 +1230,7 @@ fn scan_exif_remover(
             tool.search(&stop_flag, Some(&progress_sender));
 
             let mut vector = tool.get_exif_files().clone();
-            let messages = get_text_messages(&tool, &basic_settings);
+            let (critical, messages) = get_text_messages(&tool, &basic_settings);
 
             vector.par_sort_unstable_by(|a, b| b.exif_tags.len().cmp(&a.exif_tags.len()));
 
@@ -1185,19 +1240,23 @@ fn scan_exif_remover(
             shared_models.lock().unwrap().shared_exif_remover_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_exif_remover_results(&app, vector, messages, &scanning_time_str, items_found);
+                write_exif_remover_results(&app, vector, critical, messages, &scanning_time_str, items_found);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_exif_remover_results(app: &MainWindow, vector: Vec<ExifEntry>, messages: String, scanning_time_str: &str, items_found: usize) {
+fn write_exif_remover_results(app: &MainWindow, vector: Vec<ExifEntry>, critical: Option<String>, messages: String, scanning_time_str: &str, items_found: usize) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_exif_remover(&fe);
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_exif_remover_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_exif_files", items_found = items_found, time = scanning_time_str).into());
+    if let Some(critical) = critical {
+        app.invoke_scan_ended(critical.into());
+    } else {
+        app.invoke_scan_ended(flk!("rust_found_exif_files", items_found = items_found, time = scanning_time_str).into());
+    }
     app.global::<GuiState>().set_info_text(messages.into());
     reset_selection_at_end(app, ActiveTab::ExifRemover);
 }
@@ -1270,7 +1329,7 @@ fn scan_video_optimizer(
 
             tool.search(&stop_flag, Some(&progress_sender));
 
-            let messages = get_text_messages(&tool, &basic_settings);
+            let (critical, messages) = get_text_messages(&tool, &basic_settings);
 
             let info = tool.get_information();
             let scanning_time_str = format_time(info.scanning_time);
@@ -1281,21 +1340,28 @@ fn scan_video_optimizer(
                 shared_models.lock().unwrap().shared_video_optimizer_state = Some(tool);
 
                 a.upgrade_in_event_loop(move |app| {
-                    write_video_optimizer_crop_results(&app, video_crop_entries, messages, &scanning_time_str, items_found);
+                    write_video_optimizer_crop_results(&app, video_crop_entries, critical, messages, &scanning_time_str, items_found);
                 })
             } else {
                 let video_transcode_entries = tool.get_video_transcode_entries().clone();
                 shared_models.lock().unwrap().shared_video_optimizer_state = Some(tool);
 
                 a.upgrade_in_event_loop(move |app| {
-                    write_video_optimizer_transcode_results(&app, video_transcode_entries, messages, &scanning_time_str, items_found);
+                    write_video_optimizer_transcode_results(&app, video_transcode_entries, critical, messages, &scanning_time_str, items_found);
                 })
             }
         })
         .expect("Cannot start thread - not much we can do here");
 }
 
-fn write_video_optimizer_transcode_results(app: &MainWindow, video_transcode_entries: Vec<VideoTranscodeEntry>, messages: String, scanning_time_str: &str, items_found: usize) {
+fn write_video_optimizer_transcode_results(
+    app: &MainWindow,
+    video_transcode_entries: Vec<VideoTranscodeEntry>,
+    critical: Option<String>,
+    messages: String,
+    scanning_time_str: &str,
+    items_found: usize,
+) {
     let items = Rc::new(VecModel::default());
 
     for fe in video_transcode_entries {
@@ -1304,12 +1370,23 @@ fn write_video_optimizer_transcode_results(app: &MainWindow, video_transcode_ent
     }
 
     app.set_video_optimizer_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_video_optimizer", items_found = items_found, time = scanning_time_str).into());
+    if let Some(critical) = critical {
+        app.invoke_scan_ended(critical.into());
+    } else {
+        app.invoke_scan_ended(flk!("rust_found_video_optimizer", items_found = items_found, time = scanning_time_str).into());
+    }
     app.global::<GuiState>().set_info_text(messages.into());
     reset_selection_at_end(app, ActiveTab::VideoOptimizer);
 }
 
-fn write_video_optimizer_crop_results(app: &MainWindow, video_crop_entries: Vec<VideoCropEntry>, messages: String, scanning_time_str: &str, items_found: usize) {
+fn write_video_optimizer_crop_results(
+    app: &MainWindow,
+    video_crop_entries: Vec<VideoCropEntry>,
+    critical: Option<String>,
+    messages: String,
+    scanning_time_str: &str,
+    items_found: usize,
+) {
     let items = Rc::new(VecModel::default());
 
     for fe in video_crop_entries {
@@ -1318,7 +1395,11 @@ fn write_video_optimizer_crop_results(app: &MainWindow, video_crop_entries: Vec<
     }
 
     app.set_video_optimizer_model(items.into());
-    app.invoke_scan_ended(flk!("rust_found_video_optimizer", items_found = items_found, time = scanning_time_str).into());
+    if let Some(critical) = critical {
+        app.invoke_scan_ended(critical.into());
+    } else {
+        app.invoke_scan_ended(flk!("rust_found_video_optimizer", items_found = items_found, time = scanning_time_str).into());
+    }
     app.global::<GuiState>().set_info_text(messages.into());
     reset_selection_at_end(app, ActiveTab::VideoOptimizer);
 }
@@ -1349,8 +1430,8 @@ fn prepare_data_model_video_optimizer_crop(fe: &VideoCropEntry) -> (ModelRc<Shar
 
     let (_width, _height, pixels_diff, dim_string) = if left > right || top > bottom {
         error!(
-            "ERROR: Invalid rectangle coordinates in cache for file '{}': left={}, top={}, right={}, bottom={}. Skipping dimensions display.",
-            fe.path.display(),
+            "ERROR: Invalid rectangle coordinates in cache for file \"{}\": left={}, top={}, right={}, bottom={}. Skipping dimensions display.",
+            fe.path.to_string_lossy(),
             left,
             top,
             right,
@@ -1424,7 +1505,7 @@ fn insert_data_to_model(items: &Rc<VecModel<MainListModel>>, data_model_str: Mod
     items.push(main);
 }
 
-fn get_text_messages<T>(component: &T, basic_settings: &BasicSettings) -> String
+fn get_text_messages<T>(component: &T, basic_settings: &BasicSettings) -> (Option<String>, String)
 where
     T: CommonData,
 {
@@ -1433,7 +1514,9 @@ where
     } else {
         MessageLimit::NoLimit
     };
-    component.get_text_messages().create_messages_text(limit)
+
+    let text_messages = component.get_text_messages();
+    (text_messages.critical.clone(), text_messages.create_messages_text(limit))
 }
 
 fn set_common_settings<T>(component: &mut T, custom_settings: &SettingsCustom, stop_flag: &Arc<AtomicBool>)

@@ -380,7 +380,7 @@ fn process_file_in_file_mode(
     minimal_file_size: u64,
     maximal_file_size: u64,
 ) {
-    if !extensions.check_if_entry_have_valid_extension(entry_data.file_name()) {
+    if !extensions.check_if_entry_have_valid_extension(&entry_data.file_name()) {
         return;
     }
 
@@ -431,7 +431,7 @@ fn process_file_in_file_mode_path_check(
     let Some(file_name) = path.file_name() else {
         return;
     };
-    if !extensions.check_if_entry_have_valid_extension(file_name.to_os_string()) {
+    if !extensions.check_if_entry_have_valid_extension(file_name) {
         return;
     }
 
@@ -495,7 +495,7 @@ fn process_symlink_in_symlink_mode(
     directories: &Directories,
     excluded_items: &ExcludedItems,
 ) {
-    if !extensions.check_if_entry_have_valid_extension(entry_data.file_name()) {
+    if !extensions.check_if_entry_have_valid_extension(&entry_data.file_name()) {
         return;
     }
 
@@ -540,7 +540,7 @@ fn process_symlink_in_symlink_mode_path_check(
     let Some(file_name) = path.file_name() else {
         return;
     };
-    if !extensions.check_if_entry_have_valid_extension(file_name.to_os_string()) {
+    if !extensions.check_if_entry_have_valid_extension(file_name) {
         return;
     }
 

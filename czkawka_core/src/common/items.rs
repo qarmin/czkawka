@@ -76,6 +76,7 @@ impl ExcludedItems {
             self.connected_expressions.push(item);
         }
         Messages {
+            critical: None,
             messages: Vec::new(),
             warnings,
             errors: Vec::new(),

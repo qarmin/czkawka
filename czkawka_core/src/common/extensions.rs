@@ -1,4 +1,4 @@
-use std::ffi::OsString;
+use std::ffi::OsStr;
 
 use indexmap::IndexSet;
 
@@ -67,7 +67,7 @@ impl Extensions {
     }
 
     #[expect(clippy::string_slice)] // Valid, because we address go to dot, which is known ascii character
-    pub(crate) fn check_if_entry_have_valid_extension(&self, file_name: OsString) -> bool {
+    pub(crate) fn check_if_entry_have_valid_extension(&self, file_name: &OsStr) -> bool {
         if self.allowed_extensions_hashset.is_empty() && self.excluded_extensions_hashset.is_empty() {
             return true;
         }
@@ -198,22 +198,31 @@ mod tests {
 
         // No extensions set - all should pass
         let ext = Extensions::new();
-        assert!(ext.check_if_entry_have_valid_extension(&fs::read_dir(&temp_dir).unwrap().find(|e| e.as_ref().unwrap().file_name() == "test.jpg").unwrap().unwrap()));
+        assert!(
+            ext.check_if_entry_have_valid_extension(
+                &fs::read_dir(&temp_dir)
+                    .unwrap()
+                    .find(|e| e.as_ref().unwrap().file_name() == "test.jpg")
+                    .unwrap()
+                    .unwrap()
+                    .file_name()
+            )
+        );
 
         // Allowed extensions
         let mut ext = Extensions::new();
         ext.set_allowed_extensions("jpg,png".to_string());
         let entries: Vec<_> = fs::read_dir(&temp_dir).unwrap().map(|e| e.unwrap()).collect();
-        assert!(ext.check_if_entry_have_valid_extension(entries.iter().find(|e| e.file_name() == "test.jpg").unwrap()));
-        assert!(ext.check_if_entry_have_valid_extension(entries.iter().find(|e| e.file_name() == "test.PNG").unwrap())); // case insensitive
-        assert!(!ext.check_if_entry_have_valid_extension(entries.iter().find(|e| e.file_name() == "test.gif").unwrap()));
-        assert!(!ext.check_if_entry_have_valid_extension(entries.iter().find(|e| e.file_name() == "noext").unwrap()));
+        assert!(ext.check_if_entry_have_valid_extension(&entries.iter().find(|e| e.file_name() == "test.jpg").unwrap().file_name()));
+        assert!(ext.check_if_entry_have_valid_extension(&entries.iter().find(|e| e.file_name() == "test.PNG").unwrap().file_name())); // case insensitive
+        assert!(!ext.check_if_entry_have_valid_extension(&entries.iter().find(|e| e.file_name() == "test.gif").unwrap().file_name()));
+        assert!(!ext.check_if_entry_have_valid_extension(&entries.iter().find(|e| e.file_name() == "noext").unwrap().file_name()));
 
         // Excluded extensions
         let mut ext = Extensions::new();
         ext.set_excluded_extensions("txt".to_string());
-        assert!(ext.check_if_entry_have_valid_extension(entries.iter().find(|e| e.file_name() == "test.jpg").unwrap()));
-        assert!(!ext.check_if_entry_have_valid_extension(entries.iter().find(|e| e.file_name() == "test.txt").unwrap()));
+        assert!(ext.check_if_entry_have_valid_extension(&entries.iter().find(|e| e.file_name() == "test.jpg").unwrap().file_name()));
+        assert!(!ext.check_if_entry_have_valid_extension(&entries.iter().find(|e| e.file_name() == "test.txt").unwrap().file_name()));
     }
 
     #[test]

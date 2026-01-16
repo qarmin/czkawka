@@ -266,11 +266,20 @@ pub trait CommonData {
         self.get_cd_mut().text_messages.extend_with_another_messages(messages);
     }
 
-    fn prepare_items(&mut self) {
+    #[expect(clippy::result_unit_err)]
+    fn prepare_items(&mut self) -> Result<(), ()> {
         let recursive_search = self.get_cd().recursive_search;
         // Optimizes directories and removes recursive calls
-        let messages = self.get_cd_mut().directories.optimize_directories(recursive_search);
-        self.get_cd_mut().text_messages.extend_with_another_messages(messages);
+        match self.get_cd_mut().directories.optimize_directories(recursive_search) {
+            Ok(messages) => {
+                self.get_cd_mut().text_messages.extend_with_another_messages(messages);
+                Ok(())
+            }
+            Err(messages) => {
+                self.get_cd_mut().text_messages.extend_with_another_messages(messages);
+                Err(())
+            }
+        }
     }
 
     fn delete_simple_elements_and_add_to_messages<T: ResultEntry + Sized + Send + Sync>(

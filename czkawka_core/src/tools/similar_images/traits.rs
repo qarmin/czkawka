@@ -22,7 +22,9 @@ impl Search for SimilarImages {
         let start_time = Instant::now();
 
         let () = (|| {
-            self.prepare_items();
+            if self.prepare_items().is_err() {
+                return;
+            }
             self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty() || !self.common_data.directories.reference_files.is_empty();
             if self.check_for_similar_images(stop_flag, progress_sender) == WorkContinueStatus::Stop {
                 self.common_data.stopped_search = true;

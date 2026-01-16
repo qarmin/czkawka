@@ -116,21 +116,23 @@ impl Directories {
         self.exclude_other_filesystems = Some(exclude_other_filesystems);
     }
 
-    // TODO, after adding reference files, everything needs to be checked very carefully
-    pub(crate) fn optimize_directories(&mut self, recursive_search: bool) -> Messages {
+    pub(crate) fn optimize_directories(&mut self, recursive_search: bool) -> Result<Messages, Messages> {
         let mut messages: Messages = Messages::new();
 
+        if self.included_directories.is_empty() && self.included_files.is_empty() {
+            messages.critical = Some(flc!("core_missing_no_chosen_included_path"));
+            return Err(messages);
+        }
+
         // Remove duplicated entries like: "/", "/"
-        [
+        for items in &mut [
             &mut self.included_directories,
             &mut self.excluded_directories,
             &mut self.reference_directories,
             &mut self.included_files,
             &mut self.excluded_files,
             &mut self.reference_files,
-        ]
-        .iter_mut()
-        .for_each(|items| {
+        ] {
             if cfg!(target_family = "windows") {
                 items.iter_mut().for_each(|item| {
                     *item = normalize_windows_path(item.clone());
@@ -138,7 +140,7 @@ impl Directories {
             }
             items.sort_unstable();
             items.dedup();
-        });
+        }
 
         // Optimize for duplicated included directories - "/", "/home". "/home/Pulpit" to "/"
         // Do not use when not using recursive search
@@ -179,31 +181,22 @@ impl Directories {
 
         // Selecting Reference folders
         {
-            let mut ref_folders = Vec::new();
-            for folder in &self.reference_directories {
-                if self.included_directories.iter().any(|e| folder.starts_with(e)) {
-                    ref_folders.push(folder.clone());
-                }
-            }
-            self.reference_directories = ref_folders;
-        }
-
-        if self.included_directories.is_empty() && self.included_files.is_empty() {
-            messages.errors.push(flc!("core_path_overlap"));
-            return messages;
+            self.reference_directories.retain(|folder| self.included_directories.iter().any(|e| folder.starts_with(e)));
+            self.reference_files
+                .retain(|file| self.included_directories.iter().any(|e| file.starts_with(e)) || self.included_files.iter().any(|f| file == f));
         }
 
         // Not needed, but better is to have sorted everything
-        [
+        for items in &mut [
             &mut self.included_directories,
             &mut self.excluded_directories,
             &mut self.reference_directories,
             &mut self.included_files,
             &mut self.excluded_files,
             &mut self.reference_files,
-        ]
-        .iter_mut()
-        .for_each(|items| items.sort_unstable());
+        ] {
+            items.sort_unstable();
+        }
 
         // Get device IDs for included directories, probably ther better solution would be to get one id per directory, but this is faster, but a little less precise
         #[cfg(target_family = "unix")]
@@ -216,11 +209,19 @@ impl Directories {
             }
         }
 
-        messages
+        if self.included_directories.is_empty() && self.included_files.is_empty() {
+            messages.errors.push(flc!("core_missing_no_chosen_included_path"));
+            return Err(messages);
+        }
+
+        if self.reference_directories == self.included_directories && self.included_files == self.reference_files {
+            messages.warnings.push(flc!("core_reference_included_paths_same"));
+        }
+
+        Ok(messages)
     }
 
     pub(crate) fn is_in_referenced_directory(&self, path: &Path) -> bool {
-        path;
         self.reference_directories.iter().any(|e| path.starts_with(e));
         self.reference_files.iter().any(|e| e.as_path() == path);
         self.reference_directories.iter().any(|e| path.starts_with(e)) || self.reference_files.iter().any(|e| e.as_path() == path)

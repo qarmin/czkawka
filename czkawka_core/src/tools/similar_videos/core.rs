@@ -162,7 +162,7 @@ impl SimilarVideos {
             }
             assert_eq!(imgs.len(), tiles_size * tiles_size);
 
-            let first_img = &imgs.get(0).expect("Cannot be empty here, because at least titles_size^2 images are extracted");
+            let first_img = &imgs.first().expect("Cannot be empty here, because at least titles_size^2 images are extracted");
 
             if imgs.iter().any(|img| img.height() != first_img.height() || img.width() != first_img.width()) {
                 let _ = fs::write(&thumbnail_path, b"");
