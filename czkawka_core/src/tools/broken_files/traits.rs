@@ -23,7 +23,7 @@ impl Search for BrokenFiles {
 
         let () = (|| {
             if self.params.checked_types.contains(CheckedTypes::VIDEO) && !check_if_ffprobe_ffmpeg_exists() {
-                self.common_data.text_messages.errors.push(flc!("core_ffmpeg_not_found"));
+                self.common_data.text_messages.critical = Some(flc!("core_ffmpeg_not_found"));
                 #[cfg(target_os = "windows")]
                 self.common_data.text_messages.errors.push(flc!("core_ffmpeg_not_found_windows"));
                 return;

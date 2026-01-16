@@ -125,7 +125,7 @@
                     </property>
                     <property name="tab">
                       <object class="GtkLabel">
-                        <property name="label" translatable="yes">Included Directories</property>
+                        <property name="label" translatable="yes">Included Paths</property>
                       </object>
                     </property>
                     <property name="tab-fill">False</property>
@@ -223,7 +223,7 @@
                     <property name="position">1</property>
                     <property name="tab">
                       <object class="GtkLabel">
-                        <property name="label" translatable="yes">Excluded Directories</property>
+                        <property name="label" translatable="yes">Excluded Paths</property>
                       </object>
                     </property>
                   </object>

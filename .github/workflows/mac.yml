@@ -25,7 +25,7 @@ jobs:
           echo "ARCHNAME=$ARCHNAME" >> $GITHUB_ENV
 
       - name: Setup rust version
-        run: rustup default 1.90.0
+        run: rustup default 1.92.0
 
       - name: Install Homebrew
         run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"

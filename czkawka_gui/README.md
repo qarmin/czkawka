@@ -91,7 +91,7 @@ Compiling the GUI is more complex than compiling the CLI, core, or Krokiet, beca
 
 | Program | Minimal version |
 |:-------:|:---------------:|
-|  Rust   |     1.90.0      | 
+|  Rust   |     1.92.0      | 
 |   GTK   |       4.6       |
 
 The Rust version corresponds to the latest rustc available in Debian Sid: https://packages.debian.org/sid/rustc

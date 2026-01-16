@@ -207,8 +207,8 @@ upper_add_excluded_button_tooltip = Add directory to be excluded in search.
 upper_remove_excluded_button_tooltip = Delete directory from excluded.
 
 upper_notebook_items_configuration = Items Configuration
-upper_notebook_excluded_directories = Excluded Directories
-upper_notebook_included_directories = Included Directories
+upper_notebook_excluded_directories = Excluded Paths
+upper_notebook_included_directories = Included Paths
 
 upper_allowed_extensions_tooltip = 
         Allowed extensions must be separated by commas (by default all are available).
@@ -224,7 +224,7 @@ upper_excluded_extensions_tooltip =
 
 upper_excluded_items_tooltip = 
         Excluded items must contain * wildcard and should be separated by commas.
-        This is slower than Excluded Directories, so use it carefully.
+        This is slower than Excluded Paths, so use it carefully.
 
 upper_excluded_items = Excluded Items:
 upper_allowed_extensions = Allowed Extensions:

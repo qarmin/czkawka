@@ -119,7 +119,7 @@ impl StringComboBoxItems {
         ]);
 
         let video_optimizer_video_codec = Self::convert_to_combobox_items(&[
-            ("hevc", "HEVC/H265", VideoCodec::H265),
+            ("h265", "HEVC/H265", VideoCodec::H265),
             ("h264", "H264", VideoCodec::H264),
             ("vp9", "VP9", VideoCodec::Vp9),
             ("av1", "AV1", VideoCodec::Av1),

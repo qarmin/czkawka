@@ -25,7 +25,7 @@ impl Search for SimilarVideos {
 
         let () = (|| {
             if !check_if_ffprobe_ffmpeg_exists() {
-                self.common_data.text_messages.errors.push(flc!("core_ffmpeg_not_found"));
+                self.common_data.text_messages.critical = Some(flc!("core_ffmpeg_not_found"));
                 #[cfg(target_os = "windows")]
                 self.common_data.text_messages.errors.push(flc!("core_ffmpeg_not_found_windows"));
                 return;
@@ -75,7 +75,6 @@ impl DebugPrint for SimilarVideos {
         }
 
         println!("---------------DEBUG PRINT---------------");
-        println!("Included directories - {:?}", self.common_data.directories.included_directories);
         self.debug_print_common();
         println!("-----------------------------------------");
     }
