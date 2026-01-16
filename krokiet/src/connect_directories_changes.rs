@@ -57,7 +57,6 @@ fn connect_remove_directories(app: &MainWindow) {
 fn connect_add_directories(app: &MainWindow) {
     let a = app.as_weak();
     app.on_folder_choose_requested(move |included_paths| {
-        println!("Folder choose requested");
         let app = a.upgrade().expect("Failed to upgrade app :(");
 
         let directory = std::env::current_dir().unwrap_or(std::path::PathBuf::from("/"));
@@ -81,7 +80,6 @@ fn connect_add_directories(app: &MainWindow) {
 fn connect_add_files(app: &MainWindow) {
     let a = app.as_weak();
     app.on_file_choose_requested(move |included_paths| {
-        println!("File choose requested");
         let app = a.upgrade().expect("Failed to upgrade app :(");
 
         let directory = std::env::current_dir().unwrap_or(std::path::PathBuf::from("/"));

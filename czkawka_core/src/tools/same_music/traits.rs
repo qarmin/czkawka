@@ -22,7 +22,7 @@ impl Search for SameMusic {
 
         let () = (|| {
             self.prepare_items();
-            self.common_data.use_reference_folders =  !self.common_data.directories.reference_directories.is_empty() ||  !self.common_data.directories.reference_files.is_empty();
+            self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty() || !self.common_data.directories.reference_files.is_empty();
             if self.check_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
                 self.common_data.stopped_search = true;
                 return;

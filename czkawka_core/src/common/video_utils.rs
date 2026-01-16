@@ -1,6 +1,8 @@
 use std::path::Path;
+use std::process::{Command, Stdio};
 
 use ffprobe::ffprobe;
+use image::RgbImage;
 use serde::{Deserialize, Serialize};
 
 use crate::common::consts::VIDEO_RESOLUTION_LIMIT;
@@ -85,4 +87,44 @@ impl VideoMetadata {
 
         Ok(metadata)
     }
+}
+
+pub(crate) fn extract_frame_ffmpeg(video_path: &Path, timestamp: f32, max_values: Option<(u32, u32)>) -> Result<RgbImage, String> {
+    let mut command = Command::new("ffmpeg");
+    let command_mut = &mut command;
+    if let Some((max_width, max_height)) = max_values {
+        let vf_filter = format!("scale='min({max_width},iw)':'min({max_height},ih)':force_original_aspect_ratio=decrease");
+        command_mut.arg("-vf").arg(&vf_filter);
+    }
+
+    let output = command_mut
+        .arg("-threads")
+        .arg("1")
+        .arg("-ss")
+        .arg(timestamp.to_string())
+        .arg("-i")
+        .arg(video_path)
+        .arg("-vframes")
+        .arg("1")
+        .arg("-f")
+        .arg("image2pipe")
+        .arg("-pix_fmt")
+        .arg("rgb24")
+        .arg("-vcodec")
+        .arg("png")
+        .arg("pipe:1")
+        .stdin(Stdio::null())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::null())
+        .output()
+        .map_err(|e| format!("Failed to execute ffmpeg: {e}"))?;
+
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr).replace("\r\n", "\n").replace("\n", " ");
+        return Err(format!("ffmpeg failed with status: {} - {stderr}, ", output.status));
+    }
+
+    let img = image::load_from_memory(&output.stdout).map_err(|e| format!("Failed to load image: {e}"))?;
+
+    Ok(img.to_rgb8())
 }

@@ -12,7 +12,7 @@ use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use log::debug;
 use rayon::prelude::*;
-use trash::os_limited::metadata;
+
 use crate::common::directories::Directories;
 use crate::common::extensions::Extensions;
 use crate::common::items::ExcludedItems;
@@ -204,7 +204,6 @@ fn entry_type(file_type: FileType) -> EntryType {
     }
 }
 
-
 impl<F, T> DirTraversal<'_, F>
 where
     F: Fn(&FileEntry) -> T,
@@ -235,11 +234,12 @@ where
             ..
         } = self;
 
-
         let mut file_results = Vec::new();
         // File traversal
         while let Some(current_file) = files_to_check.pop() {
-            let Some(metadata) = common_get_metadata_from_path(&current_file, &mut all_warnings) else { continue };
+            let Some(metadata) = common_get_metadata_from_path(&current_file, &mut all_warnings) else {
+                continue;
+            };
             let file_type = metadata.file_type();
             match (entry_type(file_type), collect) {
                 (EntryType::File, Collect::Files) => {
@@ -260,16 +260,9 @@ where
                 }
                 (EntryType::Symlink, Collect::InvalidSymlinks) => {
                     progress_handler.increase_items(1);
-                    process_symlink_in_symlink_mode_path_check(
-                        &current_file,
-                        &metadata,
-                        &mut all_warnings,
-                        &mut file_results,
-                        &extensions,
-                        &excluded_items,
-                    );
+                    process_symlink_in_symlink_mode_path_check(&current_file, &metadata, &mut all_warnings, &mut file_results, &extensions, &excluded_items);
                 }
-                (EntryType::Symlink, _) | (EntryType::Dir, _) | (EntryType::Other, _) => {
+                (EntryType::Symlink | EntryType::Dir | EntryType::Other, _) => {
                     // nothing to do
                 }
             }
@@ -442,7 +435,7 @@ fn process_file_in_file_mode_path_check(
         return;
     }
 
-    if excluded_items.is_excluded(&path) {
+    if excluded_items.is_excluded(path) {
         return;
     }
 
@@ -450,7 +443,7 @@ fn process_file_in_file_mode_path_check(
         // Creating new file entry
         let fe: FileEntry = FileEntry {
             size: metadata.len(),
-            modified_date: get_modified_time(metadata, warnings, &path, false),
+            modified_date: get_modified_time(metadata, warnings, path, false),
             path: path.to_path_buf(),
         };
 
@@ -551,14 +544,14 @@ fn process_symlink_in_symlink_mode_path_check(
         return;
     }
 
-    if excluded_items.is_excluded(&path) {
+    if excluded_items.is_excluded(path) {
         return;
     }
 
     // Creating new file entry
     let fe: FileEntry = FileEntry {
         size: metadata.len(),
-        modified_date: get_modified_time(&metadata, warnings, &path, false),
+        modified_date: get_modified_time(metadata, warnings, path, false),
         path: path.to_path_buf(),
     };
 
@@ -607,11 +600,7 @@ pub(crate) fn common_get_metadata_from_path(path: &Path, warnings: &mut Vec<Stri
     let metadata: Metadata = match fs::metadata(path) {
         Ok(t) => t,
         Err(e) => {
-            warnings.push(flc!(
-                "core_cannot_read_metadata_file",
-                file = path.to_string_lossy().to_string(),
-                reason = e.to_string()
-            ));
+            warnings.push(flc!("core_cannot_read_metadata_file", file = path.to_string_lossy().to_string(), reason = e.to_string()));
             return None;
         }
     };

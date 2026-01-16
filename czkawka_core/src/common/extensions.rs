@@ -1,5 +1,4 @@
 use std::ffi::OsString;
-use std::fs::DirEntry;
 
 use indexmap::IndexSet;
 

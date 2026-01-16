@@ -5,7 +5,7 @@ use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
 use crate::common::process_utils::run_command_interruptible;
-use crate::common::video_metadata::VideoMetadata;
+use crate::common::video_utils::VideoMetadata;
 use crate::tools::video_optimizer::{VideoTranscodeEntry, VideoTranscodeFixParams};
 
 pub fn check_video(mut entry: VideoTranscodeEntry) -> VideoTranscodeEntry {

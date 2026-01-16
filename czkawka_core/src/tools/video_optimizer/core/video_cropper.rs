@@ -1,5 +1,5 @@
 use std::path::Path;
-use std::process::{Command, Stdio};
+use std::process::Command;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 
@@ -8,7 +8,7 @@ use log::error;
 
 use crate::common::consts::VIDEO_RESOLUTION_LIMIT;
 use crate::common::process_utils::run_command_interruptible;
-use crate::common::video_metadata::VideoMetadata;
+use crate::common::video_utils::{VideoMetadata, extract_frame_ffmpeg};
 use crate::tools::video_optimizer::{VideoCropEntry, VideoCropFixParams, VideoCropParams, VideoCroppingMechanism};
 
 const MIN_SAMPLES: usize = 3;
@@ -66,36 +66,6 @@ impl Rectangle {
         let bottom_margin = height - self.bottom;
         self.left > min_crop_size || right_margin > min_crop_size || self.top > min_crop_size || bottom_margin > min_crop_size
     }
-}
-
-fn extract_frame_ffmpeg(video_path: &Path, timestamp: f32) -> Option<RgbImage> {
-    let output = Command::new("ffmpeg")
-        .arg("-threads")
-        .arg("1")
-        .arg("-ss")
-        .arg(timestamp.to_string())
-        .arg("-i")
-        .arg(video_path)
-        .arg("-vframes")
-        .arg("1")
-        .arg("-f")
-        .arg("image2pipe")
-        .arg("-pix_fmt")
-        .arg("rgb24")
-        .arg("-vcodec")
-        .arg("png")
-        .arg("pipe:1")
-        .stdin(Stdio::null())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::null())
-        .output()
-        .ok()?;
-
-    if !output.status.success() {
-        return None;
-    }
-
-    image::load_from_memory(&output.stdout).ok().map(|img| img.into_rgb8())
 }
 
 fn is_pixel_black(img: &image::RgbImage, x: u32, y: u32, black_pixel_threshold: u8) -> bool {
@@ -168,7 +138,7 @@ fn detect_black_bars(rgb_img: &RgbImage, params: &VideoCropParams) -> BlackBarRe
 
 fn analyze_black_bars<F>(duration: f32, get_frame: &F, stop_flag: &Arc<AtomicBool>, first_frame: &RgbImage, params: &VideoCropParams) -> Option<Result<Option<Rectangle>, String>>
 where
-    F: Fn(f32) -> Option<RgbImage>,
+    F: Fn(f32) -> Result<RgbImage, String>,
 {
     if stop_flag.load(Ordering::Relaxed) {
         return None;
@@ -191,8 +161,11 @@ where
 
         let timestamp = (i as f32 / num_samples as f32) * duration;
 
-        let Some(tmp_frame) = get_frame(timestamp) else {
-            return Some(Ok(None));
+        let tmp_frame = match get_frame(timestamp) {
+            Ok(frame) => frame,
+            Err(e) => {
+                return Some(Err(format!("Failed to get frame at timestamp {timestamp}: {e}")));
+            }
         };
         if tmp_frame.dimensions() != first_frame.dimensions() {
             return Some(Err(format!(
@@ -252,7 +225,7 @@ fn analyze_static_image_parts<F>(
     params: &VideoCropParams,
 ) -> Option<Result<Option<Rectangle>, String>>
 where
-    F: Fn(f32) -> Option<RgbImage>,
+    F: Fn(f32) -> Result<RgbImage, String>,
 {
     if stop_flag.load(Ordering::Relaxed) {
         return None;
@@ -269,8 +242,11 @@ where
 
         let timestamp = (i as f32 / num_samples as f32) * duration;
 
-        let Some(tmp_frame) = get_frame(timestamp) else {
-            return Some(Err(format!("Failed to get frame at timestamp {timestamp}")));
+        let tmp_frame = match get_frame(timestamp) {
+            Ok(frame) => frame,
+            Err(e) => {
+                return Some(Err(format!("Failed to get frame at timestamp {timestamp}: {e}")));
+            }
         };
         if tmp_frame.dimensions() != first_frame.dimensions() {
             return Some(Err(format!(
@@ -354,13 +330,16 @@ pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, sto
     };
 
     let video_path = entry.path.clone();
-    let get_frame = |timestamp: f32| -> Option<RgbImage> { extract_frame_ffmpeg(&video_path, timestamp) };
+    let get_frame = |timestamp: f32| -> Result<RgbImage, String> { extract_frame_ffmpeg(&video_path, timestamp, None) };
 
     // TODO - metadata are broken? Not proper?
     // Metadata shows different dimensions than actual frames extracted - quite strange, probably rotated data -
-    let Some(first_frame) = get_frame(0.0) else {
-        entry.error = Some(format!("Failed to extract first frame for video \"{}\"", entry.path.to_string_lossy()));
-        return Some(entry);
+    let first_frame = match get_frame(0.0) {
+        Ok(frame) => frame,
+        Err(e) => {
+            entry.error = Some(format!("Failed to extract first frame for video \"{}\": {}", entry.path.to_string_lossy(), e));
+            return Some(entry);
+        }
     };
 
     let (width, height) = first_frame.dimensions();
@@ -610,7 +589,7 @@ mod tests {
         let stop_flag = Arc::new(AtomicBool::new(false));
         let duration = 10.0;
 
-        let get_frame = |_timestamp: f32| -> Option<RgbImage> { Some(create_frame_with_black_bars(200, 200, 20)) };
+        let get_frame = |_timestamp: f32| -> Result<RgbImage, String> { Ok(create_frame_with_black_bars(200, 200, 20)) };
 
         let result = analyze_black_bars(duration, &get_frame, &stop_flag, &create_frame_with_black_bars(200, 200, 20), &params);
         assert!(result.expect("Expected Result").unwrap().is_some());
@@ -622,7 +601,7 @@ mod tests {
         let stop_flag = Arc::new(AtomicBool::new(false));
         let duration = 10.0;
 
-        let get_frame = |_timestamp: f32| -> Option<RgbImage> { Some(create_colored_frame(200, 200, 100, 150, 200)) };
+        let get_frame = |_timestamp: f32| -> Result<RgbImage, String> { Ok(create_colored_frame(200, 200, 100, 150, 200)) };
 
         let result = analyze_black_bars(duration, &get_frame, &stop_flag, &create_colored_frame(200, 200, 100, 150, 200), &params);
         assert!(result.expect("Expected Result").unwrap().is_none());
@@ -634,11 +613,11 @@ mod tests {
         let stop_flag = Arc::new(AtomicBool::new(false));
         let duration = 10.0;
 
-        let get_frame = |timestamp: f32| -> Option<RgbImage> {
+        let get_frame = |timestamp: f32| -> Result<RgbImage, String> {
             if timestamp < 5.0 {
-                Some(create_frame_with_black_bars(200, 200, 20))
+                Ok(create_frame_with_black_bars(200, 200, 20))
             } else {
-                Some(create_colored_frame(200, 200, 100, 150, 200))
+                Ok(create_colored_frame(200, 200, 100, 150, 200))
             }
         };
 
@@ -652,13 +631,13 @@ mod tests {
         let stop_flag = Arc::new(AtomicBool::new(false));
         let duration = 10.0;
 
-        let get_frame = |timestamp: f32| -> Option<RgbImage> {
+        let get_frame = |timestamp: f32| -> Result<RgbImage, String> {
             if timestamp < 3.0 {
-                Some(create_frame_with_black_bars(200, 200, 20))
+                Ok(create_frame_with_black_bars(200, 200, 20))
             } else if timestamp < 7.0 {
-                Some(create_frame_with_black_bars(200, 200, 18))
+                Ok(create_frame_with_black_bars(200, 200, 18))
             } else {
-                Some(create_frame_with_black_bars(200, 200, 22))
+                Ok(create_frame_with_black_bars(200, 200, 22))
             }
         };
 

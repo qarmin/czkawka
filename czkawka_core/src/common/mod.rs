@@ -15,7 +15,7 @@ pub mod progress_data;
 pub mod progress_stop_handler;
 pub mod tool_data;
 pub mod traits;
-pub mod video_metadata;
+pub mod video_utils;
 
 use std::cmp::Ordering;
 use std::ffi::OsString;

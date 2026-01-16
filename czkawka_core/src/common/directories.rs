@@ -134,7 +134,7 @@ impl Directories {
             if cfg!(target_family = "windows") {
                 items.iter_mut().for_each(|item| {
                     *item = normalize_windows_path(item.clone());
-                })
+                });
             }
             items.sort_unstable();
             items.dedup();
@@ -145,18 +145,19 @@ impl Directories {
         if recursive_search && !self.exclude_other_filesystems.unwrap_or(false) {
             for kk in [&mut self.included_directories, &mut self.excluded_directories] {
                 let cloned = kk.clone();
-                kk.retain(|item| !cloned.iter().any(|other_item| item != other_item && item.starts_with(other_item)))
+                kk.retain(|item| !cloned.iter().any(|other_item| item != other_item && item.starts_with(other_item)));
             }
         }
 
         // Remove included directories which are inside any excluded directory
         // Same with included files
         for kk in [&mut self.included_directories, &mut self.included_files] {
-            kk.retain(|id| !self.excluded_directories.iter().any(|ed| id.starts_with(ed)))
+            kk.retain(|id| !self.excluded_directories.iter().any(|ed| id.starts_with(ed)));
         }
 
         // Also check if files are not excluded directly
-        for kk in [&mut self.included_files] {
+        {
+            let kk = &mut self.included_files;
             kk.retain(|id| !self.excluded_directories.iter().any(|ed| id == ed));
         }
 
@@ -167,7 +168,7 @@ impl Directories {
             &mut self.included_files,
             &mut self.included_directories,
         ] {
-            kk.retain(|path| path.exists())
+            kk.retain(|path| path.exists());
         }
 
         // Excluded paths must are inside included path, because otherwise they are pointless
@@ -219,9 +220,9 @@ impl Directories {
     }
 
     pub(crate) fn is_in_referenced_directory(&self, path: &Path) -> bool {
-        dbg!(path);
-        dbg!(self.reference_directories.iter().any(|e| path.starts_with(e)));
-        dbg!(self.reference_files.iter().any(|e| e.as_path() == path));
+        path;
+        self.reference_directories.iter().any(|e| path.starts_with(e));
+        self.reference_files.iter().any(|e| e.as_path() == path);
         self.reference_directories.iter().any(|e| path.starts_with(e)) || self.reference_files.iter().any(|e| e.as_path() == path)
     }
 
@@ -246,7 +247,7 @@ impl Directories {
                     return Ok(false); // Exact equality for included files is always allowed
                 }
                 Ok(!self.included_dev_ids.iter().any(|&id| id == m.dev()))
-            },
+            }
             Err(_) => Err(flc!("core_paths_unable_to_get_device_id", path = path.to_string_lossy().to_string())),
         }
     }
