@@ -521,11 +521,11 @@ mod tests {
         let black_img = RgbImage::from_pixel(10, 10, image::Rgb([0, 0, 0]));
         assert!(is_pixel_black(&black_img, 5, 5, params.black_pixel_threshold));
 
-        let dark_gray_img = RgbImage::from_pixel(10, 10, image::Rgb([19, 19, 19]));
-        assert!(is_pixel_black(&dark_gray_img, 5, 5, params.black_pixel_threshold));
-
         let light_gray_img = RgbImage::from_pixel(10, 10, image::Rgb([20, 20, 20]));
-        assert!(!is_pixel_black(&light_gray_img, 5, 5, params.black_pixel_threshold));
+        assert!(is_pixel_black(&light_gray_img, 5, 5, params.black_pixel_threshold));
+
+        let dark_gray_img = RgbImage::from_pixel(10, 10, image::Rgb([21, 21, 21]));
+        assert!(!is_pixel_black(&dark_gray_img, 5, 5, params.black_pixel_threshold));
 
         let white_img = RgbImage::from_pixel(10, 10, image::Rgb([255, 255, 255]));
         assert!(!is_pixel_black(&white_img, 5, 5, params.black_pixel_threshold));
