@@ -25,7 +25,7 @@ use connect_things::connect_show_hide_ui::connect_show_hide_ui;
 use connect_things::connect_similar_image_size_change::connect_similar_image_size_change;
 use crossbeam_channel::{Receiver, Sender, unbounded};
 use czkawka_core::common::basic_gui_cli::{CliResult, process_cli_args};
-use czkawka_core::common::config_cache_path::{print_infos_and_warnings, set_config_cache_path};
+use czkawka_core::common::config_cache_path::{get_config_cache_path, print_infos_and_warnings, set_config_cache_path};
 use czkawka_core::common::logger::{filtering_messages, print_version_mode, setup_logger};
 use czkawka_core::common::progress_data::ProgressData;
 use czkawka_core::common::{get_number_of_threads, set_number_of_threads};
@@ -73,10 +73,21 @@ pub const CZKAWKA_GTK_TOOL_NUMBER: usize = TOOLS_NUMBER - 2; // Missing exif and
 
 fn main() {
     let config_cache_path_set_result = set_config_cache_path("Czkawka", "Czkawka");
+    let exists_krokiet_info_file = get_config_cache_path().is_some_and(|cache_config| {
+        let file_path = cache_config.cache_folder.join("krokiet_info_dialog_seen.txt");
+        let exists = file_path.exists();
+        if !exists {
+            let _ = std::fs::write(
+                file_path,
+                "This file indicates that user has seen Krokiet info dialog. You can delete this file to see the dialog again.",
+            );
+        }
+        exists
+    });
+
     let needs_to_open_dialog_about_krokiet = !(config_cache_path_set_result.config_env_set
         || config_cache_path_set_result.cache_env_set
-        || config_cache_path_set_result.default_cache_path_exists
-        || config_cache_path_set_result.default_config_path_exists
+        || exists_krokiet_info_file
         || option_env!("CZKAWKA_DONT_ANNOY_ME").as_ref().is_some_and(|x| !x.is_empty()));
 
     let application = Application::new(None::<String>, ApplicationFlags::HANDLES_OPEN | ApplicationFlags::HANDLES_COMMAND_LINE);

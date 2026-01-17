@@ -11,7 +11,7 @@ general_close_button = Close
 # Krokiet info dialog
 krokiet_info_title = Introducing Krokiet - New version of Czkawka
 krokiet_info_message =
-        Krokiet is the new, improved, faster, and more reliable version of the Czkawka GTK GUI!
+        Krokiet is the new, improved, faster and more reliable version of the Czkawka GTK GUI!
 
         It’s easier to run and more resilient to system changes, as it depends only on core libraries available on most systems by default.
 

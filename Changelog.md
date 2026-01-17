@@ -11,6 +11,7 @@
 
 #### Devs
 - Public api functions, now do not take references to small copyable types
+- Updated to Rust 1.92 - needed by gtk4-rs, which includes critical bugfix
 
 
 ### Core
@@ -24,9 +25,10 @@
 - Commit hash is added to logs - [#1672](https://github.com/qarmin/czkawka/pull/1672)
 - Improved and fixed logic which groups similar images by its similarity - [#1685](https://github.com/qarmin/czkawka/pull/1685)
 - Added counting scan time - [#1674](https://github.com/qarmin/czkawka/pull/1674), [#1685](https://github.com/qarmin/czkawka/pull/1685)
-- Added ability to search for broken video files in broken files tool(via external ffmpeg/ffprobe) - []()
-- New mode, video optimizer, to reencode videos to more efficient codecs and cropping black/bars from videos - [#1726](https://github.com/qarmin/czkawka/pull/1726), []()
-- New mode, exif remover, to remove certain exif tags from files - []()
+- Added ability to search for broken video files in broken files tool(via external ffmpeg/ffprobe) - [#1745](https://github.com/qarmin/czkawka/pull/1745)
+- New mode, video optimizer, to reencode videos to more efficient codecs and cropping black/bars from videos(via external ffmpeg/ffprobe) - [#1726](https://github.com/qarmin/czkawka/pull/1726), [#1745](https://github.com/qarmin/czkawka/pull/1745)
+- New mode, exif remover, to remove certain exif tags from files - [#1745](https://github.com/qarmin/czkawka/pull/1745)
+- Ability to add files to scan, not only folders - [#1745](https://github.com/qarmin/czkawka/pull/1745)
 
 ### CLI
 - Using colors by default in terminal output(can be disabled by feature flag) - [#1672](https://github.com/qarmin/czkawka/pull/1672)
@@ -41,9 +43,9 @@
 - Added button, that easily allows to swap between compared images - [#1658](https://github.com/qarmin/czkawka/pull/1658)
 - Refactorings to assess whether migrating to GTK 5 will be possible (currently, it doesn’t seem very feasible) - [#1658](https://github.com/qarmin/czkawka/pull/1658)
 - Fixed sorting by size in big files mode - [#1691](https://github.com/qarmin/czkawka/pull/1691)
-- Ugly workarounds for ugly freezes, caused probably by inconsistencies between GTK4 and the Rust compiler’s optimizations - [#1691](https://github.com/qarmin/czkawka/pull/1691)
+- Fixed freezes, caused by invalid function declaration in gtk4-rs - [#1691](https://github.com/qarmin/czkawka/pull/1691)
 - About screen, now contains info, that Krokiet is successor app - [#1718](https://github.com/qarmin/czkawka/pull/1718)
-- Added `--cache`, `--config` CLI options, to open cache/config paths  - []()
+- Added `--cache`, `--config` CLI options, to open cache/config paths  - [#1745](https://github.com/qarmin/czkawka/pull/1745)
 
 ### Krokiet
 - New Logo - [#1726](https://github.com/qarmin/czkawka/pull/1726)
@@ -56,9 +58,9 @@
 - Cleaning messages in bottom panel, when scan starts - [#1726](https://github.com/qarmin/czkawka/pull/1726)
 - Fix crash, when user clicked at previous results while new scan was in progress - [#1726](https://github.com/qarmin/czkawka/pull/1726)
 - Defaulting to remove files to trash instead permanent deletion - [#1726](https://github.com/qarmin/czkawka/pull/1726)
-- Added notification dialog, when app cannot be opened - []()
-- Added `--cache`, `--config` CLI options, to open cache/config paths  - []()
-- Added new video optimizer and exif remover modes - [#1726](https://github.com/qarmin/czkawka/pull/1726), []()
+- Added notification dialog, when app cannot be opened - [#1745](https://github.com/qarmin/czkawka/pull/1745)
+- Added `--cache`, `--config` CLI options, to open cache/config paths  - [#1745](https://github.com/qarmin/czkawka/pull/1745)
+- Added new video optimizer and exif remover modes - [#1726](https://github.com/qarmin/czkawka/pull/1726), [#1745](https://github.com/qarmin/czkawka/pull/1745)
 
 ### External
 - Wine 10.20 contains bugfix that fixes crashes when running dialogs in Czkawka Gui - [Wine 49987 issue](https://bugs.winehq.org/show_bug.cgi?id=49987)
