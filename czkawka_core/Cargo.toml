@@ -81,7 +81,6 @@ anyhow = { version = "1.0.89" }
 nom-exif = "2.1.0"
 
 # EXIF data cleaning
-#little_exif = { path = "/home/rafal/test/little_exif" }
 little_exif = "0.6.20"
 
 trash = "5.1"

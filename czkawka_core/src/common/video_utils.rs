@@ -90,6 +90,14 @@ impl VideoMetadata {
 }
 
 pub(crate) fn extract_frame_ffmpeg(video_path: &Path, timestamp: f32, max_values: Option<(u32, u32)>) -> Result<RgbImage, String> {
+    // This function returns strange status 234, when path contains non default UTF-8 characters, not sure why
+    if !video_path.exists() {
+        return Err(format!(
+            "Video file does not exist(could be removed between scan/later steps): \"{}\"",
+            video_path.to_string_lossy()
+        ));
+    }
+
     let mut command = Command::new("ffmpeg");
     let command_mut = &mut command;
     if let Some((max_width, max_height)) = max_values {
@@ -121,7 +129,7 @@ pub(crate) fn extract_frame_ffmpeg(video_path: &Path, timestamp: f32, max_values
 
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr).replace("\r\n", "\n").replace("\n", " ");
-        return Err(format!("ffmpeg failed with status: {} - {stderr}, ", output.status));
+        return Err(format!("ffmpeg failed with status: {} - {stderr} - command {command:?} ", output.status));
     }
 
     let img = image::load_from_memory(&output.stdout).map_err(|e| format!("Failed to load image: {e}"))?;

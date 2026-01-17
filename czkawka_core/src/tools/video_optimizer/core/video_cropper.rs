@@ -70,7 +70,7 @@ impl Rectangle {
 
 fn is_pixel_black(img: &image::RgbImage, x: u32, y: u32, black_pixel_threshold: u8) -> bool {
     let pixel = img.get_pixel(x, y);
-    pixel.0.iter().all(|&channel| channel < black_pixel_threshold)
+    pixel.0.iter().all(|&channel| channel <= black_pixel_threshold)
 }
 
 #[derive(Debug)]
@@ -136,7 +136,14 @@ fn detect_black_bars(rgb_img: &RgbImage, params: &VideoCropParams) -> BlackBarRe
     }
 }
 
-fn analyze_black_bars<F>(duration: f32, get_frame: &F, stop_flag: &Arc<AtomicBool>, first_frame: &RgbImage, params: &VideoCropParams) -> Option<Result<Option<Rectangle>, String>>
+fn analyze_black_bars<F>(
+    duration: f32,
+    get_frame: &F,
+    stop_flag: &Arc<AtomicBool>,
+    first_frame: &RgbImage,
+    params: &VideoCropParams,
+    path: &Path,
+) -> Option<Result<Option<Rectangle>, String>>
 where
     F: Fn(f32) -> Result<RgbImage, String>,
 {
@@ -164,7 +171,7 @@ where
         let tmp_frame = match get_frame(timestamp) {
             Ok(frame) => frame,
             Err(e) => {
-                return Some(Err(format!("Failed to get frame at timestamp {timestamp}: {e}")));
+                return Some(Err(format!("Failed to get frame at timestamp \"{}\" {timestamp}: {e}", path.to_string_lossy())));
             }
         };
         if tmp_frame.dimensions() != first_frame.dimensions() {
@@ -223,6 +230,7 @@ fn analyze_static_image_parts<F>(
     stop_flag: &Arc<AtomicBool>,
     first_frame: &RgbImage,
     params: &VideoCropParams,
+    path: &Path,
 ) -> Option<Result<Option<Rectangle>, String>>
 where
     F: Fn(f32) -> Result<RgbImage, String>,
@@ -245,7 +253,7 @@ where
         let tmp_frame = match get_frame(timestamp) {
             Ok(frame) => frame,
             Err(e) => {
-                return Some(Err(format!("Failed to get frame at timestamp {timestamp}: {e}")));
+                return Some(Err(format!("Failed to get frame from \"{}\" at timestamp {timestamp}: {e}", path.to_string_lossy())));
             }
         };
         if tmp_frame.dimensions() != first_frame.dimensions() {
@@ -359,7 +367,7 @@ pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, sto
     }
 
     match params.crop_detect {
-        VideoCroppingMechanism::BlackBars => match analyze_black_bars(duration as f32, &get_frame, stop_flag, &first_frame, params) {
+        VideoCroppingMechanism::BlackBars => match analyze_black_bars(duration as f32, &get_frame, stop_flag, &first_frame, params, &entry.path) {
             Some(Ok(Some(rectangle))) => {
                 rectangle.validate_image_size(width, height);
                 entry.new_image_dimensions = Some((rectangle.left, rectangle.top, rectangle.right, rectangle.bottom));
@@ -372,7 +380,7 @@ pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, sto
             }
             None => return None,
         },
-        VideoCroppingMechanism::StaticContent => match analyze_static_image_parts(duration as f32, &get_frame, stop_flag, &first_frame, params) {
+        VideoCroppingMechanism::StaticContent => match analyze_static_image_parts(duration as f32, &get_frame, stop_flag, &first_frame, params, &entry.path) {
             Some(Ok(Some(rectangle))) => {
                 rectangle.validate_image_size(width, height);
                 entry.new_image_dimensions = Some((rectangle.left, rectangle.top, rectangle.right, rectangle.bottom));
@@ -591,7 +599,14 @@ mod tests {
 
         let get_frame = |_timestamp: f32| -> Result<RgbImage, String> { Ok(create_frame_with_black_bars(200, 200, 20)) };
 
-        let result = analyze_black_bars(duration, &get_frame, &stop_flag, &create_frame_with_black_bars(200, 200, 20), &params);
+        let result = analyze_black_bars(
+            duration,
+            &get_frame,
+            &stop_flag,
+            &create_frame_with_black_bars(200, 200, 20),
+            &params,
+            Path::new("text.txt"),
+        );
         assert!(result.expect("Expected Result").unwrap().is_some());
     }
 
@@ -603,7 +618,14 @@ mod tests {
 
         let get_frame = |_timestamp: f32| -> Result<RgbImage, String> { Ok(create_colored_frame(200, 200, 100, 150, 200)) };
 
-        let result = analyze_black_bars(duration, &get_frame, &stop_flag, &create_colored_frame(200, 200, 100, 150, 200), &params);
+        let result = analyze_black_bars(
+            duration,
+            &get_frame,
+            &stop_flag,
+            &create_colored_frame(200, 200, 100, 150, 200),
+            &params,
+            Path::new("text.txt"),
+        );
         assert!(result.expect("Expected Result").unwrap().is_none());
     }
 
@@ -621,7 +643,14 @@ mod tests {
             }
         };
 
-        let result = analyze_black_bars(duration, &get_frame, &stop_flag, &create_frame_with_black_bars(200, 200, 20), &params);
+        let result = analyze_black_bars(
+            duration,
+            &get_frame,
+            &stop_flag,
+            &create_frame_with_black_bars(200, 200, 20),
+            &params,
+            Path::new("text.txt"),
+        );
         assert!(result.expect("Expected Result").unwrap().is_none());
     }
 
@@ -641,7 +670,14 @@ mod tests {
             }
         };
 
-        let result = analyze_black_bars(duration, &get_frame, &stop_flag, &create_frame_with_black_bars(200, 200, 20), &params);
+        let result = analyze_black_bars(
+            duration,
+            &get_frame,
+            &stop_flag,
+            &create_frame_with_black_bars(200, 200, 20),
+            &params,
+            Path::new("text.txt"),
+        );
         let rect = result.expect("Expected Result").unwrap().unwrap();
         assert_eq!(rect.left, 18);
         assert_eq!(rect.top, 18);
