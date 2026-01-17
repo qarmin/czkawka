@@ -153,7 +153,7 @@ pub async fn check_if_deleting_all_files_in_group(sv: &SubView, window_main: &gt
 
     let mut selected_all_records: bool = true;
 
-    if let Some(iter) = model.iter_first() {
+    if let Some(mut iter) = model.iter_first() {
         assert!(model.get::<bool>(&iter, column_header)); // First element should be header
 
         // It is safe to remove any number of files in reference mode
@@ -162,7 +162,7 @@ pub async fn check_if_deleting_all_files_in_group(sv: &SubView, window_main: &gt
         }
 
         loop {
-            if !model.iter_next(&iter) {
+            if !model.iter_next(&mut iter) {
                 break;
             }
 

@@ -40,7 +40,7 @@ fn main() {
     println!("cargo:rustc-env=CZKAWKA_GIT_COMMIT_DATE={git_commit_date}");
 
     // Official build flag
-    if std::env::var("CZKAWKA_OFFICIAL_BUILD").is_ok() {
+    if std::env::var("CZKAWKA_OFFICIAL_BUILD") == Ok("1".to_string()) {
         println!("cargo:rustc-env=CZKAWKA_OFFICIAL_BUILD=1");
     } else {
         println!("cargo:rustc-env=CZKAWKA_OFFICIAL_BUILD=0");

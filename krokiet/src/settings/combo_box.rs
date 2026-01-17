@@ -2,12 +2,12 @@ use std::fmt::Debug;
 use std::sync::{Arc, Mutex, MutexGuard};
 
 use czkawka_core::common::model::{CheckingMethod, HashType};
+use czkawka_core::re_exported::{Cropdetect, HashAlg};
 use czkawka_core::tools::big_file::SearchMode;
+use czkawka_core::tools::video_optimizer::{VideoCodec, VideoCroppingMechanism, VideoOptimizerMode};
 use image::imageops::FilterType;
-use image_hasher::HashAlg;
 use log::warn;
 use slint::SharedString;
-use vid_dup_finder_lib::Cropdetect;
 
 use crate::connect_translation::LANGUAGE_LIST;
 
@@ -31,8 +31,9 @@ pub struct StringComboBoxItems {
     pub audio_check_type: Vec<StringComboBoxItem<CheckingMethod>>,
     pub duplicates_check_method: Vec<StringComboBoxItem<CheckingMethod>>,
     pub videos_crop_detect: Vec<StringComboBoxItem<Cropdetect>>,
-    pub video_optimizer_mode: Vec<StringComboBoxItem<String>>,
-    pub video_optimizer_video_codec: Vec<StringComboBoxItem<String>>,
+    pub video_optimizer_crop_type: Vec<StringComboBoxItem<VideoCroppingMechanism>>,
+    pub video_optimizer_mode: Vec<StringComboBoxItem<VideoOptimizerMode>>,
+    pub video_optimizer_video_codec: Vec<StringComboBoxItem<VideoCodec>>,
 }
 
 pub static STRING_COMBO_BOX_ITEMS: std::sync::LazyLock<Arc<Mutex<StringComboBoxItems>>> = std::sync::LazyLock::new(|| {
@@ -51,28 +52,6 @@ impl StringComboBoxItems {
         });
         let display_names = items.iter().map(|e| e.display_name.clone().into()).collect::<Vec<_>>();
         (position, display_names)
-    }
-
-    pub(crate) fn get_config_name_from_idx<T>(idx: usize, items: &Vec<StringComboBoxItem<T>>) -> String
-    where
-        T: Clone + Debug,
-    {
-        if idx < items.len() {
-            items[idx].config_name.clone()
-        } else {
-            warn!("Trying to get non existent item - \"{idx}\" from {items:?}");
-            items[0].config_name.clone()
-        }
-    }
-
-    pub(crate) fn get_value_from_config_name<T>(config_name: &str, items: &Vec<StringComboBoxItem<T>>) -> T
-    where
-        T: Clone + Debug,
-    {
-        let position = items.iter().position(|e| e.config_name == config_name).unwrap_or_else(|| {
-            panic!("Trying to get non existent item - \"{config_name}\" from {items:?}");
-        });
-        items[position].value.clone()
     }
 
     pub(crate) fn regenerate_items() -> Self {
@@ -129,13 +108,21 @@ impl StringComboBoxItems {
             ("none", "None", Cropdetect::None),
         ]);
 
-        let video_optimizer_mode = Self::convert_to_combobox_items(&[("image", "Image", "image".to_string()), ("video", "Video", "video".to_string())]);
+        let video_optimizer_crop_type = Self::convert_to_combobox_items(&[
+            ("blackbars", "Black Bars", VideoCroppingMechanism::BlackBars),
+            ("staticcontent", "Static Content", VideoCroppingMechanism::StaticContent),
+        ]);
+
+        let video_optimizer_mode = Self::convert_to_combobox_items(&[
+            ("crop", "Crop", VideoOptimizerMode::VideoCrop),
+            ("transcode", "Transcode", VideoOptimizerMode::VideoTranscode),
+        ]);
 
         let video_optimizer_video_codec = Self::convert_to_combobox_items(&[
-            ("hevc", "HEVC/H265", "hevc".to_string()),
-            ("h264", "H264", "h264".to_string()),
-            ("vp9", "VP9", "vp9".to_string()),
-            ("av1", "AV1", "av1".to_string()),
+            ("h265", "HEVC/H265", VideoCodec::H265),
+            ("h264", "H264", VideoCodec::H264),
+            ("vp9", "VP9", VideoCodec::Vp9),
+            ("av1", "AV1", VideoCodec::Av1),
         ]);
 
         Self {
@@ -148,6 +135,7 @@ impl StringComboBoxItems {
             audio_check_type,
             duplicates_check_method,
             videos_crop_detect,
+            video_optimizer_crop_type,
             video_optimizer_mode,
             video_optimizer_video_codec,
         }

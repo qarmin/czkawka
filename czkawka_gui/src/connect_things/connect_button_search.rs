@@ -496,6 +496,7 @@ fn broken_files_search(
     let check_button_broken_files_pdf: gtk4::CheckButton = gui_data.main_notebook.check_button_broken_files_pdf.clone();
     let check_button_broken_files_audio: gtk4::CheckButton = gui_data.main_notebook.check_button_broken_files_audio.clone();
     let check_button_broken_files_image: gtk4::CheckButton = gui_data.main_notebook.check_button_broken_files_image.clone();
+    let check_button_broken_files_video: gtk4::CheckButton = gui_data.main_notebook.check_button_broken_files_video.clone();
 
     clean_tree_view(&gui_data.main_notebook.common_tree_views.get_current_subview().tree_view);
 
@@ -512,6 +513,9 @@ fn broken_files_search(
     }
     if check_button_broken_files_archive.is_active() {
         checked_types |= CheckedTypes::ARCHIVE;
+    }
+    if check_button_broken_files_video.is_active() {
+        checked_types |= CheckedTypes::VIDEO;
     }
 
     if checked_types != CheckedTypes::NONE {
@@ -702,9 +706,9 @@ fn set_common_settings<T>(component: &mut T, loaded_commons: &LoadedCommonItems)
 where
     T: CommonData,
 {
-    component.set_included_directory(loaded_commons.included_directories.clone());
-    component.set_excluded_directory(loaded_commons.excluded_directories.clone());
-    component.set_reference_directory(loaded_commons.reference_directories.clone());
+    component.set_included_paths(loaded_commons.included_directories.clone());
+    component.set_excluded_paths(loaded_commons.excluded_directories.clone());
+    component.set_reference_paths(loaded_commons.reference_directories.clone());
     component.set_recursive_search(loaded_commons.recursive_search);
     component.set_allowed_extensions(loaded_commons.allowed_extensions.clone());
     component.set_excluded_extensions(loaded_commons.excluded_extensions.clone());

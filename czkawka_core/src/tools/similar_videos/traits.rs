@@ -7,6 +7,7 @@ use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use humansize::{BINARY, format_size};
 
+use crate::common::ffmpeg_utils::check_if_ffprobe_ffmpeg_exists;
 use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
@@ -23,21 +24,24 @@ impl Search for SimilarVideos {
         let start_time = Instant::now();
 
         let () = (|| {
-            if !ffmpeg_cmdline_utils::ffmpeg_and_ffprobe_are_callable() {
-                self.common_data.text_messages.errors.push(flc!("core_ffmpeg_not_found"));
+            if !check_if_ffprobe_ffmpeg_exists() {
+                self.common_data.text_messages.critical = Some(flc!("core_ffmpeg_not_found"));
                 #[cfg(target_os = "windows")]
                 self.common_data.text_messages.errors.push(flc!("core_ffmpeg_not_found_windows"));
-            } else {
-                self.prepare_items();
-                self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
-                if self.check_for_similar_videos(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-                    self.common_data.stopped_search = true;
-                    return;
-                }
-                if self.sort_videos(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-                    self.common_data.stopped_search = true;
-                    return;
-                }
+                return;
+            }
+
+            if self.prepare_items().is_err() {
+                return;
+            }
+            self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty() || !self.common_data.directories.reference_files.is_empty();
+            if self.check_for_similar_videos(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+                self.common_data.stopped_search = true;
+                return;
+            }
+            if self.sort_videos(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+                self.common_data.stopped_search = true;
+                return;
             }
             if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
                 self.common_data.stopped_search = true;
@@ -71,7 +75,6 @@ impl DebugPrint for SimilarVideos {
         }
 
         println!("---------------DEBUG PRINT---------------");
-        println!("Included directories - {:?}", self.common_data.directories.included_directories);
         self.debug_print_common();
         println!("-----------------------------------------");
     }

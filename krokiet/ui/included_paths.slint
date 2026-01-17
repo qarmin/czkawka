@@ -1,23 +1,23 @@
 import { Button, CheckBox, ListView } from "std-widgets.slint";
 import { Callabler } from "callabler.slint";
-import { ExcludedDirectoriesModel, IncludedDirectoriesModel } from "common.slint";
+import { ExcludedPathsModel, IncludedPathsModel } from "common.slint";
 import { ColorPalette } from "color_palette.slint";
 import { Settings } from "settings.slint";
 import { Translations } from "translations.slint";
 import { FontSizes } from "fonts.slint";
 
-export component IncludedDirectories {
-    in-out property <[IncludedDirectoriesModel]> model <=> Settings.included_directories_model;
-    in-out property <int> current_index <=> Settings.included_directories_model_selected_idx;
+export component IncludedPaths {
+    in-out property <[IncludedPathsModel]> model <=> Settings.included_paths_model;
+    in-out property <int> current_index <=> Settings.included_paths_model_selected_idx;
 
-    in-out property <length> size_referenced_folder: 33px;
+    in-out property <length> size_referenced_path: 33px;
     min-width: 50px;
     VerticalLayout {
         HorizontalLayout {
             spacing: 5px;
             Text {
                 text <=> Translations.ref_text;
-                width: size_referenced_folder;
+                width: size_referenced_path;
                 font-size: FontSizes.normal;
                 horizontal-alignment: center;
             }
@@ -71,11 +71,11 @@ export component IncludedDirectories {
                     width: parent.width;
 
                     CheckBox {
-                        checked: r.referenced_folder;
+                        checked: r.referenced_path;
                         toggled => {
-                            model[idx].referenced_folder = self.checked;
+                            model[idx].referenced_path = self.checked;
                         }
-                        width: size_referenced_folder;
+                        width: size_referenced_path;
                     }
 
                     Text {
@@ -102,7 +102,7 @@ export component IncludedDirectories {
                             icon: @image-url("../icons/krokiet_delete.svg");
                             colorize-icon: true;
                             clicked => {
-                                Callabler.remove_item_directories(true, idx);
+                                Callabler.remove_item_paths(true, idx);
                             }
                         }
                     }
@@ -112,9 +112,9 @@ export component IncludedDirectories {
     }
 }
 
-export component ExcludedDirectories {
-    in-out property <[ExcludedDirectoriesModel]> model <=> Settings.excluded_directories_model;
-    in-out property <int> current_index <=> Settings.excluded_directories_model_selected_idx;
+export component ExcludedPaths {
+    in-out property <[ExcludedPathsModel]> model <=> Settings.excluded_paths_model;
+    in-out property <int> current_index <=> Settings.excluded_paths_model_selected_idx;
 
     min-width: 50px;
     VerticalLayout {
@@ -187,7 +187,7 @@ export component ExcludedDirectories {
                             icon: @image-url("../icons/krokiet_delete.svg");
                             colorize-icon: true;
                             clicked => {
-                                Callabler.remove_item_directories(false, idx);
+                                Callabler.remove_item_paths(false, idx);
                             }
                         }
                     }

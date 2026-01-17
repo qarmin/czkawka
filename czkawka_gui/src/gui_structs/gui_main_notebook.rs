@@ -72,6 +72,7 @@ pub struct GuiMainNotebook {
     pub check_button_broken_files_pdf: CheckButton,
     pub check_button_broken_files_archive: CheckButton,
     pub check_button_broken_files_image: CheckButton,
+    pub check_button_broken_files_video: CheckButton,
 
     // Music
     pub check_button_music_title: CheckButton,
@@ -117,6 +118,7 @@ impl GuiMainNotebook {
         let check_button_broken_files_pdf: CheckButton = builder.object("check_button_broken_files_pdf").expect("Cambalache");
         let check_button_broken_files_archive: CheckButton = builder.object("check_button_broken_files_archive").expect("Cambalache");
         let check_button_broken_files_image: CheckButton = builder.object("check_button_broken_files_image").expect("Cambalache");
+        let check_button_broken_files_video: CheckButton = builder.object("check_button_broken_files_video").expect("Cambalache");
 
         let scale_similarity_similar_images: Scale = builder.object("scale_similarity_similar_images").expect("Cambalache");
         let scale_similarity_similar_videos: Scale = builder.object("scale_similarity_similar_videos").expect("Cambalache");
@@ -210,6 +212,7 @@ impl GuiMainNotebook {
             check_button_broken_files_pdf,
             check_button_broken_files_archive,
             check_button_broken_files_image,
+            check_button_broken_files_video,
             check_button_music_title,
             check_button_music_artist,
             check_button_music_year,
@@ -292,6 +295,9 @@ impl GuiMainNotebook {
         self.check_button_broken_files_archive.set_label(Some(&flg!("main_check_box_broken_files_archive")));
         self.check_button_broken_files_image.set_label(Some(&flg!("main_check_box_broken_files_image")));
         self.check_button_broken_files_pdf.set_label(Some(&flg!("main_check_box_broken_files_pdf")));
+        self.check_button_broken_files_video.set_label(Some(&flg!("main_check_box_broken_files_video")));
+        self.check_button_broken_files_video
+            .set_tooltip_text(Some(&flg!("main_check_box_broken_files_video_tooltip")));
 
         self.label_same_music_seconds.set_label(&flg!("same_music_seconds_label"));
         self.label_same_music_similarity.set_label(&flg!("same_music_similarity_label"));
@@ -305,19 +311,16 @@ impl GuiMainNotebook {
             let hash_size = IMAGES_HASH_SIZE_COMBO_BOX[hash_size_index];
             match hash_size {
                 8 => {
-                    self.label_similar_images_minimal_similarity.set_text(&get_string_from_similarity(&SIMILAR_VALUES[0][5], 8));
+                    self.label_similar_images_minimal_similarity.set_text(&get_string_from_similarity(SIMILAR_VALUES[0][5], 8));
                 }
                 16 => {
-                    self.label_similar_images_minimal_similarity
-                        .set_text(&get_string_from_similarity(&SIMILAR_VALUES[1][5], 16));
+                    self.label_similar_images_minimal_similarity.set_text(&get_string_from_similarity(SIMILAR_VALUES[1][5], 16));
                 }
                 32 => {
-                    self.label_similar_images_minimal_similarity
-                        .set_text(&get_string_from_similarity(&SIMILAR_VALUES[2][5], 32));
+                    self.label_similar_images_minimal_similarity.set_text(&get_string_from_similarity(SIMILAR_VALUES[2][5], 32));
                 }
                 64 => {
-                    self.label_similar_images_minimal_similarity
-                        .set_text(&get_string_from_similarity(&SIMILAR_VALUES[3][5], 64));
+                    self.label_similar_images_minimal_similarity.set_text(&get_string_from_similarity(SIMILAR_VALUES[3][5], 64));
                 }
                 _ => panic!(),
             }

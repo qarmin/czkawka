@@ -3,6 +3,7 @@ import { Callabler } from "callabler.slint";
 import { Translations } from "translations.slint";
 import { PopupBase } from "popup_base.slint";
 import { PopupCenteredText } from "popup_centered_text.slint";
+import { Settings } from "settings.slint";
 
 export component PopupMoveFolders inherits Rectangle {
     out property <length> popup_width: 500px;
@@ -25,23 +26,25 @@ export component PopupMoveFolders inherits Rectangle {
             VerticalLayout {
                 HorizontalLayout {
                     alignment: center;
-                    copy_checkbox := CheckBox {
+                    CheckBox {
                         text <=> Translations.popup_move_copy_checkbox_text;
+                        checked <=> Settings.popup_move_copy_mode;
                     }
                 }
                 Rectangle {height: 5px;}
 
                 HorizontalLayout {
                     alignment: center;
-                    preserve_folder_checkbox := CheckBox {
+                    CheckBox {
                         text <=> Translations.popup_move_preserve_folder_checkbox_text;
+                        checked <=> Settings.popup_move_preserve_folder_structure;
                     }
                 }
             }
         }
 
         ok_clicked => {
-            Callabler.move_items(preserve_folder_checkbox.checked, copy_checkbox.checked, folder_name);
+            Callabler.move_items(folder_name);
         }
     }
 

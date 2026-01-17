@@ -54,6 +54,7 @@ const DEFAULT_BROKEN_FILES_PDF: bool = true;
 const DEFAULT_BROKEN_FILES_AUDIO: bool = true;
 const DEFAULT_BROKEN_FILES_ARCHIVE: bool = true;
 const DEFAULT_BROKEN_FILES_IMAGE: bool = true;
+const DEFAULT_BROKEN_FILES_VIDEO: bool = false;
 
 const DEFAULT_THREAD_NUMBER: u32 = 0;
 
@@ -315,6 +316,9 @@ pub struct SettingsJson {
     #[serde(default = "default_broken_files_archive")]
     pub broken_files_archive: bool,
 
+    #[serde(default = "default_broken_files_video")]
+    pub broken_files_video: bool,
+
     #[serde(default = "default_ignore_other_filesystems")]
     pub ignore_other_filesystems: bool,
 
@@ -441,6 +445,9 @@ fn default_broken_files_image() -> bool {
 fn default_broken_files_archive() -> bool {
     DEFAULT_BROKEN_FILES_ARCHIVE
 }
+fn default_broken_files_video() -> bool {
+    DEFAULT_BROKEN_FILES_VIDEO
+}
 fn default_ignore_other_filesystems() -> bool {
     DEFAULT_GENERAL_IGNORE_OTHER_FILESYSTEMS
 }
@@ -550,6 +557,7 @@ fn set_configuration_to_gui_internal(upper_notebook: &GuiUpperNotebook, main_not
         main_notebook.check_button_broken_files_pdf.set_active(default_config.broken_files_pdf);
         main_notebook.check_button_broken_files_archive.set_active(default_config.broken_files_archive);
         main_notebook.check_button_broken_files_image.set_active(default_config.broken_files_image);
+        main_notebook.check_button_broken_files_video.set_active(default_config.broken_files_video);
 
         // Set similarity scale range/value based on chosen image hash size index
         let index = default_config.combo_box_image_hash_size as usize;
@@ -669,6 +677,7 @@ fn gui_to_settings(upper_notebook: &GuiUpperNotebook, main_notebook: &GuiMainNot
         broken_files_audio: main_notebook.check_button_broken_files_audio.is_active(),
         broken_files_image: main_notebook.check_button_broken_files_image.is_active(),
         broken_files_archive: main_notebook.check_button_broken_files_archive.is_active(),
+        broken_files_video: main_notebook.check_button_broken_files_video.is_active(),
         ignore_other_filesystems: settings.check_button_settings_one_filesystem.is_active(),
         thread_number: settings.scale_settings_number_of_threads.value() as u32,
         music_compare_by_title: main_notebook.check_button_music_compare_only_in_title_group.is_active(),

@@ -1,4 +1,4 @@
-import { ExcludedDirectoriesModel, IncludedDirectoriesModel } from "common.slint";
+import { ExcludedPathsModel, IncludedPathsModel } from "common.slint";
 
 export global Settings {
     in-out property <int> settings_preset_idx: 0;
@@ -8,10 +8,10 @@ export global Settings {
     in-out property <int> language_index: 0;
     in-out property <string> language_value: "English";
 
-    in-out property <[IncludedDirectoriesModel]> included_directories_model: [{ path: "/home/pathssssssssssssssssssssss", referenced_folder: false, selected_row: false },{ path: "/home/path", referenced_folder: false, selected_row: false },{ path: "/home/path", referenced_folder: false, selected_row: false },{ path: "/home/path", referenced_folder: false, selected_row: false }];
-    in-out property <int> included_directories_model_selected_idx: -1;
-    in-out property <[ExcludedDirectoriesModel]> excluded_directories_model: [{ path:"/home/pathssssssssssssssssssssssss", selected_row: false },{ path:"/home/path", selected_row: false },{ path:"/home/path", selected_row: false },{ path:"/home/path", selected_row: false }, { path:"/home/a", selected_row: false }];
-    in-out property <int> excluded_directories_model_selected_idx: -1;
+    in-out property <[IncludedPathsModel]> included_paths_model: [{ path: "/home/pathssssssssssssssssssssss", referenced_path: false, selected_row: false },{ path: "/home/path", referenced_path: false, selected_row: false },{ path: "/home/path", referenced_path: false, selected_row: false },{ path: "/home/path", referenced_path: false, selected_row: false }];
+    in-out property <int> included_paths_model_selected_idx: -1;
+    in-out property <[ExcludedPathsModel]> excluded_paths_model: [{ path:"/home/pathssssssssssssssssssssssss", selected_row: false },{ path:"/home/path", selected_row: false },{ path:"/home/path", selected_row: false },{ path:"/home/path", selected_row: false }, { path:"/home/a", selected_row: false }];
+    in-out property <int> excluded_paths_model_selected_idx: -1;
 
     // Settings
     in-out property <bool> dark_theme: true;
@@ -125,15 +125,25 @@ export global Settings {
     in-out property <bool> broken_files_sub_pdf: false;
     in-out property <bool> broken_files_sub_archive: false;
     in-out property <bool> broken_files_sub_image: false;
+    in-out property <bool> broken_files_sub_video: false;
 
     // Video Optimizer
-    in-out property <[string]> video_optimizer_sub_mode: ["Video"];
+    in-out property <[string]> video_optimizer_sub_mode: ["Crop", "Transcode"];
     in-out property <int> video_optimizer_sub_mode_index: 1;
-    in-out property <string> video_optimizer_sub_mode_value: "Video";
-    in-out property <[string]> video_optimizer_sub_video_codec: ["HEVC/H265", "H264", "VP9", "AV1"];
+    in-out property <string> video_optimizer_sub_mode_value: "Transcode";
+    in-out property <[string]> video_optimizer_sub_crop_type: ["Black Bars", "Static Content"];
+    in-out property <int> video_optimizer_sub_crop_type_index: 0;
+    in-out property <string> video_optimizer_sub_crop_type_value: "Black Bars";
+
+    // Video Crop scanning parameters
+    in-out property <string> video_optimizer_sub_black_pixel_threshold: "20";
+    in-out property <string> video_optimizer_sub_black_bar_min_percentage: "90";
+    in-out property <string> video_optimizer_sub_max_samples: "60";
+    in-out property <string> video_optimizer_sub_min_crop_size: "5";
+
     in-out property <int> video_optimizer_sub_video_codec_index: 0;
     in-out property <string> video_optimizer_sub_video_codec_value: "HEVC/H265";
-    in-out property <string> video_optimizer_sub_excluded_codecs: "hevc,av1,vp9";
+    in-out property <string> video_optimizer_sub_excluded_codecs: "h265,av1,vp9";
     in-out property <float> video_optimizer_sub_video_quality: 23;
     in-out property <float> video_optimizer_sub_video_quality_max: 51;
     in-out property <float> video_optimizer_sub_video_quality_min: 0;
@@ -143,7 +153,7 @@ export global Settings {
 
     // ComboBox model/value for optimizer codec (initialized from Rust)
     in-out property <[string]> video_optimizer_sub_video_codec_config: ["HEVC/H265", "H264", "VP9", "AV1"];
-    in-out property <string> video_optimizer_sub_video_codec_config_value: "hevc";
+    in-out property <string> video_optimizer_sub_video_codec_config_value: "h265";
 
     // Fail/overwrite/quality settings for optimizer (initialized from Rust)
     in-out property <bool> video_optimizer_sub_fail_if_bigger: false;
@@ -157,12 +167,29 @@ export global Settings {
     // Exif Finder
     in-out property <string> ignored_exif_tags: "";
 
-    // Clean EXIF settings
-    in-out property <bool> clean_exif_sub_overwrite_files: false;
+    // Move/Copy popup settings
+    in-out property <bool> popup_move_preserve_folder_structure: false;
+    in-out property <bool> popup_move_copy_mode: false;
+
+    // Clean EXIF popup settings
+    in-out property <bool> popup_clean_exif_overwrite_files: false;
+
+    // Reencode video popup settings
+    in-out property <bool> popup_reencode_video_overwrite_files: false;
+    in-out property <float> popup_reencode_video_quality: 23;
+    in-out property <bool> popup_reencode_video_fail_if_bigger: false;
+    in-out property <bool> popup_reencode_video_limit_video_size: false;
+    in-out property <string> popup_reencode_video_max_width: "1920";
+    in-out property <string> popup_reencode_video_max_height: "1920";
+
+    // Crop video popup settings
+    in-out property <bool> popup_crop_video_overwrite_files: false;
+    in-out property <bool> popup_crop_video_reencode: false;
+    in-out property <float> popup_crop_video_quality: 23;
 
     out property <length> path_px: 350px;
     out property <length> name_px: 100px;
-    out property <length> mod_px: 150px;
+    out property <length> mod_px: 155px;
     out property <length> size_px: 75px;
 
     in-out property <[string]> duplicates_column_name: ["Selection", "Size", "File Name", "Path", "Modification Date"];
@@ -189,6 +216,6 @@ export global Settings {
     in-out property <[length]> bad_extensions_column_size: [35px, name_px, path_px, 40px, 200px];
     in-out property <[string]> exif_remover_column_name: ["Selection", "Size", "File Name", "Path", "EXIF Tags", "Modification Date"];
     in-out property <[length]> exif_remover_column_size: [35px, size_px, name_px, path_px, 300px, mod_px];
-    in-out property <[string]> video_optimizer_column_name: ["Selection", "Size", "File Name", "Path", "Codec", "Dimensions", "Modification Date"];
-    in-out property <[length]> video_optimizer_column_size: [35px, size_px, name_px, path_px, 100px, 120px, mod_px];
+    in-out property <[string]> video_optimizer_column_name: ["Selection", "Size", "File Name", "Path", "Codec", "Dimensions", "New Dimensions", "Modification Date"];
+    in-out property <[length]> video_optimizer_column_size: [35px, size_px, name_px, path_px, 100px, 120px, 160px, mod_px];
 }

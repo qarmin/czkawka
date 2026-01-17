@@ -1,13 +1,14 @@
 import { Button, TextEdit } from "std-widgets.slint";
 import { BottomPanelVisibility } from "common.slint";
 import { GuiState } from "gui_state.slint";
-import { ExcludedDirectories, IncludedDirectories } from "included_directories.slint";
+import { ExcludedPaths, IncludedPaths } from "included_paths.slint";
 import { Translations } from "translations.slint";
 import { ColorPalette } from "color_palette.slint";
 import { FontSizes } from "fonts.slint";
 
 component DirectoriesPanel inherits HorizontalLayout {
     callback folder_choose_requested(bool);
+    callback file_choose_requested(bool);
     callback show_manual_add_dialog(bool);
 
     spacing: 5px;
@@ -26,10 +27,17 @@ component DirectoriesPanel inherits HorizontalLayout {
         padding-top: 5px;
         HorizontalLayout {
             Button {
-                icon: @image-url("../icons/krokiet_add.svg");
+                icon: @image-url("../icons/krokiet_folder_add.svg");
                 colorize-icon: true;
                 clicked => {
                     folder_choose_requested(true);
+                }
+            }
+            Button {
+                icon: @image-url("../icons/krokiet_file_add.svg");
+                colorize-icon: true;
+                clicked => {
+                    file_choose_requested(true);
                 }
             }
 
@@ -40,7 +48,7 @@ component DirectoriesPanel inherits HorizontalLayout {
             Rectangle {
                 horizontal-stretch: 1.0;
                 Text {
-                    text <=> Translations.included_directories_text;
+                    text <=> Translations.included_paths_text;
                     font-size: FontSizes.normal;
                 }
             }
@@ -62,7 +70,7 @@ component DirectoriesPanel inherits HorizontalLayout {
             height: 5px;
         }
 
-        included_list := IncludedDirectories { }
+        included_list := IncludedPaths { }
     }
 
     Rectangle {
@@ -78,10 +86,17 @@ component DirectoriesPanel inherits HorizontalLayout {
         padding-right: 5px;
         HorizontalLayout {
             Button {
-                icon: @image-url("../icons/krokiet_add.svg");
+                icon: @image-url("../icons/krokiet_folder_add.svg");
                 colorize-icon: true;
                 clicked => {
                     folder_choose_requested(false);
+                }
+            }
+            Button {
+                icon: @image-url("../icons/krokiet_file_add.svg");
+                colorize-icon: true;
+                clicked => {
+                    file_choose_requested(false);
                 }
             }
 
@@ -92,7 +107,7 @@ component DirectoriesPanel inherits HorizontalLayout {
             Rectangle {
                 horizontal-stretch: 1.0;
                 Text {
-                    text <=> Translations.excluded_directories_text;
+                    text <=> Translations.excluded_paths_text;
                     font-size: FontSizes.normal;
                 }
             }
@@ -114,7 +129,7 @@ component DirectoriesPanel inherits HorizontalLayout {
             height: 5px;
         }
 
-        excluded_list := ExcludedDirectories { }
+        excluded_list := ExcludedPaths { }
     }
 }
 
@@ -129,17 +144,21 @@ component TextErrorsPanel inherits TextEdit {
 export component BottomPanel {
     in-out property <BottomPanelVisibility> bottom_panel_visibility: BottomPanelVisibility.Directories;
     callback folder_choose_requested(bool);
+    callback file_choose_requested(bool);
     callback show_manual_add_dialog(bool);
     min-height: bottom_panel_visibility == BottomPanelVisibility.NotVisible ? 0px : 150px;
     min-width: bottom_panel_visibility == BottomPanelVisibility.NotVisible ? 0px : 400px;
     if bottom_panel_visibility == BottomPanelVisibility.Directories: DirectoriesPanel {
         width: parent.width;
         height: parent.height;
-        folder_choose_requested(included_directories) => {
-            root.folder_choose_requested(included_directories)
+        folder_choose_requested(included_paths) => {
+            root.folder_choose_requested(included_paths)
         }
-        show_manual_add_dialog(included_directories) => {
-            root.show_manual_add_dialog(included_directories)
+        file_choose_requested(included_paths) => {
+            root.file_choose_requested(included_paths)
+        }
+        show_manual_add_dialog(included_paths) => {
+            root.show_manual_add_dialog(included_paths)
         }
     }
 

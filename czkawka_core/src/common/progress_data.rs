@@ -238,14 +238,14 @@ impl ToolType {
 }
 
 impl CurrentStage {
-    pub fn is_special_non_tool_stage(&self) -> bool {
+    pub fn is_special_non_tool_stage(self) -> bool {
         matches!(
             self,
             Self::DeletingFiles | Self::RenamingFiles | Self::MovingFiles | Self::HardlinkingFiles | Self::SymlinkingFiles | Self::OptimizingVideos | Self::CleaningExif
         )
     }
 
-    pub fn get_current_stage(&self) -> u8 {
+    pub fn get_current_stage(self) -> u8 {
         #[expect(clippy::match_same_arms)] // Now it is easier to read
         match self {
             Self::DeletingFiles => 0,
@@ -286,10 +286,10 @@ impl CurrentStage {
             Self::ExifRemoverCacheSaving => 3,
         }
     }
-    pub fn check_if_loading_saving_cache(&self) -> bool {
+    pub fn check_if_loading_saving_cache(self) -> bool {
         self.check_if_saving_cache() || self.check_if_loading_cache()
     }
-    pub fn check_if_loading_cache(&self) -> bool {
+    pub fn check_if_loading_cache(self) -> bool {
         matches!(
             self,
             Self::SameMusicCacheLoadingFingerprints
@@ -299,7 +299,7 @@ impl CurrentStage {
                 | Self::ExifRemoverCacheLoading
         )
     }
-    pub fn check_if_saving_cache(&self) -> bool {
+    pub fn check_if_saving_cache(self) -> bool {
         matches!(
             self,
             Self::SameMusicCacheSavingFingerprints | Self::SameMusicCacheSavingTags | Self::DuplicateCacheSaving | Self::DuplicatePreHashCacheSaving | Self::ExifRemoverCacheSaving

@@ -3,13 +3,17 @@ use std::env;
 use std::path::PathBuf;
 
 use czkawka_core::common::items::{DEFAULT_EXCLUDED_DIRECTORIES, DEFAULT_EXCLUDED_ITEMS};
-use czkawka_core::tools::similar_videos::{
-    DEFAULT_CROP_DETECT, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION, DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL, crop_detect_to_str,
-};
+use czkawka_core::common::model::{CheckingMethod, HashType};
+use czkawka_core::re_exported::{Cropdetect, HashAlg};
+use czkawka_core::tools::big_file::SearchMode;
+use czkawka_core::tools::similar_videos::{DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION, DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL};
+use czkawka_core::tools::video_optimizer::{VideoCodec, VideoCroppingMechanism, VideoOptimizerMode};
 use home::home_dir;
+use image::imageops::FilterType;
 use serde::{Deserialize, Serialize};
 
 use crate::connect_translation::{LANGUAGE_LIST, find_the_closest_language_idx_to_system};
+use crate::settings::combo_box::StringComboBoxItem;
 
 pub const DEFAULT_MINIMUM_SIZE_KB: i32 = 16;
 pub const DEFAULT_MAXIMUM_SIZE_KB: i32 = i32::MAX / 1024;
@@ -33,12 +37,12 @@ pub const PRESET_NAME_RESERVED: &str = "CLI Folders";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SettingsCustom {
-    #[serde(default = "default_included_directories")]
-    pub included_directories: Vec<PathBuf>,
+    #[serde(default = "default_included_paths")]
+    pub included_paths: Vec<PathBuf>,
     #[serde(default)]
-    pub included_directories_referenced: Vec<PathBuf>,
-    #[serde(default = "default_excluded_directories")]
-    pub excluded_directories: Vec<PathBuf>,
+    pub included_paths_referenced: Vec<PathBuf>,
+    #[serde(default = "default_excluded_paths")]
+    pub excluded_paths: Vec<PathBuf>,
     #[serde(default = "default_excluded_items")]
     pub excluded_items: String,
     #[serde(default)]
@@ -145,6 +149,8 @@ pub struct SettingsCustom {
     pub broken_files_sub_archive: bool,
     #[serde(default = "ttrue")]
     pub broken_files_sub_image: bool,
+    #[serde(default)]
+    pub broken_files_sub_video: bool,
     #[serde(default = "default_similar_videos_skip_forward_amount")]
     pub similar_videos_skip_forward_amount: u32,
     #[serde(default = "default_similar_videos_vid_hash_duration")]
@@ -155,6 +161,16 @@ pub struct SettingsCustom {
     pub similar_videos_thumbnail_percentage: u8,
     #[serde(default = "default_video_optimizer_mode")]
     pub video_optimizer_mode: String,
+    #[serde(default = "default_video_optimizer_crop_type")]
+    pub video_optimizer_crop_type: String,
+    #[serde(default = "default_video_optimizer_black_pixel_threshold")]
+    pub video_optimizer_black_pixel_threshold: u8,
+    #[serde(default = "default_video_optimizer_black_bar_min_percentage")]
+    pub video_optimizer_black_bar_min_percentage: u8,
+    #[serde(default = "default_video_optimizer_max_samples")]
+    pub video_optimizer_max_samples: usize,
+    #[serde(default = "default_video_optimizer_min_crop_size")]
+    pub video_optimizer_min_crop_size: u32,
     #[serde(default = "default_video_optimizer_video_codec")]
     pub video_optimizer_video_codec: String,
     #[serde(default = "default_video_optimizer_excluded_codecs")]
@@ -177,12 +193,52 @@ pub struct SettingsCustom {
     pub ignored_exif_tags: String,
     #[serde(default)]
     pub column_sizes: BTreeMap<String, Vec<f32>>,
+
+    #[serde(default)]
+    pub popup_move_preserve_folder_structure: bool,
+    #[serde(default)]
+    pub popup_move_copy_mode: bool,
+    #[serde(default)]
+    pub popup_clean_exif_overwrite_files: bool,
+    #[serde(default)]
+    pub popup_reencode_video_overwrite_files: bool,
+    #[serde(default = "default_video_optimizer_video_quality")]
+    pub popup_reencode_video_quality: u32,
+    #[serde(default)]
+    pub popup_reencode_video_fail_if_bigger: bool,
+    #[serde(default)]
+    pub popup_reencode_video_limit_video_size: bool,
+    #[serde(default = "default_video_optimizer_max_width")]
+    pub popup_reencode_video_max_width: u32,
+    #[serde(default = "default_video_optimizer_max_height")]
+    pub popup_reencode_video_max_height: u32,
+    #[serde(default)]
+    pub popup_crop_video_overwrite_files: bool,
+    #[serde(default)]
+    pub popup_crop_video_reencode: bool,
+    #[serde(default = "default_video_optimizer_video_quality")]
+    pub popup_crop_video_quality: u32,
 }
 
 impl Default for SettingsCustom {
     fn default() -> Self {
         serde_json::from_str("{}").expect("Cannot fail creating {} from string")
     }
+}
+
+pub struct ComboBoxItems {
+    pub language: StringComboBoxItem<String>,
+    pub hash_size: StringComboBoxItem<u8>,
+    pub resize_algorithm: StringComboBoxItem<FilterType>,
+    pub image_hash_alg: StringComboBoxItem<HashAlg>,
+    pub duplicates_hash_type: StringComboBoxItem<HashType>,
+    pub biggest_files_method: StringComboBoxItem<SearchMode>,
+    pub audio_check_type: StringComboBoxItem<CheckingMethod>,
+    pub duplicates_check_method: StringComboBoxItem<CheckingMethod>,
+    pub videos_crop_detect: StringComboBoxItem<Cropdetect>,
+    pub video_optimizer_crop_type: StringComboBoxItem<VideoCroppingMechanism>,
+    pub video_optimizer_mode: StringComboBoxItem<VideoOptimizerMode>,
+    pub video_optimizer_video_codec: StringComboBoxItem<VideoCodec>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -224,26 +280,26 @@ fn detect_language() -> String {
     LANGUAGE_LIST[lang_idx].short_name.to_string()
 }
 
-fn default_included_directories() -> Vec<PathBuf> {
-    let mut included_directories = Vec::new();
+fn default_included_paths() -> Vec<PathBuf> {
+    let mut included_paths = Vec::new();
     if let Ok(current_dir) = env::current_dir() {
-        included_directories.push(current_dir.to_string_lossy().to_string());
+        included_paths.push(current_dir.to_string_lossy().to_string());
     } else if let Some(home_dir) = home_dir() {
-        included_directories.push(home_dir.to_string_lossy().to_string());
+        included_paths.push(home_dir.to_string_lossy().to_string());
     } else if cfg!(target_family = "unix") {
-        included_directories.push("/".to_string());
+        included_paths.push("/".to_string());
     } else {
         // This could be set to default
-        included_directories.push("C:\\".to_string());
+        included_paths.push("C:\\".to_string());
     }
-    included_directories.sort();
-    included_directories.iter().map(PathBuf::from).collect::<Vec<_>>()
+    included_paths.sort();
+    included_paths.iter().map(PathBuf::from).collect::<Vec<_>>()
 }
 
-fn default_excluded_directories() -> Vec<PathBuf> {
-    let mut excluded_directories = DEFAULT_EXCLUDED_DIRECTORIES.iter().map(PathBuf::from).collect::<Vec<_>>();
-    excluded_directories.sort();
-    excluded_directories
+fn default_excluded_paths() -> Vec<PathBuf> {
+    let mut excluded_paths = DEFAULT_EXCLUDED_DIRECTORIES.iter().map(PathBuf::from).collect::<Vec<_>>();
+    excluded_paths.sort();
+    excluded_paths
 }
 fn default_similar_videos_skip_forward_amount() -> u32 {
     DEFAULT_SKIP_FORWARD_AMOUNT
@@ -252,7 +308,7 @@ fn default_similar_videos_vid_hash_duration() -> u32 {
     DEFAULT_VID_HASH_DURATION
 }
 fn default_similar_videos_crop_detect() -> String {
-    crop_detect_to_str(DEFAULT_CROP_DETECT)
+    "letterbox".to_string()
 }
 fn default_similar_videos_thumbnail_percentage() -> u8 {
     DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL
@@ -328,13 +384,28 @@ fn default_window_height() -> u32 {
     DEFAULT_WINDOW_HEIGHT
 }
 fn default_video_optimizer_mode() -> String {
-    "video".to_string()
+    "transcode".to_string()
+}
+fn default_video_optimizer_crop_type() -> String {
+    "blackbars".to_string()
+}
+fn default_video_optimizer_black_pixel_threshold() -> u8 {
+    20
+}
+fn default_video_optimizer_black_bar_min_percentage() -> u8 {
+    90
+}
+fn default_video_optimizer_max_samples() -> usize {
+    60
+}
+fn default_video_optimizer_min_crop_size() -> u32 {
+    5
 }
 fn default_video_optimizer_video_codec() -> String {
-    "hevc".to_string()
+    "h265".to_string()
 }
 fn default_video_optimizer_excluded_codecs() -> String {
-    "hevc,av1,vp9".to_string()
+    "h265,av1,vp9".to_string()
 }
 fn default_video_optimizer_video_quality() -> u32 {
     23

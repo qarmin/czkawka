@@ -94,14 +94,14 @@ pub enum ColumnsEmptyFolders {
 
 #[derive(Clone, Copy)]
 pub enum ColumnsIncludedDirectory {
-    // Columns for Included Directories in upper Notebook
+    // Columns for Included Paths in upper Notebook
     Path = 0,
     ReferenceButton,
 }
 
 #[derive(Clone, Copy)]
 pub enum ColumnsExcludedDirectory {
-    // Columns for Excluded Directories in upper Notebook
+    // Columns for Excluded Paths in upper Notebook
     Path = 0,
 }
 

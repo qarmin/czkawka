@@ -1,19 +1,19 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
-use std::process::{Command, Stdio};
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
-use std::{fs, mem, thread};
+use std::{fs, mem};
 
 use blake3::Hasher;
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
+use image::{GenericImage, RgbImage};
 use indexmap::IndexMap;
 use log::debug;
 use rayon::prelude::*;
 use vid_dup_finder_lib::{CreationOptions, Cropdetect, VideoHash, VideoHashBuilder};
 
-use crate::common::cache::{CACHE_VIDEO_VERSION, extract_loaded_cache, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
+use crate::common::cache::{CACHE_VIDEO_VERSION, load_and_split_cache_generalized_by_path, save_and_connect_cache_generalized_by_path};
 use crate::common::config_cache_path::get_config_cache_path;
 use crate::common::consts::VIDEO_FILES_EXTENSIONS;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult, inode, take_1_per_inode};
@@ -22,7 +22,7 @@ use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::common::traits::ResultEntry;
-use crate::common::video_metadata::VideoMetadata;
+use crate::common::video_utils::{VideoMetadata, extract_frame_ffmpeg};
 use crate::tools::similar_videos::{SimilarVideos, SimilarVideosParameters, VideosEntry};
 
 pub const VIDEO_THUMBNAILS_SUBFOLDER: &str = "video_thumbnails";
@@ -69,34 +69,6 @@ impl SimilarVideos {
 
             DirTraversalResult::Stopped => WorkContinueStatus::Stop,
         }
-    }
-
-    #[fun_time(message = "load_cache_at_start", level = "debug")]
-    fn load_cache_at_start(&mut self) -> (BTreeMap<String, VideosEntry>, BTreeMap<String, VideosEntry>, BTreeMap<String, VideosEntry>) {
-        let loaded_hash_map;
-        let mut records_already_cached: BTreeMap<String, VideosEntry> = Default::default();
-        let mut non_cached_files_to_check: BTreeMap<String, VideosEntry> = Default::default();
-
-        if self.common_data.use_cache {
-            let (messages, loaded_items) = load_cache_from_file_generalized_by_path::<VideosEntry>(
-                &get_similar_videos_cache_file(self.params.skip_forward_amount, self.params.duration, self.params.crop_detect),
-                self.get_delete_outdated_cache(),
-                &self.videos_to_check,
-            );
-            self.get_text_messages_mut().extend_with_another_messages(messages);
-            loaded_hash_map = loaded_items.unwrap_or_default();
-
-            extract_loaded_cache(
-                &loaded_hash_map,
-                mem::take(&mut self.videos_to_check),
-                &mut records_already_cached,
-                &mut non_cached_files_to_check,
-            );
-        } else {
-            loaded_hash_map = Default::default();
-            mem::swap(&mut self.videos_to_check, &mut non_cached_files_to_check);
-        }
-        (loaded_hash_map, records_already_cached, non_cached_files_to_check)
     }
 
     fn check_video_file_entry(&self, mut file_entry: VideosEntry) -> VideosEntry {
@@ -166,85 +138,71 @@ impl SimilarVideos {
         }
 
         let seek_time = file_entry.duration.map_or(5.0, |d| d * (thumbnail_video_percentage_from_start as f64) / 100.0);
-        let duration_per_10_items = file_entry.duration.map_or(0.5, |d| d / 10.0);
+        let duration_per_11_items = file_entry.duration.map_or(0.5, |d| d / 11.0);
 
         let max_height = 1080;
         let max_width = 1920;
         let tiles_size = 3;
 
-        let mut command = Command::new("ffmpeg");
-        let mut command = command.arg("-threads").arg("1").arg("-i").arg(&file_entry.path);
-
         if generate_grid_instead_of_single {
-            let vf_filter = format!(
-                "fps=1/{duration_per_10_items:.6},scale='min({},iw)':'min({},ih)':force_original_aspect_ratio=decrease,tile={tiles_size}x{tiles_size}",
-                max_width / tiles_size,
-                max_height / tiles_size
-            );
-
-            command = command.arg("-vf").arg(&vf_filter);
-        } else {
-            let vf_filter = format!("scale='min({max_width},iw)':'min({max_height},ih)':force_original_aspect_ratio=decrease");
-            command = command.arg("-vf").arg(&vf_filter).arg("-ss").arg(seek_time.to_string());
-        }
-
-        let output = command
-            .arg("-frames:v")
-            .arg("1")
-            .arg("-q:v")
-            .arg("2")
-            .arg("-y")
-            .arg(&thumbnail_path)
-            .stdin(Stdio::null())
-            .stdout(Stdio::null())
-            .stderr(Stdio::null());
-
-        let stop_flag = stop_flag.clone();
-        let mut child = output.spawn().map_err(|e| format!("Failed to execute ffmpeg: {e}"))?;
-
-        let result = thread::spawn(move || {
-            loop {
-                if stop_flag.load(std::sync::atomic::Ordering::Relaxed) {
-                    let _ = child.kill();
-                    return Err(String::from("Ffmpeg process was forced to stop"));
+            let frame_times = (0..(tiles_size * tiles_size)).map(|i| duration_per_11_items as f32 * (i + 1) as f32).collect::<Vec<f32>>();
+            let mut imgs = Vec::new();
+            for ft in frame_times {
+                if check_if_stop_received(stop_flag) {
+                    return Err(String::from("Thumbnail generation was stopped by user"));
                 }
 
-                match child.try_wait() {
-                    Ok(Some(status)) => {
-                        if status.success() {
-                            break Ok(());
-                        }
-                        break Err(format!("ffmpeg exited with non-zero status: {status}"));
+                match extract_frame_ffmpeg(&file_entry.path, ft, Some((max_width, max_height))) {
+                    Ok(img) => imgs.push(img),
+                    Err(e) => {
+                        let _ = fs::write(&thumbnail_path, b"");
+                        return Err(format!("Failed to extract frame at {ft} seconds from \"{}\": {e}", file_entry.path.to_string_lossy()));
                     }
-                    Ok(None) => {}
-                    Err(e) => break Err(format!("Failed to wait on ffmpeg process: {e}")),
-                }
-
-                thread::sleep(std::time::Duration::from_millis(100));
-            }
-        })
-        .join()
-        .map_err(|e| format!("Failed to join handler, when generating thumbnail: {e:?}"))?;
-
-        match result {
-            Ok(()) => {
-                if thumbnail_path.exists() {
-                    file_entry.thumbnail_path = Some(thumbnail_path.clone());
-                    let _ = filetime::set_file_mtime(&thumbnail_path, filetime::FileTime::now());
-                    Ok(())
-                } else {
-                    let _ = fs::write(&thumbnail_path, b""); // Create empty file to avoid retrying generation again and again
-                    Err(format!(
-                        "Failed to generate thumbnail(disabled for it thumbnail) for {}: thumbnail file was not created",
-                        file_entry.path.display()
-                    ))
                 }
             }
-            Err(e) => {
-                let _ = fs::remove_file(&thumbnail_path);
-                Err(format!("Failed to generate thumbnail for {}: {e}", file_entry.path.display()))
+            assert_eq!(imgs.len(), tiles_size * tiles_size);
+
+            let first_img = &imgs.first().expect("Cannot be empty here, because at least titles_size^2 images are extracted");
+
+            if imgs.iter().any(|img| img.height() != first_img.height() || img.width() != first_img.width()) {
+                let _ = fs::write(&thumbnail_path, b"");
+                return Err(format!(
+                    "Failed to generate thumbnail for \"{}\": extracted frames have different dimensions",
+                    file_entry.path.to_string_lossy()
+                ));
+            }
+            let mut new_thumbnail = RgbImage::new(first_img.width() * tiles_size as u32, first_img.height() * tiles_size as u32);
+            for (idx, img) in imgs.iter().enumerate() {
+                let x = (idx % tiles_size) as u32 * img.width();
+                let y = (idx / tiles_size) as u32 * img.height();
+                new_thumbnail
+                    .copy_from(img, x, y)
+                    .map_err(|e| format!("Failed to generate thumbnail for \"{}\": {e}", file_entry.path.to_string_lossy()))?;
+            }
+
+            if let Err(e) = new_thumbnail.save(&thumbnail_path) {
+                let _ = fs::write(&thumbnail_path, b"");
+                return Err(format!("Failed to save thumbnail for \"{}\": {e}", file_entry.path.to_string_lossy()));
+            }
+            file_entry.thumbnail_path = Some(thumbnail_path);
+        } else {
+            match extract_frame_ffmpeg(&file_entry.path, seek_time as f32, Some((max_width, max_height))) {
+                Ok(img) => {
+                    if let Err(e) = img.save(&thumbnail_path) {
+                        let _ = fs::write(&thumbnail_path, b"");
+                        return Err(format!("Failed to save thumbnail for \"{}\": {e}", file_entry.path.to_string_lossy()));
+                    }
+                }
+                Err(e) => {
+                    let _ = fs::write(&thumbnail_path, b"");
+                    return Err(format!(
+                        "Failed to extract frame at {seek_time} seconds from \"{}\" - {e}",
+                        file_entry.path.to_string_lossy()
+                    ));
+                }
             }
         }
+        Ok(())
     }
 
     #[fun_time(message = "sort_videos", level = "debug")]
@@ -290,19 +248,19 @@ impl SimilarVideos {
         // Just connect loaded results with already calculated hashes
         vec_file_entry.extend(records_already_cached.into_values());
 
+        self.save_cache(&vec_file_entry, loaded_hash_map);
+
         let mut hashmap_with_file_entries: IndexMap<String, VideosEntry> = Default::default();
         let mut vector_of_hashes: Vec<VideoHash> = Vec::new();
-        for file_entry in &vec_file_entry {
+        for file_entry in vec_file_entry {
             // 0 means that images was not hashed correctly, e.g. could be improperly
             if file_entry.error.is_empty() {
-                hashmap_with_file_entries.insert(file_entry.vhash.src_path().to_string_lossy().to_string(), file_entry.clone());
                 vector_of_hashes.push(file_entry.vhash.clone());
+                hashmap_with_file_entries.insert(file_entry.vhash.src_path().to_string_lossy().to_string(), file_entry);
             } else {
-                self.common_data.text_messages.warnings.push(file_entry.error.clone());
+                self.common_data.text_messages.warnings.push(file_entry.error);
             }
         }
-
-        self.save_cache(vec_file_entry, loaded_hash_map);
 
         // Break if stop was clicked after saving to cache
         if check_if_stop_received(stop_flag) {
@@ -401,22 +359,22 @@ impl SimilarVideos {
     }
 
     #[fun_time(message = "save_cache", level = "debug")]
-    fn save_cache(&mut self, vec_file_entry: Vec<VideosEntry>, loaded_hash_map: BTreeMap<String, VideosEntry>) {
-        if self.common_data.use_cache {
-            // Must save all results to file, old loaded from file with all currently counted results
-            let mut all_results: BTreeMap<String, VideosEntry> = loaded_hash_map;
-            for file_entry in vec_file_entry {
-                all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
-            }
+    fn save_cache(&mut self, vec_file_entry: &[VideosEntry], loaded_hash_map: BTreeMap<String, VideosEntry>) {
+        save_and_connect_cache_generalized_by_path(
+            &get_similar_videos_cache_file(self.params.skip_forward_amount, self.params.duration, self.params.crop_detect),
+            vec_file_entry,
+            loaded_hash_map,
+            self,
+        );
+    }
 
-            let messages = save_cache_to_file_generalized(
-                &get_similar_videos_cache_file(self.params.skip_forward_amount, self.params.duration, self.params.crop_detect),
-                &all_results,
-                self.common_data.save_also_as_json,
-                0,
-            );
-            self.get_text_messages_mut().extend_with_another_messages(messages);
-        }
+    #[fun_time(message = "load_cache_at_start", level = "debug")]
+    fn load_cache_at_start(&mut self) -> (BTreeMap<String, VideosEntry>, BTreeMap<String, VideosEntry>, BTreeMap<String, VideosEntry>) {
+        load_and_split_cache_generalized_by_path(
+            &get_similar_videos_cache_file(self.params.skip_forward_amount, self.params.duration, self.params.crop_detect),
+            mem::take(&mut self.videos_to_check),
+            self,
+        )
     }
 
     #[fun_time(message = "match_groups_of_videos", level = "debug")]

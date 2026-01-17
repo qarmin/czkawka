@@ -23,7 +23,7 @@ fn test_find_empty_folders() {
     fs::write(non_empty.join("file.txt"), b"content").unwrap();
 
     let mut finder = EmptyFolder::new();
-    finder.set_included_directory(vec![path.to_path_buf()]);
+    finder.set_included_paths(vec![path.to_path_buf()]);
     finder.set_recursive_search(true);
 
     let stop_flag = Arc::new(AtomicBool::new(false));
@@ -45,7 +45,7 @@ fn test_nested_empty_folders() {
     fs::create_dir(&child).unwrap();
 
     let mut finder = EmptyFolder::new();
-    finder.set_included_directory(vec![path.to_path_buf()]);
+    finder.set_included_paths(vec![path.to_path_buf()]);
     finder.set_recursive_search(true);
 
     let stop_flag = Arc::new(AtomicBool::new(false));
@@ -67,7 +67,7 @@ fn test_no_empty_folders() {
     fs::write(dir.join("file.txt"), b"content").unwrap();
 
     let mut finder = EmptyFolder::new();
-    finder.set_included_directory(vec![path.to_path_buf()]);
+    finder.set_included_paths(vec![path.to_path_buf()]);
     finder.set_recursive_search(true);
 
     let stop_flag = Arc::new(AtomicBool::new(false));
@@ -89,7 +89,7 @@ fn test_folder_with_only_empty_subfolders() {
     fs::create_dir(parent.join("empty_child2")).unwrap();
 
     let mut finder = EmptyFolder::new();
-    finder.set_included_directory(vec![path.to_path_buf()]);
+    finder.set_included_paths(vec![path.to_path_buf()]);
     finder.set_recursive_search(true);
 
     let stop_flag = Arc::new(AtomicBool::new(false));

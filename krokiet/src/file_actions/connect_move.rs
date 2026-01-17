@@ -9,17 +9,21 @@ use slint::{ComponentHandle, Weak};
 
 use crate::model_operations::model_processor::{MessageType, ModelProcessor};
 use crate::simpler_model::{SimplerMainListModel, ToSimplerVec};
-use crate::{Callabler, GuiState, MainWindow, flk};
+use crate::{Callabler, GuiState, MainWindow, Settings, flk};
 
 pub(crate) fn connect_move(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
     let a = app.as_weak();
-    app.global::<Callabler>().on_move_items(move |preserve_structure, copy_mode, output_folder| {
+    app.global::<Callabler>().on_move_items(move |output_folder| {
         let weak_app = a.clone();
         let progress_sender = progress_sender.clone();
         let stop_flag = stop_flag.clone();
         stop_flag.store(false, Ordering::Relaxed);
         let app = a.upgrade().expect("Failed to upgrade app :(");
         let active_tab = app.global::<GuiState>().get_active_tab();
+
+        // Read settings from Settings global
+        let preserve_structure = app.global::<Settings>().get_popup_move_preserve_folder_structure();
+        let copy_mode = app.global::<Settings>().get_popup_move_copy_mode();
 
         let processor = ModelProcessor::new(active_tab);
         processor.move_selected_items(progress_sender, weak_app, stop_flag, preserve_structure, copy_mode, &output_folder);

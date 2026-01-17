@@ -23,7 +23,7 @@ fn test_find_exif_files() {
     fs::copy(&source_image, &dest_image).unwrap();
 
     let mut finder = ExifRemover::new(ExifRemoverParameters::default());
-    finder.set_included_directory(vec![path.to_path_buf()]);
+    finder.set_included_paths(vec![path.to_path_buf()]);
 
     let stop_flag = Arc::new(AtomicBool::new(false));
     finder.search(&stop_flag, None);
@@ -42,7 +42,7 @@ fn test_empty_directory() {
     let path = temp_dir.path();
 
     let mut finder = ExifRemover::new(ExifRemoverParameters::default());
-    finder.set_included_directory(vec![path.to_path_buf()]);
+    finder.set_included_paths(vec![path.to_path_buf()]);
 
     let stop_flag = Arc::new(AtomicBool::new(false));
     finder.search(&stop_flag, None);
@@ -59,7 +59,7 @@ fn test_non_image_files() {
     fs::write(path.join("test.txt"), b"This is not an image").unwrap();
 
     let mut finder = ExifRemover::new(ExifRemoverParameters::default());
-    finder.set_included_directory(vec![path.to_path_buf()]);
+    finder.set_included_paths(vec![path.to_path_buf()]);
 
     let stop_flag = Arc::new(AtomicBool::new(false));
     finder.search(&stop_flag, None);

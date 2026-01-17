@@ -17,117 +17,117 @@ pub const LANGUAGE_LIST: &[Language] = &[
     Language {
         long_name: "English",
         short_name: "en",
-        left_panel_size: 120.0,
+        left_panel_size: 130.0,
     },
     Language {
         long_name: "Polski (Polish)",
         short_name: "pl",
-        left_panel_size: 150.0,
+        left_panel_size: 160.0,
     },
     Language {
         long_name: "Français (French)",
         short_name: "fr",
-        left_panel_size: 180.0,
+        left_panel_size: 190.0,
     },
     Language {
         long_name: "Italiano (Italian)",
         short_name: "it",
-        left_panel_size: 145.0,
+        left_panel_size: 155.0,
     },
     Language {
         long_name: "Русский (Russian)",
         short_name: "ru",
-        left_panel_size: 185.0,
+        left_panel_size: 195.0,
     },
     Language {
         long_name: "український (Ukrainian)",
         short_name: "uk",
-        left_panel_size: 185.0,
+        left_panel_size: 195.0,
     },
     Language {
         long_name: "한국어 (Korean)",
         short_name: "ko",
-        left_panel_size: 145.0,
+        left_panel_size: 155.0,
     },
     Language {
         long_name: "Česky (Czech)",
         short_name: "cs",
-        left_panel_size: 170.0,
+        left_panel_size: 180.0,
     },
     Language {
         long_name: "Deutsch (German)",
         short_name: "de",
-        left_panel_size: 155.0,
+        left_panel_size: 165.0,
     },
     Language {
         long_name: "日本語 (Japanese)",
         short_name: "ja",
-        left_panel_size: 155.0,
+        left_panel_size: 165.0,
     },
     Language {
         long_name: "Português (Portuguese)",
         short_name: "pt-PT",
-        left_panel_size: 165.0,
+        left_panel_size: 175.0,
     },
     Language {
         long_name: "Português Brasileiro (Brazilian Portuguese)",
         short_name: "pt-BR",
-        left_panel_size: 165.0,
+        left_panel_size: 205.0,
     },
     Language {
         long_name: "简体中文 (Simplified Chinese)",
         short_name: "zh-CN",
-        left_panel_size: 115.0,
+        left_panel_size: 125.0,
     },
     Language {
         long_name: "繁體中文 (Traditional Chinese)",
         short_name: "zh-TW",
-        left_panel_size: 135.0,
+        left_panel_size: 145.0,
     },
     Language {
         long_name: "Español (Spanish)",
         short_name: "es-ES",
-        left_panel_size: 165.0,
+        left_panel_size: 175.0,
     },
     Language {
         long_name: "Norsk (Norwegian)",
         short_name: "no",
-        left_panel_size: 135.0,
+        left_panel_size: 145.0,
     },
     Language {
         long_name: "Svenska (Swedish)",
         short_name: "sv-SE",
-        left_panel_size: 130.0,
+        left_panel_size: 140.0,
     },
     Language {
         long_name: "العربية (Arabic)",
         short_name: "ar",
-        left_panel_size: 135.0,
+        left_panel_size: 145.0,
     },
     Language {
         long_name: "Български (Bulgarian)",
         short_name: "bg",
-        left_panel_size: 165.0,
+        left_panel_size: 205.0,
     },
     Language {
         long_name: "Ελληνικά (Greek)",
         short_name: "el",
-        left_panel_size: 160.0,
+        left_panel_size: 170.0,
     },
     Language {
         long_name: "Nederlands (Dutch)",
         short_name: "nl",
-        left_panel_size: 165.0,
+        left_panel_size: 175.0,
     },
     Language {
         long_name: "Română (Romanian)",
         short_name: "ro",
-        left_panel_size: 140.0,
+        left_panel_size: 150.0,
     },
     Language {
         long_name: "Türkçe (Turkish)",
         short_name: "tr",
-        left_panel_size: 150.0,
+        left_panel_size: 160.0,
     },
 ];
 
@@ -204,8 +204,8 @@ fn translate_items(app: &MainWindow) {
     translation.set_instruction_text(flk!("instruction").into());
     translation.set_donation_text(flk!("donation").into());
     translation.set_translation_text(flk!("translation").into());
-    translation.set_included_directories_text(flk!("included_directories").into());
-    translation.set_excluded_directories_text(flk!("excluded_directories").into());
+    translation.set_included_paths_text(flk!("included_paths").into());
+    translation.set_excluded_paths_text(flk!("excluded_paths").into());
     translation.set_ref_text(flk!("ref").into());
     translation.set_path_text(flk!("path").into());
     translation.set_tool_duplicate_files_text(flk!("tool_duplicate_files").into());
@@ -257,22 +257,34 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_music_compare_fingerprints_only_with_similar_titles_text(flk!("subsettings_music_compare_fingerprints_only_with_similar_titles").into());
     translation.set_subsettings_broken_files_type_text(flk!("subsettings_broken_files_type").into());
     translation.set_subsettings_broken_files_audio_text(flk!("subsettings_broken_files_audio").into());
+    translation.set_subsettings_broken_files_video_text(flk!("subsettings_broken_files_video").into());
     translation.set_subsettings_broken_files_pdf_text(flk!("subsettings_broken_files_pdf").into());
     translation.set_subsettings_broken_files_archive_text(flk!("subsettings_broken_files_archive").into());
     translation.set_subsettings_broken_files_image_text(flk!("subsettings_broken_files_image").into());
     translation.set_subsettings_video_optimizer_mode_text(flk!("subsettings_video_optimizer_mode").into());
+    translation.set_subsettings_video_optimizer_crop_type_text(flk!("subsettings_video_optimizer_crop_type").into());
+    translation.set_subsettings_video_optimizer_black_pixel_threshold_text(flk!("subsettings_video_optimizer_black_pixel_threshold").into());
+    translation.set_subsettings_video_optimizer_black_pixel_threshold_hint_text(flk!("subsettings_video_optimizer_black_pixel_threshold_hint").into());
+    translation.set_subsettings_video_optimizer_black_bar_min_percentage_text(flk!("subsettings_video_optimizer_black_bar_min_percentage").into());
+    translation.set_subsettings_video_optimizer_black_bar_min_percentage_hint_text(flk!("subsettings_video_optimizer_black_bar_min_percentage_hint").into());
+    translation.set_subsettings_video_optimizer_max_samples_text(flk!("subsettings_video_optimizer_max_samples").into());
+    translation.set_subsettings_video_optimizer_max_samples_hint_text(flk!("subsettings_video_optimizer_max_samples_hint").into());
+    translation.set_subsettings_video_optimizer_min_crop_size_text(flk!("subsettings_video_optimizer_min_crop_size").into());
+    translation.set_subsettings_video_optimizer_min_crop_size_hint_text(flk!("subsettings_video_optimizer_min_crop_size_hint").into());
     translation.set_subsettings_video_optimizer_video_codec_text(flk!("subsettings_video_optimizer_video_codec").into());
     translation.set_subsettings_video_optimizer_excluded_codecs_text(flk!("subsettings_video_optimizer_excluded_codecs").into());
     translation.set_subsettings_video_optimizer_video_quality_text(flk!("subsettings_video_optimizer_video_quality").into());
-    translation.set_subsettings_video_optimizer_image_threshold_text(flk!("subsettings_video_optimizer_image_threshold").into());
     translation.set_subsettings_reset_text(flk!("subsettings_reset").into());
     translation.set_subsettings_exif_ignored_tags_text(flk!("subsettings_exif_ignored_tags_text").into());
     translation.set_subsettings_exif_ignored_tags_hint_text(flk!("subsettings_exif_ignored_tags_hint_text").into());
     translation.set_clean_button_text(flk!("clean_button_text").into());
     translation.set_clean_text(flk!("clean_text").into());
     translation.set_clean_confirmation_text(flk!("clean_confirmation_text").into());
+    translation.set_crop_videos_text(flk!("crop_videos_text").into());
+    translation.set_crop_video_confirmation_text(flk!("crop_video_confirmation_text").into());
+    translation.set_crop_reencode_video_text(flk!("crop_reencode_video_text").into());
+    translation.set_reencode_videos_text(flk!("reencode_videos_text").into());
     translation.set_optimize_button_text(flk!("optimize_button_text").into());
-    translation.set_optimize_text(flk!("optimize_text").into());
     translation.set_optimize_confirmation_text(flk!("optimize_confirmation_text").into());
     translation.set_optimize_fail_if_bigger_text(flk!("optimize_fail_if_bigger_text").into());
     translation.set_optimize_overwrite_files_text(flk!("optimize_overwrite_files_text").into());
@@ -337,7 +349,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_popup_save_title_text(flk!("popup_save_title").into());
     translation.set_popup_save_message_text(flk!("popup_save_message").into());
     translation.set_popup_rename_title_text(flk!("popup_rename_title").into());
-    translation.set_popup_new_directories_title_text(flk!("popup_new_directories_title").into());
+    translation.set_popup_new_directories_title_text(flk!("popup_new_paths_title").into());
     translation.set_popup_move_title_text(flk!("popup_move_title").into());
     translation.set_popup_move_copy_checkbox_text(flk!("popup_move_copy_checkbox").into());
     translation.set_popup_move_preserve_folder_checkbox_text(flk!("popup_move_preserve_folder_checkbox").into());
@@ -357,6 +369,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_settings_log_number_size_text("".into());
     translation.set_settings_similar_videos_clear_unused_thumbnails_text(flk!("settings_similar_videos_clear_unused_thumbnails").into());
     translation.set_clean_exif_overwrite_files_text(flk!("clean_exif_overwrite_files_text").into());
+    translation.set_subsettings_broken_files_video_info_text(flk!("subsettings_broken_files_video_info").into());
 
     let tools_model: [(SharedString, ActiveTab); TOOLS_NUMBER] = [
         (flk!("tool_duplicate_files").into(), ActiveTab::DuplicateFiles),
@@ -416,6 +429,7 @@ fn translate_items(app: &MainWindow) {
     let current_extension = flk!("column_current_extension");
     let proper_extension = flk!("column_proper_extension");
     let exif_tags = flk!("column_exif_tags");
+    let new_dimensions = flk!("column_new_dimensions");
 
     let fnm = |model: &[&str]| {
         let shared_string = model.iter().map(|s| (*s).into()).collect::<Vec<SharedString>>();
@@ -434,6 +448,7 @@ fn translate_items(app: &MainWindow) {
     settings.set_broken_files_column_name(fnm(&[&selection, &file_name, &path, &type_of_error, &size, &mod_date]));
     settings.set_bad_extensions_column_name(fnm(&[&selection, &file_name, &path, &current_extension, &proper_extension]));
     settings.set_exif_remover_column_name(fnm(&[&selection, &size, &file_name, &path, &exif_tags, &mod_date]));
+    settings.set_video_optimizer_column_name(fnm(&[&selection, &size, &file_name, &path, &codec, &dimensions, &new_dimensions, &mod_date]));
 }
 
 pub(crate) fn translate_select_mode(select_mode: SelectMode) -> SharedString {

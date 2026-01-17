@@ -1,6 +1,6 @@
 ![krokiet_logo](https://github.com/user-attachments/assets/567a7a38-d754-4a79-86b5-3cc898dbbade)
 
-**Krokiet** ((IPA: [ˈkrɔcɛt]), "croquet" in Polish) new generation GUI frontend, simple, multiplatform, fast and free app to remove unnecessary files from your computer.
+**Krokiet** ((IPA: [ˈkrɔcɛt]), "croquette" in Polish) new generation GUI frontend, simple, multiplatform, fast and free app to remove unnecessary files from your computer.
 
 ![czkawka_logo](https://user-images.githubusercontent.com/41945903/102616149-66490400-4137-11eb-9cd6-813b2b070834.png)
 
@@ -30,8 +30,8 @@
     - Invalid Symbolic Links - Shows symbolic links which point to non-existent files/directories
     - Broken Files - Finds files that are invalid or corrupted
     - Bad Extensions - Lists files whose content not match with their extension
-    - Exif Remover(Experimental) - Tool to remove Exif metadata from various file types
-    - Video Optimizer(Experimental) - Converts videos to more efficient formats
+    - Exif Remover - Tool to remove Exif metadata from various file types
+    - Video Optimizer - Converts videos to more efficient formats
 
 ![Krokiet](https://github.com/user-attachments/assets/720e98c3-598a-41aa-a04b-0c0c1d8a28e6)
 
@@ -58,35 +58,39 @@ two apps shouldn't be compared directly or be considered as an alternative to on
 In this comparison remember, that even if app have same features they may work different(e.g. one app may have more
 options to choose than other).
 
-|                           |   Czkawka   |   Krokiet   | FSlint |     DupeGuru      |  Bleachbit  |
-|:-------------------------:|:-----------:|:-----------:|:------:|:-----------------:|:-----------:|
-|         Language          |    Rust     |    Rust     | Python |   Python/Obj-C    |   Python    |
-|  Framework base language  |      C      |    Rust     |   C    | C/C++/Obj-C/Swift |      C      |
-|         Framework         |    GTK 4    |    Slint    | PyGTK2 | Qt 5 (PyQt)/Cocoa |   PyGTK3    |
-|            OS             | Lin,Mac,Win | Lin,Mac,Win |  Lin   |    Lin,Mac,Win    | Lin,Mac,Win |
-|     Duplicate finder      |      ✔      |      ✔      |   ✔    |         ✔         |             |
-|        Empty files        |      ✔      |      ✔      |   ✔    |                   |             |
-|       Empty folders       |      ✔      |      ✔      |   ✔    |                   |             |
-|      Temporary files      |      ✔      |      ✔      |   ✔    |                   |      ✔      |
-|         Big files         |      ✔      |      ✔      |        |                   |             |
-|      Similar images       |      ✔      |      ✔      |        |         ✔         |             |
-|      Similar videos       |      ✔      |      ✔      |        |                   |             |
-|  Music duplicates(tags)   |      ✔      |      ✔      |        |         ✔         |             |
-| Music duplicates(content) |      ✔      |      ✔      |        |                   |             |
-|     Invalid symlinks      |      ✔      |      ✔      |   ✔    |                   |             |
-|       Broken files        |      ✔      |      ✔      |        |                   |             |
-| Invalid names/extensions  |      ✔      |      ✔      |   ✔    |                   |             |
-|      Names conflict       |             |             |   ✔    |                   |             |
-|    Installed packages     |             |             |   ✔    |                   |             |
-|          Bad ID           |             |             |   ✔    |                   |             |
-|   Non stripped binaries   |             |             |   ✔    |                   |             |
-|   Redundant whitespace    |             |             |   ✔    |                   |             |
-|     Overwriting files     |             |             |   ✔    |                   |      ✔      |
-|    Multiple languages     |      ✔      |      ✔      |   ✔    |         ✔         |      ✔      |
-|       Cache support       |      ✔      |      ✔      |        |         ✔         |             |
-|   In active development   |     Yes     |     Yes     |   No   |        No<sup>*</sup>        |     Yes     |
+|                           |     Czkawka      |   Krokiet   | FSlint |     DupeGuru      |  Bleachbit  |
+|:-------------------------:|:----------------:|:-----------:|:------:|:-----------------:|:-----------:|
+|         Language          |       Rust       |    Rust     | Python |   Python/Obj-C    |   Python    |
+|  Framework base language  |        C         |    Rust     |   C    | C/C++/Obj-C/Swift |      C      |
+|         Framework         |      GTK 4       |    Slint    | PyGTK2 | Qt 5 (PyQt)/Cocoa |   PyGTK3    |
+|            OS             |   Lin,Mac,Win    | Lin,Mac,Win |  Lin   |    Lin,Mac,Win    | Lin,Mac,Win |
+|     Duplicate finder      |        ✔         |      ✔      |   ✔    |         ✔         |             |
+|        Empty files        |        ✔         |      ✔      |   ✔    |                   |             |
+|       Empty folders       |        ✔         |      ✔      |   ✔    |                   |             |
+|      Temporary files      |        ✔         |      ✔      |   ✔    |                   |      ✔      |
+|         Big files         |        ✔         |      ✔      |        |                   |             |
+|      Similar images       |        ✔         |      ✔      |        |         ✔         |             |
+|      Similar videos       |        ✔         |      ✔      |        |                   |             |
+|  Music duplicates(tags)   |        ✔         |      ✔      |        |         ✔         |             |
+| Music duplicates(content) |        ✔         |      ✔      |        |                   |             |
+|     Invalid symlinks      |        ✔         |      ✔      |   ✔    |                   |             |
+|       Broken files        |        ✔         |      ✔      |        |                   |             |
+| Invalid names/extensions  |        ✔         |      ✔      |   ✔    |                   |             |
+|       Exif cleaner        |                  |      ✔      |        |                   |             |
+|      Video optimizer      |                  |      ✔      |        |                   |             |
+|      Names conflict       |                  |             |   ✔    |                   |             |
+|    Installed packages     |                  |             |   ✔    |                   |             |
+|          Bad ID           |                  |             |   ✔    |                   |             |
+|   Non stripped binaries   |                  |             |   ✔    |                   |             |
+|   Redundant whitespace    |                  |             |   ✔    |                   |             |
+|     Overwriting files     |                  |             |   ✔    |                   |      ✔      |
+|     Portable version      |        ✔         |      ✔      |        |                   |      ✔      |
+|    Multiple languages     |        ✔         |      ✔      |   ✔    |         ✔         |      ✔      |
+|       Cache support       |        ✔         |      ✔      |        |         ✔         |             |
+|   In active development   | Yes<sup>**</sup> |     Yes     |   No   |  No<sup>*</sup>   |     Yes     |
 
-<p><sup>*</sup> Last commit in 2024 and last version released in 2023</p> 
+<p><sup>*</sup> Few small commits added recently and last version released in 2023</p> 
+<p><sup>**</sup> Czkawka GTK is in maintenance mode receiving only bugfixes</p>
 
 ## Other apps
 

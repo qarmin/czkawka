@@ -18,7 +18,8 @@ import { PopupRenameFiles } from "popup_rename_files.slint";
 import { PopupSave } from "popup_save.slint";
 import { PopupSortResults } from "popup_sort.slint";
 import { PopupActionConfirm } from "popup_action_confirm.slint";
-import { PopupOptimize } from "popup_optimize.slint";
+import { PopupCropVideo } from "popup_crop_video.slint";
+import { PopupReencodeVideo } from "popup_optimize.slint";
 import { PopupCleanExif } from "popup_clean_exif.slint";
 import { ToolSettings } from "tool_settings.slint";
 import { Translations } from "translations.slint";
@@ -31,6 +32,7 @@ export component MainWindow inherits Window {
     callback scan_stopping;
     callback scan_starting(ActiveTab);
     callback folder_choose_requested(bool);
+    callback file_choose_requested(bool);
     callback scan_ended(string);
     callback reset_selection(ActiveTab);
     callback initialize_popup_sizes();
@@ -198,11 +200,14 @@ export component MainWindow inherits Window {
         bottom_panel := BottomPanel {
             bottom_panel_visibility <=> action_buttons.bottom_panel_visibility;
             vertical-stretch: 0.0;
-            folder_choose_requested(included_directories) => {
-                root.folder_choose_requested(included_directories)
+            folder_choose_requested(included_paths) => {
+                root.folder_choose_requested(included_paths)
             }
-            show_manual_add_dialog(included_directories) => {
-                GuiState.choosing_include_directories = included_directories;
+            file_choose_requested(included_paths) => {
+                root.file_choose_requested(included_paths)
+            }
+            show_manual_add_dialog(included_paths) => {
+                GuiState.choosing_include_directories = included_paths;
                 new_directory_popup_window.show_popup()
             }
         }
@@ -274,21 +279,34 @@ export component MainWindow inherits Window {
         x: parent.x + (root.width - self.popup_width) / 2.0;
         y: parent.y + (parent.height - self.popup_height) / 2.0;
 
-        action_confirmed(override_file) => {
-            Callabler.clean_exif_items(override_file);
+        action_confirmed() => {
+            Callabler.clean_exif_items();
         }
     }
 
-    optimize_popup_window := PopupOptimize {
+    crop_video_popup_window := PopupCropVideo {
         height: root.height;
         width: root.width;
-        title_text: Translations.optimize_text;
+        title_text: Translations.crop_videos_text;
 
         x: parent.x + (root.width - self.popup_width) / 2.0;
         y: parent.y + (parent.height - self.popup_height) / 2.0;
 
-        action_confirmed(codec, fail_if_bigger, overwrite_files, quality, limit_size, max_width, max_height) => {
-            Callabler.optimize_items(codec, fail_if_bigger, overwrite_files, quality, limit_size, max_width, max_height);
+        action_confirmed() => {
+            Callabler.crop_video_items();
+        }
+    }
+
+    reencode_video_popup_window := PopupReencodeVideo {
+        height: root.height;
+        width: root.width;
+        title_text: Translations.reencode_videos_text;
+
+        x: parent.x + (root.width - self.popup_width) / 2.0;
+        y: parent.y + (parent.height - self.popup_height) / 2.0;
+
+        action_confirmed() => {
+            Callabler.reencode_video_items();
         }
     }
 
@@ -343,16 +361,20 @@ export component MainWindow inherits Window {
         select_popup_window.close_popup();
     }
 
-    show_action_popup(request, folder_name) => {
+    show_action_popup(request, data) => {
         if (request == PopupRequest.Move) {
-            move_popup_window.folder_name = folder_name;
+            move_popup_window.folder_name = data;
             move_popup_window.show_popup();
         } else if (request == PopupRequest.Delete) {
             delete_popup_window.show_popup();
         } else if (request == PopupRequest.CleanExif) {
             clean_popup_window.show_popup();
         } else if (request == PopupRequest.OptimizeVideo) {
-            optimize_popup_window.show_popup();
+            if (data == "crop") {
+                crop_video_popup_window.show_popup();
+            } else {
+                reencode_video_popup_window.show_popup();
+            }
         } else if (request == PopupRequest.Symlink) {
             softlink_popup_window.show_popup();
         } else if (request == PopupRequest.Rename) {

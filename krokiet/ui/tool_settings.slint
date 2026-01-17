@@ -364,6 +364,15 @@ export component ToolSettings {
                 checked <=> Settings.broken_files_sub_image;
             }
 
+            CheckBoxWrapper {
+                text: Translations.subsettings_broken_files_video_text;
+                checked <=> Settings.broken_files_sub_video;
+            }
+
+            HintText {
+                hint_text: Translations.subsettings_broken_files_video_info_text;
+            }
+
             Rectangle { }
         }
 
@@ -399,7 +408,7 @@ export component ToolSettings {
                     Button {
                         text: Translations.subsettings_reset_text;
                         clicked => {
-                            Settings.video_optimizer_sub_excluded_codecs = "hevc,av1,vp9";
+                            Settings.video_optimizer_sub_excluded_codecs = "h265,av1,vp9";
                         }
                     }
                 }
@@ -408,13 +417,111 @@ export component ToolSettings {
             if Settings.video_optimizer_sub_mode_index == 0: VerticalLayout {
                 spacing: 5px;
 
-                SliderWrapper {
-                    text: Translations.subsettings_video_optimizer_image_threshold_text;
-                    end_text: "(" + round(Settings.video_optimizer_sub_image_threshold) + "/" + round(Settings.video_optimizer_sub_image_threshold_max) + ")";
-                    end_text_size: 60px;
-                    maximum <=> Settings.video_optimizer_sub_image_threshold_max;
-                    minimum <=> Settings.video_optimizer_sub_image_threshold_min;
-                    value <=> Settings.video_optimizer_sub_image_threshold;
+                ComboBoxWrapper {
+                    text: Translations.subsettings_video_optimizer_crop_type_text;
+                    model: Settings.video_optimizer_sub_crop_type;
+                    current_index <=> Settings.video_optimizer_sub_crop_type_index;
+                    current_value <=> Settings.video_optimizer_sub_crop_type_value;
+                }
+
+                HorizontalLayout {
+                    spacing: 5px;
+                    Text {
+                        text: Translations.subsettings_video_optimizer_black_pixel_threshold_text;
+                        vertical_alignment: TextVerticalAlignment.center;
+                        font-size: FontSizes.normal;
+                    }
+
+                    LineEdit {
+                        text <=> Settings.video_optimizer_sub_black_pixel_threshold;
+                        font-size: FontSizes.normal;
+                    }
+
+                    Button {
+                        text: Translations.subsettings_reset_text;
+                        clicked => {
+                            Settings.video_optimizer_sub_black_pixel_threshold = "20";
+                        }
+                    }
+                }
+
+                HintText {
+                    hint_text: Translations.subsettings_video_optimizer_black_pixel_threshold_hint_text;
+                }
+
+                HorizontalLayout {
+                    spacing: 5px;
+                    Text {
+                        text: Translations.subsettings_video_optimizer_black_bar_min_percentage_text;
+                        vertical_alignment: TextVerticalAlignment.center;
+                        font-size: FontSizes.normal;
+                    }
+
+                    LineEdit {
+                        text <=> Settings.video_optimizer_sub_black_bar_min_percentage;
+                        font-size: FontSizes.normal;
+                    }
+
+                Button {
+                    text: Translations.subsettings_reset_text;
+                    clicked => {
+                        Settings.video_optimizer_sub_black_bar_min_percentage = "90";
+                    }
+                }
+                }
+
+                HintText {
+                    hint_text: Translations.subsettings_video_optimizer_black_bar_min_percentage_hint_text;
+                }
+
+                HorizontalLayout {
+                    spacing: 5px;
+                    Text {
+                        text: Translations.subsettings_video_optimizer_max_samples_text;
+                        vertical_alignment: TextVerticalAlignment.center;
+                        font-size: FontSizes.normal;
+                    }
+
+                    LineEdit {
+                        text <=> Settings.video_optimizer_sub_max_samples;
+                        font-size: FontSizes.normal;
+                    }
+
+                    Button {
+                        text: Translations.subsettings_reset_text;
+                        clicked => {
+                            Settings.video_optimizer_sub_max_samples = "60";
+                        }
+                    }
+                }
+
+                HintText {
+                    hint_text: Translations.subsettings_video_optimizer_max_samples_hint_text;
+                }
+
+                HorizontalLayout {
+                    spacing: 5px;
+                    Text {
+                        text: Translations.subsettings_video_optimizer_min_crop_size_text;
+                        vertical_alignment: TextVerticalAlignment.center;
+                        font-size: FontSizes.normal;
+                    }
+
+                    LineEdit {
+                        text <=> Settings.video_optimizer_sub_min_crop_size;
+                        font-size: FontSizes.normal;
+                    }
+
+                    Button {
+                        text: Translations.subsettings_reset_text;
+                        clicked => {
+                            Settings.video_optimizer_sub_min_crop_size = "5";
+                        }
+                    }
+                }
+
+                HintText {
+                    hint_text: Translations.subsettings_video_optimizer_min_crop_size_hint_text;
                 }
             }
 

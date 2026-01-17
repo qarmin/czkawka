@@ -9,7 +9,7 @@ export component PopupNewDirectories inherits Rectangle {
     out property <length> popup_height: 200px;
     callback show_popup();
 
-    property <bool> included_directories;
+    property <bool> included_paths;
     private property <string> text_data;
 
     popup_window := PopupBase {
@@ -26,11 +26,12 @@ export component PopupNewDirectories inherits Rectangle {
         }
 
         ok_clicked => {
-            Callabler.added_manual_directories(GuiState.choosing_include_directories, text_data);
+            Callabler.added_manual_paths(GuiState.choosing_include_directories, text_data);
         }
     }
 
     show_popup() => {
+        text_data = "";
         popup_window.show();
     }
 }

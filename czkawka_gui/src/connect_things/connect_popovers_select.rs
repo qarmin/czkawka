@@ -18,13 +18,13 @@ use crate::helpers::model_iter::iter_list;
 fn popover_select_all(popover: &gtk4::Popover, tree_view: &gtk4::TreeView, column_button_selection: u32, column_header: Option<i32>) {
     let model = tree_view.get_model();
 
-    if let Some(iter) = model.iter_first() {
+    if let Some(mut iter) = model.iter_first() {
         if let Some(column_header) = column_header {
             loop {
                 if !model.get::<bool>(&iter, column_header) {
                     model.set_value(&iter, column_button_selection, &true.to_value());
                 }
-                if !model.iter_next(&iter) {
+                if !model.iter_next(&mut iter) {
                     break;
                 }
             }
@@ -32,7 +32,7 @@ fn popover_select_all(popover: &gtk4::Popover, tree_view: &gtk4::TreeView, colum
             loop {
                 model.set_value(&iter, column_button_selection, &true.to_value());
 
-                if !model.iter_next(&iter) {
+                if !model.iter_next(&mut iter) {
                     break;
                 }
             }
@@ -53,14 +53,14 @@ fn popover_unselect_all(popover: &gtk4::Popover, tree_view: &gtk4::TreeView, col
 fn popover_reverse(popover: &gtk4::Popover, tree_view: &gtk4::TreeView, column_button_selection: u32, column_header: Option<i32>) {
     let model = tree_view.get_model();
 
-    if let Some(iter) = model.iter_first() {
+    if let Some(mut iter) = model.iter_first() {
         if let Some(column_header) = column_header {
             loop {
                 if !model.get::<bool>(&iter, column_header) {
                     let current_value: bool = model.get::<bool>(&iter, column_button_selection as i32);
                     model.set_value(&iter, column_button_selection, &(!current_value).to_value());
                 }
-                if !model.iter_next(&iter) {
+                if !model.iter_next(&mut iter) {
                     break;
                 }
             }
@@ -69,7 +69,7 @@ fn popover_reverse(popover: &gtk4::Popover, tree_view: &gtk4::TreeView, column_b
                 let current_value: bool = model.get::<bool>(&iter, column_button_selection as i32);
                 model.set_value(&iter, column_button_selection, &(!current_value).to_value());
 
-                if !model.iter_next(&iter) {
+                if !model.iter_next(&mut iter) {
                     break;
                 }
             }
@@ -153,7 +153,7 @@ fn popover_all_except_oldest_newest(
 ) {
     let model = tree_view.get_model();
 
-    if let Some(iter) = model.iter_first() {
+    if let Some(mut iter) = model.iter_first() {
         let mut end: bool = false;
         loop {
             let mut tree_iter_array: Vec<TreeIter> = Vec::new();
@@ -166,7 +166,7 @@ fn popover_all_except_oldest_newest(
 
             loop {
                 if model.get::<bool>(&iter, column_header) {
-                    if !model.iter_next(&iter) {
+                    if !model.iter_next(&mut iter) {
                         end = true;
                     }
                     break;
@@ -187,7 +187,7 @@ fn popover_all_except_oldest_newest(
                 }
                 current_index += 1;
 
-                if !model.iter_next(&iter) {
+                if !model.iter_next(&mut iter) {
                     end = true;
                     break;
                 }
@@ -226,7 +226,7 @@ fn popover_one_oldest_newest(
     let column_header = sv.nb_object.column_header.expect("OO/ON can't be used without headers");
     let column_modification_as_secs = sv.nb_object.column_modification_as_secs.expect("OO/ON needs modification as secs column");
 
-    if let Some(iter) = model.iter_first() {
+    if let Some(mut iter) = model.iter_first() {
         let mut end: bool = false;
         loop {
             let mut tree_iter_array: Vec<TreeIter> = Vec::new();
@@ -238,7 +238,7 @@ fn popover_one_oldest_newest(
 
             loop {
                 if model.get::<bool>(&iter, column_header) {
-                    if !model.iter_next(&iter) {
+                    if !model.iter_next(&mut iter) {
                         end = true;
                     }
                     break;
@@ -260,7 +260,7 @@ fn popover_one_oldest_newest(
 
                 current_index += 1;
 
-                if !model.iter_next(&iter) {
+                if !model.iter_next(&mut iter) {
                     end = true;
                     break;
                 }
@@ -461,7 +461,7 @@ fn popover_custom_select_unselect(
 
                     let model = sv.get_model();
 
-                    let Some(iter) = model.iter_first() else {
+                    let Some(mut iter) = model.iter_first() else {
                         confirmation_dialog_select_unselect.close();
                         return;
                     };
@@ -489,7 +489,7 @@ fn popover_custom_select_unselect(
                                 }
                             }
 
-                            if !model.iter_next(&iter) {
+                            if !model.iter_next(&mut iter) {
                                 break;
                             }
 
@@ -542,7 +542,7 @@ fn popover_custom_select_unselect(
                         }
 
                         // If went to last item and all previous items were selected, then deselect last item
-                        if !model.iter_next(&iter) {
+                        if !model.iter_next(&mut iter) {
                             if select_things {
                                 if !using_reference_folders && check_all_selected && (number_of_all_things - number_of_already_selected_things == vec_of_iters.len()) {
                                     vec_of_iters.pop();
@@ -579,7 +579,7 @@ fn popover_all_except_biggest_smallest(
     let column_header = sv.nb_object.column_header.expect("AEB/AES can't be used without headers");
     let column_size_as_bytes = sv.nb_object.column_size_as_bytes.expect("AEB/AES needs size as bytes column");
 
-    if let Some(iter) = model.iter_first() {
+    if let Some(mut iter) = model.iter_first() {
         let mut end: bool = false;
         loop {
             let mut tree_iter_array: Vec<TreeIter> = Vec::new();
@@ -590,7 +590,7 @@ fn popover_all_except_biggest_smallest(
 
             loop {
                 if model.get::<bool>(&iter, column_header) {
-                    if !model.iter_next(&iter) {
+                    if !model.iter_next(&mut iter) {
                         end = true;
                     }
                     break;
@@ -628,7 +628,7 @@ fn popover_all_except_biggest_smallest(
 
                 current_index += 1;
 
-                if !model.iter_next(&iter) {
+                if !model.iter_next(&mut iter) {
                     end = true;
                     break;
                 }

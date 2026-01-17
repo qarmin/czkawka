@@ -4,8 +4,8 @@ import { Settings } from "settings.slint";
 
 export global Callabler {
     // Bottom panel operations
-    callback remove_item_directories(bool, int);
-    callback added_manual_directories(bool, string);
+    callback remove_item_paths(bool, int);
+    callback added_manual_paths(bool, string);
 
     // Row selecting
     callback reset_selection(ActiveTab);
@@ -45,10 +45,11 @@ export global Callabler {
 
     // Dialogs
     callback save_results();
-    callback move_items(bool, bool, string);
+    callback move_items(string);
     callback rename_files();
-    callback optimize_items(string, bool, bool, float, bool, int, int);
-    callback clean_exif_items(bool);
+    callback crop_video_items();
+    callback reencode_video_items();
+    callback clean_exif_items();
     callback hardlink_items();
     callback softlink_items();
 

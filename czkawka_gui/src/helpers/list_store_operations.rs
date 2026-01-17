@@ -1,5 +1,3 @@
-use std::hint::black_box;
-
 use fun_time::fun_time;
 use gtk4::prelude::*;
 use gtk4::{ListStore, TreeView};
@@ -43,13 +41,12 @@ pub(crate) fn get_from_list_store_fnc<T>(tree_view: &TreeView, fnc: &dyn Fn(&Lis
 }
 
 // After e.g. deleting files, header may become orphan or have one child, so should be deleted in this case
-// Logic in this function is quite flaky, so random black_boxes were added to not optimize this function too much - probably gtk4-rs bug
 #[fun_time(message = "clean_invalid_headers", level = "debug")]
 pub(crate) fn clean_invalid_headers(model: &ListStore, column_header: i32, column_path: i32) {
     // Remove only child from header
     if let Some(first_iter) = model.iter_first() {
         let mut vec_tree_path_to_delete: Vec<gtk4::TreePath> = Vec::new();
-        let mut current_iter = black_box(first_iter);
+        let mut current_iter = first_iter;
         // First element should be header
         assert!(model.get::<bool>(&current_iter, column_header), "First deleted element, should be a header");
 
@@ -63,7 +60,7 @@ pub(crate) fn clean_invalid_headers(model: &ListStore, column_header: i32, colum
                 assert!(model.get::<bool>(&current_iter, column_header), "First deleted element, should be a header");
 
                 next_iter = current_iter;
-                if !model.iter_next(&next_iter) {
+                if !model.iter_next(&mut next_iter) {
                     // There is only single header left (H1 -> END) -> (NOTHING)
                     vec_tree_path_to_delete.push(model.path(&current_iter));
                     break 'main;
@@ -77,7 +74,7 @@ pub(crate) fn clean_invalid_headers(model: &ListStore, column_header: i32, colum
                 }
 
                 next_next_iter = next_iter;
-                if !model.iter_next(&next_next_iter) {
+                if !model.iter_next(&mut next_next_iter) {
                     // There is only one child of header left, so we remove it with header (H1 -> C1 -> END) -> (NOTHING)
                     vec_tree_path_to_delete.push(model.path(&current_iter));
                     vec_tree_path_to_delete.push(model.path(&next_iter));
@@ -94,12 +91,12 @@ pub(crate) fn clean_invalid_headers(model: &ListStore, column_header: i32, colum
 
                 loop {
                     // (H1 -> C1 -> C2 -> Cn -> END) -> (NO CHANGE, BECAUSE IS GOOD)
-                    if black_box(!model.iter_next(&next_next_iter)) {
+                    if !model.iter_next(&mut next_next_iter) {
                         break 'main;
                     }
                     // Move to next header
                     if model.get::<bool>(&next_next_iter, column_header) {
-                        current_iter = black_box(next_next_iter);
+                        current_iter = next_next_iter;
                         continue 'main;
                     }
                 }
@@ -112,7 +109,7 @@ pub(crate) fn clean_invalid_headers(model: &ListStore, column_header: i32, colum
                 assert!(model.get::<bool>(&current_iter, column_header), "First deleted element, should be a header");
 
                 next_iter = current_iter;
-                if !model.iter_next(&next_iter) {
+                if !model.iter_next(&mut next_iter) {
                     // There is only single header left (H1 -> END) -> (NOTHING)
                     vec_tree_path_to_delete.push(model.path(&current_iter));
                     break 'reference;
@@ -126,7 +123,7 @@ pub(crate) fn clean_invalid_headers(model: &ListStore, column_header: i32, colum
                 }
 
                 next_next_iter = next_iter;
-                if !model.iter_next(&next_next_iter) {
+                if !model.iter_next(&mut next_next_iter) {
                     // There is only one child of header left, so we remove it with header (H1 -> C1 -> END) -> (NOTHING)
                     break 'reference;
                 }
@@ -139,12 +136,12 @@ pub(crate) fn clean_invalid_headers(model: &ListStore, column_header: i32, colum
 
                 loop {
                     // (H1 -> C1 -> C2 -> Cn -> END) -> (NO CHANGE, BECAUSE IS GOOD)
-                    if black_box(!model.iter_next(&next_next_iter)) {
+                    if !model.iter_next(&mut next_next_iter) {
                         break 'reference;
                     }
                     // Move to next header
                     if model.get::<bool>(&next_next_iter, column_header) {
-                        current_iter = black_box(next_next_iter);
+                        current_iter = next_next_iter;
                         continue 'reference;
                     }
                 }
@@ -156,8 +153,8 @@ pub(crate) fn clean_invalid_headers(model: &ListStore, column_header: i32, colum
     }
 
     // Last step, remove orphan header if exists
-    if let Some(iter) = model.iter_first()
-        && !model.iter_next(&iter)
+    if let Some(mut iter) = model.iter_first()
+        && !model.iter_next(&mut iter)
     {
         model.clear();
     }

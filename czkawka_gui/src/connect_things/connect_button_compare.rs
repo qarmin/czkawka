@@ -427,7 +427,7 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>,
 }
 
 fn get_all_path(model: &TreeModel, current_path: &TreePath, column_header: i32, column_path: i32, column_name: i32) -> Vec<(String, String, TreePath)> {
-    let used_iter = model.iter(current_path).expect("Using invalid tree_path");
+    let mut used_iter = model.iter(current_path).expect("Using invalid tree_path");
 
     assert!(model.get::<bool>(&used_iter, column_header));
     let using_reference = !model.get::<String>(&used_iter, column_path).is_empty();
@@ -443,7 +443,7 @@ fn get_all_path(model: &TreeModel, current_path: &TreePath, column_header: i32, 
         returned_vector.push((full_name, name, model.path(&used_iter)));
     }
 
-    assert!(model.iter_next(&used_iter), "Found only header!");
+    assert!(model.iter_next(&mut used_iter), "Found only header!");
 
     loop {
         let name = model.get::<String>(&used_iter, column_name);
@@ -453,7 +453,7 @@ fn get_all_path(model: &TreeModel, current_path: &TreePath, column_header: i32, 
 
         returned_vector.push((full_name, name, model.path(&used_iter)));
 
-        if !model.iter_next(&used_iter) {
+        if !model.iter_next(&mut used_iter) {
             break;
         }
 
@@ -468,19 +468,19 @@ fn get_all_path(model: &TreeModel, current_path: &TreePath, column_header: i32, 
 }
 
 fn move_iter(model: &TreeModel, tree_path: &TreePath, column_header: i32, go_next: bool) -> TreePath {
-    let tree_iter = model.iter(tree_path).expect("Using invalid tree_path");
+    let mut tree_iter = model.iter(tree_path).expect("Using invalid tree_path");
 
     assert!(model.get::<bool>(&tree_iter, column_header));
 
     if go_next {
-        assert!(model.iter_next(&tree_iter), "Found only header!");
+        assert!(model.iter_next(&mut tree_iter), "Found only header!");
     } else {
         assert!(model.iter_previous(&tree_iter), "Found only header!");
     }
 
     loop {
         if go_next {
-            if !model.iter_next(&tree_iter) {
+            if !model.iter_next(&mut tree_iter) {
                 break;
             }
         } else if !model.iter_previous(&tree_iter) {
@@ -622,7 +622,7 @@ fn get_current_group_and_iter_from_selection(sv: &SubView) -> (u32, TreePath) {
 
     let selected_records = selection.selected_rows().0;
 
-    let iter = model.iter_first().expect("Model is no empty, so should have first item"); // Checking that treeview is not empty should be done before
+    let mut iter = model.iter_first().expect("Model is no empty, so should have first item"); // Checking that treeview is not empty should be done before
     header_clone = iter; // if nothing selected, use first group
     possible_header = iter; // if nothing selected, use first group
     assert!(model.get::<bool>(&iter, column_header)); // First element should be header
@@ -630,7 +630,7 @@ fn get_current_group_and_iter_from_selection(sv: &SubView) -> (u32, TreePath) {
     if !selected_records.is_empty() {
         let first_selected_record = selected_records[0].clone();
         loop {
-            if !model.iter_next(&iter) {
+            if !model.iter_next(&mut iter) {
                 break;
             }
 

@@ -1,8 +1,9 @@
 use std::process;
 
-use log::warn;
+use log::{error, warn};
 
 use crate::CZKAWKA_VERSION;
+use crate::common::config_cache_path::get_config_cache_path;
 
 #[derive(Clone, Debug)]
 pub struct CliResult {
@@ -32,6 +33,8 @@ pub fn process_cli_args(app_display: &str, app_exec: &str, args: Vec<String>) ->
         println!("  FOLDER                Include a folder in the search");
         println!("  -e FOLDER, --exclude FOLDER      Exclude a folder from the search");
         println!("  -r FOLDER, --referenced FOLDER   Include a folder and set it as referenced");
+        println!("  --cache, -c           Opens the cache folder");
+        println!("  --config, -C          Opens the config folder");
         println!("  --help, -h            Show this help message");
         println!("  --version, -v         Show version information");
         println!("Examples:");
@@ -41,7 +44,14 @@ pub fn process_cli_args(app_display: &str, app_exec: &str, args: Vec<String>) ->
         process::exit(0);
     }
     if ["--version", "-v"].iter().any(|&arg| args.contains(&arg.to_string())) {
-        println!("{app_display} version {CZKAWKA_VERSION}");
+        let git_commit = env!("CZKAWKA_GIT_COMMIT_SHORT");
+        let official_build = if env!("CZKAWKA_OFFICIAL_BUILD") == "1" {
+            "O" // Official build
+        } else {
+            "U" // Unofficial build
+        };
+        let git_date = env!("CZKAWKA_GIT_COMMIT_DATE");
+        println!("{app_display} version {CZKAWKA_VERSION}({git_commit} {official_build} {git_date})");
         process::exit(0);
     }
 
@@ -58,6 +68,30 @@ pub fn process_cli_args(app_display: &str, app_exec: &str, args: Vec<String>) ->
             match arg.as_str() {
                 "-e" | "--exclude" => expected_arg = ExpectedArgs::Exclude,
                 "-r" | "--referenced" => expected_arg = ExpectedArgs::Referenced,
+                "-c" | "--cache" => {
+                    if let Some(cfg) = get_config_cache_path() {
+                        if let Err(e) = open::that(&cfg.cache_folder) {
+                            error!("Failed to open cache folder \"{}\": {e}", cfg.cache_folder.to_string_lossy());
+                            process::exit(1);
+                        }
+                        process::exit(0);
+                    } else {
+                        error!("Failed to get cache folder path");
+                        process::exit(1);
+                    }
+                }
+                "-C" | "--config" => {
+                    if let Some(cfg) = get_config_cache_path() {
+                        if let Err(e) = open::that(&cfg.config_folder) {
+                            error!("Failed to open config folder \"{}\": {e}", cfg.config_folder.to_string_lossy());
+                            process::exit(1);
+                        }
+                        process::exit(0);
+                    } else {
+                        error!("Failed to get config folder path");
+                        process::exit(1);
+                    }
+                }
                 _ => {
                     eprintln!("Unknown option: {arg}");
                     process::exit(1);

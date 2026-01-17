@@ -24,7 +24,7 @@ fn test_find_bad_extension_png_as_jpg() {
 
     let params = BadExtensionsParameters::new();
     let mut finder = BadExtensions::new(params);
-    finder.set_included_directory(vec![path.to_path_buf()]);
+    finder.set_included_paths(vec![path.to_path_buf()]);
 
     let stop_flag = Arc::new(AtomicBool::new(false));
     finder.search(&stop_flag, None);
@@ -50,7 +50,7 @@ fn test_correct_extension() {
 
     let params = BadExtensionsParameters::new();
     let mut finder = BadExtensions::new(params);
-    finder.set_included_directory(vec![path.to_path_buf()]);
+    finder.set_included_paths(vec![path.to_path_buf()]);
 
     let stop_flag = Arc::new(AtomicBool::new(false));
     finder.search(&stop_flag, None);
@@ -73,7 +73,7 @@ fn test_file_without_extension_excluded() {
     params.include_files_without_extension = false;
     let mut finder = BadExtensions::new(params);
 
-    finder.set_included_directory(vec![path.to_path_buf()]);
+    finder.set_included_paths(vec![path.to_path_buf()]);
     finder.set_recursive_search(true);
 
     let stop_flag = Arc::new(AtomicBool::new(false));
@@ -97,7 +97,7 @@ fn test_file_without_extension_included() {
     params.include_files_without_extension = true;
 
     let mut finder = BadExtensions::new(params);
-    finder.set_included_directory(vec![path.to_path_buf()]);
+    finder.set_included_paths(vec![path.to_path_buf()]);
 
     let stop_flag = Arc::new(AtomicBool::new(false));
     finder.search(&stop_flag, None);

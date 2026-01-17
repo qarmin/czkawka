@@ -1,5 +1,4 @@
 use std::collections::BTreeMap;
-use std::io::{Read, Seek};
 use std::path::Path;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
@@ -7,14 +6,13 @@ use std::{fs, mem, panic};
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
-use little_exif::exif_tag::ExifTag;
 use little_exif::filetype::FileExtension;
 use little_exif::ifd::ExifTagGroup;
 use little_exif::metadata::Metadata;
 use log::{debug, error, info};
 use rayon::prelude::*;
 
-use crate::common::cache::{CACHE_VERSION, extract_loaded_cache, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
+use crate::common::cache::{CACHE_VERSION, load_and_split_cache_generalized_by_path, save_and_connect_cache_generalized_by_path};
 use crate::common::consts::EXIF_FILES_EXTENSIONS;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{ToolType, WorkContinueStatus};
@@ -99,27 +97,11 @@ impl ExifRemover {
         _stop_flag: &Arc<AtomicBool>,
         progress_sender: Option<&Sender<ProgressData>>,
     ) -> (BTreeMap<String, ExifEntry>, BTreeMap<String, ExifEntry>, BTreeMap<String, ExifEntry>) {
-        let loaded_hash_map;
+        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::ExifRemoverCacheLoading, 0, self.get_test_type(), 0);
+        let res = load_and_split_cache_generalized_by_path(&get_exif_remover_cache_file(), mem::take(&mut self.files_to_check), self);
 
-        let mut records_already_cached: BTreeMap<String, ExifEntry> = Default::default();
-        let mut non_cached_files_to_check: BTreeMap<String, ExifEntry> = Default::default();
-        let files_to_check = mem::take(&mut self.files_to_check);
-
-        if self.common_data.use_cache {
-            let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::ExifRemoverCacheLoading, 0, self.get_test_type(), 0);
-
-            let (messages, loaded_items) = load_cache_from_file_generalized_by_path::<ExifEntry>(&get_exif_remover_cache_file(), self.get_delete_outdated_cache(), &files_to_check);
-            self.get_text_messages_mut().extend_with_another_messages(messages);
-            loaded_hash_map = loaded_items.unwrap_or_default();
-
-            extract_loaded_cache(&loaded_hash_map, files_to_check, &mut records_already_cached, &mut non_cached_files_to_check);
-
-            progress_handler.join_thread();
-        } else {
-            loaded_hash_map = Default::default();
-            non_cached_files_to_check = files_to_check;
-        }
-        (loaded_hash_map, records_already_cached, non_cached_files_to_check)
+        progress_handler.join_thread();
+        res
     }
 
     #[fun_time(message = "save_to_cache", level = "debug")]
@@ -130,23 +112,11 @@ impl ExifRemover {
         _stop_flag: &Arc<AtomicBool>,
         progress_sender: Option<&Sender<ProgressData>>,
     ) {
-        if self.common_data.use_cache {
-            let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::ExifRemoverCacheSaving, 0, self.get_test_type(), 0);
+        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::ExifRemoverCacheSaving, 0, self.get_test_type(), 0);
 
-            let mut all_results: BTreeMap<String, ExifEntry> = Default::default();
+        save_and_connect_cache_generalized_by_path(&get_exif_remover_cache_file(), vec_file_entry, loaded_hash_map, self);
 
-            for file_entry in vec_file_entry.iter().cloned() {
-                all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
-            }
-            for (name, file_entry) in loaded_hash_map {
-                all_results.insert(name, file_entry);
-            }
-
-            let messages = save_cache_to_file_generalized(&get_exif_remover_cache_file(), &all_results, self.common_data.save_also_as_json, 0);
-            self.get_text_messages_mut().extend_with_another_messages(messages);
-
-            progress_handler.join_thread();
-        }
+        progress_handler.join_thread();
     }
 
     #[fun_time(message = "check_exif_in_files", level = "debug")]
@@ -187,7 +157,7 @@ impl ExifRemover {
                     }
                     Ok(_) => {}
                     Err(e) => {
-                        file_entry.error = Some(e);
+                        file_entry.error = Some(format!("Failed to extract Exif data for file \"{}\": {}", file_entry.path.to_string_lossy(), e));
                     }
                 }
 
@@ -244,7 +214,7 @@ impl ExifRemover {
             match clean_exif_tags(&entry.path.to_string_lossy(), &exif_data_to_remove, fix_params.override_file) {
                 Ok(_number_removed_tags) => {}
                 Err(e) => {
-                    entry.error = Some(e);
+                    entry.error = Some(format!("Failed to clean EXIF tags for file \"{}\": {}", entry.path.to_string_lossy(), e));
                 }
             }
         });
@@ -258,20 +228,18 @@ pub fn clean_exif_tags(file_path: &str, tags_to_remove: &[(u16, String)], overri
         let file_path = Path::new(file_path);
         let mut file_data = fs::read(file_path).map_err(|e| e.to_string())?;
         let mut cursor = std::io::Cursor::new(&file_data);
-        let ext = auto_detect_file_extension(&mut cursor).ok_or_else(|| "Failed to detect file type".to_string())?;
+        let ext = FileExtension::auto_detect(&mut cursor).ok_or_else(|| "Failed to detect file type".to_string())?;
         let metadata = Metadata::new_from_vec(&file_data, ext).map_err(|e| format!("Failed to read EXIF: {e}"))?;
 
         let mut new_metadata = metadata;
         let mut tags_removed: u32 = 0;
         for (tag_u16, tag_group) in tags_to_remove {
             let Ok(tag_group) = string_to_exif_tag_group(tag_group) else {
+                error!("Unknown EXIF tag group string: {tag_group}, skipping tag removal.");
                 continue;
             };
 
-            let Ok(tag) = ExifTag::from_u16(*tag_u16, &tag_group) else {
-                continue;
-            };
-            new_metadata.remove_tag(tag);
+            new_metadata.remove_tag_by_hex_group(*tag_u16, tag_group);
             tags_removed += 1;
         }
 
@@ -295,7 +263,7 @@ fn extract_exif_tags(path: &Path) -> Result<Vec<(String, u16, String)>, String> 
         let file_path = Path::new(path);
         let data = fs::read(file_path).map_err(|e| e.to_string())?;
         let mut cursor = std::io::Cursor::new(&data);
-        let ext = auto_detect_file_extension(&mut cursor).ok_or_else(|| "Failed to detect file type".to_string())?;
+        let ext = FileExtension::auto_detect(&mut cursor).ok_or_else(|| "Failed to detect file type".to_string())?;
         let metadata = Metadata::new_from_vec(&data, ext).map_err(|e| format!("Failed to read EXIF: {e}"))?;
 
         let mut tags = Vec::new();
@@ -317,68 +285,7 @@ fn extract_exif_tags(path: &Path) -> Result<Vec<(String, u16, String)>, String> 
     .map_err(|e| format!("Panic occurred while reading \"{}\" - EXIF: {e:?}", path.to_string_lossy()))?
 }
 
-pub(crate) fn auto_detect_file_extension<T: Seek + Read>(cursor: &mut T) -> Option<FileExtension> {
-    let mut buffer = [0; 32];
-    let Ok(n) = cursor.read(&mut buffer) else {
-        return None;
-    };
-    if n < 4 {
-        return None;
-    }
-
-    match buffer {
-            // PNG
-            [0x89, 0x50, 0x4E, 0x47, ..] => {
-                Some(FileExtension::PNG { as_zTXt_chunk: true })
-            }
-
-            // JP(E)G
-            [0xFF, 0xD8, ..] => {
-                Some(FileExtension::JPEG)
-            }
-
-            // TIFF, little endian
-            [0x49, 0x49, 0x2A, 0x00, ..] |
-            [0x4D, 0x4D, 0x00, 0x2A, ..] => {
-                Some(FileExtension::TIFF)
-            }
-
-            // WebP
-            [0x52, 0x49, 0x46, 0x46, _, _, _, _, 0x57, 0x45, 0x42, 0x50, ..] =>
-                {
-                    Some(FileExtension::WEBP)
-                }
-
-            // A "naked" JXL codestream that can't hold metadata
-            // See: https://www.loc.gov/preservation/digital/formats/fdd/fdd000538.shtml
-            [0xFF, 0x0A, ..] => {
-                Some(FileExtension::NAKED_JXL)
-            }
-
-            // JXL (in ISO_BMFF container)
-            // In this case, the JXL file starts with the JXL signature box
-            // 4 bytes for length       J     X     L  space more stuff
-            [0x00, 0x00, 0x00, 0x0C, 0x4A, 0x58, 0x4C, 0x20, 0x0D, 0x0A, 0x87, 0x0A, ..] =>
-                {
-                    Some(FileExtension::JXL)
-                }
-
-            // HEIC/HEIF/AVIF
-            // length       f     t     y     p
-            [_, _, _, _, 0x66, 0x74, 0x79, 0x70, 0x68, 0x65, 0x69, 0x63 | 0x66, ..] |
-[_, _, _, _, 0x66, 0x74, 0x79, 0x70, 0x61, 0x76, 0x69, 0x66, ..]  // avif
-            =>
-                {
-                    Some(FileExtension::HEIF)
-                }
-
-            _ => {
-                None
-            }
-        }
-}
-
-pub fn file_extension_to_string(extension: &FileExtension) -> &'static str {
+pub fn file_extension_to_string(extension: FileExtension) -> &'static str {
     match extension {
         FileExtension::PNG { .. } => "PNG",
         FileExtension::JPEG => "JPEG",

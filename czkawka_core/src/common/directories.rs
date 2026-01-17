@@ -9,12 +9,15 @@ use crate::helpers::messages::Messages;
 
 #[derive(Debug, Clone, Default)]
 pub struct Directories {
-    pub excluded_directories: Vec<PathBuf>,
-    pub included_directories: Vec<PathBuf>,
-    pub reference_directories: Vec<PathBuf>,
-    pub exclude_other_filesystems: Option<bool>,
+    pub(crate) excluded_directories: Vec<PathBuf>,
+    pub(crate) included_directories: Vec<PathBuf>,
+    pub(crate) reference_directories: Vec<PathBuf>,
+    pub(crate) excluded_files: Vec<PathBuf>,
+    pub(crate) included_files: Vec<PathBuf>,
+    pub(crate) reference_files: Vec<PathBuf>,
+    pub(crate) exclude_other_filesystems: Option<bool>,
     #[cfg(target_family = "unix")]
-    pub included_dev_ids: Vec<u64>,
+    pub(crate) included_dev_ids: Vec<u64>,
 }
 
 impl Directories {
@@ -22,98 +25,70 @@ impl Directories {
         Default::default()
     }
 
-    pub(crate) fn set_reference_directory(&mut self, reference_directory: &[PathBuf]) -> Messages {
-        let mut messages: Messages = Messages::new();
-
-        self.reference_directories = reference_directory
-            .iter()
-            .filter_map(|directory| {
-                let (dir, msg) = Self::canonicalize_and_clear_path(directory, false);
-
-                messages.extend_with_another_messages(msg);
-
-                dir
-            })
-            .collect::<Vec<PathBuf>>();
-
-        messages
+    pub(crate) fn set_reference_paths(&mut self, reference_paths: Vec<PathBuf>) -> Messages {
+        self.reference_files = Vec::new();
+        self.reference_directories = Vec::new();
+        self.process_paths(reference_paths, true, false)
     }
 
-    pub(crate) fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) -> Messages {
-        let mut messages: Messages = Messages::new();
-
-        if included_directory.is_empty() {
-            messages.errors.push(flc!("core_missing_no_chosen_included_directory"));
-            return messages;
-        }
-
-        let directories: Vec<PathBuf> = included_directory;
-
-        let mut checked_directories: Vec<PathBuf> = Vec::new();
-        for directory in directories {
-            let (dir, msg) = Self::canonicalize_and_clear_path(&directory, false);
-
-            messages.extend_with_another_messages(msg);
-
-            if let Some(dir) = dir {
-                checked_directories.push(dir);
-            }
-        }
-
-        if checked_directories.is_empty() {
-            messages.warnings.push(flc!("core_included_directory_zero_valid_directories"));
-            return messages;
-        }
-
-        self.included_directories = checked_directories;
-
-        messages
+    pub(crate) fn set_included_paths(&mut self, included_paths: Vec<PathBuf>) -> Messages {
+        self.included_files = Vec::new();
+        self.included_directories = Vec::new();
+        self.process_paths(included_paths, false, false)
     }
 
-    pub(crate) fn set_excluded_directory(&mut self, excluded_directory: Vec<PathBuf>) -> Messages {
+    pub(crate) fn set_excluded_paths(&mut self, excluded_paths: Vec<PathBuf>) -> Messages {
+        self.excluded_files = Vec::new();
+        self.excluded_directories = Vec::new();
+        self.process_paths(excluded_paths, false, true)
+    }
+
+    fn process_paths(&mut self, paths: Vec<PathBuf>, is_reference: bool, is_excluded: bool) -> Messages {
         let mut messages: Messages = Messages::new();
 
-        if excluded_directory.is_empty() {
+        if paths.is_empty() {
             return messages;
         }
 
-        let directories: Vec<PathBuf> = excluded_directory;
-
-        let mut checked_directories: Vec<PathBuf> = Vec::new();
-        for directory in directories {
-            let directory_as_string = directory.to_string_lossy();
-            if directory_as_string == "/" {
-                messages.errors.push(flc!("core_excluded_directory_pointless_slash"));
+        for path in paths {
+            if is_excluded && path.to_string_lossy() == "/" {
+                messages.errors.push(flc!("core_excluded_paths_pointless_slash"));
                 break;
             }
 
-            let (dir, msg) = Self::canonicalize_and_clear_path(&directory, true);
+            let (dir, msg) = Self::canonicalize_and_clear_path(&path, false);
 
             messages.extend_with_another_messages(msg);
 
             if let Some(dir) = dir {
-                checked_directories.push(dir);
+                match (dir.is_file(), is_reference, is_excluded) {
+                    (false, true, false) => self.reference_directories.push(dir),
+                    (false, false, false) => self.included_directories.push(dir),
+                    (false, false, true) => self.excluded_directories.push(dir),
+
+                    (true, true, false) => self.reference_files.push(dir),
+                    (true, false, false) => self.included_files.push(dir),
+                    (true, false, true) => self.excluded_files.push(dir),
+                    _ => unreachable!("Invalid combination of parameters in process_paths"),
+                }
             }
         }
-        self.excluded_directories = checked_directories;
 
         messages
     }
 
-    fn canonicalize_and_clear_path(directory: &Path, is_excluded: bool) -> (Option<PathBuf>, Messages) {
+    fn canonicalize_and_clear_path(path: &Path, is_excluded: bool) -> (Option<PathBuf>, Messages) {
         let mut messages = Messages::new();
-        let mut directory = directory.to_path_buf();
-        if !directory.exists() {
+        let mut path = path.to_path_buf();
+        if !path.exists() {
             if !is_excluded {
-                messages.warnings.push(flc!("core_directory_must_exists", path = directory.to_string_lossy().to_string()));
+                messages.warnings.push(flc!("core_path_must_exists", path = path.to_string_lossy().to_string()));
             }
             return (None, messages);
         }
 
-        if !directory.is_dir() {
-            messages
-                .warnings
-                .push(flc!("core_directory_must_be_directory", path = directory.to_string_lossy().to_string()));
+        if !path.is_dir() && !path.is_file() {
+            messages.warnings.push(flc!("core_must_be_directory_or_file", path = path.to_string_lossy().to_string()));
             return (None, messages);
         }
 
@@ -121,19 +96,19 @@ impl Directories {
         if cfg!(windows) {
             // Only canonicalize if it's not a network path
             // This can be done by checking if path starts with \\?\UNC\
-            if let Ok(dir_can) = directory.canonicalize()
+            if let Ok(dir_can) = path.canonicalize()
                 && let Some(dir_can_str) = dir_can.to_string_lossy().strip_prefix(r"\\?\")
                 && dir_can_str.chars().nth(1) == Some(':')
             {
-                directory = PathBuf::from(dir_can_str);
+                path = PathBuf::from(dir_can_str);
             }
         } else {
-            if let Ok(dir) = directory.canonicalize() {
-                directory = dir;
+            if let Ok(dir) = path.canonicalize() {
+                path = dir;
             }
         }
 
-        (Some(directory), messages)
+        (Some(path), messages)
     }
 
     #[cfg(target_family = "unix")]
@@ -141,160 +116,115 @@ impl Directories {
         self.exclude_other_filesystems = Some(exclude_other_filesystems);
     }
 
-    pub(crate) fn optimize_directories(&mut self, recursive_search: bool) -> Messages {
+    pub(crate) fn optimize_directories(&mut self, recursive_search: bool) -> Result<Messages, Messages> {
         let mut messages: Messages = Messages::new();
 
-        let mut optimized_included: Vec<PathBuf> = Vec::new();
-        let mut optimized_excluded: Vec<PathBuf> = Vec::new();
-
-        if cfg!(target_family = "windows") {
-            self.included_directories = self.included_directories.iter().map(normalize_windows_path).collect();
-            self.excluded_directories = self.excluded_directories.iter().map(normalize_windows_path).collect();
-            self.reference_directories = self.reference_directories.iter().map(normalize_windows_path).collect();
+        if self.included_directories.is_empty() && self.included_files.is_empty() {
+            messages.critical = Some(flc!("core_missing_no_chosen_included_path"));
+            return Err(messages);
         }
 
         // Remove duplicated entries like: "/", "/"
-
-        self.excluded_directories.sort_unstable();
-        self.included_directories.sort_unstable();
-        self.reference_directories.sort_unstable();
-
-        self.excluded_directories.dedup();
-        self.included_directories.dedup();
-        self.reference_directories.dedup();
+        for items in &mut [
+            &mut self.included_directories,
+            &mut self.excluded_directories,
+            &mut self.reference_directories,
+            &mut self.included_files,
+            &mut self.excluded_files,
+            &mut self.reference_files,
+        ] {
+            if cfg!(target_family = "windows") {
+                items.iter_mut().for_each(|item| {
+                    *item = normalize_windows_path(item.clone());
+                });
+            }
+            items.sort_unstable();
+            items.dedup();
+        }
 
         // Optimize for duplicated included directories - "/", "/home". "/home/Pulpit" to "/"
-        // Do not use when not using recursive search or using
+        // Do not use when not using recursive search
         if recursive_search && !self.exclude_other_filesystems.unwrap_or(false) {
-            // This is only point which can't be done when recursive search is disabled.
-            let mut is_inside: bool;
-            for ed_checked in &self.excluded_directories {
-                is_inside = false;
-                for ed_help in &self.excluded_directories {
-                    if ed_checked == ed_help {
-                        // We checking same element
-                        continue;
-                    }
-                    if ed_checked.starts_with(ed_help) {
-                        is_inside = true;
-                        break;
-                    }
-                }
-                if !is_inside {
-                    optimized_excluded.push(ed_checked.clone());
-                }
+            for kk in [&mut self.included_directories, &mut self.excluded_directories] {
+                let cloned = kk.clone();
+                kk.retain(|item| !cloned.iter().any(|other_item| item != other_item && item.starts_with(other_item)));
             }
-
-            for id_checked in &self.included_directories {
-                is_inside = false;
-                for id_help in &self.included_directories {
-                    if id_checked == id_help {
-                        // We checking same element
-                        continue;
-                    }
-                    if id_checked.starts_with(id_help) {
-                        is_inside = true;
-                        break;
-                    }
-                }
-                if !is_inside {
-                    optimized_included.push(id_checked.clone());
-                }
-            }
-
-            self.included_directories = optimized_included;
-            optimized_included = Vec::new();
-            self.excluded_directories = optimized_excluded;
-            optimized_excluded = Vec::new();
         }
 
         // Remove included directories which are inside any excluded directory
-        for id in &self.included_directories {
-            let mut is_inside: bool = false;
-            for ed in &self.excluded_directories {
-                if id.starts_with(ed) {
-                    is_inside = true;
-                    break;
-                }
-            }
-            if !is_inside {
-                optimized_included.push(id.clone());
-            }
-        }
-        self.included_directories = optimized_included;
-        optimized_included = Vec::new();
-
-        // Remove non existed directories
-        for id in &self.included_directories {
-            let path = Path::new(id);
-            if path.exists() {
-                optimized_included.push(id.clone());
-            }
+        // Same with included files
+        for kk in [&mut self.included_directories, &mut self.included_files] {
+            kk.retain(|id| !self.excluded_directories.iter().any(|ed| id.starts_with(ed)));
         }
 
-        for ed in &self.excluded_directories {
-            let path = Path::new(ed);
-            if path.exists() {
-                optimized_excluded.push(ed.clone());
-            }
+        // Also check if files are not excluded directly
+        {
+            let kk = &mut self.included_files;
+            kk.retain(|id| !self.excluded_directories.iter().any(|ed| id == ed));
         }
 
-        self.included_directories = optimized_included;
-        self.excluded_directories = optimized_excluded;
-        optimized_excluded = Vec::new();
-
-        // Excluded paths must are inside included path, because
-        for ed in &self.excluded_directories {
-            let mut is_inside: bool = false;
-            for id in &self.included_directories {
-                if ed.starts_with(id) {
-                    is_inside = true;
-                    break;
-                }
-            }
-            if is_inside {
-                optimized_excluded.push(ed.clone());
-            }
+        // Remove non existed directories and files
+        for kk in [
+            &mut self.excluded_files,
+            &mut self.excluded_directories,
+            &mut self.included_files,
+            &mut self.included_directories,
+        ] {
+            kk.retain(|path| path.exists());
         }
 
-        self.excluded_directories = optimized_excluded;
+        // Excluded paths must are inside included path, because otherwise they are pointless
+        // So first, removing included files, that are inside excluded directories
+        // So this will allow to remove excluded directories outside included directories
+        self.included_files.retain(|ifile| !self.excluded_directories.iter().any(|ed| ifile.starts_with(ed)));
+        self.excluded_directories.retain(|ed| self.included_directories.iter().any(|id| ed.starts_with(id)));
 
         // Selecting Reference folders
         {
-            let mut ref_folders = Vec::new();
-            for folder in &self.reference_directories {
-                if self.included_directories.iter().any(|e| folder.starts_with(e)) {
-                    ref_folders.push(folder.clone());
-                }
-            }
-            self.reference_directories = ref_folders;
-        }
-
-        if self.included_directories.is_empty() {
-            messages.errors.push(flc!("core_directory_overlap"));
-            return messages;
+            self.reference_directories.retain(|folder| self.included_directories.iter().any(|e| folder.starts_with(e)));
+            self.reference_files
+                .retain(|file| self.included_directories.iter().any(|e| file.starts_with(e)) || self.included_files.iter().any(|f| file == f));
         }
 
         // Not needed, but better is to have sorted everything
-        self.excluded_directories.sort_unstable();
-        self.included_directories.sort_unstable();
+        for items in &mut [
+            &mut self.included_directories,
+            &mut self.excluded_directories,
+            &mut self.reference_directories,
+            &mut self.included_files,
+            &mut self.excluded_files,
+            &mut self.reference_files,
+        ] {
+            items.sort_unstable();
+        }
 
-        // Get device IDs for included directories
+        // Get device IDs for included directories, probably ther better solution would be to get one id per directory, but this is faster, but a little less precise
         #[cfg(target_family = "unix")]
         if self.exclude_other_filesystems() {
             for d in &self.included_directories {
                 match fs::metadata(d) {
                     Ok(m) => self.included_dev_ids.push(m.dev()),
-                    Err(_) => messages.errors.push(flc!("core_directory_unable_to_get_device_id", path = d.to_string_lossy().to_string())),
+                    Err(_) => messages.errors.push(flc!("core_paths_unable_to_get_device_id", path = d.to_string_lossy().to_string())),
                 }
             }
         }
 
-        messages
+        if self.included_directories.is_empty() && self.included_files.is_empty() {
+            messages.errors.push(flc!("core_missing_no_chosen_included_path"));
+            return Err(messages);
+        }
+
+        if self.reference_directories == self.included_directories && self.included_files == self.reference_files {
+            messages.warnings.push(flc!("core_reference_included_paths_same"));
+        }
+
+        Ok(messages)
     }
 
     pub(crate) fn is_in_referenced_directory(&self, path: &Path) -> bool {
-        self.reference_directories.iter().any(|e| path.starts_with(e))
+        self.reference_directories.iter().any(|e| path.starts_with(e));
+        self.reference_files.iter().any(|e| e.as_path() == path);
+        self.reference_directories.iter().any(|e| path.starts_with(e)) || self.reference_files.iter().any(|e| e.as_path() == path)
     }
 
     pub(crate) fn is_excluded(&self, path: &Path) -> bool {
@@ -313,8 +243,13 @@ impl Directories {
     pub(crate) fn is_on_other_filesystems<P: AsRef<Path>>(&self, path: P) -> Result<bool, String> {
         let path = path.as_ref();
         match fs::metadata(path) {
-            Ok(m) => Ok(!self.included_dev_ids.iter().any(|&id| id == m.dev())),
-            Err(_) => Err(flc!("core_directory_unable_to_get_device_id", path = path.to_string_lossy().to_string())),
+            Ok(m) => {
+                if m.file_type().is_file() && !self.included_files.is_empty() && self.included_files.contains(&path.to_path_buf()) {
+                    return Ok(false); // Exact equality for included files is always allowed
+                }
+                Ok(!self.included_dev_ids.iter().any(|&id| id == m.dev()))
+            }
+            Err(_) => Err(flc!("core_paths_unable_to_get_device_id", path = path.to_string_lossy().to_string())),
         }
     }
 

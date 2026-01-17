@@ -7,12 +7,11 @@ use clap::builder::styling::AnsiColor;
 use czkawka_core::CZKAWKA_VERSION;
 use czkawka_core::common::model::{CheckingMethod, HashType};
 use czkawka_core::common::tool_data::DeleteMethod;
+use czkawka_core::re_exported::{Cropdetect, FilterType, HashAlg};
 use czkawka_core::tools::broken_files::CheckedTypes;
 use czkawka_core::tools::same_music::MusicSimilarity;
 use czkawka_core::tools::similar_images::SimilarityPreset;
 use czkawka_core::tools::similar_videos::{ALLOWED_SKIP_FORWARD_AMOUNT, ALLOWED_VID_HASH_DURATION, DEFAULT_SKIP_FORWARD_AMOUNT, crop_detect_from_str_opt};
-use image_hasher::{FilterType, HashAlg};
-use vid_dup_finder_lib::Cropdetect;
 
 #[cfg(not(feature = "no_colors"))]
 pub const CLAP_STYLING: Styles = Styles::styled()
@@ -389,8 +388,8 @@ pub struct BrokenFilesArgs {
         long,
         default_value = "PDF",
         value_parser = parse_broken_files,
-        help = "Checking file types (PDF, AUDIO, IMAGE, ARCHIVE)",
-        long_help = "Methods to search files - default PDF.\nPDF - finds broken PDF files,\nAUDIO - finds broken audio files,\nIMAGE - finds broken image files,\nARCHIVE - finds broken archive files"
+        help = "Checking file types (PDF, AUDIO, IMAGE, ARCHIVE, VIDEO)",
+        long_help = "Methods to search files - default PDF.\nPDF - finds broken PDF files,\nAUDIO - finds broken audio files,\nIMAGE - finds broken image files,\nARCHIVE - finds broken archive files,\nVIDEO - finds broken video files"
     )]
     pub checked_types: Vec<CheckedTypes>,
 }
@@ -704,7 +703,8 @@ fn parse_broken_files(src: &str) -> Result<CheckedTypes, &'static str> {
         "audio" => Ok(CheckedTypes::AUDIO),
         "image" => Ok(CheckedTypes::IMAGE),
         "archive" => Ok(CheckedTypes::ARCHIVE),
-        _ => Err("Couldn't parse the broken files type (allowed: PDF, AUDIO, IMAGE, ARCHIVE)"),
+        "video" => Ok(CheckedTypes::VIDEO),
+        _ => Err("Couldn't parse the broken files type (allowed: PDF, AUDIO, IMAGE, ARCHIVE, VIDEO)"),
     }
 }
 

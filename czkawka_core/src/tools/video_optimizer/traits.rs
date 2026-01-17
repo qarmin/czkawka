@@ -7,11 +7,13 @@ use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use humansize::{BINARY, format_size};
 
+use crate::common::ffmpeg_utils::check_if_ffprobe_ffmpeg_exists;
 use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, FixingItems, PrintResults, Search};
-use crate::tools::video_optimizer::{Info, OptimizerMode, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters};
+use crate::flc;
+use crate::tools::video_optimizer::{Info, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters};
 
 impl AllTraits for VideoOptimizer {}
 
@@ -39,9 +41,9 @@ impl DebugPrint for VideoOptimizer {
 
         println!("### INDIVIDUAL DEBUG PRINT ###");
         println!("Info: {:?}", self.information);
-        println!("Mode: {:?}", self.params.mode);
-        println!("Video transcode entries: {}", self.video_transcode_entries.len());
-        println!("Video crop entries: {}", self.video_crop_entries.len());
+        println!("Mode: {:?}", self.params);
+        println!("Video transcode entries: {}", self.video_transcode_result_entries.len());
+        println!("Video crop entries: {}", self.video_crop_result_entries.len());
         self.debug_print_common();
         println!("-----------------------------------------");
     }
@@ -49,77 +51,65 @@ impl DebugPrint for VideoOptimizer {
 
 impl PrintResults for VideoOptimizer {
     fn write_results<T: Write>(&self, writer: &mut T) -> std::io::Result<()> {
-        writeln!(writer, "Results of Video Optimizer with mode {:?}", self.params.mode)?;
+        writeln!(writer, "Results of Video Optimizer with mode {:?}", self.params)?;
         writeln!(writer, "Searched in directories: {:?}", self.common_data.directories.included_directories)?;
         writeln!(writer, "Excluded directories: {:?}", self.common_data.directories.excluded_directories)?;
 
-        match self.params.mode {
-            OptimizerMode::VideoTranscode => {
+        match self.params.clone() {
+            VideoOptimizerParameters::VideoTranscode(_) => {
                 writeln!(writer)?;
 
-                let total_entries = self.video_transcode_entries.len();
-                let entries_needing_optimization = self.video_transcode_entries.iter().filter(|e| !e.codec.is_empty() && e.error.is_none()).count();
-                let failed_entries = self.video_transcode_entries.iter().filter(|e| e.error.is_some()).count();
+                let total_entries = self.video_transcode_result_entries.len();
+                let entries_needing_optimization = self.video_transcode_result_entries.iter().filter(|e| !e.codec.is_empty() && e.error.is_none()).count();
+                let failed_entries = self.video_transcode_result_entries.iter().filter(|e| e.error.is_some()).count();
 
                 writeln!(writer, "Total files found: {total_entries}")?;
                 writeln!(writer, "Files needing optimization: {entries_needing_optimization}")?;
                 writeln!(writer, "Failed to analyze: {failed_entries}")?;
                 writeln!(writer)?;
 
-                for entry in &self.video_transcode_entries {
+                for entry in &self.video_transcode_result_entries {
                     if !entry.codec.is_empty() {
-                        if let Some(err) = &entry.error {
-                            writeln!(writer, "[FAILED] {} - Codec: {} - Error: {}", entry.path.display(), entry.codec, err)?;
-                        } else {
-                            writeln!(
-                                writer,
-                                "[CANDIDATE] {} - Codec: {} - Dimensions: {}x{} - Size: {}",
-                                entry.path.display(),
-                                entry.codec,
-                                entry.width,
-                                entry.height,
-                                format_size(entry.size, BINARY)
-                            )?;
-                        }
+                        writeln!(
+                            writer,
+                            "\"{}\" - Codec: {} - Dimensions: {}x{} - Size: {}",
+                            entry.path.to_string_lossy(),
+                            entry.codec,
+                            entry.width,
+                            entry.height,
+                            format_size(entry.size, BINARY)
+                        )?;
                     }
                 }
             }
-            OptimizerMode::VideoCrop => {
+            VideoOptimizerParameters::VideoCrop(_) => {
                 writeln!(writer)?;
 
-                let total_entries = self.video_crop_entries.len();
-                let entries_with_crop_info = self.video_crop_entries.iter().filter(|e| !e.codec.is_empty() && e.error.is_none()).count();
-                let failed_entries = self.video_crop_entries.iter().filter(|e| e.error.is_some()).count();
+                let total_entries = self.video_crop_result_entries.len();
+                let entries_with_crop_info = self.video_crop_result_entries.iter().filter(|e| !e.codec.is_empty() && e.error.is_none()).count();
+                let failed_entries = self.video_crop_result_entries.iter().filter(|e| e.error.is_some()).count();
 
                 writeln!(writer, "Total files found: {total_entries}")?;
                 writeln!(writer, "Files with crop information: {entries_with_crop_info}")?;
                 writeln!(writer, "Failed to analyze: {failed_entries}")?;
                 writeln!(writer)?;
 
-                for entry in &self.video_crop_entries {
+                for entry in &self.video_crop_result_entries {
                     if !entry.codec.is_empty() {
-                        if let Some(err) = &entry.error {
-                            writeln!(writer, "[FAILED] {} - Codec: {} - Error: {}", entry.path.display(), entry.codec, err)?;
+                        let new_image_dimensions: String = if let Some((lt, rt, rb, lb)) = entry.new_image_dimensions {
+                            format!("  New dimensions: LT:{lt}, RT:{rt}, RB:{rb}, LB:{lb}")
                         } else {
-                            writeln!(
-                                writer,
-                                "[INFO] {} - Codec: {} - Dimensions: {}x{} - Size: {}",
-                                entry.path.display(),
-                                entry.codec,
-                                entry.width,
-                                entry.height,
-                                format_size(entry.size, BINARY)
-                            )?;
-                            if let Some(start) = entry.start_crop_frame {
-                                writeln!(writer, "  Start crop frame: {start}")?;
-                            }
-                            if let Some(end) = entry.end_crop_frame {
-                                writeln!(writer, "  End crop frame: {end}")?;
-                            }
-                            if let Some((lt, rt, rb, lb)) = entry.new_image_dimensions {
-                                writeln!(writer, "  New dimensions: LT:{lt}, RT:{rt}, RB:{rb}, LB:{lb}")?;
-                            }
-                        }
+                            String::new()
+                        };
+                        writeln!(
+                            writer,
+                            "{} - Codec: {} - Dimensions: {}x{} - Size: {}{new_image_dimensions}",
+                            entry.path.display(),
+                            entry.codec,
+                            entry.width,
+                            entry.height,
+                            format_size(entry.size, BINARY)
+                        )?;
                     }
                 }
             }
@@ -129,9 +119,9 @@ impl PrintResults for VideoOptimizer {
     }
 
     fn save_results_to_file_as_json(&self, file_name: &str, pretty_print: bool) -> std::io::Result<()> {
-        match self.params.mode {
-            OptimizerMode::VideoTranscode => self.save_results_to_file_as_json_internal(file_name, &self.video_transcode_entries, pretty_print),
-            OptimizerMode::VideoCrop => self.save_results_to_file_as_json_internal(file_name, &self.video_crop_entries, pretty_print),
+        match &self.params {
+            VideoOptimizerParameters::VideoTranscode(_) => self.save_results_to_file_as_json_internal(file_name, &self.video_transcode_result_entries, pretty_print),
+            VideoOptimizerParameters::VideoCrop(_) => self.save_results_to_file_as_json_internal(file_name, &self.video_crop_result_entries, pretty_print),
         }
     }
 }
@@ -142,7 +132,16 @@ impl Search for VideoOptimizer {
         let start_time = Instant::now();
 
         let () = (|| {
-            self.prepare_items();
+            if !check_if_ffprobe_ffmpeg_exists() {
+                self.common_data.text_messages.critical = Some(flc!("core_ffmpeg_not_found"));
+                #[cfg(target_os = "windows")]
+                self.common_data.text_messages.errors.push(flc!("core_ffmpeg_not_found_windows"));
+                return;
+            }
+
+            if self.prepare_items().is_err() {
+                return;
+            }
             if self.scan_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
                 self.common_data.stopped_search = true;
                 return;

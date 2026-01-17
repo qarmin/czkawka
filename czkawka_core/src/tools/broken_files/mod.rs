@@ -20,7 +20,6 @@ pub struct BrokenEntry {
     pub path: PathBuf,
     pub modified_date: u64,
     pub size: u64,
-    pub type_of_file: TypeOfFile,
     pub error_string: String,
 }
 impl ResultEntry for BrokenEntry {
@@ -41,8 +40,6 @@ impl FileEntry {
             size: self.size,
             path: self.path,
             modified_date: self.modified_date,
-
-            type_of_file: TypeOfFile::Unknown,
             error_string: String::new(),
         }
     }
@@ -54,7 +51,8 @@ pub enum TypeOfFile {
     Image = 0,
     ArchiveZip,
     Audio,
-    PDF,
+    Pdf,
+    Video,
 }
 
 bitflags! {
@@ -66,6 +64,7 @@ bitflags! {
         const AUDIO = 0b10;
         const IMAGE = 0b100;
         const ARCHIVE = 0b1000;
+        const VIDEO = 0b10000;
     }
 }
 

@@ -1,2 +1,3 @@
 allow-indexing-slicing-in-tests = true
 allow-unwrap-in-tests = true
+avoid-breaking-exported-api = false
