@@ -6,6 +6,7 @@ use std::path::Path;
 use std::{fs, panic};
 
 use image::{DynamicImage, ImageBuffer, ImageReader, Rgb, Rgba};
+use itertools::Itertools;
 use jxl_oxide::integration::JxlDecoder;
 #[cfg(feature = "heif")]
 use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
@@ -46,7 +47,7 @@ pub fn get_dynamic_image_from_path(path: &str) -> Result<DynamicImage, String> {
 
     trace!("decoding file \"{path}\"");
     let res = panic::catch_unwind(|| {
-        if HEIC_EXTENSIONS.iter().any(|ext| path_lower.ends_with(ext)) {
+        let img = if HEIC_EXTENSIONS.iter().any(|ext| path_lower.ends_with(ext)) {
             #[cfg(feature = "heif")]
             {
                 get_dynamic_image_from_heic(path).map_err(|e| format!("Cannot open heic file \"{path}\": {e}"))
@@ -61,7 +62,12 @@ pub fn get_dynamic_image_from_path(path: &str) -> Result<DynamicImage, String> {
             get_raw_image(path).map_err(|e| format!("Cannot open raw image file \"{path}\": {e}"))
         } else {
             decode_normal_image(path).map_err(|e| format!("Cannot open image file \"{path}\": {e}"))
+        }?;
+
+        if img.width() == 0 || img.height() == 0 {
+            return Err(format!("Image has zero width or height \"{path}\""));
         }
+        Ok(img)
     });
 
     if let Ok(res) = res {

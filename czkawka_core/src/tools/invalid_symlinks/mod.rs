@@ -29,8 +29,8 @@ pub enum ErrorType {
 }
 
 impl ErrorType {
-    pub fn translate(&self) -> String {
-        match *self {
+    pub fn translate(self) -> String {
+        match self {
             Self::InfiniteRecursion => flc!("core_invalid_symlink_infinite_recursion"),
             Self::NonExistentFile => flc!("core_invalid_symlink_non_existent_destination"),
         }

@@ -1,4 +1,14 @@
 # In Rust translations
+rust_init_error_title = Critical Error During App Startup
+rust_init_error_message =
+    A critical error occurred while starting the application:
+
+    { $error_message }
+
+    This may be caused by missing or malfunctioning OpenGL/Vulkan drivers, running the application in a virtual machine or a bug in Krokiet or one of its libraries.
+
+    You can try running different builds (skia_opengl, skia_vulkan, femtovg_opengl - the default) or with software renderer to see if that resolves the issue.
+
 rust_loaded_preset = Loaded preset { $preset_idx }
 rust_file_already_exists = File \"{ $file }\" already exists, and will not be overridden
 rust_error_removing_file_after_copy = Error while removing file \"{ $file }\" (after copying into different partition), reason: { $reason }
@@ -33,8 +43,8 @@ rust_checked_videos = Checked { $items_stats } videos ({ $size_stats })
 rust_analyzed_partial_hash = Analyzed partial hash of { $items_stats } files ({ $size_stats })
 rust_analyzed_full_hash = Analyzed full hash of { $items_stats } files ({ $size_stats })
 rust_failed_to_rename_file = Failed to rename file { $old_path } to { $new_path }, error: { $error }
-rust_no_included_directories = Cannot start scan when no included directories are set.
-rust_all_dirs_referenced = Cannot start scan when all included directories are set as referenced folders.
+rust_no_included_paths = Cannot start scan when no included paths are set.
+rust_all_paths_referenced = Cannot start scan when all included paths are set as referenced paths, you need to disable reference checkbox next to input path.
 rust_found_empty_folders = Found { $items_found } empty folders in { $time }
 rust_found_empty_files = Found { $items_found } empty files in { $time }
 rust_found_similar_images = Found { $items_found } similar image files in { $groups } groups in { $time }
@@ -120,6 +130,7 @@ column_path = Path
 column_modification_date = Modification Date
 column_similarity = Similarity
 column_dimensions = Dimensions
+column_new_dimensions = New Dimensions
 column_title = Title
 column_artist = Artist
 column_year = Year
@@ -156,8 +167,8 @@ repository = Repository
 instruction = Instruction
 donation = Donation
 translation = Translation
-included_directories = Included Directories
-excluded_directories = Excluded Directories
+included_paths = Included Paths
+excluded_paths = Excluded Paths
 ref = Ref
 path = Path
 tool_duplicate_files = Duplicate Files
@@ -216,6 +227,8 @@ subsettings_broken_files_audio = Audio
 subsettings_broken_files_pdf = Pdf
 subsettings_broken_files_archive = Archive
 subsettings_broken_files_image = Image
+subsettings_broken_files_video = Video
+subsettings_broken_files_video_info = Uses ffmpeg/ffprobe. Quite slow and may detect pedantic errors even if file plays fine.
 settings_global_settings = Global Settings
 settings_dark_theme = Dark theme
 settings_show_only_icons = Show only icons
@@ -240,11 +253,11 @@ settings_duplicate_minimal_prehash_cache_size = Minimal size of cached files - P
 settings_duplicate_delete_outdated_entries = Delete automatically outdated entries
 settings_similar_images_show_image_preview = Image preview
 settings_application_scale_text = Application scale
-settings_application_scale_hint_text = Manual application scale (e.g., 1.0 = 100%)
+settings_application_scale_hint_text = When manual scale is enabled, this allows you to choose a custom scale factor, but completely disables automatic scaling based on the monitor’s DPI.
 settings_restart_required_scale_text = ---You need to restart app to apply changes in scale---
 settings_use_manual_application_scale_text = Use manual application scale
 
-settings_similar_videos_generate_thumbnail_grid_instead_of_single_image_hint_text = Generate a grid of thumbnails instead of a single image (may take longer)
+settings_similar_videos_generate_thumbnail_grid_instead_of_single_image_hint_text = Generate thumbnail composed from multiple frames from video, instead of a single frame
 settings_similar_images_hide_hard_links = Hide hard links
 settings_delete_outdated_entries = Delete automatically outdated entries
 settings_similar_videos_hide_hard_links = Hide hard links
@@ -271,7 +284,7 @@ settings_similar_videos_clear_unused_thumbnails = Delete unused video thumbnails
 popup_save_title = Saving results
 popup_save_message = This will save results to 3 different files
 popup_rename_title = Renaming files
-popup_new_directories_title = Please add directories one per line
+popup_new_paths_title = Please add paths one per line
 popup_move_title = Moving files
 popup_move_copy_checkbox = Copy files instead of moving
 popup_move_preserve_folder_checkbox = Preserve folder structure
@@ -288,19 +301,30 @@ settings_cache_number_size_text = Cache files size: { $size }, number of files: 
 settings_video_thumbnails_number_size_text = Video thumbnails size: { $size }, number of files: { $number }
 settings_log_number_size_text = Log files size: { $size }, number of files: { $number }
 subsettings_video_optimizer_mode = Mode
+subsettings_video_optimizer_crop_type = Crop Type
+subsettings_video_optimizer_black_pixel_threshold = Black Pixel Threshold
+subsettings_video_optimizer_black_pixel_threshold_hint = Maximum RGB value for each pixel channel to be considered black (0-128). Default: 20
+subsettings_video_optimizer_black_bar_min_percentage = Black Bar Min Percentage
+subsettings_video_optimizer_black_bar_min_percentage_hint = Minimum percentage of black pixels in a row/column to be considered a black bar (50-100). Default: 90
+subsettings_video_optimizer_max_samples = Max Samples
+subsettings_video_optimizer_max_samples_hint = Maximum number of frames to analyze per video (5-1000). Default: 60
+subsettings_video_optimizer_min_crop_size = Min Crop Size
+subsettings_video_optimizer_min_crop_size_hint = Minimum pixels to crop on any side (1-1000). Smaller crops are ignored. Default: 5
 subsettings_video_optimizer_video_codec = Video codec
 subsettings_video_optimizer_excluded_codecs = Excluded codecs
 subsettings_video_optimizer_video_quality = Video quality (CRF)
-subsettings_video_optimizer_image_threshold = Image threshold
 subsettings_reset = Reset
 subsettings_exif_ignored_tags_text = Ignored tags:
 subsettings_exif_ignored_tags_hint_text = Comma-separated list of tags to exclude from scanning (e.g. GPS, Thumbnail). Some tags, such as ImageWidth in TIFF files, are hidden to prevent breaking the image.
 clean_button_text = Clean
 clean_text = Clean EXIF data
 clean_confirmation_text = Are you sure you want to remove EXIF data from the selected items?
+crop_videos_text = Crop videos
+crop_video_confirmation_text = Are you sure you want to crop the selected videos?
+crop_reencode_video_text = Re-encode video
+reencode_videos_text = Re-encode videos
 optimize_button_text = Optimize
-optimize_text = Optimize images
-optimize_confirmation_text = Are you sure you want to optimize the selected items?
+optimize_confirmation_text = Are you sure you want to re-encode the selected videos?
 optimize_fail_if_bigger_text = Fail if optimized file is bigger
 optimize_overwrite_files_text = Overwrite files
 optimize_limit_video_size_text = Limit video size

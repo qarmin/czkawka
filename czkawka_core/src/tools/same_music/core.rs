@@ -8,7 +8,6 @@ use std::{mem, panic};
 use anyhow::Context;
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
-use humansize::{BINARY, format_size};
 use indexmap::IndexSet;
 use lofty::file::{AudioFile, TaggedFileExt};
 use lofty::prelude::*;
@@ -23,7 +22,7 @@ use symphonia::core::io::MediaSourceStream;
 use symphonia::core::meta::MetadataOptions;
 use symphonia::core::probe::Hint;
 
-use crate::common::cache::{CACHE_VERSION, extract_loaded_cache, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
+use crate::common::cache::{CACHE_VERSION, load_and_split_cache_generalized_by_path, save_and_connect_cache_generalized_by_path};
 use crate::common::consts::AUDIO_FILES_EXTENSIONS;
 use crate::common::create_crash_message;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
@@ -82,52 +81,12 @@ impl SameMusic {
 
     #[fun_time(message = "load_cache", level = "debug")]
     fn load_cache(&mut self, checking_tags: bool) -> (BTreeMap<String, MusicEntry>, BTreeMap<String, MusicEntry>, BTreeMap<String, MusicEntry>) {
-        let loaded_hash_map;
-
-        let mut records_already_cached: BTreeMap<String, MusicEntry> = Default::default();
-        let mut non_cached_files_to_check: BTreeMap<String, MusicEntry> = Default::default();
-
-        if self.common_data.use_cache {
-            let (messages, loaded_items) =
-                load_cache_from_file_generalized_by_path::<MusicEntry>(&get_similar_music_cache_file(checking_tags), self.get_delete_outdated_cache(), &self.music_to_check);
-            self.get_text_messages_mut().extend_with_another_messages(messages);
-            loaded_hash_map = loaded_items.unwrap_or_default();
-
-            debug!("load_cache - Starting to check for differences");
-            extract_loaded_cache(
-                &loaded_hash_map,
-                mem::take(&mut self.music_to_check),
-                &mut records_already_cached,
-                &mut non_cached_files_to_check,
-            );
-            debug!(
-                "load_cache - completed diff between loaded and prechecked files, {}({}) - non cached, {}({}) - already cached",
-                non_cached_files_to_check.len(),
-                format_size(non_cached_files_to_check.values().map(|e| e.size).sum::<u64>(), BINARY),
-                records_already_cached.len(),
-                format_size(records_already_cached.values().map(|e| e.size).sum::<u64>(), BINARY),
-            );
-        } else {
-            loaded_hash_map = Default::default();
-            mem::swap(&mut self.music_to_check, &mut non_cached_files_to_check);
-        }
-        (loaded_hash_map, records_already_cached, non_cached_files_to_check)
+        load_and_split_cache_generalized_by_path(&get_similar_music_cache_file(checking_tags), mem::take(&mut self.music_to_check), self)
     }
 
     #[fun_time(message = "save_cache", level = "debug")]
-    fn save_cache(&mut self, vec_file_entry: Vec<MusicEntry>, loaded_hash_map: BTreeMap<String, MusicEntry>, checking_tags: bool) {
-        if !self.common_data.use_cache {
-            return;
-        }
-        // Must save all results to file, old loaded from file with all currently counted results
-        let mut all_results: BTreeMap<String, MusicEntry> = loaded_hash_map;
-
-        for file_entry in vec_file_entry {
-            all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
-        }
-
-        let messages = save_cache_to_file_generalized(&get_similar_music_cache_file(checking_tags), &all_results, self.common_data.save_also_as_json, 0);
-        self.get_text_messages_mut().extend_with_another_messages(messages);
+    fn save_cache(&mut self, vec_file_entry: &[MusicEntry], loaded_hash_map: BTreeMap<String, MusicEntry>, checking_tags: bool) {
+        save_and_connect_cache_generalized_by_path(&get_similar_music_cache_file(checking_tags), vec_file_entry, loaded_hash_map, self);
     }
 
     #[fun_time(message = "calculate_fingerprint", level = "debug")]
@@ -198,16 +157,14 @@ impl SameMusic {
         debug!("calculate_fingerprint - ended fingerprinting");
 
         progress_handler.join_thread();
+
         let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicCacheSavingFingerprints, 0, self.get_test_type(), 0);
 
-        // Just connect loaded results with already calculated
         vec_file_entry.extend(records_already_cached.into_values());
 
-        self.music_entries = vec_file_entry.clone();
+        self.save_cache(&vec_file_entry, loaded_hash_map, false);
 
-        self.save_cache(vec_file_entry, loaded_hash_map, false);
-
-        // Break if stop was clicked after saving to cache
+        self.music_entries = vec_file_entry;
 
         progress_handler.join_thread();
         if check_if_stop_received(stop_flag) {
@@ -260,14 +217,11 @@ impl SameMusic {
         progress_handler.join_thread();
         let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicCacheSavingTags, 0, self.get_test_type(), 0);
 
-        // Just connect loaded results with already calculated
         vec_file_entry.extend(records_already_cached.into_values());
 
-        self.music_entries = vec_file_entry.clone();
+        self.save_cache(&vec_file_entry, loaded_hash_map, true);
 
-        self.save_cache(vec_file_entry, loaded_hash_map, true);
-
-        // Break if stop was clicked after saving to cache
+        self.music_entries = vec_file_entry;
 
         progress_handler.join_thread();
         if check_if_stop_received(stop_flag) {

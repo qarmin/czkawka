@@ -7,7 +7,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  CZKAWKA_OFFICIAL_BUILD: 1
+  CZKAWKA_OFFICIAL_BUILD: ${{ vars.CZKAWKA_OFFICIAL_BUILD }}
 
 jobs:
   krokiet-compiled-on-linux:
@@ -21,7 +21,7 @@ jobs:
 
       - name: Setup rust version
         run: |
-          rustup default 1.90.0
+          rustup default 1.92.0
           rustup target add x86_64-pc-windows-gnu
 
       - name: Compile Krokiet Release
@@ -71,7 +71,7 @@ jobs:
 
       - name: Setup rust version
         run: |
-          rustup default 1.90.0
+          rustup default 1.92.0
 
       - name: Compile Krokiet Release
         if: ${{ github.ref == 'refs/heads/master' }}
@@ -106,7 +106,7 @@ jobs:
 
       - name: Release
         uses: softprops/action-gh-release@v2
-        if: ${{ github.ref == 'refs/heads/master' && env.HAVE_PAT_REPOSITORY_TOKEN == '1' }}
+        if: ${{ github.ref == 'refs/heads/master' && vars.HAVE_PAT_REPOSITORY_TOKEN == '1' }}
         with:
           tag_name: "Nightly"
           files: |
@@ -126,7 +126,7 @@ jobs:
           dnf install curl wget2 unzip mingw64-bzip2.noarch mingw64-poppler mingw64-poppler-glib mingw32-python3 rust-gio-devel adwaita-icon-theme -y && dnf clean all -y
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
           source "$HOME/.cargo/env"
-          rustup default 1.90.0
+          rustup default 1.92.0
           rustup target add x86_64-pc-windows-gnu
           
           mkdir -p package

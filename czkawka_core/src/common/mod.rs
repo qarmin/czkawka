@@ -5,15 +5,17 @@ pub mod consts;
 pub mod dir_traversal;
 pub mod directories;
 pub mod extensions;
+pub mod ffmpeg_utils;
 pub mod image;
 pub mod items;
 pub mod logger;
 pub mod model;
+pub mod process_utils;
 pub mod progress_data;
 pub mod progress_stop_handler;
 pub mod tool_data;
 pub mod traits;
-pub mod video_metadata;
+pub mod video_utils;
 
 use std::cmp::Ordering;
 use std::ffi::OsString;
@@ -354,6 +356,13 @@ pub fn make_file_symlink<P: AsRef<Path>, Q: AsRef<Path>>(src: P, dst: Q) -> io::
 #[cfg(not(any(target_family = "unix", target_family = "windows")))]
 pub fn make_file_symlink<P: AsRef<Path>, Q: AsRef<Path>>(src: P, dst: Q) -> io::Result<()> {
     Err(Error::new(io::ErrorKind::Other, "Soft links are not supported on this platform"))
+}
+
+pub fn debug_save_file(path: &str, data: &str) {
+    use std::io::Write;
+    if let Ok(mut f) = fs::OpenOptions::new().create(true).append(true).open(path) {
+        let _ = writeln!(f, "{data}");
+    }
 }
 
 #[cfg(test)]

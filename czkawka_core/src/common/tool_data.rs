@@ -186,11 +186,6 @@ pub trait CommonData {
         self.get_cd().minimal_file_size
     }
 
-    fn set_reference_directory(&mut self, reference_directory: Vec<PathBuf>) {
-        let messages = self.get_cd_mut().directories.set_reference_directory(&reference_directory);
-        self.get_cd_mut().text_messages.extend_with_another_messages(messages);
-    }
-
     #[cfg(target_family = "unix")]
     fn set_exclude_other_filesystems(&mut self, exclude_other_filesystems: bool) {
         self.get_cd_mut().directories.set_exclude_other_filesystems(exclude_other_filesystems);
@@ -241,19 +236,26 @@ pub trait CommonData {
         self.get_cd().move_to_trash
     }
 
-    fn set_included_directory(&mut self, included_directory: Vec<PathBuf>) {
-        let messages = self.get_cd_mut().directories.set_included_directory(included_directory);
+    fn set_included_paths(&mut self, included_paths: Vec<PathBuf>) {
+        let messages = self.get_cd_mut().directories.set_included_paths(included_paths);
         self.get_cd_mut().text_messages.extend_with_another_messages(messages);
     }
 
-    fn set_excluded_directory(&mut self, excluded_directory: Vec<PathBuf>) {
-        let messages = self.get_cd_mut().directories.set_excluded_directory(excluded_directory);
+    fn set_excluded_paths(&mut self, excluded_paths: Vec<PathBuf>) {
+        let messages = self.get_cd_mut().directories.set_excluded_paths(excluded_paths);
         self.get_cd_mut().text_messages.extend_with_another_messages(messages);
     }
+
+    fn set_reference_paths(&mut self, reference_paths: Vec<PathBuf>) {
+        let messages = self.get_cd_mut().directories.set_reference_paths(reference_paths);
+        self.get_cd_mut().text_messages.extend_with_another_messages(messages);
+    }
+
     fn set_allowed_extensions(&mut self, allowed_extensions: String) {
         let messages = self.get_cd_mut().extensions.set_allowed_extensions(allowed_extensions);
         self.get_cd_mut().text_messages.extend_with_another_messages(messages);
     }
+
     fn set_excluded_extensions(&mut self, excluded_extensions: String) {
         let messages = self.get_cd_mut().extensions.set_excluded_extensions(excluded_extensions);
         self.get_cd_mut().text_messages.extend_with_another_messages(messages);
@@ -264,11 +266,20 @@ pub trait CommonData {
         self.get_cd_mut().text_messages.extend_with_another_messages(messages);
     }
 
-    fn prepare_items(&mut self) {
+    #[expect(clippy::result_unit_err)]
+    fn prepare_items(&mut self) -> Result<(), ()> {
         let recursive_search = self.get_cd().recursive_search;
         // Optimizes directories and removes recursive calls
-        let messages = self.get_cd_mut().directories.optimize_directories(recursive_search);
-        self.get_cd_mut().text_messages.extend_with_another_messages(messages);
+        match self.get_cd_mut().directories.optimize_directories(recursive_search) {
+            Ok(messages) => {
+                self.get_cd_mut().text_messages.extend_with_another_messages(messages);
+                Ok(())
+            }
+            Err(messages) => {
+                self.get_cd_mut().text_messages.extend_with_another_messages(messages);
+                Err(())
+            }
+        }
     }
 
     fn delete_simple_elements_and_add_to_messages<T: ResultEntry + Sized + Send + Sync>(
@@ -488,6 +499,12 @@ pub trait CommonData {
     #[expect(clippy::print_stdout)]
     fn debug_print_common(&self) {
         println!("---------------DEBUG PRINT COMMON---------------");
+        println!("Included directories(optimized) - {:?}", self.get_cd().directories.included_directories);
+        println!("Included files(optimized) - {:?}", self.get_cd().directories.included_files);
+        println!("Excluded directories(optimized) - {:?}", self.get_cd().directories.excluded_directories);
+        println!("Excluded files(optimized) - {:?}", self.get_cd().directories.excluded_files);
+        println!("Reference directories(optimized) - {:?}", self.get_cd().directories.reference_directories);
+        println!("Reference files(optimized) - {:?}", self.get_cd().directories.reference_files);
         println!("Tool type: {:?}", self.get_cd().tool_type);
         println!("Directories: {:?}", self.get_cd().directories);
         println!("Extensions: {:?}", self.get_cd().extensions);

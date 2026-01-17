@@ -125,7 +125,7 @@
                     </property>
                     <property name="tab">
                       <object class="GtkLabel">
-                        <property name="label" translatable="yes">Included Directories</property>
+                        <property name="label" translatable="yes">Included Paths</property>
                       </object>
                     </property>
                     <property name="tab-fill">False</property>
@@ -223,7 +223,7 @@
                     <property name="position">1</property>
                     <property name="tab">
                       <object class="GtkLabel">
-                        <property name="label" translatable="yes">Excluded Directories</property>
+                        <property name="label" translatable="yes">Excluded Paths</property>
                       </object>
                     </property>
                   </object>
@@ -860,6 +860,12 @@
                               <object class="GtkCheckButton" id="check_button_broken_files_image">
                                 <property name="active">True</property>
                                 <property name="label">Image</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkCheckButton" id="check_button_broken_files_video">
+                                <property name="active">True</property>
+                                <property name="label">Video</property>
                               </object>
                             </child>
                           </object>

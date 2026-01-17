@@ -7,14 +7,13 @@ use std::{mem, panic};
 use bk_tree::BKTree;
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
-use humansize::{BINARY, format_size};
 use image::GenericImageView;
 use image_hasher::{FilterType, HashAlg, HasherConfig};
 use indexmap::{IndexMap, IndexSet};
 use log::{debug, error};
 use rayon::prelude::*;
 
-use crate::common::cache::{CACHE_IMAGE_VERSION, extract_loaded_cache, load_cache_from_file_generalized_by_path, save_cache_to_file_generalized};
+use crate::common::cache::{CACHE_IMAGE_VERSION, load_and_split_cache_generalized_by_path, save_and_connect_cache_generalized_by_path};
 use crate::common::consts::{HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, JXL_IMAGE_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult, inode, take_1_per_inode};
 use crate::common::image::get_dynamic_image_from_path;
@@ -90,47 +89,22 @@ impl SimilarImages {
 
     #[fun_time(message = "hash_images_load_cache", level = "debug")]
     fn hash_images_load_cache(&mut self) -> (BTreeMap<String, ImagesEntry>, BTreeMap<String, ImagesEntry>, BTreeMap<String, ImagesEntry>) {
-        let loaded_hash_map;
-
-        let mut records_already_cached: BTreeMap<String, ImagesEntry> = Default::default();
-        let mut non_cached_files_to_check: BTreeMap<String, ImagesEntry> = Default::default();
-
-        if self.common_data.use_cache {
-            let (messages, loaded_items) = load_cache_from_file_generalized_by_path::<ImagesEntry>(
-                &get_similar_images_cache_file(&self.get_params().hash_size, &self.get_params().hash_alg, &self.get_params().image_filter),
-                self.get_delete_outdated_cache(),
-                &self.images_to_check,
-            );
-            self.get_text_messages_mut().extend_with_another_messages(messages);
-            loaded_hash_map = loaded_items.unwrap_or_default();
-
-            debug!("hash_images-load_cache - starting calculating diff");
-            extract_loaded_cache(
-                &loaded_hash_map,
-                mem::take(&mut self.images_to_check),
-                &mut records_already_cached,
-                &mut non_cached_files_to_check,
-            );
-            debug!(
-                "hash_images_load_cache - completed diff between loaded and prechecked files, {}({}) - non cached, {}({}) - already cached",
-                non_cached_files_to_check.len(),
-                format_size(non_cached_files_to_check.values().map(|e| e.size).sum::<u64>(), BINARY),
-                records_already_cached.len(),
-                format_size(records_already_cached.values().map(|e| e.size).sum::<u64>(), BINARY),
-            );
-        } else {
-            loaded_hash_map = Default::default();
-            mem::swap(&mut self.images_to_check, &mut non_cached_files_to_check);
-        }
-        (loaded_hash_map, records_already_cached, non_cached_files_to_check)
+        load_and_split_cache_generalized_by_path(
+            &get_similar_images_cache_file(self.get_params().hash_size, self.get_params().hash_alg, self.get_params().image_filter),
+            mem::take(&mut self.images_to_check),
+            self,
+        )
     }
 
-    // Cache algorithm:
-    // - Load data from file
-    // - Remove from data to search, already loaded entries from cache(size and modified date must match)
-    // - Check hash of files which doesn't have saved entry
-    // - Join already read hashes with hashes which were read from file
-    // - Join all hashes and save it to file
+    #[fun_time(message = "save_to_cache", level = "debug")]
+    fn save_to_cache(&mut self, vec_file_entry: &[ImagesEntry], loaded_hash_map: BTreeMap<String, ImagesEntry>) {
+        save_and_connect_cache_generalized_by_path(
+            &get_similar_images_cache_file(self.get_params().hash_size, self.get_params().hash_alg, self.get_params().image_filter),
+            vec_file_entry,
+            loaded_hash_map,
+            self,
+        );
+    }
 
     #[fun_time(message = "hash_images", level = "debug")]
     pub(crate) fn hash_images(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
@@ -173,20 +147,17 @@ impl SimilarImages {
 
         progress_handler.join_thread();
 
-        // Just connect loaded results with already calculated hashes
-        for file_entry in records_already_cached.into_values() {
-            vec_file_entry.push(file_entry);
-        }
+        vec_file_entry.extend(records_already_cached.into_values());
+
+        self.save_to_cache(&vec_file_entry, loaded_hash_map);
 
         // All valid entries are used to create bktree used to check for hash similarity
-        for file_entry in &vec_file_entry {
+        for file_entry in vec_file_entry {
             // Only use to comparing, non broken hashes(all 0 or 255 hashes means that algorithm fails to decode them because e.g. contains a lot of alpha channel)
             if !(file_entry.hash.is_empty() || file_entry.hash.iter().all(|e| *e == 0) || file_entry.hash.iter().all(|e| *e == 255)) {
-                self.image_hashes.entry(file_entry.hash.clone()).or_default().push(file_entry.clone());
+                self.image_hashes.entry(file_entry.hash.clone()).or_default().push(file_entry);
             }
         }
-
-        self.save_to_cache(vec_file_entry, loaded_hash_map);
 
         // Break if stop was clicked after saving to cache
         if check_if_stop_received(stop_flag) {
@@ -194,25 +165,6 @@ impl SimilarImages {
         }
 
         WorkContinueStatus::Continue
-    }
-
-    #[fun_time(message = "save_to_cache", level = "debug")]
-    fn save_to_cache(&mut self, vec_file_entry: Vec<ImagesEntry>, loaded_hash_map: BTreeMap<String, ImagesEntry>) {
-        if self.common_data.use_cache {
-            // Must save all results to file, old loaded from file with all currently counted results
-            let mut all_results: BTreeMap<String, ImagesEntry> = loaded_hash_map;
-            for file_entry in vec_file_entry {
-                all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
-            }
-
-            let messages = save_cache_to_file_generalized(
-                &get_similar_images_cache_file(&self.get_params().hash_size, &self.get_params().hash_alg, &self.get_params().image_filter),
-                &all_results,
-                self.common_data.save_also_as_json,
-                0,
-            );
-            self.get_text_messages_mut().extend_with_another_messages(messages);
-        }
     }
 
     fn collect_image_file_entry(&self, mut file_entry: ImagesEntry) -> Result<ImagesEntry, String> {
@@ -422,8 +374,6 @@ impl SimilarImages {
                 continue;
             }
 
-            // dbg!(original_hash, compared_hash, similarity);
-
             let compared_hash_parent = if let Some((other_parent_hash, other_similarity)) = hashes_similarity.get(compared_hash) {
                 if *other_similarity > similarity {
                     Some(other_parent_hash.clone())
@@ -602,7 +552,7 @@ fn is_in_reference_folder(reference_directories: &[PathBuf], path: &Path) -> boo
 }
 
 #[expect(clippy::indexing_slicing)] // Because hash size is validated before
-pub fn get_string_from_similarity(similarity: &u32, hash_size: u8) -> String {
+pub fn get_string_from_similarity(similarity: u32, hash_size: u8) -> String {
     let index_preset = match hash_size {
         8 => 0,
         16 => 1,
@@ -611,19 +561,19 @@ pub fn get_string_from_similarity(similarity: &u32, hash_size: u8) -> String {
         _ => panic!("Invalid hash size {hash_size}"),
     };
 
-    if *similarity == 0 {
+    if similarity == 0 {
         flc!("core_similarity_original")
-    } else if *similarity <= SIMILAR_VALUES[index_preset][0] {
+    } else if similarity <= SIMILAR_VALUES[index_preset][0] {
         flc!("core_similarity_very_high")
-    } else if *similarity <= SIMILAR_VALUES[index_preset][1] {
+    } else if similarity <= SIMILAR_VALUES[index_preset][1] {
         flc!("core_similarity_high")
-    } else if *similarity <= SIMILAR_VALUES[index_preset][2] {
+    } else if similarity <= SIMILAR_VALUES[index_preset][2] {
         flc!("core_similarity_medium")
-    } else if *similarity <= SIMILAR_VALUES[index_preset][3] {
+    } else if similarity <= SIMILAR_VALUES[index_preset][3] {
         flc!("core_similarity_small")
-    } else if *similarity <= SIMILAR_VALUES[index_preset][4] {
+    } else if similarity <= SIMILAR_VALUES[index_preset][4] {
         flc!("core_similarity_very_small")
-    } else if *similarity <= SIMILAR_VALUES[index_preset][5] {
+    } else if similarity <= SIMILAR_VALUES[index_preset][5] {
         flc!("core_similarity_minimal")
     } else {
         panic!("Invalid similarity value {similarity} for hash size {hash_size} (index {index_preset})");
@@ -631,7 +581,7 @@ pub fn get_string_from_similarity(similarity: &u32, hash_size: u8) -> String {
 }
 
 #[expect(clippy::indexing_slicing)] // Because hash size is validated before
-pub fn return_similarity_from_similarity_preset(similarity_preset: &SimilarityPreset, hash_size: u8) -> u32 {
+pub fn return_similarity_from_similarity_preset(similarity_preset: SimilarityPreset, hash_size: u8) -> u32 {
     let index_preset = match hash_size {
         8 => 0,
         16 => 1,
@@ -738,11 +688,11 @@ fn debug_check_for_duplicated_things(
     assert!(!found_broken_thing);
 }
 
-pub fn get_similar_images_cache_file(hash_size: &u8, hash_alg: &HashAlg, image_filter: &FilterType) -> String {
+pub fn get_similar_images_cache_file(hash_size: u8, hash_alg: HashAlg, image_filter: FilterType) -> String {
     format!(
         "cache_similar_images_{hash_size}_{}_{}_{CACHE_IMAGE_VERSION}.bin",
-        convert_algorithm_to_string(*hash_alg),
-        convert_filters_to_string(*image_filter),
+        convert_algorithm_to_string(hash_alg),
+        convert_filters_to_string(image_filter),
     )
 }
 

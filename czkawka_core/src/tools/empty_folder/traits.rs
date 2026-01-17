@@ -21,7 +21,9 @@ impl Search for EmptyFolder {
         let start_time = Instant::now();
 
         let () = (|| {
-            self.prepare_items();
+            if self.prepare_items().is_err() {
+                return;
+            }
             if self.check_for_empty_folders(stop_flag, progress_sender) == WorkContinueStatus::Stop {
                 self.common_data.stopped_search = true;
                 return;

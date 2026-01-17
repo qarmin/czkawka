@@ -102,17 +102,6 @@ pub fn crop_detect_from_str_opt(s: &str) -> Option<Cropdetect> {
     }
 }
 
-pub fn crop_detect_from_str(s: &str) -> Cropdetect {
-    crop_detect_from_str_opt(s).unwrap_or(DEFAULT_CROP_DETECT)
-}
-pub fn crop_detect_to_str(crop_detect: Cropdetect) -> String {
-    match crop_detect {
-        Cropdetect::None => "none".to_string(),
-        Cropdetect::Letterbox => "letterbox".to_string(),
-        Cropdetect::Motion => "motion".to_string(),
-    }
-}
-
 impl SimilarVideosParameters {
     pub fn new(
         tolerance: i32,

@@ -1,16 +1,20 @@
+use std::sync::{Arc, Mutex};
+
+use czkawka_core::tools::video_optimizer::VideoOptimizerParameters;
 use rfd::FileDialog;
 use slint::ComponentHandle;
 
 use crate::model_operations::get_checked_info_from_app;
+use crate::shared_models::SharedModels;
 use crate::{MainWindow, PopupRequest, Translations, flk};
 
-pub(crate) fn connect_show_confirmation(app: &MainWindow) {
+pub(crate) fn connect_show_confirmation(app: &MainWindow, shared_models: Arc<Mutex<SharedModels>>) {
     let a = app.as_weak();
     app.on_request_setup_action_popup(move |popup_request: PopupRequest| {
         let app = a.upgrade().expect("Failed to upgrade app :(");
         let translation = app.global::<Translations>();
         let res = get_checked_info_from_app(&app);
-        let mut folder_path = "".to_string();
+        let mut data = "".to_string();
 
         match popup_request {
             PopupRequest::Delete => {
@@ -46,7 +50,7 @@ pub(crate) fn connect_show_confirmation(app: &MainWindow) {
                 let Some(folder) = file_dialog.pick_folder() else {
                     return;
                 };
-                folder_path = folder.to_string_lossy().to_string();
+                data = folder.to_string_lossy().to_string();
 
                 let mut base = flk!("rust_move_confirmation");
                 base.push_str(format!("\n{}", flk!("rust_move_confirmation_number_simple", items = res.checked_items_number)).as_str());
@@ -56,6 +60,15 @@ pub(crate) fn connect_show_confirmation(app: &MainWindow) {
                 let mut base = flk!("rust_optimize_video_confirmation");
                 base.push_str(format!("\n{}", flk!("rust_optimize_video_confirmation_number_simple", items = res.checked_items_number)).as_str());
                 translation.set_optimize_confirmation_text(base.into());
+
+                let shared_model = shared_models.lock();
+                let shared_model = shared_model.as_ref().expect("Failed to lock shared models");
+                let shared_model = shared_model.shared_video_optimizer_state.as_ref().expect("Item should be present for video optimizer");
+                data = if matches!(shared_model.get_params(), VideoOptimizerParameters::VideoCrop(_)) {
+                    "crop".to_string()
+                } else {
+                    "transcode".to_string()
+                }
             }
             PopupRequest::CleanExif => {
                 let mut base = flk!("rust_clean_exif_confirmation");
@@ -82,6 +95,6 @@ pub(crate) fn connect_show_confirmation(app: &MainWindow) {
             }
         }
 
-        app.invoke_show_action_popup(popup_request, folder_path.into());
+        app.invoke_show_action_popup(popup_request, data.into());
     });
 }

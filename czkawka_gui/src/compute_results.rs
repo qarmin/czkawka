@@ -956,7 +956,7 @@ fn similar_images_add_to_list_store(
     const COLUMNS_NUMBER: usize = 13;
     let (size_str, string_date) = format_size_and_date(size, modified_date, is_header, is_reference_folder);
     let color = get_row_color(is_header);
-    let similarity_string = if is_header { String::new() } else { get_string_from_similarity(&similarity, hash_size) };
+    let similarity_string = if is_header { String::new() } else { get_string_from_similarity(similarity, hash_size) };
 
     let values: [(u32, &dyn ToValue); COLUMNS_NUMBER] = [
         (ColumnsSimilarImages::ActivatableSelectButton as u32, &(!is_header)),

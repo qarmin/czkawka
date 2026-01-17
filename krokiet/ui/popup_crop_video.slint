@@ -1,16 +1,16 @@
 import { PopupBase } from "popup_base.slint";
 import { Translations } from "translations.slint";
-import { CheckBox, ComboBox, LineEdit, Slider } from "std-widgets.slint";
+import { CheckBox, ComboBox, Slider } from "std-widgets.slint";
 import { Settings } from "settings.slint";
 import { PopupCenteredText } from "popup_centered_text.slint";
 
-export component PopupReencodeVideo inherits Rectangle {
+export component PopupCropVideo inherits Rectangle {
     in-out property <string> title_text;
 
     callback action_confirmed();
 
     out property <length> popup_width: 420px;
-    out property <length> popup_height: 300px;
+    out property <length> popup_height: 280px;
     callback show_popup();
 
     popup_window := PopupBase {
@@ -31,37 +31,37 @@ export component PopupReencodeVideo inherits Rectangle {
                 VerticalLayout {
                     spacing: 8px;
 
-                    PopupCenteredText { text: Translations.optimize_confirmation_text; }
+                    PopupCenteredText { text: Translations.crop_video_confirmation_text; }
+
+                    CheckBox { text: Translations.crop_reencode_video_text; checked <=> Settings.popup_crop_video_reencode; }
 
                     HorizontalLayout {
                         spacing: 5px;
                         Text { text: Translations.subsettings_video_optimizer_video_codec_text; vertical_alignment: TextVerticalAlignment.center; }
-                        ComboBox { model <=> Settings.video_optimizer_sub_video_codec_config; current_value <=> Settings.video_optimizer_sub_video_codec_config_value; }
+                        ComboBox {
+                            model <=> Settings.video_optimizer_sub_video_codec_config;
+                            current_value <=> Settings.video_optimizer_sub_video_codec_config_value;
+                            enabled: Settings.popup_crop_video_reencode;
+                        }
                     }
 
                     HorizontalLayout {
                         spacing: 5px;
                         Text { text: Translations.subsettings_video_optimizer_video_quality_text; vertical_alignment: TextVerticalAlignment.center; }
-                        Slider { minimum: 0.0; maximum: 51.0; value <=> Settings.popup_reencode_video_quality; }
+                        Slider {
+                            minimum: 0.0;
+                            maximum: 51.0;
+                            value <=> Settings.popup_crop_video_quality;
+                            enabled: Settings.popup_crop_video_reencode;
+                        }
                         Text {
-                            text: Math.round(Settings.popup_reencode_video_quality) + " / 51";
+                            text: Math.round(Settings.popup_crop_video_quality) + " / 51";
                             vertical_alignment: TextVerticalAlignment.center;
                             min-width: 50px;
                         }
                     }
 
-                    CheckBox { text: Translations.optimize_fail_if_bigger_text; checked <=> Settings.popup_reencode_video_fail_if_bigger; }
-                    CheckBox { text: Translations.optimize_overwrite_files_text; checked <=> Settings.popup_reencode_video_overwrite_files; }
-
-                    CheckBox { text: Translations.optimize_limit_video_size_text; checked <=> Settings.popup_reencode_video_limit_video_size; }
-
-                    HorizontalLayout {
-                        spacing: 5px;
-                        Text { text: Translations.optimize_max_width_text; vertical_alignment: TextVerticalAlignment.center; }
-                        LineEdit { text <=> Settings.popup_reencode_video_max_width; enabled: Settings.popup_reencode_video_limit_video_size; }
-                        Text { text: Translations.optimize_max_height_text; vertical_alignment: TextVerticalAlignment.center; }
-                        LineEdit { text <=> Settings.popup_reencode_video_max_height; enabled: Settings.popup_reencode_video_limit_video_size; }
-                    }
+                    CheckBox { text: Translations.optimize_overwrite_files_text; checked <=> Settings.popup_crop_video_overwrite_files; }
 
                     Rectangle { height: 10px; }
                 }

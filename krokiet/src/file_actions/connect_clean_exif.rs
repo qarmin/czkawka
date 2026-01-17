@@ -9,17 +9,20 @@ use slint::{ComponentHandle, Weak};
 
 use crate::model_operations::model_processor::{MessageType, ModelProcessor};
 use crate::simpler_model::{SimplerMainListModel, ToSimplerVec};
-use crate::{Callabler, GuiState, MainWindow};
+use crate::{Callabler, GuiState, MainWindow, Settings};
 
 pub(crate) fn connect_clean(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
     let a = app.as_weak();
-    app.global::<Callabler>().on_clean_exif_items(move |override_file: bool| {
+    app.global::<Callabler>().on_clean_exif_items(move || {
         let weak_app = a.clone();
         let progress_sender = progress_sender.clone();
         let stop_flag = stop_flag.clone();
         stop_flag.store(false, Ordering::Relaxed);
         let app = a.upgrade().expect("Failed to upgrade app :(");
         let active_tab = app.global::<GuiState>().get_active_tab();
+
+        // Read settings from Settings global
+        let override_file = app.global::<Settings>().get_popup_clean_exif_overwrite_files();
 
         let processor = ModelProcessor::new(active_tab);
         processor.clean_exif_selected_files(progress_sender, weak_app, stop_flag, override_file);

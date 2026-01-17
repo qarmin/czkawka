@@ -26,20 +26,20 @@ where
 
     if let Some(mut curr_iter) = model.iter_first() {
         assert!(model.get::<bool>(&curr_iter, column_header));
-        assert!(model.iter_next(&curr_iter));
+        assert!(model.iter_next(&mut curr_iter));
         loop {
             let mut iters = Vec::new();
             let mut all_have = false;
-            let local_iter = curr_iter;
+            let mut local_iter = curr_iter;
             loop {
                 if model.get::<bool>(&local_iter, column_header) {
-                    if !model.iter_next(&local_iter) {
+                    if !model.iter_next(&mut local_iter) {
                         all_have = true;
                     }
                     break;
                 }
                 iters.push(local_iter);
-                if !model.iter_next(&local_iter) {
+                if !model.iter_next(&mut local_iter) {
                     all_have = true;
                     break;
                 }
@@ -134,23 +134,23 @@ mod test {
             append_row_to_list_store(&list_store, i);
         }
         let mut iters = Vec::new();
-        let iter = list_store.iter_first().expect("Failed to get first iter");
+        let mut iter = list_store.iter_first().expect("Failed to get first iter");
         iters.push(iter);
-        list_store.iter_next(&iter);
+        list_store.iter_next(&mut iter);
         iters.push(iter);
-        list_store.iter_next(&iter);
+        list_store.iter_next(&mut iter);
         iters.push(iter);
 
         sort_iters::<String>(&list_store, iters, 1);
 
         let expected = [(2, "AAA"), (1, "BBB"), (3, "CCC")];
-        let curr_iter = list_store.iter_first().expect("Failed to get first iter");
+        let mut curr_iter = list_store.iter_first().expect("Failed to get first iter");
         for exp in expected {
             let real_0 = list_store.get::<u32>(&curr_iter, 0);
             assert_eq!(real_0, exp.0);
             let real_1 = list_store.get::<String>(&curr_iter, 1);
             assert_eq!(real_1, exp.1);
-            list_store.iter_next(&curr_iter);
+            list_store.iter_next(&mut curr_iter);
         }
     }
 
@@ -169,11 +169,11 @@ mod test {
         popover_sort_general::<String>(&popover, &tree_view, 1, 0);
 
         let expected = ["DDD", "BBB", "CCC"];
-        let curr_iter = list_store.iter_first().expect("Failed to get first iter");
+        let mut curr_iter = list_store.iter_first().expect("Failed to get first iter");
         for exp in expected {
             let real = list_store.get::<String>(&curr_iter, 1);
             assert_eq!(real, exp);
-            list_store.iter_next(&curr_iter);
+            list_store.iter_next(&mut curr_iter);
         }
     }
 
@@ -202,11 +202,11 @@ mod test {
         popover_sort_general::<String>(&popover, &tree_view, 1, 0);
 
         let expected = ["AAA", "BBB", "CCC", "TTT", "AAA", "PPP", "RRR", "WWW", "ZZZ"];
-        let curr_iter = list_store.iter_first().expect("Failed to get first iter");
+        let mut curr_iter = list_store.iter_first().expect("Failed to get first iter");
         for exp in expected {
             let real = list_store.get::<String>(&curr_iter, 1);
             assert_eq!(real, exp);
-            list_store.iter_next(&curr_iter);
+            list_store.iter_next(&mut curr_iter);
         }
     }
 
@@ -249,11 +249,11 @@ mod test {
             }
 
             // Ensure at least one non-header after the last header
-            let last_iter = list_store.iter_first().expect("TEST");
+            let mut last_iter = list_store.iter_first().expect("TEST");
             let mut last_is_header;
             loop {
                 last_is_header = list_store.get::<bool>(&last_iter, 0);
-                if !list_store.iter_next(&last_iter) {
+                if !list_store.iter_next(&mut last_iter) {
                     break;
                 }
             }

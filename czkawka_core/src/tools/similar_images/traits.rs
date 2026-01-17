@@ -22,8 +22,10 @@ impl Search for SimilarImages {
         let start_time = Instant::now();
 
         let () = (|| {
-            self.prepare_items();
-            self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty();
+            if self.prepare_items().is_err() {
+                return;
+            }
+            self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty() || !self.common_data.directories.reference_files.is_empty();
             if self.check_for_similar_images(stop_flag, progress_sender) == WorkContinueStatus::Stop {
                 self.common_data.stopped_search = true;
                 return;
@@ -77,7 +79,7 @@ impl PrintResults for SimilarImages {
                         file_entry.width,
                         file_entry.height,
                         format_size(file_entry.size, BINARY),
-                        get_string_from_similarity(&file_entry.similarity, self.get_params().hash_size)
+                        get_string_from_similarity(file_entry.similarity, self.get_params().hash_size)
                     )?;
                 }
                 writeln!(writer)?;
@@ -95,7 +97,7 @@ impl PrintResults for SimilarImages {
                     file_entry.width,
                     file_entry.height,
                     format_size(file_entry.size, BINARY),
-                    get_string_from_similarity(&file_entry.similarity, self.get_params().hash_size)
+                    get_string_from_similarity(file_entry.similarity, self.get_params().hash_size)
                 )?;
                 for file_entry in vec_file_entry {
                     writeln!(
@@ -105,7 +107,7 @@ impl PrintResults for SimilarImages {
                         file_entry.width,
                         file_entry.height,
                         format_size(file_entry.size, BINARY),
-                        get_string_from_similarity(&file_entry.similarity, self.get_params().hash_size)
+                        get_string_from_similarity(file_entry.similarity, self.get_params().hash_size)
                     )?;
                 }
                 writeln!(writer)?;

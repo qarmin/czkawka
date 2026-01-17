@@ -20,7 +20,7 @@ fn test_find_biggest_files() {
 
     let params = BigFileParameters::new(2, SearchMode::BiggestFiles);
     let mut finder = BigFile::new(params);
-    finder.set_included_directory(vec![path.to_path_buf()]);
+    finder.set_included_paths(vec![path.to_path_buf()]);
 
     let stop_flag = Arc::new(AtomicBool::new(false));
     finder.search(&stop_flag, None);
@@ -43,7 +43,7 @@ fn test_find_smallest_files() {
 
     let params = BigFileParameters::new(2, SearchMode::SmallestFiles);
     let mut finder = BigFile::new(params);
-    finder.set_included_directory(vec![path.to_path_buf()]);
+    finder.set_included_paths(vec![path.to_path_buf()]);
     finder.set_recursive_search(true);
 
     let stop_flag = Arc::new(AtomicBool::new(false));
@@ -67,7 +67,7 @@ fn test_limit_number_of_files() {
 
     let params = BigFileParameters::new(3, SearchMode::BiggestFiles);
     let mut finder = BigFile::new(params);
-    finder.set_included_directory(vec![path.to_path_buf()]);
+    finder.set_included_paths(vec![path.to_path_buf()]);
 
     let stop_flag = Arc::new(AtomicBool::new(false));
     finder.search(&stop_flag, None);
@@ -83,7 +83,7 @@ fn test_empty_directory() {
 
     let params = BigFileParameters::new(5, SearchMode::BiggestFiles);
     let mut finder = BigFile::new(params);
-    finder.set_included_directory(vec![path.to_path_buf()]);
+    finder.set_included_paths(vec![path.to_path_buf()]);
     finder.set_recursive_search(true);
     let stop_flag = Arc::new(AtomicBool::new(false));
     finder.search(&stop_flag, None);

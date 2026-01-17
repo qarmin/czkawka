@@ -9,19 +9,19 @@ general_ok_button = Ok
 general_close_button = Close
 
 # Krokiet info dialog
-krokiet_info_title = Introducing Krokiet - New Version of Czkawka
+krokiet_info_title = Introducing Krokiet - New version of Czkawka
 krokiet_info_message =
-        Krokiet is the new, improved, faster and less buggy version of Czkawka GTK GUI!
+        Krokiet is the new, improved, faster and more reliable version of the Czkawka GTK GUI!
 
-        Being self-contained, it is much easier to run and more resistant to system changes and package version updates.
+        It’s easier to run and more resilient to system changes, as it depends only on core libraries available on most systems by default.
 
-        It includes many features unavailable in Czkawka, such as thumbnails in video comparison mode, file move/copy/delete progress and extended sorting options.
+        Krokiet also brings features that Czkawka lacks, including thumbnails in video comparison mode, an EXIF cleaner, file move/copy/delete progress or extended sorting options.
 
-        Try it out and see the difference!
+        Give it a try and see the difference!
 
-        Czkawka will still receive bug fixes and minor updates, but all new features will be implemented in Krokiet only.
+        Czkawka will continue to receive bug fixes and minor updates from me, but all new features will be developed exclusively for Krokiet, and anyone is free to contribute new features add missing modes or extend Czkawka further.
 
-        PS. This message should be visible only once, but if it appears again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non empty value.
+        PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
 
 # Main window
 music_title_checkbox = Title
@@ -167,6 +167,8 @@ main_check_box_broken_files_audio = Audio
 main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = Archive
 main_check_box_broken_files_image = Image
+main_check_box_broken_files_video = Video
+main_check_box_broken_files_video_tooltip = Uses ffmpeg/ffprobe to validate video files. Quite slow and may detect pedantic errors even if the file plays fine.
 
 check_button_general_same_size = Ignore same size
 check_button_general_same_size_tooltip = Ignore files with identical size in results - usually these are 1:1 duplicates
@@ -205,8 +207,8 @@ upper_add_excluded_button_tooltip = Add directory to be excluded in search.
 upper_remove_excluded_button_tooltip = Delete directory from excluded.
 
 upper_notebook_items_configuration = Items Configuration
-upper_notebook_excluded_directories = Excluded Directories
-upper_notebook_included_directories = Included Directories
+upper_notebook_excluded_directories = Excluded Paths
+upper_notebook_included_directories = Included Paths
 
 upper_allowed_extensions_tooltip = 
         Allowed extensions must be separated by commas (by default all are available).
@@ -222,7 +224,7 @@ upper_excluded_extensions_tooltip =
 
 upper_excluded_items_tooltip = 
         Excluded items must contain * wildcard and should be separated by commas.
-        This is slower than Excluded Directories, so use it carefully.
+        This is slower than Excluded Paths, so use it carefully.
 
 upper_excluded_items = Excluded Items:
 upper_allowed_extensions = Allowed Extensions:

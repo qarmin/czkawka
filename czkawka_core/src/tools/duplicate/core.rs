@@ -342,7 +342,7 @@ impl DuplicateFinder {
 
         if self.get_params().use_prehash_cache {
             let (messages, loaded_items) = load_cache_from_file_generalized_by_size::<DuplicateEntry>(
-                &get_duplicate_cache_file(&self.get_params().hash_type, true),
+                &get_duplicate_cache_file(self.get_params().hash_type, true),
                 self.get_delete_outdated_cache(),
                 &self.files_with_identical_size,
             );
@@ -392,7 +392,7 @@ impl DuplicateFinder {
             }
 
             let messages = save_cache_to_file_generalized(
-                &get_duplicate_cache_file(&self.get_params().hash_type, true),
+                &get_duplicate_cache_file(self.get_params().hash_type, true),
                 &save_cache_to_hashmap,
                 self.common_data.save_also_as_json,
                 self.get_params().minimal_prehash_cache_file_size,
@@ -550,7 +550,7 @@ impl DuplicateFinder {
         if self.common_data.use_cache {
             debug!("full_hashing_load_cache_at_start - using cache");
             let (messages, loaded_items) = load_cache_from_file_generalized_by_size::<DuplicateEntry>(
-                &get_duplicate_cache_file(&self.get_params().hash_type, false),
+                &get_duplicate_cache_file(self.get_params().hash_type, false),
                 self.get_delete_outdated_cache(),
                 &pre_checked_map,
             );
@@ -616,7 +616,7 @@ impl DuplicateFinder {
         }
 
         let messages = save_cache_to_file_generalized(
-            &get_duplicate_cache_file(&self.get_params().hash_type, false),
+            &get_duplicate_cache_file(self.get_params().hash_type, false),
             &all_results,
             self.common_data.save_also_as_json,
             self.get_params().minimal_cache_file_size,
@@ -790,7 +790,7 @@ impl DuplicateFinder {
     }
 }
 
-pub fn get_duplicate_cache_file(type_of_hash: &HashType, is_prehash: bool) -> String {
+pub fn get_duplicate_cache_file(type_of_hash: HashType, is_prehash: bool) -> String {
     let prehash_str = if is_prehash { "_prehash" } else { "" };
     format!("cache_duplicates_{type_of_hash:?}{prehash_str}_{CACHE_DUPLICATE_VERSION}.bin")
 }

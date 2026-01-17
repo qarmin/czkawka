@@ -22,7 +22,7 @@ fn test_find_duplicates_by_hash() {
     let params = DuplicateFinderParameters::new(CheckingMethod::Hash, HashType::Blake3, false, false, 0, 0, true);
 
     let mut finder = DuplicateFinder::new(params);
-    finder.set_included_directory(vec![path.to_path_buf()]);
+    finder.set_included_paths(vec![path.to_path_buf()]);
     finder.set_minimal_file_size(0);
     finder.set_recursive_search(true);
     finder.set_use_cache(false);
@@ -48,7 +48,7 @@ fn test_find_duplicates_by_size() {
     let params = DuplicateFinderParameters::new(CheckingMethod::Size, HashType::Blake3, false, false, 0, 0, true);
 
     let mut finder = DuplicateFinder::new(params);
-    finder.set_included_directory(vec![path.to_path_buf()]);
+    finder.set_included_paths(vec![path.to_path_buf()]);
     finder.set_recursive_search(true);
     finder.set_minimal_file_size(0);
     finder.set_use_cache(false);
@@ -80,7 +80,7 @@ fn test_find_duplicates_by_name() {
 
     let mut finder = DuplicateFinder::new(params);
     finder.set_recursive_search(true);
-    finder.set_included_directory(vec![path.to_path_buf()]);
+    finder.set_included_paths(vec![path.to_path_buf()]);
     finder.set_minimal_file_size(0);
     finder.set_use_cache(false);
     let stop_flag = Arc::new(AtomicBool::new(false));
@@ -114,7 +114,7 @@ fn test_case_insensitive_name_comparison() {
     finder.set_recursive_search(true);
     finder.set_use_cache(false);
     finder.set_minimal_file_size(0);
-    finder.set_included_directory(vec![path.to_path_buf()]);
+    finder.set_included_paths(vec![path.to_path_buf()]);
 
     let stop_flag = Arc::new(AtomicBool::new(false));
     finder.search(&stop_flag, None);
@@ -134,7 +134,7 @@ fn test_no_duplicates_found() {
     let params = DuplicateFinderParameters::new(CheckingMethod::Hash, HashType::Blake3, false, false, 0, 0, true);
 
     let mut finder = DuplicateFinder::new(params);
-    finder.set_included_directory(vec![path.to_path_buf()]);
+    finder.set_included_paths(vec![path.to_path_buf()]);
     finder.set_recursive_search(true);
     finder.set_use_cache(false);
     finder.set_minimal_file_size(0);
@@ -163,7 +163,7 @@ fn test_lost_space_calculation() {
     let mut finder = DuplicateFinder::new(params);
     finder.set_minimal_file_size(0);
     finder.set_use_cache(false);
-    finder.set_included_directory(vec![path.to_path_buf()]);
+    finder.set_included_paths(vec![path.to_path_buf()]);
 
     let stop_flag = Arc::new(AtomicBool::new(false));
     finder.search(&stop_flag, None);

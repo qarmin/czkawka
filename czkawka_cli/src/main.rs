@@ -216,7 +216,7 @@ fn similar_images(similar_images: SimilarImagesArgs, stop_flag: &Arc<AtomicBool>
         ignore_same_size,
     } = similar_images;
 
-    let similarity = return_similarity_from_similarity_preset(&similarity_preset, hash_size);
+    let similarity = return_similarity_from_similarity_preset(similarity_preset, hash_size);
     let params = SimilarImagesParameters::new(
         similarity,
         hash_size,
@@ -432,11 +432,11 @@ where
     let mut included_directories = common_cli_items.directories.clone();
     if let Some(reference_directories) = reference_directories {
         included_directories.extend_from_slice(reference_directories);
-        component.set_reference_directory(reference_directories.clone());
+        component.set_reference_paths(reference_directories.clone());
     }
 
-    component.set_included_directory(included_directories);
-    component.set_excluded_directory(common_cli_items.excluded_directories.clone());
+    component.set_included_paths(included_directories);
+    component.set_excluded_paths(common_cli_items.excluded_directories.clone());
     component.set_excluded_items(common_cli_items.excluded_items.clone());
     component.set_recursive_search(!common_cli_items.not_recursive);
     #[cfg(target_family = "unix")]

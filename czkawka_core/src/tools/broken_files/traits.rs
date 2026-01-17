@@ -6,11 +6,13 @@ use std::time::Instant;
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
 
+use crate::common::ffmpeg_utils::check_if_ffprobe_ffmpeg_exists;
 use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
 use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, PrintResults, Search};
-use crate::tools::broken_files::{BrokenFiles, BrokenFilesParameters, Info};
+use crate::flc;
+use crate::tools::broken_files::{BrokenFiles, BrokenFilesParameters, CheckedTypes, Info};
 
 impl AllTraits for BrokenFiles {}
 
@@ -20,7 +22,16 @@ impl Search for BrokenFiles {
         let start_time = Instant::now();
 
         let () = (|| {
-            self.prepare_items();
+            if self.params.checked_types.contains(CheckedTypes::VIDEO) && !check_if_ffprobe_ffmpeg_exists() {
+                self.common_data.text_messages.critical = Some(flc!("core_ffmpeg_not_found"));
+                #[cfg(target_os = "windows")]
+                self.common_data.text_messages.errors.push(flc!("core_ffmpeg_not_found_windows"));
+                return;
+            }
+
+            if self.prepare_items().is_err() {
+                return;
+            }
             if self.check_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
                 self.common_data.stopped_search = true;
                 return;

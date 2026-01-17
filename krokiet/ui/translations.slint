@@ -29,8 +29,8 @@ export global Translations {
     in-out property <string> translation_text: "Translation";
 
     // Bottom items
-    in-out property <string> included_directories_text: "Included Directories";
-    in-out property <string> excluded_directories_text: "Excluded Directories";
+    in-out property <string> included_paths_text: "Included Paths";
+    in-out property <string> excluded_paths_text: "Excluded Paths";
     in-out property <string> ref_text: "Ref";
     in-out property <string> path_text: "Path";
 
@@ -102,12 +102,22 @@ export global Translations {
     in-out property <string> subsettings_broken_files_pdf_text: "Pdf";
     in-out property <string> subsettings_broken_files_archive_text: "Archive";
     in-out property <string> subsettings_broken_files_image_text: "Image";
+    in-out property <string> subsettings_broken_files_video_text: "Video";
+    in-out property <string> subsettings_broken_files_video_info_text: "Uses ffmpeg/ffprobe. Quite slow and may detect pedantic errors even if file plays fine.";
 
     in-out property <string> subsettings_video_optimizer_mode_text: "Mode";
+    in-out property <string> subsettings_video_optimizer_crop_type_text: "Crop Type";
+    in-out property <string> subsettings_video_optimizer_black_pixel_threshold_text: "Black Pixel Threshold";
+    in-out property <string> subsettings_video_optimizer_black_pixel_threshold_hint_text: "Maximum RGB value for each pixel channel to be considered black (0-128). Default: 20";
+    in-out property <string> subsettings_video_optimizer_black_bar_min_percentage_text: "Black Bar Min Percentage";
+    in-out property <string> subsettings_video_optimizer_black_bar_min_percentage_hint_text: "Minimum percentage of black pixels in a row/column to be considered a black bar (50-100). Default: 90";
+    in-out property <string> subsettings_video_optimizer_max_samples_text: "Max Samples";
+    in-out property <string> subsettings_video_optimizer_max_samples_hint_text: "Maximum number of frames to analyze per video (5-1000). Default: 60";
+    in-out property <string> subsettings_video_optimizer_min_crop_size_text: "Min Crop Size";
+    in-out property <string> subsettings_video_optimizer_min_crop_size_hint_text: "Minimum pixels to crop on any side (1-1000). Smaller crops are ignored. Default: 5";
     in-out property <string> subsettings_video_optimizer_video_codec_text: "Video codec";
     in-out property <string> subsettings_video_optimizer_excluded_codecs_text: "Excluded codecs";
     in-out property <string> subsettings_video_optimizer_video_quality_text: "Video quality (CRF)";
-    in-out property <string> subsettings_video_optimizer_image_threshold_text: "Image threshold";
     in-out property <string> subsettings_reset_text: "Reset";
 
     in-out property <string> subsettings_exif_ignored_tags_text: "Ignored tags:";
@@ -199,9 +209,11 @@ export global Translations {
     in-out property <string> clean_confirmation_text: "Are you sure you want to remove EXIF data from the selected items?";
     in-out property <string> clean_exif_overwrite_files_text: "Overwrite files";
 
-    // Popup optimize
-    in-out property <string> optimize_text: "Optimize images";
-    in-out property <string> optimize_confirmation_text: "Are you sure you want to optimize the selected items?";
+    in-out property <string> crop_videos_text: "Crop videos";
+    in-out property <string> crop_video_confirmation_text: "Are you sure you want to crop the selected videos?";
+    in-out property <string> crop_reencode_video_text: "Re-encode video";
+    in-out property <string> reencode_videos_text: "Re-encode videos";
+    in-out property <string> optimize_confirmation_text: "Are you sure you want to re-encode the selected videos?";
     in-out property <string> optimize_fail_if_bigger_text: "Fail if optimized file is bigger";
     in-out property <string> optimize_overwrite_files_text: "Overwrite files";
     in-out property <string> optimize_limit_video_size_text: "Limit video size";

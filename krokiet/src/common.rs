@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use num_enum::TryFromPrimitive;
 use slint::{ComponentHandle, Model, ModelRc, SharedString, VecModel};
 
-use crate::{ActiveTab, ExcludedDirectoriesModel, IncludedDirectoriesModel, MainListModel, MainWindow, Settings};
+use crate::{ActiveTab, ExcludedPathsModel, IncludedPathsModel, MainListModel, MainWindow, Settings};
 
 // Int model is used to store data in unchanged(* except that we need to split u64 into two i32) form and is used to sort/select data
 // Str model is used to display data in gui
@@ -147,10 +147,9 @@ pub enum IntDataSimilarVideos {
     BitratePart2,
     Duration,
     Fps,
-    PixelsPart1,
-    PixelsPart2,
+    Dimensions,
 }
-pub const MAX_INT_DATA_SIMILAR_VIDEOS: usize = IntDataSimilarVideos::PixelsPart2 as usize + 1;
+pub const MAX_INT_DATA_SIMILAR_VIDEOS: usize = IntDataSimilarVideos::Dimensions as usize + 1;
 
 #[repr(u8)]
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
@@ -293,10 +292,14 @@ pub enum IntDataVideoOptimizer {
     ModificationDatePart2,
     SizePart1,
     SizePart2,
-    DimensionsPart1,
-    DimensionsPart2,
+    Dimensions,
+    DiffInPixels,
+    RectLeft,
+    RectTop,
+    RectRight,
+    RectBottom,
 }
-pub const MAX_INT_DATA_VIDEO_OPTIMIZER: usize = IntDataVideoOptimizer::DimensionsPart2 as usize + 1;
+pub const MAX_INT_DATA_VIDEO_OPTIMIZER: usize = IntDataVideoOptimizer::RectBottom as usize + 1;
 
 #[repr(u8)]
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
@@ -306,6 +309,7 @@ pub enum StrDataVideoOptimizer {
     Path,
     Codec,
     Dimensions,
+    NewDimensions,
     ModificationDate,
 }
 pub const MAX_STR_DATA_VIDEO_OPTIMIZER: usize = StrDataVideoOptimizer::ModificationDate as usize + 1;
@@ -369,7 +373,7 @@ impl ActiveTab {
                 StrDataSimilarVideos::Bitrate => SortIdx::IntIdxPair(IntDataSimilarVideos::BitratePart1 as i32, IntDataSimilarVideos::BitratePart2 as i32),
                 StrDataSimilarVideos::Duration => SortIdx::IntIdx(IntDataSimilarVideos::Duration as i32),
                 StrDataSimilarVideos::Fps => SortIdx::IntIdx(IntDataSimilarVideos::Fps as i32),
-                StrDataSimilarVideos::Dimensions => SortIdx::IntIdxPair(IntDataSimilarVideos::PixelsPart1 as i32, IntDataSimilarVideos::PixelsPart2 as i32),
+                StrDataSimilarVideos::Dimensions => SortIdx::IntIdx(IntDataSimilarVideos::Dimensions as i32),
             },
             Self::SimilarMusic => match StrDataSimilarMusic::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for SimilarMusic")) {
                 StrDataSimilarMusic::Name
@@ -415,7 +419,8 @@ impl ActiveTab {
                     SortIdx::IntIdxPair(IntDataVideoOptimizer::ModificationDatePart1 as i32, IntDataVideoOptimizer::ModificationDatePart2 as i32)
                 }
                 StrDataVideoOptimizer::Size => SortIdx::IntIdxPair(IntDataVideoOptimizer::SizePart1 as i32, IntDataVideoOptimizer::SizePart2 as i32),
-                StrDataVideoOptimizer::Dimensions => SortIdx::IntIdxPair(IntDataVideoOptimizer::DimensionsPart1 as i32, IntDataVideoOptimizer::DimensionsPart2 as i32),
+                StrDataVideoOptimizer::Dimensions => SortIdx::IntIdx(IntDataVideoOptimizer::Dimensions as i32),
+                StrDataVideoOptimizer::NewDimensions => SortIdx::IntIdx(IntDataVideoOptimizer::DiffInPixels as i32),
             },
             Self::Settings | Self::About => panic!("Button should be disabled"),
         }
@@ -608,15 +613,15 @@ impl ActiveTab {
     }
 }
 
-pub(crate) fn create_included_directories_model_from_pathbuf(items: &[PathBuf], referenced: &[PathBuf]) -> ModelRc<IncludedDirectoriesModel> {
+pub(crate) fn create_included_paths_model_from_pathbuf(items: &[PathBuf], referenced: &[PathBuf]) -> ModelRc<IncludedPathsModel> {
     let referenced_as_string = referenced.iter().map(|x| x.to_string_lossy().to_string()).collect::<Vec<_>>();
     let converted = items
         .iter()
         .map(|x| {
             let path_as_string = x.to_string_lossy().to_string();
-            IncludedDirectoriesModel {
+            IncludedPathsModel {
                 path: x.to_string_lossy().to_string().into(),
-                referenced_folder: referenced_as_string.contains(&path_as_string),
+                referenced_path: referenced_as_string.contains(&path_as_string),
                 selected_row: false,
             }
         })
@@ -624,10 +629,10 @@ pub(crate) fn create_included_directories_model_from_pathbuf(items: &[PathBuf], 
     ModelRc::new(VecModel::from(converted))
 }
 
-pub(crate) fn create_excluded_directories_model_from_pathbuf(items: &[PathBuf]) -> ModelRc<ExcludedDirectoriesModel> {
+pub(crate) fn create_excluded_paths_model_from_pathbuf(items: &[PathBuf]) -> ModelRc<ExcludedPathsModel> {
     let converted = items
         .iter()
-        .map(|x| ExcludedDirectoriesModel {
+        .map(|x| ExcludedPathsModel {
             path: x.to_string_lossy().to_string().into(),
             selected_row: false,
         })
@@ -636,13 +641,13 @@ pub(crate) fn create_excluded_directories_model_from_pathbuf(items: &[PathBuf]) 
 }
 
 pub(crate) fn check_if_there_are_any_included_folders(app: &MainWindow) -> bool {
-    let included = app.global::<Settings>().get_included_directories_model();
+    let included = app.global::<Settings>().get_included_paths_model();
     included.iter().count() > 0
 }
 
 pub(crate) fn check_if_all_included_dirs_are_referenced(app: &MainWindow) -> bool {
-    let included = app.global::<Settings>().get_included_directories_model();
-    included.iter().all(|x| x.referenced_folder)
+    let included = app.global::<Settings>().get_included_paths_model();
+    included.iter().all(|x| x.referenced_path)
 }
 
 pub(crate) fn create_vec_model_from_vec_string(items: Vec<String>) -> VecModel<SharedString> {

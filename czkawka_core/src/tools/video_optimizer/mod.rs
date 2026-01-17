@@ -3,6 +3,7 @@ pub mod core;
 mod tests;
 pub mod traits;
 
+use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
@@ -33,7 +34,7 @@ impl VideoCodec {
     pub const fn as_ffprobe_codec_name(&self) -> &str {
         match self {
             Self::H264 => "h264",
-            Self::H265 => "hevc",
+            Self::H265 => "h265",
             Self::Av1 => "av1",
             Self::Vp9 => "vp9",
         }
@@ -46,7 +47,7 @@ impl std::str::FromStr for VideoCodec {
     fn from_str(codec: &str) -> Result<Self, Self::Err> {
         match codec.to_lowercase().as_str() {
             "h264" | "libx264" => Ok(Self::H264),
-            "h265" | "hevc" | "libx265" => Ok(Self::H265),
+            "h265" | "libx265" => Ok(Self::H265),
             "av1" | "libaom-av1" => Ok(Self::Av1),
             "vp9" | "libvpx-vp9" => Ok(Self::Vp9),
             _ => Err(format!("Unknown codec: {codec}")),
@@ -55,22 +56,40 @@ impl std::str::FromStr for VideoCodec {
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
-pub enum OptimizerMode {
+pub enum VideoCroppingMechanism {
+    BlackBars,
+    StaticContent,
+}
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+pub enum VideoOptimizerMode {
     VideoTranscode,
     VideoCrop,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum VideoOptimizerFixParams {
-    VideoTranscode {
-        codec: VideoCodec,
-        quality: u32,
-    },
-    VideoCrop {
-        crop_start_end_static_frames: bool,
-        crop_black_bars: bool,
-        crop_static_parts: bool,
-    },
+    VideoTranscode(VideoTranscodeFixParams),
+    VideoCrop(VideoCropFixParams),
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+pub struct VideoTranscodeFixParams {
+    pub codec: VideoCodec,
+    pub quality: u32,
+    pub fail_if_not_smaller: bool,
+    pub overwrite_original: bool,
+    pub limit_video_size: bool,
+    pub max_width: u32,
+    pub max_height: u32,
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+pub struct VideoCropFixParams {
+    pub overwrite_original: bool,
+    pub target_codec: Option<VideoCodec>,
+    pub quality: Option<u32>,
+    pub crop_rectangle: (u32, u32, u32, u32),
+    pub crop_mechanism: VideoCroppingMechanism,
 }
 
 #[derive(Debug, Default, Clone)]
@@ -80,26 +99,54 @@ pub struct Info {
     pub scanning_time: Duration,
 }
 
-#[derive(Clone)]
-pub struct VideoOptimizerParameters {
-    pub mode: OptimizerMode,
-    pub excluded_codecs: Vec<String>,
+#[derive(Clone, PartialEq, Debug)]
+pub enum VideoOptimizerParameters {
+    VideoTranscode(VideoTranscodeParams),
+    VideoCrop(VideoCropParams),
 }
 
-impl Default for VideoOptimizerParameters {
-    fn default() -> Self {
+#[derive(Clone, Eq, PartialEq, Debug)]
+pub struct VideoTranscodeParams {
+    pub excluded_codecs: Vec<String>,
+}
+#[derive(Clone, PartialEq, Debug)]
+pub struct VideoCropParams {
+    pub(crate) crop_detect: VideoCroppingMechanism,
+    pub(crate) black_pixel_threshold: u8,
+    pub(crate) black_bar_min_percentage: u8,
+    pub(crate) max_samples: usize,
+    pub(crate) min_crop_size: u32,
+}
+
+impl VideoTranscodeParams {
+    pub fn new() -> Self {
         Self {
-            mode: OptimizerMode::VideoTranscode,
-            excluded_codecs: vec!["hevc".to_string(), "av1".to_string(), "vp9".to_string()],
+            excluded_codecs: vec!["h265".to_string(), "av1".to_string(), "vp9".to_string()],
         }
     }
 }
+impl Default for VideoTranscodeParams {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
-impl VideoOptimizerParameters {
-    pub fn new(mode: OptimizerMode) -> Self {
+impl VideoCropParams {
+    pub fn with_custom_params(crop_detect: VideoCroppingMechanism, black_pixel_threshold: u8, black_bar_min_percentage: u8, max_samples: usize, min_crop_size: u32) -> Self {
+        assert!(black_pixel_threshold <= 128, "black_pixel_threshold must be 0-128, got {black_pixel_threshold}");
+        assert!(
+            (50..=100).contains(&black_bar_min_percentage),
+            "black_bar_min_percentage must be 50-100, got {black_bar_min_percentage}"
+        );
+        assert!((5..=1000).contains(&max_samples), "max_samples must be 5-1000, got {max_samples}");
+        assert!((1..=1000).contains(&min_crop_size), "min_crop_size must be 1-1000, got {min_crop_size}");
+
         Self {
-            mode,
-            excluded_codecs: vec!["hevc".to_string(), "av1".to_string(), "vp9".to_string()],
+            crop_detect,
+            black_pixel_threshold,
+            black_bar_min_percentage,
+            max_samples,
+            min_crop_size,
         }
     }
 }
@@ -126,9 +173,7 @@ pub struct VideoCropEntry {
     pub codec: String,
     pub width: u32,
     pub height: u32,
-    pub start_crop_frame: Option<u32>,
-    pub end_crop_frame: Option<u32>,
-    pub new_image_dimensions: Option<(u32, u32, u32, u32)>, // (left top, right top, right bottom, left bottom)
+    pub new_image_dimensions: Option<(u32, u32, u32, u32)>,
 }
 
 impl ResultEntry for VideoTranscodeEntry {
@@ -177,8 +222,6 @@ impl FileEntry {
             codec: String::new(),
             width: 0,
             height: 0,
-            start_crop_frame: None,
-            end_crop_frame: None,
             new_image_dimensions: None,
         }
     }
@@ -192,18 +235,20 @@ pub enum VideoOptimizerEntry {
 pub struct VideoOptimizer {
     common_data: CommonToolData,
     information: Info,
-    video_transcode_entries: Vec<VideoTranscodeEntry>,
-    video_crop_entries: Vec<VideoCropEntry>,
+    video_transcode_test_entries: BTreeMap<String, VideoTranscodeEntry>,
+    video_crop_test_entries: BTreeMap<String, VideoCropEntry>,
+    video_transcode_result_entries: Vec<VideoTranscodeEntry>,
+    video_crop_result_entries: Vec<VideoCropEntry>,
     params: VideoOptimizerParameters,
 }
 
 impl VideoOptimizer {
     pub const fn get_video_transcode_entries(&self) -> &Vec<VideoTranscodeEntry> {
-        &self.video_transcode_entries
+        &self.video_transcode_result_entries
     }
 
     pub const fn get_video_crop_entries(&self) -> &Vec<VideoCropEntry> {
-        &self.video_crop_entries
+        &self.video_crop_result_entries
     }
 
     pub const fn get_params(&self) -> &VideoOptimizerParameters {

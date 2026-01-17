@@ -20,7 +20,7 @@ use file_actions::connect_move::connect_move;
 use file_actions::connect_optimize_video::connect_optimize_video;
 use file_actions::connect_rename::connect_rename;
 use file_actions::connect_symlink::connect_symlink;
-use log::info;
+use log::{error, info};
 use slint::VecModel;
 
 use crate::clear_outdated_video_thumbnails::clear_outdated_video_thumbnails;
@@ -72,8 +72,8 @@ slint::include_modules!();
 
 fn main() {
     let config_cache_path_set_result = set_config_cache_path("Czkawka", "Krokiet");
-    setup_logger(false, "krokiet", filtering_messages);
     let cli_args = process_cli_args("Krokiet", "krokiet_gui", std::env::args().skip(1).collect());
+    setup_logger(false, "krokiet", filtering_messages);
     print_version_mode("Krokiet");
     print_infos_and_warnings(config_cache_path_set_result.infos, config_cache_path_set_result.warnings);
     print_krokiet_features();
@@ -85,14 +85,21 @@ fn main() {
     // Clamp to allowed range to be safe
     if base_settings.use_manual_application_scale {
         let scale = base_settings.manual_application_scale.clamp(0.5, 3.0);
+        // SAFETY:
+        // set_var is safe when using on single threaded context
         unsafe {
             std::env::set_var("SLINT_SCALE_FACTOR", format!("{scale:.2}"));
         }
     }
 
-    // TODO Set custom scale
-
-    let app = MainWindow::new().expect("Failed to create main window");
+    let app = match MainWindow::new() {
+        Ok(app) => app,
+        Err(e) => {
+            error!("Error during creating main window: {e}");
+            show_critical_error(e.to_string());
+            return;
+        }
+    };
 
     let (progress_sender, progress_receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
     let stop_flag: Arc<AtomicBool> = Arc::default();
@@ -120,7 +127,7 @@ fn main() {
     connect_showing_proper_select_buttons(&app);
     connect_move(&app, progress_sender.clone(), stop_flag.clone());
     connect_rename(&app, progress_sender.clone(), stop_flag.clone());
-    connect_optimize_video(&app, progress_sender.clone(), stop_flag.clone(), Arc::clone(&shared_models));
+    connect_optimize_video(&app, progress_sender.clone(), stop_flag.clone());
     connect_clean(&app, progress_sender.clone(), stop_flag.clone());
     connect_hardlink(&app, progress_sender.clone(), stop_flag.clone());
     connect_symlink(&app, progress_sender, stop_flag);
@@ -130,7 +137,7 @@ fn main() {
     connect_sort_column(&app);
     connect_showing_proper_sort_buttons(&app);
     connect_size_of_config_cache(&app);
-    connect_show_confirmation(&app);
+    connect_show_confirmation(&app, Arc::clone(&shared_models));
 
     clear_outdated_video_thumbnails(&app);
 
@@ -138,9 +145,22 @@ fn main() {
     // This is simpler solution, than setting sizes of popups manually for each language
     app.invoke_initialize_popup_sizes();
 
-    app.run().expect("Failed to run app :(");
+    match app.run() {
+        Ok(()) => {
+            save_all_settings_to_file(&app, original_preset_idx);
+        }
+        Err(e) => {
+            error!("Error during running the application: {e}");
+            show_critical_error(e.to_string());
+        }
+    }
+}
 
-    save_all_settings_to_file(&app, original_preset_idx);
+pub fn show_critical_error(error: String) {
+    rfd::MessageDialog::new()
+        .set_title(flk!("rust_init_error_title"))
+        .set_description(&flk!("rust_init_error_message", error_message = error))
+        .show();
 }
 
 pub(crate) fn zeroing_all_models(app: &MainWindow) {

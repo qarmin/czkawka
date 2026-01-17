@@ -45,7 +45,7 @@ fn test_similar_images() {
         let params = SimilarImagesParameters::new(similarity, hash_size, hash_alg, filter_type, false, true);
 
         let mut finder = SimilarImages::new(params);
-        finder.set_included_directory(vec![test_path.clone()]);
+        finder.set_included_paths(vec![test_path.clone()]);
         finder.set_recursive_search(true);
         finder.set_use_cache(false);
 
@@ -72,7 +72,7 @@ fn test_similar_images_exclude_same_size() {
     let params = SimilarImagesParameters::new(10, 8, HashAlg::Gradient, FilterType::Lanczos3, true, true);
 
     let mut finder = SimilarImages::new(params);
-    finder.set_included_directory(vec![test_path]);
+    finder.set_included_paths(vec![test_path]);
     finder.set_recursive_search(true);
     finder.set_use_cache(false);
 
@@ -102,7 +102,7 @@ fn test_similar_images_empty_directory() {
     let params = SimilarImagesParameters::new(10, 8, HashAlg::Gradient, FilterType::Lanczos3, false, true);
 
     let mut finder = SimilarImages::new(params);
-    finder.set_included_directory(vec![path.to_path_buf()]);
+    finder.set_included_paths(vec![path.to_path_buf()]);
     finder.set_recursive_search(true);
     finder.set_use_cache(false);
 

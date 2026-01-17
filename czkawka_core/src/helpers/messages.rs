@@ -5,6 +5,7 @@ use crate::flc;
 /// Stores messages, warnings, and errors for reporting.
 #[derive(Debug, Default, Clone)]
 pub struct Messages {
+    pub critical: Option<String>,
     /// Informational messages.
     pub messages: Vec<String>,
     /// Warning messages.
@@ -50,6 +51,13 @@ impl Messages {
     /// Creates a formatted string containing all messages, warnings, and errors.
     pub fn create_messages_text(&self, limit: MessageLimit) -> String {
         let mut text_to_return: String = String::new();
+
+        if let Some(critical) = &self.critical {
+            text_to_return += "------------------------------CRITICAL ERROR---------------------------\n";
+            text_to_return += critical;
+            text_to_return += "\n";
+            text_to_return += "--------------------------END OF CRITICAL ERROR------------------------\n";
+        }
 
         if !self.errors.is_empty() {
             text_to_return += "--------------------------------ERRORS---------------------------------\n";
