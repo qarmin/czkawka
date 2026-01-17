@@ -88,7 +88,7 @@ fn popover_all_except_longest_shortest_path(
 ) {
     let model = tree_view.get_model();
 
-    if let Some(iter) = model.iter_first() {
+    if let Some(mut iter) = model.iter_first() {
         let mut end: bool = false;
         loop {
             let mut tree_iter_array: Vec<TreeIter> = Vec::new();
@@ -99,7 +99,7 @@ fn popover_all_except_longest_shortest_path(
 
             loop {
                 if model.get::<bool>(&iter, column_header) {
-                    if !model.iter_next(&iter) {
+                    if !model.iter_next(&mut iter) {
                         end = true;
                     }
                     break;
@@ -117,7 +117,7 @@ fn popover_all_except_longest_shortest_path(
                 }
                 current_index += 1;
 
-                if !model.iter_next(&iter) {
+                if !model.iter_next(&mut iter) {
                     end = true;
                     break;
                 }
