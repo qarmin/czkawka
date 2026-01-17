@@ -20,8 +20,8 @@ pub(crate) fn connect_select(app: &MainWindow) {
             SelectMode::SelectAll => select_all(&current_model),
             SelectMode::UnselectAll => deselect_all(&current_model),
             SelectMode::InvertSelection => invert_selection(&current_model),
-            SelectMode::SelectTheBiggestSize => select_by_property(&current_model, active_tab, Property::Size, false),
-            SelectMode::SelectTheSmallestSize => select_by_property(&current_model, active_tab, Property::Size, true),
+            SelectMode::SelectTheBiggestSize => select_by_property(&current_model, active_tab, Property::Size, true),
+            SelectMode::SelectTheSmallestSize => select_by_property(&current_model, active_tab, Property::Size, false),
             SelectMode::SelectTheBiggestResolution => select_by_property(&current_model, active_tab, Property::Resolution, false),
             SelectMode::SelectTheSmallestResolution => select_by_property(&current_model, active_tab, Property::Resolution, true),
             SelectMode::SelectNewest => select_by_property(&current_model, active_tab, Property::Date, true),
@@ -102,16 +102,31 @@ fn set_select_buttons(app: &MainWindow) {
 }
 
 fn extract_comparable_field(model: &MainListModel, property: Property, active_tab: ActiveTab) -> u64 {
-    let val_ints = model.val_int.iter().collect::<Vec<_>>();
-    let val_strs = model.val_str.iter().collect::<Vec<_>>();
+    let mut val_ints = model.val_int.iter();
+    let mut val_strs = model.val_str.iter();
     match property {
-        Property::Size => connect_i32_into_u64(val_ints[active_tab.get_int_size_idx()], val_ints[active_tab.get_int_size_idx() + 1]),
-        Property::Date => connect_i32_into_u64(
-            val_ints[active_tab.get_int_modification_date_idx()],
-            val_ints[active_tab.get_int_modification_date_idx() + 1],
-        ),
-        Property::PathLength => val_strs[active_tab.get_str_path_idx()].len() as u64,
-        Property::Resolution => (val_ints[active_tab.get_int_width_idx()].max(0) as u64) * (val_ints[active_tab.get_int_height_idx()].max(0) as u64),
+        Property::Size => {
+            let high = val_ints.nth(active_tab.get_int_size_idx()).expect("can find file size property");
+            let low = val_ints.next().expect("can find file size property");
+            connect_i32_into_u64(high, low)
+        }
+        Property::Date => {
+            let high = val_ints.nth(active_tab.get_int_modification_date_idx()).expect("can find file last modified property");
+            let low = val_ints.next().expect("can find file last modified property");
+            connect_i32_into_u64(high, low)
+        }
+        Property::PathLength => val_strs.nth(active_tab.get_str_path_idx()).expect("can find file path property").len() as u64,
+        Property::Resolution => {
+            let h_idx = active_tab.get_int_height_idx();
+            let w_idx = active_tab.get_int_width_idx();
+            assert_ne! {h_idx, w_idx, "file height and width must be stored in separate properties"};
+            let min = h_idx.min(w_idx);
+            let diff = h_idx.abs_diff(w_idx);
+            let dim1 = val_ints.nth(min).expect("can find dimension property");
+            // nth is zero indexed, therefore if |h_idx - w_idx| = 1, we want the immediate next int value
+            let dim2 = val_ints.nth(diff - 1).expect("can find dimension property");
+            (dim1 * dim2) as u64
+        }
     }
 }
 
