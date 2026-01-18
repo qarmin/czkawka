@@ -25,9 +25,9 @@
 - New mode, video optimizer, to reencode videos to more efficient codecs and cropping black/bars from videos(via external ffmpeg/ffprobe) - [#1726](https://github.com/qarmin/czkawka/pull/1726), [#1745](https://github.com/qarmin/czkawka/pull/1745)
 - New mode, exif remover, to remove certain exif tags from files - [#1745](https://github.com/qarmin/czkawka/pull/1745)
 - Ability to add files to scan, not only folders - [#1745](https://github.com/qarmin/czkawka/pull/1745)
-- Limited supported image sizes to 2000 MP - []()
-- Automatic cleaning of outdated entries, now runs max once per week - []()
-- Added new function, to manually remove outdated entries in cache files - []()
+- Limited supported image sizes to 2000 MP - [#1748](https://github.com/qarmin/czkawka/pull/1748)
+- Automatic cleaning of outdated entries, now runs max once per week - [#1748](https://github.com/qarmin/czkawka/pull/1748)
+- Added new function, to manually remove outdated entries in cache files - [#1748](https://github.com/qarmin/czkawka/pull/1748)
 
 ### CLI
 - Using colors by default in terminal output(can be disabled by feature flag) - [#1672](https://github.com/qarmin/czkawka/pull/1672)
@@ -60,8 +60,8 @@
 - Added notification dialog, when app cannot be opened - [#1745](https://github.com/qarmin/czkawka/pull/1745)
 - Added `--cache`, `--config` CLI options, to open cache/config paths  - [#1745](https://github.com/qarmin/czkawka/pull/1745)
 - Added new video optimizer and exif remover modes - [#1726](https://github.com/qarmin/czkawka/pull/1726), [#1745](https://github.com/qarmin/czkawka/pull/1745)
-- Modification date is displayed in local time instead of UTC - []()
-- Added new menu, to manually remove outdated entries in cache files - []()
+- Modification date is displayed in local time instead of UTC - [#1748](https://github.com/qarmin/czkawka/pull/1748)
+- Added new menu, to manually remove outdated entries in cache files - [#1748](https://github.com/qarmin/czkawka/pull/1748)
 
 ### External
 - Wine 10.20 contains bugfix that fixes crashes when opening file dialogs in Czkawka Gui - [Wine 49987 issue](https://bugs.winehq.org/show_bug.cgi?id=49987)
@@ -95,7 +95,7 @@
 - Replaced `imagepipe` + `rawloader` with `rawler` which is still supported and faster to decode raw files - [#1572](https://github.com/qarmin/czkawka/pull/1572)
 - Added more configuration options in video finder - [#1578](https://github.com/qarmin/czkawka/pull/1578)
 - `fast_image_resize` feature is removed and `image_hasher/fast_resize_unstable` is enabled unconditionally - [#1586](https://github.com/qarmin/czkawka/pull/1586)
-- Added to all projects, info about video properties(bitrate, codec, fps, dimensions, duration) - [#]()
+- Added to all projects, info about video properties(bitrate, codec, fps, dimensions, duration) - [#1748](https://github.com/qarmin/czkawka/pull/1748)
 
 ### CLI
 - Improved logic for deleting files and added progress bar for this operation - [#1571](https://github.com/qarmin/czkawka/pull/1571)

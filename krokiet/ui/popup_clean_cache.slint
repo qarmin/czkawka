@@ -138,7 +138,7 @@ export component PopupCleanCache inherits Rectangle {
                             }
 
                             if GuiState.cache_cleaning_result.errors_count > 0: Text {
-                                text: "Files with errors: " + GuiState.cache_cleaning_result.errors_count;
+                                text: Translations.popup_clean_cache_files_with_errors + " " + GuiState.cache_cleaning_result.errors_count;
                                 font-size: FontSizes.normal;
                             }
 

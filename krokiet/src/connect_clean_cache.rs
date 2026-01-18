@@ -96,7 +96,6 @@ pub(crate) fn connect_clean_cache(app: &MainWindow, cache_size_task_sender: std:
                         }
                     }
 
-                    // Przelicz rozmiar cache/thumbnails po zakończeniu czyszczenia
                     update_cache_sizes(&app, &cache_size_task_sender);
                 })
                 .expect("Failed to update final result in event loop");

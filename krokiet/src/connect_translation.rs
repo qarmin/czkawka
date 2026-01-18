@@ -382,6 +382,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_popup_clean_cache_stopped_by_user_text(flk!("popup_clean_cache_stopped_by_user_text").into());
     translation.set_popup_clean_cache_finished_text(flk!("popup_clean_cache_finished_text").into());
     translation.set_popup_clean_cache_error_details_text(flk!("popup_clean_cache_error_details_text").into());
+    translation.set_popup_clean_cache_files_with_errors(flk!("popup_clean_cache_files_with_errors").into());
 
     let tools_model: [(SharedString, ActiveTab); TOOLS_NUMBER] = [
         (flk!("tool_duplicate_files").into(), ActiveTab::DuplicateFiles),

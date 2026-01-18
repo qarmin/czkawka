@@ -31,7 +31,7 @@ pub(crate) const CACHE_BROKEN_FILES_VERSION: u8 = 110;
 pub(crate) const CACHE_VIDEO_OPTIMIZE_VERSION: u8 = 110;
 
 const MEMORY_LIMIT: u64 = 8 * 1024 * 1024 * 1024;
-const CLEANING_TIMESTAMPS_FILE: &str = "cleaning_timestamps.txt";
+const CLEANING_TIMESTAMPS_FILE: &str = "cleaning_timestamps.json";
 
 static CACHE_CLEANING_INTERVAL_SECONDS: Lazy<u64> = Lazy::new(|| {
     option_env!("CZKAWKA_CACHE_CLEANING_INTERVAL_SECONDS")
@@ -256,7 +256,7 @@ where
             .collect();
 
         if effective_delete_outdated {
-            update_cleaning_timestamp(cache_file_name, initial_number_of_entries != vec_loaded_entries.len());
+            update_cleaning_timestamp(cache_file_name);
         }
 
         debug!(

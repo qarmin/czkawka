@@ -101,15 +101,10 @@ pub(crate) fn should_clean_cache(cache_file_name: &str) -> bool {
     true
 }
 
-pub(crate) fn update_cleaning_timestamp(cache_file_name: &str, changed_number_of_entries: bool) {
+pub(crate) fn update_cleaning_timestamp(cache_file_name: &str) {
     let Some(timestamps_file) = get_timestamps_file_path() else {
         return;
     };
-
-    if !changed_number_of_entries && timestamps_file.exists() {
-        debug!("Cache file \"{cache_file_name}\" cleaning did not change the number of entries, skipping timestamp update.");
-        return;
-    }
 
     let mut cleaning_timestamps = if let Ok(content) = fs::read_to_string(&timestamps_file) {
         serde_json::from_str::<CleaningTimestamps>(&content).unwrap_or_else(|e| {
@@ -274,6 +269,8 @@ pub fn clean_all_cache_files(stop_flag: &Arc<AtomicBool>, cache_progress_sender:
                 stats.total_entries_removed += before - after;
                 stats.total_size_before += size_before;
                 stats.total_size_after += size_after;
+
+                update_cleaning_timestamp(&file_name);
             }
             Ok(None) => {
                 debug!("Cleaning of cache file {file_name} was skipped due to stop flag");

@@ -317,6 +317,7 @@ popup_clean_cache_overall_progress_text = Overall progress:
 popup_clean_cache_stopped_by_user_text = Cache cleaning was stopped by user
 popup_clean_cache_finished_text = Cache cleaning completed successfully!
 popup_clean_cache_error_details_text = Error details:
+popup_clean_cache_files_with_errors = Files with errors:
 subsettings_video_optimizer_mode = Mode
 subsettings_video_optimizer_crop_type = Crop Type
 subsettings_video_optimizer_black_pixel_threshold = Black Pixel Threshold
