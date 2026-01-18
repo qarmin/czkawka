@@ -6,6 +6,7 @@ use image::RgbImage;
 use serde::{Deserialize, Serialize};
 
 use crate::common::consts::VIDEO_RESOLUTION_LIMIT;
+use crate::common::process_utils::disable_windows_console_window;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct VideoMetadata {
@@ -104,6 +105,8 @@ pub(crate) fn extract_frame_ffmpeg(video_path: &Path, timestamp: f32, max_values
         let vf_filter = format!("scale='min({max_width},iw)':'min({max_height},ih)':force_original_aspect_ratio=decrease");
         command_mut.arg("-vf").arg(&vf_filter);
     }
+
+    disable_windows_console_window(command_mut);
 
     let output = command_mut
         .arg("-threads")

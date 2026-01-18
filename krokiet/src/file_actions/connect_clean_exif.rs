@@ -21,7 +21,6 @@ pub(crate) fn connect_clean(app: &MainWindow, progress_sender: Sender<ProgressDa
         let app = a.upgrade().expect("Failed to upgrade app :(");
         let active_tab = app.global::<GuiState>().get_active_tab();
 
-        // Read settings from Settings global
         let override_file = app.global::<Settings>().get_popup_clean_exif_overwrite_files();
 
         let processor = ModelProcessor::new(active_tab);

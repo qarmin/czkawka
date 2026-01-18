@@ -5,7 +5,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
 
-use chrono::DateTime;
+use chrono::{Local, TimeZone, Utc};
 use crossbeam_channel::Sender;
 use czkawka_core::common::consts::DEFAULT_THREAD_SIZE;
 use czkawka_core::common::model::{CheckingMethod, FileEntry};
@@ -768,7 +768,7 @@ fn prepare_data_model_similar_videos(fe: &VideosEntry) -> (ModelRc<SharedString>
     let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 }
-// Scan Similar Music
+////////////////////////////////////////// Similar Music
 fn scan_similar_music(
     a: Weak<MainWindow>,
     progress_sender: Sender<ProgressData>,
@@ -1481,9 +1481,8 @@ fn prepare_data_model_video_optimizer_crop(fe: &VideoCropEntry) -> (ModelRc<Shar
 }
 
 fn get_dt_timestamp_string(timestamp: u64) -> String {
-    DateTime::from_timestamp(timestamp as i64, 0)
-        .expect("Modified date always should be in valid range")
-        .to_string()
+    let dt_local = Utc.timestamp_opt(timestamp as i64, 0).single().unwrap_or_default().with_timezone(&Local);
+    dt_local.format("%Y-%m-%d %H:%M:%S").to_string()
 }
 
 ////////////////////////////////////////// Common

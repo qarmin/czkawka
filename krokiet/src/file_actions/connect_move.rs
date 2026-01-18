@@ -21,7 +21,6 @@ pub(crate) fn connect_move(app: &MainWindow, progress_sender: Sender<ProgressDat
         let app = a.upgrade().expect("Failed to upgrade app :(");
         let active_tab = app.global::<GuiState>().get_active_tab();
 
-        // Read settings from Settings global
         let preserve_structure = app.global::<Settings>().get_popup_move_preserve_folder_structure();
         let copy_mode = app.global::<Settings>().get_popup_move_copy_mode();
 
