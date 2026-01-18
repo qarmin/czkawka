@@ -98,3 +98,22 @@ export struct SortModel {
     data: SortMode,
     name: string
 }
+
+export struct CacheCleaningProgress {
+    current_cache_file: int,
+    total_cache_files: int,
+    current_file_name: string,
+    checked_entries: int,
+    all_entries: int,
+}
+
+export struct CacheCleaningResult {
+    total_files_found: int,
+    successfully_cleaned: int,
+    files_with_errors: int,
+    total_entries_removed: int,
+    total_bytes_saved: string,
+    elapsed_time_ms: int,
+    errors: string,
+}
+
