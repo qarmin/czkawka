@@ -351,7 +351,7 @@ mod tests {
 
     static INIT: Once = Once::new();
 
-    fn setup_cache_path() {
+    pub(crate) fn setup_cache_path() {
         INIT.call_once(|| {
             let temp_cache_dir = TempDir::new().expect("Failed to create temp cache dir");
             let temp_config_dir = TempDir::new().expect("Failed to create temp config dir");
