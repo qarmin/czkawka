@@ -240,10 +240,6 @@ where
 
         let effective_delete_outdated = delete_outdated_cache && should_clean;
 
-        if delete_outdated_cache && !should_clean {
-            debug!("Skipping cache cleaning for {cache_file_name} - not enough time has passed since last cleaning");
-        }
-
         vec_loaded_entries = vec_loaded_entries
             .into_par_iter()
             .filter(|file_entry| {
@@ -259,8 +255,8 @@ where
             })
             .collect();
 
-        if effective_delete_outdated && initial_number_of_entries > vec_loaded_entries.len() {
-            update_cleaning_timestamp(cache_file_name);
+        if effective_delete_outdated {
+            update_cleaning_timestamp(cache_file_name, initial_number_of_entries != vec_loaded_entries.len());
         }
 
         debug!(
