@@ -370,6 +370,18 @@ fn translate_items(app: &MainWindow) {
     translation.set_settings_similar_videos_clear_unused_thumbnails_text(flk!("settings_similar_videos_clear_unused_thumbnails").into());
     translation.set_clean_exif_overwrite_files_text(flk!("clean_exif_overwrite_files_text").into());
     translation.set_subsettings_broken_files_video_info_text(flk!("subsettings_broken_files_video_info").into());
+    translation.set_stop_text(flk!("stop_text").into());
+    translation.set_settings_cache_header_text(flk!("settings_cache_header_text").into());
+    translation.set_settings_clean_cache_button_text(flk!("settings_clean_cache_button_text").into());
+    translation.set_popup_clean_cache_title_text(flk!("popup_clean_cache_title_text").into());
+    translation.set_popup_clean_cache_confirmation_text(flk!("popup_clean_cache_confirmation_text").into());
+    translation.set_popup_clean_cache_progress_text(flk!("popup_clean_cache_progress_text").into());
+    translation.set_popup_clean_cache_current_file_text(flk!("popup_clean_cache_current_file_text").into());
+    translation.set_popup_clean_cache_file_progress_text(flk!("popup_clean_cache_file_progress_text").into());
+    translation.set_popup_clean_cache_overall_progress_text(flk!("popup_clean_cache_overall_progress_text").into());
+    translation.set_popup_clean_cache_stopped_by_user_text(flk!("popup_clean_cache_stopped_by_user_text").into());
+    translation.set_popup_clean_cache_finished_text(flk!("popup_clean_cache_finished_text").into());
+    translation.set_popup_clean_cache_error_details_text(flk!("popup_clean_cache_error_details_text").into());
 
     let tools_model: [(SharedString, ActiveTab); TOOLS_NUMBER] = [
         (flk!("tool_duplicate_files").into(), ActiveTab::DuplicateFiles),

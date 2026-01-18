@@ -123,7 +123,8 @@ rust_rename_confirmation_number_simple = { $items } items selected.
 
 rust_cache_processed_files = Processed { $files } cache files
 rust_cache_entries_stats = Removed { $removed } entries out of all { $all }, { $left } left
-rust_cache_time_elapsed = Time elapsed: { $seconds }s
+rust_cache_size_reduced = Reduced cache files size by { $size }
+rust_cache_time_elapsed = Time elapsed: { $seconds }
 
 # Slint translations, but in arrays
 
@@ -307,7 +308,6 @@ subsettings_videos_thumbnail_percentage = Thumbnail position in video (%)
 settings_cache_number_size_text = Cache files size: { $size }, number of files: { $number }
 settings_video_thumbnails_number_size_text = Video thumbnails size: { $size }, number of files: { $number }
 settings_log_number_size_text = Log files size: { $size }, number of files: { $number }
-settings_clean_cache_button_text = Clean outdated cache
 popup_clean_cache_title_text = Clean Outdated Cache
 popup_clean_cache_confirmation_text = Are you sure you want to clean outdated cache entries? This will remove cache entries for files that no longer exist or have been modified.
 popup_clean_cache_progress_text = Processing cache file:
@@ -317,10 +317,6 @@ popup_clean_cache_overall_progress_text = Overall progress:
 popup_clean_cache_stopped_by_user_text = Cache cleaning was stopped by user
 popup_clean_cache_finished_text = Cache cleaning completed successfully!
 popup_clean_cache_error_details_text = Error details:
-rust_cache_processed_files = Processed { $files } cache files
-rust_cache_entries_stats = Removed { $removed } entries out of all { $all }, { $left } left
-rust_cache_size_reduced = Reduced cache files size by { $size }
-rust_cache_time_elapsed = Time elapsed: { $seconds }
 subsettings_video_optimizer_mode = Mode
 subsettings_video_optimizer_crop_type = Crop Type
 subsettings_video_optimizer_black_pixel_threshold = Black Pixel Threshold

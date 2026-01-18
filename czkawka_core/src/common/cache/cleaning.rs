@@ -4,14 +4,6 @@ use std::path::Path;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 
-use crate::common::config_cache_path::get_config_cache_path;
-use crate::tools::broken_files::BrokenEntry;
-use crate::tools::duplicate::DuplicateEntry;
-use crate::tools::exif_remover::ExifEntry;
-use crate::tools::same_music::MusicEntry;
-use crate::tools::similar_images::ImagesEntry;
-use crate::tools::similar_videos::VideosEntry;
-use crate::tools::video_optimizer::{VideoCropEntry, VideoTranscodeEntry};
 use bincode::Options;
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
@@ -23,7 +15,15 @@ use crate::common::cache::{
     CACHE_BROKEN_FILES_VERSION, CACHE_CLEANING_INTERVAL_SECONDS, CACHE_DUPLICATE_VERSION, CACHE_IMAGE_VERSION, CACHE_VERSION, CACHE_VIDEO_OPTIMIZE_VERSION, CACHE_VIDEO_VERSION,
     CLEANING_TIMESTAMPS_FILE, MEMORY_LIMIT,
 };
+use crate::common::config_cache_path::get_config_cache_path;
 use crate::common::traits::ResultEntry;
+use crate::tools::broken_files::BrokenEntry;
+use crate::tools::duplicate::DuplicateEntry;
+use crate::tools::exif_remover::ExifEntry;
+use crate::tools::same_music::MusicEntry;
+use crate::tools::similar_images::ImagesEntry;
+use crate::tools::similar_videos::VideosEntry;
+use crate::tools::video_optimizer::{VideoCropEntry, VideoTranscodeEntry};
 
 #[derive(Debug, Clone, Default)]
 pub struct CacheCleaningStatistics {
@@ -176,7 +176,6 @@ impl CacheType {
 
 #[fun_time(message = "clean_all_cache_files", level = "debug")]
 pub fn clean_all_cache_files(stop_flag: &Arc<AtomicBool>, cache_progress_sender: Option<&Sender<CacheProgressCleaning>>) -> Result<CacheCleaningStatistics, String> {
-
     let mut stats = CacheCleaningStatistics::default();
 
     let Some(config_cache_path) = get_config_cache_path() else {
@@ -298,9 +297,7 @@ fn clean_cache_file_typed<T>(
 where
     for<'a> T: Deserialize<'a> + ResultEntry + Serialize + Clone + Send,
 {
-    let size_before = fs::metadata(cache_path)
-        .map(|m| m.len())
-        .unwrap_or(0);
+    let size_before = fs::metadata(cache_path).map(|m| m.len()).unwrap_or(0);
 
     let file = fs::File::open(cache_path).map_err(|e| format!("Cannot open file: {e}"))?;
     let reader = BufReader::new(file);
@@ -362,9 +359,7 @@ where
             .serialize_into(writer, &filtered_entries)
             .map_err(|e| format!("Cannot serialize cleaned data to temporary file: {e}"))?;
 
-        let new_size = fs::metadata(&tmp_file_path)
-            .map(|m| m.len())
-            .unwrap_or(size_before);
+        let new_size = fs::metadata(&tmp_file_path).map(|m| m.len()).unwrap_or(size_before);
 
         fs::rename(&tmp_file_path, cache_path).map_err(|e| format!("Cannot replace original cache file: {e}"))?;
 
