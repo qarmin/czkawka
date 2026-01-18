@@ -4,7 +4,7 @@ use std::mem;
 use std::sync::{LazyLock, RwLock, RwLockWriteGuard};
 
 use czkawka_core::TOOLS_NUMBER;
-use log::{debug, error, trace};
+use log::{error, trace};
 use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
 use crate::common::{connect_i32_into_u64, split_u64_into_i32s};
@@ -124,15 +124,14 @@ pub(crate) fn connect_row_selections(app: &MainWindow) {
     selection::reverse_checked_on_selection(app); // Space
     selection::reverse_selection_on_specific_item(app); // CTRL + LMB
     selection::select_items_with_shift(app); // SHIFT + LMB
-    opener::open_selected_item(app);
-    opener::open_parent_of_selected_item(app);
     opener::open_provided_item(app);
+    opener::open_provided_parent_item(app);
     opener::connect_on_open_item(app);
     checker::change_number_of_checked_items(app);
 }
 
 mod opener {
-    use super::{Callabler, ComponentHandle, GuiState, MainWindow, Model, debug, error, get_write_selection_lock};
+    use super::{Callabler, ComponentHandle, GuiState, MainWindow, Model, error};
 
     pub(crate) fn connect_on_open_item(app: &MainWindow) {
         app.global::<Callabler>().on_open_item(move |path| {
@@ -171,39 +170,6 @@ mod opener {
         open_item_simple(&path_to_open);
     }
 
-    fn open_selected_items(app: &MainWindow, items_path_str: &[usize]) {
-        let active_tab = app.global::<GuiState>().get_active_tab();
-        let mut lock = get_write_selection_lock();
-        let selection = lock.get_mut(&active_tab).expect("Failed to get selection data");
-
-        if selection.selected_rows.len() == 1 {
-            let id = selection.selected_rows[0];
-            open_item(app, items_path_str, id);
-        } else if selection.selected_rows.is_empty() {
-            debug!("Failed to open selected item, because there is no selected item");
-        } else {
-            debug!("Failed to open selected item, because there is more than one selected item");
-        }
-    }
-
-    pub(crate) fn open_selected_item(app: &MainWindow) {
-        let a = app.as_weak();
-        app.global::<Callabler>().on_row_open_selected_item(move || {
-            let app = a.upgrade().expect("Failed to upgrade app :(");
-            let active_tab = app.global::<GuiState>().get_active_tab();
-            open_selected_items(&app, &[active_tab.get_str_path_idx(), active_tab.get_str_name_idx()]);
-        });
-    }
-
-    pub(crate) fn open_parent_of_selected_item(app: &MainWindow) {
-        let a = app.as_weak();
-        app.global::<Callabler>().on_row_open_parent_of_selected_item(move || {
-            let app = a.upgrade().expect("Failed to upgrade app :(");
-            let active_tab = app.global::<GuiState>().get_active_tab();
-            open_selected_items(&app, &[active_tab.get_str_path_idx()]);
-        });
-    }
-
     pub(crate) fn open_provided_item(app: &MainWindow) {
         let a = app.as_weak();
         app.global::<Callabler>().on_row_open_item_with_index(move |idx| {
@@ -211,6 +177,16 @@ mod opener {
             let active_tab = app.global::<GuiState>().get_active_tab();
 
             open_item(&app, &[active_tab.get_str_path_idx(), active_tab.get_str_name_idx()], idx as usize);
+        });
+    }
+
+    pub(crate) fn open_provided_parent_item(app: &MainWindow) {
+        let a = app.as_weak();
+        app.global::<Callabler>().on_row_open_parent_item_with_index(move |idx| {
+            let app = a.upgrade().expect("Failed to upgrade app :(");
+            let active_tab = app.global::<GuiState>().get_active_tab();
+
+            open_item(&app, &[active_tab.get_str_path_idx()], idx as usize);
         });
     }
 }
