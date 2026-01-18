@@ -33,6 +33,8 @@ pub struct CacheCleaningStatistics {
     pub total_entries_before: usize,
     pub total_entries_removed: usize,
     pub total_entries_left: usize,
+    pub total_size_before: u64,
+    pub total_size_after: u64,
     pub errors: Vec<String>,
 }
 
@@ -261,11 +263,13 @@ pub fn clean_all_cache_files(stop_flag: &Arc<AtomicBool>, cache_progress_sender:
         };
 
         match result {
-            Ok(Some((before, after))) => {
+            Ok(Some((before, after, size_before, size_after))) => {
                 stats.successfully_cleaned += 1;
                 stats.total_entries_before += before;
                 stats.total_entries_left += after;
                 stats.total_entries_removed += before - after;
+                stats.total_size_before += size_before;
+                stats.total_size_after += size_after;
             }
             Ok(None) => {
                 debug!("Cleaning of cache file {file_name} was skipped due to stop flag");
@@ -290,10 +294,14 @@ fn clean_cache_file_typed<T>(
     stop_flag: &Arc<AtomicBool>,
     checked_entries: &Arc<std::sync::atomic::AtomicUsize>,
     all_entries: &Arc<std::sync::atomic::AtomicUsize>,
-) -> Result<Option<(usize, usize)>, String>
+) -> Result<Option<(usize, usize, u64, u64)>, String>
 where
     for<'a> T: Deserialize<'a> + ResultEntry + Serialize + Clone + Send,
 {
+    let size_before = fs::metadata(cache_path)
+        .map(|m| m.len())
+        .unwrap_or(0);
+
     let file = fs::File::open(cache_path).map_err(|e| format!("Cannot open file: {e}"))?;
     let reader = BufReader::new(file);
 
@@ -344,7 +352,7 @@ where
     let remaining_count = filtered_entries.len();
     let removed_count = original_count - remaining_count;
 
-    if removed_count > 0 {
+    let size_after = if removed_count > 0 {
         let tmp_file_path = cache_path.with_extension("tmp");
 
         let tmp_file = fs::File::create(&tmp_file_path).map_err(|e| format!("Cannot create temporary file: {e}"))?;
@@ -353,15 +361,26 @@ where
         options
             .serialize_into(writer, &filtered_entries)
             .map_err(|e| format!("Cannot serialize cleaned data to temporary file: {e}"))?;
+
+        let new_size = fs::metadata(&tmp_file_path)
+            .map(|m| m.len())
+            .unwrap_or(size_before);
+
         fs::rename(&tmp_file_path, cache_path).map_err(|e| format!("Cannot replace original cache file: {e}"))?;
 
         debug!(
-            "Cleaned cache file \"{}\": removed {} entries, {} remaining",
+            "Cleaned cache file \"{}\": removed {} entries, {} remaining, size reduced from {} to {} bytes",
             cache_path.to_string_lossy(),
             removed_count,
-            filtered_entries.len()
+            filtered_entries.len(),
+            size_before,
+            new_size
         );
-    }
 
-    Ok(Some((original_count, remaining_count)))
+        new_size
+    } else {
+        size_before
+    };
+
+    Ok(Some((original_count, remaining_count, size_before, size_after)))
 }

@@ -13,7 +13,7 @@ export component PopupCleanCache inherits Rectangle {
     in-out property <bool> stopped_by_user: false;
 
     out property <length> popup_width: 500px;
-    out property <length> popup_height: 350px;
+    out property <length> popup_height: 300px;
 
     popup_window := PopupWindow {
         width: popup_width;
@@ -110,14 +110,12 @@ export component PopupCleanCache inherits Rectangle {
                                 text <=> Translations.popup_clean_cache_stopped_by_user_text;
                                 horizontal-alignment: TextHorizontalAlignment.center;
                                 font-size: FontSizes.normal;
-                                color: Colors.orange;
                             }
 
                             if !root.stopped_by_user: Text {
                                 text <=> Translations.popup_clean_cache_finished_text;
                                 horizontal-alignment: TextHorizontalAlignment.center;
                                 font-size: FontSizes.normal;
-                                color: Colors.green;
                             }
 
                             if GuiState.cache_cleaning_result.processed_files_text != "": Text {
@@ -143,7 +141,6 @@ export component PopupCleanCache inherits Rectangle {
                             if GuiState.cache_cleaning_result.errors_count > 0: Text {
                                 text: "Files with errors: " + GuiState.cache_cleaning_result.errors_count;
                                 font-size: FontSizes.normal;
-                                color: Colors.red;
                             }
 
                             if GuiState.cache_cleaning_result.errors != "": VerticalLayout {
@@ -151,18 +148,16 @@ export component PopupCleanCache inherits Rectangle {
                                 Text {
                                     text <=> Translations.popup_clean_cache_error_details_text;
                                     font-size: FontSizes.normal;
-                                    color: Colors.red;
                                 }
                                 Text {
                                     text: GuiState.cache_cleaning_result.errors;
                                     font-size: FontSizes.small;
                                     wrap: word-wrap;
-                                    color: Colors.red;
                                 }
                             }
-
-                            Rectangle { }
                         }
+
+                        Rectangle { }
                     }
                 }
 

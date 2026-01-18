@@ -7,7 +7,7 @@ use czkawka_core::common::cache::{CacheProgressCleaning, clean_all_cache_files};
 use humansize::{BINARY, format_size};
 use slint::ComponentHandle;
 
-use crate::{Callabler, CacheCleaningProgress, CacheCleaningResult, GuiState, MainWindow};
+use crate::{Callabler, CacheCleaningProgress, CacheCleaningResult, GuiState, MainWindow, flk};
 
 pub(crate) fn connect_clean_cache(app: &MainWindow) {
     let app_weak = app.as_weak();
@@ -47,7 +47,7 @@ pub(crate) fn connect_clean_cache(app: &MainWindow) {
 
             progress_thread.join().expect("Failed to join progress thread");
 
-            let elapsed_ms = start_time.elapsed().as_millis() as i32;
+            let elapsed = format!("{:?}", start_time.elapsed());
 
             app_weak.upgrade_in_event_loop(move |app| {
                 let gui_state = app.global::<GuiState>();
@@ -56,15 +56,25 @@ pub(crate) fn connect_clean_cache(app: &MainWindow) {
 
                 match result {
                     Ok(stats) => {
-                        let processed_files_text = format!("Processed {} cache files", stats.total_files_found);
-                        let entries_stats_text = format!(
-                            "Removed {} entries out of all {}, {} left",
-                            stats.total_entries_removed,
-                            stats.total_entries_before,
-                            stats.total_entries_left
+                        let processed_files_text = flk!(
+                            "rust_cache_processed_files",
+                            files = stats.total_files_found
                         );
-                        let size_stats_text = format_size(0u64, BINARY);
-                        let time_text = format!("Time elapsed: {}s", elapsed_ms / 1000);
+                        let entries_stats_text = flk!(
+                            "rust_cache_entries_stats",
+                            removed = stats.total_entries_removed,
+                            all = stats.total_entries_before,
+                            left = stats.total_entries_left
+                        );
+                        let size_reduced = stats.total_size_before.saturating_sub(stats.total_size_after);
+                        let size_stats_text = flk!(
+                            "rust_cache_size_reduced",
+                            size = format_size(size_reduced, BINARY)
+                        );
+                        let time_text = flk!(
+                            "rust_cache_time_elapsed",
+                            seconds = elapsed
+                        );
 
                         let slint_result = CacheCleaningResult {
                             processed_files_text: processed_files_text.into(),
@@ -77,11 +87,15 @@ pub(crate) fn connect_clean_cache(app: &MainWindow) {
                         gui_state.set_cache_cleaning_result(slint_result);
                     }
                     Err(e) => {
+                        let time_text = flk!(
+                            "rust_cache_time_elapsed",
+                            seconds = elapsed
+                        );
                         let slint_result = CacheCleaningResult {
                             processed_files_text: "".into(),
                             entries_stats_text: "".into(),
                             size_stats_text: "".into(),
-                            time_text: format!("Time elapsed: {}s", elapsed_ms / 1000).into(),
+                            time_text: time_text.into(),
                             errors_count: 0,
                             errors: e.clone().into(),
                         };

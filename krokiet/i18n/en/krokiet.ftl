@@ -121,6 +121,10 @@ rust_symlink_confirmation_number_simple = { $items } items selected.
 rust_rename_confirmation = Are you sure you want to rename the selected items?
 rust_rename_confirmation_number_simple = { $items } items selected.
 
+rust_cache_processed_files = Processed { $files } cache files
+rust_cache_entries_stats = Removed { $removed } entries out of all { $all }, { $left } left
+rust_cache_time_elapsed = Time elapsed: { $seconds }s
+
 # Slint translations, but in arrays
 
 column_selection = Selection
@@ -313,6 +317,10 @@ popup_clean_cache_overall_progress_text = Overall progress:
 popup_clean_cache_stopped_by_user_text = Cache cleaning was stopped by user
 popup_clean_cache_finished_text = Cache cleaning completed successfully!
 popup_clean_cache_error_details_text = Error details:
+rust_cache_processed_files = Processed { $files } cache files
+rust_cache_entries_stats = Removed { $removed } entries out of all { $all }, { $left } left
+rust_cache_size_reduced = Reduced cache files size by { $size }
+rust_cache_time_elapsed = Time elapsed: { $seconds }
 subsettings_video_optimizer_mode = Mode
 subsettings_video_optimizer_crop_type = Crop Type
 subsettings_video_optimizer_black_pixel_threshold = Black Pixel Threshold
