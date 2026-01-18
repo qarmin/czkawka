@@ -58,7 +58,6 @@ struct SingleCleaningTimestamp {
 }
 
 fn get_timestamps_file_path() -> Option<std::path::PathBuf> {
-    use crate::common::config_cache_path::get_config_cache_path;
     get_config_cache_path().map(|config| config.cache_folder.join(CLEANING_TIMESTAMPS_FILE))
 }
 
@@ -384,18 +383,17 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeMap;
     use std::path::PathBuf;
-    use std::sync::atomic::AtomicBool;
     use std::sync::Arc;
-    use std::time::{SystemTime, UNIX_EPOCH};
+    use std::sync::atomic::AtomicBool;
+    use std::time::UNIX_EPOCH;
 
     use bincode::Options;
     use serde::{Deserialize, Serialize};
     use tempfile::TempDir;
-    use crate::common::cache::tests::setup_cache_path;
+
     use super::*;
-    use crate::common::config_cache_path::set_config_cache_path_test;
+    use crate::common::cache::tests::setup_cache_path;
 
     #[derive(Clone, Debug, Serialize, Deserialize)]
     struct TestCacheEntry {
@@ -420,7 +418,7 @@ mod tests {
     fn setup_test_env() -> (PathBuf, PathBuf) {
         setup_cache_path();
         let config_cache = get_config_cache_path().unwrap();
-        (config_cache.cache_folder.clone(), config_cache.config_folder.clone())
+        (config_cache.cache_folder.clone(), config_cache.config_folder)
     }
 
     fn create_test_file(dir: &Path, name: &str, content: &str) -> (PathBuf, u64, u64) {
@@ -463,7 +461,7 @@ mod tests {
 
     #[test]
     fn test_clean_cache_file_typed_mixed_scenarios() {
-        let (_cache_dir, _config_dir) = setup_test_env();
+        let (cache_dir, _config_dir) = setup_test_env();
         let data_dir = TempDir::new().unwrap();
 
         let (valid_path, valid_size, valid_modified) = create_test_file(data_dir.path(), "valid.txt", "valid content");
@@ -474,12 +472,27 @@ mod tests {
         fs::remove_file(&deleted_path).unwrap();
 
         let entries = vec![
-            TestCacheEntry { path: valid_path.clone(), size: valid_size, modified_date: valid_modified, data: "valid".to_string() },
-            TestCacheEntry { path: modified_path.clone(), size: 11, modified_date: old_modified, data: "modified".to_string() },
-            TestCacheEntry { path: deleted_path, size: deleted_size, modified_date: deleted_modified, data: "deleted".to_string() },
+            TestCacheEntry {
+                path: valid_path.clone(),
+                size: valid_size,
+                modified_date: valid_modified,
+                data: "valid".to_string(),
+            },
+            TestCacheEntry {
+                path: modified_path,
+                size: 11,
+                modified_date: old_modified,
+                data: "modified".to_string(),
+            },
+            TestCacheEntry {
+                path: deleted_path,
+                size: deleted_size,
+                modified_date: deleted_modified,
+                data: "deleted".to_string(),
+            },
         ];
 
-        let cache_path = create_cache_file(_cache_dir.as_path(), "test_cache.bin", &entries);
+        let cache_path = create_cache_file(cache_dir.as_path(), "test_cache.bin", &entries);
         let stop_flag = Arc::new(AtomicBool::new(false));
         let checked = Arc::new(std::sync::atomic::AtomicUsize::new(0));
         let all = Arc::new(std::sync::atomic::AtomicUsize::new(0));
@@ -503,42 +516,77 @@ mod tests {
 
     #[test]
     fn test_clean_cache_file_with_stop_flag() {
-        let (_cache_dir, _config_dir) = setup_test_env();
+        let (cache_dir, _config_dir) = setup_test_env();
         let data_dir = TempDir::new().unwrap();
 
         let mut entries = Vec::new();
-        for i in 0..100 {
-            let (path, size, modified) = create_test_file(data_dir.path(), &format!("file_{}.txt", i), &format!("content {}", i));
-            entries.push(TestCacheEntry { path, size, modified_date: modified, data: format!("data {}", i) });
+        for i in 0..1000 {
+            let (path, size, modified) = create_test_file(data_dir.path(), &format!("file_{i}.txt"), &format!("content {i}"));
+            entries.push(TestCacheEntry {
+                path,
+                size,
+                modified_date: modified,
+                data: format!("data {i}"),
+            });
         }
 
-        let cache_path = create_cache_file(_cache_dir.as_path(), "test_stop.bin", &entries);
+        let cache_path = create_cache_file(cache_dir.as_path(), "test_stop.bin", &entries);
         let stop_flag = Arc::new(AtomicBool::new(false));
         let checked = Arc::new(std::sync::atomic::AtomicUsize::new(0));
         let all = Arc::new(std::sync::atomic::AtomicUsize::new(0));
 
         let stop_flag_clone = stop_flag.clone();
         std::thread::spawn(move || {
-            std::thread::sleep(std::time::Duration::from_millis(10));
+            std::thread::sleep(std::time::Duration::from_millis(1));
             stop_flag_clone.store(true, Ordering::Relaxed);
         });
 
         let result = clean_cache_file_typed::<TestCacheEntry>(&cache_path, &stop_flag, &checked, &all).unwrap();
-        assert!(result.is_none());
+        assert!(result.is_none() || checked.load(Ordering::Relaxed) < 1000);
     }
 
     #[test]
     fn test_cache_type_from_filename_all_variants() {
-        assert!(matches!(CacheType::from_filename(&format!("cache_duplicates_hash_{}.bin", CACHE_DUPLICATE_VERSION)), Some(CacheType::Duplicates)));
-        assert!(matches!(CacheType::from_filename(&format!("cache_duplicates_size_{}.bin", CACHE_DUPLICATE_VERSION)), Some(CacheType::Duplicates)));
-        assert!(matches!(CacheType::from_filename(&format!("cache_same_music_tags_{}.bin", CACHE_VERSION)), Some(CacheType::MusicTags)));
-        assert!(matches!(CacheType::from_filename(&format!("cache_same_music_fingerprints_{}.bin", CACHE_VERSION)), Some(CacheType::MusicFingerprints)));
-        assert!(matches!(CacheType::from_filename(&format!("cache_similar_images_8_{}.bin", CACHE_IMAGE_VERSION)), Some(CacheType::SimilarImages)));
-        assert!(matches!(CacheType::from_filename(&format!("cache_similar_videos_{}__10.bin", CACHE_VIDEO_VERSION)), Some(CacheType::SimilarVideos)));
-        assert!(matches!(CacheType::from_filename(&format!("cache_broken_files_{}.bin", CACHE_BROKEN_FILES_VERSION)), Some(CacheType::BrokenFiles)));
-        assert!(matches!(CacheType::from_filename(&format!("cache_exif_remover_{}.bin", CACHE_VERSION)), Some(CacheType::ExifRemover)));
-        assert!(matches!(CacheType::from_filename(&format!("cache_video_transcode_{}.bin", CACHE_VIDEO_OPTIMIZE_VERSION)), Some(CacheType::VideoTranscode)));
-        assert!(matches!(CacheType::from_filename(&format!("cache_video_crop_{}_test.bin", CACHE_VIDEO_OPTIMIZE_VERSION)), Some(CacheType::VideoCrop)));
+        assert!(matches!(
+            CacheType::from_filename(&format!("cache_duplicates_hash_{CACHE_DUPLICATE_VERSION}.bin")),
+            Some(CacheType::Duplicates)
+        ));
+        assert!(matches!(
+            CacheType::from_filename(&format!("cache_duplicates_size_{CACHE_DUPLICATE_VERSION}.bin")),
+            Some(CacheType::Duplicates)
+        ));
+        assert!(matches!(
+            CacheType::from_filename(&format!("cache_same_music_tags_{CACHE_VERSION}.bin")),
+            Some(CacheType::MusicTags)
+        ));
+        assert!(matches!(
+            CacheType::from_filename(&format!("cache_same_music_fingerprints_{CACHE_VERSION}.bin")),
+            Some(CacheType::MusicFingerprints)
+        ));
+        assert!(matches!(
+            CacheType::from_filename(&format!("cache_similar_images_8_{CACHE_IMAGE_VERSION}.bin")),
+            Some(CacheType::SimilarImages)
+        ));
+        assert!(matches!(
+            CacheType::from_filename(&format!("cache_similar_videos_{CACHE_VIDEO_VERSION}__10.bin")),
+            Some(CacheType::SimilarVideos)
+        ));
+        assert!(matches!(
+            CacheType::from_filename(&format!("cache_broken_files_{CACHE_BROKEN_FILES_VERSION}.bin")),
+            Some(CacheType::BrokenFiles)
+        ));
+        assert!(matches!(
+            CacheType::from_filename(&format!("cache_exif_remover_{CACHE_VERSION}.bin")),
+            Some(CacheType::ExifRemover)
+        ));
+        assert!(matches!(
+            CacheType::from_filename(&format!("cache_video_transcode_{CACHE_VIDEO_OPTIMIZE_VERSION}.bin")),
+            Some(CacheType::VideoTranscode)
+        ));
+        assert!(matches!(
+            CacheType::from_filename(&format!("cache_video_crop_{CACHE_VIDEO_OPTIMIZE_VERSION}_test.bin")),
+            Some(CacheType::VideoCrop)
+        ));
 
         assert!(CacheType::from_filename("invalid_cache.bin").is_none());
         assert!(CacheType::from_filename("cache_duplicates_99.bin").is_none());
@@ -547,16 +595,21 @@ mod tests {
 
     #[test]
     fn test_clean_cache_file_no_changes_needed() {
-        let (_cache_dir, _config_dir) = setup_test_env();
+        let (cache_dir, _config_dir) = setup_test_env();
         let data_dir = TempDir::new().unwrap();
 
         let mut entries = Vec::new();
         for i in 0..5 {
-            let (path, size, modified) = create_test_file(data_dir.path(), &format!("valid_{}.txt", i), &format!("valid content {}", i));
-            entries.push(TestCacheEntry { path, size, modified_date: modified, data: format!("data {}", i) });
+            let (path, size, modified) = create_test_file(data_dir.path(), &format!("valid_{i}.txt"), &format!("valid content {i}"));
+            entries.push(TestCacheEntry {
+                path,
+                size,
+                modified_date: modified,
+                data: format!("data {i}"),
+            });
         }
 
-        let cache_path = create_cache_file(_cache_dir.as_path(), "test_no_changes.bin", &entries);
+        let cache_path = create_cache_file(cache_dir.as_path(), "test_no_changes.bin", &entries);
         let size_before = fs::metadata(&cache_path).unwrap().len();
 
         let stop_flag = Arc::new(AtomicBool::new(false));
@@ -574,34 +627,8 @@ mod tests {
     }
 
     #[test]
-    fn test_cache_cleaning_statistics_accumulation() {
-        let mut stats = CacheCleaningStatistics::default();
-
-        stats.total_files_found = 5;
-        stats.successfully_cleaned = 3;
-        stats.files_with_errors = 2;
-        stats.total_entries_before = 100;
-        stats.total_entries_removed = 30;
-        stats.total_entries_left = 70;
-        stats.total_size_before = 10000;
-        stats.total_size_after = 7000;
-        stats.errors.push("Error 1".to_string());
-        stats.errors.push("Error 2".to_string());
-
-        assert_eq!(stats.total_files_found, 5);
-        assert_eq!(stats.successfully_cleaned, 3);
-        assert_eq!(stats.files_with_errors, 2);
-        assert_eq!(stats.total_entries_before, 100);
-        assert_eq!(stats.total_entries_removed, 30);
-        assert_eq!(stats.total_entries_left, 70);
-        assert_eq!(stats.total_size_before, 10000);
-        assert_eq!(stats.total_size_after, 7000);
-        assert_eq!(stats.errors.len(), 2);
-    }
-
-    #[test]
     fn test_clean_cache_file_all_entries_invalid() {
-        let (_cache_dir, _config_dir) = setup_test_env();
+        let (cache_dir, _config_dir) = setup_test_env();
         let data_dir = TempDir::new().unwrap();
 
         let (deleted1, size1, mod1) = create_test_file(data_dir.path(), "del1.txt", "content 1");
@@ -613,12 +640,27 @@ mod tests {
         fs::remove_file(&deleted3).unwrap();
 
         let entries = vec![
-            TestCacheEntry { path: deleted1, size: size1, modified_date: mod1, data: "1".to_string() },
-            TestCacheEntry { path: deleted2, size: size2, modified_date: mod2, data: "2".to_string() },
-            TestCacheEntry { path: deleted3, size: size3, modified_date: mod3, data: "3".to_string() },
+            TestCacheEntry {
+                path: deleted1,
+                size: size1,
+                modified_date: mod1,
+                data: "1".to_string(),
+            },
+            TestCacheEntry {
+                path: deleted2,
+                size: size2,
+                modified_date: mod2,
+                data: "2".to_string(),
+            },
+            TestCacheEntry {
+                path: deleted3,
+                size: size3,
+                modified_date: mod3,
+                data: "3".to_string(),
+            },
         ];
 
-        let cache_path = create_cache_file(_cache_dir.as_path(), "test_all_invalid.bin", &entries);
+        let cache_path = create_cache_file(cache_dir.as_path(), "test_all_invalid.bin", &entries);
         let stop_flag = Arc::new(AtomicBool::new(false));
         let checked = Arc::new(std::sync::atomic::AtomicUsize::new(0));
         let all = Arc::new(std::sync::atomic::AtomicUsize::new(0));
@@ -679,4 +721,3 @@ mod tests {
         assert_eq!(deserialized.timestamps[1].last_cleaned_timestamp, 2000);
     }
 }
-

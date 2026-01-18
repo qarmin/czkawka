@@ -495,7 +495,7 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     let sel_px = 35.0;
     let path_px = 350.0;
     let name_px = 100.0;
-    let mod_px = 155.0;
+    let mod_px = 125.0;
     let size_px = 75.0;
 
     let fnm = |default_model: &[f32], name: &str| {
