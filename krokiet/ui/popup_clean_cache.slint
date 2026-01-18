@@ -120,28 +120,28 @@ export component PopupCleanCache inherits Rectangle {
                                 color: Colors.green;
                             }
 
-                            Text {
-                                text: Translations.popup_clean_cache_files_processed_text + " " + GuiState.cache_cleaning_result.total_files_found;
+                            if GuiState.cache_cleaning_result.processed_files_text != "": Text {
+                                text: GuiState.cache_cleaning_result.processed_files_text;
                                 font-size: FontSizes.normal;
                             }
 
-                            Text {
-                                text: Translations.popup_clean_cache_entries_removed_text + " " + GuiState.cache_cleaning_result.total_entries_removed;
+                            if GuiState.cache_cleaning_result.entries_stats_text != "": Text {
+                                text: GuiState.cache_cleaning_result.entries_stats_text;
                                 font-size: FontSizes.normal;
                             }
 
-                            Text {
-                                text: GuiState.cache_cleaning_result.total_bytes_saved;
+                            if GuiState.cache_cleaning_result.size_stats_text != "": Text {
+                                text: GuiState.cache_cleaning_result.size_stats_text;
                                 font-size: FontSizes.normal;
                             }
 
-                            Text {
-                                text: Translations.popup_clean_cache_time_elapsed_text + " " + (GuiState.cache_cleaning_result.elapsed_time_ms / 1000) + "s";
+                            if GuiState.cache_cleaning_result.time_text != "": Text {
+                                text: GuiState.cache_cleaning_result.time_text;
                                 font-size: FontSizes.normal;
                             }
 
-                            if GuiState.cache_cleaning_result.files_with_errors > 0: Text {
-                                text: Translations.popup_clean_cache_errors_text + " " + GuiState.cache_cleaning_result.files_with_errors;
+                            if GuiState.cache_cleaning_result.errors_count > 0: Text {
+                                text: "Files with errors: " + GuiState.cache_cleaning_result.errors_count;
                                 font-size: FontSizes.normal;
                                 color: Colors.red;
                             }
@@ -160,6 +160,8 @@ export component PopupCleanCache inherits Rectangle {
                                     color: Colors.red;
                                 }
                             }
+
+                            Rectangle { }
                         }
                     }
                 }
@@ -212,12 +214,11 @@ export component PopupCleanCache inherits Rectangle {
             all_entries: 0,
         };
         GuiState.cache_cleaning_result = {
-            total_files_found: 0,
-            successfully_cleaned: 0,
-            files_with_errors: 0,
-            total_entries_removed: 0,
-            total_bytes_saved: "",
-            elapsed_time_ms: 0,
+            processed_files_text: "",
+            entries_stats_text: "",
+            size_stats_text: "",
+            time_text: "",
+            errors_count: 0,
             errors: "",
         };
         popup_window.show();

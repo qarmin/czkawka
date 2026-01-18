@@ -108,12 +108,11 @@ export struct CacheCleaningProgress {
 }
 
 export struct CacheCleaningResult {
-    total_files_found: int,
-    successfully_cleaned: int,
-    files_with_errors: int,
-    total_entries_removed: int,
-    total_bytes_saved: string,
-    elapsed_time_ms: int,
+    processed_files_text: string,
+    entries_stats_text: string,
+    size_stats_text: string,
+    time_text: string,
+    errors_count: int,
     errors: string,
 }
 

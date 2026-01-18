@@ -56,25 +56,33 @@ pub(crate) fn connect_clean_cache(app: &MainWindow) {
 
                 match result {
                     Ok(stats) => {
+                        let processed_files_text = format!("Processed {} cache files", stats.total_files_found);
+                        let entries_stats_text = format!(
+                            "Removed {} entries out of all {}, {} left",
+                            stats.total_entries_removed,
+                            stats.total_entries_before,
+                            stats.total_entries_left
+                        );
+                        let size_stats_text = format_size(0u64, BINARY);
+                        let time_text = format!("Time elapsed: {}s", elapsed_ms / 1000);
+
                         let slint_result = CacheCleaningResult {
-                            total_files_found: stats.total_files_found as i32,
-                            successfully_cleaned: stats.successfully_cleaned as i32,
-                            files_with_errors: stats.files_with_errors as i32,
-                            total_entries_removed: stats.total_entries_removed as i32,
-                            total_bytes_saved: format_size(0u64, BINARY).into(),
-                            elapsed_time_ms: elapsed_ms,
+                            processed_files_text: processed_files_text.into(),
+                            entries_stats_text: entries_stats_text.into(),
+                            size_stats_text: size_stats_text.into(),
+                            time_text: time_text.into(),
+                            errors_count: stats.files_with_errors as i32,
                             errors: stats.errors.join("\n").into(),
                         };
                         gui_state.set_cache_cleaning_result(slint_result);
                     }
                     Err(e) => {
                         let slint_result = CacheCleaningResult {
-                            total_files_found: 0,
-                            successfully_cleaned: 0,
-                            files_with_errors: 0,
-                            total_entries_removed: 0,
-                            total_bytes_saved: "".into(),
-                            elapsed_time_ms: elapsed_ms,
+                            processed_files_text: "".into(),
+                            entries_stats_text: "".into(),
+                            size_stats_text: "".into(),
+                            time_text: format!("Time elapsed: {}s", elapsed_ms / 1000).into(),
+                            errors_count: 0,
                             errors: e.clone().into(),
                         };
                         gui_state.set_cache_cleaning_result(slint_result);

@@ -127,7 +127,7 @@ impl ModelProcessor {
     ) -> ProcessingResult {
         let rm_idx = Arc::new(AtomicUsize::new(0));
         let size = Arc::new(AtomicU64::new(0));
-        let delayed_sender = DelayedSender::new(sender, Duration::from_millis(200));
+        let delayed_sender = DelayedSender::new(sender, Duration::from_millis(100));
 
         let fnc = |(idx, data): (usize, SimplerMainListModel)| {
             if !data.checked {

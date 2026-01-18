@@ -30,7 +30,9 @@ pub struct CacheCleaningStatistics {
     pub total_files_found: usize,
     pub successfully_cleaned: usize,
     pub files_with_errors: usize,
+    pub total_entries_before: usize,
     pub total_entries_removed: usize,
+    pub total_entries_left: usize,
     pub errors: Vec<String>,
 }
 
@@ -213,7 +215,7 @@ pub fn clean_all_cache_files(stop_flag: &Arc<AtomicBool>, cache_progress_sender:
 
         std::thread::spawn(move || {
             while !stop_flag.load(Ordering::Relaxed) {
-                std::thread::sleep(std::time::Duration::from_millis(200));
+                std::thread::sleep(std::time::Duration::from_millis(100));
 
                 let current = current_file.load(Ordering::Relaxed);
                 let name = current_file_name.lock().expect("Mutex poisoned").clone();
@@ -259,9 +261,11 @@ pub fn clean_all_cache_files(stop_flag: &Arc<AtomicBool>, cache_progress_sender:
         };
 
         match result {
-            Ok(Some(removed)) => {
+            Ok(Some((before, after))) => {
                 stats.successfully_cleaned += 1;
-                stats.total_entries_removed += removed;
+                stats.total_entries_before += before;
+                stats.total_entries_left += after;
+                stats.total_entries_removed += before - after;
             }
             Ok(None) => {
                 debug!("Cleaning of cache file {file_name} was skipped due to stop flag");
@@ -273,6 +277,7 @@ pub fn clean_all_cache_files(stop_flag: &Arc<AtomicBool>, cache_progress_sender:
             }
         }
     }
+    stop_flag.store(true, Ordering::Relaxed);
     if let Some(handle) = progress_thread {
         let _ = handle.join();
     }
@@ -285,7 +290,7 @@ fn clean_cache_file_typed<T>(
     stop_flag: &Arc<AtomicBool>,
     checked_entries: &Arc<std::sync::atomic::AtomicUsize>,
     all_entries: &Arc<std::sync::atomic::AtomicUsize>,
-) -> Result<Option<usize>, String>
+) -> Result<Option<(usize, usize)>, String>
 where
     for<'a> T: Deserialize<'a> + ResultEntry + Serialize + Clone + Send,
 {
@@ -336,7 +341,8 @@ where
         return Ok(None);
     }
 
-    let removed_count = original_count - filtered_entries.len();
+    let remaining_count = filtered_entries.len();
+    let removed_count = original_count - remaining_count;
 
     if removed_count > 0 {
         let tmp_file_path = cache_path.with_extension("tmp");
@@ -357,5 +363,5 @@ where
         );
     }
 
-    Ok(Some(removed_count))
+    Ok(Some((original_count, remaining_count)))
 }
