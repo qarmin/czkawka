@@ -118,7 +118,7 @@ pub enum IntDataSimilarImages {
     SizePart2,
     Width,
     Height,
-    PixelCount
+    PixelCount,
 }
 pub const MAX_INT_DATA_SIMILAR_IMAGES: usize = IntDataSimilarImages::PixelCount as usize + 1;
 

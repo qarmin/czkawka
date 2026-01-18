@@ -6,7 +6,7 @@ use std::time::{Duration, Instant};
 
 use log::{error, warn};
 
-
+#[expect(clippy::needless_pass_by_ref_mut)]
 pub fn disable_windows_console_window(command: &mut Command) {
     #[cfg(target_os = "windows")]
     {

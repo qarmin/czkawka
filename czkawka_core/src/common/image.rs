@@ -70,7 +70,12 @@ pub fn get_dynamic_image_from_path(path: &str) -> Result<DynamicImage, String> {
             return Err(format!("Image has zero width or height \"{path}\""));
         }
         if img.width() as u64 * img.height() as u64 > MAXIMUM_IMAGE_PIXELS as u64 {
-            return Err(format!("Image is too large ({}x{}) - more than supported {} pixels \"{path}\"",  img.width(), img.height(), MAXIMUM_IMAGE_PIXELS));
+            return Err(format!(
+                "Image is too large ({}x{}) - more than supported {} pixels \"{path}\"",
+                img.width(),
+                img.height(),
+                MAXIMUM_IMAGE_PIXELS
+            ));
         }
         Ok(img)
     });

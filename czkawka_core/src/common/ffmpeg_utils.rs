@@ -1,4 +1,5 @@
 use std::process::{Command, Stdio};
+
 use crate::common::process_utils::disable_windows_console_window;
 
 pub fn check_if_ffprobe_ffmpeg_exists() -> bool {

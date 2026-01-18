@@ -2,26 +2,23 @@
 
 mod cleaning;
 
-pub use cleaning::{clean_all_cache_files, CacheCleaningStatistics, CacheProgressCleaning};
-
 use std::collections::BTreeMap;
 use std::io::{BufReader, BufWriter};
 use std::path::Path;
-use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::{fs, mem};
 
 use bincode::Options;
+pub use cleaning::{CacheCleaningStatistics, CacheProgressCleaning, clean_all_cache_files};
 use fun_time::fun_time;
 use humansize::{BINARY, format_size};
 use indexmap::IndexMap;
-use itertools::Itertools;
 use log::{debug, error};
-use once_cell::sync::{Lazy, OnceCell};
+use once_cell::sync::Lazy;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use serde::{Deserialize, Serialize};
+
 use crate::common::cache::cleaning::{should_clean_cache, update_cleaning_timestamp};
-use crate::common::config_cache_path::{open_cache_folder, ConfigCachePath};
+use crate::common::config_cache_path::open_cache_folder;
 use crate::common::tool_data::CommonData;
 use crate::common::traits::ResultEntry;
 use crate::helpers::messages::Messages;
@@ -41,7 +38,6 @@ static CACHE_CLEANING_INTERVAL_SECONDS: Lazy<u64> = Lazy::new(|| {
         .and_then(|s| s.parse::<u64>().ok())
         .unwrap_or(7 * 24 * 60 * 60)
 });
-
 
 fn get_cache_size(file_name: &Path) -> String {
     fs::metadata(file_name).map_or_else(|_| "<unknown size>".to_string(), |metadata| format_size(metadata.len(), BINARY))
@@ -245,10 +241,7 @@ where
         let effective_delete_outdated = delete_outdated_cache && should_clean;
 
         if delete_outdated_cache && !should_clean {
-            debug!(
-                "Skipping cache cleaning for {} - not enough time has passed since last cleaning",
-                cache_file_name
-            );
+            debug!("Skipping cache cleaning for {cache_file_name} - not enough time has passed since last cleaning");
         }
 
         vec_loaded_entries = vec_loaded_entries
@@ -347,8 +340,6 @@ where
     let messages = save_cache_to_file_generalized(cache_file_name, &all_results, common_data.get_save_also_as_json(), 0);
     common_data.get_text_messages_mut().extend_with_another_messages(messages);
 }
-
-
 
 #[cfg(test)]
 mod tests {
