@@ -611,7 +611,6 @@ fn prepare_data_model_similar_images(fe: &ImagesEntry, hash_size: u8) -> (ModelR
     let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
-    let pixels = split_u64_into_i32s((fe.width as u64) * (fe.height as u64));
     let data_model_int_arr: [i32; MAX_INT_DATA_SIMILAR_IMAGES] = [
         modification_split.0,
         modification_split.1,
@@ -619,8 +618,7 @@ fn prepare_data_model_similar_images(fe: &ImagesEntry, hash_size: u8) -> (ModelR
         size_split.1,
         fe.width as i32,
         fe.height as i32,
-        pixels.0,
-        pixels.1,
+        (fe.width as u64 * fe.height as u64) as i32, // Limited to 2000MP, but using u64, because in cache it can exceed i32
     ];
     let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)

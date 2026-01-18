@@ -27,6 +27,7 @@
 - New mode, video optimizer, to reencode videos to more efficient codecs and cropping black/bars from videos(via external ffmpeg/ffprobe) - [#1726](https://github.com/qarmin/czkawka/pull/1726), [#1745](https://github.com/qarmin/czkawka/pull/1745)
 - New mode, exif remover, to remove certain exif tags from files - [#1745](https://github.com/qarmin/czkawka/pull/1745)
 - Ability to add files to scan, not only folders - [#1745](https://github.com/qarmin/czkawka/pull/1745)
+- Limited supported image sizes to 2000 MP - []()
 
 ### CLI
 - Using colors by default in terminal output(can be disabled by feature flag) - [#1672](https://github.com/qarmin/czkawka/pull/1672)
