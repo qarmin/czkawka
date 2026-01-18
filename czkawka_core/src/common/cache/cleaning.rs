@@ -202,6 +202,33 @@ pub fn clean_all_cache_files(stop_flag: &Arc<AtomicBool>, cache_progress_sender:
 
     let total_files = cache_files.len();
 
+    let current_file = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+    let current_file_name = Arc::new(std::sync::Mutex::new(String::new()));
+
+    let progress_thread = cache_progress_sender.map(|sender| {
+        let sender = sender.clone();
+        let stop_flag = stop_flag.clone();
+        let current_file = current_file.clone();
+        let current_file_name = current_file_name.clone();
+
+        std::thread::spawn(move || {
+            while !stop_flag.load(Ordering::Relaxed) {
+                std::thread::sleep(std::time::Duration::from_millis(200));
+
+                let current = current_file.load(Ordering::Relaxed);
+                let name = current_file_name.lock().expect("Mutex poisoned").clone();
+
+                if current > 0 {
+                    let _ = sender.send(CacheProgressCleaning {
+                        current_file: current,
+                        total_files,
+                        current_file_name: name,
+                    });
+                }
+            }
+        })
+    });
+
     for (current_file_idx, (path, file_name, cache_type)) in cache_files.into_iter().enumerate() {
         if stop_flag.load(Ordering::Relaxed) {
             return Err("Operation stopped by user".to_string());
@@ -210,15 +237,18 @@ pub fn clean_all_cache_files(stop_flag: &Arc<AtomicBool>, cache_progress_sender:
         stats.total_files_found += 1;
         debug!("Found cache file to clean: {} (type: {:?})", file_name, cache_type);
 
+        current_file.store(current_file_idx + 1, Ordering::Relaxed);
+        *current_file_name.lock().unwrap() = file_name.clone();
+
         let result = match cache_type {
-            CacheType::Duplicates => clean_cache_file_typed::<DuplicateEntry>(&path, stop_flag, cache_progress_sender, current_file_idx + 1, total_files, &file_name),
-            CacheType::MusicTags | CacheType::MusicFingerprints => clean_cache_file_typed::<MusicEntry>(&path, stop_flag, cache_progress_sender, current_file_idx + 1, total_files, &file_name),
-            CacheType::SimilarImages => clean_cache_file_typed::<ImagesEntry>(&path, stop_flag, cache_progress_sender, current_file_idx + 1, total_files, &file_name),
-            CacheType::SimilarVideos => clean_cache_file_typed::<VideosEntry>(&path, stop_flag, cache_progress_sender, current_file_idx + 1, total_files, &file_name),
-            CacheType::BrokenFiles => clean_cache_file_typed::<BrokenEntry>(&path, stop_flag, cache_progress_sender, current_file_idx + 1, total_files, &file_name),
-            CacheType::ExifRemover => clean_cache_file_typed::<ExifEntry>(&path, stop_flag, cache_progress_sender, current_file_idx + 1, total_files, &file_name),
-            CacheType::VideoTranscode => clean_cache_file_typed::<VideoTranscodeEntry>(&path, stop_flag, cache_progress_sender, current_file_idx + 1, total_files, &file_name),
-            CacheType::VideoCrop => clean_cache_file_typed::<VideoCropEntry>(&path, stop_flag, cache_progress_sender, current_file_idx + 1, total_files, &file_name),
+            CacheType::Duplicates => clean_cache_file_typed::<DuplicateEntry>(&path, stop_flag),
+            CacheType::MusicTags | CacheType::MusicFingerprints => clean_cache_file_typed::<MusicEntry>(&path, stop_flag),
+            CacheType::SimilarImages => clean_cache_file_typed::<ImagesEntry>(&path, stop_flag),
+            CacheType::SimilarVideos => clean_cache_file_typed::<VideosEntry>(&path, stop_flag),
+            CacheType::BrokenFiles => clean_cache_file_typed::<BrokenEntry>(&path, stop_flag),
+            CacheType::ExifRemover => clean_cache_file_typed::<ExifEntry>(&path, stop_flag),
+            CacheType::VideoTranscode => clean_cache_file_typed::<VideoTranscodeEntry>(&path, stop_flag),
+            CacheType::VideoCrop => clean_cache_file_typed::<VideoCropEntry>(&path, stop_flag),
         };
 
         match result {
@@ -231,14 +261,13 @@ pub fn clean_all_cache_files(stop_flag: &Arc<AtomicBool>, cache_progress_sender:
                 return Err("Operation stopped by user".to_string());
             }
             Err(e) => {
-                if e == "Operation stopped by user" {
-                    debug!("Cleaning of cache file {} was skipped due to stop flag", file_name);
-                    return Err(e);
-                }
                 stats.files_with_errors += 1;
                 stats.errors.push(format!("{}: {}", file_name, e));
             }
         }
+    }
+    if let Some(handle) = progress_thread {
+        let _ = handle.join();
     }
 
     Ok(stats)
@@ -247,21 +276,10 @@ pub fn clean_all_cache_files(stop_flag: &Arc<AtomicBool>, cache_progress_sender:
 fn clean_cache_file_typed<T>(
     cache_path: &Path,
     stop_flag: &Arc<AtomicBool>,
-    cache_progress_sender: Option<&Sender<CacheProgressCleaning>>,
-    current_file: usize,
-    total_files: usize,
-    current_file_name: &str,
 ) -> Result<Option<usize>, String>
 where
-        for<'a> T: Deserialize<'a> + ResultEntry + Serialize + Clone,
+        for<'a> T: Deserialize<'a> + ResultEntry + Serialize + Clone + Send,
 {
-    if let Some(sender) = cache_progress_sender {
-        let _ = sender.send(CacheProgressCleaning {
-            current_file,
-            total_files,
-            current_file_name: current_file_name.to_string(),
-        });
-    }
 
     let file = fs::File::open(cache_path).map_err(|e| format!("Cannot open file: {}", e))?;
     let reader = BufReader::new(file);
@@ -302,7 +320,7 @@ where
         .collect();
 
     if stop_flag.load(Ordering::Relaxed) {
-        return None;
+        return Ok(None);
     }
 
     let removed_count = original_count - filtered_entries.len();
