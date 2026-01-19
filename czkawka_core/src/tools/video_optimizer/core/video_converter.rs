@@ -23,6 +23,7 @@ pub fn check_video(mut entry: VideoTranscodeEntry) -> VideoTranscodeEntry {
     };
 
     entry.codec = current_codec;
+    entry.duration = metadata.duration;
     match (metadata.width, metadata.height) {
         (Some(width), Some(height)) => {
             entry.width = width;
