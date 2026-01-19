@@ -1,8 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
-use std::path::Path;
+use std::mem;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
-use std::mem;
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
@@ -20,9 +19,8 @@ use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::common::traits::ResultEntry;
-use crate::common::video_utils::{VideoMetadata, generate_thumbnail, VIDEO_THUMBNAILS_SUBFOLDER};
+use crate::common::video_utils::{VIDEO_THUMBNAILS_SUBFOLDER, VideoMetadata, generate_thumbnail};
 use crate::tools::similar_videos::{SimilarVideos, SimilarVideosParameters, VideosEntry};
-
 
 impl SimilarVideos {
     pub fn new(params: SimilarVideosParameters) -> Self {
@@ -246,7 +244,7 @@ impl SimilarVideos {
                             file_entry.thumbnail_path = Some(thumbnail_path);
                         }
                         Err(e) => errs.push(e),
-                    };
+                    }
 
                     progress_handler.increase_items(1);
                 }

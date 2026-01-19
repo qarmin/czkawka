@@ -15,7 +15,7 @@ use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
-use crate::common::video_utils::{generate_thumbnail, VIDEO_THUMBNAILS_SUBFOLDER};
+use crate::common::video_utils::{VIDEO_THUMBNAILS_SUBFOLDER, generate_thumbnail};
 use crate::tools::video_optimizer::{
     Info, VideoCropEntry, VideoCropParams, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters, VideoTranscodeEntry, VideoTranscodeParams,
 };
@@ -29,7 +29,6 @@ pub use video_cropper::fix_video_crop;
 use crate::common::cache::CACHE_VIDEO_OPTIMIZE_VERSION;
 use crate::common::consts::VIDEO_FILES_EXTENSIONS;
 use crate::common::traits::ResultEntry;
-
 
 impl VideoOptimizer {
     pub fn new(params: VideoOptimizerParameters) -> Self {

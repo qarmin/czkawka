@@ -1,7 +1,7 @@
 use std::{fs, thread};
 
 use czkawka_core::common::config_cache_path::get_config_cache_path;
-use czkawka_core::tools::similar_videos::core::VIDEO_THUMBNAILS_SUBFOLDER;
+use czkawka_core::common::video_utils::VIDEO_THUMBNAILS_SUBFOLDER;
 use humansize::{BINARY, format_size};
 use log::{error, info};
 use slint::ComponentHandle;

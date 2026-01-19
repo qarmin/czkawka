@@ -1,8 +1,8 @@
+use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
-use std::fs;
 
 use blake3::Hasher;
 use ffprobe::ffprobe;
@@ -228,13 +228,9 @@ pub fn generate_thumbnail(
             }
             Err(e) => {
                 let _ = fs::write(&thumbnail_path, b"");
-                return Err(format!(
-                    "Failed to extract frame at {seek_time} seconds from \"{}\" - {e}",
-                    video_path.to_string_lossy()
-                ));
+                return Err(format!("Failed to extract frame at {seek_time} seconds from \"{}\" - {e}", video_path.to_string_lossy()));
             }
         }
     }
     Ok(thumbnail_path)
 }
-

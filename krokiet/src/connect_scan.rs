@@ -646,9 +646,9 @@ fn scan_similar_videos(
                 custom_settings.similar_videos_skip_forward_amount,
                 custom_settings.similar_videos_vid_hash_duration,
                 combo_box_items.videos_crop_detect.value,
-                custom_settings.similar_videos_image_preview,
-                custom_settings.similar_videos_thumbnail_percentage,
-                custom_settings.similar_videos_generate_thumbnail_grid_instead_of_single_image,
+                custom_settings.video_thumbnails_preview,
+                custom_settings.video_thumbnails_percentage,
+                custom_settings.video_thumbnails_generate_grid,
             );
             let mut tool = SimilarVideos::new(params);
             set_common_settings(&mut tool, &custom_settings, &stop_flag);
@@ -1303,21 +1303,30 @@ fn scan_video_optimizer(
             let video_optimizer_mode = combo_box_items.video_optimizer_mode.value;
             let params = if video_optimizer_mode == VideoOptimizerMode::VideoCrop {
                 let crop_detect = combo_box_items.video_optimizer_crop_type.value;
-                VideoOptimizerParameters::VideoCrop(VideoCropParams::with_custom_params(
+                let mut params = VideoCropParams::with_custom_params(
                     crop_detect,
                     custom_settings.video_optimizer_black_pixel_threshold,
                     custom_settings.video_optimizer_black_bar_min_percentage,
                     custom_settings.video_optimizer_max_samples,
                     custom_settings.video_optimizer_min_crop_size,
-                ))
+                );
+                params.generate_thumbnails = custom_settings.video_thumbnails_generate;
+                params.thumbnail_video_percentage_from_start = custom_settings.video_thumbnails_percentage;
+                params.generate_thumbnail_grid_instead_of_single = custom_settings.video_thumbnails_generate_grid;
+                VideoOptimizerParameters::VideoCrop(params)
             } else {
+                let mut params = VideoTranscodeParams::new();
                 let excluded_codecs: Vec<String> = custom_settings
                     .video_optimizer_excluded_codecs
                     .split(',')
                     .map(|s| s.trim().to_lowercase())
                     .filter(|s| !s.is_empty())
                     .collect();
-                VideoOptimizerParameters::VideoTranscode(VideoTranscodeParams { excluded_codecs })
+                params.excluded_codecs = excluded_codecs;
+                params.generate_thumbnails = custom_settings.video_thumbnails_generate;
+                params.thumbnail_video_percentage_from_start = custom_settings.video_thumbnails_percentage;
+                params.generate_thumbnail_grid_instead_of_single = custom_settings.video_thumbnails_generate_grid;
+                VideoOptimizerParameters::VideoTranscode(params)
             };
 
             let is_crop_mode = matches!(params, VideoOptimizerParameters::VideoCrop(_));

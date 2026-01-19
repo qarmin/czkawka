@@ -493,6 +493,9 @@ mod tests {
             black_bar_min_percentage: 90,
             max_samples: 60,
             min_crop_size: 5,
+            generate_thumbnails: false,
+            thumbnail_video_percentage_from_start: 0,
+            generate_thumbnail_grid_instead_of_single: false,
         }
     }
 

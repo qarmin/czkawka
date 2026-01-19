@@ -234,24 +234,6 @@ export component ToolSettings {
                 value <=> Settings.similar_videos_vid_hash_duration;
             }
 
-            SliderWrapper {
-                text: Translations.subsettings_videos_thumbnail_percentage_text;
-                end_text: "(" + round(Settings.similar_videos_thumbnail_percentage) + "%)";
-                end_text_size: 50px;
-                maximum <=> Settings.similar_videos_thumbnail_percentage_max;
-                minimum <=> Settings.similar_videos_thumbnail_percentage_min;
-                value <=> Settings.similar_videos_thumbnail_percentage;
-            }
-
-            CheckBoxWrapper {
-                text: Translations.settings_similar_videos_generate_thumbnail_grid_instead_of_single_image_text;
-                checked <=> Settings.similar_videos_sub_generate_thumbnail_grid_instead_of_single_image;
-            }
-
-            HintText {
-                hint_text: Translations.settings_similar_videos_generate_thumbnail_grid_instead_of_single_image_hint_text;
-            }
-
             Rectangle { }
         }
 

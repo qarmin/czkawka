@@ -224,7 +224,7 @@ impl ToolType {
         match self {
             Self::Duplicate => 6,
             Self::EmptyFolders | Self::EmptyFiles | Self::InvalidSymlinks | Self::BigFile | Self::TemporaryFiles => 0,
-            Self::BrokenFiles | Self::BadExtensions  => 1,
+            Self::BrokenFiles | Self::BadExtensions => 1,
             Self::SimilarImages | Self::SimilarVideos | Self::VideoOptimizer => 2,
             Self::ExifRemover => 3,
             Self::None => unreachable!("ToolType::None is not allowed"),
