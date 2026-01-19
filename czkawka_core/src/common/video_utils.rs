@@ -101,26 +101,21 @@ pub(crate) fn extract_frame_ffmpeg(video_path: &Path, timestamp: f32, max_values
 
     let mut command = Command::new("ffmpeg");
     let command_mut = &mut command;
+
+    disable_windows_console_window(command_mut);
+
+    command_mut.arg("-threads").arg("1").arg("-ss").arg(timestamp.to_string()).arg("-i").arg(video_path);
+
     if let Some((max_width, max_height)) = max_values {
         let vf_filter = format!("scale='min({max_width},iw)':'min({max_height},ih)':force_original_aspect_ratio=decrease");
         command_mut.arg("-vf").arg(&vf_filter);
     }
 
-    disable_windows_console_window(command_mut);
-
     let output = command_mut
-        .arg("-threads")
-        .arg("1")
-        .arg("-ss")
-        .arg(timestamp.to_string())
-        .arg("-i")
-        .arg(video_path)
         .arg("-vframes")
         .arg("1")
         .arg("-f")
         .arg("image2pipe")
-        .arg("-pix_fmt")
-        .arg("rgb24")
         .arg("-vcodec")
         .arg("png")
         .arg("pipe:1")
@@ -137,5 +132,5 @@ pub(crate) fn extract_frame_ffmpeg(video_path: &Path, timestamp: f32, max_values
 
     let img = image::load_from_memory(&output.stdout).map_err(|e| format!("Failed to load image: {e}"))?;
 
-    Ok(img.to_rgb8())
+    Ok(img.into_rgb8())
 }

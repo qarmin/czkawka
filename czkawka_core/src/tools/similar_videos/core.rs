@@ -192,6 +192,7 @@ impl SimilarVideos {
                         let _ = fs::write(&thumbnail_path, b"");
                         return Err(format!("Failed to save thumbnail for \"{}\": {e}", file_entry.path.to_string_lossy()));
                     }
+                    file_entry.thumbnail_path = Some(thumbnail_path);
                 }
                 Err(e) => {
                     let _ = fs::write(&thumbnail_path, b"");
