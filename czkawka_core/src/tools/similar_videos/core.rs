@@ -153,7 +153,6 @@ impl SimilarVideos {
         let mut hashmap_with_file_entries: IndexMap<String, VideosEntry> = Default::default();
         let mut vector_of_hashes: Vec<VideoHash> = Vec::new();
         for file_entry in vec_file_entry {
-            // 0 means that images was not hashed correctly, e.g. could be improperly
             if file_entry.error.is_empty() {
                 vector_of_hashes.push(file_entry.vhash.clone());
                 hashmap_with_file_entries.insert(file_entry.vhash.src_path().to_string_lossy().to_string(), file_entry);

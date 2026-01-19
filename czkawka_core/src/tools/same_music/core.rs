@@ -302,9 +302,9 @@ impl SameMusic {
                 for file_entry in vec_file_entry {
                     if file_entry.bitrate != 0 {
                         let thing = file_entry.bitrate.to_string();
-                        if !thing.is_empty() {
-                            hash_map.entry(thing.clone()).or_default().push(file_entry);
-                        }
+
+                            hash_map.entry(thing).or_default().push(file_entry);
+
                     }
                 }
                 for (_title, vec_file_entry) in hash_map {

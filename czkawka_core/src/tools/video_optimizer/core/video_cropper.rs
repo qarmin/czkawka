@@ -413,9 +413,6 @@ pub fn fix_video_crop(video_path: &Path, params: &VideoCropFixParams, stop_flag:
     let crop_width = right - left;
     let crop_height = bottom - top;
 
-    if crop_width == 0 || crop_height == 0 {
-        return Err("Crop dimensions cannot be zero".to_string());
-    }
 
     let crop_type_suffix = match params.crop_mechanism {
         VideoCroppingMechanism::BlackBars => "blackbars",
