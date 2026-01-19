@@ -144,6 +144,9 @@ fn trash_delete<P: AsRef<Path>>(path: P) -> Result<(), String> {
     }
 }
 
+/// Remove the folder if it only contains empty folders/is empty. If `remove_to_trash` is set, the folder
+/// will instead be sent to the system's recycle bin/trash equivalent rather than being deleted.
+/// Note that this will not do anything if the system does not have native trash support (e.g. iOS, Android).
 pub fn remove_folder_if_contains_only_empty_folders<P: AsRef<Path>>(path: P, remove_to_trash: bool) -> Result<(), String> {
     check_if_folder_contains_only_empty_folders(&path)?;
 
@@ -156,6 +159,9 @@ pub fn remove_folder_if_contains_only_empty_folders<P: AsRef<Path>>(path: P, rem
     }
 }
 
+/// Remove a single file. If `remove_to_trash` is set, the folder will instead be sent to the system's
+/// recycle bin/trash equivalent rather than being deleted. Note that this will not do anything if the
+/// system does not have native trash support (e.g. iOS, Android).
 pub fn remove_single_file<P: AsRef<Path>>(full_path: P, remove_to_trash: bool) -> Result<(), String> {
     if remove_to_trash {
         if let Err(e) = trash_delete(&full_path) {
@@ -173,6 +179,9 @@ pub fn remove_single_file<P: AsRef<Path>>(full_path: P, remove_to_trash: bool) -
     Ok(())
 }
 
+/// Remove a single folder recursively. If `remove_to_trash` is set, the folder will instead be sent to the system's
+/// recycle bin/trash equivalent rather than being deleted. Note that this will not do anything if the
+/// system does not have native trash support (e.g. iOS, Android).
 pub fn remove_single_folder(full_path: &str, remove_to_trash: bool) -> Result<(), String> {
     if remove_to_trash {
         if let Err(e) = trash_delete(full_path) {
