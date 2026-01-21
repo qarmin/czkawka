@@ -355,7 +355,6 @@ mod test {
     }
 
     #[gtk4::test]
-    #[ignore] // No idea why this freezes - when I print iters inside the loop, then it works fine
     fn cleans_invalid_headers_properly() {
         let columns_types: &[Type] = &[Type::BOOL, Type::STRING];
         let list_store = gtk4::ListStore::new(columns_types);
