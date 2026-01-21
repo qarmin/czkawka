@@ -33,6 +33,7 @@
 - Using colors by default in terminal output(can be disabled by feature flag) - [#1672](https://github.com/qarmin/czkawka/pull/1672)
 - Fixed regression, where results were not printed by default to terminal - [#1672](https://github.com/qarmin/czkawka/pull/1672)
 - Added dry_run and move_to_trash options to all tools - [#1685](https://github.com/qarmin/czkawka/pull/1685)
+- Fixed non binded `--excluded-extensions` - [#1748](https://github.com/qarmin/czkawka/pull/1748)
 
 ### GTK GUI
 - Sort button is restored and crashes when sorting are fixed(probably) - [#1623](https://github.com/qarmin/czkawka/pull/1623)

@@ -103,23 +103,17 @@ impl Extensions {
 
     // E.g. when using similar videos, user can provide extensions like "mp4,flv", but if user provide "mp4,jpg" then
     // it will be only "mp4" because "jpg" is not valid extension for videos
-
-    fn union_allowed_extensions(&mut self, file_extensions: &[&str]) {
-        let mut new_extensions = IndexSet::new();
-        for extension in file_extensions {
-            let extension_without_dot = extension.trim_start_matches('.');
-            if !self.allowed_extensions_hashset.contains(extension_without_dot) {
-                new_extensions.insert(extension_without_dot.to_string());
-            }
-        }
-        self.allowed_extensions_hashset = new_extensions;
+    fn intersection_allowed_extensions(&mut self, file_extensions: &[&str]) {
+        self.allowed_extensions_hashset.retain(|ext| file_extensions.contains(&ext.as_str()));
     }
 
     pub(crate) fn set_and_validate_allowed_extensions(&mut self, file_extensions: &[&str]) {
+        // If there is no selected allowed extensions, that means that are all allowed
+        // If there are some allowed extensions, we need to do intersection
         if self.allowed_extensions_hashset.is_empty() {
             self.extend_allowed_extensions(file_extensions);
         } else {
-            self.union_allowed_extensions(file_extensions);
+            self.intersection_allowed_extensions(file_extensions);
         }
     }
 }
@@ -235,7 +229,7 @@ mod tests {
         let mut ext = Extensions::new();
         ext.set_allowed_extensions("jpg,png,mp4".to_string());
         ext.set_and_validate_allowed_extensions(&["mp4", "mkv"]);
-        assert!(ext.allowed_extensions_hashset.contains("mkv"));
+        assert!(ext.allowed_extensions_hashset.contains("mp4"));
         assert!(!ext.allowed_extensions_hashset.contains("jpg"));
     }
 }
