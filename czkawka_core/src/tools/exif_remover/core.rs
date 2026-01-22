@@ -52,9 +52,9 @@ impl ExifRemover {
 
     #[fun_time(message = "find_exif_files", level = "debug")]
     pub(crate) fn find_exif_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
-        self.common_data.extensions.set_and_validate_allowed_extensions(EXIF_FILES_EXTENSIONS);
-        if !self.common_data.extensions.has_allowed_extensions() {
-            return WorkContinueStatus::Continue;
+        if let Err(e) = self.common_data.extensions.set_and_validate_allowed_extensions(EXIF_FILES_EXTENSIONS) {
+            self.common_data.text_messages.critical = Some(e);
+            return WorkContinueStatus::Stop;
         }
         let result = DirTraversalBuilder::new()
             .common_data(&self.common_data)

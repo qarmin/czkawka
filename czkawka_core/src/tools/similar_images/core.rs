@@ -41,18 +41,18 @@ impl SimilarImages {
 
     #[fun_time(message = "check_for_similar_images", level = "debug")]
     pub(crate) fn check_for_similar_images(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
-        if cfg!(feature = "heif") {
+        let res = if cfg!(feature = "heif") {
             self.common_data
                 .extensions
-                .set_and_validate_allowed_extensions(&[IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS, JXL_IMAGE_EXTENSIONS, HEIC_EXTENSIONS].concat());
+                .set_and_validate_allowed_extensions(&[IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS, JXL_IMAGE_EXTENSIONS, HEIC_EXTENSIONS].concat())
         } else {
             self.common_data
                 .extensions
-                .set_and_validate_allowed_extensions(&[IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS, JXL_IMAGE_EXTENSIONS].concat());
-        }
-
-        if !self.common_data.extensions.has_allowed_extensions() {
-            return WorkContinueStatus::Continue;
+                .set_and_validate_allowed_extensions(&[IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS, JXL_IMAGE_EXTENSIONS].concat())
+        };
+        if let Err(e) = res {
+            self.common_data.text_messages.critical = Some(e);
+            return WorkContinueStatus::Stop;
         }
 
         let result = DirTraversalBuilder::new()

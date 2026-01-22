@@ -51,11 +51,9 @@ impl BrokenFiles {
             }
         }
 
-        self.common_data.extensions.set_and_validate_allowed_extensions(&extensions);
-        // TODO, responsibility should be moved to CLI/GUI
-        // assert!(self.common_data.extensions.has_allowed_extensions(), "This should be checked before");
-        if !self.common_data.extensions.has_allowed_extensions() {
-            return WorkContinueStatus::Continue;
+        if let Err(e) = self.common_data.extensions.set_and_validate_allowed_extensions(&extensions) {
+            self.common_data.text_messages.critical = Some(e);
+            return WorkContinueStatus::Stop;
         }
 
         let result = DirTraversalBuilder::new()

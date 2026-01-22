@@ -144,14 +144,14 @@ pub fn remove_single_file<P: AsRef<Path>>(full_path: P, remove_to_trash: bool) -
     if remove_to_trash {
         if let Err(e) = trash::delete(&full_path) {
             return Err(flc!(
-                "rust_error_moving_to_trash",
+                "core_error_moving_to_trash",
                 file = full_path.as_ref().to_string_lossy().to_string(),
                 error = e.to_string()
             ));
         }
     } else {
         if let Err(e) = fs::remove_file(&full_path) {
-            return Err(flc!("rust_error_removing", file = full_path.as_ref().to_string_lossy().to_string(), error = e.to_string()));
+            return Err(flc!("core_error_removing", file = full_path.as_ref().to_string_lossy().to_string(), error = e.to_string()));
         }
     }
     Ok(())
@@ -160,11 +160,11 @@ pub fn remove_single_file<P: AsRef<Path>>(full_path: P, remove_to_trash: bool) -
 pub fn remove_single_folder(full_path: &str, remove_to_trash: bool) -> Result<(), String> {
     if remove_to_trash {
         if let Err(e) = trash::delete(full_path) {
-            return Err(flc!("rust_error_moving_to_trash", file = full_path, error = e.to_string()));
+            return Err(flc!("core_error_moving_to_trash", file = full_path, error = e.to_string()));
         }
     } else {
         if let Err(e) = fs::remove_dir_all(full_path) {
-            return Err(flc!("rust_error_removing", file = full_path, error = e.to_string()));
+            return Err(flc!("core_error_removing", file = full_path, error = e.to_string()));
         }
     }
     Ok(())

@@ -2,6 +2,7 @@ use std::ffi::OsStr;
 
 use indexmap::IndexSet;
 
+use crate::flc;
 use crate::helpers::messages::Messages;
 
 #[derive(Debug, Clone, Default)]
@@ -43,7 +44,9 @@ impl Extensions {
             }
 
             if extension.contains(' ') {
-                messages.warnings.push(format!("{extension} is not a valid extension because it contains empty space inside"));
+                messages
+                    .warnings
+                    .push(format!("{extension} is not a valid extension because it contains empty space inside"));
                 continue;
             }
 
@@ -90,27 +93,25 @@ impl Extensions {
         }
     }
 
-    // By default, missing allowed extensions means that all extensions are allowed
-    // But with models like video, image etc. only specific extensions are allowed, so if user set some allowed extensions,
-    // we need to check if there is any element with user/app allowed extensions, if yes, then such extensions are used
-    // if not, that means, that there is no extensions to check
-    pub(crate) fn has_allowed_extensions(&self) -> bool {
-        !self.allowed_extensions_hashset.is_empty()
-    }
-
     // E.g. when using similar videos, user can provide extensions like "mp4,flv", but if user provide "mp4,jpg" then
     // it will be only "mp4" because "jpg" is not valid extension for videos
     fn intersection_allowed_extensions(&mut self, file_extensions: &[&str]) {
         self.allowed_extensions_hashset.retain(|ext| file_extensions.contains(&ext.as_str()));
     }
 
-    pub(crate) fn set_and_validate_allowed_extensions(&mut self, file_extensions: &[&str]) {
+    pub(crate) fn set_and_validate_allowed_extensions(&mut self, file_extensions: &[&str]) -> Result<(), String> {
         // If there is no selected allowed extensions, that means that are all allowed
         // If there are some allowed extensions, we need to do intersection
         if self.allowed_extensions_hashset.is_empty() {
             self.allowed_extensions_hashset = file_extensions.iter().map(|ext| ext.trim_start_matches('.').to_string()).collect();
         } else {
             self.intersection_allowed_extensions(file_extensions);
+        }
+
+        if !self.allowed_extensions_hashset.is_empty() {
+            Ok(())
+        } else {
+            Err(flc!("core_needs_allowed_extensions", extensions = file_extensions.join(", ")))
         }
     }
 }
@@ -160,19 +161,6 @@ mod tests {
     }
 
     #[test]
-    fn test_set_allowed_and_excluded_extensions() {
-        let mut ext = Extensions::new();
-
-        let msgs = ext.set_allowed_extensions("jpg,png".to_string());
-        assert!(msgs.warnings.is_empty());
-        assert!(ext.has_allowed_extensions());
-
-        let mut ext2 = Extensions::new();
-        ext2.set_excluded_extensions("gif,bmp".to_string());
-        assert!(!ext2.has_allowed_extensions());
-    }
-
-    #[test]
     fn test_check_if_entry_have_valid_extension() {
         let temp_dir = tempfile::tempdir().unwrap();
         let file_jpg = temp_dir.path().join("test.jpg");
@@ -219,13 +207,13 @@ mod tests {
     #[test]
     fn test_set_and_validate_allowed_extensions() {
         let mut ext = Extensions::new();
-        ext.set_and_validate_allowed_extensions(&["mp4", "mkv"]);
+        ext.set_and_validate_allowed_extensions(&["mp4", "mkv"]).unwrap();
         assert_eq!(ext.allowed_extensions_hashset.len(), 2);
         assert!(ext.allowed_extensions_hashset.contains("mp4"));
 
         let mut ext = Extensions::new();
         ext.set_allowed_extensions("jpg,png,mp4".to_string());
-        ext.set_and_validate_allowed_extensions(&["mp4", "mkv"]);
+        ext.set_and_validate_allowed_extensions(&["mp4", "mkv"]).unwrap();
         assert!(ext.allowed_extensions_hashset.contains("mp4"));
         assert!(!ext.allowed_extensions_hashset.contains("jpg"));
     }
