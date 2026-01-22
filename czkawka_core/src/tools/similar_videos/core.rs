@@ -38,7 +38,7 @@ impl SimilarVideos {
     #[fun_time(message = "check_for_similar_videos", level = "debug")]
     pub(crate) fn check_for_similar_videos(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         self.common_data.extensions.set_and_validate_allowed_extensions(VIDEO_FILES_EXTENSIONS);
-        if !self.common_data.extensions.set_any_extensions() {
+        if !self.common_data.extensions.has_allowed_extensions() {
             return WorkContinueStatus::Continue;
         }
 

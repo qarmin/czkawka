@@ -51,7 +51,7 @@ impl SimilarImages {
                 .set_and_validate_allowed_extensions(&[IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS, JXL_IMAGE_EXTENSIONS].concat());
         }
 
-        if !self.common_data.extensions.set_any_extensions() {
+        if !self.common_data.extensions.has_allowed_extensions() {
             return WorkContinueStatus::Continue;
         }
 

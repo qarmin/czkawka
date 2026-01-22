@@ -1,3 +1,4 @@
+use std::cmp::Reverse;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
@@ -37,10 +38,11 @@ impl BigFile {
         match result {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
                 let mut all_files = grouped_file_entries.into_values().flatten().collect::<Vec<_>>();
-                all_files.par_sort_unstable_by_key(|fe| fe.size);
 
                 if self.get_params().search_mode == SearchMode::BiggestFiles {
-                    all_files.reverse();
+                    all_files.par_sort_unstable_by_key(|fe| Reverse(fe.size));
+                } else {
+                    all_files.par_sort_unstable_by_key(|fe| fe.size);
                 }
 
                 all_files.truncate(self.get_params().number_of_files_to_check);

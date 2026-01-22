@@ -50,7 +50,8 @@ impl SameMusic {
     #[fun_time(message = "check_files", level = "debug")]
     pub(crate) fn check_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         self.common_data.extensions.set_and_validate_allowed_extensions(AUDIO_FILES_EXTENSIONS);
-        if !self.common_data.extensions.set_any_extensions() {
+        if !self.common_data.extensions.has_allowed_extensions() {
+            self.common_data.text_messages.critical = Some(format!("Chosen audio extensions must set at least one of the following extensions: {:?}", AUDIO_FILES_EXTENSIONS));
             return WorkContinueStatus::Continue;
         }
 

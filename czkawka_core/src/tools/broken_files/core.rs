@@ -53,8 +53,8 @@ impl BrokenFiles {
 
         self.common_data.extensions.set_and_validate_allowed_extensions(&extensions);
         // TODO, responsibility should be moved to CLI/GUI
-        // assert!(self.common_data.extensions.set_any_extensions(), "This should be checked before");
-        if !self.common_data.extensions.set_any_extensions() {
+        // assert!(self.common_data.extensions.has_allowed_extensions(), "This should be checked before");
+        if !self.common_data.extensions.has_allowed_extensions() {
             return WorkContinueStatus::Continue;
         }
 
@@ -102,7 +102,7 @@ impl BrokenFiles {
             file_entry
         })
         .unwrap_or_else(|_| {
-            let message = create_crash_message("Image-rs", &file_entry_clone.path.to_string_lossy(), "https://github.com/Serial-ATA/lofty-rs");
+            let message = create_crash_message("Image-rs", &file_entry_clone.path.to_string_lossy(), "https://github.com/image-rs/image");
             error!("{message}");
             file_entry_clone.error_string = message;
             file_entry_clone
@@ -342,7 +342,7 @@ impl BrokenFiles {
     }
 }
 
-#[expect(clippy::string_slice)] // Valid, because we address go to dot, which is known ascii character
+#[expect(clippy::string_slice)] // Valid, because we address up to the dot, which is known ascii character
 fn check_extension_availability(full_name: &Path) -> TypeOfFile {
     let Some(file_name) = full_name.file_name() else {
         error!("Missing file name in file - \"{}\"", full_name.to_string_lossy());

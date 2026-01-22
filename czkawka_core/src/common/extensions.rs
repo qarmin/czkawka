@@ -38,12 +38,12 @@ impl Extensions {
             }
 
             if extension.contains('.') {
-                messages.warnings.push(format!("{extension} is not valid extension because contains dot inside"));
+                messages.warnings.push(format!("{extension} is not a valid extension because it contains a dot inside"));
                 continue;
             }
 
             if extension.contains(' ') {
-                messages.warnings.push(format!("{extension} is not valid extension because contains empty space inside"));
+                messages.warnings.push(format!("{extension} is not a valid extension because it contains empty space inside"));
                 continue;
             }
 
@@ -90,15 +90,12 @@ impl Extensions {
         }
     }
 
-    pub(crate) fn set_any_extensions(&self) -> bool {
+    // By default, missing allowed extensions means that all extensions are allowed
+    // But with models like video, image etc. only specific extensions are allowed, so if user set some allowed extensions,
+    // we need to check if there is any element with user/app allowed extensions, if yes, then such extensions are used
+    // if not, that means, that there is no extensions to check
+    pub(crate) fn has_allowed_extensions(&self) -> bool {
         !self.allowed_extensions_hashset.is_empty()
-    }
-
-    fn extend_allowed_extensions(&mut self, file_extensions: &[&str]) {
-        for extension in file_extensions {
-            let extension_without_dot = extension.trim_start_matches('.');
-            self.allowed_extensions_hashset.insert(extension_without_dot.to_string());
-        }
     }
 
     // E.g. when using similar videos, user can provide extensions like "mp4,flv", but if user provide "mp4,jpg" then
@@ -111,7 +108,7 @@ impl Extensions {
         // If there is no selected allowed extensions, that means that are all allowed
         // If there are some allowed extensions, we need to do intersection
         if self.allowed_extensions_hashset.is_empty() {
-            self.extend_allowed_extensions(file_extensions);
+            self.allowed_extensions_hashset = file_extensions.iter().map(|ext| ext.trim_start_matches('.').to_string()).collect();
         } else {
             self.intersection_allowed_extensions(file_extensions);
         }
@@ -168,11 +165,11 @@ mod tests {
 
         let msgs = ext.set_allowed_extensions("jpg,png".to_string());
         assert!(msgs.warnings.is_empty());
-        assert!(ext.set_any_extensions());
+        assert!(ext.has_allowed_extensions());
 
         let mut ext2 = Extensions::new();
         ext2.set_excluded_extensions("gif,bmp".to_string());
-        assert!(!ext2.set_any_extensions());
+        assert!(!ext2.has_allowed_extensions());
     }
 
     #[test]
