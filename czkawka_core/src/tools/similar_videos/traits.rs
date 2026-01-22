@@ -7,6 +7,7 @@ use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use humansize::{BINARY, format_size};
 
+use crate::common::consts::VIDEO_FILES_EXTENSIONS;
 use crate::common::ffmpeg_utils::check_if_ffprobe_ffmpeg_exists;
 use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;
@@ -31,7 +32,7 @@ impl Search for SimilarVideos {
                 return;
             }
 
-            if self.prepare_items().is_err() {
+            if self.prepare_items(Some(VIDEO_FILES_EXTENSIONS)).is_err() {
                 return;
             }
             self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty() || !self.common_data.directories.reference_files.is_empty();

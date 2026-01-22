@@ -99,19 +99,38 @@ impl Extensions {
         self.allowed_extensions_hashset.retain(|ext| file_extensions.contains(&ext.as_str()));
     }
 
-    pub(crate) fn set_and_validate_allowed_extensions(&mut self, file_extensions: &[&str]) -> Result<(), String> {
-        // If there is no selected allowed extensions, that means that are all allowed
-        // If there are some allowed extensions, we need to do intersection
-        if self.allowed_extensions_hashset.is_empty() {
-            self.allowed_extensions_hashset = file_extensions.iter().map(|ext| ext.trim_start_matches('.').to_string()).collect();
-        } else {
-            self.intersection_allowed_extensions(file_extensions);
+    // Tool extensions may be set by the tool itself, e.g. similar images may only use image extensions
+    pub(crate) fn set_and_validate_extensions(&mut self, tool_extensions: Option<&[&str]>) -> Result<(), String> {
+        let user_set_any_allowed_extensions = !self.allowed_extensions_hashset.is_empty();
+        let tool_have_any_extensions = tool_extensions.is_some();
+
+        // If user not set any extensions and tool not have any allowed extension, it is fine
+        if !user_set_any_allowed_extensions && !tool_have_any_extensions {
+            return Ok(());
         }
 
-        if !self.allowed_extensions_hashset.is_empty() {
-            Ok(())
+        if let Some(tool_extensions) = tool_extensions {
+            // If there is no selected allowed extensions, that means that are all allowed
+            // If there are some allowed extensions, we need to do intersection with tool extensions
+            if user_set_any_allowed_extensions {
+                self.intersection_allowed_extensions(tool_extensions);
+            } else {
+                self.allowed_extensions_hashset = tool_extensions.iter().map(|ext| ext.trim_start_matches('.').to_string()).collect();
+            }
+        }
+
+        let both_extensions = self.allowed_extensions_hashset.intersection(&self.excluded_extensions_hashset).cloned().collect::<Vec<_>>();
+        self.allowed_extensions_hashset.retain(|ext| !both_extensions.contains(ext));
+        self.excluded_extensions_hashset.retain(|ext| !both_extensions.contains(ext));
+
+        if self.allowed_extensions_hashset.is_empty() {
+            if let Some(tool_extensions) = tool_extensions {
+                Err(flc!("core_needs_allowed_extensions_limited_by_tool", extensions = tool_extensions.join(", ")))
+            } else {
+                Err(flc!("core_needs_allowed_extensions"))
+            }
         } else {
-            Err(flc!("core_needs_allowed_extensions", extensions = file_extensions.join(", ")))
+            Ok(())
         }
     }
 }
@@ -202,19 +221,5 @@ mod tests {
         ext.set_excluded_extensions("txt".to_string());
         assert!(ext.check_if_entry_have_valid_extension(&entries.iter().find(|e| e.file_name() == "test.jpg").unwrap().file_name()));
         assert!(!ext.check_if_entry_have_valid_extension(&entries.iter().find(|e| e.file_name() == "test.txt").unwrap().file_name()));
-    }
-
-    #[test]
-    fn test_set_and_validate_allowed_extensions() {
-        let mut ext = Extensions::new();
-        ext.set_and_validate_allowed_extensions(&["mp4", "mkv"]).unwrap();
-        assert_eq!(ext.allowed_extensions_hashset.len(), 2);
-        assert!(ext.allowed_extensions_hashset.contains("mp4"));
-
-        let mut ext = Extensions::new();
-        ext.set_allowed_extensions("jpg,png,mp4".to_string());
-        ext.set_and_validate_allowed_extensions(&["mp4", "mkv"]).unwrap();
-        assert!(ext.allowed_extensions_hashset.contains("mp4"));
-        assert!(!ext.allowed_extensions_hashset.contains("jpg"));
     }
 }

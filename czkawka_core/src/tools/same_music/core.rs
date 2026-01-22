@@ -23,7 +23,6 @@ use symphonia::core::meta::MetadataOptions;
 use symphonia::core::probe::Hint;
 
 use crate::common::cache::{CACHE_VERSION, load_and_split_cache_generalized_by_path, save_and_connect_cache_generalized_by_path};
-use crate::common::consts::AUDIO_FILES_EXTENSIONS;
 use crate::common::create_crash_message;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{ToolType, WorkContinueStatus};
@@ -49,11 +48,6 @@ impl SameMusic {
 
     #[fun_time(message = "check_files", level = "debug")]
     pub(crate) fn check_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
-        if let Err(e) = self.common_data.extensions.set_and_validate_allowed_extensions(AUDIO_FILES_EXTENSIONS) {
-            self.common_data.text_messages.critical = Some(e);
-            return WorkContinueStatus::Stop;
-        }
-
         let result = DirTraversalBuilder::new()
             .group_by(|_fe| ())
             .stop_flag(stop_flag)

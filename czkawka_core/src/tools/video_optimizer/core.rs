@@ -27,7 +27,6 @@ pub use video_converter::process_video;
 pub use video_cropper::fix_video_crop;
 
 use crate::common::cache::CACHE_VIDEO_OPTIMIZE_VERSION;
-use crate::common::consts::VIDEO_FILES_EXTENSIONS;
 use crate::common::traits::ResultEntry;
 
 impl VideoOptimizer {
@@ -45,11 +44,6 @@ impl VideoOptimizer {
 
     #[fun_time(message = "scan_files", level = "debug")]
     pub(crate) fn scan_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
-        let extensions_string = match &self.params {
-            VideoOptimizerParameters::VideoTranscode(_) | VideoOptimizerParameters::VideoCrop(_) => VIDEO_FILES_EXTENSIONS.join(","),
-        };
-        self.common_data.extensions.set_allowed_extensions(extensions_string);
-
         let result = DirTraversalBuilder::new()
             .group_by(|_fe| ())
             .stop_flag(stop_flag)

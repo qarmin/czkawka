@@ -6,6 +6,7 @@ use std::time::Instant;
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
 
+use crate::common::consts::{AUDIO_FILES_EXTENSIONS, IMAGE_RS_BROKEN_FILES_EXTENSIONS, PDF_FILES_EXTENSIONS, VIDEO_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS};
 use crate::common::ffmpeg_utils::check_if_ffprobe_ffmpeg_exists;
 use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;
@@ -29,7 +30,25 @@ impl Search for BrokenFiles {
                 return;
             }
 
-            if self.prepare_items().is_err() {
+            let extension_types = [
+                (CheckedTypes::PDF, PDF_FILES_EXTENSIONS),
+                (CheckedTypes::AUDIO, AUDIO_FILES_EXTENSIONS),
+                (CheckedTypes::ARCHIVE, ZIP_FILES_EXTENSIONS),
+                (CheckedTypes::IMAGE, IMAGE_RS_BROKEN_FILES_EXTENSIONS),
+                (CheckedTypes::VIDEO, VIDEO_FILES_EXTENSIONS),
+            ];
+            let extensions = extension_types
+                .into_iter()
+                .filter(|(checked_type, _)| self.get_params().checked_types.contains(*checked_type))
+                .flat_map(|(_, exts)| exts.to_vec())
+                .collect::<Vec<&str>>();
+
+            if extensions.is_empty() {
+                self.common_data.text_messages.critical = Some(flc!("core_needs_to_set_at_least_one_broken_option"));
+                return;
+            }
+
+            if self.prepare_items(Some(&extensions)).is_err() {
                 return;
             }
             if self.check_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {

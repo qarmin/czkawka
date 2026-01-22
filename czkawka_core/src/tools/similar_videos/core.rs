@@ -12,7 +12,6 @@ use vid_dup_finder_lib::{CreationOptions, Cropdetect, VideoHash, VideoHashBuilde
 
 use crate::common::cache::{CACHE_VIDEO_VERSION, load_and_split_cache_generalized_by_path, save_and_connect_cache_generalized_by_path};
 use crate::common::config_cache_path::get_config_cache_path;
-use crate::common::consts::VIDEO_FILES_EXTENSIONS;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult, inode, take_1_per_inode};
 use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
@@ -37,11 +36,6 @@ impl SimilarVideos {
 
     #[fun_time(message = "check_for_similar_videos", level = "debug")]
     pub(crate) fn check_for_similar_videos(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
-        if let Err(e) = self.common_data.extensions.set_and_validate_allowed_extensions(VIDEO_FILES_EXTENSIONS) {
-            self.common_data.text_messages.critical = Some(e);
-            return WorkContinueStatus::Stop;
-        }
-
         let result = DirTraversalBuilder::new()
             .group_by(inode)
             .stop_flag(stop_flag)

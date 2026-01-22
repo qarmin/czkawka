@@ -22,7 +22,7 @@ use crate::common::progress_stop_handler::{check_if_stop_received, prepare_threa
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::common::{create_crash_message, debug_save_file};
 use crate::helpers::audio_checker;
-use crate::tools::broken_files::{BrokenEntry, BrokenFiles, BrokenFilesParameters, CheckedTypes, Info, TypeOfFile};
+use crate::tools::broken_files::{BrokenEntry, BrokenFiles, BrokenFilesParameters, Info, TypeOfFile};
 
 impl BrokenFiles {
     pub fn new(params: BrokenFilesParameters) -> Self {
@@ -37,25 +37,6 @@ impl BrokenFiles {
 
     #[fun_time(message = "check_files", level = "debug")]
     pub(crate) fn check_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
-        let mut extensions = Vec::new();
-        let vec_extensions = [
-            (CheckedTypes::PDF, PDF_FILES_EXTENSIONS),
-            (CheckedTypes::AUDIO, AUDIO_FILES_EXTENSIONS),
-            (CheckedTypes::ARCHIVE, ZIP_FILES_EXTENSIONS),
-            (CheckedTypes::IMAGE, IMAGE_RS_BROKEN_FILES_EXTENSIONS),
-            (CheckedTypes::VIDEO, VIDEO_FILES_EXTENSIONS),
-        ];
-        for (checked_type, extensions_to_add) in &vec_extensions {
-            if self.get_params().checked_types.contains(*checked_type) {
-                extensions.extend_from_slice(extensions_to_add);
-            }
-        }
-
-        if let Err(e) = self.common_data.extensions.set_and_validate_allowed_extensions(&extensions) {
-            self.common_data.text_messages.critical = Some(e);
-            return WorkContinueStatus::Stop;
-        }
-
         let result = DirTraversalBuilder::new()
             .group_by(|_fe| ())
             .stop_flag(stop_flag)

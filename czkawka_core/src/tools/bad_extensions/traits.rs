@@ -20,7 +20,7 @@ impl Search for BadExtensions {
         let start_time = Instant::now();
 
         let () = (|| {
-            if self.prepare_items().is_err() {
+            if self.prepare_items(None).is_err() {
                 return;
             }
             if self.check_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
