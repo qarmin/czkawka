@@ -286,6 +286,7 @@ pub trait CommonData {
 
         if let Err(e) = self.get_extensions_mut().set_and_validate_extensions(tool_extensions) {
             self.get_cd_mut().text_messages.critical = Some(e);
+            return Err(());
         }
 
         Ok(())
