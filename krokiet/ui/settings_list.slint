@@ -34,12 +34,14 @@ export component TextComponent inherits HorizontalLayout {
 component CheckBoxComponent inherits HorizontalLayout {
     in-out property <bool> model;
     in property <string> name;
+    in-out property <bool> enabled: true;
     callback toggled();
     spacing: 5px;
     CheckBox {
         horizontal-stretch: 1.0;
         height: SettingsSize.item_height;
         checked <=> model;
+        enabled <=> enabled;
         text: name;
         toggled => {
             root.toggled();
@@ -325,6 +327,17 @@ export component SettingsList inherits VerticalLayout {
                 font-size: FontSizes.normal;
             }
 
+            CheckBoxComponent {
+                enabled <=> GuiState.audio_feature_enabled;
+                name <=> Translations.settings_play_audio_on_scan_completion_text;
+                model <=> Settings.play_audio_on_scan_completion;
+            }
+
+            HintText {
+                visible: !GuiState.audio_feature_enabled;
+                hint_text <=> "Available only when compiling with audio feature";
+            }
+
             HeaderText {
                 text <=> Translations.settings_general_settings_text;
             }
@@ -517,17 +530,6 @@ export component SettingsList inherits VerticalLayout {
                 name <=> Translations.settings_delete_outdated_entries_text;
                 model <=> Settings.similar_music_delete_outdated_entries;
             }
-
-
-            HeaderText {
-                text <=> Translations.settings_audio_header_text;
-            }
-
-            CheckBoxComponent {
-                name <=> Translations.settings_play_audio_on_scan_completion_text;
-                model <=> Settings.play_audio_on_scan_completion;
-            }
-
 
             HeaderText {
                 text <=> Translations.settings_cache_header_text;

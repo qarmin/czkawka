@@ -104,6 +104,9 @@ fn main() {
         }
     };
 
+    #[cfg(feature = "audio")]
+    app.global::<GuiState>().set_audio_feature_enabled(true);
+
     let (progress_sender, progress_receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
     let stop_flag: Arc<AtomicBool> = Arc::default();
 
@@ -192,6 +195,8 @@ pub(crate) fn zeroing_all_models(app: &MainWindow) {
 pub(crate) fn print_krokiet_features() {
     let mut features: Vec<&str> = Vec::new();
 
+    #[cfg(feature = "audio")]
+    features.push("audio");
     #[cfg(feature = "skia_opengl")]
     features.push("skia_opengl");
     #[cfg(feature = "skia_vulkan")]

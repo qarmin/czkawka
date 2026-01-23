@@ -37,6 +37,7 @@ use log::error;
 use rayon::prelude::*;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
 
+use crate::audio_player::AudioPlayer;
 use crate::common::{
     MAX_INT_DATA_BAD_EXTENSIONS, MAX_INT_DATA_BIG_FILES, MAX_INT_DATA_BROKEN_FILES, MAX_INT_DATA_DUPLICATE_FILES, MAX_INT_DATA_EMPTY_FILES, MAX_INT_DATA_EMPTY_FOLDERS,
     MAX_INT_DATA_EXIF_REMOVER, MAX_INT_DATA_INVALID_SYMLINKS, MAX_INT_DATA_SIMILAR_IMAGES, MAX_INT_DATA_SIMILAR_MUSIC, MAX_INT_DATA_SIMILAR_VIDEOS, MAX_INT_DATA_TEMPORARY_FILES,
@@ -47,7 +48,6 @@ use crate::common::{
 use crate::connect_row_selection::checker::set_number_of_enabled_items;
 use crate::connect_row_selection::reset_selection;
 use crate::settings::model::{BasicSettings, ComboBoxItems, SettingsCustom};
-use crate::audio_player::AudioPlayer;
 use crate::settings::{collect_base_settings, collect_combo_box_settings, collect_settings};
 use crate::shared_models::SharedModels;
 use crate::{ActiveTab, GuiState, MainListModel, MainWindow, ProgressToSend, flk};
@@ -62,7 +62,13 @@ pub struct ScanData {
     pub audio_player: Arc<AudioPlayer>,
 }
 
-pub(crate) fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>, shared_models: Arc<Mutex<SharedModels>>, audio_player: Arc<AudioPlayer>) {
+pub(crate) fn connect_scan_button(
+    app: &MainWindow,
+    progress_sender: Sender<ProgressData>,
+    stop_flag: Arc<AtomicBool>,
+    shared_models: Arc<Mutex<SharedModels>>,
+    audio_player: Arc<AudioPlayer>,
+) {
     let a = app.as_weak();
     app.on_scan_starting(move |active_tab| {
         let app = a.upgrade().expect("Failed to upgrade app :(");
@@ -97,8 +103,7 @@ pub(crate) fn connect_scan_button(app: &MainWindow, progress_sender: Sender<Prog
 
         let a = app.as_weak();
         let audio_player_clone = Arc::clone(&audio_player);
-        
-        
+
         let scan_data = ScanData {
             progress_sender,
             stop_flag,
@@ -108,47 +113,21 @@ pub(crate) fn connect_scan_button(app: &MainWindow, progress_sender: Sender<Prog
             shared_models: cloned_model,
             audio_player: audio_player_clone,
         };
-        
+
         match active_tab {
-            ActiveTab::DuplicateFiles => {
-                scan_duplicates(a, scan_data);
-            }
-            ActiveTab::EmptyFolders => {
-                scan_empty_folders(a, scan_data);
-            }
-            ActiveTab::BigFiles => {
-                scan_big_files(a, scan_data);
-            }
-            ActiveTab::EmptyFiles => {
-                scan_empty_files(a, scan_data);
-            }
-            ActiveTab::SimilarImages => {
-                scan_similar_images(a, scan_data);
-            }
-            ActiveTab::SimilarVideos => {
-                scan_similar_videos(a, scan_data);
-            }
-            ActiveTab::SimilarMusic => {
-                scan_similar_music(a, scan_data);
-            }
-            ActiveTab::InvalidSymlinks => {
-                scan_invalid_symlinks(a, scan_data);
-            }
-            ActiveTab::BadExtensions => {
-                scan_bad_extensions(a, scan_data);
-            }
-            ActiveTab::BrokenFiles => {
-                scan_broken_files(a, scan_data);
-            }
-            ActiveTab::TemporaryFiles => {
-                scan_temporary_files(a, scan_data);
-            }
-            ActiveTab::ExifRemover => {
-                scan_exif_remover(a, scan_data);
-            }
-            ActiveTab::VideoOptimizer => {
-                scan_video_optimizer(a, scan_data);
-            }
+            ActiveTab::DuplicateFiles => scan_duplicates(a, scan_data),
+            ActiveTab::EmptyFolders => scan_empty_folders(a, scan_data),
+            ActiveTab::BigFiles => scan_big_files(a, scan_data),
+            ActiveTab::EmptyFiles => scan_empty_files(a, scan_data),
+            ActiveTab::SimilarImages => scan_similar_images(a, scan_data),
+            ActiveTab::SimilarVideos => scan_similar_videos(a, scan_data),
+            ActiveTab::SimilarMusic => scan_similar_music(a, scan_data),
+            ActiveTab::InvalidSymlinks => scan_invalid_symlinks(a, scan_data),
+            ActiveTab::BadExtensions => scan_bad_extensions(a, scan_data),
+            ActiveTab::BrokenFiles => scan_broken_files(a, scan_data),
+            ActiveTab::TemporaryFiles => scan_temporary_files(a, scan_data),
+            ActiveTab::ExifRemover => scan_exif_remover(a, scan_data),
+            ActiveTab::VideoOptimizer => scan_video_optimizer(a, scan_data),
             ActiveTab::Settings | ActiveTab::About => panic!("Button should be disabled"),
         }
     });
@@ -156,14 +135,10 @@ pub(crate) fn connect_scan_button(app: &MainWindow, progress_sender: Sender<Prog
 
 // Scan Duplicates
 
-fn scan_duplicates(
-    a: Weak<MainWindow>,
-sd: ScanData
-) {
+fn scan_duplicates(a: Weak<MainWindow>, sd: ScanData) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            
             let hash_type = sd.combo_box_items.duplicates_hash_type.value;
             let check_method = sd.combo_box_items.duplicates_check_method.value;
 
@@ -240,7 +215,17 @@ sd: ScanData
             sd.shared_models.lock().unwrap().shared_duplication_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_duplicate_results(&app, vector, critical, messages, &scanning_time_str, duplicates_number, groups_number, lost_space, &sd.audio_player);
+                write_duplicate_results(
+                    &app,
+                    vector,
+                    critical,
+                    messages,
+                    &scanning_time_str,
+                    duplicates_number,
+                    groups_number,
+                    lost_space,
+                     &sd.basic_settings, &sd.audio_player
+                );
             })
         })
         .expect("Cannot start thread - not much we can do here");
@@ -254,9 +239,8 @@ fn write_duplicate_results(
     items_found: usize,
     groups: usize,
     lost_space: u64,
-    audio_player: &AudioPlayer,
-    settings_custom: &SettingsCustom,
     base_settings: &BasicSettings,
+    audio_player: &AudioPlayer,
 ) {
     let items = Rc::new(VecModel::default());
     for (ref_fe, vec_fe) in vector.into_iter().rev() {
@@ -276,7 +260,9 @@ fn write_duplicate_results(
     if let Some(critical) = critical {
         app.invoke_scan_ended(critical.into());
     } else {
-        if base_settings.
+        if base_settings.play_audio_on_scan_completion {
+            audio_player.play_scan_completed();
+        }
         if lost_space > 0 {
             app.invoke_scan_ended(
                 flk!(
@@ -300,7 +286,6 @@ fn write_duplicate_results(
             );
         }
     }
-    audio_player.play_scan_completed();
     app.global::<GuiState>().set_info_text(messages.into());
     reset_selection_at_end(app, ActiveTab::DuplicateFiles);
 }
@@ -321,14 +306,10 @@ fn prepare_data_model_duplicates(fe: &DuplicateEntry) -> (ModelRc<SharedString>,
 }
 
 ////////////////////////////////////////// Empty Folders
-fn scan_empty_folders(
-    a: Weak<MainWindow>,
-sd: ScanData
-) {
+fn scan_empty_folders(a: Weak<MainWindow>, sd: ScanData) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            
             let mut tool = EmptyFolder::new();
             set_common_settings(&mut tool, &sd.custom_settings, &sd.stop_flag);
             tool.search(&sd.stop_flag, Some(&sd.progress_sender));
@@ -344,12 +325,21 @@ sd: ScanData
             sd.shared_models.lock().unwrap().shared_empty_folders_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_empty_folders_results(&app, vector, critical, messages, &scanning_time_str, items_found, &sd.audio_player);
+                write_empty_folders_results(&app, vector, critical, messages, &scanning_time_str, items_found, &sd.basic_settings, &sd.audio_player);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_empty_folders_results(app: &MainWindow, vector: Vec<FolderEntry>, critical: Option<String>, messages: String, scanning_time_str: &str, items_found: usize, audio_player: &AudioPlayer) {
+fn write_empty_folders_results(
+    app: &MainWindow,
+    vector: Vec<FolderEntry>,
+    critical: Option<String>,
+    messages: String,
+    scanning_time_str: &str,
+    items_found: usize,
+    base_settings: &BasicSettings,
+    audio_player: &AudioPlayer,
+) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_empty_folders(&fe);
@@ -359,9 +349,11 @@ fn write_empty_folders_results(app: &MainWindow, vector: Vec<FolderEntry>, criti
     if let Some(critical) = critical {
         app.invoke_scan_ended(critical.into());
     } else {
+        if base_settings.play_audio_on_scan_completion {
+            audio_player.play_scan_completed();
+        }
         app.invoke_scan_ended(flk!("rust_found_empty_folders", items_found = items_found, time = scanning_time_str).into());
     }
-    audio_player.play_scan_completed();
     app.global::<GuiState>().set_info_text(messages.into());
     reset_selection_at_end(app, ActiveTab::EmptyFolders);
 }
@@ -377,14 +369,10 @@ fn prepare_data_model_empty_folders(fe: &FolderEntry) -> (ModelRc<SharedString>,
 }
 
 ////////////////////////////////////////// Big files
-fn scan_big_files(
-    a: Weak<MainWindow>,
-sd: ScanData
-) {
+fn scan_big_files(a: Weak<MainWindow>, sd: ScanData) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            
             let big_files_mode = sd.combo_box_items.biggest_files_method.value;
             let params = BigFileParameters::new(sd.custom_settings.biggest_files_sub_number_of_files as usize, big_files_mode);
             let mut tool = BigFile::new(params);
@@ -408,12 +396,22 @@ sd: ScanData
             sd.shared_models.lock().unwrap().shared_big_files_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_big_files_results(&app, vector, critical, messages, &scanning_time_str, items_found, files_size, &sd.audio_player);
+                write_big_files_results(&app, vector, critical, messages, &scanning_time_str, items_found, files_size, &sd.basic_settings, &sd.audio_player);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_big_files_results(app: &MainWindow, vector: Vec<FileEntry>, critical: Option<String>, messages: String, scanning_time_str: &str, items_found: usize, files_size: u64, audio_player: &AudioPlayer) {
+fn write_big_files_results(
+    app: &MainWindow,
+    vector: Vec<FileEntry>,
+    critical: Option<String>,
+    messages: String,
+    scanning_time_str: &str,
+    items_found: usize,
+    files_size: u64,
+    base_settings: &BasicSettings,
+    audio_player: &AudioPlayer,
+) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_big_files(&fe);
@@ -423,6 +421,9 @@ fn write_big_files_results(app: &MainWindow, vector: Vec<FileEntry>, critical: O
     if let Some(critical) = critical {
         app.invoke_scan_ended(critical.into());
     } else {
+        if base_settings.play_audio_on_scan_completion {
+            audio_player.play_scan_completed();
+        }
         app.invoke_scan_ended(
             flk!(
                 "rust_found_big_files",
@@ -433,7 +434,6 @@ fn write_big_files_results(app: &MainWindow, vector: Vec<FileEntry>, critical: O
             .into(),
         );
     }
-    audio_player.play_scan_completed();
     app.global::<GuiState>().set_info_text(messages.into());
     reset_selection_at_end(app, ActiveTab::BigFiles);
 }
@@ -455,14 +455,10 @@ fn prepare_data_model_big_files(fe: &FileEntry) -> (ModelRc<SharedString>, Model
 }
 
 ///////////////////////////////// Empty Files
-fn scan_empty_files(
-    a: Weak<MainWindow>,
-sd: ScanData
-) {
+fn scan_empty_files(a: Weak<MainWindow>, sd: ScanData) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            
             let mut tool = EmptyFiles::new();
             set_common_settings(&mut tool, &sd.custom_settings, &sd.stop_flag);
             tool.search(&sd.stop_flag, Some(&sd.progress_sender));
@@ -478,12 +474,21 @@ sd: ScanData
             sd.shared_models.lock().unwrap().shared_empty_files_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_empty_files_results(&app, vector, critical, messages, &scanning_time_str, items_found, &sd.audio_player);
+                write_empty_files_results(&app, vector, critical, messages, &scanning_time_str, items_found, &sd.basic_settings, &sd.audio_player);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_empty_files_results(app: &MainWindow, vector: Vec<FileEntry>, critical: Option<String>, messages: String, scanning_time_str: &str, items_found: usize, audio_player: &AudioPlayer) {
+fn write_empty_files_results(
+    app: &MainWindow,
+    vector: Vec<FileEntry>,
+    critical: Option<String>,
+    messages: String,
+    scanning_time_str: &str,
+    items_found: usize,
+    base_settings: &BasicSettings,
+    audio_player: &AudioPlayer,
+) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_empty_files(&fe);
@@ -493,9 +498,11 @@ fn write_empty_files_results(app: &MainWindow, vector: Vec<FileEntry>, critical:
     if let Some(critical) = critical {
         app.invoke_scan_ended(critical.into());
     } else {
+        if base_settings.play_audio_on_scan_completion {
+            audio_player.play_scan_completed();
+        }
         app.invoke_scan_ended(flk!("rust_found_empty_files", items_found = items_found, time = scanning_time_str).into());
     }
-    audio_player.play_scan_completed();
     app.global::<GuiState>().set_info_text(messages.into());
     reset_selection_at_end(app, ActiveTab::EmptyFiles);
 }
@@ -512,17 +519,14 @@ fn prepare_data_model_empty_files(fe: &FileEntry) -> (ModelRc<SharedString>, Mod
 }
 // Scan Similar Images
 
-fn scan_similar_images(
-    a: Weak<MainWindow>,
-sd: ScanData
-) {
+fn scan_similar_images(a: Weak<MainWindow>, sd: ScanData) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            
             let hash_alg = sd.combo_box_items.image_hash_alg.value;
             let resize_algorithm = sd.combo_box_items.resize_algorithm.value;
-            let hash_size = sd.custom_settings
+            let hash_size = sd
+                .custom_settings
                 .similar_images_sub_hash_size
                 .parse()
                 .unwrap_or_else(|_| panic!("Cannot parse hash size {}", sd.custom_settings.similar_images_sub_hash_size));
@@ -567,7 +571,7 @@ sd: ScanData
             sd.shared_models.lock().unwrap().shared_similar_images_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_similar_images_results(&app, vector, critical, messages, hash_size, &scanning_time_str, items_found, groups, &sd.audio_player);
+                write_similar_images_results(&app, vector, critical, messages, hash_size, &scanning_time_str, items_found, groups, &sd.basic_settings, &sd.audio_player);
             })
         })
         .expect("Cannot start thread - not much we can do here");
@@ -581,6 +585,7 @@ fn write_similar_images_results(
     scanning_time_str: &str,
     items_found: usize,
     groups: usize,
+    base_settings: &BasicSettings,
     audio_player: &AudioPlayer,
 ) {
     let items = Rc::new(VecModel::default());
@@ -601,9 +606,11 @@ fn write_similar_images_results(
     if let Some(critical) = critical {
         app.invoke_scan_ended(critical.into());
     } else {
+        if base_settings.play_audio_on_scan_completion {
+            audio_player.play_scan_completed();
+        }
         app.invoke_scan_ended(flk!("rust_found_similar_images", items_found = items_found, groups = groups, time = scanning_time_str).into());
     }
-    audio_player.play_scan_completed();
     app.global::<GuiState>().set_info_text(messages.into());
     reset_selection_at_end(app, ActiveTab::SimilarImages);
 }
@@ -635,14 +642,10 @@ fn prepare_data_model_similar_images(fe: &ImagesEntry, hash_size: u8) -> (ModelR
 
 // Scan Similar Videos
 
-fn scan_similar_videos(
-    a: Weak<MainWindow>,
-sd: ScanData
-) {
+fn scan_similar_videos(a: Weak<MainWindow>, sd: ScanData) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            
             let params = SimilarVideosParameters::new(
                 sd.custom_settings.similar_videos_sub_similarity,
                 sd.custom_settings.similar_videos_sub_ignore_same_size,
@@ -688,7 +691,7 @@ sd: ScanData
             sd.shared_models.lock().unwrap().shared_similar_videos_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_similar_videos_results(&app, vector, critical, messages, &scanning_time_str, items_found, groups, &sd.audio_player);
+                write_similar_videos_results(&app, vector, critical, messages, &scanning_time_str, items_found, groups, &sd.basic_settings, &sd.audio_player);
             })
         })
         .expect("Cannot start thread - not much we can do here");
@@ -701,6 +704,7 @@ fn write_similar_videos_results(
     scanning_time_str: &str,
     items_found: usize,
     groups: usize,
+    base_settings: &BasicSettings,
     audio_player: &AudioPlayer,
 ) {
     let items = Rc::new(VecModel::default());
@@ -721,9 +725,11 @@ fn write_similar_videos_results(
     if let Some(critical) = critical {
         app.invoke_scan_ended(critical.into());
     } else {
+        if base_settings.play_audio_on_scan_completion {
+            audio_player.play_scan_completed();
+        }
         app.invoke_scan_ended(flk!("rust_found_similar_videos", items_found = items_found, groups = groups, time = scanning_time_str).into());
     }
-    audio_player.play_scan_completed();
     app.global::<GuiState>().set_info_text(messages.into());
     reset_selection_at_end(app, ActiveTab::SimilarVideos);
 }
@@ -773,14 +779,10 @@ fn prepare_data_model_similar_videos(fe: &VideosEntry) -> (ModelRc<SharedString>
     (data_model_str, data_model_int)
 }
 ////////////////////////////////////////// Similar Music
-fn scan_similar_music(
-    a: Weak<MainWindow>,
-sd: ScanData
-) {
+fn scan_similar_music(a: Weak<MainWindow>, sd: ScanData) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            
             let mut music_similarity: MusicSimilarity = MusicSimilarity::NONE;
             if sd.custom_settings.similar_music_sub_title {
                 music_similarity |= MusicSimilarity::TRACK_TITLE;
@@ -847,7 +849,7 @@ sd: ScanData
             sd.shared_models.lock().unwrap().shared_same_music_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_similar_music_results(&app, vector, critical, messages, &scanning_time_str, items_found, groups);
+                write_similar_music_results(&app, vector, critical, messages, &scanning_time_str, items_found, groups, &sd.basic_settings, &sd.audio_player);
             })
         })
         .expect("Cannot start thread - not much we can do here");
@@ -860,6 +862,8 @@ fn write_similar_music_results(
     scanning_time_str: &str,
     items_found: usize,
     groups: usize,
+    base_settings: &BasicSettings,
+    audio_player: &AudioPlayer,
 ) {
     let items = Rc::new(VecModel::default());
     for (ref_fe, vec_fe) in vector {
@@ -879,6 +883,9 @@ fn write_similar_music_results(
     if let Some(critical) = critical {
         app.invoke_scan_ended(critical.into());
     } else {
+        if base_settings.play_audio_on_scan_completion {
+            audio_player.play_scan_completed();
+        }
         app.invoke_scan_ended(flk!("rust_found_similar_music_files", items_found = items_found, groups = groups, time = scanning_time_str).into());
     }
     app.global::<GuiState>().set_info_text(messages.into());
@@ -906,10 +913,7 @@ fn prepare_data_model_similar_music(fe: &MusicEntry) -> (ModelRc<SharedString>, 
     (data_model_str, data_model_int)
 }
 // Invalid Symlinks
-fn scan_invalid_symlinks(
-    a: Weak<MainWindow>,
-sd: ScanData
-) {
+fn scan_invalid_symlinks(a: Weak<MainWindow>, sd: ScanData) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
@@ -929,12 +933,14 @@ sd: ScanData
             sd.shared_models.lock().unwrap().shared_same_invalid_symlinks = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_invalid_symlinks_results(&app, vector, critical, messages, &scanning_time_str, items_found);
+                write_invalid_symlinks_results(&app, vector, critical, messages, &scanning_time_str, items_found, &sd.basic_settings, &sd.audio_player);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_invalid_symlinks_results(app: &MainWindow, vector: Vec<SymlinksFileEntry>, critical: Option<String>, messages: String, scanning_time_str: &str, items_found: usize) {
+fn write_invalid_symlinks_results(app: &MainWindow, vector: Vec<SymlinksFileEntry>, critical: Option<String>, messages: String, scanning_time_str: &str, items_found: usize,
+                                  base_settings: &BasicSettings,
+                                  audio_player: &AudioPlayer,) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_invalid_symlinks(&fe);
@@ -944,6 +950,9 @@ fn write_invalid_symlinks_results(app: &MainWindow, vector: Vec<SymlinksFileEntr
     if let Some(critical) = critical {
         app.invoke_scan_ended(critical.into());
     } else {
+        if base_settings.play_audio_on_scan_completion {
+            audio_player.play_scan_completed();
+        }
         app.invoke_scan_ended(flk!("rust_found_invalid_symlinks", items_found = items_found, time = scanning_time_str).into());
     }
     app.global::<GuiState>().set_info_text(messages.into());
@@ -966,14 +975,10 @@ fn prepare_data_model_invalid_symlinks(fe: &SymlinksFileEntry) -> (ModelRc<Share
     (data_model_str, data_model_int)
 }
 ////////////////////////////////////////// Temporary Files
-fn scan_temporary_files(
-    a: Weak<MainWindow>,
-sd: ScanData
-) {
+fn scan_temporary_files(a: Weak<MainWindow>, sd: ScanData) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            
             let mut tool = Temporary::new();
             set_common_settings(&mut tool, &sd.custom_settings, &sd.stop_flag);
 
@@ -990,12 +995,14 @@ sd: ScanData
             sd.shared_models.lock().unwrap().shared_temporary_files_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_temporary_files_results(&app, vector, critical, messages, &scanning_time_str, items_found);
+                write_temporary_files_results(&app, vector, critical, messages, &scanning_time_str, items_found, &sd.basic_settings, &sd.audio_player);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_temporary_files_results(app: &MainWindow, vector: Vec<TemporaryFileEntry>, critical: Option<String>, messages: String, scanning_time_str: &str, items_found: usize) {
+fn write_temporary_files_results(app: &MainWindow, vector: Vec<TemporaryFileEntry>, critical: Option<String>, messages: String, scanning_time_str: &str, items_found: usize,
+                                 base_settings: &BasicSettings,
+                                 audio_player: &AudioPlayer,) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_temporary_files(&fe);
@@ -1005,6 +1012,9 @@ fn write_temporary_files_results(app: &MainWindow, vector: Vec<TemporaryFileEntr
     if let Some(critical) = critical {
         app.invoke_scan_ended(critical.into());
     } else {
+        if base_settings.play_audio_on_scan_completion {
+            audio_player.play_scan_completed();
+        }
         app.invoke_scan_ended(flk!("rust_found_temporary_files", items_found = items_found, time = scanning_time_str).into());
     }
     app.global::<GuiState>().set_info_text(messages.into());
@@ -1022,14 +1032,10 @@ fn prepare_data_model_temporary_files(fe: &TemporaryFileEntry) -> (ModelRc<Share
     (data_model_str, data_model_int)
 }
 ////////////////////////////////////////// Broken Files
-fn scan_broken_files(
-    a: Weak<MainWindow>,
-sd: ScanData
-) {
+fn scan_broken_files(a: Weak<MainWindow>, sd: ScanData) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            
             let mut checked_types: CheckedTypes = CheckedTypes::NONE;
             if sd.custom_settings.broken_files_sub_audio {
                 checked_types |= CheckedTypes::AUDIO;
@@ -1073,12 +1079,14 @@ sd: ScanData
             sd.shared_models.lock().unwrap().shared_broken_files_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_broken_files_results(&app, vector, critical, messages, &scanning_time_str, items_found, size);
+                write_broken_files_results(&app, vector, critical, messages, &scanning_time_str, items_found, size, &sd.basic_settings, &sd.audio_player);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_broken_files_results(app: &MainWindow, vector: Vec<BrokenEntry>, critical: Option<String>, messages: String, scanning_time_str: &str, items_found: usize, size: u64) {
+fn write_broken_files_results(app: &MainWindow, vector: Vec<BrokenEntry>, critical: Option<String>, messages: String, scanning_time_str: &str, items_found: usize, size: u64,
+                              base_settings: &BasicSettings,
+                              audio_player: &AudioPlayer,) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_broken_files(&fe);
@@ -1088,6 +1096,9 @@ fn write_broken_files_results(app: &MainWindow, vector: Vec<BrokenEntry>, critic
     if let Some(critical) = critical {
         app.invoke_scan_ended(critical.into());
     } else {
+        if base_settings.play_audio_on_scan_completion {
+            audio_player.play_scan_completed();
+        }
         app.invoke_scan_ended(
             flk!(
                 "rust_found_broken_files",
@@ -1119,14 +1130,10 @@ fn prepare_data_model_broken_files(fe: &BrokenEntry) -> (ModelRc<SharedString>, 
     (data_model_str, data_model_int)
 }
 ////////////////////////////////////////// Bad Extensions
-fn scan_bad_extensions(
-    a: Weak<MainWindow>,
-sd: ScanData
-) {
+fn scan_bad_extensions(a: Weak<MainWindow>, sd: ScanData) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            
             let params = BadExtensionsParameters::new();
             let mut tool = BadExtensions::new(params);
             set_common_settings(&mut tool, &sd.custom_settings, &sd.stop_flag);
@@ -1143,12 +1150,14 @@ sd: ScanData
             sd.shared_models.lock().unwrap().shared_bad_extensions_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_bad_extensions_results(&app, vector, critical, messages, &scanning_time_str, items_found);
+                write_bad_extensions_results(&app, vector, critical, messages, &scanning_time_str, items_found, &sd.basic_settings, &sd.audio_player);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_bad_extensions_results(app: &MainWindow, vector: Vec<BadFileEntry>, critical: Option<String>, messages: String, scanning_time_str: &str, items_found: usize) {
+fn write_bad_extensions_results(app: &MainWindow, vector: Vec<BadFileEntry>, critical: Option<String>, messages: String, scanning_time_str: &str, items_found: usize,
+                                base_settings: &BasicSettings,
+                                audio_player: &AudioPlayer,) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_bad_extensions(&fe);
@@ -1158,6 +1167,9 @@ fn write_bad_extensions_results(app: &MainWindow, vector: Vec<BadFileEntry>, cri
     if let Some(critical) = critical {
         app.invoke_scan_ended(critical.into());
     } else {
+        if base_settings.play_audio_on_scan_completion {
+            audio_player.play_scan_completed();
+        }
         app.invoke_scan_ended(flk!("rust_found_bad_extensions", items_found = items_found, time = scanning_time_str).into());
     }
     app.global::<GuiState>().set_info_text(messages.into());
@@ -1181,16 +1193,13 @@ fn prepare_data_model_bad_extensions(fe: &BadFileEntry) -> (ModelRc<SharedString
     (data_model_str, data_model_int)
 }
 ////////////////////////////////////////// Exif Remover
-fn scan_exif_remover(
-    a: Weak<MainWindow>,
-sd: ScanData
-) {
+fn scan_exif_remover(a: Weak<MainWindow>, sd: ScanData) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            
             // Parse ignored tags from comma-separated string, trimming whitespace
-            let ignored_tags: Vec<String> = sd.custom_settings
+            let ignored_tags: Vec<String> = sd
+                .custom_settings
                 .ignored_exif_tags
                 .split(',')
                 .map(|s| s.trim().to_string())
@@ -1213,12 +1222,14 @@ sd: ScanData
             sd.shared_models.lock().unwrap().shared_exif_remover_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_exif_remover_results(&app, vector, critical, messages, &scanning_time_str, items_found);
+                write_exif_remover_results(&app, vector, critical, messages, &scanning_time_str, items_found, &sd.basic_settings, &sd.audio_player);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_exif_remover_results(app: &MainWindow, vector: Vec<ExifEntry>, critical: Option<String>, messages: String, scanning_time_str: &str, items_found: usize) {
+fn write_exif_remover_results(app: &MainWindow, vector: Vec<ExifEntry>, critical: Option<String>, messages: String, scanning_time_str: &str, items_found: usize,
+                              base_settings: &BasicSettings,
+                              audio_player: &AudioPlayer,) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_exif_remover(&fe);
@@ -1228,6 +1239,9 @@ fn write_exif_remover_results(app: &MainWindow, vector: Vec<ExifEntry>, critical
     if let Some(critical) = critical {
         app.invoke_scan_ended(critical.into());
     } else {
+        if base_settings.play_audio_on_scan_completion {
+            audio_player.play_scan_completed();
+        }
         app.invoke_scan_ended(flk!("rust_found_exif_files", items_found = items_found, time = scanning_time_str).into());
     }
     app.global::<GuiState>().set_info_text(messages.into());
@@ -1262,14 +1276,10 @@ fn prepare_data_model_exif_remover(fe: &ExifEntry) -> (ModelRc<SharedString>, Mo
 }
 
 ////////////////////////////////////////// Video Optimizer
-fn scan_video_optimizer(
-    a: Weak<MainWindow>,
-sd: ScanData
-) {
+fn scan_video_optimizer(a: Weak<MainWindow>, sd: ScanData) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            
             let video_optimizer_mode = sd.combo_box_items.video_optimizer_mode.value;
             let params = if video_optimizer_mode == VideoOptimizerMode::VideoCrop {
                 let crop_detect = sd.combo_box_items.video_optimizer_crop_type.value;
@@ -1286,7 +1296,8 @@ sd: ScanData
                 VideoOptimizerParameters::VideoCrop(params)
             } else {
                 let mut params = VideoTranscodeParams::new();
-                let excluded_codecs: Vec<String> = sd.custom_settings
+                let excluded_codecs: Vec<String> = sd
+                    .custom_settings
                     .video_optimizer_excluded_codecs
                     .split(',')
                     .map(|s| s.trim().to_lowercase())
@@ -1317,14 +1328,14 @@ sd: ScanData
                 sd.shared_models.lock().unwrap().shared_video_optimizer_state = Some(tool);
 
                 a.upgrade_in_event_loop(move |app| {
-                    write_video_optimizer_crop_results(&app, video_crop_entries, critical, messages, &scanning_time_str, items_found);
+                    write_video_optimizer_crop_results(&app, video_crop_entries, critical, messages, &scanning_time_str, items_found, &sd.basic_settings, &sd.audio_player);
                 })
             } else {
                 let video_transcode_entries = tool.get_video_transcode_entries().clone();
                 sd.shared_models.lock().unwrap().shared_video_optimizer_state = Some(tool);
 
                 a.upgrade_in_event_loop(move |app| {
-                    write_video_optimizer_transcode_results(&app, video_transcode_entries, critical, messages, &scanning_time_str, items_found);
+                    write_video_optimizer_transcode_results(&app, video_transcode_entries, critical, messages, &scanning_time_str, items_found, &sd.basic_settings, &sd.audio_player);
                 })
             }
         })
@@ -1338,6 +1349,8 @@ fn write_video_optimizer_transcode_results(
     messages: String,
     scanning_time_str: &str,
     items_found: usize,
+    base_settings: &BasicSettings,
+    audio_player: &AudioPlayer,
 ) {
     let items = Rc::new(VecModel::default());
 
@@ -1350,6 +1363,9 @@ fn write_video_optimizer_transcode_results(
     if let Some(critical) = critical {
         app.invoke_scan_ended(critical.into());
     } else {
+        if base_settings.play_audio_on_scan_completion {
+            audio_player.play_scan_completed();
+        }
         app.invoke_scan_ended(flk!("rust_found_video_optimizer", items_found = items_found, time = scanning_time_str).into());
     }
     app.global::<GuiState>().set_info_text(messages.into());
@@ -1363,6 +1379,8 @@ fn write_video_optimizer_crop_results(
     messages: String,
     scanning_time_str: &str,
     items_found: usize,
+    base_settings: &BasicSettings,
+    audio_player: &AudioPlayer,
 ) {
     let items = Rc::new(VecModel::default());
 
@@ -1375,6 +1393,9 @@ fn write_video_optimizer_crop_results(
     if let Some(critical) = critical {
         app.invoke_scan_ended(critical.into());
     } else {
+        if base_settings.play_audio_on_scan_completion {
+            audio_player.play_scan_completed();
+        }
         app.invoke_scan_ended(flk!("rust_found_video_optimizer", items_found = items_found, time = scanning_time_str).into());
     }
     app.global::<GuiState>().set_info_text(messages.into());

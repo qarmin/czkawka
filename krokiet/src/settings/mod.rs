@@ -273,6 +273,7 @@ pub(crate) fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicS
     settings.set_limit_messages_lines(basic_settings.settings_limit_lines_of_messages);
     settings.set_manual_application_scale(basic_settings.manual_application_scale);
     settings.set_use_manual_application_scale(basic_settings.use_manual_application_scale);
+    settings.set_play_audio_on_scan_completion(basic_settings.play_audio_on_scan_completion);
 
     set_combobox_basic_settings_items(&settings, basic_settings);
 }
@@ -493,9 +494,6 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_popup_crop_video_overwrite_files(custom_settings.popup_crop_video_overwrite_files);
     settings.set_popup_crop_video_reencode(custom_settings.popup_crop_video_reencode);
     settings.set_popup_crop_video_quality(custom_settings.popup_crop_video_quality as f32);
-
-    #[cfg(feature = "audio")]
-    settings.set_play_audio_on_scan_completion(custom_settings.play_audio_on_scan_completion);
 
     let sel_px = 35.0;
     let path_px = 350.0;
@@ -751,8 +749,6 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         popup_crop_video_overwrite_files: settings.get_popup_crop_video_overwrite_files(),
         popup_crop_video_reencode: settings.get_popup_crop_video_reencode(),
         popup_crop_video_quality: settings.get_popup_crop_video_quality().round() as u32,
-        #[cfg(feature = "audio")]
-        play_audio_on_scan_completion: settings.get_play_audio_on_scan_completion(),
     }
 }
 
@@ -809,6 +805,7 @@ pub(crate) fn collect_base_settings(app: &MainWindow) -> BasicSettings {
     let settings_limit_lines_of_messages = settings.get_limit_messages_lines();
     let manual_application_scale = settings.get_manual_application_scale();
     let use_manual_application_scale = settings.get_use_manual_application_scale();
+    let play_audio_on_scan_completion = settings.get_play_audio_on_scan_completion();
     BasicSettings {
         language,
         default_preset,
@@ -822,5 +819,6 @@ pub(crate) fn collect_base_settings(app: &MainWindow) -> BasicSettings {
         settings_limit_lines_of_messages,
         manual_application_scale,
         use_manual_application_scale,
+        play_audio_on_scan_completion,
     }
 }
