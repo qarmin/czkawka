@@ -22,7 +22,7 @@ use crate::common::progress_stop_handler::{check_if_stop_received, prepare_threa
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::common::{create_crash_message, debug_save_file};
 use crate::helpers::audio_checker;
-use crate::tools::broken_files::{BrokenEntry, BrokenFiles, BrokenFilesParameters, CheckedTypes, Info, TypeOfFile};
+use crate::tools::broken_files::{BrokenEntry, BrokenFiles, BrokenFilesParameters, Info, TypeOfFile};
 
 impl BrokenFiles {
     pub fn new(params: BrokenFilesParameters) -> Self {
@@ -37,27 +37,6 @@ impl BrokenFiles {
 
     #[fun_time(message = "check_files", level = "debug")]
     pub(crate) fn check_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
-        let mut extensions = Vec::new();
-        let vec_extensions = [
-            (CheckedTypes::PDF, PDF_FILES_EXTENSIONS),
-            (CheckedTypes::AUDIO, AUDIO_FILES_EXTENSIONS),
-            (CheckedTypes::ARCHIVE, ZIP_FILES_EXTENSIONS),
-            (CheckedTypes::IMAGE, IMAGE_RS_BROKEN_FILES_EXTENSIONS),
-            (CheckedTypes::VIDEO, VIDEO_FILES_EXTENSIONS),
-        ];
-        for (checked_type, extensions_to_add) in &vec_extensions {
-            if self.get_params().checked_types.contains(*checked_type) {
-                extensions.extend_from_slice(extensions_to_add);
-            }
-        }
-
-        self.common_data.extensions.set_and_validate_allowed_extensions(&extensions);
-        // TODO, responsibility should be moved to CLI/GUI
-        // assert!(self.common_data.extensions.set_any_extensions(), "This should be checked before");
-        if !self.common_data.extensions.set_any_extensions() {
-            return WorkContinueStatus::Continue;
-        }
-
         let result = DirTraversalBuilder::new()
             .group_by(|_fe| ())
             .stop_flag(stop_flag)
@@ -102,7 +81,7 @@ impl BrokenFiles {
             file_entry
         })
         .unwrap_or_else(|_| {
-            let message = create_crash_message("Image-rs", &file_entry_clone.path.to_string_lossy(), "https://github.com/Serial-ATA/lofty-rs");
+            let message = create_crash_message("Image-rs", &file_entry_clone.path.to_string_lossy(), "https://github.com/image-rs/image");
             error!("{message}");
             file_entry_clone.error_string = message;
             file_entry_clone
@@ -342,7 +321,7 @@ impl BrokenFiles {
     }
 }
 
-#[expect(clippy::string_slice)] // Valid, because we address go to dot, which is known ascii character
+#[expect(clippy::string_slice)] // Valid, because we address up to the dot, which is known ascii character
 fn check_extension_availability(full_name: &Path) -> TypeOfFile {
     let Some(file_name) = full_name.file_name() else {
         error!("Missing file name in file - \"{}\"", full_name.to_string_lossy());

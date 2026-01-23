@@ -118,10 +118,9 @@ pub enum IntDataSimilarImages {
     SizePart2,
     Width,
     Height,
-    PixelsPart1,
-    PixelsPart2,
+    PixelCount,
 }
-pub const MAX_INT_DATA_SIMILAR_IMAGES: usize = IntDataSimilarImages::PixelsPart2 as usize + 1;
+pub const MAX_INT_DATA_SIMILAR_IMAGES: usize = IntDataSimilarImages::PixelCount as usize + 1;
 
 #[repr(u8)]
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
@@ -292,7 +291,7 @@ pub enum IntDataVideoOptimizer {
     ModificationDatePart2,
     SizePart1,
     SizePart2,
-    Dimensions,
+    PixelCount,
     DiffInPixels,
     RectLeft,
     RectTop,
@@ -344,7 +343,7 @@ impl ActiveTab {
                     SortIdx::IntIdxPair(IntDataSimilarImages::ModificationDatePart1 as i32, IntDataSimilarImages::ModificationDatePart2 as i32)
                 }
                 StrDataSimilarImages::Size => SortIdx::IntIdxPair(IntDataSimilarImages::SizePart1 as i32, IntDataSimilarImages::SizePart2 as i32),
-                StrDataSimilarImages::Resolution => SortIdx::IntIdxPair(IntDataSimilarImages::PixelsPart1 as i32, IntDataSimilarImages::PixelsPart2 as i32),
+                StrDataSimilarImages::Resolution => SortIdx::IntIdx(IntDataSimilarImages::PixelCount as i32),
             },
             Self::DuplicateFiles => match StrDataDuplicateFiles::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for DuplicateFiles")) {
                 StrDataDuplicateFiles::Name | StrDataDuplicateFiles::Path => SortIdx::StrIdx(str_idx),
@@ -419,7 +418,7 @@ impl ActiveTab {
                     SortIdx::IntIdxPair(IntDataVideoOptimizer::ModificationDatePart1 as i32, IntDataVideoOptimizer::ModificationDatePart2 as i32)
                 }
                 StrDataVideoOptimizer::Size => SortIdx::IntIdxPair(IntDataVideoOptimizer::SizePart1 as i32, IntDataVideoOptimizer::SizePart2 as i32),
-                StrDataVideoOptimizer::Dimensions => SortIdx::IntIdx(IntDataVideoOptimizer::Dimensions as i32),
+                StrDataVideoOptimizer::Dimensions => SortIdx::IntIdx(IntDataVideoOptimizer::PixelCount as i32),
                 StrDataVideoOptimizer::NewDimensions => SortIdx::IntIdx(IntDataVideoOptimizer::DiffInPixels as i32),
             },
             Self::Settings | Self::About => panic!("Button should be disabled"),

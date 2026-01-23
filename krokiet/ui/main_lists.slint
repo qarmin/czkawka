@@ -6,6 +6,8 @@ import { About } from "about.slint";
 import { Settings } from "settings.slint";
 
 export component MainList {
+    callback show_clean_cache_popup();
+
     in-out property <bool> working: false;
 
     in-out property <[MainListModel]> duplicate_files_model: [];
@@ -207,6 +209,10 @@ export component MainList {
 
     settings_list := SettingsList {
         visible: GuiState.active_tab == ActiveTab.Settings;
+
+        show_clean_cache_popup() => {
+            root.show_clean_cache_popup();
+        }
     }
 
     about_app := About {

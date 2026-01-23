@@ -441,6 +441,7 @@ where
     component.set_recursive_search(!common_cli_items.not_recursive);
     #[cfg(target_family = "unix")]
     component.set_exclude_other_filesystems(common_cli_items.exclude_other_filesystems);
-    component.set_allowed_extensions(common_cli_items.allowed_extensions.clone().join(","));
+    component.set_allowed_extensions(common_cli_items.allowed_extensions.clone());
+    component.set_excluded_extensions(common_cli_items.excluded_extensions.clone());
     component.set_use_cache(!common_cli_items.disable_cache);
 }

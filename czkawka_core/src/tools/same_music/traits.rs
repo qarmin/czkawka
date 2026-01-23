@@ -6,6 +6,7 @@ use std::time::Instant;
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
 
+use crate::common::consts::AUDIO_FILES_EXTENSIONS;
 use crate::common::model::{CheckingMethod, WorkContinueStatus};
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
@@ -21,7 +22,7 @@ impl Search for SameMusic {
         let start_time = Instant::now();
 
         let () = (|| {
-            if self.prepare_items().is_err() {
+            if self.prepare_items(Some(AUDIO_FILES_EXTENSIONS)).is_err() {
                 return;
             }
             self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty() || !self.common_data.directories.reference_files.is_empty();

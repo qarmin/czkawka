@@ -156,7 +156,6 @@ impl EmptyFolder {
             }
         }
 
-        // Start to
         for current_folder in non_empty_folders.into_iter().rev() {
             Self::set_as_not_empty_folder(&mut folder_entries, &current_folder);
         }
@@ -177,10 +176,10 @@ impl EmptyFolder {
             .get_mut(current_folder)
             .unwrap_or_else(|| panic!("Folder {current_folder} not found in folder_entries"));
         if d.is_empty == FolderEmptiness::No {
-            return; // Already set as non empty by one of his child
+            return; // Already set as non empty by one of its child
         }
 
-        // Loop to recursively set as non empty this and all his parent folders
+        // Loop to recursively set as non empty this and all its parent folders
         loop {
             d.is_empty = FolderEmptiness::No;
 

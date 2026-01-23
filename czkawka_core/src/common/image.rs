@@ -24,6 +24,8 @@ use crate::helpers::debug_timer::Timer;
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
 
+const MAXIMUM_IMAGE_PIXELS: u32 = 2_000_000_000;
+
 pub(crate) fn get_jxl_image(path: &str) -> anyhow::Result<DynamicImage> {
     let file = File::open(path)?;
     let decoder = JxlDecoder::new(file)?;
@@ -66,6 +68,14 @@ pub fn get_dynamic_image_from_path(path: &str) -> Result<DynamicImage, String> {
 
         if img.width() == 0 || img.height() == 0 {
             return Err(format!("Image has zero width or height \"{path}\""));
+        }
+        if img.width() as u64 * img.height() as u64 > MAXIMUM_IMAGE_PIXELS as u64 {
+            return Err(format!(
+                "Image is too large ({}x{}) - more than supported {} pixels \"{path}\"",
+                img.width(),
+                img.height(),
+                MAXIMUM_IMAGE_PIXELS
+            ));
         }
         Ok(img)
     });

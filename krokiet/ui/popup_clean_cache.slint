@@ -1,0 +1,220 @@
+import { Button, ProgressIndicator, ScrollView } from "std-widgets.slint";
+import { ColorPalette } from "color_palette.slint";
+import { Translations } from "translations.slint";
+import { FontSizes } from "fonts.slint";
+import { GuiState } from "gui_state.slint";
+
+export component PopupCleanCache inherits Rectangle {
+    callback show_popup();
+    callback start_cleaning();
+    callback stop_cleaning();
+
+    in-out property <bool> stopped_by_user: false;
+
+    out property <length> popup_width: 500px;
+    out property <length> popup_height: 300px;
+
+    popup_window := PopupWindow {
+        width: popup_width;
+        height: popup_height;
+        close-policy: PopupClosePolicy.no-auto-close;
+
+        Rectangle {
+            width: parent.width;
+            height: parent.height;
+            border-radius: 10px;
+            border-color: ColorPalette.popup_border_color;
+            border-width: 2px;
+            background: ColorPalette.popup_background;
+            clip: true;
+
+            VerticalLayout {
+                Rectangle {
+                    background: ColorPalette.popup_background_title_line;
+                    Text {
+                        vertical-stretch: 0.0;
+                        min-height: 30px;
+                        text <=> Translations.popup_clean_cache_title_text;
+                        vertical-alignment: center;
+                        horizontal-alignment: center;
+                        font-size: FontSizes.normal;
+                    }
+                }
+
+                ScrollView {
+                    VerticalLayout {
+                        padding: 15px;
+                        spacing: 10px;
+
+                        if !GuiState.cache_cleaning_is_cleaning && !GuiState.cache_cleaning_finished: VerticalLayout {
+                            spacing: 10px;
+                            Text {
+                                text <=> Translations.popup_clean_cache_confirmation_text;
+                                horizontal-alignment: TextHorizontalAlignment.center;
+                                font-size: FontSizes.normal;
+                                wrap: word-wrap;
+                            }
+                        }
+
+                        if GuiState.cache_cleaning_is_cleaning: VerticalLayout {
+                            spacing: 15px;
+
+                            Text {
+                                text: Translations.popup_clean_cache_progress_text + " " + GuiState.cache_cleaning_progress.current_cache_file + "/" + GuiState.cache_cleaning_progress.total_cache_files;
+                                horizontal-alignment: TextHorizontalAlignment.center;
+                                font-size: FontSizes.normal;
+                            }
+
+                            if GuiState.cache_cleaning_progress.current_file_name != "": Text {
+                                text: Translations.popup_clean_cache_current_file_text + " " + GuiState.cache_cleaning_progress.current_file_name;
+                                horizontal-alignment: TextHorizontalAlignment.center;
+                                font-size: FontSizes.small;
+                                wrap: word-wrap;
+                            }
+
+                            VerticalLayout {
+                                spacing: 5px;
+                                Text {
+                                    text: Translations.popup_clean_cache_file_progress_text;
+                                    font-size: FontSizes.normal;
+                                }
+                                ProgressIndicator {
+                                    height: 10px;
+                                    progress: GuiState.cache_cleaning_progress.all_entries > 0 ? GuiState.cache_cleaning_progress.checked_entries / GuiState.cache_cleaning_progress.all_entries : 0.0;
+                                }
+                                Text {
+                                    text: GuiState.cache_cleaning_progress.checked_entries + "/" + GuiState.cache_cleaning_progress.all_entries;
+                                    font-size: FontSizes.small;
+                                    horizontal-alignment: TextHorizontalAlignment.center;
+                                }
+                            }
+
+                            VerticalLayout {
+                                spacing: 5px;
+                                Text {
+                                    text: Translations.popup_clean_cache_overall_progress_text;
+                                    font-size: FontSizes.normal;
+                                }
+                                ProgressIndicator {
+                                    height: 10px;
+                                    progress: GuiState.cache_cleaning_progress.total_cache_files > 0 ? GuiState.cache_cleaning_progress.current_cache_file / GuiState.cache_cleaning_progress.total_cache_files : 0.0;
+                                }
+                            }
+                        }
+
+                        if GuiState.cache_cleaning_finished: VerticalLayout {
+                            spacing: 10px;
+
+                            if root.stopped_by_user: Text {
+                                text <=> Translations.popup_clean_cache_stopped_by_user_text;
+                                horizontal-alignment: TextHorizontalAlignment.center;
+                                font-size: FontSizes.normal;
+                            }
+
+                            if !root.stopped_by_user: Text {
+                                text <=> Translations.popup_clean_cache_finished_text;
+                                horizontal-alignment: TextHorizontalAlignment.center;
+                                font-size: FontSizes.normal;
+                            }
+
+                            if GuiState.cache_cleaning_result.processed_files_text != "": Text {
+                                text: GuiState.cache_cleaning_result.processed_files_text;
+                                font-size: FontSizes.normal;
+                            }
+
+                            if GuiState.cache_cleaning_result.entries_stats_text != "": Text {
+                                text: GuiState.cache_cleaning_result.entries_stats_text;
+                                font-size: FontSizes.normal;
+                            }
+
+                            if GuiState.cache_cleaning_result.size_stats_text != "": Text {
+                                text: GuiState.cache_cleaning_result.size_stats_text;
+                                font-size: FontSizes.normal;
+                            }
+
+                            if GuiState.cache_cleaning_result.time_text != "": Text {
+                                text: GuiState.cache_cleaning_result.time_text;
+                                font-size: FontSizes.normal;
+                            }
+
+                            if GuiState.cache_cleaning_result.errors_count > 0: Text {
+                                text: Translations.popup_clean_cache_files_with_errors + " " + GuiState.cache_cleaning_result.errors_count;
+                                font-size: FontSizes.normal;
+                            }
+
+                            if GuiState.cache_cleaning_result.errors != "": VerticalLayout {
+                                spacing: 5px;
+                                Text {
+                                    text <=> Translations.popup_clean_cache_error_details_text;
+                                    font-size: FontSizes.normal;
+                                }
+                                Text {
+                                    text: GuiState.cache_cleaning_result.errors;
+                                    font-size: FontSizes.small;
+                                    wrap: word-wrap;
+                                }
+                            }
+                        }
+
+                        Rectangle { }
+                    }
+                }
+
+                HorizontalLayout {
+                    padding: 10px;
+                    spacing: 10px;
+
+                    if !GuiState.cache_cleaning_is_cleaning && !GuiState.cache_cleaning_finished: Button {
+                        text <=> Translations.clean_button_text;
+                        clicked => {
+                            GuiState.cache_cleaning_is_cleaning = true;
+                            GuiState.cache_cleaning_finished = false;
+                            root.stopped_by_user = false;
+                            root.start_cleaning();
+                        }
+                    }
+
+                    if GuiState.cache_cleaning_is_cleaning: Button {
+                        text <=> Translations.stop_text;
+                        clicked => {
+                            root.stopped_by_user = true;
+                            root.stop_cleaning();
+                        }
+                    }
+
+                    Rectangle { }
+
+                    Button {
+                        enabled: !GuiState.cache_cleaning_is_cleaning;
+                        text <=> Translations.cancel_button_text;
+                        clicked => {
+                            popup_window.close();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    show_popup() => {
+        GuiState.cache_cleaning_is_cleaning = false;
+        GuiState.cache_cleaning_finished = false;
+        root.stopped_by_user = false;
+        GuiState.cache_cleaning_progress = {
+            current_cache_file: 0,
+            total_cache_files: 0,
+            current_file_name: "",
+            checked_entries: 0,
+            all_entries: 0,
+        };
+        GuiState.cache_cleaning_result = {
+            processed_files_text: "",
+            entries_stats_text: "",
+            size_stats_text: "",
+            time_text: "",
+            errors_count: 0,
+            errors: "",
+        };
+        popup_window.show();
+    }
+}

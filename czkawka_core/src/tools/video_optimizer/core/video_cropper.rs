@@ -327,6 +327,8 @@ fn extract_video_metadata_for_crop(entry: &mut VideoCropEntry) -> Result<(u32, u
         return Err(());
     };
 
+    entry.duration = Some(duration);
+
     let fps = metadata.fps.unwrap_or(25.0);
 
     Ok((width, height, duration, fps))
@@ -411,10 +413,6 @@ pub fn fix_video_crop(video_path: &Path, params: &VideoCropFixParams, stop_flag:
     let crop_width = right - left;
     let crop_height = bottom - top;
 
-    if crop_width == 0 || crop_height == 0 {
-        return Err("Crop dimensions cannot be zero".to_string());
-    }
-
     let crop_type_suffix = match params.crop_mechanism {
         VideoCroppingMechanism::BlackBars => "blackbars",
         VideoCroppingMechanism::StaticContent => "staticcontent",
@@ -491,6 +489,9 @@ mod tests {
             black_bar_min_percentage: 90,
             max_samples: 60,
             min_crop_size: 5,
+            generate_thumbnails: false,
+            thumbnail_video_percentage_from_start: 0,
+            generate_thumbnail_grid_instead_of_single: false,
         }
     }
 

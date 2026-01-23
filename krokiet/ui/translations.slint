@@ -82,7 +82,6 @@ export global Translations {
     in-out property <string> subsettings_videos_skip_forward_amount_text: "Skip duration [s]";
     in-out property <string> subsettings_videos_vid_hash_duration_text: "Video hash duration";
     in-out property <string> subsettings_videos_crop_detect_text: "Crop detect method";
-    in-out property <string> subsettings_videos_thumbnail_percentage_text: "Thumbnail position in video (%)";
 
     in-out property <string> subsettings_music_audio_check_type_text: "Audio check type";
     in-out property <string> subsettings_music_approximate_comparison_text: "Approximate Tag Comparison";
@@ -154,8 +153,6 @@ export global Translations {
     in-out property <string> settings_delete_outdated_entries_text: "Delete automatically outdated entries";
     in-out property <string> settings_similar_videos_hide_hard_links_text: "Hide hard links";
     in-out property <string> settings_similar_videos_preview_text: "Image preview";
-    in-out property <string> settings_similar_videos_generate_thumbnail_grid_instead_of_single_image_text: "Generate thumbnail grid instead of single image";
-    in-out property <string> settings_similar_videos_generate_thumbnail_grid_instead_of_single_image_hint_text: "Generating multiple images in grid is a lot of slower than generating single thumbnail";
     in-out property <string> settings_open_config_folder_text: "Open config folder";
     in-out property <string> settings_open_cache_folder_text: "Open cache folder";
     in-out property <string> settings_language_text: "Language";
@@ -166,7 +163,12 @@ export global Translations {
     in-out property <string> settings_load_text: "Load";
     in-out property <string> settings_reset_text: "Reset";
     in-out property <string> settings_similar_videos_tool_text: "Similar Videos tool";
-    in-out property <string> settings_similar_videos_clear_unused_thumbnails_text: "Delete unused video thumbnails older than 7 days at app startup";
+    in-out property <string> settings_video_thumbnails_clear_unused_thumbnails_text: "Delete unused video thumbnails older than 7 days at app startup";
+    in-out property <string> settings_video_thumbnails_header_text: "Video Thumbnails";
+    in-out property <string> settings_video_thumbnails_generate_text: "Generate thumbnails";
+    in-out property <string> settings_video_thumbnails_position_text: "Thumbnail position in video (%)";
+    in-out property <string> settings_video_thumbnails_generate_grid_text: "Generate thumbnail grid instead of single image";
+    in-out property <string> settings_video_thumbnails_generate_grid_hint_text: "Generating multiple images in grid is a lot slower than generating single thumbnail";
     in-out property <string> settings_similar_images_tool_text: "Similar Images tool";
     in-out property <string> settings_similar_music_tool_text: "Similar Music tool";
     in-out property <string> settings_general_settings_text: "General Settings";
@@ -179,6 +181,8 @@ export global Translations {
     in-out property <string> settings_cache_number_size_text: "";
     in-out property <string> settings_video_thumbnails_number_size_text: "";
     in-out property <string> settings_log_number_size_text: "";
+    in-out property <string> settings_cache_header_text: "Cache Settings";
+    in-out property <string> settings_clean_cache_button_text: "Clean outdated cache";
 
     // Popup
 
@@ -231,6 +235,18 @@ export global Translations {
     // Main window
     in-out property <string> stopping_scan_text: "Stopping scan, please wait...";
     in-out property <string> searching_text: "Searching...";
+    in-out property <string> stop_text: "Stop";
+
+    in-out property <string> popup_clean_cache_title_text: "Clean Outdated Cache";
+    in-out property <string> popup_clean_cache_confirmation_text: "Are you sure you want to clean outdated cache entries? This will remove cache entries for files that no longer exist or have been modified.";
+    in-out property <string> popup_clean_cache_progress_text: "Processing cache file:";
+    in-out property <string> popup_clean_cache_current_file_text: "Current file:";
+    in-out property <string> popup_clean_cache_file_progress_text: "Current file progress:";
+    in-out property <string> popup_clean_cache_overall_progress_text: "Overall progress:";
+    in-out property <string> popup_clean_cache_stopped_by_user_text: "Cache cleaning was stopped by user";
+    in-out property <string> popup_clean_cache_finished_text: "Cache cleaning completed successfully!";
+    in-out property <string> popup_clean_cache_error_details_text: "Error details:";
+    in-out property <string> popup_clean_cache_files_with_errors: "Files with errors:";
 
 
 }

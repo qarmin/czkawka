@@ -1,8 +1,6 @@
 ## Version ?.?.? - ??
 ### New version blockers
 - sym/hardlinks in Krokiet
-- delay when checking for outdated cache
-- fix elements after changing font size in Krokiet
 
 ### Breaking changes
 #### Users
@@ -11,8 +9,6 @@
 
 #### Devs
 - Public api functions, now do not take references to small copyable types
-- Updated to Rust 1.92 - needed by gtk4-rs, which includes critical bugfix
-
 
 ### Core
 - Extensions in similar images mode and in previews, drops validating if extension is correct(most of the time) - [#1623](https://github.com/qarmin/czkawka/pull/1623)
@@ -29,11 +25,16 @@
 - New mode, video optimizer, to reencode videos to more efficient codecs and cropping black/bars from videos(via external ffmpeg/ffprobe) - [#1726](https://github.com/qarmin/czkawka/pull/1726), [#1745](https://github.com/qarmin/czkawka/pull/1745)
 - New mode, exif remover, to remove certain exif tags from files - [#1745](https://github.com/qarmin/czkawka/pull/1745)
 - Ability to add files to scan, not only folders - [#1745](https://github.com/qarmin/czkawka/pull/1745)
+- Limited supported image sizes to 2000 MP - [#1748](https://github.com/qarmin/czkawka/pull/1748)
+- Automatic cleaning of outdated entries, now runs max once per week - [#1748](https://github.com/qarmin/czkawka/pull/1748)
+- Added new function, to manually remove outdated entries in cache files - [#1748](https://github.com/qarmin/czkawka/pull/1748)
+- Added to all projects, info about video properties(bitrate, codec, fps, dimensions, duration) - [#1748](https://github.com/qarmin/czkawka/pull/1748)
 
 ### CLI
 - Using colors by default in terminal output(can be disabled by feature flag) - [#1672](https://github.com/qarmin/czkawka/pull/1672)
 - Fixed regression, where results were not printed by default to terminal - [#1672](https://github.com/qarmin/czkawka/pull/1672)
 - Added dry_run and move_to_trash options to all tools - [#1685](https://github.com/qarmin/czkawka/pull/1685)
+- Fixed non binded `--excluded-extensions` - [#1748](https://github.com/qarmin/czkawka/pull/1748)
 
 ### GTK GUI
 - Sort button is restored and crashes when sorting are fixed(probably) - [#1623](https://github.com/qarmin/czkawka/pull/1623)
@@ -44,7 +45,7 @@
 - Refactorings to assess whether migrating to GTK 5 will be possible (currently, it doesn’t seem very feasible) - [#1658](https://github.com/qarmin/czkawka/pull/1658)
 - Fixed sorting by size in big files mode - [#1691](https://github.com/qarmin/czkawka/pull/1691)
 - Fixed freezes, caused by invalid function declaration in gtk4-rs - [#1691](https://github.com/qarmin/czkawka/pull/1691)
-- About screen, now contains info, that Krokiet is successor app - [#1718](https://github.com/qarmin/czkawka/pull/1718)
+- About popup with info, that Krokiet is successor app - [#1718](https://github.com/qarmin/czkawka/pull/1718)
 - Added `--cache`, `--config` CLI options, to open cache/config paths  - [#1745](https://github.com/qarmin/czkawka/pull/1745)
 
 ### Krokiet
@@ -52,7 +53,7 @@
 - Added video thumbnails(single/grid) - [#1714](https://github.com/qarmin/czkawka/pull/1714)
 - Printing in settings, size of cache/thumbnails/logs files - [#1714](https://github.com/qarmin/czkawka/pull/1714)
 - Added sorting, by clicking at column headers - [#1718](https://github.com/qarmin/czkawka/pull/1718)
-- Added, enabled by default, limit 500 lines of messages in Krokiet, to freezes caused by slow TextEdit widget performance - [#1718](https://github.com/qarmin/czkawka/pull/1718)
+- Added, enabled by default, limit 500 lines of messages in Krokiet, to avoid freezes caused by slow TextEdit widget performance - [#1718](https://github.com/qarmin/czkawka/pull/1718)
 - Increased a little, size of all fonts, to improve readability - [#1726](https://github.com/qarmin/czkawka/pull/1726)
 - Ability to choose app scale in runtime(but with several limitations) - [#1726](https://github.com/qarmin/czkawka/pull/1726)
 - Cleaning messages in bottom panel, when scan starts - [#1726](https://github.com/qarmin/czkawka/pull/1726)
@@ -61,9 +62,11 @@
 - Added notification dialog, when app cannot be opened - [#1745](https://github.com/qarmin/czkawka/pull/1745)
 - Added `--cache`, `--config` CLI options, to open cache/config paths  - [#1745](https://github.com/qarmin/czkawka/pull/1745)
 - Added new video optimizer and exif remover modes - [#1726](https://github.com/qarmin/czkawka/pull/1726), [#1745](https://github.com/qarmin/czkawka/pull/1745)
+- Modification date is displayed in local time instead of UTC - [#1748](https://github.com/qarmin/czkawka/pull/1748)
+- Added new menu, to manually remove outdated entries in cache files - [#1748](https://github.com/qarmin/czkawka/pull/1748)
 
 ### External
-- Wine 10.20 contains bugfix that fixes crashes when running dialogs in Czkawka Gui - [Wine 49987 issue](https://bugs.winehq.org/show_bug.cgi?id=49987)
+- Wine 10.20 contains bugfix that fixes crashes when opening file dialogs in Czkawka Gui - [Wine 49987 issue](https://bugs.winehq.org/show_bug.cgi?id=49987)
 
 ### Prebuilt binaries
 - Krokiet Windows binaries with skia backend are available (this is msvc build and requires vc redist installed)
@@ -94,7 +97,6 @@
 - Replaced `imagepipe` + `rawloader` with `rawler` which is still supported and faster to decode raw files - [#1572](https://github.com/qarmin/czkawka/pull/1572)
 - Added more configuration options in video finder - [#1578](https://github.com/qarmin/czkawka/pull/1578)
 - `fast_image_resize` feature is removed and `image_hasher/fast_resize_unstable` is enabled unconditionally - [#1586](https://github.com/qarmin/czkawka/pull/1586)
-- Added to all projects, info about video properties(bitrate, codec, fps, dimensions, duration) - [#]()
 
 ### CLI
 - Improved logic for deleting files and added progress bar for this operation - [#1571](https://github.com/qarmin/czkawka/pull/1571)

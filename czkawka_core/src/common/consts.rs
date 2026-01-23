@@ -41,5 +41,7 @@ pub const VIDEO_FILES_EXTENSIONS: &[&str] = &[
     "amv", "drc", "gifv", "smk", "bik", // Older / games
 ];
 
+pub const TEXT_FILES_EXTENSIONS: &[&str] = &["txt", "md", "csv", "log", "ini", "json", "xml", "yaml", "yml", "toml", "doc", "docx", "rtf", "odt"];
+
 // "dng" - is theoretically a tiff file, but little_exif have problem with saving metadata to it
 pub const EXIF_FILES_EXTENSIONS: &[&str] = &["jpg", "jpeg", "jfif", "png", "tiff", "tif", "avif", "jxl", "webp", "heic", "heif"];

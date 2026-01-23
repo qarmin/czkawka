@@ -1,13 +1,10 @@
 use std::collections::{BTreeMap, BTreeSet};
-use std::path::Path;
+use std::mem;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
-use std::{fs, mem};
 
-use blake3::Hasher;
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
-use image::{GenericImage, RgbImage};
 use indexmap::IndexMap;
 use log::debug;
 use rayon::prelude::*;
@@ -15,17 +12,14 @@ use vid_dup_finder_lib::{CreationOptions, Cropdetect, VideoHash, VideoHashBuilde
 
 use crate::common::cache::{CACHE_VIDEO_VERSION, load_and_split_cache_generalized_by_path, save_and_connect_cache_generalized_by_path};
 use crate::common::config_cache_path::get_config_cache_path;
-use crate::common::consts::VIDEO_FILES_EXTENSIONS;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult, inode, take_1_per_inode};
 use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::common::traits::ResultEntry;
-use crate::common::video_utils::{VideoMetadata, extract_frame_ffmpeg};
+use crate::common::video_utils::{VIDEO_THUMBNAILS_SUBFOLDER, VideoMetadata, generate_thumbnail};
 use crate::tools::similar_videos::{SimilarVideos, SimilarVideosParameters, VideosEntry};
-
-pub const VIDEO_THUMBNAILS_SUBFOLDER: &str = "video_thumbnails";
 
 impl SimilarVideos {
     pub fn new(params: SimilarVideosParameters) -> Self {
@@ -42,11 +36,6 @@ impl SimilarVideos {
 
     #[fun_time(message = "check_for_similar_videos", level = "debug")]
     pub(crate) fn check_for_similar_videos(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
-        self.common_data.extensions.set_and_validate_allowed_extensions(VIDEO_FILES_EXTENSIONS);
-        if !self.common_data.extensions.set_any_extensions() {
-            return WorkContinueStatus::Continue;
-        }
-
         let result = DirTraversalBuilder::new()
             .group_by(inode)
             .stop_flag(stop_flag)
@@ -110,101 +99,6 @@ impl SimilarVideos {
         file_entry
     }
 
-    fn generate_thumbnail(
-        stop_flag: &Arc<AtomicBool>,
-        file_entry: &mut VideosEntry,
-        thumbnails_dir: &Path,
-        thumbnail_video_percentage_from_start: u8,
-        generate_grid_instead_of_single: bool,
-    ) -> Result<(), String> {
-        let mut hasher = Hasher::new();
-        hasher.update(
-            format!(
-                "{thumbnail_video_percentage_from_start}___{}___{}___{}___{generate_grid_instead_of_single}",
-                file_entry.size,
-                file_entry.modified_date,
-                file_entry.path.to_string_lossy()
-            )
-            .as_bytes(),
-        );
-        let hash = hasher.finalize();
-        let thumbnail_filename = format!("{}.jpg", hash.to_hex());
-        let thumbnail_path = thumbnails_dir.join(thumbnail_filename);
-
-        if thumbnail_path.exists() {
-            file_entry.thumbnail_path = Some(thumbnail_path.clone());
-            let _ = filetime::set_file_mtime(&thumbnail_path, filetime::FileTime::now());
-            return Ok(());
-        }
-
-        let seek_time = file_entry.duration.map_or(5.0, |d| d * (thumbnail_video_percentage_from_start as f64) / 100.0);
-        let duration_per_11_items = file_entry.duration.map_or(0.5, |d| d / 11.0);
-
-        let max_height = 1080;
-        let max_width = 1920;
-        let tiles_size = 3;
-
-        if generate_grid_instead_of_single {
-            let frame_times = (0..(tiles_size * tiles_size)).map(|i| duration_per_11_items as f32 * (i + 1) as f32).collect::<Vec<f32>>();
-            let mut imgs = Vec::new();
-            for ft in frame_times {
-                if check_if_stop_received(stop_flag) {
-                    return Err(String::from("Thumbnail generation was stopped by user"));
-                }
-
-                match extract_frame_ffmpeg(&file_entry.path, ft, Some((max_width, max_height))) {
-                    Ok(img) => imgs.push(img),
-                    Err(e) => {
-                        let _ = fs::write(&thumbnail_path, b"");
-                        return Err(format!("Failed to extract frame at {ft} seconds from \"{}\": {e}", file_entry.path.to_string_lossy()));
-                    }
-                }
-            }
-            assert_eq!(imgs.len(), tiles_size * tiles_size);
-
-            let first_img = &imgs.first().expect("Cannot be empty here, because at least titles_size^2 images are extracted");
-
-            if imgs.iter().any(|img| img.height() != first_img.height() || img.width() != first_img.width()) {
-                let _ = fs::write(&thumbnail_path, b"");
-                return Err(format!(
-                    "Failed to generate thumbnail for \"{}\": extracted frames have different dimensions",
-                    file_entry.path.to_string_lossy()
-                ));
-            }
-            let mut new_thumbnail = RgbImage::new(first_img.width() * tiles_size as u32, first_img.height() * tiles_size as u32);
-            for (idx, img) in imgs.iter().enumerate() {
-                let x = (idx % tiles_size) as u32 * img.width();
-                let y = (idx / tiles_size) as u32 * img.height();
-                new_thumbnail
-                    .copy_from(img, x, y)
-                    .map_err(|e| format!("Failed to generate thumbnail for \"{}\": {e}", file_entry.path.to_string_lossy()))?;
-            }
-
-            if let Err(e) = new_thumbnail.save(&thumbnail_path) {
-                let _ = fs::write(&thumbnail_path, b"");
-                return Err(format!("Failed to save thumbnail for \"{}\": {e}", file_entry.path.to_string_lossy()));
-            }
-            file_entry.thumbnail_path = Some(thumbnail_path);
-        } else {
-            match extract_frame_ffmpeg(&file_entry.path, seek_time as f32, Some((max_width, max_height))) {
-                Ok(img) => {
-                    if let Err(e) = img.save(&thumbnail_path) {
-                        let _ = fs::write(&thumbnail_path, b"");
-                        return Err(format!("Failed to save thumbnail for \"{}\": {e}", file_entry.path.to_string_lossy()));
-                    }
-                }
-                Err(e) => {
-                    let _ = fs::write(&thumbnail_path, b"");
-                    return Err(format!(
-                        "Failed to extract frame at {seek_time} seconds from \"{}\" - {e}",
-                        file_entry.path.to_string_lossy()
-                    ));
-                }
-            }
-        }
-        Ok(())
-    }
-
     #[fun_time(message = "sort_videos", level = "debug")]
     pub(crate) fn sort_videos(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.videos_to_check.is_empty() {
@@ -253,7 +147,6 @@ impl SimilarVideos {
         let mut hashmap_with_file_entries: IndexMap<String, VideosEntry> = Default::default();
         let mut vector_of_hashes: Vec<VideoHash> = Vec::new();
         for file_entry in vec_file_entry {
-            // 0 means that images was not hashed correctly, e.g. could be improperly
             if file_entry.error.is_empty() {
                 vector_of_hashes.push(file_entry.vhash.clone());
                 hashmap_with_file_entries.insert(file_entry.vhash.src_path().to_string_lossy().to_string(), file_entry);
@@ -330,14 +223,20 @@ impl SimilarVideos {
                         return errs;
                     }
 
-                    if let Err(e) = Self::generate_thumbnail(
+                    match generate_thumbnail(
                         stop_flag,
-                        file_entry,
+                        &file_entry.path,
+                        file_entry.size,
+                        file_entry.modified_date,
+                        file_entry.duration,
                         &thumbnails_dir,
                         thumbnail_video_percentage_from_start,
                         generate_grid_instead_of_single,
                     ) {
-                        errs.push(e);
+                        Ok(thumbnail_path) => {
+                            file_entry.thumbnail_path = Some(thumbnail_path);
+                        }
+                        Err(e) => errs.push(e),
                     }
 
                     progress_handler.increase_items(1);

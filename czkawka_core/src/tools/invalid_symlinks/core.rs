@@ -58,14 +58,14 @@ impl InvalidSymlinks {
         match current_file_name.read_link() {
             Ok(t) => {
                 destination_path.push(t);
-                let mut number_of_loop = 0;
+                let mut loop_count = 0;
                 let mut current_path = current_file_name.to_path_buf();
                 loop {
-                    if number_of_loop == 0 && !current_path.exists() {
+                    if loop_count == 0 && !current_path.exists() {
                         type_of_error = ErrorType::NonExistentFile;
                         break;
                     }
-                    if number_of_loop == MAX_NUMBER_OF_SYMLINK_JUMPS {
+                    if loop_count == MAX_NUMBER_OF_SYMLINK_JUMPS {
                         type_of_error = ErrorType::InfiniteRecursion;
                         break;
                     }
@@ -78,7 +78,7 @@ impl InvalidSymlinks {
                         }
                     };
 
-                    number_of_loop += 1;
+                    loop_count += 1;
                 }
             }
             Err(_inspected) => {

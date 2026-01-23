@@ -101,7 +101,7 @@ jobs:
             mac_krokiet_skia_vulkan_${{ env.ARCHNAME }}
 
       - name: Release
-        if: ${{ github.ref == 'refs/heads/master' && env.HAVE_PAT_REPOSITORY_TOKEN == '1' }}
+        if: ${{ github.ref == 'refs/heads/master' && vars.HAVE_PAT_REPOSITORY_TOKEN == '1' }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: "Nightly"

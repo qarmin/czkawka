@@ -24,6 +24,7 @@ use log::{error, info};
 use slint::VecModel;
 
 use crate::clear_outdated_video_thumbnails::clear_outdated_video_thumbnails;
+use crate::connect_clean_cache::connect_clean_cache;
 use crate::connect_directories_changes::connect_add_remove_directories;
 use crate::connect_open::connect_open_items;
 use crate::connect_progress_receiver::connect_progress_gathering;
@@ -45,6 +46,7 @@ use crate::shared_models::SharedModels;
 
 mod clear_outdated_video_thumbnails;
 mod common;
+mod connect_clean_cache;
 mod connect_directories_changes;
 mod connect_open;
 mod connect_progress_receiver;
@@ -136,7 +138,8 @@ fn main() {
     connect_sort(&app);
     connect_sort_column(&app);
     connect_showing_proper_sort_buttons(&app);
-    connect_size_of_config_cache(&app);
+    let cache_size_task_sender = connect_size_of_config_cache(&app);
+    connect_clean_cache(&app, cache_size_task_sender);
     connect_show_confirmation(&app, Arc::clone(&shared_models));
 
     clear_outdated_video_thumbnails(&app);

@@ -9,11 +9,13 @@ use log::{debug, info};
 use rayon::prelude::*;
 
 use crate::common::cache::{load_and_split_cache_generalized_by_path, save_and_connect_cache_generalized_by_path};
+use crate::common::config_cache_path::get_config_cache_path;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
+use crate::common::video_utils::{VIDEO_THUMBNAILS_SUBFOLDER, generate_thumbnail};
 use crate::tools::video_optimizer::{
     Info, VideoCropEntry, VideoCropParams, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters, VideoTranscodeEntry, VideoTranscodeParams,
 };
@@ -25,7 +27,6 @@ pub use video_converter::process_video;
 pub use video_cropper::fix_video_crop;
 
 use crate::common::cache::CACHE_VIDEO_OPTIMIZE_VERSION;
-use crate::common::consts::VIDEO_FILES_EXTENSIONS;
 use crate::common::traits::ResultEntry;
 
 impl VideoOptimizer {
@@ -43,11 +44,6 @@ impl VideoOptimizer {
 
     #[fun_time(message = "scan_files", level = "debug")]
     pub(crate) fn scan_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
-        let extensions_string = match &self.params {
-            VideoOptimizerParameters::VideoTranscode(_) | VideoOptimizerParameters::VideoCrop(_) => VIDEO_FILES_EXTENSIONS.join(","),
-        };
-        self.common_data.extensions.set_allowed_extensions(extensions_string);
-
         let result = DirTraversalBuilder::new()
             .group_by(|_fe| ())
             .stop_flag(stop_flag)
@@ -135,6 +131,10 @@ impl VideoOptimizer {
 
         self.video_transcode_result_entries = entries;
 
+        if self.create_transcode_thumbnails(progress_sender, stop_flag, &params) == WorkContinueStatus::Stop {
+            return WorkContinueStatus::Stop;
+        }
+
         WorkContinueStatus::Continue
     }
 
@@ -186,6 +186,150 @@ impl VideoOptimizer {
         vec_file_entry.retain(|e| e.error.is_none() && e.new_image_dimensions.is_some());
 
         self.video_crop_result_entries = vec_file_entry;
+
+        if self.create_crop_thumbnails(progress_sender, stop_flag, &params) == WorkContinueStatus::Stop {
+            return WorkContinueStatus::Stop;
+        }
+
+        WorkContinueStatus::Continue
+    }
+
+    #[fun_time(message = "create_transcode_thumbnails", level = "debug")]
+    fn create_transcode_thumbnails(&mut self, progress_sender: Option<&Sender<ProgressData>>, stop_flag: &Arc<AtomicBool>, params: &VideoTranscodeParams) -> WorkContinueStatus {
+        if !params.generate_thumbnails {
+            return WorkContinueStatus::Continue;
+        }
+
+        let progress_handler = prepare_thread_handler_common(
+            progress_sender,
+            CurrentStage::VideoOptimizerCreatingThumbnails,
+            self.video_transcode_result_entries.len(),
+            self.get_test_type(),
+            0,
+        );
+
+        let Some(config_cache_path) = get_config_cache_path() else {
+            return WorkContinueStatus::Continue;
+        };
+
+        let thumbnails_dir = config_cache_path.cache_folder.join(VIDEO_THUMBNAILS_SUBFOLDER);
+        if let Err(e) = std::fs::create_dir_all(&thumbnails_dir) {
+            debug!("Failed to create thumbnails directory: {e}");
+            return WorkContinueStatus::Continue;
+        }
+
+        let thumbnail_video_percentage_from_start = params.thumbnail_video_percentage_from_start;
+        let generate_grid_instead_of_single = params.generate_thumbnail_grid_instead_of_single;
+
+        let errors = self
+            .video_transcode_result_entries
+            .par_iter_mut()
+            .map(|entry| {
+                if check_if_stop_received(stop_flag) {
+                    return None;
+                }
+
+                match generate_thumbnail(
+                    stop_flag,
+                    &entry.path,
+                    entry.size,
+                    entry.modified_date,
+                    entry.duration,
+                    &thumbnails_dir,
+                    thumbnail_video_percentage_from_start,
+                    generate_grid_instead_of_single,
+                ) {
+                    Ok(thumbnail_path) => {
+                        entry.thumbnail_path = Some(thumbnail_path);
+                        progress_handler.increase_items(1);
+                        None
+                    }
+                    Err(e) => {
+                        progress_handler.increase_items(1);
+                        Some(e)
+                    }
+                }
+            })
+            .while_some()
+            .collect::<Vec<String>>();
+
+        self.common_data.text_messages.warnings.extend(errors);
+
+        progress_handler.join_thread();
+        if check_if_stop_received(stop_flag) {
+            return WorkContinueStatus::Stop;
+        }
+
+        WorkContinueStatus::Continue
+    }
+
+    #[fun_time(message = "create_crop_thumbnails", level = "debug")]
+    fn create_crop_thumbnails(&mut self, progress_sender: Option<&Sender<ProgressData>>, stop_flag: &Arc<AtomicBool>, params: &VideoCropParams) -> WorkContinueStatus {
+        if !params.generate_thumbnails {
+            return WorkContinueStatus::Continue;
+        }
+
+        let progress_handler = prepare_thread_handler_common(
+            progress_sender,
+            CurrentStage::VideoOptimizerCreatingThumbnails,
+            self.video_crop_result_entries.len(),
+            self.get_test_type(),
+            0,
+        );
+
+        let Some(config_cache_path) = get_config_cache_path() else {
+            return WorkContinueStatus::Continue;
+        };
+
+        let thumbnails_dir = config_cache_path.cache_folder.join(VIDEO_THUMBNAILS_SUBFOLDER);
+        if let Err(e) = std::fs::create_dir_all(&thumbnails_dir) {
+            debug!("Failed to create thumbnails directory: {e}");
+            return WorkContinueStatus::Continue;
+        }
+
+        let thumbnail_video_percentage_from_start = params.thumbnail_video_percentage_from_start;
+        let generate_grid_instead_of_single = params.generate_thumbnail_grid_instead_of_single;
+
+        let errors = self
+            .video_crop_result_entries
+            .par_iter_mut()
+            .map(|entry| {
+                if check_if_stop_received(stop_flag) {
+                    return None;
+                }
+
+                let result = generate_thumbnail(
+                    stop_flag,
+                    &entry.path,
+                    entry.size,
+                    entry.modified_date,
+                    entry.duration,
+                    &thumbnails_dir,
+                    thumbnail_video_percentage_from_start,
+                    generate_grid_instead_of_single,
+                );
+
+                match result {
+                    Ok(thumbnail_path) => {
+                        entry.thumbnail_path = Some(thumbnail_path);
+                        progress_handler.increase_items(1);
+                        None
+                    }
+                    Err(e) => {
+                        progress_handler.increase_items(1);
+                        Some(e)
+                    }
+                }
+            })
+            .while_some()
+            .collect::<Vec<String>>();
+
+        self.common_data.text_messages.warnings.extend(errors);
+
+        progress_handler.join_thread();
+        if check_if_stop_received(stop_flag) {
+            return WorkContinueStatus::Stop;
+        }
 
         WorkContinueStatus::Continue
     }

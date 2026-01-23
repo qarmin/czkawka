@@ -16,11 +16,9 @@ export global Callabler {
     callback row_reverse_item_selection(int);
     callback row_select_items_with_shift(int, int);
 
-    callback row_open_selected_item();
-    callback row_open_parent_of_selected_item();
-
     callback row_reverse_checked_selection();
     callback row_open_item_with_index(int);
+    callback row_open_parent_item_with_index(int);
 
     // Right click or middle click opener
     callback open_item(string);
@@ -58,6 +56,9 @@ export global Callabler {
 
     callback open_config_folder();
     callback open_cache_folder();
+
+    callback start_cache_cleaning();
+    callback stop_cache_cleaning();
 
     callback open_link(string);
 

@@ -7,6 +7,7 @@ use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use humansize::{BINARY, format_size};
 
+use crate::common::consts::{HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, JXL_IMAGE_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
 use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
@@ -22,7 +23,13 @@ impl Search for SimilarImages {
         let start_time = Instant::now();
 
         let () = (|| {
-            if self.prepare_items().is_err() {
+            let extensions = if cfg!(feature = "heif") {
+                [IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS, JXL_IMAGE_EXTENSIONS, HEIC_EXTENSIONS].concat()
+            } else {
+                [IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS, JXL_IMAGE_EXTENSIONS].concat()
+            };
+
+            if self.prepare_items(Some(&extensions)).is_err() {
                 return;
             }
             self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty() || !self.common_data.directories.reference_files.is_empty();

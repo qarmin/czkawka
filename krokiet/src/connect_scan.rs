@@ -5,7 +5,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
 
-use chrono::DateTime;
+use chrono::{Local, TimeZone, Utc};
 use crossbeam_channel::Sender;
 use czkawka_core::common::consts::DEFAULT_THREAD_SIZE;
 use czkawka_core::common::model::{CheckingMethod, FileEntry};
@@ -611,7 +611,6 @@ fn prepare_data_model_similar_images(fe: &ImagesEntry, hash_size: u8) -> (ModelR
     let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
-    let pixels = split_u64_into_i32s((fe.width as u64) * (fe.height as u64));
     let data_model_int_arr: [i32; MAX_INT_DATA_SIMILAR_IMAGES] = [
         modification_split.0,
         modification_split.1,
@@ -619,8 +618,7 @@ fn prepare_data_model_similar_images(fe: &ImagesEntry, hash_size: u8) -> (ModelR
         size_split.1,
         fe.width as i32,
         fe.height as i32,
-        pixels.0,
-        pixels.1,
+        (fe.width as u64 * fe.height as u64) as i32, // Limited to 2000MP, but using u64, because in cache it can exceed i32
     ];
     let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
@@ -648,9 +646,9 @@ fn scan_similar_videos(
                 custom_settings.similar_videos_skip_forward_amount,
                 custom_settings.similar_videos_vid_hash_duration,
                 combo_box_items.videos_crop_detect.value,
-                custom_settings.similar_videos_image_preview,
-                custom_settings.similar_videos_thumbnail_percentage,
-                custom_settings.similar_videos_generate_thumbnail_grid_instead_of_single_image,
+                custom_settings.video_thumbnails_preview,
+                custom_settings.video_thumbnails_percentage,
+                custom_settings.video_thumbnails_generate_grid,
             );
             let mut tool = SimilarVideos::new(params);
             set_common_settings(&mut tool, &custom_settings, &stop_flag);
@@ -768,7 +766,7 @@ fn prepare_data_model_similar_videos(fe: &VideosEntry) -> (ModelRc<SharedString>
     let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 }
-// Scan Similar Music
+////////////////////////////////////////// Similar Music
 fn scan_similar_music(
     a: Weak<MainWindow>,
     progress_sender: Sender<ProgressData>,
@@ -1305,21 +1303,30 @@ fn scan_video_optimizer(
             let video_optimizer_mode = combo_box_items.video_optimizer_mode.value;
             let params = if video_optimizer_mode == VideoOptimizerMode::VideoCrop {
                 let crop_detect = combo_box_items.video_optimizer_crop_type.value;
-                VideoOptimizerParameters::VideoCrop(VideoCropParams::with_custom_params(
+                let mut params = VideoCropParams::with_custom_params(
                     crop_detect,
                     custom_settings.video_optimizer_black_pixel_threshold,
                     custom_settings.video_optimizer_black_bar_min_percentage,
                     custom_settings.video_optimizer_max_samples,
                     custom_settings.video_optimizer_min_crop_size,
-                ))
+                );
+                params.generate_thumbnails = custom_settings.video_thumbnails_generate;
+                params.thumbnail_video_percentage_from_start = custom_settings.video_thumbnails_percentage;
+                params.generate_thumbnail_grid_instead_of_single = custom_settings.video_thumbnails_generate_grid;
+                VideoOptimizerParameters::VideoCrop(params)
             } else {
+                let mut params = VideoTranscodeParams::new();
                 let excluded_codecs: Vec<String> = custom_settings
                     .video_optimizer_excluded_codecs
                     .split(',')
                     .map(|s| s.trim().to_lowercase())
                     .filter(|s| !s.is_empty())
                     .collect();
-                VideoOptimizerParameters::VideoTranscode(VideoTranscodeParams { excluded_codecs })
+                params.excluded_codecs = excluded_codecs;
+                params.generate_thumbnails = custom_settings.video_thumbnails_generate;
+                params.thumbnail_video_percentage_from_start = custom_settings.video_thumbnails_percentage;
+                params.generate_thumbnail_grid_instead_of_single = custom_settings.video_thumbnails_generate_grid;
+                VideoOptimizerParameters::VideoTranscode(params)
             };
 
             let is_crop_mode = matches!(params, VideoOptimizerParameters::VideoCrop(_));
@@ -1481,9 +1488,8 @@ fn prepare_data_model_video_optimizer_crop(fe: &VideoCropEntry) -> (ModelRc<Shar
 }
 
 fn get_dt_timestamp_string(timestamp: u64) -> String {
-    DateTime::from_timestamp(timestamp as i64, 0)
-        .expect("Modified date always should be in valid range")
-        .to_string()
+    let dt_local = Utc.timestamp_opt(timestamp as i64, 0).single().unwrap_or_default().with_timezone(&Local);
+    dt_local.format("%Y-%m-%d %H:%M:%S").to_string()
 }
 
 ////////////////////////////////////////// Common
@@ -1531,8 +1537,8 @@ where
     component.set_recursive_search(custom_settings.recursive_search);
     component.set_minimal_file_size(custom_settings.minimum_file_size as u64 * 1024);
     component.set_maximal_file_size(custom_settings.maximum_file_size as u64 * 1024);
-    component.set_allowed_extensions(custom_settings.allowed_extensions.clone());
-    component.set_excluded_extensions(custom_settings.excluded_extensions.clone());
+    component.set_allowed_extensions(custom_settings.allowed_extensions.split(',').map(str::to_string).collect());
+    component.set_excluded_extensions(custom_settings.excluded_extensions.split(',').map(str::to_string).collect());
     component.set_excluded_items(custom_settings.excluded_items.split(',').map(str::to_string).collect());
     component.set_exclude_other_filesystems(custom_settings.ignore_other_file_systems);
     component.set_use_cache(custom_settings.use_cache);
