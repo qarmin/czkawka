@@ -255,6 +255,8 @@ fn write_duplicate_results(
     groups: usize,
     lost_space: u64,
     audio_player: &AudioPlayer,
+    settings_custom: &SettingsCustom,
+    base_settings: &BasicSettings,
 ) {
     let items = Rc::new(VecModel::default());
     for (ref_fe, vec_fe) in vector.into_iter().rev() {
@@ -274,6 +276,7 @@ fn write_duplicate_results(
     if let Some(critical) = critical {
         app.invoke_scan_ended(critical.into());
     } else {
+        if base_settings.
         if lost_space > 0 {
             app.invoke_scan_ended(
                 flk!(

@@ -1,9 +1,11 @@
-use std::io::Cursor;
+#![allow(unused_imports)]
+#![allow(dead_code)]
+use std::io::{BufReader, Cursor};
 
 #[cfg(feature = "audio")]
 use rodio::{Decoder, OutputStreamBuilder, Sink};
 
-const DEFAULT_STOP_AUDIO: &[u8] = include_bytes!("../audio/stop_bit.m4a");
+const DEFAULT_STOP_AUDIO: &[u8] = include_bytes!("../audio/stop_bit.mp3");
 
 pub struct AudioPlayer {
     #[cfg(feature = "audio")]
@@ -29,7 +31,8 @@ impl AudioPlayer {
             match std::fs::read(&custom_path) {
                 Ok(data) => {
                     let cursor = Cursor::new(data.clone());
-                    match Decoder::new(cursor) {
+                    let buf_reader = BufReader::new(cursor);
+                    match Decoder::new(buf_reader) {
                         Ok(_) => {
                             log::info!("Loaded custom audio file from: {}", custom_path);
                             return data;
@@ -66,25 +69,19 @@ impl AudioPlayer {
 
     #[cfg(feature = "audio")]
     fn play_audio_blocking(audio_data: &[u8]) -> Result<(), String> {
-        // Get an output stream handle to the default physical sound device
-        // Note: stream_handle must live as long as audio is playing
         let stream_handle = OutputStreamBuilder::open_default_stream()
             .map_err(|e| format!("Failed to get audio output stream: {}", e))?;
 
-        // Create a sink to play audio
         let sink = Sink::connect_new(&stream_handle.mixer());
 
-        // Decode the audio file - clone the data so Decoder owns it
         let cursor = Cursor::new(audio_data.to_vec());
-        let source = Decoder::new(cursor).map_err(|e| format!("Failed to decode audio: {}", e))?;
+        let buf_reader = BufReader::new(cursor);
+        let source = Decoder::new(buf_reader).map_err(|e| format!("Failed to decode audio: {}", e))?;
 
-        // Play the audio
         sink.append(source);
 
-        // Wait for the audio to finish playing before dropping stream_handle
         sink.sleep_until_end();
 
-        // Explicitly keep stream_handle alive until here
         drop(stream_handle);
 
         Ok(())
