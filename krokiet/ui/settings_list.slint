@@ -335,7 +335,12 @@ export component SettingsList inherits VerticalLayout {
 
             HintText {
                 visible: !GuiState.audio_feature_enabled;
-                hint_text <=> "Available only when compiling with audio feature";
+                hint_text: Translations.settings_audio_feature_hint_text;
+            }
+
+            HintText {
+                visible: GuiState.audio_feature_enabled;
+                hint_text: Translations.settings_audio_env_variable_hint_text;
             }
 
             HeaderText {
