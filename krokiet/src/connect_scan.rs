@@ -47,11 +47,22 @@ use crate::common::{
 use crate::connect_row_selection::checker::set_number_of_enabled_items;
 use crate::connect_row_selection::reset_selection;
 use crate::settings::model::{BasicSettings, ComboBoxItems, SettingsCustom};
+use crate::audio_player::AudioPlayer;
 use crate::settings::{collect_base_settings, collect_combo_box_settings, collect_settings};
 use crate::shared_models::SharedModels;
 use crate::{ActiveTab, GuiState, MainListModel, MainWindow, ProgressToSend, flk};
 
-pub(crate) fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>, shared_models: Arc<Mutex<SharedModels>>) {
+pub struct ScanData {
+    pub progress_sender: Sender<ProgressData>,
+    pub stop_flag: Arc<AtomicBool>,
+    pub custom_settings: SettingsCustom,
+    pub basic_settings: BasicSettings,
+    pub combo_box_items: ComboBoxItems,
+    pub shared_models: Arc<Mutex<SharedModels>>,
+    pub audio_player: Arc<AudioPlayer>,
+}
+
+pub(crate) fn connect_scan_button(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>, shared_models: Arc<Mutex<SharedModels>>, audio_player: Arc<AudioPlayer>) {
     let a = app.as_weak();
     app.on_scan_starting(move |active_tab| {
         let app = a.upgrade().expect("Failed to upgrade app :(");
@@ -85,45 +96,58 @@ pub(crate) fn connect_scan_button(app: &MainWindow, progress_sender: Sender<Prog
         app.global::<GuiState>().set_info_text("".into());
 
         let a = app.as_weak();
+        let audio_player_clone = Arc::clone(&audio_player);
+        
+        
+        let scan_data = ScanData {
+            progress_sender,
+            stop_flag,
+            custom_settings,
+            basic_settings,
+            combo_box_items,
+            shared_models: cloned_model,
+            audio_player: audio_player_clone,
+        };
+        
         match active_tab {
             ActiveTab::DuplicateFiles => {
-                scan_duplicates(a, progress_sender, stop_flag, custom_settings, basic_settings, combo_box_items, cloned_model);
+                scan_duplicates(a, scan_data);
             }
             ActiveTab::EmptyFolders => {
-                scan_empty_folders(a, progress_sender, stop_flag, custom_settings, basic_settings, combo_box_items, cloned_model);
+                scan_empty_folders(a, scan_data);
             }
             ActiveTab::BigFiles => {
-                scan_big_files(a, progress_sender, stop_flag, custom_settings, basic_settings, combo_box_items, cloned_model);
+                scan_big_files(a, scan_data);
             }
             ActiveTab::EmptyFiles => {
-                scan_empty_files(a, progress_sender, stop_flag, custom_settings, basic_settings, combo_box_items, cloned_model);
+                scan_empty_files(a, scan_data);
             }
             ActiveTab::SimilarImages => {
-                scan_similar_images(a, progress_sender, stop_flag, custom_settings, basic_settings, combo_box_items, cloned_model);
+                scan_similar_images(a, scan_data);
             }
             ActiveTab::SimilarVideos => {
-                scan_similar_videos(a, progress_sender, stop_flag, custom_settings, basic_settings, combo_box_items, cloned_model);
+                scan_similar_videos(a, scan_data);
             }
             ActiveTab::SimilarMusic => {
-                scan_similar_music(a, progress_sender, stop_flag, custom_settings, basic_settings, combo_box_items, cloned_model);
+                scan_similar_music(a, scan_data);
             }
             ActiveTab::InvalidSymlinks => {
-                scan_invalid_symlinks(a, progress_sender, stop_flag, custom_settings, basic_settings, combo_box_items, cloned_model);
+                scan_invalid_symlinks(a, scan_data);
             }
             ActiveTab::BadExtensions => {
-                scan_bad_extensions(a, progress_sender, stop_flag, custom_settings, basic_settings, combo_box_items, cloned_model);
+                scan_bad_extensions(a, scan_data);
             }
             ActiveTab::BrokenFiles => {
-                scan_broken_files(a, progress_sender, stop_flag, custom_settings, basic_settings, combo_box_items, cloned_model);
+                scan_broken_files(a, scan_data);
             }
             ActiveTab::TemporaryFiles => {
-                scan_temporary_files(a, progress_sender, stop_flag, custom_settings, basic_settings, combo_box_items, cloned_model);
+                scan_temporary_files(a, scan_data);
             }
             ActiveTab::ExifRemover => {
-                scan_exif_remover(a, progress_sender, stop_flag, custom_settings, basic_settings, combo_box_items, cloned_model);
+                scan_exif_remover(a, scan_data);
             }
             ActiveTab::VideoOptimizer => {
-                scan_video_optimizer(a, progress_sender, stop_flag, custom_settings, basic_settings, combo_box_items, cloned_model);
+                scan_video_optimizer(a, scan_data);
             }
             ActiveTab::Settings | ActiveTab::About => panic!("Button should be disabled"),
         }
@@ -134,35 +158,30 @@ pub(crate) fn connect_scan_button(app: &MainWindow, progress_sender: Sender<Prog
 
 fn scan_duplicates(
     a: Weak<MainWindow>,
-    progress_sender: Sender<ProgressData>,
-    stop_flag: Arc<AtomicBool>,
-    custom_settings: SettingsCustom,
-    basic_settings: BasicSettings,
-    combo_box_items: ComboBoxItems,
-    shared_models: Arc<Mutex<SharedModels>>,
+sd: ScanData
 ) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let _ = combo_box_items;
-            let hash_type = combo_box_items.duplicates_hash_type.value;
-            let check_method = combo_box_items.duplicates_check_method.value;
+            
+            let hash_type = sd.combo_box_items.duplicates_hash_type.value;
+            let check_method = sd.combo_box_items.duplicates_check_method.value;
 
             let params = DuplicateFinderParameters::new(
                 check_method,
                 hash_type,
-                custom_settings.duplicate_hide_hard_links,
-                custom_settings.duplicate_use_prehash,
-                custom_settings.duplicate_minimal_hash_cache_size as u64,
-                custom_settings.duplicate_minimal_prehash_cache_size as u64,
-                custom_settings.duplicates_sub_name_case_sensitive,
+                sd.custom_settings.duplicate_hide_hard_links,
+                sd.custom_settings.duplicate_use_prehash,
+                sd.custom_settings.duplicate_minimal_hash_cache_size as u64,
+                sd.custom_settings.duplicate_minimal_prehash_cache_size as u64,
+                sd.custom_settings.duplicates_sub_name_case_sensitive,
             );
             let mut tool = DuplicateFinder::new(params);
 
-            set_common_settings(&mut tool, &custom_settings, &stop_flag);
-            tool.set_delete_outdated_cache(custom_settings.duplicate_delete_outdated_entries);
-            tool.search(&stop_flag, Some(&progress_sender));
-            let (critical, messages) = get_text_messages(&tool, &basic_settings);
+            set_common_settings(&mut tool, &sd.custom_settings, &sd.stop_flag);
+            tool.set_delete_outdated_cache(sd.custom_settings.duplicate_delete_outdated_entries);
+            tool.search(&sd.stop_flag, Some(&sd.progress_sender));
+            let (critical, messages) = get_text_messages(&tool, &sd.basic_settings);
 
             let mut vector;
             if tool.get_use_reference() {
@@ -218,10 +237,10 @@ fn scan_duplicates(
                 CheckingMethod::SizeName => (info.number_of_duplicated_files_by_size_name, info.number_of_groups_by_size_name, info.lost_space_by_size),
                 _ => unreachable!("invalid check method {:?}", tool.get_check_method()),
             };
-            shared_models.lock().unwrap().shared_duplication_state = Some(tool);
+            sd.shared_models.lock().unwrap().shared_duplication_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_duplicate_results(&app, vector, critical, messages, &scanning_time_str, duplicates_number, groups_number, lost_space);
+                write_duplicate_results(&app, vector, critical, messages, &scanning_time_str, duplicates_number, groups_number, lost_space, &sd.audio_player);
             })
         })
         .expect("Cannot start thread - not much we can do here");
@@ -235,6 +254,7 @@ fn write_duplicate_results(
     items_found: usize,
     groups: usize,
     lost_space: u64,
+    audio_player: &AudioPlayer,
 ) {
     let items = Rc::new(VecModel::default());
     for (ref_fe, vec_fe) in vector.into_iter().rev() {
@@ -277,6 +297,7 @@ fn write_duplicate_results(
             );
         }
     }
+    audio_player.play_scan_completed();
     app.global::<GuiState>().set_info_text(messages.into());
     reset_selection_at_end(app, ActiveTab::DuplicateFiles);
 }
@@ -299,38 +320,33 @@ fn prepare_data_model_duplicates(fe: &DuplicateEntry) -> (ModelRc<SharedString>,
 ////////////////////////////////////////// Empty Folders
 fn scan_empty_folders(
     a: Weak<MainWindow>,
-    progress_sender: Sender<ProgressData>,
-    stop_flag: Arc<AtomicBool>,
-    custom_settings: SettingsCustom,
-    basic_settings: BasicSettings,
-    combo_box_items: ComboBoxItems,
-    shared_models: Arc<Mutex<SharedModels>>,
+sd: ScanData
 ) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let _ = combo_box_items;
+            
             let mut tool = EmptyFolder::new();
-            set_common_settings(&mut tool, &custom_settings, &stop_flag);
-            tool.search(&stop_flag, Some(&progress_sender));
+            set_common_settings(&mut tool, &sd.custom_settings, &sd.stop_flag);
+            tool.search(&sd.stop_flag, Some(&sd.progress_sender));
 
             let mut vector = tool.get_empty_folder_list().values().cloned().collect::<Vec<_>>();
-            let (critical, messages) = get_text_messages(&tool, &basic_settings);
+            let (critical, messages) = get_text_messages(&tool, &sd.basic_settings);
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
             let info = tool.get_information();
             let scanning_time_str = format_time(info.scanning_time);
             let items_found = info.number_of_empty_folders;
-            shared_models.lock().unwrap().shared_empty_folders_state = Some(tool);
+            sd.shared_models.lock().unwrap().shared_empty_folders_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_empty_folders_results(&app, vector, critical, messages, &scanning_time_str, items_found);
+                write_empty_folders_results(&app, vector, critical, messages, &scanning_time_str, items_found, &sd.audio_player);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_empty_folders_results(app: &MainWindow, vector: Vec<FolderEntry>, critical: Option<String>, messages: String, scanning_time_str: &str, items_found: usize) {
+fn write_empty_folders_results(app: &MainWindow, vector: Vec<FolderEntry>, critical: Option<String>, messages: String, scanning_time_str: &str, items_found: usize, audio_player: &AudioPlayer) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_empty_folders(&fe);
@@ -342,6 +358,7 @@ fn write_empty_folders_results(app: &MainWindow, vector: Vec<FolderEntry>, criti
     } else {
         app.invoke_scan_ended(flk!("rust_found_empty_folders", items_found = items_found, time = scanning_time_str).into());
     }
+    audio_player.play_scan_completed();
     app.global::<GuiState>().set_info_text(messages.into());
     reset_selection_at_end(app, ActiveTab::EmptyFolders);
 }
@@ -359,26 +376,21 @@ fn prepare_data_model_empty_folders(fe: &FolderEntry) -> (ModelRc<SharedString>,
 ////////////////////////////////////////// Big files
 fn scan_big_files(
     a: Weak<MainWindow>,
-    progress_sender: Sender<ProgressData>,
-    stop_flag: Arc<AtomicBool>,
-    custom_settings: SettingsCustom,
-    basic_settings: BasicSettings,
-    combo_box_items: ComboBoxItems,
-    shared_models: Arc<Mutex<SharedModels>>,
+sd: ScanData
 ) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let _ = combo_box_items;
-            let big_files_mode = combo_box_items.biggest_files_method.value;
-            let params = BigFileParameters::new(custom_settings.biggest_files_sub_number_of_files as usize, big_files_mode);
+            
+            let big_files_mode = sd.combo_box_items.biggest_files_method.value;
+            let params = BigFileParameters::new(sd.custom_settings.biggest_files_sub_number_of_files as usize, big_files_mode);
             let mut tool = BigFile::new(params);
 
-            set_common_settings(&mut tool, &custom_settings, &stop_flag);
-            tool.search(&stop_flag, Some(&progress_sender));
+            set_common_settings(&mut tool, &sd.custom_settings, &sd.stop_flag);
+            tool.search(&sd.stop_flag, Some(&sd.progress_sender));
 
             let mut vector = tool.get_big_files().clone();
-            let (critical, messages) = get_text_messages(&tool, &basic_settings);
+            let (critical, messages) = get_text_messages(&tool, &sd.basic_settings);
 
             if big_files_mode == SearchMode::BiggestFiles {
                 vector.par_sort_unstable_by_key(|fe| u64::MAX - fe.size);
@@ -390,15 +402,15 @@ fn scan_big_files(
             let scanning_time_str = format_time(info.scanning_time);
             let items_found = info.number_of_real_files;
             let files_size = tool.get_big_files().iter().map(|f| f.size).sum::<u64>();
-            shared_models.lock().unwrap().shared_big_files_state = Some(tool);
+            sd.shared_models.lock().unwrap().shared_big_files_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_big_files_results(&app, vector, critical, messages, &scanning_time_str, items_found, files_size);
+                write_big_files_results(&app, vector, critical, messages, &scanning_time_str, items_found, files_size, &sd.audio_player);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_big_files_results(app: &MainWindow, vector: Vec<FileEntry>, critical: Option<String>, messages: String, scanning_time_str: &str, items_found: usize, files_size: u64) {
+fn write_big_files_results(app: &MainWindow, vector: Vec<FileEntry>, critical: Option<String>, messages: String, scanning_time_str: &str, items_found: usize, files_size: u64, audio_player: &AudioPlayer) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_big_files(&fe);
@@ -418,6 +430,7 @@ fn write_big_files_results(app: &MainWindow, vector: Vec<FileEntry>, critical: O
             .into(),
         );
     }
+    audio_player.play_scan_completed();
     app.global::<GuiState>().set_info_text(messages.into());
     reset_selection_at_end(app, ActiveTab::BigFiles);
 }
@@ -441,38 +454,33 @@ fn prepare_data_model_big_files(fe: &FileEntry) -> (ModelRc<SharedString>, Model
 ///////////////////////////////// Empty Files
 fn scan_empty_files(
     a: Weak<MainWindow>,
-    progress_sender: Sender<ProgressData>,
-    stop_flag: Arc<AtomicBool>,
-    custom_settings: SettingsCustom,
-    basic_settings: BasicSettings,
-    combo_box_items: ComboBoxItems,
-    shared_models: Arc<Mutex<SharedModels>>,
+sd: ScanData
 ) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let _ = combo_box_items;
+            
             let mut tool = EmptyFiles::new();
-            set_common_settings(&mut tool, &custom_settings, &stop_flag);
-            tool.search(&stop_flag, Some(&progress_sender));
+            set_common_settings(&mut tool, &sd.custom_settings, &sd.stop_flag);
+            tool.search(&sd.stop_flag, Some(&sd.progress_sender));
 
             let mut vector = tool.get_empty_files().clone();
-            let (critical, messages) = get_text_messages(&tool, &basic_settings);
+            let (critical, messages) = get_text_messages(&tool, &sd.basic_settings);
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
             let info = tool.get_information();
             let scanning_time_str = format_time(info.scanning_time);
             let items_found = info.number_of_empty_files;
-            shared_models.lock().unwrap().shared_empty_files_state = Some(tool);
+            sd.shared_models.lock().unwrap().shared_empty_files_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_empty_files_results(&app, vector, critical, messages, &scanning_time_str, items_found);
+                write_empty_files_results(&app, vector, critical, messages, &scanning_time_str, items_found, &sd.audio_player);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_empty_files_results(app: &MainWindow, vector: Vec<FileEntry>, critical: Option<String>, messages: String, scanning_time_str: &str, items_found: usize) {
+fn write_empty_files_results(app: &MainWindow, vector: Vec<FileEntry>, critical: Option<String>, messages: String, scanning_time_str: &str, items_found: usize, audio_player: &AudioPlayer) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_empty_files(&fe);
@@ -484,6 +492,7 @@ fn write_empty_files_results(app: &MainWindow, vector: Vec<FileEntry>, critical:
     } else {
         app.invoke_scan_ended(flk!("rust_found_empty_files", items_found = items_found, time = scanning_time_str).into());
     }
+    audio_player.play_scan_completed();
     app.global::<GuiState>().set_info_text(messages.into());
     reset_selection_at_end(app, ActiveTab::EmptyFiles);
 }
@@ -502,41 +511,36 @@ fn prepare_data_model_empty_files(fe: &FileEntry) -> (ModelRc<SharedString>, Mod
 
 fn scan_similar_images(
     a: Weak<MainWindow>,
-    progress_sender: Sender<ProgressData>,
-    stop_flag: Arc<AtomicBool>,
-    custom_settings: SettingsCustom,
-    basic_settings: BasicSettings,
-    combo_box_items: ComboBoxItems,
-    shared_models: Arc<Mutex<SharedModels>>,
+sd: ScanData
 ) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let _ = combo_box_items;
-            let hash_alg = combo_box_items.image_hash_alg.value;
-            let resize_algorithm = combo_box_items.resize_algorithm.value;
-            let hash_size = custom_settings
+            
+            let hash_alg = sd.combo_box_items.image_hash_alg.value;
+            let resize_algorithm = sd.combo_box_items.resize_algorithm.value;
+            let hash_size = sd.custom_settings
                 .similar_images_sub_hash_size
                 .parse()
-                .unwrap_or_else(|_| panic!("Cannot parse hash size {}", custom_settings.similar_images_sub_hash_size));
+                .unwrap_or_else(|_| panic!("Cannot parse hash size {}", sd.custom_settings.similar_images_sub_hash_size));
 
             let params = SimilarImagesParameters::new(
-                custom_settings.similar_images_sub_similarity as u32,
+                sd.custom_settings.similar_images_sub_similarity as u32,
                 hash_size,
                 hash_alg,
                 resize_algorithm,
-                custom_settings.similar_images_sub_ignore_same_size,
-                custom_settings.similar_images_hide_hard_links,
+                sd.custom_settings.similar_images_sub_ignore_same_size,
+                sd.custom_settings.similar_images_hide_hard_links,
             );
             let mut tool = SimilarImages::new(params);
 
-            set_common_settings(&mut tool, &custom_settings, &stop_flag);
+            set_common_settings(&mut tool, &sd.custom_settings, &sd.stop_flag);
 
-            tool.set_delete_outdated_cache(custom_settings.similar_images_delete_outdated_entries);
+            tool.set_delete_outdated_cache(sd.custom_settings.similar_images_delete_outdated_entries);
 
-            tool.search(&stop_flag, Some(&progress_sender));
+            tool.search(&sd.stop_flag, Some(&sd.progress_sender));
 
-            let (critical, messages) = get_text_messages(&tool, &basic_settings);
+            let (critical, messages) = get_text_messages(&tool, &sd.basic_settings);
 
             let mut vector: Vec<_> = if tool.get_use_reference() {
                 tool.get_similar_images_referenced()
@@ -557,10 +561,10 @@ fn scan_similar_images(
             let scanning_time_str = format_time(info.scanning_time);
             let items_found = info.number_of_duplicates;
             let groups = info.number_of_groups;
-            shared_models.lock().unwrap().shared_similar_images_state = Some(tool);
+            sd.shared_models.lock().unwrap().shared_similar_images_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_similar_images_results(&app, vector, critical, messages, hash_size, &scanning_time_str, items_found, groups);
+                write_similar_images_results(&app, vector, critical, messages, hash_size, &scanning_time_str, items_found, groups, &sd.audio_player);
             })
         })
         .expect("Cannot start thread - not much we can do here");
@@ -574,6 +578,7 @@ fn write_similar_images_results(
     scanning_time_str: &str,
     items_found: usize,
     groups: usize,
+    audio_player: &AudioPlayer,
 ) {
     let items = Rc::new(VecModel::default());
     for (ref_fe, vec_fe) in vector {
@@ -595,6 +600,7 @@ fn write_similar_images_results(
     } else {
         app.invoke_scan_ended(flk!("rust_found_similar_images", items_found = items_found, groups = groups, time = scanning_time_str).into());
     }
+    audio_player.play_scan_completed();
     app.global::<GuiState>().set_info_text(messages.into());
     reset_selection_at_end(app, ActiveTab::SimilarImages);
 }
@@ -628,36 +634,31 @@ fn prepare_data_model_similar_images(fe: &ImagesEntry, hash_size: u8) -> (ModelR
 
 fn scan_similar_videos(
     a: Weak<MainWindow>,
-    progress_sender: Sender<ProgressData>,
-    stop_flag: Arc<AtomicBool>,
-    custom_settings: SettingsCustom,
-    basic_settings: BasicSettings,
-    combo_box_items: ComboBoxItems,
-    shared_models: Arc<Mutex<SharedModels>>,
+sd: ScanData
 ) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let _ = combo_box_items;
+            
             let params = SimilarVideosParameters::new(
-                custom_settings.similar_videos_sub_similarity,
-                custom_settings.similar_videos_sub_ignore_same_size,
-                custom_settings.similar_videos_hide_hard_links,
-                custom_settings.similar_videos_skip_forward_amount,
-                custom_settings.similar_videos_vid_hash_duration,
-                combo_box_items.videos_crop_detect.value,
-                custom_settings.video_thumbnails_preview,
-                custom_settings.video_thumbnails_percentage,
-                custom_settings.video_thumbnails_generate_grid,
+                sd.custom_settings.similar_videos_sub_similarity,
+                sd.custom_settings.similar_videos_sub_ignore_same_size,
+                sd.custom_settings.similar_videos_hide_hard_links,
+                sd.custom_settings.similar_videos_skip_forward_amount,
+                sd.custom_settings.similar_videos_vid_hash_duration,
+                sd.combo_box_items.videos_crop_detect.value,
+                sd.custom_settings.video_thumbnails_preview,
+                sd.custom_settings.video_thumbnails_percentage,
+                sd.custom_settings.video_thumbnails_generate_grid,
             );
             let mut tool = SimilarVideos::new(params);
-            set_common_settings(&mut tool, &custom_settings, &stop_flag);
+            set_common_settings(&mut tool, &sd.custom_settings, &sd.stop_flag);
 
-            tool.set_delete_outdated_cache(custom_settings.similar_videos_delete_outdated_entries);
+            tool.set_delete_outdated_cache(sd.custom_settings.similar_videos_delete_outdated_entries);
 
-            tool.search(&stop_flag, Some(&progress_sender));
+            tool.search(&sd.stop_flag, Some(&sd.progress_sender));
 
-            let (critical, messages) = get_text_messages(&tool, &basic_settings);
+            let (critical, messages) = get_text_messages(&tool, &sd.basic_settings);
 
             let mut vector: Vec<_> = if tool.get_use_reference() {
                 tool.get_similar_videos_referenced()
@@ -681,10 +682,10 @@ fn scan_similar_videos(
             let scanning_time_str = format_time(info.scanning_time);
             let items_found = info.number_of_duplicates;
             let groups = info.number_of_groups;
-            shared_models.lock().unwrap().shared_similar_videos_state = Some(tool);
+            sd.shared_models.lock().unwrap().shared_similar_videos_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_similar_videos_results(&app, vector, critical, messages, &scanning_time_str, items_found, groups);
+                write_similar_videos_results(&app, vector, critical, messages, &scanning_time_str, items_found, groups, &sd.audio_player);
             })
         })
         .expect("Cannot start thread - not much we can do here");
@@ -697,6 +698,7 @@ fn write_similar_videos_results(
     scanning_time_str: &str,
     items_found: usize,
     groups: usize,
+    audio_player: &AudioPlayer,
 ) {
     let items = Rc::new(VecModel::default());
     for (ref_fe, vec_fe) in vector {
@@ -718,6 +720,7 @@ fn write_similar_videos_results(
     } else {
         app.invoke_scan_ended(flk!("rust_found_similar_videos", items_found = items_found, groups = groups, time = scanning_time_str).into());
     }
+    audio_player.play_scan_completed();
     app.global::<GuiState>().set_info_text(messages.into());
     reset_selection_at_end(app, ActiveTab::SimilarVideos);
 }
@@ -769,34 +772,29 @@ fn prepare_data_model_similar_videos(fe: &VideosEntry) -> (ModelRc<SharedString>
 ////////////////////////////////////////// Similar Music
 fn scan_similar_music(
     a: Weak<MainWindow>,
-    progress_sender: Sender<ProgressData>,
-    stop_flag: Arc<AtomicBool>,
-    custom_settings: SettingsCustom,
-    basic_settings: BasicSettings,
-    combo_box_items: ComboBoxItems,
-    shared_models: Arc<Mutex<SharedModels>>,
+sd: ScanData
 ) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let _ = combo_box_items;
+            
             let mut music_similarity: MusicSimilarity = MusicSimilarity::NONE;
-            if custom_settings.similar_music_sub_title {
+            if sd.custom_settings.similar_music_sub_title {
                 music_similarity |= MusicSimilarity::TRACK_TITLE;
             }
-            if custom_settings.similar_music_sub_artist {
+            if sd.custom_settings.similar_music_sub_artist {
                 music_similarity |= MusicSimilarity::TRACK_ARTIST;
             }
-            if custom_settings.similar_music_sub_bitrate {
+            if sd.custom_settings.similar_music_sub_bitrate {
                 music_similarity |= MusicSimilarity::BITRATE;
             }
-            if custom_settings.similar_music_sub_length {
+            if sd.custom_settings.similar_music_sub_length {
                 music_similarity |= MusicSimilarity::LENGTH;
             }
-            if custom_settings.similar_music_sub_year {
+            if sd.custom_settings.similar_music_sub_year {
                 music_similarity |= MusicSimilarity::YEAR;
             }
-            if custom_settings.similar_music_sub_genre {
+            if sd.custom_settings.similar_music_sub_genre {
                 music_similarity |= MusicSimilarity::GENRE;
             }
 
@@ -808,21 +806,21 @@ fn scan_similar_music(
                 return Ok(());
             }
 
-            let audio_check_type = combo_box_items.audio_check_type.value;
+            let audio_check_type = sd.combo_box_items.audio_check_type.value;
             let params = SameMusicParameters::new(
                 music_similarity,
-                custom_settings.similar_music_sub_approximate_comparison,
+                sd.custom_settings.similar_music_sub_approximate_comparison,
                 audio_check_type,
-                custom_settings.similar_music_sub_minimal_fragment_duration_value,
-                custom_settings.similar_music_sub_maximum_difference_value as f64,
-                custom_settings.similar_music_compare_fingerprints_only_with_similar_titles,
+                sd.custom_settings.similar_music_sub_minimal_fragment_duration_value,
+                sd.custom_settings.similar_music_sub_maximum_difference_value as f64,
+                sd.custom_settings.similar_music_compare_fingerprints_only_with_similar_titles,
             );
             let mut tool = SameMusic::new(params);
-            set_common_settings(&mut tool, &custom_settings, &stop_flag);
+            set_common_settings(&mut tool, &sd.custom_settings, &sd.stop_flag);
 
-            tool.search(&stop_flag, Some(&progress_sender));
+            tool.search(&sd.stop_flag, Some(&sd.progress_sender));
 
-            let (critical, messages) = get_text_messages(&tool, &basic_settings);
+            let (critical, messages) = get_text_messages(&tool, &sd.basic_settings);
 
             let mut vector: Vec<_> = if tool.get_use_reference() {
                 tool.get_similar_music_referenced()
@@ -843,7 +841,7 @@ fn scan_similar_music(
             let scanning_time_str = format_time(info.scanning_time);
             let items_found = info.number_of_duplicates;
             let groups = info.number_of_groups;
-            shared_models.lock().unwrap().shared_same_music_state = Some(tool);
+            sd.shared_models.lock().unwrap().shared_same_music_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
                 write_similar_music_results(&app, vector, critical, messages, &scanning_time_str, items_found, groups);
@@ -907,31 +905,25 @@ fn prepare_data_model_similar_music(fe: &MusicEntry) -> (ModelRc<SharedString>, 
 // Invalid Symlinks
 fn scan_invalid_symlinks(
     a: Weak<MainWindow>,
-    progress_sender: Sender<ProgressData>,
-    stop_flag: Arc<AtomicBool>,
-    custom_settings: SettingsCustom,
-    basic_settings: BasicSettings,
-    combo_box_items: ComboBoxItems,
-    shared_models: Arc<Mutex<SharedModels>>,
+sd: ScanData
 ) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let _ = combo_box_items;
             let mut tool = InvalidSymlinks::new();
-            set_common_settings(&mut tool, &custom_settings, &stop_flag);
+            set_common_settings(&mut tool, &sd.custom_settings, &sd.stop_flag);
 
-            tool.search(&stop_flag, Some(&progress_sender));
+            tool.search(&sd.stop_flag, Some(&sd.progress_sender));
 
             let mut vector = tool.get_invalid_symlinks().clone();
-            let (critical, messages) = get_text_messages(&tool, &basic_settings);
+            let (critical, messages) = get_text_messages(&tool, &sd.basic_settings);
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
             let info = tool.get_information();
             let scanning_time_str = format_time(info.scanning_time);
             let items_found = info.number_of_invalid_symlinks;
-            shared_models.lock().unwrap().shared_same_invalid_symlinks = Some(tool);
+            sd.shared_models.lock().unwrap().shared_same_invalid_symlinks = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
                 write_invalid_symlinks_results(&app, vector, critical, messages, &scanning_time_str, items_found);
@@ -973,31 +965,26 @@ fn prepare_data_model_invalid_symlinks(fe: &SymlinksFileEntry) -> (ModelRc<Share
 ////////////////////////////////////////// Temporary Files
 fn scan_temporary_files(
     a: Weak<MainWindow>,
-    progress_sender: Sender<ProgressData>,
-    stop_flag: Arc<AtomicBool>,
-    custom_settings: SettingsCustom,
-    basic_settings: BasicSettings,
-    combo_box_items: ComboBoxItems,
-    shared_models: Arc<Mutex<SharedModels>>,
+sd: ScanData
 ) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let _ = combo_box_items;
+            
             let mut tool = Temporary::new();
-            set_common_settings(&mut tool, &custom_settings, &stop_flag);
+            set_common_settings(&mut tool, &sd.custom_settings, &sd.stop_flag);
 
-            tool.search(&stop_flag, Some(&progress_sender));
+            tool.search(&sd.stop_flag, Some(&sd.progress_sender));
 
             let mut vector = tool.get_temporary_files().clone();
-            let (critical, messages) = get_text_messages(&tool, &basic_settings);
+            let (critical, messages) = get_text_messages(&tool, &sd.basic_settings);
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
             let info = tool.get_information();
             let scanning_time_str = format_time(info.scanning_time);
             let items_found = info.number_of_temporary_files;
-            shared_models.lock().unwrap().shared_temporary_files_state = Some(tool);
+            sd.shared_models.lock().unwrap().shared_temporary_files_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
                 write_temporary_files_results(&app, vector, critical, messages, &scanning_time_str, items_found);
@@ -1034,31 +1021,26 @@ fn prepare_data_model_temporary_files(fe: &TemporaryFileEntry) -> (ModelRc<Share
 ////////////////////////////////////////// Broken Files
 fn scan_broken_files(
     a: Weak<MainWindow>,
-    progress_sender: Sender<ProgressData>,
-    stop_flag: Arc<AtomicBool>,
-    custom_settings: SettingsCustom,
-    basic_settings: BasicSettings,
-    combo_box_items: ComboBoxItems,
-    shared_models: Arc<Mutex<SharedModels>>,
+sd: ScanData
 ) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let _ = combo_box_items;
+            
             let mut checked_types: CheckedTypes = CheckedTypes::NONE;
-            if custom_settings.broken_files_sub_audio {
+            if sd.custom_settings.broken_files_sub_audio {
                 checked_types |= CheckedTypes::AUDIO;
             }
-            if custom_settings.broken_files_sub_pdf {
+            if sd.custom_settings.broken_files_sub_pdf {
                 checked_types |= CheckedTypes::PDF;
             }
-            if custom_settings.broken_files_sub_image {
+            if sd.custom_settings.broken_files_sub_image {
                 checked_types |= CheckedTypes::IMAGE;
             }
-            if custom_settings.broken_files_sub_archive {
+            if sd.custom_settings.broken_files_sub_archive {
                 checked_types |= CheckedTypes::ARCHIVE;
             }
-            if custom_settings.broken_files_sub_video {
+            if sd.custom_settings.broken_files_sub_video {
                 checked_types |= CheckedTypes::VIDEO;
             }
 
@@ -1072,12 +1054,12 @@ fn scan_broken_files(
 
             let params = BrokenFilesParameters::new(checked_types);
             let mut tool = BrokenFiles::new(params);
-            set_common_settings(&mut tool, &custom_settings, &stop_flag);
+            set_common_settings(&mut tool, &sd.custom_settings, &sd.stop_flag);
 
-            tool.search(&stop_flag, Some(&progress_sender));
+            tool.search(&sd.stop_flag, Some(&sd.progress_sender));
 
             let mut vector = tool.get_broken_files().clone();
-            let (critical, messages) = get_text_messages(&tool, &basic_settings);
+            let (critical, messages) = get_text_messages(&tool, &sd.basic_settings);
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
@@ -1085,7 +1067,7 @@ fn scan_broken_files(
             let scanning_time_str = format_time(info.scanning_time);
             let items_found = info.number_of_broken_files;
             let size = tool.get_broken_files().iter().map(|e| e.size).sum::<u64>();
-            shared_models.lock().unwrap().shared_broken_files_state = Some(tool);
+            sd.shared_models.lock().unwrap().shared_broken_files_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
                 write_broken_files_results(&app, vector, critical, messages, &scanning_time_str, items_found, size);
@@ -1136,31 +1118,26 @@ fn prepare_data_model_broken_files(fe: &BrokenEntry) -> (ModelRc<SharedString>, 
 ////////////////////////////////////////// Bad Extensions
 fn scan_bad_extensions(
     a: Weak<MainWindow>,
-    progress_sender: Sender<ProgressData>,
-    stop_flag: Arc<AtomicBool>,
-    custom_settings: SettingsCustom,
-    basic_settings: BasicSettings,
-    combo_box_items: ComboBoxItems,
-    shared_models: Arc<Mutex<SharedModels>>,
+sd: ScanData
 ) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let _ = combo_box_items;
+            
             let params = BadExtensionsParameters::new();
             let mut tool = BadExtensions::new(params);
-            set_common_settings(&mut tool, &custom_settings, &stop_flag);
-            tool.search(&stop_flag, Some(&progress_sender));
+            set_common_settings(&mut tool, &sd.custom_settings, &sd.stop_flag);
+            tool.search(&sd.stop_flag, Some(&sd.progress_sender));
 
             let mut vector = tool.get_bad_extensions_files().clone();
-            let (critical, messages) = get_text_messages(&tool, &basic_settings);
+            let (critical, messages) = get_text_messages(&tool, &sd.basic_settings);
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
             let info = tool.get_information();
             let scanning_time_str = format_time(info.scanning_time);
             let items_found = info.number_of_files_with_bad_extension;
-            shared_models.lock().unwrap().shared_bad_extensions_state = Some(tool);
+            sd.shared_models.lock().unwrap().shared_bad_extensions_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
                 write_bad_extensions_results(&app, vector, critical, messages, &scanning_time_str, items_found);
@@ -1203,19 +1180,14 @@ fn prepare_data_model_bad_extensions(fe: &BadFileEntry) -> (ModelRc<SharedString
 ////////////////////////////////////////// Exif Remover
 fn scan_exif_remover(
     a: Weak<MainWindow>,
-    progress_sender: Sender<ProgressData>,
-    stop_flag: Arc<AtomicBool>,
-    custom_settings: SettingsCustom,
-    basic_settings: BasicSettings,
-    combo_box_items: ComboBoxItems,
-    shared_models: Arc<Mutex<SharedModels>>,
+sd: ScanData
 ) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let _ = combo_box_items;
+            
             // Parse ignored tags from comma-separated string, trimming whitespace
-            let ignored_tags: Vec<String> = custom_settings
+            let ignored_tags: Vec<String> = sd.custom_settings
                 .ignored_exif_tags
                 .split(',')
                 .map(|s| s.trim().to_string())
@@ -1224,18 +1196,18 @@ fn scan_exif_remover(
 
             let params = ExifRemoverParameters::new(ignored_tags);
             let mut tool = ExifRemover::new(params);
-            set_common_settings(&mut tool, &custom_settings, &stop_flag);
-            tool.search(&stop_flag, Some(&progress_sender));
+            set_common_settings(&mut tool, &sd.custom_settings, &sd.stop_flag);
+            tool.search(&sd.stop_flag, Some(&sd.progress_sender));
 
             let mut vector = tool.get_exif_files().clone();
-            let (critical, messages) = get_text_messages(&tool, &basic_settings);
+            let (critical, messages) = get_text_messages(&tool, &sd.basic_settings);
 
             vector.par_sort_unstable_by(|a, b| b.exif_tags.len().cmp(&a.exif_tags.len()));
 
             let info = tool.get_information();
             let scanning_time_str = format_time(info.scanning_time);
             let items_found = info.number_of_files_with_exif;
-            shared_models.lock().unwrap().shared_exif_remover_state = Some(tool);
+            sd.shared_models.lock().unwrap().shared_exif_remover_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
                 write_exif_remover_results(&app, vector, critical, messages, &scanning_time_str, items_found);
@@ -1289,54 +1261,49 @@ fn prepare_data_model_exif_remover(fe: &ExifEntry) -> (ModelRc<SharedString>, Mo
 ////////////////////////////////////////// Video Optimizer
 fn scan_video_optimizer(
     a: Weak<MainWindow>,
-    progress_sender: Sender<ProgressData>,
-    stop_flag: Arc<AtomicBool>,
-    custom_settings: SettingsCustom,
-    basic_settings: BasicSettings,
-    combo_box_items: ComboBoxItems,
-    shared_models: Arc<Mutex<SharedModels>>,
+sd: ScanData
 ) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let _ = combo_box_items;
-            let video_optimizer_mode = combo_box_items.video_optimizer_mode.value;
+            
+            let video_optimizer_mode = sd.combo_box_items.video_optimizer_mode.value;
             let params = if video_optimizer_mode == VideoOptimizerMode::VideoCrop {
-                let crop_detect = combo_box_items.video_optimizer_crop_type.value;
+                let crop_detect = sd.combo_box_items.video_optimizer_crop_type.value;
                 let mut params = VideoCropParams::with_custom_params(
                     crop_detect,
-                    custom_settings.video_optimizer_black_pixel_threshold,
-                    custom_settings.video_optimizer_black_bar_min_percentage,
-                    custom_settings.video_optimizer_max_samples,
-                    custom_settings.video_optimizer_min_crop_size,
+                    sd.custom_settings.video_optimizer_black_pixel_threshold,
+                    sd.custom_settings.video_optimizer_black_bar_min_percentage,
+                    sd.custom_settings.video_optimizer_max_samples,
+                    sd.custom_settings.video_optimizer_min_crop_size,
                 );
-                params.generate_thumbnails = custom_settings.video_thumbnails_generate;
-                params.thumbnail_video_percentage_from_start = custom_settings.video_thumbnails_percentage;
-                params.generate_thumbnail_grid_instead_of_single = custom_settings.video_thumbnails_generate_grid;
+                params.generate_thumbnails = sd.custom_settings.video_thumbnails_generate;
+                params.thumbnail_video_percentage_from_start = sd.custom_settings.video_thumbnails_percentage;
+                params.generate_thumbnail_grid_instead_of_single = sd.custom_settings.video_thumbnails_generate_grid;
                 VideoOptimizerParameters::VideoCrop(params)
             } else {
                 let mut params = VideoTranscodeParams::new();
-                let excluded_codecs: Vec<String> = custom_settings
+                let excluded_codecs: Vec<String> = sd.custom_settings
                     .video_optimizer_excluded_codecs
                     .split(',')
                     .map(|s| s.trim().to_lowercase())
                     .filter(|s| !s.is_empty())
                     .collect();
                 params.excluded_codecs = excluded_codecs;
-                params.generate_thumbnails = custom_settings.video_thumbnails_generate;
-                params.thumbnail_video_percentage_from_start = custom_settings.video_thumbnails_percentage;
-                params.generate_thumbnail_grid_instead_of_single = custom_settings.video_thumbnails_generate_grid;
+                params.generate_thumbnails = sd.custom_settings.video_thumbnails_generate;
+                params.thumbnail_video_percentage_from_start = sd.custom_settings.video_thumbnails_percentage;
+                params.generate_thumbnail_grid_instead_of_single = sd.custom_settings.video_thumbnails_generate_grid;
                 VideoOptimizerParameters::VideoTranscode(params)
             };
 
             let is_crop_mode = matches!(params, VideoOptimizerParameters::VideoCrop(_));
 
             let mut tool = VideoOptimizer::new(params);
-            set_common_settings(&mut tool, &custom_settings, &stop_flag);
+            set_common_settings(&mut tool, &sd.custom_settings, &sd.stop_flag);
 
-            tool.search(&stop_flag, Some(&progress_sender));
+            tool.search(&sd.stop_flag, Some(&sd.progress_sender));
 
-            let (critical, messages) = get_text_messages(&tool, &basic_settings);
+            let (critical, messages) = get_text_messages(&tool, &sd.basic_settings);
 
             let info = tool.get_information();
             let scanning_time_str = format_time(info.scanning_time);
@@ -1344,14 +1311,14 @@ fn scan_video_optimizer(
 
             if is_crop_mode {
                 let video_crop_entries = tool.get_video_crop_entries().clone();
-                shared_models.lock().unwrap().shared_video_optimizer_state = Some(tool);
+                sd.shared_models.lock().unwrap().shared_video_optimizer_state = Some(tool);
 
                 a.upgrade_in_event_loop(move |app| {
                     write_video_optimizer_crop_results(&app, video_crop_entries, critical, messages, &scanning_time_str, items_found);
                 })
             } else {
                 let video_transcode_entries = tool.get_video_transcode_entries().clone();
-                shared_models.lock().unwrap().shared_video_optimizer_state = Some(tool);
+                sd.shared_models.lock().unwrap().shared_video_optimizer_state = Some(tool);
 
                 a.upgrade_in_event_loop(move |app| {
                     write_video_optimizer_transcode_results(&app, video_transcode_entries, critical, messages, &scanning_time_str, items_found);

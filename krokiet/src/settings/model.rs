@@ -220,6 +220,11 @@ pub struct SettingsCustom {
     pub popup_crop_video_reencode: bool,
     #[serde(default = "default_video_optimizer_video_quality")]
     pub popup_crop_video_quality: u32,
+
+    // Audio
+    #[cfg(feature = "audio")]
+    #[serde(default = "ttrue")]
+    pub play_audio_on_scan_completion: bool,
 }
 
 impl Default for SettingsCustom {

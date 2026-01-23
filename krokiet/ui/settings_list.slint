@@ -520,6 +520,16 @@ export component SettingsList inherits VerticalLayout {
 
 
             HeaderText {
+                text <=> Translations.settings_audio_header_text;
+            }
+
+            CheckBoxComponent {
+                name <=> Translations.settings_play_audio_on_scan_completion_text;
+                model <=> Settings.play_audio_on_scan_completion;
+            }
+
+
+            HeaderText {
                 text <=> Translations.settings_cache_header_text;
             }
 

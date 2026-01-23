@@ -44,6 +44,7 @@ use crate::connect_translation::connect_translations;
 use crate::settings::{connect_changing_settings_preset, create_default_settings_files, load_initial_settings_from_file, save_all_settings_to_file, set_initial_settings_to_gui};
 use crate::shared_models::SharedModels;
 
+mod audio_player;
 mod clear_outdated_video_thumbnails;
 mod common;
 mod connect_clean_cache;
@@ -110,6 +111,9 @@ fn main() {
 
     let shared_models = SharedModels::new_shared();
 
+    // Create audio player for scan completion notifications
+    let audio_player = Arc::new(crate::audio_player::AudioPlayer::new());
+
     // Disabled for now, due invalid settings model at start
     // set_initial_gui_infos(&app);
 
@@ -117,7 +121,7 @@ fn main() {
     set_initial_settings_to_gui(&app, &base_settings, &custom_settings, cli_args, preset_to_load);
 
     connect_delete_button(&app, progress_sender.clone(), stop_flag.clone());
-    connect_scan_button(&app, progress_sender.clone(), stop_flag.clone(), Arc::clone(&shared_models));
+    connect_scan_button(&app, progress_sender.clone(), stop_flag.clone(), Arc::clone(&shared_models), Arc::clone(&audio_player));
     connect_stop_button(&app, stop_flag.clone());
     connect_open_items(&app);
     connect_progress_gathering(&app, progress_receiver);
