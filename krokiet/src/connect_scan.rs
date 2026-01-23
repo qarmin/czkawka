@@ -1537,8 +1537,8 @@ where
     component.set_recursive_search(custom_settings.recursive_search);
     component.set_minimal_file_size(custom_settings.minimum_file_size as u64 * 1024);
     component.set_maximal_file_size(custom_settings.maximum_file_size as u64 * 1024);
-    component.set_allowed_extensions(custom_settings.allowed_extensions.clone());
-    component.set_excluded_extensions(custom_settings.excluded_extensions.clone());
+    component.set_allowed_extensions(custom_settings.allowed_extensions.split('n').map(str::to_string).collect());
+    component.set_excluded_extensions(custom_settings.excluded_extensions.split('n').map(str::to_string).collect());
     component.set_excluded_items(custom_settings.excluded_items.split(',').map(str::to_string).collect());
     component.set_exclude_other_filesystems(custom_settings.ignore_other_file_systems);
     component.set_use_cache(custom_settings.use_cache);

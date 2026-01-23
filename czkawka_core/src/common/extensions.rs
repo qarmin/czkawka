@@ -2,6 +2,7 @@ use std::ffi::OsStr;
 
 use indexmap::IndexSet;
 
+use crate::common::consts::{AUDIO_FILES_EXTENSIONS, IMAGE_RS_EXTENSIONS, TEXT_FILES_EXTENSIONS, VIDEO_FILES_EXTENSIONS};
 use crate::flc;
 use crate::helpers::messages::Messages;
 
@@ -16,53 +17,49 @@ impl Extensions {
         Default::default()
     }
 
-    pub(crate) fn filter_extensions(mut file_extensions: String) -> (IndexSet<String>, Messages) {
+    pub(crate) fn filter_extensions(file_extensions: Vec<String>) -> (IndexSet<String>, Messages) {
         let mut messages = Messages::new();
-        let mut extensions_hashset = IndexSet::new();
 
-        if file_extensions.trim().is_empty() {
-            return (Default::default(), messages);
-        }
-        file_extensions = file_extensions.replace("IMAGE", "jpg,kra,gif,png,bmp,tiff,hdr,svg");
-        file_extensions = file_extensions.replace("VIDEO", "mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts");
-        file_extensions = file_extensions.replace("MUSIC", "mp3,flac,ogg,tta,wma,webm");
-        file_extensions = file_extensions.replace("TEXT", "txt,doc,docx,odt,rtf");
+        let extensions_hashset: IndexSet<String> = file_extensions
+            .into_iter()
+            .flat_map(|e| match e.trim().trim_start_matches(".").to_lowercase().as_str() {
+                "image" => IMAGE_RS_EXTENSIONS.iter().map(|s| s.to_string()).collect(),
+                "video" => VIDEO_FILES_EXTENSIONS.iter().map(|s| s.to_string()).collect(),
+                "music" => AUDIO_FILES_EXTENSIONS.iter().map(|s| s.to_string()).collect(),
+                "text" => TEXT_FILES_EXTENSIONS.iter().map(|s| s.to_string()).collect(),
+                _ => vec![e],
+            })
+            .filter_map(|extension| {
+                let e = extension.trim().trim_start_matches(".").to_lowercase();
+                if e.is_empty() {
+                    return None;
+                }
 
-        let extensions: Vec<String> = file_extensions.split(',').map(str::trim).map(String::from).collect();
-        for mut extension in extensions {
-            if extension.is_empty() || extension.replace(['.', ' '], "").trim().is_empty() {
-                continue;
-            }
+                if e.contains(' ') {
+                    messages
+                        .warnings
+                        .push(format!("{extension} is not a valid extension because it contains empty space inside"));
+                    return None;
+                }
+                if e.contains('.') {
+                    messages.warnings.push(format!("{extension} is not a valid extension because it contains dot inside"));
+                    return None;
+                }
+                Some(e)
+            })
+            .collect();
 
-            if extension.starts_with('.') {
-                extension = extension.chars().skip(1).collect::<String>();
-            }
-
-            if extension.contains('.') {
-                messages.warnings.push(format!("{extension} is not a valid extension because it contains a dot inside"));
-                continue;
-            }
-
-            if extension.contains(' ') {
-                messages
-                    .warnings
-                    .push(format!("{extension} is not a valid extension because it contains empty space inside"));
-                continue;
-            }
-
-            extensions_hashset.insert(extension);
-        }
         (extensions_hashset, messages)
     }
 
-    pub(crate) fn set_allowed_extensions(&mut self, allowed_extensions: String) -> Messages {
+    pub(crate) fn set_allowed_extensions(&mut self, allowed_extensions: Vec<String>) -> Messages {
         let (extensions, messages) = Self::filter_extensions(allowed_extensions);
 
         self.allowed_extensions_hashset = extensions;
         messages
     }
 
-    pub(crate) fn set_excluded_extensions(&mut self, excluded_extensions: String) -> Messages {
+    pub(crate) fn set_excluded_extensions(&mut self, excluded_extensions: Vec<String>) -> Messages {
         let (extensions, messages) = Self::filter_extensions(excluded_extensions);
 
         self.excluded_extensions_hashset = extensions;
@@ -144,37 +141,37 @@ mod tests {
     #[test]
     fn test_filter_extensions_basic_and_replacements() {
         // Empty string
-        let (exts, msgs) = Extensions::filter_extensions("".to_string());
+        let (exts, msgs) = Extensions::filter_extensions(vec![]);
         assert!(exts.is_empty());
         assert!(msgs.messages.is_empty() && msgs.warnings.is_empty() && msgs.errors.is_empty());
 
         // Basic extensions
-        let (exts, msgs) = Extensions::filter_extensions("jpg,png,gif".to_string());
+        let (exts, msgs) = Extensions::filter_extensions(vec!["jpg".to_string(), "png".to_string(), "gif".to_string()]);
         assert_eq!(exts.len(), 3);
         assert!(exts.contains("jpg") && exts.contains("png") && exts.contains("gif"));
         assert!(msgs.warnings.is_empty());
 
         // With dots
-        let (exts, _) = Extensions::filter_extensions(".jpg,.png".to_string());
+        let (exts, _) = Extensions::filter_extensions(vec![".jpg".to_string(), ".png".to_string()]);
         assert_eq!(exts.len(), 2);
         assert!(exts.contains("jpg") && exts.contains("png"));
 
         // IMAGE replacement
-        let (exts, _) = Extensions::filter_extensions("IMAGE".to_string());
+        let (exts, _) = Extensions::filter_extensions(vec!["IMAGE".to_string()]);
         assert!(exts.contains("jpg") && exts.contains("png") && exts.contains("bmp"));
 
         // VIDEO replacement
-        let (exts, _) = Extensions::filter_extensions("VIDEO".to_string());
+        let (exts, _) = Extensions::filter_extensions(vec!["VIDEO".to_string()]);
         assert!(exts.contains("mp4") && exts.contains("mkv") && exts.contains("avi"));
 
         // Invalid extensions with dot inside
-        let (exts, msgs) = Extensions::filter_extensions("jpg,test.bad,png".to_string());
+        let (exts, msgs) = Extensions::filter_extensions(vec!["jpg".to_string(), "test.bad".to_string(), "png".to_string()]);
         assert_eq!(exts.len(), 2);
         assert!(!exts.contains("test.bad"));
         assert!(msgs.warnings.iter().any(|w| w.contains("test.bad")));
 
         // Invalid extensions with space
-        let (exts, msgs) = Extensions::filter_extensions("jpg,bad ext,png".to_string());
+        let (exts, msgs) = Extensions::filter_extensions(vec!["jpg".to_string(), "bad ext".to_string(), "png".to_string()]);
         assert!(!exts.contains("bad ext"));
         assert!(msgs.warnings.iter().any(|w| w.contains("bad ext")));
     }
@@ -209,7 +206,7 @@ mod tests {
 
         // Allowed extensions
         let mut ext = Extensions::new();
-        ext.set_allowed_extensions("jpg,png".to_string());
+        ext.set_allowed_extensions(vec!["jpg".to_string(), "png".to_string()]);
         let entries: Vec<_> = fs::read_dir(&temp_dir).unwrap().map(|e| e.unwrap()).collect();
         assert!(ext.check_if_entry_have_valid_extension(&entries.iter().find(|e| e.file_name() == "test.jpg").unwrap().file_name()));
         assert!(ext.check_if_entry_have_valid_extension(&entries.iter().find(|e| e.file_name() == "test.PNG").unwrap().file_name())); // case insensitive
@@ -218,7 +215,7 @@ mod tests {
 
         // Excluded extensions
         let mut ext = Extensions::new();
-        ext.set_excluded_extensions("txt".to_string());
+        ext.set_excluded_extensions(vec!["txt".to_string()]);
         assert!(ext.check_if_entry_have_valid_extension(&entries.iter().find(|e| e.file_name() == "test.jpg").unwrap().file_name()));
         assert!(!ext.check_if_entry_have_valid_extension(&entries.iter().find(|e| e.file_name() == "test.txt").unwrap().file_name()));
     }

@@ -251,12 +251,12 @@ pub trait CommonData {
         self.get_cd_mut().text_messages.extend_with_another_messages(messages);
     }
 
-    fn set_allowed_extensions(&mut self, allowed_extensions: String) {
+    fn set_allowed_extensions(&mut self, allowed_extensions: Vec<String>) {
         let messages = self.get_cd_mut().extensions.set_allowed_extensions(allowed_extensions);
         self.get_cd_mut().text_messages.extend_with_another_messages(messages);
     }
 
-    fn set_excluded_extensions(&mut self, excluded_extensions: String) {
+    fn set_excluded_extensions(&mut self, excluded_extensions: Vec<String>) {
         let messages = self.get_cd_mut().extensions.set_excluded_extensions(excluded_extensions);
         self.get_cd_mut().text_messages.extend_with_another_messages(messages);
     }
