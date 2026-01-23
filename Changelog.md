@@ -28,6 +28,7 @@
 - Limited supported image sizes to 2000 MP - [#1748](https://github.com/qarmin/czkawka/pull/1748)
 - Automatic cleaning of outdated entries, now runs max once per week - [#1748](https://github.com/qarmin/czkawka/pull/1748)
 - Added new function, to manually remove outdated entries in cache files - [#1748](https://github.com/qarmin/czkawka/pull/1748)
+- Added to all projects, info about video properties(bitrate, codec, fps, dimensions, duration) - [#1748](https://github.com/qarmin/czkawka/pull/1748)
 
 ### CLI
 - Using colors by default in terminal output(can be disabled by feature flag) - [#1672](https://github.com/qarmin/czkawka/pull/1672)
@@ -96,7 +97,6 @@
 - Replaced `imagepipe` + `rawloader` with `rawler` which is still supported and faster to decode raw files - [#1572](https://github.com/qarmin/czkawka/pull/1572)
 - Added more configuration options in video finder - [#1578](https://github.com/qarmin/czkawka/pull/1578)
 - `fast_image_resize` feature is removed and `image_hasher/fast_resize_unstable` is enabled unconditionally - [#1586](https://github.com/qarmin/czkawka/pull/1586)
-- Added to all projects, info about video properties(bitrate, codec, fps, dimensions, duration) - [#1748](https://github.com/qarmin/czkawka/pull/1748)
 
 ### CLI
 - Improved logic for deleting files and added progress bar for this operation - [#1571](https://github.com/qarmin/czkawka/pull/1571)

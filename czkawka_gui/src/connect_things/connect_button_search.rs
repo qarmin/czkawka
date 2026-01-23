@@ -38,6 +38,7 @@ use crate::helpers::model_iter::iter_list;
 use crate::notebook_enums::NotebookMainEnum;
 use crate::taskbar_progress::tbp_flags::TBPF_NOPROGRESS;
 use crate::{DEFAULT_MAXIMAL_FILE_SIZE, DEFAULT_MINIMAL_CACHE_SIZE, DEFAULT_MINIMAL_FILE_SIZE, flg};
+use crate::connect_things::connect_button_delete::tree_remove;
 
 pub(crate) fn connect_button_search(gui_data: &GuiData, result_sender: Sender<Message>, progress_sender: Sender<ProgressData>) {
     let buttons_array = gui_data.bottom_buttons.buttons_array.clone();
@@ -710,8 +711,8 @@ where
     component.set_excluded_paths(loaded_commons.excluded_directories.clone());
     component.set_reference_paths(loaded_commons.reference_directories.clone());
     component.set_recursive_search(loaded_commons.recursive_search);
-    component.set_allowed_extensions(loaded_commons.allowed_extensions.split('.').map(str::to_string).collect());
-    component.set_excluded_extensions(loaded_commons.excluded_extensions.split('.').map(str::to_string).collect());
+    component.set_allowed_extensions(loaded_commons.allowed_extensions.split(',').map(str::to_string).collect());
+    component.set_excluded_extensions(loaded_commons.excluded_extensions.split(',').map(str::to_string).collect());
     component.set_excluded_items(loaded_commons.excluded_items.clone());
     component.set_exclude_other_filesystems(loaded_commons.ignore_other_filesystems);
     component.set_use_cache(loaded_commons.use_cache);
