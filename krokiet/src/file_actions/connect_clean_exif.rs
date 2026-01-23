@@ -4,6 +4,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread;
 
 use crossbeam_channel::Sender;
+use log::error;
 use czkawka_core::common::progress_data::ProgressData;
 use slint::{ComponentHandle, Weak};
 
@@ -59,7 +60,9 @@ fn clean_exif_single_file(file_path: &str, tag_groups: &[String], tags_u16: &[St
     let connected_tags = tag_groups
         .iter()
         .zip(tags_u16.iter())
-        .map(|(group, code)| (code.parse::<u16>().unwrap_or(0), group.clone()))
+        .map(|(group, code)| (code.parse::<u16>().inspect_err(|e|{
+            error!("Failed to parse EXIF tag code {code} for file {file_path:?}, reason: {e}")
+        }).unwrap_or_default(), group.clone()))
         .collect::<Vec<(u16, String)>>();
     let _ = czkawka_core::tools::exif_remover::core::clean_exif_tags(file_path, &connected_tags, override_file)
         .map_err(|e| format!("Failed to clean EXIF for file {file_path:?}, reason: {e}"))?;

@@ -141,7 +141,7 @@ mod tests {
     #[test]
     fn test_filter_extensions_basic_and_replacements() {
         // Empty string
-        let (exts, msgs) = Extensions::filter_extensions(vec![]);
+        let (exts, msgs) = Extensions::filter_extensions(Vec::new());
         assert!(exts.is_empty());
         assert!(msgs.messages.is_empty() && msgs.warnings.is_empty() && msgs.errors.is_empty());
 

@@ -439,7 +439,6 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_similar_videos_vid_hash_duration_min(*ALLOWED_VID_HASH_DURATION.start() as f32);
     settings.set_similar_videos_vid_hash_duration_max(*ALLOWED_VID_HASH_DURATION.end() as f32);
 
-    // Video Thumbnails Global Settings
     settings.set_video_thumbnails_generate(custom_settings.video_thumbnails_generate);
     settings.set_video_thumbnails_percentage(
         custom_settings
@@ -601,7 +600,6 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let similar_videos_skip_forward_amount = settings.get_similar_videos_skip_forward_amount() as u32;
     let similar_videos_vid_hash_duration = settings.get_similar_videos_vid_hash_duration() as u32;
 
-    // Video Thumbnails Global Settings
     let video_thumbnails_generate = settings.get_video_thumbnails_generate();
     let video_thumbnails_percentage = settings.get_video_thumbnails_percentage().round() as u8;
     let video_thumbnails_generate_grid = settings.get_video_thumbnails_generate_grid();

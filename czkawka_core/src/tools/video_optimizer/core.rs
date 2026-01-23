@@ -36,8 +36,8 @@ impl VideoOptimizer {
             information: Info::default(),
             video_transcode_test_entries: Default::default(),
             video_crop_test_entries: Default::default(),
-            video_transcode_result_entries: vec![],
-            video_crop_result_entries: vec![],
+            video_transcode_result_entries: Vec::new(),
+            video_crop_result_entries: Vec::new(),
             params,
         }
     }
