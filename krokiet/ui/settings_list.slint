@@ -333,13 +333,11 @@ export component SettingsList inherits VerticalLayout {
                 model <=> Settings.play_audio_on_scan_completion;
             }
 
-            HintText {
-                visible: !GuiState.audio_feature_enabled;
+            if !GuiState.audio_feature_enabled: HintText {
                 hint_text: Translations.settings_audio_feature_hint_text;
             }
 
-            HintText {
-                visible: GuiState.audio_feature_enabled;
+            if GuiState.audio_feature_enabled: HintText {
                 hint_text: Translations.settings_audio_env_variable_hint_text;
             }
 
