@@ -41,7 +41,7 @@ slint = { version = "1.13", default-features = false, features = [
     "compat-1-2"
 ] }
 
-rodio = {version = "0.21.1", default-features = false, features = ["playback", "symphonia"]}
+rodio = {version = "0.21.1", default-features = false, features = ["playback", "symphonia-aac", "symphonia-isomp4"]}
 
 [build-dependencies]
 #slint-build = { path = "/home/rafal/test/slint/api/rs/build/"}
