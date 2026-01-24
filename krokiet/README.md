@@ -7,15 +7,21 @@ Krokiet is a new Czkawka frontend written in Slint.
 
 It aims to provide a more consistent experience across all platforms (Linux, Windows, macOS) compared to the previous GTK 4 frontend.
 
-## Usage
+## How to install?
+Prebuilt binaries are available for Windows 10/11, Mac and Ubuntu 22.04 (and similar distros with the same or newer glibc version).
 
-Krokiet should not have any special runtime requirements, it should work on almost any modern device.
-
-Prebuilt binaries are available for Windows 10/11, Mac and Ubuntu 22.04 (and similar distros with the same or newer glibc version): https://github.com/qarmin/czkawka/releases/ with recommendations about which variant to use depending on your needs.
+You can download them from https://github.com/qarmin/czkawka/releases/, which contains recommendations, which variant to use depending on your needs.
 
 ## Compilation
 
-On Ubuntu, you need to install these dependencies - `libfontconfig-dev libfreetype-dev`
+Another option is to compile it yourself.
+
+The easiest way is to install newest run and run
+```
+cargo install krokiet
+```
+
+which will install, the latest and optimized version of Krokiet.
 
 Compilation with `cargo build --release` should produce a working binary, that without any additional dependencies should run on user os.
 
