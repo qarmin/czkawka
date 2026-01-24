@@ -69,8 +69,7 @@ impl AudioPlayer {
 
     #[cfg(feature = "audio")]
     fn play_audio_blocking(audio_data: &[u8]) -> Result<(), String> {
-        let stream_handle = OutputStreamBuilder::open_default_stream()
-            .map_err(|e| format!("Failed to get audio output stream: {}", e))?;
+        let stream_handle = OutputStreamBuilder::open_default_stream().map_err(|e| format!("Failed to get audio output stream: {}", e))?;
 
         let sink = Sink::connect_new(&stream_handle.mixer());
 

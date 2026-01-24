@@ -110,23 +110,21 @@ impl BadNames {
             }
 
             let has_issues_to_fix = (entry.issues.uppercase_extension && fix_params.fix_uppercase_extension)
-                || (entry.issues.non_ascii_name.is_some() && fix_params.fix_non_ascii.is_some())
+                || (entry.issues.non_ascii_name && fix_params.fix_non_ascii.is_some())
                 || (entry.issues.emoji_used && fix_params.fix_emoji)
                 || (entry.issues.space_at_start_or_end && fix_params.fix_space_at_start_or_end)
-                || (entry.issues.restricted_charset.is_some() && fix_params.fix_restricted_charset.is_some());
+                || (entry.issues.restricted_charset && fix_params.fix_restricted_charset.is_some());
 
-            if has_issues_to_fix {
-                if let Some(new_name) = generate_fixed_name(&entry.path, &fix_params) {
-                    let new_path = entry.path.with_file_name(new_name);
+            if has_issues_to_fix && let Some(new_name) = generate_fixed_name(&entry.path, &fix_params) {
+                let new_path = entry.path.with_file_name(new_name);
 
-                    match fs::rename(&entry.path, &new_path) {
-                        Ok(_) => {
-                            fixed_count += 1;
-                            debug!("Renamed {:?} to {:?}", entry.path, new_path);
-                        }
-                        Err(e) => {
-                            failed_renames.push(format!("Failed to rename {:?}: {}", entry.path, e));
-                        }
+                match fs::rename(&entry.path, &new_path) {
+                    Ok(()) => {
+                        fixed_count += 1;
+                        debug!("Renamed {:?} to {:?}", entry.path, new_path);
+                    }
+                    Err(e) => {
+                        failed_renames.push(format!("Failed to rename {:?}: {}", entry.path, e));
                     }
                 }
             }
@@ -136,7 +134,7 @@ impl BadNames {
             self.common_data.text_messages.warnings.extend(failed_renames);
         }
 
-        debug!("Fixed {} file names", fixed_count);
+        debug!("Fixed {fixed_count} file names");
         WorkContinueStatus::Continue
     }
 }
@@ -145,25 +143,21 @@ pub fn check_file_name(path: &Path, checked_issues: &NameIssues) -> Option<NameI
     let file_name = path.file_name()?.to_string_lossy();
     let mut issues = NameIssues::none();
 
-    if checked_issues.uppercase_extension {
-        if let Some(extension) = path.extension() {
-            let ext_str = extension.to_string_lossy();
-            if ext_str.chars().any(|c| c.is_uppercase()) {
-                issues.uppercase_extension = true;
-            }
+    if checked_issues.uppercase_extension
+        && let Some(extension) = path.extension()
+    {
+        let ext_str = extension.to_string_lossy();
+        if ext_str.chars().any(|c| c.is_uppercase()) {
+            issues.uppercase_extension = true;
         }
     }
 
-    if checked_issues.non_ascii_name.is_some() {
-        if file_name.chars().any(|c| !c.is_ascii()) {
-            issues.non_ascii_name = checked_issues.non_ascii_name;
-        }
+    if checked_issues.non_ascii_name && !file_name.is_ascii() {
+        issues.non_ascii_name = true;
     }
 
-    if checked_issues.emoji_used {
-        if file_name.chars().any(is_emoji) {
-            issues.emoji_used = true;
-        }
+    if checked_issues.emoji_used && file_name.chars().any(is_emoji) {
+        issues.emoji_used = true;
     }
 
     if checked_issues.space_at_start_or_end {
@@ -181,17 +175,11 @@ pub fn check_file_name(path: &Path, checked_issues: &NameIssues) -> Option<NameI
         }
     }
 
-    if checked_issues.restricted_charset.is_some() {
-        if file_name.chars().any(|c| !is_allowed_char(c)) {
-            issues.restricted_charset = checked_issues.restricted_charset;
-        }
+    if checked_issues.restricted_charset && file_name.chars().any(|c| !is_allowed_char(c)) {
+        issues.restricted_charset = true;
     }
 
-    if issues.is_empty() {
-        None
-    } else {
-        Some(issues)
-    }
+    if issues.is_empty() { None } else { Some(issues) }
 }
 
 fn is_allowed_char(c: char) -> bool {
@@ -231,75 +219,53 @@ pub fn generate_fixed_name(path: &Path, fix_params: &NameFixerParams) -> Option<
         }
     }
 
-    if fix_params.fix_uppercase_extension {
-        if let Some(ref mut ext) = extension {
-            if ext.chars().any(|c| c.is_uppercase()) {
-                *ext = ext.to_lowercase();
-            }
-        }
+    if fix_params.fix_uppercase_extension
+        && let Some(ref mut ext) = extension
+        && ext.chars().any(|c| c.is_uppercase())
+    {
+        *ext = ext.to_lowercase();
     }
 
     let new_name = if let Some(ext) = extension {
-        if ext.is_empty() {
-            stem
-        } else {
-            format!("{}.{}", stem, ext)
-        }
+        if ext.is_empty() { stem } else { format!("{stem}.{ext}") }
     } else {
         stem
     };
 
-    if new_name != file_name.as_ref() as &str {
-        Some(new_name)
-    } else {
-        None
-    }
+    if new_name != file_name.as_ref() as &str { Some(new_name) } else { None }
 }
 
 fn fix_non_ascii(s: &str, method: CharsetFixMethod) -> String {
     match method {
-        CharsetFixMethod::ReplaceWithUnderscore => {
-            s.chars().map(|c| if c.is_ascii() { c } else { '_' }).collect()
-        }
-        CharsetFixMethod::ReplaceWithSpace => {
-            s.chars().map(|c| if c.is_ascii() { c } else { ' ' }).collect()
-        }
-        CharsetFixMethod::Delete => {
-            s.chars().filter(|c| c.is_ascii()).collect()
-        }
-        CharsetFixMethod::Transliterate => {
-            s.chars()
-                .flat_map(|c| {
-                    if c.is_ascii() {
-                        vec![c]
-                    } else {
-                        deunicode::deunicode_char(c)
-                            .map(|s| {
-                                let chars: Vec<char> = s.chars().collect();
-                                if chars.is_empty() || (chars.len() == 1 && !chars[0].is_ascii_graphic()) {
-                                    vec![' ']
-                                } else {
-                                    chars
-                                }
-                            })
-                            .unwrap_or_else(|| vec![' '])
-                    }
-                })
-                .collect()
-        }
+        CharsetFixMethod::ReplaceWithUnderscore => s.chars().map(|c| if c.is_ascii() { c } else { '_' }).collect(),
+        CharsetFixMethod::ReplaceWithSpace => s.chars().map(|c| if c.is_ascii() { c } else { ' ' }).collect(),
+        CharsetFixMethod::Delete => s.chars().filter(|c| c.is_ascii()).collect(),
+        CharsetFixMethod::Transliterate => s
+            .chars()
+            .flat_map(|c| {
+                if c.is_ascii() {
+                    vec![c]
+                } else {
+                    deunicode::deunicode_char(c)
+                        .map(|s| {
+                            let chars: Vec<char> = s.chars().collect();
+                            if chars.is_empty() || (chars.len() == 1 && !chars[0].is_ascii_graphic()) {
+                                vec![' ']
+                            } else {
+                                chars
+                            }
+                        })
+                        .unwrap_or_else(|| vec![' '])
+                }
+            })
+            .collect(),
     }
 }
 
 fn fix_restricted_charset(s: &str, method: CharsetFixMethod) -> String {
     match method {
-        CharsetFixMethod::ReplaceWithUnderscore => s
-            .chars()
-            .map(|c| if is_allowed_char(c) { c } else { '_' })
-            .collect(),
-        CharsetFixMethod::ReplaceWithSpace => s
-            .chars()
-            .map(|c| if is_allowed_char(c) { c } else { ' ' })
-            .collect(),
+        CharsetFixMethod::ReplaceWithUnderscore => s.chars().map(|c| if is_allowed_char(c) { c } else { '_' }).collect(),
+        CharsetFixMethod::ReplaceWithSpace => s.chars().map(|c| if is_allowed_char(c) { c } else { ' ' }).collect(),
         CharsetFixMethod::Delete => s.chars().filter(|c| is_allowed_char(*c)).collect(),
         CharsetFixMethod::Transliterate => s
             .chars()
@@ -310,11 +276,7 @@ fn fix_restricted_charset(s: &str, method: CharsetFixMethod) -> String {
                     deunicode::deunicode_char(c)
                         .map(|s| {
                             let chars: Vec<char> = s.chars().filter(|ch| is_allowed_char(*ch)).collect();
-                            if chars.is_empty() {
-                                vec!['_']
-                            } else {
-                                chars
-                            }
+                            if chars.is_empty() { vec!['_'] } else { chars }
                         })
                         .unwrap_or_else(|| vec!['_'])
                 } else {

@@ -33,12 +33,12 @@ impl ResultEntry for BadNameEntry {
 }
 
 #[derive(Clone, Copy, Debug, Default, Serialize, Deserialize, PartialEq)]
-pub struct  NameIssues {
+pub struct NameIssues {
     pub uppercase_extension: bool,
     pub emoji_used: bool,
     pub space_at_start_or_end: bool,
-    pub non_ascii_name: Option<CharsetFixMethod>,
-    pub restricted_charset: Option<CharsetFixMethod>,
+    pub non_ascii_name: bool,
+    pub restricted_charset: bool,
 }
 
 #[derive(Clone, Copy, Debug, Default, Serialize, Deserialize, PartialEq, Eq)]
@@ -56,8 +56,8 @@ impl NameIssues {
             uppercase_extension: true,
             emoji_used: true,
             space_at_start_or_end: true,
-            non_ascii_name: Some(CharsetFixMethod::default()),
-            restricted_charset: Some(CharsetFixMethod::default()),
+            non_ascii_name: true,
+            restricted_charset: true,
         }
     }
 
@@ -65,19 +65,15 @@ impl NameIssues {
         Self::default()
     }
 
-    pub fn is_empty(&self) -> bool {
-        !self.uppercase_extension
-            && !self.emoji_used
-            && !self.space_at_start_or_end
-            && self.non_ascii_name.is_none()
-            && self.restricted_charset.is_none()
+    pub fn is_empty(self) -> bool {
+        !self.uppercase_extension && !self.emoji_used && !self.space_at_start_or_end && !self.non_ascii_name && !self.restricted_charset
     }
 
-    pub fn has_any(&self) -> bool {
+    pub fn has_any(self) -> bool {
         !self.is_empty()
     }
 
-    pub fn to_string_list(&self) -> Vec<String> {
+    pub fn to_string_list(self) -> Vec<String> {
         let mut issues = Vec::new();
         if self.uppercase_extension {
             issues.push(flc!("core_bad_name_uppercase_extension"));
@@ -88,10 +84,10 @@ impl NameIssues {
         if self.space_at_start_or_end {
             issues.push(flc!("core_bad_name_space_at_start_end"));
         }
-        if self.non_ascii_name.is_some() {
+        if self.non_ascii_name {
             issues.push(flc!("core_bad_name_non_ascii"));
         }
-        if self.restricted_charset.is_some() {
+        if self.restricted_charset {
             issues.push(flc!("core_bad_name_restricted_charset"));
         }
         issues

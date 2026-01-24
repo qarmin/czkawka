@@ -32,7 +32,7 @@
     - Bad Extensions - Lists files whose content not match with their extension
     - Exif Remover - Removes Exif metadata from various file types
     - Video Optimizer - Crops from static parts and converts videos to more efficient formats
-    - Bad Names - Finds files and folders with names?
+    - Bad Names - Finds files with names that may be not wanted (e.g., containing special characters)
 
 ![Krokiet](https://github.com/user-attachments/assets/720e98c3-598a-41aa-a04b-0c0c1d8a28e6)
 
@@ -46,10 +46,10 @@ New releases can be found in [Github releases](https://github.com/qarmin/czkawka
 
 Each tool uses different technologies, so you can find instructions for each of them in the appropriate file:
 
+- [Krokiet GUI (Slint frontend)](krokiet/README.md)</br>
 - [Czkawka GUI (GTK frontend)](czkawka_gui/README.md)</br>
 - [Czkawka CLI](czkawka_cli/README.md)</br>
 - [Czkawka Core](czkawka_core/README.md)</br>
-- [Krokiet GUI (Slint frontend)](krokiet/README.md)</br>
 
 ## Comparison to other tools
 
@@ -79,6 +79,7 @@ options to choose than other).
 | Invalid names/extensions  |        ✔         |      ✔      |   ✔    |                   |             |
 |       Exif cleaner        |                  |      ✔      |        |                   |             |
 |      Video optimizer      |                  |      ✔      |        |                   |             |
+|         Bad Names         |                  |      ✔      |        |                   |             |
 |      Names conflict       |                  |             |   ✔    |                   |             |
 |    Installed packages     |                  |             |   ✔    |                   |             |
 |          Bad ID           |                  |             |   ✔    |                   |             |
@@ -123,6 +124,7 @@ It is written in Rust and is used by all Czkawka frontends (`czkawka_gui`, `czka
 
 It is also used by external projects, such as:
 
+- **Czkawka Tauri** - https://github.com/shixinhuang99/czkawka-tauri - A Tauri-based GUI frontend for Czkawka.
 - **page-dewarp** – https://github.com/lmmx/page-dewarp - A library for dewarping document images using a cubic sheet model.
 
 Bindings are also available for:
@@ -137,7 +139,7 @@ Some projects work as wrappers around `czkawka_cli`. Without directly depending 
 
 Big thanks to Pádraig Brady, creator of fantastic FSlint, because without his work I wouldn't create this tool.
 
-Thanks also to all the people who create patches for this program, make it available on other systems, create videos,
+Thanks also to all the people who create patches for this program, create and fix translations, make it available on other systems, create videos,
 articles about it etc.
 
 Also, I really appreciate work of people that create crates on which Czkawka is based and for that I try to report bugs

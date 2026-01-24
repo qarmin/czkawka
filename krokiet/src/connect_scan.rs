@@ -224,7 +224,8 @@ fn scan_duplicates(a: Weak<MainWindow>, sd: ScanData) {
                     duplicates_number,
                     groups_number,
                     lost_space,
-                     &sd.basic_settings, &sd.audio_player
+                    &sd.basic_settings,
+                    &sd.audio_player,
                 );
             })
         })
@@ -396,7 +397,17 @@ fn scan_big_files(a: Weak<MainWindow>, sd: ScanData) {
             sd.shared_models.lock().unwrap().shared_big_files_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_big_files_results(&app, vector, critical, messages, &scanning_time_str, items_found, files_size, &sd.basic_settings, &sd.audio_player);
+                write_big_files_results(
+                    &app,
+                    vector,
+                    critical,
+                    messages,
+                    &scanning_time_str,
+                    items_found,
+                    files_size,
+                    &sd.basic_settings,
+                    &sd.audio_player,
+                );
             })
         })
         .expect("Cannot start thread - not much we can do here");
@@ -571,7 +582,18 @@ fn scan_similar_images(a: Weak<MainWindow>, sd: ScanData) {
             sd.shared_models.lock().unwrap().shared_similar_images_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_similar_images_results(&app, vector, critical, messages, hash_size, &scanning_time_str, items_found, groups, &sd.basic_settings, &sd.audio_player);
+                write_similar_images_results(
+                    &app,
+                    vector,
+                    critical,
+                    messages,
+                    hash_size,
+                    &scanning_time_str,
+                    items_found,
+                    groups,
+                    &sd.basic_settings,
+                    &sd.audio_player,
+                );
             })
         })
         .expect("Cannot start thread - not much we can do here");
@@ -691,7 +713,17 @@ fn scan_similar_videos(a: Weak<MainWindow>, sd: ScanData) {
             sd.shared_models.lock().unwrap().shared_similar_videos_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_similar_videos_results(&app, vector, critical, messages, &scanning_time_str, items_found, groups, &sd.basic_settings, &sd.audio_player);
+                write_similar_videos_results(
+                    &app,
+                    vector,
+                    critical,
+                    messages,
+                    &scanning_time_str,
+                    items_found,
+                    groups,
+                    &sd.basic_settings,
+                    &sd.audio_player,
+                );
             })
         })
         .expect("Cannot start thread - not much we can do here");
@@ -849,7 +881,17 @@ fn scan_similar_music(a: Weak<MainWindow>, sd: ScanData) {
             sd.shared_models.lock().unwrap().shared_same_music_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_similar_music_results(&app, vector, critical, messages, &scanning_time_str, items_found, groups, &sd.basic_settings, &sd.audio_player);
+                write_similar_music_results(
+                    &app,
+                    vector,
+                    critical,
+                    messages,
+                    &scanning_time_str,
+                    items_found,
+                    groups,
+                    &sd.basic_settings,
+                    &sd.audio_player,
+                );
             })
         })
         .expect("Cannot start thread - not much we can do here");
@@ -938,9 +980,16 @@ fn scan_invalid_symlinks(a: Weak<MainWindow>, sd: ScanData) {
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_invalid_symlinks_results(app: &MainWindow, vector: Vec<SymlinksFileEntry>, critical: Option<String>, messages: String, scanning_time_str: &str, items_found: usize,
-                                  base_settings: &BasicSettings,
-                                  audio_player: &AudioPlayer,) {
+fn write_invalid_symlinks_results(
+    app: &MainWindow,
+    vector: Vec<SymlinksFileEntry>,
+    critical: Option<String>,
+    messages: String,
+    scanning_time_str: &str,
+    items_found: usize,
+    base_settings: &BasicSettings,
+    audio_player: &AudioPlayer,
+) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_invalid_symlinks(&fe);
@@ -1000,9 +1049,16 @@ fn scan_temporary_files(a: Weak<MainWindow>, sd: ScanData) {
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_temporary_files_results(app: &MainWindow, vector: Vec<TemporaryFileEntry>, critical: Option<String>, messages: String, scanning_time_str: &str, items_found: usize,
-                                 base_settings: &BasicSettings,
-                                 audio_player: &AudioPlayer,) {
+fn write_temporary_files_results(
+    app: &MainWindow,
+    vector: Vec<TemporaryFileEntry>,
+    critical: Option<String>,
+    messages: String,
+    scanning_time_str: &str,
+    items_found: usize,
+    base_settings: &BasicSettings,
+    audio_player: &AudioPlayer,
+) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_temporary_files(&fe);
@@ -1079,14 +1135,32 @@ fn scan_broken_files(a: Weak<MainWindow>, sd: ScanData) {
             sd.shared_models.lock().unwrap().shared_broken_files_state = Some(tool);
 
             a.upgrade_in_event_loop(move |app| {
-                write_broken_files_results(&app, vector, critical, messages, &scanning_time_str, items_found, size, &sd.basic_settings, &sd.audio_player);
+                write_broken_files_results(
+                    &app,
+                    vector,
+                    critical,
+                    messages,
+                    &scanning_time_str,
+                    items_found,
+                    size,
+                    &sd.basic_settings,
+                    &sd.audio_player,
+                );
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_broken_files_results(app: &MainWindow, vector: Vec<BrokenEntry>, critical: Option<String>, messages: String, scanning_time_str: &str, items_found: usize, size: u64,
-                              base_settings: &BasicSettings,
-                              audio_player: &AudioPlayer,) {
+fn write_broken_files_results(
+    app: &MainWindow,
+    vector: Vec<BrokenEntry>,
+    critical: Option<String>,
+    messages: String,
+    scanning_time_str: &str,
+    items_found: usize,
+    size: u64,
+    base_settings: &BasicSettings,
+    audio_player: &AudioPlayer,
+) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_broken_files(&fe);
@@ -1155,9 +1229,16 @@ fn scan_bad_extensions(a: Weak<MainWindow>, sd: ScanData) {
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_bad_extensions_results(app: &MainWindow, vector: Vec<BadFileEntry>, critical: Option<String>, messages: String, scanning_time_str: &str, items_found: usize,
-                                base_settings: &BasicSettings,
-                                audio_player: &AudioPlayer,) {
+fn write_bad_extensions_results(
+    app: &MainWindow,
+    vector: Vec<BadFileEntry>,
+    critical: Option<String>,
+    messages: String,
+    scanning_time_str: &str,
+    items_found: usize,
+    base_settings: &BasicSettings,
+    audio_player: &AudioPlayer,
+) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_bad_extensions(&fe);
@@ -1227,9 +1308,16 @@ fn scan_exif_remover(a: Weak<MainWindow>, sd: ScanData) {
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_exif_remover_results(app: &MainWindow, vector: Vec<ExifEntry>, critical: Option<String>, messages: String, scanning_time_str: &str, items_found: usize,
-                              base_settings: &BasicSettings,
-                              audio_player: &AudioPlayer,) {
+fn write_exif_remover_results(
+    app: &MainWindow,
+    vector: Vec<ExifEntry>,
+    critical: Option<String>,
+    messages: String,
+    scanning_time_str: &str,
+    items_found: usize,
+    base_settings: &BasicSettings,
+    audio_player: &AudioPlayer,
+) {
     let items = Rc::new(VecModel::default());
     for fe in vector {
         let (data_model_str, data_model_int) = prepare_data_model_exif_remover(&fe);
@@ -1328,14 +1416,32 @@ fn scan_video_optimizer(a: Weak<MainWindow>, sd: ScanData) {
                 sd.shared_models.lock().unwrap().shared_video_optimizer_state = Some(tool);
 
                 a.upgrade_in_event_loop(move |app| {
-                    write_video_optimizer_crop_results(&app, video_crop_entries, critical, messages, &scanning_time_str, items_found, &sd.basic_settings, &sd.audio_player);
+                    write_video_optimizer_crop_results(
+                        &app,
+                        video_crop_entries,
+                        critical,
+                        messages,
+                        &scanning_time_str,
+                        items_found,
+                        &sd.basic_settings,
+                        &sd.audio_player,
+                    );
                 })
             } else {
                 let video_transcode_entries = tool.get_video_transcode_entries().clone();
                 sd.shared_models.lock().unwrap().shared_video_optimizer_state = Some(tool);
 
                 a.upgrade_in_event_loop(move |app| {
-                    write_video_optimizer_transcode_results(&app, video_transcode_entries, critical, messages, &scanning_time_str, items_found, &sd.basic_settings, &sd.audio_player);
+                    write_video_optimizer_transcode_results(
+                        &app,
+                        video_transcode_entries,
+                        critical,
+                        messages,
+                        &scanning_time_str,
+                        items_found,
+                        &sd.basic_settings,
+                        &sd.audio_player,
+                    );
                 })
             }
         })

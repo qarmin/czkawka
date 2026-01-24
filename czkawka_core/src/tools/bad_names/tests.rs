@@ -1,5 +1,5 @@
 #[cfg(test)]
-mod tests {
+mod tests2 {
     use std::fs;
     use std::path::Path;
     use std::sync::Arc;
@@ -7,8 +7,8 @@ mod tests {
 
     use crate::common::tool_data::CommonData;
     use crate::common::traits::Search;
-    use crate::tools::bad_names::{BadNames, BadNamesParameters, CharsetFixMethod, NameFixerParams, NameIssues};
     use crate::tools::bad_names::core::{check_file_name, generate_fixed_name};
+    use crate::tools::bad_names::{BadNames, BadNamesParameters, CharsetFixMethod, NameFixerParams, NameIssues};
 
     #[test]
     fn test_uppercase_extension_detection() {
@@ -20,8 +20,8 @@ mod tests {
             uppercase_extension: true,
             emoji_used: false,
             space_at_start_or_end: false,
-            non_ascii_name: None,
-            restricted_charset: None,
+            non_ascii_name: false,
+            restricted_charset: false,
         });
         let mut bad_names = BadNames::new(params);
         bad_names.get_cd_mut().directories.set_included_paths(vec![temp_dir.path().to_path_buf()]);
@@ -43,8 +43,8 @@ mod tests {
             uppercase_extension: false,
             emoji_used: true,
             space_at_start_or_end: false,
-            non_ascii_name: None,
-            restricted_charset: None,
+            non_ascii_name: false,
+            restricted_charset: false,
         });
         let mut bad_names = BadNames::new(params);
         bad_names.get_cd_mut().directories.set_included_paths(vec![temp_dir.path().to_path_buf()]);
@@ -66,8 +66,8 @@ mod tests {
             uppercase_extension: false,
             emoji_used: false,
             space_at_start_or_end: true,
-            non_ascii_name: None,
-            restricted_charset: None,
+            non_ascii_name: false,
+            restricted_charset: false,
         });
         let mut bad_names = BadNames::new(params);
         bad_names.get_cd_mut().directories.set_included_paths(vec![temp_dir.path().to_path_buf()]);
@@ -89,8 +89,8 @@ mod tests {
             uppercase_extension: false,
             emoji_used: false,
             space_at_start_or_end: true,
-            non_ascii_name: None,
-            restricted_charset: None,
+            non_ascii_name: false,
+            restricted_charset: false,
         });
         let mut bad_names = BadNames::new(params);
         bad_names.get_cd_mut().directories.set_included_paths(vec![temp_dir.path().to_path_buf()]);
@@ -112,8 +112,8 @@ mod tests {
             uppercase_extension: false,
             emoji_used: false,
             space_at_start_or_end: false,
-            non_ascii_name: Some(CharsetFixMethod::default()),
-            restricted_charset: None,
+            non_ascii_name: true,
+            restricted_charset: false,
         });
         let mut bad_names = BadNames::new(params);
         bad_names.get_cd_mut().directories.set_included_paths(vec![temp_dir.path().to_path_buf()]);
@@ -122,7 +122,7 @@ mod tests {
         bad_names.search(&stop_flag, None);
 
         assert_eq!(bad_names.get_bad_names_files().len(), 1);
-        assert!(bad_names.get_bad_names_files()[0].issues.non_ascii_name.is_some());
+        assert!(bad_names.get_bad_names_files()[0].issues.non_ascii_name);
     }
 
     #[test]
@@ -135,8 +135,8 @@ mod tests {
             uppercase_extension: false,
             emoji_used: false,
             space_at_start_or_end: false,
-            non_ascii_name: None,
-            restricted_charset: Some(CharsetFixMethod::default()),
+            non_ascii_name: false,
+            restricted_charset: true,
         });
         let mut bad_names = BadNames::new(params);
         bad_names.get_cd_mut().directories.set_included_paths(vec![temp_dir.path().to_path_buf()]);
@@ -145,7 +145,7 @@ mod tests {
         bad_names.search(&stop_flag, None);
 
         assert_eq!(bad_names.get_bad_names_files().len(), 1);
-        assert!(bad_names.get_bad_names_files()[0].issues.restricted_charset.is_some());
+        assert!(bad_names.get_bad_names_files()[0].issues.restricted_charset);
     }
 
     #[test]
@@ -193,30 +193,28 @@ mod tests {
             if let Some(_issues) = check_file_name(path, &check_params) {
                 if let Some(new_name) = generate_fixed_name(path, &fix_params) {
                     if new_name != expected_output {
-                        errors.push(format!("Input: '{}', Expected: '{}', Got: '{}'", input, expected_output, new_name));
+                        errors.push(format!("Input: '{input}', Expected: '{expected_output}', Got: '{new_name}'"));
                     }
 
                     let fixed_path = Path::new(&new_name);
                     if generate_fixed_name(fixed_path, &fix_params).is_some() {
-                        errors.push(format!("Double fix should return None for: '{}'", new_name));
+                        errors.push(format!("Double fix should return None for: '{new_name}'"));
                     }
                 } else {
-                    errors.push(format!("Input: '{}' was not fixed", input));
+                    errors.push(format!("Input: '{input}' was not fixed"));
                 }
             } else {
-                errors.push(format!("Input: '{}' was not detected as having issues", input));
+                errors.push(format!("Input: '{input}' was not detected as having issues"));
             }
         }
 
-        if !errors.is_empty() {
-            panic!("Uppercase extension tests failed:\n{}", errors.join("\n"));
-        }
+        assert!(errors.is_empty(), "Uppercase extension tests failed:\n{}", errors.join("\n"));
     }
 
     #[test]
     fn test_non_ascii_fix_transliterate() {
         let check_params = NameIssues {
-            non_ascii_name: Some(CharsetFixMethod::Transliterate),
+            non_ascii_name: true,
             ..NameIssues::none()
         };
         let fix_params = NameFixerParams {
@@ -225,41 +223,35 @@ mod tests {
         };
 
         let mut errors = Vec::new();
-        let test_cases = [
-            ("tëst.txt", "test.txt"),
-            ("café.pdf", "cafe.pdf"),
-            ("Kraków.doc", "Krakow.doc"),
-        ];
+        let test_cases = [("tëst.txt", "test.txt"), ("café.pdf", "cafe.pdf"), ("Kraków.doc", "Krakow.doc")];
 
         for (input, expected_output) in test_cases {
             let path = Path::new(input);
             if let Some(_issues) = check_file_name(path, &check_params) {
                 if let Some(new_name) = generate_fixed_name(path, &fix_params) {
                     if new_name != expected_output {
-                        errors.push(format!("Input: '{}', Expected: '{}', Got: '{}'", input, expected_output, new_name));
+                        errors.push(format!("Input: '{input}', Expected: '{expected_output}', Got: '{new_name}'"));
                     }
 
                     let fixed_path = Path::new(&new_name);
                     if generate_fixed_name(fixed_path, &fix_params).is_some() {
-                        errors.push(format!("Double fix should return None for: '{}'", new_name));
+                        errors.push(format!("Double fix should return None for: '{new_name}'"));
                     }
                 } else {
-                    errors.push(format!("Input: '{}' was not fixed", input));
+                    errors.push(format!("Input: '{input}' was not fixed"));
                 }
             } else {
-                errors.push(format!("Input: '{}' was not detected as having issues", input));
+                errors.push(format!("Input: '{input}' was not detected as having issues"));
             }
         }
 
-        if !errors.is_empty() {
-            panic!("Non-ASCII transliterate tests failed:\n{}", errors.join("\n"));
-        }
+        assert!(errors.is_empty(), "Non-ASCII transliterate tests failed:\n{}", errors.join("\n"));
     }
 
     #[test]
     fn test_non_ascii_fix_replace_underscore() {
         let check_params = NameIssues {
-            non_ascii_name: Some(CharsetFixMethod::ReplaceWithUnderscore),
+            non_ascii_name: true,
             ..NameIssues::none()
         };
         let fix_params = NameFixerParams {
@@ -268,34 +260,29 @@ mod tests {
         };
 
         let mut errors = Vec::new();
-        let test_cases = [
-            ("tëst.txt", "t_st.txt"),
-            ("café.pdf", "caf_.pdf"),
-        ];
+        let test_cases = [("tëst.txt", "t_st.txt"), ("café.pdf", "caf_.pdf")];
 
         for (input, expected_output) in test_cases {
             let path = Path::new(input);
             if let Some(_issues) = check_file_name(path, &check_params) {
                 if let Some(new_name) = generate_fixed_name(path, &fix_params) {
                     if new_name != expected_output {
-                        errors.push(format!("Input: '{}', Expected: '{}', Got: '{}'", input, expected_output, new_name));
+                        errors.push(format!("Input: '{input}', Expected: '{expected_output}', Got: '{new_name}'"));
                     }
 
                     let fixed_path = Path::new(&new_name);
                     if generate_fixed_name(fixed_path, &fix_params).is_some() {
-                        errors.push(format!("Double fix should return None for: '{}'", new_name));
+                        errors.push(format!("Double fix should return None for: '{new_name}'"));
                     }
                 } else {
-                    errors.push(format!("Input: '{}' was not fixed", input));
+                    errors.push(format!("Input: '{input}' was not fixed"));
                 }
             } else {
-                errors.push(format!("Input: '{}' was not detected as having issues", input));
+                errors.push(format!("Input: '{input}' was not detected as having issues"));
             }
         }
 
-        if !errors.is_empty() {
-            panic!("Non-ASCII replace underscore tests failed:\n{}", errors.join("\n"));
-        }
+        assert!(errors.is_empty(), "Non-ASCII replace underscore tests failed:\n{}", errors.join("\n"));
     }
 
     #[test]
@@ -310,35 +297,29 @@ mod tests {
         };
 
         let mut errors = Vec::new();
-        let test_cases = [
-            ("test😀.txt", "test.txt"),
-            ("file🎉🎊.doc", "file.doc"),
-            ("image❤️.png", "image.png"),
-        ];
+        let test_cases = [("test😀.txt", "test.txt"), ("file🎉🎊.doc", "file.doc"), ("image❤️.png", "image.png")];
 
         for (input, expected_output) in test_cases {
             let path = Path::new(input);
             if let Some(_issues) = check_file_name(path, &check_params) {
                 if let Some(new_name) = generate_fixed_name(path, &fix_params) {
                     if new_name != expected_output {
-                        errors.push(format!("Input: '{}', Expected: '{}', Got: '{}'", input, expected_output, new_name));
+                        errors.push(format!("Input: '{input}', Expected: '{expected_output}', Got: '{new_name}'"));
                     }
 
                     let fixed_path = Path::new(&new_name);
                     if generate_fixed_name(fixed_path, &fix_params).is_some() {
-                        errors.push(format!("Double fix should return None for: '{}'", new_name));
+                        errors.push(format!("Double fix should return None for: '{new_name}'"));
                     }
                 } else {
-                    errors.push(format!("Input: '{}' was not fixed", input));
+                    errors.push(format!("Input: '{input}' was not fixed"));
                 }
             } else {
-                errors.push(format!("Input: '{}' was not detected as having issues", input));
+                errors.push(format!("Input: '{input}' was not detected as having issues"));
             }
         }
 
-        if !errors.is_empty() {
-            panic!("Emoji fix tests failed:\n{}", errors.join("\n"));
-        }
+        assert!(errors.is_empty(), "Emoji fix tests failed:\n{}", errors.join("\n"));
     }
 
     #[test]
@@ -366,30 +347,28 @@ mod tests {
             if let Some(_issues) = check_file_name(path, &check_params) {
                 if let Some(new_name) = generate_fixed_name(path, &fix_params) {
                     if new_name != expected_output {
-                        errors.push(format!("Input: '{}', Expected: '{}', Got: '{}'", input, expected_output, new_name));
+                        errors.push(format!("Input: '{input}', Expected: '{expected_output}', Got: '{new_name}'"));
                     }
 
                     let fixed_path = Path::new(&new_name);
                     if generate_fixed_name(fixed_path, &fix_params).is_some() {
-                        errors.push(format!("Double fix should return None for: '{}'", new_name));
+                        errors.push(format!("Double fix should return None for: '{new_name}'"));
                     }
                 } else {
-                    errors.push(format!("Input: '{}' was not fixed", input));
+                    errors.push(format!("Input: '{input}' was not fixed"));
                 }
             } else {
-                errors.push(format!("Input: '{}' was not detected as having issues", input));
+                errors.push(format!("Input: '{input}' was not detected as having issues"));
             }
         }
 
-        if !errors.is_empty() {
-            panic!("Space at start/end tests failed:\n{}", errors.join("\n"));
-        }
+        assert!(errors.is_empty(), "Space at start/end tests failed:\n{}", errors.join("\n"));
     }
 
     #[test]
     fn test_restricted_charset_fix_transliterate() {
         let check_params = NameIssues {
-            restricted_charset: Some(CharsetFixMethod::Transliterate),
+            restricted_charset: true,
             ..NameIssues::none()
         };
         let fix_params = NameFixerParams {
@@ -410,30 +389,28 @@ mod tests {
             if let Some(_issues) = check_file_name(path, &check_params) {
                 if let Some(new_name) = generate_fixed_name(path, &fix_params) {
                     if new_name != expected_output {
-                        errors.push(format!("Input: '{}', Expected: '{}', Got: '{}'", input, expected_output, new_name));
+                        errors.push(format!("Input: '{input}', Expected: '{expected_output}', Got: '{new_name}'"));
                     }
 
                     let fixed_path = Path::new(&new_name);
                     if generate_fixed_name(fixed_path, &fix_params).is_some() {
-                        errors.push(format!("Double fix should return None for: '{}'", new_name));
+                        errors.push(format!("Double fix should return None for: '{new_name}'"));
                     }
                 } else {
-                    errors.push(format!("Input: '{}' was not fixed", input));
+                    errors.push(format!("Input: '{input}' was not fixed"));
                 }
             } else {
-                errors.push(format!("Input: '{}' was not detected as having issues", input));
+                errors.push(format!("Input: '{input}' was not detected as having issues"));
             }
         }
 
-        if !errors.is_empty() {
-            panic!("Restricted charset transliterate tests failed:\n{}", errors.join("\n"));
-        }
+        assert!(errors.is_empty(), "Restricted charset transliterate tests failed:\n{}", errors.join("\n"));
     }
 
     #[test]
     fn test_restricted_charset_fix_replace_underscore() {
         let check_params = NameIssues {
-            restricted_charset: Some(CharsetFixMethod::ReplaceWithUnderscore),
+            restricted_charset: true,
             ..NameIssues::none()
         };
         let fix_params = NameFixerParams {
@@ -442,34 +419,29 @@ mod tests {
         };
 
         let mut errors = Vec::new();
-        let test_cases = [
-            ("test@file.txt", "test_file.txt"),
-            ("my#doc.pdf", "my_doc.pdf"),
-        ];
+        let test_cases = [("test@file.txt", "test_file.txt"), ("my#doc.pdf", "my_doc.pdf")];
 
         for (input, expected_output) in test_cases {
             let path = Path::new(input);
             if let Some(_issues) = check_file_name(path, &check_params) {
                 if let Some(new_name) = generate_fixed_name(path, &fix_params) {
                     if new_name != expected_output {
-                        errors.push(format!("Input: '{}', Expected: '{}', Got: '{}'", input, expected_output, new_name));
+                        errors.push(format!("Input: '{input}', Expected: '{expected_output}', Got: '{new_name}'"));
                     }
 
                     let fixed_path = Path::new(&new_name);
                     if generate_fixed_name(fixed_path, &fix_params).is_some() {
-                        errors.push(format!("Double fix should return None for: '{}'", new_name));
+                        errors.push(format!("Double fix should return None for: '{new_name}'"));
                     }
                 } else {
-                    errors.push(format!("Input: '{}' was not fixed", input));
+                    errors.push(format!("Input: '{input}' was not fixed"));
                 }
             } else {
-                errors.push(format!("Input: '{}' was not detected as having issues", input));
+                errors.push(format!("Input: '{input}' was not detected as having issues"));
             }
         }
 
-        if !errors.is_empty() {
-            panic!("Restricted charset replace underscore tests failed:\n{}", errors.join("\n"));
-        }
+        assert!(errors.is_empty(), "Restricted charset replace underscore tests failed:\n{}", errors.join("\n"));
     }
 
     #[test]
@@ -496,24 +468,22 @@ mod tests {
             if let Some(_issues) = check_file_name(path, &check_params) {
                 if let Some(new_name) = generate_fixed_name(path, &fix_params) {
                     if new_name != expected_output {
-                        errors.push(format!("Input: '{}', Expected: '{}', Got: '{}'", input, expected_output, new_name));
+                        errors.push(format!("Input: '{input}', Expected: '{expected_output}', Got: '{new_name}'"));
                     }
 
                     let fixed_path = Path::new(&new_name);
                     if generate_fixed_name(fixed_path, &fix_params).is_some() {
-                        errors.push(format!("Double fix should return None for: '{}'", new_name));
+                        errors.push(format!("Double fix should return None for: '{new_name}'"));
                     }
                 } else {
-                    errors.push(format!("Input: '{}' was not fixed", input));
+                    errors.push(format!("Input: '{input}' was not fixed"));
                 }
             } else {
-                errors.push(format!("Input: '{}' was not detected as having issues", input));
+                errors.push(format!("Input: '{input}' was not detected as having issues"));
             }
         }
 
-        if !errors.is_empty() {
-            panic!("Combined fixes tests failed:\n{}", errors.join("\n"));
-        }
+        assert!(errors.is_empty(), "Combined fixes tests failed:\n{}", errors.join("\n"));
     }
 
     #[test]
@@ -535,7 +505,7 @@ mod tests {
             if let Some(new_name) = generate_fixed_name(path, &fix_params) {
                 let fixed_path = Path::new(&new_name);
                 if generate_fixed_name(fixed_path, &fix_params).is_some() {
-                    errors.push(format!("Double fix failed for non_ascii with method: {:?}", method));
+                    errors.push(format!("Double fix failed for non_ascii with method: {method:?}"));
                 }
             }
         }
@@ -555,13 +525,11 @@ mod tests {
             if let Some(new_name) = generate_fixed_name(path, &fix_params) {
                 let fixed_path = Path::new(&new_name);
                 if generate_fixed_name(fixed_path, &fix_params).is_some() {
-                    errors.push(format!("Double fix failed for restricted_charset with method: {:?}", method));
+                    errors.push(format!("Double fix failed for restricted_charset with method: {method:?}"));
                 }
             }
         }
 
-        if !errors.is_empty() {
-            panic!("Double validation tests failed:\n{}", errors.join("\n"));
-        }
+        assert!(errors.is_empty(), "Double validation tests failed:\n{}", errors.join("\n"));
     }
 }

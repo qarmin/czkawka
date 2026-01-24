@@ -9,9 +9,9 @@ use fun_time::fun_time;
 use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
-use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, PrintResults, Search};
+use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, FixingItems, PrintResults, Search};
 use crate::flc;
-use crate::tools::bad_names::{BadNames, BadNamesParameters, Info};
+use crate::tools::bad_names::{BadNames, BadNamesParameters, Info, NameFixerParams};
 
 impl AllTraits for BadNames {}
 
@@ -69,12 +69,7 @@ impl PrintResults for BadNames {
             writeln!(writer, "Found {} files with bad names.", self.information.number_of_files_with_bad_names)?;
             for file_entry in &self.bad_names_files {
                 let issues_list = file_entry.issues.to_string_list();
-                writeln!(
-                    writer,
-                    "\"{}\" - Issues: {}",
-                    file_entry.path.to_string_lossy(),
-                    issues_list.join(", ")
-                )?;
+                writeln!(writer, "\"{}\" - Issues: {}", file_entry.path.to_string_lossy(), issues_list.join(", "))?;
             }
         } else {
             write!(writer, "Not found any files with bad names.")?;
@@ -99,6 +94,14 @@ impl DeletingItems for BadNames {
     }
 }
 
+impl FixingItems for BadNames {
+    type FixParams = NameFixerParams;
+    #[fun_time(message = "fix_items", level = "debug")]
+    fn fix_items(&mut self, stop_flag: &Arc<AtomicBool>, _progress_sender: Option<&Sender<ProgressData>>, fix_params: Self::FixParams) -> WorkContinueStatus {
+        self.fix_bad_names(fix_params, stop_flag)
+    }
+}
+
 impl CommonData for BadNames {
     type Info = Info;
     type Parameters = BadNamesParameters;
@@ -119,4 +122,3 @@ impl CommonData for BadNames {
         self.information.number_of_files_with_bad_names > 0
     }
 }
-

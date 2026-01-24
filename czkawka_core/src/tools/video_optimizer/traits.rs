@@ -104,8 +104,8 @@ impl PrintResults for VideoOptimizer {
                         };
                         writeln!(
                             writer,
-                            "{} - Codec: {} - Dimensions: {}x{} - Size: {}{new_image_dimensions}",
-                            entry.path.display(),
+                            "\"{}\" - Codec: {} - Dimensions: {}x{} - Size: {}{new_image_dimensions}",
+                            entry.path.to_string_lossy(),
                             entry.codec,
                             entry.width,
                             entry.height,
