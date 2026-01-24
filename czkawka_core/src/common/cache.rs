@@ -1,18 +1,23 @@
 #![allow(clippy::useless_let_if_seq)]
 
+mod cleaning;
+
 use std::collections::BTreeMap;
 use std::io::{BufReader, BufWriter};
 use std::path::Path;
 use std::{fs, mem};
 
 use bincode::Options;
+pub use cleaning::{CacheCleaningStatistics, CacheProgressCleaning, clean_all_cache_files};
 use fun_time::fun_time;
 use humansize::{BINARY, format_size};
 use indexmap::IndexMap;
 use log::{debug, error};
+use once_cell::sync::Lazy;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use serde::{Deserialize, Serialize};
 
+use crate::common::cache::cleaning::{should_clean_cache, update_cleaning_timestamp};
 use crate::common::config_cache_path::open_cache_folder;
 use crate::common::tool_data::CommonData;
 use crate::common::traits::ResultEntry;
@@ -26,6 +31,13 @@ pub(crate) const CACHE_BROKEN_FILES_VERSION: u8 = 110;
 pub(crate) const CACHE_VIDEO_OPTIMIZE_VERSION: u8 = 110;
 
 const MEMORY_LIMIT: u64 = 8 * 1024 * 1024 * 1024;
+const CLEANING_TIMESTAMPS_FILE: &str = "cleaning_timestamps.json";
+
+static CACHE_CLEANING_INTERVAL_SECONDS: Lazy<u64> = Lazy::new(|| {
+    option_env!("CZKAWKA_CACHE_CLEANING_INTERVAL_SECONDS")
+        .and_then(|s| s.parse::<u64>().ok())
+        .unwrap_or(7 * 24 * 60 * 60)
+});
 
 fn get_cache_size(file_name: &Path) -> String {
     fs::metadata(file_name).map_or_else(|_| "<unknown size>".to_string(), |metadata| format_size(metadata.len(), BINARY))
@@ -100,7 +112,8 @@ where
 {
     let check_file = |file_entry: &T| {
         let file_entry_path_str = file_entry.get_path().to_string_lossy();
-        if let Some(used_file) = used_files.get(file_entry_path_str.as_ref()) {
+        let key: &str = file_entry_path_str.as_ref();
+        if let Some(used_file) = used_files.get(key) {
             if file_entry.get_size() != used_file.get_size() {
                 return false;
             }
@@ -149,7 +162,8 @@ where
 
     let check_file = |file_entry: &T| {
         let file_entry_path_str = file_entry.get_path().to_string_lossy();
-        if let Some((size, modification_date)) = used_files.get(file_entry_path_str.as_ref()) {
+        let key: &str = file_entry_path_str.as_ref();
+        if let Some((size, modification_date)) = used_files.get(key) {
             if file_entry.get_size() != *size {
                 return false;
             }
@@ -221,9 +235,13 @@ where
             };
         }
 
-        debug!("Starting removing outdated cache entries (removing non existent files from cache - {delete_outdated_cache})");
+        let should_clean = should_clean_cache(cache_file_name);
+        debug!("Starting removing outdated cache entries (removing non existent files from cache - {delete_outdated_cache}, should_clean - {should_clean})");
         let initial_number_of_entries = vec_loaded_entries.len();
         let deleting_start_time = std::time::Instant::now();
+
+        let effective_delete_outdated = delete_outdated_cache && should_clean;
+
         vec_loaded_entries = vec_loaded_entries
             .into_par_iter()
             .filter(|file_entry| {
@@ -231,13 +249,18 @@ where
                     return false;
                 }
 
-                if delete_outdated_cache && !file_entry.get_path().exists() {
+                if effective_delete_outdated && !file_entry.get_path().exists() {
                     return false;
                 }
 
                 true
             })
             .collect();
+
+        if effective_delete_outdated {
+            update_cleaning_timestamp(cache_file_name);
+        }
+
         debug!(
             "Completed removing outdated cache entries, removed {} out of all {} entries in {:?}",
             initial_number_of_entries - vec_loaded_entries.len(),
@@ -330,7 +353,7 @@ mod tests {
 
     static INIT: Once = Once::new();
 
-    fn setup_cache_path() {
+    pub(crate) fn setup_cache_path() {
         INIT.call_once(|| {
             let temp_cache_dir = TempDir::new().expect("Failed to create temp cache dir");
             let temp_config_dir = TempDir::new().expect("Failed to create temp config dir");

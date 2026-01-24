@@ -7,6 +7,7 @@ use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use humansize::BINARY;
 
+use crate::common::consts::EXIF_FILES_EXTENSIONS;
 use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
@@ -91,7 +92,7 @@ impl Search for ExifRemover {
         let start_time = Instant::now();
 
         let () = (|| {
-            if self.prepare_items().is_err() {
+            if self.prepare_items(Some(EXIF_FILES_EXTENSIONS)).is_err() {
                 return;
             }
             if self.find_exif_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {

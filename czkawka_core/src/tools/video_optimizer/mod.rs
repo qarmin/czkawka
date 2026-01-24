@@ -108,6 +108,9 @@ pub enum VideoOptimizerParameters {
 #[derive(Clone, Eq, PartialEq, Debug)]
 pub struct VideoTranscodeParams {
     pub excluded_codecs: Vec<String>,
+    pub generate_thumbnails: bool,
+    pub thumbnail_video_percentage_from_start: u8,
+    pub generate_thumbnail_grid_instead_of_single: bool,
 }
 #[derive(Clone, PartialEq, Debug)]
 pub struct VideoCropParams {
@@ -116,12 +119,18 @@ pub struct VideoCropParams {
     pub(crate) black_bar_min_percentage: u8,
     pub(crate) max_samples: usize,
     pub(crate) min_crop_size: u32,
+    pub generate_thumbnails: bool,
+    pub thumbnail_video_percentage_from_start: u8,
+    pub generate_thumbnail_grid_instead_of_single: bool,
 }
 
 impl VideoTranscodeParams {
     pub fn new() -> Self {
         Self {
             excluded_codecs: vec!["h265".to_string(), "av1".to_string(), "vp9".to_string()],
+            generate_thumbnails: false,
+            thumbnail_video_percentage_from_start: 10,
+            generate_thumbnail_grid_instead_of_single: false,
         }
     }
 }
@@ -147,6 +156,9 @@ impl VideoCropParams {
             black_bar_min_percentage,
             max_samples,
             min_crop_size,
+            generate_thumbnails: false,
+            thumbnail_video_percentage_from_start: 10,
+            generate_thumbnail_grid_instead_of_single: false,
         }
     }
 }
@@ -161,6 +173,10 @@ pub struct VideoTranscodeEntry {
     pub codec: String,
     pub width: u32,
     pub height: u32,
+    pub duration: Option<f64>,
+
+    #[serde(skip)] // Saving it to cache is bad idea, because cache can be moved to another locations
+    pub thumbnail_path: Option<PathBuf>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -174,6 +190,10 @@ pub struct VideoCropEntry {
     pub width: u32,
     pub height: u32,
     pub new_image_dimensions: Option<(u32, u32, u32, u32)>,
+    pub duration: Option<f64>,
+
+    #[serde(skip)] // Saving it to cache is bad idea, because cache can be moved to another locations
+    pub thumbnail_path: Option<PathBuf>,
 }
 
 impl ResultEntry for VideoTranscodeEntry {
@@ -210,6 +230,8 @@ impl FileEntry {
             codec: String::new(),
             width: 0,
             height: 0,
+            duration: None,
+            thumbnail_path: None,
         }
     }
 
@@ -223,6 +245,8 @@ impl FileEntry {
             width: 0,
             height: 0,
             new_image_dimensions: None,
+            duration: None,
+            thumbnail_path: None,
         }
     }
 }

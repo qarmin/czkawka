@@ -40,7 +40,7 @@ impl Search for DuplicateFinder {
         let start_time = Instant::now();
 
         let () = (|| {
-            if self.prepare_items().is_err() {
+            if self.prepare_items(None).is_err() {
                 return;
             }
             self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty() || !self.common_data.directories.reference_files.is_empty();

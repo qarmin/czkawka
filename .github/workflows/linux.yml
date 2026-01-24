@@ -109,7 +109,7 @@ jobs:
             czkawka_all.7z
 
       - name: Release
-        if: ${{ github.ref == 'refs/heads/master' && env.HAVE_PAT_REPOSITORY_TOKEN == '1' }}
+        if: ${{ github.ref == 'refs/heads/master' && vars.HAVE_PAT_REPOSITORY_TOKEN == '1' }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: "Nightly"
@@ -171,7 +171,7 @@ jobs:
 
       - name: Release
         uses: softprops/action-gh-release@v2
-        if: ${{ github.ref == 'refs/heads/master' && env.HAVE_PAT_REPOSITORY_TOKEN == '1' }}
+        if: ${{ github.ref == 'refs/heads/master' && vars.HAVE_PAT_REPOSITORY_TOKEN == '1' }}
         with:
           tag_name: "Nightly"
           files: |

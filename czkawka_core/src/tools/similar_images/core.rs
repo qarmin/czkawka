@@ -14,7 +14,6 @@ use log::{debug, error};
 use rayon::prelude::*;
 
 use crate::common::cache::{CACHE_IMAGE_VERSION, load_and_split_cache_generalized_by_path, save_and_connect_cache_generalized_by_path};
-use crate::common::consts::{HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, JXL_IMAGE_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult, inode, take_1_per_inode};
 use crate::common::image::get_dynamic_image_from_path;
 use crate::common::model::{ToolType, WorkContinueStatus};
@@ -41,20 +40,6 @@ impl SimilarImages {
 
     #[fun_time(message = "check_for_similar_images", level = "debug")]
     pub(crate) fn check_for_similar_images(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
-        if cfg!(feature = "heif") {
-            self.common_data
-                .extensions
-                .set_and_validate_allowed_extensions(&[IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS, JXL_IMAGE_EXTENSIONS, HEIC_EXTENSIONS].concat());
-        } else {
-            self.common_data
-                .extensions
-                .set_and_validate_allowed_extensions(&[IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS, JXL_IMAGE_EXTENSIONS].concat());
-        }
-
-        if !self.common_data.extensions.set_any_extensions() {
-            return WorkContinueStatus::Continue;
-        }
-
         let result = DirTraversalBuilder::new()
             .group_by(inode)
             .stop_flag(stop_flag)

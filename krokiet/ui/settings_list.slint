@@ -244,6 +244,8 @@ component Languages inherits HorizontalLayout {
 }
 
 export component SettingsList inherits VerticalLayout {
+    callback show_clean_cache_popup();
+
     preferred-height: 300px;
     preferred-width: 400px;
 
@@ -441,7 +443,7 @@ export component SettingsList inherits VerticalLayout {
 
             CheckBoxComponent {
                 name <=> Translations.settings_similar_videos_preview_text;
-                model <=> Settings.similar_videos_image_preview;
+                model <=> Settings.video_thumbnails_preview;
             }
 
             CheckBoxComponent {
@@ -454,9 +456,57 @@ export component SettingsList inherits VerticalLayout {
                 model <=> Settings.similar_videos_delete_outdated_entries;
             }
 
+            HeaderText {
+                text <=> Translations.settings_video_thumbnails_header_text;
+            }
+
             CheckBoxComponent {
-                name <=> Translations.settings_similar_videos_clear_unused_thumbnails_text;
-                model <=> Settings.similar_videos_clear_unused_thumbnails;
+                name <=> Translations.settings_video_thumbnails_generate_text;
+                model <=> Settings.video_thumbnails_generate;
+            }
+
+            CheckBoxComponent {
+                name <=> Translations.settings_video_thumbnails_clear_unused_thumbnails_text;
+                model <=> Settings.video_thumbnails_unused_thumbnails;
+            }
+
+            HorizontalLayout {
+                spacing: 5px;
+                Text {
+                    text <=> Translations.settings_video_thumbnails_position_text;
+                    vertical-alignment: TextVerticalAlignment.center;
+                    height: SettingsSize.item_height;
+                    font-size: FontSizes.normal;
+                }
+                Slider {
+                    height: SettingsSize.item_height;
+                    minimum <=> Settings.video_thumbnails_percentage_min;
+                    maximum <=> Settings.video_thumbnails_percentage_max;
+                    value <=> Settings.video_thumbnails_percentage;
+                }
+                Text {
+                    text: "(" + round(Settings.video_thumbnails_percentage) + "%)";
+                    vertical-alignment: TextVerticalAlignment.center;
+                    height: SettingsSize.item_height;
+                    font-size: FontSizes.normal;
+                    min-width: 60px;
+                }
+            }
+
+            CheckBoxComponent {
+                name <=> Translations.settings_video_thumbnails_generate_grid_text;
+                model <=> Settings.video_thumbnails_generate_grid;
+            }
+
+            HorizontalLayout {
+                spacing: 5px;
+                Text {
+                    text <=> Translations.settings_video_thumbnails_generate_grid_hint_text;
+                    vertical-alignment: TextVerticalAlignment.center;
+                    font-size: FontSizes.small;
+                    color: ColorPalette.hint_color;
+                    wrap: TextWrap.word-wrap;
+                }
             }
 
             HeaderText {
@@ -468,6 +518,17 @@ export component SettingsList inherits VerticalLayout {
                 model <=> Settings.similar_music_delete_outdated_entries;
             }
 
+
+            HeaderText {
+                text <=> Translations.settings_cache_header_text;
+            }
+
+            Button {
+                text <=> Translations.settings_clean_cache_button_text;
+                clicked => {
+                    root.show_clean_cache_popup();
+                }
+            }
 
             if Translations.settings_cache_number_size_text != "": HeaderText {
                 text <=> Translations.settings_cache_number_size_text;

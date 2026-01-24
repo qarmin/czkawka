@@ -134,7 +134,7 @@ pub enum CurrentStage {
     ExifRemoverCacheLoading,
     ExifRemoverExtractingTags,
     ExifRemoverCacheSaving,
-    VideoOptimizerProcessingImages,
+    VideoOptimizerCreatingThumbnails,
     VideoOptimizerProcessingVideos,
 }
 
@@ -211,7 +211,7 @@ impl ProgressData {
             CurrentStage::BrokenFilesChecking => Some(ToolType::BrokenFiles),
             CurrentStage::BadExtensionsChecking => Some(ToolType::BadExtensions),
             CurrentStage::ExifRemoverCacheLoading | CurrentStage::ExifRemoverExtractingTags | CurrentStage::ExifRemoverCacheSaving => Some(ToolType::ExifRemover),
-            CurrentStage::VideoOptimizerProcessingImages | CurrentStage::VideoOptimizerProcessingVideos => Some(ToolType::VideoOptimizer),
+            CurrentStage::VideoOptimizerCreatingThumbnails | CurrentStage::VideoOptimizerProcessingVideos => Some(ToolType::VideoOptimizer),
         };
         if let Some(tool_type) = tool_type_current_stage {
             assert_eq!(self.tool_type, tool_type, "Tool type: {:?}, stage {:?}", self.tool_type, self.sstage);
@@ -224,9 +224,9 @@ impl ToolType {
         match self {
             Self::Duplicate => 6,
             Self::EmptyFolders | Self::EmptyFiles | Self::InvalidSymlinks | Self::BigFile | Self::TemporaryFiles => 0,
-            Self::BrokenFiles | Self::BadExtensions | Self::VideoOptimizer => 1,
+            Self::BrokenFiles | Self::BadExtensions => 1,
+            Self::SimilarImages | Self::SimilarVideos | Self::VideoOptimizer => 2,
             Self::ExifRemover => 3,
-            Self::SimilarImages | Self::SimilarVideos => 2,
             Self::None => unreachable!("ToolType::None is not allowed"),
             Self::SameMusic => match checking_method {
                 CheckingMethod::AudioTags => 4,
@@ -271,7 +271,7 @@ impl CurrentStage {
             Self::SimilarVideosCreatingThumbnails => 2,
             Self::BrokenFilesChecking => 1,
             Self::BadExtensionsChecking => 1,
-            Self::VideoOptimizerProcessingImages => 1,
+            Self::VideoOptimizerCreatingThumbnails => 2,
             Self::VideoOptimizerProcessingVideos => 1,
             Self::SameMusicCacheLoadingTags => 1,
             Self::SameMusicReadingTags => 2,

@@ -6,6 +6,20 @@ use std::time::{Duration, Instant};
 
 use log::{error, warn};
 
+#[expect(clippy::needless_pass_by_ref_mut)]
+pub fn disable_windows_console_window(command: &mut Command) {
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::process::CommandExt;
+        const CREATE_NO_WINDOW: u32 = 0x08000000;
+        command.creation_flags(CREATE_NO_WINDOW);
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        let _ = command;
+    }
+}
+
 pub struct CommandOutput {
     pub status: std::process::ExitStatus,
     pub stdout: String,
@@ -16,6 +30,8 @@ pub fn run_command_interruptible(mut command: Command, stop_flag: &Arc<AtomicBoo
     if stop_flag.load(Ordering::Relaxed) {
         return None;
     }
+
+    disable_windows_console_window(&mut command);
 
     command.stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped());
 

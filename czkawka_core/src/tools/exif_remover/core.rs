@@ -13,7 +13,6 @@ use log::{debug, error, info};
 use rayon::prelude::*;
 
 use crate::common::cache::{CACHE_VERSION, load_and_split_cache_generalized_by_path, save_and_connect_cache_generalized_by_path};
-use crate::common::consts::EXIF_FILES_EXTENSIONS;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
@@ -52,10 +51,6 @@ impl ExifRemover {
 
     #[fun_time(message = "find_exif_files", level = "debug")]
     pub(crate) fn find_exif_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
-        self.common_data.extensions.set_and_validate_allowed_extensions(EXIF_FILES_EXTENSIONS);
-        if !self.common_data.extensions.set_any_extensions() {
-            return WorkContinueStatus::Continue;
-        }
         let result = DirTraversalBuilder::new()
             .common_data(&self.common_data)
             .group_by(|_fe| ())
@@ -191,7 +186,7 @@ impl ExifRemover {
         }
 
         self.exif_files = vec_file_entry.into_iter().filter(|f| f.error.is_none() && !f.exif_tags.is_empty()).collect();
-        self.exif_files.iter_mut().for_each(|file| file.exif_tags.sort_unstable_by_key(|tag| tag.name.clone()));
+        self.exif_files.iter_mut().for_each(|file| file.exif_tags.sort_unstable_by(|a, b| a.name.cmp(&b.name)));
 
         self.information.number_of_files_with_exif = self.exif_files.len();
         debug!("Found {} files with EXIF data.", self.information.number_of_files_with_exif);
@@ -203,7 +198,7 @@ impl ExifRemover {
 
     #[fun_time(message = "fix_files", level = "debug")]
     pub(crate) fn fix_files(&mut self, stop_flag: &Arc<AtomicBool>, _progress_sender: Option<&Sender<ProgressData>>, fix_params: ExifTagsFixerParams) -> WorkContinueStatus {
-        info!("Starting optimization of {} video files", self.exif_files.len());
+        info!("Starting EXIF tags removal on {} files.", self.exif_files.len());
 
         self.exif_files.par_iter_mut().for_each(|entry| {
             if check_if_stop_received(stop_flag) {

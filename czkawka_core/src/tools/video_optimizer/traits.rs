@@ -7,6 +7,7 @@ use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use humansize::{BINARY, format_size};
 
+use crate::common::consts::VIDEO_FILES_EXTENSIONS;
 use crate::common::ffmpeg_utils::check_if_ffprobe_ffmpeg_exists;
 use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;
@@ -139,7 +140,7 @@ impl Search for VideoOptimizer {
                 return;
             }
 
-            if self.prepare_items().is_err() {
+            if self.prepare_items(Some(VIDEO_FILES_EXTENSIONS)).is_err() {
                 return;
             }
             if self.scan_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {

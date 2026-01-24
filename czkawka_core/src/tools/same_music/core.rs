@@ -23,7 +23,6 @@ use symphonia::core::meta::MetadataOptions;
 use symphonia::core::probe::Hint;
 
 use crate::common::cache::{CACHE_VERSION, load_and_split_cache_generalized_by_path, save_and_connect_cache_generalized_by_path};
-use crate::common::consts::AUDIO_FILES_EXTENSIONS;
 use crate::common::create_crash_message;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{ToolType, WorkContinueStatus};
@@ -49,11 +48,6 @@ impl SameMusic {
 
     #[fun_time(message = "check_files", level = "debug")]
     pub(crate) fn check_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
-        self.common_data.extensions.set_and_validate_allowed_extensions(AUDIO_FILES_EXTENSIONS);
-        if !self.common_data.extensions.set_any_extensions() {
-            return WorkContinueStatus::Continue;
-        }
-
         let result = DirTraversalBuilder::new()
             .group_by(|_fe| ())
             .stop_flag(stop_flag)
@@ -302,9 +296,8 @@ impl SameMusic {
                 for file_entry in vec_file_entry {
                     if file_entry.bitrate != 0 {
                         let thing = file_entry.bitrate.to_string();
-                        if !thing.is_empty() {
-                            hash_map.entry(thing.clone()).or_default().push(file_entry);
-                        }
+
+                        hash_map.entry(thing).or_default().push(file_entry);
                     }
                 }
                 for (_title, vec_file_entry) in hash_map {

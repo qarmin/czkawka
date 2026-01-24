@@ -43,12 +43,19 @@ export global Settings {
     in-out property <bool> similar_images_delete_outdated_entries;
     in-out property <bool> similar_images_hide_hard_links;
 
-    in-out property <bool> similar_videos_image_preview;
+    in-out property <bool> video_thumbnails_preview;
     in-out property <bool> similar_videos_delete_outdated_entries;
     in-out property <bool> similar_videos_hide_hard_links;
-    in-out property <bool> similar_videos_clear_unused_thumbnails;
+    in-out property <bool> video_thumbnails_unused_thumbnails;
 
     in-out property <bool> similar_music_delete_outdated_entries;
+
+    // Video Thumbnails Global Settings
+    in-out property <bool> video_thumbnails_generate: false;
+    in-out property <float> video_thumbnails_percentage: 10;
+    in-out property <float> video_thumbnails_percentage_max: 99;
+    in-out property <float> video_thumbnails_percentage_min: 1;
+    in-out property <bool> video_thumbnails_generate_grid: false;
 
     // Allowed subsettings
     // Similar Images
@@ -97,11 +104,6 @@ export global Settings {
     in-out property <string> similar_videos_crop_detect_value: "letterbox";
     in-out property <int> similar_videos_crop_detect_index: 0;
 
-    in-out property <float> similar_videos_thumbnail_percentage: 10;
-    in-out property <float> similar_videos_thumbnail_percentage_max: 99;
-    in-out property <float> similar_videos_thumbnail_percentage_min: 1;
-
-    in-out property <bool> similar_videos_sub_generate_thumbnail_grid_instead_of_single_image: false;
 
     // Same Music
     in-out property <[string]> similar_music_sub_audio_check_type: ["Tags", "Fingerprint"];
@@ -189,7 +191,7 @@ export global Settings {
 
     out property <length> path_px: 350px;
     out property <length> name_px: 100px;
-    out property <length> mod_px: 155px;
+    out property <length> mod_px: 125px;
     out property <length> size_px: 75px;
 
     in-out property <[string]> duplicates_column_name: ["Selection", "Size", "File Name", "Path", "Modification Date"];

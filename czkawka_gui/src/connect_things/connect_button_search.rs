@@ -710,8 +710,8 @@ where
     component.set_excluded_paths(loaded_commons.excluded_directories.clone());
     component.set_reference_paths(loaded_commons.reference_directories.clone());
     component.set_recursive_search(loaded_commons.recursive_search);
-    component.set_allowed_extensions(loaded_commons.allowed_extensions.clone());
-    component.set_excluded_extensions(loaded_commons.excluded_extensions.clone());
+    component.set_allowed_extensions(loaded_commons.allowed_extensions.split(',').map(str::to_string).collect());
+    component.set_excluded_extensions(loaded_commons.excluded_extensions.split(',').map(str::to_string).collect());
     component.set_excluded_items(loaded_commons.excluded_items.clone());
     component.set_exclude_other_filesystems(loaded_commons.ignore_other_filesystems);
     component.set_use_cache(loaded_commons.use_cache);

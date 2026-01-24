@@ -408,9 +408,8 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_similar_images_delete_outdated_entries(custom_settings.similar_images_delete_outdated_entries);
     settings.set_similar_videos_hide_hard_links(custom_settings.similar_videos_hide_hard_links);
     settings.set_similar_videos_delete_outdated_entries(custom_settings.similar_videos_delete_outdated_entries);
-    settings.set_similar_videos_image_preview(custom_settings.similar_videos_image_preview);
-    settings.set_similar_videos_sub_generate_thumbnail_grid_instead_of_single_image(custom_settings.similar_videos_generate_thumbnail_grid_instead_of_single_image);
-    settings.set_similar_videos_clear_unused_thumbnails(custom_settings.similar_videos_clear_unused_thumbnails);
+    settings.set_video_thumbnails_preview(custom_settings.video_thumbnails_preview);
+    settings.set_video_thumbnails_unused_thumbnails(custom_settings.video_thumbnails_unused_thumbnails);
     settings.set_similar_music_compare_fingerprints_only_with_similar_titles(custom_settings.similar_music_compare_fingerprints_only_with_similar_titles);
     settings.set_similar_music_delete_outdated_entries(custom_settings.similar_music_delete_outdated_entries);
 
@@ -439,13 +438,17 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     );
     settings.set_similar_videos_vid_hash_duration_min(*ALLOWED_VID_HASH_DURATION.start() as f32);
     settings.set_similar_videos_vid_hash_duration_max(*ALLOWED_VID_HASH_DURATION.end() as f32);
-    settings.set_similar_videos_thumbnail_percentage(
+
+    // Video Thumbnails Global Settings
+    settings.set_video_thumbnails_generate(custom_settings.video_thumbnails_generate);
+    settings.set_video_thumbnails_percentage(
         custom_settings
-            .similar_videos_thumbnail_percentage
+            .video_thumbnails_percentage
             .clamp(DEFAULT_MIN_VIDEO_THUMBNAIL_POSITION_PERCENT, DEFAULT_MAX_VIDEO_THUMBNAIL_POSITION_PERCENT) as f32,
     );
-    settings.set_similar_videos_thumbnail_percentage_min(DEFAULT_MIN_VIDEO_THUMBNAIL_POSITION_PERCENT as f32);
-    settings.set_similar_videos_thumbnail_percentage_max(DEFAULT_MAX_VIDEO_THUMBNAIL_POSITION_PERCENT as f32);
+    settings.set_video_thumbnails_percentage_min(DEFAULT_MIN_VIDEO_THUMBNAIL_POSITION_PERCENT as f32);
+    settings.set_video_thumbnails_percentage_max(DEFAULT_MAX_VIDEO_THUMBNAIL_POSITION_PERCENT as f32);
+    settings.set_video_thumbnails_generate_grid(custom_settings.video_thumbnails_generate_grid);
 
     settings.set_similar_music_sub_approximate_comparison(custom_settings.similar_music_sub_approximate_comparison);
     settings.set_similar_music_sub_title(custom_settings.similar_music_sub_title);
@@ -495,7 +498,7 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     let sel_px = 35.0;
     let path_px = 350.0;
     let name_px = 100.0;
-    let mod_px = 155.0;
+    let mod_px = 125.0;
     let size_px = 75.0;
 
     let fnm = |default_model: &[f32], name: &str| {
@@ -575,9 +578,8 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
 
     let similar_videos_hide_hard_links = settings.get_similar_videos_hide_hard_links();
     let similar_videos_delete_outdated_entries = settings.get_similar_videos_delete_outdated_entries();
-    let similar_videos_image_preview = settings.get_similar_videos_image_preview();
-    let similar_videos_generate_thumbnail_grid_instead_of_single_image = settings.get_similar_videos_sub_generate_thumbnail_grid_instead_of_single_image();
-    let similar_videos_clear_unused_thumbnails = settings.get_similar_videos_clear_unused_thumbnails();
+    let video_thumbnails_preview = settings.get_video_thumbnails_preview();
+    let video_thumbnails_unused_thumbnails = settings.get_video_thumbnails_unused_thumbnails();
 
     let similar_music_compare_fingerprints_only_with_similar_titles = settings.get_similar_music_compare_fingerprints_only_with_similar_titles();
     let similar_music_delete_outdated_entries = settings.get_similar_music_delete_outdated_entries();
@@ -598,7 +600,11 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let similar_videos_crop_detect = combo_box_items.videos_crop_detect.config_name.clone();
     let similar_videos_skip_forward_amount = settings.get_similar_videos_skip_forward_amount() as u32;
     let similar_videos_vid_hash_duration = settings.get_similar_videos_vid_hash_duration() as u32;
-    let similar_videos_thumbnail_percentage = settings.get_similar_videos_thumbnail_percentage().round() as u8;
+
+    // Video Thumbnails Global Settings
+    let video_thumbnails_generate = settings.get_video_thumbnails_generate();
+    let video_thumbnails_percentage = settings.get_video_thumbnails_percentage().round() as u8;
+    let video_thumbnails_generate_grid = settings.get_video_thumbnails_generate_grid();
 
     let similar_music_sub_audio_check_type = combo_box_items.audio_check_type.config_name.clone();
     let similar_music_sub_approximate_comparison = settings.get_similar_music_sub_approximate_comparison();
@@ -677,9 +683,8 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         similar_images_show_image_preview,
         similar_images_delete_outdated_entries,
         similar_videos_delete_outdated_entries,
-        similar_videos_image_preview,
-        similar_videos_generate_thumbnail_grid_instead_of_single_image,
-        similar_videos_clear_unused_thumbnails,
+        video_thumbnails_preview,
+        video_thumbnails_unused_thumbnails,
         similar_music_delete_outdated_entries,
         similar_images_sub_hash_size,
         similar_images_sub_hash_alg,
@@ -713,7 +718,9 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         similar_videos_skip_forward_amount,
         similar_videos_vid_hash_duration,
         similar_videos_crop_detect,
-        similar_videos_thumbnail_percentage,
+        video_thumbnails_generate,
+        video_thumbnails_percentage,
+        video_thumbnails_generate_grid,
         video_optimizer_mode,
         video_optimizer_crop_type,
         video_optimizer_black_pixel_threshold,

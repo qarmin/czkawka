@@ -86,11 +86,9 @@ pub struct SettingsCustom {
     #[serde(default = "ttrue")]
     pub similar_videos_delete_outdated_entries: bool,
     #[serde(default = "ttrue")]
-    pub similar_videos_image_preview: bool,
-    #[serde(default)]
-    pub similar_videos_generate_thumbnail_grid_instead_of_single_image: bool,
+    pub video_thumbnails_preview: bool,
     #[serde(default = "ttrue")]
-    pub similar_videos_clear_unused_thumbnails: bool,
+    pub video_thumbnails_unused_thumbnails: bool,
     #[serde(default = "ttrue")]
     pub similar_music_delete_outdated_entries: bool,
     #[serde(default = "default_sub_hash_size")]
@@ -157,8 +155,12 @@ pub struct SettingsCustom {
     pub similar_videos_vid_hash_duration: u32,
     #[serde(default = "default_similar_videos_crop_detect")]
     pub similar_videos_crop_detect: String,
+    #[serde(default)]
+    pub video_thumbnails_generate: bool,
     #[serde(default = "default_similar_videos_thumbnail_percentage")]
-    pub similar_videos_thumbnail_percentage: u8,
+    pub video_thumbnails_percentage: u8,
+    #[serde(default)]
+    pub video_thumbnails_generate_grid: bool,
     #[serde(default = "default_video_optimizer_mode")]
     pub video_optimizer_mode: String,
     #[serde(default = "default_video_optimizer_crop_type")]

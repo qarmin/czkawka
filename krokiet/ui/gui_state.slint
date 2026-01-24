@@ -1,4 +1,4 @@
-import { ActiveTab, BottomPanelVisibility, SelectMode, SelectModel, SortMode, SortModel } from "common.slint";
+import { ActiveTab, BottomPanelVisibility, CacheCleaningProgress, CacheCleaningResult, SelectMode, SelectModel, SortMode, SortModel } from "common.slint";
 import { Translations } from "translations.slint";
 
 // State Gui state that shows the current state of the GUI
@@ -80,4 +80,22 @@ export global GuiState {
     in-out property <int> selected_results_exif_remover2: 0;
     in-out property <int> selected_results_video_optimizer: 0;
     in-out property <int> selected_results_video_optimizer2: 0;
+
+    in-out property <bool> cache_cleaning_is_cleaning: false;
+    in-out property <bool> cache_cleaning_finished: false;
+    in-out property <CacheCleaningProgress> cache_cleaning_progress: {
+        current_cache_file: 0,
+        total_cache_files: 0,
+        current_file_name: "",
+        checked_entries: 0,
+        all_entries: 0,
+    };
+    in-out property <CacheCleaningResult> cache_cleaning_result: {
+        processed_files_text: "",
+        entries_stats_text: "",
+        size_stats_text: "",
+        time_text: "",
+        errors_count: 0,
+        errors: "",
+    };
 }

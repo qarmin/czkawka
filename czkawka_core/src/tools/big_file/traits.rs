@@ -84,7 +84,7 @@ impl Search for BigFile {
         let start_time = Instant::now();
 
         let () = (|| {
-            if self.prepare_items().is_err() {
+            if self.prepare_items(None).is_err() {
                 return;
             }
             if self.look_for_big_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {

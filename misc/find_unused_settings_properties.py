@@ -104,25 +104,25 @@ def main() -> None:
     print("=" * 80)
 
     if missing_both:
-        print(f"\n Properties with NO getter AND NO setter ({len(missing_both)}):")
+        print(f"\nProperties with NO getter AND NO setter ({len(missing_both)}):")
         print("-" * 80)
         for prop_name, prop_type in missing_both:
             print(f"  • {prop_name:<50} <{prop_type}>")
 
     if missing_getters:
-        print(f"\n  Properties with NO getter (but has setter) ({len(missing_getters)}):")
+        print(f"\nProperties with NO getter (but has setter) ({len(missing_getters)}):")
         print("-" * 80)
         for prop_name, prop_type in missing_getters:
             print(f"  • {prop_name:<50} <{prop_type}>")
 
     if missing_setters:
-        print(f"\n  Properties with NO setter (but has getter) ({len(missing_setters)}):")
+        print(f"\nProperties with NO setter (but has getter) ({len(missing_setters)}):")
         print("-" * 80)
         for prop_name, prop_type in missing_setters:
             print(f"  • {prop_name:<50} <{prop_type}>")
 
     if not missing_both and not missing_getters and not missing_setters:
-        print("\n✅ All properties have both getters and setters!")
+        print("\nAll properties have both getters and setters!")
 
     # Summary
     print("\n" + "=" * 80)
