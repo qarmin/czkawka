@@ -527,7 +527,7 @@ impl ActiveTab {
 
     pub(crate) fn get_int_pixel_count_idx(self) -> usize {
         match self {
-            Self::SimilarImages => IntDataSimilarImages::PixelsPart1 as usize,
+            Self::SimilarImages => IntDataSimilarImages::PixelCount as usize,
             Self::Settings | Self::About => panic!("Button should be disabled"),
             _ => panic!("Unable to get total pixel count from this tab"),
         }
