@@ -116,9 +116,7 @@ fn extract_comparable_field(model: &MainListModel, property: Property, active_ta
             connect_i32_into_u64(high, low)
         }
         Property::PathLength => val_strs.nth(active_tab.get_str_path_idx()).expect("can find file path property").len() as u64,
-        Property::Resolution => {
-            val_ints.nth(active_tab.get_int_pixel_count_idx()).expect("can find pixel count proerty") as u64
-        }
+        Property::Resolution => val_ints.nth(active_tab.get_int_pixel_count_idx()).expect("can find pixel count proerty") as u64,
     }
 }
 
