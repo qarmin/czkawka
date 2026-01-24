@@ -30,8 +30,9 @@
     - Invalid Symbolic Links - Shows symbolic links which point to non-existent files/directories
     - Broken Files - Finds files that are invalid or corrupted
     - Bad Extensions - Lists files whose content not match with their extension
-    - Exif Remover - Tool to remove Exif metadata from various file types
-    - Video Optimizer - Converts videos to more efficient formats
+    - Exif Remover - Removes Exif metadata from various file types
+    - Video Optimizer - Crops from static parts and converts videos to more efficient formats
+    - Bad Names - Finds files and folders with names?
 
 ![Krokiet](https://github.com/user-attachments/assets/720e98c3-598a-41aa-a04b-0c0c1d8a28e6)
 

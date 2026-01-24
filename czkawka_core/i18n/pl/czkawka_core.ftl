@@ -28,3 +28,10 @@ core_messages_limit_reached_characters = Liczba wiadomości przekroczyła ustalo
 core_messages_limit_reached_lines = Liczba wiadomości przekroczyła ustalony limit ({ $current }/{ $limit } linii), więc wynik został obcięty. Aby odczytać pełne wyjście, wyłącz opcję ograniczenia liczby linii w ustawieniach.
 rust_error_moving_to_trash = Błąd podczas przenoszenia "{ $file }" do kosza: { $error }
 rust_error_removing = Błąd podczas usuwania "{ $file }": { $error }
+
+core_bad_name_uppercase_extension = Wielkie litery w rozszerzeniu
+core_bad_name_emoji_used = Użyto emoji
+core_bad_name_space_at_start_end = Spacja na początku/końcu
+core_bad_name_non_ascii = Znaki spoza ASCII
+core_bad_name_restricted_charset = Ograniczony zestaw znaków
+
