@@ -117,15 +117,9 @@ fn extract_comparable_field(model: &MainListModel, property: Property, active_ta
         }
         Property::PathLength => val_strs.nth(active_tab.get_str_path_idx()).expect("can find file path property").len() as u64,
         Property::Resolution => {
-            let h_idx = active_tab.get_int_height_idx();
-            let w_idx = active_tab.get_int_width_idx();
-            assert_ne! {h_idx, w_idx, "file height and width must be stored in separate properties"};
-            let min = h_idx.min(w_idx);
-            let diff = h_idx.abs_diff(w_idx);
-            let dim1 = val_ints.nth(min).expect("can find dimension property");
-            // nth is zero indexed, therefore if |h_idx - w_idx| = 1, we want the immediate next int value
-            let dim2 = val_ints.nth(diff - 1).expect("can find dimension property");
-            (dim1 * dim2) as u64
+            let high = val_ints.nth(active_tab.get_int_pixel_count_idx()).expect("can find pixel count proerty");
+            let low = val_ints.next().expect("can find pixel count proerty");
+            connect_i32_into_u64(high, low)
         }
     }
 }
