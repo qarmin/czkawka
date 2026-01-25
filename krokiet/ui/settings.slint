@@ -129,6 +129,13 @@ export global Settings {
     in-out property <bool> broken_files_sub_image: false;
     in-out property <bool> broken_files_sub_video: false;
 
+    // Bad Names
+    in-out property <bool> bad_names_sub_uppercase_extension: true;
+    in-out property <bool> bad_names_sub_emoji_used: true;
+    in-out property <bool> bad_names_sub_space_at_start_end: true;
+    in-out property <bool> bad_names_sub_non_ascii: true;
+    in-out property <bool> bad_names_sub_restricted_charset: true;
+
     // Video Optimizer
     in-out property <[string]> video_optimizer_sub_mode: ["Crop", "Transcode"];
     in-out property <int> video_optimizer_sub_mode_index: 1;

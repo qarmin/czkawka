@@ -185,7 +185,7 @@ pub fn check_file_name(path: &Path, checked_issues: NameIssues) -> Option<NameIs
 }
 
 fn is_allowed_char(c: char) -> bool {
-    c.is_ascii_alphanumeric() || c == ' ' || c == '_' || c == '.'
+    c.is_ascii_graphic() || c == ' '
 }
 
 pub fn generate_fixed_name(path: &Path, fix_params: &NameFixerParams) -> Option<String> {

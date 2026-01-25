@@ -18,7 +18,14 @@ pub(crate) fn scan_bad_names(a: Weak<MainWindow>, sd: ScanData) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let params = BadNamesParameters::default(); // TODO
+            let checked_issues = czkawka_core::tools::bad_names::NameIssues {
+                uppercase_extension: sd.custom_settings.bad_names_sub_uppercase_extension,
+                emoji_used: sd.custom_settings.bad_names_sub_emoji_used,
+                space_at_start_or_end: sd.custom_settings.bad_names_sub_space_at_start_end,
+                non_ascii_name: sd.custom_settings.bad_names_sub_non_ascii,
+                restricted_charset: sd.custom_settings.bad_names_sub_restricted_charset,
+            };
+            let params = BadNamesParameters::new(checked_issues);
             let mut tool = BadNames::new(params);
             set_common_settings(&mut tool, &sd.custom_settings, &sd.stop_flag);
             tool.search(&sd.stop_flag, Some(&sd.progress_sender));

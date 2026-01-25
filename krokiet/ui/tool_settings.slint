@@ -359,6 +359,42 @@ export component ToolSettings {
         }
 
         VerticalLayout {
+            visible: GuiState.active_tab == ActiveTab.BadNames;
+            spacing: 5px;
+            padding: 10px;
+            SubsettingsHeader { }
+
+            LabelText { label_text: Translations.subsettings_bad_names_issues_text; }
+
+            CheckBoxWrapper {
+                text: Translations.subsettings_bad_names_uppercase_extension_text;
+                checked <=> Settings.bad_names_sub_uppercase_extension;
+            }
+
+            CheckBoxWrapper {
+                text: Translations.subsettings_bad_names_emoji_used_text;
+                checked <=> Settings.bad_names_sub_emoji_used;
+            }
+
+            CheckBoxWrapper {
+                text: Translations.subsettings_bad_names_space_at_start_end_text;
+                checked <=> Settings.bad_names_sub_space_at_start_end;
+            }
+
+            CheckBoxWrapper {
+                text: Translations.subsettings_bad_names_non_ascii_text;
+                checked <=> Settings.bad_names_sub_non_ascii;
+            }
+
+            CheckBoxWrapper {
+                text: Translations.subsettings_bad_names_restricted_charset_text;
+                checked <=> Settings.bad_names_sub_restricted_charset;
+            }
+
+            Rectangle { }
+        }
+
+        VerticalLayout {
             visible: GuiState.active_tab == ActiveTab.VideoOptimizer;
             spacing: 5px;
             padding: 10px;

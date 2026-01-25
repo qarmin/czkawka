@@ -466,6 +466,12 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_broken_files_sub_image(custom_settings.broken_files_sub_image);
     settings.set_broken_files_sub_video(custom_settings.broken_files_sub_video);
 
+    settings.set_bad_names_sub_uppercase_extension(custom_settings.bad_names_sub_uppercase_extension);
+    settings.set_bad_names_sub_emoji_used(custom_settings.bad_names_sub_emoji_used);
+    settings.set_bad_names_sub_space_at_start_end(custom_settings.bad_names_sub_space_at_start_end);
+    settings.set_bad_names_sub_non_ascii(custom_settings.bad_names_sub_non_ascii);
+    settings.set_bad_names_sub_restricted_charset(custom_settings.bad_names_sub_restricted_charset);
+
     settings.set_video_optimizer_sub_excluded_codecs(custom_settings.video_optimizer_excluded_codecs.clone().into());
     settings.set_video_optimizer_sub_black_pixel_threshold(custom_settings.video_optimizer_black_pixel_threshold.to_string().into());
     settings.set_video_optimizer_sub_black_bar_min_percentage(custom_settings.video_optimizer_black_bar_min_percentage.to_string().into());
@@ -526,7 +532,7 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
         settings.set_bad_extensions_column_size(fnm(&[sel_px, name_px, path_px, 40.0, 200.0], "bad_extensions"));
         settings.set_exif_remover_column_size(fnm(&[sel_px, size_px, name_px, path_px, 300.0, mod_px], "exif_remover"));
         settings.set_video_optimizer_column_size(fnm(&[sel_px, size_px, name_px, path_px, 100.0, 120.0, 160.0, mod_px], "video_optimizer"));
-        settings.set_bad_names_column_size(fnm(&[sel_px, name_px, path_px, 50.0], "bad_names"));
+        settings.set_bad_names_column_size(fnm(&[sel_px, name_px, path_px, 250.0], "bad_names"));
     }
 
     // Clear text
@@ -623,6 +629,12 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let broken_files_sub_image = settings.get_broken_files_sub_image();
     let broken_files_sub_video = settings.get_broken_files_sub_video();
 
+    let bad_names_sub_uppercase_extension = settings.get_bad_names_sub_uppercase_extension();
+    let bad_names_sub_emoji_used = settings.get_bad_names_sub_emoji_used();
+    let bad_names_sub_space_at_start_end = settings.get_bad_names_sub_space_at_start_end();
+    let bad_names_sub_non_ascii = settings.get_bad_names_sub_non_ascii();
+    let bad_names_sub_restricted_charset = settings.get_bad_names_sub_restricted_charset();
+
     let video_optimizer_mode = combo_box_items.video_optimizer_mode.config_name.clone();
     let video_optimizer_crop_type = combo_box_items.video_optimizer_crop_type.config_name.clone();
     let video_optimizer_video_codec = combo_box_items.video_optimizer_video_codec.config_name;
@@ -716,6 +728,11 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         broken_files_sub_archive,
         broken_files_sub_image,
         broken_files_sub_video,
+        bad_names_sub_uppercase_extension,
+        bad_names_sub_emoji_used,
+        bad_names_sub_space_at_start_end,
+        bad_names_sub_non_ascii,
+        bad_names_sub_restricted_charset,
         similar_videos_skip_forward_amount,
         similar_videos_vid_hash_duration,
         similar_videos_crop_detect,
