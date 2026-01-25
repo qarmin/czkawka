@@ -193,17 +193,17 @@ pub fn generate_fixed_name(path: &Path, fix_params: &NameFixerParams) -> Option<
     let mut stem = path.file_stem()?.to_string_lossy().to_string();
     let mut extension = path.extension().map(|e| e.to_string_lossy().to_string());
 
-    if fix_params.fix_space_at_start_or_end {
-        stem = stem.trim().to_string();
-        if let Some(ref mut ext) = extension {
-            *ext = ext.trim().to_string();
-        }
-    }
-
     if fix_params.fix_emoji {
         stem = stem.chars().filter(|c| !is_emoji(*c)).collect();
         if let Some(ref mut ext) = extension {
             *ext = ext.chars().filter(|c| !is_emoji(*c)).collect();
+        }
+    }
+
+    if let Some(method) = fix_params.fix_restricted_charset {
+        stem = fix_restricted_charset(&stem, method);
+        if let Some(ref mut ext) = extension {
+            *ext = fix_restricted_charset(ext, method);
         }
     }
 
@@ -214,10 +214,10 @@ pub fn generate_fixed_name(path: &Path, fix_params: &NameFixerParams) -> Option<
         }
     }
 
-    if let Some(method) = fix_params.fix_restricted_charset {
-        stem = fix_restricted_charset(&stem, method);
+    if fix_params.fix_space_at_start_or_end {
+        stem = stem.trim().to_string();
         if let Some(ref mut ext) = extension {
-            *ext = fix_restricted_charset(ext, method);
+            *ext = ext.trim().to_string();
         }
     }
 
