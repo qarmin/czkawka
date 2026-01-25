@@ -11,14 +11,13 @@ use serde::{Deserialize, Serialize};
 use crate::common::model::FileEntry;
 use crate::common::tool_data::CommonToolData;
 use crate::common::traits::ResultEntry;
-use crate::flc;
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct BadNameEntry {
     pub path: PathBuf,
     pub modified_date: u64,
     pub size: u64,
-    pub new_name: String, // File name - not full path
+    pub new_name: String,
 }
 
 impl ResultEntry for BadNameEntry {
@@ -39,7 +38,7 @@ pub struct NameIssues {
     pub emoji_used: bool,
     pub space_at_start_or_end: bool,
     pub non_ascii_graphical: bool,
-    pub restricted_charset_allowed: Vec<char>,
+    pub restricted_charset_allowed: Option<Vec<char>>,
     pub remove_duplicated_non_alphanumeric: bool,
 }
 
@@ -50,7 +49,7 @@ impl NameIssues {
             emoji_used: true,
             space_at_start_or_end: true,
             non_ascii_graphical: true,
-            restricted_charset_allowed: vec![], // Empty vec means only 0-9a-zA-Z allowed
+            restricted_charset_allowed: Some(Vec::new()),
             remove_duplicated_non_alphanumeric: true,
         }
     }
@@ -64,35 +63,8 @@ impl NameIssues {
             && !self.emoji_used
             && !self.space_at_start_or_end
             && !self.non_ascii_graphical
-            && self.restricted_charset_allowed.is_empty()
+            && self.restricted_charset_allowed.is_none()
             && !self.remove_duplicated_non_alphanumeric
-    }
-
-    pub fn has_any(&self) -> bool {
-        !self.is_empty()
-    }
-
-    pub fn to_string_list(&self) -> Vec<String> {
-        let mut issues = Vec::new();
-        if self.uppercase_extension {
-            issues.push(flc!("core_bad_name_uppercase_extension"));
-        }
-        if self.emoji_used {
-            issues.push(flc!("core_bad_name_emoji_used"));
-        }
-        if self.space_at_start_or_end {
-            issues.push(flc!("core_bad_name_space_at_start_end"));
-        }
-        if self.non_ascii_graphical {
-            issues.push(flc!("core_bad_name_non_ascii"));
-        }
-        if !self.restricted_charset_allowed.is_empty() {
-            issues.push(flc!("core_bad_name_restricted_charset"));
-        }
-        if self.remove_duplicated_non_alphanumeric {
-            issues.push("Duplicated non-alphanumeric chars".to_string());
-        }
-        issues
     }
 }
 

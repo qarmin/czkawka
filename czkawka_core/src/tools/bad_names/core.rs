@@ -203,11 +203,11 @@ pub fn check_and_generate_new_name(path: &Path, checked_issues: &NameIssues) -> 
     }
 
     // Check and fix restricted charset
-    if !checked_issues.restricted_charset_allowed.is_empty() {
+    if let Some(allowed_chars) = &checked_issues.restricted_charset_allowed {
         let original_stem = stem.clone();
         stem = stem
             .chars()
-            .filter(|c| is_alphanumeric(*c) || checked_issues.restricted_charset_allowed.contains(c))
+            .filter(|c| is_alphanumeric(*c) || allowed_chars.contains(c))
             .collect();
         if stem != original_stem {
             has_issues = true;
@@ -217,7 +217,7 @@ pub fn check_and_generate_new_name(path: &Path, checked_issues: &NameIssues) -> 
             let original_ext = ext.clone();
             *ext = ext
                 .chars()
-                .filter(|c| is_alphanumeric(*c) || checked_issues.restricted_charset_allowed.contains(c))
+                .filter(|c| is_alphanumeric(*c) || allowed_chars.contains(c))
                 .collect();
             if ext != &original_ext {
                 has_issues = true;

@@ -509,7 +509,7 @@ mod tests2 {
             emoji_used: true,
             space_at_start_or_end: true,
             non_ascii_graphical: true,
-            restricted_charset_allowed: vec!['_', '-', ' '],
+            restricted_charset_allowed: Some(vec!['_', '-', ' ']),
             remove_duplicated_non_alphanumeric: true,
         };
 

@@ -157,6 +157,8 @@ pub struct SettingsCustom {
     pub bad_names_sub_space_at_start_end: bool,
     #[serde(default = "ttrue")]
     pub bad_names_sub_non_ascii: bool,
+    #[serde(default)]
+    pub bad_names_sub_restricted_charset_enabled: bool,
     #[serde(default = "default_bad_names_restricted_charset")]
     pub bad_names_sub_restricted_charset: Vec<char>,
     #[serde(default)]

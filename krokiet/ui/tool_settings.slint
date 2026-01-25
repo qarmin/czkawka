@@ -386,9 +386,16 @@ export component ToolSettings {
                 checked <=> Settings.bad_names_sub_non_ascii;
             }
 
+            CheckBoxWrapper {
+                text: Translations.subsettings_bad_names_restricted_charset_text;
+                checked <=> Settings.bad_names_sub_restricted_charset_enabled;
+            }
+
             HorizontalLayout {
+                visible: Settings.bad_names_sub_restricted_charset_enabled;
+                spacing: 5px;
                 Text {
-                    text: Translations.subsettings_bad_names_restricted_charset_text;
+                    text: "Allowed chars:";
                     vertical-alignment: center;
                 }
                 LineEdit {

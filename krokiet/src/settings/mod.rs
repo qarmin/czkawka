@@ -470,6 +470,7 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_bad_names_sub_emoji_used(custom_settings.bad_names_sub_emoji_used);
     settings.set_bad_names_sub_space_at_start_end(custom_settings.bad_names_sub_space_at_start_end);
     settings.set_bad_names_sub_non_ascii(custom_settings.bad_names_sub_non_ascii);
+    settings.set_bad_names_sub_restricted_charset_enabled(custom_settings.bad_names_sub_restricted_charset_enabled);
     settings.set_bad_names_sub_restricted_charset(custom_settings.bad_names_sub_restricted_charset.iter().collect::<String>().into());
     settings.set_bad_names_sub_remove_duplicated(custom_settings.bad_names_sub_remove_duplicated);
 
@@ -634,6 +635,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let bad_names_sub_emoji_used = settings.get_bad_names_sub_emoji_used();
     let bad_names_sub_space_at_start_end = settings.get_bad_names_sub_space_at_start_end();
     let bad_names_sub_non_ascii = settings.get_bad_names_sub_non_ascii();
+    let bad_names_sub_restricted_charset_enabled = settings.get_bad_names_sub_restricted_charset_enabled();
     let bad_names_sub_restricted_charset: Vec<char> = settings.get_bad_names_sub_restricted_charset().chars().collect();
     let bad_names_sub_remove_duplicated = settings.get_bad_names_sub_remove_duplicated();
 
@@ -734,6 +736,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         bad_names_sub_emoji_used,
         bad_names_sub_space_at_start_end,
         bad_names_sub_non_ascii,
+        bad_names_sub_restricted_charset_enabled,
         bad_names_sub_restricted_charset,
         bad_names_sub_remove_duplicated,
         similar_videos_skip_forward_amount,
