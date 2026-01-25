@@ -10,6 +10,8 @@ type SelectionResult = (u64, u64, ModelRc<MainListModel>);
 // TODO optimize this, not sure if it is possible to not copy entire model to just select item
 // https://github.com/slint-ui/slint/discussions/4595
 pub(crate) fn connect_select(app: &MainWindow) {
+    set_select_buttons(app);
+
     let a = app.as_weak();
     app.global::<Callabler>().on_select_items(move |select_mode| {
         let app = a.upgrade().expect("Failed to upgrade app :(");
@@ -42,17 +44,7 @@ enum Property {
     Resolution,
 }
 
-pub(crate) fn connect_showing_proper_select_buttons(app: &MainWindow) {
-    set_select_buttons(app);
-    let a = app.as_weak();
-    app.global::<Callabler>().on_tab_changed(move || {
-        log::error!("Tab changed - updating select buttons");
-        let app = a.upgrade().expect("Failed to upgrade app :(");
-        set_select_buttons(&app);
-    });
-}
-
-fn set_select_buttons(app: &MainWindow) {
+pub(crate) fn set_select_buttons(app: &MainWindow) {
     let active_tab = app.global::<GuiState>().get_active_tab();
     let mut base_buttons = vec![SelectMode::SelectAll, SelectMode::UnselectAll, SelectMode::InvertSelection];
 
@@ -92,8 +84,6 @@ fn set_select_buttons(app: &MainWindow) {
     base_buttons.extend(additional_buttons);
     base_buttons.reverse();
 
-    dbg!(&base_buttons);
-
     let new_select_model = base_buttons
         .into_iter()
         .map(|e| SelectModel {
@@ -101,7 +91,6 @@ fn set_select_buttons(app: &MainWindow) {
             data: e,
         })
         .collect::<Vec<_>>();
-    dbg!(&new_select_model);
 
     app.global::<GuiState>().set_select_results_list(ModelRc::new(VecModel::from(new_select_model)));
 }

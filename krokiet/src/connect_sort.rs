@@ -60,6 +60,8 @@ pub(crate) fn connect_sort_column(app: &MainWindow) {
 }
 
 pub(crate) fn connect_sort(app: &MainWindow) {
+    set_sort_buttons(app);
+
     let a = app.as_weak();
     app.global::<Callabler>().on_sort_items(move |sort_mode| {
         let app = a.upgrade().expect("Failed to upgrade app :(");
@@ -76,17 +78,7 @@ pub(crate) fn connect_sort(app: &MainWindow) {
     });
 }
 
-pub(crate) fn connect_showing_proper_sort_buttons(app: &MainWindow) {
-    set_sort_buttons(app);
-    let a = app.as_weak();
-    app.global::<Callabler>().on_tab_changed(move || {
-        log::error!("Tab changed3 - updating select buttons");
-        let app = a.upgrade().expect("Failed to upgrade app :(");
-        set_sort_buttons(&app);
-    });
-}
-
-fn set_sort_buttons(app: &MainWindow) {
+pub(crate) fn set_sort_buttons(app: &MainWindow) {
     let mut base_buttons = vec![SortMode::FullName, SortMode::Reverse, SortMode::Selection];
     base_buttons.reverse();
 

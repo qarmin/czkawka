@@ -7,7 +7,7 @@ use czkawka_core::common::cache::{CacheProgressCleaning, clean_all_cache_files};
 use humansize::{BINARY, format_size};
 use slint::ComponentHandle;
 
-use crate::connect_size_of_config_cache::{SizeCountResult, update_cache_sizes};
+use crate::create_calculate_task_size::{SizeCountResult, update_cache_sizes};
 use crate::{CacheCleaningProgress, CacheCleaningResult, Callabler, GuiState, MainWindow, flk};
 
 pub(crate) fn connect_clean_cache(app: &MainWindow, cache_size_task_sender: std::sync::mpsc::Sender<std::sync::mpsc::Sender<SizeCountResult>>) {

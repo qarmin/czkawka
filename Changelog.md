@@ -69,6 +69,7 @@
 - Modification date is displayed in local time instead of UTC - [#1748](https://github.com/qarmin/czkawka/pull/1748)
 - Added new menu, to manually remove outdated entries in cache files - [#1748](https://github.com/qarmin/czkawka/pull/1748)
 - Added configurable and hidden under `audio` feature flag, sound of ending scan - [#1754](https://github.com/qarmin/czkawka/pull/1754)
+- Fixed problem with not updating sort options, due invalid multiple connection to single callback - []()
 
 ### External
 - Wine 10.20 contains bugfix that fixes crashes when opening file dialogs in Czkawka Gui - [Wine 49987 issue](https://bugs.winehq.org/show_bug.cgi?id=49987)
