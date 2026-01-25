@@ -125,7 +125,7 @@ pub struct SimilarImages {
     params: SimilarImagesParameters,
 }
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Copy)]
 pub struct Info {
     pub initial_found_files: usize,
     pub number_of_duplicates: usize,
@@ -150,7 +150,7 @@ impl SimilarImages {
         self.common_data.use_reference_folders
     }
 
-    pub const fn get_information(&self) -> &Info {
-        &self.information
+    pub const fn get_information(&self) -> Info {
+        self.information
     }
 }

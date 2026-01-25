@@ -141,7 +141,7 @@ pub struct SimilarVideos {
     params: SimilarVideosParameters,
 }
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Copy)]
 pub struct Info {
     pub number_of_duplicates: usize,
     pub number_of_groups: usize,
@@ -157,8 +157,8 @@ impl SimilarVideos {
         &self.similar_vectors
     }
 
-    pub const fn get_information(&self) -> &Info {
-        &self.information
+    pub const fn get_information(&self) -> Info {
+        self.information
     }
 
     pub fn get_similar_videos_referenced(&self) -> &Vec<(VideosEntry, Vec<VideosEntry>)> {

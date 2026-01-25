@@ -73,7 +73,7 @@ pub struct NameFixerParams {
     // Empty - fixing has no parameters
 }
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Copy)]
 pub struct Info {
     pub number_of_files_with_bad_names: usize,
     pub scanning_time: Duration,
@@ -115,7 +115,7 @@ impl BadNames {
         &self.params
     }
 
-    pub const fn get_information(&self) -> &Info {
-        &self.information
+    pub const fn get_information(&self) -> Info {
+        self.information
     }
 }

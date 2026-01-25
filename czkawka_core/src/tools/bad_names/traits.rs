@@ -111,7 +111,7 @@ impl CommonData for BadNames {
     type Parameters = BadNamesParameters;
 
     fn get_information(&self) -> Self::Info {
-        self.information.clone()
+        self.information
     }
     fn get_params(&self) -> Self::Parameters {
         self.params.clone()

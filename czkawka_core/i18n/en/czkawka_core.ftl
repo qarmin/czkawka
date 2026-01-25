@@ -39,3 +39,5 @@ core_messages_limit_reached_lines = Number of messages exceeded the set limit ({
 
 core_error_moving_to_trash = Error while moving "{ $file }" to the trash: { $error }
 core_error_removing = Error while removing "{ $file }": { $error }
+
+core_no_similarity_method_selected = Cannot find similar music files without a selected similarity method

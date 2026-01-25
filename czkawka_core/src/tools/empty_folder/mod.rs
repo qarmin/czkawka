@@ -48,7 +48,7 @@ pub(crate) enum FolderEmptiness {
     Maybe,
 }
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Copy)]
 pub struct Info {
     pub number_of_empty_folders: usize,
     pub scanning_time: Duration,

@@ -11,8 +11,9 @@ use crate::common::model::{CheckingMethod, WorkContinueStatus};
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
 use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, PrintResults, Search};
+use crate::flc;
 use crate::tools::same_music::core::format_audio_duration;
-use crate::tools::same_music::{Info, MusicEntry, SameMusic, SameMusicParameters};
+use crate::tools::same_music::{Info, MusicEntry, MusicSimilarity, SameMusic, SameMusicParameters};
 
 impl AllTraits for SameMusic {}
 
@@ -32,6 +33,11 @@ impl Search for SameMusic {
             }
             match self.params.check_type {
                 CheckingMethod::AudioTags => {
+                    if self.params.music_similarity == MusicSimilarity::NONE {
+                        self.common_data.text_messages.critical = flc!("core_no_similarity_method_selected").into();
+                        return;
+                    }
+
                     if self.read_tags(stop_flag, progress_sender) == WorkContinueStatus::Stop {
                         self.common_data.stopped_search = true;
                         return;
@@ -142,7 +148,7 @@ impl CommonData for SameMusic {
     type Parameters = SameMusicParameters;
 
     fn get_information(&self) -> Self::Info {
-        self.information.clone()
+        self.information
     }
     fn get_params(&self) -> Self::Parameters {
         self.params.clone()

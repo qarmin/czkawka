@@ -8,7 +8,7 @@ use std::time::Duration;
 use crate::common::model::FileEntry;
 use crate::common::tool_data::CommonToolData;
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Copy)]
 pub struct Info {
     pub number_of_empty_files: usize,
     pub scanning_time: Duration,
@@ -31,7 +31,7 @@ impl EmptyFiles {
         &self.empty_files
     }
 
-    pub const fn get_information(&self) -> &Info {
-        &self.information
+    pub const fn get_information(&self) -> Info {
+        self.information
     }
 }

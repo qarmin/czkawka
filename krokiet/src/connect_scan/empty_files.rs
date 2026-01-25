@@ -3,16 +3,16 @@ use std::thread;
 
 use czkawka_core::common::consts::DEFAULT_THREAD_SIZE;
 use czkawka_core::common::model::FileEntry;
+use czkawka_core::common::tool_data::CommonData;
 use czkawka_core::common::traits::{ResultEntry, Search};
 use czkawka_core::common::{format_time, split_path, split_path_compare};
+use czkawka_core::tools::empty_files;
 use czkawka_core::tools::empty_files::EmptyFiles;
 use rayon::prelude::*;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
 
-use crate::audio_player::AudioPlayer;
 use crate::common::{MAX_INT_DATA_EMPTY_FILES, MAX_STR_DATA_EMPTY_FILES, split_u64_into_i32s};
-use crate::connect_scan::{ScanData, get_dt_timestamp_string, get_text_messages, insert_data_to_model, reset_selection_at_end, set_common_settings};
-use crate::settings::model::BasicSettings;
+use crate::connect_scan::{MessagesData, ScanData, get_dt_timestamp_string, get_text_messages, insert_data_to_model, reset_selection_at_end, set_common_settings};
 use crate::{ActiveTab, GuiState, MainWindow, flk};
 
 pub(crate) fn scan_empty_files(a: Weak<MainWindow>, sd: ScanData) {
@@ -29,45 +29,40 @@ pub(crate) fn scan_empty_files(a: Weak<MainWindow>, sd: ScanData) {
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
             let info = tool.get_information();
-            let scanning_time_str = format_time(info.scanning_time);
-            let items_found = info.number_of_empty_files;
+            let stopped_search = tool.get_stopped_search();
             sd.shared_models.lock().unwrap().shared_empty_files_state = Some(tool);
 
+            let messages_data = MessagesData { critical, messages };
+
             a.upgrade_in_event_loop(move |app| {
-                write_empty_files_results(&app, vector, critical, messages, &scanning_time_str, items_found, &sd.basic_settings, &sd.audio_player);
+                write_empty_files_results(&app, vector, messages_data, info, sd, stopped_search);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_empty_files_results(
-    app: &MainWindow,
-    vector: Vec<FileEntry>,
-    critical: Option<String>,
-    messages: String,
-    scanning_time_str: &str,
-    items_found: usize,
-    base_settings: &BasicSettings,
-    audio_player: &AudioPlayer,
-) {
+fn write_empty_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages_data: MessagesData, info: empty_files::Info, sd: ScanData, stopped_search: bool) {
+    let scanning_time_str = format_time(info.scanning_time);
+    let items_found = info.number_of_empty_files;
+
     let items = Rc::new(VecModel::default());
     for fe in vector {
-        let (data_model_str, data_model_int) = prepare_data_model_empty_files(&fe);
+        let (data_model_str, data_model_int) = prepare_data_model_empty_files(fe);
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
     app.set_empty_files_model(items.into());
-    if let Some(critical) = critical {
+    if let Some(critical) = messages_data.critical {
         app.invoke_scan_ended(critical.into());
     } else {
-        if base_settings.play_audio_on_scan_completion {
-            audio_player.play_scan_completed();
+        if !stopped_search && sd.basic_settings.play_audio_on_scan_completion {
+            sd.audio_player.play_scan_completed();
         }
         app.invoke_scan_ended(flk!("rust_found_empty_files", items_found = items_found, time = scanning_time_str).into());
     }
-    app.global::<GuiState>().set_info_text(messages.into());
+    app.global::<GuiState>().set_info_text(messages_data.messages.into());
     reset_selection_at_end(app, ActiveTab::EmptyFiles);
 }
 
-fn prepare_data_model_empty_files(fe: &FileEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
+fn prepare_data_model_empty_files(fe: FileEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(fe.get_path());
     let data_model_str_arr: [SharedString; MAX_STR_DATA_EMPTY_FILES] = [file.into(), directory.into(), get_dt_timestamp_string(fe.get_modified_date()).into()];
     let data_model_str = VecModel::from_slice(&data_model_str_arr);

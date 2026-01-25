@@ -2,8 +2,10 @@ use std::rc::Rc;
 use std::thread;
 
 use czkawka_core::common::consts::DEFAULT_THREAD_SIZE;
+use czkawka_core::common::tool_data::CommonData;
 use czkawka_core::common::traits::Search;
 use czkawka_core::common::{format_time, split_path};
+use czkawka_core::tools::video_optimizer;
 use czkawka_core::tools::video_optimizer::{
     VideoCropEntry, VideoCropParams, VideoOptimizer, VideoOptimizerMode, VideoOptimizerParameters, VideoTranscodeEntry, VideoTranscodeParams,
 };
@@ -11,10 +13,8 @@ use humansize::{BINARY, format_size};
 use log::error;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
 
-use crate::audio_player::AudioPlayer;
 use crate::common::{MAX_INT_DATA_VIDEO_OPTIMIZER, MAX_STR_DATA_VIDEO_OPTIMIZER, split_u64_into_i32s};
-use crate::connect_scan::{ScanData, get_dt_timestamp_string, get_text_messages, insert_data_to_model, reset_selection_at_end, set_common_settings};
-use crate::settings::model::BasicSettings;
+use crate::connect_scan::{MessagesData, ScanData, get_dt_timestamp_string, get_text_messages, insert_data_to_model, reset_selection_at_end, set_common_settings};
 use crate::{ActiveTab, GuiState, MainWindow, flk};
 
 pub(crate) fn scan_video_optimizer(a: Weak<MainWindow>, sd: ScanData) {
@@ -61,40 +61,25 @@ pub(crate) fn scan_video_optimizer(a: Weak<MainWindow>, sd: ScanData) {
             let (critical, messages) = get_text_messages(&tool, &sd.basic_settings);
 
             let info = tool.get_information();
-            let scanning_time_str = format_time(info.scanning_time);
-            let items_found = info.number_of_processed_files;
+            let stopped_search = tool.get_stopped_search();
 
             if is_crop_mode {
                 let video_crop_entries = tool.get_video_crop_entries().clone();
                 sd.shared_models.lock().unwrap().shared_video_optimizer_state = Some(tool);
 
+                let messages_data = MessagesData { critical, messages };
+
                 a.upgrade_in_event_loop(move |app| {
-                    write_video_optimizer_crop_results(
-                        &app,
-                        video_crop_entries,
-                        critical,
-                        messages,
-                        &scanning_time_str,
-                        items_found,
-                        &sd.basic_settings,
-                        &sd.audio_player,
-                    );
+                    write_video_optimizer_crop_results(&app, video_crop_entries, messages_data, info, sd, stopped_search);
                 })
             } else {
                 let video_transcode_entries = tool.get_video_transcode_entries().clone();
                 sd.shared_models.lock().unwrap().shared_video_optimizer_state = Some(tool);
 
+                let messages_data = MessagesData { critical, messages };
+
                 a.upgrade_in_event_loop(move |app| {
-                    write_video_optimizer_transcode_results(
-                        &app,
-                        video_transcode_entries,
-                        critical,
-                        messages,
-                        &scanning_time_str,
-                        items_found,
-                        &sd.basic_settings,
-                        &sd.audio_player,
-                    );
+                    write_video_optimizer_transcode_results(&app, video_transcode_entries, messages_data, info, sd, stopped_search);
                 })
             }
         })
@@ -104,70 +89,72 @@ pub(crate) fn scan_video_optimizer(a: Weak<MainWindow>, sd: ScanData) {
 fn write_video_optimizer_transcode_results(
     app: &MainWindow,
     video_transcode_entries: Vec<VideoTranscodeEntry>,
-    critical: Option<String>,
-    messages: String,
-    scanning_time_str: &str,
-    items_found: usize,
-    base_settings: &BasicSettings,
-    audio_player: &AudioPlayer,
+    messages_data: MessagesData,
+    info: video_optimizer::Info,
+    sd: ScanData,
+    stopped_search: bool,
 ) {
+    let scanning_time_str = format_time(info.scanning_time);
+    let items_found = info.number_of_processed_files;
+
     let items = Rc::new(VecModel::default());
 
     for fe in video_transcode_entries {
-        let (data_model_str, data_model_int) = prepare_data_model_video_optimizer_transcode(&fe);
+        let (data_model_str, data_model_int) = prepare_data_model_video_optimizer_transcode(fe);
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
 
     app.set_video_optimizer_model(items.into());
-    if let Some(critical) = critical {
+    if let Some(critical) = messages_data.critical {
         app.invoke_scan_ended(critical.into());
     } else {
-        if base_settings.play_audio_on_scan_completion {
-            audio_player.play_scan_completed();
+        if !stopped_search && sd.basic_settings.play_audio_on_scan_completion {
+            sd.audio_player.play_scan_completed();
         }
         app.invoke_scan_ended(flk!("rust_found_video_optimizer", items_found = items_found, time = scanning_time_str).into());
     }
-    app.global::<GuiState>().set_info_text(messages.into());
+    app.global::<GuiState>().set_info_text(messages_data.messages.into());
     reset_selection_at_end(app, ActiveTab::VideoOptimizer);
 }
 
 fn write_video_optimizer_crop_results(
     app: &MainWindow,
     video_crop_entries: Vec<VideoCropEntry>,
-    critical: Option<String>,
-    messages: String,
-    scanning_time_str: &str,
-    items_found: usize,
-    base_settings: &BasicSettings,
-    audio_player: &AudioPlayer,
+    messages_data: MessagesData,
+    info: video_optimizer::Info,
+    sd: ScanData,
+    stopped_search: bool,
 ) {
+    let scanning_time_str = format_time(info.scanning_time);
+    let items_found = info.number_of_processed_files;
+
     let items = Rc::new(VecModel::default());
 
     for fe in video_crop_entries {
-        let (data_model_str, data_model_int) = prepare_data_model_video_optimizer_crop(&fe);
+        let (data_model_str, data_model_int) = prepare_data_model_video_optimizer_crop(fe);
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
 
     app.set_video_optimizer_model(items.into());
-    if let Some(critical) = critical {
+    if let Some(critical) = messages_data.critical {
         app.invoke_scan_ended(critical.into());
     } else {
-        if base_settings.play_audio_on_scan_completion {
-            audio_player.play_scan_completed();
+        if !stopped_search && sd.basic_settings.play_audio_on_scan_completion {
+            sd.audio_player.play_scan_completed();
         }
         app.invoke_scan_ended(flk!("rust_found_video_optimizer", items_found = items_found, time = scanning_time_str).into());
     }
-    app.global::<GuiState>().set_info_text(messages.into());
+    app.global::<GuiState>().set_info_text(messages_data.messages.into());
     reset_selection_at_end(app, ActiveTab::VideoOptimizer);
 }
 
-fn prepare_data_model_video_optimizer_transcode(fe: &VideoTranscodeEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
+fn prepare_data_model_video_optimizer_transcode(fe: VideoTranscodeEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(&fe.path);
     let data_model_str_arr: [SharedString; MAX_STR_DATA_VIDEO_OPTIMIZER] = [
         format_size(fe.size, BINARY).into(),
         file.into(),
         directory.into(),
-        fe.codec.clone().into(),
+        fe.codec.into(),
         format!("{}x{}", fe.width, fe.height).into(),
         "-".into(),
         get_dt_timestamp_string(fe.modified_date).into(),
@@ -181,7 +168,7 @@ fn prepare_data_model_video_optimizer_transcode(fe: &VideoTranscodeEntry) -> (Mo
     (data_model_str, data_model_int)
 }
 
-fn prepare_data_model_video_optimizer_crop(fe: &VideoCropEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
+fn prepare_data_model_video_optimizer_crop(fe: VideoCropEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(&fe.path);
     let (left, top, right, bottom) = fe.new_image_dimensions.expect("new_image_dimensions should be Some in crop mode");
 
@@ -212,7 +199,7 @@ fn prepare_data_model_video_optimizer_crop(fe: &VideoCropEntry) -> (ModelRc<Shar
         format_size(fe.size, BINARY).into(),
         file.into(),
         directory.into(),
-        fe.codec.clone().into(),
+        fe.codec.into(),
         format!("{}x{}", fe.width, fe.height).into(),
         dim_string.into(),
         get_dt_timestamp_string(fe.modified_date).into(),

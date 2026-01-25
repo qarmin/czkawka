@@ -50,7 +50,6 @@ rust_found_empty_folders = Found { $items_found } empty folders in { $time }
 rust_found_empty_files = Found { $items_found } empty files in { $time }
 rust_found_similar_images = Found { $items_found } similar image files in { $groups } groups in { $time }
 rust_found_similar_videos = Found { $items_found } similar video files in { $groups } groups in { $time }
-rust_no_similarity_method_selected = Cannot find similar music files without a selected similarity method.
 rust_found_similar_music_files = Found { $items_found } similar music files in { $groups } groups in { $time }
 rust_found_invalid_symlinks = Found { $items_found } invalid symlinks in { $time }
 rust_found_temporary_files = Found { $items_found } temporary files in { $time }

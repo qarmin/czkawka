@@ -165,7 +165,7 @@ impl CommonData for VideoOptimizer {
     type Parameters = VideoOptimizerParameters;
 
     fn get_information(&self) -> Self::Info {
-        self.information.clone()
+        self.information
     }
 
     fn get_params(&self) -> Self::Parameters {

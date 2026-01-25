@@ -2,17 +2,17 @@ use std::rc::Rc;
 use std::thread;
 
 use czkawka_core::common::consts::DEFAULT_THREAD_SIZE;
+use czkawka_core::common::tool_data::CommonData;
 use czkawka_core::common::traits::{ResultEntry, Search};
 use czkawka_core::common::{format_time, split_path};
+use czkawka_core::tools::same_music;
 use czkawka_core::tools::same_music::core::format_audio_duration;
 use czkawka_core::tools::same_music::{MusicEntry, MusicSimilarity, SameMusic, SameMusicParameters};
 use humansize::{BINARY, format_size};
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
 
-use crate::audio_player::AudioPlayer;
 use crate::common::{MAX_INT_DATA_SIMILAR_MUSIC, MAX_STR_DATA_SIMILAR_MUSIC, split_u64_into_i32s};
-use crate::connect_scan::{ScanData, get_dt_timestamp_string, get_text_messages, insert_data_to_model, reset_selection_at_end, set_common_settings};
-use crate::settings::model::BasicSettings;
+use crate::connect_scan::{MessagesData, ScanData, get_dt_timestamp_string, get_text_messages, insert_data_to_model, reset_selection_at_end, set_common_settings};
 use crate::{ActiveTab, GuiState, MainWindow, flk};
 
 pub(crate) fn scan_similar_music(a: Weak<MainWindow>, sd: ScanData) {
@@ -39,19 +39,10 @@ pub(crate) fn scan_similar_music(a: Weak<MainWindow>, sd: ScanData) {
                 music_similarity |= MusicSimilarity::GENRE;
             }
 
-            if music_similarity == MusicSimilarity::NONE {
-                a.upgrade_in_event_loop(move |app| {
-                    app.invoke_scan_ended(flk!("rust_no_similarity_method_selected").into());
-                })
-                .expect("Cannot upgrade in event loop :(");
-                return Ok(());
-            }
-
-            let audio_check_type = sd.combo_box_items.audio_check_type.value;
             let params = SameMusicParameters::new(
                 music_similarity,
                 sd.custom_settings.similar_music_sub_approximate_comparison,
-                audio_check_type,
+                sd.combo_box_items.audio_check_type.value,
                 sd.custom_settings.similar_music_sub_minimal_fragment_duration_value,
                 sd.custom_settings.similar_music_sub_maximum_difference_value as f64,
                 sd.custom_settings.similar_music_compare_fingerprints_only_with_similar_titles,
@@ -79,23 +70,15 @@ pub(crate) fn scan_similar_music(a: Weak<MainWindow>, sd: ScanData) {
             }
 
             let info = tool.get_information();
-            let scanning_time_str = format_time(info.scanning_time);
+            let stopped_search = tool.get_stopped_search();
             let items_found = info.number_of_duplicates;
             let groups = info.number_of_groups;
             sd.shared_models.lock().unwrap().shared_same_music_state = Some(tool);
 
+            let messages_data = MessagesData { critical, messages };
+
             a.upgrade_in_event_loop(move |app| {
-                write_similar_music_results(
-                    &app,
-                    vector,
-                    critical,
-                    messages,
-                    &scanning_time_str,
-                    items_found,
-                    groups,
-                    &sd.basic_settings,
-                    &sd.audio_player,
-                );
+                write_similar_music_results(&app, vector, messages_data, info, sd, stopped_search, items_found, groups);
             })
         })
         .expect("Cannot start thread - not much we can do here");
@@ -103,41 +86,42 @@ pub(crate) fn scan_similar_music(a: Weak<MainWindow>, sd: ScanData) {
 fn write_similar_music_results(
     app: &MainWindow,
     vector: Vec<(Option<MusicEntry>, Vec<MusicEntry>)>,
-    critical: Option<String>,
-    messages: String,
-    scanning_time_str: &str,
+    messages_data: MessagesData,
+    info: same_music::Info,
+    sd: ScanData,
+    stopped_search: bool,
     items_found: usize,
     groups: usize,
-    base_settings: &BasicSettings,
-    audio_player: &AudioPlayer,
 ) {
+    let scanning_time_str = format_time(info.scanning_time);
+
     let items = Rc::new(VecModel::default());
     for (ref_fe, vec_fe) in vector {
         if let Some(ref_fe) = ref_fe {
-            let (data_model_str, data_model_int) = prepare_data_model_similar_music(&ref_fe);
+            let (data_model_str, data_model_int) = prepare_data_model_similar_music(ref_fe);
             insert_data_to_model(&items, data_model_str, data_model_int, Some(true));
         } else {
             insert_data_to_model(&items, ModelRc::new(VecModel::default()), ModelRc::new(VecModel::default()), Some(false));
         }
 
         for fe in vec_fe {
-            let (data_model_str, data_model_int) = prepare_data_model_similar_music(&fe);
+            let (data_model_str, data_model_int) = prepare_data_model_similar_music(fe);
             insert_data_to_model(&items, data_model_str, data_model_int, None);
         }
     }
     app.set_similar_music_model(items.into());
-    if let Some(critical) = critical {
+    if let Some(critical) = messages_data.critical {
         app.invoke_scan_ended(critical.into());
     } else {
-        if base_settings.play_audio_on_scan_completion {
-            audio_player.play_scan_completed();
+        if !stopped_search && sd.basic_settings.play_audio_on_scan_completion {
+            sd.audio_player.play_scan_completed();
         }
         app.invoke_scan_ended(flk!("rust_found_similar_music_files", items_found = items_found, groups = groups, time = scanning_time_str).into());
     }
-    app.global::<GuiState>().set_info_text(messages.into());
+    app.global::<GuiState>().set_info_text(messages_data.messages.into());
     reset_selection_at_end(app, ActiveTab::SimilarMusic);
 }
-fn prepare_data_model_similar_music(fe: &MusicEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
+fn prepare_data_model_similar_music(fe: MusicEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(fe.get_path());
     let data_model_str_arr: [SharedString; MAX_STR_DATA_SIMILAR_MUSIC] = [
         format_size(fe.size, BINARY).into(),

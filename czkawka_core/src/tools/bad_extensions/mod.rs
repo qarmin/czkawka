@@ -35,7 +35,7 @@ impl ResultEntry for BadFileEntry {
     }
 }
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Copy)]
 pub struct Info {
     pub number_of_files_with_bad_extension: usize,
     pub scanning_time: Duration,

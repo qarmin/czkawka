@@ -44,7 +44,7 @@ impl ResultEntry for TemporaryFileEntry {
     }
 }
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Copy)]
 pub struct Info {
     pub number_of_temporary_files: usize,
     pub scanning_time: Duration,
@@ -67,7 +67,7 @@ impl Temporary {
         &self.temporary_files
     }
 
-    pub const fn get_information(&self) -> &Info {
-        &self.information
+    pub const fn get_information(&self) -> Info {
+        self.information
     }
 }
