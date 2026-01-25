@@ -275,19 +275,21 @@ fn is_alphanumeric(c: char) -> bool {
 
 fn remove_duplicated_non_alphanumeric(s: &str) -> String {
     let mut result = String::with_capacity(s.len());
-    let mut last_was_non_alphanumeric = false;
-    let mut last_non_alphanumeric_char = '\0';
+    let mut chars = s.chars().peekable();
 
-    for c in s.chars() {
-        if c.is_ascii_alphanumeric() {
-            result.push(c);
-            last_was_non_alphanumeric = false;
-        } else if !last_was_non_alphanumeric || c != last_non_alphanumeric_char {
-            result.push(c);
-            last_was_non_alphanumeric = true;
-            last_non_alphanumeric_char = c;
+    while let Some(c) = chars.next() {
+        result.push(c);
+
+        if !c.is_ascii_alphanumeric() {
+            // Skip consecutive identical non-alphanumeric characters
+            while let Some(&next_c) = chars.peek() {
+                if next_c == c {
+                    chars.next();
+                } else {
+                    break;
+                }
+            }
         }
-        // Skip duplicate non-alphanumeric characters
     }
 
     result
@@ -306,6 +308,14 @@ fn is_emoji(c: char) -> bool {
         0x1F900..=0x1F9FF |
         0x1F018..=0x1F270 |
         0x238C..=0x2454   |
-        0x20D0..=0x20FF
+        0x20D0..=0x20FF   |
+        0x231A..=0x231B   |
+        0x2328            |
+        0x2934..=0x2935   |
+        0x2B05..=0x2B07   |
+        0x3030            |
+        0x303D            |
+        0x3297            |
+        0x3299
     )
 }

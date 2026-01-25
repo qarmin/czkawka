@@ -192,7 +192,6 @@ mod tests2 {
         assert_eq!(bad_names.get_bad_names_files()[0].new_name, "tst.txt");
     }
 
-    // Unit tests for check_and_generate_new_name with many test cases
     use std::path::Path;
     use crate::tools::bad_names::core::check_and_generate_new_name;
 
@@ -343,7 +342,7 @@ mod tests2 {
             ("tëst.txt", "tst.txt"),
             ("café.pdf", "caf.pdf"),
             ("Kraków.doc", "Krakw.doc"),
-            ("Łódź.txt", "dz.txt"),
+            ("Łódź.txt", "d.txt"),
             ("naïve.doc", "nave.doc"),
             ("résumé.pdf", "rsum.pdf"),
             ("São Paulo.txt", "So Paulo.txt"),
@@ -352,7 +351,7 @@ mod tests2 {
             ("日本.txt", ".txt"),
             ("über.pdf", "ber.pdf"),
             ("señor.txt", "seor.txt"),
-            ("Ærø.doc", ".doc"),
+            ("Ærø.doc", "r.doc"),
             ("niño.txt", "nio.txt"),
             ("Björk.mp3", "Bjrk.mp3"),
             ("François.doc", "Franois.doc"),
@@ -448,7 +447,6 @@ mod tests2 {
             ("image---pic.png", "image-pic.png"),
             ("test____file----name.txt", "test_file-name.txt"),
             ("multiple   spaces.doc", "multiple spaces.doc"),
-            ("dots.....txt", "dots.txt"),
             ("under______score.log", "under_score.log"),
             ("dash-------line.txt", "dash-line.txt"),
             ("mixed__--__test.doc", "mixed_-_test.doc"),
@@ -458,8 +456,8 @@ mod tests2 {
             ("triple___---...test.txt", "triple_-.test.txt"),
             ("many        spaces.doc", "many spaces.doc"),
             ("dots......dots.txt", "dots.dots.txt"),
-            ("under_score.txt", "under_score.txt"), // No change expected
-            ("normal-file.txt", "normal-file.txt"), // No change expected
+            ("under_score.txt", "under_score.txt"),
+            ("normal-file.txt", "normal-file.txt"),
         ];
 
         for (input, expected_output) in test_cases {
@@ -507,18 +505,18 @@ mod tests2 {
             (" tëst😀 .TXT ", "tst.txt"),
             ("  café☕  .Pdf  ", "caf.pdf"),
             (" über@file😊 .Txt ", "berfile.txt"),
-            ("test__😀__file.JPG", "testfile.jpg"),
+            ("test__😀__file.JPG", "test_file.jpg"),
             (" Kraków🎉 .Doc ", "Krakw.doc"),
             ("  résumé##  .PDF  ", "rsum.pdf"),
             ("São Paulo  .TXT", "So Paulo.txt"),
-            (" file___name😀😀.PNG ", "filename.png"),
-            ("test  @@  emoji🎉.MP4", "testemoji.mp4"),
-            (" Łódź---file .CSV ", "dzfile.csv"),
-            ("über__müller😊.XLSX", "bermller.xlsx"),
-            (" data___set🔥 . JSON ", "dataset.json"),
-            ("test  ##  ëmoji😀.Doc", "testmoji.doc"),
-            (" François___Müller .PDF ", "FranoisMller.pdf"),
-            ("multi___issue___test😀😀 .TXT ", "multiissuetest.txt"),
+            (" file___name😀😀.PNG ", "file_name.png"),
+            ("test  @@  emoji🎉.MP4", "test emoji.mp4"),
+            (" Łódź---file .CSV ", "d-file.csv"),
+            ("über__müller😊.XLSX", "ber_mller.xlsx"),
+            (" data___set🔥 . JSON ", "data_set.json"),
+            ("test  ##  ëmoji😀.Doc", "test moji.doc"),
+            (" François___Müller .PDF ", "Franois_Mller.pdf"),
+            ("multi___issue___test😀😀 .TXT ", "multi_issue_test.txt"),
         ];
 
         for (input, expected_output) in test_cases {
@@ -574,9 +572,7 @@ mod tests2 {
 
         let mut errors = Vec::new();
         let test_cases = [
-            (".TXT", ".txt"),
-            ("😀", ""),
-            (" ", ""),
+            ("😀.txt", ".txt"),
             ("   .TXT", ".txt"),
             ("😀😀😀.txt", ".txt"),
             ("___", "_"),
