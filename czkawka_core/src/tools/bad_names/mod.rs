@@ -18,7 +18,7 @@ pub struct BadNameEntry {
     pub path: PathBuf,
     pub modified_date: u64,
     pub size: u64,
-    pub issues: NameIssues,
+    pub new_name: String, // File name - not full path
 }
 
 impl ResultEntry for BadNameEntry {
@@ -33,22 +33,14 @@ impl ResultEntry for BadNameEntry {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq)]
 pub struct NameIssues {
     pub uppercase_extension: bool,
     pub emoji_used: bool,
     pub space_at_start_or_end: bool,
-    pub non_ascii_name: bool,
-    pub restricted_charset: bool,
-}
-
-#[derive(Clone, Copy, Debug, Default, Serialize, Deserialize, PartialEq, Eq)]
-pub enum CharsetFixMethod {
-    ReplaceWithUnderscore,
-    ReplaceWithSpace,
-    Delete,
-    #[default]
-    Transliterate,
+    pub non_ascii_graphical: bool, // Check if name contains only ASCII graphical characters + space
+    pub restricted_charset_allowed: Vec<char>, // Always includes 0-9a-zA-Z, user can add more like '_', '-', ' '
+    pub remove_duplicated_non_alphanumeric: bool, // Remove duplicated non-alphanumeric chars like __ or -- or multiple spaces
 }
 
 impl NameIssues {
@@ -57,8 +49,9 @@ impl NameIssues {
             uppercase_extension: true,
             emoji_used: true,
             space_at_start_or_end: true,
-            non_ascii_name: true,
-            restricted_charset: true,
+            non_ascii_graphical: true,
+            restricted_charset_allowed: vec![], // Empty vec means only 0-9a-zA-Z allowed
+            remove_duplicated_non_alphanumeric: true,
         }
     }
 
@@ -66,15 +59,20 @@ impl NameIssues {
         Self::default()
     }
 
-    pub fn is_empty(self) -> bool {
-        !self.uppercase_extension && !self.emoji_used && !self.space_at_start_or_end && !self.non_ascii_name && !self.restricted_charset
+    pub fn is_empty(&self) -> bool {
+        !self.uppercase_extension
+            && !self.emoji_used
+            && !self.space_at_start_or_end
+            && !self.non_ascii_graphical
+            && self.restricted_charset_allowed.is_empty()
+            && !self.remove_duplicated_non_alphanumeric
     }
 
-    pub fn has_any(self) -> bool {
+    pub fn has_any(&self) -> bool {
         !self.is_empty()
     }
 
-    pub fn to_string_list(self) -> Vec<String> {
+    pub fn to_string_list(&self) -> Vec<String> {
         let mut issues = Vec::new();
         if self.uppercase_extension {
             issues.push(flc!("core_bad_name_uppercase_extension"));
@@ -85,11 +83,14 @@ impl NameIssues {
         if self.space_at_start_or_end {
             issues.push(flc!("core_bad_name_space_at_start_end"));
         }
-        if self.non_ascii_name {
+        if self.non_ascii_graphical {
             issues.push(flc!("core_bad_name_non_ascii"));
         }
-        if self.restricted_charset {
+        if !self.restricted_charset_allowed.is_empty() {
             issues.push(flc!("core_bad_name_restricted_charset"));
+        }
+        if self.remove_duplicated_non_alphanumeric {
+            issues.push("Duplicated non-alphanumeric chars".to_string());
         }
         issues
     }
@@ -97,11 +98,7 @@ impl NameIssues {
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq)]
 pub struct NameFixerParams {
-    pub fix_uppercase_extension: bool,
-    pub fix_emoji: bool,
-    pub fix_space_at_start_or_end: bool,
-    pub fix_non_ascii: Option<CharsetFixMethod>,
-    pub fix_restricted_charset: Option<CharsetFixMethod>,
+    // Empty - fixing has no parameters
 }
 
 #[derive(Default, Clone)]

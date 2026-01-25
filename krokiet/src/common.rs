@@ -274,9 +274,9 @@ pub const MAX_INT_DATA_BAD_NAMES: usize = IntDataBadNames::SizePart2 as usize + 
 pub enum StrDataBadNames {
     Name,
     Path,
-    Issues,
+    NewName,
 }
-pub const MAX_STR_DATA_BAD_NAMES: usize = StrDataBadNames::Issues as usize + 1;
+pub const MAX_STR_DATA_BAD_NAMES: usize = StrDataBadNames::NewName as usize + 1;
 
 #[repr(u8)]
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
@@ -427,7 +427,7 @@ impl ActiveTab {
                 | StrDataBadExtensions::ProperExtension => SortIdx::StrIdx(str_idx),
             },
             Self::BadNames => match StrDataBadNames::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for BadNames")) {
-                StrDataBadNames::Name | StrDataBadNames::Path | StrDataBadNames::Issues => SortIdx::StrIdx(str_idx),
+                StrDataBadNames::Name | StrDataBadNames::Path | StrDataBadNames::NewName => SortIdx::StrIdx(str_idx),
             },
             Self::ExifRemover => match StrDataExifRemover::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for ExifRemover")) {
                 StrDataExifRemover::ExifTagsU16 | StrDataExifRemover::ExifGroupsNames | StrDataExifRemover::Name | StrDataExifRemover::Path => SortIdx::StrIdx(str_idx),

@@ -72,8 +72,12 @@ impl PrintResults for BadNames {
         if !self.bad_names_files.is_empty() {
             writeln!(writer, "Found {} files with bad names.", self.information.number_of_files_with_bad_names)?;
             for file_entry in &self.bad_names_files {
-                let issues_list = file_entry.issues.to_string_list();
-                writeln!(writer, "\"{}\" - Issues: {}", file_entry.path.to_string_lossy(), issues_list.join(", "))?;
+                writeln!(
+                    writer,
+                    "\"{}\" -> \"{}\"",
+                    file_entry.path.to_string_lossy(),
+                    file_entry.new_name
+                )?;
             }
         } else {
             write!(writer, "Not found any files with bad names.")?;
