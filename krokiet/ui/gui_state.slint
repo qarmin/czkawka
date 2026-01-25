@@ -21,7 +21,7 @@ export global GuiState {
     in-out property <bool> choosing_include_directories;
     in-out property <bool> visible_tool_settings;
 
-    in-out property <bool> available_subsettings: active_tab == ActiveTab.SimilarImages || active_tab == ActiveTab.DuplicateFiles || active_tab == ActiveTab.SimilarVideos || active_tab == ActiveTab.SimilarMusic || active_tab == ActiveTab.BigFiles || active_tab == ActiveTab.BrokenFiles || active_tab == ActiveTab.VideoOptimizer || active_tab == ActiveTab.ExifRemover;
+    in-out property <bool> available_subsettings: active_tab == ActiveTab.BadNames || active_tab == ActiveTab.SimilarImages || active_tab == ActiveTab.DuplicateFiles || active_tab == ActiveTab.SimilarVideos || active_tab == ActiveTab.SimilarMusic || active_tab == ActiveTab.BigFiles || active_tab == ActiveTab.BrokenFiles || active_tab == ActiveTab.VideoOptimizer || active_tab == ActiveTab.ExifRemover;
     in-out property <bool> tool_with_groups: active_tab == ActiveTab.SimilarImages || active_tab == ActiveTab.DuplicateFiles || active_tab == ActiveTab.SimilarVideos || active_tab == ActiveTab.SimilarMusic;
     in-out property <ActiveTab> active_tab: ActiveTab.DuplicateFiles;
     in-out property <bool> is_tool_tab_active: active_tab != ActiveTab.Settings && active_tab != ActiveTab.About;

@@ -23,12 +23,8 @@ pub(crate) fn scan_bad_names(a: Weak<MainWindow>, sd: ScanData) {
                 emoji_used: sd.custom_settings.bad_names_sub_emoji_used,
                 space_at_start_or_end: sd.custom_settings.bad_names_sub_space_at_start_end,
                 non_ascii_graphical: sd.custom_settings.bad_names_sub_non_ascii,
-                restricted_charset_allowed: if sd.custom_settings.bad_names_sub_restricted_charset {
-                    vec!['_', '-', ' ']  // Default allowed chars beyond alphanumeric
-                } else {
-                    vec![]
-                },
-                remove_duplicated_non_alphanumeric: false,  // TODO: Add to settings when needed
+                restricted_charset_allowed: sd.custom_settings.bad_names_sub_restricted_charset,
+                remove_duplicated_non_alphanumeric: sd.custom_settings.bad_names_sub_remove_duplicated,
             };
             let params = BadNamesParameters::new(checked_issues);
             let mut tool = BadNames::new(params);
@@ -81,7 +77,7 @@ fn write_bad_names_results(
 
 fn prepare_data_model_bad_names(fe: &BadNameEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(&fe.path);
-    let data_model_str_arr: [SharedString; MAX_STR_DATA_BAD_NAMES] = [file.into(), directory.into(), fe.new_name.clone().into()];
+    let data_model_str_arr: [SharedString; MAX_STR_DATA_BAD_NAMES] = [file.into(), fe.new_name.clone().into(), directory.into()];
     let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);

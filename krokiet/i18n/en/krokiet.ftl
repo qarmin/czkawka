@@ -154,7 +154,7 @@ column_fps = FPS
 column_codec = Codec
 column_duration = Duration
 column_exif_tags = EXIF Tags
-column_issues = Issues
+column_new_name = New Name
 
 # Slint translations
 ok_button = Ok
@@ -246,7 +246,8 @@ subsettings_bad_names_uppercase_extension = Uppercase extension
 subsettings_bad_names_emoji_used = Emoji used
 subsettings_bad_names_space_at_start_end = Space at start/end
 subsettings_bad_names_non_ascii = Non-ASCII characters
-subsettings_bad_names_restricted_charset = Restricted charset
+subsettings_bad_names_restricted_charset_text = Allowed chars (besides 0-9a-zA-Z)
+subsettings_bad_names_remove_duplicated_text = Remove duplicated non-alphanumeric chars
 settings_global_settings = Global Settings
 settings_dark_theme = Dark theme
 settings_show_only_icons = Show only icons

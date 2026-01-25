@@ -157,8 +157,10 @@ pub struct SettingsCustom {
     pub bad_names_sub_space_at_start_end: bool,
     #[serde(default = "ttrue")]
     pub bad_names_sub_non_ascii: bool,
-    #[serde(default = "ttrue")]
-    pub bad_names_sub_restricted_charset: bool,
+    #[serde(default = "default_bad_names_restricted_charset")]
+    pub bad_names_sub_restricted_charset: Vec<char>,
+    #[serde(default)]
+    pub bad_names_sub_remove_duplicated: bool,
     #[serde(default = "default_similar_videos_skip_forward_amount")]
     pub similar_videos_skip_forward_amount: u32,
     #[serde(default = "default_similar_videos_vid_hash_duration")]
@@ -358,6 +360,10 @@ pub(crate) fn default_image_similarity() -> i32 {
 }
 fn default_excluded_items() -> String {
     DEFAULT_EXCLUDED_ITEMS.to_string()
+}
+
+fn default_bad_names_restricted_charset() -> Vec<char> {
+    vec!['_',  ' ', '-',]
 }
 
 fn default_preset_names() -> Vec<String> {

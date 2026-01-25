@@ -273,10 +273,10 @@ pub const MAX_INT_DATA_BAD_NAMES: usize = IntDataBadNames::SizePart2 as usize + 
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum StrDataBadNames {
     Name,
-    Path,
     NewName,
+    Path,
 }
-pub const MAX_STR_DATA_BAD_NAMES: usize = StrDataBadNames::NewName as usize + 1;
+pub const MAX_STR_DATA_BAD_NAMES: usize = StrDataBadNames::Path as usize + 1;
 
 #[repr(u8)]
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]

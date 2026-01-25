@@ -386,9 +386,20 @@ export component ToolSettings {
                 checked <=> Settings.bad_names_sub_non_ascii;
             }
 
+            HorizontalLayout {
+                Text {
+                    text: Translations.subsettings_bad_names_restricted_charset_text;
+                    vertical-alignment: center;
+                }
+                LineEdit {
+                    text <=> Settings.bad_names_sub_restricted_charset;
+                    placeholder-text: "_- ";
+                }
+            }
+
             CheckBoxWrapper {
-                text: Translations.subsettings_bad_names_restricted_charset_text;
-                checked <=> Settings.bad_names_sub_restricted_charset;
+                text: Translations.subsettings_bad_names_remove_duplicated_text;
+                checked <=> Settings.bad_names_sub_remove_duplicated;
             }
 
             Rectangle { }

@@ -84,10 +84,7 @@ fn main() {
     create_default_settings_files();
     let (base_settings, custom_settings, preset_to_load) = load_initial_settings_from_file(cli_args.as_ref());
 
-    // Apply saved application scale to Slint (requires restart to fully apply in some backends)
-    // Clamp to allowed range to be safe
     if base_settings.use_manual_application_scale {
-        let scale = base_settings.manual_application_scale.clamp(0.5, 3.0);
         // SAFETY:
         // set_var is safe when using on single threaded context
         unsafe {
@@ -181,6 +178,7 @@ pub(crate) fn zeroing_all_models(app: &MainWindow) {
     app.set_similar_music_model(Rc::new(VecModel::default()).into());
     app.set_big_files_model(Rc::new(VecModel::default()).into());
     app.set_bad_extensions_model(Rc::new(VecModel::default()).into());
+    app.set_bad_names_model(Rc::new(VecModel::default()).into());
     app.set_broken_files_model(Rc::new(VecModel::default()).into());
     app.set_similar_videos_model(Rc::new(VecModel::default()).into());
     app.set_invalid_symlinks_model(Rc::new(VecModel::default()).into());
