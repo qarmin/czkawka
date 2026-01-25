@@ -38,8 +38,8 @@ pub struct NameIssues {
     pub uppercase_extension: bool,
     pub emoji_used: bool,
     pub space_at_start_or_end: bool,
-    pub non_ascii_graphical: bool, // Check if name contains only ASCII graphical characters + space
-    pub restricted_charset_allowed: Vec<char>, // Always includes 0-9a-zA-Z, user can add more like '_', '-', ' '
+    pub non_ascii_graphical: bool,                // Check if name contains only ASCII graphical characters + space
+    pub restricted_charset_allowed: Vec<char>,    // Always includes 0-9a-zA-Z, user can add more like '_', '-', ' '
     pub remove_duplicated_non_alphanumeric: bool, // Remove duplicated non-alphanumeric chars like __ or -- or multiple spaces
 }
 

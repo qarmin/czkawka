@@ -23,7 +23,7 @@ pub(crate) fn scan_bad_names(a: Weak<MainWindow>, sd: ScanData) {
                 emoji_used: sd.custom_settings.bad_names_sub_emoji_used,
                 space_at_start_or_end: sd.custom_settings.bad_names_sub_space_at_start_end,
                 non_ascii_graphical: sd.custom_settings.bad_names_sub_non_ascii,
-                restricted_charset_allowed: sd.custom_settings.bad_names_sub_restricted_charset,
+                restricted_charset_allowed: sd.custom_settings.bad_names_sub_restricted_charset.clone(),
                 remove_duplicated_non_alphanumeric: sd.custom_settings.bad_names_sub_remove_duplicated,
             };
             let params = BadNamesParameters::new(checked_issues);

@@ -88,7 +88,7 @@ fn main() {
         // SAFETY:
         // set_var is safe when using on single threaded context
         unsafe {
-            std::env::set_var("SLINT_SCALE_FACTOR", format!("{scale:.2}"));
+            std::env::set_var("SLINT_SCALE_FACTOR", format!("{:.2}", base_settings.manual_application_scale));
         }
     }
 

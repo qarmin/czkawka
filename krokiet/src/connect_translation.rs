@@ -269,6 +269,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_bad_names_space_at_start_end_text(flk!("subsettings_bad_names_space_at_start_end").into());
     translation.set_subsettings_bad_names_non_ascii_text(flk!("subsettings_bad_names_non_ascii").into());
     translation.set_subsettings_bad_names_restricted_charset_text(flk!("subsettings_bad_names_restricted_charset").into());
+    translation.set_subsettings_bad_names_remove_duplicated_text(flk!("subsettings_bad_names_remove_duplicated").into());
     translation.set_subsettings_video_optimizer_mode_text(flk!("subsettings_video_optimizer_mode").into());
     translation.set_subsettings_video_optimizer_crop_type_text(flk!("subsettings_video_optimizer_crop_type").into());
     translation.set_subsettings_video_optimizer_black_pixel_threshold_text(flk!("subsettings_video_optimizer_black_pixel_threshold").into());

@@ -139,7 +139,7 @@ mod tests2 {
             emoji_used: false,
             space_at_start_or_end: false,
             non_ascii_graphical: false,
-            restricted_charset_allowed: vec!['_', '-', ' '],  // Allow only these + alphanumeric
+            restricted_charset_allowed: vec!['_', '-', ' '], // Allow only these + alphanumeric
             remove_duplicated_non_alphanumeric: false,
         });
         let mut bad_names = BadNames::new(params);
@@ -193,6 +193,7 @@ mod tests2 {
     }
 
     use std::path::Path;
+
     use crate::tools::bad_names::core::check_and_generate_new_name;
 
     #[test]
@@ -466,8 +467,8 @@ mod tests2 {
 
             if input == expected_output {
                 // No change expected
-                if result.is_some() {
-                    errors.push(format!("Input: '{input}' should not be modified but got: '{}'", result.unwrap()));
+                if let Some(result) = result {
+                    errors.push(format!("Input: '{input}' should not be modified but got: '{result}'"));
                 }
             } else {
                 // Change expected
@@ -588,8 +589,8 @@ mod tests2 {
             let result = check_and_generate_new_name(path, &check_params);
 
             if input == expected_output {
-                if result.is_some() {
-                    errors.push(format!("Edge case input: '{input}' should not be modified but got: '{}'", result.unwrap()));
+                if let Some(new_name) = result {
+                    errors.push(format!("Edge case input: '{input}' should not be modified but got: '{new_name}'"));
                 }
             } else {
                 if let Some(new_name) = result {

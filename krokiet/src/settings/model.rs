@@ -363,7 +363,7 @@ fn default_excluded_items() -> String {
 }
 
 fn default_bad_names_restricted_charset() -> Vec<char> {
-    vec!['_',  ' ', '-',]
+    vec!['_', ' ', '-']
 }
 
 fn default_preset_names() -> Vec<String> {

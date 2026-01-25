@@ -143,13 +143,12 @@ pub fn check_and_generate_new_name(path: &Path, checked_issues: &NameIssues) -> 
     let mut has_issues = false;
 
     // Check and fix uppercase extension
-    if checked_issues.uppercase_extension {
-        if let Some(ref mut ext) = extension {
-            if ext.chars().any(|c| c.is_uppercase()) {
-                has_issues = true;
-                *ext = ext.to_lowercase();
-            }
-        }
+    if checked_issues.uppercase_extension
+        && let Some(ref mut ext) = extension
+        && ext.chars().any(|c| c.is_uppercase())
+    {
+        has_issues = true;
+        *ext = ext.to_lowercase();
     }
 
     // Check and fix emoji
@@ -206,7 +205,8 @@ pub fn check_and_generate_new_name(path: &Path, checked_issues: &NameIssues) -> 
     // Check and fix restricted charset
     if !checked_issues.restricted_charset_allowed.is_empty() {
         let original_stem = stem.clone();
-        stem = stem.chars()
+        stem = stem
+            .chars()
             .filter(|c| is_alphanumeric(*c) || checked_issues.restricted_charset_allowed.contains(c))
             .collect();
         if stem != original_stem {
@@ -215,7 +215,8 @@ pub fn check_and_generate_new_name(path: &Path, checked_issues: &NameIssues) -> 
 
         if let Some(ref mut ext) = extension {
             let original_ext = ext.clone();
-            *ext = ext.chars()
+            *ext = ext
+                .chars()
                 .filter(|c| is_alphanumeric(*c) || checked_issues.restricted_charset_allowed.contains(c))
                 .collect();
             if ext != &original_ext {
@@ -248,21 +249,13 @@ pub fn check_and_generate_new_name(path: &Path, checked_issues: &NameIssues) -> 
 
     // Construct new file name
     let new_name = if let Some(ext) = extension {
-        if ext.is_empty() {
-            stem
-        } else {
-            format!("{stem}.{ext}")
-        }
+        if ext.is_empty() { stem } else { format!("{stem}.{ext}") }
     } else {
         stem
     };
 
     // Return new name only if it's different from original
-    if new_name != file_name.as_ref() as &str {
-        Some(new_name)
-    } else {
-        None
-    }
+    if new_name != file_name.as_ref() as &str { Some(new_name) } else { None }
 }
 
 fn is_ascii_graphical_or_space(c: char) -> bool {
