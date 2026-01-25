@@ -19,6 +19,8 @@ fn show_required_popovers(popovers_select: &GuiSelectPopovers, sv: &SubView) {
     let buttons_popover_select_all = popovers_select.buttons_popover_select_all.clone();
     let buttons_popover_unselect_all = popovers_select.buttons_popover_unselect_all.clone();
     let buttons_popover_reverse = popovers_select.buttons_popover_reverse.clone();
+    let buttons_popover_select_all_except_shortest_path = popovers_select.buttons_popover_select_all_except_shortest_path.clone();
+    let buttons_popover_select_all_except_longest_path = popovers_select.buttons_popover_select_all_except_longest_path.clone();
     let buttons_popover_select_all_except_oldest = popovers_select.buttons_popover_select_all_except_oldest.clone();
     let buttons_popover_select_all_except_newest = popovers_select.buttons_popover_select_all_except_newest.clone();
     let buttons_popover_select_one_oldest = popovers_select.buttons_popover_select_one_oldest.clone();
@@ -28,6 +30,7 @@ fn show_required_popovers(popovers_select: &GuiSelectPopovers, sv: &SubView) {
     let buttons_popover_select_all_images_except_biggest = popovers_select.buttons_popover_select_all_images_except_biggest.clone();
     let buttons_popover_select_all_images_except_smallest = popovers_select.buttons_popover_select_all_images_except_smallest.clone();
 
+    let separator_select_shortest_path = popovers_select.separator_select_shortest_path.clone();
     let separator_select_custom = popovers_select.separator_select_custom.clone();
     let separator_select_date = popovers_select.separator_select_date.clone();
     let separator_select_image_size = popovers_select.separator_select_image_size.clone();
@@ -83,5 +86,15 @@ fn show_required_popovers(popovers_select: &GuiSelectPopovers, sv: &SubView) {
         buttons_popover_select_one_oldest.set_visible(false);
         buttons_popover_select_one_newest.set_visible(false);
         separator_select_date.set_visible(false);
+    }
+
+    if arr.contains(&PopoverTypes::PathLength) {
+        buttons_popover_select_all_except_shortest_path.set_visible(true);
+        buttons_popover_select_all_except_longest_path.set_visible(true);
+        separator_select_shortest_path.set_visible(true);
+    } else {
+        buttons_popover_select_all_except_shortest_path.set_visible(false);
+        buttons_popover_select_all_except_longest_path.set_visible(false);
+        separator_select_shortest_path.set_visible(false);
     }
 }

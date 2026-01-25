@@ -210,6 +210,8 @@ popover_select_custom = Własne zaznaczanie
 popover_unselect_custom = Własne odznaczanie
 popover_select_all_images_except_biggest = Zaznacz wszystkie oprócz największego
 popover_select_all_images_except_smallest = Zaznacz wszystkie oprócz najmniejszego
+popover_select_all_except_shortest_path = Zaznacz wszystkie oprócz najkrótszej ścieżki
+popover_select_all_except_longest_path = Zaznacz wszystkie oprócz najdłuższej ścieżki
 popover_custom_path_check_button_entry_tooltip =
     Zaznacza rekordy według ścieżki.
     

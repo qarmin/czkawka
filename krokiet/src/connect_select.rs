@@ -20,16 +20,26 @@ pub(crate) fn connect_select(app: &MainWindow) {
             SelectMode::SelectAll => select_all(&current_model),
             SelectMode::UnselectAll => deselect_all(&current_model),
             SelectMode::InvertSelection => invert_selection(&current_model),
-            SelectMode::SelectTheBiggestSize => select_by_size_date(&current_model, active_tab, true, true),
-            SelectMode::SelectTheSmallestSize => select_by_size_date(&current_model, active_tab, false, true),
-            SelectMode::SelectTheBiggestResolution => select_by_resolution(&current_model, active_tab, true),
-            SelectMode::SelectTheSmallestResolution => select_by_resolution(&current_model, active_tab, false),
-            SelectMode::SelectNewest => select_by_size_date(&current_model, active_tab, true, false),
-            SelectMode::SelectOldest => select_by_size_date(&current_model, active_tab, false, false),
+            SelectMode::SelectTheBiggestSize => select_by_property(&current_model, active_tab, Property::Size, true),
+            SelectMode::SelectTheSmallestSize => select_by_property(&current_model, active_tab, Property::Size, false),
+            SelectMode::SelectTheBiggestResolution => select_by_property(&current_model, active_tab, Property::Resolution, false),
+            SelectMode::SelectTheSmallestResolution => select_by_property(&current_model, active_tab, Property::Resolution, true),
+            SelectMode::SelectNewest => select_by_property(&current_model, active_tab, Property::Date, true),
+            SelectMode::SelectOldest => select_by_property(&current_model, active_tab, Property::Date, false),
+            SelectMode::SelectShortestPath => select_by_property(&current_model, active_tab, Property::PathLength, false),
+            SelectMode::SelectLongestPath => select_by_property(&current_model, active_tab, Property::PathLength, true),
         };
         active_tab.set_tool_model(&app, new_model);
         change_number_of_enabled_items(&app, active_tab, checked_items as i64 - unchecked_items as i64);
     });
+}
+
+#[derive(Clone, Copy)]
+enum Property {
+    Size,
+    Date,
+    PathLength,
+    Resolution,
 }
 
 pub(crate) fn connect_showing_proper_select_buttons(app: &MainWindow) {
@@ -51,6 +61,8 @@ fn set_select_buttons(app: &MainWindow) {
             SelectMode::SelectNewest,
             SelectMode::SelectTheSmallestSize,
             SelectMode::SelectTheBiggestSize,
+            SelectMode::SelectShortestPath,
+            SelectMode::SelectLongestPath,
         ],
         ActiveTab::SimilarImages => vec![
             SelectMode::SelectOldest,
@@ -59,6 +71,8 @@ fn set_select_buttons(app: &MainWindow) {
             SelectMode::SelectTheBiggestSize,
             SelectMode::SelectTheSmallestResolution,
             SelectMode::SelectTheBiggestResolution,
+            SelectMode::SelectShortestPath,
+            SelectMode::SelectLongestPath,
         ],
         ActiveTab::EmptyFolders
         | ActiveTab::BigFiles
@@ -87,60 +101,26 @@ fn set_select_buttons(app: &MainWindow) {
     app.global::<GuiState>().set_select_results_list(ModelRc::new(VecModel::from(new_select_model)));
 }
 
-// TODO, when model will be able to contain i64 instead two i32, this function could be merged with select_by_size_date
-fn select_by_resolution(model: &ModelRc<MainListModel>, active_tab: ActiveTab, biggest: bool) -> SelectionResult {
-    let mut checked_items = 0;
-
-    let is_header_mode = active_tab.get_is_header_mode();
-    assert!(is_header_mode); // non header modes not really have reason to use this function
-
-    let mut old_data = model.iter().collect::<Vec<_>>();
-    let headers_idx = find_header_idx_and_deselect_all(&mut old_data);
-    let width_idx = active_tab.get_int_width_idx();
-    let height_idx = active_tab.get_int_height_idx();
-
-    if biggest {
-        for i in 0..(headers_idx.len() - 1) {
-            let mut max_item = 0;
-            let mut max_item_idx = 1;
-            #[expect(clippy::needless_range_loop)]
-            for j in (headers_idx[i] + 1)..headers_idx[i + 1] {
-                let int_data = old_data[j].val_int.iter().collect::<Vec<_>>();
-                let item = int_data[width_idx] * int_data[height_idx];
-                if item > max_item {
-                    max_item = item;
-                    max_item_idx = j;
-                }
-            }
-            if !old_data[max_item_idx].checked {
-                checked_items += 1;
-            }
-            old_data[max_item_idx].checked = true;
+fn extract_comparable_field(model: &MainListModel, property: Property, active_tab: ActiveTab) -> u64 {
+    let mut val_ints = model.val_int.iter();
+    let mut val_strs = model.val_str.iter();
+    match property {
+        Property::Size => {
+            let high = val_ints.nth(active_tab.get_int_size_idx()).expect("can find file size property");
+            let low = val_ints.next().expect("can find file size property");
+            connect_i32_into_u64(high, low)
         }
-    } else {
-        for i in 0..(headers_idx.len() - 1) {
-            let mut min_item = u64::MAX;
-            let mut min_item_idx = 1;
-            #[expect(clippy::needless_range_loop)]
-            for j in (headers_idx[i] + 1)..headers_idx[i + 1] {
-                let int_data = old_data[j].val_int.iter().collect::<Vec<_>>();
-                let item = (int_data[width_idx] * int_data[height_idx]) as u64;
-                if item < min_item {
-                    min_item = item;
-                    min_item_idx = j;
-                }
-            }
-            if !old_data[min_item_idx].checked {
-                checked_items += 1;
-            }
-            old_data[min_item_idx].checked = true;
+        Property::Date => {
+            let high = val_ints.nth(active_tab.get_int_modification_date_idx()).expect("can find file last modified property");
+            let low = val_ints.next().expect("can find file last modified property");
+            connect_i32_into_u64(high, low)
         }
+        Property::PathLength => val_strs.nth(active_tab.get_str_path_idx()).expect("can find file path property").len() as u64,
+        Property::Resolution => val_ints.nth(active_tab.get_int_pixel_count_idx()).expect("can find pixel count proerty") as u64,
     }
-
-    (checked_items, 0, ModelRc::new(VecModel::from(old_data)))
 }
 
-fn select_by_size_date(model: &ModelRc<MainListModel>, active_tab: ActiveTab, biggest_newest: bool, size: bool) -> SelectionResult {
+fn select_by_property(model: &ModelRc<MainListModel>, active_tab: ActiveTab, property: Property, increasing_order: bool) -> SelectionResult {
     let mut checked_items = 0;
 
     let is_header_mode = active_tab.get_is_header_mode();
@@ -148,20 +128,13 @@ fn select_by_size_date(model: &ModelRc<MainListModel>, active_tab: ActiveTab, bi
 
     let mut old_data = model.iter().collect::<Vec<_>>();
     let headers_idx = find_header_idx_and_deselect_all(&mut old_data);
-    let item_idx = if size {
-        active_tab.get_int_size_idx()
-    } else {
-        active_tab.get_int_modification_date_idx()
-    };
-
-    if biggest_newest {
+    if increasing_order {
         for i in 0..(headers_idx.len() - 1) {
             let mut max_item = 0;
             let mut max_item_idx = 1;
             #[expect(clippy::needless_range_loop)]
             for j in (headers_idx[i] + 1)..headers_idx[i + 1] {
-                let int_data = old_data[j].val_int.iter().collect::<Vec<_>>();
-                let item = connect_i32_into_u64(int_data[item_idx], int_data[item_idx + 1]);
+                let item = extract_comparable_field(&old_data[j], property, active_tab);
                 if item > max_item {
                     max_item = item;
                     max_item_idx = j;
@@ -178,8 +151,7 @@ fn select_by_size_date(model: &ModelRc<MainListModel>, active_tab: ActiveTab, bi
             let mut min_item_idx = 1;
             #[expect(clippy::needless_range_loop)]
             for j in (headers_idx[i] + 1)..headers_idx[i + 1] {
-                let int_data = old_data[j].val_int.iter().collect::<Vec<_>>();
-                let item = connect_i32_into_u64(int_data[item_idx], int_data[item_idx + 1]);
+                let item = extract_comparable_field(&old_data[j], property, active_tab);
                 if item < min_item {
                     min_item = item;
                     min_item_idx = j;

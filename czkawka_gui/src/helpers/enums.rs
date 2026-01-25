@@ -18,6 +18,7 @@ pub enum PopoverTypes {
     Reverse,
     Custom,
     Date,
+    PathLength,
 }
 
 #[derive(Eq, PartialEq, Copy, Clone, Hash, Debug)]
