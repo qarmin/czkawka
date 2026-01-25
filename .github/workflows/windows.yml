@@ -24,6 +24,10 @@ jobs:
           rustup default 1.92.0
           rustup target add x86_64-pc-windows-gnu
 
+      - name: Install ico tool
+        run: |
+          cargo install --path misc/add_icon_exe
+
       - name: Compile Krokiet Release
         if: ${{ github.ref == 'refs/heads/master' }}
         run: |
@@ -31,6 +35,7 @@ jobs:
           sed -i 's/#codegen-units /codegen-units /g' Cargo.toml
           cargo build --release --target x86_64-pc-windows-gnu --bin krokiet
           mv target/x86_64-pc-windows-gnu/release/krokiet.exe windows_krokiet_on_linux.exe
+          add_icon_exe windows_krokiet_on_linux.exe krokiet/icons/krokiet_logo_flag.png
 
       - name: Compile Krokiet Debug
         if: ${{ github.ref != 'refs/heads/master' }}
@@ -39,6 +44,7 @@ jobs:
           sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
           cargo build --target x86_64-pc-windows-gnu --bin krokiet
           mv target/x86_64-pc-windows-gnu/debug/krokiet.exe windows_krokiet_on_linux.exe
+          add_icon_exe windows_krokiet_on_linux.exe krokiet/icons/krokiet_logo_flag.png
 
       - name: Pack with 7z
         run: |
@@ -73,6 +79,10 @@ jobs:
         run: |
           rustup default 1.92.0
 
+      - name: Install ico tool
+        run: |
+          cargo install --path misc/add_icon_exe
+
       - name: Compile Krokiet Release
         if: ${{ github.ref == 'refs/heads/master' }}
         run: |
@@ -82,8 +92,10 @@ jobs:
           powershell -Command "(Get-Content Cargo.toml) -replace '#codegen-units ', 'codegen-units ' | Set-Content Cargo.toml"
           cargo build --release --bin krokiet --no-default-features --features "winit_skia_opengl,winit_software"
           mv target/release/krokiet.exe windows_krokiet_on_windows_skia_opengl.exe
+          add_icon_exe windows_krokiet_on_windows_skia_opengl.exe krokiet/icons/krokiet_logo_flag.png
           cargo build --release --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software"
           mv target/release/krokiet.exe windows_krokiet_on_windows_skia_vulkan.exe
+          add_icon_exe windows_krokiet_on_windows_skia_vulkan.exe krokiet/icons/krokiet_logo_flag.png
 
       - name: Compile Krokiet Debug
         if: ${{ github.ref != 'refs/heads/master' }}
@@ -94,6 +106,7 @@ jobs:
           powershell -Command "(Get-Content Cargo.toml) -replace '^opt-level = 3 # OPT PACKAGES', '#opt-level = 3 # OPT PACKAGES' | Set-Content Cargo.toml"
           cargo build --bin krokiet --no-default-features --features "winit_skia_opengl,winit_software"
           mv target/debug/krokiet.exe windows_krokiet_on_windows_skia_opengl.exe
+          add_icon_exe windows_krokiet_on_windows_skia_opengl.exe krokiet/icons/krokiet_logo_flag.png
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -131,6 +144,10 @@ jobs:
           
           mkdir -p package
 
+      - name: Install ico tool
+        run: |
+          source "$HOME/.cargo/env" && cargo install --path misc/add_icon_exe
+
       - name: Cross compile for Windows - Release
         if: ${{ github.ref == 'refs/heads/master' }}
         run: |
@@ -139,6 +156,10 @@ jobs:
           cargo build --target=x86_64-pc-windows-gnu --release --locked
           cp target/x86_64-pc-windows-gnu/release/czkawka_gui.exe package/
           cp target/x86_64-pc-windows-gnu/release/czkawka_cli.exe package/
+          
+          add_icon_exe package/czkawka_gui.exe czkawka_gui/icons/icon_about.png
+          add_icon_exe package/czkawka_cli.exe czkawka_gui/icons/icon_about.png
+          
 
       - name: Cross compile for Windows - Debug
         if: ${{ github.ref != 'refs/heads/master' }}
@@ -148,6 +169,9 @@ jobs:
           cargo build --target=x86_64-pc-windows-gnu --locked --profile fastci
           cp target/x86_64-pc-windows-gnu/fastci/czkawka_gui.exe package/
           cp target/x86_64-pc-windows-gnu/fastci/czkawka_cli.exe package/
+          
+          add_icon_exe package/czkawka_gui.exe czkawka_gui/icons/icon_about.png
+          add_icon_exe package/czkawka_cli.exe czkawka_gui/icons/icon_about.png
 
       - name: Package
         run: |
