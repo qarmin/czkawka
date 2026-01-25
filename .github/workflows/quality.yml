@@ -34,7 +34,7 @@ jobs:
       - name: Run clippy
         run: |
           cargo clippy --all-targets --all-features -- -D warnings
-          cargo clippy --all-targets --no-default-features -- -D warnings
+          cargo clippy --all-targets -- -D warnings
 
       - name: Check tools
         run: |
