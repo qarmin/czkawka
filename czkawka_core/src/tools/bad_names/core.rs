@@ -167,21 +167,15 @@ pub fn check_and_generate_new_name(path: &Path, checked_issues: &NameIssues) -> 
         stem = deunicode::deunicode(&stem);
 
         if let Some(ref mut ext) = extension {
-            *ext = deunicode::deunicode(ext).chars().filter(|e|e.is_ascii_graphic() || *e == ' ').collect();
+            *ext = deunicode::deunicode(ext).chars().filter(|e| e.is_ascii_graphic() || *e == ' ').collect();
         }
     }
 
     if let Some(allowed_chars) = &checked_issues.restricted_charset_allowed {
-        stem = stem
-            .chars()
-            .filter(|c| is_alphanumeric(*c) || allowed_chars.contains(c))
-            .collect();
+        stem = stem.chars().filter(|c| is_alphanumeric(*c) || allowed_chars.contains(c)).collect();
 
         if let Some(ref mut ext) = extension {
-            *ext = ext
-                .chars()
-                .filter(|c| is_alphanumeric(*c) || allowed_chars.contains(c))
-                .collect();
+            *ext = ext.chars().filter(|c| is_alphanumeric(*c) || allowed_chars.contains(c)).collect();
         }
     }
 
@@ -201,7 +195,6 @@ pub fn check_and_generate_new_name(path: &Path, checked_issues: &NameIssues) -> 
 
     if new_name != file_name.as_ref() as &str { Some(new_name) } else { None }
 }
-
 
 fn is_alphanumeric(c: char) -> bool {
     c.is_ascii_alphanumeric()

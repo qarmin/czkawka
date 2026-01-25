@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install Gtk 4
-        run: sudo apt update || true; sudo apt install -y libgtk-4-dev libraw-dev libheif-dev libavif-dev libdav1d-dev -y
+        run: sudo apt update || true; sudo apt install -y libgtk-4-dev libraw-dev libheif-dev libavif-dev libdav1d-dev libasound2-dev -y
 
       - name: Setup rust version
         run: |
@@ -34,7 +34,7 @@ jobs:
       - name: Run clippy
         run: |
           cargo clippy --all-targets --all-features -- -D warnings
-          cargo clippy --all-targets -- -D warnings
+          cargo clippy --all-targets --no-default-features -- -D warnings
 
       - name: Check tools
         run: |

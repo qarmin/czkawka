@@ -41,7 +41,7 @@ slint = { version = "1.13", default-features = false, features = [
     "compat-1-2"
 ] }
 
-rodio = {version = "0.21.1", default-features = false, features = ["playback", "symphonia-all"]}
+rodio = { version = "0.21.1", default-features = false, features = ["playback", "symphonia-all"], optional = true }
 
 [build-dependencies]
 #slint-build = { path = "/home/rafal/test/slint/api/rs/build/"}
@@ -50,7 +50,7 @@ slint-build = "1.13"
 
 [features]
 default = ["winit_femtovg", "winit_software"]
-audio = []
+audio = ["rodio"]
 skia_opengl = ["slint/renderer-skia-opengl"]
 skia_vulkan = ["slint/renderer-skia-vulkan"]
 software = ["slint/renderer-software"]

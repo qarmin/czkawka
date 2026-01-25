@@ -372,7 +372,7 @@ mod tests2 {
             ("Østergård.pdf", "Ostergard.pdf"),
             ("Łukasz.txt", "Lukasz.txt"),
             ("Müller.doc", "Muller.doc"),
-            ("pièces", "pieces")
+            ("pièces", "pieces"),
         ];
 
         for (input, expected_output) in test_cases {

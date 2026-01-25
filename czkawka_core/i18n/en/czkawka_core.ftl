@@ -39,10 +39,3 @@ core_messages_limit_reached_lines = Number of messages exceeded the set limit ({
 
 core_error_moving_to_trash = Error while moving "{ $file }" to the trash: { $error }
 core_error_removing = Error while removing "{ $file }": { $error }
-
-core_bad_name_uppercase_extension = Uppercase extension
-core_bad_name_emoji_used = Emoji used
-core_bad_name_space_at_start_end = Space at start/end
-core_bad_name_non_ascii = Non-ASCII characters
-core_bad_name_restricted_charset = Restricted charset
-

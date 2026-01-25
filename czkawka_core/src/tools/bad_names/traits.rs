@@ -26,8 +26,6 @@ impl Search for BadNames {
                 return;
             }
 
-            dbg!(&self.params.checked_issues);
-
             if self.prepare_items(None).is_err() {
                 return;
             }
