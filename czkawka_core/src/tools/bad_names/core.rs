@@ -248,16 +248,17 @@ fn fix_non_ascii(s: &str, method: CharsetFixMethod) -> String {
                 if c.is_ascii() {
                     vec![c]
                 } else {
-                    deunicode::deunicode_char(c)
-                        .map(|s| {
+                    deunicode::deunicode_char(c).map_or_else(
+                        || vec![' '],
+                        |s| {
                             let chars: Vec<char> = s.chars().collect();
-                            if chars.is_empty() || (chars.len() == 1 && !chars[0].is_ascii_graphic()) {
+                            if chars.is_empty() || chars.first().is_some_and(|c| c.is_ascii_graphic()) {
                                 vec![' ']
                             } else {
                                 chars
                             }
-                        })
-                        .unwrap_or_else(|| vec![' '])
+                        },
+                    )
                 }
             })
             .collect(),
@@ -275,12 +276,13 @@ fn fix_restricted_charset(s: &str, method: CharsetFixMethod) -> String {
                 if is_allowed_char(c) {
                     vec![c]
                 } else if !c.is_ascii() {
-                    deunicode::deunicode_char(c)
-                        .map(|s| {
+                    deunicode::deunicode_char(c).map_or_else(
+                        || vec!['_'],
+                        |s| {
                             let chars: Vec<char> = s.chars().filter(|ch| is_allowed_char(*ch)).collect();
                             if chars.is_empty() { vec!['_'] } else { chars }
-                        })
-                        .unwrap_or_else(|| vec!['_'])
+                        },
+                    )
                 } else {
                     vec!['_']
                 }
