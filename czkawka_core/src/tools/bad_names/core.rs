@@ -167,7 +167,7 @@ pub fn check_and_generate_new_name(path: &Path, checked_issues: &NameIssues) -> 
         stem = deunicode::deunicode(&stem);
 
         if let Some(ref mut ext) = extension {
-            *ext = deunicode::deunicode(ext);
+            *ext = deunicode::deunicode(ext).chars().filter(|e|e.is_ascii_graphic() || *e == ' ').collect();
         }
     }
 
