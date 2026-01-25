@@ -143,6 +143,7 @@ pub(crate) fn connect_size_of_config_cache(app: &MainWindow) -> std::sync::mpsc:
 
     let task_sender_clone = task_sender.clone();
     app.global::<Callabler>().on_tab_changed(move || {
+        log::error!("Tab changed2 - updating select buttons");
         let a_cloned = a.clone();
         let app = a_cloned.upgrade().expect("Failed to upgrade app :(");
         let active_tab = app.global::<GuiState>().get_active_tab();

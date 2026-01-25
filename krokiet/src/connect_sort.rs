@@ -80,6 +80,7 @@ pub(crate) fn connect_showing_proper_sort_buttons(app: &MainWindow) {
     set_sort_buttons(app);
     let a = app.as_weak();
     app.global::<Callabler>().on_tab_changed(move || {
+        log::error!("Tab changed3 - updating select buttons");
         let app = a.upgrade().expect("Failed to upgrade app :(");
         set_sort_buttons(&app);
     });

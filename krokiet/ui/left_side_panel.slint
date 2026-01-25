@@ -20,6 +20,7 @@ component TabItem {
                     return;
                 }
                 GuiState.active_tab = root.curr_tab;
+                debug("CLOCKED TAB: " + root.text);
                 Callabler.tab_changed();
                 changed_active_tab();
             }
