@@ -70,6 +70,7 @@ fn progress_save_load_cache(item: &ProgressData) -> ProgressToSend {
         | CurrentStage::SimilarVideosCreatingThumbnails
         | CurrentStage::BrokenFilesChecking
         | CurrentStage::BadExtensionsChecking
+        | CurrentStage::BadNamesChecking
         | CurrentStage::ExifRemoverExtractingTags
         | CurrentStage::VideoOptimizerCreatingThumbnails
         | CurrentStage::VideoOptimizerProcessingVideos => unreachable!(),
@@ -119,6 +120,7 @@ fn progress_default(item: &ProgressData) -> ProgressToSend {
         CurrentStage::SimilarVideosCreatingThumbnails => flk!("rust_created_thumbnails", items_stats = items_stats),
         CurrentStage::BrokenFilesChecking => flk!("rust_checked_files", items_stats = items_stats, size_stats = size_stats),
         CurrentStage::BadExtensionsChecking => flk!("rust_checked_files_bad_extensions", items_stats = items_stats),
+        CurrentStage::BadNamesChecking => flk!("rust_checked_files_bad_names", items_stats = items_stats),
         CurrentStage::VideoOptimizerCreatingThumbnails => flk!("rust_checked_images", items_stats = items_stats, size_stats = size_stats),
         CurrentStage::VideoOptimizerProcessingVideos => flk!("rust_checked_videos", items_stats = items_stats, size_stats = size_stats),
         CurrentStage::DuplicatePreHashing => flk!("rust_analyzed_partial_hash", items_stats = items_stats, size_stats = size_stats),

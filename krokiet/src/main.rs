@@ -44,6 +44,7 @@ use crate::connect_translation::connect_translations;
 use crate::settings::{connect_changing_settings_preset, create_default_settings_files, load_initial_settings_from_file, save_all_settings_to_file, set_initial_settings_to_gui};
 use crate::shared_models::SharedModels;
 
+mod audio_player;
 mod clear_outdated_video_thumbnails;
 mod common;
 mod connect_clean_cache;
@@ -83,14 +84,11 @@ fn main() {
     create_default_settings_files();
     let (base_settings, custom_settings, preset_to_load) = load_initial_settings_from_file(cli_args.as_ref());
 
-    // Apply saved application scale to Slint (requires restart to fully apply in some backends)
-    // Clamp to allowed range to be safe
     if base_settings.use_manual_application_scale {
-        let scale = base_settings.manual_application_scale.clamp(0.5, 3.0);
         // SAFETY:
         // set_var is safe when using on single threaded context
         unsafe {
-            std::env::set_var("SLINT_SCALE_FACTOR", format!("{scale:.2}"));
+            std::env::set_var("SLINT_SCALE_FACTOR", format!("{:.2}", base_settings.manual_application_scale));
         }
     }
 
@@ -103,12 +101,18 @@ fn main() {
         }
     };
 
+    #[cfg(feature = "audio")]
+    app.global::<GuiState>().set_audio_feature_enabled(true);
+
     let (progress_sender, progress_receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
     let stop_flag: Arc<AtomicBool> = Arc::default();
 
     zeroing_all_models(&app);
 
     let shared_models = SharedModels::new_shared();
+
+    // Create audio player for scan completion notifications
+    let audio_player = Arc::new(crate::audio_player::AudioPlayer::new());
 
     // Disabled for now, due invalid settings model at start
     // set_initial_gui_infos(&app);
@@ -117,7 +121,7 @@ fn main() {
     set_initial_settings_to_gui(&app, &base_settings, &custom_settings, cli_args, preset_to_load);
 
     connect_delete_button(&app, progress_sender.clone(), stop_flag.clone());
-    connect_scan_button(&app, progress_sender.clone(), stop_flag.clone(), Arc::clone(&shared_models));
+    connect_scan_button(&app, progress_sender.clone(), stop_flag.clone(), Arc::clone(&shared_models), Arc::clone(&audio_player));
     connect_stop_button(&app, stop_flag.clone());
     connect_open_items(&app);
     connect_progress_gathering(&app, progress_receiver);
@@ -174,6 +178,7 @@ pub(crate) fn zeroing_all_models(app: &MainWindow) {
     app.set_similar_music_model(Rc::new(VecModel::default()).into());
     app.set_big_files_model(Rc::new(VecModel::default()).into());
     app.set_bad_extensions_model(Rc::new(VecModel::default()).into());
+    app.set_bad_names_model(Rc::new(VecModel::default()).into());
     app.set_broken_files_model(Rc::new(VecModel::default()).into());
     app.set_similar_videos_model(Rc::new(VecModel::default()).into());
     app.set_invalid_symlinks_model(Rc::new(VecModel::default()).into());
@@ -188,6 +193,8 @@ pub(crate) fn zeroing_all_models(app: &MainWindow) {
 pub(crate) fn print_krokiet_features() {
     let mut features: Vec<&str> = Vec::new();
 
+    #[cfg(feature = "audio")]
+    features.push("audio");
     #[cfg(feature = "skia_opengl")]
     features.push("skia_opengl");
     #[cfg(feature = "skia_vulkan")]

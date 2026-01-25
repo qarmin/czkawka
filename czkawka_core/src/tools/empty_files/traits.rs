@@ -84,7 +84,7 @@ impl CommonData for EmptyFiles {
     type Parameters = ();
 
     fn get_information(&self) -> Self::Info {
-        self.information.clone()
+        self.information
     }
     fn get_params(&self) -> Self::Parameters {}
     fn get_cd(&self) -> &CommonToolData {

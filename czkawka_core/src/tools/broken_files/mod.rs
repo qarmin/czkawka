@@ -68,7 +68,7 @@ bitflags! {
     }
 }
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Copy)]
 pub struct Info {
     pub number_of_broken_files: usize,
     pub scanning_time: Duration,
@@ -102,7 +102,7 @@ impl BrokenFiles {
         &self.params
     }
 
-    pub const fn get_information(&self) -> &Info {
-        &self.information
+    pub const fn get_information(&self) -> Info {
+        self.information
     }
 }

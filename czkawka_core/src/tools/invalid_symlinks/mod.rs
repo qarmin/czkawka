@@ -14,7 +14,7 @@ use crate::common::tool_data::CommonToolData;
 use crate::common::traits::ResultEntry;
 use crate::flc;
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Copy)]
 pub struct Info {
     pub number_of_invalid_symlinks: usize,
     pub scanning_time: Duration,
@@ -101,7 +101,7 @@ impl InvalidSymlinks {
         &self.invalid_symlinks
     }
 
-    pub const fn get_information(&self) -> &Info {
-        &self.information
+    pub const fn get_information(&self) -> Info {
+        self.information
     }
 }

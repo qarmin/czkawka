@@ -139,7 +139,7 @@ impl CommonData for SimilarImages {
     type Parameters = SimilarImagesParameters;
 
     fn get_information(&self) -> Self::Info {
-        self.information.clone()
+        self.information
     }
     fn get_params(&self) -> Self::Parameters {
         self.params.clone()

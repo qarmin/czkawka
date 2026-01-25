@@ -14,7 +14,8 @@ import { PopupNewDirectories } from "popup_new_directories.slint";
 import { PopupDelete } from "popup_delete.slint";
 import { PopupMoveFolders } from "popup_move_folders.slint";
 import { PopupSelectResults } from "popup_select_results.slint";
-import { PopupRenameFiles } from "popup_rename_files.slint";
+import { PopupRenameBadExtensions } from "popup_rename_bad_extensions.slint";
+import { PopupRenameBadFileNames } from "popup_rename_bad_file_names.slint";
 import { PopupSave } from "popup_save.slint";
 import { PopupSortResults } from "popup_sort.slint";
 import { PopupActionConfirm } from "popup_action_confirm.slint";
@@ -70,6 +71,7 @@ export component MainWindow inherits Window {
     in-out property <[MainListModel]> invalid_symlinks_model: [];
     in-out property <[MainListModel]> broken_files_model: [];
     in-out property <[MainListModel]> bad_extensions_model: [];
+    in-out property <[MainListModel]> bad_names_model: [];
     in-out property <[MainListModel]> exif_remover_model: [];
     in-out property <[MainListModel]> video_optimizer_model: [];
 
@@ -107,6 +109,7 @@ export component MainWindow inherits Window {
                         invalid_symlinks_model <=> root.invalid_symlinks_model;
                         broken_files_model <=> root.broken_files_model;
                         bad_extensions_model <=> root.bad_extensions_model;
+                        bad_names_model <=> root.bad_names_model;
                         exif_remover_model <=> root.exif_remover_model;
                         video_optimizer_model <=> root.video_optimizer_model;
 
@@ -155,6 +158,7 @@ export component MainWindow inherits Window {
             invalid_symlinks_model <=> root.invalid_symlinks_model;
             broken_files_model <=> root.broken_files_model;
             bad_extensions_model <=> root.bad_extensions_model;
+            bad_names_model <=> root.bad_names_model;
             exif_remover_model <=> root.exif_remover_model;
             video_optimizer_model <=> root.video_optimizer_model;
 
@@ -251,7 +255,15 @@ export component MainWindow inherits Window {
         y: parent.y + (parent.height - self.popup_height) / 2.0;
     }
 
-    rename_popup_window := PopupRenameFiles {
+    rename_extension_popup_window := PopupRenameBadExtensions {
+        height: root.height;
+        width: root.width;
+
+        x: parent.x + (root.width - self.popup_width) / 2.0;
+        y: parent.y + (parent.height - self.popup_height) / 2.0;
+    }
+
+    rename_bad_file_name_popup_window := PopupRenameBadFileNames {
         height: root.height;
         width: root.width;
 
@@ -398,8 +410,10 @@ export component MainWindow inherits Window {
             }
         } else if (request == PopupRequest.Symlink) {
             softlink_popup_window.show_popup();
-        } else if (request == PopupRequest.Rename) {
-            rename_popup_window.show_popup();
+        } else if (request == PopupRequest.RenameBadExtension) {
+            rename_extension_popup_window.show_popup();
+        } else if (request == PopupRequest.RenameBadFileName) {
+            rename_bad_file_name_popup_window.show_popup();
         } else if (request == PopupRequest.Hardlink) {
             hardlink_popup_window.show_popup();
         } else if (request == PopupRequest.Save) {

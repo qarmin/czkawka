@@ -158,7 +158,7 @@ impl CommonData for SimilarVideos {
     type Parameters = SimilarVideosParameters;
 
     fn get_information(&self) -> Self::Info {
-        self.information.clone()
+        self.information
     }
     fn get_params(&self) -> Self::Parameters {
         self.params.clone()

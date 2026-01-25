@@ -284,7 +284,7 @@ pub fn normalize_windows_path<P: AsRef<Path>>(path_to_change: P) -> PathBuf {
 }
 
 // Function to create hardlink, when destination exists
-// This is always true in this app, because creating hardling, to newly created file is pointless
+// This is always true in this app, because creating hardlink, to newly created file is pointless
 pub fn make_hard_link<P: AsRef<Path>, Q: AsRef<Path>>(src: P, dst: Q) -> io::Result<()> {
     let src = src.as_ref();
     let dst = dst.as_ref();

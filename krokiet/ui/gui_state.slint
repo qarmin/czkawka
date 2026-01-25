@@ -12,6 +12,8 @@ export global GuiState {
     in-out property <image> preview_image;
     in-out property <string> preview_image_path;
 
+    in-out property <bool> audio_feature_enabled: false;
+
     in-out property <length> left_panel_width: 120px;
 
     in-out property <float> maximum_threads: 40;
@@ -19,7 +21,7 @@ export global GuiState {
     in-out property <bool> choosing_include_directories;
     in-out property <bool> visible_tool_settings;
 
-    in-out property <bool> available_subsettings: active_tab == ActiveTab.SimilarImages || active_tab == ActiveTab.DuplicateFiles || active_tab == ActiveTab.SimilarVideos || active_tab == ActiveTab.SimilarMusic || active_tab == ActiveTab.BigFiles || active_tab == ActiveTab.BrokenFiles || active_tab == ActiveTab.VideoOptimizer || active_tab == ActiveTab.ExifRemover;
+    in-out property <bool> available_subsettings: active_tab == ActiveTab.BadNames || active_tab == ActiveTab.SimilarImages || active_tab == ActiveTab.DuplicateFiles || active_tab == ActiveTab.SimilarVideos || active_tab == ActiveTab.SimilarMusic || active_tab == ActiveTab.BigFiles || active_tab == ActiveTab.BrokenFiles || active_tab == ActiveTab.VideoOptimizer || active_tab == ActiveTab.ExifRemover;
     in-out property <bool> tool_with_groups: active_tab == ActiveTab.SimilarImages || active_tab == ActiveTab.DuplicateFiles || active_tab == ActiveTab.SimilarVideos || active_tab == ActiveTab.SimilarMusic;
     in-out property <ActiveTab> active_tab: ActiveTab.DuplicateFiles;
     in-out property <bool> is_tool_tab_active: active_tab != ActiveTab.Settings && active_tab != ActiveTab.About;
@@ -48,7 +50,8 @@ export global GuiState {
         { name: Translations.tool_broken_files_text, tab: ActiveTab.BrokenFiles },
         { name: Translations.tool_bad_extensions_text, tab: ActiveTab.BadExtensions },
         { name: Translations.tool_exif_remover_text, tab: ActiveTab.ExifRemover },
-        { name: Translations.tool_video_optimizer_text, tab: ActiveTab.VideoOptimizer }
+        { name: Translations.tool_video_optimizer_text, tab: ActiveTab.VideoOptimizer },
+        { name: Translations.tool_bad_names_text, tab: ActiveTab.BadNames },
     ];
 
     in-out property <BottomPanelVisibility> bottom_panel_visibility: BottomPanelVisibility.Directories;
@@ -80,6 +83,8 @@ export global GuiState {
     in-out property <int> selected_results_exif_remover2: 0;
     in-out property <int> selected_results_video_optimizer: 0;
     in-out property <int> selected_results_video_optimizer2: 0;
+    in-out property <int> selected_results_bad_names: 0;
+    in-out property <int> selected_results_bad_names2: 0;
 
     in-out property <bool> cache_cleaning_is_cleaning: false;
     in-out property <bool> cache_cleaning_finished: false;

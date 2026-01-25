@@ -1,0 +1,30 @@
+import { Callabler } from "callabler.slint";
+import { Translations } from "translations.slint";
+import { PopupBase } from "popup_base.slint";
+import { PopupCenteredText } from "popup_centered_text.slint";
+
+export component PopupRenameBadExtensions inherits Rectangle {
+    out property <length> popup_width: 500px;
+    out property <length> popup_height: 150px;
+    callback show_popup();
+
+    popup_window := PopupBase {
+        width: popup_width;
+        height: popup_height;
+        title_text <=> Translations.popup_rename_title_text;
+
+        VerticalLayout {
+            PopupCenteredText {
+                text: Translations.rename_confirmation_text;
+            }
+        }
+
+        ok_clicked => {
+            Callabler.rename_files();
+        }
+    }
+
+    show_popup() => {
+        popup_window.show();
+    }
+}

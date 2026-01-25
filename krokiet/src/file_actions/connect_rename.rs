@@ -6,9 +6,10 @@ use crossbeam_channel::Sender;
 use czkawka_core::common::progress_data::ProgressData;
 use slint::{ComponentHandle, Weak};
 
+use crate::common::StrDataBadNames;
 use crate::model_operations::model_processor::{MessageType, ModelProcessor};
 use crate::simpler_model::{SimplerMainListModel, ToSimplerVec};
-use crate::{Callabler, GuiState, MainWindow};
+use crate::{ActiveTab, Callabler, GuiState, MainWindow};
 
 pub(crate) fn connect_rename(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
     let a = app.as_weak();
@@ -21,12 +22,20 @@ pub(crate) fn connect_rename(app: &MainWindow, progress_sender: Sender<ProgressD
         let active_tab = app.global::<GuiState>().get_active_tab();
 
         let processor = ModelProcessor::new(active_tab);
-        processor.rename_selected_items(progress_sender, weak_app, stop_flag);
+        match active_tab {
+            ActiveTab::BadExtensions => {
+                processor.rename_bad_extensions(progress_sender, weak_app, stop_flag);
+            }
+            ActiveTab::BadNames => {
+                processor.rename_bad_file_names(progress_sender, weak_app, stop_flag);
+            }
+            _ => panic!("{active_tab:?} is not supported for renaming bad extensions"),
+        }
     });
 }
 
 impl ModelProcessor {
-    fn rename_selected_items(self, progress_sender: Sender<ProgressData>, weak_app: Weak<MainWindow>, stop_flag: Arc<AtomicBool>) {
+    fn rename_bad_extensions(self, progress_sender: Sender<ProgressData>, weak_app: Weak<MainWindow>, stop_flag: Arc<AtomicBool>) {
         let model = self.active_tab.get_tool_model(&weak_app.upgrade().expect("Failed to upgrade app :("));
         let simpler_model = model.to_simpler_enumerated_vec();
         thread::spawn(move || {
@@ -34,7 +43,20 @@ impl ModelProcessor {
             let name_idx = self.active_tab.get_str_name_idx();
             let ext_idx = self.active_tab.get_str_proper_extension();
 
-            let rm_fnc = move |data: &SimplerMainListModel| rename_single_item(data, path_idx, name_idx, ext_idx);
+            let rm_fnc = move |data: &SimplerMainListModel| rename_single_extension_item(data, path_idx, name_idx, ext_idx);
+
+            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, rm_fnc, MessageType::Rename, false);
+        });
+    }
+    fn rename_bad_file_names(self, progress_sender: Sender<ProgressData>, weak_app: Weak<MainWindow>, stop_flag: Arc<AtomicBool>) {
+        let model = self.active_tab.get_tool_model(&weak_app.upgrade().expect("Failed to upgrade app :("));
+        let simpler_model = model.to_simpler_enumerated_vec();
+        thread::spawn(move || {
+            let path_idx = self.active_tab.get_str_path_idx();
+            let name_idx = self.active_tab.get_str_name_idx();
+            let new_name_idx = StrDataBadNames::NewName as usize;
+
+            let rm_fnc = move |data: &SimplerMainListModel| rename_single_file_name_item(data, path_idx, name_idx, new_name_idx);
 
             self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, rm_fnc, MessageType::Rename, false);
         });
@@ -42,7 +64,29 @@ impl ModelProcessor {
 }
 
 #[cfg(not(test))]
-fn rename_single_item(data: &SimplerMainListModel, path_idx: usize, name_idx: usize, ext_idx: usize) -> Result<(), String> {
+fn rename_single_file_name_item(data: &SimplerMainListModel, path_idx: usize, name_idx: usize, new_file_name_idx: usize) -> Result<(), String> {
+    use std::path::MAIN_SEPARATOR;
+    let folder = &data.val_str[path_idx];
+    let file_name = &data.val_str[name_idx];
+    let new_file_name = &data.val_str[new_file_name_idx];
+
+    let new_full_path = format!("{folder}{MAIN_SEPARATOR}{new_file_name}");
+    let old_full_path = format!("{folder}{MAIN_SEPARATOR}{file_name}");
+
+    if let Err(e) = std::fs::rename(&old_full_path, &new_full_path) {
+        Err(crate::flk!(
+            "rust_failed_to_rename_file",
+            old_path = old_full_path,
+            new_path = new_full_path,
+            error = e.to_string()
+        ))
+    } else {
+        Ok(())
+    }
+}
+
+#[cfg(not(test))]
+fn rename_single_extension_item(data: &SimplerMainListModel, path_idx: usize, name_idx: usize, ext_idx: usize) -> Result<(), String> {
     use std::path::MAIN_SEPARATOR;
     let folder = &data.val_str[path_idx];
     let file_name = &data.val_str[name_idx];
@@ -65,7 +109,16 @@ fn rename_single_item(data: &SimplerMainListModel, path_idx: usize, name_idx: us
 }
 
 #[cfg(test)]
-fn rename_single_item(data: &SimplerMainListModel, path_idx: usize, _name_idx: usize, _ext_idx: usize) -> Result<(), String> {
+fn rename_single_extension_item(data: &SimplerMainListModel, path_idx: usize, _name_idx: usize, _ext_idx: usize) -> Result<(), String> {
+    let full_path = &data.val_str[path_idx];
+    if full_path.contains("test_error") {
+        return Err(format!("Test error for item: {full_path}"));
+    }
+    Ok(())
+}
+
+#[cfg(test)]
+fn rename_single_file_name_item(data: &SimplerMainListModel, path_idx: usize, _name_idx: usize, _file_name: usize) -> Result<(), String> {
     let full_path = &data.val_str[path_idx];
     if full_path.contains("test_error") {
         return Err(format!("Test error for item: {full_path}"));
@@ -95,7 +148,7 @@ mod tests {
             let name_idx = 0;
             let ext_idx = 0;
 
-            let rm_fnc = move |data: &SimplerMainListModel| rename_single_item(data, path_idx, name_idx, ext_idx);
+            let rm_fnc = move |data: &SimplerMainListModel| rename_single_extension_item(data, path_idx, name_idx, ext_idx);
 
             let output = Self::process_items(
                 simplified_model,
@@ -124,7 +177,7 @@ mod tests {
     }
 
     #[test]
-    fn test_rename_selected_items() {
+    fn test_rename_bad_extensions() {
         let (progress, _receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
         let mut model = get_model_vec(10);
         model[0].checked = true;

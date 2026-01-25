@@ -221,6 +221,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_tool_bad_extensions_text(flk!("tool_bad_extensions").into());
     translation.set_tool_exif_remover_text(flk!("tool_exif_remover").into());
     translation.set_tool_video_optimizer_text(flk!("tool_video_optimizer").into());
+    translation.set_tool_bad_names_text(flk!("tool_bad_names").into());
     translation.set_sort_by_full_name_text(flk!("sort_by_full_name").into());
     translation.set_sort_by_selection_text(flk!("sort_by_selection").into());
     translation.set_sort_reverse_text(flk!("sort_reverse").into());
@@ -261,6 +262,21 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_broken_files_pdf_text(flk!("subsettings_broken_files_pdf").into());
     translation.set_subsettings_broken_files_archive_text(flk!("subsettings_broken_files_archive").into());
     translation.set_subsettings_broken_files_image_text(flk!("subsettings_broken_files_image").into());
+    translation.set_subsettings_broken_files_video_info_text(flk!("subsettings_broken_files_video_info").into());
+    translation.set_subsettings_bad_names_issues_text(flk!("subsettings_bad_names_issues").into());
+    translation.set_subsettings_bad_names_uppercase_extension_text(flk!("subsettings_bad_names_uppercase_extension").into());
+    translation.set_subsettings_bad_names_uppercase_extension_hint_text(flk!("subsettings_bad_names_uppercase_extension_hint").into());
+    translation.set_subsettings_bad_names_emoji_used_text(flk!("subsettings_bad_names_emoji_used").into());
+    translation.set_subsettings_bad_names_emoji_used_hint_text(flk!("subsettings_bad_names_emoji_used_hint").into());
+    translation.set_subsettings_bad_names_space_at_start_end_text(flk!("subsettings_bad_names_space_at_start_end").into());
+    translation.set_subsettings_bad_names_space_at_start_end_hint_text(flk!("subsettings_bad_names_space_at_start_end_hint").into());
+    translation.set_subsettings_bad_names_non_ascii_text(flk!("subsettings_bad_names_non_ascii").into());
+    translation.set_subsettings_bad_names_non_ascii_hint_text(flk!("subsettings_bad_names_non_ascii_hint").into());
+    translation.set_subsettings_bad_names_restricted_charset_text(flk!("subsettings_bad_names_restricted_charset").into());
+    translation.set_subsettings_bad_names_restricted_charset_hint_text(flk!("subsettings_bad_names_restricted_charset_hint").into());
+    translation.set_subsettings_bad_names_allowed_chars_text(flk!("subsettings_bad_names_allowed_chars").into());
+    translation.set_subsettings_bad_names_remove_duplicated_text(flk!("subsettings_bad_names_remove_duplicated").into());
+    translation.set_subsettings_bad_names_remove_duplicated_hint_text(flk!("subsettings_bad_names_remove_duplicated_hint").into());
     translation.set_subsettings_video_optimizer_mode_text(flk!("subsettings_video_optimizer_mode").into());
     translation.set_subsettings_video_optimizer_crop_type_text(flk!("subsettings_video_optimizer_crop_type").into());
     translation.set_subsettings_video_optimizer_black_pixel_threshold_text(flk!("subsettings_video_optimizer_black_pixel_threshold").into());
@@ -364,6 +380,9 @@ fn translate_items(app: &MainWindow) {
     translation.set_settings_load_tabs_sizes_at_startup_text(flk!("settings_load_tabs_sizes_at_startup").into());
     translation.set_settings_load_windows_size_at_startup_text(flk!("settings_load_windows_size_at_startup").into());
     translation.set_settings_limit_lines_of_messages_text(flk!("settings_limit_lines_of_messages").into());
+    translation.set_settings_play_audio_on_scan_completion_text(flk!("settings_play_audio_on_scan_completion_text").into());
+    translation.set_settings_audio_feature_hint_text(flk!("settings_audio_feature_hint_text").into());
+    translation.set_settings_audio_env_variable_hint_text(flk!("settings_audio_env_variable_hint_text").into());
     translation.set_settings_cache_number_size_text("".into());
     translation.set_settings_video_thumbnails_number_size_text("".into());
     translation.set_settings_log_number_size_text("".into());
@@ -396,6 +415,7 @@ fn translate_items(app: &MainWindow) {
         (flk!("tool_invalid_symlinks").into(), ActiveTab::InvalidSymlinks),
         (flk!("tool_broken_files").into(), ActiveTab::BrokenFiles),
         (flk!("tool_bad_extensions").into(), ActiveTab::BadExtensions),
+        (flk!("tool_bad_names").into(), ActiveTab::BadNames),
         (flk!("tool_exif_remover").into(), ActiveTab::ExifRemover),
         (flk!("tool_video_optimizer").into(), ActiveTab::VideoOptimizer),
     ];
@@ -443,6 +463,7 @@ fn translate_items(app: &MainWindow) {
     let proper_extension = flk!("column_proper_extension");
     let exif_tags = flk!("column_exif_tags");
     let new_dimensions = flk!("column_new_dimensions");
+    let new_name = flk!("column_new_name");
 
     let fnm = |model: &[&str]| {
         let shared_string = model.iter().map(|s| (*s).into()).collect::<Vec<SharedString>>();
@@ -462,6 +483,7 @@ fn translate_items(app: &MainWindow) {
     settings.set_bad_extensions_column_name(fnm(&[&selection, &file_name, &path, &current_extension, &proper_extension]));
     settings.set_exif_remover_column_name(fnm(&[&selection, &size, &file_name, &path, &exif_tags, &mod_date]));
     settings.set_video_optimizer_column_name(fnm(&[&selection, &size, &file_name, &path, &codec, &dimensions, &new_dimensions, &mod_date]));
+    settings.set_bad_names_column_name(fnm(&[&selection, &file_name, &new_name, &path]));
 }
 
 pub(crate) fn translate_select_mode(select_mode: SelectMode) -> SharedString {

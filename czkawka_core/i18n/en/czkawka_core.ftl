@@ -26,6 +26,7 @@ core_paths_unable_to_get_device_id = Unable to get device id from folder { $path
 core_needs_allowed_extensions_limited_by_tool = Cannot start scan, when all extensions available in this tool ({ $extensions }) were excluded from scan
 core_needs_allowed_extensions = Cannot start scan, when all extensions were excluded from scan
 core_needs_to_set_at_least_one_broken_option = Cannot start scan, when there is no broken option set to scan for
+core_needs_to_set_at_least_one_bad_name_option = Cannot start scan, when there is no bad name option set to scan for
 
 core_ffmpeg_not_found = Cannot find a proper installation of FFmpeg or FFprobe. These are external programs that must be installed manually.
 core_ffmpeg_not_found_windows = Be sure that ffmpeg.exe and ffprobe.exe are available in PATH or are placed directly in the same folder as the app executable
@@ -38,3 +39,5 @@ core_messages_limit_reached_lines = Number of messages exceeded the set limit ({
 
 core_error_moving_to_trash = Error while moving "{ $file }" to the trash: { $error }
 core_error_removing = Error while removing "{ $file }": { $error }
+
+core_no_similarity_method_selected = Cannot find similar music files without a selected similarity method

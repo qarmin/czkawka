@@ -90,7 +90,7 @@ impl CommonData for BadExtensions {
     type Parameters = BadExtensionsParameters;
 
     fn get_information(&self) -> Self::Info {
-        self.information.clone()
+        self.information
     }
     fn get_params(&self) -> Self::Parameters {
         self.params.clone()

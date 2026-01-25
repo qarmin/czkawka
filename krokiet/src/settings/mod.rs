@@ -273,6 +273,7 @@ pub(crate) fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicS
     settings.set_limit_messages_lines(basic_settings.settings_limit_lines_of_messages);
     settings.set_manual_application_scale(basic_settings.manual_application_scale);
     settings.set_use_manual_application_scale(basic_settings.use_manual_application_scale);
+    settings.set_play_audio_on_scan_completion(basic_settings.play_audio_on_scan_completion);
 
     set_combobox_basic_settings_items(&settings, basic_settings);
 }
@@ -439,7 +440,6 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_similar_videos_vid_hash_duration_min(*ALLOWED_VID_HASH_DURATION.start() as f32);
     settings.set_similar_videos_vid_hash_duration_max(*ALLOWED_VID_HASH_DURATION.end() as f32);
 
-    // Video Thumbnails Global Settings
     settings.set_video_thumbnails_generate(custom_settings.video_thumbnails_generate);
     settings.set_video_thumbnails_percentage(
         custom_settings
@@ -465,6 +465,14 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_broken_files_sub_archive(custom_settings.broken_files_sub_archive);
     settings.set_broken_files_sub_image(custom_settings.broken_files_sub_image);
     settings.set_broken_files_sub_video(custom_settings.broken_files_sub_video);
+
+    settings.set_bad_names_sub_uppercase_extension(custom_settings.bad_names_sub_uppercase_extension);
+    settings.set_bad_names_sub_emoji_used(custom_settings.bad_names_sub_emoji_used);
+    settings.set_bad_names_sub_space_at_start_end(custom_settings.bad_names_sub_space_at_start_end);
+    settings.set_bad_names_sub_non_ascii(custom_settings.bad_names_sub_non_ascii);
+    settings.set_bad_names_sub_restricted_charset_enabled(custom_settings.bad_names_sub_restricted_charset_enabled);
+    settings.set_bad_names_sub_restricted_charset(custom_settings.bad_names_sub_restricted_charset.iter().collect::<String>().into());
+    settings.set_bad_names_sub_remove_duplicated(custom_settings.bad_names_sub_remove_duplicated);
 
     settings.set_video_optimizer_sub_excluded_codecs(custom_settings.video_optimizer_excluded_codecs.clone().into());
     settings.set_video_optimizer_sub_black_pixel_threshold(custom_settings.video_optimizer_black_pixel_threshold.to_string().into());
@@ -526,6 +534,7 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
         settings.set_bad_extensions_column_size(fnm(&[sel_px, name_px, path_px, 40.0, 200.0], "bad_extensions"));
         settings.set_exif_remover_column_size(fnm(&[sel_px, size_px, name_px, path_px, 300.0, mod_px], "exif_remover"));
         settings.set_video_optimizer_column_size(fnm(&[sel_px, size_px, name_px, path_px, 100.0, 120.0, 160.0, mod_px], "video_optimizer"));
+        settings.set_bad_names_column_size(fnm(&[sel_px, name_px, 250.0, path_px], "bad_names"));
     }
 
     // Clear text
@@ -601,7 +610,6 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let similar_videos_skip_forward_amount = settings.get_similar_videos_skip_forward_amount() as u32;
     let similar_videos_vid_hash_duration = settings.get_similar_videos_vid_hash_duration() as u32;
 
-    // Video Thumbnails Global Settings
     let video_thumbnails_generate = settings.get_video_thumbnails_generate();
     let video_thumbnails_percentage = settings.get_video_thumbnails_percentage().round() as u8;
     let video_thumbnails_generate_grid = settings.get_video_thumbnails_generate_grid();
@@ -622,6 +630,14 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let broken_files_sub_archive = settings.get_broken_files_sub_archive();
     let broken_files_sub_image = settings.get_broken_files_sub_image();
     let broken_files_sub_video = settings.get_broken_files_sub_video();
+
+    let bad_names_sub_uppercase_extension = settings.get_bad_names_sub_uppercase_extension();
+    let bad_names_sub_emoji_used = settings.get_bad_names_sub_emoji_used();
+    let bad_names_sub_space_at_start_end = settings.get_bad_names_sub_space_at_start_end();
+    let bad_names_sub_non_ascii = settings.get_bad_names_sub_non_ascii();
+    let bad_names_sub_restricted_charset_enabled = settings.get_bad_names_sub_restricted_charset_enabled();
+    let bad_names_sub_restricted_charset: Vec<char> = settings.get_bad_names_sub_restricted_charset().chars().collect();
+    let bad_names_sub_remove_duplicated = settings.get_bad_names_sub_remove_duplicated();
 
     let video_optimizer_mode = combo_box_items.video_optimizer_mode.config_name.clone();
     let video_optimizer_crop_type = combo_box_items.video_optimizer_crop_type.config_name.clone();
@@ -655,6 +671,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         ("bad_extensions".to_string(), settings.get_bad_extensions_column_size().iter().collect::<Vec<_>>()),
         ("exif_remover".to_string(), settings.get_exif_remover_column_size().iter().collect::<Vec<_>>()),
         ("video_optimizer".to_string(), settings.get_video_optimizer_column_size().iter().collect::<Vec<_>>()),
+        ("bad_names".to_string(), settings.get_bad_names_column_size().iter().collect::<Vec<_>>()),
     ]);
     assert_eq!(column_sizes.len(), TOOLS_NUMBER);
 
@@ -715,6 +732,13 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         broken_files_sub_archive,
         broken_files_sub_image,
         broken_files_sub_video,
+        bad_names_sub_uppercase_extension,
+        bad_names_sub_emoji_used,
+        bad_names_sub_space_at_start_end,
+        bad_names_sub_non_ascii,
+        bad_names_sub_restricted_charset_enabled,
+        bad_names_sub_restricted_charset,
+        bad_names_sub_remove_duplicated,
         similar_videos_skip_forward_amount,
         similar_videos_vid_hash_duration,
         similar_videos_crop_detect,
@@ -804,8 +828,9 @@ pub(crate) fn collect_base_settings(app: &MainWindow) -> BasicSettings {
     let settings_load_tabs_sizes_at_startup = settings.get_load_tabs_sizes_at_startup();
     let settings_load_windows_size_at_startup = settings.get_load_windows_size_at_startup();
     let settings_limit_lines_of_messages = settings.get_limit_messages_lines();
-    let manual_application_scale = settings.get_manual_application_scale();
+    let manual_application_scale = settings.get_manual_application_scale().clamp(0.5, 3.0);
     let use_manual_application_scale = settings.get_use_manual_application_scale();
+    let play_audio_on_scan_completion = settings.get_play_audio_on_scan_completion();
     BasicSettings {
         language,
         default_preset,
@@ -819,5 +844,6 @@ pub(crate) fn collect_base_settings(app: &MainWindow) -> BasicSettings {
         settings_limit_lines_of_messages,
         manual_application_scale,
         use_manual_application_scale,
+        play_audio_on_scan_completion,
     }
 }

@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 use crate::common::tool_data::CommonToolData;
 use crate::common::traits::ResultEntry;
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Copy)]
 pub struct Info {
     pub number_of_files_with_exif: usize,
     pub scanning_time: Duration,
@@ -76,7 +76,7 @@ impl ExifRemover {
         &self.exif_files
     }
 
-    pub const fn get_information(&self) -> &Info {
-        &self.information
+    pub const fn get_information(&self) -> Info {
+        self.information
     }
 }

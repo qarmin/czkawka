@@ -111,10 +111,10 @@ pub(crate) fn update_cleaning_timestamp(cache_file_name: &str) {
     let mut cleaning_timestamps = if let Ok(content) = fs::read_to_string(&timestamps_file) {
         serde_json::from_str::<CleaningTimestamps>(&content).unwrap_or_else(|e| {
             error!("Failed to parse cleaning timestamps file \"{}\" content - {e:?}", timestamps_file.to_string_lossy());
-            CleaningTimestamps { timestamps: vec![] }
+            CleaningTimestamps { timestamps: Vec::new() }
         })
     } else {
-        CleaningTimestamps { timestamps: vec![] }
+        CleaningTimestamps { timestamps: Vec::new() }
     };
 
     let current_time = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap_or_default().as_secs();

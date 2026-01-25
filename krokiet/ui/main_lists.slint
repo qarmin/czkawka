@@ -33,6 +33,7 @@ export component MainList {
     in-out property <[MainListModel]> invalid_symlinks_model: [];
     in-out property <[MainListModel]> broken_files_model: [];
     in-out property <[MainListModel]> bad_extensions_model: [];
+    in-out property <[MainListModel]> bad_names_model: [];
     in-out property <[MainListModel]> exif_remover_model: [];
     in-out property <[MainListModel]> video_optimizer_model: [];
 
@@ -207,6 +208,20 @@ export component MainList {
         sort_available: !working;
     }
 
+    bad_names := SelectableTableView {
+        visible: GuiState.active_tab == ActiveTab.BadNames;
+        min-width: 200px;
+        height: parent.height;
+        columns <=> Settings.bad_names_column_name;
+        column_sizes <=> Settings.bad_names_column_size;
+        values <=> bad_names_model;
+        parentPathIdx: 2;
+        fileNameIdx: 1;
+        previewImageIdx: -1;
+        sort_available: !working;
+    }
+
+
     settings_list := SettingsList {
         visible: GuiState.active_tab == ActiveTab.Settings;
 
@@ -246,8 +261,10 @@ export component MainList {
             exif_remover.reset_selection();
         } else if (active_tab == ActiveTab.VideoOptimizer) {
             video_optimizer.reset_selection();
+        } else if (active_tab == ActiveTab.BadNames) {
+            bad_names.reset_selection();
         } else {
-            // debug("Non handled reset selection in main_lists.slint", active_tab);
+             debug("Non handled reset selection in main_lists.slint");
         }
     }
 
@@ -278,8 +295,10 @@ export component MainList {
             exif_remover.scan_started();
         } else if (GuiState.active_tab == ActiveTab.VideoOptimizer) {
             video_optimizer.scan_started();
+        } else if (GuiState.active_tab == ActiveTab.BadNames) {
+            bad_names.scan_started();
         } else {
-            // debug("Non handled reset selection in main_lists.slint", GuiState.active_tab);
+             debug("Non handled reset selection in main_lists.slint");
         }
     }
 

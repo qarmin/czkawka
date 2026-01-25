@@ -456,7 +456,7 @@ pub fn fix_video_crop(video_path: &Path, params: &VideoCropFixParams, stop_flag:
         }
         Some(Err(e)) => {
             let _ = std::fs::remove_file(&temp_output);
-            return Err(format!("Failed to crop video file {}: {e}", video_path.display()));
+            return Err(format!("Failed to crop video file \"{}\": {e}", video_path.to_string_lossy()));
         }
         Some(Ok(_)) => {
             if !temp_output.exists() {

@@ -236,7 +236,10 @@ where
         }
 
         let should_clean = should_clean_cache(cache_file_name);
-        debug!("Starting removing outdated cache entries (removing non existent files from cache - {delete_outdated_cache}, should_clean - {should_clean})");
+        debug!(
+            "Starting removing outdated cache entries (removing non existent files from cache - {delete_outdated_cache}, should_clean - {should_clean}, entries number - {})",
+            vec_loaded_entries.len()
+        );
         let initial_number_of_entries = vec_loaded_entries.len();
         let deleting_start_time = std::time::Instant::now();
 

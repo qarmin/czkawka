@@ -149,6 +149,20 @@ pub struct SettingsCustom {
     pub broken_files_sub_image: bool,
     #[serde(default)]
     pub broken_files_sub_video: bool,
+    #[serde(default = "ttrue")]
+    pub bad_names_sub_uppercase_extension: bool,
+    #[serde(default = "ttrue")]
+    pub bad_names_sub_emoji_used: bool,
+    #[serde(default = "ttrue")]
+    pub bad_names_sub_space_at_start_end: bool,
+    #[serde(default = "ttrue")]
+    pub bad_names_sub_non_ascii: bool,
+    #[serde(default)]
+    pub bad_names_sub_restricted_charset_enabled: bool,
+    #[serde(default = "default_bad_names_restricted_charset")]
+    pub bad_names_sub_restricted_charset: Vec<char>,
+    #[serde(default)]
+    pub bad_names_sub_remove_duplicated: bool,
     #[serde(default = "default_similar_videos_skip_forward_amount")]
     pub similar_videos_skip_forward_amount: u32,
     #[serde(default = "default_similar_videos_vid_hash_duration")]
@@ -269,6 +283,8 @@ pub struct BasicSettings {
     pub manual_application_scale: f32,
     #[serde(default = "default_use_manual_application_scale")]
     pub use_manual_application_scale: bool,
+    #[serde(default = "ttrue")]
+    pub play_audio_on_scan_completion: bool,
 }
 
 impl Default for BasicSettings {
@@ -346,6 +362,10 @@ pub(crate) fn default_image_similarity() -> i32 {
 }
 fn default_excluded_items() -> String {
     DEFAULT_EXCLUDED_ITEMS.to_string()
+}
+
+fn default_bad_names_restricted_charset() -> Vec<char> {
+    vec!['_', ' ', '.', ',', '-', '(', ')', '[', ']', '!']
 }
 
 fn default_preset_names() -> Vec<String> {

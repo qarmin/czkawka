@@ -359,6 +359,84 @@ export component ToolSettings {
         }
 
         VerticalLayout {
+            visible: GuiState.active_tab == ActiveTab.BadNames;
+            spacing: 5px;
+            padding: 10px;
+            SubsettingsHeader { }
+
+            LabelText { label_text: Translations.subsettings_bad_names_issues_text; }
+
+            CheckBoxWrapper {
+                text: Translations.subsettings_bad_names_uppercase_extension_text;
+                checked <=> Settings.bad_names_sub_uppercase_extension;
+            }
+
+            HintText {
+                hint_text: Translations.subsettings_bad_names_uppercase_extension_hint_text;
+            }
+
+            CheckBoxWrapper {
+                text: Translations.subsettings_bad_names_emoji_used_text;
+                checked <=> Settings.bad_names_sub_emoji_used;
+            }
+
+            HintText {
+                hint_text: Translations.subsettings_bad_names_emoji_used_hint_text;
+            }
+
+            CheckBoxWrapper {
+                text: Translations.subsettings_bad_names_space_at_start_end_text;
+                checked <=> Settings.bad_names_sub_space_at_start_end;
+            }
+
+            HintText {
+                hint_text: Translations.subsettings_bad_names_space_at_start_end_hint_text;
+            }
+
+            CheckBoxWrapper {
+                text: Translations.subsettings_bad_names_non_ascii_text;
+                checked <=> Settings.bad_names_sub_non_ascii;
+            }
+
+            HintText {
+                hint_text: Translations.subsettings_bad_names_non_ascii_hint_text;
+            }
+
+            CheckBoxWrapper {
+                text: Translations.subsettings_bad_names_restricted_charset_text;
+                checked <=> Settings.bad_names_sub_restricted_charset_enabled;
+            }
+
+            HintText {
+                hint_text: Translations.subsettings_bad_names_restricted_charset_hint_text;
+            }
+
+            HorizontalLayout {
+                visible: Settings.bad_names_sub_restricted_charset_enabled;
+                spacing: 5px;
+                Text {
+                    text: Translations.subsettings_bad_names_allowed_chars_text;
+                    vertical-alignment: center;
+                }
+                LineEdit {
+                    text <=> Settings.bad_names_sub_restricted_charset;
+                    placeholder-text: "_- ";
+                }
+            }
+
+            CheckBoxWrapper {
+                text: Translations.subsettings_bad_names_remove_duplicated_text;
+                checked <=> Settings.bad_names_sub_remove_duplicated;
+            }
+
+            HintText {
+                hint_text: Translations.subsettings_bad_names_remove_duplicated_hint_text;
+            }
+
+            Rectangle { }
+        }
+
+        VerticalLayout {
             visible: GuiState.active_tab == ActiveTab.VideoOptimizer;
             spacing: 5px;
             padding: 10px;

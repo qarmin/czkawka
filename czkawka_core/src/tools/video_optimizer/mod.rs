@@ -92,7 +92,7 @@ pub struct VideoCropFixParams {
     pub crop_mechanism: VideoCroppingMechanism,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Copy)]
 pub struct Info {
     pub number_of_processed_files: usize,
     pub number_of_failed_files: usize,
@@ -279,7 +279,7 @@ impl VideoOptimizer {
         &self.params
     }
 
-    pub const fn get_information(&self) -> &Info {
-        &self.information
+    pub const fn get_information(&self) -> Info {
+        self.information
     }
 }

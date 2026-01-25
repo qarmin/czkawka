@@ -31,8 +31,8 @@ impl EmptyFolder {
         &self.empty_folder_list
     }
 
-    pub const fn get_information(&self) -> &Info {
-        &self.information
+    pub const fn get_information(&self) -> Info {
+        self.information
     }
 
     pub(crate) fn optimize_folders(&mut self) {

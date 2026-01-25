@@ -14,6 +14,7 @@ pub enum ToolType {
     InvalidSymlinks,
     BrokenFiles,
     BadExtensions,
+    BadNames,
     BigFile,
     SameMusic,
     SimilarImages,

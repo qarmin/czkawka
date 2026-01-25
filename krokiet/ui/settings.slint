@@ -129,6 +129,15 @@ export global Settings {
     in-out property <bool> broken_files_sub_image: false;
     in-out property <bool> broken_files_sub_video: false;
 
+    // Bad Names
+    in-out property <bool> bad_names_sub_uppercase_extension: true;
+    in-out property <bool> bad_names_sub_emoji_used: true;
+    in-out property <bool> bad_names_sub_space_at_start_end: true;
+    in-out property <bool> bad_names_sub_non_ascii: true;
+    in-out property <bool> bad_names_sub_restricted_charset_enabled: false;
+    in-out property <string> bad_names_sub_restricted_charset: "_- ";
+    in-out property <bool> bad_names_sub_remove_duplicated: false;
+
     // Video Optimizer
     in-out property <[string]> video_optimizer_sub_mode: ["Crop", "Transcode"];
     in-out property <int> video_optimizer_sub_mode_index: 1;
@@ -189,6 +198,9 @@ export global Settings {
     in-out property <bool> popup_crop_video_reencode: false;
     in-out property <float> popup_crop_video_quality: 23;
 
+    // Audio
+    in-out property <bool> play_audio_on_scan_completion: true;
+
     out property <length> path_px: 350px;
     out property <length> name_px: 100px;
     out property <length> mod_px: 125px;
@@ -216,6 +228,8 @@ export global Settings {
     in-out property <[length]> broken_files_column_size: [35px, name_px, path_px, 200px, size_px, mod_px];
     in-out property <[string]> bad_extensions_column_name: ["Selection", "File Name", "Path", "Current Extension", "Proper Extension"];
     in-out property <[length]> bad_extensions_column_size: [35px, name_px, path_px, 40px, 200px];
+    in-out property <[string]> bad_names_column_name: ["Selection", "File Name", "New Name", "Path"];
+    in-out property <[length]> bad_names_column_size: [35px, name_px, 300px, path_px];
     in-out property <[string]> exif_remover_column_name: ["Selection", "Size", "File Name", "Path", "EXIF Tags", "Modification Date"];
     in-out property <[length]> exif_remover_column_size: [35px, size_px, name_px, path_px, 300px, mod_px];
     in-out property <[string]> video_optimizer_column_name: ["Selection", "Size", "File Name", "Path", "Codec", "Dimensions", "New Dimensions", "Modification Date"];

@@ -65,7 +65,7 @@ impl FileEntry {
     }
 }
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Copy)]
 pub struct Info {
     pub number_of_groups_by_size: usize,
     pub number_of_duplicated_files_by_size: usize,
@@ -193,8 +193,8 @@ impl DuplicateFinder {
         &self.files_with_identical_hashes
     }
 
-    pub const fn get_information(&self) -> &Info {
-        &self.information
+    pub const fn get_information(&self) -> Info {
+        self.information
     }
 
     pub fn set_dry_run(&mut self, dry_run: bool) {

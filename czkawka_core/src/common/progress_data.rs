@@ -131,6 +131,7 @@ pub enum CurrentStage {
     SimilarVideosCreatingThumbnails,
     BrokenFilesChecking,
     BadExtensionsChecking,
+    BadNamesChecking,
     ExifRemoverCacheLoading,
     ExifRemoverExtractingTags,
     ExifRemoverCacheSaving,
@@ -210,6 +211,7 @@ impl ProgressData {
             CurrentStage::SimilarVideosCalculatingHashes | CurrentStage::SimilarVideosCreatingThumbnails => Some(ToolType::SimilarVideos),
             CurrentStage::BrokenFilesChecking => Some(ToolType::BrokenFiles),
             CurrentStage::BadExtensionsChecking => Some(ToolType::BadExtensions),
+            CurrentStage::BadNamesChecking => Some(ToolType::BadNames),
             CurrentStage::ExifRemoverCacheLoading | CurrentStage::ExifRemoverExtractingTags | CurrentStage::ExifRemoverCacheSaving => Some(ToolType::ExifRemover),
             CurrentStage::VideoOptimizerCreatingThumbnails | CurrentStage::VideoOptimizerProcessingVideos => Some(ToolType::VideoOptimizer),
         };
@@ -224,7 +226,7 @@ impl ToolType {
         match self {
             Self::Duplicate => 6,
             Self::EmptyFolders | Self::EmptyFiles | Self::InvalidSymlinks | Self::BigFile | Self::TemporaryFiles => 0,
-            Self::BrokenFiles | Self::BadExtensions => 1,
+            Self::BrokenFiles | Self::BadExtensions | Self::BadNames => 1,
             Self::SimilarImages | Self::SimilarVideos | Self::VideoOptimizer => 2,
             Self::ExifRemover => 3,
             Self::None => unreachable!("ToolType::None is not allowed"),
@@ -271,6 +273,7 @@ impl CurrentStage {
             Self::SimilarVideosCreatingThumbnails => 2,
             Self::BrokenFilesChecking => 1,
             Self::BadExtensionsChecking => 1,
+            Self::BadNamesChecking => 1,
             Self::VideoOptimizerCreatingThumbnails => 2,
             Self::VideoOptimizerProcessingVideos => 1,
             Self::SameMusicCacheLoadingTags => 1,

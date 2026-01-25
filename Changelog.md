@@ -1,6 +1,9 @@
 ## Version ?.?.? - ??
 ### New version blockers
-- sym/hardlinks in Krokiet
+- sym/hardlinks in Krokiet(not 100% sure if I will be able to do it)
+- updating to slint 1.15, which fixes some bugs
+- update to stable 0.11 gtk-rs
+- crash when selecting items in non-header modes
 
 ### Breaking changes
 #### Users
@@ -8,7 +11,7 @@
 - In broken files mode, type of file is no longer saved to cache, so old cache files are incompatible with new version and should be regenerated from scratch
 
 #### Devs
-- Public api functions, now do not take references to small copyable types
+- Public api functions, were changed a little avoid unnecessary cloning/using reference of copyable types
 
 ### Core
 - Extensions in similar images mode and in previews, drops validating if extension is correct(most of the time) - [#1623](https://github.com/qarmin/czkawka/pull/1623)
@@ -24,6 +27,7 @@
 - Added ability to search for broken video files in broken files tool(via external ffmpeg/ffprobe) - [#1745](https://github.com/qarmin/czkawka/pull/1745)
 - New mode, video optimizer, to reencode videos to more efficient codecs and cropping black/bars from videos(via external ffmpeg/ffprobe) - [#1726](https://github.com/qarmin/czkawka/pull/1726), [#1745](https://github.com/qarmin/czkawka/pull/1745)
 - New mode, exif remover, to remove certain exif tags from files - [#1745](https://github.com/qarmin/czkawka/pull/1745)
+- New mode, bad names, to find and rename files with specific names(e.g. non-ascii, uppercase extensions etc.) - [#1754](https://github.com/qarmin/czkawka/pull/1754)
 - Ability to add files to scan, not only folders - [#1745](https://github.com/qarmin/czkawka/pull/1745)
 - Limited supported image sizes to 2000 MP - [#1748](https://github.com/qarmin/czkawka/pull/1748)
 - Automatic cleaning of outdated entries, now runs max once per week - [#1748](https://github.com/qarmin/czkawka/pull/1748)
@@ -46,7 +50,7 @@
 - Fixed sorting by size in big files mode - [#1691](https://github.com/qarmin/czkawka/pull/1691)
 - Fixed freezes, caused by invalid function declaration in gtk4-rs - [#1691](https://github.com/qarmin/czkawka/pull/1691)
 - About popup with info, that Krokiet is successor app - [#1718](https://github.com/qarmin/czkawka/pull/1718)
-- Added `--cache`, `--config` CLI options, to open cache/config paths  - [#1745](https://github.com/qarmin/czkawka/pull/1745)
+- Added `--cache`, `--config` CLI options, to open cache/config paths - [#1745](https://github.com/qarmin/czkawka/pull/1745)
 
 ### Krokiet
 - New Logo - [#1726](https://github.com/qarmin/czkawka/pull/1726)
@@ -60,10 +64,11 @@
 - Fix crash, when user clicked at previous results while new scan was in progress - [#1726](https://github.com/qarmin/czkawka/pull/1726)
 - Defaulting to remove files to trash instead permanent deletion - [#1726](https://github.com/qarmin/czkawka/pull/1726)
 - Added notification dialog, when app cannot be opened - [#1745](https://github.com/qarmin/czkawka/pull/1745)
-- Added `--cache`, `--config` CLI options, to open cache/config paths  - [#1745](https://github.com/qarmin/czkawka/pull/1745)
-- Added new video optimizer and exif remover modes - [#1726](https://github.com/qarmin/czkawka/pull/1726), [#1745](https://github.com/qarmin/czkawka/pull/1745)
+- Added `--cache`, `--config` CLI options, to open cache/config paths - [#1745](https://github.com/qarmin/czkawka/pull/1745)
+- Added new video optimizer, exif remover and bad names modes - [#1726](https://github.com/qarmin/czkawka/pull/1726), [#1745](https://github.com/qarmin/czkawka/pull/1745), [#1754](https://github.com/qarmin/czkawka/pull/1754)
 - Modification date is displayed in local time instead of UTC - [#1748](https://github.com/qarmin/czkawka/pull/1748)
 - Added new menu, to manually remove outdated entries in cache files - [#1748](https://github.com/qarmin/czkawka/pull/1748)
+- Added configurable and hidden under `audio` feature flag, sound of ending scan - [#1754](https://github.com/qarmin/czkawka/pull/1754)
 
 ### External
 - Wine 10.20 contains bugfix that fixes crashes when opening file dialogs in Czkawka Gui - [Wine 49987 issue](https://bugs.winehq.org/show_bug.cgi?id=49987)

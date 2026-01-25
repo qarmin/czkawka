@@ -81,7 +81,7 @@ struct GroupedFilesToCheck {
     pub files_to_compare: Vec<MusicEntry>,
 }
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Copy)]
 pub struct Info {
     pub number_of_duplicates: usize,
     pub number_of_groups: usize,
@@ -140,8 +140,8 @@ impl SameMusic {
         &self.params
     }
 
-    pub const fn get_information(&self) -> &Info {
-        &self.information
+    pub const fn get_information(&self) -> Info {
+        self.information
     }
 
     pub fn get_similar_music_referenced(&self) -> &Vec<(MusicEntry, Vec<MusicEntry>)> {

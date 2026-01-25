@@ -48,6 +48,7 @@ export global Translations {
     in-out property <string> tool_bad_extensions_text: "Bad Extensions";
     in-out property <string> tool_exif_remover_text: "EXIF Finder";
     in-out property <string> tool_video_optimizer_text: "Video Optimizer";
+    in-out property <string> tool_bad_names_text: "Bad Names";
 
     // Sorting
     in-out property <string> sort_by_full_name_text: "Sort by full name";
@@ -103,6 +104,21 @@ export global Translations {
     in-out property <string> subsettings_broken_files_image_text: "Image";
     in-out property <string> subsettings_broken_files_video_text: "Video";
     in-out property <string> subsettings_broken_files_video_info_text: "Uses ffmpeg/ffprobe. Quite slow and may detect pedantic errors even if file plays fine.";
+
+    in-out property <string> subsettings_bad_names_issues_text: "Filename checks";
+    in-out property <string> subsettings_bad_names_uppercase_extension_text: "Uppercase extension";
+    in-out property <string> subsettings_bad_names_uppercase_extension_hint_text: "Finds files with uppercase letters in extension";
+    in-out property <string> subsettings_bad_names_emoji_used_text: "Emoji in name";
+    in-out property <string> subsettings_bad_names_emoji_used_hint_text: "Finds files with emoji characters in name";
+    in-out property <string> subsettings_bad_names_space_at_start_end_text: "Leading/trailing spaces";
+    in-out property <string> subsettings_bad_names_space_at_start_end_hint_text: "Finds files with spaces at the start or end of the name";
+    in-out property <string> subsettings_bad_names_non_ascii_text: "Non-ASCII chars";
+    in-out property <string> subsettings_bad_names_non_ascii_hint_text: "Finds non-ASCII characters and suggests replacements or removal";
+    in-out property <string> subsettings_bad_names_restricted_charset_text: "Limited charset";
+    in-out property <string> subsettings_bad_names_restricted_charset_hint_text: "Finds files with characters outside allowed set";
+    in-out property <string> subsettings_bad_names_allowed_chars_text: "Allowed chars";
+    in-out property <string> subsettings_bad_names_remove_duplicated_text: "Duplicated chars";
+    in-out property <string> subsettings_bad_names_remove_duplicated_hint_text: "Finds consecutive duplicated non-alphanumeric characters";
 
     in-out property <string> subsettings_video_optimizer_mode_text: "Mode";
     in-out property <string> subsettings_video_optimizer_crop_type_text: "Crop Type";
@@ -183,6 +199,10 @@ export global Translations {
     in-out property <string> settings_log_number_size_text: "";
     in-out property <string> settings_cache_header_text: "Cache Settings";
     in-out property <string> settings_clean_cache_button_text: "Clean outdated cache";
+
+    in-out property <string> settings_play_audio_on_scan_completion_text: "Play sound when scan completes successfully";
+    in-out property <string> settings_audio_feature_hint_text: "Available only when compiling with audio feature";
+    in-out property <string> settings_audio_env_variable_hint_text: "Sound can be changed, by setting KROKIET_AUDIO_STOP_FILE environment variable to a valid audio file path";
 
     // Popup
 

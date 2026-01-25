@@ -71,7 +71,7 @@ for ftl_file in ftl_files:
         if f'"{key}"' not in rust_content:
             unused.append(key)
     if unused:
-        print(f"Unused keys in {ftl_file}:")
+        print(f"Unused keys in {ftl_file}(needs to bind to slint in connect_translations.rs file):")
         for key in unused:
             print(f"  {format_green(key)}")
         found = True

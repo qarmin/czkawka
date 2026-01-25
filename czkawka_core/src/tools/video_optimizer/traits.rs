@@ -104,8 +104,8 @@ impl PrintResults for VideoOptimizer {
                         };
                         writeln!(
                             writer,
-                            "{} - Codec: {} - Dimensions: {}x{} - Size: {}{new_image_dimensions}",
-                            entry.path.display(),
+                            "\"{}\" - Codec: {} - Dimensions: {}x{} - Size: {}{new_image_dimensions}",
+                            entry.path.to_string_lossy(),
                             entry.codec,
                             entry.width,
                             entry.height,
@@ -165,7 +165,7 @@ impl CommonData for VideoOptimizer {
     type Parameters = VideoOptimizerParameters;
 
     fn get_information(&self) -> Self::Info {
-        self.information.clone()
+        self.information
     }
 
     fn get_params(&self) -> Self::Parameters {
