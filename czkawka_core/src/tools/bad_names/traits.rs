@@ -26,9 +26,12 @@ impl Search for BadNames {
                 return;
             }
 
+            dbg!(&self.params.checked_issues);
+
             if self.prepare_items(None).is_err() {
                 return;
             }
+
             if self.check_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
                 self.common_data.stopped_search = true;
                 return;
