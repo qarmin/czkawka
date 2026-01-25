@@ -1,5 +1,6 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
+#![allow(clippy::unused_self)]
 use std::io::{BufReader, Cursor};
 
 #[cfg(feature = "audio")]
